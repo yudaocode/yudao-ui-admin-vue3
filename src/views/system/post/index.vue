@@ -13,7 +13,8 @@
         />
         <!-- 操作：导出 -->
         <XButton
-          type="warning"
+          type="primary"
+          plain
           preIcon="ep:download"
           :title="t('action.export')"
           v-hasPermi="['system:post:export']"
@@ -24,44 +25,48 @@
         <!-- 操作：修改 -->
         <XTextButton
           preIcon="ep:edit"
+          :title="t('action.edit')"
           v-hasPermi="['system:post:update']"
-          @click="openModal('update', row.id)"
+          @click="openModal('update', row?.id)"
         />
         <!-- 操作：详情 -->
         <XTextButton
           preIcon="ep:view"
+          :title="t('action.detail')"
           v-hasPermi="['system:post:query']"
-          @click="openModal('detail', row.id)"
+          @click="openModal('detail', row?.id)"
         />
         <!-- 操作：删除 -->
         <XTextButton
           preIcon="ep:delete"
+          :title="t('action.delete')"
           v-hasPermi="['system:post:delete']"
-          @click="deleteData(row.id)"
+          @click="deleteData(row?.id)"
         />
       </template>
     </XTable>
   </ContentWrap>
+
+  <!-- 表单弹窗：添加/修改/详情 -->
   <PostForm ref="modalRef" @success="reload()" />
 </template>
 <script setup lang="ts" name="Post">
-// 业务相关的 import
 import * as PostApi from '@/api/system/post'
 import { allSchemas } from './post.data'
-import PostForm from './PostForm.vue'
-
+import PostForm from './form.vue'
 const { t } = useI18n() // 国际化
 
 // 列表相关的变量
 const [registerTable, { reload, deleteData, exportList }] = useXTable({
-  allSchemas: allSchemas,
-  getListApi: PostApi.getPostPageApi,
-  deleteApi: PostApi.deletePostApi,
-  exportListApi: PostApi.exportPostApi
+  allSchemas: allSchemas, // 列表配置
+  getListApi: PostApi.getPostPageApi, // 加载列表的 API
+  deleteApi: PostApi.deletePostApi, // 删除数据的 API
+  exportListApi: PostApi.exportPostApi // 导出数据的 API
 })
+
 // 表单相关的变量
 const modalRef = ref()
-const openModal = (type: string, rowId?: number) => {
-  modalRef.value.openModal(type, rowId)
+const openModal = (actionType: string, id?: number) => {
+  modalRef.value.openModal(actionType, id)
 }
 </script>

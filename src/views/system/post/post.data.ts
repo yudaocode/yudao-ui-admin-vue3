@@ -8,10 +8,10 @@ export const rules = reactive({
   sort: [required]
 })
 
-// CrudSchema
+// 增删改查 CrudSchema 配置
 const crudSchemas = reactive<VxeCrudSchema>({
   primaryKey: 'id',
-  primaryType: 'seq',
+  primaryType: 'id',
   primaryTitle: '岗位编号',
   action: true,
   columns: [
@@ -27,7 +27,10 @@ const crudSchemas = reactive<VxeCrudSchema>({
     },
     {
       title: '岗位顺序',
-      field: 'sort'
+      field: 'sort',
+      form: {
+        component: 'InputNumber'
+      }
     },
     {
       title: t('common.status'),
@@ -45,7 +48,10 @@ const crudSchemas = reactive<VxeCrudSchema>({
       title: t('common.createTime'),
       field: 'createTime',
       formatter: 'formatDate',
-      isForm: false
+      isForm: false,
+      table: {
+        width: 180
+      }
     }
   ]
 })

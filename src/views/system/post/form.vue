@@ -1,6 +1,6 @@
 <template>
   <!-- 弹窗 -->
-  <XModal id="PostForm" :loading="modelLoading" v-model="modelVisible" :title="modelTitle">
+  <XModal :title="modelTitle" :loading="modelLoading" v-model="modelVisible" height="270px">
     <!-- 表单：添加/修改 -->
     <Form
       ref="formRef"
@@ -35,22 +35,21 @@ import { rules, allSchemas } from './post.data'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const emit = defineEmits(['success'])
-
 // 弹窗相关的变量
 const modelVisible = ref(false) // 是否显示弹出层
-const modelTitle = ref('update') // 弹出层标题
+const modelTitle = ref('') // 弹出层标题
 const modelLoading = ref(false) // 弹出层loading
 const actionType = ref('') // 操作按钮的类型
 const actionLoading = ref(false) // 按钮 Loading
 const formRef = ref<FormExpose>() // 表单 Ref
 const detailData = ref() // 详情 Ref
 
+// 打开弹窗
 const openModal = async (type: string, rowId?: number) => {
+  modelVisible.value = true
   modelLoading.value = true
   modelTitle.value = t('action.' + type)
   actionType.value = type
-  modelVisible.value = true
   // 设置数据
   if (rowId) {
     const res = await PostApi.getPostApi(rowId)
@@ -62,31 +61,33 @@ const openModal = async (type: string, rowId?: number) => {
   }
   modelLoading.value = false
 }
+defineExpose({ openModal: openModal }) // 提供 openModal 方法，用于打开弹窗
 
 // 提交新增/修改的表单
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
+  // 校验表单
   const elForm = unref(formRef)?.getElFormRef()
   if (!elForm) return
   const valid = await elForm.validate()
-  if (valid) {
-    actionLoading.value = true
-    // 提交请求
-    try {
-      const data = unref(formRef)?.formModel as PostApi.PostVO
-      if (actionType.value === 'create') {
-        await PostApi.createPostApi(data)
-        message.success(t('common.createSuccess'))
-      } else {
-        await PostApi.updatePostApi(data)
-        message.success(t('common.updateSuccess'))
-      }
-      modelVisible.value = false
-      emit('success')
-    } finally {
-      actionLoading.value = false
+  if (!valid) {
+    return
+  }
+  // 提交请求
+  actionLoading.value = true
+  try {
+    const data = unref(formRef)?.formModel as PostApi.PostVO
+    if (actionType.value === 'create') {
+      await PostApi.createPostApi(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await PostApi.updatePostApi(data)
+      message.success(t('common.updateSuccess'))
     }
+    modelVisible.value = false
+    emit('success')
+  } finally {
+    actionLoading.value = false
   }
 }
-
-defineExpose({ openModal: openModal })
 </script>

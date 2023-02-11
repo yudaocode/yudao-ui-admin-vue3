@@ -281,6 +281,7 @@ export default {
     create: 'Create',
     add: 'Add',
     del: 'Delete',
+    delete: 'Delete',
     edit: 'Edit',
     update: 'Update',
     preview: 'Preview',

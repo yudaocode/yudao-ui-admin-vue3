@@ -16,7 +16,7 @@ export const setTextPlaceholder = (schema: FormSchema): PlaceholderMoel => {
   const selectMap = ['Select', 'SelectV2', 'TimePicker', 'DatePicker', 'TimeSelect', 'TimeSelect']
   if (textMap.includes(schema?.component as string)) {
     return {
-      placeholder: t('common.inputText')
+      placeholder: t('common.inputText') + schema.label
     }
   }
   if (selectMap.includes(schema?.component as string)) {
@@ -34,7 +34,7 @@ export const setTextPlaceholder = (schema: FormSchema): PlaceholderMoel => {
       }
     } else {
       return {
-        placeholder: t('common.selectText')
+        placeholder: t('common.selectText') + schema.label
       }
     }
   }
