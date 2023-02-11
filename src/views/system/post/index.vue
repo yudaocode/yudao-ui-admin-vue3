@@ -66,7 +66,7 @@ const [registerTable, { reload, deleteData, exportList }] = useXTable({
 
 // 表单相关的变量
 const modalRef = ref()
-const openModal = (actionType: string, id?: number) => {
-  modalRef.value.openModal(actionType, id)
+const openModal = (type: string, id?: number) => {
+  modalRef.value.openModal(type, id)
 }
 </script>

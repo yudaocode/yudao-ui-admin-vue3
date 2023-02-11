@@ -1,6 +1,6 @@
 <template>
   <!-- 弹窗 -->
-  <XModal :title="modelTitle" :loading="modelLoading" v-model="modelVisible" height="270px">
+  <XModal :title="modelTitle" :loading="modelLoading" v-model="modelVisible">
     <!-- 表单：添加/修改 -->
     <Form
       ref="formRef"
@@ -45,14 +45,14 @@ const formRef = ref<FormExpose>() // 表单 Ref
 const detailData = ref() // 详情 Ref
 
 // 打开弹窗
-const openModal = async (type: string, rowId?: number) => {
+const openModal = async (type: string, id?: number) => {
   modelVisible.value = true
   modelLoading.value = true
   modelTitle.value = t('action.' + type)
   actionType.value = type
   // 设置数据
-  if (rowId) {
-    const res = await PostApi.getPostApi(rowId)
+  if (id) {
+    const res = await PostApi.getPostApi(id)
     if (type === 'update') {
       unref(formRef)?.setValues(res)
     } else if (type === 'detail') {
