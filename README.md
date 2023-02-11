@@ -17,7 +17,9 @@
 
 **芋道**，以开发者为中心，打造中国第一流的快速开发平台，全部开源，个人与企业可 100% 免费使用。
 
-基于 [vue-element-plus-admin](https://gitee.com/kailong110120130/vue-element-plus-admin) 实现，使用 Element Plus 免费开源的中后台模版，具备如下特性：
+* 采用 [vue-element-plus-admin](https://gitee.com/kailong110120130/vue-element-plus-admin) 
+* 改换saas，自动引入等功能 [vue-element-plus-admin](https://gitee.com/yudaocode/vue-element-plus-admin)
+* 使用 Element Plus 免费开源的中后台模版，具备如下特性：
 
 ![首页](preview/home.png)
 

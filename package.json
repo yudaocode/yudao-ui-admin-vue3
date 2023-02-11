@@ -128,10 +128,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://gitee.com/zhijiantianya/ruoyi-vue-pro"
+    "url": "git+https://gitee.com/yudaocode/yudao-ui-admin-vue3"
   },
   "bugs": {
-    "url": "https://gitee.com/zhijiantianya/ruoyi-vue-pro/issues"
+    "url": "https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues"
   },
-  "homepage": "https://gitee.com/zhijiantianya/ruoyi-vue-pro"
+  "homepage": "https://gitee.com/yudaocode/yudao-ui-admin-vue3"
 }
