@@ -197,6 +197,11 @@ const setDialogTile = (type: string) => {
   dialogVisible.value = true
 }
 
+// 同步dictTypeValue到form 否则导致表单验证不通过
+watch(dictTypeValue, (val) => {
+  unref(typeFormRef)?.setValues({ type: val })
+})
+
 // 提交按钮
 const submitTypeForm = async () => {
   const elForm = unref(typeFormRef)?.getElFormRef()
