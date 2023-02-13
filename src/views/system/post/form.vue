@@ -61,7 +61,7 @@ const openModal = async (type: string, id?: number) => {
   }
   modelLoading.value = false
 }
-defineExpose({ openModal: openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
 
 // 提交新增/修改的表单
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -70,9 +70,7 @@ const submitForm = async () => {
   const elForm = unref(formRef)?.getElFormRef()
   if (!elForm) return
   const valid = await elForm.validate()
-  if (!valid) {
-    return
-  }
+  if (!valid) return
   // 提交请求
   actionLoading.value = true
   try {

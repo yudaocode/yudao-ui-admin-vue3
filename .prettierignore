@@ -5,5 +5,7 @@
 /docs/*
 /vite.config.ts
 /src/types/env.d.ts
+/src/types/auto-components.d.ts
+/src/types/auto-imports.d.ts
 /docs/**/*
 CHANGELOG
