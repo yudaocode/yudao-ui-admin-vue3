@@ -35,6 +35,7 @@ const include = [
   'element-plus/es',
   'element-plus/es/locale/lang/zh-cn',
   'element-plus/es/locale/lang/en',
+  'element-plus/es/components/backtop/style/index',
   'element-plus/es/components/form/style/index',
   'element-plus/es/components/radio-group/style/index',
   'element-plus/es/components/radio/style/index',
