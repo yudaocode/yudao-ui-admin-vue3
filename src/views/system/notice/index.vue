@@ -15,20 +15,22 @@
         <el-button type="primary" @click="getList">Query</el-button>
       </el-form-item>
     </el-form>
-    <div style="width: 100%; height: 500px">
+    <div style="width: 100%; height: 600px">
       <el-auto-resizer>
         <template #default="{ height, width }">
           <el-table-v2 :columns="columns" :data="tableData" :width="width" :height="height" fixed />
         </template>
       </el-auto-resizer>
-      <el-pagination
-        :current-page="queryParms.pageNo"
-        :page-size="queryParms.pageSize"
-        layout="total, prev, pager, next"
-        :total="tableTotal"
-        @size-change="getList"
-        @current-change="getList"
-      />
+      <div class="mt-2">
+        <el-pagination
+          :current-page="queryParms.pageNo"
+          :page-size="queryParms.pageSize"
+          layout="total, prev, pager, next"
+          :total="tableTotal"
+          @size-change="getList"
+          @current-change="getList"
+        />
+      </div>
     </div>
   </ContentWrap>
 </template>
@@ -37,6 +39,7 @@ import dayjs from 'dayjs'
 import { Column, ElPagination, ElTableV2, TableV2FixedDir } from 'element-plus'
 import * as NoticeApi from '@/api/system/notice'
 import { XTextButton } from '@/components/XButton'
+import { DictTag } from '@/components/DictTag'
 const { t } = useI18n() // 国际化
 
 const columns: Column<any>[] = [
@@ -57,13 +60,19 @@ const columns: Column<any>[] = [
     key: 'type',
     dataKey: 'type',
     title: '公告类型',
-    width: 180
+    width: 180,
+    cellRenderer: ({ cellData: type }) => (
+      <DictTag type={DICT_TYPE.SYSTEM_NOTICE_TYPE} value={type}></DictTag>
+    )
   },
   {
     key: 'status',
     dataKey: 'status',
     title: t('common.status'),
-    width: 180
+    width: 180,
+    cellRenderer: ({ cellData: status }) => (
+      <DictTag type={DICT_TYPE.COMMON_STATUS} value={status}></DictTag>
+    )
   },
   {
     key: 'content',
@@ -85,15 +94,22 @@ const columns: Column<any>[] = [
     key: 'actionbtns',
     dataKey: 'actionbtns', //需要渲染当前列的数据字段，如{id:9527,name:'Mike'}，则填id
     title: '操作', //显示在单元格表头的文本
-    width: 80, //当前列的宽度，必须设置
+    width: 160, //当前列的宽度，必须设置
     fixed: TableV2FixedDir.RIGHT, //是否固定列
     align: 'center',
     cellRenderer: ({ cellData: id }) => (
-      <XTextButton
-        preIcon="ep:delete"
-        title={t('action.del')}
-        onClick={handleDelete.bind(this, id)}
-      ></XTextButton>
+      <>
+        <XTextButton
+          preIcon="ep:delete"
+          title={t('action.edit')}
+          onClick={handleUpdate.bind(this, id)}
+        ></XTextButton>
+        <XTextButton
+          preIcon="ep:delete"
+          title={t('action.del')}
+          onClick={handleDelete.bind(this, id)}
+        ></XTextButton>
+      </>
     )
   }
 ]
@@ -113,6 +129,10 @@ const getList = async () => {
   const res = await NoticeApi.getNoticePageApi(queryParms)
   tableData.value = res.list
   tableTotal.value = res.total
+}
+
+const handleUpdate = (id) => {
+  console.info(id)
 }
 
 const handleDelete = (id) => {
