@@ -201,13 +201,13 @@ import * as ActivityApi from '@/api/bpm/activity'
 import { formatPast2 } from '@/utils/formatTime'
 import { setConfAndFields2 } from '@/utils/formCreate'
 // import { OptionAttrs } from '@form-create/element-ui/types/config'
-import { ApiAttrs } from '@form-create/element-ui/types/config'
+import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { useUserStore } from '@/store/modules/user'
 
 const { query } = useRoute() // 查询参数
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-const { proxy } = getCurrentInstance()
+const { proxy } = getCurrentInstance() as any
 
 // ========== 审批信息 ==========
 const id = query.id as unknown as number
@@ -404,9 +404,9 @@ const getDetail = () => {
           data.formVariables
         )
         nextTick().then(() => {
-          fApi.value?.fapi.btn.show(false)
-          fApi.value?.fapi.resetBtn.show(false)
-          fApi.value?.fapi.disabled(true)
+          fApi.value?.btn.show(false)
+          fApi.value?.resetBtn.show(false)
+          fApi.value?.disabled(true)
         })
       }
 
