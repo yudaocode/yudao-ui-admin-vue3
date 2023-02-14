@@ -18,19 +18,25 @@
     <div style="width: 100%; height: 600px">
       <el-auto-resizer>
         <template #default="{ height, width }">
-          <el-table-v2 :columns="columns" :data="tableData" :width="width" :height="height" fixed />
+          <el-table-v2
+            :columns="columns"
+            :data="tableData"
+            :width="width"
+            :height="height - 50"
+            fixed
+          />
         </template>
       </el-auto-resizer>
-      <div class="mt-2">
-        <el-pagination
-          :current-page="queryParms.pageNo"
-          :page-size="queryParms.pageSize"
-          layout="total, prev, pager, next"
-          :total="tableTotal"
-          @size-change="getList"
-          @current-change="getList"
-        />
-      </div>
+    </div>
+    <div class="mt-2">
+      <el-pagination
+        :current-page="queryParms.pageNo"
+        :page-size="queryParms.pageSize"
+        layout="total, prev, pager, next"
+        :total="tableTotal"
+        @size-change="getList"
+        @current-change="getList"
+      />
     </div>
   </ContentWrap>
 </template>
@@ -122,7 +128,7 @@ const queryParms = reactive({
   title: '',
   status: undefined,
   pageNo: 1,
-  pageSize: 10
+  pageSize: 100
 })
 
 const getList = async () => {
