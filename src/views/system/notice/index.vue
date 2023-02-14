@@ -32,7 +32,8 @@
       <el-pagination
         :current-page="queryParms.pageNo"
         :page-size="queryParms.pageSize"
-        layout="total, prev, pager, next"
+        :page-sizes="[10, 20, 30, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
         :total="tableTotal"
         @size-change="getList"
         @current-change="getList"
