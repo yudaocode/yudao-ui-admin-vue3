@@ -179,6 +179,7 @@ const tableTypeSelect = ref(false)
 const cellClickEvent: VxeTableEvents.CellClick = async ({ row }) => {
   tableTypeSelect.value = true
   queryParams.dictType = row['type']
+  await nextTick()
   await dataGetList()
   parentType.value = row['type']
 }
