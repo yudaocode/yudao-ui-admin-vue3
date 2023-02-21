@@ -331,7 +331,7 @@ const additionalModules = computed(() => {
 
   // 插入用户自定义扩展模块
   if (Object.prototype.toString.call(props.additionalModel) == '[object Array]') {
-    Modules.push(...props.additionalModel)
+    Modules.push(...(props.additionalModel as any[]))
   } else {
     props.additionalModel && Modules.push(props.additionalModel)
   }

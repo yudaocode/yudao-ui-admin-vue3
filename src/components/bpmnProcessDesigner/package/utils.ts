@@ -1,4 +1,5 @@
 import { toRaw } from 'vue'
+const bpmnInstances = () => (window as any)?.bpmnInstances
 // 创建监听器实例
 export function createListenerObject(options, isTask, prefix) {
   const listenerObj = Object.create(null)
@@ -25,16 +26,16 @@ export function createListenerObject(options, isTask, prefix) {
   }
   // 任务监听器的 定时器 设置
   if (isTask && options.event === 'timeout' && !!options.eventDefinitionType) {
-    const timeDefinition = window.bpmnInstances.moddle.create('bpmn:FormalExpression', {
+    const timeDefinition = bpmnInstances().moddle.create('bpmn:FormalExpression', {
       body: options.eventTimeDefinitions
     })
-    const TimerEventDefinition = window.bpmnInstances.moddle.create('bpmn:TimerEventDefinition', {
+    const TimerEventDefinition = bpmnInstances().moddle.create('bpmn:TimerEventDefinition', {
       id: `TimerEventDefinition_${uuid(8)}`,
       [`time${options.eventDefinitionType.replace(/^\S/, (s) => s.toUpperCase())}`]: timeDefinition
     })
     listenerObj.eventDefinitions = [TimerEventDefinition]
   }
-  return window.bpmnInstances.moddle.create(
+  return bpmnInstances().moddle.create(
     `${prefix}:${isTask ? 'TaskListener' : 'ExecutionListener'}`,
     listenerObj
   )
@@ -44,7 +45,7 @@ export function createListenerObject(options, isTask, prefix) {
 export function createFieldObject(option, prefix) {
   const { name, fieldType, string, expression } = option
   const fieldConfig = fieldType === 'string' ? { name, string } : { name, expression }
-  return window.bpmnInstances.moddle.create(`${prefix}:Field`, fieldConfig)
+  return bpmnInstances().moddle.create(`${prefix}:Field`, fieldConfig)
 }
 
 // 创建脚本实例
@@ -52,21 +53,21 @@ export function createScriptObject(options, prefix) {
   const { scriptType, scriptFormat, value, resource } = options
   const scriptConfig =
     scriptType === 'inlineScript' ? { scriptFormat, value } : { scriptFormat, resource }
-  return window.bpmnInstances.moddle.create(`${prefix}:Script`, scriptConfig)
+  return bpmnInstances().moddle.create(`${prefix}:Script`, scriptConfig)
 }
 
 // 更新元素扩展属性
 export function updateElementExtensions(element, extensionList) {
-  const extensions = window.bpmnInstances.moddle.create('bpmn:ExtensionElements', {
+  const extensions = bpmnInstances().moddle.create('bpmn:ExtensionElements', {
     values: extensionList
   })
-  window.bpmnInstances.modeling.updateProperties(toRaw(element), {
+  bpmnInstances().modeling.updateProperties(toRaw(element), {
     extensionElements: extensions
   })
 }
 
 // 创建一个id
-export function uuid(length = 8, chars) {
+export function uuid(length = 8, chars?) {
   let result = ''
   const charsString = chars || '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
   for (let i = length; i > 0; --i) {
