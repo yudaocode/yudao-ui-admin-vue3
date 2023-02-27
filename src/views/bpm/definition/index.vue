@@ -43,6 +43,16 @@
         v-if="formDetailVisible"
       />
     </XModal>
+    <!-- 流程模型图的预览 -->
+    <XModal title="流程图" v-model="showBpmnOpen" width="80%" height="90%">
+      <my-process-viewer
+        key="designer"
+        v-model="bpmnXML"
+        :value="bpmnXML"
+        v-bind="bpmnControlForm"
+        :prefix="bpmnControlForm.prefix"
+      />
+    </XModal>
   </ContentWrap>
 </template>
 <script setup lang="ts">
@@ -51,8 +61,12 @@ import * as DefinitionApi from '@/api/bpm/definition'
 // import * as ModelApi from '@/api/bpm/model'
 import { allSchemas } from './definition.data'
 import { setConfAndFields2 } from '@/utils/formCreate'
-
-const message = useMessage() // 消息弹窗
+const bpmnXML = ref(null)
+const showBpmnOpen = ref(false)
+const bpmnControlForm = ref({
+  prefix: 'flowable'
+})
+// const message = useMessage() // 消息弹窗
 const router = useRouter() // 路由
 const { query } = useRoute() // 查询参数
 
@@ -89,7 +103,13 @@ const handleFormDetail = async (row) => {
 const handleBpmnDetail = (row) => {
   // TODO 芋艿：流程组件开发中
   console.log(row)
-  message.success('流程组件开发中，预计 2 月底完成')
+  DefinitionApi.getProcessDefinitionBpmnXMLApi(row).then((response) => {
+    console.log(response, 'response')
+    bpmnXML.value = response.bpmnXml
+    // 弹窗打开
+    showBpmnOpen.value = true
+  })
+  // message.success('流程组件开发中，预计 2 月底完成')
 }
 
 // 点击任务分配按钮
