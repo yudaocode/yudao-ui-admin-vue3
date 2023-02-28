@@ -24,6 +24,10 @@
       <template #name_default="{ row }">
         <XTextButton :title="row.name" @click="handleBpmnDetail(row.id)" />
       </template>
+      <!-- 流程分类 -->
+      <template #category_default="{ row }">
+        <DictTag :type="DICT_TYPE.BPM_MODEL_CATEGORY" :value="Number(row?.category)" />
+      </template>
       <!-- 表单信息 -->
       <template #formId_default="{ row }">
         <XTextButton
