@@ -6,6 +6,10 @@
       <template #name_default="{ row }">
         <XTextButton :title="row.name" @click="handleBpmnDetail(row.id)" />
       </template>
+      <!-- 流程分类 -->
+      <template #category_default="{ row }">
+        <DictTag :type="DICT_TYPE.BPM_MODEL_CATEGORY" :value="Number(row?.category)" />
+      </template>
       <!-- 表单信息 -->
       <template #formId_default="{ row }">
         <XTextButton
@@ -61,6 +65,8 @@ import * as DefinitionApi from '@/api/bpm/definition'
 // import * as ModelApi from '@/api/bpm/model'
 import { allSchemas } from './definition.data'
 import { setConfAndFields2 } from '@/utils/formCreate'
+import { DICT_TYPE } from '@/utils/dict'
+
 const bpmnXML = ref(null)
 const showBpmnOpen = ref(false)
 const bpmnControlForm = ref({
@@ -105,7 +111,7 @@ const handleBpmnDetail = (row) => {
   console.log(row)
   DefinitionApi.getProcessDefinitionBpmnXMLApi(row).then((response) => {
     console.log(response, 'response')
-    bpmnXML.value = response.bpmnXml
+    bpmnXML.value = response
     // 弹窗打开
     showBpmnOpen.value = true
   })
@@ -117,7 +123,7 @@ const handleAssignRule = (row) => {
   router.push({
     name: 'BpmTaskAssignRuleList',
     query: {
-      modelId: row.id
+      processDefinitionId: row.id
     }
   })
 }
