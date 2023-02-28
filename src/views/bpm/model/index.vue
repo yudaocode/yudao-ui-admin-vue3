@@ -433,7 +433,11 @@ const handleUpdate = async (rowId: number) => {
   await setDialogTile('edit')
   // 设置数据
   saveForm.value = await ModelApi.getModelApi(rowId)
-  saveForm.value.category = Number(saveForm.value.category)
+  if (saveForm.value.category == null) {
+    saveForm.value.category = 1
+  } else {
+    saveForm.value.category = Number(saveForm.value.category)
+  }
 }
 
 // 提交按钮
