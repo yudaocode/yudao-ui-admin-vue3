@@ -125,7 +125,9 @@ const handleUpdate = async (rowId: number) => {
   const res = await TenantPackageApi.getTenantPackageApi(rowId)
   unref(formRef)?.setValues(res)
   // 设置选中
-  unref(treeRef)?.setCheckedKeys(res.menuIds)
+  res.menuIds?.forEach((item: any) => {
+    unref(treeRef)?.setChecked(item, true,false);
+  })
 }
 
 // 提交按钮
