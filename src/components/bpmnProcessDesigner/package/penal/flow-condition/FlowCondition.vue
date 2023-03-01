@@ -79,7 +79,7 @@ const resetFlowCondition = () => {
   if (
     bpmnElementSourceRef.value &&
     bpmnElementSourceRef.value.default &&
-    bpmnElementSourceRef.value.default.id === this.bpmnElement.id
+    bpmnElementSourceRef.value.default.id === bpmnElement.value.id
   ) {
     // 默认
     flowConditionForm.value = { type: 'default' }
@@ -175,11 +175,13 @@ onBeforeUnmount(() => {
 watch(
   () => props.businessObject,
   (val) => {
-    if (val) {
-      nextTick(() => {
-        resetFlowCondition()
-      })
-    }
+    console.log(val, 'val')
+    nextTick(() => {
+      resetFlowCondition()
+    })
+  },
+  {
+    immediate: true
   }
 )
 </script>
