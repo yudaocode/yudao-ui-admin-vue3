@@ -212,9 +212,11 @@ const addToChildren = (
   }
 }
 const toCamelCase = (str: string, upperCaseFirst: boolean) => {
-  str = (str || '').toLowerCase().replace(/-(.)/g, function (group1: string) {
-    return group1.toUpperCase()
-  })
+  str = (str || '')
+    .replace(/-(.)/g, function (group1: string) {
+      return group1.toUpperCase()
+    })
+    .replaceAll('-', '')
 
   if (upperCaseFirst && str) {
     str = str.charAt(0).toUpperCase() + str.slice(1)
