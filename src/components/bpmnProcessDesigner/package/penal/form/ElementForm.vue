@@ -239,17 +239,18 @@ const elExtensionElements = ref()
 const formData = ref()
 const otherExtensions = ref()
 
+const bpmnInstances = () => (window as any)?.bpmnInstances
 const resetFormList = () => {
-  bpmnELement.value = window.bpmnInstances.bpmnElement
+  bpmnELement.value = bpmnInstances().bpmnElement
   formKey.value = bpmnELement.value.businessObject.formKey
   // 获取元素扩展属性 或者 创建扩展属性
   elExtensionElements.value =
     bpmnELement.value.businessObject.get('extensionElements') ||
-    window.bpmnInstances.moddle.create('bpmn:ExtensionElements', { values: [] })
+    bpmnInstances().moddle.create('bpmn:ExtensionElements', { values: [] })
   // 获取元素表单配置 或者 创建新的表单配置
   formData.value =
     elExtensionElements.value.values.filter((ex) => ex.$type === `${prefix}:FormData`)?.[0] ||
-    window.bpmnInstances.moddle.create(`${prefix}:FormData`, { fields: [] })
+    bpmnInstances().moddle.create(`${prefix}:FormData`, { fields: [] })
 
   // 业务标识 businessKey， 绑定在 formData 中
   businessKey.value = formData.value.businessKey
@@ -266,12 +267,12 @@ const resetFormList = () => {
   updateElementExtensions()
 }
 const updateElementFormKey = () => {
-  window.bpmnInstances.modeling.updateProperties(toRaw(bpmnELement.value), {
+  bpmnInstances().modeling.updateProperties(toRaw(bpmnELement.value), {
     formKey: formKey.value
   })
 }
 const updateElementBusinessKey = () => {
-  window.bpmnInstances.modeling.updateModdleProperties(toRaw(bpmnELement.value), formData.value, {
+  bpmnInstances().modeling.updateModdleProperties(toRaw(bpmnELement.value), formData.value, {
     businessKey: businessKey.value
   })
 }
@@ -353,37 +354,37 @@ const saveFieldOption = () => {
 // 保存字段配置
 const saveField = () => {
   const { id, type, label, defaultValue, datePattern } = formFieldForm.value
-  const Field = window.bpmnInstances.moddle.create(`${prefix}:FormField`, { id, type, label })
+  const Field = bpmnInstances().moddle.create(`${prefix}:FormField`, { id, type, label })
   defaultValue && (Field.defaultValue = defaultValue)
   datePattern && (Field.datePattern = datePattern)
   // 构建属性
   if (fieldPropertiesList.value && fieldPropertiesList.value.length) {
     const fieldPropertyList = fieldPropertiesList.value.map((fp) => {
-      return window.bpmnInstances.moddle.create(`${prefix}:Property`, {
+      return bpmnInstances().moddle.create(`${prefix}:Property`, {
         id: fp.id,
         value: fp.value
       })
     })
-    Field.properties = window.bpmnInstances.moddle.create(`${this.prefix}:Properties`, {
+    Field.properties = bpmnInstances().moddle.create(`${prefix}:Properties`, {
       values: fieldPropertyList
     })
   }
   // 构建校验规则
   if (fieldConstraintsList.value && fieldConstraintsList.value.length) {
     const fieldConstraintList = fieldConstraintsList.value.map((fc) => {
-      return window.bpmnInstances.moddle.create(`${prefix}:Constraint`, {
+      return bpmnInstances().moddle.create(`${prefix}:Constraint`, {
         name: fc.name,
         config: fc.config
       })
     })
-    Field.validation = window.bpmnInstances.moddle.create(`${prefix}:Validation`, {
+    Field.validation = bpmnInstances().moddle.create(`${prefix}:Validation`, {
       constraints: fieldConstraintList
     })
   }
   // 构建枚举值
   if (fieldEnumList.value && fieldEnumList.value.length) {
     Field.values = fieldEnumList.value.map((fe) => {
-      return window.bpmnInstances.moddle.create(`${prefix}:Value`, { name: fe.name, id: fe.id })
+      return bpmnInstances().moddle.create(`${prefix}:Value`, { name: fe.name, id: fe.id })
     })
   }
   // 更新数组 与 表单配置实例
@@ -421,11 +422,11 @@ const removeField = (field, index) => {
 
 const updateElementExtensions = () => {
   // 更新回扩展元素
-  const newElExtensionElements = window.bpmnInstances.moddle.create(`bpmn:ExtensionElements`, {
+  const newElExtensionElements = bpmnInstances().moddle.create(`bpmn:ExtensionElements`, {
     values: otherExtensions.value.concat(formData.value)
   })
   // 更新到元素上
-  window.bpmnInstances.modeling.updateProperties(toRaw(bpmnELement.value), {
+  bpmnInstances().modeling.updateProperties(toRaw(bpmnELement.value), {
     extensionElements: newElExtensionElements
   })
 }

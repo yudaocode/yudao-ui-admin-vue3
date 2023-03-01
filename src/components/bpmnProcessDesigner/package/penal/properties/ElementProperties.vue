@@ -70,10 +70,11 @@ const otherExtensionList = ref()
 const bpmnElementProperties = ref()
 const bpmnElementPropertyList = ref()
 const attributeFormRef = ref()
+const bpmnInstances = () => (window as any)?.bpmnInstances
 
 const resetAttributesList = () => {
   console.log(window, 'windowwindowwindowwindowwindowwindowwindow')
-  bpmnElement.value = window.bpmnInstances.bpmnElement
+  bpmnElement.value = bpmnInstances().bpmnElement
   otherExtensionList.value = [] // 其他扩展配置
   bpmnElementProperties.value =
     // bpmnElement.value.businessObject?.extensionElements?.filter((ex) => {
@@ -110,7 +111,7 @@ const removeAttributes = (attr, index) => {
       elementPropertyList.value.splice(index, 1)
       bpmnElementPropertyList.value.splice(index, 1)
       // 新建一个属性字段的保存列表
-      const propertiesObject = window.bpmnInstances.moddle.create(`${prefix}:Properties`, {
+      const propertiesObject = bpmnInstances().moddle.create(`${prefix}:Properties`, {
         values: bpmnElementPropertyList.value
       })
       updateElementExtensions(propertiesObject)
@@ -122,7 +123,7 @@ const saveAttribute = () => {
   console.log(propertyForm.value, 'propertyForm.value')
   const { name, value } = propertyForm.value
   if (editingPropertyIndex.value !== -1) {
-    window.bpmnInstances.modeling.updateModdleProperties(
+    bpmnInstances().modeling.updateModdleProperties(
       toRaw(bpmnElement.value),
       toRaw(bpmnElementPropertyList.value)[toRaw(editingPropertyIndex.value)],
       {
@@ -132,12 +133,12 @@ const saveAttribute = () => {
     )
   } else {
     // 新建属性字段
-    const newPropertyObject = window.bpmnInstances.moddle.create(`${prefix}:Property`, {
+    const newPropertyObject = bpmnInstances().moddle.create(`${prefix}:Property`, {
       name,
       value
     })
     // 新建一个属性字段的保存列表
-    const propertiesObject = window.bpmnInstances.moddle.create(`${prefix}:Properties`, {
+    const propertiesObject = bpmnInstances().moddle.create(`${prefix}:Properties`, {
       values: bpmnElementPropertyList.value.concat([newPropertyObject])
     })
     updateElementExtensions(propertiesObject)
@@ -146,10 +147,10 @@ const saveAttribute = () => {
   resetAttributesList()
 }
 const updateElementExtensions = (properties) => {
-  const extensions = window.bpmnInstances.moddle.create('bpmn:ExtensionElements', {
+  const extensions = bpmnInstances().moddle.create('bpmn:ExtensionElements', {
     values: otherExtensionList.value.concat([properties])
   })
-  window.bpmnInstances.modeling.updateProperties(toRaw(bpmnElement.value), {
+  bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
     extensionElements: extensions
   })
 }

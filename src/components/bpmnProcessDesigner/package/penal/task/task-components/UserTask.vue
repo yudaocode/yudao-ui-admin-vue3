@@ -53,6 +53,8 @@ const defaultTaskForm = ref({
 const userTaskForm = ref<any>({})
 // const mockData=ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 const bpmnElement = ref()
+const bpmnInstances = () => (window as any)?.bpmnInstances
+
 const resetTaskForm = () => {
   for (let key in defaultTaskForm.value) {
     let value
@@ -76,13 +78,13 @@ const updateElementTask = (key) => {
   } else {
     taskAttr[key] = userTaskForm.value[key] || null
   }
-  window.bpmnInstances.modeling.updateProperties(toRaw(bpmnElement.value), taskAttr)
+  bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), taskAttr)
 }
 
 watch(
   () => props.id,
   () => {
-    bpmnElement.value = window.bpmnInstances.bpmnElement
+    bpmnElement.value = bpmnInstances().bpmnElement
     nextTick(() => {
       resetTaskForm()
     })
