@@ -5,7 +5,14 @@ const { t } = useI18n()
 export const rules = reactive({
   username: [required],
   nickname: [required],
-  email: [required],
+  email: [
+    { required: true, message: t('profile.rules.mail'), trigger: 'blur' },
+    {
+      type: 'email',
+      message: t('profile.rules.truemail'),
+      trigger: ['blur', 'change']
+    }
+  ],
   status: [required],
   mobile: [
     {

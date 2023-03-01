@@ -45,9 +45,9 @@
           <el-select v-model="formData.roleIds" multiple clearable style="width: 100%">
             <el-option
               v-for="item in roleOptions"
-              :key="parseInt(item.id)"
+              :key="item.id"
               :label="item.name"
-              :value="parseInt(item.id)"
+              :value="item.id"
             />
           </el-select>
         </el-form-item>

@@ -43,7 +43,7 @@
     </XTable>
   </ContentWrap>
 
-  <XModal v-model="dialogVisible" :title="dialogTitle">
+  <XModal v-model="dialogVisible" :title="dialogTitle" :mask-closable="false">
     <!-- 对话框(添加 / 修改) -->
     <Form
       v-if="['create', 'update'].includes(actionType)"

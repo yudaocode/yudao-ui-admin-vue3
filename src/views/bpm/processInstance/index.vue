@@ -7,7 +7,7 @@
         <XButton
           type="primary"
           preIcon="ep:zoom-in"
-          title="新建流程"
+          title="发起流程"
           v-hasPermi="['bpm:process-instance:query']"
           @click="handleCreate"
         />

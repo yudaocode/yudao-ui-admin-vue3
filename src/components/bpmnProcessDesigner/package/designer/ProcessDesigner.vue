@@ -190,12 +190,12 @@
     </div>
     <XModal title="预览" width="80%" height="90%" v-model="previewModelVisible" destroy-on-close>
       <!-- append-to-body -->
-      <pre v-highlight>
-            <code class="hljs">
-            <!-- 高亮代码块 -->
-            {{ previewResult }}
-            </code>
-        </pre>
+      <div v-highlight>
+        <code class="hljs">
+          <!-- 高亮代码块 -->
+          {{ previewResult }}
+        </code>
+      </div>
       <!-- <pre>
         <code class="hljs" v-html="highlightedCode(previewType, previewResult)"></code>
       </pre> -->
