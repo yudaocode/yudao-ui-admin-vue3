@@ -3,7 +3,7 @@
     <IFrame :src="src" />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="Jmreport">
+<script setup lang="ts" name="JimuReport">
 import { getAccessToken } from '@/utils/auth'
 
 const BASE_URL = import.meta.env.VITE_BASE_URL

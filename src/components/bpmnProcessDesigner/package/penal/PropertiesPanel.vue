@@ -109,6 +109,7 @@ const bpmnElement = ref()
 const timer = ref()
 provide('prefix', props.prefix)
 provide('width', props.width)
+const bpmnInstances = () => (window as any)?.bpmnInstances
 const initModels = () => {
   // console.log(props, 'props')
   // console.log(props.bpmnModeler, 'sakdjjaskdsajdkasdjkadsjk')
@@ -121,7 +122,8 @@ const initModels = () => {
   }
   if (timer.value) {
     clearTimeout(timer.value)
-    window.bpmnInstances = {
+    const w = window as any
+    w.bpmnInstances = {
       modeler: props.bpmnModeler,
       modeling: props.bpmnModeler.get('modeling'),
       moddle: props.bpmnModeler.get('moddle'),
@@ -134,7 +136,7 @@ const initModels = () => {
     }
   }
 
-  console.log(window.bpmnInstances, 'window.bpmnInstances')
+  console.log(bpmnInstances(), 'window.bpmnInstances')
   getActiveElement()
   // })
 }
@@ -161,8 +163,8 @@ const initFormOnChanged = (element) => {
   let activatedElement = element
   if (!activatedElement) {
     activatedElement =
-      window.bpmnInstances.elementRegistry.find((el) => el.type === 'bpmn:Process') ??
-      window.bpmnInstances.elementRegistry.find((el) => el.type === 'bpmn:Collaboration')
+      bpmnInstances().elementRegistry.find((el) => el.type === 'bpmn:Process') ??
+      bpmnInstances().elementRegistry.find((el) => el.type === 'bpmn:Collaboration')
   }
   if (!activatedElement) return
   console.log(`
@@ -173,7 +175,7 @@ const initFormOnChanged = (element) => {
               ----------
               `)
   console.log('businessObject: ', activatedElement.businessObject)
-  window.bpmnInstances.bpmnElement = activatedElement
+  bpmnInstances().bpmnElement = activatedElement
   bpmnElement.value = activatedElement
   elementId.value = activatedElement.id
   elementType.value = activatedElement.type.split(':')[1] || ''
@@ -191,7 +193,8 @@ onMounted(() => {
   }, 100)
 })
 onBeforeUnmount(() => {
-  window.bpmnInstances = null
+  const w = window as any
+  w.bpmnInstances = null
   console.log(props, 'props1')
   console.log(props.bpmnModeler, 'props.bpmnModeler1')
 })

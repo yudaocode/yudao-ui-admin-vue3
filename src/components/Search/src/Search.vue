@@ -9,6 +9,8 @@ import { FormSchema } from '@/types/form'
 
 const { t } = useI18n()
 
+const slots = useSlots()
+
 const props = defineProps({
   // 生成Form的布局结构数组
   schema: {
@@ -123,6 +125,7 @@ const setVisible = () => {
         </ElButton>
       </div>
     </template>
+    <template v-for="(slot, name) in slots" #[name]><slot :name="name"></slot></template>
   </Form>
 
   <template v-if="layout === 'bottom'">

@@ -59,6 +59,7 @@ const queryParams = reactive({
 })
 const [registerTable] = useXTable({
   allSchemas: allSchemas,
+  topActionSlots: false,
   params: queryParams,
   getListApi: MailLogApi.getMailLogPageApi
 })
