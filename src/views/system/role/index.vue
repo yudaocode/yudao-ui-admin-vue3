@@ -99,37 +99,47 @@
         </el-select>
       </el-form-item>
       <!-- 分配角色的菜单权限对话框 -->
-      <el-form-item
-        label="权限范围"
-        v-if="
-          actionScopeType === 'menu' || dataScopeForm.dataScope === SystemDataScopeEnum.DEPT_CUSTOM
-        "
-      >
-        <el-card shadow="never">
-          <template #header>
-            父子联动(选中父节点，自动选择子节点):
-            <el-switch v-model="checkStrictly" inline-prompt active-text="是" inactive-text="否" />
-            全选/全不选:
-            <el-switch
-              v-model="treeNodeAll"
-              inline-prompt
-              active-text="是"
-              inactive-text="否"
-              @change="handleCheckedTreeNodeAll()"
-            />
-          </template>
-          <el-tree
-            ref="treeRef"
-            node-key="id"
-            show-checkbox
-            :default-checked-keys="defaultCheckedKeys"
-            :check-strictly="!checkStrictly"
-            :props="defaultProps"
-            :data="treeOptions"
-            empty-text="加载中，请稍后"
-          />
-        </el-card>
-      </el-form-item>
+      <el-row>
+        <el-col :span="24">
+          <el-form-item
+            label="权限范围"
+            v-if="
+              actionScopeType === 'menu' ||
+              dataScopeForm.dataScope === SystemDataScopeEnum.DEPT_CUSTOM
+            "
+            style="display: flex"
+          >
+            <el-card class="card" shadow="never">
+              <template #header>
+                父子联动(选中父节点，自动选择子节点):
+                <el-switch
+                  v-model="checkStrictly"
+                  inline-prompt
+                  active-text="是"
+                  inactive-text="否"
+                />
+                全选/全不选:
+                <el-switch
+                  v-model="treeNodeAll"
+                  inline-prompt
+                  active-text="是"
+                  inactive-text="否"
+                  @change="handleCheckedTreeNodeAll()"
+                />
+              </template>
+              <el-tree
+                ref="treeRef"
+                node-key="id"
+                show-checkbox
+                :default-checked-keys="defaultCheckedKeys"
+                :check-strictly="!checkStrictly"
+                :props="defaultProps"
+                :data="treeOptions"
+                empty-text="加载中，请稍后"
+              />
+            </el-card>
+          </el-form-item> </el-col
+      ></el-row>
     </el-form>
     <!-- 操作按钮 -->
     <template #footer>
@@ -312,3 +322,10 @@ onMounted(() => {
   init()
 })
 </script>
+<style scoped>
+.card {
+  width: 100%;
+  max-height: 400px;
+  overflow-y: scroll;
+}
+</style>
