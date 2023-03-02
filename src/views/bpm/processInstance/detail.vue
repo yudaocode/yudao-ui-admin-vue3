@@ -406,7 +406,7 @@ const getDetail = () => {
         nextTick().then(() => {
           fApi.value?.btn.show(false)
           fApi.value?.resetBtn.show(false)
-          fApi.value?.disabled(true)
+          fApi.value?.btn.disabled(true)
         })
       }
 
