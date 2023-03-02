@@ -5,6 +5,7 @@ const { t } = useI18n()
 export const rules = reactive({
   username: [required],
   nickname: [required],
+  password: [required],
   email: [
     { required: true, message: t('profile.rules.mail'), trigger: 'blur' },
     {
