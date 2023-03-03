@@ -1,7 +1,7 @@
 <template>
   <ContentWrap>
     <!-- 列表 -->
-    <XTable @register="registerTable">
+    <XTable @register="registerTable" ref="xGrid">
       <template #options_default="{ row }">
         <span :key="option" v-for="option in row.options">
           <el-tag>
@@ -145,11 +145,12 @@ import { listSimpleUserGroupsApi } from '@/api/bpm/userGroup'
 import { listSimpleDeptApi } from '@/api/system/dept'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { handleTree, defaultProps } from '@/utils/tree'
-import { allSchemas, rules } from './taskAssignRule.data'
+import { allSchemas, rules, idShowActionClick } from './taskAssignRule.data'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 const { query } = useRoute()
+const xGrid = ref()
 
 // ========== 列表相关 ==========
 
@@ -165,6 +166,8 @@ const taskAssignScriptDictDatas = getDictOptions(DICT_TYPE.BPM_TASK_ASSIGN_SCRIP
 const modelId = query.modelId
 // 流程定义的编号。如果 processDefinitionId 非空，则用于流程定义的查看，不支持配置
 const processDefinitionId = query.processDefinitionId
+let isShow = idShowActionClick(modelId)
+
 // 查询参数
 const queryParams = reactive({
   modelId: modelId,
@@ -346,5 +349,10 @@ onMounted(() => {
   listSimpleUserGroupsApi().then((data) => {
     userGroupOptions.value.push(...data)
   })
+  if (!isShow) {
+    setTimeout(() => {
+      xGrid.value.Ref.hideColumn('actionbtns')
+    }, 100)
+  }
 })
 </script>
