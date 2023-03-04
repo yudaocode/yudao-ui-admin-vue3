@@ -3,9 +3,21 @@
     <!-- 表单设计器 -->
     <fc-designer ref="designer" height="780px">
       <template #handle>
+        <XButton type="primary" title="生成JSON" @click="showJson" />
+        <XButton type="primary" title="生成Options" @click="showOption" />
         <XButton type="primary" :title="t('action.save')" @click="handleSave" />
       </template>
     </fc-designer>
+    <Dialog :title="dialogTitle" v-model="dialogVisible1" maxHeight="600">
+      <div ref="editor" v-if="dialogVisible1">
+        <XTextButton style="float: right" :title="t('common.copy')" @click="copy(formValue)" />
+        <el-scrollbar height="580">
+          <pre>
+            {{ formValue }}
+          </pre>
+        </el-scrollbar>
+      </div>
+    </Dialog>
     <!-- 表单保存的弹窗 -->
     <XModal v-model="dialogVisible" title="保存表单">
       <el-form ref="formRef" :model="formValues" :rules="formRules" label-width="80px">
@@ -48,13 +60,18 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as FormApi from '@/api/bpm/form'
 import { encodeConf, encodeFields, setConfAndFields } from '@/utils/formCreate'
+import { useClipboard } from '@vueuse/core'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息
 const { query } = useRoute() // 路由
 
 const designer = ref() // 表单设计器
-
+const type = ref(-1)
+const formValue = ref('')
+const dialogTitle = ref('')
 const dialogVisible = ref(false) // 弹窗是否展示
+const dialogVisible1 = ref(false) // 弹窗是否展示
 const dialogLoading = ref(false) // 弹窗的加载中
 const formRef = ref<FormInstance>()
 const formRules = reactive({
@@ -98,7 +115,32 @@ const submitForm = async () => {
     dialogLoading.value = false
   }
 }
-
+const showJson = () => {
+  openModel('生成JSON')
+  type.value = 0
+  formValue.value = designer.value.getRule()
+}
+const showOption = () => {
+  openModel('生成Options')
+  type.value = 1
+  formValue.value = designer.value.getOption()
+}
+const openModel = (title: string) => {
+  dialogVisible1.value = true
+  dialogTitle.value = title
+}
+/** 复制 **/
+const copy = async (text: string) => {
+  const { copy, copied, isSupported } = useClipboard({ source: text })
+  if (!isSupported) {
+    message.error(t('common.copyError'))
+  } else {
+    await copy()
+    if (unref(copied)) {
+      message.success(t('common.copySuccess'))
+    }
+  }
+}
 // ========== 初始化 ==========
 onMounted(() => {
   // 场景一：新增表单
