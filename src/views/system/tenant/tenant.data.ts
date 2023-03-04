@@ -27,6 +27,24 @@ export const rules = reactive({
   contactMobile: [required],
   accountCount: [required],
   expireTime: [required],
+  username: [
+    required,
+    {
+      min: 4,
+      max: 30,
+      trigger: 'blur',
+      message: '用户名称长度为 4-30 个字符'
+    }
+  ],
+  password: [
+    required,
+    {
+      min: 4,
+      max: 16,
+      trigger: 'blur',
+      message: '密码长度为 4-16 位'
+    }
+  ],
   domain: [required],
   status: [required]
 })

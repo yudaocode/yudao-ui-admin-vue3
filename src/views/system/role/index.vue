@@ -99,36 +99,41 @@
         </el-select>
       </el-form-item>
       <!-- 分配角色的菜单权限对话框 -->
-      <el-form-item
-        label="权限范围"
-        v-if="
-          actionScopeType === 'menu' || dataScopeForm.dataScope === SystemDataScopeEnum.DEPT_CUSTOM
-        "
-      >
-        <el-card shadow="never">
-          <template #header>
-            父子联动(选中父节点，自动选择子节点):
-            <el-switch v-model="checkStrictly" inline-prompt active-text="是" inactive-text="否" />
-            全选/全不选:
-            <el-switch
-              v-model="treeNodeAll"
-              inline-prompt
-              active-text="是"
-              inactive-text="否"
-              @change="handleCheckedTreeNodeAll()"
-            />
-          </template>
-          <el-tree
-            ref="treeRef"
-            node-key="id"
-            show-checkbox
-            :check-strictly="!checkStrictly"
-            :props="defaultProps"
-            :data="treeOptions"
-            empty-text="加载中，请稍后"
-          />
-        </el-card>
-      </el-form-item>
+      <el-row>
+        <el-col :span="24">
+          <el-form-item
+            label="权限范围"
+            v-if="
+              actionScopeType === 'menu' ||
+              dataScopeForm.dataScope === SystemDataScopeEnum.DEPT_CUSTOM
+            "
+            style="display: flex"
+          >
+            <el-card class="card" shadow="never">
+              <template #header>
+                <!--父子联动(选中父节点，自动选择子节点):-->
+                <!--<el-switch v-model="checkStrictly" inline-prompt active-text="是" inactive-text="否" />-->
+                <!--全选/全不选:-->
+                <!--<el-switch-->
+                <!--  v-model="treeNodeAll"-->
+                <!--  inline-prompt-->
+                <!--  active-text="是"-->
+                <!--  inactive-text="否"-->
+                <!--  @change="handleCheckedTreeNodeAll()"-->
+                <!--/>-->
+              </template>
+              <el-tree
+                ref="treeRef"
+                node-key="id"
+                show-checkbox
+                :check-strictly="!checkStrictly"
+                :props="defaultProps"
+                :data="treeOptions"
+                empty-text="加载中，请稍后"
+              />
+            </el-card>
+          </el-form-item> </el-col
+      ></el-row>
     </el-form>
     <!-- 操作按钮 -->
     <template #footer>
@@ -245,18 +250,17 @@ const dialogScopeTitle = ref('数据权限')
 const actionScopeType = ref('')
 const dataScopeDictDatas = ref()
 // 选项
-const checkStrictly = ref(true)
-const treeNodeAll = ref(false)
+const checkStrictly = ref(false)
+// const treeNodeAll = ref(false)
 // 全选/全不选
-const handleCheckedTreeNodeAll = () => {
-  treeRef.value!.setCheckedNodes(treeNodeAll.value ? treeOptions.value : [])
-}
+// const handleCheckedTreeNodeAll = () => {
+//   treeRef.value!.setCheckedNodes(treeNodeAll.value ? treeOptions.value : [])
+// }
 // 权限操作
 const handleScope = async (type: string, row: RoleApi.RoleVO) => {
   dataScopeForm.id = row.id
   dataScopeForm.name = row.name
   dataScopeForm.code = row.code
-
   actionScopeType.value = type
   dialogScopeVisible.value = true
   if (type === 'menu') {
@@ -265,7 +269,7 @@ const handleScope = async (type: string, row: RoleApi.RoleVO) => {
     const role = await PermissionApi.listRoleMenusApi(row.id)
     if (role) {
       role?.forEach((item: any) => {
-        unref(treeRef)?.setChecked(item, true,false);
+        unref(treeRef)?.setChecked(item, true, false)
       })
     }
   } else if (type === 'data') {
@@ -275,11 +279,10 @@ const handleScope = async (type: string, row: RoleApi.RoleVO) => {
     dataScopeForm.dataScope = role.dataScope
     if (role.dataScopeDeptIds) {
       role.dataScopeDeptIds?.forEach((item: any) => {
-        unref(treeRef)?.setChecked(item, true,false);
+        unref(treeRef)?.setChecked(item, true, false)
       })
     }
   }
-
 }
 // 保存权限
 const submitScope = async () => {
@@ -314,3 +317,10 @@ onMounted(() => {
   init()
 })
 </script>
+<style scoped>
+.card {
+  width: 100%;
+  max-height: 400px;
+  overflow-y: scroll;
+}
+</style>

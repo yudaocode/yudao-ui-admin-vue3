@@ -159,7 +159,7 @@
       :data="detailData"
     >
       <template #deptId="{ row }">
-        <span>{{ row.dept?.name }}</span>
+        <el-tag>{{ dataFormater(row.deptId) }}</el-tag>
       </template>
       <template #postIds="{ row }">
         <template v-if="row.postIds !== ''">
@@ -332,6 +332,28 @@ const getPostOptions = async () => {
   const res = await listSimplePostsApi()
   postOptions.value.push(...res)
 }
+const dataFormater = (val) => {
+  return deptFormater(deptOptions.value, val)
+}
+//部门回显
+const deptFormater = (ary, val: any) => {
+  var o = ''
+  if (ary && val) {
+    for (const v of ary) {
+      if (v.id == val) {
+        o = v.name
+        if (o) return o
+      } else if (v.children?.length) {
+        o = deptFormater(v.children, val)
+        if (o) return o
+      }
+    }
+    return o
+  } else {
+    return val
+  }
+}
+
 // 设置标题
 const setDialogTile = async (type: string) => {
   dialogTitle.value = t('action.' + type)
