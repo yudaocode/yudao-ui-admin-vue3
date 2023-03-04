@@ -11,6 +11,7 @@
     "build:pro": "node --max_old_space_size=8000 ./node_modules/vite/bin/vite.js build --mode pro",
     "build:dev": "node --max_old_space_size=8000 ./node_modules/vite/bin/vite.js build --mode dev",
     "build:test": "node --max_old_space_size=8000 ./node_modules/vite/bin/vite.js build --mode test",
+    "build:static": "node --max_old_space_size=8000 ./node_modules/vite/bin/vite.js build --mode static",
     "serve:pro": "vite preview --mode pro",
     "serve:dev": "vite preview --mode dev",
     "serve:test": "vite preview --mode test",
