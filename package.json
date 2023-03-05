@@ -6,7 +6,7 @@
   "private": false,
   "scripts": {
     "i": "pnpm install",
-    "dev": "vite --mode base",
+    "dev": "DEBUG=vite:plugin:mkcert vite --mode base --force",
     "ts:check": "vue-tsc --noEmit",
     "build:pro": "vite build --mode pro",
     "build:dev": "vite build --mode dev",
@@ -55,6 +55,9 @@
     "qs": "^6.11.0",
     "steady-xml": "^0.1.0",
     "url": "^0.11.0",
+    "vite-plugin-mkcert": "^1.13.0",
+    "vite-plugin-optimize-persist": "^0.1.2",
+    "vite-plugin-package-config": "^0.1.1",
     "vue": "3.2.47",
     "vue-i18n": "9.2.2",
     "vue-router": "^4.1.6",

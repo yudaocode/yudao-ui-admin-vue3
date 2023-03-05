@@ -14,6 +14,9 @@ import viteCompression from 'vite-plugin-compression'
 import vueSetupExtend from 'vite-plugin-vue-setup-extend'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
+import mkcert from 'vite-plugin-mkcert'
+// import PkgConfig from 'vite-plugin-package-config'
+// import OptimizationPersist from 'vite-plugin-optimize-persist'
 export function createVitePlugins(VITE_APP_TITLE: string) {
   const root = process.cwd()
   // 路径查找
@@ -93,6 +96,9 @@ export function createVitePlugins(VITE_APP_TITLE: string) {
     }),
     ViteEjsPlugin({
       title: VITE_APP_TITLE
-    })
+    }),
+    mkcert(),
+    // PkgConfig(),
+    // OptimizationPersist(),
   ]
 }
