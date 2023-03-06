@@ -416,12 +416,12 @@ const submitForm = async () => {
       try {
         const data = unref(formRef)?.formModel as UserApi.UserVO
         if (actionType.value === 'create') {
-          await UserApi.createUserApi(data)
           loading.value = true
+          await UserApi.createUserApi(data)
           message.success(t('common.createSuccess'))
         } else {
-          await UserApi.updateUserApi(data)
           loading.value = true
+          await UserApi.updateUserApi(data)
           message.success(t('common.updateSuccess'))
         }
         dialogVisible.value = false
