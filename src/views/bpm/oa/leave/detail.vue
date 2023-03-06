@@ -2,6 +2,7 @@
   <ContentWrap>
     <!-- 详情 -->
     <Descriptions :schema="allSchemas.detailSchema" :data="formData" />
+    <el-button @click="routerReturn" type="primary">返回</el-button>
   </ContentWrap>
 </template>
 
@@ -9,7 +10,8 @@
 // 业务相关的 import
 import * as LeaveApi from '@/api/bpm/leave'
 import { allSchemas } from '@/views/bpm/oa/leave/leave.data'
-
+import { useRouter } from 'vue-router'
+const router = useRouter()
 const { query } = useRoute() // 查询参数
 const message = useMessage() // 消息弹窗
 
@@ -21,6 +23,10 @@ const formData = ref({
   type: undefined,
   reason: undefined
 })
+
+const routerReturn = () => {
+  router.back()
+}
 
 onMounted(() => {
   id.value = query.id

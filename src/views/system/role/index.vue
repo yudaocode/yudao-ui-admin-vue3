@@ -131,7 +131,6 @@
                 ref="treeRef"
                 node-key="id"
                 show-checkbox
-                :default-checked-keys="defaultCheckedKeys"
                 :check-strictly="!checkStrictly"
                 :props="defaultProps"
                 :data="treeOptions"
@@ -255,7 +254,6 @@ const dialogScopeVisible = ref(false)
 const dialogScopeTitle = ref('数据权限')
 const actionScopeType = ref('')
 const dataScopeDictDatas = ref()
-const defaultCheckedKeys = ref()
 // 选项
 const checkStrictly = ref(true)
 const treeNodeAll = ref(false)
@@ -268,13 +266,16 @@ const handleScope = async (type: string, row: RoleApi.RoleVO) => {
   dataScopeForm.id = row.id
   dataScopeForm.name = row.name
   dataScopeForm.code = row.code
+  actionScopeType.value = type
+  dialogScopeVisible.value = true
   if (type === 'menu') {
     const menuRes = await listSimpleMenusApi()
     treeOptions.value = handleTree(menuRes)
     const role = await PermissionApi.listRoleMenusApi(row.id)
     if (role) {
-      // treeRef.value!.setCheckedKeys(role as unknown as Array<number>)
-      defaultCheckedKeys.value = role
+      role?.forEach((item: any) => {
+        unref(treeRef)?.setChecked(item, true, false)
+      })
     }
   } else if (type === 'data') {
     const deptRes = await listSimpleDeptApi()
@@ -282,12 +283,11 @@ const handleScope = async (type: string, row: RoleApi.RoleVO) => {
     const role = await RoleApi.getRoleApi(row.id)
     dataScopeForm.dataScope = role.dataScope
     if (role.dataScopeDeptIds) {
-      // treeRef.value!.setCheckedKeys(role.dataScopeDeptIds as unknown as Array<number>, false)
-      defaultCheckedKeys.value = role.dataScopeDeptIds
+      role.dataScopeDeptIds?.forEach((item: any) => {
+        unref(treeRef)?.setChecked(item, true, false)
+      })
     }
   }
-  actionScopeType.value = type
-  dialogScopeVisible.value = true
 }
 // 保存权限
 const submitScope = async () => {

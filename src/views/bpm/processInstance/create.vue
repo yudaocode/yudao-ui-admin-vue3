@@ -3,6 +3,10 @@
     <!-- 第一步，通过流程定义的列表，选择对应的流程 -->
     <div v-if="!selectProcessInstance">
       <XTable @register="registerTable">
+        <!-- 流程分类 -->
+        <template #category_default="{ row }">
+          <DictTag :type="DICT_TYPE.BPM_MODEL_CATEGORY" :value="Number(row?.category)" />
+        </template>
         <template #version_default="{ row }">
           <el-tag v-if="row">v{{ row.version }}</el-tag>
         </template>
@@ -56,6 +60,7 @@ import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import { ApiAttrs } from '@form-create/element-ui/types/config'
+import { DICT_TYPE } from '@/utils/dict'
 
 const router = useRouter() // 路由
 const message = useMessage() // 消息

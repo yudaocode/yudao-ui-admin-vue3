@@ -332,7 +332,6 @@ const getPostOptions = async () => {
   const res = await listSimplePostsApi()
   postOptions.value.push(...res)
 }
-
 const dataFormater = (val) => {
   return deptFormater(deptOptions.value, val)
 }
@@ -409,24 +408,31 @@ const handleDetail = async (rowId: number) => {
 
 // 提交按钮
 const submitForm = async () => {
-  loading.value = true
   // 提交请求
-  try {
-    const data = unref(formRef)?.formModel as UserApi.UserVO
-    if (actionType.value === 'create') {
-      await UserApi.createUserApi(data)
-      message.success(t('common.createSuccess'))
-    } else {
-      await UserApi.updateUserApi(data)
-      message.success(t('common.updateSuccess'))
+  const elForm = unref(formRef)?.getElFormRef()
+  if (!elForm) return
+  elForm.validate(async (valid) => {
+    if (valid) {
+      try {
+        const data = unref(formRef)?.formModel as UserApi.UserVO
+        if (actionType.value === 'create') {
+          await UserApi.createUserApi(data)
+          loading.value = true
+          message.success(t('common.createSuccess'))
+        } else {
+          await UserApi.updateUserApi(data)
+          loading.value = true
+          message.success(t('common.updateSuccess'))
+        }
+        dialogVisible.value = false
+      } finally {
+        // unref(formRef)?.setSchema(allSchemas.formSchema)
+        // 刷新列表
+        await reload()
+        loading.value = false
+      }
     }
-    dialogVisible.value = false
-  } finally {
-    // unref(formRef)?.setSchema(allSchemas.formSchema)
-    // 刷新列表
-    await reload()
-    loading.value = false
-  }
+  })
 }
 // 改变用户状态操作
 const handleStatusChange = async (row: UserApi.UserVO) => {

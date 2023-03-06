@@ -1,8 +1,18 @@
 import type { VxeCrudSchema } from '@/hooks/web/useVxeCrudSchemas'
 
+const { t } = useI18n() // 国际化
+
 // 表单校验
 export const rules = reactive({
-  mail: [required],
+  // mail: [required],
+  mail: [
+    { required: true, message: t('profile.rules.mail'), trigger: 'blur' },
+    {
+      type: 'email',
+      message: t('profile.rules.truemail'),
+      trigger: ['blur', 'change']
+    }
+  ],
   username: [required],
   password: [required],
   host: [required],
