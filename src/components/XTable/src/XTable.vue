@@ -26,12 +26,12 @@ const prefixCls = getPrefixCls('x-vxe-table')
 const attrs = useAttrs()
 const emit = defineEmits(['register'])
 const removeStyles = () => {
-  var filename = 'cssTheme'
+  const filename = 'cssTheme'
   //移除引入的文件名
-  var targetelement = 'style'
-  var targetattr = 'id'
-  var allsuspects = document.getElementsByTagName(targetelement)
-  for (var i = allsuspects.length; i >= 0; i--) {
+  const targetelement = 'style'
+  const targetattr = 'id'
+  const allsuspects = document.getElementsByTagName(targetelement)
+  for (let i = allsuspects.length; i >= 0; i--) {
     if (
       allsuspects[i] &&
       allsuspects[i].getAttribute(targetattr) != null &&
@@ -43,8 +43,8 @@ const removeStyles = () => {
   }
 }
 const reImport = () => {
-  var head = document.getElementsByTagName('head')[0]
-  var style = document.createElement('style')
+  const head = document.getElementsByTagName('head')[0]
+  const style = document.createElement('style')
   style.innerText = styleCss
   style.id = 'cssTheme'
   head.appendChild(style)
@@ -52,10 +52,10 @@ const reImport = () => {
 watch(
   () => appStore.getIsDark,
   () => {
-    if (appStore.getIsDark == true) {
+    if (appStore.getIsDark) {
       reImport()
     }
-    if (appStore.getIsDark == false) {
+    if (!appStore.getIsDark) {
       removeStyles()
     }
   },
