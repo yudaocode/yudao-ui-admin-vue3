@@ -18,6 +18,7 @@ export const rules = reactive({
   status: [required],
   mobile: [
     {
+      required: true,
       len: 11,
       trigger: 'blur',
       message: '请输入正确的手机号码'
