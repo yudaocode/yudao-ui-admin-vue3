@@ -12,7 +12,7 @@ import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
 import { XTableProps } from './type'
 import { isBoolean, isFunction } from '@/utils/is'
-import styleCss from './style/dark.scss'
+import styleCss from './style/dark.scss?inline'
 import download from '@/utils/download'
 
 const { t } = useI18n()
