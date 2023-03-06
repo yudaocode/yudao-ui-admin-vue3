@@ -412,8 +412,8 @@ const submitForm = async () => {
   if (!elForm) return
   elForm.validate(async (valid) => {
     if (valid) {
+      // 提交请求
       try {
-        // 提交请求
         const data = unref(formRef)?.formModel as UserApi.UserVO
         if (actionType.value === 'create') {
           loading.value = true
