@@ -11,10 +11,10 @@
       >
         <el-select v-model="bindMessageId" @change="updateTaskMessage">
           <el-option
-            v-for="id in Object.keys(messageMap)"
-            :value="id"
-            :label="messageMap[id]"
-            :key="id"
+            v-for="item in Object.keys(messageMap)"
+            :value="item"
+            :label="messageMap[item]"
+            :key="item"
           />
         </el-select>
         <XButton
