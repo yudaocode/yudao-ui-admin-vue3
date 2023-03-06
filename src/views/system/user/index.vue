@@ -408,12 +408,12 @@ const handleDetail = async (rowId: number) => {
 
 // 提交按钮
 const submitForm = async () => {
-  // 提交请求
   const elForm = unref(formRef)?.getElFormRef()
   if (!elForm) return
   elForm.validate(async (valid) => {
     if (valid) {
       try {
+        // 提交请求
         const data = unref(formRef)?.formModel as UserApi.UserVO
         if (actionType.value === 'create') {
           loading.value = true
