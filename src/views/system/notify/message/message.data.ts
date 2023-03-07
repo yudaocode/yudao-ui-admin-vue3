@@ -4,7 +4,7 @@ import type { VxeCrudSchema } from '@/hooks/web/useVxeCrudSchemas'
 const crudSchemas = reactive<VxeCrudSchema>({
   primaryKey: 'id', // 默认的主键ID
   primaryTitle: '编号', // 默认显示的值
-  primaryType: 'seq', // 默认为seq，序号模式
+  primaryType: 'id', // 默认为seq，序号模式
   action: true,
   actionWidth: '200', // 3个按钮默认200，如有删减对应增减即可
   columns: [

@@ -10,7 +10,7 @@ export const rules = reactive({
 // CrudSchema
 const crudSchemas = reactive<VxeCrudSchema>({
   primaryKey: 'id',
-  primaryType: 'seq',
+  primaryType: 'id',
   primaryTitle: '敏感词编号',
   action: true,
   columns: [
