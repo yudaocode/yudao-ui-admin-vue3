@@ -6,6 +6,11 @@
   margin-left: 2px !important;
 }
 
+// 解决抽屉弹出时，body宽度变化的问题
+.el-popup-parent--hidden {
+  width: 100% !important;
+}
+
 /* nprogress 适配 element-plus 的主题色 */
 #nprogress {
   & .bar {
