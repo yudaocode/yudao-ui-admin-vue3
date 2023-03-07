@@ -67,7 +67,19 @@ const include = [
   'element-plus/es/components/dropdown/style/index',
   'element-plus/es/components/dropdown-menu/style/index',
   'element-plus/es/components/dropdown-item/style/index',
-  'element-plus/es/components/skeleton/style/index'
+  'element-plus/es/components/skeleton/style/index',
+  'element-plus/es/components/skeleton/style/css',
+  'element-plus/es/components/backtop/style/css',
+  'element-plus/es/components/menu/style/css',
+  'element-plus/es/components/sub-menu/style/css',
+  'element-plus/es/components/menu-item/style/css',
+  'element-plus/es/components/dropdown/style/css',
+  'element-plus/es/components/tree/style/css',
+  'element-plus/es/components/dropdown-menu/style/css',
+  'element-plus/es/components/dropdown-item/style/css',
+  'element-plus/es/components/badge/style/css',
+  'element-plus/es/components/breadcrumb/style/css',
+  'element-plus/es/components/breadcrumb-item/style/css'
 ]
 
 const exclude = ['@iconify/json']
