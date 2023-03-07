@@ -59,7 +59,7 @@ import { allSchemas } from './process.create'
 import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { setConfAndFields2 } from '@/utils/formCreate'
-import { ApiAttrs } from '@form-create/element-ui/types/config'
+import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { DICT_TYPE } from '@/utils/dict'
 
 const router = useRouter() // 路由
