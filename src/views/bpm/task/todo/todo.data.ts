@@ -7,6 +7,7 @@ const crudSchemas = reactive<VxeCrudSchema>({
   primaryKey: 'id',
   primaryType: null,
   action: true,
+  searchSpan: 8,
   columns: [
     {
       title: '任务编号',

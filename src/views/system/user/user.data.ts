@@ -5,10 +5,20 @@ const { t } = useI18n()
 export const rules = reactive({
   username: [required],
   nickname: [required],
-  email: [required],
+  password: [required],
+  deptId: [required],
+  email: [
+    { required: true, message: t('profile.rules.mail'), trigger: 'blur' },
+    {
+      type: 'email',
+      message: t('profile.rules.truemail'),
+      trigger: ['blur', 'change']
+    }
+  ],
   status: [required],
   mobile: [
     {
+      required: true,
       len: 11,
       trigger: 'blur',
       message: '请输入正确的手机号码'
@@ -18,7 +28,7 @@ export const rules = reactive({
 // crudSchemas
 const crudSchemas = reactive<VxeCrudSchema>({
   primaryKey: 'id',
-  primaryType: 'seq',
+  primaryType: 'id',
   primaryTitle: '用户编号',
   action: true,
   actionWidth: '200px',

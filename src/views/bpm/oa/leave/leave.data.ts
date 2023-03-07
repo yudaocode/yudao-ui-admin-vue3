@@ -16,6 +16,7 @@ const crudSchemas = reactive<VxeCrudSchema>({
   primaryTitle: '申请编号',
   action: true,
   actionWidth: '260',
+  searchSpan: 8,
   columns: [
     {
       title: t('common.status'),

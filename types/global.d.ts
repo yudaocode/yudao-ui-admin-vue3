@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'vue'
+export {}
 declare global {
   declare interface Fn<T = any> {
     (...arg: T[]): T

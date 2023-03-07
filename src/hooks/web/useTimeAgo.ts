@@ -5,6 +5,7 @@ const TIME_AGO_MESSAGE_MAP: {
   'zh-CN': UseTimeAgoMessages
   en: UseTimeAgoMessages
 } = {
+  // @ts-ignore
   'zh-CN': {
     justNow: '刚刚',
     past: (n) => (n.match(/\d/) ? `${n}前` : n),
@@ -17,6 +18,7 @@ const TIME_AGO_MESSAGE_MAP: {
     minute: (n) => `${n} 分钟`,
     second: (n) => `${n} 秒`
   },
+  // @ts-ignore
   en: {
     justNow: 'just now',
     past: (n) => (n.match(/\d/) ? `${n} ago` : n),

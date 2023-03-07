@@ -14,7 +14,7 @@ export const rules = reactive({
 // CrudSchema
 const crudSchemas = reactive<VxeCrudSchema>({
   primaryKey: 'id',
-  primaryType: 'seq',
+  primaryType: 'id',
   primaryTitle: '套餐编号',
   action: true,
   columns: [
@@ -33,7 +33,12 @@ const crudSchemas = reactive<VxeCrudSchema>({
     {
       title: '菜单权限',
       field: 'menuIds',
-      isTable: false
+      isTable: false,
+      form: {
+        colProps: {
+          span: 24
+        }
+      }
     },
     {
       title: t('form.remark'),

@@ -64,8 +64,9 @@ const bpmnElement = ref<any>()
 const bpmnMessageRefsMap = ref<any>()
 const bpmnRootElements = ref<any>()
 
+const bpmnInstances = () => (window as any).bpmnInstances
 const getBindMessage = () => {
-  bpmnElement.value = window.bpmnInstances.bpmnElement
+  bpmnElement.value = bpmnInstances().bpmnElement
   bindMessageId.value = bpmnElement.value.businessObject?.messageRef?.id || '-1'
 }
 const openMessageModel = () => {
@@ -77,7 +78,7 @@ const createNewMessage = () => {
     message.error('该消息已存在，请修改id后重新保存')
     return
   }
-  const newMessage = window.bpmnInstances.moddle.create('bpmn:Message', newMessageForm.value)
+  const newMessage = bpmnInstances().moddle.create('bpmn:Message', newMessageForm.value)
   bpmnRootElements.value.push(newMessage)
   messageMap.value[newMessageForm.value.id] = newMessageForm.value.name
   bpmnMessageRefsMap.value[newMessageForm.value.id] = newMessage
@@ -85,11 +86,11 @@ const createNewMessage = () => {
 }
 const updateTaskMessage = (messageId) => {
   if (messageId === '-1') {
-    window.bpmnInstances.modeling.updateProperties(toRaw(bpmnElement.value), {
+    bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
       messageRef: null
     })
   } else {
-    window.bpmnInstances.modeling.updateProperties(toRaw(bpmnElement.value), {
+    bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
       messageRef: bpmnMessageRefsMap.value[messageId]
     })
   }
@@ -97,7 +98,7 @@ const updateTaskMessage = (messageId) => {
 
 onMounted(() => {
   bpmnMessageRefsMap.value = Object.create(null)
-  bpmnRootElements.value = window.bpmnInstances.modeler.getDefinitions().rootElements
+  bpmnRootElements.value = bpmnInstances().modeler.getDefinitions().rootElements
   bpmnRootElements.value
     .filter((el) => el.$type === 'bpmn:Message')
     .forEach((m) => {
@@ -113,7 +114,7 @@ onBeforeUnmount(() => {
 watch(
   () => props.id,
   () => {
-    // bpmnElement.value = window.bpmnInstances.bpmnElement
+    // bpmnElement.value = bpmnInstances().bpmnElement
     nextTick(() => {
       getBindMessage()
     })

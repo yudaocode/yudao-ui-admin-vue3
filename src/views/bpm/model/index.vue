@@ -24,6 +24,10 @@
       <template #name_default="{ row }">
         <XTextButton :title="row.name" @click="handleBpmnDetail(row.id)" />
       </template>
+      <!-- 流程分类 -->
+      <template #category_default="{ row }">
+        <DictTag :type="DICT_TYPE.BPM_MODEL_CATEGORY" :value="Number(row?.category)" />
+      </template>
       <!-- 表单信息 -->
       <template #formId_default="{ row }">
         <XTextButton
@@ -429,6 +433,11 @@ const handleUpdate = async (rowId: number) => {
   await setDialogTile('edit')
   // 设置数据
   saveForm.value = await ModelApi.getModelApi(rowId)
+  if (saveForm.value.category == null) {
+    saveForm.value.category = 1
+  } else {
+    saveForm.value.category = Number(saveForm.value.category)
+  }
 }
 
 // 提交按钮
