@@ -111,16 +111,21 @@
           >
             <el-card class="card" shadow="never">
               <template #header>
-                <!--父子联动(选中父节点，自动选择子节点):-->
-                <!--<el-switch v-model="checkStrictly" inline-prompt active-text="是" inactive-text="否" />-->
-                <!--全选/全不选:-->
-                <!--<el-switch-->
-                <!--  v-model="treeNodeAll"-->
-                <!--  inline-prompt-->
-                <!--  active-text="是"-->
-                <!--  inactive-text="否"-->
-                <!--  @change="handleCheckedTreeNodeAll()"-->
-                <!--/>-->
+                父子联动(选中父节点，自动选择子节点):
+                <el-switch
+                  v-model="checkStrictly"
+                  inline-prompt
+                  active-text="是"
+                  inactive-text="否"
+                />
+                全选/全不选:
+                <el-switch
+                  v-model="treeNodeAll"
+                  inline-prompt
+                  active-text="是"
+                  inactive-text="否"
+                  @change="handleCheckedTreeNodeAll()"
+                />
               </template>
               <el-tree
                 ref="treeRef"
@@ -250,12 +255,12 @@ const dialogScopeTitle = ref('数据权限')
 const actionScopeType = ref('')
 const dataScopeDictDatas = ref()
 // 选项
-const checkStrictly = ref(false)
-// const treeNodeAll = ref(false)
+const checkStrictly = ref(true)
+const treeNodeAll = ref(false)
 // 全选/全不选
-// const handleCheckedTreeNodeAll = () => {
-//   treeRef.value!.setCheckedNodes(treeNodeAll.value ? treeOptions.value : [])
-// }
+const handleCheckedTreeNodeAll = () => {
+  treeRef.value!.setCheckedNodes(treeNodeAll.value ? treeOptions.value : [])
+}
 // 权限操作
 const handleScope = async (type: string, row: RoleApi.RoleVO) => {
   dataScopeForm.id = row.id

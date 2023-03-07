@@ -404,9 +404,9 @@ const getDetail = () => {
           data.formVariables
         )
         nextTick().then(() => {
-          fApi.value?.btn.show(false)
-          fApi.value?.resetBtn.show(false)
-          fApi.value?.btn.disabled(true)
+          fApi.value?.fapi?.btn.show(false)
+          fApi.value?.fapi?.resetBtn.show(false)
+          fApi.value?.fapi?.disabled(true)
         })
       }
 

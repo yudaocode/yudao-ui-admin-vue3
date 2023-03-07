@@ -33,7 +33,12 @@ const crudSchemas = reactive<VxeCrudSchema>({
       field: 'category',
       dictType: DICT_TYPE.BPM_MODEL_CATEGORY,
       dictClass: 'number',
-      isSearch: true
+      isSearch: true,
+      table: {
+        slots: {
+          default: 'category_default'
+        }
+      }
     },
     {
       title: '当前审批任务',
