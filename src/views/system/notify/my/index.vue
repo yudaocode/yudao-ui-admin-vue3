@@ -35,7 +35,7 @@ const [registerTable, { reload, getCheckboxRecords }] = useXTable({
 })
 
 const handleUpdateList = async () => {
-  const list = getCheckboxRecords()
+  const list = getCheckboxRecords() as any as any[]
   if (list.length === 0) {
     return
   }

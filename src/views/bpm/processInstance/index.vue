@@ -7,10 +7,14 @@
         <XButton
           type="primary"
           preIcon="ep:zoom-in"
-          title="新建流程"
+          title="发起流程"
           v-hasPermi="['bpm:process-instance:query']"
           @click="handleCreate"
         />
+      </template>
+      <!-- 流程分类 -->
+      <template #category_default="{ row }">
+        <DictTag :type="DICT_TYPE.BPM_MODEL_CATEGORY" :value="Number(row?.category)" />
       </template>
       <!-- 当前审批任务 -->
       <template #tasks_default="{ row }">
@@ -40,6 +44,7 @@
 <script setup lang="ts">
 // 全局相关的 import
 import { ElMessageBox } from 'element-plus'
+import { DICT_TYPE } from '@/utils/dict'
 
 // 业务相关的 import
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'

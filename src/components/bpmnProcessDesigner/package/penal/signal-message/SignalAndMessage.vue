@@ -62,10 +62,11 @@ const modelConfig = computed(() => {
     return { title: '创建信号', idLabel: '信号ID', nameLabel: '信号名称' }
   }
 })
+const bpmnInstances = () => (window as any)?.bpmnInstances
 
 const initDataList = () => {
   console.log(window, 'window')
-  rootElements.value = window.bpmnInstances.modeler.getDefinitions().rootElements
+  rootElements.value = bpmnInstances().modeler.getDefinitions().rootElements
   messageIdMap.value = {}
   signalIdMap.value = {}
   messageList.value = []
@@ -91,13 +92,13 @@ const addNewObject = () => {
     if (messageIdMap.value[modelObjectForm.value.id]) {
       message.error('该消息已存在，请修改id后重新保存')
     }
-    const messageRef = window.bpmnInstances.moddle.create('bpmn:Message', modelObjectForm.value)
+    const messageRef = bpmnInstances().moddle.create('bpmn:Message', modelObjectForm.value)
     rootElements.value.push(messageRef)
   } else {
     if (signalIdMap.value[modelObjectForm.value.id]) {
       message.error('该信号已存在，请修改id后重新保存')
     }
-    const signalRef = window.bpmnInstances.moddle.create('bpmn:Signal', modelObjectForm.value)
+    const signalRef = bpmnInstances().moddle.create('bpmn:Signal', modelObjectForm.value)
     rootElements.value.push(signalRef)
   }
   modelVisible.value = false

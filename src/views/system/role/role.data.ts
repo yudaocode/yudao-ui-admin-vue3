@@ -9,12 +9,19 @@ export const rules = reactive({
 })
 // CrudSchema
 const crudSchemas = reactive<VxeCrudSchema>({
-  primaryKey: 'id',
-  primaryTitle: '角色编号',
-  primaryType: 'seq',
+  // primaryKey: 'id',
+  // primaryTitle: '角色编号',
+  // primaryType: 'seq',
   action: true,
   actionWidth: '400px',
   columns: [
+    {
+      title: '角色编号',
+      field: 'id',
+      table: {
+        width: 200
+      }
+    },
     {
       title: '角色名称',
       field: 'name',

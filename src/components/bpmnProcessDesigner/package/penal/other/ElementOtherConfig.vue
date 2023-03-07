@@ -22,13 +22,14 @@ const props = defineProps({
 })
 const documentation = ref('')
 const bpmnElement = ref()
+const bpmnInstances = () => (window as any).bpmnInstances
 const updateDocumentation = () => {
   ;(bpmnElement.value && bpmnElement.value.id === props.id) ||
-    (bpmnElement.value = (window as any).bpmnInstances.elementRegistry.get(props.id))
-  const documentations = window.bpmnInstances.bpmnFactory.create('bpmn:Documentation', {
+    (bpmnElement.value = bpmnInstances().elementRegistry.get(props.id))
+  const documentations = bpmnInstances().bpmnFactory.create('bpmn:Documentation', {
     text: documentation.value
   })
-  window.bpmnInstances.modeling.updateProperties(toRaw(bpmnElement.value), {
+  bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
     documentation: [documentations]
   })
 }
@@ -41,7 +42,7 @@ watch(
   (id) => {
     if (id && id.length) {
       nextTick(() => {
-        const documentations = window.bpmnInstances.bpmnElement.businessObject?.documentation
+        const documentations = bpmnInstances().bpmnElement.businessObject?.documentation
         documentation.value = documentations && documentations.length ? documentations[0].text : ''
       })
     } else {

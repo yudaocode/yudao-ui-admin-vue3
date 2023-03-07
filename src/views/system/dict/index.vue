@@ -179,6 +179,7 @@ const tableTypeSelect = ref(false)
 const cellClickEvent: VxeTableEvents.CellClick = async ({ row }) => {
   tableTypeSelect.value = true
   queryParams.dictType = row['type']
+  await nextTick()
   await dataGetList()
   parentType.value = row['type']
 }
@@ -196,6 +197,11 @@ const setDialogTile = (type: string) => {
   actionType.value = type
   dialogVisible.value = true
 }
+
+// 同步dictTypeValue到form 否则导致表单验证不通过
+watch(dictTypeValue, (val) => {
+  unref(typeFormRef)?.setValues({ type: val })
+})
 
 // 提交按钮
 const submitTypeForm = async () => {

@@ -16,10 +16,12 @@ const include = [
   'crypto-js',
   'cropperjs',
   'lodash-es',
-  'vxe-table',
   'nprogress',
   'animate.css',
+  'vxe-table',
   'vxe-table/es/style',
+  'vxe-table/lib/locale/lang/zh-CN',
+  'vxe-table/lib/locale/lang/en-US',
   'web-storage-cache',
   '@iconify/iconify',
   '@vueuse/core',
@@ -35,6 +37,7 @@ const include = [
   'element-plus/es',
   'element-plus/es/locale/lang/zh-cn',
   'element-plus/es/locale/lang/en',
+  'element-plus/es/components/backtop/style/index',
   'element-plus/es/components/form/style/index',
   'element-plus/es/components/radio-group/style/index',
   'element-plus/es/components/radio/style/index',
@@ -60,7 +63,11 @@ const include = [
   'element-plus/es/components/menu/style/index',
   'element-plus/es/components/sub-menu/style/index',
   'element-plus/es/components/menu-item/style/index',
-  'element-plus/es/components/option/style/index'
+  'element-plus/es/components/option/style/index',
+  'element-plus/es/components/dropdown/style/index',
+  'element-plus/es/components/dropdown-menu/style/index',
+  'element-plus/es/components/dropdown-item/style/index',
+  'element-plus/es/components/skeleton/style/index'
 ]
 
 const exclude = ['@iconify/json']

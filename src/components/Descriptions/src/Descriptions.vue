@@ -109,7 +109,13 @@ const toggleClick = () => {
             v-bind="getBindItemValue(item)"
           >
             <template #label>
-              <slot :name="`${item.field}-label`" :label="item.label">{{ item.label }}</slot>
+              <slot
+                :name="`${item.field}-label`"
+                :row="{
+                  label: item.label
+                }"
+                >{{ item.label }}</slot
+              >
             </template>
 
             <template #default>

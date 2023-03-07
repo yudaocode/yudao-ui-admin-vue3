@@ -8,9 +8,10 @@
 <script setup lang="ts" name="MyProcessPalette">
 import { assign } from 'min-dash'
 
-const addTask = (event, options = {}) => {
-  const ElementFactory = window.bpmnInstances.elementFactory
-  const create = window.bpmnInstances.modeler.get('create')
+const bpmnInstances = () => (window as any).bpmnInstances
+const addTask = (event, options: any = {}) => {
+  const ElementFactory = bpmnInstances().elementFactory
+  const create = bpmnInstances().modeler.get('create')
 
   console.log(ElementFactory, create)
 

@@ -30,7 +30,7 @@ export function createVitePlugins(VITE_APP_TITLE: string) {
     progress(),
     PurgeIcons(),
     vueSetupExtend(),
-    ElementPlus(),
+    ElementPlus({}),
     AutoImport({
       include: [
         /\.[tj]sx?$/, // .ts, .tsx, .js, .jsx

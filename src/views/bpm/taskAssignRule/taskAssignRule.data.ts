@@ -43,4 +43,12 @@ const crudSchemas = reactive<VxeCrudSchema>({
     }
   ]
 })
+
+export const idShowActionClick = (modelId?: any) => {
+  if (modelId) {
+    return true
+  } else {
+    return false
+  }
+}
 export const { allSchemas } = useVxeCrudSchemas(crudSchemas)

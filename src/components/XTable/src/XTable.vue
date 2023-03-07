@@ -12,7 +12,7 @@ import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
 import { XTableProps } from './type'
 import { isBoolean, isFunction } from '@/utils/is'
-
+import styleCss from './style/dark.scss?inline'
 import download from '@/utils/download'
 
 const { t } = useI18n()
@@ -25,15 +25,38 @@ const prefixCls = getPrefixCls('x-vxe-table')
 
 const attrs = useAttrs()
 const emit = defineEmits(['register'])
-
+const removeStyles = () => {
+  const filename = 'cssTheme'
+  //移除引入的文件名
+  const targetelement = 'style'
+  const targetattr = 'id'
+  let allsuspects = document.getElementsByTagName(targetelement)
+  for (let i = allsuspects.length; i >= 0; i--) {
+    if (
+      allsuspects[i] &&
+      allsuspects[i].getAttribute(targetattr) != null &&
+      allsuspects[i].getAttribute(targetattr)?.indexOf(filename) != -1
+    ) {
+      console.log(allsuspects[i], 'node')
+      allsuspects[i].parentNode?.removeChild(allsuspects[i])
+    }
+  }
+}
+const reImport = () => {
+  let head = document.getElementsByTagName('head')[0]
+  let style = document.createElement('style')
+  style.innerText = styleCss
+  style.id = 'cssTheme'
+  head.appendChild(style)
+}
 watch(
   () => appStore.getIsDark,
   () => {
     if (appStore.getIsDark == true) {
-      import('./style/dark.scss')
+      reImport()
     }
     if (appStore.getIsDark == false) {
-      import('./style/light.scss')
+      removeStyles()
     }
   },
   { immediate: true }
