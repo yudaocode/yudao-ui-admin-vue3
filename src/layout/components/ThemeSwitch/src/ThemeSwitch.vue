@@ -37,3 +37,8 @@ const themeChange = (val: boolean) => {
     @change="themeChange"
   />
 </template>
+<style lang="scss" scoped>
+:deep(.el-switch__core .el-switch__inner .is-icon) {
+  overflow: visible;
+}
+</style>
