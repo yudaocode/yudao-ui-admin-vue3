@@ -30,7 +30,7 @@ const removeStyles = () => {
   //移除引入的文件名
   const targetelement = 'style'
   const targetattr = 'id'
-  let allsuspects = document.getElementsByTagName(targetelement)
+  const allsuspects = document.getElementsByTagName(targetelement)
   for (let i = allsuspects.length; i >= 0; i--) {
     if (
       allsuspects[i] &&
@@ -43,8 +43,8 @@ const removeStyles = () => {
   }
 }
 const reImport = () => {
-  let head = document.getElementsByTagName('head')[0]
-  let style = document.createElement('style')
+  const head = document.getElementsByTagName('head')[0]
+  const style = document.createElement('style')
   style.innerText = styleCss
   style.id = 'cssTheme'
   head.appendChild(style)
@@ -52,10 +52,10 @@ const reImport = () => {
 watch(
   () => appStore.getIsDark,
   () => {
-    if (appStore.getIsDark == true) {
+    if (appStore.getIsDark) {
       reImport()
     }
-    if (appStore.getIsDark == false) {
+    if (!appStore.getIsDark) {
       removeStyles()
     }
   },
