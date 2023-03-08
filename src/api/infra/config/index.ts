@@ -27,7 +27,7 @@ export interface ConfigExportReqVO {
 }
 
 // 查询参数列表
-export const getConfigPageApi = (params: ConfigPageReqVO) => {
+export const getConfigPage = (params: ConfigPageReqVO) => {
   return request.get({ url: '/infra/config/page', params })
 }
 

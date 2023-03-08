@@ -1,162 +1,117 @@
 <template>
-  <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <template #toolbar_buttons>
-        <!-- 操作：新增 -->
-        <XButton
-          type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
-          v-hasPermi="['infra:config:create']"
-          @click="handleCreate()"
-        />
-        <!-- 操作：导出 -->
-        <XButton
-          type="warning"
-          preIcon="ep:download"
-          :title="t('action.export')"
-          v-hasPermi="['infra:config:export']"
-          @click="exportList('配置.xls')"
-        />
-      </template>
-      <template #visible_default="{ row }">
-        <span>{{ row.visible ? '是' : '否' }} </span>
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['infra:config:update']"
-          @click="handleUpdate(row.id)"
-        />
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
-          v-hasPermi="['infra:config:query']"
-          @click="handleDetail(row.id)"
-        />
-        <!-- 操作：删除 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['infra:config:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
-  </ContentWrap>
-
-  <XModal v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form
-      v-if="['create', 'update'].includes(actionType)"
-      :schema="allSchemas.formSchema"
-      :rules="rules"
-      ref="formRef"
-    />
-    <!-- 对话框(详情) -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
+  <content-wrap>
+    <!-- 搜索工作栏 -->
+    <el-form
+      :model="queryParams"
+      ref="queryForm"
+      :inline="true"
+      v-show="showSearch"
+      label-width="68px"
     >
-      <template #visible="{ row }">
-        <span>{{ row.visible ? '是' : '否' }} </span>
-      </template>
-    </Descriptions>
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="actionLoading"
-        @click="submitForm()"
-      />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
+      <el-form-item label="参数名称" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入参数名称"
+          clearable
+          style="width: 240px"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="参数键名" prop="key">
+        <el-input
+          v-model="queryParams.key"
+          placeholder="请输入参数键名"
+          clearable
+          style="width: 240px"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <!--      <el-form-item label="系统内置" prop="type">-->
+      <!--        <el-select v-model="queryParams.type" placeholder="系统内置" clearable>-->
+      <!--          <el-option v-for="dict in this.getDictDatas(DICT_TYPE.INFRA_CONFIG_TYPE)" :key="parseInt(dict.value)"-->
+      <!--                     :label="dict.label" :value="parseInt(dict.value)"/>-->
+      <!--        </el-select>-->
+      <!--      </el-form-item>-->
+      <!-- TODO：时间无法设置 -->
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          style="width: 240px"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="['00:00:00', '23:59:59']"
+        />
+      </el-form-item>
+      <el-form-item>
+        <!-- TODO 按钮图标不对 -->
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
+      </el-form-item>
+    </el-form>
+
+    <!-- 列表 -->
+    <el-table v-loading="loading" :data="list">
+      <el-table-column label="参数主键" align="center" prop="id" />
+      <el-table-column label="参数分类" align="center" prop="category" />
+      <el-table-column label="参数名称" align="center" prop="name" :show-overflow-tooltip="true" />
+      <el-table-column label="参数键名" align="center" prop="key" :show-overflow-tooltip="true" />
+      <el-table-column label="参数键值" align="center" prop="value" />
+      <el-table-column label="系统内置" align="center" prop="type">
+        <template v-slot="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_CONFIG_TYPE" :value="scope.row.type" />
+        </template>
+      </el-table-column>
+      <el-table-column label="备注" align="center" prop="remark" :show-overflow-tooltip="true" />
+    </el-table>
+  </content-wrap>
 </template>
 <script setup lang="ts" name="Config">
-import type { FormExpose } from '@/components/Form'
-// 业务相关的 import
 import * as ConfigApi from '@/api/infra/config'
-import { rules, allSchemas } from './config.data'
+import { DICT_TYPE } from '@/utils/dict'
 
-const { t } = useI18n() // 国际化
-const message = useMessage() // 消息弹窗
-// 列表相关的变量
-const [registerTable, { reload, deleteData, exportList }] = useXTable({
-  allSchemas: allSchemas,
-  getListApi: ConfigApi.getConfigPageApi,
-  deleteApi: ConfigApi.deleteConfigApi,
-  exportListApi: ConfigApi.exportConfigApi
+const showSearch = ref(true) // 搜索框的是否展示
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 列表的数据
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  name: undefined,
+  key: undefined,
+  type: undefined,
+  createTime: []
 })
+const queryForm = ref() // 搜索的表单
 
-// ========== CRUD 相关 ==========
-const actionLoading = ref(false) // 遮罩层
-const actionType = ref('') // 操作按钮的类型
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const formRef = ref<FormExpose>() // 表单 Ref
-const detailData = ref() // 详情 Ref
-
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
 }
 
-// 新增操作
-const handleCreate = () => {
-  setDialogTile('create')
+/** 查询参数列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await ConfigApi.getConfigPage(queryParams)
+    list.value = data.list
+    total.value = data.value
+  } finally {
+    loading.value = false
+  }
 }
 
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  // 设置数据
-  const res = await ConfigApi.getConfigApi(rowId)
-  unref(formRef)?.setValues(res)
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryForm.value.resetFields()
+  handleQuery()
 }
 
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  setDialogTile('detail')
-  const res = await ConfigApi.getConfigApi(rowId)
-  detailData.value = res
-}
-
-// 提交按钮
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as ConfigApi.ConfigVO
-        if (actionType.value === 'create') {
-          await ConfigApi.createConfigApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          await ConfigApi.updateConfigApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        // 刷新列表
-        await reload()
-      }
-    }
-  })
-}
+// ========== 初始化 ==========
+onMounted(() => {
+  getList()
+})
 </script>
