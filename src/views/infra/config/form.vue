@@ -36,7 +36,6 @@
 <script setup lang="ts">
 import * as ConfigApi from '@/api/infra/config'
 // import type { FormExpose } from '@/components/Form'
-import * as PostApi from '@/api/system/post'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 // const { proxy } = getCurrentInstance()
@@ -46,15 +45,15 @@ const modelTitle = ref('') // 弹窗的标题
 const modelLoading = ref(false) // 弹窗的 Loading 加载
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formLoading = ref(false) // 操作按钮的 Loading 加载
-let formRef = ref() // 表单的 Ref
+// let formRef = ref() // 表单的 Ref
 const formData = reactive({
-  id: undefined,
-  category: undefined,
-  name: undefined,
-  key: undefined,
-  value: undefined,
+  id: 0,
+  category: '',
+  name: '',
+  key: '',
+  value: '',
   visible: true,
-  remark: undefined
+  remark: ''
 })
 const formRules = reactive({
   category: [{ required: true, message: '参数分类不能为空', trigger: 'blur' }],
@@ -64,6 +63,8 @@ const formRules = reactive({
   visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }]
 })
 // const formRef = ref<FormExpose>() // 表单 Ref
+
+const { proxy } = getCurrentInstance() as any
 
 /** 打开弹窗 */
 const openModal = async (type: string, id?: number) => {
@@ -84,20 +85,21 @@ defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
+  const formRef = proxy.$refs['formRef']
+  console.log(formRef, '======')
   // 校验表单
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  const valid = await elForm.validate()
+  if (!formRef) return
+  const valid = await formRef.validate()
   if (!valid) return
   // 提交请求
   formLoading.value = true
   try {
-    const data = unref(formRef)?.formModel as PostApi.PostVO
+    const data = formData as ConfigApi.ConfigVO
     if (formType.value === 'create') {
-      await PostApi.createPostApi(data)
+      await ConfigApi.createConfig(data)
       message.success(t('common.createSuccess'))
     } else {
-      await PostApi.updatePostApi(data)
+      await ConfigApi.updateConfig(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
@@ -109,14 +111,14 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
-  formData.id = undefined
-  formData.category = undefined
-  formData.name = undefined
-  formData.key = undefined
-  formData.value = undefined
+  formData.id = 0
+  formData.category = ''
+  formData.name = ''
+  formData.key = ''
+  formData.value = ''
   formData.visible = true
-  formData.remark = undefined
+  formData.remark = ''
   // proxy.$refs['formRef'].resetFields()
-  // formRef.value.resetFields() // TODO 芋艿：为什么拿不到
+  // formRef.value.resetFields() // TODO 芋艿：为什么拿不到 formRef 呢？
 }
 </script>

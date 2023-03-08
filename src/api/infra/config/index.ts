@@ -42,12 +42,12 @@ export const getConfigKeyApi = (configKey: string) => {
 }
 
 // 新增参数
-export const createConfigApi = (data: ConfigVO) => {
+export const createConfig = (data: ConfigVO) => {
   return request.post({ url: '/infra/config/create', data })
 }
 
 // 修改参数
-export const updateConfigApi = (data: ConfigVO) => {
+export const updateConfig = (data: ConfigVO) => {
   return request.put({ url: '/infra/config/update', data })
 }
 
