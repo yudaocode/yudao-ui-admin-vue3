@@ -1,6 +1,6 @@
 <template>
   <div class="my-process-designer">
-    <div class="my-process-designer__header">
+    <div class="my-process-designer__header" style="display: table-row-group; z-index: 999">
       <slot name="control-header"></slot>
       <template v-if="!$slots['control-header']">
         <ElButtonGroup key="file-control">
@@ -166,6 +166,7 @@
           @click="processSave"
           :type="props.headerButtonType"
           :disabled="simulationStatus"
+
         />
       </template>
       <!-- 用于打开本地文件-->
