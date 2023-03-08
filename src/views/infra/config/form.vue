@@ -1,50 +1,53 @@
 <template>
-  <XModal :title="modelTitle" :loading="modelLoading" v-model="modelVisible">
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+  <!-- TODO 芋艿：Dialog 貌似高度不太对劲 -->
+  <Dialog :title="modelTitle" v-model="modelVisible" :loading="modelLoading">
+    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
       <el-form-item label="参数分类" prop="category">
-        <el-input v-model="form.category" placeholder="请输入参数分类" />
+        <el-input v-model="formData.category" placeholder="请输入参数分类" />
       </el-form-item>
       <el-form-item label="参数名称" prop="name">
-        <el-input v-model="form.name" placeholder="请输入参数名称" />
+        <el-input v-model="formData.name" placeholder="请输入参数名称" />
       </el-form-item>
       <el-form-item label="参数键名" prop="key">
-        <el-input v-model="form.key" placeholder="请输入参数键名" />
+        <el-input v-model="formData.key" placeholder="请输入参数键名" />
       </el-form-item>
       <el-form-item label="参数键值" prop="value">
-        <el-input v-model="form.value" placeholder="请输入参数键值" />
+        <el-input v-model="formData.value" placeholder="请输入参数键值" />
       </el-form-item>
       <el-form-item label="是否可见" prop="visible">
         <!-- TODO 芋艿：改成组件 -->
-        <el-radio-group v-model="form.visible">
+        <el-radio-group v-model="formData.visible">
           <el-radio :key="true" :label="true">是</el-radio>
           <el-radio :key="false" :label="false">否</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
+        <el-input v-model="formData.remark" type="textarea" placeholder="请输入内容" />
       </el-form-item>
     </el-form>
     <template #footer>
       <div class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="modelLoading = false">取 消</el-button>
+        <el-button @click="modelVisible = false">取 消</el-button>
       </div>
     </template>
-  </XModal>
+  </Dialog>
 </template>
 <script setup lang="ts">
+import * as ConfigApi from '@/api/infra/config'
 // import type { FormExpose } from '@/components/Form'
 import * as PostApi from '@/api/system/post'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+// const { proxy } = getCurrentInstance()
 
 const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
 const modelLoading = ref(false) // 弹窗的 Loading 加载
-const actionType = ref('') // 操作类型：create - 新增；update - 修改
-const actionLoading = ref(false) // 操作按钮的 Loading 加载
-const formRef = ref() // 表单的 Ref
-const form = reactive({
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formLoading = ref(false) // 操作按钮的 Loading 加载
+let formRef = ref() // 表单的 Ref
+const formData = reactive({
   id: undefined,
   category: undefined,
   name: undefined,
@@ -53,7 +56,7 @@ const form = reactive({
   visible: true,
   remark: undefined
 })
-const rules = reactive({
+const formRules = reactive({
   category: [{ required: true, message: '参数分类不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '参数名称不能为空', trigger: 'blur' }],
   key: [{ required: true, message: '参数键名不能为空', trigger: 'blur' }],
@@ -67,16 +70,12 @@ const openModal = async (type: string, id?: number) => {
   modelVisible.value = true
   modelLoading.value = true
   modelTitle.value = t('action.' + type)
-  actionType.value = type
+  formType.value = type
   // 设置数据
   resetForm()
   if (id) {
-    // const res = await PostApi.getPostApi(id)
-    // if (type === 'update') {
-    //   unref(formRef)?.setValues(res)
-    // } else if (type === 'detail') {
-    //   detailData.value = res
-    // }
+    const data = await ConfigApi.getConfig(id)
+    Object.assign(formData, data)
   }
   modelLoading.value = false
 }
@@ -91,10 +90,10 @@ const submitForm = async () => {
   const valid = await elForm.validate()
   if (!valid) return
   // 提交请求
-  actionLoading.value = true
+  formLoading.value = true
   try {
     const data = unref(formRef)?.formModel as PostApi.PostVO
-    if (actionType.value === 'create') {
+    if (formType.value === 'create') {
       await PostApi.createPostApi(data)
       message.success(t('common.createSuccess'))
     } else {
@@ -104,19 +103,20 @@ const submitForm = async () => {
     modelVisible.value = false
     emit('success')
   } finally {
-    actionLoading.value = false
+    formLoading.value = false
   }
 }
 
 /** 重置表单 */
 const resetForm = () => {
-  form.id = undefined
-  form.category = undefined
-  form.name = undefined
-  form.key = undefined
-  form.value = undefined
-  form.visible = true
-  form.remark = undefined
-  formRef.value.resetFields()
+  formData.id = undefined
+  formData.category = undefined
+  formData.name = undefined
+  formData.key = undefined
+  formData.value = undefined
+  formData.visible = true
+  formData.remark = undefined
+  // proxy.$refs['formRef'].resetFields()
+  // formRef.value.resetFields() // TODO 芋艿：为什么拿不到
 }
 </script>

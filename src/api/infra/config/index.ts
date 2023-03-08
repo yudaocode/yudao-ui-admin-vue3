@@ -32,7 +32,7 @@ export const getConfigPage = (params: ConfigPageReqVO) => {
 }
 
 // 查询参数详情
-export const getConfigApi = (id: number) => {
+export const getConfig = (id: number) => {
   return request.get({ url: '/infra/config/get?id=' + id })
 }
 

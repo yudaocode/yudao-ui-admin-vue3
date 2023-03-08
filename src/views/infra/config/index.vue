@@ -3,7 +3,7 @@
     <!-- 搜索工作栏 -->
     <el-form
       :model="queryParams"
-      ref="queryForm"
+      ref="queryFormRef"
       :inline="true"
       v-show="showSearch"
       label-width="68px"
@@ -65,7 +65,7 @@
           type="primary"
           plain
           icon="el-icon-plus"
-          @click="handleAdd"
+          @click="openModal('create')"
           v-hasPermi="['infra:config:create']"
         >
           新增
@@ -160,7 +160,7 @@ const queryParams = reactive({
   type: undefined,
   createTime: []
 })
-const queryForm = ref() // 搜索的表单
+const queryFormRef = ref() // 搜索的表单
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
@@ -182,7 +182,7 @@ const getList = async () => {
 
 /** 重置按钮操作 */
 const resetQuery = () => {
-  queryForm.value.resetFields()
+  queryFormRef.value.resetFields()
   handleQuery()
 }
 
