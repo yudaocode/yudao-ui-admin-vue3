@@ -26,12 +26,16 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <!--      <el-form-item label="系统内置" prop="type">-->
-      <!--        <el-select v-model="queryParams.type" placeholder="系统内置" clearable>-->
-      <!--          <el-option v-for="dict in this.getDictDatas(DICT_TYPE.INFRA_CONFIG_TYPE)" :key="parseInt(dict.value)"-->
-      <!--                     :label="dict.label" :value="parseInt(dict.value)"/>-->
-      <!--        </el-select>-->
-      <!--      </el-form-item>-->
+      <el-form-item label="系统内置" prop="type">
+        <el-select v-model="queryParams.type" placeholder="请选择系统内置" clearable>
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.INFRA_CONFIG_TYPE)"
+            :key="parseInt(dict.value)"
+            :label="dict.label"
+            :value="parseInt(dict.value)"
+          />
+        </el-select>
+      </el-form-item>
       <!-- TODO：时间无法设置 -->
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
@@ -92,7 +96,6 @@
       <el-table-column label="参数键值" align="center" prop="value" />
       <el-table-column label="是否可见" align="center" prop="visible">
         <template #default="scope">
-          <!-- TODO 芋艿：这里 false 会不展示，实现略有问题 -->
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.visible" />
         </template>
       </el-table-column>
@@ -116,7 +119,7 @@
             link
             type="primary"
             icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
+            @click="openModal('update', scope.row.id)"
             v-hasPermi="['infra:config:update']"
           >
             修改
@@ -134,10 +137,15 @@
       </el-table-column>
     </el-table>
   </content-wrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <!-- TODO 芋艿：可以改成 form 么？ -->
+  <config-form ref="modalRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Config">
 import * as ConfigApi from '@/api/infra/config'
-import { DICT_TYPE } from '@/utils/dict'
+import ConfigForm from './form.vue'
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import dayjs from 'dayjs'
 
 const showSearch = ref(true) // 搜索框的是否展示
@@ -176,6 +184,12 @@ const getList = async () => {
 const resetQuery = () => {
   queryForm.value.resetFields()
   handleQuery()
+}
+
+/** 添加/修改操作 */
+const modalRef = ref()
+const openModal = (type: string, id?: number) => {
+  modalRef.value.openModal(type, id)
 }
 
 // ========== 初始化 ==========

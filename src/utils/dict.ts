@@ -55,7 +55,7 @@ export const getBoolDictOptions = (dictType: string) => {
   dictOptions.forEach((dict: DictDataType) => {
     dictOption.push({
       ...dict,
-      value: dict.value + '' === 'true' ? true : false
+      value: dict.value + '' === 'true'
     })
   })
   return dictOption
