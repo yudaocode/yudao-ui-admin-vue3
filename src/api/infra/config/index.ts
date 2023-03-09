@@ -12,13 +12,6 @@ export interface ConfigVO {
   createTime: Date
 }
 
-export interface ConfigPageReqVO extends PageParam {
-  name?: string
-  key?: string
-  type?: number
-  createTime?: Date[]
-}
-
 export interface ConfigExportReqVO {
   name?: string
   key?: string
@@ -27,7 +20,7 @@ export interface ConfigExportReqVO {
 }
 
 // 查询参数列表
-export const getConfigPage = (params: ConfigPageReqVO) => {
+export const getConfigPage = (params: PageParam) => {
   return request.get({ url: '/infra/config/page', params })
 }
 
