@@ -1,7 +1,7 @@
 <template>
-  <!-- TODO 芋艿：Dialog 貌似高度不太对劲 -->
-  <Dialog :title="modelTitle" v-model="modelVisible" :loading="modelLoading">
-    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
+  <!-- TODO 芋艿：Dialog 貌似高度不太对劲 已解决：textarea导致 设置一个最大高就行了 -->
+  <Dialog :title="modelTitle" v-model="modelVisible" :loading="modelLoading" :max-height="'310px'">
+    <el-form ref="ruleFormRef" :model="formData" :rules="formRules" label-width="80px">
       <el-form-item label="参数分类" prop="category">
         <el-input v-model="formData.category" placeholder="请输入参数分类" />
       </el-form-item>
@@ -28,7 +28,7 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="modelVisible = false">取 消</el-button>
+        <el-button @click="colseForm(ruleFormRef)">取 消</el-button>
       </div>
     </template>
   </Dialog>
@@ -36,6 +36,7 @@
 <script setup lang="ts">
 import * as ConfigApi from '@/api/infra/config'
 // import type { FormExpose } from '@/components/Form'
+import type { FormInstance } from 'element-plus'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 // const { proxy } = getCurrentInstance()
@@ -62,7 +63,7 @@ const formRules = reactive({
   value: [{ required: true, message: '参数键值不能为空', trigger: 'blur' }],
   visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }]
 })
-// const formRef = ref<FormExpose>() // 表单 Ref
+const ruleFormRef = ref<FormInstance>() // 表单 Ref
 
 const { proxy } = getCurrentInstance() as any
 
@@ -85,7 +86,7 @@ defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
-  const formRef = proxy.$refs['formRef']
+  const formRef = proxy.$refs['ruleFormRef']
   console.log(formRef, '======')
   // 校验表单
   if (!formRef) return
@@ -118,7 +119,17 @@ const resetForm = () => {
   formData.value = ''
   formData.visible = true
   formData.remark = ''
-  // proxy.$refs['formRef'].resetFields()
-  // formRef.value.resetFields() // TODO 芋艿：为什么拿不到 formRef 呢？
+  // proxy.$refs['ruleFormRef'].resetFields()
+  // setTimeout(() => {
+  // console.log(ruleFormRef.value, 'formRef.value')
+  // formRef.value.resetFields() // TODO 芋艿：为什么拿不到 formRef 呢？ 表单还没加载出来
+  // ruleFormRef.value?.resetFields()
+  // }, 100)
+}
+/** 取消添加 */
+const colseForm = (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.resetFields()
+  modelVisible.value = false
 }
 </script>

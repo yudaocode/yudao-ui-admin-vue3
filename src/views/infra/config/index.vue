@@ -36,46 +36,46 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO：时间无法设置 -->
+      <!-- TODO：时间无法设置 已解决 -->
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
-          v-model="queryParams.createTime"
+          v-model="createTime"
           style="width: 240px"
-          value-format="yyyy-MM-dd HH:mm:ss"
+          value-format="yyyy-MM-DD HH:mm:ss"
           type="daterange"
           range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          :default-time="['00:00:00', '23:59:59']"
+          :default-time="defaultTime"
         />
       </el-form-item>
       <el-form-item>
-        <!-- TODO 按钮图标不对 -->
-        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
+        <!-- TODO 按钮图标不对 已解决 -->
+        <el-button type="primary" :icon="Search" @click="handleQuery">搜索</el-button>
+        <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
     <!-- 操作栏 -->
-    <!-- TODO 间隔貌似有点问题 -->
+    <!-- TODO 间隔貌似有点问题 没发现 -->
     <el-row :gutter="10" class="mb8">
-      <!-- TODO 芋艿，图标不对 -->
+      <!-- TODO 芋艿，图标不对 已解决 -->
       <el-col :span="1.5">
         <el-button
           type="primary"
           plain
-          icon="el-icon-plus"
+          :icon="Plus"
           @click="openModal('create')"
           v-hasPermi="['infra:config:create']"
         >
           新增
         </el-button>
       </el-col>
-      <!-- TODO 芋艿，图标不对 -->
+      <!-- TODO 芋艿，图标不对 已解决 -->
       <el-col :span="1.5">
         <el-button
           type="warning"
-          icon="el-icon-download"
+          :icon="Download"
           @click="handleExport"
           :loading="exportLoading"
           v-hasPermi="['infra:config:export']"
@@ -84,7 +84,7 @@
         </el-button>
       </el-col>
       <!-- TODO 芋艿：右侧导航 -->
-      <!--      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>-->
+      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
     </el-row>
 
     <!-- 列表 -->
@@ -112,13 +112,13 @@
           <span>{{ dayjs(scope.row.createTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
         </template>
       </el-table-column>
-      <!-- TODO 芋艿：icon 有问题，会换行 -->
+      <!-- TODO 芋艿：icon 有问题，会换行 已解决 -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button
             link
             type="primary"
-            icon="el-icon-edit"
+            :icon="Edit"
             @click="openModal('update', scope.row.id)"
             v-hasPermi="['infra:config:update']"
           >
@@ -127,7 +127,7 @@
           <el-button
             link
             type="primary"
-            icon="el-icon-delete"
+            :icon="Delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['infra:config:delete']"
           >
@@ -139,15 +139,15 @@
   </content-wrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <!-- TODO 芋艿：可以改成 form 么？ -->
-  <config-form ref="modalRef" @success="getList" />
+  <!-- TODO 芋艿：可以改成 form 么？ 已解决 -->
+  <Form ref="modalRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Config">
 import * as ConfigApi from '@/api/infra/config'
-import ConfigForm from './form.vue'
+import Form from './form.vue'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { Delete, Edit, Search, Download, Plus, Refresh } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
-
 const showSearch = ref(true) // 搜索框的是否展示
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -157,9 +157,13 @@ const queryParams = reactive({
   pageSize: 10,
   name: undefined,
   key: undefined,
-  type: undefined,
-  createTime: []
+  type: undefined
 })
+const createTime = ref('')
+const defaultTime = ref<[Date, Date]>([
+  new Date(2000, 1, 1, 0, 0, 0),
+  new Date(2000, 2, 1, 23, 59, 59)
+])
 const queryFormRef = ref() // 搜索的表单
 
 /** 搜索按钮操作 */
