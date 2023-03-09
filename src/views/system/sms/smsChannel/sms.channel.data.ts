@@ -1,5 +1,9 @@
 import type { VxeCrudSchema } from '@/hooks/web/useVxeCrudSchemas'
+import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+
 const { t } = useI18n() // 国际化
+
+const authorizedGrantOptions = getStrDictOptions(DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE)
 
 // 表单校验
 export const rules = reactive({
@@ -24,8 +28,17 @@ const crudSchemas = reactive<VxeCrudSchema>({
     {
       title: '渠道编码',
       field: 'code',
-      dictType: DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE,
-      isSearch: true
+      // dictType: DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE,
+      // dictClass: 'string',
+      isSearch: true,
+      form: {
+        component: 'Select',
+        componentProps: {
+          options: authorizedGrantOptions,
+          multiple: false,
+          filterable: true
+        }
+      }
     },
     {
       title: t('common.status'),

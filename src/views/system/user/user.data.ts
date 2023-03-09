@@ -1,6 +1,18 @@
 import type { VxeCrudSchema } from '@/hooks/web/useVxeCrudSchemas'
 // 国际化
 const { t } = useI18n()
+const validateMobile = (rule: any, value: any, callback: any) => {
+  const reg = /^1(3[0-9]|4[01456879]|5[0-35-9]|6[2567]|7[0-8]|8[0-9]|9[0-35-9])\d{8}$/
+  if (value === '') {
+    callback(new Error('请输入联系手机'))
+  } else {
+    if (!reg.test(value)) {
+      callback(new Error('请输入正确的手机号'))
+    } else {
+      callback()
+    }
+  }
+}
 // 表单校验
 export const rules = reactive({
   username: [required],
@@ -17,12 +29,13 @@ export const rules = reactive({
   ],
   status: [required],
   mobile: [
+    required,
     {
-      required: true,
       len: 11,
       trigger: 'blur',
       message: '请输入正确的手机号码'
-    }
+    },
+    { validator: validateMobile, trigger: 'blur' }
   ]
 })
 // crudSchemas

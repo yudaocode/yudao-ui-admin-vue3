@@ -44,12 +44,13 @@ const [registerTable, { exportList }] = useXTable({
 
 // 弹窗相关的变量
 const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
+const dialogTitle = ref('详情') // 弹出层标题
 const actionType = ref('') // 操作按钮的类型
 // ========== 详情相关 ==========
 const detailData = ref() // 详情 Ref
 const handleDetail = (row: SmsLoglApi.SmsLogVO) => {
   // 设置数据
+  actionType.value = 'detail'
   detailData.value = row
   dialogVisible.value = true
 }
