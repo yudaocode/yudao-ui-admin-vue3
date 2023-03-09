@@ -32,7 +32,7 @@
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
         <el-button @click="colseForm(ruleFormRef)">取 消</el-button>
       </div>
     </template>
@@ -48,9 +48,8 @@ const message = useMessage() // 消息弹窗
 
 const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的数据 Loading 加载
+const formLoading = ref(false) // 表单的 Loading 加载：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const submitLoading = ref(false) // 操作按钮的 Loading 加载：避免重复提交
 // let formRef = ref() // 表单的 Ref
 const formData = reactive({
   id: undefined,
@@ -95,13 +94,18 @@ defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
+  if (true) {
+    formLoading.value = true
+    console.log('1111')
+    return
+  }
   const formRef = proxy.$refs['formRef']
   // 校验表单
   if (!formRef) return
   const valid = await formRef.validate()
   if (!valid) return
   // 提交请求
-  submitLoading.value = true
+  formLoading.value = true
   try {
     const data = formData as ConfigApi.ConfigVO
     if (formType.value === 'create') {
@@ -114,7 +118,7 @@ const submitForm = async () => {
     modelVisible.value = false
     emit('success')
   } finally {
-    submitLoading.value = false
+    formLoading.value = false
   }
 }
 
