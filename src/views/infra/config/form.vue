@@ -1,7 +1,7 @@
 <template>
   <Dialog :title="modelTitle" v-model="modelVisible">
     <el-form
-      ref="ruleFormRef"
+      ref="formRef"
       :model="formData"
       :rules="formRules"
       label-width="80px"
@@ -33,24 +33,20 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-        <el-button @click="colseForm(ruleFormRef)">取 消</el-button>
+        <el-button @click="modelVisible = false">取 消</el-button>
       </div>
     </template>
   </Dialog>
 </template>
 <script setup lang="ts">
 import * as ConfigApi from '@/api/infra/config'
-// import type { FormExpose } from '@/components/Form'
-import type { FormInstance } from 'element-plus'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-// const { proxy } = getCurrentInstance()
 
 const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的 Loading 加载：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-// let formRef = ref() // 表单的 Ref
 const formData = reactive({
   id: undefined,
   category: '',
@@ -67,9 +63,7 @@ const formRules = reactive({
   value: [{ required: true, message: '参数键值不能为空', trigger: 'blur' }],
   visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }]
 })
-let ruleFormRef = ref<FormInstance>() // 表单 Ref
-
-const { proxy } = getCurrentInstance() as any
+const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
 const openModal = async (type: string, id?: number) => {
@@ -94,15 +88,9 @@ defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
-  if (true) {
-    formLoading.value = true
-    console.log('1111')
-    return
-  }
-  const formRef = proxy.$refs['formRef']
   // 校验表单
   if (!formRef) return
-  const valid = await formRef.validate()
+  const valid = await formRef.value.validate()
   if (!valid) return
   // 提交请求
   formLoading.value = true
@@ -124,27 +112,15 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
-  formData.id = undefined
-  formData.category = ''
-  formData.name = ''
-  formData.key = ''
-  formData.value = ''
-  formData.visible = true
-  formData.remark = ''
-  // 重置表单
-  console.log(ruleFormRef)
-  console.log(ruleFormRef.value)
-  // proxy.$refs['ruleFormRef'].resetFields()
-  // setTimeout(() => {
-  // console.log(ruleFormRef.value, 'formRef.value')
-  // formRef.value.resetFields() // TODO 芋艿：为什么拿不到 formRef 呢？ 表单还没加载出来
-  // ruleFormRef.value?.resetFields()
-  // }, 100)
-}
-/** 取消添加 */
-const colseForm = (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  formEl.resetFields()
-  modelVisible.value = false
+  Object.assign(formData, {
+    id: undefined,
+    category: '',
+    name: '',
+    key: '',
+    value: '',
+    visible: true,
+    remark: ''
+  })
+  formRef.value?.resetFields()
 }
 </script>
