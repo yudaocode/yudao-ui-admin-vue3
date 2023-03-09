@@ -49,9 +49,10 @@
         />
       </el-form-item>
       <el-form-item>
-        <!-- TODO 按钮图标不对 已解决 -->
-        <el-button type="primary" :icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button type="primary" @click="handleQuery">
+          <Icon icon="ep:search" class="mr-5px" /> 搜索
+        </el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
       </el-form-item>
     </el-form>
 
@@ -63,23 +64,20 @@
         <el-button
           type="primary"
           plain
-          :icon="Plus"
           @click="openModal('create')"
           v-hasPermi="['infra:config:create']"
         >
-          新增
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-col>
-      <!-- TODO 芋艿，图标不对 已解决 -->
       <el-col :span="1.5">
         <el-button
           type="warning"
-          :icon="Download"
           @click="handleExport"
           :loading="exportLoading"
           v-hasPermi="['infra:config:export']"
         >
-          导出
+          <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
       </el-col>
       <!-- TODO 芋艿：右侧导航 -->
@@ -111,26 +109,24 @@
           <span>{{ dayjs(scope.row.createTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
         </template>
       </el-table-column>
-      <!-- TODO 芋艿：icon 有问题，会换行 已解决 -->
+      <!-- TODO 芋艿：宽度；里面的 css -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button
             link
             type="primary"
-            :icon="Edit"
             @click="openModal('update', scope.row.id)"
             v-hasPermi="['infra:config:update']"
           >
-            修改
+            <Icon icon="ep:edit" /> 修改
           </el-button>
           <el-button
             link
             type="primary"
-            :icon="Delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['infra:config:delete']"
           >
-            删除
+            <Icon icon="ep:delete" /> 删除
           </el-button>
         </template>
       </el-table-column>
