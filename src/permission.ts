@@ -35,7 +35,7 @@ router.beforeEach(async (to, from, next) => {
       const userStore = useUserStoreWithOut()
       const permissionStore = usePermissionStoreWithOut()
       if (!dictStore.getIsSetDict) {
-        dictStore.setDictMap()
+        await dictStore.setDictMap()
       }
       if (!userStore.getIsSetUser) {
         isRelogin.show = true
