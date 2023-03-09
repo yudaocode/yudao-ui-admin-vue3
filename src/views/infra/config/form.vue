@@ -1,6 +1,5 @@
 <template>
-  <!-- TODO 芋艿：Dialog 貌似高度不太对劲 已解决：textarea导致 设置一个最大高就行了 -->
-  <Dialog :title="modelTitle" v-model="modelVisible" :loading="modelLoading" :max-height="'310px'">
+  <Dialog :title="modelTitle" v-model="modelVisible" :loading="modelLoading">
     <el-form ref="ruleFormRef" :model="formData" :rules="formRules" label-width="80px">
       <el-form-item label="参数分类" prop="category">
         <el-input v-model="formData.category" placeholder="请输入参数分类" />
@@ -48,7 +47,7 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formLoading = ref(false) // 操作按钮的 Loading 加载
 // let formRef = ref() // 表单的 Ref
 const formData = reactive({
-  id: 0,
+  id: undefined,
   category: '',
   name: '',
   key: '',
@@ -70,24 +69,27 @@ const { proxy } = getCurrentInstance() as any
 /** 打开弹窗 */
 const openModal = async (type: string, id?: number) => {
   modelVisible.value = true
-  modelLoading.value = true
   modelTitle.value = t('action.' + type)
   formType.value = type
-  // 设置数据
   resetForm()
+  // 修改时，设置数据
   if (id) {
-    const data = await ConfigApi.getConfig(id)
-    Object.assign(formData, data)
+    modelLoading.value = true
+    try {
+      const data = await ConfigApi.getConfig(id)
+      // TODO 规范纠结点：因为用 reactive，所以需要使用 Object；可以替换的方案，1）把 reactive 改成 ref；
+      Object.assign(formData, data)
+    } finally {
+      modelLoading.value = false
+    }
   }
-  modelLoading.value = false
 }
 defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
-  const formRef = proxy.$refs['ruleFormRef']
-  console.log(formRef, '======')
+  const formRef = proxy.$refs['formRef']
   // 校验表单
   if (!formRef) return
   const valid = await formRef.validate()
@@ -112,7 +114,7 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
-  formData.id = 0
+  formData.id = undefined
   formData.category = ''
   formData.name = ''
   formData.key = ''

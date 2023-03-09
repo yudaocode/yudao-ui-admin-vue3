@@ -36,17 +36,16 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO：时间无法设置 已解决 -->
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
-          v-model="createTime"
+          v-model="queryParams.createTime"
           style="width: 240px"
-          value-format="yyyy-MM-DD HH:mm:ss"
+          value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          :default-time="defaultTime"
+          :default-time="[new Date(0, 0, 0, 0, 0, 0), new Date(0, 0, 0, 23, 59, 59)]"
         />
       </el-form-item>
       <el-form-item>
@@ -139,14 +138,13 @@
   </content-wrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <!-- TODO 芋艿：可以改成 form 么？ 已解决 -->
-  <Form ref="modalRef" @success="getList" />
+  <config-form ref="modalRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Config">
 import * as ConfigApi from '@/api/infra/config'
-import Form from './form.vue'
+import ConfigForm from './form.vue'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-import { Delete, Edit, Search, Download, Plus, Refresh } from '@element-plus/icons-vue'
+// import { Delete, Edit, Search, Download, Plus, Refresh } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
 const showSearch = ref(true) // 搜索框的是否展示
 const loading = ref(true) // 列表的加载中
@@ -157,13 +155,9 @@ const queryParams = reactive({
   pageSize: 10,
   name: undefined,
   key: undefined,
-  type: undefined
+  type: undefined,
+  createTime: []
 })
-const createTime = ref('')
-const defaultTime = ref<[Date, Date]>([
-  new Date(2000, 1, 1, 0, 0, 0),
-  new Date(2000, 2, 1, 23, 59, 59)
-])
 const queryFormRef = ref() // 搜索的表单
 
 /** 搜索按钮操作 */
@@ -196,7 +190,7 @@ const openModal = (type: string, id?: number) => {
   modalRef.value.openModal(type, id)
 }
 
-// ========== 初始化 ==========
+/** 初始化 **/
 onMounted(() => {
   getList()
 })
