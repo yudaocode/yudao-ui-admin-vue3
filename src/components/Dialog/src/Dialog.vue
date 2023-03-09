@@ -86,7 +86,7 @@ const dialogStyle = computed(() => {
     <ElScrollbar :style="dialogStyle" v-if="scroll">
       <slot></slot>
     </ElScrollbar>
-    <!-- 情况一：如果 scroll 为 false，说明关闭滚动条滚动条 -->
+    <!-- 情况二：如果 scroll 为 false，说明关闭滚动条滚动条 -->
     <slot v-else></slot>
 
     <template v-if="slots.footer" #footer>

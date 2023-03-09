@@ -1,6 +1,12 @@
 <template>
-  <Dialog :title="modelTitle" v-model="modelVisible" :loading="modelLoading">
-    <el-form ref="ruleFormRef" :model="formData" :rules="formRules" label-width="80px">
+  <Dialog :title="modelTitle" v-model="modelVisible">
+    <el-form
+      ref="ruleFormRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="80px"
+      v-loading="formLoading"
+    >
       <el-form-item label="参数分类" prop="category">
         <el-input v-model="formData.category" placeholder="请输入参数分类" />
       </el-form-item>
@@ -42,9 +48,9 @@ const message = useMessage() // 消息弹窗
 
 const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
-const modelLoading = ref(false) // 弹窗的 Loading 加载
+const formLoading = ref(false) // 表单的数据 Loading 加载
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formLoading = ref(false) // 操作按钮的 Loading 加载
+const submitLoading = ref(false) // 操作按钮的 Loading 加载：避免重复提交
 // let formRef = ref() // 表单的 Ref
 const formData = reactive({
   id: undefined,
@@ -62,7 +68,7 @@ const formRules = reactive({
   value: [{ required: true, message: '参数键值不能为空', trigger: 'blur' }],
   visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }]
 })
-const ruleFormRef = ref<FormInstance>() // 表单 Ref
+let ruleFormRef = ref<FormInstance>() // 表单 Ref
 
 const { proxy } = getCurrentInstance() as any
 
@@ -74,13 +80,13 @@ const openModal = async (type: string, id?: number) => {
   resetForm()
   // 修改时，设置数据
   if (id) {
-    modelLoading.value = true
+    formLoading.value = true
     try {
       const data = await ConfigApi.getConfig(id)
       // TODO 规范纠结点：因为用 reactive，所以需要使用 Object；可以替换的方案，1）把 reactive 改成 ref；
       Object.assign(formData, data)
     } finally {
-      modelLoading.value = false
+      formLoading.value = false
     }
   }
 }
@@ -95,7 +101,7 @@ const submitForm = async () => {
   const valid = await formRef.validate()
   if (!valid) return
   // 提交请求
-  formLoading.value = true
+  submitLoading.value = true
   try {
     const data = formData as ConfigApi.ConfigVO
     if (formType.value === 'create') {
@@ -108,7 +114,7 @@ const submitForm = async () => {
     modelVisible.value = false
     emit('success')
   } finally {
-    formLoading.value = false
+    submitLoading.value = false
   }
 }
 
@@ -121,6 +127,9 @@ const resetForm = () => {
   formData.value = ''
   formData.visible = true
   formData.remark = ''
+  // 重置表单
+  console.log(ruleFormRef)
+  console.log(ruleFormRef.value)
   // proxy.$refs['ruleFormRef'].resetFields()
   // setTimeout(() => {
   // console.log(ruleFormRef.value, 'formRef.value')
