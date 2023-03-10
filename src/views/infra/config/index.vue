@@ -36,7 +36,7 @@
           range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          :default-time="[new Date(0, 0, 0, 0, 0, 0), new Date(0, 0, 0, 23, 59, 59)]"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
         />
       </el-form-item>
       <el-form-item>
@@ -103,8 +103,8 @@
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页 -->
     <Pagination
-      v-show="total > 0"
       :total="total"
       v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
