@@ -88,7 +88,7 @@
     </el-row>
 
     <!-- 列表 -->
-    <el-table v-loading="loading" :data="list">
+    <el-table v-loading="loading" :data="list" align="center">
       <el-table-column label="参数主键" align="center" prop="id" />
       <el-table-column label="参数分类" align="center" prop="category" />
       <el-table-column label="参数名称" align="center" prop="name" :show-overflow-tooltip="true" />
@@ -105,13 +105,13 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" :show-overflow-tooltip="true" />
-      <!-- TODO 芋艿：时间写的有点复杂 -->
-      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
-        <template #default="scope">
-          <!--          <span>{{ parseTime(scope.row.createTime) }}</span>-->
-          <span>{{ dayjs(scope.row.createTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
+      />
       <!-- TODO 芋艿：宽度；里面的 css -->
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
@@ -141,10 +141,10 @@
 </template>
 <script setup lang="ts" name="Config">
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
+import download from '@/utils/download'
 import * as ConfigApi from '@/api/infra/config'
 import ConfigForm from './form.vue'
-import dayjs from 'dayjs'
-import download from '@/utils/download'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -206,6 +206,7 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
+/** 导出按钮操作 */
 const handleExport = async () => {
   try {
     // 导出的二次确认
