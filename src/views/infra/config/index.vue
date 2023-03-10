@@ -112,8 +112,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <!-- TODO 芋艿：宽度；里面的 css -->
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="140">
         <template #default="scope">
           <el-button
             link
