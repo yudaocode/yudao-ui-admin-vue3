@@ -59,7 +59,6 @@
     <!-- 操作栏 -->
     <!-- TODO 间隔貌似有点问题 没发现 -->
     <el-row :gutter="10" class="mb8">
-      <!-- TODO 芋艿，图标不对 已解决 -->
       <el-col :span="1.5">
         <el-button
           type="primary"
@@ -72,12 +71,16 @@
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="warning"
+          type="success"
+          plain
           @click="handleExport"
           :loading="exportLoading"
           v-hasPermi="['infra:config:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
+        <el-button text @click="showSearch = !showSearch">
+          <Icon :icon="showSearch ? 'ep:arrow-up' : 'ep:arrow-down'" />
         </el-button>
       </el-col>
       <!-- TODO 芋艿：右侧导航 -->
@@ -123,7 +126,7 @@
           <el-button
             link
             type="primary"
-            @click="handleDelete(scope.row)"
+            @click="handleDelete(scope.row.id)"
             v-hasPermi="['infra:config:delete']"
           >
             <Icon icon="ep:delete" /> 删除
@@ -137,11 +140,13 @@
   <config-form ref="modalRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Config">
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as ConfigApi from '@/api/infra/config'
 import ConfigForm from './form.vue'
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-// import { Delete, Edit, Search, Download, Plus, Refresh } from '@element-plus/icons-vue'
 import dayjs from 'dayjs'
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
+
 const showSearch = ref(true) // 搜索框的是否展示
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -155,6 +160,7 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
@@ -184,6 +190,19 @@ const resetQuery = () => {
 const modalRef = ref()
 const openModal = (type: string, id?: number) => {
   modalRef.value.openModal(type, id)
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 二次确认
+    await message.delConfirm()
+    // 发起删除
+    await ConfigApi.deleteConfig(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
 /** 初始化 **/

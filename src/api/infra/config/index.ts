@@ -30,7 +30,7 @@ export const getConfig = (id: number) => {
 }
 
 // 根据参数键名查询参数值
-export const getConfigKeyApi = (configKey: string) => {
+export const getConfigKey = (configKey: string) => {
   return request.get({ url: '/infra/config/get-value-by-key?key=' + configKey })
 }
 
@@ -45,7 +45,7 @@ export const updateConfig = (data: ConfigVO) => {
 }
 
 // 删除参数
-export const deleteConfigApi = (id: number) => {
+export const deleteConfig = (id: number) => {
   return request.delete({ url: '/infra/config/delete?id=' + id })
 }
 
