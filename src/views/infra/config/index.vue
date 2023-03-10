@@ -103,6 +103,13 @@
         </template>
       </el-table-column>
     </el-table>
+    <Pagination
+      v-show="total > 0"
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
   </content-wrap>
 
   <!-- 表单弹窗：添加/修改 -->
@@ -137,7 +144,7 @@ const getList = async () => {
   try {
     const data = await ConfigApi.getConfigPage(queryParams)
     list.value = data.list
-    total.value = data.value
+    total.value = data.total
   } finally {
     loading.value = false
   }

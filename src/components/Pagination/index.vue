@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ 'hidden': hidden }" class="pagination-container">
+  <div :class="{ hidden }" class="pagination-container">
     <el-pagination
       :background="background"
       v-model:current-page="currentPage"
@@ -18,6 +18,7 @@
 // TODO 芋艿：ts 重写
 // TODO 芋艿：scrollTo 接入
 // import { scrollTo } from '@/utils/scroll-to'
+import { computed } from 'vue'
 
 const props = defineProps({
   total: {
@@ -38,7 +39,7 @@ const props = defineProps({
       return [10, 20, 30, 50]
     }
   },
-  // 移动端页码按钮的数量端默认值5
+  // 移动端页码按钮的数量端默认值 5
   pagerCount: {
     type: Number,
     default: document.body.clientWidth < 992 ? 5 : 7
@@ -61,7 +62,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits();
+const emit = defineEmits(['update:page', 'update:limit', 'pagination', 'pagination'])
 const currentPage = computed({
   get() {
     return props.page
@@ -74,7 +75,7 @@ const pageSize = computed({
   get() {
     return props.limit
   },
-  set(val){
+  set(val) {
     emit('update:limit', val)
   }
 })
@@ -93,7 +94,6 @@ function handleCurrentChange(val) {
     // scrollTo(0, 800)
   }
 }
-
 </script>
 
 <style scoped>
