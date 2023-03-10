@@ -1,19 +1,12 @@
 <template>
   <content-wrap>
     <!-- 搜索工作栏 -->
-    <el-form
-      :model="queryParams"
-      ref="queryFormRef"
-      :inline="true"
-      v-show="showSearch"
-      label-width="68px"
-    >
+    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
       <el-form-item label="参数名称" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入参数名称"
           clearable
-          style="width: 240px"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
@@ -22,7 +15,6 @@
           v-model="queryParams.key"
           placeholder="请输入参数键名"
           clearable
-          style="width: 240px"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
@@ -39,7 +31,6 @@
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          style="width: 240px"
           value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           range-separator="-"
@@ -49,27 +40,11 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" /> 搜索
-        </el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-      </el-form-item>
-    </el-form>
-
-    <!-- 操作栏 -->
-    <!-- TODO 间隔貌似有点问题 没发现 -->
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          @click="openModal('create')"
-          v-hasPermi="['infra:config:create']"
-        >
+        <el-button type="primary" @click="openModal('create')" v-hasPermi="['infra:config:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
-      </el-col>
-      <el-col :span="1.5">
         <el-button
           type="success"
           plain
@@ -79,13 +54,8 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
-        <el-button text @click="showSearch = !showSearch">
-          <Icon :icon="showSearch ? 'ep:arrow-up' : 'ep:arrow-down'" />
-        </el-button>
-      </el-col>
-      <!-- TODO 芋艿：右侧导航 -->
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
-    </el-row>
+      </el-form-item>
+    </el-form>
 
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list" align="center">
@@ -112,7 +82,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center" width="140">
+      <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button
             link
@@ -120,15 +90,15 @@
             @click="openModal('update', scope.row.id)"
             v-hasPermi="['infra:config:update']"
           >
-            <Icon icon="ep:edit" /> 修改
+            编辑
           </el-button>
           <el-button
             link
-            type="primary"
+            type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['infra:config:delete']"
           >
-            <Icon icon="ep:delete" /> 删除
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -147,7 +117,6 @@ import ConfigForm from './form.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
-const showSearch = ref(true) // 搜索框的是否展示
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
