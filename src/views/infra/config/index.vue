@@ -144,6 +144,7 @@ import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as ConfigApi from '@/api/infra/config'
 import ConfigForm from './form.vue'
 import dayjs from 'dayjs'
+import download from '@/utils/download'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -162,12 +163,6 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 
-/** 搜索按钮操作 */
-const handleQuery = () => {
-  queryParams.pageNo = 1
-  getList()
-}
-
 /** 查询参数列表 */
 const getList = async () => {
   loading.value = true
@@ -178,6 +173,12 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
 }
 
 /** 重置按钮操作 */
@@ -195,7 +196,7 @@ const openModal = (type: string, id?: number) => {
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
-    // 二次确认
+    // 删除的二次确认
     await message.delConfirm()
     // 发起删除
     await ConfigApi.deleteConfig(id)
@@ -203,6 +204,20 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await ConfigApi.exportConfigApi(queryParams)
+    download.excel(data, '参数配置.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
 }
 
 /** 初始化 **/
