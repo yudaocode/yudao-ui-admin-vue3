@@ -20,10 +20,14 @@
         <el-input v-model="formData.value" placeholder="请输入参数键值" />
       </el-form-item>
       <el-form-item label="是否可见" prop="visible">
-        <!-- TODO 芋艿：改成组件 -->
         <el-radio-group v-model="formData.visible">
-          <el-radio :key="true" :label="true">是</el-radio>
-          <el-radio :key="false" :label="false">否</el-radio>
+          <el-radio
+            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
@@ -39,6 +43,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
+import { DICT_TYPE, getBoolDictOptions } from '@/utils/dict'
 import * as ConfigApi from '@/api/infra/config'
 
 const { t } = useI18n() // 国际化
