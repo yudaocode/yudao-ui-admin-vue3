@@ -40,6 +40,7 @@
 </template>
 <script setup lang="ts">
 import * as ConfigApi from '@/api/infra/config'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -47,7 +48,7 @@ const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = reactive({
+const formData = ref({
   id: undefined,
   category: '',
   name: '',
@@ -75,9 +76,7 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const data = await ConfigApi.getConfig(id)
-      // TODO 规范纠结点：因为用 reactive，所以需要使用 Object；可以替换的方案，1）把 reactive 改成 ref；
-      Object.assign(formData, data)
+      formData.value = await ConfigApi.getConfig(id)
     } finally {
       formLoading.value = false
     }
@@ -95,7 +94,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData as ConfigApi.ConfigVO
+    const data = formData.value as ConfigApi.ConfigVO
     if (formType.value === 'create') {
       await ConfigApi.createConfig(data)
       message.success(t('common.createSuccess'))
@@ -104,6 +103,7 @@ const submitForm = async () => {
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
+    // 发送操作成功的事件
     emit('success')
   } finally {
     formLoading.value = false
@@ -112,7 +112,7 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
-  Object.assign(formData, {
+  formData.value = {
     id: undefined,
     category: '',
     name: '',
@@ -120,7 +120,7 @@ const resetForm = () => {
     value: '',
     visible: true,
     remark: ''
-  })
+  }
   formRef.value?.resetFields()
 }
 </script>
