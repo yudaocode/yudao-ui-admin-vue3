@@ -1,7 +1,7 @@
 <template>
+  <!-- 搜索 -->
   <content-wrap>
-    <!-- 搜索工作栏 -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
+    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
       <el-form-item label="参数名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -56,8 +56,10 @@
         </el-button>
       </el-form-item>
     </el-form>
+  </content-wrap>
 
-    <!-- 列表 -->
+  <!-- 列表 -->
+  <content-wrap>
     <el-table v-loading="loading" :data="list" align="center">
       <el-table-column label="参数主键" align="center" prop="id" />
       <el-table-column label="参数分类" align="center" prop="category" />
