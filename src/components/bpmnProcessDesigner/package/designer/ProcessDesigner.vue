@@ -166,7 +166,6 @@
           @click="processSave"
           :type="props.headerButtonType"
           :disabled="simulationStatus"
-
         />
       </template>
       <!-- 用于打开本地文件-->
