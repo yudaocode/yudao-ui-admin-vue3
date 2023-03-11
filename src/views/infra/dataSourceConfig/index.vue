@@ -3,7 +3,11 @@
     <!-- 搜索工作栏 -->
     <el-form :inline="true" label-width="68px">
       <el-form-item>
-        <el-button type="primary" @click="openModal('create')" v-hasPermi="['infra:config:create']">
+        <el-button
+          type="primary"
+          @click="openModal('create')"
+          v-hasPermi="['infra:data-source-config:create']"
+        >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
@@ -28,7 +32,7 @@
             link
             type="primary"
             @click="openModal('update', scope.row.id)"
-            v-hasPermi="['infra:config:update']"
+            v-hasPermi="['infra:data-source-config:update']"
           >
             编辑
           </el-button>
@@ -36,7 +40,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['infra:config:delete']"
+            v-hasPermi="['infra:data-source-config:delete']"
           >
             删除
           </el-button>
