@@ -31,8 +31,6 @@
 <script setup lang="ts">
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
 import { DataSourceConfigVO } from '@/api/infra/dataSourceConfig'
-import { isNullOrUnDef } from '@/utils/is'
-import { omit } from 'lodash-es'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -63,7 +61,7 @@ const openModal = async (type: string, id?: number) => {
   formType.value = type
   resetForm()
   // 修改时，设置数据
-  if (!isNullOrUnDef(id)) {
+  if (id) {
     formLoading.value = true
     try {
       formData.value = await DataSourceConfigApi.getDataSourceConfig(id)
@@ -84,7 +82,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = omit(unref(formData), 'createTime')
+    const data = formData.value as DataSourceConfigApi.DataSourceConfigVO
     if (formType.value === 'create') {
       await DataSourceConfigApi.createDataSourceConfig(data)
       message.success(t('common.createSuccess'))

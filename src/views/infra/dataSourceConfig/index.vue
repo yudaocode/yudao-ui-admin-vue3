@@ -1,7 +1,7 @@
 <template>
   <content-wrap>
     <!-- 搜索工作栏 -->
-    <el-form :inline="true" label-width="68px">
+    <el-form class="-mb-15px" :inline="true">
       <el-form-item>
         <el-button
           type="primary"
@@ -12,8 +12,10 @@
         </el-button>
       </el-form-item>
     </el-form>
+  </content-wrap>
 
-    <!-- 列表 -->
+  <!-- 列表 -->
+  <content-wrap>
     <el-table v-loading="loading" :data="list" align="center">
       <el-table-column label="主键编号" align="center" prop="id" />
       <el-table-column label="数据源名称" align="center" prop="name" />
@@ -33,6 +35,7 @@
             type="primary"
             @click="openModal('update', scope.row.id)"
             v-hasPermi="['infra:data-source-config:update']"
+            :disabled="scope.row.id === 0"
           >
             编辑
           </el-button>
@@ -41,6 +44,7 @@
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['infra:data-source-config:delete']"
+            :disabled="scope.row.id === 0"
           >
             删除
           </el-button>
