@@ -1,148 +1,150 @@
 <template>
   <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <!-- 操作：新增 -->
-      <template #toolbar_buttons>
-        <XButton
-          type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
-          v-hasPermi="['system:notice:create']"
-          @click="handleCreate()"
-        />
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['system:notice:update']"
-          @click="handleUpdate(row.id)"
-        />
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
-          v-hasPermi="['system:notice:query']"
-          @click="handleDetail(row.id)"
-        />
-        <!-- 操作：删除 -->
+    <el-form ref="searchForm" :model="queryParms" :inline="true">
+      <el-form-item label="公告标题">
+        <el-input v-model="queryParms.title" />
+      </el-form-item>
+      <el-form-item label="状态">
+        <el-select v-model="queryParms.status">
+          <el-option label="全部" value="" />
+          <el-option label="开启" :value="1" />
+          <el-option label="关闭" :value="0" />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="getList">Query</el-button>
+      </el-form-item>
+    </el-form>
+    <div style="width: 100%; height: 600px">
+      <el-auto-resizer>
+        <template #default="{ height, width }">
+          <el-table-v2
+            :columns="columns"
+            :data="tableData"
+            :width="width"
+            :height="height - 50"
+            fixed
+          />
+        </template>
+      </el-auto-resizer>
+    </div>
+    <div class="mt-2">
+      <el-pagination
+        :current-page="queryParms.pageNo"
+        :page-size="queryParms.pageSize"
+        :page-sizes="[10, 20, 30, 50, 100]"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="tableTotal"
+        @size-change="getList"
+        @current-change="getList"
+      />
+    </div>
+  </ContentWrap>
+</template>
+<script setup lang="tsx">
+import dayjs from 'dayjs'
+import { Column, ElPagination, ElTableV2, TableV2FixedDir } from 'element-plus'
+import * as NoticeApi from '@/api/system/notice'
+import { XTextButton } from '@/components/XButton'
+import { DictTag } from '@/components/DictTag'
+const { t } = useI18n() // 国际化
+
+const columns: Column<any>[] = [
+  {
+    key: 'id',
+    dataKey: 'id', //需要渲染当前列的数据字段，如{id:9527,name:'Mike'}，则填id
+    title: 'id', //显示在单元格表头的文本
+    width: 80, //当前列的宽度，必须设置
+    fixed: true //是否固定列
+  },
+  {
+    key: 'title',
+    dataKey: 'title',
+    title: '公告标题',
+    width: 180
+  },
+  {
+    key: 'type',
+    dataKey: 'type',
+    title: '公告类型',
+    width: 180,
+    cellRenderer: ({ cellData: type }) => (
+      <DictTag type={DICT_TYPE.SYSTEM_NOTICE_TYPE} value={type}></DictTag>
+    )
+  },
+  {
+    key: 'status',
+    dataKey: 'status',
+    title: t('common.status'),
+    width: 180,
+    cellRenderer: ({ cellData: status }) => (
+      <DictTag type={DICT_TYPE.COMMON_STATUS} value={status}></DictTag>
+    )
+  },
+  {
+    key: 'content',
+    dataKey: 'content',
+    title: '公告内容',
+    width: 400,
+    cellRenderer: ({ cellData: content }) => <span v-html={content}></span>
+  },
+  {
+    key: 'createTime',
+    dataKey: 'createTime',
+    title: t('common.createTime'),
+    width: 180,
+    cellRenderer: ({ cellData: createTime }) => (
+      <>{dayjs(createTime).format('YYYY-MM-DD HH:mm:ss')}</>
+    )
+  },
+  {
+    key: 'actionbtns',
+    dataKey: 'actionbtns', //需要渲染当前列的数据字段，如{id:9527,name:'Mike'}，则填id
+    title: '操作', //显示在单元格表头的文本
+    width: 160, //当前列的宽度，必须设置
+    fixed: TableV2FixedDir.RIGHT, //是否固定列
+    align: 'center',
+    cellRenderer: ({ cellData: id }) => (
+      <>
         <XTextButton
           preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['system:notice:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
-  </ContentWrap>
-  <!-- 弹窗 -->
-  <XModal id="noticeModel" v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form
-      ref="formRef"
-      v-if="['create', 'update'].includes(actionType)"
-      :schema="allSchemas.formSchema"
-      :rules="rules"
-    />
-    <!-- 对话框(详情) -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    >
-      <template #content="{ row }">
-        <Editor :model-value="row.content" :readonly="true" />
-      </template>
-    </Descriptions>
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="actionLoading"
-        @click="submitForm()"
-      />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
-</template>
-<script setup lang="ts" name="Notice">
-import type { FormExpose } from '@/components/Form'
-// 业务相关的 import
-import * as NoticeApi from '@/api/system/notice'
-import { rules, allSchemas } from './notice.data'
+          title={t('action.edit')}
+          onClick={handleUpdate.bind(this, id)}
+        ></XTextButton>
+        <XTextButton
+          preIcon="ep:delete"
+          title={t('action.del')}
+          onClick={handleDelete.bind(this, id)}
+        ></XTextButton>
+      </>
+    )
+  }
+]
 
-const { t } = useI18n() // 国际化
-const message = useMessage() // 消息弹窗
-// 列表相关的变量
-const [registerTable, { reload, deleteData }] = useXTable({
-  allSchemas: allSchemas,
-  getListApi: NoticeApi.getNoticePageApi,
-  deleteApi: NoticeApi.deleteNoticeApi
+const tableData = ref([])
+
+const tableTotal = ref(0)
+
+const queryParms = reactive({
+  title: '',
+  status: undefined,
+  pageNo: 1,
+  pageSize: 100
 })
-// 弹窗相关的变量
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const actionType = ref('') // 操作按钮的类型
-const actionLoading = ref(false) // 按钮 Loading
-const formRef = ref<FormExpose>() // 表单 Ref
-const detailData = ref() // 详情 Ref
 
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
+const getList = async () => {
+  const res = await NoticeApi.getNoticePageApi(queryParms)
+  tableData.value = res.list
+  tableTotal.value = res.total
 }
 
-// 新增操作
-const handleCreate = () => {
-  setDialogTile('create')
+const handleUpdate = (id) => {
+  console.info(id)
 }
 
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  // 设置数据
-  const res = await NoticeApi.getNoticeApi(rowId)
-  unref(formRef)?.setValues(res)
+const handleDelete = (id) => {
+  console.info(id)
 }
 
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  setDialogTile('detail')
-  // 设置数据
-  const res = await NoticeApi.getNoticeApi(rowId)
-  detailData.value = res
-}
-
-// 提交新增/修改的表单
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as NoticeApi.NoticeVO
-        if (actionType.value === 'create') {
-          await NoticeApi.createNoticeApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          await NoticeApi.updateNoticeApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        await reload()
-      }
-    }
-  })
-}
+getList()
 </script>

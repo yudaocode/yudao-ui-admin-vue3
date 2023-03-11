@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 /**
  * 时间日期转换
  * @param date 当前时间，new Date() 格式
@@ -173,4 +175,19 @@ export function formatPast2(ms) {
   } else {
     return 0 + '秒'
   }
+}
+
+/**
+ * element plus 的时间 Formatter 实现，使用 YYYY-MM-DD HH:mm:ss 格式
+ *
+ * @param row 行数据
+ * @param column 字段
+ * @param cellValue 字段值
+ */
+// @ts-ignore
+export const dateFormatter = (row, column, cellValue) => {
+  if (!cellValue) {
+    return
+  }
+  return dayjs(cellValue).format('YYYY-MM-DD HH:mm:ss')
 }

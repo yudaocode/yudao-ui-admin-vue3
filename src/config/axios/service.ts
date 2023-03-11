@@ -170,7 +170,6 @@ service.interceptors.response.use(
       return Promise.reject(new Error(msg))
     } else if (code === 901) {
       ElMessage.error({
-        duration: 5,
         offset: 300,
         dangerouslyUseHTMLString: true,
         message:

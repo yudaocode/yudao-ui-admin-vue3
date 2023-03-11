@@ -8,8 +8,9 @@ const props = defineProps({
   modelValue: propTypes.bool.def(false),
   title: propTypes.string.def('Dialog'),
   fullscreen: propTypes.bool.def(true),
-  maxHeight: propTypes.oneOfType([String, Number]).def('300px'),
-  width: propTypes.oneOfType([String, Number]).def('40%')
+  width: propTypes.oneOfType([String, Number]).def('40%'),
+  scroll: propTypes.bool.def(false), // 是否开启滚动条。如果是的话，按照 maxHeight 设置最大高度
+  maxHeight: propTypes.oneOfType([String, Number]).def('300px')
 })
 
 const getBindValue = computed(() => {
@@ -35,6 +36,7 @@ const dialogHeight = ref(isNumber(props.maxHeight) ? `${props.maxHeight}px` : pr
 watch(
   () => isFullscreen.value,
   async (val: boolean) => {
+    // 计算最大高度
     await nextTick()
     if (val) {
       const windowHeight = document.documentElement.offsetHeight
@@ -80,9 +82,12 @@ const dialogStyle = computed(() => {
       </div>
     </template>
 
-    <ElScrollbar :style="dialogStyle">
+    <!-- 情况一：如果 scroll 为 true，说明开启滚动条 -->
+    <ElScrollbar :style="dialogStyle" v-if="scroll">
       <slot></slot>
     </ElScrollbar>
+    <!-- 情况二：如果 scroll 为 false，说明关闭滚动条滚动条 -->
+    <slot v-else></slot>
 
     <template v-if="slots.footer" #footer>
       <slot name="footer"></slot>
