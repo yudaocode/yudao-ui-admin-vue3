@@ -1,7 +1,7 @@
 import request from '@/config/axios'
 
 export interface NoticeVO {
-  id: number
+  id: number | undefined
   title: string
   type: number
   content: string

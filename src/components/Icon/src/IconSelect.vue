@@ -45,16 +45,21 @@ const tabsList = [
 const pageList = computed(() => {
   if (currentPage.value === 1) {
     return copyIconList[currentActiveType.value]
-      .filter((v) => v.includes(filterValue.value))
+      ?.filter((v) => v.includes(filterValue.value))
       .slice(currentPage.value - 1, pageSize.value)
   } else {
     return copyIconList[currentActiveType.value]
-      .filter((v) => v.includes(filterValue.value))
+      ?.filter((v) => v.includes(filterValue.value))
       .slice(
         pageSize.value * (currentPage.value - 1),
         pageSize.value * (currentPage.value - 1) + pageSize.value
       )
   }
+})
+const iconCount = computed(() => {
+  return copyIconList[currentActiveType.value] == undefined
+    ? 0
+    : copyIconList[currentActiveType.value].length
 })
 
 const iconItemStyle = computed((): ParameterCSSProperties => {
@@ -159,7 +164,7 @@ watch(
 
           <ElPagination
             small
-            :total="copyIconList[currentActiveType].length as unknown as number"
+            :total="iconCount"
             :page-size="pageSize"
             :current-page="currentPage"
             background

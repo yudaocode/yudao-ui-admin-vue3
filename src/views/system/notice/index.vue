@@ -1,150 +1,170 @@
 <template>
-  <ContentWrap>
-    <el-form ref="searchForm" :model="queryParms" :inline="true">
-      <el-form-item label="公告标题">
-        <el-input v-model="queryParms.title" />
+  <content-wrap>
+    <!-- 搜索工作栏 -->
+    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
+      <el-form-item label="公告标题" prop="title">
+        <el-input
+          v-model="queryParams.title"
+          placeholder="请输入公告标题"
+          clearable
+          @keyup.enter="handleQuery"
+        />
       </el-form-item>
-      <el-form-item label="状态">
-        <el-select v-model="queryParms.status">
-          <el-option label="全部" value="" />
-          <el-option label="开启" :value="1" />
-          <el-option label="关闭" :value="0" />
+      <el-form-item label="公告类型" prop="type">
+        <el-select v-model="queryParams.type" placeholder="请选择公告类型" clearable>
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.SYSTEM_NOTICE_TYPE)"
+            :key="parseInt(dict.value)"
+            :label="dict.label"
+            :value="parseInt(dict.value)"
+          />
         </el-select>
       </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.type" placeholder="请选择状态" clearable>
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="parseInt(dict.value)"
+            :label="dict.label"
+            :value="parseInt(dict.value)"
+          />
+        </el-select>
+      </el-form-item>
+
       <el-form-item>
-        <el-button type="primary" @click="getList">Query</el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button
+          type="primary"
+          @click="openModal('create')"
+          v-hasPermi="['system:notice:create']"
+        >
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
       </el-form-item>
     </el-form>
-    <div style="width: 100%; height: 600px">
-      <el-auto-resizer>
-        <template #default="{ height, width }">
-          <el-table-v2
-            :columns="columns"
-            :data="tableData"
-            :width="width"
-            :height="height - 50"
-            fixed
-          />
+    <!-- 列表 -->
+    <el-table v-loading="loading" :data="list" align="center">
+      <el-table-column label="公告主键" align="center" prop="id" />
+      <el-table-column label="公告标题" align="center" prop="title" />
+      <el-table-column label="公告类型" align="center" prop="type">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.SYSTEM_NOTICE_TYPE" :value="scope.row.type" />
         </template>
-      </el-auto-resizer>
-    </div>
-    <div class="mt-2">
-      <el-pagination
-        :current-page="queryParms.pageNo"
-        :page-size="queryParms.pageSize"
-        :page-sizes="[10, 20, 30, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="tableTotal"
-        @size-change="getList"
-        @current-change="getList"
+      </el-table-column>
+      <el-table-column label="状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="公告内容"
+        align="center"
+        prop="content"
+        :show-overflow-tooltip="true"
       />
-    </div>
-  </ContentWrap>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
+      />
+      <el-table-column label="操作" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openModal('update', scope.row.id)"
+            v-hasPermi="['system:notice:update']"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['system:notice:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </content-wrap>
+
+  <NoticeForm ref="modalRef" @success="getList" />
 </template>
 <script setup lang="tsx">
-import dayjs from 'dayjs'
-import { Column, ElPagination, ElTableV2, TableV2FixedDir } from 'element-plus'
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 import * as NoticeApi from '@/api/system/notice'
-import { XTextButton } from '@/components/XButton'
 import { DictTag } from '@/components/DictTag'
+import NoticeForm from './form.vue'
+const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
-const columns: Column<any>[] = [
-  {
-    key: 'id',
-    dataKey: 'id', //需要渲染当前列的数据字段，如{id:9527,name:'Mike'}，则填id
-    title: 'id', //显示在单元格表头的文本
-    width: 80, //当前列的宽度，必须设置
-    fixed: true //是否固定列
-  },
-  {
-    key: 'title',
-    dataKey: 'title',
-    title: '公告标题',
-    width: 180
-  },
-  {
-    key: 'type',
-    dataKey: 'type',
-    title: '公告类型',
-    width: 180,
-    cellRenderer: ({ cellData: type }) => (
-      <DictTag type={DICT_TYPE.SYSTEM_NOTICE_TYPE} value={type}></DictTag>
-    )
-  },
-  {
-    key: 'status',
-    dataKey: 'status',
-    title: t('common.status'),
-    width: 180,
-    cellRenderer: ({ cellData: status }) => (
-      <DictTag type={DICT_TYPE.COMMON_STATUS} value={status}></DictTag>
-    )
-  },
-  {
-    key: 'content',
-    dataKey: 'content',
-    title: '公告内容',
-    width: 400,
-    cellRenderer: ({ cellData: content }) => <span v-html={content}></span>
-  },
-  {
-    key: 'createTime',
-    dataKey: 'createTime',
-    title: t('common.createTime'),
-    width: 180,
-    cellRenderer: ({ cellData: createTime }) => (
-      <>{dayjs(createTime).format('YYYY-MM-DD HH:mm:ss')}</>
-    )
-  },
-  {
-    key: 'actionbtns',
-    dataKey: 'actionbtns', //需要渲染当前列的数据字段，如{id:9527,name:'Mike'}，则填id
-    title: '操作', //显示在单元格表头的文本
-    width: 160, //当前列的宽度，必须设置
-    fixed: TableV2FixedDir.RIGHT, //是否固定列
-    align: 'center',
-    cellRenderer: ({ cellData: id }) => (
-      <>
-        <XTextButton
-          preIcon="ep:delete"
-          title={t('action.edit')}
-          onClick={handleUpdate.bind(this, id)}
-        ></XTextButton>
-        <XTextButton
-          preIcon="ep:delete"
-          title={t('action.del')}
-          onClick={handleDelete.bind(this, id)}
-        ></XTextButton>
-      </>
-    )
-  }
-]
-
-const tableData = ref([])
-
-const tableTotal = ref(0)
-
-const queryParms = reactive({
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 列表的数据
+const queryParams = reactive({
   title: '',
+  type: undefined,
   status: undefined,
   pageNo: 1,
   pageSize: 100
 })
+const queryFormRef = ref() // 搜索的表单
 
+/** 查询公告列表 */
 const getList = async () => {
-  const res = await NoticeApi.getNoticePageApi(queryParms)
-  tableData.value = res.list
-  tableTotal.value = res.total
+  loading.value = true
+  try {
+    const data = await NoticeApi.getNoticePageApi(queryParams)
+
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
+}
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
+}
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
+/** 添加/修改操作 */
+const modalRef = ref()
+const openModal = (type: string, id?: number) => {
+  modalRef.value.openModal(type, id)
+}
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await NoticeApi.deleteNoticeApi(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
-const handleUpdate = (id) => {
-  console.info(id)
-}
-
-const handleDelete = (id) => {
-  console.info(id)
-}
-
-getList()
+/** 初始化 **/
+onMounted(() => {
+  getList()
+})
 </script>
