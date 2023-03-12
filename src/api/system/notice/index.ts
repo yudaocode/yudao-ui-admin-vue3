@@ -11,32 +11,27 @@ export interface NoticeVO {
   createTime: Date
 }
 
-export interface NoticePageReqVO extends PageParam {
-  title?: string
-  status?: number
-}
-
 // 查询公告列表
-export const getNoticePageApi = (params: NoticePageReqVO) => {
+export const getNoticePage = (params: PageParam) => {
   return request.get({ url: '/system/notice/page', params })
 }
 
 // 查询公告详情
-export const getNoticeApi = (id: number) => {
+export const getNotice = (id: number) => {
   return request.get({ url: '/system/notice/get?id=' + id })
 }
 
 // 新增公告
-export const createNoticeApi = (data: NoticeVO) => {
+export const createNotice = (data: NoticeVO) => {
   return request.post({ url: '/system/notice/create', data })
 }
 
 // 修改公告
-export const updateNoticeApi = (data: NoticeVO) => {
+export const updateNotice = (data: NoticeVO) => {
   return request.put({ url: '/system/notice/update', data })
 }
 
 // 删除公告
-export const deleteNoticeApi = (id: number) => {
+export const deleteNotice = (id: number) => {
   return request.delete({ url: '/system/notice/delete?id=' + id })
 }

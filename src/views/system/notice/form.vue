@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="modelTitle" v-model="modelVisible">
+  <Dialog :title="modelTitle" v-model="modelVisible" width="800">
     <el-form
       ref="formRef"
       :model="formData"
@@ -11,7 +11,7 @@
         <el-input v-model="formData.title" placeholder="请输入公告标题" />
       </el-form-item>
       <el-form-item label="公告内容" prop="content">
-        <el-input v-model="formData.content" type="textarea" placeholder="请输公告内容" />
+        <Editor :model-value="formData.content" height="150px" />
       </el-form-item>
       <el-form-item label="公告类型" prop="type">
         <el-select v-model="formData.type" placeholder="请选择公告类型" clearable>
@@ -82,7 +82,7 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await NoticeApi.getNoticeApi(id)
+      formData.value = await NoticeApi.getNotice(id)
     } finally {
       formLoading.value = false
     }
@@ -102,10 +102,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as NoticeApi.NoticeVO
     if (formType.value === 'create') {
-      await NoticeApi.createNoticeApi(data)
+      await NoticeApi.createNotice(data)
       message.success(t('common.createSuccess'))
     } else {
-      await NoticeApi.updateNoticeApi(data)
+      await NoticeApi.updateNotice(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
