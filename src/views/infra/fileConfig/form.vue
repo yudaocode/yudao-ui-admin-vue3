@@ -147,7 +147,7 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await FileConfigApi.getFileConfigApi(id)
+      formData.value = await FileConfigApi.getFileConfig(id)
     } finally {
       formLoading.value = false
     }
@@ -167,10 +167,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as FileConfigApi.FileConfigVO
     if (formType.value === 'create') {
-      await FileConfigApi.createFileConfigApi(data)
+      await FileConfigApi.createFileConfig(data)
       message.success(t('common.createSuccess'))
     } else {
-      await FileConfigApi.updateFileConfigApi(data)
+      await FileConfigApi.updateFileConfig(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false

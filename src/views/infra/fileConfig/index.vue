@@ -135,7 +135,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await FileConfigApi.getFileConfigPageApi(queryParams)
+    const data = await FileConfigApi.getFileConfigPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -167,7 +167,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await FileConfigApi.deleteFileConfigApi(id)
+    await FileConfigApi.deleteFileConfig(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -178,7 +178,7 @@ const handleMaster = (id) => {
   message
     .confirm('是否确认修改配置编号为"' + id + '"的数据项为主配置?')
     .then(function () {
-      return FileConfigApi.updateFileConfigMasterApi(id)
+      return FileConfigApi.updateFileConfigMaster(id)
     })
     .then(() => {
       getList()
@@ -188,7 +188,7 @@ const handleMaster = (id) => {
 }
 /** 测试按钮操作 */
 const handleTest = (id) => {
-  FileConfigApi.testFileConfigApi(id)
+  FileConfigApi.testFileConfig(id)
     .then((response) => {
       message.alert('测试通过，上传文件成功！访问地址：' + response)
     })
