@@ -87,7 +87,7 @@
 </template>
 <script setup lang="ts" name="Config">
 import { dateFormatter } from '@/utils/formatTime'
-import * as FileApi from '@/api/infra/fileList'
+import * as FileApi from '@/api/infra/file'
 import FileUploadForm from './form.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -108,7 +108,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await FileApi.getFilePageApi(queryParams)
+    const data = await FileApi.getFilePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -140,7 +140,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await FileApi.deleteFileApi(id)
+    await FileApi.deleteFile(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
