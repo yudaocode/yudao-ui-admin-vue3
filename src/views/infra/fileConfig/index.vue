@@ -1,294 +1,201 @@
 <template>
-  <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <template #toolbar_buttons>
-        <!-- 操作：新增 -->
-        <XButton
-          type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
-          v-hasPermi="['infra:file-config:create']"
-          @click="handleCreate(formRef)"
-        />
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：编辑 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['infra:file-config:update']"
-          @click="handleUpdate(row.id)"
-        />
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
-          v-hasPermi="['infra:file-config:query']"
-          @click="handleDetail(row.id)"
-        />
-        <!-- 操作：主配置 -->
-        <XTextButton
-          preIcon="ep:flag"
-          title="主配置"
-          v-hasPermi="['infra:file-config:update']"
-          @click="handleMaster(row)"
-        />
-        <!-- 操作：测试 -->
-        <XTextButton preIcon="ep:share" :title="t('action.test')" @click="handleTest(row.id)" />
-        <!-- 操作：删除 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['infra:file-config:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
-  </ContentWrap>
-  <XModal v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <el-form
-      ref="formRef"
-      v-if="['create', 'update'].includes(actionType)"
-      :model="form"
-      :rules="rules"
-      label-width="120px"
-    >
+  <!-- 搜索 -->
+  <content-wrap>
+    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
       <el-form-item label="配置名" prop="name">
-        <el-input v-model="form.name" placeholder="请输入配置名" />
-      </el-form-item>
-      <el-form-item label="备注" prop="remark">
-        <el-input v-model="form.remark" placeholder="请输入备注" />
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入配置名"
+          clearable
+          @keyup.enter="handleQuery"
+        />
       </el-form-item>
       <el-form-item label="存储器" prop="storage">
-        <el-select v-model="form.storage" placeholder="请选择存储器" :disabled="form.id !== 0">
+        <el-select v-model="queryParams.storage" placeholder="请选择存储器" clearable>
           <el-option
-            v-for="(dict, index) in getIntDictOptions(DICT_TYPE.INFRA_FILE_STORAGE)"
-            :key="index"
+            v-for="dict in getDictOptions(DICT_TYPE.INFRA_FILE_STORAGE)"
+            :key="parseInt(dict.value)"
             :label="dict.label"
-            :value="dict.value"
+            :value="parseInt(dict.value)"
           />
         </el-select>
       </el-form-item>
-      <!-- DB -->
-      <!-- Local / FTP / SFTP -->
-      <el-form-item
-        v-if="form.storage >= 10 && form.storage <= 12"
-        label="基础路径"
-        prop="config.basePath"
-      >
-        <el-input v-model="form.config.basePath" placeholder="请输入基础路径" />
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+        />
       </el-form-item>
-      <el-form-item
-        v-if="form.storage >= 11 && form.storage <= 12"
-        label="主机地址"
-        prop="config.host"
-      >
-        <el-input v-model="form.config.host" placeholder="请输入主机地址" />
-      </el-form-item>
-      <el-form-item
-        v-if="form.storage >= 11 && form.storage <= 12"
-        label="主机端口"
-        prop="config.port"
-      >
-        <el-input-number :min="0" v-model="form.config.port" placeholder="请输入主机端口" />
-      </el-form-item>
-      <el-form-item
-        v-if="form.storage >= 11 && form.storage <= 12"
-        label="用户名"
-        prop="config.username"
-      >
-        <el-input v-model="form.config.username" placeholder="请输入密码" />
-      </el-form-item>
-      <el-form-item
-        v-if="form.storage >= 11 && form.storage <= 12"
-        label="密码"
-        prop="config.password"
-      >
-        <el-input v-model="form.config.password" placeholder="请输入密码" />
-      </el-form-item>
-      <el-form-item v-if="form.storage === 11" label="连接模式" prop="config.mode">
-        <el-radio-group v-model="form.config.mode">
-          <el-radio key="Active" label="Active">主动模式</el-radio>
-          <el-radio key="Passive" label="Passive">主动模式</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <!-- S3 -->
-      <el-form-item v-if="form.storage === 20" label="节点地址" prop="config.endpoint">
-        <el-input v-model="form.config.endpoint" placeholder="请输入节点地址" />
-      </el-form-item>
-      <el-form-item v-if="form.storage === 20" label="存储 bucket" prop="config.bucket">
-        <el-input v-model="form.config.bucket" placeholder="请输入 bucket" />
-      </el-form-item>
-      <el-form-item v-if="form.storage === 20" label="accessKey" prop="config.accessKey">
-        <el-input v-model="form.config.accessKey" placeholder="请输入 accessKey" />
-      </el-form-item>
-      <el-form-item v-if="form.storage === 20" label="accessSecret" prop="config.accessSecret">
-        <el-input v-model="form.config.accessSecret" placeholder="请输入 accessSecret" />
-      </el-form-item>
-      <!-- 通用 -->
-      <el-form-item v-if="form.storage === 20" label="自定义域名">
-        <!-- 无需参数校验，所以去掉 prop -->
-        <el-input v-model="form.config.domain" placeholder="请输入自定义域名" />
-      </el-form-item>
-      <el-form-item v-else-if="form.storage" label="自定义域名" prop="config.domain">
-        <el-input v-model="form.config.domain" placeholder="请输入自定义域名" />
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button
+          type="primary"
+          @click="openModal('create')"
+          v-hasPermi="['infra:file-config:create']"
+        >
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
       </el-form-item>
     </el-form>
-    <!-- 对话框(详情) -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    />
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="actionLoading"
-        @click="submitForm(formRef)"
+  </content-wrap>
+
+  <!-- 列表 -->
+  <content-wrap>
+    <el-table v-loading="loading" :data="list" align="center">
+      <el-table-column label="编号" align="center" prop="id" />
+      <el-table-column label="配置名" align="center" prop="name" />
+      <el-table-column label="存储器" align="center" prop="storage">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_FILE_STORAGE" :value="scope.row.storage" />
+        </template>
+      </el-table-column>
+      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column label="主配置" align="center" prop="primary">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.master" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
       />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
+      <el-table-column label="操作" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openModal('update', scope.row.id)"
+            v-hasPermi="['infra:file-config:update']"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            :disabled="scope.row.master"
+            @click="handleMaster(scope.row.id)"
+            v-hasPermi="['infra:file-config:update']"
+          >
+            主配置
+          </el-button>
+          <el-button link type="primary" @click="handleTest(scope.row.id)"> 测试 </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['infra:config:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </content-wrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <file-config-form ref="modalRef" @success="getList" />
 </template>
-<script setup lang="ts" name="FileConfig">
-import type { FormInstance } from 'element-plus'
-// 业务相关的 import
+<script setup lang="ts" name="Config">
 import * as FileConfigApi from '@/api/infra/fileConfig'
-import { rules, allSchemas } from './fileConfig.data'
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-
-const { t } = useI18n() // 国际化
+import FileConfigForm from './form.vue'
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 const message = useMessage() // 消息弹窗
-// 列表相关的变量
-const [registerTable, { reload, deleteData }] = useXTable({
-  allSchemas: allSchemas,
-  getListApi: FileConfigApi.getFileConfigPageApi,
-  deleteApi: FileConfigApi.deleteFileConfigApi
-})
+const { t } = useI18n() // 国际化
 
-// ========== CRUD 相关 ==========
-const actionLoading = ref(false) // 遮罩层
-const actionType = ref('') // 操作按钮的类型
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const formRef = ref<FormInstance>() // 表单 Ref
-const detailData = ref() // 详情 Ref
-const form = ref<FileConfigApi.FileConfigVO>({
-  id: 0,
-  name: '',
-  storage: 0,
-  master: false,
-  visible: false,
-  config: {
-    basePath: '',
-    host: '',
-    port: 0,
-    username: '',
-    password: '',
-    mode: '',
-    endpoint: '',
-    bucket: '',
-    accessKey: '',
-    accessSecret: '',
-    domain: ''
-  },
-  remark: '',
-  createTime: new Date()
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 列表的数据
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  name: undefined,
+  storage: undefined,
+  createTime: []
 })
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
-}
+const queryFormRef = ref() // 搜索的表单
 
-// 新增操作
-const handleCreate = (formEl: FormInstance | undefined) => {
-  setDialogTile('create')
-  formEl?.resetFields()
-  form.value = {
-    id: 0,
-    name: '',
-    storage: 0,
-    master: false,
-    visible: false,
-    config: {
-      basePath: '',
-      host: '',
-      port: 0,
-      username: '',
-      password: '',
-      mode: '',
-      endpoint: '',
-      bucket: '',
-      accessKey: '',
-      accessSecret: '',
-      domain: ''
-    },
-    remark: '',
-    createTime: new Date()
+/** 查询参数列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await FileConfigApi.getFileConfigPageApi(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
   }
 }
 
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  // 设置数据
-  const res = await FileConfigApi.getFileConfigApi(rowId)
-  form.value = res
-  setDialogTile('update')
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
 }
 
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  setDialogTile('detail')
-  // 设置数据
-  const res = await FileConfigApi.getFileConfigApi(rowId)
-  detailData.value = res
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
 }
 
-// 主配置操作
-const handleMaster = (row: FileConfigApi.FileConfigVO) => {
+/** 添加/修改操作 */
+const modalRef = ref()
+const openModal = (type: string, id?: number) => {
+  modalRef.value.openModal(type, id)
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await FileConfigApi.deleteFileConfigApi(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+/** 主配置按钮操作 */
+const handleMaster = (id) => {
   message
-    .confirm('是否确认修改配置【 ' + row.name + ' 】为主配置?', t('common.reminder'))
-    .then(async () => {
-      await FileConfigApi.updateFileConfigMasterApi(row.id)
-      await reload()
+    .confirm('是否确认修改配置编号为"' + id + '"的数据项为主配置?')
+    .then(function () {
+      return FileConfigApi.updateFileConfigMasterApi(id)
     })
+    .then(() => {
+      getList()
+      message.success(t('common.updateSuccess'))
+    })
+    .catch(() => {})
 }
-
-const handleTest = async (rowId: number) => {
-  const res = await FileConfigApi.testFileConfigApi(rowId)
-  message.alert('测试通过，上传文件成功！访问地址：' + res)
+/** 测试按钮操作 */
+const handleTest = (id) => {
+  FileConfigApi.testFileConfigApi(id)
+    .then((response) => {
+      message.alert('测试通过，上传文件成功！访问地址：' + response)
+    })
+    .catch(() => {})
 }
-
-// 提交按钮
-const submitForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return
-  formEl.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        if (actionType.value === 'create') {
-          await FileConfigApi.createFileConfigApi(form.value)
-          message.success(t('common.createSuccess'))
-        } else {
-          await FileConfigApi.updateFileConfigApi(form.value)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        await reload()
-      }
-    }
-  })
-}
+/** 初始化 **/
+onMounted(() => {
+  getList()
+})
 </script>
