@@ -68,7 +68,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" width="240px">
         <template #default="scope">
           <el-button
             link
@@ -173,8 +173,10 @@ const handleDelete = async (id: number) => {
     await getList()
   } catch {}
 }
+
 /** 主配置按钮操作 */
 const handleMaster = (id) => {
+  // TODO 改成 await 的形式
   message
     .confirm('是否确认修改配置编号为"' + id + '"的数据项为主配置?')
     .then(function () {
@@ -186,14 +188,17 @@ const handleMaster = (id) => {
     })
     .catch(() => {})
 }
+
 /** 测试按钮操作 */
 const handleTest = (id) => {
+  // TODO 改成 await 的形式
   FileConfigApi.testFileConfig(id)
     .then((response) => {
       message.alert('测试通过，上传文件成功！访问地址：' + response)
     })
     .catch(() => {})
 }
+
 /** 初始化 **/
 onMounted(() => {
   getList()

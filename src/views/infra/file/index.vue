@@ -147,6 +147,7 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
+// TODO 写到 utils/index.ts 中
 const sizeFormat = (row) => {
   const unitArr = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
   const srcSize = parseFloat(row.size)
@@ -155,6 +156,7 @@ const sizeFormat = (row) => {
   const sizeStr = size.toFixed(2) //保留的小数位数
   return sizeStr + ' ' + unitArr[index]
 }
+
 /** 初始化 **/
 onMounted(() => {
   getList()

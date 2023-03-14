@@ -13,6 +13,7 @@ export interface FileClientConfig {
   accessSecret?: string
   domain: string
 }
+
 export interface FileConfigVO {
   id: number
   name: string
@@ -24,14 +25,8 @@ export interface FileConfigVO {
   createTime: Date
 }
 
-export interface FileConfigPageReqVO extends PageParam {
-  name?: string
-  storage?: number
-  createTime?: Date[]
-}
-
 // 查询文件配置列表
-export const getFileConfigPage = (params: FileConfigPageReqVO) => {
+export const getFileConfigPage = (params: PageParam) => {
   return request.get({ url: '/infra/file-config/page', params })
 }
 

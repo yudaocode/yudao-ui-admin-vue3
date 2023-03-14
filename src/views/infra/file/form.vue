@@ -59,14 +59,17 @@ const emit = defineEmits(['success']) // 定义 success 事件，用于操作成
 const handleFileChange = (file) => {
   data.value.path = file.name
 }
+
 /** 处理文件上传中 */
 const handleFileUploadProgress = () => {
   formLoading.value = true // 禁止修改
 }
+
 /** 发起文件上传 */
 const submitFileForm = () => {
   unref(uploadRef)?.submit()
 }
+
 /** 文件上传成功处理 */
 const handleFileSuccess = () => {
   // 清理
@@ -78,5 +81,3 @@ const handleFileSuccess = () => {
   emit('success')
 }
 </script>
-
-<style scoped></style>
