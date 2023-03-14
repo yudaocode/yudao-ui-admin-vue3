@@ -44,7 +44,7 @@ const [registerTable, { exportList }] = useXTable({
 
 // 弹窗相关的变量
 const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('详情') // 弹出层标题
+const dialogTitle = ref(t('action.detail')) // 弹出层标题
 const actionType = ref('') // 操作按钮的类型
 // ========== 详情相关 ==========
 const detailData = ref() // 详情 Ref

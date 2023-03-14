@@ -3,7 +3,7 @@ import type { VxeCrudSchema } from '@/hooks/web/useVxeCrudSchemas'
 // CrudSchema
 const crudSchemas = reactive<VxeCrudSchema>({
   primaryKey: 'id',
-  primaryType: 'seq',
+  primaryType: 'id',
   primaryTitle: '日志编号',
   action: true,
   actionWidth: '80px',
