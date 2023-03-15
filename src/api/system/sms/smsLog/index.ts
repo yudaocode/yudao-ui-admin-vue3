@@ -53,5 +53,5 @@ export const getSmsLogPageApi = (params: SmsLogPageReqVO) => {
 
 // 导出短信日志
 export const exportSmsLogApi = (params: SmsLogExportReqVO) => {
-  return request.download({ url: '/system/sms-log/export', params })
+  return request.download({ url: '/system/sms-log/export-excel', params })
 }

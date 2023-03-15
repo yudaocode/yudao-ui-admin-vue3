@@ -23,6 +23,10 @@ const crudSchemas = reactive<VxeCrudSchema>({
   action: true,
   columns: [
     {
+      title: '客户端端号',
+      field: 'clientId'
+    },
+    {
       title: '客户端密钥',
       field: 'secret'
     },

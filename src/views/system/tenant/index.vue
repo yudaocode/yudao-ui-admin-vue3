@@ -123,14 +123,37 @@ const setDialogTile = (type: string) => {
 }
 
 // 新增操作
-const handleCreate = () => {
+const handleCreate = async () => {
   // 重置表单
   setDialogTile('create')
+  await nextTick()
+  console.log(allSchemas.formSchema, 'allSchemas.formSchema')
+  if (allSchemas.formSchema[4].field !== 'username') {
+    unref(formRef)?.addSchema(
+      {
+        field: 'username',
+        label: '用户名称',
+        component: 'Input'
+      },
+      0
+    )
+    unref(formRef)?.addSchema(
+      {
+        field: 'password',
+        label: '用户密码',
+        component: 'InputPassword'
+      },
+      1
+    )
+  }
 }
 
 // 修改操作
 const handleUpdate = async (rowId: number) => {
   setDialogTile('update')
+  await nextTick()
+  unref(formRef)?.delSchema('username')
+  unref(formRef)?.delSchema('password')
   // 设置数据
   const res = await TenantApi.getTenantApi(rowId)
   unref(formRef)?.setValues(res)

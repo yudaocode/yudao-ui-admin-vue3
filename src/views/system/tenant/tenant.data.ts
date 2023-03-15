@@ -123,8 +123,7 @@ const crudSchemas = reactive<VxeCrudSchema>({
       title: '用户名称',
       field: 'username',
       isTable: false,
-      isDetail: false,
-      isForm: false
+      isDetail: false
     },
     {
       title: '用户密码',
@@ -133,8 +132,7 @@ const crudSchemas = reactive<VxeCrudSchema>({
       isDetail: false,
       form: {
         component: 'InputPassword'
-      },
-      isForm: false
+      }
     },
     {
       title: '账号额度',
