@@ -61,6 +61,13 @@ const crudSchemas = reactive<VxeCrudSchema>({
       }
     },
     {
+      title: '用户' + t('profile.user.sex'),
+      field: 'sex',
+      dictType: DICT_TYPE.SYSTEM_USER_SEX,
+      dictClass: 'number',
+      table: { show: false }
+    },
+    {
       title: '用户昵称',
       field: 'nickname'
     },
