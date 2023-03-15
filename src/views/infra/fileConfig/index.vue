@@ -175,28 +175,21 @@ const handleDelete = async (id: number) => {
 }
 
 /** 主配置按钮操作 */
-const handleMaster = (id) => {
-  // TODO 改成 await 的形式
-  message
-    .confirm('是否确认修改配置编号为"' + id + '"的数据项为主配置?')
-    .then(function () {
-      return FileConfigApi.updateFileConfigMaster(id)
-    })
-    .then(() => {
-      getList()
-      message.success(t('common.updateSuccess'))
-    })
-    .catch(() => {})
+const handleMaster = async (id) => {
+  try {
+    await message.confirm('是否确认修改配置编号为"' + id + '"的数据项为主配置?')
+    await FileConfigApi.updateFileConfigMaster(id)
+    message.success(t('common.updateSuccess'))
+    await getList()
+  } catch {}
 }
 
 /** 测试按钮操作 */
-const handleTest = (id) => {
-  // TODO 改成 await 的形式
-  FileConfigApi.testFileConfig(id)
-    .then((response) => {
-      message.alert('测试通过，上传文件成功！访问地址：' + response)
-    })
-    .catch(() => {})
+const handleTest = async (id) => {
+  try {
+    const response = await FileConfigApi.testFileConfig(id)
+    message.alert('测试通过，上传文件成功！访问地址：' + response)
+  } catch {}
 }
 
 /** 初始化 **/

@@ -137,3 +137,12 @@ export const generateUUID = () => {
     return (c === 'x' ? random : (random & 0x3) | 0x8).toString(16)
   })
 }
+
+export const fileSizeFormatter = (row) => {
+  const unitArr = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+  const srcSize = parseFloat(row.size)
+  const index = Math.floor(Math.log(srcSize) / Math.log(1024))
+  const size = srcSize / Math.pow(1024, index)
+  const sizeStr = size.toFixed(2) //保留的小数位数
+  return sizeStr + ' ' + unitArr[index]
+}
