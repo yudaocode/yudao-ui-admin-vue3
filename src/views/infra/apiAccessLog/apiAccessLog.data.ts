@@ -10,7 +10,8 @@ const crudSchemas = reactive<VxeCrudSchema>({
   columns: [
     {
       title: '链路追踪',
-      field: 'traceId'
+      field: 'traceId',
+      isTable: false
     },
     {
       title: '用户编号',

@@ -1,6 +1,19 @@
 import type { VxeCrudSchema } from '@/hooks/web/useVxeCrudSchemas'
+import * as smsApi from '@/api/system/sms/smsChannel'
 const { t } = useI18n() // 国际化
-
+const tenantPackageOption = []
+const getTenantPackageOptions = async () => {
+  const res = await smsApi.getSimpleSmsChannels()
+  console.log(res, 'resresres')
+  res.forEach((tenantPackage: TenantPackageVO) => {
+    tenantPackageOption.push({
+      key: tenantPackage.id,
+      value: tenantPackage.id,
+      label: tenantPackage.signature
+    })
+  })
+}
+getTenantPackageOptions()
 // 表单校验
 export const rules = reactive({
   type: [required],
@@ -20,6 +33,19 @@ const crudSchemas = reactive<VxeCrudSchema>({
   action: true,
   actionWidth: '280',
   columns: [
+    {
+      title: '短信渠道编码',
+      field: 'channelId',
+      isSearch: false,
+      isForm: true,
+      isTable: false,
+      form: {
+        component: 'Select',
+        componentProps: {
+          options: tenantPackageOption
+        }
+      }
+    },
     {
       title: '模板编码',
       field: 'code',
