@@ -50,7 +50,7 @@
         align="center"
         prop="size"
         width="120"
-        :formatter="sizeFormat"
+        :formatter="fileSizeFormatter"
       />
       <el-table-column label="文件类型" align="center" prop="type" width="180px" />
       <el-table-column
@@ -86,6 +86,7 @@
   <file-upload-form ref="modalRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Config">
+import { fileSizeFormatter } from '@/utils'
 import { dateFormatter } from '@/utils/formatTime'
 import * as FileApi from '@/api/infra/file'
 import FileUploadForm from './form.vue'
@@ -145,16 +146,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-// TODO 写到 utils/index.ts 中
-const sizeFormat = (row) => {
-  const unitArr = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-  const srcSize = parseFloat(row.size)
-  const index = Math.floor(Math.log(srcSize) / Math.log(1024))
-  const size = srcSize / Math.pow(1024, index)
-  const sizeStr = size.toFixed(2) //保留的小数位数
-  return sizeStr + ' ' + unitArr[index]
 }
 
 /** 初始化 **/
