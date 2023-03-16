@@ -10,13 +10,8 @@ export interface MailAccountVO {
   sslEnable: boolean
 }
 
-export interface MailAccountPageReqVO extends PageParam {
-  mail?: string
-  username?: string
-}
-
 // 查询邮箱账号列表
-export const getMailAccountPageApi = async (params: MailAccountPageReqVO) => {
+export const getMailAccountPageApi = async (params: PageParam) => {
   return await request.get({ url: '/system/mail-account/page', params })
 }
 

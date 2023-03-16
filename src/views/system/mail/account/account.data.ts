@@ -2,6 +2,7 @@ import { CrudSchema, useCrudSchemas } from '@/hooks/web/useCrudSchemas'
 import { DictTag } from '@/components/DictTag'
 import { TableColumn } from '@/types/table'
 import { dateFormatter } from '@/utils/formatTime'
+import { getBoolDictOptions } from '@/utils/dict'
 
 const { t } = useI18n() // 国际化
 
@@ -59,6 +60,12 @@ const crudSchemas = reactive<CrudSchema[]>([
         type: DICT_TYPE.INFRA_BOOLEAN_STRING,
         value: cellValue
       })
+    },
+    form: {
+      component: 'Radio',
+      componentProps: {
+        options: getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)
+      }
     }
   },
   {
@@ -66,6 +73,14 @@ const crudSchemas = reactive<CrudSchema[]>([
     field: 'createTime',
     isForm: false,
     formatter: dateFormatter
+  },
+  {
+    label: '操作',
+    field: 'action',
+    width: '260px',
+    form: {
+      show: false
+    }
   }
 ])
 export const { allSchemas } = useCrudSchemas(crudSchemas)
