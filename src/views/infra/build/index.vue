@@ -8,7 +8,7 @@
           <el-button size="small" type="primary" @click="showJson">生成JSON</el-button>
           <el-button size="small" type="success" @click="showOption">生成Options</el-button>
           <el-button size="small" type="danger" @click="showTemplate">生成组件</el-button>
-          <el-button size="small" @click="changeLocale">中英切换</el-button>
+          <!-- <el-button size="small" @click="changeLocale">中英切换</el-button> -->
         </div>
       </el-col>
       <el-col>
@@ -19,9 +19,11 @@
       <div ref="editor" v-if="dialogVisible">
         <XTextButton style="float: right" :title="t('common.copy')" @click="copy(formValue)" />
         <el-scrollbar height="580">
-          <pre>
-            {{ formValue }}
-          </pre>
+          <div v-highlight>
+            <code class="hljs">
+              {{ formValue }}
+            </code>
+          </div>
         </el-scrollbar>
       </div>
       <span style="color: red" v-if="err">输入内容格式有误!</span>
@@ -69,9 +71,9 @@ const showTemplate = () => {
   type.value = 2
   formValue.value = makeTemplate()
 }
-const changeLocale = () => {
-  console.info('changeLocale')
-}
+// const changeLocale = () => {
+//   console.info('changeLocale')
+// }
 
 /** 复制 **/
 const copy = async (text: string) => {

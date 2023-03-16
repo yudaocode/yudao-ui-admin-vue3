@@ -3,14 +3,15 @@ import type { VxeCrudSchema } from '@/hooks/web/useVxeCrudSchemas'
 // CrudSchema
 const crudSchemas = reactive<VxeCrudSchema>({
   primaryKey: 'id',
-  primaryType: 'seq',
+  primaryType: 'id',
   primaryTitle: '日志编号',
   action: true,
   actionWidth: '80px',
   columns: [
     {
       title: '链路追踪',
-      field: 'traceId'
+      field: 'traceId',
+      isTable: false
     },
     {
       title: '用户编号',

@@ -70,7 +70,7 @@ const detailData = ref() // 详情 Ref
 // 详情操作
 const handleDetail = async (row: JobLogApi.JobLogVO) => {
   // 设置数据
-  const res = JobLogApi.getJobLogApi(row.id)
+  const res = await JobLogApi.getJobLogApi(row.id)
   detailData.value = res
   dialogTitle.value = t('action.detail')
   dialogVisible.value = true

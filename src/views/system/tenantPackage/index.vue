@@ -15,54 +15,54 @@
         <XTextButton preIcon="ep:delete" :title="t('action.del')" @click="deleteData(row.id)" />
       </template>
     </XTable>
-  </ContentWrap>
-  <XModal v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form
-      v-if="['create', 'update'].includes(actionType)"
-      :schema="allSchemas.formSchema"
-      :rules="rules"
-      ref="formRef"
-    >
-      <template #menuIds>
-        <el-card>
-          <template #header>
-            <div class="card-header">
-              全选/全不选:
-              <el-switch
-                v-model="treeNodeAll"
-                inline-prompt
-                active-text="是"
-                inactive-text="否"
-                @change="handleCheckedTreeNodeAll()"
-              />
-            </div>
-          </template>
-          <el-tree
-            ref="treeRef"
-            node-key="id"
-            show-checkbox
-            :props="defaultProps"
-            :data="menuOptions"
-            empty-text="加载中，请稍后"
-          />
-        </el-card>
-      </template>
-    </Form>
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
+    <XModal v-model="dialogVisible" :title="dialogTitle">
+      <!-- 对话框(添加 / 修改) -->
+      <Form
         v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="loading"
-        @click="submitForm()"
-      />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="loading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
+        :schema="allSchemas.formSchema"
+        :rules="rules"
+        ref="formRef"
+      >
+        <template #menuIds>
+          <el-card class="cardHeight">
+            <template #header>
+              <div class="card-header">
+                全选/全不选:
+                <el-switch
+                  v-model="treeNodeAll"
+                  inline-prompt
+                  active-text="是"
+                  inactive-text="否"
+                  @change="handleCheckedTreeNodeAll()"
+                />
+              </div>
+            </template>
+            <el-tree
+              ref="treeRef"
+              node-key="id"
+              show-checkbox
+              :props="defaultProps"
+              :data="menuOptions"
+              empty-text="加载中，请稍候"
+            />
+          </el-card>
+        </template>
+      </Form>
+      <!-- 操作按钮 -->
+      <template #footer>
+        <!-- 按钮：保存 -->
+        <XButton
+          v-if="['create', 'update'].includes(actionType)"
+          type="primary"
+          :title="t('action.save')"
+          :loading="loading"
+          @click="submitForm()"
+        />
+        <!-- 按钮：关闭 -->
+        <XButton :loading="loading" :title="t('dialog.close')" @click="dialogVisible = false" />
+      </template>
+    </XModal>
+  </ContentWrap>
 </template>
 <script setup lang="ts" name="TenantPackage">
 import { handleTree, defaultProps } from '@/utils/tree'
@@ -179,7 +179,7 @@ onMounted(async () => {
 // getList()
 </script>
 <style scoped>
-.el-card {
+.cardHeight {
   width: 100%;
   max-height: 400px;
   overflow-y: scroll;
