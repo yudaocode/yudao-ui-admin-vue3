@@ -1,4 +1,4 @@
-import { CrudSchema, useCrudSchemas } from '@/hooks/web/useCrudSchemas'
+import type { CrudSchema } from '@/hooks/web/useCrudSchemas'
 import { DictTag } from '@/components/DictTag'
 import { TableColumn } from '@/types/table'
 import { dateFormatter } from '@/utils/formatTime'

@@ -39,11 +39,14 @@ export function createVitePlugins(VITE_APP_TITLE: string) {
       imports: [
         'vue',
         'vue-router',
+        // 可额外添加需要 autoImport 的组件
         {
           '@/hooks/web/useI18n': ['useI18n'],
-          '@/hooks/web/useXTable': ['useXTable'],
           '@/hooks/web/useMessage': ['useMessage'],
+          '@/hooks/web/useXTable': ['useXTable'],
           '@/hooks/web/useVxeCrudSchemas': ['useVxeCrudSchemas'],
+          '@/hooks/web/useTable': ['useTable'],
+          '@/hooks/web/useCrudSchemas': ['useCrudSchemas'],
           '@/utils/formRules': ['required'],
           '@/utils/dict': ['DICT_TYPE']
         }

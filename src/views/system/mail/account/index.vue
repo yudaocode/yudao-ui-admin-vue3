@@ -53,13 +53,12 @@
 </template>
 <script setup lang="ts" name="MailAccount">
 import { allSchemas } from './account.data'
-import { useTable } from '@/hooks/web/useTable'
 import * as MailAccountApi from '@/api/system/mail/account'
 import MailAccountForm from './form.vue'
 
-// https://kailong110120130.gitee.io/vue-element-plus-admin-doc/components/table.html#usetable
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
 // tableMethods：表格的操作对象，可进行获得分页、删除记录等操作
+// 详细可见：https://kailong110120130.gitee.io/vue-element-plus-admin-doc/components/table.html#usetable
 const { tableObject, tableMethods } = useTable({
   getListApi: MailAccountApi.getMailAccountPage, // 分页接口
   delListApi: MailAccountApi.deleteMailAccount // 删除接口
