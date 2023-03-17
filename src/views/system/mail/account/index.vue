@@ -1,6 +1,6 @@
 <template>
   <!-- 搜索工作栏 -->
-  <ContentWrap>
+  <content-wrap>
     <Search :schema="allSchemas.searchSchema" @search="setSearchParams" @reset="setSearchParams">
       <!-- 新增等操作按钮 -->
       <template #actionMore>
@@ -13,10 +13,10 @@
         </el-button>
       </template>
     </Search>
-  </ContentWrap>
+  </content-wrap>
 
   <!-- 列表 -->
-  <ContentWrap>
+  <content-wrap>
     <Table
       :columns="allSchemas.tableColumns"
       :data="tableObject.tableList"
@@ -46,10 +46,10 @@
         </el-button>
       </template>
     </Table>
-  </ContentWrap>
+  </content-wrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <MailAccountForm ref="modalRef" @success="getList" />
+  <mail-account-form ref="modalRef" @success="getList" />
 </template>
 <script setup lang="ts" name="MailAccount">
 import { allSchemas } from './account.data'

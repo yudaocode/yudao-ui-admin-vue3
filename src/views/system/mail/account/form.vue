@@ -1,7 +1,6 @@
 <template>
   <Dialog :title="modelTitle" v-model="modelVisible">
-    <!-- TODO 芋艿：loading -->
-    <Form ref="formRef" :schema="allSchemas.formSchema" :rules="rules" :isCol="false" />
+    <Form ref="formRef" :schema="allSchemas.formSchema" :rules="rules" v-loading="formLoading" />
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="modelVisible = false">取 消</el-button>
@@ -12,7 +11,6 @@
 import * as MailAccountApi from '@/api/system/mail/account'
 import { rules, allSchemas } from './account.data'
 
-const formRef = ref() // 表单 Ref
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -20,6 +18,7 @@ const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
 const openModal = async (type: string, id?: number) => {
