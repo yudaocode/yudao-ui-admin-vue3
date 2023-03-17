@@ -97,8 +97,11 @@ const crudSchemas = reactive<CrudSchema[]>([
     formatter: dateFormatter,
     search: {
       show: true,
-      itemRender: {
-        name: 'XDataTimePicker'
+      component: 'DatePicker',
+      componentProps: {
+        valueFormat: 'YYYY-MM-DD HH:mm:ss',
+        type: 'daterange',
+        defaultTime: [new Date('1 00:00:00'), new Date('1 23:59:59')]
       }
     }
   }
