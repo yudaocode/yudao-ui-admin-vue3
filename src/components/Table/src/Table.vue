@@ -104,11 +104,12 @@ export default defineComponent({
     })
 
     const pagination = computed(() => {
+      // update by 芋艿：保持和 Pagination 组件的逻辑一致
       return Object.assign(
         {
           small: false,
           background: true,
-          pagerCount: 5,
+          pagerCount: document.body.clientWidth < 992 ? 5 : 7,
           layout: 'total, sizes, prev, pager, next, jumper',
           pageSizes: [10, 20, 30, 50, 100],
           disabled: false,
@@ -283,10 +284,11 @@ export default defineComponent({
           }}
         </ElTable>
         {unref(getProps).pagination ? (
+          // update by 芋艿：保持和 Pagination 组件一致
           <ElPagination
             v-model:pageSize={pageSizeRef.value}
             v-model:currentPage={currentPageRef.value}
-            class="mt-10px"
+            class="float-right mt-15px mb-15px"
             {...unref(pagination)}
           ></ElPagination>
         ) : undefined}
