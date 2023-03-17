@@ -266,7 +266,7 @@ const sendTest = async () => {
 
 // ========== 初始化 ==========
 onMounted(() => {
-  MailAccountApi.getSimpleMailAccounts().then((data) => {
+  MailAccountApi.getSimpleMailAccountList().then((data) => {
     accountOptions.value = data
   })
 })

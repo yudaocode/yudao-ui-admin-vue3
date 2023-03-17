@@ -77,7 +77,6 @@ const crudSchemas = reactive<CrudSchema[]>([
   {
     label: '操作',
     field: 'action',
-    width: '260px',
     form: {
       show: false
     }

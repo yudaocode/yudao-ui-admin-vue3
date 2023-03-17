@@ -31,7 +31,7 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const data = await MailAccountApi.getMailAccountApi(id)
+      const data = await MailAccountApi.getMailAccount(id)
       formRef.value.setValues(data)
     } finally {
       formLoading.value = false
@@ -52,10 +52,10 @@ const submitForm = async () => {
   try {
     const data = formRef.value.formModel as MailAccountApi.MailAccountVO
     if (formType.value === 'create') {
-      await MailAccountApi.createMailAccountApi(data)
+      await MailAccountApi.createMailAccount(data)
       message.success(t('common.createSuccess'))
     } else {
-      await MailAccountApi.updateMailAccountApi(data)
+      await MailAccountApi.updateMailAccount(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
