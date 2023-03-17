@@ -30,7 +30,6 @@
 </template>
 <script setup lang="ts">
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
-import { DataSourceConfigVO } from '@/api/infra/dataSourceConfig'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -39,7 +38,7 @@ const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref<DataSourceConfigVO>({
+const formData = ref<DataSourceConfigApi.DataSourceConfigVO>({
   id: undefined,
   name: '',
   url: '',

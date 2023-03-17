@@ -77,9 +77,7 @@ const crudSchemas = reactive<CrudSchema[]>([
   {
     label: '操作',
     field: 'action',
-    form: {
-      show: false
-    }
+    isForm: false
   }
 ])
 export const { allSchemas } = useCrudSchemas(crudSchemas)
