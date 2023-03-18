@@ -42,14 +42,14 @@ const crudSchemas = reactive<CrudSchema[]>([
         span: 24
       },
       componentProps: {
-        valueHtml: ''
+        valueHtml: '',
+        height: 200
       }
     }
   },
   {
     label: '邮箱账号',
     field: 'accountId',
-    isSearch: true,
     width: '200px',
     formatter: (_: Recordable, __: TableColumn, cellValue: number) => {
       return accounts.find((account) => account.id === cellValue)?.mail
@@ -57,9 +57,17 @@ const crudSchemas = reactive<CrudSchema[]>([
     search: {
       show: true,
       component: 'Select',
-      api: () => {
-        return accounts
-      },
+      api: () => accounts,
+      componentProps: {
+        optionsAlias: {
+          labelField: 'mail',
+          valueField: 'id'
+        }
+      }
+    },
+    form: {
+      component: 'Select',
+      api: () => accounts,
       componentProps: {
         optionsAlias: {
           labelField: 'mail',
@@ -104,6 +112,11 @@ const crudSchemas = reactive<CrudSchema[]>([
         defaultTime: [new Date('1 00:00:00'), new Date('1 23:59:59')]
       }
     }
+  },
+  {
+    label: '操作',
+    field: 'action',
+    isForm: false
   }
 ])
 export const { allSchemas } = useCrudSchemas(crudSchemas)
