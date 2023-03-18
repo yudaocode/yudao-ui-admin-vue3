@@ -6,6 +6,6 @@ export const getAreaTree = async () => {
 }
 
 // 获得 IP 对应的地区名
-export const getDeptApi = async (ip: string) => {
+export const getAreaByIp = async (ip: string) => {
   return await request.get({ url: '/system/area/get-by-ip?ip=' + ip })
 }
