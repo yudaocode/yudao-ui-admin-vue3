@@ -29,8 +29,8 @@
     </Table>
   </content-wrap>
 
-  <!-- 表单弹窗：添加/修改 -->
-  <mail-log-detail ref="modalRef" @success="getList" />
+  <!-- 表单弹窗：详情 -->
+  <mail-log-detail ref="modalRef" />
 </template>
 <script setup lang="ts" name="MailLog">
 import { allSchemas } from './log.data'
@@ -46,7 +46,7 @@ const { tableObject, tableMethods } = useTable({
 // 获得表格的各种操作
 const { getList, setSearchParams } = tableMethods
 
-/** 添加/修改操作 */
+/** 详情操作 */
 const modalRef = ref()
 const openModal = (id: number) => {
   modalRef.value.openModal(id)

@@ -21,7 +21,7 @@
       <el-form-item label="类型" prop="type">
         <el-select v-model="queryParams.type" placeholder="操作类型" clearable>
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.INFRA_CONFIG_TYPE)"
+            v-for="dict in getDictOptions(DICT_TYPE.SYSTEM_OPERATE_TYPE)"
             :key="parseInt(dict.value)"
             :label="dict.label"
             :value="parseInt(dict.value)"
@@ -94,7 +94,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openModal(scope.row)"
             v-hasPermi="['infra:config:query']"
           >
             详情
@@ -110,13 +110,16 @@
       @pagination="getList"
     />
   </content-wrap>
+
+  <!-- 表单弹窗：详情 -->
+  <operate-log-detail ref="modalRef" />
 </template>
 <script setup lang="ts" name="OperateLog">
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as OperateLogApi from '@/api/system/operatelog'
-// import ConfigForm from './form.vue'
+import OperateLogDetail from './detail.vue'
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
@@ -158,11 +161,11 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
-// const modalRef = ref()
-// const openModal = (type: string, id?: number) => {
-//   modalRef.value.openModal(type, id)
-// }
+/** 详情操作 */
+const modalRef = ref()
+const openModal = (data: OperateLogApi.OperateLogVO) => {
+  modalRef.value.openModal(data)
+}
 
 /** 导出按钮操作 */
 const handleExport = async () => {
