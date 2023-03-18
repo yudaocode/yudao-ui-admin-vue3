@@ -31,6 +31,14 @@
         <el-button
           link
           type="primary"
+          @click="openSend(row.id)"
+          v-hasPermi="['system:mail-template:send-mail']"
+        >
+          测试
+        </el-button>
+        <el-button
+          link
+          type="primary"
           @click="openModal('update', row.id)"
           v-hasPermi="['system:mail-template:update']"
         >
@@ -50,11 +58,15 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <mail-template-form ref="modalRef" @success="getList" />
+
+  <!-- 表单弹窗：发送测试 -->
+  <mail-template-send ref="sendRef" />
 </template>
 <script setup lang="ts" name="MailTemplate">
 import { allSchemas } from './template.data'
 import * as MailTemplateApi from '@/api/system/mail/template'
 import MailTemplateForm from './form.vue'
+import MailTemplateSend from './send.vue'
 
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
 // tableMethods：表格的操作对象，可进行获得分页、删除记录等操作
@@ -75,6 +87,12 @@ const openModal = (type: string, id?: number) => {
 /** 删除按钮操作 */
 const handleDelete = (id: number) => {
   tableMethods.delList(id, false)
+}
+
+/** 发送测试操作 */
+const sendRef = ref()
+const openSend = (id: number) => {
+  sendRef.value.openModal(id)
 }
 
 /** 初始化 **/

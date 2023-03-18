@@ -1,8 +1,5 @@
 import type { CrudSchema } from '@/hooks/web/useCrudSchemas'
-import { DictTag } from '@/components/DictTag'
-import { TableColumn } from '@/types/table'
 import { dateFormatter } from '@/utils/formatTime'
-import { getBoolDictOptions } from '@/utils/dict'
 
 const { t } = useI18n() // 国际化
 
@@ -55,17 +52,10 @@ const crudSchemas = reactive<CrudSchema[]>([
   {
     label: '是否开启 SSL',
     field: 'sslEnable',
-    formatter: (_: Recordable, __: TableColumn, cellValue: boolean) => {
-      return h(DictTag, {
-        type: DICT_TYPE.INFRA_BOOLEAN_STRING,
-        value: cellValue
-      })
-    },
+    dictType: DICT_TYPE.INFRA_BOOLEAN_STRING,
+    dictClass: 'boolean',
     form: {
-      component: 'Radio',
-      componentProps: {
-        options: getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)
-      }
+      component: 'Radio'
     }
   },
   {

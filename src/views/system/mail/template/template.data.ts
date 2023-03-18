@@ -1,7 +1,6 @@
 import type { CrudSchema } from '@/hooks/web/useCrudSchemas'
 import { dateFormatter } from '@/utils/formatTime'
 import { TableColumn } from '@/types/table'
-import { DictTag } from '@/components/DictTag'
 import * as MailAccountApi from '@/api/system/mail/account'
 
 const accounts = await MailAccountApi.getSimpleMailAccountList()
@@ -38,9 +37,6 @@ const crudSchemas = reactive<CrudSchema[]>([
     field: 'content',
     form: {
       component: 'Editor',
-      colProps: {
-        span: 24
-      },
       componentProps: {
         valueHtml: '',
         height: 200
@@ -84,12 +80,6 @@ const crudSchemas = reactive<CrudSchema[]>([
     label: '开启状态',
     field: 'status',
     isSearch: true,
-    formatter: (_: Recordable, __: TableColumn, cellValue: number) => {
-      return h(DictTag, {
-        type: DICT_TYPE.COMMON_STATUS,
-        value: cellValue
-      })
-    },
     dictType: DICT_TYPE.COMMON_STATUS,
     dictClass: 'number'
   },
