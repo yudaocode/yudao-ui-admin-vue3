@@ -3,6 +3,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import { TableColumn } from '@/types/table'
 import * as MailAccountApi from '@/api/system/mail/account'
 
+// 邮箱账号的列表
 const accounts = await MailAccountApi.getSimpleMailAccountList()
 
 // 表单校验
