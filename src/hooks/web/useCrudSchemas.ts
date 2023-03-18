@@ -8,6 +8,7 @@ import { FormSchema } from '@/types/form'
 import { TableColumn } from '@/types/table'
 import { DescriptionsSchema } from '@/types/descriptions'
 import { ComponentOptions, ComponentProps } from '@/types/components'
+import { DictTag } from '@/components/DictTag'
 
 export type CrudSchema = Omit<TableColumn, 'children'> & {
   isSearch?: boolean // 是否在查询显示
@@ -151,6 +152,15 @@ const filterTableSchema = (crudSchema: CrudSchema[]): TableColumn[] => {
   const tableColumns = treeMap<CrudSchema>(crudSchema, {
     conversion: (schema: CrudSchema) => {
       if (schema?.isTable !== false && schema?.table?.show !== false) {
+        // add by 芋艿：增加对 dict 字典数据的支持
+        if (!schema.formatter && schema.dictType) {
+          schema.formatter = (_: Recordable, __: TableColumn, cellValue: any) => {
+            return h(DictTag, {
+              type: schema.dictType!, // ! 表示一定不为空
+              value: cellValue
+            })
+          }
+        }
         return {
           ...schema.table,
           ...schema
