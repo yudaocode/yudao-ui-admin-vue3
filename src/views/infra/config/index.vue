@@ -59,7 +59,7 @@
 
   <!-- 列表 -->
   <content-wrap>
-    <el-table v-loading="loading" :data="list" align="center">
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="参数主键" align="center" prop="id" />
       <el-table-column label="参数分类" align="center" prop="category" />
       <el-table-column label="参数名称" align="center" prop="name" :show-overflow-tooltip="true" />

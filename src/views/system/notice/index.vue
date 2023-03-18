@@ -1,7 +1,7 @@
 <template>
   <content-wrap>
     <!-- 搜索工作栏 -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
+    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
       <el-form-item label="公告标题" prop="title">
         <el-input
           v-model="queryParams.title"
@@ -32,9 +32,11 @@
         </el-button>
       </el-form-item>
     </el-form>
+  </content-wrap>
 
-    <!-- 列表 -->
-    <el-table v-loading="loading" :data="list" align="center">
+  <!-- 列表 -->
+  <content-wrap>
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="公告编号" align="center" prop="id" />
       <el-table-column label="公告标题" align="center" prop="title" />
       <el-table-column label="公告类型" align="center" prop="type">
