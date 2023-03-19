@@ -1,50 +1,33 @@
 <template>
   <content-wrap>
     <el-form :model="queryParams" ref="queryFormRef" size="small" :inline="true" label-width="68px">
-      <el-form-item label="字典名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入字典名称"
-          clearable
-          style="width: 240px"
-          @keyup.enter="handleQuery"
-        />
+      <el-form-item label="字典名称" prop="dictType">
+        <el-select v-model="queryParams.dictType">
+          <el-option
+            v-for="item in simpleDictList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.type"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="字典类型" prop="type">
+      <el-form-item label="字典标签" prop="label">
         <el-input
-          v-model="queryParams.type"
-          placeholder="请输入字典类型"
+          v-model="queryParams.label"
+          placeholder="请输入字典标签"
           clearable
-          style="width: 240px"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="字典状态"
-          clearable
-          style="width: 240px"
-        >
+        <el-select v-model="queryParams.status" placeholder="数据状态" clearable>
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="parseInt(dict.value)"
+            :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
         </el-select>
-      </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          style="width: 240px"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          type="daterange"
-          range-separator="-"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-        />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -63,32 +46,31 @@
         </el-button>
       </el-form-item>
     </el-form>
-
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="字典编号" align="center" prop="id" />
-      <el-table-column label="字典名称" align="center" prop="name" show-overflow-tooltip />
-      <el-table-column label="字典类型" align="center" show-overflow-tooltip>
-        <template #default="scope">
-          <div>
-            <router-link :to="'/dict/type/data/' + scope.row.type">
-              <span>{{ scope.row.type }}</span>
-            </router-link>
-          </div>
-        </template>
-      </el-table-column>
+      <el-table-column label="字典编码" align="center" prop="id" />
+      <el-table-column label="字典标签" align="center" prop="label" />
+      <el-table-column label="字典键值" align="center" prop="value" />
+      <el-table-column label="字典排序" align="center" prop="sort" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column label="颜色类型" align="center" prop="colorType" />
+      <el-table-column label="CSS Class" align="center" prop="cssClass" />
+      <el-table-column
+        label="备注"
+        align="center"
+        prop="remark"
+        :show-overflow-tooltip="tableTooltipConfig"
+      />
       <el-table-column
         label="创建时间"
-        :formatter="dateFormatter"
         align="center"
         prop="createTime"
         width="180"
+        :formatter="dateFormatter"
       />
 
       <el-table-column label="操作" align="center">
@@ -105,7 +87,6 @@
         </template>
       </el-table-column>
     </el-table>
-
     <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
@@ -114,44 +95,57 @@
     />
   </content-wrap>
   <!-- 表单弹窗：添加/修改 -->
-  <dict-type-form ref="modalRef" @success="getList" />
+  <data-form ref="modalRef" @success="getList" />
 </template>
 
-<script setup lang="ts" name="Dict">
-import * as DictTypeApi from '@/api/system/dict/dict.type'
+<script setup lang="ts" name="Data">
+import * as DictDataApi from '@/api/system/dict/dict.data'
+import { listSimpleDictTypeApi } from '@/api/system/dict/dict.type'
 import { getDictOptions, DICT_TYPE } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
-import DictTypeForm from './form.vue'
-import { DictTypePageReqVO } from '@/api/system/dict/types'
 import download from '@/utils/download'
+import { dateFormatter } from '@/utils/formatTime'
+import DataForm from './data.form.vue'
+import { DictTypeVO } from '@/api/system/dict/types'
+import { useRoute } from 'vue-router'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
+const route = useRoute()
+
+const simpleDictList = ref<DictTypeVO[]>()
+
+const tableTooltipConfig = readonly({
+  appendTo: 'body'
+})
+
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-
-const list = ref([]) // 字典表格数据
-const queryParams = reactive<DictTypePageReqVO>({
+const list = ref([]) // 列表的数据
+const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: '',
-  type: '',
+  label: '',
   status: undefined,
-  createTime: []
+  dictType: route.params.dictType
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 
-/** 查询字典类型列表 */
+/** 查询参数列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await DictTypeApi.getDictTypePageApi(queryParams)
+    const data = await DictDataApi.getDictDataPageApi(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
     loading.value = false
   }
+}
+// 查询字典（精简)列表
+const getSimpleDictList = async () => {
+  const data = await listSimpleDictTypeApi()
+  simpleDictList.value = data
 }
 
 /** 搜索按钮操作 */
@@ -178,7 +172,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await DictTypeApi.deleteDictTypeApi(id)
+    await DictDataApi.deleteDictDataApi(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -192,8 +186,8 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await DictTypeApi.exportDictTypeApi(queryParams)
-    download.excel(data, '字典类型.xls')
+    const data = await DictDataApi.exportDictDataApi(queryParams)
+    download.excel(data, '字典数据.xls')
   } catch {
   } finally {
     exportLoading.value = false
@@ -204,4 +198,6 @@ const handleExport = async () => {
 onMounted(() => {
   getList()
 })
+// 查询字典（精简)列表
+getSimpleDictList()
 </script>
