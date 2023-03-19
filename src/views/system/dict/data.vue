@@ -1,6 +1,12 @@
 <template>
   <content-wrap>
-    <el-form :model="queryParams" ref="queryFormRef" size="small" :inline="true" label-width="68px">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="字典名称" prop="dictType">
         <el-select v-model="queryParams.dictType">
           <el-option
@@ -46,7 +52,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-    <!-- 列表 -->
+  </content-wrap>
+
+  <!-- 列表 -->
+  <content-wrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="字典编码" align="center" prop="id" />
       <el-table-column label="字典标签" align="center" prop="label" />
@@ -59,12 +68,7 @@
       </el-table-column>
       <el-table-column label="颜色类型" align="center" prop="colorType" />
       <el-table-column label="CSS Class" align="center" prop="cssClass" />
-      <el-table-column
-        label="备注"
-        align="center"
-        prop="remark"
-        :show-overflow-tooltip="tableTooltipConfig"
-      />
+      <el-table-column label="备注" align="center" prop="remark" show-overflow-tooltip />
       <el-table-column
         label="创建时间"
         align="center"
@@ -72,21 +76,28 @@
         width="180"
         :formatter="dateFormatter"
       />
-
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button
             link
+            type="primary"
             @click="openModal('update', scope.row.id)"
             v-hasPermi="['system:dict:update']"
-            ><Icon icon="ic:outline-mode" class="mr-5px" />修改</el-button
           >
-          <el-button link @click="handleDelete(scope.row.id)" v-hasPermi="['system:dict:delete']"
-            ><Icon icon="material-symbols:delete-forever-sharp" class="mr-5px" />删除</el-button
+            修改
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['system:dict:delete']"
           >
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
+    <!-- 分页 -->
     <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
@@ -94,29 +105,23 @@
       @pagination="getList"
     />
   </content-wrap>
+
   <!-- 表单弹窗：添加/修改 -->
   <data-form ref="modalRef" @success="getList" />
 </template>
-
 <script setup lang="ts" name="Data">
 import * as DictDataApi from '@/api/system/dict/dict.data'
-import { listSimpleDictTypeApi } from '@/api/system/dict/dict.type'
+import * as DictTypeApi from '@/api/system/dict/dict.data'
 import { getDictOptions, DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { dateFormatter } from '@/utils/formatTime'
 import DataForm from './data.form.vue'
-import { DictTypeVO } from '@/api/system/dict/types'
-import { useRoute } from 'vue-router'
+import type { DictTypeVO } from '@/api/system/dict/dict.type'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-
-const route = useRoute()
+const route = useRoute() // 路由
 
 const simpleDictList = ref<DictTypeVO[]>()
-
-const tableTooltipConfig = readonly({
-  appendTo: 'body'
-})
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -135,17 +140,12 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await DictDataApi.getDictDataPageApi(queryParams)
+    const data = await DictDataApi.getDictDataPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
     loading.value = false
   }
-}
-// 查询字典（精简)列表
-const getSimpleDictList = async () => {
-  const data = await listSimpleDictTypeApi()
-  simpleDictList.value = data
 }
 
 /** 搜索按钮操作 */
@@ -172,7 +172,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await DictDataApi.deleteDictDataApi(id)
+    await DictDataApi.deleteDictData(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -194,10 +194,15 @@ const handleExport = async () => {
   }
 }
 
+/** 查询字典（精简)列表 */
+const getSimpleDictList = async () => {
+  simpleDictList.value = await DictTypeApi.listSimpleDictData()
+}
+
 /** 初始化 **/
 onMounted(() => {
   getList()
+  // 查询字典（精简)列表
+  getSimpleDictList()
 })
-// 查询字典（精简)列表
-getSimpleDictList()
 </script>

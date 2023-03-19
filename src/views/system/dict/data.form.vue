@@ -17,7 +17,6 @@
       <el-form-item label="数据标签" prop="label">
         <el-input v-model="formData.label" placeholder="请输入数据标签" />
       </el-form-item>
-
       <el-form-item label="数据键值" prop="value">
         <el-input v-model="formData.value" placeholder="请输入数据键值" />
       </el-form-item>
@@ -61,9 +60,8 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-
 import * as DictDataApi from '@/api/system/dict/dict.data'
-import { DictDataVO } from '@/api/system/dict/types'
+import { CommonStatusEnum } from '@/utils/constants'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -73,15 +71,14 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  sort: 0,
+  sort: undefined,
   label: '',
   value: '',
   dictType: '',
-  status: 0,
+  status: CommonStatusEnum.ENABLE,
   colorType: '',
   cssClass: '',
-  remark: '',
-  createTime: undefined
+  remark: ''
 })
 const formRules = reactive({
   label: [{ required: true, message: '数据标签不能为空', trigger: 'blur' }],
@@ -91,7 +88,6 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 // 数据标签回显样式
-
 const colorTypeOptions = readonly([
   {
     value: 'default',
@@ -129,7 +125,7 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await DictDataApi.getDictDataApi(id)
+      formData.value = await DictDataApi.getDictData(id)
     } finally {
       formLoading.value = false
     }
@@ -147,12 +143,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as DictDataVO
+    const data = formData.value as DictDataApi.DictDataVO
     if (formType.value === 'create') {
-      await DictDataApi.createDictDataApi(data)
+      await DictDataApi.createDictData(data)
       message.success(t('common.createSuccess'))
     } else {
-      await DictDataApi.updateDictDataApi(data)
+      await DictDataApi.updateDictData(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
@@ -171,11 +167,10 @@ const resetForm = () => {
     label: '',
     value: '',
     dictType: '',
-    status: 0,
+    status: CommonStatusEnum.ENABLE,
     colorType: '',
     cssClass: '',
-    remark: '',
-    createTime: undefined
+    remark: ''
   }
   formRef.value?.resetFields()
 }

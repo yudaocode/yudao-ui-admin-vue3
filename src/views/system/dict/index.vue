@@ -1,6 +1,13 @@
 <template>
+  <!-- 搜索工作栏 -->
   <content-wrap>
-    <el-form :model="queryParams" ref="queryFormRef" size="small" :inline="true" label-width="68px">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="字典名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -63,20 +70,14 @@
         </el-button>
       </el-form-item>
     </el-form>
+  </content-wrap>
 
-    <!-- 列表 -->
+  <!-- 列表 -->
+  <content-wrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="字典编号" align="center" prop="id" />
       <el-table-column label="字典名称" align="center" prop="name" show-overflow-tooltip />
-      <el-table-column label="字典类型" align="center" show-overflow-tooltip>
-        <template #default="scope">
-          <div>
-            <router-link :to="'/dict/type/data/' + scope.row.type">
-              <span>{{ scope.row.type }}</span>
-            </router-link>
-          </div>
-        </template>
-      </el-table-column>
+      <el-table-column label="字典类型" align="center" prop="type" width="300" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -90,22 +91,31 @@
         prop="createTime"
         width="180"
       />
-
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button
             link
+            type="primary"
             @click="openModal('update', scope.row.id)"
             v-hasPermi="['system:dict:update']"
-            ><Icon icon="ic:outline-mode" class="mr-5px" />修改</el-button
           >
-          <el-button link @click="handleDelete(scope.row.id)" v-hasPermi="['system:dict:delete']"
-            ><Icon icon="material-symbols:delete-forever-sharp" class="mr-5px" />删除</el-button
+            修改
+          </el-button>
+          <router-link :to="'/dict/type/data/' + scope.row.type">
+            <el-button link type="primary">数据</el-button>
+          </router-link>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['system:dict:delete']"
           >
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
-
+    <!-- 分页 -->
     <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
@@ -113,25 +123,24 @@
       @pagination="getList"
     />
   </content-wrap>
+
   <!-- 表单弹窗：添加/修改 -->
   <dict-type-form ref="modalRef" @success="getList" />
 </template>
 
 <script setup lang="ts" name="Dict">
-import * as DictTypeApi from '@/api/system/dict/dict.type'
 import { getDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
+import * as DictTypeApi from '@/api/system/dict/dict.type'
 import DictTypeForm from './form.vue'
-import { DictTypePageReqVO } from '@/api/system/dict/types'
 import download from '@/utils/download'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-
 const list = ref([]) // 字典表格数据
-const queryParams = reactive<DictTypePageReqVO>({
+const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: '',
@@ -146,7 +155,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await DictTypeApi.getDictTypePageApi(queryParams)
+    const data = await DictTypeApi.getDictTypePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -178,7 +187,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await DictTypeApi.deleteDictTypeApi(id)
+    await DictTypeApi.deleteDictType(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -192,7 +201,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await DictTypeApi.exportDictTypeApi(queryParams)
+    const data = await DictTypeApi.exportDictType(queryParams)
     download.excel(data, '字典类型.xls')
   } catch {
   } finally {

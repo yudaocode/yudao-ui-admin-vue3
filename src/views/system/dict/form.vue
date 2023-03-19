@@ -43,7 +43,8 @@
 <script setup lang="ts">
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as DictTypeApi from '@/api/system/dict/dict.type'
-import { DictTypeVO } from '@/api/system/dict/types'
+import { CommonStatusEnum } from '@/utils/constants'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -55,7 +56,7 @@ const formData = ref({
   id: undefined,
   name: '',
   type: '',
-  status: 0,
+  status: CommonStatusEnum.ENABLE,
   remark: ''
 })
 const formRules = reactive({
@@ -74,7 +75,7 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await DictTypeApi.getDictTypeApi(id)
+      formData.value = await DictTypeApi.getDictType(id)
     } finally {
       formLoading.value = false
     }
@@ -92,12 +93,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as DictTypeVO
+    const data = formData.value as DictTypeApi.DictTypeVO
     if (formType.value === 'create') {
-      await DictTypeApi.createDictTypeApi(data)
+      await DictTypeApi.createDictType(data)
       message.success(t('common.createSuccess'))
     } else {
-      await DictTypeApi.updateDictTypeApi(data)
+      await DictTypeApi.updateDictType(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
@@ -114,7 +115,7 @@ const resetForm = () => {
     id: undefined,
     type: '',
     name: '',
-    status: undefined,
+    status: CommonStatusEnum.ENABLE,
     remark: ''
   }
   formRef.value?.resetFields()
