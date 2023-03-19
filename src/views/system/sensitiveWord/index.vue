@@ -40,7 +40,6 @@
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
         />
       </el-form-item>
-
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -82,9 +81,11 @@
             :key="index"
             v-for="(tag, index) in scope.row.tags"
             :index="index"
+            class="mr-5px"
           >
             {{ tag }}
           </el-tag>
+          &nbsp; &nbsp;
         </template>
       </el-table-column>
       <el-table-column
@@ -132,14 +133,13 @@ import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
-import ConfigForm from './form.vue'
+import ConfigForm from './form.vue' // TODO @blue-syd：组件名不对
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const tags = ref([])
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -150,23 +150,18 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const tags = ref([])
 
 /** 查询参数列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await SensitiveWordApi.getSensitiveWordPageApi(queryParams)
+    const data = await SensitiveWordApi.getSensitiveWordPageApi(queryParams) // TODO @blue-syd：去掉 API 后缀哈
     list.value = data.list
     total.value = data.total
   } finally {
     loading.value = false
   }
-}
-
-/** 初始化标签select*/
-const getTags = async () => {
-  const data = await SensitiveWordApi.getSensitiveWordTagsApi()
-  tags.value = data
 }
 
 /** 搜索按钮操作 */
@@ -186,6 +181,8 @@ const modalRef = ref()
 const openModal = (type: string, id?: number) => {
   modalRef.value.openModal(type, id)
 }
+
+// TODO @blue-syd：还少一个【测试】按钮的功能，参见 http://dashboard.yudao.iocoder.cn/system/sensitive-word
 
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
@@ -207,12 +204,17 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await SensitiveWordApi.exportSensitiveWordApi(queryParams)
+    const data = await SensitiveWordApi.exportSensitiveWordApi(queryParams) // TODO @blue-syd：去掉 API 后缀哈
     download.excel(data, '敏感词.xls')
   } catch {
   } finally {
     exportLoading.value = false
   }
+}
+
+/** 获得 Tag 标签列表 */
+const getTags = async () => {
+  tags.value = await SensitiveWordApi.getSensitiveWordTagsApi() // TODO @blue-syd：去掉 API 后缀哈
 }
 
 /** 初始化 **/

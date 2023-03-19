@@ -48,6 +48,7 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
+import { CommonStatusEnum } from '@/utils/constants'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -56,11 +57,10 @@ const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const tags = ref([])
 const formData = ref({
   id: undefined,
   name: '',
-  status: true,
+  status: CommonStatusEnum.ENABLE,
   description: '',
   tags: []
 })
@@ -69,6 +69,7 @@ const formRules = reactive({
   tags: [{ required: true, message: '标签不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const tags = ref([]) // todo @blue-syd：在 openModal 里加载下
 
 /** 打开弹窗 */
 const openModal = async (type: string, id?: number) => {
@@ -101,10 +102,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as SensitiveWordApi.SensitiveWordVO
     if (formType.value === 'create') {
-      await SensitiveWordApi.createSensitiveWordApi(data)
+      await SensitiveWordApi.createSensitiveWordApi(data) // TODO @blue-syd：去掉 API 后缀
       message.success(t('common.createSuccess'))
     } else {
-      await SensitiveWordApi.updateSensitiveWordApi(data)
+      await SensitiveWordApi.updateSensitiveWordApi(data) // TODO @blue-syd：去掉 API 后缀
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
@@ -120,7 +121,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: '',
-    status: true,
+    status: CommonStatusEnum.ENABLE,
     description: '',
     tags: []
   }
