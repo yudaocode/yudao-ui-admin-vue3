@@ -1,16 +1,18 @@
 export type DictTypeVO = {
-  id: number
+  id: number | undefined
   name: string
   type: string
-  status: number
+  status: number | undefined
   remark: string
   createTime: Date
 }
 
 export type DictTypePageReqVO = {
+  pageNo: number
+  pageSize: number
   name: string
   type: string
-  status: number
+  status: number | undefined
   createTime: Date[]
 }
 
@@ -22,8 +24,8 @@ export type DictTypeExportReqVO = {
 }
 
 export type DictDataVO = {
-  id: number
-  sort: number
+  id: number | undefined
+  sort: number | undefined
   label: string
   value: string
   dictType: string
@@ -31,12 +33,14 @@ export type DictDataVO = {
   colorType: string
   cssClass: string
   remark: string
-  createTime: Date
+  createTime: Date | undefined
 }
 export type DictDataPageReqVO = {
+  pageNo: number
+  pageSize: number
   label: string
   dictType: string
-  status: number
+  status: number | undefined
 }
 
 export type DictDataExportReqVO = {
