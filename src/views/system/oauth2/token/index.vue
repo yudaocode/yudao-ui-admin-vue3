@@ -1,17 +1,29 @@
 <template>
   <content-wrap>
     <!-- 搜索工作栏 -->
-    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="90px"
+    >
       <el-form-item label="用户编号" prop="userId">
         <el-input
           v-model="queryParams.userId"
           placeholder="请输入用户编号"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="用户类型" prop="userType">
-        <el-select v-model="queryParams.userType" placeholder="请选择用户类型" clearable>
+        <el-select
+          v-model="queryParams.userType"
+          placeholder="请选择用户类型"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
             :key="dict.value"
@@ -26,6 +38,7 @@
           placeholder="请输入客户端编号"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>

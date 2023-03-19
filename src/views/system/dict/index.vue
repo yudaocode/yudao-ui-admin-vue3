@@ -13,8 +13,8 @@
           v-model="queryParams.name"
           placeholder="请输入字典名称"
           clearable
-          style="width: 240px"
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="字典类型" prop="type">
@@ -22,17 +22,12 @@
           v-model="queryParams.type"
           placeholder="请输入字典类型"
           clearable
-          style="width: 240px"
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="字典状态"
-          clearable
-          style="width: 240px"
-        >
+        <el-select v-model="queryParams.status" placeholder="字典状态" clearable class="!w-240px">
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="parseInt(dict.value)"
@@ -44,13 +39,13 @@
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          style="width: 240px"
           value-format="yyyy-MM-dd HH:mm:ss"
           type="daterange"
           range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>

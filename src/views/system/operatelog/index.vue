@@ -1,13 +1,20 @@
 <template>
   <content-wrap>
     <!-- 搜索工作栏 -->
-    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="系统模块" prop="module">
         <el-input
           v-model="queryParams.module"
           placeholder="请输入系统模块"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="操作人员" prop="userNickname">
@@ -16,10 +23,16 @@
           placeholder="请输入操作人员"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="操作类型" clearable>
+      <el-form-item label="操作类型" prop="type">
+        <el-select
+          v-model="queryParams.type"
+          placeholder="请选择操作类型"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.SYSTEM_OPERATE_TYPE)"
             :key="parseInt(dict.value)"
@@ -28,8 +41,13 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="状态" prop="success">
-        <el-select v-model="queryParams.success" placeholder="操作状态" clearable>
+      <el-form-item label="操作状态" prop="success">
+        <el-select
+          v-model="queryParams.success"
+          placeholder="请选择操作状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option :key="true" label="成功" :value="true" />
           <el-option :key="false" label="失败" :value="false" />
         </el-select>
@@ -42,6 +60,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>

@@ -8,13 +8,8 @@
       label-width="68px"
     >
       <el-form-item label="字典名称" prop="dictType">
-        <el-select v-model="queryParams.dictType">
-          <el-option
-            v-for="item in simpleDictList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.type"
-          />
+        <el-select v-model="queryParams.dictType" class="!w-240px">
+          <el-option v-for="item in dicts" :key="item.type" :label="item.name" :value="item.type" />
         </el-select>
       </el-form-item>
       <el-form-item label="字典标签" prop="label">
@@ -23,10 +18,11 @@
           placeholder="请输入字典标签"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="数据状态" clearable>
+        <el-select v-model="queryParams.status" placeholder="数据状态" clearable class="!w-240px">
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
@@ -111,17 +107,14 @@
 </template>
 <script setup lang="ts" name="Data">
 import * as DictDataApi from '@/api/system/dict/dict.data'
-import * as DictTypeApi from '@/api/system/dict/dict.data'
+import * as DictTypeApi from '@/api/system/dict/dict.type'
 import { getDictOptions, DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 import { dateFormatter } from '@/utils/formatTime'
 import DataForm from './data.form.vue'
-import type { DictTypeVO } from '@/api/system/dict/dict.type'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const route = useRoute() // 路由
-
-const simpleDictList = ref<DictTypeVO[]>()
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -135,6 +128,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const dicts = ref<DictTypeApi.DictTypeVO[]>() // 字典类型的列表
 
 /** 查询参数列表 */
 const getList = async () => {
@@ -195,14 +189,14 @@ const handleExport = async () => {
 }
 
 /** 查询字典（精简)列表 */
-const getSimpleDictList = async () => {
-  simpleDictList.value = await DictTypeApi.listSimpleDictData()
+const getDictList = async () => {
+  dicts.value = await DictTypeApi.listSimpleDictType()
 }
 
 /** 初始化 **/
 onMounted(() => {
   getList()
   // 查询字典（精简)列表
-  getSimpleDictList()
+  getDictList()
 })
 </script>
