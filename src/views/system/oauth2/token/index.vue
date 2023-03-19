@@ -1,64 +1,146 @@
 <template>
-  <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：详情 -->
-        <XTextButton preIcon="ep:view" :title="t('action.detail')" @click="handleDetail(row)" />
-        <!-- 操作：登出 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.logout')"
-          v-hasPermi="['system:oauth2-token:delete']"
-          @click="handleForceLogout(row.id)"
+  <content-wrap>
+    <!-- 搜索工作栏 -->
+    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
+      <el-form-item label="用户编号" prop="userId">
+        <el-input
+          v-model="queryParams.userId"
+          placeholder="请输入用户编号"
+          clearable
+          @keyup.enter="handleQuery"
         />
-      </template>
-    </XTable>
-  </ContentWrap>
-  <XModal v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(详情) -->
-    <Descriptions :schema="allSchemas.detailSchema" :data="detailData" />
-    <!-- 操作按钮 -->
-    <template #footer>
-      <XButton :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
+      </el-form-item>
+      <el-form-item label="用户类型" prop="userType">
+        <el-select v-model="queryParams.userType" placeholder="请选择用户类型" clearable>
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="客户端编号" prop="clientId">
+        <el-input
+          v-model="queryParams.clientId"
+          placeholder="请输入客户端编号"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+      </el-form-item>
+    </el-form>
+  </content-wrap>
+
+  <!-- 列表 -->
+  <content-wrap>
+    <el-table v-loading="loading" :data="list">
+      <el-table-column label="访问令牌" align="center" prop="accessToken" width="300" />
+      <el-table-column label="刷新令牌" align="center" prop="refreshToken" width="300" />
+      <el-table-column label="用户编号" align="center" prop="userId" />
+      <el-table-column label="用户类型" align="center" prop="userType">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.USER_TYPE" :value="scope.row.userType" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="过期时间"
+        align="center"
+        prop="expiresTime"
+        :formatter="dateFormatter"
+        width="180"
+      />
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        :formatter="dateFormatter"
+        width="180"
+      />
+      <el-table-column label="操作" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="danger"
+            @click="handleForceLogout(scope.row.id)"
+            v-hasPermi="['system:oauth2-token:delete']"
+          >
+            强退
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </content-wrap>
 </template>
-<script setup lang="ts" name="Token">
-import { allSchemas } from './token.data'
-import * as TokenApi from '@/api/system/oauth2/token'
 
-const { t } = useI18n() // 国际化
+<script setup lang="ts" name="Oauth2AccessToken">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
+import * as OAuth2AccessTokenApi from '@/api/system/oauth2/token'
 const message = useMessage() // 消息弹窗
-// 列表相关的变量
-const [registerTable, { reload }] = useXTable({
-  allSchemas: allSchemas,
-  topActionSlots: false,
-  getListApi: TokenApi.getAccessTokenPageApi
+const { t } = useI18n() // 国际化
+
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 列表的数据
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  userId: null,
+  userType: null,
+  clientId: null
 })
+const queryFormRef = ref() // 搜索的表单
 
-// ========== 详情相关 ==========
-const detailData = ref() // 详情 Ref
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref(t('action.detail')) // 弹出层标题
-// 详情
-const handleDetail = async (row: TokenApi.OAuth2TokenVO) => {
-  // 设置数据
-  detailData.value = row
-  dialogVisible.value = true
+/** 查询参数列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await OAuth2AccessTokenApi.getAccessTokenPage(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
 }
 
-// 强退操作
-const handleForceLogout = (rowId: number) => {
-  message
-    .confirm('是否要强制退出用户')
-    .then(async () => {
-      await TokenApi.deleteAccessTokenApi(rowId)
-      message.success(t('common.success'))
-    })
-    .finally(async () => {
-      // 刷新列表
-      await reload()
-    })
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
 }
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/** 强制退出操作 */
+const handleForceLogout = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.confirm('是否要强制退出用户')
+    // 发起删除
+    await OAuth2AccessTokenApi.deleteAccessToken(id)
+    message.success(t('common.success'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 初始化 **/
+onMounted(() => {
+  getList()
+})
 </script>
