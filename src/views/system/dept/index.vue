@@ -85,7 +85,7 @@
   </ContentWrap>
 
   <!-- 添加或修改部门对话框 -->
-  <dept-form ref="modalRef" @success="getList" :userOption="userOption" />
+  <dept-form ref="modalRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Dept">
 import { handleTree } from '@/utils/tree'
@@ -105,17 +105,14 @@ const queryParams = reactive({
   pageSize: 100
 })
 
-// 搜索的表单
-const queryFormRef = ref()
-// 数据变量
-const deptDatas = ref()
+const queryFormRef = ref() // 搜索的表单
+const deptDatas = ref() // 数据变量
 const userOption = ref<UserVO[]>([])
-// 是否展开，默认全部展开
-const isExpandAll = ref(true)
-// 重新渲染表格状态
-const refreshTable = ref(true)
-// 列表的加载中
-const loading = ref(true)
+
+const isExpandAll = ref(true) // 是否展开，默认全部展开
+const refreshTable = ref(true) // 重新渲染表格状态
+const loading = ref(true) // 列表的加载中
+
 //获取用户列表
 const getUserList = async () => {
   const res = await getListSimpleUsersApi()
@@ -172,7 +169,7 @@ const resetQuery = () => {
 /** 添加/修改操作 */
 const modalRef = ref()
 const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+  modalRef.value.openModal(type, id, userOption.value)
 }
 
 const userNicknameFormat = (row) => {

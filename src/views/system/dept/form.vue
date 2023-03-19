@@ -33,7 +33,7 @@
               style="width: 100%"
             >
               <el-option
-                v-for="item in props.userOption"
+                v-for="item in userList"
                 :key="item.id"
                 :label="item.nickname"
                 :value="item.id"
@@ -88,6 +88,7 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formRef = ref() // 表单 Ref
 const deptOptions = ref() // 树形结构
+const userList = ref() // 负责人列表选项结构
 
 const formData = ref({
   id: undefined,
@@ -99,12 +100,6 @@ const formData = ref({
   phone: undefined,
   email: undefined,
   status: undefined
-})
-const props = defineProps({
-  userOption: {
-    type: Array,
-    default: () => [] as UserVO[]
-  }
 })
 
 const formRules = reactive({
@@ -118,12 +113,12 @@ const formRules = reactive({
 })
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const openModal = async (type: string, id?: number, userOption?: UserVO[]) => {
+  userList.value = userOption
   modelVisible.value = true
   modelTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  console.log(id)
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
