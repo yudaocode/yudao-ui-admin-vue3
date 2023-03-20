@@ -1,7 +1,13 @@
 <template>
   <!-- 搜索工作栏 -->
   <content-wrap>
-    <el-form :model="queryParams" ref="queryFormRef" class="-mb-15px" :inline="true">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="90px"
+    >
       <el-form-item label="错误码类型" prop="type">
         <el-select v-model="queryParams.type" placeholder="请选择错误码类型" clearable>
           <el-option
@@ -9,6 +15,7 @@
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
+            class="!w-240px"
           />
         </el-select>
       </el-form-item>
@@ -18,6 +25,7 @@
           placeholder="请输入应用名"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="错误码编码" prop="code">
@@ -34,6 +42,7 @@
           placeholder="请输入错误码提示"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
@@ -44,6 +53,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>
@@ -68,6 +78,7 @@
       </el-form-item>
     </el-form>
   </content-wrap>
+
   <!-- 列表 -->
   <content-wrap>
     <el-table v-loading="loading" :data="list">
@@ -118,6 +129,7 @@
       @pagination="getList"
     />
   </content-wrap>
+
   <!-- 表单弹窗：添加/修改 -->
   <error-code-form ref="modalRef" @success="getList" />
 </template>
@@ -194,6 +206,7 @@ const handleDelete = async (id: number) => {
     await getList()
   } catch {}
 }
+
 /** 导出按钮操作 */
 const handleExport = async () => {
   try {
@@ -202,7 +215,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await ErrorCodeApi.excelErrorCodeApi(queryParams)
-    download.excel(data, '参数配置.xls')
+    download.excel(data, '错误码.xls')
   } catch {
   } finally {
     exportLoading.value = false
