@@ -69,7 +69,16 @@ export const getDictObj = (dictType: string, value: any) => {
     }
   })
 }
-
+export const getDictLabel = (dictType: string, value: any) => {
+  const dictOptions: DictDataType[] = getDictOptions(dictType)
+  const dictLabel = ref('')
+  dictOptions.forEach((dict: DictDataType) => {
+    if (dict.value === value) {
+      dictLabel.value = dict.label
+    }
+  })
+  return dictLabel.value
+}
 export enum DICT_TYPE {
   USER_TYPE = 'user_type',
   COMMON_STATUS = 'common_status',
