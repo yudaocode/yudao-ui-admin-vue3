@@ -1,197 +1,255 @@
 <template>
-  <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <template #toolbar_buttons>
-        <!-- 操作：新增 -->
-        <XButton
+  <!-- 搜索 -->
+  <content-wrap>
+    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
+      <el-form-item label="租户名" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入租户名"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="联系人" prop="contactName">
+        <el-input
+          v-model="queryParams.contactName"
+          placeholder="请输入联系人"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="联系手机" prop="contactMobile">
+        <el-input
+          v-model="queryParams.contactMobile"
+          placeholder="请输入联系手机"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="租户状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择租户状态" clearable>
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+        />
+      </el-form-item>
+
+      <el-form-item>
+        <el-button @click="handleQuery">
+          <Icon icon="ep:search" class="mr-5px" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon icon="ep:refresh" class="mr-5px" />
+          重置
+        </el-button>
+        <el-button
           type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
+          @click="openModal('create')"
           v-hasPermi="['system:tenant:create']"
-          @click="handleCreate()"
-        />
-        <XButton
-          type="warning"
-          preIcon="ep:download"
-          :title="t('action.export')"
+        >
+          <Icon icon="ep:plus" class="mr-5px" />
+          新增
+        </el-button>
+        <el-button
+          type="success"
+          plain
+          @click="handleExport"
+          :loading="exportLoading"
           v-hasPermi="['system:tenant:export']"
-          @click="exportList('租户列表.xls')"
-        />
-      </template>
-      <template #accountCount_default="{ row }">
-        <el-tag> {{ row.accountCount }} </el-tag>
-      </template>
-      <template #packageId_default="{ row }">
-        <el-tag v-if="row.packageId === 0" type="danger">系统租户</el-tag>
-        <el-tag v-else type="success"> {{ getPackageName(row.packageId) }} </el-tag>
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['system:tenant:update']"
-          @click="handleUpdate(row.id)"
-        />
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
-          v-hasPermi="['system:tenant:update']"
-          @click="handleDetail(row.id)"
-        />
-        <!-- 操作：删除 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['system:tenant:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
-  </ContentWrap>
-  <XModal v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form
-      v-if="['create', 'update'].includes(actionType)"
-      :schema="allSchemas.formSchema"
-      :rules="rules"
-      ref="formRef"
-    />
-    <!-- 对话框(详情) -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    >
-      <template #packageId="{ row }">
-        <el-tag v-if="row.packageId === 0" type="danger">系统租户</el-tag>
-        <el-tag v-else type="success"> {{ getPackageName(row.packageId) }} </el-tag>
-      </template>
-    </Descriptions>
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="actionLoading"
-        @click="submitForm()"
+        >
+          <Icon icon="ep:download" class="mr-5px" />
+          导出
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </content-wrap>
+
+  <!-- 列表 -->
+  <content-wrap>
+    <el-table v-loading="loading" :data="list" align="center">
+      <el-table-column label="租户编号" align="center" prop="id" />
+      <el-table-column label="租户名" align="center" prop="name" />
+      <el-table-column label="租户套餐" align="center" prop="packageId">
+        <template #default="scope">
+          <el-tag v-if="scope.row.packageId === 0" type="danger">系统租户</el-tag>
+          <template v-else v-for="item in packageList">
+            <el-tag type="success" :key="item.id" v-if="item.id === scope.row.packageId"
+              >{{ item.name }}
+            </el-tag>
+          </template>
+        </template>
+      </el-table-column>
+      <el-table-column label="联系人" align="center" prop="contactName" />
+      <el-table-column label="联系手机" align="center" prop="contactMobile" />
+      <el-table-column label="账号额度" align="center" prop="accountCount">
+        <template #default="scope">
+          <el-tag>{{ scope.row.accountCount }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="过期时间"
+        align="center"
+        prop="expireTime"
+        width="180"
+        :formatter="dateFormatter"
       />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
+      <el-table-column label="绑定域名" align="center" prop="domain" width="180" />
+      <el-table-column label="租户状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
+      />
+      <el-table-column label="操作" align="center" min-width="110" fixed="right">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openModal('update', scope.row.id)"
+            v-hasPermi="['system:tenant:update']"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['system:tenant:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </content-wrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <tenant-form ref="modalRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Tenant">
-import type { FormExpose } from '@/components/Form'
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
+import download from '@/utils/download'
 import * as TenantApi from '@/api/system/tenant'
-import { rules, allSchemas, tenantPackageOption } from './tenant.data'
+import { getTenantPackageList as getTenantPackageListApi } from '@/api/system/tenantPackage'
+import TenantForm from './form.vue'
+import ContentWrap from '@/components/ContentWrap/src/ContentWrap.vue'
+import DictTag from '@/components/DictTag/src/DictTag.vue'
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-// 列表相关的变量
-const [registerTable, { reload, deleteData, exportList }] = useXTable({
-  allSchemas: allSchemas,
-  getListApi: TenantApi.getTenantPageApi,
-  deleteApi: TenantApi.deleteTenantApi,
-  exportListApi: TenantApi.exportTenantApi
+const { t } = useI18n() // 国际化
+
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 列表的数据
+const packageList = ref([]) //租户套餐列表
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  name: undefined,
+  contactName: undefined,
+  contactMobile: undefined,
+  status: undefined,
+  createTime: []
+}) //查询参数对象
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
+
+/** 查询参数列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await TenantApi.getTenantPageApi(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
+}
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/** 添加/修改操作 */
+const modalRef = ref()
+const openModal = (type: string, id?: number) => {
+  modalRef.value.openModal(type, id)
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await TenantApi.deleteTenantApi(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await TenantApi.exportTenantApi(queryParams)
+    download.excel(data, '参数配置.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+/**获取租户套餐**/
+const getTenantPackageList = async () => {
+  const data = await getTenantPackageListApi()
+  packageList.value = data
+}
+
+/** 初始化 **/
+onMounted(() => {
+  getList()
+  getTenantPackageList()
 })
-
-const actionLoading = ref(false) // 遮罩层
-const actionType = ref('') // 操作按钮的类型
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const formRef = ref<FormExpose>() // 表单 Ref
-const detailData = ref() // 详情 Ref
-const getPackageName = (packageId: number) => {
-  for (let item of tenantPackageOption) {
-    if (item.value === packageId) {
-      return item.label
-    }
-  }
-  return '未知套餐'
-}
-
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
-}
-
-// 新增操作
-const handleCreate = async () => {
-  // 重置表单
-  setDialogTile('create')
-  await nextTick()
-  console.log(allSchemas.formSchema, 'allSchemas.formSchema')
-  if (allSchemas.formSchema[4].field !== 'username') {
-    unref(formRef)?.addSchema(
-      {
-        field: 'username',
-        label: '用户名称',
-        component: 'Input'
-      },
-      0
-    )
-    unref(formRef)?.addSchema(
-      {
-        field: 'password',
-        label: '用户密码',
-        component: 'InputPassword'
-      },
-      1
-    )
-  }
-}
-
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  await nextTick()
-  unref(formRef)?.delSchema('username')
-  unref(formRef)?.delSchema('password')
-  // 设置数据
-  const res = await TenantApi.getTenantApi(rowId)
-  unref(formRef)?.setValues(res)
-}
-
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  // 设置数据
-  const res = await TenantApi.getTenantApi(rowId)
-  detailData.value = res
-  setDialogTile('detail')
-}
-
-// 提交按钮
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as TenantApi.TenantVO
-        if (actionType.value === 'create') {
-          await TenantApi.createTenantApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          await TenantApi.updateTenantApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        // 操作成功，重新加载列表
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        // 刷新列表
-        await reload()
-      }
-    }
-  })
-}
 </script>
