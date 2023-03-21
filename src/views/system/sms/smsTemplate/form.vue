@@ -1,5 +1,6 @@
 <template>
   <Dialog :title="modelTitle" v-model="modelVisible">
+    <!-- 修改/新增 -->
     <el-form
       v-if="['template.addTitle', 'template.updtaeTitle'].includes(formType)"
       ref="formRef"
@@ -55,6 +56,7 @@
         <el-input v-model="formData.remark" placeholder="请输入备注" />
       </el-form-item>
     </el-form>
+    <!-- 短信测试 -->
     <el-form
       v-if="formType === 'template.sendSms'"
       ref="sendSmsFormRef"
@@ -152,7 +154,9 @@ const sendSmsFormRef = ref()
 /** 打开弹窗 */
 interface openModalOption {
   type: string
+  // 编辑传id
   id?: ''
+  // 短信测试传row
   row?: any
 }
 const openModal = async (option: openModalOption) => {
@@ -188,16 +192,16 @@ const openModal = async (option: openModalOption) => {
 }
 defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
 
-/** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+/** 提交表单 */
 const submitForm = async () => {
+  formLoading.value = true
+  // 提交请求
   if (['template.addTitle', 'template.updtaeTitle'].includes(formType.value)) {
     // 校验表单
     if (!formRef) return
     const valid = await formRef.value.validate()
     if (!valid) return
-    // 提交请求
-    formLoading.value = true
     try {
       const data = formData.value as templateApi.SmsTemplateVO
       if (formType.value === 'template.addTitle') {
@@ -258,5 +262,6 @@ const sendSmsTest = async () => {
     message.success('提交发送成功！发送结果，见发送日志编号：' + res)
   }
   formLoading.value = false
+  modelVisible.value = false
 }
 </script>
