@@ -1,232 +1,340 @@
 <template>
-  <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <!-- 操作：新增 -->
-      <template #toolbar_buttons>
-        <XButton
-          type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
-          v-hasPermi="['system:sms-channel:create']"
-          @click="handleCreate()"
-        />
-      </template>
-      <template #actionbtns_default="{ row }">
-        <XTextButton
-          preIcon="ep:cpu"
-          :title="t('action.test')"
-          v-hasPermi="['system:sms-template:send-sms']"
-          @click="handleSendSms(row)"
-        />
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['system:sms-template:update']"
-          @click="handleUpdate(row.id)"
-        />
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
-          v-hasPermi="['system:sms-template:query']"
-          @click="handleDetail(row.id)"
-        />
-        <!-- 操作：删除 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['system:sms-template:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
-  </ContentWrap>
-  <XModal id="smsTemplate" v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form
-      v-if="['create', 'update'].includes(actionType)"
-      :schema="allSchemas.formSchema"
-      :rules="rules"
-      ref="formRef"
-    />
-    <!-- 对话框(详情) -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    />
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="actionLoading"
-        @click="submitForm()"
-      />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
-  <XModal id="sendTest" v-model="sendVisible" title="测试">
-    <el-form :model="sendSmsForm" :rules="sendSmsRules" label-width="200px" label-position="top">
-      <el-form-item label="模板内容" prop="content">
+  <content-wrap>
+    <!-- 搜索工作栏 -->
+    <el-form
+      :model="queryParams"
+      ref="queryForm"
+      :inline="true"
+      v-show="showSearch"
+      label-width="150px"
+    >
+      <el-form-item label="短信类型" prop="type">
+        <el-select v-model="queryParams.type" placeholder="请选择短信类型" clearable>
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.SYSTEM_SMS_TEMPLATE_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="开启状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择开启状态" clearable>
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="模板编码" prop="code">
         <el-input
-          v-model="sendSmsForm.content"
-          type="textarea"
-          placeholder="请输入模板内容"
-          readonly
+          v-model="queryParams.code"
+          placeholder="请输入模板编码"
+          clearable
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="手机号" prop="mobile">
-        <el-input v-model="sendSmsForm.mobile" placeholder="请输入手机号" />
-      </el-form-item>
-      <el-form-item
-        v-for="param in sendSmsForm.params"
-        :key="param"
-        :label="'参数 {' + param + '}'"
-        :prop="'templateParams.' + param"
-      >
+      <el-form-item label="短信 API 的模板编号" prop="apiTemplateId">
         <el-input
-          v-model="sendSmsForm.templateParams[param]"
-          :placeholder="'请输入 ' + param + ' 参数'"
+          v-model="queryParams.apiTemplateId"
+          placeholder="请输入短信 API 的模板编号"
+          clearable
+          @keyup.enter="handleQuery"
         />
+      </el-form-item>
+      <el-form-item label="短信渠道" prop="channelId">
+        <el-select v-model="queryParams.channelId" placeholder="请选择短信渠道" clearable>
+          <el-option
+            v-for="channel in channelOptions"
+            :key="channel.id"
+            :value="channel.id"
+            :label="
+              channel.signature +
+              '【' +
+              getDictObj(DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE, channel.code) +
+              '】'
+            "
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          style="width: 240px"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="['00:00:00', '23:59:59']"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
       </el-form-item>
     </el-form>
-    <!-- 操作按钮 -->
-    <template #footer>
-      <XButton
-        type="primary"
-        :title="t('action.test')"
-        :loading="actionLoading"
-        @click="sendSmsTest()"
+    <!-- 操作工具栏 -->
+    <el-row>
+      <el-col :span="12">
+        <el-row :gutter="10">
+          <el-col :span="1.5">
+            <el-button
+              type="primary"
+              plain
+              @click="handleAdd('template.addTitle')"
+              v-hasPermi="['system:sms-template:create']"
+              ><Icon icon="ep:plus" class="mr-5px" />新增</el-button
+            >
+          </el-col>
+          <el-col :span="1.5">
+            <el-button
+              type="success"
+              plain
+              @click="handleExport"
+              :loading="exportLoading"
+              v-hasPermi="['system:sms-template:export']"
+            >
+              <Icon icon="ep:download" class="mr-5px" /> 导出
+            </el-button>
+          </el-col>
+        </el-row>
+      </el-col>
+      <el-col :span="12">
+        <right-toolbar v-model:showSearch="showSearch" @query-table="getList" />
+      </el-col>
+    </el-row>
+    <!-- 列表 -->
+    <el-table v-loading="loading" :data="templateList" align="center">
+      <el-table-column
+        label="模板编码"
+        align="center"
+        prop="code"
+        width="120"
+        :show-overflow-tooltip="true"
       />
-      <XButton :title="t('dialog.close')" @click="sendVisible = false" />
-    </template>
-  </XModal>
+      <el-table-column
+        label="模板名称"
+        align="center"
+        prop="name"
+        width="120"
+        :show-overflow-tooltip="true"
+      />
+      <el-table-column
+        label="模板内容"
+        align="center"
+        prop="content"
+        width="200"
+        :show-overflow-tooltip="true"
+      />
+      <el-table-column label="短信类型" align="center" prop="type">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.SYSTEM_SMS_TEMPLATE_TYPE" :value="scope.row.type" />
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" align="center" prop="status" width="80">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column
+        label="短信 API 的模板编号"
+        align="center"
+        prop="apiTemplateId"
+        width="200"
+        :show-overflow-tooltip="true"
+      />
+      <el-table-column label="短信渠道" align="center" width="120">
+        <template #default="scope">
+          <div>{{ formatChannelSignature(scope.row.channelId) }}</div>
+          <dict-tag :type="DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE" :value="scope.row.channelCode" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
+      />
+      <el-table-column
+        label="操作"
+        align="center"
+        class-name="small-padding fixed-width"
+        width="210"
+        fixed="right"
+      >
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="handleSendSms('template.sendSms', scope.row)"
+            v-hasPermi="['system:sms-template:send-sms']"
+            ><Icon icon="ep:share" class="mr-3px" />测试</el-button
+          >
+          <el-button
+            link
+            type="primary"
+            @click="handleUpdate('template.updtaeTitle', scope.row)"
+            v-hasPermi="['system:sms-template:update']"
+            ><Icon icon="ep:edit" class="mr-3px" />修改</el-button
+          >
+          <el-button
+            link
+            type="primary"
+            @click="handleDelete(scope.row)"
+            v-hasPermi="['system:sms-template:delete']"
+            ><Icon icon="ep:delete" class="mr-3px" />删除</el-button
+          >
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </content-wrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <SmsTemplateFrom ref="modalRef" :channelOptions="channelOptions" @success="getList" />
 </template>
 <script setup lang="ts" name="SmsTemplate">
-import type { FormExpose } from '@/components/Form'
-// 业务相关的 import
-import * as SmsTemplateApi from '@/api/system/sms/smsTemplate'
-import { rules, allSchemas } from './sms.template.data'
-
-const { t } = useI18n() // 国际化
+import { DICT_TYPE, getDictOptions, getDictObj } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
+import * as templateApi from '@/api/system/sms/smsTemplate'
+import * as SmsChannelApi from '@/api/system/sms/smsChannel'
+import download from '@/utils/download'
+import SmsTemplateFrom from './form.vue'
 const message = useMessage() // 消息弹窗
+// const { t } = useI18n() // 国际化
 
-// 列表相关的变量
-const [registerTable, { reload, deleteData }] = useXTable({
-  allSchemas: allSchemas,
-  getListApi: SmsTemplateApi.getSmsTemplatePageApi,
-  deleteApi: SmsTemplateApi.deleteSmsTemplateApi
+// 弹出层ref
+const modalRef = ref()
+// 遮罩层
+const loading = ref(true)
+// 导出遮罩层
+// const exportLoading = ref(false)
+// 显示搜索条件
+const showSearch = ref(true)
+// 表单ref
+const queryForm = ref()
+// 查询参数
+const queryParams = ref<templateApi.SmsTemplatePageReqVO>({
+  pageNo: 1,
+  pageSize: 10,
+  type: null,
+  status: null,
+  code: '',
+  content: '',
+  apiTemplateId: '',
+  channelId: null,
+  createTime: []
 })
-
-// 弹窗相关的变量
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const actionType = ref('') // 操作按钮的类型
-const actionLoading = ref(false) // 按钮 Loading
-const formRef = ref<FormExpose>() // 表单 Ref
-const detailData = ref() // 详情 Ref
-
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
-}
-
-// 新增操作
-const handleCreate = () => {
-  setDialogTile('create')
-}
-
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  // 设置数据
-  const res = await SmsTemplateApi.getSmsTemplateApi(rowId)
-  unref(formRef)?.setValues(res)
-}
-
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  setDialogTile('detail')
-  // 设置数据
-  const res = await SmsTemplateApi.getSmsTemplateApi(rowId)
-  detailData.value = res
-}
-
-// 提交按钮
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as SmsTemplateApi.SmsTemplateVO
-        if (actionType.value === 'create') {
-          await SmsTemplateApi.createSmsTemplateApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          await SmsTemplateApi.updateSmsTemplateApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        // 刷新列表
-        await reload()
-      }
-    }
+// 总条数
+const total = ref(0)
+// 短信模板列表
+const templateList = ref([])
+/** 查询列表 */
+const getList = () => {
+  loading.value = true
+  // 执行查询
+  templateApi.getSmsTemplatePageApi(queryParams.value).then((response) => {
+    templateList.value = response.list
+    total.value = response.total
+    loading.value = false
   })
 }
-
-// ========== 测试相关 ==========
-const sendSmsForm = ref({
-  content: '',
-  params: {},
-  mobile: '',
-  templateCode: '',
-  templateParams: {}
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.value.pageNo = 1
+  getList()
+}
+/** 重置按钮操作 */
+const resetQuery = () => {
+  resetForm()
+  handleQuery()
+}
+/** 重置搜索表单 */
+const resetForm = () => {
+  queryParams.value = {
+    pageNo: 1,
+    pageSize: 10,
+    type: null,
+    status: null,
+    code: '',
+    content: '',
+    apiTemplateId: '',
+    channelId: null,
+    createTime: []
+  }
+  queryForm.value?.resetFields()
+}
+// 短信渠道
+const channelOptions = ref<SmsChannelApi.SmsChannelListVO[]>([])
+onMounted(() => {
+  SmsChannelApi.getSimpleSmsChannels().then((res) => {
+    channelOptions.value = res
+  })
 })
-const sendSmsRules = ref({
-  mobile: [{ required: true, message: '手机不能为空', trigger: 'blur' }],
-  templateCode: [{ required: true, message: '模版编号不能为空', trigger: 'blur' }],
-  templateParams: {}
-})
-const sendVisible = ref(false)
-
-const handleSendSms = (row: any) => {
-  sendSmsForm.value.content = row.content
-  sendSmsForm.value.params = row.params
-  sendSmsForm.value.templateCode = row.code
-  sendSmsForm.value.templateParams = row.params.reduce(function (obj, item) {
-    obj[item] = undefined
-    return obj
-  }, {})
-  sendSmsRules.value.templateParams = row.params.reduce(function (obj, item) {
-    obj[item] = { required: true, message: '参数 ' + item + ' 不能为空', trigger: 'change' }
-    return obj
-  }, {})
-  sendVisible.value = true
+/** 格式化短信渠道 */
+const formatChannelSignature = (channelId: number) => {
+  channelOptions.value.forEach((item) => {
+    if (item.id === channelId) {
+      return item.signature
+    }
+  })
+  return '找不到签名：' + channelId
+}
+/** 新增按钮操作 */
+const handleAdd = (type: string) => {
+  modalRef.value.openModal({ type })
+}
+/** 修改按钮操作 */
+// const handleUpdate = (row) => {}
+const exportLoading = ref(false)
+/** 导出按钮操作 */
+const handleExport = () => {
+  // 处理查询参数
+  let params = { ...queryParams.value } as templateApi.SmsTemplateExportReqVO
+  // 执行导出
+  message
+    .confirm('是否确认导出所有短信模板数据项?', '警告')
+    .then(() => {
+      exportLoading.value = true
+      return templateApi.exportPostApi(params)
+    })
+    .then((response) => {
+      download.excel(response, '短信模板.xls')
+      exportLoading.value = false
+    })
+    .catch(() => {})
+}
+/** 发送短信按钮 */
+const handleSendSms = (type, row: any) => {
+  modalRef.value.openModal({ type, row })
+}
+const handleUpdate = (type: string, { id }: { id: number }) => {
+  modalRef.value.openModal({ type, id })
+}
+/** 删除按钮操作 */
+const handleDelete = ({ id }: { id: number }) => {
+  message
+    .confirm('是否确认删除短信模板编号为"' + id + '"的数据项?')
+    .then(function () {
+      return templateApi.deleteSmsTemplateApi(id)
+    })
+    .then(() => {
+      getList()
+      message.success('删除成功')
+    })
+    .catch(() => {})
 }
 
-const sendSmsTest = async () => {
-  const data: SmsTemplateApi.SendSmsReqVO = {
-    mobile: sendSmsForm.value.mobile,
-    templateCode: sendSmsForm.value.templateCode,
-    templateParams: sendSmsForm.value.templateParams as unknown as Map<string, Object>
-  }
-  const res = await SmsTemplateApi.sendSmsApi(data)
-  if (res) {
-    message.success('提交发送成功！发送结果，见发送日志编号：' + res)
-  }
-  sendVisible.value = false
-}
+getList()
 </script>
