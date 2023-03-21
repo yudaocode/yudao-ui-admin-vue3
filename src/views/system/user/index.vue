@@ -1,576 +1,841 @@
 <template>
-  <div class="flex">
-    <el-card class="w-1/5 user" :gutter="12" shadow="always">
-      <template #header>
-        <div class="card-header">
-          <span>部门列表</span>
-          <XTextButton title="修改部门" @click="handleDeptEdit()" />
+  <div class="app-container">
+    <!-- 搜索工作栏 -->
+    <el-row :gutter="20">
+      <!--部门数据-->
+      <el-col :span="4" :xs="24">
+        <div class="head-container">
+          <el-input
+            v-model="deptName"
+            placeholder="请输入部门名称"
+            clearable
+            size="small"
+            prefix-icon="el-icon-search"
+            style="margin-bottom: 20px"
+          />
         </div>
-      </template>
-      <el-input v-model="filterText" placeholder="搜索部门" />
-      <el-scrollbar height="650">
-        <el-tree
-          ref="treeRef"
-          node-key="id"
-          default-expand-all
-          :data="deptOptions"
-          :props="defaultProps"
-          :highlight-current="true"
-          :filter-node-method="filterNode"
-          :expand-on-click-node="false"
-          @node-click="handleDeptNodeClick"
-        />
-      </el-scrollbar>
-    </el-card>
-    <el-card class="w-4/5 user" style="margin-left: 10px" :gutter="12" shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <span>{{ tableTitle }}</span>
+        <div class="head-container">
+          <el-tree
+            :data="deptOptions"
+            :props="defaultProps"
+            :expand-on-click-node="false"
+            :filter-node-method="filterNode"
+            ref="tree"
+            default-expand-all
+            highlight-current
+            @node-click="handleNodeClick"
+          />
         </div>
-      </template>
-      <!-- 列表 -->
-      <XTable @register="registerTable">
-        <template #toolbar_buttons>
-          <!-- 操作：新增 -->
-          <XButton
-            type="primary"
-            preIcon="ep:zoom-in"
-            :title="t('action.add')"
-            v-hasPermi="['system:user:create']"
-            @click="handleCreate()"
-          />
-          <!-- 操作：导入用户 -->
-          <XButton
-            type="warning"
-            preIcon="ep:upload"
-            :title="t('action.import')"
-            v-hasPermi="['system:user:import']"
-            @click="importDialogVisible = true"
-          />
-          <!-- 操作：导出用户 -->
-          <XButton
-            type="warning"
-            preIcon="ep:download"
-            :title="t('action.export')"
-            v-hasPermi="['system:user:export']"
-            @click="exportList('用户数据.xls')"
-          />
-        </template>
-        <template #status_default="{ row }">
-          <el-switch
-            v-model="row.status"
-            :active-value="0"
-            :inactive-value="1"
-            @change="handleStatusChange(row)"
-          />
-        </template>
-        <template #actionbtns_default="{ row }">
-          <!-- 操作：编辑 -->
-          <XTextButton
-            preIcon="ep:edit"
-            :title="t('action.edit')"
-            v-hasPermi="['system:user:update']"
-            @click="handleUpdate(row.id)"
-          />
-          <!-- 操作：详情 -->
-          <XTextButton
-            preIcon="ep:view"
-            :title="t('action.detail')"
-            v-hasPermi="['system:user:update']"
-            @click="handleDetail(row.id)"
-          />
-          <el-dropdown
-            class="p-0.5"
-            v-hasPermi="[
-              'system:user:update-password',
-              'system:permission:assign-user-role',
-              'system:user:delete'
-            ]"
-          >
-            <XTextButton :title="t('action.more')" postIcon="ep:arrow-down" />
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>
-                  <!-- 操作：重置密码 -->
-                  <XTextButton
-                    preIcon="ep:key"
-                    title="重置密码"
-                    v-hasPermi="['system:user:update-password']"
-                    @click="handleResetPwd(row)"
-                  />
-                </el-dropdown-item>
-                <el-dropdown-item>
-                  <!-- 操作：分配角色 -->
-                  <XTextButton
-                    preIcon="ep:key"
-                    title="分配角色"
-                    v-hasPermi="['system:permission:assign-user-role']"
-                    @click="handleRole(row)"
-                  />
-                </el-dropdown-item>
-                <el-dropdown-item>
-                  <!-- 操作：删除 -->
-                  <XTextButton
-                    preIcon="ep:delete"
-                    :title="t('action.del')"
-                    v-hasPermi="['system:user:delete']"
-                    @click="deleteData(row.id)"
-                  />
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </template>
-      </XTable>
-    </el-card>
-  </div>
-  <XModal v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form
-      v-if="['create', 'update'].includes(actionType)"
-      :rules="rules"
-      :schema="allSchemas.formSchema"
-      ref="formRef"
-    >
-      <template #deptId="form">
-        <el-tree-select
-          node-key="id"
-          v-model="form['deptId']"
-          :props="defaultProps"
-          :data="deptOptions"
-          check-strictly
-        />
-      </template>
-      <template #postIds="form">
-        <el-select v-model="form['postIds']" multiple :placeholder="t('common.selectText')">
-          <el-option
-            v-for="item in postOptions"
-            :key="item.id"
-            :label="item.name"
-            :value="(item.id as unknown as number)"
-          />
-        </el-select>
-      </template>
-    </Form>
-    <!-- 对话框(详情) -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    >
-      <template #deptId="{ row }">
-        <el-tag>{{ dataFormater(row.deptId) }}</el-tag>
-      </template>
-      <template #postIds="{ row }">
-        <template v-if="row.postIds !== ''">
-          <el-tag v-for="(post, index) in row.postIds" :key="index" index="">
-            <template v-for="postObj in postOptions">
-              {{ post === postObj.id ? postObj.name : '' }}
-            </template>
-          </el-tag>
-        </template>
-        <template v-else> </template>
-      </template>
-    </Descriptions>
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="loading"
-        @click="submitForm()"
-      />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="loading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
-  <!-- 分配用户角色 -->
-  <XModal v-model="roleDialogVisible" title="分配角色">
-    <el-form :model="userRole" label-width="140px" :inline="true">
-      <el-form-item label="用户名称">
-        <el-tag>{{ userRole.username }}</el-tag>
-      </el-form-item>
-      <el-form-item label="用户昵称">
-        <el-tag>{{ userRole.nickname }}</el-tag>
-      </el-form-item>
-      <el-form-item label="角色">
-        <el-transfer
-          v-model="userRole.roleIds"
-          :titles="['角色列表', '已选择']"
-          :props="{
-            key: 'id',
-            label: 'name'
-          }"
-          :data="roleOptions"
-        />
-      </el-form-item>
-    </el-form>
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton type="primary" :title="t('action.save')" :loading="loading" @click="submitRole()" />
-      <!-- 按钮：关闭 -->
-      <XButton :title="t('dialog.close')" @click="roleDialogVisible = false" />
-    </template>
-  </XModal>
-  <!-- 导入 -->
-  <XModal v-model="importDialogVisible" :title="importDialogTitle">
-    <el-form class="drawer-multiColumn-form" label-width="150px">
-      <el-form-item label="模板下载 :">
-        <XButton type="primary" prefix="ep:download" title="点击下载" @click="handleImportTemp()" />
-      </el-form-item>
-      <el-form-item label="文件上传 :">
-        <el-upload
-          ref="uploadRef"
-          :action="updateUrl + '?updateSupport=' + updateSupport"
-          :headers="uploadHeaders"
-          :drag="true"
-          :limit="1"
-          :multiple="true"
-          :show-file-list="true"
-          :disabled="uploadDisabled"
-          :before-upload="beforeExcelUpload"
-          :on-exceed="handleExceed"
-          :on-success="handleFileSuccess"
-          :on-error="excelUploadError"
-          :auto-upload="false"
-          accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      </el-col>
+      <!--用户数据-->
+      <el-col :span="20" :xs="24">
+        <el-form
+          :model="queryParams"
+          ref="queryForm"
+          size="small"
+          :inline="true"
+          v-show="showSearch"
+          label-width="68px"
         >
-          <Icon icon="ep:upload-filled" />
-          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-          <template #tip>
-            <div class="el-upload__tip">请上传 .xls , .xlsx 标准格式文件</div>
-          </template>
-        </el-upload>
-      </el-form-item>
-      <el-form-item label="是否更新已经存在的用户数据:">
-        <el-checkbox v-model="updateSupport" />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        type="warning"
-        preIcon="ep:upload-filled"
-        :title="t('action.save')"
-        @click="submitFileForm()"
-      />
-      <!-- 按钮：关闭 -->
-      <XButton :title="t('dialog.close')" @click="importDialogVisible = false" />
-    </template>
-  </XModal>
+          <el-form-item label="用户名称" prop="username">
+            <el-input
+              v-model="queryParams.username"
+              placeholder="请输入用户名称"
+              clearable
+              style="width: 240px"
+              @keyup.enter.native="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="手机号码" prop="mobile">
+            <el-input
+              v-model="queryParams.mobile"
+              placeholder="请输入手机号码"
+              clearable
+              style="width: 240px"
+              @keyup.enter.native="handleQuery"
+            />
+          </el-form-item>
+          <el-form-item label="状态" prop="status">
+            <el-select
+              v-model="queryParams.status"
+              placeholder="用户状态"
+              clearable
+              style="width: 240px"
+            >
+              <el-option
+                v-for="dict in statusDictDatas"
+                :key="parseInt(dict.value)"
+                :label="dict.label"
+                :value="parseInt(dict.value)"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="创建时间" prop="createTime">
+            <el-date-picker
+              v-model="queryParams.createTime"
+              style="width: 240px"
+              value-format="yyyy-MM-dd HH:mm:ss"
+              type="daterange"
+              range-separator="-"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :default-time="['00:00:00', '23:59:59']"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
+            <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
+          </el-form-item>
+        </el-form>
+
+        <el-row :gutter="10" class="mb8">
+          <el-col :span="1.5">
+            <el-button
+              type="primary"
+              plain
+              icon="el-icon-plus"
+              size="mini"
+              @click="handleAdd"
+              v-hasPermi="['system:user:create']"
+              >新增</el-button
+            >
+          </el-col>
+          <el-col :span="1.5">
+            <el-button
+              type="info"
+              icon="el-icon-upload2"
+              size="mini"
+              @click="handleImport"
+              v-hasPermi="['system:user:import']"
+              >导入</el-button
+            >
+          </el-col>
+          <el-col :span="1.5">
+            <el-button
+              type="warning"
+              icon="el-icon-download"
+              size="mini"
+              @click="handleExport"
+              :loading="exportLoading"
+              v-hasPermi="['system:user:export']"
+              >导出</el-button
+            >
+          </el-col>
+          <right-toolbar
+            :showSearch.sync="showSearch"
+            @queryTable="getList"
+            :columns="columns"
+          ></right-toolbar>
+        </el-row>
+
+        <el-table v-loading="loading" :data="userList">
+          <el-table-column
+            label="用户编号"
+            align="center"
+            key="id"
+            prop="id"
+            v-if="columns[0].visible"
+          />
+          <el-table-column
+            label="用户名称"
+            align="center"
+            key="username"
+            prop="username"
+            v-if="columns[1].visible"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            label="用户昵称"
+            align="center"
+            key="nickname"
+            prop="nickname"
+            v-if="columns[2].visible"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            label="部门"
+            align="center"
+            key="deptName"
+            prop="dept.name"
+            v-if="columns[3].visible"
+            :show-overflow-tooltip="true"
+          />
+          <el-table-column
+            label="手机号码"
+            align="center"
+            key="mobile"
+            prop="mobile"
+            v-if="columns[4].visible"
+            width="120"
+          />
+          <el-table-column label="状态" key="status" v-if="columns[5].visible" align="center">
+            <template v-slot="scope">
+              <el-switch
+                v-model="scope.row.status"
+                :active-value="0"
+                :inactive-value="1"
+                @change="handleStatusChange(scope.row)"
+              />
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="创建时间"
+            align="center"
+            prop="createTime"
+            v-if="columns[6].visible"
+            width="160"
+          >
+            <template v-slot="scope">
+              <span>{{ parseTime(scope.row.createTime) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column
+            label="操作"
+            align="center"
+            width="160"
+            class-name="small-padding fixed-width"
+          >
+            <template v-slot="scope">
+              <el-button
+                size="mini"
+                type="text"
+                icon="el-icon-edit"
+                @click="handleUpdate(scope.row)"
+                v-hasPermi="['system:user:update']"
+                >修改</el-button
+              >
+              <el-dropdown
+                @command="(command) => handleCommand(command, scope.$index, scope.row)"
+                v-hasPermi="[
+                  'system:user:delete',
+                  'system:user:update-password',
+                  'system:permission:assign-user-role'
+                ]"
+              >
+                <el-button size="mini" type="text" icon="el-icon-d-arrow-right">更多</el-button>
+                <el-dropdown-menu slot="dropdown">
+                  <el-dropdown-item
+                    command="handleDelete"
+                    v-if="scope.row.id !== 1"
+                    size="mini"
+                    type="text"
+                    icon="el-icon-delete"
+                    v-hasPermi="['system:user:delete']"
+                    >删除</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    command="handleResetPwd"
+                    size="mini"
+                    type="text"
+                    icon="el-icon-key"
+                    v-hasPermi="['system:user:update-password']"
+                    >重置密码</el-dropdown-item
+                  >
+                  <el-dropdown-item
+                    command="handleRole"
+                    size="mini"
+                    type="text"
+                    icon="el-icon-circle-check"
+                    v-hasPermi="['system:permission:assign-user-role']"
+                    >分配角色</el-dropdown-item
+                  >
+                </el-dropdown-menu>
+              </el-dropdown>
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <pagination
+          v-show="total > 0"
+          :total="total"
+          :page.sync="queryParams.pageNo"
+          :limit.sync="queryParams.pageSize"
+          @pagination="getList"
+        />
+      </el-col>
+    </el-row>
+
+    <!-- 添加或修改参数配置对话框 -->
+    <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="用户昵称" prop="nickname">
+              <el-input v-model="form.nickname" placeholder="请输入用户昵称" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="归属部门" prop="deptId">
+              <treeselect
+                v-model="form.deptId"
+                :options="deptOptions"
+                :show-count="true"
+                :clearable="false"
+                placeholder="请选择归属部门"
+                :normalizer="normalizer"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="手机号码" prop="mobile">
+              <el-input v-model="form.mobile" placeholder="请输入手机号码" maxlength="11" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="邮箱" prop="email">
+              <el-input v-model="form.email" placeholder="请输入邮箱" maxlength="50" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item v-if="form.id === undefined" label="用户名称" prop="username">
+              <el-input v-model="form.username" placeholder="请输入用户名称" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item v-if="form.id === undefined" label="用户密码" prop="password">
+              <el-input
+                v-model="form.password"
+                placeholder="请输入用户密码"
+                type="password"
+                show-password
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="12">
+            <el-form-item label="用户性别">
+              <el-select v-model="form.sex" placeholder="请选择">
+                <el-option
+                  v-for="dict in sexDictDatas"
+                  :key="parseInt(dict.value)"
+                  :label="dict.label"
+                  :value="parseInt(dict.value)"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="岗位">
+              <el-select v-model="form.postIds" multiple placeholder="请选择">
+                <el-option
+                  v-for="item in postOptions"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                ></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="备注">
+              <el-input v-model="form.remark" type="textarea" placeholder="请输入内容"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 用户导入对话框 -->
+    <el-dialog :title="upload.title" :visible.sync="upload.open" width="400px" append-to-body>
+      <el-upload
+        ref="upload"
+        :limit="1"
+        accept=".xlsx, .xls"
+        :headers="upload.headers"
+        :action="upload.url + '?updateSupport=' + upload.updateSupport"
+        :disabled="upload.isUploading"
+        :on-progress="handleFileUploadProgress"
+        :on-success="handleFileSuccess"
+        :auto-upload="false"
+        drag
+      >
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <div class="el-upload__tip text-center" slot="tip">
+          <div class="el-upload__tip" slot="tip">
+            <el-checkbox v-model="upload.updateSupport" /> 是否更新已经存在的用户数据
+          </div>
+          <span>仅允许导入xls、xlsx格式文件。</span>
+          <el-link
+            type="primary"
+            :underline="false"
+            style="font-size: 12px; vertical-align: baseline"
+            @click="importTemplate"
+            >下载模板</el-link
+          >
+        </div>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitFileForm">确 定</el-button>
+        <el-button @click="upload.open = false">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 分配角色 -->
+    <el-dialog title="分配角色" :visible.sync="openRole" width="500px" append-to-body>
+      <el-form :model="form" label-width="80px">
+        <el-form-item label="用户名称">
+          <el-input v-model="form.username" :disabled="true" />
+        </el-form-item>
+        <el-form-item label="用户昵称">
+          <el-input v-model="form.nickname" :disabled="true" />
+        </el-form-item>
+        <el-form-item label="角色">
+          <el-select v-model="form.roleIds" multiple placeholder="请选择">
+            <el-option
+              v-for="item in roleOptions"
+              :key="parseInt(item.id)"
+              :label="item.name"
+              :value="parseInt(item.id)"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitRole">确 定</el-button>
+        <el-button @click="cancelRole">取 消</el-button>
+      </div>
+    </el-dialog>
+  </div>
 </template>
-<script setup lang="ts" name="User">
-import type { ElTree, UploadRawFile, UploadInstance } from 'element-plus'
-import { handleTree, defaultProps } from '@/utils/tree'
-import download from '@/utils/download'
-import { CommonStatusEnum } from '@/utils/constants'
-import { getAccessToken, getTenantId } from '@/utils/auth'
-import type { FormExpose } from '@/components/Form'
-import { rules, allSchemas } from './user.data'
-import * as UserApi from '@/api/system/user'
-import { listSimpleDeptApi } from '@/api/system/dept'
-import { listSimpleRolesApi } from '@/api/system/role'
-import { listSimplePostsApi, PostVO } from '@/api/system/post'
+
+<script>
 import {
-  aassignUserRoleApi,
-  listUserRolesApi,
-  PermissionAssignUserRoleReqVO
-} from '@/api/system/permission'
+  createUserApi as addUser,
+  updateUserStatusApi as changeUserStatus,
+  deleteUserApi as delUser,
+  exportUserApi as exportUser,
+  // TODO: praseStrEmpty(id)
+  getUserApi as getUser,
+  importUserTemplateApi as importTemplate,
+  getUserPageApi as listUser,
+  resetUserPwdApi as resetUserPwd,
+  updateUserApi as updateUser
+} from '@/api/system/user'
+// TODO: change
+import Treeselect from '@riophae/vue-treeselect'
+// TODO: change???
+import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
-const { t } = useI18n() // 国际化
-const message = useMessage() // 消息弹窗
+import { listSimpleDeptApi } from '@/api/system/dept'
+import { listSimplePostsApi } from '@/api/system/post'
 
-const queryParams = reactive({
-  deptId: null
-})
-// ========== 列表相关 ==========
-const tableTitle = ref('用户列表')
-// 列表相关的变量
-const [registerTable, { reload, deleteData, exportList }] = useXTable({
-  allSchemas: allSchemas,
-  params: queryParams,
-  getListApi: UserApi.getUserPageApi,
-  deleteApi: UserApi.deleteUserApi,
-  exportListApi: UserApi.exportUserApi
-})
-// ========== 创建部门树结构 ==========
-const filterText = ref('')
-const deptOptions = ref<Tree[]>([]) // 树形结构
-const treeRef = ref<InstanceType<typeof ElTree>>()
-const getTree = async () => {
-  const res = await listSimpleDeptApi()
-  deptOptions.value.push(...handleTree(res))
-}
-const filterNode = (value: string, data: Tree) => {
-  if (!value) return true
-  return data.name.includes(value)
-}
-const handleDeptNodeClick = async (row: { [key: string]: any }) => {
-  queryParams.deptId = row.id
-  await reload()
-}
-const { push } = useRouter()
-const handleDeptEdit = () => {
-  push('/system/dept')
-}
-watch(filterText, (val) => {
-  treeRef.value!.filter(val)
-})
-// ========== CRUD 相关 ==========
-const loading = ref(false) // 遮罩层
-const actionType = ref('') // 操作按钮的类型
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const formRef = ref<FormExpose>() // 表单 Ref
-const postOptions = ref<PostVO[]>([]) //岗位列表
+import { CommonStatusEnum } from '@/utils/constants'
+import { DICT_TYPE, getDictDatas } from '@/utils/dict'
+import { assignUserRole, listUserRoles } from '@/api/system/permission'
+import { listSimpleRoles } from '@/api/system/role'
+import { getBaseHeader } from '@/utils/request'
 
-// 获取岗位列表
-const getPostOptions = async () => {
-  const res = await listSimplePostsApi()
-  postOptions.value.push(...res)
-}
-const dataFormater = (val) => {
-  return deptFormater(deptOptions.value, val)
-}
-//部门回显
-const deptFormater = (ary, val: any) => {
-  var o = ''
-  if (ary && val) {
-    for (const v of ary) {
-      if (v.id == val) {
-        o = v.name
-        if (o) return o
-      } else if (v.children?.length) {
-        o = deptFormater(v.children, val)
-        if (o) return o
-      }
+export default {
+  name: 'User',
+  components: { Treeselect },
+  data() {
+    return {
+      // 遮罩层
+      loading: true,
+      // 导出遮罩层
+      exportLoading: false,
+      // 显示搜索条件
+      showSearch: true,
+      // 总条数
+      total: 0,
+      // 用户表格数据
+      userList: null,
+      // 弹出层标题
+      title: '',
+      // 部门树选项
+      deptOptions: undefined,
+      // 是否显示弹出层
+      open: false,
+      // 部门名称
+      deptName: undefined,
+      // 默认密码
+      initPassword: undefined,
+      // 性别状态字典
+      sexOptions: [],
+      // 岗位选项
+      postOptions: [],
+      // 角色选项
+      roleOptions: [],
+      // 表单参数
+      form: {},
+      defaultProps: {
+        children: 'children',
+        label: 'name'
+      },
+      // 用户导入参数
+      upload: {
+        // 是否显示弹出层（用户导入）
+        open: false,
+        // 弹出层标题（用户导入）
+        title: '',
+        // 是否禁用上传
+        isUploading: false,
+        // 是否更新已经存在的用户数据
+        updateSupport: 0,
+        // 设置上传的请求头部
+        headers: getBaseHeader(),
+        // 上传的地址
+        url: process.env.VUE_APP_BASE_API + '/admin-api/system/user/import'
+      },
+      // 查询参数
+      queryParams: {
+        pageNo: 1,
+        pageSize: 10,
+        username: undefined,
+        mobile: undefined,
+        status: undefined,
+        deptId: undefined,
+        createTime: []
+      },
+      // 列信息
+      columns: [
+        { key: 0, label: `用户编号`, visible: true },
+        { key: 1, label: `用户名称`, visible: true },
+        { key: 2, label: `用户昵称`, visible: true },
+        { key: 3, label: `部门`, visible: true },
+        { key: 4, label: `手机号码`, visible: true },
+        { key: 5, label: `状态`, visible: true },
+        { key: 6, label: `创建时间`, visible: true }
+      ],
+      // 表单校验
+      rules: {
+        username: [{ required: true, message: '用户名称不能为空', trigger: 'blur' }],
+        nickname: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }],
+        password: [{ required: true, message: '用户密码不能为空', trigger: 'blur' }],
+        email: [
+          {
+            type: 'email',
+            message: "'请输入正确的邮箱地址",
+            trigger: ['blur', 'change']
+          }
+        ],
+        mobile: [
+          {
+            pattern:
+              /^(?:(?:\+|00)86)?1(?:3[\d]|4[5-79]|5[0-35-9]|6[5-7]|7[0-8]|8[\d]|9[189])\d{8}$/,
+            message: '请输入正确的手机号码',
+            trigger: 'blur'
+          }
+        ]
+      },
+      // 是否显示弹出层（角色权限）
+      openRole: false,
+
+      // 枚举
+      SysCommonStatusEnum: CommonStatusEnum,
+      // 数据字典
+      statusDictDatas: getDictDatas(DICT_TYPE.COMMON_STATUS),
+      sexDictDatas: getDictDatas(DICT_TYPE.SYSTEM_USER_SEX)
     }
-    return o
-  } else {
-    return val
-  }
-}
-
-// 设置标题
-const setDialogTile = async (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
-}
-
-// 新增操作
-const handleCreate = async () => {
-  setDialogTile('create')
-  // 重置表单
-  await nextTick()
-  if (allSchemas.formSchema[0].field !== 'username') {
-    unref(formRef)?.addSchema(
-      {
-        field: 'username',
-        label: '用户账号',
-        component: 'Input'
-      },
-      0
-    )
-    unref(formRef)?.addSchema(
-      {
-        field: 'password',
-        label: '用户密码',
-        component: 'InputPassword'
-      },
-      1
-    )
-  }
-}
-
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  await nextTick()
-  unref(formRef)?.delSchema('username')
-  unref(formRef)?.delSchema('password')
-  // 设置数据
-  const res = await UserApi.getUserApi(rowId)
-  unref(formRef)?.setValues(res)
-}
-const detailData = ref()
-
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  // 设置数据
-  const res = await UserApi.getUserApi(rowId)
-  detailData.value = res
-  await setDialogTile('detail')
-}
-
-// 提交按钮
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as UserApi.UserVO
-        if (actionType.value === 'create') {
-          loading.value = true
-          await UserApi.createUserApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          loading.value = true
-          await UserApi.updateUserApi(data)
-          message.success(t('common.updateSuccess'))
+  },
+  watch: {
+    // 根据名称筛选部门树
+    deptName(val) {
+      this.$refs.tree.filter(val)
+    }
+  },
+  created() {
+    this.getList()
+    this.getTreeselect()
+    // this.getConfigKey("sys.user.init-password").then(response => {
+    //   this.initPassword = response.msg;
+    // });
+  },
+  methods: {
+    // 更多操作
+    handleCommand(command, index, row) {
+      switch (command) {
+        case 'handleUpdate':
+          this.handleUpdate(row) //修改客户信息
+          break
+        case 'handleDelete':
+          this.handleDelete(row) //红号变更
+          break
+        case 'handleResetPwd':
+          this.handleResetPwd(row)
+          break
+        case 'handleRole':
+          this.handleRole(row)
+          break
+        default:
+          break
+      }
+    },
+    /** 查询用户列表 */
+    getList() {
+      this.loading = true
+      listUser(this.queryParams).then((response) => {
+        this.userList = response.data.list
+        this.total = response.data.total
+        this.loading = false
+      })
+    },
+    /** 查询部门下拉树结构 + 岗位下拉 */
+    getTreeselect() {
+      listSimpleDeptApi().then((response) => {
+        // 处理 deptOptions 参数
+        this.deptOptions = []
+        this.deptOptions.push(...this.handleTree(response.data, 'id'))
+      })
+      listSimplePostsApi().then((response) => {
+        // 处理 postOptions 参数
+        this.postOptions = []
+        this.postOptions.push(...response.data)
+      })
+    },
+    // 筛选节点
+    filterNode(value, data) {
+      if (!value) return true
+      return data.name.indexOf(value) !== -1
+    },
+    // 节点单击事件
+    handleNodeClick(data) {
+      this.queryParams.deptId = data.id
+      this.getList()
+    },
+    // 用户状态修改
+    handleStatusChange(row) {
+      let text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
+      this.$modal
+        .confirm('确认要"' + text + '""' + row.username + '"用户吗?')
+        .then(function () {
+          return changeUserStatus(row.id, row.status)
+        })
+        .then(() => {
+          this.$modal.msgSuccess(text + '成功')
+        })
+        .catch(function () {
+          row.status =
+            row.status === CommonStatusEnum.ENABLE
+              ? CommonStatusEnum.DISABLE
+              : CommonStatusEnum.ENABLE
+        })
+    },
+    // 取消按钮
+    cancel() {
+      this.open = false
+      this.reset()
+    },
+    // 取消按钮（角色权限）
+    cancelRole() {
+      this.openRole = false
+      this.reset()
+    },
+    // 表单重置
+    reset() {
+      this.form = {
+        id: undefined,
+        deptId: undefined,
+        username: undefined,
+        nickname: undefined,
+        password: undefined,
+        mobile: undefined,
+        email: undefined,
+        sex: undefined,
+        status: '0',
+        remark: undefined,
+        postIds: [],
+        roleIds: []
+      }
+      this.resetForm('form')
+    },
+    /** 搜索按钮操作 */
+    handleQuery() {
+      this.queryParams.pageNo = 1
+      this.getList()
+    },
+    /** 重置按钮操作 */
+    resetQuery() {
+      this.resetForm('queryForm')
+      this.handleQuery()
+    },
+    /** 新增按钮操作 */
+    handleAdd() {
+      this.reset()
+      // 获得下拉数据
+      this.getTreeselect()
+      // 打开表单，并设置初始化
+      this.open = true
+      this.title = '添加用户'
+      this.form.password = this.initPassword
+    },
+    /** 修改按钮操作 */
+    handleUpdate(row) {
+      this.reset()
+      this.getTreeselect()
+      const id = row.id
+      getUser(id).then((response) => {
+        this.form = response.data
+        this.open = true
+        this.title = '修改用户'
+        this.form.password = ''
+      })
+    },
+    /** 重置密码按钮操作 */
+    handleResetPwd(row) {
+      this.$prompt('请输入"' + row.username + '"的新密码', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消'
+      })
+        .then(({ value }) => {
+          resetUserPwd(row.id, value).then((response) => {
+            this.$modal.msgSuccess('修改成功，新密码是：' + value)
+          })
+        })
+        .catch(() => {})
+    },
+    /** 分配用户角色操作 */
+    handleRole(row) {
+      this.reset()
+      const id = row.id
+      // 处理了 form 的用户 username 和 nickname 的展示
+      this.form.id = id
+      this.form.username = row.username
+      this.form.nickname = row.nickname
+      // 打开弹窗
+      this.openRole = true
+      // 获得角色列表
+      listSimpleRoles().then((response) => {
+        // 处理 roleOptions 参数
+        this.roleOptions = []
+        this.roleOptions.push(...response.data)
+      })
+      // 获得角色拥有的菜单集合
+      listUserRoles(id).then((response) => {
+        // 设置选中
+        this.form.roleIds = response.data
+      })
+    },
+    /** 提交按钮 */
+    submitForm: function () {
+      this.$refs['form'].validate((valid) => {
+        if (valid) {
+          if (this.form.id !== undefined) {
+            updateUser(this.form).then((response) => {
+              this.$modal.msgSuccess('修改成功')
+              this.open = false
+              this.getList()
+            })
+          } else {
+            addUser(this.form).then((response) => {
+              this.$modal.msgSuccess('新增成功')
+              this.open = false
+              this.getList()
+            })
+          }
         }
-        dialogVisible.value = false
-      } finally {
-        // unref(formRef)?.setSchema(allSchemas.formSchema)
-        // 刷新列表
-        await reload()
-        loading.value = false
+      })
+    },
+    /** 提交按钮（角色权限） */
+    submitRole: function () {
+      if (this.form.id !== undefined) {
+        assignUserRole({
+          userId: this.form.id,
+          roleIds: this.form.roleIds
+        }).then((response) => {
+          this.$modal.msgSuccess('分配角色成功')
+          this.openRole = false
+          this.getList()
+        })
+      }
+    },
+    /** 删除按钮操作 */
+    handleDelete(row) {
+      const ids = row.id || this.ids
+      this.$modal
+        .confirm('是否确认删除用户编号为"' + ids + '"的数据项?')
+        .then(function () {
+          return delUser(ids)
+        })
+        .then(() => {
+          this.getList()
+          this.$modal.msgSuccess('删除成功')
+        })
+        .catch(() => {})
+    },
+    /** 导出按钮操作 */
+    handleExport() {
+      this.$modal
+        .confirm('是否确认导出所有用户数据项?')
+        .then(() => {
+          // 处理查询参数
+          let params = { ...this.queryParams }
+          params.pageNo = undefined
+          params.pageSize = undefined
+          this.exportLoading = true
+          return exportUser(params)
+        })
+        .then((response) => {
+          this.$download.excel(response, '用户数据.xls')
+          this.exportLoading = false
+        })
+        .catch(() => {})
+    },
+    /** 导入按钮操作 */
+    handleImport() {
+      this.upload.title = '用户导入'
+      this.upload.open = true
+    },
+    /** 下载模板操作 */
+    importTemplate() {
+      importTemplate().then((response) => {
+        this.$download.excel(response, '用户导入模板.xls')
+      })
+    },
+    // 文件上传中处理
+    handleFileUploadProgress(event, file, fileList) {
+      this.upload.isUploading = true
+    },
+    // 文件上传成功处理
+    handleFileSuccess(response, file, fileList) {
+      if (response.code !== 0) {
+        this.$modal.msgError(response.msg)
+        return
+      }
+      this.upload.open = false
+      this.upload.isUploading = false
+      this.$refs.upload.clearFiles()
+      // 拼接提示语
+      let data = response.data
+      let text = '创建成功数量：' + data.createUsernames.length
+      for (const username of data.createUsernames) {
+        text += '<br />&nbsp;&nbsp;&nbsp;&nbsp;' + username
+      }
+      text += '<br />更新成功数量：' + data.updateUsernames.length
+      for (const username of data.updateUsernames) {
+        text += '<br />&nbsp;&nbsp;&nbsp;&nbsp;' + username
+      }
+      text += '<br />更新失败数量：' + Object.keys(data.failureUsernames).length
+      for (const username in data.failureUsernames) {
+        text += '<br />&nbsp;&nbsp;&nbsp;&nbsp;' + username + '：' + data.failureUsernames[username]
+      }
+      this.$alert(text, '导入结果', { dangerouslyUseHTMLString: true })
+      this.getList()
+    },
+    // 提交上传文件
+    submitFileForm() {
+      this.$refs.upload.submit()
+    },
+    // 格式化部门的下拉框
+    normalizer(node) {
+      return {
+        id: node.id,
+        label: node.name,
+        children: node.children
       }
     }
-  })
-}
-// 改变用户状态操作
-const handleStatusChange = async (row: UserApi.UserVO) => {
-  const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
-  message
-    .confirm('确认要"' + text + '""' + row.username + '"用户吗?', t('common.reminder'))
-    .then(async () => {
-      row.status =
-        row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.ENABLE : CommonStatusEnum.DISABLE
-      await UserApi.updateUserStatusApi(row.id, row.status)
-      message.success(text + '成功')
-      // 刷新列表
-      await reload()
-    })
-    .catch(() => {
-      row.status =
-        row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
-    })
-}
-// 重置密码
-const handleResetPwd = (row: UserApi.UserVO) => {
-  message.prompt('请输入"' + row.username + '"的新密码', t('common.reminder')).then(({ value }) => {
-    UserApi.resetUserPwdApi(row.id, value).then(() => {
-      message.success('修改成功，新密码是：' + value)
-    })
-  })
-}
-// 分配角色
-const roleDialogVisible = ref(false)
-const roleOptions = ref()
-const userRole = reactive({
-  id: 0,
-  username: '',
-  nickname: '',
-  roleIds: []
-})
-const handleRole = async (row: UserApi.UserVO) => {
-  userRole.id = row.id
-  userRole.username = row.username
-  userRole.nickname = row.nickname
-  // 获得角色拥有的权限集合
-  const roles = await listUserRolesApi(row.id)
-  userRole.roleIds = roles
-  // 获取角色列表
-  const roleOpt = await listSimpleRolesApi()
-  roleOptions.value = roleOpt
-  roleDialogVisible.value = true
-}
-// 提交
-const submitRole = async () => {
-  const data = ref<PermissionAssignUserRoleReqVO>({
-    userId: userRole.id,
-    roleIds: userRole.roleIds
-  })
-  await aassignUserRoleApi(data.value)
-  message.success(t('common.updateSuccess'))
-  roleDialogVisible.value = false
-}
-// ========== 导入相关 ==========
-// TODO @星语：这个要不要把导入用户，封装成一个小组件？可选哈
-const importDialogVisible = ref(false)
-const uploadDisabled = ref(false)
-const importDialogTitle = ref('用户导入')
-const updateSupport = ref(0)
-let updateUrl = import.meta.env.VITE_BASE_URL + import.meta.env.VITE_API_URL + '/system/user/import'
-const uploadHeaders = ref()
-// 下载导入模版
-const handleImportTemp = async () => {
-  const res = await UserApi.importUserTemplateApi()
-  download.excel(res, '用户导入模版.xls')
-}
-// 文件上传之前判断
-const beforeExcelUpload = (file: UploadRawFile) => {
-  const isExcel =
-    file.type === 'application/vnd.ms-excel' ||
-    file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  const isLt5M = file.size / 1024 / 1024 < 5
-  if (!isExcel) message.error('上传文件只能是 xls / xlsx 格式!')
-  if (!isLt5M) message.error('上传文件大小不能超过 5MB!')
-  return isExcel && isLt5M
-}
-// 文件上传
-const uploadRef = ref<UploadInstance>()
-const submitFileForm = () => {
-  uploadHeaders.value = {
-    Authorization: 'Bearer ' + getAccessToken(),
-    'tenant-id': getTenantId()
   }
-  uploadDisabled.value = true
-  uploadRef.value!.submit()
 }
-// 文件上传成功
-const handleFileSuccess = async (response: any): Promise<void> => {
-  if (response.code !== 0) {
-    message.error(response.msg)
-    return
-  }
-  importDialogVisible.value = false
-  uploadDisabled.value = false
-  const data = response.data
-  let text = '上传成功数量：' + data.createUsernames.length + ';'
-  for (let username of data.createUsernames) {
-    text += '< ' + username + ' >'
-  }
-  text += '更新成功数量：' + data.updateUsernames.length + ';'
-  for (const username of data.updateUsernames) {
-    text += '< ' + username + ' >'
-  }
-  text += '更新失败数量：' + Object.keys(data.failureUsernames).length + ';'
-  for (const username in data.failureUsernames) {
-    text += '< ' + username + ': ' + data.failureUsernames[username] + ' >'
-  }
-  message.alert(text)
-  await reload()
-}
-// 文件数超出提示
-const handleExceed = (): void => {
-  message.error('最多只能上传一个文件！')
-}
-// 上传错误提示
-const excelUploadError = (): void => {
-  message.error('导入数据失败，请您重新上传！')
-}
-// ========== 初始化 ==========
-onMounted(async () => {
-  await getPostOptions()
-  await getTree()
-})
 </script>
-
-<style scoped>
-.user {
-  height: 780px;
-  max-height: 800px;
-}
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-</style>
