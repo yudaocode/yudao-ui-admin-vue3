@@ -9,6 +9,7 @@ import { XButton, XTextButton } from '@/components/XButton'
 import { DictTag } from '@/components/DictTag'
 import { ContentWrap } from '@/components/ContentWrap'
 import { Descriptions } from '@/components/Descriptions'
+import { RightToolbar } from '@/components/RightToolbar'
 
 export const setupGlobCom = (app: App<Element>): void => {
   app.component('Icon', Icon)
@@ -22,4 +23,5 @@ export const setupGlobCom = (app: App<Element>): void => {
   app.component('DictTag', DictTag)
   app.component('ContentWrap', ContentWrap)
   app.component('Descriptions', Descriptions)
+  app.component('RightToolbar', RightToolbar)
 }
