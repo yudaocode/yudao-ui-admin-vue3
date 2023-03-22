@@ -60,21 +60,21 @@
         <el-date-picker
           v-model="queryParams.createTime"
           style="width: 240px"
-          value-format="yyyy-MM-dd HH:mm:ss"
           type="daterange"
-          range-separator="-"
+          value-format="YYYY-MM-DD HH:mm:ss"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          :default-time="['00:00:00', '23:59:59']"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button type="primary" @click="handleQuery"
+          ><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button
+        >
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
       </el-form-item>
     </el-form>
     <!-- 操作工具栏 -->
-    <el-row>
+    <el-row class="mb-10px">
       <el-col :span="12">
         <el-row :gutter="10">
           <el-col :span="1.5">
