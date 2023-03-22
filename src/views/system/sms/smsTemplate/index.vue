@@ -51,10 +51,7 @@
             :key="channel.id"
             :value="channel.id"
             :label="
-              channel.signature +
-              '【' +
-              getDictObj(DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE, channel.code) +
-              '】'
+              channel.signature + optionLabel(DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE, channel.code)
             "
           />
         </el-select>
@@ -205,7 +202,7 @@
   <SmsTemplateFrom ref="modalRef" :channelOptions="channelOptions" @success="getList" />
 </template>
 <script setup lang="ts" name="SmsTemplate">
-import { DICT_TYPE, getDictOptions, getDictObj } from '@/utils/dict'
+import { DICT_TYPE, getDictOptions, getDictLabel } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as templateApi from '@/api/system/sms/smsTemplate'
 import * as SmsChannelApi from '@/api/system/sms/smsChannel'
@@ -282,6 +279,9 @@ onMounted(() => {
     channelOptions.value = res
   })
 })
+const optionLabel = computed(
+  () => (type: string, code: string) => `【${getDictLabel(type, code)}】`
+)
 /** 格式化短信渠道 */
 const formatChannelSignature = (channelId: number) => {
   channelOptions.value.forEach((item) => {
