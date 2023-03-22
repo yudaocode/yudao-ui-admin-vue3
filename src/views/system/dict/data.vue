@@ -1,6 +1,5 @@
 <template>
-  <ContentWrap>
-    <!-- 搜索工作栏 -->
+  <content-wrap>
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -8,26 +7,24 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="岗位名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入岗位名称"
-          clearable
-          @keyup.enter="handleQuery"
-        />
+      <el-form-item label="字典名称" prop="dictType">
+        <el-select v-model="queryParams.dictType" class="!w-240px">
+          <el-option v-for="item in dicts" :key="item.type" :label="item.name" :value="item.type" />
+        </el-select>
       </el-form-item>
-      <el-form-item label="岗位编码" prop="code">
+      <el-form-item label="字典标签" prop="label">
         <el-input
-          v-model="queryParams.code"
-          placeholder="请输入岗位编码"
+          v-model="queryParams.label"
+          placeholder="请输入字典标签"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+        <el-select v-model="queryParams.status" placeholder="数据状态" clearable class="!w-240px">
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -37,11 +34,7 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          @click="openModal('create')"
-          v-hasPermi="['system:notice:create']"
-        >
+        <el-button type="primary" @click="openModal('create')" v-hasPermi="['system:dict:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
@@ -49,27 +42,29 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['infra:config:export']"
+          v-hasPermi="['system:dict:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
       </el-form-item>
     </el-form>
-  </ContentWrap>
+  </content-wrap>
 
   <!-- 列表 -->
-  <ContentWrap>
-    <el-table v-loading="loading" :data="list" align="center">
-      <el-table-column label="岗位编号" align="center" prop="id" />
-      <el-table-column label="岗位名称" align="center" prop="name" />
-      <el-table-column label="岗位编码" align="center" prop="code" />
-      <el-table-column label="岗位顺序" align="center" prop="sort" />
-      <el-table-column label="岗位备注" align="center" prop="remark" />
+  <content-wrap>
+    <el-table v-loading="loading" :data="list">
+      <el-table-column label="字典编码" align="center" prop="id" />
+      <el-table-column label="字典标签" align="center" prop="label" />
+      <el-table-column label="字典键值" align="center" prop="value" />
+      <el-table-column label="字典排序" align="center" prop="sort" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
+      <el-table-column label="颜色类型" align="center" prop="colorType" />
+      <el-table-column label="CSS Class" align="center" prop="cssClass" />
+      <el-table-column label="备注" align="center" prop="remark" show-overflow-tooltip />
       <el-table-column
         label="创建时间"
         align="center"
@@ -83,15 +78,15 @@
             link
             type="primary"
             @click="openModal('update', scope.row.id)"
-            v-hasPermi="['system:post:update']"
+            v-hasPermi="['system:dict:update']"
           >
-            编辑
+            修改
           </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['system:post:delete']"
+            v-hasPermi="['system:dict:delete']"
           >
             删除
           </el-button>
@@ -105,20 +100,21 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </ContentWrap>
+  </content-wrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <PostForm ref="formRef" @success="getList" />
+  <data-form ref="modalRef" @success="getList" />
 </template>
-<script setup lang="tsx">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
+<script setup lang="ts" name="Data">
+import * as DictDataApi from '@/api/system/dict/dict.data'
+import * as DictTypeApi from '@/api/system/dict/dict.type'
+import { getDictOptions, DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
-import * as PostApi from '@/api/system/post'
-import PostForm from './PostForm.vue'
-
+import { dateFormatter } from '@/utils/formatTime'
+import DataForm from './data.form.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const route = useRoute() // 路由
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -126,18 +122,19 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  code: '',
-  name: '',
-  status: undefined
+  label: '',
+  status: undefined,
+  dictType: route.params.dictType
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const dicts = ref<DictTypeApi.DictTypeVO[]>() // 字典类型的列表
 
-/** 查询岗位列表 */
+/** 查询参数列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await PostApi.getPostPage(queryParams)
+    const data = await DictDataApi.getDictDataPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -158,9 +155,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
+const modalRef = ref()
 const openModal = (type: string, id?: number) => {
-  formRef.value.openModal(type, id)
+  modalRef.value.openModal(type, id)
 }
 
 /** 删除按钮操作 */
@@ -169,7 +166,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await PostApi.deletePost(id)
+    await DictDataApi.deleteDictData(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -183,16 +180,23 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await PostApi.exportPost(queryParams)
-    download.excel(data, '岗位列表.xls')
+    const data = await DictDataApi.exportDictDataApi(queryParams)
+    download.excel(data, '字典数据.xls')
   } catch {
   } finally {
     exportLoading.value = false
   }
 }
 
+/** 查询字典（精简)列表 */
+const getDictList = async () => {
+  dicts.value = await DictTypeApi.listSimpleDictType()
+}
+
 /** 初始化 **/
 onMounted(() => {
   getList()
+  // 查询字典（精简)列表
+  getDictList()
 })
 </script>

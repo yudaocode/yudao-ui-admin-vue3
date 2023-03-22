@@ -90,10 +90,10 @@
 <script setup lang="ts" name="Dept">
 import { handleTree } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
-import { getListSimpleUsersApi, UserVO } from '@/api/system/user'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import DeptForm from './form.vue'
 import { dateFormatter } from '@/utils/formatTime'
+import { getSimpleUserList, UserVO } from '@/api/system/user'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 // 搜索变量
@@ -115,7 +115,7 @@ const loading = ref(true) // 列表的加载中
 
 //获取用户列表
 const getUserList = async () => {
-  const res = await getListSimpleUsersApi()
+  const res = await getSimpleUserList()
   userOption.value = res
 }
 

@@ -46,7 +46,7 @@ export interface ApiErrorLogExportReqVO {
 }
 
 // 查询列表API 访问日志
-export const getApiErrorLogPageApi = (params: ApiErrorLogPageReqVO) => {
+export const getApiErrorLogPageApi = (params: PageParam) => {
   return request.get({ url: '/infra/api-error-log/page', params })
 }
 
@@ -58,7 +58,7 @@ export const updateApiErrorLogPageApi = (id: number, processStatus: number) => {
 }
 
 // 导出API 访问日志
-export const exportApiErrorLogApi = (params: ApiErrorLogExportReqVO) => {
+export const exportApiErrorLogApi = (params) => {
   return request.download({
     url: '/infra/api-error-log/export-excel',
     params

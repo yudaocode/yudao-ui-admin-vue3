@@ -1,17 +1,29 @@
 <template>
   <content-wrap>
     <!-- 搜索工作栏 -->
-    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="公告标题" prop="title">
         <el-input
           v-model="queryParams.title"
           placeholder="请输入公告标题"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="公告状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择公告状态" clearable>
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择公告状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="parseInt(dict.value)"
