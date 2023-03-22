@@ -1,13 +1,20 @@
 <template>
+  <!-- 搜索 -->
   <content-wrap>
-    <!-- 搜索工作栏 -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="参数名称" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入参数名称"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="参数键名" prop="key">
@@ -16,10 +23,16 @@
           placeholder="请输入参数键名"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="系统内置" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择系统内置" clearable>
+        <el-select
+          v-model="queryParams.type"
+          placeholder="请选择系统内置"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.INFRA_CONFIG_TYPE)"
             :key="parseInt(dict.value)"
@@ -33,10 +46,10 @@
           v-model="queryParams.createTime"
           value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
-          range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>
@@ -56,9 +69,11 @@
         </el-button>
       </el-form-item>
     </el-form>
+  </content-wrap>
 
-    <!-- 列表 -->
-    <el-table v-loading="loading" :data="list" align="center">
+  <!-- 列表 -->
+  <content-wrap>
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="参数主键" align="center" prop="id" />
       <el-table-column label="参数分类" align="center" prop="category" />
       <el-table-column label="参数名称" align="center" prop="name" :show-overflow-tooltip="true" />

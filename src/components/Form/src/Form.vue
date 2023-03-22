@@ -35,7 +35,8 @@ export default defineComponent({
       default: () => []
     },
     // 是否需要栅格布局
-    isCol: propTypes.bool.def(true),
+    // update by 芋艿：将 true 改成 false，因为项目更常用这种方式
+    isCol: propTypes.bool.def(false),
     // 表单数据对象
     model: {
       type: Object as PropType<Recordable>,
@@ -46,7 +47,9 @@ export default defineComponent({
     // 是否自定义内容
     isCustom: propTypes.bool.def(false),
     // 表单label宽度
-    labelWidth: propTypes.oneOfType([String, Number]).def('auto')
+    labelWidth: propTypes.oneOfType([String, Number]).def('auto'),
+    // 是否 loading 数据中 add by 芋艿
+    vLoading: propTypes.bool.def(false)
   },
   emits: ['register'],
   setup(props, { slots, expose, emit }) {
@@ -280,6 +283,7 @@ export default defineComponent({
         {...getFormBindValue()}
         model={props.isCustom ? props.model : formModel}
         class={prefixCls}
+        v-loading={props.vLoading}
       >
         {{
           // 如果需要自定义，就什么都不渲染，而是提供默认插槽

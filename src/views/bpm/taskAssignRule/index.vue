@@ -139,9 +139,9 @@ import { FormInstance } from 'element-plus'
 // 业务相关的 import
 import * as TaskAssignRuleApi from '@/api/bpm/taskAssignRule'
 import { listSimpleRolesApi } from '@/api/system/role'
-import { listSimplePostsApi } from '@/api/system/post'
-import { getListSimpleUsersApi } from '@/api/system/user'
-import { listSimpleUserGroupsApi } from '@/api/bpm/userGroup'
+import { getSimplePostList } from '@/api/system/post'
+import { getSimpleUserList } from '@/api/system/user'
+import { listSimpleUserGroup } from '@/api/bpm/userGroup'
 import { listSimpleDeptApi } from '@/api/system/dept'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { handleTree, defaultProps } from '@/utils/tree'
@@ -336,17 +336,17 @@ onMounted(() => {
   })
   // 获得岗位列表
   postOptions.value = []
-  listSimplePostsApi().then((data) => {
+  getSimplePostList().then((data) => {
     postOptions.value.push(...data)
   })
   // 获得用户列表
   userOptions.value = []
-  getListSimpleUsersApi().then((data) => {
+  getSimpleUserList().then((data) => {
     userOptions.value.push(...data)
   })
   // 获得用户组列表
   userGroupOptions.value = []
-  listSimpleUserGroupsApi().then((data) => {
+  listSimpleUserGroup().then((data) => {
     userGroupOptions.value.push(...data)
   })
   if (!isShow) {

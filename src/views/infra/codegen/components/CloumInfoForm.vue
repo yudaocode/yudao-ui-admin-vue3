@@ -114,7 +114,7 @@
 import { PropType } from 'vue'
 import { DictTypeVO } from '@/api/system/dict/types'
 import { CodegenColumnVO } from '@/api/infra/codegen/types'
-import { listSimpleDictTypeApi } from '@/api/system/dict/dict.type'
+import { listSimpleDictType } from '@/api/system/dict/dict.type'
 
 const props = defineProps({
   info: {
@@ -125,7 +125,7 @@ const props = defineProps({
 /** 查询字典下拉列表 */
 const dictOptions = ref<DictTypeVO[]>()
 const getDictOptions = async () => {
-  const res = await listSimpleDictTypeApi()
+  const res = await listSimpleDictType()
   dictOptions.value = res
 }
 onMounted(async () => {

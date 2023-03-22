@@ -98,6 +98,7 @@ const setVisible = () => {
 </script>
 
 <template>
+  <!-- update by 芋艿：class="-mb-15px" 用于降低和 ContentWrap 组件的底部距离，避免空隙过大 -->
   <Form
     :is-custom="false"
     :label-width="labelWidth"
@@ -106,21 +107,26 @@ const setVisible = () => {
     :is-col="isCol"
     :schema="newSchema"
     @register="register"
+    class="-mb-15px"
   >
     <template #action>
       <div v-if="layout === 'inline'">
-        <ElButton v-if="showSearch" type="primary" @click="search">
+        <!-- update by 芋艿：去除搜索的 type="primary"，颜色变淡一点 -->
+        <ElButton v-if="showSearch" @click="search">
           <Icon icon="ep:search" class="mr-5px" />
           {{ t('common.query') }}
         </ElButton>
+        <!-- update by 芋艿：将 icon="ep:refresh-right" 修改成 icon="ep:refresh"，和 ruoyi-vue 搜索保持一致  -->
         <ElButton v-if="showReset" @click="reset">
-          <Icon icon="ep:refresh-right" class="mr-5px" />
+          <Icon icon="ep:refresh" class="mr-5px" />
           {{ t('common.reset') }}
         </ElButton>
         <ElButton v-if="expand" text @click="setVisible">
           {{ t(visible ? 'common.shrink' : 'common.expand') }}
           <Icon :icon="visible ? 'ep:arrow-up' : 'ep:arrow-down'" />
         </ElButton>
+        <!-- add by 芋艿：补充在搜索后的按钮 -->
+        <slot name="actionMore"></slot>
       </div>
     </template>
     <template #[name] v-for="name in Object.keys($slots)" :key="name"
@@ -142,6 +148,8 @@ const setVisible = () => {
         {{ t(visible ? 'common.shrink' : 'common.expand') }}
         <Icon :icon="visible ? 'ep:arrow-up' : 'ep:arrow-down'" />
       </ElButton>
+      <!-- add by 芋艿：补充在搜索后的按钮 -->
+      <slot name="actionMore"></slot>
     </div>
   </template>
 </template>
