@@ -175,78 +175,83 @@
     />
     <!-- 短信日志详细 -->
     <el-dialog title="短信日志详细" v-model="open" width="700px" append-to-body>
-      <el-form ref="form" :model="form" label-width="140px" size="mini">
+      <el-form ref="formRef" :model="formData" label-width="140px">
         <el-row>
           <el-col :span="24">
-            <el-form-item label="日志主键：">{{ form.id }}</el-form-item>
+            <el-form-item label="日志主键：">{{ formData.id }}</el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="短信渠道：">
-              {{ formatChannelSignature(form.channelId) }}
-              <dict-tag :type="DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE" :value="form.channelCode" />
+              {{ formatChannelSignature(formData.channelId) }}
+              <dict-tag :type="DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE" :value="formData.channelCode" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="短信模板：">
-              {{ form.templateId }} | {{ form.templateCode }}
-              <dict-tag :type="DICT_TYPE.SYSTEM_SMS_TEMPLATE_TYPE" :value="form.templateType" />
+              {{ formData.templateId }} | {{ formData.templateCode }}
+              <dict-tag :type="DICT_TYPE.SYSTEM_SMS_TEMPLATE_TYPE" :value="formData.templateType" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="API 的模板编号：">{{ form.apiTemplateId }}</el-form-item>
+            <el-form-item label="API 的模板编号：">{{ formData.apiTemplateId }}</el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="用户信息："
-              >{{ form.mobile }}
-              <span v-if="form.userType && form.userId">
-                <dict-tag :type="DICT_TYPE.USER_TYPE" :value="form.userType" />({{ form.userId }})
+              >{{ formData.mobile }}
+              <span v-if="formData.userType && formData.userId">
+                <dict-tag :type="DICT_TYPE.USER_TYPE" :value="formData.userType" />({{
+                  formData.userId
+                }})
               </span>
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="短信内容：">{{ form.templateContent }}</el-form-item>
+            <el-form-item label="短信内容：">{{ formData.templateContent }}</el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="短信参数：">{{ form.templateParams }}</el-form-item>
+            <el-form-item label="短信参数：">{{ formData.templateParams }}</el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="创建时间：">{{ parseTime(form.createTime) }}</el-form-item>
+            <el-form-item label="创建时间：">{{ parseTime(formData.createTime) }}</el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="发送状态：">
-              <dict-tag :type="DICT_TYPE.SYSTEM_SMS_SEND_STATUS" :value="form.sendStatus" />
+              <dict-tag :type="DICT_TYPE.SYSTEM_SMS_SEND_STATUS" :value="formData.sendStatus" />
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="发送时间：">{{ parseTime(form.sendTime) }}</el-form-item>
+            <el-form-item label="发送时间：">{{ parseTime(formData.sendTime) }}</el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="发送结果："
-              >{{ form.sendCode }} | {{ form.sendMsg }}
+              >{{ formData.sendCode }} | {{ formData.sendMsg }}
             </el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="API 发送结果："
-              >{{ form.apiSendCode }} | {{ form.apiSendMsg }}</el-form-item
+              >{{ formData.apiSendCode }} | {{ formData.apiSendMsg }}</el-form-item
             >
           </el-col>
           <el-col :span="24">
-            <el-form-item label="API 短信编号：">{{ form.apiSerialNo }}</el-form-item>
+            <el-form-item label="API 短信编号：">{{ formData.apiSerialNo }}</el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="API 请求编号：">{{ form.apiRequestId }}</el-form-item>
+            <el-form-item label="API 请求编号：">{{ formData.apiRequestId }}</el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="接收状态：">
-              <dict-tag :type="DICT_TYPE.SYSTEM_SMS_RECEIVE_STATUS" :value="form.receiveStatus" />
+              <dict-tag
+                :type="DICT_TYPE.SYSTEM_SMS_RECEIVE_STATUS"
+                :value="formData.receiveStatus"
+              />
             </el-form-item>
           </el-col>
           <el-col :span="24">
-            <el-form-item label="接收时间：">{{ parseTime(form.receiveTime) }}</el-form-item>
+            <el-form-item label="接收时间：">{{ parseTime(formData.receiveTime) }}</el-form-item>
           </el-col>
           <el-col :span="24">
             <el-form-item label="API 接收结果："
-              >{{ form.apiReceiveCode }} | {{ form.apiReceiveMsg }}
+              >{{ formData.apiReceiveCode }} | {{ formData.apiReceiveMsg }}
             </el-form-item>
           </el-col>
         </el-row>
@@ -363,7 +368,7 @@ const getList = () => {
 }
 // ================== 详情 ====================
 const open = ref(false)
-const form = ref<SmsLogApi.SmsLogVO>({
+const formData = ref<SmsLogApi.SmsLogVO>({
   id: null,
   channelId: null,
   channelCode: '',
@@ -392,8 +397,8 @@ const form = ref<SmsLogApi.SmsLogVO>({
 })
 /** 详细按钮操作 */
 const handleView = (row: SmsLogApi.SmsLogVO) => {
+  formData.value = row
   open.value = true
-  form.value = row
 }
 getList()
 </script>
