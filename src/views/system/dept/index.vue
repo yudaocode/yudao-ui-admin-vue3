@@ -79,7 +79,7 @@ import { handleTree, defaultProps } from '@/utils/tree'
 import type { FormExpose } from '@/components/Form'
 import { allSchemas, rules } from './dept.data'
 import * as DeptApi from '@/api/system/dept'
-import { getListSimpleUsersApi, UserVO } from '@/api/system/user'
+import { getSimpleUserList, UserVO } from '@/api/system/user'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -102,7 +102,7 @@ const deptOptions = ref() // 树形结构
 const userOption = ref<UserVO[]>([])
 
 const getUserList = async () => {
-  const res = await getListSimpleUsersApi()
+  const res = await getSimpleUserList()
   userOption.value = res
 }
 // 获取下拉框[上级]的数据

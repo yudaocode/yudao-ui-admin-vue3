@@ -119,7 +119,7 @@ import { FormExpose } from '@/components/Form'
 // 业务相关的 import
 import { rules, allSchemas } from './template.data'
 import * as NotifyTemplateApi from '@/api/system/notify/template'
-import { getListSimpleUsersApi, UserVO } from '@/api/system/user'
+import { getSimpleUserList, UserVO } from '@/api/system/user'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -244,7 +244,7 @@ const sendTest = async () => {
 
 // ========== 初始化 ==========
 onMounted(() => {
-  getListSimpleUsersApi().then((data) => {
+  getSimpleUserList().then((data) => {
     userOption.value = data
   })
 })

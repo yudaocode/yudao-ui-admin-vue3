@@ -378,7 +378,7 @@ onMounted(() => {
   // 加载详情
   getDetail()
   // 加载用户的列表
-  UserApi.getListSimpleUsersApi().then((data) => {
+  UserApi.getSimpleUserList().then((data) => {
     userOptions.value.push(...data)
   })
 })
