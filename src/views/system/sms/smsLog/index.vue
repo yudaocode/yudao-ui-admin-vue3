@@ -176,9 +176,9 @@
     <!-- 短信日志详细 -->
     <Dialog title="短信日志详情" v-model="open">
       <el-descriptions border :column="1">
-        <el-descriptions-item label-align="right" width="50px" label="日志主键：">{{
-          formData.id
-        }}</el-descriptions-item>
+        <el-descriptions-item label-align="right" width="50px" label="日志主键：">
+          {{ formData.id }}
+        </el-descriptions-item>
         <el-descriptions-item label-align="right" width="50px" label="短信渠道：">
           {{ formatChannelSignature(formData.channelId) }}
           <dict-tag :type="DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE" :value="formData.channelCode" />
