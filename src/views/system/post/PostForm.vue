@@ -37,6 +37,7 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
 import * as PostApi from '@/api/system/post'
 
 const { t } = useI18n() // 国际化
@@ -50,7 +51,8 @@ const formData = ref({
   id: undefined,
   name: '',
   code: '',
-  status: undefined,
+  sort: undefined,
+  status: CommonStatusEnum.ENABLE,
   remark: ''
 })
 const formRules = reactive({
@@ -71,7 +73,7 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await PostApi.getPostApi(id)
+      formData.value = await PostApi.getPost(id)
     } finally {
       formLoading.value = false
     }
@@ -91,10 +93,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as PostApi.PostVO
     if (formType.value === 'create') {
-      await PostApi.createPostApi(data)
+      await PostApi.createPost(data)
       message.success(t('common.createSuccess'))
     } else {
-      await PostApi.updatePostApi(data)
+      await PostApi.updatePost(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
@@ -109,10 +111,10 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    title: '',
-    type: undefined,
-    content: '',
-    status: undefined,
+    name: '',
+    code: '',
+    sort: undefined,
+    status: CommonStatusEnum.ENABLE,
     remark: ''
   }
   formRef.value?.resetFields()

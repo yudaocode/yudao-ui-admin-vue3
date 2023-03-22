@@ -139,7 +139,7 @@ import { FormInstance } from 'element-plus'
 // 业务相关的 import
 import * as TaskAssignRuleApi from '@/api/bpm/taskAssignRule'
 import { listSimpleRolesApi } from '@/api/system/role'
-import { listSimplePostsApi } from '@/api/system/post'
+import { getSimplePostList } from '@/api/system/post'
 import { getSimpleUserList } from '@/api/system/user'
 import { listSimpleUserGroup } from '@/api/bpm/userGroup'
 import { listSimpleDeptApi } from '@/api/system/dept'
@@ -336,7 +336,7 @@ onMounted(() => {
   })
   // 获得岗位列表
   postOptions.value = []
-  listSimplePostsApi().then((data) => {
+  getSimplePostList().then((data) => {
     postOptions.value.push(...data)
   })
   // 获得用户列表
