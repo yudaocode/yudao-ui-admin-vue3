@@ -10,13 +10,18 @@
       <el-descriptions-item label="应用名">
         {{ detailData.applicationName }}
       </el-descriptions-item>
-      <el-descriptions-item label="用户信息">
-        {{ detailData.userId }} |
+      <el-descriptions-item label="用户编号">
+        {{ detailData.userId }}
         <dict-tag :type="DICT_TYPE.USER_TYPE" :value="detailData.userType" />
-        | {{ detailData.userIp }} | {{ detailData.userAgent }}
+      </el-descriptions-item>
+      <el-descriptions-item label="用户 IP">
+        {{ detailData.userIp }}
+      </el-descriptions-item>
+      <el-descriptions-item label="用户 UA">
+        {{ detailData.userAgent }}
       </el-descriptions-item>
       <el-descriptions-item label="请求信息">
-        {{ detailData.requestMethod }} | {{ detailData.requestUrl }}
+        {{ detailData.requestMethod }} {{ detailData.requestUrl }}
       </el-descriptions-item>
       <el-descriptions-item label="请求参数">
         {{ detailData.requestParams }}
@@ -27,7 +32,7 @@
       <el-descriptions-item label="异常名">
         {{ detailData.exceptionName }}
       </el-descriptions-item>
-      <el-descriptions-item label="异常名" v-if="detailData.exceptionStackTrace">
+      <el-descriptions-item label="异常堆栈" v-if="detailData.exceptionStackTrace">
         <el-input
           type="textarea"
           :readonly="true"
@@ -50,7 +55,6 @@
     </el-descriptions>
   </Dialog>
 </template>
-
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
@@ -61,7 +65,7 @@ const detailLoading = ref(false) // 表单的加载中
 const detailData = ref() // 详情数据
 
 /** 打开弹窗 */
-const openModal = async (data: ApiErrorLog.ApiErrorLogVO) => {
+const open = async (data: ApiErrorLog.ApiErrorLogVO) => {
   modelVisible.value = true
   // 设置数据
   detailLoading.value = true
@@ -71,6 +75,5 @@ const openModal = async (data: ApiErrorLog.ApiErrorLogVO) => {
     detailLoading.value = false
   }
 }
-
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 </script>
