@@ -50,12 +50,11 @@
         <el-date-picker
           v-model="queryParams.sendTime"
           style="width: 240px"
-          value-format="yyyy-MM-dd HH:mm:ss"
+          value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          :default-time="['00:00:00', '23:59:59']"
         />
       </el-form-item>
       <el-form-item label="接收状态" prop="receiveStatus">
@@ -72,12 +71,11 @@
         <el-date-picker
           v-model="queryParams.receiveTime"
           style="width: 240px"
-          value-format="yyyy-MM-dd HH:mm:ss"
+          value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          :default-time="['00:00:00', '23:59:59']"
         />
       </el-form-item>
       <el-form-item>
