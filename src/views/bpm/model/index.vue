@@ -374,7 +374,7 @@ const formDetailPreview = ref({
 const handleFormDetail = async (row) => {
   if (row.formType == 10) {
     // 设置表单
-    const data = await FormApi.getFormApi(row.formId)
+    const data = await FormApi.getForm(row.formId)
     setConfAndFields2(formDetailPreview, data.conf, data.fields)
     // 弹窗打开
     formDetailVisible.value = true
@@ -588,7 +588,7 @@ const uploadClose = () => {
 // ========== 初始化 ==========
 onMounted(() => {
   // 获得流程表单的下拉框的数据
-  FormApi.getSimpleFormsApi().then((data) => {
+  FormApi.getSimpleFormList().then((data) => {
     forms.value = data
   })
 })

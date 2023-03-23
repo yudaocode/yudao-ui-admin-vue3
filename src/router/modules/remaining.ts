@@ -225,14 +225,14 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: '/manager/form/edit',
-        component: () => import('@/views/bpm/form/formEditor.vue'),
+        component: () => import('@/views/bpm/form/FormEditor.vue'),
         name: 'bpmFormEditor',
         meta: {
           noCache: true,
           hidden: true,
           canTo: true,
           title: '设计流程表单',
-          activeMenu: 'bpm/manager/form/formEditor'
+          activeMenu: '/bpm/manager/form'
         }
       },
       {
