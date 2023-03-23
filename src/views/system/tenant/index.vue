@@ -1,13 +1,20 @@
 <template>
   <!-- 搜索 -->
-  <content-wrap>
-    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
+  <ContentWrap>
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="租户名" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入租户名"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="联系人" prop="contactName">
@@ -16,6 +23,7 @@
           placeholder="请输入联系人"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="联系手机" prop="contactMobile">
@@ -24,12 +32,18 @@
           placeholder="请输入联系手机"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="租户状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择租户状态" clearable>
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择租户状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -41,10 +55,10 @@
           v-model="queryParams.createTime"
           value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
-          range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
 
@@ -57,11 +71,7 @@
           <Icon icon="ep:refresh" class="mr-5px" />
           重置
         </el-button>
-        <el-button
-          type="primary"
-          @click="openModal('create')"
-          v-hasPermi="['system:tenant:create']"
-        >
+        <el-button type="primary" @click="openForm('create')" v-hasPermi="['system:tenant:create']">
           <Icon icon="ep:plus" class="mr-5px" />
           新增
         </el-button>
@@ -77,10 +87,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list" align="center">
       <el-table-column label="租户编号" align="center" prop="id" />
       <el-table-column label="租户名" align="center" prop="name" />
@@ -126,7 +136,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['system:tenant:update']"
           >
             编辑
@@ -149,20 +159,18 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <tenant-form ref="modalRef" @success="getList" />
+  <TenantForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Tenant">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as TenantApi from '@/api/system/tenant'
-import { getTenantPackageList as getTenantPackageListApi } from '@/api/system/tenantPackage'
+import * as TenantPackageApi from '@/api/system/tenantPackage'
 import TenantForm from './form.vue'
-import ContentWrap from '@/components/ContentWrap/src/ContentWrap.vue'
-import DictTag from '@/components/DictTag/src/DictTag.vue'
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -170,7 +178,6 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const packageList = ref([]) //租户套餐列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -179,15 +186,16 @@ const queryParams = reactive({
   contactMobile: undefined,
   status: undefined,
   createTime: []
-}) //查询参数对象
+})
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const packageList = ref([]) //租户套餐列表
 
 /** 查询参数列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await TenantApi.getTenantPageApi(queryParams)
+    const data = await TenantApi.getTenantPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -208,9 +216,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */
@@ -219,7 +227,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await TenantApi.deleteTenantApi(id)
+    await TenantApi.deleteTenant(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -233,23 +241,17 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await TenantApi.exportTenantApi(queryParams)
-    download.excel(data, '参数配置.xls')
+    const data = await TenantApi.exportTenant(queryParams)
+    download.excel(data, '租户列表.xls')
   } catch {
   } finally {
     exportLoading.value = false
   }
 }
 
-/**获取租户套餐**/
-const getTenantPackageList = async () => {
-  const data = await getTenantPackageListApi()
-  packageList.value = data
-}
-
 /** 初始化 **/
-onMounted(() => {
-  getList()
-  getTenantPackageList()
+onMounted(async () => {
+  await getList()
+  packageList.value = await TenantPackageApi.getTenantPackageList()
 })
 </script>

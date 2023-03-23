@@ -7,96 +7,67 @@
       label-width="80px"
       v-loading="formLoading"
     >
-      <el-row>
-        <el-col :span="10">
-          <el-form-item label="租户名" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入租户名" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="10" :offset="2">
-          <el-form-item label="租户套餐" prop="packageId">
-            <el-select v-model="formData.packageId" placeholder="请选择租户套餐" clearable>
-              <el-option
-                v-for="item in packageList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="10">
-          <el-form-item label="联系人" prop="contactName">
-            <el-input v-model="formData.contactName" placeholder="请输入联系人" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="10" :offset="2">
-          <el-form-item label="联系手机" prop="contactMobile">
-            <el-input v-model="formData.contactMobile" placeholder="请输入联系手机" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="10">
-          <el-form-item v-if="formData.id === undefined" label="用户名称" prop="username">
-            <el-input v-model="formData.username" placeholder="请输入用户名称" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="10" :offset="2">
-          <el-form-item v-if="formData.id === undefined" label="用户密码" prop="password">
-            <el-input
-              v-model="formData.password"
-              placeholder="请输入用户密码"
-              type="password"
-              show-password
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="10">
-          <el-form-item label="账号额度" prop="accountCount">
-            <el-input-number
-              v-model="formData.accountCount"
-              placeholder="请输入账号额度"
-              controls-position="right"
-              :min="0"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="10" :offset="2">
-          <el-form-item label="过期时间" prop="expireTime">
-            <el-date-picker
-              clearable
-              v-model="formData.expireTime"
-              type="date"
-              value-format="x"
-              placeholder="请选择过期时间"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="10">
-          <el-form-item label="绑定域名" prop="domain">
-            <el-input v-model="formData.domain" placeholder="请输入绑定域名" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="10" :offset="2">
-          <el-form-item label="租户状态" prop="status">
-            <el-radio-group v-model="formData.status">
-              <el-radio
-                v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-                :key="dict.value"
-                :label="dict.value"
-                >{{ dict.label }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-        </el-col>
-      </el-row>
+      <el-form-item label="租户名" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入租户名" />
+      </el-form-item>
+      <el-form-item label="租户套餐" prop="packageId">
+        <el-select v-model="formData.packageId" placeholder="请选择租户套餐" clearable>
+          <el-option
+            v-for="item in packageList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="联系人" prop="contactName">
+        <el-input v-model="formData.contactName" placeholder="请输入联系人" />
+      </el-form-item>
+      <el-form-item label="联系手机" prop="contactMobile">
+        <el-input v-model="formData.contactMobile" placeholder="请输入联系手机" />
+      </el-form-item>
+      <el-form-item v-if="formData.id === undefined" label="用户名称" prop="username">
+        <el-input v-model="formData.username" placeholder="请输入用户名称" />
+      </el-form-item>
+      <el-form-item v-if="formData.id === undefined" label="用户密码" prop="password">
+        <el-input
+          v-model="formData.password"
+          placeholder="请输入用户密码"
+          type="password"
+          show-password
+        />
+      </el-form-item>
+      <el-form-item label="账号额度" prop="accountCount">
+        <el-input-number
+          v-model="formData.accountCount"
+          placeholder="请输入账号额度"
+          controls-position="right"
+          :min="0"
+        />
+      </el-form-item>
+      <el-form-item label="过期时间" prop="expireTime">
+        <el-date-picker
+          clearable
+          v-model="formData.expireTime"
+          type="date"
+          value-format="x"
+          placeholder="请选择过期时间"
+        />
+      </el-form-item>
+      <el-form-item label="绑定域名" prop="domain">
+        <el-input v-model="formData.domain" placeholder="请输入绑定域名" />
+      </el-form-item>
+      <el-form-item label="租户状态" prop="status">
+        <el-radio-group v-model="formData.status">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
     </el-form>
     <template #footer>
       <div class="dialog-footer">
@@ -110,7 +81,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as TenantApi from '@/api/system/tenant'
 import { CommonStatusEnum } from '@/utils/constants'
-import { getTenantPackageList as getTenantPackageListApi } from '@/api/system/tenantPackage'
+import * as TenantPackageApi from '@/api/system/tenantPackage'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -142,7 +113,7 @@ const formRef = ref() // 表单 Ref
 const packageList = ref([]) // 租户套餐
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const open = async (type: string, id?: number) => {
   modelVisible.value = true
   modelTitle.value = t('action.' + type)
   formType.value = type
@@ -151,14 +122,15 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await TenantApi.getTenantApi(id)
+      formData.value = await TenantApi.getTenant(id)
     } finally {
       formLoading.value = false
     }
   }
-  packageList.value = await getTenantPackageListApi()
+  // 加载套餐列表
+  packageList.value = await TenantPackageApi.getTenantPackageList()
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -172,10 +144,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as TenantApi.TenantVO
     if (formType.value === 'create') {
-      await TenantApi.createTenantApi(data)
+      await TenantApi.createTenant(data)
       message.success(t('common.createSuccess'))
     } else {
-      await TenantApi.updateTenantApi(data)
+      await TenantApi.updateTenant(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
