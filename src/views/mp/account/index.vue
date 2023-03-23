@@ -6,7 +6,7 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="90px"
+      label-width="68px"
     >
       <el-form-item label="名称" prop="name">
         <el-input
@@ -20,8 +20,8 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" />搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" />重置</el-button>
-        <el-button type="primary" @click="openModal('create')" v-hasPermi="['mp:account:create']"
-          ><Icon icon="ep:plus" class="mr-5px" />新增
+        <el-button type="primary" @click="openForm('create')" v-hasPermi="['mp:account:create']">
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
     </el-form>
@@ -46,6 +46,14 @@
             alt="二维码"
             style="height: 100px; display: inline-block"
           />
+          <el-button
+            link
+            type="primary"
+            @click="handleGenerateQrCode(scope.row)"
+            v-hasPermi="['mp:account:qr-code']"
+          >
+            生成二维码
+          </el-button>
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" />
@@ -54,30 +62,26 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['mp:account:update']"
-            >编辑
+          >
+            编辑
           </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['mp:account:delete']"
-            >删除
-          </el-button>
-          <el-button
-            link
-            type="primary"
-            @click="handleGenerateQrCode(scope.row)"
-            v-hasPermi="['mp:account:qr-code']"
-            >生成二维码
+          >
+            删除
           </el-button>
           <el-button
             link
             type="danger"
             @click="handleCleanQuota(scope.row)"
             v-hasPermi="['mp:account:clear-quota']"
-            >清空 API 配额
+          >
+            清空 API 配额
           </el-button>
         </template>
       </el-table-column>
@@ -91,23 +95,20 @@
       @pagination="getList"
     />
   </content-wrap>
-  <!-- 对话框(添加 / 修改) -->
-  <account-form ref="modalRef" @success="getList" />
-</template>
 
+  <!-- 对话框(添加 / 修改) -->
+  <AccountForm ref="formRef" @success="getList" />
+</template>
 <script setup lang="ts" name="MpAccount">
 import * as AccountApi from '@/api/mp/account'
-import AccountForm from './form.vue'
+import AccountForm from './AccountForm.vue'
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-// 遮罩层
-const loading = ref(true)
-// 总条数
-const total = ref(0)
-// 公众号账号列表
-const list = ref([])
-// 查询参数
+
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -134,6 +135,7 @@ const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
+
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
@@ -141,9 +143,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */
@@ -158,6 +160,7 @@ const handleDelete = async (id) => {
     await getList()
   } catch {}
 }
+
 /** 生成二维码的按钮操作 */
 const handleGenerateQrCode = async (row) => {
   try {
@@ -170,6 +173,7 @@ const handleGenerateQrCode = async (row) => {
     await getList()
   } catch {}
 }
+
 /** 清空二维码 API 配额的按钮操作 */
 const handleCleanQuota = async (row) => {
   try {
@@ -181,6 +185,7 @@ const handleCleanQuota = async (row) => {
   } catch {}
 }
 
+/** 初始化 **/
 onMounted(() => {
   getList()
 })

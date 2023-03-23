@@ -1,7 +1,13 @@
 <template>
+  <!-- 搜索工作栏 -->
   <ContentWrap>
-    <!-- 搜索工作栏 -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="部门名称" prop="title">
         <el-input v-model="queryParams.name" placeholder="请输入部门名称" clearable />
       </el-form-item>
@@ -113,7 +119,7 @@ const isExpandAll = ref(true) // 是否展开，默认全部展开
 const refreshTable = ref(true) // 重新渲染表格状态
 const loading = ref(true) // 列表的加载中
 
-//获取用户列表
+// 获取用户列表
 const getUserList = async () => {
   const res = await getSimpleUserList()
   userOption.value = res
@@ -157,6 +163,7 @@ const getList = async () => {
     loading.value = false
   }
 }
+
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryParams.pageNo = 1

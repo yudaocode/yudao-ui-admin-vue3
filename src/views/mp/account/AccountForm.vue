@@ -1,6 +1,12 @@
 <template>
   <Dialog :title="modelTitle" v-model="modelVisible">
-    <el-form ref="formRef" :model="formData" :rules="rules" label-width="120px">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="rules"
+      label-width="120px"
+      v-loading="formLoading"
+    >
       <el-form-item label="名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入名称" />
       </el-form-item>
@@ -57,16 +63,13 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="modelVisible = false">取 消</el-button>
-      </div>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="modelVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
 <script setup lang="ts">
 import * as AccountApi from '@/api/mp/account'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -74,7 +77,6 @@ const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-// 表单参数
 const formData = ref({
   id: undefined,
   name: '',
@@ -85,7 +87,6 @@ const formData = ref({
   aesKey: '',
   remark: ''
 })
-// 表单校验
 const rules = reactive({
   name: [{ required: true, message: '名称不能为空', trigger: 'blur' }],
   account: [{ required: true, message: '公众号账号不能为空', trigger: 'blur' }],
@@ -96,7 +97,7 @@ const rules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const open = async (type: string, id?: number) => {
   modelVisible.value = true
   modelTitle.value = t('action.' + type)
   formType.value = type
@@ -111,12 +112,10 @@ const openModal = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-
-/** 提交按钮 */
 const submitForm = async () => {
   // 校验表单
   if (!formRef) return
