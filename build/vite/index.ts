@@ -15,7 +15,7 @@ import vueSetupExtend from 'vite-plugin-vue-setup-extend'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
-export function createVitePlugins(VITE_APP_TITLE: string) {
+export function createVitePlugins() {
   const root = process.cwd()
   // 路径查找
   function pathResolve(dir: string) {
@@ -95,8 +95,6 @@ export function createVitePlugins(VITE_APP_TITLE: string) {
       ext: '.gz', // 生成的压缩包后缀
       deleteOriginFile: false //压缩后是否删除源文件
     }),
-    ViteEjsPlugin({
-      title: VITE_APP_TITLE
-    })
+    ViteEjsPlugin()
   ]
 }
