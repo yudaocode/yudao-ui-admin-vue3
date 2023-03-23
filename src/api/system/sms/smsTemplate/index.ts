@@ -1,18 +1,18 @@
 import request from '@/config/axios'
 
 export interface SmsTemplateVO {
-  id: number
-  type: number
-  status: number
+  id: number | null
+  type: number | null
+  status: number | null
   code: string
   name: string
   content: string
   remark: string
   apiTemplateId: string
-  channelId: number
-  channelCode: string
-  params: string[]
-  createTime: Date
+  channelId: number | null
+  channelCode?: string
+  params?: string[]
+  createTime?: Date
 }
 
 export interface SendSmsReqVO {
@@ -21,13 +21,13 @@ export interface SendSmsReqVO {
   templateParams: Map<String, Object>
 }
 
-export interface SmsTemplatePageReqVO {
-  type?: number
-  status?: number
+export interface SmsTemplatePageReqVO extends PageParam {
+  type?: number | null
+  status?: number | null
   code?: string
   content?: string
   apiTemplateId?: string
-  channelId?: number
+  channelId?: number | null
   createTime?: Date[]
 }
 

@@ -126,14 +126,14 @@
   </content-wrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <config-form ref="modalRef" @success="getList" />
+  <SensitiveWordForm ref="modalRef" @success="getList" />
 </template>
 <script setup lang="ts" name="SensitiveWord">
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
-import ConfigForm from './form.vue' // TODO @blue-syd：组件名不对
+import SensitiveWordForm from './form.vue' // TODO @blue-syd：组件名不对
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -156,7 +156,7 @@ const tags = ref([])
 const getList = async () => {
   loading.value = true
   try {
-    const data = await SensitiveWordApi.getSensitiveWordPageApi(queryParams) // TODO @blue-syd：去掉 API 后缀哈
+    const data = await SensitiveWordApi.getSensitiveWordPage(queryParams) // TODO @blue-syd：去掉 API 后缀哈
     list.value = data.list
     total.value = data.total
   } finally {
@@ -190,7 +190,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await SensitiveWordApi.deleteSensitiveWordApi(id)
+    await SensitiveWordApi.deleteSensitiveWord(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -204,7 +204,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await SensitiveWordApi.exportSensitiveWordApi(queryParams) // TODO @blue-syd：去掉 API 后缀哈
+    const data = await SensitiveWordApi.exportSensitiveWord(queryParams) // TODO @blue-syd：去掉 API 后缀哈
     download.excel(data, '敏感词.xls')
   } catch {
   } finally {
@@ -214,7 +214,7 @@ const handleExport = async () => {
 
 /** 获得 Tag 标签列表 */
 const getTags = async () => {
-  tags.value = await SensitiveWordApi.getSensitiveWordTagsApi() // TODO @blue-syd：去掉 API 后缀哈
+  tags.value = await SensitiveWordApi.getSensitiveWordTags() // TODO @blue-syd：去掉 API 后缀哈
 }
 
 /** 初始化 **/

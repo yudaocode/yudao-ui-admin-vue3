@@ -45,7 +45,7 @@
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script setup lang="ts" name="SensitiveWordForm">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
 import { CommonStatusEnum } from '@/utils/constants'
@@ -81,7 +81,7 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await SensitiveWordApi.getSensitiveWordApi(id)
+      formData.value = await SensitiveWordApi.getSensitiveWord(id)
       console.log(formData.value)
     } finally {
       formLoading.value = false
@@ -102,10 +102,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as SensitiveWordApi.SensitiveWordVO
     if (formType.value === 'create') {
-      await SensitiveWordApi.createSensitiveWordApi(data) // TODO @blue-syd：去掉 API 后缀
+      await SensitiveWordApi.createSensitiveWord(data) // TODO @blue-syd：去掉 API 后缀
       message.success(t('common.createSuccess'))
     } else {
-      await SensitiveWordApi.updateSensitiveWordApi(data) // TODO @blue-syd：去掉 API 后缀
+      await SensitiveWordApi.updateSensitiveWord(data) // TODO @blue-syd：去掉 API 后缀
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false

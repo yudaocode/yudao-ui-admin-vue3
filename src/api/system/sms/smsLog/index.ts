@@ -1,39 +1,40 @@
 import request from '@/config/axios'
 
 export interface SmsLogVO {
-  id: number
-  channelId: number
+  id: number | null
+  channelId: number | null
   channelCode: string
-  templateId: number
+  templateId: number | null
   templateCode: string
-  templateType: number
+  templateType: number | null
   templateContent: string
-  templateParams: Map<string, object>
+  templateParams: Map<string, object> | null
+  apiTemplateId: string
   mobile: string
-  userId: number
-  userType: number
-  sendStatus: number
-  sendTime: Date
-  sendCode: number
+  userId: number | null
+  userType: number | null
+  sendStatus: number | null
+  sendTime: Date | null
+  sendCode: number | null
   sendMsg: string
   apiSendCode: string
   apiSendMsg: string
   apiRequestId: string
   apiSerialNo: string
-  receiveStatus: number
-  receiveTime: Date
+  receiveStatus: number | null
+  receiveTime: Date | null
   apiReceiveCode: string
   apiReceiveMsg: string
-  createTime: Date
+  createTime: Date | null
 }
 
 export interface SmsLogPageReqVO extends PageParam {
-  channelId?: number
-  templateId?: number
+  channelId?: number | null
+  templateId?: number | null
   mobile?: string
-  sendStatus?: number
+  sendStatus?: number | null
   sendTime?: Date[]
-  receiveStatus?: number
+  receiveStatus?: number | null
   receiveTime?: Date[]
 }
 export interface SmsLogExportReqVO {
