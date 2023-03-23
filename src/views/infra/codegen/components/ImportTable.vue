@@ -52,7 +52,7 @@
 import { VxeTableInstance } from 'vxe-table'
 import type { DatabaseTableVO } from '@/api/infra/codegen/types'
 import { getSchemaTableListApi, createCodegenListApi } from '@/api/infra/codegen'
-import { getDataSourceConfigListApi, DataSourceConfigVO } from '@/api/infra/dataSourceConfig'
+import { getDataSourceConfigList, DataSourceConfigVO } from '@/api/infra/dataSourceConfig'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -67,9 +67,9 @@ const queryParams = reactive({
 })
 const dataSourceConfigs = ref<DataSourceConfigVO[]>([])
 const show = async () => {
-  const res = await getDataSourceConfigListApi()
+  const res = await getDataSourceConfigList()
   dataSourceConfigs.value = res
-  queryParams.dataSourceConfigId = dataSourceConfigs.value[0].id
+  queryParams.dataSourceConfigId = dataSourceConfigs.value[0].id as number
   visible.value = true
   await getList()
 }
