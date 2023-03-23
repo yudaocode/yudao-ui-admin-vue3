@@ -118,7 +118,7 @@
             link
             type="primary"
             @click="openDetail(scope.row)"
-            v-hasPermi="['infra:api-access-log:query']"
+            v-hasPermi="['infra:api-error-log:query']"
           >
             详细
           </el-button>
