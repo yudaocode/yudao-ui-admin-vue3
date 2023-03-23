@@ -26,3 +26,9 @@
     border-left-color: var(--el-color-primary);
   }
 }
+
+// 添加表头样式
+.el-table.yudao-table {
+  --el-table-header-bg-color: #f8f8f9;
+  --el-table-header-text-color: #606266;
+}

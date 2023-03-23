@@ -63,7 +63,7 @@ const dbLoading = ref(true)
 const queryParams = reactive({
   name: undefined,
   comment: undefined,
-  dataSourceConfigId: 0
+  dataSourceConfigId: 0 as number | undefined
 })
 const dataSourceConfigs = ref<DataSourceConfigVO[]>([])
 const show = async () => {
