@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="详情" v-model="modelVisible" :scroll="true" :max-height="500" width="800">
+  <Dialog title="详情" v-model="modelVisible" width="800">
     <el-descriptions border :column="1">
       <el-descriptions-item label="日志编号" min-width="120">
         {{ detailData.id }}
@@ -35,7 +35,7 @@ const detailLoading = ref(false) // 表单的加载中
 const detailData = ref() // 详情数据
 
 /** 打开弹窗 */
-const openModal = async (data: LoginLogApi.LoginLogVO) => {
+const open = async (data: LoginLogApi.LoginLogVO) => {
   modelVisible.value = true
   // 设置数据
   detailLoading.value = true
@@ -45,5 +45,5 @@ const openModal = async (data: LoginLogApi.LoginLogVO) => {
     detailLoading.value = false
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 </script>

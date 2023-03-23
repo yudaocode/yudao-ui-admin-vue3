@@ -55,7 +55,7 @@
 
   <!-- 列表 -->
   <content-wrap>
-    <el-table class="yudao-table" v-loading="loading" :data="list">
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="日志编号" align="center" prop="id" />
       <el-table-column label="操作类型" align="center" prop="logType">
         <template #default="scope">
@@ -64,7 +64,6 @@
       </el-table-column>
       <el-table-column label="用户名称" align="center" prop="username" width="180" />
       <el-table-column label="登录地址" align="center" prop="userIp" width="180" />
-
       <el-table-column label="浏览器" align="center" prop="userAgent" />
       <el-table-column label="登陆结果" align="center" prop="result">
         <template #default="scope">
@@ -83,7 +82,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal(scope.row)"
+            @click="openDetail(scope.row)"
             v-hasPermi="['infra:config:query']"
           >
             详情
@@ -101,14 +100,14 @@
   </content-wrap>
 
   <!-- 表单弹窗：详情 -->
-  <login-log-detail ref="modalRef" />
+  <LoginLogDetail ref="detailRef" />
 </template>
 <script setup lang="ts" name="LoginLog">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as LoginLogApi from '@/api/system/loginLog'
-import LoginLogDetail from './detail.vue'
+import LoginLogDetail from './LoginLogDetail.vue'
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
@@ -149,9 +148,9 @@ const resetQuery = () => {
 }
 
 /** 详情操作 */
-const modalRef = ref()
-const openModal = (data: LoginLogApi.LoginLogVO) => {
-  modalRef.value.openModal(data)
+const detailRef = ref()
+const openDetail = (data: LoginLogApi.LoginLogVO) => {
+  detailRef.value.open(data)
 }
 
 /** 导出按钮操作 */
