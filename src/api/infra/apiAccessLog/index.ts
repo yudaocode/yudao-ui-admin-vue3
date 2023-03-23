@@ -18,6 +18,7 @@ export interface ApiAccessLogVO {
   resultMsg: string
   createTime: Date
 }
+
 // 查询列表API 访问日志
 export const getApiAccessLogPage = (params: PageParam) => {
   return request.get({ url: '/infra/api-access-log/page', params })

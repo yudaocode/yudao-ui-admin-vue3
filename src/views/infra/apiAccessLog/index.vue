@@ -85,6 +85,7 @@
       </el-form-item>
     </el-form>
   </content-wrap>
+
   <!-- 列表 -->
   <content-wrap>
     <el-table v-loading="loading" :data="list">
@@ -96,7 +97,7 @@
         </template>
       </el-table-column>
       <el-table-column label="应用名" align="center" prop="applicationName" />
-      <el-table-column label="请求方法名" align="center" prop="requestMethod" />
+      <el-table-column label="请求方法" align="center" prop="requestMethod" width="80" />
       <el-table-column label="请求地址" align="center" prop="requestUrl" width="250" />
       <el-table-column label="请求时间" align="center" prop="beginTime" width="180">
         <template #default="scope">
@@ -128,7 +129,6 @@
         </template>
       </el-table-column>
     </el-table>
-
     <!-- 分页组件 -->
     <Pagination
       :total="total"
@@ -154,7 +154,6 @@ const message = useMessage() // 消息弹窗
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -169,7 +168,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {

@@ -1,11 +1,5 @@
 <template>
-  <Dialog
-    title="API 访问日志详细"
-    v-model="modelVisible"
-    :scroll="true"
-    :max-height="500"
-    width="800"
-  >
+  <Dialog title="详情" v-model="modelVisible" :scroll="true" :max-height="500" width="800">
     <el-descriptions border :column="1">
       <el-descriptions-item label="日志主键" min-width="120">
         {{ detailData.id }}
@@ -17,20 +11,26 @@
         {{ detailData.applicationName }}
       </el-descriptions-item>
       <el-descriptions-item label="用户信息">
-        {{ detailData.userId }} |
+        {{ detailData.userId }}
         <dict-tag :type="DICT_TYPE.USER_TYPE" :value="detailData.userType" />
-        | {{ detailData.userIp }} | {{ detailData.userAgent }}
+      </el-descriptions-item>
+      <el-descriptions-item label="用户 IP">
+        {{ detailData.userIp }}
+      </el-descriptions-item>
+      <el-descriptions-item label="用户 UA">
+        {{ detailData.userAgent }}
       </el-descriptions-item>
       <el-descriptions-item label="请求信息">
-        {{ detailData.requestMethod }} | {{ detailData.requestUrl }}
+        {{ detailData.requestMethod }} {{ detailData.requestUrl }}
       </el-descriptions-item>
       <el-descriptions-item label="请求参数">
         {{ detailData.requestParams }}
       </el-descriptions-item>
-      <el-descriptions-item label="开始时间">
+      <el-descriptions-item label="请求时间">
         {{ formatDate(detailData.beginTime, 'YYYY-MM-DD HH:mm:ss') }} ~
-        {{ formatDate(detailData.endTime, 'YYYY-MM-DD HH:mm:ss') }} | {{ detailData.duration }} ms
+        {{ formatDate(detailData.endTime, 'YYYY-MM-DD HH:mm:ss') }}
       </el-descriptions-item>
+      <el-descriptions-item label="请求耗时">{{ detailData.duration }} ms</el-descriptions-item>
       <el-descriptions-item label="操作结果">
         <div v-if="detailData.resultCode === 0">正常</div>
         <div v-else-if="detailData.resultCode > 0"
@@ -51,7 +51,7 @@ const detailLoading = ref(false) // 表单地加载中
 const detailData = ref() // 详情数据
 
 /** 打开弹窗 */
-const openModal = async (data: ApiAccessLog.ApiAccessLogVO) => {
+const open = async (data: ApiAccessLog.ApiAccessLogVO) => {
   modelVisible.value = true
   // 设置数据
   detailLoading.value = true
@@ -62,5 +62,5 @@ const openModal = async (data: ApiAccessLog.ApiAccessLogVO) => {
   }
 }
 
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 </script>
