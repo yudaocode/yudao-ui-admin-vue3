@@ -45,19 +45,23 @@
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
+          plain
           @click="openModal('create')"
           v-hasPermi="['system:sensitive-word:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
-          type="success"
+          type="warning"
           plain
           @click="handleExport"
           :loading="exportLoading"
           v-hasPermi="['system:sensitive-word:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
+        <el-button type="success" plain @click="handleTest">
+          <Icon icon="ep:document-checked" class="mr-5px" /> 测试
         </el-button>
       </el-form-item>
     </el-form>
@@ -127,6 +131,9 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <SensitiveWordForm ref="modalRef" @success="getList" />
+
+  <!-- 表单弹窗：测试敏感词 -->
+  <SensitiveWordTestForm ref="modalTestRef" />
 </template>
 <script setup lang="ts" name="SensitiveWord">
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
@@ -134,6 +141,8 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
 import SensitiveWordForm from './form.vue' // TODO @blue-syd：组件名不对
+import SensitiveWordTestForm from './testForm.vue'
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -179,10 +188,15 @@ const resetQuery = () => {
 /** 添加/修改操作 */
 const modalRef = ref()
 const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+  modalRef.value.openModal(type, tags.value, id)
 }
 
 // TODO @blue-syd：还少一个【测试】按钮的功能，参见 http://dashboard.yudao.iocoder.cn/system/sensitive-word
+/* 测试敏感词按钮操作 */
+const modalTestRef = ref()
+const handleTest = () => {
+  modalTestRef.value.openModal(tags.value)
+}
 
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
