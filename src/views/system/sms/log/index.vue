@@ -102,7 +102,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['infra:config:export']"
+          v-hasPermi="['system:sms-log:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
