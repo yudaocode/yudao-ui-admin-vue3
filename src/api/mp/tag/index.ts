@@ -25,9 +25,10 @@ export const deleteTag = (id) => {
 
 // 获得公众号标签
 export const getTag = (id) => {
-  return request.get({
+  const res = request.get({
     url: '/mp/tag/get?id=' + id
   })
+  return res
 }
 
 // 获得公众号标签分页

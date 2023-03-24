@@ -7,9 +7,6 @@
       label-width="80px"
       v-loading="formLoading"
     >
-      <el-form-item label="编号" prop="accountId">
-        <el-input v-model="formData.accountId" />
-      </el-form-item>
       <el-form-item label="标签名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入标签名称" />
       </el-form-item>
@@ -52,9 +49,7 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      console.log(id)
-      const res = await MpTagApi.getTag(id)
-      formData.value = res.data
+      formData.value = await MpTagApi.getTag(id) //调用该接口无数据返回，导致提交修改时无法上送id编号
     } finally {
       formLoading.value = false
     }
