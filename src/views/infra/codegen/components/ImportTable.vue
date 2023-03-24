@@ -41,10 +41,8 @@
       <vxe-column field="comment" title="表描述" />
     </vxe-table>
     <template #footer>
-      <div class="dialog-footer">
-        <XButton type="primary" :title="t('action.import')" @click="handleImportTable()" />
-        <XButton :title="t('dialog.close')" @click="handleClose()" />
-      </div>
+      <XButton type="primary" :title="t('action.import')" @click="handleImportTable()" />
+      <XButton :title="t('dialog.close')" @click="handleClose()" />
     </template>
   </XModal>
 </template>
