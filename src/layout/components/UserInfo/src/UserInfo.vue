@@ -66,9 +66,9 @@ const toDocument = () => {
           <Icon icon="ep:menu" />
           <div @click="toDocument">{{ t('common.document') }}</div>
         </ElDropdownItem>
-        <ElDropdownItem divided>
+        <ElDropdownItem divided @click="loginOut">
           <Icon icon="ep:switch-button" />
-          <div @click="loginOut">{{ t('common.loginOut') }}</div>
+          <div>{{ t('common.loginOut') }}</div>
         </ElDropdownItem>
       </ElDropdownMenu>
     </template>
