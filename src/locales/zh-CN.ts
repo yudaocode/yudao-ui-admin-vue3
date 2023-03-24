@@ -303,14 +303,7 @@ export default {
   dialog: {
     dialog: '弹窗',
     open: '打开',
-    close: '关闭',
-    sms: {
-      template: {
-        addTitle: '添加短信模板',
-        updtaeTitle: '修改短信模板',
-        sendSms: '发送短信'
-      }
-    }
+    close: '关闭'
   },
   sys: {
     api: {

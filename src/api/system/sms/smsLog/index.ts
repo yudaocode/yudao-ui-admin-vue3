@@ -28,31 +28,12 @@ export interface SmsLogVO {
   createTime: Date | null
 }
 
-export interface SmsLogPageReqVO extends PageParam {
-  channelId?: number | null
-  templateId?: number | null
-  mobile?: string
-  sendStatus?: number | null
-  sendTime?: Date[]
-  receiveStatus?: number | null
-  receiveTime?: Date[]
-}
-export interface SmsLogExportReqVO {
-  channelId?: number
-  templateId?: number
-  mobile?: string
-  sendStatus?: number
-  sendTime?: Date[]
-  receiveStatus?: number
-  receiveTime?: Date[]
-}
-
 // 查询短信日志列表
-export const getSmsLogPageApi = (params: SmsLogPageReqVO) => {
+export const getSmsLogPage = (params: PageParam) => {
   return request.get({ url: '/system/sms-log/page', params })
 }
 
 // 导出短信日志
-export const exportSmsLogApi = (params: SmsLogExportReqVO) => {
+export const exportSmsLog = (params) => {
   return request.download({ url: '/system/sms-log/export-excel', params })
 }

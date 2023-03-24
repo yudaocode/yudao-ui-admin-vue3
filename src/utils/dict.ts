@@ -69,6 +69,13 @@ export const getDictObj = (dictType: string, value: any) => {
     }
   })
 }
+
+/**
+ * 获得字典数据的文本展示
+ *
+ * @param dictType 字典类型
+ * @param value 字典数据的值
+ */
 export const getDictLabel = (dictType: string, value: any) => {
   const dictOptions: DictDataType[] = getDictOptions(dictType)
   const dictLabel = ref('')
@@ -79,6 +86,7 @@ export const getDictLabel = (dictType: string, value: any) => {
   })
   return dictLabel.value
 }
+
 export enum DICT_TYPE {
   USER_TYPE = 'user_type',
   COMMON_STATUS = 'common_status',

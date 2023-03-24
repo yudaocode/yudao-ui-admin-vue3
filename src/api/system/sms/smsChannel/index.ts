@@ -31,7 +31,7 @@ export const getSmsChannelPageApi = (params: SmsChannelPageReqVO) => {
 }
 
 // 获得短信渠道精简列表
-export function getSimpleSmsChannels() {
+export function getSimpleSmsChannelList() {
   return request.get({ url: '/system/sms-channel/list-all-simple' })
 }
 

@@ -275,7 +275,7 @@ const resetForm = () => {
 // 短信渠道
 const channelOptions = ref<SmsChannelApi.SmsChannelListVO[]>([])
 onMounted(() => {
-  SmsChannelApi.getSimpleSmsChannels().then((res) => {
+  SmsChannelApi.getSimpleSmsChannelList().then((res) => {
     channelOptions.value = res
   })
 })
