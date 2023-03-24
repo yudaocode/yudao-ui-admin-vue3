@@ -20,7 +20,7 @@
         <dict-tag :type="DICT_TYPE.SYSTEM_LOGIN_RESULT" :value="detailData.result" />
       </el-descriptions-item>
       <el-descriptions-item label="登录日期">
-        {{ formatDate(detailData.createTime, 'YYYY-MM-DD HH:mm:ss') }}
+        {{ formatDate(detailData.createTime) }}
       </el-descriptions-item>
     </el-descriptions>
   </Dialog>

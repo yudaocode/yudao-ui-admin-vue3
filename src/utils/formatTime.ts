@@ -194,5 +194,5 @@ export const dateFormatter = (row, column, cellValue) => {
   if (!cellValue) {
     return
   }
-  return dayjs(cellValue).format('YYYY-MM-DD HH:mm:ss')
+  return formatDate(cellValue)
 }

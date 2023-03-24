@@ -27,7 +27,7 @@
         {{ detailData.requestParams }}
       </el-descriptions-item>
       <el-descriptions-item label="异常时间">
-        {{ formatDate(detailData.exceptionTime, 'YYYY-MM-DD HH:mm:ss') }}
+        {{ formatDate(detailData.exceptionTime) }}
       </el-descriptions-item>
       <el-descriptions-item label="异常名">
         {{ detailData.exceptionName }}
@@ -50,7 +50,7 @@
         {{ detailData.processUserId }}
       </el-descriptions-item>
       <el-descriptions-item label="处理时间" v-if="detailData.processTime">
-        {{ formatDate(detailData.processTime, 'YYYY-MM-DD HH:mm:ss') }}
+        {{ formatDate(detailData.processTime) }}
       </el-descriptions-item>
     </el-descriptions>
   </Dialog>

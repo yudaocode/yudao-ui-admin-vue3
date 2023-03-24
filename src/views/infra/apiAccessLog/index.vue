@@ -101,7 +101,7 @@
       <el-table-column label="请求地址" align="center" prop="requestUrl" width="250" />
       <el-table-column label="请求时间" align="center" prop="beginTime" width="180">
         <template #default="scope">
-          <span>{{ formatDate(scope.row.beginTime, 'YYYY-MM-DD HH:mm:ss') }}</span>
+          <span>{{ formatDate(scope.row.beginTime) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="执行时长" align="center" prop="duration" width="180">

@@ -27,8 +27,7 @@
         {{ detailData.requestParams }}
       </el-descriptions-item>
       <el-descriptions-item label="请求时间">
-        {{ formatDate(detailData.beginTime, 'YYYY-MM-DD HH:mm:ss') }} ~
-        {{ formatDate(detailData.endTime, 'YYYY-MM-DD HH:mm:ss') }}
+        {{ formatDate(detailData.beginTime) }} ~ {{ formatDate(detailData.endTime) }}
       </el-descriptions-item>
       <el-descriptions-item label="请求耗时">{{ detailData.duration }} ms</el-descriptions-item>
       <el-descriptions-item label="操作结果">
