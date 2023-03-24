@@ -12,21 +12,8 @@ export interface SmsChannelVO {
   createTime: Date
 }
 
-export interface SmsChannelListVO {
-  id: number
-  code: string
-  signature: string
-}
-
-export interface SmsChannelPageReqVO extends PageParam {
-  signature?: string
-  code?: string
-  status?: number
-  createTime?: Date[]
-}
-
 // 查询短信渠道列表
-export const getSmsChannelPageApi = (params: SmsChannelPageReqVO) => {
+export const getSmsChannelPage = (params: PageParam) => {
   return request.get({ url: '/system/sms-channel/page', params })
 }
 
@@ -36,21 +23,21 @@ export function getSimpleSmsChannelList() {
 }
 
 // 查询短信渠道详情
-export const getSmsChannelApi = (id: number) => {
+export const getSmsChannel = (id: number) => {
   return request.get({ url: '/system/sms-channel/get?id=' + id })
 }
 
 // 新增短信渠道
-export const createSmsChannelApi = (data: SmsChannelVO) => {
+export const createSmsChannel = (data: SmsChannelVO) => {
   return request.post({ url: '/system/sms-channel/create', data })
 }
 
 // 修改短信渠道
-export const updateSmsChannelApi = (data: SmsChannelVO) => {
+export const updateSmsChannel = (data: SmsChannelVO) => {
   return request.put({ url: '/system/sms-channel/update', data })
 }
 
 // 删除短信渠道
-export const deleteSmsChannelApi = (id: number) => {
+export const deleteSmsChannel = (id: number) => {
   return request.delete({ url: '/system/sms-channel/delete?id=' + id })
 }
