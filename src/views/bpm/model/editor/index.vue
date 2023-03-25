@@ -1,25 +1,27 @@
 <template>
-  <!-- 流程设计器，负责绘制流程等 -->
-  <my-process-designer
-    key="designer"
-    v-if="xmlString !== undefined"
-    v-model="xmlString"
-    :value="xmlString"
-    v-bind="controlForm"
-    keyboard
-    ref="processDesigner"
-    @init-finished="initModeler"
-    :additionalModel="controlForm.additionalModel"
-    @save="save"
-  />
-  <!-- 流程属性器，负责编辑每个流程节点的属性 -->
-  <my-properties-panel
-    key="penal"
-    :bpmnModeler="modeler"
-    :prefix="controlForm.prefix"
-    class="process-panel"
-    :model="model"
-  />
+  <ContentWrap>
+    <!-- 流程设计器，负责绘制流程等 -->
+    <my-process-designer
+      key="designer"
+      v-if="xmlString !== undefined"
+      v-model="xmlString"
+      :value="xmlString"
+      v-bind="controlForm"
+      keyboard
+      ref="processDesigner"
+      @init-finished="initModeler"
+      :additionalModel="controlForm.additionalModel"
+      @save="save"
+    />
+    <!-- 流程属性器，负责编辑每个流程节点的属性 -->
+    <my-properties-panel
+      key="penal"
+      :bpmnModeler="modeler"
+      :prefix="controlForm.prefix"
+      class="process-panel"
+      :model="model"
+    />
+  </ContentWrap>
 </template>
 
 <script setup lang="ts">
@@ -34,7 +36,7 @@ const { query } = useRoute() // 路由的查询
 const message = useMessage() // 国际化
 
 const xmlString = ref(undefined) // BPMN XML
-const modeler = ref(null)
+const modeler = ref(null) // BPMN Modeler
 const controlForm = ref({
   simulation: true,
   labelEditing: false,
@@ -92,27 +94,9 @@ onMounted(async () => {
 })
 </script>
 <style lang="scss">
-.control-form {
-  .el-radio {
-    width: 100%;
-    line-height: 32px;
-  }
-}
-.element-overlays {
-  box-sizing: border-box;
-  padding: 8px;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 4px;
-  color: #fafafa;
-}
-
-.my-process-designer {
-  height: calc(100vh - 84px);
-}
 .process-panel__container {
   position: absolute;
-  right: 0;
-  top: 55px;
-  height: calc(100vh - 84px);
+  right: 60px;
+  top: 90px;
 }
 </style>
