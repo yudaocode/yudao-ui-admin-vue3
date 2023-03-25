@@ -52,7 +52,7 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新建流程
         </el-button>
-        <el-button type="success" plain @click="handleImport()" v-hasPermi="['bpm:model:import']">
+        <el-button type="success" plain @click="openImportForm" v-hasPermi="['bpm:model:import']">
           <Icon icon="ep:upload" class="mr-5px" /> 导入流程
         </el-button>
       </el-form-item>
@@ -196,8 +196,11 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改 -->
+  <!-- 表单弹窗：添加/修改流程 -->
   <ModelForm ref="formRef" @success="getList" />
+
+  <!-- 表单弹窗：导入流程 -->
+  <ModelImportForm ref="importFormRef" @success="getList" />
 
   <!-- 弹窗：表单详情 -->
   <Dialog title="表单详情" v-model="formDetailVisible" width="800">
@@ -222,6 +225,7 @@ import { dateFormatter, formatDate } from '@/utils/formatTime'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import ModelForm from './ModelForm.vue'
+import ModelImportForm from '@/views/bpm/model/ModelImportForm.vue'
 import { setConfAndFields2 } from '@/utils/formCreate'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -267,6 +271,12 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 添加/修改操作 */
+const importFormRef = ref()
+const openImportForm = () => {
+  importFormRef.value.open()
 }
 
 /** 删除按钮操作 */
