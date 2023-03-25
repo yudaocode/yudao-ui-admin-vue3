@@ -19,7 +19,6 @@
 </template>
 <script setup lang="ts">
 import * as MpTagApi from '@/api/mp/tag'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -28,8 +27,8 @@ const modelTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  accountId: '',
-  name: undefined
+  accountId: -1,
+  name: ''
 })
 const formRules = reactive({
   name: [{ required: true, message: '请输入标签名称', trigger: 'blur' }]
@@ -37,23 +36,23 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const open = async (type: string, accountId: number, id?: number) => {
   modelVisible.value = true
   modelTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
+  formData.value.accountId = accountId
   // 修改时，设置数据
-
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await MpTagApi.getTag(id) //调用该接口无数据返回，导致提交修改时无法上送id编号
+      formData.value = await MpTagApi.getTag(id)
     } finally {
       formLoading.value = false
     }
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -65,7 +64,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value
+    const data = formData.value as MpTagApi.TagVO
     if (formType.value === 'create') {
       await MpTagApi.createTag(data)
       message.success(t('common.createSuccess'))
@@ -84,8 +83,8 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    accountId: '',
-    name: undefined
+    accountId: -1,
+    name: ''
   }
   formRef.value?.resetFields()
 }

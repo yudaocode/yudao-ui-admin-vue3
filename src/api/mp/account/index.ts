@@ -1,5 +1,10 @@
 import request from '@/config/axios'
 
+export interface AccountVO {
+  id?: number
+  name: string
+}
+
 // 创建公众号账号
 export const createAccount = async (data) => {
   return await request.post({ url: '/mp/account/create', data })
@@ -26,7 +31,7 @@ export const getAccountPage = async (query) => {
 }
 
 // 获取公众号账号精简信息列表
-export const getSimpleAccounts = async () => {
+export const getSimpleAccountList = async () => {
   return request.get({ url: '/mp/account/list-all-simple' })
 }
 
