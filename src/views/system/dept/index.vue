@@ -9,50 +9,61 @@
       label-width="68px"
     >
       <el-form-item label="部门名称" prop="title">
-        <el-input v-model="queryParams.name" placeholder="请输入部门名称" clearable />
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入部门名称"
+          clearable
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="部门状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择" clearable>
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择不么你状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-      </el-form-item>
-    </el-form>
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
         <el-button
           type="primary"
           plain
-          @click="openModal('create')"
+          @click="openForm('create')"
           v-hasPermi="['system:dept:create']"
-          ><Icon icon="ep:plus" class="mr-5px" /> 新增</el-button
         >
-      </el-col>
-      <el-col :span="1.5">
-        <el-button type="danger" plain @click="toggleExpandAll"
-          ><Icon icon="ep:sort" class="mr-5px" /> 展开/折叠</el-button
-        >
-      </el-col>
-    </el-row>
-    <!-- 列表 -->
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
+        <el-button type="danger" plain @click="toggleExpandAll">
+          <Icon icon="ep:sort" class="mr-5px" /> 展开/折叠
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </ContentWrap>
+
+  <!-- 列表 -->
+  <ContentWrap>
     <el-table
-      v-if="refreshTable"
       v-loading="loading"
-      :data="deptDatas"
+      :data="list"
       row-key="id"
+      v-if="refreshTable"
       :default-expand-all="isExpandAll"
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
       <el-table-column prop="name" label="部门名称" width="260" />
-      <el-table-column prop="leader" label="负责人" :formatter="userNicknameFormat" width="120" />
+      <el-table-column prop="leader" label="负责人" width="120">
+        <template #default="scope">
+          {{ userList.find((user) => user.id === scope.row.leaderUserId)?.nickname }}
+        </template>
+      </el-table-column>
       <el-table-column prop="sort" label="排序" width="200" />
       <el-table-column prop="status" label="状态" width="100">
         <template #default="scope">
@@ -66,43 +77,44 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" class-name="fixed-width">
         <template #default="scope">
           <el-button
             link
             type="primary"
-            icon="el-icon-edit"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['system:dept:update']"
-            >修改</el-button
           >
+            修改
+          </el-button>
           <el-button
-            v-if="scope.row.parentId !== 0"
             link
             type="danger"
-            icon="el-icon-delete"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['system:dept:delete']"
-            >删除</el-button
           >
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
   </ContentWrap>
 
-  <!-- 添加或修改部门对话框 -->
-  <dept-form ref="modalRef" @success="getList" />
+  <!-- 表单弹窗：添加/修改 -->
+  <DeptForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Dept">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 import { handleTree } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-import DeptForm from './form.vue'
-import { dateFormatter } from '@/utils/formatTime'
-import { getSimpleUserList, UserVO } from '@/api/system/user'
+import DeptForm from './DeptForm.vue'
+import * as UserApi from '@/api/system/user'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-// 搜索变量
+
+const loading = ref(true) // 列表的加载中
+const list = ref() // 列表的数据
 const queryParams = reactive({
   title: '',
   name: undefined,
@@ -110,19 +122,20 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 100
 })
-
 const queryFormRef = ref() // 搜索的表单
-const deptDatas = ref() // 数据变量
-const userOption = ref<UserVO[]>([])
-
 const isExpandAll = ref(true) // 是否展开，默认全部展开
 const refreshTable = ref(true) // 重新渲染表格状态
-const loading = ref(true) // 列表的加载中
+const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
-// 获取用户列表
-const getUserList = async () => {
-  const res = await getSimpleUserList()
-  userOption.value = res
+/** 查询部门列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await DeptApi.getDeptPageApi(queryParams)
+    list.value = handleTree(data)
+  } finally {
+    loading.value = false
+  }
 }
 
 /** 展开/折叠操作 */
@@ -140,6 +153,19 @@ const handleQuery = () => {
   getList()
 }
 
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryParams.pageNo = 1
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
@@ -153,47 +179,10 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 查询部门列表 */
-const getList = async () => {
-  loading.value = true
-  try {
-    const res = await DeptApi.getDeptPageApi(queryParams)
-    deptDatas.value = handleTree(res)
-  } finally {
-    loading.value = false
-  }
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryParams.pageNo = 1
-  queryParams.name = undefined
-  queryParams.status = undefined
-  queryFormRef.value.resetFields()
-  handleQuery()
-}
-
-/** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id, userOption.value)
-}
-
-const userNicknameFormat = (row) => {
-  if (!row || !row.leaderUserId) {
-    return '未设置'
-  }
-  for (const user of userOption.value) {
-    if (row.leaderUserId === user.id) {
-      return user.nickname
-    }
-  }
-  return '未知【' + row.leaderUserId + '】'
-}
-
-// ========== 初始化 ==========
+/** 初始化 **/
 onMounted(async () => {
-  await getUserList()
   await getList()
+  // 获取用户列表
+  userList.value = await UserApi.getSimpleUserList()
 })
 </script>
