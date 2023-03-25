@@ -29,7 +29,7 @@ export const getModelPageApi = async (params) => {
   return await request.get({ url: '/bpm/model/page', params })
 }
 
-export const getModelApi = async (id: number) => {
+export const getModel = async (id: number) => {
   return await request.get({ url: '/bpm/model/get?id=' + id })
 }
 

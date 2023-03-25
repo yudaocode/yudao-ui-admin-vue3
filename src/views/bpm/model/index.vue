@@ -389,7 +389,7 @@ const handleFormDetail = async (row) => {
 const handleBpmnDetail = (row) => {
   // TODO 芋艿：流程组件开发中
   console.log(row)
-  ModelApi.getModelApi(row).then((response) => {
+  ModelApi.getModel(row).then((response) => {
     console.log(response, 'response')
     bpmnXML.value = response.bpmnXml
     // 弹窗打开
@@ -432,7 +432,7 @@ const handleUpdate = async (rowId: number) => {
   resetForm()
   await setDialogTile('edit')
   // 设置数据
-  saveForm.value = await ModelApi.getModelApi(rowId)
+  saveForm.value = await ModelApi.getModel(rowId)
   if (saveForm.value.category == null) {
     saveForm.value.category = 1
   } else {
