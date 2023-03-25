@@ -144,15 +144,43 @@
           >
             修改流程
           </el-button>
-          <!-- TODO tailow 了-->
-          <el-button link @click="openDetail(scope.row.id)" v-hasPermi="['bpm:form:query']">
-            详情
+          <el-button
+            link
+            type="primary"
+            @click="handleDesign(scope.row)"
+            v-hasPermi="['bpm:model:update']"
+          >
+            设计流程
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleAssignRule(scope.row)"
+            v-hasPermi="['bpm:task-assign-rule:query']"
+          >
+            分配规则
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="handleDeploy(scope.row)"
+            v-hasPermi="['bpm:model:deploy']"
+          >
+            发布流程
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            v-hasPermi="['bpm:process-definition:query']"
+            @click="handleDefinitionList(scope.row)"
+          >
+            流程定义
           </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['bpm:form:delete']"
+            v-hasPermi="['bpm:model:delete']"
           >
             删除
           </el-button>
@@ -171,9 +199,20 @@
   <!-- 表单弹窗：添加/修改 -->
   <ModelForm ref="formRef" @success="getList" />
 
-  <!-- 表单详情的弹窗 -->
-  <Dialog title="表单详情" v-model="detailVisible" width="800">
-    <form-create :rule="detailData.rule" :option="detailData.option" />
+  <!-- 弹窗：表单详情 -->
+  <Dialog title="表单详情" v-model="formDetailVisible" width="800">
+    <form-create :rule="formDetailPreview.rule" :option="formDetailPreview.option" />
+  </Dialog>
+
+  <!-- 弹窗：流程模型图的预览 -->
+  <Dialog title="流程图" v-model="bpmnDetailVisible" width="800">
+    <my-process-viewer
+      key="designer"
+      v-model="bpmnXML"
+      :value="bpmnXML"
+      v-bind="bpmnControlForm"
+      :prefix="bpmnControlForm.prefix"
+    />
   </Dialog>
 </template>
 
@@ -181,11 +220,12 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import * as ModelApi from '@/api/bpm/model'
+import * as FormApi from '@/api/bpm/form'
 import ModelForm from './ModelForm.vue'
-// import { setConfAndFields2 } from '@/utils/formCreate'
-// const message = useMessage() // 消息弹窗
-// const { t } = useI18n() // 国际化
-// const { push } = useRouter() // 路由
+import { setConfAndFields2 } from '@/utils/formCreate'
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
+const { push } = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -230,17 +270,111 @@ const openForm = (type: string, id?: number) => {
 }
 
 /** 删除按钮操作 */
-// const handleDelete = async (id: number) => {
-//   try {
-//     // 删除的二次确认
-//     await message.delConfirm()
-//     // 发起删除
-//     await FormApi.deleteForm(id)
-//     message.success(t('common.delSuccess'))
-//     // 刷新列表
-//     await getList()
-//   } catch {}
-// }
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await ModelApi.deleteModel(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 更新状态操作 */
+const handleChangeState = async (row) => {
+  const state = row.processDefinition.suspensionState
+  try {
+    // 修改状态的二次确认
+    const id = row.id
+    const statusState = state === 1 ? '激活' : '挂起'
+    const content = '是否确认' + statusState + '流程名字为"' + row.name + '"的数据项?'
+    await message.confirm(content)
+    // 发起修改状态
+    await ModelApi.updateModelState(id, state)
+    // 刷新列表
+    await getList()
+  } catch {
+    // 取消后，进行恢复按钮
+    row.processDefinition.suspensionState = state === 1 ? 2 : 1
+  }
+}
+
+/** 设计流程 */
+const handleDesign = (row) => {
+  push({
+    name: 'modelEditor',
+    query: {
+      modelId: row.id
+    }
+  })
+}
+
+/** 发布流程 */
+const handleDeploy = async (row) => {
+  try {
+    // 删除的二次确认
+    await message.confirm('是否部署该流程！！')
+    // 发起部署
+    await ModelApi.deployModel(row.id)
+    message.success(t('部署成功'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 点击任务分配按钮 */
+const handleAssignRule = (row) => {
+  push({
+    name: 'BpmTaskAssignRuleList',
+    query: {
+      modelId: row.id
+    }
+  })
+}
+
+/** 跳转到指定流程定义列表 */
+const handleDefinitionList = (row) => {
+  push({
+    name: 'BpmProcessDefinitionList',
+    query: {
+      key: row.key
+    }
+  })
+}
+
+/** 流程表单的详情按钮操作 */
+const formDetailVisible = ref(false)
+const formDetailPreview = ref({
+  rule: [],
+  option: {}
+})
+const handleFormDetail = async (row) => {
+  if (row.formType == 10) {
+    // 设置表单
+    const data = await FormApi.getForm(row.formId)
+    setConfAndFields2(formDetailPreview, data.conf, data.fields)
+    // 弹窗打开
+    formDetailVisible.value = true
+  } else {
+    await push({
+      path: row.formCustomCreatePath
+    })
+  }
+}
+
+/** 流程图的详情按钮操作 */
+const bpmnDetailVisible = ref(false)
+const bpmnXML = ref(null)
+const bpmnControlForm = ref({
+  prefix: 'flowable'
+})
+const handleBpmnDetail = async (row) => {
+  const data = await ModelApi.getModel(row.id)
+  bpmnXML.value = data.bpmnXml || ''
+  bpmnDetailVisible.value = true
+}
 
 /** 初始化 **/
 onMounted(() => {

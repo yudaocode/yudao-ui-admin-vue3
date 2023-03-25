@@ -67,7 +67,12 @@
         </el-form-item>
         <el-form-item v-if="formData.formType === 10" label="流程表单" prop="formId">
           <el-select v-model="formData.formId" clearable style="width: 100%">
-            <el-option v-for="form in forms" :key="form.id" :label="form.name" :value="form.id" />
+            <el-option
+              v-for="form in formList"
+              :key="form.id"
+              :label="form.name"
+              :value="form.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item
@@ -120,7 +125,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { ElMessageBox } from 'element-plus'
 import * as ModelApi from '@/api/bpm/model'
-
+import * as FormApi from '@/api/bpm/form'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -145,6 +150,7 @@ const formRules = reactive({
   visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const formList = ref([]) // 流程表单的下拉框的数据
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -161,6 +167,8 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 获得流程表单的下拉框的数据
+  formList.value = await FormApi.getSimpleFormList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 

@@ -38,7 +38,7 @@ export const updateModel = async (data: ModelVO) => {
 }
 
 // 任务状态修改
-export const updateModelStateApi = async (id: number, state: number) => {
+export const updateModelState = async (id: number, state: number) => {
   const data = {
     id: id,
     state: state
@@ -50,10 +50,10 @@ export const createModel = async (data: ModelVO) => {
   return await request.post({ url: '/bpm/model/create', data: data })
 }
 
-export const deleteModelApi = async (id: number) => {
+export const deleteModel = async (id: number) => {
   return await request.delete({ url: '/bpm/model/delete?id=' + id })
 }
 
-export const deployModelApi = async (id: number) => {
+export const deployModel = async (id: number) => {
   return await request.post({ url: '/bpm/model/deploy?id=' + id })
 }
