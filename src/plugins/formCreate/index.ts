@@ -10,6 +10,8 @@ import {
   ElTransfer,
   ElAlert,
   ElTabs,
+  ElTable,
+  ElTableColumn,
   ElTabPane
 } from 'element-plus'
 
@@ -27,6 +29,8 @@ const components = [
   ElTransfer,
   ElAlert,
   ElTabs,
+  ElTable,
+  ElTableColumn,
   ElTabPane
 ]
 
