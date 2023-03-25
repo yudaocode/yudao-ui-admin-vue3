@@ -25,7 +25,7 @@ export type ModelVO = {
   bpmnXml: string
 }
 
-export const getModelPageApi = async (params) => {
+export const getModelPage = async (params) => {
   return await request.get({ url: '/bpm/model/page', params })
 }
 
@@ -33,7 +33,7 @@ export const getModel = async (id: number) => {
   return await request.get({ url: '/bpm/model/get?id=' + id })
 }
 
-export const updateModelApi = async (data: ModelVO) => {
+export const updateModel = async (data: ModelVO) => {
   return await request.put({ url: '/bpm/model/update', data: data })
 }
 
@@ -46,7 +46,7 @@ export const updateModelStateApi = async (id: number, state: number) => {
   return await request.put({ url: '/bpm/model/update-state', data: data })
 }
 
-export const createModelApi = async (data: ModelVO) => {
+export const createModel = async (data: ModelVO) => {
   return await request.post({ url: '/bpm/model/create', data: data })
 }
 
