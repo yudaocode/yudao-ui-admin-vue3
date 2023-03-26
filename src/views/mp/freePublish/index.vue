@@ -1,37 +1,36 @@
 <template>
+  <!-- 搜索工作栏 -->
   <content-wrap>
-    <doc-alert title="公众号图文" url="https://doc.iocoder.cn/mp/article/" />
-
-    <!-- 搜索工作栏 -->
     <el-form
+      class="-mb-15px"
       :model="queryParams"
       ref="queryFormRef"
-      size="small"
       :inline="true"
-      v-show="showSearch"
       label-width="68px"
     >
       <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="queryParams.accountId" placeholder="请选择公众号">
+        <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
           <el-option
-            v-for="item in accounts"
-            :key="parseInt(item.id)"
+            v-for="item in accountList"
+            :key="item.id"
             :label="item.name"
-            :value="parseInt(item.id)"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" :icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button :icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
       </el-form-item>
     </el-form>
+  </content-wrap>
 
-    <!-- 列表 -->
+  <!-- 列表 -->
+  <content-wrap>
     <div class="waterfall" v-loading="loading">
       <div
-        v-show="item.content && item.content.newsItem"
         class="waterfall-item"
+        v-show="item.content && item.content.newsItem"
         v-for="item in list"
         :key="item.articleId"
       >
@@ -40,11 +39,12 @@
         <el-row justify="center" class="ope-row">
           <el-button
             type="danger"
-            :icon="Delete"
             circle
             @click="handleDelete(item)"
             v-hasPermi="['mp:free-publish:delete']"
-          />
+          >
+            <Icon icon="ep:delete" />
+          </el-button>
         </el-row>
       </div>
     </div>
@@ -61,25 +61,21 @@
 
 <script setup lang="ts" name="freePublish">
 import { getFreePublishPage, deleteFreePublish } from '@/api/mp/freePublish'
-import { getSimpleAccounts } from '@/api/mp/account'
+import * as MpAccountApi from '@/api/mp/account'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
-import { Delete, Search, Refresh } from '@element-plus/icons-vue'
-
 const message = useMessage() // 消息弹窗
 
-const queryParams = reactive({
-  total: 0, // 总页数
-  currentPage: 1, // 当前页数
-  pageNo: 1, // 当前页数
-  accountId: undefined, // 当前页数
-  queryParamsSize: 10 // 每页显示多少条
-})
-const loading = ref(false) // 列表的加载中
-const showSearch = ref(true) // 列表的加载中
+const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const accounts = ref([]) // 列表的数据
+const queryParams = reactive({
+  currentPage: 1, // 当前页数
+  pageNo: 1, // 当前页数
+  accountId: undefined // 当前页数
+})
 const queryFormRef = ref() // 搜索的表单
+const accountList = ref<MpAccountApi.AccountVO[]>([]) // 公众号账号列表
+
 /** 查询列表 */
 const getList = async () => {
   // 如果没有选中公众号账号，则进行提示。
@@ -87,6 +83,7 @@ const getList = async () => {
     message.error('未选中公众号，无法查询已发表图文')
     return false
   }
+  // TODO 改成 await 形式
   loading.value = true
   getFreePublishPage(queryParams)
     .then((data) => {
@@ -106,18 +103,20 @@ const getList = async () => {
       loading.value = false
     })
 }
+
 /** 搜索按钮操作 */
-const handleQuery = async () => {
+const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
 
 /** 重置按钮操作 */
-const resetQuery = async () => {
+const resetQuery = () => {
   queryFormRef.value.resetFields()
   // 默认选中第一个
-  if (accounts.value.length > 0) {
-    queryParams.accountId = accounts[0].id
+  if (accountList.value.length > 0) {
+    // @ts-ignore
+    queryParams.accountId = accountList.value[0].id
   }
   handleQuery()
 }
@@ -125,6 +124,7 @@ const resetQuery = async () => {
 /** 删除按钮操作 */
 const handleDelete = async (item) => {
   {
+    // TODO 改成 await 形式
     const articleId = item.articleId
     const accountId = queryParams.accountId
     message
@@ -140,19 +140,16 @@ const handleDelete = async (item) => {
   }
 }
 
-onMounted(() => {
-  getSimpleAccounts().then((response) => {
-    accounts.value = response
-    // 默认选中第一个
-    if (accounts.value.length > 0) {
-      queryParams.accountId = accounts.value[0]['id']
-    }
-    // 加载数据
-    getList()
-  })
+onMounted(async () => {
+  accountList.value = await MpAccountApi.getSimpleAccountList()
+  // 选中第一个
+  if (accountList.value.length > 0) {
+    // @ts-ignore
+    queryParams.accountId = accountList.value[0].id
+  }
+  await getList()
 })
 </script>
-
 <style lang="scss" scoped>
 .pagination {
   float: right;
@@ -182,7 +179,7 @@ onMounted(() => {
   margin-left: 5px;
 }
 
-/*新增图文*/
+/* 新增图文 */
 .left {
   display: inline-block;
   width: 35%;

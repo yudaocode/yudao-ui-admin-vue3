@@ -12,9 +12,9 @@
         <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
           <el-option
             v-for="item in accountList"
-            :key="parseInt(item.id)"
+            :key="item.id"
             :label="item.name"
-            :value="parseInt(item.id)"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
@@ -60,11 +60,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="发送时间" align="center" prop="createTime" width="180">
-        <template #default="scope">
-          <span>{{ parseTime(scope.row.createTime) }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column
+        label="发送时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
+      />
       <el-table-column label="消息类型" align="center" prop="type" width="80" />
       <el-table-column label="发送方" align="center" prop="sendFrom" width="80">
         <template #default="scope">
@@ -180,13 +182,13 @@
 </template>
 <script setup lang="ts" name="MpMessage">
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 // import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
 // import WxMsg from '@/views/mp/components/wx-msg/main.vue'
 import WxLocation from '@/views/mp/components/wx-location/main.vue'
 // import WxMusic from '@/views/mp/components/wx-music/main.vue'
 // import WxNews from '@/views/mp/components/wx-news/main.vue'
-import { parseTime } from '@/utils/formatTime'
 import * as MpAccountApi from '@/api/mp/account'
 import * as MpMessageApi from '@/api/mp/message'
 const message = useMessage() // 消息弹窗
