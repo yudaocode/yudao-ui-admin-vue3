@@ -1,49 +1,63 @@
 <template>
+  <!-- 搜索工作栏 -->
   <ContentWrap>
-    <!-- 搜索工作栏 -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="菜单名称" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入菜单名称"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="菜单状态" clearable>
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择菜单状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openModal('create')" v-hasPermi="['system:menu:create']">
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['system:menu:create']"
+        >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
+        <el-button type="danger" plain @click="toggleExpandAll">
+          <Icon icon="ep:sort" class="mr-5px" /> 展开/折叠
         </el-button>
       </el-form-item>
     </el-form>
+  </ContentWrap>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button type="info" plain icon="el-icon-sort" @click="toggleExpandAll"
-          >展开/折叠</el-button
-        >
-      </el-col>
-    </el-row>
-
+  <!-- 列表 -->
+  <ContentWrap>
     <el-table
       v-loading="loading"
       :data="list"
-      v-if="refreshTable"
       row-key="id"
+      v-if="refreshTable"
       :default-expand-all="isExpandAll"
-      :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
     >
       <el-table-column prop="name" label="菜单名称" :show-overflow-tooltip="true" width="250" />
       <el-table-column prop="icon" label="图标" align="center" width="100">
@@ -60,62 +74,63 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['system:menu:update']"
-            >修改</el-button
           >
+            修改
+          </el-button>
           <el-button
             link
             type="primary"
-            @click="openModal('create', scope.row.id)"
+            @click="openForm('create', undefined, scope.row.id)"
             v-hasPermi="['system:menu:create']"
-            >新增</el-button
           >
+            新增
+          </el-button>
           <el-button
             link
-            type="primary"
+            type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['system:menu:delete']"
-            >删除</el-button
           >
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
   </ContentWrap>
+
   <!-- 表单弹窗：添加/修改 -->
-  <menu-form ref="modalRef" @success="getList" />
+  <MenuForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Menu">
-// 业务相关的 import
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { handleTree } from '@/utils/tree'
 import * as MenuApi from '@/api/system/menu'
-import MenuForm from './form.vue'
+import MenuForm from './MenuForm.vue'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
-
 const list = ref<any>([]) // 列表的数据
-const isExpandAll = ref(false) // 是否展开，默认全部折叠
-const refreshTable = ref(true) // 重新渲染表格状态
 const queryParams = reactive({
   name: undefined,
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const isExpandAll = ref(false) // 是否展开，默认全部折叠
+const refreshTable = ref(true) // 重新渲染表格状态
 
 /** 查询参数列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await MenuApi.getMenuListApi(queryParams)
+    const data = await MenuApi.getMenuList(queryParams)
     list.value = handleTree(data)
   } finally {
     loading.value = false
@@ -134,9 +149,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = async (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number, parentId?: number) => {
+  formRef.value.open(type, id, parentId)
 }
 
 /** 展开/折叠操作 */
@@ -154,7 +169,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await MenuApi.deleteMenuApi(id)
+    await MenuApi.deleteMenu(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
