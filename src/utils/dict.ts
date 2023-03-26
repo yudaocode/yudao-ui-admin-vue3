@@ -140,5 +140,9 @@ export enum DICT_TYPE {
   PAY_ORDER_STATUS = 'pay_order_status', // 商户支付订单状态
   PAY_ORDER_REFUND_STATUS = 'pay_order_refund_status', // 商户支付订单退款状态
   PAY_REFUND_ORDER_STATUS = 'pay_refund_order_status', // 退款订单状态
-  PAY_REFUND_ORDER_TYPE = 'pay_refund_order_type' // 退款订单类别
+  PAY_REFUND_ORDER_TYPE = 'pay_refund_order_type', // 退款订单类别
+
+  // ========== MP 模块 ==========
+  MP_AUTO_REPLY_REQUEST_MATCH = 'mp_auto_reply_request_match', // 自动回复请求匹配类型
+  MP_MESSAGE_TYPE = 'mp_message_type' // 消息类型
 }
