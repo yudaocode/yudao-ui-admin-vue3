@@ -31,16 +31,15 @@
           />
         </el-row>
         <el-row>
-          <el-icon><Location /></el-icon>{{ label }}
+          <el-icon><Location /></el-icon>
+          <Icon icon="ep:location" />
+          {{ label }}
         </el-row>
       </el-col>
     </el-link>
   </div>
 </template>
-
 <script setup lang="ts" name="WxLocation">
-import { Location } from '@element-plus/icons-vue'
-
 const props = defineProps({
   locationX: {
     required: true,
