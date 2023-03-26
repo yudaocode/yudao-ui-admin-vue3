@@ -62,7 +62,7 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="流程标识" align="center" prop="key" />
+      <el-table-column label="流程标识" align="center" prop="key" width="200" />
       <el-table-column label="流程名称" align="center" prop="name" width="200">
         <template #default="scope">
           <el-button type="text" @click="handleBpmnDetail(scope.row)">
@@ -77,11 +77,15 @@
       </el-table-column>
       <el-table-column label="表单信息" align="center" prop="formType" width="200">
         <template #default="scope">
-          <el-button v-if="scope.row.formId" type="text" @click="handleFormDetail(scope.row)">
+          <el-button
+            v-if="scope.row.formType === 10"
+            type="text"
+            @click="handleFormDetail(scope.row)"
+          >
             <span>{{ scope.row.formName }}</span>
           </el-button>
           <el-button
-            v-else-if="scope.row.formCustomCreatePath"
+            v-else-if="scope.row.formType === 20"
             type="text"
             @click="handleFormDetail(scope.row)"
           >
@@ -94,6 +98,7 @@
         label="创建时间"
         align="center"
         prop="createTime"
+        width="180"
         :formatter="dateFormatter"
       />
       <el-table-column label="最新部署的流程定义" align="center">
@@ -114,7 +119,7 @@
           label="激活状态"
           align="center"
           prop="processDefinition.version"
-          width="80"
+          width="85"
         >
           <template #default="scope">
             <el-switch
@@ -134,7 +139,7 @@
           </template>
         </el-table-column>
       </el-table-column>
-      <el-table-column label="操作" align="center" fixed="right" class-name="fixed-width">
+      <el-table-column label="操作" align="center" width="240" fixed="right">
         <template #default="scope">
           <el-button
             link

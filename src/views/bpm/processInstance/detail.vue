@@ -411,7 +411,7 @@ const getDetail = () => {
       }
 
       // 加载流程图
-      DefinitionApi.getProcessDefinitionBpmnXMLApi(processDefinition.id).then((data) => {
+      DefinitionApi.getProcessDefinitionBpmnXML(processDefinition.id).then((data) => {
         bpmnXML.value = data
       })
 
