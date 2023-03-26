@@ -181,17 +181,17 @@
   </ContentWrap>
 </template>
 <script setup lang="ts" name="MpMessage">
-import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
-// import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
+import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
-// import WxMsg from '@/views/mp/components/wx-msg/main.vue'
+import WxMsg from '@/views/mp/components/wx-msg/main.vue'
 import WxLocation from '@/views/mp/components/wx-location/main.vue'
-// import WxMusic from '@/views/mp/components/wx-music/main.vue'
-// import WxNews from '@/views/mp/components/wx-news/main.vue'
+import WxMusic from '@/views/mp/components/wx-music/main.vue'
+import WxNews from '@/views/mp/components/wx-news/main.vue'
 import * as MpAccountApi from '@/api/mp/account'
 import * as MpMessageApi from '@/api/mp/message'
 const message = useMessage() // 消息弹窗
+import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
