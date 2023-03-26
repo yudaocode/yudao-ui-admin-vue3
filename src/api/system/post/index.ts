@@ -16,7 +16,7 @@ export const getPostPage = async (params: PageParam) => {
 }
 
 // 获取岗位精简信息列表
-export const getSimplePostList = async () => {
+export const getSimplePostList = async (): Promise<PostVO[]> => {
   return await request.get({ url: '/system/post/list-all-simple' })
 }
 

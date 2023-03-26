@@ -165,7 +165,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { rules, allSchemas } from './role.data'
 import * as RoleApi from '@/api/system/role'
 import { listSimpleMenusApi } from '@/api/system/menu'
-import { listSimpleDeptApi } from '@/api/system/dept'
+import { getSimpleDeptList } from '@/api/system/dept'
 import * as PermissionApi from '@/api/system/permission'
 
 const { t } = useI18n() // 国际化
@@ -278,7 +278,7 @@ const handleScope = async (type: string, row: RoleApi.RoleVO) => {
       })
     }
   } else if (type === 'data') {
-    const deptRes = await listSimpleDeptApi()
+    const deptRes = await getSimpleDeptList()
     treeOptions.value = handleTree(deptRes)
     const role = await RoleApi.getRoleApi(row.id)
     dataScopeForm.dataScope = role.dataScope
