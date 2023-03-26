@@ -17,7 +17,7 @@
         <el-input v-model="formData.name" placeholder="请输入应用名" />
       </el-form-item>
       <el-form-item label="应用图标">
-        <UploadImg v-model="formData.logo" :limit="1" />
+        <imageUpload v-model="formData.logo" :limit="1" />
       </el-form-item>
       <el-form-item label="应用描述">
         <el-input type="textarea" v-model="formData.description" placeholder="请输入应用名" />
@@ -147,7 +147,6 @@
 <script setup lang="ts">
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as ClientApi from '@/api/system/oauth2/client'
-import UploadImg from '@/components/UploadFile'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
