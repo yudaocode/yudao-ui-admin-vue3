@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import qs from 'qs'
 
 export interface SensitiveWordVO {
   id: number
@@ -21,6 +22,11 @@ export interface SensitiveWordExportReqVO {
   tag?: string
   status?: number
   createTime?: Date[]
+}
+
+export interface SensitiveWordTestReqVO {
+  text: string
+  tag: string[]
 }
 
 // 查询敏感词列表
@@ -59,6 +65,8 @@ export const getSensitiveWordTags = () => {
 }
 
 // 获得文本所包含的不合法的敏感词数组
-export const validateText = (id: number) => {
-  return request.get({ url: '/system/sensitive-word/validate-text?' + id })
+export const validateText = (query: SensitiveWordTestReqVO) => {
+  return request.get({
+    url: '/system/sensitive-word/validate-text?' + qs.stringify(query, { arrayFormat: 'repeat' })
+  })
 }

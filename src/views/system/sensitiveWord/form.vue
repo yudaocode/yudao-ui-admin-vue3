@@ -67,10 +67,11 @@ const formRules = reactive({
   tags: [{ required: true, message: '标签不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const tags = ref([]) // todo @blue-syd：在 openModal 里加载下
+const tags: Ref<string[]> = ref([]) // todo @blue-syd：在 openModal 里加载下
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const openModal = async (type: string, paramTags: string[], id?: number) => {
+  tags.value = paramTags
   modelVisible.value = true
   modelTitle.value = t('action.' + type)
   formType.value = type
