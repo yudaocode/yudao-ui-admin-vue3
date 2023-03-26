@@ -33,7 +33,7 @@
           placeholder="请选择文章标签"
           style="width: 380px"
         >
-          <el-option v-for="tag in tags" :key="tag" :label="tag" :value="tag" />
+          <el-option v-for="tag in tagList" :key="tag" :label="tag" :value="tag" />
         </el-select>
       </el-form-item>
     </el-form>
@@ -47,7 +47,6 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
 import { CommonStatusEnum } from '@/utils/constants'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -67,11 +66,10 @@ const formRules = reactive({
   tags: [{ required: true, message: '标签不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const tags: Ref<string[]> = ref([]) // todo @blue-syd：在 openModal 里加载下
+const tagList = ref([]) // 标签数组
 
 /** 打开弹窗 */
-const openModal = async (type: string, paramTags: string[], id?: number) => {
-  tags.value = paramTags
+const open = async (type: string, id?: number) => {
   modelVisible.value = true
   modelTitle.value = t('action.' + type)
   formType.value = type
@@ -81,13 +79,14 @@ const openModal = async (type: string, paramTags: string[], id?: number) => {
     formLoading.value = true
     try {
       formData.value = await SensitiveWordApi.getSensitiveWord(id)
-      console.log(formData.value)
     } finally {
       formLoading.value = false
     }
   }
+  // 获得 Tag 标签列表
+  tagList.value = await SensitiveWordApi.getSensitiveWordTagList()
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -101,10 +100,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as SensitiveWordApi.SensitiveWordVO
     if (formType.value === 'create') {
-      await SensitiveWordApi.createSensitiveWord(data) // TODO @blue-syd：去掉 API 后缀
+      await SensitiveWordApi.createSensitiveWord(data)
       message.success(t('common.createSuccess'))
     } else {
-      await SensitiveWordApi.updateSensitiveWord(data) // TODO @blue-syd：去掉 API 后缀
+      await SensitiveWordApi.updateSensitiveWord(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false

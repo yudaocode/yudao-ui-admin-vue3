@@ -1,13 +1,20 @@
 <template>
-  <!-- 搜索 -->
-  <content-wrap>
-    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
+  <!-- 搜索工作栏 -->
+  <ContentWrap>
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="敏感词" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入敏感词"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="标签" prop="tag">
@@ -16,17 +23,19 @@
           placeholder="请选择标签"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         >
-          <el-option v-for="tag in tags" :key="tag" :label="tag" :value="tag" />
+          <el-option v-for="tag in tagList" :key="tag" :label="tag" :value="tag" />
         </el-select>
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择启用状态" clearable>
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
+            class="!w-240px"
           />
         </el-select>
       </el-form-item>
@@ -38,6 +47,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>
@@ -46,13 +56,13 @@
         <el-button
           type="primary"
           plain
-          @click="openModal('create')"
+          @click="openForm('create')"
           v-hasPermi="['system:sensitive-word:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
-          type="warning"
+          type="success"
           plain
           @click="handleExport"
           :loading="exportLoading"
@@ -60,15 +70,15 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
-        <el-button type="success" plain @click="handleTest">
+        <el-button type="warning" plain @click="openTestForm">
           <Icon icon="ep:document-checked" class="mr-5px" /> 测试
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="敏感词" align="center" prop="name" />
@@ -81,15 +91,13 @@
       <el-table-column label="标签" align="center" prop="tags">
         <template #default="scope">
           <el-tag
-            :disable-transitions="true"
-            :key="index"
-            v-for="(tag, index) in scope.row.tags"
-            :index="index"
             class="mr-5px"
+            v-for="tag in scope.row.tags"
+            :key="tag"
+            :disable-transitions="true"
           >
             {{ tag }}
           </el-tag>
-          &nbsp; &nbsp;
         </template>
       </el-table-column>
       <el-table-column
@@ -104,7 +112,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['infra:config:update']"
           >
             编辑
@@ -127,22 +135,21 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <SensitiveWordForm ref="modalRef" @success="getList" />
+  <SensitiveWordForm ref="formRef" @success="getList" />
 
   <!-- 表单弹窗：测试敏感词 -->
-  <SensitiveWordTestForm ref="modalTestRef" />
+  <SensitiveWordTestForm ref="testFormRef" />
 </template>
 <script setup lang="ts" name="SensitiveWord">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
-import SensitiveWordForm from './form.vue' // TODO @blue-syd：组件名不对
-import SensitiveWordTestForm from './testForm.vue'
-
+import SensitiveWordForm from './SensitiveWordForm.vue'
+import SensitiveWordTestForm from './SensitiveWordTestForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -159,13 +166,13 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const tags = ref([])
+const tagList = ref([]) // 标签数组
 
 /** 查询参数列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await SensitiveWordApi.getSensitiveWordPage(queryParams) // TODO @blue-syd：去掉 API 后缀哈
+    const data = await SensitiveWordApi.getSensitiveWordPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -186,16 +193,15 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, tags.value, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
-// TODO @blue-syd：还少一个【测试】按钮的功能，参见 http://dashboard.yudao.iocoder.cn/system/sensitive-word
-/* 测试敏感词按钮操作 */
-const modalTestRef = ref()
-const handleTest = () => {
-  modalTestRef.value.openModal(tags.value)
+/** 测试敏感词按钮操作 */
+const testFormRef = ref()
+const openTestForm = () => {
+  testFormRef.value.open()
 }
 
 /** 删除按钮操作 */
@@ -218,7 +224,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await SensitiveWordApi.exportSensitiveWord(queryParams) // TODO @blue-syd：去掉 API 后缀哈
+    const data = await SensitiveWordApi.exportSensitiveWord(queryParams)
     download.excel(data, '敏感词.xls')
   } catch {
   } finally {
@@ -226,14 +232,10 @@ const handleExport = async () => {
   }
 }
 
-/** 获得 Tag 标签列表 */
-const getTags = async () => {
-  tags.value = await SensitiveWordApi.getSensitiveWordTags() // TODO @blue-syd：去掉 API 后缀哈
-}
-
 /** 初始化 **/
-onMounted(() => {
-  getTags()
-  getList()
+onMounted(async () => {
+  await getList()
+  // 获得 Tag 标签列表
+  tagList.value = await SensitiveWordApi.getSensitiveWordTagList()
 })
 </script>

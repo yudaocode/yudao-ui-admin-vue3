@@ -133,7 +133,6 @@
 import type { FormExpose } from '@/components/Form'
 // 业务相关的 import
 import * as ClientApi from '@/api/system/oauth2/client'
-import { rules, allSchemas } from './client.data'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

@@ -1,6 +1,5 @@
 <template>
-  <!-- 对话框(测试敏感词) -->
-  <Dialog :title="modelTitle" v-model="modelVisible">
+  <Dialog title="检测敏感词" v-model="modelVisible">
     <el-form
       ref="formRef"
       :model="formData"
@@ -17,10 +16,10 @@
           multiple
           filterable
           allow-create
-          placeholder="请选择文章标签"
+          placeholder="请选择标签"
           style="width: 380px"
         >
-          <el-option v-for="tag in tags" :key="tag" :label="tag" :value="tag" />
+          <el-option v-for="tag in tagList" :key="tag" :label="tag" :value="tag" />
         </el-select>
       </el-form-item>
     </el-form>
@@ -34,13 +33,10 @@
 </template>
 <script setup lang="ts">
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
-
 const message = useMessage() // 消息弹窗
 
 const modelVisible = ref(false) // 弹窗的是否展示
-const modelTitle = ref('检测敏感词') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const tags: Ref<string[]> = ref([])
 const formData = ref({
   text: '',
   tags: []
@@ -50,14 +46,16 @@ const formRules = reactive({
   tags: [{ required: true, message: '标签不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const tagList = ref([]) // 标签数组
 
 /** 打开弹窗 */
-const openModal = async (paramTags: string[]) => {
-  tags.value = paramTags
+const open = async () => {
   modelVisible.value = true
   resetForm()
+  // 获得 Tag 标签列表
+  tagList.value = await SensitiveWordApi.getSensitiveWordTagList()
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const submitForm = async () => {
