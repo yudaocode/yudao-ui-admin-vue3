@@ -11,9 +11,9 @@
 -->
 <template>
   <div class="wx-voice-div" @click="playVoice">
-    <el-icon
-      ><VideoPlay v-if="playing !== true" />
-      <VideoPause v-if="playing === true" />
+    <el-icon>
+      <Icon v-if="playing !== true" icon="ep:video-play" />
+      <Icon v-else icon="ep:video-pause" />
       <span class="amr-duration" v-if="duration">{{ duration }} 秒</span>
     </el-icon>
     <div v-if="content">
@@ -25,19 +25,15 @@
 
 <script setup lang="ts" name="WxVoicePlayer">
 // 因为微信语音是 amr 格式，所以需要用到 amr 解码器：https://www.npmjs.com/package/benz-amr-recorder
-
 import BenzAMRRecorder from 'benz-amr-recorder'
-import { VideoPause, VideoPlay } from '@element-plus/icons-vue'
 
 const props = defineProps({
   url: {
-    // 语音地址，例如说：https://www.iocoder.cn/xxx.amr
-    type: String,
+    type: String, // 语音地址，例如说：https://www.iocoder.cn/xxx.amr
     required: true
   },
   content: {
-    // 语音文本
-    type: String,
+    type: String, // 语音文本
     required: false
   }
 })
@@ -46,16 +42,14 @@ const amr = ref()
 const playing = ref(false)
 const duration = ref()
 
+/** 处理点击，播放或暂停 */
 const playVoice = () => {
   // 情况一：未初始化，则创建 BenzAMRRecorder
-  debugger
-  console.log('进入' + amr.value)
   if (amr.value === undefined) {
-    console.log('开始初始化')
     amrInit()
     return
   }
-
+  // 情况二：已经初始化，则根据情况播放或暂时
   if (amr.value.isPlaying()) {
     amrStop()
   } else {
@@ -63,10 +57,9 @@ const playVoice = () => {
   }
 }
 
+/** 音频初始化 */
 const amrInit = () => {
   amr.value = new BenzAMRRecorder()
-  console.log(amr.value)
-  console.log(props.url)
   // 设置播放
   amr.value.initWithUrl(props.url).then(function () {
     amrPlay()
@@ -77,16 +70,20 @@ const amrInit = () => {
     playing.value = false
   })
 }
+
+/** 音频播放 */
 const amrPlay = () => {
   playing.value = true
   amr.value.play()
 }
+
+/** 音频暂停 */
 const amrStop = () => {
   playing.value = false
   amr.value.stop()
 }
+// TODO 芋艿：下面样式有点问题
 </script>
-
 <style lang="scss" scoped>
 .wx-voice-div {
   padding: 5px;

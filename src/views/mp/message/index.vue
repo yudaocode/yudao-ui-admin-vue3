@@ -181,7 +181,7 @@
 <script setup lang="ts" name="MpMessage">
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 // import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
-// import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
+import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
 // import WxMsg from '@/views/mp/components/wx-msg/main.vue'
 import WxLocation from '@/views/mp/components/wx-location/main.vue'
 // import WxMusic from '@/views/mp/components/wx-music/main.vue'
