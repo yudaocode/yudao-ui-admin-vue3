@@ -81,50 +81,7 @@
     </el-card>
 
     <!-- 审批记录 -->
-    <el-card class="box-card" v-loading="tasksLoad">
-      <template #header>
-        <span class="el-icon-picture-outline">审批记录</span>
-      </template>
-      <el-col :span="16" :offset="4">
-        <div class="block">
-          <el-timeline>
-            <el-timeline-item
-              v-for="(item, index) in tasks"
-              :key="index"
-              :icon="getTimelineItemIcon(item)"
-              :type="getTimelineItemType(item)"
-            >
-              <p style="font-weight: 700">任务：{{ item.name }}</p>
-              <el-card :body-style="{ padding: '10px' }">
-                <label v-if="item.assigneeUser" style="font-weight: normal; margin-right: 30px">
-                  审批人：{{ item.assigneeUser.nickname }}
-                  <el-tag type="info" size="small">{{ item.assigneeUser.deptName }}</el-tag>
-                </label>
-                <label style="font-weight: normal" v-if="item.createTime">创建时间：</label>
-                <label style="color: #8a909c; font-weight: normal">
-                  {{ parseTime(item?.createTime) }}
-                </label>
-                <label v-if="item.endTime" style="margin-left: 30px; font-weight: normal">
-                  审批时间：
-                </label>
-                <label v-if="item.endTime" style="color: #8a909c; font-weight: normal">
-                  {{ parseTime(item?.endTime) }}
-                </label>
-                <label v-if="item.durationInMillis" style="margin-left: 30px; font-weight: normal">
-                  耗时：
-                </label>
-                <label v-if="item.durationInMillis" style="color: #8a909c; font-weight: normal">
-                  {{ formatPast2(item?.durationInMillis) }}
-                </label>
-                <p v-if="item.reason">
-                  <el-tag :type="getTimelineItemType(item)">{{ item.reason }}</el-tag>
-                </p>
-              </el-card>
-            </el-timeline-item>
-          </el-timeline>
-        </div>
-      </el-col>
-    </el-card>
+    <ProcessInstanceTaskList :loading="tasksLoad" :tasks="tasks" />
 
     <!-- 高亮流程图 -->
     <ProcessInstanceBpmnViewer
@@ -140,38 +97,46 @@
   </ContentWrap>
 </template>
 <script setup lang="ts">
-import { parseTime } from '@/utils/formatTime'
-import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import * as TaskApi from '@/api/bpm/task'
-import { formatPast2 } from '@/utils/formatTime'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { useUserStore } from '@/store/modules/user'
+import * as DefinitionApi from '@/api/bpm/definition'
+import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+import * as TaskApi from '@/api/bpm/task'
 import TaskUpdateAssigneeForm from './TaskUpdateAssigneeForm.vue'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
-import * as DefinitionApi from '@/api/bpm/definition'
-
+import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
 const { query } = useRoute() // 查询参数
 const message = useMessage() // 消息弹窗
 const { proxy } = getCurrentInstance() as any
 
-// ========== 审批信息 ==========
-const id = query.id as unknown as number
+const userId = useUserStore().getUser.id // 当前登录的编号
+const id = query.id as unknown as number // 流程实例的编号
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
+const bpmnXML = ref('') // BPMN XML
+const tasksLoad = ref(true) // 任务的加载中
+const tasks = ref<any[]>([]) // 任务列表
+// ========== 审批信息 ==========
 const runningTasks = ref<any[]>([]) // 运行中的任务
 const auditForms = ref<any[]>([]) // 审批任务的表单
 const auditRule = reactive({
   reason: [{ required: true, message: '审批建议不能为空', trigger: 'blur' }]
 })
+// ========== 申请信息 ==========
+const fApi = ref<ApiAttrs>() //
+const detailForm = ref({
+  // 流程表单详情
+  rule: [],
+  option: {},
+  value: {}
+})
 
-// 处理审批通过和不通过的操作
+/** 处理审批通过和不通过的操作 */
 const handleAudit = async (task, pass) => {
   // 1.1 获得对应表单
   const index = runningTasks.value.indexOf(task)
   const auditFormRef = proxy.$refs['form' + index][0]
-  // alert(auditFormRef)
-
   // 1.2 校验表单
   const elForm = unref(auditFormRef)
   if (!elForm) return
@@ -193,54 +158,6 @@ const handleAudit = async (task, pass) => {
   // 2.2 加载最新数据
   getDetail()
 }
-
-// ========== 申请信息 ==========
-const fApi = ref<ApiAttrs>()
-const userId = useUserStore().getUser.id // 当前登录的编号
-// 流程表单详情
-const detailForm = ref({
-  rule: [],
-  option: {},
-  value: {}
-})
-
-// ========== 审批记录 ==========
-const tasksLoad = ref(true)
-const tasks = ref<any[]>([])
-
-const getTimelineItemIcon = (item) => {
-  if (item.result === 1) {
-    return 'el-icon-time'
-  }
-  if (item.result === 2) {
-    return 'el-icon-check'
-  }
-  if (item.result === 3) {
-    return 'el-icon-close'
-  }
-  if (item.result === 4) {
-    return 'el-icon-remove-outline'
-  }
-  return ''
-}
-const getTimelineItemType = (item) => {
-  if (item.result === 1) {
-    return 'primary'
-  }
-  if (item.result === 2) {
-    return 'success'
-  }
-  if (item.result === 3) {
-    return 'danger'
-  }
-  if (item.result === 4) {
-    return 'info'
-  }
-  return ''
-}
-
-// ========== 审批记录 ==========
-const bpmnXML = ref('')
 
 /** 转派审批人 */
 const taskUpdateAssigneeFormRef = ref()
@@ -352,9 +269,3 @@ const getDetail = () => {
     })
 }
 </script>
-<style lang="scss">
-.box-card {
-  width: 100%;
-  margin-bottom: 20px;
-}
-</style>
