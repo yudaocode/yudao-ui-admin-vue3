@@ -166,12 +166,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column
-        label="操作"
-        align="center"
-        width="210"
-        fixed="right"
-      >
+      <el-table-column label="操作" align="center" width="210" fixed="right">
         <template #default="scope">
           <el-button
             link
@@ -241,7 +236,7 @@ const queryParams = reactive({
   createTime: []
 })
 const exportLoading = ref(false) // 导出的加载中
-const channelList = ref([]) // 短信渠道列表
+const channelList = ref<SmsChannelApi.SmsChannelVO[]>([]) // 短信渠道列表
 
 /** 查询列表 */
 const getList = async () => {
