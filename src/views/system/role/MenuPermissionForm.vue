@@ -96,8 +96,8 @@ import type { FormExpose } from '@/components/Form'
 import { handleTree, defaultProps } from '@/utils/tree'
 import { SystemDataScopeEnum } from '@/utils/constants'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { listSimpleMenusApi } from '@/api/system/menu'
-import { listSimpleDeptApi } from '@/api/system/dept'
+import * as MenuApi from '@/api/system/menu'
+import * as DeptApi from '@/api/system/dept'
 import * as PermissionApi from '@/api/system/permission'
 // ========== CRUD 相关 ==========
 const actionLoading = ref(false) // 遮罩层
@@ -131,7 +131,7 @@ const openModal = async (type: string, row: RoleApi.RoleVO) => {
   actionScopeType.value = type
   dialogScopeVisible.value = true
   if (type === 'menu') {
-    const menuRes = await listSimpleMenusApi()
+    const menuRes = await MenuApi.getSimpleMenusList()
     treeOptions.value = handleTree(menuRes)
     const role = await PermissionApi.listRoleMenusApi(row.id)
     if (role) {
@@ -140,7 +140,7 @@ const openModal = async (type: string, row: RoleApi.RoleVO) => {
       })
     }
   } else if (type === 'data') {
-    const deptRes = await listSimpleDeptApi()
+    const deptRes = await DeptApi.getSimpleDeptList()
     treeOptions.value = handleTree(deptRes)
     const role = await RoleApi.getRole(row.id)
     dataScopeForm.dataScope = role.dataScope

@@ -23,7 +23,7 @@ export interface UpdateStatusReqVO {
 }
 
 // 查询角色列表
-export const getRolePageApi = async (params: RolePageReqVO) => {
+export const getRolePage = async (params: RolePageReqVO) => {
   return await request.get({ url: '/system/role/page', params })
 }
 
@@ -33,26 +33,33 @@ export const getSimpleRoleList = async (): Promise<RoleVO[]> => {
 }
 
 // 查询角色详情
-export const getRoleApi = async (id: number) => {
+export const getRole = async (id: number) => {
   return await request.get({ url: '/system/role/get?id=' + id })
 }
 
 // 新增角色
-export const createRoleApi = async (data: RoleVO) => {
+export const createRole = async (data: RoleVO) => {
   return await request.post({ url: '/system/role/create', data })
 }
 
 // 修改角色
-export const updateRoleApi = async (data: RoleVO) => {
+export const updateRole = async (data: RoleVO) => {
   return await request.put({ url: '/system/role/update', data })
 }
 
 // 修改角色状态
-export const updateRoleStatusApi = async (data: UpdateStatusReqVO) => {
+export const updateRoleStatus = async (data: UpdateStatusReqVO) => {
   return await request.put({ url: '/system/role/update-status', data })
 }
 
 // 删除角色
-export const deleteRoleApi = async (id: number) => {
+export const deleteRole = async (id: number) => {
   return await request.delete({ url: '/system/role/delete?id=' + id })
+}
+// 导出角色
+export const exportRole = (params) => {
+  return request.download({
+    url: '/system/role/export-excel',
+    params
+  })
 }

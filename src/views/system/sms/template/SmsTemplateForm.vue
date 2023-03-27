@@ -44,7 +44,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
-            :label="parseInt(dict.value)"
+            :label="parseInt(dict.value as string)"
           >
             {{ dict.label }}
           </el-radio>
@@ -96,7 +96,7 @@ const formRules = reactive({
   channelId: [{ required: true, message: '短信渠道编号不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
-const channelList = ref([]) // 短信渠道列表
+const channelList = ref<SmsChannelApi.SmsChannelVO[]>([]) // 短信渠道列表
 
 const open = async (type: string, id?: number) => {
   modelVisible.value = true
