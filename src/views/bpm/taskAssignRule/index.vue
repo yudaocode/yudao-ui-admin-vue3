@@ -1,186 +1,73 @@
 <template>
   <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable" ref="xGrid">
-      <template #options_default="{ row }">
-        <span :key="option" v-for="option in row.options">
-          <el-tag>
-            {{ getAssignRuleOptionName(row.type, option) }}
+    <el-table v-loading="loading" :data="list">
+      <el-table-column label="任务名" align="center" prop="taskDefinitionName" />
+      <el-table-column label="任务标识" align="center" prop="taskDefinitionKey" />
+      <el-table-column label="规则类型" align="center" prop="type">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_TASK_ASSIGN_RULE_TYPE" :value="scope.row.type" />
+        </template>
+      </el-table-column>
+      <el-table-column label="规则范围" align="center" prop="options">
+        <template #default="scope">
+          <el-tag class="mr-5px" :key="option" v-for="option in scope.row.options">
+            {{ getAssignRuleOptionName(scope.row.type, option) }}
           </el-tag>
-          &nbsp;
-        </span>
-      </template>
-      <!-- 操作 -->
-      <template #actionbtns_default="{ row }" v-if="modelId">
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['bpm:task-assign-rule:update']"
-          @click="handleUpdate(row)"
-        />
-      </template>
-    </XTable>
-
-    <!-- 添加/修改弹窗 -->
-    <XModal v-model="dialogVisible" title="修改任务规则" width="800" height="35%">
-      <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px">
-        <el-form-item label="任务名称" prop="taskDefinitionName">
-          <el-input v-model="formData.taskDefinitionName" placeholder="请输入流标标识" disabled />
-        </el-form-item>
-        <el-form-item label="任务标识" prop="taskDefinitionKey">
-          <el-input v-model="formData.taskDefinitionKey" placeholder="请输入任务标识" disabled />
-        </el-form-item>
-        <el-form-item label="规则类型" prop="type">
-          <el-select v-model="formData.type" clearable style="width: 100%">
-            <el-option
-              v-for="dict in getDictOptions(DICT_TYPE.BPM_TASK_ASSIGN_RULE_TYPE)"
-              :key="parseInt(dict.value)"
-              :label="dict.label"
-              :value="parseInt(dict.value)"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item v-if="formData.type === 10" label="指定角色" prop="roleIds">
-          <el-select v-model="formData.roleIds" multiple clearable style="width: 100%">
-            <el-option
-              v-for="item in roleOptions"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item
-          label="指定部门"
-          prop="deptIds"
-          span="24"
-          v-if="formData.type === 20 || formData.type === 21"
-        >
-          <el-tree-select
-            ref="treeRef"
-            v-model="formData.deptIds"
-            node-key="id"
-            show-checkbox
-            :props="defaultProps"
-            :data="deptTreeOptions"
-            empty-text="加载中，请稍后"
-            multiple
-          />
-        </el-form-item>
-        <el-form-item label="指定岗位" prop="postIds" span="24" v-if="formData.type === 22">
-          <el-select v-model="formData.postIds" multiple clearable style="width: 100%">
-            <el-option
-              v-for="item in postOptions"
-              :key="parseInt(item.id)"
-              :label="item.name"
-              :value="parseInt(item.id)"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item
-          label="指定用户"
-          prop="userIds"
-          span="24"
-          v-if="formData.type === 30 || formData.type === 31 || formData.type === 32"
-        >
-          <el-select v-model="formData.userIds" multiple clearable style="width: 100%">
-            <el-option
-              v-for="item in userOptions"
-              :key="parseInt(item.id)"
-              :label="item.nickname"
-              :value="parseInt(item.id)"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="指定用户组" prop="userGroupIds" v-if="formData.type === 40">
-          <el-select v-model="formData.userGroupIds" multiple clearable style="width: 100%">
-            <el-option
-              v-for="item in userGroupOptions"
-              :key="parseInt(item.id)"
-              :label="item.name"
-              :value="parseInt(item.id)"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="指定脚本" prop="scripts" v-if="formData.type === 50">
-          <el-select v-model="formData.scripts" multiple clearable style="width: 100%">
-            <el-option
-              v-for="dict in taskAssignScriptDictDatas"
-              :key="parseInt(dict.value)"
-              :label="dict.label"
-              :value="parseInt(dict.value)"
-            />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <!-- 操作按钮 -->
-      <template #footer>
-        <!-- 按钮：保存 -->
-        <XButton
-          type="primary"
-          :title="t('action.save')"
-          :loading="actionLoading"
-          @click="submitForm"
-        />
-        <!-- 按钮：关闭 -->
-        <XButton
-          :loading="actionLoading"
-          :title="t('dialog.close')"
-          @click="dialogVisible = false"
-        />
-      </template>
-    </XModal>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="queryParams.modelId" label="操作" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openForm(scope.row)"
+            v-hasPermi="['bpm:task-assign-rule:update']"
+          >
+            修改
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
   </ContentWrap>
+  <!-- 添加/修改弹窗 -->
+  <TaskAssignRuleForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="TaskAssignRule">
-// 全局相关的 import
-import { FormInstance } from 'element-plus'
-// 业务相关的 import
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as TaskAssignRuleApi from '@/api/bpm/taskAssignRule'
-import { listSimpleRolesApi } from '@/api/system/role'
-import { getSimplePostList } from '@/api/system/post'
-import { getSimpleUserList } from '@/api/system/user'
-import { listSimpleUserGroup } from '@/api/bpm/userGroup'
-import { listSimpleDeptApi } from '@/api/system/dept'
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-import { handleTree, defaultProps } from '@/utils/tree'
-import { allSchemas, rules, idShowActionClick } from './taskAssignRule.data'
+import * as RoleApi from '@/api/system/role'
+import * as DeptApi from '@/api/system/dept'
+import * as PostApi from '@/api/system/post'
+import * as UserApi from '@/api/system/user'
+import * as UserGroupApi from '@/api/bpm/userGroup'
+import TaskAssignRuleForm from './TaskAssignRuleForm.vue'
+const { query } = useRoute() // 查询参数
 
-const { t } = useI18n() // 国际化
-const message = useMessage() // 消息弹窗
-const { query } = useRoute()
-const xGrid = ref()
-
-// ========== 列表相关 ==========
-
-const roleOptions = ref() // 角色列表
-const deptOptions = ref() // 部门列表
-const deptTreeOptions = ref()
-const postOptions = ref() // 岗位列表
-const userOptions = ref() // 用户列表
-const userGroupOptions = ref() // 用户组列表
-const taskAssignScriptDictDatas = getDictOptions(DICT_TYPE.BPM_TASK_ASSIGN_SCRIPT)
-
-// 流程模型的编号。如果 modelId 非空，则用于流程模型的查看与配置
-const modelId = query.modelId
-// 流程定义的编号。如果 processDefinitionId 非空，则用于流程定义的查看，不支持配置
-const processDefinitionId = query.processDefinitionId
-let isShow = idShowActionClick(modelId)
-
-// 查询参数
+const loading = ref(true) // 列表的加载中
+const list = ref([]) // 列表的数据
 const queryParams = reactive({
-  modelId: modelId,
-  processDefinitionId: processDefinitionId
+  modelId: query.modelId, // 流程模型的编号。如果 modelId 非空，则用于流程模型的查看与配置
+  processDefinitionId: query.processDefinitionId // 流程定义的编号。如果 processDefinitionId 非空，则用于流程定义的查看，不支持配置
 })
-const [registerTable, { reload }] = useXTable({
-  allSchemas: allSchemas,
-  params: queryParams,
-  getListApi: TaskAssignRuleApi.getTaskAssignRuleList,
-  isList: true
-})
+const roleOptions = ref<RoleApi.RoleVO[]>([]) // 角色列表
+const deptOptions = ref<DeptApi.DeptVO[]>([]) // 部门列表
+const postOptions = ref<PostApi.PostVO[]>([]) // 岗位列表
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
+const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
+const taskAssignScriptDictDatas = getIntDictOptions(DICT_TYPE.BPM_TASK_ASSIGN_SCRIPT)
 
-// 翻译规则范围
+/** 查询参数列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    list.value = await TaskAssignRuleApi.getTaskAssignRuleList(queryParams)
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 翻译规则范围 */
+// TODO 芋艿：各种 ts 报错
 const getAssignRuleOptionName = (type, option) => {
   if (type === 10) {
     for (const roleOption of roleOptions.value) {
@@ -223,136 +110,24 @@ const getAssignRuleOptionName = (type, option) => {
   return '未知(' + option + ')'
 }
 
-// ========== 修改相关 ==========
-
-// 修改任务责任表单
-const actionLoading = ref(false) // 遮罩层
-const dialogVisible = ref(false) // 是否显示弹出层
-const formRef = ref<FormInstance>()
-const formData = ref() // 表单数据
-
-// 提交按钮
-const submitForm = async () => {
-  // 参数校验
-  const elForm = unref(formRef)
-  if (!elForm) return
-  const valid = await elForm.validate()
-  if (!valid) return
-  // 构建表单
-  let form = {
-    ...formData.value,
-    taskDefinitionName: undefined
-  }
-  // 将 roleIds 等选项赋值到 options 中
-  if (form.type === 10) {
-    form.options = form.roleIds
-  } else if (form.type === 20 || form.type === 21) {
-    form.options = form.deptIds
-  } else if (form.type === 22) {
-    form.options = form.postIds
-  } else if (form.type === 30 || form.type === 31 || form.type === 32) {
-    form.options = form.userIds
-  } else if (form.type === 40) {
-    form.options = form.userGroupIds
-  } else if (form.type === 50) {
-    form.options = form.scripts
-  }
-  form.roleIds = undefined
-  form.deptIds = undefined
-  form.postIds = undefined
-  form.userIds = undefined
-  form.userGroupIds = undefined
-  form.scripts = undefined
-  // 设置提交中
-  actionLoading.value = true
-  // 提交请求
-  try {
-    const data = form as TaskAssignRuleApi.TaskAssignVO
-    // 新增
-    if (!data.id) {
-      await TaskAssignRuleApi.createTaskAssignRule(data)
-      message.success(t('common.createSuccess'))
-      // 修改
-    } else {
-      await TaskAssignRuleApi.updateTaskAssignRule(data)
-      message.success(t('common.updateSuccess'))
-    }
-    dialogVisible.value = false
-  } finally {
-    actionLoading.value = false
-    // 刷新列表
-    await reload()
-  }
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (row: TaskAssignRuleApi.TaskAssignVO) => {
+  formRef.value.open(queryParams.modelId, row)
 }
 
-// 修改任务分配规则
-const handleUpdate = (row) => {
-  // 1. 先重置表单
-  formData.value = {}
-  // 2. 再设置表单
-  formData.value = {
-    ...row,
-    modelId: modelId,
-    options: [],
-    roleIds: [],
-    deptIds: [],
-    postIds: [],
-    userIds: [],
-    userGroupIds: [],
-    scripts: []
-  }
-  // 将 options 赋值到对应的 roleIds 等选项
-  if (row.type === 10) {
-    formData.value.roleIds.push(...row.options)
-  } else if (row.type === 20 || row.type === 21) {
-    formData.value.deptIds.push(...row.options)
-  } else if (row.type === 22) {
-    formData.value.postIds.push(...row.options)
-  } else if (row.type === 30 || row.type === 31 || row.type === 32) {
-    formData.value.userIds.push(...row.options)
-  } else if (row.type === 40) {
-    formData.value.userGroupIds.push(...row.options)
-  } else if (row.type === 50) {
-    formData.value.scripts.push(...row.options)
-  }
-  // 打开弹窗
-  dialogVisible.value = true
-  actionLoading.value = false
-}
-
-// ========== 初始化 ==========
-onMounted(() => {
+/** 初始化 */
+onMounted(async () => {
+  await getList()
   // 获得角色列表
-  roleOptions.value = []
-  listSimpleRolesApi().then((data) => {
-    roleOptions.value.push(...data)
-  })
+  roleOptions.value = await RoleApi.getSimpleRoleList()
   // 获得部门列表
-  deptOptions.value = []
-  deptTreeOptions.value = []
-  listSimpleDeptApi().then((data) => {
-    deptOptions.value.push(...data)
-    deptTreeOptions.value.push(...handleTree(data, 'id'))
-  })
+  deptOptions.value = await DeptApi.getSimpleDeptList()
   // 获得岗位列表
-  postOptions.value = []
-  getSimplePostList().then((data) => {
-    postOptions.value.push(...data)
-  })
+  postOptions.value = await PostApi.getSimplePostList()
   // 获得用户列表
-  userOptions.value = []
-  getSimpleUserList().then((data) => {
-    userOptions.value.push(...data)
-  })
+  userOptions.value = await UserApi.getSimpleUserList()
   // 获得用户组列表
-  userGroupOptions.value = []
-  listSimpleUserGroup().then((data) => {
-    userGroupOptions.value.push(...data)
-  })
-  if (!isShow) {
-    setTimeout(() => {
-      xGrid.value.Ref.hideColumn('actionbtns')
-    }, 100)
-  }
+  userGroupOptions.value = await UserGroupApi.getSimpleUserGroupList()
 })
 </script>

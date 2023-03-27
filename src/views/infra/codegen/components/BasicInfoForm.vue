@@ -6,7 +6,7 @@ import { useForm } from '@/hooks/web/useForm'
 import { FormSchema } from '@/types/form'
 import { CodegenTableVO } from '@/api/infra/codegen/types'
 import { getIntDictOptions } from '@/utils/dict'
-import { listSimpleMenusApi } from '@/api/system/menu'
+import { getSimpleMenusList } from '@/api/system/menu'
 import { handleTree, defaultProps } from '@/utils/tree'
 import { PropType } from 'vue'
 
@@ -21,7 +21,7 @@ const templateTypeOptions = getIntDictOptions(DICT_TYPE.INFRA_CODEGEN_TEMPLATE_T
 const sceneOptions = getIntDictOptions(DICT_TYPE.INFRA_CODEGEN_SCENE)
 const menuOptions = ref<any>([]) // 树形结构
 const getTree = async () => {
-  const res = await listSimpleMenusApi()
+  const res = await getSimpleMenusList()
   menuOptions.value = handleTree(res)
 }
 

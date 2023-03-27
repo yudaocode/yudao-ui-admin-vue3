@@ -42,6 +42,6 @@ export const getUserGroupPage = async (params) => {
 }
 
 // 获取用户组精简信息列表
-export const listSimpleUserGroup = async () => {
+export const getSimpleUserGroupList = async (): Promise<UserGroupVO[]> => {
   return await request.get({ url: '/bpm/user-group/list-all-simple' })
 }

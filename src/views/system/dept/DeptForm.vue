@@ -166,7 +166,7 @@ const resetForm = () => {
 /** 获得部门树 */
 const getTree = async () => {
   deptTree.value = []
-  const data = await DeptApi.listSimpleDeptApi()
+  const data = await DeptApi.getSimpleDeptList()
   let dept: Tree = { id: 0, name: '顶级部门', children: [] }
   dept.children = handleTree(data)
   deptTree.value.push(dept)

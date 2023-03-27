@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import qs from 'qs'
 
 export interface SensitiveWordVO {
   id: number
@@ -9,22 +10,13 @@ export interface SensitiveWordVO {
   createTime: Date
 }
 
-export interface SensitiveWordPageReqVO extends PageParam {
-  name?: string
-  tag?: string
-  status?: number
-  createTime?: Date[]
-}
-
-export interface SensitiveWordExportReqVO {
-  name?: string
-  tag?: string
-  status?: number
-  createTime?: Date[]
+export interface SensitiveWordTestReqVO {
+  text: string
+  tag: string[]
 }
 
 // 查询敏感词列表
-export const getSensitiveWordPage = (params: SensitiveWordPageReqVO) => {
+export const getSensitiveWordPage = (params: PageParam) => {
   return request.get({ url: '/system/sensitive-word/page', params })
 }
 
@@ -49,16 +41,18 @@ export const deleteSensitiveWord = (id: number) => {
 }
 
 // 导出敏感词
-export const exportSensitiveWord = (params: SensitiveWordExportReqVO) => {
+export const exportSensitiveWord = (params) => {
   return request.download({ url: '/system/sensitive-word/export-excel', params })
 }
 
 // 获取所有敏感词的标签数组
-export const getSensitiveWordTags = () => {
+export const getSensitiveWordTagList = () => {
   return request.get({ url: '/system/sensitive-word/get-tags' })
 }
 
 // 获得文本所包含的不合法的敏感词数组
-export const validateText = (id: number) => {
-  return request.get({ url: '/system/sensitive-word/validate-text?' + id })
+export const validateText = (query: SensitiveWordTestReqVO) => {
+  return request.get({
+    url: '/system/sensitive-word/validate-text?' + qs.stringify(query, { arrayFormat: 'repeat' })
+  })
 }

@@ -256,7 +256,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           title: '流程定义',
-          activeMenu: 'bpm/definition/index'
+          activeMenu: '/bpm/manager/model'
         }
       },
       {

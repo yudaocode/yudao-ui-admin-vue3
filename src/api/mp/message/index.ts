@@ -1,7 +1,7 @@
 import request from '@/config/axios'
 
 // 获得公众号消息分页
-export const getMessagePage = (query) => {
+export const getMessagePage = (query: PageParam) => {
   return request.get({
     url: '/mp/message/page',
     params: query
