@@ -12,11 +12,7 @@
         />
       </template>
       <template #beginTime_default="{ row }">
-        <span>{{
-          dayjs(row.beginTime).format('YYYY-MM-DD HH:mm:ss') +
-          ' ~ ' +
-          dayjs(row.endTime).format('YYYY-MM-DD HH:mm:ss')
-        }}</span>
+        <span>{{ parseTime(row.beginTime) + ' ~ ' + parseTime(row.endTime) }}</span>
       </template>
       <template #duration_default="{ row }">
         <span>{{ row.duration + ' 毫秒' }}</span>
@@ -48,7 +44,7 @@
   </XModal>
 </template>
 <script setup lang="ts" name="JobLog">
-import dayjs from 'dayjs'
+import { parseTime } from '@/utils/formatTime'
 
 import * as JobLogApi from '@/api/infra/jobLog'
 import { allSchemas } from './jobLog.data'

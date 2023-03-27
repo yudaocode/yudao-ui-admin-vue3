@@ -41,7 +41,7 @@
         {{ detailData.javaMethodArgs }}
       </el-descriptions-item>
       <el-descriptions-item label="操作时间">
-        {{ formatDate(detailData.startTime, 'YYYY-MM-DD HH:mm:ss') }}
+        {{ formatDate(detailData.startTime) }}
       </el-descriptions-item>
       <el-descriptions-item label="执行时长">{{ detailData.duration }} ms</el-descriptions-item>
       <el-descriptions-item label="操作结果">

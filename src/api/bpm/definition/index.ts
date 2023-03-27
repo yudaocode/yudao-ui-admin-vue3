@@ -1,19 +1,19 @@
 import request from '@/config/axios'
 
-export const getProcessDefinitionBpmnXMLApi = async (id: number) => {
+export const getProcessDefinitionBpmnXML = async (id: number) => {
   return await request.get({
     url: '/bpm/process-definition/get-bpmn-xml?id=' + id
   })
 }
 
-export const getProcessDefinitionPageApi = async (params) => {
+export const getProcessDefinitionPage = async (params) => {
   return await request.get({
     url: '/bpm/process-definition/page',
     params
   })
 }
 
-export const getProcessDefinitionListApi = async (params) => {
+export const getProcessDefinitionList = async (params) => {
   return await request.get({
     url: '/bpm/process-definition/list',
     params

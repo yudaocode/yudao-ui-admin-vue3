@@ -70,6 +70,23 @@ export const getDictObj = (dictType: string, value: any) => {
   })
 }
 
+/**
+ * 获得字典数据的文本展示
+ *
+ * @param dictType 字典类型
+ * @param value 字典数据的值
+ */
+export const getDictLabel = (dictType: string, value: any) => {
+  const dictOptions: DictDataType[] = getDictOptions(dictType)
+  const dictLabel = ref('')
+  dictOptions.forEach((dict: DictDataType) => {
+    if (dict.value === value) {
+      dictLabel.value = dict.label
+    }
+  })
+  return dictLabel.value
+}
+
 export enum DICT_TYPE {
   USER_TYPE = 'user_type',
   COMMON_STATUS = 'common_status',
@@ -123,5 +140,9 @@ export enum DICT_TYPE {
   PAY_ORDER_STATUS = 'pay_order_status', // 商户支付订单状态
   PAY_ORDER_REFUND_STATUS = 'pay_order_refund_status', // 商户支付订单退款状态
   PAY_REFUND_ORDER_STATUS = 'pay_refund_order_status', // 退款订单状态
-  PAY_REFUND_ORDER_TYPE = 'pay_refund_order_type' // 退款订单类别
+  PAY_REFUND_ORDER_TYPE = 'pay_refund_order_type', // 退款订单类别
+
+  // ========== MP 模块 ==========
+  MP_AUTO_REPLY_REQUEST_MATCH = 'mp_auto_reply_request_match', // 自动回复请求匹配类型
+  MP_MESSAGE_TYPE = 'mp_message_type' // 消息类型
 }

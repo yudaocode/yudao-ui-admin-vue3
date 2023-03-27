@@ -71,7 +71,7 @@ import type { ElTree } from 'element-plus'
 // 业务相关的 import
 import { rules, allSchemas } from './tenantPackage.data'
 import * as TenantPackageApi from '@/api/system/tenantPackage'
-import { listSimpleMenusApi } from '@/api/system/menu'
+import { getSimpleMenusList } from '@/api/system/menu'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -102,7 +102,7 @@ const validateCategory = (rule: any, value: any, callback: any) => {
 rules.menuIds = [{ required: true, validator: validateCategory, trigger: 'blur' }]
 
 const getTree = async () => {
-  const res = await listSimpleMenusApi()
+  const res = await getSimpleMenusList()
   menuOptions.value = handleTree(res)
 }
 

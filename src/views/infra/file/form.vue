@@ -23,10 +23,8 @@
       </template>
     </el-upload>
     <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="submitFileForm" type="primary" :disabled="formLoading">确 定</el-button>
-        <el-button @click="modelVisible = false">取 消</el-button>
-      </div>
+      <el-button @click="submitFileForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="modelVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>

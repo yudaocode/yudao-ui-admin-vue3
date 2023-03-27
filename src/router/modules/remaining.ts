@@ -225,26 +225,26 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: '/manager/form/edit',
-        component: () => import('@/views/bpm/form/formEditor.vue'),
+        component: () => import('@/views/bpm/form/editor/index.vue'),
         name: 'bpmFormEditor',
         meta: {
           noCache: true,
           hidden: true,
           canTo: true,
           title: '设计流程表单',
-          activeMenu: 'bpm/manager/form/formEditor'
+          activeMenu: '/bpm/manager/form'
         }
       },
       {
         path: '/manager/model/edit',
-        component: () => import('@/views/bpm/model/modelEditor.vue'),
+        component: () => import('@/views/bpm/model/editor/index.vue'),
         name: 'modelEditor',
         meta: {
           noCache: true,
           hidden: true,
           canTo: true,
           title: '设计流程',
-          activeMenu: 'bpm/manager/model/design'
+          activeMenu: '/bpm/manager/model'
         }
       },
       {
@@ -256,7 +256,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           title: '流程定义',
-          activeMenu: 'bpm/definition/index'
+          activeMenu: '/bpm/manager/model'
         }
       },
       {

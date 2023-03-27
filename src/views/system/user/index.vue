@@ -271,9 +271,9 @@ import { getAccessToken, getTenantId } from '@/utils/auth'
 import type { FormExpose } from '@/components/Form'
 import { rules, allSchemas } from './user.data'
 import * as UserApi from '@/api/system/user'
-import { listSimpleDeptApi } from '@/api/system/dept'
-import { listSimpleRolesApi } from '@/api/system/role'
-import { listSimplePostsApi, PostVO } from '@/api/system/post'
+import { getSimpleDeptList } from '@/api/system/dept'
+import { getSimpleRoleList } from '@/api/system/role'
+import { getSimplePostList, PostVO } from '@/api/system/post'
 import {
   aassignUserRoleApi,
   listUserRolesApi,
@@ -301,7 +301,7 @@ const filterText = ref('')
 const deptOptions = ref<Tree[]>([]) // 树形结构
 const treeRef = ref<InstanceType<typeof ElTree>>()
 const getTree = async () => {
-  const res = await listSimpleDeptApi()
+  const res = await getSimpleDeptList()
   deptOptions.value.push(...handleTree(res))
 }
 const filterNode = (value: string, data: Tree) => {
@@ -329,7 +329,7 @@ const postOptions = ref<PostVO[]>([]) //岗位列表
 
 // 获取岗位列表
 const getPostOptions = async () => {
-  const res = await listSimplePostsApi()
+  const res = await getSimplePostList()
   postOptions.value.push(...res)
 }
 const dataFormater = (val) => {
@@ -477,7 +477,7 @@ const handleRole = async (row: UserApi.UserVO) => {
   const roles = await listUserRolesApi(row.id)
   userRole.roleIds = roles
   // 获取角色列表
-  const roleOpt = await listSimpleRolesApi()
+  const roleOpt = await getSimpleRoleList()
   roleOptions.value = roleOpt
   roleDialogVisible.value = true
 }
