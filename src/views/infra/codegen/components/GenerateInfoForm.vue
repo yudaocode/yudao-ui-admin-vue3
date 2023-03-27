@@ -369,7 +369,7 @@ watch(
 )
 onMounted(async () => {
   try {
-    const resp = await MenuApi.listSimpleMenusApi()
+    const resp = await MenuApi.getSimpleMenusList()
     menus.value = handleTree(resp)
   } catch {}
 })
