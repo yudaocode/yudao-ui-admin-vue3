@@ -127,21 +127,13 @@
     </el-card>
 
     <!-- 高亮流程图 -->
-    <el-card class="box-card" v-loading="processInstanceLoading">
-      <template #header>
-        <span class="el-icon-picture-outline">流程图</span>
-      </template>
-      <my-process-viewer
-        key="designer"
-        v-model="bpmnXML"
-        :value="bpmnXML"
-        v-bind="bpmnControlForm"
-        :prefix="bpmnControlForm.prefix"
-        :activityData="activityList"
-        :processInstanceData="processInstance"
-        :taskData="tasks"
-      />
-    </el-card>
+    <ProcessInstanceBpmnViewer
+      :id="id"
+      :process-instance="processInstance"
+      :loading="processInstanceLoading"
+      :tasks="tasks"
+      :bpmn-xml="bpmnXML"
+    />
 
     <!-- 弹窗：转派审批人 -->
     <TaskUpdateAssigneeForm ref="taskUpdateAssigneeFormRef" @success="getDetail" />
@@ -149,16 +141,15 @@
 </template>
 <script setup lang="ts">
 import { parseTime } from '@/utils/formatTime'
-import * as UserApi from '@/api/system/user'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import * as DefinitionApi from '@/api/bpm/definition'
 import * as TaskApi from '@/api/bpm/task'
-import * as ActivityApi from '@/api/bpm/activity'
 import { formatPast2 } from '@/utils/formatTime'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { useUserStore } from '@/store/modules/user'
 import TaskUpdateAssigneeForm from './TaskUpdateAssigneeForm.vue'
+import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
+import * as DefinitionApi from '@/api/bpm/definition'
 
 const { query } = useRoute() // 查询参数
 const message = useMessage() // 消息弹窗
@@ -249,6 +240,7 @@ const getTimelineItemType = (item) => {
 }
 
 // ========== 审批记录 ==========
+const bpmnXML = ref('')
 
 /** 转派审批人 */
 const taskUpdateAssigneeFormRef = ref()
@@ -265,32 +257,12 @@ const handleDelegate = async (task) => {
 /** 处理审批退回的操作 */
 const handleBack = async (task) => {
   message.error('暂不支持【退回】功能！')
-  // 可参考 http://blog.wya1.com/article/636697030/details/7296
-  // const data = {
-  //   id: task.id,
-  //   assigneeUserId: 1
-  // }
-  // backTask(data).then(response => {
-  //   this.$modal.msgSuccess("回退成功！");
-  //   this.getDetail(); // 获得最新详情
-  // });
   console.log(task)
 }
-
-// ========== 高亮流程图 ==========
-const bpmnXML = ref(null)
-const bpmnControlForm = ref({
-  prefix: 'flowable'
-})
-const activityList = ref([])
 
 // ========== 初始化 ==========
 onMounted(() => {
   getDetail()
-  // 加载用户的列表
-  UserApi.getSimpleUserList().then((data) => {
-    userOptions.value.push(...data)
-  })
 })
 
 const getDetail = () => {
@@ -323,13 +295,6 @@ const getDetail = () => {
       // 加载流程图
       DefinitionApi.getProcessDefinitionBpmnXML(processDefinition.id).then((data) => {
         bpmnXML.value = data
-      })
-
-      // 加载活动列表
-      ActivityApi.getActivityList({
-        processInstanceId: data.id
-      }).then((data) => {
-        activityList.value = data
       })
     })
     .finally(() => {
@@ -387,12 +352,7 @@ const getDetail = () => {
     })
 }
 </script>
-
 <style lang="scss">
-.my-process-designer {
-  height: calc(100vh - 200px);
-}
-
 .box-card {
   width: 100%;
   margin-bottom: 20px;
