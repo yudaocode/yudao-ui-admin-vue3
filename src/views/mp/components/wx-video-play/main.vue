@@ -19,13 +19,7 @@
     </div>
 
     <!-- 弹窗播放 -->
-    <el-dialog
-      v-model="dialogVideo"
-      title="视频播放"
-      width="40%"
-      append-to-body
-      @close="closeDialog"
-    >
+    <el-dialog v-model="dialogVideo" title="视频播放" width="40%" append-to-body>
       <template #footer>
         <video-player
           v-if="dialogVideo"
