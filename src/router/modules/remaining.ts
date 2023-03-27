@@ -284,7 +284,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       },
       {
         path: '/process-instance/detail',
-        component: () => import('@/views/bpm/processInstance/detail.vue'),
+        component: () => import('@/views/bpm/processInstance/detail/index.vue'),
         name: 'BpmProcessInstanceDetail',
         meta: {
           noCache: true,

@@ -33,31 +33,21 @@
           </el-form-item>
         </el-form>
         <div style="margin-left: 10%; margin-bottom: 20px; font-size: 14px">
-          <XButton
-            pre-icon="ep:select"
-            type="success"
-            title="通过"
-            @click="handleAudit(item, true)"
-          />
-          <XButton
-            pre-icon="ep:close"
-            type="danger"
-            title="不通过"
-            @click="handleAudit(item, false)"
-          />
-          <XButton
-            pre-icon="ep:edit"
-            type="primary"
-            title="转办"
-            @click="handleUpdateAssignee(item)"
-          />
-          <XButton
-            pre-icon="ep:position"
-            type="primary"
-            title="委派"
-            @click="handleDelegate(item)"
-          />
-          <XButton pre-icon="ep:back" type="warning" title="委派" @click="handleBack(item)" />
+          <el-button type="success" @click="handleAudit(item, true)">
+            <Icon icon="ep:select" /> 通过
+          </el-button>
+          <el-button type="danger" @click="handleAudit(item, false)">
+            <Icon icon="ep:close" /> 不通过
+          </el-button>
+          <el-button type="primary" @click="openTaskUpdateAssigneeForm(item.id)">
+            <Icon icon="ep:edit" /> 转办
+          </el-button>
+          <el-button type="primary" @click="handleDelegate(item)">
+            <Icon icon="ep:position" /> 委派
+          </el-button>
+          <el-button type="warning" @click="handleBack(item)">
+            <Icon icon="ep:back" /> 回退
+          </el-button>
         </div>
       </el-col>
     </el-card>
@@ -85,7 +75,7 @@
             processInstance.businessKey
           "
         >
-          <XButton type="primary" preIcon="ep:view" title="点击查看" />
+          <el-button type="primary"><Icon icon="ep:view" /> 点击查看</el-button>
         </router-link>
       </div>
     </el-card>
@@ -153,42 +143,8 @@
       />
     </el-card>
 
-    <!-- 对话框(转派审批人) -->
-    <XModal v-model="updateAssigneeVisible" title="转派审批人" width="500">
-      <el-form
-        ref="updateAssigneeFormRef"
-        :model="updateAssigneeForm"
-        :rules="updateAssigneeRules"
-        label-width="110px"
-      >
-        <el-form-item label="新审批人" prop="assigneeUserId">
-          <el-select v-model="updateAssigneeForm.assigneeUserId" clearable style="width: 100%">
-            <el-option
-              v-for="item in userOptions"
-              :key="parseInt(item.id)"
-              :label="item.nickname"
-              :value="parseInt(item.id)"
-            />
-          </el-select>
-        </el-form-item>
-      </el-form>
-      <!-- 操作按钮 -->
-      <template #footer>
-        <!-- 按钮：保存 -->
-        <XButton
-          type="primary"
-          :title="t('action.save')"
-          :loading="updateAssigneeLoading"
-          @click="submitUpdateAssigneeForm"
-        />
-        <!-- 按钮：关闭 -->
-        <XButton
-          :loading="updateAssigneeLoading"
-          :title="t('dialog.close')"
-          @click="updateAssigneeLoading = false"
-        />
-      </template>
-    </XModal>
+    <!-- 弹窗：转派审批人 -->
+    <TaskUpdateAssigneeForm ref="taskUpdateAssigneeFormRef" @success="getDetail" />
   </ContentWrap>
 </template>
 <script setup lang="ts">
@@ -200,13 +156,12 @@ import * as TaskApi from '@/api/bpm/task'
 import * as ActivityApi from '@/api/bpm/activity'
 import { formatPast2 } from '@/utils/formatTime'
 import { setConfAndFields2 } from '@/utils/formCreate'
-// import { OptionAttrs } from '@form-create/element-ui/types/config'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { useUserStore } from '@/store/modules/user'
+import TaskUpdateAssigneeForm from './TaskUpdateAssigneeForm.vue'
 
 const { query } = useRoute() // 查询参数
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 const { proxy } = getCurrentInstance() as any
 
 // ========== 审批信息 ==========
@@ -294,55 +249,11 @@ const getTimelineItemType = (item) => {
 }
 
 // ========== 审批记录 ==========
-const updateAssigneeVisible = ref(false)
-const updateAssigneeLoading = ref(false)
-const updateAssigneeForm = ref({
-  id: undefined,
-  assigneeUserId: undefined
-})
-const updateAssigneeRules = ref({
-  assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }]
-})
-const updateAssigneeFormRef = ref()
-const userOptions = ref<any[]>([])
 
-// 处理转派审批人
-const handleUpdateAssignee = (task) => {
-  // 设置表单
-  resetUpdateAssigneeForm()
-  updateAssigneeForm.value.id = task.id
-  // 设置为打开
-  updateAssigneeVisible.value = true
-}
-
-// 提交转派审批人
-const submitUpdateAssigneeForm = async () => {
-  // 1. 校验表单
-  const elForm = unref(updateAssigneeFormRef)
-  if (!elForm) return
-  const valid = await elForm.validate()
-  if (!valid) return
-
-  // 2.1 提交审批
-  updateAssigneeLoading.value = true
-  try {
-    await TaskApi.updateTaskAssignee(updateAssigneeForm.value)
-    // 2.2 设置为隐藏
-    updateAssigneeVisible.value = false
-    // 加载最新数据
-    getDetail()
-  } finally {
-    updateAssigneeLoading.value = false
-  }
-}
-
-// 重置转派审批人表单
-const resetUpdateAssigneeForm = () => {
-  updateAssigneeForm.value = {
-    id: undefined,
-    assigneeUserId: undefined
-  }
-  updateAssigneeFormRef.value?.resetFields()
+/** 转派审批人 */
+const taskUpdateAssigneeFormRef = ref()
+const openTaskUpdateAssigneeForm = (id: string) => {
+  taskUpdateAssigneeFormRef.value.open(id)
 }
 
 /** 处理审批退回的操作 */
@@ -375,7 +286,6 @@ const activityList = ref([])
 
 // ========== 初始化 ==========
 onMounted(() => {
-  // 加载详情
   getDetail()
   // 加载用户的列表
   UserApi.getSimpleUserList().then((data) => {
