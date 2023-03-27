@@ -14,6 +14,7 @@
           placeholder="请输入角色名称"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="角色标识" prop="code">
@@ -22,10 +23,11 @@
           placeholder="请输入角色标识"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
@@ -48,7 +50,12 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openModal('create')" v-hasPermi="['system:role:create']">
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['system:role:create']"
+        >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
@@ -66,7 +73,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" align="center">
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="角色编号" align="center" prop="id" />
       <el-table-column label="角色名称" align="center" prop="name" />
       <el-table-column label="角色类型" align="center" prop="type" />
@@ -90,12 +97,11 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['system:role:update']"
           >
             编辑
           </el-button>
-          <!-- 操作：菜单权限 -->
           <el-button
             link
             type="primary"
@@ -106,7 +112,6 @@
           >
             菜单权限
           </el-button>
-          <!-- 操作：数据权限 -->
           <el-button
             link
             type="primary"
@@ -149,18 +154,12 @@ import MenuPermissionForm from './MenuPermissionForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const dialogTitle = ref('编辑') // 弹出层标题
-const actionType = ref('') // 操作按钮的类型
-const modelVisible = ref(false) // 是否显示弹出层
-const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
-
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -169,13 +168,8 @@ const queryParams = reactive({
   status: undefined,
   createTime: []
 })
-
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  modelVisible.value = true
-}
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
 
 /** 查询角色列表 */
 const getList = async () => {
@@ -203,9 +197,14 @@ const resetQuery = () => {
 
 /** 添加/修改操作 */
 const formRef = ref()
-const openModal = (type: string, id?: number) => {
-  setDialogTile('编辑')
-  formRef.value.openModal(type, id)
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
+/** 数据权限操作 */
+const menuPermissionFormRef = ref()
+const handleScope = async (type: string, row: RoleApi.RoleVO) => {
+  menuPermissionFormRef.value.openForm(type, row)
 }
 
 /** 删除按钮操作 */
@@ -235,13 +234,7 @@ const handleExport = async () => {
     exportLoading.value = false
   }
 }
-/** 数据权限操作 */
-const menuPermissionFormRef = ref()
 
-// 权限操作
-const handleScope = async (type: string, row: RoleApi.RoleVO) => {
-  menuPermissionFormRef.value.openModal(type, row)
-}
 /** 初始化 **/
 onMounted(() => {
   getList()

@@ -10,20 +10,13 @@ export interface RoleVO {
   createTime: Date
 }
 
-export interface RolePageReqVO extends PageParam {
-  name?: string
-  code?: string
-  status?: number
-  createTime?: Date[]
-}
-
 export interface UpdateStatusReqVO {
   id: number
   status: number
 }
 
 // 查询角色列表
-export const getRolePage = async (params: RolePageReqVO) => {
+export const getRolePage = async (params: PageParam) => {
   return await request.get({ url: '/system/role/page', params })
 }
 
