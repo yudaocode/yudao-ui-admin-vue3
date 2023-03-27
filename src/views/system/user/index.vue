@@ -332,26 +332,24 @@ const getPostOptions = async () => {
   const res = await getSimplePostList()
   postOptions.value.push(...res)
 }
-const dataFormater = (val) => {
-  return deptFormater(deptOptions.value, val)
-}
+const dataFormater = computed(() => (deptId: number) => deptFormater(deptOptions.value, deptId))
+
 //部门回显
-const deptFormater = (ary, val: any) => {
-  var o = ''
-  if (ary && val) {
-    for (const v of ary) {
-      if (v.id == val) {
-        o = v.name
-        if (o) return o
-      } else if (v.children?.length) {
-        o = deptFormater(v.children, val)
-        if (o) return o
+const deptFormater = (arr: Tree[], deptId: number) => {
+  let deptName = ''
+  if (arr && deptId) {
+    for (const item of arr) {
+      if (item.id === deptId) {
+        deptName = item.name
+        break
+      }
+      if (item.children) {
+        deptName = deptFormater(item.children, deptId) ?? ''
+        break
       }
     }
-    return o
-  } else {
-    return val
   }
+  return deptName
 }
 
 // 设置标题
