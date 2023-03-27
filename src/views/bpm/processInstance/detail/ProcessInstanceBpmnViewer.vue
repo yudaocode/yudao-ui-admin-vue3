@@ -40,9 +40,11 @@ const activityList = ref([]) // 任务列表
 
 /** 初始化 */
 onMounted(async () => {
-  activityList.value = await ActivityApi.getActivityList({
-    processInstanceId: props.id
-  })
+  if (props.id) {
+    activityList.value = await ActivityApi.getActivityList({
+      processInstanceId: props.id
+    })
+  }
 })
 </script>
 <style>

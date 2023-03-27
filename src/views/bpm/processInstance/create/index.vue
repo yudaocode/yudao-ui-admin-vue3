@@ -37,31 +37,20 @@
           />
         </el-col>
       </el-card>
-      <el-card class="box-card">
-        <div class="clearfix">
-          <span class="el-icon-picture-outline">流程图</span>
-        </div>
-        <!-- TODO 芋艿：待完成？？？ -->
-        <my-process-viewer
-          key="designer"
-          v-model="bpmnXML"
-          :value="bpmnXML"
-          v-bind="bpmnControlForm"
-          :prefix="bpmnControlForm.prefix"
-        />
-      </el-card>
+      <!-- 流程图预览 -->
+      <ProcessInstanceBpmnViewer :bpmn-xml="bpmnXML" />
     </div>
   </ContentWrap>
 </template>
 <script setup lang="ts">
+import { DICT_TYPE } from '@/utils/dict'
 // 业务相关的 import
 import { allSchemas } from './process.create'
 import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
-import { DICT_TYPE } from '@/utils/dict'
-
+import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
 const router = useRouter() // 路由
 const message = useMessage() // 消息
 
@@ -126,7 +115,6 @@ const submitForm = async (formData) => {
     })
     // 提示
     message.success('发起流程成功')
-    // this.$tab.closeOpenPage();
     router.go(-1)
   } finally {
     fApi.value.btn.loading(false)
@@ -137,18 +125,4 @@ const submitForm = async (formData) => {
 
 // // BPMN 数据
 const bpmnXML = ref(null)
-const bpmnControlForm = ref({
-  prefix: 'flowable'
-})
 </script>
-
-<style lang="scss">
-.my-process-designer {
-  height: calc(100vh - 200px);
-}
-
-.box-card {
-  width: 100%;
-  margin-bottom: 20px;
-}
-</style>
