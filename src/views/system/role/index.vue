@@ -228,7 +228,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await RoleApi.exportPostApi(queryParams)
+    const data = await RoleApi.exportRole(queryParams)
     download.excel(data, '角色列表.xls')
   } catch {
   } finally {

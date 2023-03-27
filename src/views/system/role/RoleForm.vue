@@ -44,12 +44,11 @@
 <script setup lang="ts">
 import { getDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
-import type { FormExpose } from '@/components/Form'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as RoleApi from '@/api/system/role'
 // ========== CRUD 相关 ==========
 const dialogTitle = ref('edit') // 弹出层标题
-const formRef = ref<FormExpose>() // 表单 Ref
+const formRef = ref() // 表单 Ref
 const { t } = useI18n() // 国际化
 const dataScopeDictDatas = ref()
 const message = useMessage() // 消息弹窗
@@ -97,6 +96,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: '',
+    type: '',
     code: '',
     sort: undefined,
     status: CommonStatusEnum.ENABLE,
