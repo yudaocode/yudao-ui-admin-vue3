@@ -52,7 +52,7 @@ export type CodegenPreviewVO = {
   code: string
 }
 export type CodegenUpdateReqVO = {
-  table: CodegenTableVO
+  table: CodegenTableVO | any
   columns: CodegenColumnVO[]
 }
 export type CodegenCreateListReqVO = {
