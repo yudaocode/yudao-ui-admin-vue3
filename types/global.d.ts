@@ -1,29 +1,29 @@
 export {}
 declare global {
-  declare interface Fn<T = any> {
+  interface Fn<T = any> {
     (...arg: T[]): T
   }
 
-  declare type Nullable<T> = T | null
+  type Nullable<T> = T | null
 
-  declare type ElRef<T extends HTMLElement = HTMLDivElement> = Nullable<T>
+  type ElRef<T extends HTMLElement = HTMLDivElement> = Nullable<T>
 
-  declare type Recordable<T = any, K = string> = Record<K extends null | undefined ? string : K, T>
+  type Recordable<T = any, K = string> = Record<K extends null | undefined ? string : K, T>
 
-  declare type ComponentRef<T> = InstanceType<T>
+  type ComponentRef<T> = InstanceType<T>
 
-  declare type LocaleType = 'zh-CN' | 'en'
+  type LocaleType = 'zh-CN' | 'en'
 
-  declare type AxiosHeaders =
+  type AxiosHeaders =
     | 'application/json'
     | 'application/x-www-form-urlencoded'
     | 'multipart/form-data'
 
-  declare type AxiosMethod = 'get' | 'post' | 'delete' | 'put' | 'GET' | 'POST' | 'DELETE' | 'PUT'
+  type AxiosMethod = 'get' | 'post' | 'delete' | 'put' | 'GET' | 'POST' | 'DELETE' | 'PUT'
 
-  declare type AxiosResponseType = 'arraybuffer' | 'blob' | 'document' | 'json' | 'text' | 'stream'
+  type AxiosResponseType = 'arraybuffer' | 'blob' | 'document' | 'json' | 'text' | 'stream'
 
-  declare interface AxiosConfig {
+  interface AxiosConfig {
     params?: any
     data?: any
     url?: string
@@ -32,17 +32,17 @@ declare global {
     responseType?: AxiosResponseType
   }
 
-  declare interface IResponse<T = any> {
+  interface IResponse<T = any> {
     code: string
     data: T extends any ? T : T & any
   }
 
-  declare interface PageParam {
+  interface PageParam {
     pageSize?: number
     pageNo?: number
   }
 
-  declare interface Tree {
+  interface Tree {
     id: number
     name: string
     children?: Tree[] | any[]

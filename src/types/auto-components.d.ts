@@ -100,7 +100,6 @@ declare module '@vue/runtime-core' {
     ScriptTask: typeof import('./../components/bpmnProcessDesigner/package/penal/task/task-components/ScriptTask.vue')['default']
     Search: typeof import('./../components/Search/src/Search.vue')['default']
     SignalAndMessage: typeof import('./../components/bpmnProcessDesigner/package/penal/signal-message/SignalAndMessage.vue')['default']
-    Src: typeof import('./../components/RightToolbar/src/index.vue')['default']
     Sticky: typeof import('./../components/Sticky/src/Sticky.vue')['default']
     Table: typeof import('./../components/Table/src/Table.vue')['default']
     Tooltip: typeof import('./../components/Tooltip/src/Tooltip.vue')['default']
