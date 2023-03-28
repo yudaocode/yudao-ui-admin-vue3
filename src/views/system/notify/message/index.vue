@@ -25,10 +25,10 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.USER_TYPE)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -49,10 +49,10 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.SYSTEM_NOTIFY_TEMPLATE_TYPE)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_NOTIFY_TEMPLATE_TYPE)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -76,7 +76,7 @@
 
   <!-- 列表 -->
   <content-wrap>
-    <el-table ref="tableRef" v-loading="loading" :data="list" :height="tableHeight">
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="用户类型" align="center" prop="userType">
         <template #default="scope">
@@ -84,7 +84,6 @@
         </template>
       </el-table-column>
       <el-table-column label="用户编号" align="center" prop="userId" width="80" />
-      <el-table-column label="模版编号" align="center" prop="templateId" width="80" />
       <el-table-column label="模板编码" align="center" prop="templateCode" width="80" />
       <el-table-column label="发送人名称" align="center" prop="templateNickname" width="180" />
       <el-table-column
@@ -127,12 +126,12 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" fixed="right">
         <template #default="scope">
           <el-button
             link
             type="primary"
-            @click="openModal(scope.row)"
+            @click="openDetail(scope.row)"
             v-hasPermi="['system:notify-message:query']"
           >
             详情
@@ -150,13 +149,13 @@
   </content-wrap>
 
   <!-- 表单弹窗：详情 -->
-  <notify-message-detail ref="modalRef" />
+  <NotifyMessageDetail ref="detailRef" />
 </template>
 <script setup lang="ts" name="NotifyMessage">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as NotifyMessageApi from '@/api/system/notify/message'
-import NotifyMessageDetail from './detail.vue'
+import NotifyMessageDetail from './NotifyMessageDetail.vue'
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -171,14 +170,12 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const tableRef = ref()
-const tableHeight = ref() // table高度
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await NotifyMessageApi.getNotifyMessagePageApi(queryParams)
+    const data = await NotifyMessageApi.getNotifyMessagePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -199,19 +196,13 @@ const resetQuery = () => {
 }
 
 /** 详情操作 */
-const modalRef = ref()
-const openModal = (data: NotifyMessageApi.NotifyMessageVO) => {
-  modalRef.value.openModal(data)
+const detailRef = ref()
+const openDetail = (data: NotifyMessageApi.NotifyMessageVO) => {
+  detailRef.value.open(data)
 }
 
 /** 初始化 **/
 onMounted(() => {
   getList()
-  // TODO 感觉表格自适应高度体验很好的，目前简单实现 需要进一步优化,如根据筛选条件展开或收缩改变盒子高度时
-  tableHeight.value = window.innerHeight - tableRef.value.$el.offsetTop - 85 - 155
-  // 监听浏览器高度变化
-  window.onresize = () => {
-    tableHeight.value = window.innerHeight - tableRef.value.$el.offsetTop - 85 - 155
-  }
 })
 </script>

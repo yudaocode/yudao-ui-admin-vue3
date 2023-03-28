@@ -56,7 +56,7 @@ const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
 const taskAssignScriptDictDatas = getIntDictOptions(DICT_TYPE.BPM_TASK_ASSIGN_SCRIPT)
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {

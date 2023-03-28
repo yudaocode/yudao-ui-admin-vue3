@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="消息详情" v-model="modelVisible" :scroll="true" :max-height="500" width="800">
+  <Dialog title="消息详情" v-model="modelVisible" :scroll="true" :max-height="500">
     <el-descriptions border :column="1">
       <el-descriptions-item label="发送人">
         {{ detailData.templateNickname }}
@@ -32,7 +32,7 @@ const detailLoading = ref(false) // 表单的加载中
 const detailData = ref() // 详情数据
 
 /** 打开弹窗 */
-const openModal = async (data: NotifyMessageApi.NotifyMessageVO) => {
+const open = async (data: NotifyMessageApi.NotifyMessageVO) => {
   modelVisible.value = true
   // 设置数据
   detailLoading.value = true
@@ -42,5 +42,5 @@ const openModal = async (data: NotifyMessageApi.NotifyMessageVO) => {
     detailLoading.value = false
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 </script>

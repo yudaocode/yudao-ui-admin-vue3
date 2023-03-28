@@ -210,7 +210,7 @@ const open = ref(false) // 是否显示弹出层
 const userId = ref(0) // 操作的用户编号
 const accountList = ref<MpAccountApi.AccountVO[]>([]) // 公众号账号列表
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   // 如果没有选中公众号账号，则进行提示。
   if (!queryParams.accountId) {

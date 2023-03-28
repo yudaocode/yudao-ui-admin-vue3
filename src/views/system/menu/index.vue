@@ -126,7 +126,7 @@ const queryFormRef = ref() // 搜索的表单
 const isExpandAll = ref(false) // 是否展开，默认全部折叠
 const refreshTable = ref(true) // 重新渲染表格状态
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {

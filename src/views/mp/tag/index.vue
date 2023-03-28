@@ -106,7 +106,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const accountList = ref<MpAccountApi.AccountVO[]>([]) // 公众号账号列表
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   // 如果没有选中公众号账号，则进行提示。
   if (!queryParams.accountId) {
