@@ -3,48 +3,65 @@ const { t } = useI18n() // 国际化
 
 // 表单校验
 export const rules = reactive({
+  category: [required],
   name: [required],
-  id: [required],
-  type: [required],
-  remark: [required],
-  status: [required],
-  menuIds: [required]
+  key: [required],
+  value: [required]
 })
 
 // CrudSchema
 const crudSchemas = reactive<VxeCrudSchema>({
   primaryKey: 'id',
-  primaryType: 'id',
-  primaryTitle: '套餐编号',
+  primaryType: null,
   action: true,
   columns: [
     {
-      title: '套餐名称',
+      title: '参数分类',
+      field: 'category'
+    },
+    {
+      title: '参数名称',
       field: 'name',
       isSearch: true
     },
     {
-      title: t('common.status'),
-      field: 'status',
-      dictType: DICT_TYPE.COMMON_STATUS,
+      title: '参数键名',
+      field: 'key',
+      isSearch: true
+    },
+    {
+      title: '参数键值',
+      field: 'value'
+    },
+    {
+      title: '系统内置',
+      field: 'type',
+      dictType: DICT_TYPE.INFRA_CONFIG_TYPE,
       dictClass: 'number',
       isSearch: true
     },
     {
-      title: '菜单权限',
-      field: 'menuIds',
-      isTable: false,
+      title: '是否可见',
+      field: 'visible',
+      table: {
+        slots: {
+          default: 'visible_default'
+        }
+      },
       form: {
-        colProps: {
-          span: 24
+        component: 'RadioButton',
+        componentProps: {
+          options: [
+            { label: '是', value: true },
+            { label: '否', value: false }
+          ]
         }
       }
     },
     {
       title: t('form.remark'),
       field: 'remark',
-      isTable: true,
-      isSearch: true,
+      isTable: false,
       form: {
         component: 'Input',
         componentProps: {
@@ -57,7 +74,7 @@ const crudSchemas = reactive<VxeCrudSchema>({
       }
     },
     {
-      title: '创建时间',
+      title: t('common.createTime'),
       field: 'createTime',
       formatter: 'formatDate',
       isForm: false,
