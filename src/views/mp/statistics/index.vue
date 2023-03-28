@@ -5,7 +5,7 @@
       <el-form-item label="公众号" prop="accountId">
         <el-select v-model="accountId" @change="getSummary">
           <el-option
-            v-for="item in accounts"
+            v-for="item in accountList"
             :key="parseInt(item.id)"
             :label="item.name"
             :value="parseInt(item.id)"
@@ -83,17 +83,16 @@
 </template>
 
 <script setup lang="ts" name="MpStatistics">
-// 引入基本模板
 import * as echarts from 'echarts'
 import {
   getInterfaceSummary,
   getUpstreamMessage,
   getUserCumulate,
   getUserSummary
-} from '@/api/mp/statistics'
-import { addTime, beginOfDay, betweenDay, endOfDay, formatDate } from '@/utils/dateUtils'
-import { getSimpleAccountList } from '@/api/mp/account'
-
+} from '@/api/mp/statistics' // TODO 改成 StatisticsApi 整体引入
+import { addTime, beginOfDay, betweenDay, endOfDay } from '@/utils/dateUtils' // TODO 可以改到 formatTime 里
+import { formatDate } from '@/utils/formatTime'
+import * as MpAccountApi from '@/api/mp/account'
 const message = useMessage() // 消息弹窗
 
 const defaultTime = ref<[Date, Date]>([
@@ -105,18 +104,13 @@ const dateRange = ref([
   endOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24))
 ]) // -1 天
 const accountId = ref()
-const accounts = ref([
-  {
-    id: '0',
-    name: ''
-  }
-])
+const accountList = ref<MpAccountApi.AccountVO[]>([]) // 公众号账号列表
 
 const userSummaryChartRef = ref()
 const userCumulateChartRef = ref()
 const upstreamMessageChartRef = ref()
 const interfaceSummaryChartRef = ref()
-
+// TODO 看看能不能用 https://kailong110120130.gitee.io/vue-element-plus-admin-doc/components/echart.html 组件
 const xAxisDate = ref([] as any[]) // X 轴的日期范围
 const userSummaryOption = reactive({
   // 用户增减数据
@@ -257,20 +251,16 @@ const interfaceSummaryOption = reactive({
   ]
 })
 
-onMounted(async () => {
-  // 获取公众号下拉列表
-  await getAccountList()
-  // 加载数据
-  getSummary()
-})
+/** 加载公众号账号的列表 */
 const getAccountList = async () => {
-  const data = await getSimpleAccountList()
-  accounts.value = data
+  accountList.value = await MpAccountApi.getSimpleAccountList()
   // 默认选中第一个
-  if (accounts.value.length > 0) {
-    accountId.value = accounts.value[0].id
+  if (accountList.value.length > 0) {
+    accountId.value = accountList.value[0].id
   }
 }
+
+// TODO 一些方法的注释补全下
 const getSummary = () => {
   // 如果没有选中公众号账号，则进行提示。
   if (!accountId) {
@@ -286,7 +276,7 @@ const getSummary = () => {
   const days = betweenDay(dateRange.value[0], dateRange.value[1]) // 相差天数
   for (let i = 0; i <= days; i++) {
     xAxisDate.value.push(
-      formatDate(addTime(dateRange.value[0], 3600 * 1000 * 24 * i), 'yyyy-MM-dd')
+      formatDate(addTime(dateRange.value[0], 3600 * 1000 * 24 * i), 'YYYY-MM-DD')
     )
   }
 
@@ -296,6 +286,7 @@ const getSummary = () => {
   initUpstreamMessageChart()
   interfaceSummaryChart()
 }
+
 const initUserSummaryChart = async () => {
   userSummaryOption.xAxis.data = []
   userSummaryOption.series[0].data = []
@@ -303,18 +294,14 @@ const initUserSummaryChart = async () => {
   try {
     const data = await getUserSummary({
       accountId: accountId.value,
-      date: [
-        formatDate(dateRange.value[0], 'yyyy-MM-dd HH:mm:ss'),
-        formatDate(dateRange.value[1], 'yyyy-MM-dd HH:mm:ss')
-      ]
+      date: [formatDate(dateRange.value[0]), formatDate(dateRange.value[1])]
     })
-
     userSummaryOption.xAxis.data = xAxisDate.value
     // 处理数据
     xAxisDate.value.forEach((date, index) => {
       data.forEach((item) => {
         // 匹配日期
-        const refDate = formatDate(new Date(item.refDate), 'yyyy-MM-dd')
+        const refDate = formatDate(new Date(item.refDate), 'YYYY-MM-DD')
         if (refDate.indexOf(date) === -1) {
           return
         }
@@ -328,6 +315,7 @@ const initUserSummaryChart = async () => {
     userSummaryChart.setOption(userSummaryOption)
   } catch {}
 }
+
 const initUserCumulateChart = async () => {
   userCumulateOption.xAxis.data = []
   userCumulateOption.series[0].data = []
@@ -335,10 +323,7 @@ const initUserCumulateChart = async () => {
   try {
     const data = await getUserCumulate({
       accountId: accountId.value,
-      date: [
-        formatDate(dateRange.value[0], 'yyyy-MM-dd HH:mm:ss'),
-        formatDate(dateRange.value[1], 'yyyy-MM-dd HH:mm:ss')
-      ]
+      date: [formatDate(dateRange.value[0]), formatDate(dateRange.value[1])]
     })
     userCumulateOption.xAxis.data = xAxisDate.value
     // 处理数据
@@ -358,10 +343,7 @@ const initUpstreamMessageChart = async () => {
   try {
     const data = await getUpstreamMessage({
       accountId: accountId.value,
-      date: [
-        formatDate(dateRange.value[0], 'yyyy-MM-dd HH:mm:ss'),
-        formatDate(dateRange.value[1], 'yyyy-MM-dd HH:mm:ss')
-      ]
+      date: [formatDate(dateRange.value[0]), formatDate(dateRange.value[1])]
     })
     upstreamMessageOption.xAxis.data = xAxisDate.value
     // 处理数据
@@ -384,10 +366,7 @@ const interfaceSummaryChart = async () => {
   try {
     const data = await getInterfaceSummary({
       accountId: accountId.value,
-      date: [
-        formatDate(dateRange.value[0], 'yyyy-MM-dd HH:mm:ss'),
-        formatDate(dateRange.value[1], 'yyyy-MM-dd HH:mm:ss')
-      ]
+      date: [formatDate(dateRange.value[0]), formatDate(dateRange.value[1])]
     })
     interfaceSummaryOption.xAxis.data = xAxisDate.value
     // 处理数据
@@ -402,4 +381,12 @@ const interfaceSummaryChart = async () => {
     interfaceSummaryChart.setOption(interfaceSummaryOption)
   } catch {}
 }
+
+/** 初始化 */
+onMounted(async () => {
+  // 获取公众号下拉列表
+  await getAccountList()
+  // 加载数据
+  getSummary()
+})
 </script>

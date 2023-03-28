@@ -121,13 +121,13 @@ const queryFormRef = ref() // 搜索的表单
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
-  // 处理查询参数
-  let params = { ...queryParams }
-  // 执行查询
-  const data = await AccountApi.getAccountPage(params)
-  list.value = data.list
-  total.value = data.total
-  loading.value = false
+  try {
+    const data = await AccountApi.getAccountPage(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
 }
 
 /** 搜索按钮操作 */
