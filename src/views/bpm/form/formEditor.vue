@@ -12,9 +12,11 @@
       <div ref="editor" v-if="dialogVisible1">
         <XTextButton style="float: right" :title="t('common.copy')" @click="copy(formValue)" />
         <el-scrollbar height="580">
-          <pre>
-            {{ formValue }}
-          </pre>
+          <div v-highlight>
+            <code class="hljs">
+              {{ formValue }}
+            </code>
+          </div>
         </el-scrollbar>
       </div>
     </Dialog>

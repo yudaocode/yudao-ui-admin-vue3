@@ -28,6 +28,7 @@ export const rules = reactive({
     }
   ],
   status: [required],
+  postIds: [{ required: true, message: '请选择岗位', trigger: ['blur', 'change'] }],
   mobile: [
     required,
     {

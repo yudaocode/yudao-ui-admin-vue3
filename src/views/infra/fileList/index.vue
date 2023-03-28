@@ -59,6 +59,7 @@
       :on-exceed="handleExceed"
       :on-success="handleFileSuccess"
       :on-error="excelUploadError"
+      :before-remove="beforeRemove"
       :auto-upload="false"
       accept=".jpg, .png, .gif"
     >
@@ -82,7 +83,7 @@
   </XModal>
 </template>
 <script setup lang="ts" name="FileList">
-import type { UploadInstance, UploadRawFile } from 'element-plus'
+import type { UploadInstance, UploadRawFile, UploadProps } from 'element-plus'
 // 业务相关的 import
 import { allSchemas } from './fileList.data'
 import * as FileApi from '@/api/infra/fileList'
@@ -140,6 +141,9 @@ const handleFileSuccess = async (response: any): Promise<void> => {
   uploadDialogVisible.value = false
   uploadDisabled.value = false
   await reload()
+}
+const beforeRemove: UploadProps['beforeRemove'] = () => {
+  uploadDisabled.value = false
 }
 // 文件数超出提示
 const handleExceed = (): void => {

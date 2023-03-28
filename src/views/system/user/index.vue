@@ -394,6 +394,7 @@ const handleUpdate = async (rowId: number) => {
   unref(formRef)?.delSchema('password')
   // 设置数据
   const res = await UserApi.getUserApi(rowId)
+  if (res.sex == 0) res.sex = null
   unref(formRef)?.setValues(res)
 }
 const detailData = ref()
