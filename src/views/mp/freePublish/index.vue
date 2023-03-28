@@ -19,8 +19,14 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery">
+          <Icon icon="ep:search" class="mr-5px" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon icon="ep:refresh" class="mr-5px" />
+          重置
+        </el-button>
       </el-form-item>
     </el-form>
   </content-wrap>
@@ -63,12 +69,19 @@
 import { getFreePublishPage, deleteFreePublish } from '@/api/mp/freePublish'
 import * as MpAccountApi from '@/api/mp/account'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
+
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const queryParams = reactive({
+interface QueryParams {
+  currentPage: number | undefined | string
+  pageNo: number | undefined | string
+  accountId: number | undefined | string
+}
+
+const queryParams: QueryParams = reactive({
   currentPage: 1, // 当前页数
   pageNo: 1, // 当前页数
   accountId: undefined // 当前页数
@@ -115,7 +128,6 @@ const resetQuery = () => {
   queryFormRef.value.resetFields()
   // 默认选中第一个
   if (accountList.value.length > 0) {
-    // @ts-ignore
     queryParams.accountId = accountList.value[0].id
   }
   handleQuery()
@@ -144,7 +156,6 @@ onMounted(async () => {
   accountList.value = await MpAccountApi.getSimpleAccountList()
   // 选中第一个
   if (accountList.value.length > 0) {
-    // @ts-ignore
     queryParams.accountId = accountList.value[0].id
   }
   await getList()
