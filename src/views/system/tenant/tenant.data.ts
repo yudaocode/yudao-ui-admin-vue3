@@ -143,7 +143,11 @@ const crudSchemas = reactive<VxeCrudSchema>({
         }
       },
       form: {
-        component: 'InputNumber'
+        component: 'InputNumber',
+        value: null,
+        componentProps: {
+          min: 0
+        }
       }
     },
     {
