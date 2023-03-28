@@ -6,9 +6,9 @@
         <el-select v-model="accountId" @change="getSummary">
           <el-option
             v-for="item in accountList"
-            :key="parseInt(item.id)"
+            :key="item.id"
             :label="item.name"
-            :value="parseInt(item.id)"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
@@ -37,9 +37,7 @@
               <span>用户增减数据</span>
             </div>
           </template>
-          <div class="el-table el-table--enable-row-hover el-table--medium">
-            <div ref="userSummaryChartRef" style="height: 420px"></div>
-          </div>
+          <Echart :options="userSummaryOption" :height="420" />
         </el-card>
       </el-col>
       <el-col :span="12" class="card-box">
@@ -49,9 +47,7 @@
               <span>累计用户数据</span>
             </div>
           </template>
-          <div class="el-table el-table--enable-row-hover el-table--medium">
-            <div ref="userCumulateChartRef" style="height: 420px"></div>
-          </div>
+          <Echart :options="userCumulateOption" :height="420" />
         </el-card>
       </el-col>
       <el-col :span="12" class="card-box">
@@ -61,9 +57,7 @@
               <span>消息概况数据</span>
             </div>
           </template>
-          <div class="el-table el-table--enable-row-hover el-table--medium">
-            <div ref="upstreamMessageChartRef" style="height: 420px"></div>
-          </div>
+          <Echart :options="upstreamMessageOption" :height="420" />
         </el-card>
       </el-col>
       <el-col :span="12" class="card-box">
@@ -73,9 +67,7 @@
               <span>接口分析数据</span>
             </div>
           </template>
-          <div class="el-table el-table--enable-row-hover el-table--medium">
-            <div ref="interfaceSummaryChartRef" style="height: 420px"></div>
-          </div>
+          <Echart :options="interfaceSummaryOption" :height="420" />
         </el-card>
       </el-col>
     </el-row>
@@ -83,38 +75,28 @@
 </template>
 
 <script setup lang="ts" name="MpStatistics">
-import * as echarts from 'echarts'
-import {
-  getInterfaceSummary,
-  getUpstreamMessage,
-  getUserCumulate,
-  getUserSummary
-} from '@/api/mp/statistics' // TODO 改成 StatisticsApi 整体引入
-import { addTime, beginOfDay, betweenDay, endOfDay } from '@/utils/dateUtils' // TODO 可以改到 formatTime 里
-import { formatDate } from '@/utils/formatTime'
+import * as StatisticsApi from '@/api/mp/statistics'
+import { formatDate, addTime, betweenDay, beginOfDay, endOfDay } from '@/utils/formatTime'
 import * as MpAccountApi from '@/api/mp/account'
 const message = useMessage() // 消息弹窗
 
+// 默认时间 开始时间00:00:00 结束时间23:59:59
 const defaultTime = ref<[Date, Date]>([
   new Date(2000, 1, 1, 0, 0, 0),
   new Date(2000, 2, 1, 23, 59, 59)
 ])
+// 默认开始时间是当前日期-7，结束时间是当前日期-1
 const dateRange = ref([
   beginOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24 * 7)),
   endOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24))
-]) // -1 天
+])
 const accountId = ref()
 const accountList = ref<MpAccountApi.AccountVO[]>([]) // 公众号账号列表
 
-const userSummaryChartRef = ref()
-const userCumulateChartRef = ref()
-const upstreamMessageChartRef = ref()
-const interfaceSummaryChartRef = ref()
-// TODO 看看能不能用 https://kailong110120130.gitee.io/vue-element-plus-admin-doc/components/echart.html 组件
 const xAxisDate = ref([] as any[]) // X 轴的日期范围
+// 用户增减数据图表配置项
 const userSummaryOption = reactive({
-  // 用户增减数据
-  color: ['#67C23A', '#e5323e'],
+  color: ['#67C23A', '#E5323E'],
   legend: {
     data: ['新增用户', '取消关注的用户']
   },
@@ -145,8 +127,8 @@ const userSummaryOption = reactive({
     }
   ]
 })
+// 累计用户数据图表配置项
 const userCumulateOption = reactive({
-  // 累计用户数据
   legend: {
     data: ['累计用户量']
   },
@@ -169,9 +151,9 @@ const userCumulateOption = reactive({
     }
   ]
 })
+// 消息发送概况数据图表配置项
 const upstreamMessageOption = reactive({
-  // 消息发送概况数据
-  color: ['#67C23A', '#e5323e'],
+  color: ['#67C23A', '#E5323E'],
   legend: {
     data: ['用户发送人数', '用户发送条数']
   },
@@ -203,9 +185,9 @@ const upstreamMessageOption = reactive({
     }
   ]
 })
+// 接口分析况数据图表配置项
 const interfaceSummaryOption = reactive({
-  // 接口分析况数据
-  color: ['#67C23A', '#e5323e', '#E6A23C', '#409EFF'],
+  color: ['#67C23A', '#E5323E', '#E6A23C', '#409EFF'],
   legend: {
     data: ['被动回复用户消息的次数', '失败次数', '最大耗时', '总耗时']
   },
@@ -260,7 +242,7 @@ const getAccountList = async () => {
   }
 }
 
-// TODO 一些方法的注释补全下
+/** 加载数据 */
 const getSummary = () => {
   // 如果没有选中公众号账号，则进行提示。
   if (!accountId) {
@@ -272,30 +254,33 @@ const getSummary = () => {
     message.error('时间间隔 7 天以内，请重新选择')
     return false
   }
+  // 清空横坐标日期
   xAxisDate.value = []
+  // 横坐标加载日期数据
   const days = betweenDay(dateRange.value[0], dateRange.value[1]) // 相差天数
   for (let i = 0; i <= days; i++) {
     xAxisDate.value.push(
       formatDate(addTime(dateRange.value[0], 3600 * 1000 * 24 * i), 'YYYY-MM-DD')
     )
   }
-
   // 初始化图表
   initUserSummaryChart()
   initUserCumulateChart()
   initUpstreamMessageChart()
   interfaceSummaryChart()
 }
-
+/** 用户增减数据 */
 const initUserSummaryChart = async () => {
   userSummaryOption.xAxis.data = []
   userSummaryOption.series[0].data = []
   userSummaryOption.series[1].data = []
   try {
-    const data = await getUserSummary({
+    // 用户增减数据
+    const data = await StatisticsApi.getUserSummary({
       accountId: accountId.value,
       date: [formatDate(dateRange.value[0]), formatDate(dateRange.value[1])]
     })
+    // 横坐标
     userSummaryOption.xAxis.data = xAxisDate.value
     // 处理数据
     xAxisDate.value.forEach((date, index) => {
@@ -310,18 +295,15 @@ const initUserSummaryChart = async () => {
         userSummaryOption.series[1].data[index] = item.cancelUser
       })
     })
-    // 绘制图表
-    const userSummaryChart = echarts.init(userSummaryChartRef.value)
-    userSummaryChart.setOption(userSummaryOption)
   } catch {}
 }
-
+/** 累计用户数据 */
 const initUserCumulateChart = async () => {
   userCumulateOption.xAxis.data = []
   userCumulateOption.series[0].data = []
   // 发起请求
   try {
-    const data = await getUserCumulate({
+    const data = await StatisticsApi.getUserCumulate({
       accountId: accountId.value,
       date: [formatDate(dateRange.value[0]), formatDate(dateRange.value[1])]
     })
@@ -330,18 +312,16 @@ const initUserCumulateChart = async () => {
     data.forEach((item, index) => {
       userCumulateOption.series[0].data[index] = item.cumulateUser
     })
-    // 绘制图表
-    const userCumulateChart = echarts.init(userCumulateChartRef.value)
-    userCumulateChart.setOption(userCumulateOption)
   } catch {}
 }
+/** 消息概况数据 */
 const initUpstreamMessageChart = async () => {
   upstreamMessageOption.xAxis.data = []
   upstreamMessageOption.series[0].data = []
   upstreamMessageOption.series[1].data = []
   // 发起请求
   try {
-    const data = await getUpstreamMessage({
+    const data = await StatisticsApi.getUpstreamMessage({
       accountId: accountId.value,
       date: [formatDate(dateRange.value[0]), formatDate(dateRange.value[1])]
     })
@@ -351,11 +331,9 @@ const initUpstreamMessageChart = async () => {
       upstreamMessageOption.series[0].data[index] = item.messageUser
       upstreamMessageOption.series[1].data[index] = item.messageCount
     })
-    // 绘制图表
-    const upstreamMessageChart = echarts.init(upstreamMessageChartRef.value)
-    upstreamMessageChart.setOption(upstreamMessageOption)
   } catch {}
 }
+/** 接口分析数据 */
 const interfaceSummaryChart = async () => {
   interfaceSummaryOption.xAxis.data = []
   interfaceSummaryOption.series[0].data = []
@@ -364,7 +342,7 @@ const interfaceSummaryChart = async () => {
   interfaceSummaryOption.series[3].data = []
   // 发起请求
   try {
-    const data = await getInterfaceSummary({
+    const data = await StatisticsApi.getInterfaceSummary({
       accountId: accountId.value,
       date: [formatDate(dateRange.value[0]), formatDate(dateRange.value[1])]
     })
@@ -376,9 +354,6 @@ const interfaceSummaryChart = async () => {
       interfaceSummaryOption.series[2].data[index] = item.maxTimeCost
       interfaceSummaryOption.series[3].data[index] = item.totalTimeCost
     })
-    // 绘制图表
-    const interfaceSummaryChart = echarts.init(interfaceSummaryChartRef.value)
-    interfaceSummaryChart.setOption(interfaceSummaryOption)
   } catch {}
 }
 
