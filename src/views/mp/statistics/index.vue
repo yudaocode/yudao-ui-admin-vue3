@@ -1,9 +1,9 @@
 <template>
   <!-- 搜索工作栏 -->
   <content-wrap>
-    <el-form ref="queryForm" class="-mb-15px" :inline="true" label-width="68px">
+    <el-form class="-mb-15px" ref="queryForm" :inline="true" label-width="68px">
       <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="accountId" @change="getSummary">
+        <el-select v-model="accountId" @change="getSummary" class="!w-240px">
           <el-option
             v-for="item in accountList"
             :key="item.id"
@@ -15,13 +15,12 @@
       <el-form-item label="时间范围" prop="dateRange">
         <el-date-picker
           v-model="dateRange"
-          style="width: 260px"
           type="daterange"
-          range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          :default-time="defaultTime"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           @change="getSummary"
+          class="!w-240px"
         />
       </el-form-item>
     </el-form>
@@ -75,22 +74,17 @@
 </template>
 
 <script setup lang="ts" name="MpStatistics">
-import * as StatisticsApi from '@/api/mp/statistics'
 import { formatDate, addTime, betweenDay, beginOfDay, endOfDay } from '@/utils/formatTime'
+import * as StatisticsApi from '@/api/mp/statistics'
 import * as MpAccountApi from '@/api/mp/account'
 const message = useMessage() // 消息弹窗
 
-// 默认时间 开始时间00:00:00 结束时间23:59:59
-const defaultTime = ref<[Date, Date]>([
-  new Date(2000, 1, 1, 0, 0, 0),
-  new Date(2000, 2, 1, 23, 59, 59)
-])
 // 默认开始时间是当前日期-7，结束时间是当前日期-1
 const dateRange = ref([
   beginOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24 * 7)),
   endOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24))
 ])
-const accountId = ref()
+const accountId = ref() // 选中的公众号编号
 const accountList = ref<MpAccountApi.AccountVO[]>([]) // 公众号账号列表
 
 const xAxisDate = ref([] as any[]) // X 轴的日期范围
@@ -269,6 +263,7 @@ const getSummary = () => {
   initUpstreamMessageChart()
   interfaceSummaryChart()
 }
+
 /** 用户增减数据 */
 const initUserSummaryChart = async () => {
   userSummaryOption.xAxis.data = []
@@ -297,6 +292,7 @@ const initUserSummaryChart = async () => {
     })
   } catch {}
 }
+
 /** 累计用户数据 */
 const initUserCumulateChart = async () => {
   userCumulateOption.xAxis.data = []
@@ -314,6 +310,7 @@ const initUserCumulateChart = async () => {
     })
   } catch {}
 }
+
 /** 消息概况数据 */
 const initUpstreamMessageChart = async () => {
   upstreamMessageOption.xAxis.data = []
@@ -333,6 +330,7 @@ const initUpstreamMessageChart = async () => {
     })
   } catch {}
 }
+
 /** 接口分析数据 */
 const interfaceSummaryChart = async () => {
   interfaceSummaryOption.xAxis.data = []
