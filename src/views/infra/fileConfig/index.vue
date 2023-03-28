@@ -183,7 +183,7 @@ const detailData = ref() // 详情 Ref
 const form = ref<FileConfigApi.FileConfigVO>({
   id: 0,
   name: '',
-  storage: 0,
+  storage: null,
   master: false,
   visible: false,
   config: {
@@ -216,7 +216,7 @@ const handleCreate = (formEl: FormInstance | undefined) => {
   form.value = {
     id: 0,
     name: '',
-    storage: 0,
+    storage: null,
     master: false,
     visible: false,
     config: {

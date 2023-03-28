@@ -16,7 +16,7 @@ export interface FileClientConfig {
 export interface FileConfigVO {
   id: number
   name: string
-  storage: number
+  storage: any
   master: boolean
   visible: boolean
   config: FileClientConfig
