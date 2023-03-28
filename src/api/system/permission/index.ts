@@ -37,6 +37,6 @@ export const listUserRolesApi = async (userId: number) => {
 }
 
 // 赋予用户角色
-export const aassignUserRoleApi = async (data: PermissionAssignUserRoleReqVO) => {
+export const assignUserRoleApi = async (data: PermissionAssignUserRoleReqVO) => {
   return await request.post({ url: '/system/permission/assign-user-role', data })
 }
