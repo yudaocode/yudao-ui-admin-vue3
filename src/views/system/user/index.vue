@@ -1,307 +1,325 @@
 <template>
-  <div class="flex">
-    <el-card class="w-1/5 user" :gutter="12" shadow="always">
-      <template #header>
-        <div class="card-header">
-          <span>部门列表</span>
-          <XTextButton title="修改部门" @click="handleDeptEdit()" />
-        </div>
-      </template>
-      <el-input v-model="filterText" placeholder="搜索部门" />
-      <el-scrollbar height="650">
-        <el-tree
-          ref="treeRef"
-          node-key="id"
-          default-expand-all
-          :data="deptOptions"
-          :props="defaultProps"
-          :highlight-current="true"
-          :filter-node-method="filterNode"
-          :expand-on-click-node="false"
-          @node-click="handleDeptNodeClick"
-        />
-      </el-scrollbar>
-    </el-card>
-    <el-card class="w-4/5 user" style="margin-left: 10px" :gutter="12" shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <span>{{ tableTitle }}</span>
-        </div>
-      </template>
-      <!-- 列表 -->
-      <XTable @register="registerTable">
-        <template #toolbar_buttons>
-          <!-- 操作：新增 -->
-          <XButton
-            type="primary"
-            preIcon="ep:zoom-in"
-            :title="t('action.add')"
-            v-hasPermi="['system:user:create']"
-            @click="handleCreate()"
-          />
-          <!-- 操作：导入用户 -->
-          <XButton
-            type="warning"
-            preIcon="ep:upload"
-            :title="t('action.import')"
-            v-hasPermi="['system:user:import']"
-            @click="importDialogVisible = true"
-          />
-          <!-- 操作：导出用户 -->
-          <XButton
-            type="warning"
-            preIcon="ep:download"
-            :title="t('action.export')"
-            v-hasPermi="['system:user:export']"
-            @click="exportList('用户数据.xls')"
-          />
-        </template>
-        <template #status_default="{ row }">
-          <el-switch
-            v-model="row.status"
-            :active-value="0"
-            :inactive-value="1"
-            @change="handleStatusChange(row)"
-          />
-        </template>
-        <template #actionbtns_default="{ row }">
-          <!-- 操作：编辑 -->
-          <XTextButton
-            preIcon="ep:edit"
-            :title="t('action.edit')"
-            v-hasPermi="['system:user:update']"
-            @click="handleUpdate(row.id)"
-          />
-          <!-- 操作：详情 -->
-          <XTextButton
-            preIcon="ep:view"
-            :title="t('action.detail')"
-            v-hasPermi="['system:user:update']"
-            @click="handleDetail(row.id)"
-          />
-          <el-dropdown
-            class="p-0.5"
-            v-hasPermi="[
-              'system:user:update-password',
-              'system:permission:assign-user-role',
-              'system:user:delete'
-            ]"
+  <div class="app-container">
+    <content-wrap>
+      <!-- 搜索工作栏 -->
+      <el-row :gutter="20">
+        <!--部门数据-->
+        <el-col :span="4" :xs="24">
+          <div class="head-container">
+            <el-input
+              v-model="deptName"
+              placeholder="请输入部门名称"
+              clearable
+              style="margin-bottom: 20px"
+            >
+              <template #prefix>
+                <Icon icon="ep:search" />
+              </template>
+            </el-input>
+          </div>
+          <div class="head-container">
+            <el-tree
+              :data="deptOptions"
+              :props="defaultProps"
+              :expand-on-click-node="false"
+              :filter-node-method="filterNode"
+              ref="treeRef"
+              node-key="id"
+              default-expand-all
+              highlight-current
+              @node-click="handleDeptNodeClick"
+            />
+          </div>
+        </el-col>
+        <!--用户数据-->
+        <el-col :span="20" :xs="24">
+          <el-form
+            :model="queryParams"
+            ref="queryFormRef"
+            :inline="true"
+            v-show="showSearch"
+            label-width="68px"
           >
-            <XTextButton :title="t('action.more')" postIcon="ep:arrow-down" />
-            <template #dropdown>
-              <el-dropdown-menu>
-                <el-dropdown-item>
-                  <!-- 操作：重置密码 -->
-                  <XTextButton
-                    preIcon="ep:key"
-                    title="重置密码"
-                    v-hasPermi="['system:user:update-password']"
-                    @click="handleResetPwd(row)"
-                  />
-                </el-dropdown-item>
-                <el-dropdown-item>
-                  <!-- 操作：分配角色 -->
-                  <XTextButton
-                    preIcon="ep:key"
-                    title="分配角色"
-                    v-hasPermi="['system:permission:assign-user-role']"
-                    @click="handleRole(row)"
-                  />
-                </el-dropdown-item>
-                <el-dropdown-item>
-                  <!-- 操作：删除 -->
-                  <XTextButton
-                    preIcon="ep:delete"
-                    :title="t('action.del')"
-                    v-hasPermi="['system:user:delete']"
-                    @click="deleteData(row.id)"
-                  />
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
-        </template>
-      </XTable>
-    </el-card>
-  </div>
-  <XModal v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form
-      v-if="['create', 'update'].includes(actionType)"
-      :rules="rules"
-      :schema="allSchemas.formSchema"
-      ref="formRef"
-    >
-      <template #deptId="form">
-        <el-tree-select
-          node-key="id"
-          v-model="form['deptId']"
-          :props="defaultProps"
-          :data="deptOptions"
-          check-strictly
-        />
-      </template>
-      <template #postIds="form">
-        <el-select v-model="form['postIds']" multiple :placeholder="t('common.selectText')">
-          <el-option
-            v-for="item in postOptions"
-            :key="item.id"
-            :label="item.name"
-            :value="(item.id as unknown as number)"
-          />
-        </el-select>
-      </template>
-    </Form>
-    <!-- 对话框(详情) -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    >
-      <template #deptId="{ row }">
-        <el-tag>{{ dataFormater(row.deptId) }}</el-tag>
-      </template>
-      <template #postIds="{ row }">
-        <template v-if="row.postIds !== ''">
-          <el-tag v-for="(post, index) in row.postIds" :key="index" index="">
-            <template v-for="postObj in postOptions">
-              {{ post === postObj.id ? postObj.name : '' }}
-            </template>
-          </el-tag>
-        </template>
-        <template v-else> </template>
-      </template>
-    </Descriptions>
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="loading"
-        @click="submitForm()"
-      />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="loading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
-  <!-- 分配用户角色 -->
-  <XModal v-model="roleDialogVisible" title="分配角色">
-    <el-form :model="userRole" label-width="140px" :inline="true">
-      <el-form-item label="用户名称">
-        <el-tag>{{ userRole.username }}</el-tag>
-      </el-form-item>
-      <el-form-item label="用户昵称">
-        <el-tag>{{ userRole.nickname }}</el-tag>
-      </el-form-item>
-      <el-form-item label="角色">
-        <el-transfer
-          v-model="userRole.roleIds"
-          :titles="['角色列表', '已选择']"
-          :props="{
-            key: 'id',
-            label: 'name'
-          }"
-          :data="roleOptions"
-        />
-      </el-form-item>
-    </el-form>
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton type="primary" :title="t('action.save')" :loading="loading" @click="submitRole()" />
-      <!-- 按钮：关闭 -->
-      <XButton :title="t('dialog.close')" @click="roleDialogVisible = false" />
-    </template>
-  </XModal>
-  <!-- 导入 -->
-  <XModal v-model="importDialogVisible" :title="importDialogTitle">
-    <el-form class="drawer-multiColumn-form" label-width="150px">
-      <el-form-item label="模板下载 :">
-        <XButton type="primary" prefix="ep:download" title="点击下载" @click="handleImportTemp()" />
-      </el-form-item>
-      <el-form-item label="文件上传 :">
-        <el-upload
-          ref="uploadRef"
-          :action="updateUrl + '?updateSupport=' + updateSupport"
-          :headers="uploadHeaders"
-          :drag="true"
-          :limit="1"
-          :multiple="true"
-          :show-file-list="true"
-          :disabled="uploadDisabled"
-          :before-upload="beforeExcelUpload"
-          :on-exceed="handleExceed"
-          :on-success="handleFileSuccess"
-          :on-error="excelUploadError"
-          :auto-upload="false"
-          accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        >
-          <Icon icon="ep:upload-filled" />
-          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-          <template #tip>
-            <div class="el-upload__tip">请上传 .xls , .xlsx 标准格式文件</div>
-          </template>
-        </el-upload>
-      </el-form-item>
-      <el-form-item label="是否更新已经存在的用户数据:">
-        <el-checkbox v-model="updateSupport" />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        type="warning"
-        preIcon="ep:upload-filled"
-        :title="t('action.save')"
-        @click="submitFileForm()"
-      />
-      <!-- 按钮：关闭 -->
-      <XButton :title="t('dialog.close')" @click="importDialogVisible = false" />
-    </template>
-  </XModal>
-</template>
-<script setup lang="ts" name="User">
-import type { ElTree, UploadRawFile, UploadInstance } from 'element-plus'
-import { handleTree, defaultProps } from '@/utils/tree'
-import download from '@/utils/download'
-import { CommonStatusEnum } from '@/utils/constants'
-import { getAccessToken, getTenantId } from '@/utils/auth'
-import type { FormExpose } from '@/components/Form'
-import { rules, allSchemas } from './user.data'
-import * as UserApi from '@/api/system/user'
-import { getSimpleDeptList } from '@/api/system/dept'
-import { getSimpleRoleList } from '@/api/system/role'
-import { getSimplePostList, PostVO } from '@/api/system/post'
-import {
-  aassignUserRoleApi,
-  listUserRolesApi,
-  PermissionAssignUserRoleReqVO
-} from '@/api/system/permission'
+            <el-form-item label="用户名称" prop="username">
+              <el-input
+                v-model="queryParams.username"
+                placeholder="请输入用户名称"
+                clearable
+                style="width: 240px"
+                @keyup.enter="handleQuery"
+              />
+            </el-form-item>
+            <el-form-item label="手机号码" prop="mobile">
+              <el-input
+                v-model="queryParams.mobile"
+                placeholder="请输入手机号码"
+                clearable
+                style="width: 240px"
+                @keyup.enter="handleQuery"
+              />
+            </el-form-item>
+            <el-form-item label="状态" prop="status">
+              <el-select
+                v-model="queryParams.status"
+                placeholder="用户状态"
+                clearable
+                style="width: 240px"
+              >
+                <el-option
+                  v-for="dict in statusDictDatas"
+                  :key="parseInt(dict.value)"
+                  :label="dict.label"
+                  :value="parseInt(dict.value)"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="创建时间" prop="createTime">
+              <el-date-picker
+                v-model="queryParams.createTime"
+                style="width: 240px"
+                value-format="YYYY-MM-DD HH:mm:ss"
+                type="datetimerange"
+                range-separator="-"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="handleQuery"
+                ><Icon icon="ep:search" />搜索</el-button
+              >
+              <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+            </el-form-item>
+          </el-form>
 
-const { t } = useI18n() // 国际化
+          <el-row :gutter="10" class="mb-8px">
+            <el-col :span="1.5">
+              <el-button
+                type="primary"
+                plain
+                size="small"
+                @click="handleAdd"
+                v-hasPermi="['system:user:create']"
+                ><Icon icon="ep:plus" />新增</el-button
+              >
+            </el-col>
+            <el-col :span="1.5">
+              <el-button
+                type="info"
+                size="small"
+                @click="handleImport"
+                v-hasPermi="['system:user:import']"
+                ><Icon icon="ep:upload" />导入</el-button
+              >
+            </el-col>
+            <el-col :span="1.5">
+              <el-button
+                type="warning"
+                size="small"
+                @click="handleExport"
+                :loading="exportLoading"
+                v-hasPermi="['system:user:export']"
+                ><Icon icon="ep:download" />导出</el-button
+              >
+            </el-col>
+          </el-row>
+          <el-table v-loading="loading" :data="userList">
+            <el-table-column
+              label="用户编号"
+              align="center"
+              key="id"
+              prop="id"
+              v-if="columns[0].visible"
+            />
+            <el-table-column
+              label="用户名称"
+              align="center"
+              key="username"
+              prop="username"
+              v-if="columns[1].visible"
+              :show-overflow-tooltip="true"
+            />
+            <el-table-column
+              label="用户昵称"
+              align="center"
+              key="nickname"
+              prop="nickname"
+              v-if="columns[2].visible"
+              :show-overflow-tooltip="true"
+            />
+            <el-table-column
+              label="部门"
+              align="center"
+              key="deptName"
+              prop="dept.name"
+              v-if="columns[3].visible"
+              :show-overflow-tooltip="true"
+            />
+            <el-table-column
+              label="手机号码"
+              align="center"
+              key="mobile"
+              prop="mobile"
+              v-if="columns[4].visible"
+              width="120"
+            />
+            <el-table-column label="状态" key="status" v-if="columns[5].visible" align="center">
+              <template #default="scope">
+                <el-switch
+                  v-model="scope.row.status"
+                  :active-value="0"
+                  :inactive-value="1"
+                  @change="handleStatusChange(scope.row)"
+                />
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="创建时间"
+              align="center"
+              prop="createTime"
+              v-if="columns[6].visible"
+              width="160"
+            >
+              <template #default="scope">
+                <span>{{ parseTime(scope.row.createTime) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              label="操作"
+              align="center"
+              width="160"
+              class-name="small-padding fixed-width"
+            >
+              <template #default="scope">
+                <div class="flex justify-center items-center">
+                  <el-button
+                    type="primary"
+                    link
+                    @click="handleUpdate(scope.row)"
+                    v-hasPermi="['system:user:update']"
+                    ><Icon icon="ep:edit" />修改</el-button
+                  >
+                  <el-dropdown
+                    @command="(command) => handleCommand(command, scope.$index, scope.row)"
+                    v-hasPermi="[
+                      'system:user:delete',
+                      'system:user:update-password',
+                      'system:permission:assign-user-role'
+                    ]"
+                  >
+                    <el-button type="primary" link><Icon icon="ep:d-arrow-right" />更多</el-button>
+                    <template #dropdown>
+                      <el-dropdown-menu>
+                        <!-- div包住避免控制台报错：Runtime directive used on component with non-element root node -->
+                        <div v-if="scope.row.id !== 1" v-hasPermi="['system:user:delete']">
+                          <el-dropdown-item command="handleDelete" type="text"
+                            ><Icon icon="ep:delete" />删除</el-dropdown-item
+                          >
+                        </div>
+                        <div v-hasPermi="['system:user:update-password']">
+                          <el-dropdown-item command="handleResetPwd" type="text"
+                            ><Icon icon="ep:key" />重置密码</el-dropdown-item
+                          ></div
+                        >
+                        <div v-hasPermi="['system:permission:assign-user-role']">
+                          <el-dropdown-item command="handleRole" type="text"
+                            ><Icon icon="ep:circle-check" />分配角色</el-dropdown-item
+                          ></div
+                        >
+                      </el-dropdown-menu>
+                    </template>
+                  </el-dropdown>
+                </div>
+              </template>
+            </el-table-column>
+          </el-table>
+          <pagination
+            v-show="total > 0"
+            :total="total"
+            v-model:page="queryParams.pageNo"
+            v-model:limit="queryParams.pageSize"
+            @pagination="getList"
+          />
+        </el-col>
+      </el-row>
+    </content-wrap>
+    <!-- 添加或修改用户对话框 -->
+    <AddForm
+      ref="addEditFormRef"
+      v-model="showAddDialog"
+      :dept-options="deptOptions"
+      :post-options="postOptions"
+      :form-init-value="addFormInitValue"
+      @success="getList"
+    />
+    <!-- 用户导入对话框 -->
+    <ImportForm v-model="importDialogVisible" @success="getList" />
+    <!-- 分配角色 -->
+    <RoleForm
+      ref="roleFormRef"
+      v-model:show="roleDialogVisible"
+      :role-options="roleOptions"
+      :form-init-value="userRole"
+      @success="getList"
+    />
+  </div>
+</template>
+
+<script setup lang="ts" name="User">
+import type { ElTree } from 'element-plus'
+import { handleTree, defaultProps } from '@/utils/tree'
+// 原vue3版本api方法都是Api结尾觉得见名知义，个人觉得这个可以形成规范
+import { getSimpleDeptList as getSimpleDeptListApi } from '@/api/system/dept'
+import { getSimplePostList as getSimplePostListApi, PostVO } from '@/api/system/post'
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import {
+  deleteUserApi,
+  exportUserApi,
+  resetUserPwdApi,
+  updateUserStatusApi,
+  UserVO
+} from '@/api/system/user'
+import { parseTime } from './utils'
+import AddForm from './AddForm.vue'
+import ImportForm from './ImportForm.vue'
+import RoleForm from './RoleForm.vue'
+import { getUserApi, getUserPageApi } from '@/api/system/user'
+import { getSimpleRoleList as getSimpleRoleListApi } from '@/api/system/role'
+import { listUserRolesApi } from '@/api/system/permission'
+import { CommonStatusEnum } from '@/utils/constants'
+import download from '@/utils/download'
+
 const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
 const queryParams = reactive({
-  deptId: null
+  pageNo: 1,
+  pageSize: 10,
+  username: undefined,
+  mobile: undefined,
+  status: undefined,
+  deptId: undefined,
+  createTime: []
 })
-// ========== 列表相关 ==========
-const tableTitle = ref('用户列表')
-// 列表相关的变量
-const [registerTable, { reload, deleteData, exportList }] = useXTable({
-  allSchemas: allSchemas,
-  params: queryParams,
-  getListApi: UserApi.getUserPageApi,
-  deleteApi: UserApi.deleteUserApi,
-  exportListApi: UserApi.exportUserApi
-})
+const showSearch = ref(true)
+const showAddDialog = ref(false)
+
+// 数据字典-
+const statusDictDatas = getDictOptions(DICT_TYPE.COMMON_STATUS)
+
 // ========== 创建部门树结构 ==========
-const filterText = ref('')
+const deptName = ref('')
+watch(
+  () => deptName.value,
+  (val) => {
+    treeRef.value?.filter(val)
+  }
+)
 const deptOptions = ref<Tree[]>([]) // 树形结构
 const treeRef = ref<InstanceType<typeof ElTree>>()
 const getTree = async () => {
-  const res = await getSimpleDeptList()
+  const res = await getSimpleDeptListApi()
+  deptOptions.value = []
   deptOptions.value.push(...handleTree(res))
 }
 const filterNode = (value: string, data: Tree) => {
@@ -310,154 +328,171 @@ const filterNode = (value: string, data: Tree) => {
 }
 const handleDeptNodeClick = async (row: { [key: string]: any }) => {
   queryParams.deptId = row.id
-  await reload()
+  getList()
 }
-const { push } = useRouter()
-const handleDeptEdit = () => {
-  push('/system/dept')
-}
-watch(filterText, (val) => {
-  treeRef.value!.filter(val)
-})
-// ========== CRUD 相关 ==========
-const loading = ref(false) // 遮罩层
-const actionType = ref('') // 操作按钮的类型
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const formRef = ref<FormExpose>() // 表单 Ref
-const postOptions = ref<PostVO[]>([]) //岗位列表
 
 // 获取岗位列表
+const postOptions = ref<PostVO[]>([]) //岗位列表
 const getPostOptions = async () => {
-  const res = await getSimplePostList()
+  const res = await getSimplePostListApi()
   postOptions.value.push(...res)
 }
-const dataFormater = computed(() => (deptId: number) => deptFormater(deptOptions.value, deptId))
-
-//部门回显
-const deptFormater = (arr: Tree[], deptId: number) => {
-  let deptName = ''
-  if (arr && deptId) {
-    for (const item of arr) {
-      if (item.id === deptId) {
-        deptName = item.name
-        break
-      }
-      if (item.children) {
-        deptName = deptFormater(item.children, deptId) ?? ''
-        break
-      }
-    }
-  }
-  return deptName
-}
-
-// 设置标题
-const setDialogTile = async (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
-}
-
-// 新增操作
-const handleCreate = async () => {
-  setDialogTile('create')
-  // 重置表单
-  await nextTick()
-  if (allSchemas.formSchema[0].field !== 'username') {
-    unref(formRef)?.addSchema(
-      {
-        field: 'username',
-        label: '用户账号',
-        component: 'Input'
-      },
-      0
-    )
-    unref(formRef)?.addSchema(
-      {
-        field: 'password',
-        label: '用户密码',
-        component: 'InputPassword'
-      },
-      1
-    )
-  }
-}
-
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  await nextTick()
-  unref(formRef)?.delSchema('username')
-  unref(formRef)?.delSchema('password')
-  // 设置数据
-  const res = await UserApi.getUserApi(rowId)
-  unref(formRef)?.setValues(res)
-}
-const detailData = ref()
-
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  // 设置数据
-  const res = await UserApi.getUserApi(rowId)
-  detailData.value = res
-  await setDialogTile('detail')
-}
-
-// 提交按钮
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as UserApi.UserVO
-        if (actionType.value === 'create') {
-          loading.value = true
-          await UserApi.createUserApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          loading.value = true
-          await UserApi.updateUserApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        // unref(formRef)?.setSchema(allSchemas.formSchema)
-        // 刷新列表
-        await reload()
-        loading.value = false
-      }
-    }
+// 用户列表
+const userList = ref<UserVO[]>([])
+const loading = ref(false)
+const total = ref(0)
+const columns = ref([
+  { key: 0, label: `用户编号`, visible: true },
+  { key: 1, label: `用户名称`, visible: true },
+  { key: 2, label: `用户昵称`, visible: true },
+  { key: 3, label: `部门`, visible: true },
+  { key: 4, label: `手机号码`, visible: true },
+  { key: 5, label: `状态`, visible: true },
+  { key: 6, label: `创建时间`, visible: true }
+])
+/* 查询列表 */
+const getList = () => {
+  loading.value = true
+  getUserPageApi(queryParams).then((response) => {
+    userList.value = response.list
+    total.value = response.total
+    loading.value = false
   })
 }
-// 改变用户状态操作
-const handleStatusChange = async (row: UserApi.UserVO) => {
-  const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
+}
+
+/** 重置按钮操作 */
+const queryFormRef = ref()
+const resetQuery = () => {
+  queryFormRef.value?.resetFields()
+  handleQuery()
+}
+
+// 添加或编辑
+const addEditFormRef = ref()
+// 添加用户
+const handleAdd = () => {
+  addEditFormRef?.value.resetForm()
+  // 获得下拉数据
+  getTree()
+  // 打开表单，并设置初始化
+  showAddDialog.value = true
+}
+
+// 用户导入
+const handleImport = () => {
+  importDialogVisible.value = true
+}
+
+// 用户导出
+const exportLoading = ref(false)
+const handleExport = () => {
+  message
+    .confirm('是否确认导出所有用户数据项?')
+    .then(() => {
+      // 处理查询参数
+      let params = { ...queryParams }
+      params.pageNo = 1
+      params.pageSize = 99999
+      exportLoading.value = true
+      return exportUserApi(params)
+    })
+    .then((response) => {
+      download.excel(response, '用户数据.xls')
+    })
+    .catch(() => {})
+    .finally(() => {
+      exportLoading.value = false
+    })
+}
+
+// 操作分发
+const handleCommand = (command: string, index: number, row: UserVO) => {
+  console.log(index)
+  switch (command) {
+    case 'handleUpdate':
+      handleUpdate(row) //修改客户信息
+      break
+    case 'handleDelete':
+      handleDelete(row) //红号变更
+      break
+    case 'handleResetPwd':
+      handleResetPwd(row)
+      break
+    case 'handleRole':
+      handleRole(row)
+      break
+    default:
+      break
+  }
+}
+
+// 用户状态修改
+const handleStatusChange = (row: UserVO) => {
+  let text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
   message
     .confirm('确认要"' + text + '""' + row.username + '"用户吗?', t('common.reminder'))
-    .then(async () => {
+    .then(function () {
       row.status =
         row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.ENABLE : CommonStatusEnum.DISABLE
-      await UserApi.updateUserStatusApi(row.id, row.status)
+      return updateUserStatusApi(row.id, row.status)
+    })
+    .then(() => {
       message.success(text + '成功')
       // 刷新列表
-      await reload()
+      getList()
     })
     .catch(() => {
       row.status =
         row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
     })
 }
-// 重置密码
-const handleResetPwd = (row: UserApi.UserVO) => {
-  message.prompt('请输入"' + row.username + '"的新密码', t('common.reminder')).then(({ value }) => {
-    UserApi.resetUserPwdApi(row.id, value).then(() => {
-      message.success('修改成功，新密码是：' + value)
-    })
+
+// 具体数据单行操作
+const addFormInitValue = ref<Recordable>({})
+/** 修改按钮操作 */
+const handleUpdate = (row: UserVO) => {
+  addEditFormRef.value?.resetForm()
+  getTree()
+  const id = row.id
+  getUserApi(id).then((response) => {
+    addFormInitValue.value = response
+    showAddDialog.value = true
   })
 }
+
+// 删除用户
+const handleDelete = (row: UserVO) => {
+  const ids = row.id
+  message
+    .confirm('是否确认删除用户编号为"' + ids + '"的数据项?')
+    .then(() => {
+      return deleteUserApi(ids)
+    })
+    .then(() => {
+      getList()
+      message.success('删除成功')
+    })
+    .catch(() => {})
+}
+
+// 重置密码
+const handleResetPwd = (row: UserVO) => {
+  message.prompt('请输入"' + row.username + '"的新密码', t('common.reminder')).then(({ value }) => {
+    resetUserPwdApi(row.id, value)
+      .then(() => {
+        message.success('修改成功，新密码是：' + value)
+      })
+      .catch((e) => {
+        console.error(e)
+      })
+  })
+}
+
 // 分配角色
 const roleDialogVisible = ref(false)
 const roleOptions = ref()
@@ -467,108 +502,30 @@ const userRole = reactive({
   nickname: '',
   roleIds: []
 })
-const handleRole = async (row: UserApi.UserVO) => {
+const handleRole = async (row: UserVO) => {
+  addEditFormRef.value?.resetForm()
   userRole.id = row.id
   userRole.username = row.username
   userRole.nickname = row.nickname
-  // 获得角色拥有的权限集合
+
+  // 获得角色列表
+  const roleOpt = await getSimpleRoleListApi()
+  roleOptions.value = [...roleOpt]
+
+  // 获得角色拥有的菜单集合
   const roles = await listUserRolesApi(row.id)
   userRole.roleIds = roles
-  // 获取角色列表
-  const roleOpt = await getSimpleRoleList()
-  roleOptions.value = roleOpt
+
   roleDialogVisible.value = true
 }
-// 提交
-const submitRole = async () => {
-  const data = ref<PermissionAssignUserRoleReqVO>({
-    userId: userRole.id,
-    roleIds: userRole.roleIds
-  })
-  await aassignUserRoleApi(data.value)
-  message.success(t('common.updateSuccess'))
-  roleDialogVisible.value = false
-}
-// ========== 导入相关 ==========
-// TODO @星语：这个要不要把导入用户，封装成一个小组件？可选哈
+
+/* 用户导入 */
 const importDialogVisible = ref(false)
-const uploadDisabled = ref(false)
-const importDialogTitle = ref('用户导入')
-const updateSupport = ref(0)
-let updateUrl = import.meta.env.VITE_BASE_URL + import.meta.env.VITE_API_URL + '/system/user/import'
-const uploadHeaders = ref()
-// 下载导入模版
-const handleImportTemp = async () => {
-  const res = await UserApi.importUserTemplateApi()
-  download.excel(res, '用户导入模版.xls')
-}
-// 文件上传之前判断
-const beforeExcelUpload = (file: UploadRawFile) => {
-  const isExcel =
-    file.type === 'application/vnd.ms-excel' ||
-    file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-  const isLt5M = file.size / 1024 / 1024 < 5
-  if (!isExcel) message.error('上传文件只能是 xls / xlsx 格式!')
-  if (!isLt5M) message.error('上传文件大小不能超过 5MB!')
-  return isExcel && isLt5M
-}
-// 文件上传
-const uploadRef = ref<UploadInstance>()
-const submitFileForm = () => {
-  uploadHeaders.value = {
-    Authorization: 'Bearer ' + getAccessToken(),
-    'tenant-id': getTenantId()
-  }
-  uploadDisabled.value = true
-  uploadRef.value!.submit()
-}
-// 文件上传成功
-const handleFileSuccess = async (response: any): Promise<void> => {
-  if (response.code !== 0) {
-    message.error(response.msg)
-    return
-  }
-  importDialogVisible.value = false
-  uploadDisabled.value = false
-  const data = response.data
-  let text = '上传成功数量：' + data.createUsernames.length + ';'
-  for (let username of data.createUsernames) {
-    text += '< ' + username + ' >'
-  }
-  text += '更新成功数量：' + data.updateUsernames.length + ';'
-  for (const username of data.updateUsernames) {
-    text += '< ' + username + ' >'
-  }
-  text += '更新失败数量：' + Object.keys(data.failureUsernames).length + ';'
-  for (const username in data.failureUsernames) {
-    text += '< ' + username + ': ' + data.failureUsernames[username] + ' >'
-  }
-  message.alert(text)
-  await reload()
-}
-// 文件数超出提示
-const handleExceed = (): void => {
-  message.error('最多只能上传一个文件！')
-}
-// 上传错误提示
-const excelUploadError = (): void => {
-  message.error('导入数据失败，请您重新上传！')
-}
+
 // ========== 初始化 ==========
 onMounted(async () => {
+  getList()
   await getPostOptions()
   await getTree()
 })
 </script>
-
-<style scoped>
-.user {
-  height: 780px;
-  max-height: 800px;
-}
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-</style>

@@ -43,12 +43,12 @@ export const getUserApi = (id: number) => {
 }
 
 // 新增用户
-export const createUserApi = (data: UserVO) => {
+export const createUserApi = (data: UserVO | Recordable) => {
   return request.post({ url: '/system/user/create', data })
 }
 
 // 修改用户
-export const updateUserApi = (data: UserVO) => {
+export const updateUserApi = (data: UserVO | Recordable) => {
   return request.put({ url: '/system/user/update', data })
 }
 
