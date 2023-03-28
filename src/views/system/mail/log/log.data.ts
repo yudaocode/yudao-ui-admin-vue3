@@ -114,7 +114,8 @@ const crudSchemas = reactive<VxeCrudSchema>({
     {
       title: '创建时间',
       field: 'createTime',
-      isTable: false
+      isTable: false,
+      formatter: 'formatDate'
     }
   ]
 })

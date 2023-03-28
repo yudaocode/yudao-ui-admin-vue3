@@ -146,8 +146,8 @@
             style="width: 100%"
           >
             <el-option
-              v-for="dict in getDictOptions(DICT_TYPE.BPM_MODEL_CATEGORY)"
-              :key="dict.value"
+              v-for="(dict, index) in getDictOptions(DICT_TYPE.BPM_MODEL_CATEGORY)"
+              :key="index"
               :label="dict.label"
               :value="dict.value"
             />
@@ -434,9 +434,9 @@ const handleUpdate = async (rowId: number) => {
   // 设置数据
   saveForm.value = await ModelApi.getModelApi(rowId)
   if (saveForm.value.category == null) {
-    saveForm.value.category = 1
+    saveForm.value.category = '1'
   } else {
-    saveForm.value.category = Number(saveForm.value.category)
+    saveForm.value.category = saveForm.value.category
   }
 }
 
