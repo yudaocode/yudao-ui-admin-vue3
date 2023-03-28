@@ -8,12 +8,12 @@
         <el-input v-model="formData.nickname" :disabled="true" />
       </el-form-item>
       <el-form-item label="角色">
-        <el-select v-model="formData.roleIds" multiple placeholder="请选择">
+        <el-select v-model="formData.roleIds" multiple placeholder="请选择角色">
           <el-option
             v-for="item in roleOptions"
-            :key="parseInt(item.id)"
+            :key="item.id"
             :label="item.name"
-            :value="parseInt(item.id)"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
@@ -28,6 +28,7 @@
 </template>
 
 <script setup lang="ts">
+// TODO el-dialog 用 Dialog 组件
 import { assignUserRoleApi, PermissionAssignUserRoleReqVO } from '@/api/system/permission'
 
 interface Props {
@@ -86,5 +87,3 @@ const submit = async () => {
   }
 }
 </script>
-
-<style></style>

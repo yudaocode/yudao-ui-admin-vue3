@@ -269,6 +269,7 @@
 import type { ElTree } from 'element-plus'
 import { handleTree, defaultProps } from '@/utils/tree'
 // 原vue3版本api方法都是Api结尾觉得见名知义，个人觉得这个可以形成规范
+// TODO 使用 DeptApi 这种形式哈
 import { getSimpleDeptList as getSimpleDeptListApi } from '@/api/system/dept'
 import { getSimplePostList as getSimplePostListApi, PostVO } from '@/api/system/post'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
@@ -279,16 +280,15 @@ import {
   updateUserStatusApi,
   UserVO
 } from '@/api/system/user'
-import { parseTime } from './utils'
-import AddForm from './AddForm.vue'
-import ImportForm from './ImportForm.vue'
-import RoleForm from './RoleForm.vue'
+import { parseTime } from './utils' // TODO 可以使用 formatTime 里的方法
+import AddForm from './AddForm.vue' // TODO 改成 UserForm
+import ImportForm from './ImportForm.vue' // TODO 改成 UserImportForm
+import RoleForm from './RoleForm.vue' // TODO 改成 UserAssignRoleForm
 import { getUserApi, getUserPageApi } from '@/api/system/user'
 import { getSimpleRoleList as getSimpleRoleListApi } from '@/api/system/role'
 import { listUserRolesApi } from '@/api/system/permission'
 import { CommonStatusEnum } from '@/utils/constants'
 import download from '@/utils/download'
-
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -304,10 +304,11 @@ const queryParams = reactive({
 const showSearch = ref(true)
 const showAddDialog = ref(false)
 
-// 数据字典-
+// 数据字典- // TODO 可以直接 vue 那 getIntDictOptions，这样一方面少个变量，也可以 getIntDictOptions
 const statusDictDatas = getDictOptions(DICT_TYPE.COMMON_STATUS)
 
 // ========== 创建部门树结构 ==========
+// TODO 要不把部门树拆成一个左侧的组件，然后点击后触发 handleDeptNodeClick
 const deptName = ref('')
 watch(
   () => deptName.value,
@@ -375,6 +376,7 @@ const resetQuery = () => {
 // 添加或编辑
 const addEditFormRef = ref()
 // 添加用户
+// TODO 可以参考别的模块哈，openForm；然后 tree 和 position 可以里面在加载下，让组件自己维护自己哈。
 const handleAdd = () => {
   addEditFormRef?.value.resetForm()
   // 获得下拉数据
@@ -389,6 +391,7 @@ const handleImport = () => {
 }
 
 // 用户导出
+// TODO 改成 await 的风格；
 const exportLoading = ref(false)
 const handleExport = () => {
   message
@@ -432,6 +435,7 @@ const handleCommand = (command: string, index: number, row: UserVO) => {
 }
 
 // 用户状态修改
+// TODO 改成 await 的风格；
 const handleStatusChange = (row: UserVO) => {
   let text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
   message
@@ -466,6 +470,7 @@ const handleUpdate = (row: UserVO) => {
 }
 
 // 删除用户
+// TODO 改成 await 的风格；
 const handleDelete = (row: UserVO) => {
   const ids = row.id
   message
@@ -481,6 +486,7 @@ const handleDelete = (row: UserVO) => {
 }
 
 // 重置密码
+// TODO 改成 await 的风格；
 const handleResetPwd = (row: UserVO) => {
   message.prompt('请输入"' + row.username + '"的新密码', t('common.reminder')).then(({ value }) => {
     resetUserPwdApi(row.id, value)
