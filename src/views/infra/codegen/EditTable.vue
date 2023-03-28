@@ -1,67 +1,74 @@
 <template>
-  <ContentWrap>
-    <ContentDetailWrap :title="title" @back="push('/infra/codegen')">
-      <el-tabs v-model="activeName">
-        <el-tab-pane label="基本信息" name="basicInfo">
-          <BasicInfoForm ref="basicInfoRef" :basicInfo="tableCurrentRow" />
-        </el-tab-pane>
-        <el-tab-pane label="字段信息" name="cloum">
-          <CloumInfoForm ref="cloumInfoRef" :info="cloumCurrentRow" />
-        </el-tab-pane>
-      </el-tabs>
-      <template #right>
-        <XButton
-          type="primary"
-          :title="t('action.save')"
-          :loading="loading"
-          @click="submitForm()"
-        />
-      </template>
-    </ContentDetailWrap>
-  </ContentWrap>
+  <content-wrap v-loading="loading">
+    <el-tabs v-model="activeName">
+      <el-tab-pane label="基本信息" name="basicInfo">
+        <basic-info-form ref="basicInfoRef" :table="formData.table" />
+      </el-tab-pane>
+      <el-tab-pane label="字段信息" name="colum">
+        <colum-info-form ref="columInfoRef" :columns="formData.columns" />
+      </el-tab-pane>
+      <el-tab-pane label="生成信息" name="generateInfo">
+        <generate-info-form ref="generateInfoRef" :table="formData.table" />
+      </el-tab-pane>
+    </el-tabs>
+    <el-form label-width="100px">
+      <el-form-item style="text-align: center; margin-left: -100px; margin-top: 10px">
+        <el-button type="primary" @click="submitForm" :loading="submitLoading">
+          {{ t('action.save') }}
+        </el-button>
+        <el-button @click="close">{{ t('action.back') }}</el-button>
+      </el-form-item>
+    </el-form>
+  </content-wrap>
 </template>
 <script setup lang="ts">
-import { BasicInfoForm, CloumInfoForm } from './components'
-import { getCodegenTableApi, updateCodegenTableApi } from '@/api/infra/codegen'
-import { CodegenTableVO, CodegenColumnVO, CodegenUpdateReqVO } from '@/api/infra/codegen/types'
+import { BasicInfoForm, ColumInfoForm, GenerateInfoForm } from './components'
+import * as CodegenApi from '@/api/infra/codegen'
+import ContentWrap from '@/components/ContentWrap/src/ContentWrap.vue'
+import { useTagsViewStore } from '@/store/modules/tagsView'
+import { CodegenUpdateReqVO } from '@/api/infra/codegen/types'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-const { push } = useRouter()
+const { push, currentRoute } = useRouter()
 const { query } = useRoute()
+const { delView } = useTagsViewStore()
 const loading = ref(false)
-const title = ref('代码生成')
+const submitLoading = ref(false)
 const activeName = ref('basicInfo')
-const cloumInfoRef = ref(null)
-const tableCurrentRow = ref<CodegenTableVO>()
-const cloumCurrentRow = ref<CodegenColumnVO[]>([])
 const basicInfoRef = ref<ComponentRef<typeof BasicInfoForm>>()
+const columInfoRef = ref<ComponentRef<typeof ColumInfoForm>>()
+const generateInfoRef = ref<ComponentRef<typeof GenerateInfoForm>>()
+const formData = ref<CodegenUpdateReqVO>({
+  table: {},
+  columns: []
+})
 
-const getList = async () => {
+const getDetail = async () => {
   const id = query.id as unknown as number
   if (id) {
+    loading.value = true
     // 获取表详细信息
-    const res = await getCodegenTableApi(id)
-    title.value = '修改[ ' + res.table.tableName + ' ]生成配置'
-    tableCurrentRow.value = res.table
-    cloumCurrentRow.value = res.columns
+    formData.value = await CodegenApi.getCodegenTable(id)
+    loading.value = false
   }
 }
 const submitForm = async () => {
-  const basicInfo = unref(basicInfoRef)
-  const basicForm = await basicInfo?.elFormRef?.validate()?.catch(() => {})
-  if (basicForm) {
-    const basicInfoData = (await basicInfo?.getFormData()) as CodegenTableVO
-    const genTable: CodegenUpdateReqVO = {
-      table: basicInfoData,
-      columns: cloumCurrentRow.value
-    }
-    await updateCodegenTableApi(genTable)
+  if (!unref(formData)) return
+  try {
+    await unref(basicInfoRef)?.validate()
+    await unref(generateInfoRef)?.validate()
+    await CodegenApi.updateCodegenTable(unref(formData))
     message.success(t('common.updateSuccess'))
     push('/infra/codegen')
-  }
+  } catch {}
+}
+/** 关闭按钮 */
+const close = () => {
+  delView(unref(currentRoute))
+  push('/infra/codegen')
 }
 onMounted(() => {
-  getList()
+  getDetail()
 })
 </script>

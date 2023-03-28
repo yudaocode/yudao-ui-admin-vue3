@@ -1,5 +1,11 @@
 <template>
-  <XModal title="预览" v-model="preview.open">
+  <Dialog
+    :title="modelTitle"
+    v-model="modelVisible"
+    align-center
+    width="60%"
+    class="app-infra-codegen-preview-container"
+  >
     <div class="flex">
       <el-card class="w-1/4" :gutter="12" shadow="hover">
         <el-scrollbar height="calc(100vh - 88px - 40px - 50px)">
@@ -10,6 +16,7 @@
             :expand-on-click-node="false"
             highlight-current
             @node-click="handleNodeClick"
+            default-expand-all
           />
         </el-scrollbar>
       </el-card>
@@ -21,38 +28,34 @@
             :name="item.filePath"
             :key="item.filePath"
           >
-            <XTextButton style="float: right" :title="t('common.copy')" @click="copy(item.code)" />
+            <el-button text type="primary" class="float-right" @click="copy(item.code)">
+              {{ t('common.copy') }}
+            </el-button>
             <pre>{{ item.code }}</pre>
           </el-tab-pane>
         </el-tabs>
       </el-card>
     </div>
-  </XModal>
+  </Dialog>
 </template>
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core'
 import { handleTree2 } from '@/utils/tree'
-import { previewCodegenApi } from '@/api/infra/codegen'
-import { CodegenTableVO, CodegenPreviewVO } from '@/api/infra/codegen/types'
+import * as CodegenApi from '@/api/infra/codegen'
+import { CodegenPreviewVO } from '@/api/infra/codegen/types'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
+const modelVisible = ref(false) // 弹窗的是否展示
+const modelTitle = ref('代码预览') // 弹窗的标题
 // ======== 显示页面 ========
 const preview = reactive({
-  open: false,
-  titel: '代码预览',
   fileTree: [],
   activeName: ''
 })
 const previewCodegen = ref<CodegenPreviewVO[]>()
-const show = async (row: CodegenTableVO) => {
-  const res = await previewCodegenApi(row.id)
-  let file = handleFiles(res)
-  previewCodegen.value = res
-  preview.fileTree = handleTree2(file, 'id', 'parentId', 'children', '/')
-  preview.activeName = res[0].filePath
-  preview.open = true
-}
+
 const handleNodeClick = async (data, node) => {
   if (node && !node.isLeaf) {
     return false
@@ -132,14 +135,30 @@ const copy = async (text: string) => {
   const { copy, copied, isSupported } = useClipboard({ source: text })
   if (!isSupported) {
     message.error(t('common.copyError'))
-  } else {
-    await copy()
-    if (unref(copied)) {
-      message.success(t('common.copySuccess'))
-    }
+    return
+  }
+  await copy()
+  if (unref(copied)) {
+    message.success(t('common.copySuccess'))
   }
 }
-defineExpose({
-  show
-})
+
+/** 打开弹窗 */
+const openModal = async (id: number) => {
+  modelVisible.value = true
+  const res = await CodegenApi.previewCodegen(id)
+  let file = handleFiles(res)
+  previewCodegen.value = res
+  preview.fileTree = handleTree2(file, 'id', 'parentId', 'children', '/')
+  preview.activeName = res[0].filePath
+}
+defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
 </script>
+<style lang="scss">
+.app-infra-codegen-preview-container {
+  .el-scrollbar .el-scrollbar__wrap .el-scrollbar__view {
+    white-space: nowrap;
+    display: inline-block;
+  }
+}
+</style>
