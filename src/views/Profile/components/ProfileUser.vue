@@ -34,13 +34,13 @@
       </li>
       <li class="list-group-item">
         <Icon icon="ep:calendar" class="mr-5px" />{{ t('profile.user.createTime') }}
-        <div class="pull-right">{{ dayjs(userInfo?.createTime).format('YYYY-MM-DD') }}</div>
+        <div class="pull-right">{{ parseTime(userInfo?.createTime) }}</div>
       </li>
     </ul>
   </div>
 </template>
 <script setup lang="ts">
-import dayjs from 'dayjs'
+import { parseTime } from '@/utils/formatTime'
 import UserAvatar from './UserAvatar.vue'
 
 import { getUserProfileApi, ProfileVO } from '@/api/system/user/profile'

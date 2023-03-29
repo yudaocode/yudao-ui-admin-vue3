@@ -11,8 +11,63 @@ import dayjs from 'dayjs'
  * @description format 季度 + 星期 + 几周："YYYY-mm-dd HH:MM:SS WWW QQQQ ZZZ"
  * @returns 返回拼接后的时间字符串
  */
-export function formatDate(date: Date, format: string): string {
+export function formatDate(date: Date, format?: string): string {
+  // 日期不存在，则返回空
+  if (!date) {
+    return ''
+  }
+  // 日期存在，则进行格式化
+  if (format === undefined) {
+    format = 'YYYY-MM-DD HH:mm:ss'
+  }
   return dayjs(date).format(format)
+}
+
+// TODO 芋艿：稍后去掉
+// 日期格式化
+export function parseTime(time: any, pattern?: string) {
+  if (arguments.length === 0 || !time) {
+    return null
+  }
+  const format = pattern || '{y}-{m}-{d} {h}:{i}:{s}'
+  let date
+  if (typeof time === 'object') {
+    date = time
+  } else {
+    if (typeof time === 'string' && /^[0-9]+$/.test(time)) {
+      time = parseInt(time)
+    } else if (typeof time === 'string') {
+      time = time
+        .replace(new RegExp(/-/gm), '/')
+        .replace('T', ' ')
+        .replace(new RegExp(/\.\d{3}/gm), '')
+    }
+    if (typeof time === 'number' && time.toString().length === 10) {
+      time = time * 1000
+    }
+    date = new Date(time)
+  }
+  const formatObj = {
+    y: date.getFullYear(),
+    m: date.getMonth() + 1,
+    d: date.getDate(),
+    h: date.getHours(),
+    i: date.getMinutes(),
+    s: date.getSeconds(),
+    a: date.getDay()
+  }
+  const time_str = format.replace(/{([ymdhisa])+}/g, (result, key) => {
+    let value = formatObj[key]
+    // Note: getDay() returns 0 on Sunday
+    if (key === 'a') {
+      return ['日', '一', '二', '三', '四', '五', '六'][value]
+    }
+    if (result.length > 0 && value < 10) {
+      value = '0' + value
+    }
+    return value || 0
+  })
+  return time_str
 }
 
 /**
@@ -139,5 +194,5 @@ export const dateFormatter = (row, column, cellValue) => {
   if (!cellValue) {
     return
   }
-  return dayjs(cellValue).format('YYYY-MM-DD HH:mm:ss')
+  return formatDate(cellValue)
 }

@@ -112,13 +112,13 @@
                 </label>
                 <label style="font-weight: normal" v-if="item.createTime">创建时间：</label>
                 <label style="color: #8a909c; font-weight: normal">
-                  {{ dayjs(item?.createTime).format('YYYY-MM-DD HH:mm:ss') }}
+                  {{ parseTime(item?.createTime) }}
                 </label>
                 <label v-if="item.endTime" style="margin-left: 30px; font-weight: normal">
                   审批时间：
                 </label>
                 <label v-if="item.endTime" style="color: #8a909c; font-weight: normal">
-                  {{ dayjs(item?.endTime).format('YYYY-MM-DD HH:mm:ss') }}
+                  {{ parseTime(item?.endTime) }}
                 </label>
                 <label v-if="item.durationInMillis" style="margin-left: 30px; font-weight: normal">
                   耗时：
@@ -192,7 +192,7 @@
   </ContentWrap>
 </template>
 <script setup lang="ts">
-import dayjs from 'dayjs'
+import { parseTime } from '@/utils/formatTime'
 import * as UserApi from '@/api/system/user'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
@@ -378,7 +378,7 @@ onMounted(() => {
   // 加载详情
   getDetail()
   // 加载用户的列表
-  UserApi.getListSimpleUsersApi().then((data) => {
+  UserApi.getSimpleUserList().then((data) => {
     userOptions.value.push(...data)
   })
 })
@@ -411,7 +411,7 @@ const getDetail = () => {
       }
 
       // 加载流程图
-      DefinitionApi.getProcessDefinitionBpmnXMLApi(processDefinition.id).then((data) => {
+      DefinitionApi.getProcessDefinitionBpmnXML(processDefinition.id).then((data) => {
         bpmnXML.value = data
       })
 

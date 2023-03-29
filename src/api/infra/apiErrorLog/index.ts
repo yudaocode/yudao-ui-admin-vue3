@@ -27,38 +27,20 @@ export interface ApiErrorLogVO {
   createTime: Date
 }
 
-export interface ApiErrorLogPageReqVO extends PageParam {
-  userId?: number
-  userType?: number
-  applicationName?: string
-  requestUrl?: string
-  exceptionTime?: Date[]
-  processStatus: number
-}
-
-export interface ApiErrorLogExportReqVO {
-  userId?: number
-  userType?: number
-  applicationName?: string
-  requestUrl?: string
-  exceptionTime?: Date[]
-  processStatus: number
-}
-
 // 查询列表API 访问日志
-export const getApiErrorLogPageApi = (params: ApiErrorLogPageReqVO) => {
+export const getApiErrorLogPage = (params: PageParam) => {
   return request.get({ url: '/infra/api-error-log/page', params })
 }
 
 // 更新 API 错误日志的处理状态
-export const updateApiErrorLogPageApi = (id: number, processStatus: number) => {
+export const updateApiErrorLogPage = (id: number, processStatus: number) => {
   return request.put({
     url: '/infra/api-error-log/update-status?id=' + id + '&processStatus=' + processStatus
   })
 }
 
 // 导出API 访问日志
-export const exportApiErrorLogApi = (params: ApiErrorLogExportReqVO) => {
+export const exportApiErrorLog = (params) => {
   return request.download({
     url: '/infra/api-error-log/export-excel',
     params

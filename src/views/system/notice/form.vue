@@ -38,17 +38,14 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-        <el-button @click="modelVisible = false">取 消</el-button>
-      </div>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="modelVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
 <script setup lang="ts">
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as NoticeApi from '@/api/system/notice'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

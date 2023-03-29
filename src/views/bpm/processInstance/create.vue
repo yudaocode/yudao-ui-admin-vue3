@@ -72,7 +72,7 @@ const [registerTable] = useXTable({
   params: {
     suspensionState: 1
   },
-  getListApi: DefinitionApi.getProcessDefinitionListApi,
+  getListApi: DefinitionApi.getProcessDefinitionList,
   isList: true
 })
 
@@ -99,7 +99,7 @@ const handleSelect = async (row) => {
     setConfAndFields2(detailForm, row.formConf, row.formFields)
 
     // 加载流程图
-    DefinitionApi.getProcessDefinitionBpmnXMLApi(row.id).then((response) => {
+    DefinitionApi.getProcessDefinitionBpmnXML(row.id).then((response) => {
       bpmnXML.value = response
     })
     // 情况二：业务表单

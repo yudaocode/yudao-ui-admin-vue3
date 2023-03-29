@@ -43,12 +43,12 @@ export const getUserApi = (id: number) => {
 }
 
 // 新增用户
-export const createUserApi = (data: UserVO) => {
+export const createUserApi = (data: UserVO | Recordable) => {
   return request.post({ url: '/system/user/create', data })
 }
 
 // 修改用户
-export const updateUserApi = (data: UserVO) => {
+export const updateUserApi = (data: UserVO | Recordable) => {
   return request.put({ url: '/system/user/update', data })
 }
 
@@ -86,6 +86,6 @@ export const updateUserStatusApi = (id: number, status: number) => {
 }
 
 // 获取用户精简信息列表
-export const getListSimpleUsersApi = () => {
+export const getSimpleUserList = (): Promise<UserVO[]> => {
   return request.get({ url: '/system/user/list-all-simple' })
 }
