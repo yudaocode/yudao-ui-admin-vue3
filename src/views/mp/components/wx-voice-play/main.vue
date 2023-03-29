@@ -25,6 +25,7 @@
 
 <script setup lang="ts" name="WxVoicePlayer">
 // 因为微信语音是 amr 格式，所以需要用到 amr 解码器：https://www.npmjs.com/package/benz-amr-recorder
+
 import BenzAMRRecorder from 'benz-amr-recorder'
 
 const props = defineProps({

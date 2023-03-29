@@ -51,8 +51,14 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery">
+          <Icon icon="ep:search" class="mr-5px" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon icon="ep:refresh" class="mr-5px" />
+          重置
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -85,16 +91,20 @@
             <el-tag type="danger">取消关注</el-tag>
           </div>
           <div v-else-if="scope.row.type === 'event' && scope.row.event === 'CLICK'">
-            <el-tag>点击菜单</el-tag>【{{ scope.row.eventKey }}】
+            <el-tag>点击菜单</el-tag>
+            【{{ scope.row.eventKey }}】
           </div>
           <div v-else-if="scope.row.type === 'event' && scope.row.event === 'VIEW'">
-            <el-tag>点击菜单链接</el-tag>【{{ scope.row.eventKey }}】
+            <el-tag>点击菜单链接</el-tag>
+            【{{ scope.row.eventKey }}】
           </div>
           <div v-else-if="scope.row.type === 'event' && scope.row.event === 'scancode_waitmsg'">
-            <el-tag>扫码结果</el-tag>【{{ scope.row.eventKey }}】
+            <el-tag>扫码结果</el-tag>
+            【{{ scope.row.eventKey }}】
           </div>
           <div v-else-if="scope.row.type === 'event' && scope.row.event === 'scancode_push'">
-            <el-tag>扫码结果</el-tag>【{{ scope.row.eventKey }}】
+            <el-tag>扫码结果</el-tag>
+            【{{ scope.row.eventKey }}】
           </div>
           <div v-else-if="scope.row.type === 'event' && scope.row.event === 'pic_sysphoto'">
             <el-tag>系统拍照发图</el-tag>
@@ -125,7 +135,8 @@
             <wx-video-player :url="scope.row.mediaUrl" style="margin-top: 10px" />
           </div>
           <div v-else-if="scope.row.type === 'link'">
-            <el-tag>链接</el-tag>：
+            <el-tag>链接</el-tag>
+            ：
             <a :href="scope.row.url" target="_blank">{{ scope.row.title }}</a>
           </div>
           <div v-else-if="scope.row.type === 'location'">
@@ -175,23 +186,26 @@
     />
 
     <!-- 发送消息的弹窗 -->
-    <el-dialog title="粉丝消息列表" v-model:visible="open" width="50%">
-      <wx-msg :user-id="userId" v-if="open" />
+    <el-dialog title="粉丝消息列表" v-model="open" @click="openDialog()" width="50%">
+      <template #footer>
+        <wx-msg :user-id="userId" v-if="open" />
+      </template>
     </el-dialog>
   </ContentWrap>
 </template>
 <script setup lang="ts" name="MpMessage">
-import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
-// import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
+import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
-// import WxMsg from '@/views/mp/components/wx-msg/main.vue'
+import WxMsg from '@/views/mp/components/wx-msg/main.vue'
 import WxLocation from '@/views/mp/components/wx-location/main.vue'
-// import WxMusic from '@/views/mp/components/wx-music/main.vue'
-// import WxNews from '@/views/mp/components/wx-news/main.vue'
+import WxMusic from '@/views/mp/components/wx-music/main.vue'
+import WxNews from '@/views/mp/components/wx-news/main.vue'
 import * as MpAccountApi from '@/api/mp/account'
 import * as MpMessageApi from '@/api/mp/message'
+
 const message = useMessage() // 消息弹窗
+import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -210,7 +224,7 @@ const open = ref(false) // 是否显示弹出层
 const userId = ref(0) // 操作的用户编号
 const accountList = ref<MpAccountApi.AccountVO[]>([]) // 公众号账号列表
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   // 如果没有选中公众号账号，则进行提示。
   if (!queryParams.accountId) {
@@ -247,6 +261,13 @@ const handleSend = async (row) => {
   userId.value = row.userId
   open.value = true
 }
+
+const openDialog = () => {
+  open.value = true
+}
+// const closeDiaLog = () => {
+//   open.value = false
+// }
 
 /** 初始化 **/
 onMounted(async () => {

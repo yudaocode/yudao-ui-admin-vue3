@@ -196,3 +196,54 @@ export const dateFormatter = (row, column, cellValue) => {
   }
   return formatDate(cellValue)
 }
+
+/**
+ * 设置起始日期，时间为00:00:00
+ * @param param 传入日期
+ * @returns 带时间00:00:00的日期
+ */
+export function beginOfDay(param: Date) {
+  return new Date(param.getFullYear(), param.getMonth(), param.getDate(), 0, 0, 0, 0)
+}
+
+/**
+ * 设置结束日期，时间为23:59:59
+ * @param param 传入日期
+ * @returns 带时间23:59:59的日期
+ */
+export function endOfDay(param: Date) {
+  return new Date(param.getFullYear(), param.getMonth(), param.getDate(), 23, 59, 59, 999)
+}
+
+/**
+ * 计算两个日期间隔天数
+ * @param param1 日期1
+ * @param param2 日期2
+ */
+export function betweenDay(param1: Date, param2: Date) {
+  param1 = convertDate(param1)
+  param2 = convertDate(param2)
+  // 计算差值
+  return Math.floor((param2.getTime() - param1.getTime()) / (24 * 3600 * 1000))
+}
+
+/**
+ * 日期计算
+ * @param param1 日期
+ * @param param2 添加的时间
+ */
+export function addTime(param1: Date, param2: number) {
+  param1 = convertDate(param1)
+  return new Date(param1.getTime() + param2)
+}
+
+/**
+ * 日期转换
+ * @param param 日期
+ */
+export function convertDate(param: Date | string) {
+  if (typeof param === 'string') {
+    return new Date(param)
+  }
+  return param
+}

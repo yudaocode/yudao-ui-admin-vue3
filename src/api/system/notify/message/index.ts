@@ -15,31 +15,13 @@ export interface NotifyMessageVO {
   readTime: Date
 }
 
-export interface NotifyMessagePageReqVO extends PageParam {
-  userId?: number
-  userType?: number
-  templateCode?: string
-  templateType?: number
-  createTime?: Date[]
-}
-
-export interface NotifyMessageMyPageReqVO extends PageParam {
-  readStatus?: boolean
-  createTime?: Date[]
-}
-
 // 查询站内信消息列表
-export const getNotifyMessagePageApi = async (params: NotifyMessagePageReqVO) => {
+export const getNotifyMessagePage = async (params: PageParam) => {
   return await request.get({ url: '/system/notify-message/page', params })
 }
 
-// 查询站内信消息详情
-export const getNotifyMessageApi = async (id: number) => {
-  return await request.get({ url: '/system/notify-message/get?id=' + id })
-}
-
 // 获得我的站内信分页
-export const getMyNotifyMessagePage = async (params: NotifyMessageMyPageReqVO) => {
+export const getMyNotifyMessagePage = async (params: PageParam) => {
   return await request.get({ url: '/system/notify-message/my-page', params })
 }
 

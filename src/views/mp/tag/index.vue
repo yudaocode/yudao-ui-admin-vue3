@@ -28,13 +28,21 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery">
+          <Icon icon="ep:search" class="mr-5px" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon icon="ep:refresh" class="mr-5px" />
+          重置
+        </el-button>
         <el-button type="primary" plain @click="openForm('create')" v-hasPermi="['mp:tag:create']">
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+          <Icon icon="ep:plus" class="mr-5px" />
+          新增
         </el-button>
         <el-button type="success" plain @click="handleSync" v-hasPermi="['mp:tag:sync']">
-          <Icon icon="ep:refresh" class="mr-5px" /> 同步
+          <Icon icon="ep:refresh" class="mr-5px" />
+          同步
         </el-button>
       </el-form-item>
     </el-form>
@@ -91,6 +99,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as MpTagApi from '@/api/mp/tag'
 import * as MpAccountApi from '@/api/mp/account'
 import TagForm from './TagForm.vue'
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -106,7 +115,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const accountList = ref<MpAccountApi.AccountVO[]>([]) // 公众号账号列表
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   // 如果没有选中公众号账号，则进行提示。
   if (!queryParams.accountId) {

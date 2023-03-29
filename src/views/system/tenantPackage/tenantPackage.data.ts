@@ -43,7 +43,7 @@ const crudSchemas = reactive<VxeCrudSchema>({
     {
       title: t('form.remark'),
       field: 'remark',
-      isTable: false,
+      isTable: true,
       isSearch: true,
       form: {
         component: 'Input',

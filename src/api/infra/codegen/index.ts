@@ -1,57 +1,123 @@
 import request from '@/config/axios'
-import type { CodegenUpdateReqVO, CodegenCreateListReqVO } from './types'
+
+export type CodegenTableVO = {
+  id: number
+  tableId: number
+  isParentMenuIdValid: boolean
+  dataSourceConfigId: number
+  scene: number
+  tableName: string
+  tableComment: string
+  remark: string
+  moduleName: string
+  businessName: string
+  className: string
+  classComment: string
+  author: string
+  createTime: Date
+  updateTime: Date
+  templateType: number
+  parentMenuId: number
+}
+
+export type CodegenColumnVO = {
+  id: number
+  tableId: number
+  columnName: string
+  dataType: string
+  columnComment: string
+  nullable: number
+  primaryKey: number
+  autoIncrement: string
+  ordinalPosition: number
+  javaType: string
+  javaField: string
+  dictType: string
+  example: string
+  createOperation: number
+  updateOperation: number
+  listOperation: number
+  listOperationCondition: string
+  listOperationResult: number
+  htmlType: string
+}
+
+export type DatabaseTableVO = {
+  name: string
+  comment: string
+}
+
+export type CodegenDetailVO = {
+  table: CodegenTableVO
+  columns: CodegenColumnVO[]
+}
+
+export type CodegenPreviewVO = {
+  filePath: string
+  code: string
+}
+
+export type CodegenUpdateReqVO = {
+  table: CodegenTableVO | any
+  columns: CodegenColumnVO[]
+}
+
+export type CodegenCreateListReqVO = {
+  dataSourceConfigId: number
+  tableNames: string[]
+}
 
 // 查询列表代码生成表定义
-export const getCodegenTablePageApi = (params) => {
+export const getCodegenTablePage = (params: PageParam) => {
   return request.get({ url: '/infra/codegen/table/page', params })
 }
 
 // 查询详情代码生成表定义
-export const getCodegenTableApi = (id: number) => {
+export const getCodegenTable = (id: number) => {
   return request.get({ url: '/infra/codegen/detail?tableId=' + id })
 }
 
 // 新增代码生成表定义
-export const createCodegenTableApi = (data: CodegenCreateListReqVO) => {
+export const createCodegenTable = (data: CodegenCreateListReqVO) => {
   return request.post({ url: '/infra/codegen/create', data })
 }
 
 // 修改代码生成表定义
-export const updateCodegenTableApi = (data: CodegenUpdateReqVO) => {
+export const updateCodegenTable = (data: CodegenUpdateReqVO) => {
   return request.put({ url: '/infra/codegen/update', data })
 }
 
 // 基于数据库的表结构，同步数据库的表和字段定义
-export const syncCodegenFromDBApi = (id: number) => {
+export const syncCodegenFromDB = (id: number) => {
   return request.put({ url: '/infra/codegen/sync-from-db?tableId=' + id })
 }
 
 // 基于 SQL 建表语句，同步数据库的表和字段定义
-export const syncCodegenFromSQLApi = (id: number, sql: string) => {
+export const syncCodegenFromSQL = (id: number, sql: string) => {
   return request.put({ url: '/infra/codegen/sync-from-sql?tableId=' + id + '&sql=' + sql })
 }
 
 // 预览生成代码
-export const previewCodegenApi = (id: number) => {
+export const previewCodegen = (id: number) => {
   return request.get({ url: '/infra/codegen/preview?tableId=' + id })
 }
 
 // 下载生成代码
-export const downloadCodegenApi = (id: number) => {
+export const downloadCodegen = (id: number) => {
   return request.download({ url: '/infra/codegen/download?tableId=' + id })
 }
 
 // 获得表定义
-export const getSchemaTableListApi = (params) => {
+export const getSchemaTableList = (params) => {
   return request.get({ url: '/infra/codegen/db/table/list', params })
 }
 
 // 基于数据库的表结构，创建代码生成器的表定义
-export const createCodegenListApi = (data) => {
+export const createCodegenList = (data) => {
   return request.post({ url: '/infra/codegen/create-list', data })
 }
 
 // 删除代码生成表定义
-export const deleteCodegenTableApi = (id: number) => {
+export const deleteCodegenTable = (id: number) => {
   return request.delete({ url: '/infra/codegen/delete?tableId=' + id })
 }

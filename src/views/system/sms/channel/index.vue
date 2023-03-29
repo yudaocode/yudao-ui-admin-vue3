@@ -146,7 +146,7 @@ const queryParams = reactive({
   createTime: []
 })
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {

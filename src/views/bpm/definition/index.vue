@@ -110,7 +110,7 @@ const queryParams = reactive({
   key: query.key
 })
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
