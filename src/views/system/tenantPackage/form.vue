@@ -111,7 +111,7 @@ const handleCheckedTreeNodeAll = () => {
 }
 // 全部（展开/折叠）TODO:for循环全部展开和折叠树组件数据
 const handleCheckedTreeExpand = () => {
-  const nodes = treeRef.value!.store.nodesMap
+  const nodes = treeRef.value?.store.nodesMap
   for (let node in nodes) {
     nodes[node].expanded = !nodes[node].expanded
   }
