@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="modelTitle" v-model="modelVisible" width="50%">
+  <Dialog :title="modelTitle" v-model="modelVisible">
     <el-form
       ref="formRef"
       :model="formData"
@@ -13,13 +13,6 @@
       <el-form-item label="菜单权限">
         <el-card class="cardHeight">
           <template #header>
-            父子联动(选中父节点，自动选择子节点):
-            <el-switch
-              v-model="menuCheckStrictly"
-              inline-prompt
-              active-text="是"
-              inactive-text="否"
-            />
             全选/全不选:
             <el-switch
               v-model="treeNodeAll"
@@ -43,7 +36,7 @@
             :check-strictly="!menuCheckStrictly"
             show-checkbox
             :props="defaultProps"
-            :data="menuOptions as any[]"
+            :data="menuOptions"
             empty-text="加载中，请稍候"
           />
         </el-card>
@@ -51,7 +44,7 @@
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
             :label="parseInt(dict.value)"
           >
@@ -70,30 +63,28 @@
   </Dialog>
 </template>
 <script setup lang="ts" name="TenantPackageForm">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
-import type { FormRules } from 'element-plus'
 import { defaultProps } from '@/utils/tree'
-// 业务相关
 import * as TenantPackageApi from '@/api/system/tenantPackage'
-import { getSimpleMenusList } from '@/api/system/menu'
+import * as MenuApi from '@/api/system/menu'
 import { ElTree } from 'element-plus'
 import { handleTree } from '@/utils/tree'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
 const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData: Record<string, any> = ref<Record<string, any>>({
+const formData = ref({
   id: null,
   name: null,
   remark: null,
   menuIds: [],
   status: CommonStatusEnum.ENABLE
 })
-const formRules: FormRules = ref<FormRules>({
+const formRules = reactive({
   name: [{ required: true, message: '套餐名不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }],
   menuIds: [{ required: true, message: '关联的菜单编号不能为空', trigger: 'blur' }]
@@ -105,26 +96,12 @@ const menuExpand = ref(false) // 展开/折叠
 const treeRef = ref<InstanceType<typeof ElTree>>() // 树组件Ref
 const treeNodeAll = ref(false) // 全选/全不选
 
-// 全选/全不选
-const handleCheckedTreeNodeAll = () => {
-  treeRef.value!.setCheckedNodes(treeNodeAll.value ? menuOptions.value : [])
-}
-// 全部（展开/折叠）TODO:for循环全部展开和折叠树组件数据
-const handleCheckedTreeExpand = () => {
-  const nodes = treeRef.value?.store.nodesMap
-  for (let node in nodes) {
-    nodes[node].expanded = !nodes[node].expanded
-  }
-}
-
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   modelVisible.value = true
   modelTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  // 加载Menu列表
-  menuOptions.value = handleTree(await getSimpleMenusList())
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -140,6 +117,8 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 加载Menu列表
+  menuOptions.value = handleTree(await MenuApi.getSimpleMenusList())
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -159,10 +138,10 @@ const submitForm = async () => {
       ...(treeRef.value!.getHalfCheckedKeys() as unknown as Array<number>)
     ]
     if (formType.value === 'create') {
-      await TenantPackageApi.createTenantPackageType(data)
+      await TenantPackageApi.createTenantPackage(data)
       message.success(t('common.createSuccess'))
     } else {
-      await TenantPackageApi.updateTenantPackageType(data)
+      await TenantPackageApi.updateTenantPackage(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
@@ -188,6 +167,18 @@ const resetForm = () => {
   // 设置为非严格，继续使用半选中
   menuCheckStrictly.value = false
   formRef.value?.resetFields()
+}
+
+// 全选/全不选
+const handleCheckedTreeNodeAll = () => {
+  treeRef.value!.setCheckedNodes(treeNodeAll.value ? menuOptions.value : [])
+}
+// 全部（展开/折叠）TODO:for循环全部展开和折叠树组件数据
+const handleCheckedTreeExpand = () => {
+  const nodes = treeRef.value?.store.nodesMap
+  for (let node in nodes) {
+    nodes[node].expanded = !nodes[node].expanded
+  }
 }
 </script>
 <style lang="scss" scoped>

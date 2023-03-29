@@ -14,10 +14,11 @@
           placeholder="请输入套餐名"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
@@ -29,7 +30,6 @@
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          style="width: 240px"
           type="daterange"
           value-format="YYYY-MM-DD HH:mm:ss"
           start-placeholder="开始日期"
@@ -37,19 +37,12 @@
           class="!w-240px"
         />
       </el-form-item>
-
       <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon icon="ep:refresh" class="mr-5px" />
-          重置
-        </el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
-          @click="handleCreate('create')"
+          @click="openForm('create')"
           v-hasPermi="['system:tenant-package:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" />
@@ -72,26 +65,26 @@
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="创建时间" align="center" prop="createTime" width="180">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.createTime) }}</span>
+          <span>{{ formatDate(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate('update', scope.row.id)"
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['system:tenant-package:update']"
-            >修改
+          >
+            修改
           </el-button>
           <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
+            link
+            type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['system:tenant-package:delete']"
-            >删除
+          >
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -104,15 +97,15 @@
       @pagination="getList"
     />
   </ContentWrap>
+
+  <!-- 表单弹窗：添加/修改 -->
   <TenantPackageForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="TenantPackage">
-import TenantPackageForm from './form.vue'
-// 业务相关的 import
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { parseTime } from '@/utils/formatTime'
+import { formatDate } from '@/utils/formatTime'
 import * as TenantPackageApi from '@/api/system/tenantPackage'
-
+import TenantPackageForm from './TenantPackageForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -128,17 +121,17 @@ const queryParams: Record<string, any> = ref<Record<string, any>>({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const formRef = ref() // 表单 Ref
 
 /** 查询列表 */
-const getList = () => {
+const getList = async () => {
   loading.value = true
-  // 执行查询
-  TenantPackageApi.getTenantPackageTypePage(queryParams.value).then((response) => {
-    list.value = response.list
-    total.value = response.total
+  try {
+    const data = await TenantPackageApi.getTenantPackagePage(queryParams.value)
+    list.value = data.list
+    total.value = data.total
+  } finally {
     loading.value = false
-  })
+  }
 }
 
 /** 搜索按钮操作 */
@@ -149,31 +142,31 @@ const handleQuery = () => {
 
 /** 重置按钮操作 */
 const resetQuery = () => {
-  // 表单重置
   queryFormRef.value?.resetFields()
   getList()
 }
 
-// 新增操作
-const handleCreate = (type: string) => {
-  formRef.value.open(type)
-}
-
-// 修改操作
-const handleUpdate = async (type: string, id?: number) => {
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
+
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await TenantPackageApi.deleteTenantPackageType(id)
+    await TenantPackageApi.deleteTenantPackage(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
   } catch {}
 }
-getList()
+
+/** 初始化 **/
+onMounted(() => {
+  getList()
+})
 </script>

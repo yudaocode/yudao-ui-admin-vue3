@@ -12,15 +12,8 @@ export interface TenantPackageVO {
   createTime: Date
 }
 
-export interface TenantPackagePageReqVO extends PageParam {
-  name?: string
-  status?: number
-  remark?: string
-  createTime?: Date[]
-}
-
 // 查询租户套餐列表
-export const getTenantPackageTypePage = (params: TenantPackagePageReqVO) => {
+export const getTenantPackagePage = (params: PageParam) => {
   return request.get({ url: '/system/tenant-package/page', params })
 }
 
@@ -30,17 +23,17 @@ export const getTenantPackage = (id: number) => {
 }
 
 // 新增租户套餐
-export const createTenantPackageType = (data: TenantPackageVO) => {
+export const createTenantPackage = (data: TenantPackageVO) => {
   return request.post({ url: '/system/tenant-package/create', data })
 }
 
 // 修改租户套餐
-export const updateTenantPackageType = (data: TenantPackageVO) => {
+export const updateTenantPackage = (data: TenantPackageVO) => {
   return request.put({ url: '/system/tenant-package/update', data })
 }
 
 // 删除租户套餐
-export const deleteTenantPackageType = (id: number) => {
+export const deleteTenantPackage = (id: number) => {
   return request.delete({ url: '/system/tenant-package/delete?id=' + id })
 }
 // 获取租户套餐精简信息列表
