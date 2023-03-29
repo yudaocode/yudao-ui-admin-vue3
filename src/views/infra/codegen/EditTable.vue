@@ -1,5 +1,5 @@
 <template>
-  <content-wrap v-loading="loading">
+  <content-wrap v-loading="formLoading">
     <el-tabs v-model="activeName">
       <el-tab-pane label="基本信息" name="basicInfo">
         <basic-info-form ref="basicInfoRef" :table="formData.table" />
@@ -11,63 +11,69 @@
         <generate-info-form ref="generateInfoRef" :table="formData.table" />
       </el-tab-pane>
     </el-tabs>
-    <el-form label-width="100px">
-      <el-form-item style="text-align: center; margin-left: -100px; margin-top: 10px">
-        <el-button type="primary" @click="submitForm" :loading="submitLoading">
-          {{ t('action.save') }}
-        </el-button>
+    <el-form>
+      <el-form-item style="float: right">
+        <el-button type="primary" @click="submitForm" :loading="formLoading">保存</el-button>
         <el-button @click="close">返回</el-button>
       </el-form-item>
     </el-form>
   </content-wrap>
 </template>
 <script setup lang="ts">
+import { useTagsViewStore } from '@/store/modules/tagsView'
 import { BasicInfoForm, ColumInfoForm, GenerateInfoForm } from './components'
 import * as CodegenApi from '@/api/infra/codegen'
-import ContentWrap from '@/components/ContentWrap/src/ContentWrap.vue'
-import { useTagsViewStore } from '@/store/modules/tagsView'
-import { CodegenUpdateReqVO } from '@/api/infra/codegen/types'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-const { push, currentRoute } = useRouter()
-const { query } = useRoute()
-const { delView } = useTagsViewStore()
-const loading = ref(false)
-const submitLoading = ref(false)
-const activeName = ref('basicInfo')
+const { push, currentRoute } = useRouter() // 路由
+const { query } = useRoute() // 查询参数
+const { delView } = useTagsViewStore() // 视图操作
+
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const activeName = ref('basicInfo') // Tag 激活的窗口
 const basicInfoRef = ref<ComponentRef<typeof BasicInfoForm>>()
 const columInfoRef = ref<ComponentRef<typeof ColumInfoForm>>()
 const generateInfoRef = ref<ComponentRef<typeof GenerateInfoForm>>()
-const formData = ref<CodegenUpdateReqVO>({
+const formData = ref<CodegenApi.CodegenUpdateReqVO>({
   table: {},
   columns: []
 })
 
+/** 获得详情 */
 const getDetail = async () => {
   const id = query.id as unknown as number
-  if (id) {
-    loading.value = true
-    // 获取表详细信息
+  if (!id) {
+    return
+  }
+  formLoading.value = true
+  try {
     formData.value = await CodegenApi.getCodegenTable(id)
-    loading.value = false
+  } finally {
+    formLoading.value = false
   }
 }
+
+/** 提交按钮 */
 const submitForm = async () => {
+  // 参数校验
   if (!unref(formData)) return
+  await unref(basicInfoRef)?.validate()
+  await unref(generateInfoRef)?.validate()
   try {
-    await unref(basicInfoRef)?.validate()
-    await unref(generateInfoRef)?.validate()
-    await CodegenApi.updateCodegenTable(unref(formData))
+    // 提交请求
+    await CodegenApi.updateCodegenTable(formData.value)
     message.success(t('common.updateSuccess'))
-    push('/infra/codegen')
+    close()
   } catch {}
 }
+
 /** 关闭按钮 */
 const close = () => {
   delView(unref(currentRoute))
   push('/infra/codegen')
 }
+
+/** 初始化 */
 onMounted(() => {
   getDetail()
 })
