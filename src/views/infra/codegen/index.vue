@@ -187,7 +187,7 @@ const resetQuery = () => {
   handleQuery()
 }
 
-// 导入操作
+/** 导入操作 */
 const importRef = ref()
 const openImportTable = () => {
   importRef.value.open()
@@ -201,7 +201,7 @@ const handleUpdate = (id: number) => {
 /** 预览操作 */
 const previewRef = ref()
 const handlePreview = (row: CodegenApi.CodegenTableVO) => {
-  previewRef.value.openModal(row.id)
+  previewRef.value.open(row.id)
 }
 
 /** 删除按钮操作 */
