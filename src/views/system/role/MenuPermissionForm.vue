@@ -59,7 +59,7 @@
                 show-checkbox
                 :check-strictly="!checkStrictly"
                 :props="defaultProps"
-                :data="dataScopeForm"
+                :data="treeOptions"
                 empty-text="加载中，请稍后"
               />
             </el-card>
