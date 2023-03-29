@@ -204,7 +204,7 @@ const openForm = (type: string, id?: number) => {
 /** 数据权限操作 */
 const menuPermissionFormRef = ref()
 const handleScope = async (type: string, row: RoleApi.RoleVO) => {
-  menuPermissionFormRef.value.openForm(type, row)
+  menuPermissionFormRef.value.openModal(type, row)
 }
 
 /** 删除按钮操作 */
