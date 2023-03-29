@@ -11,7 +11,6 @@
           <el-input placeholder="请输入" v-model="formData.tableComment" />
         </el-form-item>
       </el-col>
-
       <el-col :span="12">
         <el-form-item prop="className">
           <template #label>
@@ -25,7 +24,6 @@
               </el-tooltip>
             </span>
           </template>
-
           <el-input placeholder="请输入" v-model="formData.className" />
         </el-form-item>
       </el-col>
@@ -43,13 +41,12 @@
   </el-form>
 </template>
 <script setup lang="ts">
-import { CodegenTableVO } from '@/api/infra/codegen/types'
+import * as CodegenApi from '@/api/infra/codegen'
 import { PropType } from 'vue'
 
-const emits = defineEmits(['update:basicInfo'])
 const props = defineProps({
   table: {
-    type: Object as PropType<Nullable<CodegenTableVO>>,
+    type: Object as PropType<Nullable<CodegenApi.CodegenTableVO>>,
     default: () => null
   }
 })
@@ -62,7 +59,6 @@ const formData = ref({
   author: '',
   remark: ''
 })
-
 const rules = reactive({
   tableName: [required],
   tableComment: [required],
@@ -70,6 +66,7 @@ const rules = reactive({
   author: [required]
 })
 
+/** 监听 table 属性，复制给 formData 属性 */
 watch(
   () => props.table,
   (table) => {
@@ -81,12 +78,7 @@ watch(
     immediate: true
   }
 )
-watch(
-  () => formData.value,
-  (val) => {
-    emits('update:basicInfo', val)
-  }
-)
+
 defineExpose({
   validate: async () => unref(formRef)?.validate()
 })

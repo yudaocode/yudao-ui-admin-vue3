@@ -190,7 +190,7 @@ const handleExport = async () => {
 
 /** 查询字典（精简)列表 */
 const getDictList = async () => {
-  dicts.value = await DictTypeApi.listSimpleDictType()
+  dicts.value = await DictTypeApi.getSimpleDictTypeList()
 }
 
 /** 初始化 **/

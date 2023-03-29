@@ -5,10 +5,10 @@
         <el-form-item prop="templateType" label="生成模板">
           <el-select v-model="formData.templateType" @change="tplSelectChange">
             <el-option
-              v-for="dict in getDictOptions(DICT_TYPE.INFRA_CODEGEN_TEMPLATE_TYPE)"
-              :key="parseInt(dict.value)"
+              v-for="dict in getIntDictOptions(DICT_TYPE.INFRA_CODEGEN_TEMPLATE_TYPE)"
+              :key="dict.value"
               :label="dict.label"
-              :value="parseInt(dict.value)"
+              :value="dict.value"
             />
           </el-select>
         </el-form-item>
@@ -17,10 +17,10 @@
         <el-form-item prop="scene" label="生成场景">
           <el-select v-model="formData.scene">
             <el-option
-              v-for="dict in getDictOptions(DICT_TYPE.INFRA_CODEGEN_SCENE)"
-              :key="parseInt(dict.value)"
+              v-for="dict in getIntDictOptions(DICT_TYPE.INFRA_CODEGEN_SCENE)"
+              :key="dict.value"
               :label="dict.label"
-              :value="parseInt(dict.value)"
+              :value="dict.value"
             />
           </el-select>
         </el-form-item>
@@ -280,17 +280,16 @@
   </el-form>
 </template>
 <script setup lang="ts">
-import { CodegenTableVO } from '@/api/infra/codegen/types'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { handleTree } from '@/utils/tree'
+import * as CodegenApi from '@/api/infra/codegen'
 import * as MenuApi from '@/api/system/menu'
 import { PropType } from 'vue'
-import { getDictOptions, DICT_TYPE } from '@/utils/dict'
-import { handleTree } from '@/utils/tree'
 
 const message = useMessage() // 消息弹窗
-const emits = defineEmits(['update:basicInfo'])
 const props = defineProps({
   table: {
-    type: Object as PropType<Nullable<CodegenTableVO>>,
+    type: Object as PropType<Nullable<CodegenApi.CodegenTableVO>>,
     default: () => null
   }
 })
@@ -335,6 +334,7 @@ const menuTreeProps = {
 const subSelectChange = () => {
   formData.value.subTableFkName = ''
 }
+
 /** 选择生成模板触发 */
 const tplSelectChange = (value) => {
   if (value !== 1) {
@@ -361,18 +361,14 @@ watch(
     immediate: true
   }
 )
-watch(
-  () => formData.value,
-  (val) => {
-    emits('update:basicInfo', val)
-  }
-)
+
 onMounted(async () => {
   try {
     const resp = await MenuApi.getSimpleMenusList()
     menus.value = handleTree(resp)
   } catch {}
 })
+
 defineExpose({
   validate: async () => unref(formRef)?.validate()
 })

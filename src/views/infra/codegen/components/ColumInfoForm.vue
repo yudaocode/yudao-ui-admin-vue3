@@ -114,28 +114,24 @@
 </template>
 <script setup lang="ts">
 import { PropType } from 'vue'
-import { CodegenColumnVO } from '@/api/infra/codegen/types'
-import { DictTypeVO, listSimpleDictType } from '@/api/system/dict/dict.type'
+import * as CodegenApi from '@/api/infra/codegen'
+import * as DictDataApi from '@/api/system/dict/dict.type'
 
-const emits = defineEmits(['update:columns'])
 const props = defineProps({
   columns: {
-    type: Array as unknown as PropType<CodegenColumnVO[]>,
+    type: Array as unknown as PropType<CodegenApi.CodegenColumnVO[]>,
     default: () => null
   }
 })
 
-const formData = ref<CodegenColumnVO[]>([])
+const formData = ref<CodegenApi.CodegenColumnVO[]>([])
 const tableHeight = document.documentElement.scrollHeight - 350 + 'px'
 
 /** 查询字典下拉列表 */
-const dictOptions = ref<DictTypeVO[]>()
+const dictOptions = ref<DictDataApi.DictTypeVO[]>()
 const getDictOptions = async () => {
-  dictOptions.value = await listSimpleDictType()
+  dictOptions.value = await DictDataApi.getSimpleDictTypeList()
 }
-onMounted(async () => {
-  await getDictOptions()
-})
 
 watch(
   () => props.columns,
@@ -148,10 +144,8 @@ watch(
     immediate: true
   }
 )
-watch(
-  () => formData.value,
-  (val) => {
-    emits('update:columns', val)
-  }
-)
+
+onMounted(async () => {
+  await getDictOptions()
+})
 </script>
