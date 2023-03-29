@@ -135,16 +135,17 @@
   </content-wrap>
 
   <!-- 弹窗：导入表 -->
-  <ImportTable ref="importRef" @ok="getList" />
+  <ImportTable ref="importRef" success="getList" />
   <!-- 弹窗：预览代码 -->
-  <Preview ref="previewRef" />
+  <PreviewCode ref="previewRef" />
 </template>
 <script setup lang="ts" name="Codegen">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CodegenApi from '@/api/infra/codegen'
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
-import { ImportTable, Preview } from './components'
+import ImportTable from './ImportTable.vue'
+import PreviewCode from './PreviewCode.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由跳转
@@ -189,7 +190,7 @@ const resetQuery = () => {
 // 导入操作
 const importRef = ref()
 const openImportTable = () => {
-  importRef.value.show()
+  importRef.value.open()
 }
 
 /** 编辑操作 */
