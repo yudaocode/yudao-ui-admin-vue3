@@ -5,31 +5,7 @@
       <el-row :gutter="20">
         <!--部门数据-->
         <el-col :span="4" :xs="24">
-          <div class="head-container">
-            <el-input
-              v-model="deptName"
-              placeholder="请输入部门名称"
-              clearable
-              style="margin-bottom: 20px"
-            >
-              <template #prefix>
-                <Icon icon="ep:search" />
-              </template>
-            </el-input>
-          </div>
-          <div class="head-container">
-            <el-tree
-              :data="deptOptions"
-              :props="defaultProps"
-              :expand-on-click-node="false"
-              :filter-node-method="filterNode"
-              ref="treeRef"
-              node-key="id"
-              default-expand-all
-              highlight-current
-              @node-click="handleDeptNodeClick"
-            />
-          </div>
+          <UserDeptTree @node-click="handleDeptNodeClick" />
         </el-col>
         <!--用户数据-->
         <el-col :span="20" :xs="24">
@@ -66,10 +42,10 @@
                 style="width: 240px"
               >
                 <el-option
-                  v-for="dict in statusDictDatas"
-                  :key="parseInt(dict.value)"
+                  v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+                  :key="dict.value as number"
                   :label="dict.label"
-                  :value="parseInt(dict.value)"
+                  :value="dict.value as number"
                 />
               </el-select>
             </el-form-item>
@@ -244,51 +220,34 @@
       </el-row>
     </content-wrap>
     <!-- 添加或修改用户对话框 -->
-    <AddForm
-      ref="addEditFormRef"
-      v-model="showAddDialog"
-      :dept-options="deptOptions"
-      :post-options="postOptions"
-      :form-init-value="addFormInitValue"
-      @success="getList"
-    />
+    <UserForm ref="userFormRef" @success="getList" />
     <!-- 用户导入对话框 -->
-    <ImportForm v-model="importDialogVisible" @success="getList" />
+    <UserImportForm ref="userImportFormRef" @success="getList" />
     <!-- 分配角色 -->
-    <RoleForm
-      ref="roleFormRef"
-      v-model:show="roleDialogVisible"
-      :role-options="roleOptions"
-      :form-init-value="userRole"
-      @success="getList"
-    />
+    <UserAssignRoleForm ref="userAssignRoleFormRef" @success="getList" />
   </div>
 </template>
 
 <script setup lang="ts" name="User">
-import type { ElTree } from 'element-plus'
-import { handleTree, defaultProps } from '@/utils/tree'
-// 原vue3版本api方法都是Api结尾觉得见名知义，个人觉得这个可以形成规范
-// TODO 使用 DeptApi 这种形式哈
-import { getSimpleDeptList as getSimpleDeptListApi } from '@/api/system/dept'
-import { getSimplePostList as getSimplePostListApi, PostVO } from '@/api/system/post'
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import download from '@/utils/download'
+import { parseTime } from '@/utils/formatTime'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
+
 import {
   deleteUserApi,
   exportUserApi,
   resetUserPwdApi,
   updateUserStatusApi,
+  getUserPageApi,
   UserVO
 } from '@/api/system/user'
-import { parseTime } from './utils' // TODO 可以使用 formatTime 里的方法
-import AddForm from './AddForm.vue' // TODO 改成 UserForm
-import ImportForm from './ImportForm.vue' // TODO 改成 UserImportForm
-import RoleForm from './RoleForm.vue' // TODO 改成 UserAssignRoleForm
-import { getUserApi, getUserPageApi } from '@/api/system/user'
-import { getSimpleRoleList as getSimpleRoleListApi } from '@/api/system/role'
-import { listUserRolesApi } from '@/api/system/permission'
-import { CommonStatusEnum } from '@/utils/constants'
-import download from '@/utils/download'
+
+import UserForm from './components/UserForm.vue'
+import UserImportForm from './components/UserImportForm.vue'
+import UserAssignRoleForm from './components/UserAssignRoleForm.vue'
+import UserDeptTree from './components/UserDeptTree.vue'
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -302,42 +261,12 @@ const queryParams = reactive({
   createTime: []
 })
 const showSearch = ref(true)
-const showAddDialog = ref(false)
 
-// 数据字典- // TODO 可以直接 vue 那 getIntDictOptions，这样一方面少个变量，也可以 getIntDictOptions
-const statusDictDatas = getDictOptions(DICT_TYPE.COMMON_STATUS)
-
-// ========== 创建部门树结构 ==========
-// TODO 要不把部门树拆成一个左侧的组件，然后点击后触发 handleDeptNodeClick
-const deptName = ref('')
-watch(
-  () => deptName.value,
-  (val) => {
-    treeRef.value?.filter(val)
-  }
-)
-const deptOptions = ref<Tree[]>([]) // 树形结构
-const treeRef = ref<InstanceType<typeof ElTree>>()
-const getTree = async () => {
-  const res = await getSimpleDeptListApi()
-  deptOptions.value = []
-  deptOptions.value.push(...handleTree(res))
-}
-const filterNode = (value: string, data: Tree) => {
-  if (!value) return true
-  return data.name.includes(value)
-}
 const handleDeptNodeClick = async (row: { [key: string]: any }) => {
   queryParams.deptId = row.id
   getList()
 }
 
-// 获取岗位列表
-const postOptions = ref<PostVO[]>([]) //岗位列表
-const getPostOptions = async () => {
-  const res = await getSimplePostListApi()
-  postOptions.value.push(...res)
-}
 // 用户列表
 const userList = ref<UserVO[]>([])
 const loading = ref(false)
@@ -374,37 +303,30 @@ const resetQuery = () => {
 }
 
 // 添加或编辑
-const addEditFormRef = ref()
+const userFormRef = ref()
 // 添加用户
-// TODO 可以参考别的模块哈，openForm；然后 tree 和 position 可以里面在加载下，让组件自己维护自己哈。
 const handleAdd = () => {
-  addEditFormRef?.value.resetForm()
-  // 获得下拉数据
-  getTree()
-  // 打开表单，并设置初始化
-  showAddDialog.value = true
+  userFormRef.value?.openForm()
 }
 
 // 用户导入
+const userImportFormRef = ref()
 const handleImport = () => {
-  importDialogVisible.value = true
+  userImportFormRef.value?.openForm()
 }
 
 // 用户导出
-// TODO 改成 await 的风格；
 const exportLoading = ref(false)
 const handleExport = () => {
   message
     .confirm('是否确认导出所有用户数据项?')
-    .then(() => {
+    .then(async () => {
       // 处理查询参数
       let params = { ...queryParams }
       params.pageNo = 1
       params.pageSize = 99999
       exportLoading.value = true
-      return exportUserApi(params)
-    })
-    .then((response) => {
+      const response = await exportUserApi(params)
       download.excel(response, '用户数据.xls')
     })
     .catch(() => {})
@@ -435,17 +357,14 @@ const handleCommand = (command: string, index: number, row: UserVO) => {
 }
 
 // 用户状态修改
-// TODO 改成 await 的风格；
 const handleStatusChange = (row: UserVO) => {
   let text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
   message
     .confirm('确认要"' + text + '""' + row.username + '"用户吗?', t('common.reminder'))
-    .then(function () {
+    .then(async () => {
       row.status =
         row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.ENABLE : CommonStatusEnum.DISABLE
-      return updateUserStatusApi(row.id, row.status)
-    })
-    .then(() => {
+      await updateUserStatusApi(row.id, row.status)
       message.success(text + '成功')
       // 刷新列表
       getList()
@@ -457,126 +376,47 @@ const handleStatusChange = (row: UserVO) => {
 }
 
 // 具体数据单行操作
-const addFormInitValue = ref<Recordable>({})
 /** 修改按钮操作 */
 const handleUpdate = (row: UserVO) => {
-  addEditFormRef.value?.resetForm()
-  getTree()
-  const id = row.id
-  getUserApi(id).then((response) => {
-    addFormInitValue.value = response
-    showAddDialog.value = true
-  })
+  userFormRef.value?.openForm(row)
 }
 
 // 删除用户
-// TODO 改成 await 的风格；
 const handleDelete = (row: UserVO) => {
   const ids = row.id
   message
     .confirm('是否确认删除用户编号为"' + ids + '"的数据项?')
-    .then(() => {
-      return deleteUserApi(ids)
-    })
-    .then(() => {
-      getList()
+    .then(async () => {
+      await deleteUserApi(ids)
       message.success('删除成功')
+      getList()
     })
-    .catch(() => {})
+    .catch((e) => {
+      console.error(e)
+    })
 }
 
 // 重置密码
-// TODO 改成 await 的风格；
 const handleResetPwd = (row: UserVO) => {
-  message.prompt('请输入"' + row.username + '"的新密码', t('common.reminder')).then(({ value }) => {
-    resetUserPwdApi(row.id, value)
-      .then(() => {
-        message.success('修改成功，新密码是：' + value)
-      })
-      .catch((e) => {
-        console.error(e)
-      })
-  })
+  message
+    .prompt('请输入"' + row.username + '"的新密码', t('common.reminder'))
+    .then(async ({ value }) => {
+      await resetUserPwdApi(row.id, value)
+      message.success('修改成功，新密码是：' + value)
+    })
+    .catch((e) => {
+      console.error(e)
+    })
 }
 
 // 分配角色
-const roleDialogVisible = ref(false)
-const roleOptions = ref()
-const userRole = reactive({
-  id: 0,
-  username: '',
-  nickname: '',
-  roleIds: []
-})
-const handleRole = async (row: UserVO) => {
-  addEditFormRef.value?.resetForm()
-  userRole.id = row.id
-  userRole.username = row.username
-  userRole.nickname = row.nickname
-
-  // 获得角色列表
-  const roleOpt = await getSimpleRoleListApi()
-  roleOptions.value = [...roleOpt]
-
-  // 获得角色拥有的菜单集合
-  const roles = await listUserRolesApi(row.id)
-  userRole.roleIds = roles
-
-  roleDialogVisible.value = true
+const userAssignRoleFormRef = ref()
+const handleRole = (row: UserVO) => {
+  userAssignRoleFormRef.value?.openForm(row)
 }
-
-/* 用户导入 */
-const importDialogVisible = ref(false)
 
 // ========== 初始化 ==========
 onMounted(async () => {
   getList()
-  await getPostOptions()
-  await getTree()
 })
-
-const parseTime = (time) => {
-  if (!time) {
-    return null
-  }
-  const format = '{y}-{m}-{d} {h}:{i}:{s}'
-  let date
-  if (typeof time === 'object') {
-    date = time
-  } else {
-    if (typeof time === 'string' && /^[0-9]+$/.test(time)) {
-      time = parseInt(time)
-    } else if (typeof time === 'string') {
-      time = time
-        .replace(new RegExp(/-/gm), '/')
-        .replace('T', ' ')
-        .replace(new RegExp(/\.[\d]{3}/gm), '')
-    }
-    if (typeof time === 'number' && time.toString().length === 10) {
-      time = time * 1000
-    }
-    date = new Date(time)
-  }
-  const formatObj = {
-    y: date.getFullYear(),
-    m: date.getMonth() + 1,
-    d: date.getDate(),
-    h: date.getHours(),
-    i: date.getMinutes(),
-    s: date.getSeconds(),
-    a: date.getDay()
-  }
-  const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
-    let value = formatObj[key]
-    // Note: getDay() returns 0 on Sunday
-    if (key === 'a') {
-      return ['日', '一', '二', '三', '四', '五', '六'][value]
-    }
-    if (result.length > 0 && value < 10) {
-      value = '0' + value
-    }
-    return value || 0
-  })
-  return time_str
-}
 </script>
