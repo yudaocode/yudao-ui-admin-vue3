@@ -298,8 +298,7 @@ export default {
     typeUpdate: '字典类型编辑',
     dataCreate: '字典数据新增',
     dataUpdate: '字典数据编辑',
-    fileUpload: '上传文件',
-    back: '返回'
+    fileUpload: '上传文件'
   },
   dialog: {
     dialog: '弹窗',

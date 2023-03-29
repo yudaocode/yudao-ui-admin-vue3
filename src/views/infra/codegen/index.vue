@@ -1,13 +1,20 @@
 <template>
   <!-- 搜索 -->
   <content-wrap>
-    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="表名称" prop="tableName">
         <el-input
           v-model="queryParams.tableName"
           placeholder="请输入表名称"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="表描述" prop="tableComment">
@@ -16,23 +23,25 @@
           placeholder="请输入表描述"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          value-format="yyyy-MM-dd HH:mm:ss"
+          value-format="YYYY-MM-dd HH:mm:ss"
           type="daterange"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" />搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" />重置</el-button>
         <el-button type="primary" v-hasPermi="['infra:codegen:create']" @click="openImportTable()">
-          <Icon icon="ep:zoom-in" class="mr-5px" />{{ t('action.import') }}
+          <Icon icon="ep:zoom-in" class="mr-5px" /> 导入
         </el-button>
       </el-form-item>
     </el-form>
@@ -41,14 +50,20 @@
   <!-- 列表 -->
   <content-wrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="数据源" align="center" :formatter="dataSourceConfigNameFormat" />
+      <el-table-column label="数据源" align="center">
+        <template #default="scope">
+          {{
+            dataSourceConfigList.find((config) => config.id === scope.row.dataSourceConfigId)?.name
+          }}
+        </template>
+      </el-table-column>
       <el-table-column label="表名称" align="center" prop="tableName" width="200" />
       <el-table-column
         label="表描述"
         align="center"
         prop="tableComment"
         :show-overflow-tooltip="true"
-        width="120"
+        width="200"
       />
       <el-table-column label="实体" align="center" prop="className" width="200" />
       <el-table-column
@@ -65,53 +80,53 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column
-        label="操作"
-        align="center"
-        width="300px"
-        class-name="small-padding fixed-width"
-      >
+      <el-table-column label="操作" align="center" width="300px" fixed="right">
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="handlePreview(scope.row)"
             v-hasPermi="['infra:codegen:preview']"
-            >预览</el-button
           >
+            预览
+          </el-button>
           <el-button
             link
             type="primary"
             @click="handleUpdate(scope.row.id)"
             v-hasPermi="['infra:codegen:update']"
-            >编辑</el-button
           >
+            编辑
+          </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['infra:codegen:delete']"
-            >删除</el-button
           >
+            删除
+          </el-button>
           <el-button
             link
             type="primary"
-            @click="handleSynchDb(scope.row)"
+            @click="handleSyncDB(scope.row)"
             v-hasPermi="['infra:codegen:update']"
-            >同步</el-button
           >
+            同步
+          </el-button>
           <el-button
             link
             type="primary"
             @click="handleGenTable(scope.row)"
             v-hasPermi="['infra:codegen:download']"
-            >生成代码</el-button
           >
+            生成代码
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
-    <pagination
-      v-show="total > 0"
+    <!-- 分页 -->
+    <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
@@ -120,20 +135,16 @@
   </content-wrap>
 
   <!-- 弹窗：导入表 -->
-  <ImportTable ref="importRef" @ok="reload()" />
+  <ImportTable ref="importRef" @ok="getList" />
   <!-- 弹窗：预览代码 -->
   <Preview ref="previewRef" />
 </template>
 <script setup lang="ts" name="Codegen">
+import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CodegenApi from '@/api/infra/codegen'
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
-import { CodegenTableVO } from '@/api/infra/codegen/types'
 import { ImportTable, Preview } from './components'
-import ContentWrap from '@/components/ContentWrap/src/ContentWrap.vue'
-import { DataSourceConfigVO } from '@/api/infra/dataSourceConfig'
-import { dateFormatter } from '@/utils/formatTime'
-
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由跳转
@@ -149,8 +160,7 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-
-const dataSourceConfigs = ref<DataSourceConfigVO[]>([]) // 数据源列表
+const dataSourceConfigList = ref<DataSourceConfigApi.DataSourceConfigVO[]>([]) // 数据源列表
 
 /** 查询参数列表 */
 const getList = async () => {
@@ -176,35 +186,21 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 初始化 **/
-onMounted(async () => {
-  getList()
-  dataSourceConfigs.value = await DataSourceConfigApi.getDataSourceConfigList()
-})
-
-// 数据源配置的名字
-const dataSourceConfigNameFormat = (row) => {
-  for (const config of dataSourceConfigs.value) {
-    if (row.dataSourceConfigId === config.id) {
-      return config.name
-    }
-  }
-  return '未知【' + row.leaderUserId + '】'
-}
-
 // 导入操作
 const importRef = ref()
 const openImportTable = () => {
   importRef.value.show()
 }
-// 预览操作
-const previewRef = ref()
-const handlePreview = (row: CodegenTableVO) => {
-  previewRef.value.openModal(row.id)
+
+/** 编辑操作 */
+const handleUpdate = (id: number) => {
+  push('/codegen/edit?id=' + id)
 }
-// 编辑操作
-const handleUpdate = (rowId: number) => {
-  push('/codegen/edit?id=' + rowId)
+
+/** 预览操作 */
+const previewRef = ref()
+const handlePreview = (row: CodegenApi.CodegenTableVO) => {
+  previewRef.value.openModal(row.id)
 }
 
 /** 删除按钮操作 */
@@ -219,8 +215,9 @@ const handleDelete = async (id: number) => {
     await getList()
   } catch {}
 }
-// 同步操作
-const handleSynchDb = async (row: CodegenTableVO) => {
+
+/** 同步操作  */
+const handleSyncDB = async (row: CodegenApi.CodegenTableVO) => {
   // 基于 DB 同步
   const tableName = row.tableName
   try {
@@ -230,9 +227,16 @@ const handleSynchDb = async (row: CodegenTableVO) => {
   } catch {}
 }
 
-// 生成代码操作
-const handleGenTable = async (row: CodegenTableVO) => {
+/** 生成代码操作 */
+const handleGenTable = async (row: CodegenApi.CodegenTableVO) => {
   const res = await CodegenApi.downloadCodegen(row.id)
   download.zip(res, 'codegen-' + row.className + '.zip')
 }
+
+/** 初始化 **/
+onMounted(async () => {
+  await getList()
+  // 加载数据源列表
+  dataSourceConfigList.value = await DataSourceConfigApi.getDataSourceConfigList()
+})
 </script>

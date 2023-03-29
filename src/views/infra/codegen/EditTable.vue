@@ -16,7 +16,7 @@
         <el-button type="primary" @click="submitForm" :loading="submitLoading">
           {{ t('action.save') }}
         </el-button>
-        <el-button @click="close">{{ t('action.back') }}</el-button>
+        <el-button @click="close">返回</el-button>
       </el-form-item>
     </el-form>
   </content-wrap>
