@@ -69,7 +69,6 @@ import * as TenantPackageApi from '@/api/system/tenantPackage'
 import * as MenuApi from '@/api/system/menu'
 import { ElTree } from 'element-plus'
 import { handleTree } from '@/utils/tree'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -92,7 +91,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const menuOptions = ref<any[]>([]) // 树形结构数据
 const menuExpand = ref(false) // 展开/折叠
-const treeRef = ref<InstanceType<typeof ElTree>>() // 树组件Ref
+const treeRef = ref<ElTree>() // 树组件 Ref
 const treeNodeAll = ref(false) // 全选/全不选
 
 /** 打开弹窗 */
@@ -133,8 +132,8 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as TenantPackageApi.TenantPackageVO
     data.menuIds = [
-      ...(treeRef.value!.getCheckedKeys(false) as unknown as Array<number>), // 获得当前选中节点
-      ...(treeRef.value!.getHalfCheckedKeys() as unknown as Array<number>) // 获得半选中的父节点
+      ...(treeRef.value.getCheckedKeys(false) as unknown as Array<number>), // 获得当前选中节点
+      ...(treeRef.value.getHalfCheckedKeys() as unknown as Array<number>) // 获得半选中的父节点
     ]
     if (formType.value === 'create') {
       await TenantPackageApi.createTenantPackage(data)
@@ -168,17 +167,19 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 
-// 全选/全不选
+/** 全选/全不选 */
 const handleCheckedTreeNodeAll = () => {
-  treeRef.value!.setCheckedNodes(treeNodeAll.value ? menuOptions.value : [])
+  treeRef.value.setCheckedNodes(treeNodeAll.value ? menuOptions.value : [])
 }
 
-// 全部（展开/折叠）TODO:for循环全部展开和折叠树组件数据
+/** 展开/折叠全部 */
 const handleCheckedTreeExpand = () => {
   const nodes = treeRef.value?.store.nodesMap
   for (let node in nodes) {
-    if (nodes[node].expanded === menuExpand.value) continue
-    nodes[node].expanded = !nodes[node].expanded
+    if (nodes[node].expanded === menuExpand.value) {
+      continue
+    }
+    nodes[node].expanded = menuExpand.value
   }
 }
 </script>
