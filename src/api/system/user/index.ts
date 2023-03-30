@@ -17,23 +17,8 @@ export interface UserVO {
   createTime: Date
 }
 
-export interface UserPageReqVO extends PageParam {
-  deptId?: number
-  username?: string
-  mobile?: string
-  status?: number
-  createTime?: Date[]
-}
-
-export interface UserExportReqVO {
-  code?: string
-  name?: string
-  status?: number
-  createTime?: Date[]
-}
-
 // 查询用户管理列表
-export const getUserPageApi = (params: UserPageReqVO) => {
+export const getUserPage = (params: PageParam) => {
   return request.get({ url: '/system/user/page', params })
 }
 
@@ -53,12 +38,12 @@ export const updateUserApi = (data: UserVO | Recordable) => {
 }
 
 // 删除用户
-export const deleteUserApi = (id: number) => {
+export const deleteUser = (id: number) => {
   return request.delete({ url: '/system/user/delete?id=' + id })
 }
 
 // 导出用户
-export const exportUserApi = (params: UserExportReqVO) => {
+export const exportUser = (params) => {
   return request.download({ url: '/system/user/export', params })
 }
 

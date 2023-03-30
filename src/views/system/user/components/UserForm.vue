@@ -56,7 +56,7 @@
             <el-select v-model="formData.sex" placeholder="请选择">
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
-                :key="dict.value as number"
+                :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
               />
@@ -70,7 +70,7 @@
                 v-for="item in postOptions"
                 :key="item.id"
                 :label="item.name"
-                :value="item.id as number"
+                :value="item.id"
               />
             </el-select>
           </el-form-item>
@@ -102,7 +102,6 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { ElForm, FormItemRule } from 'element-plus'
 import { Arrayable } from 'element-plus/es/utils'
-import { UserVO } from '@/api/login/types'
 
 type Form = InstanceType<typeof ElForm>
 
@@ -210,7 +209,8 @@ const cancel = () => {
 }
 
 /* 打开弹框 */
-const openForm = (row: undefined | UserVO) => {
+const open = (type: string, id?: number) => {
+  console.log(type, id)
   resetForm()
   getTree() // 部门树
   if (row && row.id) {
@@ -232,6 +232,6 @@ onMounted(async () => {
 
 defineExpose({
   resetForm,
-  openForm
+  open
 })
 </script>
