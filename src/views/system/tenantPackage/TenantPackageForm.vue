@@ -69,6 +69,7 @@ import * as TenantPackageApi from '@/api/system/tenantPackage'
 import * as MenuApi from '@/api/system/menu'
 import { ElTree } from 'element-plus'
 import { handleTree } from '@/utils/tree'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -176,6 +177,7 @@ const handleCheckedTreeNodeAll = () => {
 const handleCheckedTreeExpand = () => {
   const nodes = treeRef.value?.store.nodesMap
   for (let node in nodes) {
+    if (nodes[node].expanded === menuExpand.value) continue
     nodes[node].expanded = !nodes[node].expanded
   }
 }
