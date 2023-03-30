@@ -33,7 +33,6 @@
           <el-tree
             ref="treeRef"
             node-key="id"
-            :check-strictly="!menuCheckStrictly"
             show-checkbox
             :props="defaultProps"
             :data="menuOptions"
@@ -91,7 +90,6 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const menuOptions = ref<any[]>([]) // 树形结构数据
-const menuCheckStrictly = ref(false) // 在显示复选框的情况下，是否严格的遵循父子不互相关联的做法，默认为 true
 const menuExpand = ref(false) // 展开/折叠
 const treeRef = ref<InstanceType<typeof ElTree>>() // 树组件Ref
 const treeNodeAll = ref(false) // 全选/全不选
@@ -102,6 +100,8 @@ const open = async (type: string, id?: number) => {
   modelTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
+  // 加载 Menu 列表。注意，必须放在前面，不然下面 setChecked 没数据节点
+  menuOptions.value = handleTree(await MenuApi.getSimpleMenusList())
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -110,15 +110,13 @@ const open = async (type: string, id?: number) => {
       // 设置选中
       formData.value = res
       // 设置选中
-      res.menuIds?.forEach((item: any) => {
-        treeRef.value?.setChecked(item, true, false)
+      res.menuIds.forEach((menuId: number) => {
+        treeRef.value.setChecked(menuId, true, false)
       })
     } finally {
       formLoading.value = false
     }
   }
-  // 加载Menu列表
-  menuOptions.value = handleTree(await MenuApi.getSimpleMenusList())
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -134,8 +132,8 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as TenantPackageApi.TenantPackageVO
     data.menuIds = [
-      ...(treeRef.value!.getCheckedKeys(false) as unknown as Array<number>),
-      ...(treeRef.value!.getHalfCheckedKeys() as unknown as Array<number>)
+      ...(treeRef.value!.getCheckedKeys(false) as unknown as Array<number>), // 获得当前选中节点
+      ...(treeRef.value!.getHalfCheckedKeys() as unknown as Array<number>) // 获得半选中的父节点
     ]
     if (formType.value === 'create') {
       await TenantPackageApi.createTenantPackage(data)
@@ -154,6 +152,10 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
+  // 重置选项
+  treeNodeAll.value = false
+  menuExpand.value = false
+  // 重置表单
   formData.value = {
     id: null,
     name: null,
@@ -162,10 +164,6 @@ const resetForm = () => {
     status: CommonStatusEnum.ENABLE
   }
   treeRef.value?.setCheckedNodes([])
-  treeNodeAll.value = false
-  menuExpand.value = false
-  // 设置为非严格，继续使用半选中
-  menuCheckStrictly.value = false
   formRef.value?.resetFields()
 }
 
@@ -173,6 +171,7 @@ const resetForm = () => {
 const handleCheckedTreeNodeAll = () => {
   treeRef.value!.setCheckedNodes(treeNodeAll.value ? menuOptions.value : [])
 }
+
 // 全部（展开/折叠）TODO:for循环全部展开和折叠树组件数据
 const handleCheckedTreeExpand = () => {
   const nodes = treeRef.value?.store.nodesMap
