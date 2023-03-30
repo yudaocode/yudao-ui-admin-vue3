@@ -91,7 +91,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const menuOptions = ref<any[]>([]) // 树形结构数据
 const menuExpand = ref(false) // 展开/折叠
-const treeRef = ref<ElTree>() // 树组件 Ref
+const treeRef = ref<InstanceType<typeof ElTree>>() // 树组件 Ref
 const treeNodeAll = ref(false) // 全选/全不选
 
 /** 打开弹窗 */
