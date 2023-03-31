@@ -53,7 +53,7 @@ export const importUserTemplateApi = () => {
 }
 
 // 用户密码重置
-export const resetUserPwdApi = (id: number, password: string) => {
+export const resetUserPwd = (id: number, password: string) => {
   const data = {
     id,
     password
@@ -62,7 +62,7 @@ export const resetUserPwdApi = (id: number, password: string) => {
 }
 
 // 用户状态修改
-export const updateUserStatusApi = (id: number, status: number) => {
+export const updateUserStatus = (id: number, status: number) => {
   const data = {
     id,
     status

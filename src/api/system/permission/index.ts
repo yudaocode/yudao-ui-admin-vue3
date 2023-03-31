@@ -32,11 +32,11 @@ export const assignRoleDataScopeApi = async (data: PermissionAssignRoleDataScope
 }
 
 // 查询用户拥有的角色数组
-export const listUserRolesApi = async (userId: number) => {
+export const getUserRoleList = async (userId: number) => {
   return await request.get({ url: '/system/permission/list-user-roles?userId=' + userId })
 }
 
 // 赋予用户角色
-export const assignUserRoleApi = async (data: PermissionAssignUserRoleReqVO) => {
+export const assignUserRole = async (data: PermissionAssignUserRoleReqVO) => {
   return await request.post({ url: '/system/permission/assign-user-role', data })
 }

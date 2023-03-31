@@ -193,13 +193,10 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { CommonStatusEnum } from '@/utils/constants'
-
-import { resetUserPwdApi, updateUserStatusApi, UserVO } from '@/api/system/user'
 import * as UserApi from '@/api/system/user'
-
 import UserForm from './components/UserForm.vue'
 import UserImportForm from './components/UserImportForm.vue'
-import UserAssignRoleForm from './components/UserAssignRoleForm.vue'
+import UserAssignRoleForm from './UserAssignRoleForm.vue'
 import DeptTree from './DeptTree.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -260,54 +257,21 @@ const handleImport = () => {
   importFormRef.value?.openForm()
 }
 
-// 操作分发
-const handleCommand = (command: string, index: number, row: UserApi.UserVO) => {
-  console.log(index)
-  switch (command) {
-    case 'handleDelete':
-      handleDelete(row.id)
-      break
-    case 'handleResetPwd':
-      handleResetPwd(row)
-      break
-    case 'handleRole':
-      handleRole(row)
-      break
-    default:
-      break
-  }
-}
-
-// 用户状态修改
-const handleStatusChange = (row: UserVO) => {
-  let text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
-  message
-    .confirm('确认要"' + text + '""' + row.username + '"用户吗?', t('common.reminder'))
-    .then(async () => {
-      row.status =
-        row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.ENABLE : CommonStatusEnum.DISABLE
-      await updateUserStatusApi(row.id, row.status)
-      message.success(text + '成功')
-      // 刷新列表
-      getList()
-    })
-    .catch(() => {
-      row.status =
-        row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
-    })
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
+/** 修改用户状态 */
+const handleStatusChange = async (row: UserApi.UserVO) => {
   try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await UserApi.deleteUser(id)
-    message.success(t('common.delSuccess'))
+    // 修改状态的二次确认
+    const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
+    await message.confirm('确认要"' + text + '""' + row.username + '"用户吗?')
+    // 发起修改状态
+    await UserApi.updateUserStatus(row.id, row.status)
     // 刷新列表
     await getList()
-  } catch {}
+  } catch {
+    // 取消后，进行恢复按钮
+    row.status =
+      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
+  }
 }
 
 /** 导出按钮操作 */
@@ -326,23 +290,56 @@ const handleExport = async () => {
   }
 }
 
-// 重置密码
-const handleResetPwd = (row: UserVO) => {
-  message
-    .prompt('请输入"' + row.username + '"的新密码', t('common.reminder'))
-    .then(async ({ value }) => {
-      await resetUserPwdApi(row.id, value)
-      message.success('修改成功，新密码是：' + value)
-    })
-    .catch((e) => {
-      console.error(e)
-    })
+/** 操作分发 */
+const handleCommand = (command: string, index: number, row: UserApi.UserVO) => {
+  console.log(index)
+  switch (command) {
+    case 'handleDelete':
+      handleDelete(row.id)
+      break
+    case 'handleResetPwd':
+      handleResetPwd(row)
+      break
+    case 'handleRole':
+      handleRole(row)
+      break
+    default:
+      break
+  }
 }
 
-// 分配角色
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await UserApi.deleteUser(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 重置密码 */
+const handleResetPwd = async (row: UserApi.UserVO) => {
+  try {
+    // 重置的二次确认
+    const result = await message.prompt(
+      '请输入"' + row.username + '"的新密码',
+      t('common.reminder')
+    )
+    const password = result.value
+    // 发起重置
+    await UserApi.resetUserPwd(row.id, password)
+    message.success('修改成功，新密码是：' + password)
+  } catch {}
+}
+
+/** 分配角色 */
 const assignRoleFormRef = ref()
-const handleRole = (row: UserVO) => {
-  assignRoleFormRef.value?.openForm(row)
+const handleRole = (row: UserApi.UserVO) => {
+  assignRoleFormRef.value.open(row)
 }
 
 /** 初始化 */
