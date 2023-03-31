@@ -8,7 +8,7 @@
         :data="formData"
         name="bpmnFile"
         v-model:file-list="fileList"
-        :drag="true"
+        drag
         :auto-upload="false"
         accept=".bpmn, .xml"
         :limit="1"
@@ -77,7 +77,7 @@ const open = async () => {
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** 重置表单 */
+/** 提交表单 */
 const submitForm = async () => {
   // 校验表单
   if (!formRef) return
@@ -98,7 +98,7 @@ const submitForm = async () => {
 
 /** 文件上传成功 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-const submitFormSuccess = async (response: any): Promise<void> => {
+const submitFormSuccess = async (response: any) => {
   if (response.code !== 0) {
     message.error(response.msg)
     formLoading.value = false

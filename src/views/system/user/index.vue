@@ -194,7 +194,7 @@ import download from '@/utils/download'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as UserApi from '@/api/system/user'
 import UserForm from './UserForm.vue'
-import UserImportForm from './components/UserImportForm.vue'
+import UserImportForm from './UserImportForm.vue'
 import UserAssignRoleForm from './UserAssignRoleForm.vue'
 import DeptTree from './DeptTree.vue'
 const message = useMessage() // 消息弹窗
@@ -250,10 +250,10 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-// 用户导入
+/** 用户导入 */
 const importFormRef = ref()
 const handleImport = () => {
-  importFormRef.value?.openForm()
+  importFormRef.value.open()
 }
 
 /** 修改用户状态 */
