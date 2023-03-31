@@ -1,7 +1,12 @@
 <template>
-  <!-- 添加或修改参数配置对话框 -->
-  <Dialog :title="title" :modelValue="showDialog" width="600px" append-to-body @close="closeDialog">
-    <el-form ref="formRef" :model="formData" :rules="rules" label-width="80px">
+  <Dialog :title="modelTitle" v-model="modelVisible">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="80px"
+      v-loading="formLoading"
+    >
       <el-row>
         <el-col :span="12">
           <el-form-item label="用户昵称" prop="nickname">
@@ -13,7 +18,7 @@
             <el-tree-select
               node-key="id"
               v-model="formData.deptId"
-              :data="deptOptions"
+              :data="deptList"
               :props="defaultProps"
               check-strictly
               placeholder="请选择归属部门"
@@ -67,7 +72,7 @@
           <el-form-item label="岗位">
             <el-select v-model="formData.postIds" multiple placeholder="请选择">
               <el-option
-                v-for="item in postOptions"
+                v-for="item in postList"
                 :key="item.id"
                 :label="item.name"
                 :value="item.id"
@@ -85,52 +90,26 @@
       </el-row>
     </el-form>
     <template #footer>
-      <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
-      </div>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="modelVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
 <script lang="ts" setup>
-import { PostVO } from '@/api/system/post'
-import * as PostApi from '@/api/system/post'
-import { createUserApi, getUserApi, updateUserApi } from '@/api/system/user'
-import * as DeptApi from '@/api/system/dept'
-
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
 import { defaultProps, handleTree } from '@/utils/tree'
-import { ElForm, FormItemRule } from 'element-plus'
-import { Arrayable } from 'element-plus/es/utils'
-
-type Form = InstanceType<typeof ElForm>
-
-const emits = defineEmits(['success'])
-
+import * as PostApi from '@/api/system/post'
+import * as DeptApi from '@/api/system/dept'
+import * as UserApi from '@/api/system/user'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const showDialog = ref(false)
-// 弹出层标题
-const title = computed(() => {
-  return formData.value?.id ? '修改用户' : '添加用户'
-})
-
-const deptOptions = ref<Tree[]>([]) // 树形结构
-const getTree = async () => {
-  const res = await DeptApi.getSimpleDeptList()
-  deptOptions.value = []
-  deptOptions.value.push(...handleTree(res))
-}
-// 获取岗位列表
-const postOptions = ref<PostVO[]>([]) //岗位列表
-const getPostOptions = async () => {
-  const res = (await PostApi.getSimplePostList()) as PostVO[]
-  postOptions.value.push(...res)
-}
-
-// 表单初始化参数
-const initParams = {
+const modelVisible = ref(false) // 弹窗的是否展示
+const modelTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formData = ref({
   nickname: '',
   deptId: '',
   mobile: '',
@@ -138,15 +117,13 @@ const initParams = {
   id: undefined,
   username: '',
   password: '',
-  sex: 1,
+  sex: undefined,
   postIds: [],
   remark: '',
-  status: '0',
+  status: CommonStatusEnum.ENABLE,
   roleIds: []
-}
-
-// 校验规则
-const rules = {
+})
+const formRules = reactive({
   username: [{ required: true, message: '用户名称不能为空', trigger: 'blur' }],
   nickname: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }],
   password: [{ required: true, message: '用户密码不能为空', trigger: 'blur' }],
@@ -164,74 +141,75 @@ const rules = {
       trigger: 'blur'
     }
   ]
-} as Partial<Record<string, Arrayable<FormItemRule>>>
-const formRef = ref<Form | null>()
-const formData = ref<Recordable>({ ...initParams })
+})
+const formRef = ref() // 表单 Ref
+const deptList = ref<Tree[]>([]) // 树形结构
+const postList = ref([]) // 岗位列表
 
-const resetForm = () => {
-  let form = formRef?.value
-  if (!form) return
-  formData.value = { ...initParams }
-  form && (form as Form).resetFields()
-}
-const closeDialog = () => {
-  showDialog.value = false
-}
-// 操作成功
-const operateOk = () => {
-  emits('success', true)
-  closeDialog()
-}
-const submitForm = () => {
-  let form = formRef.value as Form
-  form.validate(async (valid) => {
-    let data = formData.value
-    if (valid) {
-      try {
-        if (data?.id !== undefined) {
-          await updateUserApi(data)
-          message.success(t('common.updateSuccess'))
-          operateOk()
-        } else {
-          await createUserApi(data)
-          message.success(t('common.createSuccess'))
-          operateOk()
-        }
-      } catch (err) {
-        console.error(err)
-      }
-    }
-  })
-}
-/* 取消 */
-const cancel = () => {
-  closeDialog()
-}
-
-/* 打开弹框 */
-const open = (type: string, id?: number) => {
-  console.log(type, id)
+/** 打开弹窗 */
+const open = async (type: string, id?: number) => {
+  modelVisible.value = true
+  modelTitle.value = t('action.' + type)
+  formType.value = type
   resetForm()
-  getTree() // 部门树
-  if (row && row.id) {
-    const id = row.id
-    getUserApi(id).then((response) => {
-      formData.value = response
-    })
-  } else {
-    formData.value = { ...initParams }
+  // 修改时，设置数据
+  if (id) {
+    formLoading.value = true
+    try {
+      formData.value = await UserApi.getUser(id)
+    } finally {
+      formLoading.value = false
+    }
   }
+  // 加载部门树
+  deptList.value = handleTree(await DeptApi.getSimpleDeptList())
+  // 加载岗位列表
+  postList.value = await PostApi.getSimplePostList()
+}
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-  showDialog.value = true
+/** 提交表单 */
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+const submitForm = async () => {
+  // 校验表单
+  if (!formRef) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  // 提交请求
+  formLoading.value = true
+  try {
+    const data = formData.value as unknown as UserApi.UserVO
+    if (formType.value === 'create') {
+      await UserApi.createUser(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await UserApi.updateUser(data)
+      message.success(t('common.updateSuccess'))
+    }
+    modelVisible.value = false
+    // 发送操作成功的事件
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
 }
 
-// ========== 初始化 ==========
-onMounted(async () => {
-  await getPostOptions()
-})
-
-defineExpose({
-  resetForm,
-  open
-})
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    nickname: '',
+    deptId: '',
+    mobile: '',
+    email: '',
+    id: undefined,
+    username: '',
+    password: '',
+    sex: undefined,
+    postIds: [],
+    remark: '',
+    status: CommonStatusEnum.ENABLE,
+    roleIds: []
+  }
+  formRef.value?.resetFields()
+}
 </script>

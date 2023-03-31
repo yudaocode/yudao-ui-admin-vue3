@@ -23,17 +23,17 @@ export const getUserPage = (params: PageParam) => {
 }
 
 // 查询用户详情
-export const getUserApi = (id: number) => {
+export const getUser = (id: number) => {
   return request.get({ url: '/system/user/get?id=' + id })
 }
 
 // 新增用户
-export const createUserApi = (data: UserVO | Recordable) => {
+export const createUser = (data: UserVO) => {
   return request.post({ url: '/system/user/create', data })
 }
 
 // 修改用户
-export const updateUserApi = (data: UserVO | Recordable) => {
+export const updateUser = (data: UserVO) => {
   return request.put({ url: '/system/user/update', data })
 }
 
