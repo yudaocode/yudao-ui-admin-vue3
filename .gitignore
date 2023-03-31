@@ -6,6 +6,3 @@ dist-ssr
 /dist*
 *-lock.*
 pnpm-debug
-
-.idea
-.history
