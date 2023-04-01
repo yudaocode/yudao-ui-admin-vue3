@@ -117,7 +117,7 @@
                 <el-dropdown-item command="handleRun" v-if="checkPermi(['infra:job:trigger'])">
                   执行一次
                 </el-dropdown-item>
-                <el-dropdown-item command="handleView" v-if="checkPermi(['infra:job:query'])">
+                <el-dropdown-item command="openDetail" v-if="checkPermi(['infra:job:query'])">
                   任务详细
                 </el-dropdown-item>
                 <el-dropdown-item command="handleJobLog" v-if="checkPermi(['infra:job:query'])">
@@ -141,13 +141,13 @@
   <!-- 表单弹窗：添加/修改 -->
   <JobForm ref="formRef" @success="getList" />
   <!-- 表单弹窗：查看 -->
-  <job-view ref="viewModalRef" @success="getList" />
+  <JobDetail ref="detailRef" />
 </template>
 <script setup lang="ts" name="Job">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { checkPermi } from '@/utils/permission'
 import JobForm from './JobForm.vue'
-import JobView from './view.vue'
+import JobDetail from './JobDetail.vue'
 import download from '@/utils/download'
 import * as JobApi from '@/api/infra/job'
 import { InfraJobStatusEnum } from '@/utils/constants'
@@ -254,8 +254,8 @@ const handleCommand = (command, row) => {
     case 'handleRun':
       handleRun(row)
       break
-    case 'handleView':
-      handleView(row?.id)
+    case 'openDetail':
+      openDetail(row.id)
       break
     case 'handleJobLog':
       handleJobLog(row?.id)
@@ -279,10 +279,11 @@ const handleRun = async (row: JobApi.JobVO) => {
 }
 
 /** 查看操作 */
-const viewModalRef = ref()
-const handleView = (rowId?: number) => {
-  viewModalRef.value.openForm(rowId)
+const detailRef = ref()
+const openDetail = (id: number) => {
+  detailRef.value.open(id)
 }
+
 // 执行日志
 const handleJobLog = (rowId?: number) => {
   if (rowId) {
