@@ -17,7 +17,7 @@ export interface PermissionAssignRoleDataScopeReqVO {
 }
 
 // 查询角色拥有的菜单权限
-export const listRoleMenusApi = async (roleId: number) => {
+export const getRoleMenuList = async (roleId: number) => {
   return await request.get({ url: '/system/permission/list-role-resources?roleId=' + roleId })
 }
 
