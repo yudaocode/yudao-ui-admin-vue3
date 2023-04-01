@@ -59,9 +59,9 @@ const open = async (id: number) => {
   if (id) {
     detailLoading.value = true
     try {
-      detailData.value = await JobApi.getJobApi(id)
+      detailData.value = await JobApi.getJob(id)
       // 获取下一次执行时间
-      nextTimes.value = await JobApi.getJobNextTimesApi(id)
+      nextTimes.value = await JobApi.getJobNextTimes(id)
     } finally {
       detailLoading.value = false
     }

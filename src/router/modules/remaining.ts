@@ -162,7 +162,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: 'job-log',
-        component: () => import('@/views/infra/job/JobLog.vue'),
+        component: () => import('@/views/infra/job/logger/index.vue'),
         name: 'JobLog',
         meta: {
           noCache: true,

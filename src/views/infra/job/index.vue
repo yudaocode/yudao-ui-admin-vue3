@@ -172,7 +172,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await JobApi.getJobPageApi(queryParams)
+    const data = await JobApi.getJobPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -199,7 +199,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await JobApi.exportJobApi(queryParams)
+    const data = await JobApi.exportJob(queryParams)
     download.excel(data, '定时任务.xls')
   } catch {
   } finally {
@@ -224,7 +224,7 @@ const handleChangeStatus = async (row: JobApi.JobVO) => {
     )
     const status =
       row.status === InfraJobStatusEnum.STOP ? InfraJobStatusEnum.NORMAL : InfraJobStatusEnum.STOP
-    await JobApi.updateJobStatusApi(row.id, status)
+    await JobApi.updateJobStatus(row.id, status)
     message.success(text + '成功')
     // 刷新列表
     await getList()
@@ -241,7 +241,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await JobApi.deleteJobApi(id)
+    await JobApi.deleteJob(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -284,10 +284,10 @@ const openDetail = (id: number) => {
   detailRef.value.open(id)
 }
 
-// 执行日志
-const handleJobLog = (rowId?: number) => {
-  if (rowId) {
-    push('/job/job-log?id=' + rowId)
+/** 跳转执行日志 */
+const handleJobLog = (id: number) => {
+  if (id) {
+    push('/job/job-log?id=' + id)
   } else {
     push('/job/job-log')
   }

@@ -80,7 +80,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await JobApi.getJobApi(id)
+      formData.value = await JobApi.getJob(id)
     } finally {
       formLoading.value = false
     }
@@ -100,10 +100,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as JobApi.JobVO
     if (formType.value === 'create') {
-      await JobApi.createJobApi(data)
+      await JobApi.createJob(data)
       message.success(t('common.createSuccess'))
     } else {
-      await JobApi.updateJobApi(data)
+      await JobApi.updateJob(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
