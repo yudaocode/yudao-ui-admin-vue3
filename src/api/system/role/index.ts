@@ -7,6 +7,8 @@ export interface RoleVO {
   sort: number
   status: number
   type: number
+  dataScope: number
+  dataScopeDeptIds: number[]
   createTime: Date
 }
 
@@ -49,6 +51,7 @@ export const updateRoleStatus = async (data: UpdateStatusReqVO) => {
 export const deleteRole = async (id: number) => {
   return await request.delete({ url: '/system/role/delete?id=' + id })
 }
+
 // 导出角色
 export const exportRole = (params) => {
   return request.download({

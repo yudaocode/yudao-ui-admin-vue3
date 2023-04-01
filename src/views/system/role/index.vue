@@ -118,7 +118,7 @@
             preIcon="ep:coin"
             title="数据权限"
             v-hasPermi="['system:permission:assign-role-data-scope']"
-            @click="handleScope('data', scope.row)"
+            @click="openDataPermissionForm(scope.row)"
           >
             数据权限
           </el-button>
@@ -145,9 +145,9 @@
   <!-- 表单弹窗：添加/修改 -->
   <RoleForm ref="formRef" @success="getList" />
   <!-- 表单弹窗：菜单权限 -->
-  <RoleAssignMenuForm ref="assignMenuFormRef" @success="getList" />
+  <RoleAssignMenuForm ref="assignMenuFormRef" />
   <!-- 表单弹窗：数据权限 -->
-  <DataPermissionForm ref="dataPermissionFormRef" @success="getList" />
+  <RoleDataPermissionForm ref="dataPermissionFormRef" />
 </template>
 <script setup lang="tsx">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
@@ -156,7 +156,7 @@ import download from '@/utils/download'
 import * as RoleApi from '@/api/system/role'
 import RoleForm from './RoleForm.vue'
 import RoleAssignMenuForm from './RoleAssignMenuForm.vue'
-import DataPermissionForm from './DataPermissionForm.vue'
+import RoleDataPermissionForm from './RoleDataPermissionForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -206,13 +206,8 @@ const openForm = (type: string, id?: number) => {
 
 /** 数据权限操作 */
 const dataPermissionFormRef = ref()
-
-const handleScope = async (type: string, row: RoleApi.RoleVO) => {
-  if (type === 'menu') {
-    assignMenuFormRef.value.openModal(type, row)
-  } else if (type === 'data') {
-    dataPermissionFormRef.value.openModal(type, row)
-  }
+const openDataPermissionForm = async (row: RoleApi.RoleVO) => {
+  dataPermissionFormRef.value.open(row)
 }
 
 /** 菜单权限操作 */

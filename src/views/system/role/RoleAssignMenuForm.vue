@@ -1,12 +1,6 @@
 <template>
   <Dialog title="菜单权限" v-model="modelVisible">
-    <el-form
-      ref="formRef"
-      :model="formData"
-      :inline="true"
-      label-width="80px"
-      v-loading="formLoading"
-    >
+    <el-form ref="formRef" :model="formData" label-width="80px" v-loading="formLoading">
       <el-form-item label="角色名称">
         <el-tag>{{ formData.name }}</el-tag>
       </el-form-item>
@@ -53,7 +47,6 @@
 <script setup lang="ts">
 import { handleTree, defaultProps } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'
-import type { ElTree } from 'element-plus'
 import * as MenuApi from '@/api/system/menu'
 import * as PermissionApi from '@/api/system/permission'
 const { t } = useI18n() // 国际化
@@ -70,7 +63,7 @@ const formData = reactive({
 const formRef = ref() // 表单 Ref
 const menuOptions = ref<any[]>([]) // 菜单树形结构
 const menuExpand = ref(false) // 展开/折叠
-const treeRef = ref<InstanceType<typeof ElTree>>() // 树组件 Ref
+const treeRef = ref() // 菜单树组件 Ref
 const treeNodeAll = ref(false) // 全选/全不选
 
 /** 打开弹窗 */
@@ -112,7 +105,7 @@ const submitForm = async () => {
         ...(treeRef.value.getHalfCheckedKeys() as unknown as Array<number>) // 获得半选中的父节点
       ]
     }
-    await PermissionApi.assignRoleMenuApi(data)
+    await PermissionApi.assignRoleMenu(data)
     message.success(t('common.updateSuccess'))
     modelVisible.value = false
   } finally {

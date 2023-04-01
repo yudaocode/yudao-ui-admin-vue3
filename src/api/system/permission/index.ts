@@ -22,12 +22,12 @@ export const getRoleMenuList = async (roleId: number) => {
 }
 
 // 赋予角色菜单权限
-export const assignRoleMenuApi = async (data: PermissionAssignRoleMenuReqVO) => {
+export const assignRoleMenu = async (data: PermissionAssignRoleMenuReqVO) => {
   return await request.post({ url: '/system/permission/assign-role-menu', data })
 }
 
 // 赋予角色数据权限
-export const assignRoleDataScopeApi = async (data: PermissionAssignRoleDataScopeReqVO) => {
+export const assignRoleDataScope = async (data: PermissionAssignRoleDataScopeReqVO) => {
   return await request.post({ url: '/system/permission/assign-role-data-scope', data })
 }
 
