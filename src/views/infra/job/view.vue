@@ -40,7 +40,7 @@
 </template>
 <script setup lang="ts" name="JobView">
 import * as JobApi from '@/api/infra/job'
-import { parseTime } from './utils'
+import { parseTime } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调

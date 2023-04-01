@@ -121,8 +121,7 @@
       </el-table-column>
     </el-table>
     <!-- 分页组件 -->
-    <pagination
-      v-show="total > 0"
+    <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"

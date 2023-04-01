@@ -137,7 +137,7 @@
                   <Icon icon="ep:edit" />修改
                 </el-button>
                 <el-dropdown
-                  @command="(command) => handleCommand(command, scope.$index, scope.row)"
+                  @command="(command) => handleCommand(command, scope.row)"
                   v-hasPermi="[
                     'system:user:delete',
                     'system:user:update-password',
@@ -147,22 +147,24 @@
                   <el-button type="primary" link><Icon icon="ep:d-arrow-right" /> 更多</el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <!-- div包住避免控制台报错：Runtime directive used on component with non-element root node -->
-                      <div v-hasPermi="['system:user:delete']">
-                        <el-dropdown-item command="handleDelete">
-                          <Icon icon="ep:delete" />删除
-                        </el-dropdown-item>
-                      </div>
-                      <div v-hasPermi="['system:user:update-password']">
-                        <el-dropdown-item command="handleResetPwd">
-                          <Icon icon="ep:key" />重置密码
-                        </el-dropdown-item>
-                      </div>
-                      <div v-hasPermi="['system:permission:assign-user-role']">
-                        <el-dropdown-item command="handleRole">
-                          <Icon icon="ep:circle-check" />分配角色
-                        </el-dropdown-item>
-                      </div>
+                      <el-dropdown-item
+                        command="handleDelete"
+                        v-if="checkPermi(['system:user:delete'])"
+                      >
+                        <Icon icon="ep:delete" />删除
+                      </el-dropdown-item>
+                      <el-dropdown-item
+                        command="handleResetPwd"
+                        v-if="checkPermi(['system:user:update-password'])"
+                      >
+                        <Icon icon="ep:key" />重置密码
+                      </el-dropdown-item>
+                      <el-dropdown-item
+                        command="handleRole"
+                        v-if="checkPermi(['system:permission:assign-user-role'])"
+                      >
+                        <Icon icon="ep:circle-check" />分配角色
+                      </el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -189,6 +191,7 @@
 </template>
 <script setup lang="ts" name="User">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { checkPermi } from '@/utils/permission'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { CommonStatusEnum } from '@/utils/constants'
@@ -290,8 +293,7 @@ const handleExport = async () => {
 }
 
 /** 操作分发 */
-const handleCommand = (command: string, index: number, row: UserApi.UserVO) => {
-  console.log(index)
+const handleCommand = (command: string, row: UserApi.UserVO) => {
   switch (command) {
     case 'handleDelete':
       handleDelete(row.id)

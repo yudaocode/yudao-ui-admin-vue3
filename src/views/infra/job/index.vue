@@ -1,19 +1,31 @@
 <template>
   <content-wrap>
-    <!-- 搜索栏 -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="100px">
+    <!-- 搜索工作栏 -->
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="100px"
+    >
       <el-form-item label="任务名称" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入任务名称"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="任务状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择任务状态" clearable>
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择任务状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.INFRA_JOB_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.INFRA_JOB_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -26,6 +38,7 @@
           placeholder="请输入处理器的名字"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>
@@ -34,7 +47,7 @@
         <el-button
           type="primary"
           plain
-          @click="openModal('create')"
+          @click="openForm('create')"
           v-hasPermi="['infra:job:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
@@ -48,63 +61,66 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
-
         <el-button type="info" plain @click="handleJobLog" v-hasPermi="['infra:job:query']">
           <Icon icon="ep:zoom-in" class="mr-5px" /> 执行日志
         </el-button>
       </el-form-item>
     </el-form>
+  </content-wrap>
 
+  <!-- 列表 -->
+  <content-wrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="任务编号" align="center" prop="id" />
       <el-table-column label="任务名称" align="center" prop="name" />
       <el-table-column label="任务状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_JOB_STATUS" :value="scope.row.status" />
-        </template> </el-table-column
-      >>
+        </template>
+      </el-table-column>
       <el-table-column label="处理器的名字" align="center" prop="handlerName" />
       <el-table-column label="处理器的参数" align="center" prop="handlerParam" />
       <el-table-column label="CRON 表达式" align="center" prop="cronExpression" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" width="200">
         <template #default="scope">
           <el-button
+            type="primary"
             link
-            icon="el-icon-edit"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['infra:job:update']"
-            >修改</el-button
           >
+            修改
+          </el-button>
           <el-button
+            type="primary"
             link
-            icon="el-icon-check"
             @click="handleChangeStatus(scope.row)"
             v-hasPermi="['infra:job:update']"
-            >{{ scope.row.status === InfraJobStatusEnum.STOP ? '开启' : '暂停' }}</el-button
           >
+            {{ scope.row.status === InfraJobStatusEnum.STOP ? '开启' : '暂停' }}
+          </el-button>
           <el-button
+            type="danger"
             link
-            icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['infra:job:delete']"
-            >删除</el-button
           >
+            删除
+          </el-button>
           <el-dropdown
-            class="mt-1"
-            :teleported="true"
             @command="(command) => handleCommand(command, scope.row)"
             v-hasPermi="['infra:job:trigger', 'infra:job:query']"
           >
-            <el-button link icon="el-icon-d-arrow-right">更多</el-button>
+            <el-button type="primary" link><Icon icon="ep:d-arrow-right" /> 更多</el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="handleRun" v-if="hasPermi(['infra:job:trigger'])">
+                <el-dropdown-item command="handleRun" v-if="checkPermi(['infra:job:trigger'])">
                   执行一次
                 </el-dropdown-item>
-                <el-dropdown-item command="handleView" v-if="hasPermi(['infra:job:query'])">
+                <el-dropdown-item command="handleView" v-if="checkPermi(['infra:job:query'])">
                   任务详细
                 </el-dropdown-item>
-                <el-dropdown-item command="handleJobLog" v-if="hasPermi(['infra:job:query'])">
+                <el-dropdown-item command="handleJobLog" v-if="checkPermi(['infra:job:query'])">
                   调度日志
                 </el-dropdown-item>
               </el-dropdown-menu>
@@ -114,8 +130,7 @@
       </el-table-column>
     </el-table>
     <!-- 分页组件 -->
-    <pagination
-      v-show="total > 0"
+    <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
@@ -124,23 +139,21 @@
   </content-wrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <job-form ref="modalRef" @success="getList" />
+  <job-form ref="formRef" @success="getList" />
   <!-- 表单弹窗：查看 -->
   <job-view ref="viewModalRef" @success="getList" />
 </template>
-
 <script setup lang="ts" name="Job">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { checkPermi } from '@/utils/permission'
 import JobForm from './form.vue'
 import JobView from './view.vue'
 import download from '@/utils/download'
 import * as JobApi from '@/api/infra/job'
 import { InfraJobStatusEnum } from '@/utils/constants'
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-const { push } = useRouter()
+const { push } = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -167,30 +180,6 @@ const getList = async () => {
   }
 }
 
-const handleChangeStatus = async (row: JobApi.JobVO) => {
-  const text = row.status === InfraJobStatusEnum.STOP ? '开启' : '关闭'
-
-  const status =
-    row.status === InfraJobStatusEnum.STOP ? InfraJobStatusEnum.NORMAL : InfraJobStatusEnum.STOP
-  message
-    .confirm('确认要' + text + '定时任务编号为"' + row.id + '"的数据项?', t('common.reminder'))
-    .then(async () => {
-      row.status =
-        row.status === InfraJobStatusEnum.NORMAL
-          ? InfraJobStatusEnum.NORMAL
-          : InfraJobStatusEnum.STOP
-      await JobApi.updateJobStatusApi(row.id, status)
-      message.success(text + '成功')
-      await getList()
-    })
-    .catch(() => {
-      row.status =
-        row.status === InfraJobStatusEnum.NORMAL
-          ? InfraJobStatusEnum.STOP
-          : InfraJobStatusEnum.NORMAL
-    })
-}
-
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
@@ -203,10 +192,47 @@ const resetQuery = () => {
   handleQuery()
 }
 
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await JobApi.exportJobApi(queryParams)
+    download.excel(data, '定时任务.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+}
+
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
+/** 修改状态操作 */
+const handleChangeStatus = async (row: JobApi.JobVO) => {
+  try {
+    // 修改状态的二次确认
+    const text = row.status === InfraJobStatusEnum.STOP ? '开启' : '关闭'
+    await message.confirm(
+      '确认要' + text + '定时任务编号为"' + row.id + '"的数据项?',
+      t('common.reminder')
+    )
+    const status =
+      row.status === InfraJobStatusEnum.STOP ? InfraJobStatusEnum.NORMAL : InfraJobStatusEnum.STOP
+    await JobApi.updateJobStatusApi(row.id, status)
+    message.success(text + '成功')
+    // 刷新列表
+    await getList()
+  } catch {
+    // 取消后，进行恢复按钮
+    row.status =
+      row.status === InfraJobStatusEnum.NORMAL ? InfraJobStatusEnum.STOP : InfraJobStatusEnum.NORMAL
+  }
 }
 
 /** 删除按钮操作 */
@@ -220,28 +246,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-/** 查看操作 */
-const viewModalRef = ref()
-const handleView = (rowId?: number) => {
-  viewModalRef.value.openModal(rowId)
-}
-// 执行日志
-const handleJobLog = (rowId?: number) => {
-  if (rowId) {
-    push('/job/job-log?id=' + rowId)
-  } else {
-    push('/job/job-log')
-  }
-}
-// 执行一次
-const handleRun = (row: JobApi.JobVO) => {
-  message.confirm('确认要立即执行一次' + row.name + '?', t('common.reminder')).then(async () => {
-    await JobApi.runJobApi(row.id)
-    message.success('执行成功')
-    await getList()
-  })
 }
 
 /** '更多'操作按钮 */
@@ -261,36 +265,31 @@ const handleCommand = (command, row) => {
   }
 }
 
-/** 导出按钮操作 */
-const handleExport = async () => {
+/** 执行一次 */
+const handleRun = async (row: JobApi.JobVO) => {
   try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await JobApi.exportJobApi(queryParams)
-    download.excel(data, '定时任务.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
+    // 二次确认
+    await message.confirm('确认要立即执行一次' + row.name + '?', t('common.reminder'))
+    // 提交执行
+    await JobApi.runJobApi(row.id)
+    message.success('执行成功')
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
-// 权限判断：dropdown 与 v-hasPermi有冲突会造成大量的waring，改用v-if调用此方法
-const hasPermi = (permiKeys: string[]) => {
-  const { wsCache } = useCache()
-  const all_permission = '*:*:*'
-  const permissions = wsCache.get(CACHE_KEY.USER).permissions
-
-  if (permiKeys && permiKeys instanceof Array && permiKeys.length > 0) {
-    const permissionFlag = permiKeys
-
-    const hasPermissions = permissions.some((permission: string) => {
-      return all_permission === permission || permissionFlag.includes(permission)
-    })
-    return hasPermissions
+/** 查看操作 */
+const viewModalRef = ref()
+const handleView = (rowId?: number) => {
+  viewModalRef.value.openForm(rowId)
+}
+// 执行日志
+const handleJobLog = (rowId?: number) => {
+  if (rowId) {
+    push('/job/job-log?id=' + rowId)
+  } else {
+    push('/job/job-log')
   }
-  return false
 }
 
 /** 初始化 **/
