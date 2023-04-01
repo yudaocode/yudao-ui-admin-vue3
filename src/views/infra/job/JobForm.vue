@@ -1,5 +1,4 @@
 <template>
-  <!-- 添加或修改定时任务对话框 -->
   <Dialog :title="modelTitle" v-model="modelVisible">
     <el-form
       ref="formRef"
@@ -22,14 +21,7 @@
         <el-input v-model="formData.handlerParam" placeholder="请输入处理器的参数" />
       </el-form-item>
       <el-form-item label="CRON 表达式" prop="cronExpression">
-        <el-input v-model="formData.cronExpression" placeholder="请输入CRON 表达式">
-          <template #append>
-            <el-button type="primary" @click="handleShowCron">
-              生成表达式
-              <i class="el-icon-time el-icon--right"></i>
-            </el-button>
-          </template>
-        </el-input>
+        <crontab v-model="formData.cronExpression" />
       </el-form-item>
       <el-form-item label="重试次数" prop="retryCount">
         <el-input
@@ -47,30 +39,14 @@
         <el-input v-model="formData.monitorTimeout" placeholder="请输入监控超时时间，单位：毫秒" />
       </el-form-item>
     </el-form>
-    <!-- 操作按钮 -->
     <template #footer>
-      <!-- 按钮：保存 -->
-      <div class="dialog-footer">
-        <el-button type="primary" @click="submitForm" :loading="formLoading">确 定</el-button>
-        <el-button @click="modelVisible = false">取 消</el-button>
-      </div>
+      <el-button type="primary" @click="submitForm" :loading="formLoading">确 定</el-button>
+      <el-button @click="modelVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <el-dialog
-    title="Cron表达式生成器"
-    v-model="openCron"
-    append-to-body
-    class="scrollbar"
-    destroy-on-close
-  >
-    <crontab @hide="openCron = false" @fill="crontabFill" :expression="expression" />
-  </el-dialog>
 </template>
 <script setup lang="ts" name="JobForm">
 import * as JobApi from '@/api/infra/job'
-
-const emit = defineEmits(['success', 'crontabFill']) // 定义 success 事件，用于操作成功后的回调
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -78,25 +54,13 @@ const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const defaultFormData = {
+const formData = ref({
   id: undefined,
   name: '',
-  status: 0,
   handlerName: '',
   handlerParam: '',
-  cronExpression: '',
-  retryCount: 0,
-  retryInterval: 0,
-  monitorTimeout: 0,
-  createTime: new Date()
-}
-const formData = ref({ ...defaultFormData })
-
-// 是否显示Cron表达式弹出层
-const openCron = ref(false)
-// 传入的表达式
-const expression = ref('')
-// 表单校验
+  cronExpression: ''
+})
 const formRules = reactive({
   name: [{ required: true, message: '任务名称不能为空', trigger: 'blur' }],
   handlerName: [{ required: true, message: '处理器的名字不能为空', trigger: 'blur' }],
@@ -124,20 +88,8 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** cron表达式按钮操作 */
-const handleShowCron = () => {
-  console.info(123333333333)
-  expression.value = formData.value.cronExpression
-  openCron.value = true
-}
-
-// cron表达式填充
-const crontabFill = (expression: string) => {
-  formData.value.cronExpression = expression
-  emit('crontabFill', expression)
-}
-
-// 提交按钮
+/** 提交按钮 */
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
   // 校验表单
   if (!formRef) return
@@ -165,7 +117,11 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    ...defaultFormData
+    id: undefined,
+    name: '',
+    handlerName: '',
+    handlerParam: '',
+    cronExpression: ''
   }
   formRef.value?.resetFields()
 }

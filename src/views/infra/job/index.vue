@@ -139,14 +139,14 @@
   </content-wrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <job-form ref="formRef" @success="getList" />
+  <JobForm ref="formRef" @success="getList" />
   <!-- 表单弹窗：查看 -->
   <job-view ref="viewModalRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Job">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { checkPermi } from '@/utils/permission'
-import JobForm from './form.vue'
+import JobForm from './JobForm.vue'
 import JobView from './view.vue'
 import download from '@/utils/download'
 import * as JobApi from '@/api/infra/job'
