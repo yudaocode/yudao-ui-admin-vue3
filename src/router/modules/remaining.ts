@@ -319,6 +319,22 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       }
     ]
+  },
+  {
+    path: '/property',
+    component: Layout,
+    name: 'property',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'value/:propertyId(\\d+)',
+        component: () => import('@/views/mall/product/property/value/index.vue'),
+        name: 'PropertyValue',
+        meta: { title: '商品属性值', icon: '', activeMenu: '/product/property' }
+      }
+    ]
   }
 ]
 
