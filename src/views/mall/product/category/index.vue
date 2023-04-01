@@ -1,7 +1,13 @@
 <template>
-  <content-wrap>
-    <!-- 搜索工作栏 -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
+  <!-- 搜索工作栏 -->
+  <ContentWrap>
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="分类名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -13,23 +19,25 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openModal('create')" v-hasPermi="['infra:config:create']">
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['product:category:create']"
+        >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
     </el-form>
+  </ContentWrap>
 
-    <!-- 列表 -->
-    <el-table v-loading="loading" :data="list" align="center" default-expand-all row-key="id">
+  <!-- 列表 -->
+  <ContentWrap>
+    <el-table v-loading="loading" :data="list" row-key="id" default-expand-all>
       <el-table-column label="分类名称" prop="name" sortable />
       <el-table-column label="分类图片" align="center" prop="picUrl">
         <template #default="scope">
-          <img
-            v-if="scope.row.picUrl"
-            :src="scope.row.picUrl"
-            alt="分类图片"
-            style="height: 100px"
-          />
+          <img v-if="scope.row.picUrl" :src="scope.row.picUrl" alt="分类图片" class="h-100px" />
         </template>
       </el-table-column>
       <el-table-column label="分类排序" align="center" prop="sort" />
@@ -50,8 +58,8 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
-            v-hasPermi="['infra:config:update']"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['product:category:update']"
           >
             编辑
           </el-button>
@@ -59,25 +67,24 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['infra:config:delete']"
+            v-hasPermi="['product:category:delete']"
           >
             删除
           </el-button>
         </template>
       </el-table-column>
     </el-table>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <config-form ref="modalRef" @success="getList" />
+  <CategoryForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="Config">
+<script setup lang="ts" name="ProductCategory">
 import { DICT_TYPE } from '@/utils/dict'
+import { handleTree } from '@/utils/tree'
 import { dateFormatter } from '@/utils/formatTime'
 import * as ProductCategoryApi from '@/api/mall/product/category'
-import ConfigForm from './form.vue'
-import { handleTree } from '@/utils/tree'
-
+import CategoryForm from './CategoryForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -88,13 +95,12 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
     const data = await ProductCategoryApi.getCategoryList(queryParams)
     list.value = handleTree(data, 'id', 'parentId')
-    console.info(list)
   } finally {
     loading.value = false
   }
@@ -112,9 +118,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */

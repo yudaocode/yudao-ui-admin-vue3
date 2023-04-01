@@ -55,8 +55,8 @@
       v-loading="loading"
       :data="list"
       row-key="id"
+      default-expand-all
       v-if="refreshTable"
-      :default-expand-all="isExpandAll"
     >
       <el-table-column prop="name" label="部门名称" width="260" />
       <el-table-column prop="leader" label="负责人" width="120">
