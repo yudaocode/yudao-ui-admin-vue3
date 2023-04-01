@@ -28,7 +28,7 @@ export const rules = reactive({
     }
   ],
   status: [required],
-  postIds: [{ required: true, message: '请选择岗位', trigger: ['blur', 'change'] }],
+  postIds: [required],
   mobile: [
     required,
     {
@@ -87,11 +87,6 @@ const crudSchemas = reactive<VxeCrudSchema>({
       isTable: false
     },
     {
-      title: '岗位',
-      field: 'postIds',
-      isTable: false
-    },
-    {
       title: t('common.status'),
       field: 'status',
       dictType: DICT_TYPE.COMMON_STATUS,
@@ -102,6 +97,11 @@ const crudSchemas = reactive<VxeCrudSchema>({
           default: 'status_default'
         }
       }
+    },
+    {
+      title: '岗位',
+      field: 'postIds',
+      isTable: false
     },
     {
       title: '最后登录时间',
