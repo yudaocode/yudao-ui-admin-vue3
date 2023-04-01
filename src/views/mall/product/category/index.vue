@@ -14,6 +14,7 @@
           placeholder="请输入分类名称"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>

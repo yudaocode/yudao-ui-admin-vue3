@@ -24,7 +24,6 @@
 </template>
 <script setup lang="ts">
 import * as PropertyApi from '@/api/mall/product/property'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -32,18 +31,17 @@ const modelVisible = ref(false) // 弹窗的是否展示
 const modelTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const defaultFormData: PropertyApi.PropertyVO = {
+const formData = ref({
   id: undefined,
   name: ''
-}
-const formData = ref({ ...defaultFormData })
+})
 const formRules = reactive({
   name: [{ required: true, message: '名称不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const open = async (type: string, id?: number) => {
   modelVisible.value = true
   modelTitle.value = t('action.' + type)
   formType.value = type
@@ -58,7 +56,7 @@ const openModal = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -88,7 +86,10 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
-  formData.value = { ...defaultFormData }
+  formData.value = {
+    id: undefined,
+    name: ''
+  }
   formRef.value?.resetFields()
 }
 </script>

@@ -61,7 +61,7 @@ export const getProperty = (id: number): Promise<PropertyVO> => {
 }
 
 // 获得属性项分页
-export const getPropertyPage = (params: PageParam & any) => {
+export const getPropertyPage = (params: PageParam) => {
   return request.get({ url: '/product/property/page', params })
 }
 
