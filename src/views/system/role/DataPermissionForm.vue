@@ -1,7 +1,7 @@
 <template>
   <Dialog :title="dialogScopeTitle" v-model="dialogScopeVisible" width="800">
     <el-form
-      ref="menuPermissionFormRef"
+      ref="dataPermissionFormRef"
       :model="dataScopeForm"
       :inline="true"
       label-width="80px"
@@ -13,41 +13,60 @@
       <el-form-item label="角色标识">
         <el-tag>{{ dataScopeForm.code }}</el-tag>
       </el-form-item>
-      <!-- 分配角色的菜单权限对话框 -->
-      <el-row>
-        <el-col :span="24">
-          <el-form-item label="权限范围" style="display: flex">
-            <el-card class="card" shadow="never">
-              <template #header>
-                父子联动(选中父节点，自动选择子节点):
-                <el-switch
-                  v-model="checkStrictly"
-                  inline-prompt
-                  active-text="是"
-                  inactive-text="否"
-                />
-                全选/全不选:
-                <el-switch
-                  v-model="treeNodeAll"
-                  inline-prompt
-                  active-text="是"
-                  inactive-text="否"
-                  @change="handleCheckedTreeNodeAll()"
-                />
-              </template>
-              <el-tree
-                ref="treeRef"
-                node-key="id"
-                show-checkbox
-                :check-strictly="!checkStrictly"
-                :props="defaultProps"
-                :data="treeOptions"
-                empty-text="加载中，请稍后"
-              />
-            </el-card>
-          </el-form-item> </el-col
-      ></el-row>
+      <!-- 分配角色的数据权限对话框 -->
+      <el-form-item label="权限范围">
+        <el-select v-model="dataScopeForm.dataScope">
+          <el-option
+            v-for="item in dataScopeDictDatas"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
     </el-form>
+    <!-- 分配角色的菜单权限对话框 -->
+    <el-row>
+      <el-col :span="24">
+        <el-form-item
+          label="权限范围"
+          v-if="
+            actionScopeType === 'menu' ||
+            dataScopeForm.dataScope === SystemDataScopeEnum.DEPT_CUSTOM
+          "
+          style="display: flex"
+        >
+          <el-card class="card" shadow="never">
+            <template #header>
+              父子联动(选中父节点，自动选择子节点):
+              <el-switch
+                v-model="checkStrictly"
+                inline-prompt
+                active-text="是"
+                inactive-text="否"
+              />
+              全选/全不选:
+              <el-switch
+                v-model="treeNodeAll"
+                inline-prompt
+                active-text="是"
+                inactive-text="否"
+                @change="handleCheckedTreeNodeAll()"
+              />
+            </template>
+            <el-tree
+              ref="treeRef"
+              node-key="id"
+              show-checkbox
+              :check-strictly="!checkStrictly"
+              :props="defaultProps"
+              :data="treeOptions"
+              empty-text="加载中，请稍后"
+            />
+          </el-card>
+        </el-form-item> </el-col
+    ></el-row>
+
     <!-- 操作按钮 -->
     <template #footer>
       <div class="dialog-footer">
@@ -76,20 +95,21 @@ import * as RoleApi from '@/api/system/role'
 import type { ElTree } from 'element-plus'
 import type { FormExpose } from '@/components/Form'
 import { handleTree, defaultProps } from '@/utils/tree'
+import { SystemDataScopeEnum } from '@/utils/constants'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import * as MenuApi from '@/api/system/menu'
+import * as DeptApi from '@/api/system/dept'
 import * as PermissionApi from '@/api/system/permission'
 // ========== CRUD 相关 ==========
 const actionLoading = ref(false) // 遮罩层
-const menuPermissionFormRef = ref<FormExpose>() // 表单 Ref
+const dataPermissionFormRef = ref<FormExpose>() // 表单 Ref
 const { t } = useI18n() // 国际化
 const dialogScopeTitle = ref('菜单权限')
 const dataScopeDictDatas = ref()
 const message = useMessage() // 消息弹窗
 const actionScopeType = ref('')
 // 选项
-const checkStrictly = ref(true)
 const treeNodeAll = ref(false)
+const checkStrictly = ref(true)
 const dialogScopeVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const treeOptions = ref<any[]>([]) // 菜单树形结构
@@ -110,11 +130,12 @@ const openModal = async (type: string, row: RoleApi.RoleVO) => {
   dataScopeForm.code = row.code
   actionScopeType.value = type
   dialogScopeVisible.value = true
-  const menuRes = await MenuApi.getSimpleMenusList()
-  treeOptions.value = handleTree(menuRes)
-  const role = await PermissionApi.listRoleMenusApi(row.id)
-  if (role) {
-    role?.forEach((item: any) => {
+  const deptRes = await DeptApi.getSimpleDeptList()
+  treeOptions.value = handleTree(deptRes)
+  const role = await RoleApi.getRole(row.id)
+  dataScopeForm.dataScope = role.dataScope
+  if (role.dataScopeDeptIds) {
+    role.dataScopeDeptIds?.forEach((item: any) => {
       unref(treeRef)?.setChecked(item, true, false)
     })
   }
@@ -122,14 +143,15 @@ const openModal = async (type: string, row: RoleApi.RoleVO) => {
 
 // 保存权限
 const submitScope = async () => {
-  const data = ref<PermissionApi.PermissionAssignRoleMenuReqVO>({
+  const data = ref<PermissionApi.PermissionAssignRoleDataScopeReqVO>({
     roleId: dataScopeForm.id,
-    menuIds: [
-      ...(treeRef.value!.getCheckedKeys(false) as unknown as Array<number>),
-      ...(treeRef.value!.getHalfCheckedKeys() as unknown as Array<number>)
-    ]
+    dataScope: dataScopeForm.dataScope,
+    dataScopeDeptIds:
+      dataScopeForm.dataScope !== SystemDataScopeEnum.DEPT_CUSTOM
+        ? []
+        : (treeRef.value!.getCheckedKeys(false) as unknown as Array<number>)
   })
-  await PermissionApi.assignRoleMenuApi(data.value)
+  await PermissionApi.assignRoleDataScopeApi(data.value)
 
   message.success(t('common.updateSuccess'))
   dialogScopeVisible.value = false
