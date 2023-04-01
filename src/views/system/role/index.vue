@@ -146,11 +146,14 @@
   <RoleForm ref="formRef" @success="getList" />
   <!-- 表单弹窗：菜单权限 -->
   <MenuPermissionForm ref="menuPermissionFormRef" @success="getList" />
+  <!-- 表单弹窗：数据权限 -->
+  <DataPermissionForm ref="dataPermissionFormRef" @success="getList" />
 </template>
 <script setup lang="tsx">
 import * as RoleApi from '@/api/system/role'
 import RoleForm from './RoleForm.vue'
 import MenuPermissionForm from './MenuPermissionForm.vue'
+import DataPermissionForm from './DataPermissionForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
@@ -201,10 +204,17 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 数据权限操作 */
+/** 菜单权限操作 */
 const menuPermissionFormRef = ref()
+/** 数据权限操作 */
+const dataPermissionFormRef = ref()
+
 const handleScope = async (type: string, row: RoleApi.RoleVO) => {
-  menuPermissionFormRef.value.openModal(type, row)
+  if (type === 'menu') {
+    menuPermissionFormRef.value.openModal(type, row)
+  } else if (type === 'data') {
+    dataPermissionFormRef.value.openModal(type, row)
+  }
 }
 
 /** 删除按钮操作 */
