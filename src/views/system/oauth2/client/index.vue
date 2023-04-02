@@ -1,206 +1,179 @@
 <template>
-  <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <template #toolbar_buttons>
-        <!-- 操作：新增 -->
-        <XButton
-          type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
-          v-hasPermi="['system:oauth2-client:create']"
-          @click="handleCreate()"
-        />
-      </template>
-      <template #accessTokenValiditySeconds_default="{ row }">
-        {{ row.accessTokenValiditySeconds + '秒' }}
-      </template>
-      <template #refreshTokenValiditySeconds_default="{ row }">
-        {{ row.refreshTokenValiditySeconds + '秒' }}
-      </template>
-      <template #authorizedGrantTypes_default="{ row }">
-        <el-tag
-          :disable-transitions="true"
-          :key="index"
-          v-for="(authorizedGrantType, index) in row.authorizedGrantTypes"
-          :index="index"
-        >
-          {{ authorizedGrantType }}
-        </el-tag>
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['system:oauth2-client:update']"
-          @click="handleUpdate(row.id)"
-        />
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
-          v-hasPermi="['system:oauth2-client:query']"
-          @click="handleDetail(row.id)"
-        />
-        <!-- 操作：删除 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['system:oauth2-client:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
-  </ContentWrap>
-  <!-- 弹窗 -->
-  <XModal id="postModel" v-model="dialogVisible" :title="dialogTitle">
-    <!-- 表单：添加/修改 -->
-    <Form
-      ref="formRef"
-      v-if="['create', 'update'].includes(actionType)"
-      :schema="allSchemas.formSchema"
-      :rules="rules"
-    />
-    <!-- 表单：详情 -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
+  <!-- 搜索 -->
+  <content-wrap>
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
     >
-      <template #accessTokenValiditySeconds="{ row }">
-        {{ row.accessTokenValiditySeconds + '秒' }}
-      </template>
-      <template #refreshTokenValiditySeconds="{ row }">
-        {{ row.refreshTokenValiditySeconds + '秒' }}
-      </template>
-      <template #authorizedGrantTypes="{ row }">
-        <el-tag
-          :disable-transitions="true"
-          :key="index"
-          v-for="(authorizedGrantType, index) in row.authorizedGrantTypes"
-          :index="index"
-        >
-          {{ authorizedGrantType }}
-        </el-tag>
-      </template>
-      <template #scopes="{ row }">
-        <el-tag
-          :disable-transitions="true"
-          :key="index"
-          v-for="(scopes, index) in row.scopes"
-          :index="index"
-        >
-          {{ scopes }}
-        </el-tag>
-      </template>
-      <template #autoApproveScopes="{ row }">
-        <el-tag
-          :disable-transitions="true"
-          :key="index"
-          v-for="(autoApproveScopes, index) in row.autoApproveScopes"
-          :index="index"
-        >
-          {{ autoApproveScopes }}
-        </el-tag>
-      </template>
-      <template #redirectUris="{ row }">
-        <el-tag
-          :disable-transitions="true"
-          :key="index"
-          v-for="(redirectUris, index) in row.redirectUris"
-          :index="index"
-        >
-          {{ redirectUris }}
-        </el-tag>
-      </template>
-    </Descriptions>
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="actionLoading"
-        @click="submitForm()"
+      <el-form-item label="应用名" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入应用名"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable size="small">
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button type="primary" @click="openModal('create')" v-hasPermi="['infra:config:create']">
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </content-wrap>
+
+  <!-- 列表 -->
+  <content-wrap>
+    <el-table v-loading="loading" :data="list">
+      <el-table-column label="客户端编号" align="center" prop="clientId" />
+      <el-table-column label="客户端密钥" align="center" prop="secret" />
+      <el-table-column label="应用名" align="center" prop="name" />
+      <el-table-column label="应用图标" align="center" prop="logo">
+        <template #default="scope">
+          <img width="40px" height="40px" :src="scope.row.logo" />
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column label="访问令牌的有效期" align="center" prop="accessTokenValiditySeconds">
+        <template #default="scope">{{ scope.row.accessTokenValiditySeconds }} 秒</template>
+      </el-table-column>
+      <el-table-column label="刷新令牌的有效期" align="center" prop="refreshTokenValiditySeconds">
+        <template #default="scope">{{ scope.row.refreshTokenValiditySeconds }} 秒</template>
+      </el-table-column>
+      <el-table-column label="授权类型" align="center" prop="authorizedGrantTypes">
+        <template #default="scope">
+          <el-tag
+            :disable-transitions="true"
+            :key="index"
+            v-for="(authorizedGrantType, index) in scope.row.authorizedGrantTypes"
+            :index="index"
+          >
+            {{ authorizedGrantType }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
       />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
+      <el-table-column label="操作" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openModal('update', scope.row.id)"
+            v-hasPermi="['infra:config:update']"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['infra:config:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </content-wrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <ClientForm ref="modalRef" @success="getList" />
 </template>
-<script setup lang="ts" name="Client">
-import type { FormExpose } from '@/components/Form'
-// 业务相关的 import
+<script setup lang="ts">
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 import * as ClientApi from '@/api/system/oauth2/client'
-
-const { t } = useI18n() // 国际化
+import ClientForm from './form.vue'
 const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-// 列表相关的变量
-const [registerTable, { reload, deleteData }] = useXTable({
-  allSchemas: allSchemas,
-  getListApi: ClientApi.getOAuth2ClientPageApi,
-  deleteApi: ClientApi.deleteOAuth2ClientApi
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 列表的数据
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  name: null,
+  status: null
 })
-// 弹窗相关的变量
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const actionType = ref('') // 操作按钮的类型
-const actionLoading = ref(false) // 按钮 Loading
-const formRef = ref<FormExpose>() // 表单 Ref
-const detailData = ref() // 详情 Ref
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
+const queryFormRef = ref() // 搜索的表单
+
+/** 查询参数列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await ClientApi.getOAuth2ClientPageApi(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
 }
 
-// 新增操作
-const handleCreate = () => {
-  setDialogTile('create')
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
 }
 
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  // 设置数据
-  const res = await ClientApi.getOAuth2ClientApi(rowId)
-  unref(formRef)?.setValues(res)
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
 }
 
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  setDialogTile('detail')
-  const res = await ClientApi.getOAuth2ClientApi(rowId)
-  detailData.value = res
+/** 添加/修改操作 */
+const modalRef = ref()
+const openModal = (type: string, id?: number) => {
+  modalRef.value.openModal(type, id)
 }
 
-// 提交新增/修改的表单
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as ClientApi.OAuth2ClientVO
-        if (actionType.value === 'create') {
-          await ClientApi.createOAuth2ClientApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          await ClientApi.updateOAuth2ClientApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        // 刷新列表
-        await reload()
-      }
-    }
-  })
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await ClientApi.deleteOAuth2ClientApi(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
+
+/** 初始化 **/
+onMounted(() => {
+  getList()
+})
 </script>
