@@ -19,14 +19,8 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon icon="ep:refresh" class="mr-5px" />
-          重置
-        </el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
       </el-form-item>
     </el-form>
   </content-wrap>
@@ -41,7 +35,6 @@
         :key="item.articleId"
       >
         <wx-news :articles="item.content.newsItem" />
-        <!-- 操作 -->
         <el-row justify="center" class="ope-row">
           <el-button
             type="danger"
@@ -54,9 +47,8 @@
         </el-row>
       </div>
     </div>
-    <!-- 分页组件 -->
-    <pagination
-      v-show="total > 0"
+    <!-- 分页 -->
+    <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
@@ -66,24 +58,18 @@
 </template>
 
 <script setup lang="ts" name="freePublish">
-import { getFreePublishPage, deleteFreePublish } from '@/api/mp/freePublish'
+import * as FreePublishApi from '@/api/mp/freePublish'
 import * as MpAccountApi from '@/api/mp/account'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
-
 const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-interface QueryParams {
-  currentPage: number | undefined | string
-  pageNo: number | undefined | string
-  accountId: number | undefined | string
-}
-
-const queryParams: QueryParams = reactive({
-  currentPage: 1, // 当前页数
-  pageNo: 1, // 当前页数
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
   accountId: undefined // 当前页数
 })
 const queryFormRef = ref() // 搜索的表单
@@ -96,25 +82,14 @@ const getList = async () => {
     message.error('未选中公众号，无法查询已发表图文')
     return false
   }
-  // TODO 改成 await 形式
-  loading.value = true
-  getFreePublishPage(queryParams)
-    .then((data) => {
-      console.log(data)
-      // 将 thumbUrl 转成 picUrl，保证 wx-news 组件可以预览封面
-      data.list.forEach((item) => {
-        console.log(item)
-        const newsItem = item.content.newsItem
-        newsItem.forEach((article) => {
-          article.picUrl = article.thumbUrl
-        })
-      })
-      list.value = data.list
-      total.value = data.total
-    })
-    .finally(() => {
-      loading.value = false
-    })
+  try {
+    loading.value = true
+    const data = await FreePublishApi.getFreePublishPage(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
 }
 
 /** 搜索按钮操作 */
@@ -135,21 +110,15 @@ const resetQuery = () => {
 
 /** 删除按钮操作 */
 const handleDelete = async (item) => {
-  {
-    // TODO 改成 await 形式
-    const articleId = item.articleId
-    const accountId = queryParams.accountId
-    message
-      .confirm('删除后用户将无法访问此页面，确定删除？')
-      .then(function () {
-        return deleteFreePublish(accountId, articleId)
-      })
-      .then(() => {
-        getList()
-        message.success('删除成功')
-      })
-      .catch(() => {})
-  }
+  try {
+    // 删除的二次确认
+    await message.delConfirm('删除后用户将无法访问此页面，确定删除？')
+    // 发起删除
+    await FreePublishApi.deleteFreePublish(queryParams.accountId, item.articleId)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
 onMounted(async () => {
@@ -162,15 +131,6 @@ onMounted(async () => {
 })
 </script>
 <style lang="scss" scoped>
-.pagination {
-  float: right;
-  margin-right: 25px;
-}
-
-.add_but {
-  padding: 10px;
-}
-
 .ope-row {
   margin-top: 5px;
   text-align: center;
