@@ -59,7 +59,6 @@
       :on-exceed="handleExceed"
       :on-success="handleFileSuccess"
       :on-error="excelUploadError"
-      :on-change="handleFileChange"
       :before-remove="beforeRemove"
       :auto-upload="false"
       accept=".jpg, .png, .gif"
@@ -84,7 +83,7 @@
   </XModal>
 </template>
 <script setup lang="ts" name="FileList">
-import type { UploadInstance, UploadRawFile, UploadProps, UploadFile } from 'element-plus'
+import type { UploadInstance, UploadRawFile, UploadProps } from 'element-plus'
 // 业务相关的 import
 import { allSchemas } from './fileList.data'
 import * as FileApi from '@/api/infra/fileList'
@@ -120,11 +119,9 @@ const beforeUpload = (file: UploadRawFile) => {
   return isImg && isLt5M
 }
 // 处理上传的文件发生变化
-const handleFileChange = (uploadFile: UploadFile): void => {
-  // uploadRef.value.data.path = uploadFile.name
-  console.log(uploadFile, 'uploadFile')
-  uploadDisabled.value = false
-}
+// const handleFileChange = (uploadFile: UploadFile): void => {
+//   uploadRef.value.data.path = uploadFile.name
+// }
 // 文件上传
 const submitFileForm = () => {
   uploadHeaders.value = {
@@ -151,12 +148,10 @@ const beforeRemove: UploadProps['beforeRemove'] = () => {
 // 文件数超出提示
 const handleExceed = (): void => {
   message.error('最多只能上传一个文件！')
-  uploadDisabled.value = false
 }
 // 上传错误提示
 const excelUploadError = (): void => {
   message.error('导入数据失败，请您重新上传！')
-  uploadDisabled.value = false
 }
 
 // 详情操作
@@ -169,26 +164,14 @@ const handleDetail = (row: FileApi.FileVO) => {
 
 // ========== 复制相关 ==========
 const handleCopy = async (text: string) => {
-  let url = text
-  let oInput = document.createElement('textarea')
-  oInput.value = url
-  document.body.appendChild(oInput)
-  oInput.select() // 选择对象;
-  // console.log(oInput.value)
-  document.execCommand('Copy') // 执行浏览器复制命令
-  message.success(t('common.copySuccess'))
-  oInput.remove()
-  // const { copy, copied, isSupported } = useClipboard({ source: text, read: true })
-  // console.log(copy, 'copycopycopy')
-  // console.log(copied, 'copiedcopiedcopied')
-  // console.log(isSupported, 'isSupportedisSupportedisSupported')
-  // if (!isSupported.value) {
-  //   message.error(t('common.copyError'))
-  // } else {
-  //   await copy()
-  //   if (unref(copied.value)) {
-  //     message.success(t('common.copySuccess'))
-  //   }
-  // }
+  const { copy, copied, isSupported } = useClipboard({ source: text })
+  if (!isSupported) {
+    message.error(t('common.copyError'))
+  } else {
+    await copy()
+    if (unref(copied)) {
+      message.success(t('common.copySuccess'))
+    }
+  }
 }
 </script>

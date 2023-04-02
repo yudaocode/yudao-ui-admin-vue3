@@ -6,8 +6,7 @@ export const rules = reactive({
   category: [required],
   name: [required],
   key: [required],
-  value: [required],
-  visible: [{ required: true, message: '请选择是否可见', trigger: 'change' }]
+  value: [required]
 })
 
 // CrudSchema
