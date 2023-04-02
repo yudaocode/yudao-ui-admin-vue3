@@ -13,50 +13,38 @@ export interface JobVO {
   createTime: Date
 }
 
-export interface JobPageReqVO extends PageParam {
-  name?: string
-  status?: number
-  handlerName?: string
-}
-
-export interface JobExportReqVO {
-  name?: string
-  status?: number
-  handlerName?: string
-}
-
 // 任务列表
-export const getJobPageApi = (params: JobPageReqVO) => {
+export const getJobPage = (params: PageParam) => {
   return request.get({ url: '/infra/job/page', params })
 }
 
 // 任务详情
-export const getJobApi = (id: number) => {
+export const getJob = (id: number) => {
   return request.get({ url: '/infra/job/get?id=' + id })
 }
 
 // 新增任务
-export const createJobApi = (data: JobVO) => {
+export const createJob = (data: JobVO) => {
   return request.post({ url: '/infra/job/create', data })
 }
 
 // 修改定时任务调度
-export const updateJobApi = (data: JobVO) => {
+export const updateJob = (data: JobVO) => {
   return request.put({ url: '/infra/job/update', data })
 }
 
 // 删除定时任务调度
-export const deleteJobApi = (id: number) => {
+export const deleteJob = (id: number) => {
   return request.delete({ url: '/infra/job/delete?id=' + id })
 }
 
 // 导出定时任务调度
-export const exportJobApi = (params: JobExportReqVO) => {
+export const exportJob = (params) => {
   return request.download({ url: '/infra/job/export-excel', params })
 }
 
 // 任务状态修改
-export const updateJobStatusApi = (id: number, status: number) => {
+export const updateJobStatus = (id: number, status: number) => {
   const params = {
     id,
     status
@@ -70,6 +58,6 @@ export const runJobApi = (id: number) => {
 }
 
 // 获得定时任务的下 n 次执行时间
-export const getJobNextTimesApi = (id: number) => {
+export const getJobNextTimes = (id: number) => {
   return request.get({ url: '/infra/job/get_next_times?id=' + id })
 }

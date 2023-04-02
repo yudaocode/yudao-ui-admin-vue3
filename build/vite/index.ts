@@ -15,7 +15,7 @@ import vueSetupExtend from 'vite-plugin-vue-setup-extend'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
-export function createVitePlugins(VITE_APP_TITLE: string) {
+export function createVitePlugins() {
   const root = process.cwd()
   // 路径查找
   function pathResolve(dir: string) {
@@ -39,11 +39,14 @@ export function createVitePlugins(VITE_APP_TITLE: string) {
       imports: [
         'vue',
         'vue-router',
+        // 可额外添加需要 autoImport 的组件
         {
           '@/hooks/web/useI18n': ['useI18n'],
-          '@/hooks/web/useXTable': ['useXTable'],
           '@/hooks/web/useMessage': ['useMessage'],
+          '@/hooks/web/useXTable': ['useXTable'],
           '@/hooks/web/useVxeCrudSchemas': ['useVxeCrudSchemas'],
+          '@/hooks/web/useTable': ['useTable'],
+          '@/hooks/web/useCrudSchemas': ['useCrudSchemas'],
           '@/utils/formRules': ['required'],
           '@/utils/dict': ['DICT_TYPE']
         }
@@ -92,8 +95,6 @@ export function createVitePlugins(VITE_APP_TITLE: string) {
       ext: '.gz', // 生成的压缩包后缀
       deleteOriginFile: false //压缩后是否删除源文件
     }),
-    ViteEjsPlugin({
-      title: VITE_APP_TITLE
-    })
+    ViteEjsPlugin()
   ]
 }

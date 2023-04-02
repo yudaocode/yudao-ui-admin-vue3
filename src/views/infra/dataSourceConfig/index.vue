@@ -1,145 +1,102 @@
 <template>
-  <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <template #toolbar_buttons>
-        <XButton
+  <content-wrap>
+    <!-- 搜索工作栏 -->
+    <el-form class="-mb-15px" :inline="true">
+      <el-form-item>
+        <el-button
           type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
+          @click="openModal('create')"
           v-hasPermi="['infra:data-source-config:create']"
-          @click="handleCreate()"
-        />
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['infra:data-source-config:update']"
-          @click="handleUpdate(row.id)"
-        />
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
-          v-hasPermi="['infra:data-source-config:query']"
-          @click="handleDetail(row.id)"
-        />
-        <!-- 操作：删除 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['infra:data-source-config:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
-  </ContentWrap>
-  <XModal v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form
-      v-if="['create', 'update'].includes(actionType)"
-      :schema="allSchemas.formSchema"
-      :rules="rules"
-      ref="formRef"
-    />
-    <!-- 对话框(详情) -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    />
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="loading"
-        @click="submitForm()"
+        >
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </content-wrap>
+
+  <!-- 列表 -->
+  <content-wrap>
+    <el-table v-loading="loading" :data="list" align="center">
+      <el-table-column label="主键编号" align="center" prop="id" />
+      <el-table-column label="数据源名称" align="center" prop="name" />
+      <el-table-column label="数据源连接" align="center" prop="url" :show-overflow-tooltip="true" />
+      <el-table-column label="用户名" align="center" prop="username" />
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
       />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="loading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
+      <el-table-column label="操作" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openModal('update', scope.row.id)"
+            v-hasPermi="['infra:data-source-config:update']"
+            :disabled="scope.row.id === 0"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['infra:data-source-config:delete']"
+            :disabled="scope.row.id === 0"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </content-wrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <data-source-config-form ref="modalRef" @success="getList" />
 </template>
 <script setup lang="ts" name="DataSourceConfig">
-import type { FormExpose } from '@/components/Form'
-// 业务相关的 import
-import * as DataSourceConfiggApi from '@/api/infra/dataSourceConfig'
-import { rules, allSchemas } from './dataSourceConfig.data'
-
-const { t } = useI18n() // 国际化
+import { dateFormatter } from '@/utils/formatTime'
+import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
+import DataSourceConfigForm from './form.vue'
 const message = useMessage() // 消息弹窗
-// 列表相关的变量
-const [registerTable, { reload, deleteData }] = useXTable({
-  allSchemas: allSchemas,
-  isList: true,
-  getListApi: DataSourceConfiggApi.getDataSourceConfigListApi,
-  deleteApi: DataSourceConfiggApi.deleteDataSourceConfigApi
+const { t } = useI18n() // 国际化
+
+const loading = ref(true) // 列表的加载中
+const list = ref([]) // 列表的数据
+
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    list.value = await DataSourceConfigApi.getDataSourceConfigList()
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 添加/修改操作 */
+const modalRef = ref()
+const openModal = (type: string, id?: number) => {
+  modalRef.value.openModal(type, id)
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await DataSourceConfigApi.deleteDataSourceConfig(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 初始化 **/
+onMounted(() => {
+  getList()
 })
-// ========== CRUD 相关 ==========
-const loading = ref(false) // 遮罩层
-const actionType = ref('') // 操作按钮的类型
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const formRef = ref<FormExpose>() // 表单 Ref
-const detailData = ref() // 详情 Ref
-
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
-}
-
-// 新增操作
-const handleCreate = () => {
-  setDialogTile('create')
-}
-
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  // 设置数据
-  const res = await DataSourceConfiggApi.getDataSourceConfigApi(rowId)
-  unref(formRef)?.setValues(res)
-}
-
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  // 设置数据
-  const res = await DataSourceConfiggApi.getDataSourceConfigApi(rowId)
-  detailData.value = res
-  setDialogTile('detail')
-}
-
-// 提交按钮
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      loading.value = true
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as DataSourceConfiggApi.DataSourceConfigVO
-        if (actionType.value === 'create') {
-          await DataSourceConfiggApi.createDataSourceConfigApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          await DataSourceConfiggApi.updateDataSourceConfigApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        loading.value = false
-        // 刷新列表
-        await reload()
-      }
-    }
-  })
-}
 </script>

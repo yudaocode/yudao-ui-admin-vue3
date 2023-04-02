@@ -1,183 +1,85 @@
 <template>
-  <Form :rules="rules" @register="register" />
+  <el-form ref="formRef" :model="formData" :rules="rules" label-width="120px">
+    <el-row>
+      <el-col :span="12">
+        <el-form-item label="表名称" prop="tableName">
+          <el-input placeholder="请输入仓库名称" v-model="formData.tableName" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="表描述" prop="tableComment">
+          <el-input placeholder="请输入" v-model="formData.tableComment" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item prop="className">
+          <template #label>
+            <span>
+              实体类名称
+              <el-tooltip
+                content="默认去除表名的前缀。如果存在重复，则需要手动添加前缀，避免 MyBatis 报 Alias 重复的问题。"
+                placement="top"
+              >
+                <Icon icon="ep:question-filled" class="" />
+              </el-tooltip>
+            </span>
+          </template>
+          <el-input placeholder="请输入" v-model="formData.className" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item label="作者" prop="author">
+          <el-input placeholder="请输入" v-model="formData.author" />
+        </el-form-item>
+      </el-col>
+      <el-col :span="24">
+        <el-form-item label="备注" prop="remark">
+          <el-input type="textarea" :rows="3" v-model="formData.remark" />
+        </el-form-item>
+      </el-col>
+    </el-row>
+  </el-form>
 </template>
 <script setup lang="ts">
-import { useForm } from '@/hooks/web/useForm'
-import { FormSchema } from '@/types/form'
-import { CodegenTableVO } from '@/api/infra/codegen/types'
-import { getIntDictOptions } from '@/utils/dict'
-import { listSimpleMenusApi } from '@/api/system/menu'
-import { handleTree, defaultProps } from '@/utils/tree'
+import * as CodegenApi from '@/api/infra/codegen'
 import { PropType } from 'vue'
 
 const props = defineProps({
-  basicInfo: {
-    type: Object as PropType<Nullable<CodegenTableVO>>,
+  table: {
+    type: Object as PropType<Nullable<CodegenApi.CodegenTableVO>>,
     default: () => null
   }
 })
 
-const templateTypeOptions = getIntDictOptions(DICT_TYPE.INFRA_CODEGEN_TEMPLATE_TYPE)
-const sceneOptions = getIntDictOptions(DICT_TYPE.INFRA_CODEGEN_SCENE)
-const menuOptions = ref<any>([]) // 树形结构
-const getTree = async () => {
-  const res = await listSimpleMenusApi()
-  menuOptions.value = handleTree(res)
-}
-
+const formRef = ref()
+const formData = ref({
+  tableName: '',
+  tableComment: '',
+  className: '',
+  author: '',
+  remark: ''
+})
 const rules = reactive({
   tableName: [required],
   tableComment: [required],
   className: [required],
-  author: [required],
-  templateType: [required],
-  scene: [required],
-  moduleName: [required],
-  businessName: [required],
-  businessPackage: [required],
-  classComment: [required]
+  author: [required]
 })
-const schema = reactive<FormSchema[]>([
-  {
-    label: '上级菜单',
-    field: 'parentMenuId',
-    component: 'TreeSelect',
-    componentProps: {
-      data: menuOptions,
-      props: defaultProps,
-      checkStrictly: true,
-      nodeKey: 'id'
-    },
-    labelMessage: '分配到指定菜单下，例如 系统管理',
-    colProps: {
-      span: 24
-    }
-  },
-  {
-    label: '表名称',
-    field: 'tableName',
-    component: 'Input',
-    colProps: {
-      span: 12
-    }
-  },
-  {
-    label: '表描述',
-    field: 'tableComment',
-    component: 'Input',
-    colProps: {
-      span: 12
-    }
-  },
-  {
-    label: '实体类名称',
-    field: 'className',
-    component: 'Input',
-    colProps: {
-      span: 12
-    }
-  },
-  {
-    label: '类名称',
-    field: 'className',
-    component: 'Input',
-    labelMessage: '类名称（首字母大写），例如SysUser、SysMenu、SysDictData 等等',
-    colProps: {
-      span: 12
-    }
-  },
-  {
-    label: '生成模板',
-    field: 'templateType',
-    component: 'Select',
-    componentProps: {
-      options: templateTypeOptions
-    },
-    colProps: {
-      span: 12
-    }
-  },
-  {
-    label: '生成场景',
-    field: 'scene',
-    component: 'Select',
-    componentProps: {
-      options: sceneOptions
-    },
-    colProps: {
-      span: 12
-    }
-  },
-  {
-    label: '模块名',
-    field: 'moduleName',
-    component: 'Input',
-    labelMessage: '模块名，即一级目录，例如 system、infra、tool 等等',
-    colProps: {
-      span: 12
-    }
-  },
-  {
-    label: '业务名',
-    field: 'businessName',
-    component: 'Input',
-    labelMessage: '业务名，即二级目录，例如 user、permission、dict 等等',
-    colProps: {
-      span: 12
-    }
-  },
-  {
-    label: '类描述',
-    field: 'classComment',
-    component: 'Input',
-    labelMessage: '用作类描述，例如 用户',
-    colProps: {
-      span: 12
-    }
-  },
-  {
-    label: '作者',
-    field: 'author',
-    component: 'Input',
-    colProps: {
-      span: 12
-    }
-  },
-  {
-    label: '备注',
-    field: 'remark',
-    component: 'Input',
-    componentProps: {
-      type: 'textarea',
-      rows: 4
-    },
-    colProps: {
-      span: 24
-    }
-  }
-])
-const { register, methods, elFormRef } = useForm({
-  schema
-})
+
+/** 监听 table 属性，复制给 formData 属性 */
 watch(
-  () => props.basicInfo,
-  (basicInfo) => {
-    if (!basicInfo) return
-    const { setValues } = methods
-    setValues(basicInfo)
+  () => props.table,
+  (table) => {
+    if (!table) return
+    formData.value = table
   },
   {
     deep: true,
     immediate: true
   }
 )
-// ========== 初始化 ==========
-onMounted(async () => {
-  await getTree()
-})
 
 defineExpose({
-  elFormRef,
-  getFormData: methods.getFormData
+  validate: async () => unref(formRef)?.validate()
 })
 </script>

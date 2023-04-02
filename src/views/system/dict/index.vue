@@ -1,257 +1,211 @@
 <template>
-  <div class="flex">
-    <!-- ====== 字典分类 ====== -->
-    <el-card class="w-1/2 dict" :gutter="12" shadow="always">
-      <template #header>
-        <div class="card-header">
-          <span>字典分类</span>
-        </div>
-      </template>
-      <XTable @register="registerType" @cell-click="cellClickEvent">
-        <!-- 操作：新增类型 -->
-        <template #toolbar_buttons>
-          <XButton
-            type="primary"
-            preIcon="ep:zoom-in"
-            :title="t('action.add')"
-            v-hasPermi="['system:dict:create']"
-            @click="handleTypeCreate()"
+  <!-- 搜索工作栏 -->
+  <content-wrap>
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
+      <el-form-item label="字典名称" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入字典名称"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="字典类型" prop="type">
+        <el-input
+          v-model="queryParams.type"
+          placeholder="请输入字典类型"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="字典状态" clearable class="!w-240px">
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="parseInt(dict.value)"
+            :label="dict.label"
+            :value="dict.value"
           />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button type="primary" @click="openModal('create')" v-hasPermi="['system:dict:create']">
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
+        <el-button
+          type="success"
+          plain
+          @click="handleExport"
+          :loading="exportLoading"
+          v-hasPermi="['system:dict:export']"
+        >
+          <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </content-wrap>
+
+  <!-- 列表 -->
+  <content-wrap>
+    <el-table v-loading="loading" :data="list">
+      <el-table-column label="字典编号" align="center" prop="id" />
+      <el-table-column label="字典名称" align="center" prop="name" show-overflow-tooltip />
+      <el-table-column label="字典类型" align="center" prop="type" width="300" />
+      <el-table-column label="状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
-        <template #actionbtns_default="{ row }">
-          <!-- 操作：编辑类型 -->
-          <XTextButton
-            preIcon="ep:edit"
-            :title="t('action.edit')"
-            v-hasPermi="['system:dict:update']"
-            @click="handleTypeUpdate(row.id)"
-          />
-          <!-- 操作：删除类型 -->
-          <XTextButton
-            preIcon="ep:delete"
-            :title="t('action.del')"
-            v-hasPermi="['system:dict:delete']"
-            @click="typeDeleteData(row.id)"
-          />
-        </template>
-      </XTable>
-      <!-- @星语：分页和列表重叠在一起了 -->
-    </el-card>
-    <!-- ====== 字典数据 ====== -->
-    <el-card class="w-1/2 dict ml-3" :gutter="12" shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <span>字典数据</span>
-        </div>
-      </template>
-      <!-- 列表 -->
-      <div v-if="!tableTypeSelect">
-        <span>请从左侧选择</span>
-      </div>
-      <div v-if="tableTypeSelect">
-        <!-- 列表 -->
-        <XTable @register="registerData">
-          <!-- 操作：新增数据 -->
-          <template #toolbar_buttons>
-            <XButton
-              type="primary"
-              preIcon="ep:zoom-in"
-              :title="t('action.add')"
-              v-hasPermi="['system:dict:create']"
-              @click="handleDataCreate()"
-            />
-          </template>
-          <template #actionbtns_default="{ row }">
-            <!-- 操作：修改数据 -->
-            <XTextButton
-              v-hasPermi="['system:dict:update']"
-              preIcon="ep:edit"
-              :title="t('action.edit')"
-              @click="handleDataUpdate(row.id)"
-            />
-            <!-- 操作：删除数据 -->
-            <XTextButton
-              v-hasPermi="['system:dict:delete']"
-              preIcon="ep:delete"
-              :title="t('action.del')"
-              @click="dataDeleteData(row.id)"
-            />
-          </template>
-        </XTable>
-      </div>
-    </el-card>
-    <XModal id="dictModel" v-model="dialogVisible" :title="dialogTitle">
-      <Form
-        v-if="['typeCreate', 'typeUpdate'].includes(actionType)"
-        :schema="DictTypeSchemas.allSchemas.formSchema"
-        :rules="DictTypeSchemas.dictTypeRules"
-        ref="typeFormRef"
-      >
-        <template #type>
-          <template v-if="actionType == 'typeUpdate'">
-            <el-tag>{{ dictTypeValue }}</el-tag>
-          </template>
-          <template v-else><el-input v-model="dictTypeValue" /> </template>
-        </template>
-      </Form>
-      <Form
-        v-if="['dataCreate', 'dataUpdate'].includes(actionType)"
-        :schema="DictDataSchemas.allSchemas.formSchema"
-        :rules="DictDataSchemas.dictDataRules"
-        ref="dataFormRef"
+      </el-table-column>
+      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column
+        label="创建时间"
+        :formatter="dateFormatter"
+        align="center"
+        prop="createTime"
+        width="180"
       />
-      <!-- 操作按钮 -->
-      <template #footer>
-        <XButton
-          v-if="['typeCreate', 'typeUpdate'].includes(actionType)"
-          type="primary"
-          :title="t('action.save')"
-          :loading="actionLoading"
-          @click="submitTypeForm"
-        />
-        <XButton
-          v-if="['dataCreate', 'dataUpdate'].includes(actionType)"
-          type="primary"
-          :title="t('action.save')"
-          :loading="actionLoading"
-          @click="submitDataForm"
-        />
-        <XButton :title="t('dialog.close')" @click="dialogVisible = false" />
-      </template>
-    </XModal>
-  </div>
+      <el-table-column label="操作" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openModal('update', scope.row.id)"
+            v-hasPermi="['system:dict:update']"
+          >
+            修改
+          </el-button>
+          <router-link :to="'/dict/type/data/' + scope.row.type">
+            <el-button link type="primary">数据</el-button>
+          </router-link>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['system:dict:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </content-wrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <dict-type-form ref="modalRef" @success="getList" />
 </template>
+
 <script setup lang="ts" name="Dict">
-import { VxeTableEvents } from 'vxe-table'
-import type { FormExpose } from '@/components/Form'
-import * as DictTypeSchemas from './dict.type'
-import * as DictDataSchemas from './dict.data'
+import { getDictOptions, DICT_TYPE } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 import * as DictTypeApi from '@/api/system/dict/dict.type'
-import * as DictDataApi from '@/api/system/dict/dict.data'
-import { DictDataVO, DictTypeVO } from '@/api/system/dict/types'
-
-const { t } = useI18n() // 国际化
+import DictTypeForm from './form.vue'
+import download from '@/utils/download'
 const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
-const [registerType, { reload: typeGetList, deleteData: typeDeleteData }] = useXTable({
-  allSchemas: DictTypeSchemas.allSchemas,
-  getListApi: DictTypeApi.getDictTypePageApi,
-  deleteApi: DictTypeApi.deleteDictTypeApi
-})
-
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 字典表格数据
 const queryParams = reactive({
-  dictType: null
+  pageNo: 1,
+  pageSize: 10,
+  name: '',
+  type: '',
+  status: undefined,
+  createTime: []
 })
-const [registerData, { reload: dataGetList, deleteData: dataDeleteData }] = useXTable({
-  allSchemas: DictDataSchemas.allSchemas,
-  params: queryParams,
-  getListApi: DictDataApi.getDictDataPageApi,
-  deleteApi: DictDataApi.deleteDictDataApi
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
+
+/** 查询字典类型列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await DictTypeApi.getDictTypePage(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
+}
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/** 添加/修改操作 */
+const modalRef = ref()
+const openModal = (type: string, id?: number) => {
+  modalRef.value.openModal(type, id)
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await DictTypeApi.deleteDictType(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await DictTypeApi.exportDictType(queryParams)
+    download.excel(data, '字典类型.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+/** 初始化 **/
+onMounted(() => {
+  getList()
 })
-// ========== 字典分类列表相关 ==========
-const dictTypeValue = ref('')
-// 字典分类修改操作
-const handleTypeCreate = () => {
-  dictTypeValue.value = ''
-  setDialogTile('typeCreate')
-}
-const handleTypeUpdate = async (rowId: number) => {
-  setDialogTile('typeUpdate')
-  // 设置数据
-  const res = await DictTypeApi.getDictTypeApi(rowId)
-  dictTypeValue.value = res.type
-  unref(typeFormRef)?.setValues(res)
-}
-
-// 字典数据修改操作
-const handleDataCreate = () => {
-  setDialogTile('dataCreate')
-}
-const handleDataUpdate = async (rowId: number) => {
-  setDialogTile('dataUpdate')
-  // 设置数据
-  const res = await DictDataApi.getDictDataApi(rowId)
-  unref(dataFormRef)?.setValues(res)
-}
-// 字典分类点击行事件
-const parentType = ref('')
-const tableTypeSelect = ref(false)
-const cellClickEvent: VxeTableEvents.CellClick = async ({ row }) => {
-  tableTypeSelect.value = true
-  queryParams.dictType = row['type']
-  await nextTick()
-  await dataGetList()
-  parentType.value = row['type']
-}
-// 弹出框
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const actionLoading = ref(false) // 遮罩层
-const typeFormRef = ref<FormExpose>() // 分类表单 Ref
-const dataFormRef = ref<FormExpose>() // 数据表单 Ref
-const actionType = ref('') // 操作按钮的类型
-
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
-}
-
-// 同步dictTypeValue到form 否则导致表单验证不通过
-watch(dictTypeValue, (val) => {
-  unref(typeFormRef)?.setValues({ type: val })
-})
-
-// 提交按钮
-const submitTypeForm = async () => {
-  const elForm = unref(typeFormRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid && dictTypeValue.value != '') {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(typeFormRef)?.formModel as DictTypeVO
-        if (actionType.value === 'typeCreate') {
-          data.type = dictTypeValue.value
-          await DictTypeApi.createDictTypeApi(data)
-          message.success(t('common.createSuccess'))
-        } else if (actionType.value === 'typeUpdate') {
-          await DictTypeApi.updateDictTypeApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        typeGetList()
-      }
-    }
-  })
-}
-const submitDataForm = async () => {
-  const elForm = unref(dataFormRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(dataFormRef)?.formModel as DictDataVO
-        if (actionType.value === 'dataCreate') {
-          data.dictType = parentType.value
-          await DictDataApi.createDictDataApi(data)
-          message.success(t('common.createSuccess'))
-        } else if (actionType.value === 'dataUpdate') {
-          await DictDataApi.updateDictDataApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        dataGetList()
-      }
-    }
-  })
-}
 </script>

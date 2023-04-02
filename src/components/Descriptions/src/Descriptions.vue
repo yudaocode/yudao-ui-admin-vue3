@@ -76,7 +76,7 @@ const toggleClick = () => {
       v-if="title"
       :class="[
         `${prefixCls}-header`,
-        'h-50px flex justify-between items-center mb-10px border-bottom-1 border-solid border-[var(--tags-view-border-color)] px-10px cursor-pointer dark:border-[var(--el-border-color)]'
+        'h-50px flex justify-between items-center border-bottom-1 border-solid border-[var(--tags-view-border-color)] px-10px cursor-pointer dark:border-[var(--el-border-color)]'
       ]"
       @click="toggleClick"
     >

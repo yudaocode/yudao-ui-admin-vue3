@@ -12,13 +12,6 @@ export interface ConfigVO {
   createTime: Date
 }
 
-export interface ConfigExportReqVO {
-  name?: string
-  key?: string
-  type?: number
-  createTime?: Date[]
-}
-
 // 查询参数列表
 export const getConfigPage = (params: PageParam) => {
   return request.get({ url: '/infra/config/page', params })
@@ -50,6 +43,6 @@ export const deleteConfig = (id: number) => {
 }
 
 // 导出参数
-export const exportConfigApi = (params: ConfigExportReqVO) => {
+export const exportConfigApi = (params) => {
   return request.download({ url: '/infra/config/export', params })
 }

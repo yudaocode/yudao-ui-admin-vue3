@@ -1,189 +1,188 @@
 <template>
+  <!-- 搜索工作栏 -->
   <ContentWrap>
-    <!-- 列表 -->
-    <XTable ref="xGrid" @register="registerTable" show-overflow>
-      <template #toolbar_buttons>
-        <!-- 操作：新增 -->
-        <XButton
-          type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
-          v-hasPermi="['system:dept:create']"
-          @click="handleCreate()"
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
+      <el-form-item label="部门名称" prop="title">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入部门名称"
+          clearable
+          class="!w-240px"
         />
-        <XButton title="展开所有" @click="xGrid?.Ref.setAllTreeExpand(true)" />
-        <XButton title="关闭所有" @click="xGrid?.Ref.clearTreeExpand()" />
-      </template>
-      <template #leaderUserId_default="{ row }">
-        <span>{{ userNicknameFormat(row) }}</span>
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['system:dept:update']"
-          @click="handleUpdate(row.id)"
-        />
-        <!-- 操作：删除 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['system:dept:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
-  </ContentWrap>
-  <!-- 添加或修改菜单对话框 -->
-  <XModal id="deptModel" v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form ref="formRef" :schema="allSchemas.formSchema" :rules="rules">
-      <template #parentId="form">
-        <el-tree-select
-          node-key="id"
-          v-model="form['parentId']"
-          :props="defaultProps"
-          :data="deptOptions"
-          :default-expanded-keys="[100]"
-          check-strictly
-        />
-      </template>
-      <template #leaderUserId="form">
-        <el-select v-model="form['leaderUserId']">
+      </el-form-item>
+      <el-form-item label="部门状态" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择不么你状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
-            v-for="item in userOption"
-            :key="item.id"
-            :label="item.nickname"
-            :value="item.id"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
           />
         </el-select>
-      </template>
-    </Form>
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :loading="actionLoading"
-        @click="submitForm()"
-        :title="t('action.save')"
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['system:dept:create']"
+        >
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
+        <el-button type="danger" plain @click="toggleExpandAll">
+          <Icon icon="ep:sort" class="mr-5px" /> 展开/折叠
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </ContentWrap>
+
+  <!-- 列表 -->
+  <ContentWrap>
+    <el-table
+      v-loading="loading"
+      :data="list"
+      row-key="id"
+      default-expand-all
+      v-if="refreshTable"
+    >
+      <el-table-column prop="name" label="部门名称" width="260" />
+      <el-table-column prop="leader" label="负责人" width="120">
+        <template #default="scope">
+          {{ userList.find((user) => user.id === scope.row.leaderUserId)?.nickname }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="sort" label="排序" width="200" />
+      <el-table-column prop="status" label="状态" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
       />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" @click="dialogVisible = false" :title="t('dialog.close')" />
-    </template>
-  </XModal>
+      <el-table-column label="操作" align="center" class-name="fixed-width">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['system:dept:update']"
+          >
+            修改
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['system:dept:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+  </ContentWrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <DeptForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Dept">
-import { handleTree, defaultProps } from '@/utils/tree'
-import type { FormExpose } from '@/components/Form'
-import { allSchemas, rules } from './dept.data'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
+import { handleTree } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
-import { getListSimpleUsersApi, UserVO } from '@/api/system/user'
-
-const { t } = useI18n() // 国际化
+import DeptForm from './DeptForm.vue'
+import * as UserApi from '@/api/system/user'
 const message = useMessage() // 消息弹窗
-// 列表相关的变量
-const xGrid = ref<any>() // 列表 Grid Ref
-const treeConfig = {
-  transform: true,
-  rowField: 'id',
-  parentField: 'parentId',
-  expandAll: true
-}
+const { t } = useI18n() // 国际化
 
-// 弹窗相关的变量
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const actionType = ref('') // 操作按钮的类型
-const actionLoading = ref(false) // 遮罩层
-const formRef = ref<FormExpose>() // 表单 Ref
-const deptOptions = ref() // 树形结构
-const userOption = ref<UserVO[]>([])
-
-const getUserList = async () => {
-  const res = await getListSimpleUsersApi()
-  userOption.value = res
-}
-// 获取下拉框[上级]的数据
-const getTree = async () => {
-  deptOptions.value = []
-  const res = await DeptApi.listSimpleDeptApi()
-  let dept: Tree = { id: 0, name: '顶级部门', children: [] }
-  dept.children = handleTree(res)
-  deptOptions.value.push(dept)
-}
-const [registerTable, { reload, deleteData }] = useXTable({
-  allSchemas: allSchemas,
-  treeConfig: treeConfig,
-  getListApi: DeptApi.getDeptPageApi,
-  deleteApi: DeptApi.deleteDeptApi
+const loading = ref(true) // 列表的加载中
+const list = ref() // 列表的数据
+const queryParams = reactive({
+  title: '',
+  name: undefined,
+  status: undefined,
+  pageNo: 1,
+  pageSize: 100
 })
-// ========== 新增/修改 ==========
+const queryFormRef = ref() // 搜索的表单
+const isExpandAll = ref(true) // 是否展开，默认全部展开
+const refreshTable = ref(true) // 重新渲染表格状态
+const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
+/** 查询部门列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await DeptApi.getDeptPageApi(queryParams)
+    list.value = handleTree(data)
+  } finally {
+    loading.value = false
+  }
 }
 
-// 新增操作
-const handleCreate = async () => {
-  setDialogTile('create')
-}
-
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  // 设置数据
-  const res = await DeptApi.getDeptApi(rowId)
-  await nextTick()
-  unref(formRef)?.setValues(res)
-}
-
-// 提交新增/修改的表单
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as DeptApi.DeptVO
-        if (actionType.value === 'create') {
-          await DeptApi.createDeptApi(data)
-          message.success(t('common.createSuccess'))
-        } else if (actionType.value === 'update') {
-          await DeptApi.updateDeptApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        await getTree()
-        await reload()
-      }
-    }
+/** 展开/折叠操作 */
+const toggleExpandAll = () => {
+  refreshTable.value = false
+  isExpandAll.value = !isExpandAll.value
+  console.log(isExpandAll.value)
+  nextTick(() => {
+    refreshTable.value = true
   })
 }
 
-const userNicknameFormat = (row) => {
-  if (!row || !row.leaderUserId) {
-    return '未设置'
-  }
-  for (const user of userOption.value) {
-    if (row.leaderUserId === user.id) {
-      return user.nickname
-    }
-  }
-  return '未知【' + row.leaderUserId + '】'
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  getList()
 }
 
-// ========== 初始化 ==========
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryParams.pageNo = 1
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await DeptApi.deleteDeptApi(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 初始化 **/
 onMounted(async () => {
-  await getUserList()
-  await getTree()
+  await getList()
+  // 获取用户列表
+  userList.value = await UserApi.getSimpleUserList()
 })
 </script>

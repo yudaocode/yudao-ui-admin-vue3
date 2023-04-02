@@ -1,145 +1,228 @@
 <template>
-  <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <!-- 操作：新增 -->
-      <template #toolbar_buttons>
-        <XButton
+  <!-- 搜索工作栏 -->
+  <content-wrap>
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="90px"
+    >
+      <el-form-item label="错误码类型" prop="type">
+        <el-select v-model="queryParams.type" placeholder="请选择错误码类型" clearable>
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.SYSTEM_ERROR_CODE_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+            class="!w-240px"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="应用名" prop="applicationName">
+        <el-input
+          v-model="queryParams.applicationName"
+          placeholder="请输入应用名"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="错误码编码" prop="code">
+        <el-input
+          v-model="queryParams.code"
+          placeholder="请输入错误码编码"
+          clearable
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="错误码提示" prop="message">
+        <el-input
+          v-model="queryParams.message"
+          placeholder="请输入错误码提示"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button
           type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
+          @click="openModal('create')"
           v-hasPermi="['system:error-code:create']"
-          @click="handleCreate()"
-        />
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['system:error-code:update']"
-          @click="handleUpdate(row.id)"
-        />
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
-          v-hasPermi="['system:error-code:query']"
-          @click="handleDetail(row.id)"
-        />
-        <!-- 操作：删除 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['system:error-code:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
-  </ContentWrap>
-  <!-- 弹窗 -->
-  <XModal id="errorCodeModel" v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form
-      v-if="['create', 'update'].includes(actionType)"
-      :schema="allSchemas.formSchema"
-      :rules="rules"
-      ref="formRef"
-    />
-    <!-- 对话框(详情) -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    />
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="actionLoading"
-        @click="submitForm()"
+        >
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
+        <el-button
+          type="success"
+          plain
+          @click="handleExport"
+          :loading="exportLoading"
+          v-hasPermi="['system:error-code:export']"
+        >
+          <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </content-wrap>
+
+  <!-- 列表 -->
+  <content-wrap>
+    <el-table v-loading="loading" :data="list">
+      <el-table-column label="编号" align="center" prop="id" />
+      <el-table-column label="类型" align="center" prop="type" width="80">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.SYSTEM_ERROR_CODE_TYPE" :value="scope.row.type" />
+        </template>
+      </el-table-column>
+      <el-table-column label="应用名" align="center" prop="applicationName" width="200" />
+      <el-table-column label="错误码编码" align="center" prop="code" width="120" />
+      <el-table-column label="错误码提示" align="center" prop="message" width="300" />
+      <el-table-column label="备注" align="center" prop="memo" width="200" />
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
       />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
+      <el-table-column label="操作" align="center" class-name="small-paddingfixed-width">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openModal('update', scope.row.id)"
+            v-hasPermi="['system:error-code:update']"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['system:error-code:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页组件 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </content-wrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <error-code-form ref="modalRef" @success="getList" />
 </template>
+
 <script setup lang="ts" name="ErrorCode">
-import type { FormExpose } from '@/components/Form'
-// 业务相关的 import
-import { rules, allSchemas } from './errorCode.data'
 import * as ErrorCodeApi from '@/api/system/errorCode'
-
-const { t } = useI18n() // 国际化
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
+import ErrorCodeForm from './form.vue'
+import download from '@/utils/download'
 const message = useMessage() // 消息弹窗
-// 列表相关的变量
-const [registerTable, { reload, deleteData }] = useXTable({
-  allSchemas: allSchemas,
-  getListApi: ErrorCodeApi.getErrorCodePageApi,
-  deleteApi: ErrorCodeApi.deleteErrorCodeApi
+const { t } = useI18n() // 国际化
+
+// 遮罩层
+const loading = ref(true)
+// 导出遮罩层
+const exportLoading = ref(false)
+// 总条数
+const total = ref(0)
+// 错误码列表
+const list = ref([])
+// 查询参数
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  type: undefined,
+  applicationName: undefined,
+  code: undefined,
+  message: undefined,
+  createTime: []
 })
-// 弹窗相关的变量
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const actionType = ref('') // 操作按钮的类型
-const actionLoading = ref(false) // 按钮 Loading
-const formRef = ref<FormExpose>() // 表单 Ref
-const detailData = ref() // 详情 Ref
+// 搜索的表单
+const queryFormRef = ref()
 
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  // 执行查询
+  try {
+    const data = await ErrorCodeApi.getErrorCodePageApi(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
 }
 
-// 新增操作
-const handleCreate = () => {
-  setDialogTile('create')
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
 }
 
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  // 设置数据
-  const res = await ErrorCodeApi.getErrorCodeApi(rowId)
-  unref(formRef)?.setValues(res)
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
 }
 
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  setDialogTile('detail')
-  // 设置数据
-  const res = await ErrorCodeApi.getErrorCodeApi(rowId)
-  detailData.value = res
+/** 添加/修改操作 */
+const modalRef = ref()
+const openModal = (type: string, id?: number) => {
+  modalRef.value.openModal(type, id)
 }
 
-// 提交新增/修改的表单
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as ErrorCodeApi.ErrorCodeVO
-        if (actionType.value === 'create') {
-          await ErrorCodeApi.createErrorCodeApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          await ErrorCodeApi.updateErrorCodeApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        // 刷新列表
-        await reload()
-      }
-    }
-  })
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    await ErrorCodeApi.deleteErrorCodeApi(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
+
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await ErrorCodeApi.excelErrorCodeApi(queryParams)
+    download.excel(data, '错误码.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+/** 初始化 **/
+onMounted(() => {
+  getList()
+})
 </script>

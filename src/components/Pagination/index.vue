@@ -5,7 +5,7 @@
     class="float-right mt-15px mb-15px"
     :background="true"
     layout="total, sizes, prev, pager, next, jumper"
-    :page-sizes="[10, 20, 30, 50]"
+    :page-sizes="[10, 20, 30, 50, 100]"
     v-model:current-page="currentPage"
     v-model:page-size="pageSize"
     :pager-count="pagerCount"

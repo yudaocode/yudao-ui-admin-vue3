@@ -1,17 +1,29 @@
 <template>
   <content-wrap>
     <!-- 搜索工作栏 -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="公告标题" prop="title">
         <el-input
           v-model="queryParams.title"
           placeholder="请输入公告标题"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="公告状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择公告状态" clearable>
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择公告状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="parseInt(dict.value)"
@@ -32,9 +44,11 @@
         </el-button>
       </el-form-item>
     </el-form>
+  </content-wrap>
 
-    <!-- 列表 -->
-    <el-table v-loading="loading" :data="list" align="center">
+  <!-- 列表 -->
+  <content-wrap>
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="公告编号" align="center" prop="id" />
       <el-table-column label="公告标题" align="center" prop="title" />
       <el-table-column label="公告类型" align="center" prop="type">
@@ -100,11 +114,11 @@ const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
   title: '',
   type: undefined,
-  status: undefined,
-  pageNo: 1,
-  pageSize: 100
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 

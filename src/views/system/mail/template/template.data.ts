@@ -1,98 +1,113 @@
-import type { VxeCrudSchema } from '@/hooks/web/useVxeCrudSchemas'
+import type { CrudSchema } from '@/hooks/web/useCrudSchemas'
+import { dateFormatter } from '@/utils/formatTime'
+import { TableColumn } from '@/types/table'
+import * as MailAccountApi from '@/api/system/mail/account'
+
+// 邮箱账号的列表
+const accounts = await MailAccountApi.getSimpleMailAccountList()
 
 // 表单校验
 export const rules = reactive({
   name: [required],
   code: [required],
   accountId: [required],
-  title: [required],
+  label: [required],
   content: [required],
   params: [required],
   status: [required]
 })
 
-// CrudSchema
-const crudSchemas = reactive<VxeCrudSchema>({
-  primaryKey: 'id', // 默认的主键ID
-  primaryTitle: '编号', // 默认显示的值
-  primaryType: null,
-  action: true,
-  actionWidth: '260',
-  columns: [
-    {
-      title: '模板编码',
-      field: 'code',
-      isSearch: true
+// CrudSchema：https://kailong110120130.gitee.io/vue-element-plus-admin-doc/hooks/useCrudSchemas.html
+const crudSchemas = reactive<CrudSchema[]>([
+  {
+    label: '模板编码',
+    field: 'code',
+    isSearch: true
+  },
+  {
+    label: '模板名称',
+    field: 'name',
+    isSearch: true
+  },
+  {
+    label: '模板标题',
+    field: 'title'
+  },
+  {
+    label: '模板内容',
+    field: 'content',
+    form: {
+      component: 'Editor',
+      componentProps: {
+        valueHtml: '',
+        height: 200
+      }
+    }
+  },
+  {
+    label: '邮箱账号',
+    field: 'accountId',
+    width: '200px',
+    formatter: (_: Recordable, __: TableColumn, cellValue: number) => {
+      return accounts.find((account) => account.id === cellValue)?.mail
     },
-    {
-      title: '模板名称',
-      field: 'name',
-      isSearch: true
-    },
-    {
-      title: '模板标题',
-      field: 'title'
-    },
-    {
-      title: '模板内容',
-      field: 'content',
-      form: {
-        component: 'Editor',
-        colProps: {
-          span: 24
-        },
-        componentProps: {
-          valueHtml: ''
+    search: {
+      show: true,
+      component: 'Select',
+      api: () => accounts,
+      componentProps: {
+        optionsAlias: {
+          labelField: 'mail',
+          valueField: 'id'
         }
       }
     },
-    {
-      title: '邮箱账号',
-      field: 'accountId',
-      isSearch: true,
-      table: {
-        width: 200,
-        slots: {
-          default: 'accountId_default'
-        }
-      },
-      search: {
-        slots: {
-          default: 'accountId_search'
-        }
-      }
-    },
-    {
-      title: '发送人名称',
-      field: 'nickname'
-    },
-    {
-      title: '开启状态',
-      field: 'status',
-      isSearch: true,
-      dictType: DICT_TYPE.COMMON_STATUS,
-      dictClass: 'number'
-    },
-    {
-      title: '备注',
-      field: 'remark',
-      isTable: false
-    },
-    {
-      title: '创建时间',
-      field: 'createTime',
-      isForm: false,
-      formatter: 'formatDate',
-      table: {
-        width: 180
-      },
-      search: {
-        show: true,
-        itemRender: {
-          name: 'XDataTimePicker'
+    form: {
+      component: 'Select',
+      api: () => accounts,
+      componentProps: {
+        optionsAlias: {
+          labelField: 'mail',
+          valueField: 'id'
         }
       }
     }
-  ]
-})
-export const { allSchemas } = useVxeCrudSchemas(crudSchemas)
+  },
+  {
+    label: '发送人名称',
+    field: 'nickname'
+  },
+  {
+    label: '开启状态',
+    field: 'status',
+    isSearch: true,
+    dictType: DICT_TYPE.COMMON_STATUS,
+    dictClass: 'number'
+  },
+  {
+    label: '备注',
+    field: 'remark',
+    isTable: false
+  },
+  {
+    label: '创建时间',
+    field: 'createTime',
+    isForm: false,
+    formatter: dateFormatter,
+    search: {
+      show: true,
+      component: 'DatePicker',
+      componentProps: {
+        valueFormat: 'YYYY-MM-DD HH:mm:ss',
+        type: 'daterange',
+        defaultTime: [new Date('1 00:00:00'), new Date('1 23:59:59')]
+      }
+    }
+  },
+  {
+    label: '操作',
+    field: 'action',
+    isForm: false
+  }
+])
+export const { allSchemas } = useCrudSchemas(crudSchemas)

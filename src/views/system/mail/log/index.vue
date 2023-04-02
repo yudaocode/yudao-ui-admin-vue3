@@ -1,98 +1,59 @@
 <template>
-  <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <template #accountId_search>
-        <el-select v-model="queryParams.accountId">
-          <el-option :key="undefined" label="全部" :value="undefined" />
-          <el-option
-            v-for="item in accountOptions"
-            :key="item.id"
-            :label="item.mail"
-            :value="item.id"
-          />
-        </el-select>
-      </template>
-      <template #toMail_default="{ row }">
-        <div>{{ row.toMail }}</div>
-        <div v-if="row.userType && row.userId">
-          <DictTag :type="DICT_TYPE.USER_TYPE" :value="row.userType" />{{ '(' + row.userId + ')' }}
-        </div>
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
+  <!-- 搜索工作栏 -->
+  <content-wrap>
+    <Search :schema="allSchemas.searchSchema" @search="setSearchParams" @reset="setSearchParams" />
+  </content-wrap>
+
+  <!-- 列表 -->
+  <content-wrap>
+    <Table
+      :columns="allSchemas.tableColumns"
+      :data="tableObject.tableList"
+      :loading="tableObject.loading"
+      :pagination="{
+        total: tableObject.total
+      }"
+      v-model:pageSize="tableObject.pageSize"
+      v-model:currentPage="tableObject.currentPage"
+    >
+      <template #action="{ row }">
+        <el-button
+          link
+          type="primary"
+          @click="openModal(row.id)"
           v-hasPermi="['system:mail-log:query']"
-          @click="handleDetail(row.id)"
-        />
+        >
+          详情
+        </el-button>
       </template>
-    </XTable>
-  </ContentWrap>
-  <!-- 弹窗 -->
-  <XModal id="mailLogModel" :loading="modelLoading" v-model="modelVisible" :title="modelTitle">
-    <!-- 表单：详情 -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    />
-    <template #footer>
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="modelVisible = false" />
-    </template>
-  </XModal>
+    </Table>
+  </content-wrap>
+
+  <!-- 表单弹窗：详情 -->
+  <mail-log-detail ref="modalRef" />
 </template>
 <script setup lang="ts" name="MailLog">
-// 业务相关的 import
-import { DICT_TYPE } from '@/utils/dict'
 import { allSchemas } from './log.data'
 import * as MailLogApi from '@/api/system/mail/log'
-import * as MailAccountApi from '@/api/system/mail/account'
+import MailLogDetail from './detail.vue'
 
-const { t } = useI18n() // 国际化
-
-// 列表相关的变量
-const queryParams = reactive({
-  accountId: null
+// tableObject：表格的属性对象，可获得分页大小、条数等属性
+// tableMethods：表格的操作对象，可进行获得分页、删除记录等操作
+// 详细可见：https://kailong110120130.gitee.io/vue-element-plus-admin-doc/components/table.html#usetable
+const { tableObject, tableMethods } = useTable({
+  getListApi: MailLogApi.getMailLogPage // 分页接口
 })
-const [registerTable] = useXTable({
-  allSchemas: allSchemas,
-  topActionSlots: false,
-  params: queryParams,
-  getListApi: MailLogApi.getMailLogPageApi
-})
-const accountOptions = ref<any[]>([]) // 账号下拉选项
+// 获得表格的各种操作
+const { getList, setSearchParams } = tableMethods
 
-// 弹窗相关的变量
-const modelVisible = ref(false) // 是否显示弹出层
-const modelTitle = ref('edit') // 弹出层标题
-const modelLoading = ref(false) // 弹出层loading
-const actionType = ref('') // 操作按钮的类型
-const actionLoading = ref(false) // 按钮 Loading
-const detailData = ref() // 详情 Ref
-
-// 设置标题
-const setDialogTile = (type: string) => {
-  modelLoading.value = true
-  modelTitle.value = t('action.' + type)
-  actionType.value = type
-  modelVisible.value = true
+/** 详情操作 */
+const modalRef = ref()
+const openModal = (id: number) => {
+  modalRef.value.openModal(id)
 }
 
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  setDialogTile('detail')
-  const res = await MailLogApi.getMailLogApi(rowId)
-  detailData.value = res
-  modelLoading.value = false
-}
-
-// ========== 初始化 ==========
+/** 初始化 **/
 onMounted(() => {
-  MailAccountApi.getSimpleMailAccounts().then((data) => {
-    accountOptions.value = data
-  })
+  getList()
 })
 </script>

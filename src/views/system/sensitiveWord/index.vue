@@ -1,191 +1,241 @@
 <template>
+  <!-- 搜索工作栏 -->
   <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <template #toolbar_buttons>
-        <!-- 操作：新增 -->
-        <XButton
-          type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
-          v-hasPermi="['system:sensitive-word:create']"
-          @click="handleCreate()"
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
+      <el-form-item label="敏感词" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入敏感词"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
         />
-        <!-- 操作：导出 -->
-        <XButton
-          type="warning"
-          preIcon="ep:download"
-          :title="t('action.export')"
-          v-hasPermi="['system:sensitive-word:export']"
-          @click="exportList('敏感词数据.xls')"
-        />
-      </template>
-      <template #tags_default="{ row }">
-        <el-tag
-          :disable-transitions="true"
-          :key="index"
-          v-for="(tag, index) in row.tags"
-          :index="index"
+      </el-form-item>
+      <el-form-item label="标签" prop="tag">
+        <el-select
+          v-model="queryParams.tag"
+          placeholder="请选择标签"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
         >
-          {{ tag }}
-        </el-tag>
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['system:sensitive-word:update']"
-          @click="handleUpdate(row.id)"
+          <el-option v-for="tag in tagList" :key="tag" :label="tag" :value="tag" />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择启用状态" clearable>
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+            class="!w-240px"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
-          v-hasPermi="['system:sensitive-word:update']"
-          @click="handleDetail(row.id)"
-        />
-        <!-- 操作：删除 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['system:sensitive-word:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['system:sensitive-word:create']"
+        >
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
+        <el-button
+          type="success"
+          plain
+          @click="handleExport"
+          :loading="exportLoading"
+          v-hasPermi="['system:sensitive-word:export']"
+        >
+          <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
+        <el-button type="warning" plain @click="openTestForm">
+          <Icon icon="ep:document-checked" class="mr-5px" /> 测试
+        </el-button>
+      </el-form-item>
+    </el-form>
   </ContentWrap>
 
-  <XModal v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form
-      v-if="['create', 'update'].includes(actionType)"
-      :schema="allSchemas.formSchema"
-      :rules="rules"
-      ref="formRef"
-    >
-      <template #tags="form">
-        <el-select v-model="form['tags']" multiple placeholder="请选择">
-          <el-option v-for="item in tagsOptions" :key="item" :label="item" :value="item" />
-        </el-select>
-      </template>
-    </Form>
-    <!-- 对话框(详情) -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    >
-      <template #tags="{ row }">
-        <el-tag
-          :disable-transitions="true"
-          :key="index"
-          v-for="(tag, index) in row.tags"
-          :index="index"
-        >
-          {{ tag }}
-        </el-tag>
-      </template>
-    </Descriptions>
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="actionLoading"
-        @click="submitForm()"
+  <!-- 列表 -->
+  <ContentWrap>
+    <el-table v-loading="loading" :data="list">
+      <el-table-column label="编号" align="center" prop="id" />
+      <el-table-column label="敏感词" align="center" prop="name" />
+      <el-table-column label="状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column label="描述" align="center" prop="description" />
+      <el-table-column label="标签" align="center" prop="tags">
+        <template #default="scope">
+          <el-tag
+            class="mr-5px"
+            v-for="tag in scope.row.tags"
+            :key="tag"
+            :disable-transitions="true"
+          >
+            {{ tag }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
       />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
+      <el-table-column label="操作" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['infra:config:update']"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['infra:config:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </ContentWrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <SensitiveWordForm ref="formRef" @success="getList" />
+
+  <!-- 表单弹窗：测试敏感词 -->
+  <SensitiveWordTestForm ref="testFormRef" />
 </template>
 <script setup lang="ts" name="SensitiveWord">
-import type { FormExpose } from '@/components/Form'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
+import download from '@/utils/download'
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
-import { rules, allSchemas } from './sensitiveWord.data'
-
-const { t } = useI18n() // 国际化
+import SensitiveWordForm from './SensitiveWordForm.vue'
+import SensitiveWordTestForm from './SensitiveWordTestForm.vue'
 const message = useMessage() // 消息弹窗
-// 列表相关的变量
-const [registerTable, { reload, deleteData, exportList }] = useXTable({
-  allSchemas: allSchemas,
-  getListApi: SensitiveWordApi.getSensitiveWordPageApi,
-  deleteApi: SensitiveWordApi.deleteSensitiveWordApi,
-  exportListApi: SensitiveWordApi.exportSensitiveWordApi
+const { t } = useI18n() // 国际化
+
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 列表的数据
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  name: undefined,
+  tag: undefined,
+  status: undefined,
+  createTime: []
 })
-const actionLoading = ref(false) // 遮罩层
-const actionType = ref('') // 操作按钮的类型
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const formRef = ref<FormExpose>() // 表单 Ref
-const detailData = ref() // 详情 Ref
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
+const tagList = ref([]) // 标签数组
 
-// 获取标签
-const tagsOptions = ref()
-const getTags = async () => {
-  const res = await SensitiveWordApi.getSensitiveWordTagsApi()
-  tagsOptions.value = res
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await SensitiveWordApi.getSensitiveWordPage(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
 }
 
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
 }
 
-// 新增操作
-const handleCreate = () => {
-  setDialogTile('create')
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
 }
 
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  // 设置数据
-  const res = await SensitiveWordApi.getSensitiveWordApi(rowId)
-  unref(formRef)?.setValues(res)
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  setDialogTile('detail')
-  const res = await SensitiveWordApi.getSensitiveWordApi(rowId)
-  detailData.value = res
+/** 测试敏感词按钮操作 */
+const testFormRef = ref()
+const openTestForm = () => {
+  testFormRef.value.open()
 }
 
-// 提交按钮
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as SensitiveWordApi.SensitiveWordVO
-        if (actionType.value === 'create') {
-          await SensitiveWordApi.createSensitiveWordApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          await SensitiveWordApi.updateSensitiveWordApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        // 刷新列表
-        await reload()
-      }
-    }
-  })
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await SensitiveWordApi.deleteSensitiveWord(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
-// ========== 初始化 ==========
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await SensitiveWordApi.exportSensitiveWord(queryParams)
+    download.excel(data, '敏感词.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+/** 初始化 **/
 onMounted(async () => {
-  await getTags()
+  await getList()
+  // 获得 Tag 标签列表
+  tagList.value = await SensitiveWordApi.getSensitiveWordTagList()
 })
 </script>

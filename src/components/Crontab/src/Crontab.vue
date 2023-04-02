@@ -6,7 +6,10 @@ interface shortcutsType {
   value: string
 }
 const props = defineProps({
-  modelValue: { type: String, default: '* * * * * ?' },
+  modelValue: {
+    type: String,
+    default: '* * * * * ?'
+  },
   shortcuts: { type: Array as PropType<shortcutsType[]>, default: () => [] }
 })
 const defaultValue = ref('')

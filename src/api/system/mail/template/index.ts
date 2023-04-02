@@ -13,14 +13,6 @@ export interface MailTemplateVO {
   remark: string
 }
 
-export interface MailTemplatePageReqVO extends PageParam {
-  name?: string
-  code?: string
-  accountId?: number
-  status?: number
-  createTime?: Date[]
-}
-
 export interface MailSendReqVO {
   mail: string
   templateCode: string
@@ -28,31 +20,31 @@ export interface MailSendReqVO {
 }
 
 // 查询邮件模版列表
-export const getMailTemplatePageApi = async (params: MailTemplatePageReqVO) => {
+export const getMailTemplatePage = async (params: PageParam) => {
   return await request.get({ url: '/system/mail-template/page', params })
 }
 
 // 查询邮件模版详情
-export const getMailTemplateApi = async (id: number) => {
+export const getMailTemplate = async (id: number) => {
   return await request.get({ url: '/system/mail-template/get?id=' + id })
 }
 
 // 新增邮件模版
-export const createMailTemplateApi = async (data: MailTemplateVO) => {
+export const createMailTemplate = async (data: MailTemplateVO) => {
   return await request.post({ url: '/system/mail-template/create', data })
 }
 
 // 修改邮件模版
-export const updateMailTemplateApi = async (data: MailTemplateVO) => {
+export const updateMailTemplate = async (data: MailTemplateVO) => {
   return await request.put({ url: '/system/mail-template/update', data })
 }
 
 // 删除邮件模版
-export const deleteMailTemplateApi = async (id: number) => {
+export const deleteMailTemplate = async (id: number) => {
   return await request.delete({ url: '/system/mail-template/delete?id=' + id })
 }
 
 // 发送邮件
-export const sendMailApi = (data: MailSendReqVO) => {
+export const sendMail = (data: MailSendReqVO) => {
   return request.post({ url: '/system/mail-template/send-mail', data })
 }

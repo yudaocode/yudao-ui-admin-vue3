@@ -11,18 +11,12 @@ export interface OAuth2TokenVO {
   expiresTime: Date
 }
 
-export interface OAuth2TokenPageReqVO extends PageParam {
-  userId?: number
-  userType?: number
-  clientId?: string
-}
-
 // 查询 token列表
-export const getAccessTokenPageApi = (params: OAuth2TokenPageReqVO) => {
+export const getAccessTokenPage = (params: PageParam) => {
   return request.get({ url: '/system/oauth2-token/page', params })
 }
 
 // 删除 token
-export const deleteAccessTokenApi = (accessToken: number) => {
+export const deleteAccessToken = (accessToken: number) => {
   return request.delete({ url: '/system/oauth2-token/delete?accessToken=' + accessToken })
 }
