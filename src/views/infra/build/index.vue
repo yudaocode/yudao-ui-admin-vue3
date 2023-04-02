@@ -77,24 +77,15 @@ const showTemplate = () => {
 
 /** 复制 **/
 const copy = async (text: string) => {
-  // const { copy, copied, isSupported } = useClipboard({ source: JSON.stringify(text) })
-  // if (!isSupported.value) {
-  //   message.error(t('common.copyError'))
-  // } else {
-  //   await copy()
-  //   if (unref(copied.value)) {
-  //     message.success(t('common.copySuccess'))
-  //   }
-  // }
-  let url = JSON.stringify(text)
-  let oInput = document.createElement('textarea')
-  oInput.value = url
-  document.body.appendChild(oInput)
-  oInput.select() // 选择对象;
-  // console.log(oInput.value)
-  document.execCommand('Copy') // 执行浏览器复制命令
-  message.success(t('common.copySuccess'))
-  oInput.remove()
+  const { copy, copied, isSupported } = useClipboard({ source: text })
+  if (!isSupported) {
+    message.error(t('common.copyError'))
+  } else {
+    await copy()
+    if (unref(copied)) {
+      message.success(t('common.copySuccess'))
+    }
+  }
 }
 
 const makeTemplate = () => {
