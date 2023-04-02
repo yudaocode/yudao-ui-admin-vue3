@@ -114,11 +114,11 @@ const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
   title: '',
   type: undefined,
-  status: undefined,
-  pageNo: 1,
-  pageSize: 100
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 
