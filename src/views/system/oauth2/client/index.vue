@@ -14,12 +14,13 @@
           placeholder="请输入应用名"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable size="small">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -29,7 +30,12 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openModal('create')" v-hasPermi="['infra:config:create']">
+        <el-button
+          plain
+          type="primary"
+          @click="openForm('create')"
+          v-hasPermi="['system:oauth2-client:create']"
+        >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
@@ -82,8 +88,8 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
-            v-hasPermi="['infra:config:update']"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['system:oauth2-client:update']"
           >
             编辑
           </el-button>
@@ -91,7 +97,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['infra:config:delete']"
+            v-hasPermi="['system:oauth2-client:delete']"
           >
             删除
           </el-button>
@@ -108,13 +114,13 @@
   </content-wrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <ClientForm ref="modalRef" @success="getList" />
+  <ClientForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as ClientApi from '@/api/system/oauth2/client'
-import ClientForm from './form.vue'
+import ClientForm from './ClientForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -133,7 +139,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ClientApi.getOAuth2ClientPageApi(queryParams)
+    const data = await ClientApi.getOAuth2ClientPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -154,9 +160,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */
@@ -165,7 +171,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ClientApi.deleteOAuth2ClientApi(id)
+    await ClientApi.deleteOAuth2Client(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

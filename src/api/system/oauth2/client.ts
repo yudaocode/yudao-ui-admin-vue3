@@ -21,31 +21,27 @@ export interface OAuth2ClientVO {
   createTime: Date
 }
 
-export interface OAuth2ClientPageReqVO extends PageParam {
-  name?: string
-  status?: number
-}
-// 查询 OAuth2列表
-export const getOAuth2ClientPageApi = (params: OAuth2ClientPageReqVO) => {
+// 查询 OAuth2 客户端的列表
+export const getOAuth2ClientPage = (params: PageParam) => {
   return request.get({ url: '/system/oauth2-client/page', params })
 }
 
-// 查询 OAuth2详情
-export const getOAuth2ClientApi = (id: number) => {
+// 查询 OAuth2 客户端的详情
+export const getOAuth2Client = (id: number) => {
   return request.get({ url: '/system/oauth2-client/get?id=' + id })
 }
 
-// 新增 OAuth2
-export const createOAuth2ClientApi = (data: OAuth2ClientVO) => {
+// 新增 OAuth2 客户端
+export const createOAuth2Client = (data: OAuth2ClientVO) => {
   return request.post({ url: '/system/oauth2-client/create', data })
 }
 
-// 修改 OAuth2
-export const updateOAuth2ClientApi = (data: OAuth2ClientVO) => {
+// 修改 OAuth2 客户端
+export const updateOAuth2Client = (data: OAuth2ClientVO) => {
   return request.put({ url: '/system/oauth2-client/update', data })
 }
 
 // 删除 OAuth2
-export const deleteOAuth2ClientApi = (id: number) => {
+export const deleteOAuth2Client = (id: number) => {
   return request.delete({ url: '/system/oauth2-client/delete?id=' + id })
 }

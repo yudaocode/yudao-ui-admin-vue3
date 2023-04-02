@@ -1,10 +1,10 @@
 <template>
-  <Dialog :title="modelTitle" v-model="modelVisible" width="800">
+  <Dialog :title="modelTitle" v-model="modelVisible" scroll max-height="500px">
     <el-form
       ref="formRef"
       :model="formData"
       :rules="formRules"
-      label-width="120px"
+      label-width="160px"
       v-loading="formLoading"
     >
       <el-form-item label="客户端编号" prop="secret">
@@ -17,7 +17,7 @@
         <el-input v-model="formData.name" placeholder="请输入应用名" />
       </el-form-item>
       <el-form-item label="应用图标">
-        <imageUpload v-model="formData.logo" :limit="1" />
+        <UploadImg v-model="formData.logo" :limit="1" />
       </el-form-item>
       <el-form-item label="应用描述">
         <el-input type="textarea" v-model="formData.description" placeholder="请输入应用名" />
@@ -25,11 +25,12 @@
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
-            :label="parseInt(dict.value)"
-            >{{ dict.label }}</el-radio
+            :label="dict.value"
           >
+            {{ dict.label }}
+          </el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="访问令牌的有效期" prop="accessTokenValiditySeconds">
@@ -47,7 +48,7 @@
           style="width: 500px"
         >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.SYSTEM_OAUTH2_GRANT_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_OAUTH2_GRANT_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -137,15 +138,14 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-        <el-button @click="modelVisible = false">取 消</el-button>
-      </div>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="modelVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
 import * as ClientApi from '@/api/system/oauth2/client'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -161,7 +161,7 @@ const formData = ref({
   name: undefined,
   logo: undefined,
   description: undefined,
-  status: DICT_TYPE.COMMON_STATUS,
+  status: CommonStatusEnum.ENABLE,
   accessTokenValiditySeconds: 30 * 60,
   refreshTokenValiditySeconds: 30 * 24 * 60,
   redirectUris: [],
@@ -190,7 +190,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const open = async (type: string, id?: number) => {
   modelVisible.value = true
   modelTitle.value = t('action.' + type)
   formType.value = type
@@ -199,13 +199,13 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ClientApi.getOAuth2ClientApi(id)
+      formData.value = await ClientApi.getOAuth2Client(id)
     } finally {
       formLoading.value = false
     }
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -219,10 +219,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as ClientApi.OAuth2ClientVO
     if (formType.value === 'create') {
-      await ClientApi.createOAuth2ClientApi(data)
+      await ClientApi.createOAuth2Client(data)
       message.success(t('common.createSuccess'))
     } else {
-      await ClientApi.updateOAuth2ClientApi(data)
+      await ClientApi.updateOAuth2Client(data)
       message.success(t('common.updateSuccess'))
     }
     modelVisible.value = false
@@ -242,7 +242,7 @@ const resetForm = () => {
     name: undefined,
     logo: undefined,
     description: undefined,
-    status: DICT_TYPE.COMMON_STATUS,
+    status: CommonStatusEnum.ENABLE,
     accessTokenValiditySeconds: 30 * 60,
     refreshTokenValiditySeconds: 30 * 24 * 60,
     redirectUris: [],
