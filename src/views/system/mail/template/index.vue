@@ -6,6 +6,7 @@
       <template #actionMore>
         <el-button
           type="primary"
+          plain
           @click="openModal('create')"
           v-hasPermi="['system:mail-account:create']"
         >

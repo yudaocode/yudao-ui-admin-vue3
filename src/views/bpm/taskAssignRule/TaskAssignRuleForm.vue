@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="修改任务规则" v-model="modelVisible" width="600">
+  <Dialog title="修改任务规则" v-model="dialogVisible" width="600">
     <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
       <el-form-item label="任务名称" prop="taskDefinitionName">
         <el-input v-model="formData.taskDefinitionName" placeholder="请输入流标标识" disabled />
@@ -93,7 +93,7 @@
     <!-- 操作按钮 -->
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="modelVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -109,7 +109,7 @@ import * as UserGroupApi from '@/api/bpm/userGroup'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
   type: Number(undefined),
@@ -171,7 +171,7 @@ const open = async (modelId: string, row: TaskAssignRuleApi.TaskAssignVO) => {
     formData.value.scripts.push(...row.options)
   }
   // 打开弹窗
-  modelVisible.value = true
+  dialogVisible.value = true
 
   // 获得角色列表
   roleOptions.value = await RoleApi.getSimpleRoleList()
@@ -232,7 +232,7 @@ const submitForm = async () => {
       await TaskAssignRuleApi.updateTaskAssignRule(data)
       message.success(t('common.updateSuccess'))
     }
-    modelVisible.value = false
+    dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
   } finally {

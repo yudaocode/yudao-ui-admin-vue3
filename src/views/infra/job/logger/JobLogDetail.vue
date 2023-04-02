@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="任务详细" v-model="modelVisible" width="700px">
+  <Dialog title="任务详细" v-model="dialogVisible" width="700px">
     <el-descriptions border :column="1">
       <el-descriptions-item label="日志编号" min-width="60">
         {{ detailData.id }}
@@ -36,13 +36,13 @@ import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as JobLogApi from '@/api/infra/jobLog'
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
 const detailData = ref({}) // 详情数据
 
 /** 打开弹窗 */
 const open = async (id: number) => {
-  modelVisible.value = true
+  dialogVisible.value = true
   // 查看，设置数据
   if (id) {
     detailLoading.value = true

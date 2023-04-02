@@ -5,6 +5,7 @@
       <el-form-item>
         <el-button
           type="primary"
+          plain
           @click="openModal('create')"
           v-hasPermi="['infra:data-source-config:create']"
         >

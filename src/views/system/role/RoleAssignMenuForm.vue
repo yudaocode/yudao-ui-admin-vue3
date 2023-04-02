@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="菜单权限" v-model="modelVisible">
+  <Dialog title="菜单权限" v-model="dialogVisible">
     <el-form ref="formRef" :model="formData" label-width="80px" v-loading="formLoading">
       <el-form-item label="角色名称">
         <el-tag>{{ formData.name }}</el-tag>
@@ -40,7 +40,7 @@
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="modelVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -52,7 +52,7 @@ import * as PermissionApi from '@/api/system/permission'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = reactive({
   id: 0,
@@ -68,7 +68,7 @@ const treeNodeAll = ref(false) // 全选/全不选
 
 /** 打开弹窗 */
 const open = async (row: RoleApi.RoleVO) => {
-  modelVisible.value = true
+  dialogVisible.value = true
   resetForm()
   // 加载 Menu 列表。注意，必须放在前面，不然下面 setChecked 没数据节点
   menuOptions.value = handleTree(await MenuApi.getSimpleMenusList())
@@ -107,7 +107,7 @@ const submitForm = async () => {
     }
     await PermissionApi.assignRoleMenu(data)
     message.success(t('common.updateSuccess'))
-    modelVisible.value = false
+    dialogVisible.value = false
   } finally {
     formLoading.value = false
   }

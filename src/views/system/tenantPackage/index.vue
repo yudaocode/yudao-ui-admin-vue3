@@ -42,6 +42,7 @@
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
+          plain
           @click="openForm('create')"
           v-hasPermi="['system:tenant-package:create']"
         >
@@ -63,11 +64,13 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
-        <template #default="scope">
-          <span>{{ formatDate(scope.row.createTime) }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
+      />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button
@@ -103,7 +106,7 @@
 </template>
 <script setup lang="ts" name="TenantPackage">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { formatDate } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import * as TenantPackageApi from '@/api/system/tenantPackage'
 import TenantPackageForm from './TenantPackageForm.vue'
 const message = useMessage() // 消息弹窗

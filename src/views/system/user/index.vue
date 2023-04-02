@@ -70,11 +70,16 @@
             >
               <Icon icon="ep:plus" /> 新增
             </el-button>
-            <el-button type="info" plain @click="handleImport" v-hasPermi="['system:user:import']">
+            <el-button
+              type="warning"
+              plain
+              @click="handleImport"
+              v-hasPermi="['system:user:import']"
+            >
               <Icon icon="ep:upload" /> 导入
             </el-button>
             <el-button
-              type="warning"
+              type="success"
               plain
               @click="handleExport"
               :loading="exportLoading"

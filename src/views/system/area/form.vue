@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="IP 查询" v-model="modelVisible">
+  <Dialog title="IP 查询" v-model="dialogVisible">
     <el-form
       ref="formRef"
       :model="formData"
@@ -16,7 +16,7 @@
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="modelVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -24,7 +24,7 @@
 import * as AreaApi from '@/api/system/area'
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：提交的按钮禁用
 const formData = ref({
   ip: '',
@@ -37,7 +37,7 @@ const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
 const openModal = async () => {
-  modelVisible.value = true
+  dialogVisible.value = true
   resetForm()
 }
 defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗

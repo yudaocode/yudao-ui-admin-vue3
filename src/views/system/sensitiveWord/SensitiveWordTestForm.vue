@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="检测敏感词" v-model="modelVisible">
+  <Dialog title="检测敏感词" v-model="dialogVisible">
     <el-form
       ref="formRef"
       :model="formData"
@@ -24,10 +24,8 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="submitForm" type="primary" :disabled="formLoading">检 测</el-button>
-        <el-button @click="modelVisible = false">取 消</el-button>
-      </div>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">检 测</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -35,7 +33,7 @@
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
   text: '',
@@ -50,7 +48,7 @@ const tagList = ref([]) // 标签数组
 
 /** 打开弹窗 */
 const open = async () => {
-  modelVisible.value = true
+  dialogVisible.value = true
   resetForm()
   // 获得 Tag 标签列表
   tagList.value = await SensitiveWordApi.getSensitiveWordTagList()
@@ -73,7 +71,7 @@ const submitForm = async () => {
       return
     }
     message.warning('包含敏感词：' + data.join(', '))
-    modelVisible.value = false
+    dialogVisible.value = false
   } finally {
     formLoading.value = false
   }

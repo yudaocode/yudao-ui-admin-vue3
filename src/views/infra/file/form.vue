@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="modelTitle" v-model="modelVisible">
+  <Dialog :title="dialogTitle" v-model="dialogVisible">
     <el-upload
       ref="uploadRef"
       :limit="1"
@@ -24,7 +24,7 @@
     </el-upload>
     <template #footer>
       <el-button @click="submitFileForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="modelVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -36,8 +36,8 @@ import { getAccessToken } from '@/utils/auth'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
-const modelTitle = ref('') // 弹窗的标题
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const url = import.meta.env.VITE_UPLOAD_URL
 const headers = { Authorization: 'Bearer ' + getAccessToken() }
@@ -46,8 +46,8 @@ const uploadRef = ref()
 
 /** 打开弹窗 */
 const openModal = async () => {
-  modelVisible.value = true
-  modelTitle.value = t('action.fileUpload')
+  dialogVisible.value = true
+  dialogTitle.value = t('action.fileUpload')
 }
 defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
 
@@ -71,7 +71,7 @@ const submitFileForm = () => {
 /** 文件上传成功处理 */
 const handleFileSuccess = () => {
   // 清理
-  modelVisible.value = false
+  dialogVisible.value = false
   formLoading.value = false
   unref(uploadRef)?.clearFiles()
   // 提示成功，并刷新

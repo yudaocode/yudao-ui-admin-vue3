@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="分配角色" v-model="modelVisible">
+  <Dialog title="分配角色" v-model="dialogVisible">
     <el-form ref="formRef" :model="formData" label-width="80px" v-loading="formLoading">
       <el-form-item label="用户名称">
         <el-input v-model="formData.username" :disabled="true" />
@@ -15,7 +15,7 @@
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="modelVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -26,7 +26,7 @@ import * as RoleApi from '@/api/system/role'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
   id: undefined,
@@ -39,7 +39,7 @@ const roleList = ref([]) // 角色的列表
 
 /** 打开弹窗 */
 const open = async (row: UserApi.UserVO) => {
-  modelVisible.value = true
+  dialogVisible.value = true
   resetForm()
   // 设置数据
   formData.value.id = row.id
@@ -72,7 +72,7 @@ const submitForm = async () => {
       roleIds: formData.value.roleIds
     })
     message.success(t('common.updateSuccess'))
-    modelVisible.value = false
+    dialogVisible.value = false
     // 发送操作成功的事件
     emit('success', true)
   } finally {

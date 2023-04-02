@@ -51,13 +51,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table
-      v-loading="loading"
-      :data="list"
-      row-key="id"
-      default-expand-all
-      v-if="refreshTable"
-    >
+    <el-table v-loading="loading" :data="list" row-key="id" default-expand-all v-if="refreshTable">
       <el-table-column prop="name" label="部门名称" width="260" />
       <el-table-column prop="leader" label="负责人" width="120">
         <template #default="scope">

@@ -1,7 +1,7 @@
 <template>
   <!-- 操作栏 -->
   <content-wrap>
-    <el-button type="primary" @click="openModal()">
+    <el-button type="primary" plain @click="openModal()">
       <Icon icon="ep:plus" class="mr-5px" /> IP 查询
     </el-button>
   </content-wrap>

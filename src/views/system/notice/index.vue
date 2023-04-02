@@ -37,6 +37,7 @@
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
+          plain
           @click="openModal('create')"
           v-hasPermi="['system:notice:create']"
         >
@@ -127,7 +128,6 @@ const getList = async () => {
   loading.value = true
   try {
     const data = await NoticeApi.getNoticePage(queryParams)
-
     list.value = data.list
     total.value = data.total
   } finally {
