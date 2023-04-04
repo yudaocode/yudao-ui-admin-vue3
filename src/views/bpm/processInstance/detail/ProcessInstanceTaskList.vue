@@ -20,13 +20,13 @@
               </label>
               <label style="font-weight: normal" v-if="item.createTime">创建时间：</label>
               <label style="color: #8a909c; font-weight: normal">
-                {{ parseTime(item?.createTime) }}
+                {{ formatDate(item?.createTime) }}
               </label>
               <label v-if="item.endTime" style="margin-left: 30px; font-weight: normal">
                 审批时间：
               </label>
               <label v-if="item.endTime" style="color: #8a909c; font-weight: normal">
-                {{ parseTime(item?.endTime) }}
+                {{ formatDate(item?.endTime) }}
               </label>
               <label v-if="item.durationInMillis" style="margin-left: 30px; font-weight: normal">
                 耗时：
@@ -45,7 +45,7 @@
   </el-card>
 </template>
 <script setup lang="ts">
-import { parseTime, formatPast2 } from '@/utils/formatTime'
+import { formatDate, formatPast2 } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'
 
 defineProps({

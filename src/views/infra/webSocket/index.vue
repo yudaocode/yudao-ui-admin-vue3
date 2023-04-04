@@ -44,7 +44,7 @@
           <li v-for="item in getList" class="mt-2" :key="item.time">
             <div class="flex items-center">
               <span class="mr-2 text-primary font-medium">收到消息:</span>
-              <span>{{ parseTime(item.time) }}</span>
+              <span>{{ formatDate(item.time) }}</span>
             </div>
             <div>
               {{ item.res }}
@@ -56,7 +56,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { parseTime } from '@/utils/formatTime'
+import { formatDate } from '@/utils/formatTime'
 import { useUserStore } from '@/store/modules/user'
 import { useWebSocket } from '@vueuse/core'
 
