@@ -229,7 +229,7 @@ const handleAuthorized = () => {
         wsCache.clear()
         removeToken()
         isRelogin.show = false
-        window.location.href = '/'
+        window.location.href = import.meta.env.VITE_BASE_PATH
       })
       .catch(() => {
         isRelogin.show = false
