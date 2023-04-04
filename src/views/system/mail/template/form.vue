@@ -1,5 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" :scroll="true" :width="800" :max-height="500">
+  <Dialog
+    :title="dialogTitle"
+    v-model="dialogVisible"
+    :scroll="true"
+    :width="800"
+    :max-height="500"
+  >
     <Form ref="formRef" :schema="allSchemas.formSchema" :rules="rules" v-loading="formLoading" />
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -9,7 +15,7 @@
 </template>
 <script setup lang="ts">
 import * as MailTemplateApi from '@/api/system/mail/template'
-import { rules, allSchemas } from './template.data'
+import { allSchemas, rules } from './template.data'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
