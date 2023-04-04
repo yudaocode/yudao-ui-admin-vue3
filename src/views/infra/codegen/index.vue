@@ -163,7 +163,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const dataSourceConfigList = ref<DataSourceConfigApi.DataSourceConfigVO[]>([]) // 数据源列表
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {

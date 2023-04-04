@@ -1,153 +1,242 @@
 <template>
-  <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <template #toolbar_buttons>
-        <!-- 操作：新增 -->
-        <XButton
+  <content-wrap>
+    <!-- 搜索工作栏 -->
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
+      <el-form-item label="商户号" prop="no">
+        <el-input v-model="queryParams.no" placeholder="请输入商户号" clearable class="!w-240px" />
+      </el-form-item>
+      <el-form-item label="商户全称" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入商户全称"
+          clearable
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="商户简称" prop="shortName">
+        <el-input
+          v-model="queryParams.shortName"
+          placeholder="请输入商户简称"
+          clearable
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="开启状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="字典状态" clearable class="!w-240px">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="备注" prop="remark">
+        <el-input
+          v-model="queryParams.remark"
+          placeholder="请输入备注"
+          clearable
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="datetimerange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button
+          plain
           type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
+          @click="openForm('create')"
           v-hasPermi="['pay:merchant:create']"
-          @click="handleCreate()"
-        />
-        <!-- 操作：导出 -->
-        <XButton
-          type="warning"
-          preIcon="ep:download"
-          :title="t('action.export')"
+        >
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
+        <el-button
+          type="success"
+          plain
+          @click="handleExport"
+          :loading="exportLoading"
           v-hasPermi="['pay:merchant:export']"
-          @click="exportList('商户列表.xls')"
-        />
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['pay:merchant:update']"
-          @click="handleUpdate(row.id)"
-        />
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
-          v-hasPermi="['pay:merchant:query']"
-          @click="handleDetail(row.id)"
-        />
-        <!-- 操作：删除 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['pay:merchant:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
-  </ContentWrap>
-  <XModal v-model="dialogVisible" :title="dialogTitle">
-    <!-- 对话框(添加 / 修改) -->
-    <Form
-      v-if="['create', 'update'].includes(actionType)"
-      :schema="allSchemas.formSchema"
-      :rules="rules"
-      ref="formRef"
-    />
-    <!-- 对话框(详情) -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    />
-    <!-- 操作按钮 -->
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="actionLoading"
-        @click="submitForm()"
+        >
+          <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </content-wrap>
+
+  <!-- 列表 -->
+  <content-wrap>
+    <el-table v-loading="loading" :data="list">
+      <el-table-column label="商户编号" align="center" prop="id" />
+      <el-table-column label="商户号" align="center" prop="no" />
+      <el-table-column label="商户全称" align="center" prop="name" />
+      <el-table-column label="商户简称" align="center" prop="shortName" />
+      <el-table-column label="开启状态" align="center" prop="status">
+        <template #default="scope">
+          <el-switch
+            v-model="scope.row.status"
+            :active-value="0"
+            :inactive-value="1"
+            @change="handleStatusChange(scope.row)"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        :formatter="dateFormatter"
+        width="180"
       />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </XModal>
+      <el-table-column label="操作" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['pay:merchant:update']"
+          >
+            修改
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['pay:merchant:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </content-wrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <MerchantForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Merchant">
-import type { FormExpose } from '@/components/Form'
-import { rules, allSchemas } from './merchant.data'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
+import { dateFormatter } from '@/utils/formatTime'
+import download from '@/utils/download'
 import * as MerchantApi from '@/api/pay/merchant'
-
-const { t } = useI18n() // 国际化
+import MerchantForm from './MerchantForm.vue'
 const message = useMessage() // 消息弹窗
-// 列表相关的变量
-const [registerTable, { reload, deleteData, exportList }] = useXTable({
-  allSchemas: allSchemas,
-  getListApi: MerchantApi.getMerchantPageApi,
-  deleteApi: MerchantApi.deleteMerchantApi,
-  exportListApi: MerchantApi.exportMerchantApi
+const { t } = useI18n() // 国际化
+
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 列表的数据
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  name: '',
+  shortName: '',
+  status: undefined
 })
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
 
-// ========== CRUD 相关 ==========
-const actionLoading = ref(false) // 遮罩层
-const actionType = ref('') // 操作按钮的类型
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const formRef = ref<FormExpose>() // 表单 Ref
-const detailData = ref() // 详情 Ref
-
-// 设置标题
-const setDialogTile = (type: string) => {
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await MerchantApi.getMerchantPage(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
 }
 
-// 新增操作
-const handleCreate = () => {
-  setDialogTile('create')
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
 }
 
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  // 设置数据
-  const res = await MerchantApi.getMerchantApi(rowId)
-  unref(formRef)?.setValues(res)
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
 }
 
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  setDialogTile('detail')
-  const res = await MerchantApi.getMerchantApi(rowId)
-  detailData.value = res
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
-// 提交按钮
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as MerchantApi.MerchantVO
-        if (actionType.value === 'create') {
-          await MerchantApi.createMerchantApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          await MerchantApi.updateMerchantApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        // 刷新列表
-        await reload()
-      }
-    }
-  })
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await MerchantApi.deleteMerchant(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
+
+/** 修改状态操作 */
+const handleStatusChange = async (row: MerchantApi.MerchantVO) => {
+  try {
+    // 修改状态的二次确认
+    const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
+    await message.confirm('确认要"' + text + '""' + row.name + '"商户吗?', t('common.reminder'))
+    // 发起修改状态
+    await MerchantApi.updateMerchantStatus(row.id, row.status)
+    // 刷新列表
+    await getList()
+  } catch {
+    // 取消后，进行恢复按钮
+    row.status =
+      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
+  }
+}
+
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await MerchantApi.exportMerchant(queryParams)
+    download.excel(data, '商户信息.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+/** 初始化 **/
+onMounted(() => {
+  getList()
+})
 </script>

@@ -11,7 +11,7 @@
   </ContentWrap>
 
   <!-- 表单保存的弹窗 -->
-  <Dialog title="保存表单" v-model="modelVisible" width="600">
+  <Dialog title="保存表单" v-model="dialogVisible" width="600">
     <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
       <el-form-item label="表单名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入表单名" />
@@ -33,7 +33,7 @@
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="modelVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -48,7 +48,7 @@ const message = useMessage() // 消息
 const { query } = useRoute() // 路由
 
 const designer = ref() // 表单设计器
-const modelVisible = ref(false) // 弹窗是否展示
+const dialogVisible = ref(false) // 弹窗是否展示
 const formLoading = ref(false) // 表单的加载中：提交的按钮禁用
 const formData = ref({
   name: '',
@@ -63,7 +63,7 @@ const formRef = ref() // 表单 Ref
 
 /** 处理保存按钮 */
 const handleSave = () => {
-  modelVisible.value = true
+  dialogVisible.value = true
 }
 
 /** 提交表单 */
@@ -85,7 +85,7 @@ const submitForm = async () => {
       await FormApi.updateForm(data)
       message.success(t('common.updateSuccess'))
     }
-    modelVisible.value = false
+    dialogVisible.value = false
   } finally {
     formLoading.value = false
   }

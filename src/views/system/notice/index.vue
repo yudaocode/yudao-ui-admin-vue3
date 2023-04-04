@@ -37,6 +37,7 @@
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
+          plain
           @click="openModal('create')"
           v-hasPermi="['system:notice:create']"
         >
@@ -114,11 +115,11 @@ const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
   title: '',
   type: undefined,
-  status: undefined,
-  pageNo: 1,
-  pageSize: 100
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -127,7 +128,6 @@ const getList = async () => {
   loading.value = true
   try {
     const data = await NoticeApi.getNoticePage(queryParams)
-
     list.value = data.list
     total.value = data.total
   } finally {

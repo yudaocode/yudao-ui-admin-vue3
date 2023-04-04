@@ -46,7 +46,7 @@
   </ContentWrap>
 
   <!-- 添加/修改的弹窗 -->
-  <XModal id="templateModel" :loading="modelLoading" v-model="modelVisible" :title="modelTitle">
+  <XModal id="templateModel" :loading="modelLoading" v-model="dialogVisible" :title="dialogTitle">
     <!-- 表单：添加/修改 -->
     <Form
       ref="formRef"
@@ -70,7 +70,7 @@
         @click="submitForm()"
       />
       <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="modelVisible = false" />
+      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
     </template>
   </XModal>
 
@@ -132,8 +132,8 @@ const [registerTable, { reload, deleteData }] = useXTable({
 })
 
 // 弹窗相关的变量
-const modelVisible = ref(false) // 是否显示弹出层
-const modelTitle = ref('edit') // 弹出层标题
+const dialogVisible = ref(false) // 是否显示弹出层
+const dialogTitle = ref('edit') // 弹出层标题
 const modelLoading = ref(false) // 弹出层loading
 const actionType = ref('') // 操作按钮的类型
 const actionLoading = ref(false) // 按钮 Loading
@@ -143,9 +143,9 @@ const detailData = ref() // 详情 Ref
 // 设置标题
 const setDialogTile = (type: string) => {
   modelLoading.value = true
-  modelTitle.value = t('action.' + type)
+  dialogTitle.value = t('action.' + type)
   actionType.value = type
-  modelVisible.value = true
+  dialogVisible.value = true
 }
 
 // 新增操作
@@ -188,7 +188,7 @@ const submitForm = async () => {
           await NotifyTemplateApi.updateNotifyTemplateApi(data)
           message.success(t('common.updateSuccess'))
         }
-        modelVisible.value = false
+        dialogVisible.value = false
       } finally {
         actionLoading.value = false
         // 刷新列表

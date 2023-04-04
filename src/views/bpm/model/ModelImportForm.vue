@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="导入流程" v-model="modelVisible" width="400">
+  <Dialog title="导入流程" v-model="dialogVisible" width="400">
     <div>
       <el-upload
         ref="uploadRef"
@@ -8,7 +8,7 @@
         :data="formData"
         name="bpmnFile"
         v-model:file-list="fileList"
-        :drag="true"
+        drag
         :auto-upload="false"
         accept=".bpmn, .xml"
         :limit="1"
@@ -45,7 +45,7 @@
     </div>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="modelVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -53,7 +53,7 @@
 import { getAccessToken, getTenantId } from '@/utils/auth'
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formData = ref({
   key: '',
@@ -72,12 +72,12 @@ const fileList = ref([]) // 文件列表
 
 /** 打开弹窗 */
 const open = async () => {
-  modelVisible.value = true
+  dialogVisible.value = true
   resetForm()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** 重置表单 */
+/** 提交表单 */
 const submitForm = async () => {
   // 校验表单
   if (!formRef) return
@@ -98,7 +98,7 @@ const submitForm = async () => {
 
 /** 文件上传成功 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-const submitFormSuccess = async (response: any): Promise<void> => {
+const submitFormSuccess = async (response: any) => {
   if (response.code !== 0) {
     message.error(response.msg)
     formLoading.value = false

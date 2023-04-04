@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="modelTitle" v-model="modelVisible">
+  <Dialog :title="dialogTitle" v-model="dialogVisible">
     <el-form
       ref="formRef"
       :model="formData"
@@ -57,24 +57,22 @@
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="modelVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
 <script setup lang="ts" name="TenantPackageForm">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
-import { defaultProps } from '@/utils/tree'
+import { defaultProps, handleTree } from '@/utils/tree'
 import * as TenantPackageApi from '@/api/system/tenantPackage'
 import * as MenuApi from '@/api/system/menu'
 import { ElTree } from 'element-plus'
-import { handleTree } from '@/utils/tree'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
-const modelTitle = ref('') // 弹窗的标题
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
@@ -92,13 +90,13 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const menuOptions = ref<any[]>([]) // 树形结构数据
 const menuExpand = ref(false) // 展开/折叠
-const treeRef = ref<InstanceType<typeof ElTree>>() // 树组件Ref
+const treeRef = ref<InstanceType<typeof ElTree>>() // 树组件 Ref
 const treeNodeAll = ref(false) // 全选/全不选
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
-  modelVisible.value = true
-  modelTitle.value = t('action.' + type)
+  dialogVisible.value = true
+  dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
   // 加载 Menu 列表。注意，必须放在前面，不然下面 setChecked 没数据节点
@@ -133,8 +131,8 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as TenantPackageApi.TenantPackageVO
     data.menuIds = [
-      ...(treeRef.value!.getCheckedKeys(false) as unknown as Array<number>), // 获得当前选中节点
-      ...(treeRef.value!.getHalfCheckedKeys() as unknown as Array<number>) // 获得半选中的父节点
+      ...(treeRef.value.getCheckedKeys(false) as unknown as Array<number>), // 获得当前选中节点
+      ...(treeRef.value.getHalfCheckedKeys() as unknown as Array<number>) // 获得半选中的父节点
     ]
     if (formType.value === 'create') {
       await TenantPackageApi.createTenantPackage(data)
@@ -143,7 +141,7 @@ const submitForm = async () => {
       await TenantPackageApi.updateTenantPackage(data)
       message.success(t('common.updateSuccess'))
     }
-    modelVisible.value = false
+    dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
   } finally {
@@ -168,17 +166,19 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 
-// 全选/全不选
+/** 全选/全不选 */
 const handleCheckedTreeNodeAll = () => {
-  treeRef.value!.setCheckedNodes(treeNodeAll.value ? menuOptions.value : [])
+  treeRef.value.setCheckedNodes(treeNodeAll.value ? menuOptions.value : [])
 }
 
-// 全部（展开/折叠）TODO:for循环全部展开和折叠树组件数据
+/** 展开/折叠全部 */
 const handleCheckedTreeExpand = () => {
   const nodes = treeRef.value?.store.nodesMap
   for (let node in nodes) {
-    if (nodes[node].expanded === menuExpand.value) continue
-    nodes[node].expanded = !nodes[node].expanded
+    if (nodes[node].expanded === menuExpand.value) {
+      continue
+    }
+    nodes[node].expanded = menuExpand.value
   }
 }
 </script>

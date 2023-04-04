@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="详情" v-model="modelVisible" :scroll="true" :max-height="500">
+  <Dialog title="详情" v-model="dialogVisible" :scroll="true" :max-height="500">
     <el-descriptions border :column="1">
       <el-descriptions-item label="编号" min-width="120">
         {{ detailData.id }}
@@ -45,13 +45,13 @@ import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as NotifyMessageApi from '@/api/system/notify/message'
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
 const detailData = ref() // 详情数据
 
 /** 打开弹窗 */
 const open = async (data: NotifyMessageApi.NotifyMessageVO) => {
-  modelVisible.value = true
+  dialogVisible.value = true
   // 设置数据
   detailLoading.value = true
   try {

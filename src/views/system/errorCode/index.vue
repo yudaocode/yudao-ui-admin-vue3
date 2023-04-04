@@ -61,6 +61,7 @@
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
+          plain
           @click="openModal('create')"
           v-hasPermi="['system:error-code:create']"
         >
@@ -121,8 +122,7 @@
       </el-table-column>
     </el-table>
     <!-- 分页组件 -->
-    <pagination
-      v-show="total > 0"
+    <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"

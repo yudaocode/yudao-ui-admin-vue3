@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="导入表" v-model="modelVisible" width="800px">
+  <Dialog title="导入表" v-model="dialogVisible" width="800px">
     <!-- 搜索栏 -->
     <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
       <el-form-item label="数据源" prop="dataSourceConfigId">
@@ -69,7 +69,7 @@ import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
 import { ElTable } from 'element-plus'
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const dbTableLoading = ref(true) // 数据源的加载中
 const dbTableList = ref<CodegenApi.DatabaseTableVO[]>([]) // 表的列表
 const queryParams = reactive({
@@ -103,7 +103,7 @@ const open = async () => {
   // 加载数据源的列表
   dataSourceConfigList.value = await DataSourceConfigApi.getDataSourceConfigList()
   queryParams.dataSourceConfigId = dataSourceConfigList.value[0].id as number
-  modelVisible.value = true
+  dialogVisible.value = true
   // 加载表的列表
   await getList()
 }
@@ -111,7 +111,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 关闭弹窗 */
 const close = () => {
-  modelVisible.value = false
+  dialogVisible.value = false
   tableList.value = []
 }
 

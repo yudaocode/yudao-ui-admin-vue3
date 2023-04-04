@@ -12,9 +12,9 @@
         <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
           <el-option
             v-for="item in accountList"
-            :key="parseInt(item.id)"
+            :key="item.id"
             :label="item.name"
-            :value="parseInt(item.id)"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
@@ -28,21 +28,15 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon icon="ep:refresh" class="mr-5px" />
-          重置
-        </el-button>
+        <el-form-item>
+          <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+          <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        </el-form-item>
         <el-button type="primary" plain @click="openForm('create')" v-hasPermi="['mp:tag:create']">
-          <Icon icon="ep:plus" class="mr-5px" />
-          新增
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button type="success" plain @click="handleSync" v-hasPermi="['mp:tag:sync']">
-          <Icon icon="ep:refresh" class="mr-5px" />
-          同步
+          <Icon icon="ep:refresh" class="mr-5px" /> 同步
         </el-button>
       </el-form-item>
     </el-form>
@@ -99,7 +93,6 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as MpTagApi from '@/api/mp/tag'
 import * as MpAccountApi from '@/api/mp/account'
 import TagForm from './TagForm.vue'
-
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -143,7 +136,6 @@ const resetQuery = () => {
   queryFormRef.value.resetFields()
   // 默认选中第一个
   if (accountList.value.length > 0) {
-    // @ts-ignore
     queryParams.accountId = accountList.value[0].id
   }
   handleQuery()
@@ -184,7 +176,6 @@ onMounted(async () => {
   accountList.value = await MpAccountApi.getSimpleAccountList()
   // 选中第一个
   if (accountList.value.length > 0) {
-    // @ts-ignore
     queryParams.accountId = accountList.value[0].id
   }
   await getList()

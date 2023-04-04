@@ -1,6 +1,6 @@
 <template>
   <div class="head-container">
-    <el-input v-model="deptName" placeholder="请输入部门名称" clearable style="margin-bottom: 20px">
+    <el-input v-model="deptName" placeholder="请输入部门名称" clearable class="mb-20px">
       <template #prefix>
         <Icon icon="ep:search" />
       </template>
@@ -8,15 +8,15 @@
   </div>
   <div class="head-container">
     <el-tree
-      :data="deptOptions"
+      :data="deptList"
       :props="defaultProps"
+      node-key="id"
       :expand-on-click-node="false"
       :filter-node-method="filterNode"
       ref="treeRef"
-      node-key="id"
       default-expand-all
       highlight-current
-      @node-click="handleDeptNodeClick"
+      @node-click="handleNodeClick"
     />
   </div>
 </template>
@@ -26,25 +26,30 @@ import { ElTree } from 'element-plus'
 import * as DeptApi from '@/api/system/dept'
 import { defaultProps, handleTree } from '@/utils/tree'
 
-const emits = defineEmits(['node-click'])
 const deptName = ref('')
-const deptOptions = ref<Tree[]>([]) // 树形结构
+const deptList = ref<Tree[]>([]) // 树形结构
 const treeRef = ref<InstanceType<typeof ElTree>>()
+
+/** 获得部门树 */
 const getTree = async () => {
   const res = await DeptApi.getSimpleDeptList()
-  deptOptions.value = []
-  deptOptions.value.push(...handleTree(res))
+  deptList.value = []
+  deptList.value.push(...handleTree(res))
 }
 
-const filterNode = (value: string, data: Tree) => {
-  if (!value) return true
-  return data.name.includes(value)
+/** 基于名字过滤 */
+const filterNode = (name: string, data: Tree) => {
+  if (!name) return true
+  return data.name.includes(name)
 }
 
-const handleDeptNodeClick = async (row: { [key: string]: any }) => {
+/** 处理部门被点击 */
+const handleNodeClick = async (row: { [key: string]: any }) => {
   emits('node-click', row)
 }
+const emits = defineEmits(['node-click'])
 
+/** 初始化 */
 onMounted(async () => {
   await getTree()
 })

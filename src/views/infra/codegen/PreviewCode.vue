@@ -1,7 +1,7 @@
 <template>
   <Dialog
     title="代码预览"
-    v-model="modelVisible"
+    v-model="dialogVisible"
     align-center
     width="80%"
     class="app-infra-codegen-preview-container"
@@ -61,7 +61,7 @@ import * as CodegenApi from '@/api/infra/codegen'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const loading = ref(false) // 加载中的状态
 const preview = reactive({
   fileTree: [], // 文件树
@@ -86,7 +86,7 @@ interface filesType {
 
 /** 打开弹窗 */
 const open = async (id: number) => {
-  modelVisible.value = true
+  dialogVisible.value = true
   try {
     loading.value = true
     // 生成代码

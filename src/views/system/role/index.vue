@@ -108,7 +108,7 @@
             preIcon="ep:basketball"
             title="菜单权限"
             v-hasPermi="['system:permission:assign-role-menu']"
-            @click="handleScope('menu', scope.row)"
+            @click="openAssignMenuForm(scope.row)"
           >
             菜单权限
           </el-button>
@@ -118,7 +118,7 @@
             preIcon="ep:coin"
             title="数据权限"
             v-hasPermi="['system:permission:assign-role-data-scope']"
-            @click="handleScope('data', scope.row)"
+            @click="openDataPermissionForm(scope.row)"
           >
             数据权限
           </el-button>
@@ -145,15 +145,18 @@
   <!-- 表单弹窗：添加/修改 -->
   <RoleForm ref="formRef" @success="getList" />
   <!-- 表单弹窗：菜单权限 -->
-  <MenuPermissionForm ref="menuPermissionFormRef" @success="getList" />
+  <RoleAssignMenuForm ref="assignMenuFormRef" />
+  <!-- 表单弹窗：数据权限 -->
+  <RoleDataPermissionForm ref="dataPermissionFormRef" />
 </template>
 <script setup lang="tsx">
-import * as RoleApi from '@/api/system/role'
-import RoleForm from './RoleForm.vue'
-import MenuPermissionForm from './MenuPermissionForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
+import * as RoleApi from '@/api/system/role'
+import RoleForm from './RoleForm.vue'
+import RoleAssignMenuForm from './RoleAssignMenuForm.vue'
+import RoleDataPermissionForm from './RoleDataPermissionForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -202,9 +205,15 @@ const openForm = (type: string, id?: number) => {
 }
 
 /** 数据权限操作 */
-const menuPermissionFormRef = ref()
-const handleScope = async (type: string, row: RoleApi.RoleVO) => {
-  menuPermissionFormRef.value.openModal(type, row)
+const dataPermissionFormRef = ref()
+const openDataPermissionForm = async (row: RoleApi.RoleVO) => {
+  dataPermissionFormRef.value.open(row)
+}
+
+/** 菜单权限操作 */
+const assignMenuFormRef = ref()
+const openAssignMenuForm = async (row: RoleApi.RoleVO) => {
+  assignMenuFormRef.value.open(row)
 }
 
 /** 删除按钮操作 */

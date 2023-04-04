@@ -180,7 +180,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await DictDataApi.exportDictDataApi(queryParams)
+    const data = await DictDataApi.exportDictData(queryParams)
     download.excel(data, '字典数据.xls')
   } catch {
   } finally {

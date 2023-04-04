@@ -35,6 +35,7 @@
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
+          plain
           @click="openModal('create')"
           v-hasPermi="['infra:file-config:create']"
         >

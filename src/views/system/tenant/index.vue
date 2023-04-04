@@ -71,7 +71,12 @@
           <Icon icon="ep:refresh" class="mr-5px" />
           重置
         </el-button>
-        <el-button type="primary" @click="openForm('create')" v-hasPermi="['system:tenant:create']">
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['system:tenant:create']"
+        >
           <Icon icon="ep:plus" class="mr-5px" />
           新增
         </el-button>

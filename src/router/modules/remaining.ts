@@ -162,7 +162,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: 'job-log',
-        component: () => import('@/views/infra/job/JobLog.vue'),
+        component: () => import('@/views/infra/job/logger/index.vue'),
         name: 'JobLog',
         meta: {
           noCache: true,
@@ -317,6 +317,22 @@ const remainingRouter: AppRouteRecordRaw[] = [
           title: '查看 OA 请假',
           activeMenu: 'bpm/oa/leave/detail'
         }
+      }
+    ]
+  },
+  {
+    path: '/property',
+    component: Layout,
+    name: 'property',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'value/:propertyId(\\d+)',
+        component: () => import('@/views/mall/product/property/value/index.vue'),
+        name: 'PropertyValue',
+        meta: { title: '商品属性值', icon: '', activeMenu: '/product/property' }
       }
     ]
   }

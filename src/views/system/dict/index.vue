@@ -41,7 +41,6 @@
           v-model="queryParams.createTime"
           value-format="yyyy-MM-dd HH:mm:ss"
           type="daterange"
-          range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
@@ -51,7 +50,12 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openModal('create')" v-hasPermi="['system:dict:create']">
+        <el-button
+          type="primary"
+          plain
+          @click="openModal('create')"
+          v-hasPermi="['system:dict:create']"
+        >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
