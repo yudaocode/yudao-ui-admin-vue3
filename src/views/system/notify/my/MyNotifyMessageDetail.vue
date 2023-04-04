@@ -5,7 +5,7 @@
         {{ detailData.templateNickname }}
       </el-descriptions-item>
       <el-descriptions-item label="发送时间">
-        {{ formatDate(detailData.createTime, 'YYYY-MM-DD HH:mm:ss') }}
+        {{ formatDate(detailData.createTime) }}
       </el-descriptions-item>
       <el-descriptions-item label="消息类型">
         <dict-tag :type="DICT_TYPE.SYSTEM_NOTIFY_TEMPLATE_TYPE" :value="detailData.templateType" />
@@ -14,7 +14,7 @@
         <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="detailData.readStatus" />
       </el-descriptions-item>
       <el-descriptions-item label="阅读时间" v-if="detailData.readStatus">
-        {{ formatDate(detailData.readTime, 'YYYY-MM-DD HH:mm:ss') }}
+        {{ formatDate(detailData.readTime) }}
       </el-descriptions-item>
       <el-descriptions-item label="内容">
         {{ detailData.templateContent }}

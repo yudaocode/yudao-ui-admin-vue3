@@ -32,7 +32,7 @@
           </div>
           <div class="avue-comment__main">
             <div class="avue-comment__header">
-              <div class="avue-comment__create_time">{{ parseTime(item.createTime) }}</div>
+              <div class="avue-comment__create_time">{{ formatDate(item.createTime) }}</div>
             </div>
             <div
               class="avue-comment__body"
@@ -145,7 +145,7 @@ import { defineComponent } from 'vue'
 const message = useMessage() // 消息弹窗
 import profile from '@/assets/imgs/profile.jpg'
 import wechat from '@/assets/imgs/wechat.png'
-import { parseTime } from '@/utils/formatTime'
+import { formatDate } from '@/utils/formatTime'
 
 export default defineComponent({
   components: {
@@ -286,7 +286,7 @@ export default defineComponent({
     return {
       sendMsg,
       loadingMore,
-      parseTime,
+      formatDate,
       scrollToBottom,
       objData,
       mp,

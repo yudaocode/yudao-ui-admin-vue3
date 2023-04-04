@@ -265,6 +265,7 @@ export const handleTree = (data: any[], id?: string, parentId?: string, children
   }
   return tree
 }
+
 /**
  * 构造树型结构数据
  * @param {*} data 数据源
@@ -273,6 +274,7 @@ export const handleTree = (data: any[], id?: string, parentId?: string, children
  * @param {*} children 孩子节点字段 默认 'children'
  * @param {*} rootId 根Id 默认 0
  */
+// @ts-ignore
 export const handleTree2 = (data, id, parentId, children, rootId) => {
   id = id || 'id'
   parentId = parentId || 'parentId'

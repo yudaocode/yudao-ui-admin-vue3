@@ -34,13 +34,13 @@
       </li>
       <li class="list-group-item">
         <Icon icon="ep:calendar" class="mr-5px" />{{ t('profile.user.createTime') }}
-        <div class="pull-right">{{ parseTime(userInfo?.createTime) }}</div>
+        <div class="pull-right">{{ formatDate(userInfo?.createTime) }}</div>
       </li>
     </ul>
   </div>
 </template>
 <script setup lang="ts">
-import { parseTime } from '@/utils/formatTime'
+import { formatDate } from '@/utils/formatTime'
 import UserAvatar from './UserAvatar.vue'
 
 import { getUserProfileApi, ProfileVO } from '@/api/system/user/profile'

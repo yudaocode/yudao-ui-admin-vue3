@@ -41,7 +41,7 @@
       </el-table-column>
       <el-table-column label="上传时间" align="center" prop="createTime" width="180">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.createTime) }}</span>
+          <span>{{ formatDate(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -80,7 +80,7 @@
       </el-table-column>
       <el-table-column label="上传时间" align="center" prop="createTime" width="180">
         <template #default="scope">
-          <span>{{ parseTime(scope.row.createTime) }}</span>
+          <span>{{ formatDate(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -136,7 +136,7 @@ import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
 import { getMaterialPage } from '@/api/mp/material'
 import { getFreePublishPage } from '@/api/mp/freePublish'
 import { getDraftPage } from '@/api/mp/draft'
-import { dateFormatter, parseTime } from '@/utils/formatTime'
+import { dateFormatter, formatDate } from '@/utils/formatTime'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
@@ -238,7 +238,7 @@ export default defineComponent({
       selectMaterialFun,
       getMaterialPageFun,
       getPage,
-      parseTime,
+      formatDate,
       newsTypeRef,
       queryParams,
       objDataRef,
