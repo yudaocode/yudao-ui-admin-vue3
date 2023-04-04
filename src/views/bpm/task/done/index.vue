@@ -14,36 +14,30 @@
           placeholder="请输入任务名称"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['bpm:task:done:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
+
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" align="center">
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="任务编号" align="center" prop="id" width="300px" />
       <el-table-column label="任务名称" align="center" prop="name" />
       <el-table-column label="所属流程" align="center" prop="processInstance.name" />
@@ -63,8 +57,8 @@
       />
       <el-table-column label="操作" align="center">
         <template #default="scope">
-          <el-button link type="primary" @click="openModal(scope.row)"> 流程信息 </el-button>
-          <el-button link type="primary" @click="handleAudit(scope.row)"> 流程详情 </el-button>
+          <el-button link type="primary" @click="openDetail(scope.row)">详情</el-button>
+          <el-button link type="primary" @click="handleAudit(scope.row)">流程</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -76,46 +70,28 @@
       @pagination="getList"
     />
   </ContentWrap>
+
   <!-- 表单弹窗：详情 -->
-  <TaskDoneDetail ref="modalRef" @success="getList" />
+  <TaskDetail ref="detailRef" @success="getList" />
 </template>
 <script setup lang="tsx">
+import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as TaskApi from '@/api/bpm/task'
-import download from '@/utils/download'
-import TaskDoneDetail from './Taskdetail.vue'
+import TaskDetail from './TaskDetail.vue'
+const { push } = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const message = useMessage() // 消息弹窗
-const exportLoading = ref(false) // 导出的加载中
-const queryFormRef = ref() // 搜索的表单
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: '',
-  status: undefined,
   createTime: []
 })
+const queryFormRef = ref() // 搜索的表单
 
-/** 搜索按钮操作 */
-const handleQuery = () => {
-  queryParams.pageNo = 1
-  getList()
-}
-/** 详情操作 */
-const modalRef = ref()
-const openModal = (data: TaskApi.TaskVO) => {
-  modalRef.value.openModal(data)
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  handleQuery()
-}
 /** 查询任务列表 */
 const getList = async () => {
   loading.value = true
@@ -127,22 +103,26 @@ const getList = async () => {
     loading.value = false
   }
 }
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await TaskApi.exportTask(queryParams)
-    download.excel(data, '任务列表.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
+
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
 }
-const { push } = useRouter() // 路由
-// 处理审批按钮
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/** 详情操作 */
+const detailRef = ref()
+const openDetail = (row: TaskApi.TaskVO) => {
+  detailRef.value.open(row)
+}
+
+/** 处理审批按钮 */
 const handleAudit = (row) => {
   push({
     name: 'BpmProcessInstanceDetail',
@@ -151,6 +131,7 @@ const handleAudit = (row) => {
     }
   })
 }
+
 /** 初始化 **/
 onMounted(() => {
   getList()

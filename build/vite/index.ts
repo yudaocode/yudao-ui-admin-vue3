@@ -98,7 +98,7 @@ export function createVitePlugins() {
       deleteOriginFile: false //压缩后是否删除源文件
     }),
     ViteEjsPlugin(),
-    topLevelAwait({
+    topLevelAwait({ // https://juejin.cn/post/7152191742513512485
       // The export name of top-level await promise for each chunk module
       promiseExportName: '__tla',
       // The function to generate import names of top-level await promise in each chunk module
