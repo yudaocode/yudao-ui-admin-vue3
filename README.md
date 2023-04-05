@@ -9,6 +9,7 @@
 
 ## 🐶 新手必读
 
+* nodejs > 16.0.0 && pnpm > 7.30.0
 * 演示地址：<http://dashboard.yudao.iocoder.cn>
 * 启动文档：<https://doc.iocoder.cn/quick-start/>
 * 视频教程：<https://doc.iocoder.cn/video/>
