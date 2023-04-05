@@ -1,5 +1,7 @@
 <template>
-  <content-wrap>
+  <doc-alert title="OAuth 2.0（SSO 单点登录)" url="https://doc.iocoder.cn/oauth2/" />
+
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
@@ -46,10 +48,10 @@
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="访问令牌" align="center" prop="accessToken" width="300" />
       <el-table-column label="刷新令牌" align="center" prop="refreshToken" width="300" />
@@ -93,7 +95,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 </template>
 
 <script setup lang="ts" name="Oauth2AccessToken">

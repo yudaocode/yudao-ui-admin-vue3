@@ -280,7 +280,7 @@ const elementHover = (element) => {
     if (element.value.type === 'bpmn:StartEvent' && processInstance.value) {
       html = `<p>发起人：${processInstance.value.startUser.nickname}</p>
                   <p>部门：${processInstance.value.startUser.deptName}</p>
-                  <p>创建时间：${parseTime(processInstance.value.createTime)}`
+                  <p>创建时间：${formatDate(processInstance.value.createTime)}`
     } else if (element.value.type === 'bpmn:UserTask') {
       // debugger
       let task = taskList.value.find((m) => m.id === activity.taskId) // 找到活动对应的 taskId
@@ -297,26 +297,26 @@ const elementHover = (element) => {
       html = `<p>审批人：${task.assigneeUser.nickname}</p>
                   <p>部门：${task.assigneeUser.deptName}</p>
                   <p>结果：${dataResult}</p>
-                  <p>创建时间：${parseTime(task.createTime)}</p>`
+                  <p>创建时间：${formatDate(task.createTime)}</p>`
       // html = `<p>审批人：${task.assigneeUser.nickname}</p>
       //             <p>部门：${task.assigneeUser.deptName}</p>
       //             <p>结果：${getIntDictOptions(
       //               DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT,
       //               task.result
       //             )}</p>
-      //             <p>创建时间：${parseTime(task.createTime)}</p>`
+      //             <p>创建时间：${formatDate(task.createTime)}</p>`
       if (task.endTime) {
-        html += `<p>结束时间：${parseTime(task.endTime)}</p>`
+        html += `<p>结束时间：${formatDate(task.endTime)}</p>`
       }
       if (task.reason) {
         html += `<p>审批建议：${task.reason}</p>`
       }
     } else if (element.value.type === 'bpmn:ServiceTask' && processInstance.value) {
       if (activity.startTime > 0) {
-        html = `<p>创建时间：${parseTime(activity.startTime)}</p>`
+        html = `<p>创建时间：${formatDate(activity.startTime)}</p>`
       }
       if (activity.endTime > 0) {
-        html += `<p>结束时间：${parseTime(activity.endTime)}</p>`
+        html += `<p>结束时间：${formatDate(activity.endTime)}</p>`
       }
       console.log(html)
     } else if (element.value.type === 'bpmn:EndEvent' && processInstance.value) {
@@ -333,7 +333,7 @@ const elementHover = (element) => {
       //   processInstance.value.result
       // )}</p>`
       if (processInstance.value.endTime) {
-        html += `<p>结束时间：${parseTime(processInstance.value.endTime)}</p>`
+        html += `<p>结束时间：${formatDate(processInstance.value.endTime)}</p>`
       }
     }
     console.log(html, 'html111111111111111')
@@ -347,50 +347,6 @@ const elementHover = (element) => {
 const elementOut = (element) => {
   toRaw(overlays.value).remove({ element })
   elementOverlayIds.value[element.id] = null
-}
-const parseTime = (time) => {
-  if (!time) {
-    return null
-  }
-  const format = '{y}-{m}-{d} {h}:{i}:{s}'
-  let date
-  if (typeof time === 'object') {
-    date = time
-  } else {
-    if (typeof time === 'string' && /^[0-9]+$/.test(time)) {
-      time = parseInt(time)
-    } else if (typeof time === 'string') {
-      time = time
-        .replace(new RegExp(/-/gm), '/')
-        .replace('T', ' ')
-        .replace(new RegExp(/\.[\d]{3}/gm), '')
-    }
-    if (typeof time === 'number' && time.toString().length === 10) {
-      time = time * 1000
-    }
-    date = new Date(time)
-  }
-  const formatObj = {
-    y: date.getFullYear(),
-    m: date.getMonth() + 1,
-    d: date.getDate(),
-    h: date.getHours(),
-    i: date.getMinutes(),
-    s: date.getSeconds(),
-    a: date.getDay()
-  }
-  const time_str = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
-    let value = formatObj[key]
-    // Note: getDay() returns 0 on Sunday
-    if (key === 'a') {
-      return ['日', '一', '二', '三', '四', '五', '六'][value]
-    }
-    if (result.length > 0 && value < 10) {
-      value = '0' + value
-    }
-    return value || 0
-  })
-  return time_str
 }
 
 onMounted(() => {

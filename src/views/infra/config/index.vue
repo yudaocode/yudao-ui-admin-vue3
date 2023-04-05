@@ -1,6 +1,8 @@
 <template>
+  <doc-alert title="配置中心" url="https://doc.iocoder.cn/config-center/" />
+
   <!-- 搜索 -->
-  <content-wrap>
+  <ContentWrap>
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -34,10 +36,10 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.INFRA_CONFIG_TYPE)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.INFRA_CONFIG_TYPE)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -55,7 +57,12 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openModal('create')" v-hasPermi="['infra:config:create']">
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['infra:config:create']"
+        >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
@@ -69,10 +76,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="参数主键" align="center" prop="id" />
       <el-table-column label="参数分类" align="center" prop="category" />
@@ -102,7 +109,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['infra:config:update']"
           >
             编辑
@@ -125,17 +132,17 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <config-form ref="modalRef" @success="getList" />
+  <ConfigForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Config">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ConfigApi from '@/api/infra/config'
-import ConfigForm from './form.vue'
+import ConfigForm from './ConfigForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -178,9 +185,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */
@@ -203,7 +210,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await ConfigApi.exportConfigApi(queryParams)
+    const data = await ConfigApi.exportConfig(queryParams)
     download.excel(data, '参数配置.xls')
   } catch {
   } finally {

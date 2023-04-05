@@ -219,21 +219,19 @@ const handleAuthorized = () => {
   if (!isRelogin.show) {
     isRelogin.show = true
     ElMessageBox.confirm(t('sys.api.timeoutMessage'), t('common.confirmTitle'), {
+      showCancelButton: false,
+      closeOnClickModal: false,
+      showClose: false,
       confirmButtonText: t('login.relogin'),
-      cancelButtonText: t('common.cancel'),
       type: 'warning'
+    }).then(() => {
+      const { wsCache } = useCache()
+      resetRouter() // 重置静态路由表
+      wsCache.clear()
+      removeToken()
+      isRelogin.show = false
+      window.location.href = import.meta.env.VITE_BASE_PATH
     })
-      .then(() => {
-        const { wsCache } = useCache()
-        resetRouter() // 重置静态路由表
-        wsCache.clear()
-        removeToken()
-        isRelogin.show = false
-        window.location.href = import.meta.env.VITE_BASE_PATH
-      })
-      .catch(() => {
-        isRelogin.show = false
-      })
   }
   return Promise.reject(t('sys.api.timeoutMessage'))
 }

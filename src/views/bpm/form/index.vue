@@ -1,5 +1,5 @@
 <template>
-  <content-wrap>
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
@@ -20,15 +20,15 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openForm()" v-hasPermi="['bpm:form:create']">
+        <el-button type="primary" plain @click="openForm" v-hasPermi="['bpm:form:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="表单名" align="center" prop="name" />
@@ -75,7 +75,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单详情的弹窗 -->
   <Dialog title="表单详情" v-model="detailVisible" width="800">

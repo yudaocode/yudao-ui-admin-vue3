@@ -3,17 +3,19 @@ import request from '@/config/axios'
 /**
  * 获取redis 监控信息
  */
-export const getCacheApi = () => {
+export const getCache = () => {
   return request.get({ url: '/infra/redis/get-monitor-info' })
 }
+
 // 获取模块
-export const getKeyDefineListApi = () => {
+export const getKeyDefineList = () => {
   return request.get({ url: '/infra/redis/get-key-define-list' })
 }
+
 /**
  * 获取redis key列表
  */
-export const getKeyListApi = (keyTemplate: string) => {
+export const getKeyList = (keyTemplate: string) => {
   return request.get({
     url: '/infra/redis/get-key-list',
     params: {
@@ -21,17 +23,18 @@ export const getKeyListApi = (keyTemplate: string) => {
     }
   })
 }
+
 // 获取缓存内容
-export const getKeyValueApi = (key: string) => {
+export const getKeyValue = (key: string) => {
   return request.get({ url: '/infra/redis/get-key-value?key=' + key })
 }
 
 // 根据键名删除缓存
-export const deleteKeyApi = (key: string) => {
+export const deleteKey = (key: string) => {
   return request.delete({ url: '/infra/redis/delete-key?key=' + key })
 }
 
-export const deleteKeysApi = (keyTemplate: string) => {
+export const deleteKeys = (keyTemplate: string) => {
   return request.delete({
     url: '/infra/redis/delete-keys?',
     params: {

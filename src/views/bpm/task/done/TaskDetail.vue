@@ -1,25 +1,25 @@
 <template>
-  <Dialog title="详情" v-model="dialogVisible" width="800">
+  <Dialog title="详情" v-model="dialogVisible" :scroll="true" :max-height="500">
     <el-descriptions border :column="1">
-      <el-descriptions-item label="日志编号" min-width="120">
+      <el-descriptions-item label="任务编号" min-width="120">
         {{ detailData.id }}
       </el-descriptions-item>
-      <el-descriptions-item label="操作类型">
-        <dict-tag :type="DICT_TYPE.SYSTEM_LOGIN_TYPE" :value="detailData.logType" />
+      <el-descriptions-item label="任务名称">
+        {{ detailData.name }}
       </el-descriptions-item>
-      <el-descriptions-item label="用户名称">
-        {{ detailData.username }}
+      <el-descriptions-item label="所属流程">
+        {{ detailData.processInstance.name }}
       </el-descriptions-item>
-      <el-descriptions-item label="登录地址">
-        {{ detailData.userIp }}
+      <el-descriptions-item label="流程发起人">
+        {{ detailData.processInstance.startUserNickname }}
       </el-descriptions-item>
-      <el-descriptions-item label="浏览器">
-        {{ detailData.userAgent }}
+      <el-descriptions-item label="状态">
+        <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="detailData.result" />
       </el-descriptions-item>
-      <el-descriptions-item label="登陆结果">
-        <dict-tag :type="DICT_TYPE.SYSTEM_LOGIN_RESULT" :value="detailData.result" />
+      <el-descriptions-item label="原因">
+        {{ detailData.reason }}
       </el-descriptions-item>
-      <el-descriptions-item label="登录日期">
+      <el-descriptions-item label="创建时间">
         {{ formatDate(detailData.createTime) }}
       </el-descriptions-item>
     </el-descriptions>
@@ -28,14 +28,14 @@
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
-import * as LoginLogApi from '@/api/system/loginLog'
+import * as TaskApi from '@/api/bpm/task'
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
 const detailData = ref() // 详情数据
 
 /** 打开弹窗 */
-const open = async (data: LoginLogApi.LoginLogVO) => {
+const open = async (data: TaskApi.TaskVO) => {
   dialogVisible.value = true
   // 设置数据
   detailLoading.value = true

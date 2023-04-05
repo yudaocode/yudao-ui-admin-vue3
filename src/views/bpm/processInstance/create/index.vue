@@ -111,7 +111,7 @@ const submitForm = async (formData) => {
   // 提交请求
   fApi.value.btn.loading(true)
   try {
-    await ProcessInstanceApi.createProcessInstanceApi({
+    await ProcessInstanceApi.createProcessInstance({
       processDefinitionId: selectProcessInstance.value.id,
       variables: formData
     })

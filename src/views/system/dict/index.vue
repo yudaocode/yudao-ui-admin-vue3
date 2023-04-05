@@ -1,6 +1,6 @@
 <template>
   <!-- 搜索工作栏 -->
-  <content-wrap>
+  <ContentWrap>
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -27,10 +27,15 @@
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="字典状态" clearable class="!w-240px">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择字典状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
@@ -41,7 +46,6 @@
           v-model="queryParams.createTime"
           value-format="yyyy-MM-dd HH:mm:ss"
           type="daterange"
-          range-separator="-"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
@@ -51,7 +55,12 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openModal('create')" v-hasPermi="['system:dict:create']">
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['system:dict:create']"
+        >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
@@ -65,10 +74,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="字典编号" align="center" prop="id" />
       <el-table-column label="字典名称" align="center" prop="name" show-overflow-tooltip />
@@ -91,7 +100,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['system:dict:update']"
           >
             修改
@@ -117,17 +126,17 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <dict-type-form ref="modalRef" @success="getList" />
+  <DictTypeForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts" name="Dict">
-import { getDictOptions, DICT_TYPE } from '@/utils/dict'
+<script setup lang="ts" name="DictType">
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as DictTypeApi from '@/api/system/dict/dict.type'
-import DictTypeForm from './form.vue'
+import DictTypeForm from './DictTypeForm.vue'
 import download from '@/utils/download'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -171,9 +180,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */

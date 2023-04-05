@@ -1,5 +1,7 @@
 <template>
-  <content-wrap>
+  <doc-alert title="系统日志" url="https://doc.iocoder.cn/system-log/" />
+
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
@@ -51,10 +53,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="日志编号" align="center" prop="id" />
       <el-table-column label="操作类型" align="center" prop="logType">
@@ -97,7 +99,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：详情 -->
   <LoginLogDetail ref="detailRef" />

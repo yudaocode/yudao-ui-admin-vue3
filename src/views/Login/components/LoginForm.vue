@@ -195,7 +195,7 @@ const getCode = async () => {
 //获取租户ID
 const getTenantId = async () => {
   if (loginData.tenantEnable === 'true') {
-    const res = await LoginApi.getTenantIdByNameApi(loginData.loginForm.tenantName)
+    const res = await LoginApi.getTenantIdByName(loginData.loginForm.tenantName)
     authUtil.setTenantId(res)
   }
 }
@@ -222,7 +222,7 @@ const handleLogin = async (params) => {
       return
     }
     loginData.loginForm.captchaVerification = params.captchaVerification
-    const res = await LoginApi.loginApi(loginData.loginForm)
+    const res = await LoginApi.login(loginData.loginForm)
     if (!res) {
       return
     }
@@ -259,7 +259,7 @@ const doSocialLogin = async (type: number) => {
     loginLoading.value = true
     if (loginData.tenantEnable === 'true') {
       await message.prompt('请输入租户名称', t('common.reminder')).then(async ({ value }) => {
-        const res = await LoginApi.getTenantIdByNameApi(value)
+        const res = await LoginApi.getTenantIdByName(value)
         authUtil.setTenantId(res)
       })
     }
@@ -267,7 +267,7 @@ const doSocialLogin = async (type: number) => {
     const redirectUri =
       location.origin + '/social-login?type=' + type + '&redirect=' + (redirect.value || '/')
     // 进行跳转
-    const res = await LoginApi.socialAuthRedirectApi(type, encodeURIComponent(redirectUri))
+    const res = await LoginApi.socialAuthRedirect(type, encodeURIComponent(redirectUri))
     window.location.href = res
   }
 }

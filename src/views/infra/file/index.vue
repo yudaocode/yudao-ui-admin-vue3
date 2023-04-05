@@ -1,6 +1,8 @@
 <template>
+  <doc-alert title="上传下载" url="https://doc.iocoder.cn/file/"/>
+
   <!-- 搜索 -->
-  <content-wrap>
+  <ContentWrap>
     <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
       <el-form-item label="文件路径" prop="path">
         <el-input
@@ -31,16 +33,16 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openModal">
+        <el-button type="primary" @click="openForm">
           <Icon icon="ep:upload" class="mr-5px" /> 上传文件
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
-    <el-table v-loading="loading" :data="list" align="center">
+  <ContentWrap>
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="文件名" align="center" prop="name" :show-overflow-tooltip="true" />
       <el-table-column label="文件路径" align="center" prop="path" :show-overflow-tooltip="true" />
       <el-table-column label="URL" align="center" prop="url" :show-overflow-tooltip="true" />
@@ -79,16 +81,16 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <file-upload-form ref="modalRef" @success="getList" />
+  <FileForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Config">
 import { fileSizeFormatter } from '@/utils'
 import { dateFormatter } from '@/utils/formatTime'
 import * as FileApi from '@/api/infra/file'
-import FileUploadForm from './form.vue'
+import FileUploadForm from './FileForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -129,9 +131,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = () => {
-  modalRef.value.openModal()
+const formRef = ref()
+const openForm = () => {
+  formRef.value.open()
 }
 
 /** 删除按钮操作 */

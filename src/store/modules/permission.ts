@@ -3,7 +3,7 @@ import { store } from '../index'
 import { cloneDeep } from 'lodash-es'
 import remainingRouter from '@/router/modules/remaining'
 import { generateRoute, flatMultiLevelRoutes } from '@/utils/routerHelper'
-import { getAsyncRoutesApi } from '@/api/login'
+import { getAsyncRoutes } from '@/api/login'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 
 const { wsCache } = useCache()
@@ -38,7 +38,7 @@ export const usePermissionStore = defineStore('permission', {
         if (wsCache.get(CACHE_KEY.ROLE_ROUTERS)) {
           res = wsCache.get(CACHE_KEY.ROLE_ROUTERS) as AppCustomRouteRecordRaw[]
         } else {
-          res = await getAsyncRoutesApi()
+          res = await getAsyncRoutes()
           wsCache.set(CACHE_KEY.ROLE_ROUTERS, res)
         }
         const routerMap: AppRouteRecordRaw[] = generateRoute(res as AppCustomRouteRecordRaw[])

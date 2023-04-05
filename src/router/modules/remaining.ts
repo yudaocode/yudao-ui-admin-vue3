@@ -115,7 +115,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: 'type/data/:dictType',
-        component: () => import('@/views/system/dict/data.vue'),
+        component: () => import('@/views/system/dict/data/index.vue'),
         name: 'data',
         meta: {
           title: '字典数据',
@@ -123,7 +123,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           icon: '',
-          activeMenu: 'system/dict/data'
+          activeMenu: '/system/dict'
         }
       }
     ]

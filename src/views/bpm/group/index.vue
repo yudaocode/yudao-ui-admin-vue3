@@ -43,6 +43,7 @@
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
+          plain
           @click="openForm('create')"
           v-hasPermi="['bpm:user-group:create']"
         >

@@ -43,6 +43,6 @@ export const deleteConfig = (id: number) => {
 }
 
 // 导出参数
-export const exportConfigApi = (params) => {
+export const exportConfig = (params) => {
   return request.download({ url: '/infra/config/export', params })
 }

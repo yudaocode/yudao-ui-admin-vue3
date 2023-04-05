@@ -1,5 +1,7 @@
 <template>
-  <content-wrap>
+  <doc-alert title="系统日志" url="https://doc.iocoder.cn/system-log/" />
+
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
@@ -34,10 +36,10 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.SYSTEM_OPERATE_TYPE)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_OPERATE_TYPE)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -77,10 +79,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="日志编号" align="center" prop="id" />
       <el-table-column label="操作模块" align="center" prop="module" width="180" />
@@ -113,7 +115,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal(scope.row)"
+            @click="openDetail(scope.row)"
             v-hasPermi="['infra:config:query']"
           >
             详情
@@ -128,17 +130,17 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：详情 -->
-  <operate-log-detail ref="modalRef" />
+  <OperateLogDetail ref="detailRef" />
 </template>
 <script setup lang="ts" name="OperateLog">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as OperateLogApi from '@/api/system/operatelog'
-import OperateLogDetail from './detail.vue'
+import OperateLogDetail from './OperateLogDetail.vue'
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
@@ -181,9 +183,9 @@ const resetQuery = () => {
 }
 
 /** 详情操作 */
-const modalRef = ref()
-const openModal = (data: OperateLogApi.OperateLogVO) => {
-  modalRef.value.openModal(data)
+const detailRef = ref()
+const openDetail = (data: OperateLogApi.OperateLogVO) => {
+  detailRef.value.open(data)
 }
 
 /** 导出按钮操作 */

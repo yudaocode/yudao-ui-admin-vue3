@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="modelTitle" v-model="modelVisible">
+  <Dialog :title="dialogTitle" v-model="dialogVisible">
     <el-form
       ref="formRef"
       :model="formData"
@@ -13,7 +13,7 @@
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="modelVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -22,8 +22,8 @@ import * as MpTagApi from '@/api/mp/tag'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
-const modelTitle = ref('') // 弹窗的标题
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
@@ -37,8 +37,8 @@ const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
 const open = async (type: string, accountId: number, id?: number) => {
-  modelVisible.value = true
-  modelTitle.value = t('action.' + type)
+  dialogVisible.value = true
+  dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
   formData.value.accountId = accountId
@@ -72,7 +72,7 @@ const submitForm = async () => {
       await MpTagApi.updateTag(data)
       message.success(t('common.updateSuccess'))
     }
-    modelVisible.value = false
+    dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
   } finally {

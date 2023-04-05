@@ -1,11 +1,13 @@
 <template>
+  <doc-alert title="邮件配置" url="https://doc.iocoder.cn/mail" />
+
   <!-- 搜索工作栏 -->
-  <content-wrap>
+  <ContentWrap>
     <Search :schema="allSchemas.searchSchema" @search="setSearchParams" @reset="setSearchParams" />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <Table
       :columns="allSchemas.tableColumns"
       :data="tableObject.tableList"
@@ -20,22 +22,22 @@
         <el-button
           link
           type="primary"
-          @click="openModal(row.id)"
+          @click="openDetail(row.id)"
           v-hasPermi="['system:mail-log:query']"
         >
           详情
         </el-button>
       </template>
     </Table>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：详情 -->
-  <mail-log-detail ref="modalRef" />
+  <mail-log-detail ref="detailRef" />
 </template>
 <script setup lang="ts" name="MailLog">
 import { allSchemas } from './log.data'
 import * as MailLogApi from '@/api/system/mail/log'
-import MailLogDetail from './detail.vue'
+import MailLogDetail from './MailLogDetail.vue'
 
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
 // tableMethods：表格的操作对象，可进行获得分页、删除记录等操作
@@ -47,9 +49,9 @@ const { tableObject, tableMethods } = useTable({
 const { getList, setSearchParams } = tableMethods
 
 /** 详情操作 */
-const modalRef = ref()
-const openModal = (id: number) => {
-  modalRef.value.openModal(id)
+const detailRef = ref()
+const openDetail = (id: number) => {
+  detailRef.value.open(id)
 }
 
 /** 初始化 **/

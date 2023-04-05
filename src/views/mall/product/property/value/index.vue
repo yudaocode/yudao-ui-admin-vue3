@@ -108,7 +108,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const propertyOptions = ref([]) // 属性项的列表
 
-/** 查询参数列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {

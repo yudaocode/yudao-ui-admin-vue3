@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="转派审批人" v-model="modelVisible" width="500">
+  <Dialog title="转派审批人" v-model="dialogVisible" width="500">
     <el-form
       ref="formRef"
       :model="formData"
@@ -20,7 +20,7 @@
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="modelVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -28,7 +28,7 @@
 import * as TaskApi from '@/api/bpm/task'
 import * as UserApi from '@/api/system/user'
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formData = ref({
   id: '',
@@ -43,7 +43,7 @@ const userList = ref<any[]>([]) // 用户列表
 
 /** 打开弹窗 */
 const open = async (id: string) => {
-  modelVisible.value = true
+  dialogVisible.value = true
   resetForm()
   formData.value.id = id
   // 获得用户列表
@@ -62,7 +62,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     await TaskApi.updateTaskAssignee(formData.value)
-    modelVisible.value = false
+    dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
   } finally {

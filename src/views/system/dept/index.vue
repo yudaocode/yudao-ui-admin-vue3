@@ -55,7 +55,7 @@
       v-loading="loading"
       :data="list"
       row-key="id"
-      default-expand-all
+      :default-expand-all="isExpandAll"
       v-if="refreshTable"
     >
       <el-table-column prop="name" label="部门名称" width="260" />
@@ -131,7 +131,7 @@ const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 const getList = async () => {
   loading.value = true
   try {
-    const data = await DeptApi.getDeptPageApi(queryParams)
+    const data = await DeptApi.getDeptPage(queryParams)
     list.value = handleTree(data)
   } finally {
     loading.value = false
@@ -142,7 +142,6 @@ const getList = async () => {
 const toggleExpandAll = () => {
   refreshTable.value = false
   isExpandAll.value = !isExpandAll.value
-  console.log(isExpandAll.value)
   nextTick(() => {
     refreshTable.value = true
   })
@@ -172,7 +171,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await DeptApi.deleteDeptApi(id)
+    await DeptApi.deleteDept(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

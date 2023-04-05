@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="SaaS 多租户" url="https://doc.iocoder.cn/saas-tenant/" />
+
   <!-- 搜索 -->
   <ContentWrap>
     <el-form
@@ -42,6 +44,7 @@
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
+          plain
           @click="openForm('create')"
           v-hasPermi="['system:tenant-package:create']"
         >
@@ -54,7 +57,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" align="center">
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="套餐编号" align="center" prop="id" width="120" />
       <el-table-column label="套餐名" align="center" prop="name" />
       <el-table-column label="状态" align="center" prop="status" width="100">
@@ -63,11 +66,13 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="创建时间" align="center" prop="createTime" width="180">
-        <template #default="scope">
-          <span>{{ formatDate(scope.row.createTime) }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
+      />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button
@@ -103,7 +108,7 @@
 </template>
 <script setup lang="ts" name="TenantPackage">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { formatDate } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import * as TenantPackageApi from '@/api/system/tenantPackage'
 import TenantPackageForm from './TenantPackageForm.vue'
 const message = useMessage() // 消息弹窗

@@ -1,6 +1,6 @@
 <template>
   <!-- 搜索工作栏 -->
-  <content-wrap>
+  <ContentWrap>
     <el-form class="-mb-15px" ref="queryForm" :inline="true" label-width="68px">
       <el-form-item label="公众号" prop="accountId">
         <el-select v-model="accountId" @change="getSummary" class="!w-240px">
@@ -24,10 +24,10 @@
         />
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 图表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-row>
       <el-col :span="12" class="card-box">
         <el-card>
@@ -70,7 +70,7 @@
         </el-card>
       </el-col>
     </el-row>
-  </content-wrap>
+  </ContentWrap>
 </template>
 
 <script setup lang="ts" name="MpStatistics">

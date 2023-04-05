@@ -1,6 +1,8 @@
 <template>
+  <doc-alert title="上传下载" url="https://doc.iocoder.cn/file/" />
+
   <!-- 搜索 -->
-  <content-wrap>
+  <ContentWrap>
     <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
       <el-form-item label="配置名" prop="name">
         <el-input
@@ -13,10 +15,10 @@
       <el-form-item label="存储器" prop="storage">
         <el-select v-model="queryParams.storage" placeholder="请选择存储器" clearable>
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.INFRA_FILE_STORAGE)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.INFRA_FILE_STORAGE)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -35,18 +37,19 @@
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
-          @click="openModal('create')"
+          plain
+          @click="openForm('create')"
           v-hasPermi="['infra:file-config:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
-    <el-table v-loading="loading" :data="list" align="center">
+  <ContentWrap>
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="配置名" align="center" prop="name" />
       <el-table-column label="存储器" align="center" prop="storage">
@@ -72,7 +75,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['infra:file-config:update']"
           >
             编辑
@@ -105,15 +108,15 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <file-config-form ref="modalRef" @success="getList" />
+  <FileConfigForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="Config">
 import * as FileConfigApi from '@/api/infra/fileConfig'
-import FileConfigForm from './form.vue'
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import FileConfigForm from './FileConfigForm.vue'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -155,9 +158,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */

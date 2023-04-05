@@ -1,5 +1,9 @@
 <template>
-  <content-wrap>
+  <doc-alert title="定时任务" url="https://doc.iocoder.cn/job/" />
+  <doc-alert title="异步任务" url="https://doc.iocoder.cn/async-task/" />
+  <doc-alert title="消息队列" url="https://doc.iocoder.cn/message-queue/" />
+
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
@@ -66,10 +70,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="任务编号" align="center" prop="id" />
       <el-table-column label="任务名称" align="center" prop="name" />
@@ -136,7 +140,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
   <JobForm ref="formRef" @success="getList" />
@@ -271,7 +275,7 @@ const handleRun = async (row: JobApi.JobVO) => {
     // 二次确认
     await message.confirm('确认要立即执行一次' + row.name + '?', t('common.reminder'))
     // 提交执行
-    await JobApi.runJobApi(row.id)
+    await JobApi.runJob(row.id)
     message.success('执行成功')
     // 刷新列表
     await getList()
@@ -286,7 +290,7 @@ const openDetail = (id: number) => {
 
 /** 跳转执行日志 */
 const handleJobLog = (id: number) => {
-  if (id) {
+  if (id > 0) {
     push('/job/job-log?id=' + id)
   } else {
     push('/job/job-log')
