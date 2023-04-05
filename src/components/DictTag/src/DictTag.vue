@@ -48,6 +48,7 @@ export default defineComponent({
               ? dictData.value?.cssClass
               : ''
           }
+          disableTransitions={true}
         >
           {dictData.value?.label}
         </ElTag>

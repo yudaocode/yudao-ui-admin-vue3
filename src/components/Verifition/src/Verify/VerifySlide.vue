@@ -78,7 +78,7 @@
  * */
 import { aesEncrypt } from './../utils/ase'
 import { resetSize } from './../utils/util'
-import { getCodeApi, reqCheckApi } from '@/api/login'
+import { getCode, reqCheck } from '@/api/login'
 
 const props = defineProps({
   captchaType: {
@@ -286,7 +286,7 @@ const end = () => {
         : JSON.stringify({ x: moveLeftDistance, y: 5.0 }),
       token: backToken.value
     }
-    reqCheckApi(data).then((res) => {
+    reqCheck(data).then((res) => {
       if (res.repCode == '0000') {
         moveBlockBackgroundColor.value = '#5cb85c'
         leftBarBorderColor.value = '#5cb85c'
@@ -301,7 +301,7 @@ const end = () => {
           }, 1500)
         }
         passFlag.value = true
-        tipWords.value = `${((endMovetime.value - startMoveTime.value) / 1000).toFixed(2)}s 
+        tipWords.value = `${((endMovetime.value - startMoveTime.value) / 1000).toFixed(2)}s
             ${t('captcha.success')}`
         var captchaVerification = secretKey.value
           ? aesEncrypt(
@@ -363,7 +363,7 @@ const getPictrue = async () => {
   let data = {
     captchaType: captchaType.value
   }
-  const res = await getCodeApi(data)
+  const res = await getCode(data)
   if (res.repCode == '0000') {
     backImgBase.value = res.repData.originalImageBase64
     blockBackImgBase.value = res.repData.jigsawImageBase64

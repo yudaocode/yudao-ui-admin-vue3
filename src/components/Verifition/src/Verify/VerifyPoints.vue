@@ -64,7 +64,7 @@
  * */
 import { resetSize } from './../utils/util'
 import { aesEncrypt } from './../utils/ase'
-import { getCodeApi, reqCheckApi } from '@/api/login'
+import { getCode, reqCheck } from '@/api/login'
 import { onMounted, reactive, ref, nextTick, toRefs, getCurrentInstance } from 'vue'
 
 const props = defineProps({
@@ -170,7 +170,7 @@ const canvasClick = (e) => {
           : JSON.stringify(checkPosArr),
         token: backToken.value
       }
-      reqCheckApi(data).then((res) => {
+      reqCheck(data).then((res) => {
         if (res.repCode == '0000') {
           barAreaColor.value = '#4cae4c'
           barAreaBorderColor.value = '#5cb85c'
@@ -227,7 +227,7 @@ const getPictrue = async () => {
   let data = {
     captchaType: captchaType.value
   }
-  const res = await getCodeApi(data)
+  const res = await getCode(data)
   if (res.repCode == '0000') {
     pointBackImgBase.value = res.repData.originalImageBase64
     backToken.value = res.repData.token

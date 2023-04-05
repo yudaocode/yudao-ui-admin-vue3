@@ -33,7 +33,6 @@
 </template>
 <script setup lang="ts">
 import * as MailTemplateApi from '@/api/system/mail/template'
-
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
@@ -53,7 +52,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const openModal = async (id: number) => {
+const open = async (id: number) => {
   dialogVisible.value = true
   resetForm()
   // 设置数据
@@ -76,7 +75,7 @@ const openModal = async (id: number) => {
     formLoading.value = false
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const submitForm = async () => {

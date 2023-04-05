@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="SaaS 多租户" url="https://doc.iocoder.cn/saas-tenant/" />
+
   <!-- 搜索 -->
   <ContentWrap>
     <el-form
@@ -55,7 +57,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" align="center">
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="套餐编号" align="center" prop="id" width="120" />
       <el-table-column label="套餐名" align="center" prop="name" />
       <el-table-column label="状态" align="center" prop="status" width="100">

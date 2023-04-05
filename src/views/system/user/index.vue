@@ -1,14 +1,18 @@
 <template>
+  <doc-alert title="用户体系" url="https://doc.iocoder.cn/user-center/" />
+  <doc-alert title="三方登陆" url="https://doc.iocoder.cn/social-user/" />
+  <doc-alert title="Excel 导入导出" url="https://doc.iocoder.cn/excel-import-and-export/" />
+
   <el-row :gutter="20">
     <!-- 左侧部门树 -->
     <el-col :span="4" :xs="24">
-      <content-wrap class="h-1/1">
+      <ContentWrap class="h-1/1">
         <DeptTree @node-click="handleDeptNodeClick" />
-      </content-wrap>
+      </ContentWrap>
     </el-col>
     <el-col :span="20" :xs="24">
       <!-- 搜索 -->
-      <content-wrap>
+      <ContentWrap>
         <el-form
           class="-mb-15px"
           :model="queryParams"
@@ -89,8 +93,8 @@
             </el-button>
           </el-form-item>
         </el-form>
-      </content-wrap>
-      <content-wrap>
+      </ContentWrap>
+      <ContentWrap>
         <el-table v-loading="loading" :data="list">
           <el-table-column label="用户编号" align="center" key="id" prop="id" />
           <el-table-column
@@ -183,7 +187,7 @@
           v-model:limit="queryParams.pageSize"
           @pagination="getList"
         />
-      </content-wrap>
+      </ContentWrap>
     </el-col>
   </el-row>
 

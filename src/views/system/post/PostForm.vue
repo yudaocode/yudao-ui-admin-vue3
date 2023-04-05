@@ -16,10 +16,10 @@
       <el-form-item label="状态" prop="status">
         <el-select v-model="formData.status" placeholder="请选择状态" clearable>
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -34,7 +34,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as PostApi from '@/api/system/post'
 
@@ -62,7 +62,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -77,7 +77,7 @@ const openModal = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调

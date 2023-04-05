@@ -11,7 +11,7 @@
         <el-tree-select
           v-model="formData.parentId"
           :data="deptTree"
-          :props="{ value: 'id', label: 'name', children: 'children' }"
+          :props="defaultProps"
           value-key="deptId"
           placeholder="请选择上级部门"
           check-strictly
@@ -25,12 +25,7 @@
         <el-input-number v-model="formData.sort" controls-position="right" :min="0" />
       </el-form-item>
       <el-form-item label="负责人" prop="leaderUserId">
-        <el-select
-          v-model="formData.leaderUserId"
-          placeholder="请输入负责人"
-          clearable
-          style="width: 100%"
-        >
+        <el-select v-model="formData.leaderUserId" placeholder="请输入负责人" clearable>
           <el-option
             v-for="item in userList"
             :key="item.id"
@@ -64,7 +59,7 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { handleTree } from '@/utils/tree'
+import { handleTree, defaultProps } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
 import { CommonStatusEnum } from '@/utils/constants'
@@ -93,7 +88,8 @@ const formRules = reactive({
   email: [{ type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }],
   phone: [
     { pattern: /^1[3|4|5|6|7|8|9][0-9]\d{8}$/, message: '请输入正确的手机号码', trigger: 'blur' }
-  ]
+  ],
+  status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const deptTree = ref() // 树形结构
@@ -109,7 +105,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await DeptApi.getDeptApi(id)
+      formData.value = await DeptApi.getDept(id)
     } finally {
       formLoading.value = false
     }
@@ -133,10 +129,10 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as DeptApi.DeptVO
     if (formType.value === 'create') {
-      await DeptApi.createDeptApi(data)
+      await DeptApi.createDept(data)
       message.success(t('common.createSuccess'))
     } else {
-      await DeptApi.updateDeptApi(data)
+      await DeptApi.updateDept(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false

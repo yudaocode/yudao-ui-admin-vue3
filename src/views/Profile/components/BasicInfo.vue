@@ -17,8 +17,8 @@ import { ElMessage } from 'element-plus'
 import { FormSchema } from '@/types/form'
 import type { FormExpose } from '@/components/Form'
 import {
-  getUserProfileApi,
-  updateUserProfileApi,
+  getUserProfile,
+  updateUserProfile,
   UserProfileUpdateReqVO
 } from '@/api/system/user/profile'
 
@@ -73,14 +73,14 @@ const submit = () => {
   elForm.validate(async (valid) => {
     if (valid) {
       const data = unref(formRef)?.formModel as UserProfileUpdateReqVO
-      await updateUserProfileApi(data)
+      await updateUserProfile(data)
       ElMessage.success(t('common.updateSuccess'))
       await init()
     }
   })
 }
 const init = async () => {
-  const res = await getUserProfileApi()
+  const res = await getUserProfile()
   unref(formRef)?.setValues(res)
 }
 onMounted(async () => {

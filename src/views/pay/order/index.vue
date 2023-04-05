@@ -49,8 +49,8 @@ const { t } = useI18n() // 国际化
 // 列表相关的变量
 const [registerTable, { exportList }] = useXTable({
   allSchemas: allSchemas,
-  getListApi: OrderApi.getOrderPageApi,
-  exportListApi: OrderApi.exportOrderApi
+  getListApi: OrderApi.getOrderPage,
+  exportListApi: OrderApi.exportOrder
 })
 // ========== CRUD 相关 ==========
 const actionLoading = ref(false) // 遮罩层
@@ -73,7 +73,7 @@ const handleCreate = () => {
 // 详情操作
 const handleDetail = async (rowId: number) => {
   setDialogTile('detail')
-  const res = await OrderApi.getOrderApi(rowId)
+  const res = await OrderApi.getOrder(rowId)
   detailData.value = res
 }
 </script>

@@ -4,7 +4,7 @@ import { TableColumn } from '@/types/table'
 import * as MailAccountApi from '@/api/system/mail/account'
 
 // 邮箱账号的列表
-const accounts = await MailAccountApi.getSimpleMailAccountList()
+const accountList = await MailAccountApi.getSimpleMailAccountList()
 
 // 表单校验
 export const rules = reactive({
@@ -49,12 +49,12 @@ const crudSchemas = reactive<CrudSchema[]>([
     field: 'accountId',
     width: '200px',
     formatter: (_: Recordable, __: TableColumn, cellValue: number) => {
-      return accounts.find((account) => account.id === cellValue)?.mail
+      return accountList.find((account) => account.id === cellValue)?.mail
     },
     search: {
       show: true,
       component: 'Select',
-      api: () => accounts,
+      api: () => accountList,
       componentProps: {
         optionsAlias: {
           labelField: 'mail',
@@ -64,7 +64,7 @@ const crudSchemas = reactive<CrudSchema[]>([
     },
     form: {
       component: 'Select',
-      api: () => accounts,
+      api: () => accountList,
       componentProps: {
         optionsAlias: {
           labelField: 'mail',

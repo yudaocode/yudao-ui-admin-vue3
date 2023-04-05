@@ -1,5 +1,7 @@
 <template>
-  <content-wrap>
+  <doc-alert title="站内信配置" url="https://doc.iocoder.cn/notify/" />
+
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
@@ -45,10 +47,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
-  <content-wrap>
-    <!-- 列表 -->
+  <!-- 列表 -->
+  <ContentWrap>
     <el-table
       v-loading="loading"
       :data="list"
@@ -107,7 +109,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：详情 -->
   <MyNotifyMessageDetail ref="detailRef" />

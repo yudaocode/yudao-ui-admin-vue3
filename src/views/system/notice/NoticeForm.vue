@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="800">
     <el-form
       ref="formRef"
       :model="formData"
@@ -7,29 +7,34 @@
       label-width="80px"
       v-loading="formLoading"
     >
-      <el-form-item label="字典名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入字典名称" />
+      <el-form-item label="公告标题" prop="title">
+        <el-input v-model="formData.title" placeholder="请输入公告标题" />
       </el-form-item>
-      <el-form-item label="字典类型" prop="type">
-        <el-input
-          :disabled="typeof formData.id !== 'undefined'"
-          v-model="formData.type"
-          placeholder="请输入参数名称"
-        />
+      <el-form-item label="公告内容" prop="content">
+        <Editor :model-value="formData.content" height="150px" />
+      </el-form-item>
+      <el-form-item label="公告类型" prop="type">
+        <el-select v-model="formData.type" placeholder="请选择公告类型" clearable>
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_NOTICE_TYPE)"
+            :key="parseInt(dict.value)"
+            :label="dict.label"
+            :value="parseInt(dict.value)"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-radio-group v-model="formData.status">
-          <el-radio
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
+        <el-select v-model="formData.status" placeholder="请选择状态" clearable>
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="parseInt(dict.value)"
-            :label="parseInt(dict.value)"
-            >{{ dict.label }}</el-radio
-          >
-        </el-radio-group>
+            :label="dict.label"
+            :value="parseInt(dict.value)"
+          />
+        </el-select>
       </el-form-item>
-
       <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" type="textarea" placeholder="请输入内容" />
+        <el-input v-model="formData.remark" type="textarea" placeholder="请输备注" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -39,10 +44,9 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-import * as DictTypeApi from '@/api/system/dict/dict.type'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
-
+import * as NoticeApi from '@/api/system/notice'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -52,19 +56,22 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  name: '',
-  type: '',
+  title: '',
+  type: undefined,
+  content: '',
   status: CommonStatusEnum.ENABLE,
   remark: ''
 })
 const formRules = reactive({
-  name: [{ required: true, message: '字典名称不能为空', trigger: 'blur' }],
-  type: [{ required: true, message: '字典类型不能为空', trigger: 'blur' }]
+  title: [{ required: true, message: '公告标题不能为空', trigger: 'blur' }],
+  type: [{ required: true, message: '公告类型不能为空', trigger: 'change' }],
+  status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
+  content: [{ required: true, message: '公告内容不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -73,13 +80,13 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await DictTypeApi.getDictType(id)
+      formData.value = await NoticeApi.getNotice(id)
     } finally {
       formLoading.value = false
     }
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -91,12 +98,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as DictTypeApi.DictTypeVO
+    const data = formData.value as unknown as NoticeApi.NoticeVO
     if (formType.value === 'create') {
-      await DictTypeApi.createDictType(data)
+      await NoticeApi.createNotice(data)
       message.success(t('common.createSuccess'))
     } else {
-      await DictTypeApi.updateDictType(data)
+      await NoticeApi.updateNotice(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -111,8 +118,9 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    type: '',
-    name: '',
+    title: '',
+    type: undefined,
+    content: '',
     status: CommonStatusEnum.ENABLE,
     remark: ''
   }

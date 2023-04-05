@@ -1,23 +1,25 @@
 <template>
+  <doc-alert title="邮件配置" url="https://doc.iocoder.cn/mail" />
+
   <!-- 搜索工作栏 -->
-  <content-wrap>
+  <ContentWrap>
     <Search :schema="allSchemas.searchSchema" @search="setSearchParams" @reset="setSearchParams">
       <!-- 新增等操作按钮 -->
       <template #actionMore>
         <el-button
           type="primary"
           plain
-          @click="openModal('create')"
+          @click="openForm('create')"
           v-hasPermi="['system:mail-account:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </template>
     </Search>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <Table
       :columns="allSchemas.tableColumns"
       :data="tableObject.tableList"
@@ -32,7 +34,7 @@
         <el-button
           link
           type="primary"
-          @click="openModal('update', row.id)"
+          @click="openForm('update', row.id)"
           v-hasPermi="['system:mail-account:update']"
         >
           编辑
@@ -47,15 +49,15 @@
         </el-button>
       </template>
     </Table>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <mail-account-form ref="modalRef" @success="getList" />
+  <MailAccountForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="MailAccount">
 import { allSchemas } from './account.data'
 import * as MailAccountApi from '@/api/system/mail/account'
-import MailAccountForm from './form.vue'
+import MailAccountForm from './MailAccountForm.vue'
 
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
 // tableMethods：表格的操作对象，可进行获得分页、删除记录等操作
@@ -68,9 +70,9 @@ const { tableObject, tableMethods } = useTable({
 const { getList, setSearchParams } = tableMethods
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */

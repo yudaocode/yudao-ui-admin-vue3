@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="短信配置" url="https://doc.iocoder.cn/sms/" />
+
   <ContentWrap>
     <el-form
       class="-mb-15px"
@@ -52,7 +54,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" align="center">
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="短信签名" align="center" prop="signature" />
       <el-table-column label="渠道编码" align="center" prop="code">

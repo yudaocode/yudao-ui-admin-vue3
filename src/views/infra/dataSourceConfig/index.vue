@@ -1,23 +1,23 @@
 <template>
-  <content-wrap>
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form class="-mb-15px" :inline="true">
       <el-form-item>
         <el-button
           type="primary"
           plain
-          @click="openModal('create')"
+          @click="openForm('create')"
           v-hasPermi="['infra:data-source-config:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
-    <el-table v-loading="loading" :data="list" align="center">
+  <ContentWrap>
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="主键编号" align="center" prop="id" />
       <el-table-column label="数据源名称" align="center" prop="name" />
       <el-table-column label="数据源连接" align="center" prop="url" :show-overflow-tooltip="true" />
@@ -34,7 +34,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['infra:data-source-config:update']"
             :disabled="scope.row.id === 0"
           >
@@ -52,15 +52,15 @@
         </template>
       </el-table-column>
     </el-table>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <data-source-config-form ref="modalRef" @success="getList" />
+  <DataSourceConfigForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="DataSourceConfig">
 import { dateFormatter } from '@/utils/formatTime'
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
-import DataSourceConfigForm from './form.vue'
+import DataSourceConfigForm from './DataSourceConfigForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -78,9 +78,9 @@ const getList = async () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */

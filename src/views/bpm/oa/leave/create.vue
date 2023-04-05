@@ -44,7 +44,7 @@ const submitForm = async () => {
       data.startTime = Date.parse(new Date(data.startTime).toString()).toString()
       data.endTime = Date.parse(new Date(data.endTime).toString()).toString()
       // 添加的提交
-      await LeaveApi.createLeaveApi(data)
+      await LeaveApi.createLeave(data)
       message.success(t('common.createSuccess'))
       // 关闭窗口
       push('/bpm/oa/leave')

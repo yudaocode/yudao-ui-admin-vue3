@@ -1,5 +1,5 @@
 <template>
-  <content-wrap v-loading="formLoading">
+  <ContentWrap v-loading="formLoading">
     <el-tabs v-model="activeName">
       <el-tab-pane label="基本信息" name="basicInfo">
         <basic-info-form ref="basicInfoRef" :table="formData.table" />
@@ -17,7 +17,7 @@
         <el-button @click="close">返回</el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 </template>
 <script setup lang="ts">
 import { useTagsViewStore } from '@/store/modules/tagsView'

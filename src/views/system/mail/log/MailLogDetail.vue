@@ -17,7 +17,7 @@ const detailLoading = ref(false) // 表单的加载中
 const detailData = ref() // 详情数据
 
 /** 打开弹窗 */
-const openModal = async (id: number) => {
+const open = async (id: number) => {
   dialogVisible.value = true
   // 设置数据
   detailLoading.value = true
@@ -27,5 +27,5 @@ const openModal = async (id: number) => {
     detailLoading.value = false
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 </script>

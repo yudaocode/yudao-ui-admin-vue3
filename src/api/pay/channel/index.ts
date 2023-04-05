@@ -12,35 +12,13 @@ export interface ChannelVO {
   createTime: Date
 }
 
-export interface ChannelPageReqVO extends PageParam {
-  code?: string
-  status?: number
-  remark?: string
-  feeRate?: number
-  merchantId?: number
-  appId?: number
-  config?: string
-  createTime?: Date[]
-}
-
-export interface ChannelExportReqVO {
-  code?: string
-  status?: number
-  remark?: string
-  feeRate?: number
-  merchantId?: number
-  appId?: number
-  config?: string
-  createTime?: Date[]
-}
-
 // 查询列表支付渠道
-export const getChannelPageApi = (params: ChannelPageReqVO) => {
+export const getChannelPage = (params: PageParam) => {
   return request.get({ url: '/pay/channel/page', params })
 }
 
 // 查询详情支付渠道
-export const getChannelApi = (merchantId: number, appId: string, code: string) => {
+export const getChannel = (merchantId: number, appId: string, code: string) => {
   const params = {
     merchantId: merchantId,
     appId: appId,
@@ -50,21 +28,21 @@ export const getChannelApi = (merchantId: number, appId: string, code: string) =
 }
 
 // 新增支付渠道
-export const createChannelApi = (data: ChannelVO) => {
+export const createChannel = (data: ChannelVO) => {
   return request.post({ url: '/pay/channel/create', data })
 }
 
 // 修改支付渠道
-export const updateChannelApi = (data: ChannelVO) => {
+export const updateChannel = (data: ChannelVO) => {
   return request.put({ url: '/pay/channel/update', data })
 }
 
 // 删除支付渠道
-export const deleteChannelApi = (id: number) => {
+export const deleteChannel = (id: number) => {
   return request.delete({ url: '/pay/channel/delete?id=' + id })
 }
 
 // 导出支付渠道
-export const exportChannelApi = (params: ChannelExportReqVO) => {
+export const exportChannel = (params) => {
   return request.download({ url: '/pay/channel/export-excel', params })
 }

@@ -12,7 +12,7 @@
 </template>
 <script setup lang="ts">
 import { propTypes } from '@/utils/propTypes'
-import { uploadAvatarApi } from '@/api/system/user/profile'
+import { uploadAvatar } from '@/api/system/user/profile'
 const props = defineProps({
   img: propTypes.string.def('')
 })
@@ -22,7 +22,7 @@ const avatar = computed(() => {
 
 const cropperRef = ref()
 const handelUpload = async ({ data }) => {
-  await uploadAvatarApi({ avatarFile: data })
+  await uploadAvatar({ avatarFile: data })
   cropperRef.value.close()
 }
 </script>

@@ -26,11 +26,12 @@
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="parseInt(dict.value)"
-            :label="parseInt(dict.value)"
-            >{{ dict.label }}</el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.value"
           >
+            {{ dict.label }}
+          </el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="颜色类型" prop="colorType">
@@ -57,7 +58,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as DictDataApi from '@/api/system/dict/dict.data'
 import { CommonStatusEnum } from '@/utils/constants'
 const { t } = useI18n() // 国际化
@@ -114,7 +115,7 @@ const colorTypeOptions = readonly([
 ])
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -129,7 +130,7 @@ const openModal = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调

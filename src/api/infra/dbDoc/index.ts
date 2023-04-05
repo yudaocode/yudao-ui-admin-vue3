@@ -1,16 +1,16 @@
 import request from '@/config/axios'
 
 // 导出Html
-export const exportHtmlApi = () => {
+export const exportHtml = () => {
   return request.download({ url: '/infra/db-doc/export-html' })
 }
 
 // 导出Word
-export const exportWordApi = () => {
+export const exportWord = () => {
   return request.download({ url: '/infra/db-doc/export-word' })
 }
 
 // 导出Markdown
-export const exportMarkdownApi = () => {
+export const exportMarkdown = () => {
   return request.download({ url: '/infra/db-doc/export-markdown' })
 }

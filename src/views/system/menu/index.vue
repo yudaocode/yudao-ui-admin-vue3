@@ -1,4 +1,7 @@
 <template>
+  <doc-alert title="功能权限" url="https://doc.iocoder.cn/resource-permission" />
+  <doc-alert title="菜单路由" url="https://doc.iocoder.cn/vue2/route/" />
+
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form

@@ -1,4 +1,7 @@
 <template>
+  <doc-alert title="Redis 缓存" url="https://doc.iocoder.cn/redis-cache/" />
+  <doc-alert title="本地缓存" url="https://doc.iocoder.cn/local-cache/" />
+
   <el-scrollbar height="calc(100vh - 88px - 40px - 50px)">
     <el-row>
       <el-col :span="24" class="card-box" shadow="hover">
@@ -130,18 +133,18 @@ import { DICT_TYPE } from '@/utils/dict'
 
 import * as RedisApi from '@/api/infra/redis'
 import { RedisKeyInfo, RedisMonitorInfoVO } from '@/api/infra/redis/types'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
 const cache = ref<RedisMonitorInfoVO>()
 const keyListLoad = ref(true)
 const keyList = ref<RedisKeyInfo[]>([])
 // 基本信息
 const readRedisInfo = async () => {
-  const data = await RedisApi.getCacheApi()
+  const data = await RedisApi.getCache()
   cache.value = data
   loadEchartOptions(data.commandStats)
-  const redisKeysInfo = await RedisApi.getKeyDefineListApi()
+  const redisKeysInfo = await RedisApi.getKeyDefineList()
   keyList.value = redisKeysInfo
   keyListLoad.value = false //加载完成
 }
@@ -250,19 +253,19 @@ const cacheForm = ref<{
 })
 const openKeyTemplate = async (row: RedisKeyInfo) => {
   keyTemplate.value = row.keyTemplate
-  cacheKeys.value = await RedisApi.getKeyListApi(row.keyTemplate)
+  cacheKeys.value = await RedisApi.getKeyList(row.keyTemplate)
   dialogVisible.value = true
 }
 const handleDeleteKey = async (row) => {
-  RedisApi.deleteKeyApi(row)
+  RedisApi.deleteKey(row)
   message.success(t('common.delSuccess'))
 }
 const handleDeleteKeys = async (row) => {
-  RedisApi.deleteKeysApi(row)
+  RedisApi.deleteKeys(row)
   message.success(t('common.delSuccess'))
 }
 const handleKeyValue = async (row) => {
-  const res = await RedisApi.getKeyValueApi(row)
+  const res = await RedisApi.getKeyValue(row)
   cacheForm.value = res
 }
 onBeforeMount(() => {

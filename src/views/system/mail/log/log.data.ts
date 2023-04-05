@@ -3,7 +3,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as MailAccountApi from '@/api/system/mail/account'
 
 // 邮箱账号的列表
-const accounts = await MailAccountApi.getSimpleMailAccountList()
+const accountList = await MailAccountApi.getSimpleMailAccountList()
 
 // CrudSchema：https://kailong110120130.gitee.io/vue-element-plus-admin-doc/hooks/useCrudSchemas.html
 const crudSchemas = reactive<CrudSchema[]>([
@@ -74,7 +74,7 @@ const crudSchemas = reactive<CrudSchema[]>([
     search: {
       show: true,
       component: 'Select',
-      api: () => accounts,
+      api: () => accountList,
       componentProps: {
         optionsAlias: {
           labelField: 'mail',

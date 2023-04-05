@@ -57,7 +57,7 @@ const { t } = useI18n() // 国际化
 // ========== 列表相关 ==========
 const [registerTable, { reload }] = useXTable({
   allSchemas: allSchemas,
-  getListApi: ProcessInstanceApi.getMyProcessInstancePageApi
+  getListApi: ProcessInstanceApi.getMyProcessInstancePage
 })
 
 /** 发起流程操作 **/
@@ -85,7 +85,7 @@ const handleCancel = (row) => {
     inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 判断非空，且非空格
     inputErrorMessage: '取消原因不能为空'
   }).then(async ({ value }) => {
-    await ProcessInstanceApi.cancelProcessInstanceApi(row.id, value)
+    await ProcessInstanceApi.cancelProcessInstance(row.id, value)
     message.success('取消成功')
     reload()
   })

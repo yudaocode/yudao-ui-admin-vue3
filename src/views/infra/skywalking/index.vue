@@ -1,4 +1,5 @@
 <template>
+  <doc-alert title="服务监控" url="https://doc.iocoder.cn/server-monitor/" />
   <ContentWrap>
     <IFrame :src="src" />
   </ContentWrap>

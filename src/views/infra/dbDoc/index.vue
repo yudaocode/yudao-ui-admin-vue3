@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="数据库文档" url="https://doc.iocoder.cn/db-doc/" />
+
   <ContentWrap title="数据库文档">
     <!-- 操作工具栏 -->
     <div class="mb-10px">
@@ -34,7 +36,7 @@ const src = ref('')
 const loding = ref(true)
 /** 页面加载 */
 const init = async () => {
-  const res = await DbDocApi.exportHtmlApi()
+  const res = await DbDocApi.exportHtml()
   let blob = new Blob([res], { type: 'text/html' })
   let blobUrl = window.URL.createObjectURL(blob)
   src.value = blobUrl
@@ -43,15 +45,15 @@ const init = async () => {
 /** 处理导出  */
 const handleExport = async (type: string) => {
   if (type === 'HTML') {
-    const res = await DbDocApi.exportHtmlApi()
+    const res = await DbDocApi.exportHtml()
     download.html(res, '数据库文档.html')
   }
   if (type === 'Word') {
-    const res = await DbDocApi.exportWordApi()
+    const res = await DbDocApi.exportWord()
     download.word(res, '数据库文档.doc')
   }
   if (type === 'Markdown') {
-    const res = await DbDocApi.exportMarkdownApi()
+    const res = await DbDocApi.exportMarkdown()
     download.markdown(res, '数据库文档.md')
   }
 }

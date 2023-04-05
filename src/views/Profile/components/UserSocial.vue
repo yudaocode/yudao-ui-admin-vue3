@@ -23,7 +23,7 @@
 </template>
 <script setup lang="ts">
 import { SystemUserSocialTypeEnum } from '@/utils/constants'
-import { getUserProfileApi, ProfileVO } from '@/api/system/user/profile'
+import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
 import { socialAuthRedirect, socialUnbind } from '@/api/system/user/socialUser'
 
 const message = useMessage()
@@ -31,7 +31,7 @@ const socialUsers = ref<any[]>([])
 const userInfo = ref<ProfileVO>()
 
 const initSocial = async () => {
-  const res = await getUserProfileApi()
+  const res = await getUserProfile()
   userInfo.value = res
   for (const i in SystemUserSocialTypeEnum) {
     const socialUser = { ...SystemUserSocialTypeEnum[i] }

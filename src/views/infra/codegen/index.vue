@@ -1,6 +1,9 @@
 <template>
+  <doc-alert title="代码生成" url="https://doc.iocoder.cn/new-feature/" />
+  <doc-alert title="单元测试" url="https://doc.iocoder.cn/unit-test/" />
+
   <!-- 搜索 -->
-  <content-wrap>
+  <ContentWrap>
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -45,10 +48,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="数据源" align="center">
         <template #default="scope">
@@ -132,7 +135,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 弹窗：导入表 -->
   <ImportTable ref="importRef" success="getList" />

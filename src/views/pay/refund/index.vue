@@ -42,8 +42,8 @@ const { t } = useI18n() // 国际化
 // 列表相关的变量
 const [registerTable, { exportList }] = useXTable({
   allSchemas: allSchemas,
-  getListApi: RefundApi.getRefundPageApi,
-  exportListApi: RefundApi.exportRefundApi
+  getListApi: RefundApi.getRefundPage,
+  exportListApi: RefundApi.exportRefund
 })
 
 // ========== CRUD 相关 ==========
@@ -53,7 +53,7 @@ const detailData = ref() // 详情 Ref
 // 详情操作
 const handleDetail = async (rowId: number) => {
   // 设置数据
-  detailData.value = RefundApi.getRefundApi(rowId)
+  detailData.value = RefundApi.getRefund(rowId)
   dialogVisible.value = true
 }
 </script>

@@ -1,5 +1,7 @@
 <template>
-  <content-wrap>
+  <doc-alert title="系统日志" url="https://doc.iocoder.cn/system-log/" />
+
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
@@ -25,10 +27,10 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.USER_TYPE)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -84,10 +86,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="日志编号" align="center" prop="id" />
       <el-table-column label="用户编号" align="center" prop="userId" />
@@ -105,15 +107,11 @@
         </template>
       </el-table-column>
       <el-table-column label="执行时长" align="center" prop="duration" width="180">
-        <template #default="scope">
-          <span>{{ scope.row.duration }} ms</span>
-        </template>
+        <template #default="scope"> {{ scope.row.duration }} ms </template>
       </el-table-column>
       <el-table-column label="操作结果" align="center" prop="status">
         <template #default="scope">
-          <span>{{
-            scope.row.resultCode === 0 ? '成功' : '失败(' + scope.row.resultMsg + ')'
-          }}</span>
+          {{ scope.row.resultCode === 0 ? '成功' : '失败(' + scope.row.resultMsg + ')' }}
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
@@ -136,19 +134,17 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：详情 -->
   <ApiAccessLogDetail ref="detailRef" />
 </template>
-
 <script setup lang="ts" name="ApiAccessLog">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { formatDate } from '@/utils/formatTime'
 import * as ApiAccessLogApi from '@/api/infra/apiAccessLog'
 import ApiAccessLogDetail from './ApiAccessLogDetail.vue'
-
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中

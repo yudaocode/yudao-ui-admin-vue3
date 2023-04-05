@@ -1,5 +1,5 @@
 <template>
-  <content-wrap>
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
@@ -25,10 +25,10 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -38,17 +38,17 @@
         <el-button
           type="primary"
           plain
-          @click="openModal('create')"
+          @click="openForm('create')"
           v-hasPermi="['system:notice:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="公告编号" align="center" prop="id" />
       <el-table-column label="公告标题" align="center" prop="title" />
@@ -74,7 +74,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['system:notice:update']"
           >
             编辑
@@ -97,17 +97,16 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <notice-form ref="modalRef" @success="getList" />
+  <NoticeForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="tsx">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as NoticeApi from '@/api/system/notice'
-import { DictTag } from '@/components/DictTag'
-import NoticeForm from './form.vue'
+import NoticeForm from './NoticeForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -148,9 +147,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */
