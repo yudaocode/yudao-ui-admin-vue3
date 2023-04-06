@@ -52,6 +52,11 @@
             <QrCodeForm class="p-20px h-auto m-auto <xl:(rounded-3xl light:bg-white)" />
             <!-- 注册 -->
             <RegisterForm class="p-20px h-auto m-auto <xl:(rounded-3xl light:bg-white)" />
+            <!-- 三方登录 v-if触发组件初始化 -->
+            <SSOLoginVue
+              v-if="isSSO"
+              class="p-20px h-auto m-auto <xl:(rounded-3xl light:bg-white)"
+            />
           </div>
         </Transition>
       </div>
@@ -65,12 +70,25 @@ import { useDesign } from '@/hooks/web/useDesign'
 import { useAppStore } from '@/store/modules/app'
 import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
-import { LoginForm, MobileForm, RegisterForm, QrCodeForm } from './components'
+
+import { LoginForm, MobileForm, QrCodeForm, RegisterForm, SSOLoginVue } from './components'
+import { RouteLocationNormalizedLoaded } from 'vue-router'
 
 const { t } = useI18n()
 const appStore = useAppStore()
 const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('login')
+// =======SSO======
+const isSSO = ref(false)
+const router = useRouter()
+// 监听当前路由
+watch(
+  () => router.currentRoute.value,
+  (route: RouteLocationNormalizedLoaded) => {
+    if (route.name === 'SSOLogin') isSSO.value = true
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>

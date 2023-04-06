@@ -1,8 +1,8 @@
 import axios, {
+  AxiosError,
   AxiosInstance,
   AxiosRequestHeaders,
   AxiosResponse,
-  AxiosError,
   InternalAxiosRequestConfig
 } from 'axios'
 
@@ -230,7 +230,7 @@ const handleAuthorized = () => {
       wsCache.clear()
       removeToken()
       isRelogin.show = false
-      window.location.href = '/'
+      window.location.href = '/login?redirect=/sso?' + window.location.href.split('?')[1]
     })
   }
   return Promise.reject(t('sys.api.timeoutMessage'))

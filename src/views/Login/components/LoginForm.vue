@@ -137,7 +137,7 @@ import { useIcon } from '@/hooks/web/useIcon'
 import * as authUtil from '@/utils/auth'
 import { usePermissionStore } from '@/store/modules/permission'
 import * as LoginApi from '@/api/login'
-import { LoginStateEnum, useLoginState, useFormValid } from './useLogin'
+import { LoginStateEnum, useFormValid, useLoginState } from './useLogin'
 
 const { t } = useI18n()
 const message = useMessage()
@@ -240,7 +240,12 @@ const handleLogin = async (params) => {
     if (!redirect.value) {
       redirect.value = '/'
     }
-    push({ path: redirect.value || permissionStore.addRouters[0].path })
+    // 判断是否为SSO登录
+    if (redirect.value.indexOf('sso') !== -1) {
+      window.location.href = window.location.href.replace('/login?redirect=', '')
+    } else {
+      push({ path: redirect.value || permissionStore.addRouters[0].path })
+    }
   } catch {
     loginLoading.value = false
   } finally {
@@ -274,6 +279,7 @@ const doSocialLogin = async (type: number) => {
 watch(
   () => currentRoute.value,
   (route: RouteLocationNormalizedLoaded) => {
+    if (route.name === 'SSOLogin') setLoginState(LoginStateEnum.SSO)
     redirect.value = route?.query?.redirect as string
   },
   {
@@ -291,6 +297,7 @@ onMounted(() => {
     color: var(--el-color-primary) !important;
   }
 }
+
 .login-code {
   width: 100%;
   height: 38px;

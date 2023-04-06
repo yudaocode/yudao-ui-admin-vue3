@@ -5,7 +5,8 @@ export enum LoginStateEnum {
   REGISTER,
   RESET_PASSWORD,
   MOBILE,
-  QR_CODE
+  QR_CODE,
+  SSO
 }
 
 const currentState = ref(LoginStateEnum.LOGIN)
