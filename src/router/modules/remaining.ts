@@ -341,6 +341,18 @@ const remainingRouter: AppRouteRecordRaw[] = [
           title: '代办任务',
           activeMenu: 'bpm/task/todo/index'
         }
+      },
+      {
+        path: '/bpm/processInstance',
+        component: () => import('@/views/bpm/processInstance/index.vue'),
+        name: 'processInstance',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '流程办理',
+          activeMenu: 'bpm/processInstance/index'
+        }
       }
     ]
   },
