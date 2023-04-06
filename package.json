@@ -26,8 +26,8 @@
     "lint:pretty": "pretty-quick --staged"
   },
   "dependencies": {
-    "@form-create/designer": "^3.1.0",
-    "@form-create/element-ui": "^3.1.17",
+    "@form-create/designer": "^3.1.3",
+    "@form-create/element-ui": "^3.1.18",
     "@iconify/iconify": "^3.1.0",
     "@videojs-player/vue": "^1.0.0",
     "@vueuse/core": "^9.13.0",
