@@ -317,6 +317,30 @@ const remainingRouter: AppRouteRecordRaw[] = [
           title: '查看 OA 请假',
           activeMenu: 'bpm/oa/leave/detail'
         }
+      },
+      {
+        path: '/bpm/task/done',
+        component: () => import('@/views/bpm/task/done/index.vue'),
+        name: 'TaskDone',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '已办任务',
+          activeMenu: 'bpm/task/done/index'
+        }
+      },
+      {
+        path: '/bpm/task/todo',
+        component: () => import('@/views/bpm/task/todo/index.vue'),
+        name: 'TaskTodo',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '代办任务',
+          activeMenu: 'bpm/task/todo/index'
+        }
       }
     ]
   },
