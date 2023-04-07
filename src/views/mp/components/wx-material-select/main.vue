@@ -5,127 +5,130 @@
   ① 移除 avue 组件，使用 ElementUI 原生组件
 -->
 <template>
-  <!-- 类型：图片 -->
-  <div v-if="objData.type === 'image'">
-    <div class="waterfall" v-loading="loading">
-      <div class="waterfall-item" v-for="item in list" :key="item.mediaId">
-        <img class="material-img" :src="item.url" />
-        <p class="item-name">{{ item.name }}</p>
-        <el-row class="ope-row">
-          <el-button type="success" @click="selectMaterialFun(item)"
-            >选择
-            <i class="el-icon-circle-check el-icon--right"></i>
-          </el-button>
-        </el-row>
-      </div>
-    </div>
-    <!-- 分页组件 -->
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      v-model:page="queryParams.pageNo"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getMaterialPageFun"
-    />
-  </div>
-  <!-- 类型：语音 -->
-  <div v-else-if="objData.type === 'voice'">
-    <!-- 列表 -->
-    <el-table v-loading="loading" :data="list">
-      <el-table-column label="编号" align="center" prop="mediaId" />
-      <el-table-column label="文件名" align="center" prop="name" />
-      <el-table-column label="语音" align="center">
-        <template #default="scope">
-          <wx-voice-player :url="scope.row.url" />
-        </template>
-      </el-table-column>
-      <el-table-column label="上传时间" align="center" prop="createTime" width="180">
-        <template #default="scope">
-          <span>{{ formatDate(scope.row.createTime) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="操作"
-        align="center"
-        fixed="right"
-        class-name="small-padding fixed-width"
-      >
-        <template #default="scope">
-          <el-button type="text" icon="el-icon-circle-plus" @click="selectMaterialFun(scope.row)"
-            >选择
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <!-- 分页组件 -->
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      v-model:page="queryParams.pageNo"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getPage"
-    />
-  </div>
-  <div v-else-if="objData.type === 'video'">
-    <!-- 列表 -->
-    <el-table v-loading="loading" :data="list">
-      <el-table-column label="编号" align="center" prop="mediaId" />
-      <el-table-column label="文件名" align="center" prop="name" />
-      <el-table-column label="标题" align="center" prop="title" />
-      <el-table-column label="介绍" align="center" prop="introduction" />
-      <el-table-column label="视频" align="center">
-        <template #default="scope">
-          <wx-video-player :url="scope.row.url" />
-        </template>
-      </el-table-column>
-      <el-table-column label="上传时间" align="center" prop="createTime" width="180">
-        <template #default="scope">
-          <span>{{ formatDate(scope.row.createTime) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="操作"
-        align="center"
-        fixed="right"
-        class-name="small-padding fixed-width"
-      >
-        <template #default="scope">
-          <el-button type="text" icon="el-icon-circle-plus" @click="selectMaterialFun(scope.row)"
-            >选择
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-    <!-- 分页组件 -->
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      v-model:page="queryParams.pageNo"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getMaterialPageFun"
-    />
-  </div>
-  <div v-else-if="objData.type === 'news'">
-    <div class="waterfall" v-loading="loading">
-      <div class="waterfall-item" v-for="item in list" :key="item.mediaId">
-        <div v-if="item.content && item.content.newsItem">
-          <wx-news :articles="item.content.newsItem" />
+  <div class="pb-30px">
+    <!-- 类型：image -->
+    <div v-if="objData.type === 'image'">
+      <div class="waterfall" v-loading="loading">
+        <div class="waterfall-item" v-for="item in list" :key="item.mediaId">
+          <img class="material-img" :src="item.url" />
+          <p class="item-name">{{ item.name }}</p>
           <el-row class="ope-row">
-            <el-button type="success" @click="selectMaterialFun(item)">
-              选择<i class="el-icon-circle-check el-icon--right"></i>
+            <el-button type="success" @click="selectMaterialFun(item)"
+              >选择 <Icon icon="ep:circle-check" />
             </el-button>
           </el-row>
         </div>
       </div>
+      <!-- 分页组件 -->
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        v-model:page="queryParams.pageNo"
+        v-model:limit="queryParams.pageSize"
+        @pagination="getMaterialPageFun"
+      />
     </div>
-    <!-- 分页组件 -->
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      v-model:page="queryParams.pageNo"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getMaterialPageFun"
-    />
+    <!-- 类型：voice -->
+    <div v-else-if="objData.type === 'voice'">
+      <!-- 列表 -->
+      <el-table v-loading="loading" :data="list">
+        <el-table-column label="编号" align="center" prop="mediaId" />
+        <el-table-column label="文件名" align="center" prop="name" />
+        <el-table-column label="语音" align="center">
+          <template #default="scope">
+            <WxVoicePlayer :url="scope.row.url" />
+          </template>
+        </el-table-column>
+        <el-table-column label="上传时间" align="center" prop="createTime" width="180">
+          <template #default="scope">
+            <span>{{ formatDate(scope.row.createTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="操作"
+          align="center"
+          fixed="right"
+          class-name="small-padding fixed-width"
+        >
+          <template #default="scope">
+            <el-button type="text" @click="selectMaterialFun(scope.row)"
+              >选择<Icon icon="ep:plus" />
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <!-- 分页组件 -->
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        v-model:page="queryParams.pageNo"
+        v-model:limit="queryParams.pageSize"
+        @pagination="getPage"
+      />
+    </div>
+    <!-- 类型：video -->
+    <div v-else-if="objData.type === 'video'">
+      <!-- 列表 -->
+      <el-table v-loading="loading" :data="list">
+        <el-table-column label="编号" align="center" prop="mediaId" />
+        <el-table-column label="文件名" align="center" prop="name" />
+        <el-table-column label="标题" align="center" prop="title" />
+        <el-table-column label="介绍" align="center" prop="introduction" />
+        <el-table-column label="视频" align="center">
+          <template #default="scope">
+            <WxVideoPlayer :url="scope.row.url" />
+          </template>
+        </el-table-column>
+        <el-table-column label="上传时间" align="center" prop="createTime" width="180">
+          <template #default="scope">
+            <span>{{ formatDate(scope.row.createTime) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="操作"
+          align="center"
+          fixed="right"
+          class-name="small-padding fixed-width"
+        >
+          <template #default="scope">
+            <el-button type="text" @click="selectMaterialFun(scope.row)"
+              >选择<Icon icon="ep:circle-plus" />
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <!-- 分页组件 -->
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        v-model:page="queryParams.pageNo"
+        v-model:limit="queryParams.pageSize"
+        @pagination="getMaterialPageFun"
+      />
+    </div>
+    <!-- 类型：news -->
+    <div v-else-if="objData.type === 'news'">
+      <div class="waterfall" v-loading="loading">
+        <div class="waterfall-item" v-for="item in list" :key="item.mediaId">
+          <div v-if="item.content && item.content.newsItem">
+            <WxNews :articles="item.content.newsItem" />
+            <el-row class="ope-row">
+              <el-button type="success" @click="selectMaterialFun(item)">
+                选择<Icon icon="ep:circle-check" />
+              </el-button>
+            </el-row>
+          </div>
+        </div>
+      </div>
+      <!-- 分页组件 -->
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        v-model:page="queryParams.pageNo"
+        v-model:limit="queryParams.pageSize"
+        @pagination="getMaterialPageFun"
+      />
+    </div>
   </div>
 </template>
 
@@ -173,7 +176,7 @@ export default defineComponent({
     const newsTypeRef = ref(props.newsType)
 
     const selectMaterialFun = (item) => {
-      ctx.emit('selectMaterial', item)
+      ctx.emit('select-material', item)
     }
     /** 搜索按钮操作 */
     const handleQuery = () => {
@@ -203,9 +206,10 @@ export default defineComponent({
       total.value = data.total
       loading.value = false
     }
+
     const getFreePublishPageFun = async () => {
       let data = await getFreePublishPage(queryParams)
-      data.list.foreach((item) => {
+      data.list.forEach((item) => {
         const newsItem = item.content.newsItem
         newsItem.forEach((article) => {
           article.picUrl = article.thumbUrl
@@ -232,6 +236,7 @@ export default defineComponent({
     onMounted(async () => {
       getPage()
     })
+
     return {
       handleQuery,
       dateFormatter,
