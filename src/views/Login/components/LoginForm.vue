@@ -279,7 +279,6 @@ const doSocialLogin = async (type: number) => {
 watch(
   () => currentRoute.value,
   (route: RouteLocationNormalizedLoaded) => {
-    if (route.name === 'SSOLogin') setLoginState(LoginStateEnum.SSO)
     redirect.value = route?.query?.redirect as string
   },
   {

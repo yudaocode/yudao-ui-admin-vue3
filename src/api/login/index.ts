@@ -76,7 +76,14 @@ export const reqCheckApi = (data) => {
 }
 
 // ========== OAUTH 2.0 相关 ==========
-
+export type scopesType = string[]
+export interface paramsType {
+  responseType: string
+  clientId: string
+  redirectUri: string
+  state: string
+  scopes: scopesType
+}
 export const getAuthorize = (clientId) => {
   return request.get({ url: '/system/oauth2/authorize?clientId=' + clientId })
 }
@@ -87,8 +94,8 @@ export function authorize(
   redirectUri: string,
   state: string,
   autoApprove: boolean,
-  checkedScopes: any,
-  uncheckedScopes: any
+  checkedScopes: scopesType,
+  uncheckedScopes: scopesType
 ) {
   // 构建 scopes
   const scopes = {}
