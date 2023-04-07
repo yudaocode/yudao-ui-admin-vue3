@@ -174,9 +174,3 @@ onBeforeMount(() => {
   readRedisInfo()
 })
 </script>
-<style scoped>
-.redis {
-  height: 600px;
-  max-height: 860px;
-}
-</style>

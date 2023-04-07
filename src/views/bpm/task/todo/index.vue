@@ -72,10 +72,10 @@
 </template>
 
 <script setup lang="tsx">
-// 业务相关的 import
-import * as TaskApi from '@/api/bpm/task'
 import { dateFormatter } from '@/utils/formatTime'
 const { push } = useRouter() // 路由
+import * as TaskApi from '@/api/bpm/task'
+
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
@@ -98,17 +98,20 @@ const getList = async () => {
     loading.value = false
   }
 }
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
+
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
-// 处理审批按钮
+
+/** 处理审批按钮 */
 const handleAudit = (row) => {
   push({
     name: 'BpmProcessInstanceDetail',
@@ -117,6 +120,7 @@ const handleAudit = (row) => {
     }
   })
 }
+
 /** 初始化 **/
 onMounted(() => {
   getList()

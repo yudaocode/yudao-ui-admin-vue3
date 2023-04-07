@@ -27,7 +27,12 @@
         />
       </el-form-item>
       <el-form-item label="流程分类" prop="category">
-        <el-select v-model="queryParams.category" placeholder="请选择" clearable>
+        <el-select
+          v-model="queryParams.category"
+          placeholder="请选择流程分类"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.BPM_MODEL_CATEGORY)"
             :key="dict.value"
@@ -37,7 +42,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择" clearable>
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
             :key="dict.value"
@@ -47,7 +52,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="结果" prop="result">
-        <el-select v-model="queryParams.result" placeholder="请选择" clearable>
+        <el-select v-model="queryParams.result" placeholder="请选择结果" clearable class="!w-240px">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT)"
             :key="dict.value"
@@ -70,21 +75,16 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button
+          type="primary"
+          plain
+          v-hasPermi="['bpm:process-instance:query']"
+          @click="handleCreate"
+        >
+          发起流程
+        </el-button>
       </el-form-item>
     </el-form>
-    <el-col>
-      <el-row>
-        <el-col>
-          <!-- 操作：新增 -->
-          <el-button
-            type="primary"
-            v-hasPermi="['bpm:process-instance:query']"
-            @click="handleCreate"
-            >发起流程</el-button
-          >
-        </el-col>
-      </el-row>
-    </el-col>
   </ContentWrap>
 
   <!-- 列表 -->
@@ -135,16 +135,18 @@
             type="primary"
             v-hasPermi="['bpm:process-instance:cancel']"
             @click="handleDetail(scope.row)"
-            >详情</el-button
           >
+            详情
+          </el-button>
           <el-button
             link
             type="primary"
             v-if="scope.row.result === 1"
             v-hasPermi="['bpm:process-instance:query']"
             @click="handleCancel(scope.row)"
-            >取消</el-button
           >
+            取消
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -158,14 +160,14 @@
   </ContentWrap>
 </template>
 <script setup lang="ts">
-// 全局相关的 import
-import { ElMessageBox } from 'element-plus'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-
-// 业务相关的 import
-import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-// import { allSchemas } from './process.data'
 import { dateFormatter } from '@/utils/formatTime'
+import { ElMessageBox } from 'element-plus'
+import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+const router = useRouter() // 路由
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
+
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
@@ -179,10 +181,8 @@ const queryParams = reactive({
   result: undefined,
   createTime: []
 })
-const router = useRouter() // 路由
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 const queryFormRef = ref() // 搜索的表单
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -194,6 +194,7 @@ const getList = async () => {
     loading.value = false
   }
 }
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
@@ -205,11 +206,6 @@ const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
-// ========== 列表相关 ==========
-// const [reload] = useXTable({
-//   allSchemas: allSchemas,
-//   getListApi: ProcessInstanceApi.getMyProcessInstancePage
-// })
 
 /** 发起流程操作 **/
 const handleCreate = () => {
@@ -218,7 +214,7 @@ const handleCreate = () => {
   })
 }
 
-// 列表操作
+/** 查看详情 */
 const handleDetail = (row) => {
   router.push({
     name: 'BpmProcessInstanceDetail',
@@ -229,18 +225,21 @@ const handleDetail = (row) => {
 }
 
 /** 取消按钮操作 */
-const handleCancel = (row) => {
-  ElMessageBox.prompt('请输入取消原因', '取消流程', {
+const handleCancel = async (row) => {
+  // 二次确认
+  const { value } = await ElMessageBox.prompt('请输入取消原因', '取消流程', {
     confirmButtonText: t('common.ok'),
     cancelButtonText: t('common.cancel'),
     inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 判断非空，且非空格
     inputErrorMessage: '取消原因不能为空'
-  }).then(async ({ value }) => {
-    await ProcessInstanceApi.cancelProcessInstance(row.id, value)
-    message.success('取消成功')
-    // reload()
   })
+  // 发起取消
+  await ProcessInstanceApi.cancelProcessInstance(row.id, value)
+  message.success('取消成功')
+  // 刷新列表
+  await getList()
 }
+
 /** 初始化 **/
 onMounted(() => {
   getList()
