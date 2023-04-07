@@ -35,7 +35,7 @@ onMounted(() => {
     return
   }
   // 获得请假信息
-  LeaveApi.getLeaveApi(id.value).then((data) => {
+  LeaveApi.getLeave(id.value).then((data) => {
     formData.value = data
   })
 })

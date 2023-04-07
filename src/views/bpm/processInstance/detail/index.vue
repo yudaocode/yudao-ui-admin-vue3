@@ -189,7 +189,7 @@ const getDetail = () => {
 const getProcessInstance = async () => {
   try {
     processInstanceLoading.value = true
-    const data = await ProcessInstanceApi.getProcessInstanceApi(id)
+    const data = await ProcessInstanceApi.getProcessInstance(id)
     if (!data) {
       message.error('查询不到流程信息！')
       return

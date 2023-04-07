@@ -43,12 +43,12 @@
 import { formatDate } from '@/utils/formatTime'
 import UserAvatar from './UserAvatar.vue'
 
-import { getUserProfileApi, ProfileVO } from '@/api/system/user/profile'
+import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
 
 const { t } = useI18n()
 const userInfo = ref<ProfileVO>()
 const getUserInfo = async () => {
-  const users = await getUserProfileApi()
+  const users = await getUserProfile()
   userInfo.value = users
 }
 onMounted(async () => {

@@ -53,7 +53,7 @@ export const updateJobStatus = (id: number, status: number) => {
 }
 
 // 定时任务立即执行一次
-export const runJobApi = (id: number) => {
+export const runJob = (id: number) => {
   return request.put({ url: '/infra/job/trigger?id=' + id })
 }
 

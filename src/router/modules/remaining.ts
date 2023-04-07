@@ -115,7 +115,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: 'type/data/:dictType',
-        component: () => import('@/views/system/dict/data.vue'),
+        component: () => import('@/views/system/dict/data/index.vue'),
         name: 'data',
         meta: {
           title: '字典数据',
@@ -123,7 +123,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           icon: '',
-          activeMenu: 'system/dict/data'
+          activeMenu: '/system/dict'
         }
       }
     ]
@@ -317,15 +317,27 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/bpm/oa/leave/detail',
-        component: () => import('@/views/bpm/oa/leave/detail.vue'),
-        name: 'OALeaveDetail',
+        path: '/bpm/task/todo',
+        component: () => import('@/views/bpm/task/todo/index.vue'),
+        name: 'TaskTodo',
         meta: {
           noCache: true,
           hidden: true,
           canTo: true,
-          title: '查看 OA 请假',
-          activeMenu: 'bpm/oa/leave/detail'
+          title: '代办任务',
+          activeMenu: 'bpm/task/todo/index'
+        }
+      },
+      {
+        path: '/bpm/processInstance',
+        component: () => import('@/views/bpm/processInstance/index.vue'),
+        name: 'processInstance',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '流程办理',
+          activeMenu: 'bpm/processInstance/index'
         }
       }
     ]

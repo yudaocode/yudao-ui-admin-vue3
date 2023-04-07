@@ -1,6 +1,8 @@
 <template>
+  <doc-alert title="OAuth 2.0（SSO 单点登录)" url="https://doc.iocoder.cn/oauth2/" />
+
   <!-- 搜索 -->
-  <content-wrap>
+  <ContentWrap>
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -40,10 +42,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="客户端编号" align="center" prop="clientId" />
       <el-table-column label="客户端密钥" align="center" prop="secret" />
@@ -71,6 +73,7 @@
             :key="index"
             v-for="(authorizedGrantType, index) in scope.row.authorizedGrantTypes"
             :index="index"
+            class="mr-5px"
           >
             {{ authorizedGrantType }}
           </el-tag>
@@ -111,7 +114,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
   <ClientForm ref="formRef" @success="getList" />

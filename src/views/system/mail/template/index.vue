@@ -1,23 +1,25 @@
 <template>
+  <doc-alert title="邮件配置" url="https://doc.iocoder.cn/mail" />
+
   <!-- 搜索工作栏 -->
-  <content-wrap>
+  <ContentWrap>
     <Search :schema="allSchemas.searchSchema" @search="setSearchParams" @reset="setSearchParams">
       <!-- 新增等操作按钮 -->
       <template #actionMore>
         <el-button
           type="primary"
           plain
-          @click="openModal('create')"
+          @click="openForm('create')"
           v-hasPermi="['system:mail-account:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </template>
     </Search>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <Table
       :columns="allSchemas.tableColumns"
       :data="tableObject.tableList"
@@ -32,7 +34,7 @@
         <el-button
           link
           type="primary"
-          @click="openSend(row.id)"
+          @click="openSendForm(row.id)"
           v-hasPermi="['system:mail-template:send-mail']"
         >
           测试
@@ -40,7 +42,7 @@
         <el-button
           link
           type="primary"
-          @click="openModal('update', row.id)"
+          @click="openForm('update', row.id)"
           v-hasPermi="['system:mail-template:update']"
         >
           编辑
@@ -55,19 +57,19 @@
         </el-button>
       </template>
     </Table>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <mail-template-form ref="modalRef" @success="getList" />
+  <MailTemplateForm ref="formRef" @success="getList" />
 
   <!-- 表单弹窗：发送测试 -->
-  <mail-template-send ref="sendRef" />
+  <MailTemplateSendForm ref="sendFormRef" />
 </template>
 <script setup lang="ts" name="MailTemplate">
 import { allSchemas } from './template.data'
 import * as MailTemplateApi from '@/api/system/mail/template'
-import MailTemplateForm from './form.vue'
-import MailTemplateSend from './send.vue'
+import MailTemplateForm from './MailTemplateForm.vue'
+import MailTemplateSendForm from './MailTemplateSendForm.vue'
 
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
 // tableMethods：表格的操作对象，可进行获得分页、删除记录等操作
@@ -80,9 +82,9 @@ const { tableObject, tableMethods } = useTable({
 const { getList, setSearchParams } = tableMethods
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */
@@ -91,9 +93,9 @@ const handleDelete = (id: number) => {
 }
 
 /** 发送测试操作 */
-const sendRef = ref()
-const openSend = (id: number) => {
-  sendRef.value.openModal(id)
+const sendFormRef = ref()
+const openSendForm = (id: number) => {
+  sendFormRef.value.open(id)
 }
 
 /** 初始化 **/

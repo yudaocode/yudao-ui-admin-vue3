@@ -19,7 +19,7 @@
 import type { FormRules, FormInstance } from 'element-plus'
 
 import { InputPassword } from '@/components/InputPassword'
-import { updateUserPwdApi } from '@/api/system/user/profile'
+import { updateUserPassword } from '@/api/system/user/profile'
 
 const { t } = useI18n()
 const message = useMessage()
@@ -56,7 +56,7 @@ const submit = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate(async (valid) => {
     if (valid) {
-      await updateUserPwdApi(password.oldPassword, password.newPassword)
+      await updateUserPassword(password.oldPassword, password.newPassword)
       message.success(t('common.updateSuccess'))
     }
   })

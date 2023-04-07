@@ -1,5 +1,5 @@
 <template>
-  <content-wrap>
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
@@ -77,10 +77,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="商户编号" align="center" prop="id" />
       <el-table-column label="商户号" align="center" prop="no" />
@@ -132,7 +132,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
   <MerchantForm ref="formRef" @success="getList" />

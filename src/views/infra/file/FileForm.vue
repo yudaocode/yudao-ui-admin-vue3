@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog title="上传文件" v-model="dialogVisible">
     <el-upload
       ref="uploadRef"
       :limit="1"
@@ -28,11 +28,9 @@
     </template>
   </Dialog>
 </template>
-
 <script setup lang="ts">
 import { Dialog } from '@/components/Dialog'
 import { getAccessToken } from '@/utils/auth'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -45,11 +43,10 @@ const data = ref({ path: '' })
 const uploadRef = ref()
 
 /** 打开弹窗 */
-const openModal = async () => {
+const open = async () => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.fileUpload')
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调

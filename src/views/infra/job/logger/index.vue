@@ -1,5 +1,9 @@
 <template>
-  <content-wrap>
+  <doc-alert title="定时任务" url="https://doc.iocoder.cn/job/" />
+  <doc-alert title="异步任务" url="https://doc.iocoder.cn/async-task/" />
+  <doc-alert title="消息队列" url="https://doc.iocoder.cn/message-queue/" />
+
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
@@ -67,10 +71,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="日志编号" align="center" prop="id" />
       <el-table-column label="任务编号" align="center" prop="jobId" />
@@ -112,7 +116,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：查看 -->
   <JobLogDetail ref="detailRef" />

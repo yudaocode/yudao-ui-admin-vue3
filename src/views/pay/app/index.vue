@@ -86,9 +86,9 @@ const message = useMessage() // 消息弹窗
 // 列表相关的变量
 const [registerTable, { reload, deleteData, exportList }] = useXTable({
   allSchemas: allSchemas,
-  getListApi: AppApi.getAppPageApi,
-  deleteApi: AppApi.deleteAppApi,
-  exportListApi: AppApi.exportAppApi
+  getListApi: AppApi.getAppPage,
+  deleteApi: AppApi.deleteApp,
+  exportListApi: AppApi.exportApp
 })
 
 // ========== CRUD 相关 ==========
@@ -115,14 +115,14 @@ const handleCreate = () => {
 const handleUpdate = async (rowId: number) => {
   setDialogTile('update')
   // 设置数据
-  const res = await AppApi.getAppApi(rowId)
+  const res = await AppApi.getApp(rowId)
   unref(formRef)?.setValues(res)
 }
 
 // 详情操作
 const handleDetail = async (rowId: number) => {
   setDialogTile('detail')
-  const res = await AppApi.getAppApi(rowId)
+  const res = await AppApi.getApp(rowId)
   detailData.value = res
 }
 
@@ -137,10 +137,10 @@ const submitForm = async () => {
       try {
         const data = unref(formRef)?.formModel as AppApi.AppVO
         if (actionType.value === 'create') {
-          await AppApi.createAppApi(data)
+          await AppApi.createApp(data)
           message.success(t('common.createSuccess'))
         } else {
-          await AppApi.updateAppApi(data)
+          await AppApi.updateApp(data)
           message.success(t('common.updateSuccess'))
         }
         dialogVisible.value = false

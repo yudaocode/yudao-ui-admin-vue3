@@ -1,5 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog
+    :title="dialogTitle"
+    v-model="dialogVisible"
+    :scroll="true"
+    :width="800"
+    :max-height="500"
+  >
     <Form ref="formRef" :schema="allSchemas.formSchema" :rules="rules" v-loading="formLoading" />
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -8,9 +14,8 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as MailAccountApi from '@/api/system/mail/account'
-import { rules, allSchemas } from './account.data'
-
+import * as MailTemplateApi from '@/api/system/mail/template'
+import { allSchemas, rules } from './template.data'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -21,7 +26,7 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -29,14 +34,14 @@ const openModal = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const data = await MailAccountApi.getMailAccount(id)
+      const data = await MailTemplateApi.getMailTemplate(id)
       formRef.value.setValues(data)
     } finally {
       formLoading.value = false
     }
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -48,12 +53,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formRef.value.formModel as MailAccountApi.MailAccountVO
+    const data = formRef.value.formModel as MailTemplateApi.MailTemplateVO
     if (formType.value === 'create') {
-      await MailAccountApi.createMailAccount(data)
+      await MailTemplateApi.createMailTemplate(data)
       message.success(t('common.createSuccess'))
     } else {
-      await MailAccountApi.updateMailAccount(data)
+      await MailTemplateApi.updateMailTemplate(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false

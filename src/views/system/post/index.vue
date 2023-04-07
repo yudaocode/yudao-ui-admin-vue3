@@ -40,7 +40,7 @@
         <el-button
           type="primary"
           plain
-          @click="openModal('create')"
+          @click="openForm('create')"
           v-hasPermi="['system:notice:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
@@ -60,7 +60,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" align="center">
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="岗位编号" align="center" prop="id" />
       <el-table-column label="岗位名称" align="center" prop="name" />
       <el-table-column label="岗位编码" align="center" prop="code" />
@@ -83,7 +83,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['system:post:update']"
           >
             编辑
@@ -160,8 +160,8 @@ const resetQuery = () => {
 
 /** 添加/修改操作 */
 const formRef = ref()
-const openModal = (type: string, id?: number) => {
-  formRef.value.openModal(type, id)
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */

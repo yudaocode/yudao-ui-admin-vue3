@@ -101,7 +101,6 @@
 <script setup lang="ts">
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as FileConfigApi from '@/api/infra/fileConfig'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -136,7 +135,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const openModal = async (type: string, id?: number) => {
+const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -151,7 +150,7 @@ const openModal = async (type: string, id?: number) => {
     }
   }
 }
-defineExpose({ openModal }) // 提供 openModal 方法，用于打开弹窗
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调

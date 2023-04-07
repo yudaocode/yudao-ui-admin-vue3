@@ -1,6 +1,8 @@
 <template>
+  <doc-alert title="异常处理（错误码）" url="https://doc.iocoder.cn/exception/" />
+
   <!-- 搜索工作栏 -->
-  <content-wrap>
+  <ContentWrap>
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -11,7 +13,7 @@
       <el-form-item label="错误码类型" prop="type">
         <el-select v-model="queryParams.type" placeholder="请选择错误码类型" clearable>
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.SYSTEM_ERROR_CODE_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_ERROR_CODE_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -34,6 +36,7 @@
           placeholder="请输入错误码编码"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="错误码提示" prop="message">
@@ -62,7 +65,7 @@
         <el-button
           type="primary"
           plain
-          @click="openModal('create')"
+          @click="openForm('create')"
           v-hasPermi="['system:error-code:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
@@ -78,10 +81,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="类型" align="center" prop="type" width="80">
@@ -105,7 +108,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['system:error-code:update']"
           >
             编辑
@@ -128,30 +131,25 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <error-code-form ref="modalRef" @success="getList" />
+  <ErrorCodeForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts" name="ErrorCode">
-import * as ErrorCodeApi from '@/api/system/errorCode'
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import ErrorCodeForm from './form.vue'
 import download from '@/utils/download'
+import * as ErrorCodeApi from '@/api/system/errorCode'
+import ErrorCodeForm from './ErrorCodeForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
-// 遮罩层
-const loading = ref(true)
-// 导出遮罩层
-const exportLoading = ref(false)
-// 总条数
-const total = ref(0)
-// 错误码列表
-const list = ref([])
-// 查询参数
+const loading = ref(true) // 遮罩层
+const exportLoading = ref(false) // 导出遮罩层
+const total = ref(0) // 总条数
+const list = ref([]) // 错误码列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -161,15 +159,13 @@ const queryParams = reactive({
   message: undefined,
   createTime: []
 })
-// 搜索的表单
-const queryFormRef = ref()
+const queryFormRef = ref() // 搜索的表单
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
-  // 执行查询
   try {
-    const data = await ErrorCodeApi.getErrorCodePageApi(queryParams)
+    const data = await ErrorCodeApi.getErrorCodePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -190,9 +186,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */
@@ -200,7 +196,7 @@ const handleDelete = async (id: number) => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    await ErrorCodeApi.deleteErrorCodeApi(id)
+    await ErrorCodeApi.deleteErrorCode(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -214,7 +210,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await ErrorCodeApi.excelErrorCodeApi(queryParams)
+    const data = await ErrorCodeApi.excelErrorCode(queryParams)
     download.excel(data, '错误码.xls')
   } catch {
   } finally {

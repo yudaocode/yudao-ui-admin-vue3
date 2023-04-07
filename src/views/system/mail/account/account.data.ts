@@ -1,6 +1,5 @@
 import type { CrudSchema } from '@/hooks/web/useCrudSchemas'
 import { dateFormatter } from '@/utils/formatTime'
-
 const { t } = useI18n() // 国际化
 
 // 表单校验
@@ -62,12 +61,16 @@ const crudSchemas = reactive<CrudSchema[]>([
     label: '创建时间',
     field: 'createTime',
     isForm: false,
-    formatter: dateFormatter
+    formatter: dateFormatter,
+    detail: {
+      dateFormat: 'YYYY-MM-DD HH:mm:ss'
+    }
   },
   {
     label: '操作',
     field: 'action',
-    isForm: false
+    isForm: false,
+    isDetail: false
   }
 ])
 export const { allSchemas } = useCrudSchemas(crudSchemas)

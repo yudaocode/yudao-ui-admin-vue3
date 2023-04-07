@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="短信配置" url="https://doc.iocoder.cn/sms/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -111,7 +113,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" align="center">
+    <el-table v-loading="loading" :data="list">
       <el-table-column
         label="模板编码"
         align="center"

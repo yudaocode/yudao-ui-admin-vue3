@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="SaaS 多租户" url="https://doc.iocoder.cn/saas-tenant/" />
+
   <!-- 搜索 -->
   <ContentWrap>
     <el-form
@@ -96,15 +98,15 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" align="center">
+    <el-table v-loading="loading" :data="list">
       <el-table-column label="租户编号" align="center" prop="id" />
       <el-table-column label="租户名" align="center" prop="name" />
       <el-table-column label="租户套餐" align="center" prop="packageId">
         <template #default="scope">
           <el-tag v-if="scope.row.packageId === 0" type="danger">系统租户</el-tag>
           <template v-else v-for="item in packageList">
-            <el-tag type="success" :key="item.id" v-if="item.id === scope.row.packageId"
-              >{{ item.name }}
+            <el-tag type="success" :key="item.id" v-if="item.id === scope.row.packageId">
+              {{ item.name }}
             </el-tag>
           </template>
         </template>
@@ -175,7 +177,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as TenantApi from '@/api/system/tenant'
 import * as TenantPackageApi from '@/api/system/tenantPackage'
-import TenantForm from './form.vue'
+import TenantForm from './TenantForm.vue'
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化

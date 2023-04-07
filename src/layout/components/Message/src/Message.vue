@@ -9,14 +9,14 @@ const list = ref<any[]>([]) // 消息列表
 
 // 获得消息列表
 const getList = async () => {
-  list.value = await NotifyMessageApi.getUnreadNotifyMessageListApi()
+  list.value = await NotifyMessageApi.getUnreadNotifyMessageList()
   // 强制设置 unreadCount 为 0，避免小红点因为轮询太慢，不消除
   unreadCount.value = 0
 }
 
 // 获得未读消息数
 const getUnreadCount = async () => {
-  NotifyMessageApi.getUnreadNotifyMessageCountApi().then((data) => {
+  NotifyMessageApi.getUnreadNotifyMessageCount().then((data) => {
     unreadCount.value = data
   })
 }

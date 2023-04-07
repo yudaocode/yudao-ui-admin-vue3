@@ -29,7 +29,7 @@ export const getMenuList = (params) => {
 }
 
 // 获取菜单详情
-export const getMenuApi = (id: number) => {
+export const getMenu = (id: number) => {
   return request.get({ url: '/system/menu/get?id=' + id })
 }
 

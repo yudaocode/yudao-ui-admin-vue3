@@ -1,5 +1,5 @@
 <template>
-  <content-wrap>
+  <ContentWrap>
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -9,7 +9,12 @@
     >
       <el-form-item label="字典名称" prop="dictType">
         <el-select v-model="queryParams.dictType" class="!w-240px">
-          <el-option v-for="item in dicts" :key="item.type" :label="item.name" :value="item.type" />
+          <el-option
+            v-for="item in dictTypeList"
+            :key="item.type"
+            :label="item.name"
+            :value="item.type"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="字典标签" prop="label">
@@ -24,7 +29,7 @@
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="数据状态" clearable class="!w-240px">
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -34,7 +39,12 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openModal('create')" v-hasPermi="['system:dict:create']">
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['system:dict:create']"
+        >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
@@ -48,10 +58,10 @@
         </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="字典编码" align="center" prop="id" />
       <el-table-column label="字典标签" align="center" prop="label" />
@@ -77,7 +87,7 @@
           <el-button
             link
             type="primary"
-            @click="openModal('update', scope.row.id)"
+            @click="openForm('update', scope.row.id)"
             v-hasPermi="['system:dict:update']"
           >
             修改
@@ -100,18 +110,18 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <data-form ref="modalRef" @success="getList" />
+  <DictDataForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="Data">
+<script setup lang="ts" name="DictData">
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
+import download from '@/utils/download'
 import * as DictDataApi from '@/api/system/dict/dict.data'
 import * as DictTypeApi from '@/api/system/dict/dict.type'
-import { getDictOptions, DICT_TYPE } from '@/utils/dict'
-import download from '@/utils/download'
-import { dateFormatter } from '@/utils/formatTime'
-import DataForm from './data.form.vue'
+import DictDataForm from './DictDataForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const route = useRoute() // 路由
@@ -128,7 +138,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const dicts = ref<DictTypeApi.DictTypeVO[]>() // 字典类型的列表
+const dictTypeList = ref<DictTypeApi.DictTypeVO[]>() // 字典类型的列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -155,9 +165,9 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const modalRef = ref()
-const openModal = (type: string, id?: number) => {
-  modalRef.value.openModal(type, id)
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 删除按钮操作 */
@@ -188,15 +198,10 @@ const handleExport = async () => {
   }
 }
 
-/** 查询字典（精简)列表 */
-const getDictList = async () => {
-  dicts.value = await DictTypeApi.getSimpleDictTypeList()
-}
-
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
   // 查询字典（精简)列表
-  getDictList()
+  dictTypeList.value = await DictTypeApi.getSimpleDictTypeList()
 })
 </script>
