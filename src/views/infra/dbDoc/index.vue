@@ -2,46 +2,38 @@
   <doc-alert title="数据库文档" url="https://doc.iocoder.cn/db-doc/" />
 
   <ContentWrap title="数据库文档">
-    <!-- 操作工具栏 -->
     <div class="mb-10px">
-      <XButton
-        type="primary"
-        preIcon="ep:download"
-        :title="t('action.export') + ' HTML'"
-        @click="handleExport('HTML')"
-      />
-      <XButton
-        type="primary"
-        preIcon="ep:download"
-        :title="t('action.export') + ' Word'"
-        @click="handleExport('Word')"
-      />
-      <XButton
-        type="primary"
-        preIcon="ep:download"
-        :title="t('action.export') + ' Markdown'"
-        @click="handleExport('Markdown')"
-      />
+      <el-button type="primary" plain @click="handleExport('HTML')">
+        <Icon icon="ep:download" /> 导出 HTML
+      </el-button>
+      <el-button type="primary" plain @click="handleExport('Word')">
+        <Icon icon="ep:download" /> 导出 Word
+      </el-button>
+      <el-button type="primary" plain @click="handleExport('Markdown')">
+        <Icon icon="ep:download" /> 导出 Markdown
+      </el-button>
     </div>
-    <IFrame v-if="!loding" v-loading="loding" :src="src" />
+    <IFrame v-if="!loading" v-loading="loading" :src="src" />
   </ContentWrap>
 </template>
 <script setup lang="ts" name="DbDoc">
 import download from '@/utils/download'
-
 import * as DbDocApi from '@/api/infra/dbDoc'
 
-const { t } = useI18n() // 国际化
-const src = ref('')
-const loding = ref(true)
+const loading = ref(true) // 是否加载中
+const src = ref('') // HTML 的地址
+
 /** 页面加载 */
 const init = async () => {
-  const res = await DbDocApi.exportHtml()
-  let blob = new Blob([res], { type: 'text/html' })
-  let blobUrl = window.URL.createObjectURL(blob)
-  src.value = blobUrl
-  loding.value = false
+  try {
+    const data = await DbDocApi.exportHtml()
+    const blob = new Blob([data], { type: 'text/html' })
+    src.value = window.URL.createObjectURL(blob)
+  } finally {
+    loading.value = false
+  }
 }
+
 /** 处理导出  */
 const handleExport = async (type: string) => {
   if (type === 'HTML') {
@@ -57,6 +49,8 @@ const handleExport = async (type: string) => {
     download.markdown(res, '数据库文档.md')
   }
 }
+
+/** 初始化 */
 onMounted(async () => {
   await init()
 })

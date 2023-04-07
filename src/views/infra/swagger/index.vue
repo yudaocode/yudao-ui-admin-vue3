@@ -6,7 +6,21 @@
   </ContentWrap>
 </template>
 <script setup lang="ts" name="Swagger">
-const BASE_URL = import.meta.env.VITE_BASE_URL
-// const src = ref(BASE_URL + '/doc.html')
-const src = ref(BASE_URL + '/swagger-ui')
+import * as ConfigApi from '@/api/infra/config'
+
+const loading = ref(true) // 是否加载中
+const src = ref(import.meta.env.VITE_BASE_URL + '/doc.html') // Knife4j UI
+// const src = ref(import.meta.env.VITE_BASE_URL + '/swagger-ui') // Swagger UI
+
+/** 初始化 */
+onMounted(async () => {
+  try {
+    const data = await ConfigApi.getConfigKey('url.swagger')
+    if (data && data.length > 0) {
+      src.value = data
+    }
+  } finally {
+    loading.value = false
+  }
+})
 </script>
