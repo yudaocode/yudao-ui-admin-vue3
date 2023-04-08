@@ -261,9 +261,9 @@ import WxEditor from '@/views/mp/components/wx-editor/WxEditor.vue'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
 import { getAccessToken } from '@/utils/auth'
-import { createDraft, deleteDraft, getDraftPage, updateDraft } from '@/api/mp/draft'
-import { getSimpleAccountList } from '@/api/mp/account'
-import { submitFreePublish } from '@/api/mp/freePublish'
+import * as MpAccountApi from '@/api/mp/account'
+import * as MpDraftApi from '@/api/mp/draft'
+import * as MpFreePublishApi from '@/api/mp/freePublish'
 const message = useMessage() // 消息
 // 可以用改本地数据模拟，避免API调用超限
 // import drafts from './mock'
@@ -302,7 +302,7 @@ const hackResetEditor = ref(false)
 
 /** 初始化 **/
 onMounted(async () => {
-  accountList.value = await getSimpleAccountList()
+  accountList.value = await MpAccountApi.getSimpleAccountList()
   // 选中第一个
   if (accountList.value.length > 0) {
     // @ts-ignore
@@ -328,7 +328,7 @@ const getList = async () => {
 
   loading.value = true
   try {
-    const drafts = await getDraftPage(queryParams)
+    const drafts = await MpDraftApi.getDraftPage(queryParams)
     drafts.list.forEach((item) => {
       const newsItem = item.content.newsItem
       // 将 thumbUrl 转成 picUrl，保证 wx-news 组件可以预览封面
@@ -389,7 +389,7 @@ const submitForm = () => {
   // TODO @Dhb52: 参考别的模块写法，改成 await 方式
   addMaterialLoading.value = true
   if (operateMaterial.value === 'add') {
-    createDraft(queryParams.accountId, articlesAdd.value)
+    MpDraftApi.createDraft(queryParams.accountId, articlesAdd.value)
       .then(() => {
         message.notifySuccess('新增成功')
         dialogNewsVisible.value = false
@@ -399,7 +399,7 @@ const submitForm = () => {
         addMaterialLoading.value = false
       })
   } else {
-    updateDraft(queryParams.accountId, articlesMediaId.value, articlesAdd.value)
+    MpDraftApi.updateDraft(queryParams.accountId, articlesMediaId.value, articlesAdd.value)
       .then(() => {
         message.notifySuccess('更新成功')
         dialogNewsVisible.value = false
@@ -553,7 +553,7 @@ const handlePublish = async (item) => {
     '你正在通过发布的方式发表内容。 发布不占用群发次数，一天可多次发布。已发布内容不会推送给用户，也不会展示在公众号主页中。 发布后，你可以前往发表记录获取链接，也可以将发布内容添加到自定义菜单、自动回复、话题和页面模板中。'
   try {
     await message.confirm(content)
-    await submitFreePublish(accountId, mediaId)
+    await MpFreePublishApi.submitFreePublish(accountId, mediaId)
     message.notifySuccess('发布成功')
     await getList()
   } catch {}
@@ -565,7 +565,7 @@ const handleDelete = async (item) => {
   const mediaId = item.mediaId
   try {
     await message.confirm('此操作将永久删除该草稿, 是否继续?')
-    await deleteDraft(accountId, mediaId)
+    await MpDraftApi.deleteDraft(accountId, mediaId)
     message.notifySuccess('删除成功')
     await getList()
   } catch {}

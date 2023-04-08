@@ -1,25 +1,33 @@
 <template>
-  <div class="app-container">
-    <doc-alert title="公众号菜单" url="https://doc.iocoder.cn/mp/menu/" />
-
-    <!-- 搜索工作栏 -->
-    <el-form ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+  <doc-alert title="公众号菜单" url="https://doc.iocoder.cn/mp/menu/" />
+  <!-- 搜索工作栏 -->
+  <ContentWrap>
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="公众号" prop="accountId">
         <el-select v-model="accountId" placeholder="请选择公众号">
           <el-option
             v-for="item in accountList"
-            :key="parseInt(item.id)"
+            :key="item.id"
             :label="item.name"
-            :value="parseInt(item.id)"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
       </el-form-item>
     </el-form>
+  </ContentWrap>
 
+  <!-- 列表 -->
+  <ContentWrap>
     <div class="public-account-management clearfix" v-loading="loading">
       <!--左边配置菜单-->
       <div class="left">
@@ -63,7 +71,6 @@
           <el-button
             class="save_btn"
             type="success"
-            size="small"
             @click="handleSave"
             v-hasPermi="['mp:menu:save']"
             >保存并发布菜单</el-button
@@ -71,7 +78,6 @@
           <el-button
             class="save_btn"
             type="danger"
-            size="small"
             @click="handleDelete"
             v-hasPermi="['mp:menu:delete']"
             >清空菜单</el-button
@@ -82,9 +88,9 @@
       <div v-if="showRightFlag" class="right">
         <div class="configure_page">
           <div class="delete_btn">
-            <el-button size="small" type="danger" @click="handleDeleteMenu(tempObj)"
-              >删除当前菜单<Icon icon="ep:delete"
-            /></el-button>
+            <el-button size="small" type="danger" @click="handleDeleteMenu(tempObj)">
+              删除当前菜单<Icon icon="ep:delete" />
+            </el-button>
           </div>
           <div>
             <span>菜单名称：</span>
@@ -161,9 +167,9 @@
                 <div class="select-item" v-if="tempObj && tempObj.replyArticles">
                   <WxNews :articles="tempObj.replyArticles" />
                   <el-row class="ope-row" justify="center" align="middle">
-                    <el-button type="danger" circle @click="deleteMaterial"
-                      ><icon icon="ep:delete"
-                    /></el-button>
+                    <el-button type="danger" circle @click="deleteMaterial">
+                      <icon icon="ep:delete" />
+                    </el-button>
                   </el-row>
                 </div>
                 <div v-else>
@@ -197,33 +203,25 @@
         <p>请选择菜单配置</p>
       </div>
     </div>
-  </div>
+  </ContentWrap>
 </template>
-
-<script setup>
-import { ref, nextTick } from 'vue'
+<script setup name="MpMenu">
+import { handleTree } from '@/utils/tree'
 import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
 import { deleteMenu, getMenuList, saveMenu } from '@/api/mp/menu'
-import { getSimpleAccountList } from '@/api/mp/account'
-import { handleTree } from '@/utils/tree'
+import * as MpAccountApi from '@/api/mp/account'
 import menuOptions from './menuOptions'
-
-const message = useMessage()
+const message = useMessage() // 消息
 
 // ======================== 列表查询 ========================
-// 遮罩层
-const loading = ref(true)
-// 显示搜索条件
-const showSearch = ref(true)
-// 公众号Id
-const accountId = ref(undefined)
-// 公众号名
-const name = ref('')
+const loading = ref(true) // 遮罩层
+const accountId = ref(undefined) // 公众号Id
+const name = ref('') // 公众号名
 const menuList = ref({ children: [] })
+const accountList = ref([]) // 公众号账号列表
 
-// const menuList = ref(menuListData)
 // ======================== 菜单操作 ========================
 const isActive = ref(-1) // 一级菜单点中样式
 const isSubMenuActive = ref(-1) // 一级菜单点中样式
@@ -241,11 +239,8 @@ const tempSelfObj = ref({
 })
 const dialogNewsVisible = ref(false) // 跳转图文时的素材选择弹窗
 
-// 公众号账号列表
-const accountList = ref([])
-
 onMounted(async () => {
-  accountList.value = await getSimpleAccountList()
+  accountList.value = await MpAccountApi.getSimpleAccountList()
   // 选中第一个
   if (accountList.value.length > 0) {
     // @ts-ignore
