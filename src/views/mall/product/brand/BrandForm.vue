@@ -12,10 +12,20 @@
       </el-form-item>
       <el-form-item label="品牌图片" prop="picUrl">
         <UploadImg v-model="formData.picUrl" :limit="1" :is-show-tip="false" />
-        <div style="font-size: 10px">推荐 100x100 图片分辨率</div>
       </el-form-item>
       <el-form-item label="品牌排序" prop="sort">
         <el-input-number v-model="formData.sort" controls-position="right" :min="0" />
+      </el-form-item>
+      <el-form-item label="品牌状态" prop="status">
+        <el-radio-group v-model="formData.status">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
       </el-form-item>
       <el-form-item label="品牌描述">
         <el-input v-model="formData.description" type="textarea" placeholder="请输入品牌描述" />
@@ -27,7 +37,8 @@
     </template>
   </Dialog>
 </template>
-<script setup lang="ts" name="ProductBrand">
+<script setup lang="ts" name="ProductBrandForm">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as ProductBrandApi from '@/api/mall/product/brand'
 const { t } = useI18n() // 国际化

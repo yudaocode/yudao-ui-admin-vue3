@@ -132,7 +132,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ProductBrandApi.getBrandList(queryParams)
+    const data = await ProductBrandApi.getBrandParam(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
