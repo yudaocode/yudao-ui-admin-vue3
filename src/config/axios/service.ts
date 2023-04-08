@@ -230,7 +230,8 @@ const handleAuthorized = () => {
       wsCache.clear()
       removeToken()
       isRelogin.show = false
-      window.location.href = '/login?redirect=/sso?' + window.location.href.split('?')[1]
+      // 干掉token后再走一次路由让它过router.beforeEach的校验
+      window.location.href = window.location.href
     })
   }
   return Promise.reject(t('sys.api.timeoutMessage'))
