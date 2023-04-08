@@ -129,6 +129,12 @@ export default {
     btnMobile: '手机登录',
     btnQRCode: '二维码登录',
     qrcode: '扫描二维码登录',
+    sso: {
+      user: {
+        read: '访问你的个人信息',
+        write: '修改你的个人信息'
+      }
+    },
     btnRegister: '注册',
     SmsSendMsg: '验证码已发送'
   },
@@ -352,6 +358,7 @@ export default {
     login: {
       backSignIn: '返回',
       signInFormTitle: '登录',
+      ssoFormTitle: '三方授权',
       mobileSignInFormTitle: '手机登录',
       qrSignInFormTitle: '二维码登录',
       signUpFormTitle: '注册',
