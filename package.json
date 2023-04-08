@@ -6,7 +6,7 @@
   "private": false,
   "scripts": {
     "i": "pnpm install",
-    "dev": "vite --mode base",
+    "dev": "pnpm vite",
     "front": "vite --mode front",
     "ts:check": "vue-tsc --noEmit",
     "build:pro": "node --max_old_space_size=8000 ./node_modules/vite/bin/vite.js build --mode pro",
@@ -27,10 +27,12 @@
     "lint:pretty": "pretty-quick --staged"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.1.0",
     "@form-create/designer": "^3.1.0",
     "@form-create/element-ui": "^3.1.17",
     "@iconify/iconify": "^3.1.0",
     "@videojs-player/vue": "^1.0.0",
+    "@vueup/vue-quill": "^1.1.1",
     "@vueuse/core": "^9.13.0",
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-vue": "^5.1.10",
