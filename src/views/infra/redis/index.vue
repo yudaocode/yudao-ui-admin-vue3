@@ -63,7 +63,7 @@
     </el-row>
   </el-scrollbar>
 </template>
-<script setup lang="ts" name="Redis">
+<script setup lang="ts" name="InfraRedis">
 import * as echarts from 'echarts'
 import * as RedisApi from '@/api/infra/redis'
 import { RedisMonitorInfoVO } from '@/api/infra/redis/types'

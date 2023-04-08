@@ -74,7 +74,7 @@
   <!-- 表单弹窗：详情 -->
   <TaskDetail ref="detailRef" @success="getList" />
 </template>
-<script setup lang="tsx">
+<script setup lang="tsx" name="BpmTodoTask">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'

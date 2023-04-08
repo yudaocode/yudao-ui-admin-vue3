@@ -81,7 +81,7 @@
           v-hasPermi="['bpm:process-instance:query']"
           @click="handleCreate"
         >
-          发起流程
+          <Icon icon="ep:plus" class="mr-5px" /> 发起流程
         </el-button>
       </el-form-item>
     </el-form>
@@ -159,7 +159,7 @@
     />
   </ContentWrap>
 </template>
-<script setup lang="ts">
+<script setup lang="ts" name="BpmProcessInstance">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { ElMessageBox } from 'element-plus'

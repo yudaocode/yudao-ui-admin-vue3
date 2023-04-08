@@ -50,7 +50,7 @@
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script setup lang="ts" name="ProductCategory">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { handleTree } from '@/utils/tree'

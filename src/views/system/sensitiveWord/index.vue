@@ -143,7 +143,7 @@
   <!-- 表单弹窗：测试敏感词 -->
   <SensitiveWordTestForm ref="testFormRef" />
 </template>
-<script setup lang="ts" name="SensitiveWord">
+<script setup lang="ts" name="SystemSensitiveWordhao">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'

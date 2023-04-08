@@ -34,7 +34,7 @@
   <!-- 表单弹窗：详情 -->
   <mail-log-detail ref="detailRef" />
 </template>
-<script setup lang="ts" name="MailLog">
+<script setup lang="ts" name="SystemMailLog">
 import { allSchemas } from './log.data'
 import * as MailLogApi from '@/api/system/mail/log'
 import MailLogDetail from './MailLogDetail.vue'

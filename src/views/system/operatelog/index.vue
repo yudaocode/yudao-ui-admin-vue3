@@ -135,7 +135,7 @@
   <!-- 表单弹窗：详情 -->
   <OperateLogDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="OperateLog">
+<script setup lang="ts" name="SystemOperateLog">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
