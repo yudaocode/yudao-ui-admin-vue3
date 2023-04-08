@@ -1,13 +1,6 @@
 import request from '@/config/axios'
 import { getRefreshToken } from '@/utils/auth'
 import type { UserLoginVO } from './types'
-import { service } from '@/config/axios/service'
-
-export interface CodeImgResult {
-  captchaOnOff: boolean
-  img: string
-  uuid: string
-}
 
 export interface SmsCodeVO {
   mobile: string
@@ -73,52 +66,4 @@ export const getCode = (data) => {
 // 滑动或者点选验证
 export const reqCheck = (data) => {
   return request.postOriginal({ url: 'system/captcha/check', data })
-}
-
-// ========== OAUTH 2.0 相关 ==========
-export type scopesType = string[]
-export interface paramsType {
-  responseType: string
-  clientId: string
-  redirectUri: string
-  state: string
-  scopes: scopesType
-}
-export const getAuthorize = (clientId) => {
-  return request.get({ url: '/system/oauth2/authorize?clientId=' + clientId })
-}
-
-export function authorize(
-  responseType: string,
-  clientId: string,
-  redirectUri: string,
-  state: string,
-  autoApprove: boolean,
-  checkedScopes: scopesType,
-  uncheckedScopes: scopesType
-) {
-  // 构建 scopes
-  const scopes = {}
-  for (const scope of checkedScopes) {
-    scopes[scope] = true
-  }
-  for (const scope of uncheckedScopes) {
-    scopes[scope] = false
-  }
-  // 发起请求
-  return service({
-    url: '/system/oauth2/authorize',
-    headers: {
-      'Content-type': 'application/x-www-form-urlencoded'
-    },
-    params: {
-      response_type: responseType,
-      client_id: clientId,
-      redirect_uri: redirectUri,
-      state: state,
-      auto_approve: autoApprove,
-      scope: JSON.stringify(scopes)
-    },
-    method: 'post'
-  })
 }

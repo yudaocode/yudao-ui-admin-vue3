@@ -26,17 +26,3 @@ export type UserVO = {
   loginIp: string
   loginDate: string
 }
-
-export type UserInfoVO = {
-  permissions: []
-  roles: []
-  user: {
-    avatar: string
-    id: number
-    nickname: string
-  }
-}
-
-export type TentantNameVO = {
-  name: string
-}

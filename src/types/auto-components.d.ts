@@ -21,6 +21,7 @@ declare module '@vue/runtime-core' {
     Descriptions: typeof import('./../components/Descriptions/src/Descriptions.vue')['default']
     Dialog: typeof import('./../components/Dialog/src/Dialog.vue')['default']
     DictTag: typeof import('./../components/DictTag/src/DictTag.vue')['default']
+    DocAlert: typeof import('./../components/DocAlert/index.vue')['default']
     Echart: typeof import('./../components/Echart/src/Echart.vue')['default']
     Editor: typeof import('./../components/Editor/src/Editor.vue')['default']
     ElBadge: typeof import('element-plus/es')['ElBadge']
