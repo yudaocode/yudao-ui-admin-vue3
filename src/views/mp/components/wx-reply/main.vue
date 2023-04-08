@@ -12,10 +12,7 @@
     <!-- 类型 1：文本 -->
     <el-tab-pane name="text">
       <template #label>
-        <el-row align="middle">
-          <icon icon="ep:document" />
-          文本
-        </el-row>
+        <el-row align="middle"><Icon icon="ep:document" /> 文本</el-row>
       </template>
       <el-input
         type="textarea"
@@ -28,10 +25,7 @@
     <!-- 类型 2：图片 -->
     <el-tab-pane name="image">
       <template #label>
-        <el-row align="middle">
-          <icon icon="ep:picture" class="mr-5px" />
-          图片
-        </el-row>
+        <el-row align="middle"><Icon icon="ep:picture" class="mr-5px" /> 图片</el-row>
       </template>
       <!-- 情况一：已经选择好素材、或者上传好图片 -->
       <div class="select-item" v-if="objDataRef.url">
@@ -39,7 +33,7 @@
         <p class="item-name" v-if="objDataRef.name">{{ objDataRef.name }}</p>
         <el-row class="ope-row" justify="center">
           <el-button type="danger" circle @click="deleteObj">
-            <icon icon="ep:delete" />
+            <Icon icon="ep:delete" />
           </el-button>
         </el-row>
       </div>
@@ -48,8 +42,7 @@
         <!-- 选择素材 -->
         <el-col :span="12" class="col-select">
           <el-button type="success" @click="openMaterial">
-            素材库选择
-            <icon icon="ep:circle-check" />
+            素材库选择 <Icon icon="ep:circle-check" />
           </el-button>
           <el-dialog title="选择图片" v-model="dialogImageVisible" width="90%" append-to-body>
             <WxMaterialSelect :obj-data="objDataRef" @select-material="selectMaterial" />
@@ -70,10 +63,8 @@
             <el-button type="primary">上传图片</el-button>
             <template #tip>
               <span>
-                <div class="el-upload__tip"
-                  >支持 bmp/png/jpeg/jpg/gif 格式，大小不超过 2M</div
-                ></span
-              >
+                <div class="el-upload__tip">支持 bmp/png/jpeg/jpg/gif 格式，大小不超过 2M</div>
+              </span>
             </template>
           </el-upload>
         </el-col>
@@ -82,12 +73,8 @@
     <!-- 类型 3：语音 -->
     <el-tab-pane name="voice">
       <template #label>
-        <el-row align="middle">
-          <icon icon="ep:phone" />
-          语音
-        </el-row>
+        <el-row align="middle"><Icon icon="ep:phone" /> 语音</el-row>
       </template>
-
       <div class="select-item2" v-if="objDataRef.url">
         <p class="item-name">{{ objDataRef.name }}</p>
         <div class="item-infos">
@@ -121,8 +108,8 @@
           >
             <el-button type="primary">点击上传</el-button>
             <template #tip>
-              <div class="el-upload__tip"
-                >格式支持 mp3/wma/wav/amr，文件大小不超过 2M，播放长度不超过 60s
+              <div class="el-upload__tip">
+                格式支持 mp3/wma/wav/amr，文件大小不超过 2M，播放长度不超过 60s
               </div>
             </template>
           </el-upload>
@@ -132,10 +119,7 @@
     <!-- 类型 4：视频 -->
     <el-tab-pane name="video">
       <template #label>
-        <el-row align="middle">
-          <icon icon="ep:share" />
-          视频
-        </el-row>
+        <el-row align="middle"><Icon icon="ep:share" /> 视频</el-row>
       </template>
       <el-row>
         <el-input
@@ -158,8 +142,7 @@
             <!-- 选择素材 -->
             <el-col :span="12">
               <el-button type="success" @click="openMaterial">
-                素材库选择
-                <icon icon="ep:circle-check" />
+                素材库选择 <Icon icon="ep:circle-check" />
               </el-button>
               <el-dialog title="选择视频" v-model="dialogVideoVisible" width="90%" append-to-body>
                 <WxMaterialSelect :objData="objDataRef" @select-material="selectMaterial" />
@@ -177,10 +160,7 @@
                 :before-upload="beforeVideoUpload"
                 :on-success="handleUploadSuccess"
               >
-                <el-button type="primary"
-                  >新建视频
-                  <icon icon="ep:upload" />
-                </el-button>
+                <el-button type="primary">新建视频 <Icon icon="ep:upload" /></el-button>
               </el-upload>
             </el-col>
           </el-row>
@@ -190,17 +170,14 @@
     <!-- 类型 5：图文 -->
     <el-tab-pane name="news">
       <template #label>
-        <el-row align="middle">
-          <icon icon="ep:reading" />
-          图文
-        </el-row>
+        <el-row align="middle"><Icon icon="ep:reading" /> 图文</el-row>
       </template>
       <el-row>
         <div class="select-item" v-if="objDataRef.articles?.length > 0">
           <WxNews :articles="objDataRef.articles" />
           <el-col class="ope-row">
             <el-button type="danger" circle @click="deleteObj">
-              <icon icon="ep:delete" />
+              <Icon icon="ep:delete" />
             </el-button>
           </el-col>
         </div>
@@ -208,8 +185,8 @@
         <el-col :span="24" v-if="!objDataRef.content">
           <el-row style="text-align: center" align="middle">
             <el-col :span="24">
-              <el-button type="success" @click="openMaterial"
-                >{{ newsType === '1' ? '选择已发布图文' : '选择草稿箱图文' }}
+              <el-button type="success" @click="openMaterial">
+                {{ newsType === '1' ? '选择已发布图文' : '选择草稿箱图文' }}
                 <icon icon="ep:circle-check" />
               </el-button>
             </el-col>
@@ -227,10 +204,7 @@
     <!-- 类型 6：音乐 -->
     <el-tab-pane name="music">
       <template #label>
-        <el-row align="middle">
-          <icon icon="ep:service" />
-          音乐
-        </el-row>
+        <el-row align="middle"><Icon icon="ep:service" />音乐</el-row>
       </template>
       <el-row align="middle" justify="center">
         <el-col :span="6">
@@ -259,8 +233,8 @@
                     <template #trigger>
                       <el-button type="text">本地上传</el-button>
                     </template>
-                    <el-button type="text" @click="openMaterial" style="margin-left: 5px"
-                      >素材库选择
+                    <el-button type="text" @click="openMaterial" style="margin-left: 5px">
+                      素材库选择
                     </el-button>
                   </el-upload>
                 </div>
@@ -295,7 +269,6 @@
     </el-tab-pane>
   </el-tabs>
 </template>
-
 <script lang="ts" name="WxReplySelect">
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
