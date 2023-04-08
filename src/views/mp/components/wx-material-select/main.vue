@@ -29,6 +29,7 @@
     </div>
     <!-- 类型：voice -->
     <div v-else-if="objData.type === 'voice'">
+      <!-- 列表 -->
       <el-table v-loading="loading" :data="list">
         <el-table-column label="编号" align="center" prop="mediaId" />
         <el-table-column label="文件名" align="center" prop="name" />
@@ -47,7 +48,7 @@
         <el-table-column label="操作" align="center" fixed="right">
           <template #default="scope">
             <el-button type="text" @click="selectMaterialFun(scope.row)">
-              选择 <Icon icon="ep:plus" />
+              选择<Icon icon="ep:plus" />
             </el-button>
           </template>
         </el-table-column>
@@ -80,10 +81,15 @@
           width="180"
           :formatter="dateFormatter"
         />
-        <el-table-column label="操作" align="center">
+        <el-table-column
+          label="操作"
+          align="center"
+          fixed="right"
+          class-name="small-padding fixed-width"
+        >
           <template #default="scope">
-            <el-button type="text" @click="selectMaterialFun(scope.row)"
-              >选择<Icon icon="ep:circle-plus" />
+            <el-button type="text" @click="selectMaterialFun(scope.row)">
+              选择<Icon icon="akar-icons:circle-plus" />
             </el-button>
           </template>
         </el-table-column>
@@ -104,7 +110,7 @@
             <WxNews :articles="item.content.newsItem" />
             <el-row class="ope-row">
               <el-button type="success" @click="selectMaterialFun(item)">
-                选择 <Icon icon="ep:circle-check" />
+                选择<Icon icon="ep:circle-check" />
               </el-button>
             </el-row>
           </div>
@@ -120,6 +126,7 @@
     </div>
   </div>
 </template>
+
 <script lang="ts" name="WxMaterialSelect">
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
@@ -231,7 +238,7 @@ export default defineComponent({
       selectMaterialFun,
       getMaterialPageFun,
       getPage,
-      newsTypeRef,
+      formatDate,
       queryParams,
       objDataRef,
       list,
@@ -241,7 +248,6 @@ export default defineComponent({
   }
 })
 </script>
-
 <style lang="scss" scoped>
 /*瀑布流样式*/
 .waterfall {
