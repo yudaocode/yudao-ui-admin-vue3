@@ -37,7 +37,7 @@
       <div class="select-item" v-if="objDataRef.url">
         <img class="material-img" :src="objDataRef.url" />
         <p class="item-name" v-if="objDataRef.name">{{ objDataRef.name }}</p>
-        <el-row class="ope-row">
+        <el-row class="ope-row" justify="center">
           <el-button type="danger" circle @click="deleteObj">
             <icon icon="ep:delete" />
           </el-button>
@@ -52,7 +52,7 @@
             <icon icon="ep:circle-check" />
           </el-button>
           <el-dialog title="选择图片" v-model="dialogImageVisible" width="90%" append-to-body>
-            <wx-material-select :obj-data="objDataRef" @selectMaterial="selectMaterial" />
+            <WxMaterialSelect :obj-data="objDataRef" @select-material="selectMaterial" />
           </el-dialog>
         </el-col>
         <!-- 文件上传 -->
@@ -91,20 +91,20 @@
       <div class="select-item2" v-if="objDataRef.url">
         <p class="item-name">{{ objDataRef.name }}</p>
         <div class="item-infos">
-          <wx-voice-player :url="objDataRef.url" />
+          <WxVoicePlayer :url="objDataRef.url" />
         </div>
-        <el-row class="ope-row">
-          <el-button type="danger" icon="el-icon-delete" circle @click="deleteObj" />
+        <el-row class="ope-row" justify="center">
+          <el-button type="danger" circle @click="deleteObj"><Icon icon="ep:delete" /></el-button>
         </el-row>
       </div>
       <el-row v-else style="text-align: center">
         <!-- 选择素材 -->
         <el-col :span="12" class="col-select">
           <el-button type="success" @click="openMaterial">
-            素材库选择<i class="el-icon-circle-check el-icon--right"></i>
+            素材库选择<Icon icon="ep:circle-check" />
           </el-button>
           <el-dialog title="选择语音" v-model="dialogVoiceVisible" width="90%" append-to-body>
-            <WxMaterialSelect :objData="objData" @selectMaterial="selectMaterial" />
+            <WxMaterialSelect :objData="objData" @select-material="selectMaterial" />
           </el-dialog>
         </el-col>
         <!-- 文件上传 -->
@@ -151,7 +151,7 @@
           @input="inputContent"
         />
         <div style="text-align: center">
-          <wx-video-player v-if="objDataRef.url" :url="objDataRef.url" />
+          <WxVideoPlayer v-if="objDataRef.url" :url="objDataRef.url" />
         </div>
         <el-col>
           <el-row style="text-align: center" align="middle">
@@ -162,7 +162,7 @@
                 <icon icon="ep:circle-check" />
               </el-button>
               <el-dialog title="选择视频" v-model="dialogVideoVisible" width="90%" append-to-body>
-                <wx-material-select :objData="objDataRef" @selectMaterial="selectMaterial" />
+                <WxMaterialSelect :objData="objDataRef" @select-material="selectMaterial" />
               </el-dialog>
             </el-col>
             <!-- 文件上传 -->
@@ -196,8 +196,8 @@
         </el-row>
       </template>
       <el-row>
-        <div class="select-item" v-if="objDataRef.articles.size > 0">
-          <wx-news :articles="objDataRef.articles" />
+        <div class="select-item" v-if="objDataRef.articles?.length > 0">
+          <WxNews :articles="objDataRef.articles" />
           <el-col class="ope-row">
             <el-button type="danger" circle @click="deleteObj">
               <icon icon="ep:delete" />
@@ -216,9 +216,9 @@
           </el-row>
         </el-col>
         <el-dialog title="选择图文" v-model="dialogNewsVisible" width="90%" append-to-body>
-          <wx-material-select
+          <WxMaterialSelect
             :objData="objDataRef"
-            @selectMaterial="selectMaterial"
+            @select-material="selectMaterial"
             :newsType="newsType"
           />
         </el-dialog>
@@ -268,9 +268,9 @@
             </el-col>
           </el-row>
           <el-dialog title="选择图片" v-model="dialogThumbVisible" width="80%" append-to-body>
-            <wx-material-select
+            <WxMaterialSelect
               :objData="{ type: 'image', accountId: objDataRef.accountId }"
-              @selectMaterial="selectMaterial"
+              @select-material="selectMaterial"
             />
           </el-dialog>
         </el-col>
@@ -482,7 +482,7 @@ export default defineComponent({
       // 创建 tempObjItem 对象，并设置对应的值
       let tempObjItem = {
         type: '',
-        articles: '',
+        articles: [],
         thumbMediaId: '',
         thumbMediaUrl: '',
         introduction: '',
@@ -560,7 +560,7 @@ export default defineComponent({
     }
     const deleteObj = () => {
       if (objDataRef.type === 'news') {
-        objDataRef.articles = ''
+        objDataRef.articles = []
       } else if (objDataRef.type === 'image') {
         objDataRef.mediaId = null
         objDataRef.url = null
