@@ -152,7 +152,7 @@
   <!-- 表单弹窗：数据权限 -->
   <RoleDataPermissionForm ref="dataPermissionFormRef" />
 </template>
-<script setup lang="tsx">
+<script setup lang="tsx" name="SystemRole">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'

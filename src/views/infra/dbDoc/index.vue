@@ -16,7 +16,7 @@
     <IFrame v-if="!loading" v-loading="loading" :src="src" />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="DbDoc">
+<script setup lang="ts" name="InfraDBDoc">
 import download from '@/utils/download'
 import * as DbDocApi from '@/api/infra/dbDoc'
 

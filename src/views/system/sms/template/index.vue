@@ -211,7 +211,7 @@
   <!-- 表单弹窗：测试发送 -->
   <SmsTemplateSendForm ref="sendFormRef" />
 </template>
-<script setup lang="ts" name="SmsTemplate">
+<script setup lang="ts" name="SystemSmsTemplate">
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as SmsTemplateApi from '@/api/system/sms/smsTemplate'

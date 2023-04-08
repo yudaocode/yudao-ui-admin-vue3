@@ -5,7 +5,7 @@
     <IFrame v-if="!loading" v-loading="loading" :src="src" />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="Skywalking">
+<script setup lang="ts" name="InfraSkyWalking">
 import * as ConfigApi from '@/api/infra/config'
 
 const loading = ref(true) // 是否加载中

@@ -31,7 +31,7 @@
     </div>
   </Dialog>
 </template>
-<script setup lang="ts" name="Build">
+<script setup lang="ts" name="InfraBuild">
 import formCreate from '@form-create/element-ui'
 import { useClipboard } from '@vueuse/core'
 const { t } = useI18n() // 国际化

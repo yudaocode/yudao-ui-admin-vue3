@@ -93,7 +93,7 @@
   </Dialog>
 </template>
 
-<script setup lang="ts" name="Form">
+<script setup lang="ts" name="BpmProcessDefinition">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as DefinitionApi from '@/api/bpm/definition'

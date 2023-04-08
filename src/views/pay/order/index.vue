@@ -41,7 +41,7 @@
     </template>
   </XModal>
 </template>
-<script setup lang="ts" name="Order">
+<script setup lang="ts" name="PayOrder">
 import { allSchemas } from './order.data'
 import * as OrderApi from '@/api/pay/order'
 

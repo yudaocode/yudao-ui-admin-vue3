@@ -5,7 +5,7 @@
     <IFrame :src="src" />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="Swagger">
+<script setup lang="ts" name="InfraSwagger">
 import * as ConfigApi from '@/api/infra/config'
 
 const loading = ref(true) // 是否加载中

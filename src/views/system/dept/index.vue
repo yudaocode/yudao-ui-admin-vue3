@@ -103,7 +103,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <DeptForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="Dept">
+<script setup lang="ts" name="SystemDept">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { handleTree } from '@/utils/tree'

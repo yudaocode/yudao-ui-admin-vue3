@@ -6,7 +6,7 @@
     <IFrame v-if="!loading" :src="url" />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="Druid">
+<script setup lang="ts" name="InfraDruid">
 import * as ConfigApi from '@/api/infra/config'
 
 const loading = ref(true) // 是否加载中

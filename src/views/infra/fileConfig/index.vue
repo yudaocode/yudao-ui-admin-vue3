@@ -3,17 +3,29 @@
 
   <!-- 搜索 -->
   <ContentWrap>
-    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="配置名" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入配置名"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="存储器" prop="storage">
-        <el-select v-model="queryParams.storage" placeholder="请选择存储器" clearable>
+        <el-select
+          v-model="queryParams.storage"
+          placeholder="请选择存储器"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.INFRA_FILE_STORAGE)"
             :key="dict.value"
@@ -30,6 +42,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>
@@ -113,7 +126,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <FileConfigForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="Config">
+<script setup lang="ts" name="InfraFileConfig">
 import * as FileConfigApi from '@/api/infra/fileConfig'
 import FileConfigForm from './FileConfigForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'

@@ -71,7 +71,7 @@
   </ContentWrap>
 </template>
 
-<script setup lang="tsx">
+<script setup lang="tsx" name="BpmDoneTask">
 import { dateFormatter } from '@/utils/formatTime'
 const { push } = useRouter() // 路由
 import * as TaskApi from '@/api/bpm/task'

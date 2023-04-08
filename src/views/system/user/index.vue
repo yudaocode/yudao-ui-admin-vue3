@@ -198,7 +198,7 @@
   <!-- 分配角色 -->
   <UserAssignRoleForm ref="assignRoleFormRef" @success="getList" />
 </template>
-<script setup lang="ts" name="User">
+<script setup lang="ts" name="SystemUser">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { checkPermi } from '@/utils/permission'
 import { dateFormatter } from '@/utils/formatTime'

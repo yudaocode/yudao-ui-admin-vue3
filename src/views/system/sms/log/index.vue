@@ -184,7 +184,7 @@
   <!-- 表单弹窗：详情 -->
   <SmsLogDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="smsLog">
+<script setup lang="ts" name="SystemSmsLog">
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import download from '@/utils/download'

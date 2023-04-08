@@ -33,7 +33,7 @@
     </template>
   </XModal>
 </template>
-<script setup lang="ts" name="Refund">
+<script setup lang="ts" name="PayRefund">
 import { allSchemas } from './refund.data'
 import * as RefundApi from '@/api/pay/refund'
 

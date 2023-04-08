@@ -116,7 +116,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       {
         path: 'type/data/:dictType',
         component: () => import('@/views/system/dict/data/index.vue'),
-        name: 'data',
+        name: 'SystemDictData',
         meta: {
           title: '字典数据',
           noCache: true,
@@ -140,7 +140,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       {
         path: 'edit',
         component: () => import('@/views/infra/codegen/EditTable.vue'),
-        name: 'EditTable',
+        name: 'InfraCodegenEditTable',
         meta: {
           noCache: true,
           hidden: true,
@@ -163,7 +163,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       {
         path: 'job-log',
         component: () => import('@/views/infra/job/logger/index.vue'),
-        name: 'JobLog',
+        name: 'InfraJobLog',
         meta: {
           noCache: true,
           hidden: true,
@@ -226,7 +226,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       {
         path: '/manager/form/edit',
         component: () => import('@/views/bpm/form/editor/index.vue'),
-        name: 'bpmFormEditor',
+        name: 'BpmFormEditor',
         meta: {
           noCache: true,
           hidden: true,
@@ -238,7 +238,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       {
         path: '/manager/model/edit',
         component: () => import('@/views/bpm/model/editor/index.vue'),
-        name: 'modelEditor',
+        name: 'BpmModelEditor',
         meta: {
           noCache: true,
           hidden: true,
@@ -250,7 +250,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       {
         path: '/manager/definition',
         component: () => import('@/views/bpm/definition/index.vue'),
-        name: 'BpmProcessDefinitionList',
+        name: 'BpmProcessDefinition',
         meta: {
           noCache: true,
           hidden: true,
@@ -262,7 +262,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       {
         path: '/manager/task-assign-rule',
         component: () => import('@/views/bpm/taskAssignRule/index.vue'),
-        name: 'BpmTaskAssignRuleList',
+        name: 'BpmTaskAssignRule',
         meta: {
           noCache: true,
           hidden: true,
@@ -305,30 +305,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
           title: '发起 OA 请假',
           activeMenu: 'bpm/oa/leave/create'
         }
-      },
-      {
-        path: '/bpm/task/todo',
-        component: () => import('@/views/bpm/task/todo/index.vue'),
-        name: 'TaskTodo',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: '代办任务',
-          activeMenu: 'bpm/task/todo/index'
-        }
-      },
-      {
-        path: '/bpm/processInstance',
-        component: () => import('@/views/bpm/processInstance/index.vue'),
-        name: 'processInstance',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: '流程办理',
-          activeMenu: 'bpm/processInstance/index'
-        }
       }
     ]
   },
@@ -343,7 +319,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       {
         path: 'value/:propertyId(\\d+)',
         component: () => import('@/views/mall/product/property/value/index.vue'),
-        name: 'PropertyValue',
+        name: 'ProductPropertyValue',
         meta: { title: '商品属性值', icon: '', activeMenu: '/product/property' }
       }
     ]

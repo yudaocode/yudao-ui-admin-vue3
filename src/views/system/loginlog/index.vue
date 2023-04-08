@@ -104,7 +104,7 @@
   <!-- 表单弹窗：详情 -->
   <LoginLogDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="LoginLog">
+<script setup lang="ts" name="SystemLoginLog">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'

@@ -83,12 +83,11 @@
   </Dialog>
 </template>
 
-<script setup lang="ts" name="Form">
+<script setup lang="ts" name="BpmForm">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as FormApi from '@/api/bpm/form'
 import { setConfAndFields2 } from '@/utils/formCreate'
-
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由
@@ -130,7 +129,7 @@ const resetQuery = () => {
 /** 添加/修改操作 */
 const openForm = (id?: number) => {
   push({
-    name: 'bpmFormEditor',
+    name: 'BpmFormEditor',
     query: {
       id
     }
