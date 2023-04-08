@@ -1,40 +1,37 @@
 <template>
-  <div class="app-container">
-    <doc-alert title="公众号图文" url="https://doc.iocoder.cn/mp/article/" />
+  <doc-alert title="公众号图文" url="https://doc.iocoder.cn/mp/article/" />
 
-    <!-- 搜索工作栏 -->
-    <el-form :model="queryParams" ref="queryFormRef" size="small" :inline="true" label-width="68px">
+  <!-- 搜索工作栏 -->
+  <ContentWrap>
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="公众号" prop="accountId">
         <el-select v-model="queryParams.accountId" placeholder="请选择公众号">
           <el-option
             v-for="item in accountList"
-            :key="parseInt(item.id)"
+            :key="item.id"
             :label="item.name"
-            :value="parseInt(item.id)"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+        <el-button type="primary" plain @click="handleAdd" v-hasPermi="['mp:draft:create']">
+          <Icon icon="ep:plus" />新增
+        </el-button>
       </el-form-item>
     </el-form>
+  </ContentWrap>
 
-    <!-- 操作工具栏 -->
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          size="small"
-          @click="handleAdd"
-          v-hasPermi="['mp:draft:create']"
-          ><Icon icon="ep:plus" />新增
-        </el-button>
-      </el-col>
-    </el-row>
-
-    <!-- 列表 -->
+  <!-- 列表 -->
+  <ContentWrap>
     <div class="waterfall" v-loading="loading">
       <template v-for="item in list" :key="item.articleId">
         <div class="waterfall-item" v-if="item.content && item.content.newsItem">
@@ -46,35 +43,40 @@
               circle
               @click="handlePublish(item)"
               v-hasPermi="['mp:free-publish:submit']"
-              ><Icon icon="fa:upload"
-            /></el-button>
+            >
+              <Icon icon="fa:upload" />
+            </el-button>
             <el-button
               type="primary"
               circle
               @click="handleUpdate(item)"
               v-hasPermi="['mp:draft:update']"
-              ><Icon icon="ep:edit"
-            /></el-button>
+            >
+              <Icon icon="ep:edit" />
+            </el-button>
             <el-button
               type="danger"
               circle
               @click="handleDelete(item)"
               v-hasPermi="['mp:draft:delete']"
-              ><Icon icon="ep:delete"
-            /></el-button>
+            >
+              <Icon icon="ep:delete" />
+            </el-button>
           </el-row>
         </div>
       </template>
     </div>
     <!-- 分页记录 -->
-    <pagination
-      v-show="total > 0"
+    <Pagination
       :total="total"
       v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
+  </ContentWrap>
 
+  <!-- TODO @Dhb52：迁移成独立路由 -->
+  <div class="app-container">
     <!-- 添加或修改草稿对话框 -->
     <Teleport to="body">
       <el-dialog
@@ -254,9 +256,7 @@
     </Teleport>
   </div>
 </template>
-
 <script setup name="MpDraft">
-import { ref, onMounted, reactive, nextTick } from 'vue'
 import WxEditor from '@/views/mp/components/wx-editor/WxEditor.vue'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
@@ -264,30 +264,24 @@ import { getAccessToken } from '@/utils/auth'
 import { createDraft, deleteDraft, getDraftPage, updateDraft } from '@/api/mp/draft'
 import { getSimpleAccountList } from '@/api/mp/account'
 import { submitFreePublish } from '@/api/mp/freePublish'
+const message = useMessage() // 消息
 // 可以用改本地数据模拟，避免API调用超限
 // import drafts from './mock'
 
-const BASE_URL = import.meta.env.VITE_BASE_URL
-
-const message = useMessage()
-
-const materialSelectRef = ref()
-const queryFormRef = ref()
-
-// 遮罩层
-const loading = ref(false)
-// 显示搜索条件
-// 总条数
-const total = ref(0)
-// 数据列表
-const list = ref([])
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   accountId: undefined
 })
+const queryFormRef = ref() // 搜索的表单
+const accountList = ref([]) // 公众号账号列表
 
 // ========== 文件上传 ==========
+const materialSelectRef = ref()
+const BASE_URL = import.meta.env.VITE_BASE_URL
 const actionUrl = ref(BASE_URL + '/admin-api/mp/material/upload-permanent') // 上传永久素材的地址
 const headers = ref({ Authorization: 'Bearer ' + getAccessToken() }) // 设置上传的请求头部
 const fileList = ref([])
@@ -305,9 +299,8 @@ const dialogImageVisible = ref(false)
 const operateMaterial = ref('add')
 const articlesMediaId = ref('')
 const hackResetEditor = ref(false)
-// 公众号账号列表
-const accountList = ref([])
 
+/** 初始化 **/
 onMounted(async () => {
   accountList.value = await getSimpleAccountList()
   // 选中第一个
@@ -393,6 +386,7 @@ const handleUpdate = (item) => {
 
 /** 提交按钮 */
 const submitForm = () => {
+  // TODO @Dhb52: 参考别的模块写法，改成 await 方式
   addMaterialLoading.value = true
   if (operateMaterial.value === 'add') {
     createDraft(queryParams.accountId, articlesAdd.value)
@@ -560,23 +554,23 @@ const handlePublish = async (item) => {
   try {
     await message.confirm(content)
     await submitFreePublish(accountId, mediaId)
-    getList()
     message.notifySuccess('发布成功')
+    await getList()
   } catch {}
 }
 
+/** 删除按钮操作 */
 const handleDelete = async (item) => {
   const accountId = queryParams.accountId
   const mediaId = item.mediaId
   try {
     await message.confirm('此操作将永久删除该草稿, 是否继续?')
     await deleteDraft(accountId, mediaId)
-    getList()
     message.notifySuccess('删除成功')
+    await getList()
   } catch {}
 }
 </script>
-
 <style lang="scss" scoped>
 .pagination {
   float: right;
