@@ -1,56 +1,107 @@
 <template>
-  <ContentWrap>
-    <!-- 对话框(添加 / 修改) -->
-    <Form :schema="allSchemas.formSchema" :rules="rules" ref="formRef" />
-    <!-- 按钮：保存 -->
-    <XButton
-      type="primary"
-      :title="t('action.save')"
-      :loading="actionLoading"
-      @click="submitForm"
-    />
-  </ContentWrap>
+  <Dialog title="发起OA请假流程" v-model="modelVisible">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="80px"
+      v-loading="formLoading"
+    >
+      <el-form-item label="请假类型" prop="type">
+        <el-select v-model="formData.type" placeholder="请选择请假类型" clearable>
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_OA_LEAVE_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="开始时间" prop="startTime">
+        <el-date-picker
+          clearable
+          v-model="formData.startTime"
+          type="datetime"
+          value-format="x"
+          placeholder="请选择开始时间"
+        />
+      </el-form-item>
+      <el-form-item label="结束时间" prop="endTime">
+        <el-date-picker
+          clearable
+          v-model="formData.endTime"
+          type="datetime"
+          value-format="x"
+          placeholder="请选择结束时间"
+        />
+      </el-form-item>
+      <el-form-item label="原因" prop="reason">
+        <el-input v-model="formData.reason" type="textarea" placeholder="请输请假原因" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="modelVisible = false">取 消</el-button>
+    </template>
+  </Dialog>
 </template>
 <script setup lang="ts">
-import { FormExpose } from '@/components/Form'
-// import XEUtils from 'xe-utils'
-
-// 业务相关的 import
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as LeaveApi from '@/api/bpm/leave'
-import { rules, allSchemas } from './leave.data'
-
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-const { push } = useRouter() // 路由
 
-// 表单参数
-const actionLoading = ref(false) // 按钮 Loading
-const formRef = ref<FormExpose>() // 表单 Ref
+const modelVisible = ref(false) // 弹窗的是否展示
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formData = ref({
+  type: undefined,
+  reason: undefined,
+  startTime: undefined,
+  endTime: undefined
+})
+const formRules = reactive({
+  type: [{ required: true, message: '请假类型不能为空', trigger: 'blur' }],
+  reason: [{ required: true, message: '请假原因不能为空', trigger: 'change' }],
+  startTime: [{ required: true, message: '请假开始时间不能为空', trigger: 'change' }],
+  endTime: [{ required: true, message: '请假结束时间不能为空', trigger: 'change' }]
+})
+const formRef = ref() // 表单 Ref
 
-// 提交按钮
+/** 打开弹窗 */
+const open = async () => {
+  modelVisible.value = true
+  resetForm()
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    type: undefined,
+    reason: undefined,
+    startTime: undefined,
+    endTime: undefined
+  }
+  formRef.value?.resetFields()
+}
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+/** 提交表单 */
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (!valid) {
-      return
-    }
-    try {
-      // 设置提交中
-      actionLoading.value = true
-      const data = unref(formRef)?.formModel as LeaveApi.LeaveVO
-      // data.startTime = XEUtils.toDateString(data.startTime, 'yyyy-MM-dd HH:mm:ss')
-      // data.endTime = XEUtils.toDateString(data.endTime, 'yyyy-MM-dd HH:mm:ss')
-      data.startTime = Date.parse(new Date(data.startTime).toString()).toString()
-      data.endTime = Date.parse(new Date(data.endTime).toString()).toString()
-      // 添加的提交
-      await LeaveApi.createLeave(data)
-      message.success(t('common.createSuccess'))
-      // 关闭窗口
-      push('/bpm/oa/leave')
-    } finally {
-      actionLoading.value = false
-    }
-  })
+  // 校验表单
+  if (!formRef) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  // 提交请求
+  formLoading.value = true
+  try {
+    const data = formData.value as unknown as LeaveApi.LeaveVO
+    await LeaveApi.createLeaveApi(data)
+    message.success('新增成功')
+    modelVisible.value = false
+    // 发送操作成功的事件
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
 }
 </script>
