@@ -3,32 +3,33 @@
     <doc-alert title="自动回复" url="https://doc.iocoder.cn/mp/auto-reply/" />
 
     <!-- 搜索工作栏 -->
-    <el-form
-      :model="queryParams"
-      ref="queryFormRef"
-      size="small"
-      :inline="true"
-      v-show="showSearch"
-      label-width="68px"
-    >
-      <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="queryParams.accountId" placeholder="请选择公众号">
-          <el-option
-            v-for="item in accounts"
-            :key="parseInt(item.id)"
-            :label="item.name"
-            :value="parseInt(item.id)"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
-      </el-form-item>
-    </el-form>
-
     <ContentWrap>
-      <!-- tab 切换 -->
+      <el-form
+        class="-mb-15px"
+        :model="queryParams"
+        ref="queryFormRef"
+        :inline="true"
+        label-width="68px"
+      >
+        <el-form-item label="公众号" prop="accountId">
+          <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
+            <el-option
+              v-for="item in accountList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
+          <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+        </el-form-item>
+      </el-form>
+    </ContentWrap>
+
+    <!-- tab 切换 -->
+    <ContentWrap>
       <el-tabs v-model="type" @tab-change="handleTabChange">
         <!-- 操作工具栏 -->
         <el-row :gutter="10" class="mb8">
@@ -36,7 +37,6 @@
             <el-button
               type="primary"
               plain
-              size="small"
               @click="handleAdd"
               v-hasPermi="['mp:auto-reply:create']"
               v-if="type !== '1' || list.length <= 0"
@@ -62,8 +62,10 @@
           </template>
         </el-tab-pane>
       </el-tabs>
+    </ContentWrap>
 
-      <!-- 列表 -->
+    <!-- 列表 -->
+    <ContentWrap>
       <el-table v-loading="loading" :data="list">
         <el-table-column
           label="请求消息类型"
@@ -82,34 +84,31 @@
         </el-table-column>
         <el-table-column label="回复消息类型" align="center">
           <template #default="scope">
-            <dict-tag :type="DICT_TYPE.MP_MESSAGE_TYPE" :value="scope.row.responseMessageType" />
+            <dict-tag :type="DICT_TYPE.MP_MESSAGE_TYPE" :value="scope.row.responsType" />
           </template>
         </el-table-column>
         <el-table-column label="回复内容" align="center">
           <template #default="scope">
-            <div v-if="scope.row.responseMessageType === 'text'">{{
-              scope.row.responseContent
-            }}</div>
-            <div v-else-if="scope.row.responseMessageType === 'voice'">
+            <div v-if="scope.row.responsType === 'text'">{{ scope.row.responseContent }}</div>
+            <div v-else-if="scope.row.responsType === 'voice'">
               <WxVoicePlayer :url="scope.row.responseMediaUrl" />
             </div>
-            <div v-else-if="scope.row.responseMessageType === 'image'">
+            <div v-else-if="scope.row.responsType === 'image'">
               <a target="_blank" :href="scope.row.responseMediaUrl">
                 <img :src="scope.row.responseMediaUrl" style="width: 100px" />
               </a>
             </div>
             <div
               v-else-if="
-                scope.row.responseMessageType === 'video' ||
-                scope.row.responseMessageType === 'shortvideo'
+                scope.row.responsType === 'video' || scope.row.responsType === 'shortvideo'
               "
             >
               <WxVideoPlayer :url="scope.row.responseMediaUrl" style="margin-top: 10px" />
             </div>
-            <div v-else-if="scope.row.responseMessageType === 'news'">
+            <div v-else-if="scope.row.responsType === 'news'">
               <WxNews :articles="scope.row.responseArticles" />
             </div>
-            <div v-else-if="scope.row.responseMessageType === 'music'">
+            <div v-else-if="scope.row.responsType === 'music'">
               <WxMusic
                 :title="scope.row.responseTitle"
                 :description="scope.row.responseDescription"
@@ -120,9 +119,15 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="创建时间" align="center" prop="createTime" width="180">
+        <el-table-column
+          label="创建时间"
+          align="center"
+          prop="createTime"
+          :formatter="dateFormatter"
+          width="180"
+        >
           <template #default="scope">
-            <span>{{ formatDate(scope.row.createTime) }}</span>
+            <span>{{ scope.row.createTime }}</span>
           </template>
         </el-table-column>
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -211,7 +216,7 @@ import {
 } from '@/api/mp/autoReply'
 
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-import { formatDate } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import { ContentWrap } from '@/components/ContentWrap'
 
 const message = useMessage()
@@ -226,7 +231,7 @@ const requestMessageTypes = ['text', 'image', 'voice', 'video', 'shortvideo', 'l
 // 遮罩层
 const loading = ref(true)
 // 显示搜索条件
-const showSearch = ref(true)
+// const showSearch = ref(true)
 // 总条数
 const total = ref(0)
 // 自动回复列表
@@ -257,14 +262,14 @@ const rules = {
 const hackResetWxReplySelect = ref(false) // 重置 WxReplySelect 组件，解决无法清除的问题
 
 // 公众号账号列表
-const accounts = ref([])
+const accountList = ref([])
 
 onMounted(() => {
   getSimpleAccountList().then((data) => {
-    accounts.value = data
+    accountList.value = data
     // 默认选中第一个
-    if (accounts.value.length > 0) {
-      queryParams.accountId = accounts.value[0].id
+    if (accountList.value.length > 0) {
+      queryParams.accountId = accountList.value[0].id
     }
     // 加载数据
     getList()
@@ -303,8 +308,8 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value?.resetFields()
   // 默认选中第一个
-  if (accounts.value.length > 0) {
-    queryParams.accountId = accounts.value[0].id
+  if (accountList.value.length > 0) {
+    queryParams.accountId = accountList.value[0].id
   }
   handleQuery()
 }
@@ -336,14 +341,14 @@ const handleUpdate = (row) => {
   getAutoReply(row.id).then((data) => {
     // 设置属性
     form.value = { ...data }
-    delete form.value['responseMessageType']
+    delete form.value['responsType']
     delete form.value['responseContent']
     delete form.value['responseMediaId']
     delete form.value['responseMediaUrl']
     delete form.value['responseDescription']
     delete form.value['responseArticles']
     objData.value = {
-      type: data.responseMessageType,
+      type: data.responsType,
       accountId: queryParams.accountId,
       content: data.responseContent,
       mediaId: data.responseMediaId,
@@ -371,7 +376,7 @@ const handleSubmit = () => {
 
     // 处理回复消息
     const form = { ...form.value }
-    form.responseMessageType = objData.value.type
+    form.responsType = objData.value.type
     form.responseContent = objData.value.content
     form.responseMediaId = objData.value.mediaId
     form.responseMediaUrl = objData.value.url
