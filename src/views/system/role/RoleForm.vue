@@ -11,10 +11,10 @@
         <el-input v-model="formData.name" placeholder="请输入角色名称" />
       </el-form-item>
       <el-form-item label="角色标识" prop="code">
-        <el-input :model-value="formData.code" placeholder="请输入角色标识" height="150px" />
+        <el-input v-model="formData.code" placeholder="请输入角色标识" />
       </el-form-item>
       <el-form-item label="显示顺序" prop="sort">
-        <el-input :model-value="formData.sort" placeholder="请输入显示顺序" height="150px" />
+        <el-input v-model="formData.sort" placeholder="请输入显示顺序" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="formData.status" placeholder="请选择状态" clearable>
