@@ -2,22 +2,7 @@
   <doc-alert title="公众号菜单" url="https://doc.iocoder.cn/mp/menu/" />
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <el-form class="-mb-15px" ref="queryFormRef" :inline="true" label-width="68px">
-      <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="accountId" placeholder="请选择公众号" class="!w-240px">
-          <el-option
-            v-for="item in accountList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
-      </el-form-item>
-    </el-form>
+    <WxAccountSelect @change="(accountId) => accountChanged(accountId)" />
   </ContentWrap>
 
   <!-- 列表 -->
@@ -204,17 +189,15 @@ import { handleTree } from '@/utils/tree'
 import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
-import { deleteMenu, getMenuList, saveMenu } from '@/api/mp/menu'
-import * as MpAccountApi from '@/api/mp/account'
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import * as MpMenuApi from '@/api/mp/menu'
 import menuOptions from './menuOptions'
 const message = useMessage() // 消息
 
 // ======================== 列表查询 ========================
 const loading = ref(true) // 遮罩层
 const accountId = ref(undefined) // 公众号Id
-const name = ref('') // 公众号名
 const menuList = ref({ children: [] })
-const accountList = ref([]) // 公众号账号列表
 
 // ======================== 菜单操作 ========================
 const isActive = ref(-1) // 一级菜单点中样式
@@ -228,58 +211,32 @@ const showConfigureContent = ref(true) // 是否展示配置内容；如果有�
 const hackResetWxReplySelect = ref(false) // 重置 WxReplySelect 组件
 const tempObj = ref({}) // 右边临时变量，作为中间值牵引关系
 
-const tempSelfObj = ref({
-  // 一些临时值放在这里进行判断，如果放在 tempObj，由于引用关系，menu 也会多了多余的参数
-})
+// 一些临时值放在这里进行判断，如果放在 tempObj，由于引用关系，menu 也会多了多余的参数
+const tempSelfObj = ref({})
 const dialogNewsVisible = ref(false) // 跳转图文时的素材选择弹窗
 
-onMounted(async () => {
-  accountList.value = await MpAccountApi.getSimpleAccountList()
-  // 选中第一个
-  if (accountList.value.length > 0) {
-    // @ts-ignore
-    setAccountId(accountList.value[0].id)
-  }
-  await getList()
-})
-
-// ======================== 列表查询 ========================
-/** 设置账号编号 */
-const setAccountId = (id) => {
+/** 侦听公众号变化 **/
+const accountChanged = (accountId) => {
   accountId.value = id
-  name.value = accountList.value.find((item) => item.id === accountId.value)?.name
+  getList()
 }
 
+/** 查询并转换菜单 **/
 const getList = async () => {
   loading.value = false
-  getMenuList(accountId.value)
-    .then((response) => {
-      const menuData = convertMenuList(response)
-      menuList.value = handleTree(menuData, 'id')
-    })
-    .finally(() => {
-      loading.value = false
-    })
+  try {
+    const data = await MpMenuApi.getMenuList(accountId.value)
+    const menuData = convertMenuList(data)
+    menuList.value = handleTree(menuData, 'id')
+  } finally {
+    loading.value = false
+  }
 }
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   resetForm()
-  // 默认选中第一个
-  if (accountId.value) {
-    setAccountId(accountId.value)
-  }
   getList()
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  resetForm()
-  // 默认选中第一个
-  if (accountList.value.length > 0) {
-    setAccountId(accountList.value[0].id)
-  }
-  handleQuery()
 }
 
 // 将后端返回的 menuList，转换成前端的 menuList
@@ -443,7 +400,7 @@ const handleSave = async () => {
   try {
     await message.confirm('确定要删除吗?')
     loading.value = true
-    await saveMenu(accountId.value, convertMenuFormList())
+    await MpMenuApi.saveMenu(accountId.value, convertMenuFormList())
     getList()
     message.notifySuccess('发布成功')
   } finally {
@@ -464,7 +421,7 @@ const handleDelete = async () => {
   try {
     await message.confirm('确定要删除吗?')
     loading.value = true
-    await deleteMenu(accountId.value)
+    await MpMenuApi.deleteMenu(accountId.value)
     handleQuery()
     message.notifySuccess('清空成功')
   } finally {
@@ -546,6 +503,7 @@ const deleteMaterial = () => {
   delete tempObj.value['replyArticles']
 }
 </script>
+
 <!--本组件样式-->
 <style lang="scss" scoped="scoped">
 /* 公共颜色变量 */
