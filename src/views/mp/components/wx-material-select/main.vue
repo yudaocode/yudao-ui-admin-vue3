@@ -51,7 +51,7 @@
           class-name="small-padding fixed-width"
         >
           <template #default="scope">
-            <el-button type="text" @click="selectMaterialFun(scope.row)"
+            <el-button type="primary" link @click="selectMaterialFun(scope.row)"
               >选择<Icon icon="ep:plus" />
             </el-button>
           </template>
@@ -91,7 +91,7 @@
           class-name="small-padding fixed-width"
         >
           <template #default="scope">
-            <el-button type="text" @click="selectMaterialFun(scope.row)"
+            <el-button type="primary" link @click="selectMaterialFun(scope.row)"
               >选择<Icon icon="akar-icons:circle-plus" />
             </el-button>
           </template>

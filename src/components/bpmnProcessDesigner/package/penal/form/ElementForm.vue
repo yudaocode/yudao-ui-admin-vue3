@@ -33,9 +33,15 @@
         />
         <el-table-column label="操作" width="90px">
           <template #default="scope">
-            <el-button type="text" @click="openFieldForm(scope, scope.$index)">编辑</el-button>
+            <el-button type="primary" link @click="openFieldForm(scope, scope.$index)"
+              >编辑</el-button
+            >
             <el-divider direction="vertical" />
-            <el-button type="text" style="color: #ff4d4f" @click="removeField(scope, scope.$index)"
+            <el-button
+              type="primary"
+              link
+              style="color: #ff4d4f"
+              @click="removeField(scope, scope.$index)"
               >移除</el-button
             >
           </template>
@@ -97,7 +103,10 @@
           <el-table-column label="枚举值名称" prop="name" min-width="100px" show-overflow-tooltip />
           <el-table-column label="操作" width="90px">
             <template #default="scope">
-              <el-button type="text" @click="openFieldOptionForm(scope, scope.$index, 'enum')"
+              <el-button
+                type="primary"
+                link
+                @click="openFieldOptionForm(scope, scope.$index, 'enum')"
                 >编辑</el-button
               >
               <el-divider direction="vertical" />
@@ -126,7 +135,10 @@
         <el-table-column label="约束配置" prop="config" min-width="100px" show-overflow-tooltip />
         <el-table-column label="操作" width="90px">
           <template #default="scope">
-            <el-button type="text" @click="openFieldOptionForm(scope, scope.$index, 'constraint')"
+            <el-button
+              type="primary"
+              link
+              @click="openFieldOptionForm(scope, scope.$index, 'constraint')"
               >编辑</el-button
             >
             <el-divider direction="vertical" />
@@ -154,7 +166,10 @@
         <el-table-column label="属性值" prop="value" min-width="100px" show-overflow-tooltip />
         <el-table-column label="操作" width="90px">
           <template #default="scope">
-            <el-button type="text" @click="openFieldOptionForm(scope, scope.$index, 'property')"
+            <el-button
+              type="primary"
+              link
+              @click="openFieldOptionForm(scope, scope.$index, 'property')"
               >编辑</el-button
             >
             <el-divider direction="vertical" />

@@ -65,7 +65,7 @@
       <el-table-column label="流程标识" align="center" prop="key" width="200" />
       <el-table-column label="流程名称" align="center" prop="name" width="200">
         <template #default="scope">
-          <el-button type="text" @click="handleBpmnDetail(scope.row)">
+          <el-button type="primary" link @click="handleBpmnDetail(scope.row)">
             <span>{{ scope.row.name }}</span>
           </el-button>
         </template>
