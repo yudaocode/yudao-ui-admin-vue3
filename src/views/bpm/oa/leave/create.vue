@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="发起 OA 请假流程" v-model="modelVisible">
+  <Dialog title="发起 OA 请假流程" v-model="dialogVisible">
     <el-form
       ref="formRef"
       :model="formData"
@@ -41,7 +41,7 @@
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
-      <el-button @click="modelVisible = false">取 消</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
@@ -50,7 +50,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as LeaveApi from '@/api/bpm/leave'
 const message = useMessage() // 消息弹窗
 
-const modelVisible = ref(false) // 弹窗的是否展示
+const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
   type: undefined,
@@ -68,7 +68,7 @@ const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
 const open = async () => {
-  modelVisible.value = true
+  dialogVisible.value = true
   resetForm()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -86,7 +86,7 @@ const submitForm = async () => {
     const data = formData.value as unknown as LeaveApi.LeaveVO
     await LeaveApi.createLeave(data)
     message.success('新增成功')
-    modelVisible.value = false
+    dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
   } finally {

@@ -174,10 +174,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="cancel">取 消</el-button>
-          <el-button type="primary" @click="handleSubmit">确 定</el-button>
-        </span>
+        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="handleSubmit">确 定</el-button>
       </template>
     </el-dialog>
   </ContentWrap>

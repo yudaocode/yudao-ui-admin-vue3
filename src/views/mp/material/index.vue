@@ -197,10 +197,8 @@
             </el-row>
           </el-form>
           <template #footer>
-            <div class="dialog-footer">
-              <el-button @click="cancelVideo">取 消</el-button>
-              <el-button type="primary" @click="submitVideo">提 交</el-button>
-            </div>
+            <el-button @click="cancelVideo">取 消</el-button>
+            <el-button type="primary" @click="submitVideo">提 交</el-button>
           </template>
         </el-dialog>
 
