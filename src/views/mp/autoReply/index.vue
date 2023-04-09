@@ -1,204 +1,187 @@
 <template>
-  <div class="app-container">
-    <doc-alert title="自动回复" url="https://doc.iocoder.cn/mp/auto-reply/" />
+  <doc-alert title="自动回复" url="https://doc.iocoder.cn/mp/auto-reply/" />
 
-    <!-- 搜索工作栏 -->
-    <ContentWrap>
-      <el-form
-        class="-mb-15px"
-        :model="queryParams"
-        ref="queryFormRef"
-        :inline="true"
-        label-width="68px"
-      >
-        <el-form-item label="公众号" prop="accountId">
-          <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
+  <!-- 搜索工作栏 -->
+  <ContentWrap>
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
+      <el-form-item label="公众号" prop="accountId">
+        <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
+          <el-option
+            v-for="item in accountList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+      </el-form-item>
+    </el-form>
+  </ContentWrap>
+
+  <!-- tab 切换 -->
+  <ContentWrap>
+    <el-tabs v-model="type" @tab-change="handleTabChange">
+      <!-- 操作工具栏 -->
+      <el-row :gutter="10" class="mb8">
+        <el-col :span="1.5">
+          <el-button
+            type="primary"
+            plain
+            @click="handleAdd"
+            v-hasPermi="['mp:auto-reply:create']"
+            v-if="type !== '1' || list.length <= 0"
+          >
+            <Icon icon="ep:plus" />新增
+          </el-button>
+        </el-col>
+      </el-row>
+      <!-- tab 项 -->
+      <el-tab-pane name="1">
+        <template #label>
+          <span><Icon icon="ep:star-off" /> 关注时回复</span>
+        </template>
+      </el-tab-pane>
+      <el-tab-pane name="2">
+        <template #label>
+          <span><Icon icon="ep:chat-line-round" /> 消息回复</span>
+        </template>
+      </el-tab-pane>
+      <el-tab-pane name="3">
+        <template #label>
+          <span><Icon icon="ep:news" /> 关键词回复</span>
+        </template>
+      </el-tab-pane>
+    </el-tabs>
+    <!-- 列表 -->
+    <el-table v-loading="loading" :data="list">
+      <el-table-column
+        label="请求消息类型"
+        align="center"
+        prop="requestMessageType"
+        v-if="type === '2'"
+      />
+      <el-table-column label="关键词" align="center" prop="requestKeyword" v-if="type === '3'" />
+      <el-table-column label="匹配类型" align="center" prop="requestMatch" v-if="type === '3'">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MP_AUTO_REPLY_REQUEST_MATCH" :value="scope.row.requestMatch" />
+        </template>
+      </el-table-column>
+      <el-table-column label="回复消息类型" align="center">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MP_MESSAGE_TYPE" :value="scope.row.responseMessageType" />
+        </template>
+      </el-table-column>
+      <el-table-column label="回复内容" align="center">
+        <template #default="scope">
+          <div v-if="scope.row.responseMessageType === 'text'">{{ scope.row.responseContent }}</div>
+          <div v-else-if="scope.row.responseMessageType === 'voice'">
+            <WxVoicePlayer :url="scope.row.responseMediaUrl" />
+          </div>
+          <div v-else-if="scope.row.responseMessageType === 'image'">
+            <a target="_blank" :href="scope.row.responseMediaUrl">
+              <img :src="scope.row.responseMediaUrl" style="width: 100px" />
+            </a>
+          </div>
+          <div
+            v-else-if="
+              scope.row.responseMessageType === 'video' ||
+              scope.row.responseMessageType === 'shortvideo'
+            "
+          >
+            <WxVideoPlayer :url="scope.row.responseMediaUrl" style="margin-top: 10px" />
+          </div>
+          <div v-else-if="scope.row.responseMessageType === 'news'">
+            <WxNews :articles="scope.row.responseArticles" />
+          </div>
+          <div v-else-if="scope.row.responseMessageType === 'music'">
+            <WxMusic
+              :title="scope.row.responseTitle"
+              :description="scope.row.responseDescription"
+              :thumb-media-url="scope.row.responseThumbMediaUrl"
+              :music-url="scope.row.responseMusicUrl"
+              :hq-music-url="scope.row.responseHqMusicUrl"
+            />
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        :formatter="dateFormatter"
+        width="180"
+      />
+      <el-table-column label="操作" align="center">
+        <template #default="scope">
+          <el-button
+            type="primary"
+            link
+            @click="handleUpdate(scope.row)"
+            v-hasPermi="['mp:auto-reply:update']"
+          >
+            修改
+          </el-button>
+          <el-button
+            type="danger"
+            link
+            @click="handleDelete(scope.row)"
+            v-hasPermi="['mp:auto-reply:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <!-- 添加或修改自动回复的对话框 -->
+    <el-dialog :title="title" v-model="open" width="800px" append-to-body>
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
+        <el-form-item label="消息类型" prop="requestMessageType" v-if="type === '2'">
+          <el-select v-model="form.requestMessageType" placeholder="请选择">
+            <template v-for="dict in getDictOptions(DICT_TYPE.MP_MESSAGE_TYPE)" :key="dict.value">
+              <el-option
+                v-if="requestMessageTypes.includes(dict.value)"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </template>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="匹配类型" prop="requestMatch" v-if="type === '3'">
+          <el-select v-model="form.requestMatch" placeholder="请选择匹配类型" clearable>
             <el-option
-              v-for="item in accountList"
-              :key="item.id"
-              :label="item.name"
-              :value="item.id"
+              v-for="dict in getDictOptions(DICT_TYPE.MP_AUTO_REPLY_REQUEST_MATCH)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
             />
           </el-select>
         </el-form-item>
-        <el-form-item>
-          <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-          <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+        <el-form-item label="关键词" prop="requestKeyword" v-if="type === '3'">
+          <el-input v-model="form.requestKeyword" placeholder="请输入内容" clearable />
+        </el-form-item>
+        <el-form-item label="回复消息">
+          <WxReplySelect :objData="objData" v-if="hackResetWxReplySelect" />
         </el-form-item>
       </el-form>
-    </ContentWrap>
-
-    <!-- tab 切换 -->
-    <ContentWrap>
-      <el-tabs v-model="type" @tab-change="handleTabChange">
-        <!-- 操作工具栏 -->
-        <el-row :gutter="10" class="mb8">
-          <el-col :span="1.5">
-            <el-button
-              type="primary"
-              plain
-              @click="handleAdd"
-              v-hasPermi="['mp:auto-reply:create']"
-              v-if="type !== '1' || list.length <= 0"
-              ><Icon icon="ep:plus" />新增
-            </el-button>
-          </el-col>
-          <!-- <right-toolbar v-model:showSearch="showSearch" @query-table="getList" /> -->
-        </el-row>
-        <!-- tab 项 -->
-        <el-tab-pane name="1">
-          <template #label>
-            <span><Icon icon="ep:star-off" /> 关注时回复</span>
-          </template>
-        </el-tab-pane>
-        <el-tab-pane name="2">
-          <template #label>
-            <span><Icon icon="ep:chat-line-round" /> 消息回复</span>
-          </template>
-        </el-tab-pane>
-        <el-tab-pane name="3">
-          <template #label>
-            <span><Icon icon="ep:news" /> 关键词回复</span>
-          </template>
-        </el-tab-pane>
-      </el-tabs>
-    </ContentWrap>
-
-    <!-- 列表 -->
-    <ContentWrap>
-      <el-table v-loading="loading" :data="list">
-        <el-table-column
-          label="请求消息类型"
-          align="center"
-          prop="requestMessageType"
-          v-if="type === '2'"
-        />
-        <el-table-column label="关键词" align="center" prop="requestKeyword" v-if="type === '3'" />
-        <el-table-column label="匹配类型" align="center" prop="requestMatch" v-if="type === '3'">
-          <template #default="scope">
-            <dict-tag
-              :type="DICT_TYPE.MP_AUTO_REPLY_REQUEST_MATCH"
-              :value="scope.row.requestMatch"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column label="回复消息类型" align="center">
-          <template #default="scope">
-            <dict-tag :type="DICT_TYPE.MP_MESSAGE_TYPE" :value="scope.row.responsType" />
-          </template>
-        </el-table-column>
-        <el-table-column label="回复内容" align="center">
-          <template #default="scope">
-            <div v-if="scope.row.responsType === 'text'">{{ scope.row.responseContent }}</div>
-            <div v-else-if="scope.row.responsType === 'voice'">
-              <WxVoicePlayer :url="scope.row.responseMediaUrl" />
-            </div>
-            <div v-else-if="scope.row.responsType === 'image'">
-              <a target="_blank" :href="scope.row.responseMediaUrl">
-                <img :src="scope.row.responseMediaUrl" style="width: 100px" />
-              </a>
-            </div>
-            <div
-              v-else-if="
-                scope.row.responsType === 'video' || scope.row.responsType === 'shortvideo'
-              "
-            >
-              <WxVideoPlayer :url="scope.row.responseMediaUrl" style="margin-top: 10px" />
-            </div>
-            <div v-else-if="scope.row.responsType === 'news'">
-              <WxNews :articles="scope.row.responseArticles" />
-            </div>
-            <div v-else-if="scope.row.responsType === 'music'">
-              <WxMusic
-                :title="scope.row.responseTitle"
-                :description="scope.row.responseDescription"
-                :thumb-media-url="scope.row.responseThumbMediaUrl"
-                :music-url="scope.row.responseMusicUrl"
-                :hq-music-url="scope.row.responseHqMusicUrl"
-              />
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="创建时间"
-          align="center"
-          prop="createTime"
-          :formatter="dateFormatter"
-          width="180"
-        >
-          <template #default="scope">
-            <span>{{ scope.row.createTime }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-          <template #default="scope">
-            <el-button
-              size="small"
-              type="primary"
-              link
-              @click="handleUpdate(scope.row)"
-              v-hasPermi="['mp:auto-reply:update']"
-              ><Icon icon="ep:edit" />修改
-            </el-button>
-            <el-button
-              size="small"
-              type="primary"
-              link
-              @click="handleDelete(scope.row)"
-              v-hasPermi="['mp:auto-reply:delete']"
-              ><Icon icon="ep:delete" />删除
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <!-- 添加或修改自动回复的对话框 -->
-      <el-dialog :title="title" v-model="open" width="800px" append-to-body>
-        <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-          <el-form-item label="消息类型" prop="requestMessageType" v-if="type === '2'">
-            <el-select v-model="form.requestMessageType" placeholder="请选择">
-              <template v-for="dict in getDictOptions(DICT_TYPE.MP_MESSAGE_TYPE)" :key="dict.value">
-                <el-option
-                  v-if="requestMessageTypes.includes(dict.value)"
-                  :label="dict.label"
-                  :value="dict.value"
-                />
-              </template>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="匹配类型" prop="requestMatch" v-if="type === '3'">
-            <el-select
-              v-model="form.requestMatch"
-              placeholder="请选择匹配类型"
-              clearable
-              size="small"
-            >
-              <el-option
-                v-for="dict in getDictOptions(DICT_TYPE.MP_AUTO_REPLY_REQUEST_MATCH)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="parseInt(dict.value)"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="关键词" prop="requestKeyword" v-if="type === '3'">
-            <el-input v-model="form.requestKeyword" placeholder="请输入内容" clearable />
-          </el-form-item>
-          <el-form-item label="回复消息">
-            <WxReplySelect :objData="objData" v-if="hackResetWxReplySelect" />
-          </el-form-item>
-        </el-form>
-        <template #footer>
-          <span class="dialog-footer">
-            <el-button @click="cancel">取 消</el-button>
-            <el-button type="primary" @click="handleSubmit">确 定</el-button>
-          </span>
-        </template>
-      </el-dialog>
-    </ContentWrap>
-  </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="cancel">取 消</el-button>
+          <el-button type="primary" @click="handleSubmit">确 定</el-button>
+        </span>
+      </template>
+    </el-dialog>
+  </ContentWrap>
 </template>
-
 <script setup>
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
@@ -341,14 +324,14 @@ const handleUpdate = (row) => {
   getAutoReply(row.id).then((data) => {
     // 设置属性
     form.value = { ...data }
-    delete form.value['responsType']
+    delete form.value['responseMessageType']
     delete form.value['responseContent']
     delete form.value['responseMediaId']
     delete form.value['responseMediaUrl']
     delete form.value['responseDescription']
     delete form.value['responseArticles']
     objData.value = {
-      type: data.responsType,
+      type: data.responseMessageType,
       accountId: queryParams.accountId,
       content: data.responseContent,
       mediaId: data.responseMediaId,
@@ -376,7 +359,7 @@ const handleSubmit = () => {
 
     // 处理回复消息
     const form = { ...form.value }
-    form.responsType = objData.value.type
+    form.responseMessageType = objData.value.type
     form.responseContent = objData.value.content
     form.responseMediaId = objData.value.mediaId
     form.responseMediaUrl = objData.value.url
