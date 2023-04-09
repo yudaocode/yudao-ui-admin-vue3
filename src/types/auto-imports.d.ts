@@ -6,6 +6,7 @@ export {}
 declare global {
   const DICT_TYPE: typeof import('@/utils/dict')['DICT_TYPE']
   const EffectScope: typeof import('vue')['EffectScope']
+  const ElMessageBox: typeof import('element-plus/es')['ElMessageBox']
   const computed: typeof import('vue')['computed']
   const createApp: typeof import('vue')['createApp']
   const customRef: typeof import('vue')['customRef']

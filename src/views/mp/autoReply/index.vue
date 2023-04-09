@@ -182,7 +182,7 @@
     </el-dialog>
   </ContentWrap>
 </template>
-<script setup>
+<script setup name="MpAutoReply">
 import { ref, reactive, onMounted, nextTick } from 'vue'
 import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'

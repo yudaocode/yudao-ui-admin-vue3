@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="发起OA请假流程" v-model="modelVisible">
+  <Dialog title="发起 OA 请假流程" v-model="modelVisible">
     <el-form
       ref="formRef"
       :model="formData"
@@ -71,17 +71,6 @@ const open = async () => {
   modelVisible.value = true
   resetForm()
 }
-
-/** 重置表单 */
-const resetForm = () => {
-  formData.value = {
-    type: undefined,
-    reason: undefined,
-    startTime: undefined,
-    endTime: undefined
-  }
-  formRef.value?.resetFields()
-}
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
@@ -95,7 +84,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as LeaveApi.LeaveVO
-    await LeaveApi.createLeaveApi(data)
+    await LeaveApi.createLeave(data)
     message.success('新增成功')
     modelVisible.value = false
     // 发送操作成功的事件
@@ -103,5 +92,16 @@ const submitForm = async () => {
   } finally {
     formLoading.value = false
   }
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    type: undefined,
+    reason: undefined,
+    startTime: undefined,
+    endTime: undefined
+  }
+  formRef.value?.resetFields()
 }
 </script>

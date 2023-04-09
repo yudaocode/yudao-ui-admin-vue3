@@ -1,5 +1,5 @@
 <template>
-  <content-wrap>
+  <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
       class="-mb-15px"
@@ -56,15 +56,15 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button @click="handleCreate()"
-          ><Icon icon="ep:plus" class="mr-5px" /> 发起请假</el-button
-        >
+        <el-button type="primary" plain @click="handleCreate()">
+          <Icon icon="ep:plus" class="mr-5px" /> 发起请假
+        </el-button>
       </el-form-item>
     </el-form>
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 列表 -->
-  <content-wrap>
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="申请编号" align="center" prop="id" />
       <el-table-column label="状态" align="center" prop="result">
@@ -99,36 +99,33 @@
         width="180"
         :formatter="dateFormatter"
       />
-
-      <el-table-column
-        label="操作"
-        align="center"
-        class-name="small-padding fixed-width"
-        width="200"
-      >
+      <el-table-column label="操作" align="center" width="200">
         <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="cancelLeave(scope.row)"
-            v-hasPermi="['bpm:oa-leave:create']"
-            v-if="scope.row.result === 1"
-            >取消</el-button
-          >
           <el-button
             link
             type="primary"
             @click="handleDetail(scope.row)"
             v-hasPermi="['bpm:oa-leave:query']"
-            >详情</el-button
           >
+            详情
+          </el-button>
           <el-button
             link
             type="primary"
             @click="handleProcessDetail(scope.row)"
             v-hasPermi="['bpm:oa-leave:query']"
-            >进度</el-button
           >
+            进度
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="cancelLeave(scope.row)"
+            v-hasPermi="['bpm:oa-leave:create']"
+            v-if="scope.row.result === 1"
+          >
+            取消
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -139,28 +136,27 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：详情 -->
   <LeaveDetail ref="detailRef" />
-
   <!-- 表单弹窗：添加 -->
   <LeaveForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="OaLeave">
+<script setup lang="ts" name="BpmOALeave">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as LeaveApi from '@/api/bpm/leave'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import LeaveDetail from './detail.vue'
 import LeaveForm from './create.vue'
+const message = useMessage() // 消息弹窗
+const router = useRouter() // 路由
+const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-
-const message = useMessage() // 消息弹窗
-const router = useRouter()
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -175,7 +171,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await LeaveApi.getLeavePageApi(queryParams)
+    const data = await LeaveApi.getLeavePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -207,20 +203,23 @@ const handleDetail = (data: LeaveApi.LeaveVO) => {
   detailRef.value.open(data)
 }
 
-// 取消请假弹窗
-const cancelLeave = (row) => {
-  ElMessageBox.prompt('请输入取消原因', '取消流程', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
+/** 取消请假操作 */
+const cancelLeave = async (row) => {
+  // 二次确认
+  const { value } = await ElMessageBox.prompt('请输入取消原因', '取消流程', {
+    confirmButtonText: t('common.ok'),
+    cancelButtonText: t('common.cancel'),
     inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 判断非空，且非空格
     inputErrorMessage: '取消原因不能为空'
-  }).then(async ({ value }) => {
-    await ProcessInstanceApi.cancelProcessInstanceApi(row.id, value)
-    message.success('取消成功')
   })
+  // 发起取消
+  await ProcessInstanceApi.cancelProcessInstance(row.id, value)
+  message.success('取消成功')
+  // 刷新列表
+  await getList()
 }
 
-// 审批进度
+/** 审批进度 */
 const handleProcessDetail = (row) => {
   router.push({
     name: 'BpmProcessInstanceDetail',
