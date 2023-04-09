@@ -1,9 +1,14 @@
 <template>
-  <doc-alert title="上传下载" url="https://doc.iocoder.cn/file/"/>
-
+  <doc-alert title="上传下载" url="https://doc.iocoder.cn/file/" />
   <!-- 搜索 -->
   <ContentWrap>
-    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="文件路径" prop="path">
         <el-input
           v-model="queryParams.path"
@@ -33,7 +38,7 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openForm">
+        <el-button type="primary" plain @click="openForm">
           <Icon icon="ep:upload" class="mr-5px" /> 上传文件
         </el-button>
       </el-form-item>
@@ -86,11 +91,11 @@
   <!-- 表单弹窗：添加/修改 -->
   <FileForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="Config">
+<script setup lang="ts" name="InfraFile">
 import { fileSizeFormatter } from '@/utils'
 import { dateFormatter } from '@/utils/formatTime'
 import * as FileApi from '@/api/infra/file'
-import FileUploadForm from './FileForm.vue'
+import FileForm from './FileForm.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

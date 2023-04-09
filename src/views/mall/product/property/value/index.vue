@@ -88,7 +88,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <ValueForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="Config">
+<script setup lang="ts" name="ProductPropertyValue">
 import { dateFormatter } from '@/utils/formatTime'
 import * as PropertyApi from '@/api/mall/product/property'
 import ValueForm from './ValueForm.vue'

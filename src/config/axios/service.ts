@@ -1,8 +1,8 @@
 import axios, {
+  AxiosError,
   AxiosInstance,
   AxiosRequestHeaders,
   AxiosResponse,
-  AxiosError,
   InternalAxiosRequestConfig
 } from 'axios'
 
@@ -230,7 +230,8 @@ const handleAuthorized = () => {
       wsCache.clear()
       removeToken()
       isRelogin.show = false
-      window.location.href = import.meta.env.VITE_BASE_PATH
+      // 干掉token后再走一次路由让它过router.beforeEach的校验
+      window.location.href = window.location.href
     })
   }
   return Promise.reject(t('sys.api.timeoutMessage'))

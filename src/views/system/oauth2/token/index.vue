@@ -98,7 +98,7 @@
   </ContentWrap>
 </template>
 
-<script setup lang="ts" name="Oauth2AccessToken">
+<script setup lang="ts" name="SystemTokenClient">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as OAuth2AccessTokenApi from '@/api/system/oauth2/token'

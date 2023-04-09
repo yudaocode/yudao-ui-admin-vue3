@@ -13,15 +13,14 @@
           <img class="material-img" :src="item.url" />
           <p class="item-name">{{ item.name }}</p>
           <el-row class="ope-row">
-            <el-button type="success" @click="selectMaterialFun(item)"
-              >选择 <Icon icon="ep:circle-check" />
+            <el-button type="success" @click="selectMaterialFun(item)">
+              选择 <Icon icon="ep:circle-check" />
             </el-button>
           </el-row>
         </div>
       </div>
       <!-- 分页组件 -->
-      <pagination
-        v-show="total > 0"
+      <Pagination
         :total="total"
         v-model:page="queryParams.pageNo"
         v-model:limit="queryParams.pageSize"
@@ -39,18 +38,16 @@
             <WxVoicePlayer :url="scope.row.url" />
           </template>
         </el-table-column>
-        <el-table-column label="上传时间" align="center" prop="createTime" width="180">
-          <template #default="scope">
-            <span>{{ formatDate(scope.row.createTime) }}</span>
-          </template>
-        </el-table-column>
         <el-table-column
-          label="操作"
+          label="上传时间"
           align="center"
-          fixed="right"
-          class-name="small-padding fixed-width"
-        >
+          prop="createTime"
+          width="180"
+          :formatter="dateFormatter"
+        />
+        <el-table-column label="操作" align="center" fixed="right">
           <template #default="scope">
+
             <el-button type="primary" link @click="selectMaterialFun(scope.row)"
               >选择<Icon icon="ep:plus" />
             </el-button>
@@ -58,8 +55,7 @@
         </el-table-column>
       </el-table>
       <!-- 分页组件 -->
-      <pagination
-        v-show="total > 0"
+      <Pagination
         :total="total"
         v-model:page="queryParams.pageNo"
         v-model:limit="queryParams.pageSize"
@@ -79,11 +75,13 @@
             <WxVideoPlayer :url="scope.row.url" />
           </template>
         </el-table-column>
-        <el-table-column label="上传时间" align="center" prop="createTime" width="180">
-          <template #default="scope">
-            <span>{{ formatDate(scope.row.createTime) }}</span>
-          </template>
-        </el-table-column>
+        <el-table-column
+          label="上传时间"
+          align="center"
+          prop="createTime"
+          width="180"
+          :formatter="dateFormatter"
+        />
         <el-table-column
           label="操作"
           align="center"
@@ -98,8 +96,7 @@
         </el-table-column>
       </el-table>
       <!-- 分页组件 -->
-      <pagination
-        v-show="total > 0"
+      <Pagination
         :total="total"
         v-model:page="queryParams.pageNo"
         v-model:limit="queryParams.pageSize"
@@ -121,8 +118,7 @@
         </div>
       </div>
       <!-- 分页组件 -->
-      <pagination
-        v-show="total > 0"
+      <Pagination
         :total="total"
         v-model:page="queryParams.pageNo"
         v-model:limit="queryParams.pageSize"
@@ -139,7 +135,7 @@ import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
 import { getMaterialPage } from '@/api/mp/material'
 import { getFreePublishPage } from '@/api/mp/freePublish'
 import { getDraftPage } from '@/api/mp/draft'
-import { dateFormatter, formatDate } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import { defineComponent, PropType } from 'vue'
 
 export default defineComponent({
@@ -244,7 +240,6 @@ export default defineComponent({
       getMaterialPageFun,
       getPage,
       formatDate,
-      newsTypeRef,
       queryParams,
       objDataRef,
       list,
@@ -254,7 +249,6 @@ export default defineComponent({
   }
 })
 </script>
-
 <style lang="scss" scoped>
 /*瀑布流样式*/
 .waterfall {

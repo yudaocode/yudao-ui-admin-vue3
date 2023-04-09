@@ -139,7 +139,7 @@
   <!-- 表单弹窗：详情 -->
   <ApiAccessLogDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="ApiAccessLog">
+<script setup lang="ts" name="InfraApiAccessLog">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { formatDate } from '@/utils/formatTime'

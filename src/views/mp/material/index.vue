@@ -1,32 +1,32 @@
 <template>
-  <div class="app-container">
-    <doc-alert title="公众号素材" url="https://doc.iocoder.cn/mp/material/" />
-
-    <!-- 搜索工作栏 -->
+  <doc-alert title="公众号素材" url="https://doc.iocoder.cn/mp/material/" />
+  <!-- 搜索工作栏 -->
+  <ContentWrap>
     <el-form
+      class="-mb-15px"
       :model="queryParams"
       ref="queryFormRef"
-      size="small"
       :inline="true"
-      v-show="showSearch"
       label-width="68px"
     >
       <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="queryParams.accountId" placeholder="请选择公众号">
+        <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
           <el-option
-            v-for="item in accounts"
-            :key="parseInt(item.id)"
+            v-for="item in accountList"
+            :key="item.id"
             :label="item.name"
-            :value="parseInt(item.id)"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
       </el-form-item>
     </el-form>
+  </ContentWrap>
 
+  <ContentWrap>
     <el-tabs v-model="type" @tab-change="handleTabChange">
       <!-- tab 1：图片  -->
       <el-tab-pane name="image">
@@ -44,11 +44,11 @@
             :before-upload="beforeImageUpload"
             :on-success="handleUploadSuccess"
           >
-            <el-button size="small" type="primary">点击上传</el-button>
+            <el-button type="primary" plain>点击上传</el-button>
             <template #tip>
-              <span class="el-upload__tip" style="margin-left: 5px"
-                >支持 bmp/png/jpeg/jpg/gif 格式，大小不超过 2M</span
-              >
+              <span class="el-upload__tip" style="margin-left: 5px">
+                支持 bmp/png/jpeg/jpg/gif 格式，大小不超过 2M
+              </span>
             </template>
           </el-upload>
         </div>
@@ -64,14 +64,14 @@
                 circle
                 @click="handleDelete(item)"
                 v-hasPermi="['mp:material:delete']"
-                ><Icon icon="ep:delete"
-              /></el-button>
+              >
+                <Icon icon="ep:delete" />
+              </el-button>
             </el-row>
           </div>
         </div>
         <!-- 分页组件 -->
-        <pagination
-          v-show="total > 0"
+        <Pagination
           :total="total"
           v-model:page="queryParams.pageNo"
           v-model:limit="queryParams.pageSize"
@@ -95,11 +95,11 @@
             :on-success="handleUploadSuccess"
             :before-upload="beforeVoiceUpload"
           >
-            <el-button size="small" type="primary">点击上传</el-button>
+            <el-button type="primary" plain>点击上传</el-button>
             <template #tip>
-              <span class="el-upload__tip" style="margin-left: 5px"
-                >格式支持 mp3/wma/wav/amr，文件大小不超过 2M，播放长度不超过 60s</span
-              >
+              <span class="el-upload__tip" style="margin-left: 5px">
+                格式支持 mp3/wma/wav/amr，文件大小不超过 2M，播放长度不超过 60s
+              </span>
             </template>
           </el-upload>
         </div>
@@ -118,24 +118,23 @@
           </el-table-column>
           <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
             <template #default="scope">
-              <el-button type="primary" link size="small" plain @click="handleDownload(scope.row)"
-                ><Icon icon="ep:download" />下载</el-button
-              >
+              <el-button type="primary" link plain @click="handleDownload(scope.row)">
+                <Icon icon="ep:download" />下载
+              </el-button>
               <el-button
                 type="primary"
                 link
-                size="small"
                 plain
                 @click="handleDelete(scope.row)"
                 v-hasPermi="['mp:material:delete']"
-                ><Icon icon="ep:delete" />删除</el-button
               >
+                <Icon icon="ep:delete" />删除
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
         <!-- 分页组件 -->
-        <pagination
-          v-show="total > 0"
+        <Pagination
           :total="total"
           v-model:page="queryParams.pageNo"
           v-model:limit="queryParams.pageSize"
@@ -149,7 +148,7 @@
           <span><Icon icon="ep:video-play" /> 视频</span>
         </template>
         <div class="add_but" v-hasPermi="['mp:material:upload-permanent']">
-          <el-button size="small" type="primary" @click="handleAddVideo">新建视频</el-button>
+          <el-button type="primary" plain @click="handleAddVideo">新建视频</el-button>
         </div>
         <!-- 新建视频的弹窗 -->
         <el-dialog
@@ -220,14 +219,9 @@
               <span>{{ formatDate(scope.row.createTime) }}</span>
             </template>
           </el-table-column>
-          <el-table-column
-            label="操作"
-            align="center"
-            fixed="right"
-            class-name="small-padding fixed-width"
-          >
+          <el-table-column label="操作" align="center" fixed="right">
             <template #default="scope">
-              <el-button type="primary" link size="small" plain @click="handleDownload(scope.row)"
+              <el-button type="primary" link plain @click="handleDownload(scope.row)"
                 ><Icon icon="ep:download" />下载</el-button
               >
               <el-button
@@ -237,14 +231,14 @@
                 plain
                 @click="handleDelete(scope.row)"
                 v-hasPermi="['mp:material:delete']"
-                ><Icon icon="ep:delete" />删除</el-button
               >
+                <Icon icon="ep:delete" />删除
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
         <!-- 分页组件 -->
-        <pagination
-          v-show="total > 0"
+        <Pagination
           :total="total"
           v-model:page="queryParams.pageNo"
           v-model:limit="queryParams.pageSize"
@@ -252,11 +246,9 @@
         />
       </el-tab-pane>
     </el-tabs>
-  </div>
+  </ContentWrap>
 </template>
-
-<script setup>
-import { ref } from 'vue'
+<script setup name="MpMaterial">
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
 import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
 import { getSimpleAccountList } from '@/api/mp/account'
@@ -275,8 +267,6 @@ const uploadVideoRef = ref()
 const type = ref('image')
 // 遮罩层
 const loading = ref(false)
-// 显示搜索条件
-const showSearch = ref(true)
 // 总条数
 const total = ref(0)
 // 数据列表
@@ -308,14 +298,14 @@ const uploadRules = reactive({
 })
 
 // 公众号账号列表
-const accounts = ref([])
+const accountList = ref([])
 
 onMounted(() => {
   getSimpleAccountList().then((data) => {
-    accounts.value = data
+    accountList.value = data
     // 默认选中第一个
-    if (accounts.value.length > 0) {
-      setAccountId(accounts.value[0].id)
+    if (accountList.value.length > 0) {
+      setAccountId(accountList.value[0].id)
     }
     // 加载数据
     getList()
@@ -365,8 +355,8 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value?.resetFields()
   // 默认选中第一个
-  if (accounts.value.length > 0) {
-    setAccountId(accounts.value[0].id)
+  if (accountList.value.length > 0) {
+    setAccountId(accountList.value[0].id)
   }
   handleQuery()
 }

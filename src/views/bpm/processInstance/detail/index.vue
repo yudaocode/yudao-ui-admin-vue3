@@ -96,7 +96,7 @@
     <TaskUpdateAssigneeForm ref="taskUpdateAssigneeFormRef" @success="getDetail" />
   </ContentWrap>
 </template>
-<script setup lang="ts">
+<script setup lang="ts" name="BpmProcessInstanceDetail">
 import { useUserStore } from '@/store/modules/user'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'

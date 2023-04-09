@@ -119,7 +119,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <ClientForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts">
+<script setup lang="ts" name="SystemOAuth2Client">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as ClientApi from '@/api/system/oauth2/client'

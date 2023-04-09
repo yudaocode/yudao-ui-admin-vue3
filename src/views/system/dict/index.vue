@@ -132,7 +132,7 @@
   <DictTypeForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts" name="DictType">
+<script setup lang="ts" name="SystemDictType">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as DictTypeApi from '@/api/system/dict/dict.type'

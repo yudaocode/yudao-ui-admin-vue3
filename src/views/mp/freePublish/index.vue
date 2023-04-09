@@ -59,7 +59,7 @@
   </ContentWrap>
 </template>
 
-<script setup lang="ts" name="freePublish">
+<script setup lang="ts" name="MpFreePublish">
 import * as FreePublishApi from '@/api/mp/freePublish'
 import * as MpAccountApi from '@/api/mp/account'
 import WxNews from '@/views/mp/components/wx-news/main.vue'

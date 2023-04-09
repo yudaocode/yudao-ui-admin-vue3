@@ -75,7 +75,7 @@
     </template>
   </XModal>
 </template>
-<script setup lang="ts" name="App">
+<script setup lang="ts" name="PayApp">
 import type { FormExpose } from '@/components/Form'
 import { rules, allSchemas } from './app.data'
 import * as AppApi from '@/api/pay/app'

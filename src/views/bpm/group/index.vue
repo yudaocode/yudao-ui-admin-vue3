@@ -111,7 +111,7 @@
   <UserGroupForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts" name="UserGroup">
+<script setup lang="ts" name="BpmUserGroup">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as UserGroupApi from '@/api/bpm/userGroup'

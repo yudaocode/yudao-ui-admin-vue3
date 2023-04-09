@@ -147,7 +147,7 @@
   <!-- 表单弹窗：查看 -->
   <JobDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="Job">
+<script setup lang="ts" name="InfraJob">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { checkPermi } from '@/utils/permission'
 import JobForm from './JobForm.vue'

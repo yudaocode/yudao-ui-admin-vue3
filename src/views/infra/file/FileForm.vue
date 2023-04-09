@@ -2,17 +2,19 @@
   <Dialog title="上传文件" v-model="dialogVisible">
     <el-upload
       ref="uploadRef"
-      :limit="1"
-      accept=".jpg, .png, .gif"
-      :auto-upload="false"
-      drag
-      :headers="headers"
       :action="url"
       :data="data"
-      :disabled="formLoading"
+      :headers="uploadHeaders"
+      v-model:file-list="fileList"
+      drag
+      accept=".jpg, .png, .gif"
+      :limit="1"
+      :on-success="submitFormSuccess"
+      :on-exceed="handleExceed"
+      :on-error="submitFormError"
       :on-change="handleFileChange"
-      :on-progress="handleFileUploadProgress"
-      :on-success="handleFileSuccess"
+      :auto-upload="false"
+      :disabled="formLoading"
     >
       <i class="el-icon-upload"></i>
       <div class="el-upload__text"> 将文件拖到此处，或 <em>点击上传</em> </div>
@@ -29,44 +31,47 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { Dialog } from '@/components/Dialog'
-import { getAccessToken } from '@/utils/auth'
+import { getAccessToken, getTenantId } from '@/utils/auth'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formLoading = ref(false) // 表单的加载中
 const url = import.meta.env.VITE_UPLOAD_URL
-const headers = { Authorization: 'Bearer ' + getAccessToken() }
+const uploadHeaders = ref() // 上传 Header 头
+const fileList = ref([]) // 文件列表
 const data = ref({ path: '' })
 const uploadRef = ref()
 
 /** 打开弹窗 */
 const open = async () => {
   dialogVisible.value = true
+  resetForm()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** 提交表单 */
-const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 /** 处理上传的文件发生变化 */
 const handleFileChange = (file) => {
   data.value.path = file.name
 }
 
-/** 处理文件上传中 */
-const handleFileUploadProgress = () => {
-  formLoading.value = true // 禁止修改
-}
-
-/** 发起文件上传 */
+/** 提交表单 */
 const submitFileForm = () => {
+  if (fileList.value.length == 0) {
+    message.error('请上传文件')
+    return
+  }
+  // 提交请求
+  uploadHeaders.value = {
+    Authorization: 'Bearer ' + getAccessToken(),
+    'tenant-id': getTenantId()
+  }
   unref(uploadRef)?.submit()
 }
 
 /** 文件上传成功处理 */
-const handleFileSuccess = () => {
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+const submitFormSuccess = () => {
   // 清理
   dialogVisible.value = false
   formLoading.value = false
@@ -74,5 +79,23 @@ const handleFileSuccess = () => {
   // 提示成功，并刷新
   message.success(t('common.createSuccess'))
   emit('success')
+}
+
+/** 上传错误提示 */
+const submitFormError = (): void => {
+  message.error('上传失败，请您重新上传！')
+  formLoading.value = false
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  // 重置上传状态和文件
+  formLoading.value = false
+  uploadRef.value?.clearFiles()
+}
+
+/** 文件数超出提示 */
+const handleExceed = (): void => {
+  message.error('最多只能上传一个文件！')
 }
 </script>

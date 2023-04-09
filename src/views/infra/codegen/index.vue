@@ -142,7 +142,7 @@
   <!-- 弹窗：预览代码 -->
   <PreviewCode ref="previewRef" />
 </template>
-<script setup lang="ts" name="Codegen">
+<script setup lang="ts" name="InfraCodegen">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CodegenApi from '@/api/infra/codegen'

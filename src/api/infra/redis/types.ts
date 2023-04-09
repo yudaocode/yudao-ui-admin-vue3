@@ -174,12 +174,3 @@ export interface RedisCommandStatsVO {
   calls: number
   usec: number
 }
-
-export interface RedisKeyInfo {
-  keyTemplate: string
-  keyType: string
-  valueType: string
-  timeoutType: number
-  timeout: number
-  memo: string
-}
