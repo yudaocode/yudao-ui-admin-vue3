@@ -3,49 +3,13 @@
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <el-form
-      class="-mb-15px"
-      :model="queryParams"
-      ref="queryFormRef"
-      :inline="true"
-      label-width="68px"
-    >
-      <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
-          <el-option
-            v-for="item in accountList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="用户标识" prop="openid">
-        <el-input
-          v-model="queryParams.openid"
-          placeholder="请输入用户标识"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="昵称" prop="nickname">
-        <el-input
-          v-model="queryParams.nickname"
-          placeholder="请输入昵称"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+    <WxAccountSelect @change="(accountId) => accountChanged(accountId)">
+      <template #actions>
         <el-button type="success" plain @click="handleSync" v-hasPermi="['mp:user:sync']">
           <Icon icon="ep:refresh" class="mr-5px" /> 同步
         </el-button>
-      </el-form-item>
-    </el-form>
+      </template>
+    </WxAccountSelect>
   </ContentWrap>
 
   <!-- 列表 -->
@@ -101,11 +65,12 @@
   <UserForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup name="MpUser">
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 import { dateFormatter } from '@/utils/formatTime'
-import * as MpAccountApi from '@/api/mp/account'
 import * as MpUserApi from '@/api/mp/user'
 import * as MpTagApi from '@/api/mp/tag'
 import UserForm from './UserForm.vue'
+
 const message = useMessage() // 消息
 
 const loading = ref(true) // 列表的加载中
@@ -118,17 +83,22 @@ const queryParams = reactive({
   openid: null,
   nickname: null
 })
-const queryFormRef = ref() // 搜索的表单
-const accountList = ref([]) // 公众号账号列表
 const tagList = ref([]) // 公众号标签列表
+
+/** 初始化 */
+onMounted(async () => {
+  tagList.value = await MpTagApi.getSimpleTagList()
+})
+
+/** 侦听公众号变化 **/
+const accountChanged = (accountId) => {
+  queryParams.pageNo = 1
+  queryParams.accountId = accountId
+  getList()
+}
 
 /** 查询列表 */
 const getList = async () => {
-  // 如果没有选中公众号账号，则进行提示。
-  if (!queryParams.accountId) {
-    message.error('未选中公众号，无法查询用户')
-    return false
-  }
   try {
     loading.value = true
     const data = await MpUserApi.getUserPage(queryParams)
@@ -137,22 +107,6 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
-}
-
-/** 搜索按钮操作 */
-const handleQuery = () => {
-  queryParams.pageNo = 1
-  getList()
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  // 默认选中第一个
-  if (accountList.value.length > 0) {
-    queryParams.accountId = accountList.value[0].id
-  }
-  handleQuery()
 }
 
 /** 添加/修改操作 */
@@ -171,17 +125,4 @@ const handleSync = async () => {
     await getList()
   } catch {}
 }
-
-/** 初始化 */
-onMounted(async () => {
-  // 加载标签
-  tagList.value = await MpTagApi.getSimpleTagList()
-
-  // 加载账号
-  accountList.value = await MpAccountApi.getSimpleAccountList()
-  if (accountList.value.length > 0) {
-    queryParams.accountId = accountList.value[0].id
-  }
-  await getList()
-})
 </script>
