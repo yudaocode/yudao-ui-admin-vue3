@@ -17,7 +17,7 @@
       <span class="amr-duration" v-if="duration">{{ duration }} 秒</span>
     </el-icon>
     <div v-if="content">
-      <el-tag type="success" size="mini">语音识别</el-tag>
+      <el-tag type="success" size="small">语音识别</el-tag>
       {{ content }}
     </div>
   </div>

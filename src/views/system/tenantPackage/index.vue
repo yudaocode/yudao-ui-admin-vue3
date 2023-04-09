@@ -106,7 +106,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <TenantPackageForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="TenantPackage">
+<script setup lang="ts" name="SystemTenantPackage">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as TenantPackageApi from '@/api/system/tenantPackage'

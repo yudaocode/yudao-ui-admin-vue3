@@ -9,19 +9,19 @@
       >
         <!-- 左上角的 logo + 系统标题 -->
         <div class="flex items-center relative text-white">
-          <img src="@/assets/imgs/logo.png" alt="" class="w-48px h-48px mr-10px" />
+          <img alt="" class="w-48px h-48px mr-10px" src="@/assets/imgs/logo.png" />
           <span class="text-20px font-bold">{{ underlineToHump(appStore.getTitle) }}</span>
         </div>
         <!-- 左边的背景图 + 欢迎语 -->
         <div class="flex justify-center items-center h-[calc(100%-60px)]">
           <TransitionGroup
             appear
-            tag="div"
             enter-active-class="animate__animated animate__bounceInLeft"
+            tag="div"
           >
-            <img src="@/assets/svgs/login-box-bg.svg" key="1" alt="" class="w-350px" />
-            <div class="text-3xl text-white" key="2">{{ t('login.welcome') }}</div>
-            <div class="mt-5 font-normal text-white text-14px" key="3">
+            <img key="1" alt="" class="w-350px" src="@/assets/svgs/login-box-bg.svg" />
+            <div key="2" class="text-3xl text-white">{{ t('login.welcome') }}</div>
+            <div key="3" class="mt-5 font-normal text-white text-14px">
               {{ t('login.message') }}
             </div>
           </TransitionGroup>
@@ -31,7 +31,7 @@
         <!-- 右上角的主题、语言选择 -->
         <div class="flex justify-between items-center text-white @2xl:justify-end @xl:justify-end">
           <div class="flex items-center @2xl:hidden @xl:hidden">
-            <img src="@/assets/imgs/logo.png" alt="" class="w-48px h-48px mr-10px" />
+            <img alt="" class="w-48px h-48px mr-10px" src="@/assets/imgs/logo.png" />
             <span class="text-20px font-bold">{{ underlineToHump(appStore.getTitle) }}</span>
           </div>
           <div class="flex justify-end items-center space-x-10px">
@@ -52,20 +52,23 @@
             <QrCodeForm class="p-20px h-auto m-auto <xl:(rounded-3xl light:bg-white)" />
             <!-- 注册 -->
             <RegisterForm class="p-20px h-auto m-auto <xl:(rounded-3xl light:bg-white)" />
+            <!-- 三方登录 -->
+            <SSOLoginVue class="p-20px h-auto m-auto <xl:(rounded-3xl light:bg-white)" />
           </div>
         </Transition>
       </div>
     </div>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { underlineToHump } from '@/utils'
 
 import { useDesign } from '@/hooks/web/useDesign'
 import { useAppStore } from '@/store/modules/app'
 import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
-import { LoginForm, MobileForm, RegisterForm, QrCodeForm } from './components'
+
+import { LoginForm, MobileForm, QrCodeForm, RegisterForm, SSOLoginVue } from './components'
 
 const { t } = useI18n()
 const appStore = useAppStore()

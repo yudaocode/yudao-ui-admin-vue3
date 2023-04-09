@@ -2,15 +2,11 @@ import request from '@/config/axios'
 import { getRefreshToken } from '@/utils/auth'
 import type { UserLoginVO } from './types'
 
-export interface CodeImgResult {
-  captchaOnOff: boolean
-  img: string
-  uuid: string
-}
 export interface SmsCodeVO {
   mobile: string
   scene: number
 }
+
 export interface SmsLoginVO {
   mobile: string
   code: string

@@ -46,7 +46,7 @@
     <ProcessInstanceBpmnViewer :bpmn-xml="bpmnXML" />
   </ContentWrap>
 </template>
-<script setup lang="ts">
+<script setup lang="ts" name="BpmProcessInstanceCreate">
 import { DICT_TYPE } from '@/utils/dict'
 import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'

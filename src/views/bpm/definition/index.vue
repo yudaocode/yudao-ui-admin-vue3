@@ -4,7 +4,7 @@
       <el-table-column label="定义编号" align="center" prop="id" width="400" />
       <el-table-column label="流程名称" align="center" prop="name" width="200">
         <template #default="scope">
-          <el-button type="text" @click="handleBpmnDetail(scope.row)">
+          <el-button type="primary" link @click="handleBpmnDetail(scope.row)">
             <span>{{ scope.row.name }}</span>
           </el-button>
         </template>
@@ -23,7 +23,7 @@
           >
             <span>{{ scope.row.formName }}</span>
           </el-button>
-          <el-button v-else type="text" @click="handleFormDetail(scope.row)">
+          <el-button v-else type="primary" link @click="handleFormDetail(scope.row)">
             <span>{{ scope.row.formCustomCreatePath }}</span>
           </el-button>
         </template>
@@ -93,7 +93,7 @@
   </Dialog>
 </template>
 
-<script setup lang="ts" name="Form">
+<script setup lang="ts" name="BpmProcessDefinition">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as DefinitionApi from '@/api/bpm/definition'

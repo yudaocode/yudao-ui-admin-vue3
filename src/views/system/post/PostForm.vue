@@ -11,7 +11,7 @@
         <el-input v-model="formData.name" placeholder="请输入岗位标题" />
       </el-form-item>
       <el-form-item label="岗位编码" prop="code">
-        <el-input :model-value="formData.code" placeholder="请输入岗位编码" height="150px" />
+        <el-input v-model="formData.code" placeholder="请输入岗位编码" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="formData.status" placeholder="请选择状态" clearable>

@@ -111,7 +111,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <MenuForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="Menu">
+<script setup lang="ts" name="SystemMenu">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { handleTree } from '@/utils/tree'
 import * as MenuApi from '@/api/system/menu'

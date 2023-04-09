@@ -65,7 +65,7 @@
       <el-table-column label="流程标识" align="center" prop="key" width="200" />
       <el-table-column label="流程名称" align="center" prop="name" width="200">
         <template #default="scope">
-          <el-button type="text" @click="handleBpmnDetail(scope.row)">
+          <el-button type="primary" link @click="handleBpmnDetail(scope.row)">
             <span>{{ scope.row.name }}</span>
           </el-button>
         </template>
@@ -224,7 +224,7 @@
   </Dialog>
 </template>
 
-<script setup lang="ts" name="Form">
+<script setup lang="ts" name="BpmModel">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import * as ModelApi from '@/api/bpm/model'
@@ -319,7 +319,7 @@ const handleChangeState = async (row) => {
 /** 设计流程 */
 const handleDesign = (row) => {
   push({
-    name: 'modelEditor',
+    name: 'BpmModelEditor',
     query: {
       modelId: row.id
     }
@@ -352,7 +352,7 @@ const handleAssignRule = (row) => {
 /** 跳转到指定流程定义列表 */
 const handleDefinitionList = (row) => {
   push({
-    name: 'BpmProcessDefinitionList',
+    name: 'BpmProcessDefinition',
     query: {
       key: row.key
     }

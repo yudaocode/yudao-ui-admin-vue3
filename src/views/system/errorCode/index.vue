@@ -137,7 +137,7 @@
   <ErrorCodeForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts" name="ErrorCode">
+<script setup lang="ts" name="SystemErrorCode">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'

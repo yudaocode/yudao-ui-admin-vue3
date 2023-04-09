@@ -30,7 +30,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <AreaForm ref="formRef" />
 </template>
-<script setup lang="tsx" name="Area">
+<script setup lang="tsx" name="SystemArea">
 import type { Column } from 'element-plus'
 import AreaForm from './AreaForm.vue'
 import * as AreaApi from '@/api/system/area'
