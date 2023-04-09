@@ -22,6 +22,6 @@ export const getLeave = async (id: number) => {
 }
 
 // 获得请假申请分页
-export const getLeavePage = async (params) => {
+export const getLeavePage = async (params: PageParam) => {
   return await request.get({ url: '/bpm/oa/leave/page', params })
 }

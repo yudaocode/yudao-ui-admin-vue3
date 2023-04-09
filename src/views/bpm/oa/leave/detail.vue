@@ -1,42 +1,40 @@
 <template>
-  <ContentWrap>
-    <!-- 详情 -->
-    <Descriptions :schema="allSchemas.detailSchema" :data="formData" />
-    <el-button @click="routerReturn" type="primary">返回</el-button>
-  </ContentWrap>
+  <Dialog title="详情" v-model="modelVisible" :scroll="true" :max-height="200">
+    <el-descriptions border :column="1">
+      <el-descriptions-item label="请假类型">
+        <dict-tag :type="DICT_TYPE.BPM_OA_LEAVE_TYPE" :value="detailData.type" />
+      </el-descriptions-item>
+      <el-descriptions-item label="开始时间">
+        {{ formatDate(detailData.startTime) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="结束时间">
+        {{ formatDate(detailData.endTime) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="原因">
+        {{ detailData.reason }}
+      </el-descriptions-item>
+    </el-descriptions>
+  </Dialog>
 </template>
-
 <script setup lang="ts">
-// 业务相关的 import
+import { DICT_TYPE } from '@/utils/dict'
+import { formatDate } from '@/utils/formatTime'
 import * as LeaveApi from '@/api/bpm/leave'
-import { allSchemas } from '@/views/bpm/oa/leave/leave.data'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-const { query } = useRoute() // 查询参数
-const message = useMessage() // 消息弹窗
 
-const id = ref() // 请假编号
-// 表单参数
-const formData = ref({
-  startTime: undefined,
-  endTime: undefined,
-  type: undefined,
-  reason: undefined
-})
+const modelVisible = ref(false) // 弹窗的是否展示
+const detailLoading = ref(false) // 表单的加载中
+const detailData = ref() // 详情数据
 
-const routerReturn = () => {
-  router.back()
-}
-
-onMounted(() => {
-  id.value = query.id
-  if (!id.value) {
-    message.error('未传递 id 参数，无法查看 OA 请假信息')
-    return
+/** 打开弹窗 */
+const open = async (data: LeaveApi.LeaveVO) => {
+  modelVisible.value = true
+  // 设置数据
+  detailLoading.value = true
+  try {
+    detailData.value = data
+  } finally {
+    detailLoading.value = false
   }
-  // 获得请假信息
-  LeaveApi.getLeave(id.value).then((data) => {
-    formData.value = data
-  })
-})
+}
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 </script>
