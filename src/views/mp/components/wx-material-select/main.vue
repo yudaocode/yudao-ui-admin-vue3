@@ -238,7 +238,6 @@ export default defineComponent({
       selectMaterialFun,
       getMaterialPageFun,
       getPage,
-      formatDate,
       queryParams,
       objDataRef,
       list,
