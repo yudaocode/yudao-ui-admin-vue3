@@ -47,8 +47,8 @@
         />
         <el-table-column label="操作" align="center" fixed="right">
           <template #default="scope">
-            <el-button type="text" @click="selectMaterialFun(scope.row)">
-              选择<Icon icon="ep:plus" />
+            <el-button type="primary" link @click="selectMaterialFun(scope.row)"
+              >选择<Icon icon="ep:plus" />
             </el-button>
           </template>
         </el-table-column>
@@ -88,8 +88,8 @@
           class-name="small-padding fixed-width"
         >
           <template #default="scope">
-            <el-button type="text" @click="selectMaterialFun(scope.row)">
-              选择<Icon icon="akar-icons:circle-plus" />
+            <el-button type="primary" link @click="selectMaterialFun(scope.row)"
+              >选择<Icon icon="akar-icons:circle-plus" />
             </el-button>
           </template>
         </el-table-column>

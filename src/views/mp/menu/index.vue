@@ -2,12 +2,7 @@
   <doc-alert title="公众号菜单" url="https://doc.iocoder.cn/mp/menu/" />
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <el-form
-      class="-mb-15px"
-      ref="queryFormRef"
-      :inline="true"
-      label-width="68px"
-    >
+    <el-form class="-mb-15px" ref="queryFormRef" :inline="true" label-width="68px">
       <el-form-item label="公众号" prop="accountId">
         <el-select v-model="accountId" placeholder="请选择公众号" class="!w-240px">
           <el-option

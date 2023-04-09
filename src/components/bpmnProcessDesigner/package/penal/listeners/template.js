@@ -7,9 +7,9 @@ export const template = (isTaskListener) => {
       <el-table-column label="监听器类型" min-width="100px" show-overflow-tooltip :formatter="row => listenerTypeObject[row.listenerType]" />
       <el-table-column label="操作" width="90px">
         <template #default="scope">
-          <el-button size="small" type="text" @click="openListenerForm(scope, scope.$index)">编辑</el-button>
+          <el-button size="small" type="primary" link @click="openListenerForm(scope, scope.$index)">编辑</el-button>
           <el-divider direction="vertical" />
-          <el-button size="small" type="text" style="color: #ff4d4f" @click="removeListener(scope, scope.$index)">移除</el-button>
+          <el-button size="small" type="primary" link style="color: #ff4d4f" @click="removeListener(scope, scope.$index)">移除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -125,9 +125,9 @@ export const template = (isTaskListener) => {
         <el-table-column label="字段值/表达式" min-width="100px" show-overflow-tooltip :formatter="row => row.string || row.expression" />
         <el-table-column label="操作" width="100px">
           <template #default="scope">
-            <el-button size="small" type="text" @click="openListenerFieldForm(scope, scope.$index)">编辑</el-button>
+            <el-button size="small" type="primary" link @click="openListenerFieldForm(scope, scope.$index)">编辑</el-button>
             <el-divider direction="vertical" />
-            <el-button size="small" type="text" style="color: #ff4d4f" @click="removeListenerField(scope, scope.$index)">移除</el-button>
+            <el-button size="small" type="primary" link style="color: #ff4d4f" @click="removeListenerField(scope, scope.$index)">移除</el-button>
           </template>
         </el-table-column>
       </el-table>
