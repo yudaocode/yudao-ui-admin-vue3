@@ -4,13 +4,12 @@
   <ContentWrap>
     <el-form
       class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
       label-width="68px"
     >
       <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="accountId" placeholder="请选择公众号">
+        <el-select v-model="accountId" placeholder="请选择公众号" class="!w-240px">
           <el-option
             v-for="item in accountList"
             :key="item.id"

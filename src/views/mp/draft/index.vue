@@ -247,10 +247,8 @@
           </el-row>
         </div>
         <template #footer>
-          <div class="dialog-footer">
-            <el-button @click="dialogNewsVisible = false">取 消</el-button>
-            <el-button type="primary" @click="submitForm">提 交</el-button>
-          </div>
+          <el-button @click="dialogNewsVisible = false">取 消</el-button>
+          <el-button type="primary" @click="submitForm">提 交</el-button>
         </template>
       </el-dialog>
     </Teleport>

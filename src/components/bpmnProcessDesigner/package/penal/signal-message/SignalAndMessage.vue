@@ -23,7 +23,7 @@
     </el-table>
 
     <el-dialog
-      v-model="modelVisible"
+      v-model="dialogVisible"
       :title="modelConfig.title"
       :close-on-click-modal="false"
       width="400px"
@@ -39,7 +39,7 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="modelVisible = false">取 消</el-button>
+        <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="addNewObject">保 存</el-button>
       </template>
     </el-dialog>
@@ -49,7 +49,7 @@
 const message = useMessage()
 const signalList = ref<any[]>([])
 const messageList = ref<any[]>([])
-const modelVisible = ref(false)
+const dialogVisible = ref(false)
 const modelType = ref('')
 const modelObjectForm = ref<any>({})
 const rootElements = ref()
@@ -85,7 +85,7 @@ const initDataList = () => {
 const openModel = (type) => {
   modelType.value = type
   modelObjectForm.value = {}
-  modelVisible.value = true
+  dialogVisible.value = true
 }
 const addNewObject = () => {
   if (modelType.value === 'message') {
@@ -101,7 +101,7 @@ const addNewObject = () => {
     const signalRef = bpmnInstances().moddle.create('bpmn:Signal', modelObjectForm.value)
     rootElements.value.push(signalRef)
   }
-  modelVisible.value = false
+  dialogVisible.value = false
   initDataList()
 }
 
