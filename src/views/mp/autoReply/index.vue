@@ -3,28 +3,7 @@
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <el-form
-      class="-mb-15px"
-      :model="queryParams"
-      ref="queryFormRef"
-      :inline="true"
-      label-width="68px"
-    >
-      <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
-          <el-option
-            v-for="item in accountList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
-      </el-form-item>
-    </el-form>
+    <WxAccountSelect @change="(accountId) => accountChanged(accountId)" />
   </ContentWrap>
 
   <!-- tab 切换 -->
@@ -181,20 +160,13 @@
   </ContentWrap>
 </template>
 <script setup name="MpAutoReply">
-import { ref, reactive, onMounted, nextTick } from 'vue'
 import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
 import WxMusic from '@/views/mp/components/wx-music/main.vue'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
-import { getSimpleAccountList } from '@/api/mp/account'
-import {
-  createAutoReply,
-  deleteAutoReply,
-  getAutoReply,
-  getAutoReplyPage,
-  updateAutoReply
-} from '@/api/mp/autoReply'
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import * as MpAutoReplyApi from '@/api/mp/autoReply'
 
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
@@ -202,7 +174,7 @@ import { ContentWrap } from '@/components/ContentWrap'
 
 const message = useMessage()
 
-const queryFormRef = ref()
+// const queryFormRef = ref()
 const formRef = ref()
 
 // tab 类型（1、关注时回复；2、消息回复；3、关键词回复）
@@ -240,59 +212,33 @@ const rules = {
   requestMatch: [{ required: true, message: '请求的关键字的匹配不能为空', trigger: 'blur' }]
 }
 
-const hackResetWxReplySelect = ref(false) // 重置 WxReplySelect 组件，解决无法清除的问题
+// 重置 WxReplySelect 组件，解决无法清除的问题
+const hackResetWxReplySelect = ref(false)
 
-// 公众号账号列表
-const accountList = ref([])
-
-onMounted(() => {
-  getSimpleAccountList().then((data) => {
-    accountList.value = data
-    // 默认选中第一个
-    if (accountList.value.length > 0) {
-      queryParams.accountId = accountList.value[0].id
-    }
-    // 加载数据
-    getList()
-  })
-})
+const accountChanged = (accountId) => {
+  queryParams.accountId = accountId
+  getList()
+}
 
 /** 查询列表 */
 const getList = async () => {
-  // 如果没有选中公众号账号，则进行提示。
-  if (!queryParams.accountId) {
-    message.error('未选中公众号，无法查询自动回复')
-    return false
-  }
-
   loading.value = false
-  // 处理查询参数
-  let params = {
-    ...queryParams,
-    type: type.value
-  }
-  // 执行查询
-  getAutoReplyPage(params).then((data) => {
+  try {
+    const data = await MpAutoReplyApi.getAutoReplyPage({
+      ...queryParams,
+      type: type.value
+    })
     list.value = data.list
     total.value = data.total
+  } finally {
     loading.value = false
-  })
+  }
 }
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value?.resetFields()
-  // 默认选中第一个
-  if (accountList.value.length > 0) {
-    queryParams.accountId = accountList.value[0].id
-  }
-  handleQuery()
 }
 
 const handleTabChange = (tabName) => {
@@ -319,7 +265,7 @@ const handleUpdate = (row) => {
   resetEditor()
   console.log(row)
 
-  getAutoReply(row.id).then((data) => {
+  MpAutoReplyApi.getAutoReply(row.id).then((data) => {
     // 设置属性
     form.value = { ...data }
     delete form.value['responseMessageType']
@@ -370,13 +316,13 @@ const handleSubmit = () => {
     form.responseHqMusicUrl = objData.value.hqMusicUrl
 
     if (form.value.id !== undefined) {
-      updateAutoReply(form).then(() => {
+      MpAutoReplyApi.updateAutoReply(form).then(() => {
         message.success('修改成功')
         open.value = false
         getList()
       })
     } else {
-      createAutoReply(form).then(() => {
+      MpAutoReplyApi.createAutoReply(form).then(() => {
         message.success('新增成功')
         open.value = false
         getList()
@@ -414,7 +360,7 @@ const resetEditor = () => {
 
 const handleDelete = async (row) => {
   await message.confirm('是否确认删除此数据?')
-  await deleteAutoReply(row.id)
+  await MpAutoReplyApi.deleteAutoReply(row.id)
   await getList()
   message.success('删除成功')
 }
