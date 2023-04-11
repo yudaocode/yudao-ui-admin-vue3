@@ -2,26 +2,12 @@
   <doc-alert title="公众号素材" url="https://doc.iocoder.cn/mp/material/" />
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <el-form
-      class="-mb-15px"
-      :model="queryParams"
-      ref="queryFormRef"
-      :inline="true"
-      label-width="68px"
-    >
+    <el-form class="-mb-15px" :inline="true" label-width="68px">
       <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
-          <el-option
-            v-for="item in accountList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
+        <WxMpSelect @change="(accountId) => accountChange(accountId)" />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+        <slot name="actions"></slot>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -31,11 +17,11 @@
       <!-- tab 1：图片  -->
       <el-tab-pane name="image">
         <template #label>
-          <span><Icon icon="ep:picture" />图片</span>
+          <span> <Icon icon="ep:picture" />图片 </span>
         </template>
         <div class="add_but" v-hasPermi="['mp:material:upload-permanent']">
           <el-upload
-            :action="actionUrl"
+            :action="uploadUrl"
             :headers="headers"
             multiple
             :limit="1"
@@ -58,7 +44,7 @@
               <img class="material-img" :src="item.url" />
               <div class="item-name">{{ item.name }}</div>
             </a>
-            <el-row class="ope-row" justify="center">
+            <el-row justify="center">
               <el-button
                 type="danger"
                 circle
@@ -82,11 +68,11 @@
       <!-- tab 2：语音  -->
       <el-tab-pane name="voice">
         <template #label>
-          <span><Icon icon="ep:microphone" />语音</span>
+          <span> <Icon icon="ep:microphone" />语音 </span>
         </template>
         <div class="add_but" v-hasPermi="['mp:material:upload-permanent']">
           <el-upload
-            :action="actionUrl"
+            :action="uploadUrl"
             :headers="headers"
             multiple
             :limit="1"
@@ -103,6 +89,8 @@
             </template>
           </el-upload>
         </div>
+
+        <!-- 列表 -->
         <el-table :data="list" stripe border v-loading="loading" style="margin-top: 10px">
           <el-table-column label="编号" align="center" prop="mediaId" />
           <el-table-column label="文件名" align="center" prop="name" />
@@ -111,9 +99,15 @@
               <WxVoicePlayer :url="scope.row.url" />
             </template>
           </el-table-column>
-          <el-table-column label="上传时间" align="center" prop="createTime" width="180">
+          <el-table-column
+            label="上传时间"
+            align="center"
+            prop="createTime"
+            :formatter="dateFormatter"
+            width="180"
+          >
             <template #default="scope">
-              <span>{{ formatDate(scope.row.createTime) }}</span>
+              <span>{{ scope.row.createTime }}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -145,7 +139,7 @@
       <!-- tab 3：视频 -->
       <el-tab-pane name="video">
         <template #label>
-          <span><Icon icon="ep:video-play" /> 视频</span>
+          <span> <Icon icon="ep:video-play" /> 视频 </span>
         </template>
         <div class="add_but" v-hasPermi="['mp:material:upload-permanent']">
           <el-button type="primary" plain @click="handleAddVideo">新建视频</el-button>
@@ -158,7 +152,7 @@
           v-loading="addMaterialLoading"
         >
           <el-upload
-            :action="actionUrl"
+            :action="uploadUrl"
             :headers="headers"
             multiple
             :limit="1"
@@ -197,11 +191,14 @@
             </el-row>
           </el-form>
           <template #footer>
+            <!-- <span class="dialog-footer"> -->
             <el-button @click="cancelVideo">取 消</el-button>
             <el-button type="primary" @click="submitVideo">提 交</el-button>
+            <!-- </span> -->
           </template>
         </el-dialog>
 
+        <!-- 列表 -->
         <el-table :data="list" stripe border v-loading="loading" style="margin-top: 10px">
           <el-table-column label="编号" align="center" prop="mediaId" />
           <el-table-column label="文件名" align="center" prop="name" />
@@ -212,16 +209,22 @@
               <WxVideoPlayer :url="scope.row.url" />
             </template>
           </el-table-column>
-          <el-table-column label="上传时间" align="center" prop="createTime" width="180">
+          <el-table-column
+            label="上传时间"
+            align="center"
+            :formatter="dateFormatter"
+            prop="createTime"
+            width="180"
+          >
             <template #default="scope">
-              <span>{{ formatDate(scope.row.createTime) }}</span>
+              <span>{{ scope.row.createTime }}</span>
             </template>
           </el-table-column>
           <el-table-column label="操作" align="center" fixed="right">
             <template #default="scope">
-              <el-button type="primary" link plain @click="handleDownload(scope.row)"
-                ><Icon icon="ep:download" />下载</el-button
-              >
+              <el-button type="primary" link plain @click="handleDownload(scope.row)">
+                <Icon icon="ep:download" />下载
+              </el-button>
               <el-button
                 type="primary"
                 link
@@ -246,23 +249,41 @@
     </el-tabs>
   </ContentWrap>
 </template>
-<script setup name="MpMaterial">
+
+<script lang="ts" setup name="MpMaterial">
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
 import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
-import { getSimpleAccountList } from '@/api/mp/account'
-import { getMaterialPage, deletePermanentMaterial } from '@/api/mp/material'
-import { getAccessToken } from '@/utils/auth'
-import { formatDate } from '@/utils/formatTime'
+import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
+import * as MpMaterialApi from '@/api/mp/material'
+import * as authUtil from '@/utils/auth'
+import { dateFormatter } from '@/utils/formatTime'
+import type {
+  FormInstance,
+  FormRules,
+  TabPaneName,
+  UploadInstance,
+  UploadProps,
+  UploadRawFile,
+  UploadUserFile
+} from 'element-plus'
 
 const BASE_URL = import.meta.env.VITE_BASE_URL
+const uploadUrl = BASE_URL + '/admin-api/mp/material/upload-permanent'
+const headers = { Authorization: 'Bearer ' + authUtil.getAccessToken() }
 
 const message = useMessage()
 
-const queryFormRef = ref()
-const uploadFormRef = ref()
-const uploadVideoRef = ref()
+const uploadFormRef = ref<FormInstance>()
+const uploadVideoRef = ref<UploadInstance>()
 
-const type = ref('image')
+const uploadRules: FormRules = {
+  title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
+  introduction: [{ required: true, message: '请输入描述', trigger: 'blur' }]
+}
+
+// 素材类型
+type MatertialType = 'image' | 'voice' | 'video'
+const type = ref<MatertialType>('image')
 // 遮罩层
 const loading = ref(false)
 // 总条数
@@ -270,17 +291,27 @@ const total = ref(0)
 // 数据列表
 const list = ref([])
 // 查询参数
-const queryParams = reactive({
+interface QueryParams {
+  pageNo: number
+  pageSize: number
+  accountId?: number
+  permanent: boolean
+}
+const queryParams: QueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   accountId: undefined,
   permanent: true
 })
 
-const actionUrl = BASE_URL + '/admin-api/mp/material/upload-permanent'
-const headers = { Authorization: 'Bearer ' + getAccessToken() }
-const fileList = ref([])
-const uploadData = reactive({
+const fileList = ref<UploadUserFile[]>([])
+
+interface UploadData {
+  type: MatertialType
+  title: string
+  introduction: string
+}
+const uploadData: UploadData = reactive({
   type: 'image',
   title: '',
   introduction: ''
@@ -289,96 +320,57 @@ const uploadData = reactive({
 // === 视频上传，独有变量 ===
 const dialogVideoVisible = ref(false)
 const addMaterialLoading = ref(false)
-const uploadRules = reactive({
-  // 视频上传的校验规则
-  title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
-  introduction: [{ required: true, message: '请输入描述', trigger: 'blur' }]
-})
 
-// 公众号账号列表
-const accountList = ref([])
-
-onMounted(() => {
-  getSimpleAccountList().then((data) => {
-    accountList.value = data
-    // 默认选中第一个
-    if (accountList.value.length > 0) {
-      setAccountId(accountList.value[0].id)
-    }
-    // 加载数据
-    getList()
-  })
-})
-
-// ======================== 列表查询 ========================
-/** 设置账号编号 */
-const setAccountId = (accountId) => {
+/** 侦听公众号变化 **/
+const accountChange = (accountId: number | undefined) => {
   queryParams.accountId = accountId
-  uploadData.accountId = accountId
+  getList()
 }
 
+// ======================== 列表查询 ========================
 /** 查询列表 */
-const getList = () => {
-  // 如果没有选中公众号账号，则进行提示。
-  if (!queryParams.accountId) {
-    message.error('未选中公众号，无法查询草稿箱')
-    return false
-  }
-
+const getList = async () => {
   loading.value = true
-  getMaterialPage({
-    ...queryParams,
-    type: type.value
-  })
-    .then((data) => {
-      list.value = data.list
-      total.value = data.total
+  try {
+    const data = await MpMaterialApi.getMaterialPage({
+      ...queryParams,
+      type: type.value
     })
-    .finally(() => {
-      loading.value = false
-    })
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
 }
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
-  // 默认选中第一个
-  if (queryParams.accountId) {
-    setAccountId(queryParams.accountId)
-  }
   getList()
 }
 
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value?.resetFields()
-  // 默认选中第一个
-  if (accountList.value.length > 0) {
-    setAccountId(accountList.value[0].id)
-  }
-  handleQuery()
-}
-
-const handleTabChange = (tabName) => {
+const handleTabChange = (tabName: TabPaneName) => {
   // 设置 type
-  uploadData.type = tabName
+  uploadData.type = tabName as MatertialType
+
+  // 提前情况数据，避免tab切换后显示垃圾数据
+  list.value = []
+  total.value = 0
+
   // 从第一页开始查询
   handleQuery()
 }
 
 // ======================== 文件上传 ========================
-const beforeImageUpload = (file) => {
-  const isType =
-    file.type === 'image/jpeg' ||
-    file.type === 'image/png' ||
-    file.type === 'image/gif' ||
-    file.type === 'image/bmp' ||
-    file.type === 'image/jpg'
+const beforeImageUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
+  const isType = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/jpg'].includes(
+    rawFile.type
+  )
   if (!isType) {
     message.error('上传图片格式不对!')
     return false
   }
-  const isLt = file.size / 1024 / 1024 < 2
+  const isLt = rawFile.size / 1024 / 1024 < 2
   if (!isLt) {
     message.error('上传图片大小不能超过 2M!')
     return false
@@ -387,13 +379,9 @@ const beforeImageUpload = (file) => {
   return true
 }
 
-const beforeVoiceUpload = (file) => {
-  const isType =
-    file.type === 'audio/mp3' ||
-    file.type === 'audio/wma' ||
-    file.type === 'audio/wav' ||
-    file.type === 'audio/amr'
-  const isLt = file.size / 1024 / 1024 < 2
+const beforeVoiceUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
+  const isType = ['audio/mp3', 'audio/wma', 'audio/wav', 'audio/amr'].includes(file.type)
+  const isLt = rawFile.size / 1024 / 1024 < 2
   if (!isType) {
     message.error('上传语音格式不对!')
     return false
@@ -406,22 +394,24 @@ const beforeVoiceUpload = (file) => {
   return true
 }
 
-const beforeVideoUpload = (file) => {
-  const isType = file.type === 'video/mp4'
+const beforeVideoUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
+  const isType = rawFile.type === 'video/mp4'
   if (!isType) {
     message.error('上传视频格式不对!')
     return false
   }
-  const isLt = file.size / 1024 / 1024 < 10
+
+  const isLt = rawFile.size / 1024 / 1024 < 10
   if (!isLt) {
     message.error('上传视频大小不能超过 10M!')
     return false
   }
+
   addMaterialLoading.value = true
   return true
 }
 
-const handleUploadSuccess = (response, file, fileList) => {
+const handleUploadSuccess: UploadProps['onSuccess'] = (response: any) => {
   loading.value = false
   addMaterialLoading.value = false
   if (response.code !== 0) {
@@ -440,17 +430,17 @@ const handleUploadSuccess = (response, file, fileList) => {
 }
 
 // 下载文件
-const handleDownload = (row) => {
+const handleDownload = (row: any) => {
   window.open(row.url, '_blank')
 }
 
 // 提交 video 新建的表单
 const submitVideo = () => {
-  uploadFormRef.value.validate((valid) => {
+  uploadFormRef.value?.validate((valid) => {
     if (!valid) {
       return false
     }
-    uploadVideoRef.value.submit()
+    uploadVideoRef.value?.submit()
   })
 }
 
@@ -474,9 +464,9 @@ const resetVideo = () => {
 }
 
 // ======================== 其它操作 ========================
-const handleDelete = async (item) => {
+const handleDelete = async (item: any) => {
   await message.confirm('此操作将永久删除该文件, 是否继续?')
-  await deletePermanentMaterial(item.id)
+  await MpMaterialApi.deletePermanentMaterial(item.id)
   message.alertSuccess('删除成功')
 }
 </script>
@@ -487,40 +477,48 @@ const handleDelete = async (item) => {
   width: 100%;
   column-gap: 10px;
   column-count: 5;
-  margin-top: 10px; /* 芋道源码：增加 10px，避免顶着上面 */
+  margin-top: 10px;
+  /* 芋道源码：增加 10px，避免顶着上面 */
 }
+
 .waterfall-item {
   padding: 10px;
   margin-bottom: 10px;
   break-inside: avoid;
   border: 1px solid #eaeaea;
 }
+
 .material-img {
   width: 100%;
 }
+
 p {
   line-height: 30px;
 }
+
 @media (min-width: 992px) and (max-width: 1300px) {
   .waterfall {
     column-count: 3;
   }
+
   p {
     color: red;
   }
 }
+
 @media (min-width: 768px) and (max-width: 991px) {
   .waterfall {
     column-count: 2;
   }
+
   p {
     color: orange;
   }
 }
+
 @media (max-width: 767px) {
   .waterfall {
     column-count: 1;
   }
 }
-/*瀑布流样式*/
 </style>

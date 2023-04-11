@@ -3,31 +3,13 @@
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <el-form
-      class="-mb-15px"
-      :model="queryParams"
-      ref="queryFormRef"
-      :inline="true"
-      label-width="68px"
-    >
-      <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="queryParams.accountId" placeholder="请选择公众号">
-          <el-option
-            v-for="item in accountList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+    <WxAccountSelect @change="(accountId) => accountChanged(accountId)">
+      <template #actions>
         <el-button type="primary" plain @click="handleAdd" v-hasPermi="['mp:draft:create']">
           <Icon icon="ep:plus" />新增
         </el-button>
-      </el-form-item>
-    </el-form>
+      </template>
+    </WxAccountSelect>
   </ContentWrap>
 
   <!-- 列表 -->
@@ -35,7 +17,7 @@
     <div class="waterfall" v-loading="loading">
       <template v-for="item in list" :key="item.articleId">
         <div class="waterfall-item" v-if="item.content && item.content.newsItem">
-          <wx-news :articles="item.content.newsItem" />
+          <WxNews :articles="item.content.newsItem" />
           <!-- 操作按钮 -->
           <el-row class="ope-row">
             <el-button
@@ -239,7 +221,7 @@
           </div>
           <!--富文本编辑器组件-->
           <el-row>
-            <wx-editor
+            <WxEditor
               v-model="articlesAdd[isActiveAddNews].content"
               :account-id="uploadData.accountId"
               v-if="hackResetEditor"
@@ -258,13 +240,14 @@
 import WxEditor from '@/views/mp/components/wx-editor/WxEditor.vue'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 import { getAccessToken } from '@/utils/auth'
-import * as MpAccountApi from '@/api/mp/account'
 import * as MpDraftApi from '@/api/mp/draft'
 import * as MpFreePublishApi from '@/api/mp/freePublish'
-const message = useMessage() // 消息
 // 可以用改本地数据模拟，避免API调用超限
 // import drafts from './mock'
+
+const message = useMessage() // 消息
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -274,8 +257,6 @@ const queryParams = reactive({
   pageSize: 10,
   accountId: undefined
 })
-const queryFormRef = ref() // 搜索的表单
-const accountList = ref([]) // 公众号账号列表
 
 // ========== 文件上传 ==========
 const materialSelectRef = ref()
@@ -298,16 +279,11 @@ const operateMaterial = ref('add')
 const articlesMediaId = ref('')
 const hackResetEditor = ref(false)
 
-/** 初始化 **/
-onMounted(async () => {
-  accountList.value = await MpAccountApi.getSimpleAccountList()
-  // 选中第一个
-  if (accountList.value.length > 0) {
-    // @ts-ignore
-    queryParams.accountId = accountList.value[0].id
-  }
-  await getList()
-})
+/** 侦听公众号变化 **/
+const accountChanged = (accountId) => {
+  setAccountId(accountId)
+  getList()
+}
 
 // ======================== 列表查询 ========================
 /** 设置账号编号 */
@@ -339,26 +315,6 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
-}
-
-/** 搜索按钮操作 */
-const handleQuery = () => {
-  queryParams.pageNo = 1
-  // 默认选中第一个
-  if (queryParams.accountId) {
-    setAccountId(queryParams.accountId)
-  }
-  getList()
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  // 默认选中第一个
-  if (accountList.value.length > 0) {
-    setAccountId(accountList.value[0].id)
-  }
-  handleQuery()
 }
 
 // ======================== 新增/修改草稿 ========================

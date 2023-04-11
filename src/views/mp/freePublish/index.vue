@@ -3,28 +3,7 @@
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <el-form
-      class="-mb-15px"
-      :model="queryParams"
-      ref="queryFormRef"
-      :inline="true"
-      label-width="68px"
-    >
-      <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
-          <el-option
-            v-for="item in accountList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-      </el-form-item>
-    </el-form>
+    <WxAccountSelect @change="(accountId) => accountChanged(accountId)" />
   </ContentWrap>
 
   <!-- 列表 -->
@@ -59,10 +38,11 @@
   </ContentWrap>
 </template>
 
-<script setup lang="ts" name="MpFreePublish">
+<script setup name="MpFreePublish">
 import * as FreePublishApi from '@/api/mp/freePublish'
-import * as MpAccountApi from '@/api/mp/account'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -72,18 +52,17 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: undefined // 当前页数
+  accountId: undefined
 })
-const queryFormRef = ref() // 搜索的表单
-const accountList = ref<MpAccountApi.AccountVO[]>([]) // 公众号账号列表
+
+/** 侦听公众号变化 **/
+const accountChanged = (accountId) => {
+  queryParams.accountId = accountId
+  getList()
+}
 
 /** 查询列表 */
 const getList = async () => {
-  // 如果没有选中公众号账号，则进行提示。
-  if (!queryParams.accountId) {
-    message.error('未选中公众号，无法查询已发表图文')
-    return false
-  }
   try {
     loading.value = true
     const data = await FreePublishApi.getFreePublishPage(queryParams)
@@ -92,22 +71,6 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
-}
-
-/** 搜索按钮操作 */
-const handleQuery = () => {
-  queryParams.pageNo = 1
-  getList()
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  // 默认选中第一个
-  if (accountList.value.length > 0) {
-    queryParams.accountId = accountList.value[0].id
-  }
-  handleQuery()
 }
 
 /** 删除按钮操作 */
@@ -122,16 +85,8 @@ const handleDelete = async (item) => {
     await getList()
   } catch {}
 }
-
-onMounted(async () => {
-  accountList.value = await MpAccountApi.getSimpleAccountList()
-  // 选中第一个
-  if (accountList.value.length > 0) {
-    queryParams.accountId = accountList.value[0].id
-  }
-  await getList()
-})
 </script>
+
 <style lang="scss" scoped>
 .ope-row {
   margin-top: 5px;
