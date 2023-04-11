@@ -46,7 +46,7 @@
   </ContentWrap>
 
   <!-- 添加/修改的弹窗 -->
-  <XModal id="templateModel" :loading="modelLoading" v-model="dialogVisible" :title="dialogTitle">
+  <Dialog id="templateModel" :loading="modelLoading" v-model="dialogVisible" :title="dialogTitle">
     <!-- 表单：添加/修改 -->
     <Form
       ref="formRef"
@@ -72,10 +72,10 @@
       <!-- 按钮：关闭 -->
       <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
     </template>
-  </XModal>
+  </Dialog>
 
   <!-- 测试站内信的弹窗 -->
-  <XModal id="sendTest" v-model="sendVisible" title="测试">
+  <Dialog id="sendTest" v-model="sendVisible" title="测试">
     <el-form :model="sendForm" :rules="sendRules" label-width="200px" label-position="top">
       <el-form-item label="模板内容" prop="content">
         <el-input type="textarea" v-model="sendForm.content" readonly />
@@ -112,7 +112,7 @@
       />
       <XButton :title="t('dialog.close')" @click="sendVisible = false" />
     </template>
-  </XModal>
+  </Dialog>
 </template>
 <script setup lang="ts" name="SystemNotifyTemplate">
 import { FormExpose } from '@/components/Form'
