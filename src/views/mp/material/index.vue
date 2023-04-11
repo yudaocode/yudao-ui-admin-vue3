@@ -4,10 +4,7 @@
   <ContentWrap>
     <el-form class="-mb-15px" :inline="true" label-width="68px">
       <el-form-item label="公众号" prop="accountId">
-        <WxMpSelect @change="(accountId) => accountChange(accountId)" />
-      </el-form-item>
-      <el-form-item>
-        <slot name="actions"></slot>
+        <WxMpSelect @change="accountChange" />
       </el-form-item>
     </el-form>
   </ContentWrap>

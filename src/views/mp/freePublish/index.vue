@@ -3,6 +3,7 @@
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
+    <!-- TODO @芋艿：调整成 el-form 和 WxAccountSelect  -->
     <WxAccountSelect @change="(accountId) => accountChanged(accountId)" />
   </ContentWrap>
 

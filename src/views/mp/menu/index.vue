@@ -2,7 +2,8 @@
   <doc-alert title="公众号菜单" url="https://doc.iocoder.cn/mp/menu/" />
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <WxAccountSelect @change="(accountId) => accountChanged(accountId)" />
+    <!-- TODO @芋艿：调整成 el-form 和 WxAccountSelect  -->
+    <WxAccountSelect @change="accountChanged" />
   </ContentWrap>
 
   <!-- 列表 -->

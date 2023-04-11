@@ -3,7 +3,8 @@
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <WxAccountSelect @change="(accountId) => accountChanged(accountId)">
+    <!-- TODO @芋艿：调整成 el-form 和 WxAccountSelect  -->
+    <WxAccountSelect @change="accountChanged">
       <template #actions>
         <el-button type="primary" plain @click="handleAdd" v-hasPermi="['mp:draft:create']">
           <Icon icon="ep:plus" />新增

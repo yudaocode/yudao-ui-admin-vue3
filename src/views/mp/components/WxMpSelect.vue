@@ -19,13 +19,12 @@ const emit = defineEmits<{
   (e: 'change', id: number | undefined): void
 }>()
 
-onMounted(async () => {
+onMounted(() => {
   handleQuery()
 })
 
 const handleQuery = async () => {
-  const data = await MpAccountApi.getSimpleAccountList()
-  accountList.value = data
+  accountList.value = await MpAccountApi.getSimpleAccountList()
   // 默认选中第一个
   if (accountList.value.length > 0) {
     accountId.value = accountList.value[0].id
