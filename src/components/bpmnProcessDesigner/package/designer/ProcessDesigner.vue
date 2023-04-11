@@ -188,7 +188,13 @@
       <!-- <div id="js-properties-panel" class="panel"></div> -->
       <!-- <div class="my-process-designer__canvas" ref="bpmn-canvas"></div> -->
     </div>
-    <XModal title="预览" width="80%" height="90%" v-model="previewModelVisible" destroy-on-close>
+    <Dialog
+      title="预览"
+      v-model="previewModelVisible"
+      width="80%"
+      :scroll="true"
+      max-height="600px"
+    >
       <!-- append-to-body -->
       <div v-highlight>
         <code class="hljs">
@@ -196,10 +202,7 @@
           {{ previewResult }}
         </code>
       </div>
-      <!-- <pre>
-        <code class="hljs" v-html="highlightedCode(previewType, previewResult)"></code>
-      </pre> -->
-    </XModal>
+    </Dialog>
   </div>
 </template>
 
@@ -231,7 +234,7 @@ import activitiModdleExtension from './plugins/extension-moddle/activiti'
 import flowableModdleExtension from './plugins/extension-moddle/flowable'
 // 引入json转换与高亮
 // import xml2js from 'xml-js'
-import xml2js from 'fast-xml-parser'
+// import xml2js from 'fast-xml-parser'
 import { XmlNode, XmlNodeType, parseXmlString } from 'steady-xml'
 // 代码高亮插件
 // import hljs from 'highlight.js/lib/highlight'
@@ -626,7 +629,7 @@ const elementsAlign = (align) => {
 const previewProcessXML = () => {
   console.log(bpmnModeler.saveXML, 'bpmnModeler')
   bpmnModeler.saveXML({ format: true }).then(({ xml }) => {
-    console.log(xml, 'xml111111')
+    // console.log(xml, 'xml111111')
     previewResult.value = xml
     previewType.value = 'xml'
     previewModelVisible.value = true
@@ -634,7 +637,7 @@ const previewProcessXML = () => {
 }
 const previewProcessJson = () => {
   bpmnModeler.saveXML({ format: true }).then(({ xml }) => {
-    console.log(xml, 'xml')
+    // console.log(xml, 'xml')
 
     // const rootNode = parseXmlString(xml)
     // console.log(rootNode, 'rootNoderootNode')
@@ -644,9 +647,9 @@ const previewProcessJson = () => {
     // console.log(JSON.stringify(rootNodes.parent.toJsObject()), 'rootNodes.toJSON()')
     // console.log(JSON.stringify(rootNodes.parent.toJSON()), 'rootNodes.toJSON()')
 
-    const parser = new xml2js.XMLParser()
-    let jObj = parser.parse(xml)
-    console.log(jObj, 'jObjjObjjObjjObjjObj')
+    // const parser = new xml2js.XMLParser()
+    // let jObj = parser.parse(xml)
+    // console.log(jObj, 'jObjjObjjObjjObjjObj')
     // const builder = new xml2js.XMLBuilder(xml)
     // const xmlContent = builder
     // console.log(xmlContent, 'xmlContent')

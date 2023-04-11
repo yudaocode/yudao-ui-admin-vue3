@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="50%">
+  <Dialog :title="dialogTitle" v-model="dialogVisible">
     <el-form
       ref="formRef"
       :model="formData"
@@ -10,17 +10,8 @@
       <el-form-item label="应用名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入应用名" />
       </el-form-item>
-
       <el-form-item label="所属商户" prop="merchantId">
-        <el-select
-          v-model="formData.merchantId"
-          filterable
-          remote
-          reserve-keyword
-          placeholder="请选择所属商户"
-          :remote-method="handleGetMerchantListByName"
-          :loading="formLoading"
-        >
+        <el-select v-model="formData.merchantId" placeholder="请选择所属商户">
           <el-option
             v-for="item in merchantList"
             :key="item.id"
@@ -61,9 +52,9 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as AppApi from '@/api/pay/app'
 import * as MerchantApi from '@/api/pay/merchant'
 import { CommonStatusEnum } from '@/utils/constants'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
@@ -104,7 +95,8 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
-  await handleGetMerchantListByName(null)
+  // 加载商户列表
+  merchantList.value = await MerchantApi.getMerchantListByName()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -132,14 +124,6 @@ const submitForm = async () => {
   } finally {
     formLoading.value = false
   }
-}
-
-/**
- * 根据商户名称模糊匹配商户信息
- * @param name 商户名称
- */
-const handleGetMerchantListByName = async (name) => {
-  merchantList.value = await MerchantApi.getMerchantListByName(name)
 }
 
 /** 重置表单 */

@@ -227,7 +227,7 @@
       </template>
     </el-table-column>
   </el-table>
-  <content-wrap>
+  <ContentWrap>
     <!-- 分页 -->
     <Pagination
       :total="total"
@@ -235,7 +235,7 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
   <!-- 表单弹窗：预览 -->
   <RefundForm ref="formRef" @success="getList" />
 </template>

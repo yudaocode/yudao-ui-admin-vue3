@@ -5,24 +5,14 @@
       :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      label-width="120px"
+      label-width="100px"
     >
       <el-form-item label="所属商户" prop="merchantId">
         <el-select
           v-model="queryParams.merchantId"
           clearable
-          @clear="
-            () => {
-              queryParams.merchantId = null
-            }
-          "
-          filterable
-          remote
-          reserve-keyword
           placeholder="请选择所属商户"
-          @change="handleGetAppListByMerchantId"
-          :remote-method="handleGetMerchantListByName"
-          :loading="merchantLoading"
+          class="!w-240px"
         >
           <el-option
             v-for="item in merchantList"
@@ -33,7 +23,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="应用编号" prop="appId">
-        <el-select clearable v-model="queryParams.appId" filterable placeholder="请选择应用信息">
+        <el-select
+          clearable
+          v-model="queryParams.appId"
+          placeholder="请选择应用信息"
+          class="!w-240px"
+        >
           <el-option v-for="item in appList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
       </el-form-item>
@@ -42,14 +37,10 @@
           v-model="queryParams.channelCode"
           placeholder="请输入渠道编码"
           clearable
-          @clear="
-            () => {
-              queryParams.channelCode = null
-            }
-          "
+          class="!w-240px"
         >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.PAY_CHANNEL_CODE_TYPE)"
+            v-for="dict in getStrDictOptions(DICT_TYPE.PAY_CHANNEL_CODE_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -62,6 +53,7 @@
           placeholder="请输入商户订单编号"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="渠道订单号" prop="channelOrderNo">
@@ -70,25 +62,36 @@
           placeholder="请输入渠道订单号"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="支付状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择支付状态" clearable size="small">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择支付状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.PAY_ORDER_STATUS)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.PAY_ORDER_STATUS)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
       <el-form-item label="退款状态" prop="refundStatus">
-        <el-select v-model="queryParams.refundStatus" placeholder="请选择退款状态" clearable>
+        <el-select
+          v-model="queryParams.refundStatus"
+          placeholder="请选择退款状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.PAY_ORDER_REFUND_STATUS)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.PAY_ORDER_REFUND_STATUS)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -97,12 +100,13 @@
           v-model="queryParams.notifyStatus"
           placeholder="请选择订单回调商户状态"
           clearable
+          class="!w-240px"
         >
           <el-option
-            v-for="dict in getDictOptions(DICT_TYPE.PAY_ORDER_NOTIFY_STATUS)"
-            :key="parseInt(dict.value)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.PAY_ORDER_NOTIFY_STATUS)"
+            :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -118,14 +122,8 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon icon="ep:refresh" class="mr-5px" />
-          重置
-        </el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="success"
           plain
@@ -133,13 +131,13 @@
           :loading="exportLoading"
           v-hasPermi="['system:tenant:export']"
         >
-          <Icon icon="ep:download" class="mr-5px" />
-          导出
+          <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
-  <content-wrap>
+
+  <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="订单编号" align="center" prop="id" />
       <el-table-column label="商户名称" align="center" prop="merchantName" width="120" />
@@ -151,17 +149,17 @@
       <el-table-column label="异步通知地址" align="center" prop="notifyUrl" width="250" />
       <el-table-column label="回调状态" align="center" prop="notifyStatus">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.PAY_ORDER_NOTIFY_STATUS" :value="scope.row.notifyStatus" />
         </template>
       </el-table-column>
-      <el-table-column label="支付订单" align="left">
+      <el-table-column label="支付订单" width="280">
         <template #default="scope">
           <p class="order-font">
-            <el-tag size="small">商户</el-tag>
+            <el-tag>商户</el-tag>
             {{ scope.row.merchantOrderId }}
           </p>
           <p class="order-font">
-            <el-tag size="small" type="warning">支付</el-tag>
+            <el-tag type="warning">支付</el-tag>
             {{ scope.row.channelOrderNo }}
           </p>
         </template>
@@ -195,35 +193,29 @@
         label="创建时间"
         align="center"
         prop="createTime"
-        width="100"
+        width="180"
         :formatter="dateFormatter"
       />
       <el-table-column
         label="支付时间"
         align="center"
         prop="successTime"
-        width="100"
+        width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column
-        label="操作"
-        align="center"
-        fixed="right"
-        class-name="small-padding fixed-width"
-      >
+      <el-table-column label="操作" align="center" fixed="right">
         <template #default="scope">
           <el-button
-            size="small"
-            type="text"
-            icon="el-icon-search"
-            @click="openForm(scope.row.id)"
+            type="primary"
+            link
+            @click="openDetail(scope.row.id)"
             v-hasPermi="['pay:order:query']"
-            >查看详情
+          >
+            详情
           </el-button>
         </template>
       </el-table-column>
     </el-table>
-    <!-- 分页组件 -->
     <!-- 分页 -->
     <Pagination
       :total="total"
@@ -231,30 +223,21 @@
       v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
-  </content-wrap>
+  </ContentWrap>
 
   <!-- 表单弹窗：预览 -->
-  <OrderForm ref="formRef" @success="getList" />
+  <OrderDetail ref="detailRef" @success="getList" />
 </template>
-<script setup lang="ts" name="Order">
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-import ContentWrap from '@/components/ContentWrap/src/ContentWrap.vue'
+<script setup lang="ts" name="PayOrder">
+import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 import * as MerchantApi from '@/api/pay/merchant'
 import * as OrderApi from '@/api/pay/order'
-import download from '@/utils/download'
-import * as AppApi from '@/api/pay/app'
-import { dateFormatter } from '@/utils/formatTime'
-import OrderForm from '@/views/pay/order/orderForm.vue'
-
+import OrderDetail from '@/views/pay/order/OrderDetail.vue'
 const message = useMessage() // 消息弹窗
+import download from '@/utils/download'
 
-// const { t } = useI18n() // 国际化
-const queryFormRef = ref() // 搜索的表单
-const merchantList = ref([]) // 商户列表
-const merchantLoading = ref(false) // 商户加载遮罩层
-const appList = ref([]) // 支付应用列表集合
 const loading = ref(false) // 列表的加载中
-const exportLoading = ref(false) // 导出等待
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
@@ -285,26 +268,10 @@ const queryParams = reactive({
   notifyTime: [],
   createTime: []
 })
-
-/**
- * 根据商户名称模糊匹配商户信息
- * @param name 商户名称
- */
-const handleGetMerchantListByName = async (name) => {
-  merchantList.value = await MerchantApi.getMerchantListByName(name)
-}
-
-/**
- * 根据商户 ID 查询支付应用信息
- */
-const handleGetAppListByMerchantId = () => {
-  queryParams.appId = undefined
-  if (queryParams.merchantId) {
-    AppApi.getAppListByMerchantId(queryParams.merchantId).then((response) => {
-      appList.value = response.data
-    })
-  }
-}
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出等待
+const merchantList = ref([]) // 商户列表
+const appList = ref([]) // 支付应用列表集合
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
@@ -332,25 +299,35 @@ const resetQuery = () => {
 
 /** 导出按钮操作 */
 const handleExport = async () => {
-  // 处理查询参数
-  // 导出的二次确认
-  await message.exportConfirm()
-  // 发起导出
-  exportLoading.value = true
-  const data = await OrderApi.exportOrder(queryParams)
-  download.excel(data, '支付订单.xls')
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await OrderApi.exportOrder(queryParams)
+    download.excel(data, '支付订单.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
 }
+
 /** 预览详情 */
-const formRef = ref()
-const openForm = (id?: number) => {
-  formRef.value.open(id)
+const detailRef = ref()
+const openDetail = (id?: number) => {
+  detailRef.value.open(id)
 }
+
 /** 初始化 **/
 onMounted(async () => {
   await getList()
+  // 加载商户列表
+  merchantList.value = await MerchantApi.getMerchantListByName()
+  // 加载 App 列表
+  // TODO 芋艿：候选少一个查询应用列表的接口
+  // appList.value = await AppApi.getAppListByMerchantId()
 })
 </script>
-
 <style>
 .order-font {
   font-size: 12px;
