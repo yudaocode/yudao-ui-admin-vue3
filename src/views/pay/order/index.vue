@@ -233,7 +233,7 @@ import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as MerchantApi from '@/api/pay/merchant'
 import * as OrderApi from '@/api/pay/order'
-import OrderDetail from '@/views/pay/order/OrderDetail.vue'
+import OrderDetail from './OrderDetail.vue'
 const message = useMessage() // 消息弹窗
 import download from '@/utils/download'
 
@@ -314,7 +314,7 @@ const handleExport = async () => {
 
 /** 预览详情 */
 const detailRef = ref()
-const openDetail = (id?: number) => {
+const openDetail = (id: number) => {
   detailRef.value.open(id)
 }
 
