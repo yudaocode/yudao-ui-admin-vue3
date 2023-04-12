@@ -19,7 +19,7 @@
 </template>
 <script setup lang="ts">
 import * as MpTagApi from '@/api/mp/tag'
-import { FormInstance, FormRules } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

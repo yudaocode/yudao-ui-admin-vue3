@@ -188,7 +188,7 @@ import * as MpAutoReplyApi from '@/api/mp/autoReply'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { ContentWrap } from '@/components/ContentWrap'
-import { TabPaneName } from 'element-plus'
+import type { TabPaneName } from 'element-plus'
 
 const message = useMessage()
 

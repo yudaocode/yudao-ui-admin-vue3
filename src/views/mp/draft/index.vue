@@ -249,7 +249,7 @@ import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
 import { getAccessToken } from '@/utils/auth'
 import * as MpDraftApi from '@/api/mp/draft'
 import * as MpFreePublishApi from '@/api/mp/freePublish'
-import { UploadFiles, UploadProps, UploadRawFile } from 'element-plus'
+import type { UploadFiles, UploadProps, UploadRawFile } from 'element-plus'
 // 可以用改本地数据模拟，避免API调用超限
 // import drafts from './mock'
 

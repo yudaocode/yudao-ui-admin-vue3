@@ -98,7 +98,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as MpUserApi from '@/api/mp/user'
 import * as MpTagApi from '@/api/mp/tag'
 import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
-import { FormInstance } from 'element-plus'
+import type { FormInstance } from 'element-plus'
 import UserForm from './UserForm.vue'
 
 const message = useMessage() // 消息
