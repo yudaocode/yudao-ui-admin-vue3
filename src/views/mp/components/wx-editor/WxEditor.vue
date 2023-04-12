@@ -1,11 +1,11 @@
 <script setup>
 import { ref, reactive } from 'vue'
-import { QuillEditor } from '@vueup/vue-quill'
-import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import { getAccessToken } from '@/utils/auth'
-import editorOptions from './quill-options'
+import { Editor } from '@/components/Editor'
 
 const BASE_URL = import.meta.env.VITE_BASE_URL
+const actionUrl = BASE_URL + '/admin-api/mp/material/upload-news-image' // 这里写你要上传的图片服务器地址
+const headers = { Authorization: 'Bearer ' + getAccessToken() } // 设置上传的请求头部
 
 const message = useMessage()
 
@@ -30,21 +30,16 @@ const props = defineProps({
 const emit = defineEmits(['input'])
 
 const myQuillEditorRef = ref()
-
 const content = ref(props.value.replace(/data-src/g, 'src'))
-
 const loading = ref(false) // 根据图片上传状态来确定是否显示loading动画，刚开始是false,不显示
-
-const actionUrl = ref(BASE_URL + '/admin-api/mp/material/upload-news-image') // 这里写你要上传的图片服务器地址
-const headers = ref({ Authorization: 'Bearer ' + getAccessToken() }) // 设置上传的请求头部
 const uploadData = reactive({
   type: 'image', // TODO 芋艿：试试要不要换成 thumb
   accountId: props.accountId
 })
 
-const onEditorChange = () => {
+const onEditorChange = (text) => {
   //内容改变事件
-  emit('input', content.value)
+  emit('input', text)
 }
 
 // 富文本图片上传前
@@ -98,104 +93,14 @@ const uploadError = () => {
         :on-error="uploadError"
         :before-upload="beforeUpload"
       />
-      <QuillEditor
-        class="editor"
-        v-model="content"
+      <Editor
+        editor-id="wxEditor"
         ref="quillEditorRef"
-        :options="editorOptions"
-        @change="onEditorChange($event)"
+        :modelValue="content"
+        @change="(editor) => onEditorChange(editor.getText())"
       />
     </div>
   </div>
 </template>
 
-<style>
-.editor {
-  line-height: normal !important;
-  height: 500px;
-}
-
-.ql-snow .ql-tooltip[data-mode='link']::before {
-  content: '请输入链接地址:';
-}
-
-.ql-snow .ql-tooltip.ql-editing a.ql-action::after {
-  border-right: 0;
-  content: '保存';
-  padding-right: 0;
-}
-
-.ql-snow .ql-tooltip[data-mode='video']::before {
-  content: '请输入视频地址:';
-}
-
-.ql-snow .ql-picker.ql-size .ql-picker-label::before,
-.ql-snow .ql-picker.ql-size .ql-picker-item::before {
-  content: '14px';
-}
-
-.ql-snow .ql-picker.ql-size .ql-picker-label[data-value='small']::before,
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value='small']::before {
-  content: '10px';
-}
-
-.ql-snow .ql-picker.ql-size .ql-picker-label[data-value='large']::before,
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value='large']::before {
-  content: '18px';
-}
-
-.ql-snow .ql-picker.ql-size .ql-picker-label[data-value='huge']::before,
-.ql-snow .ql-picker.ql-size .ql-picker-item[data-value='huge']::before {
-  content: '32px';
-}
-
-.ql-snow .ql-picker.ql-header .ql-picker-label::before,
-.ql-snow .ql-picker.ql-header .ql-picker-item::before {
-  content: '文本';
-}
-
-.ql-snow .ql-picker.ql-header .ql-picker-label[data-value='1']::before,
-.ql-snow .ql-picker.ql-header .ql-picker-item[data-value='1']::before {
-  content: '标题1';
-}
-
-.ql-snow .ql-picker.ql-header .ql-picker-label[data-value='2']::before,
-.ql-snow .ql-picker.ql-header .ql-picker-item[data-value='2']::before {
-  content: '标题2';
-}
-
-.ql-snow .ql-picker.ql-header .ql-picker-label[data-value='3']::before,
-.ql-snow .ql-picker.ql-header .ql-picker-item[data-value='3']::before {
-  content: '标题3';
-}
-
-.ql-snow .ql-picker.ql-header .ql-picker-label[data-value='4']::before,
-.ql-snow .ql-picker.ql-header .ql-picker-item[data-value='4']::before {
-  content: '标题4';
-}
-
-.ql-snow .ql-picker.ql-header .ql-picker-label[data-value='5']::before,
-.ql-snow .ql-picker.ql-header .ql-picker-item[data-value='5']::before {
-  content: '标题5';
-}
-
-.ql-snow .ql-picker.ql-header .ql-picker-label[data-value='6']::before,
-.ql-snow .ql-picker.ql-header .ql-picker-item[data-value='6']::before {
-  content: '标题6';
-}
-
-.ql-snow .ql-picker.ql-font .ql-picker-label::before,
-.ql-snow .ql-picker.ql-font .ql-picker-item::before {
-  content: '标准字体';
-}
-
-.ql-snow .ql-picker.ql-font .ql-picker-label[data-value='serif']::before,
-.ql-snow .ql-picker.ql-font .ql-picker-item[data-value='serif']::before {
-  content: '衬线字体';
-}
-
-.ql-snow .ql-picker.ql-font .ql-picker-label[data-value='monospace']::before,
-.ql-snow .ql-picker.ql-font .ql-picker-item[data-value='monospace']::before {
-  content: '等宽字体';
-}
-</style>
+<style></style>

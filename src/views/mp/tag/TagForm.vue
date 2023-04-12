@@ -19,24 +19,30 @@
 </template>
 <script setup lang="ts">
 import * as MpTagApi from '@/api/mp/tag'
+import { FormInstance, FormRules } from 'element-plus'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref<'create' | 'update' | ''>('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   accountId: -1,
   name: ''
 })
-const formRules = reactive({
+const formRules: FormRules = {
   name: [{ required: true, message: '请输入标签名称', trigger: 'blur' }]
-})
-const formRef = ref() // 表单 Ref
+}
+const formRef = ref<FormInstance | null>(null) // 表单 Ref
+
+const emit = defineEmits<{
+  (e: 'success'): void
+}>()
 
 /** 打开弹窗 */
-const open = async (type: string, accountId: number, id?: number) => {
+const open = async (type: 'create' | 'update', accountId: number, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -55,11 +61,10 @@ const open = async (type: string, accountId: number, id?: number) => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
-const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
   // 校验表单
   if (!formRef) return
-  const valid = await formRef.value.validate()
+  const valid = await formRef.value?.validate()
   if (!valid) return
   // 提交请求
   formLoading.value = true
