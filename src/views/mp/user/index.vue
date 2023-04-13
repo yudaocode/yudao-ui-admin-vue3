@@ -11,14 +11,7 @@
       label-width="68px"
     >
       <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
-          <el-option
-            v-for="item in accountList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
+        <WxMpSelect @change="onAccountChanged" />
       </el-form-item>
       <el-form-item label="用户标识" prop="openid">
         <el-input
@@ -39,8 +32,8 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+        <el-button @click="handleQuery"> <Icon icon="ep:search" />搜索 </el-button>
+        <el-button @click="resetQuery"> <Icon icon="ep:refresh" />重置 </el-button>
         <el-button type="success" plain @click="handleSync" v-hasPermi="['mp:user:sync']">
           <Icon icon="ep:refresh" class="mr-5px" /> 同步
         </el-button>
@@ -102,33 +95,44 @@
 </template>
 <script lang="ts" setup name="MpUser">
 import { dateFormatter } from '@/utils/formatTime'
-import * as MpAccountApi from '@/api/mp/account'
 import * as MpUserApi from '@/api/mp/user'
 import * as MpTagApi from '@/api/mp/tag'
+import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
+import type { FormInstance } from 'element-plus'
 import UserForm from './UserForm.vue'
+
 const message = useMessage() // 消息
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
-const queryParams = reactive({
+const list = ref<any[]>([]) // 列表的数据
+
+interface QueryParams {
+  pageNo: number
+  pageSize: number
+  accountId?: number
+  openid: string | null
+  nickname: string | null
+}
+const queryParams: QueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: null,
+  accountId: undefined,
   openid: null,
   nickname: null
 })
-const queryFormRef = ref() // 搜索的表单
-const accountList = ref([]) // 公众号账号列表
-const tagList = ref([]) // 公众号标签列表
+const queryFormRef = ref<FormInstance | null>(null) // 搜索的表单
+const tagList = ref<any[]>([]) // 公众号标签列表
+
+/** 侦听公众号变化 **/
+const onAccountChanged = (id?: number) => {
+  queryParams.pageNo = 1
+  queryParams.accountId = id
+  getList()
+}
 
 /** 查询列表 */
 const getList = async () => {
-  // 如果没有选中公众号账号，则进行提示。
-  if (!queryParams.accountId) {
-    message.error('未选中公众号，无法查询用户')
-    return false
-  }
   try {
     loading.value = true
     const data = await MpUserApi.getUserPage(queryParams)
@@ -147,26 +151,23 @@ const handleQuery = () => {
 
 /** 重置按钮操作 */
 const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  // 默认选中第一个
-  if (accountList.value.length > 0) {
-    queryParams.accountId = accountList.value[0].id
-  }
+  const accountId = queryParams.accountId
+  queryFormRef.value?.resetFields()
+  queryParams.accountId = accountId
   handleQuery()
 }
 
 /** 添加/修改操作 */
-const formRef = ref()
+const formRef = ref<InstanceType<typeof UserForm> | null>(null)
 const openForm = (id: number) => {
-  formRef.value.open(id)
+  formRef.value?.open(id)
 }
 
 /** 同步标签 */
 const handleSync = async () => {
-  const accountId = queryParams.accountId
   try {
     await message.confirm('是否确认同步粉丝？')
-    await MpUserApi.syncUser(accountId)
+    await MpUserApi.syncUser(queryParams.accountId)
     message.success('开始从微信公众号同步粉丝信息，同步需要一段时间，建议稍后再查询')
     await getList()
   } catch {}
@@ -174,14 +175,6 @@ const handleSync = async () => {
 
 /** 初始化 */
 onMounted(async () => {
-  // 加载标签
   tagList.value = await MpTagApi.getSimpleTagList()
-
-  // 加载账号
-  accountList.value = await MpAccountApi.getSimpleAccountList()
-  if (accountList.value.length > 0) {
-    queryParams.accountId = accountList.value[0].id
-  }
-  await getList()
 })
 </script>

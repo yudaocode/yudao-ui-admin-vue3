@@ -14,6 +14,19 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
+        <el-form-item prop="frontType" label="前端类型">
+          <el-select v-model="formData.frontType">
+            <el-option
+              v-for="dict in getIntDictOptions(DICT_TYPE.INFRA_CODEGEN_FRONT_TYPE)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+      </el-col>
+
+      <el-col :span="12">
         <el-form-item prop="scene" label="生成场景">
           <el-select v-model="formData.scene">
             <el-option
@@ -23,6 +36,26 @@
               :value="dict.value"
             />
           </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item>
+          <template #label>
+            <span>
+              上级菜单
+              <el-tooltip content="分配到指定菜单下，例如 系统管理" placement="top">
+                <Icon icon="ep:question-filled" />
+              </el-tooltip>
+            </span>
+          </template>
+          <el-tree-select
+            v-model="formData.parentMenuId"
+            placeholder="请选择系统菜单"
+            node-key="id"
+            check-strictly
+            :data="menus"
+            :props="menuTreeProps"
+          />
         </el-form-item>
       </el-col>
 
@@ -112,27 +145,6 @@
             </span>
           </template>
           <el-input v-model="formData.classComment" />
-        </el-form-item>
-      </el-col>
-
-      <el-col :span="12">
-        <el-form-item>
-          <template #label>
-            <span>
-              上级菜单
-              <el-tooltip content="分配到指定菜单下，例如 系统管理" placement="top">
-                <Icon icon="ep:question-filled" />
-              </el-tooltip>
-            </span>
-          </template>
-          <el-tree-select
-            v-model="formData.parentMenuId"
-            placeholder="请选择系统菜单"
-            node-key="id"
-            check-strictly
-            :data="menus"
-            :props="menuTreeProps"
-          />
         </el-form-item>
       </el-col>
 
@@ -297,6 +309,7 @@ const props = defineProps({
 const formRef = ref()
 const formData = ref({
   templateType: null,
+  frontType: null,
   scene: null,
   moduleName: '',
   businessName: '',
@@ -315,6 +328,7 @@ const formData = ref({
 
 const rules = reactive({
   templateType: [required],
+  frontType: [required],
   scene: [required],
   moduleName: [required],
   businessName: [required],

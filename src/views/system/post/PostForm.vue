@@ -13,6 +13,9 @@
       <el-form-item label="岗位编码" prop="code">
         <el-input v-model="formData.code" placeholder="请输入岗位编码" />
       </el-form-item>
+      <el-form-item label="岗位顺序" prop="sort">
+        <el-input v-model="formData.sort" placeholder="请输入岗位顺序" />
+      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="formData.status" placeholder="请选择状态" clearable>
           <el-option
@@ -49,7 +52,7 @@ const formData = ref({
   id: undefined,
   name: '',
   code: '',
-  sort: undefined,
+  sort: 0,
   status: CommonStatusEnum.ENABLE,
   remark: ''
 })

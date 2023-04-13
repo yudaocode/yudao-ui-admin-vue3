@@ -120,8 +120,6 @@ declare module '@vue/runtime-core' {
     VerifyPoints: typeof import('./../components/Verifition/src/Verify/VerifyPoints.vue')['default']
     VerifySlide: typeof import('./../components/Verifition/src/Verify/VerifySlide.vue')['default']
     XButton: typeof import('./../components/XButton/src/XButton.vue')['default']
-    XModal: typeof import('./../components/XModal/src/XModal.vue')['default']
-    XTable: typeof import('./../components/XTable/src/XTable.vue')['default']
     XTextButton: typeof import('./../components/XButton/src/XTextButton.vue')['default']
   }
   export interface ComponentCustomProperties {
