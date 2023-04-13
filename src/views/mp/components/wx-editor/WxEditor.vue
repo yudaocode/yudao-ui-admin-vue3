@@ -102,5 +102,3 @@ const uploadError = () => {
     </div>
   </div>
 </template>
-
-<style></style>

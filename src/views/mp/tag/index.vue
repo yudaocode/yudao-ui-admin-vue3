@@ -71,11 +71,10 @@
   <TagForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="MpTag">
+import { dateFormatter } from '@/utils/formatTime'
 import * as MpTagApi from '@/api/mp/tag'
 import TagForm from './TagForm.vue'
 import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
-import { dateFormatter } from '@/utils/formatTime'
-
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -93,7 +92,6 @@ const queryParams: QueryParams = reactive({
   pageSize: 10,
   accountId: undefined
 })
-
 const formRef = ref<InstanceType<typeof TagForm> | null>(null)
 
 /** 侦听公众号变化 **/
