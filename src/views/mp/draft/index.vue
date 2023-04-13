@@ -252,7 +252,6 @@ import * as MpFreePublishApi from '@/api/mp/freePublish'
 import type { UploadFiles, UploadProps, UploadRawFile } from 'element-plus'
 // 可以用改本地数据模拟，避免API调用超限
 // import drafts from './mock'
-
 const message = useMessage() // 消息
 
 const loading = ref(true) // 列表的加载中
@@ -362,7 +361,7 @@ const submitForm = async () => {
   } finally {
     dialogNewsVisible.value = false
     addMaterialLoading.value = false
-    getList()
+    await getList()
   }
 }
 

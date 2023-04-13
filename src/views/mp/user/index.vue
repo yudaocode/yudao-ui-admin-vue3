@@ -121,15 +121,8 @@ const queryParams: QueryParams = reactive({
   openid: null,
   nickname: null
 })
-
-const tagList = ref<any[]>([]) // 公众号标签列表
 const queryFormRef = ref<FormInstance | null>(null) // 搜索的表单
-const formRef = ref<InstanceType<typeof UserForm> | null>(null)
-
-/** 初始化 */
-onMounted(async () => {
-  tagList.value = await MpTagApi.getSimpleTagList()
-})
+const tagList = ref<any[]>([]) // 公众号标签列表
 
 /** 侦听公众号变化 **/
 const onAccountChanged = (id?: number) => {
@@ -165,6 +158,7 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
+const formRef = ref<InstanceType<typeof UserForm> | null>(null)
 const openForm = (id: number) => {
   formRef.value?.open(id)
 }
@@ -175,7 +169,12 @@ const handleSync = async () => {
     await message.confirm('是否确认同步粉丝？')
     await MpUserApi.syncUser(queryParams.accountId)
     message.success('开始从微信公众号同步粉丝信息，同步需要一段时间，建议稍后再查询')
-    getList()
+    await getList()
   } catch {}
 }
+
+/** 初始化 */
+onMounted(async () => {
+  tagList.value = await MpTagApi.getSimpleTagList()
+})
 </script>

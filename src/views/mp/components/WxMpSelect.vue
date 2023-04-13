@@ -3,7 +3,7 @@
     <el-option v-for="item in accountList" :key="item.id" :label="item.name" :value="item.id" />
   </el-select>
 </template>
-
+<!-- TODO @芋艿：WxMpSelect 改成 WxAccountSelect，然后挪到现有的 wx-account-select 包下 -->
 <script lang="ts" setup name="WxMpSelect">
 import * as MpAccountApi from '@/api/mp/account'
 

@@ -75,7 +75,8 @@ const include = [
   'element-plus/es/components/dropdown-item/style/css',
   'element-plus/es/components/badge/style/css',
   'element-plus/es/components/breadcrumb/style/css',
-  'element-plus/es/components/breadcrumb-item/style/css'
+  'element-plus/es/components/breadcrumb-item/style/css',
+  'element-plus/es/components/image/style/css'
 ]
 
 const exclude = ['@iconify/json']

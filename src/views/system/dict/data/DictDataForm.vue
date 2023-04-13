@@ -115,11 +115,12 @@ const colorTypeOptions = readonly([
 ])
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (type: string, id?: number, dictType?: string) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
+  formData.value.dictType = dictType
   // 修改时，设置数据
   if (id) {
     formLoading.value = true

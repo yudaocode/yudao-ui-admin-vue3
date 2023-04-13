@@ -277,14 +277,11 @@ const uploadRules: FormRules = {
 }
 
 // 素材类型
-type MatertialType = 'image' | 'voice' | 'video'
-const type = ref<MatertialType>('image')
-// 遮罩层
-const loading = ref(false)
-// 总条数
-// 数据列表
-const list = ref<any[]>([])
-const total = ref(0)
+type MaterialType = 'image' | 'voice' | 'video'
+const type = ref<MaterialType>('image')
+const loading = ref(false) // 遮罩层
+const list = ref<any[]>([]) // 总条数
+const total = ref(0) // 数据列表
 // 查询参数
 interface QueryParams {
   pageNo: number
@@ -302,7 +299,7 @@ const queryParams: QueryParams = reactive({
 const fileList = ref<UploadUserFile[]>([])
 
 interface UploadData {
-  type: MatertialType
+  type: MaterialType
   title: string
   introduction: string
 }
@@ -346,7 +343,7 @@ const handleQuery = () => {
 
 const onTabChange = (tabName: TabPaneName) => {
   // 设置 type
-  uploadData.type = tabName as MatertialType
+  uploadData.type = tabName as MaterialType
 
   // 提前情况数据，避免tab切换后显示垃圾数据
   list.value = []
