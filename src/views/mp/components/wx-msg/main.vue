@@ -39,79 +39,79 @@
               :style="item.sendFrom === 2 ? 'background: #6BED72;' : ''"
             >
               <!-- 【事件】区域 -->
-              <div v-if="item.type === 'event' && item.event === 'subscribe'">
+              <div v-if="item.type === MsgType.Event && item.event === 'subscribe'">
                 <el-tag type="success">关注</el-tag>
               </div>
-              <div v-else-if="item.type === 'event' && item.event === 'unsubscribe'">
+              <div v-else-if="item.type === MsgType.Event && item.event === 'unsubscribe'">
                 <el-tag type="danger">取消关注</el-tag>
               </div>
-              <div v-else-if="item.type === 'event' && item.event === 'CLICK'">
+              <div v-else-if="item.type === MsgType.Event && item.event === 'CLICK'">
                 <el-tag>点击菜单</el-tag>
                 【{{ item.eventKey }}】
               </div>
-              <div v-else-if="item.type === 'event' && item.event === 'VIEW'">
+              <div v-else-if="item.type === MsgType.Event && item.event === 'VIEW'">
                 <el-tag>点击菜单链接</el-tag>
                 【{{ item.eventKey }}】
               </div>
-              <div v-else-if="item.type === 'event' && item.event === 'scancode_waitmsg'">
+              <div v-else-if="item.type === MsgType.Event && item.event === 'scancode_waitmsg'">
                 <el-tag>扫码结果</el-tag>
                 【{{ item.eventKey }}】
               </div>
-              <div v-else-if="item.type === 'event' && item.event === 'scancode_push'">
+              <div v-else-if="item.type === MsgType.Event && item.event === 'scancode_push'">
                 <el-tag>扫码结果</el-tag>
                 【{{ item.eventKey }}】
               </div>
-              <div v-else-if="item.type === 'event' && item.event === 'pic_sysphoto'">
+              <div v-else-if="item.type === MsgType.Event && item.event === 'pic_sysphoto'">
                 <el-tag>系统拍照发图</el-tag>
               </div>
-              <div v-else-if="item.type === 'event' && item.event === 'pic_photo_or_album'">
+              <div v-else-if="item.type === MsgType.Event && item.event === 'pic_photo_or_album'">
                 <el-tag>拍照或者相册</el-tag>
               </div>
-              <div v-else-if="item.type === 'event' && item.event === 'pic_weixin'">
+              <div v-else-if="item.type === MsgType.Event && item.event === 'pic_weixin'">
                 <el-tag>微信相册</el-tag>
               </div>
-              <div v-else-if="item.type === 'event' && item.event === 'location_select'">
+              <div v-else-if="item.type === MsgType.Event && item.event === 'location_select'">
                 <el-tag>选择地理位置</el-tag>
               </div>
-              <div v-else-if="item.type === 'event'">
+              <div v-else-if="item.type === MsgType.Event">
                 <el-tag type="danger">未知事件类型</el-tag>
               </div>
               <!-- 【消息】区域 -->
-              <div v-else-if="item.type === 'text'">{{ item.content }}</div>
-              <div v-else-if="item.type === 'voice'">
-                <wx-voice-player :url="item.mediaUrl" :content="item.recognition" />
+              <div v-else-if="item.type === MsgType.Text">{{ item.content }}</div>
+              <div v-else-if="item.type === MsgType.Voice">
+                <WxVoicePlayer :url="item.mediaUrl" :content="item.recognition" />
               </div>
-              <div v-else-if="item.type === 'image'">
+              <div v-else-if="item.type === MsgType.Image">
                 <a target="_blank" :href="item.mediaUrl">
                   <img :src="item.mediaUrl" style="width: 100px" />
                 </a>
               </div>
               <div
-                v-else-if="item.type === 'video' || item.type === 'shortvideo'"
+                v-else-if="item.type === MsgType.Video || item.type === 'shortvideo'"
                 style="text-align: center"
               >
-                <wx-video-player :url="item.mediaUrl" />
+                <WxVideoPlayer :url="item.mediaUrl" />
               </div>
-              <div v-else-if="item.type === 'link'" class="avue-card__detail">
+              <div v-else-if="item.type === MsgType.Link" class="avue-card__detail">
                 <el-link type="success" :underline="false" target="_blank" :href="item.url">
                   <div class="avue-card__title"><i class="el-icon-link"></i>{{ item.title }}</div>
                 </el-link>
                 <div class="avue-card__info" style="height: unset">{{ item.description }}</div>
               </div>
               <!-- TODO 芋艿：待完善 -->
-              <div v-else-if="item.type === 'location'">
-                <wx-location
+              <div v-else-if="item.type === MsgType.Location">
+                <WxLocation
                   :label="item.label"
                   :location-y="item.locationY"
                   :location-x="item.locationX"
                 />
               </div>
-              <div v-else-if="item.type === 'news'" style="width: 300px">
+              <div v-else-if="item.type === MsgType.News" style="width: 300px">
                 <!-- TODO 芋艿：待测试；详情页也存在类似的情况 -->
-                <wx-news :articles="item.articles" />
+                <WxNews :articles="item.articles" />
               </div>
-              <div v-else-if="item.type === 'music'">
-                <wx-music
+              <div v-else-if="item.type === MsgType.Music">
+                <WxMusic
                   :title="item.title"
                   :description="item.description"
                   :thumb-media-url="item.thumbMediaUrl"
@@ -125,182 +125,185 @@
       </div>
     </div>
     <div class="msg-send" v-loading="sendLoading">
-      <wx-reply-select ref="replySelect" :objData="objData" />
+      <WxReplySelect ref="replySelectRef" :objData="objData" />
       <el-button type="success" size="small" class="send-but" @click="sendMsg">发送(S)</el-button>
     </div>
   </ContentWrap>
 </template>
 
-<script lang="ts" name="WxMsg">
-import { getMessagePage, sendMessage } from '@/api/mp/message'
+<script setup lang="ts" name="WxMsg">
 import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
 import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxLocation from '@/views/mp/components/wx-location/main.vue'
 import WxMusic from '@/views/mp/components/wx-music/main.vue'
+import { getMessagePage, sendMessage } from '@/api/mp/message'
 import { getUser } from '@/api/mp/user'
-import { defineComponent } from 'vue'
-
-const message = useMessage() // 消息弹窗
+import { formatDate } from '@/utils/formatTime'
 import profile from '@/assets/imgs/profile.jpg'
 import wechat from '@/assets/imgs/wechat.png'
-import { formatDate } from '@/utils/formatTime'
+import { MsgType } from './types'
 
-export default defineComponent({
-  components: {
-    WxReplySelect,
-    WxVideoPlayer,
-    WxVoicePlayer,
-    WxNews,
-    WxLocation,
-    WxMusic
-  },
-  props: {
-    userId: {
-      type: Number,
-      required: true
-    }
-  },
-  setup(props) {
-    const nowStr = ref(new Date().getTime()) // 当前的时间戳，用于每次消息加载后，回到原位置；具体见 :id="'msg-div' + nowStr" 处
-    const loading = ref(false) // 消息列表是否正在加载中
-    const loadMore = ref(true) // 是否可以加载更多
-    const list = ref<any[]>([]) // 消息列表
-    const queryParams = reactive({
-      pageNo: 1, // 当前页数
-      pageSize: 14, // 每页显示多少条
-      accountId: undefined
-    })
-    const user = reactive({
-      // 由于微信不再提供昵称，直接使用“用户”展示
-      nickname: '用户',
-      avatar: profile,
-      accountId: 0 // 公众号账号编号
-    })
-    const mp = reactive({
-      nickname: '公众号',
-      avatar: wechat
-    })
+const message = useMessage() // 消息弹窗
 
-    // ========= 消息发送 =========
-    const sendLoading = ref(false) // 发送消息是否加载中
-    const objData = reactive({
-      // 微信发送消息
-      type: 'text',
-      accountId: null,
-      articles: []
-    })
-
-    const replySelect = ref(null)
-    // 执行发送
-    const sendMsg = async () => {
-      if (!objData) {
-        return
-      }
-      //     // 公众号限制：客服消息，公众号只允许发送一条
-      if (objData.type === 'news' && objData.articles.length > 1) {
-        objData.articles = [objData.articles[0]]
-        message.success('图文消息条数限制在 1 条以内，已默认发送第一条')
-      }
-      let data = await sendMessage(Object.assign({ userId: props.userId }, { ...objData }))
-      sendLoading.value = false
-      list.value = [...list.value, ...[data]]
-      scrollToBottom()
-      //ts檢查的時候會判斷這個組件可能是空的，所以需要進行斷言。
-      //避免 tab 的数据未清理
-      const deleteObj = (replySelect.value as any).deleteObj
-      if (deleteObj) {
-        deleteObj()
-      }
-    }
-    const loadingMore = () => {
-      queryParams.pageNo++
-      getPage(queryParams, null)
-    }
-    const getPage = async (page, params) => {
-      loading.value = true
-      let dataTemp = await getMessagePage(
-        Object.assign(
-          {
-            pageNo: page.pageNo,
-            pageSize: page.pageSize,
-            userId: props.userId,
-            accountId: page.accountId
-          },
-          params
-        )
-      )
-      const msgDiv = document.getElementById('msg-div' + nowStr.value)
-      let scrollHeight = 0
-      if (msgDiv) {
-        scrollHeight = msgDiv.scrollHeight
-      }
-      // 处理数据
-      let data = dataTemp.list.reverse()
-      list.value = [...data, ...list.value]
-      loading.value = false
-      if (data.length < queryParams.pageSize || data.length === 0) {
-        loadMore.value = false
-      }
-      queryParams.pageNo = page.pageNo
-      queryParams.pageSize = page.pageSize
-      // 滚动到原来的位置
-      if (queryParams.pageNo === 1) {
-        // 定位到消息底部
-        scrollToBottom()
-      } else if (data.length !== 0) {
-        // 定位滚动条
-        await nextTick(() => {
-          if (scrollHeight !== 0) {
-            let div = document.getElementById('msg-div' + nowStr.value)
-            if (div && msgDiv) {
-              msgDiv.scrollTop = div.scrollHeight - scrollHeight - 100
-            }
-          }
-        })
-      }
-    }
-    const refreshChange = () => {
-      getPage(queryParams, null)
-    }
-    /** 定位到消息底部 */
-    const scrollToBottom = () => {
-      nextTick(() => {
-        let div = document.getElementById('msg-div' + nowStr.value)
-        if (div) {
-          div.scrollTop = div.scrollHeight
-        }
-      })
-    }
-
-    onMounted(async () => {
-      let data = await getUser(props.userId)
-      user.nickname = data.nickname && data.nickname.length > 0 ? data.nickname : user.nickname
-      user.avatar = data.avatar && user.avatar.length > 0 ? data.avatar : user.avatar
-      user.accountId = data.accountId
-      queryParams.accountId = data.accountId
-      objData.accountId = data.accountId
-      refreshChange()
-    })
-    return {
-      sendMsg,
-      loadingMore,
-      formatDate,
-      scrollToBottom,
-      objData,
-      mp,
-      user,
-      queryParams,
-      list,
-      loadMore,
-      loading,
-      nowStr,
-      sendLoading
-    }
+const props = defineProps({
+  userId: {
+    type: Number,
+    required: true
   }
 })
+
+const nowStr = ref(new Date().getTime()) // 当前的时间戳，用于每次消息加载后，回到原位置；具体见 :id="'msg-div' + nowStr" 处
+const loading = ref(false) // 消息列表是否正在加载中
+const loadMore = ref(true) // 是否可以加载更多
+const list = ref<any[]>([]) // 消息列表
+const queryParams = reactive({
+  pageNo: 1, // 当前页数
+  pageSize: 14, // 每页显示多少条
+  accountId: undefined
+})
+
+interface User {
+  nickname: string
+  avatar: string
+  accountId: number
+}
+// 由于微信不再提供昵称，直接使用“用户”展示
+const user: User = reactive({
+  nickname: '用户',
+  avatar: profile,
+  accountId: 0 // 公众号账号编号
+})
+
+interface Mp {
+  nickname: string
+  avatar: string
+}
+const mp: Mp = reactive({
+  nickname: '公众号',
+  avatar: wechat
+})
+
+// ========= 消息发送 =========
+const sendLoading = ref(false) // 发送消息是否加载中
+interface ObjData {
+  type: MsgType
+  accountId: number | null
+  articles: any[]
+}
+
+// 微信发送消息
+const objData: ObjData = reactive({
+  type: MsgType.Text,
+  accountId: null,
+  articles: []
+})
+
+const replySelectRef = ref<InstanceType<typeof WxReplySelect> | null>(null)
+
+/** 完成加载 */
+onMounted(async () => {
+  const data = await getUser(props.userId)
+  user.nickname = data.nickname?.length > 0 ? data.nickname : user.nickname
+  user.avatar = user.avatar?.length > 0 ? data.avatar : user.avatar
+  user.accountId = data.accountId
+  queryParams.accountId = data.accountId
+  objData.accountId = data.accountId
+
+  refreshChange()
+})
+
+// 执行发送
+const sendMsg = async () => {
+  if (!objData) {
+    return
+  }
+  // 公众号限制：客服消息，公众号只允许发送一条
+  if (objData.type === MsgType.News && objData.articles.length > 1) {
+    objData.articles = [objData.articles[0]]
+    message.success('图文消息条数限制在 1 条以内，已默认发送第一条')
+  }
+
+  const data = await sendMessage(Object.assign({ userId: props.userId }, { ...objData }))
+  sendLoading.value = false
+
+  list.value = [...list.value, ...[data]]
+  scrollToBottom()
+
+  //ts检查的時候会判断这个组件可能是空的，所以需要进行断言。
+  //避免 tab 的数据未清理
+  const deleteObj = replySelectRef.value?.deleteObj
+  if (deleteObj) {
+    deleteObj()
+  }
+}
+
+const loadingMore = () => {
+  queryParams.pageNo++
+  getPage(queryParams, null)
+}
+
+const getPage = async (page, params) => {
+  loading.value = true
+  let dataTemp = await getMessagePage(
+    Object.assign(
+      {
+        pageNo: page.pageNo,
+        pageSize: page.pageSize,
+        userId: props.userId,
+        accountId: page.accountId
+      },
+      params
+    )
+  )
+
+  const msgDiv = document.getElementById('msg-div' + nowStr.value)
+  let scrollHeight = 0
+  if (msgDiv) {
+    scrollHeight = msgDiv.scrollHeight
+  }
+  // 处理数据
+  const data = dataTemp.list.reverse()
+  list.value = [...data, ...list.value]
+  loading.value = false
+  if (data.length < queryParams.pageSize || data.length === 0) {
+    loadMore.value = false
+  }
+  queryParams.pageNo = page.pageNo
+  queryParams.pageSize = page.pageSize
+  // 滚动到原来的位置
+  if (queryParams.pageNo === 1) {
+    // 定位到消息底部
+    scrollToBottom()
+  } else if (data.length !== 0) {
+    // 定位滚动条
+    await nextTick(() => {
+      if (scrollHeight !== 0) {
+        let div = document.getElementById('msg-div' + nowStr.value)
+        if (div && msgDiv) {
+          msgDiv.scrollTop = div.scrollHeight - scrollHeight - 100
+        }
+      }
+    })
+  }
+}
+
+const refreshChange = () => {
+  getPage(queryParams, null)
+}
+
+/** 定位到消息底部 */
+const scrollToBottom = () => {
+  nextTick(() => {
+    let div = document.getElementById('msg-div' + nowStr.value)
+    if (div) {
+      div.scrollTop = div.scrollHeight
+    }
+  })
+}
 </script>
+
 <style lang="scss" scoped>
 /* 因为 joolun 实现依赖 avue 组件，该页面使用了 comment.scss、card.scc  */
 @import './comment.scss';
