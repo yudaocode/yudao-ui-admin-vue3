@@ -15,7 +15,7 @@
         v-loading="loading"
         element-loading-text="生成文件目录中..."
       >
-        <el-scrollbar height="calc(100vh - 88px - 40px - 50px)">
+        <el-scrollbar height="calc(100vh - 88px - 40px)">
           <el-tree
             ref="treeRef"
             node-key="id"

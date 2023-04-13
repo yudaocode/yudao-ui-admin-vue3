@@ -16,9 +16,6 @@ import { setupGlobCom } from '@/components'
 // 引入 element-plus
 import { setupElementPlus } from '@/plugins/elementPlus'
 
-// 引入 vxe-table
-import { setupVxeTable } from '@/plugins/vxeTable'
-
 // 引入 form-create
 import { setupFormCreate } from '@/plugins/formCreate'
 
@@ -82,8 +79,6 @@ const setupAll = async () => {
   setupGlobCom(app)
 
   setupElementPlus(app)
-
-  setupVxeTable(app)
 
   setupFormCreate(app)
 

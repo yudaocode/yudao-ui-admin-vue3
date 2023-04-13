@@ -14,7 +14,8 @@
           <p class="item-name">{{ item.name }}</p>
           <el-row class="ope-row">
             <el-button type="success" @click="selectMaterialFun(item)">
-              选择 <Icon icon="ep:circle-check" />
+              选择
+              <Icon icon="ep:circle-check" />
             </el-button>
           </el-row>
         </div>
@@ -48,7 +49,8 @@
         <el-table-column label="操作" align="center" fixed="right">
           <template #default="scope">
             <el-button type="primary" link @click="selectMaterialFun(scope.row)"
-              >选择<Icon icon="ep:plus" />
+              >选择
+              <Icon icon="ep:plus" />
             </el-button>
           </template>
         </el-table-column>
@@ -89,7 +91,8 @@
         >
           <template #default="scope">
             <el-button type="primary" link @click="selectMaterialFun(scope.row)"
-              >选择<Icon icon="akar-icons:circle-plus" />
+              >选择
+              <Icon icon="akar-icons:circle-plus" />
             </el-button>
           </template>
         </el-table-column>
@@ -110,7 +113,8 @@
             <WxNews :articles="item.content.newsItem" />
             <el-row class="ope-row">
               <el-button type="success" @click="selectMaterialFun(item)">
-                选择<Icon icon="ep:circle-check" />
+                选择
+                <Icon icon="ep:circle-check" />
               </el-button>
             </el-row>
           </div>
@@ -127,125 +131,101 @@
   </div>
 </template>
 
-<script lang="ts" name="WxMaterialSelect">
+<script lang="ts" setup name="WxMaterialSelect">
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
 import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
-import { getMaterialPage } from '@/api/mp/material'
-import { getFreePublishPage } from '@/api/mp/freePublish'
-import { getDraftPage } from '@/api/mp/draft'
+import * as MpMaterialApi from '@/api/mp/material'
+import * as MpFreePublishApi from '@/api/mp/freePublish'
+import * as MpDraftApi from '@/api/mp/draft'
 import { dateFormatter } from '@/utils/formatTime'
-import { defineComponent, PropType } from 'vue'
 
-export default defineComponent({
-  components: {
-    WxNews,
-    WxVoicePlayer,
-    WxVideoPlayer
+const props = defineProps({
+  objData: {
+    type: Object, // type - 类型；accountId - 公众号账号编号
+    required: true
   },
-  props: {
-    objData: {
-      type: Object, // type - 类型；accountId - 公众号账号编号
-      required: true
-    },
-    newsType: {
-      // 图文类型：1、已发布图文；2、草稿箱图文
-      type: String as PropType<string>,
-      default: '1'
-    }
-  },
-  setup(props, ctx) {
-    // 遮罩层
-    const loading = ref(false)
-    // 总条数
-    const total = ref(0)
-    // 数据列表
-    const list = ref([])
-    // 查询参数
-    const queryParams = reactive({
-      pageNo: 1,
-      pageSize: 10,
-      accountId: props.objData.accountId
-    })
-    const objDataRef = reactive(props.objData)
-    const newsTypeRef = ref(props.newsType)
-
-    const selectMaterialFun = (item) => {
-      ctx.emit('select-material', item)
-    }
-    /** 搜索按钮操作 */
-    const handleQuery = () => {
-      queryParams.pageNo = 1
-      getPage()
-    }
-    const getPage = () => {
-      loading.value = true
-      if (objDataRef.type === 'news' && newsTypeRef.value === '1') {
-        // 【图文】+ 【已发布】
-        getFreePublishPageFun()
-      } else if (objDataRef.type === 'news' && newsTypeRef.value === '2') {
-        // 【图文】+ 【草稿】
-        getDraftPageFun()
-      } else {
-        // 【素材】
-        getMaterialPageFun()
-      }
-    }
-
-    const getMaterialPageFun = async () => {
-      let data = await getMaterialPage({
-        ...queryParams,
-        type: objDataRef.type
-      })
-      list.value = data.list
-      total.value = data.total
-      loading.value = false
-    }
-
-    const getFreePublishPageFun = async () => {
-      let data = await getFreePublishPage(queryParams)
-      data.list.forEach((item) => {
-        const newsItem = item.content.newsItem
-        newsItem.forEach((article) => {
-          article.picUrl = article.thumbUrl
-        })
-      })
-      list.value = data.list
-      total.value = data.total
-      loading.value = false
-    }
-
-    const getDraftPageFun = async () => {
-      let data = await getDraftPage(queryParams)
-      data.list.forEach((item) => {
-        const newsItem = item.content.newsItem
-        newsItem.forEach((article) => {
-          article.picUrl = article.thumbUrl
-        })
-      })
-      list.value = data.list
-      total.value = data.total
-      loading.value = false
-    }
-
-    onMounted(async () => {
-      getPage()
-    })
-
-    return {
-      handleQuery,
-      dateFormatter,
-      selectMaterialFun,
-      getMaterialPageFun,
-      getPage,
-      formatDate,
-      queryParams,
-      objDataRef,
-      list,
-      total,
-      loading
-    }
+  newsType: {
+    // 图文类型：1、已发布图文；2、草稿箱图文
+    type: String as PropType<string>,
+    default: '1'
   }
+})
+
+const emit = defineEmits(['select-material'])
+
+// 遮罩层
+const loading = ref(false)
+// 总条数
+const total = ref(0)
+// 数据列表
+const list = ref([])
+// 查询参数
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  accountId: props.objData.accountId
+})
+const objDataRef = reactive(props.objData)
+const newsTypeRef = ref(props.newsType)
+
+const selectMaterialFun = (item) => {
+  emit('select-material', item)
+}
+
+const getPage = async () => {
+  loading.value = true
+  try {
+    if (objDataRef.type === 'news' && newsTypeRef.value === '1') {
+      // 【图文】+ 【已发布】
+      await getFreePublishPageFun()
+    } else if (objDataRef.type === 'news' && newsTypeRef.value === '2') {
+      // 【图文】+ 【草稿】
+      await getDraftPageFun()
+    } else {
+      // 【素材】
+      await getMaterialPageFun()
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+const getMaterialPageFun = async () => {
+  const data = await MpMaterialApi.getMaterialPage({
+    ...queryParams,
+    type: objDataRef.type
+  })
+  list.value = data.list
+  total.value = data.total
+}
+
+const getFreePublishPageFun = async () => {
+  const data = await MpFreePublishApi.getFreePublishPage(queryParams)
+  data.list.forEach((item) => {
+    const newsItem = item.content.newsItem
+    newsItem.forEach((article) => {
+      article.picUrl = article.thumbUrl
+    })
+  })
+  list.value = data.list
+  total.value = data.total
+}
+
+const getDraftPageFun = async () => {
+  const data = await MpDraftApi.getDraftPage(queryParams)
+  data.list.forEach((item) => {
+    const newsItem = item.content.newsItem
+    newsItem.forEach((article) => {
+      article.picUrl = article.thumbUrl
+    })
+  })
+  list.value = data.list
+  total.value = data.total
+}
+
+onMounted(async () => {
+  getPage()
 })
 </script>
 <style lang="scss" scoped>
@@ -276,6 +256,7 @@ p {
   .waterfall {
     column-count: 3;
   }
+
   p {
     color: red;
   }
@@ -285,6 +266,7 @@ p {
   .waterfall {
     column-count: 2;
   }
+
   p {
     color: orange;
   }

@@ -6,7 +6,6 @@ export {}
 declare global {
   const DICT_TYPE: typeof import('@/utils/dict')['DICT_TYPE']
   const EffectScope: typeof import('vue')['EffectScope']
-  const ElMessageBox: typeof import('element-plus/es')['ElMessageBox']
   const computed: typeof import('vue')['computed']
   const createApp: typeof import('vue')['createApp']
   const customRef: typeof import('vue')['customRef']
@@ -63,8 +62,6 @@ declare global {
   const useRouter: typeof import('vue-router')['useRouter']
   const useSlots: typeof import('vue')['useSlots']
   const useTable: typeof import('@/hooks/web/useTable')['useTable']
-  const useVxeCrudSchemas: typeof import('@/hooks/web/useVxeCrudSchemas')['useVxeCrudSchemas']
-  const useXTable: typeof import('@/hooks/web/useXTable')['useXTable']
   const watch: typeof import('vue')['watch']
   const watchEffect: typeof import('vue')['watchEffect']
   const watchPostEffect: typeof import('vue')['watchPostEffect']

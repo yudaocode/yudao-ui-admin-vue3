@@ -68,7 +68,6 @@
     "vue-router": "^4.1.6",
     "vue-types": "^5.0.2",
     "vuedraggable": "^4.1.0",
-    "vxe-table": "^4.3.11",
     "web-storage-cache": "^1.1.1",
     "xe-utils": "^3.5.7",
     "xml-js": "^1.6.11"

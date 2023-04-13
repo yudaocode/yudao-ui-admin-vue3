@@ -4,26 +4,23 @@
       ref="formRef"
       :model="formData"
       :rules="formRules"
-      label-width="80px"
+      label-width="160px"
       v-loading="formLoading"
     >
-      <el-form-item label="字典类型" prop="type">
-        <el-input
-          :disabled="typeof formData.id !== 'undefined'"
-          v-model="formData.dictType"
-          placeholder="请输入参数名称"
-        />
+      <el-form-item label="应用名" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入应用名" />
       </el-form-item>
-      <el-form-item label="数据标签" prop="label">
-        <el-input v-model="formData.label" placeholder="请输入数据标签" />
+      <el-form-item label="所属商户" prop="merchantId">
+        <el-select v-model="formData.merchantId" placeholder="请选择所属商户">
+          <el-option
+            v-for="item in merchantList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="数据键值" prop="value">
-        <el-input v-model="formData.value" placeholder="请输入数据键值" />
-      </el-form-item>
-      <el-form-item label="显示排序" prop="sort">
-        <el-input-number v-model="formData.sort" controls-position="right" :min="0" />
-      </el-form-item>
-      <el-form-item label="状态" prop="status">
+      <el-form-item label="开启状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -34,21 +31,14 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="颜色类型" prop="colorType">
-        <el-select v-model="formData.colorType">
-          <el-option
-            v-for="item in colorTypeOptions"
-            :key="item.value"
-            :label="item.label + '(' + item.value + ')'"
-            :value="item.value"
-          />
-        </el-select>
+      <el-form-item label="支付结果的回调地址" prop="payNotifyUrl">
+        <el-input v-model="formData.payNotifyUrl" placeholder="请输入支付结果的回调地址" />
       </el-form-item>
-      <el-form-item label="CSS Class" prop="cssClass">
-        <el-input v-model="formData.cssClass" placeholder="请输入 CSS Class" />
+      <el-form-item label="退款结果的回调地址" prop="refundNotifyUrl">
+        <el-input v-model="formData.refundNotifyUrl" placeholder="请输入退款结果的回调地址" />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" type="textarea" placeholder="请输入内容" />
+        <el-input v-model="formData.remark" placeholder="请输入备注" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -59,7 +49,8 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import * as DictDataApi from '@/api/system/dict/dict.data'
+import * as AppApi from '@/api/pay/app'
+import * as MerchantApi from '@/api/pay/merchant'
 import { CommonStatusEnum } from '@/utils/constants'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -70,66 +61,42 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  sort: undefined,
-  label: '',
-  value: '',
-  dictType: '',
-  status: CommonStatusEnum.ENABLE,
-  colorType: '',
-  cssClass: '',
-  remark: ''
+  name: undefined,
+  packageId: undefined,
+  contactName: undefined,
+  contactMobile: undefined,
+  accountCount: undefined,
+  expireTime: undefined,
+  domain: undefined,
+  status: CommonStatusEnum.ENABLE
 })
 const formRules = reactive({
-  label: [{ required: true, message: '数据标签不能为空', trigger: 'blur' }],
-  value: [{ required: true, message: '数据键值不能为空', trigger: 'blur' }],
-  sort: [{ required: true, message: '数据顺序不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: '应用名不能为空', trigger: 'blur' }],
+  status: [{ required: true, message: '开启状态不能为空', trigger: 'blur' }],
+  payNotifyUrl: [{ required: true, message: '支付结果的回调地址不能为空', trigger: 'blur' }],
+  refundNotifyUrl: [{ required: true, message: '退款结果的回调地址不能为空', trigger: 'blur' }],
+  merchantId: [{ required: true, message: '商户编号不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-
-// 数据标签回显样式
-const colorTypeOptions = readonly([
-  {
-    value: 'default',
-    label: '默认'
-  },
-  {
-    value: 'primary',
-    label: '主要'
-  },
-  {
-    value: 'success',
-    label: '成功'
-  },
-  {
-    value: 'info',
-    label: '信息'
-  },
-  {
-    value: 'warning',
-    label: '警告'
-  },
-  {
-    value: 'danger',
-    label: '危险'
-  }
-])
+const merchantList = ref([]) // 商户列表
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number, dictType?: string) => {
+const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  formData.value.dictType = dictType
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await DictDataApi.getDictData(id)
+      formData.value = await AppApi.getApp(id)
     } finally {
       formLoading.value = false
     }
   }
+  // 加载商户列表
+  merchantList.value = await MerchantApi.getMerchantListByName()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -143,12 +110,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as DictDataApi.DictDataVO
+    const data = formData.value as unknown as AppApi.AppVO
     if (formType.value === 'create') {
-      await DictDataApi.createDictData(data)
+      await AppApi.createApp(data)
       message.success(t('common.createSuccess'))
     } else {
-      await DictDataApi.updateDictData(data)
+      await AppApi.updateApp(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -163,14 +130,12 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    sort: undefined,
-    label: '',
-    value: '',
-    dictType: '',
+    name: undefined,
     status: CommonStatusEnum.ENABLE,
-    colorType: '',
-    cssClass: '',
-    remark: ''
+    remark: undefined,
+    payNotifyUrl: undefined,
+    refundNotifyUrl: undefined,
+    merchantId: undefined
   }
   formRef.value?.resetFields()
 }
