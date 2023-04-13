@@ -95,7 +95,7 @@ watch(
     return props.modelValue
   },
   () => {
-    if (props.modelValue && props.modelValue.contains(':')) {
+    if (props.modelValue && props.modelValue.indexOf(':') >= 0) {
       currentActiveType.value = props.modelValue.substring(0, props.modelValue.indexOf(':') + 1)
       icon.value = props.modelValue.substring(props.modelValue.indexOf(':') + 1)
     }
