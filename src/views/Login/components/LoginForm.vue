@@ -18,7 +18,8 @@
       <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
         <el-form-item prop="tenantName" v-if="loginData.tenantEnable === 'true'">
           <el-input
-            type="text"
+            type="primary"
+            link
             v-model="loginData.loginForm.tenantName"
             :placeholder="t('login.tenantNamePlaceholder')"
             :prefix-icon="iconHouse"

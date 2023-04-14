@@ -1,29 +1,21 @@
 <template>
-  <el-form class="-mb-15px" ref="queryFormRef" :inline="true" label-width="68px">
-    <el-form-item label="公众号" prop="accountId">
-      <!-- TODO 芋艿：需要将 el-form 和 el-select 解耦 -->
-      <el-select
-        v-model="accountId"
-        placeholder="请选择公众号"
-        class="!w-240px"
-        @change="accountChanged()"
-      >
-        <el-option v-for="item in accountList" :key="item.id" :label="item.name" :value="item.id" />
-      </el-select>
-    </el-form-item>
-    <el-form-item>
-      <slot name="actions"></slot>
-    </el-form-item>
-  </el-form>
+  <el-select v-model="account.id" placeholder="请选择公众号" class="!w-240px" @change="onChanged">
+    <el-option v-for="item in accountList" :key="item.id" :label="item.name" :value="item.id" />
+  </el-select>
 </template>
 
-<script setup name="WxAccountSelect">
+<script lang="ts" setup name="WxAccountSelect">
 import * as MpAccountApi from '@/api/mp/account'
-const accountId = ref()
-const accountList = ref([])
-const queryFormRef = ref()
 
-const emit = defineEmits(['change'])
+const account: MpAccountApi.AccountVO = reactive({
+  id: undefined,
+  name: ''
+})
+const accountList: Ref<MpAccountApi.AccountVO[]> = ref([])
+
+const emit = defineEmits<{
+  (e: 'change', id?: number, name?: string): void
+}>()
 
 onMounted(() => {
   handleQuery()
@@ -33,12 +25,12 @@ const handleQuery = async () => {
   accountList.value = await MpAccountApi.getSimpleAccountList()
   // 默认选中第一个
   if (accountList.value.length > 0) {
-    accountId.value = accountList.value[0].id
-    emit('change', accountId.value)
+    account.id = accountList.value[0].id
+    emit('change', account.id, account.name)
   }
 }
 
-const accountChanged = () => {
-  emit('change', accountId.value)
+const onChanged = () => {
+  emit('change', account.id, account.name)
 }
 </script>
