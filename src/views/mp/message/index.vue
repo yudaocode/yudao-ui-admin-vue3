@@ -9,7 +9,7 @@
       label-width="68px"
     >
       <el-form-item label="公众号" prop="accountId">
-        <WxMpSelect @change="onAccountChanged" />
+        <WxAccountSelect @change="onAccountChanged" />
       </el-form-item>
       <el-form-item label="消息类型" prop="type">
         <el-select v-model="queryParams.type" placeholder="请选择消息类型" class="!w-240px">
@@ -203,7 +203,7 @@ import WxMsg from '@/views/mp/components/wx-msg/main.vue'
 import WxLocation from '@/views/mp/components/wx-location/main.vue'
 import WxMusic from '@/views/mp/components/wx-music/main.vue'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
-import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 import * as MpMessageApi from '@/api/mp/message'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
