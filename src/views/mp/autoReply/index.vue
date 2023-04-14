@@ -140,7 +140,7 @@
     </el-table>
 
     <!-- 添加或修改自动回复的对话框 -->
-    <el-dialog :title="title" v-model="showReplyFormDialog" width="800px" append-to-body>
+    <el-dialog :title="title" v-model="showReplyFormDialog" width="800px" destroy-on-close>
       <el-form ref="formRef" :model="replyForm" :rules="rules" label-width="80px">
         <el-form-item label="消息类型" prop="requestMessageType" v-if="msgType === MsgType.Message">
           <el-select v-model="replyForm.requestMessageType" placeholder="请选择">
@@ -167,7 +167,7 @@
           <el-input v-model="replyForm.requestKeyword" placeholder="请输入内容" clearable />
         </el-form-item>
         <el-form-item label="回复消息">
-          <WxReplySelect :objData="objData" v-if="hackResetWxReplySelect" />
+          <WxReplySelect :objData="objData" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -195,7 +195,7 @@ const message = useMessage()
 const formRef = ref()
 
 // 消息类型（Follow: 关注时回复；Message: 消息回复；Keyword: 关键词回复）
-// 作为tab.name
+// 作为tab.name，enum的数字不能随意修改，与api参数相关
 enum MsgType {
   Follow = 1,
   Message = 2,
@@ -277,9 +277,6 @@ const rules = {
   requestMatch: [{ required: true, message: '请求的关键字的匹配不能为空', trigger: 'blur' }]
 }
 
-// 重置 WxReplySelect 组件，解决无法清除的问题
-const hackResetWxReplySelect = ref(false)
-
 const onAccountChanged = (id?: number) => {
   queryParams.accountId = id
   getList()
@@ -314,7 +311,6 @@ const handleTabChange = (tabName: TabPaneName) => {
 /** 新增按钮操作 */
 const handleAdd = () => {
   reset()
-  resetEditor()
   // 打开表单，并设置初始化
   objData.value = {
     type: 'text',
@@ -328,7 +324,6 @@ const handleAdd = () => {
 /** 修改按钮操作 */
 const handleUpdate = async (row: any) => {
   reset()
-  resetEditor()
 
   const data = await MpAutoReplyApi.getAutoReply(row.id)
   // 设置属性
@@ -386,7 +381,7 @@ const handleSubmit = async () => {
   }
 
   showReplyFormDialog.value = false
-  getList()
+  await getList()
 }
 
 // 表单重置
@@ -406,14 +401,6 @@ const reset = () => {
 const cancel = () => {
   showReplyFormDialog.value = false
   reset()
-}
-
-// 表单 Editor 重置
-const resetEditor = () => {
-  hackResetWxReplySelect.value = false // 销毁组件
-  nextTick(() => {
-    hackResetWxReplySelect.value = true // 重建组件
-  })
 }
 
 const handleDelete = async (row) => {

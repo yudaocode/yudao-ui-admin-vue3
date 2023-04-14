@@ -190,10 +190,9 @@
       v-model="showMessageBox"
       @click="showMessageBox = true"
       width="50%"
+      destroy-on-close
     >
-      <template #footer>
-        <WxMsg :user-id="userId" v-if="showMessageBox" />
-      </template>
+      <WxMsg :user-id="userId" />
     </el-dialog>
   </ContentWrap>
 </template>
@@ -262,6 +261,7 @@ const handleQuery = () => {
 
 /** 重置按钮操作 */
 const resetQuery = async () => {
+  // 暂存accountId，并在reset后恢复
   const accountId = queryParams.accountId
   queryFormRef.value?.resetFields()
   queryParams.accountId = accountId
