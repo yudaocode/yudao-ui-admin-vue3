@@ -19,10 +19,12 @@ import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
 export function createVitePlugins() {
   const root = process.cwd()
+
   // 路径查找
   function pathResolve(dir: string) {
     return resolve(root, '.', dir)
   }
+
   return [
     Vue(),
     VueJsx(),
@@ -45,8 +47,6 @@ export function createVitePlugins() {
         {
           '@/hooks/web/useI18n': ['useI18n'],
           '@/hooks/web/useMessage': ['useMessage'],
-          '@/hooks/web/useXTable': ['useXTable'],
-          '@/hooks/web/useVxeCrudSchemas': ['useVxeCrudSchemas'],
           '@/hooks/web/useTable': ['useTable'],
           '@/hooks/web/useCrudSchemas': ['useCrudSchemas'],
           '@/utils/formRules': ['required'],
