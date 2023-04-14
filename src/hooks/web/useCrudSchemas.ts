@@ -29,6 +29,8 @@ type CrudSearchParams = {
   show?: boolean
   // 接口
   api?: () => Promise<any>
+  // 搜索字段
+  field?: string
 } & Omit<FormSchema, 'field'>
 
 type CrudTableParams = {

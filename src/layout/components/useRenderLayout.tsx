@@ -177,7 +177,9 @@ export const useRenderLayout = () => {
             class={[
               `${prefixCls}-content-scrollbar`,
               {
-                'mt-[var(--tags-view-height)]': fixedHeader.value
+                'mt-[var(--tags-view-height)] !pb-[calc(var(--tags-view-height)+var(--app-footer-height))]':
+                  fixedHeader.value,
+                'pb-[var(--app-footer-height)]': !fixedHeader.value
               }
             ]}
           >
