@@ -2,8 +2,11 @@
   <doc-alert title="公众号菜单" url="https://doc.iocoder.cn/mp/menu/" />
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <!-- TODO @芋艿：调整成 el-form 和 WxAccountSelect  -->
-    <WxAccountSelect @change="accountChanged" />
+    <el-form class="-mb-15px" ref="queryFormRef" :inline="true" label-width="68px">
+      <el-form-item label="公众号" prop="accountId">
+        <WxMpSelect @change="onAccountChanged" />
+      </el-form-item>
+    </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
@@ -12,7 +15,7 @@
       <!--左边配置菜单-->
       <div class="left">
         <div class="weixin-hd">
-          <div class="weixin-title">{{ name }}</div>
+          <div class="weixin-title">{{ accountName }}</div>
         </div>
         <div class="weixin-menu menu_main clearfix">
           <div class="menu_bottom" v-for="(item, i) of menuList" :key="i">
@@ -68,7 +71,7 @@
       <div v-if="showRightFlag" class="right">
         <div class="configure_page">
           <div class="delete_btn">
-            <el-button size="small" type="danger" @click="handleDeleteMenu(tempObj)">
+            <el-button size="small" type="danger" @click="handleDeleteMenu">
               删除当前菜单<Icon icon="ep:delete" />
             </el-button>
           </div>
@@ -155,7 +158,7 @@
                 <div v-else>
                   <el-row justify="center">
                     <el-col :span="24" style="text-align: center">
-                      <el-button type="success" @click="openMaterial">
+                      <el-button type="success" @click="dialogNewsVisible = true">
                         素材库选择<Icon icon="ep:circle-check" />
                       </el-button>
                     </el-col>
@@ -185,24 +188,26 @@
     </div>
   </ContentWrap>
 </template>
-<script setup name="MpMenu">
-import { handleTree } from '@/utils/tree'
+<script lang="ts" setup name="MpMenu">
 import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
-import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
 import * as MpMenuApi from '@/api/mp/menu'
+import { handleTree } from '@/utils/tree'
 import menuOptions from './menuOptions'
+
 const message = useMessage() // 消息
 
 // ======================== 列表查询 ========================
-const loading = ref(true) // 遮罩层
-const accountId = ref(undefined) // 公众号Id
-const menuList = ref({ children: [] })
+const loading = ref(false) // 遮罩层
+const accountId = ref<number | undefined>()
+const accountName = ref<string | undefined>('')
+const menuList = ref<any>({ children: [] })
 
 // ======================== 菜单操作 ========================
 const isActive = ref(-1) // 一级菜单点中样式
-const isSubMenuActive = ref(-1) // 一级菜单点中样式
+const isSubMenuActive = ref<string | number>(-1) // 一级菜单点中样式
 const isSubMenuFlag = ref(-1) // 二级菜单显示标志
 
 // ======================== 菜单编辑 ========================
@@ -210,15 +215,16 @@ const showRightFlag = ref(false) // 右边配置显示默认详情还是配置�
 const nameMaxLength = ref(0) // 菜单名称最大长度；1 级是 4 字符；2 级是 7 字符；
 const showConfigureContent = ref(true) // 是否展示配置内容；如果有子菜单，就不显示配置内容
 const hackResetWxReplySelect = ref(false) // 重置 WxReplySelect 组件
-const tempObj = ref({}) // 右边临时变量，作为中间值牵引关系
+const tempObj = ref<any>({}) // 右边临时变量，作为中间值牵引关系
 
 // 一些临时值放在这里进行判断，如果放在 tempObj，由于引用关系，menu 也会多了多余的参数
-const tempSelfObj = ref({})
+const tempSelfObj = ref<any>({})
 const dialogNewsVisible = ref(false) // 跳转图文时的素材选择弹窗
 
 /** 侦听公众号变化 **/
-const accountChanged = (id) => {
+const onAccountChanged = (id?: number, name?: string) => {
   accountId.value = id
+  accountName.value = name
   getList()
 }
 
@@ -241,10 +247,10 @@ const handleQuery = () => {
 }
 
 // 将后端返回的 menuList，转换成前端的 menuList
-const convertMenuList = (list) => {
+const convertMenuList = (list: any[]) => {
   if (!list) return []
 
-  const menuList = []
+  const result: any[] = []
   list.forEach((item) => {
     const menu = {
       ...item
@@ -271,9 +277,9 @@ const convertMenuList = (list) => {
         hqMusicUrl: item.replyHqMusicUrl
       }
     }
-    menuList.push(menu)
+    result.push(menu)
   })
-  return menuList
+  return result
 }
 
 // 重置表单，清空表单数据
@@ -286,7 +292,7 @@ const resetForm = () => {
   // 菜单编辑
   showRightFlag.value = false
   nameMaxLength.value = 0
-  showConfigureContent.value = 0
+  showConfigureContent.value = false
   hackResetWxReplySelect.value = false
   tempObj.value = {}
   tempSelfObj.value = {}
@@ -295,7 +301,7 @@ const resetForm = () => {
 
 // ======================== 菜单操作 ========================
 // 一级菜单点击事件
-const menuClick = (i, item) => {
+const menuClick = (i: number, item: any) => {
   // 右侧的表单相关
   resetEditor()
   showRightFlag.value = true // 右边菜单
@@ -312,11 +318,10 @@ const menuClick = (i, item) => {
 }
 
 // 二级菜单点击事件
-const subMenuClick = (subItem, index, k) => {
+const subMenuClick = (subItem: any, index: number, k: number) => {
   // 右侧的表单相关
   resetEditor()
   showRightFlag.value = true // 右边菜单
-  console.log(subItem)
   tempObj.value = subItem // 将点击的数据放到临时变量，对象有引用作用
   tempSelfObj.value.grand = '2' // 表示二级菜单
   tempSelfObj.value.index = index // 表示一级菜单索引
@@ -331,7 +336,7 @@ const subMenuClick = (subItem, index, k) => {
 
 // 添加横向一级菜单
 const addMenu = () => {
-  const menuKeyLength = menuList.value.length
+  const menuKeyLength: number = menuList.value.length
   const addButton = {
     name: '菜单名称',
     children: [],
@@ -342,10 +347,10 @@ const addMenu = () => {
     }
   }
   menuList.value[menuKeyLength] = addButton
-  menuClick(menuKeyLength.value - 1, addButton)
+  menuClick(menuKeyLength - 1, addButton)
 }
 // 添加横向二级菜单；item 表示要操作的父菜单
-const addSubMenu = (i, item) => {
+const addSubMenu = (i: number, item: any) => {
   // 清空父菜单的属性，因为它只需要 name 属性即可
   if (!item.children || item.children.length <= 0) {
     item.children = []
@@ -361,8 +366,8 @@ const addSubMenu = (i, item) => {
     showConfigureContent.value = false
   }
 
-  let subMenuKeyLength = item.children.length // 获取二级菜单key长度
-  let addButton = {
+  const subMenuKeyLength = item.children.length // 获取二级菜单key长度
+  const addButton = {
     name: '子菜单名称',
     reply: {
       // 用于存储回复内容
@@ -399,7 +404,7 @@ const handleDeleteMenu = async () => {
 // ======================== 菜单编辑 ========================
 const handleSave = async () => {
   try {
-    await message.confirm('确定要删除吗?')
+    await message.confirm('确定要保存吗?')
     loading.value = true
     await MpMenuApi.saveMenu(accountId.value, convertMenuFormList())
     getList()
@@ -413,7 +418,6 @@ const handleSave = async () => {
 const resetEditor = () => {
   hackResetWxReplySelect.value = false // 销毁组件
   nextTick(() => {
-    console.log('nextTick')
     hackResetWxReplySelect.value = true // 重建组件
   })
 }
@@ -432,9 +436,9 @@ const handleDelete = async () => {
 
 // 将前端的 menuList，转换成后端接收的 menuList
 const convertMenuFormList = () => {
-  const result = []
+  const result: any[] = []
   menuList.value.forEach((item) => {
-    let menu = convertMenuForm(item)
+    const menu = convertMenuForm(item)
     result.push(menu)
 
     // 处理子菜单
@@ -450,7 +454,7 @@ const convertMenuFormList = () => {
 }
 
 // 将前端的 menu，转换成后端接收的 menu
-const convertMenuForm = (menu) => {
+const convertMenuForm = (menu: any) => {
   let result = {
     ...menu,
     children: undefined, // 不处理子节点
@@ -473,11 +477,7 @@ const convertMenuForm = (menu) => {
 }
 
 // ======================== 菜单编辑（素材选择） ========================
-const openMaterial = () => {
-  dialogNewsVisible.value = true
-}
-
-const selectMaterial = (item) => {
+const selectMaterial = (item: any) => {
   const articleId = item.articleId
   const articles = item.content.newsItem
   // 提示，针对多图文

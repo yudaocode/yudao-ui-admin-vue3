@@ -3,8 +3,17 @@
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <!-- TODO @芋艿：调整成 el-form 和 WxAccountSelect  -->
-    <WxAccountSelect @change="(accountId) => accountChanged(accountId)" />
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
+      <el-form-item label="公众号" prop="accountId">
+        <WxMpSelect @change="onAccountChanged" />
+      </el-form-item>
+    </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
@@ -39,26 +48,32 @@
   </ContentWrap>
 </template>
 
-<script setup name="MpFreePublish">
+<script lang="ts" setup name="MpFreePublish">
 import * as FreePublishApi from '@/api/mp/freePublish'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
-import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
-const queryParams = reactive({
+const list = ref<any[]>([]) // 列表的数据
+
+interface QueryParams {
+  pageNo: number
+  pageSize: number
+  accountId?: number
+}
+const queryParams: QueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   accountId: undefined
 })
 
 /** 侦听公众号变化 **/
-const accountChanged = (accountId) => {
-  queryParams.accountId = accountId
+const onAccountChanged = (id: number | undefined) => {
+  queryParams.accountId = id
   getList()
 }
 
@@ -75,7 +90,7 @@ const getList = async () => {
 }
 
 /** 删除按钮操作 */
-const handleDelete = async (item) => {
+const handleDelete = async (item: any) => {
   try {
     // 删除的二次确认
     await message.delConfirm('删除后用户将无法访问此页面，确定删除？')
