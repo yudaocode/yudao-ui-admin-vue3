@@ -1,5 +1,5 @@
 <script name="WxEditor" setup>
-import { ref, reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { getAccessToken } from '@/utils/auth'
 import { Editor } from '@/components/Editor'
 
@@ -83,21 +83,21 @@ const uploadError = () => {
     <div v-loading="loading" element-loading-text="请稍等，图片上传中">
       <!-- 图片上传组件辅助-->
       <el-upload
+        :action="actionUrl"
+        :before-upload="beforeUpload"
+        :data="uploadData"
+        :headers="headers"
+        :on-error="uploadError"
+        :on-success="uploadSuccess"
+        :show-file-list="false"
         class="avatar-uploader"
         name="file"
-        :action="actionUrl"
-        :headers="headers"
-        :show-file-list="false"
-        :data="uploadData"
-        :on-success="uploadSuccess"
-        :on-error="uploadError"
-        :before-upload="beforeUpload"
       />
       <Editor
-        editor-id="wxEditor"
         ref="quillEditorRef"
         :modelValue="content"
-        @change="(editor) => onEditorChange(editor.getText())"
+        editor-id="wxEditor"
+        @change="(editor_) => onEditorChange(editor_.getText())"
       />
     </div>
   </div>
