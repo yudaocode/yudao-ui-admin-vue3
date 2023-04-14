@@ -79,14 +79,16 @@
         <template #default="scope">
           <el-button
             v-if="scope.row.formType === 10"
-            type="text"
+            type="primary"
+            link
             @click="handleFormDetail(scope.row)"
           >
             <span>{{ scope.row.formName }}</span>
           </el-button>
           <el-button
             v-else-if="scope.row.formType === 20"
-            type="text"
+            type="primary"
+            link
             @click="handleFormDetail(scope.row)"
           >
             <span>{{ scope.row.formCustomCreatePath }}</span>
