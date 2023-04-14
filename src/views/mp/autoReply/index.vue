@@ -5,7 +5,7 @@
   <ContentWrap>
     <el-form class="-mb-15px" :model="queryParams" :inline="true" label-width="68px">
       <el-form-item label="公众号" prop="accountId">
-        <WxMpSelect @change="onAccountChanged" />
+        <WxAccountSelect @change="onAccountChanged" />
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -183,7 +183,7 @@ import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
 import WxMusic from '@/views/mp/components/wx-music/main.vue'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
-import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 import * as MpAutoReplyApi from '@/api/mp/autoReply'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
