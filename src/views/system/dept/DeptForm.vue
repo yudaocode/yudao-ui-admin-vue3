@@ -1,31 +1,31 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="80px"
-      v-loading="formLoading"
     >
       <el-form-item label="上级部门" prop="parentId">
         <el-tree-select
           v-model="formData.parentId"
           :data="deptTree"
           :props="defaultProps"
-          value-key="deptId"
-          placeholder="请选择上级部门"
           check-strictly
           default-expand-all
+          placeholder="请选择上级部门"
+          value-key="deptId"
         />
       </el-form-item>
       <el-form-item label="部门名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入部门名称" />
       </el-form-item>
       <el-form-item label="显示排序" prop="sort">
-        <el-input-number v-model="formData.sort" controls-position="right" :min="0" />
+        <el-input-number v-model="formData.sort" :min="0" controls-position="right" />
       </el-form-item>
       <el-form-item label="负责人" prop="leaderUserId">
-        <el-select v-model="formData.leaderUserId" placeholder="请输入负责人" clearable>
+        <el-select v-model="formData.leaderUserId" clearable placeholder="请输入负责人">
           <el-option
             v-for="item in userList"
             :key="item.id"
@@ -35,13 +35,13 @@
         </el-select>
       </el-form-item>
       <el-form-item label="联系电话" prop="phone">
-        <el-input v-model="formData.phone" placeholder="请输入联系电话" maxlength="11" />
+        <el-input v-model="formData.phone" maxlength="11" placeholder="请输入联系电话" />
       </el-form-item>
       <el-form-item label="邮箱" prop="email">
-        <el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="50" />
+        <el-input v-model="formData.email" maxlength="50" placeholder="请输入邮箱" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="formData.status" placeholder="请选择状态" clearable>
+        <el-select v-model="formData.status" clearable placeholder="请选择状态">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
@@ -57,12 +57,13 @@
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemDeptForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { handleTree, defaultProps } from '@/utils/tree'
+import { defaultProps, handleTree } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
 import { CommonStatusEnum } from '@/utils/constants'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

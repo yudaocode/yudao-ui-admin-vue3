@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { ref, watch, computed, onMounted, unref } from 'vue'
+<script lang="ts" name="Logo" setup>
+import { computed, onMounted, ref, unref, watch } from 'vue'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
 
@@ -66,8 +66,8 @@ watch(
       to="/"
     >
       <img
-        src="@/assets/imgs/logo.png"
         class="w-[calc(var(--logo-height)-10px)] h-[calc(var(--logo-height)-10px)]"
+        src="@/assets/imgs/logo.png"
       />
       <div
         v-if="show"

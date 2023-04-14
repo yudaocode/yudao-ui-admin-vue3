@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="详情" v-model="dialogVisible" width="50%">
+  <Dialog v-model="dialogVisible" title="详情" width="50%">
     <el-descriptions :column="2">
       <el-descriptions-item label="商户名称">{{ detailData.merchantName }}</el-descriptions-item>
       <el-descriptions-item label="应用名称">{{ detailData.appName }}</el-descriptions-item>
@@ -76,7 +76,7 @@
       </el-descriptions-item>
     </el-descriptions>
     <br />
-    <el-descriptions :column="1" direction="vertical" border>
+    <el-descriptions :column="1" border direction="vertical">
       <el-descriptions-item label="渠道额外参数">
         {{ detailData.channelExtras }}
       </el-descriptions-item>
@@ -84,7 +84,7 @@
     </el-descriptions>
   </Dialog>
 </template>
-<script setup lang="ts" name="refundForm">
+<script lang="ts" name="PayRefundDetail" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as RefundApi from '@/api/pay/refund'

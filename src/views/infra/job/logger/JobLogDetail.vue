@@ -1,6 +1,6 @@
 <template>
-  <Dialog title="任务详细" v-model="dialogVisible" width="700px">
-    <el-descriptions border :column="1">
+  <Dialog v-model="dialogVisible" title="任务详细" width="700px">
+    <el-descriptions :column="1" border>
       <el-descriptions-item label="日志编号" min-width="60">
         {{ detailData.id }}
       </el-descriptions-item>
@@ -31,7 +31,7 @@
     </el-descriptions>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="JobLogDetail" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as JobLogApi from '@/api/infra/jobLog'

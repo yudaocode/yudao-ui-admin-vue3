@@ -1,9 +1,9 @@
 <template>
-  <Dialog title="详情" v-model="dialogVisible">
-    <Descriptions :schema="allSchemas.detailSchema" :data="detailData" />
+  <Dialog v-model="dialogVisible" title="详情">
+    <Descriptions :data="detailData" :schema="allSchemas.detailSchema" />
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemMailAccountDetail" setup>
 import * as MailAccountApi from '@/api/system/mail/account'
 import { allSchemas } from './account.data'
 

@@ -1,45 +1,45 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="600">
+  <Dialog v-model="dialogVisible" :title="dialogTitle" width="600">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="110px"
-      v-loading="formLoading"
     >
       <el-form-item label="流程标识" prop="key">
         <el-input
           v-model="formData.key"
+          :disabled="!!formData.id"
           placeholder="请输入流标标识"
           style="width: 330px"
-          :disabled="!!formData.id"
         />
         <el-tooltip
           v-if="!formData.id"
           class="item"
-          effect="light"
           content="新建后，流程标识不可修改！"
+          effect="light"
           placement="top"
         >
-          <i style="padding-left: 5px" class="el-icon-question"></i>
+          <i class="el-icon-question" style="padding-left: 5px"></i>
         </el-tooltip>
-        <el-tooltip v-else class="item" effect="light" content="流程标识不可修改！" placement="top">
-          <i style="padding-left: 5px" class="el-icon-question"></i>
+        <el-tooltip v-else class="item" content="流程标识不可修改！" effect="light" placement="top">
+          <i class="el-icon-question" style="padding-left: 5px"></i>
         </el-tooltip>
       </el-form-item>
       <el-form-item label="流程名称" prop="name">
         <el-input
           v-model="formData.name"
-          placeholder="请输入流程名称"
           :disabled="!!formData.id"
           clearable
+          placeholder="请输入流程名称"
         />
       </el-form-item>
       <el-form-item v-if="formData.id" label="流程分类" prop="category">
         <el-select
           v-model="formData.category"
-          placeholder="请选择流程分类"
           clearable
+          placeholder="请选择流程分类"
           style="width: 100%"
         >
           <el-option
@@ -51,7 +51,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="流程描述" prop="description">
-        <el-input type="textarea" v-model="formData.description" clearable />
+        <el-input v-model="formData.description" clearable type="textarea" />
       </el-form-item>
       <div v-if="formData.id">
         <el-form-item label="表单类型" prop="formType">
@@ -87,11 +87,11 @@
           />
           <el-tooltip
             class="item"
-            effect="light"
             content="自定义表单的提交路径，使用 Vue 的路由地址，例如说：bpm/oa/leave/create"
+            effect="light"
             placement="top"
           >
-            <i style="padding-left: 5px" class="el-icon-question"></i>
+            <i class="el-icon-question" style="padding-left: 5px"></i>
           </el-tooltip>
         </el-form-item>
         <el-form-item
@@ -106,26 +106,27 @@
           />
           <el-tooltip
             class="item"
-            effect="light"
             content="自定义表单的查看路径，使用 Vue 的路由地址，例如说：bpm/oa/leave/view"
+            effect="light"
             placement="top"
           >
-            <i style="padding-left: 5px" class="el-icon-question"></i>
+            <i class="el-icon-question" style="padding-left: 5px"></i>
           </el-tooltip>
         </el-form-item>
       </div>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="ModelForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { ElMessageBox } from 'element-plus'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

@@ -1,6 +1,6 @@
 <template>
-  <Dialog title="详情" v-model="dialogVisible" :scroll="true" :max-height="200">
-    <el-descriptions border :column="1">
+  <Dialog v-model="dialogVisible" :max-height="200" :scroll="true" title="详情">
+    <el-descriptions :column="1" border>
       <el-descriptions-item label="请假类型">
         <dict-tag :type="DICT_TYPE.BPM_OA_LEAVE_TYPE" :value="detailData.type" />
       </el-descriptions-item>
@@ -16,7 +16,7 @@
     </el-descriptions>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="BpmOALeaveDetail" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as LeaveApi from '@/api/bpm/leave'

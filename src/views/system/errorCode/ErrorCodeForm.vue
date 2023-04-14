@@ -1,32 +1,32 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="100px"
-      v-loading="formLoading"
     >
       <el-form-item label="应用名" prop="applicationName">
-        <el-input v-model="formData.applicationName" placeholder="请输入应用名" clearable />
+        <el-input v-model="formData.applicationName" clearable placeholder="请输入应用名" />
       </el-form-item>
       <el-form-item label="错误码编码" prop="code">
-        <el-input v-model="formData.code" placeholder="请输入错误码编码" clearable />
+        <el-input v-model="formData.code" clearable placeholder="请输入错误码编码" />
       </el-form-item>
       <el-form-item label="错误码提示" prop="message">
-        <el-input v-model="formData.message" placeholder="请输入错误码提示" clearable />
+        <el-input v-model="formData.message" clearable placeholder="请输入错误码提示" />
       </el-form-item>
       <el-form-item label="备注" prop="memo">
-        <el-input v-model="formData.memo" placeholder="请输入备注" clearable />
+        <el-input v-model="formData.memo" clearable placeholder="请输入备注" />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemErrorCodeForm" setup>
 import * as ErrorCodeApi from '@/api/system/errorCode'
 
 const { t } = useI18n() // 国际化

@@ -1,17 +1,17 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="100px"
-      v-loading="formLoading"
     >
       <el-form-item label="组名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入组名" />
       </el-form-item>
       <el-form-item label="描述">
-        <el-input type="textarea" v-model="formData.name" placeholder="请输入描述" />
+        <el-input v-model="formData.name" placeholder="请输入描述" type="textarea" />
       </el-form-item>
       <el-form-item label="成员" prop="memberUserIds">
         <el-select v-model="formData.memberUserIds" multiple placeholder="请选择成员">
@@ -36,12 +36,12 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="UserGroupForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as UserGroupApi from '@/api/bpm/userGroup'

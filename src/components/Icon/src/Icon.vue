@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="Icon" setup>
 import { propTypes } from '@/utils/propTypes'
 import Iconify from '@purge-icons/generated'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -72,7 +72,7 @@ watch(
 
 <template>
   <ElIcon :class="prefixCls" :color="color" :size="size">
-    <svg v-if="isLocal" aria-hidden="true" :class="getSvgClass">
+    <svg v-if="isLocal" :class="getSvgClass" aria-hidden="true">
       <use :xlink:href="symbolId" />
     </svg>
 

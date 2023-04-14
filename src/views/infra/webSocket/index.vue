@@ -1,6 +1,6 @@
 <template>
   <div class="flex">
-    <el-card class="w-1/2" :gutter="12" shadow="always">
+    <el-card :gutter="12" class="w-1/2" shadow="always">
       <template #header>
         <div class="card-header">
           <span>连接</span>
@@ -14,7 +14,7 @@
 
       <div class="flex">
         <el-input v-model="server" disabled>
-          <template #prepend> 服务地址 </template>
+          <template #prepend> 服务地址</template>
         </el-input>
         <el-button :type="getIsOpen ? 'danger' : 'primary'" @click="toggle">
           {{ getIsOpen ? '关闭连接' : '开启连接' }}
@@ -25,15 +25,15 @@
       <el-input
         v-model="sendValue"
         :autosize="{ minRows: 2, maxRows: 4 }"
-        type="textarea"
         :disabled="!getIsOpen"
         clearable
+        type="textarea"
       />
-      <el-button type="primary" block class="mt-4" :disabled="!getIsOpen" @click="handlerSend">
+      <el-button :disabled="!getIsOpen" block class="mt-4" type="primary" @click="handlerSend">
         发送
       </el-button>
     </el-card>
-    <el-card class="w-1/2" :gutter="12" shadow="always">
+    <el-card :gutter="12" class="w-1/2" shadow="always">
       <template #header>
         <div class="card-header">
           <span>消息记录</span>
@@ -41,7 +41,7 @@
       </template>
       <div class="max-h-80 overflow-auto">
         <ul>
-          <li v-for="item in getList" class="mt-2" :key="item.time">
+          <li v-for="item in getList" :key="item.time" class="mt-2">
             <div class="flex items-center">
               <span class="mr-2 text-primary font-medium">收到消息:</span>
               <span>{{ formatDate(item.time) }}</span>
@@ -55,7 +55,7 @@
     </el-card>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="InfraWebSocket" setup>
 import { formatDate } from '@/utils/formatTime'
 import { useUserStore } from '@/store/modules/user'
 import { useWebSocket } from '@vueuse/core'

@@ -3,14 +3,14 @@
     <img
       v-show="isReady"
       ref="imgElRef"
-      :src="src"
       :alt="alt"
       :crossorigin="crossorigin"
+      :src="src"
       :style="getImageStyle"
     />
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="Cropper" setup>
 import { CSSProperties, PropType } from 'vue'
 import Cropper from 'cropperjs'
 import 'cropperjs/dist/cropper.css'

@@ -1,17 +1,17 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="50%">
+  <Dialog v-model="dialogVisible" :title="dialogTitle" width="50%">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="80px"
-      v-loading="formLoading"
     >
       <el-form-item label="租户名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入租户名" />
       </el-form-item>
       <el-form-item label="租户套餐" prop="packageId">
-        <el-select v-model="formData.packageId" placeholder="请选择租户套餐" clearable>
+        <el-select v-model="formData.packageId" clearable placeholder="请选择租户套餐">
           <el-option
             v-for="item in packageList"
             :key="item.id"
@@ -33,25 +33,25 @@
         <el-input
           v-model="formData.password"
           placeholder="请输入用户密码"
-          type="password"
           show-password
+          type="password"
         />
       </el-form-item>
       <el-form-item label="账号额度" prop="accountCount">
         <el-input-number
           v-model="formData.accountCount"
-          placeholder="请输入账号额度"
-          controls-position="right"
           :min="0"
+          controls-position="right"
+          placeholder="请输入账号额度"
         />
       </el-form-item>
       <el-form-item label="过期时间" prop="expireTime">
         <el-date-picker
-          clearable
           v-model="formData.expireTime"
+          clearable
+          placeholder="请选择过期时间"
           type="date"
           value-format="x"
-          placeholder="请选择过期时间"
         />
       </el-form-item>
       <el-form-item label="绑定域名" prop="domain">
@@ -70,12 +70,12 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemTenantForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as TenantApi from '@/api/system/tenant'
 import { CommonStatusEnum } from '@/utils/constants'

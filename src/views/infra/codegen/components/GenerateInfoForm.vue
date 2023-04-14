@@ -2,7 +2,7 @@
   <el-form ref="formRef" :model="formData" :rules="rules" label-width="150px">
     <el-row>
       <el-col :span="12">
-        <el-form-item prop="templateType" label="生成模板">
+        <el-form-item label="生成模板" prop="templateType">
           <el-select v-model="formData.templateType" @change="tplSelectChange">
             <el-option
               v-for="dict in getIntDictOptions(DICT_TYPE.INFRA_CODEGEN_TEMPLATE_TYPE)"
@@ -14,7 +14,7 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item prop="frontType" label="前端类型">
+        <el-form-item label="前端类型" prop="frontType">
           <el-select v-model="formData.frontType">
             <el-option
               v-for="dict in getIntDictOptions(DICT_TYPE.INFRA_CODEGEN_FRONT_TYPE)"
@@ -27,7 +27,7 @@
       </el-col>
 
       <el-col :span="12">
-        <el-form-item prop="scene" label="生成场景">
+        <el-form-item label="生成场景" prop="scene">
           <el-select v-model="formData.scene">
             <el-option
               v-for="dict in getIntDictOptions(DICT_TYPE.INFRA_CODEGEN_SCENE)"
@@ -50,11 +50,11 @@
           </template>
           <el-tree-select
             v-model="formData.parentMenuId"
-            placeholder="请选择系统菜单"
-            node-key="id"
-            check-strictly
             :data="menus"
             :props="menuTreeProps"
+            check-strictly
+            node-key="id"
+            placeholder="请选择系统菜单"
           />
         </el-form-item>
       </el-col>
@@ -148,7 +148,7 @@
         </el-form-item>
       </el-col>
 
-      <el-col :span="24" v-if="formData.genType === '1'">
+      <el-col v-if="formData.genType === '1'" :span="24">
         <el-form-item prop="genPath">
           <template #label>
             <span>
@@ -291,8 +291,8 @@
     </el-row>
   </el-form>
 </template>
-<script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+<script lang="ts" name="InfraCodegenGenerateInfoForm" setup>
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { handleTree } from '@/utils/tree'
 import * as CodegenApi from '@/api/infra/codegen'
 import * as MenuApi from '@/api/system/menu'

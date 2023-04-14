@@ -1,6 +1,6 @@
 <template>
-  <Dialog title="详情" v-model="dialogVisible" :scroll="true" :max-height="500" width="800">
-    <el-descriptions border :column="1">
+  <Dialog v-model="dialogVisible" :max-height="500" :scroll="true" title="详情" width="800">
+    <el-descriptions :column="1" border>
       <el-descriptions-item label="日志主键" min-width="120">
         {{ detailData.id }}
       </el-descriptions-item>
@@ -25,10 +25,10 @@
       <el-descriptions-item label="操作名">
         {{ detailData.name }}
       </el-descriptions-item>
-      <el-descriptions-item label="操作内容" v-if="detailData.content">
+      <el-descriptions-item v-if="detailData.content" label="操作内容">
         {{ detailData.content }}
       </el-descriptions-item>
-      <el-descriptions-item label="操作拓展参数" v-if="detailData.exts">
+      <el-descriptions-item v-if="detailData.exts" label="操作拓展参数">
         {{ detailData.exts }}
       </el-descriptions-item>
       <el-descriptions-item label="请求 URL">
@@ -48,16 +48,16 @@
         <div v-if="detailData.resultCode === 0">正常</div>
         <div v-else>失败({{ detailData.resultCode }})</div>
       </el-descriptions-item>
-      <el-descriptions-item label="操作结果" v-if="detailData.resultCode === 0">
+      <el-descriptions-item v-if="detailData.resultCode === 0" label="操作结果">
         {{ detailData.resultData }}
       </el-descriptions-item>
-      <el-descriptions-item label="失败提示" v-if="detailData.resultCode > 0">
+      <el-descriptions-item v-if="detailData.resultCode > 0" label="失败提示">
         {{ detailData.resultMsg }}
       </el-descriptions-item>
     </el-descriptions>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemOperateLogDetail" setup>
 import { formatDate } from '@/utils/formatTime'
 import * as OperateLogApi from '@/api/system/operatelog'
 

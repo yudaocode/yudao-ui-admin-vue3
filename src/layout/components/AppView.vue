@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="AppView" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useAppStore } from '@/store/modules/app'
 import { Footer } from '@/layout/components/Footer'
