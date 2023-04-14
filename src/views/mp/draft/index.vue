@@ -71,168 +71,182 @@
     <el-dialog
       :title="operateMaterial === 'add' ? '新建图文' : '修改图文'"
       width="80%"
-      top="20px"
       v-model="dialogNewsVisible"
       :before-close="dialogNewsClose"
-      :close-on-click-modal="false"
+      destroy-on-close
     >
-      <div class="left">
-        <div class="select-item">
-          <div v-for="(news, index) in articlesAdd" :key="news.id">
-            <div
-              class="news-main father"
-              v-if="index === 0"
-              :class="{ activeAddNews: isActiveAddNews === index }"
-              @click="activeNews(index)"
-            >
-              <div class="news-content">
-                <img class="material-img" v-if="news.thumbUrl" :src="news.thumbUrl" />
-                <div class="news-content-title">{{ news.title }}</div>
-              </div>
-              <div class="child" v-if="articlesAdd.length > 1">
-                <el-button size="small" @click="downNews(index)"
-                  ><Icon icon="ep:sort-down" />下移</el-button
-                >
-                <el-button v-if="operateMaterial === 'add'" size="small" @click="minusNews(index)"
-                  ><Icon icon="ep:delete" />删除
-                </el-button>
-              </div>
-            </div>
-            <div
-              class="news-main-item father"
-              v-if="index > 0"
-              :class="{ activeAddNews: isActiveAddNews === index }"
-              @click="activeNews(index)"
-            >
-              <div class="news-content-item">
-                <div class="news-content-item-title">{{ news.title }}</div>
-                <div class="news-content-item-img">
-                  <img
-                    class="material-img"
-                    v-if="news.thumbUrl"
-                    :src="news.thumbUrl"
-                    height="100%"
-                  />
+      <el-container>
+        <el-aside width="40%">
+          <div class="select-item">
+            <div v-for="(news, index) in articlesAdd" :key="news.id">
+              <div
+                class="news-main father"
+                v-if="index === 0"
+                :class="{ activeAddNews: isActiveAddNews === index }"
+                @click="activeNews(index)"
+              >
+                <div class="news-content">
+                  <img class="material-img" v-if="news.thumbUrl" :src="news.thumbUrl" />
+                  <div class="news-content-title">{{ news.title }}</div>
+                </div>
+                <div class="child" v-if="articlesAdd.length > 1">
+                  <el-button size="small" @click="downNews(index)"
+                    ><Icon icon="ep:sort-down" />下移</el-button
+                  >
+                  <el-button v-if="operateMaterial === 'add'" size="small" @click="minusNews(index)"
+                    ><Icon icon="ep:delete" />删除
+                  </el-button>
                 </div>
               </div>
-              <div class="child">
-                <el-button
-                  v-if="articlesAdd.length > index + 1"
-                  size="small"
-                  @click="downNews(index)"
-                  ><Icon icon="ep:sort-down" />下移
-                </el-button>
-                <el-button size="small" @click="upNews(index)"
-                  ><Icon icon="ep:sort-up" />上移</el-button
-                >
-                <el-button
-                  v-if="operateMaterial === 'add'"
-                  type="danger"
-                  size="small"
-                  @click="minusNews(index)"
-                  ><Icon icon="ep:delete" />删除
-                </el-button>
+              <div
+                class="news-main-item father"
+                v-if="index > 0"
+                :class="{ activeAddNews: isActiveAddNews === index }"
+                @click="activeNews(index)"
+              >
+                <div class="news-content-item">
+                  <div class="news-content-item-title">{{ news.title }}</div>
+                  <div class="news-content-item-img">
+                    <img
+                      class="material-img"
+                      v-if="news.thumbUrl"
+                      :src="news.thumbUrl"
+                      width="100%"
+                    />
+                  </div>
+                </div>
+                <div class="child">
+                  <el-button
+                    v-if="articlesAdd.length > index + 1"
+                    size="small"
+                    @click="downNews(index)"
+                    ><Icon icon="ep:sort-down" />下移
+                  </el-button>
+                  <el-button size="small" @click="upNews(index)"
+                    ><Icon icon="ep:sort-up" />上移</el-button
+                  >
+                  <el-button
+                    v-if="operateMaterial === 'add'"
+                    type="danger"
+                    size="small"
+                    @click="minusNews(index)"
+                    ><Icon icon="ep:delete" />删除
+                  </el-button>
+                </div>
               </div>
             </div>
-          </div>
-          <el-row justify="center" class="ope-row">
-            <el-button
-              type="primary"
-              circle
-              @click="plusNews"
-              v-if="articlesAdd.length < 8 && operateMaterial === 'add'"
-            >
-              <Icon icon="ep:plus" />
-            </el-button>
-          </el-row>
-        </div>
-      </div>
-      <div class="right" v-loading="addMaterialLoading" v-if="articlesAdd.length > 0">
-        <br />
-        <br />
-        <br />
-        <br />
-        <!-- 标题、作者、原文地址 -->
-        <el-input v-model="articlesAdd[isActiveAddNews].title" placeholder="请输入标题（必填）" />
-        <el-input
-          v-model="articlesAdd[isActiveAddNews].author"
-          placeholder="请输入作者"
-          style="margin-top: 5px"
-        />
-        <el-input
-          v-model="articlesAdd[isActiveAddNews].contentSourceUrl"
-          placeholder="请输入原文地址"
-          style="margin-top: 5px"
-        />
-        <!-- 封面和摘要 -->
-        <div class="input-tt">封面和摘要：</div>
-        <div>
-          <div class="thumb-div">
-            <img
-              class="material-img"
-              v-if="articlesAdd[isActiveAddNews].thumbUrl"
-              :src="articlesAdd[isActiveAddNews].thumbUrl"
-              :class="isActiveAddNews === 0 ? 'avatar' : 'avatar1'"
-            />
-            <Icon
-              v-else
-              icon="ep:plus"
-              class="avatar-uploader-icon"
-              :class="isActiveAddNews === 0 ? 'avatar' : 'avatar1'"
-            />
-            <div class="thumb-but">
-              <el-upload
-                :action="uploadUrl"
-                :headers="headers"
-                multiple
-                :limit="1"
-                :file-list="fileList"
-                :data="uploadData"
-                :before-upload="beforeThumbImageUpload"
-                :on-success="handleUploadSuccess"
+            <el-row justify="center" class="ope-row">
+              <el-button
+                type="primary"
+                circle
+                @click="plusNews"
+                v-if="articlesAdd.length < 8 && operateMaterial === 'add'"
               >
-                <template #trigger>
-                  <el-button size="small" type="primary">本地上传</el-button>
-                </template>
-                <el-button
-                  size="small"
-                  type="primary"
-                  @click="openMaterial"
-                  style="margin-left: 5px"
-                  >素材库选择</el-button
-                >
-                <template #tip>
-                  <div class="el-upload__tip">支持 bmp/png/jpeg/jpg/gif 格式，大小不超过 2M</div>
-                </template>
-              </el-upload>
-            </div>
-            <el-dialog title="选择图片" v-model="dialogImageVisible" width="80%" append-to-body>
-              <WxMaterialSelect
-                ref="materialSelectRef"
-                :objData="{ type: 'image', accountId: queryParams.accountId }"
-                @select-material="selectMaterial"
-              />
-            </el-dialog>
+                <Icon icon="ep:plus" />
+              </el-button>
+            </el-row>
           </div>
-          <el-input
-            :rows="8"
-            type="textarea"
-            v-model="articlesAdd[isActiveAddNews].digest"
-            placeholder="请输入摘要"
-            class="digest"
-            maxlength="120"
-            style="float: right"
-          />
-        </div>
-        <!--富文本编辑器组件-->
-        <el-row>
-          <WxEditor
-            v-model="articlesAdd[isActiveAddNews].content"
-            :account-id="uploadData.accountId"
-            v-if="hackResetEditor"
-          />
-        </el-row>
-      </div>
+        </el-aside>
+        <el-main>
+          <div class="" v-loading="addMaterialLoading" v-if="articlesAdd.length > 0">
+            <!-- 标题、作者、原文地址 -->
+            <el-row :gutter="20">
+              <el-input
+                v-model="articlesAdd[isActiveAddNews].title"
+                placeholder="请输入标题（必填）"
+              />
+              <el-input
+                v-model="articlesAdd[isActiveAddNews].author"
+                placeholder="请输入作者"
+                style="margin-top: 5px"
+              />
+              <el-input
+                v-model="articlesAdd[isActiveAddNews].contentSourceUrl"
+                placeholder="请输入原文地址"
+                style="margin-top: 5px"
+              />
+            </el-row>
+            <!-- 封面和摘要 -->
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <p>封面:</p>
+                <div class="thumb-div">
+                  <el-image
+                    v-if="articlesAdd[isActiveAddNews].thumbUrl"
+                    style="width: 300px; max-height: 300px"
+                    :src="articlesAdd[isActiveAddNews].thumbUrl"
+                    fit="contain"
+                  />
+                  <Icon
+                    v-else
+                    icon="ep:plus"
+                    class="avatar-uploader-icon"
+                    :class="isActiveAddNews === 0 ? 'avatar' : 'avatar1'"
+                  />
+                  <div class="thumb-but">
+                    <el-upload
+                      :action="uploadUrl"
+                      :headers="headers"
+                      multiple
+                      :limit="1"
+                      :file-list="fileList"
+                      :data="uploadData"
+                      :before-upload="beforeThumbImageUpload"
+                      :on-success="handleUploadSuccess"
+                    >
+                      <template #trigger>
+                        <el-button size="small" type="primary">本地上传</el-button>
+                      </template>
+                      <el-button
+                        size="small"
+                        type="primary"
+                        @click="openMaterial"
+                        style="margin-left: 5px"
+                        >素材库选择</el-button
+                      >
+                      <template #tip>
+                        <div class="el-upload__tip"
+                          >支持 bmp/png/jpeg/jpg/gif 格式，大小不超过 2M</div
+                        >
+                      </template>
+                    </el-upload>
+                  </div>
+                  <el-dialog
+                    title="选择图片"
+                    v-model="dialogImageVisible"
+                    width="80%"
+                    append-to-body
+                  >
+                    <WxMaterialSelect
+                      ref="materialSelectRef"
+                      :objData="{ type: 'image', accountId: queryParams.accountId }"
+                      @select-material="selectMaterial"
+                    />
+                  </el-dialog>
+                </div>
+              </el-col>
+              <el-col :span="12">
+                <p>摘要:</p>
+                <el-input
+                  :rows="8"
+                  type="textarea"
+                  v-model="articlesAdd[isActiveAddNews].digest"
+                  placeholder="请输入摘要"
+                  class="digest"
+                  maxlength="120"
+                />
+              </el-col>
+            </el-row>
+            <!--富文本编辑器组件-->
+            <el-row>
+              <Editor
+                v-model="articlesAdd[isActiveAddNews].content"
+                :editor-config="editorConfig"
+              />
+            </el-row>
+          </div>
+        </el-main>
+      </el-container>
       <template #footer>
         <el-button @click="dialogNewsVisible = false">取 消</el-button>
         <el-button type="primary" @click="submitForm">提 交</el-button>
@@ -242,7 +256,7 @@
 </template>
 
 <script setup lang="ts" name="MpDraft">
-import WxEditor from '@/views/mp/components/wx-editor/WxEditor.vue'
+import { Editor } from '@/components/Editor'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
 import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
@@ -250,8 +264,11 @@ import { getAccessToken } from '@/utils/auth'
 import * as MpDraftApi from '@/api/mp/draft'
 import * as MpFreePublishApi from '@/api/mp/freePublish'
 import type { UploadFiles, UploadProps, UploadRawFile } from 'element-plus'
+import { createEditorConfig } from './editor-config'
 // 可以用改本地数据模拟，避免API调用超限
-// import drafts from './mock'
+import drafts from './mock'
+import { IEditorConfig } from '@wangeditor/editor'
+
 const message = useMessage() // 消息
 
 const loading = ref(true) // 列表的加载中
@@ -285,14 +302,25 @@ const uploadData: UploadData = reactive({
 })
 
 // ========== 草稿新建 or 修改 ==========
+interface Article {
+  title: string
+  thumbMediaId: string
+  author: string
+  digest: string
+  showCoverPic: string
+  content: string
+  contentSourceUrl: string
+  needOpenComment: string
+  onlyFansCanComment: string
+  thumbUrl: string
+}
 const dialogNewsVisible = ref(false)
 const addMaterialLoading = ref(false) // 添加草稿的 loading 标识
-const articlesAdd = ref<any[]>([])
+const articlesAdd = ref<Article[]>([])
 const isActiveAddNews = ref(0)
 const dialogImageVisible = ref(false)
 const operateMaterial = ref<'add' | 'edit'>('add')
 const articlesMediaId = ref('')
-const hackResetEditor = ref(false)
 
 /** 侦听公众号变化 **/
 const onAccountChanged = (id?: number) => {
@@ -305,13 +333,16 @@ const onAccountChanged = (id?: number) => {
 const setAccountId = (id?: number) => {
   queryParams.accountId = id
   uploadData.accountId = id
+  editorConfig.value = createEditorConfig(uploadUrl, queryParams.accountId)
 }
+
+const editorConfig = ref<Partial<IEditorConfig>>({})
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const drafts = await MpDraftApi.getDraftPage(queryParams)
+    // const drafts = await MpDraftApi.getDraftPage(queryParams)
     drafts.list.forEach((item) => {
       const newsItem = item.content.newsItem
       // 将 thumbUrl 转成 picUrl，保证 wx-news 组件可以预览封面
@@ -329,7 +360,6 @@ const getList = async () => {
 // ======================== 新增/修改草稿 ========================
 /** 新增按钮操作 */
 const handleAdd = () => {
-  resetEditor()
   reset()
   // 打开表单，并设置初始化
   operateMaterial.value = 'add'
@@ -338,7 +368,6 @@ const handleAdd = () => {
 
 /** 更新按钮操作 */
 const handleUpdate = (item: any) => {
-  resetEditor()
   reset()
   articlesMediaId.value = item.mediaId
   articlesAdd.value = JSON.parse(JSON.stringify(item.content.newsItem))
@@ -370,7 +399,6 @@ const dialogNewsClose = async (onDone: () => {}) => {
   try {
     await message.confirm('修改内容可能还未保存，确定关闭吗?')
     reset()
-    resetEditor()
     onDone()
   } catch {}
 }
@@ -379,14 +407,6 @@ const dialogNewsClose = async (onDone: () => {}) => {
 const reset = () => {
   isActiveAddNews.value = 0
   articlesAdd.value = [buildEmptyArticle()]
-}
-
-// 表单 Editor 重置
-const resetEditor = () => {
-  hackResetEditor.value = false // 销毁组件
-  nextTick(() => {
-    hackResetEditor.value = true // 重建组件
-  })
 }
 
 // 将图文向下移动
@@ -398,8 +418,8 @@ const downNews = (index: number) => {
 }
 
 // 将图文向上移动
-const upNews = (index) => {
-  let temp = articlesAdd.value[index]
+const upNews = (index: number) => {
+  const temp = articlesAdd.value[index]
   articlesAdd.value[index] = articlesAdd.value[index - 1]
   articlesAdd.value[index - 1] = temp
   isActiveAddNews.value = index - 1
@@ -407,7 +427,6 @@ const upNews = (index) => {
 
 // 选中指定 index 的图文
 const activeNews = (index: number) => {
-  resetEditor()
   isActiveAddNews.value = index
 }
 
@@ -429,7 +448,7 @@ const plusNews = () => {
 }
 
 // 创建空的 article
-const buildEmptyArticle = () => {
+const buildEmptyArticle = (): Article => {
   return {
     title: '',
     thumbMediaId: '',
@@ -455,8 +474,8 @@ const beforeThumbImageUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawF
     addMaterialLoading.value = false
     return false
   }
-  const isLt = rawFile.size / 1024 / 1024 < 2
-  if (!isLt) {
+
+  if (rawFile.size / 1024 / 1024 > 2) {
     message.error('上传图片大小不能超过 2M!')
     addMaterialLoading.value = false
     return false
@@ -465,10 +484,10 @@ const beforeThumbImageUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawF
   return true
 }
 
-const handleUploadSuccess: UploadProps['onSuccess'] = (response: any) => {
+const handleUploadSuccess: UploadProps['onSuccess'] = (res: any) => {
   addMaterialLoading.value = false
-  if (response.code !== 0) {
-    message.error('上传出错：' + response.msg)
+  if (res.code !== 0) {
+    message.error('上传出错：' + res.msg)
     return false
   }
 
@@ -476,8 +495,8 @@ const handleUploadSuccess: UploadProps['onSuccess'] = (response: any) => {
   fileList.value = []
 
   // 设置草稿的封面字段
-  articlesAdd.value[isActiveAddNews.value].thumbMediaId = response.data.mediaId
-  articlesAdd.value[isActiveAddNews.value].thumbUrl = response.data.url
+  articlesAdd.value[isActiveAddNews.value].thumbMediaId = res.data.mediaId
+  articlesAdd.value[isActiveAddNews.value].thumbUrl = res.data.url
 }
 
 // 选择 or 上传完素材，设置回草稿
@@ -502,7 +521,7 @@ const handlePublish = async (item: any) => {
     await message.confirm(content)
     await MpFreePublishApi.submitFreePublish(accountId, mediaId)
     message.notifySuccess('发布成功')
-    getList()
+    await getList()
   } catch {}
 }
 
@@ -514,7 +533,7 @@ const handleDelete = async (item: any) => {
     await message.confirm('此操作将永久删除该草稿, 是否继续?')
     await MpDraftApi.deleteDraft(accountId, mediaId)
     message.notifySuccess('删除成功')
-    getList()
+    await getList()
   } catch {}
 }
 </script>
@@ -535,6 +554,13 @@ const handleDelete = async (item: any) => {
   padding-top: 5px;
 }
 
+.el-row {
+  margin-bottom: 20px;
+}
+.el-row:last-child {
+  margin-bottom: 0;
+}
+
 .item-name {
   font-size: 12px;
   overflow: hidden;
@@ -548,35 +574,33 @@ const handleDelete = async (item: any) => {
 }
 
 /*新增图文*/
-.left {
-  display: inline-block;
-  width: 35%;
-  vertical-align: top;
-  margin-top: 200px;
-}
+// .left {
+//   display: inline-block;
+//   vertical-align: top;
+//   margin-top: 200px;
+// }
 
-.right {
-  display: inline-block;
-  width: 60%;
-  margin-top: -40px;
-}
+// .right {
+//   display: inline-block;
+//   width: 100%;
+// }
 
-.avatar-uploader {
-  width: 20%;
-  display: inline-block;
-}
+// .avatar-uploader {
+//   width: 20%;
+//   display: inline-block;
+// }
 
-.avatar-uploader .el-upload {
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  text-align: unset !important;
-}
+// .avatar-uploader .el-upload {
+//   border-radius: 6px;
+//   cursor: pointer;
+//   position: relative;
+//   overflow: hidden;
+//   text-align: unset !important;
+// }
 
-.avatar-uploader .el-upload:hover {
-  border-color: #165dff;
-}
+// .avatar-uploader .el-upload:hover {
+//   border-color: #165dff;
+// }
 
 .avatar-uploader-icon {
   border: 1px solid #d9d9d9;
@@ -599,7 +623,7 @@ const handleDelete = async (item: any) => {
 }
 
 .digest {
-  width: 60%;
+  width: 100%;
   display: inline-block;
   vertical-align: top;
 }
@@ -620,27 +644,15 @@ const handleDelete = async (item: any) => {
   border: 1px solid #eaeaea;
 }
 
-p {
-  line-height: 30px;
-}
-
 @media (min-width: 992px) and (max-width: 1300px) {
   .waterfall {
     column-count: 3;
-  }
-
-  p {
-    color: red;
   }
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
   .waterfall {
     column-count: 2;
-  }
-
-  p {
-    color: orange;
   }
 }
 
@@ -707,10 +719,6 @@ p {
   background-color: #acadae;
 }
 
-.input-tt {
-  padding: 5px;
-}
-
 .activeAddNews {
   border: 5px solid #2bb673;
 }
@@ -747,7 +755,7 @@ p {
 
 .thumb-div {
   display: inline-block;
-  width: 30%;
+  width: 100%;
   text-align: center;
 }
 
