@@ -1,13 +1,14 @@
 import request from '@/config/axios'
 
 export interface NotifyTemplateVO {
-  id: number
+  id: number | null
   name: string
+  nickname: string
   code: string
   content: string
-  type: number
+  type: number | null
   params: string
-  status: number
+  status: number | null
   remark: string
 }
 
@@ -19,7 +20,7 @@ export interface NotifyTemplatePageReqVO extends PageParam {
 }
 
 export interface NotifySendReqVO {
-  userId: number
+  userId: number | null
   templateCode: string
   templateParams: Map<String, Object>
 }
