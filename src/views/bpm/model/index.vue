@@ -216,7 +216,7 @@
 
   <!-- 弹窗：流程模型图的预览 -->
   <Dialog title="流程图" v-model="bpmnDetailVisible" width="800">
-    <my-process-viewer
+    <MyProcessViewer
       key="designer"
       v-model="bpmnXML"
       :value="bpmnXML"
@@ -229,6 +229,7 @@
 <script setup lang="ts" name="BpmModel">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
+import { MyProcessViewer } from '@/components/bpmnProcessDesigner/package'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import ModelForm from './ModelForm.vue'

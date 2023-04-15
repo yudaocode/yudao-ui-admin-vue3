@@ -37,13 +37,6 @@ import App from './App.vue'
 
 import './permission'
 
-import { MyPD } from '@/components/bpmnProcessDesigner/package/index.js'
-import '@/components/bpmnProcessDesigner/package/theme/index.scss'
-import 'bpmn-js/dist/assets/diagram-js.css'
-import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css'
-import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css'
-import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-embedded.css'
-
 import hljs from 'highlight.js' //导入代码高亮文件
 import 'highlight.js/styles/github.css' //导入代码高亮样式  新版
 
@@ -64,8 +57,6 @@ const setupAll = async () => {
   })
 
   await setupI18n(app)
-
-  MyPD(app)
 
   setupStore(app)
 
