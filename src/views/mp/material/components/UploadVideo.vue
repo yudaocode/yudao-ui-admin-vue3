@@ -9,6 +9,7 @@
       :data="uploadData"
       :before-upload="beforeVideoUpload"
       :on-progress="() => (uploading = true)"
+      :on-error="(err: Error) => message.error(`上传失败: ${err.message}`)"
       :on-success="handleUploadSuccess"
       ref="uploadVideoRef"
       :auto-upload="false"

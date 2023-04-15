@@ -7,6 +7,7 @@
     :file-list="fileList"
     :data="uploadData"
     :on-progress="() => (uploading = true)"
+    :on-error="(err: Error) => message.error(`上传失败: ${err.message}`)"
     :before-upload="beforeUpload"
     :on-success="handleUploadSuccess"
   >
@@ -33,7 +34,7 @@ import {
 
 const message = useMessage()
 
-const props = defineProps<{ type: boolean }>()
+const props = defineProps<{ type: MaterialType }>()
 
 const fileList = ref<UploadUserFile[]>([])
 const emit = defineEmits<{
@@ -47,7 +48,7 @@ const uploadData: UploadData = reactive({
 })
 const uploading = ref(false)
 
-const beforeUpload = props.type == MaterialType.Image ? beforeImageUpload : beforeVoiceUpload
+const beforeUpload = props.type === MaterialType.Image ? beforeImageUpload : beforeVoiceUpload
 
 const handleUploadSuccess: UploadProps['onSuccess'] = (res: any) => {
   if (res.code !== 0) {
