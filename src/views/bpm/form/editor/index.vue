@@ -1,14 +1,14 @@
 <template>
   <ContentWrap>
     <!-- 表单设计器 -->
-    <fc-designer ref="designer" height="780px">
+    <FcDesigner ref="designer" height="780px">
       <template #handle>
         <el-button round size="small" type="primary" @click="handleSave">
           <Icon class="mr-5px" icon="ep:plus" />
           保存
         </el-button>
       </template>
-    </fc-designer>
+    </FcDesigner>
   </ContentWrap>
 
   <!-- 表单保存的弹窗 -->
@@ -42,6 +42,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as FormApi from '@/api/bpm/form'
+import FcDesigner from '@form-create/designer'
 import { encodeConf, encodeFields, setConfAndFields } from '@/utils/formCreate'
 
 const { t } = useI18n() // 国际化

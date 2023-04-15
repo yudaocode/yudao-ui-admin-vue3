@@ -45,8 +45,8 @@
             <el-button class="float-right" text type="primary" @click="copy(item.code)">
               {{ t('common.copy') }}
             </el-button>
-            <div v-highlight>
-              <code>{{ item.code }}</code>
+            <div>
+              <pre><code class="hljs" v-html="highlightedCode(item)"></code></pre>
             </div>
           </el-tab-pane>
         </el-tabs>
@@ -180,6 +180,34 @@ const copy = async (text: string) => {
     message.success(t('common.copySuccess'))
   }
 }
+
+/**
+ * 代码高亮
+ */
+import hljs from 'highlight.js' // 导入代码高亮文件
+import 'highlight.js/styles/github.css' // 导入代码高亮样式
+import java from 'highlight.js/lib/languages/java'
+import xml from 'highlight.js/lib/languages/java'
+import javascript from 'highlight.js/lib/languages/javascript'
+import sql from 'highlight.js/lib/languages/sql'
+import typescript from 'highlight.js/lib/languages/typescript'
+const highlightedCode = (item) => {
+  const language = item.filePath.substring(item.filePath.lastIndexOf('.') + 1)
+  const result = hljs.highlight(language, item.code || '', true)
+  return result.value || '&nbsp;'
+}
+
+/** 初始化 **/
+onMounted(async () => {
+  // 注册代码高亮的各种语言
+  hljs.registerLanguage('java', java)
+  hljs.registerLanguage('xml', xml)
+  hljs.registerLanguage('html', xml)
+  hljs.registerLanguage('vue', xml)
+  hljs.registerLanguage('javascript', javascript)
+  hljs.registerLanguage('sql', sql)
+  hljs.registerLanguage('typescript', typescript)
+})
 </script>
 <style lang="scss">
 .app-infra-codegen-preview-container {
