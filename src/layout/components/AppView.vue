@@ -21,16 +21,17 @@ const getCaches = computed((): string[] => {
 <template>
   <section
     :class="[
-      'p-[var(--app-content-padding)] w-[100%] bg-[var(--app-contnet-bg-color)] dark:bg-[var(--el-bg-color)]',
+      'p-[var(--app-content-padding)] w-[100%] bg-[var(--app-content-bg-color)] dark:bg-[var(--el-bg-color)]',
       {
         '!min-h-[calc(100%-var(--app-footer-height))]':
-          fixedHeader && (layout === 'classic' || layout === 'topLeft') && footer,
+          ((fixedHeader && (layout === 'classic' || layout === 'topLeft')) || layout === 'top') &&
+          footer,
 
         '!min-h-[calc(100%-var(--tags-view-height)-var(--top-tool-height)-var(--app-footer-height))]':
-          ((!fixedHeader && layout === 'classic') || layout === 'top') && footer,
+          !fixedHeader && layout === 'classic' && footer,
 
         '!min-h-[calc(100%-var(--tags-view-height)-var(--app-footer-height))]':
-          !fixedHeader && layout === 'topLeft' && footer,
+          !fixedHeader && (layout === 'topLeft' || layout === 'top') && footer,
 
         '!min-h-[calc(100%-var(--top-tool-height))]': fixedHeader && layout === 'cutMenu' && footer,
 

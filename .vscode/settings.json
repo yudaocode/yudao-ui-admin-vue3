@@ -40,5 +40,15 @@
   "i18n-ally.displayLanguage": "zh-CN",
   "i18n-ally.enabledFrameworks": ["vue", "react"],
   "god.tsconfig": "./tsconfig.json",
-  "vue-i18n.i18nPaths": "src/locales"
+  "vue-i18n.i18nPaths": "src/locales",
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "$(capture).test.ts, $(capture).test.tsx",
+    "*.tsx": "$(capture).test.ts, $(capture).test.tsx",
+    "*.env": "$(capture).env.*",
+    "CHANGELOG.md": "CHANGELOG*",
+    "package.json": "pnpm-lock.yaml,pnpm-workspace.yaml,LICENSE,.gitattributes,.gitignore,.gitpod.yml,CNAME,README*,.npmrc,.browserslistrc,vite.config.*,windi.*,tailwind.*,tsconfig.*,postcss*",
+    ".eslintrc.js": ".eslintignore,.eslintrc-*,.prettierignore,.stylelintignore,.commitlintrc.js,.prettierrc.js,.stylelint*,stylelint*,prettier.*,.editorconfig"
+  }
 }

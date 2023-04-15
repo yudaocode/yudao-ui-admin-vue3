@@ -4,7 +4,7 @@
   <ContentWrap>
     <el-form class="-mb-15px" :inline="true" label-width="68px">
       <el-form-item label="公众号" prop="accountId">
-        <WxMpSelect @change="onAccountChanged" />
+        <WxAccountSelect @change="onAccountChanged" />
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -248,7 +248,7 @@
 <script lang="ts" setup name="MpMaterial">
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
 import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
-import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 import * as MpMaterialApi from '@/api/mp/material'
 import * as authUtil from '@/utils/auth'
 import { dateFormatter } from '@/utils/formatTime'
