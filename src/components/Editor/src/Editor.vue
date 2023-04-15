@@ -1,7 +1,7 @@
-<script setup lang="ts">
+<script lang="ts" name="Editor" setup>
 import { PropType } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
-import { IDomEditor, IEditorConfig, i18nChangeLanguage } from '@wangeditor/editor'
+import { i18nChangeLanguage, IDomEditor, IEditorConfig } from '@wangeditor/editor'
 import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
 import { ElMessage } from 'element-plus'
@@ -189,8 +189,8 @@ defineExpose({
     <!-- 编辑器 -->
     <Editor
       v-model="valueHtml"
-      :editorId="editorId"
       :defaultConfig="editorConfig"
+      :editorId="editorId"
       :style="editorStyle"
       @on-change="handleChange"
       @on-created="handleCreated"

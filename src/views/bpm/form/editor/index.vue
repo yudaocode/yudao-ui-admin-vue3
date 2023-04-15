@@ -4,14 +4,15 @@
     <fc-designer ref="designer" height="780px">
       <template #handle>
         <el-button round size="small" type="primary" @click="handleSave">
-          <Icon icon="ep:plus" class="mr-5px" /> 保存
+          <Icon class="mr-5px" icon="ep:plus" />
+          保存
         </el-button>
       </template>
     </fc-designer>
   </ContentWrap>
 
   <!-- 表单保存的弹窗 -->
-  <Dialog title="保存表单" v-model="dialogVisible" width="600">
+  <Dialog v-model="dialogVisible" title="保存表单" width="600">
     <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
       <el-form-item label="表单名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入表单名" />
@@ -28,16 +29,16 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
+        <el-input v-model="formData.remark" placeholder="请输入备注" type="textarea" />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="BpmFormEditor" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as FormApi from '@/api/bpm/form'

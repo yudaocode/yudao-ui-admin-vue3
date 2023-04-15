@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="ThemeSwitch" setup>
 import { useAppStore } from '@/store/modules/app'
 import { useIcon } from '@/hooks/web/useIcon'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -26,14 +26,14 @@ const themeChange = (val: boolean) => {
 
 <template>
   <ElSwitch
-    :class="prefixCls"
     v-model="isDark"
-    inline-prompt
-    :border-color="blackColor"
-    :inactive-color="blackColor"
     :active-color="blackColor"
     :active-icon="Sun"
+    :border-color="blackColor"
+    :class="prefixCls"
+    :inactive-color="blackColor"
     :inactive-icon="CrescentMoon"
+    inline-prompt
     @change="themeChange"
   />
 </template>

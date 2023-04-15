@@ -1,12 +1,12 @@
 <template>
-  <Dialog title="导入表" v-model="dialogVisible" width="800px">
+  <Dialog v-model="dialogVisible" title="导入表" width="800px">
     <!-- 搜索栏 -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
+    <el-form ref="queryFormRef" :inline="true" :model="queryParams" label-width="68px">
       <el-form-item label="数据源" prop="dataSourceConfigId">
         <el-select
           v-model="queryParams.dataSourceConfigId"
-          placeholder="请选择数据源"
           class="!w-240px"
+          placeholder="请选择数据源"
         >
           <el-option
             v-for="config in dataSourceConfigList"
@@ -19,54 +19,61 @@
       <el-form-item label="表名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入表名称"
-          clearable
-          @keyup.enter="getList"
           class="!w-240px"
+          clearable
+          placeholder="请输入表名称"
+          @keyup.enter="getList"
         />
       </el-form-item>
       <el-form-item label="表描述" prop="comment">
         <el-input
           v-model="queryParams.comment"
-          placeholder="请输入表描述"
-          clearable
-          @keyup.enter="getList"
           class="!w-240px"
+          clearable
+          placeholder="请输入表描述"
+          @keyup.enter="getList"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="getList"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="getList">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
       </el-form-item>
     </el-form>
     <!-- 列表 -->
     <el-row>
       <el-table
-        v-loading="dbTableLoading"
-        @row-click="handleRowClick"
         ref="tableRef"
+        v-loading="dbTableLoading"
         :data="dbTableList"
-        @selection-change="handleSelectionChange"
         height="260px"
+        @row-click="handleRowClick"
+        @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column prop="name" label="表名称" :show-overflow-tooltip="true" />
-        <el-table-column prop="comment" label="表描述" :show-overflow-tooltip="true" />
+        <el-table-column :show-overflow-tooltip="true" label="表名称" prop="name" />
+        <el-table-column :show-overflow-tooltip="true" label="表描述" prop="comment" />
       </el-table>
     </el-row>
     <!-- 操作 -->
     <template #footer>
-      <el-button @click="handleImportTable" type="primary" :disabled="tableList.length === 0">
+      <el-button :disabled="tableList.length === 0" type="primary" @click="handleImportTable">
         导入
       </el-button>
       <el-button @click="close">关闭</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="InfraCodegenImportTable" setup>
 import * as CodegenApi from '@/api/infra/codegen'
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
 import { ElTable } from 'element-plus'
+
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示

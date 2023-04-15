@@ -2,17 +2,18 @@
   <div class="change-avatar">
     <CropperAvatar
       ref="cropperRef"
-      :value="avatar"
-      :showBtn="false"
-      @change="handelUpload"
       :btnProps="{ preIcon: 'ant-design:cloud-upload-outlined' }"
+      :showBtn="false"
+      :value="avatar"
       width="120px"
+      @change="handelUpload"
     />
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="UserAvatar" setup>
 import { propTypes } from '@/utils/propTypes'
 import { uploadAvatar } from '@/api/system/user/profile'
+
 const props = defineProps({
   img: propTypes.string.def('')
 })
@@ -27,7 +28,7 @@ const handelUpload = async ({ data }) => {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .change-avatar {
   img {
     display: block;

@@ -1,11 +1,11 @@
 <template>
-  <Dialog title="修改任务规则" v-model="dialogVisible" width="600">
+  <Dialog v-model="dialogVisible" title="修改任务规则" width="600">
     <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
       <el-form-item label="任务名称" prop="taskDefinitionName">
-        <el-input v-model="formData.taskDefinitionName" placeholder="请输入流标标识" disabled />
+        <el-input v-model="formData.taskDefinitionName" disabled placeholder="请输入流标标识" />
       </el-form-item>
       <el-form-item label="任务标识" prop="taskDefinitionKey">
-        <el-input v-model="formData.taskDefinitionKey" placeholder="请输入任务标识" disabled />
+        <el-input v-model="formData.taskDefinitionKey" disabled placeholder="请输入任务标识" />
       </el-form-item>
       <el-form-item label="规则类型" prop="type">
         <el-select v-model="formData.type" clearable style="width: 100%">
@@ -18,7 +18,7 @@
         </el-select>
       </el-form-item>
       <el-form-item v-if="formData.type === 10" label="指定角色" prop="roleIds">
-        <el-select v-model="formData.roleIds" multiple clearable style="width: 100%">
+        <el-select v-model="formData.roleIds" clearable multiple style="width: 100%">
           <el-option
             v-for="item in roleOptions"
             :key="item.id"
@@ -28,24 +28,24 @@
         </el-select>
       </el-form-item>
       <el-form-item
+        v-if="formData.type === 20 || formData.type === 21"
         label="指定部门"
         prop="deptIds"
         span="24"
-        v-if="formData.type === 20 || formData.type === 21"
       >
         <el-tree-select
           ref="treeRef"
           v-model="formData.deptIds"
-          node-key="id"
-          show-checkbox
-          :props="defaultProps"
           :data="deptTreeOptions"
+          :props="defaultProps"
           empty-text="加载中，请稍后"
           multiple
+          node-key="id"
+          show-checkbox
         />
       </el-form-item>
-      <el-form-item label="指定岗位" prop="postIds" span="24" v-if="formData.type === 22">
-        <el-select v-model="formData.postIds" multiple clearable style="width: 100%">
+      <el-form-item v-if="formData.type === 22" label="指定岗位" prop="postIds" span="24">
+        <el-select v-model="formData.postIds" clearable multiple style="width: 100%">
           <el-option
             v-for="item in postOptions"
             :key="parseInt(item.id)"
@@ -55,12 +55,12 @@
         </el-select>
       </el-form-item>
       <el-form-item
+        v-if="formData.type === 30 || formData.type === 31 || formData.type === 32"
         label="指定用户"
         prop="userIds"
         span="24"
-        v-if="formData.type === 30 || formData.type === 31 || formData.type === 32"
       >
-        <el-select v-model="formData.userIds" multiple clearable style="width: 100%">
+        <el-select v-model="formData.userIds" clearable multiple style="width: 100%">
           <el-option
             v-for="item in userOptions"
             :key="parseInt(item.id)"
@@ -69,8 +69,8 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="指定用户组" prop="userGroupIds" v-if="formData.type === 40">
-        <el-select v-model="formData.userGroupIds" multiple clearable style="width: 100%">
+      <el-form-item v-if="formData.type === 40" label="指定用户组" prop="userGroupIds">
+        <el-select v-model="formData.userGroupIds" clearable multiple style="width: 100%">
           <el-option
             v-for="item in userGroupOptions"
             :key="parseInt(item.id)"
@@ -79,8 +79,8 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="指定脚本" prop="scripts" v-if="formData.type === 50">
-        <el-select v-model="formData.scripts" multiple clearable style="width: 100%">
+      <el-form-item v-if="formData.type === 50" label="指定脚本" prop="scripts">
+        <el-select v-model="formData.scripts" clearable multiple style="width: 100%">
           <el-option
             v-for="dict in taskAssignScriptDictDatas"
             :key="dict.value"
@@ -92,20 +92,21 @@
     </el-form>
     <!-- 操作按钮 -->
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="BpmTaskAssignRuleForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { handleTree, defaultProps } from '@/utils/tree'
+import { defaultProps, handleTree } from '@/utils/tree'
 import * as TaskAssignRuleApi from '@/api/bpm/taskAssignRule'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
 import * as PostApi from '@/api/system/post'
 import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

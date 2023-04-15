@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="SizeDropdown" setup>
 import { useAppStore } from '@/store/modules/app'
 
 import { propTypes } from '@/utils/propTypes'
@@ -26,7 +26,7 @@ const setCurrentSize = (size: ElementPlusSize) => {
 
 <template>
   <ElDropdown :class="prefixCls" trigger="click" @command="setCurrentSize">
-    <Icon :size="18" icon="mdi:format-size" :color="color" class="cursor-pointer" />
+    <Icon :color="color" :size="18" class="cursor-pointer" icon="mdi:format-size" />
     <template #dropdown>
       <ElDropdownMenu>
         <ElDropdownItem v-for="item in sizeMap" :key="item" :command="item">

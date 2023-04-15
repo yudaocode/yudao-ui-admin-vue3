@@ -313,7 +313,19 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           title: '发起 OA 请假',
-          activeMenu: 'bpm/oa/leave/create'
+          activeMenu: '/bpm/oa/leave'
+        }
+      },
+      {
+        path: '/bpm/oa/leave/detail',
+        component: () => import('@/views/bpm/oa/leave/detail.vue'),
+        name: 'OALeaveDetail',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '查看 OA 请假',
+          activeMenu: '/bpm/oa/leave'
         }
       }
     ]

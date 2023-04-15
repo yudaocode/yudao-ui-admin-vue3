@@ -1,13 +1,13 @@
 <template>
   <el-form
-    :model="loginData.loginForm"
-    :rules="rules"
-    label-position="top"
-    class="login-form"
-    label-width="120px"
-    size="large"
     v-show="getShow"
     ref="formSmsLogin"
+    :model="loginData.loginForm"
+    :rules="rules"
+    class="login-form"
+    label-position="top"
+    label-width="120px"
+    size="large"
   >
     <el-row style="margin-left: -10px; margin-right: -10px">
       <!-- 租户名 -->
@@ -17,13 +17,13 @@
         </el-form-item>
       </el-col>
       <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
-        <el-form-item prop="tenantName" v-if="loginData.tenantEnable === 'true'">
+        <el-form-item v-if="loginData.tenantEnable === 'true'" prop="tenantName">
           <el-input
-            type="primary"
-            link
             v-model="loginData.loginForm.tenantName"
             :placeholder="t('login.tenantNamePlaceholder')"
             :prefix-icon="iconHouse"
+            type="primary"
+            link
           />
         </el-form-item>
       </el-col>
@@ -40,7 +40,7 @@
       <!-- 验证码 -->
       <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
         <el-form-item prop="code">
-          <el-row justify="space-between" style="width: 100%" :gutter="5">
+          <el-row :gutter="5" justify="space-between" style="width: 100%">
             <el-col :span="24">
               <el-input
                 v-model="loginData.loginForm.code"
@@ -51,9 +51,9 @@
                 <template #append>
                   <span
                     v-if="mobileCodeTimer <= 0"
-                    @click="getSmsCode"
                     class="getMobileCode"
                     style="cursor: pointer"
+                    @click="getSmsCode"
                   >
                     {{ t('login.getSmsCode') }}
                   </span>
@@ -72,9 +72,9 @@
         <el-form-item>
           <XButton
             :loading="loginLoading"
-            type="primary"
-            class="w-[100%]"
             :title="t('login.login')"
+            class="w-[100%]"
+            type="primary"
             @click="signIn()"
           />
         </el-form-item>
@@ -83,8 +83,8 @@
         <el-form-item>
           <XButton
             :loading="loginLoading"
-            class="w-[100%]"
             :title="t('login.backLogin')"
+            class="w-[100%]"
             @click="handleBackLogin()"
           />
         </el-form-item>
@@ -92,7 +92,7 @@
     </el-row>
   </el-form>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="MobileForm" setup>
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 
 import { useIcon } from '@/hooks/web/useIcon'
@@ -101,7 +101,7 @@ import { setTenantId, setToken } from '@/utils/auth'
 import { usePermissionStore } from '@/store/modules/permission'
 import { getTenantIdByName, sendSmsCode, smsLogin } from '@/api/login'
 import LoginFormTitle from './LoginFormTitle.vue'
-import { useLoginState, LoginStateEnum, useFormValid } from './useLogin'
+import { LoginStateEnum, useFormValid, useLoginState } from './useLogin'
 
 const { t } = useI18n()
 const message = useMessage()

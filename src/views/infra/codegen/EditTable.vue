@@ -13,16 +13,17 @@
     </el-tabs>
     <el-form>
       <el-form-item style="float: right">
-        <el-button type="primary" @click="submitForm" :loading="formLoading">保存</el-button>
+        <el-button :loading="formLoading" type="primary" @click="submitForm">保存</el-button>
         <el-button @click="close">返回</el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="InfraCodegenEditTable" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { BasicInfoForm, ColumInfoForm, GenerateInfoForm } from './components'
 import * as CodegenApi from '@/api/infra/codegen'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 const { push, currentRoute } = useRouter() // 路由

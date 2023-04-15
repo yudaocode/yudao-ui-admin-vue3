@@ -1,30 +1,30 @@
 <template>
   <el-table :data="socialUsers" :show-header="false">
-    <el-table-column type="seq" title="序号" width="60" fixed="left" />
-    <el-table-column label="社交平台" align="left" width="120">
+    <el-table-column fixed="left" title="序号" type="seq" width="60" />
+    <el-table-column align="left" label="社交平台" width="120">
       <template #default="{ row }">
-        <img class="h-5 align-middle" :src="row.img" alt="" />
+        <img :src="row.img" alt="" class="h-5 align-middle" />
         <p class="mr-5">{{ row.title }}</p>
       </template>
     </el-table-column>
-    <el-table-column label="操作" align="center">
+    <el-table-column align="center" label="操作">
       <template #default="{ row }">
         <template v-if="row.openid">
           已绑定
-          <XTextButton type="primary" class="mr-5" @click="unbind(row)" title="(解绑)" />
+          <XTextButton class="mr-5" title="(解绑)" type="primary" @click="unbind(row)" />
         </template>
         <template v-else>
           未绑定
-          <XTextButton type="primary" class="mr-5" @click="bind(row)" title="(绑定)" />
+          <XTextButton class="mr-5" title="(绑定)" type="primary" @click="bind(row)" />
         </template>
       </template>
     </el-table-column>
   </el-table>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="UserSocial" setup>
 import { SystemUserSocialTypeEnum } from '@/utils/constants'
 import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
-import { socialAuthRedirect, socialUnbind } from '@/api/system/user/socialUser'
+import { socialAuthRedirect, socialBind, socialUnbind } from '@/api/system/user/socialUser'
 
 const message = useMessage()
 const socialUsers = ref<any[]>([])
@@ -46,11 +46,25 @@ const initSocial = async () => {
     }
   }
 }
+const route = useRoute()
+const bindSocial = () => {
+  // 社交绑定
+  const type = route.query.type
+  const code = route.query.code
+  const state = route.query.state
+  if (!code) {
+    return
+  }
+  socialBind(type, code, state).then(() => {
+    message.success('绑定成功')
+    initSocial()
+  })
+}
 const bind = (row) => {
   const redirectUri = location.origin + '/user/profile?type=' + row.type
   // 进行跳转
   socialAuthRedirect(row.type, encodeURIComponent(redirectUri)).then((res) => {
-    window.location.href = res.data
+    window.location.href = res
   })
 }
 const unbind = async (row) => {
@@ -64,4 +78,15 @@ const unbind = async (row) => {
 onMounted(async () => {
   await initSocial()
 })
+
+watch(
+  () => route,
+  (newRoute) => {
+    bindSocial()
+    console.log(newRoute)
+  },
+  {
+    immediate: true
+  }
+)
 </script>

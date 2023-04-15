@@ -1,10 +1,10 @@
 <template>
-  <el-table ref="dragTable" :data="formData" row-key="columnId" :max-height="tableHeight">
+  <el-table ref="dragTable" :data="formData" :max-height="tableHeight" row-key="columnId">
     <el-table-column
-      label="字段列名"
-      prop="columnName"
-      min-width="10%"
       :show-overflow-tooltip="true"
+      label="字段列名"
+      min-width="10%"
+      prop="columnName"
     />
     <el-table-column label="字段描述" min-width="10%">
       <template #default="scope">
@@ -12,10 +12,10 @@
       </template>
     </el-table-column>
     <el-table-column
-      label="物理类型"
-      prop="dataType"
-      min-width="10%"
       :show-overflow-tooltip="true"
+      label="物理类型"
+      min-width="10%"
+      prop="dataType"
     />
     <el-table-column label="Java类型" min-width="11%">
       <template #default="scope">
@@ -37,26 +37,26 @@
     </el-table-column>
     <el-table-column label="插入" min-width="4%">
       <template #default="scope">
-        <el-checkbox true-label="true" false-label="false" v-model="scope.row.createOperation" />
+        <el-checkbox v-model="scope.row.createOperation" false-label="false" true-label="true" />
       </template>
     </el-table-column>
     <el-table-column label="编辑" min-width="4%">
       <template #default="scope">
-        <el-checkbox true-label="true" false-label="false" v-model="scope.row.updateOperation" />
+        <el-checkbox v-model="scope.row.updateOperation" false-label="false" true-label="true" />
       </template>
     </el-table-column>
     <el-table-column label="列表" min-width="4%">
       <template #default="scope">
         <el-checkbox
-          true-label="true"
-          false-label="false"
           v-model="scope.row.listOperationResult"
+          false-label="false"
+          true-label="true"
         />
       </template>
     </el-table-column>
     <el-table-column label="查询" min-width="4%">
       <template #default="scope">
-        <el-checkbox true-label="true" false-label="false" v-model="scope.row.listOperation" />
+        <el-checkbox v-model="scope.row.listOperation" false-label="false" true-label="true" />
       </template>
     </el-table-column>
     <el-table-column label="查询方式" min-width="10%">
@@ -75,7 +75,7 @@
     </el-table-column>
     <el-table-column label="允许空" min-width="5%">
       <template #default="scope">
-        <el-checkbox true-label="true" false-label="false" v-model="scope.row.nullable" />
+        <el-checkbox v-model="scope.row.nullable" false-label="false" true-label="true" />
       </template>
     </el-table-column>
     <el-table-column label="显示类型" min-width="12%">
@@ -112,7 +112,7 @@
     </el-table-column>
   </el-table>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="InfraCodegenColumInfoForm" setup>
 import { PropType } from 'vue'
 import * as CodegenApi from '@/api/infra/codegen'
 import * as DictDataApi from '@/api/system/dict/dict.type'

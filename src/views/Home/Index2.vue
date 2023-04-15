@@ -1,26 +1,26 @@
 <template>
-  <el-row :gutter="20" justify="space-between" :class="prefixCls">
-    <el-col :xl="6" :lg="6" :md="12" :sm="12" :xs="24">
-      <el-card shadow="hover" class="mb-20px">
-        <el-skeleton :loading="loading" animated :rows="2">
+  <el-row :class="prefixCls" :gutter="20" justify="space-between">
+    <el-col :lg="6" :md="12" :sm="12" :xl="6" :xs="24">
+      <el-card class="mb-20px" shadow="hover">
+        <el-skeleton :loading="loading" :rows="2" animated>
           <template #default>
             <div :class="`${prefixCls}__item flex justify-between`">
               <div>
                 <div
                   :class="`${prefixCls}__item--icon ${prefixCls}__item--peoples p-16px inline-block rounded-6px`"
                 >
-                  <Icon icon="svg-icon:peoples" :size="40" />
+                  <Icon :size="40" icon="svg-icon:peoples" />
                 </div>
               </div>
               <div class="flex flex-col justify-between">
-                <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`">{{
-                  t('analysis.newUser')
-                }}</div>
+                <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`"
+                  >{{ t('analysis.newUser') }}
+                </div>
                 <CountTo
-                  class="text-20px font-700 text-right"
-                  :start-val="0"
-                  :end-val="102400"
                   :duration="2600"
+                  :end-val="102400"
+                  :start-val="0"
+                  class="text-20px font-700 text-right"
                 />
               </div>
             </div>
@@ -29,27 +29,27 @@
       </el-card>
     </el-col>
 
-    <el-col :xl="6" :lg="6" :md="12" :sm="12" :xs="24">
-      <el-card shadow="hover" class="mb-20px">
-        <el-skeleton :loading="loading" animated :rows="2">
+    <el-col :lg="6" :md="12" :sm="12" :xl="6" :xs="24">
+      <el-card class="mb-20px" shadow="hover">
+        <el-skeleton :loading="loading" :rows="2" animated>
           <template #default>
             <div :class="`${prefixCls}__item flex justify-between`">
               <div>
                 <div
                   :class="`${prefixCls}__item--icon ${prefixCls}__item--message p-16px inline-block rounded-6px`"
                 >
-                  <Icon icon="svg-icon:message" :size="40" />
+                  <Icon :size="40" icon="svg-icon:message" />
                 </div>
               </div>
               <div class="flex flex-col justify-between">
-                <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`">{{
-                  t('analysis.unreadInformation')
-                }}</div>
+                <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`"
+                  >{{ t('analysis.unreadInformation') }}
+                </div>
                 <CountTo
-                  class="text-20px font-700 text-right"
-                  :start-val="0"
-                  :end-val="81212"
                   :duration="2600"
+                  :end-val="81212"
+                  :start-val="0"
+                  class="text-20px font-700 text-right"
                 />
               </div>
             </div>
@@ -58,27 +58,27 @@
       </el-card>
     </el-col>
 
-    <el-col :xl="6" :lg="6" :md="12" :sm="12" :xs="24">
-      <el-card shadow="hover" class="mb-20px">
-        <el-skeleton :loading="loading" animated :rows="2">
+    <el-col :lg="6" :md="12" :sm="12" :xl="6" :xs="24">
+      <el-card class="mb-20px" shadow="hover">
+        <el-skeleton :loading="loading" :rows="2" animated>
           <template #default>
             <div :class="`${prefixCls}__item flex justify-between`">
               <div>
                 <div
                   :class="`${prefixCls}__item--icon ${prefixCls}__item--money p-16px inline-block rounded-6px`"
                 >
-                  <Icon icon="svg-icon:money" :size="40" />
+                  <Icon :size="40" icon="svg-icon:money" />
                 </div>
               </div>
               <div class="flex flex-col justify-between">
-                <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`">{{
-                  t('analysis.transactionAmount')
-                }}</div>
+                <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`"
+                  >{{ t('analysis.transactionAmount') }}
+                </div>
                 <CountTo
-                  class="text-20px font-700 text-right"
-                  :start-val="0"
-                  :end-val="9280"
                   :duration="2600"
+                  :end-val="9280"
+                  :start-val="0"
+                  class="text-20px font-700 text-right"
                 />
               </div>
             </div>
@@ -87,27 +87,27 @@
       </el-card>
     </el-col>
 
-    <el-col :xl="6" :lg="6" :md="12" :sm="12" :xs="24">
-      <el-card shadow="hover" class="mb-20px">
-        <el-skeleton :loading="loading" animated :rows="2">
+    <el-col :lg="6" :md="12" :sm="12" :xl="6" :xs="24">
+      <el-card class="mb-20px" shadow="hover">
+        <el-skeleton :loading="loading" :rows="2" animated>
           <template #default>
             <div :class="`${prefixCls}__item flex justify-between`">
               <div>
                 <div
                   :class="`${prefixCls}__item--icon ${prefixCls}__item--shopping p-16px inline-block rounded-6px`"
                 >
-                  <Icon icon="svg-icon:shopping" :size="40" />
+                  <Icon :size="40" icon="svg-icon:shopping" />
                 </div>
               </div>
               <div class="flex flex-col justify-between">
-                <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`">{{
-                  t('analysis.totalShopping')
-                }}</div>
+                <div :class="`${prefixCls}__item--text text-16px text-gray-500 text-right`"
+                  >{{ t('analysis.totalShopping') }}
+                </div>
                 <CountTo
-                  class="text-20px font-700 text-right"
-                  :start-val="0"
-                  :end-val="13600"
                   :duration="2600"
+                  :end-val="13600"
+                  :start-val="0"
+                  class="text-20px font-700 text-right"
                 />
               </div>
             </div>
@@ -117,36 +117,36 @@
     </el-col>
   </el-row>
   <el-row :gutter="20" justify="space-between">
-    <el-col :xl="10" :lg="10" :md="24" :sm="24" :xs="24">
-      <el-card shadow="hover" class="mb-20px">
+    <el-col :lg="10" :md="24" :sm="24" :xl="10" :xs="24">
+      <el-card class="mb-20px" shadow="hover">
         <el-skeleton :loading="loading" animated>
-          <Echart :options="pieOptionsData" :height="300" />
+          <Echart :height="300" :options="pieOptionsData" />
         </el-skeleton>
       </el-card>
     </el-col>
-    <el-col :xl="14" :lg="14" :md="24" :sm="24" :xs="24">
-      <el-card shadow="hover" class="mb-20px">
+    <el-col :lg="14" :md="24" :sm="24" :xl="14" :xs="24">
+      <el-card class="mb-20px" shadow="hover">
         <el-skeleton :loading="loading" animated>
-          <Echart :options="barOptionsData" :height="300" />
+          <Echart :height="300" :options="barOptionsData" />
         </el-skeleton>
       </el-card>
     </el-col>
     <el-col :span="24">
-      <el-card shadow="hover" class="mb-20px">
-        <el-skeleton :loading="loading" animated :rows="4">
-          <Echart :options="lineOptionsData" :height="350" />
+      <el-card class="mb-20px" shadow="hover">
+        <el-skeleton :loading="loading" :rows="4" animated>
+          <Echart :height="350" :options="lineOptionsData" />
         </el-skeleton>
       </el-card>
     </el-col>
   </el-row>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="Home2" setup>
 import { set } from 'lodash-es'
 import { EChartsOption } from 'echarts'
 
 import { useDesign } from '@/hooks/web/useDesign'
 import type { AnalysisTotalTypes } from './types'
-import { pieOptions, barOptions, lineOptions } from './echarts-data'
+import { barOptions, lineOptions, pieOptions } from './echarts-data'
 
 const { t } = useI18n()
 const loading = ref(true)
@@ -291,18 +291,23 @@ $prefix-cls: #{$namespace}-panel;
       :deep(.#{$namespace}-icon) {
         color: #fff !important;
       }
+
       .#{$prefix-cls}__item--icon {
         transition: all 0.38s ease-out;
       }
+
       .#{$prefix-cls}__item--peoples {
         background: #40c9c6;
       }
+
       .#{$prefix-cls}__item--message {
         background: #36a3f7;
       }
+
       .#{$prefix-cls}__item--money {
         background: #f4516c;
       }
+
       .#{$prefix-cls}__item--shopping {
         background: #34bfa3;
       }

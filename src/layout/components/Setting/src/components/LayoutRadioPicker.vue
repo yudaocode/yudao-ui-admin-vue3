@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="LayoutRadioPicker" setup>
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
 

@@ -9,13 +9,13 @@
   <div class="news-home">
     <div v-for="(article, index) in articles" :key="index" class="news-div">
       <!-- 头条 -->
-      <a target="_blank" :href="article.url" v-if="index === 0">
+      <a v-if="index === 0" :href="article.url" target="_blank">
         <div class="news-main">
           <div class="news-content">
             <el-image
+              :src="article.picUrl"
               class="material-img"
               style="width: 100%; height: 120px"
-              :src="article.picUrl"
             />
             <div class="news-content-title">
               <span>{{ article.title }}</span>
@@ -24,12 +24,12 @@
         </div>
       </a>
       <!-- 二条/三条等等 -->
-      <a target="_blank" :href="article.url" v-else>
+      <a v-else :href="article.url" target="_blank">
         <div class="news-main-item">
           <div class="news-content-item">
             <div class="news-content-item-title">{{ article.title }}</div>
             <div class="news-content-item-img">
-              <img class="material-img" :src="article.picUrl" height="100%" />
+              <img :src="article.picUrl" class="material-img" height="100%" />
             </div>
           </div>
         </div>
@@ -38,7 +38,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" name="WxNews" setup>
 const props = defineProps({
   articles: {
     type: Array,
@@ -57,15 +57,18 @@ defineExpose({
   width: 100%;
   margin: auto;
 }
+
 .news-main {
   width: 100%;
   margin: auto;
 }
+
 .news-content {
   background-color: #acadae;
   width: 100%;
   position: relative;
 }
+
 .news-content-title {
   display: inline-block;
   font-size: 12px;
@@ -80,14 +83,17 @@ defineExpose({
   white-space: normal;
   box-sizing: unset !important;
 }
+
 .news-main-item {
   background-color: #ffffff;
   padding: 5px 0;
   border-top: 1px solid #eaeaea;
 }
+
 .news-content-item {
   position: relative;
 }
+
 .news-content-item-title {
   display: inline-block;
   font-size: 10px;
@@ -95,12 +101,14 @@ defineExpose({
   margin-left: 1%;
   white-space: normal;
 }
+
 .news-content-item-img {
   display: inline-block;
   width: 25%;
   background-color: #acadae;
   margin-right: 1%;
 }
+
 .material-img {
   width: 100%;
 }

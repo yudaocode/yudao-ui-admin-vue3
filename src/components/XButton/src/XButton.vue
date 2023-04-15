@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="XButton" setup>
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 
@@ -30,9 +30,9 @@ const getBindValue = computed(() => {
 
 <template>
   <el-button v-bind="getBindValue" @click="onClick">
-    <Icon :icon="preIcon" v-if="preIcon" class="mr-1px" />
+    <Icon v-if="preIcon" :icon="preIcon" class="mr-1px" />
     {{ title ? title : '' }}
-    <Icon :icon="postIcon" v-if="postIcon" class="mr-1px" />
+    <Icon v-if="postIcon" :icon="postIcon" class="mr-1px" />
   </el-button>
 </template>
 <style lang="scss" scoped>
@@ -40,6 +40,7 @@ const getBindValue = computed(() => {
   margin-left: 0;
   padding: 8px 4px;
 }
+
 :deep(.el-button.is-link) {
   margin-left: 0;
   padding: 8px 4px;

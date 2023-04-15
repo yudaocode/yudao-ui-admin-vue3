@@ -2,26 +2,26 @@
   <div>
     <Dialog
       v-model="dialogVisible"
-      :title="t('cropper.modalTitle')"
-      width="800px"
-      maxHeight="380px"
       :canFullscreen="false"
+      :title="t('cropper.modalTitle')"
+      maxHeight="380px"
+      width="800px"
     >
       <div :class="prefixCls">
         <div :class="`${prefixCls}-left`">
           <div :class="`${prefixCls}-cropper`">
             <CropperImage
               v-if="src"
+              :circled="circled"
               :src="src"
               height="300px"
-              :circled="circled"
               @cropend="handleCropend"
               @ready="handleReady"
             />
           </div>
 
           <div :class="`${prefixCls}-toolbar`">
-            <el-upload :fileList="[]" accept="image/*" :beforeUpload="handleBeforeUpload">
+            <el-upload :beforeUpload="handleBeforeUpload" :fileList="[]" accept="image/*">
               <el-tooltip :content="t('cropper.selectImage')" placement="bottom">
                 <XButton preIcon="ant-design:upload-outlined" type="primary" />
               </el-tooltip>
@@ -29,64 +29,64 @@
             <el-space>
               <el-tooltip :content="t('cropper.btn_reset')" placement="bottom">
                 <XButton
-                  type="primary"
+                  :disabled="!src"
                   preIcon="ant-design:reload-outlined"
                   size="small"
-                  :disabled="!src"
+                  type="primary"
                   @click="handlerToolbar('reset')"
                 />
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_rotate_left')" placement="bottom">
                 <XButton
-                  type="primary"
+                  :disabled="!src"
                   preIcon="ant-design:rotate-left-outlined"
                   size="small"
-                  :disabled="!src"
+                  type="primary"
                   @click="handlerToolbar('rotate', -45)"
                 />
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_rotate_right')" placement="bottom">
                 <XButton
-                  type="primary"
+                  :disabled="!src"
                   preIcon="ant-design:rotate-right-outlined"
                   size="small"
-                  :disabled="!src"
+                  type="primary"
                   @click="handlerToolbar('rotate', 45)"
                 />
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_scale_x')" placement="bottom">
                 <XButton
-                  type="primary"
+                  :disabled="!src"
                   preIcon="vaadin:arrows-long-h"
                   size="small"
-                  :disabled="!src"
+                  type="primary"
                   @click="handlerToolbar('scaleX')"
                 />
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_scale_y')" placement="bottom">
                 <XButton
-                  type="primary"
+                  :disabled="!src"
                   preIcon="vaadin:arrows-long-v"
                   size="small"
-                  :disabled="!src"
+                  type="primary"
                   @click="handlerToolbar('scaleY')"
                 />
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_zoom_in')" placement="bottom">
                 <XButton
-                  type="primary"
+                  :disabled="!src"
                   preIcon="ant-design:zoom-in-outlined"
                   size="small"
-                  :disabled="!src"
+                  type="primary"
                   @click="handlerToolbar('zoom', 0.1)"
                 />
               </el-tooltip>
               <el-tooltip :content="t('cropper.btn_zoom_out')" placement="bottom">
                 <XButton
-                  type="primary"
+                  :disabled="!src"
                   preIcon="ant-design:zoom-out-outlined"
                   size="small"
-                  :disabled="!src"
+                  type="primary"
                   @click="handlerToolbar('zoom', -0.1)"
                 />
               </el-tooltip>
@@ -95,14 +95,14 @@
         </div>
         <div :class="`${prefixCls}-right`">
           <div :class="`${prefixCls}-preview`">
-            <img :src="previewSource" v-if="previewSource" :alt="t('cropper.preview')" />
+            <img v-if="previewSource" :alt="t('cropper.preview')" :src="previewSource" />
           </div>
           <template v-if="previewSource">
             <div :class="`${prefixCls}-group`">
               <el-avatar :src="previewSource" size="large" />
-              <el-avatar :src="previewSource" :size="48" />
-              <el-avatar :src="previewSource" :size="64" />
-              <el-avatar :src="previewSource" :size="80" />
+              <el-avatar :size="48" :src="previewSource" />
+              <el-avatar :size="64" :src="previewSource" />
+              <el-avatar :size="80" :src="previewSource" />
             </div>
           </template>
         </div>
@@ -113,7 +113,7 @@
     </Dialog>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="CopperModal" setup>
 import { useDesign } from '@/hooks/web/useDesign'
 import { dataURLtoBlob } from '@/utils/filt'
 import { useI18n } from 'vue-i18n'
@@ -173,12 +173,15 @@ async function handleOk() {
   const blob = dataURLtoBlob(previewSource.value)
   emit('uploadSuccess', { source: previewSource.value, data: blob, filename: filename })
 }
+
 function openModal() {
   dialogVisible.value = true
 }
+
 function closeModal() {
   dialogVisible.value = false
 }
+
 defineExpose({ openModal, closeModal })
 </script>
 <style lang="scss">

@@ -1,6 +1,6 @@
 <template>
   <div class="head-container">
-    <el-input v-model="deptName" placeholder="请输入部门名称" clearable class="mb-20px">
+    <el-input v-model="deptName" class="mb-20px" clearable placeholder="请输入部门名称">
       <template #prefix>
         <Icon icon="ep:search" />
       </template>
@@ -8,20 +8,20 @@
   </div>
   <div class="head-container">
     <el-tree
+      ref="treeRef"
       :data="deptList"
-      :props="defaultProps"
-      node-key="id"
       :expand-on-click-node="false"
       :filter-node-method="filterNode"
-      ref="treeRef"
+      :props="defaultProps"
       default-expand-all
       highlight-current
+      node-key="id"
       @node-click="handleNodeClick"
     />
   </div>
 </template>
 
-<script setup lang="ts" name="UserDeptTree">
+<script lang="ts" name="SystemUserDeptTree" setup>
 import { ElTree } from 'element-plus'
 import * as DeptApi from '@/api/system/dept'
 import { defaultProps, handleTree } from '@/utils/tree'

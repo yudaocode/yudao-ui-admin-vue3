@@ -1,11 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" scroll max-height="500px">
+  <Dialog v-model="dialogVisible" :title="dialogTitle" max-height="500px" scroll>
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="160px"
-      v-loading="formLoading"
     >
       <el-form-item label="客户端编号" prop="secret">
         <el-input v-model="formData.clientId" placeholder="请输入客户端编号" />
@@ -20,7 +20,7 @@
         <UploadImg v-model="formData.logo" :limit="1" />
       </el-form-item>
       <el-form-item label="应用描述">
-        <el-input type="textarea" v-model="formData.description" placeholder="请输入应用名" />
+        <el-input v-model="formData.description" placeholder="请输入应用名" type="textarea" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -42,8 +42,8 @@
       <el-form-item label="授权类型" prop="authorizedGrantTypes">
         <el-select
           v-model="formData.authorizedGrantTypes"
-          multiple
           filterable
+          multiple
           placeholder="请输入授权类型"
           style="width: 500px"
         >
@@ -58,9 +58,9 @@
       <el-form-item label="授权范围" prop="scopes">
         <el-select
           v-model="formData.scopes"
-          multiple
-          filterable
           allow-create
+          filterable
+          multiple
           placeholder="请输入授权范围"
           style="width: 500px"
         >
@@ -70,8 +70,8 @@
       <el-form-item label="自动授权范围" prop="autoApproveScopes">
         <el-select
           v-model="formData.autoApproveScopes"
-          multiple
           filterable
+          multiple
           placeholder="请输入授权范围"
           style="width: 500px"
         >
@@ -81,9 +81,9 @@
       <el-form-item label="可重定向的 URI 地址" prop="redirectUris">
         <el-select
           v-model="formData.redirectUris"
-          multiple
-          filterable
           allow-create
+          filterable
+          multiple
           placeholder="请输入可重定向的 URI 地址"
           style="width: 500px"
         >
@@ -98,9 +98,9 @@
       <el-form-item label="权限" prop="authorities">
         <el-select
           v-model="formData.authorities"
-          multiple
-          filterable
           allow-create
+          filterable
+          multiple
           placeholder="请输入权限"
           style="width: 500px"
         >
@@ -115,9 +115,9 @@
       <el-form-item label="资源" prop="resourceIds">
         <el-select
           v-model="formData.resourceIds"
-          multiple
-          filterable
           allow-create
+          filterable
+          multiple
           placeholder="请输入资源"
           style="width: 500px"
         >
@@ -131,22 +131,23 @@
       </el-form-item>
       <el-form-item label="附加信息" prop="additionalInformation">
         <el-input
-          type="textarea"
           v-model="formData.additionalInformation"
           placeholder="请输入附加信息，JSON 格式数据"
+          type="textarea"
         />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemOAuth2ClientForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as ClientApi from '@/api/system/oauth2/client'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
