@@ -1,22 +1,15 @@
 import request from '@/config/axios'
 
 export interface NotifyTemplateVO {
-  id: number | null
+  id?: number
   name: string
   nickname: string
   code: string
   content: string
-  type: number | null
+  type: number
   params: string
-  status: number | null
+  status: number
   remark: string
-}
-
-export interface NotifyTemplatePageReqVO extends PageParam {
-  name?: string
-  code?: string
-  status?: number
-  createTime?: Date[]
 }
 
 export interface NotifySendReqVO {
@@ -26,22 +19,22 @@ export interface NotifySendReqVO {
 }
 
 // 查询站内信模板列表
-export const getNotifyTemplatePageApi = async (params: NotifyTemplatePageReqVO) => {
+export const getNotifyTemplatePage = async (params: PageParam) => {
   return await request.get({ url: '/system/notify-template/page', params })
 }
 
 // 查询站内信模板详情
-export const getNotifyTemplateApi = async (id: number) => {
+export const getNotifyTemplate = async (id: number) => {
   return await request.get({ url: '/system/notify-template/get?id=' + id })
 }
 
 // 新增站内信模板
-export const createNotifyTemplateApi = async (data: NotifyTemplateVO) => {
+export const createNotifyTemplate = async (data: NotifyTemplateVO) => {
   return await request.post({ url: '/system/notify-template/create', data })
 }
 
 // 修改站内信模板
-export const updateNotifyTemplateApi = async (data: NotifyTemplateVO) => {
+export const updateNotifyTemplate = async (data: NotifyTemplateVO) => {
   return await request.put({ url: '/system/notify-template/update', data })
 }
 
@@ -51,6 +44,6 @@ export const deleteNotifyTemplateApi = async (id: number) => {
 }
 
 // 发送站内信
-export const sendNotifyApi = (data: NotifySendReqVO) => {
+export const sendNotify = (data: NotifySendReqVO) => {
   return request.post({ url: '/system/notify-template/send-notify', data })
 }
