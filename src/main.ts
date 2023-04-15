@@ -37,9 +37,6 @@ import App from './App.vue'
 
 import './permission'
 
-import hljs from 'highlight.js' //导入代码高亮文件
-import 'highlight.js/styles/github.css' //导入代码高亮样式  新版
-
 import '@/plugins/tongji' // 百度统计
 
 import Logger from '@/utils/Logger'
@@ -47,14 +44,6 @@ import Logger from '@/utils/Logger'
 // 创建实例
 const setupAll = async () => {
   const app = createApp(App)
-
-  //自定义一个代码高亮指令
-  app.directive('highlight', function (el) {
-    const blocks = el.querySelectorAll('code')
-    blocks.forEach((block: any) => {
-      hljs.highlightElement(block)
-    })
-  })
 
   await setupI18n(app)
 
