@@ -52,7 +52,6 @@
 import * as FreePublishApi from '@/api/mp/freePublish'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
-
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -102,7 +101,6 @@ const handleDelete = async (item: any) => {
   } catch {}
 }
 </script>
-
 <style lang="scss" scoped>
 .ope-row {
   margin-top: 5px;
