@@ -58,7 +58,8 @@ const formData = ref({
 })
 const formRules = reactive({
   name: [{ required: true, message: '字典名称不能为空', trigger: 'blur' }],
-  type: [{ required: true, message: '字典类型不能为空', trigger: 'blur' }]
+  type: [{ required: true, message: '字典类型不能为空', trigger: 'blur' }],
+  status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
 
