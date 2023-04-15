@@ -1,87 +1,169 @@
 <template>
+  <doc-alert title="站内信配置" url="https://doc.iocoder.cn/notify/" />
+
   <ContentWrap>
-    <!-- 列表 -->
-    <XTable @register="registerTable">
-      <template #toolbar_buttons>
-        <!-- 操作：新增 -->
-        <XButton
+    <!-- 搜索工作栏 -->
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
+      <el-form-item label="模板名称" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入模板名称"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="模板编号" prop="code">
+        <el-input
+          v-model="queryParams.code"
+          placeholder="请输入模版编码"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择开启状态"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button
           type="primary"
-          preIcon="ep:zoom-in"
-          :title="t('action.add')"
+          plain
+          @click="openForm('create')"
           v-hasPermi="['system:notify-template:create']"
-          @click="handleCreate()"
-        />
-      </template>
-      <template #actionbtns_default="{ row }">
-        <!-- 操作：测试站内信 -->
-        <XTextButton
-          preIcon="ep:cpu"
-          :title="t('action.test')"
-          v-hasPermi="['system:notify-template:send-notify']"
-          @click="handleSendNotify(row)"
-        />
-        <!-- 操作：修改 -->
-        <XTextButton
-          preIcon="ep:edit"
-          :title="t('action.edit')"
-          v-hasPermi="['system:notify-template:update']"
-          @click="handleUpdate(row.id)"
-        />
-        <!-- 操作：详情 -->
-        <XTextButton
-          preIcon="ep:view"
-          :title="t('action.detail')"
-          v-hasPermi="['system:notify-template:query']"
-          @click="handleDetail(row.id)"
-        />
-        <!-- 操作：删除 -->
-        <XTextButton
-          preIcon="ep:delete"
-          :title="t('action.del')"
-          v-hasPermi="['system:notify-template:delete']"
-          @click="deleteData(row.id)"
-        />
-      </template>
-    </XTable>
+        >
+          <Icon icon="ep:plus" class="mr-5px" />新增
+        </el-button>
+      </el-form-item>
+    </el-form>
   </ContentWrap>
 
-  <!-- 添加/修改的弹窗 -->
-  <Dialog id="templateModel" :loading="modelLoading" v-model="dialogVisible" :title="dialogTitle">
-    <!-- 表单：添加/修改 -->
-    <Form
-      ref="formRef"
-      v-if="['create', 'update'].includes(actionType)"
-      :schema="allSchemas.formSchema"
-      :rules="rules"
-    />
-    <!-- 表单：详情 -->
-    <Descriptions
-      v-if="actionType === 'detail'"
-      :schema="allSchemas.detailSchema"
-      :data="detailData"
-    />
-    <template #footer>
-      <!-- 按钮：保存 -->
-      <XButton
-        v-if="['create', 'update'].includes(actionType)"
-        type="primary"
-        :title="t('action.save')"
-        :loading="actionLoading"
-        @click="submitForm()"
+  <!-- 列表 -->
+  <ContentWrap>
+    <el-table v-loading="loading" :data="list">
+      <el-table-column
+        label="模板编码"
+        align="center"
+        prop="code"
+        width="120"
+        :show-overflow-tooltip="true"
       />
-      <!-- 按钮：关闭 -->
-      <XButton :loading="actionLoading" :title="t('dialog.close')" @click="dialogVisible = false" />
-    </template>
-  </Dialog>
+      <el-table-column
+        label="模板名称"
+        align="center"
+        prop="name"
+        width="120"
+        :show-overflow-tooltip="true"
+      />
+      <el-table-column label="类型" align="center" prop="type">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.SYSTEM_NOTIFY_TEMPLATE_TYPE" :value="scope.row.type" />
+        </template>
+      </el-table-column>
+      <el-table-column label="发送人名称" align="center" prop="nickname" />
+      <el-table-column
+        label="模板内容"
+        align="center"
+        prop="content"
+        width="200"
+        :show-overflow-tooltip="true"
+      />
 
-  <!-- 测试站内信的弹窗 -->
-  <Dialog id="sendTest" v-model="sendVisible" title="测试">
-    <el-form :model="sendForm" :rules="sendRules" label-width="200px" label-position="top">
+      <el-table-column label="开启状态" align="center" prop="status" width="80">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        width="180"
+        :formatter="dateFormatter"
+      />
+      <el-table-column label="操作" align="center" width="210" fixed="right">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['system:notify-template:update']"
+          >
+            修改
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="openSendForm(scope.row)"
+            v-hasPermi="['system:notify-template:send-notify']"
+          >
+            测试
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['system:notify-template:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
+  </ContentWrap>
+
+  <Dialog v-model="dialogFormVisible" title="测试发送" :max-height="500">
+    <el-form
+      ref="sendFormRef"
+      :model="sendFormData"
+      :rules="sendFormRules"
+      label-width="140px"
+      v-loading="formLoading"
+    >
       <el-form-item label="模板内容" prop="content">
-        <el-input type="textarea" v-model="sendForm.content" readonly />
+        <el-input v-model="sendFormData.content" readonly />
       </el-form-item>
       <el-form-item label="接收人" prop="userId">
-        <el-select v-model="sendForm.userId" placeholder="请选择接收人">
+        <el-select v-model="sendFormData.userId" placeholder="请选择接收人">
           <el-option
             v-for="item in userOption"
             :key="item.id"
@@ -91,159 +173,155 @@
         </el-select>
       </el-form-item>
       <el-form-item
-        v-for="param in sendForm.params"
+        v-for="param in sendFormData.params"
         :key="param"
         :label="'参数 {' + param + '}'"
         :prop="'templateParams.' + param"
       >
         <el-input
-          v-model="sendForm.templateParams[param]"
+          v-model="sendFormData.templateParams[param]"
           :placeholder="'请输入 ' + param + ' 参数'"
         />
       </el-form-item>
     </el-form>
-    <!-- 操作按钮 -->
     <template #footer>
-      <XButton
-        type="primary"
-        :title="t('action.test')"
-        :loading="actionLoading"
-        @click="sendTest()"
-      />
-      <XButton :title="t('dialog.close')" @click="sendVisible = false" />
+      <span class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitForm"> 确定 </el-button>
+      </span>
     </template>
   </Dialog>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <NotifyTemplateForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="SystemNotifyTemplate">
-import { FormExpose } from '@/components/Form'
-// 业务相关的 import
-import { rules, allSchemas } from './template.data'
+<script setup lang="ts" name="NotifySmsTemplate">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
 import * as NotifyTemplateApi from '@/api/system/notify/template'
 import { getSimpleUserList, UserVO } from '@/api/system/user'
+import NotifyTemplateForm from './NotifyTemplateForm.vue'
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-// 列表相关的变量
-const [registerTable, { reload, deleteData }] = useXTable({
-  allSchemas: allSchemas,
-  getListApi: NotifyTemplateApi.getNotifyTemplatePageApi,
-  deleteApi: NotifyTemplateApi.deleteNotifyTemplateApi
+const loading = ref(false) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 列表的数据
+const queryFormRef = ref() // 搜索的表单
+
+const formLoading = ref(false)
+const dialogFormVisible = ref(false)
+const sendFormRef = ref() // 表单 Ref
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  name: undefined,
+  status: undefined,
+  code: undefined,
+  createTime: []
 })
 
-// 弹窗相关的变量
-const dialogVisible = ref(false) // 是否显示弹出层
-const dialogTitle = ref('edit') // 弹出层标题
-const modelLoading = ref(false) // 弹出层loading
-const actionType = ref('') // 操作按钮的类型
-const actionLoading = ref(false) // 按钮 Loading
-const formRef = ref<FormExpose>() // 表单 Ref
-const detailData = ref() // 详情 Ref
-
-// 设置标题
-const setDialogTile = (type: string) => {
-  modelLoading.value = true
-  dialogTitle.value = t('action.' + type)
-  actionType.value = type
-  dialogVisible.value = true
-}
-
-// 新增操作
-const handleCreate = () => {
-  setDialogTile('create')
-  modelLoading.value = false
-}
-
-// 修改操作
-const handleUpdate = async (rowId: number) => {
-  setDialogTile('update')
-  // 设置数据
-  const res = await NotifyTemplateApi.getNotifyTemplateApi(rowId)
-  unref(formRef)?.setValues(res)
-  modelLoading.value = false
-}
-
-// 详情操作
-const handleDetail = async (rowId: number) => {
-  setDialogTile('detail')
-  const res = await NotifyTemplateApi.getNotifyTemplateApi(rowId)
-  detailData.value = res
-  modelLoading.value = false
-}
-
-// 提交按钮
-const submitForm = async () => {
-  const elForm = unref(formRef)?.getElFormRef()
-  if (!elForm) return
-  elForm.validate(async (valid) => {
-    if (valid) {
-      actionLoading.value = true
-      // 提交请求
-      try {
-        const data = unref(formRef)?.formModel as NotifyTemplateApi.NotifyTemplateVO
-        if (actionType.value === 'create') {
-          await NotifyTemplateApi.createNotifyTemplateApi(data)
-          message.success(t('common.createSuccess'))
-        } else {
-          await NotifyTemplateApi.updateNotifyTemplateApi(data)
-          message.success(t('common.updateSuccess'))
-        }
-        dialogVisible.value = false
-      } finally {
-        actionLoading.value = false
-        // 刷新列表
-        await reload()
-      }
-    }
-  })
-}
-
-// ========== 测试相关 ==========
-const sendForm = ref({
+const sendFormData = ref({
   content: '',
   params: {},
-  userId: 0,
+  userId: null,
   templateCode: '',
   templateParams: {}
 })
-const sendRules = ref({
-  userId: [{ required: true, message: '用户编号不能为空', trigger: 'blur' }],
+
+const sendFormRules = ref({
+  userId: [{ required: true, message: '用户编号不能为空', trigger: 'change' }],
   templateCode: [{ required: true, message: '模版编号不能为空', trigger: 'blur' }],
   templateParams: {}
 })
-const sendVisible = ref(false)
+
 const userOption = ref<UserVO[]>([])
 
-const handleSendNotify = (row: any) => {
-  sendForm.value.content = row.content
-  sendForm.value.params = row.params
-  sendForm.value.templateCode = row.code
-  sendForm.value.templateParams = row.params.reduce(function (obj, item) {
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await NotifyTemplateApi.getNotifyTemplatePageApi(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
+}
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await NotifyTemplateApi.deleteNotifyTemplateApi(id)
+    message.success('删除成功')
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+const openSendForm = (row: any) => {
+  sendFormData.value.content = row.content
+  sendFormData.value.params = row.params
+  sendFormData.value.templateCode = row.code
+  sendFormData.value.templateParams = row.params.reduce(function (obj, item) {
     obj[item] = undefined
     return obj
   }, {})
-  sendRules.value.templateParams = row.params.reduce(function (obj, item) {
+  sendFormRules.value.templateParams = row.params.reduce(function (obj, item) {
     obj[item] = { required: true, message: '参数 ' + item + ' 不能为空', trigger: 'change' }
     return obj
   }, {})
-  sendVisible.value = true
+  dialogFormVisible.value = true
 }
 
-const sendTest = async () => {
-  const data: NotifyTemplateApi.NotifySendReqVO = {
-    userId: sendForm.value.userId,
-    templateCode: sendForm.value.templateCode,
-    templateParams: sendForm.value.templateParams as unknown as Map<string, Object>
+/** 提交表单 */
+const submitForm = async () => {
+  // 校验表单
+  if (!sendFormRef) return
+  const valid = await sendFormRef.value.validate()
+  if (!valid) return
+  // 提交请求
+  formLoading.value = true
+  try {
+    const data: NotifyTemplateApi.NotifySendReqVO = {
+      userId: sendFormData.value.userId,
+      templateCode: sendFormData.value.templateCode,
+      templateParams: sendFormData.value.templateParams as unknown as Map<string, Object>
+    }
+    const res = await NotifyTemplateApi.sendNotifyApi(data)
+    if (res) {
+      message.success('提交发送成功！发送结果，见消息记录编号：' + res)
+    }
+    dialogFormVisible.value = false
+  } finally {
+    formLoading.value = false
   }
-  const res = await NotifyTemplateApi.sendNotifyApi(data)
-  if (res) {
-    message.success('提交发送成功！发送结果，见发送日志编号：' + res)
-  }
-  sendVisible.value = false
 }
 
-// ========== 初始化 ==========
+/** 初始化 **/
 onMounted(() => {
+  getList()
   getSimpleUserList().then((data) => {
     userOption.value = data
   })
