@@ -1,0 +1,73 @@
+import type { UploadProps, UploadRawFile } from 'element-plus'
+import { getAccessToken } from '@/utils/auth'
+
+const message = useMessage()
+
+const HEADERS = { Authorization: 'Bearer ' + getAccessToken() }
+const UPLOAD_URL = 'http://127.0.0.1:8000/upload/' //import.meta.env.VITE_BASE_URL + '/admin-api/mp/material/upload-permanent'
+
+enum MaterialType {
+  Image = 'image',
+  Voice = 'voice',
+  Video = 'video'
+}
+
+interface UploadData {
+  type: MaterialType
+  title: string
+  introduction: string
+}
+
+const beforeUpload = (rawFile: UploadRawFile, materialType: MaterialType): boolean => {
+  let allowTypes: string[] = []
+  let maxSizeMB = 0
+  let name = ''
+
+  switch (materialType) {
+    case MaterialType.Image:
+      allowTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/jpg']
+      maxSizeMB = 2
+      name = '图片'
+      break
+    case MaterialType.Voice:
+      allowTypes = ['audio/mp3', 'audio/mpeg', 'audio/wma', 'audio/wav', 'audio/amr']
+      maxSizeMB = 2
+      name = '图片'
+      break
+    case MaterialType.Video:
+      allowTypes = ['video/mp4']
+      maxSizeMB = 10
+      name = '视频'
+  }
+
+  if (!allowTypes.includes(rawFile.type)) {
+    message.error(`上传${name}格式不对!`)
+    return false
+  }
+
+  if (rawFile.size / 1024 / 1024 > maxSizeMB) {
+    message.error(`上传${name}大小不能超过${maxSizeMB}M!`)
+    return false
+  }
+
+  return true
+}
+
+const beforeImageUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) =>
+  beforeUpload(rawFile, MaterialType.Image)
+
+const beforeVoiceUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) =>
+  beforeUpload(rawFile, MaterialType.Voice)
+
+const beforeVideoUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) =>
+  beforeUpload(rawFile, MaterialType.Video)
+
+export {
+  HEADERS,
+  UPLOAD_URL,
+  MaterialType,
+  UploadData,
+  beforeImageUpload,
+  beforeVoiceUpload,
+  beforeVideoUpload
+}
