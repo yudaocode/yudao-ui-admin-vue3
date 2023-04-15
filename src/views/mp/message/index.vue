@@ -58,7 +58,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <DataGrid :list="list" :loading="loading" @send="handleSend" />
+    <MessageTable :list="list" :loading="loading" @send="handleSend" />
     <Pagination
       v-show="total > 0"
       :total="total"
@@ -83,7 +83,7 @@
 import * as MpMessageApi from '@/api/mp/message'
 import WxMsg from '@/views/mp/components/wx-msg/main.vue'
 import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
-import DataGrid from './DataGrid.vue'
+import MessageTable from './MessageTable.vue'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { MsgType } from '@/views/mp/components/wx-msg/types'
 import type { FormInstance } from 'element-plus'
@@ -142,7 +142,7 @@ const getList = async () => {
 
 /** 重置按钮操作 */
 const resetQuery = async () => {
-  // 暂存accountId，并在reset后恢复
+  // 暂存 accountId，并在 reset 后恢复
   const accountId = queryParams.accountId
   queryFormRef.value?.resetFields()
   queryParams.accountId = accountId

@@ -17,10 +17,6 @@ const emit = defineEmits<{
   (e: 'change', id?: number, name?: string): void
 }>()
 
-onMounted(() => {
-  handleQuery()
-})
-
 const handleQuery = async () => {
   accountList.value = await MpAccountApi.getSimpleAccountList()
   // 默认选中第一个
@@ -33,4 +29,9 @@ const handleQuery = async () => {
 const onChanged = () => {
   emit('change', account.id, account.name)
 }
+
+/** 初始化 */
+onMounted(() => {
+  handleQuery()
+})
 </script>

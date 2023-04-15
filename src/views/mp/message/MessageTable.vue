@@ -143,5 +143,3 @@ const props = defineProps({
 
 const emit = defineEmits<{ (e: 'send', v: number) }>()
 </script>
-
-<style scoped></style>

@@ -265,8 +265,7 @@ import * as MpDraftApi from '@/api/mp/draft'
 import * as MpFreePublishApi from '@/api/mp/freePublish'
 import type { UploadFiles, UploadProps, UploadRawFile } from 'element-plus'
 import { createEditorConfig } from './editor-config'
-// 可以用改本地数据模拟，避免API调用超限
-import drafts from './mock'
+// import drafts from './mock' // 可以用改本地数据模拟，避免API调用超限
 import { IEditorConfig } from '@wangeditor/editor'
 
 const message = useMessage() // 消息
@@ -342,7 +341,7 @@ const editorConfig = ref<Partial<IEditorConfig>>({})
 const getList = async () => {
   loading.value = true
   try {
-    // const drafts = await MpDraftApi.getDraftPage(queryParams)
+    const drafts = await MpDraftApi.getDraftPage(queryParams)
     drafts.list.forEach((item) => {
       const newsItem = item.content.newsItem
       // 将 thumbUrl 转成 picUrl，保证 wx-news 组件可以预览封面

@@ -21,7 +21,10 @@ export const createEditorConfig = (
         allowedFileTypes: ['image/*'],
 
         // 自定义上传参数，例如传递验证的 token 等。参数会被添加到 formData 中，一起上传到服务端。
-        meta: { accountId: accountId },
+        meta: {
+          accountId: accountId,
+          type: 'image'
+        },
         // 将 meta 拼接到 url 参数中，默认 false
         metaWithUrl: true,
 
@@ -64,7 +67,7 @@ export const createEditorConfig = (
         },
         // 自定义插入图片
         customInsert(res: any, insertFn: InsertFnType) {
-          insertFn(res.data, 'image', res.data)
+          insertFn(res.data.url, 'image', res.data.url)
         }
       }
     }
