@@ -49,5 +49,3 @@ const emit = defineEmits<{
   (e: 'delete', v: number)
 }>()
 </script>
-
-<style scoped></style>

@@ -123,5 +123,3 @@ const handleUploadSuccess: UploadProps['onSuccess'] = (res: any) => {
   emit('uploaded')
 }
 </script>
-
-<style scoped></style>

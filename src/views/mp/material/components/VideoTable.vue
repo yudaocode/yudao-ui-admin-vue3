@@ -57,5 +57,3 @@ const handleDownload = (url: string) => {
   window.open(url, '_blank')
 }
 </script>
-
-<style scoped></style>

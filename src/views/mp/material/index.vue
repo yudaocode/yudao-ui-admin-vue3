@@ -16,14 +16,15 @@
         <template #label>
           <span> <Icon icon="ep:picture" />图片 </span>
         </template>
-        <Upload
+        <UploadFile
           v-hasPermi="['mp:material:upload-permanent']"
           :type="MaterialType.Image"
           @uploaded="getList"
         >
           支持 bmp/png/jpeg/jpg/gif 格式，大小不超过 2M
-        </Upload>
-        <Waterfall :loading="loading" :list="list" @delete="handleDelete" />
+        </UploadFile>
+        <!-- 列表 -->
+        <ImageTable :loading="loading" :list="list" @delete="handleDelete" />
         <!-- 分页组件 -->
         <Pagination
           :total="total"
@@ -38,14 +39,13 @@
         <template #label>
           <span> <Icon icon="ep:microphone" />语音 </span>
         </template>
-        <Upload
+        <UploadFile
           v-hasPermi="['mp:material:upload-permanent']"
           :type="MaterialType.Voice"
           @uploaded="getList"
         >
           格式支持 mp3/wma/wav/amr，文件大小不超过 2M，播放长度不超过 60s
-        </Upload>
-
+        </UploadFile>
         <!-- 列表 -->
         <VoiceTable :list="list" :loading="loading" @delete="handleDelete" />
         <!-- 分页组件 -->
@@ -71,7 +71,6 @@
         >
         <!-- 新建视频的弹窗 -->
         <UploadVideo v-model="showCreateVideo" />
-
         <!-- 列表 -->
         <VideoTable :list="list" :loading="loading" @delete="handleDelete" />
         <!-- 分页组件 -->
@@ -85,21 +84,18 @@
     </el-tabs>
   </ContentWrap>
 </template>
-
 <script lang="ts" setup name="MpMaterial">
 import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
-import Waterfall from './components/Waterfall.vue'
+import ImageTable from './components/ImageTable.vue'
 import VoiceTable from './components/VoiceTable.vue'
 import VideoTable from './components/VideoTable.vue'
-import Upload from './components/Upload.vue'
+import UploadFile from './components/UploadFile.vue'
 import UploadVideo from './components/UploadVideo.vue'
 import { MaterialType } from './components/upload'
 import * as MpMaterialApi from '@/api/mp/material'
+const message = useMessage() // 消息
 
-const message = useMessage()
-
-// 素材类型
-const type = ref<MaterialType>(MaterialType.Image)
+const type = ref<MaterialType>(MaterialType.Image) // 素材类型
 const loading = ref(false) // 遮罩层
 const list = ref<any[]>([]) // 总条数
 const total = ref(0) // 数据列表
@@ -116,9 +112,7 @@ const queryParams: QueryParams = reactive({
   accountId: undefined,
   permanent: true
 })
-
-// === 视频上传，独有变量 ===
-const showCreateVideo = ref(false)
+const showCreateVideo = ref(false) // 是否新建视频的弹窗
 
 /** 侦听公众号变化 **/
 const onAccountChanged = (id?: number) => {
@@ -126,7 +120,6 @@ const onAccountChanged = (id?: number) => {
   getList()
 }
 
-// ======================== 列表查询 ========================
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -148,21 +141,19 @@ const handleQuery = () => {
   getList()
 }
 
+/** 处理 table 切换 */
 const onTabChange = () => {
-  // 提前情况数据，避免tab切换后显示垃圾数据
+  // 提前情况数据，避免 tab 切换后显示垃圾数据
   list.value = []
   total.value = 0
-
   // 从第一页开始查询
   handleQuery()
 }
 
-// ======================== 其它操作 ========================
+/** 处理删除操作 */
 const handleDelete = async (id: number) => {
   await message.confirm('此操作将永久删除该文件, 是否继续?')
   await MpMaterialApi.deletePermanentMaterial(id)
   message.alertSuccess('删除成功')
 }
 </script>
-
-<style lang="scss" scoped></style>

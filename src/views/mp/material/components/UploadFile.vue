@@ -20,7 +20,6 @@
     </template>
   </el-upload>
 </template>
-
 <script setup lang="ts">
 import type { UploadProps, UploadUserFile } from 'element-plus'
 import {
@@ -66,5 +65,3 @@ const handleUploadSuccess: UploadProps['onSuccess'] = (res: any) => {
   emit('uploaded')
 }
 </script>
-
-<style scoped></style>

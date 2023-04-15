@@ -1,10 +1,9 @@
 import type { UploadProps, UploadRawFile } from 'element-plus'
 import { getAccessToken } from '@/utils/auth'
-
-const message = useMessage()
-
-const HEADERS = { Authorization: 'Bearer ' + getAccessToken() }
-const UPLOAD_URL = 'http://127.0.0.1:8000/upload/' //import.meta.env.VITE_BASE_URL + '/admin-api/mp/material/upload-permanent'
+const message = useMessage() // 消息
+const HEADERS = { Authorization: 'Bearer ' + getAccessToken() } // 请求头
+// const UPLOAD_URL = 'http://127.0.0.1:8000/upload/' // 上传地址
+const UPLOAD_URL = import.meta.env.VITE_BASE_URL + '/admin-api/mp/material/upload-permanent' // 上传地址
 
 enum MaterialType {
   Image = 'image',
@@ -22,7 +21,6 @@ const beforeUpload = (rawFile: UploadRawFile, materialType: MaterialType): boole
   let allowTypes: string[] = []
   let maxSizeMB = 0
   let name = ''
-
   switch (materialType) {
     case MaterialType.Image:
       allowTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/jpg']
@@ -38,18 +36,18 @@ const beforeUpload = (rawFile: UploadRawFile, materialType: MaterialType): boole
       allowTypes = ['video/mp4']
       maxSizeMB = 10
       name = '视频'
+      break
   }
-
+  // 格式不正确
   if (!allowTypes.includes(rawFile.type)) {
     message.error(`上传${name}格式不对!`)
     return false
   }
-
+  // 大小不正确
   if (rawFile.size / 1024 / 1024 > maxSizeMB) {
     message.error(`上传${name}大小不能超过${maxSizeMB}M!`)
     return false
   }
-
   return true
 }
 
