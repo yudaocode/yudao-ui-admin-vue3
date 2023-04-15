@@ -1,22 +1,22 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="140px"
-      v-loading="formLoading"
     >
       <el-form-item label="短信渠道编号" prop="channelId">
         <el-select v-model="formData.channelId" placeholder="请选择短信渠道编号">
           <el-option
             v-for="channel in channelList"
             :key="channel.id"
-            :value="channel.id"
             :label="
               channel.signature +
               `【 ${getDictLabel(DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE, channel.code)}】`
             "
+            :value="channel.id"
           />
         </el-select>
       </el-form-item>
@@ -37,7 +37,7 @@
         <el-input v-model="formData.name" placeholder="请输入模板名称" />
       </el-form-item>
       <el-form-item label="模板内容" prop="content">
-        <el-input type="textarea" v-model="formData.content" placeholder="请输入模板内容" />
+        <el-input v-model="formData.content" placeholder="请输入模板内容" type="textarea" />
       </el-form-item>
       <el-form-item label="开启状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -58,16 +58,17 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
+<script lang="ts" name="SystemSmsTemplateForm" setup>
+import { DICT_TYPE, getDictLabel, getIntDictOptions } from '@/utils/dict'
 import * as SmsTemplateApi from '@/api/system/sms/smsTemplate'
 import * as SmsChannelApi from '@/api/system/sms/smsChannel'
 import { CommonStatusEnum } from '@/utils/constants'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

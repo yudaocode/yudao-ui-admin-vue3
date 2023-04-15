@@ -1,5 +1,6 @@
-<script setup lang="ts">
+<script lang="ts" name="Tooltip" setup>
 import { propTypes } from '@/utils/propTypes'
+
 defineProps({
   titel: propTypes.string.def(''),
   message: propTypes.string.def(''),

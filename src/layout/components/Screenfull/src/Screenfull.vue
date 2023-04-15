@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="ScreenFull" setup>
 import { Icon } from '@/components/Icon'
 import { useFullscreen } from '@vueuse/core'
 import { propTypes } from '@/utils/propTypes'
@@ -22,9 +22,9 @@ const toggleFullscreen = () => {
 <template>
   <div :class="prefixCls" @click="toggleFullscreen">
     <Icon
-      :size="18"
-      :icon="isFullscreen ? 'zmdi:fullscreen-exit' : 'zmdi:fullscreen'"
       :color="color"
+      :icon="isFullscreen ? 'zmdi:fullscreen-exit' : 'zmdi:fullscreen'"
+      :size="18"
     />
   </div>
 </template>

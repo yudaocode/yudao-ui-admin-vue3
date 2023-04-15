@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="UserInfo" setup>
 import { ElMessageBox } from 'element-plus'
 
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'

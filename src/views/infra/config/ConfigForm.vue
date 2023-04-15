@@ -1,11 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="80px"
-      v-loading="formLoading"
     >
       <el-form-item label="参数分类" prop="category">
         <el-input v-model="formData.category" placeholder="请输入参数分类" />
@@ -31,16 +31,16 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" type="textarea" placeholder="请输入内容" />
+        <el-input v-model="formData.remark" placeholder="请输入内容" type="textarea" />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="InfraConfigForm" setup>
 import { DICT_TYPE, getBoolDictOptions } from '@/utils/dict'
 import * as ConfigApi from '@/api/infra/config'
 

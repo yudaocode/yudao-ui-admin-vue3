@@ -1,24 +1,24 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="100px"
-      v-loading="formLoading"
     >
       <el-form-item label="上级菜单">
         <el-tree-select
-          node-key="id"
           v-model="formData.parentId"
-          :props="defaultProps"
           :data="menuTree"
           :default-expanded-keys="[0]"
+          :props="defaultProps"
           check-strictly
+          node-key="id"
         />
       </el-form-item>
       <el-form-item label="菜单名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入菜单名称" clearable />
+        <el-input v-model="formData.name" clearable placeholder="请输入菜单名称" />
       </el-form-item>
       <el-form-item label="菜单类型" prop="type">
         <el-radio-group v-model="formData.type">
@@ -31,35 +31,35 @@
           </el-radio-button>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="菜单图标" v-if="formData.type !== 3">
+      <el-form-item v-if="formData.type !== 3" label="菜单图标">
         <IconSelect v-model="formData.icon" clearable />
       </el-form-item>
-      <el-form-item label="路由地址" prop="path" v-if="formData.type !== 3">
+      <el-form-item v-if="formData.type !== 3" label="路由地址" prop="path">
         <template #label>
           <Tooltip
-            titel="路由地址"
             message="访问的路由地址，如：`user`。如需外网地址时，则以 `http(s)://` 开头"
+            titel="路由地址"
           />
         </template>
-        <el-input v-model="formData.path" placeholder="请输入路由地址" clearable />
+        <el-input v-model="formData.path" clearable placeholder="请输入路由地址" />
       </el-form-item>
-      <el-form-item label="组件地址" prop="component" v-if="formData.type === 2">
-        <el-input v-model="formData.component" placeholder="例如说：system/user/index" clearable />
+      <el-form-item v-if="formData.type === 2" label="组件地址" prop="component">
+        <el-input v-model="formData.component" clearable placeholder="例如说：system/user/index" />
       </el-form-item>
-      <el-form-item label="组件名字" prop="componentName" v-if="formData.type === 2">
-        <el-input v-model="formData.componentName" placeholder="例如说：SystemUser" clearable />
+      <el-form-item v-if="formData.type === 2" label="组件名字" prop="componentName">
+        <el-input v-model="formData.componentName" clearable placeholder="例如说：SystemUser" />
       </el-form-item>
-      <el-form-item label="权限标识" prop="permission" v-if="formData.type !== 1">
+      <el-form-item v-if="formData.type !== 1" label="权限标识" prop="permission">
         <template #label>
           <Tooltip
-            titel="权限标识"
             message="Controller 方法上的权限字符，如：@PreAuthorize(`@ss.hasPermission('system:user:list')`)"
+            titel="权限标识"
           />
         </template>
-        <el-input v-model="formData.permission" placeholder="请输入权限标识" clearable />
+        <el-input v-model="formData.permission" clearable placeholder="请输入权限标识" />
       </el-form-item>
       <el-form-item label="显示排序" prop="sort">
-        <el-input-number v-model="formData.sort" controls-position="right" :min="0" clearable />
+        <el-input-number v-model="formData.sort" :min="0" clearable controls-position="right" />
       </el-form-item>
       <el-form-item label="菜单状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -72,52 +72,53 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="显示状态" prop="visible" v-if="formData.type !== 3">
+      <el-form-item v-if="formData.type !== 3" label="显示状态" prop="visible">
         <template #label>
-          <Tooltip titel="显示状态" message="选择隐藏时，路由将不会出现在侧边栏，但仍然可以访问" />
+          <Tooltip message="选择隐藏时，路由将不会出现在侧边栏，但仍然可以访问" titel="显示状态" />
         </template>
         <el-radio-group v-model="formData.visible">
-          <el-radio border key="true" :label="true">显示</el-radio>
-          <el-radio border key="false" :label="false">隐藏</el-radio>
+          <el-radio key="true" :label="true" border>显示</el-radio>
+          <el-radio key="false" :label="false" border>隐藏</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="总是显示" prop="alwaysShow" v-if="formData.type !== 3">
+      <el-form-item v-if="formData.type !== 3" label="总是显示" prop="alwaysShow">
         <template #label>
           <Tooltip
-            titel="总是显示"
             message="选择不是时，当该菜单只有一个子菜单时，不展示自己，直接展示子菜单"
+            titel="总是显示"
           />
         </template>
         <el-radio-group v-model="formData.alwaysShow">
-          <el-radio border key="true" :label="true">总是</el-radio>
-          <el-radio border key="false" :label="false">不是</el-radio>
+          <el-radio key="true" :label="true" border>总是</el-radio>
+          <el-radio key="false" :label="false" border>不是</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="缓存状态" prop="keepAlive" v-if="formData.type === 2">
+      <el-form-item v-if="formData.type === 2" label="缓存状态" prop="keepAlive">
         <template #label>
           <Tooltip
-            titel="缓存状态"
             message="选择缓存时，则会被 `keep-alive` 缓存，必须填写「组件名称」字段"
+            titel="缓存状态"
           />
         </template>
         <el-radio-group v-model="formData.keepAlive">
-          <el-radio border key="true" :label="true">缓存</el-radio>
-          <el-radio border key="false" :label="false">不缓存</el-radio>
+          <el-radio key="true" :label="true" border>缓存</el-radio>
+          <el-radio key="false" :label="false" border>不缓存</el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemMenuForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as MenuApi from '@/api/system/menu'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
-import { SystemMenuTypeEnum, CommonStatusEnum } from '@/utils/constants'
-import { handleTree, defaultProps } from '@/utils/tree'
+import { CommonStatusEnum, SystemMenuTypeEnum } from '@/utils/constants'
+import { defaultProps, handleTree } from '@/utils/tree'
+
 const { wsCache } = useCache()
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

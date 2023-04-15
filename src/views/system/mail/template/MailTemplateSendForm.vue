@@ -1,14 +1,14 @@
 <template>
-  <Dialog title="测试" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" title="测试">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="120px"
-      v-loading="formLoading"
     >
       <el-form-item label="模板内容" prop="content">
-        <Editor :model-value="formData.content" readonly height="150px" />
+        <Editor :model-value="formData.content" height="150px" readonly />
       </el-form-item>
       <el-form-item label="收件邮箱" prop="mail">
         <el-input v-model="formData.mail" placeholder="请输入收件邮箱" />
@@ -26,13 +26,14 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemMailTemplateSendForm" setup>
 import * as MailTemplateApi from '@/api/system/mail/template'
+
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示

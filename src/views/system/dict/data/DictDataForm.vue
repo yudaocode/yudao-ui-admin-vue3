@@ -1,16 +1,16 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="80px"
-      v-loading="formLoading"
     >
       <el-form-item label="字典类型" prop="type">
         <el-input
-          :disabled="typeof formData.id !== 'undefined'"
           v-model="formData.dictType"
+          :disabled="typeof formData.id !== 'undefined'"
           placeholder="请输入参数名称"
         />
       </el-form-item>
@@ -21,7 +21,7 @@
         <el-input v-model="formData.value" placeholder="请输入数据键值" />
       </el-form-item>
       <el-form-item label="显示排序" prop="sort">
-        <el-input-number v-model="formData.sort" controls-position="right" :min="0" />
+        <el-input-number v-model="formData.sort" :min="0" controls-position="right" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -48,19 +48,20 @@
         <el-input v-model="formData.cssClass" placeholder="请输入 CSS Class" />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" type="textarea" placeholder="请输入内容" />
+        <el-input v-model="formData.remark" placeholder="请输入内容" type="textarea" />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemDictDataForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as DictDataApi from '@/api/system/dict/dict.data'
 import { CommonStatusEnum } from '@/utils/constants'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

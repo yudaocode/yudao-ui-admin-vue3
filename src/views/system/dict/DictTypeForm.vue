@@ -1,19 +1,19 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="80px"
-      v-loading="formLoading"
     >
       <el-form-item label="字典名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入字典名称" />
       </el-form-item>
       <el-form-item label="字典类型" prop="type">
         <el-input
-          :disabled="typeof formData.id !== 'undefined'"
           v-model="formData.type"
+          :disabled="typeof formData.id !== 'undefined'"
           placeholder="请输入参数名称"
         />
       </el-form-item>
@@ -29,19 +29,20 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" type="textarea" placeholder="请输入内容" />
+        <el-input v-model="formData.remark" placeholder="请输入内容" type="textarea" />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemDictTypeForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as DictTypeApi from '@/api/system/dict/dict.type'
 import { CommonStatusEnum } from '@/utils/constants'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

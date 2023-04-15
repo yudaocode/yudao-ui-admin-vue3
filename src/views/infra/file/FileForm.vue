@@ -1,23 +1,23 @@
 <template>
-  <Dialog title="上传文件" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" title="上传文件">
     <el-upload
       ref="uploadRef"
-      :action="url"
-      :data="data"
-      :headers="uploadHeaders"
       v-model:file-list="fileList"
-      drag
-      accept=".jpg, .png, .gif"
-      :limit="1"
-      :on-success="submitFormSuccess"
-      :on-exceed="handleExceed"
-      :on-error="submitFormError"
-      :on-change="handleFileChange"
+      :action="url"
       :auto-upload="false"
+      :data="data"
       :disabled="formLoading"
+      :headers="uploadHeaders"
+      :limit="1"
+      :on-change="handleFileChange"
+      :on-error="submitFormError"
+      :on-exceed="handleExceed"
+      :on-success="submitFormSuccess"
+      accept=".jpg, .png, .gif"
+      drag
     >
       <i class="el-icon-upload"></i>
-      <div class="el-upload__text"> 将文件拖到此处，或 <em>点击上传</em> </div>
+      <div class="el-upload__text"> 将文件拖到此处，或 <em>点击上传</em></div>
       <template #tip>
         <div class="el-upload__tip" style="color: red">
           提示：仅允许导入 jpg、png、gif 格式文件！
@@ -25,13 +25,14 @@
       </template>
     </el-upload>
     <template #footer>
-      <el-button @click="submitFileForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitFileForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="InfraFileForm" setup>
 import { getAccessToken, getTenantId } from '@/utils/auth'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

@@ -1,8 +1,8 @@
-<script setup lang="ts">
+<script lang="ts" name="InputPassword" setup>
 import { propTypes } from '@/utils/propTypes'
 import { useConfigGlobal } from '@/hooks/web/useConfigGlobal'
-import { zxcvbn } from '@zxcvbn-ts/core'
 import type { ZxcvbnResult } from '@zxcvbn-ts/core'
+import { zxcvbn } from '@zxcvbn-ts/core'
 import { useDesign } from '@/hooks/web/useDesign'
 
 const { getPrefixCls } = useDesign()
@@ -57,9 +57,9 @@ const getIconName = computed(() => (unref(textType) === 'password' ? 'ep:hide' :
 
 <template>
   <div :class="[prefixCls, `${prefixCls}--${configGlobal?.size}`]">
-    <ElInput v-bind="$attrs" v-model="valueRef" :type="textType">
+    <ElInput v-model="valueRef" :type="textType" v-bind="$attrs">
       <template #suffix>
-        <Icon class="el-input__icon cursor-pointer" :icon="getIconName" @click="changeTextType" />
+        <Icon :icon="getIconName" class="el-input__icon cursor-pointer" @click="changeTextType" />
       </template>
     </ElInput>
     <div

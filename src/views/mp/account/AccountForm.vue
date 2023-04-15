@@ -1,11 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="rules"
       label-width="120px"
-      v-loading="formLoading"
     >
       <el-form-item label="名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入名称" />
@@ -59,17 +59,18 @@
         <el-input v-model="formData.aesKey" placeholder="请输入消息加解密密钥" />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
+        <el-input v-model="formData.remark" placeholder="请输入备注" type="textarea" />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="MpAccountForm" setup>
 import * as AccountApi from '@/api/mp/account'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

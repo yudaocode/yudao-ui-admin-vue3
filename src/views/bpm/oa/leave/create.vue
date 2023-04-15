@@ -42,7 +42,7 @@
     </el-form-item>
   </el-form>
 </template>
-<script setup lang="ts">
+<script setup name="BpmOALeaveCreate" lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as LeaveApi from '@/api/bpm/leave'
 import { useTagsViewStore } from '@/store/modules/tagsView'

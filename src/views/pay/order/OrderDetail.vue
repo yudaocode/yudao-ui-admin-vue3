@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="详情" v-model="dialogVisible" width="50%">
+  <Dialog v-model="dialogVisible" title="详情" width="50%">
     <el-descriptions :column="2">
       <el-descriptions-item label="商户名称">{{ detailData.merchantName }}</el-descriptions-item>
       <el-descriptions-item label="应用名称">{{ detailData.appName }}</el-descriptions-item>
@@ -66,7 +66,7 @@
       </el-descriptions-item>
     </el-descriptions>
     <el-divider />
-    <el-descriptions :column="1" direction="vertical" border>
+    <el-descriptions :column="1" border direction="vertical">
       <el-descriptions-item label="商品描述">
         {{ detailData.body }}
       </el-descriptions-item>
@@ -78,7 +78,7 @@
     </el-descriptions>
   </Dialog>
 </template>
-<script setup lang="ts" name="orderForm">
+<script lang="ts" name="PayOrderDetail" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import * as OrderApi from '@/api/pay/order'
 import { formatDate } from '@/utils/formatTime'

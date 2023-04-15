@@ -1,11 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="80px"
-      v-loading="formLoading"
     >
       <el-form-item label="敏感词" prop="name">
         <el-input v-model="formData.name" placeholder="请输入敏感词" />
@@ -27,9 +27,9 @@
       <el-form-item label="标签" prop="tags">
         <el-select
           v-model="formData.tags"
-          multiple
-          filterable
           allow-create
+          filterable
+          multiple
           placeholder="请选择文章标签"
           style="width: 380px"
         >
@@ -38,15 +38,16 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts" name="SensitiveWordForm">
+<script lang="ts" name="SystemSensitiveWordForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
 import { CommonStatusEnum } from '@/utils/constants'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

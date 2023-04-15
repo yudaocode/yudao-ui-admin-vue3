@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="Dialog" setup>
 import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
 
@@ -59,13 +59,13 @@ const dialogStyle = computed(() => {
 
 <template>
   <ElDialog
-    v-bind="getBindValue"
-    :fullscreen="isFullscreen"
-    destroy-on-close
-    lock-scroll
-    draggable
-    :width="width"
     :close-on-click-modal="true"
+    :fullscreen="isFullscreen"
+    :width="width"
+    destroy-on-close
+    draggable
+    lock-scroll
+    v-bind="getBindValue"
   >
     <template #header>
       <div class="flex justify-between">
@@ -74,8 +74,8 @@ const dialogStyle = computed(() => {
         </slot>
         <Icon
           v-if="fullscreen"
-          class="mr-22px cursor-pointer is-hover mt-2px z-10"
           :icon="isFullscreen ? 'zmdi:fullscreen-exit' : 'zmdi:fullscreen'"
+          class="mr-22px cursor-pointer is-hover mt-2px z-10"
           color="var(--el-color-info)"
           @click="toggleFull"
         />
@@ -83,7 +83,7 @@ const dialogStyle = computed(() => {
     </template>
 
     <!-- 情况一：如果 scroll 为 true，说明开启滚动条 -->
-    <ElScrollbar :style="dialogStyle" v-if="scroll">
+    <ElScrollbar v-if="scroll" :style="dialogStyle">
       <slot></slot>
     </ElScrollbar>
     <!-- 情况二：如果 scroll 为 false，说明关闭滚动条滚动条 -->

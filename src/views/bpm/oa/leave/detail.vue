@@ -16,7 +16,7 @@
     </el-descriptions>
   </ContentWrap>
 </template>
-<script setup lang="ts" name="OALeaveCreate">
+<script lang="ts" name="BpmOALeaveDetail" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'

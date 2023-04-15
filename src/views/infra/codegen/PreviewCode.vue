@@ -1,48 +1,48 @@
 <template>
   <Dialog
-    title="代码预览"
     v-model="dialogVisible"
     align-center
-    width="80%"
     class="app-infra-codegen-preview-container"
+    title="代码预览"
+    width="80%"
   >
     <div class="flex">
       <!-- 代码目录树 -->
       <el-card
-        class="w-1/3"
-        :gutter="12"
-        shadow="hover"
         v-loading="loading"
+        :gutter="12"
+        class="w-1/3"
         element-loading-text="生成文件目录中..."
+        shadow="hover"
       >
         <el-scrollbar height="calc(100vh - 88px - 40px)">
           <el-tree
             ref="treeRef"
-            node-key="id"
             :data="preview.fileTree"
             :expand-on-click-node="false"
-            highlight-current
-            @node-click="handleNodeClick"
             default-expand-all
+            highlight-current
+            node-key="id"
+            @node-click="handleNodeClick"
           />
         </el-scrollbar>
       </el-card>
       <!-- 代码 -->
       <el-card
-        class="w-2/3 ml-3"
-        :gutter="12"
-        shadow="hover"
         v-loading="loading"
+        :gutter="12"
+        class="w-2/3 ml-3"
         element-loading-text="加载代码中..."
+        shadow="hover"
       >
         <el-tabs v-model="preview.activeName">
           <el-tab-pane
             v-for="item in previewCodegen"
+            :key="item.filePath"
             :label="item.filePath.substring(item.filePath.lastIndexOf('/') + 1)"
             :name="item.filePath"
-            :key="item.filePath"
           >
-            <el-button text type="primary" class="float-right" @click="copy(item.code)">
+            <el-button class="float-right" text type="primary" @click="copy(item.code)">
               {{ t('common.copy') }}
             </el-button>
             <div v-highlight>
@@ -54,10 +54,11 @@
     </div>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="InfraCodegenPreviewCode" setup>
 import { useClipboard } from '@vueuse/core'
 import { handleTree2 } from '@/utils/tree'
 import * as CodegenApi from '@/api/infra/codegen'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

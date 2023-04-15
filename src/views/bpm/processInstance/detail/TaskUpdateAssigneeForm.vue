@@ -1,11 +1,11 @@
 <template>
-  <Dialog title="转派审批人" v-model="dialogVisible" width="500">
+  <Dialog v-model="dialogVisible" title="转派审批人" width="500">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="110px"
-      v-loading="formLoading"
     >
       <el-form-item label="新审批人" prop="assigneeUserId">
         <el-select v-model="formData.assigneeUserId" clearable style="width: 100%">
@@ -19,12 +19,12 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="BpmTaskUpdateAssigneeForm" setup>
 import * as TaskApi from '@/api/bpm/task'
 import * as UserApi from '@/api/system/user'
 

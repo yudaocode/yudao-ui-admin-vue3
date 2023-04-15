@@ -4,23 +4,23 @@
       <LoginFormTitle style="width: 100%" />
     </el-col>
     <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
-      <el-card shadow="hover" class="mb-10px text-center">
+      <el-card class="mb-10px text-center" shadow="hover">
         <Qrcode :logo="logoImg" />
       </el-card>
     </el-col>
     <el-divider class="enter-x">{{ t('login.qrcode') }}</el-divider>
     <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
       <div class="w-[100%] mt-15px">
-        <XButton class="w-[100%]" :title="t('login.backLogin')" @click="handleBackLogin()" />
+        <XButton :title="t('login.backLogin')" class="w-[100%]" @click="handleBackLogin()" />
       </div>
     </el-col>
   </el-row>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="QrCodeForm" setup>
 import logoImg from '@/assets/imgs/logo.png'
 
 import LoginFormTitle from './LoginFormTitle.vue'
-import { useLoginState, LoginStateEnum } from './useLogin'
+import { LoginStateEnum, useLoginState } from './useLogin'
 
 const { t } = useI18n()
 const { handleBackLogin, getLoginState } = useLoginState()

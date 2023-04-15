@@ -1,6 +1,6 @@
 <template>
   <Error @error-click="push('/')" />
 </template>
-<script setup lang="ts">
+<script lang="ts" name="Error404" setup>
 const { push } = useRouter()
 </script>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="InterfaceDisplay" setup>
 import { setCssVar } from '@/utils'
 
 import { useDesign } from '@/hooks/web/useDesign'

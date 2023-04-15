@@ -1,18 +1,18 @@
 <template>
-  <Dialog title="测试" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" title="测试">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="140px"
-      v-loading="formLoading"
     >
       <el-form-item label="模板内容" prop="content">
         <el-input
           v-model="formData.content"
-          type="textarea"
           placeholder="请输入模板内容"
           readonly
+          type="textarea"
         />
       </el-form-item>
       <el-form-item label="手机号" prop="mobile">
@@ -31,13 +31,14 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemSmsTemplateSendForm" setup>
 import * as SmsTemplateApi from '@/api/system/sms/smsTemplate'
+
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示

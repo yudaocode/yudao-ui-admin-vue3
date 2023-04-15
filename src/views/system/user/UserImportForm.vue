@@ -1,31 +1,32 @@
 <template>
-  <Dialog title="用户导入" v-model="dialogVisible" width="400">
+  <Dialog v-model="dialogVisible" title="用户导入" width="400">
     <el-upload
       ref="uploadRef"
-      :action="importUrl + '?updateSupport=' + updateSupport"
-      :headers="uploadHeaders"
       v-model:file-list="fileList"
-      drag
-      accept=".xlsx, .xls"
-      :limit="1"
-      :on-success="submitFormSuccess"
-      :on-exceed="handleExceed"
-      :on-error="submitFormError"
+      :action="importUrl + '?updateSupport=' + updateSupport"
       :auto-upload="false"
       :disabled="formLoading"
+      :headers="uploadHeaders"
+      :limit="1"
+      :on-error="submitFormError"
+      :on-exceed="handleExceed"
+      :on-success="submitFormSuccess"
+      accept=".xlsx, .xls"
+      drag
     >
       <Icon icon="ep:upload" />
       <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
       <template #tip>
         <div class="el-upload__tip text-center">
           <div class="el-upload__tip">
-            <el-checkbox v-model="updateSupport" /> 是否更新已经存在的用户数据
+            <el-checkbox v-model="updateSupport" />
+            是否更新已经存在的用户数据
           </div>
           <span>仅允许导入 xls、xlsx 格式文件。</span>
           <el-link
-            type="primary"
             :underline="false"
             style="font-size: 12px; vertical-align: baseline"
+            type="primary"
             @click="importTemplate"
           >
             下载模板
@@ -34,15 +35,16 @@
       </template>
     </el-upload>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script lang="ts" setup>
+<script lang="ts" name="SystemUserImportForm" setup>
 import * as UserApi from '@/api/system/user'
 import { getAccessToken, getTenantId } from '@/utils/auth'
 import download from '@/utils/download'
+
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示

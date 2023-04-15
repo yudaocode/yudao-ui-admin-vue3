@@ -1,20 +1,20 @@
 <template>
-  <el-card class="box-card" v-loading="loading">
+  <el-card v-loading="loading" class="box-card">
     <template #header>
       <span class="el-icon-picture-outline">流程图</span>
     </template>
     <my-process-viewer
       key="designer"
-      :value="bpmnXml"
-      v-bind="bpmnControlForm"
-      :prefix="bpmnControlForm.prefix"
       :activityData="activityList"
+      :prefix="bpmnControlForm.prefix"
       :processInstanceData="processInstance"
       :taskData="tasks"
+      :value="bpmnXml"
+      v-bind="bpmnControlForm"
     />
   </el-card>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="BpmProcessInstanceBpmnViewer" setup>
 import { propTypes } from '@/utils/propTypes'
 import * as ActivityApi from '@/api/bpm/activity'
 // import * as DefinitionApi from '@/api/bpm/definition'

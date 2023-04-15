@@ -1,24 +1,24 @@
 <template>
-  <Dialog title="导入流程" v-model="dialogVisible" width="400">
+  <Dialog v-model="dialogVisible" title="导入流程" width="400">
     <div>
       <el-upload
         ref="uploadRef"
-        :action="importUrl"
-        :headers="uploadHeaders"
-        :data="formData"
-        name="bpmnFile"
         v-model:file-list="fileList"
-        drag
+        :action="importUrl"
         :auto-upload="false"
-        accept=".bpmn, .xml"
+        :data="formData"
+        :disabled="formLoading"
+        :headers="uploadHeaders"
         :limit="1"
+        :on-error="submitFormError"
         :on-exceed="handleExceed"
         :on-success="submitFormSuccess"
-        :on-error="submitFormError"
-        :disabled="formLoading"
+        accept=".bpmn, .xml"
+        drag
+        name="bpmnFile"
       >
         <Icon class="el-icon--upload" icon="ep:upload-filled" />
-        <div class="el-upload__text"> 将文件拖到此处，或 <em>点击上传</em> </div>
+        <div class="el-upload__text"> 将文件拖到此处，或 <em>点击上传</em></div>
         <template #tip>
           <div class="el-upload__tip" style="color: red">
             提示：仅允许导入“bpm”或“xml”格式文件！
@@ -33,10 +33,10 @@
                 />
               </el-form-item>
               <el-form-item label="流程名称" prop="name">
-                <el-input v-model="formData.name" placeholder="请输入流程名称" clearable />
+                <el-input v-model="formData.name" clearable placeholder="请输入流程名称" />
               </el-form-item>
               <el-form-item label="流程描述" prop="description">
-                <el-input type="textarea" v-model="formData.description" clearable />
+                <el-input v-model="formData.description" clearable type="textarea" />
               </el-form-item>
             </el-form>
           </div>
@@ -44,13 +44,14 @@
       </el-upload>
     </div>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="ModelImportForm" setup>
 import { getAccessToken, getTenantId } from '@/utils/auth'
+
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示

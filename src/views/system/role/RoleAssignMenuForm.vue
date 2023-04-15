@@ -1,6 +1,6 @@
 <template>
-  <Dialog title="菜单权限" v-model="dialogVisible">
-    <el-form ref="formRef" :model="formData" label-width="80px" v-loading="formLoading">
+  <Dialog v-model="dialogVisible" title="菜单权限">
+    <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
       <el-form-item label="角色名称">
         <el-tag>{{ formData.name }}</el-tag>
       </el-form-item>
@@ -13,42 +13,43 @@
             全选/全不选:
             <el-switch
               v-model="treeNodeAll"
-              inline-prompt
               active-text="是"
               inactive-text="否"
+              inline-prompt
               @change="handleCheckedTreeNodeAll"
             />
             全部展开/折叠:
             <el-switch
               v-model="menuExpand"
-              inline-prompt
               active-text="展开"
               inactive-text="折叠"
+              inline-prompt
               @change="handleCheckedTreeExpand"
             />
           </template>
           <el-tree
             ref="treeRef"
+            :data="menuOptions"
+            :props="defaultProps"
+            empty-text="加载中，请稍候"
             node-key="id"
             show-checkbox
-            :props="defaultProps"
-            :data="menuOptions"
-            empty-text="加载中，请稍候"
           />
         </el-card>
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
-import { handleTree, defaultProps } from '@/utils/tree'
+<script lang="ts" name="SystemRoleAssignMenuForm" setup>
+import { defaultProps, handleTree } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'
 import * as MenuApi from '@/api/system/menu'
 import * as PermissionApi from '@/api/system/permission'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

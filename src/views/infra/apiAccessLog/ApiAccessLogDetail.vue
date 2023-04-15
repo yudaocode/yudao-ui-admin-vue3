@@ -1,6 +1,6 @@
 <template>
-  <Dialog title="详情" v-model="dialogVisible" :scroll="true" :max-height="500" width="800">
-    <el-descriptions border :column="1">
+  <Dialog v-model="dialogVisible" :max-height="500" :scroll="true" title="详情" width="800">
+    <el-descriptions :column="1" border>
       <el-descriptions-item label="日志主键" min-width="120">
         {{ detailData.id }}
       </el-descriptions-item>
@@ -33,14 +33,14 @@
       <el-descriptions-item label="操作结果">
         <div v-if="detailData.resultCode === 0">正常</div>
         <div v-else-if="detailData.resultCode > 0"
-          >失败 | {{ detailData.resultCode }} | {{ detailData.resultMsg }}</div
-        >
+          >失败 | {{ detailData.resultCode }} | {{ detailData.resultMsg }}
+        </div>
       </el-descriptions-item>
     </el-descriptions>
   </Dialog>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" name="ApiAccessLogDetail" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as ApiAccessLog from '@/api/infra/apiAccessLog'

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="CountTo" setup>
 import { PropType } from 'vue'
 import { isNumber } from '@/utils/is'
 import { propTypes } from '@/utils/propTypes'

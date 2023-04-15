@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="IconSelect" setup>
 import { CSSProperties } from 'vue'
 import { cloneDeep } from 'lodash-es'
 import { IconJson } from '@/components/Icon/src/data'
@@ -116,13 +116,13 @@ watch(
     <ElInput v-model="inputValue" @click="visible = !visible">
       <template #append>
         <ElPopover
-          :width="350"
-          trigger="click"
-          popper-class="pure-popper"
           :popper-options="{
             placement: 'auto'
           }"
           :visible="visible"
+          :width="350"
+          popper-class="pure-popper"
+          trigger="click"
         >
           <template #reference>
             <div
@@ -133,7 +133,7 @@ watch(
             </div>
           </template>
 
-          <ElInput class="p-2" v-model="filterValue" placeholder="搜索图标" clearable />
+          <ElInput v-model="filterValue" class="p-2" clearable placeholder="搜索图标" />
           <ElDivider border-style="dashed" />
 
           <ElTabs v-model="currentActiveType" @tab-click="handleClick">
@@ -143,15 +143,15 @@ watch(
               :label="pane.label"
               :name="pane.name"
             >
-              <ElDivider class="tab-divider" border-style="dashed" />
+              <ElDivider border-style="dashed" class="tab-divider" />
               <ElScrollbar height="220px">
                 <ul class="flex flex-wrap px-2 ml-2">
                   <li
                     v-for="(item, key) in pageList"
                     :key="key"
+                    :style="iconItemStyle(item)"
                     :title="item"
                     class="icon-item p-2 w-1/10 cursor-pointer mr-2 mt-1 flex justify-center items-center border border-solid"
-                    :style="iconItemStyle(item)"
                     @click="onChangeIcon(item)"
                   >
                     <Icon :icon="currentActiveType + item" />
@@ -163,13 +163,13 @@ watch(
           <ElDivider border-style="dashed" />
 
           <ElPagination
-            small
-            :total="iconCount"
-            :page-size="pageSize"
             :current-page="currentPage"
+            :page-size="pageSize"
+            :total="iconCount"
             background
-            layout="prev, pager, next"
             class="flex items-center justify-center h-10"
+            layout="prev, pager, next"
+            small
             @current-change="onCurrentChange"
           />
         </ElPopover>

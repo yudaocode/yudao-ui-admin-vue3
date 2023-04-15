@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="LocaleDropdown" setup>
 import { useLocaleStore } from '@/store/modules/locale'
 import { useLocale } from '@/hooks/web/useLocale'
 import { propTypes } from '@/utils/propTypes'
@@ -33,11 +33,11 @@ const setLang = (lang: LocaleType) => {
 <template>
   <ElDropdown :class="prefixCls" trigger="click" @command="setLang">
     <Icon
-      :size="18"
-      icon="ion:language-sharp"
-      class="cursor-pointer"
       :class="$attrs.class"
       :color="color"
+      :size="18"
+      class="cursor-pointer"
+      icon="ion:language-sharp"
     />
     <template #dropdown>
       <ElDropdownMenu>
