@@ -231,7 +231,7 @@
                     :on-success="handleUploadSuccess"
                   >
                     <template #trigger>
-                      <el-button type="text">本地上传</el-button>
+                      <el-button type="primary" link>本地上传</el-button>
                     </template>
                     <el-button type="primary" link @click="openMaterial" style="margin-left: 5px"
                       >素材库选择

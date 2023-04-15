@@ -3,14 +3,22 @@
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <!-- TODO @芋艿：调整成 el-form 和 WxAccountSelect  -->
-    <WxAccountSelect @change="accountChanged">
-      <template #actions>
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
+      <el-form-item label="公众号" prop="accountId">
+        <WxAccountSelect @change="onAccountChanged" />
+      </el-form-item>
+      <el-form-item>
         <el-button type="primary" plain @click="handleAdd" v-hasPermi="['mp:draft:create']">
           <Icon icon="ep:plus" />新增
         </el-button>
-      </template>
-    </WxAccountSelect>
+      </el-form-item>
+    </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
@@ -58,19 +66,17 @@
     />
   </ContentWrap>
 
-  <!-- TODO @Dhb52：迁移成独立路由 -->
   <div class="app-container">
     <!-- 添加或修改草稿对话框 -->
-    <Teleport to="body">
-      <el-dialog
-        :title="operateMaterial === 'add' ? '新建图文' : '修改图文'"
-        width="80%"
-        top="20px"
-        v-model="dialogNewsVisible"
-        :before-close="dialogNewsClose"
-        :close-on-click-modal="false"
-      >
-        <div class="left">
+    <el-dialog
+      :title="operateMaterial === 'add' ? '新建图文' : '修改图文'"
+      width="80%"
+      v-model="dialogNewsVisible"
+      :before-close="dialogNewsClose"
+      destroy-on-close
+    >
+      <el-container>
+        <el-aside width="40%">
           <div class="select-item">
             <div v-for="(news, index) in articlesAdd" :key="news.id">
               <div
@@ -105,7 +111,7 @@
                       class="material-img"
                       v-if="news.thumbUrl"
                       :src="news.thumbUrl"
-                      height="100%"
+                      width="100%"
                     />
                   </div>
                 </div>
@@ -133,174 +139,206 @@
               <el-button
                 type="primary"
                 circle
-                @click="plusNews(item)"
+                @click="plusNews"
                 v-if="articlesAdd.length < 8 && operateMaterial === 'add'"
               >
                 <Icon icon="ep:plus" />
               </el-button>
             </el-row>
           </div>
-        </div>
-        <div class="right" v-loading="addMaterialLoading" v-if="articlesAdd.length > 0">
-          <br />
-          <br />
-          <br />
-          <br />
-          <!-- 标题、作者、原文地址 -->
-          <el-input v-model="articlesAdd[isActiveAddNews].title" placeholder="请输入标题（必填）" />
-          <el-input
-            v-model="articlesAdd[isActiveAddNews].author"
-            placeholder="请输入作者"
-            style="margin-top: 5px"
-          />
-          <el-input
-            v-model="articlesAdd[isActiveAddNews].contentSourceUrl"
-            placeholder="请输入原文地址"
-            style="margin-top: 5px"
-          />
-          <!-- 封面和摘要 -->
-          <div class="input-tt">封面和摘要：</div>
-          <div>
-            <div class="thumb-div">
-              <img
-                class="material-img"
-                v-if="articlesAdd[isActiveAddNews].thumbUrl"
-                :src="articlesAdd[isActiveAddNews].thumbUrl"
-                :class="isActiveAddNews === 0 ? 'avatar' : 'avatar1'"
+        </el-aside>
+        <el-main>
+          <div class="" v-loading="addMaterialLoading" v-if="articlesAdd.length > 0">
+            <!-- 标题、作者、原文地址 -->
+            <el-row :gutter="20">
+              <el-input
+                v-model="articlesAdd[isActiveAddNews].title"
+                placeholder="请输入标题（必填）"
               />
-              <Icon
-                v-else
-                icon="ep:plus"
-                class="avatar-uploader-icon"
-                :class="isActiveAddNews === 0 ? 'avatar' : 'avatar1'"
+              <el-input
+                v-model="articlesAdd[isActiveAddNews].author"
+                placeholder="请输入作者"
+                style="margin-top: 5px"
               />
-              <div class="thumb-but">
-                <el-upload
-                  :action="actionUrl"
-                  :headers="headers"
-                  multiple
-                  :limit="1"
-                  :file-list="fileList"
-                  :data="uploadData"
-                  :before-upload="beforeThumbImageUpload"
-                  :on-success="handleUploadSuccess"
-                >
-                  <template #trigger>
-                    <el-button size="small" type="primary">本地上传</el-button>
-                  </template>
-                  <el-button
-                    size="small"
-                    type="primary"
-                    @click="openMaterial"
-                    style="margin-left: 5px"
-                    >素材库选择</el-button
-                  >
-                  <template #tip>
-                    <div class="el-upload__tip">支持 bmp/png/jpeg/jpg/gif 格式，大小不超过 2M</div>
-                  </template>
-                </el-upload>
-              </div>
-              <Teleport to="body">
-                <el-dialog title="选择图片" v-model="dialogImageVisible" width="80%">
-                  <WxMaterialSelect
-                    ref="materialSelectRef"
-                    :objData="{ type: 'image', accountId: queryParams.accountId }"
-                    @select-material="selectMaterial"
+              <el-input
+                v-model="articlesAdd[isActiveAddNews].contentSourceUrl"
+                placeholder="请输入原文地址"
+                style="margin-top: 5px"
+              />
+            </el-row>
+            <!-- 封面和摘要 -->
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <p>封面:</p>
+                <div class="thumb-div">
+                  <el-image
+                    v-if="articlesAdd[isActiveAddNews].thumbUrl"
+                    style="width: 300px; max-height: 300px"
+                    :src="articlesAdd[isActiveAddNews].thumbUrl"
+                    fit="contain"
                   />
-                </el-dialog>
-              </Teleport>
-            </div>
-            <el-input
-              :rows="8"
-              type="textarea"
-              v-model="articlesAdd[isActiveAddNews].digest"
-              placeholder="请输入摘要"
-              class="digest"
-              maxlength="120"
-              style="float: right"
-            />
+                  <Icon
+                    v-else
+                    icon="ep:plus"
+                    class="avatar-uploader-icon"
+                    :class="isActiveAddNews === 0 ? 'avatar' : 'avatar1'"
+                  />
+                  <div class="thumb-but">
+                    <el-upload
+                      :action="uploadUrl"
+                      :headers="headers"
+                      multiple
+                      :limit="1"
+                      :file-list="fileList"
+                      :data="uploadData"
+                      :before-upload="beforeThumbImageUpload"
+                      :on-success="handleUploadSuccess"
+                    >
+                      <template #trigger>
+                        <el-button size="small" type="primary">本地上传</el-button>
+                      </template>
+                      <el-button
+                        size="small"
+                        type="primary"
+                        @click="openMaterial"
+                        style="margin-left: 5px"
+                        >素材库选择</el-button
+                      >
+                      <template #tip>
+                        <div class="el-upload__tip"
+                          >支持 bmp/png/jpeg/jpg/gif 格式，大小不超过 2M</div
+                        >
+                      </template>
+                    </el-upload>
+                  </div>
+                  <el-dialog
+                    title="选择图片"
+                    v-model="dialogImageVisible"
+                    width="80%"
+                    append-to-body
+                  >
+                    <WxMaterialSelect
+                      ref="materialSelectRef"
+                      :objData="{ type: 'image', accountId: queryParams.accountId }"
+                      @select-material="selectMaterial"
+                    />
+                  </el-dialog>
+                </div>
+              </el-col>
+              <el-col :span="12">
+                <p>摘要:</p>
+                <el-input
+                  :rows="8"
+                  type="textarea"
+                  v-model="articlesAdd[isActiveAddNews].digest"
+                  placeholder="请输入摘要"
+                  class="digest"
+                  maxlength="120"
+                />
+              </el-col>
+            </el-row>
+            <!--富文本编辑器组件-->
+            <el-row>
+              <Editor
+                v-model="articlesAdd[isActiveAddNews].content"
+                :editor-config="editorConfig"
+              />
+            </el-row>
           </div>
-          <!--富文本编辑器组件-->
-          <el-row>
-            <WxEditor
-              v-model="articlesAdd[isActiveAddNews].content"
-              :account-id="uploadData.accountId"
-              v-if="hackResetEditor"
-            />
-          </el-row>
-        </div>
-        <template #footer>
-          <el-button @click="dialogNewsVisible = false">取 消</el-button>
-          <el-button type="primary" @click="submitForm">提 交</el-button>
-        </template>
-      </el-dialog>
-    </Teleport>
+        </el-main>
+      </el-container>
+      <template #footer>
+        <el-button @click="dialogNewsVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitForm">提 交</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
-<script setup name="MpDraft">
-import WxEditor from '@/views/mp/components/wx-editor/WxEditor.vue'
+
+<script setup lang="ts" name="MpDraft">
+import { Editor } from '@/components/Editor'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
 import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 import { getAccessToken } from '@/utils/auth'
 import * as MpDraftApi from '@/api/mp/draft'
 import * as MpFreePublishApi from '@/api/mp/freePublish'
-// 可以用改本地数据模拟，避免API调用超限
-// import drafts from './mock'
+import type { UploadFiles, UploadProps, UploadRawFile } from 'element-plus'
+import { createEditorConfig } from './editor-config'
+// import drafts from './mock' // 可以用改本地数据模拟，避免API调用超限
+import { IEditorConfig } from '@wangeditor/editor'
 
 const message = useMessage() // 消息
 
 const loading = ref(true) // 列表的加载中
+const list = ref<any[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
-const queryParams = reactive({
+interface QueryParams {
+  pageNo: number
+  pageSize: number
+  accountId?: number
+}
+const queryParams: QueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   accountId: undefined
 })
 
 // ========== 文件上传 ==========
-const materialSelectRef = ref()
 const BASE_URL = import.meta.env.VITE_BASE_URL
-const actionUrl = ref(BASE_URL + '/admin-api/mp/material/upload-permanent') // 上传永久素材的地址
-const headers = ref({ Authorization: 'Bearer ' + getAccessToken() }) // 设置上传的请求头部
-const fileList = ref([])
-const uploadData = reactive({
+const uploadUrl = BASE_URL + '/admin-api/mp/material/upload-permanent' // 上传永久素材的地址
+const headers = { Authorization: 'Bearer ' + getAccessToken() } // 设置上传的请求头部
+
+const materialSelectRef = ref<InstanceType<typeof WxMaterialSelect> | null>(null)
+const fileList = ref<UploadFiles>([])
+interface UploadData {
+  type: 'image' | 'video' | 'audio'
+  accountId?: number
+}
+const uploadData: UploadData = reactive({
   type: 'image',
   accountId: 1
 })
 
 // ========== 草稿新建 or 修改 ==========
+interface Article {
+  title: string
+  thumbMediaId: string
+  author: string
+  digest: string
+  showCoverPic: string
+  content: string
+  contentSourceUrl: string
+  needOpenComment: string
+  onlyFansCanComment: string
+  thumbUrl: string
+}
 const dialogNewsVisible = ref(false)
 const addMaterialLoading = ref(false) // 添加草稿的 loading 标识
-const articlesAdd = ref([])
+const articlesAdd = ref<Article[]>([])
 const isActiveAddNews = ref(0)
 const dialogImageVisible = ref(false)
-const operateMaterial = ref('add')
+const operateMaterial = ref<'add' | 'edit'>('add')
 const articlesMediaId = ref('')
-const hackResetEditor = ref(false)
 
 /** 侦听公众号变化 **/
-const accountChanged = (accountId) => {
-  setAccountId(accountId)
+const onAccountChanged = (id?: number) => {
+  setAccountId(id)
   getList()
 }
 
 // ======================== 列表查询 ========================
 /** 设置账号编号 */
-const setAccountId = (accountId) => {
-  queryParams.accountId = accountId
-  uploadData.accountId = accountId
+const setAccountId = (id?: number) => {
+  queryParams.accountId = id
+  uploadData.accountId = id
+  editorConfig.value = createEditorConfig(uploadUrl, queryParams.accountId)
 }
+
+const editorConfig = ref<Partial<IEditorConfig>>({})
 
 /** 查询列表 */
 const getList = async () => {
-  // 如果没有选中公众号账号，则进行提示。
-  if (!queryParams.accountId) {
-    message.error('未选中公众号，无法查询草稿箱')
-    return false
-  }
-
   loading.value = true
   try {
     const drafts = await MpDraftApi.getDraftPage(queryParams)
@@ -321,7 +359,6 @@ const getList = async () => {
 // ======================== 新增/修改草稿 ========================
 /** 新增按钮操作 */
 const handleAdd = () => {
-  resetEditor()
   reset()
   // 打开表单，并设置初始化
   operateMaterial.value = 'add'
@@ -329,8 +366,7 @@ const handleAdd = () => {
 }
 
 /** 更新按钮操作 */
-const handleUpdate = (item) => {
-  resetEditor()
+const handleUpdate = (item: any) => {
   reset()
   articlesMediaId.value = item.mediaId
   articlesAdd.value = JSON.parse(JSON.stringify(item.content.newsItem))
@@ -340,39 +376,29 @@ const handleUpdate = (item) => {
 }
 
 /** 提交按钮 */
-const submitForm = () => {
-  // TODO @Dhb52: 参考别的模块写法，改成 await 方式
+const submitForm = async () => {
   addMaterialLoading.value = true
-  if (operateMaterial.value === 'add') {
-    MpDraftApi.createDraft(queryParams.accountId, articlesAdd.value)
-      .then(() => {
-        message.notifySuccess('新增成功')
-        dialogNewsVisible.value = false
-        getList()
-      })
-      .finally(() => {
-        addMaterialLoading.value = false
-      })
-  } else {
-    MpDraftApi.updateDraft(queryParams.accountId, articlesMediaId.value, articlesAdd.value)
-      .then(() => {
-        message.notifySuccess('更新成功')
-        dialogNewsVisible.value = false
-        getList()
-      })
-      .finally(() => {
-        addMaterialLoading.value = false
-      })
+  try {
+    if (operateMaterial.value === 'add') {
+      await MpDraftApi.createDraft(queryParams.accountId, articlesAdd.value)
+      message.notifySuccess('新增成功')
+    } else {
+      await MpDraftApi.updateDraft(queryParams.accountId, articlesMediaId.value, articlesAdd.value)
+      message.notifySuccess('更新成功')
+    }
+  } finally {
+    dialogNewsVisible.value = false
+    addMaterialLoading.value = false
+    await getList()
   }
 }
 
 // 关闭弹窗
-const dialogNewsClose = async (done) => {
+const dialogNewsClose = async (onDone: () => {}) => {
   try {
     await message.confirm('修改内容可能还未保存，确定关闭吗?')
     reset()
-    resetEditor()
-    done()
+    onDone()
   } catch {}
 }
 
@@ -382,16 +408,8 @@ const reset = () => {
   articlesAdd.value = [buildEmptyArticle()]
 }
 
-// 表单 Editor 重置
-const resetEditor = () => {
-  hackResetEditor.value = false // 销毁组件
-  nextTick(() => {
-    hackResetEditor.value = true // 重建组件
-  })
-}
-
 // 将图文向下移动
-const downNews = (index) => {
+const downNews = (index: number) => {
   let temp = articlesAdd.value[index]
   articlesAdd.value[index] = articlesAdd.value[index + 1]
   articlesAdd.value[index + 1] = temp
@@ -399,21 +417,20 @@ const downNews = (index) => {
 }
 
 // 将图文向上移动
-const upNews = (index) => {
-  let temp = articlesAdd.value[index]
+const upNews = (index: number) => {
+  const temp = articlesAdd.value[index]
   articlesAdd.value[index] = articlesAdd.value[index - 1]
   articlesAdd.value[index - 1] = temp
   isActiveAddNews.value = index - 1
 }
 
 // 选中指定 index 的图文
-const activeNews = (index) => {
-  resetEditor()
+const activeNews = (index: number) => {
   isActiveAddNews.value = index
 }
 
 // 删除指定 index 的图文
-const minusNews = async (index) => {
+const minusNews = async (index: number) => {
   try {
     await message.confirm('确定删除该图文吗?')
     articlesAdd.value.splice(index, 1)
@@ -430,7 +447,7 @@ const plusNews = () => {
 }
 
 // 创建空的 article
-const buildEmptyArticle = () => {
+const buildEmptyArticle = (): Article => {
   return {
     title: '',
     thumbMediaId: '',
@@ -446,21 +463,18 @@ const buildEmptyArticle = () => {
 }
 
 // ======================== 文件上传 ========================
-const beforeThumbImageUpload = (file) => {
+const beforeThumbImageUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
   addMaterialLoading.value = true
-  const isType =
-    file.type === 'image/jpeg' ||
-    file.type === 'image/png' ||
-    file.type === 'image/gif' ||
-    file.type === 'image/bmp' ||
-    file.type === 'image/jpg'
+  const isType = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/jpg'].includes(
+    rawFile.type
+  )
   if (!isType) {
     message.error('上传图片格式不对!')
     addMaterialLoading.value = false
     return false
   }
-  const isLt = file.size / 1024 / 1024 < 2
-  if (!isLt) {
+
+  if (rawFile.size / 1024 / 1024 > 2) {
     message.error('上传图片大小不能超过 2M!')
     addMaterialLoading.value = false
     return false
@@ -469,10 +483,10 @@ const beforeThumbImageUpload = (file) => {
   return true
 }
 
-const handleUploadSuccess = (response, file, fileList) => {
+const handleUploadSuccess: UploadProps['onSuccess'] = (res: any) => {
   addMaterialLoading.value = false
-  if (response.code !== 0) {
-    message.error('上传出错：' + response.msg)
+  if (res.code !== 0) {
+    message.error('上传出错：' + res.msg)
     return false
   }
 
@@ -480,12 +494,12 @@ const handleUploadSuccess = (response, file, fileList) => {
   fileList.value = []
 
   // 设置草稿的封面字段
-  articlesAdd.value[isActiveAddNews.value].thumbMediaId = response.data.mediaId
-  articlesAdd.value[isActiveAddNews.value].thumbUrl = response.data.url
+  articlesAdd.value[isActiveAddNews.value].thumbMediaId = res.data.mediaId
+  articlesAdd.value[isActiveAddNews.value].thumbUrl = res.data.url
 }
 
 // 选择 or 上传完素材，设置回草稿
-const selectMaterial = (item) => {
+const selectMaterial = (item: any) => {
   dialogImageVisible.value = false
   articlesAdd.value[isActiveAddNews.value].thumbMediaId = item.mediaId
   articlesAdd.value[isActiveAddNews.value].thumbUrl = item.url
@@ -494,14 +508,10 @@ const selectMaterial = (item) => {
 // 打开素材选择
 const openMaterial = () => {
   dialogImageVisible.value = true
-  try {
-    materialSelectRef.value.queryParams.accountId = queryParams.accountId // 强制设置下 accountId，避免二次查询不对
-    materialSelectRef.value.handleQuery() // 刷新列表，失败也无所谓
-  } catch (e) {}
 }
 
 // ======================== 草稿箱发布 ========================
-const handlePublish = async (item) => {
+const handlePublish = async (item: any) => {
   const accountId = queryParams.accountId
   const mediaId = item.mediaId
   const content =
@@ -515,7 +525,7 @@ const handlePublish = async (item) => {
 }
 
 /** 删除按钮操作 */
-const handleDelete = async (item) => {
+const handleDelete = async (item: any) => {
   const accountId = queryParams.accountId
   const mediaId = item.mediaId
   try {
@@ -543,6 +553,13 @@ const handleDelete = async (item) => {
   padding-top: 5px;
 }
 
+.el-row {
+  margin-bottom: 20px;
+}
+.el-row:last-child {
+  margin-bottom: 0;
+}
+
 .item-name {
   font-size: 12px;
   overflow: hidden;
@@ -556,35 +573,33 @@ const handleDelete = async (item) => {
 }
 
 /*新增图文*/
-.left {
-  display: inline-block;
-  width: 35%;
-  vertical-align: top;
-  margin-top: 200px;
-}
+// .left {
+//   display: inline-block;
+//   vertical-align: top;
+//   margin-top: 200px;
+// }
 
-.right {
-  display: inline-block;
-  width: 60%;
-  margin-top: -40px;
-}
+// .right {
+//   display: inline-block;
+//   width: 100%;
+// }
 
-.avatar-uploader {
-  width: 20%;
-  display: inline-block;
-}
+// .avatar-uploader {
+//   width: 20%;
+//   display: inline-block;
+// }
 
-.avatar-uploader .el-upload {
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  text-align: unset !important;
-}
+// .avatar-uploader .el-upload {
+//   border-radius: 6px;
+//   cursor: pointer;
+//   position: relative;
+//   overflow: hidden;
+//   text-align: unset !important;
+// }
 
-.avatar-uploader .el-upload:hover {
-  border-color: #165dff;
-}
+// .avatar-uploader .el-upload:hover {
+//   border-color: #165dff;
+// }
 
 .avatar-uploader-icon {
   border: 1px solid #d9d9d9;
@@ -607,7 +622,7 @@ const handleDelete = async (item) => {
 }
 
 .digest {
-  width: 60%;
+  width: 100%;
   display: inline-block;
   vertical-align: top;
 }
@@ -628,27 +643,15 @@ const handleDelete = async (item) => {
   border: 1px solid #eaeaea;
 }
 
-p {
-  line-height: 30px;
-}
-
 @media (min-width: 992px) and (max-width: 1300px) {
   .waterfall {
     column-count: 3;
-  }
-
-  p {
-    color: red;
   }
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
   .waterfall {
     column-count: 2;
-  }
-
-  p {
-    color: orange;
   }
 }
 
@@ -715,10 +718,6 @@ p {
   background-color: #acadae;
 }
 
-.input-tt {
-  padding: 5px;
-}
-
 .activeAddNews {
   border: 5px solid #2bb673;
 }
@@ -755,7 +754,7 @@ p {
 
 .thumb-div {
   display: inline-block;
-  width: 30%;
+  width: 100%;
   text-align: center;
 }
 

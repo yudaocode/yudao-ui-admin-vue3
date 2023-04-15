@@ -4,13 +4,13 @@
   <ContentWrap>
     <el-form class="-mb-15px" :inline="true" label-width="68px">
       <el-form-item label="公众号" prop="accountId">
-        <WxMpSelect @change="accountChange" />
+        <WxAccountSelect @change="onAccountChanged" />
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <ContentWrap>
-    <el-tabs v-model="type" @tab-change="handleTabChange">
+    <el-tabs v-model="type" @tab-change="onTabChange">
       <!-- tab 1：图片  -->
       <el-tab-pane name="image">
         <template #label>
@@ -93,7 +93,7 @@
           <el-table-column label="文件名" align="center" prop="name" />
           <el-table-column label="语音" align="center">
             <template #default="scope">
-              <WxVoicePlayer :url="scope.row.url" />
+              <WxVoicePlayer v-if="scope.row.url" :url="scope.row.url" />
             </template>
           </el-table-column>
           <el-table-column
@@ -188,10 +188,8 @@
             </el-row>
           </el-form>
           <template #footer>
-            <!-- <span class="dialog-footer"> -->
             <el-button @click="cancelVideo">取 消</el-button>
             <el-button type="primary" @click="submitVideo">提 交</el-button>
-            <!-- </span> -->
           </template>
         </el-dialog>
 
@@ -203,7 +201,7 @@
           <el-table-column label="介绍" align="center" prop="introduction" />
           <el-table-column label="视频" align="center">
             <template #default="scope">
-              <WxVideoPlayer :url="scope.row.url" />
+              <WxVideoPlayer v-if="scope.row.url" :url="scope.row.url" />
             </template>
           </el-table-column>
           <el-table-column
@@ -250,7 +248,7 @@
 <script lang="ts" setup name="MpMaterial">
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
 import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
-import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 import * as MpMaterialApi from '@/api/mp/material'
 import * as authUtil from '@/utils/auth'
 import { dateFormatter } from '@/utils/formatTime'
@@ -279,14 +277,11 @@ const uploadRules: FormRules = {
 }
 
 // 素材类型
-type MatertialType = 'image' | 'voice' | 'video'
-const type = ref<MatertialType>('image')
-// 遮罩层
-const loading = ref(false)
-// 总条数
-const total = ref(0)
-// 数据列表
-const list = ref([])
+type MaterialType = 'image' | 'voice' | 'video'
+const type = ref<MaterialType>('image')
+const loading = ref(false) // 遮罩层
+const list = ref<any[]>([]) // 总条数
+const total = ref(0) // 数据列表
 // 查询参数
 interface QueryParams {
   pageNo: number
@@ -304,7 +299,7 @@ const queryParams: QueryParams = reactive({
 const fileList = ref<UploadUserFile[]>([])
 
 interface UploadData {
-  type: MatertialType
+  type: MaterialType
   title: string
   introduction: string
 }
@@ -319,8 +314,8 @@ const dialogVideoVisible = ref(false)
 const addMaterialLoading = ref(false)
 
 /** 侦听公众号变化 **/
-const accountChange = (accountId: number | undefined) => {
-  queryParams.accountId = accountId
+const onAccountChanged = (id?: number) => {
+  queryParams.accountId = id
   getList()
 }
 
@@ -346,9 +341,9 @@ const handleQuery = () => {
   getList()
 }
 
-const handleTabChange = (tabName: TabPaneName) => {
+const onTabChange = (tabName: TabPaneName) => {
   // 设置 type
-  uploadData.type = tabName as MatertialType
+  uploadData.type = tabName as MaterialType
 
   // 提前情况数据，避免tab切换后显示垃圾数据
   list.value = []
@@ -359,54 +354,49 @@ const handleTabChange = (tabName: TabPaneName) => {
 }
 
 // ======================== 文件上传 ========================
-const beforeImageUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
-  const isType = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/jpg'].includes(
-    rawFile.type
-  )
-  if (!isType) {
-    message.error('上传图片格式不对!')
+const beforeUpload = (rawFile: UploadRawFile, category: 'image' | 'audio' | 'video'): boolean => {
+  let allowTypes: string[] = []
+  let maxSizeMB = 0
+  let name = ''
+
+  switch (category) {
+    case 'image':
+      allowTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/jpg']
+      maxSizeMB = 2
+      name = '图片'
+      break
+    case 'audio':
+      allowTypes = ['audio/mp3', 'audio/mpeg', 'audio/wma', 'audio/wav', 'audio/amr']
+      maxSizeMB = 2
+      name = '图片'
+      break
+    case 'video':
+      allowTypes = ['video/mp4']
+      maxSizeMB = 10
+      name = '视频'
+  }
+
+  if (!allowTypes.includes(rawFile.type)) {
+    message.error(`上传${name}格式不对!`)
     return false
   }
-  const isLt = rawFile.size / 1024 / 1024 < 2
-  if (!isLt) {
-    message.error('上传图片大小不能超过 2M!')
+  // 校验大小
+  if (rawFile.size / 1024 / 1024 > maxSizeMB) {
+    message.error(`上传${name}大小不能超过${maxSizeMB}M!`)
     return false
   }
   loading.value = true
   return true
 }
 
-const beforeVoiceUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
-  const isType = ['audio/mp3', 'audio/wma', 'audio/wav', 'audio/amr'].includes(file.type)
-  const isLt = rawFile.size / 1024 / 1024 < 2
-  if (!isType) {
-    message.error('上传语音格式不对!')
-    return false
-  }
-  if (!isLt) {
-    message.error('上传语音大小不能超过 2M!')
-    return false
-  }
-  loading.value = true
-  return true
-}
+const beforeImageUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) =>
+  beforeUpload(rawFile, 'image')
 
-const beforeVideoUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
-  const isType = rawFile.type === 'video/mp4'
-  if (!isType) {
-    message.error('上传视频格式不对!')
-    return false
-  }
+const beforeVoiceUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) =>
+  beforeUpload(rawFile, 'audio')
 
-  const isLt = rawFile.size / 1024 / 1024 < 10
-  if (!isLt) {
-    message.error('上传视频大小不能超过 10M!')
-    return false
-  }
-
-  addMaterialLoading.value = true
-  return true
-}
+const beforeVideoUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) =>
+  beforeUpload(rawFile, 'video')
 
 const handleUploadSuccess: UploadProps['onSuccess'] = (response: any) => {
   loading.value = false
@@ -441,6 +431,7 @@ const submitVideo = () => {
   })
 }
 
+// 弹出 video 新建的表单
 const handleAddVideo = () => {
   resetVideo()
   dialogVideoVisible.value = true
