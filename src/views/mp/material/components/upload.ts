@@ -2,7 +2,6 @@ import type { UploadProps, UploadRawFile } from 'element-plus'
 import { getAccessToken } from '@/utils/auth'
 const message = useMessage() // 消息
 const HEADERS = { Authorization: 'Bearer ' + getAccessToken() } // 请求头
-// const UPLOAD_URL = 'http://127.0.0.1:8000/upload/' // 上传地址
 const UPLOAD_URL = import.meta.env.VITE_BASE_URL + '/admin-api/mp/material/upload-permanent' // 上传地址
 
 enum MaterialType {

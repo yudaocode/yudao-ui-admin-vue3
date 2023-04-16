@@ -8,9 +8,9 @@
       :file-list="fileList"
       :data="uploadData"
       :before-upload="beforeVideoUpload"
-      :on-progress="() => (uploading = true)"
-      :on-error="(err: Error) => message.error(`上传失败: ${err.message}`)"
-      :on-success="handleUploadSuccess"
+      :on-progress="(isUploading = true)"
+      :on-error="onUploadError"
+      :on-success="onUploadSuccess"
       ref="uploadVideoRef"
       :auto-upload="false"
       class="mb-5"
@@ -23,7 +23,7 @@
       >
     </el-upload>
     <el-divider />
-    <el-form :model="uploadData" :rules="uploadRules" ref="uploadFormRef" v-loading="uploading">
+    <el-form :model="uploadData" :rules="uploadRules" ref="uploadFormRef" v-loading="isUploading">
       <el-form-item label="标题" prop="title">
         <el-input
           v-model="uploadData.title"
@@ -41,7 +41,7 @@
     </el-form>
     <template #footer>
       <el-button @click="showDialog = false">取 消</el-button>
-      <el-button type="primary" @click="submitVideo" :loading="uploading" :disabled="uploading"
+      <el-button type="primary" @click="submitVideo" :loading="isUploading" :disabled="isUploading"
         >提 交</el-button
       >
     </template>
@@ -76,7 +76,7 @@ const emit = defineEmits<{
   (e: 'uploaded', v: void)
 }>()
 
-const showDialog = computed({
+const showDialog = computed<boolean>({
   get() {
     return props.modelValue
   },
@@ -85,7 +85,7 @@ const showDialog = computed({
   }
 })
 
-const uploading = ref(false)
+const isUploading = ref(false)
 
 const fileList = ref<UploadUserFile[]>([])
 
@@ -107,8 +107,9 @@ const submitVideo = () => {
   })
 }
 
-const handleUploadSuccess: UploadProps['onSuccess'] = (res: any) => {
-  uploading.value = false
+/** 上传成功处理 */
+const onUploadSuccess: UploadProps['onSuccess'] = (res: any) => {
+  isUploading.value = false
   if (res.code !== 0) {
     message.error('上传出错：' + res.msg)
     return false
@@ -123,4 +124,7 @@ const handleUploadSuccess: UploadProps['onSuccess'] = (res: any) => {
   message.notifySuccess('上传成功')
   emit('uploaded')
 }
+
+/** 上传失败处理 */
+const onUploadError = (err: Error) => message.error(`上传失败: ${err.message}`)
 </script>
