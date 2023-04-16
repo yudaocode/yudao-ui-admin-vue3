@@ -1,17 +1,17 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="130px"
-      v-loading="formLoading"
     >
       <el-form-item label="短信签名" prop="signature">
         <el-input v-model="formData.signature" placeholder="请输入短信签名" />
       </el-form-item>
       <el-form-item label="渠道编码" prop="code">
-        <el-select v-model="formData.code" placeholder="请选择渠道编码" clearable>
+        <el-select v-model="formData.code" clearable placeholder="请选择渠道编码">
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE)"
             :key="dict.value"
@@ -45,15 +45,16 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemSmsChannelForm" setup>
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import * as SmsChannelApi from '@/api/system/sms/smsChannel'
 import { CommonStatusEnum } from '@/utils/constants'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

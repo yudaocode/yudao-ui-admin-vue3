@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="Search" setup>
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 
@@ -100,25 +100,25 @@ const setVisible = () => {
 <template>
   <!-- update by 芋艿：class="-mb-15px" 用于降低和 ContentWrap 组件的底部距离，避免空隙过大 -->
   <Form
-    :is-custom="false"
-    :label-width="labelWidth"
-    hide-required-asterisk
     :inline="inline"
     :is-col="isCol"
+    :is-custom="false"
+    :label-width="labelWidth"
     :schema="newSchema"
-    @register="register"
     class="-mb-15px"
+    hide-required-asterisk
+    @register="register"
   >
     <template #action>
       <div v-if="layout === 'inline'">
         <!-- update by 芋艿：去除搜索的 type="primary"，颜色变淡一点 -->
         <ElButton v-if="showSearch" @click="search">
-          <Icon icon="ep:search" class="mr-5px" />
+          <Icon class="mr-5px" icon="ep:search" />
           {{ t('common.query') }}
         </ElButton>
         <!-- update by 芋艿：将 icon="ep:refresh-right" 修改成 icon="ep:refresh"，和 ruoyi-vue 搜索保持一致  -->
         <ElButton v-if="showReset" @click="reset">
-          <Icon icon="ep:refresh" class="mr-5px" />
+          <Icon class="mr-5px" icon="ep:refresh" />
           {{ t('common.reset') }}
         </ElButton>
         <ElButton v-if="expand" text @click="setVisible">
@@ -129,19 +129,19 @@ const setVisible = () => {
         <slot name="actionMore"></slot>
       </div>
     </template>
-    <template #[name] v-for="name in Object.keys($slots)" :key="name"
-      ><slot :name="name"></slot
-    ></template>
+    <template v-for="name in Object.keys($slots)" :key="name" #[name]>
+      <slot :name="name"></slot>
+    </template>
   </Form>
 
   <template v-if="layout === 'bottom'">
     <div :style="bottonButtonStyle">
       <ElButton v-if="showSearch" type="primary" @click="search">
-        <Icon icon="ep:search" class="mr-5px" />
+        <Icon class="mr-5px" icon="ep:search" />
         {{ t('common.query') }}
       </ElButton>
       <ElButton v-if="showReset" @click="reset">
-        <Icon icon="ep:refresh-right" class="mr-5px" />
+        <Icon class="mr-5px" icon="ep:refresh-right" />
         {{ t('common.reset') }}
       </ElButton>
       <ElButton v-if="expand" text @click="setVisible">

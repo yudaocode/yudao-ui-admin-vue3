@@ -4,13 +4,13 @@
       <el-col>
         <div class="mb-2 float-right">
           <el-button size="small" type="primary" @click="showJson">生成 JSON</el-button>
-          <el-button size="small" type="success" @click="showOption">生成O ptions</el-button>
+          <el-button size="small" type="success" @click="showOption">生成 Options</el-button>
           <el-button size="small" type="danger" @click="showTemplate">生成组件</el-button>
         </div>
       </el-col>
       <!-- 表单设计器 -->
       <el-col>
-        <fc-designer ref="designer" height="780px" />
+        <FcDesigner ref="designer" height="780px" />
       </el-col>
     </el-row>
   </ContentWrap>
@@ -22,18 +22,17 @@
         {{ t('common.copy') }}
       </el-button>
       <el-scrollbar height="580">
-        <div v-highlight>
-          <code class="hljs">
-            {{ formData }}
-          </code>
+        <div>
+          <pre><code class="hljs" v-html="highlightedCode(formData)"></code></pre>
         </div>
       </el-scrollbar>
     </div>
   </Dialog>
 </template>
 <script setup lang="ts" name="InfraBuild">
-import formCreate from '@form-create/element-ui'
+import FcDesigner from '@form-create/designer'
 import { useClipboard } from '@vueuse/core'
+import { isString } from '@/utils/is'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息
 
@@ -109,4 +108,32 @@ const copy = async (text: string) => {
     }
   }
 }
+
+/**
+ * 代码高亮
+ */
+import hljs from 'highlight.js' // 导入代码高亮文件
+import 'highlight.js/styles/github.css' // 导入代码高亮样式
+import xml from 'highlight.js/lib/languages/java'
+import json from 'highlight.js/lib/languages/json'
+const highlightedCode = (code) => {
+  // 处理语言和代码
+  let language = 'json'
+  if (formType.value === 2) {
+    language = 'xml'
+  }
+  if (!isString(code)) {
+    code = JSON.stringify(code)
+  }
+  // 高亮
+  const result = hljs.highlight(language, code, true)
+  return result.value || '&nbsp;'
+}
+
+/** 初始化 **/
+onMounted(async () => {
+  // 注册代码高亮的各种语言
+  hljs.registerLanguage('xml', xml)
+  hljs.registerLanguage('json', json)
+})
 </script>

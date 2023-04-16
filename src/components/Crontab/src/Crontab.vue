@@ -1,10 +1,12 @@
-<script setup lang="ts">
+<script lang="ts" name="Crontab" setup>
 import { ElMessage } from 'element-plus'
 import { PropType } from 'vue'
+
 interface shortcutsType {
   text: string
   value: string
 }
+
 const props = defineProps({
   modelValue: {
     type: String,
@@ -501,7 +503,7 @@ const submit = () => {
 }
 </script>
 <template>
-  <el-input v-model="defaultValue" v-bind="$attrs" class="input-with-select">
+  <el-input v-model="defaultValue" class="input-with-select" v-bind="$attrs">
     <template #append>
       <el-select v-model="select" placeholder="生成器" style="width: 115px">
         <el-option label="每分钟" value="0 * * * * ?" />
@@ -522,11 +524,11 @@ const submit = () => {
   </el-input>
 
   <el-dialog
-    title="cron规则生成器"
     v-model="dialogVisible"
     :width="580"
-    destroy-on-close
     append-to-body
+    destroy-on-close
+    title="cron规则生成器"
   >
     <div class="sc-cron">
       <el-tabs>
@@ -546,38 +548,38 @@ const submit = () => {
                 <el-radio-button label="3">指定</el-radio-button>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="范围" v-if="cronValue.second.type == '1'">
+            <el-form-item v-if="cronValue.second.type == '1'" label="范围">
               <el-input-number
                 v-model="cronValue.second.range.start"
-                :min="0"
                 :max="59"
+                :min="0"
                 controls-position="right"
               />
               <span style="padding: 0 15px">-</span>
               <el-input-number
                 v-model="cronValue.second.range.end"
-                :min="0"
                 :max="59"
+                :min="0"
                 controls-position="right"
               />
             </el-form-item>
-            <el-form-item label="间隔" v-if="cronValue.second.type == '2'">
+            <el-form-item v-if="cronValue.second.type == '2'" label="间隔">
               <el-input-number
                 v-model="cronValue.second.loop.start"
-                :min="0"
                 :max="59"
+                :min="0"
                 controls-position="right"
               />
               秒开始，每
               <el-input-number
                 v-model="cronValue.second.loop.end"
-                :min="0"
                 :max="59"
+                :min="0"
                 controls-position="right"
               />
               秒执行一次
             </el-form-item>
-            <el-form-item label="指定" v-if="cronValue.second.type == '3'">
+            <el-form-item v-if="cronValue.second.type == '3'" label="指定">
               <el-select v-model="cronValue.second.appoint" multiple style="width: 100%">
                 <el-option
                   v-for="(item, index) in data.second"
@@ -605,38 +607,38 @@ const submit = () => {
                 <el-radio-button label="3">指定</el-radio-button>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="范围" v-if="cronValue.minute.type == '1'">
+            <el-form-item v-if="cronValue.minute.type == '1'" label="范围">
               <el-input-number
                 v-model="cronValue.minute.range.start"
-                :min="0"
                 :max="59"
+                :min="0"
                 controls-position="right"
               />
               <span style="padding: 0 15px">-</span>
               <el-input-number
                 v-model="cronValue.minute.range.end"
-                :min="0"
                 :max="59"
+                :min="0"
                 controls-position="right"
               />
             </el-form-item>
-            <el-form-item label="间隔" v-if="cronValue.minute.type == '2'">
+            <el-form-item v-if="cronValue.minute.type == '2'" label="间隔">
               <el-input-number
                 v-model="cronValue.minute.loop.start"
-                :min="0"
                 :max="59"
+                :min="0"
                 controls-position="right"
               />
               分钟开始，每
               <el-input-number
                 v-model="cronValue.minute.loop.end"
-                :min="0"
                 :max="59"
+                :min="0"
                 controls-position="right"
               />
               分钟执行一次
             </el-form-item>
-            <el-form-item label="指定" v-if="cronValue.minute.type == '3'">
+            <el-form-item v-if="cronValue.minute.type == '3'" label="指定">
               <el-select v-model="cronValue.minute.appoint" multiple style="width: 100%">
                 <el-option
                   v-for="(item, index) in data.minute"
@@ -664,38 +666,38 @@ const submit = () => {
                 <el-radio-button label="3">指定</el-radio-button>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="范围" v-if="cronValue.hour.type == '1'">
+            <el-form-item v-if="cronValue.hour.type == '1'" label="范围">
               <el-input-number
                 v-model="cronValue.hour.range.start"
-                :min="0"
                 :max="23"
+                :min="0"
                 controls-position="right"
               />
               <span style="padding: 0 15px">-</span>
               <el-input-number
                 v-model="cronValue.hour.range.end"
-                :min="0"
                 :max="23"
+                :min="0"
                 controls-position="right"
               />
             </el-form-item>
-            <el-form-item label="间隔" v-if="cronValue.hour.type == '2'">
+            <el-form-item v-if="cronValue.hour.type == '2'" label="间隔">
               <el-input-number
                 v-model="cronValue.hour.loop.start"
-                :min="0"
                 :max="23"
+                :min="0"
                 controls-position="right"
               />
               小时开始，每
               <el-input-number
                 v-model="cronValue.hour.loop.end"
-                :min="0"
                 :max="23"
+                :min="0"
                 controls-position="right"
               />
               小时执行一次
             </el-form-item>
-            <el-form-item label="指定" v-if="cronValue.hour.type == '3'">
+            <el-form-item v-if="cronValue.hour.type == '3'" label="指定">
               <el-select v-model="cronValue.hour.appoint" multiple style="width: 100%">
                 <el-option
                   v-for="(item, index) in data.hour"
@@ -725,38 +727,38 @@ const submit = () => {
                 <el-radio-button label="5">不指定</el-radio-button>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="范围" v-if="cronValue.day.type == '1'">
+            <el-form-item v-if="cronValue.day.type == '1'" label="范围">
               <el-input-number
                 v-model="cronValue.day.range.start"
-                :min="1"
                 :max="31"
+                :min="1"
                 controls-position="right"
               />
               <span style="padding: 0 15px">-</span>
               <el-input-number
                 v-model="cronValue.day.range.end"
-                :min="1"
                 :max="31"
+                :min="1"
                 controls-position="right"
               />
             </el-form-item>
-            <el-form-item label="间隔" v-if="cronValue.day.type == '2'">
+            <el-form-item v-if="cronValue.day.type == '2'" label="间隔">
               <el-input-number
                 v-model="cronValue.day.loop.start"
-                :min="1"
                 :max="31"
+                :min="1"
                 controls-position="right"
               />
               号开始，每
               <el-input-number
                 v-model="cronValue.day.loop.end"
-                :min="1"
                 :max="31"
+                :min="1"
                 controls-position="right"
               />
               天执行一次
             </el-form-item>
-            <el-form-item label="指定" v-if="cronValue.day.type == '3'">
+            <el-form-item v-if="cronValue.day.type == '3'" label="指定">
               <el-select v-model="cronValue.day.appoint" multiple style="width: 100%">
                 <el-option
                   v-for="(item, index) in data.day"
@@ -784,38 +786,38 @@ const submit = () => {
                 <el-radio-button label="3">指定</el-radio-button>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="范围" v-if="cronValue.month.type == '1'">
+            <el-form-item v-if="cronValue.month.type == '1'" label="范围">
               <el-input-number
                 v-model="cronValue.month.range.start"
-                :min="1"
                 :max="12"
+                :min="1"
                 controls-position="right"
               />
               <span style="padding: 0 15px">-</span>
               <el-input-number
                 v-model="cronValue.month.range.end"
-                :min="1"
                 :max="12"
+                :min="1"
                 controls-position="right"
               />
             </el-form-item>
-            <el-form-item label="间隔" v-if="cronValue.month.type == '2'">
+            <el-form-item v-if="cronValue.month.type == '2'" label="间隔">
               <el-input-number
                 v-model="cronValue.month.loop.start"
-                :min="1"
                 :max="12"
+                :min="1"
                 controls-position="right"
               />
               月开始，每
               <el-input-number
                 v-model="cronValue.month.loop.end"
-                :min="1"
                 :max="12"
+                :min="1"
                 controls-position="right"
               />
               月执行一次
             </el-form-item>
-            <el-form-item label="指定" v-if="cronValue.month.type == '3'">
+            <el-form-item v-if="cronValue.month.type == '3'" label="指定">
               <el-select v-model="cronValue.month.appoint" multiple style="width: 100%">
                 <el-option
                   v-for="(item, index) in data.month"
@@ -846,7 +848,7 @@ const submit = () => {
                   <el-radio-button label="5">不指定</el-radio-button>
                 </el-radio-group>
               </el-form-item>
-              <el-form-item label="范围" v-if="cronValue.week.type == '1'">
+              <el-form-item v-if="cronValue.week.type == '1'" label="范围">
                 <el-select v-model="cronValue.week.range.start">
                   <el-option
                     v-for="(item, index) in data.week"
@@ -865,12 +867,12 @@ const submit = () => {
                   />
                 </el-select>
               </el-form-item>
-              <el-form-item label="间隔" v-if="cronValue.week.type == '2'">
+              <el-form-item v-if="cronValue.week.type == '2'" label="间隔">
                 第
                 <el-input-number
                   v-model="cronValue.week.loop.start"
-                  :min="1"
                   :max="4"
+                  :min="1"
                   controls-position="right"
                 />
                 周的星期
@@ -884,7 +886,7 @@ const submit = () => {
                 </el-select>
                 执行一次
               </el-form-item>
-              <el-form-item label="指定" v-if="cronValue.week.type == '3'">
+              <el-form-item v-if="cronValue.week.type == '3'" label="指定">
                 <el-select v-model="cronValue.week.appoint" multiple style="width: 100%">
                   <el-option
                     v-for="(item, index) in data.week"
@@ -894,7 +896,7 @@ const submit = () => {
                   />
                 </el-select>
               </el-form-item>
-              <el-form-item label="最后一周" v-if="cronValue.week.type == '4'">
+              <el-form-item v-if="cronValue.week.type == '4'" label="最后一周">
                 <el-select v-model="cronValue.week.last">
                   <el-option
                     v-for="(item, index) in data.week"
@@ -924,12 +926,12 @@ const submit = () => {
                 <el-radio-button label="3">指定</el-radio-button>
               </el-radio-group>
             </el-form-item>
-            <el-form-item label="范围" v-if="cronValue.year.type == '1'">
+            <el-form-item v-if="cronValue.year.type == '1'" label="范围">
               <el-input-number v-model="cronValue.year.range.start" controls-position="right" />
               <span style="padding: 0 15px">-</span>
               <el-input-number v-model="cronValue.year.range.end" controls-position="right" />
             </el-form-item>
-            <el-form-item label="间隔" v-if="cronValue.year.type == '2'">
+            <el-form-item v-if="cronValue.year.type == '2'" label="间隔">
               <el-input-number v-model="cronValue.year.loop.start" controls-position="right" />
               年开始，每
               <el-input-number
@@ -939,7 +941,7 @@ const submit = () => {
               />
               年执行一次
             </el-form-item>
-            <el-form-item label="指定" v-if="cronValue.year.type == '3'">
+            <el-form-item v-if="cronValue.year.type == '3'" label="指定">
               <el-select v-model="cronValue.year.appoint" multiple style="width: 100%">
                 <el-option
                   v-for="(item, index) in data.year"
@@ -968,16 +970,19 @@ const submit = () => {
   padding: 0 7px;
   vertical-align: bottom;
 }
+
 .sc-cron-num {
   text-align: center;
   margin-bottom: 15px;
   width: 100%;
 }
+
 .sc-cron-num h2 {
   font-size: 12px;
   margin-bottom: 15px;
   font-weight: normal;
 }
+
 .sc-cron-num h4 {
   display: block;
   height: 32px;
@@ -988,13 +993,16 @@ const submit = () => {
   background: var(--el-color-primary-light-9);
   border-radius: 4px;
 }
+
 .sc-cron:deep(.el-tabs__item.is-active) .sc-cron-num h4 {
   background: var(--el-color-primary);
   color: #fff;
 }
+
 [data-theme='dark'] .sc-cron-num h4 {
   background: var(--el-color-white);
 }
+
 .input-with-select .el-input-group__prepend {
   background-color: var(--el-fill-color-blank);
 }

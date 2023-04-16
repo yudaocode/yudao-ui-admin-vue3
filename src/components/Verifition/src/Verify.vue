@@ -1,42 +1,42 @@
 <template>
-  <div :class="mode == 'pop' ? 'mask' : ''" v-show="showBox">
+  <div v-show="showBox" :class="mode == 'pop' ? 'mask' : ''">
     <div
       :class="mode == 'pop' ? 'verifybox' : ''"
       :style="{ 'max-width': parseInt(imgSize.width) + 20 + 'px' }"
     >
-      <div class="verifybox-top" v-if="mode == 'pop'">
+      <div v-if="mode == 'pop'" class="verifybox-top">
         {{ t('captcha.verification') }}
         <span class="verifybox-close" @click="closeBox">
           <i class="iconfont icon-close"></i>
         </span>
       </div>
-      <div class="verifybox-bottom" :style="{ padding: mode == 'pop' ? '10px' : '0' }">
+      <div :style="{ padding: mode == 'pop' ? '10px' : '0' }" class="verifybox-bottom">
         <!-- 验证码容器 -->
         <component
-          v-if="componentType"
           :is="componentType"
-          :captchaType="captchaType"
-          :type="verifyType"
-          :figure="figure"
-          :arith="arith"
-          :mode="mode"
-          :vSpace="vSpace"
-          :explain="explain"
-          :imgSize="imgSize"
-          :blockSize="blockSize"
-          :barSize="barSize"
+          v-if="componentType"
           ref="instance"
+          :arith="arith"
+          :barSize="barSize"
+          :blockSize="blockSize"
+          :captchaType="captchaType"
+          :explain="explain"
+          :figure="figure"
+          :imgSize="imgSize"
+          :mode="mode"
+          :type="verifyType"
+          :vSpace="vSpace"
         />
       </div>
     </div>
   </div>
 </template>
-<script type="text/babel">
+<script name="Verify" type="text/babel">
 /**
  * Verify 验证码组件
  * @description 分发验证码使用
  * */
-import { VerifySlide, VerifyPoints } from './Verify'
+import { VerifyPoints, VerifySlide } from './Verify'
 import { computed, ref, toRefs, watchEffect } from 'vue'
 
 export default {
@@ -155,6 +155,7 @@ export default {
   border-radius: 5px;
   transform: translate(-50%, -50%);
 }
+
 .verifybox-top {
   padding: 0 15px;
   height: 40px;
@@ -165,10 +166,12 @@ export default {
   border-bottom: 1px solid #e4e7eb;
   box-sizing: border-box;
 }
+
 .verifybox-bottom {
   padding: 10px;
   box-sizing: border-box;
 }
+
 .verifybox-close {
   position: absolute;
   top: 13px;
@@ -178,6 +181,7 @@ export default {
   text-align: center;
   cursor: pointer;
 }
+
 .mask {
   position: fixed;
   top: 0;
@@ -189,6 +193,7 @@ export default {
   /* display: none; */
   transition: all 0.5s;
 }
+
 .verify-tips {
   text-indent: 10px;
   position: absolute;
@@ -199,22 +204,27 @@ export default {
   line-height: 30px;
   color: #fff;
 }
+
 .suc-bg {
   background-color: rgba(92, 184, 92, 0.5);
   filter: progid:DXImageTransform.Microsoft.gradient(startcolorstr=#7f5CB85C, endcolorstr=#7f5CB85C);
 }
+
 .err-bg {
   background-color: rgba(217, 83, 79, 0.5);
   filter: progid:DXImageTransform.Microsoft.gradient(startcolorstr=#7fD9534F, endcolorstr=#7fD9534F);
 }
+
 .tips-enter,
 .tips-leave-to {
   bottom: -30px;
 }
+
 .tips-enter-active,
 .tips-leave-active {
   transition: bottom 0.5s;
 }
+
 /* ---------------------------- */
 /*常规验证码*/
 .verify-code {

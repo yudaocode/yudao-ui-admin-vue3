@@ -60,7 +60,7 @@
     </div>
   </div>
 </template>
-<script lang="ts" setup>
+<script lang="ts" name="Login" setup>
 import { underlineToHump } from '@/utils'
 
 import { useDesign } from '@/hooks/web/useDesign'

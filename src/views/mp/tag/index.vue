@@ -11,7 +11,7 @@
       label-width="68px"
     >
       <el-form-item label="公众号" prop="accountId">
-        <WxMpSelect @change="onAccountChanged" />
+        <WxAccountSelect @change="onAccountChanged" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" plain @click="openForm('create')" v-hasPermi="['mp:tag:create']">
@@ -74,7 +74,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import * as MpTagApi from '@/api/mp/tag'
 import TagForm from './TagForm.vue'
-import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

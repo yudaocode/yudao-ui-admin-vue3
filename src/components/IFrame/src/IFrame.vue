@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="IFrame" setup>
 import { propTypes } from '@/utils/propTypes'
 
 const props = defineProps({
@@ -20,11 +20,11 @@ onMounted(() => {
 <template>
   <div v-loading="loading" :style="'height:' + height">
     <iframe
+      ref="frameRef"
       :src="props.src"
-      style="width: 100%; height: 100%"
       frameborder="no"
       scrolling="auto"
-      ref="frameRef"
+      style="width: 100%; height: 100%"
     ></iframe>
   </div>
 </template>

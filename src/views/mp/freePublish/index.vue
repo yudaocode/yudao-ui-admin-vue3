@@ -11,7 +11,7 @@
       label-width="68px"
     >
       <el-form-item label="公众号" prop="accountId">
-        <WxMpSelect @change="onAccountChanged" />
+        <WxAccountSelect @change="onAccountChanged" />
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -51,8 +51,7 @@
 <script lang="ts" setup name="MpFreePublish">
 import * as FreePublishApi from '@/api/mp/freePublish'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
-import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
-
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -102,7 +101,6 @@ const handleDelete = async (item: any) => {
   } catch {}
 }
 </script>
-
 <style lang="scss" scoped>
 .ope-row {
   margin-top: 5px;

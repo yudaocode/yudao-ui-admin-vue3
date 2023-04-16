@@ -4,7 +4,7 @@
   <ContentWrap>
     <el-form class="-mb-15px" ref="queryFormRef" :inline="true" label-width="68px">
       <el-form-item label="公众号" prop="accountId">
-        <WxMpSelect @change="onAccountChanged" />
+        <WxAccountSelect @change="onAccountChanged" />
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -192,7 +192,7 @@
 import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
 import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
-import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 import * as MpMenuApi from '@/api/mp/menu'
 import { handleTree } from '@/utils/tree'
 import menuOptions from './menuOptions'

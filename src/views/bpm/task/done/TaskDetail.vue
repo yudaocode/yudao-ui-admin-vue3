@@ -1,6 +1,6 @@
 <template>
-  <Dialog title="详情" v-model="dialogVisible" :scroll="true" :max-height="500">
-    <el-descriptions border :column="1">
+  <Dialog v-model="dialogVisible" :max-height="500" :scroll="true" title="详情">
+    <el-descriptions :column="1" border>
       <el-descriptions-item label="任务编号" min-width="120">
         {{ detailData.id }}
       </el-descriptions-item>
@@ -25,7 +25,7 @@
     </el-descriptions>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="BpmTaskDetail" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'

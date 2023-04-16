@@ -5,41 +5,48 @@
     </div>
     <ul class="list-group list-group-striped">
       <li class="list-group-item">
-        <Icon icon="ep:user" class="mr-5px" />{{ t('profile.user.username') }}
+        <Icon class="mr-5px" icon="ep:user" />
+        {{ t('profile.user.username') }}
         <div class="pull-right">{{ userInfo?.username }}</div>
       </li>
       <li class="list-group-item">
-        <Icon icon="ep:phone" class="mr-5px" />{{ t('profile.user.mobile') }}
+        <Icon class="mr-5px" icon="ep:phone" />
+        {{ t('profile.user.mobile') }}
         <div class="pull-right">{{ userInfo?.mobile }}</div>
       </li>
       <li class="list-group-item">
-        <Icon icon="fontisto:email" class="mr-5px" />{{ t('profile.user.email') }}
+        <Icon class="mr-5px" icon="fontisto:email" />
+        {{ t('profile.user.email') }}
         <div class="pull-right">{{ userInfo?.email }}</div>
       </li>
       <li class="list-group-item">
-        <Icon icon="carbon:tree-view-alt" class="mr-5px" />{{ t('profile.user.dept') }}
-        <div class="pull-right" v-if="userInfo?.dept">{{ userInfo?.dept.name }}</div>
+        <Icon class="mr-5px" icon="carbon:tree-view-alt" />
+        {{ t('profile.user.dept') }}
+        <div v-if="userInfo?.dept" class="pull-right">{{ userInfo?.dept.name }}</div>
       </li>
       <li class="list-group-item">
-        <Icon icon="ep:suitcase" class="mr-5px" />{{ t('profile.user.posts') }}
-        <div class="pull-right" v-if="userInfo?.posts">
+        <Icon class="mr-5px" icon="ep:suitcase" />
+        {{ t('profile.user.posts') }}
+        <div v-if="userInfo?.posts" class="pull-right">
           {{ userInfo?.posts.map((post) => post.name).join(',') }}
         </div>
       </li>
       <li class="list-group-item">
-        <Icon icon="icon-park-outline:peoples" class="mr-5px" />{{ t('profile.user.roles') }}
-        <div class="pull-right" v-if="userInfo?.roles">
+        <Icon class="mr-5px" icon="icon-park-outline:peoples" />
+        {{ t('profile.user.roles') }}
+        <div v-if="userInfo?.roles" class="pull-right">
           {{ userInfo?.roles.map((role) => role.name).join(',') }}
         </div>
       </li>
       <li class="list-group-item">
-        <Icon icon="ep:calendar" class="mr-5px" />{{ t('profile.user.createTime') }}
+        <Icon class="mr-5px" icon="ep:calendar" />
+        {{ t('profile.user.createTime') }}
         <div class="pull-right">{{ formatDate(userInfo?.createTime) }}</div>
       </li>
     </ul>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="ProfileUser" setup>
 import { formatDate } from '@/utils/formatTime'
 import UserAvatar from './UserAvatar.vue'
 
@@ -62,6 +69,7 @@ onMounted(async () => {
   position: relative;
   height: 120px;
 }
+
 .list-group-striped > .list-group-item {
   border-left: 0;
   border-right: 0;
@@ -82,6 +90,7 @@ onMounted(async () => {
   padding: 11px 0px;
   font-size: 13px;
 }
+
 .pull-right {
   float: right !important;
 }

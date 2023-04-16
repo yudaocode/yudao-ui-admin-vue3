@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="APP" setup>
 import { isDark } from '@/utils/is'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -32,6 +32,7 @@ $prefix-cls: #{$namespace}-app;
   width: 100%;
   height: 100%;
 }
+
 html,
 body {
   padding: 0 !important;
@@ -43,6 +44,7 @@ body {
     @extend .size;
   }
 }
+
 .#{$prefix-cls}-grey-mode {
   filter: grayscale(100%);
 }

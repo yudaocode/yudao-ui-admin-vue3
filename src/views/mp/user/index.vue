@@ -11,7 +11,7 @@
       label-width="68px"
     >
       <el-form-item label="公众号" prop="accountId">
-        <WxMpSelect @change="onAccountChanged" />
+        <WxAccountSelect @change="onAccountChanged" />
       </el-form-item>
       <el-form-item label="用户标识" prop="openid">
         <el-input
@@ -97,7 +97,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import * as MpUserApi from '@/api/mp/user'
 import * as MpTagApi from '@/api/mp/tag'
-import WxMpSelect from '@/views/mp/components/WxMpSelect.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 import type { FormInstance } from 'element-plus'
 import UserForm from './UserForm.vue'
 

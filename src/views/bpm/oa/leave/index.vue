@@ -137,19 +137,12 @@
       @pagination="getList"
     />
   </ContentWrap>
-
-  <!-- 表单弹窗：详情 -->
-  <LeaveDetail ref="detailRef" />
-  <!-- 表单弹窗：添加 -->
-  <LeaveForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="BpmOALeave">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as LeaveApi from '@/api/bpm/leave'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import LeaveDetail from './detail.vue'
-import LeaveForm from './create.vue'
 const message = useMessage() // 消息弹窗
 const router = useRouter() // 路由
 const { t } = useI18n() // 国际化
@@ -192,15 +185,18 @@ const resetQuery = () => {
 }
 
 /** 添加操作 */
-const formRef = ref()
 const handleCreate = () => {
-  formRef.value.open()
+  router.push({ name: 'OALeaveCreate' })
 }
 
 /** 详情操作 */
-const detailRef = ref()
-const handleDetail = (data: LeaveApi.LeaveVO) => {
-  detailRef.value.open(data)
+const handleDetail = (row: LeaveApi.LeaveVO) => {
+  router.push({
+    name: 'OALeaveDetail',
+    query: {
+      id: row.id
+    }
+  })
 }
 
 /** 取消请假操作 */

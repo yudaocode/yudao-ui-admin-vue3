@@ -1,11 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="80px"
-      v-loading="formLoading"
     >
       <el-row>
         <el-col :span="12">
@@ -16,11 +16,11 @@
         <el-col :span="12">
           <el-form-item label="归属部门" prop="deptId">
             <el-tree-select
-              node-key="id"
               v-model="formData.deptId"
               :data="deptList"
               :props="defaultProps"
               check-strictly
+              node-key="id"
               placeholder="请选择归属部门"
             />
           </el-form-item>
@@ -29,12 +29,12 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="手机号码" prop="mobile">
-            <el-input v-model="formData.mobile" placeholder="请输入手机号码" maxlength="11" />
+            <el-input v-model="formData.mobile" maxlength="11" placeholder="请输入手机号码" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="邮箱" prop="email">
-            <el-input v-model="formData.email" placeholder="请输入邮箱" maxlength="50" />
+            <el-input v-model="formData.email" maxlength="50" placeholder="请输入邮箱" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -49,8 +49,8 @@
             <el-input
               v-model="formData.password"
               placeholder="请输入用户密码"
-              type="password"
               show-password
+              type="password"
             />
           </el-form-item>
         </el-col>
@@ -84,24 +84,25 @@
       <el-row>
         <el-col :span="24">
           <el-form-item label="备注">
-            <el-input v-model="formData.remark" type="textarea" placeholder="请输入内容" />
+            <el-input v-model="formData.remark" placeholder="请输入内容" type="textarea" />
           </el-form-item>
         </el-col>
       </el-row>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script lang="ts" setup>
+<script lang="ts" name="SystemUserForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as PostApi from '@/api/system/post'
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

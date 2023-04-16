@@ -1,17 +1,17 @@
 <template>
   <div class="user-info-head" @click="open()">
-    <img :src="sourceValue" v-if="sourceValue" class="img-circle img-lg" alt="avatar" />
-    <el-button :class="`${prefixCls}-upload-btn`" @click="open()" v-if="showBtn">
+    <img v-if="sourceValue" :src="sourceValue" alt="avatar" class="img-circle img-lg" />
+    <el-button v-if="showBtn" :class="`${prefixCls}-upload-btn`" @click="open()">
       {{ btnText ? btnText : t('cropper.selectImage') }}
     </el-button>
     <CopperModal
       ref="cropperModelRef"
-      @upload-success="handleUploadSuccess"
       :srcValue="sourceValue"
+      @upload-success="handleUploadSuccess"
     />
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="CropperAvatar" setup>
 import { useDesign } from '@/hooks/web/useDesign'
 
 import { propTypes } from '@/utils/propTypes'
@@ -54,9 +54,11 @@ function handleUploadSuccess({ source, data, filename }) {
 function open() {
   cropperModelRef.value.openModal()
 }
+
 function close() {
   cropperModelRef.value.closeModal()
 }
+
 defineExpose({
   open,
   close
@@ -104,17 +106,21 @@ $prefix-cls: #{$namespace}--cropper-avatar;
     margin: 10px auto;
   }
 }
+
 .user-info-head {
   position: relative;
   display: inline-block;
 }
+
 .img-circle {
   border-radius: 50%;
 }
+
 .img-lg {
   width: 120px;
   height: 120px;
 }
+
 .user-info-head:hover:after {
   content: '+';
   position: absolute;

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="Collapse" setup>
 import { useAppStore } from '@/store/modules/app'
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -24,9 +24,9 @@ const toggleCollapse = () => {
 <template>
   <div :class="prefixCls">
     <Icon
-      :size="18"
-      :icon="collapse ? 'ep:expand' : 'ep:fold'"
       :color="color"
+      :icon="collapse ? 'ep:expand' : 'ep:fold'"
+      :size="18"
       class="cursor-pointer"
       @click="toggleCollapse"
     />

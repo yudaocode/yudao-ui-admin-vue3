@@ -1,11 +1,11 @@
 <template>
-  <Dialog title="修改" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" title="修改">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="80px"
-      v-loading="formLoading"
     >
       <el-form-item label="昵称" prop="nickname">
         <el-input v-model="formData.nickname" placeholder="请输入昵称" />
@@ -14,7 +14,7 @@
         <el-input v-model="formData.remark" placeholder="请输入备注" />
       </el-form-item>
       <el-form-item label="标签" prop="tagIds">
-        <el-select v-model="formData.tagIds" multiple clearable placeholder="请选择标签">
+        <el-select v-model="formData.tagIds" clearable multiple placeholder="请选择标签">
           <el-option
             v-for="item in tagList"
             :key="item.tagId"
@@ -25,14 +25,15 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="MpUserForm" setup>
 import * as MpTagApi from '@/api/mp/tag'
 import * as MpUserApi from '@/api/mp/user'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

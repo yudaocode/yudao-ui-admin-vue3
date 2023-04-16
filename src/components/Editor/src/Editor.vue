@@ -1,7 +1,7 @@
-<script setup lang="ts">
+<script lang="ts" name="Editor" setup>
 import { PropType } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
-import { IDomEditor, IEditorConfig, i18nChangeLanguage } from '@wangeditor/editor'
+import { i18nChangeLanguage, IDomEditor, IEditorConfig } from '@wangeditor/editor'
 import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
 import { ElMessage } from 'element-plus'
@@ -20,7 +20,7 @@ const props = defineProps({
   editorId: propTypes.string.def('wangeEditor-1'),
   height: propTypes.oneOfType([Number, String]).def('500px'),
   editorConfig: {
-    type: Object as PropType<IEditorConfig>,
+    type: Object as PropType<Partial<IEditorConfig>>,
     default: () => undefined
   },
   readonly: propTypes.bool.def(false),
@@ -147,6 +147,7 @@ const editorConfig = computed((): IEditorConfig => {
     props.editorConfig || {}
   )
 })
+
 const editorStyle = computed(() => {
   return {
     height: isNumber(props.height) ? `${props.height}px` : props.height
@@ -188,8 +189,8 @@ defineExpose({
     <!-- 编辑器 -->
     <Editor
       v-model="valueHtml"
-      :editorId="editorId"
       :defaultConfig="editorConfig"
+      :editorId="editorId"
       :style="editorStyle"
       @on-change="handleChange"
       @on-created="handleCreated"

@@ -1,13 +1,13 @@
 <template>
   <el-form
-    :model="loginData.loginForm"
-    :rules="LoginRules"
-    label-position="top"
-    class="login-form"
-    label-width="120px"
-    size="large"
     v-show="getShow"
     ref="formLogin"
+    :model="loginData.loginForm"
+    :rules="LoginRules"
+    class="login-form"
+    label-position="top"
+    label-width="120px"
+    size="large"
   >
     <el-row style="maring-left: -10px; maring-right: -10px">
       <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
@@ -16,12 +16,13 @@
         </el-form-item>
       </el-col>
       <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
-        <el-form-item prop="tenantName" v-if="loginData.tenantEnable === 'true'">
+        <el-form-item v-if="loginData.tenantEnable === 'true'" prop="tenantName">
           <el-input
-            type="text"
             v-model="loginData.loginForm.tenantName"
             :placeholder="t('login.tenantNamePlaceholder')"
             :prefix-icon="iconHouse"
+            type="primary"
+            link
           />
         </el-form-item>
       </el-col>
@@ -38,11 +39,11 @@
         <el-form-item prop="password">
           <el-input
             v-model="loginData.loginForm.password"
-            type="password"
             :placeholder="t('login.passwordPlaceholder')"
-            show-password
-            @keyup.enter="getCode()"
             :prefix-icon="iconLock"
+            show-password
+            type="password"
+            @keyup.enter="getCode()"
           />
         </el-form-item>
       </el-col>
@@ -57,8 +58,8 @@
                 {{ t('login.remember') }}
               </el-checkbox>
             </el-col>
-            <el-col :span="12" :offset="6">
-              <el-link type="primary" style="float: right">{{ t('login.forgetPassword') }}</el-link>
+            <el-col :offset="6" :span="12">
+              <el-link style="float: right" type="primary">{{ t('login.forgetPassword') }}</el-link>
             </el-col>
           </el-row>
         </el-form-item>
@@ -67,41 +68,41 @@
         <el-form-item>
           <XButton
             :loading="loginLoading"
-            type="primary"
-            class="w-[100%]"
             :title="t('login.login')"
+            class="w-[100%]"
+            type="primary"
             @click="getCode()"
           />
         </el-form-item>
       </el-col>
       <Verify
         ref="verify"
-        mode="pop"
         :captchaType="captchaType"
         :imgSize="{ width: '400px', height: '200px' }"
+        mode="pop"
         @success="handleLogin"
       />
       <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
         <el-form-item>
-          <el-row justify="space-between" style="width: 100%" :gutter="5">
+          <el-row :gutter="5" justify="space-between" style="width: 100%">
             <el-col :span="8">
               <XButton
-                class="w-[100%]"
                 :title="t('login.btnMobile')"
+                class="w-[100%]"
                 @click="setLoginState(LoginStateEnum.MOBILE)"
               />
             </el-col>
             <el-col :span="8">
               <XButton
-                class="w-[100%]"
                 :title="t('login.btnQRCode')"
+                class="w-[100%]"
                 @click="setLoginState(LoginStateEnum.QR_CODE)"
               />
             </el-col>
             <el-col :span="8">
               <XButton
-                class="w-[100%]"
                 :title="t('login.btnRegister')"
+                class="w-[100%]"
                 @click="setLoginState(LoginStateEnum.REGISTER)"
               />
             </el-col>
@@ -127,7 +128,7 @@
     </el-row>
   </el-form>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="LoginForm" setup>
 import { ElLoading } from 'element-plus'
 import LoginFormTitle from './LoginFormTitle.vue'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
