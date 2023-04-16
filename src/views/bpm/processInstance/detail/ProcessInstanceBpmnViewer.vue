@@ -3,7 +3,7 @@
     <template #header>
       <span class="el-icon-picture-outline">流程图</span>
     </template>
-    <my-process-viewer
+    <MyProcessViewer
       key="designer"
       :activityData="activityList"
       :prefix="bpmnControlForm.prefix"
@@ -16,8 +16,8 @@
 </template>
 <script lang="ts" name="BpmProcessInstanceBpmnViewer" setup>
 import { propTypes } from '@/utils/propTypes'
+import { MyProcessViewer } from '@/components/bpmnProcessDesigner/package'
 import * as ActivityApi from '@/api/bpm/activity'
-// import * as DefinitionApi from '@/api/bpm/definition'
 
 const props = defineProps({
   loading: propTypes.bool, // 是否加载中

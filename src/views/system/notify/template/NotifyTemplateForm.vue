@@ -25,7 +25,7 @@
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_NOTIFY_TEMPLATE_TYPE)"
             :key="dict.value"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="dict.value"
           />
         </el-select>
       </el-form-item>
@@ -34,7 +34,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
-            :label="parseInt(dict.value as string)"
+            :label="dict.value as string"
           >
             {{ dict.label }}
           </el-radio>
@@ -81,6 +81,7 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 
+/** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = type
@@ -90,7 +91,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await NotifyTemplateApi.getNotifyTemplateApi(id)
+      formData.value = await NotifyTemplateApi.getNotifyTemplate(id)
     } finally {
       formLoading.value = false
     }
@@ -107,12 +108,12 @@ const submitForm = async () => {
   if (!valid) return
   formLoading.value = true
   try {
-    const data = formData.value as NotifyTemplateApi.NotifyTemplateVO
+    const data = formData.value as unknown as NotifyTemplateApi.NotifyTemplateVO
     if (formType.value === 'create') {
-      await NotifyTemplateApi.createNotifyTemplateApi(data)
+      await NotifyTemplateApi.createNotifyTemplate(data)
       message.success('新增成功')
     } else {
-      await NotifyTemplateApi.updateNotifyTemplateApi(data)
+      await NotifyTemplateApi.updateNotifyTemplate(data)
       message.success('修改成功')
     }
     dialogVisible.value = false

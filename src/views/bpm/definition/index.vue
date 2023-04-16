@@ -84,7 +84,7 @@
 
   <!-- 弹窗：流程模型图的预览 -->
   <Dialog title="流程图" v-model="bpmnDetailVisible" width="800">
-    <my-process-viewer
+    <MyProcessViewer
       key="designer"
       v-model="bpmnXML"
       :value="bpmnXML"
@@ -97,6 +97,7 @@
 <script setup lang="ts" name="BpmProcessDefinition">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
+import { MyProcessViewer } from '@/components/bpmnProcessDesigner/package'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { setConfAndFields2 } from '@/utils/formCreate'
 const { push } = useRouter() // 路由
