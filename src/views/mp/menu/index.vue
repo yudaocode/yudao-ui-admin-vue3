@@ -9,7 +9,6 @@
     </el-form>
   </ContentWrap>
 
-  <!-- 列表 -->
   <ContentWrap>
     <div class="public-account-management clearfix" v-loading="loading">
       <!--左边配置菜单-->
@@ -17,169 +16,33 @@
         <div class="weixin-hd">
           <div class="weixin-title">{{ accountName }}</div>
         </div>
-        <div class="weixin-menu menu_main clearfix">
-          <div class="menu_bottom" v-for="(item, i) of menuList" :key="i">
-            <!-- 一级菜单 -->
-            <div @click="menuClick(i, item)" class="menu_item" :class="{ active: isActive === i }"
-              ><Icon icon="ep:fold" color="black" />{{ item.name }}
-            </div>
-            <!-- 以下为二级菜单-->
-            <div class="submenu" v-if="isSubMenuFlag === i">
-              <div class="subtitle menu_bottom" v-for="(subItem, k) in item.children" :key="k">
-                <div
-                  class="menu_subItem"
-                  v-if="item.children"
-                  :class="{ active: isSubMenuActive === i + '' + k }"
-                  @click="subMenuClick(subItem, i, k)"
-                >
-                  {{ subItem.name }}
-                </div>
-              </div>
-              <!-- 二级菜单加号， 当长度 小于 5 才显示二级菜单的加号  -->
-              <div
-                class="menu_bottom menu_addicon"
-                v-if="!item.children || item.children.length < 5"
-                @click="addSubMenu(i, item)"
-              >
-                <Icon icon="ep:plus" />
-              </div>
-            </div>
-          </div>
-          <!-- 一级菜单加号 -->
-          <div class="menu_bottom menu_addicon" v-if="menuList.length < 3" @click="addMenu">
-            <Icon icon="ep:plus" />
-          </div>
+        <div class="weixin-menu clearfix">
+          <MenuPreviewer
+            v-model="menuList"
+            :account-id="accountId"
+            :active-index="activeIndex"
+            :parent-index="parentIndex"
+            @menu-clicked="(parent, x) => menuClicked(parent, x)"
+            @submenu-clicked="(child, x, y) => subMenuClicked(child, x, y)"
+          />
         </div>
         <div class="save_div">
-          <el-button
-            class="save_btn"
-            type="success"
-            @click="handleSave"
-            v-hasPermi="['mp:menu:save']"
+          <el-button class="save_btn" type="success" @click="onSave" v-hasPermi="['mp:menu:save']"
             >保存并发布菜单</el-button
           >
-          <el-button
-            class="save_btn"
-            type="danger"
-            @click="handleDelete"
-            v-hasPermi="['mp:menu:delete']"
+          <el-button class="save_btn" type="danger" @click="onClear" v-hasPermi="['mp:menu:delete']"
             >清空菜单</el-button
           >
         </div>
       </div>
       <!--右边配置-->
-      <div v-if="showRightFlag" class="right">
-        <div class="configure_page">
-          <div class="delete_btn">
-            <el-button size="small" type="danger" @click="handleDeleteMenu">
-              删除当前菜单<Icon icon="ep:delete" />
-            </el-button>
-          </div>
-          <div>
-            <span>菜单名称：</span>
-            <el-input
-              class="input_width"
-              v-model="tempObj.name"
-              placeholder="请输入菜单名称"
-              :maxlength="nameMaxLength"
-              clearable
-            />
-          </div>
-          <div v-if="showConfigureContent">
-            <div class="menu_content">
-              <span>菜单标识：</span>
-              <el-input
-                class="input_width"
-                v-model="tempObj.menuKey"
-                placeholder="请输入菜单 KEY"
-                clearable
-              />
-            </div>
-            <div class="menu_content">
-              <span>菜单内容：</span>
-              <el-select v-model="tempObj.type" clearable placeholder="请选择" class="menu_option">
-                <el-option
-                  v-for="item in menuOptions"
-                  :label="item.label"
-                  :value="item.value"
-                  :key="item.value"
-                />
-              </el-select>
-            </div>
-            <div class="configur_content" v-if="tempObj.type === 'view'">
-              <span>跳转链接：</span>
-              <el-input
-                class="input_width"
-                v-model="tempObj.url"
-                placeholder="请输入链接"
-                clearable
-              />
-            </div>
-            <div class="configur_content" v-if="tempObj.type === 'miniprogram'">
-              <div class="applet">
-                <span>小程序的 appid ：</span>
-                <el-input
-                  class="input_width"
-                  v-model="tempObj.miniProgramAppId"
-                  placeholder="请输入小程序的appid"
-                  clearable
-                />
-              </div>
-              <div class="applet">
-                <span>小程序的页面路径：</span>
-                <el-input
-                  class="input_width"
-                  v-model="tempObj.miniProgramPagePath"
-                  placeholder="请输入小程序的页面路径，如：pages/index"
-                  clearable
-                />
-              </div>
-              <div class="applet">
-                <span>小程序的备用网页：</span>
-                <el-input
-                  class="input_width"
-                  v-model="tempObj.url"
-                  placeholder="不支持小程序的老版本客户端将打开本网页"
-                  clearable
-                />
-              </div>
-              <p class="blue">tips:需要和公众号进行关联才可以把小程序绑定带微信菜单上哟！</p>
-            </div>
-            <div class="configur_content" v-if="tempObj.type === 'article_view_limited'">
-              <el-row>
-                <div class="select-item" v-if="tempObj && tempObj.replyArticles">
-                  <WxNews :articles="tempObj.replyArticles" />
-                  <el-row class="ope-row" justify="center" align="middle">
-                    <el-button type="danger" circle @click="deleteMaterial">
-                      <icon icon="ep:delete" />
-                    </el-button>
-                  </el-row>
-                </div>
-                <div v-else>
-                  <el-row justify="center">
-                    <el-col :span="24" style="text-align: center">
-                      <el-button type="success" @click="dialogNewsVisible = true">
-                        素材库选择<Icon icon="ep:circle-check" />
-                      </el-button>
-                    </el-col>
-                  </el-row>
-                </div>
-                <el-dialog title="选择图文" v-model="dialogNewsVisible" width="90%">
-                  <WxMaterialSelect
-                    :objData="{ type: 'news', accountId: accountId }"
-                    @select-material="selectMaterial"
-                  />
-                </el-dialog>
-              </el-row>
-            </div>
-            <div
-              class="configur_content"
-              v-if="tempObj.type === 'click' || tempObj.type === 'scancode_waitmsg'"
-            >
-              <WxReplySelect :objData="tempObj.reply" v-if="hackResetWxReplySelect" />
-            </div>
-          </div>
-        </div>
+      <div class="right" v-if="showRightPanel">
+        <MenuEditor
+          :account-id="accountId"
+          :is-parent="isParent"
+          v-model="activeMenu"
+          @delete="onDeleteMenu"
+        />
       </div>
       <!-- 一进页面就显示的默认页面，当点击左边按钮的时候，就不显示了-->
       <div v-else class="right">
@@ -188,37 +51,55 @@
     </div>
   </ContentWrap>
 </template>
+
 <script lang="ts" setup name="MpMenu">
-import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
-import WxNews from '@/views/mp/components/wx-news/main.vue'
-import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
 import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import MenuEditor from './components/MenuEditor.vue'
+import MenuPreviewer from './components/MenuPreviewer.vue'
 import * as MpMenuApi from '@/api/mp/menu'
-import { handleTree } from '@/utils/tree'
-import menuOptions from './menuOptions'
+import * as UtilsTree from '@/utils/tree'
+import { RawMenu, Menu } from './components/types'
 
 const message = useMessage() // 消息
+const MENU_NOT_SELECTED = '__MENU_NOT_SELECTED__'
 
 // ======================== 列表查询 ========================
 const loading = ref(false) // 遮罩层
 const accountId = ref<number | undefined>()
 const accountName = ref<string | undefined>('')
-const menuList = ref<any>({ children: [] })
+const menuList = ref<Menu[]>([])
 
 // ======================== 菜单操作 ========================
-const isActive = ref(-1) // 一级菜单点中样式
-const isSubMenuActive = ref<string | number>(-1) // 一级菜单点中样式
-const isSubMenuFlag = ref(-1) // 二级菜单显示标志
+// 当前选中菜单编码：
+//  * 一级（'x'）
+//  * 二级（'x-y'）
+//  * 未选中（MENU_NOT_SELECTED）
+const activeIndex = ref<string>(MENU_NOT_SELECTED)
+// 二级菜单显示标志: 归属的一级菜单index
+// * 未初始化：-1
+// * 初始化：x
+const parentIndex = ref(-1)
 
 // ======================== 菜单编辑 ========================
-const showRightFlag = ref(false) // 右边配置显示默认详情还是配置详情
-const nameMaxLength = ref(0) // 菜单名称最大长度；1 级是 4 字符；2 级是 7 字符；
-const showConfigureContent = ref(true) // 是否展示配置内容；如果有子菜单，就不显示配置内容
-const hackResetWxReplySelect = ref(false) // 重置 WxReplySelect 组件
-const tempObj = ref<any>({}) // 右边临时变量，作为中间值牵引关系
+const showRightPanel = ref(false) // 右边配置显示默认详情还是配置详情
+const isParent = ref<boolean>(true) // 是否一级菜单，控制MenuEditor中name字段长度
+const activeMenu = ref<Menu>({}) // 选中菜单，MenuEditor的modelValue
 
-// 一些临时值放在这里进行判断，如果放在 tempObj，由于引用关系，menu 也会多了多余的参数
-const tempSelfObj = ref<any>({})
+// 一些临时值放在这里进行判断，如果放在 activeMenu，由于引用关系，menu 也会多了多余的参数
+enum Level {
+  Undefined = '0',
+  Parent = '1',
+  Child = '2'
+}
+const tempSelfObj = ref<{
+  grand: Level
+  x: number
+  y: number
+}>({
+  grand: Level.Undefined,
+  x: 0,
+  y: 0
+})
 const dialogNewsVisible = ref(false) // 跳转图文时的素材选择弹窗
 
 /** 侦听公众号变化 **/
@@ -233,8 +114,8 @@ const getList = async () => {
   loading.value = false
   try {
     const data = await MpMenuApi.getMenuList(accountId.value)
-    const menuData = convertMenuList(data)
-    menuList.value = handleTree(menuData, 'id')
+    const menuData = menuListToFrontend(data)
+    menuList.value = UtilsTree.handleTree(menuData, 'id')
   } finally {
     loading.value = false
   }
@@ -247,37 +128,29 @@ const handleQuery = () => {
 }
 
 // 将后端返回的 menuList，转换成前端的 menuList
-const convertMenuList = (list: any[]) => {
+const menuListToFrontend = (list: any[]) => {
   if (!list) return []
 
-  const result: any[] = []
-  list.forEach((item) => {
-    const menu = {
+  const result: RawMenu[] = []
+  list.forEach((item: RawMenu) => {
+    const menu: any = {
       ...item
     }
-    if (item.type === 'click' || item.type === 'scancode_waitmsg') {
-      delete menu.replyMessageType
-      delete menu.replyContent
-      delete menu.replyMediaId
-      delete menu.replyMediaUrl
-      delete menu.replyDescription
-      delete menu.replyArticles
-      menu.reply = {
-        type: item.replyMessageType,
-        accountId: item.accountId,
-        content: item.replyContent,
-        mediaId: item.replyMediaId,
-        url: item.replyMediaUrl,
-        title: item.replyTitle,
-        description: item.replyDescription,
-        thumbMediaId: item.replyThumbMediaId,
-        thumbMediaUrl: item.replyThumbMediaUrl,
-        articles: item.replyArticles,
-        musicUrl: item.replyMusicUrl,
-        hqMusicUrl: item.replyHqMusicUrl
-      }
+    menu.reply = {
+      type: item.replyMessageType,
+      accountId: item.accountId,
+      content: item.replyContent,
+      mediaId: item.replyMediaId,
+      url: item.replyMediaUrl,
+      title: item.replyTitle,
+      description: item.replyDescription,
+      thumbMediaId: item.replyThumbMediaId,
+      thumbMediaUrl: item.replyThumbMediaUrl,
+      articles: item.replyArticles,
+      musicUrl: item.replyMusicUrl,
+      hqMusicUrl: item.replyHqMusicUrl
     }
-    result.push(menu)
+    result.push(menu as RawMenu)
   })
   return result
 }
@@ -285,128 +158,72 @@ const convertMenuList = (list: any[]) => {
 // 重置表单，清空表单数据
 const resetForm = () => {
   // 菜单操作
-  isActive.value = -1
-  isSubMenuActive.value = -1
-  isSubMenuFlag.value = -1
+  activeIndex.value = MENU_NOT_SELECTED
+  parentIndex.value = -1
 
   // 菜单编辑
-  showRightFlag.value = false
-  nameMaxLength.value = 0
-  showConfigureContent.value = false
-  hackResetWxReplySelect.value = false
-  tempObj.value = {}
-  tempSelfObj.value = {}
+  showRightPanel.value = false
+  activeMenu.value = {}
+  tempSelfObj.value = { grand: Level.Undefined, x: 0, y: 0 }
   dialogNewsVisible.value = false
 }
 
 // ======================== 菜单操作 ========================
 // 一级菜单点击事件
-const menuClick = (i: number, item: any) => {
+const menuClicked = (parent: Menu, x: number) => {
   // 右侧的表单相关
-  resetEditor()
-  showRightFlag.value = true // 右边菜单
-  tempObj.value = item // 这个如果放在顶部，flag 会没有。因为重新赋值了。
-  tempSelfObj.value.grand = '1' // 表示一级菜单
-  tempSelfObj.value.index = i // 表示一级菜单索引
-  nameMaxLength.value = 4
-  showConfigureContent.value = !(item.children && item.children.length > 0) // 有子菜单，就不显示配置内容
+  showRightPanel.value = true // 右边菜单
+  activeMenu.value = parent // 这个如果放在顶部，flag 会没有。因为重新赋值了。
+  tempSelfObj.value.grand = Level.Parent // 表示一级菜单
+  tempSelfObj.value.x = x // 表示一级菜单索引
+  isParent.value = true
 
   // 左侧的选中
-  isActive.value = i // 一级菜单选中样式
-  isSubMenuFlag.value = i // 二级菜单显示标志
-  isSubMenuActive.value = -1 // 二级菜单去除选中样式
+  activeIndex.value = `${x}` // 菜单选中样式
+  parentIndex.value = x // 二级菜单显示标志
 }
 
 // 二级菜单点击事件
-const subMenuClick = (subItem: any, index: number, k: number) => {
+const subMenuClicked = (child: Menu, x: number, y: number) => {
   // 右侧的表单相关
-  resetEditor()
-  showRightFlag.value = true // 右边菜单
-  tempObj.value = subItem // 将点击的数据放到临时变量，对象有引用作用
-  tempSelfObj.value.grand = '2' // 表示二级菜单
-  tempSelfObj.value.index = index // 表示一级菜单索引
-  tempSelfObj.value.secondIndex = k // 表示二级菜单索引
-  nameMaxLength.value = 7
-  showConfigureContent.value = true
+  showRightPanel.value = true // 右边菜单
+  activeMenu.value = child // 将点击的数据放到临时变量，对象有引用作用
+  tempSelfObj.value.grand = Level.Child // 表示二级菜单
+  tempSelfObj.value.x = x // 表示一级菜单索引
+  tempSelfObj.value.y = y // 表示二级菜单索引
+  isParent.value = false
 
   // 左侧的选中
-  isActive.value = -1 // 一级菜单去除样式
-  isSubMenuActive.value = index + '' + k // 二级菜单选中样式
-}
-
-// 添加横向一级菜单
-const addMenu = () => {
-  const menuKeyLength: number = menuList.value.length
-  const addButton = {
-    name: '菜单名称',
-    children: [],
-    reply: {
-      // 用于存储回复内容
-      type: 'text',
-      accountId: accountId.value // 保证组件里，可以使用到对应的公众号
-    }
-  }
-  menuList.value[menuKeyLength] = addButton
-  menuClick(menuKeyLength - 1, addButton)
-}
-// 添加横向二级菜单；item 表示要操作的父菜单
-const addSubMenu = (i: number, item: any) => {
-  // 清空父菜单的属性，因为它只需要 name 属性即可
-  if (!item.children || item.children.length <= 0) {
-    item.children = []
-    delete item['type']
-    delete item['menuKey']
-    delete item['miniProgramAppId']
-    delete item['miniProgramPagePath']
-    delete item['url']
-    delete item['reply']
-    delete item['articleId']
-    delete item['replyArticles']
-    // 关闭配置面板
-    showConfigureContent.value = false
-  }
-
-  const subMenuKeyLength = item.children.length // 获取二级菜单key长度
-  const addButton = {
-    name: '子菜单名称',
-    reply: {
-      // 用于存储回复内容
-      type: 'text',
-      accountId: accountId.value // 保证组件里，可以使用到对应的公众号
-    }
-  }
-  item.children[subMenuKeyLength] = addButton
-  subMenuClick(item.children[subMenuKeyLength], i, subMenuKeyLength)
+  activeIndex.value = `${x}-${y}`
 }
 
 // 删除当前菜单
-const handleDeleteMenu = async () => {
+const onDeleteMenu = async () => {
   try {
     await message.confirm('确定要删除吗?')
-    if (tempSelfObj.value.grand === '1') {
+    if (tempSelfObj.value.grand === Level.Parent) {
       // 一级菜单的删除方法
-      menuList.value.splice(tempSelfObj.value.index, 1)
-    } else if (tempSelfObj.value.grand === '2') {
+      menuList.value.splice(tempSelfObj.value.x, 1)
+    } else if (tempSelfObj.value.grand === Level.Child) {
       // 二级菜单的删除方法
-      menuList.value[tempSelfObj.value.index].children.splice(tempSelfObj.value.secondIndex, 1)
+      menuList.value[tempSelfObj.value.x].children?.splice(tempSelfObj.value.y, 1)
     }
     // 提示
     message.notifySuccess('删除成功')
 
     // 处理菜单的选中
-    tempObj.value = {}
-    showRightFlag.value = false
-    isActive.value = -1
-    isSubMenuActive.value = -1
+    activeMenu.value = {}
+    showRightPanel.value = false
+    activeIndex.value = MENU_NOT_SELECTED
   } catch {}
 }
 
 // ======================== 菜单编辑 ========================
-const handleSave = async () => {
+const onSave = async () => {
   try {
     await message.confirm('确定要保存吗?')
     loading.value = true
-    await MpMenuApi.saveMenu(accountId.value, convertMenuFormList())
+    await MpMenuApi.saveMenu(accountId.value, menuListToBackend())
     getList()
     message.notifySuccess('发布成功')
   } finally {
@@ -414,15 +231,7 @@ const handleSave = async () => {
   }
 }
 
-// 表单 Editor 重置
-const resetEditor = () => {
-  hackResetWxReplySelect.value = false // 销毁组件
-  nextTick(() => {
-    hackResetWxReplySelect.value = true // 重建组件
-  })
-}
-
-const handleDelete = async () => {
+const onClear = async () => {
   try {
     await message.confirm('确定要删除吗?')
     loading.value = true
@@ -435,10 +244,10 @@ const handleDelete = async () => {
 }
 
 // 将前端的 menuList，转换成后端接收的 menuList
-const convertMenuFormList = () => {
+const menuListToBackend = () => {
   const result: any[] = []
   menuList.value.forEach((item) => {
-    const menu = convertMenuForm(item)
+    const menu = menuToBackend(item)
     result.push(menu)
 
     // 处理子菜单
@@ -447,61 +256,33 @@ const convertMenuFormList = () => {
     }
     menu.children = []
     item.children.forEach((subItem) => {
-      menu.children.push(convertMenuForm(subItem))
+      menu.children.push(menuToBackend(subItem))
     })
   })
   return result
 }
 
 // 将前端的 menu，转换成后端接收的 menu
-const convertMenuForm = (menu: any) => {
+// TODO: @芋艿，需要根据后台API删除不需要的字段
+const menuToBackend = (menu: any) => {
   let result = {
     ...menu,
     children: undefined, // 不处理子节点
     reply: undefined // 稍后复制
   }
-  if (menu.type === 'click' || menu.type === 'scancode_waitmsg') {
-    result.replyMessageType = menu.reply.type
-    result.replyContent = menu.reply.content
-    result.replyMediaId = menu.reply.mediaId
-    result.replyMediaUrl = menu.reply.url
-    result.replyTitle = menu.reply.title
-    result.replyDescription = menu.reply.description
-    result.replyThumbMediaId = menu.reply.thumbMediaId
-    result.replyThumbMediaUrl = menu.reply.thumbMediaUrl
-    result.replyArticles = menu.reply.articles
-    result.replyMusicUrl = menu.reply.musicUrl
-    result.replyHqMusicUrl = menu.reply.hqMusicUrl
-  }
+  result.replyMessageType = menu.reply.type
+  result.replyContent = menu.reply.content
+  result.replyMediaId = menu.reply.mediaId
+  result.replyMediaUrl = menu.reply.url
+  result.replyTitle = menu.reply.title
+  result.replyDescription = menu.reply.description
+  result.replyThumbMediaId = menu.reply.thumbMediaId
+  result.replyThumbMediaUrl = menu.reply.thumbMediaUrl
+  result.replyArticles = menu.reply.articles
+  result.replyMusicUrl = menu.reply.musicUrl
+  result.replyHqMusicUrl = menu.reply.hqMusicUrl
+
   return result
-}
-
-// ======================== 菜单编辑（素材选择） ========================
-const selectMaterial = (item: any) => {
-  const articleId = item.articleId
-  const articles = item.content.newsItem
-  // 提示，针对多图文
-  if (articles.length > 1) {
-    message.alertWarning('您选择的是多图文，将默认跳转第一篇')
-  }
-  dialogNewsVisible.value = false
-
-  // 设置菜单的回复
-  tempObj.value.articleId = articleId
-  tempObj.value.replyArticles = []
-  articles.forEach((article) => {
-    tempObj.value.replyArticles.push({
-      title: article.title,
-      description: article.digest,
-      picUrl: article.picUrl,
-      url: article.url
-    })
-  })
-}
-
-const deleteMaterial = () => {
-  delete tempObj.value['articleId']
-  delete tempObj.value['replyArticles']
 }
 </script>
 
@@ -513,9 +294,9 @@ const deleteMaterial = () => {
 }
 
 .clearfix::after {
-  content: '';
   display: table;
   clear: both;
+  content: '';
 }
 
 div {
@@ -523,115 +304,49 @@ div {
 }
 
 .weixin-hd {
-  color: #fff;
-  text-align: center;
   position: relative;
   bottom: 426px;
-  left: 0px;
+  left: 0;
   width: 300px;
   height: 64px;
+  color: #fff;
+  text-align: center;
   background: transparent url('./assets/menu_head.png') no-repeat 0 0;
   background-position: 0 0;
   background-size: 100%;
 }
 
 .weixin-title {
-  color: #fff;
-  font-size: 14px;
-  width: 100%;
-  text-align: center;
   position: absolute;
   top: 33px;
-  left: 0px;
+  left: 0;
+  width: 100%;
+  font-size: 14px;
+  color: #fff;
+  text-align: center;
 }
 
 .weixin-menu {
-  background: transparent url('./assets/menu_foot.png') no-repeat 0 0;
   padding-left: 43px;
   font-size: 12px;
-}
-
-.menu_option {
-  width: 40% !important;
+  background: transparent url('./assets/menu_foot.png') no-repeat 0 0;
 }
 
 .public-account-management {
-  min-width: 1200px;
-  width: 1200px;
+  // width: 1200px;
+  // min-width: 1200px;
   margin: 0 auto;
 
   .left {
-    float: left;
+    position: relative;
     display: inline-block;
+    float: left;
     width: 350px;
     height: 715px;
+    padding: 518px 25px 88px;
     background: url('./assets/iphone_backImg.png') no-repeat;
     background-size: 100% auto;
-    padding: 518px 25px 88px;
-    position: relative;
     box-sizing: border-box;
-
-    /*第一级菜单*/
-    .menu_main {
-      .menu_bottom {
-        position: relative;
-        float: left;
-        display: inline-block;
-        box-sizing: border-box;
-        width: 85.5px;
-        text-align: center;
-        border: 1px solid #ebedee;
-        background-color: #fff;
-        cursor: pointer;
-
-        &.menu_addicon {
-          height: 46px;
-          line-height: 46px;
-        }
-
-        .menu_item {
-          height: 44px;
-          line-height: 44px;
-          // text-align: center;
-          box-sizing: border-box;
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-
-          &.active {
-            border: 1px solid #2bb673;
-          }
-        }
-
-        .menu_subItem {
-          height: 44px;
-          line-height: 44px;
-          text-align: center;
-          box-sizing: border-box;
-
-          &.active {
-            border: 1px solid #2bb673;
-          }
-        }
-      }
-
-      i {
-        color: #2bb673;
-      }
-
-      /*第二级菜单*/
-      .submenu {
-        position: absolute;
-        width: 85.5px;
-        bottom: 45px;
-
-        .subtitle {
-          background-color: #fff;
-          box-sizing: border-box;
-        }
-      }
-    }
 
     .save_div {
       margin-top: 15px;
@@ -644,85 +359,29 @@ div {
     }
   }
 
-  /*右边菜单内容*/
+  /* 右边菜单内容 */
   .right {
     float: left;
     width: 63%;
-    background-color: #e8e7e7;
     padding: 20px;
     margin-left: 20px;
-    -webkit-box-sizing: border-box;
+    background-color: #e8e7e7;
     box-sizing: border-box;
-
-    .configure_page {
-      .delete_btn {
-        text-align: right;
-        margin-bottom: 15px;
-      }
-
-      .menu_content {
-        margin-top: 20px;
-      }
-
-      .configur_content {
-        margin-top: 20px;
-        background-color: #fff;
-        padding: 20px 10px;
-        border-radius: 5px;
-      }
-
-      .blue {
-        color: #29b6f6;
-        margin-top: 10px;
-      }
-
-      .applet {
-        margin-bottom: 20px;
-
-        span {
-          width: 20%;
-        }
-      }
-
-      .input_width {
-        width: 40%;
-      }
-
-      .material {
-        .input_width {
-          width: 30%;
-        }
-
-        .el-textarea {
-          width: 80%;
-        }
-      }
-    }
-  }
-
-  .el-input {
-    width: 70%;
-    margin-right: 2%;
+    box-sizing: border-box;
   }
 }
 </style>
 <!--素材样式-->
 <style lang="scss" scoped>
 .pagination {
-  text-align: right;
   margin-right: 25px;
+  text-align: right;
 }
 
 .select-item {
   width: 280px;
   padding: 10px;
-  margin: 0 auto 10px auto;
-  border: 1px solid #eaeaea;
-}
-
-.select-item2 {
-  padding: 10px;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 10px;
   border: 1px solid #eaeaea;
 }
 
@@ -732,10 +391,10 @@ div {
 }
 
 .item-name {
-  font-size: 12px;
   overflow: hidden;
+  font-size: 12px;
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: center;
 }
 </style>
