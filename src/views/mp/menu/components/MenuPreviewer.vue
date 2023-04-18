@@ -14,7 +14,7 @@
         <div
           class="menu_subItem"
           v-if="parent.children"
-          :class="{ active: activeIndex === `${x}-${y}` }"
+          :class="{ active: props.activeIndex === `${x}-${y}` }"
           @click="subMenuClicked(child, x, y)"
         >
           {{ child.name }}

@@ -1,14 +1,9 @@
 import type { UploadProps, UploadRawFile } from 'element-plus'
 import { getAccessToken } from '@/utils/auth'
-const message = useMessage() // 消息
+import { MaterialType, useBeforeUpload } from '@/views/mp/hooks/useUpload'
+
 const HEADERS = { Authorization: 'Bearer ' + getAccessToken() } // 请求头
 const UPLOAD_URL = import.meta.env.VITE_BASE_URL + '/admin-api/mp/material/upload-permanent' // 上传地址
-
-enum MaterialType {
-  Image = 'image',
-  Voice = 'voice',
-  Video = 'video'
-}
 
 interface UploadData {
   type: MaterialType
@@ -16,48 +11,14 @@ interface UploadData {
   introduction: string
 }
 
-const beforeUpload = (rawFile: UploadRawFile, materialType: MaterialType): boolean => {
-  let allowTypes: string[] = []
-  let maxSizeMB = 0
-  let name = ''
-  switch (materialType) {
-    case MaterialType.Image:
-      allowTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/jpg']
-      maxSizeMB = 2
-      name = '图片'
-      break
-    case MaterialType.Voice:
-      allowTypes = ['audio/mp3', 'audio/mpeg', 'audio/wma', 'audio/wav', 'audio/amr']
-      maxSizeMB = 2
-      name = '图片'
-      break
-    case MaterialType.Video:
-      allowTypes = ['video/mp4']
-      maxSizeMB = 10
-      name = '视频'
-      break
-  }
-  // 格式不正确
-  if (!allowTypes.includes(rawFile.type)) {
-    message.error(`上传${name}格式不对!`)
-    return false
-  }
-  // 大小不正确
-  if (rawFile.size / 1024 / 1024 > maxSizeMB) {
-    message.error(`上传${name}大小不能超过${maxSizeMB}M!`)
-    return false
-  }
-  return true
-}
-
 const beforeImageUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) =>
-  beforeUpload(rawFile, MaterialType.Image)
+  useBeforeUpload(MaterialType.Image, 2)(rawFile)
 
 const beforeVoiceUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) =>
-  beforeUpload(rawFile, MaterialType.Voice)
+  useBeforeUpload(MaterialType.Voice, 2)(rawFile)
 
 const beforeVideoUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) =>
-  beforeUpload(rawFile, MaterialType.Video)
+  useBeforeUpload(MaterialType.Video, 10)(rawFile)
 
 export {
   HEADERS,
