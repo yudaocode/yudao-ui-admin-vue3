@@ -2,26 +2,33 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="表单名" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入表单名"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入表单名"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" plain @click="openForm" v-hasPermi="['bpm:form:create']">
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-button v-hasPermi="['bpm:form:create']" plain type="primary" @click="openForm">
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
         </el-button>
       </el-form-item>
     </el-form>
@@ -30,38 +37,38 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="表单名" align="center" prop="name" />
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column align="center" label="编号" prop="id" />
+      <el-table-column align="center" label="表单名" prop="name" />
+      <el-table-column align="center" label="状态" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column align="center" label="备注" prop="remark" />
       <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
         :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column align="center" label="操作">
         <template #default="scope">
           <el-button
+            v-hasPermi="['bpm:form:update']"
             link
             type="primary"
             @click="openForm(scope.row.id)"
-            v-hasPermi="['bpm:form:update']"
           >
             编辑
           </el-button>
-          <el-button link @click="openDetail(scope.row.id)" v-hasPermi="['bpm:form:query']">
+          <el-button v-hasPermi="['bpm:form:query']" link @click="openDetail(scope.row.id)">
             详情
           </el-button>
           <el-button
+            v-hasPermi="['bpm:form:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['bpm:form:delete']"
           >
             删除
           </el-button>
@@ -70,24 +77,25 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
 
   <!-- 表单详情的弹窗 -->
-  <Dialog title="表单详情" v-model="detailVisible" width="800">
-    <form-create :rule="detailData.rule" :option="detailData.option" />
+  <Dialog v-model="detailVisible" title="表单详情" width="800">
+    <form-create :option="detailData.option" :rule="detailData.rule" />
   </Dialog>
 </template>
 
-<script setup lang="ts" name="BpmForm">
+<script lang="ts" name="BpmForm" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as FormApi from '@/api/bpm/form'
 import { setConfAndFields2 } from '@/utils/formCreate'
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由
@@ -128,12 +136,16 @@ const resetQuery = () => {
 
 /** 添加/修改操作 */
 const openForm = (id?: number) => {
-  push({
-    name: 'BpmFormEditor',
-    query: {
+  const toRouter: { name: string; query?: { id: number } } = {
+    name: 'BpmFormEditor'
+  }
+  // 表单新建的时候id传的是event需要排除
+  if (typeof id === 'number') {
+    toRouter.query = {
       id
     }
-  })
+  }
+  push(toRouter)
 }
 
 /** 删除按钮操作 */
