@@ -2,81 +2,78 @@
   <ContentWrap>
     <!-- 审批信息 -->
     <el-card
-      class="box-card"
-      v-loading="processInstanceLoading"
       v-for="(item, index) in runningTasks"
       :key="index"
+      v-loading="processInstanceLoading"
+      class="box-card"
     >
       <template #header>
         <span class="el-icon-picture-outline">审批任务【{{ item.name }}】</span>
       </template>
-      <el-col :span="16" :offset="6">
+      <el-col :offset="6" :span="16">
         <el-form
           :ref="'form' + index"
           :model="auditForms[index]"
           :rules="auditRule"
           label-width="100px"
         >
-          <el-form-item label="流程名" v-if="processInstance && processInstance.name">
+          <el-form-item v-if="processInstance && processInstance.name" label="流程名">
             {{ processInstance.name }}
           </el-form-item>
-          <el-form-item label="流程发起人" v-if="processInstance && processInstance.startUser">
+          <el-form-item v-if="processInstance && processInstance.startUser" label="流程发起人">
             {{ processInstance.startUser.nickname }}
-            <el-tag type="info" size="small">{{ processInstance.startUser.deptName }}</el-tag>
+            <el-tag size="small" type="info">{{ processInstance.startUser.deptName }}</el-tag>
           </el-form-item>
           <el-form-item label="审批建议" prop="reason">
             <el-input
-              type="textarea"
               v-model="auditForms[index].reason"
               placeholder="请输入审批建议"
+              type="textarea"
             />
           </el-form-item>
         </el-form>
         <div style="margin-left: 10%; margin-bottom: 20px; font-size: 14px">
           <el-button type="success" @click="handleAudit(item, true)">
-            <Icon icon="ep:select" /> 通过
+            <Icon icon="ep:select" />
+            通过
           </el-button>
           <el-button type="danger" @click="handleAudit(item, false)">
-            <Icon icon="ep:close" /> 不通过
+            <Icon icon="ep:close" />
+            不通过
           </el-button>
           <el-button type="primary" @click="openTaskUpdateAssigneeForm(item.id)">
-            <Icon icon="ep:edit" /> 转办
+            <Icon icon="ep:edit" />
+            转办
           </el-button>
           <el-button type="primary" @click="handleDelegate(item)">
-            <Icon icon="ep:position" /> 委派
+            <Icon icon="ep:position" />
+            委派
           </el-button>
           <el-button type="warning" @click="handleBack(item)">
-            <Icon icon="ep:back" /> 回退
+            <Icon icon="ep:back" />
+            回退
           </el-button>
         </div>
       </el-col>
     </el-card>
 
     <!-- 申请信息 -->
-    <el-card class="box-card" v-loading="processInstanceLoading">
+    <el-card v-loading="processInstanceLoading" class="box-card">
       <template #header>
         <span class="el-icon-document">申请信息【{{ processInstance.name }}】</span>
       </template>
       <!-- 情况一：流程表单 -->
-      <el-col v-if="processInstance?.processDefinition?.formType === 10" :span="16" :offset="6">
+      <el-col v-if="processInstance?.processDefinition?.formType === 10" :offset="6" :span="16">
         <form-create
           ref="fApi"
-          :rule="detailForm.rule"
-          :option="detailForm.option"
           v-model="detailForm.value"
+          :option="detailForm.option"
+          :rule="detailForm.rule"
         />
       </el-col>
-      <!-- 情况二：流程表单 -->
+      <!-- 情况二：业务表单 -->
       <div v-if="processInstance?.processDefinition?.formType === 20">
-        <router-link
-          :to="
-            processInstance.processDefinition.formCustomViewPath +
-            '?id=' +
-            processInstance.businessKey
-          "
-        >
-          <el-button type="primary"><Icon icon="ep:view" /> 点击查看</el-button>
-        </router-link>
+        <autoComponent :id="processInstance.businessKey" />
       </div>
     </el-card>
 
@@ -85,18 +82,18 @@
 
     <!-- 高亮流程图 -->
     <ProcessInstanceBpmnViewer
-      :id="id"
-      :process-instance="processInstance"
-      :loading="processInstanceLoading"
-      :tasks="tasks"
+      :id="`${id}`"
       :bpmn-xml="bpmnXML"
+      :loading="processInstanceLoading"
+      :process-instance="processInstance"
+      :tasks="tasks"
     />
 
     <!-- 弹窗：转派审批人 -->
     <TaskUpdateAssigneeForm ref="taskUpdateAssigneeFormRef" @success="getDetail" />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="BpmProcessInstanceDetail">
+<script lang="ts" name="BpmProcessInstanceDetail" setup>
 import { useUserStore } from '@/store/modules/user'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
@@ -106,6 +103,8 @@ import * as TaskApi from '@/api/bpm/task'
 import TaskUpdateAssigneeForm from './TaskUpdateAssigneeForm.vue'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
+import { registerComponent } from '@/utils/routerHelper'
+
 const { query } = useRoute() // 查询参数
 const message = useMessage() // 消息弹窗
 const { proxy } = getCurrentInstance() as any
@@ -184,7 +183,7 @@ const getDetail = () => {
   // 2. 获得流程任务列表（审批记录）
   getTaskList()
 }
-
+const autoComponent = ref(null) // 异步组件
 /** 加载流程实例 */
 const getProcessInstance = async () => {
   try {
@@ -195,7 +194,7 @@ const getProcessInstance = async () => {
       return
     }
     processInstance.value = data
-
+    autoComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
     // 设置表单信息
     const processDefinition = data.processDefinition
     if (processDefinition.formType === 10) {
@@ -213,7 +212,7 @@ const getProcessInstance = async () => {
     }
 
     // 加载流程图
-    bpmnXML.value = await DefinitionApi.getProcessDefinitionBpmnXML(processDefinition.id)
+    bpmnXML.value = await DefinitionApi.getProcessDefinitionBpmnXML(processDefinition.id as number)
   } finally {
     processInstanceLoading.value = false
   }
