@@ -212,7 +212,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await NotifyTemplateApi.deleteNotifyTemplateApi(id)
+    await NotifyTemplateApi.deleteNotifyTemplate(id)
     message.success('删除成功')
     // 刷新列表
     await getList()
