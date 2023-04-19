@@ -1,5 +1,5 @@
 // 消息类型（Follow: 关注时回复；Message: 消息回复；Keyword: 关键词回复）
-// 作为tab.name，enum的数字不能随意修改，与api参数相关
+// 作为 tab.name，enum 的数字不能随意修改，与 api 参数相关
 export enum MsgType {
   Follow = 1,
   Message = 2,
@@ -31,6 +31,7 @@ export interface ReplyForm {
   responseHqMusicUrl?: string
 }
 
+// TODO @Dhb52：ObjData 这个类名可以在看看，ObjData 有点通用
 export interface ObjData {
   type: ReplyType
   accountId?: number
