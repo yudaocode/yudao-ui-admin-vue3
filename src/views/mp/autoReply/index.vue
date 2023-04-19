@@ -12,14 +12,14 @@
 
   <!-- tab 切换 -->
   <ContentWrap>
-    <el-tabs v-model="msgType" @tab-change="handleTabChange">
+    <el-tabs v-model="msgType" @tab-change="onTabChange">
       <!-- 操作工具栏 -->
       <el-row :gutter="10" class="mb8">
         <el-col :span="1.5">
           <el-button
             type="primary"
             plain
-            @click="handleAdd"
+            @click="onCreate"
             v-hasPermi="['mp:auto-reply:create']"
             v-if="msgType !== MsgType.Follow || list.length <= 0"
           >
@@ -30,117 +30,31 @@
       <!-- tab 项 -->
       <el-tab-pane :name="MsgType.Follow">
         <template #label>
-          <span><Icon icon="ep:star" /> 关注时回复</span>
+          <el-row align="middle"><Icon icon="ep:star" class="mr-2px" /> 关注时回复</el-row>
         </template>
       </el-tab-pane>
       <el-tab-pane :name="MsgType.Message">
         <template #label>
-          <span><Icon icon="ep:chat-line-round" /> 消息回复</span>
+          <el-row align="middle"><Icon icon="ep:chat-line-round" class="mr-2px" /> 消息回复</el-row>
         </template>
       </el-tab-pane>
       <el-tab-pane :name="MsgType.Keyword">
         <template #label>
-          <span><Icon icon="fa:newspaper-o" /> 关键词回复</span>
+          <el-row align="middle"><Icon icon="fa:newspaper-o" class="mr-2px" /> 关键词回复</el-row>
         </template>
       </el-tab-pane>
     </el-tabs>
     <!-- 列表 -->
-    <el-table v-loading="loading" :data="list">
-      <el-table-column
-        label="请求消息类型"
-        align="center"
-        prop="requestMessageType"
-        v-if="msgType === MsgType.Message"
-      />
-      <el-table-column
-        label="关键词"
-        align="center"
-        prop="requestKeyword"
-        v-if="msgType === MsgType.Keyword"
-      />
-      <el-table-column
-        label="匹配类型"
-        align="center"
-        prop="requestMatch"
-        v-if="msgType === MsgType.Keyword"
-      >
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MP_AUTO_REPLY_REQUEST_MATCH" :value="scope.row.requestMatch" />
-        </template>
-      </el-table-column>
-      <el-table-column label="回复消息类型" align="center">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MP_MESSAGE_TYPE" :value="scope.row.responseMessageType" />
-        </template>
-      </el-table-column>
-      <el-table-column label="回复内容" align="center">
-        <template #default="scope">
-          <div v-if="scope.row.responseMessageType === 'text'">{{ scope.row.responseContent }}</div>
-          <div v-else-if="scope.row.responseMessageType === 'voice'">
-            <WxVoicePlayer v-if="scope.row.responseMediaUrl" :url="scope.row.responseMediaUrl" />
-          </div>
-          <div v-else-if="scope.row.responseMessageType === 'image'">
-            <a target="_blank" :href="scope.row.responseMediaUrl">
-              <img :src="scope.row.responseMediaUrl" style="width: 100px" />
-            </a>
-          </div>
-          <div
-            v-else-if="
-              scope.row.responseMessageType === 'video' ||
-              scope.row.responseMessageType === 'shortvideo'
-            "
-          >
-            <WxVideoPlayer
-              v-if="scope.row.responseMediaUrl"
-              :url="scope.row.responseMediaUrl"
-              style="margin-top: 10px"
-            />
-          </div>
-          <div v-else-if="scope.row.responseMessageType === 'news'">
-            <WxNews :articles="scope.row.responseArticles" />
-          </div>
-          <div v-else-if="scope.row.responseMessageType === 'music'">
-            <WxMusic
-              :title="scope.row.responseTitle"
-              :description="scope.row.responseDescription"
-              :thumb-media-url="scope.row.responseThumbMediaUrl"
-              :music-url="scope.row.responseMusicUrl"
-              :hq-music-url="scope.row.responseHqMusicUrl"
-            />
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180"
-      />
-      <el-table-column label="操作" align="center">
-        <template #default="scope">
-          <el-button
-            type="primary"
-            link
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['mp:auto-reply:update']"
-          >
-            修改
-          </el-button>
-          <el-button
-            type="danger"
-            link
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['mp:auto-reply:delete']"
-          >
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <ReplyTable
+      :loading="loading"
+      :list="list"
+      :msg-type="msgType"
+      @on-update="(id) => onUpdate(id)"
+      @on-delete="(id) => onDelete(id)"
+    />
 
     <!-- 添加或修改自动回复的对话框 -->
-    <el-dialog :title="title" v-model="showReplyFormDialog" width="800px" destroy-on-close>
+    <el-dialog :title="dialogTitle" v-model="showFormDialog" width="800px" destroy-on-close>
       <el-form ref="formRef" :model="replyForm" :rules="rules" label-width="80px">
         <el-form-item label="消息类型" prop="requestMessageType" v-if="msgType === MsgType.Message">
           <el-select v-model="replyForm.requestMessageType" placeholder="请选择">
@@ -172,35 +86,25 @@
       </el-form>
       <template #footer>
         <el-button @click="cancel">取 消</el-button>
-        <el-button type="primary" @click="handleSubmit">确 定</el-button>
+        <el-button type="primary" @click="onSubmit">确 定</el-button>
       </template>
     </el-dialog>
   </ContentWrap>
 </template>
 <script setup lang="ts" name="MpAutoReply">
-import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
-import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
-import WxMusic from '@/views/mp/components/wx-music/main.vue'
-import WxNews from '@/views/mp/components/wx-news/main.vue'
 import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
 import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 import * as MpAutoReplyApi from '@/api/mp/autoReply'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
 import { ContentWrap } from '@/components/ContentWrap'
 import type { TabPaneName } from 'element-plus'
+import ReplyTable from './components/ReplyTable.vue'
+import { MsgType, ReplyForm, ObjData } from './components/types'
 
 const message = useMessage()
 
 const formRef = ref()
 
-// 消息类型（Follow: 关注时回复；Message: 消息回复；Keyword: 关键词回复）
-// 作为tab.name，enum的数字不能随意修改，与api参数相关
-enum MsgType {
-  Follow = 1,
-  Message = 2,
-  Keyword = 3
-}
 const msgType = ref<MsgType>(MsgType.Keyword)
 // 允许选择的请求消息类型
 const RequestMessageTypes = ['text', 'image', 'voice', 'video', 'shortvideo', 'location', 'link']
@@ -224,47 +128,11 @@ const queryParams: QueryParams = reactive({
 })
 
 // 弹出层标题
-const title = ref('')
+const dialogTitle = ref('')
 // 是否显示弹出层
-const showReplyFormDialog = ref(false)
+const showFormDialog = ref(false)
 // 表单参数
-type ReplyType = 'text' | 'image' | 'voice' | 'video' | 'shortvideo' | 'location' | 'link'
-interface ReplyForm {
-  // relation:
-  id?: number
-  accountId?: number
-  type?: MsgType
-  // request:
-  requestMessageType?: ReplyType
-  requestMatch?: number
-  requestKeyword?: string
-  // response:
-  responseMessageType?: ReplyType
-  responseContent?: string
-  responseMediaId?: number
-  responseMediaUrl?: string
-  responseTitle?: string
-  responseDescription?: number
-  responseThumbMediaId?: string
-  responseThumbMediaUrl?: string
-  responseArticles?: any[]
-  responseMusicUrl?: string
-  responseHqMusicUrl?: string
-}
-interface ObjData {
-  type: ReplyType
-  accountId?: number
-  content?: string
-  mediaId?: number
-  url?: string
-  title?: string
-  description?: string
-  thumbMediaId?: number
-  thumbMediaUrl?: string
-  articles?: any[]
-  musicUrl?: string
-  hqMusicUrl?: string
-}
+
 const replyForm = ref<ReplyForm>({})
 // 回复消息
 const objData = ref<ObjData>({
@@ -277,6 +145,7 @@ const rules = {
   requestMatch: [{ required: true, message: '请求的关键字的匹配不能为空', trigger: 'blur' }]
 }
 
+/** 侦听账号变化 */
 const onAccountChanged = (id?: number) => {
   queryParams.accountId = id
   getList()
@@ -284,7 +153,7 @@ const onAccountChanged = (id?: number) => {
 
 /** 查询列表 */
 const getList = async () => {
-  loading.value = false
+  loading.value = true
   try {
     const data = await MpAutoReplyApi.getAutoReplyPage({
       ...queryParams,
@@ -303,13 +172,13 @@ const handleQuery = () => {
   getList()
 }
 
-const handleTabChange = (tabName: TabPaneName) => {
+const onTabChange = (tabName: TabPaneName) => {
   msgType.value = tabName as MsgType
   handleQuery()
 }
 
 /** 新增按钮操作 */
-const handleAdd = () => {
+const onCreate = () => {
   reset()
   // 打开表单，并设置初始化
   objData.value = {
@@ -317,15 +186,15 @@ const handleAdd = () => {
     accountId: queryParams.accountId
   }
 
-  title.value = '新增自动回复'
-  showReplyFormDialog.value = true
+  dialogTitle.value = '新增自动回复'
+  showFormDialog.value = true
 }
 
 /** 修改按钮操作 */
-const handleUpdate = async (row: any) => {
+const onUpdate = async (id: number) => {
   reset()
 
-  const data = await MpAutoReplyApi.getAutoReply(row.id)
+  const data = await MpAutoReplyApi.getAutoReply(id)
   // 设置属性
   replyForm.value = { ...data }
   delete replyForm.value['responseMessageType']
@@ -350,11 +219,19 @@ const handleUpdate = async (row: any) => {
   }
 
   // 打开表单
-  title.value = '修改自动回复'
-  showReplyFormDialog.value = true
+  dialogTitle.value = '修改自动回复'
+  showFormDialog.value = true
 }
 
-const handleSubmit = async () => {
+/** 删除按钮操作 */
+const onDelete = async (id: number) => {
+  await message.confirm('是否确认删除此数据?')
+  await MpAutoReplyApi.deleteAutoReply(id)
+  await getList()
+  message.success('删除成功')
+}
+
+const onSubmit = async () => {
   const valid = await formRef.value?.validate()
   if (!valid) return
 
@@ -380,7 +257,7 @@ const handleSubmit = async () => {
     message.success('新增成功')
   }
 
-  showReplyFormDialog.value = false
+  showFormDialog.value = false
   await getList()
 }
 
@@ -399,14 +276,7 @@ const reset = () => {
 
 // 取消按钮
 const cancel = () => {
-  showReplyFormDialog.value = false
+  showFormDialog.value = false
   reset()
-}
-
-const handleDelete = async (row) => {
-  await message.confirm('是否确认删除此数据?')
-  await MpAutoReplyApi.deleteAutoReply(row.id)
-  await getList()
-  message.success('删除成功')
 }
 </script>
