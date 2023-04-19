@@ -51,7 +51,6 @@
     </el-row>
   </el-tab-pane>
 </template>
-
 <script setup lang="ts">
 import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
@@ -59,7 +58,6 @@ import { MaterialType, useBeforeUpload } from '@/views/mp/hooks/useUpload'
 import type { UploadRawFile } from 'element-plus'
 import { getAccessToken } from '@/utils/auth'
 import { ObjData } from './types'
-
 const message = useMessage()
 
 const UPLOAD_URL = import.meta.env.VITE_API_BASEPATH + '/admin-api/mp/material/upload-temporary'
