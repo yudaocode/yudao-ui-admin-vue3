@@ -22,11 +22,14 @@ const handleQuery = async () => {
   // 默认选中第一个
   if (accountList.value.length > 0) {
     account.id = accountList.value[0].id
+    account.name = accountList.value[0].name
     emit('change', account.id, account.name)
   }
 }
 
-const onChanged = () => {
+const onChanged = (id?: number) => {
+  const found = accountList.value.find((v) => v.id === id)
+  account.name = found ? found.name : ''
   emit('change', account.id, account.name)
 }
 
