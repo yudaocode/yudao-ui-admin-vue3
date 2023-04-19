@@ -11,7 +11,7 @@
         <el-input v-model="formData.name" placeholder="请输入组名" />
       </el-form-item>
       <el-form-item label="描述">
-        <el-input v-model="formData.name" placeholder="请输入描述" type="textarea" />
+        <el-input v-model="formData.description" placeholder="请输入描述" type="textarea" />
       </el-form-item>
       <el-form-item label="成员" prop="memberUserIds">
         <el-select v-model="formData.memberUserIds" multiple placeholder="请选择成员">

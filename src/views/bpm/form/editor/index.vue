@@ -44,10 +44,13 @@ import { CommonStatusEnum } from '@/utils/constants'
 import * as FormApi from '@/api/bpm/form'
 import FcDesigner from '@form-create/designer'
 import { encodeConf, encodeFields, setConfAndFields } from '@/utils/formCreate'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息
-const { query } = useRoute() // 路由
+const { push, currentRoute } = useRouter() // 路由
+const { query } = useRoute() // 路由信息
+const { delView } = useTagsViewStore() // 视图操作
 
 const designer = ref() // 表单设计器
 const dialogVisible = ref(false) // 弹窗是否展示
@@ -88,9 +91,15 @@ const submitForm = async () => {
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
+    close()
   } finally {
     formLoading.value = false
   }
+}
+/** 关闭按钮 */
+const close = () => {
+  delView(unref(currentRoute))
+  push('/bpm/manager/form')
 }
 
 /** 初始化 **/
