@@ -98,7 +98,7 @@ import { setConfAndFields2 } from '@/utils/formCreate'
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-const { push } = useRouter() // 路由
+const { currentRoute, push } = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -174,7 +174,16 @@ const openDetail = async (rowId: number) => {
   // 弹窗打开
   detailVisible.value = true
 }
-
+/**表单保存返回后重新加载列表 */
+watch(
+  () => currentRoute.value,
+  () => {
+    getList()
+  },
+  {
+    immediate: true
+  }
+)
 /** 初始化 **/
 onMounted(() => {
   getList()
