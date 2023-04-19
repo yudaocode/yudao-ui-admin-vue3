@@ -126,7 +126,7 @@
     </div>
     <div class="msg-send" v-loading="sendLoading">
       <WxReplySelect ref="replySelectRef" :objData="objData" />
-      <el-button type="success" size="small" class="send-but" @click="sendMsg">发送(S)</el-button>
+      <el-button type="success" class="send-but" @click="sendMsg">发送(S)</el-button>
     </div>
   </ContentWrap>
 </template>
@@ -231,12 +231,8 @@ const sendMsg = async () => {
   list.value = [...list.value, ...[data]]
   scrollToBottom()
 
-  //ts检查的時候会判断这个组件可能是空的，所以需要进行断言。
-  //避免 tab 的数据未清理
-  const deleteObj = replySelectRef.value?.deleteObj
-  if (deleteObj) {
-    deleteObj()
-  }
+  // 发送后清空数据
+  replySelectRef.value?.clear()
 }
 
 const loadingMore = () => {
@@ -333,6 +329,7 @@ const scrollToBottom = () => {
 
 .send-but {
   float: right;
-  margin-top: 8px !important;
+  margin-top: 8px;
+  margin-bottom: 8px;
 }
 </style>

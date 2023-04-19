@@ -333,7 +333,7 @@ div {
 }
 
 .public-account-management {
-  // width: 1200px;
+  width: 1200px;
   // min-width: 1200px;
   margin: 0 auto;
 

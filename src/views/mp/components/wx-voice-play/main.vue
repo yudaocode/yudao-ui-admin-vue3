@@ -12,8 +12,8 @@
 <template>
   <div class="wx-voice-div" @click="playVoice">
     <el-icon>
-      <Icon v-if="playing !== true" icon="ep:video-play" />
-      <Icon v-else icon="ep:video-pause" />
+      <Icon v-if="playing !== true" icon="ep:video-play" :size="32" />
+      <Icon v-else icon="ep:video-pause" :size="32" />
       <span class="amr-duration" v-if="duration">{{ duration }} 秒</span>
     </el-icon>
     <div v-if="content">
@@ -25,7 +25,6 @@
 
 <script setup lang="ts" name="WxVoicePlayer">
 // 因为微信语音是 amr 格式，所以需要用到 amr 解码器：https://www.npmjs.com/package/benz-amr-recorder
-
 import BenzAMRRecorder from 'benz-amr-recorder'
 
 const props = defineProps({
@@ -90,6 +89,12 @@ const amrStop = () => {
   padding: 5px;
   background-color: #eaeaea;
   border-radius: 10px;
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .amr-duration {
   font-size: 11px;
