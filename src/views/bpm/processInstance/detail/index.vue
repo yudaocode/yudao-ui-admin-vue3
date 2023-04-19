@@ -73,7 +73,7 @@
       </el-col>
       <!-- 情况二：业务表单 -->
       <div v-if="processInstance?.processDefinition?.formType === 20">
-        <autoComponent :id="processInstance.businessKey" />
+        <BusinessFormComponent :id="processInstance.businessKey" />
       </div>
     </el-card>
 
@@ -183,8 +183,9 @@ const getDetail = () => {
   // 2. 获得流程任务列表（审批记录）
   getTaskList()
 }
-const autoComponent = ref(null) // 异步组件
+
 /** 加载流程实例 */
+const BusinessFormComponent = ref(null) // 异步组件
 const getProcessInstance = async () => {
   try {
     processInstanceLoading.value = true
@@ -194,7 +195,7 @@ const getProcessInstance = async () => {
       return
     }
     processInstance.value = data
-    autoComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
+
     // 设置表单信息
     const processDefinition = data.processDefinition
     if (processDefinition.formType === 10) {
@@ -209,6 +210,8 @@ const getProcessInstance = async () => {
         fApi.value?.fapi?.resetBtn.show(false)
         fApi.value?.fapi?.disabled(true)
       })
+    } else {
+      BusinessFormComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
     }
 
     // 加载流程图
