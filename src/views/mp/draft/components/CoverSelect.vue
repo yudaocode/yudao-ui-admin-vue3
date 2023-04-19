@@ -65,10 +65,10 @@ import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
 import { getAccessToken } from '@/utils/auth'
 import type { UploadFiles, UploadProps, UploadRawFile } from 'element-plus'
 import { NewsItem } from './types'
-
 const message = useMessage()
 
-const UPLOAD_URL = 'http://localhost:8000/upload/' //import.meta.env.VITE_BASE_URL + '/admin-api/mp/material/upload-permanent' // 上传永久素材的地址
+// const UPLOAD_URL = 'http://localhost:8000/upload/' // 上传永久素材的地址
+const UPLOAD_URL = import.meta.env.VITE_BASE_URL + '/admin-api/mp/material/upload-permanent' // 上传永久素材的地址
 const HEADERS = { Authorization: 'Bearer ' + getAccessToken() } // 设置上传的请求头部
 
 const props = defineProps<{
@@ -109,7 +109,6 @@ const onMaterialSelected = (item: any) => {
   newsItem.value.thumbUrl = item.url
 }
 
-// ======================== 文件上传 ========================
 const onBeforeUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
   const isType = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/jpg'].includes(
     rawFile.type

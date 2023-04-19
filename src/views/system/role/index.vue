@@ -156,9 +156,9 @@
   <!-- 表单弹窗：添加/修改 -->
   <RoleForm ref="formRef" @success="getList" />
   <!-- 表单弹窗：菜单权限 -->
-  <RoleAssignMenuForm ref="assignMenuFormRef" />
+  <RoleAssignMenuForm ref="assignMenuFormRef" @success="getList" />
   <!-- 表单弹窗：数据权限 -->
-  <RoleDataPermissionForm ref="dataPermissionFormRef" />
+  <RoleDataPermissionForm ref="dataPermissionFormRef" @success="getList" />
 </template>
 <script lang="ts" name="SystemRole" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'

@@ -25,5 +25,3 @@ const content = computed<string | null>({
   }
 })
 </script>
-
-<style scoped></style>

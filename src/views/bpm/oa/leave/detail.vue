@@ -1,6 +1,6 @@
 <template>
   <ContentWrap>
-    <el-descriptions border :column="1">
+    <el-descriptions :column="1" border>
       <el-descriptions-item label="请假类型">
         <dict-tag :type="DICT_TYPE.BPM_OA_LEAVE_TYPE" :value="detailData.type" />
       </el-descriptions-item>
@@ -21,6 +21,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'
 import * as LeaveApi from '@/api/bpm/leave'
+
 const { query } = useRoute() // 查询参数
 
 const props = defineProps({
@@ -34,7 +35,7 @@ const queryId = query.id as unknown as number // 从 URL 传递过来的 id 编�
 const getInfo = async () => {
   detailLoading.value = true
   try {
-    detailData.value = await LeaveApi.getLeave(queryId || props.id)
+    detailData.value = await LeaveApi.getLeave(props.id || queryId)
   } finally {
     detailLoading.value = false
   }

@@ -93,7 +93,6 @@
     </el-table-column>
   </el-table>
 </template>
-
 <script setup lang="ts">
 import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
@@ -114,5 +113,3 @@ const emit = defineEmits<{
   (e: 'on-delete', v: number)
 }>()
 </script>
-
-<style scoped></style>

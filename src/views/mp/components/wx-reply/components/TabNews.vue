@@ -18,7 +18,7 @@
           <el-col :span="24">
             <el-button type="success" @click="showDialog = true">
               {{ newsType === NewsType.Published ? '选择已发布图文' : '选择草稿箱图文' }}
-              <icon icon="ep:circle-check" />
+              <Icon icon="ep:circle-check" />
             </el-button>
           </el-col>
         </el-row>

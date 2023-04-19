@@ -130,6 +130,7 @@ const emit = defineEmits<{
   (e: 'update:modelValue', v: any)
 }>()
 
+// TODO @Dhb52 输入的 table 切换时，表单应该保留
 const menu = computed({
   get() {
     return props.modelValue

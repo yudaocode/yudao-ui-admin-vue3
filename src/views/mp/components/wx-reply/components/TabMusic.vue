@@ -117,5 +117,3 @@ const selectMaterial = (item: any) => {
   objData.value.thumbMediaUrl = item.url
 }
 </script>
-
-<style scoped></style>

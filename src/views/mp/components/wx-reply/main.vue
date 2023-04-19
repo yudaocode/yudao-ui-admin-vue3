@@ -42,6 +42,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const objData = reactive(props.objData)
+// TODO @Dhb52：Tab 切换的时候，应该表单还保留着；清除只有两个时机：1）发送成功后；2）关闭窗口后；我捉摸，是不是每个 TabXXX 组件，是个独立的 Form，然后有自己的对象，不粘在 objData 一起。这样最终就是 MusicMessageForm、ImageMessageForm
 // const tempObj = new Map().set(objData.type, Object.assign({}, objData))
 
 /** 切换消息类型的 tab */

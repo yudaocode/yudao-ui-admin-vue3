@@ -60,7 +60,6 @@ import { MaterialType, useBeforeUpload } from '@/views/mp/hooks/useUpload'
 import type { UploadRawFile } from 'element-plus'
 import { getAccessToken } from '@/utils/auth'
 import { ObjData } from './types'
-
 const message = useMessage()
 
 const UPLOAD_URL = import.meta.env.VITE_API_BASEPATH + '/admin-api/mp/material/upload-temporary'

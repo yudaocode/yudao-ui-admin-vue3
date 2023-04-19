@@ -5,46 +5,53 @@
   <!-- 搜索 -->
   <ContentWrap>
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="表名称" prop="tableName">
         <el-input
           v-model="queryParams.tableName"
-          placeholder="请输入表名称"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入表名称"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="表描述" prop="tableComment">
         <el-input
           v-model="queryParams.tableComment"
-          placeholder="请输入表描述"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入表描述"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          value-format="YYYY-MM-dd HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="daterange"
+          value-format="YYYY-MM-dd HH:mm:ss"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" />重置</el-button>
-        <el-button type="primary" v-hasPermi="['infra:codegen:create']" @click="openImportTable()">
-          <Icon icon="ep:zoom-in" class="mr-5px" /> 导入
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-button v-hasPermi="['infra:codegen:create']" type="primary" @click="openImportTable()">
+          <Icon class="mr-5px" icon="ep:zoom-in" />
+          导入
         </el-button>
       </el-form-item>
     </el-form>
@@ -53,75 +60,75 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="数据源" align="center">
+      <el-table-column align="center" label="数据源">
         <template #default="scope">
           {{
             dataSourceConfigList.find((config) => config.id === scope.row.dataSourceConfigId)?.name
           }}
         </template>
       </el-table-column>
-      <el-table-column label="表名称" align="center" prop="tableName" width="200" />
+      <el-table-column align="center" label="表名称" prop="tableName" width="200" />
       <el-table-column
-        label="表描述"
-        align="center"
-        prop="tableComment"
         :show-overflow-tooltip="true"
+        align="center"
+        label="表描述"
+        prop="tableComment"
         width="200"
       />
-      <el-table-column label="实体" align="center" prop="className" width="200" />
+      <el-table-column align="center" label="实体" prop="className" width="200" />
       <el-table-column
+        :formatter="dateFormatter"
+        align="center"
         label="创建时间"
-        align="center"
         prop="createTime"
         width="180"
-        :formatter="dateFormatter"
       />
       <el-table-column
-        label="更新时间"
+        :formatter="dateFormatter"
         align="center"
+        label="更新时间"
         prop="createTime"
         width="180"
-        :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center" width="300px" fixed="right">
+      <el-table-column align="center" fixed="right" label="操作" width="300px">
         <template #default="scope">
           <el-button
+            v-hasPermi="['infra:codegen:preview']"
             link
             type="primary"
             @click="handlePreview(scope.row)"
-            v-hasPermi="['infra:codegen:preview']"
           >
             预览
           </el-button>
           <el-button
+            v-hasPermi="['infra:codegen:update']"
             link
             type="primary"
             @click="handleUpdate(scope.row.id)"
-            v-hasPermi="['infra:codegen:update']"
           >
             编辑
           </el-button>
           <el-button
+            v-hasPermi="['infra:codegen:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['infra:codegen:delete']"
           >
             删除
           </el-button>
           <el-button
+            v-hasPermi="['infra:codegen:update']"
             link
             type="primary"
             @click="handleSyncDB(scope.row)"
-            v-hasPermi="['infra:codegen:update']"
           >
             同步
           </el-button>
           <el-button
+            v-hasPermi="['infra:codegen:download']"
             link
             type="primary"
             @click="handleGenTable(scope.row)"
-            v-hasPermi="['infra:codegen:download']"
           >
             生成代码
           </el-button>
@@ -130,25 +137,26 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
 
   <!-- 弹窗：导入表 -->
-  <ImportTable ref="importRef" success="getList" />
+  <ImportTable ref="importRef" @success="getList" />
   <!-- 弹窗：预览代码 -->
   <PreviewCode ref="previewRef" />
 </template>
-<script setup lang="ts" name="InfraCodegen">
+<script lang="ts" name="InfraCodegen" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CodegenApi from '@/api/infra/codegen'
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
 import ImportTable from './ImportTable.vue'
 import PreviewCode from './PreviewCode.vue'
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由跳转

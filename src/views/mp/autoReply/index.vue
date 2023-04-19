@@ -49,11 +49,12 @@
       :loading="loading"
       :list="list"
       :msg-type="msgType"
-      @on-update="(id) => onUpdate(id)"
-      @on-delete="(id) => onDelete(id)"
+      @on-update="onUpdate"
+      @on-delete="onDelete"
     />
 
     <!-- 添加或修改自动回复的对话框 -->
+    <!-- TODO @Dhb52 -->
     <el-dialog :title="dialogTitle" v-model="showFormDialog" width="800px" destroy-on-close>
       <el-form ref="formRef" :model="replyForm" :rules="rules" label-width="80px">
         <el-form-item label="消息类型" prop="requestMessageType" v-if="msgType === MsgType.Message">
@@ -70,7 +71,7 @@
         <el-form-item label="匹配类型" prop="requestMatch" v-if="msgType === MsgType.Keyword">
           <el-select v-model="replyForm.requestMatch" placeholder="请选择匹配类型" clearable>
             <el-option
-              v-for="dict in getDictOptions(DICT_TYPE.MP_AUTO_REPLY_REQUEST_MATCH)"
+              v-for="dict in getIntDictOptions(DICT_TYPE.MP_AUTO_REPLY_REQUEST_MATCH)"
               :key="dict.value"
               :label="dict.label"
               :value="dict.value"
@@ -95,26 +96,19 @@
 import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
 import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
 import * as MpAutoReplyApi from '@/api/mp/autoReply'
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getDictOptions, getIntDictOptions } from '@/utils/dict'
 import { ContentWrap } from '@/components/ContentWrap'
 import type { TabPaneName } from 'element-plus'
 import ReplyTable from './components/ReplyTable.vue'
 import { MsgType, ReplyForm, ObjData } from './components/types'
+const message = useMessage() // 消息
 
-const message = useMessage()
-
-const formRef = ref()
-
-const msgType = ref<MsgType>(MsgType.Keyword)
-// 允许选择的请求消息类型
-const RequestMessageTypes = ['text', 'image', 'voice', 'video', 'shortvideo', 'location', 'link']
-// 遮罩层
-const loading = ref(true)
-// 总条数
-const total = ref(0)
-// 自动回复列表
-const list = ref<any[]>([])
-
+const msgType = ref<MsgType>(MsgType.Keyword) // 消息类型
+const RequestMessageTypes = ['text', 'image', 'voice', 'video', 'shortvideo', 'location', 'link'] // 允许选择的请求消息类型
+const loading = ref(true) // 遮罩层
+const total = ref(0) // 总条数
+const list = ref<any[]>([]) // 自动回复列表
+const formRef = ref() // 表单 ref
 // 查询参数
 interface QueryParams {
   pageNo: number
@@ -127,13 +121,9 @@ const queryParams: QueryParams = reactive({
   accountId: undefined
 })
 
-// 弹出层标题
-const dialogTitle = ref('')
-// 是否显示弹出层
-const showFormDialog = ref(false)
-// 表单参数
-
-const replyForm = ref<ReplyForm>({})
+const dialogTitle = ref('') // 弹出层标题
+const showFormDialog = ref(false) // 是否显示弹出层
+const replyForm = ref<ReplyForm>({}) // 表单参数
 // 回复消息
 const objData = ref<ObjData>({
   type: 'text',

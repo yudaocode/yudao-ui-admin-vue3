@@ -272,7 +272,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       {
         path: '/manager/task-assign-rule',
         component: () => import('@/views/bpm/taskAssignRule/index.vue'),
-        name: 'BpmTaskAssignRule',
+        name: 'BpmTaskAssignRuleList',
         meta: {
           noCache: true,
           hidden: true,
