@@ -84,7 +84,7 @@ const reply = computed<Reply>({
   set: (val) => emit('update:modelValue', val)
 })
 // 作为多个标签保存各自Reply的缓存
-const objCache = new Map<ReplyType, Reply>()
+const tabCache = new Map<ReplyType, Reply>()
 // 采用独立的ref来保存当前tab，避免在watch标签变化，对reply进行赋值会产生了循环调用
 const currentTab = ref<ReplyType>(props.modelValue.type || ReplyType.Text)
 
@@ -97,10 +97,10 @@ watch(
       return
     }
 
-    objCache.set(oldTab, unref(reply))
+    tabCache.set(oldTab, unref(reply))
 
     // 从缓存里面取出新tab内容，有则覆盖Reply，没有则创建空Reply
-    const temp = objCache.get(newTab)
+    const temp = tabCache.get(newTab)
     if (temp) {
       reply.value = temp
     } else {
