@@ -120,15 +120,15 @@ const selectMaterial = (item: Reply) => {
 <style lang="scss" scoped>
 .select-item2 {
   padding: 10px;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 10px;
   border: 1px solid #eaeaea;
 
   .item-name {
-    font-size: 12px;
     overflow: hidden;
+    font-size: 12px;
+    text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-align: center;
 
     .ope-row {
       width: 100%;
@@ -138,18 +138,18 @@ const selectMaterial = (item: Reply) => {
   }
 
   .col-select {
-    border: 1px solid rgb(234, 234, 234);
-    padding: 50px 0px;
-    height: 160px;
     width: 49.5%;
+    height: 160px;
+    padding: 50px 0;
+    border: 1px solid rgb(234 234 234);
   }
 
   .col-add {
-    border: 1px solid rgb(234, 234, 234);
-    padding: 50px 0px;
-    height: 160px;
-    width: 49.5%;
     float: right;
+    width: 49.5%;
+    height: 160px;
+    padding: 50px 0;
+    border: 1px solid rgb(234 234 234);
 
     .el-upload__tip {
       line-height: 18px;

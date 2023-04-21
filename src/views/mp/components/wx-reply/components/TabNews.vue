@@ -65,7 +65,7 @@ const onDelete = () => {
 .select-item {
   width: 280px;
   padding: 10px;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 10px;
   border: 1px solid #eaeaea;
 
   .ope-row {

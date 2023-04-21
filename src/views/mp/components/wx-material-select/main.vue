@@ -227,29 +227,6 @@ onMounted(async () => {
 })
 </script>
 <style lang="scss" scoped>
-/*瀑布流样式*/
-.waterfall {
-  width: 100%;
-  column-gap: 10px;
-  column-count: 5;
-  margin: 0 auto;
-}
-
-.waterfall-item {
-  padding: 10px;
-  margin-bottom: 10px;
-  break-inside: avoid;
-  border: 1px solid #eaeaea;
-}
-
-.material-img {
-  width: 100%;
-}
-
-p {
-  line-height: 30px;
-}
-
 @media (min-width: 992px) and (max-width: 1300px) {
   .waterfall {
     column-count: 3;
@@ -276,5 +253,25 @@ p {
   }
 }
 
-/*瀑布流样式*/
+.waterfall {
+  width: 100%;
+  column-gap: 10px;
+  column-count: 5;
+  margin: 0 auto;
+}
+
+.waterfall-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  break-inside: avoid;
+  border: 1px solid #eaeaea;
+}
+
+.material-img {
+  width: 100%;
+}
+
+p {
+  line-height: 30px;
+}
 </style>

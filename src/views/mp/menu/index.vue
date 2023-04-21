@@ -367,7 +367,6 @@ div {
     margin-left: 20px;
     background-color: #e8e7e7;
     box-sizing: border-box;
-    box-sizing: border-box;
   }
 }
 </style>

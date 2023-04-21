@@ -123,7 +123,7 @@ const selectMaterial = (item) => {
 .select-item {
   width: 280px;
   padding: 10px;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 10px;
   border: 1px solid #eaeaea;
 
   .material-img {
@@ -131,11 +131,11 @@ const selectMaterial = (item) => {
   }
 
   .item-name {
-    font-size: 12px;
     overflow: hidden;
+    font-size: 12px;
+    text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-align: center;
 
     .item-infos {
       width: 30%;
@@ -149,18 +149,18 @@ const selectMaterial = (item) => {
   }
 
   .col-select {
-    border: 1px solid rgb(234, 234, 234);
-    padding: 50px 0px;
-    height: 160px;
     width: 49.5%;
+    height: 160px;
+    padding: 50px 0;
+    border: 1px solid rgb(234 234 234);
   }
 
   .col-add {
-    border: 1px solid rgb(234, 234, 234);
-    padding: 50px 0px;
-    height: 160px;
-    width: 49.5%;
     float: right;
+    width: 49.5%;
+    height: 160px;
+    padding: 50px 0;
+    border: 1px solid rgb(234 234 234);
 
     .el-upload__tip {
       line-height: 18px;

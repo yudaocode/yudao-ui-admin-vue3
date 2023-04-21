@@ -128,13 +128,13 @@ defineExpose({
 .select-item {
   width: 280px;
   padding: 10px;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 10px;
   border: 1px solid #eaeaea;
 }
 
 .select-item2 {
   padding: 10px;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 10px;
   border: 1px solid #eaeaea;
 }
 
@@ -148,11 +148,11 @@ defineExpose({
 }
 
 .item-name {
-  font-size: 12px;
   overflow: hidden;
+  font-size: 12px;
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: center;
 }
 
 .el-form-item__content {
@@ -160,34 +160,34 @@ defineExpose({
 }
 
 .col-select {
-  border: 1px solid rgb(234, 234, 234);
-  padding: 50px 0px;
-  height: 160px;
   width: 49.5%;
+  height: 160px;
+  padding: 50px 0;
+  border: 1px solid rgb(234 234 234);
 }
 
 .col-select2 {
-  border: 1px solid rgb(234, 234, 234);
-  padding: 50px 0px;
   height: 160px;
+  padding: 50px 0;
+  border: 1px solid rgb(234 234 234);
 }
 
 .col-add {
-  border: 1px solid rgb(234, 234, 234);
-  padding: 50px 0px;
-  height: 160px;
-  width: 49.5%;
   float: right;
+  width: 49.5%;
+  height: 160px;
+  padding: 50px 0;
+  border: 1px solid rgb(234 234 234);
 }
 
 .avatar-uploader-icon {
-  border: 1px solid #d9d9d9;
-  font-size: 28px;
-  color: #8c939d;
   width: 100px !important;
   height: 100px !important;
+  font-size: 28px;
   line-height: 100px !important;
+  color: #8c939d;
   text-align: center;
+  border: 1px solid #d9d9d9;
 }
 
 .material-img {
