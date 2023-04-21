@@ -4,6 +4,9 @@
     <div
       @click="menuClicked(parent, x)"
       class="menu_item"
+      draggable="true"
+      @dragstart="onDragStart(DragType.Parent, x)"
+      @dragenter.prevent="onDragEnter(DragType.Parent, x)"
       :class="{ active: props.activeIndex === `${x}` }"
     >
       <Icon icon="ep:fold" color="black" />{{ parent.name }}
@@ -13,6 +16,9 @@
       <div class="subtitle menu_bottom" v-for="(child, y) in parent.children" :key="y">
         <div
           class="menu_subItem"
+          draggable="true"
+          @dragstart="onDragStart(DragType.Child, y)"
+          @dragenter.prevent="onDragEnter(DragType.Child, x, y)"
           v-if="parent.children"
           :class="{ active: props.activeIndex === `${x}-${y}` }"
           @click="subMenuClicked(child, x, y)"
@@ -43,7 +49,7 @@ const props = defineProps<{
   modelValue: Menu[]
   activeIndex: string
   parentIndex: number
-  accountId?: number
+  accountId: number
 }>()
 
 const emit = defineEmits<{
@@ -93,6 +99,44 @@ const menuClicked = (parent: Menu, x: number) => {
 }
 const subMenuClicked = (child: Menu, x: number, y: number) => {
   emit('submenu-clicked', child, x, y)
+}
+
+// ======================== 菜单排序 ========================
+const dragIndex = ref<number>(0)
+enum DragType {
+  Parent = 'parent',
+  Child = 'child'
+}
+const dragType = ref<DragType>()
+
+/**
+ * 菜单开始拖动回调，记录被拖动菜单的信息（类型,下标）
+ *
+ * @param type DragType, 拖动类型，父节点、子节点
+ * @param index number, 被拖动的菜单下标
+ */
+const onDragStart = (type: DragType, index: number) => {
+  dragIndex.value = index
+  dragType.value = type
+}
+
+/**
+ * 拖动其他菜单位置回调, 判断【被拖动】及【被替换位置】的两个菜单是否同个类型，同类型才会进行插入
+ *
+ * @param type: DragType, 拖动类型，父节点、子节点
+ * @param x number, 准备替换父节点位置的下标
+ * @param y number, 准备替换子节点位置的下标, 父节点拖动时可选
+ */
+const onDragEnter = (type: DragType, x: number, y = -1) => {
+  if (dragIndex.value !== x && dragType.value === type) {
+    if (type === DragType.Parent) {
+      const source = menuList.value.splice(dragIndex.value, 1)
+      menuList.value.splice(x, 0, ...source)
+    } else {
+      const source = menuList.value[x].children?.splice(dragIndex.value, 1)
+      menuList.value[x].children?.splice(y, 0, ...(source as any))
+    }
+  }
 }
 </script>
 
