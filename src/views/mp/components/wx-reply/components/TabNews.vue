@@ -1,11 +1,8 @@
 <template>
-  <el-tab-pane name="news">
-    <template #label>
-      <el-row align="middle"><Icon icon="ep:reading" /> 图文</el-row>
-    </template>
+  <div>
     <el-row>
-      <div class="select-item" v-if="objData.articles?.length > 0">
-        <WxNews :articles="objData.articles" />
+      <div class="select-item" v-if="reply.articles && reply.articles.length > 0">
+        <WxNews :articles="reply.articles" />
         <el-col class="ope-row">
           <el-button type="danger" circle @click="onDelete">
             <Icon icon="ep:delete" />
@@ -13,7 +10,7 @@
         </el-col>
       </div>
       <!-- 选择素材 -->
-      <el-col :span="24" v-if="!objData.content">
+      <el-col :span="24" v-if="!reply.content">
         <el-row style="text-align: center" align="middle">
           <el-col :span="24">
             <el-button type="success" @click="showDialog = true">
@@ -25,28 +22,29 @@
       </el-col>
       <el-dialog title="选择图文" v-model="showDialog" width="90%" append-to-body destroy-on-close>
         <WxMaterialSelect
-          :objData="objData"
-          @select-material="selectMaterial"
+          type="news"
+          :account-id="reply.accountId"
           :newsType="newsType"
+          @select-material="selectMaterial"
         />
       </el-dialog>
     </el-row>
-  </el-tab-pane>
+  </div>
 </template>
 
 <script setup lang="ts">
-import WxNews from '@/views/mp/components/wx-news/main.vue'
-import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
-import { ObjData, NewsType } from './types'
+import WxNews from '@/views/mp/components/wx-news'
+import WxMaterialSelect from '@/views/mp/components/wx-material-select'
+import { Reply, NewsType } from './types'
 
 const props = defineProps<{
-  modelValue: ObjData
+  modelValue: Reply
   newsType: NewsType
 }>()
 const emit = defineEmits<{
-  (e: 'update:modelValue', v: ObjData)
+  (e: 'update:modelValue', v: Reply)
 }>()
-const objData = computed<ObjData>({
+const reply = computed<Reply>({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
 })
@@ -55,11 +53,11 @@ const showDialog = ref(false)
 
 const selectMaterial = (item: any) => {
   showDialog.value = false
-  objData.value.articles = item.content.newsItem
+  reply.value.articles = item.content.newsItem
 }
 
 const onDelete = () => {
-  objData.value.articles = []
+  reply.value.articles = []
 }
 </script>
 

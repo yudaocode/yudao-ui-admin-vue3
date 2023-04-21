@@ -1,14 +1,11 @@
 <template>
-  <el-tab-pane name="music">
-    <template #label>
-      <el-row align="middle"><Icon icon="ep:service" />音乐</el-row>
-    </template>
+  <div>
     <el-row align="middle" justify="center">
       <el-col :span="6">
         <el-row align="middle" justify="center" class="thumb-div">
           <el-col :span="24">
             <el-row align="middle" justify="center">
-              <img style="width: 100px" v-if="objData.thumbMediaUrl" :src="objData.thumbMediaUrl" />
+              <img style="width: 100px" v-if="reply.thumbMediaUrl" :src="reply.thumbMediaUrl" />
               <icon v-else icon="ep:plus" />
             </el-row>
             <el-row align="middle" justify="center" style="margin-top: 2%">
@@ -42,30 +39,31 @@
           destroy-on-close
         >
           <WxMaterialSelect
-            :objData="{ type: 'image', accountId: objData.accountId }"
+            type="image"
+            :account-id="reply.accountId"
             @select-material="selectMaterial"
           />
         </el-dialog>
       </el-col>
       <el-col :span="18">
-        <el-input v-model="objData.title" placeholder="请输入标题" />
+        <el-input v-model="reply.title" placeholder="请输入标题" />
         <div style="margin: 20px 0"></div>
-        <el-input v-model="objData.description" placeholder="请输入描述" />
+        <el-input v-model="reply.description" placeholder="请输入描述" />
       </el-col>
     </el-row>
     <div style="margin: 20px 0"></div>
-    <el-input v-model="objData.musicUrl" placeholder="请输入音乐链接" />
+    <el-input v-model="reply.musicUrl" placeholder="请输入音乐链接" />
     <div style="margin: 20px 0"></div>
-    <el-input v-model="objData.hqMusicUrl" placeholder="请输入高质量音乐链接" />
-  </el-tab-pane>
+    <el-input v-model="reply.hqMusicUrl" placeholder="请输入高质量音乐链接" />
+  </div>
 </template>
 
 <script setup lang="ts">
-import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
+import WxMaterialSelect from '@/views/mp/components/wx-material-select'
 import type { UploadRawFile } from 'element-plus'
-import { MaterialType, useBeforeUpload } from '@/views/mp/hooks/useUpload'
+import { UploadType, useBeforeUpload } from '@/views/mp/hooks/useUpload'
 import { getAccessToken } from '@/utils/auth'
-import { ObjData } from './types'
+import { Reply } from './types'
 
 const message = useMessage()
 
@@ -73,12 +71,12 @@ const UPLOAD_URL = import.meta.env.VITE_API_BASEPATH + '/admin-api/mp/material/u
 const HEADERS = { Authorization: 'Bearer ' + getAccessToken() } // 设置上传的请求头部
 
 const props = defineProps<{
-  modelValue: ObjData
+  modelValue: Reply
 }>()
 const emit = defineEmits<{
-  (e: 'update:modelValue', v: ObjData)
+  (e: 'update:modelValue', v: Reply)
 }>()
-const objData = computed<ObjData>({
+const reply = computed<Reply>({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
 })
@@ -86,14 +84,13 @@ const objData = computed<ObjData>({
 const showDialog = ref(false)
 const fileList = ref([])
 const uploadData = reactive({
-  accountId: objData.value.accountId,
+  accountId: reply.value.accountId,
   type: 'thumb', // 音乐类型为thumb
   title: '',
   introduction: ''
 })
 
-const beforeImageUpload = (rawFile: UploadRawFile) =>
-  useBeforeUpload(MaterialType.Image, 2)(rawFile)
+const beforeImageUpload = (rawFile: UploadRawFile) => useBeforeUpload(UploadType.Image, 2)(rawFile)
 
 const onUploadSuccess = (res: any) => {
   if (res.code !== 0) {
@@ -113,7 +110,7 @@ const onUploadSuccess = (res: any) => {
 const selectMaterial = (item: any) => {
   showDialog.value = false
 
-  objData.value.thumbMediaId = item.mediaId
-  objData.value.thumbMediaUrl = item.url
+  reply.value.thumbMediaId = item.mediaId
+  reply.value.thumbMediaUrl = item.url
 }
 </script>

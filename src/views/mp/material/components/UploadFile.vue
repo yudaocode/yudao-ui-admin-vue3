@@ -6,14 +6,11 @@
     :limit="1"
     :file-list="fileList"
     :data="uploadData"
-    :on-progress="(isUploading = true)"
     :on-error="onUploadError"
     :before-upload="onBeforeUpload"
     :on-success="onUploadSuccess"
   >
-    <el-button type="primary" plain :loading="isUploading" :disabled="isUploading">
-      {{ isUploading ? '正在上传' : '点击上传' }}
-    </el-button>
+    <el-button type="primary" plain> 点击上传 </el-button>
     <template #tip>
       <span class="el-upload__tip" style="margin-left: 5px">
         <slot></slot>
@@ -27,14 +24,14 @@ import {
   HEADERS,
   UPLOAD_URL,
   UploadData,
-  MaterialType,
+  UploadType,
   beforeImageUpload,
   beforeVoiceUpload
 } from './upload'
 
 const message = useMessage()
 
-const props = defineProps<{ type: MaterialType }>()
+const props = defineProps<{ type: UploadType }>()
 
 const fileList = ref<UploadUserFile[]>([])
 const emit = defineEmits<{
@@ -42,14 +39,13 @@ const emit = defineEmits<{
 }>()
 
 const uploadData: UploadData = reactive({
-  type: MaterialType.Image,
+  type: UploadType.Image,
   title: '',
   introduction: ''
 })
-const isUploading = ref(false)
 
 /** 上传前检查 */
-const onBeforeUpload = props.type === MaterialType.Image ? beforeImageUpload : beforeVoiceUpload
+const onBeforeUpload = props.type === UploadType.Image ? beforeImageUpload : beforeVoiceUpload
 
 /** 上传成功处理 */
 const onUploadSuccess: UploadProps['onSuccess'] = (res: any) => {
@@ -64,7 +60,6 @@ const onUploadSuccess: UploadProps['onSuccess'] = (res: any) => {
   uploadData.introduction = ''
 
   message.notifySuccess('上传成功')
-  isUploading.value = false
   emit('uploaded')
 }
 

@@ -34,7 +34,13 @@
       <el-form-item>
         <el-button @click="handleQuery"> <Icon icon="ep:search" />搜索 </el-button>
         <el-button @click="resetQuery"> <Icon icon="ep:refresh" />重置 </el-button>
-        <el-button type="success" plain @click="handleSync" v-hasPermi="['mp:user:sync']">
+        <el-button
+          type="success"
+          plain
+          @click="handleSync"
+          v-hasPermi="['mp:user:sync']"
+          :disabled="queryParams.accountId === 0"
+        >
           <Icon icon="ep:refresh" class="mr-5px" /> 同步
         </el-button>
       </el-form-item>
@@ -97,7 +103,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import * as MpUserApi from '@/api/mp/user'
 import * as MpTagApi from '@/api/mp/tag'
-import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select'
 import type { FormInstance } from 'element-plus'
 import UserForm from './UserForm.vue'
 
@@ -110,14 +116,14 @@ const list = ref<any[]>([]) // 列表的数据
 interface QueryParams {
   pageNo: number
   pageSize: number
-  accountId?: number
+  accountId: number
   openid: string | null
   nickname: string | null
 }
 const queryParams: QueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: undefined,
+  accountId: 0,
   openid: null,
   nickname: null
 })
@@ -125,7 +131,7 @@ const queryFormRef = ref<FormInstance | null>(null) // 搜索的表单
 const tagList = ref<any[]>([]) // 公众号标签列表
 
 /** 侦听公众号变化 **/
-const onAccountChanged = (id?: number) => {
+const onAccountChanged = (id: number) => {
   queryParams.pageNo = 1
   queryParams.accountId = id
   getList()

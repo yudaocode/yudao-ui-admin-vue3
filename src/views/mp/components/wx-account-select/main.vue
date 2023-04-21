@@ -14,7 +14,7 @@ const account: MpAccountApi.AccountVO = reactive({
 const accountList: Ref<MpAccountApi.AccountVO[]> = ref([])
 
 const emit = defineEmits<{
-  (e: 'change', id?: number, name?: string): void
+  (e: 'change', id: number, name: string): void
 }>()
 
 const handleQuery = async () => {
@@ -22,15 +22,19 @@ const handleQuery = async () => {
   // 默认选中第一个
   if (accountList.value.length > 0) {
     account.id = accountList.value[0].id
-    account.name = accountList.value[0].name
-    emit('change', account.id, account.name)
+    if (account.id) {
+      account.name = accountList.value[0].name
+      emit('change', account.id, account.name)
+    }
   }
 }
 
 const onChanged = (id?: number) => {
   const found = accountList.value.find((v) => v.id === id)
-  account.name = found ? found.name : ''
-  emit('change', account.id, account.name)
+  if (account.id) {
+    account.name = found ? found.name : ''
+    emit('change', account.id, account.name)
+  }
 }
 
 /** 初始化 */

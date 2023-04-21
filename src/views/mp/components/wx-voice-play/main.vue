@@ -7,7 +7,7 @@
     1）joolun 的做法：使用 mediaId 从微信公众号，下载对应的 mp4 素材，从而播放内容；
       存在的问题：mediaId 有效期是 3 天，超过时间后无法播放
     2）重构后的做法：后端接收到微信公众号的视频消息后，将视频消息的 media_id 的文件内容保存到文件服务器中，这样前端可以直接使用 URL 播放。
-  ② 代码优化：将 props 中的 objData 调成为 data 中对应的属性，并补充相关注释
+  ② 代码优化：将 props 中的 reply 调成为 data 中对应的属性，并补充相关注释
 -->
 <template>
   <div class="wx-voice-div" @click="playVoice">
@@ -89,8 +89,8 @@ const amrStop = () => {
   padding: 5px;
   background-color: #eaeaea;
   border-radius: 10px;
-  width: 40px;
-  height: 40px;
+  width: 120px;
+  height: 50px;
 
   display: flex;
   justify-content: center;

@@ -53,7 +53,7 @@
 </template>
 
 <script lang="ts" setup name="MpMenu">
-import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select'
 import MenuEditor from './components/MenuEditor.vue'
 import MenuPreviewer from './components/MenuPreviewer.vue'
 import * as MpMenuApi from '@/api/mp/menu'
@@ -65,8 +65,8 @@ const MENU_NOT_SELECTED = '__MENU_NOT_SELECTED__'
 
 // ======================== 列表查询 ========================
 const loading = ref(false) // 遮罩层
-const accountId = ref<number | undefined>()
-const accountName = ref<string | undefined>('')
+const accountId = ref<number>(0)
+const accountName = ref<string>('')
 const menuList = ref<Menu[]>([])
 
 // ======================== 菜单操作 ========================
@@ -103,7 +103,7 @@ const tempSelfObj = ref<{
 const dialogNewsVisible = ref(false) // 跳转图文时的素材选择弹窗
 
 /** 侦听公众号变化 **/
-const onAccountChanged = (id?: number, name?: string) => {
+const onAccountChanged = (id: number, name: string) => {
   accountId.value = id
   accountName.value = name
   getList()

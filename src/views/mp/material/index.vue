@@ -12,13 +12,13 @@
   <ContentWrap>
     <el-tabs v-model="type" @tab-change="onTabChange">
       <!-- tab 1：图片  -->
-      <el-tab-pane :name="MaterialType.Image">
+      <el-tab-pane :name="UploadType.Image">
         <template #label>
-          <span> <Icon icon="ep:picture" />图片 </span>
+          <el-row align="middle"> <Icon icon="ep:picture" />图片 </el-row>
         </template>
         <UploadFile
           v-hasPermi="['mp:material:upload-permanent']"
-          :type="MaterialType.Image"
+          :type="UploadType.Image"
           @uploaded="getList"
         >
           支持 bmp/png/jpeg/jpg/gif 格式，大小不超过 2M
@@ -35,13 +35,13 @@
       </el-tab-pane>
 
       <!-- tab 2：语音  -->
-      <el-tab-pane :name="MaterialType.Voice">
+      <el-tab-pane :name="UploadType.Voice">
         <template #label>
-          <span> <Icon icon="ep:microphone" />语音 </span>
+          <el-row align="middle"> <Icon icon="ep:microphone" />语音 </el-row>
         </template>
         <UploadFile
           v-hasPermi="['mp:material:upload-permanent']"
-          :type="MaterialType.Voice"
+          :type="UploadType.Voice"
           @uploaded="getList"
         >
           格式支持 mp3/wma/wav/amr，文件大小不超过 2M，播放长度不超过 60s
@@ -58,9 +58,9 @@
       </el-tab-pane>
 
       <!-- tab 3：视频 -->
-      <el-tab-pane :name="MaterialType.Video">
+      <el-tab-pane :name="UploadType.Video">
         <template #label>
-          <span> <Icon icon="ep:video-play" /> 视频 </span>
+          <el-row align="middle"> <Icon icon="ep:video-play" /> 视频 </el-row>
         </template>
         <el-button
           v-hasPermi="['mp:material:upload-permanent']"
@@ -85,17 +85,17 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup name="MpMaterial">
-import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select'
 import ImageTable from './components/ImageTable.vue'
 import VoiceTable from './components/VoiceTable.vue'
 import VideoTable from './components/VideoTable.vue'
 import UploadFile from './components/UploadFile.vue'
 import UploadVideo from './components/UploadVideo.vue'
-import { MaterialType } from './components/upload'
+import { UploadType } from './components/upload'
 import * as MpMaterialApi from '@/api/mp/material'
 const message = useMessage() // 消息
 
-const type = ref<MaterialType>(MaterialType.Image) // 素材类型
+const type = ref<UploadType>(UploadType.Image) // 素材类型
 const loading = ref(false) // 遮罩层
 const list = ref<any[]>([]) // 总条数
 const total = ref(0) // 数据列表
@@ -103,19 +103,19 @@ const total = ref(0) // 数据列表
 interface QueryParams {
   pageNo: number
   pageSize: number
-  accountId?: number
+  accountId: number
   permanent: boolean
 }
 const queryParams: QueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: undefined,
+  accountId: 0,
   permanent: true
 })
 const showCreateVideo = ref(false) // 是否新建视频的弹窗
 
 /** 侦听公众号变化 **/
-const onAccountChanged = (id?: number) => {
+const onAccountChanged = (id: number) => {
   queryParams.accountId = id
   getList()
 }

@@ -82,7 +82,7 @@
           <el-input v-model="replyForm.requestKeyword" placeholder="请输入内容" clearable />
         </el-form-item>
         <el-form-item label="回复消息">
-          <WxReplySelect :objData="objData" />
+          <WxReplySelect v-model="reply" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -93,14 +93,14 @@
   </ContentWrap>
 </template>
 <script setup lang="ts" name="MpAutoReply">
-import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
-import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import WxReplySelect, { type Reply, ReplyType } from '@/views/mp/components/wx-reply'
+import WxAccountSelect from '@/views/mp/components/wx-account-select'
 import * as MpAutoReplyApi from '@/api/mp/autoReply'
 import { DICT_TYPE, getDictOptions, getIntDictOptions } from '@/utils/dict'
 import { ContentWrap } from '@/components/ContentWrap'
-import type { TabPaneName } from 'element-plus'
+import type { FormInstance, TabPaneName } from 'element-plus'
 import ReplyTable from './components/ReplyTable.vue'
-import { MsgType, ReplyForm, ObjData } from './components/types'
+import { MsgType } from './components/types'
 const message = useMessage() // 消息
 
 const msgType = ref<MsgType>(MsgType.Keyword) // 消息类型
@@ -108,26 +108,26 @@ const RequestMessageTypes = ['text', 'image', 'voice', 'video', 'shortvideo', 'l
 const loading = ref(true) // 遮罩层
 const total = ref(0) // 总条数
 const list = ref<any[]>([]) // 自动回复列表
-const formRef = ref() // 表单 ref
+const formRef = ref<FormInstance | null>(null) // 表单 ref
 // 查询参数
 interface QueryParams {
   pageNo: number
   pageSize: number
-  accountId?: number
+  accountId: number
 }
 const queryParams: QueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: undefined
+  accountId: 0
 })
 
 const dialogTitle = ref('') // 弹出层标题
 const showFormDialog = ref(false) // 是否显示弹出层
-const replyForm = ref<ReplyForm>({}) // 表单参数
+const replyForm = ref<any>({}) // 表单参数
 // 回复消息
-const objData = ref<ObjData>({
-  type: 'text',
-  accountId: undefined
+const reply = ref<Reply>({
+  type: ReplyType.Text,
+  accountId: 0
 })
 // 表单校验
 const rules = {
@@ -136,8 +136,9 @@ const rules = {
 }
 
 /** 侦听账号变化 */
-const onAccountChanged = (id?: number) => {
+const onAccountChanged = (id: number) => {
   queryParams.accountId = id
+  reply.value.accountId = id
   getList()
 }
 
@@ -171,8 +172,8 @@ const onTabChange = (tabName: TabPaneName) => {
 const onCreate = () => {
   reset()
   // 打开表单，并设置初始化
-  objData.value = {
-    type: 'text',
+  reply.value = {
+    type: ReplyType.Text,
     accountId: queryParams.accountId
   }
 
@@ -193,7 +194,7 @@ const onUpdate = async (id: number) => {
   delete replyForm.value['responseMediaUrl']
   delete replyForm.value['responseDescription']
   delete replyForm.value['responseArticles']
-  objData.value = {
+  reply.value = {
     type: data.responseMessageType,
     accountId: queryParams.accountId,
     content: data.responseContent,
@@ -227,17 +228,17 @@ const onSubmit = async () => {
 
   // 处理回复消息
   const submitForm: any = { ...replyForm.value }
-  submitForm.responseMessageType = objData.value.type
-  submitForm.responseContent = objData.value.content
-  submitForm.responseMediaId = objData.value.mediaId
-  submitForm.responseMediaUrl = objData.value.url
-  submitForm.responseTitle = objData.value.title
-  submitForm.responseDescription = objData.value.description
-  submitForm.responseThumbMediaId = objData.value.thumbMediaId
-  submitForm.responseThumbMediaUrl = objData.value.thumbMediaUrl
-  submitForm.responseArticles = objData.value.articles
-  submitForm.responseMusicUrl = objData.value.musicUrl
-  submitForm.responseHqMusicUrl = objData.value.hqMusicUrl
+  submitForm.responseMessageType = reply.value.type
+  submitForm.responseContent = reply.value.content
+  submitForm.responseMediaId = reply.value.mediaId
+  submitForm.responseMediaUrl = reply.value.url
+  submitForm.responseTitle = reply.value.title
+  submitForm.responseDescription = reply.value.description
+  submitForm.responseThumbMediaId = reply.value.thumbMediaId
+  submitForm.responseThumbMediaUrl = reply.value.thumbMediaUrl
+  submitForm.responseArticles = reply.value.articles
+  submitForm.responseMusicUrl = reply.value.musicUrl
+  submitForm.responseHqMusicUrl = reply.value.hqMusicUrl
 
   if (replyForm.value.id !== undefined) {
     await MpAutoReplyApi.updateAutoReply(submitForm)

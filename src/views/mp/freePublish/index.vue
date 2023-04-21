@@ -50,8 +50,8 @@
 
 <script lang="ts" setup name="MpFreePublish">
 import * as FreePublishApi from '@/api/mp/freePublish'
-import WxNews from '@/views/mp/components/wx-news/main.vue'
-import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import WxNews from '@/views/mp/components/wx-news'
+import WxAccountSelect from '@/views/mp/components/wx-account-select'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -62,16 +62,16 @@ const list = ref<any[]>([]) // 列表的数据
 interface QueryParams {
   pageNo: number
   pageSize: number
-  accountId?: number
+  accountId: number
 }
 const queryParams: QueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: undefined
+  accountId: 0
 })
 
 /** 侦听公众号变化 **/
-const onAccountChanged = (id: number | undefined) => {
+const onAccountChanged = (id: number) => {
   queryParams.accountId = id
   getList()
 }

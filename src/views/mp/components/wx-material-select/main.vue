@@ -7,7 +7,7 @@
 <template>
   <div class="pb-30px">
     <!-- 类型：image -->
-    <div v-if="objData.type === 'image'">
+    <div v-if="props.type === 'image'">
       <div class="waterfall" v-loading="loading">
         <div class="waterfall-item" v-for="item in list" :key="item.mediaId">
           <img class="material-img" :src="item.url" />
@@ -29,7 +29,7 @@
       />
     </div>
     <!-- 类型：voice -->
-    <div v-else-if="objData.type === 'voice'">
+    <div v-else-if="props.type === 'voice'">
       <!-- 列表 -->
       <el-table v-loading="loading" :data="list">
         <el-table-column label="编号" align="center" prop="mediaId" />
@@ -64,7 +64,7 @@
       />
     </div>
     <!-- 类型：video -->
-    <div v-else-if="objData.type === 'video'">
+    <div v-else-if="props.type === 'video'">
       <!-- 列表 -->
       <el-table v-loading="loading" :data="list">
         <el-table-column label="编号" align="center" prop="mediaId" />
@@ -106,7 +106,7 @@
       />
     </div>
     <!-- 类型：news -->
-    <div v-else-if="objData.type === 'news'">
+    <div v-else-if="props.type === 'news'">
       <div class="waterfall" v-loading="loading">
         <div class="waterfall-item" v-for="item in list" :key="item.mediaId">
           <div v-if="item.content && item.content.newsItem">
@@ -132,25 +132,25 @@
 </template>
 
 <script lang="ts" setup name="WxMaterialSelect">
-import WxNews from '@/views/mp/components/wx-news/main.vue'
-import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
-import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
+import WxNews from '@/views/mp/components/wx-news'
+import WxVoicePlayer from '@/views/mp/components/wx-voice-play'
+import WxVideoPlayer from '@/views/mp/components/wx-video-play'
+import { NewsType } from './types'
 import * as MpMaterialApi from '@/api/mp/material'
 import * as MpFreePublishApi from '@/api/mp/freePublish'
 import * as MpDraftApi from '@/api/mp/draft'
 import { dateFormatter } from '@/utils/formatTime'
 
-const props = defineProps({
-  objData: {
-    type: Object, // type - 类型；accountId - 公众号账号编号
-    required: true
-  },
-  newsType: {
-    // 图文类型：1、已发布图文；2、草稿箱图文
-    type: String as PropType<string>,
-    default: '1'
+const props = withDefaults(
+  defineProps<{
+    type: string
+    accountId: number
+    newsType?: NewsType
+  }>(),
+  {
+    newsType: NewsType.Published
   }
-})
+)
 
 const emit = defineEmits(['select-material'])
 
@@ -159,15 +159,13 @@ const loading = ref(false)
 // 总条数
 const total = ref(0)
 // 数据列表
-const list = ref([])
+const list = ref<any[]>([])
 // 查询参数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: props.objData.accountId
+  accountId: props.accountId
 })
-const objDataRef = reactive(props.objData)
-const newsTypeRef = ref(props.newsType)
 
 const selectMaterialFun = (item) => {
   emit('select-material', item)
@@ -176,10 +174,10 @@ const selectMaterialFun = (item) => {
 const getPage = async () => {
   loading.value = true
   try {
-    if (objDataRef.type === 'news' && newsTypeRef.value === '1') {
+    if (props.type === 'news' && props.newsType === NewsType.Published) {
       // 【图文】+ 【已发布】
       await getFreePublishPageFun()
-    } else if (objDataRef.type === 'news' && newsTypeRef.value === '2') {
+    } else if (props.type === 'news' && props.newsType === NewsType.Draft) {
       // 【图文】+ 【草稿】
       await getDraftPageFun()
     } else {
@@ -194,7 +192,7 @@ const getPage = async () => {
 const getMaterialPageFun = async () => {
   const data = await MpMaterialApi.getMaterialPage({
     ...queryParams,
-    type: objDataRef.type
+    type: props.type
   })
   list.value = data.list
   total.value = data.total
@@ -202,9 +200,9 @@ const getMaterialPageFun = async () => {
 
 const getFreePublishPageFun = async () => {
   const data = await MpFreePublishApi.getFreePublishPage(queryParams)
-  data.list.forEach((item) => {
-    const newsItem = item.content.newsItem
-    newsItem.forEach((article) => {
+  data.list.forEach((item: any) => {
+    const articles = item.content.newsItem
+    articles.forEach((article: any) => {
       article.picUrl = article.thumbUrl
     })
   })
@@ -214,9 +212,9 @@ const getFreePublishPageFun = async () => {
 
 const getDraftPageFun = async () => {
   const data = await MpDraftApi.getDraftPage(queryParams)
-  data.list.forEach((item) => {
-    const newsItem = item.content.newsItem
-    newsItem.forEach((article) => {
+  data.list.forEach((draft: any) => {
+    const articles = draft.content.newsItem
+    articles.forEach((article: any) => {
       article.picUrl = article.thumbUrl
     })
   })

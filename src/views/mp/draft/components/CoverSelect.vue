@@ -27,9 +27,7 @@
           :on-success="onUploadSuccess"
         >
           <template #trigger>
-            <el-button size="small" type="primary" :loading="isUploading" disabled="isUploading">
-              {{ isUploading ? '正在上传' : '本地上传' }}
-            </el-button>
+            <el-button size="small" type="primary">本地上传</el-button>
           </template>
           <el-button
             size="small"
@@ -52,7 +50,8 @@
         destroy-on-close
       >
         <WxMaterialSelect
-          :objData="{ type: 'image', accountId: accountId }"
+          type="image"
+          :account-id="accountId"
           @select-material="onMaterialSelected"
         />
       </el-dialog>
@@ -61,13 +60,13 @@
 </template>
 
 <script setup lang="ts">
-import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
+import WxMaterialSelect from '@/views/mp/components/wx-material-select'
 import { getAccessToken } from '@/utils/auth'
 import type { UploadFiles, UploadProps, UploadRawFile } from 'element-plus'
+import { UploadType, useBeforeUpload } from '@/views/mp/hooks/useUpload'
 import { NewsItem } from './types'
 const message = useMessage()
 
-// const UPLOAD_URL = 'http://localhost:8000/upload/' // 上传永久素材的地址
 const UPLOAD_URL = import.meta.env.VITE_BASE_URL + '/admin-api/mp/material/upload-permanent' // 上传永久素材的地址
 const HEADERS = { Authorization: 'Bearer ' + getAccessToken() } // 设置上传的请求头部
 
@@ -93,14 +92,13 @@ const showImageDialog = ref(false)
 
 const fileList = ref<UploadFiles>([])
 interface UploadData {
-  type: 'image' | 'video' | 'audio'
-  accountId?: number
+  type: UploadType
+  accountId: number | undefined
 }
 const uploadData: UploadData = reactive({
-  type: 'image',
+  type: UploadType.Image,
   accountId: accountId
 })
-const isUploading = ref(false)
 
 /** 素材选择完成事件*/
 const onMaterialSelected = (item: any) => {
@@ -109,22 +107,8 @@ const onMaterialSelected = (item: any) => {
   newsItem.value.thumbUrl = item.url
 }
 
-const onBeforeUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) => {
-  const isType = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/jpg'].includes(
-    rawFile.type
-  )
-  if (!isType) {
-    message.error('上传图片格式不对!')
-    return false
-  }
-
-  if (rawFile.size / 1024 / 1024 > 2) {
-    message.error('上传图片大小不能超过 2M!')
-    return false
-  }
-  // 校验通过
-  return true
-}
+const onBeforeUpload: UploadProps['beforeUpload'] = (rawFile: UploadRawFile) =>
+  useBeforeUpload(UploadType.Image, 2)(rawFile)
 
 const onUploadSuccess: UploadProps['onSuccess'] = (res: any) => {
   if (res.code !== 0) {

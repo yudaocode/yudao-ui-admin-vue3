@@ -1,12 +1,9 @@
 <template>
-  <el-tab-pane name="voice">
-    <template #label>
-      <el-row align="middle"><Icon icon="ep:phone" /> 语音</el-row>
-    </template>
-    <div class="select-item2" v-if="objData.url">
-      <p class="item-name">{{ objData.name }}</p>
+  <div>
+    <div class="select-item2" v-if="reply.url">
+      <p class="item-name">{{ reply.name }}</p>
       <el-row class="ope-row" justify="center">
-        <WxVoicePlayer :url="objData.url" />
+        <WxVoicePlayer :url="reply.url" />
       </el-row>
       <el-row class="ope-row" justify="center">
         <el-button type="danger" circle @click="onDelete"><Icon icon="ep:delete" /></el-button>
@@ -25,7 +22,11 @@
           append-to-body
           destroy-on-close
         >
-          <WxMaterialSelect :objData="objData" @select-material="selectMaterial" />
+          <WxMaterialSelect
+            type="voice"
+            :account-id="reply.accountId"
+            @select-material="selectMaterial"
+          />
         </el-dialog>
       </el-col>
       <!-- 文件上传 -->
@@ -49,27 +50,27 @@
         </el-upload>
       </el-col>
     </el-row>
-  </el-tab-pane>
+  </div>
 </template>
 <script setup lang="ts">
-import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
-import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
-import { MaterialType, useBeforeUpload } from '@/views/mp/hooks/useUpload'
+import WxMaterialSelect from '@/views/mp/components/wx-material-select'
+import WxVoicePlayer from '@/views/mp/components/wx-voice-play'
+import { UploadType, useBeforeUpload } from '@/views/mp/hooks/useUpload'
 import type { UploadRawFile } from 'element-plus'
 import { getAccessToken } from '@/utils/auth'
-import { ObjData } from './types'
+import { Reply } from './types'
 const message = useMessage()
 
 const UPLOAD_URL = import.meta.env.VITE_API_BASEPATH + '/admin-api/mp/material/upload-temporary'
 const HEADERS = { Authorization: 'Bearer ' + getAccessToken() } // 设置上传的请求头部
 
 const props = defineProps<{
-  modelValue: ObjData
+  modelValue: Reply
 }>()
 const emit = defineEmits<{
-  (e: 'update:modelValue', v: ObjData)
+  (e: 'update:modelValue', v: Reply)
 }>()
-const objData = computed<ObjData>({
+const reply = computed<Reply>({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
 })
@@ -77,14 +78,13 @@ const objData = computed<ObjData>({
 const showDialog = ref(false)
 const fileList = ref([])
 const uploadData = reactive({
-  accountId: objData.value.accountId,
+  accountId: reply.value.accountId,
   type: 'voice',
   title: '',
   introduction: ''
 })
 
-const beforeVoiceUpload = (rawFile: UploadRawFile) =>
-  useBeforeUpload(MaterialType.Voice, 10)(rawFile)
+const beforeVoiceUpload = (rawFile: UploadRawFile) => useBeforeUpload(UploadType.Voice, 10)(rawFile)
 
 const onUploadSuccess = (res: any) => {
   if (res.code !== 0) {
@@ -102,18 +102,18 @@ const onUploadSuccess = (res: any) => {
 }
 
 const onDelete = () => {
-  objData.value.mediaId = null
-  objData.value.url = null
-  objData.value.name = null
+  reply.value.mediaId = null
+  reply.value.url = null
+  reply.value.name = null
 }
 
-const selectMaterial = (item: ObjData) => {
+const selectMaterial = (item: Reply) => {
   showDialog.value = false
 
-  objData.value.type = 'voice'
-  objData.value.mediaId = item.mediaId
-  objData.value.url = item.url
-  objData.value.name = item.name
+  // reply.value.type = ReplyType.Voice
+  reply.value.mediaId = item.mediaId
+  reply.value.url = item.url
+  reply.value.name = item.name
 }
 </script>
 

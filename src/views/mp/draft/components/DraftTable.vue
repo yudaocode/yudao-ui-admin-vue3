@@ -36,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import WxNews from '@/views/mp/components/wx-news/main.vue'
+import WxNews from '@/views/mp/components/wx-news'
 
 import { Article } from './types'
 
