@@ -4,7 +4,7 @@
     item-key="id"
     ghost-class="draggable-ghost"
     :animation="400"
-    @end="onDragEnd"
+    @end="onParentDragEnd"
   >
     <template #item="{ element: parent, index: x }">
       <div class="menu_bottom">
@@ -23,6 +23,7 @@
             item-key="id"
             ghost-class="draggable-ghost"
             :animation="400"
+            @end="onChildDragEnd"
           >
             <template #item="{ element: child, index: y }">
               <div class="subtitle menu_bottom">
@@ -118,42 +119,49 @@ const subMenuClicked = (child: Menu, x: number, y: number) => {
 }
 
 /**
- * 处理一级菜单展开后被拖动
+ * 处理一级菜单展开后被拖动，激活(展开)原来活动的一级菜单
  *
  * @param oldIndex: 一级菜单拖动前的位置
  * @param newIndex: 一级菜单拖动后的位置
  */
-const onDragEnd = ({ oldIndex, newIndex }) => {
+const onParentDragEnd = ({ oldIndex, newIndex }) => {
   // 二级菜单没有展开，直接返回
   if (props.activeIndex === '__MENU_NOT_SELECTED__') {
     return
   }
 
-  let newParent = props.parentIndex
-  if (props.parentIndex === oldIndex) {
-    newParent = newIndex
-  } else if (props.parentIndex === newIndex) {
-    newParent = oldIndex
-  } else {
-    // 如果展开的二级菜单下标`props.parentIndex`不是被移动的菜单的前后下标。
-    // 那么使用一个辅助素组来模拟菜单移动，然后找到展开的二级菜单的新下标`newParent`
-    let positions = new Array<boolean>(menuList.value.length).fill(false)
-    positions[props.parentIndex] = true
-    positions.splice(oldIndex, 1)
-    positions.splice(newIndex, 0, true)
-    newParent = positions.indexOf(true)
-  }
+  // 使用一个辅助数组来模拟菜单移动，然后找到展开的二级菜单的新下标`newParent`
+  let positions = new Array<boolean>(menuList.value.length).fill(false)
+  positions[props.parentIndex] = true
+  const [out] = positions.splice(oldIndex, 1) // 移出菜单，保存到变量out
+  positions.splice(newIndex, 0, out) // 把out变量插入被移出的菜单
+  const newParentIndex = positions.indexOf(true)
 
   // 找到菜单元素，触发一级菜单点击
-  const parent = menuList.value[newParent]
-  emit('menu-clicked', parent, newParent)
+  const parent = menuList.value[newParentIndex]
+  emit('menu-clicked', parent, newParentIndex)
+}
+
+/**
+ * 处理二级菜单展开后被拖动，激活被拖动的菜单
+ *
+ * @param newIndex 二级菜单拖动后的位置
+ */
+const onChildDragEnd = ({ newIndex }) => {
+  const x = props.parentIndex
+  const y = newIndex
+  const children = menuList.value[x]?.children
+  if (children && children?.length > 0) {
+    const child = children[y]
+    emit('submenu-clicked', child, x, y)
+  }
 }
 </script>
 
 <style lang="scss" scoped>
 .menu_bottom {
   position: relative;
-  display: inline-block;
+  display: block;
   float: left;
   width: 85.5px;
   text-align: center;
