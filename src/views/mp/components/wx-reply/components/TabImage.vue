@@ -1,12 +1,9 @@
 <template>
-  <el-tab-pane name="image">
-    <template #label>
-      <el-row align="middle"><Icon icon="ep:picture" class="mr-5px" /> 图片</el-row>
-    </template>
+  <div>
     <!-- 情况一：已经选择好素材、或者上传好图片 -->
-    <div class="select-item" v-if="objData.url">
-      <img class="material-img" :src="objData.url" />
-      <p class="item-name" v-if="objData.name">{{ objData.name }}</p>
+    <div class="select-item" v-if="reply.url">
+      <img class="material-img" :src="reply.url" />
+      <p class="item-name" v-if="reply.name">{{ reply.name }}</p>
       <el-row class="ope-row" justify="center">
         <el-button type="danger" circle @click="onDelete">
           <Icon icon="ep:delete" />
@@ -27,7 +24,11 @@
           append-to-body
           destroy-on-close
         >
-          <WxMaterialSelect :objData="objData" @select-material="selectMaterial" />
+          <WxMaterialSelect
+            type="image"
+            :account-id="reply.accountId"
+            @select-material="selectMaterial"
+          />
         </el-dialog>
       </el-col>
       <!-- 文件上传 -->
@@ -51,27 +52,27 @@
         </el-upload>
       </el-col>
     </el-row>
-  </el-tab-pane>
+  </div>
 </template>
 
 <script setup lang="ts">
-import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
-import { MaterialType, useBeforeUpload } from '@/views/mp/hooks/useUpload'
+import WxMaterialSelect from '@/views/mp/components/wx-material-select'
+import { UploadType, useBeforeUpload } from '@/views/mp/hooks/useUpload'
 import type { UploadRawFile } from 'element-plus'
 import { getAccessToken } from '@/utils/auth'
-import { ObjData } from './types'
+import { Reply } from './types'
 const message = useMessage()
 
 const UPLOAD_URL = import.meta.env.VITE_API_BASEPATH + '/admin-api/mp/material/upload-temporary'
 const HEADERS = { Authorization: 'Bearer ' + getAccessToken() } // 设置上传的请求头部
 
 const props = defineProps<{
-  modelValue: ObjData
+  modelValue: Reply
 }>()
 const emit = defineEmits<{
-  (e: 'update:modelValue', v: ObjData)
+  (e: 'update:modelValue', v: Reply)
 }>()
-const objData = computed<ObjData>({
+const reply = computed<Reply>({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
 })
@@ -79,14 +80,13 @@ const objData = computed<ObjData>({
 const showDialog = ref(false)
 const fileList = ref([])
 const uploadData = reactive({
-  accountId: objData.value.accountId,
+  accountId: reply.value.accountId,
   type: 'image',
   title: '',
   introduction: ''
 })
 
-const beforeImageUpload = (rawFile: UploadRawFile) =>
-  useBeforeUpload(MaterialType.Image, 2)(rawFile)
+const beforeImageUpload = (rawFile: UploadRawFile) => useBeforeUpload(UploadType.Image, 2)(rawFile)
 
 const onUploadSuccess = (res: any) => {
   if (res.code !== 0) {
@@ -104,18 +104,18 @@ const onUploadSuccess = (res: any) => {
 }
 
 const onDelete = () => {
-  objData.value.mediaId = null
-  objData.value.url = null
-  objData.value.name = null
+  reply.value.mediaId = null
+  reply.value.url = null
+  reply.value.name = null
 }
 
 const selectMaterial = (item) => {
   showDialog.value = false
 
-  objData.value.type = 'image'
-  objData.value.mediaId = item.mediaId
-  objData.value.url = item.url
-  objData.value.name = item.name
+  // reply.value.type = 'image'
+  reply.value.mediaId = item.mediaId
+  reply.value.url = item.url
+  reply.value.name = item.name
 }
 </script>
 
@@ -123,7 +123,7 @@ const selectMaterial = (item) => {
 .select-item {
   width: 280px;
   padding: 10px;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 10px;
   border: 1px solid #eaeaea;
 
   .material-img {
@@ -131,11 +131,11 @@ const selectMaterial = (item) => {
   }
 
   .item-name {
-    font-size: 12px;
     overflow: hidden;
+    font-size: 12px;
+    text-align: center;
     text-overflow: ellipsis;
     white-space: nowrap;
-    text-align: center;
 
     .item-infos {
       width: 30%;
@@ -149,18 +149,18 @@ const selectMaterial = (item) => {
   }
 
   .col-select {
-    border: 1px solid rgb(234, 234, 234);
-    padding: 50px 0px;
-    height: 160px;
     width: 49.5%;
+    height: 160px;
+    padding: 50px 0;
+    border: 1px solid rgb(234 234 234);
   }
 
   .col-add {
-    border: 1px solid rgb(234, 234, 234);
-    padding: 50px 0px;
-    height: 160px;
-    width: 49.5%;
     float: right;
+    width: 49.5%;
+    height: 160px;
+    padding: 50px 0;
+    border: 1px solid rgb(234 234 234);
 
     .el-upload__tip {
       line-height: 18px;

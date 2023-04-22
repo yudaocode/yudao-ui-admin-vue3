@@ -8,24 +8,59 @@
   ④ 支持发送【视频】消息时，支持新建视频
 -->
 <template>
-  <el-tabs type="border-card" v-model="objData.type" @tab-click="onTabClick">
+  <el-tabs type="border-card" v-model="currentTab">
     <!-- 类型 1：文本 -->
-    <TabText v-model="objData.content" />
+    <el-tab-pane :name="ReplyType.Text">
+      <template #label>
+        <el-row align="middle"><Icon icon="ep:document" /> 文本</el-row>
+      </template>
+      <TabText v-model="reply.content" />
+    </el-tab-pane>
+
     <!-- 类型 2：图片 -->
-    <TabImage v-model="objData" />
+    <el-tab-pane :name="ReplyType.Image">
+      <template #label>
+        <el-row align="middle"><Icon icon="ep:picture" class="mr-5px" /> 图片</el-row>
+      </template>
+      <TabImage v-model="reply" />
+    </el-tab-pane>
+
     <!-- 类型 3：语音 -->
-    <TabVoice v-model="objData" />
+    <el-tab-pane :name="ReplyType.Voice">
+      <template #label>
+        <el-row align="middle"><Icon icon="ep:phone" /> 语音</el-row>
+      </template>
+      <TabVoice v-model="reply" />
+    </el-tab-pane>
+
     <!-- 类型 4：视频 -->
-    <TabVideo v-model="objData" />
+    <el-tab-pane :name="ReplyType.Video">
+      <template #label>
+        <el-row align="middle"><Icon icon="ep:share" /> 视频</el-row>
+      </template>
+      <TabVideo v-model="reply" />
+    </el-tab-pane>
+
     <!-- 类型 5：图文 -->
-    <TabNews v-model="objData" :news-type="newsType" />
+    <el-tab-pane :name="ReplyType.News">
+      <template #label>
+        <el-row align="middle"><Icon icon="ep:reading" /> 图文</el-row>
+      </template>
+      <TabNews v-model="reply" :news-type="newsType" />
+    </el-tab-pane>
+
     <!-- 类型 6：音乐 -->
-    <TabMusic v-model="objData" />
+    <el-tab-pane :name="ReplyType.Music">
+      <template #label>
+        <el-row align="middle"><Icon icon="ep:service" />音乐</el-row>
+      </template>
+      <TabMusic v-model="reply" />
+    </el-tab-pane>
   </el-tabs>
 </template>
 
 <script setup lang="ts" name="WxReplySelect">
-import { ObjData, NewsType } from './components/types'
+import { Reply, NewsType, ReplyType, createEmptyReply } from './components/types'
 import TabText from './components/TabText.vue'
 import TabImage from './components/TabImage.vue'
 import TabVoice from './components/TabVoice.vue'
@@ -34,30 +69,54 @@ import TabNews from './components/TabNews.vue'
 import TabMusic from './components/TabMusic.vue'
 
 interface Props {
-  objData: ObjData
+  modelValue: Reply
   newsType?: NewsType
 }
 const props = withDefaults(defineProps<Props>(), {
   newsType: () => NewsType.Published
 })
+const emit = defineEmits<{
+  (e: 'update:modelValue', v: Reply)
+}>()
 
-const objData = reactive(props.objData)
-// TODO @Dhb52：Tab 切换的时候，应该表单还保留着；清除只有两个时机：1）发送成功后；2）关闭窗口后；我捉摸，是不是每个 TabXXX 组件，是个独立的 Form，然后有自己的对象，不粘在 objData 一起。这样最终就是 MusicMessageForm、ImageMessageForm
-// const tempObj = new Map().set(objData.type, Object.assign({}, objData))
+const reply = computed<Reply>({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val)
+})
+// 作为多个标签保存各自Reply的缓存
+const tabCache = new Map<ReplyType, Reply>()
+// 采用独立的ref来保存当前tab，避免在watch标签变化，对reply进行赋值会产生了循环调用
+const currentTab = ref<ReplyType>(props.modelValue.type || ReplyType.Text)
 
-/** 切换消息类型的 tab */
-const onTabClick = () => {
-  clear()
-}
+watch(
+  currentTab,
+  (newTab, oldTab) => {
+    // 第一次进入：oldTab 为 undefined
+    // 判断 newTab 是因为 Reply 为 Partial
+    if (oldTab === undefined || newTab === undefined) {
+      return
+    }
 
-/** 清除除了`type`的字段 */
+    tabCache.set(oldTab, unref(reply))
+
+    // 从缓存里面取出新tab内容，有则覆盖Reply，没有则创建空Reply
+    const temp = tabCache.get(newTab)
+    if (temp) {
+      reply.value = temp
+    } else {
+      let newData = createEmptyReply(reply)
+      newData.type = newTab
+      reply.value = newData
+    }
+  },
+  {
+    immediate: true
+  }
+)
+
+/** 清除除了`type`, `accountId`的字段 */
 const clear = () => {
-  objData.content = ''
-  objData.mediaId = ''
-  objData.url = ''
-  objData.title = ''
-  objData.description = ''
-  objData.articles = []
+  reply.value = createEmptyReply(reply)
 }
 
 defineExpose({
@@ -69,13 +128,13 @@ defineExpose({
 .select-item {
   width: 280px;
   padding: 10px;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 10px;
   border: 1px solid #eaeaea;
 }
 
 .select-item2 {
   padding: 10px;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 10px;
   border: 1px solid #eaeaea;
 }
 
@@ -89,11 +148,11 @@ defineExpose({
 }
 
 .item-name {
-  font-size: 12px;
   overflow: hidden;
+  font-size: 12px;
+  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: center;
 }
 
 .el-form-item__content {
@@ -101,34 +160,34 @@ defineExpose({
 }
 
 .col-select {
-  border: 1px solid rgb(234, 234, 234);
-  padding: 50px 0px;
-  height: 160px;
   width: 49.5%;
+  height: 160px;
+  padding: 50px 0;
+  border: 1px solid rgb(234 234 234);
 }
 
 .col-select2 {
-  border: 1px solid rgb(234, 234, 234);
-  padding: 50px 0px;
   height: 160px;
+  padding: 50px 0;
+  border: 1px solid rgb(234 234 234);
 }
 
 .col-add {
-  border: 1px solid rgb(234, 234, 234);
-  padding: 50px 0px;
-  height: 160px;
-  width: 49.5%;
   float: right;
+  width: 49.5%;
+  height: 160px;
+  padding: 50px 0;
+  border: 1px solid rgb(234 234 234);
 }
 
 .avatar-uploader-icon {
-  border: 1px solid #d9d9d9;
-  font-size: 28px;
-  color: #8c939d;
   width: 100px !important;
   height: 100px !important;
+  font-size: 28px;
   line-height: 100px !important;
+  color: #8c939d;
   text-align: center;
+  border: 1px solid #d9d9d9;
 }
 
 .material-img {

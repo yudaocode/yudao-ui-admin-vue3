@@ -39,12 +39,14 @@
 </template>
 
 <script lang="ts" name="WxNews" setup>
-const props = defineProps({
-  articles: {
-    type: Array,
-    default: () => null
+const props = withDefaults(
+  defineProps<{
+    articles: any[] | null
+  }>(),
+  {
+    articles: null
   }
-})
+)
 
 defineExpose({
   articles: props.articles
@@ -53,9 +55,9 @@ defineExpose({
 
 <style lang="scss" scoped>
 .news-home {
-  background-color: #ffffff;
   width: 100%;
   margin: auto;
+  background-color: #fff;
 }
 
 .news-main {
@@ -64,29 +66,29 @@ defineExpose({
 }
 
 .news-content {
-  background-color: #acadae;
-  width: 100%;
   position: relative;
+  width: 100%;
+  background-color: #acadae;
 }
 
 .news-content-title {
-  display: inline-block;
-  font-size: 12px;
-  color: #ffffff;
   position: absolute;
-  left: 0;
   bottom: 0;
-  background-color: black;
+  left: 0;
+  display: inline-block;
   width: 98%;
   padding: 1%;
-  opacity: 0.65;
+  font-size: 12px;
+  color: #fff;
   white-space: normal;
+  background-color: black;
+  opacity: 0.65;
   box-sizing: unset !important;
 }
 
 .news-main-item {
-  background-color: #ffffff;
   padding: 5px 0;
+  background-color: #fff;
   border-top: 1px solid #eaeaea;
 }
 
@@ -96,17 +98,17 @@ defineExpose({
 
 .news-content-item-title {
   display: inline-block;
-  font-size: 10px;
   width: 70%;
   margin-left: 1%;
+  font-size: 10px;
   white-space: normal;
 }
 
 .news-content-item-img {
   display: inline-block;
   width: 25%;
-  background-color: #acadae;
   margin-right: 1%;
+  background-color: #acadae;
 }
 
 .material-img {

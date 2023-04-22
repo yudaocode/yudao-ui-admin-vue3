@@ -1,15 +1,10 @@
 <template>
-  <el-tab-pane name="text">
-    <template #label>
-      <el-row align="middle"><Icon icon="ep:document" /> 文本</el-row>
-    </template>
-    <el-input type="textarea" :rows="5" placeholder="请输入内容" v-model="content" />
-  </el-tab-pane>
+  <el-input type="textarea" :rows="5" placeholder="请输入内容" v-model="content" />
 </template>
 
 <script setup lang="ts">
 const props = defineProps<{
-  modelValue: string | null
+  modelValue?: string | null
 }>()
 
 const emit = defineEmits<{
@@ -17,7 +12,7 @@ const emit = defineEmits<{
   (e: 'input', v: string | null)
 }>()
 
-const content = computed<string | null>({
+const content = computed<string | null | undefined>({
   get: () => props.modelValue,
   set: (val: string | null) => {
     emit('update:modelValue', val)
