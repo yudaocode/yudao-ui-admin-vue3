@@ -46,7 +46,6 @@
   </ContentWrap>
 
   <!-- 添加或修改草稿对话框 -->
-  <!-- TODO @Dhb52：是不是整个做成一个组件 -->
   <el-dialog
     :title="isCreating ? '新建图文' : '修改图文'"
     width="80%"
@@ -63,7 +62,7 @@
 </template>
 
 <script setup lang="ts" name="MpDraft">
-import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import WxAccountSelect from '@/views/mp/components/wx-account-select'
 import * as MpDraftApi from '@/api/mp/draft'
 import * as MpFreePublishApi from '@/api/mp/freePublish'
 import {
@@ -77,7 +76,7 @@ import {
 
 const message = useMessage() // 消息
 
-const accountId = ref(0)
+const accountId = ref<number>(0)
 provide('accountId', accountId)
 
 const loading = ref(true) // 列表的加载中
@@ -91,7 +90,7 @@ interface QueryParams {
 const queryParams: QueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: accountId.value
+  accountId: 0
 })
 
 interface UploadData {
@@ -100,7 +99,7 @@ interface UploadData {
 }
 const uploadData: UploadData = reactive({
   type: 'image',
-  accountId: accountId.value
+  accountId: 0
 })
 
 // ========== 草稿新建 or 修改 ==========

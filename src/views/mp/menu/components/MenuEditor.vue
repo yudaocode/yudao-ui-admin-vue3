@@ -94,7 +94,8 @@
             </div>
             <el-dialog title="选择图文" v-model="showNewsDialog" width="80%" destroy-on-close>
               <WxMaterialSelect
-                :objData="{ type: 'news', accountId: props.accountId }"
+                type="news"
+                :account-id="props.accountId"
                 @select-material="selectMaterial"
               />
             </el-dialog>
@@ -104,7 +105,7 @@
           class="configur_content"
           v-if="menu.type === 'click' || menu.type === 'scancode_waitmsg'"
         >
-          <WxReplySelect v-if="hackResetWxReplySelect" :objData="menu.reply" />
+          <WxReplySelect v-if="hackResetWxReplySelect" v-model="menu.reply" />
         </div>
       </div>
     </div>
@@ -112,15 +113,15 @@
 </template>
 
 <script setup lang="ts">
-import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
-import WxNews from '@/views/mp/components/wx-news/main.vue'
-import WxMaterialSelect from '@/views/mp/components/wx-material-select/main.vue'
+import WxReplySelect from '@/views/mp/components/wx-reply'
+import WxNews from '@/views/mp/components/wx-news'
+import WxMaterialSelect from '@/views/mp/components/wx-material-select'
 import menuOptions from './menuOptions'
 
 const message = useMessage()
 
 const props = defineProps<{
-  accountId?: number
+  accountId: number
   modelValue: any
   isParent: boolean
 }>()
@@ -130,7 +131,6 @@ const emit = defineEmits<{
   (e: 'update:modelValue', v: any)
 }>()
 
-// TODO @Dhb52 输入的 table 切换时，表单应该保留
 const menu = computed({
   get() {
     return props.modelValue

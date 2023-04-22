@@ -122,11 +122,11 @@
 </template>
 
 <script setup lang="ts">
-import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
-import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
-import WxLocation from '@/views/mp/components/wx-location/main.vue'
-import WxMusic from '@/views/mp/components/wx-music/main.vue'
-import WxNews from '@/views/mp/components/wx-news/main.vue'
+import WxVideoPlayer from '@/views/mp/components/wx-video-play'
+import WxVoicePlayer from '@/views/mp/components/wx-voice-play'
+import WxLocation from '@/views/mp/components/wx-location'
+import WxMusic from '@/views/mp/components/wx-music'
+import WxNews from '@/views/mp/components/wx-news'
 import { dateFormatter } from '@/utils/formatTime'
 import { MsgType } from '@/views/mp/components/wx-msg/types'
 

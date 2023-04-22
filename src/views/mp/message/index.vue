@@ -81,8 +81,8 @@
 </template>
 <script setup lang="ts" name="MpMessage">
 import * as MpMessageApi from '@/api/mp/message'
-import WxMsg from '@/views/mp/components/wx-msg/main.vue'
-import WxAccountSelect from '@/views/mp/components/wx-account-select/main.vue'
+import WxMsg from '@/views/mp/components/wx-msg'
+import WxAccountSelect from '@/views/mp/components/wx-account-select'
 import MessageTable from './MessageTable.vue'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { MsgType } from '@/views/mp/components/wx-msg/types'
@@ -96,17 +96,17 @@ const list = ref<any[]>([]) // 当前页的列表数据
 interface QueryParams {
   pageNo: number
   pageSize: number
-  openid: string | null
-  accountId: number | null
-  type: MsgType | null
+  openid: string | undefined
+  accountId: number
+  type: MsgType | undefined
   createTime: string[] | []
 }
 const queryParams: QueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  openid: null,
-  accountId: null,
-  type: null,
+  openid: undefined,
+  accountId: 0,
+  type: undefined,
   createTime: []
 })
 const queryFormRef = ref<FormInstance | null>(null) // 搜索的表单
@@ -118,8 +118,8 @@ const messageBox = reactive({
 })
 
 /** 侦听accountId */
-const onAccountChanged = (id?: number) => {
-  queryParams.accountId = id as number
+const onAccountChanged = (id: number) => {
+  queryParams.accountId = id
   handleQuery()
 }
 

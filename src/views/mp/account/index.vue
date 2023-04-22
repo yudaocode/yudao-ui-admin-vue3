@@ -46,7 +46,7 @@
             v-if="scope.row.qrCodeUrl"
             :src="scope.row.qrCodeUrl"
             alt="二维码"
-            style="height: 100px; display: inline-block"
+            style="display: inline-block; height: 100px"
           />
           <el-button
             link

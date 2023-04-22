@@ -2,29 +2,29 @@ import type { UploadRawFile } from 'element-plus'
 
 const message = useMessage() // 消息
 
-enum MaterialType {
+enum UploadType {
   Image = 'image',
   Voice = 'voice',
   Video = 'video'
 }
 
-const useBeforeUpload = (type: MaterialType, maxSizeMB: number) => {
+const useBeforeUpload = (type: UploadType, maxSizeMB: number) => {
   const fn = (rawFile: UploadRawFile): boolean => {
     let allowTypes: string[] = []
     let name = ''
 
     switch (type) {
-      case MaterialType.Image:
+      case UploadType.Image:
         allowTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/jpg']
         maxSizeMB = 2
         name = '图片'
         break
-      case MaterialType.Voice:
+      case UploadType.Voice:
         allowTypes = ['audio/mp3', 'audio/mpeg', 'audio/wma', 'audio/wav', 'audio/amr']
         maxSizeMB = 2
         name = '语音'
         break
-      case MaterialType.Video:
+      case UploadType.Video:
         allowTypes = ['video/mp4']
         maxSizeMB = 10
         name = '视频'
@@ -47,4 +47,4 @@ const useBeforeUpload = (type: MaterialType, maxSizeMB: number) => {
   return fn
 }
 
-export { MaterialType, useBeforeUpload }
+export { UploadType, useBeforeUpload }

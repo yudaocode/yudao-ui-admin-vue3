@@ -31,30 +31,6 @@ const emit = defineEmits<{
 </script>
 
 <style lang="scss" scoped>
-/*瀑布流样式*/
-.waterfall {
-  width: 100%;
-  column-gap: 10px;
-  column-count: 5;
-  margin-top: 10px;
-  /* 芋道源码：增加 10px，避免顶着上面 */
-}
-
-.waterfall-item {
-  padding: 10px;
-  margin-bottom: 10px;
-  break-inside: avoid;
-  border: 1px solid #eaeaea;
-}
-
-.material-img {
-  width: 100%;
-}
-
-p {
-  line-height: 30px;
-}
-
 @media (min-width: 992px) and (max-width: 1300px) {
   .waterfall {
     column-count: 3;
@@ -79,5 +55,29 @@ p {
   .waterfall {
     column-count: 1;
   }
+}
+
+.waterfall {
+  width: 100%;
+  column-gap: 10px;
+  column-count: 5;
+  margin-top: 10px;
+
+  /* 芋道源码：增加 10px，避免顶着上面 */
+}
+
+.waterfall-item {
+  padding: 10px;
+  margin-bottom: 10px;
+  break-inside: avoid;
+  border: 1px solid #eaeaea;
+}
+
+.material-img {
+  width: 100%;
+}
+
+p {
+  line-height: 30px;
 }
 </style>

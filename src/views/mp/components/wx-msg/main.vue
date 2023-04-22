@@ -125,19 +125,19 @@
       </div>
     </div>
     <div class="msg-send" v-loading="sendLoading">
-      <WxReplySelect ref="replySelectRef" :objData="objData" />
+      <WxReplySelect ref="replySelectRef" v-model="reply" />
       <el-button type="success" class="send-but" @click="sendMsg">发送(S)</el-button>
     </div>
   </ContentWrap>
 </template>
 
 <script setup lang="ts" name="WxMsg">
-import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
-import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
-import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
-import WxNews from '@/views/mp/components/wx-news/main.vue'
-import WxLocation from '@/views/mp/components/wx-location/main.vue'
-import WxMusic from '@/views/mp/components/wx-music/main.vue'
+import WxReplySelect from '@/views/mp/components/wx-reply'
+import WxVideoPlayer from '@/views/mp/components/wx-video-play'
+import WxVoicePlayer from '@/views/mp/components/wx-voice-play'
+import WxNews from '@/views/mp/components/wx-news'
+import WxLocation from '@/views/mp/components/wx-location'
+import WxMusic from '@/views/mp/components/wx-music'
 import { getMessagePage, sendMessage } from '@/api/mp/message'
 import { getUser } from '@/api/mp/user'
 import { formatDate } from '@/utils/formatTime'
@@ -187,14 +187,14 @@ const mp: Mp = reactive({
 
 // ========= 消息发送 =========
 const sendLoading = ref(false) // 发送消息是否加载中
-interface ObjData {
+interface Reply {
   type: MsgType
   accountId: number | null
   articles: any[]
 }
 
 // 微信发送消息
-const objData: ObjData = reactive({
+const reply = ref<Reply>({
   type: MsgType.Text,
   accountId: null,
   articles: []
@@ -209,23 +209,23 @@ onMounted(async () => {
   user.avatar = user.avatar?.length > 0 ? data.avatar : user.avatar
   user.accountId = data.accountId
   queryParams.accountId = data.accountId
-  objData.accountId = data.accountId
+  reply.value.accountId = data.accountId
 
   refreshChange()
 })
 
 // 执行发送
 const sendMsg = async () => {
-  if (!objData) {
+  if (!reply) {
     return
   }
   // 公众号限制：客服消息，公众号只允许发送一条
-  if (objData.type === MsgType.News && objData.articles.length > 1) {
-    objData.articles = [objData.articles[0]]
+  if (reply.value.type === MsgType.News && reply.value.articles.length > 1) {
+    reply.value.articles = [reply.value.articles[0]]
     message.success('图文消息条数限制在 1 条以内，已默认发送第一条')
   }
 
-  const data = await sendMessage(Object.assign({ userId: props.userId }, { ...objData }))
+  const data = await sendMessage({ userId: props.userId, ...reply.value })
   sendLoading.value = false
 
   list.value = [...list.value, ...[data]]

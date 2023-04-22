@@ -1,35 +1,55 @@
 <template>
-  <div class="menu_bottom" v-for="(parent, x) of menuList" :key="x">
-    <!-- 一级菜单 -->
-    <div
-      @click="menuClicked(parent, x)"
-      class="menu_item"
-      :class="{ active: props.activeIndex === `${x}` }"
-    >
-      <Icon icon="ep:fold" color="black" />{{ parent.name }}
-    </div>
-    <!-- 以下为二级菜单-->
-    <div class="submenu" v-if="parentIndex === x && parent.children">
-      <div class="subtitle menu_bottom" v-for="(child, y) in parent.children" :key="y">
+  <draggable
+    v-model="menuList"
+    item-key="id"
+    ghost-class="draggable-ghost"
+    :animation="400"
+    @end="onDragEnd"
+  >
+    <template #item="{ element: parent, index: x }">
+      <div class="menu_bottom">
+        <!-- 一级菜单 -->
         <div
-          class="menu_subItem"
-          v-if="parent.children"
-          :class="{ active: props.activeIndex === `${x}-${y}` }"
-          @click="subMenuClicked(child, x, y)"
+          @click="menuClicked(parent, x)"
+          class="menu_item"
+          :class="{ active: props.activeIndex === `${x}` }"
         >
-          {{ child.name }}
+          <Icon icon="ep:fold" color="black" />{{ parent.name }}
+        </div>
+        <!-- 以下为二级菜单-->
+        <div class="submenu" v-if="props.parentIndex === x && parent.children">
+          <draggable
+            v-model="parent.children"
+            item-key="id"
+            ghost-class="draggable-ghost"
+            :animation="400"
+          >
+            <template #item="{ element: child, index: y }">
+              <div class="subtitle menu_bottom">
+                <div
+                  class="menu_subItem"
+                  v-if="parent.children"
+                  :class="{ active: props.activeIndex === `${x}-${y}` }"
+                  @click="subMenuClicked(child, x, y)"
+                >
+                  {{ child.name }}
+                </div>
+              </div>
+            </template>
+          </draggable>
+          <!-- 二级菜单加号， 当长度 小于 5 才显示二级菜单的加号  -->
+          <div
+            class="menu_bottom menu_addicon"
+            v-if="!parent.children || parent.children.length < 5"
+            @click="addSubMenu(x, parent)"
+          >
+            <Icon icon="ep:plus" class="plus" />
+          </div>
         </div>
       </div>
-      <!-- 二级菜单加号， 当长度 小于 5 才显示二级菜单的加号  -->
-      <div
-        class="menu_bottom menu_addicon"
-        v-if="!parent.children || parent.children.length < 5"
-        @click="addSubMenu(x, parent)"
-      >
-        <Icon icon="ep:plus" class="plus" />
-      </div>
-    </div>
-  </div>
+    </template>
+  </draggable>
+
   <!-- 一级菜单加号 -->
   <div class="menu_bottom menu_addicon" v-if="menuList.length < 3" @click="addMenu">
     <Icon icon="ep:plus" class="plus" />
@@ -38,12 +58,13 @@
 
 <script setup lang="ts">
 import { Menu } from './types'
+import draggable from 'vuedraggable'
 
 const props = defineProps<{
   modelValue: Menu[]
   activeIndex: string
   parentIndex: number
-  accountId?: number
+  accountId: number
 }>()
 
 const emit = defineEmits<{
@@ -91,8 +112,41 @@ const addSubMenu = (i: number, parent: any) => {
 const menuClicked = (parent: Menu, x: number) => {
   emit('menu-clicked', parent, x)
 }
+
 const subMenuClicked = (child: Menu, x: number, y: number) => {
   emit('submenu-clicked', child, x, y)
+}
+
+/**
+ * 处理一级菜单展开后被拖动
+ *
+ * @param oldIndex: 一级菜单拖动前的位置
+ * @param newIndex: 一级菜单拖动后的位置
+ */
+const onDragEnd = ({ oldIndex, newIndex }) => {
+  // 二级菜单没有展开，直接返回
+  if (props.activeIndex === '__MENU_NOT_SELECTED__') {
+    return
+  }
+
+  let newParent = props.parentIndex
+  if (props.parentIndex === oldIndex) {
+    newParent = newIndex
+  } else if (props.parentIndex === newIndex) {
+    newParent = oldIndex
+  } else {
+    // 如果展开的二级菜单下标`props.parentIndex`不是被移动的菜单的前后下标。
+    // 那么使用一个辅助素组来模拟菜单移动，然后找到展开的二级菜单的新下标`newParent`
+    let positions = new Array<boolean>(menuList.value.length).fill(false)
+    positions[props.parentIndex] = true
+    positions.splice(oldIndex, 1)
+    positions.splice(newIndex, 0, true)
+    newParent = positions.indexOf(true)
+  }
+
+  // 找到菜单元素，触发一级菜单点击
+  const parent = menuList.value[newParent]
+  emit('menu-clicked', parent, newParent)
 }
 </script>
 
@@ -154,5 +208,11 @@ const subMenuClicked = (child: Menu, x: number, y: number) => {
     background-color: #fff;
     box-sizing: border-box;
   }
+}
+
+.draggable-ghost {
+  opacity: 0.5;
+  background: #f7fafc;
+  border: 1px solid #4299e1;
 }
 </style>

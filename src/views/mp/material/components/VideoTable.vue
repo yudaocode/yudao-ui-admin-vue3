@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
+import WxVideoPlayer from '@/views/mp/components/wx-video-play'
 import { dateFormatter } from '@/utils/formatTime'
 
 const props = defineProps<{
