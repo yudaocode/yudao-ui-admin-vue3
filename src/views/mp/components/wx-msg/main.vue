@@ -7,7 +7,7 @@
 -->
 <template>
   <ContentWrap>
-    <div class="msg-div" :id="msgDivId">
+    <div class="msg-div" ref="msgDivRef">
       <!-- 加载更多 -->
       <div v-loading="loading"></div>
       <div v-if="!loading">
@@ -47,8 +47,7 @@ const props = defineProps({
   }
 })
 
-const accountId = ref<number>(-1) // 公众号ID，需要通过userId初始化
-const msgDivId = `msg-div-{new Date().getTime()}` // 当前的时间戳，用于每次消息加载后，回到原位置；具体见 :id="'msg-div' + nowStr" 处
+const accountId = ref(-1) // 公众号ID，需要通过userId初始化
 const loading = ref(false) // 消息列表是否正在加载中
 const hasMore = ref(true) // 是否可以加载更多
 const list = ref<any[]>([]) // 消息列表
@@ -74,7 +73,8 @@ const reply = ref<Reply>({
   articles: []
 })
 
-const replySelectRef = ref<InstanceType<typeof WxReplySelect> | null>(null)
+const replySelectRef = ref<InstanceType<typeof WxReplySelect> | null>(null) // WxReplySelect组件ref，用于消息发送成功后清除内容
+const msgDivRef = ref() // 消息显示窗口ref，用于滚动到底部
 
 /** 完成加载 */
 onMounted(async () => {
@@ -89,7 +89,7 @@ onMounted(async () => {
 
 // 执行发送
 const sendMsg = async () => {
-  if (!reply) {
+  if (!unref(reply)) {
     return
   }
   // 公众号限制：客服消息，公众号只允许发送一条
@@ -117,7 +117,7 @@ const loadMore = () => {
   getPage(queryParams, null)
 }
 
-const getPage = async (page: any, params: any) => {
+const getPage = async (page: any, params: any = null) => {
   loading.value = true
   let dataTemp = await getMessagePage(
     Object.assign(
@@ -131,11 +131,7 @@ const getPage = async (page: any, params: any) => {
     )
   )
 
-  const msgDiv = document.getElementById(msgDivId)
-  let scrollHeight = 0
-  if (msgDiv) {
-    scrollHeight = msgDiv.scrollHeight
-  }
+  const scrollHeight = msgDivRef.value?.scrollHeight ?? 0
   // 处理数据
   const data = dataTemp.list.reverse()
   list.value = [...data, ...list.value]
@@ -153,24 +149,22 @@ const getPage = async (page: any, params: any) => {
     // 定位滚动条
     await nextTick()
     if (scrollHeight !== 0) {
-      let div = document.getElementById(msgDivId)
-      if (div && msgDiv) {
-        msgDiv.scrollTop = div.scrollHeight - scrollHeight - 100
+      if (msgDivRef.value) {
+        msgDivRef.value.scrollTop = msgDivRef.value.scrollHeight - scrollHeight - 100
       }
     }
   }
 }
 
 const refreshChange = () => {
-  getPage(queryParams, null)
+  getPage(queryParams)
 }
 
 /** 定位到消息底部 */
 const scrollToBottom = async () => {
   await nextTick()
-  let div = document.getElementById(msgDivId)
-  if (div) {
-    div.scrollTop = div.scrollHeight
+  if (msgDivRef.value) {
+    msgDivRef.value.scrollTop = msgDivRef.value.scrollHeight
   }
 }
 </script>
