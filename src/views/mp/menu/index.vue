@@ -339,7 +339,7 @@ div {
 
   .left {
     position: relative;
-    display: inline-block;
+    display: block;
     float: left;
     width: 350px;
     height: 715px;

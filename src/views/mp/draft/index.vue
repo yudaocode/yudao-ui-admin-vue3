@@ -76,7 +76,7 @@ import {
 
 const message = useMessage() // 消息
 
-const accountId = ref<number>(0)
+const accountId = ref<number>(-1)
 provide('accountId', accountId)
 
 const loading = ref(true) // 列表的加载中
@@ -90,16 +90,7 @@ interface QueryParams {
 const queryParams: QueryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: 0
-})
-
-interface UploadData {
-  type: 'image' | 'video' | 'audio'
-  accountId: number
-}
-const uploadData: UploadData = reactive({
-  type: 'image',
-  accountId: 0
+  accountId: accountId
 })
 
 // ========== 草稿新建 or 修改 ==========
@@ -126,8 +117,8 @@ const onBeforeDialogClose = async (onDone: () => {}) => {
 // ======================== 列表查询 ========================
 /** 设置账号编号 */
 const setAccountId = (id: number) => {
-  queryParams.accountId = id
-  uploadData.accountId = id
+  accountId.value = id
+  // queryParams.accountId = id
 }
 
 /** 查询列表 */
