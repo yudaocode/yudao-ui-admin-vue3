@@ -5,27 +5,27 @@
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="菜单名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入菜单名称"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入菜单名称"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select
           v-model="queryParams.status"
-          placeholder="请选择菜单状态"
-          clearable
           class="!w-240px"
+          clearable
+          placeholder="请选择菜单状态"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -36,18 +36,30 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['system:menu:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
         </el-button>
-        <el-button type="danger" plain @click="toggleExpandAll">
-          <Icon icon="ep:sort" class="mr-5px" /> 展开/折叠
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-button
+          v-hasPermi="['system:menu:create']"
+          plain
+          type="primary"
+          @click="openForm('create')"
+        >
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
+        </el-button>
+        <el-button plain type="danger" @click="toggleExpandAll">
+          <Icon class="mr-5px" icon="ep:sort" />
+          展开/折叠
+        </el-button>
+        <el-button plain @click="refreshMenu">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          刷新菜单缓存
         </el-button>
       </el-form-item>
     </el-form>
@@ -56,50 +68,50 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table
+      v-if="refreshTable"
       v-loading="loading"
       :data="list"
-      row-key="id"
-      v-if="refreshTable"
       :default-expand-all="isExpandAll"
+      row-key="id"
     >
-      <el-table-column prop="name" label="菜单名称" :show-overflow-tooltip="true" width="250" />
-      <el-table-column prop="icon" label="图标" align="center" width="100">
+      <el-table-column :show-overflow-tooltip="true" label="菜单名称" prop="name" width="250" />
+      <el-table-column align="center" label="图标" prop="icon" width="100">
         <template #default="scope">
           <Icon :icon="scope.row.icon" />
         </template>
       </el-table-column>
-      <el-table-column prop="sort" label="排序" width="60" />
-      <el-table-column prop="permission" label="权限标识" :show-overflow-tooltip="true" />
-      <el-table-column prop="component" label="组件路径" :show-overflow-tooltip="true" />
-      <el-table-column prop="componentName" label="组件名称" :show-overflow-tooltip="true" />
-      <el-table-column prop="status" label="状态" width="80">
+      <el-table-column label="排序" prop="sort" width="60" />
+      <el-table-column :show-overflow-tooltip="true" label="权限标识" prop="permission" />
+      <el-table-column :show-overflow-tooltip="true" label="组件路径" prop="component" />
+      <el-table-column :show-overflow-tooltip="true" label="组件名称" prop="componentName" />
+      <el-table-column label="状态" prop="status" width="80">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center">
+      <el-table-column align="center" label="操作">
         <template #default="scope">
           <el-button
+            v-hasPermi="['system:menu:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['system:menu:update']"
           >
             修改
           </el-button>
           <el-button
+            v-hasPermi="['system:menu:create']"
             link
             type="primary"
             @click="openForm('create', undefined, scope.row.id)"
-            v-hasPermi="['system:menu:create']"
           >
             新增
           </el-button>
           <el-button
+            v-hasPermi="['system:menu:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['system:menu:delete']"
           >
             删除
           </el-button>
@@ -111,11 +123,14 @@
   <!-- 表单弹窗：添加/修改 -->
   <MenuForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="SystemMenu">
+<script lang="ts" name="SystemMenu" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { handleTree } from '@/utils/tree'
 import * as MenuApi from '@/api/system/menu'
 import MenuForm from './MenuForm.vue'
+import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
+
+const { wsCache } = useCache()
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -165,7 +180,19 @@ const toggleExpandAll = () => {
     refreshTable.value = true
   })
 }
-
+/** 刷新菜单缓存按钮操作 */
+const refreshMenu = () => {
+  ElMessageBox.confirm('即将更新缓存刷新浏览器！', '刷新菜单缓存', {
+    confirmButtonText: t('common.ok'),
+    cancelButtonText: t('common.cancel'),
+    type: 'warning'
+  }).then(() => {
+    // 清空，从而触发刷新
+    wsCache.delete(CACHE_KEY.ROLE_ROUTERS)
+    // 刷新浏览器
+    location.reload()
+  })
+}
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
