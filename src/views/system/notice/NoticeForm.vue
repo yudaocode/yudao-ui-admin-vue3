@@ -17,9 +17,9 @@
         <el-select v-model="formData.type" clearable placeholder="请选择公告类型">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_NOTICE_TYPE)"
-            :key="parseInt(dict.value)"
+            :key="parseInt(dict.value as any)"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="parseInt(dict.value as any)"
           />
         </el-select>
       </el-form-item>
@@ -27,9 +27,9 @@
         <el-select v-model="formData.status" clearable placeholder="请选择状态">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="parseInt(dict.value)"
+            :key="parseInt(dict.value as any)"
             :label="dict.label"
-            :value="parseInt(dict.value)"
+            :value="parseInt(dict.value as any)"
           />
         </el-select>
       </el-form-item>
