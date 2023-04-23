@@ -117,6 +117,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as UserGroupApi from '@/api/bpm/userGroup'
 import * as UserApi from '@/api/system/user'
 import UserGroupForm from './UserGroupForm.vue'
+import { UserVO } from '@/api/system/user'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -131,7 +132,7 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const userList = ref([]) // 用户列表
+const userList = ref<UserVO[]>([]) // 用户列表
 
 /** 查询列表 */
 const getList = async () => {

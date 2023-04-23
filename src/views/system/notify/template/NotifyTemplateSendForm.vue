@@ -102,7 +102,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as SmsTemplateApi.SendSmsReqVO
+    const data = formData.value as unknown as SmsTemplateApi.SendSmsReqVO
     const logId = await SmsTemplateApi.sendSms(data)
     if (logId) {
       message.success('提交发送成功！发送结果，见发送日志编号：' + logId)
@@ -121,7 +121,7 @@ const resetForm = () => {
     mobile: '',
     templateCode: '',
     templateParams: new Map()
-  }
+  } as any
   formRef.value?.resetFields()
 }
 </script>

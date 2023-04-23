@@ -122,7 +122,9 @@ const open = async (type: string, id?: number, dictType?: string) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  formData.value.dictType = dictType
+  if (dictType) {
+    formData.value.dictType = dictType
+  }
   // 修改时，设置数据
   if (id) {
     formLoading.value = true

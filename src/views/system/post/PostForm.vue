@@ -117,7 +117,7 @@ const resetForm = () => {
     sort: undefined,
     status: CommonStatusEnum.ENABLE,
     remark: ''
-  }
+  } as any
   formRef.value?.resetFields()
 }
 </script>
