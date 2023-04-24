@@ -11,6 +11,7 @@
 
 * nodejs > 16.0.0 && pnpm > 7.30.0
 * 演示地址【Vue3 + element-plus】：<http://dashboard-vue3.yudao.iocoder.cn>
+* 演示地址【Vue3 + vben(ant-design-vue)】：<http://dashboard-vben.yudao.iocoder.cn>
 * 演示地址【Vue2 + element-ui】：<http://dashboard.yudao.iocoder.cn>
 * 启动文档：<https://doc.iocoder.cn/quick-start/>
 * 视频教程：<https://doc.iocoder.cn/video/>
@@ -19,8 +20,8 @@
 
 **芋道**，以开发者为中心，打造中国第一流的快速开发平台，全部开源，个人与企业可 100% 免费使用。
 
-* 采用 [vue-element-plus-admin](https://gitee.com/kailong110120130/vue-element-plus-admin) 
-* 改换saas，自动引入等功能 [vue-element-plus-admin](https://gitee.com/yudaocode/vue-element-plus-admin)
+* 采用 [vue-element-plus-admin](https://gitee.com/kailong110120130/vue-element-plus-admin) 实现
+* 改换 saas，自动引入等功能
 * 使用 Element Plus 免费开源的中后台模版，具备如下特性：
 
 ![首页](preview/home.png)
