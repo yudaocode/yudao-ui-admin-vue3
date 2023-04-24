@@ -10,6 +10,12 @@
   width: 100% !important;
 }
 
+// 解决表格内容超过表格总宽度后，横向滚动条前端顶不到表格边缘的问题
+.el-scrollbar__bar {
+  display: flex;
+  justify-content: flex-start;
+}
+
 /* nprogress 适配 element-plus 的主题色 */
 #nprogress {
   & .bar {
