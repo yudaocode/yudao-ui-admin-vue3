@@ -55,6 +55,6 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
-/* 因为 joolun 实现依赖 avue 组件，该页面使用了 card.scc  */
-@import url('../wx-msg/card.scss');
+/* 因为 joolun 实现依赖 avue 组件，该页面使用了 card.scss  */
+@import '../wx-msg/card.scss';
 </style>

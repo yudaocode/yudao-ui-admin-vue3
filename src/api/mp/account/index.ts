@@ -1,7 +1,7 @@
 import request from '@/config/axios'
 
 export interface AccountVO {
-  id?: number
+  id: number
   name: string
 }
 

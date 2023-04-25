@@ -103,6 +103,7 @@ import ReplyTable from './components/ReplyTable.vue'
 import { MsgType } from './components/types'
 const message = useMessage() // 消息
 
+const accountId = ref(-1) // 公众号ID
 const msgType = ref<MsgType>(MsgType.Keyword) // 消息类型
 const RequestMessageTypes = ['text', 'image', 'voice', 'video', 'shortvideo', 'location', 'link'] // 允许选择的请求消息类型
 const loading = ref(true) // 遮罩层
@@ -110,15 +111,10 @@ const total = ref(0) // 总条数
 const list = ref<any[]>([]) // 自动回复列表
 const formRef = ref<FormInstance | null>(null) // 表单 ref
 // 查询参数
-interface QueryParams {
-  pageNo: number
-  pageSize: number
-  accountId: number
-}
-const queryParams: QueryParams = reactive({
+const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: 0
+  accountId: accountId
 })
 
 const dialogTitle = ref('') // 弹出层标题
@@ -127,7 +123,7 @@ const replyForm = ref<any>({}) // 表单参数
 // 回复消息
 const reply = ref<Reply>({
   type: ReplyType.Text,
-  accountId: 0
+  accountId: -1
 })
 // 表单校验
 const rules = {
@@ -137,8 +133,9 @@ const rules = {
 
 /** 侦听账号变化 */
 const onAccountChanged = (id: number) => {
-  queryParams.accountId = id
+  accountId.value = id
   reply.value.accountId = id
+  queryParams.pageNo = 1
   getList()
 }
 

@@ -51,7 +51,7 @@
       >
         <WxMaterialSelect
           type="image"
-          :account-id="accountId"
+          :account-id="accountId!"
           @select-material="onMaterialSelected"
         />
       </el-dialog>
@@ -93,11 +93,11 @@ const showImageDialog = ref(false)
 const fileList = ref<UploadFiles>([])
 interface UploadData {
   type: UploadType
-  accountId: number | undefined
+  accountId: number
 }
 const uploadData: UploadData = reactive({
   type: UploadType.Image,
-  accountId: accountId
+  accountId: accountId!
 })
 
 /** 素材选择完成事件*/
