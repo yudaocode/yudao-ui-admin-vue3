@@ -93,20 +93,12 @@ const total = ref(0) // 数据的总页数
 const list = ref<any[]>([]) // 当前页的列表数据
 
 // 搜索参数
-interface QueryParams {
-  pageNo: number
-  pageSize: number
-  openid: string | undefined
-  accountId: number
-  type: MsgType | undefined
-  createTime: string[] | []
-}
-const queryParams: QueryParams = reactive({
+const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  openid: undefined,
-  accountId: 0,
-  type: undefined,
+  openid: '',
+  accountId: -1,
+  type: MsgType.Text,
   createTime: []
 })
 const queryFormRef = ref<FormInstance | null>(null) // 搜索的表单
@@ -120,6 +112,7 @@ const messageBox = reactive({
 /** 侦听accountId */
 const onAccountChanged = (id: number) => {
   queryParams.accountId = id
+  queryParams.pageNo = 1
   handleQuery()
 }
 

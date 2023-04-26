@@ -9,3 +9,9 @@ export enum MsgType {
   Music = 'music',
   News = 'news'
 }
+
+export interface User {
+  nickname: string
+  avatar: string
+  accountId: number
+}
