@@ -1,19 +1,19 @@
 <template>
-  <el-form ref="formRef" :model="formData" :rules="rules" label-width="120px">
+  <el-form ref="OtherSettingsFormRef" :model="formData" :rules="rules" label-width="120px">
     <el-row>
       <el-col :span="24">
         <el-col :span="8">
-          <el-form-item label="商品排序">
+          <el-form-item label="商品排序" prop="sort">
             <el-input-number v-model="formData.sort" :min="0" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="赠送积分">
+          <el-form-item label="赠送积分" prop="giveIntegral">
             <el-input-number v-model="formData.giveIntegral" :min="0" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="虚拟销量">
+          <el-form-item label="虚拟销量" prop="virtualSalesCount">
             <el-input-number
               v-model="formData.virtualSalesCount"
               :min="0"
@@ -50,6 +50,18 @@
 </template>
 <script lang="ts" name="OtherSettingsForm" setup>
 // 商品推荐
+import type { SpuType } from '@/api/mall/product/management/type'
+import { PropType } from 'vue'
+import { copyValueToTarget } from '@/utils/object'
+
+const message = useMessage() // 消息弹窗
+const props = defineProps({
+  propFormData: {
+    type: Object as PropType<SpuType>,
+    default: () => {}
+  }
+})
+// 商品推荐选项
 const recommend = [
   { name: '是否热卖', value: 'recommendHot' },
   { name: '是否优惠', value: 'recommendBenefit' },
@@ -57,7 +69,9 @@ const recommend = [
   { name: '是否新品', value: 'recommendNew' },
   { name: '是否优品', value: 'recommendGood' }
 ]
-const checkboxGroup = ref<string[]>([])
+// 选中推荐选项
+const checkboxGroup = ref<string[]>(['recommendHot'])
+// 选择商品后赋值
 const onChangeGroup = () => {
   checkboxGroup.value.includes('recommendHot')
     ? (formData.value.recommendHot = true)
@@ -75,20 +89,63 @@ const onChangeGroup = () => {
     ? (formData.value.recommendGood = true)
     : (formData.value.recommendGood = false)
 }
-const formRef = ref()
-const formData = ref({
-  sort: '',
-  giveIntegral: 666,
-  virtualSalesCount: 565656,
-  recommendHot: false,
-  recommendBenefit: false,
-  recommendBest: false,
-  recommendNew: false,
-  recommendGood: false
+const OtherSettingsFormRef = ref() // 表单Ref
+// 表单数据
+const formData = ref<SpuType>({
+  sort: 12, // 商品排序
+  giveIntegral: 666, // 赠送积分
+  virtualSalesCount: 565656, // 虚拟销量
+  recommendHot: false, // 是否热卖
+  recommendBenefit: false, // 是否优惠
+  recommendBest: false, // 是否精品
+  recommendNew: false, // 是否新品
+  recommendGood: false // 是否优品
 })
+// 表单规则
 const rules = reactive({
   sort: [required],
   giveIntegral: [required],
   virtualSalesCount: [required]
 })
+/**
+ * 将传进来的值赋值给formData
+ */
+watch(
+  () => props.propFormData,
+  (data) => {
+    if (!data) return
+    copyValueToTarget(formData.value, data)
+    checkboxGroup.value = []
+    formData.value.recommendHot ? checkboxGroup.value.push('recommendHot') : ''
+    formData.value.recommendBenefit ? checkboxGroup.value.push('recommendBenefit') : ''
+    formData.value.recommendBest ? checkboxGroup.value.push('recommendBest') : ''
+    formData.value.recommendNew ? checkboxGroup.value.push('recommendNew') : ''
+    formData.value.recommendGood ? checkboxGroup.value.push('recommendGood') : ''
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
+const emit = defineEmits(['update:activeName'])
+/**
+ * 表单校验
+ */
+const validate = async () => {
+  // 校验表单
+  if (!OtherSettingsFormRef) return
+  return await unref(OtherSettingsFormRef).validate((valid) => {
+    if (!valid) {
+      message.warning('商品其他设置未完善！！')
+      emit('update:activeName', 'otherSettings')
+      // 目的截断之后的校验
+      throw new Error('商品其他设置未完善！！')
+    } else {
+      // 校验通过更新数据
+      Object.assign(props.propFormData, formData.value)
+    }
+  })
+}
+
+defineExpose({ validate })
 </script>

@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="formRef" :model="formData" :rules="rules" label-width="120px">
+  <el-form ref="ProductManagementBasicInfoRef" :model="formData" :rules="rules" label-width="120px">
     <el-row>
       <el-col :span="12">
         <el-form-item label="商品名称" prop="name">
@@ -40,26 +40,12 @@
       </el-col>
       <el-col :span="12">
         <el-form-item label="商品封面图" prop="picUrl">
-          <div class="demo-image__preview pt-5px pb-5px pl-11x pr-11px">
-            <el-image
-              :initial-index="0"
-              :preview-src-list="srcList"
-              :src="url"
-              :zoom-rate="1.2"
-              fit="cover"
-              style="width: 100%; height: 90px"
-            />
-          </div>
+          <UploadImg v-model="formData.picUrl" height="80px" />
         </el-form-item>
       </el-col>
       <el-col :span="24">
         <el-form-item label="商品轮播图" prop="sliderPicUrls">
-          <el-button>添加轮播图</el-button>
-          <el-carousel :interval="3000" height="200px" style="width: 100%" type="card">
-            <el-carousel-item v-for="item in 6" :key="item">
-              <h3 justify="center" text="2xl">{{ item }}</h3>
-            </el-carousel-item>
-          </el-carousel>
+          <UploadImgs v-model="formData.sliderPicUrls" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -72,6 +58,7 @@
       <el-col :span="12">
         <el-button class="ml-20px">运费模板</el-button>
       </el-col>
+      <!-- TODO 商品规格和分销类型切换待定    -->
       <el-col :span="12">
         <el-form-item label="商品规格" props="specType">
           <el-radio-group v-model="formData.specType" @change="changeSpecType(formData.specType)">
@@ -113,23 +100,31 @@
   </el-form>
 </template>
 <script lang="ts" name="ProductManagementBasicInfoForm" setup>
-// TODO 商品封面测试数据
+import { PropType } from 'vue'
 import { defaultProps } from '@/utils/tree'
+import type { SpuType } from '@/api/mall/product/management/type'
+import { UploadImg, UploadImgs } from '@/components/UploadFile'
+import { copyValueToTarget } from '@/utils/object'
 
-const url = 'https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg'
-const srcList = ['https://fuss10.elemecdn.com/a/3f/3302e58f9a181d2509f3dc0fa68b0jpeg.jpeg']
+const message = useMessage() // 消息弹窗
+const props = defineProps({
+  propFormData: {
+    type: Object as PropType<SpuType>,
+    default: () => {}
+  }
+})
 
-const formRef = ref()
-const formData = ref({
+const ProductManagementBasicInfoRef = ref() // 表单Ref
+const formData = ref<SpuType>({
   name: '', // 商品名称
-  categoryId: '', // 商品分类
+  categoryId: 155415, // 商品分类
   keyword: '', // 关键字
   unit: '', // 单位
   picUrl: '', // 商品封面图
   sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
   deliveryTemplateId: '', // 运费模版
-  selectRule: '',
+  selectRule: '', // 选择规则 TODO 暂定
   specType: false, // 商品规格
   subCommissionType: false // 分销类型
 })
@@ -138,12 +133,47 @@ const rules = reactive({
   categoryId: [required],
   keyword: [required],
   unit: [required],
+  introduction: [required],
   picUrl: [required],
-  sliderPicUrls: [required],
-  deliveryTemplateId: [required],
-  specType: [required],
-  subCommissionType: [required]
+  sliderPicUrls: [required]
+  // deliveryTemplateId: [required],
+  // specType: [required],
+  // subCommissionType: [required],
 })
+/**
+ * 将传进来的值赋值给formData
+ */
+watch(
+  () => props.propFormData,
+  (data) => {
+    if (!data) return
+    copyValueToTarget(formData.value, data)
+  },
+  {
+    deep: true,
+    immediate: true
+  }
+)
+const emit = defineEmits(['update:activeName'])
+/**
+ * 表单校验
+ */
+const validate = async () => {
+  // 校验表单
+  if (!ProductManagementBasicInfoRef) return
+  return await unref(ProductManagementBasicInfoRef).validate((valid) => {
+    if (!valid) {
+      message.warning('商品信息未完善！！')
+      emit('update:activeName', 'basicInfo')
+      // 目的截断之后的校验
+      throw new Error('商品信息未完善！！')
+    } else {
+      // 校验通过更新数据
+      Object.assign(props.propFormData, formData.value)
+    }
+  })
+}
+defineExpose({ validate })
 // 选择规格
 const changeSpecType = (specType) => {
   console.log(specType)
@@ -157,35 +187,3 @@ const confirm = () => {}
 // 添加规格
 const addRule = () => {}
 </script>
-<style scoped>
-/*TODO 商品轮播图测试样式*/
-.el-carousel__item h3 {
-  color: #475669;
-  opacity: 0.75;
-  line-height: 200px;
-  margin: 0;
-  text-align: center;
-}
-
-.el-carousel__item:nth-child(2n) {
-  background-color: #99a9bf;
-}
-
-.el-carousel__item:nth-child(2n + 1) {
-  background-color: #d3dce6;
-}
-
-/*TODO 商品封面测试样式*/
-.demo-image__error .image-slot {
-  font-size: 30px;
-}
-
-.demo-image__error .image-slot .el-icon {
-  font-size: 30px;
-}
-
-.demo-image__error .el-image {
-  width: 100%;
-  height: 200px;
-}
-</style>
