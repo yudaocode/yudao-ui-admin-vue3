@@ -49,7 +49,7 @@ const DescriptionRef = ref<ComponentRef<typeof DescriptionForm>>() // 商品详�
 const OtherSettingsRef = ref<ComponentRef<typeof OtherSettingsForm>>() // 其他设置Ref
 const formData = ref<SpuType>({
   name: '', // 商品名称
-  categoryId: 0, // 商品分类
+  categoryId: undefined, // 商品分类
   keyword: '', // 关键字
   unit: '', // 单位
   picUrl: '', // 商品封面图

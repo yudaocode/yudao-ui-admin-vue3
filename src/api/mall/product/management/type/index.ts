@@ -1,6 +1,6 @@
 export interface SpuType {
   name?: string // 商品名称
-  categoryId?: number // 商品分类
+  categoryId?: number | undefined // 商品分类
   keyword?: string // 关键字
   unit?: string // 单位
   picUrl?: string // 商品封面图

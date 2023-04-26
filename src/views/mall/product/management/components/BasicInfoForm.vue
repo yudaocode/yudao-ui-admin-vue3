@@ -10,7 +10,7 @@
         <el-form-item label="商品分类" prop="categoryId">
           <el-tree-select
             v-model="formData.categoryId"
-            :data="[]"
+            :data="categoryList"
             :props="defaultProps"
             check-strictly
             node-key="id"
@@ -101,10 +101,11 @@
 </template>
 <script lang="ts" name="ProductManagementBasicInfoForm" setup>
 import { PropType } from 'vue'
-import { defaultProps } from '@/utils/tree'
 import type { SpuType } from '@/api/mall/product/management/type'
 import { UploadImg, UploadImgs } from '@/components/UploadFile'
 import { copyValueToTarget } from '@/utils/object'
+import * as ProductCategoryApi from '@/api/mall/product/category'
+import { defaultProps, handleTree } from '@/utils/tree'
 
 const message = useMessage() // 消息弹窗
 const props = defineProps({
@@ -117,7 +118,7 @@ const props = defineProps({
 const ProductManagementBasicInfoRef = ref() // 表单Ref
 const formData = ref<SpuType>({
   name: '', // 商品名称
-  categoryId: 155415, // 商品分类
+  categoryId: undefined, // 商品分类
   keyword: '', // 关键字
   unit: '', // 单位
   picUrl: '', // 商品封面图
@@ -186,4 +187,10 @@ const changeSubCommissionType = (subCommissionType) => {
 const confirm = () => {}
 // 添加规格
 const addRule = () => {}
+const categoryList = ref() // 分类树
+onMounted(async () => {
+  // 获得分类树
+  const data = await ProductCategoryApi.getCategoryList({})
+  categoryList.value = handleTree(data, 'id', 'parentId')
+})
 </script>

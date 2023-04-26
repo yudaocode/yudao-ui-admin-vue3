@@ -92,9 +92,9 @@ const onChangeGroup = () => {
 const OtherSettingsFormRef = ref() // 表单Ref
 // 表单数据
 const formData = ref<SpuType>({
-  sort: 12, // 商品排序
-  giveIntegral: 666, // 赠送积分
-  virtualSalesCount: 565656, // 虚拟销量
+  sort: 1, // 商品排序
+  giveIntegral: 1, // 赠送积分
+  virtualSalesCount: 1, // 虚拟销量
   recommendHot: false, // 是否热卖
   recommendBenefit: false, // 是否优惠
   recommendBest: false, // 是否精品
