@@ -7,7 +7,7 @@
   </el-form>
 </template>
 <script lang="ts" name="DescriptionForm" setup>
-import type { SpuType } from '@/api/mall/product/management/type'
+import type { SpuType } from '@/api/mall/product/management/type/spuType'
 import { Editor } from '@/components/Editor'
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils/object'

@@ -47,12 +47,7 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <el-button
-          v-hasPermi="['product:brand:create']"
-          plain
-          type="primary"
-          @click="openForm('create')"
-        >
+        <el-button v-hasPermi="['product:brand:create']" plain type="primary" @click="openForm">
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
@@ -133,8 +128,8 @@
 </template>
 <script lang="ts" name="ProductManagement" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
-
+import { dateFormatter } from '@/utils/formatTime' // 业务api
+import * as managementApi from '@/api/mall/product/management/spu' // const message = useMessage() // 消息弹窗
 // const message = useMessage() // 消息弹窗
 // const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由跳转
@@ -182,9 +177,9 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    // const data = await ProductBrandApi.getBrandParam(queryParams)
-    // list.value = data.list
-    // total.value = data.total
+    const data = await managementApi.getSkuList(queryParams)
+    list.value = data.list
+    total.value = data.total
   } finally {
     loading.value = false
   }
@@ -201,7 +196,10 @@ const resetQuery = () => {
   handleQuery()
 }
 
-const openForm = () => {
+const openForm = (id?: number) => {
+  if (typeof id === 'number') {
+    push('/product/productManagementAdd?id=' + id)
+  }
   push('/product/productManagementAdd')
 }
 

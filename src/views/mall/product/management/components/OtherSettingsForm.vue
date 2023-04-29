@@ -50,7 +50,7 @@
 </template>
 <script lang="ts" name="OtherSettingsForm" setup>
 // 商品推荐
-import type { SpuType } from '@/api/mall/product/management/type'
+import type { SpuType } from '@/api/mall/product/management/type/spuType'
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils/object'
 

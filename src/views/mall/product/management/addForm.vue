@@ -34,12 +34,14 @@
 <script lang="ts" name="ProductManagementForm" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { BasicInfoForm, DescriptionForm, OtherSettingsForm } from './components'
-import { SpuType } from '@/api/mall/product/management/type' // const { t } = useI18n() // 国际化
+import type { SpuType } from '@/api/mall/product/management/type/spuType'
+// 业务api
+import * as managementApi from '@/api/mall/product/management/spu'
 
-// const { t } = useI18n() // 国际化
-// const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 const { push, currentRoute } = useRouter() // 路由
-// const { query } = useRoute() // 查询参数
+const { query } = useRoute() // 查询参数
 const { delView } = useTagsViewStore() // 视图操作
 
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
@@ -70,10 +72,17 @@ const formData = ref<SpuType>({
   recommendGood: false // 是否优品
 })
 /** 获得详情 */
-const getDetail = async () => {}
+const getDetail = async () => {
+  const id = query.id as unknown as number
+  if (!id) {
+    return
+  }
+}
 
 /** 提交按钮 */
 const submitForm = async () => {
+  // 提交请求
+  formLoading.value = true
   // TODO 三个表单逐一校验，如果有一个表单校验不通过则切换到对应表单，如果有两个及以上的情况则切换到最前面的一个并弹出提示消息
   // 校验各表单
   try {
@@ -81,9 +90,20 @@ const submitForm = async () => {
     await unref(DescriptionRef)?.validate()
     await unref(OtherSettingsRef)?.validate()
     // 校验都通过后提交表单
-    console.log(formData.value)
-  } catch {}
+    const data = formData.value as SpuType
+    const id = query.id as unknown as number
+    if (!id) {
+      await managementApi.createSpu(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await managementApi.updateSpu(data)
+      message.success(t('common.updateSuccess'))
+    }
+  } finally {
+    formLoading.value = false
+  }
 }
+
 /**
  * 重置表单
  */

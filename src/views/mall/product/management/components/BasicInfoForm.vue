@@ -58,7 +58,6 @@
       <el-col :span="12">
         <el-button class="ml-20px">运费模板</el-button>
       </el-col>
-      <!-- TODO 商品规格和分销类型切换待定    -->
       <el-col :span="12">
         <el-form-item label="商品规格" props="specType">
           <el-radio-group v-model="formData.specType" @change="changeSpecType(formData.specType)">
@@ -67,45 +66,41 @@
           </el-radio-group>
         </el-form-item>
       </el-col>
-      <!-- TODO 商品规格和分销类型切换待定    -->
       <el-col :span="12">
         <el-form-item label="分销类型" props="subCommissionType">
-          <el-radio-group
-            v-model="formData.subCommissionType"
-            @change="changeSubCommissionType(formData.subCommissionType)"
-          >
+          <el-radio-group v-model="formData.subCommissionType" @change="changeSubCommissionType">
             <el-radio :label="false">默认设置</el-radio>
             <el-radio :label="true" class="radio">自行设置</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-col>
       <!-- 多规格添加-->
-      <el-col v-if="formData.specType" :span="24">
-        <el-form-item label="选择规格" prop="">
-          <div class="acea-row">
-            <el-select v-model="formData.selectRule">
-              <el-option
-                v-for="item in []"
-                :key="item.id"
-                :label="item.ruleName"
-                :value="item.id"
-              />
-            </el-select>
-            <el-button class="mr-20px" type="primary" @click="confirm">确认</el-button>
-            <el-button class="mr-15px" @click="addRule">添加规格</el-button>
-          </div>
+      <el-col :span="24">
+        <el-form-item v-if="formData.specType" label="商品属性" prop="">
+          <el-button class="mr-15px" @click="AttributesAddFormRef.open()">添加规格</el-button>
+          <ProductAttributes :attribute-data="attributeList" />
+        </el-form-item>
+        <el-form-item>
+          <SkuList :sku-data="formData.skus" :subCommissionType="formData.subCommissionType" />
         </el-form-item>
       </el-col>
     </el-row>
   </el-form>
+  <ProductAttributesAddForm ref="AttributesAddFormRef" @success="addAttribute" />
 </template>
 <script lang="ts" name="ProductManagementBasicInfoForm" setup>
 import { PropType } from 'vue'
-import type { SpuType } from '@/api/mall/product/management/type'
+import type { SpuType } from '@/api/mall/product/management/type/spuType'
 import { UploadImg, UploadImgs } from '@/components/UploadFile'
+import SkuList from './SkuList/index.vue'
+import ProductAttributesAddForm from './ProductAttributesAddForm.vue'
+import ProductAttributes from './ProductAttributes.vue'
 import { copyValueToTarget } from '@/utils/object'
+// 业务Api
 import * as ProductCategoryApi from '@/api/mall/product/category'
+import * as PropertyApi from '@/api/mall/product/property'
 import { defaultProps, handleTree } from '@/utils/tree'
+import { ElInput } from 'element-plus'
 
 const message = useMessage() // 消息弹窗
 const props = defineProps({
@@ -114,9 +109,21 @@ const props = defineProps({
     default: () => {}
   }
 })
-
+const AttributesAddFormRef = ref() // 添加商品属性表单
 const ProductManagementBasicInfoRef = ref() // 表单Ref
-const formData = ref<SpuType>({
+// 属性列表
+const attributeList = ref([
+  {
+    id: 1,
+    name: '颜色',
+    attributeValues: [{ id: 1, name: '白色' }]
+  }
+])
+const addAttribute = async (propertyId: number) => {
+  const data = await PropertyApi.getPropertyValuePage({ id: propertyId })
+  console.log(data)
+}
+const formData = reactive<SpuType>({
   name: '', // 商品名称
   categoryId: undefined, // 商品分类
   keyword: '', // 关键字
@@ -124,10 +131,46 @@ const formData = ref<SpuType>({
   picUrl: '', // 商品封面图
   sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
-  deliveryTemplateId: '', // 运费模版
+  deliveryTemplateId: 1, // 运费模版
   selectRule: '', // 选择规则 TODO 暂定
   specType: false, // 商品规格
-  subCommissionType: false // 分销类型
+  subCommissionType: false, // 分销类型
+  skus: [
+    {
+      /**
+       * 商品价格，单位：分
+       */
+      price: 0,
+      /**
+       * 市场价，单位：分
+       */
+      marketPrice: 0,
+      /**
+       * 成本价，单位：分
+       */
+      costPrice: 0,
+      /**
+       * 商品条码
+       */
+      barCode: '',
+      /**
+       * 图片地址
+       */
+      picUrl: '',
+      /**
+       * 库存
+       */
+      stock: 0,
+      /**
+       * 商品重量，单位：kg 千克
+       */
+      weight: 0,
+      /**
+       * 商品体积，单位：m^3 平米
+       */
+      volume: 0
+    }
+  ]
 })
 const rules = reactive({
   name: [required],
@@ -148,7 +191,7 @@ watch(
   () => props.propFormData,
   (data) => {
     if (!data) return
-    copyValueToTarget(formData.value, data)
+    copyValueToTarget(formData, data)
   },
   {
     deep: true,
@@ -170,7 +213,7 @@ const validate = async () => {
       throw new Error('商品信息未完善！！')
     } else {
       // 校验通过更新数据
-      Object.assign(props.propFormData, formData.value)
+      Object.assign(props.propFormData, formData)
     }
   })
 }
@@ -180,13 +223,17 @@ const changeSpecType = (specType) => {
   console.log(specType)
 }
 // 分销类型
-const changeSubCommissionType = (subCommissionType) => {
-  console.log(subCommissionType)
+const changeSubCommissionType = () => {
+  // 默认为零，类型切换后也要重置为零
+  for (const item of formData.skus) {
+    item.subCommissionFirstPrice = 0
+    item.subCommissionSecondPrice = 0
+  }
 }
 // 选择属性确认
-const confirm = () => {}
+// const confirm = () => {}
 // 添加规格
-const addRule = () => {}
+// const addRule = () => {}
 const categoryList = ref() // 分类树
 onMounted(async () => {
   // 获得分类树

@@ -1,3 +1,5 @@
+import { SkuType } from './skuType'
+
 export interface SpuType {
   name?: string // 商品名称
   categoryId?: number | undefined // 商品分类
@@ -10,6 +12,7 @@ export interface SpuType {
   selectRule?: string // 选择规格 TODO 暂时定义
   specType?: boolean // 商品规格
   subCommissionType?: boolean // 分销类型
+  skus?: SkuType[] // sku数组
   description?: string // 商品详情
   sort?: string // 商品排序
   giveIntegral?: number // 赠送积分
