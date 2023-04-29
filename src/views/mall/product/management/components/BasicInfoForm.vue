@@ -98,7 +98,6 @@ import ProductAttributes from './ProductAttributes.vue'
 import { copyValueToTarget } from '@/utils/object'
 // 业务Api
 import * as ProductCategoryApi from '@/api/mall/product/category'
-import * as PropertyApi from '@/api/mall/product/property'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { ElInput } from 'element-plus'
 
@@ -116,12 +115,11 @@ const attributeList = ref([
   {
     id: 1,
     name: '颜色',
-    attributeValues: [{ id: 1, name: '白色' }]
+    values: [{ id: 1, name: '白色' }]
   }
 ])
-const addAttribute = async (propertyId: number) => {
-  const data = await PropertyApi.getPropertyValuePage({ id: propertyId })
-  console.log(data)
+const addAttribute = (property: any) => {
+  attributeList.value.push(property)
 }
 const formData = reactive<SpuType>({
   name: '', // 商品名称
@@ -132,7 +130,6 @@ const formData = reactive<SpuType>({
   sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
   deliveryTemplateId: 1, // 运费模版
-  selectRule: '', // 选择规则 TODO 暂定
   specType: false, // 商品规格
   subCommissionType: false, // 分销类型
   skus: [

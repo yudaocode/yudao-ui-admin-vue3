@@ -62,7 +62,7 @@ const submitForm = async () => {
       const propertyId = await PropertyApi.createProperty(data)
       emit('success', { id: propertyId, ...formData.value, values: [] })
     } else {
-      emit(res[0]) // 因为只用一个
+      emit('success', res[0]) // 因为只用一个
     }
     message.success(t('common.createSuccess'))
     dialogVisible.value = false

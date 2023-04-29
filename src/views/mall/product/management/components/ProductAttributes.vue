@@ -7,7 +7,7 @@
     <div>
       <el-text class="mx-1">属性值：</el-text>
       <el-tag
-        v-for="(value, valueIndex) in item.attributeValues"
+        v-for="(value, valueIndex) in item.values"
         :key="value.name"
         :disable-transitions="false"
         class="mx-1"
@@ -17,7 +17,7 @@
         {{ value.name }}
       </el-tag>
       <el-input
-        v-if="inputVisible"
+        v-show="inputVisible(index)"
         ref="InputRef"
         v-model="inputValue"
         class="!w-20"
@@ -25,7 +25,12 @@
         @blur="handleInputConfirm(index)"
         @keyup.enter="handleInputConfirm(index)"
       />
-      <el-button v-else class="button-new-tag ml-1" size="small" @click="showInput(index)">
+      <el-button
+        v-show="!inputVisible(index)"
+        class="button-new-tag ml-1"
+        size="small"
+        @click="showInput(index)"
+      >
         + 添加
       </el-button>
     </div>
@@ -37,8 +42,13 @@
 import { ElInput } from 'element-plus'
 
 const inputValue = ref('') // 输入框值
-const inputVisible = ref(false) // 输入框显隐控制
-const InputRef = ref<InstanceType<typeof ElInput>>() //标签输入框Ref
+const attributeIndex = ref<number | null>(null) // 获取焦点时记录当前属性项的index
+// 输入框显隐控制
+const inputVisible = computed(() => (index) => {
+  if (attributeIndex.value === null) return false
+  if (attributeIndex.value === index) return true
+})
+const InputRef = ref() //标签输入框Ref
 const attributeList = ref([])
 const props = defineProps({
   attributeData: {
@@ -60,23 +70,20 @@ watch(
 )
 /** 删除标签 tagValue 标签值*/
 const handleClose = (index, valueIndex) => {
-  const av = attributeList.value[index].attributeValues
-  av.splice(valueIndex, 1)
+  attributeList.value[index].values?.splice(valueIndex, 1)
 }
 /** 显示输入框并获取焦点 */
-const showInput = (index) => {
-  inputVisible.value = true
-  nextTick(() => {
-    InputRef.value[index]!.input!.focus()
-  })
+const showInput = async (index) => {
+  attributeIndex.value = index
+  // 因为组件在ref中所以需要用索引获取对应的Ref
+  InputRef.value[index]!.input!.focus()
 }
 /** 输入框失去焦点或点击回车时触发 */
 const handleInputConfirm = (index) => {
   if (inputValue.value) {
-    // 因为ref再循环里，所以需要index获取对应的ref
-    attributeList.value[index].attributeValues.push({ name: inputValue.value })
+    attributeList.value[index].values.push({ name: inputValue.value })
   }
-  inputVisible.value = false
+  attributeIndex.value = null
   inputValue.value = ''
 }
 </script>
