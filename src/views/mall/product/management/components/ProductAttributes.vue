@@ -49,10 +49,10 @@ const inputVisible = computed(() => (index) => {
   if (attributeIndex.value === index) return true
 })
 const InputRef = ref() //标签输入框Ref
-const attributeList = ref([])
+const attributeList = ref([]) // 商品属性列表
 const props = defineProps({
   attributeData: {
-    type: Object,
+    type: Array,
     default: () => {}
   }
 })

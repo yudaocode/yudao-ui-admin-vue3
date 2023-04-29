@@ -62,6 +62,9 @@ const submitForm = async () => {
       const propertyId = await PropertyApi.createProperty(data)
       emit('success', { id: propertyId, ...formData.value, values: [] })
     } else {
+      if (res[0].values === null) {
+        res[0].values = []
+      }
       emit('success', res[0]) // 因为只用一个
     }
     message.success(t('common.createSuccess'))

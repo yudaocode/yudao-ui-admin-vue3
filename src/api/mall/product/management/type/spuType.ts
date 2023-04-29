@@ -9,7 +9,6 @@ export interface SpuType {
   sliderPicUrls?: string[] // 商品轮播图
   introduction?: string // 商品简介
   deliveryTemplateId?: number // 运费模版
-  selectRule?: string // 选择规格 TODO 暂时定义
   specType?: boolean // 商品规格
   subCommissionType?: boolean // 分销类型
   skus?: SkuType[] // sku数组

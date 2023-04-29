@@ -60,7 +60,7 @@
       </el-col>
       <el-col :span="12">
         <el-form-item label="商品规格" props="specType">
-          <el-radio-group v-model="formData.specType" @change="changeSpecType(formData.specType)">
+          <el-radio-group v-model="formData.specType">
             <el-radio :label="false" class="radio">单规格</el-radio>
             <el-radio :label="true">多规格</el-radio>
           </el-radio-group>
@@ -76,12 +76,17 @@
       </el-col>
       <!-- 多规格添加-->
       <el-col :span="24">
-        <el-form-item v-if="formData.specType" label="商品属性" prop="">
-          <el-button class="mr-15px" @click="AttributesAddFormRef.open()">添加规格</el-button>
+        <el-form-item v-if="formData.specType" label="商品属性">
+          <el-button class="mr-15px mb-10px" @click="AttributesAddFormRef.open()"
+            >添加规格
+          </el-button>
           <ProductAttributes :attribute-data="attributeList" />
         </el-form-item>
+        <el-form-item v-if="formData.specType" label="批量设置">
+          <SkuList :attributeList="attributeList" :is-batch="true" :prop-form-data="formData" />
+        </el-form-item>
         <el-form-item>
-          <SkuList :sku-data="formData.skus" :subCommissionType="formData.subCommissionType" />
+          <SkuList :attributeList="attributeList" :prop-form-data="formData" />
         </el-form-item>
       </el-col>
     </el-row>
@@ -110,14 +115,8 @@ const props = defineProps({
 })
 const AttributesAddFormRef = ref() // 添加商品属性表单
 const ProductManagementBasicInfoRef = ref() // 表单Ref
-// 属性列表
-const attributeList = ref([
-  {
-    id: 1,
-    name: '颜色',
-    values: [{ id: 1, name: '白色' }]
-  }
-])
+const attributeList = ref([]) // 商品属性列表
+/** 添加商品属性 */
 const addAttribute = (property: any) => {
   attributeList.value.push(property)
 }
@@ -176,10 +175,10 @@ const rules = reactive({
   unit: [required],
   introduction: [required],
   picUrl: [required],
-  sliderPicUrls: [required]
+  sliderPicUrls: [required],
   // deliveryTemplateId: [required],
-  // specType: [required],
-  // subCommissionType: [required],
+  specType: [required],
+  subCommissionType: [required]
 })
 /**
  * 将传进来的值赋值给formData
@@ -215,10 +214,7 @@ const validate = async () => {
   })
 }
 defineExpose({ validate })
-// 选择规格
-const changeSpecType = (specType) => {
-  console.log(specType)
-}
+
 // 分销类型
 const changeSubCommissionType = () => {
   // 默认为零，类型切换后也要重置为零
@@ -227,10 +223,7 @@ const changeSubCommissionType = () => {
     item.subCommissionSecondPrice = 0
   }
 }
-// 选择属性确认
-// const confirm = () => {}
-// 添加规格
-// const addRule = () => {}
+
 const categoryList = ref() // 分类树
 onMounted(async () => {
   // 获得分类树
