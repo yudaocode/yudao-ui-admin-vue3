@@ -68,7 +68,9 @@
     </template>
     <el-table-column v-if="formData.specType" align="center" fixed="right" label="操作" width="80">
       <template #default>
-        <el-button v-if="isBatch" link size="small" type="primary">批量添加</el-button>
+        <el-button v-if="isBatch" link size="small" type="primary" @click="batchAdd"
+          >批量添加
+        </el-button>
         <el-button v-else link size="small" type="primary">删除</el-button>
       </template>
     </el-table-column>
@@ -81,6 +83,7 @@ import { PropType } from 'vue'
 import { SpuType } from '@/api/mall/product/management/type/spuType'
 import { propTypes } from '@/utils/propTypes'
 import { SkuType } from '@/api/mall/product/management/type/skuType'
+import { copyValueToTarget } from '@/utils/object'
 
 const props = defineProps({
   propFormData: {
@@ -131,6 +134,12 @@ const SkuData = ref<SkuType[]>([
     volume: 0
   }
 ])
+/** 批量添加 */
+const batchAdd = () => {
+  formData.value.skus.forEach((item) => {
+    copyValueToTarget(item, SkuData.value[0])
+  })
+}
 const tableHeaderList = ref<{ prop: string; label: string }[]>([])
 /**
  * 将传进来的值赋值给SkuData
@@ -209,8 +218,21 @@ watch(
   (data) => {
     // 如果不是多规格则结束
     if (!formData.value.specType) return
-    // 如果当前组件作为批量添加数据使用则结束
-    if (props.isBatch) return
+    // 如果当前组件作为批量添加数据使用则重置表数据
+    if (props.isBatch) {
+      SkuData.value = [
+        {
+          price: 0,
+          marketPrice: 0,
+          costPrice: 0,
+          barCode: '',
+          picUrl: '',
+          stock: 0,
+          weight: 0,
+          volume: 0
+        }
+      ]
+    }
     // 判断代理对象是否为空
     if (JSON.stringify(data) === '[]') return
     // 重置表头
