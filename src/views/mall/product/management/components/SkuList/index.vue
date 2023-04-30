@@ -5,16 +5,19 @@
         <UploadImg v-model="row.picUrl" height="80px" width="100%" />
       </template>
     </el-table-column>
-    <template v-if="formData.specType">
+    <template v-if="formData.specType && !isBatch">
       <!--  根据商品属性动态添加  -->
       <el-table-column
         v-for="(item, index) in tableHeaderList"
         :key="index"
         :label="item.label"
-        :prop="item.prop"
         align="center"
         min-width="120"
-      />
+      >
+        <template #default="{ row }">
+          {{ row.properties[index].value }}
+        </template>
+      </el-table-column>
     </template>
     <el-table-column align="center" label="商品条码" min-width="120">
       <template #default="{ row }">
@@ -143,17 +146,77 @@ watch(
     immediate: true
   }
 )
+/** 生成表数据 */
+const generateTableData = (data: any[]) => {
+  // 构建数据结构
+  const propertiesItemList = []
+  for (const item of data) {
+    const objList = []
+    for (const v of item.values) {
+      const obj = { propertyId: 0, valueId: 0, value: '' }
+      obj.propertyId = item.id
+      obj.valueId = v.id
+      obj.value = v.name
+      objList.push(obj)
+    }
+    propertiesItemList.push(objList)
+  }
+  build(propertiesItemList).forEach((item) => {
+    const row = {
+      properties: [],
+      price: 0,
+      marketPrice: 0,
+      costPrice: 0,
+      barCode: '',
+      picUrl: '',
+      stock: 0,
+      weight: 0,
+      volume: 0
+    }
+    if (Array.isArray(item)) {
+      row.properties = item
+    } else {
+      row.properties.push(item)
+    }
+    formData.value.skus.push(row)
+  })
+}
+/** 构建所有排列组合 */
+const build = (list: any[]) => {
+  if (list.length === 0) {
+    return []
+  } else if (list.length === 1) {
+    return list[0]
+  } else {
+    const result = []
+    const rest = build(list.slice(1))
+    for (let i = 0; i < list[0].length; i++) {
+      for (let j = 0; j < rest.length; j++) {
+        // 第一次不是数组结构，后面的都是数组结构
+        if (Array.isArray(rest[j])) {
+          result.push([list[0][i], ...rest[j]])
+        } else {
+          result.push([list[0][i], rest[j]])
+        }
+      }
+    }
+    return result
+  }
+}
 /** 监听属性列表生成相关参数和表头 */
 watch(
   () => props.attributeList,
   (data) => {
+    // 如果不是多规格则结束
+    if (!formData.value.specType) return
+    // 如果当前组件作为批量添加数据使用则结束
+    if (props.isBatch) return
     // 判断代理对象是否为空
     if (JSON.stringify(data) === '[]') return
     // 重置表头
     tableHeaderList.value = []
     // 重置表数据
     formData.value!.skus = []
-    SkuData.value = []
     // 生成表头
     data.forEach((item, index) => {
       // name加属性项index区分属性值
@@ -166,30 +229,4 @@ watch(
     immediate: true
   }
 )
-/** 生成表数据 */
-const generateTableData = (data: any[]) => {
-  // const row = {
-  //   price: 0,
-  //   marketPrice: 0,
-  //   costPrice: 0,
-  //   barCode: '',
-  //   picUrl: '',
-  //   stock: 0,
-  //   weight: 0,
-  //   volume: 0
-  // }
-  // 先把所有的属性值取出来
-  const newDataList: any[] = []
-  for (const index in data) {
-    newDataList.push(data[index].values)
-  }
-  console.log(newDataList)
-}
-// const buildRow = (list: any[]) => {
-//   for (const index in data) {
-//     for (const index1 of data[index].values) {
-//       row[`name${index1}`] = data[index].values[index1]
-//     }
-//   }
-// }
 </script>
