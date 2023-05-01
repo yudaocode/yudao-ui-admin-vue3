@@ -2,9 +2,9 @@ import { SkuType } from './skuType'
 
 export interface SpuType {
   name?: string // 商品名称
-  categoryId?: number | undefined // 商品分类
+  categoryId?: number | null // 商品分类
   keyword?: string // 关键字
-  unit?: string // 单位
+  unit?: number | null // 单位
   picUrl?: string // 商品封面图
   sliderPicUrls?: string[] // 商品轮播图
   introduction?: string // 商品简介

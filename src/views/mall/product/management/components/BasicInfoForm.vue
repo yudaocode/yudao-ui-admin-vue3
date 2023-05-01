@@ -25,7 +25,14 @@
       </el-col>
       <el-col :span="12">
         <el-form-item label="单位" prop="unit">
-          <el-input v-model="formData.unit" placeholder="请输入单位" />
+          <el-select v-model="formData.unit" placeholder="请选择单位">
+            <el-option
+              v-for="dict in getIntDictOptions(DICT_TYPE.PRODUCT_UNIT)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -60,7 +67,7 @@
       </el-col>
       <el-col :span="12">
         <el-form-item label="商品规格" props="specType">
-          <el-radio-group v-model="formData.specType">
+          <el-radio-group v-model="formData.specType" @change="onChangeSpec">
             <el-radio :label="false" class="radio">单规格</el-radio>
             <el-radio :label="true">多规格</el-radio>
           </el-radio-group>
@@ -82,10 +89,15 @@
           </el-button>
           <ProductAttributes :attribute-data="attributeList" />
         </el-form-item>
-        <el-form-item v-if="formData.specType" label="批量设置">
-          <SkuList :attributeList="attributeList" :is-batch="true" :prop-form-data="formData" />
-        </el-form-item>
-        <el-form-item>
+        <template v-if="formData.specType && attributeList.length > 0">
+          <el-form-item label="批量设置">
+            <SkuList :attributeList="attributeList" :is-batch="true" :prop-form-data="formData" />
+          </el-form-item>
+          <el-form-item label="属性列表">
+            <SkuList :attributeList="attributeList" :prop-form-data="formData" />
+          </el-form-item>
+        </template>
+        <el-form-item v-if="!formData.specType">
           <SkuList :attributeList="attributeList" :prop-form-data="formData" />
         </el-form-item>
       </el-col>
@@ -95,16 +107,15 @@
 </template>
 <script lang="ts" name="ProductManagementBasicInfoForm" setup>
 import { PropType } from 'vue'
-import type { SpuType } from '@/api/mall/product/management/type/spuType'
-import { UploadImg, UploadImgs } from '@/components/UploadFile'
-import SkuList from './SkuList/index.vue'
-import ProductAttributesAddForm from './ProductAttributesAddForm.vue'
-import ProductAttributes from './ProductAttributes.vue'
-import { copyValueToTarget } from '@/utils/object'
-// 业务Api
-import * as ProductCategoryApi from '@/api/mall/product/category'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { ElInput } from 'element-plus'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import type { SpuType } from '@/api/mall/product/management/type/spuType'
+import { UploadImg, UploadImgs } from '@/components/UploadFile'
+import { copyValueToTarget } from '@/utils/object'
+import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
+// 业务Api
+import * as ProductCategoryApi from '@/api/mall/product/category'
 
 const message = useMessage() // 消息弹窗
 const props = defineProps({
@@ -131,42 +142,7 @@ const formData = reactive<SpuType>({
   deliveryTemplateId: 1, // 运费模版
   specType: false, // 商品规格
   subCommissionType: false, // 分销类型
-  skus: [
-    {
-      /**
-       * 商品价格，单位：分
-       */
-      price: 0,
-      /**
-       * 市场价，单位：分
-       */
-      marketPrice: 0,
-      /**
-       * 成本价，单位：分
-       */
-      costPrice: 0,
-      /**
-       * 商品条码
-       */
-      barCode: '',
-      /**
-       * 图片地址
-       */
-      picUrl: '',
-      /**
-       * 库存
-       */
-      stock: 0,
-      /**
-       * 商品重量，单位：kg 千克
-       */
-      weight: 0,
-      /**
-       * 商品体积，单位：m^3 平米
-       */
-      volume: 0
-    }
-  ]
+  skus: []
 })
 const rules = reactive({
   name: [required],
@@ -222,6 +198,27 @@ const changeSubCommissionType = () => {
     item.subCommissionFirstPrice = 0
     item.subCommissionSecondPrice = 0
   }
+}
+// 选择规格
+const onChangeSpec = () => {
+  console.log(111)
+  // 重置商品属性列表
+  attributeList.value = []
+  // 重置sku列表
+  formData.skus = [
+    {
+      price: 0,
+      marketPrice: 0,
+      costPrice: 0,
+      barCode: '',
+      picUrl: '',
+      stock: 0,
+      weight: 0,
+      volume: 0,
+      subCommissionFirstPrice: 0,
+      subCommissionSecondPrice: 0
+    }
+  ]
 }
 
 const categoryList = ref() // 分类树

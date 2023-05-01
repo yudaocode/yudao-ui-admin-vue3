@@ -21,48 +21,68 @@
     </template>
     <el-table-column align="center" label="商品条码" min-width="120">
       <template #default="{ row }">
-        <el-input v-model="row.barCode" :min="0" class="w-100%" />
+        <el-input v-model="row.barCode" class="w-100%" />
       </template>
     </el-table-column>
     <el-table-column align="center" label="销售价(分)" min-width="120">
       <template #default="{ row }">
-        <el-input v-model="row.price" :min="0" class="w-100%" type="number" />
+        <el-input-number v-model="row.price" :min="0" class="w-100%" controls-position="right" />
       </template>
     </el-table-column>
     <el-table-column align="center" label="市场价(分)" min-width="120">
       <template #default="{ row }">
-        <el-input v-model="row.marketPrice" :min="0" class="w-100%" type="number" />
+        <el-input-number
+          v-model="row.marketPrice"
+          :min="0"
+          class="w-100%"
+          controls-position="right"
+        />
       </template>
     </el-table-column>
     <el-table-column align="center" label="成本价(分)" min-width="120">
       <template #default="{ row }">
-        <el-input v-model="row.costPrice" :min="0" class="w-100%" type="number" />
+        <el-input-number
+          v-model="row.costPrice"
+          :min="0"
+          class="w-100%"
+          controls-position="right"
+        />
       </template>
     </el-table-column>
     <el-table-column align="center" label="库存" min-width="120">
       <template #default="{ row }">
-        <el-input v-model="row.stock" :min="0" class="w-100%" type="number" />
+        <el-input-number v-model="row.stock" :min="0" class="w-100%" controls-position="right" />
       </template>
     </el-table-column>
     <el-table-column align="center" label="重量(kg)" min-width="120">
       <template #default="{ row }">
-        <el-input v-model="row.weight" :min="0" class="w-100%" type="number" />
+        <el-input-number v-model="row.weight" :min="0" class="w-100%" controls-position="right" />
       </template>
     </el-table-column>
     <el-table-column align="center" label="体积(m^3)" min-width="120">
       <template #default="{ row }">
-        <el-input v-model="row.volume" :min="0" class="w-100%" type="number" />
+        <el-input-number v-model="row.volume" :min="0" class="w-100%" controls-position="right" />
       </template>
     </el-table-column>
     <template v-if="formData.subCommissionType">
       <el-table-column align="center" label="一级返佣(分)" min-width="120">
         <template #default="{ row }">
-          <el-input v-model="row.subCommissionFirstPrice" :min="0" class="w-100%" type="number" />
+          <el-input-number
+            v-model="row.subCommissionFirstPrice"
+            :min="0"
+            class="w-100%"
+            controls-position="right"
+          />
         </template>
       </el-table-column>
       <el-table-column align="center" label="二级返佣(分)" min-width="120">
         <template #default="{ row }">
-          <el-input v-model="row.subCommissionSecondPrice" :min="0" class="w-100%" type="number" />
+          <el-input-number
+            v-model="row.subCommissionSecondPrice"
+            :min="0"
+            class="w-100%"
+            controls-position="right"
+          />
         </template>
       </el-table-column>
     </template>
@@ -77,7 +97,7 @@
   </el-table>
 </template>
 
-<script lang="ts" name="index" setup>
+<script lang="ts" name="SkuList" setup>
 import { UploadImg } from '@/components/UploadFile'
 import { PropType } from 'vue'
 import { SpuType } from '@/api/mall/product/management/type/spuType'
@@ -131,7 +151,15 @@ const SkuData = ref<SkuType[]>([
     /**
      * 商品体积，单位：m^3 平米
      */
-    volume: 0
+    volume: 0,
+    /**
+     * 一级分销的佣金，单位：分
+     */
+    subCommissionFirstPrice: 0,
+    /**
+     * 二级分销的佣金，单位：分
+     */
+    subCommissionSecondPrice: 0
   }
 ])
 /** 批量添加 */
@@ -180,7 +208,9 @@ const generateTableData = (data: any[]) => {
       picUrl: '',
       stock: 0,
       weight: 0,
-      volume: 0
+      volume: 0,
+      subCommissionFirstPrice: 0,
+      subCommissionSecondPrice: 0
     }
     if (Array.isArray(item)) {
       row.properties = item
@@ -229,7 +259,9 @@ watch(
           picUrl: '',
           stock: 0,
           weight: 0,
-          volume: 0
+          volume: 0,
+          subCommissionFirstPrice: 0,
+          subCommissionSecondPrice: 0
         }
       ]
     }

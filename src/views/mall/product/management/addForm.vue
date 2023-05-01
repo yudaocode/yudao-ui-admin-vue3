@@ -34,8 +34,7 @@
 <script lang="ts" name="ProductManagementForm" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { BasicInfoForm, DescriptionForm, OtherSettingsForm } from './components'
-import type { SpuType } from '@/api/mall/product/management/type/spuType'
-// 业务api
+import type { SpuType } from '@/api/mall/product/management/type/spuType' // 业务api
 import * as managementApi from '@/api/mall/product/management/spu'
 
 const { t } = useI18n() // 国际化
@@ -50,18 +49,67 @@ const BasicInfoRef = ref<ComponentRef<typeof BasicInfoForm>>() // 商品信息Re
 const DescriptionRef = ref<ComponentRef<typeof DescriptionForm>>() // 商品详情Ref
 const OtherSettingsRef = ref<ComponentRef<typeof OtherSettingsForm>>() // 其他设置Ref
 const formData = ref<SpuType>({
-  name: '', // 商品名称
-  categoryId: undefined, // 商品分类
-  keyword: '', // 关键字
-  unit: '', // 单位
-  picUrl: '', // 商品封面图
-  sliderPicUrls: [], // 商品轮播图
-  introduction: '', // 商品简介
+  name: '213', // 商品名称
+  categoryId: null, // 商品分类
+  keyword: '213', // 关键字
+  unit: null, // 单位
+  picUrl:
+    'http://127.0.0.1:48080/admin-api/infra/file/4/get/6ffdf8f5dfc03f7ceec1ff1ebc138adb8b721a057d505ccfb0e61a8783af1371.png', // 商品封面图
+  sliderPicUrls: [
+    {
+      name: 'http://127.0.0.1:48080/admin-api/infra/file/4/get/6ffdf8f5dfc03f7ceec1ff1ebc138adb8b721a057d505ccfb0e61a8783af1371.png',
+      url: 'http://127.0.0.1:48080/admin-api/infra/file/4/get/6ffdf8f5dfc03f7ceec1ff1ebc138adb8b721a057d505ccfb0e61a8783af1371.png'
+    }
+  ], // 商品轮播图
+  introduction: '213', // 商品简介
   deliveryTemplateId: 0, // 运费模版
-  selectRule: '',
   specType: false, // 商品规格
   subCommissionType: false, // 分销类型
-  description: '', // 商品详情
+  skus: [
+    {
+      /**
+       * 商品价格，单位：分
+       */
+      price: 0,
+      /**
+       * 市场价，单位：分
+       */
+      marketPrice: 0,
+      /**
+       * 成本价，单位：分
+       */
+      costPrice: 0,
+      /**
+       * 商品条码
+       */
+      barCode: '',
+      /**
+       * 图片地址
+       */
+      picUrl: '',
+      /**
+       * 库存
+       */
+      stock: 0,
+      /**
+       * 商品重量，单位：kg 千克
+       */
+      weight: 0,
+      /**
+       * 商品体积，单位：m^3 平米
+       */
+      volume: 0,
+      /**
+       * 一级分销的佣金，单位：分
+       */
+      subCommissionFirstPrice: 0,
+      /**
+       * 二级分销的佣金，单位：分
+       */
+      subCommissionSecondPrice: 0
+    }
+  ],
+  description: '5425', // 商品详情
   sort: 1, // 商品排序
   giveIntegral: 1, // 赠送积分
   virtualSalesCount: 1, // 虚拟销量
@@ -83,14 +131,38 @@ const getDetail = async () => {
 const submitForm = async () => {
   // 提交请求
   formLoading.value = true
+  const newSkus = [...formData.value.skus] //复制一份skus保存失败时使用
   // TODO 三个表单逐一校验，如果有一个表单校验不通过则切换到对应表单，如果有两个及以上的情况则切换到最前面的一个并弹出提示消息
   // 校验各表单
   try {
     await unref(BasicInfoRef)?.validate()
     await unref(DescriptionRef)?.validate()
     await unref(OtherSettingsRef)?.validate()
+    // 处理掉一些无关数据
+    formData.value.skus.forEach((item) => {
+      // 给sku name赋值
+      item.name = formData.value.name
+      // 多规格情况移除skus相关属性值value
+      if (formData.value.specType) {
+        item.properties.forEach((item2) => {
+          delete item2.value
+        })
+      }
+    })
+    // 处理轮播图列表
+    const newSliderPicUrls = []
+    formData.value.sliderPicUrls.forEach((item) => {
+      // 如果是前端选的图
+      if (typeof item === 'object') {
+        newSliderPicUrls.push(item.url)
+      } else {
+        newSliderPicUrls.push(item)
+      }
+    })
+    formData.value.sliderPicUrls = newSliderPicUrls
     // 校验都通过后提交表单
     const data = formData.value as SpuType
+    // 移除skus.
     const id = query.id as unknown as number
     if (!id) {
       await managementApi.createSpu(data)
@@ -99,6 +171,9 @@ const submitForm = async () => {
       await managementApi.updateSpu(data)
       message.success(t('common.updateSuccess'))
     }
+  } catch (e) {
+    console.log(e)
+    console.log(newSkus)
   } finally {
     formLoading.value = false
   }
