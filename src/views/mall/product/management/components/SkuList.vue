@@ -19,17 +19,17 @@
         </template>
       </el-table-column>
     </template>
-    <el-table-column align="center" label="商品条码" min-width="120">
+    <el-table-column align="center" label="商品条码" min-width="168">
       <template #default="{ row }">
         <el-input v-model="row.barCode" class="w-100%" />
       </template>
     </el-table-column>
-    <el-table-column align="center" label="销售价(分)" min-width="120">
+    <el-table-column align="center" label="销售价(分)" min-width="168">
       <template #default="{ row }">
         <el-input-number v-model="row.price" :min="0" class="w-100%" controls-position="right" />
       </template>
     </el-table-column>
-    <el-table-column align="center" label="市场价(分)" min-width="120">
+    <el-table-column align="center" label="市场价(分)" min-width="168">
       <template #default="{ row }">
         <el-input-number
           v-model="row.marketPrice"
@@ -39,7 +39,7 @@
         />
       </template>
     </el-table-column>
-    <el-table-column align="center" label="成本价(分)" min-width="120">
+    <el-table-column align="center" label="成本价(分)" min-width="168">
       <template #default="{ row }">
         <el-input-number
           v-model="row.costPrice"
@@ -49,23 +49,23 @@
         />
       </template>
     </el-table-column>
-    <el-table-column align="center" label="库存" min-width="120">
+    <el-table-column align="center" label="库存" min-width="168">
       <template #default="{ row }">
         <el-input-number v-model="row.stock" :min="0" class="w-100%" controls-position="right" />
       </template>
     </el-table-column>
-    <el-table-column align="center" label="重量(kg)" min-width="120">
+    <el-table-column align="center" label="重量(kg)" min-width="168">
       <template #default="{ row }">
         <el-input-number v-model="row.weight" :min="0" class="w-100%" controls-position="right" />
       </template>
     </el-table-column>
-    <el-table-column align="center" label="体积(m^3)" min-width="120">
+    <el-table-column align="center" label="体积(m^3)" min-width="168">
       <template #default="{ row }">
         <el-input-number v-model="row.volume" :min="0" class="w-100%" controls-position="right" />
       </template>
     </el-table-column>
     <template v-if="formData.subCommissionType">
-      <el-table-column align="center" label="一级返佣(分)" min-width="120">
+      <el-table-column align="center" label="一级返佣(分)" min-width="168">
         <template #default="{ row }">
           <el-input-number
             v-model="row.subCommissionFirstPrice"
@@ -75,7 +75,7 @@
           />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="二级返佣(分)" min-width="120">
+      <el-table-column align="center" label="二级返佣(分)" min-width="168">
         <template #default="{ row }">
           <el-input-number
             v-model="row.subCommissionSecondPrice"

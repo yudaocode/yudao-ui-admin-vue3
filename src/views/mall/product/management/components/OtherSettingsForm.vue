@@ -53,13 +53,15 @@
 import type { SpuType } from '@/api/mall/product/management/type/spuType'
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils/object'
+import { propTypes } from '@/utils/propTypes'
 
 const message = useMessage() // 消息弹窗
 const props = defineProps({
   propFormData: {
     type: Object as PropType<SpuType>,
     default: () => {}
-  }
+  },
+  activeName: propTypes.string.def('')
 })
 // 商品推荐选项
 const recommend = [

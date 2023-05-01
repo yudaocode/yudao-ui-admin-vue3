@@ -11,13 +11,15 @@ import type { SpuType } from '@/api/mall/product/management/type/spuType'
 import { Editor } from '@/components/Editor'
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils/object'
+import { propTypes } from '@/utils/propTypes'
 
 const message = useMessage() // 消息弹窗
 const props = defineProps({
   propFormData: {
     type: Object as PropType<SpuType>,
     default: () => {}
-  }
+  },
+  activeName: propTypes.string.def('')
 })
 const DescriptionFormRef = ref() // 表单Ref
 const formData = ref<SpuType>({

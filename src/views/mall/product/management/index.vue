@@ -68,7 +68,7 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column type="expand">
         <template #default="{ row }">
-          <el-form class="demo-table-expand" inline label-position="left">
+          <el-form inline label-position="left">
             <el-form-item label="市场价：">
               <span>{{ row.marketPrice }}</span>
             </el-form-item>
@@ -83,23 +83,18 @@
       </el-table-column>
       <el-table-column label="商品图" min-width="80">
         <template #default="{ row }">
-          <div class="demo-image__preview">
+          <div class="demo-image__preview z-100">
             <el-image
-              :preview-src-list="[row.image]"
-              :src="row.image"
+              :src="row.picUrl"
               style="width: 36px; height: 36px"
+              @click="imgViewVisible = true"
             />
           </div>
         </template>
       </el-table-column>
-      <el-table-column
-        :show-overflow-tooltip="true"
-        label="商品名称"
-        min-width="300"
-        prop="storeName"
-      />
+      <el-table-column :show-overflow-tooltip="true" label="商品名称" min-width="300" prop="name" />
       <el-table-column align="center" label="商品售价" min-width="90" prop="price" />
-      <el-table-column align="center" label="销量" min-width="90" prop="sales" />
+      <el-table-column align="center" label="销量" min-width="90" prop="salesCount" />
       <el-table-column align="center" label="库存" min-width="90" prop="stock" />
       <el-table-column align="center" label="排序" min-width="70" prop="sort" />
       <el-table-column
@@ -112,7 +107,7 @@
       <el-table-column fixed="right" label="状态" min-width="80">
         <template #default="{ row }">
           <!--TODO 暂时用COMMON_STATUS占位一下使其不报错       -->
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="row.status" />
+          <dict-tag :type="DICT_TYPE.PRODUCT_SPU_STATUS" :value="row.status" />
         </template>
       </el-table-column>
       <el-table-column align="center" fixed="right" label="操作" min-width="150" />
@@ -125,11 +120,19 @@
       @pagination="getList"
     />
   </ContentWrap>
+  <!-- 必须在表格外面展示。不然单元格会遮挡图层 -->
+  <el-image-viewer
+    v-if="imgViewVisible"
+    :url-list="[
+      'http://127.0.0.1:48080/admin-api/infra/file/4/get/6ffdf8f5dfc03f7ceec1ff1ebc138adb8b721a057d505ccfb0e61a8783af1371.png'
+    ]"
+    @close="imgViewVisible = false"
+  />
 </template>
 <script lang="ts" name="ProductManagement" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime' // 业务api
-import * as managementApi from '@/api/mall/product/management/spu' // const message = useMessage() // 消息弹窗
+import * as managementApi from '@/api/mall/product/management/spu'
 // const message = useMessage() // 消息弹窗
 // const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由跳转
@@ -163,13 +166,10 @@ const headerNum = ref([
     type: 5
   }
 ])
+const imgViewVisible = ref(false)
 const queryParams = reactive({
   pageNo: 1,
-  pageSize: 10,
-  name: undefined,
-  status: undefined,
-  createTime: [],
-  type: '1'
+  pageSize: 10
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -177,7 +177,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await managementApi.getSkuList(queryParams)
+    const data = await managementApi.getSpuList(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -218,6 +218,6 @@ const openForm = (id?: number) => {
 
 /** 初始化 **/
 onMounted(() => {
-  // getList()
+  getList()
 })
 </script>

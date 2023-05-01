@@ -1,9 +1,9 @@
 import request from '@/config/axios'
 import type { SpuType } from './type/spuType'
 
-// 获得sku列表
-export const getSkuList = (params: any) => {
-  return request.get({ url: '/product/sku/list', params })
+// 获得spu列表
+export const getSpuList = (params: any) => {
+  return request.get({ url: '/product/spu/page', params })
 }
 // 创建商品spu
 export const createSpu = (data: SpuType) => {

@@ -116,13 +116,15 @@ import { copyValueToTarget } from '@/utils/object'
 import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
 // 业务Api
 import * as ProductCategoryApi from '@/api/mall/product/category'
+import { propTypes } from '@/utils/propTypes'
 
 const message = useMessage() // 消息弹窗
 const props = defineProps({
   propFormData: {
     type: Object as PropType<SpuType>,
     default: () => {}
-  }
+  },
+  activeName: propTypes.string.def('')
 })
 const AttributesAddFormRef = ref() // 添加商品属性表单
 const ProductManagementBasicInfoRef = ref() // 表单Ref

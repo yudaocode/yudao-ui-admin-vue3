@@ -147,5 +147,6 @@ export enum DICT_TYPE {
   MP_MESSAGE_TYPE = 'mp_message_type', // 消息类型
 
   // ========== MALL 模块 ==========
-  PRODUCT_UNIT = 'product_unit' // 商品单位
+  PRODUCT_UNIT = 'product_unit', // 商品单位
+  PRODUCT_SPU_STATUS = 'product_spu_status' //商品状态
 }
