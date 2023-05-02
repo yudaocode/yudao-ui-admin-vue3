@@ -131,6 +131,10 @@ const ProductManagementBasicInfoRef = ref() // 表单Ref
 const attributeList = ref([]) // 商品属性列表
 /** 添加商品属性 */
 const addAttribute = (property: any) => {
+  if (Array.isArray(property)) {
+    attributeList.value = property
+    return
+  }
   attributeList.value.push(property)
 }
 const formData = reactive<SpuType>({
@@ -191,7 +195,7 @@ const validate = async () => {
     }
   })
 }
-defineExpose({ validate })
+defineExpose({ validate, addAttribute })
 
 // 分销类型
 const changeSubCommissionType = () => {
@@ -203,7 +207,6 @@ const changeSubCommissionType = () => {
 }
 // 选择规格
 const onChangeSpec = () => {
-  console.log(111)
   // 重置商品属性列表
   attributeList.value = []
   // 重置sku列表

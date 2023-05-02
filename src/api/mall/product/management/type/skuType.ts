@@ -11,6 +11,10 @@ export interface Property {
    * 关联 {@link ProductPropertyValueDO#getId()}
    */
   valueId?: number
+  /**
+   * 属性值名称
+   */
+  valueName?: string
 }
 
 export interface SkuType {

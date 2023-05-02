@@ -13,3 +13,7 @@ export const createSpu = (data: SpuType) => {
 export const updateSpu = (data: SpuType) => {
   return request.put({ url: '/product/spu/update', data })
 }
+// 获得商品spu
+export const getSpu = (id: number) => {
+  return request.get({ url: `/product/spu/get-detail?id=${id}` })
+}

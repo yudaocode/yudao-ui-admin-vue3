@@ -1,6 +1,7 @@
 import { SkuType } from './skuType'
 
 export interface SpuType {
+  id?: number
   name?: string // 商品名称
   categoryId?: number | null // 商品分类
   keyword?: string // 关键字
@@ -11,7 +12,7 @@ export interface SpuType {
   deliveryTemplateId?: number // 运费模版
   specType?: boolean // 商品规格
   subCommissionType?: boolean // 分销类型
-  skus?: SkuType[] // sku数组
+  skus: SkuType[] // sku数组
   description?: string // 商品详情
   sort?: string // 商品排序
   giveIntegral?: number // 赠送积分

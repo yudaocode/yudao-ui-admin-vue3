@@ -1,5 +1,11 @@
 <template>
-  <el-table :data="isBatch ? SkuData : formData.skus" border class="tabNumWidth" size="small">
+  <el-table
+    :data="isBatch ? SkuData : formData.skus"
+    border
+    class="tabNumWidth"
+    max-height="500"
+    size="small"
+  >
     <el-table-column align="center" fixed="left" label="图片" min-width="100">
       <template #default="{ row }">
         <UploadImg v-model="row.picUrl" height="80px" width="100%" />
@@ -15,7 +21,7 @@
         min-width="120"
       >
         <template #default="{ row }">
-          {{ row.properties[index].value }}
+          {{ row.properties[index]?.valueName }}
         </template>
       </el-table-column>
     </template>
@@ -190,15 +196,28 @@ const generateTableData = (data: any[]) => {
   for (const item of data) {
     const objList = []
     for (const v of item.values) {
-      const obj = { propertyId: 0, valueId: 0, value: '' }
+      const obj = { propertyId: 0, valueId: 0, valueName: '' }
       obj.propertyId = item.id
       obj.valueId = v.id
-      obj.value = v.name
+      obj.valueName = v.name
       objList.push(obj)
     }
     propertiesItemList.push(objList)
   }
-  build(propertiesItemList).forEach((item) => {
+  const buildList = build(propertiesItemList)
+  // 如果构建后的组合数跟sku数量一样的话则不用处理,添加新属性没有属性值也不做处理 （解决编辑表单时或查看详情时数据回显问题）
+  console.log(
+    buildList.length === formData.value.skus.length || data.some((item) => item.values.length === 0)
+  )
+  if (
+    buildList.length === formData.value.skus.length ||
+    data.some((item) => item.values.length === 0)
+  ) {
+    return
+  }
+  // 重置表数据
+  formData.value!.skus = []
+  buildList.forEach((item) => {
     const row = {
       properties: [],
       price: 0,
@@ -212,6 +231,7 @@ const generateTableData = (data: any[]) => {
       subCommissionFirstPrice: 0,
       subCommissionSecondPrice: 0
     }
+    // 判断是否是单一属性的情况
     if (Array.isArray(item)) {
       row.properties = item
     } else {
@@ -269,8 +289,6 @@ watch(
     if (JSON.stringify(data) === '[]') return
     // 重置表头
     tableHeaderList.value = []
-    // 重置表数据
-    formData.value!.skus = []
     // 生成表头
     data.forEach((item, index) => {
       // name加属性项index区分属性值

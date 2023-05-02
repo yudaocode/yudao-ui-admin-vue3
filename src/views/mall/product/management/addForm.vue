@@ -36,6 +36,7 @@ import { useTagsViewStore } from '@/store/modules/tagsView'
 import { BasicInfoForm, DescriptionForm, OtherSettingsForm } from './components'
 import type { SpuType } from '@/api/mall/product/management/type/spuType' // 业务api
 import * as managementApi from '@/api/mall/product/management/spu'
+import * as PropertyApi from '@/api/mall/product/property'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -122,8 +123,20 @@ const formData = ref<SpuType>({
 /** 获得详情 */
 const getDetail = async () => {
   const id = query.id as unknown as number
-  if (!id) {
-    return
+  if (id) {
+    formLoading.value = true
+    try {
+      const res = (await managementApi.getSpu(id)) as SpuType
+      formData.value = res
+      // 直接取第一个值就能得到所有属性的id
+      const propertyIds = res.skus[0]?.properties.map((item) => item.propertyId)
+      const PropertyS = await PropertyApi.getPropertyListAndValue({ propertyIds })
+      await nextTick()
+      // 回显商品属性
+      BasicInfoRef.value.addAttribute(PropertyS)
+    } finally {
+      formLoading.value = false
+    }
   }
 }
 
@@ -145,7 +158,7 @@ const submitForm = async () => {
       // 多规格情况移除skus相关属性值value
       if (formData.value.specType) {
         item.properties.forEach((item2) => {
-          delete item2.value
+          delete item2.valueName
         })
       }
     })

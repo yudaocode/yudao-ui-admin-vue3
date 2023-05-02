@@ -87,7 +87,7 @@
             <el-image
               :src="row.picUrl"
               style="width: 36px; height: 36px"
-              @click="imgViewVisible = true"
+              @click="imagePreview(row.picUrl)"
             />
           </div>
         </template>
@@ -106,11 +106,38 @@
       />
       <el-table-column fixed="right" label="状态" min-width="80">
         <template #default="{ row }">
-          <!--TODO 暂时用COMMON_STATUS占位一下使其不报错       -->
-          <dict-tag :type="DICT_TYPE.PRODUCT_SPU_STATUS" :value="row.status" />
+          <el-switch
+            v-model="row.status"
+            :active-value="0"
+            :disabled="Number(row.status) < 0"
+            :inactive-value="1"
+            active-text="上架"
+            inactive-text="下架"
+            inline-prompt
+            @change="changeStatus(row)"
+          />
         </template>
       </el-table-column>
-      <el-table-column align="center" fixed="right" label="操作" min-width="150" />
+      <el-table-column align="center" fixed="right" label="操作" min-width="150">
+        <template #default="{ row }">
+          <el-button
+            v-hasPermi="['product:spu:query']"
+            link
+            type="primary"
+            @click="openForm(row.id)"
+          >
+            修改
+          </el-button>
+          <el-button
+            v-hasPermi="['product:spu:update']"
+            link
+            type="primary"
+            @click="changeStatus(row)"
+          >
+            加入回收站
+          </el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -123,9 +150,7 @@
   <!-- 必须在表格外面展示。不然单元格会遮挡图层 -->
   <el-image-viewer
     v-if="imgViewVisible"
-    :url-list="[
-      'http://127.0.0.1:48080/admin-api/infra/file/4/get/6ffdf8f5dfc03f7ceec1ff1ebc138adb8b721a057d505ccfb0e61a8783af1371.png'
-    ]"
+    :url-list="imageViewerList"
     @close="imgViewVisible = false"
   />
 </template>
@@ -166,7 +191,8 @@ const headerNum = ref([
     type: 5
   }
 ])
-const imgViewVisible = ref(false)
+const imgViewVisible = ref(false) // 商品图预览
+const imageViewerList = ref<string[]>([]) // 商品图预览列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10
@@ -184,7 +210,21 @@ const getList = async () => {
     loading.value = false
   }
 }
-
+/**
+ * 更改SPU状态
+ * @param row
+ */
+const changeStatus = (row) => {
+  console.log(row)
+}
+/**
+ * 商品图预览
+ * @param imgUrl
+ */
+const imagePreview = (imgUrl: string) => {
+  imageViewerList.value = [imgUrl]
+  imgViewVisible.value = true
+}
 /** 搜索按钮操作 */
 const handleQuery = () => {
   getList()
@@ -196,25 +236,17 @@ const resetQuery = () => {
   handleQuery()
 }
 
+/**
+ * 新增或修改
+ * @param id
+ */
 const openForm = (id?: number) => {
   if (typeof id === 'number') {
     push('/product/productManagementAdd?id=' + id)
+    return
   }
   push('/product/productManagementAdd')
 }
-
-/** 删除按钮操作 */
-// const handleDelete = async (id: number) => {
-//   try {
-//     // 删除的二次确认
-//     await message.delConfirm()
-//     // 发起删除
-//     await ProductBrandApi.deleteBrand(id)
-//     message.success(t('common.delSuccess'))
-//     // 刷新列表
-//     await getList()
-//   } catch {}
-// }
 
 /** 初始化 **/
 onMounted(() => {
