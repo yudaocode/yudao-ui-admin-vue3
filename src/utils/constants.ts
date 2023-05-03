@@ -220,3 +220,20 @@ export const PayRefundStatusEnum = {
     name: '退款关闭'
   }
 }
+/**
+ * 商品SPU枚举类
+ */
+export const ProductSpuStatusEnum = {
+  RECYCLE: {
+    status: -1,
+    name: '回收站'
+  },
+  DISABLE: {
+    status: 0,
+    name: '下架'
+  },
+  ENABLE: {
+    status: 1,
+    name: '上架'
+  }
+}

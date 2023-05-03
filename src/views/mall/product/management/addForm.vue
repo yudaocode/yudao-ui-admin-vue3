@@ -144,7 +144,7 @@ const getDetail = async () => {
 const submitForm = async () => {
   // 提交请求
   formLoading.value = true
-  const newSkus = [...formData.value.skus] //复制一份skus保存失败时使用
+  const newSkus = JSON.parse(JSON.stringify(formData.value.skus)) //深拷贝一份skus保存失败时使用
   // TODO 三个表单逐一校验，如果有一个表单校验不通过则切换到对应表单，如果有两个及以上的情况则切换到最前面的一个并弹出提示消息
   // 校验各表单
   try {
@@ -184,9 +184,12 @@ const submitForm = async () => {
       await managementApi.updateSpu(data)
       message.success(t('common.updateSuccess'))
     }
+    close()
   } catch (e) {
-    console.log(e)
-    console.log(newSkus)
+    // 如果是后端校验失败,恢复skus数据
+    if (typeof e === 'string') {
+      formData.value.skus = newSkus
+    }
   } finally {
     formLoading.value = false
   }

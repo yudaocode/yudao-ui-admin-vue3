@@ -206,9 +206,6 @@ const generateTableData = (data: any[]) => {
   }
   const buildList = build(propertiesItemList)
   // 如果构建后的组合数跟sku数量一样的话则不用处理,添加新属性没有属性值也不做处理 （解决编辑表单时或查看详情时数据回显问题）
-  console.log(
-    buildList.length === formData.value.skus.length || data.some((item) => item.values.length === 0)
-  )
   if (
     buildList.length === formData.value.skus.length ||
     data.some((item) => item.values.length === 0)

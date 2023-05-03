@@ -117,6 +117,7 @@ watch(
   (data) => {
     if (!data) return
     copyValueToTarget(formData.value, data)
+    // TODO 如果先修改其他设置的值，再改变商品详情或是商品信息会重置其他设置页面中的相关值 下一个版本修复
     checkboxGroup.value = []
     formData.value.recommendHot ? checkboxGroup.value.push('recommendHot') : ''
     formData.value.recommendBenefit ? checkboxGroup.value.push('recommendBenefit') : ''
