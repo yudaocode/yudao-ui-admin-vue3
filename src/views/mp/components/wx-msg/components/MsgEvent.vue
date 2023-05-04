@@ -47,5 +47,3 @@ const props = defineProps<{
 
 const item = ref(props.item)
 </script>
-
-<style scoped></style>

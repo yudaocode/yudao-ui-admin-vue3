@@ -18,7 +18,7 @@
           class="avue-comment__body"
           :style="item.sendFrom === SendFrom.MpBot ? 'background: #6BED72;' : ''"
         >
-          <!-- 【事件】区域 -->
+          <!-- 【事件】区域 TODO 芋艿：是不是把拆个 Message 出来，里面包括 MsgEvent + 各种其它消息，分开有点不够整体 -->
           <MsgEvent v-if="item.type === MsgType.Event" :item="item" />
           <!-- 【消息】区域 -->
           <div v-else-if="item.type === MsgType.Text">{{ item.content }}</div>
@@ -68,7 +68,6 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts" name="MsgList">
 import WxVideoPlayer from '@/views/mp/components/wx-video-play'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play'
