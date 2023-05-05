@@ -2,9 +2,9 @@ import { Layout } from '@/utils/routerHelper'
 
 const { t } = useI18n()
 /**
-* redirect: noredirect        当设置 noredirect 的时候该路由在面包屑导航中不可被点击
-* name:'router-name'          设定路由的名字，一定要填写不然使用<keep-alive>时会出现各种问题
-* meta : {
+ * redirect: noredirect        当设置 noredirect 的时候该路由在面包屑导航中不可被点击
+ * name:'router-name'          设定路由的名字，一定要填写不然使用<keep-alive>时会出现各种问题
+ * meta : {
     hidden: true              当设置 true 的时候该路由不会再侧边栏出现 如404，login等页面(默认 false)
 
     alwaysShow: true          当你一个路由下面的 children 声明的路由大于1个时，自动会变成嵌套的模式，
@@ -31,7 +31,7 @@ const { t } = useI18n()
 
     canTo: true               设置为true即使hidden为true，也依然可以进行路由跳转(默认 false)
   }
-**/
+ **/
 const remainingRouter: AppRouteRecordRaw[] = [
   {
     path: '/redirect',
@@ -343,6 +343,29 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/mall/product/property/value/index.vue'),
         name: 'ProductPropertyValue',
         meta: { title: '商品属性值', icon: '', activeMenu: '/product/property' }
+      }
+    ]
+  },
+  {
+    path: '/product',
+    component: Layout,
+    name: 'ProductManagementEdit',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'productManagementAdd',
+        component: () => import('@/views/mall/product/management/addForm.vue'),
+        name: 'ProductManagementAdd',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          icon: 'ep:edit',
+          title: '添加商品',
+          activeMenu: '/product/product-management'
+        }
       }
     ]
   }
