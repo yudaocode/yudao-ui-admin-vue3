@@ -1,6 +1,6 @@
 import { FormSchema } from '@/types/form'
 
-export interface PlaceholderMoel {
+export interface PlaceholderModel {
   placeholder?: string
   startPlaceholder?: string
   endPlaceholder?: string
