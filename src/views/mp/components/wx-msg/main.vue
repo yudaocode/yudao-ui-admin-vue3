@@ -74,7 +74,7 @@ const reply = ref<Reply>({
 })
 
 const replySelectRef = ref<InstanceType<typeof WxReplySelect> | null>(null) // WxReplySelect组件ref，用于消息发送成功后清除内容
-const msgDivRef = ref() // 消息显示窗口ref，用于滚动到底部
+const msgDivRef = ref<HTMLDivElement | null>(null) // 消息显示窗口ref，用于滚动到底部
 
 /** 完成加载 */
 onMounted(async () => {
