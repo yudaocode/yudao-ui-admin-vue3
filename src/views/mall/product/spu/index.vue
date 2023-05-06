@@ -8,6 +8,7 @@
       class="-mb-15px"
       label-width="68px"
     >
+      <!-- TODO @puhui999：https://admin.java.crmeb.net/store/index，参考，使用分类 + 标题搜索 -->
       <el-form-item label="品牌名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -51,6 +52,7 @@
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
+        <!-- TODO @puhui999：增加一个【导出】操作 -->
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -66,6 +68,7 @@
       />
     </el-tabs>
     <el-table v-loading="loading" :data="list">
+      <!-- TODO puhui999: ID 编号的展示 -->
       <!--   TODO 暂时不做折叠数据   -->
       <!--      <el-table-column type="expand">-->
       <!--        <template #default="{ row }">-->
@@ -92,6 +95,7 @@
         </template>
       </el-table-column>
       <el-table-column :show-overflow-tooltip="true" label="商品名称" min-width="300" prop="name" />
+      <!-- TODO 价格 / 100.0 -->
       <el-table-column align="center" label="商品售价" min-width="90" prop="price" />
       <el-table-column align="center" label="销量" min-width="90" prop="salesCount" />
       <el-table-column align="center" label="库存" min-width="90" prop="stock" />
@@ -105,6 +109,7 @@
       />
       <el-table-column fixed="right" label="状态" min-width="80">
         <template #default="{ row }">
+          <!-- TODO @puhui：是不是不用 Number(row.status) 去比较哈，直接 row.status < 0 -->
           <el-switch
             v-model="row.status"
             :active-value="1"
@@ -119,6 +124,7 @@
       </el-table-column>
       <el-table-column align="center" fixed="right" label="操作" min-width="150">
         <template #default="{ row }">
+          <!-- TODO @puhui999：【详情】，可以后面点做哈 -->
           <template v-if="queryParams.tabType === 4">
             <el-button
               v-hasPermi="['product:spu:delete']"
@@ -166,6 +172,7 @@
       @pagination="getList"
     />
   </ContentWrap>
+  <!-- https://kailong110120130.gitee.io/vue-element-plus-admin-doc/components/image-viewer.html，可以用这个么？ -->
   <!-- 必须在表格外面展示。不然单元格会遮挡图层 -->
   <el-image-viewer
     v-if="imgViewVisible"
@@ -173,20 +180,21 @@
     @close="imgViewVisible = false"
   />
 </template>
-<script lang="ts" name="ProductManagement" setup>
+<script lang="ts" name="ProductList" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime' // 业务api
+import { dateFormatter } from '@/utils/formatTime'
+// TODO @puhui999：managementApi=》ProductSpuApi
 import * as managementApi from '@/api/mall/product/management/spu'
 import { ProductSpuStatusEnum } from '@/utils/constants'
 import { TabsPaneContext } from 'element-plus'
-
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { currentRoute, push } = useRouter() // 路由跳转
+
 const loading = ref(false) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref<any[]>([]) // 列表的数据
-// tabs数据
+// tabs 数据
 const tabsData = ref([
   {
     count: 0,
@@ -214,7 +222,10 @@ const tabsData = ref([
     type: 4
   }
 ])
+
+/** 获得每个 Tab 的数量 */
 const getTabsCount = async () => {
+  // TODO @puhui999：这里是不是可以不要 try catch 哈
   try {
     const res = await managementApi.getTabsCount()
     for (let objName in res) {
@@ -222,6 +233,7 @@ const getTabsCount = async () => {
     }
   } catch {}
 }
+
 const imgViewVisible = ref(false) // 商品图预览
 const imageViewerList = ref<string[]>([]) // 商品图预览列表
 const queryParams = ref({
@@ -230,10 +242,13 @@ const queryParams = ref({
   tabType: 0
 })
 const queryFormRef = ref() // 搜索的表单
+
+// TODO @puhui999：可以改成 handleTabClick：更准确一点；
 const handleClick = (tab: TabsPaneContext) => {
   queryParams.value.tabType = tab.paneName
   getList()
 }
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -246,8 +261,10 @@ const getList = async () => {
   }
 }
 
+// TODO @puhui999：是不是 changeStatus 和 addToTrash 调用一个统一的方法，去更新状态。这样逻辑会更干净一些。
 /**
- * 更改SPU状态
+ * 更改 SPU 状态
+ *
  * @param row
  * @param status 更改前的值
  */
@@ -271,7 +288,7 @@ const changeStatus = async (row, status?: number) => {
     )
     await managementApi.updateStatus({ id: row.id, status: row.status })
     message.success('更新状态成功')
-    // 刷新tabs数据
+    // 刷新 tabs 数据
     await getTabsCount()
     // 刷新列表
     await getList()
@@ -288,8 +305,10 @@ const changeStatus = async (row, status?: number) => {
         : ProductSpuStatusEnum.DISABLE.status
   }
 }
+
 /**
  * 加入回收站
+ *
  * @param row
  * @param status
  */
@@ -299,6 +318,7 @@ const addToTrash = (row, status) => {
   row.status = status
   changeStatus(row, num)
 }
+
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
@@ -313,6 +333,7 @@ const handleDelete = async (id: number) => {
     await getList()
   } catch {}
 }
+
 /**
  * 商品图预览
  * @param imgUrl
@@ -321,6 +342,7 @@ const imagePreview = (imgUrl: string) => {
   imageViewerList.value = [imgUrl]
   imgViewVisible.value = true
 }
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   getList()
@@ -334,16 +356,20 @@ const resetQuery = () => {
 
 /**
  * 新增或修改
- * @param id
+ *
+ * @param id 商品 SPU 编号
  */
 const openForm = (id?: number) => {
+  // 修改
   if (typeof id === 'number') {
     push('/product/productManagementAdd?id=' + id)
     return
   }
+  // 新增
   push('/product/productManagementAdd')
 }
-// 监听路由变化更新列表
+
+// 监听路由变化更新列表 TODO @puhui999：这个是必须加的么？
 watch(
   () => currentRoute.value,
   () => {
@@ -353,6 +379,7 @@ watch(
     immediate: true
   }
 )
+
 /** 初始化 **/
 onMounted(() => {
   getTabsCount()

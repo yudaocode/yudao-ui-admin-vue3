@@ -25,11 +25,13 @@
         </template>
       </el-table-column>
     </template>
+    <!-- TODO @puhui999： controls-position="right" 可以去掉哈，不然太长了，手动输入更方便 -->
     <el-table-column align="center" label="商品条码" min-width="168">
       <template #default="{ row }">
         <el-input v-model="row.barCode" class="w-100%" />
       </template>
     </el-table-column>
+    <!-- TODO @puhui999：用户输入的时候，是按照元；分主要是我们自己用； -->
     <el-table-column align="center" label="销售价(分)" min-width="168">
       <template #default="{ row }">
         <el-input-number v-model="row.price" :min="0" class="w-100%" controls-position="right" />
@@ -94,15 +96,14 @@
     </template>
     <el-table-column v-if="formData.specType" align="center" fixed="right" label="操作" width="80">
       <template #default>
-        <el-button v-if="isBatch" link size="small" type="primary" @click="batchAdd"
-          >批量添加
+        <el-button v-if="isBatch" link size="small" type="primary" @click="batchAdd">
+          批量添加
         </el-button>
         <el-button v-else link size="small" type="primary">删除</el-button>
       </template>
     </el-table-column>
   </el-table>
 </template>
-
 <script lang="ts" name="SkuList" setup>
 import { UploadImg } from '@/components/UploadFile'
 import { PropType } from 'vue'
@@ -123,7 +124,7 @@ const props = defineProps({
   isBatch: propTypes.bool.def(false) // 是否批量操作
 })
 const formData = ref<SpuType>() // 表单数据
-// 批量添加时的零时数据
+// 批量添加时的零时数据 TODO @puhui999：小写开头哈；然后变量都尾注释
 const SkuData = ref<SkuType[]>([
   {
     /**
@@ -168,13 +169,16 @@ const SkuData = ref<SkuType[]>([
     subCommissionSecondPrice: 0
   }
 ])
+
 /** 批量添加 */
 const batchAdd = () => {
   formData.value.skus.forEach((item) => {
     copyValueToTarget(item, SkuData.value[0])
   })
 }
+
 const tableHeaderList = ref<{ prop: string; label: string }[]>([])
+
 /**
  * 将传进来的值赋值给SkuData
  */
@@ -189,6 +193,8 @@ watch(
     immediate: true
   }
 )
+
+// TODO @芋艿：看看 chatgpt 可以进一步下面几个方法的实现不
 /** 生成表数据 */
 const generateTableData = (data: any[]) => {
   // 构建数据结构
@@ -237,6 +243,7 @@ const generateTableData = (data: any[]) => {
     formData.value.skus.push(row)
   })
 }
+
 /** 构建所有排列组合 */
 const build = (list: any[]) => {
   if (list.length === 0) {
@@ -259,6 +266,7 @@ const build = (list: any[]) => {
     return result
   }
 }
+
 /** 监听属性列表生成相关参数和表头 */
 watch(
   () => props.attributeList,

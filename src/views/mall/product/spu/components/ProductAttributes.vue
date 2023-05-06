@@ -71,16 +71,19 @@ watch(
     immediate: true
   }
 )
+
 /** 删除标签 tagValue 标签值*/
 const handleClose = (index, valueIndex) => {
   attributeList.value[index].values?.splice(valueIndex, 1)
 }
+
 /** 显示输入框并获取焦点 */
 const showInput = async (index) => {
   attributeIndex.value = index
   // 因为组件在ref中所以需要用索引获取对应的Ref
   InputRef.value[index]!.input!.focus()
 }
+
 /** 输入框失去焦点或点击回车时触发 */
 const handleInputConfirm = async (index, propertyId) => {
   if (inputValue.value) {

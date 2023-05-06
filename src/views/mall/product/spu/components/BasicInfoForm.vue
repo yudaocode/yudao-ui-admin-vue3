@@ -7,6 +7,7 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
+        <!-- TODO @puhui999：只能选根节点 -->
         <el-form-item label="商品分类" prop="categoryId">
           <el-tree-select
             v-model="formData.categoryId"
@@ -15,6 +16,7 @@
             check-strictly
             node-key="id"
             placeholder="请选择商品分类"
+            class="w-1/1"
           />
         </el-form-item>
       </el-col>
@@ -25,7 +27,7 @@
       </el-col>
       <el-col :span="12">
         <el-form-item label="单位" prop="unit">
-          <el-select v-model="formData.unit" placeholder="请选择单位">
+          <el-select v-model="formData.unit" placeholder="请选择单位" class="w-1/1">
             <el-option
               v-for="dict in getIntDictOptions(DICT_TYPE.PRODUCT_UNIT)"
               :key="dict.value"
@@ -57,7 +59,7 @@
       </el-col>
       <el-col :span="12">
         <el-form-item label="运费模板" prop="deliveryTemplateId">
-          <el-select v-model="formData.deliveryTemplateId" placeholder="请选择" style="width: 100%">
+          <el-select v-model="formData.deliveryTemplateId" placeholder="请选择" class="w-1/1">
             <el-option v-for="item in []" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
@@ -84,9 +86,8 @@
       <!-- 多规格添加-->
       <el-col :span="24">
         <el-form-item v-if="formData.specType" label="商品属性">
-          <el-button class="mr-15px mb-10px" @click="AttributesAddFormRef.open()"
-            >添加规格
-          </el-button>
+          <!-- TODO @puhui999：参考 https://admin.java.crmeb.net/store/list/creatProduct 添加规格好做么？添加的时候，不用输入备注哈 -->
+          <el-button class="mr-15px mb-10px" @click="AttributesAddFormRef.open">添加规格</el-button>
           <ProductAttributes :attribute-data="attributeList" />
         </el-form-item>
         <template v-if="formData.specType && attributeList.length > 0">
@@ -108,17 +109,15 @@
 <script lang="ts" name="ProductManagementBasicInfoForm" setup>
 import { PropType } from 'vue'
 import { defaultProps, handleTree } from '@/utils/tree'
-import { ElInput } from 'element-plus'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import type { SpuType } from '@/api/mall/product/management/type/spuType'
 import { UploadImg, UploadImgs } from '@/components/UploadFile'
 import { copyValueToTarget } from '@/utils/object'
 import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
-// 业务Api
 import * as ProductCategoryApi from '@/api/mall/product/category'
 import { propTypes } from '@/utils/propTypes'
-
 const message = useMessage() // 消息弹窗
+
 const props = defineProps({
   propFormData: {
     type: Object as PropType<SpuType>,
@@ -126,10 +125,11 @@ const props = defineProps({
   },
   activeName: propTypes.string.def('')
 })
-const AttributesAddFormRef = ref() // 添加商品属性表单
-const ProductManagementBasicInfoRef = ref() // 表单Ref
+const AttributesAddFormRef = ref() // 添加商品属性表单 TODO @puhui999：小写开头哈
+const ProductManagementBasicInfoRef = ref() // 表单Ref TODO @puhui999：小写开头哈
+// TODO @puhui999：attributeList 改成 propertyList，会更统一一点
 const attributeList = ref([]) // 商品属性列表
-/** 添加商品属性 */
+/** 添加商品属性 */ // TODO @puhui999：propFormData 算出来
 const addAttribute = (property: any) => {
   if (Array.isArray(property)) {
     attributeList.value = property
@@ -162,8 +162,9 @@ const rules = reactive({
   specType: [required],
   subCommissionType: [required]
 })
+
 /**
- * 将传进来的值赋值给formData
+ * 将传进来的值赋值给 formData
  */
 watch(
   () => props.propFormData,
@@ -176,10 +177,11 @@ watch(
     immediate: true
   }
 )
-const emit = defineEmits(['update:activeName'])
+
 /**
  * 表单校验
  */
+const emit = defineEmits(['update:activeName'])
 const validate = async () => {
   // 校验表单
   if (!ProductManagementBasicInfoRef) return
@@ -197,7 +199,7 @@ const validate = async () => {
 }
 defineExpose({ validate, addAttribute })
 
-// 分销类型
+/** 分销类型 */
 const changeSubCommissionType = () => {
   // 默认为零，类型切换后也要重置为零
   for (const item of formData.skus) {
@@ -205,7 +207,8 @@ const changeSubCommissionType = () => {
     item.subCommissionSecondPrice = 0
   }
 }
-// 选择规格
+
+/** 选择规格 */
 const onChangeSpec = () => {
   // 重置商品属性列表
   attributeList.value = []

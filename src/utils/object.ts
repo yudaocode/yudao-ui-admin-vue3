@@ -1,3 +1,4 @@
+// TODO @puhui999：这个方法，可以考虑放到 index.js
 /**
  * 将值复制到目标对象，且以目标对象属性为准，例：target: {a:1} source:{a:2,b:3} 结果为：{a:2}
  * @param target 目标对象

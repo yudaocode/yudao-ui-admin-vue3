@@ -1,6 +1,7 @@
 <template>
   <el-form ref="OtherSettingsFormRef" :model="formData" :rules="rules" label-width="120px">
     <el-row>
+      <!-- TODO @puhui999：横着三个哈 -->
       <el-col :span="24">
         <el-col :span="8">
           <el-form-item label="商品排序" prop="sort">
@@ -40,6 +41,7 @@
           <el-tag class="ml-2" type="warning">拼团</el-tag>
         </el-form-item>
       </el-col>
+      <!-- TODO @puhui999：等优惠劵 ok 在搞 -->
       <el-col :span="24">
         <el-form-item label="赠送优惠劵">
           <el-button>选择优惠券</el-button>
@@ -49,13 +51,12 @@
   </el-form>
 </template>
 <script lang="ts" name="OtherSettingsForm" setup>
-// 商品推荐
 import type { SpuType } from '@/api/mall/product/management/type/spuType'
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils/object'
 import { propTypes } from '@/utils/propTypes'
-
 const message = useMessage() // 消息弹窗
+
 const props = defineProps({
   propFormData: {
     type: Object as PropType<SpuType>,
@@ -63,7 +64,7 @@ const props = defineProps({
   },
   activeName: propTypes.string.def('')
 })
-// 商品推荐选项
+// 商品推荐选项 TODO @puhui999：这种叫 recommendOptions 会更合适哈
 const recommend = [
   { name: '是否热卖', value: 'recommendHot' },
   { name: '是否优惠', value: 'recommendBenefit' },
@@ -71,10 +72,10 @@ const recommend = [
   { name: '是否新品', value: 'recommendNew' },
   { name: '是否优品', value: 'recommendGood' }
 ]
-// 选中推荐选项
-const checkboxGroup = ref<string[]>(['recommendHot'])
-// 选择商品后赋值
+const checkboxGroup = ref<string[]>(['recommendHot']) // 选中推荐选项
+/** 选择商品后赋值 */
 const onChangeGroup = () => {
+  // TODO @puhui999：是不是可以遍历 recommend，然后进行是否选中；
   checkboxGroup.value.includes('recommendHot')
     ? (formData.value.recommendHot = true)
     : (formData.value.recommendHot = false)
@@ -109,6 +110,7 @@ const rules = reactive({
   giveIntegral: [required],
   virtualSalesCount: [required]
 })
+
 /**
  * 将传进来的值赋值给formData
  */
@@ -130,10 +132,11 @@ watch(
     immediate: true
   }
 )
-const emit = defineEmits(['update:activeName'])
+
 /**
  * 表单校验
  */
+const emit = defineEmits(['update:activeName'])
 const validate = async () => {
   // 校验表单
   if (!OtherSettingsFormRef) return
@@ -149,6 +152,5 @@ const validate = async () => {
     }
   })
 }
-
 defineExpose({ validate })
 </script>

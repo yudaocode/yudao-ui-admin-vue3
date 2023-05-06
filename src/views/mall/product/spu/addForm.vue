@@ -37,7 +37,6 @@ import { BasicInfoForm, DescriptionForm, OtherSettingsForm } from './components'
 import type { SpuType } from '@/api/mall/product/management/type/spuType' // 业务api
 import * as managementApi from '@/api/mall/product/management/spu'
 import * as PropertyApi from '@/api/mall/product/property'
-
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 const { push, currentRoute } = useRouter() // 路由
@@ -69,7 +68,7 @@ const formData = ref<SpuType>({
   skus: [
     {
       /**
-       * 商品价格，单位：分
+       * 商品价格，单位：分 TODO @puhui999：注释放在尾巴哈，简洁一点~
        */
       price: 0,
       /**
@@ -120,6 +119,7 @@ const formData = ref<SpuType>({
   recommendNew: false, // 是否新品
   recommendGood: false // 是否优品
 })
+
 /** 获得详情 */
 const getDetail = async () => {
   const id = query.id as unknown as number
@@ -129,6 +129,7 @@ const getDetail = async () => {
       const res = (await managementApi.getSpu(id)) as SpuType
       formData.value = res
       // 直接取第一个值就能得到所有属性的id
+      // TODO @puhui999：可以直接拿 propertyName 拼接处规格 id + 属性，可以看下商品 uniapp 详情的做法
       const propertyIds = res.skus[0]?.properties.map((item) => item.propertyId)
       const PropertyS = await PropertyApi.getPropertyListAndValue({ propertyIds })
       await nextTick()
@@ -151,6 +152,7 @@ const submitForm = async () => {
     await unref(BasicInfoRef)?.validate()
     await unref(DescriptionRef)?.validate()
     await unref(OtherSettingsRef)?.validate()
+    // TODO @puhui：直接做深拷贝？这样最终 server 端不满足，不需要恢复
     // 处理掉一些无关数据
     formData.value.skus.forEach((item) => {
       // 给sku name赋值
@@ -166,6 +168,7 @@ const submitForm = async () => {
     const newSliderPicUrls = []
     formData.value.sliderPicUrls.forEach((item) => {
       // 如果是前端选的图
+      // TODO @puhui999：疑问哈，为啥会是 object 呀？
       if (typeof item === 'object') {
         newSliderPicUrls.push(item.url)
       } else {
@@ -224,6 +227,7 @@ const resetForm = async () => {
 }
 /** 关闭按钮 */
 const close = () => {
+  // TODO @puhui999：是不是不用 reset 呀？close 默认销毁
   resetForm()
   delView(unref(currentRoute))
   push('/product/product-management')

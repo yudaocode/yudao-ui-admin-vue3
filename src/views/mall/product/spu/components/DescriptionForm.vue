@@ -25,6 +25,11 @@ const DescriptionFormRef = ref() // 表单Ref
 const formData = ref<SpuType>({
   description: '' // 商品详情
 })
+// 表单规则
+const rules = reactive({
+  description: [required]
+})
+
 /**
  * 富文本编辑器如果输入过再清空会有残留，需再重置一次
  */
@@ -40,10 +45,7 @@ watch(
     immediate: true
   }
 )
-// 表单规则
-const rules = reactive({
-  description: [required]
-})
+
 /**
  * 将传进来的值赋值给formData
  */
@@ -58,10 +60,11 @@ watch(
     immediate: true
   }
 )
-const emit = defineEmits(['update:activeName'])
+
 /**
  * 表单校验
  */
+const emit = defineEmits(['update:activeName'])
 const validate = async () => {
   // 校验表单
   if (!DescriptionFormRef) return
