@@ -218,7 +218,6 @@ const getSummary = () => {
   usedMemoryInstance()
 }
 
-<<<<<<< HEAD
 /** 命令使用情况 */
 const initcommandStatsChart = async () => {
   usedmemoryEchartChika.series[0].data = []
@@ -257,6 +256,7 @@ const usedMemoryInstance = async () => {
       value: cache.value!.info.used_memory_human,
       name: '内存消耗'
     }
+    console.log(cache.value!.info)
     usedmemoryEchartChika.tooltip = {
       formatter: '{b} <br/>{a} : ' + cache.value!.info.used_memory_human
     }
@@ -265,10 +265,6 @@ const usedMemoryInstance = async () => {
 
 /** 初始化 **/
 onMounted(() => {
-=======
-onBeforeMount(() => {
-  // TODO @hiiwbs 微信，优化使用 Echart 组件
->>>>>>> e92361ed401771998c6abd6d9ba53801a6e0cfa6
   readRedisInfo()
   // 加载数据
   getSummary()
