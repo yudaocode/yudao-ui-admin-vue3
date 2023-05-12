@@ -1,7 +1,6 @@
-<script setup lang="ts">
-import { PropType, nextTick, ref, watch, computed, unref } from 'vue'
-import QRCode from 'qrcode'
-import { QRCodeRenderersOptions } from 'qrcode'
+<script lang="ts" name="Qrcode" setup>
+import { computed, nextTick, PropType, ref, unref, watch } from 'vue'
+import QRCode, { QRCodeRenderersOptions } from 'qrcode'
 import { cloneDeep } from 'lodash-es'
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -230,7 +229,7 @@ const disabledClick = () => {
       @click="disabledClick"
     >
       <div class="absolute top-[50%] left-[50%] font-bold">
-        <Icon icon="ep:refresh-right" :size="30" color="var(--el-color-primary)" />
+        <Icon :size="30" color="var(--el-color-primary)" icon="ep:refresh-right" />
         <div>{{ disabledText }}</div>
       </div>
     </div>

@@ -21,7 +21,7 @@ export interface DictDataType {
 }
 
 export const getDictOptions = (dictType: string) => {
-  return dictStore.getDictByType(dictType)
+  return dictStore.getDictByType(dictType) || []
 }
 
 export const getIntDictOptions = (dictType: string) => {
@@ -117,6 +117,7 @@ export enum DICT_TYPE {
   INFRA_API_ERROR_LOG_PROCESS_STATUS = 'infra_api_error_log_process_status',
   INFRA_CONFIG_TYPE = 'infra_config_type',
   INFRA_CODEGEN_TEMPLATE_TYPE = 'infra_codegen_template_type',
+  INFRA_CODEGEN_FRONT_TYPE = 'infra_codegen_front_type',
   INFRA_CODEGEN_SCENE = 'infra_codegen_scene',
   INFRA_FILE_STORAGE = 'infra_file_storage',
 
@@ -143,5 +144,9 @@ export enum DICT_TYPE {
 
   // ========== MP 模块 ==========
   MP_AUTO_REPLY_REQUEST_MATCH = 'mp_auto_reply_request_match', // 自动回复请求匹配类型
-  MP_MESSAGE_TYPE = 'mp_message_type' // 消息类型
+  MP_MESSAGE_TYPE = 'mp_message_type', // 消息类型
+
+  // ========== MALL 模块 ==========
+  PRODUCT_UNIT = 'product_unit', // 商品单位
+  PRODUCT_SPU_STATUS = 'product_spu_status' //商品状态
 }

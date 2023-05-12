@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="ConfigGlobal" setup>
 import { propTypes } from '@/utils/propTypes'
 import { useLocaleStore } from '@/store/modules/locale'
 import { useAppStore } from '@/store/modules/app'
@@ -51,9 +51,9 @@ const currentLocale = computed(() => localeStore.currentLocale)
 
 <template>
   <ElConfigProvider
-    :namespace="variables.elNamespace"
     :locale="currentLocale.elLocale"
     :message="{ max: 1 }"
+    :namespace="variables.elNamespace"
     :size="size"
   >
     <slot></slot>

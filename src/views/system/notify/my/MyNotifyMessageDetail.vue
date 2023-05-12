@@ -1,6 +1,6 @@
 <template>
-  <Dialog title="消息详情" v-model="dialogVisible" :scroll="true" :max-height="500">
-    <el-descriptions border :column="1">
+  <Dialog v-model="dialogVisible" :max-height="500" :scroll="true" title="消息详情">
+    <el-descriptions :column="1" border>
       <el-descriptions-item label="发送人">
         {{ detailData.templateNickname }}
       </el-descriptions-item>
@@ -13,7 +13,7 @@
       <el-descriptions-item label="是否已读">
         <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="detailData.readStatus" />
       </el-descriptions-item>
-      <el-descriptions-item label="阅读时间" v-if="detailData.readStatus">
+      <el-descriptions-item v-if="detailData.readStatus" label="阅读时间">
         {{ formatDate(detailData.readTime) }}
       </el-descriptions-item>
       <el-descriptions-item label="内容">
@@ -22,7 +22,7 @@
     </el-descriptions>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="MyNotifyMessageDetailDetail" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as NotifyMessageApi from '@/api/system/notify/message'

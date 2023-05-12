@@ -2,19 +2,19 @@
 <template>
   <el-pagination
     v-show="total > 0"
-    class="float-right mt-15px mb-15px"
-    :background="true"
-    layout="total, sizes, prev, pager, next, jumper"
-    :page-sizes="[10, 20, 30, 50, 100]"
     v-model:current-page="currentPage"
     v-model:page-size="pageSize"
+    :background="true"
+    :page-sizes="[10, 20, 30, 50, 100]"
     :pager-count="pagerCount"
     :total="total"
+    class="float-right mt-15px mb-15px"
+    layout="total, sizes, prev, pager, next, jumper"
     @size-change="handleSizeChange"
     @current-change="handleCurrentChange"
   />
 </template>
-<script setup>
+<script name="Pagination" setup>
 import { computed } from 'vue'
 
 const props = defineProps({

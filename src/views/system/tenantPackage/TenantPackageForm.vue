@@ -1,11 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="80px"
-      v-loading="formLoading"
     >
       <el-form-item label="套餐名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入套餐名" />
@@ -16,27 +16,27 @@
             全选/全不选:
             <el-switch
               v-model="treeNodeAll"
-              inline-prompt
               active-text="是"
               inactive-text="否"
+              inline-prompt
               @change="handleCheckedTreeNodeAll"
             />
             全部展开/折叠:
             <el-switch
               v-model="menuExpand"
-              inline-prompt
               active-text="展开"
               inactive-text="折叠"
+              inline-prompt
               @change="handleCheckedTreeExpand"
             />
           </template>
           <el-tree
             ref="treeRef"
+            :data="menuOptions"
+            :props="defaultProps"
+            empty-text="加载中，请稍候"
             node-key="id"
             show-checkbox
-            :props="defaultProps"
-            :data="menuOptions"
-            empty-text="加载中，请稍候"
           />
         </el-card>
       </el-form-item>
@@ -56,18 +56,19 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts" name="TenantPackageForm">
+<script lang="ts" name="SystemTenantPackageForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as TenantPackageApi from '@/api/system/tenantPackage'
 import * as MenuApi from '@/api/system/menu'
 import { ElTree } from 'element-plus'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

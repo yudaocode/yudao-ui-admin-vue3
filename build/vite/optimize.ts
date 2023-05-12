@@ -18,10 +18,6 @@ const include = [
   'lodash-es',
   'nprogress',
   'animate.css',
-  'vxe-table',
-  'vxe-table/es/style',
-  'vxe-table/lib/locale/lang/zh-CN',
-  'vxe-table/lib/locale/lang/en-US',
   'web-storage-cache',
   '@iconify/iconify',
   '@vueuse/core',
@@ -68,6 +64,7 @@ const include = [
   'element-plus/es/components/dropdown-menu/style/index',
   'element-plus/es/components/dropdown-item/style/index',
   'element-plus/es/components/skeleton/style/index',
+
   'element-plus/es/components/skeleton/style/css',
   'element-plus/es/components/backtop/style/css',
   'element-plus/es/components/menu/style/css',
@@ -79,7 +76,22 @@ const include = [
   'element-plus/es/components/dropdown-item/style/css',
   'element-plus/es/components/badge/style/css',
   'element-plus/es/components/breadcrumb/style/css',
-  'element-plus/es/components/breadcrumb-item/style/css'
+  'element-plus/es/components/breadcrumb-item/style/css',
+  'element-plus/es/components/image/style/css',
+  'element-plus/es/components/tag/style/css',
+  'element-plus/es/components/dialog/style/css',
+  'element-plus/es/components/form/style/css',
+  'element-plus/es/components/form-item/style/css',
+  'element-plus/es/components/card/style/css',
+  'element-plus/es/components/tooltip/style/css',
+  'element-plus/es/components/radio-group/style/css',
+  'element-plus/es/components/radio/style/css',
+  'element-plus/es/components/input-number/style/css',
+  'element-plus/es/components/tree-select/style/css',
+  'element-plus/es/components/drawer/style/css',
+  'element-plus/es/components/image-viewer/style/css',
+  'element-plus/es/components/upload/style/css',
+  'element-plus/es/components/switch/style/css'
 ]
 
 const exclude = ['@iconify/json']

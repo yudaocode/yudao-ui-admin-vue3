@@ -111,7 +111,8 @@
               >
               <el-divider direction="vertical" />
               <el-button
-                type="text"
+                type="primary"
+                link
                 style="color: #ff4d4f"
                 @click="removeFieldOptionItem(scope, scope.$index, 'enum')"
                 >移除</el-button
@@ -143,7 +144,8 @@
             >
             <el-divider direction="vertical" />
             <el-button
-              type="text"
+              type="primary"
+              link
               style="color: #ff4d4f"
               @click="removeFieldOptionItem(scope, scope.$index, 'constraint')"
               >移除</el-button
@@ -174,7 +176,8 @@
             >
             <el-divider direction="vertical" />
             <el-button
-              type="text"
+              type="primary"
+              link
               style="color: #ff4d4f"
               @click="removeFieldOptionItem(scope, scope.$index, 'property')"
               >移除</el-button

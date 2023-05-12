@@ -10,13 +10,13 @@
       <InputPassword v-model="password.confirmPassword" strength />
     </el-form-item>
     <el-form-item>
-      <XButton type="primary" @click="submit(formRef)" :title="t('common.save')" />
-      <XButton type="danger" :title="t('common.reset')" @click="reset(formRef)" />
+      <XButton :title="t('common.save')" type="primary" @click="submit(formRef)" />
+      <XButton :title="t('common.reset')" type="danger" @click="reset(formRef)" />
     </el-form-item>
   </el-form>
 </template>
-<script setup lang="ts">
-import type { FormRules, FormInstance } from 'element-plus'
+<script lang="ts" name="ResetPwd" setup>
+import type { FormInstance, FormRules } from 'element-plus'
 
 import { InputPassword } from '@/components/InputPassword'
 import { updateUserPassword } from '@/api/system/user/profile'

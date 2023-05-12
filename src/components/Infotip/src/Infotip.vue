@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="InfoTip" setup>
 import { PropType } from 'vue'
 import { useDesign } from '@/hooks/web/useDesign'
 import { propTypes } from '@/utils/propTypes'
@@ -34,14 +34,14 @@ const keyClick = (key: string) => {
     ]"
   >
     <div v-if="title" :class="[`${prefixCls}__header`, 'flex items-center']">
-      <Icon icon="ep:warning-filled" :size="22" color="var(--el-color-primary)" />
+      <Icon :size="22" color="var(--el-color-primary)" icon="ep:warning-filled" />
       <span :class="[`${prefixCls}__title`, 'pl-5px text-16px font-bold']">{{ title }}</span>
     </div>
     <div :class="`${prefixCls}__content`">
       <p v-for="(item, $index) in schema" :key="$index" class="text-14px mt-15px">
         <Highlight
-          :keys="typeof item === 'string' ? [] : item.keys"
           :color="highlightColor"
+          :keys="typeof item === 'string' ? [] : item.keys"
           @click="keyClick"
         >
           {{ showIndex ? `${$index + 1}、` : '' }}{{ typeof item === 'string' ? item : item.label }}

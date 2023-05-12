@@ -1,21 +1,22 @@
 <template>
   <Dialog
-    :title="dialogTitle"
     v-model="dialogVisible"
-    :scroll="true"
-    :width="800"
     :max-height="500"
+    :scroll="true"
+    :title="dialogTitle"
+    :width="800"
   >
-    <Form ref="formRef" :schema="allSchemas.formSchema" :rules="rules" v-loading="formLoading" />
+    <Form ref="formRef" v-loading="formLoading" :rules="rules" :schema="allSchemas.formSchema" />
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemMailTemplateForm" setup>
 import * as MailTemplateApi from '@/api/system/mail/template'
 import { allSchemas, rules } from './template.data'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="ImageViewer" setup>
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 

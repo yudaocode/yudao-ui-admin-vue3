@@ -17,7 +17,7 @@ export const rules = reactive({
   status: [required]
 })
 
-// CrudSchema：https://kailong110120130.gitee.io/vue-element-plus-admin-doc/hooks/useCrudSchemas.html
+// CrudSchema：https://doc.iocoder.cn/vue3/crud-schema/
 const crudSchemas = reactive<CrudSchema[]>([
   {
     label: '模板编码',

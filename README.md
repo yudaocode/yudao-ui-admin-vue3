@@ -10,7 +10,8 @@
 ## 🐶 新手必读
 
 * nodejs > 16.0.0 && pnpm > 7.30.0
-* 演示地址：<http://dashboard.yudao.iocoder.cn>
+* 演示地址【Vue3 + element-plus】：<http://dashboard-vue3.yudao.iocoder.cn>
+* 演示地址【Vue2 + element-ui】：<http://dashboard.yudao.iocoder.cn>
 * 启动文档：<https://doc.iocoder.cn/quick-start/>
 * 视频教程：<https://doc.iocoder.cn/video/>
 
@@ -42,7 +43,6 @@
 | [TypeScript](https://www.typescriptlang.org/docs/)                   | JavaScript 的超集   | 4.9.5  |
 | [pinia](https://pinia.vuejs.org/)                                    | Vue 存储库 替代 vuex5 | 2.0.33 |
 | [vueuse](https://vueuse.org/)                                        | 常用工具集            | 9.13.0 |
-| [vxe-table](https://vxetable.cn/)                                    | Vue 最强表单         | 4.3.10  |
 | [vue-i18n](https://kazupon.github.io/vue-i18n/zh/introduction.html/) | 国际化              | 9.2.2  |
 | [vue-router](https://router.vuejs.org/)                              | Vue 路由           | 4.1.6  |
 | [windicss](https://cn.windicss.org/)                                 | 下一代工具优先的 CSS 框架  | 3.5.6  |

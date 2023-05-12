@@ -2,35 +2,41 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="任务名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入任务名称"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入任务名称"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="daterange"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -38,24 +44,24 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="任务编号" align="center" prop="id" width="300px" />
-      <el-table-column label="任务名称" align="center" prop="name" />
-      <el-table-column label="所属流程" align="center" prop="processInstance.name" />
-      <el-table-column label="流程发起人" align="center" prop="processInstance.startUserNickname" />
+      <el-table-column align="center" label="任务编号" prop="id" width="300px" />
+      <el-table-column align="center" label="任务名称" prop="name" />
+      <el-table-column align="center" label="所属流程" prop="processInstance.name" />
+      <el-table-column align="center" label="流程发起人" prop="processInstance.startUserNickname" />
       <el-table-column
-        label="创建时间"
+        :formatter="dateFormatter"
         align="center"
+        label="创建时间"
         prop="createTime"
         width="180"
-        :formatter="dateFormatter"
       />
       <el-table-column label="任务状态" prop="suspensionState">
         <template #default="scope">
-          <el-tag type="success" v-if="scope.row.suspensionState === 1">激活</el-tag>
-          <el-tag type="warning" v-if="scope.row.suspensionState === 2">挂起</el-tag>
+          <el-tag v-if="scope.row.suspensionState === 1" type="success">激活</el-tag>
+          <el-tag v-if="scope.row.suspensionState === 2" type="warning">挂起</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center">
+      <el-table-column align="center" label="操作">
         <template #default="scope">
           <el-button link type="primary" @click="handleAudit(scope.row)">审批进度</el-button>
         </template>
@@ -63,18 +69,19 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
 </template>
 
-<script setup lang="tsx" name="BpmDoneTask">
+<script lang="ts" name="BpmDoneTask" setup>
 import { dateFormatter } from '@/utils/formatTime'
-const { push } = useRouter() // 路由
 import * as TaskApi from '@/api/bpm/task'
+
+const { push } = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数

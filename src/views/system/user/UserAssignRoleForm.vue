@@ -1,6 +1,6 @@
 <template>
-  <Dialog title="分配角色" v-model="dialogVisible">
-    <el-form ref="formRef" :model="formData" label-width="80px" v-loading="formLoading">
+  <Dialog v-model="dialogVisible" title="分配角色">
+    <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
       <el-form-item label="用户名称">
         <el-input v-model="formData.username" :disabled="true" />
       </el-form-item>
@@ -14,15 +14,16 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemUserAssignRoleForm" setup>
 import * as PermissionApi from '@/api/system/permission'
 import * as UserApi from '@/api/system/user'
 import * as RoleApi from '@/api/system/role'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

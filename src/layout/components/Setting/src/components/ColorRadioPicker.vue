@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="ColorRadioPicker" setup>
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -42,14 +42,14 @@ watch(
     <span
       v-for="(item, i) in schema"
       :key="`radio-${i}`"
-      class="w-20px h-20px cursor-pointer rounded-2px border-solid border-gray-300 border-2px text-center leading-20px mb-5px"
       :class="{ 'is-active': colorVal === item }"
       :style="{
         background: item
       }"
+      class="w-20px h-20px cursor-pointer rounded-2px border-solid border-gray-300 border-2px text-center leading-20px mb-5px"
       @click="colorVal = item"
     >
-      <Icon v-if="colorVal === item" color="#fff" icon="ep:check" :size="16" />
+      <Icon v-if="colorVal === item" :size="16" color="#fff" icon="ep:check" />
     </span>
   </div>
 </template>

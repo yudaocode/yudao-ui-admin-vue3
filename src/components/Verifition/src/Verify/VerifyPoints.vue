@@ -2,20 +2,20 @@
   <div style="position: relative">
     <div class="verify-img-out">
       <div
-        class="verify-img-panel"
         :style="{
           width: setSize.imgWidth,
           height: setSize.imgHeight,
           'background-size': setSize.imgWidth + ' ' + setSize.imgHeight,
           'margin-bottom': vSpace + 'px'
         }"
+        class="verify-img-panel"
       >
-        <div class="verify-refresh" style="z-index: 3" @click="refresh" v-show="showRefresh">
+        <div v-show="showRefresh" class="verify-refresh" style="z-index: 3" @click="refresh">
           <i class="iconfont icon-refresh"></i>
         </div>
         <img
-          :src="'data:image/png;base64,' + pointBackImgBase"
           ref="canvas"
+          :src="'data:image/png;base64,' + pointBackImgBase"
           alt=""
           style="width: 100%; height: 100%; display: block"
           @click="bindingClick ? canvasClick($event) : undefined"
@@ -24,7 +24,6 @@
         <div
           v-for="(tempPoint, index) in tempPoints"
           :key="index"
-          class="point-area"
           :style="{
             'background-color': '#1abd6c',
             color: '#fff',
@@ -38,6 +37,7 @@
             top: parseInt(tempPoint.y - 10) + 'px',
             left: parseInt(tempPoint.x - 10) + 'px'
           }"
+          class="point-area"
         >
           {{ index + 1 }}
         </div>
@@ -45,19 +45,19 @@
     </div>
     <!-- 'height': this.barSize.height, -->
     <div
-      class="verify-bar-area"
       :style="{
         width: setSize.imgWidth,
         color: barAreaColor,
         'border-color': barAreaBorderColor,
         'line-height': barSize.height
       }"
+      class="verify-bar-area"
     >
       <span class="verify-msg">{{ text }}</span>
     </div>
   </div>
 </template>
-<script type="text/babel" setup>
+<script name="VerifyPoints" setup type="text/babel">
 /**
  * VerifyPoints
  * @description 点选
@@ -65,7 +65,7 @@
 import { resetSize } from './../utils/util'
 import { aesEncrypt } from './../utils/ase'
 import { getCode, reqCheck } from '@/api/login'
-import { onMounted, reactive, ref, nextTick, toRefs, getCurrentInstance } from 'vue'
+import { getCurrentInstance, nextTick, onMounted, reactive, ref, toRefs } from 'vue'
 
 const props = defineProps({
   //弹出式pop，固定fixed

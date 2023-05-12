@@ -1,6 +1,6 @@
 <template>
-  <Dialog title="菜单权限" v-model="dialogVisible" width="800">
-    <el-form ref="formRef" :model="formData" label-width="80px" v-loading="formLoading">
+  <Dialog v-model="dialogVisible" title="菜单权限" width="800">
+    <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
       <el-form-item label="角色名称">
         <el-tag>{{ formData.name }}</el-tag>
       </el-form-item>
@@ -19,8 +19,8 @@
       </el-form-item>
     </el-form>
     <el-form-item
-      label="权限范围"
       v-if="formData.dataScope === SystemDataScopeEnum.DEPT_CUSTOM"
+      label="权限范围"
       style="display: flex"
     >
       <el-card class="card" shadow="never">
@@ -28,47 +28,48 @@
           全选/全不选:
           <el-switch
             v-model="treeNodeAll"
-            inline-prompt
             active-text="是"
             inactive-text="否"
+            inline-prompt
             @change="handleCheckedTreeNodeAll()"
           />
           全部展开/折叠:
           <el-switch
             v-model="deptExpand"
-            inline-prompt
             active-text="展开"
             inactive-text="折叠"
+            inline-prompt
             @change="handleCheckedTreeExpand"
           />
           父子联动(选中父节点，自动选择子节点):
-          <el-switch v-model="checkStrictly" inline-prompt active-text="是" inactive-text="否" />
+          <el-switch v-model="checkStrictly" active-text="是" inactive-text="否" inline-prompt />
         </template>
         <el-tree
           ref="treeRef"
+          :check-strictly="!checkStrictly"
+          :data="deptOptions"
+          :props="defaultProps"
+          default-expand-all
+          empty-text="加载中，请稍后"
           node-key="id"
           show-checkbox
-          :check-strictly="!checkStrictly"
-          :props="defaultProps"
-          :data="deptOptions"
-          empty-text="加载中，请稍后"
-          default-expand-all
         />
       </el-card>
     </el-form-item>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemRoleDataPermissionForm" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { handleTree, defaultProps } from '@/utils/tree'
+import { defaultProps, handleTree } from '@/utils/tree'
 import { SystemDataScopeEnum } from '@/utils/constants'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
 import * as PermissionApi from '@/api/system/permission'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -106,6 +107,7 @@ const open = async (row: RoleApi.RoleVO) => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
   formLoading.value = true
   try {
@@ -120,6 +122,8 @@ const submitForm = async () => {
     await PermissionApi.assignRoleDataScope(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
+    // 发送操作成功的事件
+    emit('success')
   } finally {
     formLoading.value = false
   }

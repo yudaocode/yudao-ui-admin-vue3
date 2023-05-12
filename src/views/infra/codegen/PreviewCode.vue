@@ -1,52 +1,52 @@
 <template>
   <Dialog
-    title="代码预览"
     v-model="dialogVisible"
     align-center
-    width="80%"
     class="app-infra-codegen-preview-container"
+    title="代码预览"
+    width="80%"
   >
     <div class="flex">
       <!-- 代码目录树 -->
       <el-card
-        class="w-1/3"
-        :gutter="12"
-        shadow="hover"
         v-loading="loading"
+        :gutter="12"
+        class="w-1/3"
         element-loading-text="生成文件目录中..."
+        shadow="hover"
       >
-        <el-scrollbar height="calc(100vh - 88px - 40px - 50px)">
+        <el-scrollbar height="calc(100vh - 88px - 40px)">
           <el-tree
             ref="treeRef"
-            node-key="id"
             :data="preview.fileTree"
             :expand-on-click-node="false"
-            highlight-current
-            @node-click="handleNodeClick"
             default-expand-all
+            highlight-current
+            node-key="id"
+            @node-click="handleNodeClick"
           />
         </el-scrollbar>
       </el-card>
       <!-- 代码 -->
       <el-card
-        class="w-2/3 ml-3"
-        :gutter="12"
-        shadow="hover"
         v-loading="loading"
+        :gutter="12"
+        class="w-2/3 ml-3"
         element-loading-text="加载代码中..."
+        shadow="hover"
       >
         <el-tabs v-model="preview.activeName">
           <el-tab-pane
             v-for="item in previewCodegen"
+            :key="item.filePath"
             :label="item.filePath.substring(item.filePath.lastIndexOf('/') + 1)"
             :name="item.filePath"
-            :key="item.filePath"
           >
-            <el-button text type="primary" class="float-right" @click="copy(item.code)">
+            <el-button class="float-right" text type="primary" @click="copy(item.code)">
               {{ t('common.copy') }}
             </el-button>
-            <div v-highlight>
-              <code>{{ item.code }}</code>
+            <div>
+              <pre><code class="hljs" v-html="highlightedCode(item)"></code></pre>
             </div>
           </el-tab-pane>
         </el-tabs>
@@ -54,10 +54,11 @@
     </div>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="InfraCodegenPreviewCode" setup>
 import { useClipboard } from '@vueuse/core'
 import { handleTree2 } from '@/utils/tree'
 import * as CodegenApi from '@/api/infra/codegen'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -179,6 +180,34 @@ const copy = async (text: string) => {
     message.success(t('common.copySuccess'))
   }
 }
+
+/**
+ * 代码高亮
+ */
+import hljs from 'highlight.js' // 导入代码高亮文件
+import 'highlight.js/styles/github.css' // 导入代码高亮样式
+import java from 'highlight.js/lib/languages/java'
+import xml from 'highlight.js/lib/languages/java'
+import javascript from 'highlight.js/lib/languages/javascript'
+import sql from 'highlight.js/lib/languages/sql'
+import typescript from 'highlight.js/lib/languages/typescript'
+const highlightedCode = (item) => {
+  const language = item.filePath.substring(item.filePath.lastIndexOf('.') + 1)
+  const result = hljs.highlight(language, item.code || '', true)
+  return result.value || '&nbsp;'
+}
+
+/** 初始化 **/
+onMounted(async () => {
+  // 注册代码高亮的各种语言
+  hljs.registerLanguage('java', java)
+  hljs.registerLanguage('xml', xml)
+  hljs.registerLanguage('html', xml)
+  hljs.registerLanguage('vue', xml)
+  hljs.registerLanguage('javascript', javascript)
+  hljs.registerLanguage('sql', sql)
+  hljs.registerLanguage('typescript', typescript)
+})
 </script>
 <style lang="scss">
 .app-infra-codegen-preview-container {

@@ -1,7 +1,7 @@
 <template>
   <ContentWrap>
     <!-- 流程设计器，负责绘制流程等 -->
-    <my-process-designer
+    <MyProcessDesigner
       key="designer"
       v-if="xmlString !== undefined"
       v-model="xmlString"
@@ -14,7 +14,7 @@
       @save="save"
     />
     <!-- 流程属性器，负责编辑每个流程节点的属性 -->
-    <my-properties-panel
+    <MyProcessPenal
       key="penal"
       :bpmnModeler="modeler"
       :prefix="controlForm.prefix"
@@ -25,6 +25,7 @@
 </template>
 
 <script setup lang="ts" name="BpmModelEditor">
+import { MyProcessDesigner, MyProcessPenal } from '@/components/bpmnProcessDesigner/package'
 // 自定义元素选中时的弹出菜单（修改 默认任务 为 用户任务）
 import CustomContentPadProvider from '@/components/bpmnProcessDesigner/package/designer/plugins/content-pad'
 // 自定义左侧菜单（修改 默认任务 为 用户任务）

@@ -1,21 +1,21 @@
 <template>
-  <Dialog title="检测敏感词" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" title="检测敏感词">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="80px"
-      v-loading="formLoading"
     >
       <el-form-item label="文本" prop="text">
-        <el-input type="textarea" v-model="formData.text" placeholder="请输入测试文本" />
+        <el-input v-model="formData.text" placeholder="请输入测试文本" type="textarea" />
       </el-form-item>
       <el-form-item label="标签" prop="tags">
         <el-select
           v-model="formData.tags"
-          multiple
-          filterable
           allow-create
+          filterable
+          multiple
           placeholder="请选择标签"
           style="width: 380px"
         >
@@ -24,13 +24,14 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">检 测</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">检 测</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemSensitiveWordTestForm" setup>
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
+
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示

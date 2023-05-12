@@ -2,20 +2,20 @@
   <div style="position: relative">
     <div
       v-if="type === '2'"
-      class="verify-img-out"
       :style="{ height: parseInt(setSize.imgHeight) + vSpace + 'px' }"
+      class="verify-img-out"
     >
-      <div class="verify-img-panel" :style="{ width: setSize.imgWidth, height: setSize.imgHeight }">
+      <div :style="{ width: setSize.imgWidth, height: setSize.imgHeight }" class="verify-img-panel">
         <img
           :src="'data:image/png;base64,' + backImgBase"
           alt=""
           style="width: 100%; height: 100%; display: block"
         />
-        <div class="verify-refresh" @click="refresh" v-show="showRefresh">
+        <div v-show="showRefresh" class="verify-refresh" @click="refresh">
           <i class="iconfont icon-refresh"></i>
         </div>
         <transition name="tips">
-          <span class="verify-tips" v-if="tipWords" :class="passFlag ? 'suc-bg' : 'err-bg'">
+          <span v-if="tipWords" :class="passFlag ? 'suc-bg' : 'err-bg'" class="verify-tips">
             {{ tipWords }}
           </span>
         </transition>
@@ -23,24 +23,21 @@
     </div>
     <!-- 公共部分 -->
     <div
-      class="verify-bar-area"
       :style="{ width: setSize.imgWidth, height: barSize.height, 'line-height': barSize.height }"
+      class="verify-bar-area"
     >
       <span class="verify-msg" v-text="text"></span>
       <div
-        class="verify-left-bar"
         :style="{
           width: leftBarWidth !== undefined ? leftBarWidth : barSize.height,
           height: barSize.height,
           'border-color': leftBarBorderColor,
           transaction: transitionWidth
         }"
+        class="verify-left-bar"
       >
         <span class="verify-msg" v-text="finishText"></span>
         <div
-          class="verify-move-block"
-          @touchstart="start"
-          @mousedown="start"
           :style="{
             width: barSize.height,
             height: barSize.height,
@@ -48,17 +45,20 @@
             left: moveBlockLeft,
             transition: transitionLeft
           }"
+          class="verify-move-block"
+          @mousedown="start"
+          @touchstart="start"
         >
           <i :class="['verify-icon iconfont', iconClass]" :style="{ color: iconColor }"></i>
           <div
             v-if="type === '2'"
-            class="verify-sub-block"
             :style="{
               width: Math.floor((parseInt(setSize.imgWidth) * 47) / 310) + 'px',
               height: setSize.imgHeight,
               top: '-' + (parseInt(setSize.imgHeight) + vSpace) + 'px',
               'background-size': setSize.imgWidth + ' ' + setSize.imgHeight
             }"
+            class="verify-sub-block"
           >
             <img
               :src="'data:image/png;base64,' + blockBackImgBase"
@@ -71,7 +71,7 @@
     </div>
   </div>
 </template>
-<script type="text/babel" setup>
+<script name="VerifySlide" setup type="text/babel">
 /**
  * VerifySlide
  * @description 滑块

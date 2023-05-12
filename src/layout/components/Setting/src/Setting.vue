@@ -1,12 +1,12 @@
-<script setup lang="ts">
+<script lang="ts" name="Setting" setup>
 import { ElMessage } from 'element-plus'
-import { useCssVar, useClipboard } from '@vueuse/core'
+import { useClipboard, useCssVar } from '@vueuse/core'
 
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 import { useDesign } from '@/hooks/web/useDesign'
 
-import { trim, setCssVar } from '@/utils'
-import { colorIsDark, lighten, hexToRGB } from '@/utils/color'
+import { setCssVar, trim } from '@/utils'
+import { colorIsDark, hexToRGB, lighten } from '@/utils/color'
 import { useAppStore } from '@/store/modules/app'
 import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import ColorRadioPicker from './components/ColorRadioPicker.vue'
@@ -202,10 +202,10 @@ const clear = () => {
     class="fixed top-[45%] right-0 w-40px h-40px text-center leading-40px bg-[var(--el-color-primary)] cursor-pointer"
     @click="drawer = true"
   >
-    <Icon icon="ep:setting" color="#fff" />
+    <Icon color="#fff" icon="ep:setting" />
   </div>
 
-  <ElDrawer v-model="drawer" direction="rtl" size="350px" :z-index="4000">
+  <ElDrawer v-model="drawer" :z-index="4000" direction="rtl" size="350px">
     <template #header>
       <span class="text-16px font-700">{{ t('setting.projectSetting') }}</span>
     </template>
@@ -279,10 +279,10 @@ const clear = () => {
 
     <ElDivider />
     <div>
-      <ElButton type="primary" class="w-full" @click="copyConfig">{{ t('setting.copy') }}</ElButton>
+      <ElButton class="w-full" type="primary" @click="copyConfig">{{ t('setting.copy') }}</ElButton>
     </div>
     <div class="mt-5px">
-      <ElButton type="danger" class="w-full" @click="clear">
+      <ElButton class="w-full" type="danger" @click="clear">
         {{ t('setting.clearAndReset') }}
       </ElButton>
     </div>

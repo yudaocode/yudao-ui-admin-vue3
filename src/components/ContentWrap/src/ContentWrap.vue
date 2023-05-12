@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="ContentWrap" setup>
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 
@@ -21,7 +21,7 @@ defineProps({
           <template #content>
             <div class="max-w-200px">{{ message }}</div>
           </template>
-          <Icon class="ml-5px" icon="ep:question-filled" :size="14" />
+          <Icon :size="14" class="ml-5px" icon="ep:question-filled" />
         </ElTooltip>
       </div>
     </template>

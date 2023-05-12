@@ -1,12 +1,12 @@
 <template>
   <Form
-    :schema="schema"
-    :rules="rules"
-    label-position="top"
-    hide-required-asterisk
-    size="large"
     v-show="getShow"
+    :rules="rules"
+    :schema="schema"
     class="dark:(border-1 border-[var(--el-border-color)] border-solid)"
+    hide-required-asterisk
+    label-position="top"
+    size="large"
     @register="register"
   >
     <template #title>
@@ -23,25 +23,25 @@
       <div class="w-[100%]">
         <XButton
           :loading="loading"
-          type="primary"
-          class="w-[100%]"
           :title="t('login.register')"
+          class="w-[100%]"
+          type="primary"
           @click="loginRegister()"
         />
       </div>
       <div class="w-[100%] mt-15px">
-        <XButton class="w-[100%]" :title="t('login.hasUser')" @click="handleBackLogin()" />
+        <XButton :title="t('login.hasUser')" class="w-[100%]" @click="handleBackLogin()" />
       </div>
     </template>
   </Form>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="RegisterForm" setup>
 import type { FormRules } from 'element-plus'
 
 import { useForm } from '@/hooks/web/useForm'
 import { useValidator } from '@/hooks/web/useValidator'
 import LoginFormTitle from './LoginFormTitle.vue'
-import { useLoginState, LoginStateEnum } from './useLogin'
+import { LoginStateEnum, useLoginState } from './useLogin'
 import { FormSchema } from '@/types/form'
 
 const { t } = useI18n()

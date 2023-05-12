@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="ContentDetailWrap" setup>
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 
@@ -21,7 +21,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div :class="[`${prefixCls}-container`]" ref="contentDetailWrap">
+  <div ref="contentDetailWrap" :class="[`${prefixCls}-container`]">
     <Sticky :offset="offset">
       <div
         :class="[
@@ -31,7 +31,7 @@ onMounted(() => {
       >
         <div :class="[`${prefixCls}-header__back`, 'flex pl-10px pr-10px ']">
           <ElButton @click="emit('back')">
-            <Icon icon="ep:arrow-left" class="mr-5px" />
+            <Icon class="mr-5px" icon="ep:arrow-left" />
             {{ t('common.back') }}
           </ElButton>
         </div>
@@ -47,7 +47,9 @@ onMounted(() => {
     </Sticky>
     <div style="padding: var(--app-content-padding)">
       <ElCard :class="[`${prefixCls}-body`, 'mb-20px']" shadow="never">
-        <div> <slot></slot> </div>
+        <div>
+          <slot></slot>
+        </div>
       </ElCard>
     </div>
   </div>

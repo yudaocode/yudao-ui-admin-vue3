@@ -39,9 +39,9 @@ export const getMerchant = (id: number) => {
 }
 
 // 根据商户名称搜索商户列表
-export const getMerchantListByName = (name: string) => {
+export const getMerchantListByName = (name?: string) => {
   return request.get({
-    url: '/pay/merchant/list-by-name?id=',
+    url: '/pay/merchant/list-by-name',
     params: {
       name: name
     }

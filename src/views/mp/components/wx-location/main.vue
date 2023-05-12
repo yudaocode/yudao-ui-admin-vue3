@@ -1,5 +1,5 @@
 <!--
-  【微信消息 - 定位】
+  【微信消息 - 定位】TODO @Dhb52 目前未启用
 -->
 <template>
   <div>
@@ -31,7 +31,6 @@
           />
         </el-row>
         <el-row>
-          <el-icon><Location /></el-icon>
           <Icon icon="ep:location" />
           {{ label }}
         </el-row>
@@ -39,6 +38,7 @@
     </el-link>
   </div>
 </template>
+
 <script setup lang="ts" name="WxLocation">
 const props = defineProps({
   locationX: {

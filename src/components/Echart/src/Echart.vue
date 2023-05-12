@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="EChart" setup>
 import type { EChartsOption } from 'echarts'
 import echarts from '@/plugins/echarts'
 import { debounce } from 'lodash-es'

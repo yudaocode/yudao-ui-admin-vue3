@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="Descriptions" setup>
 import { PropType } from 'vue'
 import dayjs from 'dayjs'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -84,7 +84,7 @@ const toggleClick = () => {
         <div class="flex items-center">
           {{ title }}
           <ElTooltip v-if="message" :content="message" placement="right">
-            <Icon icon="ep:warning" class="ml-5px" />
+            <Icon class="ml-5px" icon="ep:warning" />
           </ElTooltip>
         </div>
       </div>
@@ -95,8 +95,8 @@ const toggleClick = () => {
       <div v-show="show" :class="[`${prefixCls}-content`, 'p-10px']">
         <ElDescriptions
           :column="props.columns"
-          border
           :direction="mobile ? 'vertical' : 'horizontal'"
+          border
           v-bind="getBindValue"
         >
           <template v-if="slots['extra']" #extra>
@@ -114,8 +114,8 @@ const toggleClick = () => {
                 :row="{
                   label: item.label
                 }"
-                >{{ item.label }}</slot
-              >
+                >{{ item.label }}
+              </slot>
             </template>
 
             <template #default>

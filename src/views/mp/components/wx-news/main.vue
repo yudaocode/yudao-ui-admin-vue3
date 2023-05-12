@@ -9,13 +9,13 @@
   <div class="news-home">
     <div v-for="(article, index) in articles" :key="index" class="news-div">
       <!-- 头条 -->
-      <a target="_blank" :href="article.url" v-if="index === 0">
+      <a v-if="index === 0" :href="article.url" target="_blank">
         <div class="news-main">
           <div class="news-content">
             <el-image
+              :src="article.picUrl"
               class="material-img"
               style="width: 100%; height: 120px"
-              :src="article.picUrl"
             />
             <div class="news-content-title">
               <span>{{ article.title }}</span>
@@ -24,12 +24,12 @@
         </div>
       </a>
       <!-- 二条/三条等等 -->
-      <a target="_blank" :href="article.url" v-else>
+      <a v-else :href="article.url" target="_blank">
         <div class="news-main-item">
           <div class="news-content-item">
             <div class="news-content-item-title">{{ article.title }}</div>
             <div class="news-content-item-img">
-              <img class="material-img" :src="article.picUrl" height="100%" />
+              <img :src="article.picUrl" class="material-img" height="100%" />
             </div>
           </div>
         </div>
@@ -38,13 +38,15 @@
   </div>
 </template>
 
-<script setup lang="ts">
-const props = defineProps({
-  articles: {
-    type: Array,
-    default: () => null
+<script lang="ts" name="WxNews" setup>
+const props = withDefaults(
+  defineProps<{
+    articles: any[] | null
+  }>(),
+  {
+    articles: null
   }
-})
+)
 
 defineExpose({
   articles: props.articles
@@ -53,54 +55,62 @@ defineExpose({
 
 <style lang="scss" scoped>
 .news-home {
-  background-color: #ffffff;
   width: 100%;
   margin: auto;
+  background-color: #fff;
 }
+
 .news-main {
   width: 100%;
   margin: auto;
 }
+
 .news-content {
-  background-color: #acadae;
-  width: 100%;
   position: relative;
+  width: 100%;
+  background-color: #acadae;
 }
+
 .news-content-title {
-  display: inline-block;
-  font-size: 12px;
-  color: #ffffff;
   position: absolute;
-  left: 0;
   bottom: 0;
-  background-color: black;
+  left: 0;
+  display: inline-block;
   width: 98%;
   padding: 1%;
-  opacity: 0.65;
+  font-size: 12px;
+  color: #fff;
   white-space: normal;
+  background-color: black;
+  opacity: 0.65;
   box-sizing: unset !important;
 }
+
 .news-main-item {
-  background-color: #ffffff;
   padding: 5px 0;
+  background-color: #fff;
   border-top: 1px solid #eaeaea;
 }
+
 .news-content-item {
   position: relative;
 }
+
 .news-content-item-title {
   display: inline-block;
-  font-size: 10px;
   width: 70%;
   margin-left: 1%;
+  font-size: 10px;
   white-space: normal;
 }
+
 .news-content-item-img {
   display: inline-block;
   width: 25%;
-  background-color: #acadae;
   margin-right: 1%;
+  background-color: #acadae;
 }
+
 .material-img {
   width: 100%;
 }

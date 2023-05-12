@@ -1,6 +1,6 @@
 <template>
-  <Dialog title="详情" v-model="dialogVisible" :scroll="true" :max-height="500">
-    <Descriptions :schema="allSchemas.detailSchema" :data="detailData">
+  <Dialog v-model="dialogVisible" :max-height="500" :scroll="true" title="详情">
+    <Descriptions :data="detailData" :schema="allSchemas.detailSchema">
       <!-- 展示 HTML 内容 -->
       <template #templateContent="{ row }">
         <div v-html="row.templateContent"></div>
@@ -8,7 +8,7 @@
     </Descriptions>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemMailLogDetail" setup>
 import * as MailLogApi from '@/api/system/mail/log'
 import { allSchemas } from './log.data'
 

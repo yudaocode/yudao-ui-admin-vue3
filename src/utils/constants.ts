@@ -114,6 +114,10 @@ export const PayChannelEnum = {
   ALIPAY_QR: {
     code: 'alipay_qr',
     name: '支付宝扫码支付'
+  },
+  ALIPAY_BAR: {
+    code: 'alipay_bar',
+    name: '支付宝条码支付'
   }
 }
 
@@ -214,5 +218,23 @@ export const PayRefundStatusEnum = {
   CLOSE: {
     status: 99,
     name: '退款关闭'
+  }
+}
+
+/**
+ * 商品SPU枚举类
+ */
+export const ProductSpuStatusEnum = {
+  RECYCLE: {
+    status: -1,
+    name: '回收站'
+  },
+  DISABLE: {
+    status: 0,
+    name: '下架'
+  },
+  ENABLE: {
+    status: 1,
+    name: '上架'
   }
 }

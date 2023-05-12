@@ -1,15 +1,16 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
-    <Form ref="formRef" :schema="allSchemas.formSchema" :rules="rules" v-loading="formLoading" />
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
+    <Form ref="formRef" v-loading="formLoading" :rules="rules" :schema="allSchemas.formSchema" />
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="SystemMailAccountForm" setup>
 import * as MailAccountApi from '@/api/system/mail/account'
-import { rules, allSchemas } from './account.data'
+import { allSchemas, rules } from './account.data'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

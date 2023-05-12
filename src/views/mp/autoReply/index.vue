@@ -3,236 +3,127 @@
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <el-form
-      class="-mb-15px"
-      :model="queryParams"
-      ref="queryFormRef"
-      :inline="true"
-      label-width="68px"
-    >
+    <el-form class="-mb-15px" :model="queryParams" :inline="true" label-width="68px">
       <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="queryParams.accountId" placeholder="请选择公众号" class="!w-240px">
-          <el-option
-            v-for="item in accountList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" />搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" />重置</el-button>
+        <WxAccountSelect @change="onAccountChanged" />
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- tab 切换 -->
   <ContentWrap>
-    <el-tabs v-model="type" @tab-change="handleTabChange">
+    <el-tabs v-model="msgType" @tab-change="onTabChange">
       <!-- 操作工具栏 -->
       <el-row :gutter="10" class="mb8">
         <el-col :span="1.5">
           <el-button
             type="primary"
             plain
-            @click="handleAdd"
+            @click="onCreate"
             v-hasPermi="['mp:auto-reply:create']"
-            v-if="type !== '1' || list.length <= 0"
+            v-if="msgType !== MsgType.Follow || list.length <= 0"
           >
             <Icon icon="ep:plus" />新增
           </el-button>
         </el-col>
       </el-row>
       <!-- tab 项 -->
-      <el-tab-pane name="1">
+      <el-tab-pane :name="MsgType.Follow">
         <template #label>
-          <span><Icon icon="ep:star-off" /> 关注时回复</span>
+          <el-row align="middle"><Icon icon="ep:star" class="mr-2px" /> 关注时回复</el-row>
         </template>
       </el-tab-pane>
-      <el-tab-pane name="2">
+      <el-tab-pane :name="MsgType.Message">
         <template #label>
-          <span><Icon icon="ep:chat-line-round" /> 消息回复</span>
+          <el-row align="middle"><Icon icon="ep:chat-line-round" class="mr-2px" /> 消息回复</el-row>
         </template>
       </el-tab-pane>
-      <el-tab-pane name="3">
+      <el-tab-pane :name="MsgType.Keyword">
         <template #label>
-          <span><Icon icon="ep:news" /> 关键词回复</span>
+          <el-row align="middle"><Icon icon="fa:newspaper-o" class="mr-2px" /> 关键词回复</el-row>
         </template>
       </el-tab-pane>
     </el-tabs>
     <!-- 列表 -->
-    <el-table v-loading="loading" :data="list">
-      <el-table-column
-        label="请求消息类型"
-        align="center"
-        prop="requestMessageType"
-        v-if="type === '2'"
-      />
-      <el-table-column label="关键词" align="center" prop="requestKeyword" v-if="type === '3'" />
-      <el-table-column label="匹配类型" align="center" prop="requestMatch" v-if="type === '3'">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MP_AUTO_REPLY_REQUEST_MATCH" :value="scope.row.requestMatch" />
-        </template>
-      </el-table-column>
-      <el-table-column label="回复消息类型" align="center">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MP_MESSAGE_TYPE" :value="scope.row.responseMessageType" />
-        </template>
-      </el-table-column>
-      <el-table-column label="回复内容" align="center">
-        <template #default="scope">
-          <div v-if="scope.row.responseMessageType === 'text'">{{ scope.row.responseContent }}</div>
-          <div v-else-if="scope.row.responseMessageType === 'voice'">
-            <WxVoicePlayer :url="scope.row.responseMediaUrl" />
-          </div>
-          <div v-else-if="scope.row.responseMessageType === 'image'">
-            <a target="_blank" :href="scope.row.responseMediaUrl">
-              <img :src="scope.row.responseMediaUrl" style="width: 100px" />
-            </a>
-          </div>
-          <div
-            v-else-if="
-              scope.row.responseMessageType === 'video' ||
-              scope.row.responseMessageType === 'shortvideo'
-            "
-          >
-            <WxVideoPlayer :url="scope.row.responseMediaUrl" style="margin-top: 10px" />
-          </div>
-          <div v-else-if="scope.row.responseMessageType === 'news'">
-            <WxNews :articles="scope.row.responseArticles" />
-          </div>
-          <div v-else-if="scope.row.responseMessageType === 'music'">
-            <WxMusic
-              :title="scope.row.responseTitle"
-              :description="scope.row.responseDescription"
-              :thumb-media-url="scope.row.responseThumbMediaUrl"
-              :music-url="scope.row.responseMusicUrl"
-              :hq-music-url="scope.row.responseHqMusicUrl"
-            />
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180"
-      />
-      <el-table-column label="操作" align="center">
-        <template #default="scope">
-          <el-button
-            type="primary"
-            link
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['mp:auto-reply:update']"
-          >
-            修改
-          </el-button>
-          <el-button
-            type="danger"
-            link
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['mp:auto-reply:delete']"
-          >
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <ReplyTable
+      :loading="loading"
+      :list="list"
+      :msg-type="msgType"
+      @on-update="onUpdate"
+      @on-delete="onDelete"
+    />
 
     <!-- 添加或修改自动回复的对话框 -->
-    <el-dialog :title="title" v-model="open" width="800px" append-to-body>
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="消息类型" prop="requestMessageType" v-if="type === '2'">
-          <el-select v-model="form.requestMessageType" placeholder="请选择">
+    <!-- TODO @Dhb52 -->
+    <el-dialog :title="dialogTitle" v-model="showFormDialog" width="800px" destroy-on-close>
+      <el-form ref="formRef" :model="replyForm" :rules="rules" label-width="80px">
+        <el-form-item label="消息类型" prop="requestMessageType" v-if="msgType === MsgType.Message">
+          <el-select v-model="replyForm.requestMessageType" placeholder="请选择">
             <template v-for="dict in getDictOptions(DICT_TYPE.MP_MESSAGE_TYPE)" :key="dict.value">
               <el-option
-                v-if="requestMessageTypes.includes(dict.value)"
+                v-if="RequestMessageTypes.includes(dict.value)"
                 :label="dict.label"
                 :value="dict.value"
               />
             </template>
           </el-select>
         </el-form-item>
-        <el-form-item label="匹配类型" prop="requestMatch" v-if="type === '3'">
-          <el-select v-model="form.requestMatch" placeholder="请选择匹配类型" clearable>
+        <el-form-item label="匹配类型" prop="requestMatch" v-if="msgType === MsgType.Keyword">
+          <el-select v-model="replyForm.requestMatch" placeholder="请选择匹配类型" clearable>
             <el-option
-              v-for="dict in getDictOptions(DICT_TYPE.MP_AUTO_REPLY_REQUEST_MATCH)"
+              v-for="dict in getIntDictOptions(DICT_TYPE.MP_AUTO_REPLY_REQUEST_MATCH)"
               :key="dict.value"
               :label="dict.label"
               :value="dict.value"
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="关键词" prop="requestKeyword" v-if="type === '3'">
-          <el-input v-model="form.requestKeyword" placeholder="请输入内容" clearable />
+        <el-form-item label="关键词" prop="requestKeyword" v-if="msgType === MsgType.Keyword">
+          <el-input v-model="replyForm.requestKeyword" placeholder="请输入内容" clearable />
         </el-form-item>
         <el-form-item label="回复消息">
-          <WxReplySelect :objData="objData" v-if="hackResetWxReplySelect" />
+          <WxReplySelect v-model="reply" />
         </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="cancel">取 消</el-button>
-        <el-button type="primary" @click="handleSubmit">确 定</el-button>
+        <el-button type="primary" @click="onSubmit">确 定</el-button>
       </template>
     </el-dialog>
   </ContentWrap>
 </template>
-<script setup name="MpAutoReply">
-import { ref, reactive, onMounted, nextTick } from 'vue'
-import WxVideoPlayer from '@/views/mp/components/wx-video-play/main.vue'
-import WxVoicePlayer from '@/views/mp/components/wx-voice-play/main.vue'
-import WxMusic from '@/views/mp/components/wx-music/main.vue'
-import WxNews from '@/views/mp/components/wx-news/main.vue'
-import WxReplySelect from '@/views/mp/components/wx-reply/main.vue'
-import { getSimpleAccountList } from '@/api/mp/account'
-import {
-  createAutoReply,
-  deleteAutoReply,
-  getAutoReply,
-  getAutoReplyPage,
-  updateAutoReply
-} from '@/api/mp/autoReply'
-
-import { DICT_TYPE, getDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
+<script setup lang="ts" name="MpAutoReply">
+import WxReplySelect, { type Reply, ReplyType } from '@/views/mp/components/wx-reply'
+import WxAccountSelect from '@/views/mp/components/wx-account-select'
+import * as MpAutoReplyApi from '@/api/mp/autoReply'
+import { DICT_TYPE, getDictOptions, getIntDictOptions } from '@/utils/dict'
 import { ContentWrap } from '@/components/ContentWrap'
+import type { FormInstance, TabPaneName } from 'element-plus'
+import ReplyTable from './components/ReplyTable.vue'
+import { MsgType } from './components/types'
+const message = useMessage() // 消息
 
-const message = useMessage()
-
-const queryFormRef = ref()
-const formRef = ref()
-
-// tab 类型（1、关注时回复；2、消息回复；3、关键词回复）
-const type = ref('3')
-// 允许选择的请求消息类型
-const requestMessageTypes = ['text', 'image', 'voice', 'video', 'shortvideo', 'location', 'link']
-// 遮罩层
-const loading = ref(true)
-// 显示搜索条件
-// const showSearch = ref(true)
-// 总条数
-const total = ref(0)
-// 自动回复列表
-const list = ref([])
+const accountId = ref(-1) // 公众号ID
+const msgType = ref<MsgType>(MsgType.Keyword) // 消息类型
+const RequestMessageTypes = ['text', 'image', 'voice', 'video', 'shortvideo', 'location', 'link'] // 允许选择的请求消息类型
+const loading = ref(true) // 遮罩层
+const total = ref(0) // 总条数
+const list = ref<any[]>([]) // 自动回复列表
+const formRef = ref<FormInstance | null>(null) // 表单 ref
 // 查询参数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: undefined
+  accountId: accountId
 })
 
-// 弹出层标题
-const title = ref('')
-// 是否显示弹出层
-const open = ref(false)
-// 表单参数
-const form = ref({})
+const dialogTitle = ref('') // 弹出层标题
+const showFormDialog = ref(false) // 是否显示弹出层
+const replyForm = ref<any>({}) // 表单参数
 // 回复消息
-const objData = ref({
-  type: 'text'
+const reply = ref<Reply>({
+  type: ReplyType.Text,
+  accountId: -1
 })
 // 表单校验
 const rules = {
@@ -240,43 +131,27 @@ const rules = {
   requestMatch: [{ required: true, message: '请求的关键字的匹配不能为空', trigger: 'blur' }]
 }
 
-const hackResetWxReplySelect = ref(false) // 重置 WxReplySelect 组件，解决无法清除的问题
-
-// 公众号账号列表
-const accountList = ref([])
-
-onMounted(() => {
-  getSimpleAccountList().then((data) => {
-    accountList.value = data
-    // 默认选中第一个
-    if (accountList.value.length > 0) {
-      queryParams.accountId = accountList.value[0].id
-    }
-    // 加载数据
-    getList()
-  })
-})
+/** 侦听账号变化 */
+const onAccountChanged = (id: number) => {
+  accountId.value = id
+  reply.value.accountId = id
+  queryParams.pageNo = 1
+  getList()
+}
 
 /** 查询列表 */
 const getList = async () => {
-  // 如果没有选中公众号账号，则进行提示。
-  if (!queryParams.accountId) {
-    message.error('未选中公众号，无法查询自动回复')
-    return false
-  }
-
-  loading.value = false
-  // 处理查询参数
-  let params = {
-    ...queryParams,
-    type: type.value
-  }
-  // 执行查询
-  getAutoReplyPage(params).then((data) => {
+  loading.value = true
+  try {
+    const data = await MpAutoReplyApi.getAutoReplyPage({
+      ...queryParams,
+      type: msgType.value
+    })
     list.value = data.list
     total.value = data.total
+  } finally {
     loading.value = false
-  })
+  }
 }
 
 /** 搜索按钮操作 */
@@ -285,114 +160,103 @@ const handleQuery = () => {
   getList()
 }
 
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value?.resetFields()
-  // 默认选中第一个
-  if (accountList.value.length > 0) {
-    queryParams.accountId = accountList.value[0].id
-  }
-  handleQuery()
-}
-
-const handleTabChange = (tabName) => {
-  type.value = tabName
+const onTabChange = (tabName: TabPaneName) => {
+  msgType.value = tabName as MsgType
   handleQuery()
 }
 
 /** 新增按钮操作 */
-const handleAdd = () => {
+const onCreate = () => {
   reset()
-  resetEditor()
   // 打开表单，并设置初始化
-  open.value = true
-  title.value = '新增自动回复'
-  objData.value = {
-    type: 'text',
+  reply.value = {
+    type: ReplyType.Text,
     accountId: queryParams.accountId
   }
+
+  dialogTitle.value = '新增自动回复'
+  showFormDialog.value = true
 }
 
 /** 修改按钮操作 */
-const handleUpdate = (row) => {
+const onUpdate = async (id: number) => {
   reset()
-  resetEditor()
-  console.log(row)
 
-  getAutoReply(row.id).then((data) => {
-    // 设置属性
-    form.value = { ...data }
-    delete form.value['responseMessageType']
-    delete form.value['responseContent']
-    delete form.value['responseMediaId']
-    delete form.value['responseMediaUrl']
-    delete form.value['responseDescription']
-    delete form.value['responseArticles']
-    objData.value = {
-      type: data.responseMessageType,
-      accountId: queryParams.accountId,
-      content: data.responseContent,
-      mediaId: data.responseMediaId,
-      url: data.responseMediaUrl,
-      title: data.responseTitle,
-      description: data.responseDescription,
-      thumbMediaId: data.responseThumbMediaId,
-      thumbMediaUrl: data.responseThumbMediaUrl,
-      articles: data.responseArticles,
-      musicUrl: data.responseMusicUrl,
-      hqMusicUrl: data.responseHqMusicUrl
-    }
+  const data = await MpAutoReplyApi.getAutoReply(id)
+  // 设置属性
+  replyForm.value = { ...data }
+  delete replyForm.value['responseMessageType']
+  delete replyForm.value['responseContent']
+  delete replyForm.value['responseMediaId']
+  delete replyForm.value['responseMediaUrl']
+  delete replyForm.value['responseDescription']
+  delete replyForm.value['responseArticles']
+  reply.value = {
+    type: data.responseMessageType,
+    accountId: queryParams.accountId,
+    content: data.responseContent,
+    mediaId: data.responseMediaId,
+    url: data.responseMediaUrl,
+    title: data.responseTitle,
+    description: data.responseDescription,
+    thumbMediaId: data.responseThumbMediaId,
+    thumbMediaUrl: data.responseThumbMediaUrl,
+    articles: data.responseArticles,
+    musicUrl: data.responseMusicUrl,
+    hqMusicUrl: data.responseHqMusicUrl
+  }
 
-    // 打开表单
-    open.value = true
-    title.value = '修改自动回复'
-  })
+  // 打开表单
+  dialogTitle.value = '修改自动回复'
+  showFormDialog.value = true
 }
 
-const handleSubmit = () => {
-  formRef.value?.validate((valid) => {
-    if (!valid) {
-      return
-    }
+/** 删除按钮操作 */
+const onDelete = async (id: number) => {
+  await message.confirm('是否确认删除此数据?')
+  await MpAutoReplyApi.deleteAutoReply(id)
+  await getList()
+  message.success('删除成功')
+}
 
-    // 处理回复消息
-    const form = { ...form.value }
-    form.responseMessageType = objData.value.type
-    form.responseContent = objData.value.content
-    form.responseMediaId = objData.value.mediaId
-    form.responseMediaUrl = objData.value.url
-    form.responseTitle = objData.value.title
-    form.responseDescription = objData.value.description
-    form.responseThumbMediaId = objData.value.thumbMediaId
-    form.responseThumbMediaUrl = objData.value.thumbMediaUrl
-    form.responseArticles = objData.value.articles
-    form.responseMusicUrl = objData.value.musicUrl
-    form.responseHqMusicUrl = objData.value.hqMusicUrl
+const onSubmit = async () => {
+  const valid = await formRef.value?.validate()
+  if (!valid) return
 
-    if (form.value.id !== undefined) {
-      updateAutoReply(form).then(() => {
-        message.success('修改成功')
-        open.value = false
-        getList()
-      })
-    } else {
-      createAutoReply(form).then(() => {
-        message.success('新增成功')
-        open.value = false
-        getList()
-      })
-    }
-  })
+  // 处理回复消息
+  const submitForm: any = { ...replyForm.value }
+  submitForm.responseMessageType = reply.value.type
+  submitForm.responseContent = reply.value.content
+  submitForm.responseMediaId = reply.value.mediaId
+  submitForm.responseMediaUrl = reply.value.url
+  submitForm.responseTitle = reply.value.title
+  submitForm.responseDescription = reply.value.description
+  submitForm.responseThumbMediaId = reply.value.thumbMediaId
+  submitForm.responseThumbMediaUrl = reply.value.thumbMediaUrl
+  submitForm.responseArticles = reply.value.articles
+  submitForm.responseMusicUrl = reply.value.musicUrl
+  submitForm.responseHqMusicUrl = reply.value.hqMusicUrl
+
+  if (replyForm.value.id !== undefined) {
+    await MpAutoReplyApi.updateAutoReply(submitForm)
+    message.success('修改成功')
+  } else {
+    await MpAutoReplyApi.createAutoReply(submitForm)
+    message.success('新增成功')
+  }
+
+  showFormDialog.value = false
+  await getList()
 }
 
 // 表单重置
 const reset = () => {
-  form.value = {
+  replyForm.value = {
     id: undefined,
     accountId: queryParams.accountId,
-    type: type.value,
+    type: msgType.value,
     requestKeyword: undefined,
-    requestMatch: type.value === '3' ? 1 : undefined,
+    requestMatch: msgType.value === MsgType.Keyword ? 1 : undefined,
     requestMessageType: undefined
   }
   formRef.value?.resetFields()
@@ -400,22 +264,7 @@ const reset = () => {
 
 // 取消按钮
 const cancel = () => {
-  open.value = false
+  showFormDialog.value = false
   reset()
-}
-
-// 表单 Editor 重置
-const resetEditor = () => {
-  hackResetWxReplySelect.value = false // 销毁组件
-  nextTick(() => {
-    hackResetWxReplySelect.value = true // 重建组件
-  })
-}
-
-const handleDelete = async (row) => {
-  await message.confirm('是否确认删除此数据?')
-  await deleteAutoReply(row.id)
-  await getList()
-  message.success('删除成功')
 }
 </script>

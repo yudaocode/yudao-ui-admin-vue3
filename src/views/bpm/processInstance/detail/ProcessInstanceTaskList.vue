@@ -1,9 +1,9 @@
 <template>
-  <el-card class="box-card" v-loading="loading">
+  <el-card v-loading="loading" class="box-card">
     <template #header>
       <span class="el-icon-picture-outline">审批记录</span>
     </template>
-    <el-col :span="16" :offset="4">
+    <el-col :offset="4" :span="16">
       <div class="block">
         <el-timeline>
           <el-timeline-item
@@ -16,9 +16,9 @@
             <el-card :body-style="{ padding: '10px' }">
               <label v-if="item.assigneeUser" style="font-weight: normal; margin-right: 30px">
                 审批人：{{ item.assigneeUser.nickname }}
-                <el-tag type="info" size="small">{{ item.assigneeUser.deptName }}</el-tag>
+                <el-tag size="small" type="info">{{ item.assigneeUser.deptName }}</el-tag>
               </label>
-              <label style="font-weight: normal" v-if="item.createTime">创建时间：</label>
+              <label v-if="item.createTime" style="font-weight: normal">创建时间：</label>
               <label style="color: #8a909c; font-weight: normal">
                 {{ formatDate(item?.createTime) }}
               </label>
@@ -44,7 +44,7 @@
     </el-col>
   </el-card>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="BpmProcessInstanceTaskList" setup>
 import { formatDate, formatPast2 } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'
 

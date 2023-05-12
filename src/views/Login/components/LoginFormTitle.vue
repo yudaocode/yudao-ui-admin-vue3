@@ -3,7 +3,7 @@
     {{ getFormTitle }}
   </h2>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="LoginFormTitle" setup>
 import { LoginStateEnum, useLoginState } from './useLogin'
 
 const { t } = useI18n()

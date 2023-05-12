@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" name="ContextMenu" setup>
 import { PropType } from 'vue'
 
 import { useDesign } from '@/hooks/web/useDesign'
@@ -51,9 +51,9 @@ defineExpose({
     :class="prefixCls"
     :trigger="trigger"
     placement="bottom-start"
+    popper-class="v-context-menu-popper"
     @command="command"
     @visible-change="visibleChange"
-    popper-class="v-context-menu-popper"
   >
     <slot></slot>
     <template #dropdown>
@@ -61,11 +61,12 @@ defineExpose({
         <ElDropdownItem
           v-for="(item, index) in schema"
           :key="`dropdown${index}`"
-          :divided="item.divided"
-          :disabled="item.disabled"
           :command="item"
+          :disabled="item.disabled"
+          :divided="item.divided"
         >
-          <Icon :icon="item.icon" /> {{ t(item.label) }}
+          <Icon :icon="item.icon" />
+          {{ t(item.label) }}
         </ElDropdownItem>
       </ElDropdownMenu>
     </template>

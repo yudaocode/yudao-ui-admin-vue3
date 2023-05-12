@@ -1,11 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="120px"
-      v-loading="formLoading"
     >
       <el-form-item label="配置名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入配置名" />
@@ -16,8 +16,8 @@
       <el-form-item label="存储器" prop="storage">
         <el-select
           v-model="formData.storage"
-          placeholder="请选择存储器"
           :disabled="formData.id !== undefined"
+          placeholder="请选择存储器"
         >
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.INFRA_FILE_STORAGE)"
@@ -48,7 +48,7 @@
         label="主机端口"
         prop="config.port"
       >
-        <el-input-number :min="0" v-model="formData.config.port" placeholder="请输入主机端口" />
+        <el-input-number v-model="formData.config.port" :min="0" placeholder="请输入主机端口" />
       </el-form-item>
       <el-form-item
         v-if="formData.storage >= 11 && formData.storage <= 12"
@@ -93,14 +93,15 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" name="InfraFileConfigForm" setup>
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as FileConfigApi from '@/api/infra/fileConfig'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
