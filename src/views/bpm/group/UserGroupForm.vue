@@ -68,7 +68,7 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const userList = ref([]) // 用户列表
+const userList = ref<any[]>([]) // 用户列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {

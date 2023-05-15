@@ -59,6 +59,14 @@ import { useClipboard } from '@vueuse/core'
 import { handleTree2 } from '@/utils/tree'
 import * as CodegenApi from '@/api/infra/codegen'
 
+import hljs from 'highlight.js' // 导入代码高亮文件
+import 'highlight.js/styles/github.css' // 导入代码高亮样式
+import java from 'highlight.js/lib/languages/java'
+import xml from 'highlight.js/lib/languages/java'
+import javascript from 'highlight.js/lib/languages/javascript'
+import sql from 'highlight.js/lib/languages/sql'
+import typescript from 'highlight.js/lib/languages/typescript'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -184,13 +192,6 @@ const copy = async (text: string) => {
 /**
  * 代码高亮
  */
-import hljs from 'highlight.js' // 导入代码高亮文件
-import 'highlight.js/styles/github.css' // 导入代码高亮样式
-import java from 'highlight.js/lib/languages/java'
-import xml from 'highlight.js/lib/languages/java'
-import javascript from 'highlight.js/lib/languages/javascript'
-import sql from 'highlight.js/lib/languages/sql'
-import typescript from 'highlight.js/lib/languages/typescript'
 const highlightedCode = (item) => {
   const language = item.filePath.substring(item.filePath.lastIndexOf('.') + 1)
   const result = hljs.highlight(language, item.code || '', true)

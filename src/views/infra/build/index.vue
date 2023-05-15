@@ -33,6 +33,12 @@
 import FcDesigner from '@form-create/designer'
 import { useClipboard } from '@vueuse/core'
 import { isString } from '@/utils/is'
+
+import hljs from 'highlight.js' // 导入代码高亮文件
+import 'highlight.js/styles/github.css' // 导入代码高亮样式
+import xml from 'highlight.js/lib/languages/java'
+import json from 'highlight.js/lib/languages/json'
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息
 
@@ -112,10 +118,6 @@ const copy = async (text: string) => {
 /**
  * 代码高亮
  */
-import hljs from 'highlight.js' // 导入代码高亮文件
-import 'highlight.js/styles/github.css' // 导入代码高亮样式
-import xml from 'highlight.js/lib/languages/java'
-import json from 'highlight.js/lib/languages/json'
 const highlightedCode = (code) => {
   // 处理语言和代码
   let language = 'json'

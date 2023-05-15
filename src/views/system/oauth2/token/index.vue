@@ -80,7 +80,7 @@
           <el-button
             link
             type="danger"
-            @click="handleForceLogout(scope.row.id)"
+            @click="handleForceLogout(scope.row.accessToken)"
             v-hasPermi="['system:oauth2-token:delete']"
           >
             强退
@@ -142,12 +142,12 @@ const resetQuery = () => {
 }
 
 /** 强制退出操作 */
-const handleForceLogout = async (id: number) => {
+const handleForceLogout = async (accessToken: string) => {
   try {
     // 删除的二次确认
     await message.confirm('是否要强制退出用户')
     // 发起删除
-    await OAuth2AccessTokenApi.deleteAccessToken(id)
+    await OAuth2AccessTokenApi.deleteAccessToken(accessToken)
     message.success(t('common.success'))
     // 刷新列表
     await getList()
