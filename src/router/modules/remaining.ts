@@ -331,28 +331,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/infra',
-    component: Layout,
-    name: 'InfraRedis',
-    meta: {
-      hidden: true
-    },
-    children: [
-      {
-        path: '/infra/redis',
-        component: () => import('@/views/infra/redis/index.vue'),
-        name: 'InfraRedis',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: 'REDIS测试测试测试',
-          activeMenu: 'infra/redis/index'
-        }
-      }
-    ]
-  },
-  {
     path: '/property',
     component: Layout,
     name: 'property',

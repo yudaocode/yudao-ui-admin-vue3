@@ -68,8 +68,6 @@ import { GaugeChart } from 'echarts/charts'
 import { ToolboxComponent } from 'echarts/components'
 import * as RedisApi from '@/api/infra/redis'
 import { RedisMonitorInfoVO } from '@/api/infra/redis/types'
-echarts.use([ToolboxComponent])
-echarts.use([GaugeChart])
 const cache = ref<RedisMonitorInfoVO>()
 
 // 基本信息
@@ -145,14 +143,14 @@ const usedmemoryEchartChika = reactive({
         fontSize: 15
       },
       pointer: {
-        //指针的大小
+        // 指针的大小
         width: 7,
         show: true
       },
       detail: {
         textStyle: {
           fontWeight: 'normal',
-          //里面文字下的数值大小（50）
+          // 里面文字下的数值大小（50）
           fontSize: 15,
           color: '#FFFFFF'
         },
@@ -213,13 +211,13 @@ const commandStatsRefChika = reactive({
 
 /** 加载数据 */
 const getSummary = () => {
-  //初始化命令图表
-  initcommandStatsChart()
+  // 初始化命令图表
+  initCommandStatsChart()
   usedMemoryInstance()
 }
 
 /** 命令使用情况 */
-const initcommandStatsChart = async () => {
+const initCommandStatsChart = async () => {
   usedmemoryEchartChika.series[0].data = []
   // 发起请求
   try {
@@ -265,6 +263,9 @@ const usedMemoryInstance = async () => {
 
 /** 初始化 **/
 onMounted(() => {
+  echarts.use([ToolboxComponent])
+  echarts.use([GaugeChart])
+  // 读取 redis 信息
   readRedisInfo()
   // 加载数据
   getSummary()
