@@ -100,16 +100,10 @@ const loading = ref(false) // 遮罩层
 const list = ref<any[]>([]) // 总条数
 const total = ref(0) // 数据列表
 // 查询参数
-interface QueryParams {
-  pageNo: number
-  pageSize: number
-  accountId: number
-  permanent: boolean
-}
-const queryParams: QueryParams = reactive({
+const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: 0,
+  accountId: -1,
   permanent: true
 })
 const showCreateVideo = ref(false) // 是否新建视频的弹窗
@@ -117,6 +111,7 @@ const showCreateVideo = ref(false) // 是否新建视频的弹窗
 /** 侦听公众号变化 **/
 const onAccountChanged = (id: number) => {
   queryParams.accountId = id
+  queryParams.pageNo = 1
   getList()
 }
 

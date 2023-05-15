@@ -8,13 +8,14 @@
 import * as MpAccountApi from '@/api/mp/account'
 
 const account: MpAccountApi.AccountVO = reactive({
-  id: undefined,
+  id: -1,
   name: ''
 })
-const accountList: Ref<MpAccountApi.AccountVO[]> = ref([])
+
+const accountList = ref<MpAccountApi.AccountVO[]>([])
 
 const emit = defineEmits<{
-  (e: 'change', id: number, name: string): void
+  (e: 'change', id: number, name: string)
 }>()
 
 const handleQuery = async () => {

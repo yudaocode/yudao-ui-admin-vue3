@@ -113,27 +113,20 @@ const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref<any[]>([]) // 列表的数据
 
-interface QueryParams {
-  pageNo: number
-  pageSize: number
-  accountId: number
-  openid: string | null
-  nickname: string | null
-}
-const queryParams: QueryParams = reactive({
+const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: 0,
-  openid: null,
-  nickname: null
+  accountId: -1,
+  openid: '',
+  nickname: ''
 })
 const queryFormRef = ref<FormInstance | null>(null) // 搜索的表单
 const tagList = ref<any[]>([]) // 公众号标签列表
 
 /** 侦听公众号变化 **/
 const onAccountChanged = (id: number) => {
-  queryParams.pageNo = 1
   queryParams.accountId = id
+  queryParams.pageNo = 1
   getList()
 }
 

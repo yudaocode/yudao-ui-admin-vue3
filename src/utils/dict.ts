@@ -144,5 +144,9 @@ export enum DICT_TYPE {
 
   // ========== MP 模块 ==========
   MP_AUTO_REPLY_REQUEST_MATCH = 'mp_auto_reply_request_match', // 自动回复请求匹配类型
-  MP_MESSAGE_TYPE = 'mp_message_type' // 消息类型
+  MP_MESSAGE_TYPE = 'mp_message_type', // 消息类型
+
+  // ========== MALL 模块 ==========
+  PRODUCT_UNIT = 'product_unit', // 商品单位
+  PRODUCT_SPU_STATUS = 'product_spu_status' //商品状态
 }

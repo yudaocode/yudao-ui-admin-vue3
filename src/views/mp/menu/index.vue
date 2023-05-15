@@ -65,7 +65,7 @@ const MENU_NOT_SELECTED = '__MENU_NOT_SELECTED__'
 
 // ======================== 列表查询 ========================
 const loading = ref(false) // 遮罩层
-const accountId = ref<number>(0)
+const accountId = ref(-1)
 const accountName = ref<string>('')
 const menuList = ref<Menu[]>([])
 
@@ -339,7 +339,7 @@ div {
 
   .left {
     position: relative;
-    display: inline-block;
+    display: block;
     float: left;
     width: 350px;
     height: 715px;
