@@ -1,32 +1,34 @@
 <template>
   <el-form ref="OtherSettingsFormRef" :model="formData" :rules="rules" label-width="120px">
     <el-row>
-      <!-- TODO @puhui999：横着三个哈 -->
+      <!-- TODO @puhui999：横着三个哈  fix-->
       <el-col :span="24">
-        <el-col :span="8">
-          <el-form-item label="商品排序" prop="sort">
-            <el-input-number v-model="formData.sort" :min="0" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="赠送积分" prop="giveIntegral">
-            <el-input-number v-model="formData.giveIntegral" :min="0" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="虚拟销量" prop="virtualSalesCount">
-            <el-input-number
-              v-model="formData.virtualSalesCount"
-              :min="0"
-              placeholder="请输入虚拟销量"
-            />
-          </el-form-item>
-        </el-col>
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="商品排序" prop="sort">
+              <el-input-number v-model="formData.sort" :min="0" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="赠送积分" prop="giveIntegral">
+              <el-input-number v-model="formData.giveIntegral" :min="0" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="虚拟销量" prop="virtualSalesCount">
+              <el-input-number
+                v-model="formData.virtualSalesCount"
+                :min="0"
+                placeholder="请输入虚拟销量"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-col>
       <el-col :span="24">
         <el-form-item label="商品推荐">
           <el-checkbox-group v-model="checkboxGroup" @change="onChangeGroup">
-            <el-checkbox v-for="(item, index) in recommend" :key="index" :label="item.value">
+            <el-checkbox v-for="(item, index) in recommendOptions" :key="index" :label="item.value">
               {{ item.name }}
             </el-checkbox>
           </el-checkbox-group>
@@ -51,7 +53,7 @@
   </el-form>
 </template>
 <script lang="ts" name="OtherSettingsForm" setup>
-import type { SpuType } from '@/api/mall/product/management/type/spuType'
+import type { SpuType } from '@/api/mall/product/spu'
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
@@ -65,34 +67,7 @@ const props = defineProps({
   },
   activeName: propTypes.string.def('')
 })
-// 商品推荐选项 TODO @puhui999：这种叫 recommendOptions 会更合适哈
-const recommend = [
-  { name: '是否热卖', value: 'recommendHot' },
-  { name: '是否优惠', value: 'recommendBenefit' },
-  { name: '是否精品', value: 'recommendBest' },
-  { name: '是否新品', value: 'recommendNew' },
-  { name: '是否优品', value: 'recommendGood' }
-]
-const checkboxGroup = ref<string[]>(['recommendHot']) // 选中推荐选项
-/** 选择商品后赋值 */
-const onChangeGroup = () => {
-  // TODO @puhui999：是不是可以遍历 recommend，然后进行是否选中；
-  checkboxGroup.value.includes('recommendHot')
-    ? (formData.value.recommendHot = true)
-    : (formData.value.recommendHot = false)
-  checkboxGroup.value.includes('recommendBenefit')
-    ? (formData.value.recommendBenefit = true)
-    : (formData.value.recommendBenefit = false)
-  checkboxGroup.value.includes('recommendBest')
-    ? (formData.value.recommendBest = true)
-    : (formData.value.recommendBest = false)
-  checkboxGroup.value.includes('recommendNew')
-    ? (formData.value.recommendNew = true)
-    : (formData.value.recommendNew = false)
-  checkboxGroup.value.includes('recommendGood')
-    ? (formData.value.recommendGood = true)
-    : (formData.value.recommendGood = false)
-}
+
 const OtherSettingsFormRef = ref() // 表单Ref
 // 表单数据
 const formData = ref<SpuType>({
@@ -111,6 +86,23 @@ const rules = reactive({
   giveIntegral: [required],
   virtualSalesCount: [required]
 })
+// TODO @puhui999：这种叫 recommendOptions 会更合适哈 fix
+const recommendOptions = [
+  { name: '是否热卖', value: 'recommendHot' },
+  { name: '是否优惠', value: 'recommendBenefit' },
+  { name: '是否精品', value: 'recommendBest' },
+  { name: '是否新品', value: 'recommendNew' },
+  { name: '是否优品', value: 'recommendGood' }
+] // 商品推荐选项
+const checkboxGroup = ref<string[]>([]) // 选中的推荐选项
+
+/** 选择商品后赋值 */
+const onChangeGroup = () => {
+  // TODO @puhui999：是不是可以遍历 recommend，然后进行是否选中；fix
+  recommendOptions.forEach(({ value }) => {
+    formData.value[value] = checkboxGroup.value.includes(value) ? true : false
+  })
+}
 
 /**
  * 将传进来的值赋值给formData
@@ -120,13 +112,6 @@ watch(
   (data) => {
     if (!data) return
     copyValueToTarget(formData.value, data)
-    // TODO 如果先修改其他设置的值，再改变商品详情或是商品信息会重置其他设置页面中的相关值 下一个版本修复
-    checkboxGroup.value = []
-    formData.value.recommendHot ? checkboxGroup.value.push('recommendHot') : ''
-    formData.value.recommendBenefit ? checkboxGroup.value.push('recommendBenefit') : ''
-    formData.value.recommendBest ? checkboxGroup.value.push('recommendBest') : ''
-    formData.value.recommendNew ? checkboxGroup.value.push('recommendNew') : ''
-    formData.value.recommendGood ? checkboxGroup.value.push('recommendGood') : ''
   },
   {
     deep: true,
@@ -154,4 +139,14 @@ const validate = async () => {
   })
 }
 defineExpose({ validate })
+onMounted(async () => {
+  await nextTick()
+  // TODO 如果先修改其他设置的值，再改变商品详情或是商品信息会重置其他设置页面中的相关值 fix:已修复，改为组件初始化时赋值
+  checkboxGroup.value = []
+  recommendOptions.forEach(({ value }) => {
+    if (formData.value[value]) {
+      checkboxGroup.value.push(value)
+    }
+  })
+})
 </script>
