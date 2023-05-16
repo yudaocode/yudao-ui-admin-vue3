@@ -33,7 +33,7 @@ export interface SpuType {
   picUrl?: string // 商品封面图
   sliderPicUrls?: string[] // 商品轮播图
   introduction?: string // 商品简介
-  deliveryTemplateId?: number // 运费模版
+  deliveryTemplateId?: number | null // 运费模版
   specType?: boolean // 商品规格
   subCommissionType?: boolean // 分销类型
   skus: SkuType[] // sku数组
@@ -48,39 +48,37 @@ export interface SpuType {
   recommendGood?: boolean // 是否优品
 }
 
-// TODO @puhui999：中英文之间有空格
-
-// 获得spu列表 TODO @puhui999：这个是 getSpuPage 哈
+// 获得 Spu 列表
 export const getSpuPage = (params: PageParam) => {
   return request.get({ url: '/product/spu/page', params })
 }
 
-// 获得spu列表tabsCount
+// 获得 Spu 列表 tabsCount
 export const getTabsCount = () => {
-  return request.get({ url: '/product/spu/tabsCount' })
+  return request.get({ url: '/product/spu/get-count' })
 }
 
-// 创建商品spu
+// 创建商品 Spu
 export const createSpu = (data: SpuType) => {
   return request.post({ url: '/product/spu/create', data })
 }
 
-// 更新商品spu
+// 更新商品 Spu
 export const updateSpu = (data: SpuType) => {
   return request.put({ url: '/product/spu/update', data })
 }
 
-// 更新商品spu status
+// 更新商品 Spu status
 export const updateStatus = (data: { id: number; status: number }) => {
-  return request.put({ url: '/product/spu/updateStatus', data })
+  return request.put({ url: '/product/spu/update-status', data })
 }
 
-// 获得商品 spu
+// 获得商品 Spu
 export const getSpu = (id: number) => {
   return request.get({ url: `/product/spu/get-detail?id=${id}` })
 }
 
-// 删除商品Spu
+// 删除商品 Spu
 export const deleteSpu = (id: number) => {
   return request.delete({ url: `/product/spu/delete?id=${id}` })
 }

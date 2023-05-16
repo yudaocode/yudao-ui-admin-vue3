@@ -18,15 +18,17 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状态">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+      <!--  TODO 分类只能选择二级分类目前还没做，还是先以联调通顺为主 -->
+      <el-form-item label="商品分类" prop="categoryId">
+        <el-tree-select
+          v-model="queryParams.categoryId"
+          :data="categoryList"
+          :props="defaultProps"
+          check-strictly
+          class="w-1/1"
+          node-key="id"
+          placeholder="请选择商品分类"
+        />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
@@ -59,7 +61,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-tabs v-model="queryParams.tabType" @tab-click="handleClick">
+    <el-tabs v-model="queryParams.tabType" @tab-click="handleTabClick">
       <el-tab-pane
         v-for="item in tabsData"
         :key="item.type"
@@ -68,28 +70,29 @@
       />
     </el-tabs>
     <el-table v-loading="loading" :data="list">
-      <!-- TODO puhui999: ID 编号的展示 -->
-      <!--   TODO 暂时不做折叠数据   -->
-      <!--      <el-table-column type="expand">-->
-      <!--        <template #default="{ row }">-->
-      <!--          <el-form inline label-position="left">-->
-      <!--            <el-form-item label="市场价：">-->
-      <!--              <span>{{ row.marketPrice }}</span>-->
-      <!--            </el-form-item>-->
-      <!--            <el-form-item label="成本价：">-->
-      <!--              <span>{{ row.costPrice }}</span>-->
-      <!--            </el-form-item>-->
-      <!--            <el-form-item label="虚拟销量：">-->
-      <!--              <span>{{ row.virtualSalesCount }}</span>-->
-      <!--            </el-form-item>-->
-      <!--          </el-form>-->
-      <!--        </template>-->
-      <!--      </el-table-column>-->
+      <!--   TODO 折叠数据按需增加暂定以下三个   -->
+      <el-table-column type="expand" width="30">
+        <template #default="{ row }">
+          <el-form class="demo-table-expand" inline label-position="left">
+            <el-form-item label="市场价：">
+              <span>{{ row.marketPrice }}</span>
+            </el-form-item>
+            <el-form-item label="成本价：">
+              <span>{{ row.costPrice }}</span>
+            </el-form-item>
+            <el-form-item label="虚拟销量：">
+              <span>{{ row.virtualSalesCount }}</span>
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-table-column>
+      <!-- TODO puhui999: ID 编号的展示 fix-->
+      <el-table-column key="id" align="center" label="商品编号" prop="id" />
       <el-table-column label="商品图" min-width="80">
         <template #default="{ row }">
           <el-image
             :src="row.picUrl"
-            style="width: 36px; height: 36px"
+            style="width: 30px; height: 30px"
             @click="imagePreview(row.picUrl)"
           />
         </template>
@@ -107,19 +110,23 @@
         prop="createTime"
         width="180"
       />
-      <el-table-column fixed="right" label="状态" min-width="80">
+      <el-table-column align="center" label="状态" min-width="80">
         <template #default="{ row }">
-          <!-- TODO @puhui：是不是不用 Number(row.status) 去比较哈，直接 row.status < 0 -->
-          <el-switch
-            v-model="row.status"
-            :active-value="1"
-            :disabled="Number(row.status) < 0"
-            :inactive-value="0"
-            active-text="上架"
-            inactive-text="下架"
-            inline-prompt
-            @change="changeStatus(row)"
-          />
+          <!-- fix: 修复打开回收站时商品误触改变商品状态的事件，因为el-switch只用0和1没有-1所以当商品状态为-1时状态使用el-tag显示  -->
+          <template v-if="row.status >= 0">
+            <el-switch
+              v-model="row.status"
+              :active-value="1"
+              :inactive-value="0"
+              active-text="上架"
+              inactive-text="下架"
+              inline-prompt
+              @change="changeStatus(row)"
+            />
+          </template>
+          <template v-else>
+            <el-tag type="info">回收站</el-tag>
+          </template>
         </template>
       </el-table-column>
       <el-table-column align="center" fixed="right" label="操作" min-width="150">
@@ -138,7 +145,7 @@
               v-hasPermi="['product:spu:update']"
               link
               type="primary"
-              @click="addToTrash(row, ProductSpuStatusEnum.DISABLE.status)"
+              @click="changeStatus(row, ProductSpuStatusEnum.DISABLE.status)"
             >
               恢复到仓库
             </el-button>
@@ -156,7 +163,7 @@
               v-hasPermi="['product:spu:update']"
               link
               type="primary"
-              @click="addToTrash(row, ProductSpuStatusEnum.RECYCLE.status)"
+              @click="changeStatus(row, ProductSpuStatusEnum.RECYCLE.status)"
             >
               加入回收站
             </el-button>
@@ -172,21 +179,17 @@
       @pagination="getList"
     />
   </ContentWrap>
-  <!-- https://kailong110120130.gitee.io/vue-element-plus-admin-doc/components/image-viewer.html，可以用这个么？ -->
-  <!-- 必须在表格外面展示。不然单元格会遮挡图层 -->
-  <el-image-viewer
-    v-if="imgViewVisible"
-    :url-list="imageViewerList"
-    @close="imgViewVisible = false"
-  />
 </template>
-<script lang="ts" name="ProductList" setup>
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
-// TODO @puhui999：managementApi=》ProductSpuApi
-import * as managementApi from '@/api/mall/product/management/spu'
-import { ProductSpuStatusEnum } from '@/utils/constants'
+<script lang="ts" name="ProductSpu" setup>
 import { TabsPaneContext } from 'element-plus'
+import { cloneDeep } from 'lodash-es'
+import { createImageViewer } from '@/components/ImageViewer'
+import { dateFormatter } from '@/utils/formatTime'
+import { defaultProps, handleTree } from '@/utils/tree'
+import { ProductSpuStatusEnum } from '@/utils/constants'
+import * as ProductSpuApi from '@/api/mall/product/spu'
+import * as ProductCategoryApi from '@/api/mall/product/category'
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { currentRoute, push } = useRouter() // 路由跳转
@@ -225,26 +228,21 @@ const tabsData = ref([
 
 /** 获得每个 Tab 的数量 */
 const getTabsCount = async () => {
-  // TODO @puhui999：这里是不是可以不要 try catch 哈
-  try {
-    const res = await managementApi.getTabsCount()
-    for (let objName in res) {
-      tabsData.value[Number(objName)].count = res[objName]
-    }
-  } catch {}
+  // TODO @puhui999：这里是不是可以不要 try catch 哈 fix
+  const res = await ProductSpuApi.getTabsCount()
+  for (let objName in res) {
+    tabsData.value[Number(objName)].count = res[objName]
+  }
 }
-
-const imgViewVisible = ref(false) // 商品图预览
-const imageViewerList = ref<string[]>([]) // 商品图预览列表
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
   tabType: 0
-})
-const queryFormRef = ref() // 搜索的表单
+}) // 查询参数
+const queryFormRef = ref() // 搜索的表单Ref
 
-// TODO @puhui999：可以改成 handleTabClick：更准确一点；
-const handleClick = (tab: TabsPaneContext) => {
+// TODO @puhui999：可以改成 handleTabClick：更准确一点；fix
+const handleTabClick = (tab: TabsPaneContext) => {
   queryParams.value.tabType = tab.paneName
   getList()
 }
@@ -253,7 +251,7 @@ const handleClick = (tab: TabsPaneContext) => {
 const getList = async () => {
   loading.value = true
   try {
-    const data = await managementApi.getSpuList(queryParams.value)
+    const data = await ProductSpuApi.getSpuPage(queryParams.value)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -261,7 +259,7 @@ const getList = async () => {
   }
 }
 
-// TODO @puhui999：是不是 changeStatus 和 addToTrash 调用一个统一的方法，去更新状态。这样逻辑会更干净一些。
+// TODO @puhui999：是不是 changeStatus 和 addToTrash 调用一个统一的方法，去更新状态。这样逻辑会更干净一些。fix
 /**
  * 更改 SPU 状态
  *
@@ -269,10 +267,12 @@ const getList = async () => {
  * @param status 更改前的值
  */
 const changeStatus = async (row, status?: number) => {
-  // TODO 测试过程中似乎有点问题，下一版修复
+  // fix: 将加入回收站功能合并到changeStatus并优化
+  const deepCopyValue = cloneDeep(unref(row))
+  if (typeof status !== 'undefined') deepCopyValue.status = status
   try {
     let text = ''
-    switch (row.status) {
+    switch (deepCopyValue.status) {
       case ProductSpuStatusEnum.DISABLE.status:
         text = ProductSpuStatusEnum.DISABLE.name
         break
@@ -283,21 +283,21 @@ const changeStatus = async (row, status?: number) => {
         text = `加入${ProductSpuStatusEnum.RECYCLE.name}`
         break
     }
+    // fix: 修复恢复到仓库的信息提示
     await message.confirm(
-      row.status === -1 ? `确认要将[${row.name}]${text}吗？` : `确认要${text}[${row.name}]吗？`
+      deepCopyValue.status === -1
+        ? `确认要将[${row.name}]${text}吗？`
+        : row.status === -1 // 再判断一次原对象是否等于-1，例: 把回收站中的商品恢复到仓库中，事件触发时原对象status为-1 深拷贝对象status被赋值为0
+        ? `确认要将[${row.name}]恢复到仓库吗？`
+        : `确认要${text}[${row.name}]吗？`
     )
-    await managementApi.updateStatus({ id: row.id, status: row.status })
+    await ProductSpuApi.updateStatus({ id: deepCopyValue.id, status: deepCopyValue.status })
     message.success('更新状态成功')
     // 刷新 tabs 数据
     await getTabsCount()
     // 刷新列表
     await getList()
   } catch {
-    // 取消加入回收站时回显数据
-    if (typeof status !== 'undefined') {
-      row.status = status
-      return
-    }
     // 取消更改状态时回显数据
     row.status =
       row.status === ProductSpuStatusEnum.DISABLE.status
@@ -306,26 +306,13 @@ const changeStatus = async (row, status?: number) => {
   }
 }
 
-/**
- * 加入回收站
- *
- * @param row
- * @param status
- */
-const addToTrash = (row, status) => {
-  // 复制一份原值
-  const num = Number(`${row.status}`)
-  row.status = status
-  changeStatus(row, num)
-}
-
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await managementApi.deleteSpu(id)
+    await ProductSpuApi.deleteSpu(id)
     message.success(t('common.delSuccess'))
     // 刷新tabs数据
     await getTabsCount()
@@ -339,8 +326,10 @@ const handleDelete = async (id: number) => {
  * @param imgUrl
  */
 const imagePreview = (imgUrl: string) => {
-  imageViewerList.value = [imgUrl]
-  imgViewVisible.value = true
+  // fix: 改用https://kailong110120130.gitee.io/vue-element-plus-admin-doc/components/image-viewer.html 预览图片
+  createImageViewer({
+    urlList: [imgUrl]
+  })
 }
 
 /** 搜索按钮操作 */
@@ -369,20 +358,28 @@ const openForm = (id?: number) => {
   push('/product/productManagementAdd')
 }
 
-// 监听路由变化更新列表 TODO @puhui999：这个是必须加的么？
+// 监听路由变化更新列表 TODO @puhui999：这个是必须加的么？fix: 因为编辑表单是以路由的方式打开，保存表单后列表不会刷新
 watch(
   () => currentRoute.value,
   () => {
     getList()
-  },
-  {
-    immediate: true
   }
 )
-
+const categoryList = ref() // 分类树
 /** 初始化 **/
-onMounted(() => {
-  getTabsCount()
-  getList()
+onMounted(async () => {
+  await getTabsCount()
+  await getList()
+  // 获得分类树
+  const data = await ProductCategoryApi.getCategoryList({})
+  categoryList.value = handleTree(data, 'id', 'parentId')
 })
 </script>
+<style lang="scss" scoped>
+.demo-table-expand {
+  :deep(.el-form-item__label) {
+    width: 82px;
+    color: #99a9bf;
+  }
+}
+</style>
