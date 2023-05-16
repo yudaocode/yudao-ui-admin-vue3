@@ -7,11 +7,8 @@
       :rules="formRules"
       label-width="80px"
     >
-      <el-form-item label="名称" prop="name">
+      <el-form-item label="属性名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入名称" />
-      </el-form-item>
-      <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" placeholder="请输入内容" type="textarea" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -30,8 +27,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('添加商品属性') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
-  name: '',
-  remark: ''
+  name: ''
 })
 const formRules = reactive({
   name: [{ required: true, message: '名称不能为空', trigger: 'blur' }]
