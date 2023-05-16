@@ -25,7 +25,7 @@
         </template>
       </el-table-column>
     </template>
-    <!-- TODO @puhui999： controls-position="right" 可以去掉哈，不然太长了，手动输入更方便 -->
+    <!-- TODO @puhui999： controls-position=" " 可以去掉哈，不然太长了，手动输入更方便 -->
     <el-table-column align="center" label="商品条码" min-width="168">
       <template #default="{ row }">
         <el-input v-model="row.barCode" class="w-100%" />
@@ -110,7 +110,7 @@ import { PropType } from 'vue'
 import { SpuType } from '@/api/mall/product/management/type/spuType'
 import { propTypes } from '@/utils/propTypes'
 import { SkuType } from '@/api/mall/product/management/type/skuType'
-import { copyValueToTarget } from '@/utils/object'
+import { copyValueToTarget } from '@/utils'
 
 const props = defineProps({
   propFormData: {

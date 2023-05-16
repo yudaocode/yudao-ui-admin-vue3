@@ -10,7 +10,7 @@
 import type { SpuType } from '@/api/mall/product/management/type/spuType'
 import { Editor } from '@/components/Editor'
 import { PropType } from 'vue'
-import { copyValueToTarget } from '@/utils/object'
+import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
 
 const message = useMessage() // 消息弹窗

@@ -14,9 +14,9 @@
             :data="categoryList"
             :props="defaultProps"
             check-strictly
+            class="w-1/1"
             node-key="id"
             placeholder="请选择商品分类"
-            class="w-1/1"
           />
         </el-form-item>
       </el-col>
@@ -27,7 +27,7 @@
       </el-col>
       <el-col :span="12">
         <el-form-item label="单位" prop="unit">
-          <el-select v-model="formData.unit" placeholder="请选择单位" class="w-1/1">
+          <el-select v-model="formData.unit" class="w-1/1" placeholder="请选择单位">
             <el-option
               v-for="dict in getIntDictOptions(DICT_TYPE.PRODUCT_UNIT)"
               :key="dict.value"
@@ -59,7 +59,7 @@
       </el-col>
       <el-col :span="12">
         <el-form-item label="运费模板" prop="deliveryTemplateId">
-          <el-select v-model="formData.deliveryTemplateId" placeholder="请选择" class="w-1/1">
+          <el-select v-model="formData.deliveryTemplateId" class="w-1/1" placeholder="请选择">
             <el-option v-for="item in []" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
@@ -112,10 +112,11 @@ import { defaultProps, handleTree } from '@/utils/tree'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import type { SpuType } from '@/api/mall/product/management/type/spuType'
 import { UploadImg, UploadImgs } from '@/components/UploadFile'
-import { copyValueToTarget } from '@/utils/object'
+import { copyValueToTarget } from '@/utils'
 import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
 import * as ProductCategoryApi from '@/api/mall/product/category'
 import { propTypes } from '@/utils/propTypes'
+
 const message = useMessage() // 消息弹窗
 
 const props = defineProps({
