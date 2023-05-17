@@ -25,13 +25,13 @@
         </template>
       </el-table-column>
     </template>
-    <!-- TODO @puhui999： controls-position=" " 可以去掉哈，不然太长了，手动输入更方便 -->
+    <!-- TODO @puhui999： controls-position=" " 可以去掉哈，不然太长了，手动输入更方便 fix -->
     <el-table-column align="center" label="商品条码" min-width="168">
       <template #default="{ row }">
         <el-input v-model="row.barCode" class="w-100%" />
       </template>
     </el-table-column>
-    <!-- TODO @puhui999：用户输入的时候，是按照元；分主要是我们自己用； -->
+    <!-- TODO @puhui999：用户输入的时候，是按照元；分主要是我们自己用；fix -->
     <el-table-column align="center" label="销售价(元)" min-width="168">
       <template #default="{ row }">
         <el-input-number v-model="row.price" :min="0" class="w-100%" />
@@ -96,7 +96,7 @@ const props = defineProps({
     type: Object as PropType<SpuType>,
     default: () => {}
   },
-  attributeList: {
+  propertyList: {
     type: Array,
     default: () => []
   },
@@ -142,7 +142,7 @@ watch(
   }
 )
 
-// TODO @芋艿：看看 chatgpt 可以进一步下面几个方法的实现不
+// TODO @芋艿：看看 chatgpt 可以进一步下面几个方法的实现不 fix
 /** 生成表数据 */
 const generateTableData = (data: any[]) => {
   // 构建数据结构 fix: 使用map替换多重for循环
@@ -207,8 +207,8 @@ const build = (propertyValuesList: Property[][]) => {
 
 /** 监听属性列表生成相关参数和表头 */
 watch(
-  () => props.attributeList,
-  (attributeList) => {
+  () => props.propertyList,
+  (propertyList) => {
     // 如果不是多规格则结束
     if (!formData.value.specType) return
     // 如果当前组件作为批量添加数据使用则重置表数据
@@ -229,15 +229,15 @@ watch(
       ]
     }
     // 判断代理对象是否为空
-    if (JSON.stringify(attributeList) === '[]') return
+    if (JSON.stringify(propertyList) === '[]') return
     // 重置表头
     tableHeaders.value = []
     // 生成表头
-    attributeList.forEach((item, index) => {
+    propertyList.forEach((item, index) => {
       // name加属性项index区分属性值
       tableHeaders.value.push({ prop: `name${index}`, label: item.name })
     })
-    generateTableData(attributeList)
+    generateTableData(propertyList)
   },
   {
     deep: true,

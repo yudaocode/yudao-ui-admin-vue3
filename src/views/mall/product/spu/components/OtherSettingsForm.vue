@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="OtherSettingsFormRef" :model="formData" :rules="rules" label-width="120px">
+  <el-form ref="otherSettingsFormRef" :model="formData" :rules="rules" label-width="120px">
     <el-row>
       <!-- TODO @puhui999：横着三个哈  fix-->
       <el-col :span="24">
@@ -55,8 +55,8 @@
 <script lang="ts" name="OtherSettingsForm" setup>
 import type { SpuType } from '@/api/mall/product/spu'
 import { PropType } from 'vue'
-import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
+import { copyValueToTarget } from '@/utils'
 
 const message = useMessage() // 消息弹窗
 
@@ -68,7 +68,7 @@ const props = defineProps({
   activeName: propTypes.string.def('')
 })
 
-const OtherSettingsFormRef = ref() // 表单Ref
+const otherSettingsFormRef = ref() // 表单Ref
 // 表单数据
 const formData = ref<SpuType>({
   sort: 1, // 商品排序
@@ -100,7 +100,7 @@ const checkboxGroup = ref<string[]>([]) // 选中的推荐选项
 const onChangeGroup = () => {
   // TODO @puhui999：是不是可以遍历 recommend，然后进行是否选中；fix
   recommendOptions.forEach(({ value }) => {
-    formData.value[value] = checkboxGroup.value.includes(value) ? true : false
+    formData.value[value] = checkboxGroup.value.includes(value)
   })
 }
 
@@ -111,22 +111,28 @@ watch(
   () => props.propFormData,
   (data) => {
     if (!data) return
+    // fix：三个表单组件监听赋值必须使用 copyValueToTarget 使用 formData.value = data 会监听非常多次
     copyValueToTarget(formData.value, data)
+    recommendOptions.forEach(({ value }) => {
+      // TODO 如果先修改其他设置的值，再改变商品详情或是商品信息会重置其他设置页面中的相关值 fix:已修复
+      if (formData.value[value] && !checkboxGroup.value.includes(value)) {
+        checkboxGroup.value.push(value)
+      }
+    })
   },
   {
-    deep: true,
+    // fix: 去掉深度监听只有对象引用发生改变的时候才执行,解决改一动多的问题
     immediate: true
   }
 )
-
 /**
  * 表单校验
  */
 const emit = defineEmits(['update:activeName'])
 const validate = async () => {
   // 校验表单
-  if (!OtherSettingsFormRef) return
-  return await unref(OtherSettingsFormRef).validate((valid) => {
+  if (!otherSettingsFormRef) return
+  return await unref(otherSettingsFormRef).validate((valid) => {
     if (!valid) {
       message.warning('商品其他设置未完善！！')
       emit('update:activeName', 'otherSettings')
@@ -139,14 +145,4 @@ const validate = async () => {
   })
 }
 defineExpose({ validate })
-onMounted(async () => {
-  await nextTick()
-  // TODO 如果先修改其他设置的值，再改变商品详情或是商品信息会重置其他设置页面中的相关值 fix:已修复，改为组件初始化时赋值
-  checkboxGroup.value = []
-  recommendOptions.forEach(({ value }) => {
-    if (formData.value[value]) {
-      checkboxGroup.value.push(value)
-    }
-  })
-})
 </script>

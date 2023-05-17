@@ -54,14 +54,14 @@ const inputVisible = computed(() => (index) => {
 const InputRef = ref() //标签输入框Ref
 const attributeList = ref([]) // 商品属性列表
 const props = defineProps({
-  attributeData: {
+  propertyList: {
     type: Array,
     default: () => {}
   }
 })
 
 watch(
-  () => props.attributeData,
+  () => props.propertyList,
   (data) => {
     if (!data) return
     attributeList.value = data
@@ -80,6 +80,7 @@ const handleClose = (index, valueIndex) => {
 /** 显示输入框并获取焦点 */
 const showInput = async (index) => {
   attributeIndex.value = index
+  // TODO 嗯！！！自动获取焦点还是有点问题，后续继续改进
   // 因为组件在ref中所以需要用索引获取对应的Ref
   InputRef.value[index]!.input!.focus()
 }

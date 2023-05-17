@@ -82,3 +82,8 @@ export const getSpu = (id: number) => {
 export const deleteSpu = (id: number) => {
   return request.delete({ url: `/product/spu/delete?id=${id}` })
 }
+
+// 导出商品 Spu
+export const exportUser = (params) => {
+  return request.download({ url: '/product/spu/export', params })
+}

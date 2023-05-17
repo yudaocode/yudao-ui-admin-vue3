@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="ProductManagementBasicInfoRef" :model="formData" :rules="rules" label-width="120px">
+  <el-form ref="productSpuBasicInfoRef" :model="formData" :rules="rules" label-width="120px">
     <el-row>
       <el-col :span="12">
         <el-form-item label="商品名称" prop="name">
@@ -54,7 +54,7 @@
       </el-col>
       <el-col :span="24">
         <el-form-item label="商品轮播图" prop="sliderPicUrls">
-          <UploadImgs v-model="formData.sliderPicUrls" />
+          <UploadImgs v-model:modelValue="formData.sliderPicUrls" />
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -86,36 +86,36 @@
       <!-- 多规格添加-->
       <el-col :span="24">
         <el-form-item v-if="formData.specType" label="商品属性">
-          <!-- TODO @puhui999：参考 https://admin.java.crmeb.net/store/list/creatProduct 添加规格好做么？添加的时候，不用输入备注哈 -->
-          <el-button class="mr-15px mb-10px" @click="AttributesAddFormRef.open">添加规格</el-button>
-          <ProductAttributes :attribute-data="attributeList" />
+          <!-- TODO @puhui999：参考 https://admin.java.crmeb.net/store/list/creatProduct 添加规格好做么？添加的时候，不用输入备注哈 fix-->
+          <el-button class="mr-15px mb-10px" @click="attributesAddFormRef.open">添加规格</el-button>
+          <ProductAttributes :propertyList="propertyList" />
         </el-form-item>
-        <template v-if="formData.specType && attributeList.length > 0">
+        <template v-if="formData.specType && propertyList.length > 0">
           <el-form-item label="批量设置">
-            <SkuList :attributeList="attributeList" :is-batch="true" :prop-form-data="formData" />
+            <SkuList :is-batch="true" :prop-form-data="formData" :propertyList="propertyList" />
           </el-form-item>
           <el-form-item label="属性列表">
-            <SkuList :attributeList="attributeList" :prop-form-data="formData" />
+            <SkuList :prop-form-data="formData" :propertyList="propertyList" />
           </el-form-item>
         </template>
         <el-form-item v-if="!formData.specType">
-          <SkuList :attributeList="attributeList" :prop-form-data="formData" />
+          <SkuList :prop-form-data="formData" :propertyList="propertyList" />
         </el-form-item>
       </el-col>
     </el-row>
   </el-form>
-  <ProductAttributesAddForm ref="AttributesAddFormRef" @success="addAttribute" />
+  <ProductAttributesAddForm ref="attributesAddFormRef" @success="addAttribute" />
 </template>
-<script lang="ts" name="ProductManagementBasicInfoForm" setup>
+<script lang="ts" name="ProductSpuBasicInfoForm" setup>
 import { PropType } from 'vue'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import type { SpuType } from '@/api/mall/product/management/type/spuType'
+import type { SpuType } from '@/api/mall/product/spu'
 import { UploadImg, UploadImgs } from '@/components/UploadFile'
-import { copyValueToTarget } from '@/utils'
 import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
 import * as ProductCategoryApi from '@/api/mall/product/category'
 import { propTypes } from '@/utils/propTypes'
+import { copyValueToTarget } from '@/utils'
 
 const message = useMessage() // 消息弹窗
 
@@ -126,17 +126,14 @@ const props = defineProps({
   },
   activeName: propTypes.string.def('')
 })
-const AttributesAddFormRef = ref() // 添加商品属性表单 TODO @puhui999：小写开头哈
-const ProductManagementBasicInfoRef = ref() // 表单Ref TODO @puhui999：小写开头哈
-// TODO @puhui999：attributeList 改成 propertyList，会更统一一点
-const attributeList = ref([]) // 商品属性列表
-/** 添加商品属性 */ // TODO @puhui999：propFormData 算出来
+const attributesAddFormRef = ref() // 添加商品属性表单 TODO @puhui999：小写开头哈 fix
+const productSpuBasicInfoRef = ref() // 表单Ref TODO @puhui999：小写开头哈  fix
+// TODO @puhui999：attributeList 改成 propertyList，会更统一一点 fix
+const propertyList = ref([]) // 商品属性列表
+/** 添加商品属性 */
+// TODO @puhui999：propFormData 算出来 fix: 因为ProductAttributesAddForm添加属性成功回调得使用不能完全依赖于propFormData
 const addAttribute = (property: any) => {
-  if (Array.isArray(property)) {
-    attributeList.value = property
-    return
-  }
-  attributeList.value.push(property)
+  Array.isArray(property) ? (propertyList.value = property) : propertyList.value.push(property)
 }
 const formData = reactive<SpuType>({
   name: '', // 商品名称
@@ -171,10 +168,15 @@ watch(
   () => props.propFormData,
   (data) => {
     if (!data) return
+    // fix：三个表单组件监听赋值必须使用 copyValueToTarget 使用 formData.value = data 会监听非常多次
     copyValueToTarget(formData, data)
+    // fix: 多图上传组件需要一个包含url属性的对象才能正常回显
+    formData.sliderPicUrls = data['sliderPicUrls'].map((item) => ({
+      url: item
+    }))
   },
   {
-    deep: true,
+    // fix: 去掉深度监听只有对象引用发生改变的时候才执行,解决改一动多的问题
     immediate: true
   }
 )
@@ -185,8 +187,8 @@ watch(
 const emit = defineEmits(['update:activeName'])
 const validate = async () => {
   // 校验表单
-  if (!ProductManagementBasicInfoRef) return
-  return await unref(ProductManagementBasicInfoRef).validate((valid) => {
+  if (!productSpuBasicInfoRef) return
+  return await unref(productSpuBasicInfoRef).validate((valid) => {
     if (!valid) {
       message.warning('商品信息未完善！！')
       emit('update:activeName', 'basicInfo')
@@ -212,7 +214,7 @@ const changeSubCommissionType = () => {
 /** 选择规格 */
 const onChangeSpec = () => {
   // 重置商品属性列表
-  attributeList.value = []
+  propertyList.value = []
   // 重置sku列表
   formData.skus = [
     {

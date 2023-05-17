@@ -1,5 +1,5 @@
 <template>
-  <el-form ref="DescriptionFormRef" :model="formData" :rules="rules" label-width="120px">
+  <el-form ref="descriptionFormRef" :model="formData" :rules="rules" label-width="120px">
     <!--富文本编辑器组件-->
     <el-form-item label="商品详情" prop="description">
       <Editor v-model:modelValue="formData.description" />
@@ -7,11 +7,11 @@
   </el-form>
 </template>
 <script lang="ts" name="DescriptionForm" setup>
-import type { SpuType } from '@/api/mall/product/management/type/spuType'
+import type { SpuType } from '@/api/mall/product/spu'
 import { Editor } from '@/components/Editor'
 import { PropType } from 'vue'
-import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
+import { copyValueToTarget } from '@/utils'
 
 const message = useMessage() // 消息弹窗
 const props = defineProps({
@@ -21,7 +21,7 @@ const props = defineProps({
   },
   activeName: propTypes.string.def('')
 })
-const DescriptionFormRef = ref() // 表单Ref
+const descriptionFormRef = ref() // 表单Ref
 const formData = ref<SpuType>({
   description: '' // 商品详情
 })
@@ -29,7 +29,6 @@ const formData = ref<SpuType>({
 const rules = reactive({
   description: [required]
 })
-
 /**
  * 富文本编辑器如果输入过再清空会有残留，需再重置一次
  */
@@ -45,7 +44,6 @@ watch(
     immediate: true
   }
 )
-
 /**
  * 将传进来的值赋值给formData
  */
@@ -53,10 +51,11 @@ watch(
   () => props.propFormData,
   (data) => {
     if (!data) return
+    // fix：三个表单组件监听赋值必须使用 copyValueToTarget 使用 formData.value = data 会监听非常多次
     copyValueToTarget(formData.value, data)
   },
   {
-    deep: true,
+    // fix: 去掉深度监听只有对象引用发生改变的时候才执行,解决改一动多的问题
     immediate: true
   }
 )
@@ -67,8 +66,8 @@ watch(
 const emit = defineEmits(['update:activeName'])
 const validate = async () => {
   // 校验表单
-  if (!DescriptionFormRef) return
-  return unref(DescriptionFormRef).validate((valid) => {
+  if (!descriptionFormRef) return
+  return await unref(descriptionFormRef).validate((valid) => {
     if (!valid) {
       message.warning('商品详情为完善!!')
       emit('update:activeName', 'description')

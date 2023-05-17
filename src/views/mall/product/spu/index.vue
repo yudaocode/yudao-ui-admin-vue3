@@ -8,7 +8,7 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <!-- TODO @puhui999：https://admin.java.crmeb.net/store/index，参考，使用分类 + 标题搜索 -->
+      <!-- TODO @puhui999：https://admin.java.crmeb.net/store/index，参考，使用分类 + 标题搜索 fix-->
       <el-form-item label="品牌名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -351,11 +351,11 @@ const resetQuery = () => {
 const openForm = (id?: number) => {
   // 修改
   if (typeof id === 'number') {
-    push('/product/productManagementAdd?id=' + id)
+    push('/product/productSpuEdit/' + id)
     return
   }
   // 新增
-  push('/product/productManagementAdd')
+  push('/product/productSpuAdd')
 }
 
 // 监听路由变化更新列表 TODO @puhui999：这个是必须加的么？fix: 因为编辑表单是以路由的方式打开，保存表单后列表不会刷新
@@ -377,8 +377,11 @@ onMounted(async () => {
 </script>
 <style lang="scss" scoped>
 .demo-table-expand {
+  padding-left: 42px;
+
   :deep(.el-form-item__label) {
     width: 82px;
+    font-weight: bold;
     color: #99a9bf;
   }
 }
