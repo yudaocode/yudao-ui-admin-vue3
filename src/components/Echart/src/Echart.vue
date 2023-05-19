@@ -27,7 +27,7 @@ const props = defineProps({
 const isDark = computed(() => appStore.getIsDark)
 
 const theme = computed(() => {
-  const echartTheme: boolean | string = unref(isDark) ? true : 'auto'
+  const echartTheme: boolean | string = unref(isDark) ? true : 'inherit'
 
   return echartTheme
 })

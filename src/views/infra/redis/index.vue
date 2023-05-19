@@ -63,9 +63,6 @@
   </el-scrollbar>
 </template>
 <script setup lang="ts">
-import echarts from '@/plugins/echarts'
-import { GaugeChart } from 'echarts/charts'
-import { ToolboxComponent } from 'echarts/components'
 import * as RedisApi from '@/api/infra/redis'
 import { RedisMonitorInfoVO } from '@/api/infra/redis/types'
 const cache = ref<RedisMonitorInfoVO>()
@@ -77,7 +74,7 @@ const readRedisInfo = async () => {
 }
 
 // 内存使用情况
-const usedmemoryEchartChika = reactive({
+const usedmemoryEchartChika = reactive<any>({
   title: {
     // 仪表盘标题。
     text: '内存使用情况',
@@ -263,8 +260,6 @@ const usedMemoryInstance = async () => {
 
 /** 初始化 **/
 onMounted(() => {
-  echarts.use([ToolboxComponent])
-  echarts.use([GaugeChart])
   // 读取 redis 信息
   readRedisInfo()
   // 加载数据
