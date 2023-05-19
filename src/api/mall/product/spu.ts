@@ -34,6 +34,7 @@ export interface SpuType {
   sliderPicUrls?: string[] // 商品轮播图
   introduction?: string // 商品简介
   deliveryTemplateId?: number | null // 运费模版
+  brandId?: number | null // 商品品牌编号
   specType?: boolean // 商品规格
   subCommissionType?: boolean // 分销类型
   skus: SkuType[] // sku数组

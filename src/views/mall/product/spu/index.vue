@@ -75,10 +75,10 @@
         <template #default="{ row }">
           <el-form class="demo-table-expand" inline label-position="left">
             <el-form-item label="市场价：">
-              <span>{{ row.marketPrice }}</span>
+              <span>{{ formatToFraction(row.marketPrice) }}</span>
             </el-form-item>
             <el-form-item label="成本价：">
-              <span>{{ row.costPrice }}</span>
+              <span>{{ formatToFraction(row.costPrice) }}</span>
             </el-form-item>
             <el-form-item label="虚拟销量：">
               <span>{{ row.virtualSalesCount }}</span>
@@ -99,7 +99,11 @@
       </el-table-column>
       <el-table-column :show-overflow-tooltip="true" label="商品名称" min-width="300" prop="name" />
       <!-- TODO 价格 / 100.0 -->
-      <el-table-column align="center" label="商品售价" min-width="90" prop="price" />
+      <el-table-column align="center" label="商品售价" min-width="90" prop="price">
+        <template #default="{ row }">
+          {{ formatToFraction(row.price) }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="销量" min-width="90" prop="salesCount" />
       <el-table-column align="center" label="库存" min-width="90" prop="stock" />
       <el-table-column align="center" label="排序" min-width="70" prop="sort" />
@@ -129,9 +133,12 @@
           </template>
         </template>
       </el-table-column>
-      <el-table-column align="center" fixed="right" label="操作" min-width="150">
+      <el-table-column align="center" fixed="right" label="操作" min-width="200">
         <template #default="{ row }">
           <!-- TODO @puhui999：【详情】，可以后面点做哈 -->
+          <el-button v-hasPermi="['product:spu:update']" link type="primary" @click="openDetail">
+            详情
+          </el-button>
           <template v-if="queryParams.tabType === 4">
             <el-button
               v-hasPermi="['product:spu:delete']"
@@ -151,7 +158,9 @@
             </el-button>
           </template>
           <template v-else>
+            <!-- 只有不是上架和回收站的商品可以编辑 -->
             <el-button
+              v-if="queryParams.tabType !== 0"
               v-hasPermi="['product:spu:update']"
               link
               type="primary"
@@ -189,6 +198,7 @@ import { defaultProps, handleTree } from '@/utils/tree'
 import { ProductSpuStatusEnum } from '@/utils/constants'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
+import { formatToFraction } from '@/utils'
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -357,7 +367,12 @@ const openForm = (id?: number) => {
   // 新增
   push('/product/productSpuAdd')
 }
-
+/**
+ * 查看商品详情
+ */
+const openDetail = () => {
+  message.alert('查看详情未完善！！！')
+}
 // 监听路由变化更新列表 TODO @puhui999：这个是必须加的么？fix: 因为编辑表单是以路由的方式打开，保存表单后列表不会刷新
 watch(
   () => currentRoute.value,

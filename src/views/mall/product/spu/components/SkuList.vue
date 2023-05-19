@@ -34,17 +34,29 @@
     <!-- TODO @puhui999：用户输入的时候，是按照元；分主要是我们自己用；fix -->
     <el-table-column align="center" label="销售价(元)" min-width="168">
       <template #default="{ row }">
-        <el-input-number v-model="row.price" :min="0" class="w-100%" />
+        <el-input-number v-model="row.price" :min="0" :precision="2" :step="0.1" class="w-100%" />
       </template>
     </el-table-column>
     <el-table-column align="center" label="市场价(元)" min-width="168">
       <template #default="{ row }">
-        <el-input-number v-model="row.marketPrice" :min="0" class="w-100%" />
+        <el-input-number
+          v-model="row.marketPrice"
+          :min="0"
+          :precision="2"
+          :step="0.1"
+          class="w-100%"
+        />
       </template>
     </el-table-column>
     <el-table-column align="center" label="成本价(元)" min-width="168">
       <template #default="{ row }">
-        <el-input-number v-model="row.costPrice" :min="0" class="w-100%" />
+        <el-input-number
+          v-model="row.costPrice"
+          :min="0"
+          :precision="2"
+          :step="0.1"
+          class="w-100%"
+        />
       </template>
     </el-table-column>
     <el-table-column align="center" label="库存" min-width="168">
@@ -54,42 +66,54 @@
     </el-table-column>
     <el-table-column align="center" label="重量(kg)" min-width="168">
       <template #default="{ row }">
-        <el-input-number v-model="row.weight" :min="0" class="w-100%" />
+        <el-input-number v-model="row.weight" :min="0" :precision="2" :step="0.1" class="w-100%" />
       </template>
     </el-table-column>
     <el-table-column align="center" label="体积(m^3)" min-width="168">
       <template #default="{ row }">
-        <el-input-number v-model="row.volume" :min="0" class="w-100%" />
+        <el-input-number v-model="row.volume" :min="0" :precision="2" :step="0.1" class="w-100%" />
       </template>
     </el-table-column>
     <template v-if="formData.subCommissionType">
       <el-table-column align="center" label="一级返佣(元)" min-width="168">
         <template #default="{ row }">
-          <el-input-number v-model="row.subCommissionFirstPrice" :min="0" class="w-100%" />
+          <el-input-number
+            v-model="row.subCommissionFirstPrice"
+            :min="0"
+            :precision="2"
+            :step="0.1"
+            class="w-100%"
+          />
         </template>
       </el-table-column>
       <el-table-column align="center" label="二级返佣(元)" min-width="168">
         <template #default="{ row }">
-          <el-input-number v-model="row.subCommissionSecondPrice" :min="0" class="w-100%" />
+          <el-input-number
+            v-model="row.subCommissionSecondPrice"
+            :min="0"
+            :precision="2"
+            :step="0.1"
+            class="w-100%"
+          />
         </template>
       </el-table-column>
     </template>
     <el-table-column v-if="formData.specType" align="center" fixed="right" label="操作" width="80">
-      <template #default>
+      <template #default="{ row }">
         <el-button v-if="isBatch" link size="small" type="primary" @click="batchAdd">
           批量添加
         </el-button>
-        <el-button v-else link size="small" type="primary">删除</el-button>
+        <el-button v-else link size="small" type="primary" @click="deleteSku(row)">删除</el-button>
       </template>
     </el-table-column>
   </el-table>
 </template>
 <script lang="ts" name="SkuList" setup>
-import { UploadImg } from '@/components/UploadFile'
 import { PropType } from 'vue'
-import type { Property, SkuType, SpuType } from '@/api/mall/product/spu'
-import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
+import { propTypes } from '@/utils/propTypes'
+import { UploadImg } from '@/components/UploadFile'
+import type { Property, SkuType, SpuType } from '@/api/mall/product/spu'
 
 const props = defineProps({
   propFormData: {
@@ -124,7 +148,14 @@ const batchAdd = () => {
     copyValueToTarget(item, skuList.value[0])
   })
 }
-
+/** 删除 sku */
+const deleteSku = (row) => {
+  const index = formData.value.skus.findIndex(
+    // 直接把列表转成字符串比较
+    (sku) => JSON.stringify(sku.properties) === JSON.stringify(row.properties)
+  )
+  formData.value.skus.splice(index, 1)
+}
 const tableHeaders = ref<{ prop: string; label: string }[]>([]) // 多属性表头
 
 /**
@@ -142,11 +173,11 @@ watch(
   }
 )
 
-// TODO @芋艿：看看 chatgpt 可以进一步下面几个方法的实现不 fix
+// TODO @芋艿：看看 chatgpt 可以进一步下面几个方法的实现不 fix: 添加相关处理逻辑解决编辑表单时或查看详情时数据回显问题
 /** 生成表数据 */
-const generateTableData = (data: any[]) => {
+const generateTableData = (propertyList: any[]) => {
   // 构建数据结构 fix: 使用map替换多重for循环
-  const propertiesItemList = data.map((item) =>
+  const propertiesItemList = propertyList.map((item) =>
     item.values.map((v) => ({
       propertyId: item.id,
       propertyName: item.name,
@@ -155,19 +186,14 @@ const generateTableData = (data: any[]) => {
     }))
   )
   const buildList = build(propertiesItemList)
-  // 如果构建后的组合数跟sku数量一样的话则不用处理,添加新属性没有属性值也不做处理
-  // fix: 解决编辑表单时或查看详情时数据回显问题
-  if (
-    buildList.length === formData.value.skus.length ||
-    data.some((item) => item.values.length === 0)
-  ) {
-    return
+  // 如果回显的 sku 属性和添加的属性不一致则重置 skus 列表
+  if (!validateData(propertyList)) {
+    // 如果不一致则重置表数据，默认添加新的属性重新生成sku列表
+    formData.value!.skus = []
   }
-  // 重置表数据
-  formData.value!.skus = []
-  buildList.forEach((item) => {
+  for (const item of buildList) {
     const row = {
-      properties: Array.isArray(item) ? item : [item],
+      properties: Array.isArray(item) ? item : [item], // 如果只有一个属性的话返回的是一个property对象
       price: 0,
       marketPrice: 0,
       costPrice: 0,
@@ -179,8 +205,36 @@ const generateTableData = (data: any[]) => {
       subCommissionFirstPrice: 0,
       subCommissionSecondPrice: 0
     }
+    const index = formData.value!.skus.findIndex(
+      (sku) => JSON.stringify(sku.properties) === JSON.stringify(row.properties)
+    )
+    // 如果存在属性相同的 sku 则不做处理
+    if (index !== -1) {
+      continue
+    }
+    /**
+     * TODO 嗯。。有一个问题回显数据时已删除的 sku 会被重新添加暂时没想到好办法，保存时先手动重新删除一下因为是一条空数据很好辨别 不手动删也没是提交表单时会检测删除空sku来兜底
+     *
+     */
     formData.value.skus.push(row)
-  })
+  }
+}
+/**
+ * 生成 skus 前置校验
+ */
+const validateData = (propertyList: any[]) => {
+  const skuPropertyIds = []
+  formData.value.skus.forEach((sku) =>
+    sku.properties
+      ?.map((property) => property.propertyId)
+      .forEach((propertyId) => {
+        if (skuPropertyIds.indexOf(propertyId) === -1) {
+          skuPropertyIds.push(propertyId)
+        }
+      })
+  )
+  const propertyIds = propertyList.map((item) => item.id)
+  return skuPropertyIds.length === propertyIds.length
 }
 /** 构建所有排列组合 */
 const build = (propertyValuesList: Property[][]) => {
@@ -237,6 +291,10 @@ watch(
       // name加属性项index区分属性值
       tableHeaders.value.push({ prop: `name${index}`, label: item.name })
     })
+    // 如果回显的 sku 属性和添加的属性一致则不处理
+    if (validateData(propertyList)) return
+    // 添加新属性没有属性值也不做处理
+    if (propertyList.some((item) => item.values.length === 0)) return
     generateTableData(propertyList)
   },
   {

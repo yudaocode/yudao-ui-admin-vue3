@@ -38,6 +38,7 @@ import { BasicInfoForm, DescriptionForm, OtherSettingsForm } from './components'
 // 业务api
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as PropertyApi from '@/api/mall/product/property'
+import { convertToInteger, formatToFraction } from '@/utils'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -60,6 +61,7 @@ const formData = ref<ProductSpuApi.SpuType>({
   sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
   deliveryTemplateId: 1, // 运费模版
+  brandId: null, // 商品品牌
   specType: false, // 商品规格
   subCommissionType: false, // 分销类型
   skus: [
@@ -94,14 +96,34 @@ const getDetail = async () => {
     formLoading.value = true
     try {
       const res = (await ProductSpuApi.getSpu(id)) as ProductSpuApi.SpuType
+      res.skus.forEach((item) => {
+        // 回显价格分转元
+        item.price = formatToFraction(item.price)
+        item.marketPrice = formatToFraction(item.marketPrice)
+        item.costPrice = formatToFraction(item.costPrice)
+        item.subCommissionFirstPrice = formatToFraction(item.subCommissionFirstPrice)
+        item.subCommissionSecondPrice = formatToFraction(item.subCommissionSecondPrice)
+      })
       formData.value = res
-      // 直接取第一个值就能得到所有属性的id
-      // TODO @puhui999：可以直接拿 propertyName 拼接处规格 id + 属性，可以看下商品 uniapp 详情的做法
-      const propertyIds = res.skus[0]?.properties.map((item) => item.propertyId)
-      const PropertyS = await PropertyApi.getPropertyListAndValue({ propertyIds })
-      await nextTick()
-      // 回显商品属性
-      basicInfoRef.value.addAttribute(PropertyS)
+      // 只有是多规格才处理
+      if (res.specType) {
+        // TODO @puhui999：可以直接拿 propertyName 拼接处规格 id + 属性，可以看下商品 uniapp 详情的做法
+        // fix: 考虑到 sku 数量和通过属性算出来的sku不一致的情况
+        const propertyIds = []
+        res.skus.forEach((sku) =>
+          sku.properties
+            ?.map((property) => property.propertyId)
+            .forEach((propertyId) => {
+              if (propertyIds.indexOf(propertyId) === -1) {
+                propertyIds.push(propertyId)
+              }
+            })
+        )
+        const properties = await PropertyApi.getPropertyListAndValue({ propertyIds })
+        await nextTick()
+        // 回显商品属性
+        basicInfoRef.value.addAttribute(properties)
+      }
     } finally {
       formLoading.value = false
     }
@@ -119,10 +141,26 @@ const submitForm = async () => {
     await unref(descriptionRef)?.validate()
     await unref(otherSettingsRef)?.validate()
     const deepCopyFormData = cloneDeep(unref(formData.value)) // 深拷贝一份 fix:这样最终 server 端不满足，不需要恢复，
-    // 处理掉一些无关数据
+    // TODO 兜底处理 sku 空数据详见 SkuList TODO
+    formData.value.skus.forEach((sku) => {
+      // 因为是空数据这里判断一下商品条码是否为空就行
+      if (sku.barCode === '') {
+        const index = deepCopyFormData.skus.findIndex(
+          (item) => JSON.stringify(item.properties) === JSON.stringify(sku.properties)
+        )
+        // 删除这条 sku
+        deepCopyFormData.skus.splice(index, 1)
+      }
+    })
     deepCopyFormData.skus.forEach((item) => {
       // 给sku name赋值
       item.name = deepCopyFormData.name
+      // sku相关价格元转分
+      item.price = convertToInteger(item.price)
+      item.marketPrice = convertToInteger(item.marketPrice)
+      item.costPrice = convertToInteger(item.costPrice)
+      item.subCommissionFirstPrice = convertToInteger(item.subCommissionFirstPrice)
+      item.subCommissionSecondPrice = convertToInteger(item.subCommissionSecondPrice)
     })
     // 处理轮播图列表
     const newSliderPicUrls = []
@@ -148,34 +186,6 @@ const submitForm = async () => {
   }
 }
 
-/**
- * 重置表单
- * fix:先注释保留，如果后期没有使用到则移除
- */
-// const resetForm = async () => {
-//   formData.value = {
-//     name: '', // 商品名称
-//     categoryId: 0, // 商品分类
-//     keyword: '', // 关键字
-//     unit: '', // 单位
-//     picUrl: '', // 商品封面图
-//     sliderPicUrls: [], // 商品轮播图
-//     introduction: '', // 商品简介
-//     deliveryTemplateId: 0, // 运费模版
-//     selectRule: '',
-//     specType: false, // 商品规格
-//     subCommissionType: false, // 分销类型
-//     description: '', // 商品详情
-//     sort: 1, // 商品排序
-//     giveIntegral: 1, // 赠送积分
-//     virtualSalesCount: 1, // 虚拟销量
-//     recommendHot: false, // 是否热卖
-//     recommendBenefit: false, // 是否优惠
-//     recommendBest: false, // 是否精品
-//     recommendNew: false, // 是否新品
-//     recommendGood: false // 是否优品
-//   }
-// }
 /** 关闭按钮 */
 const close = () => {
   delView(unref(currentRoute))

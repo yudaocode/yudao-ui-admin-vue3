@@ -59,13 +59,23 @@
       </el-col>
       <el-col :span="12">
         <el-form-item label="运费模板" prop="deliveryTemplateId">
-          <el-select v-model="formData.deliveryTemplateId" class="w-1/1" placeholder="请选择">
+          <el-select v-model="formData.deliveryTemplateId" placeholder="请选择">
             <el-option v-for="item in []" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
+          <el-button class="ml-20px">运费模板</el-button>
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-button class="ml-20px">运费模板</el-button>
+        <el-form-item label="品牌" prop="brandId">
+          <el-select v-model="formData.brandId" placeholder="请选择">
+            <el-option
+              v-for="item in brandList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
       </el-col>
       <el-col :span="12">
         <el-form-item label="商品规格" props="specType">
@@ -108,14 +118,15 @@
 </template>
 <script lang="ts" name="ProductSpuBasicInfoForm" setup>
 import { PropType } from 'vue'
+import { copyValueToTarget } from '@/utils'
+import { propTypes } from '@/utils/propTypes'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import type { SpuType } from '@/api/mall/product/spu'
 import { UploadImg, UploadImgs } from '@/components/UploadFile'
 import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
 import * as ProductCategoryApi from '@/api/mall/product/category'
-import { propTypes } from '@/utils/propTypes'
-import { copyValueToTarget } from '@/utils'
+import { getSimpleBrandList } from '@/api/mall/product/brand'
 
 const message = useMessage() // 消息弹窗
 
@@ -135,15 +146,20 @@ const propertyList = ref([]) // 商品属性列表
 const addAttribute = (property: any) => {
   Array.isArray(property) ? (propertyList.value = property) : propertyList.value.push(property)
 }
+/** 调用 SkuList generateTableData 方法*/
+// const generateSkus(propertyList){
+//   skuList.value.generateTableData()
+// }
 const formData = reactive<SpuType>({
   name: '', // 商品名称
-  categoryId: undefined, // 商品分类
+  categoryId: null, // 商品分类
   keyword: '', // 关键字
   unit: '', // 单位
   picUrl: '', // 商品封面图
   sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
   deliveryTemplateId: 1, // 运费模版
+  brandId: null, // 商品品牌
   specType: false, // 商品规格
   subCommissionType: false, // 分销类型
   skus: []
@@ -157,6 +173,7 @@ const rules = reactive({
   picUrl: [required],
   sliderPicUrls: [required],
   // deliveryTemplateId: [required],
+  brandId: [required],
   specType: [required],
   subCommissionType: [required]
 })
@@ -232,10 +249,13 @@ const onChangeSpec = () => {
   ]
 }
 
-const categoryList = ref() // 分类树
+const categoryList = ref([]) // 分类树
+const brandList = ref([]) // 精简商品品牌列表
 onMounted(async () => {
   // 获得分类树
   const data = await ProductCategoryApi.getCategoryList({})
   categoryList.value = handleTree(data, 'id', 'parentId')
+  // 获取商品品牌列表
+  brandList.value = await getSimpleBrandList()
 })
 </script>

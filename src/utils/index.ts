@@ -173,3 +173,24 @@ export const copyValueToTarget = (target, source) => {
   // 更新目标对象值
   Object.assign(target, newObj)
 }
+
+/**
+ * 将一个整数转换为分数保留两位小数
+ * @param num
+ */
+export const formatToFraction = (num: number | string | undefined): number => {
+  if (typeof num === 'undefined') return 0
+  const parsedNumber = typeof num === 'string' ? parseFloat(num) : num
+  return parseFloat((parsedNumber / 100).toFixed(2))
+}
+
+/**
+ * 将一个分数转换为整数
+ * @param num
+ */
+export const convertToInteger = (num: number | string | undefined): number => {
+  if (typeof num === 'undefined') return 0
+  const parsedNumber = typeof num === 'string' ? parseFloat(num) : num
+  // TODO 分转元后还有小数则四舍五入
+  return Math.round(parsedNumber * 100)
+}
