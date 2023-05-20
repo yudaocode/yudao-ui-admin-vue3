@@ -43,7 +43,7 @@
       </el-col>
     </el-card>
     <!-- 流程图预览 -->
-    <ProcessInstanceBpmnViewer :bpmn-xml="bpmnXML" />
+    <ProcessInstanceBpmnViewer :bpmn-xml="bpmnXML as any" />
   </ContentWrap>
 </template>
 <script setup lang="ts" name="BpmProcessInstanceCreate">
