@@ -37,7 +37,6 @@ import { useTagsViewStore } from '@/store/modules/tagsView'
 import { BasicInfoForm, DescriptionForm, OtherSettingsForm } from './components'
 // 业务api
 import * as ProductSpuApi from '@/api/mall/product/spu'
-import * as PropertyApi from '@/api/mall/product/property'
 import { convertToInteger, formatToFraction } from '@/utils'
 
 const { t } = useI18n() // 国际化
@@ -105,25 +104,6 @@ const getDetail = async () => {
         item.subCommissionSecondPrice = formatToFraction(item.subCommissionSecondPrice)
       })
       formData.value = res
-      // 只有是多规格才处理
-      if (res.specType) {
-        // TODO @puhui999：可以直接拿 propertyName 拼接处规格 id + 属性，可以看下商品 uniapp 详情的做法
-        // fix: 考虑到 sku 数量和通过属性算出来的sku不一致的情况
-        const propertyIds = []
-        res.skus.forEach((sku) =>
-          sku.properties
-            ?.map((property) => property.propertyId)
-            .forEach((propertyId) => {
-              if (propertyIds.indexOf(propertyId) === -1) {
-                propertyIds.push(propertyId)
-              }
-            })
-        )
-        const properties = await PropertyApi.getPropertyListAndValue({ propertyIds })
-        await nextTick()
-        // 回显商品属性
-        basicInfoRef.value.addAttribute(properties)
-      }
     } finally {
       formLoading.value = false
     }
@@ -141,7 +121,7 @@ const submitForm = async () => {
     await unref(descriptionRef)?.validate()
     await unref(otherSettingsRef)?.validate()
     const deepCopyFormData = cloneDeep(unref(formData.value)) // 深拷贝一份 fix:这样最终 server 端不满足，不需要恢复，
-    // TODO 兜底处理 sku 空数据详见 SkuList TODO
+    // TODO 兜底处理 sku 空数据
     formData.value.skus.forEach((sku) => {
       // 因为是空数据这里判断一下商品条码是否为空就行
       if (sku.barCode === '') {

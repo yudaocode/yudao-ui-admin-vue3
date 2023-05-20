@@ -212,10 +212,6 @@ const generateTableData = (propertyList: any[]) => {
     if (index !== -1) {
       continue
     }
-    /**
-     * TODO 嗯。。有一个问题回显数据时已删除的 sku 会被重新添加暂时没想到好办法，保存时先手动重新删除一下因为是一条空数据很好辨别 不手动删也没是提交表单时会检测删除空sku来兜底
-     *
-     */
     formData.value.skus.push(row)
   }
 }
@@ -302,4 +298,6 @@ watch(
     immediate: true
   }
 )
+// 暴露出生成 sku 方法给添加属性成功时调用 fix: 为了在只有一个属性下 spu 回显 skus 属性和和商品属性个数一致的情况下 添加属性值时添加 sku
+defineExpose({ generateTableData })
 </script>
