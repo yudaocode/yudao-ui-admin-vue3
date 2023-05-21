@@ -57,7 +57,8 @@ const list = ref([])
  * 获得数据列表
  */
 const getList = async () => {
-  list.value = await AreaApi.getAreaTree()
+  // id == 1 中国
+  list.value = await AreaApi.getAreaTree(1)
 }
 
 /** 添加/修改操作 */
