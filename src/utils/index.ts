@@ -194,3 +194,17 @@ export const convertToInteger = (num: number | string | undefined): number => {
   // TODO 分转元后还有小数则四舍五入
   return Math.round(parsedNumber * 100)
 }
+
+/**
+ * 元转分
+ */
+export const yuanToFen = (amount: string | number): number => {
+  return Math.round(Number(amount) * 100)
+}
+
+/**
+ * 分转元
+ */
+export const fenToYuan = (amount: string | number): number => {
+  return Number((Number(amount) / 100).toFixed(2))
+}

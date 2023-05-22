@@ -21,16 +21,18 @@
         <el-table border style="width: 100%" :data="formData.templateCharge">
           <el-table-column align="center" label="区域">
             <template #default="{ row }">
-              <!--   @芋艿 TODO 数据多，性能有问题 , 如何解决 -->
+              <!--   区域数据太多，用赖加载方式，要不然性能有问题 -->
               <el-tree-select
                 v-model="row.areaId"
-                :data="areaList"
+                lazy
+                :load="loadChargeArea"
                 :props="defaultProps"
                 node-key="id"
                 check-strictly
                 show-checkbox
                 check-on-click-node
                 :render-after-expand="false"
+                :cache-data="areaCache"
               />
             </template>
           </el-table-column>
@@ -39,7 +41,6 @@
               <el-input-number v-model="row.startCount" :min="1" />
             </template>
           </el-table-column>
-          <!--   TODO 元转换 分       -->
           <el-table-column label="运费(元)" prop="startPrice">
             <template #default="{ row }">
               <el-input-number v-model="row.startPrice" :min="1" />
@@ -73,16 +74,18 @@
         <el-table border style="width: 100%" :data="formData.templateFree">
           <el-table-column label="区域">
             <template #default="{ row }">
-              <!--   @芋艿 TODO 数据多，性能有问题 , 如何解决 -->
+              <!--   区域数据太多，用赖加载方式，要不然性能有问题 -->
               <el-tree-select
                 v-model="row.areaId"
-                :data="areaList"
+                lazy
+                :load="loadFreeArea"
                 :props="defaultProps"
                 node-key="id"
                 check-strictly
                 show-checkbox
                 check-on-click-node
                 :render-after-expand="false"
+                :cache-data="areaCache"
               />
             </template>
           </el-table-column>
@@ -121,7 +124,9 @@
 <script setup lang="ts">
 import * as DeliveryExpressTemplateApi from '@/api/mall/trade/delivery/expressTemplate'
 import { defaultProps } from '@/utils/tree'
-import { getAreaTree } from '@/api/system/area'
+import { yuanToFen, fenToYuan } from '@/utils'
+import { getChildrenArea, getAreaListByIds } from '@/api/system/area'
+import { cloneDeep } from 'lodash-es'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -137,6 +142,7 @@ const formData = ref({
   templateCharge: [],
   templateFree: []
 })
+const columnTitleMap = new Map()
 const columnTitle = ref({
   startCountTitle: '首件',
   extraCountTitle: '续件',
@@ -148,7 +154,8 @@ const formRules = reactive({
   sort: [{ required: true, message: '分类排序不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const areaList = ref([]) //区域数据
+const areaCache = ref([]) //由于区域节点懒加载，已选区域节点需要缓存展示
+// let areaTree: any[]
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -160,6 +167,26 @@ const open = async (type: string, id?: number) => {
     if (id) {
       formLoading.value = true
       formData.value = await DeliveryExpressTemplateApi.getDeliveryExpressTemplate(id)
+      columnTitle.value = columnTitleMap.get(formData.value.chargeMode)
+      //已选的区域节点
+      const areaIds = []
+      formData.value.templateCharge.forEach((item) => {
+        //不等于全国的节点
+        if (item.areaId !== 1) {
+          areaIds.push(item.areaId)
+        }
+        //前端价格以元展示
+        item.startPrice = fenToYuan(item.startPrice)
+        item.extraPrice = fenToYuan(item.extraPrice)
+      })
+      formData.value.templateFree.forEach((item) => {
+        if (item.areaId !== 1 && !areaIds.includes(item.areaId)) {
+          areaIds.push(item.areaId)
+        }
+        item.freePrice = fenToYuan(item.freePrice)
+      })
+      //区域节点，懒加载方式。 已选节点需要缓存展示
+      areaCache.value = await getAreaListByIds(areaIds)
     }
   } finally {
     formLoading.value = false
@@ -178,6 +205,14 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as DeliveryExpressTemplateApi.DeliveryExpressTemplateVO
+    data.templateCharge.forEach((item) => {
+      //前端价格以元展示，提交到后端。用分计算
+      item.startPrice = yuanToFen(item.startPrice)
+      item.extraPrice = yuanToFen(item.extraPrice)
+    })
+    data.templateFree.forEach((item) => {
+      item.freePrice = yuanToFen(item.freePrice)
+    })
     if (formType.value === 'create') {
       await DeliveryExpressTemplateApi.createDeliveryExpressTemplate(data)
       message.success(t('common.createSuccess'))
@@ -210,46 +245,102 @@ const resetForm = () => {
     templateFree: [],
     sort: 0
   }
-  columnTitle.value = {
-    startCountTitle: '首件',
-    extraCountTitle: '续件',
-    freeCountTitle: '包邮件数'
-  }
+  columnTitle.value = columnTitleMap.get(1)
   formRef.value?.resetFields()
 }
 /** 配送计费方法改变 */
-const changeChargeMode = (chargeMod: number) => {
-  if (chargeMod === 1) {
-    columnTitle.value = {
-      startCountTitle: '首件',
-      extraCountTitle: '续件',
-      freeCountTitle: '包邮件数'
+const changeChargeMode = (chargeMode: number) => {
+  columnTitle.value = columnTitleMap.get(chargeMode)
+}
+const defaultArea = [{ id: 1, name: '全国', disabled: false }]
+
+/** 初始化数据 */
+const initData = async () => {
+  // TODO 从服务端全量加载数据， 后面看懒加载是不是可以从前端获取数据。 目前从后端获取数据
+  // formLoading.value = true
+  // try {
+  //   const data = await getAreaTree()
+  //   areaTree = data
+  //   console.log('areaTree', areaTree)
+  // } finally {
+  //   formLoading.value = false
+  // }
+  //表头标题和计费方式的映射
+  columnTitleMap.set(1, {
+    startCountTitle: '首件',
+    extraCountTitle: '续件',
+    freeCountTitle: '包邮件数'
+  })
+  columnTitleMap.set(2, {
+    startCountTitle: '首件重量(kg)',
+    extraCountTitle: '续件重量(kg)',
+    freeCountTitle: '包邮重量(kg)'
+  })
+  columnTitleMap.set(3, {
+    startCountTitle: '首件体积(m³)',
+    extraCountTitle: '续件体积(m³)',
+    freeCountTitle: '包邮体积(m³)'
+  })
+}
+
+/** 懒加载运费区域树 */
+const loadChargeArea = async (node, resolve) => {
+  const areaIds = []
+  formData.value.templateCharge.forEach((item) => {
+    if (item.areaId) {
+      areaIds.push(item.areaId)
     }
-  }
-  if (chargeMod === 2) {
-    columnTitle.value = {
-      startCountTitle: '首件重量(kg)',
-      extraCountTitle: '续件重量(kg)',
-      freeCountTitle: '包邮重量(kg)'
+  })
+  if (node.isLeaf) return resolve([])
+  const length = node.data.length
+  if (length === 0) {
+    const data = cloneDeep(defaultArea)
+    const item = data[0]
+    if (areaIds.includes(item.id)) {
+      item.disabled = true
     }
-  }
-  if (chargeMod === 3) {
-    columnTitle.value = {
-      startCountTitle: '首件体积(m³)',
-      extraCountTitle: '续件体积(m³)',
-      freeCountTitle: '包邮体积(m³)'
-    }
+    resolve(data)
+  } else {
+    const id = node.data.id
+    const data = await getChildrenArea(id)
+    data.forEach((item) => {
+      if (areaIds.includes(item.id)) {
+        item.disabled = true
+      }
+    })
+    resolve(data)
   }
 }
 
-/** 初始化区域数据 */
-const initAreaData = async () => {
-  formLoading.value = true
-  try {
-    const data = await getAreaTree(1)
-    areaList.value = data
-  } finally {
-    formLoading.value = false
+/** 懒加载包邮区域树 */
+const loadFreeArea = async (node, resolve) => {
+  if (node.isLeaf) return resolve([])
+  //已经选择的区域id
+  const areaIds = []
+  formData.value.templateFree.forEach((item) => {
+    if (item.areaId) {
+      areaIds.push(item.areaId)
+    }
+  })
+  const length = node.data.length
+  if (length === 0) {
+    // 为空，从全国开始选择。全国 id == 1
+    const data = cloneDeep(defaultArea)
+    const item = data[0]
+    if (areaIds.includes(item.id)) {
+      item.disabled = true
+    }
+    resolve(data)
+  } else {
+    const id = node.data.id
+    const data = await getChildrenArea(id)
+    //已选区域需要禁止再次选择
+    data.forEach((item) => {
+      if (areaIds.includes(item.id)) {
+        item.disabled = true
+      }
+    })
+    resolve(data)
   }
 }
 /** 添加计费区域 */
@@ -285,6 +376,6 @@ const deleteFreeArea = (index) => {
 
 /** 初始化 **/
 onMounted(() => {
-  initAreaData()
+  initData()
 })
 </script>
