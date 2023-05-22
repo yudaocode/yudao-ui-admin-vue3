@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="85%">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="80%">
     <el-form
       ref="formRef"
       :model="formData"
@@ -12,14 +12,18 @@
       </el-form-item>
       <el-form-item label="计费方式" prop="chargeMode">
         <el-radio-group v-model="formData.chargeMode" @change="changeChargeMode">
-          <el-radio :label="1">按件数</el-radio>
-          <el-radio :label="2">按重量</el-radio>
-          <el-radio :label="3">按体积</el-radio>
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.EXPRESS_CHARGE_MODE)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="运费" prop="templateCharge">
         <el-table border style="width: 100%" :data="formData.templateCharge">
-          <el-table-column align="center" label="区域">
+          <el-table-column align="center" label="区域" width="180">
             <template #default="{ row }">
               <!--   区域数据太多，用赖加载方式，要不然性能有问题 -->
               <el-tree-select
@@ -36,22 +40,32 @@
               />
             </template>
           </el-table-column>
-          <el-table-column :label="columnTitle.startCountTitle" prop="startCount">
+          <el-table-column
+            align="center"
+            :label="columnTitle.startCountTitle"
+            width="180"
+            prop="startCount"
+          >
             <template #default="{ row }">
               <el-input-number v-model="row.startCount" :min="1" />
             </template>
           </el-table-column>
-          <el-table-column label="运费(元)" prop="startPrice">
+          <el-table-column width="180" align="center" label="运费(元)" prop="startPrice">
             <template #default="{ row }">
               <el-input-number v-model="row.startPrice" :min="1" />
             </template>
           </el-table-column>
-          <el-table-column :label="columnTitle.extraCountTitle" prop="extraCount">
+          <el-table-column
+            width="180"
+            align="center"
+            :label="columnTitle.extraCountTitle"
+            prop="extraCount"
+          >
             <template #default="{ row }">
               <el-input-number v-model="row.extraCount" :min="1" />
             </template>
           </el-table-column>
-          <el-table-column label="续费(元)" prop="extraPrice">
+          <el-table-column width="180" align="center" label="续费(元)" prop="extraPrice">
             <template #default="{ row }">
               <el-input-number v-model="row.extraPrice" :min="1" />
             </template>
@@ -72,7 +86,7 @@
       </el-form-item>
       <el-form-item label="包邮区域" prop="templateFree">
         <el-table border style="width: 100%" :data="formData.templateFree">
-          <el-table-column label="区域">
+          <el-table-column align="center" label="区域">
             <template #default="{ row }">
               <!--   区域数据太多，用赖加载方式，要不然性能有问题 -->
               <el-tree-select
@@ -89,12 +103,12 @@
               />
             </template>
           </el-table-column>
-          <el-table-column :label="columnTitle.freeCountTitle" prop="freeCount">
+          <el-table-column align="center" :label="columnTitle.freeCountTitle" prop="freeCount">
             <template #default="{ row }">
               <el-input-number v-model="row.freeCount" :min="1" />
             </template>
           </el-table-column>
-          <el-table-column label="包邮金额（元）" prop="freePrice">
+          <el-table-column align="center" label="包邮金额（元）" prop="freePrice">
             <template #default="{ row }">
               <el-input-number v-model="row.freePrice" :min="1" />
             </template>
@@ -122,6 +136,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as DeliveryExpressTemplateApi from '@/api/mall/trade/delivery/expressTemplate'
 import { defaultProps } from '@/utils/tree'
 import { yuanToFen, fenToYuan } from '@/utils'
