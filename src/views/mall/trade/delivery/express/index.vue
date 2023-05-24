@@ -57,7 +57,7 @@
       <el-table-column label="快递公司名称" prop="name" />
       <el-table-column label="快递公司 logo " prop="logo">
         <template #default="scope">
-          <img v-if="scope.row.logo" :src="scope.row.logo" alt="快递公司logo" class="h-25px" />
+          <img v-if="scope.row.logo" :src="scope.row.logo" alt="快递公司logo" class="h-100px" />
         </template>
       </el-table-column>
       <el-table-column label="排序" align="center" prop="sort" />
@@ -118,6 +118,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true

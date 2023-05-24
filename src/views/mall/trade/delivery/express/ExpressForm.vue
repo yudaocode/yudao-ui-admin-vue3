@@ -13,7 +13,7 @@
       <el-form-item label="快递公司名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入快递名称" />
       </el-form-item>
-      <el-form-item label="快递公司logo" prop="logo">
+      <el-form-item label="快递公司 logo" prop="logo">
         <UploadImg v-model="formData.logo" :limit="1" :is-show-tip="false" />
         <div style="font-size: 10px" class="pl-10px">推荐 180x180 图片分辨率</div>
       </el-form-item>
@@ -38,7 +38,6 @@
     </template>
   </Dialog>
 </template>
-
 <script setup lang="ts" name="ExpressForm">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
