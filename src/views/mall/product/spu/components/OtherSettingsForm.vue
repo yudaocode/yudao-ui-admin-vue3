@@ -1,7 +1,6 @@
 <template>
   <el-form ref="otherSettingsFormRef" :model="formData" :rules="rules" label-width="120px">
     <el-row>
-      <!-- TODO @puhui999：横着三个哈  fix-->
       <el-col :span="24">
         <el-row :gutter="20">
           <el-col :span="8">
@@ -35,7 +34,7 @@
         </el-form-item>
       </el-col>
       <el-col :span="24">
-        <!--   TODO tag展示暂时不考虑排序     -->
+        <!--   TODO tag展示暂时不考虑排序 -->
         <el-form-item label="活动优先级">
           <el-tag>默认</el-tag>
           <el-tag class="ml-2" type="success">秒杀</el-tag>
@@ -86,7 +85,6 @@ const rules = reactive({
   giveIntegral: [required],
   virtualSalesCount: [required]
 })
-// TODO @puhui999：这种叫 recommendOptions 会更合适哈 fix
 const recommendOptions = [
   { name: '是否热卖', value: 'recommendHot' },
   { name: '是否优惠', value: 'recommendBenefit' },
@@ -98,7 +96,6 @@ const checkboxGroup = ref<string[]>([]) // 选中的推荐选项
 
 /** 选择商品后赋值 */
 const onChangeGroup = () => {
-  // TODO @puhui999：是不是可以遍历 recommend，然后进行是否选中；fix
   recommendOptions.forEach(({ value }) => {
     formData.value[value] = checkboxGroup.value.includes(value)
   })
@@ -110,21 +107,21 @@ const onChangeGroup = () => {
 watch(
   () => props.propFormData,
   (data) => {
-    if (!data) return
-    // fix：三个表单组件监听赋值必须使用 copyValueToTarget 使用 formData.value = data 会监听非常多次
+    if (!data) {
+      return
+    }
     copyValueToTarget(formData.value, data)
     recommendOptions.forEach(({ value }) => {
-      // TODO 如果先修改其他设置的值，再改变商品详情或是商品信息会重置其他设置页面中的相关值 fix:已修复
       if (formData.value[value] && !checkboxGroup.value.includes(value)) {
         checkboxGroup.value.push(value)
       }
     })
   },
   {
-    // fix: 去掉深度监听只有对象引用发生改变的时候才执行,解决改一动多的问题
     immediate: true
   }
 )
+
 /**
  * 表单校验
  */

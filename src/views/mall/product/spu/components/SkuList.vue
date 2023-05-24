@@ -12,7 +12,7 @@
       </template>
     </el-table-column>
     <template v-if="formData.specType && !isBatch">
-      <!--  根据商品属性动态添加  -->
+      <!--  根据商品属性动态添加 -->
       <el-table-column
         v-for="(item, index) in tableHeaders"
         :key="index"
@@ -21,17 +21,16 @@
         min-width="120"
       >
         <template #default="{ row }">
+          <!-- TODO puhui999：展示成蓝色，有点区分度哈 -->
           {{ row.properties[index]?.valueName }}
         </template>
       </el-table-column>
     </template>
-    <!-- TODO @puhui999： controls-position=" " 可以去掉哈，不然太长了，手动输入更方便 fix -->
     <el-table-column align="center" label="商品条码" min-width="168">
       <template #default="{ row }">
         <el-input v-model="row.barCode" class="w-100%" />
       </template>
     </el-table-column>
-    <!-- TODO @puhui999：用户输入的时候，是按照元；分主要是我们自己用；fix -->
     <el-table-column align="center" label="销售价(元)" min-width="168">
       <template #default="{ row }">
         <el-input-number v-model="row.price" :min="0" :precision="2" :step="0.1" class="w-100%" />
@@ -141,6 +140,7 @@ const skuList = ref<SkuType[]>([
     subCommissionSecondPrice: 0 // 二级分销的佣金
   }
 ]) // 批量添加时的临时数据
+// TODO @puhui999：保存时，每个商品规格的表单要校验下。例如说，销售金额最低是 0.01 这种。
 
 /** 批量添加 */
 const batchAdd = () => {
@@ -148,6 +148,7 @@ const batchAdd = () => {
     copyValueToTarget(item, skuList.value[0])
   })
 }
+
 /** 删除 sku */
 const deleteSku = (row) => {
   const index = formData.value.skus.findIndex(
@@ -159,7 +160,7 @@ const deleteSku = (row) => {
 const tableHeaders = ref<{ prop: string; label: string }[]>([]) // 多属性表头
 
 /**
- * 将传进来的值赋值给skuList
+ * 将传进来的值赋值给 skuList
  */
 watch(
   () => props.propFormData,
@@ -173,11 +174,10 @@ watch(
   }
 )
 
-// TODO @芋艿：看看 chatgpt 可以进一步下面几个方法的实现不 fix: 添加相关处理逻辑解决编辑表单时或查看详情时数据回显问题
 /** 生成表数据 */
 const generateTableData = (propertyList: any[]) => {
-  // 构建数据结构 fix: 使用map替换多重for循环
-  const propertiesItemList = propertyList.map((item) =>
+  // 构建数据结构
+  const propertyValues = propertyList.map((item) =>
     item.values.map((v) => ({
       propertyId: item.id,
       propertyName: item.name,
@@ -185,15 +185,16 @@ const generateTableData = (propertyList: any[]) => {
       valueName: v.name
     }))
   )
-  const buildList = build(propertiesItemList)
+  // TODO @puhui：是不是 buildSkuList，这样容易理解一点哈。item 改成 sku
+  const buildList = build(propertyValues)
   // 如果回显的 sku 属性和添加的属性不一致则重置 skus 列表
   if (!validateData(propertyList)) {
-    // 如果不一致则重置表数据，默认添加新的属性重新生成sku列表
+    // 如果不一致则重置表数据，默认添加新的属性重新生成 sku 列表
     formData.value!.skus = []
   }
   for (const item of buildList) {
     const row = {
-      properties: Array.isArray(item) ? item : [item], // 如果只有一个属性的话返回的是一个property对象
+      properties: Array.isArray(item) ? item : [item], // 如果只有一个属性的话返回的是一个 property 对象
       price: 0,
       marketPrice: 0,
       costPrice: 0,
@@ -205,16 +206,17 @@ const generateTableData = (propertyList: any[]) => {
       subCommissionFirstPrice: 0,
       subCommissionSecondPrice: 0
     }
+    // 如果存在属性相同的 sku 则不做处理
     const index = formData.value!.skus.findIndex(
       (sku) => JSON.stringify(sku.properties) === JSON.stringify(row.properties)
     )
-    // 如果存在属性相同的 sku 则不做处理
     if (index !== -1) {
       continue
     }
     formData.value.skus.push(row)
   }
 }
+
 /**
  * 生成 skus 前置校验
  */
@@ -232,6 +234,7 @@ const validateData = (propertyList: any[]) => {
   const propertyIds = propertyList.map((item) => item.id)
   return skuPropertyIds.length === propertyIds.length
 }
+
 /** 构建所有排列组合 */
 const build = (propertyValuesList: Property[][]) => {
   if (propertyValuesList.length === 0) {
@@ -255,13 +258,15 @@ const build = (propertyValuesList: Property[][]) => {
   }
 }
 
-/** 监听属性列表生成相关参数和表头 */
+/** 监听属性列表，生成相关参数和表头 */
 watch(
   () => props.propertyList,
   (propertyList) => {
     // 如果不是多规格则结束
-    if (!formData.value.specType) return
-    // 如果当前组件作为批量添加数据使用则重置表数据
+    if (!formData.value.specType) {
+      return
+    }
+    // 如果当前组件作为批量添加数据使用，则重置表数据
     if (props.isBatch) {
       skuList.value = [
         {
@@ -278,8 +283,11 @@ watch(
         }
       ]
     }
+
     // 判断代理对象是否为空
-    if (JSON.stringify(propertyList) === '[]') return
+    if (JSON.stringify(propertyList) === '[]') {
+      return
+    }
     // 重置表头
     tableHeaders.value = []
     // 生成表头
@@ -287,10 +295,16 @@ watch(
       // name加属性项index区分属性值
       tableHeaders.value.push({ prop: `name${index}`, label: item.name })
     })
+
     // 如果回显的 sku 属性和添加的属性一致则不处理
-    if (validateData(propertyList)) return
+    if (validateData(propertyList)) {
+      return
+    }
     // 添加新属性没有属性值也不做处理
-    if (propertyList.some((item) => item.values.length === 0)) return
+    if (propertyList.some((item) => item.values.length === 0)) {
+      return
+    }
+    // 生成 table 数据，即 sku 列表
     generateTableData(propertyList)
   },
   {
@@ -298,6 +312,6 @@ watch(
     immediate: true
   }
 )
-// 暴露出生成 sku 方法给添加属性成功时调用 fix: 为了在只有一个属性下 spu 回显 skus 属性和和商品属性个数一致的情况下 添加属性值时添加 sku
+// 暴露出生成 sku 方法，给添加属性成功时调用
 defineExpose({ generateTableData })
 </script>

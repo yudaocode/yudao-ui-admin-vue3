@@ -96,7 +96,6 @@
       <!-- 多规格添加-->
       <el-col :span="24">
         <el-form-item v-if="formData.specType" label="商品属性">
-          <!-- TODO @puhui999：参考 https://admin.java.crmeb.net/store/list/creatProduct 添加规格好做么？添加的时候，不用输入备注哈 fix-->
           <el-button class="mr-15px mb-10px" @click="attributesAddFormRef.open">添加规格</el-button>
           <ProductAttributes :propertyList="propertyList" @success="generateSkus" />
         </el-form-item>
@@ -137,9 +136,8 @@ const props = defineProps({
   },
   activeName: propTypes.string.def('')
 })
-const attributesAddFormRef = ref() // 添加商品属性表单 TODO @puhui999：小写开头哈 fix
-const productSpuBasicInfoRef = ref() // 表单Ref TODO @puhui999：小写开头哈  fix
-// TODO @puhui999：attributeList 改成 propertyList，会更统一一点 fix
+const attributesAddFormRef = ref() // 添加商品属性表单
+const productSpuBasicInfoRef = ref() // 表单 Ref
 const propertyList = ref([]) // 商品属性列表
 const skuListRef = ref() // 商品属性列表Ref
 /** 调用 SkuList generateTableData 方法*/
@@ -180,17 +178,17 @@ const rules = reactive({
 watch(
   () => props.propFormData,
   (data) => {
-    if (!data) return
-    // fix：三个表单组件监听赋值必须使用 copyValueToTarget 使用 formData.value = data 会监听非常多次
+    if (!data) {
+      return
+    }
     copyValueToTarget(formData, data)
-    // fix: 多图上传组件需要一个包含url属性的对象才能正常回显
     formData.sliderPicUrls = data['sliderPicUrls'].map((item) => ({
       url: item
     }))
+    // TODO @puhui999：if return，减少嵌套层级
     // 只有是多规格才处理
     if (formData.specType) {
-      // TODO @puhui999：可以直接拿 propertyName 拼接处规格 id + 属性，可以看下商品 uniapp 详情的做法
-      // fix: 直接拿返回的 skus 属性逆向生成出 propertyList
+      //  直接拿返回的 skus 属性逆向生成出 propertyList
       const properties = []
       formData.skus.forEach((sku) => {
         sku.properties.forEach(({ propertyId, propertyName, valueId, valueName }) => {
@@ -209,7 +207,6 @@ watch(
     }
   },
   {
-    // fix: 去掉深度监听只有对象引用发生改变的时候才执行,解决改一动多的问题
     immediate: true
   }
 )

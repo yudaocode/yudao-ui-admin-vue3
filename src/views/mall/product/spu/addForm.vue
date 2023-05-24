@@ -146,7 +146,6 @@ const submitForm = async () => {
     const newSliderPicUrls = []
     deepCopyFormData.sliderPicUrls.forEach((item) => {
       // 如果是前端选的图
-      // TODO @puhui999：疑问哈，为啥会是 object 呀？fix
       typeof item === 'object' ? newSliderPicUrls.push(item.url) : newSliderPicUrls.push(item)
     })
     deepCopyFormData.sliderPicUrls = newSliderPicUrls

@@ -174,6 +174,7 @@ export const copyValueToTarget = (target, source) => {
   Object.assign(target, newObj)
 }
 
+// TODO @puhui999：返回要带上 .00 哈.例如说 1.00
 /**
  * 将一个整数转换为分数保留两位小数
  * @param num

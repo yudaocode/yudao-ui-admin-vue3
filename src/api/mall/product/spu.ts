@@ -7,6 +7,7 @@ export interface Property {
   valueName?: string // 属性值名称
 }
 
+// TODO puhui999：是不是直接叫 Sku 更简洁一点哈。type 待后面，总感觉有个类型？
 export interface SkuType {
   id?: number // 商品 SKU 编号
   spuId?: number // SPU 编号
@@ -24,6 +25,7 @@ export interface SkuType {
   salesCount?: number // 商品销量
 }
 
+// TODO puhui999：是不是直接叫 Spu 更简洁一点哈。type 待后面，总感觉有个类型？
 export interface SpuType {
   id?: number
   name?: string // 商品名称
