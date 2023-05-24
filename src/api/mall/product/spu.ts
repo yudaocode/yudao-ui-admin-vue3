@@ -86,7 +86,7 @@ export const deleteSpu = (id: number) => {
   return request.delete({ url: `/product/spu/delete?id=${id}` })
 }
 
-// 导出商品 Spu
-export const exportUser = (params) => {
-  return request.download({ url: '/product/spu/export', params })
+// 导出商品 Spu Excel
+export const exportSpu = async (params) => {
+  return await request.download({ url: '/product/spu/export', params })
 }

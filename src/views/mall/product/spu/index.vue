@@ -51,11 +51,21 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <el-button v-hasPermi="['product:brand:create']" plain type="primary" @click="openForm">
+        <el-button v-hasPermi="['product:spu:create']" plain type="primary" @click="openForm">
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
         <!-- TODO @puhui999：增加一个【导出】操作 -->
+        <el-button
+          v-hasPermi="['product:spu:export']"
+          :loading="exportLoading"
+          plain
+          type="success"
+          @click="handleExport"
+        >
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -195,15 +205,17 @@ import { createImageViewer } from '@/components/ImageViewer'
 import { dateFormatter } from '@/utils/formatTime'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { ProductSpuStatusEnum } from '@/utils/constants'
+import { formatToFraction } from '@/utils'
+import download from '@/utils/download'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
-import { formatToFraction } from '@/utils'
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { currentRoute, push } = useRouter() // 路由跳转
 
 const loading = ref(false) // 列表的加载中
+const exportLoading = ref(false) // 导出的加载中
 const total = ref(0) // 列表的总页数
 const list = ref<any[]>([]) // 列表的数据
 // tabs 数据
@@ -365,7 +377,22 @@ const openDetail = () => {
   message.alert('查看详情未完善！！！')
 }
 
-// 监听路由变化更新列表，解决商品保存后，列表不刷新的问题。
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await ProductSpuApi.exportSpu(queryParams)
+    download.excel(data, '商品spu.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+// 监听路由变化更新列表 TODO @puhui999：这个是必须加的么？fix: 因为编辑表单是以路由的方式打开，保存表单后列表不会刷新
 watch(
   () => currentRoute.value,
   () => {
