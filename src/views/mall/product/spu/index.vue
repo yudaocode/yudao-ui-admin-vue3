@@ -55,7 +55,6 @@
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
-        <!-- TODO @puhui999：增加一个【导出】操作 -->
         <el-button
           v-hasPermi="['product:spu:export']"
           :loading="exportLoading"
@@ -385,7 +384,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await ProductSpuApi.exportSpu(queryParams)
-    download.excel(data, '商品spu.xls')
+    download.excel(data, '商品列表.xls')
   } catch {
   } finally {
     exportLoading.value = false
