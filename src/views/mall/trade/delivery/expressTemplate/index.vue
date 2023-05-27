@@ -90,13 +90,13 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <DeliveryExpressTemplateForm ref="formRef" @success="getList" />
+  <ExpressTemplateForm ref="formRef" @success="getList" />
 </template>
 <script setup lang="ts" name="DeliveryExpressTemplate">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as DeliveryExpressTemplateApi from '@/api/mall/trade/delivery/expressTemplate'
-import DeliveryExpressTemplateForm from './DeliveryExpressTemplateForm.vue'
+import ExpressTemplateForm from './ExpressTemplateForm.vue'
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
