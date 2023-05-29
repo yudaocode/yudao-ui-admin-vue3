@@ -39,7 +39,7 @@ export const updateNotifyTemplate = async (data: NotifyTemplateVO) => {
 }
 
 // 删除站内信模板
-export const deleteNotifyTemplateApi = async (id: number) => {
+export const deleteNotifyTemplate = async (id: number) => {
   return await request.delete({ url: '/system/notify-template/delete?id=' + id })
 }
 

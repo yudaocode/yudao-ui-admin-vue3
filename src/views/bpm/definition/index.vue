@@ -87,7 +87,7 @@
     <MyProcessViewer
       key="designer"
       v-model="bpmnXML"
-      :value="bpmnXML"
+      :value="bpmnXML as any"
       v-bind="bpmnControlForm"
       :prefix="bpmnControlForm.prefix"
     />

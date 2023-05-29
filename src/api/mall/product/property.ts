@@ -71,8 +71,8 @@ export const getPropertyList = (params: any) => {
 }
 
 // 获得属性项列表
-export const getPropertyListAndValue = (params: any) => {
-  return request.get({ url: '/product/property/get-value-list', params })
+export const getPropertyListAndValue = (data: any) => {
+  return request.post({ url: '/product/property/get-value-list', data })
 }
 
 // ------------------------ 属性值 -------------------

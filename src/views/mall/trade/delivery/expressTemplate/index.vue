@@ -2,48 +2,46 @@
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form
+      class="-mb-15px"
+      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      :model="queryParams"
-      class="-mb-15px"
-      label-width="68px"
+      label-width="100px"
     >
-      <el-form-item label="名称" prop="name">
+      <el-form-item label="模板名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          class="!w-240px"
+          placeholder="请输入模板名称"
           clearable
-          placeholder="请输入名称"
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+      <el-form-item label="计费方式" prop="chargeMode">
+        <el-select
+          v-model="queryParams.chargeMode"
+          placeholder="计费方式"
+          clearable
           class="!w-240px"
-          end-placeholder="结束日期"
-          start-placeholder="开始日期"
-          type="daterange"
-          value-format="YYYY-MM-DD HH:mm:ss"
-        />
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.EXPRESS_CHARGE_MODE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon class="mr-5px" icon="ep:search" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon class="mr-5px" icon="ep:refresh" />
-          重置
-        </el-button>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
-          v-hasPermi="['product:property:create']"
-          plain
           type="primary"
+          plain
           @click="openForm('create')"
+          v-hasPermi="['trade:delivery:express-template:create']"
         >
-          <Icon class="mr-5px" icon="ep:plus" />
+          <Icon icon="ep:plus" class="mr-5px" />
           新增
         </el-button>
       </el-form-item>
@@ -53,76 +51,70 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column align="center" label="编号" prop="id" />
-      <el-table-column align="center" label="名称" prop="name" />
-      <el-table-column :show-overflow-tooltip="true" align="center" label="备注" prop="remark" />
+      <el-table-column label="编号" prop="id" />
+      <el-table-column label="模板名称" prop="name" />
+      <el-table-column label="计费方式" prop="chargeMode" align="center">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.EXPRESS_CHARGE_MODE" :value="scope.row.chargeMode" />
+        </template>
+      </el-table-column>
+      <el-table-column label="排序" prop="sort" />
       <el-table-column
-        :formatter="dateFormatter"
-        align="center"
         label="创建时间"
+        align="center"
         prop="createTime"
         width="180"
+        :formatter="dateFormatter"
       />
-      <el-table-column align="center" label="操作">
+      <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button
-            v-hasPermi="['product:property:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
+            v-hasPermi="['trade:delivery:express-template:update']"
           >
             编辑
           </el-button>
-          <el-button link type="primary">
-            <router-link :to="'/property/value/' + scope.row.id">属性值</router-link>
-          </el-button>
           <el-button
-            v-hasPermi="['product:property:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
+            v-hasPermi="['trade:delivery:express-template:delete']"
           >
             删除
           </el-button>
         </template>
       </el-table-column>
     </el-table>
-    <!-- 分页 -->
-    <Pagination
-      v-model:limit="queryParams.pageSize"
-      v-model:page="queryParams.pageNo"
-      :total="total"
-      @pagination="getList"
-    />
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <PropertyForm ref="formRef" @success="getList" />
+  <ExpressTemplateForm ref="formRef" @success="getList" />
 </template>
-<script lang="ts" name="ProductProperty" setup>
+<script setup lang="ts" name="DeliveryExpressTemplate">
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as PropertyApi from '@/api/mall/product/property'
-import PropertyForm from './PropertyForm.vue'
+import * as DeliveryExpressTemplateApi from '@/api/mall/trade/delivery/expressTemplate'
+import ExpressTemplateForm from './ExpressTemplateForm.vue'
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-
-const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref([]) // 列表的数据
+const loading = ref(true) // 列表的加载中
+const list = ref<any[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: undefined,
-  createTime: []
+  name: '',
+  chargeMode: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await PropertyApi.getPropertyPage(queryParams)
+    const data = await DeliveryExpressTemplateApi.getDeliveryExpressTemplatePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -154,7 +146,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await PropertyApi.deleteProperty(id)
+    await DeliveryExpressTemplateApi.deleteDeliveryExpressTemplate(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

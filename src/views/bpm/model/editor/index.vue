@@ -16,7 +16,7 @@
     <!-- 流程属性器，负责编辑每个流程节点的属性 -->
     <MyProcessPenal
       key="penal"
-      :bpmnModeler="modeler"
+      :bpmnModeler="modeler as any"
       :prefix="controlForm.prefix"
       class="process-panel"
       :model="model"

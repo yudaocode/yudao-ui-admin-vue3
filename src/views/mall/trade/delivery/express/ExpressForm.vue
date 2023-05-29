@@ -1,46 +1,47 @@
 <template>
-  <Dialog v-model="dialogVisible" :title="dialogTitle" width="800">
+  <Dialog :title="dialogTitle" v-model="dialogVisible">
     <el-form
       ref="formRef"
-      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
-      label-width="80px"
+      label-width="120px"
+      v-loading="formLoading"
     >
-      <el-form-item label="岗位标题" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入岗位标题" />
+      <el-form-item label="快递公司编码" prop="code">
+        <el-input v-model="formData.code" placeholder="请输入快递编码" />
       </el-form-item>
-      <el-form-item label="岗位编码" prop="code">
-        <el-input v-model="formData.code" placeholder="请输入岗位编码" />
+      <el-form-item label="快递公司名称" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入快递名称" />
       </el-form-item>
-      <el-form-item label="岗位顺序" prop="sort">
-        <el-input v-model="formData.sort" placeholder="请输入岗位顺序" />
+      <el-form-item label="快递公司 logo" prop="logo">
+        <UploadImg v-model="formData.logo" :limit="1" :is-show-tip="false" />
+        <div style="font-size: 10px" class="pl-10px">推荐 180x180 图片分辨率</div>
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="formData.status" clearable placeholder="请选择状态">
-          <el-option
+      <el-form-item label="分类排序" prop="sort">
+        <el-input-number v-model="formData.sort" controls-position="right" :min="0" />
+      </el-form-item>
+      <el-form-item label="开启状态" prop="status">
+        <el-radio-group v-model="formData.status">
+          <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" placeholder="请输备注" type="textarea" />
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemPostForm" setup>
+<script setup lang="ts" name="ExpressForm">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
-import * as PostApi from '@/api/system/post'
-
+import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -50,17 +51,18 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  name: '',
   code: '',
+  name: '',
+  logo: '',
   sort: 0,
-  status: CommonStatusEnum.ENABLE,
-  remark: ''
+  status: CommonStatusEnum.ENABLE
 })
 const formRules = reactive({
-  name: [{ required: true, message: '岗位标题不能为空', trigger: 'blur' }],
-  code: [{ required: true, message: '岗位编码不能为空', trigger: 'change' }],
-  status: [{ required: true, message: '岗位状态不能为空', trigger: 'change' }],
-  remark: [{ required: false, message: '岗位内容不能为空', trigger: 'blur' }]
+  code: [{ required: true, message: '快递编码不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '分类名称不能为空', trigger: 'blur' }],
+  logo: [{ required: true, message: '分类图片不能为空', trigger: 'blur' }],
+  sort: [{ required: true, message: '分类排序不能为空', trigger: 'blur' }],
+  status: [{ required: true, message: '开启状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -74,7 +76,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await PostApi.getPost(id)
+      formData.value = await DeliveryExpressApi.getDeliveryExpress(id)
     } finally {
       formLoading.value = false
     }
@@ -92,12 +94,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as PostApi.PostVO
+    const data = formData.value as DeliveryExpressApi.DeliveryExpressVO
     if (formType.value === 'create') {
-      await PostApi.createPost(data)
+      await DeliveryExpressApi.createDeliveryExpress(data)
       message.success(t('common.createSuccess'))
     } else {
-      await PostApi.updatePost(data)
+      await DeliveryExpressApi.updateDeliveryExpress(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -113,11 +115,10 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: '',
-    code: '',
-    sort: undefined,
-    status: CommonStatusEnum.ENABLE,
-    remark: ''
-  } as any
+    picUrl: '',
+    bigPicUrl: '',
+    status: CommonStatusEnum.ENABLE
+  }
   formRef.value?.resetFields()
 }
 </script>
