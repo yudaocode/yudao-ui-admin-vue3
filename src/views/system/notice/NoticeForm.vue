@@ -11,7 +11,7 @@
         <el-input v-model="formData.title" placeholder="请输入公告标题" />
       </el-form-item>
       <el-form-item label="公告内容" prop="content">
-        <Editor :model-value="formData.content" height="150px" />
+        <Editor v-model="formData.content" height="150px" />
       </el-form-item>
       <el-form-item label="公告类型" prop="type">
         <el-select v-model="formData.type" clearable placeholder="请选择公告类型">
