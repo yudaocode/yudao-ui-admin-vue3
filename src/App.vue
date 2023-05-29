@@ -3,6 +3,8 @@ import { isDark } from '@/utils/is'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
+import routerSearch from '@/components/RouterSearch'
+
 
 const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('app')
@@ -24,6 +26,7 @@ setDefaultTheme()
 <template>
   <ConfigGlobal :size="currentSize">
     <RouterView :class="greyMode ? `${prefixCls}-grey-mode` : ''" />
+    <routerSearch/>
   </ConfigGlobal>
 </template>
 <style lang="scss">
