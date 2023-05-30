@@ -51,15 +51,15 @@ const basicInfoRef = ref<ComponentRef<typeof BasicInfoForm>>() // 商品信息Re
 const descriptionRef = ref<ComponentRef<typeof DescriptionForm>>() // 商品详情Ref
 const otherSettingsRef = ref<ComponentRef<typeof OtherSettingsForm>>() // 其他设置Ref
 // spu 表单数据
-const formData = ref<ProductSpuApi.SpuType>({
+const formData = ref<ProductSpuApi.Spu>({
   name: '', // 商品名称
   categoryId: null, // 商品分类
   keyword: '', // 关键字
   unit: null, // 单位
   picUrl: '', // 商品封面图
-  sliderPicUrls: [], // 商品轮播图
+  sliderPicUrls: [''], // 商品轮播图
   introduction: '', // 商品简介
-  deliveryTemplateId: 1, // 运费模版
+  deliveryTemplateId: null, // 运费模版
   brandId: null, // 商品品牌
   specType: false, // 商品规格
   subCommissionType: false, // 分销类型
@@ -94,7 +94,7 @@ const getDetail = async () => {
   if (id) {
     formLoading.value = true
     try {
-      const res = (await ProductSpuApi.getSpu(id)) as ProductSpuApi.SpuType
+      const res = (await ProductSpuApi.getSpu(id)) as ProductSpuApi.Spu
       res.skus.forEach((item) => {
         // 回显价格分转元
         item.price = formatToFraction(item.price)
@@ -120,8 +120,9 @@ const submitForm = async () => {
     await unref(basicInfoRef)?.validate()
     await unref(descriptionRef)?.validate()
     await unref(otherSettingsRef)?.validate()
-    const deepCopyFormData = cloneDeep(unref(formData.value)) // 深拷贝一份 fix:这样最终 server 端不满足，不需要恢复，
-    // TODO 兜底处理 sku 空数据
+    // 深拷贝一份, 这样最终 server 端不满足，不需要恢复，
+    const deepCopyFormData = cloneDeep(unref(formData.value))
+    // 兜底处理 sku 空数据
     formData.value.skus.forEach((sku) => {
       // 因为是空数据这里判断一下商品条码是否为空就行
       if (sku.barCode === '') {
@@ -150,7 +151,7 @@ const submitForm = async () => {
     })
     deepCopyFormData.sliderPicUrls = newSliderPicUrls
     // 校验都通过后提交表单
-    const data = deepCopyFormData as ProductSpuApi.SpuType
+    const data = deepCopyFormData as ProductSpuApi.Spu
     const id = params.spuId as number
     if (!id) {
       await ProductSpuApi.createSpu(data)

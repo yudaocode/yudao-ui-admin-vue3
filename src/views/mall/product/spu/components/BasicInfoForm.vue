@@ -7,7 +7,7 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <!-- TODO @puhui999：只能选根节点 -->
+        <!-- TODO @puhui999：只能选根节点 fix: 已完善-->
         <el-form-item label="商品分类" prop="categoryId">
           <el-tree-select
             v-model="formData.categoryId"
@@ -17,6 +17,7 @@
             class="w-1/1"
             node-key="id"
             placeholder="请选择商品分类"
+            @change="nodeClick"
           />
         </el-form-item>
       </el-col>
@@ -119,9 +120,9 @@
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
-import { defaultProps, handleTree } from '@/utils/tree'
+import { checkSelectedNode, defaultProps, handleTree } from '@/utils/tree'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import type { SpuType } from '@/api/mall/product/spu'
+import type { Spu } from '@/api/mall/product/spu'
 import { UploadImg, UploadImgs } from '@/components/UploadFile'
 import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
 import * as ProductCategoryApi from '@/api/mall/product/category'
@@ -131,7 +132,7 @@ const message = useMessage() // 消息弹窗
 
 const props = defineProps({
   propFormData: {
-    type: Object as PropType<SpuType>,
+    type: Object as PropType<Spu>,
     default: () => {}
   },
   activeName: propTypes.string.def('')
@@ -144,7 +145,7 @@ const skuListRef = ref() // 商品属性列表Ref
 const generateSkus = (propertyList) => {
   skuListRef.value.generateTableData(propertyList)
 }
-const formData = reactive<SpuType>({
+const formData = reactive<Spu>({
   name: '', // 商品名称
   categoryId: null, // 商品分类
   keyword: '', // 关键字
@@ -185,26 +186,24 @@ watch(
     formData.sliderPicUrls = data['sliderPicUrls'].map((item) => ({
       url: item
     }))
-    // TODO @puhui999：if return，减少嵌套层级
     // 只有是多规格才处理
-    if (formData.specType) {
-      //  直接拿返回的 skus 属性逆向生成出 propertyList
-      const properties = []
-      formData.skus.forEach((sku) => {
-        sku.properties.forEach(({ propertyId, propertyName, valueId, valueName }) => {
-          // 添加属性
-          if (!properties.some((item) => item.id === propertyId)) {
-            properties.push({ id: propertyId, name: propertyName, values: [] })
-          }
-          // 添加属性值
-          const index = properties.findIndex((item) => item.id === propertyId)
-          if (!properties[index].values.some((value) => value.id === valueId)) {
-            properties[index].values.push({ id: valueId, name: valueName })
-          }
-        })
+    if (!formData.specType) return
+    //  直接拿返回的 skus 属性逆向生成出 propertyList
+    const properties = []
+    formData.skus.forEach((sku) => {
+      sku.properties.forEach(({ propertyId, propertyName, valueId, valueName }) => {
+        // 添加属性
+        if (!properties.some((item) => item.id === propertyId)) {
+          properties.push({ id: propertyId, name: propertyName, values: [] })
+        }
+        // 添加属性值
+        const index = properties.findIndex((item) => item.id === propertyId)
+        if (!properties[index].values.some((value) => value.id === valueId)) {
+          properties[index].values.push({ id: valueId, name: valueName })
+        }
       })
-      propertyList.value = properties
-    }
+    })
+    propertyList.value = properties
   },
   {
     immediate: true
@@ -216,6 +215,11 @@ watch(
  */
 const emit = defineEmits(['update:activeName'])
 const validate = async () => {
+  // 校验 sku
+  if (!skuListRef.value.validateSku()) {
+    message.warning('商品相关价格不能低于0.01元！！')
+    throw new Error('商品相关价格不能低于0.01元！！')
+  }
   // 校验表单
   if (!productSpuBasicInfoRef) return
   return await unref(productSpuBasicInfoRef).validate((valid) => {
@@ -263,6 +267,15 @@ const onChangeSpec = () => {
 }
 
 const categoryList = ref([]) // 分类树
+/**
+ * 选择分类时触发校验
+ */
+const nodeClick = () => {
+  if (!checkSelectedNode(categoryList.value, formData.categoryId)) {
+    formData.categoryId = null
+    message.warning('必须选择二级节点！！')
+  }
+}
 const brandList = ref([]) // 精简商品品牌列表
 onMounted(async () => {
   // 获得分类树
