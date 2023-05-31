@@ -1,10 +1,27 @@
 <template>
-  <el-form ref="descriptionFormRef" :model="formData" :rules="rules" label-width="120px">
+  <el-form
+    v-if="!isDetail"
+    ref="descriptionFormRef"
+    :model="formData"
+    :rules="rules"
+    label-width="120px"
+  >
     <!--富文本编辑器组件-->
     <el-form-item label="商品详情" prop="description">
       <Editor v-model:modelValue="formData.description" />
     </el-form-item>
   </el-form>
+  <Descriptions
+    v-if="isDetail"
+    :data="formData"
+    :schema="allSchemas.detailSchema"
+    class="descriptionFormDescriptions"
+  >
+    <!-- 展示 HTML 内容 -->
+    <template #description="{ row }">
+      <div style="width: 600px" v-html="row.description"></div>
+    </template>
+  </Descriptions>
 </template>
 <script lang="ts" name="DescriptionForm" setup>
 import type { Spu } from '@/api/mall/product/spu'
@@ -12,6 +29,9 @@ import { Editor } from '@/components/Editor'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
+import { descriptionSchema } from './spu.data'
+
+const { allSchemas } = useCrudSchemas(descriptionSchema)
 
 const message = useMessage() // 消息弹窗
 const props = defineProps({
@@ -19,7 +39,8 @@ const props = defineProps({
     type: Object as PropType<Spu>,
     default: () => {}
   },
-  activeName: propTypes.string.def('')
+  activeName: propTypes.string.def(''),
+  isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
 const descriptionFormRef = ref() // 表单Ref
 const formData = ref<Spu>({

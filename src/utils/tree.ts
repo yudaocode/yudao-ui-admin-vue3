@@ -312,26 +312,30 @@ export const handleTree2 = (data, id, parentId, children, rootId) => {
  * @param nodeId 需要判断在什么层级的数据
  * @param level 检查的级别, 默认检查到二级
  */
-export const checkSelectedNode = (tree: any[], nodeId, level = 2) => {
+export const checkSelectedNode = (tree: any[], nodeId: any, level = 2): boolean => {
   if (typeof tree === 'undefined' || !Array.isArray(tree) || tree.length === 0) {
     console.warn('tree must be an array')
     return false
   }
+
   // 校验是否是一级节点
   if (tree.some((item) => item.id === nodeId)) {
     return false
   }
+
   // 递归计数
   let count = 1
 
   // 深层次校验
-  function performAThoroughValidation(arr) {
+  function performAThoroughValidation(arr: any[]): boolean {
     count += 1
     for (const item of arr) {
       if (item.id === nodeId) {
         return true
       } else if (typeof item.children !== 'undefined' && item.children.length !== 0) {
-        performAThoroughValidation(item.children)
+        if (performAThoroughValidation(item.children)) {
+          return true
+        }
       }
     }
     return false
@@ -341,11 +345,15 @@ export const checkSelectedNode = (tree: any[], nodeId, level = 2) => {
     count = 1
     if (performAThoroughValidation(item.children)) {
       // 找到后对比是否是期望的层级
-      if (count >= level) return true
+      if (count >= level) {
+        return true
+      }
     }
   }
+
   return false
 }
+
 /**
  * 获取节点的完整结构
  * @param tree 树数据
@@ -369,7 +377,10 @@ export const treeToString = (tree: any[], nodeId) => {
         str += `/${item.name}`
         return true
       } else if (typeof item.children !== 'undefined' && item.children.length !== 0) {
-        performAThoroughValidation(item.children)
+        str += `/${item.name}`
+        if (performAThoroughValidation(item.children)) {
+          return true
+        }
       }
     }
     return false

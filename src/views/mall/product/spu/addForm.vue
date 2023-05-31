@@ -5,6 +5,7 @@
         <BasicInfoForm
           ref="basicInfoRef"
           v-model:activeName="activeName"
+          :is-detail="isDetail"
           :propFormData="formData"
         />
       </el-tab-pane>
@@ -12,6 +13,7 @@
         <DescriptionForm
           ref="descriptionRef"
           v-model:activeName="activeName"
+          :is-detail="isDetail"
           :propFormData="formData"
         />
       </el-tab-pane>
@@ -19,6 +21,7 @@
         <OtherSettingsForm
           ref="otherSettingsRef"
           v-model:activeName="activeName"
+          :is-detail="isDetail"
           :propFormData="formData"
         />
       </el-tab-pane>
@@ -42,11 +45,12 @@ import { convertToInteger, formatToFraction } from '@/utils'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 const { push, currentRoute } = useRouter() // 路由
-const { params } = useRoute() // 查询参数
+const { params, name } = useRoute() // 查询参数
 const { delView } = useTagsViewStore() // 视图操作
 
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const activeName = ref('basicInfo') // Tag 激活的窗口
+const isDetail = ref(false) // 是否查看详情
 const basicInfoRef = ref<ComponentRef<typeof BasicInfoForm>>() // 商品信息Ref
 const descriptionRef = ref<ComponentRef<typeof DescriptionForm>>() // 商品详情Ref
 const otherSettingsRef = ref<ComponentRef<typeof OtherSettingsForm>>() // 其他设置Ref
@@ -90,12 +94,13 @@ const formData = ref<ProductSpuApi.Spu>({
 
 /** 获得详情 */
 const getDetail = async () => {
+  console.log(name)
   const id = params.spuId as number
   if (id) {
     formLoading.value = true
     try {
       const res = (await ProductSpuApi.getSpu(id)) as ProductSpuApi.Spu
-      res.skus.forEach((item) => {
+      res.skus!.forEach((item) => {
         // 回显价格分转元
         item.price = formatToFraction(item.price)
         item.marketPrice = formatToFraction(item.marketPrice)
@@ -123,7 +128,7 @@ const submitForm = async () => {
     // 深拷贝一份, 这样最终 server 端不满足，不需要恢复，
     const deepCopyFormData = cloneDeep(unref(formData.value))
     // 兜底处理 sku 空数据
-    formData.value.skus.forEach((sku) => {
+    formData.value.skus!.forEach((sku) => {
       // 因为是空数据这里判断一下商品条码是否为空就行
       if (sku.barCode === '') {
         const index = deepCopyFormData.skus.findIndex(
@@ -171,7 +176,6 @@ const close = () => {
   delView(unref(currentRoute))
   push('/product/product-spu')
 }
-
 /** 初始化 */
 onMounted(async () => {
   await getDetail()

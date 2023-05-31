@@ -1,5 +1,6 @@
 <template>
   <el-table
+    v-if="!isDetail"
     :data="isBatch ? skuList : formData!.skus"
     border
     class="tabNumWidth"
@@ -21,8 +22,8 @@
         min-width="120"
       >
         <template #default="{ row }">
-          <!-- TODO puhui999：展示成蓝色，有点区分度哈 fix: 字体加粗，颜色使用 #99a9bf 蓝色有点不好看哈哈-->
-          <span style="font-weight: bold; color: #99a9bf">
+          <!-- TODO puhui999：展示成蓝色，有点区分度哈 fix-->
+          <span style="font-weight: bold; color: #40aaff">
             {{ row.properties[index]?.valueName }}
           </span>
         </template>
@@ -108,6 +109,84 @@
       </template>
     </el-table-column>
   </el-table>
+  <el-table
+    v-if="isDetail"
+    :data="formData!.skus"
+    border
+    max-height="500"
+    size="small"
+    style="width: 99%"
+  >
+    <el-table-column align="center" label="图片" min-width="80">
+      <template #default="{ row }">
+        <el-image :src="row.picUrl" class="w-60px h-60px" @click="imagePreview(row.picUrl)" />
+      </template>
+    </el-table-column>
+    <template v-if="formData!.specType && !isBatch">
+      <!--  根据商品属性动态添加 -->
+      <el-table-column
+        v-for="(item, index) in tableHeaders"
+        :key="index"
+        :label="item.label"
+        align="center"
+        min-width="80"
+      >
+        <template #default="{ row }">
+          <!-- TODO puhui999：展示成蓝色，有点区分度哈 fix-->
+          <span style="font-weight: bold; color: #40aaff">
+            {{ row.properties[index]?.valueName }}
+          </span>
+        </template>
+      </el-table-column>
+    </template>
+    <el-table-column align="center" label="商品条码" min-width="100">
+      <template #default="{ row }">
+        {{ row.barCode }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="销售价(元)" min-width="80">
+      <template #default="{ row }">
+        {{ row.price }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="市场价(元)" min-width="80">
+      <template #default="{ row }">
+        {{ row.marketPrice }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="成本价(元)" min-width="80">
+      <template #default="{ row }">
+        {{ row.costPrice }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="库存" min-width="80">
+      <template #default="{ row }">
+        {{ row.stock }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="重量(kg)" min-width="80">
+      <template #default="{ row }">
+        {{ row.weight }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="体积(m^3)" min-width="80">
+      <template #default="{ row }">
+        {{ row.volume }}
+      </template>
+    </el-table-column>
+    <template v-if="formData!.subCommissionType">
+      <el-table-column align="center" label="一级返佣(元)" min-width="80">
+        <template #default="{ row }">
+          {{ row.subCommissionFirstPrice }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="二级返佣(元)" min-width="80">
+        <template #default="{ row }">
+          {{ row.subCommissionSecondPrice }}
+        </template>
+      </el-table-column>
+    </template>
+  </el-table>
 </template>
 <script lang="ts" name="SkuList" setup>
 import { PropType, Ref } from 'vue'
@@ -115,6 +194,7 @@ import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
 import { UploadImg } from '@/components/UploadFile'
 import type { Property, Sku, Spu } from '@/api/mall/product/spu'
+import { createImageViewer } from '@/components/ImageViewer'
 
 const props = defineProps({
   propFormData: {
@@ -125,7 +205,8 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
-  isBatch: propTypes.bool.def(false) // 是否作为批量操作组件
+  isBatch: propTypes.bool.def(false), // 是否作为批量操作组件
+  isDetail: propTypes.bool.def(false) // 是否作为 sku 详情组件
 })
 const formData: Ref<Spu | undefined> = ref<Spu>() // 表单数据
 const skuList = ref<Sku[]>([
@@ -143,20 +224,27 @@ const skuList = ref<Sku[]>([
   }
 ]) // 批量添加时的临时数据
 
+/** 商品图预览 */
+const imagePreview = (imgUrl: string) => {
+  createImageViewer({
+    urlList: [imgUrl]
+  })
+}
+
 /** 批量添加 */
 const batchAdd = () => {
-  formData.value!.skus.forEach((item) => {
+  formData.value!.skus!.forEach((item) => {
     copyValueToTarget(item, skuList.value[0])
   })
 }
 
 /** 删除 sku */
 const deleteSku = (row) => {
-  const index = formData.value!.skus.findIndex(
+  const index = formData.value!.skus!.findIndex(
     // 直接把列表转成字符串比较
     (sku) => JSON.stringify(sku.properties) === JSON.stringify(row.properties)
   )
-  formData.value!.skus.splice(index, 1)
+  formData.value!.skus!.splice(index, 1)
 }
 const tableHeaders = ref<{ prop: string; label: string }[]>([]) // 多属性表头
 /**
@@ -221,13 +309,13 @@ const generateTableData = (propertyList: any[]) => {
       subCommissionSecondPrice: 0
     }
     // 如果存在属性相同的 sku 则不做处理
-    const index = formData.value!.skus.findIndex(
+    const index = formData.value!.skus!.findIndex(
       (sku) => JSON.stringify(sku.properties) === JSON.stringify(row.properties)
     )
     if (index !== -1) {
       continue
     }
-    formData.value!.skus.push(row)
+    formData.value!.skus!.push(row)
   }
 }
 
@@ -236,7 +324,7 @@ const generateTableData = (propertyList: any[]) => {
  */
 const validateData = (propertyList: any[]) => {
   const skuPropertyIds = []
-  formData.value!.skus.forEach((sku) =>
+  formData.value!.skus!.forEach((sku) =>
     sku.properties
       ?.map((property) => property.propertyId)
       .forEach((propertyId) => {

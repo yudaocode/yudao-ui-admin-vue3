@@ -1,5 +1,11 @@
 <template>
-  <el-form ref="productSpuBasicInfoRef" :model="formData" :rules="rules" label-width="120px">
+  <el-form
+    v-if="!isDetail"
+    ref="productSpuBasicInfoRef"
+    :model="formData"
+    :rules="rules"
+    label-width="120px"
+  >
     <el-row>
       <el-col :span="12">
         <el-form-item label="商品名称" prop="name">
@@ -115,18 +121,72 @@
     </el-row>
   </el-form>
   <ProductAttributesAddForm ref="attributesAddFormRef" :propertyList="propertyList" />
+  <!-- 详情跟表单放在一块可以共用已有功能，再抽离成组件有点过度封装的感觉 -->
+  <Descriptions v-if="isDetail" :data="formData" :schema="allSchemas.detailSchema">
+    <template #categoryId="{ row }"> {{ categoryString(row.categoryId) }}</template>
+    <template #brandId="{ row }">
+      {{ brandList.find((item) => item.id === row.brandId)?.name }}
+    </template>
+    <template #specType="{ row }">
+      {{ row.specType ? '多规格' : '单规格' }}
+    </template>
+    <template #subCommissionType="{ row }">
+      {{ row.subCommissionType ? '自行设置' : '默认设置' }}
+    </template>
+    <template #picUrl="{ row }">
+      <el-image :src="row.picUrl" class="w-60px h-60px" @click="imagePreview(row.picUrl)" />
+    </template>
+    <template #sliderPicUrls="{ row }">
+      <el-image
+        v-for="(item, index) in row.sliderPicUrls"
+        :key="index"
+        :src="item.url"
+        class="w-60px h-60px mr-10px"
+        @click="imagePreview(row.sliderPicUrls)"
+      />
+    </template>
+    <template #skus>
+      <SkuList
+        ref="skuDetailListRef"
+        :is-detail="isDetail"
+        :prop-form-data="formData"
+        :propertyList="propertyList"
+      />
+    </template>
+  </Descriptions>
 </template>
 <script lang="ts" name="ProductSpuBasicInfoForm" setup>
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
-import { checkSelectedNode, defaultProps, handleTree } from '@/utils/tree'
+import { checkSelectedNode, defaultProps, handleTree, treeToString } from '@/utils/tree'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import type { Spu } from '@/api/mall/product/spu'
 import { UploadImg, UploadImgs } from '@/components/UploadFile'
 import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
+import { basicInfoSchema } from './spu.data'
+import { createImageViewer } from '@/components/ImageViewer'
 import * as ProductCategoryApi from '@/api/mall/product/category'
 import { getSimpleBrandList } from '@/api/mall/product/brand'
+import { isArray } from '@/utils/is'
+
+// ====== 商品详情相关操作 ======
+const { allSchemas } = useCrudSchemas(basicInfoSchema)
+/** 商品图预览 */
+const imagePreview = (args) => {
+  const urlList = []
+  if (isArray(args)) {
+    args.forEach((item) => {
+      urlList.push(item.url)
+    })
+  } else {
+    urlList.push(args)
+  }
+  createImageViewer({
+    urlList
+  })
+}
+// ====== end ======
 
 const message = useMessage() // 消息弹窗
 
@@ -135,7 +195,8 @@ const props = defineProps({
     type: Object as PropType<Spu>,
     default: () => {}
   },
-  activeName: propTypes.string.def('')
+  activeName: propTypes.string.def(''),
+  isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
 const attributesAddFormRef = ref() // 添加商品属性表单
 const productSpuBasicInfoRef = ref() // 表单 Ref
@@ -149,11 +210,11 @@ const formData = reactive<Spu>({
   name: '', // 商品名称
   categoryId: null, // 商品分类
   keyword: '', // 关键字
-  unit: '', // 单位
+  unit: null, // 单位
   picUrl: '', // 商品封面图
   sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
-  deliveryTemplateId: 1, // 运费模版
+  deliveryTemplateId: null, // 运费模版
   brandId: null, // 商品品牌
   specType: false, // 商品规格
   subCommissionType: false, // 分销类型
@@ -273,8 +334,15 @@ const categoryList = ref([]) // 分类树
 const nodeClick = () => {
   if (!checkSelectedNode(categoryList.value, formData.categoryId)) {
     formData.categoryId = null
-    message.warning('必须选择二级节点！！')
+    message.warning('必须选择二级及以下节点！！')
   }
+}
+/**
+ * 获取分类的节点的完整结构
+ * @param categoryId 分类id
+ */
+const categoryString = (categoryId) => {
+  return treeToString(categoryList.value, categoryId)
 }
 const brandList = ref([]) // 精简商品品牌列表
 onMounted(async () => {

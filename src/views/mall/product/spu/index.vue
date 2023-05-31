@@ -171,8 +171,13 @@
       </el-table-column>
       <el-table-column align="center" fixed="right" label="操作" min-width="200">
         <template #default="{ row }">
-          <!-- TODO @puhui999：【详情】，可以后面点做哈 -->
-          <el-button v-hasPermi="['product:spu:update']" link type="primary" @click="openDetail">
+          <!-- TODO @puhui999：【详情】，可以后面点做哈 fix-->
+          <el-button
+            v-hasPermi="['product:spu:update']"
+            link
+            type="primary"
+            @click="openDetail(row.id)"
+          >
             详情
           </el-button>
           <template v-if="queryParams.tabType === 4">
@@ -284,12 +289,14 @@ const getTabsCount = async () => {
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
-  tabType: 0
+  tabType: 0,
+  name: '',
+  categoryId: null
 }) // 查询参数
 const queryFormRef = ref() // 搜索的表单Ref
 
 const handleTabClick = (tab: TabsPaneContext) => {
-  queryParams.value.tabType = tab.paneName
+  queryParams.value.tabType = tab.paneName as number
   getList()
 }
 
@@ -400,8 +407,8 @@ const openForm = (id?: number) => {
 /**
  * 查看商品详情
  */
-const openDetail = () => {
-  message.alert('查看详情未完善！！！')
+const openDetail = (id?: number) => {
+  push('/product/productSpuDetail' + id)
 }
 
 /** 导出按钮操作 */
@@ -436,12 +443,12 @@ const categoryString = (categoryId) => {
   return treeToString(categoryList.value, categoryId)
 }
 /**
- * 校验所选是否为二级节点
+ * 校验所选是否为二级及以下节点
  */
 const nodeClick = () => {
   if (!checkSelectedNode(categoryList.value, queryParams.value.categoryId)) {
     queryParams.value.categoryId = null
-    message.warning('必须选择二级节点！！')
+    message.warning('必须选择二级及以下节点！！')
   }
 }
 /** 初始化 **/
