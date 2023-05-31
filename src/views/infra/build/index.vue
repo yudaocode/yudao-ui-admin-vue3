@@ -16,20 +16,20 @@
   </ContentWrap>
 
   <!-- 弹窗：表单预览 -->
-  <Dialog :title="dialogTitle" v-model="dialogVisible" max-height="600">
-    <div ref="editor" v-if="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle" max-height="600">
+    <div v-if="dialogVisible" ref="editor">
       <el-button style="float: right" @click="copy(formData)">
         {{ t('common.copy') }}
       </el-button>
       <el-scrollbar height="580">
         <div>
-          <pre><code class="hljs" v-html="highlightedCode(formData)"></code></pre>
+          <pre><code v-dompurify-html="highlightedCode(formData)" class="hljs"></code></pre>
         </div>
       </el-scrollbar>
     </div>
   </Dialog>
 </template>
-<script setup lang="ts" name="InfraBuild">
+<script lang="ts" name="InfraBuild" setup>
 import FcDesigner from '@form-create/designer'
 import { useClipboard } from '@vueuse/core'
 import { isString } from '@/utils/is'

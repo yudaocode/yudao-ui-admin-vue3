@@ -19,7 +19,7 @@
   >
     <!-- 展示 HTML 内容 -->
     <template #description="{ row }">
-      <div style="width: 600px" v-html="row.description"></div>
+      <div v-dompurify-html="row.description" style="width: 600px"></div>
     </template>
   </Descriptions>
 </template>
