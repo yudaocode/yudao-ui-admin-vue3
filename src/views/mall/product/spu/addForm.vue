@@ -28,7 +28,9 @@
     </el-tabs>
     <el-form>
       <el-form-item style="float: right">
-        <el-button :loading="formLoading" type="primary" @click="submitForm">保存</el-button>
+        <el-button v-if="!isDetail" :loading="formLoading" type="primary" @click="submitForm">
+          保存
+        </el-button>
         <el-button @click="close">返回</el-button>
       </el-form-item>
     </el-form>
@@ -94,7 +96,9 @@ const formData = ref<ProductSpuApi.Spu>({
 
 /** 获得详情 */
 const getDetail = async () => {
-  console.log(name)
+  if ('productSpuDetail' === name) {
+    isDetail.value = true
+  }
   const id = params.spuId as number
   if (id) {
     formLoading.value = true

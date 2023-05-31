@@ -33,6 +33,11 @@ export const getDeliveryExpressTemplate = async (id: number) => {
   return await request.get({ url: '/trade/delivery/express-template/get?id=' + id })
 }
 
+// 查询快递运费模板详情
+export const getSimpleTemplateList = async () => {
+  return await request.get({ url: '/trade/delivery/express-template/list-all-simple' })
+}
+
 // 新增快递运费模板
 export const createDeliveryExpressTemplate = async (data: DeliveryExpressTemplateVO) => {
   return await request.post({ url: '/trade/delivery/express-template/create', data })

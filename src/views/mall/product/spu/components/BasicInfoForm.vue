@@ -67,7 +67,12 @@
       <el-col :span="12">
         <el-form-item label="运费模板" prop="deliveryTemplateId">
           <el-select v-model="formData.deliveryTemplateId" placeholder="请选择">
-            <el-option v-for="item in []" :key="item.id" :label="item.name" :value="item.id" />
+            <el-option
+              v-for="item in deliveryTemplateList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
           </el-select>
           <el-button class="ml-20px">运费模板</el-button>
         </el-form-item>
@@ -127,6 +132,9 @@
     <template #brandId="{ row }">
       {{ brandList.find((item) => item.id === row.brandId)?.name }}
     </template>
+    <template #deliveryTemplateId="{ row }">
+      {{ deliveryTemplateList.find((item) => item.id === row.deliveryTemplateId)?.name }}
+    </template>
     <template #specType="{ row }">
       {{ row.specType ? '多规格' : '单规格' }}
     </template>
@@ -157,19 +165,19 @@
 </template>
 <script lang="ts" name="ProductSpuBasicInfoForm" setup>
 import { PropType } from 'vue'
+import { isArray } from '@/utils/is'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
 import { checkSelectedNode, defaultProps, handleTree, treeToString } from '@/utils/tree'
+import { createImageViewer } from '@/components/ImageViewer'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import type { Spu } from '@/api/mall/product/spu'
 import { UploadImg, UploadImgs } from '@/components/UploadFile'
 import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
 import { basicInfoSchema } from './spu.data'
-import { createImageViewer } from '@/components/ImageViewer'
+import type { Spu } from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
 import { getSimpleBrandList } from '@/api/mall/product/brand'
-import { isArray } from '@/utils/is'
-
+import { getSimpleTemplateList } from '@/api/mall/trade/delivery/expressTemplate/index'
 // ====== 商品详情相关操作 ======
 const { allSchemas } = useCrudSchemas(basicInfoSchema)
 /** 商品图预览 */
@@ -345,11 +353,14 @@ const categoryString = (categoryId) => {
   return treeToString(categoryList.value, categoryId)
 }
 const brandList = ref([]) // 精简商品品牌列表
+const deliveryTemplateList = ref([]) // 运费模版
 onMounted(async () => {
   // 获得分类树
   const data = await ProductCategoryApi.getCategoryList({})
   categoryList.value = handleTree(data, 'id', 'parentId')
   // 获取商品品牌列表
   brandList.value = await getSimpleBrandList()
+  // 获取运费模版
+  deliveryTemplateList.value = await getSimpleTemplateList()
 })
 </script>

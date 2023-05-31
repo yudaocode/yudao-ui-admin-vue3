@@ -408,7 +408,7 @@ const openForm = (id?: number) => {
  * 查看商品详情
  */
 const openDetail = (id?: number) => {
-  push('/product/productSpuDetail' + id)
+  push('/product/productSpuDetail/' + id)
 }
 
 /** 导出按钮操作 */
