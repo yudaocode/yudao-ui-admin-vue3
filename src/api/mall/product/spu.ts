@@ -90,3 +90,8 @@ export const deleteSpu = (id: number) => {
 export const exportSpu = async (params) => {
   return await request.download({ url: '/product/spu/export', params })
 }
+
+// 获得商品 SPU 精简列表
+export const getSpuSimpleList = async () => {
+  return request.get({ url: '/product/spu/get-simple-list' })
+}

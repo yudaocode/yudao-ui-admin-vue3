@@ -491,7 +491,7 @@ const handleAdd = () => {
 }
 
 /** 修改按钮操作 */
-const handleUpdate = async (row) => {
+const handleUpdate = async (row: any) => {
   reset()
   const id = row.id
   try {
@@ -558,7 +558,7 @@ const submitForm = async () => {
 }
 
 /** 优惠劵模板状态修改 */
-const handleStatusChange = async (row) => {
+const handleStatusChange = async (row: any) => {
   // 此时，row 已经变成目标状态了，所以可以直接提交请求和提示
   let text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
 
@@ -574,7 +574,7 @@ const handleStatusChange = async (row) => {
 }
 
 /** 删除按钮操作 */
-const handleDelete = async (row) => {
+const handleDelete = async (row: any) => {
   const id = row.id
   try {
     await message.confirm('是否确认删除优惠劵编号为"' + id + '"的数据项?')
@@ -583,7 +583,7 @@ const handleDelete = async (row) => {
 }
 
 // 格式化【优惠金额/折扣】
-const discountFormat = (row) => {
+const discountFormat = (row: any) => {
   if (row.discountType === PromotionDiscountTypeEnum.PRICE.type) {
     return `￥${(row.discountPrice / 100.0).toFixed(2)}`
   }
@@ -594,7 +594,7 @@ const discountFormat = (row) => {
 }
 
 // 格式化【领取上限】
-const takeLimitCountFormat = (row) => {
+const takeLimitCountFormat = (row: any) => {
   if (row.takeLimitCount === -1) {
     return '无领取限制'
   }
@@ -602,7 +602,7 @@ const takeLimitCountFormat = (row) => {
 }
 
 // 格式化【有效期限】
-const validityTypeFormat = (row) => {
+const validityTypeFormat = (row: any) => {
   if (row.validityType === CouponTemplateValidityTypeEnum.DATE.type) {
     return `${formatDate(row.validStartTime)} 至 ${formatDate(row.validEndTime)}`
   }

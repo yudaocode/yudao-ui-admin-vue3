@@ -1,7 +1,30 @@
 import request from '@/config/axios'
 
+export interface CouponTemplateVO {
+  id: number
+  name: string
+  status: number
+  totalCount: number
+  takeLimitCount: number
+  takeType: number
+  usePrice: number
+  productScope: number
+  productSpuIds: string
+  validityType: number
+  validStartTime: Date
+  validEndTime: Date
+  fixedStartTerm: number
+  fixedEndTerm: number
+  discountType: number
+  discountPercent: number
+  discountPrice: number
+  discountLimitPrice: number
+  takeCount: number
+  useCount: number
+}
+
 // 创建优惠劵模板
-export function createCouponTemplate(data) {
+export function createCouponTemplate(data: CouponTemplateVO) {
   return request.post({
     url: '/promotion/coupon-template/create',
     data: data
@@ -9,7 +32,7 @@ export function createCouponTemplate(data) {
 }
 
 // 更新优惠劵模板
-export function updateCouponTemplate(data) {
+export function updateCouponTemplate(data: CouponTemplateVO) {
   return request.put({
     url: '/promotion/coupon-template/update',
     data: data
@@ -17,7 +40,7 @@ export function updateCouponTemplate(data) {
 }
 
 // 更新优惠劵模板的状态
-export function updateCouponTemplateStatus(id, status) {
+export function updateCouponTemplateStatus(id: number, status: [0, 1]) {
   const data = {
     id,
     status
@@ -29,32 +52,32 @@ export function updateCouponTemplateStatus(id, status) {
 }
 
 // 删除优惠劵模板
-export function deleteCouponTemplate(id) {
+export function deleteCouponTemplate(id: number) {
   return request.delete({
     url: '/promotion/coupon-template/delete?id=' + id
   })
 }
 
 // 获得优惠劵模板
-export function getCouponTemplate(id) {
+export function getCouponTemplate(id: number) {
   return request.get({
     url: '/promotion/coupon-template/get?id=' + id
   })
 }
 
 // 获得优惠劵模板分页
-export function getCouponTemplatePage(query) {
+export function getCouponTemplatePage(params: PageParam) {
   return request.get({
     url: '/promotion/coupon-template/page',
-    params: query
+    params: params
   })
 }
 
 // 导出优惠劵模板 Excel
-export function exportCouponTemplateExcel(query) {
+export function exportCouponTemplateExcel(params: PageParam) {
   return request.get({
     url: '/promotion/coupon-template/export-excel',
-    params: query,
+    params: params,
     responseType: 'blob'
   })
 }

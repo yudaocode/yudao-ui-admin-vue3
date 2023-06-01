@@ -222,6 +222,24 @@ export const PayRefundStatusEnum = {
 }
 
 /**
+ * 商品 SPU 状态
+ */
+export const ProductSpuStatusEnum = {
+  RECYCLE: {
+    status: -1,
+    name: '回收站'
+  },
+  DISABLE: {
+    status: 0,
+    name: '下架'
+  },
+  ENABLE: {
+    status: 1,
+    name: '上架'
+  }
+}
+
+/**
  * 优惠劵模板的有限期类型的枚举
  */
 export const CouponTemplateValidityTypeEnum = {
