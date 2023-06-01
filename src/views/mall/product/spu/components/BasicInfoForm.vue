@@ -74,7 +74,8 @@
               :value="item.id"
             />
           </el-select>
-          <el-button class="ml-20px">运费模板</el-button>
+          <!-- TODO 可能情况：善品录入后选择运费发现下拉选择中没有对应的模版 这里需不需要做添加运费模版后选择的功能 -->
+          <!-- <el-button class="ml-20px">运费模板</el-button>-->
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -107,6 +108,9 @@
       </el-col>
       <!-- 多规格添加-->
       <el-col :span="24">
+        <el-form-item v-if="!formData.specType">
+          <SkuList ref="skuListRef" :prop-form-data="formData" :propertyList="propertyList" />
+        </el-form-item>
         <el-form-item v-if="formData.specType" label="商品属性">
           <el-button class="mr-15px mb-10px" @click="attributesAddFormRef.open">添加规格</el-button>
           <ProductAttributes :propertyList="propertyList" @success="generateSkus" />
@@ -119,9 +123,6 @@
             <SkuList ref="skuListRef" :prop-form-data="formData" :propertyList="propertyList" />
           </el-form-item>
         </template>
-        <el-form-item v-if="!formData.specType">
-          <SkuList :prop-form-data="formData" :propertyList="propertyList" />
-        </el-form-item>
       </el-col>
     </el-row>
   </el-form>

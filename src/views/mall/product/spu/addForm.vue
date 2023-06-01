@@ -63,7 +63,7 @@ const formData = ref<ProductSpuApi.Spu>({
   keyword: '', // 关键字
   unit: null, // 单位
   picUrl: '', // 商品封面图
-  sliderPicUrls: [''], // 商品轮播图
+  sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
   deliveryTemplateId: null, // 运费模版
   brandId: null, // 商品品牌
