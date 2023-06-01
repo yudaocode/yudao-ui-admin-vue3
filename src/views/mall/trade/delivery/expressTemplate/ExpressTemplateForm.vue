@@ -27,10 +27,11 @@
             <template #default="{ row }">
               <!--   区域数据太多，用赖加载方式，要不然性能有问题 -->
               <el-tree-select
-                v-model="row.areaId"
+                v-model="row.areaIds"
                 lazy
                 :load="loadChargeArea"
                 :props="defaultProps"
+                multiple
                 node-key="id"
                 check-strictly
                 show-checkbox
@@ -90,7 +91,8 @@
             <template #default="{ row }">
               <!--   区域数据太多，用赖加载方式，要不然性能有问题 -->
               <el-tree-select
-                v-model="row.areaId"
+                v-model="row.areaIds"
+                multiple
                 lazy
                 :load="loadFreeArea"
                 :props="defaultProps"
@@ -98,7 +100,7 @@
                 check-strictly
                 show-checkbox
                 check-on-click-node
-                :render-after-expand="false"
+                :render-after-expand="true"
                 :cache-data="areaCache"
               />
             </template>
@@ -170,7 +172,6 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const areaCache = ref([]) //由于区域节点懒加载，已选区域节点需要缓存展示
-// let areaTree: any[]
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -183,25 +184,30 @@ const open = async (type: string, id?: number) => {
       formLoading.value = true
       formData.value = await DeliveryExpressTemplateApi.getDeliveryExpressTemplate(id)
       columnTitle.value = columnTitleMap.get(formData.value.chargeMode)
-      //已选的区域节点
-      const areaIds = []
+      const chargeAreaIds = []
+      const freeAreaIds = []
       formData.value.templateCharge.forEach((item) => {
-        //不等于全国的节点
-        if (item.areaId !== 1) {
-          areaIds.push(item.areaId)
+        for (let i = 0; i < item.areaIds.length; i++) {
+          if (!chargeAreaIds.includes(item.areaIds[i])) {
+            chargeAreaIds.push(item.areaIds[i])
+          }
         }
         //前端价格以元展示
         item.startPrice = fenToYuan(item.startPrice)
         item.extraPrice = fenToYuan(item.extraPrice)
       })
       formData.value.templateFree.forEach((item) => {
-        if (item.areaId !== 1 && !areaIds.includes(item.areaId)) {
-          areaIds.push(item.areaId)
+        for (let i = 0; i < item.areaIds.length; i++) {
+          if (!chargeAreaIds.includes(item.areaIds[i]) && !freeAreaIds.includes(item.areaIds[i])) {
+            freeAreaIds.push(item.areaIds[i])
+          }
         }
         item.freePrice = fenToYuan(item.freePrice)
       })
+      //已选的区域节点
+      const areaIds = chargeAreaIds.concat(freeAreaIds)
       //区域节点，懒加载方式。 已选节点需要缓存展示
-      areaCache.value = await getAreaListByIds(areaIds)
+      areaCache.value = await getAreaListByIds(areaIds.join(','))
     }
   } finally {
     formLoading.value = false
@@ -250,7 +256,7 @@ const resetForm = () => {
     chargeMode: 1,
     templateCharge: [
       {
-        areaId: 1,
+        areaIds: [1],
         startCount: 2,
         startPrice: 5,
         extraCount: 5,
@@ -300,10 +306,11 @@ const initData = async () => {
 
 /** 懒加载运费区域树 */
 const loadChargeArea = async (node, resolve) => {
+  //已选区域需要禁止再次选择
   const areaIds = []
   formData.value.templateCharge.forEach((item) => {
-    if (item.areaId) {
-      areaIds.push(item.areaId)
+    if (item.areaIds.length > 0) {
+      item.areaIds.forEach((areaId) => areaIds.push(areaId))
     }
   })
   if (node.isLeaf) return resolve([])
@@ -312,7 +319,8 @@ const loadChargeArea = async (node, resolve) => {
     const data = cloneDeep(defaultArea)
     const item = data[0]
     if (areaIds.includes(item.id)) {
-      item.disabled = true
+      // TODO 禁止选中的区域有些问题， 导致修改时候不能重新选择 不知道如何处理。 暂时注释掉 @芋艿 有空瞅瞅
+      //item.disabled = true
     }
     resolve(data)
   } else {
@@ -320,7 +328,7 @@ const loadChargeArea = async (node, resolve) => {
     const data = await getChildrenArea(id)
     data.forEach((item) => {
       if (areaIds.includes(item.id)) {
-        item.disabled = true
+        //item.disabled = true
       }
     })
     resolve(data)
@@ -330,11 +338,11 @@ const loadChargeArea = async (node, resolve) => {
 /** 懒加载包邮区域树 */
 const loadFreeArea = async (node, resolve) => {
   if (node.isLeaf) return resolve([])
-  //已经选择的区域id
+  //已选区域需要禁止再次选择
   const areaIds = []
   formData.value.templateFree.forEach((item) => {
-    if (item.areaId) {
-      areaIds.push(item.areaId)
+    if (item.areaIds.length > 0) {
+      item.areaIds.forEach((areaId) => areaIds.push(areaId))
     }
   })
   const length = node.data.length
@@ -343,7 +351,7 @@ const loadFreeArea = async (node, resolve) => {
     const data = cloneDeep(defaultArea)
     const item = data[0]
     if (areaIds.includes(item.id)) {
-      item.disabled = true
+      //item.disabled = true
     }
     resolve(data)
   } else {
@@ -352,7 +360,8 @@ const loadFreeArea = async (node, resolve) => {
     //已选区域需要禁止再次选择
     data.forEach((item) => {
       if (areaIds.includes(item.id)) {
-        item.disabled = true
+        // TODO 禁止选中的区域有些问题， 导致修改时候不能重新选择 不知道如何处理。 暂时注释掉 @芋艿 有空瞅瞅
+        //item.disabled = true
       }
     })
     resolve(data)
@@ -362,7 +371,7 @@ const loadFreeArea = async (node, resolve) => {
 const addChargeArea = () => {
   const data = formData.value
   data.templateCharge.push({
-    areaId: undefined,
+    areaIds: [],
     startCount: 1,
     startPrice: 1,
     extraCount: 1,
@@ -378,7 +387,7 @@ const deleteChargeArea = (index) => {
 const addFreeArea = () => {
   const data = formData.value
   data.templateFree.push({
-    areaId: undefined,
+    areaIds: [],
     freeCount: 1,
     freePrice: 1
   })

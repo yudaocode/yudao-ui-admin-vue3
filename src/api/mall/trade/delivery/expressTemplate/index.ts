@@ -10,7 +10,7 @@ export interface DeliveryExpressTemplateVO {
 }
 
 export declare type ExpressTemplateChargeVO = {
-  areaId: number
+  areaIds: number[]
   startCount: number
   startPrice: number
   extraCount: number
@@ -18,7 +18,7 @@ export declare type ExpressTemplateChargeVO = {
 }
 
 export declare type ExpressTemplateFreeVO = {
-  areaId: number
+  areaIds: number[]
   freeCount: number
   freePrice: number
 }

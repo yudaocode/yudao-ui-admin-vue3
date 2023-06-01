@@ -6,11 +6,11 @@ export const getAreaTree = async () => {
 }
 
 export const getChildrenArea = async (id: number) => {
-  return await request.get({ url: '/system/area/getChildrenArea?id=' + id })
+  return await request.get({ url: '/system/area/get-children?id=' + id })
 }
 
-export const getAreaListByIds = async (data) => {
-  return await request.post({ url: '/system/area/list', data })
+export const getAreaListByIds = async (ids) => {
+  return await request.get({ url: '/system/area/get-by-ids?ids=' + ids })
 }
 
 // 获得 IP 对应的地区名
