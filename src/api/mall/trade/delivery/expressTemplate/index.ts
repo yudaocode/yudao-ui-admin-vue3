@@ -47,8 +47,3 @@ export const updateDeliveryExpressTemplate = async (data: DeliveryExpressTemplat
 export const deleteDeliveryExpressTemplate = async (id: number) => {
   return await request.delete({ url: '/trade/delivery/express-template/delete?id=' + id })
 }
-
-// 导出快递运费模板 Excel
-export const exportDeliveryExpressTemplateApi = async (params) => {
-  return await request.download({ url: '/trade/delivery/express-template/export-excel', params })
-}

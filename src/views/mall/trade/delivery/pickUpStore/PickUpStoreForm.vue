@@ -51,7 +51,7 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="门店所在地区" prop="areaId">
-            <el-cascader v-model="formData.areaId" :options="areaList" :props="cascaderProps" />
+            <el-cascader v-model="formData.areaId" :options="areaList" :props="areaTreeProps" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -99,7 +99,7 @@
         </el-col>
       </el-row>
       <el-form-item label="获取经纬度">
-        <el-button type="primary" @click="searchLocation">获取</el-button>
+        <el-button type="primary" @click="mapDialogVisible.value = true">获取</el-button>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -125,6 +125,7 @@ import { getAreaTree } from '@/api/system/area'
 import * as ConfigApi from '@/api/infra/config'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
 const dialogVisible = ref(false) // 弹窗的是否展示
 const mapDialogVisible = ref(false) // 地图弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
@@ -160,14 +161,15 @@ const formRules = reactive({
   status: [{ required: true, message: '开启状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const cascaderProps = {
+const areaTreeProps = {
   children: 'children',
   label: 'name',
   value: 'id',
   emitPath: false
 }
 const areaList = ref() // 区域树
-const tencentLbsUrl = ref('') //腾讯位置服务 url
+const tencentLbsUrl = ref('') // 腾讯位置服务 url
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -196,7 +198,6 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    console.log('formData.value', formData.value)
     const data = formData.value as DeliveryPickUpStoreApi.DeliveryPickUpStoreVO
     if (formType.value === 'create') {
       await DeliveryPickUpStoreApi.createDeliveryPickUpStore(data)
@@ -222,7 +223,7 @@ const resetForm = () => {
     logo: '',
     detailAddress: '',
     introduction: '',
-    areaId: 1,
+    areaId: undefined,
     openingTime: undefined,
     closingTime: undefined,
     latitude: undefined,
@@ -232,11 +233,7 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 
-//查找位置
-const searchLocation = async () => {
-  mapDialogVisible.value = true
-}
-// 选择经纬度
+/** 选择经纬度 */
 const selectAddress = function (loc: any): void {
   if (loc.latlng && loc.latlng.lat) {
     formData.value.latitude = loc.latlng.lat
@@ -246,6 +243,7 @@ const selectAddress = function (loc: any): void {
   }
   mapDialogVisible.value = false
 }
+
 /** 初始化数据 */
 const initData = async () => {
   formLoading.value = true
@@ -255,6 +253,7 @@ const initData = async () => {
   } finally {
     formLoading.value = false
   }
+  // TODO @jason：要不创建一个 initTencentLbsMap
   window.selectAddress = selectAddress
   window.addEventListener(
     'message',
@@ -262,7 +261,7 @@ const initData = async () => {
       // 接收位置信息，用户选择确认位置点后选点组件会触发该事件，回传用户的位置信息
       let loc = event.data
       if (loc && loc.module === 'locationPicker') {
-        // 防止其他应用也会向该页面post信息，需判断module是否为'locationPicker'
+        // 防止其他应用也会向该页面 post 信息，需判断 module 是否为 'locationPicker'
         window.parent.selectAddress(loc)
       }
     },

@@ -121,6 +121,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+
 const total = ref(0) // 列表的总页数
 const loading = ref(true) // 列表的加载中
 const exportLoading = ref(false) // 导出的加载中
@@ -134,6 +135,7 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
+
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
@@ -153,7 +155,7 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-//** 查询列表 */
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
