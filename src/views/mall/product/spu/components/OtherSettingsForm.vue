@@ -1,4 +1,5 @@
 <template>
+  <!-- 情况一：添加/修改 -->
   <el-form
     v-if="!isDetail"
     ref="otherSettingsFormRef"
@@ -56,6 +57,8 @@
       </el-col>
     </el-row>
   </el-form>
+
+  <!-- 情况二：详情 -->
   <Descriptions v-if="isDetail" :data="formData" :schema="allSchemas.detailSchema">
     <template #recommendHot="{ row }">
       {{ row.recommendHot ? '是' : '否' }}

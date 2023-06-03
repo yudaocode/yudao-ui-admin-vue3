@@ -1,4 +1,5 @@
 <template>
+  <!-- 情况一：添加/修改 -->
   <el-form
     v-if="!isDetail"
     ref="productSpuBasicInfoRef"
@@ -23,7 +24,7 @@
             class="w-1/1"
             node-key="id"
             placeholder="请选择商品分类"
-            @change="nodeClick"
+            @change="categoryNodeClick"
           />
         </el-form-item>
       </el-col>
@@ -126,8 +127,8 @@
       </el-col>
     </el-row>
   </el-form>
-  <ProductAttributesAddForm ref="attributesAddFormRef" :propertyList="propertyList" />
-  <!-- 详情跟表单放在一块可以共用已有功能，再抽离成组件有点过度封装的感觉 -->
+
+  <!-- 情况二：详情 -->
   <Descriptions v-if="isDetail" :data="formData" :schema="allSchemas.detailSchema">
     <template #categoryId="{ row }"> {{ categoryString(row.categoryId) }}</template>
     <template #brandId="{ row }">
@@ -163,6 +164,10 @@
       />
     </template>
   </Descriptions>
+
+  <!-- 商品属性添加 Form 表单 -->
+  <!-- TODO @puhui999: ProductPropertyAddForm 是不是更合适呀 -->
+  <ProductAttributesAddForm ref="attributesAddFormRef" :propertyList="propertyList" />
 </template>
 <script lang="ts" name="ProductSpuBasicInfoForm" setup>
 import { PropType } from 'vue'
@@ -257,7 +262,9 @@ watch(
       url: item
     }))
     // 只有是多规格才处理
-    if (!formData.specType) return
+    if (!formData.specType) {
+      return
+    }
     //  直接拿返回的 skus 属性逆向生成出 propertyList
     const properties = []
     formData.skus.forEach((sku) => {
@@ -287,8 +294,8 @@ const emit = defineEmits(['update:activeName'])
 const validate = async () => {
   // 校验 sku
   if (!skuListRef.value.validateSku()) {
-    message.warning('商品相关价格不能低于0.01元！！')
-    throw new Error('商品相关价格不能低于0.01元！！')
+    message.warning('商品相关价格不能低于 0.01 元！！')
+    throw new Error('商品相关价格不能低于 0.01 元！！')
   }
   // 校验表单
   if (!productSpuBasicInfoRef) return
@@ -340,7 +347,7 @@ const categoryList = ref([]) // 分类树
 /**
  * 选择分类时触发校验
  */
-const nodeClick = () => {
+const categoryNodeClick = () => {
   if (!checkSelectedNode(categoryList.value, formData.categoryId)) {
     formData.categoryId = null
     message.warning('必须选择二级及以下节点！！')
@@ -348,6 +355,7 @@ const nodeClick = () => {
 }
 /**
  * 获取分类的节点的完整结构
+ *
  * @param categoryId 分类id
  */
 const categoryString = (categoryId) => {

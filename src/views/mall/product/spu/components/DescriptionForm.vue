@@ -1,4 +1,5 @@
 <template>
+  <!-- 情况一：添加/修改 -->
   <el-form
     v-if="!isDetail"
     ref="descriptionFormRef"
@@ -11,6 +12,8 @@
       <Editor v-model:modelValue="formData.description" />
     </el-form-item>
   </el-form>
+
+  <!-- 情况二：详情 -->
   <Descriptions
     v-if="isDetail"
     :data="formData"
@@ -30,10 +33,9 @@ import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
 import { descriptionSchema } from './spu.data'
+const message = useMessage() // 消息弹窗
 
 const { allSchemas } = useCrudSchemas(descriptionSchema)
-
-const message = useMessage() // 消息弹窗
 const props = defineProps({
   propFormData: {
     type: Object as PropType<Spu>,

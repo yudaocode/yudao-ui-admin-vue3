@@ -1,5 +1,6 @@
 import { CrudSchema } from '@/hooks/web/useCrudSchemas'
 
+// TODO @puhui999：如果只要 detail，可以不用 CrudSchema，只要描述的 Schema
 export const basicInfoSchema = reactive<CrudSchema[]>([
   {
     label: '商品名称',
