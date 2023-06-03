@@ -38,8 +38,9 @@ import App from './App.vue'
 import './permission'
 
 import '@/plugins/tongji' // 百度统计
-
 import Logger from '@/utils/Logger'
+
+import VueDOMPurifyHTML from 'vue-dompurify-html' // 解决v-html 的安全隐患
 
 // 创建实例
 const setupAll = async () => {
@@ -60,6 +61,8 @@ const setupAll = async () => {
   setupAuth(app)
 
   await router.isReady()
+
+  app.use(VueDOMPurifyHTML)
 
   app.mount('#app')
 }

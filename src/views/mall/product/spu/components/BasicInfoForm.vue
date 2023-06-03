@@ -1,5 +1,11 @@
 <template>
-  <el-form ref="productSpuBasicInfoRef" :model="formData" :rules="rules" label-width="120px">
+  <el-form
+    v-if="!isDetail"
+    ref="productSpuBasicInfoRef"
+    :model="formData"
+    :rules="rules"
+    label-width="120px"
+  >
     <el-row>
       <el-col :span="12">
         <el-form-item label="商品名称" prop="name">
@@ -7,7 +13,7 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <!-- TODO @puhui999：只能选根节点 -->
+        <!-- TODO @puhui999：只能选根节点 fix: 已完善-->
         <el-form-item label="商品分类" prop="categoryId">
           <el-tree-select
             v-model="formData.categoryId"
@@ -17,6 +23,7 @@
             class="w-1/1"
             node-key="id"
             placeholder="请选择商品分类"
+            @change="nodeClick"
           />
         </el-form-item>
       </el-col>
@@ -60,9 +67,15 @@
       <el-col :span="12">
         <el-form-item label="运费模板" prop="deliveryTemplateId">
           <el-select v-model="formData.deliveryTemplateId" placeholder="请选择">
-            <el-option v-for="item in []" :key="item.id" :label="item.name" :value="item.id" />
+            <el-option
+              v-for="item in deliveryTemplateList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id"
+            />
           </el-select>
-          <el-button class="ml-20px">运费模板</el-button>
+          <!-- TODO 可能情况：善品录入后选择运费发现下拉选择中没有对应的模版 这里需不需要做添加运费模版后选择的功能 -->
+          <!-- <el-button class="ml-20px">运费模板</el-button>-->
         </el-form-item>
       </el-col>
       <el-col :span="12">
@@ -95,6 +108,9 @@
       </el-col>
       <!-- 多规格添加-->
       <el-col :span="24">
+        <el-form-item v-if="!formData.specType">
+          <SkuList ref="skuListRef" :prop-form-data="formData" :propertyList="propertyList" />
+        </el-form-item>
         <el-form-item v-if="formData.specType" label="商品属性">
           <el-button class="mr-15px mb-10px" @click="attributesAddFormRef.open">添加规格</el-button>
           <ProductAttributes :propertyList="propertyList" @success="generateSkus" />
@@ -107,34 +123,89 @@
             <SkuList ref="skuListRef" :prop-form-data="formData" :propertyList="propertyList" />
           </el-form-item>
         </template>
-        <el-form-item v-if="!formData.specType">
-          <SkuList :prop-form-data="formData" :propertyList="propertyList" />
-        </el-form-item>
       </el-col>
     </el-row>
   </el-form>
   <ProductAttributesAddForm ref="attributesAddFormRef" :propertyList="propertyList" />
+  <!-- 详情跟表单放在一块可以共用已有功能，再抽离成组件有点过度封装的感觉 -->
+  <Descriptions v-if="isDetail" :data="formData" :schema="allSchemas.detailSchema">
+    <template #categoryId="{ row }"> {{ categoryString(row.categoryId) }}</template>
+    <template #brandId="{ row }">
+      {{ brandList.find((item) => item.id === row.brandId)?.name }}
+    </template>
+    <template #deliveryTemplateId="{ row }">
+      {{ deliveryTemplateList.find((item) => item.id === row.deliveryTemplateId)?.name }}
+    </template>
+    <template #specType="{ row }">
+      {{ row.specType ? '多规格' : '单规格' }}
+    </template>
+    <template #subCommissionType="{ row }">
+      {{ row.subCommissionType ? '自行设置' : '默认设置' }}
+    </template>
+    <template #picUrl="{ row }">
+      <el-image :src="row.picUrl" class="w-60px h-60px" @click="imagePreview(row.picUrl)" />
+    </template>
+    <template #sliderPicUrls="{ row }">
+      <el-image
+        v-for="(item, index) in row.sliderPicUrls"
+        :key="index"
+        :src="item.url"
+        class="w-60px h-60px mr-10px"
+        @click="imagePreview(row.sliderPicUrls)"
+      />
+    </template>
+    <template #skus>
+      <SkuList
+        ref="skuDetailListRef"
+        :is-detail="isDetail"
+        :prop-form-data="formData"
+        :propertyList="propertyList"
+      />
+    </template>
+  </Descriptions>
 </template>
 <script lang="ts" name="ProductSpuBasicInfoForm" setup>
 import { PropType } from 'vue'
+import { isArray } from '@/utils/is'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
-import { defaultProps, handleTree } from '@/utils/tree'
+import { checkSelectedNode, defaultProps, handleTree, treeToString } from '@/utils/tree'
+import { createImageViewer } from '@/components/ImageViewer'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import type { SpuType } from '@/api/mall/product/spu'
 import { UploadImg, UploadImgs } from '@/components/UploadFile'
 import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
+import { basicInfoSchema } from './spu.data'
+import type { Spu } from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
 import { getSimpleBrandList } from '@/api/mall/product/brand'
+import { getSimpleTemplateList } from '@/api/mall/trade/delivery/expressTemplate/index'
+// ====== 商品详情相关操作 ======
+const { allSchemas } = useCrudSchemas(basicInfoSchema)
+/** 商品图预览 */
+const imagePreview = (args) => {
+  const urlList = []
+  if (isArray(args)) {
+    args.forEach((item) => {
+      urlList.push(item.url)
+    })
+  } else {
+    urlList.push(args)
+  }
+  createImageViewer({
+    urlList
+  })
+}
+// ====== end ======
 
 const message = useMessage() // 消息弹窗
 
 const props = defineProps({
   propFormData: {
-    type: Object as PropType<SpuType>,
+    type: Object as PropType<Spu>,
     default: () => {}
   },
-  activeName: propTypes.string.def('')
+  activeName: propTypes.string.def(''),
+  isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
 const attributesAddFormRef = ref() // 添加商品属性表单
 const productSpuBasicInfoRef = ref() // 表单 Ref
@@ -144,15 +215,15 @@ const skuListRef = ref() // 商品属性列表Ref
 const generateSkus = (propertyList) => {
   skuListRef.value.generateTableData(propertyList)
 }
-const formData = reactive<SpuType>({
+const formData = reactive<Spu>({
   name: '', // 商品名称
   categoryId: null, // 商品分类
   keyword: '', // 关键字
-  unit: '', // 单位
+  unit: null, // 单位
   picUrl: '', // 商品封面图
   sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
-  deliveryTemplateId: 1, // 运费模版
+  deliveryTemplateId: null, // 运费模版
   brandId: null, // 商品品牌
   specType: false, // 商品规格
   subCommissionType: false, // 分销类型
@@ -185,26 +256,24 @@ watch(
     formData.sliderPicUrls = data['sliderPicUrls'].map((item) => ({
       url: item
     }))
-    // TODO @puhui999：if return，减少嵌套层级
     // 只有是多规格才处理
-    if (formData.specType) {
-      //  直接拿返回的 skus 属性逆向生成出 propertyList
-      const properties = []
-      formData.skus.forEach((sku) => {
-        sku.properties.forEach(({ propertyId, propertyName, valueId, valueName }) => {
-          // 添加属性
-          if (!properties.some((item) => item.id === propertyId)) {
-            properties.push({ id: propertyId, name: propertyName, values: [] })
-          }
-          // 添加属性值
-          const index = properties.findIndex((item) => item.id === propertyId)
-          if (!properties[index].values.some((value) => value.id === valueId)) {
-            properties[index].values.push({ id: valueId, name: valueName })
-          }
-        })
+    if (!formData.specType) return
+    //  直接拿返回的 skus 属性逆向生成出 propertyList
+    const properties = []
+    formData.skus.forEach((sku) => {
+      sku.properties.forEach(({ propertyId, propertyName, valueId, valueName }) => {
+        // 添加属性
+        if (!properties.some((item) => item.id === propertyId)) {
+          properties.push({ id: propertyId, name: propertyName, values: [] })
+        }
+        // 添加属性值
+        const index = properties.findIndex((item) => item.id === propertyId)
+        if (!properties[index].values.some((value) => value.id === valueId)) {
+          properties[index].values.push({ id: valueId, name: valueName })
+        }
       })
-      propertyList.value = properties
-    }
+    })
+    propertyList.value = properties
   },
   {
     immediate: true
@@ -216,6 +285,11 @@ watch(
  */
 const emit = defineEmits(['update:activeName'])
 const validate = async () => {
+  // 校验 sku
+  if (!skuListRef.value.validateSku()) {
+    message.warning('商品相关价格不能低于0.01元！！')
+    throw new Error('商品相关价格不能低于0.01元！！')
+  }
   // 校验表单
   if (!productSpuBasicInfoRef) return
   return await unref(productSpuBasicInfoRef).validate((valid) => {
@@ -263,12 +337,31 @@ const onChangeSpec = () => {
 }
 
 const categoryList = ref([]) // 分类树
+/**
+ * 选择分类时触发校验
+ */
+const nodeClick = () => {
+  if (!checkSelectedNode(categoryList.value, formData.categoryId)) {
+    formData.categoryId = null
+    message.warning('必须选择二级及以下节点！！')
+  }
+}
+/**
+ * 获取分类的节点的完整结构
+ * @param categoryId 分类id
+ */
+const categoryString = (categoryId) => {
+  return treeToString(categoryList.value, categoryId)
+}
 const brandList = ref([]) // 精简商品品牌列表
+const deliveryTemplateList = ref([]) // 运费模版
 onMounted(async () => {
   // 获得分类树
   const data = await ProductCategoryApi.getCategoryList({})
   categoryList.value = handleTree(data, 'id', 'parentId')
   // 获取商品品牌列表
   brandList.value = await getSimpleBrandList()
+  // 获取运费模版
+  deliveryTemplateList.value = await getSimpleTemplateList()
 })
 </script>

@@ -379,6 +379,19 @@ const remainingRouter: AppRouteRecordRaw[] = [
           title: '编辑商品',
           activeMenu: '/product/product-spu'
         }
+      },
+      {
+        path: 'productSpuDetail/:spuId(\\d+)',
+        component: () => import('@/views/mall/product/spu/addForm.vue'),
+        name: 'productSpuDetail',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          icon: 'ep:view',
+          title: '商品详情',
+          activeMenu: '/product/product-spu'
+        }
       }
     ]
   }

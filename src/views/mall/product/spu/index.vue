@@ -8,18 +8,16 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <!-- TODO @puhui999：品牌应该是数据下拉哈 -->
-      <el-form-item label="品牌名称" prop="name">
+      <el-form-item label="商品名称" prop="name">
         <el-input
           v-model="queryParams.name"
           class="!w-240px"
           clearable
-          placeholder="请输入品牌名称"
+          placeholder="请输入商品名称"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <!--  TODO 分类只能选择二级分类目前还没做，还是先以联调通顺为主 -->
-      <!-- TODO puhui999：我们要不改成支持选择一级。如果选择一级，后端要递归查询下子分类，然后去 in？ -->
+      <!--  TODO 分类只能选择二级分类目前还没做，还是先以联调通顺为主 fixL: 已完善 -->
       <el-form-item label="商品分类" prop="categoryId">
         <el-tree-select
           v-model="queryParams.categoryId"
@@ -29,6 +27,7 @@
           class="w-1/1"
           node-key="id"
           placeholder="请选择商品分类"
+          @change="nodeClick"
         />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
@@ -80,31 +79,60 @@
       />
     </el-tabs>
     <el-table v-loading="loading" :data="list">
-      <!-- TODO puhui：这几个属性哈，一行三个
+      <!-- TODO puhui：这几个属性哈，一行三个 fix
       商品分类：服装鞋包/箱包
 商品市场价格：100.00
 成本价：0.00
 收藏：5
-虚拟销量：999   -->
+虚拟销量：999  -->
       <el-table-column type="expand" width="30">
         <template #default="{ row }">
-          <el-form class="demo-table-expand" inline label-position="left">
-            <el-form-item label="市场价：">
-              <span>{{ formatToFraction(row.marketPrice) }}</span>
-            </el-form-item>
-            <el-form-item label="成本价：">
-              <span>{{ formatToFraction(row.costPrice) }}</span>
-            </el-form-item>
-            <el-form-item label="虚拟销量：">
-              <span>{{ row.virtualSalesCount }}</span>
-            </el-form-item>
+          <el-form class="demo-table-expand" label-position="left">
+            <el-row>
+              <el-col :span="24">
+                <el-row>
+                  <el-col :span="8">
+                    <el-form-item label="商品分类:">
+                      <span>{{ categoryString(row.categoryId) }}</span>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="8">
+                    <el-form-item label="市场价:">
+                      <span>{{ formatToFraction(row.marketPrice) }}</span>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="8">
+                    <el-form-item label="成本价:">
+                      <span>{{ formatToFraction(row.costPrice) }}</span>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24">
+                <el-row>
+                  <el-col :span="8">
+                    <el-form-item label="收藏:">
+                      <!-- TODO 没有这个属性，暂时写死 5 个 -->
+                      <span>5</span>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="8">
+                    <el-form-item label="虚拟销量:">
+                      <span>{{ row.virtualSalesCount }}</span>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-col>
+            </el-row>
           </el-form>
         </template>
       </el-table-column>
       <el-table-column key="id" align="center" label="商品编号" prop="id" />
       <el-table-column label="商品图" min-width="80">
         <template #default="{ row }">
-          <el-image :src="row.picUrl" @click="imagePreview(row.picUrl)" class="w-30px h-30px" />
+          <el-image :src="row.picUrl" class="w-30px h-30px" @click="imagePreview(row.picUrl)" />
         </template>
       </el-table-column>
       <el-table-column :show-overflow-tooltip="true" label="商品名称" min-width="300" prop="name" />
@@ -143,8 +171,13 @@
       </el-table-column>
       <el-table-column align="center" fixed="right" label="操作" min-width="200">
         <template #default="{ row }">
-          <!-- TODO @puhui999：【详情】，可以后面点做哈 -->
-          <el-button v-hasPermi="['product:spu:update']" link type="primary" @click="openDetail">
+          <!-- TODO @puhui999：【详情】，可以后面点做哈 fix-->
+          <el-button
+            v-hasPermi="['product:spu:update']"
+            link
+            type="primary"
+            @click="openDetail(row.id)"
+          >
             详情
           </el-button>
           <template v-if="queryParams.tabType === 4">
@@ -202,7 +235,7 @@ import { TabsPaneContext } from 'element-plus'
 import { cloneDeep } from 'lodash-es'
 import { createImageViewer } from '@/components/ImageViewer'
 import { dateFormatter } from '@/utils/formatTime'
-import { defaultProps, handleTree } from '@/utils/tree'
+import { checkSelectedNode, defaultProps, handleTree, treeToString } from '@/utils/tree'
 import { ProductSpuStatusEnum } from '@/utils/constants'
 import { formatToFraction } from '@/utils'
 import download from '@/utils/download'
@@ -256,12 +289,14 @@ const getTabsCount = async () => {
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
-  tabType: 0
+  tabType: 0,
+  name: '',
+  categoryId: null
 }) // 查询参数
 const queryFormRef = ref() // 搜索的表单Ref
 
 const handleTabClick = (tab: TabsPaneContext) => {
-  queryParams.value.tabType = tab.paneName
+  queryParams.value.tabType = tab.paneName as number
   getList()
 }
 
@@ -372,8 +407,8 @@ const openForm = (id?: number) => {
 /**
  * 查看商品详情
  */
-const openDetail = () => {
-  message.alert('查看详情未完善！！！')
+const openDetail = (id?: number) => {
+  push('/product/productSpuDetail/' + id)
 }
 
 /** 导出按钮操作 */
@@ -391,7 +426,7 @@ const handleExport = async () => {
   }
 }
 
-// 监听路由变化更新列表 TODO @puhui999：这个是必须加的么？fix: 因为编辑表单是以路由的方式打开，保存表单后列表不会刷新
+// 监听路由变化更新列表，解决商品保存后，列表不刷新的问题。
 watch(
   () => currentRoute.value,
   () => {
@@ -400,6 +435,22 @@ watch(
 )
 
 const categoryList = ref() // 分类树
+/**
+ * 获取分类的节点的完整结构
+ * @param categoryId 分类id
+ */
+const categoryString = (categoryId) => {
+  return treeToString(categoryList.value, categoryId)
+}
+/**
+ * 校验所选是否为二级及以下节点
+ */
+const nodeClick = () => {
+  if (!checkSelectedNode(categoryList.value, queryParams.value.categoryId)) {
+    queryParams.value.categoryId = null
+    message.warning('必须选择二级及以下节点！！')
+  }
+}
 /** 初始化 **/
 onMounted(async () => {
   await getTabsCount()

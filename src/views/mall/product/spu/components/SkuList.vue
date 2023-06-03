@@ -1,6 +1,7 @@
 <template>
   <el-table
-    :data="isBatch ? skuList : formData.skus"
+    v-if="!isDetail"
+    :data="isBatch ? skuList : formData!.skus"
     border
     class="tabNumWidth"
     max-height="500"
@@ -11,7 +12,7 @@
         <UploadImg v-model="row.picUrl" height="80px" width="100%" />
       </template>
     </el-table-column>
-    <template v-if="formData.specType && !isBatch">
+    <template v-if="formData!.specType && !isBatch">
       <!--  根据商品属性动态添加 -->
       <el-table-column
         v-for="(item, index) in tableHeaders"
@@ -21,8 +22,10 @@
         min-width="120"
       >
         <template #default="{ row }">
-          <!-- TODO puhui999：展示成蓝色，有点区分度哈 -->
-          {{ row.properties[index]?.valueName }}
+          <!-- TODO puhui999：展示成蓝色，有点区分度哈 fix-->
+          <span style="font-weight: bold; color: #40aaff">
+            {{ row.properties[index]?.valueName }}
+          </span>
         </template>
       </el-table-column>
     </template>
@@ -73,7 +76,7 @@
         <el-input-number v-model="row.volume" :min="0" :precision="2" :step="0.1" class="w-100%" />
       </template>
     </el-table-column>
-    <template v-if="formData.subCommissionType">
+    <template v-if="formData!.subCommissionType">
       <el-table-column align="center" label="一级返佣(元)" min-width="168">
         <template #default="{ row }">
           <el-input-number
@@ -97,7 +100,7 @@
         </template>
       </el-table-column>
     </template>
-    <el-table-column v-if="formData.specType" align="center" fixed="right" label="操作" width="80">
+    <el-table-column v-if="formData?.specType" align="center" fixed="right" label="操作" width="80">
       <template #default="{ row }">
         <el-button v-if="isBatch" link size="small" type="primary" @click="batchAdd">
           批量添加
@@ -106,27 +109,107 @@
       </template>
     </el-table-column>
   </el-table>
+  <el-table
+    v-if="isDetail"
+    :data="formData!.skus"
+    border
+    max-height="500"
+    size="small"
+    style="width: 99%"
+  >
+    <el-table-column align="center" label="图片" min-width="80">
+      <template #default="{ row }">
+        <el-image :src="row.picUrl" class="w-60px h-60px" @click="imagePreview(row.picUrl)" />
+      </template>
+    </el-table-column>
+    <template v-if="formData!.specType && !isBatch">
+      <!--  根据商品属性动态添加 -->
+      <el-table-column
+        v-for="(item, index) in tableHeaders"
+        :key="index"
+        :label="item.label"
+        align="center"
+        min-width="80"
+      >
+        <template #default="{ row }">
+          <!-- TODO puhui999：展示成蓝色，有点区分度哈 fix-->
+          <span style="font-weight: bold; color: #40aaff">
+            {{ row.properties[index]?.valueName }}
+          </span>
+        </template>
+      </el-table-column>
+    </template>
+    <el-table-column align="center" label="商品条码" min-width="100">
+      <template #default="{ row }">
+        {{ row.barCode }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="销售价(元)" min-width="80">
+      <template #default="{ row }">
+        {{ row.price }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="市场价(元)" min-width="80">
+      <template #default="{ row }">
+        {{ row.marketPrice }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="成本价(元)" min-width="80">
+      <template #default="{ row }">
+        {{ row.costPrice }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="库存" min-width="80">
+      <template #default="{ row }">
+        {{ row.stock }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="重量(kg)" min-width="80">
+      <template #default="{ row }">
+        {{ row.weight }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="体积(m^3)" min-width="80">
+      <template #default="{ row }">
+        {{ row.volume }}
+      </template>
+    </el-table-column>
+    <template v-if="formData!.subCommissionType">
+      <el-table-column align="center" label="一级返佣(元)" min-width="80">
+        <template #default="{ row }">
+          {{ row.subCommissionFirstPrice }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="二级返佣(元)" min-width="80">
+        <template #default="{ row }">
+          {{ row.subCommissionSecondPrice }}
+        </template>
+      </el-table-column>
+    </template>
+  </el-table>
 </template>
 <script lang="ts" name="SkuList" setup>
-import { PropType } from 'vue'
+import { PropType, Ref } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
 import { UploadImg } from '@/components/UploadFile'
-import type { Property, SkuType, SpuType } from '@/api/mall/product/spu'
+import type { Property, Sku, Spu } from '@/api/mall/product/spu'
+import { createImageViewer } from '@/components/ImageViewer'
 
 const props = defineProps({
   propFormData: {
-    type: Object as PropType<SpuType>,
+    type: Object as PropType<Spu>,
     default: () => {}
   },
   propertyList: {
     type: Array,
     default: () => []
   },
-  isBatch: propTypes.bool.def(false) // 是否作为批量操作组件
+  isBatch: propTypes.bool.def(false), // 是否作为批量操作组件
+  isDetail: propTypes.bool.def(false) // 是否作为 sku 详情组件
 })
-const formData = ref<SpuType>() // 表单数据
-const skuList = ref<SkuType[]>([
+const formData: Ref<Spu | undefined> = ref<Spu>() // 表单数据
+const skuList = ref<Sku[]>([
   {
     price: 0, // 商品价格
     marketPrice: 0, // 市场价
@@ -140,24 +223,44 @@ const skuList = ref<SkuType[]>([
     subCommissionSecondPrice: 0 // 二级分销的佣金
   }
 ]) // 批量添加时的临时数据
-// TODO @puhui999：保存时，每个商品规格的表单要校验下。例如说，销售金额最低是 0.01 这种。
+
+/** 商品图预览 */
+const imagePreview = (imgUrl: string) => {
+  createImageViewer({
+    urlList: [imgUrl]
+  })
+}
 
 /** 批量添加 */
 const batchAdd = () => {
-  formData.value.skus.forEach((item) => {
+  formData.value!.skus!.forEach((item) => {
     copyValueToTarget(item, skuList.value[0])
   })
 }
 
 /** 删除 sku */
 const deleteSku = (row) => {
-  const index = formData.value.skus.findIndex(
+  const index = formData.value!.skus!.findIndex(
     // 直接把列表转成字符串比较
     (sku) => JSON.stringify(sku.properties) === JSON.stringify(row.properties)
   )
-  formData.value.skus.splice(index, 1)
+  formData.value!.skus!.splice(index, 1)
 }
 const tableHeaders = ref<{ prop: string; label: string }[]>([]) // 多属性表头
+/**
+ * 保存时，每个商品规格的表单要校验下。例如说，销售金额最低是 0.01 这种。
+ */
+const validateSku = (): boolean => {
+  const checks = ['price', 'marketPrice', 'costPrice']
+  let validate = true // 默认通过
+  for (const sku of formData.value!.skus) {
+    if (checks.some((check) => sku[check] < 0.01)) {
+      validate = false // 只要有一个不通过则直接不通过
+      break
+    }
+  }
+  return validate
+}
 
 /**
  * 将传进来的值赋值给 skuList
@@ -185,14 +288,13 @@ const generateTableData = (propertyList: any[]) => {
       valueName: v.name
     }))
   )
-  // TODO @puhui：是不是 buildSkuList，这样容易理解一点哈。item 改成 sku
-  const buildList = build(propertyValues)
+  const buildSkuList = build(propertyValues)
   // 如果回显的 sku 属性和添加的属性不一致则重置 skus 列表
   if (!validateData(propertyList)) {
     // 如果不一致则重置表数据，默认添加新的属性重新生成 sku 列表
     formData.value!.skus = []
   }
-  for (const item of buildList) {
+  for (const item of buildSkuList) {
     const row = {
       properties: Array.isArray(item) ? item : [item], // 如果只有一个属性的话返回的是一个 property 对象
       price: 0,
@@ -207,13 +309,13 @@ const generateTableData = (propertyList: any[]) => {
       subCommissionSecondPrice: 0
     }
     // 如果存在属性相同的 sku 则不做处理
-    const index = formData.value!.skus.findIndex(
+    const index = formData.value!.skus!.findIndex(
       (sku) => JSON.stringify(sku.properties) === JSON.stringify(row.properties)
     )
     if (index !== -1) {
       continue
     }
-    formData.value.skus.push(row)
+    formData.value!.skus!.push(row)
   }
 }
 
@@ -222,7 +324,7 @@ const generateTableData = (propertyList: any[]) => {
  */
 const validateData = (propertyList: any[]) => {
   const skuPropertyIds = []
-  formData.value.skus.forEach((sku) =>
+  formData.value!.skus!.forEach((sku) =>
     sku.properties
       ?.map((property) => property.propertyId)
       .forEach((propertyId) => {
@@ -263,7 +365,7 @@ watch(
   () => props.propertyList,
   (propertyList) => {
     // 如果不是多规格则结束
-    if (!formData.value.specType) {
+    if (!formData.value!.specType) {
       return
     }
     // 如果当前组件作为批量添加数据使用，则重置表数据
@@ -313,5 +415,5 @@ watch(
   }
 )
 // 暴露出生成 sku 方法，给添加属性成功时调用
-defineExpose({ generateTableData })
+defineExpose({ generateTableData, validateSku })
 </script>
