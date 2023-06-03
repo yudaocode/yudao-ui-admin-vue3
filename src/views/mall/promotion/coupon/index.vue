@@ -142,17 +142,6 @@ const statusTabs = reactive([
 
 const queryFormRef = ref<FormInstance | null>(null)
 
-onMounted(() => {
-  getList()
-  // 设置 statuses 过滤
-  for (const dict of getIntDictOptions(DICT_TYPE.PROMOTION_COUPON_STATUS)) {
-    statusTabs.push({
-      label: dict.label,
-      value: dict.value as string
-    })
-  }
-})
-
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -197,4 +186,15 @@ const onTabChange = (tabName) => {
   queryParams.status = tabName === 'all' ? undefined : tabName
   getList()
 }
+
+onMounted(() => {
+  getList()
+  // 设置 statuses 过滤
+  for (const dict of getIntDictOptions(DICT_TYPE.PROMOTION_COUPON_STATUS)) {
+    statusTabs.push({
+      label: dict.label,
+      value: dict.value as string
+    })
+  }
+})
 </script>
