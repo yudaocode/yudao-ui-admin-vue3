@@ -5,10 +5,7 @@ export const getOrderList = (params: PageParam) => {
   return request.get({ url: '/trade/order/page', params })
 }
 
-// // 获得交易订单详情
-// export function getOrderDetail(id) {
-//   return request({
-//     url: '/trade/order/get-detail?id=' + id,
-//     method: 'get'
-//   })
-// }
+// 获得交易订单详情
+export const getOrderDetail = (id: number) => {
+  return request.get({ url: '/trade/order/get-detail?id=' + id })
+}
