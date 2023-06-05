@@ -1,5 +1,12 @@
 <template>
-  <el-form ref="otherSettingsFormRef" :model="formData" :rules="rules" label-width="120px">
+  <!-- 情况一：添加/修改 -->
+  <el-form
+    v-if="!isDetail"
+    ref="otherSettingsFormRef"
+    :model="formData"
+    :rules="rules"
+    label-width="120px"
+  >
     <el-row>
       <el-col :span="24">
         <el-row :gutter="20">
@@ -50,26 +57,55 @@
       </el-col>
     </el-row>
   </el-form>
+
+  <!-- 情况二：详情 -->
+  <Descriptions v-if="isDetail" :data="formData" :schema="allSchemas.detailSchema">
+    <template #recommendHot="{ row }">
+      {{ row.recommendHot ? '是' : '否' }}
+    </template>
+    <template #recommendBenefit="{ row }">
+      {{ row.recommendBenefit ? '是' : '否' }}
+    </template>
+    <template #recommendBest="{ row }">
+      {{ row.recommendBest ? '是' : '否' }}
+    </template>
+    <template #recommendNew="{ row }">
+      {{ row.recommendNew ? '是' : '否' }}
+    </template>
+    <template #recommendGood="{ row }">
+      {{ row.recommendGood ? '是' : '否' }}
+    </template>
+    <template #activityOrders>
+      <el-tag>默认</el-tag>
+      <el-tag class="ml-2" type="success">秒杀</el-tag>
+      <el-tag class="ml-2" type="info">砍价</el-tag>
+      <el-tag class="ml-2" type="warning">拼团</el-tag>
+    </template>
+  </Descriptions>
 </template>
 <script lang="ts" name="OtherSettingsForm" setup>
-import type { SpuType } from '@/api/mall/product/spu'
+import type { Spu } from '@/api/mall/product/spu'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
+import { otherSettingsSchema } from './spu.data'
+
+const { allSchemas } = useCrudSchemas(otherSettingsSchema)
 
 const message = useMessage() // 消息弹窗
 
 const props = defineProps({
   propFormData: {
-    type: Object as PropType<SpuType>,
+    type: Object as PropType<Spu>,
     default: () => {}
   },
-  activeName: propTypes.string.def('')
+  activeName: propTypes.string.def(''),
+  isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
 
 const otherSettingsFormRef = ref() // 表单Ref
 // 表单数据
-const formData = ref<SpuType>({
+const formData = ref<Spu>({
   sort: 1, // 商品排序
   giveIntegral: 1, // 赠送积分
   virtualSalesCount: 1, // 虚拟销量

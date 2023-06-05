@@ -89,7 +89,7 @@
         <el-table border style="width: 100%" :data="formData.templateFree">
           <el-table-column align="center" label="区域">
             <template #default="{ row }">
-              <!--   区域数据太多，用赖加载方式，要不然性能有问题 -->
+              <!-- 区域数据太多，用赖加载方式，要不然性能有问题 -->
               <el-tree-select
                 v-model="row.areaIds"
                 multiple
@@ -171,7 +171,10 @@ const formRules = reactive({
   sort: [{ required: true, message: '分类排序不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const areaCache = ref([]) //由于区域节点懒加载，已选区域节点需要缓存展示
+const areaCache = ref([]) // 由于区域节点懒加载，已选区域节点需要缓存展示
+// TODO @jason：配送的时候，只允许选择省市级别，不允许选择区；如果这样的话，是不是打开弹窗，直接把城市都请求过来；
+// TODO @jaosn：因为只有省市两级，感觉就不用特殊做全国逻辑；选择全国，就默认把子节点都选择上；另外，选择父节点，要把子节点选中哈；
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -204,9 +207,9 @@ const open = async (type: string, id?: number) => {
         }
         item.freePrice = fenToYuan(item.freePrice)
       })
-      //已选的区域节点
+      // 已选的区域节点
       const areaIds = chargeAreaIds.concat(freeAreaIds)
-      //区域节点，懒加载方式。 已选节点需要缓存展示
+      // 区域节点，懒加载方式。已选节点需要缓存展示
       areaCache.value = await getAreaListByIds(areaIds.join(','))
     }
   } finally {
@@ -226,8 +229,9 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as DeliveryExpressTemplateApi.DeliveryExpressTemplateVO
+    // 前端价格以元展示，提交到后端。用分计算
+    // TODO @jason：不能直接这样改，要复制出来改。不然后端操作失败，数据已经被改了
     data.templateCharge.forEach((item) => {
-      //前端价格以元展示，提交到后端。用分计算
       item.startPrice = yuanToFen(item.startPrice)
       item.extraPrice = yuanToFen(item.extraPrice)
     })
@@ -248,6 +252,7 @@ const submitForm = async () => {
     formLoading.value = false
   }
 }
+
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
@@ -269,6 +274,7 @@ const resetForm = () => {
   columnTitle.value = columnTitleMap.get(1)
   formRef.value?.resetFields()
 }
+
 /** 配送计费方法改变 */
 const changeChargeMode = (chargeMode: number) => {
   columnTitle.value = columnTitleMap.get(chargeMode)
@@ -276,6 +282,24 @@ const changeChargeMode = (chargeMode: number) => {
 const defaultArea = [{ id: 1, name: '全国', disabled: false }]
 
 /** 初始化数据 */
+// TODO @jason：是不是不用写这样一个初始化方法，columnTitleMap 直接就可以了呀
+// const columnTitleMap = {
+//   '1': {
+//     startCountTitle: '首件',
+//     extraCountTitle: '续件',
+//     freeCountTitle: '包邮件数'
+//   },
+//   '2': {
+//     startCountTitle: '首件重量(kg)',
+//     extraCountTitle: '续件重量(kg)',
+//     freeCountTitle: '包邮重量(kg)'
+//   },
+//   '3': {
+//     startCountTitle: '首件体积(m³)',
+//     extraCountTitle: '续件体积(m³)',
+//     freeCountTitle: '包邮体积(m³)'
+//   }
+// }
 const initData = async () => {
   // TODO 从服务端全量加载数据， 后面看懒加载是不是可以从前端获取数据。 目前从后端获取数据
   // formLoading.value = true
@@ -286,7 +310,7 @@ const initData = async () => {
   // } finally {
   //   formLoading.value = false
   // }
-  //表头标题和计费方式的映射
+  // 表头标题和计费方式的映射
   columnTitleMap.set(1, {
     startCountTitle: '首件',
     extraCountTitle: '续件',
@@ -320,6 +344,7 @@ const loadChargeArea = async (node, resolve) => {
     const item = data[0]
     if (areaIds.includes(item.id)) {
       // TODO 禁止选中的区域有些问题， 导致修改时候不能重新选择 不知道如何处理。 暂时注释掉 @芋艿 有空瞅瞅
+      // TODO @jason：先不做这个功能哈。
       //item.disabled = true
     }
     resolve(data)
@@ -357,10 +382,11 @@ const loadFreeArea = async (node, resolve) => {
   } else {
     const id = node.data.id
     const data = await getChildrenArea(id)
-    //已选区域需要禁止再次选择
+    // 已选区域需要禁止再次选择
     data.forEach((item) => {
       if (areaIds.includes(item.id)) {
         // TODO 禁止选中的区域有些问题， 导致修改时候不能重新选择 不知道如何处理。 暂时注释掉 @芋艿 有空瞅瞅
+        // TODO @jason：先不做这个功能哈。
         //item.disabled = true
       }
     })
@@ -378,11 +404,13 @@ const addChargeArea = () => {
     extraPrice: 1
   })
 }
+
 /** 删除计费区域 */
 const deleteChargeArea = (index) => {
   const data = formData.value
   data.templateCharge.splice(index, 1)
 }
+
 /** 添加包邮区域 */
 const addFreeArea = () => {
   const data = formData.value
@@ -392,6 +420,7 @@ const addFreeArea = () => {
     freePrice: 1
   })
 }
+
 /** 删除包邮区域 */
 const deleteFreeArea = (index) => {
   const data = formData.value

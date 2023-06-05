@@ -222,7 +222,7 @@ export const PayRefundStatusEnum = {
 }
 
 /**
- * 商品SPU枚举类
+ * 商品 SPU 状态
  */
 export const ProductSpuStatusEnum = {
   RECYCLE: {
@@ -236,5 +236,61 @@ export const ProductSpuStatusEnum = {
   ENABLE: {
     status: 1,
     name: '上架'
+  }
+}
+
+/**
+ * 优惠劵模板的有限期类型的枚举
+ */
+export const CouponTemplateValidityTypeEnum = {
+  DATE: {
+    type: 1,
+    name: '固定日期可用'
+  },
+  TERM: {
+    type: 2,
+    name: '领取之后可用'
+  }
+}
+
+/**
+ * 营销的商品范围枚举
+ */
+export const PromotionProductScopeEnum = {
+  ALL: {
+    scope: 1,
+    name: '全部商品参与'
+  },
+  SPU: {
+    scope: 2,
+    name: '指定商品参与'
+  }
+}
+
+/**
+ * 营销的条件类型枚举
+ */
+export const PromotionConditionTypeEnum = {
+  PRICE: {
+    type: 10,
+    name: '满 N 元'
+  },
+  COUNT: {
+    type: 20,
+    name: '满 N 件'
+  }
+}
+
+/**
+ * 优惠类型枚举
+ */
+export const PromotionDiscountTypeEnum = {
+  PRICE: {
+    type: 1,
+    name: '满减'
+  },
+  PERCENT: {
+    type: 2,
+    name: '折扣'
   }
 }
