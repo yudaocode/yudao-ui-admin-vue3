@@ -306,11 +306,14 @@ export const handleTree2 = (data, id, parentId, children, rootId) => {
   })
   return treeData !== '' ? treeData : data
 }
+
 /**
+ * 校验选中的节点，是否为指定 level
  *
  * @param tree 要操作的树结构数据
  * @param nodeId 需要判断在什么层级的数据
  * @param level 检查的级别, 默认检查到二级
+ * @return true 是；false 否
  */
 export const checkSelectedNode = (tree: any[], nodeId: any, level = 2): boolean => {
   if (typeof tree === 'undefined' || !Array.isArray(tree) || tree.length === 0) {

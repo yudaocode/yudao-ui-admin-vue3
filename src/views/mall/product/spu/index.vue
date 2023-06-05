@@ -171,7 +171,6 @@
       </el-table-column>
       <el-table-column align="center" fixed="right" label="操作" min-width="200">
         <template #default="{ row }">
-          <!-- TODO @puhui999：【详情】，可以后面点做哈 fix-->
           <el-button
             v-hasPermi="['product:spu:update']"
             link
