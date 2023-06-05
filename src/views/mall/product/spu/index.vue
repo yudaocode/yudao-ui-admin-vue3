@@ -8,7 +8,7 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <!-- TODO @puhui999：https://admin.java.crmeb.net/store/index，参考，使用分类 + 标题搜索 -->
+      <!-- TODO @puhui999：品牌应该是数据下拉哈 -->
       <el-form-item label="品牌名称" prop="name">
         <el-input
           v-model="queryParams.name"
@@ -18,15 +18,18 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状态">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+      <!--  TODO 分类只能选择二级分类目前还没做，还是先以联调通顺为主 -->
+      <!-- TODO puhui999：我们要不改成支持选择一级。如果选择一级，后端要递归查询下子分类，然后去 in？ -->
+      <el-form-item label="商品分类" prop="categoryId">
+        <el-tree-select
+          v-model="queryParams.categoryId"
+          :data="categoryList"
+          :props="defaultProps"
+          check-strictly
+          class="w-1/1"
+          node-key="id"
+          placeholder="请选择商品分类"
+        />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
@@ -48,18 +51,27 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <el-button v-hasPermi="['product:brand:create']" plain type="primary" @click="openForm">
+        <el-button v-hasPermi="['product:spu:create']" plain type="primary" @click="openForm">
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
-        <!-- TODO @puhui999：增加一个【导出】操作 -->
+        <el-button
+          v-hasPermi="['product:spu:export']"
+          :loading="exportLoading"
+          plain
+          type="success"
+          @click="handleExport"
+        >
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-tabs v-model="queryParams.tabType" @tab-click="handleClick">
+    <el-tabs v-model="queryParams.tabType" @tab-click="handleTabClick">
       <el-tab-pane
         v-for="item in tabsData"
         :key="item.type"
@@ -68,35 +80,39 @@
       />
     </el-tabs>
     <el-table v-loading="loading" :data="list">
-      <!-- TODO puhui999: ID 编号的展示 -->
-      <!--   TODO 暂时不做折叠数据   -->
-      <!--      <el-table-column type="expand">-->
-      <!--        <template #default="{ row }">-->
-      <!--          <el-form inline label-position="left">-->
-      <!--            <el-form-item label="市场价：">-->
-      <!--              <span>{{ row.marketPrice }}</span>-->
-      <!--            </el-form-item>-->
-      <!--            <el-form-item label="成本价：">-->
-      <!--              <span>{{ row.costPrice }}</span>-->
-      <!--            </el-form-item>-->
-      <!--            <el-form-item label="虚拟销量：">-->
-      <!--              <span>{{ row.virtualSalesCount }}</span>-->
-      <!--            </el-form-item>-->
-      <!--          </el-form>-->
-      <!--        </template>-->
-      <!--      </el-table-column>-->
+      <!-- TODO puhui：这几个属性哈，一行三个
+      商品分类：服装鞋包/箱包
+商品市场价格：100.00
+成本价：0.00
+收藏：5
+虚拟销量：999   -->
+      <el-table-column type="expand" width="30">
+        <template #default="{ row }">
+          <el-form class="demo-table-expand" inline label-position="left">
+            <el-form-item label="市场价：">
+              <span>{{ formatToFraction(row.marketPrice) }}</span>
+            </el-form-item>
+            <el-form-item label="成本价：">
+              <span>{{ formatToFraction(row.costPrice) }}</span>
+            </el-form-item>
+            <el-form-item label="虚拟销量：">
+              <span>{{ row.virtualSalesCount }}</span>
+            </el-form-item>
+          </el-form>
+        </template>
+      </el-table-column>
+      <el-table-column key="id" align="center" label="商品编号" prop="id" />
       <el-table-column label="商品图" min-width="80">
         <template #default="{ row }">
-          <el-image
-            :src="row.picUrl"
-            style="width: 36px; height: 36px"
-            @click="imagePreview(row.picUrl)"
-          />
+          <el-image :src="row.picUrl" @click="imagePreview(row.picUrl)" class="w-30px h-30px" />
         </template>
       </el-table-column>
       <el-table-column :show-overflow-tooltip="true" label="商品名称" min-width="300" prop="name" />
-      <!-- TODO 价格 / 100.0 -->
-      <el-table-column align="center" label="商品售价" min-width="90" prop="price" />
+      <el-table-column align="center" label="商品售价" min-width="90" prop="price">
+        <template #default="{ row }">
+          {{ formatToFraction(row.price) }}
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="销量" min-width="90" prop="salesCount" />
       <el-table-column align="center" label="库存" min-width="90" prop="stock" />
       <el-table-column align="center" label="排序" min-width="70" prop="sort" />
@@ -107,24 +123,30 @@
         prop="createTime"
         width="180"
       />
-      <el-table-column fixed="right" label="状态" min-width="80">
+      <el-table-column align="center" label="状态" min-width="80">
         <template #default="{ row }">
-          <!-- TODO @puhui：是不是不用 Number(row.status) 去比较哈，直接 row.status < 0 -->
-          <el-switch
-            v-model="row.status"
-            :active-value="1"
-            :disabled="Number(row.status) < 0"
-            :inactive-value="0"
-            active-text="上架"
-            inactive-text="下架"
-            inline-prompt
-            @change="changeStatus(row)"
-          />
+          <template v-if="row.status >= 0">
+            <el-switch
+              v-model="row.status"
+              :active-value="1"
+              :inactive-value="0"
+              active-text="上架"
+              inactive-text="下架"
+              inline-prompt
+              @change="changeStatus(row)"
+            />
+          </template>
+          <template v-else>
+            <el-tag type="info">回收站</el-tag>
+          </template>
         </template>
       </el-table-column>
-      <el-table-column align="center" fixed="right" label="操作" min-width="150">
+      <el-table-column align="center" fixed="right" label="操作" min-width="200">
         <template #default="{ row }">
           <!-- TODO @puhui999：【详情】，可以后面点做哈 -->
+          <el-button v-hasPermi="['product:spu:update']" link type="primary" @click="openDetail">
+            详情
+          </el-button>
           <template v-if="queryParams.tabType === 4">
             <el-button
               v-hasPermi="['product:spu:delete']"
@@ -138,13 +160,15 @@
               v-hasPermi="['product:spu:update']"
               link
               type="primary"
-              @click="addToTrash(row, ProductSpuStatusEnum.DISABLE.status)"
+              @click="changeStatus(row, ProductSpuStatusEnum.DISABLE.status)"
             >
               恢复到仓库
             </el-button>
           </template>
           <template v-else>
+            <!-- 只有不是上架和回收站的商品可以编辑 -->
             <el-button
+              v-if="queryParams.tabType !== 0"
               v-hasPermi="['product:spu:update']"
               link
               type="primary"
@@ -156,7 +180,7 @@
               v-hasPermi="['product:spu:update']"
               link
               type="primary"
-              @click="addToTrash(row, ProductSpuStatusEnum.RECYCLE.status)"
+              @click="changeStatus(row, ProductSpuStatusEnum.RECYCLE.status)"
             >
               加入回收站
             </el-button>
@@ -172,26 +196,25 @@
       @pagination="getList"
     />
   </ContentWrap>
-  <!-- https://kailong110120130.gitee.io/vue-element-plus-admin-doc/components/image-viewer.html，可以用这个么？ -->
-  <!-- 必须在表格外面展示。不然单元格会遮挡图层 -->
-  <el-image-viewer
-    v-if="imgViewVisible"
-    :url-list="imageViewerList"
-    @close="imgViewVisible = false"
-  />
 </template>
-<script lang="ts" name="ProductList" setup>
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
-// TODO @puhui999：managementApi=》ProductSpuApi
-import * as managementApi from '@/api/mall/product/management/spu'
-import { ProductSpuStatusEnum } from '@/utils/constants'
+<script lang="ts" name="ProductSpu" setup>
 import { TabsPaneContext } from 'element-plus'
+import { cloneDeep } from 'lodash-es'
+import { createImageViewer } from '@/components/ImageViewer'
+import { dateFormatter } from '@/utils/formatTime'
+import { defaultProps, handleTree } from '@/utils/tree'
+import { ProductSpuStatusEnum } from '@/utils/constants'
+import { formatToFraction } from '@/utils'
+import download from '@/utils/download'
+import * as ProductSpuApi from '@/api/mall/product/spu'
+import * as ProductCategoryApi from '@/api/mall/product/category'
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { currentRoute, push } = useRouter() // 路由跳转
 
 const loading = ref(false) // 列表的加载中
+const exportLoading = ref(false) // 导出的加载中
 const total = ref(0) // 列表的总页数
 const list = ref<any[]>([]) // 列表的数据
 // tabs 数据
@@ -225,26 +248,19 @@ const tabsData = ref([
 
 /** 获得每个 Tab 的数量 */
 const getTabsCount = async () => {
-  // TODO @puhui999：这里是不是可以不要 try catch 哈
-  try {
-    const res = await managementApi.getTabsCount()
-    for (let objName in res) {
-      tabsData.value[Number(objName)].count = res[objName]
-    }
-  } catch {}
+  const res = await ProductSpuApi.getTabsCount()
+  for (let objName in res) {
+    tabsData.value[Number(objName)].count = res[objName]
+  }
 }
-
-const imgViewVisible = ref(false) // 商品图预览
-const imageViewerList = ref<string[]>([]) // 商品图预览列表
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
   tabType: 0
-})
-const queryFormRef = ref() // 搜索的表单
+}) // 查询参数
+const queryFormRef = ref() // 搜索的表单Ref
 
-// TODO @puhui999：可以改成 handleTabClick：更准确一点；
-const handleClick = (tab: TabsPaneContext) => {
+const handleTabClick = (tab: TabsPaneContext) => {
   queryParams.value.tabType = tab.paneName
   getList()
 }
@@ -253,7 +269,7 @@ const handleClick = (tab: TabsPaneContext) => {
 const getList = async () => {
   loading.value = true
   try {
-    const data = await managementApi.getSpuList(queryParams.value)
+    const data = await ProductSpuApi.getSpuPage(queryParams.value)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -261,7 +277,6 @@ const getList = async () => {
   }
 }
 
-// TODO @puhui999：是不是 changeStatus 和 addToTrash 调用一个统一的方法，去更新状态。这样逻辑会更干净一些。
 /**
  * 更改 SPU 状态
  *
@@ -269,10 +284,11 @@ const getList = async () => {
  * @param status 更改前的值
  */
 const changeStatus = async (row, status?: number) => {
-  // TODO 测试过程中似乎有点问题，下一版修复
+  const deepCopyValue = cloneDeep(unref(row))
+  if (typeof status !== 'undefined') deepCopyValue.status = status
   try {
     let text = ''
-    switch (row.status) {
+    switch (deepCopyValue.status) {
       case ProductSpuStatusEnum.DISABLE.status:
         text = ProductSpuStatusEnum.DISABLE.name
         break
@@ -284,20 +300,19 @@ const changeStatus = async (row, status?: number) => {
         break
     }
     await message.confirm(
-      row.status === -1 ? `确认要将[${row.name}]${text}吗？` : `确认要${text}[${row.name}]吗？`
+      deepCopyValue.status === -1
+        ? `确认要将[${row.name}]${text}吗？`
+        : row.status === -1 // 再判断一次原对象是否等于-1，例: 把回收站中的商品恢复到仓库中，事件触发时原对象status为-1 深拷贝对象status被赋值为0
+        ? `确认要将[${row.name}]恢复到仓库吗？`
+        : `确认要${text}[${row.name}]吗？`
     )
-    await managementApi.updateStatus({ id: row.id, status: row.status })
+    await ProductSpuApi.updateStatus({ id: deepCopyValue.id, status: deepCopyValue.status })
     message.success('更新状态成功')
     // 刷新 tabs 数据
     await getTabsCount()
     // 刷新列表
     await getList()
   } catch {
-    // 取消加入回收站时回显数据
-    if (typeof status !== 'undefined') {
-      row.status = status
-      return
-    }
     // 取消更改状态时回显数据
     row.status =
       row.status === ProductSpuStatusEnum.DISABLE.status
@@ -306,26 +321,13 @@ const changeStatus = async (row, status?: number) => {
   }
 }
 
-/**
- * 加入回收站
- *
- * @param row
- * @param status
- */
-const addToTrash = (row, status) => {
-  // 复制一份原值
-  const num = Number(`${row.status}`)
-  row.status = status
-  changeStatus(row, num)
-}
-
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await managementApi.deleteSpu(id)
+    await ProductSpuApi.deleteSpu(id)
     message.success(t('common.delSuccess'))
     // 刷新tabs数据
     await getTabsCount()
@@ -334,13 +336,11 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/**
- * 商品图预览
- * @param imgUrl
- */
+/** 商品图预览 */
 const imagePreview = (imgUrl: string) => {
-  imageViewerList.value = [imgUrl]
-  imgViewVisible.value = true
+  createImageViewer({
+    urlList: [imgUrl]
+  })
 }
 
 /** 搜索按钮操作 */
@@ -362,27 +362,61 @@ const resetQuery = () => {
 const openForm = (id?: number) => {
   // 修改
   if (typeof id === 'number') {
-    push('/product/productManagementAdd?id=' + id)
+    push('/product/productSpuEdit/' + id)
     return
   }
   // 新增
-  push('/product/productManagementAdd')
+  push('/product/productSpuAdd')
 }
 
-// 监听路由变化更新列表 TODO @puhui999：这个是必须加的么？
+/**
+ * 查看商品详情
+ */
+const openDetail = () => {
+  message.alert('查看详情未完善！！！')
+}
+
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await ProductSpuApi.exportSpu(queryParams)
+    download.excel(data, '商品列表.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+}
+
+// 监听路由变化更新列表 TODO @puhui999：这个是必须加的么？fix: 因为编辑表单是以路由的方式打开，保存表单后列表不会刷新
 watch(
   () => currentRoute.value,
   () => {
     getList()
-  },
-  {
-    immediate: true
   }
 )
 
+const categoryList = ref() // 分类树
 /** 初始化 **/
-onMounted(() => {
-  getTabsCount()
-  getList()
+onMounted(async () => {
+  await getTabsCount()
+  await getList()
+  // 获得分类树
+  const data = await ProductCategoryApi.getCategoryList({})
+  categoryList.value = handleTree(data, 'id', 'parentId')
 })
 </script>
+<style lang="scss" scoped>
+.demo-table-expand {
+  padding-left: 42px;
+
+  :deep(.el-form-item__label) {
+    width: 82px;
+    font-weight: bold;
+    color: #99a9bf;
+  }
+}
+</style>

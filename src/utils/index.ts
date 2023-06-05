@@ -155,3 +155,57 @@ export const fileSizeFormatter = (row, column, cellValue) => {
   const sizeStr = size.toFixed(2) //保留的小数位数
   return sizeStr + ' ' + unitArr[index]
 }
+
+/**
+ * 将值复制到目标对象，且以目标对象属性为准，例：target: {a:1} source:{a:2,b:3} 结果为：{a:2}
+ * @param target 目标对象
+ * @param source 源对象
+ */
+export const copyValueToTarget = (target, source) => {
+  const newObj = Object.assign({}, target, source)
+  // 删除多余属性
+  Object.keys(newObj).forEach((key) => {
+    // 如果不是target中的属性则删除
+    if (Object.keys(target).indexOf(key) === -1) {
+      delete newObj[key]
+    }
+  })
+  // 更新目标对象值
+  Object.assign(target, newObj)
+}
+
+// TODO @puhui999：返回要带上 .00 哈.例如说 1.00
+/**
+ * 将一个整数转换为分数保留两位小数
+ * @param num
+ */
+export const formatToFraction = (num: number | string | undefined): number => {
+  if (typeof num === 'undefined') return 0
+  const parsedNumber = typeof num === 'string' ? parseFloat(num) : num
+  return parseFloat((parsedNumber / 100).toFixed(2))
+}
+
+/**
+ * 将一个分数转换为整数
+ * @param num
+ */
+export const convertToInteger = (num: number | string | undefined): number => {
+  if (typeof num === 'undefined') return 0
+  const parsedNumber = typeof num === 'string' ? parseFloat(num) : num
+  // TODO 分转元后还有小数则四舍五入
+  return Math.round(parsedNumber * 100)
+}
+
+/**
+ * 元转分
+ */
+export const yuanToFen = (amount: string | number): number => {
+  return Math.round(Number(amount) * 100)
+}
+
+/**
+ * 分转元
+ */
+export const fenToYuan = (amount: string | number): number => {
+  return Number((Number(amount) / 100).toFixed(2))
+}

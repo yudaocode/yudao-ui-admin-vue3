@@ -149,6 +149,9 @@ export enum DICT_TYPE {
   PRODUCT_UNIT = 'product_unit', // 商品单位
   PRODUCT_SPU_STATUS = 'product_spu_status', //商品状态
 
+  // ========== MALL 交易模块 ==========
+  EXPRESS_CHARGE_MODE = 'trade_delivery_express_charge_mode', //快递的计费方式
+
   //===add by 20230530====
   // ========== MALL - ORDER 模块 ==========
   TRADE_AFTER_SALE_STATUS = 'trade_after_sale_status', // 售后 - 状态

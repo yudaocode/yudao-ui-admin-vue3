@@ -54,3 +54,8 @@ export const getBrand = (id: number) => {
 export const getBrandParam = (params: PageParam) => {
   return request.get({ url: '/product/brand/page', params })
 }
+
+// 获得商品品牌精简信息列表
+export const getSimpleBrandList = () => {
+  return request.get({ url: '/product/brand/list-all-simple' })
+}
