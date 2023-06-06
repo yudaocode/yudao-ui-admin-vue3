@@ -14,7 +14,6 @@
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <!-- TODO @puhui999：只能选根节点 fix: 已完善-->
         <el-form-item label="商品分类" prop="categoryId">
           <el-tree-select
             v-model="formData.categoryId"
@@ -166,8 +165,7 @@
   </Descriptions>
 
   <!-- 商品属性添加 Form 表单 -->
-  <!-- TODO @puhui999: ProductPropertyAddForm 是不是更合适呀 -->
-  <ProductAttributesAddForm ref="attributesAddFormRef" :propertyList="propertyList" />
+  <ProductPropertyAddForm ref="attributesAddFormRef" :propertyList="propertyList" />
 </template>
 <script lang="ts" name="ProductSpuBasicInfoForm" setup>
 import { PropType } from 'vue'
@@ -178,7 +176,7 @@ import { checkSelectedNode, defaultProps, handleTree, treeToString } from '@/uti
 import { createImageViewer } from '@/components/ImageViewer'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { UploadImg, UploadImgs } from '@/components/UploadFile'
-import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
+import { ProductAttributes, ProductPropertyAddForm, SkuList } from './index'
 import { basicInfoSchema } from './spu.data'
 import type { Spu } from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'

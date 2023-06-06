@@ -147,6 +147,7 @@ export enum DICT_TYPE {
   MP_MESSAGE_TYPE = 'mp_message_type', // 消息类型
 
   // ========== MALL - PROMOTION 模块 ==========
+  PRODUCT_UNIT = 'product_unit', // 商品单位
   PROMOTION_DISCOUNT_TYPE = 'promotion_discount_type', // 优惠类型
   PROMOTION_PRODUCT_SCOPE = 'promotion_product_scope', // 营销的商品范围
   PROMOTION_COUPON_TEMPLATE_VALIDITY_TYPE = 'promotion_coupon_template_validity_type', // 优惠劵模板的有限期类型
