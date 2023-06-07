@@ -256,7 +256,7 @@ watch(
       return
     }
     copyValueToTarget(formData, data)
-    formData.sliderPicUrls = data['sliderPicUrls'].map((item) => ({
+    formData.sliderPicUrls = data['sliderPicUrls']?.map((item) => ({
       url: item
     }))
     // 只有是多规格才处理
@@ -265,16 +265,16 @@ watch(
     }
     //  直接拿返回的 skus 属性逆向生成出 propertyList
     const properties = []
-    formData.skus.forEach((sku) => {
-      sku.properties.forEach(({ propertyId, propertyName, valueId, valueName }) => {
+    formData.skus?.forEach((sku) => {
+      sku.properties?.forEach(({ propertyId, propertyName, valueId, valueName }) => {
         // 添加属性
-        if (!properties.some((item) => item.id === propertyId)) {
+        if (!properties?.some((item) => item.id === propertyId)) {
           properties.push({ id: propertyId, name: propertyName, values: [] })
         }
         // 添加属性值
-        const index = properties.findIndex((item) => item.id === propertyId)
-        if (!properties[index].values.some((value) => value.id === valueId)) {
-          properties[index].values.push({ id: valueId, name: valueName })
+        const index = properties?.findIndex((item) => item.id === propertyId)
+        if (!properties[index].values?.some((value) => value.id === valueId)) {
+          properties[index].values?.push({ id: valueId, name: valueName })
         }
       })
     })
