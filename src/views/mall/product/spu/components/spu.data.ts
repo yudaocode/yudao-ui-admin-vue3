@@ -1,6 +1,7 @@
 import { CrudSchema } from '@/hooks/web/useCrudSchemas'
 
 // TODO @puhui999：如果只要 detail，可以不用 CrudSchema，只要描述的 Schema
+// fix: useCrudSchemas 中没有单独处理的情况且只要 detail 的情况只要 spu 这里有使用 如果改动得添加/修改代码
 export const basicInfoSchema = reactive<CrudSchema[]>([
   {
     label: '商品名称',

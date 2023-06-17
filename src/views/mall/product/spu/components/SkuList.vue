@@ -23,7 +23,6 @@
         min-width="120"
       >
         <template #default="{ row }">
-          <!-- TODO puhui999：展示成蓝色，有点区分度哈 fix-->
           <span style="font-weight: bold; color: #40aaff">
             {{ row.properties[index]?.valueName }}
           </span>

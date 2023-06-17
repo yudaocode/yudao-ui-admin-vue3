@@ -355,7 +355,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     },
     children: [
       {
-        path: 'productSpuAdd', // TODO @puhui999：最好拆成 add 和 edit 两个路由；添加商品；修改商品 fix
+        path: 'spu/add',
         component: () => import('@/views/mall/product/spu/addForm.vue'),
         name: 'ProductSpuAdd',
         meta: {
@@ -368,9 +368,9 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: 'productSpuEdit/:spuId(\\d+)',
+        path: 'spu/edit/:spuId(\\d+)',
         component: () => import('@/views/mall/product/spu/addForm.vue'),
-        name: 'productSpuEdit',
+        name: 'ProductSpuEdit',
         meta: {
           noCache: true,
           hidden: true,
@@ -381,9 +381,9 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: 'productSpuDetail/:spuId(\\d+)',
+        path: 'spu/detail/:spuId(\\d+)',
         component: () => import('@/views/mall/product/spu/addForm.vue'),
-        name: 'productSpuDetail',
+        name: 'ProductSpuDetail',
         meta: {
           noCache: true,
           hidden: true,

@@ -104,7 +104,7 @@ const getDetail = async () => {
     formLoading.value = true
     try {
       const res = (await ProductSpuApi.getSpu(id)) as ProductSpuApi.Spu
-      res.skus!.forEach((item) => {
+      res.skus?.forEach((item) => {
         // 回显价格分转元
         item.price = formatToFraction(item.price)
         item.marketPrice = formatToFraction(item.marketPrice)

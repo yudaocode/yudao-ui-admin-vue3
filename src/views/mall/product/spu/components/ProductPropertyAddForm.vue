@@ -17,7 +17,7 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="ProductPropertyForm" setup>
+<script lang="ts" name="ProductPropertyAddForm" setup>
 import * as PropertyApi from '@/api/mall/product/property'
 
 const { t } = useI18n() // 国际化
