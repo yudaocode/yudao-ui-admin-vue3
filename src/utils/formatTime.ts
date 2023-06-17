@@ -155,7 +155,7 @@ export const dateFormatter = (row, column, cellValue) => {
  * @returns 带时间00:00:00的日期
  */
 export function beginOfDay(param: Date) {
-  return new Date(param.getFullYear(), param.getMonth(), param.getDate(), 0, 0, 0, 0)
+  return new Date(param.getFullYear(), param.getMonth(), param.getDate(), 0, 0, 0)
 }
 
 /**
@@ -164,7 +164,7 @@ export function beginOfDay(param: Date) {
  * @returns 带时间23:59:59的日期
  */
 export function endOfDay(param: Date) {
-  return new Date(param.getFullYear(), param.getMonth(), param.getDate(), 23, 59, 59, 999)
+  return new Date(param.getFullYear(), param.getMonth(), param.getDate(), 23, 59, 59)
 }
 
 /**
