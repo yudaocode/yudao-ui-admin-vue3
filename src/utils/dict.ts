@@ -146,6 +146,11 @@ export enum DICT_TYPE {
   MP_AUTO_REPLY_REQUEST_MATCH = 'mp_auto_reply_request_match', // 自动回复请求匹配类型
   MP_MESSAGE_TYPE = 'mp_message_type', // 消息类型
 
+  // ========== MALL - 会员模块 ==========
+  // 积分模块 TODO 芋艿：改成 member_ 前缀；包括枚举和值；
+  POINT_BIZ_TYPE = 'point_biz_type',
+  POINT_STATUS = 'point_status',
+
   // ========== MALL - 商品模块 ==========
   PRODUCT_UNIT = 'product_unit', // 商品单位
   PRODUCT_SPU_STATUS = 'product_spu_status', //商品状态
@@ -161,8 +166,4 @@ export enum DICT_TYPE {
   PROMOTION_COUPON_TAKE_TYPE = 'promotion_coupon_take_type', // 优惠劵的领取方式
   PROMOTION_ACTIVITY_STATUS = 'promotion_activity_status', // 优惠活动的状态
   PROMOTION_CONDITION_TYPE = 'promotion_condition_type' // 营销的条件类型枚举
-  // 积分模块 TODO 芋艿：这里枚举要改下
-  POINT_BIZ_TYPE = 'point_biz_type',
-  POINT_STATUS = 'point_status'
-
 }
