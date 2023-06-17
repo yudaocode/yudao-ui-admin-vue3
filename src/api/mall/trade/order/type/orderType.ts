@@ -1,3 +1,6 @@
+// TODO @xiaobai：这个放到 order/index.ts  里哈
+// TODO @xiaobai：注释放到变量后面，这样简洁一点
+// TODO @xiaobai：这个改成 TradeOrderRespVO
 export interface TradeOrderPageItemRespVO {
   // 订单编号
   id: number
@@ -85,6 +88,7 @@ export interface TradeOrderPageItemRespVO {
   items: TradeOrderItemBaseVO[]
 }
 
+// TODO @xiaobai：这个改成 TradeOrderItemRespVO
 /**
  * 交易订单项 Base VO，提供给添加、修改、详细的子 VO 使用
  * 如果子 VO 存在差异的字段，请不要添加到这里，影响 Swagger 文档生成

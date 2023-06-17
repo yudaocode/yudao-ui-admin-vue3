@@ -64,9 +64,8 @@
           />
         </el-select>
       </el-form-item>
-
       <el-form-item label="订单搜索" prop="searchValue">
-        <!-- 双item绑定2个变量用于reset时没法重置 -->
+        <!-- 双 item 绑定 2 个变量用于 reset 时没法重置 -->
         <el-form-item class="!w-280px" prop="searchType">
           <el-input
             class="!w-280px"
@@ -101,8 +100,8 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <!-- v-hasPermi="['trade:order:export']"
-           需要将选中的数据存入orderSelect.multipleSelection中 
+        <!-- v-hasPermi="['trade:order:export']" TODO 待开发
+           需要将选中的数据存入orderSelect.multipleSelection中
           需要考虑全选时数据如何处理-->
         <el-button type="success" plain @click="handleExport" :loading="exportLoading">
           <Icon icon="ep:download" class="mr-5px" /> 导出TODO
@@ -110,9 +109,9 @@
       </el-form-item>
     </el-form>
   </ContentWrap>
-  <!-- 表格 -->
+
+  <!-- 列表 -->
   <ContentWrap>
-    <!-- 表单 -->
     <el-table v-loading="loading" :data="list">
       <el-table-column type="expand" fixed="left">
         <template #default="scope">
@@ -136,7 +135,6 @@
         <template #header>
           <el-dropdown icon="eq:search" @command="handleDropType">
             <el-button link type="primary">全选({{ orderSelect.checkTotal }}) </el-button>
-
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="1">当前页</el-dropdown-item>
@@ -162,7 +160,6 @@
           <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
-
       <el-table-column label="订单来源" align="center" min-width="100">
         <template #default="scope">
           <dict-tag
@@ -173,8 +170,8 @@
           <span v-else>{{ scope.terminal }}</span>
         </template>
       </el-table-column>
-
-      <el-table-column label="用户信息(id)" align="center" min-width="100">
+      <el-table-column label="用户信息" align="center" min-width="100">
+        <!-- TODO xiaobai：展示昵称，跳转到用户详情 -->
         <template #default="scope">
           <el-button link type="primary" @click="goUserDetail(scope.row)">{{
             scope.row.userId
@@ -207,6 +204,7 @@
             <div v-for="item in scope.row.items" :key="item">
               <div>
                 <p>{{ item.spuName }}</p>
+                <!-- TODO @xiaobai：不用 parseFloat 操作，直接 / 100.0 -->
                 <p>{{
                   '￥ ' + parseFloat(item.payPrice / 100).toFixed(2) + '元 x ' + item.count
                 }}</p>
@@ -215,7 +213,6 @@
           </el-popover>
         </template>
       </el-table-column>
-
       <el-table-column label="实际支付(元)" align="center" prop="payPrice" min-width="100">
         <template #default="scope">
           {{ '￥ ' + parseFloat(scope.row.payPrice / 100).toFixed(2) }}
@@ -228,6 +225,7 @@
         prop="payTime"
         min-width="180"
       />
+      <!-- TODO @xiaobai：增加一个 createTime 时间的展示 -->
       <el-table-column label="支付类型" align="center" min-width="100" prop="payChannelCode">
         <template #default="scope">
           <dict-tag
@@ -239,8 +237,9 @@
       </el-table-column>
       <el-table-column label="订单状态" align="center" prop="status" min-width="100">
         <template #default="scope">
+          <!-- TODO @xiaobai：不用做判断，直接 dict-tag 渲染就好列 -->
           <dict-tag
-            v-if="scope.row.status == ''"
+            v-if="scope.row.status === ''"
             :type="DICT_TYPE.TRADE_ORDER_STATUS"
             :value="scope.row.status"
           />
@@ -249,17 +248,16 @@
       </el-table-column>
       <el-table-column label="操作" align="center" fixed="right" min-width="150">
         <template #default="scope">
-          <el-button v-if="scope.row.status == '0'" link type="primary" @click="sendXX(scope.row)"
-            >待支付</el-button
-          >
-          <el-button v-if="scope.row.status == '10'" link type="primary" @click="sendXX(scope.row)"
-            >发货</el-button
-          >
+          <el-button v-if="scope.row.status === 0" link type="primary" @click="sendXX(scope.row)">
+            待支付
+          </el-button>
+          <el-button v-if="scope.row.status === 10" link type="primary" @click="sendXX(scope.row)">
+            发货
+          </el-button>
           <el-button link type="primary" @click="showOrderDetail(scope.row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
-
     <!-- 分页 -->
     <Pagination
       v-model:limit="queryParams.pageSize"
@@ -279,7 +277,8 @@ import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import download from '@/utils/download'
-// import TradeOrderDetail from './tradeOrderDetail.vue'
+const message = useMessage() // 消息弹窗
+const { push } = useRouter() // 路由
 interface CurrentType {
   checkTotal: number //选中的数量
   currentType: string //页面选中类型, 0-noPage无选中页面 1-currentPage 当前页面 2-allPage所有页面
@@ -295,24 +294,17 @@ const orderSelect: CurrentType = reactive({
   pageNoList: []
 })
 
-const message = useMessage()
-
-const { push } = useRouter()
+const loading = ref(false) // 列表的加载中
+const total = ref(0) // 总记录数
+const list = ref<any>([]) // 表数据
 const queryFormRef = ref() //表单搜索
 const queryParams = ref({
-  pageNo: 1, //首页
-  pageSize: 10, //页面大小
-  tabIndex: 0 //详情页面数据
+  pageNo: 1, // 首页
+  pageSize: 10, // 页面大小
+  tabIndex: 0 // 详情页面数据
 })
-
-const loading = ref(false)
-const exportLoading = ref(false)
-// 总记录数
-const total = ref(0)
-
-//表数据
-const list = ref<any>([])
-//订单搜索
+const exportLoading = ref(false) // 导出按钮的加载中
+// 订单搜索
 const searchList = ref([
   {
     value: 'orderNo',
@@ -323,19 +315,19 @@ const searchList = ref([
     label: '用户UID'
   },
   {
-    value: 'userName',
+    value: 'userName', // TODO @xiaobai：userNickname
     label: '用户姓名'
   },
   {
-    value: 'userTel',
+    value: 'userTel', // TODO @xiaobai：userMobile 改成
     label: '用户电话'
   },
   {
-    value: 'itemName',
+    value: 'itemName', // TODO @xiaobai：不用筛选
     label: '商品名称'
   },
   {
-    value: 'itemCount',
+    value: 'itemCount', // TODO @xiaobai：件数不用筛选好列
     label: '商品件数'
   }
 ])
@@ -344,6 +336,7 @@ const imgViewVisible = ref(false) // 商品图预览
 
 const imageViewerList = ref<string[]>([]) // 商品图预览列表
 
+// TODO @xiaobai：要不全选逻辑先不做？
 /**当前页 所有页  暂不考虑数据本地化 会导致选中当前页 从后台重新拉取数据时出现数据不一致*/
 const handleDropType = (command: string) => {
   orderSelect.currentType = command
@@ -408,51 +401,8 @@ const handcheckclick = (row: any) => {
     orderSelect.checkTotal = orderSelect.checkTotal + 1
   }
 }
-/**
- * 导出数据
- */
 
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    //TODO导出的数据是后台导出还是从前端中获取数据(全选时数据怎么打印?)
-    download.excel(orderSelect.multipleSelection as any, '订单信息.xls') //
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
-  //TODO
-  exportLoading.value = false
-}
-
-/** 搜索按钮操作 */
-const handleQuery = () => {
-  //选中状态初始化
-  orderSelect.checkTotal = 0
-  orderSelect.currentType = '0'
-  orderSelect.multipleSelection = []
-  orderSelect.pageNoList = []
-  orderSelect.selectAll = false
-
-  getList()
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  //选中状态初始化
-  orderSelect.checkTotal = 0
-  orderSelect.currentType = '0'
-  orderSelect.multipleSelection = []
-  orderSelect.pageNoList = []
-  orderSelect.selectAll = false
-
-  queryFormRef.value.resetFields()
-  handleQuery()
-}
-
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
@@ -480,27 +430,77 @@ const getList = async () => {
   }
 }
 
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  //选中状态初始化
+  orderSelect.checkTotal = 0
+  orderSelect.currentType = '0'
+  orderSelect.multipleSelection = []
+  orderSelect.pageNoList = []
+  orderSelect.selectAll = false
+  // queryParams.pageNo = 1 TODO @xiaobai：缺了个
+
+  getList()
+}
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+  //选中状态初始化
+  orderSelect.checkTotal = 0
+  orderSelect.currentType = '0'
+  orderSelect.multipleSelection = []
+  orderSelect.pageNoList = []
+  orderSelect.selectAll = false
+
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/**
+ * 导出数据
+ */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    //TODO导出的数据是后台导出还是从前端中获取数据(全选时数据怎么打印?)
+    download.excel(orderSelect.multipleSelection as any, '订单信息.xls') //
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+  //TODO
+  exportLoading.value = false
+}
+
 /**
  * 跳转订单详情
  */
 const showOrderDetail = (row: any) => {
-  console.log('TODO Order Detail: ' + row.id)
-  push({ name: 'TradeOrderDetail', query: { id: row.id } })
+  push({
+    name: 'TradeOrderDetail',
+    query: {
+      id: row.id
+    }
+  })
 }
 
 /**
- * 跳转用户详情
+ * 跳转用户详情 TODO
  */
 const goUserDetail = (row: any) => {
   console.log('TODO User Detail: ' + row.userId)
 }
 /**
- * 发货
+ * 发货 TODO
  */
 const sendXX = (row: any) => {
   console.log('TODO Send XX: ' + row.no)
 }
 
+// TOPDO @xiaobai：https://kailong110120130.gitee.io/vue-element-plus-admin-doc/components/image-viewer.html 使用这个组件哈
 /**
  * 商品图预览
  * @param imgUrl
