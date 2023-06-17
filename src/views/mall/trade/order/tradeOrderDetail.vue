@@ -81,8 +81,8 @@
                     v-for="property in row.properties"
                     :key="property.propertyId"
                   >
-                    {{ property.propertyName }}：{{ property.valueName }}</el-tag
-                  >
+                    {{ property.propertyName }}：{{ property.valueName }}
+                  </el-tag>
                 </template>
               </el-table-column>
               <el-table-column prop="originalUnitPrice" label="单价(元)" width="180">
@@ -113,15 +113,15 @@
       <!-- <el-descriptions-item v-for="item in 5" label-class-name="no-colon" :key="item" /> -->
     </el-descriptions>
     <el-descriptions column="6">
-      <el-descriptions-item label="商品总额: "
-        >￥{{ (order.originalPrice / 100.0).toFixed(2) }}</el-descriptions-item
-      >
-      <el-descriptions-item label="运费金额: "
-        >￥{{ (order.deliveryPrice / 100.0).toFixed(2) }}</el-descriptions-item
-      >
-      <el-descriptions-item label="订单调价: "
-        >￥{{ (order.adjustPrice / 100.0).toFixed(2) }}</el-descriptions-item
-      >
+      <el-descriptions-item label="商品总额: ">
+        ￥{{ (order.originalPrice / 100.0).toFixed(2) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="运费金额: ">
+        ￥{{ (order.deliveryPrice / 100.0).toFixed(2) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="订单调价: ">
+        ￥{{ (order.adjustPrice / 100.0).toFixed(2) }}
+      </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">商品优惠: </span></template>
         ￥{{ ((order.originalPrice - order.originalPrice) / 100.0).toFixed(2) }}
@@ -158,6 +158,7 @@
         </el-descriptions-item>
 
         <!-- 物流信息 -->
+        <!-- TODO @xiaobai：改成一个包裹哈；目前只允许发货一次 -->
         <el-descriptions-item v-if="group.key === 'expressInfo'" labelClassName="no-colon">
           <el-tabs type="card">
             <!-- 循环包裹物流信息 -->
@@ -186,12 +187,12 @@
                         :src="goodInfo.imgUrl"
                       />
                       <el-descriptions :column="1">
-                        <el-descriptions-item labelClassName="no-colon">{{
-                          goodInfo.name
-                        }}</el-descriptions-item>
-                        <el-descriptions-item label="数量">{{
-                          goodInfo.count
-                        }}</el-descriptions-item>
+                        <el-descriptions-item labelClassName="no-colon">
+                          {{goodInfo.name }}
+                        </el-descriptions-item>
+                        <el-descriptions-item label="数量">
+                          {{goodInfo.count }}
+                        </el-descriptions-item>
                       </el-descriptions>
                     </div>
                   </template>
@@ -225,6 +226,7 @@
   </ContentWrap>
 </template>
 <script lang="ts" name="TradeOrderDetail" setup>
+// TODO @xiaobai：在 order 下创建一个 order/detail，然后改名为 index.vue
 import { DICT_TYPE } from '@/utils/dict'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 const message = useMessage() // 消息弹窗
@@ -238,7 +240,7 @@ const loading = ref(false)
 const order = ref<any>({
   items: [],
   user: {}
-}) //详情数据
+}) // 详情数据
 
 const detailGroups = ref([
   {
@@ -305,7 +307,7 @@ const detailInfo = ref({
   ],
   goodsInfo: [] // 商品详情tableData
 })
-//暂考虑一次性加载详情页面所有数据
+// 暂考虑一次性加载详情页面所有数据 TODO @xiaobai：getDetail
 const getlist = async () => {
   dialogVisible.value = true
   loading.value = true
