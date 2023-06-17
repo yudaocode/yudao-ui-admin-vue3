@@ -33,7 +33,6 @@ export const getIntDictOptions = (dictType: string) => {
       value: parseInt(dict.value + '')
     })
   })
-
   return dictOption
 }
 
@@ -165,5 +164,16 @@ export enum DICT_TYPE {
   PROMOTION_COUPON_STATUS = 'promotion_coupon_status', // 优惠劵的状态
   PROMOTION_COUPON_TAKE_TYPE = 'promotion_coupon_take_type', // 优惠劵的领取方式
   PROMOTION_ACTIVITY_STATUS = 'promotion_activity_status', // 优惠活动的状态
-  PROMOTION_CONDITION_TYPE = 'promotion_condition_type' // 营销的条件类型枚举
+  PROMOTION_CONDITION_TYPE = 'promotion_condition_type', // 营销的条件类型枚举
+
+  //===add by 20230530====
+  // ========== MALL - ORDER 模块 ==========
+  TRADE_AFTER_SALE_STATUS = 'trade_after_sale_status', // 售后 - 状态
+  TRADE_AFTER_SALE_WAY = 'trade_after_sale_way', // 售后 - 方式
+  TRADE_AFTER_SALE_TYPE = 'trade_after_sale_type', // 售后 - 类型
+  TRADE_ORDER_TYPE = 'trade_order_type', // 订单 - 类型
+  TRADE_ORDER_STATUS = 'trade_order_status', // 订单 - 状态
+  TRADE_ORDER_ITEM_AFTER_SALE_STATUS = 'trade_order_item_after_sale_status', // 订单项 - 售后状态
+
+  TERMINAL = 'terminal'
 }
