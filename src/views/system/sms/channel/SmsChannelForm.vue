@@ -1,18 +1,32 @@
 <template>
   <Dialog v-model="dialogVisible" :title="dialogTitle">
-    <el-form ref="formRef" v-loading="formLoading" :model="formData" :rules="formRules" label-width="130px">
+    <el-form
+      ref="formRef"
+      v-loading="formLoading"
+      :model="formData"
+      :rules="formRules"
+      label-width="130px"
+    >
       <el-form-item label="短信签名" prop="signature">
         <el-input v-model="formData.signature" placeholder="请输入短信签名" />
       </el-form-item>
       <el-form-item label="渠道编码" prop="code">
         <el-select v-model="formData.code" clearable placeholder="请选择渠道编码">
-          <el-option v-for="dict in getStrDictOptions(DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE)" :key="dict.value"
-            :label="dict.label" :value="dict.value" />
+          <el-option
+            v-for="dict in getStrDictOptions(DICT_TYPE.SYSTEM_SMS_CHANNEL_CODE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="启用状态">
         <el-radio-group v-model="formData.status">
-          <el-radio v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)" :key="dict.value" :label="dict.value">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.value"
+          >
             {{ dict.label }}
           </el-radio>
         </el-radio-group>
