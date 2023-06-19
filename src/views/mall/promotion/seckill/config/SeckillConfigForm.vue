@@ -8,9 +8,8 @@
   </Dialog>
 </template>
 <script lang="ts" name="SeckillConfigForm" setup>
-import { cloneDeep } from 'lodash-es'
 import * as SeckillConfigApi from '@/api/mall/promotion/seckill/seckillConfig'
-import { allSchemas, format, rules } from './seckillConfig.data'
+import { allSchemas, rules } from './seckillConfig.data'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -31,9 +30,6 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       const data = await SeckillConfigApi.getSeckillConfig(id)
-      const info = cloneDeep(data)
-      data.startTime = format(info.startTime)
-      data.endTime = format(info.endTime)
       formRef.value.setValues(data)
     } finally {
       formLoading.value = false

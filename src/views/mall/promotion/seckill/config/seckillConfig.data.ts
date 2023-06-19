@@ -6,7 +6,6 @@ export const rules = reactive({
   name: [required],
   startTime: [required],
   endTime: [required],
-  seckillActivityCount: [required],
   picUrl: [required],
   status: [required]
 })
@@ -78,16 +77,3 @@ const crudSchemas = reactive<CrudSchema[]>([
   }
 ])
 export const { allSchemas } = useCrudSchemas(crudSchemas)
-
-/**
- *  添加这个函数呢是因为数据库表使用 time 类型存的时分秒信息，对应实体类字段使用的 LocalTime，然后返回给前端的就数据是
- *  '00:05:00' 会变成 [0,5],所以才使用此方法转一道。我想着或许直接后台返回字符串格式的
- * @param data
- */
-export const format = (data: number[]): string => {
-  if (typeof data === 'undefined') {
-    return ''
-  }
-  const paddedData = data.length >= 3 ? data.slice(0, 3) : [...data, 0, 0].slice(0, 3)
-  return paddedData.map((num) => num.toString().padStart(2, '0')).join(':')
-}
