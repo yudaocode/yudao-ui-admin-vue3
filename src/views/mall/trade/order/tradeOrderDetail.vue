@@ -124,11 +124,14 @@
           parseFloat((order.adjustPrice / 100.0) as unknown as string).toFixed(2)
         }}</el-descriptions-item
       >
+
       <el-descriptions-item>
         <template #label><span style="color: red">商品优惠: </span></template>
         <!-- 没理解TODO  order.totalPrice - order.totalPrice -->
         ￥{{
-          parseFloat((order.totalPrice - order.totalPrice / 100.0) as unknown as string).toFixed(2)
+          parseFloat(((order.totalPrice - order.totalPrice) / 100.0) as unknown as string).toFixed(
+            2
+          )
         }}
       </el-descriptions-item>
       <el-descriptions-item>
@@ -163,6 +166,7 @@
         </el-descriptions-item>
 
         <!-- 物流信息 -->
+        <!-- TODO @xiaobai：改成一个包裹哈；目前只允许发货一次 -->
         <el-descriptions-item v-if="group.key === 'expressInfo'" labelClassName="no-colon">
           <!-- 循环包裹物流信息 -->
           <div v-show="(pkgInfo = detailInfo[group.key]) !== null" style="border: 1px dashed">
@@ -222,6 +226,7 @@
   </ContentWrap>
 </template>
 <script lang="ts" name="TradeOrderDetail" setup>
+// TODO @xiaobai：在 order 下创建一个 order/detail，然后改名为 index.vue
 import { DICT_TYPE } from '@/utils/dict'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 const message = useMessage() // 消息弹窗
@@ -235,7 +240,7 @@ const loading = ref(false)
 const order = ref<any>({
   items: [],
   user: {}
-}) //详情数据
+}) // 详情数据
 
 const detailGroups = ref([
   {
@@ -301,7 +306,7 @@ const detailInfo = ref({
   ],
   goodsInfo: [] // 商品详情tableData
 })
-//暂考虑一次性加载详情页面所有数据
+// 暂考虑一次性加载详情页面所有数据 TODO
 const getlist = async () => {
   dialogVisible.value = true
   loading.value = true
@@ -327,9 +332,11 @@ const clipboardSuccess = () => {
   &:not(:nth-child(1)) {
     margin-top: 20px;
   }
+
   .el-descriptions__title {
     display: flex;
     align-items: center;
+
     &::before {
       content: '';
       display: inline-block;
@@ -339,10 +346,13 @@ const clipboardSuccess = () => {
       background-color: #409eff;
     }
   }
+
   .el-descriptions-item__container {
     margin: 0 10px;
+
     .no-colon {
       margin: 0;
+
       &::after {
         content: '';
       }

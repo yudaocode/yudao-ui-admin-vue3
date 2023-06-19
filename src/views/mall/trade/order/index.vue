@@ -12,7 +12,7 @@
         <el-select class="!w-280px" v-model="queryParams.status" clearable placeholder="全部">
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.TRADE_ORDER_STATUS)"
-            :key="dict.value"
+            :key="(dict.value as string)"
             :label="dict.label"
             :value="dict.value"
           />
@@ -27,7 +27,7 @@
         >
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.PAY_CHANNEL_CODE_TYPE)"
-            :key="dict.value"
+            :key="(dict.value as string)"
             :label="dict.label"
             :value="dict.value"
           />
@@ -48,7 +48,7 @@
         <el-select class="!w-280px" v-model="queryParams.terminal" clearable placeholder="全部">
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.TERMINAL)"
-            :key="dict.value"
+            :key="(dict.value as string)"
             :label="dict.label"
             :value="dict.value"
           />
@@ -58,7 +58,7 @@
         <el-select class="!w-280px" v-model="queryParams.type" clearable placeholder="全部">
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.TRADE_ORDER_TYPE)"
-            :key="dict.value"
+            :key="(dict.value as string)"
             :label="dict.label"
             :value="dict.value"
           />
@@ -363,7 +363,6 @@ const handleDropType = (command: string) => {
   }
   //所有页按钮
   if (command === '2') {
-    initSelect() //重置之前选中的类容清空
     orderSelect.selectAllFlag = !orderSelect.selectAllFlag
 
     if (orderSelect.selectAllFlag) {
@@ -379,6 +378,7 @@ const handleDropType = (command: string) => {
       for (i; i < list.value.length; i++) {
         list.value[i]['itemSelect'] = false
       }
+      initSelect() //重置之前选中的类容清空
     }
   }
 }
@@ -493,54 +493,6 @@ const getList = async () => {
     loading.value = false
   }
 }
-
-// const getList = async () => {
-//   loading.value = true
-//   try {
-//     const data = await TradeOrderApi.getOrderList(queryParams)
-//     list.value = data.list
-//     total.value = data.total
-//     let i = 0
-//     //给数组添加选中属性 itemSelect 默认为false 当前状态如果时全选 则新加载的页面都为选中状态
-
-//     if (orderSelect.selectAllFlag) {
-//       if (orderSelect.selectData && orderSelect.selectData.has(queryParams.pageNo)) {
-//         //页面已经加载过了
-//         for (i = 0; i < list.value.length; i++) {
-//           if (orderSelect.selectData.get(queryParams.pageNo)!.has(list.value[i].id)) {
-//             list.value[i]['itemSelect'] = true //之前已经选取过了
-//           } else {
-//             list.value[i]['itemSelect'] = false
-//           }
-//         }
-//       } else {
-//         //首次加载页面 默认全部选中
-//         orderSelect.selectData.set(queryParams.pageNo, new Set<string>())
-//         for (i = 0; i < list.value.length; i++) {
-//           list.value[i]['itemSelect'] = true
-//           orderSelect.selectData.get(queryParams.pageNo)!.add(list.value[i].id)
-//         }
-//       }
-//     } else {
-//       if (orderSelect.selectData && orderSelect.selectData.has(queryParams.pageNo)) {
-//         //页面已经加载过了
-//         for (i = 0; i < list.value.length; i++) {
-//           if (orderSelect.selectData.get(queryParams.pageNo)!.has(list.value[i].id)) {
-//             list.value[i]['itemSelect'] = true //之前已经选取过了
-//           } else {
-//             list.value[i]['itemSelect'] = false
-//           }
-//         }
-//       } else {
-//         for (i; i < list.value.length; i++) {
-//           list.value[i]['itemSelect'] = false //设置状态为未选中状态
-//         }
-//       }
-//     }
-//   } finally {
-//     loading.value = false
-//   }
-// }
 
 /**
  * 跳转订单详情
