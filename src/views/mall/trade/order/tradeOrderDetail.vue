@@ -21,10 +21,10 @@
       <el-descriptions-item label="付款方式: ">
         <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE_TYPE" :value="order.payChannelCode" />
       </el-descriptions-item>
-      <el-descriptions-item label="买家: ">{{ order.user.nickname }}</el-descriptions-item>
+      <!-- <el-descriptions-item label="买家: ">{{ order.user.nickname }}</el-descriptions-item> -->
       <!-- TODO 芋艿：待实现：跳转会员 -->
       <el-descriptions-item label="收货地址: ">
-        {{ order.receiverAreaName }} " "{{ order.receiverDetailAddress }} " "
+        {{ order.receiverAreaName }} {{ order.receiverDetailAddress }}
         <el-link
           v-clipboard:copy="order.receiverAreaName + ' ' + order.receiverDetailAddress"
           v-clipboard:success="clipboardSuccess"
@@ -37,7 +37,11 @@
     <!-- 订单状态 -->
     <el-descriptions title="订单状态" :column="1">
       <el-descriptions-item label="订单状态: ">
-        <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="order.status" />
+        <dict-tag
+          v-if="order.status !== ''"
+          :type="DICT_TYPE.TRADE_ORDER_STATUS"
+          :value="order.status"
+        />
       </el-descriptions-item>
       <el-descriptions-item label-class-name="no-colon">
         <el-button type="primary" size="small">调整价格</el-button>
@@ -68,12 +72,12 @@
     <!-- 物流信息 TODO -->
 
     <!-- 商品信息 -->
-    <el-descriptions title="商品信息" column="6">
+    <el-descriptions title="商品信息">
       <el-descriptions-item labelClassName="no-colon">
         <el-row :gutter="20">
-          <el-col :span="10">
+          <el-col :span="15">
             <el-table :data="order.items" border>
-              <el-table-column prop="spuName" label="商品" width="400">
+              <el-table-column prop="spuName" label="商品" width="auto">
                 <template #default="{ row }">
                   {{ row.spuName }}
                   <el-tag
@@ -81,22 +85,18 @@
                     v-for="property in row.properties"
                     :key="property.propertyId"
                   >
-                    {{ property.propertyName }}：{{ property.valueName }}</el-tag
+                    {{ property.propertyName }}: {{ property.valueName }}</el-tag
                   >
                 </template>
               </el-table-column>
-              <el-table-column prop="originalUnitPrice" label="单价(元)" width="180">
-                <template #default="{ row }">
-                  ￥{{ (row.originalUnitPrice / 100.0).toFixed(2) }}
-                </template>
+              <el-table-column prop="price" label="商品原价(元)" width="150">
+                <template #default="{ row }"> ￥{{ (row.price / 100.0).toFixed(2) }} </template>
               </el-table-column>
               <el-table-column prop="count" label="数量" width="100" />
-              <el-table-column prop="originalPrice" label="小计（元）" width="100">
-                <template #default="{ row }">
-                  ￥{{ (row.originalPrice / 100.0).toFixed(2) }}
-                </template>
+              <el-table-column prop="payPrice" label="合计(元)" width="150">
+                <template #default="{ row }"> ￥{{ (row.payPrice / 100.0).toFixed(2) }} </template>
               </el-table-column>
-              <el-table-column prop="afterSaleStatus" label="退款状态">
+              <el-table-column prop="afterSaleStatus" label="售后状态" width="auto">
                 <template #default="{ row }">
                   <dict-tag
                     :type="DICT_TYPE.TRADE_ORDER_ITEM_AFTER_SALE_STATUS"
@@ -113,26 +113,31 @@
       <!-- <el-descriptions-item v-for="item in 5" label-class-name="no-colon" :key="item" /> -->
     </el-descriptions>
     <el-descriptions column="6">
-      <el-descriptions-item label="商品总额: "
-        >￥{{ (order.originalPrice / 100.0).toFixed(2) }}</el-descriptions-item
-      >
-      <el-descriptions-item label="运费金额: "
-        >￥{{ (order.deliveryPrice / 100.0).toFixed(2) }}</el-descriptions-item
-      >
-      <el-descriptions-item label="订单调价: "
-        >￥{{ (order.adjustPrice / 100.0).toFixed(2) }}</el-descriptions-item
+      <el-descriptions-item label="商品总额: ">
+        ￥{{ parseFloat((order.totalPrice / 100.0) as unknown as string).toFixed(2) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="运费金额: ">
+        ￥{{ parseFloat((order.deliveryPrice / 100.0) as unknown as string).toFixed(2) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="订单调价: ">
+        ￥{{
+          parseFloat((order.adjustPrice / 100.0) as unknown as string).toFixed(2)
+        }}</el-descriptions-item
       >
       <el-descriptions-item>
         <template #label><span style="color: red">商品优惠: </span></template>
-        ￥{{ ((order.originalPrice - order.originalPrice) / 100.0).toFixed(2) }}
+        <!-- 没理解TODO  order.totalPrice - order.totalPrice -->
+        ￥{{
+          parseFloat((order.totalPrice - order.totalPrice / 100.0) as unknown as string).toFixed(2)
+        }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">订单优惠: </span></template>
-        ￥{{ (order.discountPrice / 100.0).toFixed(2) }}
+        ￥{{ parseFloat((order.discountPrice / 100.0) as unknown as string).toFixed(2) }}
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">积分抵扣: </span></template>
-        ￥{{ (order.pointPrice / 100.0).toFixed(2) }}
+        ￥{{ parseFloat((order.pointPrice / 100.0) as unknown as string).toFixed(2) }}
       </el-descriptions-item>
 
       <el-descriptions-item v-for="item in 5" label-class-name="no-colon" :key="item" />
@@ -159,66 +164,58 @@
 
         <!-- 物流信息 -->
         <el-descriptions-item v-if="group.key === 'expressInfo'" labelClassName="no-colon">
-          <el-tabs type="card">
-            <!-- 循环包裹物流信息 -->
-            <el-tab-pane
-              v-for="pkgInfo in detailInfo[group.key]"
-              :key="pkgInfo.label"
-              :label="pkgInfo.label"
-            >
-              <!-- 包裹详情 -->
-              <el-descriptions>
-                <el-descriptions-item
-                  v-for="(pkgChild, pkgCIdx) in group.children"
-                  v-bind="pkgChild.childProps"
-                  :key="`pkgChild_${pkgCIdx}`"
-                  :label="pkgChild.label"
-                >
-                  <!-- 包裹商品列表 -->
-                  <template v-if="pkgChild.valueKey === 'goodsList' && pkgInfo[pkgChild.valueKey]">
-                    <div
-                      v-for="(goodInfo, goodInfoIdx) in pkgInfo[pkgChild.valueKey]"
-                      :key="`goodInfo_${goodInfoIdx}`"
-                      style="display: flex"
-                    >
-                      <el-image
-                        style="width: 100px; height: 100px; flex: none"
-                        :src="goodInfo.imgUrl"
-                      />
-                      <el-descriptions :column="1">
-                        <el-descriptions-item labelClassName="no-colon">{{
-                          goodInfo.name
-                        }}</el-descriptions-item>
-                        <el-descriptions-item label="数量">{{
-                          goodInfo.count
-                        }}</el-descriptions-item>
-                      </el-descriptions>
-                    </div>
-                  </template>
+          <!-- 循环包裹物流信息 -->
+          <div v-show="(pkgInfo = detailInfo[group.key]) !== null" style="border: 1px dashed">
+            <!-- 包裹详情 -->
+            <el-descriptions class="m-5">
+              <el-descriptions-item
+                v-for="(pkgChild, pkgCIdx) in group.children"
+                v-bind="pkgChild.childProps"
+                :key="`pkgChild_${pkgCIdx}`"
+                :label="pkgChild.label"
+              >
+                <!-- 包裹商品列表 -->
+                <template v-if="pkgChild.valueKey === 'goodsList' && pkgInfo[pkgChild.valueKey]">
+                  <div
+                    v-for="(goodInfo, goodInfoIdx) in pkgInfo[pkgChild.valueKey]"
+                    :key="`goodInfo_${goodInfoIdx}`"
+                    style="display: flex"
+                  >
+                    <el-image
+                      style="width: 100px; height: 100px; flex: none"
+                      :src="goodInfo.imgUrl"
+                    />
+                    <el-descriptions :column="1">
+                      <el-descriptions-item labelClassName="no-colon">{{
+                        goodInfo.name
+                      }}</el-descriptions-item>
+                      <el-descriptions-item label="数量">{{ goodInfo.count }}</el-descriptions-item>
+                    </el-descriptions>
+                  </div>
+                </template>
 
-                  <!-- 包裹物流详情 -->
-                  <template v-else-if="pkgChild.valueKey === 'wlxq'">
-                    <el-row :gutter="10">
-                      <el-col :span="6" :offset="1">
-                        <el-timeline>
-                          <el-timeline-item
-                            v-for="(activity, index) in pkgInfo[pkgChild.valueKey]"
-                            :key="index"
-                            :timestamp="activity.timestamp"
-                          >
-                            {{ activity.content }}
-                          </el-timeline-item>
-                        </el-timeline>
-                      </el-col>
-                    </el-row>
-                  </template>
-                  <template v-else>
-                    {{ pkgInfo[pkgChild.valueKey] }}
-                  </template>
-                </el-descriptions-item>
-              </el-descriptions>
-            </el-tab-pane>
-          </el-tabs>
+                <!-- 包裹物流详情 -->
+                <template v-else-if="pkgChild.valueKey === 'wlxq'">
+                  <el-row :gutter="10">
+                    <el-col :span="6" :offset="1">
+                      <el-timeline>
+                        <el-timeline-item
+                          v-for="(activity, index) in pkgInfo[pkgChild.valueKey]"
+                          :key="index"
+                          :timestamp="activity.timestamp"
+                        >
+                          {{ activity.content }}
+                        </el-timeline-item>
+                      </el-timeline>
+                    </el-col>
+                  </el-row>
+                </template>
+                <template v-else>
+                  {{ pkgInfo[pkgChild.valueKey] }}
+                </template>
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
         </el-descriptions-item>
       </el-descriptions>
     </div>
@@ -259,7 +256,7 @@ const detailGroups = ref([
 ])
 
 const detailInfo = ref({
-  expressInfo: [
+  expressInfo:
     // 物流信息
     {
       label: '包裹1',
@@ -290,8 +287,7 @@ const detailInfo = ref({
           timestamp: '2018-04-11 12:55:52'
         }
       ]
-    }
-  ],
+    },
   orderLog: [
     // 订单操作日志
     {
@@ -310,8 +306,9 @@ const getlist = async () => {
   dialogVisible.value = true
   loading.value = true
   try {
-    const res = await TradeOrderApi.getOrderDetail(queryParams.id)
+    const res = await TradeOrderApi.getOrderDetail(queryParams.id as unknown as number)
     order.value = res
+    console.log(order)
   } catch {
     message.error('获取详情数据失败')
   } finally {
