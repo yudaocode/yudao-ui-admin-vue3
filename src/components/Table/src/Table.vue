@@ -9,6 +9,7 @@ import { set } from 'lodash-es'
 import { Pagination, TableColumn, TableSetPropsType, TableSlotDefault } from '@/types/table'
 
 export default defineComponent({
+  // eslint-disable-next-line vue/no-reserved-component-names
   name: 'Table',
   props: {
     pageSize: propTypes.number.def(10),
