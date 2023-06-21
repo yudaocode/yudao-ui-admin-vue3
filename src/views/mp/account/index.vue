@@ -100,7 +100,7 @@
   <!-- 对话框(添加 / 修改) -->
   <AccountForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as AccountApi from '@/api/mp/account'
 import AccountForm from './AccountForm.vue'
 

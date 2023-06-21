@@ -87,7 +87,7 @@
   <SignInConfigForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as SignInConfigApi from '@/api/point/signInConfig'

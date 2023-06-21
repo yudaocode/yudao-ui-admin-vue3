@@ -3,7 +3,7 @@
     <IFrame :src="src" />
   </ContentWrap>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { getAccessToken } from '@/utils/auth'
 
 defineOptions({ name: 'JimuReport' })

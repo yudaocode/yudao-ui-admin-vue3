@@ -137,7 +137,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <ConfigForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'

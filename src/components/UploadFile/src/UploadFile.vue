@@ -32,7 +32,7 @@
     </el-upload>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { PropType } from 'vue'
 
 import { propTypes } from '@/utils/propTypes'

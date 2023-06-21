@@ -5,7 +5,7 @@
     <IFrame :src="src" />
   </ContentWrap>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'InfraSwagger' })

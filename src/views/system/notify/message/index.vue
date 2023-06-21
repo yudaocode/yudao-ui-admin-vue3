@@ -153,7 +153,7 @@
   <!-- 表单弹窗：详情 -->
   <NotifyMessageDetail ref="detailRef" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as NotifyMessageApi from '@/api/system/notify/message'

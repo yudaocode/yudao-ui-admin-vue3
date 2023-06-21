@@ -32,7 +32,7 @@
   <!-- 添加/修改弹窗 -->
   <TaskAssignRuleForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as TaskAssignRuleApi from '@/api/bpm/taskAssignRule'
 import * as RoleApi from '@/api/system/role'

@@ -30,7 +30,7 @@
   </ContentWrap>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import WxReplySelect, { Reply, ReplyType } from '@/views/mp/components/wx-reply'
 import MsgList from './components/MsgList.vue'
 import { getMessagePage, sendMessage } from '@/api/mp/message'

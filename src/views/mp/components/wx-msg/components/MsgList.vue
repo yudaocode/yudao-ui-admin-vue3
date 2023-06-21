@@ -24,7 +24,7 @@
     </div>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import Msg from './Msg.vue'
 import { formatDate } from '@/utils/formatTime'
 import { User } from '../types'

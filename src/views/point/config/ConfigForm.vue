@@ -33,7 +33,7 @@
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as ConfigApi from '@/api/point/config'
 
 const { t } = useI18n() // 国际化

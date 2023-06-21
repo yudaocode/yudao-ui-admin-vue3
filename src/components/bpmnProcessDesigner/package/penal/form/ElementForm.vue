@@ -222,7 +222,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 defineOptions({ name: 'ElementForm' })
 
 const props = defineProps({

@@ -65,7 +65,7 @@
   <!-- 表单弹窗：发送测试 -->
   <MailTemplateSendForm ref="sendFormRef" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { allSchemas } from './template.data'
 import * as MailTemplateApi from '@/api/system/mail/template'
 import MailTemplateForm from './MailTemplateForm.vue'

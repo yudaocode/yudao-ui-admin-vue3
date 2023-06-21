@@ -241,7 +241,7 @@
     </el-dialog>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ElMessageBox } from 'element-plus'
 import { createListenerObject, updateElementExtensions } from '../../utils'
 import { initListenerType, initListenerForm, listenerType, fieldType } from './utilSelf'

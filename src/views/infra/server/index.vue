@@ -5,7 +5,7 @@
     <IFrame v-if="!loading" v-loading="loading" :src="src" />
   </ContentWrap>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'InfraAdminServer' })

@@ -64,7 +64,7 @@
   <!-- 详情弹窗 -->
   <MailAccountDetail ref="detailRef" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { allSchemas } from './account.data'
 import * as MailAccountApi from '@/api/system/mail/account'
 import MailAccountForm from './MailAccountForm.vue'

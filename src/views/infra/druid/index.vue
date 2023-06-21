@@ -6,7 +6,7 @@
     <IFrame v-if="!loading" :src="url" />
   </ContentWrap>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as ConfigApi from '@/api/infra/config'
 
 defineOptions({ name: 'InfraDruid' })

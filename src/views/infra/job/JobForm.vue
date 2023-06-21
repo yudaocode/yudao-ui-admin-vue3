@@ -45,7 +45,7 @@
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as JobApi from '@/api/infra/job'
 
 defineOptions({ name: 'JobForm' })

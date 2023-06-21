@@ -29,7 +29,7 @@
     </div>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import FcDesigner from '@form-create/designer'
 import { useClipboard } from '@vueuse/core'
 import { isString } from '@/utils/is'

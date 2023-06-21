@@ -19,7 +19,7 @@
   </ElDialog>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 const router = useRouter() // 路由对象
 const showSearch = ref(false) // 是否显示弹框
 const value: Ref = ref('') // 用户输入的值

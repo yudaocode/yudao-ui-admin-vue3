@@ -38,7 +38,7 @@
     </el-form>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 defineOptions({ name: 'ElementBaseInfo' })
 
 const props = defineProps({

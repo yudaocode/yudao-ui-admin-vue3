@@ -32,7 +32,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import WxReplySelect, { type Reply } from '@/views/mp/components/wx-reply'
 import type { FormInstance } from 'element-plus'
 import { MsgType } from './types'

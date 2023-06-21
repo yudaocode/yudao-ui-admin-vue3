@@ -232,7 +232,7 @@
   <!-- 表单弹窗：预览 -->
   <RefundDetail ref="detailRef" @success="getList" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as MerchantApi from '@/api/pay/merchant'

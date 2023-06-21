@@ -45,7 +45,7 @@
     </el-dialog>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 defineOptions({ name: 'SignalAndMassage' })
 
 const message = useMessage()

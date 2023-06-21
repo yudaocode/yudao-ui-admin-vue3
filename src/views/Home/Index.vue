@@ -160,7 +160,7 @@
     </el-col>
   </el-row>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { set } from 'lodash-es'
 import { EChartsOption } from 'echarts'
 import { formatTime } from '@/utils'

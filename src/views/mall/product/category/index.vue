@@ -80,7 +80,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <CategoryForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { handleTree } from '@/utils/tree'
 import { dateFormatter } from '@/utils/formatTime'

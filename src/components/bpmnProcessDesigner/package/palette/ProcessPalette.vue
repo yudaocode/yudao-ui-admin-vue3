@@ -5,7 +5,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { assign } from 'min-dash'
 
 defineOptions({ name: 'MyProcessPalette' })

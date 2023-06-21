@@ -35,7 +35,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import WxNews from '@/views/mp/components/wx-news'
 
 import { Article } from './types'

@@ -18,7 +18,7 @@
     </template>
   </el-upload>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { UploadProps, UploadUserFile } from 'element-plus'
 import {
   HEADERS,

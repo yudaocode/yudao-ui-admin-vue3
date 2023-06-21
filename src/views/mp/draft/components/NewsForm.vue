@@ -125,7 +125,7 @@
   </el-container>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { Editor } from '@/components/Editor'
 import { createEditorConfig } from '../editor-config'
 import CoverSelect from './CoverSelect.vue'

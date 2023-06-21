@@ -59,7 +59,7 @@
   </el-tabs>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { Reply, NewsType, ReplyType, createEmptyReply } from './components/types'
 import TabText from './components/TabText.vue'
 import TabImage from './components/TabImage.vue'

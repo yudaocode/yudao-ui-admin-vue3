@@ -48,7 +48,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import 'video.js/dist/video-js.css'
 import { VideoPlayer } from '@videojs-player/vue'
 

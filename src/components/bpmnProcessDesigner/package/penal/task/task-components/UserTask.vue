@@ -37,7 +37,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 defineOptions({ name: 'UserTask' })
 const props = defineProps({
   id: String,

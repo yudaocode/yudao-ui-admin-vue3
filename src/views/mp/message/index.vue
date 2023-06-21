@@ -79,7 +79,7 @@
     <WxMsg :user-id="messageBox.userId" />
   </el-dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as MpMessageApi from '@/api/mp/message'
 import WxMsg from '@/views/mp/components/wx-msg'
 import WxAccountSelect from '@/views/mp/components/wx-account-select'

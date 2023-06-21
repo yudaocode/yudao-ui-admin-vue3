@@ -50,7 +50,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type { UploadProps } from 'element-plus'
 
 import { generateUUID } from '@/utils'

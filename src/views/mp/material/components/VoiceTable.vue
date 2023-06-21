@@ -36,7 +36,7 @@
   </el-table>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play'
 import { dateFormatter } from '@/utils/formatTime'
 

@@ -48,7 +48,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 defineOptions({ name: 'ReceiveTask' })
 const props = defineProps({
   id: String,

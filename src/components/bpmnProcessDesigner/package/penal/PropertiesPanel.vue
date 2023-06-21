@@ -62,7 +62,7 @@
     </el-collapse>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import ElementBaseInfo from './base/ElementBaseInfo.vue'
 import ElementOtherConfig from './other/ElementOtherConfig.vue'
 import ElementTask from './task/ElementTask.vue'
