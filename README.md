@@ -9,7 +9,7 @@
 
 ## 🐶 新手必读
 
-* nodejs > 16.0.0 && pnpm > 7.30.0
+* nodejs > 16.0.0 && pnpm > 8.6.0 (强制使用pnpm)
 * 演示地址【Vue3 + element-plus】：<http://dashboard-vue3.yudao.iocoder.cn>
 * 演示地址【Vue3 + vben(ant-design-vue)】：<http://dashboard-vben.yudao.iocoder.cn>
 * 演示地址【Vue2 + element-ui】：<http://dashboard.yudao.iocoder.cn>
@@ -39,11 +39,11 @@
 | 框架                                                                   | 说明               | 版本     |
 |----------------------------------------------------------------------|------------------|--------|
 | [Vue](https://staging-cn.vuejs.org/)                                 | Vue 框架           | 3.3.4 |
-| [Vite](https://cn.vitejs.dev//)                                      | 开发与构建工具          | 4.3.8  |
-| [Element Plus](https://element-plus.org/zh-CN/)                      | Element Plus     | 2.3.4 |
-| [TypeScript](https://www.typescriptlang.org/docs/)                   | JavaScript 的超集   | 5.0.4  |
-| [pinia](https://pinia.vuejs.org/)                                    | Vue 存储库 替代 vuex5 | 2.1.3 |
-| [vueuse](https://vueuse.org/)                                        | 常用工具集            | 10.1.2 |
+| [Vite](https://cn.vitejs.dev//)                                      | 开发与构建工具          | 4.3.9  |
+| [Element Plus](https://element-plus.org/zh-CN/)                      | Element Plus     | 2.3.6 |
+| [TypeScript](https://www.typescriptlang.org/docs/)                   | JavaScript 的超集   | 5.1.3  |
+| [pinia](https://pinia.vuejs.org/)                                    | Vue 存储库 替代 vuex5 | 2.1.4 |
+| [vueuse](https://vueuse.org/)                                        | 常用工具集            | 10.2.0 |
 | [vue-i18n](https://kazupon.github.io/vue-i18n/zh/introduction.html/) | 国际化              | 9.2.2  |
 | [vue-router](https://router.vuejs.org/)                              | Vue 路由           | 4.2.1  |
 | [windicss](https://cn.windicss.org/)                                 | 下一代工具优先的 CSS 框架  | 3.5.6  |
@@ -136,7 +136,7 @@ ps：核心功能已经实现，正在对接微信小程序中...
 |     | 表单构建     | 拖动表单元素生成相应的 HTML 代码，支持导出 JSON、Vue 文件         |
 | 🚀  | 配置管理     | 对系统动态配置常用参数，支持 SpringBoot 加载                 |
 | ⭐️  | 定时任务     | 在线（添加、修改、删除)任务调度包含执行结果日志                     |
-| 🚀  | 文件服务     | 支持将文件存储到 S3（MinIO、阿里云、腾讯云、七牛云）、本地、FTP、数据库等   | 
+| 🚀  | 文件服务     | 支持将文件存储到 S3（MinIO、阿里云、腾讯云、七牛云）、本地、FTP、数据库等   |
 | 🚀  | API 日志   | 包括 RESTful API 访问日志、异常日志两部分，方便排查 API 相关的问题   |
 |     | MySQL 监控 | 监视当前系统数据库连接池状态，可进行分析SQL找出系统性能瓶颈              |
 |     | Redis 监控 | 监控 Redis 数据库的使用情况，使用的 Redis Key 管理           |
