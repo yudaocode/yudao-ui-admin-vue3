@@ -1,6 +1,8 @@
 export type TableColumn = {
   field: string
   label?: string
+  width?: number | string
+  fixed?: 'left' | 'right'
   children?: TableColumn[]
 } & Recordable
 
