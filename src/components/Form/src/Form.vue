@@ -27,6 +27,7 @@ const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('form')
 
 export default defineComponent({
+  // eslint-disable-next-line vue/no-reserved-component-names
   name: 'Form',
   props: {
     // 生成Form的布局结构数组
