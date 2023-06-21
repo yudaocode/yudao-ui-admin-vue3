@@ -407,6 +407,7 @@ watch(
   stroke-dasharray: 4px !important;
   fill-opacity: 0.2 !important;
 }
+
 .highlight-todo.djs-shape .djs-visual > :nth-child(1) {
   fill: #1890ff !important;
   stroke: #1890ff !important;
@@ -418,8 +419,9 @@ watch(
   stroke: #1890ff !important;
   stroke-dasharray: 4px !important;
   fill-opacity: 0.2 !important;
-  marker-end: url(#sequenceflow-end-_E7DFDF-_E7DFDF-803g1kf6zwzmcig1y2ulm5egr);
+  marker-end: url('#sequenceflow-end-_E7DFDF-_E7DFDF-803g1kf6zwzmcig1y2ulm5egr');
 }
+
 :deep(.highlight-todo.djs-shape .djs-visual > :nth-child(1)) {
   fill: #1890ff !important;
   stroke: #1890ff !important;
@@ -433,14 +435,17 @@ watch(
   stroke: green !important;
   fill-opacity: 0.2 !important;
 }
+
 .highlight.djs-shape .djs-visual > :nth-child(2) {
   fill: green !important;
 }
+
 .highlight.djs-shape .djs-visual > path {
   fill: green !important;
   fill-opacity: 0.2 !important;
   stroke: green !important;
 }
+
 .highlight.djs-connection > .djs-visual > path {
   stroke: green !important;
 }
@@ -454,14 +459,17 @@ watch(
   stroke: green !important;
   fill-opacity: 0.2 !important;
 }
+
 :deep(.highlight.djs-shape .djs-visual > :nth-child(2)) {
   fill: green !important;
 }
+
 :deep(.highlight.djs-shape .djs-visual > path) {
   fill: green !important;
   fill-opacity: 0.2 !important;
   stroke: green !important;
 }
+
 :deep(.highlight.djs-connection > .djs-visual > path) {
   stroke: green !important;
 }
@@ -472,14 +480,17 @@ watch(
   stroke: red !important;
   fill-opacity: 0.2 !important;
 }
+
 .highlight-reject.djs-shape .djs-visual > :nth-child(2) {
   fill: red !important;
 }
+
 .highlight-reject.djs-shape .djs-visual > path {
   fill: red !important;
   fill-opacity: 0.2 !important;
   stroke: red !important;
 }
+
 .highlight-reject.djs-connection > .djs-visual > path {
   stroke: red !important;
 }
@@ -493,14 +504,17 @@ watch(
   stroke: red !important;
   fill-opacity: 0.2 !important;
 }
+
 :deep(.highlight-reject.djs-shape .djs-visual > :nth-child(2)) {
   fill: red !important;
 }
+
 :deep(.highlight-reject.djs-shape .djs-visual > path) {
   fill: red !important;
   fill-opacity: 0.2 !important;
   stroke: red !important;
 }
+
 :deep(.highlight-reject.djs-connection > .djs-visual > path) {
   stroke: red !important;
 }
@@ -511,14 +525,17 @@ watch(
   stroke: grey !important;
   fill-opacity: 0.2 !important;
 }
+
 .highlight-cancel.djs-shape .djs-visual > :nth-child(2) {
   fill: grey !important;
 }
+
 .highlight-cancel.djs-shape .djs-visual > path {
   fill: grey !important;
   fill-opacity: 0.2 !important;
   stroke: grey !important;
 }
+
 .highlight-cancel.djs-connection > .djs-visual > path {
   stroke: grey !important;
 }
@@ -532,14 +549,17 @@ watch(
   stroke: grey !important;
   fill-opacity: 0.2 !important;
 }
+
 :deep(.highlight-cancel.djs-shape .djs-visual > :nth-child(2)) {
   fill: grey !important;
 }
+
 :deep(.highlight-cancel.djs-shape .djs-visual > path) {
   fill: grey !important;
   fill-opacity: 0.2 !important;
   stroke: grey !important;
 }
+
 :deep(.highlight-cancel.djs-connection > .djs-visual > path) {
   stroke: grey !important;
 }
@@ -547,7 +567,7 @@ watch(
 .element-overlays {
   box-sizing: border-box;
   padding: 8px;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgb(0 0 0 / 60%);
   border-radius: 4px;
   color: #fafafa;
   width: 200px;

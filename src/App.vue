@@ -40,10 +40,11 @@ $prefix-cls: #{$namespace}-app;
 
 html,
 body {
+  @extend .size;
+
   padding: 0 !important;
   margin: 0;
   overflow: hidden;
-  @extend .size;
 
   #app {
     @extend .size;

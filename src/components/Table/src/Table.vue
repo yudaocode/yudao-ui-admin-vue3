@@ -302,6 +302,7 @@ export default defineComponent({
   margin-left: 0;
   padding: 8px 4px;
 }
+
 :deep(.el-button.is-link) {
   margin-left: 0;
   padding: 8px 4px;
