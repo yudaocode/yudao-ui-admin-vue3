@@ -8,6 +8,7 @@ module.exports = defineConfig({
     es6: true
   },
   parser: 'vue-eslint-parser',
+  plugins: ['vue'],
   parserOptions: {
     parser: '@typescript-eslint/parser',
     ecmaVersion: 2020,
@@ -17,13 +18,7 @@ module.exports = defineConfig({
       jsx: true
     }
   },
-  extends: [
-    'plugin:vue/vue3-recommended',
-    'plugin:@typescript-eslint/recommended',
-    'prettier',
-    'plugin:prettier/recommended',
-    './.eslintrc-auto-import.json'
-  ],
+  extends: ['plugin:vue/vue3-recommended', 'prettier', 'plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
   rules: {
     'vue/script-setup-uses-vars': 'error',
     'vue/no-reserved-component-names': 'off',
