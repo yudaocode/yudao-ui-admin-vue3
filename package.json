@@ -129,9 +129,6 @@
     "vue-tsc": "^1.8.1",
     "windicss": "^3.5.6"
   },
-  "engines": {
-    "node": ">=16.0.0"
-  },
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -140,5 +137,10 @@
   "bugs": {
     "url": "https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues"
   },
-  "homepage": "https://gitee.com/yudaocode/yudao-ui-admin-vue3"
+  "homepage": "https://gitee.com/yudaocode/yudao-ui-admin-vue3",
+  "packageManager": "pnpm@8.6.0",
+  "engines": {
+    "node": ">= 16.0.0",
+    "pnpm": ">=8.6.0"
+  }
 }
