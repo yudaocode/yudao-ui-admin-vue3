@@ -111,13 +111,16 @@
   <UserGroupForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts" name="BpmUserGroup">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as UserGroupApi from '@/api/bpm/userGroup'
 import * as UserApi from '@/api/system/user'
 import UserGroupForm from './UserGroupForm.vue'
 import { UserVO } from '@/api/system/user'
+
+defineOptions({ name: 'BpmUserGroup' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

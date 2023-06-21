@@ -32,11 +32,13 @@
   </div>
 </template>
 
-<script setup lang="ts" name="ReplyForm">
+<script setup lang="ts">
 import WxReplySelect, { type Reply } from '@/views/mp/components/wx-reply'
 import type { FormInstance } from 'element-plus'
 import { MsgType } from './types'
 import { DICT_TYPE, getDictOptions, getIntDictOptions } from '@/utils/dict'
+
+defineOptions({ name: 'ReplyForm' })
 
 const props = defineProps<{
   modelValue: any

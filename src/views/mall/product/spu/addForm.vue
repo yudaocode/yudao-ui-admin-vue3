@@ -31,13 +31,15 @@
     </el-form>
   </ContentWrap>
 </template>
-<script lang="ts" name="ProductSpuForm" setup>
+<script lang="ts" setup>
 import { cloneDeep } from 'lodash-es'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { BasicInfoForm, DescriptionForm, OtherSettingsForm } from './components'
 // 业务api
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { convertToInteger, formatToFraction } from '@/utils'
+
+defineOptions({ name: 'ProductSpuForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

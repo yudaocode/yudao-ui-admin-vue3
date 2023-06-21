@@ -30,13 +30,15 @@
   </ContentWrap>
 </template>
 
-<script setup lang="ts" name="WxMsg">
+<script setup lang="ts">
 import WxReplySelect, { Reply, ReplyType } from '@/views/mp/components/wx-reply'
 import MsgList from './components/MsgList.vue'
 import { getMessagePage, sendMessage } from '@/api/mp/message'
 import { getUser } from '@/api/mp/user'
 import profile from '@/assets/imgs/profile.jpg'
 import { User } from './types'
+
+defineOptions({ name: 'WxMsg' })
 
 const message = useMessage() // 消息弹窗
 

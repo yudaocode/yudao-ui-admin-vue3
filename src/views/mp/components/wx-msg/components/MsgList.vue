@@ -24,11 +24,13 @@
     </div>
   </div>
 </template>
-<script setup lang="ts" name="MsgList">
+<script setup lang="ts">
 import Msg from './Msg.vue'
 import { formatDate } from '@/utils/formatTime'
 import { User } from '../types'
 import avatarWechat from '@/assets/imgs/wechat.png'
+
+defineOptions({ name: 'MsgList' })
 
 const props = defineProps<{
   list: any[]

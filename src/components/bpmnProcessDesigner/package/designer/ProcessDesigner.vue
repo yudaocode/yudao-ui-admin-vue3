@@ -206,7 +206,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="MyProcessDesigner">
+<script setup lang="ts">
 // import 'bpmn-js/dist/assets/diagram-js.css' // 左边工具栏以及编辑节点的样式
 // import 'bpmn-js/dist/assets/bpmn-font/css/bpmn.css'
 // import 'bpmn-js/dist/assets/bpmn-font/css/bpmn-codes.css'
@@ -244,6 +244,9 @@ import { XmlNode, XmlNodeType, parseXmlString } from 'steady-xml'
 // const eventName = reactive({
 //   name: ''
 // })
+
+defineOptions({ name: 'MyProcessDesigner' })
+
 const bpmnCanvas = ref()
 const refFile = ref()
 const emit = defineEmits([

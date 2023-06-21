@@ -59,7 +59,7 @@
   </el-tabs>
 </template>
 
-<script setup lang="ts" name="WxReplySelect">
+<script setup lang="ts">
 import { Reply, NewsType, ReplyType, createEmptyReply } from './components/types'
 import TabText from './components/TabText.vue'
 import TabImage from './components/TabImage.vue'
@@ -67,6 +67,8 @@ import TabVoice from './components/TabVoice.vue'
 import TabVideo from './components/TabVideo.vue'
 import TabNews from './components/TabNews.vue'
 import TabMusic from './components/TabMusic.vue'
+
+defineOptions({ name: 'WxReplySelect' })
 
 interface Props {
   modelValue: Reply

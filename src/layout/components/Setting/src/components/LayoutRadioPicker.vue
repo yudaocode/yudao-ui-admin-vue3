@@ -1,6 +1,8 @@
-<script lang="ts" name="LayoutRadioPicker" setup>
+<script lang="ts" setup>
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
+
+defineOptions({ name: 'LayoutRadioPicker' })
 
 const { getPrefixCls } = useDesign()
 
@@ -66,7 +68,7 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
     border: 2px solid #e5e7eb;
     border-radius: 4px;
 
-    &:before {
+    &::before {
       position: absolute;
       top: 0;
       left: 0;
@@ -78,14 +80,14 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
       content: '';
     }
 
-    &:after {
+    &::after {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 25%;
       background-color: #fff;
-      border-radius: 4px 4px 0 4px;
+      border-radius: 4px 4px 0;
       content: '';
     }
   }
@@ -94,7 +96,7 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
     border: 2px solid #e5e7eb;
     border-radius: 4px;
 
-    &:before {
+    &::before {
       position: absolute;
       top: 0;
       left: 0;
@@ -106,7 +108,7 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
       content: '';
     }
 
-    &:after {
+    &::after {
       position: absolute;
       top: 0;
       left: 0;
@@ -122,7 +124,7 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
     border: 2px solid #e5e7eb;
     border-radius: 4px;
 
-    &:before {
+    &::before {
       position: absolute;
       top: 0;
       left: 0;
@@ -139,7 +141,7 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
     border: 2px solid #e5e7eb;
     border-radius: 4px;
 
-    &:before {
+    &::before {
       position: absolute;
       top: 0;
       left: 0;
@@ -151,7 +153,7 @@ $prefix-cls: #{$namespace}-layout-radio-picker;
       content: '';
     }
 
-    &:after {
+    &::after {
       position: absolute;
       top: 0;
       left: 0;

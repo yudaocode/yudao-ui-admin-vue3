@@ -108,11 +108,14 @@
   <SignInRecordForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts" name="SignInRecord">
+<script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as SignInRecordApi from '@/api/point/signInRecord'
 import SignInRecordForm from './SignInRecordForm.vue'
+
+defineOptions({ name: 'SignInRecord' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

@@ -107,12 +107,14 @@
     </el-table-column>
   </el-table>
 </template>
-<script lang="ts" name="SkuList" setup>
+<script lang="ts" setup>
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
 import { UploadImg } from '@/components/UploadFile'
 import type { Property, SkuType, SpuType } from '@/api/mall/product/spu'
+
+defineOptions({ name: 'SkuList' })
 
 const props = defineProps({
   propFormData: {

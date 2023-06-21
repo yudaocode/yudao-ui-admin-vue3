@@ -88,10 +88,13 @@
   <!-- 表单弹窗：添加/修改 -->
   <ValueForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="ProductPropertyValue">
+<script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import * as PropertyApi from '@/api/mall/product/property'
 import ValueForm from './ValueForm.vue'
+
+defineOptions({ name: 'ProductPropertyValue' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { params } = useRoute() // 查询参数

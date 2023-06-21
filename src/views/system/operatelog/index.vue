@@ -135,12 +135,15 @@
   <!-- 表单弹窗：详情 -->
   <OperateLogDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="SystemOperateLog">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as OperateLogApi from '@/api/system/operatelog'
 import OperateLogDetail from './OperateLogDetail.vue'
+
+defineOptions({ name: 'SystemOperateLog' })
+
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中

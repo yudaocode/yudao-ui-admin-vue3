@@ -158,13 +158,16 @@
   <ApiErrorLogDetail ref="detailRef" />
 </template>
 
-<script setup lang="ts" name="InfraApiErrorLog">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ApiErrorLogApi from '@/api/infra/apiErrorLog'
 import ApiErrorLogDetail from './ApiErrorLogDetail.vue'
 import { InfraApiErrorLogProcessStatusEnum } from '@/utils/constants'
+
+defineOptions({ name: 'InfraApiErrorLog' })
+
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中

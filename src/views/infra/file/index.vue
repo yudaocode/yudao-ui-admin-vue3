@@ -91,11 +91,14 @@
   <!-- 表单弹窗：添加/修改 -->
   <FileForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="InfraFile">
+<script setup lang="ts">
 import { fileSizeFormatter } from '@/utils'
 import { dateFormatter } from '@/utils/formatTime'
 import * as FileApi from '@/api/infra/file'
 import FileForm from './FileForm.vue'
+
+defineOptions({ name: 'InfraFile' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

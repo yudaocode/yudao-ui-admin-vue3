@@ -169,12 +169,15 @@
   <RecordForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts" name="PointRecord">
+<script setup lang="ts">
 import { DICT_TYPE, getStrDictOptions, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as RecordApi from '@/api/point/record'
 import RecordForm from './RecordForm.vue'
+
+defineOptions({ name: 'PointRecord' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

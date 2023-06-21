@@ -6,10 +6,14 @@
   </div>
 </template>
 
-<script setup lang="ts" name="MyProcessViewer">
+<script setup lang="ts">
 import BpmnViewer from 'bpmn-js/lib/Viewer'
 import DefaultEmptyXML from './plugins/defaultEmpty'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { formatDate } from '@/utils/formatTime'
+
+defineOptions({ name: 'MyProcessViewer' })
+
 const props = defineProps({
   value: {
     // BPMN XML 字符串

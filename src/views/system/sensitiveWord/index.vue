@@ -152,13 +152,15 @@
   <!-- 表单弹窗：测试敏感词 -->
   <SensitiveWordTestForm ref="testFormRef" />
 </template>
-<script lang="ts" name="SystemSensitiveWordHao" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
 import SensitiveWordForm from './SensitiveWordForm.vue'
 import SensitiveWordTestForm from './SensitiveWordTestForm.vue'
+
+defineOptions({ name: 'SystemSensitiveWord' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化

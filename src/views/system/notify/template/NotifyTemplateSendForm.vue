@@ -43,9 +43,12 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemNotifyTemplateSendForm" setup>
+<script lang="ts" setup>
 import * as UserApi from '@/api/system/user'
 import * as NotifyTemplateApi from '@/api/system/notify/template'
+
+defineOptions({ name: 'SystemNotifyTemplateSendForm' })
+
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示

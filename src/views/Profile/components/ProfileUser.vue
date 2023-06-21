@@ -46,11 +46,13 @@
     </ul>
   </div>
 </template>
-<script lang="ts" name="ProfileUser" setup>
+<script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import UserAvatar from './UserAvatar.vue'
 
 import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
+
+defineOptions({ name: 'ProfileUser' })
 
 const { t } = useI18n()
 const userInfo = ref<ProfileVO>()
@@ -79,7 +81,7 @@ onMounted(async () => {
 }
 
 .list-group {
-  padding-left: 0px;
+  padding-left: 0;
   list-style: none;
 }
 
@@ -87,7 +89,7 @@ onMounted(async () => {
   border-bottom: 1px solid #e7eaec;
   border-top: 1px solid #e7eaec;
   margin-bottom: -1px;
-  padding: 11px 0px;
+  padding: 11px 0;
   font-size: 13px;
 }
 

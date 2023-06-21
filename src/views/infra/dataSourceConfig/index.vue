@@ -57,10 +57,13 @@
   <!-- 表单弹窗：添加/修改 -->
   <DataSourceConfigForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="InfraDataSourceConfig">
+<script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
 import DataSourceConfigForm from './DataSourceConfigForm.vue'
+
+defineOptions({ name: 'InfraDataSourceConfig' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

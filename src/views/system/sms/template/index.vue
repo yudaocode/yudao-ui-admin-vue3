@@ -211,7 +211,7 @@
   <!-- 表单弹窗：测试发送 -->
   <SmsTemplateSendForm ref="sendFormRef" />
 </template>
-<script setup lang="ts" name="SystemSmsTemplate">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as SmsTemplateApi from '@/api/system/sms/smsTemplate'
@@ -219,6 +219,9 @@ import * as SmsChannelApi from '@/api/system/sms/smsChannel'
 import download from '@/utils/download'
 import SmsTemplateForm from './SmsTemplateForm.vue'
 import SmsTemplateSendForm from './SmsTemplateSendForm.vue'
+
+defineOptions({ name: 'SystemSmsTemplate' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

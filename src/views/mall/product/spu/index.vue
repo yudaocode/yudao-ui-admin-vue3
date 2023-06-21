@@ -197,7 +197,7 @@
     />
   </ContentWrap>
 </template>
-<script lang="ts" name="ProductSpu" setup>
+<script lang="ts" setup>
 import { TabsPaneContext } from 'element-plus'
 import { cloneDeep } from 'lodash-es'
 import { createImageViewer } from '@/components/ImageViewer'
@@ -208,6 +208,8 @@ import { formatToFraction } from '@/utils'
 import download from '@/utils/download'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
+
+defineOptions({ name: 'ProductSpu' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化

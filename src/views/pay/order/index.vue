@@ -228,14 +228,17 @@
   <!-- 表单弹窗：预览 -->
   <OrderDetail ref="detailRef" @success="getList" />
 </template>
-<script setup lang="ts" name="PayOrder">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as MerchantApi from '@/api/pay/merchant'
 import * as OrderApi from '@/api/pay/order'
 import OrderDetail from './OrderDetail.vue'
-const message = useMessage() // 消息弹窗
 import download from '@/utils/download'
+
+defineOptions({ name: 'PayOrder' })
+
+const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表的加载中
 const total = ref(0) // 列表的总页数

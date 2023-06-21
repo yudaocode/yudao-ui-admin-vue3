@@ -3,6 +3,8 @@
     <IFrame :src="src" />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="GoView">
+<script setup lang="ts">
+defineOptions({ name: 'GoView' })
+
 const src = 'http://127.0.0.1:3000'
 </script>

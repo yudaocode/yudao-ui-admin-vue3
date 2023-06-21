@@ -149,13 +149,15 @@
   <!-- 弹窗：预览代码 -->
   <PreviewCode ref="previewRef" />
 </template>
-<script lang="ts" name="InfraCodegen" setup>
+<script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CodegenApi from '@/api/infra/codegen'
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
 import ImportTable from './ImportTable.vue'
 import PreviewCode from './PreviewCode.vue'
+
+defineOptions({ name: 'InfraCodegen' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化

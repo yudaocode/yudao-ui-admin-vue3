@@ -68,8 +68,10 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="MpAccountForm" setup>
+<script lang="ts" setup>
 import * as AccountApi from '@/api/mp/account'
+
+defineOptions({ name: 'MpAccountForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

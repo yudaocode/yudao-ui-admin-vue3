@@ -1,6 +1,8 @@
-<script lang="ts" name="Footer" setup>
+<script lang="ts" setup>
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
+
+defineOptions({ name: 'Footer' })
 
 const { getPrefixCls } = useDesign()
 

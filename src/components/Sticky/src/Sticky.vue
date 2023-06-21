@@ -1,7 +1,9 @@
-<script lang="ts" name="Sticky" setup>
+<script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { isClient, useEventListener, useWindowSize } from '@vueuse/core'
 import type { CSSProperties } from 'vue'
+
+defineOptions({ name: 'Sticky' })
 
 const props = defineProps({
   // 距离顶部或者底部的距离(单位px)

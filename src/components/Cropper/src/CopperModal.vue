@@ -113,13 +113,15 @@
     </Dialog>
   </div>
 </template>
-<script lang="ts" name="CopperModal" setup>
+<script lang="ts" setup>
 import { useDesign } from '@/hooks/web/useDesign'
 import { dataURLtoBlob } from '@/utils/filt'
 import { useI18n } from 'vue-i18n'
 import type { CropendResult, Cropper } from './types'
 import { propTypes } from '@/utils/propTypes'
 import { CropperImage } from '@/components/Cropper'
+
+defineOptions({ name: 'CopperModal' })
 
 const props = defineProps({
   srcValue: propTypes.string.def(''),

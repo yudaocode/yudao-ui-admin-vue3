@@ -119,11 +119,14 @@
   <!-- 表单弹窗：添加/修改 -->
   <ClientForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="SystemOAuth2Client">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as ClientApi from '@/api/system/oauth2/client'
 import ClientForm from './ClientForm.vue'
+
+defineOptions({ name: 'SystemOAuth2Client' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

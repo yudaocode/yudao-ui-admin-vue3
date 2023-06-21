@@ -45,8 +45,11 @@
     </template>
   </Dialog>
 </template>
-<script setup lang="ts" name="JobForm">
+<script setup lang="ts">
 import * as JobApi from '@/api/infra/job'
+
+defineOptions({ name: 'JobForm' })
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 

@@ -94,12 +94,15 @@
   </Dialog>
 </template>
 
-<script setup lang="ts" name="BpmProcessDefinition">
+<script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { MyProcessViewer } from '@/components/bpmnProcessDesigner/package'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { setConfAndFields2 } from '@/utils/formCreate'
+
+defineOptions({ name: 'BpmProcessDefinition' })
+
 const { push } = useRouter() // 路由
 const { query } = useRoute() // 查询参数
 

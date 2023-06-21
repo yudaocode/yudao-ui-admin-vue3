@@ -3,9 +3,11 @@
     <Descriptions :data="detailData" :schema="allSchemas.detailSchema" />
   </Dialog>
 </template>
-<script lang="ts" name="SystemMailAccountDetail" setup>
+<script lang="ts" setup>
 import * as MailAccountApi from '@/api/system/mail/account'
 import { allSchemas } from './account.data'
+
+defineOptions({ name: 'SystemMailAccountDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中

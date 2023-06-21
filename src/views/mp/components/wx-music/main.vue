@@ -25,7 +25,9 @@
   </div>
 </template>
 
-<script setup lang="ts" name="WxMusic">
+<script setup lang="ts">
+defineOptions({ name: 'WxMusic' })
+
 const props = defineProps({
   title: {
     required: false,

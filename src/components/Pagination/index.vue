@@ -14,8 +14,10 @@
     @current-change="handleCurrentChange"
   />
 </template>
-<script name="Pagination" setup>
+<script setup lang="ts">
 import { computed } from 'vue'
+
+defineOptions({ name: 'Pagination' })
 
 const props = defineProps({
   // 总条目数

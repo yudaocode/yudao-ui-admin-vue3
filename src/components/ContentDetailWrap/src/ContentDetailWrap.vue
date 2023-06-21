@@ -1,6 +1,8 @@
-<script lang="ts" name="ContentDetailWrap" setup>
+<script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
+
+defineOptions({ name: 'ContentDetailWrap' })
 
 const { t } = useI18n()
 

@@ -10,13 +10,15 @@
     />
   </div>
 </template>
-<script lang="ts" name="Cropper" setup>
+<script lang="ts" setup>
 import { CSSProperties, PropType } from 'vue'
 import Cropper from 'cropperjs'
 import 'cropperjs/dist/cropper.css'
 import { useDesign } from '@/hooks/web/useDesign'
 import { propTypes } from '@/utils/propTypes'
 import { useDebounceFn } from '@vueuse/core'
+
+defineOptions({ name: 'Cropper' })
 
 type Options = Cropper.Options
 

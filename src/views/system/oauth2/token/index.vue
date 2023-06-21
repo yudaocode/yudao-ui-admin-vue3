@@ -98,10 +98,13 @@
   </ContentWrap>
 </template>
 
-<script setup lang="ts" name="SystemTokenClient">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as OAuth2AccessTokenApi from '@/api/system/oauth2/token'
+
+defineOptions({ name: 'SystemTokenClient' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

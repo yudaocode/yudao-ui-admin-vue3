@@ -198,7 +198,7 @@
   <!-- 分配角色 -->
   <UserAssignRoleForm ref="assignRoleFormRef" @success="getList" />
 </template>
-<script setup lang="ts" name="SystemUser">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { checkPermi } from '@/utils/permission'
 import { dateFormatter } from '@/utils/formatTime'
@@ -209,6 +209,9 @@ import UserForm from './UserForm.vue'
 import UserImportForm from './UserImportForm.vue'
 import UserAssignRoleForm from './UserAssignRoleForm.vue'
 import DeptTree from './DeptTree.vue'
+
+defineOptions({ name: 'SystemUser' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

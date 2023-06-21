@@ -232,14 +232,17 @@
   <!-- 表单弹窗：预览 -->
   <RefundDetail ref="detailRef" @success="getList" />
 </template>
-<script setup lang="ts" name="PayRefund">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as MerchantApi from '@/api/pay/merchant'
 import * as RefundApi from '@/api/pay/refund'
 import RefundDetail from './RefundDetail.vue'
-const message = useMessage() // 消息弹窗
 import download from '@/utils/download'
+
+defineOptions({ name: 'PayRefund' })
+
+const message = useMessage() // 消息弹窗
 
 const loading = ref(false) // 列表遮罩层
 const total = ref(0) // 列表的总页数

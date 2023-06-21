@@ -139,12 +139,15 @@
   <!-- 表单弹窗：详情 -->
   <ApiAccessLogDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="InfraApiAccessLog">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
 import { formatDate } from '@/utils/formatTime'
 import * as ApiAccessLogApi from '@/api/infra/apiAccessLog'
 import ApiAccessLogDetail from './ApiAccessLogDetail.vue'
+
+defineOptions({ name: 'InfraApiAccessLog' })
+
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中

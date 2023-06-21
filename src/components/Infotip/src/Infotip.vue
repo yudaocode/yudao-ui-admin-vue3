@@ -1,8 +1,10 @@
-<script lang="ts" name="InfoTip" setup>
+<script lang="ts" setup>
 import { PropType } from 'vue'
 import { useDesign } from '@/hooks/web/useDesign'
 import { propTypes } from '@/utils/propTypes'
 import { TipSchema } from '@/types/infoTip'
+
+defineOptions({ name: 'InfoTip' })
 
 const { getPrefixCls } = useDesign()
 

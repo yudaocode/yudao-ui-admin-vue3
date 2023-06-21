@@ -87,11 +87,14 @@
   <SignInConfigForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts" name="SignInConfig">
+<script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as SignInConfigApi from '@/api/point/signInConfig'
 import SignInConfigForm from './SignInConfigForm.vue'
+
+defineOptions({ name: 'SignInConfig' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

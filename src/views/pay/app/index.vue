@@ -303,13 +303,16 @@
   <!-- 表单弹窗：添加/修改 -->
   <AppForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="PayApp">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as AppApi from '@/api/pay/app'
 import AppForm from '@/views/pay/app/AppForm.vue'
 import { PayChannelEnum, PayType } from '@/utils/constants'
+
+defineOptions({ name: 'PayApp' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

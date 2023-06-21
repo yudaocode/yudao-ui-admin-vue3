@@ -36,8 +36,10 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemSmsTemplateSendForm" setup>
+<script lang="ts" setup>
 import * as SmsTemplateApi from '@/api/system/sms/smsTemplate'
+
+defineOptions({ name: 'SystemSmsTemplateSendForm' })
 
 const message = useMessage() // 消息弹窗
 

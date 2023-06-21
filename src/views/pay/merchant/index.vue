@@ -137,13 +137,16 @@
   <!-- 表单弹窗：添加/修改 -->
   <MerchantForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="PayMerchant">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as MerchantApi from '@/api/pay/merchant'
 import MerchantForm from './MerchantForm.vue'
+
+defineOptions({ name: 'PayMerchant' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

@@ -1,4 +1,4 @@
-<script lang="ts" name="TagsView" setup>
+<script lang="ts" setup>
 import type { RouteLocationNormalizedLoaded, RouterLinkProps } from 'vue-router'
 import { usePermissionStore } from '@/store/modules/permission'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -10,6 +10,8 @@ import { useDesign } from '@/hooks/web/useDesign'
 import { ElScrollbar } from 'element-plus'
 import { useScrollTo } from '@/hooks/event/useScrollTo'
 import { useTemplateRefsList } from '@vueuse/core'
+
+defineOptions({ name: 'TagsView' })
 
 const { getPrefixCls } = useDesign()
 
@@ -483,7 +485,7 @@ $prefix-cls: #{$namespace}-tags-view;
       }
     }
 
-    &:after {
+    &::after {
       position: absolute;
       top: 1px;
       left: 0;
@@ -502,7 +504,7 @@ $prefix-cls: #{$namespace}-tags-view;
     padding-right: 16px;
     margin-left: 4px;
     font-size: 12px;
-    border-radius: 3px 3px 3px 3px;
+    border-radius: 3px;
     cursor: pointer;
     border: 1px solid #d9d9d9;
 
@@ -549,7 +551,7 @@ $prefix-cls: #{$namespace}-tags-view;
         }
       }
 
-      &:after {
+      &::after {
         border-right: 1px solid var(--el-border-color);
         border-left: 1px solid var(--el-border-color);
       }
@@ -561,7 +563,7 @@ $prefix-cls: #{$namespace}-tags-view;
       height: calc(100% - 4px);
       padding-right: 16px;
       font-size: 12px;
-      border-radius: 3px 3px 3px 3px;
+      border-radius: 3px;
       cursor: pointer;
       border: 1px solid var(--el-border-color);
     }

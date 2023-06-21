@@ -140,13 +140,15 @@
     </el-col>
   </el-row>
 </template>
-<script lang="ts" name="Home2" setup>
+<script lang="ts" setup>
 import { set } from 'lodash-es'
 import { EChartsOption } from 'echarts'
 
 import { useDesign } from '@/hooks/web/useDesign'
 import type { AnalysisTotalTypes } from './types'
 import { barOptions, lineOptions, pieOptions } from './echarts-data'
+
+defineOptions({ name: 'Home2' })
 
 const { t } = useI18n()
 const loading = ref(true)

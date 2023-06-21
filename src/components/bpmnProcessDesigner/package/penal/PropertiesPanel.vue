@@ -62,7 +62,7 @@
     </el-collapse>
   </div>
 </template>
-<script setup lang="ts" name="MyPropertiesPanel">
+<script setup lang="ts">
 import ElementBaseInfo from './base/ElementBaseInfo.vue'
 import ElementOtherConfig from './other/ElementOtherConfig.vue'
 import ElementTask from './task/ElementTask.vue'
@@ -73,6 +73,9 @@ import ElementListeners from './listeners/ElementListeners.vue'
 import ElementProperties from './properties/ElementProperties.vue'
 // import ElementForm from './form/ElementForm.vue'
 import UserTaskListeners from './listeners/UserTaskListeners.vue'
+
+defineOptions({ name: 'MyPropertiesPanel' })
+
 /**
  * 侧边栏
  * @Author MiyueFE

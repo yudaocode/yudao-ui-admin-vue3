@@ -40,9 +40,11 @@
     </el-row>
   </el-form>
 </template>
-<script lang="ts" name="InfraCodegenBasicInfoForm" setup>
+<script lang="ts" setup>
 import * as CodegenApi from '@/api/infra/codegen'
 import { PropType } from 'vue'
+
+defineOptions({ name: 'InfraCodegenBasicInfoForm' })
 
 const props = defineProps({
   table: {

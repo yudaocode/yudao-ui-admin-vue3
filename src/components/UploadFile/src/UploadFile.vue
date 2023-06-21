@@ -32,12 +32,14 @@
     </el-upload>
   </div>
 </template>
-<script setup lang="ts" name="UploadFile">
+<script setup lang="ts">
 import { PropType } from 'vue'
 
 import { propTypes } from '@/utils/propTypes'
 import { getAccessToken, getTenantId } from '@/utils/auth'
 import type { UploadInstance, UploadUserFile, UploadProps, UploadRawFile } from 'element-plus'
+
+defineOptions({ name: 'UploadFile' })
 
 const message = useMessage() // 消息弹窗
 const emit = defineEmits(['update:modelValue'])
@@ -143,21 +145,25 @@ const listToString = (list: UploadUserFile[], separator?: string) => {
 .upload-file-uploader {
   margin-bottom: 5px;
 }
+
 :deep(.upload-file-list .el-upload-list__item) {
   border: 1px solid #e4e7ed;
   line-height: 2;
   margin-bottom: 10px;
   position: relative;
 }
+
 :deep(.el-upload-list__item-file-name) {
   max-width: 250px;
 }
+
 :deep(.upload-file-list .ele-upload-list__item-content) {
   display: flex;
   justify-content: space-between;
   align-items: center;
   color: inherit;
 }
+
 :deep(.ele-upload-list__item-content-action .el-link) {
   margin-right: 10px;
 }

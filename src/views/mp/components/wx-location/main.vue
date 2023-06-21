@@ -39,7 +39,9 @@
   </div>
 </template>
 
-<script setup lang="ts" name="WxLocation">
+<script setup lang="ts">
+defineOptions({ name: 'WxLocation' })
+
 const props = defineProps({
   locationX: {
     required: true,

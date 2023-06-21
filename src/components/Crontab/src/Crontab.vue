@@ -1,6 +1,8 @@
-<script lang="ts" name="Crontab" setup>
+<script lang="ts" setup>
 import { ElMessage } from 'element-plus'
 import { PropType } from 'vue'
+
+defineOptions({ name: 'Crontab' })
 
 interface shortcutsType {
   text: string
@@ -966,37 +968,37 @@ const submit = () => {
 <style scoped>
 .sc-cron:deep(.el-tabs__item) {
   height: auto;
-  line-height: 1;
   padding: 0 7px;
+  line-height: 1;
   vertical-align: bottom;
 }
 
 .sc-cron-num {
-  text-align: center;
-  margin-bottom: 15px;
   width: 100%;
+  margin-bottom: 15px;
+  text-align: center;
 }
 
 .sc-cron-num h2 {
-  font-size: 12px;
   margin-bottom: 15px;
+  font-size: 12px;
   font-weight: normal;
 }
 
 .sc-cron-num h4 {
   display: block;
-  height: 32px;
-  line-height: 30px;
   width: 100%;
-  font-size: 12px;
+  height: 32px;
   padding: 0 15px;
+  font-size: 12px;
+  line-height: 30px;
   background: var(--el-color-primary-light-9);
   border-radius: 4px;
 }
 
 .sc-cron:deep(.el-tabs__item.is-active) .sc-cron-num h4 {
-  background: var(--el-color-primary);
   color: #fff;
+  background: var(--el-color-primary);
 }
 
 [data-theme='dark'] .sc-cron-num h4 {

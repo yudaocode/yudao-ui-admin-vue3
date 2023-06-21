@@ -101,11 +101,14 @@
   <ConfigForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts" name="PointConfig">
+<script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ConfigApi from '@/api/point/config'
 import ConfigForm from './ConfigForm.vue'
+
+defineOptions({ name: 'PointConfig' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

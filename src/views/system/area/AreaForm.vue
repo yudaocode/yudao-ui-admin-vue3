@@ -20,8 +20,10 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemAreaForm" setup>
+<script lang="ts" setup>
 import * as AreaApi from '@/api/system/area'
+
+defineOptions({ name: 'SystemAreaForm' })
 
 const message = useMessage() // 消息弹窗
 

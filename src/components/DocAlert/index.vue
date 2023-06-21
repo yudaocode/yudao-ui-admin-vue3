@@ -5,8 +5,10 @@
     </template>
   </el-alert>
 </template>
-<script setup lang="tsx" name="DocAlert">
+<script setup lang="tsx">
 import { propTypes } from '@/utils/propTypes'
+
+defineOptions({ name: 'DocAlert' })
 
 const props = defineProps({
   title: propTypes.string,
@@ -25,8 +27,8 @@ const getEnable = () => {
 </script>
 <style scoped>
 .el-alert--success.is-light {
-  border: 1px solid green;
   margin-bottom: 10px;
   cursor: pointer;
+  border: 1px solid green;
 }
 </style>

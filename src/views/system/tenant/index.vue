@@ -171,13 +171,16 @@
   <!-- 表单弹窗：添加/修改 -->
   <TenantForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="SystemTenant">
+<script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as TenantApi from '@/api/system/tenant'
 import * as TenantPackageApi from '@/api/system/tenantPackage'
 import TenantForm from './TenantForm.vue'
+
+defineOptions({ name: 'SystemTenant' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

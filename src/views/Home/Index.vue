@@ -160,7 +160,7 @@
     </el-col>
   </el-row>
 </template>
-<script setup lang="ts" name="Home">
+<script setup lang="ts">
 import { set } from 'lodash-es'
 import { EChartsOption } from 'echarts'
 import { formatTime } from '@/utils'
@@ -170,6 +170,8 @@ import { useWatermark } from '@/hooks/web/useWatermark'
 import avatarImg from '@/assets/imgs/avatar.gif'
 import type { WorkplaceTotal, Project, Notice, Shortcut } from './types'
 import { pieOptions, barOptions } from './echarts-data'
+
+defineOptions({ name: 'Home' })
 
 const { t } = useI18n()
 const userStore = useUserStore()

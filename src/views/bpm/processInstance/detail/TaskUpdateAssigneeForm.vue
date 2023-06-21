@@ -24,9 +24,11 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="BpmTaskUpdateAssigneeForm" setup>
+<script lang="ts" setup>
 import * as TaskApi from '@/api/bpm/task'
 import * as UserApi from '@/api/system/user'
+
+defineOptions({ name: 'BpmTaskUpdateAssigneeForm' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
