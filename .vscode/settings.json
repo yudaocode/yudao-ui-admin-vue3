@@ -1,6 +1,7 @@
 {
   "typescript.tsdk": "node_modules/typescript/lib",
   "prettier.enable": true,
+  "npm.packageManager": "pnpm",
   "editor.formatOnType": true,
   "editor.formatOnSave": true,
   "editor.formatOnPaste": true,
