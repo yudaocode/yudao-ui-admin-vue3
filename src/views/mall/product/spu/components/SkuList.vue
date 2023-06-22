@@ -118,7 +118,9 @@
     max-height="500"
     size="small"
     style="width: 99%"
+    @selection-change="handleSelectionChange"
   >
+    <el-table-column v-if="isComponent" type="selection" width="45" />
     <el-table-column align="center" label="图片" min-width="80">
       <template #default="{ row }">
         <el-image :src="row.picUrl" class="w-60px h-60px" @click="imagePreview(row.picUrl)" />
@@ -207,7 +209,8 @@ const props = defineProps({
     default: () => []
   },
   isBatch: propTypes.bool.def(false), // 是否作为批量操作组件
-  isDetail: propTypes.bool.def(false) // 是否作为 sku 详情组件
+  isDetail: propTypes.bool.def(false), // 是否作为 sku 详情组件
+  isComponent: propTypes.bool.def(false) // 是否作为 sku 选择组件
 })
 const formData: Ref<Spu | undefined> = ref<Spu>() // 表单数据
 const skuList = ref<Sku[]>([
@@ -261,6 +264,17 @@ const validateSku = (): boolean => {
     }
   }
   return validate
+}
+
+const emit = defineEmits<{
+  (e: 'selectionChange', value: Sku[]): void
+}>()
+/**
+ * 选择时触发
+ * @param Sku 传递过来的选中的 sku 是一个数组
+ */
+const handleSelectionChange = (val: Sku[]) => {
+  emit('selectionChange', val)
 }
 
 /**

@@ -19,6 +19,11 @@ export const getSeckillConfig = async (id: number) => {
   return await request.get({ url: '/promotion/seckill-config/get?id=' + id })
 }
 
+// 获得所有开启状态的秒杀时段精简列表
+export const getListAllSimple = async () => {
+  return await request.get({ url: '/promotion/seckill-config/list-all-simple' })
+}
+
 // 新增秒杀时段配置
 export const createSeckillConfig = async (data: SeckillConfigVO) => {
   return await request.post({ url: '/promotion/seckill-config/create', data })
