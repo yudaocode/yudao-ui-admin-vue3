@@ -49,6 +49,16 @@ export interface Spu {
   recommendGood?: boolean // 是否优品
 }
 
+export interface SpuRespVO extends Spu {
+  price: number
+  salesCount: number
+  marketPrice: number
+  costPrice: number
+  stock: number
+  createTime: Date
+  status: number
+}
+
 // 获得 Spu 列表
 export const getSpuPage = (params: PageParam) => {
   return request.get({ url: '/product/spu/page', params })

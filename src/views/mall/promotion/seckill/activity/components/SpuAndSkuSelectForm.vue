@@ -51,7 +51,7 @@
         :data="list"
         :expand-row-keys="expandRowKeys"
         row-key="id"
-        @expandChange="getPropertyList"
+        @expand-change="expandChange"
         @selection-change="selectSpu"
       >
         <el-table-column v-if="isSelectSku" type="expand" width="30">
@@ -111,7 +111,7 @@
 </template>
 
 <script lang="ts" name="SeckillActivitySpuAndSkuSelect" setup>
-import { SkuList } from '@/views/mall/product/spu/components'
+import { getPropertyList, Properties, SkuList } from '@/views/mall/product/spu/components'
 import { ElTable } from 'element-plus'
 import { dateFormatter } from '@/utils/formatTime'
 import { createImageViewer } from '@/components/ImageViewer'
@@ -142,13 +142,13 @@ const queryParams = ref({
   categoryId: null,
   createTime: []
 }) // 查询参数
-const propertyList = ref([]) // 商品属性列表
+const propertyList = ref<Properties[]>([]) // 商品属性列表
 const spuListRef = ref<InstanceType<typeof ElTable>>()
 const spuData = ref<ProductSpuApi.Spu | {}>() // 商品详情
 const isExpand = ref(false) // 控制 SKU 列表显示
 const expandRowKeys = ref<number[]>() // 控制展开行需要设置 row-key 属性才能使用，该属性为展开行的 keys 数组。
 // 计算商品属性
-const getPropertyList = async (row: ProductSpuApi.Spu, expandedRows: ProductSpuApi.Spu[]) => {
+const expandChange = async (row: ProductSpuApi.Spu, expandedRows: ProductSpuApi.Spu[]) => {
   spuData.value = {}
   propertyList.value = []
   isExpand.value = false
@@ -158,26 +158,8 @@ const getPropertyList = async (row: ProductSpuApi.Spu, expandedRows: ProductSpuA
     return
   }
   // 获取 SPU 详情
-  const res = (await ProductSpuApi.getSpu(row.id as number)) as ProductSpuApi.Spu
-  // 只有是多规格才处理
-  if (res.specType) {
-    //  直接拿返回的 skus 属性逆向生成出 propertyList
-    const properties = []
-    res.skus?.forEach((sku) => {
-      sku.properties?.forEach(({ propertyId, propertyName, valueId, valueName }) => {
-        // 添加属性
-        if (!properties?.some((item) => item.id === propertyId)) {
-          properties.push({ id: propertyId, name: propertyName, values: [] })
-        }
-        // 添加属性值
-        const index = properties?.findIndex((item) => item.id === propertyId)
-        if (!properties[index].values?.some((value) => value.id === valueId)) {
-          properties[index].values?.push({ id: valueId, name: valueName })
-        }
-      })
-    })
-    propertyList.value = properties
-  }
+  const res = (await ProductSpuApi.getSpu(row.id as number)) as ProductSpuApi.SpuRespVO
+  propertyList.value = getPropertyList(res)
   spuData.value = res
   isExpand.value = true
   expandRowKeys.value = [row.id!]
@@ -219,7 +201,7 @@ const confirm = () => {
     message.warning('没有选择任何商品属性')
     return
   }
-
+  // TODO 返回选择 sku 没测试过，后续测试完善
   props.isSelectSku
     ? emits('confirm', selectedSpu.value!, selectedSku.value!)
     : emits('confirm', selectedSpu.value!)
