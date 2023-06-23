@@ -1,6 +1,8 @@
-<script lang="ts" name="XTextButton" setup>
+<script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { PropType } from 'vue'
+
+defineOptions({ name: 'XTextButton' })
 
 const props = defineProps({
   modelValue: propTypes.bool.def(false),

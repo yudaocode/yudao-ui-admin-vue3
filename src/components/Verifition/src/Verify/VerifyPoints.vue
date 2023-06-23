@@ -57,7 +57,7 @@
     </div>
   </div>
 </template>
-<script name="VerifyPoints" setup type="text/babel">
+<script setup type="text/babel">
 /**
  * VerifyPoints
  * @description 点选

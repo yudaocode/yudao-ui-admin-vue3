@@ -92,7 +92,7 @@
     </el-row>
   </el-form>
 </template>
-<script lang="ts" name="MobileForm" setup>
+<script lang="ts" setup>
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 
 import { useIcon } from '@/hooks/web/useIcon'
@@ -102,6 +102,8 @@ import { usePermissionStore } from '@/store/modules/permission'
 import { getTenantIdByName, sendSmsCode, smsLogin } from '@/api/login'
 import LoginFormTitle from './LoginFormTitle.vue'
 import { LoginStateEnum, useFormValid, useLoginState } from './useLogin'
+
+defineOptions({ name: 'MobileForm' })
 
 const { t } = useI18n()
 const message = useMessage()

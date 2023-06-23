@@ -57,12 +57,14 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemDeptForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
 import { CommonStatusEnum } from '@/utils/constants'
+
+defineOptions({ name: 'SystemDeptForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

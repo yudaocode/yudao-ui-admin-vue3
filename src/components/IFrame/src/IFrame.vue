@@ -1,5 +1,7 @@
-<script lang="ts" name="IFrame" setup>
+<script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
+
+defineOptions({ name: 'IFrame' })
 
 const props = defineProps({
   src: propTypes.string.def('')

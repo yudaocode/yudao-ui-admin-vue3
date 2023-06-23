@@ -1,6 +1,8 @@
-<script lang="ts" name="ContentWrap" setup>
+<script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
+
+defineOptions({ name: 'ContentWrap' })
 
 const { getPrefixCls } = useDesign()
 

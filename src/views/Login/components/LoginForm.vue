@@ -143,7 +143,7 @@
     </el-row>
   </el-form>
 </template>
-<script lang="ts" name="LoginForm" setup>
+<script lang="ts" setup>
 import { ElLoading } from 'element-plus'
 import LoginFormTitle from './LoginFormTitle.vue'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
@@ -154,6 +154,8 @@ import * as authUtil from '@/utils/auth'
 import { usePermissionStore } from '@/store/modules/permission'
 import * as LoginApi from '@/api/login'
 import { LoginStateEnum, useFormValid, useLoginState } from './useLogin'
+
+defineOptions({ name: 'LoginForm' })
 
 const { t } = useI18n()
 const message = useMessage()

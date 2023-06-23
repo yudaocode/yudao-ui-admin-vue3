@@ -1,6 +1,4 @@
-// @ts-check
-const { defineConfig } = require('eslint-define-config')
-module.exports = defineConfig({
+module.exports = {
   root: true,
   env: {
     browser: true,
@@ -8,6 +6,7 @@ module.exports = defineConfig({
     es6: true
   },
   parser: 'vue-eslint-parser',
+  plugins: ['vue'],
   parserOptions: {
     parser: '@typescript-eslint/parser',
     ecmaVersion: 2020,
@@ -17,16 +16,9 @@ module.exports = defineConfig({
       jsx: true
     }
   },
-  extends: [
-    'plugin:vue/vue3-recommended',
-    'plugin:@typescript-eslint/recommended',
-    'prettier',
-    'plugin:prettier/recommended',
-    './.eslintrc-auto-import.json'
-  ],
+  extends: ['plugin:vue/vue3-recommended', 'prettier', 'plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
   rules: {
     'vue/script-setup-uses-vars': 'error',
-    'vue/no-reserved-component-names': 'off',
     '@typescript-eslint/ban-ts-ignore': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
@@ -39,8 +31,20 @@ module.exports = defineConfig({
     '@typescript-eslint/ban-types': 'off',
     '@typescript-eslint/no-non-null-assertion': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-unused-vars': 'error',
-    'no-unused-vars': 'error',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_'
+      }
+    ],
+    'no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_'
+      }
+    ],
     'space-before-function-paren': 'off',
 
     'vue/attributes-order': 'off',
@@ -66,4 +70,4 @@ module.exports = defineConfig({
     ],
     'vue/multi-word-component-names': 'off'
   }
-})
+}

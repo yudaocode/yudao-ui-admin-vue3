@@ -131,7 +131,7 @@
   </div>
 </template>
 
-<script lang="ts" setup name="WxMaterialSelect">
+<script lang="ts" setup>
 import WxNews from '@/views/mp/components/wx-news'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play'
 import WxVideoPlayer from '@/views/mp/components/wx-video-play'
@@ -140,6 +140,8 @@ import * as MpMaterialApi from '@/api/mp/material'
 import * as MpFreePublishApi from '@/api/mp/freePublish'
 import * as MpDraftApi from '@/api/mp/draft'
 import { dateFormatter } from '@/utils/formatTime'
+
+defineOptions({ name: 'WxMaterialSelect' })
 
 const props = withDefaults(
   defineProps<{
@@ -227,7 +229,7 @@ onMounted(async () => {
 })
 </script>
 <style lang="scss" scoped>
-@media (min-width: 992px) and (max-width: 1300px) {
+@media (width >= 992px) and (width <= 1300px) {
   .waterfall {
     column-count: 3;
   }
@@ -237,7 +239,7 @@ onMounted(async () => {
   }
 }
 
-@media (min-width: 768px) and (max-width: 991px) {
+@media (width >= 768px) and (width <= 991px) {
   .waterfall {
     column-count: 2;
   }
@@ -247,7 +249,7 @@ onMounted(async () => {
   }
 }
 
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .waterfall {
     column-count: 1;
   }

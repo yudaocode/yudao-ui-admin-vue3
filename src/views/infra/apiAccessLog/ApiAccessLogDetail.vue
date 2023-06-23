@@ -40,10 +40,12 @@
   </Dialog>
 </template>
 
-<script lang="ts" name="ApiAccessLogDetail" setup>
+<script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as ApiAccessLog from '@/api/infra/apiAccessLog'
+
+defineOptions({ name: 'ApiAccessLogDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单地加载中

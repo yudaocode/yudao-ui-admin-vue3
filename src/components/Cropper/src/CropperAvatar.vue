@@ -11,12 +11,14 @@
     />
   </div>
 </template>
-<script lang="ts" name="CropperAvatar" setup>
+<script lang="ts" setup>
 import { useDesign } from '@/hooks/web/useDesign'
 
 import { propTypes } from '@/utils/propTypes'
 import { useI18n } from 'vue-i18n'
 import CopperModal from './CopperModal.vue'
+
+defineOptions({ name: 'CropperAvatar' })
 
 const props = defineProps({
   width: propTypes.string.def('200px'),
@@ -83,14 +85,14 @@ $prefix-cls: #{$namespace}--cropper-avatar;
   }
 
   &-image-mask {
-    opacity: 0%;
     position: absolute;
     width: inherit;
     height: inherit;
-    border-radius: inherit;
-    border: inherit;
-    background: rgb(0 0 0 / 40%);
     cursor: pointer;
+    background: rgb(0 0 0 / 40%);
+    border: inherit;
+    border-radius: inherit;
+    opacity: 0;
     transition: opacity 0.4s;
 
     ::v-deep(svg) {
@@ -99,7 +101,7 @@ $prefix-cls: #{$namespace}--cropper-avatar;
   }
 
   &-image-mask:hover {
-    opacity: 4000%;
+    opacity: 40;
   }
 
   &-upload-btn {
@@ -121,21 +123,18 @@ $prefix-cls: #{$namespace}--cropper-avatar;
   height: 120px;
 }
 
-.user-info-head:hover:after {
-  content: '+';
+.user-info-head:hover::after {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  color: #eee;
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
   font-size: 24px;
-  font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  cursor: pointer;
+  font-style: normal;
   line-height: 110px;
+  color: #eee;
+  cursor: pointer;
+  background: rgb(0 0 0 / 50%);
   border-radius: 50%;
+  content: '+';
 }
 </style>

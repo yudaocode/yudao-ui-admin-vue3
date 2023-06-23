@@ -69,10 +69,12 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="InfraCodegenImportTable" setup>
+<script lang="ts" setup>
 import * as CodegenApi from '@/api/infra/codegen'
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
 import { ElTable } from 'element-plus'
+
+defineOptions({ name: 'InfraCodegenImportTable' })
 
 const message = useMessage() // 消息弹窗
 

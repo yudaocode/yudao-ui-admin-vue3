@@ -50,10 +50,12 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemSmsChannelForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import * as SmsChannelApi from '@/api/system/sms/smsChannel'
 import { CommonStatusEnum } from '@/utils/constants'
+
+defineOptions({ name: 'SystemSmsChannelForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -109,7 +111,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = unref(formRef)?.formModel as SmsChannelApi.SmsChannelVO
+    const data = formData.value as unknown as SmsChannelApi.SmsChannelVO
     if (formType.value === 'create') {
       await SmsChannelApi.createSmsChannel(data)
       message.success(t('common.createSuccess'))

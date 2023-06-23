@@ -16,11 +16,13 @@
     </el-col>
   </el-row>
 </template>
-<script lang="ts" name="QrCodeForm" setup>
+<script lang="ts" setup>
 import logoImg from '@/assets/imgs/logo.png'
 
 import LoginFormTitle from './LoginFormTitle.vue'
 import { LoginStateEnum, useLoginState } from './useLogin'
+
+defineOptions({ name: 'QrCodeForm' })
 
 const { t } = useI18n()
 const { handleBackLogin, getLoginState } = useLoginState()

@@ -43,10 +43,12 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemSensitiveWordForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
 import { CommonStatusEnum } from '@/utils/constants'
+
+defineOptions({ name: 'SystemSensitiveWordForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

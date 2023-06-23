@@ -25,10 +25,12 @@
     </el-descriptions>
   </Dialog>
 </template>
-<script lang="ts" name="BpmTaskDetail" setup>
+<script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
+
+defineOptions({ name: 'BpmTaskDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中

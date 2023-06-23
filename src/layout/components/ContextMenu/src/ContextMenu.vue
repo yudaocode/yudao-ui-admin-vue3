@@ -1,10 +1,12 @@
-<script lang="ts" name="ContextMenu" setup>
+<script lang="ts" setup>
 import { PropType } from 'vue'
 
 import { useDesign } from '@/hooks/web/useDesign'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 import { contextMenuSchema } from '@/types/contextMenu'
 import type { ElDropdown } from 'element-plus'
+
+defineOptions({ name: 'ContextMenu' })
 
 const { getPrefixCls } = useDesign()
 

@@ -1,7 +1,7 @@
 <template>
   <div class="panel-tab__content">
     <div class="panel-tab__content--title">
-      <span><Icon icon="ep:menu" style="margin-right: 8px; color: #555555" />消息列表</span>
+      <span><Icon icon="ep:menu" style="margin-right: 8px; color: #555" />消息列表</span>
       <XButton type="primary" title="创建新消息" preIcon="ep:plus" @click="openModel('message')" />
     </div>
     <el-table :data="messageList" border>
@@ -11,9 +11,9 @@
     </el-table>
     <div
       class="panel-tab__content--title"
-      style="padding-top: 8px; margin-top: 8px; border-top: 1px solid #eeeeee"
+      style="padding-top: 8px; margin-top: 8px; border-top: 1px solid #eee"
     >
-      <span><Icon icon="ep:menu" style="margin-right: 8px; color: #555555" />信号列表</span>
+      <span><Icon icon="ep:menu" style="margin-right: 8px; color: #555" />信号列表</span>
       <XButton type="primary" title="创建新信号" preIcon="ep:plus" @click="openModel('signal')" />
     </div>
     <el-table :data="signalList" border>
@@ -45,7 +45,9 @@
     </el-dialog>
   </div>
 </template>
-<script setup lang="ts" name="SignalAndMassage">
+<script lang="ts" setup>
+defineOptions({ name: 'SignalAndMassage' })
+
 const message = useMessage()
 const signalList = ref<any[]>([])
 const messageList = ref<any[]>([])

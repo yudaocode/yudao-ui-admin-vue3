@@ -62,7 +62,9 @@
   </div>
 </template>
 
-<script setup lang="ts" name="FlowCondition">
+<script lang="ts" setup>
+defineOptions({ name: 'FlowCondition' })
+
 const props = defineProps({
   businessObject: Object,
   type: String

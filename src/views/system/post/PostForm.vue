@@ -36,10 +36,12 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemPostForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as PostApi from '@/api/system/post'
+
+defineOptions({ name: 'SystemPostForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

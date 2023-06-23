@@ -1,4 +1,4 @@
-<script lang="ts" name="Setting" setup>
+<script lang="ts" setup>
 import { ElMessage } from 'element-plus'
 import { useClipboard, useCssVar } from '@vueuse/core'
 
@@ -12,6 +12,8 @@ import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import ColorRadioPicker from './components/ColorRadioPicker.vue'
 import InterfaceDisplay from './components/InterfaceDisplay.vue'
 import LayoutRadioPicker from './components/LayoutRadioPicker.vue'
+
+defineOptions({ name: 'Setting' })
 
 const { t } = useI18n()
 const appStore = useAppStore()

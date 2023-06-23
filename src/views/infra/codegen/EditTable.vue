@@ -19,10 +19,12 @@
     </el-form>
   </ContentWrap>
 </template>
-<script lang="ts" name="InfraCodegenEditTable" setup>
+<script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { BasicInfoForm, ColumInfoForm, GenerateInfoForm } from './components'
 import * as CodegenApi from '@/api/infra/codegen'
+
+defineOptions({ name: 'InfraCodegenEditTable' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

@@ -16,11 +16,13 @@
     </el-descriptions>
   </ContentWrap>
 </template>
-<script lang="ts" name="BpmOALeaveDetail" setup>
+<script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'
 import * as LeaveApi from '@/api/bpm/leave'
+
+defineOptions({ name: 'BpmOALeaveDetail' })
 
 const { query } = useRoute() // 查询参数
 

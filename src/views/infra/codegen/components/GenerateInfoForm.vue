@@ -291,12 +291,14 @@
     </el-row>
   </el-form>
 </template>
-<script lang="ts" name="InfraCodegenGenerateInfoForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { handleTree } from '@/utils/tree'
 import * as CodegenApi from '@/api/infra/codegen'
 import * as MenuApi from '@/api/system/menu'
 import { PropType } from 'vue'
+
+defineOptions({ name: 'InfraCodegenGenerateInfoForm' })
 
 const message = useMessage() // 消息弹窗
 const props = defineProps({

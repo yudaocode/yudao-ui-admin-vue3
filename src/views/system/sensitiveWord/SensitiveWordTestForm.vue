@@ -29,8 +29,10 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemSensitiveWordTestForm" setup>
+<script lang="ts" setup>
 import * as SensitiveWordApi from '@/api/system/sensitiveWord'
+
+defineOptions({ name: 'SystemSensitiveWordTestForm' })
 
 const message = useMessage() // 消息弹窗
 

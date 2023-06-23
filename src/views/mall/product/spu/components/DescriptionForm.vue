@@ -26,7 +26,8 @@
     </template>
   </Descriptions>
 </template>
-<script lang="ts" name="DescriptionForm" setup>
+<script lang="ts" setup>
+defineOptions({ name: 'DescriptionForm' })
 import type { Spu } from '@/api/mall/product/spu'
 import { Editor } from '@/components/Editor'
 import { PropType } from 'vue'

@@ -13,7 +13,6 @@ import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import viteCompression from 'vite-plugin-compression'
 import topLevelAwait from 'vite-plugin-top-level-await'
-import vueSetupExtend from 'vite-plugin-vue-setup-extend-plus'
 import VueI18nPlugin from '@intlify/unplugin-vue-i18n/vite'
 import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
@@ -31,7 +30,6 @@ export function createVitePlugins() {
     WindiCSS(),
     progress(),
     PurgeIcons(),
-    vueSetupExtend(),
     ElementPlus({}),
     AutoImport({
       include: [

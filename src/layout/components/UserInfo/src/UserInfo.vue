@@ -1,4 +1,4 @@
-<script lang="ts" name="UserInfo" setup>
+<script lang="ts" setup>
 import { ElMessageBox } from 'element-plus'
 
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
@@ -6,6 +6,8 @@ import { useDesign } from '@/hooks/web/useDesign'
 import avatarImg from '@/assets/imgs/avatar.gif'
 import { useUserStore } from '@/store/modules/user'
 import { useTagsViewStore } from '@/store/modules/tagsView'
+
+defineOptions({ name: 'UserInfo' })
 
 const { t } = useI18n()
 

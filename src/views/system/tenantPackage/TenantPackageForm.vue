@@ -61,13 +61,15 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemTenantPackageForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as TenantPackageApi from '@/api/system/tenantPackage'
 import * as MenuApi from '@/api/system/menu'
 import { ElTree } from 'element-plus'
+
+defineOptions({ name: 'SystemTenantPackageForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

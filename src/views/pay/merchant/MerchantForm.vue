@@ -27,10 +27,12 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="PayMerchantForm" setup>
+<script lang="ts" setup>
 import * as MerchantApi from '@/api/pay/merchant'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
+
+defineOptions({ name: 'PayMerchantForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

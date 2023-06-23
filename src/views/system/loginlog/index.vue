@@ -104,12 +104,15 @@
   <!-- 表单弹窗：详情 -->
   <LoginLogDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="SystemLoginLog">
+<script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as LoginLogApi from '@/api/system/loginLog'
 import LoginLogDetail from './LoginLogDetail.vue'
+
+defineOptions({ name: 'SystemLoginLog' })
+
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中

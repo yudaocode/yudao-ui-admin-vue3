@@ -15,11 +15,13 @@
     </el-form-item>
   </el-form>
 </template>
-<script lang="ts" name="ResetPwd" setup>
+<script lang="ts" setup>
 import type { FormInstance, FormRules } from 'element-plus'
 
 import { InputPassword } from '@/components/InputPassword'
 import { updateUserPassword } from '@/api/system/user/profile'
+
+defineOptions({ name: 'ResetPwd' })
 
 const { t } = useI18n()
 const message = useMessage()

@@ -7,9 +7,11 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemMailAccountForm" setup>
+<script lang="ts" setup>
 import * as MailAccountApi from '@/api/system/mail/account'
 import { allSchemas, rules } from './account.data'
+
+defineOptions({ name: 'SystemMailAccountForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

@@ -5,8 +5,10 @@
     <IFrame v-if="!loading" v-loading="loading" :src="src" />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="InfraSkyWalking">
+<script lang="ts" setup>
 import * as ConfigApi from '@/api/infra/config'
+
+defineOptions({ name: 'InfraSkyWalking' })
 
 const loading = ref(true) // 是否加载中
 const src = ref('http://skywalking.shop.iocoder.cn')

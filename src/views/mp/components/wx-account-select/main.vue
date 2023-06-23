@@ -4,8 +4,10 @@
   </el-select>
 </template>
 
-<script lang="ts" setup name="WxAccountSelect">
+<script lang="ts" setup>
 import * as MpAccountApi from '@/api/mp/account'
+
+defineOptions({ name: 'WxAccountSelect' })
 
 const account: MpAccountApi.AccountVO = reactive({
   id: -1,

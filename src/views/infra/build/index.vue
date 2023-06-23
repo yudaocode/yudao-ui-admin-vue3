@@ -23,13 +23,14 @@
       </el-button>
       <el-scrollbar height="580">
         <div>
-          <pre><code v-dompurify-html="highlightedCode(formData)" class="hljs"></code></pre>
+          <pre><code class="hljs" v-html="highlightedCode(formData)"></code></pre>
         </div>
       </el-scrollbar>
     </div>
   </Dialog>
 </template>
-<script lang="ts" name="InfraBuild" setup>
+<script lang="ts" setup>
+defineOptions({ name: 'InfraBuild' })
 import FcDesigner from '@form-create/designer'
 import { useClipboard } from '@vueuse/core'
 import { isString } from '@/utils/is'

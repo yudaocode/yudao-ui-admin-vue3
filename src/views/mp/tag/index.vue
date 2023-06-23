@@ -82,11 +82,13 @@
   <!-- 表单弹窗：添加/修改 -->
   <TagForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="MpTag">
+<script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import * as MpTagApi from '@/api/mp/tag'
 import TagForm from './TagForm.vue'
 import WxAccountSelect from '@/views/mp/components/wx-account-select'
+
+defineOptions({ name: 'MpTag' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化

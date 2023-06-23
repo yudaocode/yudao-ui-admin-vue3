@@ -1,6 +1,8 @@
-<script lang="ts" name="ImageViewer" setup>
+<script lang="ts" setup>
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
+
+defineOptions({ name: 'ImageViewer' })
 
 const props = defineProps({
   urlList: {

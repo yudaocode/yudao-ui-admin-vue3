@@ -77,9 +77,11 @@
   </ContentWrap>
 </template>
 
-<script lang="ts" name="BpmDoneTask" setup>
+<script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
+
+defineOptions({ name: 'BpmDoneTask' })
 
 const { push } = useRouter() // 路由
 

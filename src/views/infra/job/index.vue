@@ -147,7 +147,7 @@
   <!-- 表单弹窗：查看 -->
   <JobDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="InfraJob">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { checkPermi } from '@/utils/permission'
 import JobForm from './JobForm.vue'
@@ -155,6 +155,9 @@ import JobDetail from './JobDetail.vue'
 import download from '@/utils/download'
 import * as JobApi from '@/api/infra/job'
 import { InfraJobStatusEnum } from '@/utils/constants'
+
+defineOptions({ name: 'InfraJob' })
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 const { push } = useRouter() // 路由

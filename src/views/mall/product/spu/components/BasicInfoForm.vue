@@ -167,7 +167,7 @@
   <!-- 商品属性添加 Form 表单 -->
   <ProductPropertyAddForm ref="attributesAddFormRef" :propertyList="propertyList" />
 </template>
-<script lang="ts" name="ProductSpuBasicInfoForm" setup>
+<script lang="ts" setup>
 import { PropType } from 'vue'
 import { isArray } from '@/utils/is'
 import { copyValueToTarget } from '@/utils'
@@ -199,6 +199,8 @@ const imagePreview = (args) => {
   })
 }
 // ====== end ======
+
+defineOptions({ name: 'ProductSpuBasicInfoForm' })
 
 const message = useMessage() // 消息弹窗
 

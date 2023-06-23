@@ -14,10 +14,12 @@
     />
   </el-card>
 </template>
-<script lang="ts" name="BpmProcessInstanceBpmnViewer" setup>
+<script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { MyProcessViewer } from '@/components/bpmnProcessDesigner/package'
 import * as ActivityApi from '@/api/bpm/activity'
+
+defineOptions({ name: 'BpmProcessInstanceBpmnViewer' })
 
 const props = defineProps({
   loading: propTypes.bool, // 是否加载中

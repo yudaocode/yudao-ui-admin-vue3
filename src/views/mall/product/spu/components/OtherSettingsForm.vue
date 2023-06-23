@@ -83,7 +83,8 @@
     </template>
   </Descriptions>
 </template>
-<script lang="ts" name="OtherSettingsForm" setup>
+<script lang="ts" setup>
+defineOptions({ name: 'OtherSettingsForm' })
 import type { Spu } from '@/api/mall/product/spu'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'

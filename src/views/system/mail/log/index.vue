@@ -34,10 +34,12 @@
   <!-- 表单弹窗：详情 -->
   <mail-log-detail ref="detailRef" />
 </template>
-<script setup lang="ts" name="SystemMailLog">
+<script lang="ts" setup>
 import { allSchemas } from './log.data'
 import * as MailLogApi from '@/api/system/mail/log'
 import MailLogDetail from './MailLogDetail.vue'
+
+defineOptions({ name: 'SystemMailLog' })
 
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
 // tableMethods：表格的操作对象，可进行获得分页、删除记录等操作

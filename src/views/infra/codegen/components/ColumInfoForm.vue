@@ -112,10 +112,12 @@
     </el-table-column>
   </el-table>
 </template>
-<script lang="ts" name="InfraCodegenColumInfoForm" setup>
+<script lang="ts" setup>
 import { PropType } from 'vue'
 import * as CodegenApi from '@/api/infra/codegen'
 import * as DictDataApi from '@/api/system/dict/dict.type'
+
+defineOptions({ name: 'InfraCodegenColumInfoForm' })
 
 const props = defineProps({
   columns: {

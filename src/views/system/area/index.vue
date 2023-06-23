@@ -30,10 +30,12 @@
   <!-- 表单弹窗：添加/修改 -->
   <AreaForm ref="formRef" />
 </template>
-<script setup lang="tsx" name="SystemArea">
+<script setup lang="tsx">
 import type { Column } from 'element-plus'
 import AreaForm from './AreaForm.vue'
 import * as AreaApi from '@/api/system/area'
+
+defineOptions({ name: 'SystemArea' })
 
 // 表格的 column 字段
 const columns: Column[] = [

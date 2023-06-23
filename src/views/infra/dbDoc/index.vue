@@ -16,9 +16,11 @@
     <IFrame v-if="!loading" v-loading="loading" :src="src" />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="InfraDBDoc">
+<script lang="ts" setup>
 import download from '@/utils/download'
 import * as DbDocApi from '@/api/infra/dbDoc'
+
+defineOptions({ name: 'InfraDBDoc' })
 
 const loading = ref(true) // 是否加载中
 const src = ref('') // HTML 的地址

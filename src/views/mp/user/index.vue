@@ -99,13 +99,15 @@
   <!-- 表单弹窗：修改 -->
   <UserForm ref="formRef" @success="getList" />
 </template>
-<script lang="ts" setup name="MpUser">
+<script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import * as MpUserApi from '@/api/mp/user'
 import * as MpTagApi from '@/api/mp/tag'
 import WxAccountSelect from '@/views/mp/components/wx-account-select'
 import type { FormInstance } from 'element-plus'
 import UserForm from './UserForm.vue'
+
+defineOptions({ name: 'MpUser' })
 
 const message = useMessage() // 消息
 

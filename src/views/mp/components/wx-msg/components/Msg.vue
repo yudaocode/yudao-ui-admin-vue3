@@ -48,7 +48,7 @@
   </div>
 </template>
 
-<script setup lang="ts" name="Msg">
+<script lang="ts" setup>
 import WxVideoPlayer from '@/views/mp/components/wx-video-play'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play'
 import WxNews from '@/views/mp/components/wx-news'
@@ -56,6 +56,8 @@ import WxLocation from '@/views/mp/components/wx-location'
 import WxMusic from '@/views/mp/components/wx-music'
 import MsgEvent from './MsgEvent.vue'
 import { MsgType } from '../types'
+
+defineOptions({ name: 'Msg' })
 
 const props = defineProps<{
   item: any

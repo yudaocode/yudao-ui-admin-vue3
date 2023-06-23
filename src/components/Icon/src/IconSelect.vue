@@ -1,7 +1,9 @@
-<script lang="ts" name="IconSelect" setup>
+<script lang="ts" setup>
 import { CSSProperties } from 'vue'
 import { cloneDeep } from 'lodash-es'
 import { IconJson } from '@/components/Icon/src/data'
+
+defineOptions({ name: 'IconSelect' })
 
 type ParameterCSSProperties = (item?: string) => CSSProperties | undefined
 
@@ -189,10 +191,10 @@ watch(
 
 .icon-item {
   &:hover {
-    border-color: var(--el-color-primary);
     color: var(--el-color-primary);
-    transition: all 0.4s;
+    border-color: var(--el-color-primary);
     transform: scaleX(1.05);
+    transition: all 0.4s;
   }
 }
 
@@ -213,15 +215,15 @@ watch(
 }
 
 :deep(.el-tabs__item) {
+  height: 30px;
   font-size: 12px;
   font-weight: normal;
-  height: 30px;
   line-height: 30px;
 }
 
 :deep(.el-tabs__header),
 :deep(.el-tabs__nav-wrap) {
-  margin: 0;
   position: static;
+  margin: 0;
 }
 </style>

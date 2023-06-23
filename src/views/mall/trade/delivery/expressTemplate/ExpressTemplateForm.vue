@@ -137,7 +137,7 @@
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as DeliveryExpressTemplateApi from '@/api/mall/trade/delivery/expressTemplate'
 import { defaultProps } from '@/utils/tree'

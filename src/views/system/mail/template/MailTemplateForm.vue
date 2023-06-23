@@ -13,9 +13,11 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemMailTemplateForm" setup>
+<script lang="ts" setup>
 import * as MailTemplateApi from '@/api/system/mail/template'
 import { allSchemas, rules } from './template.data'
+
+defineOptions({ name: 'SystemMailTemplateForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

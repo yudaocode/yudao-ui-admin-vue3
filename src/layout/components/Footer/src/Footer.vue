@@ -1,6 +1,9 @@
-<script lang="ts" name="Footer" setup>
+<script lang="ts" setup>
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
+
+// eslint-disable-next-line vue/no-reserved-component-names
+defineOptions({ name: 'Footer' })
 
 const { getPrefixCls } = useDesign()
 

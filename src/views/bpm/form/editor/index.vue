@@ -38,13 +38,15 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="BpmFormEditor" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as FormApi from '@/api/bpm/form'
 import FcDesigner from '@form-create/designer'
 import { encodeConf, encodeFields, setConfAndFields } from '@/utils/formCreate'
 import { useTagsViewStore } from '@/store/modules/tagsView'
+
+defineOptions({ name: 'BpmFormEditor' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息
