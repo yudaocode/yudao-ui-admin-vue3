@@ -37,6 +37,7 @@
     <!-- 订单状态 -->
     <el-descriptions title="订单状态" :column="1">
       <el-descriptions-item label="订单状态: ">
+        <!-- TODO xiaobai：status 一定有值哈，不用判断 -->
         <dict-tag
           v-if="order.status !== ''"
           :type="DICT_TYPE.TRADE_ORDER_STATUS"
@@ -114,6 +115,7 @@
     </el-descriptions>
     <el-descriptions column="6">
       <el-descriptions-item label="商品总额: ">
+        <!-- TODO xiaobai: 是不是 (item.payPrice / 100.0).toFixed(2) -->
         ￥{{ parseFloat((order.totalPrice / 100.0) as unknown as string).toFixed(2) }}
       </el-descriptions-item>
       <el-descriptions-item label="运费金额: ">
@@ -150,6 +152,7 @@
       </el-descriptions-item>
     </el-descriptions>
 
+    <!-- TODO 芋艿：需要改改 -->
     <div v-for="group in detailGroups" :key="group.title">
       <el-descriptions v-bind="group.groupProps" :title="group.title">
         <!-- 订单操作日志 -->

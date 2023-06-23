@@ -205,6 +205,7 @@
             <div v-for="item in scope.row.items" :key="item">
               <div>
                 <p>{{ item.spuName }}</p>
+                <!-- TODO xiaobai: 是不是 (item.payPrice / 100.0).toFixed(2) -->
                 <p>{{
                   '￥ ' +
                   parseFloat((item.payPrice / 100) as unknown as string).toFixed(2) +
@@ -216,7 +217,6 @@
           </el-popover>
         </template>
       </el-table-column>
-
       <el-table-column label="实际支付(元)" align="center" prop="payPrice" min-width="100">
         <template #default="scope">
           {{ '￥ ' + parseFloat((scope.row.payPrice / 100) as unknown as string).toFixed(2) }}
@@ -295,7 +295,7 @@ const exportLoading = ref(false)
 const total = ref(0) // 总记录数
 const list = ref<Array<TradeOrderPageItemRespVO | any>>([]) //表数据
 
-//选中状态选中处理
+// 选中状态选中处理
 const orderSelect: SelectType = reactive({
   queryParams: {} as TradeOrderPageReqVO,
   selectTotal: 0,
