@@ -82,7 +82,7 @@
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { DICT_TYPE, getStrDictOptions, getIntDictOptions } from '@/utils/dict'
 import * as RecordApi from '@/api/point/record'
 

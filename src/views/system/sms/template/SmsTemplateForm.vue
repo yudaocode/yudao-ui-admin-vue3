@@ -63,11 +63,13 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemSmsTemplateForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getDictLabel, getIntDictOptions } from '@/utils/dict'
 import * as SmsTemplateApi from '@/api/system/sms/smsTemplate'
 import * as SmsChannelApi from '@/api/system/sms/smsChannel'
 import { CommonStatusEnum } from '@/utils/constants'
+
+defineOptions({ name: 'SystemSmsTemplateForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

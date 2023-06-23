@@ -5,8 +5,10 @@
     <IFrame v-if="!loading" v-loading="loading" :src="src" />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="InfraAdminServer">
+<script lang="ts" setup>
 import * as ConfigApi from '@/api/infra/config'
+
+defineOptions({ name: 'InfraAdminServer' })
 
 const loading = ref(true) // 是否加载中
 const src = ref(import.meta.env.VITE_BASE_URL + '/admin/applications')

@@ -93,7 +93,7 @@
     </el-table-column>
   </el-table>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import WxVideoPlayer from '@/views/mp/components/wx-video-play'
 import WxVoicePlayer from '@/views/mp/components/wx-voice-play'
 import WxMusic from '@/views/mp/components/wx-music'

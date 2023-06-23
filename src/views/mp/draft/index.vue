@@ -61,7 +61,7 @@
   </el-dialog>
 </template>
 
-<script setup lang="ts" name="MpDraft">
+<script lang="ts" setup>
 import WxAccountSelect from '@/views/mp/components/wx-account-select'
 import * as MpDraftApi from '@/api/mp/draft'
 import * as MpFreePublishApi from '@/api/mp/freePublish'
@@ -73,6 +73,8 @@ import {
   createEmptyNewsItem
 } from './components/'
 // import drafts from './mock' // 可以用改本地数据模拟，避免API调用超限
+
+defineOptions({ name: 'MpDraft' })
 
 const message = useMessage() // 消息
 

@@ -31,10 +31,12 @@
     </el-descriptions>
   </Dialog>
 </template>
-<script lang="ts" name="JobLogDetail" setup>
+<script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as JobLogApi from '@/api/infra/jobLog'
+
+defineOptions({ name: 'JobLogDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中

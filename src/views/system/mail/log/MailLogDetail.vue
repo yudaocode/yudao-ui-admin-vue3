@@ -8,9 +8,11 @@
     </Descriptions>
   </Dialog>
 </template>
-<script lang="ts" name="SystemMailLogDetail" setup>
+<script lang="ts" setup>
 import * as MailLogApi from '@/api/system/mail/log'
 import { allSchemas } from './log.data'
+
+defineOptions({ name: 'SystemMailLogDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中

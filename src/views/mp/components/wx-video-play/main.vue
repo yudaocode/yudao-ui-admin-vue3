@@ -48,9 +48,11 @@
   </div>
 </template>
 
-<script setup lang="ts" name="WxVideoPlayer">
+<script lang="ts" setup>
 import 'video.js/dist/video-js.css'
 import { VideoPlayer } from '@videojs-player/vue'
+
+defineOptions({ name: 'WxVideoPlayer' })
 
 const props = defineProps({
   url: {

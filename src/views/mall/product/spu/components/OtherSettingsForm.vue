@@ -83,16 +83,18 @@
     </template>
   </Descriptions>
 </template>
-<script lang="ts" name="OtherSettingsForm" setup>
+<script lang="ts" setup>
 import type { Spu } from '@/api/mall/product/spu'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
 import { otherSettingsSchema } from './spu.data'
 
-const { allSchemas } = useCrudSchemas(otherSettingsSchema)
+defineOptions({ name: 'OtherSettingsForm' })
 
 const message = useMessage() // 消息弹窗
+
+const { allSchemas } = useCrudSchemas(otherSettingsSchema)
 
 const props = defineProps({
   propFormData: {

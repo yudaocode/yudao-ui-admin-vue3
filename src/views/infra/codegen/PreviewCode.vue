@@ -54,7 +54,7 @@
     </div>
   </Dialog>
 </template>
-<script lang="ts" name="InfraCodegenPreviewCode" setup>
+<script lang="ts" setup>
 import { useClipboard } from '@vueuse/core'
 import { handleTree2 } from '@/utils/tree'
 import * as CodegenApi from '@/api/infra/codegen'
@@ -66,6 +66,8 @@ import xml from 'highlight.js/lib/languages/java'
 import javascript from 'highlight.js/lib/languages/javascript'
 import sql from 'highlight.js/lib/languages/sql'
 import typescript from 'highlight.js/lib/languages/typescript'
+
+defineOptions({ name: 'InfraCodegenPreviewCode' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

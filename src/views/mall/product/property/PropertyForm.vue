@@ -20,8 +20,10 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="ProductPropertyForm" setup>
+<script lang="ts" setup>
 import * as PropertyApi from '@/api/mall/product/property'
+
+defineOptions({ name: 'ProductPropertyForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

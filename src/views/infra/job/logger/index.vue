@@ -121,12 +121,15 @@
   <!-- 表单弹窗：查看 -->
   <JobLogDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="InfraJobLog">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import download from '@/utils/download'
 import JobLogDetail from './JobLogDetail.vue'
 import * as JobLogApi from '@/api/infra/jobLog'
+
+defineOptions({ name: 'InfraJobLog' })
+
 const message = useMessage() // 消息弹窗
 const { query } = useRoute() // 查询参数
 

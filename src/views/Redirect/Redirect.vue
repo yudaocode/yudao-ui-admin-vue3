@@ -1,7 +1,9 @@
 <template>
   <div></div>
 </template>
-<script setup lang="ts" name="Redirect">
+<script lang="ts" setup>
+defineOptions({ name: 'Redirect' })
+
 const { currentRoute, replace } = useRouter()
 const { params, query } = unref(currentRoute)
 const { path, _redirect_type = 'path' } = params

@@ -48,7 +48,7 @@
           style="width: 500px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_OAUTH2_GRANT_TYPE)"
+            v-for="dict in getDictOptions(DICT_TYPE.SYSTEM_OAUTH2_GRANT_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -143,10 +143,12 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemOAuth2ClientForm" setup>
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+<script lang="ts" setup>
+import { DICT_TYPE, getDictOptions, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as ClientApi from '@/api/system/oauth2/client'
+
+defineOptions({ name: 'SystemOAuth2ClientForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

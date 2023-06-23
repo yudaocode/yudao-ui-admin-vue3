@@ -1,7 +1,9 @@
-<script lang="ts" name="ThemeSwitch" setup>
+<script lang="ts" setup>
 import { useAppStore } from '@/store/modules/app'
 import { useIcon } from '@/hooks/web/useIcon'
 import { useDesign } from '@/hooks/web/useDesign'
+
+defineOptions({ name: 'ThemeSwitch' })
 
 const { getPrefixCls } = useDesign()
 

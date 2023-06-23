@@ -42,10 +42,13 @@
     </el-form-item>
   </el-form>
 </template>
-<script setup name="BpmOALeaveCreate" lang="ts">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as LeaveApi from '@/api/bpm/leave'
 import { useTagsViewStore } from '@/store/modules/tagsView'
+
+defineOptions({ name: 'BpmOALeaveCreate' })
+
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
 const { currentRoute } = useRouter() // 路由

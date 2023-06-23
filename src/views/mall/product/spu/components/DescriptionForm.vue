@@ -26,13 +26,16 @@
     </template>
   </Descriptions>
 </template>
-<script lang="ts" name="DescriptionForm" setup>
+<script lang="ts" setup>
 import type { Spu } from '@/api/mall/product/spu'
 import { Editor } from '@/components/Editor'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
 import { descriptionSchema } from './spu.data'
+
+defineOptions({ name: 'DescriptionForm' })
+
 const message = useMessage() // 消息弹窗
 
 const { allSchemas } = useCrudSchemas(descriptionSchema)

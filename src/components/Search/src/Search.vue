@@ -1,4 +1,4 @@
-<script lang="ts" name="Search" setup>
+<script lang="ts" setup>
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 
@@ -6,6 +6,8 @@ import { useForm } from '@/hooks/web/useForm'
 import { findIndex } from '@/utils'
 import { cloneDeep } from 'lodash-es'
 import { FormSchema } from '@/types/form'
+
+defineOptions({ name: 'Search' })
 
 const { t } = useI18n()
 

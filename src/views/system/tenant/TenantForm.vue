@@ -75,11 +75,13 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemTenantForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as TenantApi from '@/api/system/tenant'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as TenantPackageApi from '@/api/system/tenantPackage'
+
+defineOptions({ name: 'SystemTenantForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

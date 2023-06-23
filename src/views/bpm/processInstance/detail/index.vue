@@ -93,7 +93,7 @@
     <TaskUpdateAssigneeForm ref="taskUpdateAssigneeFormRef" @success="getDetail" />
   </ContentWrap>
 </template>
-<script lang="ts" name="BpmProcessInstanceDetail" setup>
+<script lang="ts" setup>
 import { useUserStore } from '@/store/modules/user'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
@@ -104,6 +104,8 @@ import TaskUpdateAssigneeForm from './TaskUpdateAssigneeForm.vue'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
 import { registerComponent } from '@/utils/routerHelper'
+
+defineOptions({ name: 'BpmProcessInstanceDetail' })
 
 const { query } = useRoute() // 查询参数
 const message = useMessage() // 消息弹窗

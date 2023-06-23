@@ -137,12 +137,15 @@
   <!-- 表单弹窗：添加/修改 -->
   <ConfigForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="InfraConfig">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ConfigApi from '@/api/infra/config'
 import ConfigForm from './ConfigForm.vue'
+
+defineOptions({ name: 'InfraConfig' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

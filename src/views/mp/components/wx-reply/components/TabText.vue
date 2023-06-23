@@ -2,7 +2,7 @@
   <el-input type="textarea" :rows="5" placeholder="请输入内容" v-model="content" />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 const props = defineProps<{
   modelValue?: string | null
 }>()

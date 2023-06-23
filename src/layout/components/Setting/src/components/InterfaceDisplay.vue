@@ -1,9 +1,11 @@
-<script lang="ts" name="InterfaceDisplay" setup>
+<script lang="ts" setup>
 import { setCssVar } from '@/utils'
 
 import { useDesign } from '@/hooks/web/useDesign'
 import { useWatermark } from '@/hooks/web/useWatermark'
 import { useAppStore } from '@/store/modules/app'
+
+defineOptions({ name: 'InterfaceDisplay' })
 
 const { t } = useI18n()
 const { getPrefixCls } = useDesign()

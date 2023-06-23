@@ -62,7 +62,7 @@
     </el-row>
   </el-scrollbar>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as RedisApi from '@/api/infra/redis'
 import { RedisMonitorInfoVO } from '@/api/infra/redis/types'
 const cache = ref<RedisMonitorInfoVO>()

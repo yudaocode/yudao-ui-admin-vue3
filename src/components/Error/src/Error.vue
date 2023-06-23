@@ -1,8 +1,10 @@
-<script lang="ts" name="Error" setup>
+<script lang="ts" setup>
 import pageError from '@/assets/svgs/404.svg'
 import networkError from '@/assets/svgs/500.svg'
 import noPermission from '@/assets/svgs/403.svg'
 import { propTypes } from '@/utils/propTypes'
+
+defineOptions({ name: 'Error' })
 
 interface ErrorMap {
   url: string

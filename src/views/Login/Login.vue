@@ -60,7 +60,7 @@
     </div>
   </div>
 </template>
-<script lang="ts" name="Login" setup>
+<script lang="ts" setup>
 import { underlineToHump } from '@/utils'
 
 import { useDesign } from '@/hooks/web/useDesign'
@@ -69,6 +69,8 @@ import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
 
 import { LoginForm, MobileForm, QrCodeForm, RegisterForm, SSOLoginVue } from './components'
+
+defineOptions({ name: 'Login' })
 
 const { t } = useI18n()
 const appStore = useAppStore()

@@ -30,8 +30,10 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="InfraFileForm" setup>
+<script lang="ts" setup>
 import { getAccessToken, getTenantId } from '@/utils/auth'
+
+defineOptions({ name: 'InfraFileForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

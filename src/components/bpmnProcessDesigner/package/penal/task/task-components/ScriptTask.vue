@@ -44,7 +44,8 @@
   </div>
 </template>
 
-<script setup lang="ts" name="ScriptTask">
+<script lang="ts" setup>
+defineOptions({ name: 'ScriptTask' })
 const props = defineProps({
   id: String,
   type: String

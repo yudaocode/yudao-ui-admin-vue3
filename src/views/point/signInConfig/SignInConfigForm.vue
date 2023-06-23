@@ -23,7 +23,7 @@
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as SignInConfigApi from '@/api/point/signInConfig'
 
 const { t } = useI18n() // 国际化

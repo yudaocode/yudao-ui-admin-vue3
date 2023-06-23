@@ -48,7 +48,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import WxVideoPlayer from '@/views/mp/components/wx-video-play'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select'
 import type { UploadRawFile } from 'element-plus'

@@ -153,11 +153,13 @@
   <!-- 表单弹窗：详情 -->
   <NotifyMessageDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="SystemNotifyMessage">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as NotifyMessageApi from '@/api/system/notify/message'
 import NotifyMessageDetail from './NotifyMessageDetail.vue'
+
+defineOptions({ name: 'SystemNotifyMessage' })
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数

@@ -251,7 +251,7 @@
     <slot name="extension"></slot>
   </el-table>
 </template>
-<script lang="ts" name="SkuList" setup>
+<script lang="ts" setup>
 import { PropType, Ref } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
@@ -259,6 +259,8 @@ import { UploadImg } from '@/components/UploadFile'
 import type { Property, Sku, Spu } from '@/api/mall/product/spu'
 import { createImageViewer } from '@/components/ImageViewer'
 import { RuleConfig } from '@/views/mall/product/spu/components/index'
+
+defineOptions({ name: 'SkuList' })
 
 const props = defineProps({
   propFormData: {

@@ -1,7 +1,9 @@
-<script lang="ts" name="Collapse" setup>
+<script lang="ts" setup>
 import { useAppStore } from '@/store/modules/app'
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
+
+defineOptions({ name: 'Collapse' })
 
 const { getPrefixCls } = useDesign()
 

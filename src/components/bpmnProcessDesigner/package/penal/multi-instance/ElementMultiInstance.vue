@@ -66,7 +66,9 @@
   </div>
 </template>
 
-<script setup lang="ts" name="ElementMultiInstance">
+<script lang="ts" setup>
+defineOptions({ name: 'ElementMultiInstance' })
+
 const props = defineProps({
   businessObject: Object,
   type: String

@@ -1,7 +1,9 @@
-<script lang="ts" name="Icon" setup>
+<script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import Iconify from '@purge-icons/generated'
 import { useDesign } from '@/hooks/web/useDesign'
+
+defineOptions({ name: 'Icon' })
 
 const { getPrefixCls } = useDesign()
 

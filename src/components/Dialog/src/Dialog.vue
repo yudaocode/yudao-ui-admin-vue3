@@ -1,6 +1,9 @@
-<script lang="ts" name="Dialog" setup>
+<script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
+
+// eslint-disable-next-line vue/no-reserved-component-names
+defineOptions({ name: 'Dialog' })
 
 const slots = useSlots()
 

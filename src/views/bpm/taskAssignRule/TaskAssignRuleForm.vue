@@ -97,7 +97,7 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="BpmTaskAssignRuleForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as TaskAssignRuleApi from '@/api/bpm/taskAssignRule'
@@ -106,6 +106,8 @@ import * as DeptApi from '@/api/system/dept'
 import * as PostApi from '@/api/system/post'
 import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
+
+defineOptions({ name: 'BpmTaskAssignRuleForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

@@ -57,10 +57,12 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemDictDataForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as DictDataApi from '@/api/system/dict/dict.data'
 import { CommonStatusEnum } from '@/utils/constants'
+
+defineOptions({ name: 'SystemDictDataForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

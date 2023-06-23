@@ -73,10 +73,13 @@
   </ContentWrap>
 </template>
 
-<script setup lang="ts" name="MpStatistics">
+<script lang="ts" setup>
 import { formatDate, addTime, betweenDay, beginOfDay, endOfDay } from '@/utils/formatTime'
 import * as StatisticsApi from '@/api/mp/statistics'
 import * as MpAccountApi from '@/api/mp/account'
+
+defineOptions({ name: 'MpStatistics' })
+
 const message = useMessage() // 消息弹窗
 
 // 默认开始时间是当前日期-7，结束时间是当前日期-1

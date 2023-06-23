@@ -129,11 +129,14 @@
   <!-- 表单弹窗：添加/修改 -->
   <SmsChannelForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="SystemSmsChannel">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as SmsChannelApi from '@/api/system/sms/smsChannel'
 import SmsChannelForm from './SmsChannelForm.vue'
+
+defineOptions({ name: 'SystemSmsChannel' })
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
