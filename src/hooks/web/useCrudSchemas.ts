@@ -1,7 +1,7 @@
 import { reactive } from 'vue'
 import { AxiosPromise } from 'axios'
 import { findIndex } from '@/utils'
-import { eachTree, treeMap, filter } from '@/utils/tree'
+import { eachTree, filter, treeMap } from '@/utils/tree'
 import { getBoolDictOptions, getDictOptions, getIntDictOptions } from '@/utils/dict'
 
 import { FormSchema } from '@/types/form'
@@ -36,8 +36,11 @@ type CrudSearchParams = {
 type CrudTableParams = {
   // 是否显示表头
   show?: boolean
+  // 列宽配置
+  width?: number | string
+  // 列是否固定在左侧或者右侧
+  fixed?: 'left' | 'right'
 } & Omit<FormSchema, 'field'>
-
 type CrudFormParams = {
   // 是否显示表单项
   show?: boolean

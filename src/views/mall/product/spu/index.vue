@@ -17,7 +17,6 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <!--  TODO 分类只能选择二级分类目前还没做，还是先以联调通顺为主 fixL: 已完善 -->
       <el-form-item label="商品分类" prop="categoryId">
         <el-tree-select
           v-model="queryParams.categoryId"
@@ -79,12 +78,6 @@
       />
     </el-tabs>
     <el-table v-loading="loading" :data="list">
-      <!-- TODO puhui：这几个属性哈，一行三个 fix
-      商品分类：服装鞋包/箱包
-商品市场价格：100.00
-成本价：0.00
-收藏：5
-虚拟销量：999  -->
       <el-table-column type="expand" width="30">
         <template #default="{ row }">
           <el-form class="demo-table-expand" label-position="left">
@@ -292,7 +285,8 @@ const queryParams = ref({
   pageSize: 10,
   tabType: 0,
   name: '',
-  categoryId: null
+  categoryId: null,
+  createTime: []
 }) // 查询参数
 const queryFormRef = ref() // 搜索的表单Ref
 

@@ -1,7 +1,7 @@
 <template>
   <!-- 情况一：添加/修改 -->
   <el-table
-    v-if="!isDetail"
+    v-if="!isDetail && !isActivityComponent"
     :data="isBatch ? skuList : formData!.skus"
     border
     class="tabNumWidth"
@@ -118,7 +118,9 @@
     max-height="500"
     size="small"
     style="width: 99%"
+    @selection-change="handleSelectionChange"
   >
+    <el-table-column v-if="isComponent" type="selection" width="45" />
     <el-table-column align="center" label="图片" min-width="80">
       <template #default="{ row }">
         <el-image :src="row.picUrl" class="w-60px h-60px" @click="imagePreview(row.picUrl)" />
@@ -188,6 +190,66 @@
       </el-table-column>
     </template>
   </el-table>
+
+  <!-- 情况三：作为活动组件 -->
+  <el-table
+    v-if="isActivityComponent"
+    :data="formData!.skus"
+    border
+    max-height="500"
+    size="small"
+    style="width: 99%"
+  >
+    <el-table-column v-if="isComponent" type="selection" width="45" />
+    <el-table-column align="center" label="图片" min-width="80">
+      <template #default="{ row }">
+        <el-image :src="row.picUrl" class="w-60px h-60px" @click="imagePreview(row.picUrl)" />
+      </template>
+    </el-table-column>
+    <template v-if="formData!.specType">
+      <!--  根据商品属性动态添加 -->
+      <el-table-column
+        v-for="(item, index) in tableHeaders"
+        :key="index"
+        :label="item.label"
+        align="center"
+        min-width="80"
+      >
+        <template #default="{ row }">
+          <span style="font-weight: bold; color: #40aaff">
+            {{ row.properties[index]?.valueName }}
+          </span>
+        </template>
+      </el-table-column>
+    </template>
+    <el-table-column align="center" label="商品条码" min-width="100">
+      <template #default="{ row }">
+        {{ row.barCode }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="销售价(元)" min-width="80">
+      <template #default="{ row }">
+        {{ row.price }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="市场价(元)" min-width="80">
+      <template #default="{ row }">
+        {{ row.marketPrice }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="成本价(元)" min-width="80">
+      <template #default="{ row }">
+        {{ row.costPrice }}
+      </template>
+    </el-table-column>
+    <el-table-column align="center" label="库存" min-width="80">
+      <template #default="{ row }">
+        {{ row.stock }}
+      </template>
+    </el-table-column>
+    <!--  方便扩展每个活动配置的属性不一样  -->
+    <slot name="extension"></slot>
+  </el-table>
 </template>
 <script lang="ts" setup>
 import { PropType, Ref } from 'vue'
@@ -196,6 +258,7 @@ import { propTypes } from '@/utils/propTypes'
 import { UploadImg } from '@/components/UploadFile'
 import type { Property, Sku, Spu } from '@/api/mall/product/spu'
 import { createImageViewer } from '@/components/ImageViewer'
+import { RuleConfig } from '@/views/mall/product/spu/components/index'
 
 defineOptions({ name: 'SkuList' })
 
@@ -208,8 +271,14 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  ruleConfig: {
+    type: Array as PropType<RuleConfig[]>,
+    default: () => []
+  },
   isBatch: propTypes.bool.def(false), // 是否作为批量操作组件
-  isDetail: propTypes.bool.def(false) // 是否作为 sku 详情组件
+  isDetail: propTypes.bool.def(false), // 是否作为 sku 详情组件
+  isComponent: propTypes.bool.def(false), // 是否作为 sku 选择组件
+  isActivityComponent: propTypes.bool.def(false) // 是否作为 sku 活动配置组件
 })
 const formData: Ref<Spu | undefined> = ref<Spu>() // 表单数据
 const skuList = ref<Sku[]>([
@@ -230,6 +299,7 @@ const skuList = ref<Sku[]>([
 /** 商品图预览 */
 const imagePreview = (imgUrl: string) => {
   createImageViewer({
+    zIndex: 9999999,
     urlList: [imgUrl]
   })
 }
@@ -257,12 +327,33 @@ const validateSku = (): boolean => {
   const checks = ['price', 'marketPrice', 'costPrice']
   let validate = true // 默认通过
   for (const sku of formData.value!.skus) {
-    if (checks.some((check) => sku[check] < 0.01)) {
-      validate = false // 只要有一个不通过则直接不通过
-      break
+    // 作为活动组件的校验
+    if (props.isActivityComponent) {
+      for (const rule of props.ruleConfig) {
+        if (sku[rule.name] < rule.geValue) {
+          validate = false // 只要有一个不通过则直接不通过
+          break
+        }
+      }
+    } else {
+      if (checks.some((check) => sku[check] < 0.01)) {
+        validate = false // 只要有一个不通过则直接不通过
+        break
+      }
     }
   }
   return validate
+}
+
+const emit = defineEmits<{
+  (e: 'selectionChange', value: Sku[]): void
+}>()
+/**
+ * 选择时触发
+ * @param Sku 传递过来的选中的 sku 是一个数组
+ */
+const handleSelectionChange = (val: Sku[]) => {
+  emit('selectionChange', val)
 }
 
 /**
