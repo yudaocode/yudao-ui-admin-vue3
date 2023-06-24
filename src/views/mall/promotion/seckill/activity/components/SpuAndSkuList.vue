@@ -47,7 +47,7 @@
   </el-table>
 </template>
 <script lang="ts" name="SpuAndSkuList" setup>
-// TODO 后续计划重新封装作为活动商品配置通用组件
+// TODO 后续计划重新封装作为活动商品配置通用组件；可以等其他活动做到的时候，在统一处理 SPU 选择组件哈
 import { formatToFraction } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as ProductSpuApi from '@/api/mall/product/spu'
@@ -59,7 +59,9 @@ import {
   SkuList
 } from '@/views/mall/product/spu/components'
 import { SeckillProductVO, SpuExtension } from '@/api/mall/promotion/seckill/seckillActivity'
+const message = useMessage() // 消息弹窗
 
+// TODO @puhui999：是不是改成传递一个 spu 就好啦？
 const props = defineProps({
   spuList: {
     type: Array,
@@ -72,7 +74,7 @@ interface spuProperty {
   spuId: number
   spuDetail: SpuExtension
   propertyList: Properties[]
-}
+} // TODO @puhui999：类名首字母大写哈
 
 const spuPropertyList = ref<spuProperty[]>([]) // spuId 对应的 sku 的属性列表
 /**
@@ -112,7 +114,6 @@ const ruleConfig: RuleConfig[] = [
     geValue: 0.01
   }
 ]
-const message = useMessage() // 消息弹窗
 /**
  * 获取所有 sku 秒杀配置
  */
@@ -132,6 +133,7 @@ const getSkuConfigs = (): SeckillProductVO[] => {
 }
 // 暴露出给表单提交时使用
 defineExpose({ getSkuConfigs })
+
 /** 商品图预览 */
 const imagePreview = (imgUrl: string) => {
   createImageViewer({
@@ -139,6 +141,7 @@ const imagePreview = (imgUrl: string) => {
     urlList: [imgUrl]
   })
 }
+
 /**
  * 将传进来的值赋值给 skuList
  */

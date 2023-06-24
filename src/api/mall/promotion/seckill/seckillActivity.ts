@@ -60,8 +60,3 @@ export const updateSeckillActivity = async (data: SeckillActivityVO) => {
 export const deleteSeckillActivity = async (id: number) => {
   return await request.delete({ url: '/promotion/seckill-activity/delete?id=' + id })
 }
-
-// 导出秒杀活动 Excel
-export const exportSeckillActivityApi = async (params) => {
-  return await request.download({ url: '/promotion/seckill-activity/export-excel', params })
-}

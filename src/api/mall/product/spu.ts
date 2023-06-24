@@ -49,6 +49,7 @@ export interface Spu {
   recommendGood?: boolean // 是否优品
 }
 
+// TODO @puhui999: SpuRespVO 合并到 SPU 里？前端少点 VO 类哈；
 export interface SpuRespVO extends Spu {
   price: number
   salesCount: number

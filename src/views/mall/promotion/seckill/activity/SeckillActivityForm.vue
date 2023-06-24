@@ -9,7 +9,8 @@
     >
       <!-- 先选择 -->
       <template #spuId>
-        <el-button @click="spuAndSkuSelectForm.open('秒杀商品选择')">添加商品</el-button>
+        <el-button @click="spuAndSkuSelectForm.open('秒杀商品选择')">选择商品</el-button>
+        <!-- TODO @puhui999：默认展开 SKU 哈，毕竟 SKU 是主角，SPU 是配角 -->
         <SpuAndSkuList ref="spuAndSkuListRef" :spu-list="spuList" />
       </template>
     </Form>
@@ -18,6 +19,7 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+  <!-- TODO @puhui999：这个组件是不是 SpuSelect，不需要带 sku 或者 Form 呀 -->
   <SpuAndSkuSelectForm ref="spuAndSkuSelectForm" @confirm="selectSpu" />
 </template>
 <script lang="ts" name="PromotionSeckillActivityForm" setup>
@@ -37,6 +39,7 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formRef = ref() // 表单 Ref
 const spuAndSkuSelectForm = ref() // 商品和属性选择 Ref
 const spuAndSkuListRef = ref() // sku 秒杀配置组件Ref
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true

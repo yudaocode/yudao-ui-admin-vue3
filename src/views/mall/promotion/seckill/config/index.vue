@@ -64,7 +64,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <SeckillConfigForm ref="formRef" @success="getList" />
 </template>
-<script lang="ts" name="SeckillConfig" setup>
+<script lang="ts" name="PromotionSeckillConfig" setup>
 import { allSchemas } from './seckillConfig.data'
 import * as SeckillConfigApi from '@/api/mall/promotion/seckill/seckillConfig'
 import SeckillConfigForm from './SeckillConfigForm.vue'
@@ -81,12 +81,14 @@ const { tableObject, tableMethods } = useTable({
 })
 // 获得表格的各种操作
 const { getList, setSearchParams } = tableMethods
+
 /** 商品图预览 */
 const imagePreview = (imgUrl: string) => {
   createImageViewer({
     urlList: [imgUrl]
   })
 }
+
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
@@ -97,6 +99,7 @@ const openForm = (type: string, id?: number) => {
 const handleDelete = (id: number) => {
   tableMethods.delList(id, false)
 }
+
 /** 修改用户状态 */
 const handleStatusChange = async (row: SeckillConfigApi.SeckillConfigVO) => {
   try {

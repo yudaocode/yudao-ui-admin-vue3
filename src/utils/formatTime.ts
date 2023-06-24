@@ -150,6 +150,21 @@ export const dateFormatter = (row, column, cellValue) => {
 }
 
 /**
+ * element plus 的时间 Formatter 实现，使用 YYYY-MM-DD 格式
+ *
+ * @param row 行数据
+ * @param column 字段
+ * @param cellValue 字段值
+ */
+// @ts-ignore
+export const dateFormatter2 = (row, column, cellValue) => {
+  if (!cellValue) {
+    return
+  }
+  return formatDate(cellValue, 'YYYY-MM-DD')
+}
+
+/**
  * 设置起始日期，时间为00:00:00
  * @param param 传入日期
  * @returns 带时间00:00:00的日期

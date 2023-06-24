@@ -47,8 +47,3 @@ export const updateSeckillConfigStatus = (id: number, status: number) => {
 export const deleteSeckillConfig = async (id: number) => {
   return await request.delete({ url: '/promotion/seckill-config/delete?id=' + id })
 }
-
-// 导出秒杀时段配置 Excel
-export const exportSeckillConfigApi = async (params) => {
-  return await request.download({ url: '/promotion/seckill-config/export-excel', params })
-}

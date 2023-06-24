@@ -147,6 +147,7 @@ const spuListRef = ref<InstanceType<typeof ElTable>>()
 const spuData = ref<ProductSpuApi.Spu | {}>() // 商品详情
 const isExpand = ref(false) // 控制 SKU 列表显示
 const expandRowKeys = ref<number[]>() // 控制展开行需要设置 row-key 属性才能使用，该属性为展开行的 keys 数组。
+
 // 计算商品属性
 const expandChange = async (row: ProductSpuApi.Spu, expandedRows: ProductSpuApi.Spu[]) => {
   spuData.value = {}
@@ -208,6 +209,8 @@ const confirm = () => {
   // 关闭弹窗
   dialogVisible.value = false
 }
+
+// TODO @puhui999：直接叫商品选择；不用外部传入标题；
 /** 打开弹窗 TODO 没做国际化 */
 const open = (title: string) => {
   dialogTitle.value = title
@@ -226,6 +229,7 @@ const getList = async () => {
     loading.value = false
   }
 }
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   getList()
@@ -243,6 +247,7 @@ const resetQuery = () => {
   }
   getList()
 }
+
 /** 商品图预览 */
 const imagePreview = (imgUrl: string) => {
   createImageViewer({
@@ -253,6 +258,7 @@ const imagePreview = (imgUrl: string) => {
 
 const categoryList = ref() // 分类树
 
+// TODO @puhui999：商品搜索的时候，可以通过一级搜二级；所以这个校验可以去掉哈；也就是说，只允许挂在二级，但是一级可搜索到
 /**
  * 校验所选是否为二级及以下节点
  */
