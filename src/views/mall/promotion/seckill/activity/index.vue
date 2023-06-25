@@ -24,11 +24,14 @@
       v-model:pageSize="tableObject.pageSize"
       :columns="allSchemas.tableColumns"
       :data="tableObject.tableList"
+      :expand="true"
       :loading="tableObject.loading"
       :pagination="{
         total: tableObject.total
       }"
+      @expand-change="expandChange"
     >
+      <template #expand> 展示活动商品和商品相关属性活动配置</template>
       <template #configIds="{ row }">
         <el-tag v-for="(name, index) in convertSeckillConfigNames(row)" :key="index" class="mr-5px">
           {{ name }}
@@ -93,6 +96,11 @@ const convertSeckillConfigNames = computed(
       ?.filter((item) => row.configIds.includes(item.id))
       ?.map((config) => config.name)
 )
+const expandChange = (row, expandedRows) => {
+  // TODO puhui：等 CRUD 完事后弄
+  console.log(row, expandedRows)
+}
+
 /** 初始化 **/
 onMounted(async () => {
   await getList()

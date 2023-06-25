@@ -10,7 +10,6 @@
       <!-- 先选择 -->
       <template #spuIds>
         <el-button @click="spuSelectRef.open()">选择商品</el-button>
-        <!-- TODO @puhui999：默认展开 SKU 哈，毕竟 SKU 是主角，SPU 是配角 -->
         <SpuAndSkuList
           ref="spuAndSkuListRef"
           :rule-config="ruleConfig"
@@ -24,7 +23,7 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <SpuSelect ref="spuSelectRef" :is-select-sku="true" @confirm="selectSpu" />
+  <SpuSelect ref="spuSelectRef" @confirm="selectSpu" />
 </template>
 <script lang="ts" setup>
 import { SpuAndSkuList, SpuProperty, SpuSelect } from '../../components'
@@ -132,7 +131,7 @@ const submitForm = async () => {
   try {
     const data = formRef.value.formModel as SeckillActivityApi.SeckillActivityVO
     data.spuIds = spuList.value.map((spu) => spu.id!)
-    data.products = spuAndSkuListRef.value.getSkuConfigs()
+    data.products = spuAndSkuListRef.value.getSkuConfigs('productConfig')
     if (formType.value === 'create') {
       await SeckillActivityApi.createSeckillActivity(data)
       message.success(t('common.createSuccess'))
