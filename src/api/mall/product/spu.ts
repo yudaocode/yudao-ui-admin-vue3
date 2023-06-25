@@ -47,17 +47,13 @@ export interface Spu {
   recommendBest?: boolean // 是否精品
   recommendNew?: boolean // 是否新品
   recommendGood?: boolean // 是否优品
-}
-
-// TODO @puhui999: SpuRespVO 合并到 SPU 里？前端少点 VO 类哈；
-export interface SpuRespVO extends Spu {
-  price: number
-  salesCount: number
-  marketPrice: number
-  costPrice: number
-  stock: number
-  createTime: Date
-  status: number
+  price?: number // 商品价格
+  salesCount?: number // 商品销量
+  marketPrice?: number // 市场价
+  costPrice?: number // 成本价
+  stock?: number // 商品库存
+  createTime?: Date // 商品创建时间
+  status?: number // 商品状态
 }
 
 // 获得 Spu 列表

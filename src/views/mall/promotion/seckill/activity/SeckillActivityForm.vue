@@ -8,10 +8,15 @@
       :schema="allSchemas.formSchema"
     >
       <!-- 先选择 -->
-      <template #spuId>
-        <el-button @click="spuAndSkuSelectForm.open('秒杀商品选择')">选择商品</el-button>
+      <template #spuIds>
+        <el-button @click="spuSelectRef.open()">选择商品</el-button>
         <!-- TODO @puhui999：默认展开 SKU 哈，毕竟 SKU 是主角，SPU 是配角 -->
-        <SpuAndSkuList ref="spuAndSkuListRef" :spu-list="spuList" />
+        <SpuAndSkuList
+          ref="spuAndSkuListRef"
+          :rule-config="ruleConfig"
+          :spu-list="spuList"
+          :spu-property-list-p="spuPropertyList"
+        />
       </template>
     </Form>
     <template #footer>
@@ -19,15 +24,15 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <!-- TODO @puhui999：这个组件是不是 SpuSelect，不需要带 sku 或者 Form 呀 -->
-  <SpuAndSkuSelectForm ref="spuAndSkuSelectForm" @confirm="selectSpu" />
+  <SpuSelect ref="spuSelectRef" :is-select-sku="true" @confirm="selectSpu" />
 </template>
 <script lang="ts" setup>
-import { SpuAndSkuList, SpuAndSkuSelectForm } from './components'
+import { SpuAndSkuList, SpuProperty, SpuSelect } from '../../components'
 import { allSchemas, rules } from './seckillActivity.data'
-import { Spu } from '@/api/mall/product/spu'
 
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
+import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
+import * as ProductSpuApi from '@/api/mall/product/spu'
 
 defineOptions({ name: 'PromotionSeckillActivityForm' })
 
@@ -39,14 +44,26 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formRef = ref() // 表单 Ref
-const spuAndSkuSelectForm = ref() // 商品和属性选择 Ref
+const spuSelectRef = ref() // 商品和属性选择 Ref
 const spuAndSkuListRef = ref() // sku 秒杀配置组件Ref
-
+const ruleConfig: RuleConfig[] = [
+  {
+    name: 'productConfig.stock',
+    rule: (arg) => arg > 1,
+    message: '商品秒杀库存必须大于 1 ！！！'
+  },
+  {
+    name: 'productConfig.seckillPrice',
+    rule: (arg) => arg > 0.01,
+    message: '商品秒杀价格必须大于 0.01 ！！！'
+  }
+]
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
+  resetForm()
   // 修改时，设置数据 TODO 没测试估计有问题
   if (id) {
     formLoading.value = true
@@ -60,12 +77,49 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-const spuList = ref<Spu[]>([]) // 选择的 spu
-const selectSpu = (val: Spu) => {
-  formRef.value.setValues({ spuId: val.id })
-  spuList.value = [val]
+const spuList = ref<SeckillActivityApi.SpuExtension[]>([]) // 选择的 spu
+const spuPropertyList = ref<SpuProperty<SeckillActivityApi.SpuExtension>[]>([])
+const selectSpu = (spuIds: number[]) => {
+  formRef.value.setValues({ spuIds })
+  getSpuDetails(spuIds)
+}
+/**
+ * 获取 SPU 详情
+ * TODO 获取 SPU 详情，放到各自活动表单来做，让 SpuAndSkuList 职责单一点
+ * @param spuIds
+ */
+const getSpuDetails = async (spuIds: number[]) => {
+  const spuProperties: SpuProperty<SeckillActivityApi.SpuExtension>[] = []
+  spuList.value = []
+  // TODO puhui999: 考虑后端添加通过 spuIds 批量获取
+  for (const spuId of spuIds) {
+    // 获取 SPU 详情
+    const res = (await ProductSpuApi.getSpu(spuId)) as SeckillActivityApi.SpuExtension
+    if (!res) {
+      continue
+    }
+    spuList.value.push(res)
+    // 初始化每个 sku 秒杀配置
+    res.skus?.forEach((sku) => {
+      const config: SeckillActivityApi.SeckillProductVO = {
+        spuId,
+        skuId: sku.id!,
+        stock: 0,
+        seckillPrice: 0
+      }
+      sku.productConfig = config
+    })
+    spuProperties.push({ spuId, spuDetail: res, propertyList: getPropertyList(res) })
+  }
+  spuPropertyList.value = spuProperties
 }
 
+/** 重置表单 */
+const resetForm = () => {
+  spuList.value = []
+  spuPropertyList.value = []
+  formRef.value.getElFormRef().resetFields()
+}
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {

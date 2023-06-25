@@ -259,8 +259,10 @@ import { UploadImg } from '@/components/UploadFile'
 import type { Property, Sku, Spu } from '@/api/mall/product/spu'
 import { createImageViewer } from '@/components/ImageViewer'
 import { RuleConfig } from '@/views/mall/product/spu/components/index'
+import { Properties } from './index'
 
 defineOptions({ name: 'SkuList' })
+const message = useMessage() // 消息弹窗
 
 const props = defineProps({
   propFormData: {
@@ -268,7 +270,7 @@ const props = defineProps({
     default: () => {}
   },
   propertyList: {
-    type: Array,
+    type: Array as PropType<Properties[]>,
     default: () => []
   },
   ruleConfig: {
@@ -323,26 +325,47 @@ const tableHeaders = ref<{ prop: string; label: string }[]>([]) // 多属性表�
 /**
  * 保存时，每个商品规格的表单要校验下。例如说，销售金额最低是 0.01 这种。
  */
-const validateSku = (): boolean => {
+const validateSku = () => {
   const checks = ['price', 'marketPrice', 'costPrice']
+  let warningInfo = '请检查商品各行相关属性配置，'
   let validate = true // 默认通过
-  for (const sku of formData.value!.skus) {
+  for (const sku of formData.value!.skus!) {
     // 作为活动组件的校验
     if (props.isActivityComponent) {
       for (const rule of props.ruleConfig) {
-        if (sku[rule.name] < rule.geValue) {
+        const arg = getValue(sku, rule.name)
+        if (!rule.rule(arg)) {
           validate = false // 只要有一个不通过则直接不通过
+          warningInfo += rule.message
           break
         }
       }
     } else {
       if (checks.some((check) => sku[check] < 0.01)) {
         validate = false // 只要有一个不通过则直接不通过
+        warningInfo = '商品相关价格不能低于 0.01 元！！'
         break
       }
     }
+    // 只要有一个不通过则结束后续的校验
+    if (!validate) {
+      message.warning(warningInfo)
+      throw new Error(warningInfo)
+    }
   }
-  return validate
+}
+const getValue = (obj, arg) => {
+  const keys = arg.split('.')
+  let value = obj
+  for (const key of keys) {
+    if (value && typeof value === 'object' && key in value) {
+      value = value[key]
+    } else {
+      value = undefined
+      break
+    }
+  }
+  return value
 }
 
 const emit = defineEmits<{
@@ -417,13 +440,13 @@ const generateTableData = (propertyList: any[]) => {
  * 生成 skus 前置校验
  */
 const validateData = (propertyList: any[]) => {
-  const skuPropertyIds = []
+  const skuPropertyIds: number[] = []
   formData.value!.skus!.forEach((sku) =>
     sku.properties
       ?.map((property) => property.propertyId)
-      .forEach((propertyId) => {
-        if (skuPropertyIds.indexOf(propertyId) === -1) {
-          skuPropertyIds.push(propertyId)
+      ?.forEach((propertyId) => {
+        if (skuPropertyIds.indexOf(propertyId!) === -1) {
+          skuPropertyIds.push(propertyId!)
         }
       })
   )
@@ -457,7 +480,7 @@ const build = (propertyValuesList: Property[][]) => {
 /** 监听属性列表，生成相关参数和表头 */
 watch(
   () => props.propertyList,
-  (propertyList) => {
+  (propertyList: Properties[]) => {
     // 如果不是多规格则结束
     if (!formData.value!.specType) {
       return
@@ -497,7 +520,7 @@ watch(
       return
     }
     // 添加新属性没有属性值也不做处理
-    if (propertyList.some((item) => item.values.length === 0)) {
+    if (propertyList.some((item) => item.values!.length === 0)) {
       return
     }
     // 生成 table 数据，即 sku 列表

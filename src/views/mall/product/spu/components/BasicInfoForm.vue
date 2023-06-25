@@ -274,10 +274,7 @@ watch(
 const emit = defineEmits(['update:activeName'])
 const validate = async () => {
   // 校验 sku
-  if (!skuListRef.value.validateSku()) {
-    message.warning('商品相关价格不能低于 0.01 元！！')
-    throw new Error('商品相关价格不能低于 0.01 元！！')
-  }
+  skuListRef.value.validateSku()
   // 校验表单
   if (!productSpuBasicInfoRef) return
   return await unref(productSpuBasicInfoRef).validate((valid) => {

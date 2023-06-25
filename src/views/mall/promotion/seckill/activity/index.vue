@@ -29,6 +29,11 @@
         total: tableObject.total
       }"
     >
+      <template #configIds="{ row }">
+        <el-tag v-for="(name, index) in convertSeckillConfigNames(row)" :key="index" class="mr-5px">
+          {{ name }}
+        </el-tag>
+      </template>
       <template #action="{ row }">
         <el-button
           v-hasPermi="['promotion:seckill-activity:update']"
@@ -55,6 +60,7 @@
 </template>
 <script lang="ts" setup>
 import { allSchemas } from './seckillActivity.data'
+import { getListAllSimple } from '@/api/mall/promotion/seckill/seckillConfig'
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
 import SeckillActivityForm from './SeckillActivityForm.vue'
 
@@ -80,9 +86,16 @@ const openForm = (type: string, id?: number) => {
 const handleDelete = (id: number) => {
   tableMethods.delList(id, false)
 }
-
+const seckillConfigAllSimple = ref([]) // 时段配置精简列表
+const convertSeckillConfigNames = computed(
+  () => (row) =>
+    seckillConfigAllSimple.value
+      ?.filter((item) => row.configIds.includes(item.id))
+      ?.map((config) => config.name)
+)
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  seckillConfigAllSimple.value = await getListAllSimple()
 })
 </script>

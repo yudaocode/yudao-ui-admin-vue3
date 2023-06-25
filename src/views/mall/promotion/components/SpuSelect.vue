@@ -20,7 +20,6 @@
             class="w-1/1"
             node-key="id"
             placeholder="请选择商品分类"
-            @change="nodeClick"
           />
         </el-col>
         <el-col :span="6">
@@ -116,13 +115,13 @@ import { ElTable } from 'element-plus'
 import { dateFormatter } from '@/utils/formatTime'
 import { createImageViewer } from '@/components/ImageViewer'
 import { formatToFraction } from '@/utils'
-import { checkSelectedNode, defaultProps, handleTree } from '@/utils/tree'
+import { defaultProps, handleTree } from '@/utils/tree'
 
 import * as ProductCategoryApi from '@/api/mall/product/category'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { propTypes } from '@/utils/propTypes'
 
-defineOptions({ name: 'PromotionSpuAndSkuSelect' })
+defineOptions({ name: 'PromotionSpuSelect' })
 
 const props = defineProps({
   // 默认不需要（不需要的情况下只返回 spu，需要的情况下返回 选中的 spu 和 sku 列表）
@@ -161,7 +160,7 @@ const expandChange = async (row: ProductSpuApi.Spu, expandedRows: ProductSpuApi.
     return
   }
   // 获取 SPU 详情
-  const res = (await ProductSpuApi.getSpu(row.id as number)) as ProductSpuApi.SpuRespVO
+  const res = (await ProductSpuApi.getSpu(row.id as number)) as ProductSpuApi.Spu
   propertyList.value = getPropertyList(res)
   spuData.value = res
   isExpand.value = true
@@ -169,53 +168,50 @@ const expandChange = async (row: ProductSpuApi.Spu, expandedRows: ProductSpuApi.
 }
 
 //============ 商品选择相关 ============
-const selectedSpu = ref<ProductSpuApi.Spu>() // 选中的商品 spu 只能选择一个
-const selectedSku = ref<ProductSpuApi.Sku[]>() // 选中的商品 sku
+const selectedSpuIds = ref<number[]>([]) // 选中的商品 spuIds
+const selectedSkuIds = ref<number[]>([]) // 选中的商品 skuIds
 const selectSku = (val: ProductSpuApi.Sku[]) => {
-  selectedSku.value = val
+  selectedSkuIds.value = val.map((sku) => sku.id!)
 }
 const selectSpu = (val: ProductSpuApi.Spu[]) => {
-  // 只选择一个
-  selectedSpu.value = val[0]
-  // 如果大于1个
-  if (val.length > 1) {
-    // 清空选择
-    spuListRef.value.clearSelection()
-    // 变更为最后一次选择的
-    spuListRef.value.toggleRowSelection(val.pop(), true)
-  }
+  selectedSpuIds.value = val.map((spu) => spu.id!)
+  // // 只选择一个
+  // selectedSpu.value = val[0]
+  // // 如果大于1个
+  // if (val.length > 1) {
+  //   // 清空选择
+  //   spuListRef.value.clearSelection()
+  //   // 变更为最后一次选择的
+  //   spuListRef.value.toggleRowSelection(val.pop(), true)
+  // }
 }
 // 确认选择时的触发事件
 const emits = defineEmits<{
-  (e: 'confirm', value: ProductSpuApi.Spu, value1?: ProductSpuApi.Sku[]): void
+  (e: 'confirm', spuIds: number[], skuIds?: number[]): void
 }>()
 /**
  * 确认选择返回选中的 spu 和 sku (如果需要选择sku的话)
  */
 const confirm = () => {
-  if (typeof selectedSpu.value === 'undefined') {
+  if (selectedSpuIds.value.length === 0) {
     message.warning('没有选择任何商品')
     return
   }
-  if (
-    (props.isSelectSku && typeof selectedSku.value === 'undefined') ||
-    selectedSku.value?.length === 0
-  ) {
+  if (props.isSelectSku && selectedSkuIds.value.length === 0) {
     message.warning('没有选择任何商品属性')
     return
   }
-  // TODO 返回选择 sku 没测试过，后续测试完善
+  // 返回各自 id 列表
   props.isSelectSku
-    ? emits('confirm', selectedSpu.value!, selectedSku.value!)
-    : emits('confirm', selectedSpu.value!)
+    ? emits('confirm', selectedSpuIds.value, selectedSkuIds.value)
+    : emits('confirm', selectedSpuIds.value)
   // 关闭弹窗
   dialogVisible.value = false
 }
 
-// TODO @puhui999：直接叫商品选择；不用外部传入标题；
-/** 打开弹窗 TODO 没做国际化 */
-const open = (title: string) => {
-  dialogTitle.value = title
+/** 打开弹窗 */
+const open = () => {
+  dialogTitle.value = '商品选择'
   dialogVisible.value = true
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -261,15 +257,6 @@ const imagePreview = (imgUrl: string) => {
 const categoryList = ref() // 分类树
 
 // TODO @puhui999：商品搜索的时候，可以通过一级搜二级；所以这个校验可以去掉哈；也就是说，只允许挂在二级，但是一级可搜索到
-/**
- * 校验所选是否为二级及以下节点
- */
-const nodeClick = () => {
-  if (!checkSelectedNode(categoryList.value, queryParams.value.categoryId)) {
-    queryParams.value.categoryId = null
-    message.warning('必须选择二级及以下节点！！')
-  }
-}
 /** 初始化 **/
 onMounted(async () => {
   await getList()

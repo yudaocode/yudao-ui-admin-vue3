@@ -1,5 +1,5 @@
 import request from '@/config/axios'
-import { Sku, SpuRespVO } from '@/api/mall/product/spu'
+import { Sku, Spu } from '@/api/mall/product/spu'
 
 export interface SeckillActivityVO {
   id: number
@@ -21,6 +21,7 @@ export interface SeckillActivityVO {
   products: SeckillProductVO[]
 }
 
+// 秒杀活动所需属性
 export interface SeckillProductVO {
   spuId: number
   skuId: number
@@ -28,11 +29,12 @@ export interface SeckillProductVO {
   stock: number
 }
 
+// 扩展 Sku 配置
 type SkuExtension = Sku & {
   productConfig: SeckillProductVO
 }
 
-export interface SpuExtension extends SpuRespVO {
+export interface SpuExtension extends Spu {
   skus: SkuExtension[] // 重写类型
 }
 

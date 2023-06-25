@@ -40,8 +40,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       component: 'DatePicker',
       componentProps: {
         valueFormat: 'YYYY-MM-DD',
-        type: 'daterange',
-        defaultTime: [new Date('1 00:00:00'), new Date('1 23:59:59')]
+        type: 'daterange'
       }
     },
     form: {
@@ -52,7 +51,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       }
     },
     table: {
-      width: 300
+      width: 120
     }
   },
   {
@@ -64,8 +63,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       component: 'DatePicker',
       componentProps: {
         valueFormat: 'YYYY-MM-DD',
-        type: 'daterange',
-        defaultTime: [new Date('1 00:00:00'), new Date('1 23:59:59')]
+        type: 'daterange'
       }
     },
     form: {
@@ -76,11 +74,11 @@ const crudSchemas = reactive<CrudSchema[]>([
       }
     },
     table: {
-      width: 300
+      width: 120
     }
   },
   {
-    label: '秒杀时段', // todo @PUHUI999: 在列表界面，格式化不对
+    label: '秒杀时段',
     field: 'configIds',
     form: {
       component: 'Select',
@@ -106,7 +104,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       value: 0
     },
     table: {
-      width: 300
+      width: 120
     }
   },
   {
@@ -118,7 +116,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       value: 0
     },
     table: {
-      width: 300
+      width: 120
     }
   },
   {
@@ -130,7 +128,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       value: 0
     },
     table: {
-      width: 300
+      width: 120
     }
   },
   {
@@ -141,7 +139,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       value: 0
     },
     table: {
-      width: 300
+      width: 120
     }
   },
   {
@@ -152,7 +150,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       value: 0
     },
     table: {
-      width: 300
+      width: 120
     }
   },
   {
@@ -164,7 +162,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       value: 0
     },
     table: {
-      width: 300
+      width: 120
     }
   },
   {
@@ -175,12 +173,12 @@ const crudSchemas = reactive<CrudSchema[]>([
       value: 0
     },
     table: {
-      width: 300
+      width: 120
     }
   },
   {
     label: '秒杀活动商品', // TODO @puhui999：格式化的商品不对；
-    field: 'spuId',
+    field: 'spuIds',
     form: {
       colProps: {
         span: 24
@@ -204,7 +202,7 @@ const crudSchemas = reactive<CrudSchema[]>([
     },
     isForm: false,
     table: {
-      width: 300
+      width: 120
     }
   },
   {
@@ -215,7 +213,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       value: 0
     },
     table: {
-      width: 300
+      width: 80
     }
   },
   {
