@@ -46,7 +46,7 @@
     <el-table-column align="center" label="库存" min-width="90" prop="stock" />
   </el-table>
 </template>
-<script lang="ts" name="SpuAndSkuList" setup>
+<script lang="ts" setup>
 // TODO 后续计划重新封装作为活动商品配置通用组件；可以等其他活动做到的时候，在统一处理 SPU 选择组件哈
 import { formatToFraction } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
@@ -59,6 +59,9 @@ import {
   SkuList
 } from '@/views/mall/product/spu/components'
 import { SeckillProductVO, SpuExtension } from '@/api/mall/promotion/seckill/seckillActivity'
+
+defineOptions({ name: 'PromotionSpuAndSkuList' })
+
 const message = useMessage() // 消息弹窗
 
 // TODO @puhui999：是不是改成传递一个 spu 就好啦？

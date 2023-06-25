@@ -22,12 +22,14 @@
   <!-- TODO @puhui999：这个组件是不是 SpuSelect，不需要带 sku 或者 Form 呀 -->
   <SpuAndSkuSelectForm ref="spuAndSkuSelectForm" @confirm="selectSpu" />
 </template>
-<script lang="ts" name="PromotionSeckillActivityForm" setup>
+<script lang="ts" setup>
 import { SpuAndSkuList, SpuAndSkuSelectForm } from './components'
 import { allSchemas, rules } from './seckillActivity.data'
 import { Spu } from '@/api/mall/product/spu'
 
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
+
+defineOptions({ name: 'PromotionSeckillActivityForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

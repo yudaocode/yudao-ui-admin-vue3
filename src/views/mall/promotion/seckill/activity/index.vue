@@ -53,10 +53,12 @@
   <!-- 表单弹窗：添加/修改 -->
   <SeckillActivityForm ref="formRef" @success="getList" />
 </template>
-<script lang="ts" name="PromotionSeckillActivity" setup>
+<script lang="ts" setup>
 import { allSchemas } from './seckillActivity.data'
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
 import SeckillActivityForm from './SeckillActivityForm.vue'
+
+defineOptions({ name: 'PromotionSeckillActivity' })
 
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
 // tableMethods：表格的操作对象，可进行获得分页、删除记录等操作

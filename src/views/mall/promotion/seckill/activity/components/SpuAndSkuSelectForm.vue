@@ -110,7 +110,7 @@
   </Dialog>
 </template>
 
-<script lang="ts" name="SeckillActivitySpuAndSkuSelect" setup>
+<script lang="ts" setup>
 import { getPropertyList, Properties, SkuList } from '@/views/mall/product/spu/components'
 import { ElTable } from 'element-plus'
 import { dateFormatter } from '@/utils/formatTime'
@@ -121,6 +121,8 @@ import { checkSelectedNode, defaultProps, handleTree } from '@/utils/tree'
 import * as ProductCategoryApi from '@/api/mall/product/category'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { propTypes } from '@/utils/propTypes'
+
+defineOptions({ name: 'PromotionSpuAndSkuSelect' })
 
 const props = defineProps({
   // 默认不需要（不需要的情况下只返回 spu，需要的情况下返回 选中的 spu 和 sku 列表）

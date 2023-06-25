@@ -55,9 +55,9 @@ const { delView } = useTagsViewStore() // 视图操作
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const activeName = ref('basicInfo') // Tag 激活的窗口
 const isDetail = ref(false) // 是否查看详情
-const basicInfoRef = ref<ComponentRef<typeof BasicInfoForm>>() // 商品信息Ref
-const descriptionRef = ref<ComponentRef<typeof DescriptionForm>>() // 商品详情Ref
-const otherSettingsRef = ref<ComponentRef<typeof OtherSettingsForm>>() // 其他设置Ref
+const basicInfoRef = ref() // 商品信息Ref
+const descriptionRef = ref() // 商品详情Ref
+const otherSettingsRef = ref() // 其他设置Ref
 // spu 表单数据
 const formData = ref<ProductSpuApi.Spu>({
   name: '', // 商品名称
@@ -98,7 +98,7 @@ const formData = ref<ProductSpuApi.Spu>({
 
 /** 获得详情 */
 const getDetail = async () => {
-  if ('productSpuDetail' === name) {
+  if ('ProductSpuDetail' === name) {
     isDetail.value = true
   }
   const id = params.spuId as number
