@@ -25,7 +25,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.POINT_BIZ_TYPE)"
+            v-for="dict in getStrDictOptions(DICT_TYPE.MEMBER_POINT_BIZ_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -50,7 +50,7 @@
       <el-form-item label="积分状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.POINT_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MEMBER_POINT_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -71,18 +71,6 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openForm('create')" v-hasPermi="['point:record:create']">
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['point:record:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -94,7 +82,7 @@
       <el-table-column label="业务编码" align="center" prop="bizId" />
       <el-table-column label="业务类型" align="center" prop="bizType">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.POINT_BIZ_TYPE" :value="scope.row.bizType" />
+          <dict-tag :type="DICT_TYPE.MEMBER_POINT_BIZ_TYPE" :value="scope.row.bizType" />
         </template>
       </el-table-column>
       <el-table-column
@@ -113,7 +101,7 @@
       <el-table-column label="变动后的积分" align="center" prop="totalPoint" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.POINT_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.MEMBER_POINT_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="用户id" align="center" prop="userId" />
@@ -135,26 +123,6 @@
         prop="createDate"
         :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center">
-        <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['point:record:update']"
-          >
-            编辑
-          </el-button>
-          <el-button
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-            v-hasPermi="['point:record:delete']"
-          >
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -172,14 +140,10 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getStrDictOptions, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import * as RecordApi from '@/api/point/record'
 import RecordForm from './RecordForm.vue'
 
 defineOptions({ name: 'PointRecord' })
-
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -195,7 +159,6 @@ const queryParams = reactive({
   createDate: []
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -219,40 +182,6 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
-}
-
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await RecordApi.deleteRecord(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await RecordApi.exportRecord(queryParams)
-    download.excel(data, '用户积分记录.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /** 初始化 **/
