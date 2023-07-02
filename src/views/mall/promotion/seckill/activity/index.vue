@@ -89,6 +89,8 @@ const openForm = (type: string, id?: number) => {
 const handleDelete = (id: number) => {
   tableMethods.delList(id, false)
 }
+
+// TODO @puhui：是不是直接叫 configList 就好啦
 const seckillConfigAllSimple = ref([]) // 时段配置精简列表
 const convertSeckillConfigNames = computed(
   () => (row) =>
@@ -96,6 +98,7 @@ const convertSeckillConfigNames = computed(
       ?.filter((item) => row.configIds.includes(item.id))
       ?.map((config) => config.name)
 )
+
 const expandChange = (row, expandedRows) => {
   // TODO puhui：等 CRUD 完事后弄
   console.log(row, expandedRows)

@@ -256,7 +256,6 @@ const imagePreview = (imgUrl: string) => {
 
 const categoryList = ref() // 分类树
 
-// TODO @puhui999：商品搜索的时候，可以通过一级搜二级；所以这个校验可以去掉哈；也就是说，只允许挂在二级，但是一级可搜索到
 /** 初始化 **/
 onMounted(async () => {
   await getList()

@@ -219,7 +219,7 @@ const crudSchemas = reactive<CrudSchema[]>([
   },
   {
     label: '状态',
-    field: 'status', // TODO @puhui999：状态在 table 格式化不对；建表插入的数据状态值不对，改为 0 或 1 就好了
+    field: 'status',
     dictType: DICT_TYPE.COMMON_STATUS,
     dictClass: 'number',
     isForm: false,
