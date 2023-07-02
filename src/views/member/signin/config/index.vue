@@ -8,6 +8,7 @@
       :inline="true"
       label-width="68px"
     >
+      <!-- TODO @xiaqing：搜索可以去掉，因为一共就没几条配置哈 -->
       <el-form-item label="签到天数" prop="day">
         <el-input
           v-model="queryParams.day"
@@ -35,6 +36,7 @@
           :loading="exportLoading"
           v-hasPermi="['point:sign-in-config:export']"
         >
+          <!-- TODO @xiaqing：四个功能的导出都可以去掉 -->
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
       </el-form-item>
@@ -44,15 +46,10 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="序号" align="center" prop="id" v-if="false" />
+      <!-- TODO @xiaqing：展示优化下，改成第 1 天、第 2 天这种 -->
       <el-table-column label="签到天数" align="center" prop="day" />
-      <el-table-column label="签到分数" align="center" prop="point" />
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-      />
+      <el-table-column label="获得积分" align="center" prop="point" />
+      <!-- TODO @xiaqing：展示一个是否开启 -->
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button
@@ -88,7 +85,6 @@
 </template>
 
 <script lang="ts" setup>
-import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as SignInConfigApi from '@/api/point/signInConfig'
 import SignInConfigForm from './SignInConfigForm.vue'
@@ -109,6 +105,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 
+// TODO @xiaqing：可以不分页；
 /** 查询列表 */
 const getList = async () => {
   loading.value = true

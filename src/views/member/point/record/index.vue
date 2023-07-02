@@ -57,7 +57,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="发生时间" prop="createDate">
+      <el-form-item label="获得时间" prop="createDate">
         <el-date-picker
           v-model="queryParams.createDate"
           value-format="YYYY-MM-DD HH:mm:ss"
@@ -78,13 +78,18 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="序号" align="center" prop="id" />
-      <el-table-column label="业务编码" align="center" prop="bizId" />
-      <el-table-column label="业务类型" align="center" prop="bizType">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MEMBER_POINT_BIZ_TYPE" :value="scope.row.bizType" />
-        </template>
-      </el-table-column>
+      <el-table-column label="编号" align="center" prop="id" />
+      <!-- TODO @xiaqing：展示用户的昵称哈； -->
+      <el-table-column label="用户" align="center" prop="userId" />
+      <el-table-column label="积分标题" align="center" prop="title" />
+      <el-table-column label="积分描述" align="center" prop="description" />
+      <el-table-column
+        label="获得时间"
+        align="center"
+        prop="createDate"
+        :formatter="dateFormatter"
+      />
+      <!-- todo @xiaqing：可以参考 crmeb 的展示，把积分和增加减少放一起，用红色和绿色展示 -->
       <el-table-column
         label="操作类型"
         align="center"
@@ -95,16 +100,19 @@
           }
         "
       />
-      <el-table-column label="积分标题" align="center" prop="title" />
-      <el-table-column label="积分描述" align="center" prop="description" />
       <el-table-column label="积分" align="center" prop="point" />
       <el-table-column label="变动后的积分" align="center" prop="totalPoint" />
+      <el-table-column label="业务编码" align="center" prop="bizId" />
+      <el-table-column label="业务类型" align="center" prop="bizType">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MEMBER_POINT_BIZ_TYPE" :value="scope.row.bizType" />
+        </template>
+      </el-table-column>
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MEMBER_POINT_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="用户id" align="center" prop="userId" />
       <el-table-column
         label="冻结时间"
         align="center"
@@ -115,12 +123,6 @@
         label="解冻时间"
         align="center"
         prop="thawingTime"
-        :formatter="dateFormatter"
-      />
-      <el-table-column
-        label="发生时间"
-        align="center"
-        prop="createDate"
         :formatter="dateFormatter"
       />
     </el-table>

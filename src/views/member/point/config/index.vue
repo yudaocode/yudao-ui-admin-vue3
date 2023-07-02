@@ -10,9 +10,11 @@
       <el-form-item label="hideId" v-show="false">
         <el-input v-model="formData.id" />
       </el-form-item>
+      <!-- TODO @xiaqing：展示给用户的字段名，可以和 crmeb 保持一直，然后每一个表单都有类似 crmeb 的 tip；例如说：积分抵用比例(1积分抵多少金额)单位：元 -->
       <el-form-item label="积分抵扣" prop="tradeDeductEnable">
         <el-switch v-model="formData.tradeDeductEnable" />
       </el-form-item>
+      <!-- TODO @xiaqing：用户看到的是元，最多 2 位；分是后端的存储哈 -->
       <el-form-item label="抵扣单位(分)" prop="tradeDeductUnitPrice">
         <el-input-number
           v-model="formData.tradeDeductUnitPrice"
@@ -27,10 +29,10 @@
           style="width: 300px"
         />
       </el-form-item>
-      <el-form-item label="1元赠送多少分" prop="tradeGivePoint">
+      <el-form-item label="1 元赠送多少分" prop="tradeGivePoint">
         <el-input-number
           v-model="formData.tradeGivePoint"
-          placeholder="请输入1元赠送多少积分"
+          placeholder="请输入 1 元赠送多少积分"
           style="width: 300px"
         />
       </el-form-item>
@@ -58,6 +60,7 @@ const formData = ref({
 const formRules = reactive({})
 const formRef = ref() // 表单 Ref
 
+/** 修改积分配置 */
 const onSubmit = async () => {
   // 校验表单
   if (!formRef) return
@@ -75,6 +78,7 @@ const onSubmit = async () => {
   }
 }
 
+/** 获得积分配置 */
 const getConfig = async () => {
   try {
     const data = await ConfigApi.getConfig()
@@ -82,6 +86,7 @@ const getConfig = async () => {
   } finally {
   }
 }
+
 onMounted(() => {
   getConfig()
 })

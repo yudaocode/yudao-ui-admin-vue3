@@ -40,14 +40,6 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <!--        <el-button-->
-        <!--          type="primary"-->
-        <!--          plain-->
-        <!--          @click="openForm('create')"-->
-        <!--          v-hasPermi="['point:sign-in-record:create']"-->
-        <!--        >-->
-        <!--          <Icon icon="ep:plus" class="mr-5px" /> 新增-->
-        <!--        </el-button>-->
         <el-button
           type="success"
           plain
@@ -64,10 +56,11 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="序号" align="center" prop="id" />
+      <el-table-column label="编号" align="center" prop="id" />
+      <!-- TODO @xiaqing：展示用户昵称  -->
       <el-table-column label="签到用户" align="center" prop="userId" />
       <el-table-column label="签到天数" align="center" prop="day" />
-      <el-table-column label="签到的分数" align="center" prop="point" />
+      <el-table-column label="获得积分" align="center" prop="point" />
       <el-table-column
         label="签到时间"
         align="center"
@@ -76,14 +69,6 @@
       />
       <el-table-column label="操作" align="center">
         <template #default="scope">
-          <!--          <el-button-->
-          <!--            link-->
-          <!--            type="primary"-->
-          <!--            @click="openForm('update', scope.row.id)"-->
-          <!--            v-hasPermi="['point:sign-in-record:update']"-->
-          <!--          >-->
-          <!--            编辑-->
-          <!--          </el-button>-->
           <el-button
             link
             type="danger"
