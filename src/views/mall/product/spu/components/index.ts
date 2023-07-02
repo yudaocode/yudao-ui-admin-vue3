@@ -7,6 +7,7 @@ import SkuList from './SkuList.vue'
 
 import { Spu } from '@/api/mall/product/spu'
 
+// TODO @puhui999：Properties 改成 Property 更合适？
 interface Properties {
   id: number
   name: string
@@ -30,8 +31,10 @@ interface RuleConfig {
 }
 
 /**
- *  商品通用函数
+ * 获得商品的规格列表
+ *
  * @param spu
+ * @return Property 规格列表
  */
 const getPropertyList = (spu: Spu): Properties[] => {
   //  直接拿返回的 skus 属性逆向生成出 propertyList

@@ -437,6 +437,7 @@ const categoryList = ref() // 分类树
 const categoryString = (categoryId) => {
   return treeToString(categoryList.value, categoryId)
 }
+
 /**
  * 校验所选是否为二级及以下节点
  */
@@ -446,6 +447,7 @@ const nodeClick = () => {
     message.warning('必须选择二级及以下节点！！')
   }
 }
+
 /** 初始化 **/
 onMounted(async () => {
   await getTabsCount()

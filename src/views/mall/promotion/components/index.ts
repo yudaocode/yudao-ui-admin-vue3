@@ -7,6 +7,7 @@ type SpuProperty<T> = {
   spuDetail: T
   propertyList: Properties[]
 }
+
 /**
  * 提供商品活动商品选择通用组件
  */
