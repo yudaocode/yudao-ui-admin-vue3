@@ -24,11 +24,19 @@
       v-model:pageSize="tableObject.pageSize"
       :columns="allSchemas.tableColumns"
       :data="tableObject.tableList"
+      :expand="true"
       :loading="tableObject.loading"
       :pagination="{
         total: tableObject.total
       }"
+      @expand-change="expandChange"
     >
+      <template #expand> 展示活动商品和商品相关属性活动配置</template>
+      <template #configIds="{ row }">
+        <el-tag v-for="(name, index) in convertSeckillConfigNames(row)" :key="index" class="mr-5px">
+          {{ name }}
+        </el-tag>
+      </template>
       <template #action="{ row }">
         <el-button
           v-hasPermi="['promotion:seckill-activity:update']"
@@ -53,10 +61,13 @@
   <!-- 表单弹窗：添加/修改 -->
   <SeckillActivityForm ref="formRef" @success="getList" />
 </template>
-<script lang="ts" name="PromotionSeckillActivity" setup>
+<script lang="ts" setup>
 import { allSchemas } from './seckillActivity.data'
+import { getListAllSimple } from '@/api/mall/promotion/seckill/seckillConfig'
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
 import SeckillActivityForm from './SeckillActivityForm.vue'
+
+defineOptions({ name: 'PromotionSeckillActivity' })
 
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
 // tableMethods：表格的操作对象，可进行获得分页、删除记录等操作
@@ -78,9 +89,21 @@ const openForm = (type: string, id?: number) => {
 const handleDelete = (id: number) => {
   tableMethods.delList(id, false)
 }
+const seckillConfigAllSimple = ref([]) // 时段配置精简列表
+const convertSeckillConfigNames = computed(
+  () => (row) =>
+    seckillConfigAllSimple.value
+      ?.filter((item) => row.configIds.includes(item.id))
+      ?.map((config) => config.name)
+)
+const expandChange = (row, expandedRows) => {
+  // TODO puhui：等 CRUD 完事后弄
+  console.log(row, expandedRows)
+}
 
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  seckillConfigAllSimple.value = await getListAllSimple()
 })
 </script>
