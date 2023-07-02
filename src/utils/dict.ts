@@ -147,8 +147,8 @@ export enum DICT_TYPE {
 
   // ========== MALL - 会员模块 ==========
   // 积分模块 TODO 芋艿：改成 member_ 前缀；包括枚举和值；
-  POINT_BIZ_TYPE = 'point_biz_type',
-  POINT_STATUS = 'point_status',
+  MEMBER_POINT_BIZ_TYPE = 'member_point_biz_type',
+  MEMBER_POINT_STATUS = 'member_point_status',
 
   // ========== MALL - 商品模块 ==========
   PRODUCT_UNIT = 'product_unit', // 商品单位
