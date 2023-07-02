@@ -136,9 +136,7 @@ export const useTable = <T = any>(config?: UseTableConfig<T>) => {
       })
       if (res) {
         tableObject.tableList = (res as unknown as ResponseType).list
-        if ((res as unknown as ResponseType).total) {
-          tableObject.total = (res as unknown as ResponseType).total as unknown as number
-        }
+        tableObject.total = (res as unknown as ResponseType).total ?? 0
       }
     },
     setProps: async (props: TableProps = {}) => {
