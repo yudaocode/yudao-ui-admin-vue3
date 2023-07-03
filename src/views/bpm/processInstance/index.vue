@@ -159,11 +159,14 @@
     />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="BpmProcessInstance">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { ElMessageBox } from 'element-plus'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+
+defineOptions({ name: 'BpmProcessInstance' })
+
 const router = useRouter() // 路由
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化

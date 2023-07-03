@@ -6,12 +6,14 @@
     </el-form-item>
   </el-form>
 </template>
-<script lang="ts" name="DescriptionForm" setup>
+<script lang="ts" setup>
 import type { SpuType } from '@/api/mall/product/spu'
 import { Editor } from '@/components/Editor'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
+
+defineOptions({ name: 'DescriptionForm' })
 
 const message = useMessage() // 消息弹窗
 const props = defineProps({

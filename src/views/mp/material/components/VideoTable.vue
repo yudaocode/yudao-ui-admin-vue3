@@ -38,7 +38,7 @@
   </el-table>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import WxVideoPlayer from '@/views/mp/components/wx-video-play'
 import { dateFormatter } from '@/utils/formatTime'
 

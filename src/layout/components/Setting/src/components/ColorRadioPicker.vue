@@ -1,7 +1,9 @@
-<script lang="ts" name="ColorRadioPicker" setup>
+<script lang="ts" setup>
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
+
+defineOptions({ name: 'ColorRadioPicker' })
 
 const { getPrefixCls } = useDesign()
 

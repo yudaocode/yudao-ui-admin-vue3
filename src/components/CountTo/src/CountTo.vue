@@ -1,8 +1,10 @@
-<script lang="ts" name="CountTo" setup>
+<script lang="ts" setup>
 import { PropType } from 'vue'
 import { isNumber } from '@/utils/is'
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
+
+defineOptions({ name: 'CountTo' })
 
 const { getPrefixCls } = useDesign()
 

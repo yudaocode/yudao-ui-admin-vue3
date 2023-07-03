@@ -115,11 +115,14 @@
   <MyNotifyMessageDetail ref="detailRef" />
 </template>
 
-<script setup lang="ts" name="SystemMyNotify">
+<script lang="ts" setup>
 import { DICT_TYPE, getBoolDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as NotifyMessageApi from '@/api/system/notify/message'
 import MyNotifyMessageDetail from './MyNotifyMessageDetail.vue'
+
+defineOptions({ name: 'SystemMyNotify' })
+
 const message = useMessage() // 消息
 
 const loading = ref(true) // 列表的加载中

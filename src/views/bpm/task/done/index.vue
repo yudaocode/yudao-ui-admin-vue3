@@ -80,11 +80,13 @@
   <!-- 表单弹窗：详情 -->
   <TaskDetail ref="detailRef" @success="getList" />
 </template>
-<script lang="ts" name="BpmTodoTask" setup>
+<script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
 import TaskDetail from './TaskDetail.vue'
+
+defineOptions({ name: 'BpmTodoTask' })
 
 const { push } = useRouter() // 路由
 

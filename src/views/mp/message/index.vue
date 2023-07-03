@@ -79,7 +79,7 @@
     <WxMsg :user-id="messageBox.userId" />
   </el-dialog>
 </template>
-<script setup lang="ts" name="MpMessage">
+<script lang="ts" setup>
 import * as MpMessageApi from '@/api/mp/message'
 import WxMsg from '@/views/mp/components/wx-msg'
 import WxAccountSelect from '@/views/mp/components/wx-account-select'
@@ -87,6 +87,8 @@ import MessageTable from './MessageTable.vue'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { MsgType } from '@/views/mp/components/wx-msg/types'
 import type { FormInstance } from 'element-plus'
+
+defineOptions({ name: 'MpMessage' })
 
 const loading = ref(false)
 const total = ref(0) // 数据的总页数

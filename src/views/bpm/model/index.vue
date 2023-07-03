@@ -226,7 +226,7 @@
   </Dialog>
 </template>
 
-<script setup lang="ts" name="BpmModel">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter, formatDate } from '@/utils/formatTime'
 import { MyProcessViewer } from '@/components/bpmnProcessDesigner/package'
@@ -235,6 +235,9 @@ import * as FormApi from '@/api/bpm/form'
 import ModelForm from './ModelForm.vue'
 import ModelImportForm from '@/views/bpm/model/ModelImportForm.vue'
 import { setConfAndFields2 } from '@/utils/formCreate'
+
+defineOptions({ name: 'BpmModel' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由

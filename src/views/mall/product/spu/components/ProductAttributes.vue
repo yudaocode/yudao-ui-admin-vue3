@@ -40,9 +40,11 @@
   </el-col>
 </template>
 
-<script lang="ts" name="ProductAttributes" setup>
+<script lang="ts" setup>
 import { ElInput } from 'element-plus'
 import * as PropertyApi from '@/api/mall/product/property'
+
+defineOptions({ name: 'ProductAttributes' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

@@ -115,7 +115,7 @@
   </el-form>
   <ProductAttributesAddForm ref="attributesAddFormRef" :propertyList="propertyList" />
 </template>
-<script lang="ts" name="ProductSpuBasicInfoForm" setup>
+<script lang="ts" setup>
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
@@ -126,6 +126,8 @@ import { UploadImg, UploadImgs } from '@/components/UploadFile'
 import { ProductAttributes, ProductAttributesAddForm, SkuList } from './index'
 import * as ProductCategoryApi from '@/api/mall/product/category'
 import { getSimpleBrandList } from '@/api/mall/product/brand'
+
+defineOptions({ name: 'ProductSpuBasicInfoForm' })
 
 const message = useMessage() // 消息弹窗
 

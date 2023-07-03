@@ -40,10 +40,12 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemUserImportForm" setup>
+<script lang="ts" setup>
 import * as UserApi from '@/api/system/user'
 import { getAccessToken, getTenantId } from '@/utils/auth'
 import download from '@/utils/download'
+
+defineOptions({ name: 'SystemUserImportForm' })
 
 const message = useMessage() // 消息弹窗
 

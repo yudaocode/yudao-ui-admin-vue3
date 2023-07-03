@@ -1,8 +1,10 @@
-<script lang="ts" name="ScreenFull" setup>
+<script lang="ts" setup>
 import { Icon } from '@/components/Icon'
 import { useFullscreen } from '@vueuse/core'
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
+
+defineOptions({ name: 'ScreenFull' })
 
 const { getPrefixCls } = useDesign()
 

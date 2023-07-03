@@ -1,7 +1,9 @@
-<script lang="ts" name="AppView" setup>
+<script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useAppStore } from '@/store/modules/app'
 import { Footer } from '@/layout/components/Footer'
+
+defineOptions({ name: 'AppView' })
 
 const appStore = useAppStore()
 

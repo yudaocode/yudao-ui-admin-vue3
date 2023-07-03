@@ -57,7 +57,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { Menu } from './types'
 import draggable from 'vuedraggable'
 

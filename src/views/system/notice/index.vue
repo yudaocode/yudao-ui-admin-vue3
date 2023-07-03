@@ -102,11 +102,14 @@
   <!-- 表单弹窗：添加/修改 -->
   <NoticeForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="tsx" name="SystemNotice">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as NoticeApi from '@/api/system/notice'
 import NoticeForm from './NoticeForm.vue'
+
+defineOptions({ name: 'SystemNotice' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 

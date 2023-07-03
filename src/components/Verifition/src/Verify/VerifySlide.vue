@@ -71,7 +71,7 @@
     </div>
   </div>
 </template>
-<script name="VerifySlide" setup type="text/babel">
+<script setup type="text/babel">
 /**
  * VerifySlide
  * @description 滑块

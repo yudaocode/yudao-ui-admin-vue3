@@ -43,10 +43,12 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemNoticeForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
 import * as NoticeApi from '@/api/system/notice'
+
+defineOptions({ name: 'SystemNoticeForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

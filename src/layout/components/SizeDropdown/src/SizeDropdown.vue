@@ -1,9 +1,11 @@
-<script lang="ts" name="SizeDropdown" setup>
+<script lang="ts" setup>
 import { useAppStore } from '@/store/modules/app'
 
 import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 import { ElementPlusSize } from '@/types/elementPlus'
+
+defineOptions({ name: 'SizeDropdown' })
 
 const { getPrefixCls } = useDesign()
 

@@ -1,10 +1,12 @@
-<script lang="ts" name="Descriptions" setup>
+<script lang="ts" setup>
 import { PropType } from 'vue'
 import dayjs from 'dayjs'
 import { useDesign } from '@/hooks/web/useDesign'
 import { propTypes } from '@/utils/propTypes'
 import { useAppStore } from '@/store/modules/app'
 import { DescriptionsSchema } from '@/types/descriptions'
+
+defineOptions({ name: 'Descriptions' })
 
 const appStore = useAppStore()
 

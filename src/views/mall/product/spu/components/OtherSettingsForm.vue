@@ -51,11 +51,13 @@
     </el-row>
   </el-form>
 </template>
-<script lang="ts" name="OtherSettingsForm" setup>
+<script lang="ts" setup>
 import type { SpuType } from '@/api/mall/product/spu'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
+
+defineOptions({ name: 'OtherSettingsForm' })
 
 const message = useMessage() // 消息弹窗
 

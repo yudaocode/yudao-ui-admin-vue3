@@ -38,11 +38,14 @@
     </div>
   </div>
 </template>
-<script lang="ts" name="SSOLogin" setup>
+<script lang="ts" setup>
 import LoginFormTitle from './LoginFormTitle.vue'
 import * as OAuth2Api from '@/api/login/oauth2'
 import { LoginStateEnum, useLoginState } from './useLogin'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
+
+defineOptions({ name: 'SSOLogin' })
+
 const route = useRoute() // 路由
 const { currentRoute } = useRouter() // 路由
 const { getLoginState, setLoginState } = useLoginState()

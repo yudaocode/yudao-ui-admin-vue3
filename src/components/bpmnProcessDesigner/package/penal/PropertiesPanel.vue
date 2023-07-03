@@ -62,7 +62,7 @@
     </el-collapse>
   </div>
 </template>
-<script setup lang="ts" name="MyPropertiesPanel">
+<script lang="ts" setup>
 import ElementBaseInfo from './base/ElementBaseInfo.vue'
 import ElementOtherConfig from './other/ElementOtherConfig.vue'
 import ElementTask from './task/ElementTask.vue'
@@ -73,6 +73,9 @@ import ElementListeners from './listeners/ElementListeners.vue'
 import ElementProperties from './properties/ElementProperties.vue'
 // import ElementForm from './form/ElementForm.vue'
 import UserTaskListeners from './listeners/UserTaskListeners.vue'
+
+defineOptions({ name: 'MyPropertiesPanel' })
+
 /**
  * 侧边栏
  * @Author MiyueFE
@@ -110,18 +113,18 @@ const timer = ref()
 provide('prefix', props.prefix)
 provide('width', props.width)
 const bpmnInstances = () => (window as any)?.bpmnInstances
-const initModels = () => {
-  // console.log(props, 'props')
-  // console.log(props.bpmnModeler, 'sakdjjaskdsajdkasdjkadsjk')
-  // 初始化 modeler 以及其他 moddle
-  // nextTick(() => {
-  if (!props.bpmnModeler) {
+
+// 监听 props.bpmnModeler 然后 initModels
+const unwatchBpmn = watch(
+  () => props.bpmnModeler,
+  () => {
     // 避免加载时 流程图 并未加载完成
-    timer.value = setTimeout(() => initModels(), 10)
-    return
-  }
-  if (timer.value) {
-    clearTimeout(timer.value)
+    if (!props.bpmnModeler) {
+      console.log('缺少props.bpmnModeler')
+      return
+    }
+
+    console.log('props.bpmnModeler 有值了！！！')
     const w = window as any
     w.bpmnInstances = {
       modeler: props.bpmnModeler,
@@ -134,12 +137,16 @@ const initModels = () => {
       replace: props.bpmnModeler.get('replace'),
       selection: props.bpmnModeler.get('selection')
     }
-  }
 
-  console.log(bpmnInstances(), 'window.bpmnInstances')
-  getActiveElement()
-  // })
-}
+    console.log(bpmnInstances(), 'window.bpmnInstances')
+    getActiveElement()
+    unwatchBpmn()
+  },
+  {
+    immediate: true
+  }
+)
+
 const getActiveElement = () => {
   // 初始第一个选中元素 bpmn:Process
   initFormOnChanged(null)
@@ -187,11 +194,7 @@ const initFormOnChanged = (element) => {
   )
   formVisible.value = elementType.value === 'UserTask' || elementType.value === 'StartEvent'
 }
-onMounted(() => {
-  setTimeout(() => {
-    initModels()
-  }, 100)
-})
+
 onBeforeUnmount(() => {
   const w = window as any
   w.bpmnInstances = null

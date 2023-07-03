@@ -98,9 +98,11 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="InfraFileConfigForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as FileConfigApi from '@/api/infra/fileConfig'
+
+defineOptions({ name: 'InfraFileConfigForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -112,7 +114,7 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   name: '',
-  storage: '',
+  storage: 0,
   remark: '',
   config: {}
 })
@@ -184,7 +186,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: '',
-    storage: '',
+    storage: 0,
     remark: '',
     config: {}
   }

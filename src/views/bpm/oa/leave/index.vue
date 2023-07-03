@@ -138,11 +138,14 @@
     />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="BpmOALeave">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as LeaveApi from '@/api/bpm/leave'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+
+defineOptions({ name: 'BpmOALeave' })
+
 const message = useMessage() // 消息弹窗
 const router = useRouter() // 路由
 const { t } = useI18n() // 国际化

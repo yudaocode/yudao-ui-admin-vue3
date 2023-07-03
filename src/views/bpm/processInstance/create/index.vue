@@ -46,13 +46,16 @@
     <ProcessInstanceBpmnViewer :bpmn-xml="bpmnXML as any" />
   </ContentWrap>
 </template>
-<script setup lang="ts" name="BpmProcessInstanceCreate">
+<script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
+
+defineOptions({ name: 'BpmProcessInstanceCreate' })
+
 const router = useRouter() // 路由
 const message = useMessage() // 消息
 

@@ -10,9 +10,11 @@
     />
   </div>
 </template>
-<script lang="ts" name="UserAvatar" setup>
+<script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { uploadAvatar } from '@/api/system/user/profile'
+
+defineOptions({ name: 'UserAvatar' })
 
 const props = defineProps({
   img: propTypes.string.def('')

@@ -65,11 +65,13 @@
   <!-- 表单弹窗：发送测试 -->
   <MailTemplateSendForm ref="sendFormRef" />
 </template>
-<script setup lang="ts" name="SystemMailTemplate">
+<script lang="ts" setup>
 import { allSchemas } from './template.data'
 import * as MailTemplateApi from '@/api/system/mail/template'
 import MailTemplateForm from './MailTemplateForm.vue'
 import MailTemplateSendForm from './MailTemplateSendForm.vue'
+
+defineOptions({ name: 'SystemMailTemplate' })
 
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
 // tableMethods：表格的操作对象，可进行获得分页、删除记录等操作

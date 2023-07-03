@@ -26,8 +26,10 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemErrorCodeForm" setup>
+<script lang="ts" setup>
 import * as ErrorCodeApi from '@/api/system/errorCode'
+
+defineOptions({ name: 'SystemErrorCodeForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

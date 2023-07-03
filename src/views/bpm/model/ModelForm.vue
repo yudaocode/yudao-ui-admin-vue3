@@ -121,11 +121,13 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="ModelForm" setup>
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { ElMessageBox } from 'element-plus'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
+
+defineOptions({ name: 'ModelForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

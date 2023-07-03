@@ -112,7 +112,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import WxReplySelect from '@/views/mp/components/wx-reply'
 import WxNews from '@/views/mp/components/wx-news'
 import WxMaterialSelect from '@/views/mp/components/wx-material-select'

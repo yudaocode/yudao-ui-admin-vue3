@@ -1,6 +1,8 @@
-<script lang="ts" name="BackTop" setup>
+<script lang="ts" setup>
 import { ElBacktop } from 'element-plus'
 import { useDesign } from '@/hooks/web/useDesign'
+
+defineOptions({ name: 'BackTop' })
 
 const { getPrefixCls, variables } = useDesign()
 

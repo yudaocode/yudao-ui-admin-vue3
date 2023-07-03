@@ -19,7 +19,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 const props = defineProps<{
   list: any[]
   loading: boolean
@@ -31,7 +31,7 @@ const emit = defineEmits<{
 </script>
 
 <style lang="scss" scoped>
-@media (min-width: 992px) and (max-width: 1300px) {
+@media (width >= 992px) and (width <= 1300px) {
   .waterfall {
     column-count: 3;
   }
@@ -41,7 +41,7 @@ const emit = defineEmits<{
   }
 }
 
-@media (min-width: 768px) and (max-width: 991px) {
+@media (width >= 768px) and (width <= 991px) {
   .waterfall {
     column-count: 2;
   }
@@ -51,7 +51,7 @@ const emit = defineEmits<{
   }
 }
 
-@media (max-width: 767px) {
+@media (width <= 767px) {
   .waterfall {
     column-count: 1;
   }

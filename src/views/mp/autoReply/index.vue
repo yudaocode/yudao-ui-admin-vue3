@@ -67,7 +67,7 @@
     </el-dialog>
   </ContentWrap>
 </template>
-<script setup lang="ts" name="MpAutoReply">
+<script lang="ts" setup>
 import ReplyForm from '@/views/mp/autoReply/components/ReplyForm.vue'
 import { type Reply, ReplyType } from '@/views/mp/components/wx-reply'
 import WxAccountSelect from '@/views/mp/components/wx-account-select'
@@ -76,6 +76,9 @@ import { ContentWrap } from '@/components/ContentWrap'
 import type { TabPaneName } from 'element-plus'
 import ReplyTable from './components/ReplyTable.vue'
 import { MsgType } from './components/types'
+
+defineOptions({ name: 'MpAutoReply' })
+
 const message = useMessage() // 消息
 
 const accountId = ref(-1) // 公众号ID

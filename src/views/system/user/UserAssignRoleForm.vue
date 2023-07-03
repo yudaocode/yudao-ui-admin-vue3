@@ -19,10 +19,12 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="SystemUserAssignRoleForm" setup>
+<script lang="ts" setup>
 import * as PermissionApi from '@/api/system/permission'
 import * as UserApi from '@/api/system/user'
 import * as RoleApi from '@/api/system/role'
+
+defineOptions({ name: 'SystemUserAssignRoleForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

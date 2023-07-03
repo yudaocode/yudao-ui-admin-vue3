@@ -7,8 +7,9 @@
           href="https://doc.iocoder.cn/bpm/#_3-%E6%B5%81%E7%A8%8B%E5%9B%BE%E7%A4%BA%E4%BE%8B"
           type="danger"
           target="_blank"
-          >如何实现实现会签、或签？</el-link
         >
+          如何实现实现会签、或签？
+        </el-link>
         <el-form-item label="流程标识" prop="id">
           <el-input
             v-model="needProps.id"
@@ -37,7 +38,9 @@
     </el-form>
   </div>
 </template>
-<script setup lang="ts" name="ElementBaseInfo">
+<script lang="ts" setup>
+defineOptions({ name: 'ElementBaseInfo' })
+
 const props = defineProps({
   businessObject: {
     type: Object,

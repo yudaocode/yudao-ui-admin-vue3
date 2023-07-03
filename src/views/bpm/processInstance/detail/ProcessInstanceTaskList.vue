@@ -44,13 +44,15 @@
     </el-col>
   </el-card>
 </template>
-<script lang="ts" name="BpmProcessInstanceTaskList" setup>
+<script lang="ts" setup>
 import { formatDate, formatPast2 } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'
 
+defineOptions({ name: 'BpmProcessInstanceTaskList' })
+
 defineProps({
   loading: propTypes.bool, // 是否加载中
-  tasks: propTypes.array // 流程任务的数组
+  tasks: propTypes.arrayOf(propTypes.object) // 流程任务的数组
 })
 
 /** 获得任务对应的 icon */

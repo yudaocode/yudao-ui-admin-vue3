@@ -26,8 +26,10 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="InfraDataSourceConfigForm" setup>
+<script lang="ts" setup>
 import * as DataSourceConfigApi from '@/api/infra/dataSourceConfig'
+
+defineOptions({ name: 'InfraDataSourceConfigForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

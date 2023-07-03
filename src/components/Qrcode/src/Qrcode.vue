@@ -1,4 +1,4 @@
-<script lang="ts" name="Qrcode" setup>
+<script lang="ts" setup>
 import { computed, nextTick, PropType, ref, unref, watch } from 'vue'
 import QRCode, { QRCodeRenderersOptions } from 'qrcode'
 import { cloneDeep } from 'lodash-es'
@@ -6,6 +6,8 @@ import { propTypes } from '@/utils/propTypes'
 import { useDesign } from '@/hooks/web/useDesign'
 import { isString } from '@/utils/is'
 import { QrcodeLogo } from '@/types/qrcode'
+
+defineOptions({ name: 'Qrcode' })
 
 const props = defineProps({
   // img 或者 canvas,img不支持logo嵌套
@@ -241,7 +243,7 @@ $prefix-cls: #{$namespace}-qrcode;
 
 .#{$prefix-cls} {
   &--disabled {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgb(255 255 255 / 95%);
 
     & > div {
       transform: translate(-50%, -50%);

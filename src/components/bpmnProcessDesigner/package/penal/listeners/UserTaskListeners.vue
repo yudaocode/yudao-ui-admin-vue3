@@ -287,10 +287,13 @@
     </el-dialog>
   </div>
 </template>
-<script setup lang="ts" name="UserTaskListeners">
+<script lang="ts" setup>
 import { ElMessageBox } from 'element-plus'
 import { createListenerObject, updateElementExtensions } from '../../utils'
 import { initListenerForm, initListenerType, eventType, listenerType, fieldType } from './utilSelf'
+
+defineOptions({ name: 'UserTaskListeners' })
+
 const props = defineProps({
   id: String,
   type: String

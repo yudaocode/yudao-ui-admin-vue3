@@ -38,7 +38,9 @@
   </div>
 </template>
 
-<script lang="ts" name="WxNews" setup>
+<script lang="ts" setup>
+defineOptions({ name: 'WxNews' })
+
 const props = withDefaults(
   defineProps<{
     articles: any[] | null

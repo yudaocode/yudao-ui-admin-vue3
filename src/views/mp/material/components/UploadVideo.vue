@@ -47,7 +47,7 @@
   </el-dialog>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import type {
   FormInstance,
   FormRules,

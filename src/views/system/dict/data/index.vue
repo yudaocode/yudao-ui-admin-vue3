@@ -115,13 +115,16 @@
   <!-- 表单弹窗：添加/修改 -->
   <DictDataForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="SystemDictData">
+<script lang="ts" setup>
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as DictDataApi from '@/api/system/dict/dict.data'
 import * as DictTypeApi from '@/api/system/dict/dict.type'
 import DictDataForm from './DictDataForm.vue'
+
+defineOptions({ name: 'SystemDictData' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const route = useRoute() // 路由

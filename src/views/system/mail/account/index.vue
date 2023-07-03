@@ -64,11 +64,13 @@
   <!-- 详情弹窗 -->
   <MailAccountDetail ref="detailRef" />
 </template>
-<script setup lang="ts" name="SystemMailAccount">
+<script lang="ts" setup>
 import { allSchemas } from './account.data'
 import * as MailAccountApi from '@/api/system/mail/account'
 import MailAccountForm from './MailAccountForm.vue'
 import MailAccountDetail from './MailAccountDetail.vue'
+
+defineOptions({ name: 'SystemMailAccount' })
 
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
 // tableMethods：表格的操作对象，可进行获得分页、删除记录等操作
