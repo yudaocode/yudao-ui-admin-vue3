@@ -30,8 +30,8 @@ import { SpuAndSkuList, SpuProperty, SpuSelect } from '../../components'
 import { allSchemas, rules } from './seckillActivity.data'
 
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
-import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
 import * as ProductSpuApi from '@/api/mall/product/spu'
+import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
 
 defineOptions({ name: 'PromotionSeckillActivityForm' })
 
@@ -62,7 +62,7 @@ const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
-  resetForm()
+  await resetForm()
   // 修改时，设置数据 TODO 没测试估计有问题
   if (id) {
     formLoading.value = true
@@ -89,34 +89,30 @@ const selectSpu = (spuIds: number[]) => {
  */
 const getSpuDetails = async (spuIds: number[]) => {
   const spuProperties: SpuProperty<SeckillActivityApi.SpuExtension>[] = []
+  const res = (await ProductSpuApi.getSpuDetailList(spuIds)) as SeckillActivityApi.SpuExtension[]
   spuList.value = []
-  // TODO puhui999: 考虑后端添加通过 spuIds 批量获取
-  for (const spuId of spuIds) {
-    // 获取 SPU 详情
-    const res = (await ProductSpuApi.getSpu(spuId)) as SeckillActivityApi.SpuExtension
-    if (!res) {
-      continue
-    }
-    spuList.value.push(res)
+  res?.forEach((spu) => {
     // 初始化每个 sku 秒杀配置
-    res.skus?.forEach((sku) => {
+    spu.skus?.forEach((sku) => {
       const config: SeckillActivityApi.SeckillProductVO = {
-        spuId,
+        spuId: spu.id!,
         skuId: sku.id!,
         stock: 0,
         seckillPrice: 0
       }
       sku.productConfig = config
     })
-    spuProperties.push({ spuId, spuDetail: res, propertyList: getPropertyList(res) })
-  }
+    spuProperties.push({ spuId: spu.id!, spuDetail: spu, propertyList: getPropertyList(spu) })
+  })
+  spuList.value.push(...res)
   spuPropertyList.value = spuProperties
 }
 
 /** 重置表单 */
-const resetForm = () => {
+const resetForm = async () => {
   spuList.value = []
   spuPropertyList.value = []
+  await nextTick()
   formRef.value.getElFormRef().resetFields()
 }
 /** 提交表单 */

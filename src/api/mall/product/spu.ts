@@ -86,6 +86,11 @@ export const getSpu = (id: number) => {
   return request.get({ url: `/product/spu/get-detail?id=${id}` })
 }
 
+// 获得商品 Spu 详情列表
+export const getSpuDetailList = (ids: number[]) => {
+  return request.get({ url: `/product/spu/list?spuIds=${ids}` })
+}
+
 // 删除商品 Spu
 export const deleteSpu = (id: number) => {
   return request.delete({ url: `/product/spu/delete?id=${id}` })
