@@ -111,7 +111,7 @@
 </template>
 
 <script lang="ts" setup>
-import { getPropertyList, Properties, SkuList } from '@/views/mall/product/spu/components'
+import { getPropertyList, PropertyAndValues, SkuList } from '@/views/mall/product/spu/components'
 import { ElTable } from 'element-plus'
 import { dateFormatter } from '@/utils/formatTime'
 import { createImageViewer } from '@/components/ImageViewer'
@@ -144,7 +144,7 @@ const queryParams = ref({
   categoryId: null,
   createTime: []
 }) // 查询参数
-const propertyList = ref<Properties[]>([]) // 商品属性列表
+const propertyList = ref<PropertyAndValues[]>([]) // 商品属性列表
 const spuListRef = ref<InstanceType<typeof ElTable>>()
 const skuListRef = ref() // 商品属性选择 Ref
 const spuData = ref<ProductSpuApi.Spu>() // 商品详情

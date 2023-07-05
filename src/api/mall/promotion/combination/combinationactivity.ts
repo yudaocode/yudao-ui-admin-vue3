@@ -1,20 +1,38 @@
 import request from '@/config/axios'
+import { Sku, Spu } from '@/api/mall/product/spu'
 
 export interface CombinationActivityVO {
-  id: number
-  name: string
+  id?: number
+  name?: string
+  spuIds?: number[]
+  totalLimitCount?: number
+  singleLimitCount?: number
+  startTime?: Date
+  endTime?: Date
+  userSize?: number
+  totalNum?: number
+  successNum?: number
+  orderUserCount?: number
+  virtualGroup?: number
+  status?: number
+  limitDuration?: number
+  products: CombinationProductVO[]
+}
+
+// 拼团活动所需属性
+export interface CombinationProductVO {
   spuId: number
-  totalLimitCount: number
-  singleLimitCount: number
-  startTime: Date
-  endTime: Date
-  userSize: number
-  totalNum: number
-  successNum: number
-  orderUserCount: number
-  virtualGroup: number
-  status: number
-  limitDuration: number
+  skuId: number
+  activePrice: number // 拼团价格
+}
+
+// 扩展 Sku 配置
+type SkuExtension = Sku & {
+  productConfig: CombinationProductVO
+}
+
+export interface SpuExtension extends Spu {
+  skus: SkuExtension[] // 重写类型
 }
 
 // 查询拼团活动列表

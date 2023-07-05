@@ -38,17 +38,19 @@ const crudSchemas = reactive<CrudSchema[]>([
       show: true,
       component: 'DatePicker',
       componentProps: {
-        valueFormat: 'YYYY-MM-DD HH:mm:ss',
-        type: 'datetimerange'
+        valueFormat: 'x',
+        type: 'datetimerange',
+        rangeSeparator: '至'
       }
     },
     form: {
       component: 'DatePicker',
       componentProps: {
-        valueFormat: 'YYYY-MM-DD HH:mm:ss',
-        type: 'datetimerange'
+        valueFormat: 'x',
+        type: 'datetimerange',
+        rangeSeparator: '至'
       },
-      value: [getNowDateTime(), getNowDateTime()],
+      value: [getNowDateTime().valueOf(), getNowDateTime().valueOf()],
       colProps: {
         span: 24
       }
@@ -120,10 +122,7 @@ const crudSchemas = reactive<CrudSchema[]>([
     field: 'virtualGroup',
     isSearch: false,
     isTable: false,
-    form: {
-      component: 'InputNumber',
-      value: 0
-    }
+    isForm: false
   },
   {
     label: '活动状态',
@@ -134,24 +133,8 @@ const crudSchemas = reactive<CrudSchema[]>([
     isForm: false
   },
   {
-    label: '创建时间',
-    field: 'createTime',
-    formatter: dateFormatter,
-    isSearch: false,
-    isTable: false,
-    search: {
-      component: 'DatePicker',
-      componentProps: {
-        valueFormat: 'YYYY-MM-DD HH:mm:ss',
-        type: 'daterange',
-        defaultTime: [new Date('1 00:00:00'), new Date('1 23:59:59')]
-      }
-    },
-    isForm: false
-  },
-  {
     label: '拼团商品',
-    field: 'spuId',
+    field: 'spuIds',
     isSearch: false,
     form: {
       colProps: {

@@ -186,7 +186,7 @@ const crudSchemas = reactive<CrudSchema[]>([
   {
     label: '秒杀活动商品',
     field: 'spuId',
-    isTable: false,
+    isTable: true,
     isSearch: false,
     form: {
       colProps: {

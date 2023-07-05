@@ -66,6 +66,7 @@ import { allSchemas } from './seckillActivity.data'
 import { getListAllSimple } from '@/api/mall/promotion/seckill/seckillConfig'
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
 import SeckillActivityForm from './SeckillActivityForm.vue'
+import { cloneDeep } from 'lodash-es'
 
 defineOptions({ name: 'PromotionSeckillActivity' })
 
@@ -90,11 +91,10 @@ const handleDelete = (id: number) => {
   tableMethods.delList(id, false)
 }
 
-// TODO @puhui：是不是直接叫 configList 就好啦
-const seckillConfigAllSimple = ref([]) // 时段配置精简列表
+const configList = ref([]) // 时段配置精简列表
 const convertSeckillConfigNames = computed(
   () => (row) =>
-    seckillConfigAllSimple.value
+    configList.value
       ?.filter((item) => row.configIds.includes(item.id))
       ?.map((config) => config.name)
 )
@@ -106,7 +106,13 @@ const expandChange = (row, expandedRows) => {
 
 /** 初始化 **/
 onMounted(async () => {
+  // 处理一下表格列让商品往前
+  const index = allSchemas.tableColumns.findIndex((item) => item.field === 'spuId')
+  const column = cloneDeep(allSchemas.tableColumns[index])
+  allSchemas.tableColumns.splice(index, 1)
+  // 添加到开头
+  allSchemas.tableColumns.unshift(column)
   await getList()
-  seckillConfigAllSimple.value = await getListAllSimple()
+  configList.value = await getListAllSimple()
 })
 </script>

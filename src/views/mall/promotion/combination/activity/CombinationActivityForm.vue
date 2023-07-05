@@ -1,21 +1,49 @@
 <template>
-  <Dialog v-model="dialogVisible" :title="dialogTitle">
+  <Dialog v-model="dialogVisible" :title="dialogTitle" width="65%">
     <Form
       ref="formRef"
       v-loading="formLoading"
       :is-col="true"
       :rules="rules"
       :schema="allSchemas.formSchema"
-    />
+    >
+      <template #spuIds>
+        <el-button @click="spuSelectRef.open()">选择商品</el-button>
+        <SpuAndSkuList
+          ref="spuAndSkuListRef"
+          :rule-config="ruleConfig"
+          :spu-list="spuList"
+          :spu-property-list-p="spuPropertyList"
+        >
+          <el-table-column align="center" label="拼团价格(元)" min-width="168">
+            <template #default="{ row: sku }">
+              <el-input-number
+                v-model="sku.productConfig.activePrice"
+                :min="0"
+                :precision="2"
+                :step="0.1"
+                class="w-100%"
+              />
+            </template>
+          </el-table-column>
+        </SpuAndSkuList>
+      </template>
+    </Form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+  <SpuSelect ref="spuSelectRef" @confirm="selectSpu" />
 </template>
 <script lang="ts" setup>
 import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationactivity'
+import { CombinationProductVO } from '@/api/mall/promotion/combination/combinationactivity'
 import { allSchemas, rules } from './combinationActivity.data'
+import { SpuAndSkuList, SpuProperty, SpuSelect } from '@/views/mall/promotion/components'
+import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
+import * as ProductSpuApi from '@/api/mall/product/spu'
+import { convertToInteger } from '@/utils'
 
 defineOptions({ name: 'PromotionCombinationActivityForm' })
 
@@ -27,6 +55,52 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formRef = ref() // 表单 Ref
+
+// ================= 商品选择相关 =================
+
+const spuSelectRef = ref() // 商品和属性选择 Ref
+const spuAndSkuListRef = ref() // sku 秒杀配置组件Ref
+const spuList = ref<CombinationActivityApi.SpuExtension[]>([]) // 选择的 spu
+const spuPropertyList = ref<SpuProperty<CombinationActivityApi.SpuExtension>[]>([])
+const ruleConfig: RuleConfig[] = [
+  {
+    name: 'productConfig.activePrice',
+    rule: (arg) => arg > 0.01,
+    message: '商品拼团价格不能小于0.01 ！！！'
+  }
+]
+const selectSpu = (spuId: number, skuIds: number[]) => {
+  formRef.value.setValues({ spuId })
+  getSpuDetails([spuId])
+  console.log(skuIds)
+}
+/**
+ * 获取 SPU 详情
+ * @param spuIds
+ */
+const getSpuDetails = async (spuIds: number[]) => {
+  const spuProperties: SpuProperty<CombinationActivityApi.SpuExtension>[] = []
+  const res = (await ProductSpuApi.getSpuDetailList(
+    spuIds
+  )) as CombinationActivityApi.SpuExtension[]
+  spuList.value = []
+  res?.forEach((spu) => {
+    // 初始化每个 sku 秒杀配置
+    spu.skus?.forEach((sku) => {
+      const config: CombinationActivityApi.CombinationProductVO = {
+        spuId: spu.id!,
+        skuId: sku.id!,
+        activePrice: 0
+      }
+      sku.productConfig = config
+    })
+    spuProperties.push({ spuId: spu.id!, spuDetail: spu, propertyList: getPropertyList(spu) })
+  })
+  spuList.value.push(...res)
+  spuPropertyList.value = spuProperties
+}
+
+// ================= end =================
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -57,6 +131,12 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formRef.value.formModel as CombinationActivityApi.CombinationActivityVO
+    const products = spuAndSkuListRef.value.getSkuConfigs('productConfig')
+    products.forEach((item: CombinationProductVO) => {
+      // 拼团价格元转分
+      item.activePrice = convertToInteger(item.activePrice)
+    })
+    data.products = products
     if (formType.value === 'create') {
       await CombinationActivityApi.createCombinationActivity(data)
       message.success(t('common.createSuccess'))
