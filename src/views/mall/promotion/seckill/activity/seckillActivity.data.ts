@@ -194,7 +194,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       }
     },
     table: {
-      width: 200
+      width: 300
     }
   },
   {

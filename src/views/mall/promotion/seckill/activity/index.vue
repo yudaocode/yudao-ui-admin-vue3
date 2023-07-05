@@ -32,6 +32,14 @@
       @expand-change="expandChange"
     >
       <template #expand> 展示活动商品和商品相关属性活动配置</template>
+      <template #spuId="{ row }">
+        <el-image
+          :src="row.picUrl"
+          class="w-30px h-30px align-middle mr-5px"
+          @click="imagePreview(row.picUrl)"
+        />
+        <span class="align-middle">{{ row.spuName }}</span>
+      </template>
       <template #configIds="{ row }">
         <el-tag v-for="(name, index) in convertSeckillConfigNames(row)" :key="index" class="mr-5px">
           {{ name }}
@@ -67,6 +75,7 @@ import { getListAllSimple } from '@/api/mall/promotion/seckill/seckillConfig'
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
 import SeckillActivityForm from './SeckillActivityForm.vue'
 import { cloneDeep } from 'lodash-es'
+import { createImageViewer } from '@/components/ImageViewer'
 
 defineOptions({ name: 'PromotionSeckillActivity' })
 
@@ -90,7 +99,12 @@ const openForm = (type: string, id?: number) => {
 const handleDelete = (id: number) => {
   tableMethods.delList(id, false)
 }
-
+/** 商品图预览 */
+const imagePreview = (imgUrl: string) => {
+  createImageViewer({
+    urlList: [imgUrl]
+  })
+}
 const configList = ref([]) // 时段配置精简列表
 const convertSeckillConfigNames = computed(
   () => (row) =>
@@ -106,6 +120,11 @@ const expandChange = (row, expandedRows) => {
 
 /** 初始化 **/
 onMounted(async () => {
+  /*
+   TODO
+   后面准备封装成一个函数来操作 tableColumns 重新排列：比如说需求是表单上商品选择是在后面的而列表展示的时候需要调到位置。
+   封装效果支持批量操作，给出 field 和需要插入的位置，例：[{field:'spuId',index: 1}] 效果为把 field 为 spuId 的 column 移动到第一个位置
+   */
   // 处理一下表格列让商品往前
   const index = allSchemas.tableColumns.findIndex((item) => item.field === 'spuId')
   const column = cloneDeep(allSchemas.tableColumns[index])
