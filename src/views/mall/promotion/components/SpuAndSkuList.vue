@@ -10,22 +10,7 @@
           :rule-config="ruleConfig"
         >
           <template #extension>
-            <el-table-column align="center" label="秒杀库存" min-width="168">
-              <template #default="{ row: sku }">
-                <el-input-number v-model="sku.productConfig.stock" :min="0" class="w-100%" />
-              </template>
-            </el-table-column>
-            <el-table-column align="center" label="秒杀价格(元)" min-width="168">
-              <template #default="{ row: sku }">
-                <el-input-number
-                  v-model="sku.productConfig.seckillPrice"
-                  :min="0"
-                  :precision="2"
-                  :step="0.1"
-                  class="w-100%"
-                />
-              </template>
-            </el-table-column>
+            <slot></slot>
           </template>
         </SkuList>
       </template>
@@ -56,7 +41,7 @@ import { SpuProperty } from '@/views/mall/promotion/components/index'
 defineOptions({ name: 'PromotionSpuAndSkuList' })
 
 const props = defineProps<{
-  spuList: T[]
+  spuList: T[] // TODO 为了方便兼容后续可能有需要展示多个 spu 的情况暂时保持，如果后续都是只操作一个 spu 的话则可更改为接受一个 spu 或保持
   ruleConfig: RuleConfig[]
   spuPropertyListP: SpuProperty<T>[]
 }>()

@@ -145,17 +145,61 @@ const queryParams = ref({
 }) // 查询参数
 const propertyList = ref<Properties[]>([]) // 商品属性列表
 const spuListRef = ref<InstanceType<typeof ElTable>>()
-const spuData = ref<ProductSpuApi.Spu | {}>() // 商品详情
+const spuData = ref<ProductSpuApi.Spu>() // 商品详情
 const isExpand = ref(false) // 控制 SKU 列表显示
 const expandRowKeys = ref<number[]>() // 控制展开行需要设置 row-key 属性才能使用，该属性为展开行的 keys 数组。
 
+//============ 商品选择相关 ============
+const selectedSpuId = ref<number>(0) // 选中的商品 spuId
+const selectedSkuIds = ref<number[]>([]) // 选中的商品 skuIds
+const selectSku = (val: ProductSpuApi.Sku[]) => {
+  if (selectedSpuId.value === 0) {
+    return
+  }
+  selectedSkuIds.value = val.map((sku) => sku.id!)
+}
+const selectSpu = (val: ProductSpuApi.Spu[]) => {
+  if (val.length === 0) {
+    selectedSpuId.value = 0
+    return
+  }
+  // 只选择一个
+  selectedSpuId.value = val.map((spu) => spu.id!)[0]
+  // 切换选择 spu 如果有选择的 sku 则清空,确保选择的 sku 是对应的 spu 下面的
+  if (selectedSkuIds.value.length > 0) {
+    selectedSkuIds.value = []
+  }
+  // 如果大于1个
+  if (val.length > 1) {
+    // 清空选择
+    spuListRef.value.clearSelection()
+    // 变更为最后一次选择的
+    spuListRef.value.toggleRowSelection(val.pop(), true)
+    return
+  }
+  expandChange(val[0], val)
+}
+
 // 计算商品属性
-const expandChange = async (row: ProductSpuApi.Spu, expandedRows: ProductSpuApi.Spu[]) => {
+const expandChange = async (row: ProductSpuApi.Spu, expandedRows?: ProductSpuApi.Spu[]) => {
+  // 判断需要展开的 spuId === 选择的 spuId。如果选择了 A 就展开 A 的 skuList。如果选择了 A 手动展开 B 则阻断
+  // 目的防止误选 sku
+  if (selectedSpuId.value !== 0) {
+    if (row.id !== selectedSpuId.value) {
+      message.warning('你已选择商品请先取消')
+      expandRowKeys.value = [selectedSpuId.value]
+      return
+    }
+    // 如果以展开 skuList 则选择此对应的 spu 不需要重新获取渲染 skuList
+    if (isExpand.value && spuData.value?.id === row.id) {
+      return
+    }
+  }
   spuData.value = {}
   propertyList.value = []
   isExpand.value = false
-  // 如果展开个数为 0
-  if (expandedRows.length === 0) {
+  if (expandedRows?.length === 0) {
+    // 如果展开个数为 0
     expandRowKeys.value = []
     return
   }
@@ -167,33 +211,15 @@ const expandChange = async (row: ProductSpuApi.Spu, expandedRows: ProductSpuApi.
   expandRowKeys.value = [row.id!]
 }
 
-//============ 商品选择相关 ============
-const selectedSpuIds = ref<number[]>([]) // 选中的商品 spuIds
-const selectedSkuIds = ref<number[]>([]) // 选中的商品 skuIds
-const selectSku = (val: ProductSpuApi.Sku[]) => {
-  selectedSkuIds.value = val.map((sku) => sku.id!)
-}
-const selectSpu = (val: ProductSpuApi.Spu[]) => {
-  selectedSpuIds.value = val.map((spu) => spu.id!)
-  // // 只选择一个
-  // selectedSpu.value = val[0]
-  // // 如果大于1个
-  // if (val.length > 1) {
-  //   // 清空选择
-  //   spuListRef.value.clearSelection()
-  //   // 变更为最后一次选择的
-  //   spuListRef.value.toggleRowSelection(val.pop(), true)
-  // }
-}
 // 确认选择时的触发事件
 const emits = defineEmits<{
-  (e: 'confirm', spuIds: number[], skuIds?: number[]): void
+  (e: 'confirm', spuId: number, skuIds?: number[]): void
 }>()
 /**
  * 确认选择返回选中的 spu 和 sku (如果需要选择sku的话)
  */
 const confirm = () => {
-  if (selectedSpuIds.value.length === 0) {
+  if (selectedSpuId.value === 0) {
     message.warning('没有选择任何商品')
     return
   }
@@ -203,8 +229,8 @@ const confirm = () => {
   }
   // 返回各自 id 列表
   props.isSelectSku
-    ? emits('confirm', selectedSpuIds.value, selectedSkuIds.value)
-    : emits('confirm', selectedSpuIds.value)
+    ? emits('confirm', selectedSpuId.value, selectedSkuIds.value)
+    : emits('confirm', selectedSpuId.value)
   // 关闭弹窗
   dialogVisible.value = false
 }

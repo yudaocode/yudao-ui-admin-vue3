@@ -194,6 +194,7 @@
   <!-- 情况三：作为活动组件 -->
   <el-table
     v-if="isActivityComponent"
+    ref="activitySkuListRef"
     :data="formData!.skus"
     border
     max-height="500"
