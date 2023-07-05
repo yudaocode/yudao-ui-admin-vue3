@@ -50,7 +50,7 @@ import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivit
 import { SeckillProductVO } from '@/api/mall/promotion/seckill/seckillActivity'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
-import { convertToInteger } from '@/utils'
+import { convertToInteger, formatToFraction } from '@/utils'
 
 defineOptions({ name: 'PromotionSeckillActivityForm' })
 
@@ -89,7 +89,11 @@ const selectSpu = (spuId: number, skuIds: number[]) => {
  * 获取 SPU 详情
  * @param spuIds
  */
-const getSpuDetails = async (spuId: number, skuIds: number[]) => {
+const getSpuDetails = async (
+  spuId: number,
+  skuIds: number[] | undefined,
+  products?: SeckillProductVO[]
+) => {
   const spuProperties: SpuProperty<SeckillActivityApi.SpuExtension>[] = []
   const res = (await ProductSpuApi.getSpuDetailList([spuId])) as SeckillActivityApi.SpuExtension[]
   if (res.length == 0) {
@@ -98,12 +102,21 @@ const getSpuDetails = async (spuId: number, skuIds: number[]) => {
   spuList.value = []
   // 因为只能选择一个
   const spu = res[0]
-  const selectSkus = spu?.skus?.filter((sku) => skuIds.includes(sku.id!))
+  const selectSkus =
+    typeof skuIds === 'undefined' ? spu?.skus : spu?.skus?.filter((sku) => skuIds.includes(sku.id!))
   selectSkus?.forEach((sku) => {
-    const config: SeckillActivityApi.SeckillProductVO = {
+    let config: SeckillActivityApi.SeckillProductVO = {
       skuId: sku.id!,
       stock: 0,
       seckillPrice: 0
+    }
+    if (typeof products !== 'undefined') {
+      const product = products.find((item) => item.skuId === sku.id)
+      if (product) {
+        // 元转分
+        product.seckillPrice = formatToFraction(product.seckillPrice)
+      }
+      config = product || config
     }
     sku.productConfig = config
   })
@@ -113,7 +126,7 @@ const getSpuDetails = async (spuId: number, skuIds: number[]) => {
     spuDetail: spu,
     propertyList: getPropertyList(spu)
   })
-  spuList.value.push(...res)
+  spuList.value.push(spu)
   spuPropertyList.value = spuProperties
 }
 
@@ -125,11 +138,18 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   await resetForm()
-  // 修改时，设置数据 TODO 没测试估计有问题
+  // 修改时，设置数据
   if (id) {
     formLoading.value = true
     try {
-      const data = await SeckillActivityApi.getSeckillActivity(id)
+      const data = (await SeckillActivityApi.getSeckillActivity(
+        id
+      )) as SeckillActivityApi.SeckillActivityVO
+      await getSpuDetails(
+        data.spuId!,
+        data.products?.map((sku) => sku.skuId),
+        data.products
+      )
       formRef.value.setValues(data)
     } finally {
       formLoading.value = false
@@ -162,7 +182,7 @@ const submitForm = async () => {
       item.seckillPrice = convertToInteger(item.seckillPrice)
     })
     // 获取秒杀商品配置
-    data.products = spuAndSkuListRef.value.getSkuConfigs('productConfig')
+    data.products = products
     if (formType.value === 'create') {
       await SeckillActivityApi.createSeckillActivity(data)
       message.success(t('common.createSuccess'))

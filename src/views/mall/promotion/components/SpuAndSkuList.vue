@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="spuData" :default-expand-all="true">
+  <el-table :data="spuData" :expand-row-keys="expandRowKeys" row-key="id">
     <el-table-column type="expand" width="30">
       <template #default="{ row }">
         <SkuList
@@ -48,9 +48,8 @@ const props = defineProps<{
 
 const spuData = ref<Spu[]>([]) // spu 详情数据列表
 const skuListRef = ref() // 商品属性列表Ref
-
 const spuPropertyList = ref<SpuProperty<T>[]>([]) // spuId 对应的 sku 的属性列表
-
+const expandRowKeys = ref<number[]>() // 控制展开行需要设置 row-key 属性才能使用，该属性为展开行的 keys 数组。
 /**
  * 获取所有 sku 活动配置
  * @param extendedAttribute 在 sku 上扩展的属性，例：秒杀活动 sku 扩展属性 productConfig 请参考 seckillActivity.ts
@@ -98,6 +97,10 @@ watch(
   (data) => {
     if (!data) return
     spuPropertyList.value = data as SpuProperty<T>[]
+    // 解决如果之前选择的是单规格 spu 的话后面选择多规格 sku 多规格属性信息不展示的问题。解决方法：让 SkuList 组件重新渲染（行折叠会干掉包含的组件展开时会重新加载）
+    setTimeout(() => {
+      expandRowKeys.value = data.map((item) => item.spuId)
+    }, 200)
   },
   {
     deep: true,

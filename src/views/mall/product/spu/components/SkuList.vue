@@ -113,6 +113,7 @@
   <!-- 情况二：详情 -->
   <el-table
     v-if="isDetail"
+    ref="activitySkuListRef"
     :data="formData!.skus"
     border
     max-height="500"
@@ -194,7 +195,6 @@
   <!-- 情况三：作为活动组件 -->
   <el-table
     v-if="isActivityComponent"
-    ref="activitySkuListRef"
     :data="formData!.skus"
     border
     max-height="500"
@@ -261,6 +261,7 @@ import type { Property, Sku, Spu } from '@/api/mall/product/spu'
 import { createImageViewer } from '@/components/ImageViewer'
 import { RuleConfig } from '@/views/mall/product/spu/components/index'
 import { Properties } from './index'
+import { ElTable } from 'element-plus'
 
 defineOptions({ name: 'SkuList' })
 const message = useMessage() // 消息弹窗
@@ -515,7 +516,6 @@ watch(
       // name加属性项index区分属性值
       tableHeaders.value.push({ prop: `name${index}`, label: item.name })
     })
-
     // 如果回显的 sku 属性和添加的属性一致则不处理
     if (validateData(propertyList)) {
       return
@@ -532,6 +532,10 @@ watch(
     immediate: true
   }
 )
+const activitySkuListRef = ref<InstanceType<typeof ElTable>>()
+const clearSelection = () => {
+  activitySkuListRef.value.clearSelection()
+}
 // 暴露出生成 sku 方法，给添加属性成功时调用
-defineExpose({ generateTableData, validateSku })
+defineExpose({ generateTableData, validateSku, clearSelection })
 </script>

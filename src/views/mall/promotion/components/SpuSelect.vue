@@ -57,6 +57,7 @@
           <template #default>
             <SkuList
               v-if="isExpand"
+              ref="skuListRef"
               :isComponent="true"
               :isDetail="true"
               :prop-form-data="spuData"
@@ -145,6 +146,7 @@ const queryParams = ref({
 }) // 查询参数
 const propertyList = ref<Properties[]>([]) // 商品属性列表
 const spuListRef = ref<InstanceType<typeof ElTable>>()
+const skuListRef = ref() // 商品属性选择 Ref
 const spuData = ref<ProductSpuApi.Spu>() // 商品详情
 const isExpand = ref(false) // 控制 SKU 列表显示
 const expandRowKeys = ref<number[]>() // 控制展开行需要设置 row-key 属性才能使用，该属性为展开行的 keys 数组。
@@ -154,6 +156,8 @@ const selectedSpuId = ref<number>(0) // 选中的商品 spuId
 const selectedSkuIds = ref<number[]>([]) // 选中的商品 skuIds
 const selectSku = (val: ProductSpuApi.Sku[]) => {
   if (selectedSpuId.value === 0) {
+    message.warning('请先选择商品再选择相应的规格！！！')
+    skuListRef.value.clearSelection()
     return
   }
   selectedSkuIds.value = val.map((sku) => sku.id!)
@@ -233,6 +237,8 @@ const confirm = () => {
     : emits('confirm', selectedSpuId.value)
   // 关闭弹窗
   dialogVisible.value = false
+  selectedSpuId.value = 0
+  selectedSkuIds.value = []
 }
 
 /** 打开弹窗 */
