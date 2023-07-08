@@ -109,7 +109,7 @@ const elementBusinessObject = ref<any>({}) // 元素 businessObject 镜像，提
 const conditionFormVisible = ref(false) // 流转条件设置
 const formVisible = ref(false) // 表单配置
 const bpmnElement = ref()
-const timer = ref()
+
 provide('prefix', props.prefix)
 provide('width', props.width)
 const bpmnInstances = () => (window as any)?.bpmnInstances
