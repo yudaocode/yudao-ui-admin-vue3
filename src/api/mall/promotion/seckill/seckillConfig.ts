@@ -5,7 +5,7 @@ export interface SeckillConfigVO {
   name: string
   startTime: string
   endTime: string
-  picUrl: string
+  sliderPicUrls: string[]
   status: number
 }
 

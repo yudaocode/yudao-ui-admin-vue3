@@ -46,11 +46,14 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    label: '秒杀主图',
-    field: 'picUrl',
+    label: '秒杀轮播图',
+    field: 'sliderPicUrls',
     isSearch: false,
     form: {
-      component: 'UploadImg'
+      component: 'UploadImgs'
+    },
+    table: {
+      width: 300
     }
   },
   {
