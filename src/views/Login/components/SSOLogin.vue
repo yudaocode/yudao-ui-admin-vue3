@@ -55,7 +55,14 @@ const client = ref({
   name: '',
   logo: ''
 })
-const queryParams = reactive({
+interface queryType {
+  responseType: string
+  clientId: string
+  redirectUri: string
+  state: string
+  scopes: string[]
+}
+const queryParams = reactive<queryType>({
   // URL 上的 client_id、scope 等参数
   responseType: '',
   clientId: '',
@@ -64,7 +71,10 @@ const queryParams = reactive({
   scopes: [] // 优先从 query 参数获取；如果未传递，从后端获取
 })
 const ssoVisible = computed(() => unref(getLoginState) === LoginStateEnum.SSO) // 是否展示 SSO 登录的表单
-const formData = reactive({
+interface formType {
+  scopes: string[]
+}
+const formData = reactive<formType>({
   scopes: [] // 已选中的 scope 数组
 })
 const formLoading = ref(false) // 表单是否提交中
