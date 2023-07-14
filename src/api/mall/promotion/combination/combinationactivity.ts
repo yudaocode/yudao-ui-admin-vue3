@@ -4,7 +4,7 @@ import { Sku, Spu } from '@/api/mall/product/spu'
 export interface CombinationActivityVO {
   id?: number
   name?: string
-  spuIds?: number[]
+  spuId?: number
   totalLimitCount?: number
   singleLimitCount?: number
   startTime?: Date
@@ -27,7 +27,7 @@ export interface CombinationProductVO {
 }
 
 // 扩展 Sku 配置
-type SkuExtension = Sku & {
+export type SkuExtension = Sku & {
   productConfig: CombinationProductVO
 }
 
@@ -58,9 +58,4 @@ export const updateCombinationActivity = async (data: CombinationActivityVO) => 
 // 删除拼团活动
 export const deleteCombinationActivity = async (id: number) => {
   return await request.delete({ url: '/promotion/combination-activity/delete?id=' + id })
-}
-
-// 导出拼团活动 Excel
-export const exportCombinationActivity = async (params) => {
-  return await request.download({ url: '/promotion/combination-activity/export-excel', params })
 }

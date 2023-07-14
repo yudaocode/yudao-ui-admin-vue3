@@ -7,7 +7,7 @@
       :rules="rules"
       :schema="allSchemas.formSchema"
     >
-      <template #spuIds>
+      <template #spuId>
         <el-button @click="spuSelectRef.open()">选择商品</el-button>
         <SpuAndSkuList
           ref="spuAndSkuListRef"
@@ -34,7 +34,7 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <SpuSelect ref="spuSelectRef" @confirm="selectSpu" />
+  <SpuSelect ref="spuSelectRef" :isSelectSku="true" @confirm="selectSpu" />
 </template>
 <script lang="ts" setup>
 import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationactivity'
@@ -43,7 +43,7 @@ import { allSchemas, rules } from './combinationActivity.data'
 import { SpuAndSkuList, SpuProperty, SpuSelect } from '@/views/mall/promotion/components'
 import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
 import * as ProductSpuApi from '@/api/mall/product/spu'
-import { convertToInteger } from '@/utils'
+import { convertToInteger, formatToFraction } from '@/utils'
 
 defineOptions({ name: 'PromotionCombinationActivityForm' })
 
@@ -71,32 +71,51 @@ const ruleConfig: RuleConfig[] = [
 ]
 const selectSpu = (spuId: number, skuIds: number[]) => {
   formRef.value.setValues({ spuId })
-  getSpuDetails([spuId])
-  console.log(skuIds)
+  getSpuDetails(spuId, skuIds)
 }
 /**
  * 获取 SPU 详情
- * @param spuIds
  */
-const getSpuDetails = async (spuIds: number[]) => {
+const getSpuDetails = async (
+  spuId: number,
+  skuIds: number[] | undefined,
+  products?: CombinationProductVO[]
+) => {
   const spuProperties: SpuProperty<CombinationActivityApi.SpuExtension>[] = []
-  const res = (await ProductSpuApi.getSpuDetailList(
-    spuIds
-  )) as CombinationActivityApi.SpuExtension[]
+  const res = (await ProductSpuApi.getSpuDetailList([
+    spuId
+  ])) as CombinationActivityApi.SpuExtension[]
+  if (res.length == 0) {
+    return
+  }
   spuList.value = []
-  res?.forEach((spu) => {
-    // 初始化每个 sku 秒杀配置
-    spu.skus?.forEach((sku) => {
-      const config: CombinationActivityApi.CombinationProductVO = {
-        spuId: spu.id!,
-        skuId: sku.id!,
-        activePrice: 0
+  // 因为只能选择一个
+  const spu = res[0]
+  const selectSkus =
+    typeof skuIds === 'undefined' ? spu?.skus : spu?.skus?.filter((sku) => skuIds.includes(sku.id!))
+  selectSkus?.forEach((sku) => {
+    let config: CombinationProductVO = {
+      spuId: spu.id!,
+      skuId: sku.id!,
+      activePrice: 0
+    }
+    if (typeof products !== 'undefined') {
+      const product = products.find((item) => item.skuId === sku.id)
+      if (product) {
+        // 分转元
+        product.activePrice = formatToFraction(product.activePrice)
       }
-      sku.productConfig = config
-    })
-    spuProperties.push({ spuId: spu.id!, spuDetail: spu, propertyList: getPropertyList(spu) })
+      config = product || config
+    }
+    sku.productConfig = config
   })
-  spuList.value.push(...res)
+  spu.skus = selectSkus as CombinationActivityApi.SkuExtension[]
+  spuProperties.push({
+    spuId: spu.id!,
+    spuDetail: spu,
+    propertyList: getPropertyList(spu)
+  })
+  spuList.value.push(spu)
   spuPropertyList.value = spuProperties
 }
 
@@ -107,11 +126,19 @@ const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
+  await resetForm()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
     try {
-      const data = await CombinationActivityApi.getCombinationActivity(id)
+      const data = (await CombinationActivityApi.getCombinationActivity(
+        id
+      )) as CombinationActivityApi.CombinationActivityVO
+      await getSpuDetails(
+        data.spuId!,
+        data.products?.map((sku) => sku.skuId),
+        data.products
+      )
       formRef.value.setValues(data)
     } finally {
       formLoading.value = false
@@ -119,6 +146,14 @@ const open = async (type: string, id?: number) => {
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+/** 重置表单 */
+const resetForm = async () => {
+  spuList.value = []
+  spuPropertyList.value = []
+  await nextTick()
+  formRef.value.getElFormRef().resetFields()
+}
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调

@@ -134,7 +134,7 @@ const crudSchemas = reactive<CrudSchema[]>([
   },
   {
     label: '拼团商品',
-    field: 'spuIds',
+    field: 'spuId',
     isSearch: false,
     form: {
       colProps: {

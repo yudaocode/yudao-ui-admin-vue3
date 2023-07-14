@@ -87,7 +87,6 @@ const selectSpu = (spuId: number, skuIds: number[]) => {
 }
 /**
  * 获取 SPU 详情
- * @param spuIds
  */
 const getSpuDetails = async (
   spuId: number,
@@ -113,7 +112,7 @@ const getSpuDetails = async (
     if (typeof products !== 'undefined') {
       const product = products.find((item) => item.skuId === sku.id)
       if (product) {
-        // 元转分
+        // 分转元
         product.seckillPrice = formatToFraction(product.seckillPrice)
       }
       config = product || config

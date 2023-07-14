@@ -29,6 +29,14 @@
         total: tableObject.total
       }"
     >
+      <template #spuId="{ row }">
+        <el-image
+          :src="row.picUrl"
+          class="w-30px h-30px align-middle mr-5px"
+          @click="imagePreview(row.picUrl)"
+        />
+        <span class="align-middle">{{ row.spuName }}</span>
+      </template>
       <template #action="{ row }">
         <el-button
           v-hasPermi="['promotion:combination-activity:update']"
@@ -57,6 +65,8 @@
 import { allSchemas } from './combinationActivity.data'
 import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationactivity'
 import CombinationActivityForm from './CombinationActivityForm.vue'
+import { cloneDeep } from 'lodash-es'
+import { createImageViewer } from '@/components/ImageViewer'
 
 defineOptions({ name: 'PromotionCombinationActivity' })
 
@@ -69,6 +79,13 @@ const { tableObject, tableMethods } = useTable({
 })
 // 获得表格的各种操作
 const { getList, setSearchParams } = tableMethods
+
+/** 商品图预览 */
+const imagePreview = (imgUrl: string) => {
+  createImageViewer({
+    urlList: [imgUrl]
+  })
+}
 
 /** 添加/修改操作 */
 const formRef = ref()
@@ -83,6 +100,17 @@ const handleDelete = (id: number) => {
 
 /** 初始化 **/
 onMounted(() => {
+  /*
+ TODO
+ 后面准备封装成一个函数来操作 tableColumns 重新排列：比如说需求是表单上商品选择是在后面的而列表展示的时候需要调到位置。
+ 封装效果支持批量操作，给出 field 和需要插入的位置，例：[{field:'spuId',index: 1}] 效果为把 field 为 spuId 的 column 移动到第一个位置
+ */
+  // 处理一下表格列让商品往前
+  const index = allSchemas.tableColumns.findIndex((item) => item.field === 'spuId')
+  const column = cloneDeep(allSchemas.tableColumns[index])
+  allSchemas.tableColumns.splice(index, 1)
+  // 添加到开头
+  allSchemas.tableColumns.unshift(column)
   getList()
 })
 </script>
