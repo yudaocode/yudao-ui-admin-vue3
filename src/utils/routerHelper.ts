@@ -69,10 +69,7 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
       icon: route.icon,
       hidden: !route.visible,
       noCache: !route.keepAlive,
-      alwaysShow:
-        route.children &&
-        route.children.length === 1 &&
-        (route.alwaysShow !== undefined ? route.alwaysShow : true)
+      alwaysShow:route.alwaysShow
     }
     // 路由地址转首字母大写驼峰，作为路由名称，适配keepAlive
     let data: AppRouteRecordRaw = {
