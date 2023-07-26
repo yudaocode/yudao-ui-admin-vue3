@@ -50,8 +50,10 @@ const spuData = ref<Spu[]>([]) // spu 详情数据列表
 const skuListRef = ref() // 商品属性列表Ref
 const spuPropertyList = ref<SpuProperty<T>[]>([]) // spuId 对应的 sku 的属性列表
 const expandRowKeys = ref<number[]>() // 控制展开行需要设置 row-key 属性才能使用，该属性为展开行的 keys 数组。
+
 /**
  * 获取所有 sku 活动配置
+ *
  * @param extendedAttribute 在 sku 上扩展的属性，例：秒杀活动 sku 扩展属性 productConfig 请参考 seckillActivity.ts
  */
 const getSkuConfigs = (extendedAttribute: string) => {
