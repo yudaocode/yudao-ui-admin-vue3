@@ -2,35 +2,34 @@ import request from '@/config/axios'
 import { Sku, Spu } from '@/api/mall/product/spu'
 
 export interface SeckillActivityVO {
-  id: number
-  spuIds: number[]
-  name: string
-  status: number
-  remark: string
-  startTime: Date
-  endTime: Date
-  sort: number
-  configIds: string
-  orderCount: number
-  userCount: number
-  totalPrice: number
-  totalLimitCount: number
-  singleLimitCount: number
-  stock: number
-  totalStock: number
-  products: SeckillProductVO[]
+  id?: number
+  spuId?: number
+  name?: string
+  status?: number
+  remark?: string
+  startTime?: Date
+  endTime?: Date
+  sort?: number
+  configIds?: string
+  orderCount?: number
+  userCount?: number
+  totalPrice?: number
+  totalLimitCount?: number
+  singleLimitCount?: number
+  stock?: number
+  totalStock?: number
+  products?: SeckillProductVO[]
 }
 
 // 秒杀活动所需属性
 export interface SeckillProductVO {
-  spuId: number
   skuId: number
   seckillPrice: number
   stock: number
 }
 
 // 扩展 Sku 配置
-type SkuExtension = Sku & {
+export type SkuExtension = Sku & {
   productConfig: SeckillProductVO
 }
 
