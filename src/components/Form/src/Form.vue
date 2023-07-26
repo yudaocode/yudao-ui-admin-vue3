@@ -1,16 +1,16 @@
 <script lang="tsx">
-import { PropType, defineComponent, ref, computed, unref, watch, onMounted } from 'vue'
-import { ElForm, ElFormItem, ElRow, ElCol, ElTooltip } from 'element-plus'
+import { computed, defineComponent, onMounted, PropType, ref, unref, watch } from 'vue'
+import { ElCol, ElForm, ElFormItem, ElRow, ElTooltip } from 'element-plus'
 import { componentMap } from './componentMap'
 import { propTypes } from '@/utils/propTypes'
 import { getSlot } from '@/utils/tsxHelper'
 import {
-  setTextPlaceholder,
-  setGridProp,
-  setComponentProps,
-  setItemComponentSlots,
   initModel,
-  setFormItemSlots
+  setComponentProps,
+  setFormItemSlots,
+  setGridProp,
+  setItemComponentSlots,
+  setTextPlaceholder
 } from './helper'
 import { useRenderSelect } from './components/useRenderSelect'
 import { useRenderRadio } from './components/useRenderRadio'
@@ -197,7 +197,7 @@ export default defineComponent({
               <span>{item.label}</span>
               <ElTooltip placement="right" raw-content>
                 {{
-                  content: () => <span v-html={item.labelMessage}></span>,
+                  content: () => <span v-dompurify-html={item.labelMessage}></span>,
                   default: () => (
                     <Icon
                       icon="ep:warning"

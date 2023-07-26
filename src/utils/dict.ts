@@ -33,7 +33,6 @@ export const getIntDictOptions = (dictType: string) => {
       value: parseInt(dict.value + '')
     })
   })
-
   return dictOption
 }
 
@@ -146,12 +145,30 @@ export enum DICT_TYPE {
   MP_AUTO_REPLY_REQUEST_MATCH = 'mp_auto_reply_request_match', // 自动回复请求匹配类型
   MP_MESSAGE_TYPE = 'mp_message_type', // 消息类型
 
-  // ========== MALL 模块 ==========
+  // ========== MALL - 会员模块 ==========
+  MEMBER_POINT_BIZ_TYPE = 'member_point_biz_type', // 积分的业务类型
+  MEMBER_POINT_STATUS = 'member_point_status', // 积分的状态
+
+  // ========== MALL - 商品模块 ==========
   PRODUCT_UNIT = 'product_unit', // 商品单位
   PRODUCT_SPU_STATUS = 'product_spu_status', //商品状态
-  // ========== MALL 交易模块 ==========
+
+  // ========== MALL - 交易模块 ==========
   EXPRESS_CHARGE_MODE = 'trade_delivery_express_charge_mode', //快递的计费方式
-  //积分模块//
-  POINT_BIZ_TYPE = 'point_biz_type',
-  POINT_STATUS = 'point_status'
+  TRADE_AFTER_SALE_STATUS = 'trade_after_sale_status', // 售后 - 状态
+  TRADE_AFTER_SALE_WAY = 'trade_after_sale_way', // 售后 - 方式
+  TRADE_AFTER_SALE_TYPE = 'trade_after_sale_type', // 售后 - 类型
+  TRADE_ORDER_TYPE = 'trade_order_type', // 订单 - 类型
+  TRADE_ORDER_STATUS = 'trade_order_status', // 订单 - 状态
+  TRADE_ORDER_ITEM_AFTER_SALE_STATUS = 'trade_order_item_after_sale_status', // 订单项 - 售后状态
+  TERMINAL = 'terminal', // 终端
+
+  // ========== MALL - 营销模块 ==========
+  PROMOTION_DISCOUNT_TYPE = 'promotion_discount_type', // 优惠类型
+  PROMOTION_PRODUCT_SCOPE = 'promotion_product_scope', // 营销的商品范围
+  PROMOTION_COUPON_TEMPLATE_VALIDITY_TYPE = 'promotion_coupon_template_validity_type', // 优惠劵模板的有限期类型
+  PROMOTION_COUPON_STATUS = 'promotion_coupon_status', // 优惠劵的状态
+  PROMOTION_COUPON_TAKE_TYPE = 'promotion_coupon_take_type', // 优惠劵的领取方式
+  PROMOTION_ACTIVITY_STATUS = 'promotion_activity_status', // 优惠活动的状态
+  PROMOTION_CONDITION_TYPE = 'promotion_condition_type' // 营销的条件类型枚举
 }

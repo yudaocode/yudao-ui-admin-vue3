@@ -17,7 +17,7 @@ const props = defineProps({
 })
 
 const getBindValue = computed(() => {
-  const delArr: string[] = ['fullscreen', 'title', 'maxHeight']
+  const delArr: string[] = ['fullscreen', 'title', 'maxHeight', 'appendToBody']
   const attrs = useAttrs()
   const obj = { ...attrs, ...props }
   for (const key in obj) {

@@ -7,8 +7,7 @@ export interface Property {
   valueName?: string // 属性值名称
 }
 
-// TODO puhui999：是不是直接叫 Sku 更简洁一点哈。type 待后面，总感觉有个类型？
-export interface SkuType {
+export interface Sku {
   id?: number // 商品 SKU 编号
   spuId?: number // SPU 编号
   properties?: Property[] // 属性数组
@@ -25,8 +24,7 @@ export interface SkuType {
   salesCount?: number // 商品销量
 }
 
-// TODO puhui999：是不是直接叫 Spu 更简洁一点哈。type 待后面，总感觉有个类型？
-export interface SpuType {
+export interface Spu {
   id?: number
   name?: string // 商品名称
   categoryId?: number | null // 商品分类
@@ -39,9 +37,9 @@ export interface SpuType {
   brandId?: number | null // 商品品牌编号
   specType?: boolean // 商品规格
   subCommissionType?: boolean // 分销类型
-  skus: SkuType[] // sku数组
+  skus?: Sku[] // sku数组
   description?: string // 商品详情
-  sort?: string // 商品排序
+  sort?: number // 商品排序
   giveIntegral?: number // 赠送积分
   virtualSalesCount?: number // 虚拟销量
   recommendHot?: boolean // 是否热卖
@@ -49,6 +47,13 @@ export interface SpuType {
   recommendBest?: boolean // 是否精品
   recommendNew?: boolean // 是否新品
   recommendGood?: boolean // 是否优品
+  price?: number // 商品价格
+  salesCount?: number // 商品销量
+  marketPrice?: number // 市场价
+  costPrice?: number // 成本价
+  stock?: number // 商品库存
+  createTime?: Date // 商品创建时间
+  status?: number // 商品状态
 }
 
 // 获得 Spu 列表
@@ -62,12 +67,12 @@ export const getTabsCount = () => {
 }
 
 // 创建商品 Spu
-export const createSpu = (data: SpuType) => {
+export const createSpu = (data: Spu) => {
   return request.post({ url: '/product/spu/create', data })
 }
 
 // 更新商品 Spu
-export const updateSpu = (data: SpuType) => {
+export const updateSpu = (data: Spu) => {
   return request.put({ url: '/product/spu/update', data })
 }
 
@@ -89,4 +94,9 @@ export const deleteSpu = (id: number) => {
 // 导出商品 Spu Excel
 export const exportSpu = async (params) => {
   return await request.download({ url: '/product/spu/export', params })
+}
+
+// 获得商品 SPU 精简列表
+export const getSpuSimpleList = async () => {
+  return request.get({ url: '/product/spu/get-simple-list' })
 }

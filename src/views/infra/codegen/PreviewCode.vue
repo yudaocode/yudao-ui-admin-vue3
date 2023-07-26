@@ -46,7 +46,7 @@
               {{ t('common.copy') }}
             </el-button>
             <div>
-              <pre><code class="hljs" v-html="highlightedCode(item)"></code></pre>
+              <pre><code v-dompurify-html="highlightedCode(item)" class="hljs"></code></pre>
             </div>
           </el-tab-pane>
         </el-tabs>

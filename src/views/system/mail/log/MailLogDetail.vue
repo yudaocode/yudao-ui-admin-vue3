@@ -3,7 +3,7 @@
     <Descriptions :data="detailData" :schema="allSchemas.detailSchema">
       <!-- 展示 HTML 内容 -->
       <template #templateContent="{ row }">
-        <div v-html="row.templateContent"></div>
+        <div v-dompurify-html="row.templateContent"></div>
       </template>
     </Descriptions>
   </Dialog>

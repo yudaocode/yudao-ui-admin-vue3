@@ -92,8 +92,7 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    name: '',
-    remark: ''
+    name: ''
   }
   formRef.value?.resetFields()
 }
