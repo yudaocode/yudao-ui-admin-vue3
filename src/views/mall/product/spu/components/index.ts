@@ -7,11 +7,11 @@ import SkuList from './SkuList.vue'
 
 import { Spu } from '@/api/mall/product/spu'
 
-// TODO @puhui999：Properties 改成 Property 更合适？
-interface Properties {
+// TODO @puhui999：Properties 改成 Property 更合适？Property 在 Spu 中已存在避免冲突 PropertyAndValues
+interface PropertyAndValues {
   id: number
   name: string
-  values?: Properties[]
+  values?: PropertyAndValues[]
 }
 
 interface RuleConfig {
@@ -23,7 +23,7 @@ interface RuleConfig {
   // 例：需要校验价格必须大于0.01
   // {
   //  name:'price',
-  //  rule:(arg) => arg > 0.01
+  //  rule:(arg: number) => arg > 0.01
   // }
   rule: (arg: any) => boolean
   // 校验不通过时的消息提示
@@ -34,11 +34,11 @@ interface RuleConfig {
  * 获得商品的规格列表
  *
  * @param spu
- * @return Property 规格列表
+ * @return PropertyAndValues 规格列表
  */
-const getPropertyList = (spu: Spu): Properties[] => {
+const getPropertyList = (spu: Spu): PropertyAndValues[] => {
   //  直接拿返回的 skus 属性逆向生成出 propertyList
-  const properties: Properties[] = []
+  const properties: PropertyAndValues[] = []
   // 只有是多规格才处理
   if (spu.specType) {
     spu.skus?.forEach((sku) => {
@@ -66,6 +66,6 @@ export {
   ProductPropertyAddForm,
   SkuList,
   getPropertyList,
-  Properties,
+  PropertyAndValues,
   RuleConfig
 }

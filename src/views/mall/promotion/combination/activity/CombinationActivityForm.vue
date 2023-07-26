@@ -3,11 +3,10 @@
     <Form
       ref="formRef"
       v-loading="formLoading"
-      :isCol="true"
+      :is-col="true"
       :rules="rules"
       :schema="allSchemas.formSchema"
     >
-      <!-- 先选择 -->
       <template #spuId>
         <el-button @click="spuSelectRef.open()">选择商品</el-button>
         <SpuAndSkuList
@@ -16,15 +15,10 @@
           :spu-list="spuList"
           :spu-property-list-p="spuPropertyList"
         >
-          <el-table-column align="center" label="秒杀库存" min-width="168">
-            <template #default="{ row: sku }">
-              <el-input-number v-model="sku.productConfig.stock" :min="0" class="w-100%" />
-            </template>
-          </el-table-column>
-          <el-table-column align="center" label="秒杀价格(元)" min-width="168">
+          <el-table-column align="center" label="拼团价格(元)" min-width="168">
             <template #default="{ row: sku }">
               <el-input-number
-                v-model="sku.productConfig.seckillPrice"
+                v-model="sku.productConfig.activePrice"
                 :min="0"
                 :precision="2"
                 :step="0.1"
@@ -43,16 +37,15 @@
   <SpuSelect ref="spuSelectRef" :isSelectSku="true" @confirm="selectSpu" />
 </template>
 <script lang="ts" setup>
-import { SpuAndSkuList, SpuProperty, SpuSelect } from '../../components'
-import { allSchemas, rules } from './seckillActivity.data'
-
-import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
-import { SeckillProductVO } from '@/api/mall/promotion/seckill/seckillActivity'
-import * as ProductSpuApi from '@/api/mall/product/spu'
+import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationactivity'
+import { CombinationProductVO } from '@/api/mall/promotion/combination/combinationactivity'
+import { allSchemas, rules } from './combinationActivity.data'
+import { SpuAndSkuList, SpuProperty, SpuSelect } from '@/views/mall/promotion/components'
 import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
+import * as ProductSpuApi from '@/api/mall/product/spu'
 import { convertToInteger, formatToFraction } from '@/utils'
 
-defineOptions({ name: 'PromotionSeckillActivityForm' })
+defineOptions({ name: 'PromotionCombinationActivityForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -67,20 +60,15 @@ const formRef = ref() // 表单 Ref
 
 const spuSelectRef = ref() // 商品和属性选择 Ref
 const spuAndSkuListRef = ref() // sku 秒杀配置组件Ref
+const spuList = ref<CombinationActivityApi.SpuExtension[]>([]) // 选择的 spu
+const spuPropertyList = ref<SpuProperty<CombinationActivityApi.SpuExtension>[]>([])
 const ruleConfig: RuleConfig[] = [
   {
-    name: 'productConfig.stock',
-    rule: (arg) => arg > 1,
-    message: '商品秒杀库存必须大于 1 ！！！'
-  },
-  {
-    name: 'productConfig.seckillPrice',
+    name: 'productConfig.activePrice',
     rule: (arg) => arg > 0.01,
-    message: '商品秒杀价格必须大于 0.01 ！！！'
+    message: '商品拼团价格不能小于0.01 ！！！'
   }
 ]
-const spuList = ref<SeckillActivityApi.SpuExtension[]>([]) // 选择的 spu
-const spuPropertyList = ref<SpuProperty<SeckillActivityApi.SpuExtension>[]>([])
 const selectSpu = (spuId: number, skuIds: number[]) => {
   formRef.value.setValues({ spuId })
   getSpuDetails(spuId, skuIds)
@@ -91,10 +79,12 @@ const selectSpu = (spuId: number, skuIds: number[]) => {
 const getSpuDetails = async (
   spuId: number,
   skuIds: number[] | undefined,
-  products?: SeckillProductVO[]
+  products?: CombinationProductVO[]
 ) => {
-  const spuProperties: SpuProperty<SeckillActivityApi.SpuExtension>[] = []
-  const res = (await ProductSpuApi.getSpuDetailList([spuId])) as SeckillActivityApi.SpuExtension[]
+  const spuProperties: SpuProperty<CombinationActivityApi.SpuExtension>[] = []
+  const res = (await ProductSpuApi.getSpuDetailList([
+    spuId
+  ])) as CombinationActivityApi.SpuExtension[]
   if (res.length == 0) {
     return
   }
@@ -104,22 +94,22 @@ const getSpuDetails = async (
   const selectSkus =
     typeof skuIds === 'undefined' ? spu?.skus : spu?.skus?.filter((sku) => skuIds.includes(sku.id!))
   selectSkus?.forEach((sku) => {
-    let config: SeckillActivityApi.SeckillProductVO = {
+    let config: CombinationProductVO = {
+      spuId: spu.id!,
       skuId: sku.id!,
-      stock: 0,
-      seckillPrice: 0
+      activePrice: 0
     }
     if (typeof products !== 'undefined') {
       const product = products.find((item) => item.skuId === sku.id)
       if (product) {
         // 分转元
-        product.seckillPrice = formatToFraction(product.seckillPrice)
+        product.activePrice = formatToFraction(product.activePrice)
       }
       config = product || config
     }
     sku.productConfig = config
   })
-  spu.skus = selectSkus as SeckillActivityApi.SkuExtension[]
+  spu.skus = selectSkus as CombinationActivityApi.SkuExtension[]
   spuProperties.push({
     spuId: spu.id!,
     spuDetail: spu,
@@ -141,9 +131,9 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const data = (await SeckillActivityApi.getSeckillActivity(
+      const data = (await CombinationActivityApi.getCombinationActivity(
         id
-      )) as SeckillActivityApi.SeckillActivityVO
+      )) as CombinationActivityApi.CombinationActivityVO
       await getSpuDetails(
         data.spuId!,
         data.products?.map((sku) => sku.skuId),
@@ -164,6 +154,7 @@ const resetForm = async () => {
   await nextTick()
   formRef.value.getElFormRef().resetFields()
 }
+
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
@@ -174,19 +165,18 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formRef.value.formModel as SeckillActivityApi.SeckillActivityVO
+    const data = formRef.value.formModel as CombinationActivityApi.CombinationActivityVO
     const products = spuAndSkuListRef.value.getSkuConfigs('productConfig')
-    products.forEach((item: SeckillProductVO) => {
-      // 秒杀价格元转分
-      item.seckillPrice = convertToInteger(item.seckillPrice)
+    products.forEach((item: CombinationProductVO) => {
+      // 拼团价格元转分
+      item.activePrice = convertToInteger(item.activePrice)
     })
-    // 获取秒杀商品配置
     data.products = products
     if (formType.value === 'create') {
-      await SeckillActivityApi.createSeckillActivity(data)
+      await CombinationActivityApi.createCombinationActivity(data)
       message.success(t('common.createSuccess'))
     } else {
-      await SeckillActivityApi.updateSeckillActivity(data)
+      await CombinationActivityApi.updateCombinationActivity(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -197,14 +187,3 @@ const submitForm = async () => {
   }
 }
 </script>
-<style lang="scss" scoped>
-.demo-table-expand {
-  padding-left: 42px;
-
-  :deep(.el-form-item__label) {
-    width: 82px;
-    font-weight: bold;
-    color: #99a9bf;
-  }
-}
-</style>

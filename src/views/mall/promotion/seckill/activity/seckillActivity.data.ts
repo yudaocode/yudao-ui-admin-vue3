@@ -153,6 +153,17 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
+    label: '排序',
+    field: 'sort',
+    form: {
+      component: 'InputNumber',
+      value: 0
+    },
+    table: {
+      width: 80
+    }
+  },
+  {
     label: '秒杀库存',
     field: 'stock',
     isForm: false,
@@ -167,18 +178,15 @@ const crudSchemas = reactive<CrudSchema[]>([
   {
     label: '秒杀总库存',
     field: 'totalStock',
-    form: {
-      component: 'InputNumber',
-      value: 0
-    },
+    isForm: false,
     table: {
       width: 120
     }
   },
   {
     label: '秒杀活动商品',
-    field: 'spuIds',
-    isTable: false,
+    field: 'spuId',
+    isTable: true,
     isSearch: false,
     form: {
       colProps: {
@@ -186,7 +194,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       }
     },
     table: {
-      width: 200
+      width: 300
     }
   },
   {
@@ -204,17 +212,6 @@ const crudSchemas = reactive<CrudSchema[]>([
     isForm: false,
     table: {
       width: 120
-    }
-  },
-  {
-    label: '排序',
-    field: 'sort',
-    form: {
-      component: 'InputNumber',
-      value: 0
-    },
-    table: {
-      width: 80
     }
   },
   {

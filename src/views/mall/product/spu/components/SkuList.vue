@@ -2,7 +2,7 @@
   <!-- 情况一：添加/修改 -->
   <el-table
     v-if="!isDetail && !isActivityComponent"
-    :data="isBatch ? skuList : formData!.skus"
+    :data="isBatch ? skuList : formData!.skus!"
     border
     class="tabNumWidth"
     max-height="500"
@@ -113,7 +113,8 @@
   <!-- 情况二：详情 -->
   <el-table
     v-if="isDetail"
-    :data="formData!.skus"
+    ref="activitySkuListRef"
+    :data="formData!.skus!"
     border
     max-height="500"
     size="small"
@@ -194,7 +195,7 @@
   <!-- 情况三：作为活动组件 -->
   <el-table
     v-if="isActivityComponent"
-    :data="formData!.skus"
+    :data="formData!.skus!"
     border
     max-height="500"
     size="small"
@@ -259,7 +260,8 @@ import { UploadImg } from '@/components/UploadFile'
 import type { Property, Sku, Spu } from '@/api/mall/product/spu'
 import { createImageViewer } from '@/components/ImageViewer'
 import { RuleConfig } from '@/views/mall/product/spu/components/index'
-import { Properties } from './index'
+import { PropertyAndValues } from './index'
+import { ElTable } from 'element-plus'
 
 defineOptions({ name: 'SkuList' })
 const message = useMessage() // 消息弹窗
@@ -270,7 +272,7 @@ const props = defineProps({
     default: () => {}
   },
   propertyList: {
-    type: Array as PropType<Properties[]>,
+    type: Array as PropType<PropertyAndValues[]>,
     default: () => []
   },
   ruleConfig: {
@@ -480,7 +482,7 @@ const build = (propertyValuesList: Property[][]) => {
 /** 监听属性列表，生成相关参数和表头 */
 watch(
   () => props.propertyList,
-  (propertyList: Properties[]) => {
+  (propertyList: PropertyAndValues[]) => {
     // 如果不是多规格则结束
     if (!formData.value!.specType) {
       return
@@ -514,7 +516,6 @@ watch(
       // name加属性项index区分属性值
       tableHeaders.value.push({ prop: `name${index}`, label: item.name })
     })
-
     // 如果回显的 sku 属性和添加的属性一致则不处理
     if (validateData(propertyList)) {
       return
@@ -531,6 +532,10 @@ watch(
     immediate: true
   }
 )
+const activitySkuListRef = ref<InstanceType<typeof ElTable>>()
+const clearSelection = () => {
+  activitySkuListRef.value.clearSelection()
+}
 // 暴露出生成 sku 方法，给添加属性成功时调用
-defineExpose({ generateTableData, validateSku })
+defineExpose({ generateTableData, validateSku, clearSelection })
 </script>

@@ -1,11 +1,11 @@
 import SpuSelect from './SpuSelect.vue'
 import SpuAndSkuList from './SpuAndSkuList.vue'
-import { Properties } from '@/views/mall/product/spu/components'
+import { PropertyAndValues } from '@/views/mall/product/spu/components'
 
 type SpuProperty<T> = {
   spuId: number
   spuDetail: T
-  propertyList: Properties[]
+  propertyList: PropertyAndValues[]
 }
 
 /**

@@ -1,5 +1,5 @@
 <template>
-  <el-table :data="spuData" :default-expand-all="true">
+  <el-table :data="spuData" :expand-row-keys="expandRowKeys" row-key="id">
     <el-table-column type="expand" width="30">
       <template #default="{ row }">
         <SkuList
@@ -10,22 +10,7 @@
           :rule-config="ruleConfig"
         >
           <template #extension>
-            <el-table-column align="center" label="秒杀库存" min-width="168">
-              <template #default="{ row: sku }">
-                <el-input-number v-model="sku.productConfig.stock" :min="0" class="w-100%" />
-              </template>
-            </el-table-column>
-            <el-table-column align="center" label="秒杀价格(元)" min-width="168">
-              <template #default="{ row: sku }">
-                <el-input-number
-                  v-model="sku.productConfig.seckillPrice"
-                  :min="0"
-                  :precision="2"
-                  :step="0.1"
-                  class="w-100%"
-                />
-              </template>
-            </el-table-column>
+            <slot></slot>
           </template>
         </SkuList>
       </template>
@@ -47,35 +32,31 @@
   </el-table>
 </template>
 <script generic="T extends Spu" lang="ts" setup>
-// TODO 后续计划重新封装作为活动商品配置通用组件；可以等其他活动做到的时候，在统一处理 SPU 选择组件哈
 import { formatToFraction } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
 import { Spu } from '@/api/mall/product/spu'
 import { RuleConfig, SkuList } from '@/views/mall/product/spu/components'
-import { SeckillProductVO } from '@/api/mall/promotion/seckill/seckillActivity'
 import { SpuProperty } from '@/views/mall/promotion/components/index'
 
 defineOptions({ name: 'PromotionSpuAndSkuList' })
 
-// TODO @puhui999：是不是改成传递一个 spu 就好啦？ 因为活动商品可以多选所以展示编辑的时候需要展示多个
 const props = defineProps<{
-  spuList: T[]
+  spuList: T[] // TODO 为了方便兼容后续可能有需要展示多个 spu 的情况暂时保持，如果后续都是只操作一个 spu 的话则可更改为接受一个 spu 或保持
   ruleConfig: RuleConfig[]
   spuPropertyListP: SpuProperty<T>[]
 }>()
 
 const spuData = ref<Spu[]>([]) // spu 详情数据列表
 const skuListRef = ref() // 商品属性列表Ref
-
 const spuPropertyList = ref<SpuProperty<T>[]>([]) // spuId 对应的 sku 的属性列表
-
+const expandRowKeys = ref<number[]>() // 控制展开行需要设置 row-key 属性才能使用，该属性为展开行的 keys 数组。
 /**
- * 获取所有 sku 秒杀配置
+ * 获取所有 sku 活动配置
  * @param extendedAttribute 在 sku 上扩展的属性，例：秒杀活动 sku 扩展属性 productConfig 请参考 seckillActivity.ts
  */
-const getSkuConfigs: <V>(extendedAttribute: string) => V[] = (extendedAttribute: string) => {
+const getSkuConfigs = (extendedAttribute: string) => {
   skuListRef.value.validateSku()
-  const seckillProducts: SeckillProductVO[] = []
+  const seckillProducts = []
   spuPropertyList.value.forEach((item) => {
     item.spuDetail.skus.forEach((sku) => {
       seckillProducts.push(sku[extendedAttribute])
@@ -116,6 +97,10 @@ watch(
   (data) => {
     if (!data) return
     spuPropertyList.value = data as SpuProperty<T>[]
+    // 解决如果之前选择的是单规格 spu 的话后面选择多规格 sku 多规格属性信息不展示的问题。解决方法：让 SkuList 组件重新渲染（行折叠会干掉包含的组件展开时会重新加载）
+    setTimeout(() => {
+      expandRowKeys.value = data.map((item) => item.spuId)
+    }, 200)
   },
   {
     deep: true,
