@@ -58,6 +58,7 @@ export const useUserStore = defineStore('admin-user', {
       this.user = userInfo.user
       this.isSetUser = true
       wsCache.set(CACHE_KEY.USER, userInfo)
+      wsCache.set(CACHE_KEY.ROLE_ROUTERS, userInfo.menus)
     },
     async loginOut() {
       await loginOut()

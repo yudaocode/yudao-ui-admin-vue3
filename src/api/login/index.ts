@@ -37,11 +37,6 @@ export const getInfo = () => {
   return request.get({ url: '/system/auth/get-permission-info' })
 }
 
-// 路由
-export const getAsyncRoutes = () => {
-  return request.get({ url: '/system/auth/list-menus' })
-}
-
 //获取登录验证码
 export const sendSmsCode = (data: SmsCodeVO) => {
   return request.post({ url: '/system/auth/send-sms-code', data })
