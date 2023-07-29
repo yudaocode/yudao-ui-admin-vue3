@@ -99,28 +99,24 @@ const dialogStyle = computed(() => {
 </template>
 
 <style lang="scss">
-.#{$elNamespace}-dialog__header {
-  margin-right: 0 !important;
-  border-bottom: 1px solid var(--tags-view-border-color);
-}
+.#{$elNamespace}-dialog {
+  &__header {
+    margin-right: 0 !important;
+    border-bottom: 1px solid var(--el-border-color);
+  }
 
-.#{$elNamespace}-dialog__footer {
-  border-top: 1px solid var(--tags-view-border-color);
+  &__body {
+    padding: 0 !important;
+  }
+
+  &__footer {
+    border-top: 1px solid var(--el-border-color);
+  }
 }
 
 .is-hover {
   &:hover {
     color: var(--el-color-primary) !important;
-  }
-}
-
-.dark {
-  .#{$elNamespace}-dialog__header {
-    border-bottom: 1px solid var(--el-border-color);
-  }
-
-  .#{$elNamespace}-dialog__footer {
-    border-top: 1px solid var(--el-border-color);
   }
 }
 </style>

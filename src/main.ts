@@ -1,5 +1,5 @@
 // 引入windi css
-import '@/plugins/windi.css'
+import '@/plugins/unocss'
 
 // 导入全局的svg图标
 import '@/plugins/svgIcon'

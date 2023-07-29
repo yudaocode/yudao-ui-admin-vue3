@@ -28,7 +28,7 @@ onMounted(() => {
       <div
         :class="[
           `${prefixCls}-header`,
-          'flex border-bottom-1 h-50px items-center text-center pr-10px'
+          'lex b-b-1 h-50px items-center text-center bg-white pr-10px'
         ]"
       >
         <div :class="[`${prefixCls}-header__back`, 'flex pl-10px pr-10px ']">

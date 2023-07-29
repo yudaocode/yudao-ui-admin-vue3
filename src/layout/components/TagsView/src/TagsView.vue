@@ -1,17 +1,17 @@
 <script lang="ts" setup>
+import { onMounted, watch, computed, unref, ref, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import type { RouteLocationNormalizedLoaded, RouterLinkProps } from 'vue-router'
 import { usePermissionStore } from '@/store/modules/permission'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useAppStore } from '@/store/modules/app'
-
+import { useI18n } from '@/hooks/web/useI18n'
 import { filterAffixTags } from './helper'
 import { ContextMenu, ContextMenuExpose } from '@/layout/components/ContextMenu'
 import { useDesign } from '@/hooks/web/useDesign'
+import { useTemplateRefsList } from '@vueuse/core'
 import { ElScrollbar } from 'element-plus'
 import { useScrollTo } from '@/hooks/event/useScrollTo'
-import { useTemplateRefsList } from '@vueuse/core'
-
-defineOptions({ name: 'TagsView' })
 
 const { getPrefixCls } = useDesign()
 
@@ -34,6 +34,8 @@ const affixTagArr = ref<RouteLocationNormalizedLoaded[]>([])
 const appStore = useAppStore()
 
 const tagsViewIcon = computed(() => appStore.getTagsViewIcon)
+
+const isDark = computed(() => appStore.getIsDark)
 
 // 初始化tag
 const initTags = () => {
@@ -73,7 +75,7 @@ const closeAllTags = () => {
   toLastView()
 }
 
-// 关闭其他
+// 关闭其它
 const closeOthersTags = () => {
   tagsViewStore.delOthersViews(unref(selectedTag) as RouteLocationNormalizedLoaded)
 }
@@ -128,6 +130,7 @@ const moveToCurrentTag = async () => {
       if (v.fullPath !== unref(currentRoute).fullPath) {
         tagsViewStore.updateVisitedView(unref(currentRoute))
       }
+
       break
     }
   }
@@ -263,29 +266,21 @@ watch(
     class="flex w-full relative bg-[#fff] dark:bg-[var(--el-bg-color)]"
   >
     <span
-      :class="`${prefixCls}__tool`"
-      class="w-[var(--tags-view-height)] h-[var(--tags-view-height)] cursor-pointer"
+      :class="`${prefixCls}__tool ${prefixCls}__tool--first`"
+      class="w-[var(--tags-view-height)] h-[var(--tags-view-height)] flex items-center justify-center cursor-pointer"
       @click="move(-200)"
     >
       <Icon
-        :color="appStore.getIsDark ? 'var(--el-text-color-regular)' : '#333'"
         icon="ep:d-arrow-left"
+        color="var(--el-text-color-placeholder)"
+        :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
       />
     </span>
     <div class="overflow-hidden flex-1">
       <ElScrollbar ref="scrollbarRef" class="h-full" @scroll="scroll">
         <div class="flex h-full">
           <ContextMenu
-            v-for="item in visitedViews"
-            :key="item.fullPath"
             :ref="itemRefs.set"
-            :class="[
-              `${prefixCls}__item`,
-              item?.meta?.affix ? `${prefixCls}__item--affix` : '',
-              {
-                'is-active': isActive(item)
-              }
-            ]"
             :schema="[
               {
                 icon: 'ep:refresh',
@@ -343,14 +338,23 @@ watch(
                 }
               }
             ]"
+            v-for="item in visitedViews"
+            :key="item.fullPath"
             :tag-item="item"
+            :class="[
+              `${prefixCls}__item`,
+              item?.meta?.affix ? `${prefixCls}__item--affix` : '',
+              {
+                'is-active': isActive(item)
+              }
+            ]"
             @visible-change="visibleChange"
           >
             <div>
-              <router-link :ref="tagLinksRefs.set" v-slot="{ navigate }" :to="{ ...item }" custom>
+              <router-link :ref="tagLinksRefs.set" :to="{ ...item }" custom v-slot="{ navigate }">
                 <div
-                  class="h-full flex justify-center items-center whitespace-nowrap pl-15px"
                   @click="navigate"
+                  class="h-full flex justify-center items-center whitespace-nowrap pl-15px"
                 >
                   <Icon
                     v-if="
@@ -366,9 +370,9 @@ watch(
                   {{ t(item?.meta?.title as string) }}
                   <Icon
                     :class="`${prefixCls}__item--close`"
-                    :size="12"
                     color="#333"
                     icon="ep:close"
+                    :size="12"
                     @click.prevent.stop="closeSelectedTag(item)"
                   />
                 </div>
@@ -380,25 +384,28 @@ watch(
     </div>
     <span
       :class="`${prefixCls}__tool`"
-      class="w-[var(--tags-view-height)] h-[var(--tags-view-height)] text-center leading-[var(--tags-view-height)] cursor-pointer"
+      class="w-[var(--tags-view-height)] h-[var(--tags-view-height)] flex items-center justify-center cursor-pointer"
       @click="move(200)"
     >
       <Icon
-        :color="appStore.getIsDark ? 'var(--el-text-color-regular)' : '#333'"
         icon="ep:d-arrow-right"
+        color="var(--el-text-color-placeholder)"
+        :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
       />
     </span>
     <span
       :class="`${prefixCls}__tool`"
-      class="w-[var(--tags-view-height)] h-[var(--tags-view-height)] text-center leading-[var(--tags-view-height)] cursor-pointer"
+      class="w-[var(--tags-view-height)] h-[var(--tags-view-height)] flex items-center justify-center cursor-pointer"
       @click="refreshSelectedTag(selectedTag)"
     >
       <Icon
-        :color="appStore.getIsDark ? 'var(--el-text-color-regular)' : '#333'"
         icon="ep:refresh-right"
+        color="var(--el-text-color-placeholder)"
+        :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
       />
     </span>
     <ContextMenu
+      trigger="click"
       :schema="[
         {
           icon: 'ep:refresh',
@@ -450,15 +457,15 @@ watch(
           }
         }
       ]"
-      trigger="click"
     >
       <span
         :class="`${prefixCls}__tool`"
-        class="w-[var(--tags-view-height)] h-[var(--tags-view-height)] text-center leading-[var(--tags-view-height)] cursor-pointer block"
+        class="w-[var(--tags-view-height)] h-[var(--tags-view-height)] flex items-center justify-center cursor-pointer block"
       >
         <Icon
-          :color="appStore.getIsDark ? 'var(--el-text-color-regular)' : '#333'"
           icon="ep:menu"
+          color="var(--el-text-color-placeholder)"
+          :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
         />
       </span>
     </ContextMenu>
@@ -475,47 +482,49 @@ $prefix-cls: #{$namespace}-tags-view;
 
   &__tool {
     position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 
-    &:hover {
-      :deep(span) {
-        color: var(--el-color-black) !important;
-      }
-    }
-
-    &::after {
+    &::before {
       position: absolute;
       top: 1px;
       left: 0;
       width: 100%;
       height: calc(100% - 1px);
-      border-right: 1px solid var(--tags-view-border-color);
-      border-left: 1px solid var(--tags-view-border-color);
+      border-left: 1px solid var(--el-border-color);
       content: '';
+    }
+
+    &--first {
+      &::before {
+        position: absolute;
+        top: 1px;
+        left: 0;
+        width: 100%;
+        height: calc(100% - 1px);
+        border-right: 1px solid var(--el-border-color);
+        border-left: none;
+        content: '';
+      }
     }
   }
 
   &__item {
     position: relative;
     top: 2px;
-    height: calc(100% - 4px);
-    padding-right: 16px;
+    height: calc(100% - 6px);
+    padding-right: 25px;
     margin-left: 4px;
     font-size: 12px;
-    border-radius: 3px;
     cursor: pointer;
     border: 1px solid #d9d9d9;
+    border-radius: 2px;
 
     &--close {
       position: absolute;
       top: 50%;
-      right: 3px;
+      right: 5px;
       display: none;
       transform: translate(0, -50%);
     }
-
     &:not(.#{$prefix-cls}__item--affix):hover {
       .#{$prefix-cls}__item--close {
         display: block;
@@ -533,7 +542,6 @@ $prefix-cls: #{$namespace}-tags-view;
     color: var(--el-color-white);
     background-color: var(--el-color-primary);
     border: 1px solid var(--el-color-primary);
-
     .#{$prefix-cls}__item--close {
       :deep(span) {
         color: var(--el-color-white) !important;
@@ -545,26 +553,14 @@ $prefix-cls: #{$namespace}-tags-view;
 .dark {
   .#{$prefix-cls} {
     &__tool {
-      &:hover {
-        :deep(span) {
-          color: #fff !important;
+      &--first {
+        &::after {
+          display: none;
         }
-      }
-
-      &::after {
-        border-right: 1px solid var(--el-border-color);
-        border-left: 1px solid var(--el-border-color);
       }
     }
 
     &__item {
-      position: relative;
-      top: 2px;
-      height: calc(100% - 4px);
-      padding-right: 16px;
-      font-size: 12px;
-      border-radius: 3px;
-      cursor: pointer;
       border: 1px solid var(--el-border-color);
     }
 
@@ -577,7 +573,7 @@ $prefix-cls: #{$namespace}-tags-view;
     &__item.is-active {
       color: var(--el-color-white);
       background-color: var(--el-color-primary);
-
+      border: 1px solid var(--el-color-primary);
       .#{$prefix-cls}__item--close {
         :deep(span) {
           color: var(--el-color-white) !important;
