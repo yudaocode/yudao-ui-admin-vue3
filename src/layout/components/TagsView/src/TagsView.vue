@@ -410,7 +410,7 @@ watch(
         {
           icon: 'ep:close',
           label: t('common.closeTab'),
-           disabled: !!visitedViews?.length && selectedTag?.meta.affix,
+          disabled: !!visitedViews?.length && selectedTag?.meta.affix,
           command: () => {
             closeSelectedTag(selectedTag!)
           }
