@@ -46,7 +46,7 @@
 | [vueuse](https://vueuse.org/)                                        | 常用工具集            | 10.2.1 |
 | [vue-i18n](https://kazupon.github.io/vue-i18n/zh/introduction.html/) | 国际化              | 9.2.2  |
 | [vue-router](https://router.vuejs.org/)                              | Vue 路由           | 4.2.4  |
-| [unocss](https://uno.antfu.me/)                                      | 原子 css  | unocss  |
+| [unocss](https://uno.antfu.me/)                                      | 原子 css          | 0.54.0  |
 | [iconify](https://icon-sets.iconify.design/)                         | 在线图标库            | 3.1.1  |
 | [wangeditor](https://www.wangeditor.com/)                            | 富文本编辑器           | 5.1.23 |
 
