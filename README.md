@@ -46,7 +46,7 @@
 | [vueuse](https://vueuse.org/)                                        | 常用工具集            | 10.2.1 |
 | [vue-i18n](https://kazupon.github.io/vue-i18n/zh/introduction.html/) | 国际化              | 9.2.2  |
 | [vue-router](https://router.vuejs.org/)                              | Vue 路由           | 4.2.4  |
-| [windicss](https://cn.windicss.org/)                                 | 下一代工具优先的 CSS 框架  | 3.5.6  |
+| [unocss](https://uno.antfu.me/)                                      | 原子 css  | unocss  |
 | [iconify](https://icon-sets.iconify.design/)                         | 在线图标库            | 3.1.1  |
 | [wangeditor](https://www.wangeditor.com/)                            | 富文本编辑器           | 5.1.23 |
 
@@ -56,14 +56,14 @@
 
 | 插件名                           | 功能                       |
 |-------------------------------|--------------------------|
-| TypeScript Vue Plugin (Volar) | 用于 TypeScript 的 Vue 插件   |
+| TypeScript Vue Plugin (Volar) | 用于 TypeScript 的 Vue 插件  |
 | Vue Language Features (Volar) | Vue3.0 语法支持              |
-| WindiCSS IntelliSense         | 自动完成、语法突出显示、代码折叠和构建等高级功能 |
-| Iconify IntelliSense          | Iconify 预览和搜索            |
-| i18n Ally                     | 国际化智能提示                  |
+| unocss                        | unocss for vscode           |
+| Iconify IntelliSense          | Iconify 预览和搜索           |
+| i18n Ally                     | 国际化智能提示               |
 | Stylelint                     | Css    格式化               |
-| Prettier                      | 代码格式化                    |
-| ESLint                        | 脚本代码检查                   |
+| Prettier                      | 代码格式化                   |
+| ESLint                        | 脚本代码检查                  |
 | DotENV                        | env 文件高亮                 |
 
 ## 内置功能
