@@ -23,7 +23,7 @@
       </el-button>
       <el-scrollbar height="580">
         <div>
-          <pre><code class="hljs" v-html="highlightedCode(formData)"></code></pre>
+          <pre><code class="hljs" v-dompurify-html="highlightedCode(formData)"></code></pre>
         </div>
       </el-scrollbar>
     </div>
