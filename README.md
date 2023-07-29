@@ -24,7 +24,7 @@
 * 改换 saas，自动引入等功能
 * 使用 Element Plus 免费开源的中后台模版，具备如下特性：
 
-![首页](preview/home.png)
+![首页](public/home.png)
 
 * **最新技术栈**：使用 Vue3、Vite4 等前端前沿技术开发
 * **TypeScript**: 应用程序级 JavaScript 的语言
