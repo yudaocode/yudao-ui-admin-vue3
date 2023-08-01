@@ -9,11 +9,6 @@ export const rules = reactive({
   startTime: [required],
   endTime: [required],
   userSize: [required],
-  totalNum: [required],
-  successNum: [required],
-  orderUserCount: [required],
-  virtualGroup: [required],
-  status: [required],
   limitDuration: [required]
 })
 
@@ -58,7 +53,7 @@ const crudSchemas = reactive<CrudSchema[]>([
   },
   {
     label: '参与人数',
-    field: 'orderUserCount',
+    field: 'userSize',
     isSearch: false,
     form: {
       component: 'InputNumber',
@@ -115,13 +110,6 @@ const crudSchemas = reactive<CrudSchema[]>([
     label: '成团组数',
     field: 'successNum',
     isSearch: false,
-    isForm: false
-  },
-  {
-    label: '虚拟成团',
-    field: 'virtualGroup',
-    isSearch: false,
-    isTable: false,
     isForm: false
   },
   {
