@@ -1,5 +1,5 @@
 import type { CrudSchema } from '@/hooks/web/useCrudSchemas'
-import { dateFormatter, getNowDateTime } from '@/utils/formatTime'
+import { dateFormatter2 } from '@/utils/formatTime'
 
 // 表单校验
 export const rules = reactive({
@@ -26,29 +26,49 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    label: '活动时间',
-    field: 'activityTime',
-    formatter: dateFormatter,
+    label: '活动开始时间',
+    field: 'startTime',
+    formatter: dateFormatter2,
+    isSearch: true,
     search: {
-      show: true,
       component: 'DatePicker',
       componentProps: {
-        valueFormat: 'x',
-        type: 'datetimerange',
-        rangeSeparator: '至'
+        valueFormat: 'YYYY-MM-DD',
+        type: 'daterange'
       }
     },
     form: {
       component: 'DatePicker',
       componentProps: {
-        valueFormat: 'x',
-        type: 'datetimerange',
-        rangeSeparator: '至'
-      },
-      value: [getNowDateTime().valueOf(), getNowDateTime().valueOf()],
-      colProps: {
-        span: 24
+        type: 'date',
+        valueFormat: 'x'
       }
+    },
+    table: {
+      width: 120
+    }
+  },
+  {
+    label: '活动结束时间',
+    field: 'endTime',
+    formatter: dateFormatter2,
+    isSearch: true,
+    search: {
+      component: 'DatePicker',
+      componentProps: {
+        valueFormat: 'YYYY-MM-DD',
+        type: 'daterange'
+      }
+    },
+    form: {
+      component: 'DatePicker',
+      componentProps: {
+        type: 'date',
+        valueFormat: 'x'
+      }
+    },
+    table: {
+      width: 120
     }
   },
   {

@@ -63,7 +63,7 @@
 </template>
 <script lang="ts" setup>
 import { allSchemas } from './combinationActivity.data'
-import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationactivity'
+import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationActivity'
 import CombinationActivityForm from './CombinationActivityForm.vue'
 import { cloneDeep } from 'lodash-es'
 import { createImageViewer } from '@/components/ImageViewer'
@@ -102,10 +102,10 @@ const handleDelete = (id: number) => {
 /** 初始化 **/
 onMounted(() => {
   /**
- TODO
- 后面准备封装成一个函数来操作 tableColumns 重新排列：比如说需求是表单上商品选择是在后面的而列表展示的时候需要调到位置。
- 封装效果支持批量操作，给出 field 和需要插入的位置，例：[{field:'spuId',index: 1}] 效果为把 field 为 spuId 的 column 移动到第一个位置
- */
+   TODO
+   后面准备封装成一个函数来操作 tableColumns 重新排列：比如说需求是表单上商品选择是在后面的而列表展示的时候需要调到位置。
+   封装效果支持批量操作，给出 field 和需要插入的位置，例：[{field:'spuId',index: 1}] 效果为把 field 为 spuId 的 column 移动到第一个位置
+   */
   // 处理一下表格列让商品往前
   const index = allSchemas.tableColumns.findIndex((item) => item.field === 'spuId')
   const column = cloneDeep(allSchemas.tableColumns[index])

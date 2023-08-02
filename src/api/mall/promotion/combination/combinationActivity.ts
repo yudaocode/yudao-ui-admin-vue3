@@ -1,8 +1,6 @@
 import request from '@/config/axios'
 import { Sku, Spu } from '@/api/mall/product/spu'
 
-// TODO @puhui999: combinationActivity.ts
-
 export interface CombinationActivityVO {
   id?: number
   name?: string
