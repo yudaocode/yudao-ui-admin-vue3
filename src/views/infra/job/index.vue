@@ -106,7 +106,7 @@
           <el-button
             type="danger"
             link
-            @click="handleDelete(scope.row)"
+            @click="handleDelete(scope.row.id)"
             v-hasPermi="['infra:job:delete']"
           >
             删除

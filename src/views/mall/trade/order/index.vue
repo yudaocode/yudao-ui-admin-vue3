@@ -12,7 +12,7 @@
         <el-select class="!w-280px" v-model="queryParams.status" clearable placeholder="全部">
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.TRADE_ORDER_STATUS)"
-            :key="(dict.value as string)"
+            :key="dict.value as string"
             :label="dict.label"
             :value="dict.value"
           />
@@ -27,7 +27,7 @@
         >
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.PAY_CHANNEL_CODE_TYPE)"
-            :key="(dict.value as string)"
+            :key="dict.value as string"
             :label="dict.label"
             :value="dict.value"
           />
@@ -48,7 +48,7 @@
         <el-select class="!w-280px" v-model="queryParams.terminal" clearable placeholder="全部">
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.TERMINAL)"
-            :key="(dict.value as string)"
+            :key="dict.value as string"
             :label="dict.label"
             :value="dict.value"
           />
@@ -58,7 +58,7 @@
         <el-select class="!w-280px" v-model="queryParams.type" clearable placeholder="全部">
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.TRADE_ORDER_TYPE)"
-            :key="(dict.value as string)"
+            :key="dict.value as string"
             :label="dict.label"
             :value="dict.value"
           />

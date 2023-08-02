@@ -23,7 +23,9 @@
   }
 
   & .peg {
-    box-shadow: 0 0 10px var(--el-color-primary), 0 0 5px var(--el-color-primary) !important;
+    box-shadow:
+      0 0 10px var(--el-color-primary),
+      0 0 5px var(--el-color-primary) !important;
   }
 
   & .spinner-icon {

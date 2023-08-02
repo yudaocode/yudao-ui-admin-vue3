@@ -138,15 +138,6 @@ $prefix-cls: #{$namespace}-menu;
   position: relative;
   transition: width var(--transition-time-02);
 
-  &:after {
-    position: absolute;
-    top: 0;
-    right: 0;
-    height: 100%;
-    border-left: 1px solid var(--left-menu-border-color);
-    content: '';
-  }
-
   :deep(.#{$elNamespace}-menu) {
     width: 100% !important;
     border-right: none;

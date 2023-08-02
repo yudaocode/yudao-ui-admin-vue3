@@ -144,11 +144,7 @@ const open = async (type: string, id?: number) => {
       const data = (await SeckillActivityApi.getSeckillActivity(
         id
       )) as SeckillActivityApi.SeckillActivityVO
-      await getSpuDetails(
-        data.spuId!,
-        data.products?.map((sku) => sku.skuId),
-        data.products
-      )
+      await getSpuDetails(data.spuId!, data.products?.map((sku) => sku.skuId), data.products)
       formRef.value.setValues(data)
     } finally {
       formLoading.value = false

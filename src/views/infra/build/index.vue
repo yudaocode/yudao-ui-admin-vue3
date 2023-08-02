@@ -23,7 +23,7 @@
       </el-button>
       <el-scrollbar height="580">
         <div>
-          <pre><code class="hljs" v-html="highlightedCode(formData)"></code></pre>
+          <pre><code class="hljs" v-dompurify-html="highlightedCode(formData)"></code></pre>
         </div>
       </el-scrollbar>
     </div>
@@ -39,6 +39,7 @@ import hljs from 'highlight.js' // 导入代码高亮文件
 import 'highlight.js/styles/github.css' // 导入代码高亮样式
 import xml from 'highlight.js/lib/languages/java'
 import json from 'highlight.js/lib/languages/json'
+import formCreate from '@form-create/element-ui'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息

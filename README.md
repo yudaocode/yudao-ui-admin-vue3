@@ -24,7 +24,7 @@
 * 改换 saas，自动引入等功能
 * 使用 Element Plus 免费开源的中后台模版，具备如下特性：
 
-![首页](preview/home.png)
+![首页](public/home.png)
 
 * **最新技术栈**：使用 Vue3、Vite4 等前端前沿技术开发
 * **TypeScript**: 应用程序级 JavaScript 的语言
@@ -39,15 +39,15 @@
 | 框架                                                                   | 说明               | 版本     |
 |----------------------------------------------------------------------|------------------|--------|
 | [Vue](https://staging-cn.vuejs.org/)                                 | Vue 框架           | 3.3.4 |
-| [Vite](https://cn.vitejs.dev//)                                      | 开发与构建工具          | 4.3.9  |
-| [Element Plus](https://element-plus.org/zh-CN/)                      | Element Plus     | 2.3.7 |
-| [TypeScript](https://www.typescriptlang.org/docs/)                   | JavaScript 的超集   | 5.0.4  |
-| [pinia](https://pinia.vuejs.org/)                                    | Vue 存储库 替代 vuex5 | 2.1.4 |
-| [vueuse](https://vueuse.org/)                                        | 常用工具集            | 10.2.0 |
+| [Vite](https://cn.vitejs.dev//)                                      | 开发与构建工具          | 4.4.7  |
+| [Element Plus](https://element-plus.org/zh-CN/)                      | Element Plus     | 2.3.8 |
+| [TypeScript](https://www.typescriptlang.org/docs/)                   | JavaScript 的超集   | 5.1.6  |
+| [pinia](https://pinia.vuejs.org/)                                    | Vue 存储库 替代 vuex5 | 2.1.6 |
+| [vueuse](https://vueuse.org/)                                        | 常用工具集            | 10.2.1 |
 | [vue-i18n](https://kazupon.github.io/vue-i18n/zh/introduction.html/) | 国际化              | 9.2.2  |
-| [vue-router](https://router.vuejs.org/)                              | Vue 路由           | 4.2.1  |
-| [windicss](https://cn.windicss.org/)                                 | 下一代工具优先的 CSS 框架  | 3.5.6  |
-| [iconify](https://icon-sets.iconify.design/)                         | 在线图标库            | 3.1.0  |
+| [vue-router](https://router.vuejs.org/)                              | Vue 路由           | 4.2.4  |
+| [unocss](https://uno.antfu.me/)                                      | 原子 css          | 0.54.0  |
+| [iconify](https://icon-sets.iconify.design/)                         | 在线图标库            | 3.1.1  |
 | [wangeditor](https://www.wangeditor.com/)                            | 富文本编辑器           | 5.1.23 |
 
 ## 开发工具
@@ -56,14 +56,14 @@
 
 | 插件名                           | 功能                       |
 |-------------------------------|--------------------------|
-| TypeScript Vue Plugin (Volar) | 用于 TypeScript 的 Vue 插件   |
+| TypeScript Vue Plugin (Volar) | 用于 TypeScript 的 Vue 插件  |
 | Vue Language Features (Volar) | Vue3.0 语法支持              |
-| WindiCSS IntelliSense         | 自动完成、语法突出显示、代码折叠和构建等高级功能 |
-| Iconify IntelliSense          | Iconify 预览和搜索            |
-| i18n Ally                     | 国际化智能提示                  |
+| unocss                        | unocss for vscode           |
+| Iconify IntelliSense          | Iconify 预览和搜索           |
+| i18n Ally                     | 国际化智能提示               |
 | Stylelint                     | Css    格式化               |
-| Prettier                      | 代码格式化                    |
-| ESLint                        | 脚本代码检查                   |
+| Prettier                      | 代码格式化                   |
+| ESLint                        | 脚本代码检查                  |
 | DotENV                        | env 文件高亮                 |
 
 ## 内置功能

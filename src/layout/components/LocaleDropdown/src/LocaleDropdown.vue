@@ -38,7 +38,7 @@ const setLang = (lang: LocaleType) => {
       :class="$attrs.class"
       :color="color"
       :size="18"
-      class="cursor-pointer"
+      class="cursor-pointer !p-0"
       icon="ion:language-sharp"
     />
     <template #dropdown>

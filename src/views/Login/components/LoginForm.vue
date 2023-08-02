@@ -9,7 +9,7 @@
     label-width="120px"
     size="large"
   >
-    <el-row style="maring-left: -10px; maring-right: -10px">
+    <el-row style="margin-left: -10px; margin-right: -10px">
       <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
         <el-form-item>
           <LoginFormTitle style="width: 100%" />

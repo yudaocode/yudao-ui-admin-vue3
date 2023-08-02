@@ -139,7 +139,7 @@ export default defineComponent({
         id={`${variables.namespace}-menu`}
         class={[
           prefixCls,
-          'relative bg-[var(--left-menu-bg-color)] top-1px z-3000',
+          'relative bg-[var(--left-menu-bg-color)] top-1px z-3000 layout-border__right',
           {
             'w-[var(--tab-menu-max-width)]': !unref(collapse),
             'w-[var(--tab-menu-min-width)]': unref(collapse)
@@ -195,7 +195,7 @@ export default defineComponent({
         </div>
         <Menu
           class={[
-            '!absolute top-0 border-left-1 border-solid border-[var(--left-menu-bg-light-color)]',
+            '!absolute top-0',
             {
               '!left-[var(--tab-menu-min-width)]': unref(collapse),
               '!left-[var(--tab-menu-max-width)]': !unref(collapse),
@@ -217,16 +217,6 @@ $prefix-cls: #{$namespace}-tab-menu;
 .#{$prefix-cls} {
   transition: all var(--transition-time-02);
 
-  &::after {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 1px;
-    height: 100%;
-    border-left: 1px solid var(--left-menu-border-color);
-    content: '';
-  }
-
   &__item {
     color: var(--left-menu-text-color);
     transition: all var(--transition-time-02);
@@ -240,7 +230,6 @@ $prefix-cls: #{$namespace}-tab-menu;
   &--collapse {
     color: var(--left-menu-text-color);
     background-color: var(--left-menu-bg-light-color);
-    border-top: 1px solid var(--left-menu-border-color);
   }
 
   .is-active {

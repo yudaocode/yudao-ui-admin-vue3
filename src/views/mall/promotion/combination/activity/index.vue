@@ -98,9 +98,10 @@ const handleDelete = (id: number) => {
   tableMethods.delList(id, false)
 }
 
+// TODO @puhui999：要不还是使用原生的 element plus 做。感觉 crud schema 复杂界面，做起来麻烦
 /** 初始化 **/
 onMounted(() => {
-  /*
+  /**
  TODO
  后面准备封装成一个函数来操作 tableColumns 重新排列：比如说需求是表单上商品选择是在后面的而列表展示的时候需要调到位置。
  封装效果支持批量操作，给出 field 和需要插入的位置，例：[{field:'spuId',index: 1}] 效果为把 field 为 spuId 的 column 移动到第一个位置
