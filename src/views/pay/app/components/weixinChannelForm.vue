@@ -103,13 +103,13 @@
           </el-form-item>
           <el-form-item
             label-width="180px"
-            label="apiclient_key.perm 证书"
+            label="apiclient_key.pem 证书"
             prop="config.privateKeyContent"
           >
             <el-input
               v-model="formData.config.privateKeyContent"
               type="textarea"
-              placeholder="请上传 apiclient_key.perm 证书"
+              placeholder="请上传 apiclient_key.pem 证书"
               readonly
               :autosize="{ minRows: 8, maxRows: 8 }"
               :style="{ width: '100%' }"
@@ -129,13 +129,13 @@
           </el-form-item>
           <el-form-item
             label-width="180px"
-            label="apiclient_cert.perm证书"
+            label="apiclient_cert.pem证书"
             prop="config.privateCertContent"
           >
             <el-input
               v-model="formData.config.privateCertContent"
               type="textarea"
-              placeholder="请上传apiclient_cert.perm证书"
+              placeholder="请上传apiclient_cert.pem证书"
               readonly
               :autosize="{ minRows: 8, maxRows: 8 }"
               :style="{ width: '100%' }"
@@ -207,10 +207,10 @@ const rules = {
     { required: true, message: '请上传 apiclient_cert.p12 证书', trigger: 'blur' }
   ],
   'config.privateKeyContent': [
-    { required: true, message: '请上传 apiclient_key.perm 证书', trigger: 'blur' }
+    { required: true, message: '请上传 apiclient_key.pem 证书', trigger: 'blur' }
   ],
   'config.privateCertContent': [
-    { required: true, message: '请上传 apiclient_cert.perm证 书', trigger: 'blur' }
+    { required: true, message: '请上传 apiclient_cert.pem证 书', trigger: 'blur' }
   ],
   'config.apiV3Key': [{ required: true, message: '请上传 api V3 密钥值', trigger: 'blur' }]
 }
