@@ -325,7 +325,7 @@ const openDetail = (id: number) => {
 onMounted(async () => {
   await getList()
   // 加载商户列表
-  merchantList.value = await MerchantApi.getMerchantListByName()
+  // merchantList.value = await MerchantApi.getMerchantListByName()
   // 加载 App 列表
   // TODO 芋艿：候选少一个查询应用列表的接口
   // appList.value = await AppApi.getAppListByMerchantId()
