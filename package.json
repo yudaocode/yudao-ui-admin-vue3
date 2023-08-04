@@ -18,7 +18,7 @@
     "serve:pro": "vite preview --mode pro",
     "serve:dev": "vite preview --mode dev",
     "serve:test": "vite preview --mode test",
-    "preview": "pnpm build && vite preview",
+    "preview": "pnpm build:dev && vite preview",
     "npm:check": "npx npm-check-updates",
     "clean": "npx rimraf node_modules",
     "clean:cache": "npx rimraf node_modules/.cache",
