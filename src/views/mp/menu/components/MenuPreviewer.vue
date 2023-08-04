@@ -219,8 +219,8 @@ const onChildDragEnd = ({ newIndex }) => {
 }
 
 .draggable-ghost {
-  opacity: 0.5;
   background: #f7fafc;
   border: 1px solid #4299e1;
+  opacity: 0.5;
 }
 </style>

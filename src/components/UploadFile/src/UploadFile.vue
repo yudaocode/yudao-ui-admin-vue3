@@ -147,10 +147,10 @@ const listToString = (list: UploadUserFile[], separator?: string) => {
 }
 
 :deep(.upload-file-list .el-upload-list__item) {
-  border: 1px solid #e4e7ed;
-  line-height: 2;
-  margin-bottom: 10px;
   position: relative;
+  margin-bottom: 10px;
+  line-height: 2;
+  border: 1px solid #e4e7ed;
 }
 
 :deep(.el-upload-list__item-file-name) {

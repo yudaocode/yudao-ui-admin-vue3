@@ -565,11 +565,11 @@ watch(
 }
 
 .element-overlays {
-  box-sizing: border-box;
+  width: 200px;
   padding: 8px;
+  color: #fafafa;
   background: rgb(0 0 0 / 60%);
   border-radius: 4px;
-  color: #fafafa;
-  width: 200px;
+  box-sizing: border-box;
 }
 </style>
