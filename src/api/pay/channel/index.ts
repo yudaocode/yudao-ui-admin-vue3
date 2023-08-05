@@ -7,7 +7,6 @@ export interface ChannelVO {
   status: number
   remark: string
   feeRate: number
-  merchantId: number
   appId: number
   createTime: Date
 }
@@ -18,13 +17,12 @@ export const getChannelPage = (params: PageParam) => {
 }
 
 // 查询详情支付渠道
-export const getChannel = (merchantId: number, appId: string, code: string) => {
+export const getChannel = (appId: string, code: string) => {
   const params = {
-    merchantId: merchantId,
     appId: appId,
     code: code
   }
-  return request.get({ url: '/pay/channel/get-channel', params: params })
+  return request.get({ url: '/pay/channel/get', params: params })
 }
 
 // 新增支付渠道
