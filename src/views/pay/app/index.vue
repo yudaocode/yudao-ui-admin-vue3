@@ -305,11 +305,11 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import download from '@/utils/download'
-import * as PayappApi from '@/api/pay/app'
+import * as AppApi from '@/api/pay/app'
 import AppForm from './components/AppForm.vue'
 import { PayChannelEnum, PayType } from '@/utils/constants'
 import AlipayChannelForm from './components/channel/AlipayChannelForm.vue'
-import WeixinChannelForm from './components/weixinChannelForm.vue'
+import WeixinChannelForm from './components/channel/WeixinChannelForm.vue'
 import MockChannelForm from './components/mockChannelForm.vue'
 import { CommonStatusEnum } from '@/utils/constants'
 
@@ -333,7 +333,6 @@ const queryParams = reactive({
   remark: undefined,
   payNotifyUrl: undefined,
   refundNotifyUrl: undefined,
-  merchantName: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -343,7 +342,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await PayappApi.getAppPage(queryParams)
+    const data = await AppApi.getAppPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -368,7 +367,7 @@ const handleStatusChange = async (row: any) => {
   let text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
   try {
     await message.confirm('确认要"' + text + '""' + row.name + '"应用吗?')
-    await PayappApi.changeAppStatus({ id: row.id, status: row.status })
+    await AppApi.changeAppStatus({ id: row.id, status: row.status })
     message.success(text + '成功')
   } catch {
     row.status =
@@ -393,7 +392,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await PayappApi.deleteApp(id)
+    await AppApi.deleteApp(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -407,7 +406,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await PayappApi.exportApp(queryParams)
+    const data = await AppApi.exportApp(queryParams)
     download.excel(data, '支付应用信息.xls')
   } finally {
     exportLoading.value = false

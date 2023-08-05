@@ -1,17 +1,10 @@
 <template>
   <div>
-    <el-dialog
-      v-model="dialogVisible"
-      :title="title"
-      @close="close"
-      append-to-body
-      destroy-on-close
-      width="800px"
-    >
+    <Dialog v-model="dialogVisible" :title="dialogTitle" @close="close" width="800px">
       <el-form
         ref="formRef"
         :model="formData"
-        :rules="rules"
+        :rules="formRules"
         label-width="120px"
         v-loading="formLoading"
       >
@@ -86,7 +79,9 @@
               :before-upload="p12FileBeforeUpload"
               :http-request="keyContentUpload"
             >
-              <el-button size="small" type="primary" icon="el-icon-upload">点击上传</el-button>
+              <el-button type="primary">
+                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
+              </el-button>
             </el-upload>
           </el-form-item>
         </div>
@@ -124,7 +119,9 @@
               :before-upload="pemFileBeforeUpload"
               :http-request="privateKeyContentUpload"
             >
-              <el-button size="small" type="primary" icon="el-icon-upload">点击上传</el-button>
+              <el-button type="primary">
+                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
+              </el-button>
             </el-upload>
           </el-form-item>
           <el-form-item
@@ -150,7 +147,9 @@
               :before-upload="pemFileBeforeUpload"
               :http-request="privateCertContentUpload"
             >
-              <el-button size="small" type="primary" icon="el-icon-upload">点击上传</el-button>
+              <el-button type="primary">
+                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
+              </el-button>
             </el-upload>
           </el-form-item>
         </div>
@@ -162,19 +161,22 @@
         <el-button @click="close">取消</el-button>
         <el-button type="primary" @click="submitForm">确定</el-button>
       </template>
-    </el-dialog>
+    </Dialog>
   </div>
 </template>
-<script lang="ts" setup name="WeixinChannelForm">
-import { createChannel, getChannel, updateChannel } from '@/api/pay/channel'
+<script lang="ts" setup>
 import { CommonStatusEnum } from '@/utils/constants'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import * as ChannelApi from '@/api/pay/channel'
 
+defineOptions({ name: 'WeixinChannelForm' })
+
+const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const formLoading = ref(false)
-const title = ref('')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref<any>({
   appId: '',
   code: '',
@@ -192,11 +194,7 @@ const formData = ref<any>({
     apiV3Key: ''
   }
 })
-const formRef = ref()
-
-const emit = defineEmits(['success'])
-
-const rules = {
+const formRules = {
   feeRate: [{ required: true, message: '请输入渠道费率', trigger: 'blur' }],
   status: [{ required: true, message: '渠道状态不能为空', trigger: 'blur' }],
   'config.mchId': [{ required: true, message: '请传入商户号', trigger: 'blur' }],
@@ -214,53 +212,56 @@ const rules = {
   ],
   'config.apiV3Key': [{ required: true, message: '请上传 api V3 密钥值', trigger: 'blur' }]
 }
+const formRef = ref() // 表单 Ref
 
+/** 打开弹窗 */
 const open = async (appId, code) => {
   dialogVisible.value = true
   formLoading.value = true
-  reset(appId, code)
-
+  resetForm(appId, code)
+  // 加载数据
   try {
-    const data = await getChannel(appId, code)
+    const data = await ChannelApi.getChannel(appId, code)
     if (data && data.id) {
       formData.value = data
       formData.value.config = JSON.parse(data.config)
     }
-    title.value = !formData.value.id ? '创建支付渠道' : '编辑支付渠道'
+    dialogTitle.value = !formData.value.id ? '创建支付渠道' : '编辑支付渠道'
+  } finally {
+    formLoading.value = false
+  }
+}
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+/** 提交表单 */
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+const submitForm = async () => {
+  // 校验表单
+  if (!formRef) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  // 提交请求
+  formLoading.value = true
+  try {
+    const data = { ...formData.value } as unknown as ChannelApi.ChannelVO
+    data.config = JSON.stringify(formData.value.config)
+    if (!data.id) {
+      await ChannelApi.createChannel(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await ChannelApi.updateChannel(data)
+      message.success(t('common.updateSuccess'))
+    }
+    dialogVisible.value = false
+    // 发送操作成功的事件
+    emit('success')
   } finally {
     formLoading.value = false
   }
 }
 
-const close = () => {
-  dialogVisible.value = false
-  reset(undefined, undefined)
-}
-
-const submitForm = async () => {
-  const valid = await formRef.value.validate()
-  if (!valid) {
-    return
-  }
-  const data: any = { ...formData.value }
-  data.config = JSON.stringify(formData.value.config)
-  if (!data.id) {
-    createChannel(data).then(() => {
-      message.alertSuccess('新增成功')
-      emit('success')
-      close()
-    })
-  } else {
-    updateChannel(data).then(() => {
-      message.alertSuccess('修改成功')
-      emit('success')
-      close()
-    })
-  }
-}
-
 /** 重置表单 */
-const reset = (appId, code) => {
+const resetForm = (appId, code) => {
   formData.value = {
     appId: appId,
     code: code,
@@ -338,6 +339,4 @@ const keyContentUpload = (event) => {
   }
   readFile.readAsDataURL(event.file) // 读成 base64
 }
-
-defineExpose({ open })
 </script>

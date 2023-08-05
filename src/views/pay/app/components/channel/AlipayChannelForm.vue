@@ -1,13 +1,6 @@
 <template>
   <div>
-    <Dialog
-      v-model="dialogVisible"
-      :title="dialogTitle"
-      @closed="close"
-      append-to-body
-      destroy-on-close
-      width="830px"
-    >
+    <Dialog v-model="dialogVisible" :title="dialogTitle" @closed="close" width="830px">
       <el-form
         ref="formRef"
         :model="formData"
@@ -164,10 +157,12 @@
     </Dialog>
   </div>
 </template>
-<script lang="ts" setup name="AlipayChannelForm">
+<script lang="ts" setup>
 import { CommonStatusEnum } from '@/utils/constants'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as ChannelApi from '@/api/pay/channel'
+
+defineOptions({ name: 'AlipayChannelForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
