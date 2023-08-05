@@ -6,6 +6,7 @@
       :is-col="true"
       :rules="rules"
       :schema="allSchemas.formSchema"
+      class="mt-10px"
     >
       <template #spuId>
         <el-button @click="spuSelectRef.open()">选择商品</el-button>
@@ -37,8 +38,8 @@
   <SpuSelect ref="spuSelectRef" :isSelectSku="true" @confirm="selectSpu" />
 </template>
 <script lang="ts" setup>
-import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationactivity'
-import { CombinationProductVO } from '@/api/mall/promotion/combination/combinationactivity'
+import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationActivity'
+import { CombinationProductVO } from '@/api/mall/promotion/combination/combinationActivity'
 import { allSchemas, rules } from './combinationActivity.data'
 import { SpuAndSkuList, SpuProperty, SpuSelect } from '@/views/mall/promotion/components'
 import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
