@@ -126,15 +126,6 @@ export const PayChannelEnum = {
 }
 
 /**
- * 支付类型枚举
- */
-export const PayType = {
-  WECHAT: 'WECHAT',
-  ALIPAY: 'ALIPAY',
-  MOCK: 'MOCK'
-}
-
-/**
  * 支付订单状态枚举
  */
 export const PayOrderStatusEnum = {

@@ -151,8 +151,8 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="close">取消</el-button>
-        <el-button type="primary" @click="submitForm">确定</el-button>
+        <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="dialogVisible = false">取 消</el-button>
       </template>
     </Dialog>
   </div>

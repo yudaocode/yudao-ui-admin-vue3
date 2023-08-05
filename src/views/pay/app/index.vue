@@ -88,7 +88,7 @@
             <el-button
               type="success"
               v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.ALIPAY_APP.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_APP.code, PayType.ALIPAY)"
+              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_APP.code)"
               circle
             >
               <Icon icon="ep:check" />
@@ -97,7 +97,7 @@
               v-else
               type="danger"
               circle
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_APP.code, PayType.ALIPAY)"
+              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_APP.code)"
             >
               <Icon icon="ep:close" />
             </el-button>
@@ -109,7 +109,7 @@
               type="success"
               circle
               v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.ALIPAY_PC.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_PC.code, PayType.ALIPAY)"
+              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_PC.code)"
             >
               <Icon icon="ep:check" />
             </el-button>
@@ -117,7 +117,7 @@
               v-else
               type="danger"
               circle
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_PC.code, PayType.ALIPAY)"
+              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_PC.code)"
             >
               <Icon icon="ep:close" />
             </el-button>
@@ -129,7 +129,7 @@
               type="success"
               circle
               v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.ALIPAY_WAP.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_WAP.code, PayType.ALIPAY)"
+              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_WAP.code)"
             >
               <Icon icon="ep:check" />
             </el-button>
@@ -137,7 +137,7 @@
               v-else
               type="danger"
               circle
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_WAP.code, PayType.ALIPAY)"
+              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_WAP.code)"
             >
               <Icon icon="ep:close" />
             </el-button>
@@ -149,7 +149,7 @@
               type="success"
               circle
               v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.ALIPAY_QR.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_QR.code, PayType.ALIPAY)"
+              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_QR.code)"
             >
               <Icon icon="ep:check" />
             </el-button>
@@ -157,7 +157,7 @@
               v-else
               type="danger"
               circle
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_QR.code, PayType.ALIPAY)"
+              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_QR.code)"
             >
               <Icon icon="ep:close" />
             </el-button>
@@ -169,7 +169,7 @@
               type="success"
               circle
               v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.ALIPAY_BAR.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_BAR.code, PayType.ALIPAY)"
+              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_BAR.code)"
             >
               <Icon icon="ep:check" />
             </el-button>
@@ -177,7 +177,7 @@
               v-else
               type="danger"
               circle
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_BAR.code, PayType.ALIPAY)"
+              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_BAR.code)"
             >
               <Icon icon="ep:close" />
             </el-button>
@@ -191,7 +191,7 @@
               type="success"
               circle
               v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.WX_LITE.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_LITE.code, PayType.WECHAT)"
+              @click="openChannelForm(scope.row, PayChannelEnum.WX_LITE.code)"
             >
               <Icon icon="ep:check" />
             </el-button>
@@ -199,7 +199,7 @@
               v-else
               type="danger"
               circle
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_LITE.code, PayType.WECHAT)"
+              @click="openChannelForm(scope.row, PayChannelEnum.WX_LITE.code)"
             >
               <Icon icon="ep:close" />
             </el-button>
@@ -211,7 +211,7 @@
               type="success"
               circle
               v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.WX_PUB.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_PUB.code, PayType.WECHAT)"
+              @click="openChannelForm(scope.row, PayChannelEnum.WX_PUB.code)"
             >
               <Icon icon="ep:check" />
             </el-button>
@@ -219,7 +219,7 @@
               v-else
               type="danger"
               circle
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_PUB.code, PayType.WECHAT)"
+              @click="openChannelForm(scope.row, PayChannelEnum.WX_PUB.code)"
             >
               <Icon icon="ep:close" />
             </el-button>
@@ -231,7 +231,7 @@
               type="success"
               circle
               v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.WX_APP.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_APP.code, PayType.WECHAT)"
+              @click="openChannelForm(scope.row, PayChannelEnum.WX_APP.code)"
             >
               <Icon icon="ep:check" />
             </el-button>
@@ -239,7 +239,7 @@
               v-else
               type="danger"
               circle
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_APP.code, PayType.WECHAT)"
+              @click="openChannelForm(scope.row, PayChannelEnum.WX_APP.code)"
             >
               <Icon icon="ep:close" />
             </el-button>
@@ -252,17 +252,19 @@
             <el-button
               type="success"
               circle
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.MOCK.code)"
+              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.MOCK)"
               @click="openChannelForm(scope.row, PayChannelEnum.MOCK.code)"
-              ><Icon icon="ep:check"
-            /></el-button>
+            >
+              <Icon icon="ep:check" />
+            </el-button>
             <el-button
               v-else
               type="danger"
               circle
               @click="openChannelForm(scope.row, PayChannelEnum.MOCK.code)"
-              ><Icon icon="ep:close"
-            /></el-button>
+            >
+              <Icon icon="ep:close" />
+            </el-button>
           </template>
         </el-table-column>
       </el-table-column>
@@ -310,17 +312,13 @@ import AppForm from './components/AppForm.vue'
 import { PayChannelEnum, PayType } from '@/utils/constants'
 import AlipayChannelForm from './components/channel/AlipayChannelForm.vue'
 import WeixinChannelForm from './components/channel/WeixinChannelForm.vue'
-import MockChannelForm from './components/mockChannelForm.vue'
+import MockChannelForm from './components/channel/MockChannelForm.vue'
 import { CommonStatusEnum } from '@/utils/constants'
 
 defineOptions({ name: 'PayApp' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-
-const alipayFormRef = ref()
-const weixinFormRef = ref()
-const mockFormRef = ref()
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -376,11 +374,6 @@ const handleStatusChange = async (row: any) => {
 }
 
 /** 添加/修改操作 */
-const channelParam = reactive({
-  loading: false,
-  appId: null, // 应用 ID
-  payCode: null // 渠道编码
-})
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
@@ -429,20 +422,26 @@ const isChannelExists = (channels, channelCode) => {
 /**
  * 新增支付渠道信息
  */
-const openChannelForm = async (row, payCode, type) => {
-  channelParam.loading = false
+const alipayFormRef = ref()
+const weixinFormRef = ref()
+const mockFormRef = ref()
+const channelParam = reactive({
+  appId: null, // 应用 ID
+  payCode: null // 渠道编码
+})
+const openChannelForm = async (row, payCode) => {
   channelParam.appId = row.id
   channelParam.payCode = payCode
-  switch (type) {
-    case PayType.ALIPAY:
-      alipayFormRef.value.open(row.id, payCode)
-      break
-    case PayType.WECHAT:
-      weixinFormRef.value.open(row.id, payCode)
-      break
-    case PayType.MOCK:
-      mockFormRef.value.open(row.id, payCode)
-      break
+  if (payCode.indexOf('alipay_') === 0) {
+    alipayFormRef.value.open(row.id, payCode)
+    return
+  }
+  if (payCode.indexOf('wx_') === 0) {
+    weixinFormRef.value.open(row.id, payCode)
+    return
+  }
+  if (payCode.indexOf('mock') === 0) {
+    mockFormRef.value.open(row.id, payCode)
   }
 }
 
