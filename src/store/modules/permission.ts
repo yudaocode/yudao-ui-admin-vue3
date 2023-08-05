@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { store } from '../index'
 import { cloneDeep } from 'lodash-es'
 import remainingRouter from '@/router/modules/remaining'
-import { generateRoute, flatMultiLevelRoutes } from '@/utils/routerHelper'
+import { flatMultiLevelRoutes, generateRoute } from '@/utils/routerHelper'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 
 const { wsCache } = useCache()
@@ -34,11 +34,11 @@ export const usePermissionStore = defineStore('permission', {
     async generateRoutes(): Promise<unknown> {
       return new Promise<void>(async (resolve) => {
         // 获得菜单列表，它在登录的时候，setUserInfoAction 方法中已经进行获取
-        let res: AppCustomRouteRecordRaw[]
+        let res: AppCustomRouteRecordRaw[] = []
         if (wsCache.get(CACHE_KEY.ROLE_ROUTERS)) {
           res = wsCache.get(CACHE_KEY.ROLE_ROUTERS) as AppCustomRouteRecordRaw[]
         }
-        const routerMap: AppRouteRecordRaw[] = generateRoute(res as AppCustomRouteRecordRaw[])
+        const routerMap: AppRouteRecordRaw[] = generateRoute(res)
         // 动态路由，404一定要放到最后面
         this.addRouters = routerMap.concat([
           {
