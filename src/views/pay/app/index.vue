@@ -308,7 +308,7 @@ import download from '@/utils/download'
 import * as PayappApi from '@/api/pay/app'
 import AppForm from './components/AppForm.vue'
 import { PayChannelEnum, PayType } from '@/utils/constants'
-import AlipayChannelForm from './components/alipayChannelForm.vue'
+import AlipayChannelForm from './components/channel/AlipayChannelForm.vue'
 import WeixinChannelForm from './components/weixinChannelForm.vue'
 import MockChannelForm from './components/mockChannelForm.vue'
 import { CommonStatusEnum } from '@/utils/constants'
@@ -338,16 +338,6 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const channelParam = reactive({
-  loading: false,
-  appId: null, // 应用 ID
-  payCode: null, // 渠道编码
-  // 商户对象
-  payMerchant: {
-    id: null, // 编号
-    name: null // 名称
-  }
-}) // 微信组件传参参数
 
 /** 查询列表 */
 const getList = async () => {
@@ -373,10 +363,9 @@ const resetQuery = () => {
   handleQuery()
 }
 
-// 用户状态修改
+/** 应用状态修改 */
 const handleStatusChange = async (row: any) => {
   let text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
-
   try {
     await message.confirm('确认要"' + text + '""' + row.name + '"应用吗?')
     await PayappApi.changeAppStatus({ id: row.id, status: row.status })
@@ -388,6 +377,11 @@ const handleStatusChange = async (row: any) => {
 }
 
 /** 添加/修改操作 */
+const channelParam = reactive({
+  loading: false,
+  appId: null, // 应用 ID
+  payCode: null // 渠道编码
+})
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
@@ -440,17 +434,13 @@ const openChannelForm = async (row, payCode, type) => {
   channelParam.loading = false
   channelParam.appId = row.id
   channelParam.payCode = payCode
-  channelParam.payMerchant = row.payMerchant
-
   switch (type) {
     case PayType.ALIPAY:
       alipayFormRef.value.open(row.id, payCode)
       break
-
     case PayType.WECHAT:
       weixinFormRef.value.open(row.id, payCode)
       break
-
     case PayType.MOCK:
       mockFormRef.value.open(row.id, payCode)
       break

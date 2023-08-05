@@ -1,8 +1,8 @@
 <template>
   <div>
-    <el-dialog
+    <Dialog
       v-model="dialogVisible"
-      :title="title"
+      :title="dialogTitle"
       @closed="close"
       append-to-body
       destroy-on-close
@@ -11,7 +11,7 @@
       <el-form
         ref="formRef"
         :model="formData"
-        :rules="rules"
+        :formRules="formRules"
         label-width="100px"
         v-loading="formLoading"
       >
@@ -37,9 +37,9 @@
         <el-form-item label-width="180px" label="网关地址" prop="config.serverUrl">
           <el-radio-group v-model="formData.config.serverUrl">
             <el-radio label="https://openapi.alipay.com/gateway.do">线上环境</el-radio>
-            <el-radio label="https://openapi-sandbox.dl.alipaydev.com/gateway.do"
-              >沙箱环境</el-radio
-            >
+            <el-radio label="https://openapi-sandbox.dl.alipaydev.com/gateway.do">
+              沙箱环境
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label-width="180px" label="算法类型" prop="config.signType">
@@ -95,7 +95,9 @@
               :http-request="appCertUpload"
               :before-upload="fileBeforeUpload"
             >
-              <el-button size="small" type="primary" icon="el-icon-upload">点击上传</el-button>
+              <el-button type="primary">
+                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
+              </el-button>
             </el-upload>
           </el-form-item>
           <el-form-item
@@ -121,7 +123,9 @@
               :before-upload="fileBeforeUpload"
               :http-request="alipayPublicCertUpload"
             >
-              <el-button size="small" type="primary" icon="el-icon-upload">点击上传</el-button>
+              <el-button type="primary">
+                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
+              </el-button>
             </el-upload>
           </el-form-item>
           <el-form-item label-width="180px" label="根证书" prop="config.rootCertContent">
@@ -143,7 +147,9 @@
               :before-upload="fileBeforeUpload"
               :http-request="rootCertUpload"
             >
-              <el-button size="small" type="primary" icon="el-icon-upload">点击上传</el-button>
+              <el-button type="primary">
+                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
+              </el-button>
             </el-upload>
           </el-form-item>
         </div>
@@ -155,21 +161,20 @@
         <el-button @click="close">取消</el-button>
         <el-button type="primary" @click="submitForm">确定</el-button>
       </template>
-    </el-dialog>
+    </Dialog>
   </div>
 </template>
 <script lang="ts" setup name="AlipayChannelForm">
-import { createChannel, getChannel, updateChannel } from '@/api/pay/channel'
 import { CommonStatusEnum } from '@/utils/constants'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import * as ChannelApi from '@/api/pay/channel'
 
+const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
-const emit = defineEmits(['success'])
-
-const dialogVisible = ref(false)
-const formLoading = ref(false)
-const title = ref('')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref<any>({
   appId: '',
   code: '',
@@ -188,8 +193,7 @@ const formData = ref<any>({
     rootCertContent: ''
   }
 })
-
-const rules = {
+const formRules = {
   feeRate: [{ required: true, message: '请输入渠道费率', trigger: 'blur' }],
   status: [{ required: true, message: '渠道状态不能为空', trigger: 'blur' }],
   'config.appId': [{ required: true, message: '请输入开放平台上创建的应用的 ID', trigger: 'blur' }],
@@ -206,55 +210,57 @@ const rules = {
   ],
   'config.rootCertContent': [{ required: true, message: '请上传指定根证书', trigger: 'blur' }]
 }
-
 const fileAccept = '.crt'
+const formRef = ref() // 表单 Ref
 
-const formRef = ref()
-
+/** 打开弹窗 */
 const open = async (appId, code) => {
   dialogVisible.value = true
   formLoading.value = true
-  reset(appId, code)
-
+  resetForm(appId, code)
+  // 加载数据
   try {
-    const data = await getChannel(appId, code)
+    const data = await ChannelApi.getChannel(appId, code)
     if (data && data.id) {
       formData.value = data
       formData.value.config = JSON.parse(data.config)
     }
-    title.value = !formData.value.id ? '创建支付渠道' : '编辑支付渠道'
+    dialogTitle.value = !formData.value.id ? '创建支付渠道' : '编辑支付渠道'
+  } finally {
+    formLoading.value = false
+  }
+}
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+/** 提交表单 */
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+const submitForm = async () => {
+  // 校验表单
+  if (!formRef) return
+  const valid = await formRef.value.validate()
+  if (!valid) return
+  // 提交请求
+  formLoading.value = true
+  try {
+    const data = { ...formData.value } as unknown as ChannelApi.ChannelVO
+    data.config = JSON.stringify(formData.value.config)
+    if (!data.id) {
+      await ChannelApi.createChannel(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await ChannelApi.updateChannel(data)
+      message.success(t('common.updateSuccess'))
+    }
+    dialogVisible.value = false
+    // 发送操作成功的事件
+    emit('success')
   } finally {
     formLoading.value = false
   }
 }
 
-defineExpose({ open })
-
-const close = () => {
-  dialogVisible.value = false
-  reset(undefined, undefined)
-}
-
-const submitForm = async () => {
-  const valid = await formRef.value.validate()
-  if (!valid) return
-
-  const data: any = { ...formData.value }
-  data.config = JSON.stringify(formData.value.config)
-  if (!data.id) {
-    await createChannel(data)
-    message.success('新增成功')
-  } else {
-    await updateChannel(data)
-    message.success('修改成功')
-  }
-
-  emit('success')
-  close()
-}
-
 /** 重置表单 */
-const reset = (appId, code) => {
+const resetForm = (appId, code) => {
   formData.value = {
     appId: appId,
     code: code,
@@ -273,7 +279,7 @@ const reset = (appId, code) => {
       rootCertContent: ''
     }
   }
-  // formRef.value?.resetFields()
+  formRef.value?.resetFields()
 }
 
 const fileBeforeUpload = (file) => {
