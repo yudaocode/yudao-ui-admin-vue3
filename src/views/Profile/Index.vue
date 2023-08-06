@@ -54,8 +54,8 @@ const activeName = ref('basicInfo')
 
 .profile-tabs > .el-tabs__content {
   padding: 32px;
-  color: #6b778c;
   font-weight: 600;
+  color: #6b778c;
 }
 
 .el-tabs--left .el-tabs__content {

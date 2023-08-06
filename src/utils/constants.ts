@@ -118,15 +118,11 @@ export const PayChannelEnum = {
   ALIPAY_BAR: {
     code: 'alipay_bar',
     name: '支付宝条码支付'
+  },
+  MOCK: {
+    code: 'mock',
+    name: '模拟支付'
   }
-}
-
-/**
- * 支付类型枚举
- */
-export const PayType = {
-  WECHAT: 'WECHAT',
-  ALIPAY: 'ALIPAY'
 }
 
 /**

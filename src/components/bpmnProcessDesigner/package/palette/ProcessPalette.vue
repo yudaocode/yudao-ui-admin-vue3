@@ -31,15 +31,15 @@ const addTask = (event, options: any = {}) => {
 
 <style scoped lang="scss">
 .my-process-palette {
-  box-sizing: border-box;
   padding: 80px 20px 20px;
+  box-sizing: border-box;
 
   .test-button {
-    box-sizing: border-box;
     padding: 8px 16px;
-    border-radius: 4px;
-    border: 1px solid rgb(24 144 255 / 80%);
     cursor: pointer;
+    border: 1px solid rgb(24 144 255 / 80%);
+    border-radius: 4px;
+    box-sizing: border-box;
   }
 }
 </style>

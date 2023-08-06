@@ -10,16 +10,6 @@
       <el-form-item label="应用名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入应用名" />
       </el-form-item>
-      <el-form-item label="所属商户" prop="merchantId">
-        <el-select v-model="formData.merchantId" placeholder="请选择所属商户">
-          <el-option
-            v-for="item in merchantList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item label="开启状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
@@ -47,10 +37,10 @@
     </template>
   </Dialog>
 </template>
+
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as AppApi from '@/api/pay/app'
-import * as MerchantApi from '@/api/pay/merchant'
 import { CommonStatusEnum } from '@/utils/constants'
 
 defineOptions({ name: 'PayAppForm' })
@@ -77,11 +67,9 @@ const formRules = reactive({
   name: [{ required: true, message: '应用名不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '开启状态不能为空', trigger: 'blur' }],
   payNotifyUrl: [{ required: true, message: '支付结果的回调地址不能为空', trigger: 'blur' }],
-  refundNotifyUrl: [{ required: true, message: '退款结果的回调地址不能为空', trigger: 'blur' }],
-  merchantId: [{ required: true, message: '商户编号不能为空', trigger: 'blur' }]
+  refundNotifyUrl: [{ required: true, message: '退款结果的回调地址不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const merchantList = ref([]) // 商户列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -98,8 +86,6 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
-  // 加载商户列表
-  merchantList.value = await MerchantApi.getMerchantListByName()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -137,8 +123,7 @@ const resetForm = () => {
     status: CommonStatusEnum.ENABLE,
     remark: undefined,
     payNotifyUrl: undefined,
-    refundNotifyUrl: undefined,
-    merchantId: undefined
+    refundNotifyUrl: undefined
   }
   formRef.value?.resetFields()
 }

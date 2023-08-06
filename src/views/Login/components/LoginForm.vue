@@ -9,13 +9,13 @@
     label-width="120px"
     size="large"
   >
-    <el-row style="margin-left: -10px; margin-right: -10px">
-      <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
+    <el-row style="margin-right: -10px; margin-left: -10px">
+      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item>
           <LoginFormTitle style="width: 100%" />
         </el-form-item>
       </el-col>
-      <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
+      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item v-if="loginData.tenantEnable === 'true'" prop="tenantName">
           <el-input
             v-model="loginData.loginForm.tenantName"
@@ -26,7 +26,7 @@
           />
         </el-form-item>
       </el-col>
-      <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
+      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item prop="username">
           <el-input
             v-model="loginData.loginForm.username"
@@ -35,7 +35,7 @@
           />
         </el-form-item>
       </el-col>
-      <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
+      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item prop="password">
           <el-input
             v-model="loginData.loginForm.password"
@@ -49,7 +49,7 @@
       </el-col>
       <el-col
         :span="24"
-        style="padding-left: 10px; padding-right: 10px; margin-top: -20px; margin-bottom: -20px"
+        style="padding-right: 10px; padding-left: 10px; margin-top: -20px; margin-bottom: -20px"
       >
         <el-form-item>
           <el-row justify="space-between" style="width: 100%">
@@ -64,7 +64,7 @@
           </el-row>
         </el-form-item>
       </el-col>
-      <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
+      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item>
           <XButton
             :loading="loginLoading"
@@ -82,7 +82,7 @@
         mode="pop"
         @success="handleLogin"
       />
-      <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
+      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item>
           <el-row :gutter="5" justify="space-between" style="width: 100%">
             <el-col :span="8">
@@ -110,7 +110,7 @@
         </el-form-item>
       </el-col>
       <el-divider content-position="center">{{ t('login.otherLogin') }}</el-divider>
-      <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
+      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item>
           <div class="flex justify-between w-[100%]">
             <Icon
@@ -126,7 +126,7 @@
         </el-form-item>
       </el-col>
       <el-divider content-position="center">萌新必读</el-divider>
-      <el-col :span="24" style="padding-left: 10px; padding-right: 10px">
+      <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item>
           <div class="flex justify-between w-[100%]">
             <el-link href="https://doc.iocoder.cn/" target="_blank">📚开发指南</el-link>
@@ -316,16 +316,16 @@ onMounted(() => {
 }
 
 .login-code {
+  float: right;
   width: 100%;
   height: 38px;
-  float: right;
 
   img {
-    cursor: pointer;
     width: 100%;
-    max-width: 100px;
     height: auto;
+    max-width: 100px;
     vertical-align: middle;
+    cursor: pointer;
   }
 }
 </style>

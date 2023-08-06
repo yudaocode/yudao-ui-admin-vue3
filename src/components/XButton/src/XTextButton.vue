@@ -38,12 +38,12 @@ const getBindValue = computed(() => {
 </template>
 <style lang="scss" scoped>
 :deep(.el-button.is-text) {
-  margin-left: 0;
   padding: 8px 4px;
+  margin-left: 0;
 }
 
 :deep(.el-button.is-link) {
-  margin-left: 0;
   padding: 8px 4px;
+  margin-left: 0;
 }
 </style>

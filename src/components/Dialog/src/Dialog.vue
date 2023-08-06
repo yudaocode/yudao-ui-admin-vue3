@@ -1,8 +1,6 @@
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { isNumber } from '@/utils/is'
-
-// eslint-disable-next-line vue/no-reserved-component-names
 defineOptions({ name: 'Dialog' })
 
 const slots = useSlots()
@@ -13,7 +11,7 @@ const props = defineProps({
   fullscreen: propTypes.bool.def(true),
   width: propTypes.oneOfType([String, Number]).def('40%'),
   scroll: propTypes.bool.def(false), // 是否开启滚动条。如果是的话，按照 maxHeight 设置最大高度
-  maxHeight: propTypes.oneOfType([String, Number]).def('300px')
+  maxHeight: propTypes.oneOfType([String, Number]).def('400px')
 })
 
 const getBindValue = computed(() => {
@@ -39,7 +37,6 @@ const dialogHeight = ref(isNumber(props.maxHeight) ? `${props.maxHeight}px` : pr
 watch(
   () => isFullscreen.value,
   async (val: boolean) => {
-    // 计算最大高度
     await nextTick()
     if (val) {
       const windowHeight = document.documentElement.offsetHeight
@@ -62,36 +59,47 @@ const dialogStyle = computed(() => {
 
 <template>
   <ElDialog
+    v-bind="getBindValue"
     :close-on-click-modal="true"
     :fullscreen="isFullscreen"
     :width="width"
     destroy-on-close
-    draggable
     lock-scroll
-    v-bind="getBindValue"
+    draggable
+    top="0"
+    :show-close="false"
   >
-    <template #header>
-      <div class="flex justify-between">
+    <template #header="{ close }">
+      <div class="flex justify-between items-center h-54px pl-15px pr-15px relative">
         <slot name="title">
           {{ title }}
         </slot>
-        <Icon
-          v-if="fullscreen"
-          :icon="isFullscreen ? 'zmdi:fullscreen-exit' : 'zmdi:fullscreen'"
-          class="mr-22px cursor-pointer is-hover mt-2px z-10"
-          color="var(--el-color-info)"
-          @click="toggleFull"
-        />
+        <div
+          class="h-54px flex justify-between items-center absolute top-[50%] right-15px translate-y-[-50%]"
+        >
+          <Icon
+            v-if="fullscreen"
+            class="cursor-pointer is-hover mr-10px"
+            :icon="isFullscreen ? 'radix-icons:exit-full-screen' : 'radix-icons:enter-full-screen'"
+            color="var(--el-color-info)"
+            hover-color="var(--el-color-primary)"
+            @click="toggleFull"
+          />
+          <Icon
+            class="cursor-pointer is-hover"
+            icon="ep:close"
+            hover-color="var(--el-color-primary)"
+            color="var(--el-color-info)"
+            @click="close"
+          />
+        </div>
       </div>
     </template>
 
-    <!-- 情况一：如果 scroll 为 true，说明开启滚动条 -->
     <ElScrollbar v-if="scroll" :style="dialogStyle">
       <slot></slot>
     </ElScrollbar>
-    <!-- 情况二：如果 scroll 为 false，说明关闭滚动条滚动条 -->
     <slot v-else></slot>
-
     <template v-if="slots.footer" #footer>
       <slot name="footer"></slot>
     </template>
@@ -99,24 +107,32 @@ const dialogStyle = computed(() => {
 </template>
 
 <style lang="scss">
+.#{$elNamespace}-overlay-dialog {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .#{$elNamespace}-dialog {
+  margin: 0 !important;
+
   &__header {
+    height: 54px;
+    padding: 0;
     margin-right: 0 !important;
     border-bottom: 1px solid var(--el-border-color);
   }
 
   &__body {
-    padding: 0 !important;
+    padding: 15px !important;
   }
 
   &__footer {
     border-top: 1px solid var(--el-border-color);
   }
-}
 
-.is-hover {
-  &:hover {
-    color: var(--el-color-primary) !important;
+  &__headerbtn {
+    top: 0;
   }
 }
 </style>

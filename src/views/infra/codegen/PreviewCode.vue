@@ -215,8 +215,8 @@ onMounted(async () => {
 <style lang="scss">
 .app-infra-codegen-preview-container {
   .el-scrollbar .el-scrollbar__wrap .el-scrollbar__view {
-    white-space: nowrap;
     display: inline-block;
+    white-space: nowrap;
   }
 }
 </style>

@@ -32,7 +32,7 @@
             />
           </el-form-item>
         </el-form>
-        <div style="margin-left: 10%; margin-bottom: 20px; font-size: 14px">
+        <div style="margin-bottom: 20px; margin-left: 10%; font-size: 14px">
           <el-button type="success" @click="handleAudit(item, true)">
             <Icon icon="ep:select" />
             通过

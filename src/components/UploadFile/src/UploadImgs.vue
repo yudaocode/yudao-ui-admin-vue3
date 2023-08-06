@@ -248,16 +248,16 @@ const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
       position: absolute;
       top: 0;
       right: 0;
-      box-sizing: border-box;
       display: flex;
-      align-items: center;
-      justify-content: center;
       width: 100%;
       height: 100%;
       cursor: pointer;
       background: rgb(0 0 0 / 60%);
       opacity: 0;
+      box-sizing: border-box;
       transition: var(--el-transition-duration-fast);
+      align-items: center;
+      justify-content: center;
 
       .handle-icon {
         display: flex;

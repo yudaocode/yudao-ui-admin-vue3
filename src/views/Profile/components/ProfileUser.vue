@@ -67,17 +67,17 @@ onMounted(async () => {
 
 <style scoped>
 .text-center {
-  text-align: center;
   position: relative;
   height: 120px;
+  text-align: center;
 }
 
 .list-group-striped > .list-group-item {
-  border-left: 0;
-  border-right: 0;
-  border-radius: 0;
-  padding-left: 0;
   padding-right: 0;
+  padding-left: 0;
+  border-right: 0;
+  border-left: 0;
+  border-radius: 0;
 }
 
 .list-group {
@@ -86,11 +86,11 @@ onMounted(async () => {
 }
 
 .list-group-item {
-  border-bottom: 1px solid #e7eaec;
-  border-top: 1px solid #e7eaec;
-  margin-bottom: -1px;
   padding: 11px 0;
+  margin-bottom: -1px;
   font-size: 13px;
+  border-top: 1px solid #e7eaec;
+  border-bottom: 1px solid #e7eaec;
 }
 
 .pull-right {

@@ -1,6 +1,6 @@
 <template>
   <div class="my-process-designer">
-    <div class="my-process-designer__header" style="display: table-row-group; z-index: 999">
+    <div class="my-process-designer__header" style="z-index: 999; display: table-row-group">
       <slot name="control-header"></slot>
       <template v-if="!$slots['control-header']">
         <ElButtonGroup key="file-control">

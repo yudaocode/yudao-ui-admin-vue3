@@ -14,24 +14,24 @@
           >
             <p style="font-weight: 700">任务：{{ item.name }}</p>
             <el-card :body-style="{ padding: '10px' }">
-              <label v-if="item.assigneeUser" style="font-weight: normal; margin-right: 30px">
+              <label v-if="item.assigneeUser" style="margin-right: 30px; font-weight: normal">
                 审批人：{{ item.assigneeUser.nickname }}
                 <el-tag size="small" type="info">{{ item.assigneeUser.deptName }}</el-tag>
               </label>
               <label v-if="item.createTime" style="font-weight: normal">创建时间：</label>
-              <label style="color: #8a909c; font-weight: normal">
+              <label style="font-weight: normal; color: #8a909c">
                 {{ formatDate(item?.createTime) }}
               </label>
               <label v-if="item.endTime" style="margin-left: 30px; font-weight: normal">
                 审批时间：
               </label>
-              <label v-if="item.endTime" style="color: #8a909c; font-weight: normal">
+              <label v-if="item.endTime" style="font-weight: normal; color: #8a909c">
                 {{ formatDate(item?.endTime) }}
               </label>
               <label v-if="item.durationInMillis" style="margin-left: 30px; font-weight: normal">
                 耗时：
               </label>
-              <label v-if="item.durationInMillis" style="color: #8a909c; font-weight: normal">
+              <label v-if="item.durationInMillis" style="font-weight: normal; color: #8a909c">
                 {{ formatPast2(item?.durationInMillis) }}
               </label>
               <p v-if="item.reason">

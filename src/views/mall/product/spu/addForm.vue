@@ -101,7 +101,7 @@ const getDetail = async () => {
   if ('ProductSpuDetail' === name) {
     isDetail.value = true
   }
-  const id = params.spuId as number
+  const id = params.spuId as unknown as number
   if (id) {
     formLoading.value = true
     try {
@@ -155,15 +155,15 @@ const submitForm = async () => {
       item.subCommissionSecondPrice = convertToInteger(item.subCommissionSecondPrice)
     })
     // 处理轮播图列表
-    const newSliderPicUrls = []
-    deepCopyFormData.sliderPicUrls.forEach((item) => {
+    const newSliderPicUrls: any[] = []
+    deepCopyFormData.sliderPicUrls.forEach((item: any) => {
       // 如果是前端选的图
       typeof item === 'object' ? newSliderPicUrls.push(item.url) : newSliderPicUrls.push(item)
     })
     deepCopyFormData.sliderPicUrls = newSliderPicUrls
     // 校验都通过后提交表单
     const data = deepCopyFormData as ProductSpuApi.Spu
-    const id = params.spuId as number
+    const id = params.spuId as unknown as number
     if (!id) {
       await ProductSpuApi.createSpu(data)
       message.success(t('common.createSuccess'))

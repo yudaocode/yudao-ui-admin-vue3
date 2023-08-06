@@ -174,10 +174,10 @@ const scrollToBottom = async () => {
 <style lang="scss" scoped>
 .msg-div {
   height: 50vh;
+  margin-right: 10px;
+  margin-left: 10px;
   overflow: auto;
   background-color: #eaeaea;
-  margin-left: 10px;
-  margin-right: 10px;
 }
 
 .msg-send {
