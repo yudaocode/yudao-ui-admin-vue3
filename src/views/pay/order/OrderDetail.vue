@@ -19,11 +19,11 @@
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="金额">
-        <el-tag type="success">￥{{ parseFloat(detailData.amount / 100, 2).toFixed(2) }}</el-tag>
+        <el-tag type="success">￥{{ parseFloat(detailData.price / 100, 2).toFixed(2) }}</el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="手续费">
         <el-tag type="warning">
-          ￥{{ parseFloat(detailData.channelFeeAmount / 100, 2).toFixed(2) }}
+          ￥{{ parseFloat(detailData.channelFeePrice / 100, 2).toFixed(2) }}
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="手续费比例">
@@ -61,7 +61,7 @@
       <el-descriptions-item label="退款次数">{{ detailData.refundTimes }}</el-descriptions-item>
       <el-descriptions-item label="退款金额">
         <el-tag type="warning">
-          {{ parseFloat(detailData.refundAmount / 100, 2) }}
+          {{ parseFloat(detailData.refundPrice / 100, 2) }}
         </el-tag>
       </el-descriptions-item>
     </el-descriptions>
