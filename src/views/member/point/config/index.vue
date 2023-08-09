@@ -105,8 +105,8 @@ const onSubmit = async () => {
 const getConfig = async () => {
   try {
     const data = await ConfigApi.getConfig()
-    // if (data === null) return
-    // formData.value = data
+    if (data === null) return
+    formData.value = data
   } finally {
   }
 }
