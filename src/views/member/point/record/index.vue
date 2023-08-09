@@ -69,8 +69,14 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery">
+          <Icon icon="ep:search" class="mr-5px" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon icon="ep:refresh" class="mr-5px" />
+          重置
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -95,7 +101,7 @@
         align="center"
         prop="type"
         :formatter="
-          (a, b, c) => {
+          (_, __, c) => {
             return c === '1' ? '增加' : '扣减'
           }
         "

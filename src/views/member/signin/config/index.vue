@@ -1,55 +1,39 @@
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
-    <el-form
-      class="-mb-15px"
-      :model="queryParams"
-      ref="queryFormRef"
-      :inline="true"
-      label-width="68px"
+    <el-button
+      type="primary"
+      plain
+      @click="openForm('create')"
+      v-hasPermi="['point:sign-in-config:create']"
     >
-      <!-- TODO @xiaqing：搜索可以去掉，因为一共就没几条配置哈 -->
-      <el-form-item label="签到天数" prop="day">
-        <el-input
-          v-model="queryParams.day"
-          placeholder="请输入签到天数"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['point:sign-in-config:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['point:sign-in-config:export']"
-        >
-          <!-- TODO @xiaqing：四个功能的导出都可以去掉 -->
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
-      </el-form-item>
-    </el-form>
+      <Icon icon="ep:plus" class="mr-5px" /> 新增
+    </el-button>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <!-- TODO @xiaqing：展示优化下，改成第 1 天、第 2 天这种 -->
-      <el-table-column label="签到天数" align="center" prop="day" />
+      <el-table-column
+        label="签到天数"
+        align="center"
+        prop="day"
+        :formatter="(_, __, cellValue) => ['第', cellValue, '天'].join(' ')"
+      />
       <el-table-column label="获得积分" align="center" prop="point" />
-      <!-- TODO @xiaqing：展示一个是否开启 -->
+      <el-table-column label="是否开启" align="center">
+        <template #default="scope">
+          <div>
+            <el-switch
+              v-model="scope.row.isEnable"
+              @change="handleSwitchChange(scope.row.id, $event)"
+              inline-prompt
+              active-text="开启"
+              inactive-text="关闭"
+            />
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button
@@ -71,13 +55,6 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- 分页 -->
-    <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
@@ -85,9 +62,9 @@
 </template>
 
 <script lang="ts" setup>
-import download from '@/utils/download'
 import * as SignInConfigApi from '@/api/point/signInConfig'
 import SignInConfigForm from './SignInConfigForm.vue'
+import { SignInConfigVO } from '@/api/point/signInConfig'
 
 defineOptions({ name: 'SignInConfig' })
 
@@ -95,39 +72,18 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const queryParams = reactive({
-  pageNo: 1,
-  pageSize: 10,
-  day: null
-})
-const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
-// TODO @xiaqing：可以不分页；
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await SignInConfigApi.getSignInConfigPage(queryParams)
-    list.value = data.list
-    total.value = data.total
+    const data = await SignInConfigApi.getSignInConfigPage()
+    console.log(data)
+    list.value = data
   } finally {
     loading.value = false
   }
-}
-
-/** 搜索按钮操作 */
-const handleQuery = () => {
-  queryParams.pageNo = 1
-  getList()
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  handleQuery()
 }
 
 /** 添加/修改操作 */
@@ -149,19 +105,16 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await SignInConfigApi.exportSignInConfig(queryParams)
-    download.excel(data, '积分签到规则.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
+const handleSwitchChange = async (id, e) => {
+  console.log('开关状态变更，id:', id, '新状态：', e)
+  // 创建对象
+  const signInConfig: SignInConfigVO = {
+    id: id,
+    day: null,
+    point: null,
+    isEnable: e
   }
+  await SignInConfigApi.updateSignInConfig(signInConfig)
 }
 
 /** 初始化 **/

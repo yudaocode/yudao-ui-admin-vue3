@@ -2,13 +2,14 @@ import request from '@/config/axios'
 
 export interface SignInConfigVO {
   id: number
-  day: number
-  point: number
+  day: number | null
+  point: number | null
+  isEnable: boolean | null
 }
 
 // 查询积分签到规则列表
-export const getSignInConfigPage = async (params) => {
-  return await request.get({ url: `/point/sign-in-config/page`, params })
+export const getSignInConfigPage = async () => {
+  return await request.get({ url: `/point/sign-in-config/list` })
 }
 
 // 查询积分签到规则详情
@@ -29,9 +30,4 @@ export const updateSignInConfig = async (data: SignInConfigVO) => {
 // 删除积分签到规则
 export const deleteSignInConfig = async (id: number) => {
   return await request.delete({ url: `/point/sign-in-config/delete?id=` + id })
-}
-
-// 导出积分签到规则 Excel
-export const exportSignInConfig = async (params) => {
-  return await request.download({ url: `/point/sign-in-config/export-excel`, params })
 }
