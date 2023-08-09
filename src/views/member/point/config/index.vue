@@ -16,12 +16,12 @@
       <el-form-item>
         <el-text class="mx-1" size="small" type="info">下单积分是否抵用订单金额</el-text>
       </el-form-item>
-      <!-- TODO @xiaqing：用户看到的是元，最多 2 位；分是后端的存储哈 -->
       <el-form-item label="积分抵扣" prop="tradeDeductUnitPrice" class="item-bottom">
         <el-input-number
-          v-model="formData.tradeDeductUnitPrice"
+          v-model="computedTradeDeductUnitPrice"
           placeholder="请输入积分抵扣金额"
           style="width: 300px"
+          :precision="2"
         />
       </el-form-item>
       <el-form-item>
@@ -67,11 +67,19 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
   id: undefined,
-  tradeDeductEnable: undefined,
-  tradeDeductUnitPrice: undefined,
-  tradeDeductMaxPrice: undefined,
-  tradeGivePoint: undefined
+  tradeDeductEnable: true,
+  tradeDeductUnitPrice: 0,
+  tradeDeductMaxPrice: 0,
+  tradeGivePoint: 0
 })
+// 创建一个计算属性，用于将 tradeDeductUnitPrice 显示为带两位小数的形式
+const computedTradeDeductUnitPrice = computed({
+  get: () => (formData.value.tradeDeductUnitPrice / 100).toFixed(2),
+  set: (newValue) => {
+    formData.value.tradeDeductUnitPrice = Math.round(newValue * 100)
+  }
+})
+
 const formRules = reactive({})
 const formRef = ref() // 表单 Ref
 
@@ -97,7 +105,8 @@ const onSubmit = async () => {
 const getConfig = async () => {
   try {
     const data = await ConfigApi.getConfig()
-    formData.value = data
+    // if (data === null) return
+    // formData.value = data
   } finally {
   }
 }
