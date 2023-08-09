@@ -67,7 +67,7 @@
       <el-form-item v-if="formData.storage === 11" label="连接模式" prop="config.mode">
         <el-radio-group v-model="formData.config.mode">
           <el-radio key="Active" label="Active">主动模式</el-radio>
-          <el-radio key="Passive" label="Passive">主动模式</el-radio>
+          <el-radio key="Passive" label="Passive">被动模式</el-radio>
         </el-radio-group>
       </el-form-item>
       <!-- S3 -->
