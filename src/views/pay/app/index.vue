@@ -54,15 +54,6 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['system:tenant:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -390,20 +381,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await AppApi.exportApp(queryParams)
-    download.excel(data, '支付应用信息.xls')
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /**

@@ -5,15 +5,15 @@
       <el-descriptions-item label="支付单号">{{ payOrder.id }}</el-descriptions-item>
       <el-descriptions-item label="商品标题">{{ payOrder.subject }}</el-descriptions-item>
       <el-descriptions-item label="商品内容">{{ payOrder.body }}</el-descriptions-item>
-      <el-descriptions-item label="支付金额"
-        >￥{{ (payOrder.price / 100.0).toFixed(2) }}</el-descriptions-item
-      >
-      <el-descriptions-item label="创建时间">{{
-        formatDate(payOrder.createTime)
-      }}</el-descriptions-item>
-      <el-descriptions-item label="过期时间">{{
-        formatDate(payOrder.expireTime)
-      }}</el-descriptions-item>
+      <el-descriptions-item label="支付金额">
+        ￥{{ (payOrder.price / 100.0).toFixed(2) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="创建时间">
+        {{ formatDate(payOrder.createTime) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="过期时间">
+        {{ formatDate(payOrder.expireTime) }}
+      </el-descriptions-item>
     </el-descriptions>
   </el-card>
 
@@ -61,7 +61,7 @@
   </el-card>
 
   <!-- 展示形式：二维码 URL -->
-  <el-dialog
+  <Dialog
     :title="qrCode.title"
     v-model="qrCode.visible"
     width="350px"
@@ -69,10 +69,10 @@
     :close-on-press-escape="false"
   >
     <qrcode-vue :value="qrCode.url" :size="310" level="L" />
-  </el-dialog>
+  </Dialog>
 
   <!-- 展示形式：BarCode 条形码 -->
-  <el-dialog
+  <Dialog
     :title="barCode.title"
     v-model="barCode.visible"
     width="500px"
@@ -93,8 +93,9 @@
               type="danger"
               target="_blank"
               href="https://baike.baidu.com/item/条码支付/10711903"
-              >(扫码枪/扫码盒)</el-link
             >
+              (扫码枪/扫码盒)
+            </el-link>
             扫码
           </div>
         </el-col>
@@ -105,21 +106,22 @@
         type="primary"
         @click="submit0(barCode.channelCode)"
         :disabled="barCode.value.length === 0"
-        >确认支付</el-button
       >
+        确认支付
+      </el-button>
       <el-button @click="barCode.visible = false">取 消</el-button>
     </template>
-  </el-dialog>
+  </Dialog>
 </template>
 
-<script setup lang="ts" name="PayCashier">
+<script lang="ts" setup>
 import QrcodeVue from 'qrcode.vue'
-import { getOrder, createOrder } from '@/api/pay/order'
+import { getOrder, submitOrder } from '@/api/pay/order'
 import { PayChannelEnum, PayDisplayModeEnum, PayOrderStatusEnum } from '@/utils/constants'
-import { ref, onMounted } from 'vue'
 import { formatDate } from '@/utils/formatTime'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 
-// TODO: ugly
+// 导入图标
 import svg_alipay_pc from '@/assets/svgs/pay/icon/alipay_pc.svg'
 import svg_alipay_wap from '@/assets/svgs/pay/icon/alipay_wap.svg'
 import svg_alipay_app from '@/assets/svgs/pay/icon/alipay_app.svg'
@@ -132,11 +134,14 @@ import svg_wx_native from '@/assets/svgs/pay/icon/wx_native.svg'
 import svg_wx_bar from '@/assets/svgs/pay/icon/wx_bar.svg'
 import svg_mock from '@/assets/svgs/pay/icon/mock.svg'
 
-const message = useMessage() // 消息弹窗
-const route = useRoute()
-const router = useRouter()
+defineOptions({ name: 'PayCashier' })
 
-const id = ref(undefined) // 请假编号
+const message = useMessage() // 消息弹窗
+const route = useRoute() // 路由
+const { push, currentRoute } = useRouter() // 路由
+const { delView } = useTagsViewStore() // 视图操作
+
+const id = ref(undefined) // 支付单号
 const returnUrl = ref<string | undefined>(undefined) // 支付完的回调地址
 const loading = ref(false) // 支付信息的 loading
 const payOrder = ref({}) // 支付信息
@@ -167,7 +172,6 @@ const channelsAlipay = [
     code: 'alipay_bar'
   }
 ]
-
 const channelsWechat = [
   {
     name: '微信公众号支付',
@@ -195,7 +199,6 @@ const channelsWechat = [
     code: 'wx_bar'
   }
 ]
-
 const channelsMock = [
   {
     name: '模拟支付',
@@ -218,14 +221,6 @@ const barCode = ref({
   value: '',
   title: '',
   visible: false
-})
-
-onMounted(() => {
-  id.value = route.query.id
-  if (route.query.returnUrl) {
-    returnUrl.value = decodeURIComponent(route.query.returnUrl)
-  }
-  getDetail()
 })
 
 /** 获得支付信息 */
@@ -297,7 +292,7 @@ const submit = (channelCode) => {
 
 const submit0 = (channelCode) => {
   submitLoading.value = true
-  createOrder({
+  submitOrder({
     id: id.value,
     channelCode: channelCode,
     returnUrl: location.href, // 支付成功后，支付渠道跳转回当前页；再由当前页，跳转回 {@link returnUrl} 对应的地址
@@ -308,7 +303,7 @@ const submit0 = (channelCode) => {
       if (data.status === PayOrderStatusEnum.SUCCESS.status) {
         clearQueryInterval()
         message.success('支付成功！')
-        goReturnUrl()
+        goReturnUrl('success')
         return
       }
 
@@ -396,13 +391,13 @@ const createQueryInterval = () => {
       if (data.status === PayOrderStatusEnum.SUCCESS.status) {
         clearQueryInterval()
         message.success('支付成功！')
-        goReturnUrl()
+        goReturnUrl('success')
       }
       // 已取消
       if (data.status === PayOrderStatusEnum.CLOSED.status) {
         clearQueryInterval()
         message.error('支付已关闭！')
-        goReturnUrl()
+        goReturnUrl('close')
       }
     })
   }, 1000 * 2)
@@ -435,8 +430,7 @@ const goReturnUrl = (payResult) => {
 
   // 未配置的情况下，只能关闭
   if (!returnUrl.value) {
-    // TODO: dhb52 需要找到对应 $tab 功能
-    // this.$tab.closePage()
+    delView(unref(currentRoute))
     return
   }
 
@@ -448,14 +442,21 @@ const goReturnUrl = (payResult) => {
   if (returnUrl.value.indexOf('http') === 0) {
     location.href = url
   } else {
-    // TODO: dhb52 需要找到对应 $tab 功能
-    // this.$tab.closePage(() => {
-    //   router.push({
-    //     path: url
-    //   })
-    // })
+    delView(unref(currentRoute))
+    push({
+      path: url
+    })
   }
 }
+
+/** 初始化 */
+onMounted(() => {
+  id.value = route.query.id
+  if (route.query.returnUrl) {
+    returnUrl.value = decodeURIComponent(route.query.returnUrl)
+  }
+  getDetail()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -464,7 +465,7 @@ const goReturnUrl = (payResult) => {
   margin-top: -10px;
 
   .box {
-    width: 130px;
+    width: 160px;
     border: 1px solid #e6ebf5;
     cursor: pointer;
     text-align: center;

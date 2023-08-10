@@ -93,19 +93,9 @@ export const getOrderDetail = async (id: number) => {
   return await request.get({ url: '/pay/order/get-detail?id=' + id })
 }
 
-// 新增支付订单
-export const createOrder = async (data: OrderVO) => {
+// 提交支付订单
+export const submitOrder = async (data: any) => {
   return await request.post({ url: '/pay/order/submit', data })
-}
-
-// 修改支付订单
-export const updateOrder = async (data: OrderVO) => {
-  return await request.put({ url: '/pay/order/update', data })
-}
-
-// 删除支付订单
-export const deleteOrder = async (id: number) => {
-  return await request.delete({ url: '/pay/order/delete?id=' + id })
 }
 
 // 导出支付订单
