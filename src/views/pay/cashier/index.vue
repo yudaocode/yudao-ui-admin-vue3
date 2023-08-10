@@ -116,7 +116,7 @@
 
 <script lang="ts" setup>
 import QrcodeVue from 'qrcode.vue'
-import { getOrder, submitOrder } from '@/api/pay/order'
+import * as PayOrderApi from '@/api/pay/order'
 import { PayChannelEnum, PayDisplayModeEnum, PayOrderStatusEnum } from '@/utils/constants'
 import { formatDate } from '@/utils/formatTime'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -224,34 +224,31 @@ const barCode = ref({
 })
 
 /** 获得支付信息 */
-const getDetail = () => {
+const getDetail = async () => {
   // 1.1 未传递订单编号
   if (!id.value) {
     message.error('未传递支付单号，无法查看对应的支付信息')
     goReturnUrl('cancel')
     return
   }
-  getOrder(id.value).then((data) => {
-    // 1.2 无法查询到支付信息
-    if (!data) {
-      message.error('支付订单不存在，请检查！')
-      goReturnUrl('cancel')
-      return
-    }
-    // 1.3 如果已支付、或者已关闭，则直接跳转
-    if (data.status === PayOrderStatusEnum.SUCCESS.status) {
-      message.success('支付成功')
-      goReturnUrl('success')
-      return
-    } else if (data.status === PayOrderStatusEnum.CLOSED.status) {
-      message.error('无法支付，原因：订单已关闭')
-      goReturnUrl('close')
-      return
-    }
-
-    // 2. 可以展示
-    payOrder.value = data
-  })
+  const data = await PayOrderApi.getOrder(id.value)
+  payOrder.value = data
+  // 1.2 无法查询到支付信息
+  if (!data) {
+    message.error('支付订单不存在，请检查！')
+    goReturnUrl('cancel')
+    return
+  }
+  // 1.3 如果已支付、或者已关闭，则直接跳转
+  if (data.status === PayOrderStatusEnum.SUCCESS.status) {
+    message.success('支付成功')
+    goReturnUrl('success')
+    return
+  } else if (data.status === PayOrderStatusEnum.CLOSED.status) {
+    message.error('无法支付，原因：订单已关闭')
+    goReturnUrl('close')
+    return
+  }
 }
 
 /** 提交支付 */
@@ -290,38 +287,38 @@ const submit = (channelCode) => {
   submit0(channelCode)
 }
 
-const submit0 = (channelCode) => {
+const submit0 = async (channelCode) => {
   submitLoading.value = true
-  submitOrder({
-    id: id.value,
-    channelCode: channelCode,
-    returnUrl: location.href, // 支付成功后，支付渠道跳转回当前页；再由当前页，跳转回 {@link returnUrl} 对应的地址
-    ...buildSubmitParam(channelCode)
-  })
-    .then((data) => {
-      // 直接返回已支付的情况，例如说扫码支付
-      if (data.status === PayOrderStatusEnum.SUCCESS.status) {
-        clearQueryInterval()
-        message.success('支付成功！')
-        goReturnUrl('success')
-        return
-      }
+  try {
+    const formData = {
+      id: id.value,
+      channelCode: channelCode,
+      returnUrl: location.href, // 支付成功后，支付渠道跳转回当前页；再由当前页，跳转回 {@link returnUrl} 对应的地址
+      ...buildSubmitParam(channelCode)
+    }
+    const data = await PayOrderApi.submitOrder(formData)
+    // 直接返回已支付的情况，例如说扫码支付
+    if (data.status === PayOrderStatusEnum.SUCCESS.status) {
+      clearQueryInterval()
+      message.success('支付成功！')
+      goReturnUrl('success')
+      return
+    }
 
-      // 展示对应的界面
-      if (data.displayMode === PayDisplayModeEnum.URL.mode) {
-        displayUrl(channelCode, data)
-      } else if (data.displayMode === PayDisplayModeEnum.QR_CODE.mode) {
-        displayQrCode(channelCode, data)
-      } else if (data.displayMode === PayDisplayModeEnum.APP.mode) {
-        displayApp(channelCode)
-      }
+    // 展示对应的界面
+    if (data.displayMode === PayDisplayModeEnum.URL.mode) {
+      displayUrl(channelCode, data)
+    } else if (data.displayMode === PayDisplayModeEnum.QR_CODE.mode) {
+      displayQrCode(channelCode, data)
+    } else if (data.displayMode === PayDisplayModeEnum.APP.mode) {
+      displayApp(channelCode)
+    }
 
-      // 打开轮询任务
-      createQueryInterval()
-    })
-    .catch(() => {
-      submitLoading.value = false
-    })
+    // 打开轮询任务
+    createQueryInterval()
+  } finally {
+    submitLoading.value = false
+  }
 }
 
 /** 构建提交支付的额外参数 */
@@ -385,21 +382,20 @@ const createQueryInterval = () => {
   if (interval.value) {
     return
   }
-  interval.value = setInterval(() => {
-    getOrder(id.value).then((data) => {
-      // 已支付
-      if (data.status === PayOrderStatusEnum.SUCCESS.status) {
-        clearQueryInterval()
-        message.success('支付成功！')
-        goReturnUrl('success')
-      }
-      // 已取消
-      if (data.status === PayOrderStatusEnum.CLOSED.status) {
-        clearQueryInterval()
-        message.error('支付已关闭！')
-        goReturnUrl('close')
-      }
-    })
+  interval.value = setInterval(async () => {
+    const data = await PayOrderApi.getOrder(id.value)
+    // 已支付
+    if (data.status === PayOrderStatusEnum.SUCCESS.status) {
+      clearQueryInterval()
+      message.success('支付成功！')
+      goReturnUrl('success')
+    }
+    // 已取消
+    if (data.status === PayOrderStatusEnum.CLOSED.status) {
+      clearQueryInterval()
+      message.error('支付已关闭！')
+      goReturnUrl('close')
+    }
   }, 1000 * 2)
 }
 
