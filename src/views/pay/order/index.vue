@@ -139,56 +139,7 @@
 
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="订单编号" align="center" prop="id" />
-      <el-table-column label="商户名称" align="center" prop="merchantName" width="120" />
-      <el-table-column label="应用名称" align="center" prop="appName" width="120" />
-      <el-table-column label="渠道名称" align="center" prop="channelCodeName" width="120" />
-      <el-table-column label="渠道订单号" align="center" prop="merchantOrderId" width="120" />
-      <el-table-column label="商品标题" align="center" prop="subject" width="250" />
-      <el-table-column label="商品描述" align="center" prop="body" width="250" />
-      <el-table-column label="异步通知地址" align="center" prop="notifyUrl" width="250" />
-      <el-table-column label="回调状态" align="center" prop="notifyStatus">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PAY_ORDER_NOTIFY_STATUS" :value="scope.row.notifyStatus" />
-        </template>
-      </el-table-column>
-      <el-table-column label="支付订单" width="280">
-        <template #default="scope">
-          <p class="order-font">
-            <el-tag>商户</el-tag>
-            {{ scope.row.merchantOrderId }}
-          </p>
-          <p class="order-font">
-            <el-tag type="warning">支付</el-tag>
-            {{ scope.row.channelOrderNo }}
-          </p>
-        </template>
-      </el-table-column>
-      <el-table-column label="支付金额" align="center" prop="amount">
-        <template #default="scope">
-          ￥{{ parseFloat(scope.row.amount / 100).toFixed(2) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="手续金额" align="center" prop="channelFeeAmount">
-        <template #default="scope">
-          ￥{{ parseFloat(scope.row.channelFeeAmount / 100).toFixed(2) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="退款金额" align="center" prop="refundAmount">
-        <template #default="scope">
-          ￥{{ parseFloat(scope.row.refundAmount / 100).toFixed(2) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="支付状态" align="center" prop="status">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PAY_ORDER_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column label="回调状态" align="center" prop="notifyStatus">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PAY_ORDER_NOTIFY_STATUS" :value="scope.row.notifyStatus" />
-        </template>
-      </el-table-column>
+      <el-table-column label="编号" align="center" prop="id" width="80" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -196,6 +147,42 @@
         width="180"
         :formatter="dateFormatter"
       />
+      <el-table-column label="支付金额" align="center" prop="price" width="100">
+        <template #default="scope"> ￥{{ parseFloat(scope.row.price / 100).toFixed(2) }} </template>
+      </el-table-column>
+      <el-table-column label="退款金额" align="center" prop="refundPrice" width="100">
+        <template #default="scope">
+          ￥{{ parseFloat(scope.row.refundPrice / 100).toFixed(2) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="手续金额" align="center" prop="channelFeePrice" width="100">
+        <template #default="scope">
+          ￥{{ parseFloat(scope.row.channelFeePrice / 100).toFixed(2) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="订单号" align="left" width="300">
+        <template #default="scope">
+          <p class="order-font">
+            <el-tag size="small"> 商户</el-tag> {{ scope.row.merchantOrderId }}
+          </p>
+          <p class="order-font" v-if="scope.row.no">
+            <el-tag size="small" type="warning">支付</el-tag> {{ scope.row.no }}
+          </p>
+          <p class="order-font" v-if="scope.row.channelOrderNo">
+            <el-tag size="small" type="success">渠道</el-tag> {{ scope.row.channelOrderNo }}
+          </p>
+        </template>
+      </el-table-column>
+      <el-table-column label="支付状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.PAY_ORDER_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column label="支付渠道" align="center" prop="channelCode" width="140">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="scope.row.channelCode" />
+        </template>
+      </el-table-column>
       <el-table-column
         label="支付时间"
         align="center"
@@ -203,11 +190,14 @@
         width="180"
         :formatter="dateFormatter"
       />
+      <el-table-column label="支付应用" align="center" prop="appName" width="100" />
+      <el-table-column label="商品标题" align="center" prop="subject" width="180" />
       <el-table-column label="操作" align="center" fixed="right">
         <template #default="scope">
           <el-button
             type="primary"
             link
+            size="small"
             @click="openDetail(scope.row.id)"
             v-hasPermi="['pay:order:query']"
           >
@@ -231,7 +221,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as MerchantApi from '@/api/pay/merchant'
+// import * as MerchantApi from '@/api/pay/merchant'
 import * as OrderApi from '@/api/pay/order'
 import OrderDetail from './OrderDetail.vue'
 import download from '@/utils/download'

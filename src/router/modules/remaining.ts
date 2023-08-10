@@ -410,6 +410,24 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       }
     ]
+  },
+  {
+    path: '/pay',
+    component: Layout,
+    name: 'pay',
+    meta: { hidden: true },
+    children: [
+      {
+        path: 'cashier',
+        name: 'PayCashier',
+        meta: {
+          title: '收银台',
+          noCache: true,
+          hidden: true
+        },
+        component: () => import('@/views/pay/cashier/index.vue')
+      }
+    ]
   }
 ]
 

@@ -235,7 +235,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as MerchantApi from '@/api/pay/merchant'
+// import * as MerchantApi from '@/api/pay/merchant'
 import * as RefundApi from '@/api/pay/refund'
 import RefundDetail from './RefundDetail.vue'
 import download from '@/utils/download'
@@ -330,7 +330,7 @@ const openDetail = (id: number) => {
 onMounted(async () => {
   await getList()
   // 加载商户列表
-  merchantList.value = await MerchantApi.getMerchantListByName()
+  // merchantList.value = await MerchantApi.getMerchantListByName()
   // TODO 芋艿：候选少一个查询应用列表的接口
   // appList.value = await AppApi.getAppListByMerchantId()
 })

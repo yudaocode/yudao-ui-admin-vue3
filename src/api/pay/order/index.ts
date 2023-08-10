@@ -95,7 +95,7 @@ export const getOrderDetail = async (id: number) => {
 
 // 新增支付订单
 export const createOrder = async (data: OrderVO) => {
-  return await request.post({ url: '/pay/order/create', data })
+  return await request.post({ url: '/pay/order/submit', data })
 }
 
 // 修改支付订单

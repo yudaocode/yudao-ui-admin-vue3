@@ -99,6 +99,10 @@ export const PayChannelEnum = {
     code: 'wx_app',
     name: '微信 APP 支付'
   },
+  WX_BAR: {
+    code: 'wx_bar',
+    name: '微信条码支付'
+  },
   ALIPAY_PC: {
     code: 'alipay_pc',
     name: '支付宝 PC 网站支付'
@@ -123,6 +127,36 @@ export const PayChannelEnum = {
     code: 'mock',
     name: '模拟支付'
   }
+}
+
+/**
+ * 支付的展示模式每局
+ */
+export const PayDisplayModeEnum = {
+  URL: {
+    mode: 'url'
+  },
+  IFRAME: {
+    mode: 'iframe'
+  },
+  FORM: {
+    mode: 'form'
+  },
+  QR_CODE: {
+    mode: 'qr_code'
+  },
+  APP: {
+    mode: 'app'
+  }
+}
+
+/**
+ * 支付类型枚举
+ */
+export const PayType = {
+  WECHAT: 'WECHAT',
+  ALIPAY: 'ALIPAY',
+  MOCK: 'MOCK'
 }
 
 /**
