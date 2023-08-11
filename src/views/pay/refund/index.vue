@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="支付宝、微信退款接入" url="https://doc.iocoder.cn/pay/refund-demo/" />
+
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form
