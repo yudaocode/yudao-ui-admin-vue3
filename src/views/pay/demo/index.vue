@@ -96,7 +96,7 @@
         >
           <el-option v-for="item in spus" :key="item.id" :label="item.name" :value="item.id">
             <span style="float: left">{{ item.name }}</span>
-            <span style="float: right; color: #8492a6; font-size: 13px">
+            <span style="float: right; font-size: 13px; color: #8492a6">
               ￥{{ (item.price / 100.0).toFixed(2) }}
             </span>
           </el-option>
@@ -228,6 +228,7 @@ const submitForm = async () => {
     dialogVisible.value = false
   } finally {
     formLoading.value = false
+    getList()
   }
 }
 
