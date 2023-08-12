@@ -22,16 +22,6 @@ export interface AppPageReqVO extends PageParam {
   createTime?: Date[]
 }
 
-export interface AppExportReqVO {
-  name?: string
-  status?: number
-  remark?: string
-  payNotifyUrl?: string
-  refundNotifyUrl?: string
-  merchantName?: string
-  createTime?: Date[]
-}
-
 export interface AppUpdateStatusReqVO {
   id: number
   status: number
@@ -67,12 +57,9 @@ export const deleteApp = (id: number) => {
   return request.delete({ url: '/pay/app/delete?id=' + id })
 }
 
-// 导出支付应用
-export const exportApp = (params: AppExportReqVO) => {
-  return request.download({ url: '/pay/app/export-excel', params })
-}
-
-// 根据商ID称搜索应用列表
-export const getAppListByMerchantId = (merchantId: number) => {
-  return request.get({ url: '/pay/app/list-merchant-id', params: { merchantId: merchantId } })
+// 获得支付应用列表
+export const getAppList = () => {
+  return request.get({
+    url: '/pay/app/list'
+  })
 }
