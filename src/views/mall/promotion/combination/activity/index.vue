@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="功能开启" url="https://doc.iocoder.cn/mall/build/" />
+
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <Search :schema="allSchemas.searchSchema" @reset="setSearchParams" @search="setSearchParams">
@@ -10,8 +12,7 @@
           type="primary"
           @click="openForm('create')"
         >
-          <Icon class="mr-5px" icon="ep:plus" />
-          新增
+          <Icon class="mr-5px" icon="ep:plus" /> 新增
         </el-button>
       </template>
     </Search>
@@ -65,7 +66,7 @@
 import { allSchemas } from './combinationActivity.data'
 import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationActivity'
 import CombinationActivityForm from './CombinationActivityForm.vue'
-import { cloneDeep } from 'lodash-es'
+import { sortTableColumns } from '@/hooks/web/useCrudSchemas'
 import { createImageViewer } from '@/components/ImageViewer'
 
 defineOptions({ name: 'PromotionCombinationActivity' })
@@ -100,17 +101,8 @@ const handleDelete = (id: number) => {
 
 /** 初始化 **/
 onMounted(() => {
-  /**
-   TODO
-   后面准备封装成一个函数来操作 tableColumns 重新排列：比如说需求是表单上商品选择是在后面的而列表展示的时候需要调到位置。
-   封装效果支持批量操作，给出 field 和需要插入的位置，例：[{field:'spuId',index: 1}] 效果为把 field 为 spuId 的 column 移动到第一个位置
-   */
-  // 处理一下表格列让商品往前
-  const index = allSchemas.tableColumns.findIndex((item) => item.field === 'spuId')
-  const column = cloneDeep(allSchemas.tableColumns[index])
-  allSchemas.tableColumns.splice(index, 1)
-  // 添加到开头
-  allSchemas.tableColumns.unshift(column)
+  // 获得活动列表
+  sortTableColumns(allSchemas.tableColumns, 'spuId')
   getList()
 })
 </script>

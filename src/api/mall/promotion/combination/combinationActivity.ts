@@ -10,8 +10,8 @@ export interface CombinationActivityVO {
   startTime?: Date
   endTime?: Date
   userSize?: number
-  totalNum?: number
-  successNum?: number
+  totalCount?: number
+  successCount?: number
   orderUserCount?: number
   virtualGroup?: number
   status?: number
@@ -23,7 +23,7 @@ export interface CombinationActivityVO {
 export interface CombinationProductVO {
   spuId: number
   skuId: number
-  activePrice: number // 拼团价格
+  combinationPrice: number // 拼团价格
 }
 
 // 扩展 Sku 配置

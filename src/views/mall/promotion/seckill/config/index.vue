@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="功能开启" url="https://doc.iocoder.cn/mall/build/" />
+
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <Search :schema="allSchemas.searchSchema" @reset="setSearchParams" @search="setSearchParams">

@@ -122,13 +122,13 @@ const crudSchemas = reactive<CrudSchema[]>([
   },
   {
     label: '开团组数',
-    field: 'totalNum',
+    field: 'totalCount',
     isSearch: false,
     isForm: false
   },
   {
     label: '成团组数',
-    field: 'successNum',
+    field: 'successCount',
     isSearch: false,
     isForm: false
   },
