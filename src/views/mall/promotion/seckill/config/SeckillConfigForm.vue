@@ -10,7 +10,6 @@
 <script lang="ts" name="SeckillConfigForm" setup>
 import * as SeckillConfigApi from '@/api/mall/promotion/seckill/seckillConfig'
 import { allSchemas, rules } from './seckillConfig.data'
-import { cloneDeep } from 'lodash-es'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -53,19 +52,22 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     // 处理轮播图列表
-    const data = formRef.value.formModel as SeckillConfigApi.SeckillConfigVO
-    const cloneData = cloneDeep(data)
-    const newSliderPicUrls = []
-    cloneData.sliderPicUrls.forEach((item) => {
+    const sliderPicUrls = []
+    formRef.value.formModel.sliderPicUrls.forEach((item) => {
       // 如果是前端选的图
-      typeof item === 'object' ? newSliderPicUrls.push(item.url) : newSliderPicUrls.push(item)
+      typeof item === 'object' ? sliderPicUrls.push(item.url) : sliderPicUrls.push(item)
     })
-    cloneData.sliderPicUrls = newSliderPicUrls
+
+    // 真正提交
+    const data = {
+      ...formRef.value.formModel,
+      sliderPicUrls
+    } as SeckillConfigApi.SeckillConfigVO
     if (formType.value === 'create') {
-      await SeckillConfigApi.createSeckillConfig(cloneData)
+      await SeckillConfigApi.createSeckillConfig(data)
       message.success(t('common.createSuccess'))
     } else {
-      await SeckillConfigApi.updateSeckillConfig(cloneData)
+      await SeckillConfigApi.updateSeckillConfig(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false

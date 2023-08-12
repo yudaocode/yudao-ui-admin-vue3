@@ -61,9 +61,7 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" /> 搜索
-        </el-button>
+        <el-button @click="handleQuery"> <Icon icon="ep:search" class="mr-5px" />搜索 </el-button>
         <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" />重置 </el-button>
         <el-button
           v-hasPermi="['promotion:coupon-template:create']"
@@ -172,7 +170,7 @@
 </template>
 
 <script lang="ts" setup>
-import * as CouponTemplateApi from '@/api/mall/promotion/couponTemplate'
+import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
 import {
   CommonStatusEnum,
   CouponTemplateValidityTypeEnum,

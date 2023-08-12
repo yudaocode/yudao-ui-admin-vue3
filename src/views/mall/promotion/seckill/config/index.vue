@@ -76,7 +76,6 @@ import * as SeckillConfigApi from '@/api/mall/promotion/seckill/seckillConfig'
 import SeckillConfigForm from './SeckillConfigForm.vue'
 import { createImageViewer } from '@/components/ImageViewer'
 import { CommonStatusEnum } from '@/utils/constants'
-import { isArray } from '@/utils/is'
 
 const message = useMessage() // 消息弹窗
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
@@ -88,21 +87,6 @@ const { tableObject, tableMethods } = useTable({
 })
 // 获得表格的各种操作
 const { getList, setSearchParams } = tableMethods
-
-/** 轮播图预览预览 */
-const imagePreview = (args) => {
-  const urlList = []
-  if (isArray(args)) {
-    args.forEach((item) => {
-      urlList.push(item)
-    })
-  } else {
-    urlList.push(args)
-  }
-  createImageViewer({
-    urlList
-  })
-}
 
 /** 添加/修改操作 */
 const formRef = ref()
@@ -131,6 +115,14 @@ const handleStatusChange = async (row: SeckillConfigApi.SeckillConfigVO) => {
       row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
   }
 }
+
+/** 轮播图预览预览 */
+const imagePreview = (args) => {
+  createImageViewer({
+    urlList: args
+  })
+}
+
 /** 初始化 **/
 onMounted(() => {
   getList()

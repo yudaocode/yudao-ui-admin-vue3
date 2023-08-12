@@ -20,7 +20,7 @@ export const getSeckillConfig = async (id: number) => {
 }
 
 // 获得所有开启状态的秒杀时段精简列表
-export const getListAllSimple = async () => {
+export const getSimpleSeckillConfigList = async () => {
   return await request.get({ url: '/promotion/seckill-config/list-all-simple' })
 }
 

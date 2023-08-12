@@ -71,7 +71,7 @@
 </template>
 <script lang="ts" setup>
 import { allSchemas } from './seckillActivity.data'
-import { getListAllSimple } from '@/api/mall/promotion/seckill/seckillConfig'
+import { getSimpleSeckillConfigList } from '@/api/mall/promotion/seckill/seckillConfig'
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
 import SeckillActivityForm from './SeckillActivityForm.vue'
 import { cloneDeep } from 'lodash-es'
@@ -132,6 +132,6 @@ onMounted(async () => {
   // 添加到开头
   allSchemas.tableColumns.unshift(column)
   await getList()
-  configList.value = await getListAllSimple()
+  configList.value = await getSimpleSeckillConfigList()
 })
 </script>

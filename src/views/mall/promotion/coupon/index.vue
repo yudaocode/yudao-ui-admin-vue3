@@ -31,9 +31,7 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" /> 搜索
-        </el-button>
+        <el-button @click="handleQuery"> <Icon icon="ep:search" class="mr-5px" />搜索 </el-button>
         <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" />重置 </el-button>
       </el-form-item>
     </el-form>
@@ -108,7 +106,7 @@
 </template>
 
 <script setup lang="ts" name="PromotionCoupon">
-import { deleteCoupon, getCouponPage } from '@/api/mall/promotion/coupon'
+import { deleteCoupon, getCouponPage } from '@/api/mall/promotion/coupon/coupon'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 

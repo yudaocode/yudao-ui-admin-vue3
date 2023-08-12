@@ -187,7 +187,7 @@
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import * as CouponTemplateApi from '@/api/mall/promotion/couponTemplate'
+import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import {
   CouponTemplateValidityTypeEnum,
