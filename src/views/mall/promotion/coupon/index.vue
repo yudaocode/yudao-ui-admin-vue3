@@ -1,12 +1,19 @@
 <template>
   <doc-alert title="功能开启" url="https://doc.iocoder.cn/mall/build/" />
 
+  <!-- 搜索工作栏 -->
   <ContentWrap>
-    <!-- 搜索工作栏 -->
-    <el-form :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
+    <el-form
+      ref="queryFormRef"
+      :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
+      label-width="68px"
+    >
       <el-form-item label="会员昵称" prop="nickname">
         <el-input
           v-model="queryParams.nickname"
+          class="!w-240px"
           placeholder="请输入会员昵称"
           clearable
           @keyup="handleQuery"
@@ -15,13 +22,12 @@
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          style="width: 240px"
-          type="datetimerange"
           value-format="YYYY-MM-DD HH:mm:ss"
-          range-separator="-"
+          type="daterange"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          :default-time="[new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)]"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>
@@ -31,11 +37,6 @@
         <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" />重置 </el-button>
       </el-form-item>
     </el-form>
-
-    <!-- 操作工具栏 -->
-    <!-- <el-row :gutter="10" class="mb8">
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" />
-    </el-row> -->
   </ContentWrap>
 
   <ContentWrap>
@@ -86,23 +87,21 @@
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template #default="scope">
           <el-button
-            size="small"
-            type="primary"
-            link
-            @click="handleDelete(scope.row)"
             v-hasPermi="['promotion:coupon:delete']"
-            ><Icon icon="ep:delete" :size="12" class="mr-1px" />回收</el-button
+            type="danger"
+            link
+            @click="handleDelete(scope.row.id)"
           >
+            回收
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
-
-    <!-- 分页组件 -->
-    <pagination
-      v-show="total > 0"
-      :total="total"
-      v-model:page="queryParams.pageNo"
+    <!-- 分页 -->
+    <Pagination
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -112,17 +111,14 @@
 import { deleteCoupon, getCouponPage } from '@/api/mall/promotion/coupon'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { FormInstance } from 'element-plus'
 
-// 消息弹窗
-const message = useMessage()
+defineOptions({ name: 'PromotionCoupon' })
 
-// 遮罩层
-const loading = ref(true)
-// 总条数
-const total = ref(0)
-// 优惠劵列表
-const list = ref([])
+const message = useMessage() // 消息弹窗
+
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref([]) // 字典表格数据
 // 查询参数
 const queryParams = reactive({
   pageNo: 1,
@@ -130,17 +126,15 @@ const queryParams = reactive({
   createTime: [],
   status: undefined
 })
-// Tab 筛选
-const activeTab = ref('all')
+const queryFormRef = ref() // 搜索的表单
 
+const activeTab = ref('all') // Tab 筛选
 const statusTabs = reactive([
   {
     label: '全部',
     value: 'all'
   }
 ])
-
-const queryFormRef = ref<FormInstance | null>(null)
 
 /** 查询列表 */
 const getList = async () => {
@@ -168,16 +162,17 @@ const resetQuery = () => {
 }
 
 /** 删除按钮操作 */
-const handleDelete = async (row) => {
-  const id = row.id
-
+const handleDelete = async (id: number) => {
   try {
+    // 二次确认
     await message.confirm(
       '回收将会收回会员领取的待使用的优惠券，已使用的将无法回收，确定要回收所选优惠券吗？'
     )
+    // 发起删除
     await deleteCoupon(id)
-    getList()
     message.notifySuccess('回收成功')
+    // 重新加载列表
+    await getList()
   } catch {}
 }
 
@@ -187,6 +182,7 @@ const onTabChange = (tabName) => {
   getList()
 }
 
+/** 初始化 **/
 onMounted(() => {
   getList()
   // 设置 statuses 过滤
