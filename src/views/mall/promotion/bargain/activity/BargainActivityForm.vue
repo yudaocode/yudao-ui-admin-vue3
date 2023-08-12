@@ -129,7 +129,6 @@ const getSpuDetails = async (
     if (typeof products !== 'undefined') {
       const product = products.find((item) => item.skuId === sku.id)
       if (product) {
-        // 分转元
         product.bargainFirstPrice = formatToFraction(product.bargainFirstPrice)
         product.bargainPrice = formatToFraction(product.bargainPrice)
       }
