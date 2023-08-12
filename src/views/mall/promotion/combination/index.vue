@@ -98,7 +98,6 @@ const handleDelete = (id: number) => {
   tableMethods.delList(id, false)
 }
 
-// TODO @puhui999：要不还是使用原生的 element plus 做。感觉 crud schema 复杂界面，做起来麻烦
 /** 初始化 **/
 onMounted(() => {
   /**
