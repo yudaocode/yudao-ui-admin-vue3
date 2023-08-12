@@ -4,22 +4,28 @@
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
-      v-show="showSearch"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="82px"
     >
       <el-form-item label="优惠券名称" prop="name">
         <el-input
           v-model="queryParams.name"
+          class="!w-240px"
           placeholder="请输入优惠劵名"
           clearable
           @keyup="handleQuery"
         />
       </el-form-item>
       <el-form-item label="优惠券类型" prop="discountType">
-        <el-select v-model="queryParams.discountType" placeholder="请选择优惠券类型" clearable>
+        <el-select
+          v-model="queryParams.discountType"
+          class="!w-240px"
+          placeholder="请选择优惠券类型"
+          clearable
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_DISCOUNT_TYPE)"
             :key="dict.value"
@@ -29,7 +35,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="优惠券状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择优惠券状态" clearable>
+        <el-select
+          v-model="queryParams.status"
+          class="!w-240px"
+          placeholder="请选择优惠券状态"
+          clearable
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
@@ -41,13 +52,12 @@
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          style="width: 240px"
-          type="datetimerange"
           value-format="YYYY-MM-DD HH:mm:ss"
-          range-separator="-"
+          type="daterange"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          :default-time="[new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)]"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>
@@ -283,7 +293,7 @@
         <el-date-picker
           v-model="form.validTimes"
           style="width: 240px"
-          value-format="yyyy-MM-dd HH:mm:ss"
+          value-format="YYYY-MM-DD HH:mm:ss"
           type="datetimerange"
           :default-time="[new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)]"
         />
@@ -377,8 +387,6 @@ const message = useMessage()
 
 // 遮罩层
 const loading = ref(true)
-// 显示搜索条件
-const showSearch = ref(true)
 // 总条数
 const total = ref(0)
 // 优惠劵列表
