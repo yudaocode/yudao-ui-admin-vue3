@@ -244,7 +244,7 @@
             <el-button
               type="success"
               circle
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.MOCK)"
+              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.MOCK.code)"
               @click="openChannelForm(scope.row, PayChannelEnum.MOCK.code)"
             >
               <Icon icon="ep:check" />
