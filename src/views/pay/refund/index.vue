@@ -113,6 +113,7 @@
     </el-form>
   </ContentWrap>
 
+  <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
@@ -289,7 +290,6 @@ onMounted(async () => {
   appList.value = await AppApi.getAppList()
 })
 </script>
-
 <style>
 .order-font {
   padding: 2px 0;

@@ -7,17 +7,14 @@
       <el-descriptions-item label="支付单号">
         <el-tag type="warning" size="small" v-if="detailData.no">{{ detailData.no }}</el-tag>
       </el-descriptions-item>
-
       <el-descriptions-item label="应用编号">{{ detailData.appId }}</el-descriptions-item>
       <el-descriptions-item label="应用名称">{{ detailData.appName }}</el-descriptions-item>
-
       <el-descriptions-item label="支付状态">
         <dict-tag :type="DICT_TYPE.PAY_ORDER_STATUS" :value="detailData.status" size="small" />
       </el-descriptions-item>
       <el-descriptions-item label="支付金额">
         <el-tag type="success" size="small">￥{{ (detailData.price / 100.0).toFixed(2) }}</el-tag>
       </el-descriptions-item>
-
       <el-descriptions-item label="手续费">
         <el-tag type="warning" size="small">
           ￥{{ (detailData.channelFeePrice / 100.0).toFixed(2) }}
@@ -26,14 +23,12 @@
       <el-descriptions-item label="手续费比例">
         {{ (detailData.channelFeeRate / 100.0).toFixed(2) }}%
       </el-descriptions-item>
-
       <el-descriptions-item label="支付时间">
         {{ formatDate(detailData.successTime) }}
       </el-descriptions-item>
       <el-descriptions-item label="失效时间">
         {{ formatDate(detailData.expireTime) }}
       </el-descriptions-item>
-
       <el-descriptions-item label="创建时间">
         {{ formatDate(detailData.createTime) }}
       </el-descriptions-item>
@@ -41,26 +36,21 @@
         {{ formatDate(detailData.updateTime) }}
       </el-descriptions-item>
     </el-descriptions>
-
     <!-- 分割线 -->
     <el-divider />
-
     <el-descriptions :column="2" label-class-name="desc-label">
       <el-descriptions-item label="商品标题">{{ detailData.subject }}</el-descriptions-item>
       <el-descriptions-item label="商品描述">{{ detailData.body }}</el-descriptions-item>
-
       <el-descriptions-item label="支付渠道">
         <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="detailData.channelCode" />
       </el-descriptions-item>
       <el-descriptions-item label="支付 IP">{{ detailData.userIp }}</el-descriptions-item>
-
       <el-descriptions-item label="渠道单号">
         <el-tag size="mini" type="success" v-if="detailData.channelOrderNo">
           {{ detailData.channelOrderNo }}
         </el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="渠道用户">{{ detailData.channelUserId }}</el-descriptions-item>
-
       <el-descriptions-item label="退款金额">
         <el-tag size="mini" type="danger">
           ￥{{ (detailData.refundPrice / 100.0).toFixed(2) }}
@@ -68,10 +58,8 @@
       </el-descriptions-item>
       <el-descriptions-item label="通知 URL">{{ detailData.notifyUrl }}</el-descriptions-item>
     </el-descriptions>
-
     <!-- 分割线 -->
     <el-divider />
-
     <el-descriptions :column="1" label-class-name="desc-label" direction="vertical" border>
       <el-descriptions-item label="支付通道异步回调内容">
         {{ detailData.extension.channelNotifyData }}
