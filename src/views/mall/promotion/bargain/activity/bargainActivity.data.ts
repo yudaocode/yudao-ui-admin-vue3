@@ -4,18 +4,17 @@ import { dateFormatter2 } from '@/utils/formatTime'
 // 表单校验
 export const rules = reactive({
   name: [required],
-  totalLimitCount: [required],
-  singleLimitCount: [required],
   startTime: [required],
   endTime: [required],
   userSize: [required],
-  limitDuration: [required]
+  bargainCount: [required],
+  singleLimitCount: [required]
 })
 
 // CrudSchema https://doc.iocoder.cn/vue3/crud-schema/
 const crudSchemas = reactive<CrudSchema[]>([
   {
-    label: '拼团名称',
+    label: '砍价活动名称',
     field: 'name',
     isSearch: true,
     isTable: false,
@@ -72,7 +71,7 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    label: '参与人数',
+    label: '砍价人数',
     field: 'userSize',
     isSearch: false,
     form: {
@@ -82,53 +81,60 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    label: '限制时长',
-    field: 'limitDuration',
+    label: '最大帮砍次数',
+    field: 'bargainCount',
     isSearch: false,
-    isTable: false,
     form: {
       component: 'InputNumber',
-      labelMessage: '限制时长(小时)',
-      componentProps: {
-        placeholder: '请输入限制时长(小时)'
-      }
+      labelMessage: '参与人数不能少于两人',
+      value: 2
     }
   },
   {
     label: '总限购数量',
     field: 'totalLimitCount',
     isSearch: false,
-    isTable: false,
     form: {
       component: 'InputNumber',
+      labelMessage: '用户最大能发起砍价的次数',
       value: 0
     }
   },
   {
-    label: '单次限购数量',
-    field: 'singleLimitCount',
+    label: '砍价的最小金额',
+    field: 'randomMinPrice',
     isSearch: false,
     isTable: false,
     form: {
       component: 'InputNumber',
+      componentProps: {
+        min: 0,
+        precision: 2,
+        step: 0.1
+      },
+      labelMessage: '用户每次砍价的最小金额',
       value: 0
     }
   },
   {
-    label: '购买人数',
-    field: 'userSize',
+    label: '砍价的最大金额',
+    field: 'randomMaxPrice',
     isSearch: false,
-    isForm: false
+    isTable: false,
+    form: {
+      component: 'InputNumber',
+      componentProps: {
+        min: 0,
+        precision: 2,
+        step: 0.1
+      },
+      labelMessage: '用户每次砍价的最大金额',
+      value: 0
+    }
   },
   {
-    label: '开团组数',
-    field: 'totalNum',
-    isSearch: false,
-    isForm: false
-  },
-  {
-    label: '成团组数',
-    field: 'successNum',
+    label: '砍价成功数量',
+    field: 'successCount',
     isSearch: false,
     isForm: false
   },

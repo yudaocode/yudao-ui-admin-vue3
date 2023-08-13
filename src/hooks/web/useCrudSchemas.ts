@@ -9,6 +9,7 @@ import { TableColumn } from '@/types/table'
 import { DescriptionsSchema } from '@/types/descriptions'
 import { ComponentOptions, ComponentProps } from '@/types/components'
 import { DictTag } from '@/components/DictTag'
+import { cloneDeep } from 'lodash-es'
 
 export type CrudSchema = Omit<TableColumn, 'children'> & {
   isSearch?: boolean // 是否在查询显示
@@ -305,4 +306,13 @@ const filterOptions = (options: Recordable, labelField?: string) => {
     }
     return v
   })
+}
+
+// 将 tableColumns 指定 fields 放到最前面
+export const sortTableColumns = (tableColumns: TableColumn[], field: string) => {
+  const fieldIndex = tableColumns.findIndex((item) => item.field === field)
+  const fieldColumn = cloneDeep(tableColumns[fieldIndex])
+  tableColumns.splice(fieldIndex, 1)
+  // 添加到开头
+  tableColumns.unshift(fieldColumn)
 }

@@ -73,7 +73,7 @@
         <el-date-picker
           v-model="queryParams.createTime"
           style="width: 240px"
-          value-format="yyyy-MM-dd HH:mm:ss"
+          value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           range-separator="-"
           start-placeholder="开始日期"
