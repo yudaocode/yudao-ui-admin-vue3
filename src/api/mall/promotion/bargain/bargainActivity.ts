@@ -7,18 +7,20 @@ export interface BargainActivityVO {
   startTime?: Date
   endTime?: Date
   status?: number
-  spuId?: number
   userSize?: number // 达到该人数，才能砍到低价
   bargainCount?: number // 最大帮砍次数
   totalLimitCount?: number // 最大购买次数
-  stock?: number // 活动总库存
+  spuId: number
+  skuId: number
+  bargainFirstPrice: number // 砍价起始价格，单位分
+  bargainPrice: number // 砍价底价
+  stock: number // 活动库存
   randomMinPrice?: number // 用户每次砍价的最小金额，单位：分
   randomMaxPrice?: number // 用户每次砍价的最大金额，单位：分
   successCount?: number // 砍价成功数量
-  products?: BargainProductVO[]
 }
 
-// 砍价活动所需属性
+// 砍价活动所需属性。 选择的商品和属性的时候使用方便使用活动的通用封装
 export interface BargainProductVO {
   spuId: number
   skuId: number

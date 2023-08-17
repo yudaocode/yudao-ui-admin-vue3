@@ -334,7 +334,7 @@ const validateSku = () => {
   for (const sku of formData.value!.skus!) {
     // 作为活动组件的校验
     if (props.isActivityComponent) {
-      for (const rule of props.ruleConfig) {
+      for (const rule of props?.ruleConfig) {
         const arg = getValue(sku, rule.name)
         if (!rule.rule(arg)) {
           validate = false // 只要有一个不通过则直接不通过
@@ -534,9 +534,10 @@ watch(
   }
 )
 const activitySkuListRef = ref<InstanceType<typeof ElTable>>()
-const clearSelection = () => {
-  activitySkuListRef.value.clearSelection()
+
+const getSkuTableRef = () => {
+  return activitySkuListRef.value
 }
 // 暴露出生成 sku 方法，给添加属性成功时调用
-defineExpose({ generateTableData, validateSku, clearSelection })
+defineExpose({ generateTableData, validateSku, getSkuTableRef })
 </script>
