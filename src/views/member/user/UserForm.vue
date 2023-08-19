@@ -57,6 +57,9 @@
           :render-after-expand="true"
         />
       </el-form-item>
+      <el-form-item label="用户标签" prop="tagIds">
+        <MemberTagSelect v-model="formData.tagIds" show-add />
+      </el-form-item>
       <el-form-item label="会员备注" prop="mark">
         <el-input type="textarea" v-model="formData.mark" placeholder="请输入会员备注" />
       </el-form-item>
@@ -72,6 +75,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as UserApi from '@/api/member/user'
 import * as AreaApi from '@/api/system/area'
 import { defaultProps } from '@/utils/tree'
+import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -90,7 +94,8 @@ const formData = ref({
   sex: undefined,
   areaId: undefined,
   birthday: undefined,
-  mark: undefined
+  mark: undefined,
+  tagIds: []
 })
 const formRules = reactive({
   mobile: [{ required: true, message: '手机号不能为空', trigger: 'blur' }],
@@ -163,7 +168,8 @@ const resetForm = () => {
     areaId: undefined,
     birthday: undefined,
     mark: undefined,
-    createTime: undefined
+    createTime: undefined,
+    tagIds: []
   }
   formRef.value?.resetFields()
 }
