@@ -8,9 +8,9 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="用户" prop="nickName">
+      <el-form-item label="用户" prop="nickname">
         <el-input
-          v-model="queryParams.nickName"
+          v-model="queryParams.nickname"
           placeholder="请输入用户昵称"
           clearable
           @keyup.enter="handleQuery"
@@ -79,13 +79,13 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="用户" align="center" prop="nickName" />
+      <el-table-column label="用户" align="center" prop="nickname" />
       <el-table-column label="积分标题" align="center" prop="title" />
       <el-table-column label="积分描述" align="center" prop="description" />
       <el-table-column
         label="获得时间"
         align="center"
-        prop="createDate"
+        prop="createTime"
         :formatter="dateFormatter"
       />
       <el-table-column label="积分" align="center" prop="point">
@@ -147,7 +147,7 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  nickName: null,
+  nickname: null,
   bizType: null,
   type: null,
   title: null,

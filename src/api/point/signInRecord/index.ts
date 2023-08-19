@@ -9,10 +9,10 @@ export interface SignInRecordVO {
 
 // 查询用户签到积分列表
 export const getSignInRecordPage = async (params) => {
-  return await request.get({ url: `/point/sign-in-record/page`, params })
+  return await request.get({ url: `/member/point/sign-in-record/page`, params })
 }
 
 // 导出用户签到积分 Excel
 export const exportSignInRecord = async (params) => {
-  return await request.download({ url: `/point/sign-in-record/export-excel`, params })
+  return await request.download({ url: `/member/point/sign-in-record/export-excel`, params })
 }

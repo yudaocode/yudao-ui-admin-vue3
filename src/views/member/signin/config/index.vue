@@ -25,8 +25,8 @@
         <template #default="scope">
           <div>
             <el-switch
-              v-model="scope.row.isEnable"
-              @change="handleSwitchChange(scope.row.id, $event)"
+              v-model="scope.row.enable"
+              @change="handleSwitchChange(scope.row, $event)"
               inline-prompt
               active-text="开启"
               inactive-text="关闭"
@@ -105,15 +105,11 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-const handleSwitchChange = async (id, e) => {
-  console.log('开关状态变更，id:', id, '新状态：', e)
+const handleSwitchChange = async (row, e) => {
+  console.log('开关状态变更，id:', row, '新状态：', e)
   // 创建对象
-  const signInConfig: SignInConfigVO = {
-    id: id,
-    day: null,
-    point: null,
-    isEnable: e
-  }
+  const signInConfig: SignInConfigVO = { enable: e }
+  ;({ id: signInConfig.id, day: signInConfig.day, point: signInConfig.point, enable: e } = row)
   await SignInConfigApi.updateSignInConfig(signInConfig)
 }
 

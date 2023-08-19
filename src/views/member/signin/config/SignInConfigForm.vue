@@ -71,6 +71,8 @@ const submitForm = async () => {
   try {
     const data = formData.value as unknown as SignInConfigApi.SignInConfigVO
     if (formType.value === 'create') {
+      //默认新创建的自动启动
+      data.enable = true
       await SignInConfigApi.createSignInConfig(data)
       message.success(t('common.createSuccess'))
     } else {

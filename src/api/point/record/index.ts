@@ -17,5 +17,5 @@ export interface RecordVO {
 
 // 查询用户积分记录列表
 export const getRecordPage = async (params) => {
-  return await request.get({ url: `/point/record/page`, params })
+  return await request.get({ url: `/member/point/record/page`, params })
 }

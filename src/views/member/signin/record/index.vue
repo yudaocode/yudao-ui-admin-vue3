@@ -8,9 +8,9 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="签到用户" prop="nickName">
+      <el-form-item label="签到用户" prop="nickname">
         <el-input
-          v-model="queryParams.nickName"
+          v-model="queryParams.nickname"
           placeholder="请输入签到用户"
           clearable
           @keyup.enter="handleQuery"
@@ -58,7 +58,7 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
       <!-- TODO @xiaqing：展示用户昵称  -->
-      <el-table-column label="签到用户" align="center" prop="nickName" />
+      <el-table-column label="签到用户" align="center" prop="nickname" />
       <el-table-column
         label="签到天数"
         align="center"
@@ -101,7 +101,7 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  nickName: null,
+  nickname: null,
   day: null,
   createTime: []
 })
