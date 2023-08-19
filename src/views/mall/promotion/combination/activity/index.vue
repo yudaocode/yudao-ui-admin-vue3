@@ -1,17 +1,18 @@
 <template>
+  <doc-alert title="功能开启" url="https://doc.iocoder.cn/mall/build/" />
+
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <Search :schema="allSchemas.searchSchema" @reset="setSearchParams" @search="setSearchParams">
       <!-- 新增等操作按钮 -->
       <template #actionMore>
         <el-button
-          v-hasPermi="['promotion:bargain-activity:create']"
+          v-hasPermi="['promotion:combination-activity:create']"
           plain
           type="primary"
           @click="openForm('create')"
         >
-          <Icon class="mr-5px" icon="ep:plus" />
-          新增
+          <Icon class="mr-5px" icon="ep:plus" /> 新增
         </el-button>
       </template>
     </Search>
@@ -39,7 +40,7 @@
       </template>
       <template #action="{ row }">
         <el-button
-          v-hasPermi="['promotion:bargain-activity:update']"
+          v-hasPermi="['promotion:combination-activity:update']"
           link
           type="primary"
           @click="openForm('update', row.id)"
@@ -47,7 +48,7 @@
           编辑
         </el-button>
         <el-button
-          v-hasPermi="['promotion:bargain-activity:delete']"
+          v-hasPermi="['promotion:combination-activity:delete']"
           link
           type="danger"
           @click="handleDelete(row.id)"
@@ -59,23 +60,23 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <BargainActivityForm ref="formRef" @success="getList" />
+  <CombinationActivityForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
-import { allSchemas } from './bargainActivity.data'
-import * as BargainActivityApi from '@/api/mall/promotion/bargain/bargainActivity'
-import BargainActivityForm from './BargainActivityForm.vue'
-import { cloneDeep } from 'lodash-es'
+import { allSchemas } from './combinationActivity.data'
+import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationActivity'
+import CombinationActivityForm from './CombinationActivityForm.vue'
+import { sortTableColumns } from '@/hooks/web/useCrudSchemas'
 import { createImageViewer } from '@/components/ImageViewer'
 
-defineOptions({ name: 'PromotionBargainActivity' })
+defineOptions({ name: 'PromotionCombinationActivity' })
 
 // tableObject：表格的属性对象，可获得分页大小、条数等属性
 // tableMethods：表格的操作对象，可进行获得分页、删除记录等操作
 // 详细可见：https://doc.iocoder.cn/vue3/crud-schema/
 const { tableObject, tableMethods } = useTable({
-  getListApi: BargainActivityApi.getBargainActivityPage, // 分页接口
-  delListApi: BargainActivityApi.deleteBargainActivity // 删除接口
+  getListApi: CombinationActivityApi.getCombinationActivityPage, // 分页接口
+  delListApi: CombinationActivityApi.deleteCombinationActivity // 删除接口
 })
 // 获得表格的各种操作
 const { getList, setSearchParams } = tableMethods
@@ -98,20 +99,10 @@ const handleDelete = (id: number) => {
   tableMethods.delList(id, false)
 }
 
-// TODO @puhui999：要不还是使用原生的 element plus 做。感觉 crud schema 复杂界面，做起来麻烦
 /** 初始化 **/
 onMounted(() => {
-  /**
-   TODO
-   后面准备封装成一个函数来操作 tableColumns 重新排列：比如说需求是表单上商品选择是在后面的而列表展示的时候需要调到位置。
-   封装效果支持批量操作，给出 field 和需要插入的位置，例：[{field:'spuId',index: 1}] 效果为把 field 为 spuId 的 column 移动到第一个位置
-   */
-  // 处理一下表格列让商品往前
-  const index = allSchemas.tableColumns.findIndex((item) => item.field === 'spuId')
-  const column = cloneDeep(allSchemas.tableColumns[index])
-  allSchemas.tableColumns.splice(index, 1)
-  // 添加到开头
-  allSchemas.tableColumns.unshift(column)
+  // 获得活动列表
+  sortTableColumns(allSchemas.tableColumns, 'spuId')
   getList()
 })
 </script>

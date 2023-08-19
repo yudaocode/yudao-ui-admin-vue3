@@ -49,7 +49,7 @@
           end-placeholder="结束日期"
           start-placeholder="开始日期"
           type="daterange"
-          value-format="yyyy-MM-dd HH:mm:ss"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
       <el-form-item>

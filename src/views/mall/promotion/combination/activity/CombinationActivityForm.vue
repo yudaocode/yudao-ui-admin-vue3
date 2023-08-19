@@ -19,7 +19,7 @@
           <el-table-column align="center" label="拼团价格(元)" min-width="168">
             <template #default="{ row: sku }">
               <el-input-number
-                v-model="sku.productConfig.activePrice"
+                v-model="sku.productConfig.combinationPrice"
                 :min="0"
                 :precision="2"
                 :step="0.1"
@@ -45,6 +45,7 @@ import { SpuAndSkuList, SpuProperty, SpuSelect } from '@/views/mall/promotion/co
 import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { convertToInteger, formatToFraction } from '@/utils'
+import { cloneDeep } from 'lodash-es'
 
 defineOptions({ name: 'PromotionCombinationActivityForm' })
 
@@ -65,8 +66,8 @@ const spuList = ref<CombinationActivityApi.SpuExtension[]>([]) // 选择的 spu
 const spuPropertyList = ref<SpuProperty<CombinationActivityApi.SpuExtension>[]>([])
 const ruleConfig: RuleConfig[] = [
   {
-    name: 'productConfig.activePrice',
-    rule: (arg) => arg > 0.01,
+    name: 'productConfig.combinationPrice',
+    rule: (arg) => arg >= 0.01,
     message: '商品拼团价格不能小于0.01 ！！！'
   }
 ]
@@ -98,13 +99,12 @@ const getSpuDetails = async (
     let config: CombinationProductVO = {
       spuId: spu.id!,
       skuId: sku.id!,
-      activePrice: 0
+      combinationPrice: 0
     }
     if (typeof products !== 'undefined') {
       const product = products.find((item) => item.skuId === sku.id)
       if (product) {
-        // 分转元
-        product.activePrice = formatToFraction(product.activePrice)
+        product.combinationPrice = formatToFraction(product.combinationPrice)
       }
       config = product || config
     }
@@ -162,13 +162,14 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formRef.value.formModel as CombinationActivityApi.CombinationActivityVO
-    const products = spuAndSkuListRef.value.getSkuConfigs('productConfig')
-    products.forEach((item: CombinationProductVO) => {
-      // 拼团价格元转分
-      item.activePrice = convertToInteger(item.activePrice)
+    // 获得拼团商品配置
+    const products = cloneDeep(spuAndSkuListRef.value.getSkuConfigs('productConfig'))
+    products.forEach((item: CombinationActivityApi.CombinationProductVO) => {
+      item.combinationPrice = convertToInteger(item.combinationPrice)
     })
+    const data = formRef.value.formModel as CombinationActivityApi.CombinationActivityVO
     data.products = products
+    // 真正提交
     if (formType.value === 'create') {
       await CombinationActivityApi.createCombinationActivity(data)
       message.success(t('common.createSuccess'))

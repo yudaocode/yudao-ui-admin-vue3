@@ -31,7 +31,7 @@ let requestList: any[] = []
 // 是否正在刷新中
 let isRefreshToken = false
 // 请求白名单，无须token的接口
-const whiteList: string[] = ['/login', '/refresh-token']
+const whiteList: string[] = ['/login', '/refresh-token', '/system/tenant/get-id-by-name']
 
 // 创建axios实例
 const service: AxiosInstance = axios.create({
@@ -47,8 +47,7 @@ service.interceptors.request.use(
     let isToken = (config!.headers || {}).isToken === false
     whiteList.some((v) => {
       if (config.url) {
-        config.url.indexOf(v) > -1
-        return (isToken = false)
+        return (isToken = config.url.indexOf(v) > -1)
       }
     })
     if (getAccessToken() && !isToken) {

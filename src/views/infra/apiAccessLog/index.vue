@@ -46,7 +46,7 @@
       <el-form-item label="请求时间" prop="beginTime">
         <el-date-picker
           v-model="queryParams.beginTime"
-          value-format="yyyy-MM-dd HH:mm:ss"
+          value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           start-placeholder="开始日期"
           end-placeholder="结束日期"

@@ -45,6 +45,7 @@
 <script lang="ts" setup>
 import { SpuAndSkuList, SpuProperty, SpuSelect } from '../../components'
 import { allSchemas, rules } from './seckillActivity.data'
+import { cloneDeep } from 'lodash-es'
 
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
 import { SeckillProductVO } from '@/api/mall/promotion/seckill/seckillActivity'
@@ -70,13 +71,13 @@ const spuAndSkuListRef = ref() // sku 秒杀配置组件Ref
 const ruleConfig: RuleConfig[] = [
   {
     name: 'productConfig.stock',
-    rule: (arg) => arg > 1,
-    message: '商品秒杀库存必须大于 1 ！！！'
+    rule: (arg) => arg >= 1,
+    message: '商品秒杀库存必须大于等于 1 ！！！'
   },
   {
     name: 'productConfig.seckillPrice',
-    rule: (arg) => arg > 0.01,
-    message: '商品秒杀价格必须大于 0.01 ！！！'
+    rule: (arg) => arg >= 0.01,
+    message: '商品秒杀价格必须大于等于 0.01 ！！！'
   }
 ]
 const spuList = ref<SeckillActivityApi.SpuExtension[]>([]) // 选择的 spu
@@ -112,7 +113,6 @@ const getSpuDetails = async (
     if (typeof products !== 'undefined') {
       const product = products.find((item) => item.skuId === sku.id)
       if (product) {
-        // 分转元
         product.seckillPrice = formatToFraction(product.seckillPrice)
       }
       config = product || config
@@ -153,13 +153,6 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** 重置表单 */
-const resetForm = async () => {
-  spuList.value = []
-  spuPropertyList.value = []
-  await nextTick()
-  formRef.value.getElFormRef().resetFields()
-}
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
@@ -170,14 +163,14 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formRef.value.formModel as SeckillActivityApi.SeckillActivityVO
-    const products = spuAndSkuListRef.value.getSkuConfigs('productConfig')
+    // 获取秒杀商品配置
+    const products = cloneDeep(spuAndSkuListRef.value.getSkuConfigs('productConfig'))
     products.forEach((item: SeckillProductVO) => {
-      // 秒杀价格元转分
       item.seckillPrice = convertToInteger(item.seckillPrice)
     })
-    // 获取秒杀商品配置
+    const data = formRef.value.formModel as SeckillActivityApi.SeckillActivityVO
     data.products = products
+    // 真正提交
     if (formType.value === 'create') {
       await SeckillActivityApi.createSeckillActivity(data)
       message.success(t('common.createSuccess'))
@@ -192,6 +185,15 @@ const submitForm = async () => {
     formLoading.value = false
   }
 }
+
+/** 重置表单 */
+const resetForm = async () => {
+  spuList.value = []
+  spuPropertyList.value = []
+  await nextTick()
+  formRef.value.getElFormRef().resetFields()
+}
+// TODO @puhui999：下面的 css 名字，是不是可以改下；demo-table-expand
 </script>
 <style lang="scss" scoped>
 .demo-table-expand {

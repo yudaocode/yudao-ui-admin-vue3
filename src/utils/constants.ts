@@ -99,6 +99,10 @@ export const PayChannelEnum = {
     code: 'wx_app',
     name: '微信 APP 支付'
   },
+  WX_BAR: {
+    code: 'wx_bar',
+    name: '微信条码支付'
+  },
   ALIPAY_PC: {
     code: 'alipay_pc',
     name: '支付宝 PC 网站支付'
@@ -126,6 +130,36 @@ export const PayChannelEnum = {
 }
 
 /**
+ * 支付的展示模式每局
+ */
+export const PayDisplayModeEnum = {
+  URL: {
+    mode: 'url'
+  },
+  IFRAME: {
+    mode: 'iframe'
+  },
+  FORM: {
+    mode: 'form'
+  },
+  QR_CODE: {
+    mode: 'qr_code'
+  },
+  APP: {
+    mode: 'app'
+  }
+}
+
+/**
+ * 支付类型枚举
+ */
+export const PayType = {
+  WECHAT: 'WECHAT',
+  ALIPAY: 'ALIPAY',
+  MOCK: 'MOCK'
+}
+
+/**
  * 支付订单状态枚举
  */
 export const PayOrderStatusEnum = {
@@ -140,80 +174,6 @@ export const PayOrderStatusEnum = {
   CLOSED: {
     status: 20,
     name: '未支付'
-  }
-}
-
-/**
- * 支付订单回调状态枚举
- */
-export const PayOrderNotifyStatusEnum = {
-  NO: {
-    status: 0,
-    name: '未通知'
-  },
-  SUCCESS: {
-    status: 10,
-    name: '通知成功'
-  },
-  FAILURE: {
-    status: 20,
-    name: '通知失败'
-  }
-}
-
-/**
- * 支付订单退款状态枚举
- */
-export const PayOrderRefundStatusEnum = {
-  NO: {
-    status: 0,
-    name: '未退款'
-  },
-  SOME: {
-    status: 10,
-    name: '部分退款'
-  },
-  ALL: {
-    status: 20,
-    name: '全部退款'
-  }
-}
-
-/**
- * 支付退款订单状态枚举
- */
-export const PayRefundStatusEnum = {
-  CREATE: {
-    status: 0,
-    name: '退款订单生成'
-  },
-  SUCCESS: {
-    status: 1,
-    name: '退款成功'
-  },
-  FAILURE: {
-    status: 2,
-    name: '退款失败'
-  },
-  PROCESSING_NOTIFY: {
-    status: 3,
-    name: '退款中，渠道通知结果'
-  },
-  PROCESSING_QUERY: {
-    status: 4,
-    name: '退款中，系统查询结果'
-  },
-  UNKNOWN_RETRY: {
-    status: 5,
-    name: '状态未知，请重试'
-  },
-  UNKNOWN_QUERY: {
-    status: 6,
-    name: '状态未知，系统查询结果'
-  },
-  CLOSE: {
-    status: 99,
-    name: '退款关闭'
   }
 }
 
