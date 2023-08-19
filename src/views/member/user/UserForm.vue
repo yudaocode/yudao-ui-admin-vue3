@@ -25,7 +25,7 @@
         <el-input v-model="formData.nickname" placeholder="请输入用户昵称" />
       </el-form-item>
       <el-form-item label="头像" prop="avatar">
-        <el-input v-model="formData.avatar" placeholder="请输入头像" />
+        <UploadImg v-model="formData.avatar" :limit="1" :is-show-tip="false" />
       </el-form-item>
       <el-form-item label="真实名字" prop="name">
         <el-input v-model="formData.name" placeholder="请输入真实名字" />
@@ -50,7 +50,12 @@
         />
       </el-form-item>
       <el-form-item label="所在地" prop="areaId">
-        <el-input v-model="formData.areaId" placeholder="请输入所在地" />
+        <el-tree-select
+          v-model="formData.areaId"
+          :data="areaList"
+          :props="defaultProps"
+          :render-after-expand="true"
+        />
       </el-form-item>
       <el-form-item label="会员备注" prop="mark">
         <el-input type="textarea" v-model="formData.mark" placeholder="请输入会员备注" />
@@ -65,6 +70,8 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as UserApi from '@/api/member/user'
+import * as AreaApi from '@/api/system/area'
+import { defaultProps } from '@/utils/tree'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -90,6 +97,7 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const areaList = ref([]) // 地区列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -106,6 +114,8 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 获得地区列表
+  areaList.value = await AreaApi.getAreaTree()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
