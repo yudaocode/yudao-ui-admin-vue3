@@ -21,8 +21,8 @@
             v-model="loginData.loginForm.tenantName"
             :placeholder="t('login.tenantNamePlaceholder')"
             :prefix-icon="iconHouse"
-            type="primary"
             link
+            type="primary"
           />
         </el-form-item>
       </el-col>
@@ -148,8 +148,8 @@ import { ElLoading } from 'element-plus'
 import LoginFormTitle from './LoginFormTitle.vue'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
-const { wsCache } = useCache()
+// import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
+// const { wsCache } = useCache()
 import { useIcon } from '@/hooks/web/useIcon'
 
 import * as authUtil from '@/utils/auth'
@@ -246,7 +246,7 @@ const handleLogin = async (params) => {
     if (!res) {
       return
     }
-    wsCache.delete(CACHE_KEY.USER) // 清除上次登录用户信息
+    // wsCache.delete(CACHE_KEY.USER) // 清除上次登录用户信息
     ElLoading.service({
       lock: true,
       text: '正在加载系统中...',
