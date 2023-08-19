@@ -244,7 +244,7 @@
             <el-button
               type="success"
               circle
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.MOCK)"
+              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.MOCK.code)"
               @click="openChannelForm(scope.row, PayChannelEnum.MOCK.code)"
             >
               <Icon icon="ep:check" />
@@ -326,7 +326,6 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
