@@ -68,7 +68,7 @@
     append-to-body
     :close-on-press-escape="false"
   >
-    <qrcode-vue :value="qrCode.url" :size="310" level="L" />
+    <Qrcode :text="qrCode.url" :width="310" />
   </Dialog>
 
   <!-- 展示形式：BarCode 条形码 -->
@@ -115,7 +115,7 @@
 </template>
 
 <script lang="ts" setup>
-import QrcodeVue from 'qrcode.vue'
+import { Qrcode } from '@/components/Qrcode'
 import * as PayOrderApi from '@/api/pay/order'
 import { PayChannelEnum, PayDisplayModeEnum, PayOrderStatusEnum } from '@/utils/constants'
 import { formatDate } from '@/utils/formatTime'
@@ -462,12 +462,12 @@ onMounted(() => {
 
   .box {
     width: 160px;
-    border: 1px solid #e6ebf5;
-    cursor: pointer;
-    text-align: center;
     padding-top: 10px;
     padding-bottom: 5px;
     margin-right: 10px;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid #e6ebf5;
 
     img {
       width: 40px;

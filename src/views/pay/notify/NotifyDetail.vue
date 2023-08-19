@@ -7,32 +7,27 @@
       <el-descriptions-item label="通知状态">
         <dict-tag :type="DICT_TYPE.PAY_NOTIFY_STATUS" :value="detailData.status" />
       </el-descriptions-item>
-    </el-descriptions>
-    <el-descriptions :column="2">
+
       <el-descriptions-item label="应用编号">{{ detailData.appId }}</el-descriptions-item>
       <el-descriptions-item label="应用名称">{{ detailData.appName }}</el-descriptions-item>
-    </el-descriptions>
-    <el-descriptions :column="2">
+
       <el-descriptions-item label="关联编号">{{ detailData.dataId }}</el-descriptions-item>
       <el-descriptions-item label="通知类型">
         <dict-tag :type="DICT_TYPE.PAY_NOTIFY_TYPE" :value="detailData.type" />
       </el-descriptions-item>
-    </el-descriptions>
-    <el-descriptions :column="2">
+
       <el-descriptions-item label="通知次数">{{ detailData.notifyTimes }}</el-descriptions-item>
       <el-descriptions-item label="最大通知次数">
         {{ detailData.maxNotifyTimes }}
       </el-descriptions-item>
-    </el-descriptions>
-    <el-descriptions :column="2">
+
       <el-descriptions-item label="最后通知时间">
         {{ formatDate(detailData.lastExecuteTime) }}
       </el-descriptions-item>
       <el-descriptions-item label="下次通知时间">
         {{ formatDate(detailData.nextNotifyTime) }}
       </el-descriptions-item>
-    </el-descriptions>
-    <el-descriptions :column="2">
+
       <el-descriptions-item label="创建时间">
         {{ formatDate(detailData.createTime) }}
       </el-descriptions-item>
@@ -40,8 +35,10 @@
         {{ formatDate(detailData.updateTime) }}
       </el-descriptions-item>
     </el-descriptions>
+
     <!-- 分割线 -->
     <el-divider />
+
     <el-descriptions :column="1" direction="vertical" border>
       <el-descriptions-item label="回调日志">
         <el-table :data="detailData.logs">

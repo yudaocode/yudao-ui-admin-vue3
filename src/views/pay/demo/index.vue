@@ -96,7 +96,7 @@
         >
           <el-option v-for="item in spus" :key="item.id" :label="item.name" :value="item.id">
             <span style="float: left">{{ item.name }}</span>
-            <span style="float: right; color: #8492a6; font-size: 13px">
+            <span style="float: right; font-size: 13px; color: #8492a6">
               ￥{{ (item.price / 100.0).toFixed(2) }}
             </span>
           </el-option>
@@ -121,7 +121,8 @@ const message = useMessage() // 消息弹窗
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const queryParams = ref({
+// 查询条件
+const queryParams = reactive({
   pageNo: 1,
   pageSize: 10
 })
@@ -141,7 +142,7 @@ const getList = async () => {
 }
 
 /** 支付按钮操作 */
-const handlePay = (row) => {
+const handlePay = (row: any) => {
   router.push({
     name: 'PayCashier',
     query: {
@@ -195,7 +196,7 @@ const spus = ref([
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const formData = ref({}) // 表单数据
+const formData = ref<any>({}) // 表单数据
 const formRules = {
   spuId: [{ required: true, message: '商品编号不能为空', trigger: 'blur' }]
 }
@@ -228,6 +229,7 @@ const submitForm = async () => {
     dialogVisible.value = false
   } finally {
     formLoading.value = false
+    getList()
   }
 }
 
