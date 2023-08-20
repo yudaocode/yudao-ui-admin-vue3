@@ -8,10 +8,10 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="业务编码" prop="bizId">
+      <el-form-item label="用户" prop="nickname">
         <el-input
-          v-model="queryParams.bizId"
-          placeholder="请输入业务编码"
+          v-model="queryParams.nickname"
+          placeholder="请输入用户昵称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -30,12 +30,6 @@
             :label="dict.label"
             :value="dict.value"
           />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="操作类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="操作类型" clearable class="!w-240px">
-          <el-option label="增加" value="1" />
-          <el-option label="扣减" value="0" />
         </el-select>
       </el-form-item>
       <el-form-item label="积分标题" prop="title">
@@ -69,8 +63,14 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery">
+          <Icon icon="ep:search" class="mr-5px" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon icon="ep:refresh" class="mr-5px" />
+          重置
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -79,28 +79,23 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
-      <!-- TODO @xiaqing：展示用户的昵称哈； -->
-      <el-table-column label="用户" align="center" prop="userId" />
+      <el-table-column label="用户" align="center" prop="nickname" />
       <el-table-column label="积分标题" align="center" prop="title" />
       <el-table-column label="积分描述" align="center" prop="description" />
       <el-table-column
         label="获得时间"
         align="center"
-        prop="createDate"
+        prop="createTime"
         :formatter="dateFormatter"
       />
-      <!-- todo @xiaqing：可以参考 crmeb 的展示，把积分和增加减少放一起，用红色和绿色展示 -->
-      <el-table-column
-        label="操作类型"
-        align="center"
-        prop="type"
-        :formatter="
-          (a, b, c) => {
-            return c === '1' ? '增加' : '扣减'
-          }
-        "
-      />
-      <el-table-column label="积分" align="center" prop="point" />
+      <el-table-column label="积分" align="center" prop="point">
+        <template #default="scope">
+          <el-tag v-if="scope.row.point > 0" class="ml-2" type="success" effect="dark">
+            {{ scope.row.point }}
+          </el-tag>
+          <el-tag v-else class="ml-2" type="danger" effect="dark"> {{ scope.row.point }} </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="变动后的积分" align="center" prop="totalPoint" />
       <el-table-column label="业务编码" align="center" prop="bizId" />
       <el-table-column label="业务类型" align="center" prop="bizType">
@@ -143,7 +138,6 @@
 import { DICT_TYPE, getStrDictOptions, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as RecordApi from '@/api/point/record'
-import RecordForm from './RecordForm.vue'
 
 defineOptions({ name: 'PointRecord' })
 
@@ -153,7 +147,7 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  bizId: null,
+  nickname: null,
   bizType: null,
   type: null,
   title: null,
