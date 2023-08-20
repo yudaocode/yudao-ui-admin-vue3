@@ -41,16 +41,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="积分状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.MEMBER_POINT_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item label="获得时间" prop="createDate">
         <el-date-picker
           v-model="queryParams.createDate"
@@ -78,48 +68,32 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="用户" align="center" prop="nickname" />
-      <el-table-column label="积分标题" align="center" prop="title" />
-      <el-table-column label="积分描述" align="center" prop="description" />
+      <el-table-column label="编号" align="center" prop="id" width="180" />
       <el-table-column
         label="获得时间"
         align="center"
         prop="createTime"
         :formatter="dateFormatter"
+        width="180"
       />
-      <el-table-column label="积分" align="center" prop="point">
+      <el-table-column label="用户" align="center" prop="nickname" width="200" />
+      <el-table-column label="变动积分" align="center" prop="point" width="100">
         <template #default="scope">
           <el-tag v-if="scope.row.point > 0" class="ml-2" type="success" effect="dark">
-            {{ scope.row.point }}
+            +{{ scope.row.point }}
           </el-tag>
           <el-tag v-else class="ml-2" type="danger" effect="dark"> {{ scope.row.point }} </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="变动后的积分" align="center" prop="totalPoint" />
+      <el-table-column label="总积分" align="center" prop="totalPoint" width="100" />
+      <el-table-column label="标题" align="center" prop="title" />
+      <el-table-column label="描述" align="center" prop="description" />
       <el-table-column label="业务编码" align="center" prop="bizId" />
       <el-table-column label="业务类型" align="center" prop="bizType">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.MEMBER_POINT_BIZ_TYPE" :value="scope.row.bizType" />
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="status">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MEMBER_POINT_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="冻结时间"
-        align="center"
-        prop="freezingTime"
-        :formatter="dateFormatter"
-      />
-      <el-table-column
-        label="解冻时间"
-        align="center"
-        prop="thawingTime"
-        :formatter="dateFormatter"
-      />
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -149,9 +123,7 @@ const queryParams = reactive({
   pageSize: 10,
   nickname: null,
   bizType: null,
-  type: null,
   title: null,
-  status: null,
   createDate: []
 })
 const queryFormRef = ref() // 搜索的表单
