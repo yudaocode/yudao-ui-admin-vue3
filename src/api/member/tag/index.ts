@@ -29,8 +29,3 @@ export const updateMemberTag = async (data: TagVO) => {
 export const deleteMemberTag = async (id: number) => {
   return await request.delete({ url: `/member/tag/delete?id=` + id })
 }
-
-// 导出会员标签 Excel
-export const exportMemberTag = async (params) => {
-  return await request.download({ url: `/member/tag/export-excel`, params })
-}

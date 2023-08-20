@@ -25,8 +25,8 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-text class="mx-1" size="small" type="info"
-          >积分抵用比例(1积分抵多少金额)单位：元
+        <el-text class="mx-1" size="small" type="info">
+          积分抵用比例(1 积分抵多少金额)，单位：元
         </el-text>
       </el-form-item>
       <el-form-item label="积分抵扣最大值" prop="tradeDeductMaxPrice" class="item-bottom">
@@ -37,7 +37,7 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-text class="mx-1" size="small" type="info">单次下单积分使用上限,0不限制</el-text>
+        <el-text class="mx-1" size="small" type="info">单次下单积分使用上限，0 不限制</el-text>
       </el-form-item>
       <el-form-item label="1 元赠送多少分" prop="tradeGivePoint" class="item-bottom">
         <el-input-number
@@ -47,9 +47,9 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-text class="mx-1" size="small" type="info"
-          >下单支付金额按比例赠送积分（实际支付1元赠送多少积分）</el-text
-        >
+        <el-text class="mx-1" size="small" type="info">
+          下单支付金额按比例赠送积分（实际支付 1 元赠送多少积分）
+        </el-text>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="onSubmit">保存</el-button>
@@ -60,18 +60,20 @@
 <script lang="ts" setup>
 import * as ConfigApi from '@/api/point/config'
 
+defineOptions({ name: 'MemberPointConfig' })
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
-  id: undefined,
   tradeDeductEnable: true,
   tradeDeductUnitPrice: 0,
   tradeDeductMaxPrice: 0,
   tradeGivePoint: 0
 })
+
 // 创建一个计算属性，用于将 tradeDeductUnitPrice 显示为带两位小数的形式
 const computedTradeDeductUnitPrice = computed({
   get: () => (formData.value.tradeDeductUnitPrice / 100).toFixed(2),
@@ -105,7 +107,9 @@ const onSubmit = async () => {
 const getConfig = async () => {
   try {
     const data = await ConfigApi.getConfig()
-    if (data === null) return
+    if (data === null) {
+      return
+    }
     formData.value = data
   } finally {
   }
@@ -118,6 +122,6 @@ onMounted(() => {
 
 <style scoped>
 .item-bottom {
-  margin-bottom: 0px;
+  margin-bottom: 0;
 }
 </style>
