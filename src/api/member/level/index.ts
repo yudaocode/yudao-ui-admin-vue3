@@ -1,0 +1,37 @@
+import request from '@/config/axios'
+
+export interface LevelVO {
+  id: number
+  name: string
+  experience: number
+  value: number
+  discount: number
+  icon: string
+  bgUrl: string
+  status: number
+}
+
+// 查询会员等级列表
+export const getLevelPage = async (params) => {
+  return await request.get({ url: `/member/level/page`, params })
+}
+
+// 查询会员等级详情
+export const getLevel = async (id: number) => {
+  return await request.get({ url: `/member/level/get?id=` + id })
+}
+
+// 新增会员等级
+export const createLevel = async (data: LevelVO) => {
+  return await request.post({ url: `/member/level/create`, data })
+}
+
+// 修改会员等级
+export const updateLevel = async (data: LevelVO) => {
+  return await request.put({ url: `/member/level/update`, data })
+}
+
+// 删除会员等级
+export const deleteLevel = async (id: number) => {
+  return await request.delete({ url: `/member/level/delete?id=` + id })
+}
