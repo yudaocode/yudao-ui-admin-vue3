@@ -58,7 +58,7 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
-import * as ConfigApi from '@/api/point/config'
+import * as ConfigApi from '@/api/member/point/config'
 
 defineOptions({ name: 'MemberPointConfig' })
 

@@ -8,7 +8,7 @@ export interface SignInConfigVO {
 }
 
 // 查询积分签到规则列表
-export const getSignInConfigPage = async () => {
+export const getSignInConfigList = async () => {
   return await request.get({ url: `/member/point/sign-in-config/list` })
 }
 

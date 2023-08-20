@@ -25,7 +25,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.MEMBER_POINT_BIZ_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.MEMBER_POINT_BIZ_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -109,9 +109,9 @@
 </template>
 
 <script lang="ts" setup>
-import { DICT_TYPE, getStrDictOptions, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as RecordApi from '@/api/point/record'
+import * as RecordApi from '@/api//member/point/record'
 
 defineOptions({ name: 'PointRecord' })
 

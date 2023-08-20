@@ -21,17 +21,9 @@
         :formatter="(_, __, cellValue) => ['第', cellValue, '天'].join(' ')"
       />
       <el-table-column label="获得积分" align="center" prop="point" />
-      <el-table-column label="是否开启" align="center">
+      <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
-          <div>
-            <el-switch
-              v-model="scope.row.enable"
-              @change="handleSwitchChange(scope.row, $event)"
-              inline-prompt
-              active-text="开启"
-              inactive-text="关闭"
-            />
-          </div>
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
@@ -60,11 +52,10 @@
   <!-- 表单弹窗：添加/修改 -->
   <SignInConfigForm ref="formRef" @success="getList" />
 </template>
-
 <script lang="ts" setup>
-import * as SignInConfigApi from '@/api/point/signInConfig'
+import * as SignInConfigApi from '@/api/member/signin/config'
 import SignInConfigForm from './SignInConfigForm.vue'
-import { SignInConfigVO } from '@/api/point/signInConfig'
+import { DICT_TYPE } from '@/utils/dict'
 
 defineOptions({ name: 'SignInConfig' })
 
@@ -78,7 +69,7 @@ const list = ref([]) // 列表的数据
 const getList = async () => {
   loading.value = true
   try {
-    const data = await SignInConfigApi.getSignInConfigPage()
+    const data = await SignInConfigApi.getSignInConfigList()
     console.log(data)
     list.value = data
   } finally {
@@ -103,14 +94,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-const handleSwitchChange = async (row, e) => {
-  console.log('开关状态变更，id:', row, '新状态：', e)
-  // 创建对象
-  const signInConfig: SignInConfigVO = { enable: e }
-  ;({ id: signInConfig.id, day: signInConfig.day, point: signInConfig.point, enable: e } = row)
-  await SignInConfigApi.updateSignInConfig(signInConfig)
 }
 
 /** 初始化 **/

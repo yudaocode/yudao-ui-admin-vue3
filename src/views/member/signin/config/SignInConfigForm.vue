@@ -10,11 +10,22 @@
       <el-form-item label="签到天数" prop="day">
         <el-input-number v-model="formData.day" :min="1" :max="7" :precision="0" />
         <el-text class="mx-1" style="margin-left: 10px" type="danger">
-          只允许设置1-7，默认签到7天为一个周期</el-text
-        >
+          只允许设置 1-7，默认签到 7 天为一个周期
+        </el-text>
       </el-form-item>
       <el-form-item label="签到分数" prop="point">
         <el-input-number v-model="formData.point" :precision="0" />
+      </el-form-item>
+      <el-form-item label="开启状态" prop="status">
+        <el-radio-group v-model="formData.status">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -24,7 +35,9 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import * as SignInConfigApi from '@/api/point/signInConfig'
+import * as SignInConfigApi from '@/api/member/signin/config'
+import { CommonStatusEnum } from '@/utils/constants'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -92,7 +105,8 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     day: undefined,
-    point: undefined
+    point: undefined,
+    status: CommonStatusEnum.ENABLE
   }
   formRef.value?.resetFields()
 }
