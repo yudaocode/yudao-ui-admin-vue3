@@ -40,15 +40,6 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['point:sign-in-record:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -57,7 +48,6 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
-      <!-- TODO @xiaqing：展示用户昵称  -->
       <el-table-column label="签到用户" align="center" prop="nickname" />
       <el-table-column
         label="签到天数"
@@ -65,7 +55,14 @@
         prop="day"
         :formatter="(_, __, cellValue) => ['第', cellValue, '天'].join(' ')"
       />
-      <el-table-column label="获得积分" align="center" prop="point" />
+      <el-table-column label="获得积分" align="center" prop="point" width="100">
+        <template #default="scope">
+          <el-tag v-if="scope.row.point > 0" class="ml-2" type="success" effect="dark">
+            +{{ scope.row.point }}
+          </el-tag>
+          <el-tag v-else class="ml-2" type="danger" effect="dark"> {{ scope.row.point }} </el-tag>
+        </template>
+      </el-table-column>
       <el-table-column
         label="签到时间"
         align="center"
@@ -81,15 +78,11 @@
       @pagination="getList"
     />
   </ContentWrap>
-
-  <!-- 表单弹窗：添加/修改 -->
-  <SignInRecordForm ref="formRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
-import * as SignInRecordApi from '@/api/point/signInRecord'
+import * as SignInRecordApi from '@/api/member/signin/record'
 
 defineOptions({ name: 'SignInRecord' })
 
@@ -130,21 +123,6 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await SignInRecordApi.exportSignInRecord(queryParams)
-    download.excel(data, '用户签到积分.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /** 初始化 **/

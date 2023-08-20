@@ -77,7 +77,7 @@
         width="180"
       />
       <el-table-column label="用户" align="center" prop="nickname" width="200" />
-      <el-table-column label="变动积分" align="center" prop="point" width="100">
+      <el-table-column label="获得积分" align="center" prop="point" width="100">
         <template #default="scope">
           <el-tag v-if="scope.row.point > 0" class="ml-2" type="success" effect="dark">
             +{{ scope.row.point }}

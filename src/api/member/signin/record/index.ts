@@ -11,8 +11,3 @@ export interface SignInRecordVO {
 export const getSignInRecordPage = async (params) => {
   return await request.get({ url: `/member/point/sign-in-record/page`, params })
 }
-
-// 导出用户签到积分 Excel
-export const exportSignInRecord = async (params) => {
-  return await request.download({ url: `/member/point/sign-in-record/export-excel`, params })
-}
