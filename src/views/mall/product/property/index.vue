@@ -73,9 +73,7 @@
           >
             编辑
           </el-button>
-          <el-button link type="primary">
-            <router-link :to="'/property/value/' + scope.row.id">属性值</router-link>
-          </el-button>
+          <el-button link type="primary" @click="goValueList(scope.row.id)">属性值</el-button>
           <el-button
             v-hasPermi="['product:property:delete']"
             link
@@ -103,6 +101,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import * as PropertyApi from '@/api/mall/product/property'
 import PropertyForm from './PropertyForm.vue'
+const { push } = useRouter()
 
 defineOptions({ name: 'ProductProperty' })
 
@@ -161,6 +160,11 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 跳转商品属性列表 */
+const goValueList = (id: number) => {
+  push({ path: '/property/value/' + id })
 }
 
 /** 初始化 **/
