@@ -178,6 +178,10 @@
                     </el-button>
                     <template #dropdown>
                       <el-dropdown-menu>
+                        <el-dropdown-item command="delivery">
+                          <Icon icon="ep:takeaway-box" />
+                          发货
+                        </el-dropdown-item>
                         <el-dropdown-item command="orderRemarks">
                           <Icon icon="ep:chat-line-square" />
                           订单备注
@@ -185,14 +189,6 @@
                         <el-dropdown-item command="refund">
                           <Icon icon="ep:credit-card" />
                           立即退款
-                        </el-dropdown-item>
-                        <el-dropdown-item command="printReceipt">
-                          <Icon icon="ep:takeaway-box" />
-                          打印小票
-                        </el-dropdown-item>
-                        <el-dropdown-item command="printInvoice">
-                          <Icon icon="ep:takeaway-box" />
-                          打印配货单
                         </el-dropdown-item>
                       </el-dropdown-menu>
                     </template>
@@ -257,10 +253,14 @@
       @pagination="getList"
     />
   </ContentWrap>
+  <DeliveryOrderForm ref="deliveryOrderFormRef" @success="getList" />
+  <OrderRemarksForm ref="orderRemarksFormRef" @success="getList" />
 </template>
 
 <script lang="ts" name="Order" setup>
 import type { FormInstance, TableColumnCtx } from 'element-plus'
+import DeliveryOrderForm from './DeliveryOrderForm.vue'
+import OrderRemarksForm from './OrderRemarksForm.vue'
 import { dateFormatter } from '@/utils/formatTime'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { OrderItemRespVO, OrderVO } from '@/api/mall/trade/order'
@@ -275,7 +275,9 @@ const { currentRoute, push } = useRouter() // 路由跳转
 const loading = ref(true) // 列表的加载中
 const total = ref(2) // 列表的总页数
 const list = ref<OrderVO[]>([]) // 列表的数据
-const openForm = (id) => {
+const deliveryOrderFormRef = ref()
+const orderRemarksFormRef = ref()
+const openForm = (id: number) => {
   push('/trade/order/detail/' + id)
 }
 /** 商品图预览 */
@@ -314,19 +316,17 @@ const handleCommand = (command: string, row: OrderVO) => {
   console.log(row)
   switch (command) {
     case 'orderRemarks':
+      orderRemarksFormRef.value?.open(row)
       break
     case 'refund':
       break
-    case 'printReceipt':
-      break
-    case 'printInvoice':
-      break
-    default:
+    case 'delivery':
+      deliveryOrderFormRef.value?.open(row.id)
       break
   }
 }
 const queryFormRef = ref<FormInstance>() // 搜索的表单
-//表单搜索
+//表单搜索 TODO 订单相关操作完成后立马实现
 const queryParams = reactive({
   pageNo: 1, //首页
   pageSize: 10, //页面大小

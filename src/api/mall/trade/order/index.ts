@@ -94,17 +94,18 @@ export const getOrder = async (id: number | null) => {
   return await request.get({ url: `/trade/order/get-detail?id=` + id })
 }
 
-// 新增交易订单
-export const createOrder = async (data: OrderVO) => {
-  return await request.post({ url: `/trade/order/create`, data })
+export interface DeliveryVO {
+  id: number // 订单编号
+  logisticsId: number | null // 物流公司编号
+  logisticsNo: string // 物流编号
 }
 
-// 修改交易订单
-export const updateOrder = async (data: OrderVO) => {
-  return await request.put({ url: `/trade/order/update`, data })
+// 订单发货
+export const delivery = async (data: DeliveryVO) => {
+  return await request.post({ url: `/trade/order/delivery`, data })
 }
 
-// 删除交易订单
-export const deleteOrder = async (id: number | null) => {
-  return await request.delete({ url: `/trade/order/delete?id=` + id })
+// 订单备注
+export const remark = async (data) => {
+  return await request.post({ url: `/trade/order/remark`, data })
 }

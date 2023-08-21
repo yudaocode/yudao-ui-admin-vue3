@@ -47,9 +47,9 @@
       <el-descriptions-item label-class-name="no-colon">
         <el-button size="small" type="primary">调整价格</el-button>
         <!-- TODO 芋艿：待实现 -->
-        <el-button size="small" type="primary">备注</el-button>
+        <el-button size="small" type="primary" @click="openForm('remark')">备注</el-button>
         <!-- TODO 芋艿：待实现 -->
-        <el-button size="small" type="primary">发货</el-button>
+        <el-button size="small" type="primary" @click="openForm('delivery')">发货</el-button>
         <!-- TODO 芋艿：待实现 -->
         <el-button size="small" type="primary">修改地址</el-button>
         <!-- TODO 芋艿：待实现 -->
@@ -212,17 +212,20 @@
       </el-descriptions>
     </div>
   </ContentWrap>
+  <DeliveryOrderForm ref="deliveryOrderFormRef" @success="getDetail" />
+  <OrderRemarksForm ref="orderRemarksFormRef" @success="getDetail" />
 </template>
 <script lang="ts" setup>
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { formatToFraction } from '@/utils'
 import { DICT_TYPE } from '@/utils/dict'
+import OrderRemarksForm from '@/views/mall/trade/order/OrderRemarksForm.vue'
+import DeliveryOrderForm from '@/views/mall/trade/order/DeliveryOrderForm.vue'
 
 defineOptions({ name: 'TradeOrderDetailForm' })
 
 const message = useMessage() // 消息弹窗
 const { params } = useRoute() // 查询参数
-// const loading = ref(false)
 const orderInfo = ref<TradeOrderApi.OrderVO>({
   no: '',
   createTime: null,
@@ -331,6 +334,20 @@ const detailInfo = ref({
   ],
   goodsInfo: [] // 商品详情tableData
 })
+
+const deliveryOrderFormRef = ref() // 发货表单 Ref
+const orderRemarksFormRef = ref() // 订单备注表单 Ref
+
+const openForm = (type: string) => {
+  switch (type) {
+    case 'remark':
+      orderRemarksFormRef.value?.open(orderInfo)
+      break
+    case 'delivery':
+      deliveryOrderFormRef.value?.open(orderInfo.id)
+      break
+  }
+}
 
 /** 获得详情 */
 const getDetail = async () => {
