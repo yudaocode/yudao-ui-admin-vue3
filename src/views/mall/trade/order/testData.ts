@@ -18,7 +18,7 @@ export const testData: OrderVO = [
     remark: '',
     payOrderId: 10002,
     payed: false,
-    payTime: null,
+    payTime: new Date('2023-08-17T12:30:00'),
     payChannelCode: 'wx_app',
     originalPrice: 80,
     orderPrice: 80,
@@ -32,26 +32,27 @@ export const testData: OrderVO = [
     deliveryStatus: 0,
     deliveryTime: null,
     receiveTime: null,
-    receiverName: 'Jane Smith',
-    receiverMobile: '987-654-3210',
+    receiverName: '李四',
+    receiverMobile: '19855568989',
     receiverAreaId: 4002,
     receiverPostCode: 54321,
-    receiverDetailAddress: '456 Elm St, Apt 2C',
+    receiverDetailAddress: '翻斗花园',
     afterSaleStatus: 0,
     refundPrice: 0,
     couponId: null,
     couponPrice: 0,
     pointPrice: 0,
-    receiverAreaName: 'Townsville',
+    receiverAreaName: '北京市朝阳区',
     items: [
       {
         id: 103,
         userId: 1002,
         orderId: 2,
         spuId: 5003,
-        spuName: 'Widget C',
+        spuName: '毛绒鸭子',
         skuId: 6003,
-        picUrl: 'https://example.com/images/widget_c.jpg',
+        picUrl:
+          'http://127.0.0.1:48080/admin-api/infra/file/5/get/20220723041544165856414464011_BIG.jpg',
         count: 1,
         originalPrice: 40,
         originalUnitPrice: 40,
@@ -61,8 +62,8 @@ export const testData: OrderVO = [
         orderDividePrice: 40,
         afterSaleStatus: 0,
         properties: [
-          { propertyId: 7001, propertyName: 'Color', valueId: 8004, valueName: 'Green' },
-          { propertyId: 7002, propertyName: 'Size', valueId: 8002, valueName: 'Medium' }
+          { propertyId: 7001, propertyName: '颜色', valueId: 8004, valueName: '黄色' },
+          { propertyId: 7002, propertyName: '尺寸', valueId: 8002, valueName: '小鸭子' }
         ]
       },
       {
@@ -70,9 +71,10 @@ export const testData: OrderVO = [
         userId: 1002,
         orderId: 2,
         spuId: 5004,
-        spuName: 'Widget D',
+        spuName: '毛绒鸭子',
         skuId: 6004,
-        picUrl: 'https://example.com/images/widget_d.jpg',
+        picUrl:
+          'http://127.0.0.1:48080/admin-api/infra/file/5/get/20220723041544165856414464011_BIG.jpg',
         count: 1,
         originalPrice: 40,
         originalUnitPrice: 40,
@@ -82,14 +84,14 @@ export const testData: OrderVO = [
         orderDividePrice: 40,
         afterSaleStatus: 0,
         properties: [
-          { propertyId: 7003, propertyName: 'Color', valueId: 8005, valueName: 'Yellow' },
-          { propertyId: 7002, propertyName: 'Size', valueId: 8002, valueName: 'Medium' }
+          { propertyId: 7001, propertyName: '颜色', valueId: 8004, valueName: '黄色' },
+          { propertyId: 7002, propertyName: '尺寸', valueId: 8002, valueName: '大鸭子' }
         ]
       }
     ],
     user: {
       id: 1002,
-      nickname: 'janesmith',
+      nickname: '小妮子',
       avatar: 'https://example.com/images/avatar.jpg'
     }
   },
@@ -124,26 +126,26 @@ export const testData: OrderVO = [
     deliveryStatus: 2,
     deliveryTime: new Date('2023-08-18T10:30:00'),
     receiveTime: new Date('2023-08-19T11:30:00'),
-    receiverName: 'Sarah Johnson',
-    receiverMobile: '555-123-4567',
+    receiverName: '张三',
+    receiverMobile: '13988886656',
     receiverAreaId: 4003,
     receiverPostCode: 67890,
-    receiverDetailAddress: '789 Oak Ave',
+    receiverDetailAddress: '成华大道',
     afterSaleStatus: 0,
     refundPrice: 0,
     couponId: 2001,
     couponPrice: 5,
     pointPrice: 0,
-    receiverAreaName: 'Villageville',
+    receiverAreaName: '四川省成都市',
     items: [
       {
         id: 105,
         userId: 1003,
         orderId: 3,
         spuId: 5005,
-        spuName: 'Widget E',
+        spuName: '华为',
         skuId: 6005,
-        picUrl: 'https://example.com/images/widget_e.jpg',
+        picUrl: 'http://127.0.0.1:48080/admin-api/infra/file/5/get/sj.jpg',
         count: 1,
         originalPrice: 20,
         originalUnitPrice: 20,
@@ -153,14 +155,14 @@ export const testData: OrderVO = [
         orderDividePrice: 15,
         afterSaleStatus: 0,
         properties: [
-          { propertyId: 7001, propertyName: 'Color', valueId: 8006, valueName: 'Black' },
-          { propertyId: 7002, propertyName: 'Size', valueId: 8002, valueName: 'Medium' }
+          { propertyId: 7001, propertyName: '颜色', valueId: 8006, valueName: '紫色' },
+          { propertyId: 7002, propertyName: '选配', valueId: 8002, valueName: '标配' }
         ]
       }
     ],
     user: {
       id: 1003,
-      nickname: 'sarahjohnson',
+      nickname: '无敌最俊朗',
       avatar: 'https://example.com/images/avatar.jpg'
     }
   }

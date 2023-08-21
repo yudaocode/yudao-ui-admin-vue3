@@ -111,20 +111,31 @@
       <el-table-column fixed="left" type="expand">
         <template #default="scope">
           <el-table :data="scope.row.items" :span-method="spanMethod" border style="width: 100%">
-            <el-table-column label="商品" prop="spuName">
+            <el-table-column label="商品信息" min-width="300" prop="spuName">
               <template #default="{ row }">
-                {{ row.spuName }}
-                <el-tag v-for="property in row.properties" :key="property.propertyId">
-                  {{ property.propertyName }}: {{ property.valueName }}
-                </el-tag>
+                <div class="flex items-center">
+                  <el-image
+                    :src="row.picUrl"
+                    class="w-30px h-30px mr-10px"
+                    @click="imagePreview(row.picUrl)"
+                  />
+                  <span class="mr-10px">{{ row.spuName }}</span>
+                  <el-tag
+                    v-for="property in row.properties"
+                    :key="property.propertyId"
+                    class="mr-10px"
+                  >
+                    {{ property.propertyName }}: {{ property.valueName }}
+                  </el-tag>
+                </div>
               </template>
             </el-table-column>
-            <el-table-column label="商品原价(元)" prop="price" width="150">
-              <template #default="{ row }">{{ formatToFraction(row.price) }}</template>
+            <el-table-column label="商品原价" prop="price" width="150">
+              <template #default="{ row }">{{ formatToFraction(row.price) }}元</template>
             </el-table-column>
             <el-table-column label="数量" prop="count" width="100" />
-            <el-table-column label="合计(元)" prop="payPrice" width="150">
-              <template #default="{ row }">{{ formatToFraction(row.payPrice) }}</template>
+            <el-table-column label="合计" prop="payPrice" width="150">
+              <template #default="{ row }">{{ formatToFraction(row.payPrice) }}元</template>
             </el-table-column>
             <el-table-column label="售后状态" prop="afterSaleStatus" width="120">
               <template #default="{ row }">
@@ -134,22 +145,33 @@
                 />
               </template>
             </el-table-column>
-            <el-table-column align="center" label="实际支付(元)" min-width="120" prop="payPrice">
+            <el-table-column align="center" label="实际支付" min-width="120" prop="payPrice">
               <template #default>
                 {{ formatToFraction(scope.row.payPrice) + '元' }}
+              </template>
+            </el-table-column>
+            <el-table-column label="买家/收货人" min-width="120">
+              <template #default>
+                <div class="flex flex-col">
+                  <span>买家：{{ scope.row.user.nickname }}</span>
+                  <span>
+                    收货人：{{ scope.row.receiverName }} {{ scope.row.receiverMobile }}
+                    {{ scope.row.receiverAreaName }} {{ scope.row.receiverDetailAddress }}
+                  </span>
+                </div>
               </template>
             </el-table-column>
             <el-table-column align="center" label="配送方式" prop="deliveryType" width="120">
               <template #default> 快递</template>
             </el-table-column>
             <el-table-column align="center" fixed="right" label="操作" width="160">
-              <template #default="{ row }">
+              <template #default>
                 <div class="flex justify-center items-center">
-                  <el-button link type="primary" @click="openForm">
+                  <el-button link type="primary" @click="openForm(scope.row.id)">
                     <Icon icon="ep:notification" />
                     详情
                   </el-button>
-                  <el-dropdown @command="(command) => handleCommand(command, row)">
+                  <el-dropdown @command="(command) => handleCommand(command, scope.row)">
                     <el-button link type="primary">
                       <Icon icon="ep:d-arrow-right" />
                       更多
@@ -185,13 +207,6 @@
       <el-table-column align="center" label="订单类型" min-width="100">
         <template #default="{ row }">
           <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="row.type" />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="用户信息" min-width="100">
-        <template #default="{ row }">
-          <el-button link type="primary">
-            {{ row.userId }}{{ '[' + row.user.nickname + ']' }}
-          </el-button>
         </template>
       </el-table-column>
       <el-table-column align="center" label="订单来源" min-width="145">
@@ -242,28 +257,26 @@
       @pagination="getList"
     />
   </ContentWrap>
-  <TradeOrderDetailForm ref="tradeOrderDetailFormRef" />
 </template>
 
 <script lang="ts" name="Order" setup>
-import TradeOrderDetailForm from './detail/index.vue'
 import type { FormInstance, TableColumnCtx } from 'element-plus'
 import { dateFormatter } from '@/utils/formatTime'
+import * as TradeOrderApi from '@/api/mall/trade/order'
 import { OrderItemRespVO, OrderVO } from '@/api/mall/trade/order'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { formatToFraction } from '@/utils'
-import { testData } from './testData'
 import { createImageViewer } from '@/components/ImageViewer'
 
 // const message = useMessage() // 消息弹窗
 // const { t } = useI18n() // 国际化
+const { currentRoute, push } = useRouter() // 路由跳转
 
 const loading = ref(true) // 列表的加载中
 const total = ref(2) // 列表的总页数
 const list = ref<OrderVO[]>([]) // 列表的数据
-const tradeOrderDetailFormRef = ref<InstanceType<typeof TradeOrderDetailForm>>()
-const openForm = () => {
-  tradeOrderDetailFormRef.value?.open()
+const openForm = (id) => {
+  push('/trade/order/detail/' + id)
 }
 /** 商品图预览 */
 const imagePreview = (imgUrl: string) => {
@@ -280,7 +293,7 @@ interface SpanMethodProps {
 }
 
 const spanMethod = ({ rowIndex, columnIndex }: SpanMethodProps) => {
-  const colIndex = [5, 6, 7]
+  const colIndex = [5, 6, 7, 8]
   // 处理列
   if (colIndex.includes(columnIndex)) {
     // 处理被合并的行
@@ -348,9 +361,18 @@ const searchList = ref([
 const getList = async () => {
   loading.value = true
   try {
-    // const data = await TradeOrderApi.getOrderPage(queryParams)
-    // list.value = data.list
-    // total.value = data.total
+    const data = await TradeOrderApi.getOrderPage(queryParams)
+    const list_ = data.list as OrderVO[]
+    // TODO 测试使用
+    list_.forEach((item) => {
+      item.user = {
+        id: 247,
+        nickname: '小妮子'
+      }
+    })
+
+    list.value = list_
+    total.value = data.total
   } finally {
     loading.value = false
   }
@@ -368,9 +390,17 @@ const resetQuery = () => {
   handleQuery()
 }
 
+// 监听路由变化更新列表，解决商品保存后，列表不刷新的问题。
+watch(
+  () => currentRoute.value,
+  () => {
+    getList()
+  }
+)
+
 /** 初始化 **/
 onMounted(() => {
-  list.value = testData
+  // list.value = testData
   getList()
 })
 </script>
