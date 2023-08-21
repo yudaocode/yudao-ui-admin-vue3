@@ -7,14 +7,8 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="签到用户" prop="userId">
-        <el-input v-model="formData.userId" placeholder="请输入签到用户" />
-      </el-form-item>
-      <el-form-item label="签到天数" prop="day">
-        <el-input v-model="formData.day" placeholder="请输入签到天数" />
-      </el-form-item>
-      <el-form-item label="签到的分数" prop="point">
-        <el-input v-model="formData.point" placeholder="请输入签到的分数" />
+      <el-form-item label="标签名称" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入标签名称" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -23,8 +17,8 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" setup>
-import * as SignInRecordApi from '@/api/point/signInRecord'
+<script setup lang="ts">
+import * as TagApi from '@/api/member/tag'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -35,11 +29,11 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  userId: undefined,
-  day: undefined,
-  point: undefined
+  name: undefined
 })
-const formRules = reactive({})
+const formRules = reactive({
+  name: [{ required: true, message: '标签名称不能为空', trigger: 'blur' }]
+})
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
@@ -52,7 +46,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await SignInRecordApi.getSignInRecord(id)
+      formData.value = await TagApi.getMemberTag(id)
     } finally {
       formLoading.value = false
     }
@@ -70,12 +64,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as SignInRecordApi.SignInRecordVO
+    const data = formData.value as unknown as TagApi.TagVO
     if (formType.value === 'create') {
-      await SignInRecordApi.createSignInRecord(data)
+      await TagApi.createMemberTag(data)
       message.success(t('common.createSuccess'))
     } else {
-      await SignInRecordApi.updateSignInRecord(data)
+      await TagApi.updateMemberTag(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -90,9 +84,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    userId: undefined,
-    day: undefined,
-    point: undefined
+    name: undefined
   }
   formRef.value?.resetFields()
 }

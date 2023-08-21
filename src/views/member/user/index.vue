@@ -48,6 +48,9 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="用户标签" prop="tagIds">
+        <MemberTagSelect v-model="queryParams.tagIds" />
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -69,6 +72,16 @@
       <!-- TODO 芋艿：待接入 -->
       <el-table-column label="等级" align="center" width="100px" />
       <el-table-column label="分组" align="center" width="100px" />
+      <el-table-column
+        label="用户标签"
+        align="center"
+        prop="tagNames"
+        :show-overflow-tooltip="false"
+      >
+        <template #default="scope">
+          <el-tag v-for="(tagName, index) in scope.row.tagNames" :key="index">{{ tagName }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="积分" align="center" width="100px" />
       <el-table-column label="状态" align="center" prop="status" width="100px">
         <template #default="scope">
@@ -119,6 +132,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as UserApi from '@/api/member/user'
 import UserForm from './UserForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
+import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
 
 defineOptions({ name: 'MemberUser' })
 
@@ -134,7 +148,8 @@ const queryParams = reactive({
   nickname: null,
   mobile: null,
   loginDate: [],
-  createTime: []
+  createTime: [],
+  tagIds: []
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中

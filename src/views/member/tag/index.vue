@@ -8,25 +8,16 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="签到用户" prop="nickname">
+      <el-form-item label="标签名称" prop="name">
         <el-input
-          v-model="queryParams.nickname"
-          placeholder="请输入签到用户"
+          v-model="queryParams.name"
+          placeholder="请输入标签名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="签到天数" prop="day">
-        <el-input
-          v-model="queryParams.day"
-          placeholder="请输入签到天数"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="签到时间" prop="createTime">
+      <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
           value-format="YYYY-MM-DD HH:mm:ss"
@@ -40,35 +31,45 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button type="primary" @click="openForm('create')" v-hasPermi="['member:tag:create']">
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="签到用户" align="center" prop="nickname" />
+    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <el-table-column label="编号" align="center" prop="id" width="150px" />
+      <el-table-column label="标签名称" align="center" prop="name" />
       <el-table-column
-        label="签到天数"
-        align="center"
-        prop="day"
-        :formatter="(_, __, cellValue) => ['第', cellValue, '天'].join(' ')"
-      />
-      <el-table-column label="获得积分" align="center" prop="point" width="100">
-        <template #default="scope">
-          <el-tag v-if="scope.row.point > 0" class="ml-2" type="success" effect="dark">
-            +{{ scope.row.point }}
-          </el-tag>
-          <el-tag v-else class="ml-2" type="danger" effect="dark"> {{ scope.row.point }} </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="签到时间"
+        label="创建时间"
         align="center"
         prop="createTime"
         :formatter="dateFormatter"
+        width="180px"
       />
+      <el-table-column label="操作" align="center" width="150px">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['member:tag:update']"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['member:tag:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -78,15 +79,18 @@
       @pagination="getList"
     />
   </ContentWrap>
+
+  <!-- 表单弹窗：添加/修改 -->
+  <TagForm ref="formRef" @success="getList" />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts" name="MemberTag">
 import { dateFormatter } from '@/utils/formatTime'
-import * as SignInRecordApi from '@/api/member/signin/record'
-
-defineOptions({ name: 'SignInRecord' })
-
+import download from '@/utils/download'
+import * as TagApi from '@/api/member/tag'
+import TagForm from './TagForm.vue'
 const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -94,18 +98,16 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  nickname: null,
-  day: null,
+  name: null,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await SignInRecordApi.getSignInRecordPage(queryParams)
+    const data = await TagApi.getMemberTagPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -123,6 +125,25 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
+}
+
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await TagApi.deleteMemberTag(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
 /** 初始化 **/

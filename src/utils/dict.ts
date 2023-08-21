@@ -142,7 +142,6 @@ export enum DICT_TYPE {
 
   // ========== MALL - 会员模块 ==========
   MEMBER_POINT_BIZ_TYPE = 'member_point_biz_type', // 积分的业务类型
-  MEMBER_POINT_STATUS = 'member_point_status', // 积分的状态
 
   // ========== MALL - 商品模块 ==========
   PRODUCT_UNIT = 'product_unit', // 商品单位
