@@ -60,6 +60,22 @@
       <el-form-item label="用户标签" prop="tagIds">
         <MemberTagSelect v-model="formData.tagIds" show-add />
       </el-form-item>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="用户等级" prop="levelId">
+            <MemberLevelSelect v-model="formData.levelId" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item
+            label="修改原因"
+            prop="levelReason"
+            v-if="formData.levelId != originLevelId"
+          >
+            <el-input type="text" v-model="formData.levelReason" placeholder="请输入修改原因" />
+          </el-form-item>
+        </el-col>
+      </el-row>
       <el-form-item label="会员备注" prop="mark">
         <el-input type="textarea" v-model="formData.mark" placeholder="请输入会员备注" />
       </el-form-item>
@@ -76,6 +92,7 @@ import * as UserApi from '@/api/member/user'
 import * as AreaApi from '@/api/system/area'
 import { defaultProps } from '@/utils/tree'
 import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
+import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -87,6 +104,7 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   mobile: undefined,
+  password: undefined,
   status: undefined,
   nickname: undefined,
   avatar: undefined,
@@ -95,14 +113,18 @@ const formData = ref({
   areaId: undefined,
   birthday: undefined,
   mark: undefined,
-  tagIds: []
+  tagIds: [],
+  levelId: undefined,
+  levelReason: undefined
 })
 const formRules = reactive({
   mobile: [{ required: true, message: '手机号不能为空', trigger: 'blur' }],
-  status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
+  status: [{ required: true, message: '状态不能为空', trigger: 'blur' }],
+  levelReason: [{ required: true, message: '修改原因不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const areaList = ref([]) // 地区列表
+const originLevelId = ref() // 修改前的会员等级
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -115,6 +137,7 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await UserApi.getUser(id)
+      originLevelId.value = formData.value.levelId
     } finally {
       formLoading.value = false
     }
@@ -158,9 +181,6 @@ const resetForm = () => {
     mobile: undefined,
     password: undefined,
     status: undefined,
-    registerIp: undefined,
-    loginIp: undefined,
-    loginDate: undefined,
     nickname: undefined,
     avatar: undefined,
     name: undefined,
@@ -168,8 +188,9 @@ const resetForm = () => {
     areaId: undefined,
     birthday: undefined,
     mark: undefined,
-    createTime: undefined,
-    tagIds: []
+    tagIds: [],
+    levelId: undefined,
+    levelReason: undefined
   }
   formRef.value?.resetFields()
 }

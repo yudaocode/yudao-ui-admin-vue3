@@ -21,6 +21,11 @@ export const getLevel = async (id: number) => {
   return await request.get({ url: `/member/level/get?id=` + id })
 }
 
+// 查询会员等级 - 精简信息列表
+export const getSimpleLevelList = async () => {
+  return await request.get({ url: `/member/level/list-all-simple` })
+}
+
 // 新增会员等级
 export const createLevel = async (data: LevelVO) => {
   return await request.post({ url: `/member/level/create`, data })

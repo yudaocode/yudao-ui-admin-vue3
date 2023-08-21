@@ -51,6 +51,9 @@
       <el-form-item label="用户标签" prop="tagIds">
         <MemberTagSelect v-model="queryParams.tagIds" />
       </el-form-item>
+      <el-form-item label="用户等级" prop="levelId">
+        <MemberLevelSelect v-model="queryParams.levelId" />
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -69,8 +72,8 @@
       </el-table-column>
       <el-table-column label="手机号" align="center" prop="mobile" width="120px" />
       <el-table-column label="昵称" align="center" prop="nickname" width="80px" />
+      <el-table-column label="等级" align="center" prop="levelName" width="100px" />
       <!-- TODO 芋艿：待接入 -->
-      <el-table-column label="等级" align="center" width="100px" />
       <el-table-column label="分组" align="center" width="100px" />
       <el-table-column
         label="用户标签"
@@ -133,11 +136,9 @@ import * as UserApi from '@/api/member/user'
 import UserForm from './UserForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
+import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
 
 defineOptions({ name: 'MemberUser' })
-
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -149,10 +150,10 @@ const queryParams = reactive({
   mobile: null,
   loginDate: [],
   createTime: [],
-  tagIds: []
+  tagIds: [],
+  levelId: null
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
