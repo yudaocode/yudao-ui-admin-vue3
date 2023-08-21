@@ -1,19 +1,19 @@
 <template>
-  <el-select v-model="levelId" placeholder="请选择用户等级" clearable class="!w-240px">
+  <el-select v-model="groupId" placeholder="请选择用户分组" clearable class="!w-240px">
     <el-option
-      v-for="level in levelOptions"
-      :key="level.id"
-      :label="level.name"
-      :value="level.id"
+      v-for="group in groupOptions"
+      :key="group.id"
+      :label="group.name"
+      :value="group.id"
     />
   </el-select>
 </template>
 
 <script lang="ts" setup>
-import * as LevelApi from '@/api/member/level'
+import * as GroupApi from '@/api/member/group'
 
-/** 会员等级选择框 **/
-defineOptions({ name: 'MemberLevelSelect' })
+/** 会员分组选择框 **/
+defineOptions({ name: 'MemberGroupSelect' })
 
 const props = defineProps({
   /** 下拉框选中值 **/
@@ -24,7 +24,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['update:modelValue'])
 
-const levelId = computed({
+const groupId = computed({
   get() {
     return props.modelValue
   },
@@ -33,10 +33,10 @@ const levelId = computed({
   }
 })
 
-const levelOptions = ref<LevelApi.LevelVO[]>([])
+const groupOptions = ref<GroupApi.GroupVO[]>([])
 
 const getList = async () => {
-  levelOptions.value = await LevelApi.getSimpleLevelList()
+  groupOptions.value = await GroupApi.getSimpleGroupList()
 }
 
 /** 初始化 */

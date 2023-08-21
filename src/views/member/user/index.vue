@@ -54,6 +54,9 @@
       <el-form-item label="用户等级" prop="levelId">
         <MemberLevelSelect v-model="queryParams.levelId" />
       </el-form-item>
+      <el-form-item label="用户分组" prop="groupId">
+        <MemberGroupSelect v-model="queryParams.groupId" />
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -73,8 +76,7 @@
       <el-table-column label="手机号" align="center" prop="mobile" width="120px" />
       <el-table-column label="昵称" align="center" prop="nickname" width="80px" />
       <el-table-column label="等级" align="center" prop="levelName" width="100px" />
-      <!-- TODO 芋艿：待接入 -->
-      <el-table-column label="分组" align="center" width="100px" />
+      <el-table-column label="分组" align="center" prop="groupName" width="100px" />
       <el-table-column
         label="用户标签"
         align="center"
@@ -137,6 +139,7 @@ import UserForm from './UserForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
 import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
+import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect.vue'
 
 defineOptions({ name: 'MemberUser' })
 
@@ -151,7 +154,8 @@ const queryParams = reactive({
   loginDate: [],
   createTime: [],
   tagIds: [],
-  levelId: null
+  levelId: null,
+  groupId: null
 })
 const queryFormRef = ref() // 搜索的表单
 

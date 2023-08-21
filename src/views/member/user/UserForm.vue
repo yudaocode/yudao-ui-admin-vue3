@@ -76,6 +76,9 @@
           </el-form-item>
         </el-col>
       </el-row>
+      <el-form-item label="用户分组" prop="groupId">
+        <MemberGroupSelect v-model="formData.groupId" />
+      </el-form-item>
       <el-form-item label="会员备注" prop="mark">
         <el-input type="textarea" v-model="formData.mark" placeholder="请输入会员备注" />
       </el-form-item>
@@ -93,6 +96,7 @@ import * as AreaApi from '@/api/system/area'
 import { defaultProps } from '@/utils/tree'
 import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
 import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
+import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -115,7 +119,8 @@ const formData = ref({
   mark: undefined,
   tagIds: [],
   levelId: undefined,
-  levelReason: undefined
+  levelReason: undefined,
+  groupId: undefined
 })
 const formRules = reactive({
   mobile: [{ required: true, message: '手机号不能为空', trigger: 'blur' }],
@@ -190,7 +195,8 @@ const resetForm = () => {
     mark: undefined,
     tagIds: [],
     levelId: undefined,
-    levelReason: undefined
+    levelReason: undefined,
+    groupId: undefined
   }
   formRef.value?.resetFields()
 }
