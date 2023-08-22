@@ -32,3 +32,8 @@ export const getUser = async (id: number) => {
 export const updateUser = async (data: UserVO) => {
   return await request.put({ url: `/member/user/update`, data })
 }
+
+// 修改会员用户等级
+export const updateUserLevel = async (data: any) => {
+  return await request.put({ url: `/member/user/update-level`, data })
+}

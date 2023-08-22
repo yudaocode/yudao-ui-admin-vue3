@@ -60,22 +60,6 @@
       <el-form-item label="用户标签" prop="tagIds">
         <MemberTagSelect v-model="formData.tagIds" show-add />
       </el-form-item>
-      <el-row>
-        <el-col :span="12">
-          <el-form-item label="用户等级" prop="levelId">
-            <MemberLevelSelect v-model="formData.levelId" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item
-            label="修改原因"
-            prop="levelReason"
-            v-if="formData.levelId != originLevelId"
-          >
-            <el-input type="text" v-model="formData.levelReason" placeholder="请输入修改原因" />
-          </el-form-item>
-        </el-col>
-      </el-row>
       <el-form-item label="用户分组" prop="groupId">
         <MemberGroupSelect v-model="formData.groupId" />
       </el-form-item>
@@ -95,7 +79,6 @@ import * as UserApi from '@/api/member/user'
 import * as AreaApi from '@/api/system/area'
 import { defaultProps } from '@/utils/tree'
 import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
-import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
 import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect.vue'
 
 const { t } = useI18n() // 国际化
@@ -118,18 +101,14 @@ const formData = ref({
   birthday: undefined,
   mark: undefined,
   tagIds: [],
-  levelId: undefined,
-  levelReason: undefined,
   groupId: undefined
 })
 const formRules = reactive({
   mobile: [{ required: true, message: '手机号不能为空', trigger: 'blur' }],
-  status: [{ required: true, message: '状态不能为空', trigger: 'blur' }],
-  levelReason: [{ required: true, message: '修改原因不能为空', trigger: 'blur' }]
+  status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const areaList = ref([]) // 地区列表
-const originLevelId = ref() // 修改前的会员等级
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -142,7 +121,6 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await UserApi.getUser(id)
-      originLevelId.value = formData.value.levelId
     } finally {
       formLoading.value = false
     }
@@ -194,8 +172,6 @@ const resetForm = () => {
     birthday: undefined,
     mark: undefined,
     tagIds: [],
-    levelId: undefined,
-    levelReason: undefined,
     groupId: undefined
   }
   formRef.value?.resetFields()
