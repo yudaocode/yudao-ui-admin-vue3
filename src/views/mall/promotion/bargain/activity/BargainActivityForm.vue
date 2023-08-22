@@ -83,17 +83,17 @@ const ruleConfig: RuleConfig[] = [
   {
     name: 'productConfig.bargainFirstPrice',
     rule: (arg) => arg > 0,
-    message: '商品砍价起始价格不能小于0 ！！！'
+    message: '商品砍价起始价格不能小于 0 ！！！'
   },
   {
     name: 'productConfig.bargainPrice',
     rule: (arg) => arg >= 0,
-    message: '商品砍价底价不能小于0 ！！！'
+    message: '商品砍价底价不能小于 0 ！！！'
   },
   {
     name: 'productConfig.stock',
     rule: (arg) => arg >= 1,
-    message: '商品活动库存不能小于1 ！！！'
+    message: '商品活动库存不能小于 1 ！！！'
   }
 ]
 const selectSpu = (spuId: number, skuIds: number[]) => {

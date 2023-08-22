@@ -70,7 +70,7 @@
           <el-form-item
             label="修改原因"
             prop="levelReason"
-            v-if="formData.levelId != originLevelId"
+            v-if="formData.levelId !== originLevelId"
           >
             <el-input type="text" v-model="formData.levelReason" placeholder="请输入修改原因" />
           </el-form-item>

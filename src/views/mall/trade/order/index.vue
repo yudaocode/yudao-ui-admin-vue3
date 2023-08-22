@@ -11,8 +11,8 @@
       <el-form-item label="订单状态" prop="status">
         <el-select v-model="queryParams.status" class="!w-280px" clearable placeholder="全部">
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.TRADE_ORDER_STATUS)"
-            :key="dict.value as string"
+            v-for="dict in getIntDictOptions(DICT_TYPE.TRADE_ORDER_STATUS)"
+            :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
@@ -26,8 +26,8 @@
           placeholder="全部"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.PAY_CHANNEL_CODE_TYPE)"
-            :key="dict.value as string"
+            v-for="dict in getStrDictOptions(DICT_TYPE.PAY_CHANNEL_CODE)"
+            :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
@@ -47,8 +47,8 @@
       <el-form-item label="订单来源" prop="terminal">
         <el-select v-model="queryParams.terminal" class="!w-280px" clearable placeholder="全部">
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.TERMINAL)"
-            :key="dict.value as string"
+            v-for="dict in getIntDictOptions(DICT_TYPE.TERMINAL)"
+            :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
@@ -57,8 +57,8 @@
       <el-form-item label="订单类型" prop="type">
         <el-select v-model="queryParams.type" class="!w-280px" clearable placeholder="全部">
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.TRADE_ORDER_TYPE)"
-            :key="dict.value as string"
+            v-for="dict in getIntDictOptions(DICT_TYPE.TRADE_ORDER_TYPE)"
+            :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
@@ -68,7 +68,7 @@
         <el-select v-model="queryParams.logisticsId" class="!w-280px" clearable placeholder="全部">
           <el-option
             v-for="item in deliveryExpressList"
-            :key="item.id as string"
+            :key="item.id"
             :label="item.name"
             :value="item.id"
           />
@@ -84,13 +84,13 @@
         >
           <el-option
             v-for="item in pickUpStoreList"
-            :key="item.id as string"
+            :key="item.id"
             :label="item.name"
             :value="item.id"
           />
         </el-select>
       </el-form-item>
-      <!-- TODO 考虑是否移除或重构-->
+      <!-- TODO 考虑是否移除或重构；这个还是需要的哈-->
       <el-form-item label="聚合搜索">
         <el-input
           v-show="true"
@@ -100,7 +100,7 @@
           placeholder="请输入"
         >
           <template #prepend>
-            <el-select v-model="queryType.k" clearable placeholder="全部" style="width: 110px">
+            <el-select v-model="queryType.k" clearable placeholder="全部" class="!w-110px">
               <el-option
                 v-for="dict in searchList"
                 :key="dict.value"
@@ -125,6 +125,12 @@
   </ContentWrap>
 
   <!-- 列表 -->
+  <!-- TODO @puhui999：列表有可能尽量对齐 https://gitee.com/niushop_team/niushop_b2c_v5_stand/raw/master/image/back_end5.png 哇，主要感觉视觉上有点无法分辨一个订单项，是和哪个订单关联。
+
+  1、订单号、订单类型、订单来源、支付时间那一行，直接做到订单项的数据中
+  2、商品信息、商品原价那一行，应该是在最顶上一行，不用每个订单项都写一条
+  3、然后点击展开和收拢订单项，可以不做哈。
+   -->
   <ContentWrap>
     <el-table
       v-loading="loading"
@@ -157,7 +163,8 @@
             </el-table-column>
             <el-table-column label="商品原价*数量" prop="price" width="150">
               <template #default="{ row }">
-                {{ formatToFraction(row.price) }}元 * {{ row.count }}
+                <!-- TODO @puhui999：价格，要有 xxx.00 这种格式 -->
+                {{ formatToFraction(row.price) }} 元 * {{ row.count }}
               </template>
             </el-table-column>
             <el-table-column label="合计" prop="payPrice" width="150">
@@ -173,6 +180,7 @@
             </el-table-column>
             <el-table-column align="center" label="实际支付" min-width="120" prop="payPrice">
               <template #default>
+                <!-- TODO @puhui999：价格，要有 xxx.00 这种格式 -->
                 {{ formatToFraction(scope.row.payPrice) + '元' }}
               </template>
             </el-table-column>
@@ -207,7 +215,7 @@
             </el-table-column>
             <el-table-column align="center" label="配送方式" width="120">
               <template #default>
-                <dict-tag :type="DICT_TYPE.DELIVERY_TYPE" :value="scope.row.deliveryType" />
+                <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="scope.row.deliveryType" />
               </template>
             </el-table-column>
             <el-table-column align="center" fixed="right" label="操作" width="160">
@@ -225,6 +233,7 @@
                     </el-button>
                     <template #dropdown>
                       <el-dropdown-menu>
+                        <!-- TODO puhui999：可以判断下状态 + 物流类型，展示【发货】按钮 -->
                         <el-dropdown-item command="delivery">
                           <Icon icon="ep:takeaway-box" />
                           发货
@@ -265,7 +274,7 @@
         <template #default="{ row }">
           <dict-tag
             v-if="row.payChannelCode"
-            :type="DICT_TYPE.PAY_CHANNEL_CODE_TYPE"
+            :type="DICT_TYPE.PAY_CHANNEL_CODE"
             :value="row.payChannelCode"
           />
         </template>
@@ -296,6 +305,8 @@
       @pagination="getList"
     />
   </ContentWrap>
+
+  <!-- 各种操作的弹窗 -->
   <DeliveryOrderForm ref="deliveryOrderFormRef" @success="getList" />
   <OrderRemarksForm ref="orderRemarksFormRef" @success="getList" />
 </template>
@@ -306,9 +317,11 @@ import DeliveryOrderForm from './components/DeliveryOrderForm.vue'
 import OrderRemarksForm from './components/OrderRemarksForm.vue'
 import { dateFormatter } from '@/utils/formatTime'
 import * as TradeOrderApi from '@/api/mall/trade/order'
+// @puhui999：通过 TradeOrderApi 去引用对应的 VO 就可以啦
 import { OrderItemRespVO, OrderVO } from '@/api/mall/trade/order'
+// @puhui999：使用 XXXApi 哈
 import { getListAllSimple } from '@/api/mall/trade/delivery/pickUpStore'
-import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getStrDictOptions, getIntDictOptions } from '@/utils/dict'
 import { formatToFraction } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
@@ -318,55 +331,8 @@ const { currentRoute, push } = useRouter() // 路由跳转
 const loading = ref(true) // 列表的加载中
 const total = ref(2) // 列表的总页数
 const list = ref<OrderVO[]>([]) // 列表的数据
-const deliveryOrderFormRef = ref()
-const orderRemarksFormRef = ref()
-const openForm = (id: number) => {
-  push('/trade/order/detail/' + id)
-}
-/** 商品图预览 */
-const imagePreview = (imgUrl: string) => {
-  createImageViewer({
-    urlList: [imgUrl]
-  })
-}
-
-interface SpanMethodProps {
-  row: OrderItemRespVO
-  column: TableColumnCtx<OrderItemRespVO>
-  rowIndex: number
-  columnIndex: number
-}
-
-const spanMethod = ({ rowIndex, columnIndex }: SpanMethodProps) => {
-  const colIndex = [4, 5, 6, 7]
-  // 处理列
-  if (colIndex.includes(columnIndex)) {
-    // 处理被合并的行
-    if (rowIndex !== 0) {
-      return {
-        rowspan: 0,
-        colspan: 0
-      }
-    }
-    return {
-      rowspan: 2,
-      colspan: 1
-    }
-  }
-}
-/** 操作分发 */
-const handleCommand = (command: string, row: OrderVO) => {
-  switch (command) {
-    case 'orderRemarks':
-      orderRemarksFormRef.value?.open(row)
-      break
-    case 'delivery':
-      deliveryOrderFormRef.value?.open(row.id)
-      break
-  }
-}
 const queryFormRef = ref<FormInstance>() // 搜索的表单
-//表单搜索
+// 表单搜索
 const queryParams = reactive({
   pageNo: 1, //首页
   pageSize: 10, //页面大小
@@ -387,11 +353,12 @@ const queryParams = reactive({
   logisticsId: null,
   all: ''
 })
-
 const queryType = reactive({ k: '', v: '' }) // 订单搜索类型kv
-/*
+/**
  * 订单聚合搜索
- * 商品名称  商品件数 全部  需要后端支持TODO
+ * 商品名称、商品件数、全部
+ *
+ * 需要后端支持 TODO
  */
 const searchList = ref([
   { value: 'no', label: '订单号' },
@@ -399,6 +366,31 @@ const searchList = ref([
   { value: 'userNickname', label: '用户昵称' },
   { value: 'userMobile', label: '用户电话' }
 ])
+
+interface SpanMethodProps {
+  row: OrderItemRespVO
+  column: TableColumnCtx<OrderItemRespVO>
+  rowIndex: number
+  columnIndex: number
+}
+const spanMethod = ({ rowIndex, columnIndex }: SpanMethodProps) => {
+  const colIndex = [4, 5, 6, 7]
+  // 处理列
+  if (colIndex.includes(columnIndex)) {
+    // 处理被合并的行
+    if (rowIndex !== 0) {
+      return {
+        rowspan: 0,
+        colspan: 0
+      }
+    }
+    return {
+      rowspan: 2,
+      colspan: 1
+    }
+  }
+}
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -421,6 +413,33 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value?.resetFields()
   handleQuery()
+}
+
+/** 商品图预览 */
+const imagePreview = (imgUrl: string) => {
+  createImageViewer({
+    urlList: [imgUrl]
+  })
+}
+
+/** 查看商品详情 */
+const openForm = (id: number) => {
+  // TODO @puhui999：这里最好用 name 来跳转，因为 url 可能会改
+  push('/trade/order/detail/' + id)
+}
+
+/** 操作分发 */
+const deliveryOrderFormRef = ref()
+const orderRemarksFormRef = ref()
+const handleCommand = (command: string, row: OrderVO) => {
+  switch (command) {
+    case 'orderRemarks': // TODO @puhui999：orderRemarks 是不是改成 remark 会好点，保持统一
+      orderRemarksFormRef.value?.open(row)
+      break
+    case 'delivery':
+      deliveryOrderFormRef.value?.open(row.id)
+      break
+  }
 }
 
 // 监听路由变化更新列表，解决商品保存后，列表不刷新的问题。

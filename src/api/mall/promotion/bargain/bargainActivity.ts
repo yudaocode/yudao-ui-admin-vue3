@@ -20,7 +20,7 @@ export interface BargainActivityVO {
   successCount?: number // 砍价成功数量
 }
 
-// 砍价活动所需属性。 选择的商品和属性的时候使用方便使用活动的通用封装
+// 砍价活动所需属性。选择的商品和属性的时候使用方便使用活动的通用封装
 export interface BargainProductVO {
   spuId: number
   skuId: number

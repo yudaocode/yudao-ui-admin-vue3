@@ -4,7 +4,7 @@
     <el-descriptions title="订单信息">
       <el-descriptions-item label="订单号: ">{{ orderInfo.no }}</el-descriptions-item>
       <el-descriptions-item label="配送方式: ">
-        <dict-tag :type="DICT_TYPE.DELIVERY_TYPE" :value="orderInfo.deliveryType" />
+        <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="orderInfo.deliveryType" />
       </el-descriptions-item>
       <!-- TODO 营销活动待实现     -->
       <el-descriptions-item label="营销活动: ">秒杀活动</el-descriptions-item>
@@ -20,7 +20,7 @@
       <el-descriptions-item label="商家备注: ">{{ orderInfo.remark }}</el-descriptions-item>
       <el-descriptions-item label="支付单号: ">{{ orderInfo.payOrderId }}</el-descriptions-item>
       <el-descriptions-item label="付款方式: ">
-        <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE_TYPE" :value="orderInfo.payChannelCode" />
+        <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="orderInfo.payChannelCode" />
       </el-descriptions-item>
       <!-- <el-descriptions-item label="买家: ">{{ orderInfo.user.nickname }}</el-descriptions-item> -->
       <!-- TODO 芋艿：待实现：跳转会员 -->
@@ -41,14 +41,10 @@
         <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="orderInfo.status" />
       </el-descriptions-item>
       <el-descriptions-item label-class-name="no-colon">
-        <el-button size="small" type="primary" @click="openForm('adjustPrice')">调整价格</el-button>
-        <el-button size="small" type="primary" @click="openForm('remark')">备注</el-button>
-        <el-button size="small" type="primary" @click="openForm('delivery')">发货</el-button>
-        <el-button size="small" type="primary" @click="openForm('adjustAddress')">
-          修改地址
-        </el-button>
-        <!-- TODO 后台商家也需要收货功能吗？ -->
-        <el-button size="small" type="primary">确认收货</el-button>
+        <el-button type="primary" @click="openForm('adjustPrice')">调整价格</el-button>
+        <el-button type="primary" @click="openForm('remark')">备注</el-button>
+        <el-button type="primary" @click="openForm('delivery')">发货</el-button>
+        <el-button type="primary" @click="openForm('adjustAddress')">修改地址</el-button>
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">提醒: </span></template>
@@ -201,6 +197,8 @@
       </el-descriptions>
     </div>
   </ContentWrap>
+
+  <!-- 各种操作的弹窗 -->
   <DeliveryOrderForm ref="deliveryFormRef" @success="getDetail" />
   <OrderRemarksForm ref="remarksFormRef" @success="getDetail" />
   <OrderAdjustAddressForm ref="adjustAddressFormRef" @success="getDetail" />
@@ -215,10 +213,12 @@ import DeliveryOrderForm from '@/views/mall/trade/order/components/DeliveryOrder
 import OrderAdjustAddressForm from '@/views/mall/trade/order/components/OrderAdjustAddressForm.vue'
 import OrderAdjustPriceForm from '@/views/mall/trade/order/components/OrderAdjustPriceForm.vue'
 
+// TODO @puhui999：TradeOrderDetailForm 可以挪到 order/detail/index.vue 中，它是一个 vue 界面哈。
 defineOptions({ name: 'TradeOrderDetailForm' })
 
 const message = useMessage() // 消息弹窗
 const { params } = useRoute() // 查询参数
+// TODO @puhui999：orderInfo 应该不用把属性弄出来也；
 const orderInfo = ref<TradeOrderApi.OrderVO>({
   no: '',
   createTime: null,
@@ -263,6 +263,7 @@ const orderInfo = ref<TradeOrderApi.OrderVO>({
   user: {}
 })
 
+// TODO @puhui999：这个改成直接读属性，不用按照这种写法；
 const detailGroups = ref([
   {
     title: '物流信息',
@@ -281,6 +282,7 @@ const detailGroups = ref([
   }
 ])
 
+// TODO @puhui999：从后台读数据哈。
 const detailInfo = ref({
   // 物流信息
   expressInfo: {

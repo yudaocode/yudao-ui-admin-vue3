@@ -7,6 +7,7 @@
       <el-form-item label="收件人手机">
         <el-input v-model="formData.receiverMobile" />
       </el-form-item>
+      <!-- TODO @puhui999：应该是个地区下拉框，可以看下 UserForm 所在地 -->
       <el-form-item label="收件人地区编号">
         <el-input v-model="formData.receiverAreaId" />
       </el-form-item>
@@ -24,6 +25,7 @@
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { copyValueToTarget } from '@/utils'
 
+// TODO @puhui999：OrderAdjustAddressForm 改成 OrderUpdateAddressForm 更新哈，保持统一；
 defineOptions({ name: 'OrderAdjustAddressForm' })
 
 const { t } = useI18n() // 国际化

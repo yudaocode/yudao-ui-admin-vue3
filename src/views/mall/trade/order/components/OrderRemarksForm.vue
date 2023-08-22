@@ -14,6 +14,7 @@
 <script lang="ts" setup>
 import * as TradeOrderApi from '@/api/mall/trade/order'
 
+// TODO @puhui999：OrderRemarksForm 改成 OrderUpdateRemarkForm 更新哈，保持统一；
 defineOptions({ name: 'OrderRemarksForm' })
 
 const { t } = useI18n() // 国际化
