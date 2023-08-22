@@ -52,8 +52,7 @@ const tagIds = computed({
 const tags = ref<TagApi.TagVO[]>([])
 
 const getList = async () => {
-  const data = await TagApi.getMemberTagPage({})
-  tags.value = data.list
+  tags.value = await TagApi.getSimpleTagList()
 }
 
 /** 添加用户标签表单弹框 */
