@@ -6,6 +6,15 @@ export interface SignInRecordVO {
   day: number
   point: number
 }
+export interface SignInRecordQueryVO {
+  pageNo: number
+  pageSize: number
+  userId?: number
+  nickname: number | undefined | null
+  day?: number | null | undefined
+  point?: number | null | undefined
+  createTime: string[] | null | undefined
+}
 
 // 查询用户签到积分列表
 export const getSignInRecordPage = async (params) => {

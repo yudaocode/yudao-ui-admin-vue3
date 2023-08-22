@@ -1,12 +1,12 @@
 <template>
-  <el-form ref="formRef" :model="password" :rules="rules" label-width="80px">
-    <el-form-item :label="t('profile.password.oldPassword')">
+  <el-form ref="formRef" :model="password" :rules="rules" :label-width="200">
+    <el-form-item :label="t('profile.password.oldPassword')" prop="oldPassword">
       <InputPassword v-model="password.oldPassword" />
     </el-form-item>
-    <el-form-item :label="t('profile.password.newPassword')">
+    <el-form-item :label="t('profile.password.newPassword')" prop="newPassword">
       <InputPassword v-model="password.newPassword" strength />
     </el-form-item>
-    <el-form-item :label="t('profile.password.confirmPassword')">
+    <el-form-item :label="t('profile.password.confirmPassword')" prop="confirmPassword">
       <InputPassword v-model="password.confirmPassword" strength />
     </el-form-item>
     <el-form-item>
@@ -33,17 +33,18 @@ const password = reactive({
 })
 
 // 表单校验
-const equalToPassword = (value, callback) => {
+const equalToPassword = (_rule, value, callback) => {
   if (password.newPassword !== value) {
     callback(new Error(t('profile.password.diffPwd')))
   } else {
     callback()
   }
 }
+
 const rules = reactive<FormRules>({
   oldPassword: [
     { required: true, message: t('profile.password.oldPwdMsg'), trigger: 'blur' },
-    { min: 3, max: 5, message: t('profile.password.pwdRules'), trigger: 'blur' }
+    { min: 6, max: 20, message: t('profile.password.pwdRules'), trigger: 'blur' }
   ],
   newPassword: [
     { required: true, message: t('profile.password.newPwdMsg'), trigger: 'blur' },
@@ -54,6 +55,7 @@ const rules = reactive<FormRules>({
     { required: true, validator: equalToPassword, trigger: 'blur' }
   ]
 })
+
 const submit = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.validate(async (valid) => {
@@ -63,6 +65,7 @@ const submit = (formEl: FormInstance | undefined) => {
     }
   })
 }
+
 const reset = (formEl: FormInstance | undefined) => {
   if (!formEl) return
   formEl.resetFields()
