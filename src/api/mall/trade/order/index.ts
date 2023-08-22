@@ -109,3 +109,13 @@ export const delivery = async (data: DeliveryVO) => {
 export const remark = async (data) => {
   return await request.post({ url: `/trade/order/remark`, data })
 }
+
+// 订单调价
+export const adjustPrice = async (data) => {
+  return await request.post({ url: `/trade/order/adjust-price`, data })
+}
+
+// 修改订单地址
+export const adjustAddress = async (data) => {
+  return await request.post({ url: `/trade/order/adjust-address`, data })
+}

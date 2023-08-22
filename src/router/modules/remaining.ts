@@ -421,7 +421,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: 'detail/:orderId(\\d+)',
-        component: () => import('@/views/mall/trade/order/detail/index.vue'),
+        component: () => import('@/views/mall/trade/order/components/OrderDetailForm.vue'),
         name: 'TradeOrderDetailForm',
         meta: { title: '订单详情', icon: '', activeMenu: '/trade/trade/order' }
       }

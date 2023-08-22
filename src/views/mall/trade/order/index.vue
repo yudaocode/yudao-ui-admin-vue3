@@ -130,10 +130,11 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="商品原价" prop="price" width="150">
-              <template #default="{ row }">{{ formatToFraction(row.price) }}元</template>
+            <el-table-column label="商品原价*数量" prop="price" width="150">
+              <template #default="{ row }">
+                {{ formatToFraction(row.price) }}元 * {{ row.count }}
+              </template>
             </el-table-column>
-            <el-table-column label="数量" prop="count" width="100" />
             <el-table-column label="合计" prop="payPrice" width="150">
               <template #default="{ row }">{{ formatToFraction(row.payPrice) }}元</template>
             </el-table-column>
@@ -150,7 +151,7 @@
                 {{ formatToFraction(scope.row.payPrice) + '元' }}
               </template>
             </el-table-column>
-            <el-table-column label="买家/收货人" min-width="120">
+            <el-table-column label="买家/收货人" min-width="160">
               <template #default>
                 <div class="flex flex-col">
                   <span>买家：{{ scope.row.user.nickname }}</span>
@@ -161,8 +162,10 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column align="center" label="配送方式" prop="deliveryType" width="120">
-              <template #default> 快递</template>
+            <el-table-column align="center" label="配送方式" width="120">
+              <template #default>
+                <span>{{ scope.row.deliveryType || '快递' }}</span>
+              </template>
             </el-table-column>
             <el-table-column align="center" fixed="right" label="操作" width="160">
               <template #default>
@@ -259,8 +262,8 @@
 
 <script lang="ts" name="Order" setup>
 import type { FormInstance, TableColumnCtx } from 'element-plus'
-import DeliveryOrderForm from './DeliveryOrderForm.vue'
-import OrderRemarksForm from './OrderRemarksForm.vue'
+import DeliveryOrderForm from './components/DeliveryOrderForm.vue'
+import OrderRemarksForm from './components/OrderRemarksForm.vue'
 import { dateFormatter } from '@/utils/formatTime'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { OrderItemRespVO, OrderVO } from '@/api/mall/trade/order'
@@ -293,7 +296,7 @@ interface SpanMethodProps {
 }
 
 const spanMethod = ({ rowIndex, columnIndex }: SpanMethodProps) => {
-  const colIndex = [5, 6, 7, 8]
+  const colIndex = [4, 5, 6, 7]
   // 处理列
   if (colIndex.includes(columnIndex)) {
     // 处理被合并的行

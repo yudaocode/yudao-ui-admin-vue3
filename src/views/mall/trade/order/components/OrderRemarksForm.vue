@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="订单备注" width="25%">
+  <Dialog v-model="dialogVisible" title="商家备注" width="25%">
     <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
       <el-form-item label="备注">
         <el-input v-model="formData.remark" />
@@ -44,6 +44,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = unref(formData)
+    console.log(data)
     await TradeOrderApi.remark(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
@@ -58,8 +59,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: 0, // 订单编号
-    logisticsId: null, // 物流公司编号
-    logisticsNo: '' // 物流编号
+    remark: '' // 订单备注
   }
   formRef.value?.resetFields()
 }

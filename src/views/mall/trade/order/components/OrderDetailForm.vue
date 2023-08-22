@@ -3,10 +3,11 @@
     <!-- 订单信息 -->
     <el-descriptions title="订单信息">
       <el-descriptions-item label="订单号: ">{{ orderInfo.no }}</el-descriptions-item>
-      <el-descriptions-item label="配送方式: ">物流配送</el-descriptions-item>
-      <!-- TODO 芋艿：待实现 -->
-      <el-descriptions-item label="营销活动: ">物流配送</el-descriptions-item>
-      <!-- TODO 芋艿：待实现 -->
+      <el-descriptions-item label="配送方式: ">
+        <dict-tag :type="DICT_TYPE.DELIVERY_TYPE" :value="orderInfo.deliveryType" />
+      </el-descriptions-item>
+      <!-- TODO 营销活动待实现     -->
+      <el-descriptions-item label="营销活动: ">秒杀活动</el-descriptions-item>
       <el-descriptions-item label="订单类型: ">
         <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="orderInfo.type" />
       </el-descriptions-item>
@@ -37,22 +38,17 @@
     <!-- 订单状态 -->
     <el-descriptions :column="1" title="订单状态">
       <el-descriptions-item label="订单状态: ">
-        <!-- TODO xiaobai：status 一定有值哈，不用判断 -->
-        <dict-tag
-          v-if="orderInfo.status !== ''"
-          :type="DICT_TYPE.TRADE_ORDER_STATUS"
-          :value="orderInfo.status"
-        />
+        <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="orderInfo.status" />
       </el-descriptions-item>
       <el-descriptions-item label-class-name="no-colon">
-        <el-button size="small" type="primary">调整价格</el-button>
+        <el-button size="small" type="primary" @click="openForm('adjustPrice')">调整价格</el-button>
         <el-button size="small" type="primary" @click="openForm('remark')">备注</el-button>
         <el-button size="small" type="primary" @click="openForm('delivery')">发货</el-button>
-        <!-- TODO 芋艿：待实现 -->
-        <el-button size="small" type="primary">修改地址</el-button>
-        <!-- TODO 芋艿：待实现 -->
+        <el-button size="small" type="primary" @click="openForm('adjustAddress')">
+          修改地址
+        </el-button>
+        <!-- TODO 后台商家也需要收货功能吗？ -->
         <el-button size="small" type="primary">确认收货</el-button>
-        <!-- TODO 芋艿：待实现 -->
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">提醒: </span></template>
@@ -61,8 +57,6 @@
         如果买家表示没收到货或货物有问题，请及时联系买家处理，友好协商
       </el-descriptions-item>
     </el-descriptions>
-
-    <!-- 物流信息 TODO -->
 
     <!-- 商品信息 -->
     <el-descriptions title="商品信息">
@@ -98,8 +92,6 @@
           <el-col :span="10" />
         </el-row>
       </el-descriptions-item>
-      <!-- 占位 -->
-      <!-- <el-descriptions-item v-for="item in 5" label-class-name="no-colon" :key="item" /> -->
     </el-descriptions>
     <el-descriptions :column="6">
       <el-descriptions-item label="商品总额: ">
@@ -114,8 +106,7 @@
 
       <el-descriptions-item>
         <template #label><span style="color: red">商品优惠: </span></template>
-        <!-- 没理解TODO  orderInfo.totalPrice - orderInfo.totalPrice -->
-        {{ formatToFraction(orderInfo.totalPrice - orderInfo.totalPrice) }}元
+        {{ formatToFraction(orderInfo.couponPrice) }}元
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">订单优惠: </span></template>
@@ -149,7 +140,7 @@
           </el-timeline>
         </el-descriptions-item>
 
-        <!-- 物流信息 -->
+        <!-- 物流信息 TODO 等物流接口搞定重构一下 -->
         <!-- TODO @xiaobai：改成一个包裹哈；目前只允许发货一次 -->
         <el-descriptions-item v-if="group.key === 'expressInfo'" labelClassName="no-colon">
           <!-- 循环包裹物流信息 -->
@@ -210,15 +201,19 @@
       </el-descriptions>
     </div>
   </ContentWrap>
-  <DeliveryOrderForm ref="deliveryOrderFormRef" @success="getDetail" />
-  <OrderRemarksForm ref="orderRemarksFormRef" @success="getDetail" />
+  <DeliveryOrderForm ref="deliveryFormRef" @success="getDetail" />
+  <OrderRemarksForm ref="remarksFormRef" @success="getDetail" />
+  <OrderAdjustAddressForm ref="adjustAddressFormRef" @success="getDetail" />
+  <OrderAdjustPriceForm ref="adjustPriceFormRef" @success="getDetail" />
 </template>
 <script lang="ts" setup>
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { formatToFraction } from '@/utils'
 import { DICT_TYPE } from '@/utils/dict'
-import OrderRemarksForm from '@/views/mall/trade/order/OrderRemarksForm.vue'
-import DeliveryOrderForm from '@/views/mall/trade/order/DeliveryOrderForm.vue'
+import OrderRemarksForm from '@/views/mall/trade/order/components/OrderRemarksForm.vue'
+import DeliveryOrderForm from '@/views/mall/trade/order/components/DeliveryOrderForm.vue'
+import OrderAdjustAddressForm from '@/views/mall/trade/order/components/OrderAdjustAddressForm.vue'
+import OrderAdjustPriceForm from '@/views/mall/trade/order/components/OrderAdjustPriceForm.vue'
 
 defineOptions({ name: 'TradeOrderDetailForm' })
 
@@ -287,38 +282,37 @@ const detailGroups = ref([
 ])
 
 const detailInfo = ref({
-  expressInfo:
-    // 物流信息
-    {
-      label: '包裹1',
-      name: 'bg1',
-      fhsj: '2022-11-03 16:50:45',
-      wlgs: '极兔',
-      ydh: '2132123',
-      wlzt: '不支持此快递公司',
-      wlxq: [
-        {
-          content: '正在派送途中,请您准备签收(派件人:王涛,电话:13854563814)',
-          timestamp: '2018-04-15 15:00:16'
-        },
-        {
-          content: '快件到达 【烟台龙口东江村委营业点】',
-          timestamp: '2018-04-13 14:54:19'
-        },
-        {
-          content: '快件已发车',
-          timestamp: '2018-04-11 12:55:52'
-        },
-        {
-          content: '快件已发车',
-          timestamp: '2018-04-11 12:55:52'
-        },
-        {
-          content: '快件已发车',
-          timestamp: '2018-04-11 12:55:52'
-        }
-      ]
-    },
+  // 物流信息
+  expressInfo: {
+    label: '包裹1',
+    name: 'bg1',
+    fhsj: '2022-11-03 16:50:45',
+    wlgs: '极兔',
+    ydh: '2132123',
+    wlzt: '不支持此快递公司',
+    wlxq: [
+      {
+        content: '正在派送途中,请您准备签收(派件人:王涛,电话:13854563814)',
+        timestamp: '2018-04-15 15:00:16'
+      },
+      {
+        content: '快件到达 【烟台龙口东江村委营业点】',
+        timestamp: '2018-04-13 14:54:19'
+      },
+      {
+        content: '快件已发车',
+        timestamp: '2018-04-11 12:55:52'
+      },
+      {
+        content: '快件已发车',
+        timestamp: '2018-04-11 12:55:52'
+      },
+      {
+        content: '快件已发车',
+        timestamp: '2018-04-11 12:55:52'
+      }
+    ]
+  },
   orderLog: [
     // 订单操作日志
     {
@@ -333,16 +327,23 @@ const detailInfo = ref({
   goodsInfo: [] // 商品详情tableData
 })
 
-const deliveryOrderFormRef = ref() // 发货表单 Ref
-const orderRemarksFormRef = ref() // 订单备注表单 Ref
-
+const deliveryFormRef = ref() // 发货表单 Ref
+const remarksFormRef = ref() // 订单备注表单 Ref
+const adjustAddressFormRef = ref() // 收货地址表单 Ref
+const adjustPriceFormRef = ref() // 订单调价表单 Ref
 const openForm = (type: string) => {
   switch (type) {
     case 'remark':
-      orderRemarksFormRef.value?.open(orderInfo)
+      remarksFormRef.value?.open(orderInfo.value)
       break
     case 'delivery':
-      deliveryOrderFormRef.value?.open(orderInfo.id)
+      deliveryFormRef.value?.open(orderInfo.value.id)
+      break
+    case 'adjustAddress':
+      adjustAddressFormRef.value?.open(orderInfo.value)
+      break
+    case 'adjustPrice':
+      adjustPriceFormRef.value?.open(orderInfo.value)
       break
   }
 }
