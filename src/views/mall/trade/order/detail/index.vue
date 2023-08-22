@@ -46,9 +46,7 @@
       </el-descriptions-item>
       <el-descriptions-item label-class-name="no-colon">
         <el-button size="small" type="primary">调整价格</el-button>
-        <!-- TODO 芋艿：待实现 -->
         <el-button size="small" type="primary" @click="openForm('remark')">备注</el-button>
-        <!-- TODO 芋艿：待实现 -->
         <el-button size="small" type="primary" @click="openForm('delivery')">发货</el-button>
         <!-- TODO 芋艿：待实现 -->
         <el-button size="small" type="primary">修改地址</el-button>
@@ -354,11 +352,6 @@ const getDetail = async () => {
   const id = params.orderId as unknown as number
   if (id) {
     const res = (await TradeOrderApi.getOrder(id)) as TradeOrderApi.OrderVO
-    // TODO 测试使用
-    res.user = {
-      id: 247,
-      nickname: '小妮子'
-    }
     orderInfo.value = res
   }
 }

@@ -268,8 +268,6 @@ import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { formatToFraction } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
 
-// const message = useMessage() // 消息弹窗
-// const { t } = useI18n() // 国际化
 const { currentRoute, push } = useRouter() // 路由跳转
 
 const loading = ref(true) // 列表的加载中
@@ -362,16 +360,7 @@ const getList = async () => {
   loading.value = true
   try {
     const data = await TradeOrderApi.getOrderPage(queryParams)
-    const list_ = data.list as OrderVO[]
-    // TODO 测试使用
-    list_.forEach((item) => {
-      item.user = {
-        id: 247,
-        nickname: '小妮子'
-      }
-    })
-
-    list.value = list_
+    list.value = data.list
     total.value = data.total
   } finally {
     loading.value = false
@@ -399,8 +388,7 @@ watch(
 )
 
 /** 初始化 **/
-onMounted(() => {
-  // list.value = testData
-  getList()
+onMounted(async () => {
+  await getList()
 })
 </script>
