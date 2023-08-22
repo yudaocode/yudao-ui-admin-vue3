@@ -51,7 +51,7 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <SpuSelect ref="spuSelectRef" :isSelectSku="true" @confirm="selectSpu" />
+  <SpuSelect ref="spuSelectRef" :isSelectSku="true" :radio="true" @confirm="selectSpu" />
 </template>
 <script lang="ts" setup>
 import * as BargainActivityApi from '@/api/mall/promotion/bargain/bargainActivity'
@@ -87,12 +87,12 @@ const ruleConfig: RuleConfig[] = [
   },
   {
     name: 'productConfig.bargainPrice',
-    rule: (arg) => arg > 0,
+    rule: (arg) => arg >= 0,
     message: '商品砍价底价不能小于0 ！！！'
   },
   {
     name: 'productConfig.stock',
-    rule: (arg) => arg > 1,
+    rule: (arg) => arg >= 1,
     message: '商品活动库存不能小于1 ！！！'
   }
 ]
@@ -164,7 +164,20 @@ const open = async (type: string, id?: number) => {
       // 用户每次砍价金额分转元, 分转元
       data.randomMinPrice = formatToFraction(data.randomMinPrice)
       data.randomMaxPrice = formatToFraction(data.randomMaxPrice)
-      await getSpuDetails(data.spuId!, data.products?.map((sku) => sku.skuId), data.products)
+      // 对齐活动商品处理结构
+      await getSpuDetails(
+        data.spuId!,
+        [data.skuId],
+        [
+          {
+            spuId: data.spuId!,
+            skuId: data.skuId,
+            bargainFirstPrice: data.bargainFirstPrice, // 砍价起始价格，单位分
+            bargainPrice: data.bargainPrice, // 砍价底价
+            stock: data.stock // 活动库存
+          }
+        ]
+      )
       formRef.value.setValues(data)
     } finally {
       formLoading.value = false
@@ -201,12 +214,12 @@ const submitForm = async () => {
     // 用户每次砍价金额分转元, 元转分
     data.randomMinPrice = convertToInteger(data.randomMinPrice)
     data.randomMaxPrice = convertToInteger(data.randomMaxPrice)
-    data.products = products
+    const formData = { ...data, ...products[0] }
     if (formType.value === 'create') {
-      await BargainActivityApi.createBargainActivity(data)
+      await BargainActivityApi.createBargainActivity(formData)
       message.success(t('common.createSuccess'))
     } else {
-      await BargainActivityApi.updateBargainActivity(data)
+      await BargainActivityApi.updateBargainActivity(formData)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false

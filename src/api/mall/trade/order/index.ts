@@ -1,12 +1,121 @@
 import request from '@/config/axios'
 
-// 获得交易订单分页
-// TODO @xiaobai：改成 getOrderPage
-export const getOrderList = (params: PageParam) => {
-  return request.get({ url: '/trade/order/page', params })
+export interface OrderVO {
+  id?: number | null // 订单编号
+  no?: string // 订单流水号
+  createTime?: Date | null // 下单时间
+  type?: number | null // 订单类型
+  terminal?: number | null // 订单来源
+  userId?: number | null // 用户编号
+  userIp?: string // 用户 IP
+  userRemark?: string // 用户备注
+  status?: number | null // 订单状态
+  productCount?: number | null // 购买的商品数量
+  finishTime?: Date | null // 订单完成时间
+  cancelTime?: Date | null // 订单取消时间
+  cancelType?: number | null // 取消类型
+  remark?: string // 商家备注
+  payOrderId: number | null // 支付订单编号
+  payed?: boolean // 是否已支付
+  payTime?: Date | null // 付款时间
+  payChannelCode?: string // 支付渠道
+  originalPrice?: number | null // 商品原价（总）
+  orderPrice?: number | null // 订单原价（总）
+  discountPrice?: number | null // 订单优惠（总）
+  deliveryPrice?: number | null // 运费金额
+  adjustPrice?: number | null // 订单调价（总）
+  payPrice?: number | null // 应付金额（总）
+  deliveryType?: number | null // 发货方式
+  deliveryTemplateId?: number | null // 配送模板编号
+  logisticsId?: number | null | null // 发货物流公司编号
+  logisticsNo?: string // 发货物流单号
+  deliveryStatus?: number | null // 发货状态
+  deliveryTime?: Date | null // 发货时间
+  receiveTime?: Date | null // 收货时间
+  receiverName?: string // 收件人名称
+  receiverMobile?: string // 收件人手机
+  receiverAreaId?: number | null // 收件人地区编号
+  receiverPostCode?: number | null // 收件人邮编
+  receiverDetailAddress?: string // 收件人详细地址
+  afterSaleStatus?: number | null // 售后状态
+  refundPrice?: number | null // 退款金额
+  couponId?: number | null // 优惠劵编号
+  couponPrice?: number | null // 优惠劵减免金额
+  pointPrice?: number | null // 积分抵扣的金额
+  receiverAreaName?: string //收件人地区名字
+  items?: OrderItemRespVO[] // 订单项列表
+  //用户信息
+  user?: {
+    id?: number | null
+    nickname?: string
+    avatar?: string
+  }
 }
 
-// 获得交易订单详情
-export const getOrderDetail = (id: number) => {
-  return request.get({ url: '/trade/order/get-detail?id=' + id })
+export interface OrderItemRespVO {
+  // ========== 订单项基本信息 ==========
+  id?: number | null // 编号
+  userId?: number | null // 用户编号
+  orderId?: number | null // 订单编号
+  // ========== 商品基本信息 ==========
+  spuId?: number | null // 商品 SPU 编号
+  spuName?: string //商品 SPU 名称
+  skuId?: number | null // 商品 SKU 编号
+  picUrl?: string //商品图片
+  count?: number | null //购买数量
+  // ========== 价格 + 支付基本信息 ==========
+  originalPrice?: number | null //商品原价（总）
+  originalUnitPrice?: number | null //商品原价（单）
+  discountPrice?: number | null //商品优惠（总）
+  payPrice?: number | null //商品实付金额（总）
+  orderPartPrice?: number | null //子订单分摊金额（总）
+  orderDividePrice?: number | null //分摊后子订单实付金额（总）
+  // ========== 营销基本信息 ==========
+  // TODO 芋艿：在捉摸一下
+  // ========== 售后基本信息 ==========
+  afterSaleStatus?: number | null // 售后状态
+  properties?: ProductPropertiesVO[] //属性数组
+}
+
+export interface ProductPropertiesVO {
+  propertyId?: number | null // 属性的编号
+  propertyName?: string // 属性的名称
+  valueId?: number | null //属性值的编号
+  valueName?: string // 属性值的名称
+}
+
+// 查询交易订单列表
+export const getOrderPage = async (params) => {
+  return await request.get({ url: `/trade/order/page`, params })
+}
+
+// 查询交易订单详情
+export const getOrder = async (id: number | null) => {
+  return await request.get({ url: `/trade/order/get-detail?id=` + id })
+}
+
+export interface DeliveryVO {
+  id: number // 订单编号
+  logisticsId: number | null // 物流公司编号
+  logisticsNo: string // 物流编号
+}
+
+// 订单发货
+export const delivery = async (data: DeliveryVO) => {
+  return await request.post({ url: `/trade/order/delivery`, data })
+}
+
+// 订单备注
+export const remark = async (data) => {
+  return await request.post({ url: `/trade/order/remark`, data })
+}
+
+// 订单调价
+export const adjustPrice = async (data) => {
+  return await request.post({ url: `/trade/order/adjust-price`, data })
+}
+
+// 修改订单地址
+export const adjustAddress = async (data) => {
+  return await request.post({ url: `/trade/order/adjust-address`, data })
 }

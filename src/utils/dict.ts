@@ -130,7 +130,7 @@ export enum DICT_TYPE {
   BPM_OA_LEAVE_TYPE = 'bpm_oa_leave_type',
 
   // ========== PAY 模块 ==========
-  PAY_CHANNEL_CODE = 'pay_channel_code', // 支付渠道编码类型
+  PAY_CHANNEL_CODE_TYPE = 'pay_channel_code_type', // 支付渠道编码类型
   PAY_ORDER_STATUS = 'pay_order_status', // 商户支付订单状态
   PAY_REFUND_STATUS = 'pay_refund_status', // 退款订单状态
   PAY_NOTIFY_STATUS = 'pay_notify_status', // 商户支付回调状态
@@ -164,5 +164,8 @@ export enum DICT_TYPE {
   PROMOTION_COUPON_STATUS = 'promotion_coupon_status', // 优惠劵的状态
   PROMOTION_COUPON_TAKE_TYPE = 'promotion_coupon_take_type', // 优惠劵的领取方式
   PROMOTION_ACTIVITY_STATUS = 'promotion_activity_status', // 优惠活动的状态
-  PROMOTION_CONDITION_TYPE = 'promotion_condition_type' // 营销的条件类型枚举
+  PROMOTION_CONDITION_TYPE = 'promotion_condition_type', // 营销的条件类型枚举
+
+  // ========== MALL - 物流模块 ==========
+  DELIVERY_TYPE = 'delivery_type' // 配送方式
 }
