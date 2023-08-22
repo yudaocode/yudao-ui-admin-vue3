@@ -66,6 +66,7 @@ const submitForm = async () => {
     const data = unref(formData)
     if (radio.value === '2') {
       data.logisticsId = 0
+      data.logisticsNo = ''
     }
     await TradeOrderApi.delivery(data)
     message.success(t('common.updateSuccess'))

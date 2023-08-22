@@ -164,7 +164,7 @@
             </el-table-column>
             <el-table-column align="center" label="配送方式" width="120">
               <template #default>
-                <span>{{ scope.row.deliveryType || '快递' }}</span>
+                <dict-tag :type="DICT_TYPE.DELIVERY_TYPE" :value="scope.row.deliveryType" />
               </template>
             </el-table-column>
             <el-table-column align="center" fixed="right" label="操作" width="160">
@@ -188,10 +188,6 @@
                         <el-dropdown-item command="orderRemarks">
                           <Icon icon="ep:chat-line-square" />
                           订单备注
-                        </el-dropdown-item>
-                        <el-dropdown-item command="refund">
-                          <Icon icon="ep:credit-card" />
-                          立即退款
                         </el-dropdown-item>
                       </el-dropdown-menu>
                     </template>
@@ -221,7 +217,7 @@
         min-width="180"
         prop="payTime"
       />
-      <el-table-column align="center" label="支付类型" min-width="100" prop="payChannelCode">
+      <el-table-column align="center" label="支付类型" min-width="120" prop="payChannelCode">
         <template #default="{ row }">
           <dict-tag
             v-if="row.payChannelCode"
@@ -314,12 +310,9 @@ const spanMethod = ({ rowIndex, columnIndex }: SpanMethodProps) => {
 }
 /** 操作分发 */
 const handleCommand = (command: string, row: OrderVO) => {
-  console.log(row)
   switch (command) {
     case 'orderRemarks':
       orderRemarksFormRef.value?.open(row)
-      break
-    case 'refund':
       break
     case 'delivery':
       deliveryOrderFormRef.value?.open(row.id)
