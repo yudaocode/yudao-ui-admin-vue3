@@ -64,8 +64,34 @@
           />
         </el-select>
       </el-form-item>
-
-      <el-form-item label="订单搜索">
+      <el-form-item label="快递公司" prop="type">
+        <el-select v-model="queryParams.logisticsId" class="!w-280px" clearable placeholder="全部">
+          <el-option
+            v-for="item in deliveryExpressList"
+            :key="item.id as string"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="自提门店" prop="type">
+        <el-select
+          v-model="queryParams.pickUpStoreId"
+          class="!w-280px"
+          clearable
+          multiple
+          placeholder="全部"
+        >
+          <el-option
+            v-for="item in pickUpStoreList"
+            :key="item.id as string"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <!-- TODO 考虑是否移除或重构-->
+      <el-form-item label="聚合搜索">
         <el-input
           v-show="true"
           v-model="queryType.v"
@@ -86,7 +112,6 @@
         </el-input>
       </el-form-item>
       <el-form-item>
-        <!-- TODO 订单按钮相关权限等订单完善后补齐 -->
         <el-button @click="handleQuery">
           <Icon class="mr-5px" icon="ep:search" />
           搜索
@@ -153,11 +178,29 @@
             </el-table-column>
             <el-table-column label="买家/收货人" min-width="160">
               <template #default>
-                <div class="flex flex-col">
+                <!-- 快递发货  -->
+                <div v-if="scope.row.deliveryType === 1" class="flex flex-col">
                   <span>买家：{{ scope.row.user.nickname }}</span>
                   <span>
                     收货人：{{ scope.row.receiverName }} {{ scope.row.receiverMobile }}
                     {{ scope.row.receiverAreaName }} {{ scope.row.receiverDetailAddress }}
+                  </span>
+                </div>
+                <!-- 自提  -->
+                <div v-if="scope.row.deliveryType === 2" class="flex flex-col">
+                  <span>
+                    门店名称：
+                    {{ pickUpStoreList.find((p) => p.id === scope.row.pickUpStoreId)?.name }}
+                  </span>
+                  <span>
+                    门店手机：
+                    {{ pickUpStoreList.find((p) => p.id === scope.row.pickUpStoreId)?.phone }}
+                  </span>
+                  <span>
+                    自提门店:
+                    {{
+                      pickUpStoreList.find((p) => p.id === scope.row.pickUpStoreId)?.detailAddress
+                    }}
                   </span>
                 </div>
               </template>
@@ -169,6 +212,7 @@
             </el-table-column>
             <el-table-column align="center" fixed="right" label="操作" width="160">
               <template #default>
+                <!-- TODO 权限后续补齐 -->
                 <div class="flex justify-center items-center">
                   <el-button link type="primary" @click="openForm(scope.row.id)">
                     <Icon icon="ep:notification" />
@@ -263,9 +307,11 @@ import OrderRemarksForm from './components/OrderRemarksForm.vue'
 import { dateFormatter } from '@/utils/formatTime'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { OrderItemRespVO, OrderVO } from '@/api/mall/trade/order'
+import { getListAllSimple } from '@/api/mall/trade/delivery/pickUpStore'
 import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import { formatToFraction } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
+import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 
 const { currentRoute, push } = useRouter() // 路由跳转
 
@@ -320,7 +366,7 @@ const handleCommand = (command: string, row: OrderVO) => {
   }
 }
 const queryFormRef = ref<FormInstance>() // 搜索的表单
-//表单搜索 TODO 订单相关操作完成后立马实现
+//表单搜索
 const queryParams = reactive({
   pageNo: 1, //首页
   pageSize: 10, //页面大小
@@ -337,6 +383,8 @@ const queryParams = reactive({
   createTime: [],
   spuName: '',
   itemCount: '',
+  pickUpStoreId: [],
+  logisticsId: null,
   all: ''
 })
 
@@ -383,8 +431,12 @@ watch(
   }
 )
 
+const pickUpStoreList = ref([]) // 自提门店精简列表
+const deliveryExpressList = ref([]) // 物流公司
 /** 初始化 **/
 onMounted(async () => {
   await getList()
+  pickUpStoreList.value = await getListAllSimple()
+  deliveryExpressList.value = await DeliveryExpressApi.getSimpleDeliveryExpressList()
 })
 </script>
