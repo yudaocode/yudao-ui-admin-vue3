@@ -1,23 +1,27 @@
 <template>
   <div v-loading="loading">
     <el-row :gutter="10" class="detail-info-warp">
+      <!-- 左上角：基本信息 -->
       <el-col :span="14" class="detail-info-item">
         <el-card shadow="never">
           <template #header>
             <div class="card-header">
+              <!-- TODO @梦：如果不要小蓝线，是不是直接用 el-card 自带的 title 即可？ -->
               <CardTitle title="基本信息" />
               <el-button
-                v-if="userInfo.id"
+                v-if="user.id"
                 type="primary"
+                size="small"
                 text
-                @click="openForm('update', userInfo.id)"
-                >编辑</el-button
+                @click="openForm('update', user.id)"
               >
+                编辑
+              </el-button>
             </div>
           </template>
           <el-row>
             <el-col :span="4">
-              <ElAvatar shape="square" :size="140" :src="userInfo.avatar || undefined" />
+              <ElAvatar shape="square" :size="140" :src="user.avatar || undefined" />
             </el-col>
             <el-col :span="20">
               <el-descriptions :column="2">
@@ -28,7 +32,7 @@
                       用户名
                     </div>
                   </template>
-                  {{ userInfo.name || '空' }}
+                  {{ user.name || '空' }}
                 </el-descriptions-item>
                 <el-descriptions-item>
                   <template #label>
@@ -37,8 +41,8 @@
                       昵称
                     </div>
                   </template>
-                  {{ userInfo.nickname }}</el-descriptions-item
-                >
+                  {{ user.nickname }}
+                </el-descriptions-item>
                 <el-descriptions-item label="手机号">
                   <template #label>
                     <div class="cell-item">
@@ -46,8 +50,8 @@
                       手机号
                     </div>
                   </template>
-                  {{ userInfo.mobile }}</el-descriptions-item
-                >
+                  {{ user.mobile }}
+                </el-descriptions-item>
                 <el-descriptions-item>
                   <template #label>
                     <div class="cell-item">
@@ -55,7 +59,7 @@
                       性别
                     </div>
                   </template>
-                  <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="userInfo.sex" />
+                  <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="user.sex" />
                 </el-descriptions-item>
                 <el-descriptions-item>
                   <template #label>
@@ -64,16 +68,17 @@
                       所在地
                     </div>
                   </template>
-                  {{ userInfo.areaId }}
+                  <!-- TODO @梦：这里后端返回的时候，要返回 areaName -->
+                  {{ user.areaId }}
                 </el-descriptions-item>
                 <el-descriptions-item>
                   <template #label>
                     <div class="cell-item">
                       <Icon icon="ep:position" />
-                      注册IP
+                      注册 IP
                     </div>
                   </template>
-                  {{ userInfo.registerIp }}
+                  {{ user.registerIp }}
                 </el-descriptions-item>
                 <el-descriptions-item>
                   <template #label>
@@ -82,7 +87,7 @@
                       生日
                     </div>
                   </template>
-                  {{ userInfo.birthday ? formatDate(userInfo.birthday) : '空' }}
+                  {{ user.birthday ? formatDate(user.birthday) : '空' }}
                 </el-descriptions-item>
                 <el-descriptions-item>
                   <template #label>
@@ -91,7 +96,7 @@
                       注册时间
                     </div>
                   </template>
-                  {{ userInfo.createTime ? formatDate(userInfo.createTime) : '空' }}
+                  {{ user.createTime ? formatDate(user.createTime) : '空' }}
                 </el-descriptions-item>
                 <el-descriptions-item>
                   <template #label>
@@ -100,31 +105,36 @@
                       最后登录时间
                     </div>
                   </template>
-                  {{ userInfo.loginDate ? formatDate(userInfo.loginDate) : '空' }}
+                  {{ user.loginDate ? formatDate(user.loginDate) : '空' }}
                 </el-descriptions-item>
               </el-descriptions>
             </el-col>
           </el-row>
         </el-card>
       </el-col>
+
+      <!-- 右上角：账户信息 -->
       <el-col :span="10" class="detail-info-item">
         <el-card shadow="never">
           <template #header>
-            <CardTitle title="账户信息(WIP)" />
+            <CardTitle title="账户信息" />
           </template>
           <AccountInfo />
         </el-card>
       </el-col>
+
+      <!-- 下边：账户明细 -->
+      <!-- TODO 芋艿：【收货地址】【订单管理】【售后管理】【收藏记录】【优惠劵】 -->
       <el-card header="账户明细" style="width: 100%; margin-top: 20px" shadow="never">
         <template #header>
           <CardTitle title="账户明细" />
         </template>
-        <el-tabs v-model="activeName" class="demo-tabs">
+        <el-tabs v-model="activeName">
           <el-tab-pane label="积分" name="point">
-            <PointList v-if="userInfo.id" :member-id="userInfo.id" />
+            <PointList v-if="user.id" :member-id="user.id" />
           </el-tab-pane>
           <el-tab-pane label="签到" name="sign">
-            <SignList v-if="userInfo.id" :member-id="userInfo.id" />
+            <SignList v-if="user.id" :member-id="user.id" />
           </el-tab-pane>
           <el-tab-pane label="成长值" name="third">成长值(WIP)</el-tab-pane>
           <el-tab-pane label="余额" name="fourth">余额(WIP)</el-tab-pane>
@@ -132,30 +142,28 @@
       </el-card>
     </el-row>
   </div>
+
   <!-- 表单弹窗：添加/修改 -->
-  <UserForm ref="formRef" @success="getUserData(userInfo.id)" />
+  <UserForm ref="formRef" @success="getUserData(user.id)" />
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
+// TODO @梦：组件对应的 vue，都大写
 import PointList from '@/views/member/user/components/point-list.vue'
 import SignList from '@/views/member/user/components/sign-list.vue'
 import CardTitle from '@/views/member/user/components/card-title.vue'
-import { ElMessage } from 'element-plus'
+// TODO @梦：参考别的模块，UserApi 这样去引用
 import { getUser, UserBaseInfoVO } from '@/api/member/user'
 import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import UserForm from '@/views/member/user/UserForm.vue'
+// TODO @梦：把用户信息，也抽成一个组件，类似 AccountInfo
 import AccountInfo from '@/views/member/user/components/account-info.vue'
+
 defineOptions({ name: 'MemberDetail' })
 
-const activeName = ref('point')
-const loading = ref(true)
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
-let userInfo = ref<UserBaseInfoVO>({
+const activeName = ref('point') // 账户明细 选中的 tabs
+const loading = ref(true) // 加载中
+let user = ref<UserBaseInfoVO>({
   areaId: undefined,
   avatar: undefined,
   birthday: undefined,
@@ -173,29 +181,40 @@ let userInfo = ref<UserBaseInfoVO>({
   status: 0
 })
 
-const getUserData = async (id: any) => {
+/** 获得用户 */
+const getUserData = async (id: number) => {
   loading.value = true
   try {
-    // userInfo.value = Object.assign(userInfo, await getUser(parseInt(id as string)))
-    userInfo.value = await getUser(parseInt(id as string))
+    user.value = await getUser(id)
   } finally {
     loading.value = false
   }
 }
+
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
+/** 初始化 */
 const route = useRoute()
-let router = useRouter()
-const { member_id } = route.query
+const router = useRouter()
+// TODO @梦：改成 id 路径参数，而不是 query
+// TODO @梦：会员列表，把【详情】按钮加上哈
+const member_id = route.query.member_id as number
 onMounted(() => {
   if (!member_id) {
-    ElMessage.warning('会员id 未携带！')
+    // TODO
+    ElMessage.warning('参数错误，会员编号不能为空！')
     router.back()
     return
   }
   getUserData(member_id)
 })
 </script>
-
 <style scoped lang="css">
+/** TODO 这 3 个 css 貌似没用？ */
 .detail-info-item:first-child {
   padding-left: 0 !important;
 }
@@ -211,6 +230,7 @@ onMounted(() => {
 .cell-item {
   display: inline;
 }
+/** TODO 下面 css 貌似没啥用？ */
 .cell-item::after {
   content: ':';
 }

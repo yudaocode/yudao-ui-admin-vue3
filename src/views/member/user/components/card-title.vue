@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { defineComponent } from 'vue'
 defineComponent({
   name: 'CardTitle'
 })
+
 const { title } = defineProps({
   title: {
     type: String,

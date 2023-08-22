@@ -17,6 +17,8 @@ export interface UserVO {
   mark: string
   createTime: Date
 }
+
+// TODO @梦：和 UserVO 搞成一个把。
 export interface UserBaseInfoVO {
   id: number | undefined | null
   mobile: string
@@ -34,6 +36,7 @@ export interface UserBaseInfoVO {
   mark: string | null | undefined
   createTime: Date | null | undefined
 }
+
 // 查询会员用户列表
 export const getUserPage = async (params) => {
   return await request.get({ url: `/member/user/page`, params })

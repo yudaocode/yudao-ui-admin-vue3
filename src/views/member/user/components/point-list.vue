@@ -100,13 +100,13 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as RecordApi from '@/api//member/point/record'
-import { RecordQueryVO } from '@/api//member/point/record'
 
 defineOptions({ name: 'PointList' })
+
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const queryParams = reactive<RecordQueryVO>({
+const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   bizType: undefined,
@@ -139,12 +139,15 @@ const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
+
+// TODO @梦:改成 userId 哈
 const { memberId } = defineProps({
   memberId: {
     type: Number,
     required: true
   }
 })
+
 /** 初始化 **/
 onMounted(() => {
   queryParams.userId = memberId

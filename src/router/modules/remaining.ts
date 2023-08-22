@@ -347,7 +347,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/property',
+    path: '/property', // TODO @puhui999：这里的 path 有问题，应该是 /product/property
     component: Layout,
     name: 'Property',
     meta: {
@@ -424,6 +424,24 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/mall/trade/order/components/OrderDetailForm.vue'),
         name: 'TradeOrderDetailForm',
         meta: { title: '订单详情', icon: '', activeMenu: '/trade/trade/order' }
+      }
+    ]
+  },
+  {
+    path: '/member',
+    component: Layout,
+    name: 'member',
+    meta: { hidden: true },
+    children: [
+      {
+        path: 'user/detail',
+        name: 'MemberUserDetail',
+        meta: {
+          title: '会员详情',
+          noCache: true,
+          hidden: true
+        },
+        component: () => import('@/views/member/user/detail/index.vue')
       }
     ]
   },

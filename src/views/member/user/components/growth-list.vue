@@ -6,6 +6,7 @@ export default defineComponent({
 })
 </script>
 
+<!-- TODO @梦：可以读取 member_experience_log 表 -->
 <template>
   <div>成长值列表</div>
 </template>
