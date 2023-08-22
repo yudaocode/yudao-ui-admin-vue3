@@ -5,7 +5,7 @@ export interface LevelVO {
   name: string
   experience: number
   value: number
-  discount: number
+  discountPercent: number
   icon: string
   bgUrl: string
   status: number

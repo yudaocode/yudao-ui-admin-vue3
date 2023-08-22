@@ -8,7 +8,6 @@
     </el-option>
   </el-select>
 </template>
-
 <script lang="ts" setup>
 import * as LevelApi from '@/api/member/level'
 

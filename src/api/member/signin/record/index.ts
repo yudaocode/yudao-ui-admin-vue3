@@ -9,5 +9,5 @@ export interface SignInRecordVO {
 
 // 查询用户签到积分列表
 export const getSignInRecordPage = async (params) => {
-  return await request.get({ url: `/member/point/sign-in-record/page`, params })
+  return await request.get({ url: `/member/sign-in/record/page`, params })
 }

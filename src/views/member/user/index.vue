@@ -84,10 +84,12 @@
         :show-overflow-tooltip="false"
       >
         <template #default="scope">
-          <el-tag v-for="(tagName, index) in scope.row.tagNames" :key="index">{{ tagName }}</el-tag>
+          <el-tag v-for="(tagName, index) in scope.row.tagNames" :key="index" class="mr-5px">
+            {{ tagName }}
+          </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="积分" align="center" width="100px" />
+      <el-table-column label="积分" align="center" prop="point" width="100px" />
       <el-table-column label="状态" align="center" prop="status" width="100px">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />

@@ -38,9 +38,9 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="享受折扣(%)" prop="discount">
+          <el-form-item label="享受折扣(%)" prop="discountPercent">
             <el-input-number
-              v-model="formData.discount"
+              v-model="formData.discountPercent"
               :min="0"
               :max="100"
               :precision="0"
@@ -100,7 +100,7 @@ const formData = ref({
   name: undefined,
   experience: undefined,
   level: undefined,
-  discount: undefined,
+  discountPercent: undefined,
   icon: undefined,
   backgroundUrl: undefined,
   status: CommonStatusEnum.ENABLE
@@ -109,7 +109,7 @@ const formRules = reactive({
   name: [{ required: true, message: '等级名称不能为空', trigger: 'blur' }],
   experience: [{ required: true, message: '升级经验不能为空', trigger: 'blur' }],
   level: [{ required: true, message: '等级不能为空', trigger: 'blur' }],
-  discount: [{ required: true, message: '享受折扣不能为空', trigger: 'blur' }],
+  discountPercent: [{ required: true, message: '享受折扣不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
 })
 const formRef = ref() // 表单 Ref
@@ -165,7 +165,7 @@ const resetForm = () => {
     name: undefined,
     experience: undefined,
     level: undefined,
-    discount: undefined,
+    discountPercent: undefined,
     icon: undefined,
     backgroundUrl: undefined,
     status: CommonStatusEnum.ENABLE
