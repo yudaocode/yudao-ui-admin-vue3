@@ -45,9 +45,9 @@
             <el-button class="float-right" text type="primary" @click="copy(item.code)">
               {{ t('common.copy') }}
             </el-button>
-            <div>
+            <el-scrollbar height="600px">
               <pre><code v-dompurify-html="highlightedCode(item)" class="hljs"></code></pre>
-            </div>
+            </el-scrollbar>
           </el-tab-pane>
         </el-tabs>
       </el-card>

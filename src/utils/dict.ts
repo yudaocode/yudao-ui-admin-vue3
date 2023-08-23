@@ -90,6 +90,7 @@ export enum DICT_TYPE {
   USER_TYPE = 'user_type',
   COMMON_STATUS = 'common_status',
   SYSTEM_TENANT_PACKAGE_ID = 'system_tenant_package_id',
+  TERMINAL = 'terminal', // 终端
 
   // ========== SYSTEM 模块 ==========
   SYSTEM_USER_SEX = 'system_user_sex',
@@ -142,7 +143,6 @@ export enum DICT_TYPE {
 
   // ========== MALL - 会员模块 ==========
   MEMBER_POINT_BIZ_TYPE = 'member_point_biz_type', // 积分的业务类型
-  MEMBER_POINT_STATUS = 'member_point_status', // 积分的状态
 
   // ========== MALL - 商品模块 ==========
   PRODUCT_UNIT = 'product_unit', // 商品单位
@@ -156,7 +156,7 @@ export enum DICT_TYPE {
   TRADE_ORDER_TYPE = 'trade_order_type', // 订单 - 类型
   TRADE_ORDER_STATUS = 'trade_order_status', // 订单 - 状态
   TRADE_ORDER_ITEM_AFTER_SALE_STATUS = 'trade_order_item_after_sale_status', // 订单项 - 售后状态
-  TERMINAL = 'terminal', // 终端
+  TRADE_DELIVERY_TYPE = 'trade_delivery_type', // 配送方式
 
   // ========== MALL - 营销模块 ==========
   PROMOTION_DISCOUNT_TYPE = 'promotion_discount_type', // 优惠类型

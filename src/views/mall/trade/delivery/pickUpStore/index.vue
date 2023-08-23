@@ -1,27 +1,27 @@
 <template>
   <!-- 搜索工作栏 -->
   <ContentWrap>
-    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true">
+    <el-form ref="queryFormRef" :inline="true" :model="queryParams" class="-mb-15px">
       <el-form-item label="门店手机" prop="phone">
         <el-input
           v-model="queryParams.phone"
-          placeholder="请输门店手机"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输门店手机"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="门店名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输门店名称"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输门店名称"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="门店状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="门店状态" clearable class="!w-240px">
+        <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="门店状态">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
@@ -33,32 +33,30 @@
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="datetimerange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
           class="!w-240px"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="datetimerange"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['trade:delivery:pick-up-store:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
         </el-button>
         <el-button
-          type="success"
+          v-hasPermi="['trade:delivery:pick-up-store:create']"
           plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['trade:delivery:pick-up-store:export']"
+          type="primary"
+          @click="openForm('create')"
         >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
         </el-button>
       </el-form-item>
     </el-form>
@@ -75,34 +73,34 @@
       </el-table-column>
       <el-table-column label="门店名称" prop="name" />
       <el-table-column label="门店手机" prop="phone" />
-      <el-table-column label="门店详细地址" align="center" prop="detailAddress" />
-      <el-table-column label="开启状态" align="center" prop="status">
+      <el-table-column align="center" label="门店详细地址" prop="detailAddress" />
+      <el-table-column align="center" label="开启状态" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
-        label="创建时间"
+        :formatter="dateFormatter"
         align="center"
+        label="创建时间"
         prop="createTime"
         width="180"
-        :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column align="center" label="操作">
         <template #default="scope">
           <el-button
+            v-hasPermi="['trade:delivery:pick-up-store:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['trade:delivery:pick-up-store:update']"
           >
             编辑
           </el-button>
           <el-button
+            v-hasPermi="['trade:delivery:pick-up-store:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['trade:delivery:pick-up-store:delete']"
           >
             删除
           </el-button>
@@ -113,18 +111,17 @@
   <!-- 表单弹窗：添加/修改 -->
   <DeliveryPickUpStoreForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts" name="DeliveryPickUpStore">
+<script lang="ts" name="DeliveryPickUpStore" setup>
 import * as DeliveryPickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
 import DeliveryPickUpStoreForm from './PickUpStoreForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const total = ref(0) // 列表的总页数
 const loading = ref(true) // 列表的加载中
-const exportLoading = ref(false) // 导出的加载中
 const list = ref<any[]>([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
@@ -177,21 +174,6 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await DeliveryPickUpStoreApi.exportDeliveryPickUpStoreApi(queryParams)
-    download.excel(data, '自提门店.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /** 初始化 **/

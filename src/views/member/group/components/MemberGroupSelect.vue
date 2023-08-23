@@ -8,7 +8,6 @@
     />
   </el-select>
 </template>
-
 <script lang="ts" setup>
 import * as GroupApi from '@/api/member/group'
 

@@ -8,10 +8,7 @@ export interface RecordVO {
   description: string
   point: number
   totalPoint: number
-  status: number
   userId: number
-  freezingTime: Date
-  thawingTime: Date
   createDate: Date
 }
 

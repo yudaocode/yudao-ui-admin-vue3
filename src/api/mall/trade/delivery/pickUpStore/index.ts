@@ -16,13 +16,18 @@ export interface DeliveryPickUpStoreVO {
 }
 
 // 查询自提门店列表
-export const getDeliveryPickUpStorePage = async (params: DeliveryPickUpStorePageReqVO) => {
+export const getDeliveryPickUpStorePage = async (params) => {
   return await request.get({ url: '/trade/delivery/pick-up-store/page', params })
 }
 
 // 查询自提门店详情
 export const getDeliveryPickUpStore = async (id: number) => {
   return await request.get({ url: '/trade/delivery/pick-up-store/get?id=' + id })
+}
+
+// 查询自提门店精简列表
+export const getListAllSimple = async () => {
+  return await request.get({ url: '/trade/delivery/pick-up-store/list-all-simple' })
 }
 
 // 新增自提门店
@@ -38,9 +43,4 @@ export const updateDeliveryPickUpStore = async (data: DeliveryPickUpStoreVO) => 
 // 删除自提门店
 export const deleteDeliveryPickUpStore = async (id: number) => {
   return await request.delete({ url: '/trade/delivery/pick-up-store/delete?id=' + id })
-}
-
-// 导出自提门店 Excel
-export const exportDeliveryPickUpStoreApi = async (params) => {
-  return await request.download({ url: '/trade/delivery/pick-up-store/export-excel', params })
 }

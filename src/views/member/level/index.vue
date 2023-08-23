@@ -62,7 +62,7 @@
       <el-table-column label="等级名称" align="center" prop="name" min-width="100" />
       <el-table-column label="等级" align="center" prop="level" min-width="60" />
       <el-table-column label="升级经验" align="center" prop="experience" min-width="80" />
-      <el-table-column label="享受折扣(%)" align="center" prop="discount" min-width="110" />
+      <el-table-column label="享受折扣(%)" align="center" prop="discountPercent" min-width="110" />
       <el-table-column label="状态" align="center" prop="status" min-width="70">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />

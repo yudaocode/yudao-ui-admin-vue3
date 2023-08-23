@@ -1,5 +1,5 @@
 <template>
-  <Form ref="formRef" :labelWidth="80" :rules="rules" :schema="schema">
+  <Form ref="formRef" :labelWidth="200" :rules="rules" :schema="schema">
     <template #sex="form">
       <el-radio-group v-model="form['sex']">
         <el-radio :label="1">{{ t('profile.user.man') }}</el-radio>
@@ -7,8 +7,10 @@
       </el-radio-group>
     </template>
   </Form>
-  <XButton :title="t('common.save')" @click="submit()" />
-  <XButton :title="t('common.reset')" type="danger" @click="init()" />
+  <div style="text-align: center">
+    <XButton :title="t('common.save')" type="primary" @click="submit()" />
+    <XButton :title="t('common.reset')" type="danger" @click="init()" />
+  </div>
 </template>
 <script lang="ts" setup>
 import type { FormRules } from 'element-plus'

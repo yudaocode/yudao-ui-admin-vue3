@@ -10,9 +10,6 @@
       <el-form-item label="名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入名称" />
       </el-form-item>
-      <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
-      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
@@ -23,6 +20,9 @@
             {{ dict.label }}
           </el-radio>
         </el-radio-group>
+      </el-form-item>
+      <el-form-item label="备注" prop="remark">
+        <el-input v-model="formData.remark" type="textarea" placeholder="请输入备注" />
       </el-form-item>
     </el-form>
     <template #footer>

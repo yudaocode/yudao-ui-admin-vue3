@@ -18,6 +18,25 @@ export interface UserVO {
   createTime: Date
 }
 
+// TODO @梦：和 UserVO 搞成一个把。
+export interface UserBaseInfoVO {
+  id: number | undefined | null
+  mobile: string
+  password: string | null | undefined
+  status: number
+  registerIp: string | null | undefined
+  loginIp: string | null | undefined
+  loginDate: Date | null | undefined
+  nickname: string | null | undefined
+  avatar: string | null | undefined
+  name: string | null | undefined
+  sex: number
+  areaId: number | null | undefined
+  birthday: Date | null | undefined
+  mark: string | null | undefined
+  createTime: Date | null | undefined
+}
+
 // 查询会员用户列表
 export const getUserPage = async (params) => {
   return await request.get({ url: `/member/user/page`, params })
