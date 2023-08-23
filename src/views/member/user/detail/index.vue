@@ -200,9 +200,7 @@ const openForm = (type: string, id?: number) => {
 /** 初始化 */
 const route = useRoute()
 const router = useRouter()
-// TODO @梦：改成 id 路径参数，而不是 query
-// TODO @梦：会员列表，把【详情】按钮加上哈
-const member_id = route.query.member_id as number
+const member_id = route.params.member_id as number
 onMounted(() => {
   if (!member_id) {
     // TODO

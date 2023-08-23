@@ -183,7 +183,7 @@ const resetQuery = () => {
 
 const { push } = useRouter()
 const goMemberDetail = (id: number) => {
-  push({ path: 'user/detail', query: { member_id: id } })
+  push({ name: 'MemberUserDetail', params: { member_id: id } })
 }
 
 /** 初始化 **/
