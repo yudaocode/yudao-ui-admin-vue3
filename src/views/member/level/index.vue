@@ -96,13 +96,6 @@
         </template>
       </el-table-column>
     </el-table>
-    <!-- 分页 -->
-    <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
@@ -122,11 +115,8 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
-  pageNo: 1,
-  pageSize: 10,
   name: null,
   status: null
 })
@@ -136,9 +126,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await LevelApi.getLevelPage(queryParams)
-    list.value = data.list
-    total.value = data.total
+    list.value = await LevelApi.getLevelList(queryParams)
   } finally {
     loading.value = false
   }
@@ -146,7 +134,6 @@ const getList = async () => {
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
-  queryParams.pageNo = 1
   getList()
 }
 
