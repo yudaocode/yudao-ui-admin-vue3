@@ -111,7 +111,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as RecordApi from '@/api//member/point/record'
+import * as RecordApi from '@/api/member/point/record'
 
 defineOptions({ name: 'PointRecord' })
 
