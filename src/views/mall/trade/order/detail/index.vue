@@ -41,10 +41,10 @@
         <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="orderInfo.status" />
       </el-descriptions-item>
       <el-descriptions-item label-class-name="no-colon">
-        <el-button type="primary" @click="openForm('adjustPrice')">调整价格</el-button>
+        <el-button type="primary" @click="openForm('updatePrice')">调整价格</el-button>
         <el-button type="primary" @click="openForm('remark')">备注</el-button>
         <el-button type="primary" @click="openForm('delivery')">发货</el-button>
-        <el-button type="primary" @click="openForm('adjustAddress')">修改地址</el-button>
+        <el-button type="primary" @click="openForm('updateAddress')">修改地址</el-button>
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">提醒: </span></template>
@@ -68,12 +68,12 @@
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="商品原价(元)" prop="price" width="150">
-                <template #default="{ row }">{{ formatToFraction(row.price) }}</template>
+              <el-table-column label="商品原价" prop="price" width="150">
+                <template #default="{ row }">{{ floatToFixed2(row.price) }}元</template>
               </el-table-column>
               <el-table-column label="数量" prop="count" width="100" />
-              <el-table-column label="合计(元)" prop="payPrice" width="150">
-                <template #default="{ row }">{{ formatToFraction(row.payPrice) }}</template>
+              <el-table-column label="合计" prop="payPrice" width="150">
+                <template #default="{ row }">{{ floatToFixed2(row.payPrice) }}元</template>
               </el-table-column>
               <el-table-column label="售后状态" prop="afterSaleStatus" width="120">
                 <template #default="{ row }">
@@ -91,32 +91,32 @@
     </el-descriptions>
     <el-descriptions :column="6">
       <el-descriptions-item label="商品总额: ">
-        {{ formatToFraction(orderInfo.totalPrice) }}元
+        {{ floatToFixed2(orderInfo.totalPrice) }}元
       </el-descriptions-item>
       <el-descriptions-item label="运费金额: ">
-        {{ formatToFraction(orderInfo.deliveryPrice) }}元
+        {{ floatToFixed2(orderInfo.deliveryPrice) }}元
       </el-descriptions-item>
       <el-descriptions-item label="订单调价: ">
-        {{ formatToFraction(orderInfo.adjustPrice) }}元
+        {{ floatToFixed2(orderInfo.updatePrice) }}元
       </el-descriptions-item>
 
       <el-descriptions-item>
         <template #label><span style="color: red">商品优惠: </span></template>
-        {{ formatToFraction(orderInfo.couponPrice) }}元
+        {{ floatToFixed2(orderInfo.couponPrice) }}元
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">订单优惠: </span></template>
-        {{ formatToFraction(orderInfo.discountPrice) }}元
+        {{ floatToFixed2(orderInfo.discountPrice) }}元
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">积分抵扣: </span></template>
-        {{ formatToFraction(orderInfo.pointPrice) }}元
+        {{ floatToFixed2(orderInfo.pointPrice) }}元
       </el-descriptions-item>
 
       <el-descriptions-item v-for="item in 5" :key="item" label-class-name="no-colon" />
       <!-- 占位 -->
       <el-descriptions-item label="应付金额: ">
-        {{ formatToFraction(orderInfo.payPrice) }}元
+        {{ floatToFixed2(orderInfo.payPrice) }}元
       </el-descriptions-item>
     </el-descriptions>
 
@@ -199,69 +199,25 @@
   </ContentWrap>
 
   <!-- 各种操作的弹窗 -->
-  <DeliveryOrderForm ref="deliveryFormRef" @success="getDetail" />
-  <OrderRemarksForm ref="remarksFormRef" @success="getDetail" />
-  <OrderAdjustAddressForm ref="adjustAddressFormRef" @success="getDetail" />
-  <OrderAdjustPriceForm ref="adjustPriceFormRef" @success="getDetail" />
+  <OrderDeliveryForm ref="deliveryFormRef" @success="getDetail" />
+  <OrderUpdateRemarkForm ref="updateRemarkForm" @success="getDetail" />
+  <OrderUpdateAddressForm ref="updateAddressFormRef" @success="getDetail" />
+  <OrderUpdatePriceForm ref="updatePriceFormRef" @success="getDetail" />
 </template>
 <script lang="ts" setup>
 import * as TradeOrderApi from '@/api/mall/trade/order'
-import { formatToFraction } from '@/utils'
+import { floatToFixed2 } from '@/utils'
 import { DICT_TYPE } from '@/utils/dict'
-import OrderRemarksForm from '@/views/mall/trade/order/components/OrderRemarksForm.vue'
-import DeliveryOrderForm from '@/views/mall/trade/order/components/DeliveryOrderForm.vue'
-import OrderAdjustAddressForm from '@/views/mall/trade/order/components/OrderAdjustAddressForm.vue'
-import OrderAdjustPriceForm from '@/views/mall/trade/order/components/OrderAdjustPriceForm.vue'
+import OrderUpdateRemarkForm from '@/views/mall/trade/order/components/OrderUpdateRemarkForm.vue'
+import OrderDeliveryForm from '@/views/mall/trade/order/components/OrderDeliveryForm.vue'
+import OrderUpdateAddressForm from '@/views/mall/trade/order/components/OrderUpdateAddressForm.vue'
+import OrderUpdatePriceForm from '@/views/mall/trade/order/components/OrderUpdatePriceForm.vue'
 
-// TODO @puhui999：TradeOrderDetailForm 可以挪到 order/detail/index.vue 中，它是一个 vue 界面哈。
 defineOptions({ name: 'TradeOrderDetailForm' })
 
 const message = useMessage() // 消息弹窗
 const { params } = useRoute() // 查询参数
-// TODO @puhui999：orderInfo 应该不用把属性弄出来也；
-const orderInfo = ref<TradeOrderApi.OrderVO>({
-  no: '',
-  createTime: null,
-  type: null,
-  terminal: null,
-  userId: null,
-  userIp: '',
-  userRemark: '',
-  status: null,
-  productCount: null,
-  finishTime: null,
-  cancelTime: null,
-  cancelType: null,
-  remark: '',
-  payOrderId: null,
-  payed: false,
-  payTime: null,
-  payChannelCode: '',
-  originalPrice: null,
-  orderPrice: null,
-  discountPrice: null,
-  deliveryPrice: null,
-  adjustPrice: null,
-  payPrice: null,
-  deliveryTemplateId: null,
-  logisticsId: null,
-  logisticsNo: '',
-  deliveryStatus: null,
-  deliveryTime: null,
-  receiveTime: null,
-  receiverName: '',
-  receiverMobile: '',
-  receiverAreaId: null,
-  receiverPostCode: null,
-  receiverDetailAddress: '',
-  afterSaleStatus: null,
-  refundPrice: null,
-  couponPrice: null,
-  pointPrice: null,
-  receiverAreaName: '',
-  items: [],
-  user: {}
-})
+const orderInfo = ref<TradeOrderApi.OrderVO>({})
 
 // TODO @puhui999：这个改成直接读属性，不用按照这种写法；
 const detailGroups = ref([
@@ -330,22 +286,22 @@ const detailInfo = ref({
 })
 
 const deliveryFormRef = ref() // 发货表单 Ref
-const remarksFormRef = ref() // 订单备注表单 Ref
-const adjustAddressFormRef = ref() // 收货地址表单 Ref
-const adjustPriceFormRef = ref() // 订单调价表单 Ref
+const updateRemarkForm = ref() // 订单备注表单 Ref
+const updateAddressFormRef = ref() // 收货地址表单 Ref
+const updatePriceFormRef = ref() // 订单调价表单 Ref
 const openForm = (type: string) => {
   switch (type) {
     case 'remark':
-      remarksFormRef.value?.open(orderInfo.value)
+      updateRemarkForm.value?.open(orderInfo.value)
       break
     case 'delivery':
-      deliveryFormRef.value?.open(orderInfo.value.id)
+      deliveryFormRef.value?.open(orderInfo.value)
       break
-    case 'adjustAddress':
-      adjustAddressFormRef.value?.open(orderInfo.value)
+    case 'updateAddress':
+      updateAddressFormRef.value?.open(orderInfo.value)
       break
-    case 'adjustPrice':
-      adjustPriceFormRef.value?.open(orderInfo.value)
+    case 'updatePrice':
+      updatePriceFormRef.value?.open(orderInfo.value)
       break
   }
 }

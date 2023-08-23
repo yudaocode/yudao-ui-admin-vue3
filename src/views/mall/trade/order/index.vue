@@ -100,7 +100,7 @@
           placeholder="请输入"
         >
           <template #prepend>
-            <el-select v-model="queryType.k" clearable placeholder="全部" class="!w-110px">
+            <el-select v-model="queryType.k" class="!w-110px" clearable placeholder="全部">
               <el-option
                 v-for="dict in searchList"
                 :key="dict.value"
@@ -164,11 +164,11 @@
             <el-table-column label="商品原价*数量" prop="price" width="150">
               <template #default="{ row }">
                 <!-- TODO @puhui999：价格，要有 xxx.00 这种格式 -->
-                {{ formatToFraction(row.price) }} 元 * {{ row.count }}
+                {{ floatToFixed2(row.price) }} 元 * {{ row.count }}
               </template>
             </el-table-column>
             <el-table-column label="合计" prop="payPrice" width="150">
-              <template #default="{ row }">{{ formatToFraction(row.payPrice) }}元</template>
+              <template #default="{ row }">{{ floatToFixed2(row.payPrice) }}元</template>
             </el-table-column>
             <el-table-column label="售后状态" prop="afterSaleStatus" width="120">
               <template #default="{ row }">
@@ -181,7 +181,7 @@
             <el-table-column align="center" label="实际支付" min-width="120" prop="payPrice">
               <template #default>
                 <!-- TODO @puhui999：价格，要有 xxx.00 这种格式 -->
-                {{ formatToFraction(scope.row.payPrice) + '元' }}
+                {{ floatToFixed2(scope.row.payPrice) + '元' }}
               </template>
             </el-table-column>
             <el-table-column label="买家/收货人" min-width="160">
@@ -307,22 +307,19 @@
   </ContentWrap>
 
   <!-- 各种操作的弹窗 -->
-  <DeliveryOrderForm ref="deliveryOrderFormRef" @success="getList" />
-  <OrderRemarksForm ref="orderRemarksFormRef" @success="getList" />
+  <OrderDeliveryForm ref="deliveryFormRef" @success="getList" />
+  <OrderUpdateRemarkForm ref="updateRemarkForm" @success="getList" />
 </template>
 
 <script lang="ts" name="Order" setup>
 import type { FormInstance, TableColumnCtx } from 'element-plus'
-import DeliveryOrderForm from './components/DeliveryOrderForm.vue'
-import OrderRemarksForm from './components/OrderRemarksForm.vue'
+import OrderDeliveryForm from './components/OrderDeliveryForm.vue'
+import OrderUpdateRemarkForm from './components/OrderUpdateRemarkForm.vue'
 import { dateFormatter } from '@/utils/formatTime'
 import * as TradeOrderApi from '@/api/mall/trade/order'
-// @puhui999：通过 TradeOrderApi 去引用对应的 VO 就可以啦
-import { OrderItemRespVO, OrderVO } from '@/api/mall/trade/order'
-// @puhui999：使用 XXXApi 哈
-import { getListAllSimple } from '@/api/mall/trade/delivery/pickUpStore'
-import { DICT_TYPE, getStrDictOptions, getIntDictOptions } from '@/utils/dict'
-import { formatToFraction } from '@/utils'
+import * as PickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
+import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { floatToFixed2 } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 
@@ -330,7 +327,7 @@ const { currentRoute, push } = useRouter() // 路由跳转
 
 const loading = ref(true) // 列表的加载中
 const total = ref(2) // 列表的总页数
-const list = ref<OrderVO[]>([]) // 列表的数据
+const list = ref<TradeOrderApi.OrderVO[]>([]) // 列表的数据
 const queryFormRef = ref<FormInstance>() // 搜索的表单
 // 表单搜索
 const queryParams = reactive({
@@ -368,11 +365,12 @@ const searchList = ref([
 ])
 
 interface SpanMethodProps {
-  row: OrderItemRespVO
-  column: TableColumnCtx<OrderItemRespVO>
+  row: TradeOrderApi.OrderItemRespVO
+  column: TableColumnCtx<TradeOrderApi.OrderItemRespVO>
   rowIndex: number
   columnIndex: number
 }
+
 const spanMethod = ({ rowIndex, columnIndex }: SpanMethodProps) => {
   const colIndex = [4, 5, 6, 7]
   // 处理列
@@ -384,6 +382,7 @@ const spanMethod = ({ rowIndex, columnIndex }: SpanMethodProps) => {
         colspan: 0
       }
     }
+    // TODO puhui：合并的行数需要动态计算
     return {
       rowspan: 2,
       colspan: 1
@@ -422,27 +421,26 @@ const imagePreview = (imgUrl: string) => {
   })
 }
 
-/** 查看商品详情 */
+/** 查看订单详情 */
 const openForm = (id: number) => {
-  // TODO @puhui999：这里最好用 name 来跳转，因为 url 可能会改
-  push('/trade/order/detail/' + id)
+  push({ name: 'TradeOrderDetailForm', params: { orderId: id } })
 }
 
 /** 操作分发 */
-const deliveryOrderFormRef = ref()
-const orderRemarksFormRef = ref()
-const handleCommand = (command: string, row: OrderVO) => {
+const deliveryFormRef = ref()
+const updateRemarkForm = ref()
+const handleCommand = (command: string, row: TradeOrderApi.OrderVO) => {
   switch (command) {
-    case 'orderRemarks': // TODO @puhui999：orderRemarks 是不是改成 remark 会好点，保持统一
-      orderRemarksFormRef.value?.open(row)
+    case 'remark':
+      updateRemarkForm.value?.open(row)
       break
     case 'delivery':
-      deliveryOrderFormRef.value?.open(row.id)
+      deliveryFormRef.value?.open(row)
       break
   }
 }
 
-// 监听路由变化更新列表，解决商品保存后，列表不刷新的问题。
+// 监听路由变化更新列表，解决订单保存/更新后，列表不刷新的问题。
 watch(
   () => currentRoute.value,
   () => {
@@ -455,7 +453,7 @@ const deliveryExpressList = ref([]) // 物流公司
 /** 初始化 **/
 onMounted(async () => {
   await getList()
-  pickUpStoreList.value = await getListAllSimple()
+  pickUpStoreList.value = await PickUpStoreApi.getListAllSimple()
   deliveryExpressList.value = await DeliveryExpressApi.getSimpleDeliveryExpressList()
 })
 </script>

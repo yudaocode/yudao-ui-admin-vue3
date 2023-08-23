@@ -42,7 +42,7 @@ import { useTagsViewStore } from '@/store/modules/tagsView'
 import { BasicInfoForm, DescriptionForm, OtherSettingsForm } from './components'
 // 业务api
 import * as ProductSpuApi from '@/api/mall/product/spu'
-import { convertToInteger, formatToFraction } from '@/utils'
+import { convertToInteger, floatToFixed2, formatToFraction } from '@/utils'
 
 defineOptions({ name: 'ProductSpuForm' })
 
@@ -107,12 +107,20 @@ const getDetail = async () => {
     try {
       const res = (await ProductSpuApi.getSpu(id)) as ProductSpuApi.Spu
       res.skus?.forEach((item) => {
-        // 回显价格分转元
-        item.price = formatToFraction(item.price)
-        item.marketPrice = formatToFraction(item.marketPrice)
-        item.costPrice = formatToFraction(item.costPrice)
-        item.subCommissionFirstPrice = formatToFraction(item.subCommissionFirstPrice)
-        item.subCommissionSecondPrice = formatToFraction(item.subCommissionSecondPrice)
+        if (isDetail.value === true) {
+          item.price = floatToFixed2(item.price)
+          item.marketPrice = floatToFixed2(item.marketPrice)
+          item.costPrice = floatToFixed2(item.costPrice)
+          item.subCommissionFirstPrice = floatToFixed2(item.subCommissionFirstPrice)
+          item.subCommissionSecondPrice = floatToFixed2(item.subCommissionSecondPrice)
+        } else {
+          // 回显价格分转元
+          item.price = formatToFraction(item.price)
+          item.marketPrice = formatToFraction(item.marketPrice)
+          item.costPrice = formatToFraction(item.costPrice)
+          item.subCommissionFirstPrice = formatToFraction(item.subCommissionFirstPrice)
+          item.subCommissionSecondPrice = formatToFraction(item.subCommissionSecondPrice)
+        }
       })
       formData.value = res
     } finally {
@@ -132,19 +140,19 @@ const submitForm = async () => {
     await unref(descriptionRef)?.validate()
     await unref(otherSettingsRef)?.validate()
     // 深拷贝一份, 这样最终 server 端不满足，不需要恢复，
-    const deepCopyFormData = cloneDeep(unref(formData.value))
+    const deepCopyFormData = cloneDeep(unref(formData.value)) as ProductSpuApi.Spu
     // 兜底处理 sku 空数据
     formData.value.skus!.forEach((sku) => {
       // 因为是空数据这里判断一下商品条码是否为空就行
       if (sku.barCode === '') {
-        const index = deepCopyFormData.skus.findIndex(
+        const index = deepCopyFormData.skus!.findIndex(
           (item) => JSON.stringify(item.properties) === JSON.stringify(sku.properties)
         )
         // 删除这条 sku
-        deepCopyFormData.skus.splice(index, 1)
+        deepCopyFormData.skus!.splice(index, 1)
       }
     })
-    deepCopyFormData.skus.forEach((item) => {
+    deepCopyFormData.skus!.forEach((item) => {
       // 给sku name赋值
       item.name = deepCopyFormData.name
       // sku相关价格元转分
@@ -156,7 +164,7 @@ const submitForm = async () => {
     })
     // 处理轮播图列表
     const newSliderPicUrls: any[] = []
-    deepCopyFormData.sliderPicUrls.forEach((item: any) => {
+    deepCopyFormData.sliderPicUrls!.forEach((item: any) => {
       // 如果是前端选的图
       typeof item === 'object' ? newSliderPicUrls.push(item.url) : newSliderPicUrls.push(item)
     })

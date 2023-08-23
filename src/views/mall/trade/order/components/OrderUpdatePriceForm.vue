@@ -23,8 +23,7 @@ import * as TradeOrderApi from '@/api/mall/trade/order'
 import { convertToInteger, formatToFraction } from '@/utils'
 import { cloneDeep } from 'lodash-es'
 
-// TODO @puhui999：OrderAdjustPriceForm 改成 OrderUpdatePriceForm 更新哈，保持统一；
-defineOptions({ name: 'OrderAdjustPriceForm' })
+defineOptions({ name: 'OrderUpdatePriceForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -53,6 +52,7 @@ const open = async (row: TradeOrderApi.OrderVO) => {
   // 设置数据
   formData.value.adjustPrice = formatToFraction(row.adjustPrice)
   formData.value.payPrice = formatToFraction(row.payPrice) + '元'
+  formData.value.newPayPrice = formData.value.payPrice
   dialogVisible.value = true
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -67,7 +67,7 @@ const submitForm = async () => {
     data.adjustPrice = convertToInteger(data.adjustPrice)
     delete data.payPrice
     delete data.newPayPrice
-    await TradeOrderApi.adjustPrice(data)
+    await TradeOrderApi.updatePrice(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
     // 发送操作成功的事件
