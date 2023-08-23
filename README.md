@@ -39,14 +39,14 @@
 | 框架                                                                   | 说明               | 版本     |
 |----------------------------------------------------------------------|------------------|--------|
 | [Vue](https://staging-cn.vuejs.org/)                                 | Vue 框架           | 3.3.4 |
-| [Vite](https://cn.vitejs.dev//)                                      | 开发与构建工具          | 4.4.8  |
+| [Vite](https://cn.vitejs.dev//)                                      | 开发与构建工具          | 4.4.9  |
 | [Element Plus](https://element-plus.org/zh-CN/)                      | Element Plus     | 2.3.9 |
 | [TypeScript](https://www.typescriptlang.org/docs/)                   | JavaScript 的超集   | 5.1.6  |
 | [pinia](https://pinia.vuejs.org/)                                    | Vue 存储库 替代 vuex5 | 2.1.6 |
 | [vueuse](https://vueuse.org/)                                        | 常用工具集            | 10.3.0 |
 | [vue-i18n](https://kazupon.github.io/vue-i18n/zh/introduction.html/) | 国际化              | 9.2.2  |
 | [vue-router](https://router.vuejs.org/)                              | Vue 路由           | 4.2.4  |
-| [unocss](https://uno.antfu.me/)                                      | 原子 css          | 0.54.1  |
+| [unocss](https://uno.antfu.me/)                                      | 原子 css          | 0.55.2  |
 | [iconify](https://icon-sets.iconify.design/)                         | 在线图标库            | 3.1.1  |
 | [wangeditor](https://www.wangeditor.com/)                            | 富文本编辑器           | 5.1.23 |
 
