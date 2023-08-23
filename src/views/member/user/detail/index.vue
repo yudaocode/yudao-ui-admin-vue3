@@ -142,28 +142,25 @@
       </el-card>
     </el-row>
   </div>
-
   <!-- 表单弹窗：添加/修改 -->
-  <UserForm ref="formRef" @success="getUserData(user.id)" />
+  <UserForm ref="formRef" v-if="user.id" @success="getUserData(user.id)" />
 </template>
 <script setup lang="ts">
-// TODO @梦：组件对应的 vue，都大写
-import PointList from '@/views/member/user/components/point-list.vue'
-import SignList from '@/views/member/user/components/sign-list.vue'
-import CardTitle from '@/views/member/user/components/card-title.vue'
-// TODO @梦：参考别的模块，UserApi 这样去引用
-import { getUser, UserBaseInfoVO } from '@/api/member/user'
+import PointList from '@/views/member/user/components/PointList.vue'
+import SignList from '@/views/member/user/components/SignList.vue'
+import CardTitle from '@/views/member/user/components/CardTitle.vue'
+import * as UserApi from '@/api/member/user'
 import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import UserForm from '@/views/member/user/UserForm.vue'
 // TODO @梦：把用户信息，也抽成一个组件，类似 AccountInfo
-import AccountInfo from '@/views/member/user/components/account-info.vue'
+import AccountInfo from '@/views/member/user/components/AccountInfo.vue'
 
 defineOptions({ name: 'MemberDetail' })
 
 const activeName = ref('point') // 账户明细 选中的 tabs
 const loading = ref(true) // 加载中
-let user = ref<UserBaseInfoVO>({
+let user = ref<UserApi.UserBaseInfoVO>({
   areaId: undefined,
   avatar: undefined,
   birthday: undefined,
@@ -185,7 +182,7 @@ let user = ref<UserBaseInfoVO>({
 const getUserData = async (id: number) => {
   loading.value = true
   try {
-    user.value = await getUser(id)
+    user.value = await UserApi.getUser(id)
   } finally {
     loading.value = false
   }
