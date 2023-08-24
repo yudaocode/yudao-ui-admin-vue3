@@ -12,8 +12,8 @@ export interface LevelVO {
 }
 
 // 查询会员等级列表
-export const getLevelPage = async (params) => {
-  return await request.get({ url: `/member/level/page`, params })
+export const getLevelList = async (params) => {
+  return await request.get({ url: `/member/level/list`, params })
 }
 
 // 查询会员等级详情
