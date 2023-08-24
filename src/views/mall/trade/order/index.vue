@@ -90,7 +90,7 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO 考虑是否移除或重构；这个还是需要的哈-->
+      <!-- TODO 聚合搜索等售后结束后实现-->
       <el-form-item label="聚合搜索">
         <el-input
           v-show="true"
@@ -132,17 +132,53 @@
   3、然后点击展开和收拢订单项，可以不做哈。
    -->
   <ContentWrap>
-    <el-table
-      v-loading="loading"
-      :data="list"
-      :show-overflow-tooltip="true"
-      :stripe="true"
-      default-expand-all
-    >
-      <el-table-column fixed="left" type="expand">
+    <el-table v-loading="loading" :data="list">
+      <el-table-column class-name="order-table-col">
+        <template #header>
+          <div class="flex items-center" style="width: 100%">
+            <div class="ml-100px mr-200px">商品信息</div>
+            <div class="mr-60px">单价(元)/数量</div>
+            <div class="mr-60px">售后状态</div>
+            <div class="mr-60px">实付金额(元)</div>
+            <div class="mr-60px">买家/收货人</div>
+            <div class="mr-60px">配送方式</div>
+            <div class="mr-60px">订单状态</div>
+            <div class="mr-60px">操作</div>
+          </div>
+        </template>
         <template #default="scope">
-          <el-table :data="scope.row.items" :span-method="spanMethod" border style="width: 100%">
-            <el-table-column label="商品信息" min-width="300" prop="spuName">
+          <el-table
+            :data="scope.row.items"
+            :header-cell-style="headerStyle"
+            :span-method="spanMethod"
+            border
+            style="width: 100%"
+          >
+            <el-table-column min-width="300" prop="spuName">
+              <template #header>
+                <div
+                  class="flex items-center"
+                  style="height: 35px; background-color: #f7f7f7; width: 100%"
+                >
+                  <span class="mr-20px">订单号：{{ scope.row.no }} </span>
+                  <span class="mr-20px">下单时间：{{ formatDate(scope.row.createTime) }}</span>
+                  <span>订单来源：</span>
+                  <dict-tag
+                    :type="DICT_TYPE.TERMINAL"
+                    :value="scope.row.terminal"
+                    class="mr-20px"
+                  />
+                  <span>支付方式：</span>
+                  <dict-tag
+                    :type="DICT_TYPE.PAY_CHANNEL_CODE"
+                    :value="scope.row.payChannelCode"
+                    class="mr-20px"
+                  />
+                  <span class="mr-20px">支付时间：{{ formatDate(scope.row.payTime) }}</span>
+                  <span>订单类型：</span>
+                  <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="scope.row.type" />
+                </div>
+              </template>
               <template #default="{ row }">
                 <div class="flex items-center">
                   <el-image
@@ -163,12 +199,8 @@
             </el-table-column>
             <el-table-column label="商品原价*数量" prop="price" width="150">
               <template #default="{ row }">
-                <!-- TODO @puhui999：价格，要有 xxx.00 这种格式 -->
-                {{ floatToFixed2(row.price) }} 元 * {{ row.count }}
+                {{ floatToFixed2(row.price) }} 元 / {{ row.count }}
               </template>
-            </el-table-column>
-            <el-table-column label="合计" prop="payPrice" width="150">
-              <template #default="{ row }">{{ floatToFixed2(row.payPrice) }}元</template>
             </el-table-column>
             <el-table-column label="售后状态" prop="afterSaleStatus" width="120">
               <template #default="{ row }">
@@ -180,7 +212,6 @@
             </el-table-column>
             <el-table-column align="center" label="实际支付" min-width="120" prop="payPrice">
               <template #default>
-                <!-- TODO @puhui999：价格，要有 xxx.00 这种格式 -->
                 {{ floatToFixed2(scope.row.payPrice) + '元' }}
               </template>
             </el-table-column>
@@ -233,8 +264,11 @@
                     </el-button>
                     <template #dropdown>
                       <el-dropdown-menu>
-                        <!-- TODO puhui999：可以判断下状态 + 物流类型，展示【发货】按钮 -->
-                        <el-dropdown-item command="delivery">
+                        <!--判断下 物流类型 + 状态，快递 + 待发货时展示【发货】按钮 -->
+                        <el-dropdown-item
+                          v-if="scope.row.deliveryType === 1 && scope.row.status === 10"
+                          command="delivery"
+                        >
                           <Icon icon="ep:takeaway-box" />
                           发货
                         </el-dropdown-item>
@@ -251,51 +285,6 @@
           </el-table>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="订单号" min-width="110" prop="no" />
-      <el-table-column align="center" label="订单类型" min-width="100">
-        <template #default="{ row }">
-          <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="row.type" />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="订单来源" min-width="145">
-        <template #default="{ row }">
-          <dict-tag v-if="row.terminal" :type="DICT_TYPE.TERMINAL" :value="row.terminal" />
-          <span v-else>{{ row.terminal }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        :formatter="dateFormatter"
-        align="center"
-        label="支付时间"
-        min-width="180"
-        prop="payTime"
-      />
-      <el-table-column align="center" label="支付类型" min-width="120" prop="payChannelCode">
-        <template #default="{ row }">
-          <dict-tag
-            v-if="row.payChannelCode"
-            :type="DICT_TYPE.PAY_CHANNEL_CODE"
-            :value="row.payChannelCode"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="订单状态" min-width="100" prop="status">
-        <template #default="{ row }">
-          <dict-tag
-            v-if="row.status !== ''"
-            :type="DICT_TYPE.TRADE_ORDER_STATUS"
-            :value="row.status"
-          />
-          <span v-else>{{ row.status }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        :formatter="dateFormatter"
-        align="center"
-        label="创建时间"
-        min-width="180"
-        prop="createTime"
-      />
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -315,10 +304,10 @@
 import type { FormInstance, TableColumnCtx } from 'element-plus'
 import OrderDeliveryForm from './components/OrderDeliveryForm.vue'
 import OrderUpdateRemarkForm from './components/OrderUpdateRemarkForm.vue'
-import { dateFormatter } from '@/utils/formatTime'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import * as PickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { formatDate } from '@/utils/formatTime'
 import { floatToFixed2 } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
@@ -364,6 +353,19 @@ const searchList = ref([
   { value: 'userMobile', label: '用户电话' }
 ])
 
+const headerStyle = ({ row, columnIndex }: any) => {
+  // 表头第一行第一列占 8
+  if (columnIndex === 0) {
+    row[columnIndex].colSpan = 8
+  } else {
+    // 其余的不要
+    row[columnIndex].colSpan = 0
+    return {
+      display: 'none'
+    }
+  }
+}
+
 interface SpanMethodProps {
   row: TradeOrderApi.OrderItemRespVO
   column: TableColumnCtx<TradeOrderApi.OrderItemRespVO>
@@ -371,20 +373,23 @@ interface SpanMethodProps {
   columnIndex: number
 }
 
-const spanMethod = ({ rowIndex, columnIndex }: SpanMethodProps) => {
-  const colIndex = [4, 5, 6, 7]
-  // 处理列
+const spanMethod = ({ row, rowIndex, columnIndex }: SpanMethodProps) => {
+  const len = list.value.find(
+    (order) => order.items?.findIndex((item) => item.id === row.id) !== -1
+  )?.items?.length
+  // 要合并的列，从零开始
+  const colIndex = [3, 4, 5, 6]
   if (colIndex.includes(columnIndex)) {
-    // 处理被合并的行
+    // 除了第一行其余的不要
     if (rowIndex !== 0) {
       return {
         rowspan: 0,
         colspan: 0
       }
     }
-    // TODO puhui：合并的行数需要动态计算
+    // 动态合并行
     return {
-      rowspan: 2,
+      rowspan: len,
       colspan: 1
     }
   }
@@ -403,9 +408,9 @@ const getList = async () => {
 }
 
 /** 搜索按钮操作 */
-const handleQuery = () => {
+const handleQuery = async () => {
   queryParams.pageNo = 1
-  getList()
+  await getList()
 }
 
 /** 重置按钮操作 */
@@ -457,3 +462,8 @@ onMounted(async () => {
   deliveryExpressList.value = await DeliveryExpressApi.getSimpleDeliveryExpressList()
 })
 </script>
+<style lang="scss" scoped>
+:deep(.order-table-col > .cell) {
+  padding: 0px;
+}
+</style>

@@ -219,7 +219,7 @@ const message = useMessage() // 消息弹窗
 const { params } = useRoute() // 查询参数
 const orderInfo = ref<TradeOrderApi.OrderVO>({})
 
-// TODO @puhui999：这个改成直接读属性，不用按照这种写法；
+// TODO @puhui999：这个改成直接读属性，不用按照这种写法；后续再改
 const detailGroups = ref([
   {
     title: '物流信息',
@@ -238,7 +238,7 @@ const detailGroups = ref([
   }
 ])
 
-// TODO @puhui999：从后台读数据哈。
+// TODO @puhui999：从后台读数据哈。后续再改
 const detailInfo = ref({
   // 物流信息
   expressInfo: {
