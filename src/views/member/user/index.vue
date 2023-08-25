@@ -114,6 +114,13 @@
           <el-button
             link
             type="primary"
+            @click="goMemberDetail(scope.row.id)"
+          >
+            详情
+          </el-button>
+          <el-button
+            link
+            type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['member:user:update']"
           >
@@ -148,7 +155,6 @@
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import * as UserApi from '@/api/member/user'
-import UserForm from './UserForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
 import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
@@ -198,10 +204,9 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
+const { push } = useRouter()
+const goMemberDetail = (id: number) => {
+  push({ name: 'MemberUserDetail', params: { member_id: id } })
 }
 
 /** 初始化 **/
