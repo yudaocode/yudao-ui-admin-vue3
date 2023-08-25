@@ -434,7 +434,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     meta: { hidden: true },
     children: [
       {
-        path: 'user/detail/:member_id',
+        path: 'user/detail/:userId',
         name: 'MemberUserDetail',
         meta: {
           title: '会员详情',

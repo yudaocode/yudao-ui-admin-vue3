@@ -1,21 +1,21 @@
 import request from '@/config/axios'
 
 export interface UserVO {
+  areaId: number | undefined
+  areaName: string | undefined
+  avatar: string | undefined
+  birthday: number | undefined
+  createTime: number | undefined
   id: number
-  mobile: string
-  password: string
-  status: number
-  registerIp: string
+  loginDate: number | undefined
   loginIp: string
-  loginDate: Date
-  nickname: string
-  avatar: string
-  name: string
-  sex: number
-  areaId: number
-  birthday: Date
   mark: string
-  createTime: Date
+  mobile: string
+  name: string | undefined
+  nickname: string | undefined
+  registerIp: string
+  sex: number
+  status: number
 }
 
 // TODO @梦：和 UserVO 搞成一个把。
@@ -32,6 +32,7 @@ export interface UserBaseInfoVO {
   name: string | null | undefined
   sex: number
   areaId: number | null | undefined
+  areaName: string | null | undefined
   birthday: Date | null | undefined
   mark: string | null | undefined
   createTime: Date | null | undefined

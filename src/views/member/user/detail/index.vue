@@ -1,12 +1,11 @@
 <template>
   <div v-loading="loading">
-    <el-row :gutter="10" class="detail-info-warp">
+    <el-row :gutter="10">
       <!-- 左上角：基本信息 -->
       <el-col :span="14" class="detail-info-item">
-        <el-card shadow="never">
+        <UserBasicInfo :user="user">
           <template #header>
             <div class="card-header">
-              <!-- TODO @梦：如果不要小蓝线，是不是直接用 el-card 自带的 title 即可？ -->
               <CardTitle title="基本信息" />
               <el-button
                 v-if="user.id"
@@ -19,100 +18,8 @@
               </el-button>
             </div>
           </template>
-          <el-row>
-            <el-col :span="4">
-              <ElAvatar shape="square" :size="140" :src="user.avatar || undefined" />
-            </el-col>
-            <el-col :span="20">
-              <el-descriptions :column="2">
-                <el-descriptions-item>
-                  <template #label>
-                    <div class="cell-item">
-                      <Icon icon="ep:user" />
-                      用户名
-                    </div>
-                  </template>
-                  {{ user.name || '空' }}
-                </el-descriptions-item>
-                <el-descriptions-item>
-                  <template #label>
-                    <div class="cell-item">
-                      <Icon icon="ep:user" />
-                      昵称
-                    </div>
-                  </template>
-                  {{ user.nickname }}
-                </el-descriptions-item>
-                <el-descriptions-item label="手机号">
-                  <template #label>
-                    <div class="cell-item">
-                      <Icon icon="ep:phone" />
-                      手机号
-                    </div>
-                  </template>
-                  {{ user.mobile }}
-                </el-descriptions-item>
-                <el-descriptions-item>
-                  <template #label>
-                    <div class="cell-item">
-                      <Icon icon="fa:mars-double" />
-                      性别
-                    </div>
-                  </template>
-                  <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="user.sex" />
-                </el-descriptions-item>
-                <el-descriptions-item>
-                  <template #label>
-                    <div class="cell-item">
-                      <Icon icon="ep:location" />
-                      所在地
-                    </div>
-                  </template>
-                  <!-- TODO @梦：这里后端返回的时候，要返回 areaName -->
-                  {{ user.areaId }}
-                </el-descriptions-item>
-                <el-descriptions-item>
-                  <template #label>
-                    <div class="cell-item">
-                      <Icon icon="ep:position" />
-                      注册 IP
-                    </div>
-                  </template>
-                  {{ user.registerIp }}
-                </el-descriptions-item>
-                <el-descriptions-item>
-                  <template #label>
-                    <div class="cell-item">
-                      <Icon icon="fa:birthday-cake" />
-                      生日
-                    </div>
-                  </template>
-                  {{ user.birthday ? formatDate(user.birthday) : '空' }}
-                </el-descriptions-item>
-                <el-descriptions-item>
-                  <template #label>
-                    <div class="cell-item">
-                      <Icon icon="ep:calendar" />
-                      注册时间
-                    </div>
-                  </template>
-                  {{ user.createTime ? formatDate(user.createTime) : '空' }}
-                </el-descriptions-item>
-                <el-descriptions-item>
-                  <template #label>
-                    <div class="cell-item">
-                      <Icon icon="ep:calendar" />
-                      最后登录时间
-                    </div>
-                  </template>
-                  {{ user.loginDate ? formatDate(user.loginDate) : '空' }}
-                </el-descriptions-item>
-              </el-descriptions>
-            </el-col>
-          </el-row>
-        </el-card>
+        </UserBasicInfo>
       </el-col>
-
       <!-- 右上角：账户信息 -->
       <el-col :span="10" class="detail-info-item">
         <el-card shadow="never">
@@ -122,7 +29,6 @@
           <AccountInfo />
         </el-card>
       </el-col>
-
       <!-- 下边：账户明细 -->
       <!-- TODO 芋艿：【收货地址】【订单管理】【售后管理】【收藏记录】【优惠劵】 -->
       <el-card header="账户明细" style="width: 100%; margin-top: 20px" shadow="never">
@@ -131,13 +37,20 @@
         </template>
         <el-tabs v-model="activeName">
           <el-tab-pane label="积分" name="point">
-            <PointList v-if="user.id" :member-id="user.id" />
+            <PointList v-if="user.id" :user-id="user.id" />
           </el-tab-pane>
           <el-tab-pane label="签到" name="sign">
-            <SignList v-if="user.id" :member-id="user.id" />
+            <SignList v-if="user.id" :user-id="user.id" />
           </el-tab-pane>
           <el-tab-pane label="成长值" name="third">成长值(WIP)</el-tab-pane>
           <el-tab-pane label="余额" name="fourth">余额(WIP)</el-tab-pane>
+          <el-tab-pane label="收货地址" name="address">
+            <AddressList v-if="user.id" :user-id="user.id" />
+          </el-tab-pane>
+          <el-tab-pane label="订单管理" name="fourth">订单管理(WIP)</el-tab-pane>
+          <el-tab-pane label="售后管理" name="fourth">售后管理(WIP)</el-tab-pane>
+          <el-tab-pane label="收藏记录" name="fourth">收藏记录(WIP)</el-tab-pane>
+          <el-tab-pane label="优惠劵" name="fourth">优惠劵(WIP)</el-tab-pane>
         </el-tabs>
       </el-card>
     </el-row>
@@ -150,34 +63,37 @@ import PointList from '@/views/member/user/components/PointList.vue'
 import SignList from '@/views/member/user/components/SignList.vue'
 import CardTitle from '@/views/member/user/components/CardTitle.vue'
 import * as UserApi from '@/api/member/user'
-import { formatDate } from '@/utils/formatTime'
-import { DICT_TYPE } from '@/utils/dict'
 import UserForm from '@/views/member/user/UserForm.vue'
-// TODO @梦：把用户信息，也抽成一个组件，类似 AccountInfo
 import AccountInfo from '@/views/member/user/components/AccountInfo.vue'
+import UserBasicInfo from '@/views/member/user/components/UserBasicInfo.vue'
+import AddressList from '@/views/member/user/components/AddressList.vue'
 
 defineOptions({ name: 'MemberDetail' })
 
 const activeName = ref('point') // 账户明细 选中的 tabs
 const loading = ref(true) // 加载中
-let user = ref<UserApi.UserBaseInfoVO>({
+let user = ref<UserApi.UserVO>({
   areaId: undefined,
   avatar: undefined,
   birthday: undefined,
   createTime: undefined,
-  id: undefined,
+  id: NaN,
   loginDate: undefined,
   loginIp: '',
   mark: '',
   mobile: '',
   name: '',
   nickname: '',
-  password: null,
-  registerIp: undefined,
+  registerIp: '',
   sex: 0,
-  status: 0
+  status: 0,
+  areaName: ''
 })
-
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
 /** 获得用户 */
 const getUserData = async (id: number) => {
   loading.value = true
@@ -188,16 +104,10 @@ const getUserData = async (id: number) => {
   }
 }
 
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
-
 /** 初始化 */
 const route = useRoute()
 const router = useRouter()
-const member_id = route.params.member_id as number
+const member_id = Number(route.params.userId as string)
 onMounted(() => {
   if (!member_id) {
     // TODO
@@ -221,12 +131,5 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-.cell-item {
-  display: inline;
-}
-/** TODO 下面 css 貌似没啥用？ */
-.cell-item::after {
-  content: ':';
 }
 </style>

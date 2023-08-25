@@ -17,7 +17,7 @@
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.MEMBER_POINT_BIZ_TYPE)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.label"
             :value="dict.value"
           />
@@ -112,7 +112,7 @@ const queryParams = reactive({
   bizType: undefined,
   title: null,
   createDate: [],
-  userId: null
+  userId: NaN
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -140,9 +140,8 @@ const resetQuery = () => {
   handleQuery()
 }
 
-// TODO @梦:改成 userId 哈
-const { memberId } = defineProps({
-  memberId: {
+const { userId } = defineProps({
+  userId: {
     type: Number,
     required: true
   }
@@ -150,7 +149,7 @@ const { memberId } = defineProps({
 
 /** 初始化 **/
 onMounted(() => {
-  queryParams.userId = memberId
+  queryParams.userId = userId
   getList()
 })
 </script>
