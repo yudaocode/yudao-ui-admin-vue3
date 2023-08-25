@@ -2,39 +2,20 @@ import request from '@/config/axios'
 
 export interface UserVO {
   id: number
-  mobile: string
-  password: string
-  status: number
-  registerIp: string
+  avatar: string | undefined
+  birthday: number | undefined
+  createTime: number | undefined
+  loginDate: number | undefined
   loginIp: string
-  loginDate: Date
-  nickname: string
-  avatar: string
-  name: string
-  sex: number
-  areaId: number
-  birthday: Date
   mark: string
-  createTime: Date
-}
-
-// TODO @梦：和 UserVO 搞成一个把。
-export interface UserBaseInfoVO {
-  id: number | undefined | null
   mobile: string
-  password: string | null | undefined
-  status: number
-  registerIp: string | null | undefined
-  loginIp: string | null | undefined
-  loginDate: Date | null | undefined
-  nickname: string | null | undefined
-  avatar: string | null | undefined
-  name: string | null | undefined
+  name: string | undefined
+  nickname: string | undefined
+  registerIp: string
   sex: number
-  areaId: number | null | undefined
-  birthday: Date | null | undefined
-  mark: string | null | undefined
-  createTime: Date | null | undefined
+  status: number
+  areaId: number | undefined
+  areaName: string | undefined
 }
 
 // 查询会员用户列表

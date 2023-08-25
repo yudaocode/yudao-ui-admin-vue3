@@ -46,11 +46,6 @@
     </el-descriptions-item>
   </el-descriptions>
 </template>
-<script lang="ts" setup>
-defineComponent({
-  name: 'AccountInfo'
-})
-</script>
 <style scoped lang="scss">
 .cell-item {
   display: inline;

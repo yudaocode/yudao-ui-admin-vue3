@@ -67,7 +67,6 @@
         :formatter="dateFormatter"
         width="180"
       />
-      <el-table-column label="用户" align="center" prop="nickname" width="200" />
       <el-table-column label="获得积分" align="center" prop="point" width="100">
         <template #default="scope">
           <el-tag v-if="scope.row.point > 0" class="ml-2" type="success" effect="dark">
@@ -101,8 +100,6 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as RecordApi from '@/api//member/point/record'
 
-defineOptions({ name: 'PointList' })
-
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
@@ -112,7 +109,7 @@ const queryParams = reactive({
   bizType: undefined,
   title: null,
   createDate: [],
-  userId: null
+  userId: NaN
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -140,9 +137,8 @@ const resetQuery = () => {
   handleQuery()
 }
 
-// TODO @梦:改成 userId 哈
-const { memberId } = defineProps({
-  memberId: {
+const { userId } = defineProps({
+  userId: {
     type: Number,
     required: true
   }
@@ -150,7 +146,7 @@ const { memberId } = defineProps({
 
 /** 初始化 **/
 onMounted(() => {
-  queryParams.userId = memberId
+  queryParams.userId = userId
   getList()
 })
 </script>
