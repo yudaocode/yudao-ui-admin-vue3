@@ -7,13 +7,7 @@
           <template #header>
             <div class="card-header">
               <CardTitle title="基本信息" />
-              <el-button
-                v-if="user.id"
-                type="primary"
-                size="small"
-                text
-                @click="openForm('update', user.id)"
-              >
+              <el-button type="primary" size="small" text @click="openForm('update')">
                 编辑
               </el-button>
             </div>
@@ -26,26 +20,26 @@
           <template #header>
             <CardTitle title="账户信息" />
           </template>
-          <AccountInfo />
+          <UserAccountInfo />
         </el-card>
       </el-col>
       <!-- 下边：账户明细 -->
-      <!-- TODO 芋艿：【收货地址】【订单管理】【售后管理】【收藏记录】【优惠劵】 -->
+      <!-- TODO 芋艿：【订单管理】【售后管理】【收藏记录】【优惠劵】 -->
       <el-card header="账户明细" style="width: 100%; margin-top: 20px" shadow="never">
         <template #header>
           <CardTitle title="账户明细" />
         </template>
         <el-tabs v-model="activeName">
           <el-tab-pane label="积分" name="point">
-            <PointList v-if="user.id" :user-id="user.id" />
+            <UserPointList :user-id="id" />
           </el-tab-pane>
           <el-tab-pane label="签到" name="sign">
-            <SignList v-if="user.id" :user-id="user.id" />
+            <UserSignList :user-id="id" />
           </el-tab-pane>
           <el-tab-pane label="成长值" name="third">成长值(WIP)</el-tab-pane>
           <el-tab-pane label="余额" name="fourth">余额(WIP)</el-tab-pane>
           <el-tab-pane label="收货地址" name="address">
-            <AddressList v-if="user.id" :user-id="user.id" />
+            <UserAddressList :user-id="id" />
           </el-tab-pane>
           <el-tab-pane label="订单管理" name="fourth">订单管理(WIP)</el-tab-pane>
           <el-tab-pane label="售后管理" name="fourth">售后管理(WIP)</el-tab-pane>
@@ -55,45 +49,33 @@
       </el-card>
     </el-row>
   </div>
+
   <!-- 表单弹窗：添加/修改 -->
-  <UserForm ref="formRef" v-if="user.id" @success="getUserData(user.id)" />
+  <UserForm ref="formRef" @success="getUserData(id)" />
 </template>
 <script setup lang="ts">
-import PointList from '@/views/member/user/components/PointList.vue'
-import SignList from '@/views/member/user/components/SignList.vue'
-import CardTitle from '@/views/member/user/components/CardTitle.vue'
 import * as UserApi from '@/api/member/user'
+import { useTagsViewStore } from '@/store/modules/tagsView'
+import UserBasicInfo from './UserBasicInfo.vue'
 import UserForm from '@/views/member/user/UserForm.vue'
-import AccountInfo from '@/views/member/user/components/AccountInfo.vue'
-import UserBasicInfo from '@/views/member/user/components/UserBasicInfo.vue'
-import AddressList from '@/views/member/user/components/AddressList.vue'
+import UserAccountInfo from './UserAccountInfo.vue'
+import UserAddressList from './UserAddressList.vue'
+import UserPointList from './UserPointList.vue'
+import UserSignList from './UserSignList.vue'
+import { CardTitle } from '@/components/Card/index'
 
 defineOptions({ name: 'MemberDetail' })
 
 const activeName = ref('point') // 账户明细 选中的 tabs
 const loading = ref(true) // 加载中
-let user = ref<UserApi.UserVO>({
-  areaId: undefined,
-  avatar: undefined,
-  birthday: undefined,
-  createTime: undefined,
-  id: NaN,
-  loginDate: undefined,
-  loginIp: '',
-  mark: '',
-  mobile: '',
-  name: '',
-  nickname: '',
-  registerIp: '',
-  sex: 0,
-  status: 0,
-  areaName: ''
-})
+let user = ref<UserApi.UserVO>({})
+
 /** 添加/修改操作 */
 const formRef = ref()
-const openForm = (type: string, id?: number) => {
+const openForm = (type: string) => {
   formRef.value.open(type, id)
 }
+
 /** 获得用户 */
 const getUserData = async (id: number) => {
   loading.value = true
@@ -105,21 +87,20 @@ const getUserData = async (id: number) => {
 }
 
 /** 初始化 */
+const { push, currentRoute } = useRouter() // 路由
+const { delView } = useTagsViewStore() // 视图操作
 const route = useRoute()
-const router = useRouter()
-const member_id = Number(route.params.userId as string)
+const id = route.params.id as number
 onMounted(() => {
-  if (!member_id) {
-    // TODO
+  if (!id) {
     ElMessage.warning('参数错误，会员编号不能为空！')
-    router.back()
+    delView(unref(currentRoute))
     return
   }
-  getUserData(member_id)
+  getUserData(id)
 })
 </script>
 <style scoped lang="css">
-/** TODO 这 3 个 css 貌似没用？ */
 .detail-info-item:first-child {
   padding-left: 0 !important;
 }

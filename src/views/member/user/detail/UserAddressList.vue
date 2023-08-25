@@ -1,6 +1,6 @@
 <template>
   <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-    <el-table-column label="收件地址编号" align="center" prop="id" width="150px" />
+    <el-table-column label="地址编号" align="center" prop="id" width="150px" />
     <el-table-column label="收件人名称" align="center" prop="name" width="150px" />
     <el-table-column label="手机号" align="center" prop="mobile" width="150px" />
     <el-table-column label="地区编码" align="center" prop="areaId" width="150px" />
@@ -18,21 +18,9 @@
       width="180px"
     />
   </el-table>
-  <!-- 分页 -->
-  <Pagination
-    :total="total"
-    v-model:page="queryParams.pageNo"
-    v-model:limit="queryParams.pageSize"
-    @pagination="getList"
-  />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
-
-defineComponent({
-  name: 'AddressList'
-})
-import { defineComponent } from 'vue'
 import { dateFormatter } from '@/utils/formatTime'
 import * as AddressApi from '@/api/member/address'
 
@@ -46,25 +34,12 @@ const { userId }: { userId: number } = defineProps({
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const queryParams = reactive({
-  pageNo: 1,
-  pageSize: 10,
-  userId: NaN,
-  name: null,
-  mobile: null,
-  areaId: null,
-  detailAddress: null,
-  defaultStatus: null,
-  createTime: []
-})
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await AddressApi.getAddressPage(queryParams)
-    list.value = data.list
-    total.value = data.total
+    list.value = await AddressApi.getAddressList({ userId })
   } finally {
     loading.value = false
   }
@@ -72,7 +47,6 @@ const getList = async () => {
 
 /** 初始化 **/
 onMounted(() => {
-  queryParams.userId = userId
   getList()
 })
 </script>

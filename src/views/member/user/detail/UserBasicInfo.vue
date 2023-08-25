@@ -72,7 +72,7 @@
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import * as UserApi from '@/api/member/user'
-import DescriptionsItemLabel from '@/views/member/user/components/descriptions/DescriptionsItemLabel.vue'
+import { DescriptionsItemLabel } from '@/components/Descriptions/index'
 
 const { user }: { user: UserApi.UserVO } = defineProps({
   user: {

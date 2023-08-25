@@ -109,15 +109,9 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="140px" fixed="right">
+      <el-table-column label="操作" align="center" width="180px" fixed="right">
         <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="goMemberDetail(scope.row.id)"
-          >
-            详情
-          </el-button>
+          <el-button link type="primary" @click="openDetail(scope.row.id)">详情</el-button>
           <el-button
             link
             type="primary"
@@ -204,9 +198,10 @@ const resetQuery = () => {
   handleQuery()
 }
 
+/** 打开会员详情 */
 const { push } = useRouter()
-const goMemberDetail = (id: number) => {
-  push({ name: 'MemberUserDetail', params: { member_id: id } })
+const openDetail = (id: number) => {
+  push({ name: 'MemberUserDetail', params: { id } })
 }
 
 /** 初始化 **/
