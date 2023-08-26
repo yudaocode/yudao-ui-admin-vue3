@@ -37,7 +37,6 @@ import { ElTable } from 'element-plus'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { propTypes } from '@/utils/propTypes'
 
-// TODO @疯狂：是不是挪到 spu 的 components 下哈
 defineOptions({ name: 'SkuTableSelect' })
 
 const props = defineProps({
