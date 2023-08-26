@@ -86,7 +86,6 @@ import { defaultProps, handleTree } from '@/utils/tree'
 import * as ProductCategoryApi from '@/api/mall/product/category'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 
-// TODO @疯狂：是不是挪到 spu 的 components 下哈
 defineOptions({ name: 'SpuTableSelect' })
 
 const message = useMessage() // 消息弹窗

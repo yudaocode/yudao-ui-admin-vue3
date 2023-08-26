@@ -36,10 +36,6 @@
       <el-form-item label="评论内容" prop="content">
         <el-input type="textarea" v-model="formData.content" />
       </el-form-item>
-      <!-- TODO @疯狂：formData.scores 是通过后端计算的哈，不要前端传递 -->
-      <el-form-item label="评分星级" prop="scores">
-        <el-rate v-model="formData.scores" />
-      </el-form-item>
       <el-form-item label="描述星级" prop="descriptionScores">
         <el-rate v-model="formData.descriptionScores" />
       </el-form-item>
@@ -60,9 +56,9 @@
 </template>
 <script setup lang="ts">
 import * as CommentApi from '@/api/mall/product/comment'
-import SpuTableSelect from '@/views/mall/product/comment/components/SpuTableSelect.vue'
+import SpuTableSelect from '@/views/mall/product/spu/components/SpuTableSelect.vue'
 import * as ProductSpuApi from '@/api/mall/product/spu'
-import SkuTableSelect from '@/views/mall/product/comment/components/SkuTableSelect.vue'
+import SkuTableSelect from '@/views/mall/product/spu/components/SkuTableSelect.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -79,7 +75,6 @@ const formData = ref({
   spuId: undefined,
   spuName: undefined,
   skuId: undefined,
-  scores: 5,
   descriptionScores: 5,
   benefitScores: 5,
   content: undefined,
@@ -91,7 +86,6 @@ const formRules = reactive({
   userAvatar: [{ required: true, message: '用户头像不能为空', trigger: 'blur' }],
   userNickname: [{ required: true, message: '用户名称不能为空', trigger: 'blur' }],
   content: [{ required: true, message: '评论内容不能为空', trigger: 'blur' }],
-  scores: [{ required: true, message: '评分星级不能为空', trigger: 'blur' }],
   descriptionScores: [{ required: true, message: '描述星级不能为空', trigger: 'blur' }],
   benefitScores: [{ required: true, message: '服务星级不能为空', trigger: 'blur' }]
 })
@@ -157,7 +151,6 @@ const resetForm = () => {
     userAvatar: undefined,
     spuId: undefined,
     skuId: undefined,
-    scores: 5,
     descriptionScores: 5,
     benefitScores: 5,
     content: undefined,
