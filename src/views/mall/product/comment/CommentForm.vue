@@ -75,7 +75,6 @@ const formData = ref({
   spuId: undefined,
   spuName: undefined,
   skuId: undefined,
-  scores: 5,
   descriptionScores: 5,
   benefitScores: 5,
   content: undefined,
@@ -87,7 +86,6 @@ const formRules = reactive({
   userAvatar: [{ required: true, message: '用户头像不能为空', trigger: 'blur' }],
   userNickname: [{ required: true, message: '用户名称不能为空', trigger: 'blur' }],
   content: [{ required: true, message: '评论内容不能为空', trigger: 'blur' }],
-  scores: [{ required: true, message: '评分星级不能为空', trigger: 'blur' }],
   descriptionScores: [{ required: true, message: '描述星级不能为空', trigger: 'blur' }],
   benefitScores: [{ required: true, message: '服务星级不能为空', trigger: 'blur' }]
 })
@@ -153,7 +151,6 @@ const resetForm = () => {
     userAvatar: undefined,
     spuId: undefined,
     skuId: undefined,
-    scores: 5,
     descriptionScores: 5,
     benefitScores: 5,
     content: undefined,

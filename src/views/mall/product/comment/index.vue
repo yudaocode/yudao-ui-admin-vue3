@@ -60,7 +60,6 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="false">
       <el-table-column label="评论编号" align="center" prop="id" min-width="60" />
-      <!-- TODO @疯狂：后端貌似没读取？ -->
       <el-table-column label="用户名称" align="center" prop="userNickname" width="80" />
       <el-table-column label="商品信息" align="center" min-width="210">
         <template #default="scope">
@@ -144,33 +143,15 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <CommentForm ref="formRef" @success="getList" />
-
-  <Dialog title="回复" v-model="replyDialog.visible">
-    <el-form
-      ref="replyFormRef"
-      :model="replyDialog.formData"
-      :rules="replyDialog.formRules"
-      label-width="100px"
-      v-loading="replyDialog.loading"
-    >
-      <el-form-item label="回复内容" prop="replyContent">
-        <el-input type="textarea" v-model="replyDialog.formData.replyContent" />
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <el-button @click="submitReplyForm" type="primary" :disabled="replyDialog.loading"
-        >确 定
-      </el-button>
-      <el-button @click="replyDialog.visible = false">取 消</el-button>
-    </template>
-  </Dialog>
+  <!-- 回复表单弹窗 -->
+  <ReplyForm ref="replyFormRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import * as CommentApi from '@/api/mall/product/comment'
 import CommentForm from './CommentForm.vue'
-import { ElInput } from 'element-plus'
+import ReplyForm from '@/views/mall/product/comment/ReplyForm.vue'
 
 defineOptions({ name: 'ProductComment' })
 
@@ -242,39 +223,10 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-// TODO @疯狂：要不回复，也搞一个组件出去？
-/** 回复 **/
+/** 回复按钮操作 **/
 const replyFormRef = ref()
-const replyDialog = reactive({
-  visible: false,
-  loading: false,
-  formData: {
-    id: -1,
-    replyContent: ''
-  },
-  formRules: {
-    replyContent: [{ required: true, message: '回复内容不能为空', trigger: 'blur' }]
-  }
-})
 const handleReply = (id: number) => {
-  replyDialog.formData.id = id
-  replyDialog.formData.replyContent = ''
-  replyDialog.visible = true
-}
-const submitReplyForm = async () => {
-  const valid = await replyFormRef?.value?.validate()
-  if (!valid) return
-
-  replyDialog.loading = true
-  try {
-    await CommentApi.replyComment(replyDialog.formData)
-    message.success(t('common.createSuccess'))
-
-    replyDialog.visible = false
-    await getList()
-  } finally {
-    replyDialog.loading = false
-  }
+  replyFormRef.value.open(id)
 }
 
 /** 显示/隐藏 **/
