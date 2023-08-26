@@ -16,3 +16,11 @@ export const getCouponPage = async (params: PageParam) => {
     params: params
   })
 }
+
+// 发送优惠券
+export const sendCoupon = async (data: any) => {
+  return request.post({
+    url: '/promotion/coupon/send',
+    data: data
+  })
+}

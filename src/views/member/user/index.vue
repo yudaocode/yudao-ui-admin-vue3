@@ -60,13 +60,21 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="openCoupon" v-hasPermi="['promotion:coupon:send']">发送优惠券</el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      @selection-change="handleSelectionChange"
+    >
+      <el-table-column type="selection" width="55" />
       <el-table-column label="用户编号" align="center" prop="id" width="120px" />
       <el-table-column label="头像" align="center" prop="avatar" width="80px">
         <template #default="scope">
@@ -145,6 +153,8 @@
   <UserForm ref="formRef" @success="getList" />
   <!-- 修改用户等级弹窗 -->
   <UpdateLevelForm ref="updateLevelFormRef" @success="getList" />
+  <!-- 发送优惠券弹窗 -->
+  <CouponSend ref="couponSend" />
 </template>
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
@@ -154,8 +164,11 @@ import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
 import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
 import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect.vue'
 import UpdateLevelForm from '@/views/member/user/UpdateLevelForm.vue'
+import CouponSend from '@/views/mall/promotion/coupon/components/CouponSend.vue'
 
 defineOptions({ name: 'MemberUser' })
+
+const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -173,6 +186,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const updateLevelFormRef = ref() // 修改会员等级表单
+const selectedIds = ref<number[]>([]) // 表格的选中 ID 数组
 
 /** 查询列表 */
 const getList = async () => {
@@ -202,6 +216,22 @@ const resetQuery = () => {
 const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'MemberUserDetail', params: { id } })
+}
+
+/** 表格选中事件 */
+const handleSelectionChange = (rows: UserApi.UserVO[]) => {
+  selectedIds.value = rows.map((row) => row.id)
+}
+
+/** 发送优惠券 */
+const couponSend = ref()
+const openCoupon = () => {
+  if (selectedIds.value.length === 0) {
+    message.warning('请选择要发送优惠券的用户')
+    return
+  }
+
+  couponSend.value.open(selectedIds.value)
 }
 
 /** 初始化 **/
