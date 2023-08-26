@@ -1,51 +1,54 @@
 <template>
   <el-descriptions :column="2">
-    <!-- TODO @梦：要不 icon 也给加下？ -->
-    <!-- TODO @梦：积分、成长值、等级，已经可以读取了，可以看下 -->
     <el-descriptions-item>
       <template #label>
-        <div class="cell-item"> 等级 </div>
+        <descriptions-item-label label=" 等级 " icon="svg-icon:member_level" />
+      </template>
+      {{ user.levelName || 0 }}
+    </el-descriptions-item>
+    <el-descriptions-item>
+      <template #label>
+        <descriptions-item-label label=" 成长值 " icon="ep:suitcase" />
+      </template>
+      {{ user.experience || 0 }}
+    </el-descriptions-item>
+    <el-descriptions-item>
+      <template #label>
+        <descriptions-item-label label=" 当前积分 " icon="ep:coin" />
+      </template>
+      {{ user.point || 0 }}
+    </el-descriptions-item>
+    <el-descriptions-item>
+      <template #label>
+        <descriptions-item-label label=" 总积分 " icon="ep:coin" />
       </template>
       {{ 0 }}
     </el-descriptions-item>
     <el-descriptions-item>
       <template #label>
-        <div class="cell-item"> 成长值 </div>
+        <descriptions-item-label label=" 当前余额 " icon="svg-icon:member_balance" />
       </template>
       {{ 0 }}
     </el-descriptions-item>
     <el-descriptions-item>
       <template #label>
-        <div class="cell-item"> 当前积分 </div>
+        <descriptions-item-label label=" 支出金额 " icon="svg-icon:member_expenditure_balance" />
       </template>
       {{ 0 }}
     </el-descriptions-item>
     <el-descriptions-item>
       <template #label>
-        <div class="cell-item"> 总积分 </div>
-      </template>
-      {{ 0 }}
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template #label>
-        <div class="cell-item"> 当前余额 </div>
-      </template>
-      {{ 0 }}
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template #label>
-        <div class="cell-item"> 支出金额 </div>
-      </template>
-      {{ 0 }}
-    </el-descriptions-item>
-    <el-descriptions-item>
-      <template #label>
-        <div class="cell-item"> 充值金额 </div>
+        <descriptions-item-label label=" 充值金额 " icon="svg-icon:member_recharge_balance" />
       </template>
       {{ 0 }}
     </el-descriptions-item>
   </el-descriptions>
 </template>
+<script setup lang="ts">
+import { DescriptionsItemLabel } from '@/components/Descriptions'
+import * as UserApi from '@/api/member/user'
+const { user } = defineProps<{ user: UserApi.UserVO }>()
+</script>
 <style scoped lang="scss">
 .cell-item {
   display: inline;

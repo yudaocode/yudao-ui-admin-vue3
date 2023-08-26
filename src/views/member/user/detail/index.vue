@@ -20,7 +20,7 @@
           <template #header>
             <CardTitle title="账户信息" />
           </template>
-          <UserAccountInfo />
+          <UserAccountInfo :user="user" />
         </el-card>
       </el-col>
       <!-- 下边：账户明细 -->
@@ -33,12 +33,12 @@
           <el-tab-pane label="积分" name="point">
             <UserPointList :user-id="id" />
           </el-tab-pane>
-          <el-tab-pane label="签到" name="sign">
+          <el-tab-pane label="签到" name="sign" lazy>
             <UserSignList :user-id="id" />
           </el-tab-pane>
           <el-tab-pane label="成长值" name="third">成长值(WIP)</el-tab-pane>
           <el-tab-pane label="余额" name="fourth">余额(WIP)</el-tab-pane>
-          <el-tab-pane label="收货地址" name="address">
+          <el-tab-pane label="收货地址" name="address" lazy>
             <UserAddressList :user-id="id" />
           </el-tab-pane>
           <el-tab-pane label="订单管理" name="fourth">订单管理(WIP)</el-tab-pane>
@@ -87,10 +87,10 @@ const getUserData = async (id: number) => {
 }
 
 /** 初始化 */
-const { push, currentRoute } = useRouter() // 路由
+const { currentRoute } = useRouter() // 路由
 const { delView } = useTagsViewStore() // 视图操作
 const route = useRoute()
-const id = route.params.id as number
+const id = Number(route.params.id)
 onMounted(() => {
   if (!id) {
     ElMessage.warning('参数错误，会员编号不能为空！')

@@ -74,12 +74,7 @@ import { formatDate } from '@/utils/formatTime'
 import * as UserApi from '@/api/member/user'
 import { DescriptionsItemLabel } from '@/components/Descriptions/index'
 
-const { user }: { user: UserApi.UserVO } = defineProps({
-  user: {
-    type: UserApi.UserVO,
-    required: true
-  }
-})
+const { user } = defineProps<{ user: UserApi.UserVO }>()
 </script>
 <style scoped lang="scss">
 .card-header {
