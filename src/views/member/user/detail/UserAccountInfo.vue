@@ -4,7 +4,7 @@
       <template #label>
         <descriptions-item-label label=" 等级 " icon="svg-icon:member_level" />
       </template>
-      {{ user.levelName || 0 }}
+      {{ user.levelName || '无' }}
     </el-descriptions-item>
     <el-descriptions-item>
       <template #label>
@@ -22,8 +22,9 @@
       <template #label>
         <descriptions-item-label label=" 总积分 " icon="ep:coin" />
       </template>
-      {{ 0 }}
+      {{ user.totalPoint || 0 }}
     </el-descriptions-item>
+    <!-- TODO 芋艿：后续接入余额、支付金额 -->
     <el-descriptions-item>
       <template #label>
         <descriptions-item-label label=" 当前余额 " icon="svg-icon:member_balance" />

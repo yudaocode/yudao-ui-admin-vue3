@@ -18,6 +18,7 @@ export interface UserVO {
   areaName: string | undefined
   levelName: string | null
   point: number | undefined | null
+  totalPoint: number | undefined | null
   experience: number | null | undefined
 }
 
