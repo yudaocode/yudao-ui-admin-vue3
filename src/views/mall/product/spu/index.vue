@@ -80,7 +80,7 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column type="expand" width="30">
         <template #default="{ row }">
-          <el-form class="demo-table-expand" label-position="left">
+          <el-form class="spu-table-expand" label-position="left">
             <el-row>
               <el-col :span="24">
                 <el-row>
@@ -91,12 +91,12 @@
                   </el-col>
                   <el-col :span="8">
                     <el-form-item label="市场价:">
-                      <span>{{ formatToFraction(row.marketPrice) }}</span>
+                      <span>{{ floatToFixed2(row.marketPrice) }}元</span>
                     </el-form-item>
                   </el-col>
                   <el-col :span="8">
                     <el-form-item label="成本价:">
-                      <span>{{ formatToFraction(row.costPrice) }}</span>
+                      <span>{{ floatToFixed2(row.costPrice) }}元</span>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -130,9 +130,7 @@
       </el-table-column>
       <el-table-column :show-overflow-tooltip="true" label="商品名称" min-width="300" prop="name" />
       <el-table-column align="center" label="商品售价" min-width="90" prop="price">
-        <template #default="{ row }">
-          {{ formatToFraction(row.price) }}
-        </template>
+        <template #default="{ row }"> {{ floatToFixed2(row.price) }}元</template>
       </el-table-column>
       <el-table-column align="center" label="销量" min-width="90" prop="salesCount" />
       <el-table-column align="center" label="库存" min-width="90" prop="stock" />
@@ -229,7 +227,7 @@ import { createImageViewer } from '@/components/ImageViewer'
 import { dateFormatter } from '@/utils/formatTime'
 import { checkSelectedNode, defaultProps, handleTree, treeToString } from '@/utils/tree'
 import { ProductSpuStatusEnum } from '@/utils/constants'
-import { formatToFraction } from '@/utils'
+import { floatToFixed2 } from '@/utils'
 import download from '@/utils/download'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
@@ -392,7 +390,7 @@ const resetQuery = () => {
 const openForm = (id?: number) => {
   // 修改
   if (typeof id === 'number') {
-    push('/product/spu/edit/' + id)
+    push({ name: 'ProductSpuEdit', params: { spuId: id } })
     return
   }
   // 新增
@@ -402,8 +400,8 @@ const openForm = (id?: number) => {
 /**
  * 查看商品详情
  */
-const openDetail = (id?: number) => {
-  push('/product/spu/detail/' + id)
+const openDetail = (id: number) => {
+  push({ name: 'ProductSpuDetail', params: { spuId: id } })
 }
 
 /** 导出按钮操作 */
@@ -458,7 +456,7 @@ onMounted(async () => {
 })
 </script>
 <style lang="scss" scoped>
-.demo-table-expand {
+.spu-table-expand {
   padding-left: 42px;
 
   :deep(.el-form-item__label) {

@@ -1,8 +1,13 @@
 <template>
-  <Dialog v-model="dialogVisible" title="商家备注" width="25%">
+  <Dialog v-model="dialogVisible" title="商家备注" width="45%">
     <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
       <el-form-item label="备注">
-        <el-input v-model="formData.remark" />
+        <el-input
+          v-model="formData.remark"
+          :rows="3"
+          placeholder="请输入订单备注"
+          type="textarea"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -14,8 +19,7 @@
 <script lang="ts" setup>
 import * as TradeOrderApi from '@/api/mall/trade/order'
 
-// TODO @puhui999：OrderRemarksForm 改成 OrderUpdateRemarkForm 更新哈，保持统一；
-defineOptions({ name: 'OrderRemarksForm' })
+defineOptions({ name: 'OrderUpdateRemarkForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -46,7 +50,7 @@ const submitForm = async () => {
   try {
     const data = unref(formData)
     console.log(data)
-    await TradeOrderApi.remark(data)
+    await TradeOrderApi.updateRemark(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
     // 发送操作成功的事件
