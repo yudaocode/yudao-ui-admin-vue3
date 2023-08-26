@@ -7,7 +7,6 @@ import SkuList from './SkuList.vue'
 
 import { Spu } from '@/api/mall/product/spu'
 
-// TODO @puhui999：Properties 改成 Property 更合适？Property 在 Spu 中已存在避免冲突 PropertyAndValues
 interface PropertyAndValues {
   id: number
   name: string

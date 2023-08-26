@@ -347,22 +347,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/property', // TODO @puhui999：这里的 path 有问题，应该是 /product/property
-    component: Layout,
-    name: 'Property',
-    meta: {
-      hidden: true
-    },
-    children: [
-      {
-        path: 'value/:propertyId(\\d+)',
-        component: () => import('@/views/mall/product/property/value/index.vue'),
-        name: 'ProductPropertyValue',
-        meta: { title: '商品属性值', icon: '', activeMenu: '/product/property' }
-      }
-    ]
-  },
-  {
     path: '/product',
     component: Layout,
     name: 'Product',
@@ -408,6 +392,19 @@ const remainingRouter: AppRouteRecordRaw[] = [
           title: '商品详情',
           activeMenu: '/product/product-spu'
         }
+      },
+      {
+        path: 'property/value/:propertyId(\\d+)',
+        component: () => import('@/views/mall/product/property/value/index.vue'),
+        name: 'ProductPropertyValue',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          icon: 'ep:view',
+          title: '商品属性值',
+          activeMenu: '/product/property'
+        }
       }
     ]
   },
@@ -421,7 +418,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: 'detail/:orderId(\\d+)',
-        component: () => import('@/views/mall/trade/order/components/OrderDetailForm.vue'),
+        component: () => import('@/views/mall/trade/order/detail/index.vue'),
         name: 'TradeOrderDetailForm',
         meta: { title: '订单详情', icon: '', activeMenu: '/trade/trade/order' }
       }
