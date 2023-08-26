@@ -102,20 +102,20 @@ export interface DeliveryVO {
 
 // 订单发货
 export const delivery = async (data: DeliveryVO) => {
-  return await request.post({ url: `/trade/order/delivery`, data })
+  return await request.put({ url: `/trade/order/delivery`, data })
 }
 
 // 订单备注
-export const remark = async (data) => {
-  return await request.post({ url: `/trade/order/remark`, data })
+export const updateRemark = async (data: any) => {
+  return await request.put({ url: `/trade/order/update-remark`, data })
 }
 
 // 订单调价
-export const adjustPrice = async (data) => {
-  return await request.post({ url: `/trade/order/adjust-price`, data })
+export const updatePrice = async (data: any) => {
+  return await request.put({ url: `/trade/order/update-price`, data })
 }
 
 // 修改订单地址
-export const adjustAddress = async (data) => {
-  return await request.post({ url: `/trade/order/adjust-address`, data })
+export const updateAddress = async (data: any) => {
+  return await request.put({ url: `/trade/order/update-address`, data })
 }

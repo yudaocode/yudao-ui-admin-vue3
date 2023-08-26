@@ -60,6 +60,7 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="false">
       <el-table-column label="评论编号" align="center" prop="id" min-width="60" />
+      <!-- TODO @疯狂：后端貌似没读取？ -->
       <el-table-column label="用户名称" align="center" prop="userNickname" width="80" />
       <el-table-column label="商品信息" align="center" min-width="210">
         <template #default="scope">
@@ -210,7 +211,7 @@ const getList = async () => {
   loading.value = true
   try {
     const data = await CommentApi.getCommentPage(queryParams)
-    // visible 如果为 null，会导致刷新的时候触发e-switch的change事件
+    // visible 如果为 null，会导致刷新的时候触发 e-switch 的 change 事件
     data.list.forEach((item) => {
       if (!item.visible) {
         item.visible = false
@@ -241,6 +242,7 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
+// TODO @疯狂：要不回复，也搞一个组件出去？
 /** 回复 **/
 const replyFormRef = ref()
 const replyDialog = reactive({

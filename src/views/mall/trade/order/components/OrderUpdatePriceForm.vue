@@ -20,11 +20,10 @@
 </template>
 <script lang="ts" setup>
 import * as TradeOrderApi from '@/api/mall/trade/order'
-import { convertToInteger, formatToFraction } from '@/utils'
+import { convertToInteger, floatToFixed2, formatToFraction } from '@/utils'
 import { cloneDeep } from 'lodash-es'
 
-// TODO @puhui999：OrderAdjustPriceForm 改成 OrderUpdatePriceForm 更新哈，保持统一；
-defineOptions({ name: 'OrderAdjustPriceForm' })
+defineOptions({ name: 'OrderUpdatePriceForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -40,7 +39,9 @@ const formData = ref({
 watch(
   () => formData.value.adjustPrice,
   (data: number) => {
-    formData.value.newPayPrice = formData.value.payPrice.replace('元', '') * 1 + data + '元'
+    const num = formData.value.payPrice!.replace('元', '')
+    // @ts-ignore
+    formData.value.newPayPrice = (num * 1 + data).toFixed(2) + '元'
   }
 )
 
@@ -49,10 +50,11 @@ const formRef = ref() // 表单 Ref
 /** 打开弹窗 */
 const open = async (row: TradeOrderApi.OrderVO) => {
   resetForm()
-  formData.value.id = row.id
+  formData.value.id = row.id!
   // 设置数据
-  formData.value.adjustPrice = formatToFraction(row.adjustPrice)
-  formData.value.payPrice = formatToFraction(row.payPrice) + '元'
+  formData.value.adjustPrice = formatToFraction(row.adjustPrice!)
+  formData.value.payPrice = floatToFixed2(row.payPrice!) + '元'
+  formData.value.newPayPrice = formData.value.payPrice
   dialogVisible.value = true
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -67,7 +69,7 @@ const submitForm = async () => {
     data.adjustPrice = convertToInteger(data.adjustPrice)
     delete data.payPrice
     delete data.newPayPrice
-    await TradeOrderApi.adjustPrice(data)
+    await TradeOrderApi.updatePrice(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
     // 发送操作成功的事件
