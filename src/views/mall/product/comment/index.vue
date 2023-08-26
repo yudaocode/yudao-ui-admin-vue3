@@ -61,17 +61,24 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="false">
       <el-table-column label="评论编号" align="center" prop="id" min-width="60" />
       <el-table-column label="用户名称" align="center" prop="userNickname" width="80" />
-      <el-table-column label="商品信息" align="center" min-width="210">
+      <el-table-column label="商品信息" align="center" min-width="300">
         <template #default="scope">
           <div class="flex row items-center gap-x-4px">
             <el-image
               v-if="scope.row.skuPicUrl"
               :src="scope.row.skuPicUrl"
               :preview-src-list="[scope.row.skuPicUrl]"
-              class="w-30px h-30px shrink-0"
+              class="w-40px h-40px shrink-0"
               preview-teleported
             />
             <div>{{ scope.row.spuName }}</div>
+            <el-tag
+              v-for="property in scope.row.skuProperties"
+              :key="property.propertyId"
+              class="mr-10px"
+            >
+              {{ property.propertyName }}: {{ property.valueName }}
+            </el-tag>
           </div>
         </template>
       </el-table-column>
@@ -88,7 +95,7 @@
               :src="picUrl"
               :preview-src-list="scope.row.picUrls"
               :initial-index="index"
-              class="w-30px h-30px"
+              class="w-40px h-40px"
               preview-teleported
             />
           </div>
@@ -151,7 +158,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import * as CommentApi from '@/api/mall/product/comment'
 import CommentForm from './CommentForm.vue'
-import ReplyForm from '@/views/mall/product/comment/ReplyForm.vue'
+import ReplyForm from './ReplyForm.vue'
 
 defineOptions({ name: 'ProductComment' })
 
@@ -164,25 +171,10 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  userId: null,
-  userNickname: null,
-  userAvatar: null,
-  anonymous: null,
-  orderId: null,
-  orderItemId: null,
-  spuId: null,
-  spuName: null,
-  skuId: null,
-  visible: null,
-  scores: null,
-  descriptionScores: null,
-  benefitScores: null,
-  content: null,
-  picUrls: null,
   replyStatus: null,
-  replyUserId: null,
-  replyContent: null,
-  replyTime: [],
+  spuName: null,
+  userNickname: null,
+  orderId: null,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单

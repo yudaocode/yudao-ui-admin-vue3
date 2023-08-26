@@ -48,16 +48,15 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-
 const submitReplyForm = async () => {
+  // 校验表单
   const valid = await formRef?.value?.validate()
   if (!valid) return
-
+  // 提交请求
   formLoading.value = true
   try {
     await CommentApi.replyComment(formData.value)
     message.success(t('common.createSuccess'))
-
     dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
