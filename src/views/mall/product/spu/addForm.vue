@@ -44,6 +44,8 @@ import { BasicInfoForm, DescriptionForm, OtherSettingsForm } from './components'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { convertToInteger, formatToFraction } from '@/utils'
 
+// TODO @芋艿：后续稍微调整下；
+
 defineOptions({ name: 'ProductSpuForm' })
 
 const { t } = useI18n() // 国际化

@@ -36,6 +36,7 @@
       <el-form-item label="评论内容" prop="content">
         <el-input type="textarea" v-model="formData.content" />
       </el-form-item>
+      <!-- TODO @疯狂：formData.scores 是通过后端计算的哈，不要前端传递 -->
       <el-form-item label="评分星级" prop="scores">
         <el-rate v-model="formData.scores" />
       </el-form-item>
