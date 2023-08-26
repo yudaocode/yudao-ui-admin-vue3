@@ -16,6 +16,9 @@ export interface UserVO {
   status: number
   areaId: number | undefined
   areaName: string | undefined
+  levelName: string | null
+  point: number | undefined | null
+  experience: number | null | undefined
 }
 
 // 查询会员用户列表
