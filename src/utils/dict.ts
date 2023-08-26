@@ -156,7 +156,7 @@ export enum DICT_TYPE {
   TRADE_ORDER_TYPE = 'trade_order_type', // 订单 - 类型
   TRADE_ORDER_STATUS = 'trade_order_status', // 订单 - 状态
   TRADE_ORDER_ITEM_AFTER_SALE_STATUS = 'trade_order_item_after_sale_status', // 订单项 - 售后状态
-  TRADE_DELIVERY_TYPE = 'delivery_type', // 配送方式
+  TRADE_DELIVERY_TYPE = 'trade_delivery_type', // 配送方式
 
   // ========== MALL - 营销模块 ==========
   PROMOTION_DISCOUNT_TYPE = 'promotion_discount_type', // 优惠类型

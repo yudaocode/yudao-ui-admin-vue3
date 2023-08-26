@@ -347,22 +347,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/product/property',
-    component: Layout,
-    name: 'Property',
-    meta: {
-      hidden: true
-    },
-    children: [
-      {
-        path: 'value/:propertyId(\\d+)',
-        component: () => import('@/views/mall/product/property/value/index.vue'),
-        name: 'ProductPropertyValue',
-        meta: { title: '商品属性值', icon: '', activeMenu: '/product/property' }
-      }
-    ]
-  },
-  {
     path: '/product',
     component: Layout,
     name: 'Product',
@@ -407,6 +391,19 @@ const remainingRouter: AppRouteRecordRaw[] = [
           icon: 'ep:view',
           title: '商品详情',
           activeMenu: '/product/product-spu'
+        }
+      },
+      {
+        path: 'property/value/:propertyId(\\d+)',
+        component: () => import('@/views/mall/product/property/value/index.vue'),
+        name: 'ProductPropertyValue',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          icon: 'ep:view',
+          title: '商品属性值',
+          activeMenu: '/product/property'
         }
       }
     ]

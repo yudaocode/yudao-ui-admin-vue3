@@ -34,6 +34,7 @@ import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { copyValueToTarget } from '@/utils'
 
+// TODO @puhui999：要不 Form 保持和别的模块一样，和 index.vue 放在一个目录下，不作为 components；components 更多要支持给多个模块使用哈。
 defineOptions({ name: 'OrderDeliveryForm' })
 
 const { t } = useI18n() // 国际化

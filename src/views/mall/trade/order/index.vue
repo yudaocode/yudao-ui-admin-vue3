@@ -64,6 +64,9 @@
           />
         </el-select>
       </el-form-item>
+      <!-- TODO @puhui999：要不加个 deliveryType 筛选；配送方式；然后如果选了快递，就有【快递公司】筛选；如果选了自提，就有【自提门店】；然后把他们这 3 个，坐在一个 el-form-item 里；
+        目的是；有的时候，会筛选门店，然后做核销；这个时候，就需要筛选自提门店；
+       -->
       <el-form-item label="快递公司" prop="type">
         <el-select v-model="queryParams.logisticsId" class="!w-280px" clearable placeholder="全部">
           <el-option
@@ -125,16 +128,11 @@
   </ContentWrap>
 
   <!-- 列表 -->
-  <!-- TODO @puhui999：列表有可能尽量对齐 https://gitee.com/niushop_team/niushop_b2c_v5_stand/raw/master/image/back_end5.png 哇，主要感觉视觉上有点无法分辨一个订单项，是和哪个订单关联。
-
-  1、订单号、订单类型、订单来源、支付时间那一行，直接做到订单项的数据中
-  2、商品信息、商品原价那一行，应该是在最顶上一行，不用每个订单项都写一条
-  3、然后点击展开和收拢订单项，可以不做哈。
-   -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column class-name="order-table-col">
         <template #header>
+          <!-- TODO @phui999：小屏幕下，会有偏移，后续看看 -->
           <div class="flex items-center" style="width: 100%">
             <div class="ml-100px mr-200px">商品信息</div>
             <div class="mr-60px">单价(元)/数量</div>
@@ -170,11 +168,15 @@
                   />
                   <span>支付方式：</span>
                   <dict-tag
+                    v-if="scope.row.payChannelCode"
                     :type="DICT_TYPE.PAY_CHANNEL_CODE"
                     :value="scope.row.payChannelCode"
                     class="mr-20px"
                   />
-                  <span class="mr-20px">支付时间：{{ formatDate(scope.row.payTime) }}</span>
+                  <v-else class="mr-20px" v-else>未支付</v-else>
+                  <span class="mr-20px" v-if="scope.row.payTime">
+                    支付时间：{{ formatDate(scope.row.payTime) }}
+                  </span>
                   <span>订单类型：</span>
                   <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="scope.row.type" />
                 </div>
@@ -249,6 +251,11 @@
                 <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="scope.row.deliveryType" />
               </template>
             </el-table-column>
+            <el-table-column align="center" label="订单状态" width="120">
+              <template #default>
+                <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="scope.row.status" />
+              </template>
+            </el-table-column>
             <el-table-column align="center" fixed="right" label="操作" width="160">
               <template #default>
                 <!-- TODO 权限后续补齐 -->
@@ -264,7 +271,7 @@
                     </el-button>
                     <template #dropdown>
                       <el-dropdown-menu>
-                        <!--判断下 物流类型 + 状态，快递 + 待发货时展示【发货】按钮 -->
+                        <!-- 如果是【快递】，并且【未发货】，则展示【发货】按钮 -->
                         <el-dropdown-item
                           v-if="scope.row.deliveryType === 1 && scope.row.status === 10"
                           command="delivery"
@@ -272,9 +279,8 @@
                           <Icon icon="ep:takeaway-box" />
                           发货
                         </el-dropdown-item>
-                        <el-dropdown-item command="orderRemarks">
-                          <Icon icon="ep:chat-line-square" />
-                          订单备注
+                        <el-dropdown-item command="remark">
+                          <Icon icon="ep:chat-line-square" /> 备注
                         </el-dropdown-item>
                       </el-dropdown-menu>
                     </template>
@@ -464,6 +470,6 @@ onMounted(async () => {
 </script>
 <style lang="scss" scoped>
 :deep(.order-table-col > .cell) {
-  padding: 0px;
+  padding: 0;
 }
 </style>
