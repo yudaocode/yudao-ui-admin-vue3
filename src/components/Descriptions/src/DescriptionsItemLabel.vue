@@ -13,7 +13,7 @@ const { label } = defineProps({
 
 <template>
   <div class="cell-item">
-    <Icon :icon="icon" v-if="icon" style="vertical-align: middle" />
+    <Icon :icon="icon" v-if="icon" style="vertical-align: middle" :size="18" />
     {{ label }}
   </div>
 </template>
