@@ -67,6 +67,7 @@ const dialogStyle = computed(() => {
     lock-scroll
     draggable
     top="0"
+    class="com-dialog"
     :show-close="false"
   >
     <template #header="{ close }">
@@ -107,32 +108,34 @@ const dialogStyle = computed(() => {
 </template>
 
 <style lang="scss">
-.#{$elNamespace}-overlay-dialog {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.#{$elNamespace}-dialog {
-  margin: 0 !important;
-
-  &__header {
-    height: 54px;
-    padding: 0;
-    margin-right: 0 !important;
-    border-bottom: 1px solid var(--el-border-color);
+.com-dialog {
+  .#{$elNamespace}-overlay-dialog {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
-  &__body {
-    padding: 15px !important;
-  }
+  .#{$elNamespace}-dialog {
+    margin: 0 !important;
 
-  &__footer {
-    border-top: 1px solid var(--el-border-color);
-  }
+    &__header {
+      height: 54px;
+      padding: 0;
+      margin-right: 0 !important;
+      border-bottom: 1px solid var(--el-border-color);
+    }
 
-  &__headerbtn {
-    top: 0;
+    &__body {
+      padding: 15px !important;
+    }
+
+    &__footer {
+      border-top: 1px solid var(--el-border-color);
+    }
+
+    &__headerbtn {
+      top: 0;
+    }
   }
 }
 </style>
