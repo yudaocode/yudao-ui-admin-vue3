@@ -48,7 +48,6 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="签到用户" align="center" prop="nickname" />
       <el-table-column
         label="签到天数"
         align="center"
@@ -83,16 +82,14 @@
 <script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import * as SignInRecordApi from '@/api/member/signin/record'
-import { SignInRecordQueryVO } from '@/api/member/signin/record'
-
-defineOptions({ name: 'SignList' })
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const queryParams = reactive<SignInRecordQueryVO>({
+const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
+  userId: NaN,
   nickname: null,
   day: null,
   createTime: []
@@ -122,15 +119,17 @@ const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
-const { memberId } = defineProps({
-  memberId: {
+
+const { userId } = defineProps({
+  userId: {
     type: Number,
     required: true
   }
 })
+
 /** 初始化 **/
 onMounted(() => {
-  queryParams.userId = memberId
+  queryParams.userId = userId
   getList()
 })
 </script>

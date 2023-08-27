@@ -51,6 +51,12 @@
       <el-form-item label="用户标签" prop="tagIds">
         <MemberTagSelect v-model="queryParams.tagIds" />
       </el-form-item>
+      <el-form-item label="用户等级" prop="levelId">
+        <MemberLevelSelect v-model="queryParams.levelId" />
+      </el-form-item>
+      <el-form-item label="用户分组" prop="groupId">
+        <MemberGroupSelect v-model="queryParams.groupId" />
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -69,9 +75,8 @@
       </el-table-column>
       <el-table-column label="手机号" align="center" prop="mobile" width="120px" />
       <el-table-column label="昵称" align="center" prop="nickname" width="80px" />
-      <!-- TODO 芋艿：待接入 -->
-      <el-table-column label="等级" align="center" width="100px" />
-      <el-table-column label="分组" align="center" width="100px" />
+      <el-table-column label="等级" align="center" prop="levelName" width="100px" />
+      <el-table-column label="分组" align="center" prop="groupName" width="100px" />
       <el-table-column
         label="用户标签"
         align="center"
@@ -79,10 +84,12 @@
         :show-overflow-tooltip="false"
       >
         <template #default="scope">
-          <el-tag v-for="(tagName, index) in scope.row.tagNames" :key="index">{{ tagName }}</el-tag>
+          <el-tag v-for="(tagName, index) in scope.row.tagNames" :key="index" class="mr-5px">
+            {{ tagName }}
+          </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="积分" align="center" width="100px" />
+      <el-table-column label="积分" align="center" prop="point" width="100px" />
       <el-table-column label="状态" align="center" prop="status" width="100px">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -102,8 +109,9 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" width="180px" fixed="right">
         <template #default="scope">
+          <el-button link type="primary" @click="openDetail(scope.row.id)">详情</el-button>
           <el-button
             link
             type="primary"
@@ -111,6 +119,15 @@
             v-hasPermi="['member:user:update']"
           >
             编辑
+          </el-button>
+          <!-- todo 放到更多菜单中 -->
+          <el-button
+            link
+            type="primary"
+            @click="updateLevelFormRef.open(scope.row.id)"
+            v-hasPermi="['member:user:update-level']"
+          >
+            修改等级
           </el-button>
         </template>
       </el-table-column>
@@ -126,18 +143,19 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <UserForm ref="formRef" @success="getList" />
+  <!-- 修改用户等级弹窗 -->
+  <UpdateLevelForm ref="updateLevelFormRef" @success="getList" />
 </template>
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import * as UserApi from '@/api/member/user'
-import UserForm from './UserForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
+import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
+import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect.vue'
+import UpdateLevelForm from '@/views/member/user/UpdateLevelForm.vue'
 
 defineOptions({ name: 'MemberUser' })
-
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -149,10 +167,12 @@ const queryParams = reactive({
   mobile: null,
   loginDate: [],
   createTime: [],
-  tagIds: []
+  tagIds: [],
+  levelId: null,
+  groupId: null
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const updateLevelFormRef = ref() // 修改会员等级表单
 
 /** 查询列表 */
 const getList = async () => {
@@ -178,10 +198,10 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
+/** 打开会员详情 */
+const { push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'MemberUserDetail', params: { id } })
 }
 
 /** 初始化 **/

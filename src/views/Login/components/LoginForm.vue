@@ -21,8 +21,8 @@
             v-model="loginData.loginForm.tenantName"
             :placeholder="t('login.tenantNamePlaceholder')"
             :prefix-icon="iconHouse"
-            type="primary"
             link
+            type="primary"
           />
         </el-form-item>
       </el-col>

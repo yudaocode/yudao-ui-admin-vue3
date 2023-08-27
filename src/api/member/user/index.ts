@@ -2,38 +2,26 @@ import request from '@/config/axios'
 
 export interface UserVO {
   id: number
-  mobile: string
-  password: string
-  status: number
-  registerIp: string
+  avatar: string | undefined
+  birthday: number | undefined
+  createTime: number | undefined
+  loginDate: number | undefined
   loginIp: string
-  loginDate: Date
-  nickname: string
-  avatar: string
-  name: string
-  sex: number
-  areaId: number
-  birthday: Date
   mark: string
-  createTime: Date
-}
-export interface UserBaseInfoVO {
-  id: number | undefined | null
   mobile: string
-  password: string | null | undefined
-  status: number
-  registerIp: string | null | undefined
-  loginIp: string | null | undefined
-  loginDate: Date | null | undefined
-  nickname: string | null | undefined
-  avatar: string | null | undefined
-  name: string | null | undefined
+  name: string | undefined
+  nickname: string | undefined
+  registerIp: string
   sex: number
-  areaId: number | null | undefined
-  birthday: Date | null | undefined
-  mark: string | null | undefined
-  createTime: Date | null | undefined
+  status: number
+  areaId: number | undefined
+  areaName: string | undefined
+  levelName: string | null
+  point: number | undefined | null
+  totalPoint: number | undefined | null
+  experience: number | null | undefined
 }
+
 // 查询会员用户列表
 export const getUserPage = async (params) => {
   return await request.get({ url: `/member/user/page`, params })
@@ -47,4 +35,9 @@ export const getUser = async (id: number) => {
 // 修改会员用户
 export const updateUser = async (data: UserVO) => {
   return await request.put({ url: `/member/user/update`, data })
+}
+
+// 修改会员用户等级
+export const updateUserLevel = async (data: any) => {
+  return await request.put({ url: `/member/user/update-level`, data })
 }

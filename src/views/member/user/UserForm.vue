@@ -60,6 +60,9 @@
       <el-form-item label="用户标签" prop="tagIds">
         <MemberTagSelect v-model="formData.tagIds" show-add />
       </el-form-item>
+      <el-form-item label="用户分组" prop="groupId">
+        <MemberGroupSelect v-model="formData.groupId" />
+      </el-form-item>
       <el-form-item label="会员备注" prop="mark">
         <el-input type="textarea" v-model="formData.mark" placeholder="请输入会员备注" />
       </el-form-item>
@@ -76,6 +79,7 @@ import * as UserApi from '@/api/member/user'
 import * as AreaApi from '@/api/system/area'
 import { defaultProps } from '@/utils/tree'
 import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
+import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -87,6 +91,7 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   mobile: undefined,
+  password: undefined,
   status: undefined,
   nickname: undefined,
   avatar: undefined,
@@ -95,7 +100,8 @@ const formData = ref({
   areaId: undefined,
   birthday: undefined,
   mark: undefined,
-  tagIds: []
+  tagIds: [],
+  groupId: undefined
 })
 const formRules = reactive({
   mobile: [{ required: true, message: '手机号不能为空', trigger: 'blur' }],
@@ -158,9 +164,6 @@ const resetForm = () => {
     mobile: undefined,
     password: undefined,
     status: undefined,
-    registerIp: undefined,
-    loginIp: undefined,
-    loginDate: undefined,
     nickname: undefined,
     avatar: undefined,
     name: undefined,
@@ -168,8 +171,8 @@ const resetForm = () => {
     areaId: undefined,
     birthday: undefined,
     mark: undefined,
-    createTime: undefined,
-    tagIds: []
+    tagIds: [],
+    groupId: undefined
   }
   formRef.value?.resetFields()
 }

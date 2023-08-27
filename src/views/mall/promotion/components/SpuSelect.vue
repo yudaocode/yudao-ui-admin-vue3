@@ -127,7 +127,8 @@ defineOptions({ name: 'PromotionSpuSelect' })
 const props = defineProps({
   // 默认不需要（不需要的情况下只返回 spu，需要的情况下返回 选中的 spu 和 sku 列表）
   // 其它活动需要选择商品和商品属性导入此组件即可，需添加组件属性 :isSelectSku='true'
-  isSelectSku: propTypes.bool.def(false) // 是否需要选择 sku 属性
+  isSelectSku: propTypes.bool.def(false), // 是否需要选择 sku 属性
+  radio: propTypes.bool.def(false) // 是否单选 sku
 })
 
 const message = useMessage() // 消息弹窗
@@ -146,7 +147,7 @@ const queryParams = ref({
 }) // 查询参数
 const propertyList = ref<PropertyAndValues[]>([]) // 商品属性列表
 const spuListRef = ref<InstanceType<typeof ElTable>>()
-const skuListRef = ref() // 商品属性选择 Ref
+const skuListRef = ref<InstanceType<typeof SkuList>>() // 商品属性选择 Ref
 const spuData = ref<ProductSpuApi.Spu>() // 商品详情
 const isExpand = ref(false) // 控制 SKU 列表显示
 const expandRowKeys = ref<number[]>() // 控制展开行需要设置 row-key 属性才能使用，该属性为展开行的 keys 数组。
@@ -155,12 +156,30 @@ const expandRowKeys = ref<number[]>() // 控制展开行需要设置 row-key 属
 const selectedSpuId = ref<number>(0) // 选中的商品 spuId
 const selectedSkuIds = ref<number[]>([]) // 选中的商品 skuIds
 const selectSku = (val: ProductSpuApi.Sku[]) => {
+  const skuTable = skuListRef.value?.getSkuTableRef()
   if (selectedSpuId.value === 0) {
     message.warning('请先选择商品再选择相应的规格！！！')
-    skuListRef.value.clearSelection()
+    skuTable?.clearSelection()
     return
   }
-  selectedSkuIds.value = val.map((sku) => sku.id!)
+  if (val.length === 0) {
+    selectedSkuIds.value = []
+    return
+  }
+  if (props.radio) {
+    // 只选择一个
+    selectedSkuIds.value = [val.map((sku) => sku.id!)[0]]
+    // 如果大于1个
+    if (val.length > 1) {
+      // 清空选择
+      skuTable?.clearSelection()
+      // 变更为最后一次选择的
+      skuTable?.toggleRowSelection(val.pop(), true)
+      return
+    }
+  } else {
+    selectedSkuIds.value = val.map((sku) => sku.id!)
+  }
 }
 const selectSpu = (val: ProductSpuApi.Spu[]) => {
   if (val.length === 0) {
@@ -176,9 +195,9 @@ const selectSpu = (val: ProductSpuApi.Spu[]) => {
   // 如果大于1个
   if (val.length > 1) {
     // 清空选择
-    spuListRef.value.clearSelection()
+    spuListRef.value?.clearSelection()
     // 变更为最后一次选择的
-    spuListRef.value.toggleRowSelection(val.pop(), true)
+    spuListRef.value?.toggleRowSelection(val.pop(), true)
     return
   }
   expandChange(val[0], val)
@@ -194,7 +213,7 @@ const expandChange = async (row: ProductSpuApi.Spu, expandedRows?: ProductSpuApi
       expandRowKeys.value = [selectedSpuId.value]
       return
     }
-    // 如果以展开 skuList 则选择此对应的 spu 不需要重新获取渲染 skuList
+    // 如果已展开 skuList 则选择此对应的 spu 不需要重新获取渲染 skuList
     if (isExpand.value && spuData.value?.id === row.id) {
       return
     }

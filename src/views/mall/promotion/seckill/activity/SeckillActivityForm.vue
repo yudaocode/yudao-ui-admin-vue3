@@ -193,16 +193,4 @@ const resetForm = async () => {
   await nextTick()
   formRef.value.getElFormRef().resetFields()
 }
-// TODO @puhui999：下面的 css 名字，是不是可以改下；demo-table-expand
 </script>
-<style lang="scss" scoped>
-.demo-table-expand {
-  padding-left: 42px;
-
-  :deep(.el-form-item__label) {
-    width: 82px;
-    font-weight: bold;
-    color: #99a9bf;
-  }
-}
-</style>
