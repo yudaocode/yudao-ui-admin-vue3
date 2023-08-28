@@ -39,12 +39,11 @@
 <script lang="ts" setup>
 import { cloneDeep } from 'lodash-es'
 import { useTagsViewStore } from '@/store/modules/tagsView'
-import { BasicInfoForm, DescriptionForm, OtherSettingsForm } from './components'
-// 业务api
 import * as ProductSpuApi from '@/api/mall/product/spu'
+import BasicInfoForm from './BasicInfoForm.vue'
+import DescriptionForm from './DescriptionForm.vue'
+import OtherSettingsForm from './OtherSettingsForm.vue'
 import { convertToInteger, floatToFixed2, formatToFraction } from '@/utils'
-
-// TODO @芋艿：后续稍微调整下；
 
 defineOptions({ name: 'ProductSpuForm' })
 

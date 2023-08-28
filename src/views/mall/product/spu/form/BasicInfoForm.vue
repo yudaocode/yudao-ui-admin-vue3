@@ -175,13 +175,17 @@ import { propTypes } from '@/utils/propTypes'
 import { checkSelectedNode, defaultProps, handleTree, treeToString } from '@/utils/tree'
 import { createImageViewer } from '@/components/ImageViewer'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { UploadImg, UploadImgs } from '@/components/UploadFile'
-import { getPropertyList, ProductAttributes, ProductPropertyAddForm, SkuList } from './index'
+import { PropertyAndValues, SkuList } from '@/views/mall/product/spu/components/index.ts'
+import ProductAttributes from './ProductAttributes.vue'
+import ProductPropertyAddForm from './ProductPropertyAddForm.vue'
 import { basicInfoSchema } from './spu.data'
 import type { Spu } from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
-import { getSimpleBrandList } from '@/api/mall/product/brand'
-import { getSimpleTemplateList } from '@/api/mall/trade/delivery/expressTemplate/index'
+import * as ProductBrandApi from '@/api/mall/product/brand'
+import * as ExpressTemplateApi from '@/api/mall/trade/delivery/expressTemplate'
+
+defineOptions({ name: 'ProductSpuBasicInfoForm' })
+
 // ====== 商品详情相关操作 ======
 const { allSchemas } = useCrudSchemas(basicInfoSchema)
 /** 商品图预览 */
@@ -198,9 +202,36 @@ const imagePreview = (args) => {
     urlList
   })
 }
-// ====== end ======
 
-defineOptions({ name: 'ProductSpuBasicInfoForm' })
+/**
+ * 获得商品的规格列表
+ *
+ * @param spu
+ * @return PropertyAndValues 规格列表
+ */
+const getPropertyList = (spu: Spu): PropertyAndValues[] => {
+  //  直接拿返回的 skus 属性逆向生成出 propertyList
+  const properties: PropertyAndValues[] = []
+  // 只有是多规格才处理
+  if (spu.specType) {
+    spu.skus?.forEach((sku) => {
+      sku.properties?.forEach(({ propertyId, propertyName, valueId, valueName }) => {
+        // 添加属性
+        if (!properties?.some((item) => item.id === propertyId)) {
+          properties.push({ id: propertyId!, name: propertyName!, values: [] })
+        }
+        // 添加属性值
+        const index = properties?.findIndex((item) => item.id === propertyId)
+        if (!properties[index].values?.some((value) => value.id === valueId)) {
+          properties[index].values?.push({ id: valueId!, name: valueName! })
+        }
+      })
+    })
+  }
+  return properties
+}
+
+// ====== end ======
 
 const message = useMessage() // 消息弹窗
 
@@ -346,8 +377,8 @@ onMounted(async () => {
   const data = await ProductCategoryApi.getCategoryList({})
   categoryList.value = handleTree(data, 'id', 'parentId')
   // 获取商品品牌列表
-  brandList.value = await getSimpleBrandList()
+  brandList.value = await ProductBrandApi.getSimpleBrandList()
   // 获取运费模版
-  deliveryTemplateList.value = await getSimpleTemplateList()
+  deliveryTemplateList.value = await ExpressTemplateApi.getSimpleTemplateList()
 })
 </script>
