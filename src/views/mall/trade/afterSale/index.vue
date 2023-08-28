@@ -91,19 +91,32 @@
     </el-tabs>
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list">
-      <el-table-column align="center" label="退款编号" prop="no" />
-      <el-table-column align="center" label="订单编号" prop="orderNo" />
-      <!-- TODO 芋艿：未来要加个订单链接 -->
-      <el-table-column align="center" label="商品信息" min-width="300" prop="spuName" width="auto">
-        <!-- TODO @小红：样式不太对，辛苦改改 -->
-        <!--        <div v-slot="{ row }" class="goods-info">-->
-        <!--          <img :src="row.picUrl"/>-->
-        <!--          <span class="ellipsis-2" :title="row.name">{{row.name}}</span>-->
-        <!--        </div>-->
+      <el-table-column align="center" label="退款编号" min-width="200" prop="no" />
+      <el-table-column align="center" label="订单编号" min-width="200" prop="orderNo">
+        <template #default="{ row }">
+          <el-button link type="primary" @click="openOrderDetail(row.orderId)">
+            {{ row.orderNo }}
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="商品信息" min-width="600" prop="spuName">
+        <template #default="{ row }">
+          <div class="flex items-center">
+            <el-image
+              :src="row.picUrl"
+              class="w-30px h-30px mr-10px"
+              @click="imagePreview(row.picUrl)"
+            />
+            <span class="mr-10px">{{ row.spuName }}</span>
+            <el-tag v-for="property in row.properties" :key="property.propertyId" class="mr-10px">
+              {{ property.propertyName }}: {{ property.valueName }}
+            </el-tag>
+          </div>
+        </template>
       </el-table-column>
       <el-table-column align="center" label="订单金额" prop="refundPrice">
         <template #default="scope">
-          <span>￥{{ (scope.row.refundPrice / 100.0).toFixed(2) }}</span>
+          <span>{{ floatToFixed2(scope.row.refundPrice) }}元</span>
         </template>
       </el-table-column>
       <el-table-column align="center" label="买家" prop="user.nickname" />
@@ -124,8 +137,8 @@
         </template>
       </el-table-column>
       <el-table-column align="center" fixed="right" label="操作" width="160">
-        <template #default>
-          <el-button icon="el-icon-thumb" link type="primary">处理退款</el-button>
+        <template #default="{ row }">
+          <el-button link type="primary" @click="openAfterSaleDetail(row.id)">处理退款</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -142,11 +155,20 @@
 import * as AfterSaleApi from '@/api/mall/trade/afterSale/index'
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
+import { createImageViewer } from '@/components/ImageViewer'
 import { TabsPaneContext } from 'element-plus'
 import { cloneDeep } from 'lodash-es'
+import { floatToFixed2 } from '@/utils'
 
 defineOptions({ name: 'TradeAfterSale' })
 
+const { push } = useRouter() // 路由跳转
+/** 商品图预览 */
+const imagePreview = (imgUrl: string) => {
+  createImageViewer({
+    urlList: [imgUrl]
+  })
+}
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref<AfterSaleApi.TradeAfterSaleVO[]>([]) // 列表的数据
@@ -200,6 +222,15 @@ const resetQuery = () => {
 const tabClick = async (tab: TabsPaneContext) => {
   queryParams.status = tab.paneName
   await getList()
+}
+
+/** 处理退款 */
+const openAfterSaleDetail = (id: number) => {
+  push({ name: 'TradeAfterSaleDetail', params: { orderId: id } })
+}
+/** 查看订单详情 */
+const openOrderDetail = (id: number) => {
+  push({ name: 'TradeOrderDetail', params: { orderId: id } })
 }
 
 onMounted(async () => {

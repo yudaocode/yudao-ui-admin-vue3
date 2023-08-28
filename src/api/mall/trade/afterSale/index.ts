@@ -40,15 +40,12 @@ export interface ProductPropertiesVO {
   valueName?: string // 属性值的名称
 }
 
-// 获得交易售后
-export function getAfterSale(id) {
-  return request({
-    url: '/trade/after-sale/get?id=' + id,
-    method: 'get'
-  })
-}
-
 // 获得交易售后分页
 export const getAfterSalePage = async (params) => {
   return await request.get({ url: `/trade/after-sale/page`, params })
+}
+
+// 获得交易售后详情
+export const getAfterSale = async (id) => {
+  return await request.get({ url: `/trade/after-sale/get-detail?id=${id}` })
 }

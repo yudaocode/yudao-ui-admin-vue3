@@ -401,10 +401,16 @@ const remainingRouter: AppRouteRecordRaw[] = [
     },
     children: [
       {
-        path: 'detail/:orderId(\\d+)',
+        path: 'orderDetail/:orderId(\\d+)',
         component: () => import('@/views/mall/trade/order/detail/index.vue'),
         name: 'TradeOrderDetail',
         meta: { title: '订单详情', icon: '', activeMenu: '/trade/trade/order' }
+      },
+      {
+        path: 'afterSaleDetail/:orderId(\\d+)',
+        component: () => import('@/views/mall/trade/afterSale/detail/index.vue'),
+        name: 'TradeAfterSaleDetail',
+        meta: { title: '退款详情', icon: '', activeMenu: '/trade/trade/after-sale' }
       }
     ]
   },
