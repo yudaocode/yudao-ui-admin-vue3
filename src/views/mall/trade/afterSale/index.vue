@@ -1,0 +1,215 @@
+<template>
+  <!-- 搜索 -->
+  <ContentWrap>
+    <el-form ref="queryFormRef" :inline="true" :model="queryParams" label-width="68px">
+      <el-form-item label="商品名称" prop="spuName">
+        <el-input
+          v-model="queryParams.spuName"
+          clearable
+          placeholder="请输入商品 SPU 名称"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="退款编号" prop="no">
+        <el-input
+          v-model="queryParams.no"
+          clearable
+          placeholder="请输入退款编号"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="订单编号" prop="orderNo">
+        <el-input
+          v-model="queryParams.orderNo"
+          clearable
+          placeholder="请输入订单编号"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="售后状态" prop="status">
+        <el-select v-model="queryParams.status" clearable placeholder="请选择售后状态">
+          <el-option label="全部" value="0" />
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.TRADE_AFTER_SALE_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="售后方式" prop="way">
+        <el-select v-model="queryParams.way" clearable placeholder="请选择售后方式">
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.TRADE_AFTER_SALE_WAY)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="售后类型" prop="type">
+        <el-select v-model="queryParams.type" clearable placeholder="请选择售后类型">
+          <el-option
+            v-for="dict in getDictOptions(DICT_TYPE.TRADE_AFTER_SALE_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-280px"
+          end-placeholder="自定义时间"
+          start-placeholder="自定义时间"
+          type="daterange"
+          value-format="YYYY-MM-DD HH:mm:ss"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </ContentWrap>
+  <ContentWrap>
+    <el-tabs v-model="queryParams.status" @tab-click="tabClick">
+      <el-tab-pane
+        v-for="item in statusTabs"
+        :key="item.label"
+        :label="item.label"
+        :name="item.value"
+      />
+    </el-tabs>
+    <!-- 列表 -->
+    <el-table v-loading="loading" :data="list">
+      <el-table-column align="center" label="退款编号" prop="no" />
+      <el-table-column align="center" label="订单编号" prop="orderNo" />
+      <!-- TODO 芋艿：未来要加个订单链接 -->
+      <el-table-column align="center" label="商品信息" min-width="300" prop="spuName" width="auto">
+        <!-- TODO @小红：样式不太对，辛苦改改 -->
+        <!--        <div v-slot="{ row }" class="goods-info">-->
+        <!--          <img :src="row.picUrl"/>-->
+        <!--          <span class="ellipsis-2" :title="row.name">{{row.name}}</span>-->
+        <!--        </div>-->
+      </el-table-column>
+      <el-table-column align="center" label="订单金额" prop="refundPrice">
+        <template #default="scope">
+          <span>￥{{ (scope.row.refundPrice / 100.0).toFixed(2) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="买家" prop="user.nickname" />
+      <!-- TODO 芋艿：未来要加个会员链接 -->
+      <el-table-column align="center" label="申请时间" prop="createTime" width="180">
+        <template #default="scope">
+          <span>{{ formatDate(scope.row.createTime) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="售后状态">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="售后方式">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_WAY" :value="scope.row.way" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" fixed="right" label="操作" width="160">
+        <template #default>
+          <el-button icon="el-icon-thumb" link type="primary">处理退款</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
+      @pagination="getList"
+    />
+  </ContentWrap>
+</template>
+<script lang="ts" setup>
+import * as AfterSaleApi from '@/api/mall/trade/afterSale/index'
+import { DICT_TYPE, getDictOptions } from '@/utils/dict'
+import { formatDate } from '@/utils/formatTime'
+import { TabsPaneContext } from 'element-plus'
+import { cloneDeep } from 'lodash-es'
+
+defineOptions({ name: 'TradeAfterSale' })
+
+const loading = ref(true) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref<AfterSaleApi.TradeAfterSaleVO[]>([]) // 列表的数据
+const statusTabs = ref([
+  {
+    label: '全部',
+    value: '0'
+  }
+])
+const queryFormRef = ref() // 搜索的表单
+// 查询参数
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  no: null,
+  status: '0',
+  orderNo: null,
+  spuName: null,
+  createTime: [],
+  way: null,
+  type: null
+})
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = cloneDeep(queryParams)
+    // 处理掉全部的状态，不传就是全部
+    if (data.status === '0') {
+      delete data.status
+    }
+    // 执行查询
+    const res = (await AfterSaleApi.getAfterSalePage(data)) as AfterSaleApi.TradeAfterSaleVO[]
+    list.value = res.list
+    total.value = res.total
+  } finally {
+    loading.value = false
+  }
+}
+/** 搜索按钮操作 */
+const handleQuery = async () => {
+  queryParams.pageNo = 1
+  await getList()
+}
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value?.resetFields()
+  handleQuery()
+}
+/** tab 切换 */
+const tabClick = async (tab: TabsPaneContext) => {
+  queryParams.status = tab.paneName
+  await getList()
+}
+
+onMounted(async () => {
+  await getList()
+  // 设置 statuses 过滤
+  for (const dict of getDictOptions(DICT_TYPE.TRADE_AFTER_SALE_STATUS)) {
+    statusTabs.value.push({
+      label: dict.label,
+      value: dict.value
+    })
+  }
+})
+</script>

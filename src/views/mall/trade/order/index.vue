@@ -146,10 +146,10 @@
         </template>
         <template #default="scope">
           <el-table
+            :border="true"
             :data="scope.row.items"
             :header-cell-style="headerStyle"
             :span-method="spanMethod"
-            :border="true"
             style="width: 100%"
           >
             <el-table-column min-width="300" prop="spuName">
@@ -173,8 +173,8 @@
                     :value="scope.row.payChannelCode"
                     class="mr-20px"
                   />
-                  <v-else class="mr-20px" v-else>未支付</v-else>
-                  <span class="mr-20px" v-if="scope.row.payTime">
+                  <v-else v-else class="mr-20px">未支付</v-else>
+                  <span v-if="scope.row.payTime" class="mr-20px">
                     支付时间：{{ formatDate(scope.row.payTime) }}
                   </span>
                   <span>订单类型：</span>
@@ -280,7 +280,8 @@
                           发货
                         </el-dropdown-item>
                         <el-dropdown-item command="remark">
-                          <Icon icon="ep:chat-line-square" /> 备注
+                          <Icon icon="ep:chat-line-square" />
+                          备注
                         </el-dropdown-item>
                       </el-dropdown-menu>
                     </template>
@@ -306,7 +307,7 @@
   <OrderUpdateRemarkForm ref="updateRemarkForm" @success="getList" />
 </template>
 
-<script lang="ts" name="Order" setup>
+<script lang="ts" setup>
 import type { FormInstance, TableColumnCtx } from 'element-plus'
 import OrderDeliveryForm from './components/OrderDeliveryForm.vue'
 import OrderUpdateRemarkForm from './components/OrderUpdateRemarkForm.vue'
@@ -317,6 +318,8 @@ import { formatDate } from '@/utils/formatTime'
 import { floatToFixed2 } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
+
+defineOptions({ name: 'TradeOrder' })
 
 const { currentRoute, push } = useRouter() // 路由跳转
 
