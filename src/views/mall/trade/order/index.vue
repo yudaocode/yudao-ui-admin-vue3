@@ -149,14 +149,14 @@
             :data="scope.row.items"
             :header-cell-style="headerStyle"
             :span-method="spanMethod"
-            border
+            :border="true"
             style="width: 100%"
           >
             <el-table-column min-width="300" prop="spuName">
               <template #header>
                 <div
                   class="flex items-center"
-                  style="height: 35px; background-color: #f7f7f7; width: 100%"
+                  style="width: 100%; height: 35px; background-color: #f7f7f7"
                 >
                   <span class="mr-20px">订单号：{{ scope.row.no }} </span>
                   <span class="mr-20px">下单时间：{{ formatDate(scope.row.createTime) }}</span>
@@ -384,7 +384,7 @@ const spanMethod = ({ row, rowIndex, columnIndex }: SpanMethodProps) => {
     (order) => order.items?.findIndex((item) => item.id === row.id) !== -1
   )?.items?.length
   // 要合并的列，从零开始
-  const colIndex = [3, 4, 5, 6]
+  const colIndex = [3, 4, 5, 6, 7]
   if (colIndex.includes(columnIndex)) {
     // 除了第一行其余的不要
     if (rowIndex !== 0) {
@@ -434,7 +434,7 @@ const imagePreview = (imgUrl: string) => {
 
 /** 查看订单详情 */
 const openForm = (id: number) => {
-  push({ name: 'TradeOrderDetailForm', params: { orderId: id } })
+  push({ name: 'TradeOrderDetail', params: { orderId: id } })
 }
 
 /** 操作分发 */
