@@ -207,7 +207,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         path: 'detail',
         name: 'TradeOrderDetail',
         // component: () => import('@/views/mall/trade/order/tradeOrderDetail.vue'),
-        component: () => import('@/views/mall/trade/detail/index.vue'),
+        component: () => import('@/views/mall/trade/order/detail/index.vue'),
         meta: { title: '订单详情', hidden: true }
       }
     ]
