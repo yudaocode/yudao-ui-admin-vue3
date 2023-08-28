@@ -31,6 +31,8 @@ const include = [
   'element-plus/es',
   'element-plus/es/locale/lang/zh-cn',
   'element-plus/es/locale/lang/en',
+  'element-plus/es/components/avatar/style/css',
+  'element-plus/es/components/space/style/css',
   'element-plus/es/components/backtop/style/css',
   'element-plus/es/components/form/style/css',
   'element-plus/es/components/radio-group/style/css',
