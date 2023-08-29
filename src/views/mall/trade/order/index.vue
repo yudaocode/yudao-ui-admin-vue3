@@ -146,17 +146,17 @@
         </template>
         <template #default="scope">
           <el-table
+            :border="true"
             :data="scope.row.items"
             :header-cell-style="headerStyle"
             :span-method="spanMethod"
-            border
             style="width: 100%"
           >
             <el-table-column min-width="300" prop="spuName">
               <template #header>
                 <div
                   class="flex items-center"
-                  style="height: 35px; background-color: #f7f7f7; width: 100%"
+                  style="width: 100%; height: 35px; background-color: #f7f7f7"
                 >
                   <span class="mr-20px">订单号：{{ scope.row.no }} </span>
                   <span class="mr-20px">下单时间：{{ formatDate(scope.row.createTime) }}</span>
@@ -173,8 +173,8 @@
                     :value="scope.row.payChannelCode"
                     class="mr-20px"
                   />
-                  <v-else class="mr-20px" v-else>未支付</v-else>
-                  <span class="mr-20px" v-if="scope.row.payTime">
+                  <v-else v-else class="mr-20px">未支付</v-else>
+                  <span v-if="scope.row.payTime" class="mr-20px">
                     支付时间：{{ formatDate(scope.row.payTime) }}
                   </span>
                   <span>订单类型：</span>
@@ -280,7 +280,8 @@
                           发货
                         </el-dropdown-item>
                         <el-dropdown-item command="remark">
-                          <Icon icon="ep:chat-line-square" /> 备注
+                          <Icon icon="ep:chat-line-square" />
+                          备注
                         </el-dropdown-item>
                       </el-dropdown-menu>
                     </template>
@@ -306,7 +307,7 @@
   <OrderUpdateRemarkForm ref="updateRemarkForm" @success="getList" />
 </template>
 
-<script lang="ts" name="Order" setup>
+<script lang="ts" setup>
 import type { FormInstance, TableColumnCtx } from 'element-plus'
 import OrderDeliveryForm from './components/OrderDeliveryForm.vue'
 import OrderUpdateRemarkForm from './components/OrderUpdateRemarkForm.vue'
@@ -317,6 +318,8 @@ import { formatDate } from '@/utils/formatTime'
 import { floatToFixed2 } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
+
+defineOptions({ name: 'TradeOrder' })
 
 const { currentRoute, push } = useRouter() // 路由跳转
 
@@ -384,7 +387,7 @@ const spanMethod = ({ row, rowIndex, columnIndex }: SpanMethodProps) => {
     (order) => order.items?.findIndex((item) => item.id === row.id) !== -1
   )?.items?.length
   // 要合并的列，从零开始
-  const colIndex = [3, 4, 5, 6]
+  const colIndex = [3, 4, 5, 6, 7]
   if (colIndex.includes(columnIndex)) {
     // 除了第一行其余的不要
     if (rowIndex !== 0) {
@@ -434,7 +437,7 @@ const imagePreview = (imgUrl: string) => {
 
 /** 查看订单详情 */
 const openForm = (id: number) => {
-  push({ name: 'TradeOrderDetailForm', params: { orderId: id } })
+  push({ name: 'TradeOrderDetail', params: { orderId: id } })
 }
 
 /** 操作分发 */
