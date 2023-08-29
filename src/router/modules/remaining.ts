@@ -340,7 +340,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: 'spu/add',
-        component: () => import('@/views/mall/product/spu/addForm.vue'),
+        component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuAdd',
         meta: {
           noCache: true,
@@ -353,7 +353,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       },
       {
         path: 'spu/edit/:spuId(\\d+)',
-        component: () => import('@/views/mall/product/spu/addForm.vue'),
+        component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuEdit',
         meta: {
           noCache: true,
@@ -366,7 +366,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       },
       {
         path: 'spu/detail/:spuId(\\d+)',
-        component: () => import('@/views/mall/product/spu/addForm.vue'),
+        component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuDetail',
         meta: {
           noCache: true,
