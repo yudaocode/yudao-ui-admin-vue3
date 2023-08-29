@@ -1,11 +1,11 @@
 <template>
-  <Dialog v-model="dialogVisible" title="商家备注" width="45%">
+  <Dialog v-model="dialogVisible" title="拒绝售后" width="45%">
     <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
-      <el-form-item label="备注">
+      <el-form-item label="审批备注">
         <el-input
-          v-model="formData.remark"
+          v-model="formData.auditReason"
           :rows="3"
-          placeholder="请输入订单备注"
+          placeholder="请输入审批备注"
           type="textarea"
         />
       </el-form-item>
@@ -17,9 +17,9 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import * as TradeOrderApi from '@/api/mall/trade/order'
+import * as AfterSaleApi from '@/api/mall/trade/afterSale/index'
 
-defineOptions({ name: 'OrderUpdateRemarkForm' })
+defineOptions({ name: 'UpdateAuditReasonForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -27,17 +27,17 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
-  id: 0, // 订单编号
-  remark: '' // 订单备注
+  id: 0, // 售后订单编号
+  auditReason: '' // 审批备注
 })
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const open = async (row: TradeOrderApi.OrderVO) => {
+const open = async (row: AfterSaleApi.TradeAfterSaleVO) => {
   resetForm()
   // 设置数据
   formData.value.id = row.id
-  formData.value.remark = row.remark
+  formData.value.auditReason = row.auditReason
   dialogVisible.value = true
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -49,7 +49,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = unref(formData)
-    await TradeOrderApi.updateRemark(data)
+    await AfterSaleApi.disagree(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
     // 发送操作成功的事件
@@ -62,8 +62,8 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: 0, // 订单编号
-    remark: '' // 订单备注
+    id: 0, // 售后订单编号
+    auditReason: '' // 审批备注
   }
   formRef.value?.resetFields()
 }

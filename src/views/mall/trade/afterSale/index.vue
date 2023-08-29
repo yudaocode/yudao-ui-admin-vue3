@@ -119,8 +119,8 @@
           <span>{{ floatToFixed2(scope.row.refundPrice) }}元</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="买家" prop="user.nickname" />
       <!-- TODO 芋艿：未来要加个会员链接 -->
+      <el-table-column align="center" label="买家" prop="user.nickname" />
       <el-table-column align="center" label="申请时间" prop="createTime" width="180">
         <template #default="scope">
           <span>{{ formatDate(scope.row.createTime) }}</span>

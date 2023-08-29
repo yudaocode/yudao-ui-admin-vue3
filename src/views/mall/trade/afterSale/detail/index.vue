@@ -2,61 +2,61 @@
   <ContentWrap>
     <!-- 订单信息 -->
     <el-descriptions title="退款订单信息">
-      <el-descriptions-item label="订单号: ">{{ orderInfo.orderNo }}</el-descriptions-item>
+      <el-descriptions-item label="订单号: ">{{ formData.orderNo }}</el-descriptions-item>
       <el-descriptions-item label="配送方式: ">
-        <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="orderInfo.order.deliveryType" />
+        <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="formData.order.deliveryType" />
       </el-descriptions-item>
       <el-descriptions-item label="订单类型: ">
-        <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="orderInfo.order.type" />
+        <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="formData.order.type" />
       </el-descriptions-item>
       <el-descriptions-item label="收货人: ">
-        {{ orderInfo.order.receiverName }}
+        {{ formData.order.receiverName }}
       </el-descriptions-item>
       <el-descriptions-item label="买家留言: ">
-        {{ orderInfo.order.userRemark }}
+        {{ formData.order.userRemark }}
       </el-descriptions-item>
       <el-descriptions-item label="订单来源: ">
-        <dict-tag :type="DICT_TYPE.TERMINAL" :value="orderInfo.order.terminal" />
+        <dict-tag :type="DICT_TYPE.TERMINAL" :value="formData.order.terminal" />
       </el-descriptions-item>
       <el-descriptions-item label="联系电话: ">
-        {{ orderInfo.order.receiverMobile }}
+        {{ formData.order.receiverMobile }}
       </el-descriptions-item>
-      <el-descriptions-item label="商家备注: ">{{ orderInfo.order.remark }}</el-descriptions-item>
+      <el-descriptions-item label="商家备注: ">{{ formData.order.remark }}</el-descriptions-item>
       <el-descriptions-item label="支付单号: ">
-        {{ orderInfo.order.payOrderId }}
+        {{ formData.order.payOrderId }}
       </el-descriptions-item>
       <el-descriptions-item label="付款方式: ">
-        <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="orderInfo.order.payChannelCode" />
+        <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="formData.order.payChannelCode" />
       </el-descriptions-item>
       <!-- TODO 芋艿：待实现：跳转会员 -->
-      <!-- <el-descriptions-item label="买家: ">{{ orderInfo.user.nickname }}</el-descriptions-item> -->
+      <!-- <el-descriptions-item label="买家: ">{{ formData.user.nickname }}</el-descriptions-item> -->
     </el-descriptions>
 
     <!-- 售后信息 -->
     <el-descriptions title="售后信息">
-      <el-descriptions-item label="退款编号: ">{{ orderInfo.no }}</el-descriptions-item>
+      <el-descriptions-item label="退款编号: ">{{ formData.no }}</el-descriptions-item>
       <el-descriptions-item label="申请时间: ">
-        {{ formatDate(orderInfo.auditTime) }}
+        {{ formatDate(formData.auditTime) }}
       </el-descriptions-item>
       <!-- TODO 营销活动待实现     -->
       <el-descriptions-item label="售后类型: ">
-        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_TYPE" :value="orderInfo.type" />
+        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_TYPE" :value="formData.type" />
       </el-descriptions-item>
       <el-descriptions-item label="售后方式: ">
-        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_WAY" :value="orderInfo.way" />
+        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_WAY" :value="formData.way" />
       </el-descriptions-item>
-      <el-descriptions-item label="退款金额: ">{{ orderInfo.refundPrice }}</el-descriptions-item>
-      <el-descriptions-item label="退款原因: ">{{ orderInfo.applyReason }}</el-descriptions-item>
+      <el-descriptions-item label="退款金额: ">{{ formData.refundPrice }}</el-descriptions-item>
+      <el-descriptions-item label="退款原因: ">{{ formData.applyReason }}</el-descriptions-item>
       <el-descriptions-item label="补充描述: ">
-        {{ orderInfo.applyDescription }}
+        {{ formData.applyDescription }}
       </el-descriptions-item>
-      <el-descriptions-item label="凭证图片: "> {{ orderInfo.applyPicUrls }}</el-descriptions-item>
+      <el-descriptions-item label="凭证图片: "> {{ formData.applyPicUrls }}</el-descriptions-item>
     </el-descriptions>
 
     <!-- 退款状态 -->
     <el-descriptions :column="1" title="退款状态">
       <el-descriptions-item label="退款状态: ">
-        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS" :value="orderInfo.status" />
+        <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS" :value="formData.status" />
       </el-descriptions-item>
       <el-descriptions-item label-class-name="no-colon">
         <el-button type="primary" @click="openForm('agree')">同意售后</el-button>
@@ -64,9 +64,6 @@
         <el-button type="primary" @click="openForm('receive')">确认收货</el-button>
         <el-button type="primary" @click="openForm('refuse')">拒绝收货</el-button>
         <el-button type="primary" @click="openForm('refund')">确认退款</el-button>
-        <el-button type="primary" @click="openForm('update-refunded')">
-          更新售后订单为已退款
-        </el-button>
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">提醒: </span></template>
@@ -81,7 +78,7 @@
       <el-descriptions-item labelClassName="no-colon">
         <el-row :gutter="20">
           <el-col :span="15">
-            <el-table :data="orderInfo.items" border>
+            <el-table :data="formData.items" border>
               <el-table-column label="商品" prop="spuName" width="auto">
                 <template #default="{ row }">
                   {{ row.spuName }}
@@ -114,40 +111,56 @@
     <!-- 售后信息 -->
     <el-descriptions title="售后日志" />
   </ContentWrap>
+
+  <!-- 各种操作的弹窗 -->
+  <UpdateAuditReasonForm ref="updateAuditReasonFormRef" @success="getDetail" />
 </template>
 <script lang="ts" setup>
 import * as AfterSaleApi from '@/api/mall/trade/afterSale/index'
 import { floatToFixed2 } from '@/utils'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
+import UpdateAuditReasonForm from '@/views/mall/trade/afterSale/components/UpdateAuditReasonForm.vue'
 
 defineOptions({ name: 'TradeOrderDetailForm' })
 
+const message = useMessage() // 消息弹窗
 const { params } = useRoute() // 查询参数
-const orderInfo = ref({
+const formData = ref({
   order: {}
 })
+const updateAuditReasonFormRef = ref() // 拒绝售后表单 Ref
 /** 获得详情 */
 const getDetail = async () => {
   const id = params.orderId as unknown as number
   if (id) {
-    const res = (await AfterSaleApi.getAfterSale(id)) as AfterSaleApi.TradeAfterSaleVO
-    orderInfo.value = res
+    formData.value = await AfterSaleApi.getAfterSale(id)
   }
 }
 const openForm = (type: string) => {
   switch (type) {
     case 'agree':
+      message.confirm('是否同意售后？').then(() => {
+        AfterSaleApi.agree(formData.value.id)
+      })
       break
     case 'disagree':
+      updateAuditReasonFormRef.value?.open(formData.value)
       break
     case 'receive':
+      message.confirm('是否确认收货？').then(() => {
+        AfterSaleApi.receive(formData.value.id)
+      })
       break
     case 'refuse':
+      message.confirm('是否拒绝收货？').then(() => {
+        AfterSaleApi.refuse(formData.value.id)
+      })
       break
     case 'refund':
-      break
-    case 'update-refunded':
+      message.confirm('是否确认退款？').then(() => {
+        AfterSaleApi.refund(formData.value.id)
+      })
       break
   }
 }
