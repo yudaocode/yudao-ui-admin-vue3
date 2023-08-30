@@ -5,6 +5,7 @@
       <el-form-item label="商品名称" prop="spuName">
         <el-input
           v-model="queryParams.spuName"
+          class="!w-280px"
           clearable
           placeholder="请输入商品 SPU 名称"
           @keyup.enter="handleQuery"
@@ -13,6 +14,7 @@
       <el-form-item label="退款编号" prop="no">
         <el-input
           v-model="queryParams.no"
+          class="!w-280px"
           clearable
           placeholder="请输入退款编号"
           @keyup.enter="handleQuery"
@@ -21,13 +23,19 @@
       <el-form-item label="订单编号" prop="orderNo">
         <el-input
           v-model="queryParams.orderNo"
+          class="!w-280px"
           clearable
           placeholder="请输入订单编号"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="售后状态" prop="status">
-        <el-select v-model="queryParams.status" clearable placeholder="请选择售后状态">
+        <el-select
+          v-model="queryParams.status"
+          class="!w-280px"
+          clearable
+          placeholder="请选择售后状态"
+        >
           <el-option label="全部" value="0" />
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.TRADE_AFTER_SALE_STATUS)"
@@ -38,7 +46,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="售后方式" prop="way">
-        <el-select v-model="queryParams.way" clearable placeholder="请选择售后方式">
+        <el-select
+          v-model="queryParams.way"
+          class="!w-280px"
+          clearable
+          placeholder="请选择售后方式"
+        >
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.TRADE_AFTER_SALE_WAY)"
             :key="dict.value"
@@ -48,7 +61,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="售后类型" prop="type">
-        <el-select v-model="queryParams.type" clearable placeholder="请选择售后类型">
+        <el-select
+          v-model="queryParams.type"
+          class="!w-280px"
+          clearable
+          placeholder="请选择售后类型"
+        >
           <el-option
             v-for="dict in getDictOptions(DICT_TYPE.TRADE_AFTER_SALE_TYPE)"
             :key="dict.value"
@@ -61,7 +79,7 @@
         <el-date-picker
           v-model="queryParams.createTime"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-280px"
+          class="!w-260px"
           end-placeholder="自定义时间"
           start-placeholder="自定义时间"
           type="daterange"
@@ -80,6 +98,7 @@
       </el-form-item>
     </el-form>
   </ContentWrap>
+
   <ContentWrap>
     <el-tabs v-model="queryParams.status" @tab-click="tabClick">
       <el-tab-pane
@@ -163,12 +182,7 @@ import { floatToFixed2 } from '@/utils'
 defineOptions({ name: 'TradeAfterSale' })
 
 const { push } = useRouter() // 路由跳转
-/** 商品图预览 */
-const imagePreview = (imgUrl: string) => {
-  createImageViewer({
-    urlList: [imgUrl]
-  })
-}
+
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref<AfterSaleApi.TradeAfterSaleVO[]>([]) // 列表的数据
@@ -228,9 +242,17 @@ const tabClick = async (tab: TabsPaneContext) => {
 const openAfterSaleDetail = (id: number) => {
   push({ name: 'TradeAfterSaleDetail', params: { orderId: id } })
 }
+
 /** 查看订单详情 */
 const openOrderDetail = (id: number) => {
   push({ name: 'TradeOrderDetail', params: { orderId: id } })
+}
+
+/** 商品图预览 */
+const imagePreview = (imgUrl: string) => {
+  createImageViewer({
+    urlList: [imgUrl]
+  })
 }
 
 onMounted(async () => {

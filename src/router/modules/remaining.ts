@@ -401,9 +401,9 @@ const remainingRouter: AppRouteRecordRaw[] = [
     },
     children: [
       {
-        path: 'orderDetail/:orderId(\\d+)',
+        path: 'orderDetail/:orderId(\\d+)', // TODO @puhui999：路径合理的是 trade/order/detail
         component: () => import('@/views/mall/trade/order/detail/index.vue'),
-        name: 'TradeOrderDetail',
+        name: 'TradeOrderDetail', // TODO @puhui999：路径合理的是 trade/after-sale/detail
         meta: { title: '订单详情', icon: '', activeMenu: '/trade/trade/order' }
       },
       {

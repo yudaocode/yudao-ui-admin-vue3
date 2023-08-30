@@ -43,26 +43,32 @@ export interface ProductPropertiesVO {
 export const getAfterSalePage = async (params) => {
   return await request.get({ url: `/trade/after-sale/page`, params })
 }
+
 // 获得交易售后详情
 export const getAfterSale = async (id: any) => {
   return await request.get({ url: `/trade/after-sale/get-detail?id=${id}` })
 }
+
 // 同意售后
 export const agree = async (id: any) => {
   return await request.put({ url: `/trade/after-sale/agree?id=${id}` })
 }
+
 // 拒绝售后
 export const disagree = async (data: any) => {
   return await request.put({ url: `/trade/after-sale/disagree`, data })
 }
+
 // 确认收货
 export const receive = async (id: any) => {
   return await request.put({ url: `/trade/after-sale/receive?id=${id}` })
 }
+
 // 拒绝收货
 export const refuse = async (id: any) => {
   return await request.put({ url: `/trade/after-sale/refuse?id=${id}` })
 }
+
 // 确认退款
 export const refund = async (id: any) => {
   return await request.put({ url: `/trade/after-sale/refund?id=${id}` })

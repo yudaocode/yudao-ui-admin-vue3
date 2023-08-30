@@ -1,7 +1,7 @@
 <template>
   <ContentWrap>
     <!-- 订单信息 -->
-    <el-descriptions title="退款订单信息">
+    <el-descriptions title="订单信息">
       <el-descriptions-item label="订单号: ">{{ formData.orderNo }}</el-descriptions-item>
       <el-descriptions-item label="配送方式: ">
         <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="formData.order.deliveryType" />
@@ -38,18 +38,20 @@
       <el-descriptions-item label="申请时间: ">
         {{ formatDate(formData.auditTime) }}
       </el-descriptions-item>
-      <!-- TODO 营销活动待实现     -->
+      <!-- TODO 营销活动待实现 -->
       <el-descriptions-item label="售后类型: ">
         <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_TYPE" :value="formData.type" />
       </el-descriptions-item>
       <el-descriptions-item label="售后方式: ">
         <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_WAY" :value="formData.way" />
       </el-descriptions-item>
+      <!-- TODO @puhui999：金额的格式化 -->
       <el-descriptions-item label="退款金额: ">{{ formData.refundPrice }}</el-descriptions-item>
       <el-descriptions-item label="退款原因: ">{{ formData.applyReason }}</el-descriptions-item>
       <el-descriptions-item label="补充描述: ">
         {{ formData.applyDescription }}
       </el-descriptions-item>
+      <!-- TODO @puhui999：数组，图片 -->
       <el-descriptions-item label="凭证图片: "> {{ formData.applyPicUrls }}</el-descriptions-item>
     </el-descriptions>
 
@@ -58,6 +60,7 @@
       <el-descriptions-item label="退款状态: ">
         <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS" :value="formData.status" />
       </el-descriptions-item>
+      <!-- TODO @puhui999：不同状态，展示不同按钮 -->
       <el-descriptions-item label-class-name="no-colon">
         <el-button type="primary" @click="openForm('agree')">同意售后</el-button>
         <el-button type="primary" @click="openForm('disagree')">拒绝售后</el-button>
@@ -108,7 +111,7 @@
         </el-row>
       </el-descriptions-item>
     </el-descriptions>
-    <!-- 售后信息 -->
+    <!-- 售后信息 TODO @puhui999：需要接入 -->
     <el-descriptions title="售后日志" />
   </ContentWrap>
 
@@ -130,6 +133,7 @@ const formData = ref({
   order: {}
 })
 const updateAuditReasonFormRef = ref() // 拒绝售后表单 Ref
+
 /** 获得详情 */
 const getDetail = async () => {
   const id = params.orderId as unknown as number
@@ -137,6 +141,8 @@ const getDetail = async () => {
     formData.value = await AfterSaleApi.getAfterSale(id)
   }
 }
+
+/** 各种操作 TODO @puhui999：是不是每个一个方法好点，干净点 */
 const openForm = (type: string) => {
   switch (type) {
     case 'agree':
