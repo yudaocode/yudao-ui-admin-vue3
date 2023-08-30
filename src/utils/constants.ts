@@ -220,6 +220,10 @@ export const PromotionProductScopeEnum = {
   SPU: {
     scope: 2,
     name: '指定商品参与'
+  },
+  CATEGORY: {
+    scope: 3,
+    name: '指定品类参与'
   }
 }
 

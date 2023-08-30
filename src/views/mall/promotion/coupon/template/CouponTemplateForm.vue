@@ -172,6 +172,12 @@
           </div>
         </div>
       </el-form-item>
+      <el-form-item
+        v-if="formData.productScope === PromotionProductScopeEnum.CATEGORY.scope"
+        prop="productCategoryIds"
+      >
+        <ProductCategorySelect v-model="formData.productCategoryIds" multiple />
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -190,6 +196,7 @@ import {
   PromotionProductScopeEnum
 } from '@/utils/constants'
 import SpuTableSelect from '@/views/mall/product/spu/components/SpuTableSelect.vue'
+import ProductCategorySelect from '@/views/mall/product/category/components/ProductCategorySelect.vue'
 
 defineOptions({ name: 'CouponTemplateForm' })
 
@@ -218,7 +225,8 @@ const formData = ref({
   fixedStartTerm: undefined,
   fixedEndTerm: undefined,
   productScope: PromotionProductScopeEnum.ALL.scope,
-  productSpuIds: []
+  productSpuIds: [],
+  productCategoryIds: []
 })
 const formRules = reactive({
   name: [{ required: true, message: '优惠券名称不能为空', trigger: 'blur' }],
@@ -235,7 +243,8 @@ const formRules = reactive({
   fixedStartTerm: [{ required: true, message: '开始领取天数不能为空', trigger: 'blur' }],
   fixedEndTerm: [{ required: true, message: '开始领取天数不能为空', trigger: 'blur' }],
   productScope: [{ required: true, message: '商品范围不能为空', trigger: 'blur' }],
-  productSpuIds: [{ required: true, message: '商品范围不能为空', trigger: 'blur' }]
+  productSpuIds: [{ required: true, message: '商品范围不能为空', trigger: 'blur' }],
+  productCategoryIds: [{ required: true, message: '分类范围不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const productSpus = ref<ProductSpuApi.Spu[]>([]) // 商品列表
@@ -302,6 +311,12 @@ const submitForm = async () => {
           ? formData.value.validTimes[1]
           : undefined
     } as CouponTemplateApi.CouponTemplateVO
+
+    if (formData.value.productCategoryIds?.length > 0) {
+      // 改个名字？加个字段？
+      data.productSpuIds = formData.value.productCategoryIds
+    }
+
     if (formType.value === 'create') {
       await CouponTemplateApi.createCouponTemplate(data)
       message.success(t('common.createSuccess'))
@@ -337,7 +352,8 @@ const resetForm = () => {
     fixedStartTerm: undefined,
     fixedEndTerm: undefined,
     productScope: PromotionProductScopeEnum.ALL.scope,
-    productSpuIds: []
+    productSpuIds: [],
+    productCategoryIds: []
   }
   formRef.value?.resetFields()
   productSpus.value = []
@@ -349,6 +365,10 @@ const getProductScope = async () => {
     case PromotionProductScopeEnum.SPU.scope:
       // 获得商品列表
       productSpus.value = await ProductSpuApi.getSpuDetailList(formData.value.productSpuIds)
+      break
+    case PromotionProductScopeEnum.CATEGORY.scope:
+      formData.value.productCategoryIds = formData.value.productSpuIds
+      formData.value.productSpuIds = []
       break
     default:
       break

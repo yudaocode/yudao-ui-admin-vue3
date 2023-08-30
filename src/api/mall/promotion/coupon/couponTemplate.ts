@@ -9,7 +9,7 @@ export interface CouponTemplateVO {
   takeType: number
   usePrice: number
   productScope: number
-  productSpuIds: string
+  productSpuIds: number[]
   validityType: number
   validStartTime: Date
   validEndTime: Date
