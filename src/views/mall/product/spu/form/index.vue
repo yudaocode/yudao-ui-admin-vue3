@@ -189,7 +189,7 @@ const submitForm = async () => {
 /** 关闭按钮 */
 const close = () => {
   delView(unref(currentRoute))
-  push('/product/product-spu')
+  push({ name: 'ProductSpu' })
 }
 /** 初始化 */
 onMounted(async () => {

@@ -59,7 +59,7 @@
       <el-table-column label="品牌名称" prop="name" sortable />
       <el-table-column label="品牌图片" align="center" prop="picUrl">
         <template #default="scope">
-          <img v-if="scope.row.picUrl" :src="scope.row.picUrl" alt="品牌图片" class="h-100px" />
+          <img v-if="scope.row.picUrl" :src="scope.row.picUrl" alt="品牌图片" class="h-30px" />
         </template>
       </el-table-column>
       <el-table-column label="品牌排序" align="center" prop="sort" />
