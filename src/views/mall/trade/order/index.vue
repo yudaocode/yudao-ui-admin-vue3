@@ -64,10 +64,17 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @puhui999：要不加个 deliveryType 筛选；配送方式；然后如果选了快递，就有【快递公司】筛选；如果选了自提，就有【自提门店】；然后把他们这 3 个，坐在一个 el-form-item 里；
-        目的是；有的时候，会筛选门店，然后做核销；这个时候，就需要筛选自提门店；
-       -->
-      <el-form-item label="快递公司" prop="type">
+      <el-form-item label="配送方式" prop="deliveryType">
+        <el-select v-model="queryParams.deliveryType" class="!w-280px" clearable placeholder="全部">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.TRADE_DELIVERY_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item v-if="queryParams.deliveryType === 1" label="快递公司">
         <el-select v-model="queryParams.logisticsId" class="!w-280px" clearable placeholder="全部">
           <el-option
             v-for="item in deliveryExpressList"
@@ -77,7 +84,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="自提门店" prop="type">
+      <el-form-item v-if="queryParams.deliveryType === 2" label="自提门店">
         <el-select
           v-model="queryParams.pickUpStoreId"
           class="!w-280px"
@@ -146,17 +153,17 @@
         </template>
         <template #default="scope">
           <el-table
+            :border="true"
             :data="scope.row.items"
             :header-cell-style="headerStyle"
             :span-method="spanMethod"
-            border
             style="width: 100%"
           >
             <el-table-column min-width="300" prop="spuName">
               <template #header>
                 <div
                   class="flex items-center"
-                  style="height: 35px; background-color: #f7f7f7; width: 100%"
+                  style="width: 100%; height: 35px; background-color: #f7f7f7"
                 >
                   <span class="mr-20px">订单号：{{ scope.row.no }} </span>
                   <span class="mr-20px">下单时间：{{ formatDate(scope.row.createTime) }}</span>
@@ -173,8 +180,8 @@
                     :value="scope.row.payChannelCode"
                     class="mr-20px"
                   />
-                  <v-else class="mr-20px" v-else>未支付</v-else>
-                  <span class="mr-20px" v-if="scope.row.payTime">
+                  <v-else v-else class="mr-20px">未支付</v-else>
+                  <span v-if="scope.row.payTime" class="mr-20px">
                     支付时间：{{ formatDate(scope.row.payTime) }}
                   </span>
                   <span>订单类型：</span>
@@ -280,7 +287,8 @@
                           发货
                         </el-dropdown-item>
                         <el-dropdown-item command="remark">
-                          <Icon icon="ep:chat-line-square" /> 备注
+                          <Icon icon="ep:chat-line-square" />
+                          备注
                         </el-dropdown-item>
                       </el-dropdown-menu>
                     </template>
@@ -306,10 +314,10 @@
   <OrderUpdateRemarkForm ref="updateRemarkForm" @success="getList" />
 </template>
 
-<script lang="ts" name="Order" setup>
+<script lang="ts" setup>
 import type { FormInstance, TableColumnCtx } from 'element-plus'
-import OrderDeliveryForm from './components/OrderDeliveryForm.vue'
-import OrderUpdateRemarkForm from './components/OrderUpdateRemarkForm.vue'
+import OrderDeliveryForm from '@/views/mall/trade/order/form/OrderDeliveryForm.vue'
+import OrderUpdateRemarkForm from '@/views/mall/trade/order/form/OrderUpdateRemarkForm.vue'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import * as PickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
@@ -317,6 +325,8 @@ import { formatDate } from '@/utils/formatTime'
 import { floatToFixed2 } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
+
+defineOptions({ name: 'TradeOrder' })
 
 const { currentRoute, push } = useRouter() // 路由跳转
 
@@ -334,11 +344,13 @@ const queryParams = reactive({
   userMobile: '',
   receiverName: '',
   receiverMobile: '',
+
   terminal: '',
   type: null,
   status: null,
   payChannelCode: '',
   createTime: [],
+  deliveryType: null,
   spuName: '',
   itemCount: '',
   pickUpStoreId: [],
@@ -384,7 +396,7 @@ const spanMethod = ({ row, rowIndex, columnIndex }: SpanMethodProps) => {
     (order) => order.items?.findIndex((item) => item.id === row.id) !== -1
   )?.items?.length
   // 要合并的列，从零开始
-  const colIndex = [3, 4, 5, 6]
+  const colIndex = [3, 4, 5, 6, 7]
   if (colIndex.includes(columnIndex)) {
     // 除了第一行其余的不要
     if (rowIndex !== 0) {
@@ -434,7 +446,7 @@ const imagePreview = (imgUrl: string) => {
 
 /** 查看订单详情 */
 const openForm = (id: number) => {
-  push({ name: 'TradeOrderDetailForm', params: { orderId: id } })
+  push({ name: 'TradeOrderDetail', params: { orderId: id } })
 }
 
 /** 操作分发 */

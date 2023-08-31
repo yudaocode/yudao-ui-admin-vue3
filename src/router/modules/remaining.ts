@@ -196,23 +196,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
     }
   },
   {
-    path: '/trade/order',
-    component: Layout,
-    name: 'order',
-    meta: {
-      hidden: true
-    },
-    children: [
-      {
-        path: 'detail',
-        name: 'TradeOrderDetail',
-        // component: () => import('@/views/mall/trade/order/tradeOrderDetail.vue'),
-        component: () => import('@/views/mall/trade/order/detail/index.vue'),
-        meta: { title: '订单详情', hidden: true }
-      }
-    ]
-  },
-  {
     path: '/403',
     component: () => import('@/views/Error/403.vue'),
     name: 'NoAccess',
@@ -357,7 +340,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: 'spu/add',
-        component: () => import('@/views/mall/product/spu/addForm.vue'),
+        component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuAdd',
         meta: {
           noCache: true,
@@ -370,7 +353,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       },
       {
         path: 'spu/edit/:spuId(\\d+)',
-        component: () => import('@/views/mall/product/spu/addForm.vue'),
+        component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuEdit',
         meta: {
           noCache: true,
@@ -383,7 +366,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
       },
       {
         path: 'spu/detail/:spuId(\\d+)',
-        component: () => import('@/views/mall/product/spu/addForm.vue'),
+        component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuDetail',
         meta: {
           noCache: true,
@@ -410,18 +393,24 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/trade/order',
+    path: '/trade',
     component: Layout,
-    name: 'Detail',
+    name: 'Order',
     meta: {
       hidden: true
     },
     children: [
       {
-        path: 'detail/:orderId(\\d+)',
+        path: 'order/detail/:orderId(\\d+)',
         component: () => import('@/views/mall/trade/order/detail/index.vue'),
-        name: 'TradeOrderDetailForm',
+        name: 'TradeOrderDetail',
         meta: { title: '订单详情', icon: '', activeMenu: '/trade/trade/order' }
+      },
+      {
+        path: 'after-sale/detail/:orderId(\\d+)',
+        component: () => import('@/views/mall/trade/afterSale/detail/index.vue'),
+        name: 'TradeAfterSaleDetail',
+        meta: { title: '退款详情', icon: '', activeMenu: '/trade/trade/after-sale' }
       }
     ]
   },

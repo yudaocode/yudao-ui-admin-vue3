@@ -208,10 +208,10 @@
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { floatToFixed2 } from '@/utils'
 import { DICT_TYPE } from '@/utils/dict'
-import OrderUpdateRemarkForm from '@/views/mall/trade/order/components/OrderUpdateRemarkForm.vue'
-import OrderDeliveryForm from '@/views/mall/trade/order/components/OrderDeliveryForm.vue'
-import OrderUpdateAddressForm from '@/views/mall/trade/order/components/OrderUpdateAddressForm.vue'
-import OrderUpdatePriceForm from '@/views/mall/trade/order/components/OrderUpdatePriceForm.vue'
+import OrderUpdateRemarkForm from '@/views/mall/trade/order/form/OrderUpdateRemarkForm.vue'
+import OrderDeliveryForm from '@/views/mall/trade/order/form/OrderDeliveryForm.vue'
+import OrderUpdateAddressForm from '@/views/mall/trade/order/form/OrderUpdateAddressForm.vue'
+import OrderUpdatePriceForm from '@/views/mall/trade/order/form/OrderUpdatePriceForm.vue'
 
 defineOptions({ name: 'TradeOrderDetailForm' })
 

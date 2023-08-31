@@ -80,6 +80,8 @@ const submitForm = async () => {
       if (res[0].values === null) {
         res[0].values = []
       }
+      // 不需要属性值
+      res[0].values = []
       attributeList.value.push(res[0]) // 因为只用一个
     }
     message.success(t('common.createSuccess'))
