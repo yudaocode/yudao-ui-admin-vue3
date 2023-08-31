@@ -1,6 +1,7 @@
 <template>
   <div class="user-info-head" @click="open()">
     <img v-if="sourceValue" :src="sourceValue" alt="avatar" class="img-circle img-lg" />
+    <img v-if="!sourceValue" :src="avatar" alt="avatar" class="img-circle img-lg" />
     <el-button v-if="showBtn" :class="`${prefixCls}-upload-btn`" @click="open()">
       {{ btnText ? btnText : t('cropper.selectImage') }}
     </el-button>
@@ -17,6 +18,7 @@ import { useDesign } from '@/hooks/web/useDesign'
 import { propTypes } from '@/utils/propTypes'
 import { useI18n } from 'vue-i18n'
 import CopperModal from './CopperModal.vue'
+import avatar from '@/assets/imgs/avatar.jpg'
 
 defineOptions({ name: 'CropperAvatar' })
 
