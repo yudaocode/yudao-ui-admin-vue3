@@ -6,6 +6,7 @@
       <el-descriptions-item label="配送方式: ">
         <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="formData.order.deliveryType" />
       </el-descriptions-item>
+      <!-- TODO 营销活动待实现 -->
       <el-descriptions-item label="订单类型: ">
         <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="formData.order.type" />
       </el-descriptions-item>
@@ -38,21 +39,28 @@
       <el-descriptions-item label="申请时间: ">
         {{ formatDate(formData.auditTime) }}
       </el-descriptions-item>
-      <!-- TODO 营销活动待实现 -->
       <el-descriptions-item label="售后类型: ">
         <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_TYPE" :value="formData.type" />
       </el-descriptions-item>
       <el-descriptions-item label="售后方式: ">
         <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_WAY" :value="formData.way" />
       </el-descriptions-item>
-      <!-- TODO @puhui999：金额的格式化 -->
-      <el-descriptions-item label="退款金额: ">{{ formData.refundPrice }}</el-descriptions-item>
+      <el-descriptions-item label="退款金额: ">
+        {{ floatToFixed2(formData.refundPrice) }}
+      </el-descriptions-item>
       <el-descriptions-item label="退款原因: ">{{ formData.applyReason }}</el-descriptions-item>
       <el-descriptions-item label="补充描述: ">
         {{ formData.applyDescription }}
       </el-descriptions-item>
-      <!-- TODO @puhui999：数组，图片 -->
-      <el-descriptions-item label="凭证图片: "> {{ formData.applyPicUrls }}</el-descriptions-item>
+      <el-descriptions-item label="凭证图片: ">
+        <el-image
+          v-for="(item, index) in formData.applyPicUrls"
+          :key="index"
+          :src="item.url"
+          class="w-60px h-60px mr-10px"
+          @click="imagePreview(formData.applyPicUrls)"
+        />
+      </el-descriptions-item>
     </el-descriptions>
 
     <!-- 退款状态 -->
@@ -60,13 +68,16 @@
       <el-descriptions-item label="退款状态: ">
         <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS" :value="formData.status" />
       </el-descriptions-item>
-      <!-- TODO @puhui999：不同状态，展示不同按钮 -->
       <el-descriptions-item label-class-name="no-colon">
-        <el-button type="primary" @click="openForm('agree')">同意售后</el-button>
-        <el-button type="primary" @click="openForm('disagree')">拒绝售后</el-button>
-        <el-button type="primary" @click="openForm('receive')">确认收货</el-button>
-        <el-button type="primary" @click="openForm('refuse')">拒绝收货</el-button>
-        <el-button type="primary" @click="openForm('refund')">确认退款</el-button>
+        <el-button v-if="formData.status === 10" type="primary" @click="agree">同意售后</el-button>
+        <el-button v-if="formData.status === 10" type="primary" @click="disagree">
+          拒绝售后
+        </el-button>
+        <el-button v-if="formData.status === 30" type="primary" @click="receive">
+          确认收货
+        </el-button>
+        <el-button v-if="formData.status === 30" type="primary" @click="refuse">拒绝收货</el-button>
+        <el-button v-if="formData.status === 40" type="primary" @click="refund">确认退款</el-button>
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">提醒: </span></template>
@@ -123,7 +134,9 @@ import * as AfterSaleApi from '@/api/mall/trade/afterSale/index'
 import { floatToFixed2 } from '@/utils'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
-import UpdateAuditReasonForm from '@/views/mall/trade/afterSale/components/UpdateAuditReasonForm.vue'
+import UpdateAuditReasonForm from '@/views/mall/trade/afterSale/form/AfterSaleDisagreeForm.vue'
+import { createImageViewer } from '@/components/ImageViewer'
+import { isArray } from '@/utils/is'
 
 defineOptions({ name: 'TradeOrderDetailForm' })
 
@@ -141,34 +154,57 @@ const getDetail = async () => {
     formData.value = await AfterSaleApi.getAfterSale(id)
   }
 }
-
-/** 各种操作 TODO @puhui999：是不是每个一个方法好点，干净点 */
-const openForm = (type: string) => {
-  switch (type) {
-    case 'agree':
-      message.confirm('是否同意售后？').then(() => {
-        AfterSaleApi.agree(formData.value.id)
-      })
-      break
-    case 'disagree':
-      updateAuditReasonFormRef.value?.open(formData.value)
-      break
-    case 'receive':
-      message.confirm('是否确认收货？').then(() => {
-        AfterSaleApi.receive(formData.value.id)
-      })
-      break
-    case 'refuse':
-      message.confirm('是否拒绝收货？').then(() => {
-        AfterSaleApi.refuse(formData.value.id)
-      })
-      break
-    case 'refund':
-      message.confirm('是否确认退款？').then(() => {
-        AfterSaleApi.refund(formData.value.id)
-      })
-      break
+/**
+ *  同意售后
+ */
+const agree = () => {
+  message.confirm('是否同意售后？').then(() => {
+    AfterSaleApi.agree(formData.value.id)
+  })
+}
+/**
+ *  拒绝售后
+ */
+const disagree = () => {
+  updateAuditReasonFormRef.value?.open(formData.value)
+}
+/**
+ *  确认收货
+ */
+const receive = () => {
+  message.confirm('是否确认收货？').then(() => {
+    AfterSaleApi.receive(formData.value.id)
+  })
+}
+/**
+ *  拒绝收货
+ */
+const refuse = () => {
+  message.confirm('是否拒绝收货？').then(() => {
+    AfterSaleApi.refuse(formData.value.id)
+  })
+}
+/**
+ *  确认退款
+ */
+const refund = () => {
+  message.confirm('是否确认退款？').then(() => {
+    AfterSaleApi.refund(formData.value.id)
+  })
+}
+/** 图片预览 */
+const imagePreview = (args) => {
+  const urlList = []
+  if (isArray(args)) {
+    args.forEach((item) => {
+      urlList.push(item.url)
+    })
+  } else {
+    urlList.push(args)
   }
+  createImageViewer({
+    urlList
+  })
 }
 onMounted(async () => {
   await getDetail()

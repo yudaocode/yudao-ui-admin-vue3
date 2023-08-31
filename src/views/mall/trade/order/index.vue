@@ -309,8 +309,8 @@
 
 <script lang="ts" setup>
 import type { FormInstance, TableColumnCtx } from 'element-plus'
-import OrderDeliveryForm from './components/OrderDeliveryForm.vue'
-import OrderUpdateRemarkForm from './components/OrderUpdateRemarkForm.vue'
+import OrderDeliveryForm from '@/views/mall/trade/order/form/OrderDeliveryForm.vue'
+import OrderUpdateRemarkForm from '@/views/mall/trade/order/form/OrderUpdateRemarkForm.vue'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import * as PickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'

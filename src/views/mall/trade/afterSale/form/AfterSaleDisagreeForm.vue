@@ -19,8 +19,7 @@
 <script lang="ts" setup>
 import * as AfterSaleApi from '@/api/mall/trade/afterSale/index'
 
-// TODO @puhui999：是不是改成 AfterSaleDisagreeForm ，更明确
-defineOptions({ name: 'UpdateAuditReasonForm' })
+defineOptions({ name: 'AfterSaleDisagreeForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
