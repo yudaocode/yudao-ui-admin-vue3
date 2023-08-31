@@ -64,10 +64,17 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @puhui999：要不加个 deliveryType 筛选；配送方式；然后如果选了快递，就有【快递公司】筛选；如果选了自提，就有【自提门店】；然后把他们这 3 个，坐在一个 el-form-item 里；
-        目的是；有的时候，会筛选门店，然后做核销；这个时候，就需要筛选自提门店；
-       -->
-      <el-form-item label="快递公司" prop="type">
+      <el-form-item label="配送方式" prop="deliveryType">
+        <el-select v-model="queryParams.deliveryType" class="!w-280px" clearable placeholder="全部">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.TRADE_DELIVERY_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item v-if="queryParams.deliveryType === 1" label="快递公司">
         <el-select v-model="queryParams.logisticsId" class="!w-280px" clearable placeholder="全部">
           <el-option
             v-for="item in deliveryExpressList"
@@ -77,7 +84,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="自提门店" prop="type">
+      <el-form-item v-if="queryParams.deliveryType === 2" label="自提门店">
         <el-select
           v-model="queryParams.pickUpStoreId"
           class="!w-280px"
@@ -337,11 +344,13 @@ const queryParams = reactive({
   userMobile: '',
   receiverName: '',
   receiverMobile: '',
+
   terminal: '',
   type: null,
   status: null,
   payChannelCode: '',
   createTime: [],
+  deliveryType: null,
   spuName: '',
   itemCount: '',
   pickUpStoreId: [],
