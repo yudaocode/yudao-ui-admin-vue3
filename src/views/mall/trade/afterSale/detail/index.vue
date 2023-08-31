@@ -154,44 +154,41 @@ const getDetail = async () => {
     formData.value = await AfterSaleApi.getAfterSale(id)
   }
 }
-/**
- *  同意售后
- */
+
+// TODO @puhui999：操作后，需要提示和刷新哈。
+/** 同意售后 */
 const agree = () => {
   message.confirm('是否同意售后？').then(() => {
     AfterSaleApi.agree(formData.value.id)
   })
 }
-/**
- *  拒绝售后
- */
+
+/** 拒绝售后 */
 const disagree = () => {
   updateAuditReasonFormRef.value?.open(formData.value)
 }
-/**
- *  确认收货
- */
+
+/** 确认收货 */
 const receive = () => {
   message.confirm('是否确认收货？').then(() => {
     AfterSaleApi.receive(formData.value.id)
   })
 }
-/**
- *  拒绝收货
- */
+
+/** 拒绝收货 */
 const refuse = () => {
   message.confirm('是否拒绝收货？').then(() => {
     AfterSaleApi.refuse(formData.value.id)
   })
 }
-/**
- *  确认退款
- */
+
+/** 确认退款 */
 const refund = () => {
   message.confirm('是否确认退款？').then(() => {
     AfterSaleApi.refund(formData.value.id)
   })
 }
+
 /** 图片预览 */
 const imagePreview = (args) => {
   const urlList = []
@@ -206,6 +203,7 @@ const imagePreview = (args) => {
     urlList
   })
 }
+
 onMounted(async () => {
   await getDetail()
 })
