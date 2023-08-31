@@ -393,7 +393,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/trade/order',
+    path: '/trade',
     component: Layout,
     name: 'Order',
     meta: {
@@ -401,13 +401,13 @@ const remainingRouter: AppRouteRecordRaw[] = [
     },
     children: [
       {
-        path: 'orderDetail/:orderId(\\d+)', // TODO @puhui999：路径合理的是 trade/order/detail
+        path: 'order/detail/:orderId(\\d+)',
         component: () => import('@/views/mall/trade/order/detail/index.vue'),
-        name: 'TradeOrderDetail', // TODO @puhui999：路径合理的是 trade/after-sale/detail
+        name: 'TradeOrderDetail',
         meta: { title: '订单详情', icon: '', activeMenu: '/trade/trade/order' }
       },
       {
-        path: 'afterSaleDetail/:orderId(\\d+)',
+        path: 'after-sale/detail/:orderId(\\d+)',
         component: () => import('@/views/mall/trade/afterSale/detail/index.vue'),
         name: 'TradeAfterSaleDetail',
         meta: { title: '退款详情', icon: '', activeMenu: '/trade/trade/after-sale' }
