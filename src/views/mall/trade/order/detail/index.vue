@@ -2,32 +2,32 @@
   <ContentWrap>
     <!-- 订单信息 -->
     <el-descriptions title="订单信息">
-      <el-descriptions-item label="订单号: ">{{ orderInfo.no }}</el-descriptions-item>
+      <el-descriptions-item label="订单号: ">{{ formData.no }}</el-descriptions-item>
       <el-descriptions-item label="配送方式: ">
-        <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="orderInfo.deliveryType" />
+        <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="formData.deliveryType!" />
       </el-descriptions-item>
       <!-- TODO 营销活动待实现     -->
       <el-descriptions-item label="营销活动: ">秒杀活动</el-descriptions-item>
       <el-descriptions-item label="订单类型: ">
-        <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="orderInfo.type" />
+        <dict-tag :type="DICT_TYPE.TRADE_ORDER_TYPE" :value="formData.type!" />
       </el-descriptions-item>
-      <el-descriptions-item label="收货人: ">{{ orderInfo.receiverName }}</el-descriptions-item>
-      <el-descriptions-item label="买家留言: ">{{ orderInfo.userRemark }}</el-descriptions-item>
+      <el-descriptions-item label="收货人: ">{{ formData.receiverName }}</el-descriptions-item>
+      <el-descriptions-item label="买家留言: ">{{ formData.userRemark }}</el-descriptions-item>
       <el-descriptions-item label="订单来源: ">
-        <dict-tag :type="DICT_TYPE.TERMINAL" :value="orderInfo.terminal" />
+        <dict-tag :type="DICT_TYPE.TERMINAL" :value="formData.terminal!" />
       </el-descriptions-item>
-      <el-descriptions-item label="联系电话: ">{{ orderInfo.receiverMobile }}</el-descriptions-item>
-      <el-descriptions-item label="商家备注: ">{{ orderInfo.remark }}</el-descriptions-item>
-      <el-descriptions-item label="支付单号: ">{{ orderInfo.payOrderId }}</el-descriptions-item>
+      <el-descriptions-item label="联系电话: ">{{ formData.receiverMobile }}</el-descriptions-item>
+      <el-descriptions-item label="商家备注: ">{{ formData.remark }}</el-descriptions-item>
+      <el-descriptions-item label="支付单号: ">{{ formData.payOrderId }}</el-descriptions-item>
       <el-descriptions-item label="付款方式: ">
-        <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="orderInfo.payChannelCode" />
+        <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="formData.payChannelCode!" />
       </el-descriptions-item>
-      <!-- <el-descriptions-item label="买家: ">{{ orderInfo.user.nickname }}</el-descriptions-item> -->
+      <!-- <el-descriptions-item label="买家: ">{{ formData.user.nickname }}</el-descriptions-item> -->
       <!-- TODO 芋艿：待实现：跳转会员 -->
       <el-descriptions-item label="收货地址: ">
-        {{ orderInfo.receiverAreaName }} {{ orderInfo.receiverDetailAddress }}
+        {{ formData.receiverAreaName }} {{ formData.receiverDetailAddress }}
         <el-link
-          v-clipboard:copy="orderInfo.receiverAreaName + ' ' + orderInfo.receiverDetailAddress"
+          v-clipboard:copy="formData.receiverAreaName + ' ' + formData.receiverDetailAddress"
           v-clipboard:success="clipboardSuccess"
           icon="ep:document-copy"
           type="primary"
@@ -38,7 +38,7 @@
     <!-- 订单状态 -->
     <el-descriptions :column="1" title="订单状态">
       <el-descriptions-item label="订单状态: ">
-        <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="orderInfo.status" />
+        <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="formData.status!" />
       </el-descriptions-item>
       <el-descriptions-item label-class-name="no-colon">
         <el-button type="primary" @click="openForm('updatePrice')">调整价格</el-button>
@@ -59,7 +59,7 @@
       <el-descriptions-item labelClassName="no-colon">
         <el-row :gutter="20">
           <el-col :span="15">
-            <el-table :data="orderInfo.items" border>
+            <el-table :data="formData.items" border>
               <el-table-column label="商品" prop="spuName" width="auto">
                 <template #default="{ row }">
                   {{ row.spuName }}
@@ -91,111 +91,75 @@
     </el-descriptions>
     <el-descriptions :column="6">
       <el-descriptions-item label="商品总额: ">
-        {{ floatToFixed2(orderInfo.totalPrice) }}元
+        {{ floatToFixed2(formData.totalPrice!) }}元
       </el-descriptions-item>
       <el-descriptions-item label="运费金额: ">
-        {{ floatToFixed2(orderInfo.deliveryPrice) }}元
+        {{ floatToFixed2(formData.deliveryPrice!) }}元
       </el-descriptions-item>
       <el-descriptions-item label="订单调价: ">
-        {{ floatToFixed2(orderInfo.updatePrice) }}元
+        {{ floatToFixed2(formData.adjustPrice!) }}元
       </el-descriptions-item>
 
       <el-descriptions-item>
         <template #label><span style="color: red">商品优惠: </span></template>
-        {{ floatToFixed2(orderInfo.couponPrice) }}元
+        {{ floatToFixed2(formData.couponPrice!) }}元
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">订单优惠: </span></template>
-        {{ floatToFixed2(orderInfo.discountPrice) }}元
+        {{ floatToFixed2(formData.discountPrice!) }}元
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">积分抵扣: </span></template>
-        {{ floatToFixed2(orderInfo.pointPrice) }}元
+        {{ floatToFixed2(formData.pointPrice!) }}元
       </el-descriptions-item>
 
       <el-descriptions-item v-for="item in 5" :key="item" label-class-name="no-colon" />
       <!-- 占位 -->
       <el-descriptions-item label="应付金额: ">
-        {{ floatToFixed2(orderInfo.payPrice) }}元
+        {{ floatToFixed2(formData.payPrice!) }}元
       </el-descriptions-item>
     </el-descriptions>
 
     <!-- TODO 芋艿：需要改改 -->
-    <div v-for="group in detailGroups" :key="group.title">
-      <el-descriptions :title="group.title" v-bind="group.groupProps">
-        <!-- 订单操作日志 -->
-        <el-descriptions-item v-if="group.key === 'orderLog'" labelClassName="no-colon">
-          <el-timeline>
-            <el-timeline-item
-              v-for="activity in detailInfo[group.key]"
-              :key="activity.timestamp"
-              :timestamp="activity.timestamp"
-            >
-              {{ activity.content }}
-            </el-timeline-item>
-          </el-timeline>
-        </el-descriptions-item>
-
-        <!-- 物流信息 TODO 等物流接口搞定重构一下 -->
-        <!-- TODO @xiaobai：改成一个包裹哈；目前只允许发货一次 -->
-        <el-descriptions-item v-if="group.key === 'expressInfo'" labelClassName="no-colon">
-          <!-- 循环包裹物流信息 -->
-          <div v-show="(pkgInfo = detailInfo[group.key]) !== null" style="border: 1px dashed">
-            <!-- 包裹详情 -->
-            <el-descriptions class="m-5">
-              <el-descriptions-item
-                v-for="(pkgChild, pkgCIdx) in group.children"
-                :key="`pkgChild_${pkgCIdx}`"
-                :label="pkgChild.label"
-                v-bind="pkgChild.childProps"
-              >
-                <!-- 包裹商品列表 -->
-                <template v-if="pkgChild.valueKey === 'goodsList' && pkgInfo[pkgChild.valueKey]">
-                  <div
-                    v-for="(goodInfo, goodInfoIdx) in pkgInfo[pkgChild.valueKey]"
-                    :key="`goodInfo_${goodInfoIdx}`"
-                    style="display: flex"
-                  >
-                    <el-image
-                      :src="goodInfo.imgUrl"
-                      style="width: 100px; height: 100px; flex: none"
-                    />
-                    <el-descriptions :column="1">
-                      <el-descriptions-item labelClassName="no-colon"
-                        >{{ goodInfo.name }}
-                      </el-descriptions-item>
-                      <el-descriptions-item label="数量"
-                        >{{ goodInfo.count }}
-                      </el-descriptions-item>
-                    </el-descriptions>
-                  </div>
-                </template>
-
-                <!-- 包裹物流详情 -->
-                <template v-else-if="pkgChild.valueKey === 'wlxq'">
-                  <el-row :gutter="10">
-                    <el-col :offset="1" :span="6">
-                      <el-timeline>
-                        <el-timeline-item
-                          v-for="(activity, index) in pkgInfo[pkgChild.valueKey]"
-                          :key="index"
-                          :timestamp="activity.timestamp"
-                        >
-                          {{ activity.content }}
-                        </el-timeline-item>
-                      </el-timeline>
-                    </el-col>
-                  </el-row>
-                </template>
-                <template v-else>
-                  {{ pkgInfo[pkgChild.valueKey] }}
-                </template>
-              </el-descriptions-item>
-            </el-descriptions>
-          </div>
-        </el-descriptions-item>
-      </el-descriptions>
-    </div>
+    <el-descriptions :column="4" title="物流信息">
+      <el-descriptions-item label="物流公司: ">
+        {{ deliveryExpressList.find((item) => item.id === formData.logisticsId)?.name }}
+      </el-descriptions-item>
+      <el-descriptions-item label="运单号: ">{{ formData.logisticsNo }}</el-descriptions-item>
+      <el-descriptions-item label="发货时间: ">
+        {{ formatDate(formData.deliveryTime!) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="物流状态: ">
+        <!-- TODO 物流状态怎么获取？ -->
+        <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="formData.deliveryStatus!" />
+      </el-descriptions-item>
+      <!-- 占位 4 -->
+      <el-descriptions-item v-for="item in 4" :key="item" label-class-name="no-colon" />
+      <el-descriptions-item label="物流详情: ">
+        <el-timeline>
+          <el-timeline-item
+            v-for="(express, index) in expressTrackList"
+            :key="index"
+            :timestamp="formatDate(express.time)"
+          >
+            {{ express.content }}
+          </el-timeline-item>
+        </el-timeline>
+      </el-descriptions-item>
+    </el-descriptions>
+    <el-descriptions title="订单操作日志">
+      <el-descriptions-item labelClassName="no-colon">
+        <el-timeline>
+          <el-timeline-item
+            v-for="(log, index) in formData.orderLog"
+            :key="index"
+            :timestamp="formatDate(log.createTime!)"
+          >
+            {{ log.content }}
+          </el-timeline-item>
+        </el-timeline>
+      </el-descriptions-item>
+    </el-descriptions>
   </ContentWrap>
 
   <!-- 各种操作的弹窗 -->
@@ -207,82 +171,21 @@
 <script lang="ts" setup>
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { floatToFixed2 } from '@/utils'
+import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import OrderUpdateRemarkForm from '@/views/mall/trade/order/form/OrderUpdateRemarkForm.vue'
 import OrderDeliveryForm from '@/views/mall/trade/order/form/OrderDeliveryForm.vue'
 import OrderUpdateAddressForm from '@/views/mall/trade/order/form/OrderUpdateAddressForm.vue'
 import OrderUpdatePriceForm from '@/views/mall/trade/order/form/OrderUpdatePriceForm.vue'
+import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 
 defineOptions({ name: 'TradeOrderDetailForm' })
 
 const message = useMessage() // 消息弹窗
 const { params } = useRoute() // 查询参数
-const orderInfo = ref<TradeOrderApi.OrderVO>({})
-
-// TODO @puhui999：这个改成直接读属性，不用按照这种写法；后续再改
-const detailGroups = ref([
-  {
-    title: '物流信息',
-    key: 'expressInfo',
-    children: [
-      { label: '发货时间: ', valueKey: 'fhsj' },
-      { label: '物流公司: ', valueKey: 'wlgs' },
-      { label: '运单号: ', valueKey: 'ydh' },
-      { label: '物流状态: ', valueKey: 'wlzt', childProps: { span: 3 } },
-      { label: '物流详情: ', valueKey: 'wlxq' }
-    ]
-  },
-  {
-    title: '订单操作日志',
-    key: 'orderLog'
-  }
-])
-
-// TODO @puhui999：从后台读数据哈。后续再改
-const detailInfo = ref({
-  // 物流信息
-  expressInfo: {
-    label: '包裹1',
-    name: 'bg1',
-    fhsj: '2022-11-03 16:50:45',
-    wlgs: '极兔',
-    ydh: '2132123',
-    wlzt: '不支持此快递公司',
-    wlxq: [
-      {
-        content: '正在派送途中,请您准备签收(派件人:王涛,电话:13854563814)',
-        timestamp: '2018-04-15 15:00:16'
-      },
-      {
-        content: '快件到达 【烟台龙口东江村委营业点】',
-        timestamp: '2018-04-13 14:54:19'
-      },
-      {
-        content: '快件已发车',
-        timestamp: '2018-04-11 12:55:52'
-      },
-      {
-        content: '快件已发车',
-        timestamp: '2018-04-11 12:55:52'
-      },
-      {
-        content: '快件已发车',
-        timestamp: '2018-04-11 12:55:52'
-      }
-    ]
-  },
-  orderLog: [
-    // 订单操作日志
-    {
-      content: '买家【乌鸦】关闭了订单',
-      timestamp: '2018-04-15 15:00:16'
-    },
-    {
-      content: '买家【乌鸦】下单了',
-      timestamp: '2018-04-15 15:00:16'
-    }
-  ],
-  goodsInfo: [] // 商品详情tableData
+// 订单详情
+const formData = ref<TradeOrderApi.OrderVO>({
+  orderLog: []
 })
 
 const deliveryFormRef = ref() // 发货表单 Ref
@@ -292,16 +195,16 @@ const updatePriceFormRef = ref() // 订单调价表单 Ref
 const openForm = (type: string) => {
   switch (type) {
     case 'remark':
-      updateRemarkForm.value?.open(orderInfo.value)
+      updateRemarkForm.value?.open(formData.value)
       break
     case 'delivery':
-      deliveryFormRef.value?.open(orderInfo.value)
+      deliveryFormRef.value?.open(formData.value)
       break
     case 'updateAddress':
-      updateAddressFormRef.value?.open(orderInfo.value)
+      updateAddressFormRef.value?.open(formData.value)
       break
     case 'updatePrice':
-      updatePriceFormRef.value?.open(orderInfo.value)
+      updatePriceFormRef.value?.open(formData.value)
       break
   }
 }
@@ -311,12 +214,15 @@ const getDetail = async () => {
   const id = params.orderId as unknown as number
   if (id) {
     const res = (await TradeOrderApi.getOrder(id)) as TradeOrderApi.OrderVO
-    orderInfo.value = res
+    formData.value = res
   }
 }
-
+const deliveryExpressList = ref([]) // 物流公司
+const expressTrackList = ref([]) // 物流详情
 onMounted(async () => {
   await getDetail()
+  deliveryExpressList.value = await DeliveryExpressApi.getSimpleDeliveryExpressList()
+  expressTrackList.value = await TradeOrderApi.getExpressTrackList(formData.value.id!)
 })
 
 const clipboardSuccess = () => {

@@ -109,7 +109,12 @@
       <!-- 多规格添加-->
       <el-col :span="24">
         <el-form-item v-if="!formData.specType">
-          <SkuList ref="skuListRef" :prop-form-data="formData" :propertyList="propertyList" />
+          <SkuList
+            ref="skuListRef"
+            :prop-form-data="formData"
+            :propertyList="propertyList"
+            :rule-config="ruleConfig"
+          />
         </el-form-item>
         <el-form-item v-if="formData.specType" label="商品属性">
           <el-button class="mr-15px mb-10px" @click="attributesAddFormRef.open">添加规格</el-button>
@@ -120,7 +125,12 @@
             <SkuList :is-batch="true" :prop-form-data="formData" :propertyList="propertyList" />
           </el-form-item>
           <el-form-item label="属性列表">
-            <SkuList ref="skuListRef" :prop-form-data="formData" :propertyList="propertyList" />
+            <SkuList
+              ref="skuListRef"
+              :prop-form-data="formData"
+              :propertyList="propertyList"
+              :rule-config="ruleConfig"
+            />
           </el-form-item>
         </template>
       </el-col>
@@ -175,7 +185,7 @@ import { propTypes } from '@/utils/propTypes'
 import { checkSelectedNode, defaultProps, handleTree, treeToString } from '@/utils/tree'
 import { createImageViewer } from '@/components/ImageViewer'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { getPropertyList, SkuList } from '@/views/mall/product/spu/components/index.ts'
+import { getPropertyList, RuleConfig, SkuList } from '@/views/mall/product/spu/components/index.ts'
 import ProductAttributes from './ProductAttributes.vue'
 import ProductPropertyAddForm from './ProductPropertyAddForm.vue'
 import { basicInfoSchema } from './spu.data'
@@ -185,6 +195,30 @@ import * as ProductBrandApi from '@/api/mall/product/brand'
 import * as ExpressTemplateApi from '@/api/mall/trade/delivery/expressTemplate'
 
 defineOptions({ name: 'ProductSpuBasicInfoForm' })
+
+// sku 相关属性校验规则
+const ruleConfig: RuleConfig[] = [
+  {
+    name: 'stock',
+    rule: (arg) => arg >= 1,
+    message: '商品库存必须大于等于 1 ！！！'
+  },
+  {
+    name: 'price',
+    rule: (arg) => arg >= 0.01,
+    message: '商品销售价格必须大于等于 0.01 ！！！'
+  },
+  {
+    name: 'marketPrice',
+    rule: (arg) => arg >= 0.01,
+    message: '商品市场价格必须大于等于 0.01 ！！！'
+  },
+  {
+    name: 'costPrice',
+    rule: (arg) => arg >= 0.01,
+    message: '商品成本价格必须大于等于 0.01 ！！！'
+  }
+]
 
 // ====== 商品详情相关操作 ======
 const { allSchemas } = useCrudSchemas(basicInfoSchema)

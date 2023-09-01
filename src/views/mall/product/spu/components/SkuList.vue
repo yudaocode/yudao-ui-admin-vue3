@@ -328,24 +328,15 @@ const tableHeaders = ref<{ prop: string; label: string }[]>([]) // 多属性表�
  * 保存时，每个商品规格的表单要校验下。例如说，销售金额最低是 0.01 这种。
  */
 const validateSku = () => {
-  const checks = ['price', 'marketPrice', 'costPrice']
   let warningInfo = '请检查商品各行相关属性配置，'
   let validate = true // 默认通过
   for (const sku of formData.value!.skus!) {
     // 作为活动组件的校验
-    if (props.isActivityComponent) {
-      for (const rule of props?.ruleConfig) {
-        const arg = getValue(sku, rule.name)
-        if (!rule.rule(arg)) {
-          validate = false // 只要有一个不通过则直接不通过
-          warningInfo += rule.message
-          break
-        }
-      }
-    } else {
-      if (checks.some((check) => sku[check] < 0.01)) {
+    for (const rule of props?.ruleConfig) {
+      const arg = getValue(sku, rule.name)
+      if (!rule.rule(arg)) {
         validate = false // 只要有一个不通过则直接不通过
-        warningInfo = '商品相关价格不能低于 0.01 元！！'
+        warningInfo += rule.message
         break
       }
     }
