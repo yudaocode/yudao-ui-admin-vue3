@@ -73,14 +73,6 @@ export function getCouponTemplatePage(params: PageParam) {
   })
 }
 
-// 获得可用于领取的优惠劵模板分页
-export function getCanTakeCouponTemplatePage(params: PageParam) {
-  return request.get({
-    url: '/promotion/coupon-template/can-take-page',
-    params: params
-  })
-}
-
 // 导出优惠劵模板 Excel
 export function exportCouponTemplateExcel(params: PageParam) {
   return request.get({
