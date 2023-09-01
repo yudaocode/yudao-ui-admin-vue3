@@ -166,7 +166,7 @@ import UpdateAuditReasonForm from '@/views/mall/trade/afterSale/form/AfterSaleDi
 import { createImageViewer } from '@/components/ImageViewer'
 import { isArray } from '@/utils/is'
 
-defineOptions({ name: 'TradeOrderDetailForm' })
+defineOptions({ name: 'TradeAfterSaleDetail' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

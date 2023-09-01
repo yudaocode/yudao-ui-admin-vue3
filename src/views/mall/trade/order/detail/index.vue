@@ -23,7 +23,7 @@
         <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="formData.payChannelCode!" />
       </el-descriptions-item>
       <!-- <el-descriptions-item label="买家: ">{{ formData.user.nickname }}</el-descriptions-item> -->
-      <!-- TODO 芋艿：待实现：跳转会员 -->
+      <!-- TODO @puhui999：待实现：跳转会员 -->
       <el-descriptions-item label="收货地址: ">
         {{ formData.receiverAreaName }} {{ formData.receiverDetailAddress }}
         <el-link
@@ -40,6 +40,7 @@
       <el-descriptions-item label="订单状态: ">
         <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="formData.status!" />
       </el-descriptions-item>
+      <!-- TODO @puhui999：根据状态，进行展示按钮 -->
       <el-descriptions-item label-class-name="no-colon">
         <el-button type="primary" @click="openForm('updatePrice')">调整价格</el-button>
         <el-button type="primary" @click="openForm('remark')">备注</el-button>
@@ -179,15 +180,16 @@ import OrderUpdateAddressForm from '@/views/mall/trade/order/form/OrderUpdateAdd
 import OrderUpdatePriceForm from '@/views/mall/trade/order/form/OrderUpdatePriceForm.vue'
 import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 
-defineOptions({ name: 'TradeOrderDetailForm' })
+defineOptions({ name: 'TradeOrderDetail' })
 
 const message = useMessage() // 消息弹窗
-const { params } = useRoute() // 查询参数
+
 // 订单详情
 const formData = ref<TradeOrderApi.OrderVO>({
-  orderLog: []
+  orderLog: [] // TODO @puhui999：orderLogs
 })
 
+// TODO @puhui999：这个最好也拆掉哈
 const deliveryFormRef = ref() // 发货表单 Ref
 const updateRemarkForm = ref() // 订单备注表单 Ref
 const updateAddressFormRef = ref() // 收货地址表单 Ref
@@ -210,6 +212,7 @@ const openForm = (type: string) => {
 }
 
 /** 获得详情 */
+const { params } = useRoute() // 查询参数
 const getDetail = async () => {
   const id = params.orderId as unknown as number
   if (id) {
@@ -217,6 +220,13 @@ const getDetail = async () => {
     formData.value = res
   }
 }
+
+/** 复制 */
+const clipboardSuccess = () => {
+  message.success('复制成功')
+}
+
+/** 初始化 **/
 const deliveryExpressList = ref([]) // 物流公司
 const expressTrackList = ref([]) // 物流详情
 onMounted(async () => {
@@ -224,10 +234,6 @@ onMounted(async () => {
   deliveryExpressList.value = await DeliveryExpressApi.getSimpleDeliveryExpressList()
   expressTrackList.value = await TradeOrderApi.getExpressTrackList(formData.value.id!)
 })
-
-const clipboardSuccess = () => {
-  message.success('复制成功')
-}
 </script>
 <style lang="scss" scoped>
 :deep(.el-descriptions) {
