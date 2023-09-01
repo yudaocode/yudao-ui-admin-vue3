@@ -122,8 +122,36 @@
         </el-row>
       </el-descriptions-item>
     </el-descriptions>
-    <!-- 售后信息 TODO @puhui999：需要接入 -->
-    <el-descriptions title="售后日志" />
+    <el-descriptions title="售后日志">
+      <el-descriptions-item labelClassName="no-colon">
+        <el-timeline>
+          <el-timeline-item
+            v-for="saleLog in formData.afterSaleLog"
+            :key="saleLog.id"
+            :timestamp="formatDate(saleLog.createTime)"
+            placement="top"
+          >
+            <el-card>
+              <span>用户类型：</span>
+              <dict-tag :type="DICT_TYPE.USER_TYPE" :value="saleLog.userType" class="mr-10px" />
+              <span>售后状态(之前)：</span>
+              <dict-tag
+                :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS"
+                :value="saleLog.beforeStatus"
+                class="mr-10px"
+              />
+              <span>售后状态(之后)：</span>
+              <dict-tag
+                :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS"
+                :value="saleLog.afterStatus"
+                class="mr-10px"
+              />
+              <span>操作明细：{{ saleLog.content }}</span>
+            </el-card>
+          </el-timeline-item>
+        </el-timeline>
+      </el-descriptions-item>
+    </el-descriptions>
   </ContentWrap>
 
   <!-- 各种操作的弹窗 -->
@@ -140,10 +168,12 @@ import { isArray } from '@/utils/is'
 
 defineOptions({ name: 'TradeOrderDetailForm' })
 
+const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 const { params } = useRoute() // 查询参数
 const formData = ref({
-  order: {}
+  order: {},
+  afterSaleLog: []
 })
 const updateAuditReasonFormRef = ref() // 拒绝售后表单 Ref
 
@@ -155,11 +185,12 @@ const getDetail = async () => {
   }
 }
 
-// TODO @puhui999：操作后，需要提示和刷新哈。
 /** 同意售后 */
 const agree = () => {
   message.confirm('是否同意售后？').then(() => {
     AfterSaleApi.agree(formData.value.id)
+    message.success(t('common.success'))
+    getDetail()
   })
 }
 
@@ -172,6 +203,8 @@ const disagree = () => {
 const receive = () => {
   message.confirm('是否确认收货？').then(() => {
     AfterSaleApi.receive(formData.value.id)
+    message.success(t('common.success'))
+    getDetail()
   })
 }
 
@@ -179,6 +212,8 @@ const receive = () => {
 const refuse = () => {
   message.confirm('是否拒绝收货？').then(() => {
     AfterSaleApi.refuse(formData.value.id)
+    message.success(t('common.success'))
+    getDetail()
   })
 }
 
@@ -186,6 +221,8 @@ const refuse = () => {
 const refund = () => {
   message.confirm('是否确认退款？').then(() => {
     AfterSaleApi.refund(formData.value.id)
+    message.success(t('common.success'))
+    getDetail()
   })
 }
 
