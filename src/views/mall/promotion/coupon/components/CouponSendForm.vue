@@ -93,6 +93,7 @@ import {
   usePriceFormat,
   validityTypeFormat
 } from '@/views/mall/promotion/coupon/formatter'
+import { CouponTemplateTakeTypeEnum } from '@/utils/constants'
 
 defineOptions({ name: 'PromotionCouponSendForm' })
 
@@ -105,7 +106,8 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
-  name: null
+  name: null,
+  canTakeTypes: [CouponTemplateTakeTypeEnum.BY_ADMIN.type]
 }) // 查询参数
 const queryFormRef = ref() // 搜索的表单
 // 领取人的编号列表
@@ -125,7 +127,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const getList = async () => {
   loading.value = true
   try {
-    const data = await CouponTemplateApi.getCanTakeCouponTemplatePage(queryParams.value)
+    const data = await CouponTemplateApi.getCouponTemplatePage(queryParams.value)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -135,7 +137,7 @@ const getList = async () => {
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
-  queryParams.pageNo = 1
+  queryParams.value.pageNo = 1
   getList()
 }
 
@@ -157,9 +159,4 @@ const handleSendCoupon = async (templateId: number) => {
     sendLoading.value = false
   }
 }
-
-/** 初始化 **/
-// onMounted(async () => {
-// await getList()
-// })
 </script>

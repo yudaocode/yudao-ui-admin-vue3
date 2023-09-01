@@ -210,6 +210,24 @@ export const CouponTemplateValidityTypeEnum = {
 }
 
 /**
+ * 优惠劵模板的领取方式的枚举
+ */
+export const CouponTemplateTakeTypeEnum = {
+  BY_USER: {
+    type: 1,
+    name: '直接领取'
+  },
+  BY_ADMIN: {
+    type: 2,
+    name: '指定发放'
+  },
+  BY_REGISTER: {
+    type: 3,
+    name: '新人券'
+  }
+}
+
+/**
  * 营销的商品范围枚举
  */
 export const PromotionProductScopeEnum = {
