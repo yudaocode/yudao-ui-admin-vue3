@@ -15,11 +15,11 @@ export interface OrderVO {
   cancelTime?: Date | null // 订单取消时间
   cancelType?: number | null // 取消类型
   remark?: string // 商家备注
-  payOrderId: number | null // 支付订单编号
+  payOrderId?: number | null // 支付订单编号
   payed?: boolean // 是否已支付
   payTime?: Date | null // 付款时间
   payChannelCode?: string // 支付渠道
-  originalPrice?: number | null // 商品原价（总）
+  totalPrice?: number | null // 商品原价（总）
   orderPrice?: number | null // 订单原价（总）
   discountPrice?: number | null // 订单优惠（总）
   deliveryPrice?: number | null // 运费金额
@@ -44,12 +44,19 @@ export interface OrderVO {
   pointPrice?: number | null // 积分抵扣的金额
   receiverAreaName?: string //收件人地区名字
   items?: OrderItemRespVO[] // 订单项列表
-  //用户信息
+  // 用户信息
   user?: {
     id?: number | null
     nickname?: string
     avatar?: string
   }
+  // 订单操作日志
+  orderLog: orderLog[]
+}
+
+export interface orderLog {
+  content?: string
+  createTime?: Date
 }
 
 export interface OrderItemRespVO {
@@ -92,6 +99,11 @@ export const getOrderPage = async (params) => {
 // 查询交易订单详情
 export const getOrder = async (id: number | null) => {
   return await request.get({ url: `/trade/order/get-detail?id=` + id })
+}
+
+// 查询交易订单物流详情
+export const getExpressTrackList = async (id: number | null) => {
+  return await request.get({ url: `/trade/order/get-express-track-list?id=` + id })
 }
 
 export interface DeliveryVO {
