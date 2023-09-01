@@ -210,7 +210,7 @@ const emits = defineEmits<{
 
 /** 全选 */
 const handleCheckAll = (checked: boolean) => {
-  //todo 不触发？
+  debugger
   console.log('checkAll', checked)
   allChecked.value = checked
   const index = checkedPageNos.value.indexOf(queryParams.value.pageNo)

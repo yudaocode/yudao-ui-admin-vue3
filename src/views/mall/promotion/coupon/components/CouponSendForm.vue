@@ -107,7 +107,7 @@ const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
   name: null,
-  canTakeTypes: [CouponTemplateTakeTypeEnum.BY_ADMIN.type]
+  canTakeTypes: [CouponTemplateTakeTypeEnum.ADMIN.type]
 }) // 查询参数
 const queryFormRef = ref() // 搜索的表单
 // 领取人的编号列表
