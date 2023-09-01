@@ -1,5 +1,6 @@
 <template>
   <Dialog v-model="dialogVisible" :appendToBody="true" title="发送优惠券" width="70%">
+    <!-- 搜索工作栏 -->
     <el-form
       ref="queryFormRef"
       :inline="true"
@@ -27,6 +28,8 @@
         </el-button>
       </el-form-item>
     </el-form>
+
+    <!-- 列表 -->
     <el-table v-loading="loading" :data="list" show-overflow-tooltip>
       <el-table-column align="center" label="优惠券名称" prop="name" min-width="60" />
       <el-table-column
@@ -41,7 +44,7 @@
         label="最低消费"
         prop="usePrice"
         min-width="60"
-        :formatter="userPriceFormat"
+        :formatter="usePriceFormat"
       />
       <el-table-column
         align="center"
@@ -72,6 +75,7 @@
       </el-table-column>
     </el-table>
     <!-- 分页 -->
+    <!-- TODO 疯狂：可以看看，为啥弹窗没把分页包进去，可能和 footer 有关？ -->
     <Pagination
       v-model:limit="queryParams.pageSize"
       v-model:page="queryParams.pageNo"
@@ -80,18 +84,17 @@
     />
   </Dialog>
 </template>
-
 <script lang="ts" setup>
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
 import * as CouponApi from '@/api/mall/promotion/coupon/coupon'
 import {
   discountFormat,
   remainedCountFormat,
-  userPriceFormat,
+  usePriceFormat,
   validityTypeFormat
 } from '@/views/mall/promotion/coupon/formatter'
 
-defineOptions({ name: 'PromotionCouponSend' })
+defineOptions({ name: 'PromotionCouponSendForm' })
 
 const message = useMessage() // 消息弹窗
 const total = ref(0) // 列表的总页数
@@ -147,7 +150,7 @@ const handleSendCoupon = async (templateId: number) => {
   try {
     sendLoading.value = true
     await CouponApi.sendCoupon({ templateId, userIds })
-
+    // 提示
     message.success('发送成功')
     dialogVisible.value = false
   } finally {

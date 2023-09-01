@@ -10,7 +10,41 @@
       <el-form-item label="优惠券名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入优惠券名称" />
       </el-form-item>
-      <el-form-item label="优惠券类型" prop="discountType">
+      <el-form-item label="优惠劵类型" prop="productScope">
+        <el-radio-group v-model="formData.productScope">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_PRODUCT_SCOPE)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item
+        label="商品"
+        v-if="formData.productScope === PromotionProductScopeEnum.SPU.scope"
+        prop="productSpuIds"
+      >
+        <div class="flex items-center gap-1 flex-wrap">
+          <div class="select-box spu-pic" v-for="(spu, index) in productSpus" :key="spu.id">
+            <el-image :src="spu.picUrl" />
+            <Icon icon="ep:circle-close-filled" class="del-icon" @click="handleRemoveSpu(index)" />
+          </div>
+          <div class="select-box" @click="openSpuTableSelect">
+            <Icon icon="ep:plus" />
+          </div>
+        </div>
+      </el-form-item>
+      <!-- TODO 疯狂：要不把 productSpuIds 改成 productScopeValues，更通用？另外，改完后，涉及到优惠劵的匹配逻辑，要补充分类相关的逻辑，例如说获得匹配的优惠劵列表之类的，包括使用卷的时候； -->
+      <el-form-item
+        label="分类"
+        v-if="formData.productScope === PromotionProductScopeEnum.CATEGORY.scope"
+        prop="productCategoryIds"
+      >
+        <ProductCategorySelect v-model="formData.productCategoryIds" />
+      </el-form-item>
+      <el-form-item label="优惠类型" prop="discountType">
         <el-radio-group v-model="formData.discountType">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_DISCOUNT_TYPE)"
@@ -146,37 +180,6 @@
           :min="0"
         />
         天有效
-      </el-form-item>
-      <el-form-item label="活动商品" prop="productScope">
-        <el-radio-group v-model="formData.productScope">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_PRODUCT_SCOPE)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item
-        v-if="formData.productScope === PromotionProductScopeEnum.SPU.scope"
-        prop="productSpuIds"
-      >
-        <div class="flex items-center gap-1 flex-wrap">
-          <div class="select-box spu-pic" v-for="(spu, index) in productSpus" :key="spu.id">
-            <el-image :src="spu.picUrl" />
-            <Icon icon="ep:circle-close-filled" class="del-icon" @click="handleRemoveSpu(index)" />
-          </div>
-          <div class="select-box" @click="openSpuTableSelect">
-            <Icon icon="ep:plus" />
-          </div>
-        </div>
-      </el-form-item>
-      <el-form-item
-        v-if="formData.productScope === PromotionProductScopeEnum.CATEGORY.scope"
-        prop="productCategoryIds"
-      >
-        <ProductCategorySelect v-model="formData.productCategoryIds" multiple />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -367,6 +370,7 @@ const getProductScope = async () => {
       productSpus.value = await ProductSpuApi.getSpuDetailList(formData.value.productSpuIds)
       break
     case PromotionProductScopeEnum.CATEGORY.scope:
+      // TODO @疯狂：貌似分类不会选中。
       formData.value.productCategoryIds = formData.value.productSpuIds
       formData.value.productSpuIds = []
       break
@@ -375,7 +379,7 @@ const getProductScope = async () => {
   }
 }
 
-/** 活动商品 按钮 */
+/** 活动商品的按钮 */
 const spuTableSelectRef = ref()
 const openSpuTableSelect = () => {
   spuTableSelectRef.value.open(productSpus.value)

@@ -24,7 +24,7 @@ const props = defineProps({
   multiple: propTypes.bool.def(false) // 是否多选
 })
 
-/** 选中的分类ID */
+/** 选中的分类 ID */
 const selectCategoryId = computed({
   get: () => {
     return props.value
@@ -37,8 +37,8 @@ const selectCategoryId = computed({
 /** 分类选择 */
 const emit = defineEmits(['update:modelValue'])
 
+/** 初始化 **/
 const categoryList = ref([]) // 分类树
-
 onMounted(async () => {
   // 获得分类树
   const data = await ProductCategoryApi.getCategoryList({})

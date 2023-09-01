@@ -39,6 +39,6 @@ export const remainedCountFormat = (row: CouponTemplateVO) => {
 }
 
 // 格式化【最低消费】
-export const userPriceFormat = (row: CouponTemplateVO) => {
+export const usePriceFormat = (row: CouponTemplateVO) => {
   return `￥${floatToFixed2(row.usePrice)}`
 }

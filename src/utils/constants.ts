@@ -215,15 +215,15 @@ export const CouponTemplateValidityTypeEnum = {
 export const PromotionProductScopeEnum = {
   ALL: {
     scope: 1,
-    name: '全部商品参与'
+    name: '通用劵'
   },
   SPU: {
     scope: 2,
-    name: '指定商品参与'
+    name: '商品劵'
   },
   CATEGORY: {
     scope: 3,
-    name: '指定品类参与'
+    name: '品类劵'
   }
 }
 

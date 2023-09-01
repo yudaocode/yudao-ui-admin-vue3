@@ -154,7 +154,7 @@
   <!-- 修改用户等级弹窗 -->
   <UpdateLevelForm ref="updateLevelFormRef" @success="getList" />
   <!-- 发送优惠券弹窗 -->
-  <CouponSend ref="couponSend" />
+  <CouponSendForm ref="couponSendFormRef" />
 </template>
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
@@ -164,7 +164,7 @@ import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
 import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
 import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect.vue'
 import UpdateLevelForm from '@/views/member/user/UpdateLevelForm.vue'
-import CouponSend from '@/views/mall/promotion/coupon/components/CouponSend.vue'
+import CouponSendForm from '@/views/mall/promotion/coupon/components/CouponSendForm.vue'
 
 defineOptions({ name: 'MemberUser' })
 
@@ -224,14 +224,13 @@ const handleSelectionChange = (rows: UserApi.UserVO[]) => {
 }
 
 /** 发送优惠券 */
-const couponSend = ref()
+const couponSendFormRef = ref()
 const openCoupon = () => {
   if (selectedIds.value.length === 0) {
     message.warning('请选择要发送优惠券的用户')
     return
   }
-
-  couponSend.value.open(selectedIds.value)
+  couponSendFormRef.value.open(selectedIds.value)
 }
 
 /** 初始化 **/
