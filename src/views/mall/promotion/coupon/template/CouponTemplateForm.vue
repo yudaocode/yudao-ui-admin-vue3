@@ -152,7 +152,7 @@
         <el-date-picker
           v-model="formData.validTimes"
           style="width: 240px"
-          value-format="YYYY-MM-DD HH:mm:ss"
+          value-format="x"
           type="datetimerange"
           :default-time="[new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)]"
         />
