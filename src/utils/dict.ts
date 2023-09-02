@@ -60,13 +60,20 @@ export const getBoolDictOptions = (dictType: string) => {
   return dictOption
 }
 
-export const getDictObj = (dictType: string, value: any) => {
+/**
+ * 获取指定字典类型的指定值对应的字典对象
+ * @param dictType 字典类型
+ * @param value 字典值
+ * @return DictDataType 字典对象
+ */
+export const getDictObj = (dictType: string, value: any): DictDataType | undefined => {
   const dictOptions: DictDataType[] = getDictOptions(dictType)
-  dictOptions.forEach((dict: DictDataType) => {
-    if (dict.value === value.toString()) {
+  console.log(dictOptions)
+  for (const dict of dictOptions) {
+    if (dict.value === value + '') {
       return dict
     }
-  })
+  }
 }
 
 /**
@@ -74,12 +81,13 @@ export const getDictObj = (dictType: string, value: any) => {
  *
  * @param dictType 字典类型
  * @param value 字典数据的值
+ * @return 字典名称
  */
-export const getDictLabel = (dictType: string, value: any) => {
+export const getDictLabel = (dictType: string, value: any): string => {
   const dictOptions: DictDataType[] = getDictOptions(dictType)
   const dictLabel = ref('')
   dictOptions.forEach((dict: DictDataType) => {
-    if (dict.value === value) {
+    if (dict.value === value + '') {
       dictLabel.value = dict.label
     }
   })

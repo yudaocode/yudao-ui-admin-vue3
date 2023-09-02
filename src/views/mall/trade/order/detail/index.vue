@@ -155,8 +155,16 @@
             v-for="(log, index) in formData.orderLog"
             :key="index"
             :timestamp="formatDate(log.createTime!)"
+            placement="top"
           >
-            {{ log.content }}
+            <div class="el-timeline-right-content">
+              {{ log.content }}
+            </div>
+            <template #dot>
+              <span :style="{ backgroundColor: updateStyles(log.userType) }" class="dot-node-style">
+                {{ getDictLabel(DICT_TYPE.USER_TYPE, log.userType)[0] }}
+              </span>
+            </template>
           </el-timeline-item>
         </el-timeline>
       </el-descriptions-item>
@@ -173,7 +181,7 @@
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { floatToFixed2 } from '@/utils'
 import { formatDate } from '@/utils/formatTime'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getDictLabel, getDictObj } from '@/utils/dict'
 import OrderUpdateRemarkForm from '@/views/mall/trade/order/form/OrderUpdateRemarkForm.vue'
 import OrderDeliveryForm from '@/views/mall/trade/order/form/OrderDeliveryForm.vue'
 import OrderUpdateAddressForm from '@/views/mall/trade/order/form/OrderUpdateAddressForm.vue'
@@ -183,6 +191,21 @@ import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 defineOptions({ name: 'TradeOrderDetail' })
 
 const message = useMessage() // 消息弹窗
+
+const updateStyles = (type: number) => {
+  const dict = getDictObj(DICT_TYPE.USER_TYPE, type)
+  switch (dict?.colorType) {
+    case 'success':
+      return '#67C23A'
+    case 'info':
+      return '#909399'
+    case 'warning':
+      return '#E6A23C'
+    case 'danger':
+      return '#F56C6C'
+  }
+  return '#409EFF'
+}
 
 // 订单详情
 const formData = ref<TradeOrderApi.OrderVO>({
@@ -265,6 +288,53 @@ onMounted(async () => {
         content: '';
       }
     }
+  }
+}
+
+// 时间线样式调整
+:deep(.el-timeline) {
+  margin: 10px 0px 0px 160px;
+
+  .el-timeline-item__wrapper {
+    position: relative;
+    top: -20px;
+
+    .el-timeline-item__timestamp {
+      position: absolute !important;
+      top: 10px;
+      left: -150px;
+    }
+  }
+
+  .el-timeline-right-content {
+    display: flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 10px;
+    background-color: #f7f8fa;
+
+    &::before {
+      content: ''; /* 必须设置 content 属性 */
+      position: absolute;
+      top: 10px;
+      left: 13px; /* 将伪元素水平居中 */
+      border-width: 8px; /* 调整尖角大小 */
+      border-style: solid;
+      border-color: transparent #f7f8fa transparent transparent; /* 尖角颜色，左侧朝向 */
+    }
+  }
+
+  .dot-node-style {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    left: -5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 10px;
   }
 }
 </style>

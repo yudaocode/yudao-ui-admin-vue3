@@ -131,9 +131,7 @@
             :timestamp="formatDate(saleLog.createTime)"
             placement="top"
           >
-            <el-card>
-              <span>用户类型：</span>
-              <dict-tag :type="DICT_TYPE.USER_TYPE" :value="saleLog.userType" class="mr-10px" />
+            <div class="el-timeline-right-content">
               <span>售后状态(之前)：</span>
               <dict-tag
                 :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS"
@@ -147,7 +145,15 @@
                 class="mr-10px"
               />
               <span>操作明细：{{ saleLog.content }}</span>
-            </el-card>
+            </div>
+            <template #dot>
+              <span
+                :style="{ backgroundColor: updateStyles(saleLog.userType) }"
+                class="dot-node-style"
+              >
+                {{ getDictLabel(DICT_TYPE.USER_TYPE, saleLog.userType)[0] }}
+              </span>
+            </template>
           </el-timeline-item>
         </el-timeline>
       </el-descriptions-item>
@@ -160,7 +166,7 @@
 <script lang="ts" setup>
 import * as AfterSaleApi from '@/api/mall/trade/afterSale/index'
 import { floatToFixed2 } from '@/utils'
-import { DICT_TYPE } from '@/utils/dict'
+import { DICT_TYPE, getDictLabel, getDictObj } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 import UpdateAuditReasonForm from '@/views/mall/trade/afterSale/form/AfterSaleDisagreeForm.vue'
 import { createImageViewer } from '@/components/ImageViewer'
@@ -176,6 +182,21 @@ const formData = ref({
   afterSaleLog: []
 })
 const updateAuditReasonFormRef = ref() // 拒绝售后表单 Ref
+
+const updateStyles = (type: number) => {
+  const dict = getDictObj(DICT_TYPE.USER_TYPE, type)
+  switch (dict?.colorType) {
+    case 'success':
+      return '#67C23A'
+    case 'info':
+      return '#909399'
+    case 'warning':
+      return '#E6A23C'
+    case 'danger':
+      return '#F56C6C'
+  }
+  return '#409EFF'
+}
 
 /** 获得详情 */
 const getDetail = async () => {
@@ -275,6 +296,53 @@ onMounted(async () => {
         content: '';
       }
     }
+  }
+}
+
+// 时间线样式调整
+:deep(.el-timeline) {
+  margin: 10px 0px 0px 160px;
+
+  .el-timeline-item__wrapper {
+    position: relative;
+    top: -20px;
+
+    .el-timeline-item__timestamp {
+      position: absolute !important;
+      top: 10px;
+      left: -150px;
+    }
+  }
+
+  .el-timeline-right-content {
+    display: flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 10px;
+    background-color: #f7f8fa;
+
+    &::before {
+      content: ''; /* 必须设置 content 属性 */
+      position: absolute;
+      top: 10px;
+      left: 13px; /* 将伪元素水平居中 */
+      border-width: 8px; /* 调整尖角大小 */
+      border-style: solid;
+      border-color: transparent #f7f8fa transparent transparent; /* 尖角颜色，左侧朝向 */
+    }
+  }
+
+  .dot-node-style {
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    left: -5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 10px;
   }
 }
 </style>
