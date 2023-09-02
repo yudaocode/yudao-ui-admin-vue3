@@ -36,7 +36,6 @@
           </div>
         </div>
       </el-form-item>
-      <!-- TODO 疯狂：要不把 productSpuIds 改成 productScopeValues，更通用？另外，改完后，涉及到优惠劵的匹配逻辑，要补充分类相关的逻辑，例如说获得匹配的优惠劵列表之类的，包括使用卷的时候； -->
       <el-form-item
         label="分类"
         v-if="formData.productScope === PromotionProductScopeEnum.CATEGORY.scope"
@@ -228,8 +227,9 @@ const formData = ref({
   fixedStartTerm: undefined,
   fixedEndTerm: undefined,
   productScope: PromotionProductScopeEnum.ALL.scope,
-  productSpuIds: [],
-  productCategoryIds: []
+  productScopeValues: [], // 商品范围：值为 品类编号列表 或 商品编号列表 ，用于提交
+  productCategoryIds: [], // 仅用于表单，不提交
+  productSpuIds: [] // 仅用于表单，不提交
 })
 const formRules = reactive({
   name: [{ required: true, message: '优惠券名称不能为空', trigger: 'blur' }],
@@ -246,8 +246,8 @@ const formRules = reactive({
   fixedStartTerm: [{ required: true, message: '开始领取天数不能为空', trigger: 'blur' }],
   fixedEndTerm: [{ required: true, message: '开始领取天数不能为空', trigger: 'blur' }],
   productScope: [{ required: true, message: '商品范围不能为空', trigger: 'blur' }],
-  productSpuIds: [{ required: true, message: '商品范围不能为空', trigger: 'blur' }],
-  productCategoryIds: [{ required: true, message: '分类范围不能为空', trigger: 'blur' }]
+  productSpuIds: [{ required: true, message: '商品不能为空', trigger: 'blur' }],
+  productCategoryIds: [{ required: true, message: '分类不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const productSpus = ref<ProductSpuApi.Spu[]>([]) // 商品列表
@@ -313,12 +313,10 @@ const submitForm = async () => {
         formData.value.validTimes && formData.value.validTimes.length === 2
           ? formData.value.validTimes[1]
           : undefined
-    } as CouponTemplateApi.CouponTemplateVO
+    } as unknown as CouponTemplateApi.CouponTemplateVO
 
-    if (formData.value.productCategoryIds?.length > 0) {
-      // 改个名字？加个字段？
-      data.productSpuIds = formData.value.productCategoryIds
-    }
+    // 设置商品范围
+    setProductScopeValues(data)
 
     if (formType.value === 'create') {
       await CouponTemplateApi.createCouponTemplate(data)
@@ -355,6 +353,7 @@ const resetForm = () => {
     fixedStartTerm: undefined,
     fixedEndTerm: undefined,
     productScope: PromotionProductScopeEnum.ALL.scope,
+    productScopeValues: [],
     productSpuIds: [],
     productCategoryIds: []
   }
@@ -366,13 +365,36 @@ const resetForm = () => {
 const getProductScope = async () => {
   switch (formData.value.productScope) {
     case PromotionProductScopeEnum.SPU.scope:
+      // 设置商品编号
+      formData.value.productSpuIds = formData.value.productScopeValues
       // 获得商品列表
-      productSpus.value = await ProductSpuApi.getSpuDetailList(formData.value.productSpuIds)
+      productSpus.value = await ProductSpuApi.getSpuDetailList(formData.value.productScopeValues)
       break
     case PromotionProductScopeEnum.CATEGORY.scope:
-      // TODO @疯狂：貌似分类不会选中。
-      formData.value.productCategoryIds = formData.value.productSpuIds
-      formData.value.productSpuIds = []
+      await nextTick(() => {
+        let productCategoryIds = formData.value.productScopeValues
+        if (Array.isArray(productCategoryIds) && productCategoryIds.length > 0) {
+          // 单选时使用数组不能反显
+          productCategoryIds = productCategoryIds[0]
+        }
+        // 设置品类编号
+        formData.value.productCategoryIds = productCategoryIds
+      })
+      break
+    default:
+      break
+  }
+}
+/** 设置商品范围 */
+function setProductScopeValues(data: CouponTemplateApi.CouponTemplateVO) {
+  switch (formData.value.productScope) {
+    case PromotionProductScopeEnum.SPU.scope:
+      data.productScopeValues = formData.value.productSpuIds
+      break
+    case PromotionProductScopeEnum.CATEGORY.scope:
+      data.productScopeValues = Array.isArray(formData.value.productCategoryIds)
+        ? formData.value.productCategoryIds
+        : [formData.value.productCategoryIds]
       break
     default:
       break
