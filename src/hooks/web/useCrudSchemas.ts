@@ -9,7 +9,7 @@ import { TableColumn } from '@/types/table'
 import { DescriptionsSchema } from '@/types/descriptions'
 import { ComponentOptions, ComponentProps } from '@/types/components'
 import { DictTag } from '@/components/DictTag'
-import { cloneDeep } from 'lodash-es'
+import { cloneDeep, merge } from 'lodash-es'
 
 export type CrudSchema = Omit<TableColumn, 'children'> & {
   isSearch?: boolean // 是否在查询显示
@@ -117,14 +117,18 @@ const filterSearchSchema = (crudSchema: CrudSchema[], allSchemas: AllSchemas): F
         }
         if (!schemaItem.search?.component) component = 'Select'
       }
-      const searchSchemaItem = {
-        // 默认为 input
-        component: component,
-        componentProps: comonentProps,
-        ...schemaItem.search,
-        field: schemaItem.field,
-        label: schemaItem.search?.label || schemaItem.label
-      }
+
+      // updated by AKing: 解决了当使用默认的dict选项时，form中事件不能触发的问题
+      const searchSchemaItem = merge(
+        {
+          // 默认为 input
+          component,
+          ...schemaItem.search,
+          field: schemaItem.field,
+          label: schemaItem.search?.label || schemaItem.label
+        },
+        { componentProps: comonentProps }
+      )
       if (searchSchemaItem.api) {
         searchRequestTask.push(async () => {
           const res = await (searchSchemaItem.api as () => AxiosPromise)()
@@ -224,15 +228,19 @@ const filterFormSchema = (crudSchema: CrudSchema[], allSchemas: AllSchemas): For
         }
         if (!(schemaItem.form && schemaItem.form.component)) component = 'Select'
       }
-      const formSchemaItem = {
-        // 默认为 input
-        component: component,
-        componentProps: comonentProps,
-        value: defaultValue,
-        ...schemaItem.form,
-        field: schemaItem.field,
-        label: schemaItem.form?.label || schemaItem.label
-      }
+
+      // updated by AKing: 解决了当使用默认的dict选项时，form中事件不能触发的问题
+      const formSchemaItem = merge(
+        {
+          // 默认为 input
+          component,
+          value: defaultValue,
+          ...schemaItem.form,
+          field: schemaItem.field,
+          label: schemaItem.form?.label || schemaItem.label
+        },
+        { componentProps: comonentProps }
+      )
 
       if (formSchemaItem.api) {
         formRequestTask.push(async () => {
