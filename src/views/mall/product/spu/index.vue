@@ -170,6 +170,14 @@
           >
             详情
           </el-button>
+          <el-button
+            v-hasPermi="['product:spu:update']"
+            link
+            type="primary"
+            @click="openForm(row.id)"
+          >
+            修改
+          </el-button>
           <template v-if="queryParams.tabType === 4">
             <el-button
               v-hasPermi="['product:spu:delete']"
@@ -189,16 +197,6 @@
             </el-button>
           </template>
           <template v-else>
-            <!-- 只有不是上架和回收站的商品可以编辑 -->
-            <el-button
-              v-if="queryParams.tabType !== 0"
-              v-hasPermi="['product:spu:update']"
-              link
-              type="primary"
-              @click="openForm(row.id)"
-            >
-              修改
-            </el-button>
             <el-button
               v-hasPermi="['product:spu:update']"
               link

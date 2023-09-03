@@ -142,17 +142,6 @@ const submitForm = async () => {
     await unref(otherSettingsRef)?.validate()
     // 深拷贝一份, 这样最终 server 端不满足，不需要恢复，
     const deepCopyFormData = cloneDeep(unref(formData.value)) as ProductSpuApi.Spu
-    // 兜底处理 sku 空数据
-    formData.value.skus!.forEach((sku) => {
-      // 因为是空数据这里判断一下商品条码是否为空就行
-      if (sku.barCode === '') {
-        const index = deepCopyFormData.skus!.findIndex(
-          (item) => JSON.stringify(item.properties) === JSON.stringify(sku.properties)
-        )
-        // 删除这条 sku
-        deepCopyFormData.skus!.splice(index, 1)
-      }
-    })
     deepCopyFormData.skus!.forEach((item) => {
       // 给sku name赋值
       item.name = deepCopyFormData.name
@@ -189,7 +178,7 @@ const submitForm = async () => {
 /** 关闭按钮 */
 const close = () => {
   delView(unref(currentRoute))
-  push('/product/product-spu')
+  push({ name: 'ProductSpu' })
 }
 /** 初始化 */
 onMounted(async () => {

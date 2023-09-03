@@ -10,7 +10,40 @@
       <el-form-item label="优惠券名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入优惠券名称" />
       </el-form-item>
-      <el-form-item label="优惠券类型" prop="discountType">
+      <el-form-item label="优惠劵类型" prop="productScope">
+        <el-radio-group v-model="formData.productScope">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_PRODUCT_SCOPE)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item
+        label="商品"
+        v-if="formData.productScope === PromotionProductScopeEnum.SPU.scope"
+        prop="productSpuIds"
+      >
+        <div class="flex items-center gap-1 flex-wrap">
+          <div class="select-box spu-pic" v-for="(spu, index) in productSpus" :key="spu.id">
+            <el-image :src="spu.picUrl" />
+            <Icon icon="ep:circle-close-filled" class="del-icon" @click="handleRemoveSpu(index)" />
+          </div>
+          <div class="select-box" @click="openSpuTableSelect">
+            <Icon icon="ep:plus" />
+          </div>
+        </div>
+      </el-form-item>
+      <el-form-item
+        label="分类"
+        v-if="formData.productScope === PromotionProductScopeEnum.CATEGORY.scope"
+        prop="productCategoryIds"
+      >
+        <ProductCategorySelect v-model="formData.productCategoryIds" />
+      </el-form-item>
+      <el-form-item label="优惠类型" prop="discountType">
         <el-radio-group v-model="formData.discountType">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_DISCOUNT_TYPE)"
@@ -29,7 +62,7 @@
         <el-input-number
           v-model="formData.discountPrice"
           placeholder="请输入优惠金额，单位：元"
-          style="width: 400px"
+          class="!w-400px mr-2"
           :precision="2"
           :min="0"
         />
@@ -43,7 +76,7 @@
         <el-input-number
           v-model="formData.discountPercent"
           placeholder="优惠券折扣不能小于 1 折，且不可大于 9.9 折"
-          style="width: 400px"
+          class="!w-400px mr-2"
           :precision="1"
           :min="1"
           :max="9.9"
@@ -58,7 +91,7 @@
         <el-input-number
           v-model="formData.discountLimitPrice"
           placeholder="请输入最多优惠"
-          style="width: 400px"
+          class="!w-400px mr-2"
           :precision="2"
           :min="0"
         />
@@ -68,7 +101,7 @@
         <el-input-number
           v-model="formData.usePrice"
           placeholder="无门槛请设为 0"
-          style="width: 400px"
+          class="!w-400px mr-2"
           :precision="2"
           :min="0"
         />
@@ -84,7 +117,7 @@
         <el-input-number
           v-model="formData.totalCount"
           placeholder="发放数量，没有之后不能领取或发放，-1 为不限制"
-          style="width: 400px"
+          class="!w-400px mr-2"
           :precision="0"
           :min="-1"
         />
@@ -94,7 +127,7 @@
         <el-input-number
           v-model="formData.takeLimitCount"
           placeholder="设置为 -1 时，可无限领取"
-          style="width: 400px"
+          class="!w-400px mr-2"
           :precision="0"
           :min="-1"
         />
@@ -119,7 +152,7 @@
         <el-date-picker
           v-model="formData.validTimes"
           style="width: 240px"
-          value-format="YYYY-MM-DD HH:mm:ss"
+          value-format="x"
           type="datetimerange"
           :default-time="[new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)]"
         />
@@ -133,7 +166,7 @@
         <el-input-number
           v-model="formData.fixedStartTerm"
           placeholder="0 为今天生效"
-          style="width: 165px"
+          class="mx-2"
           :precision="0"
           :min="0"
         />
@@ -141,42 +174,11 @@
         <el-input-number
           v-model="formData.fixedEndTerm"
           placeholder="请输入结束天数"
-          style="width: 165px"
+          class="mx-2"
           :precision="0"
           :min="0"
         />
         天有效
-      </el-form-item>
-      <el-form-item label="活动商品" prop="productScope">
-        <el-radio-group v-model="formData.productScope">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_PRODUCT_SCOPE)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item
-        v-if="formData.productScope === PromotionProductScopeEnum.SPU.scope"
-        prop="productSpuIds"
-      >
-        <el-select
-          v-model="formData.productSpuIds"
-          placeholder="请选择活动商品"
-          clearable
-          multiple
-          filterable
-          style="width: 400px"
-        >
-          <el-option v-for="item in productSpus" :key="item.id" :label="item.name" :value="item.id">
-            <span style="float: left">{{ item.name }}</span>
-            <span style="float: right; font-size: 13px; color: #8492a6">
-              ￥{{ (item.minPrice / 100.0).toFixed(2) }}
-            </span>
-          </el-option>
-        </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -184,6 +186,7 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+  <SpuTableSelect ref="spuTableSelectRef" multiple @change="handleSpuSelected" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
@@ -194,6 +197,8 @@ import {
   PromotionDiscountTypeEnum,
   PromotionProductScopeEnum
 } from '@/utils/constants'
+import SpuTableSelect from '@/views/mall/product/spu/components/SpuTableSelect.vue'
+import ProductCategorySelect from '@/views/mall/product/category/components/ProductCategorySelect.vue'
 
 defineOptions({ name: 'CouponTemplateForm' })
 
@@ -222,7 +227,9 @@ const formData = ref({
   fixedStartTerm: undefined,
   fixedEndTerm: undefined,
   productScope: PromotionProductScopeEnum.ALL.scope,
-  productSpuIds: []
+  productScopeValues: [], // 商品范围：值为 品类编号列表 或 商品编号列表 ，用于提交
+  productCategoryIds: [], // 仅用于表单，不提交
+  productSpuIds: [] // 仅用于表单，不提交
 })
 const formRules = reactive({
   name: [{ required: true, message: '优惠券名称不能为空', trigger: 'blur' }],
@@ -239,10 +246,11 @@ const formRules = reactive({
   fixedStartTerm: [{ required: true, message: '开始领取天数不能为空', trigger: 'blur' }],
   fixedEndTerm: [{ required: true, message: '开始领取天数不能为空', trigger: 'blur' }],
   productScope: [{ required: true, message: '商品范围不能为空', trigger: 'blur' }],
-  productSpuIds: [{ required: true, message: '商品范围不能为空', trigger: 'blur' }]
+  productSpuIds: [{ required: true, message: '商品不能为空', trigger: 'blur' }],
+  productCategoryIds: [{ required: true, message: '分类不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const productSpus = ref([]) // 商品列表
+const productSpus = ref<ProductSpuApi.Spu[]>([]) // 商品列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -265,12 +273,12 @@ const open = async (type: string, id?: number) => {
         usePrice: data.usePrice !== undefined ? data.usePrice / 100.0 : undefined,
         validTimes: [data.validStartTime, data.validEndTime]
       }
+      // 获得商品范围
+      await getProductScope()
     } finally {
       formLoading.value = false
     }
   }
-  // 获得商品列表
-  productSpus.value = await ProductSpuApi.getSpuSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -305,7 +313,11 @@ const submitForm = async () => {
         formData.value.validTimes && formData.value.validTimes.length === 2
           ? formData.value.validTimes[1]
           : undefined
-    } as CouponTemplateApi.CouponTemplateVO
+    } as unknown as CouponTemplateApi.CouponTemplateVO
+
+    // 设置商品范围
+    setProductScopeValues(data)
+
     if (formType.value === 'create') {
       await CouponTemplateApi.createCouponTemplate(data)
       message.success(t('common.createSuccess'))
@@ -341,8 +353,92 @@ const resetForm = () => {
     fixedStartTerm: undefined,
     fixedEndTerm: undefined,
     productScope: PromotionProductScopeEnum.ALL.scope,
-    productSpuIds: []
+    productScopeValues: [],
+    productSpuIds: [],
+    productCategoryIds: []
   }
   formRef.value?.resetFields()
+  productSpus.value = []
+}
+
+/** 获得商品范围 */
+const getProductScope = async () => {
+  switch (formData.value.productScope) {
+    case PromotionProductScopeEnum.SPU.scope:
+      // 设置商品编号
+      formData.value.productSpuIds = formData.value.productScopeValues
+      // 获得商品列表
+      productSpus.value = await ProductSpuApi.getSpuDetailList(formData.value.productScopeValues)
+      break
+    case PromotionProductScopeEnum.CATEGORY.scope:
+      await nextTick(() => {
+        let productCategoryIds = formData.value.productScopeValues
+        if (Array.isArray(productCategoryIds) && productCategoryIds.length > 0) {
+          // 单选时使用数组不能反显
+          productCategoryIds = productCategoryIds[0]
+        }
+        // 设置品类编号
+        formData.value.productCategoryIds = productCategoryIds
+      })
+      break
+    default:
+      break
+  }
+}
+/** 设置商品范围 */
+function setProductScopeValues(data: CouponTemplateApi.CouponTemplateVO) {
+  switch (formData.value.productScope) {
+    case PromotionProductScopeEnum.SPU.scope:
+      data.productScopeValues = formData.value.productSpuIds
+      break
+    case PromotionProductScopeEnum.CATEGORY.scope:
+      data.productScopeValues = Array.isArray(formData.value.productCategoryIds)
+        ? formData.value.productCategoryIds
+        : [formData.value.productCategoryIds]
+      break
+    default:
+      break
+  }
+}
+
+/** 活动商品的按钮 */
+const spuTableSelectRef = ref()
+const openSpuTableSelect = () => {
+  spuTableSelectRef.value.open(productSpus.value)
+}
+
+/** 选择商品后触发 */
+const handleSpuSelected = (spus: ProductSpuApi.Spu[]) => {
+  productSpus.value = spus
+  formData.value.productSpuIds = spus.map((spu) => spu.id) as []
+}
+
+/** 选择商品后触发 */
+const handleRemoveSpu = (index: number) => {
+  productSpus.value.splice(index, 1)
+  formData.value.productSpuIds.splice(index, 1)
 }
 </script>
+
+<style scoped lang="scss">
+.select-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--el-border-color-darker);
+  border-radius: 8px;
+  width: 60px;
+  height: 60px;
+}
+.spu-pic {
+  position: relative;
+}
+.del-icon {
+  position: absolute;
+  z-index: 1;
+  width: 20px !important;
+  height: 20px !important;
+  right: -10px;
+  top: -10px;
+}
+</style>

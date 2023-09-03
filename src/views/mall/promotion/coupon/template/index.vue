@@ -103,7 +103,7 @@
         label="剩余数量"
         align="center"
         prop="totalCount"
-        :formatter="(row) => row.totalCount - row.takeCount"
+        :formatter="remainedCountFormat"
       />
       <el-table-column
         label="领取上限"
@@ -171,14 +171,16 @@
 
 <script lang="ts" setup>
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
-import {
-  CommonStatusEnum,
-  CouponTemplateValidityTypeEnum,
-  PromotionDiscountTypeEnum
-} from '@/utils/constants'
+import { CommonStatusEnum } from '@/utils/constants'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter, formatDate } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import CouponTemplateForm from './CouponTemplateForm.vue'
+import {
+  discountFormat,
+  remainedCountFormat,
+  takeLimitCountFormat,
+  validityTypeFormat
+} from '@/views/mall/promotion/coupon/formatter'
 
 defineOptions({ name: 'PromotionCouponTemplate' })
 
@@ -193,6 +195,7 @@ const queryParams = reactive({
   pageSize: 10,
   name: null,
   status: null,
+  discountType: null,
   type: null,
   createTime: []
 })
@@ -256,36 +259,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-// 格式化【优惠金额/折扣】
-const discountFormat = (row: any) => {
-  if (row.discountType === PromotionDiscountTypeEnum.PRICE.type) {
-    return `￥${(row.discountPrice / 100.0).toFixed(2)}`
-  }
-  if (row.discountType === PromotionDiscountTypeEnum.PERCENT.type) {
-    return `￥${(row.discountPrice / 100.0).toFixed(2)}`
-  }
-  return '未知【' + row.discountType + '】'
-}
-
-// 格式化【领取上限】
-const takeLimitCountFormat = (row: any) => {
-  if (row.takeLimitCount === -1) {
-    return '无领取限制'
-  }
-  return `${row.takeLimitCount} 张/人`
-}
-
-// 格式化【有效期限】
-const validityTypeFormat = (row: any) => {
-  if (row.validityType === CouponTemplateValidityTypeEnum.DATE.type) {
-    return `${formatDate(row.validStartTime)} 至 ${formatDate(row.validEndTime)}`
-  }
-  if (row.validityType === CouponTemplateValidityTypeEnum.TERM.type) {
-    return `领取后第 ${row.fixedStartTerm} - ${row.fixedEndTerm} 天内可用`
-  }
-  return '未知【' + row.validityType + '】'
 }
 
 /** 初始化 **/

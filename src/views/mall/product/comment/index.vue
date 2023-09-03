@@ -115,7 +115,7 @@
         :formatter="dateFormatter"
         width="170"
       />
-      <el-table-column label="状态" align="center" width="65px">
+      <el-table-column label="是否展示" align="center" width="80px">
         <template #default="scope">
           <el-switch
             v-model="scope.row.visible"
