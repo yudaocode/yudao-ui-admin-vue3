@@ -147,6 +147,8 @@ export enum DICT_TYPE {
   BROKERAGE_BIND_MODE = 'brokerage_bind_mode', // 分销关系绑定模式
   BROKERAGE_BANK_NAME = 'brokerage_bank_name', // 佣金提现银行
   BROKERAGE_WITHDRAW_TYPE = 'brokerage_withdraw_type', // 佣金冻结时间
+  BROKERAGE_RECORD_BIZ_TYPE = 'brokerage_record_biz_type', // 佣金业务类型
+  BROKERAGE_RECORD_STATUS = 'brokerage_record_status', // 佣金状态
 
   // ========== MALL - 商品模块 ==========
   PRODUCT_UNIT = 'product_unit', // 商品单位
