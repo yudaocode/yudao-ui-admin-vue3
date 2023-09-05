@@ -272,3 +272,30 @@ export const PromotionDiscountTypeEnum = {
     name: '折扣'
   }
 }
+
+/**
+ * 分销关系绑定模式枚举
+ */
+export const BrokerageBindModeEnum = {
+  ANYTIME: {
+    mode: 0,
+    name: '没有推广人'
+  },
+  REGISTER: {
+    mode: 1,
+    name: '新用户'
+  }
+}
+/**
+ * 分佣模式枚举
+ */
+export const BrokerageEnabledConditionEnum = {
+  ALL: {
+    condition: 0,
+    name: '人人分销'
+  },
+  ADMIN: {
+    condition: 1,
+    name: '指定分销'
+  }
+}
