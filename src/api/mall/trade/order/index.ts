@@ -51,10 +51,10 @@ export interface OrderVO {
     avatar?: string
   }
   // 订单操作日志
-  orderLog?: orderLog[]
+  logs?: logs[]
 }
 
-export interface orderLog {
+export interface logs {
   content?: string
   createTime?: Date
   userType?: number

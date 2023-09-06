@@ -68,7 +68,6 @@ export const getBoolDictOptions = (dictType: string) => {
  */
 export const getDictObj = (dictType: string, value: any): DictDataType | undefined => {
   const dictOptions: DictDataType[] = getDictOptions(dictType)
-  console.log(dictOptions)
   for (const dict of dictOptions) {
     if (dict.value === value + '') {
       return dict

@@ -40,12 +40,17 @@
       <el-descriptions-item label="订单状态: ">
         <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="formData.status!" />
       </el-descriptions-item>
-      <!-- TODO @puhui999：根据状态，进行展示按钮 -->
       <el-descriptions-item label-class-name="no-colon">
-        <el-button type="primary" @click="openForm('updatePrice')">调整价格</el-button>
-        <el-button type="primary" @click="openForm('remark')">备注</el-button>
-        <el-button type="primary" @click="openForm('delivery')">发货</el-button>
-        <el-button type="primary" @click="openForm('updateAddress')">修改地址</el-button>
+        <el-button v-if="formData.status! === 0" type="primary" @click="updatePrice">
+          调整价格
+        </el-button>
+        <el-button type="primary" @click="remark">备注</el-button>
+        <el-button v-if="formData.status! === 10" type="primary" @click="delivery">
+          发货
+        </el-button>
+        <el-button v-if="formData.status! === 10" type="primary" @click="updateAddress">
+          修改地址
+        </el-button>
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">提醒: </span></template>
@@ -152,7 +157,7 @@
       <el-descriptions-item labelClassName="no-colon">
         <el-timeline>
           <el-timeline-item
-            v-for="(log, index) in formData.orderLog"
+            v-for="(log, index) in formData.logs"
             :key="index"
             :timestamp="formatDate(log.createTime!)"
             placement="top"
@@ -161,7 +166,10 @@
               {{ log.content }}
             </div>
             <template #dot>
-              <span :style="{ backgroundColor: updateStyles(log.userType) }" class="dot-node-style">
+              <span
+                :style="{ backgroundColor: updateStyles(log.userType!) }"
+                class="dot-node-style"
+              >
                 {{ getDictLabel(DICT_TYPE.USER_TYPE, log.userType)[0] }}
               </span>
             </template>
@@ -209,31 +217,25 @@ const updateStyles = (type: number) => {
 
 // 订单详情
 const formData = ref<TradeOrderApi.OrderVO>({
-  orderLog: [] // TODO @puhui999：orderLogs
+  logs: []
 })
 
-// TODO @puhui999：这个最好也拆掉哈
 const deliveryFormRef = ref() // 发货表单 Ref
 const updateRemarkForm = ref() // 订单备注表单 Ref
 const updateAddressFormRef = ref() // 收货地址表单 Ref
 const updatePriceFormRef = ref() // 订单调价表单 Ref
-const openForm = (type: string) => {
-  switch (type) {
-    case 'remark':
-      updateRemarkForm.value?.open(formData.value)
-      break
-    case 'delivery':
-      deliveryFormRef.value?.open(formData.value)
-      break
-    case 'updateAddress':
-      updateAddressFormRef.value?.open(formData.value)
-      break
-    case 'updatePrice':
-      updatePriceFormRef.value?.open(formData.value)
-      break
-  }
+const remark = () => {
+  updateRemarkForm.value?.open(formData.value)
 }
-
+const delivery = () => {
+  deliveryFormRef.value?.open(formData.value)
+}
+const updateAddress = () => {
+  updateAddressFormRef.value?.open(formData.value)
+}
+const updatePrice = () => {
+  updatePriceFormRef.value?.open(formData.value)
+}
 /** 获得详情 */
 const { params } = useRoute() // 查询参数
 const getDetail = async () => {

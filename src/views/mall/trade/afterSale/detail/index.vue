@@ -126,7 +126,7 @@
       <el-descriptions-item labelClassName="no-colon">
         <el-timeline>
           <el-timeline-item
-            v-for="saleLog in formData.afterSaleLog"
+            v-for="saleLog in formData.logs"
             :key="saleLog.id"
             :timestamp="formatDate(saleLog.createTime)"
             placement="top"
@@ -151,7 +151,7 @@
                 :style="{ backgroundColor: updateStyles(saleLog.userType) }"
                 class="dot-node-style"
               >
-                {{ getDictLabel(DICT_TYPE.USER_TYPE, saleLog.userType)[0] }}
+                {{ getDictLabel(DICT_TYPE.USER_TYPE, saleLog.userType)[0] || '系' }}
               </span>
             </template>
           </el-timeline-item>
@@ -171,15 +171,17 @@ import { formatDate } from '@/utils/formatTime'
 import UpdateAuditReasonForm from '@/views/mall/trade/afterSale/form/AfterSaleDisagreeForm.vue'
 import { createImageViewer } from '@/components/ImageViewer'
 import { isArray } from '@/utils/is'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 
 defineOptions({ name: 'TradeAfterSaleDetail' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 const { params } = useRoute() // 查询参数
+const { push, currentRoute } = useRouter() // 路由
 const formData = ref({
   order: {},
-  afterSaleLog: []
+  logs: []
 })
 const updateAuditReasonFormRef = ref() // 拒绝售后表单 Ref
 
@@ -202,7 +204,12 @@ const updateStyles = (type: number) => {
 const getDetail = async () => {
   const id = params.orderId as unknown as number
   if (id) {
-    formData.value = await AfterSaleApi.getAfterSale(id)
+    const res = await AfterSaleApi.getAfterSale(id)
+    // 没有表单信息则关闭页面返回
+    if (res === null) {
+      close()
+    }
+    formData.value = res
   }
 }
 
@@ -261,7 +268,12 @@ const imagePreview = (args) => {
     urlList
   })
 }
-
+const { delView } = useTagsViewStore() // 视图操作
+/** 关闭 tag */
+const close = () => {
+  delView(unref(currentRoute))
+  push({ name: 'TradeAfterSale' })
+}
 onMounted(async () => {
   await getDetail()
 })
@@ -322,10 +334,10 @@ onMounted(async () => {
     background-color: #f7f8fa;
 
     &::before {
-      content: ''; /* 必须设置 content 属性 */
+      content: '';
       position: absolute;
       top: 10px;
-      left: 13px; /* 将伪元素水平居中 */
+      left: 13px;
       border-width: 8px; /* 调整尖角大小 */
       border-style: solid;
       border-color: transparent #f7f8fa transparent transparent; /* 尖角颜色，左侧朝向 */
