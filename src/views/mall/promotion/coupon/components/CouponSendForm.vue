@@ -75,13 +75,13 @@
       </el-table-column>
     </el-table>
     <!-- 分页 -->
-    <!-- TODO 疯狂：可以看看，为啥弹窗没把分页包进去，可能和 footer 有关？ -->
     <Pagination
       v-model:limit="queryParams.pageSize"
       v-model:page="queryParams.pageNo"
       :total="total"
       @pagination="getList"
     />
+    <div class="clear-both"></div>
   </Dialog>
 </template>
 <script lang="ts" setup>

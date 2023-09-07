@@ -6,6 +6,16 @@ export interface ConfigVO {
   tradeDeductUnitPrice: number
   tradeDeductMaxPrice: number
   tradeGivePoint: number
+  brokerageEnabled: boolean
+  brokerageEnabledCondition: number
+  brokerageBindMode: number
+  brokeragePostUrls: string[]
+  brokerageFirstPercent: number
+  brokerageSecondPercent: number
+  brokerageWithdrawMinPrice: number
+  brokerageBankNames: number[]
+  brokerageFrozenDays: number
+  brokerageWithdrawType: number[]
 }
 
 // 查询积分设置详情
