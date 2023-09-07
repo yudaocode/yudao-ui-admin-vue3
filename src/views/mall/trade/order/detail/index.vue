@@ -195,6 +195,7 @@ import OrderDeliveryForm from '@/views/mall/trade/order/form/OrderDeliveryForm.v
 import OrderUpdateAddressForm from '@/views/mall/trade/order/form/OrderUpdateAddressForm.vue'
 import OrderUpdatePriceForm from '@/views/mall/trade/order/form/OrderUpdatePriceForm.vue'
 import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 
 defineOptions({ name: 'TradeOrderDetail' })
 
@@ -242,10 +243,20 @@ const getDetail = async () => {
   const id = params.orderId as unknown as number
   if (id) {
     const res = (await TradeOrderApi.getOrder(id)) as TradeOrderApi.OrderVO
+    // 没有表单信息则关闭页面返回
+    if (res === null) {
+      close()
+    }
     formData.value = res
   }
 }
-
+const { delView } = useTagsViewStore() // 视图操作
+const { push, currentRoute } = useRouter() // 路由
+/** 关闭 tag */
+const close = () => {
+  delView(unref(currentRoute))
+  push({ name: 'TradeAfterSale' })
+}
 /** 复制 */
 const clipboardSuccess = () => {
   message.success('复制成功')
