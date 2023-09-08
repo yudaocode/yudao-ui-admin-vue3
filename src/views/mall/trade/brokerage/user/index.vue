@@ -8,9 +8,9 @@
       :inline="true"
       label-width="85px"
     >
-      <el-form-item label="推广员编号" prop="brokerageUserId">
+      <el-form-item label="推广员编号" prop="bindUserId">
         <el-input
-          v-model="queryParams.brokerageUserId"
+          v-model="queryParams.bindUserId"
           placeholder="请输入推广员编号"
           clearable
           @keyup.enter="handleQuery"
@@ -102,11 +102,11 @@
         :formatter="dateFormatter"
         width="170px"
       />
-      <el-table-column label="上级推广员编号" align="center" prop="brokerageUserId" width="150px" />
+      <el-table-column label="上级推广员编号" align="center" prop="bindUserId" width="150px" />
       <el-table-column
         label="推广员绑定时间"
         align="center"
-        prop="brokerageBindTime"
+        prop="bindUserTime"
         :formatter="dateFormatter"
         width="170px"
       />
@@ -179,7 +179,7 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  brokerageUserId: null,
+  bindUserId: null,
   brokerageEnabled: null,
   createTime: []
 })
