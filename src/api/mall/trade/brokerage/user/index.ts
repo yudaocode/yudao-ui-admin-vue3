@@ -6,8 +6,8 @@ export interface BrokerageUserVO {
   bindUserTime: Date
   brokerageEnabled: boolean
   brokerageTime: Date
-  brokeragePrice: number
-  frozenBrokeragePrice: number
+  price: number
+  frozenPrice: number
 }
 
 // 查询分销用户列表

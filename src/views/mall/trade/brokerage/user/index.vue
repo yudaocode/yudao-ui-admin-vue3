@@ -76,11 +76,11 @@
       />
       <el-table-column label="已提现金额" align="center" prop="withdrawPrice" min-width="100px" />
       <el-table-column label="已提现次数" align="center" prop="withdrawCount" min-width="100px" />
-      <el-table-column label="未提现金额" align="center" prop="brokeragePrice" min-width="100px" />
+      <el-table-column label="未提现金额" align="center" prop="price" min-width="100px" />
       <el-table-column
         label="冻结中佣金"
         align="center"
-        prop="frozenBrokeragePrice"
+        prop="frozenPrice"
         min-width="100px"
       />
       <el-table-column label="推广资格" align="center" prop="brokerageEnabled" min-width="80px">
