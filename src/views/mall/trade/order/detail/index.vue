@@ -167,7 +167,7 @@
             </div>
             <template #dot>
               <span
-                :style="{ backgroundColor: updateStyles(log.userType!) }"
+                :style="{ backgroundColor: getUserTypeColor(log.userType!) }"
                 class="dot-node-style"
               >
                 {{ getDictLabel(DICT_TYPE.USER_TYPE, log.userType)[0] }}
@@ -201,7 +201,8 @@ defineOptions({ name: 'TradeOrderDetail' })
 
 const message = useMessage() // 消息弹窗
 
-const updateStyles = (type: number) => {
+/** 获得 userType 颜色 */
+const getUserTypeColor = (type: number) => {
   const dict = getDictObj(DICT_TYPE.USER_TYPE, type)
   switch (dict?.colorType) {
     case 'success':
@@ -221,22 +222,24 @@ const formData = ref<TradeOrderApi.OrderVO>({
   logs: []
 })
 
-const deliveryFormRef = ref() // 发货表单 Ref
+/** 各种操作 */
 const updateRemarkForm = ref() // 订单备注表单 Ref
-const updateAddressFormRef = ref() // 收货地址表单 Ref
-const updatePriceFormRef = ref() // 订单调价表单 Ref
 const remark = () => {
   updateRemarkForm.value?.open(formData.value)
 }
+const deliveryFormRef = ref() // 发货表单 Ref
 const delivery = () => {
   deliveryFormRef.value?.open(formData.value)
 }
+const updateAddressFormRef = ref() // 收货地址表单 Ref
 const updateAddress = () => {
   updateAddressFormRef.value?.open(formData.value)
 }
+const updatePriceFormRef = ref() // 订单调价表单 Ref
 const updatePrice = () => {
   updatePriceFormRef.value?.open(formData.value)
 }
+
 /** 获得详情 */
 const { params } = useRoute() // 查询参数
 const getDetail = async () => {
@@ -250,13 +253,15 @@ const getDetail = async () => {
     formData.value = res
   }
 }
+
+/** 关闭 tag */
 const { delView } = useTagsViewStore() // 视图操作
 const { push, currentRoute } = useRouter() // 路由
-/** 关闭 tag */
 const close = () => {
   delView(unref(currentRoute))
   push({ name: 'TradeAfterSale' })
 }
+
 /** 复制 */
 const clipboardSuccess = () => {
   message.success('复制成功')

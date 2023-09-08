@@ -54,6 +54,7 @@ export interface OrderVO {
   logs?: logs[]
 }
 
+// TODO @puhui999：OrderLogRespVO 会不会更好哈。
 export interface logs {
   content?: string
   createTime?: Date

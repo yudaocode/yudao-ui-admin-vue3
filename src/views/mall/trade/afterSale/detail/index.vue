@@ -132,23 +132,11 @@
             placement="top"
           >
             <div class="el-timeline-right-content">
-              <span>售后状态(之前)：</span>
-              <dict-tag
-                :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS"
-                :value="saleLog.beforeStatus"
-                class="mr-10px"
-              />
-              <span>售后状态(之后)：</span>
-              <dict-tag
-                :type="DICT_TYPE.TRADE_AFTER_SALE_STATUS"
-                :value="saleLog.afterStatus"
-                class="mr-10px"
-              />
-              <span>操作明细：{{ saleLog.content }}</span>
+              <span>{{ saleLog.content }}</span>
             </div>
             <template #dot>
               <span
-                :style="{ backgroundColor: updateStyles(saleLog.userType) }"
+                :style="{ backgroundColor: getUserTypeColor(saleLog.userType) }"
                 class="dot-node-style"
               >
                 {{ getDictLabel(DICT_TYPE.USER_TYPE, saleLog.userType)[0] || '系' }}
@@ -185,7 +173,8 @@ const formData = ref({
 })
 const updateAuditReasonFormRef = ref() // 拒绝售后表单 Ref
 
-const updateStyles = (type: number) => {
+/** 获得 userType 颜色 */
+const getUserTypeColor = (type: number) => {
   const dict = getDictObj(DICT_TYPE.USER_TYPE, type)
   switch (dict?.colorType) {
     case 'success':
