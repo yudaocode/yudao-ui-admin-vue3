@@ -41,7 +41,7 @@ import { SpuProperty } from '@/views/mall/promotion/components/index'
 defineOptions({ name: 'PromotionSpuAndSkuList' })
 
 const props = defineProps<{
-  spuList: T[] // TODO 为了方便兼容后续可能有需要展示多个 spu 的情况暂时保持，如果后续都是只操作一个 spu 的话则可更改为接受一个 spu 或保持
+  spuList: T[]
   ruleConfig: RuleConfig[]
   spuPropertyListP: SpuProperty<T>[]
 }>()

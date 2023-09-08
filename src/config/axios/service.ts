@@ -191,6 +191,10 @@ service.interceptors.response.use(
       }
       return Promise.reject('error')
     } else {
+      // 前端处理 data 为 null 的情况，进行提示
+      if (data.msg !== '') {
+        ElNotification.error({ title: msg })
+      }
       return data
     }
   },
