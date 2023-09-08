@@ -107,9 +107,9 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as MemberBrokerageRecordApi from '@/api/member/brokerage/record'
+import * as BrokerageRecordApi from '@/api/mall/trade/brokerage/record'
 
-defineOptions({ name: 'MemberBrokerageRecord' })
+defineOptions({ name: 'TradeBrokerageRecord' })
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -129,7 +129,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await MemberBrokerageRecordApi.getMemberBrokerageRecordPage(queryParams)
+    const data = await BrokerageRecordApi.getBrokerageRecordPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
