@@ -195,7 +195,8 @@ const getDetail = async () => {
   if (id) {
     const res = await AfterSaleApi.getAfterSale(id)
     // 没有表单信息则关闭页面返回
-    if (res === null) {
+    if (res == null) {
+      message.notifyError('售后订单不存在')
       close()
     }
     formData.value = res
