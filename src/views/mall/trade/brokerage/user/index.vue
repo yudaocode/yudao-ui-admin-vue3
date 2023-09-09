@@ -73,15 +73,29 @@
         align="center"
         prop="brokerageOrderPrice"
         min-width="110px"
+        :formatter="fenToYuanFormat"
       />
-      <el-table-column label="已提现金额" align="center" prop="withdrawPrice" min-width="100px" />
+      <el-table-column
+        label="已提现金额"
+        align="center"
+        prop="withdrawPrice"
+        min-width="100px"
+        :formatter="fenToYuanFormat"
+      />
       <el-table-column label="已提现次数" align="center" prop="withdrawCount" min-width="100px" />
-      <el-table-column label="未提现金额" align="center" prop="price" min-width="100px" />
+      <el-table-column
+        label="未提现金额"
+        align="center"
+        prop="price"
+        min-width="100px"
+        :formatter="fenToYuanFormat"
+      />
       <el-table-column
         label="冻结中佣金"
         align="center"
         prop="frozenPrice"
         min-width="100px"
+        :formatter="fenToYuanFormat"
       />
       <el-table-column label="推广资格" align="center" prop="brokerageEnabled" min-width="80px">
         <template #default="scope">
@@ -167,6 +181,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import * as BrokerageUserApi from '@/api/mall/trade/brokerage/user'
 import { checkPermi } from '@/utils/permission'
+import { fenToYuanFormat } from '@/utils/formatter'
 
 defineOptions({ name: 'TradeBrokerageUser' })
 
