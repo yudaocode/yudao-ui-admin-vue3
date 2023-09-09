@@ -267,7 +267,7 @@
               <template #default>
                 <!-- TODO 权限后续补齐 -->
                 <div class="flex justify-center items-center">
-                  <el-button link type="primary" @click="openForm(scope.row.id)">
+                  <el-button link type="primary" @click="openDetail(scope.row.id)">
                     <Icon icon="ep:notification" />
                     详情
                   </el-button>
@@ -445,7 +445,7 @@ const imagePreview = (imgUrl: string) => {
 }
 
 /** 查看订单详情 */
-const openForm = (id: number) => {
+const openDetail = (id: number) => {
   push({ name: 'TradeOrderDetail', params: { orderId: id } })
 }
 

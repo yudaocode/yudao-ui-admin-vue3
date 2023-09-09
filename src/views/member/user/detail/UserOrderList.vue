@@ -139,7 +139,7 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column class-name="order-table-col">
         <template #header>
-          <!-- TODO @phui999：小屏幕下，会有偏移，后续看看 -->
+          <!-- TODO @puhui999：小屏幕下，会有偏移，后续看看 -->
           <div class="flex items-center" style="width: 100%">
             <div class="ml-100px mr-200px">商品信息</div>
             <div class="mr-60px">单价(元)/数量</div>
@@ -263,6 +263,14 @@
                 <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="scope.row.status" />
               </template>
             </el-table-column>
+            <el-table-column align="center" fixed="right" label="操作" width="160">
+              <template #default>
+                <el-button link type="primary" @click="openDetail(scope.row.id)">
+                  <Icon icon="ep:notification" />
+                  详情
+                </el-button>
+              </template>
+            </el-table-column>
           </el-table>
         </template>
       </el-table-column>
@@ -286,6 +294,8 @@ import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { FormInstance, TableColumnCtx } from 'element-plus'
+
+const { push } = useRouter() // 路由跳转
 
 const { userId }: { userId: number } = defineProps({
   userId: {
@@ -376,6 +386,12 @@ const spanMethod = ({ row, rowIndex, columnIndex }: SpanMethodProps) => {
     }
   }
 }
+
+/** 查看订单详情 */
+const openDetail = (id: number) => {
+  push({ name: 'TradeOrderDetail', params: { orderId: id } })
+}
+
 /** 初始化 **/
 onMounted(async () => {
   queryParams.userId = userId

@@ -54,19 +54,12 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="编号" align="center" prop="id" width="150px" />
-      <el-table-column label="业务编号" align="center" prop="bizId" width="150px">
-        <!--   TODO 芋艿：此处应创建对应的字典       -->
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MEMBER_EXPERIENCE_BIZ_ID" :value="scope.row.bizId" />
-        </template>
-      </el-table-column>
-      <el-table-column label="业务类型" align="center" prop="bizType" width="150px">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.MEMBER_EXPERIENCE_BIZ_TYPE" :value="scope.row.bizType" />
-        </template>
-      </el-table-column>
-      <el-table-column label="标题" align="center" prop="title" width="150px" />
-      <el-table-column label="描述" align="center" prop="description" />
+      <el-table-column
+        label="获得时间"
+        align="center"
+        prop="createTime"
+        :formatter="dateFormatter"
+      />
       <el-table-column label="经验" align="center" prop="experience" width="150px">
         <template #default="scope">
           <el-tag v-if="scope.row.experience > 0" class="ml-2" type="success" effect="dark">
@@ -77,19 +70,22 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="变更后的经验" align="center" prop="totalExperience" width="150px">
+      <el-table-column label="总经验" align="center" prop="totalExperience" width="150px">
         <template #default="scope">
           <el-tag class="ml-2" effect="dark">
             {{ scope.row.totalExperience }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-      />
+      <el-table-column label="标题" align="center" prop="title" width="150px" />
+      <el-table-column label="描述" align="center" prop="description" />
+      <el-table-column label="业务编号" align="center" prop="bizId" width="150px" />
+      <el-table-column label="业务类型" align="center" prop="bizType" width="150px">
+        <!--   TODO 芋艿：此处应创建对应的字典 -->
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.MEMBER_EXPERIENCE_BIZ_TYPE" :value="scope.row.bizType" />
+        </template>
+      </el-table-column>
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -106,7 +102,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as ExperienceRecordApi from '@/api/member/experience-record/index'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
-defineOptions({ name: 'UserExperienceRecord' })
+defineOptions({ name: 'UserExperienceRecordList' })
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
