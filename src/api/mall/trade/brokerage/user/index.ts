@@ -10,6 +10,7 @@ export interface BrokerageUserVO {
   frozenPrice: number
 
   nickname: string
+  avatar: string
 }
 
 // 查询分销用户列表

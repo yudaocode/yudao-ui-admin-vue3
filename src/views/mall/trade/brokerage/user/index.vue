@@ -154,7 +154,7 @@
                   推广订单
                 </el-dropdown-item>
                 <el-dropdown-item
-                  command="openUpdateBindUser"
+                  command="openUpdateBindUserForm"
                   v-if="checkPermi(['trade:brokerage-user:update-bind-user'])"
                 >
                   修改上级推广人
@@ -181,6 +181,8 @@
       @pagination="getList"
     />
   </ContentWrap>
+  <!-- 修改上级推广人表单 -->
+  <UpdateBindUserForm ref="updateBindUserFormRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
@@ -188,6 +190,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as BrokerageUserApi from '@/api/mall/trade/brokerage/user'
 import { checkPermi } from '@/utils/permission'
 import { fenToYuanFormat } from '@/utils/formatter'
+import UpdateBindUserForm from '@/views/mall/trade/brokerage/user/UpdateBindUserForm.vue'
 
 defineOptions({ name: 'TradeBrokerageUser' })
 
@@ -237,8 +240,8 @@ const handleCommand = (command: string, row: BrokerageUserApi.BrokerageUserVO) =
     case 'openBrokerageOrderTable':
       openBrokerageOrderTable(row.id)
       break
-    case 'openUpdateBindUser':
-      openUpdateBindUser(row.id)
+    case 'openUpdateBindUserForm':
+      openUpdateBindUserForm(row)
       break
     case 'handleClearBindUser':
       handleClearBindUser(row)
@@ -253,17 +256,9 @@ const openBrokerageUserTable = (id: number) => {}
 const openBrokerageOrderTable = (id: number) => {}
 
 /** 打开表单：修改上级推广人 */
-const openUpdateBindUser = (id: number) => {}
-/** 修改上级推广人 */
-const handleUpdateBindUser = async (row: BrokerageUserApi.BrokerageUserVO) => {
-  try {
-    // 二次确认
-    await message.confirm(`确认要修改"${row.nickname}"的上级推广人吗？`)
-    // 发起修改
-    await BrokerageUserApi.updateBindUser({ id: row.id })
-    // 刷新列表
-    await getList()
-  } catch {}
+const updateBindUserFormRef = ref()
+const openUpdateBindUserForm = (row: BrokerageUserApi.BrokerageUserVO) => {
+  updateBindUserFormRef.value.open(row)
 }
 
 /** 清除上级推广人 */
