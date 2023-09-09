@@ -82,8 +82,8 @@ const formData = ref<ProductSpuApi.Spu>({
       stock: 0, // 库存
       weight: 0, // 商品重量
       volume: 0, // 商品体积
-      subCommissionFirstPrice: 0, // 一级分销的佣金
-      subCommissionSecondPrice: 0 // 二级分销的佣金
+      firstBrokerageRecord: 0, // 一级分销的佣金
+      secondBrokerageRecord: 0 // 二级分销的佣金
     }
   ],
   description: '', // 商品详情
@@ -112,15 +112,15 @@ const getDetail = async () => {
           item.price = floatToFixed2(item.price)
           item.marketPrice = floatToFixed2(item.marketPrice)
           item.costPrice = floatToFixed2(item.costPrice)
-          item.subCommissionFirstPrice = floatToFixed2(item.subCommissionFirstPrice)
-          item.subCommissionSecondPrice = floatToFixed2(item.subCommissionSecondPrice)
+          item.firstBrokerageRecord = floatToFixed2(item.firstBrokerageRecord)
+          item.secondBrokerageRecord = floatToFixed2(item.secondBrokerageRecord)
         } else {
           // 回显价格分转元
           item.price = formatToFraction(item.price)
           item.marketPrice = formatToFraction(item.marketPrice)
           item.costPrice = formatToFraction(item.costPrice)
-          item.subCommissionFirstPrice = formatToFraction(item.subCommissionFirstPrice)
-          item.subCommissionSecondPrice = formatToFraction(item.subCommissionSecondPrice)
+          item.firstBrokerageRecord = formatToFraction(item.firstBrokerageRecord)
+          item.secondBrokerageRecord = formatToFraction(item.secondBrokerageRecord)
         }
       })
       formData.value = res
@@ -149,8 +149,8 @@ const submitForm = async () => {
       item.price = convertToInteger(item.price)
       item.marketPrice = convertToInteger(item.marketPrice)
       item.costPrice = convertToInteger(item.costPrice)
-      item.subCommissionFirstPrice = convertToInteger(item.subCommissionFirstPrice)
-      item.subCommissionSecondPrice = convertToInteger(item.subCommissionSecondPrice)
+      item.firstBrokerageRecord = convertToInteger(item.firstBrokerageRecord)
+      item.secondBrokerageRecord = convertToInteger(item.secondBrokerageRecord)
     })
     // 处理轮播图列表
     const newSliderPicUrls: any[] = []
