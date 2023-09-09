@@ -72,7 +72,13 @@
       </el-table-column>
       <el-table-column label="业务编号" align="center" prop="bizId" min-width="80" />
       <el-table-column label="标题" align="center" prop="title" min-width="110" />
-      <el-table-column label="金额" align="center" prop="price" min-width="60" />
+      <el-table-column
+        label="金额"
+        align="center"
+        prop="price"
+        min-width="60"
+        :formatter="fenToYuanFormat"
+      />
       <el-table-column label="说明" align="center" prop="description" min-width="120" />
       <el-table-column label="状态" align="center" prop="status" min-width="85">
         <template #default="scope">
@@ -108,6 +114,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as BrokerageRecordApi from '@/api/mall/trade/brokerage/record'
+import { fenToYuanFormat } from '@/utils/formatter'
 
 defineOptions({ name: 'TradeBrokerageRecord' })
 
