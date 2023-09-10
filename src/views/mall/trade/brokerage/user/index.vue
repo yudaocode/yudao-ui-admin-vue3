@@ -56,12 +56,7 @@
         </template>
       </el-table-column>
       <el-table-column label="昵称" align="center" prop="nickname" min-width="80px" />
-      <el-table-column
-        label="推广人数（一级）"
-        align="center"
-        prop="brokerageUserCount"
-        min-width="140px"
-      />
+      <el-table-column label="推广人数" align="center" prop="brokerageUserCount" width="80px" />
       <el-table-column
         label="推广订单数量"
         align="center"

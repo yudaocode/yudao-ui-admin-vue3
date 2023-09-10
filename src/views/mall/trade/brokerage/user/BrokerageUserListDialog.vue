@@ -49,10 +49,10 @@
         </el-table-column>
         <el-table-column label="昵称" align="center" prop="nickname" min-width="80px" />
         <el-table-column
-          label="推广人数（一级）"
+          label="推广人数"
           align="center"
           prop="brokerageUserCount"
-          min-width="110px"
+          min-width="80px"
         />
         <el-table-column
           label="推广订单数量"
