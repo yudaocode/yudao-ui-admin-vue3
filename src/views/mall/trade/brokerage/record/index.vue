@@ -65,6 +65,12 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="编号" align="center" prop="id" min-width="60" />
       <el-table-column label="用户编号" align="center" prop="userId" min-width="80" />
+      <el-table-column label="头像" align="center" prop="userAvatar" width="70px">
+        <template #default="scope">
+          <el-avatar :src="scope.row.userAvatar" />
+        </template>
+      </el-table-column>
+      <el-table-column label="昵称" align="center" prop="userNickname" min-width="80px" />
       <el-table-column label="业务类型" align="center" prop="bizType" min-width="85">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BROKERAGE_RECORD_BIZ_TYPE" :value="scope.row.bizType" />

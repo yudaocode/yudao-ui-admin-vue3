@@ -316,3 +316,16 @@ export const BrokerageUserTypeEnum = {
     name: '二级推广人'
   }
 }
+/**
+ * 佣金记录业务类型枚举
+ */
+export const BrokerageRecordBizTypeEnum = {
+  ORDER: {
+    type: 1,
+    name: '获得推广佣金'
+  },
+  WITHDRAW: {
+    type: 2,
+    name: '提现申请'
+  }
+}

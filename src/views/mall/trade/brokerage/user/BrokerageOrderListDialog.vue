@@ -20,9 +20,24 @@
             </el-radio-button>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="绑定时间" prop="bindUserTime">
+        <el-form-item label="状态" prop="status">
+          <el-select
+            v-model="queryParams.status"
+            placeholder="请选择状态"
+            clearable
+            class="!w-240px"
+          >
+            <el-option
+              v-for="dict in getIntDictOptions(DICT_TYPE.BROKERAGE_RECORD_STATUS)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="绑定时间" prop="createTime">
           <el-date-picker
-            v-model="queryParams.bindUserTime"
+            v-model="queryParams.createTime"
             value-format="YYYY-MM-DD HH:mm:ss"
             type="daterange"
             start-placeholder="开始日期"
@@ -41,35 +56,30 @@
     <!-- 列表 -->
     <ContentWrap>
       <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-        <el-table-column label="用户编号" align="center" prop="id" min-width="80px" />
-        <el-table-column label="头像" align="center" prop="avatar" width="70px">
+        <el-table-column label="订单编号" align="center" prop="bizId" min-width="80px" />
+        <el-table-column label="用户编号" align="center" prop="sourceUserId" min-width="80px" />
+        <el-table-column label="头像" align="center" prop="sourceUserAvatar" width="70px">
           <template #default="scope">
-            <el-avatar :src="scope.row.avatar" />
+            <el-avatar :src="scope.row.sourceUserAvatar" />
           </template>
         </el-table-column>
-        <el-table-column label="昵称" align="center" prop="nickname" min-width="80px" />
+        <el-table-column label="昵称" align="center" prop="sourceUserNickname" min-width="80px" />
         <el-table-column
-          label="推广人数（一级）"
+          label="佣金"
           align="center"
-          prop="brokerageUserCount"
-          min-width="110px"
+          prop="price"
+          min-width="100px"
+          :formatter="fenToYuanFormat"
         />
-        <el-table-column
-          label="推广订单数量"
-          align="center"
-          prop="brokerageOrderCount"
-          min-width="110px"
-        />
-        <el-table-column label="推广资格" align="center" prop="brokerageEnabled" min-width="80px">
+        <el-table-column label="状态" align="center" prop="status" min-width="85">
           <template #default="scope">
-            <el-tag v-if="scope.row.brokerageEnabled">有</el-tag>
-            <el-tag v-else type="info">无</el-tag>
+            <dict-tag :type="DICT_TYPE.BROKERAGE_RECORD_STATUS" :value="scope.row.status" />
           </template>
         </el-table-column>
         <el-table-column
-          label="绑定时间"
+          label="创建时间"
           align="center"
-          prop="bindUserTime"
+          prop="createTime"
           :formatter="dateFormatter"
           width="170px"
         />
@@ -87,11 +97,13 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import * as BrokerageUserApi from '@/api/mall/trade/brokerage/user'
-import { BrokerageUserTypeEnum } from '@/utils/constants'
+import * as BrokerageRecordApi from '@/api/mall/trade/brokerage/record'
+import { BrokerageRecordBizTypeEnum, BrokerageUserTypeEnum } from '@/utils/constants'
+import { fenToYuanFormat } from '@/utils/formatter'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
-/** 推广人列表 */
-defineOptions({ name: 'BrokerageUserListDialog' })
+/** 推广订单列表 */
+defineOptions({ name: 'BrokerageOrderListDialog' })
 
 const message = useMessage() // 消息弹窗
 
@@ -101,17 +113,18 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  bindUserId: null,
+  userId: null,
+  bizType: BrokerageRecordBizTypeEnum.ORDER.type,
   userType: BrokerageUserTypeEnum.ALL.type,
-  bindUserTime: []
+  createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
 
 /** 打开弹窗 */
 const dialogVisible = ref(false) // 弹窗的是否展示
-const open = async (bindUserId: number) => {
+const open = async (userId: number) => {
   dialogVisible.value = true
-  queryParams.bindUserId = bindUserId
+  queryParams.userId = userId
   resetQuery()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -120,7 +133,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const getList = async () => {
   loading.value = true
   try {
-    const data = await BrokerageUserApi.getBrokerageUserPage(queryParams)
+    const data = await BrokerageRecordApi.getBrokerageRecordPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {

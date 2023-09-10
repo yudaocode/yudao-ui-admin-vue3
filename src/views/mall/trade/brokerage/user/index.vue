@@ -183,7 +183,10 @@
   </ContentWrap>
   <!-- 修改上级推广人表单 -->
   <UpdateBindUserForm ref="updateBindUserFormRef" @success="getList" />
+  <!-- 推广人列表 -->
   <BrokerageUserListDialog ref="brokerageUserListDialogRef" />
+  <!-- 推广订单列表 -->
+  <BrokerageOrderListDialog ref="brokerageOrderListDialogRef" />
 </template>
 
 <script setup lang="ts">
@@ -193,6 +196,7 @@ import { checkPermi } from '@/utils/permission'
 import { fenToYuanFormat } from '@/utils/formatter'
 import UpdateBindUserForm from '@/views/mall/trade/brokerage/user/UpdateBindUserForm.vue'
 import BrokerageUserListDialog from '@/views/mall/trade/brokerage/user/BrokerageUserListDialog.vue'
+import BrokerageOrderListDialog from '@/views/mall/trade/brokerage/user/BrokerageOrderListDialog.vue'
 
 defineOptions({ name: 'TradeBrokerageUser' })
 
@@ -258,7 +262,10 @@ const openBrokerageUserTable = (id: number) => {
 }
 
 /** 打开推广订单列表 */
-const openBrokerageOrderTable = (id: number) => {}
+const brokerageOrderListDialogRef = ref()
+const openBrokerageOrderTable = (id: number) => {
+  brokerageOrderListDialogRef.value.open(id)
+}
 
 /** 打开表单：修改上级推广人 */
 const updateBindUserFormRef = ref()
