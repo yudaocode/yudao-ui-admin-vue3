@@ -57,10 +57,10 @@
       </el-table-column>
       <el-table-column label="昵称" align="center" prop="nickname" min-width="80px" />
       <el-table-column
-        label="推广用户数量（一级）"
+        label="推广人数（一级）"
         align="center"
         prop="brokerageUserCount"
-        min-width="110px"
+        min-width="140px"
       />
       <el-table-column
         label="推广订单数量"
@@ -183,6 +183,7 @@
   </ContentWrap>
   <!-- 修改上级推广人表单 -->
   <UpdateBindUserForm ref="updateBindUserFormRef" @success="getList" />
+  <BrokerageUserListDialog ref="brokerageUserListDialogRef" />
 </template>
 
 <script setup lang="ts">
@@ -191,6 +192,7 @@ import * as BrokerageUserApi from '@/api/mall/trade/brokerage/user'
 import { checkPermi } from '@/utils/permission'
 import { fenToYuanFormat } from '@/utils/formatter'
 import UpdateBindUserForm from '@/views/mall/trade/brokerage/user/UpdateBindUserForm.vue'
+import BrokerageUserListDialog from '@/views/mall/trade/brokerage/user/BrokerageUserListDialog.vue'
 
 defineOptions({ name: 'TradeBrokerageUser' })
 
@@ -250,7 +252,10 @@ const handleCommand = (command: string, row: BrokerageUserApi.BrokerageUserVO) =
 }
 
 /** 打开推广人列表 */
-const openBrokerageUserTable = (id: number) => {}
+const brokerageUserListDialogRef = ref()
+const openBrokerageUserTable = (id: number) => {
+  brokerageUserListDialogRef.value.open(id)
+}
 
 /** 打开推广订单列表 */
 const openBrokerageOrderTable = (id: number) => {}
