@@ -1,6 +1,6 @@
 {
   "name": "yudao-ui-admin-vue3",
-  "version": "1.8.0-snapshot",
+  "version": "1.8.1-snapshot",
   "description": "基于vue3、vite4、element-plus、typesScript",
   "author": "xingyu",
   "private": false,
@@ -27,8 +27,8 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
-    "@form-create/designer": "^3.1.0",
-    "@form-create/element-ui": "^3.1.17",
+    "@form-create/designer": "^3.1.3",
+    "@form-create/element-ui": "^3.1.24",
     "@iconify/iconify": "^3.1.1",
     "@videojs-player/vue": "^1.0.0",
     "@vueuse/core": "^10.4.1",

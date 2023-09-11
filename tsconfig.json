@@ -29,8 +29,7 @@
       "element-plus/global",
       "@types/intro.js",
       "@types/qrcode",
-      "vite-plugin-svg-icons/client",
-      "@form-create/element-ui/types"
+      "vite-plugin-svg-icons/client"
     ],
     "outDir": "target", // 请保留这个属性，防止tsconfig.json文件报错
     "typeRoots": ["./node_modules/@types/", "./types"]
