@@ -63,12 +63,13 @@ import UserAddressList from './UserAddressList.vue'
 import UserPointList from './UserPointList.vue'
 import UserSignList from './UserSignList.vue'
 import { CardTitle } from '@/components/Card/index'
+import { ElMessage } from 'element-plus'
 
 defineOptions({ name: 'MemberDetail' })
 
 const activeName = ref('point') // 账户明细 选中的 tabs
 const loading = ref(true) // 加载中
-let user = ref<UserApi.UserVO>({})
+const user = ref<UserApi.UserVO>()
 
 /** 添加/修改操作 */
 const formRef = ref()
@@ -104,10 +105,12 @@ onMounted(() => {
 .detail-info-item:first-child {
   padding-left: 0 !important;
 }
+
 /* first-child 不生效有没有大佬给看下q.q */
 .detail-info-item:nth-child(2) {
   padding-right: 0 !important;
 }
+
 .card-header {
   display: flex;
   justify-content: space-between;

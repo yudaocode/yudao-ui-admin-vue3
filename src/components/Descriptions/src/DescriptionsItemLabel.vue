@@ -22,6 +22,7 @@ const { label } = defineProps({
 .cell-item {
   display: inline;
 }
+
 .cell-item::after {
   content: ':';
 }

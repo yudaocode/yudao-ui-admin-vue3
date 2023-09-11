@@ -19,17 +19,18 @@ const { title } = defineProps({
 .card-title {
   font-size: 14px;
   font-weight: 600;
+
   &::before {
-    content: '';
+    position: relative;
+    top: 8px;
+    left: -5px;
     display: inline-block;
     width: 3px;
     height: 14px;
     //background-color: #105cfb;
     background: var(--el-color-primary);
-    position: relative;
-    left: -5px;
-    top: 8px;
     border-radius: 5px;
+    content: '';
     transform: translateY(-50%);
   }
 }

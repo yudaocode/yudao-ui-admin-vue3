@@ -423,22 +423,24 @@ const handleRemoveSpu = (index: number) => {
 <style scoped lang="scss">
 .select-box {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed var(--el-border-color-darker);
-  border-radius: 8px;
   width: 60px;
   height: 60px;
+  border: 1px dashed var(--el-border-color-darker);
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
 }
+
 .spu-pic {
   position: relative;
 }
+
 .del-icon {
   position: absolute;
+  top: -10px;
+  right: -10px;
   z-index: 1;
   width: 20px !important;
   height: 20px !important;
-  right: -10px;
-  top: -10px;
 }
 </style>
