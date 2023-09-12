@@ -104,13 +104,19 @@
       <el-form-item label="聚合搜索">
         <el-input
           v-show="true"
-          v-model="queryType.v"
+          v-model="queryParams[queryType.k]"
           class="!w-280px"
           clearable
           placeholder="请输入"
         >
           <template #prepend>
-            <el-select v-model="queryType.k" class="!w-110px" clearable placeholder="全部">
+            <el-select
+              v-model="queryType.k"
+              class="!w-110px"
+              clearable
+              placeholder="全部"
+              @change="inputChangeSelect"
+            >
               <el-option
                 v-for="dict in searchList"
                 :key="dict.value"
@@ -335,41 +341,41 @@ const total = ref(2) // 列表的总页数
 const list = ref<TradeOrderApi.OrderVO[]>([]) // 列表的数据
 const queryFormRef = ref<FormInstance>() // 搜索的表单
 // 表单搜索
-const queryParams = reactive({
-  pageNo: 1, //首页
-  pageSize: 10, //页面大小
-  no: '',
-  userId: '',
-  userNickname: '',
-  userMobile: '',
-  receiverName: '',
-  receiverMobile: '',
-
-  terminal: '',
-  type: null,
-  status: null,
-  payChannelCode: '',
-  createTime: [],
-  deliveryType: null,
-  spuName: '',
-  itemCount: '',
-  pickUpStoreId: [],
-  logisticsId: null,
-  all: ''
+const queryParams = ref({
+  pageNo: 1, // 页数
+  pageSize: 10, // 每页显示数量
+  status: null, // 订单状态
+  payChannelCode: null, // 支付方式
+  createTime: null, // 创建时间
+  terminal: null, // 订单来源
+  type: null, // 订单类型
+  deliveryType: null, // 配送方式
+  logisticsId: null, // 快递公司
+  pickUpStoreId: null // 自提门店
 })
-const queryType = reactive({ k: '', v: '' }) // 订单搜索类型kv
-/**
- * 订单聚合搜索
- * 商品名称、商品件数、全部
- *
- * 需要后端支持 TODO
- */
+const queryType = reactive({ k: '' }) // 订单搜索类型 k
+
+// 订单聚合搜索 select 类型配置
 const searchList = ref([
   { value: 'no', label: '订单号' },
   { value: 'userId', label: '用户UID' },
   { value: 'userNickname', label: '用户昵称' },
   { value: 'userMobile', label: '用户电话' }
 ])
+/**
+ * 聚合搜索切换查询对象时触发
+ * @param val
+ */
+const inputChangeSelect = (val: string) => {
+  searchList.value
+    .filter((item) => item.value !== val)
+    ?.forEach((item1) => {
+      // 清除集合搜索无用属性
+      if (queryParams.value.hasOwnProperty(item1.value)) {
+        delete queryParams.value[item1.value]
+      }
+    })
+}
 
 const headerStyle = ({ row, columnIndex }: any) => {
   // 表头第一行第一列占 8
@@ -417,7 +423,7 @@ const spanMethod = ({ row, rowIndex, columnIndex }: SpanMethodProps) => {
 const getList = async () => {
   loading.value = true
   try {
-    const data = await TradeOrderApi.getOrderPage(queryParams)
+    const data = await TradeOrderApi.getOrderPage(unref(queryParams))
     list.value = data.list
     total.value = data.total
   } finally {
@@ -427,13 +433,25 @@ const getList = async () => {
 
 /** 搜索按钮操作 */
 const handleQuery = async () => {
-  queryParams.pageNo = 1
+  queryParams.value.pageNo = 1
   await getList()
 }
 
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value?.resetFields()
+  queryParams.value = {
+    pageNo: 1, // 页数
+    pageSize: 10, // 每页显示数量
+    status: null, // 订单状态
+    payChannelCode: null, // 支付方式
+    createTime: null, // 创建时间
+    terminal: null, // 订单来源
+    type: null, // 订单类型
+    deliveryType: null, // 配送方式
+    logisticsId: null, // 快递公司
+    pickUpStoreId: null // 自提门店
+  }
   handleQuery()
 }
 

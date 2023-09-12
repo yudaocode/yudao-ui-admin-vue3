@@ -245,9 +245,10 @@ const { params } = useRoute() // 查询参数
 const getDetail = async () => {
   const id = params.orderId as unknown as number
   if (id) {
-    const res = (await TradeOrderApi.getOrder(id)) as TradeOrderApi.OrderVO
+    const res = (await TradeOrderApi.getOrder(66666)) as TradeOrderApi.OrderVO
     // 没有表单信息则关闭页面返回
-    if (res === null) {
+    if (res == null) {
+      message.error('交易订单不存在')
       close()
     }
     formData.value = res
@@ -259,7 +260,7 @@ const { delView } = useTagsViewStore() // 视图操作
 const { push, currentRoute } = useRouter() // 路由
 const close = () => {
   delView(unref(currentRoute))
-  push({ name: 'TradeAfterSale' })
+  push({ name: 'TradeOrder' })
 }
 
 /** 复制 */

@@ -191,11 +191,6 @@ service.interceptors.response.use(
       }
       return Promise.reject('error')
     } else {
-      // TODO @puhui999：这个先不用支持哈；
-      // 前端处理 data 为 null 的情况，进行提示
-      if (data.msg !== '') {
-        ElNotification.error({ title: msg })
-      }
       return data
     }
   },

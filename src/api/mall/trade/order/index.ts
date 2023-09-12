@@ -51,11 +51,10 @@ export interface OrderVO {
     avatar?: string
   }
   // 订单操作日志
-  logs?: logs[]
+  logs?: OrderLogRespVO[]
 }
 
-// TODO @puhui999：OrderLogRespVO 会不会更好哈。
-export interface logs {
+export interface OrderLogRespVO {
   content?: string
   createTime?: Date
   userType?: number

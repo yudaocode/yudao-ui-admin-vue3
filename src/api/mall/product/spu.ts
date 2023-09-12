@@ -20,8 +20,8 @@ export interface Sku {
   stock?: number // 库存
   weight?: number // 商品重量，单位：kg 千克
   volume?: number // 商品体积，单位：m^3 平米
-  subCommissionFirstPrice?: number | string // 一级分销的佣金
-  subCommissionSecondPrice?: number | string // 二级分销的佣金
+  firstBrokerageRecord?: number | string // 一级分销的佣金
+  secondBrokerageRecord?: number | string // 二级分销的佣金
   salesCount?: number // 商品销量
 }
 
