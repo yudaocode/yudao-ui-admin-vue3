@@ -151,13 +151,6 @@ export enum DICT_TYPE {
   // ========== MALL - 会员模块 ==========
   MEMBER_POINT_BIZ_TYPE = 'member_point_biz_type', // 积分的业务类型
   MEMBER_EXPERIENCE_BIZ_TYPE = 'member_experience_biz_type', // 会员经验业务类型
-  // TODO @疯狂：这块的枚举，是不是要挪到 TRADE 那啦
-  BROKERAGE_ENABLED_CONDITION = 'brokerage_enabled_condition', // 分佣模式
-  BROKERAGE_BIND_MODE = 'brokerage_bind_mode', // 分销关系绑定模式
-  BROKERAGE_BANK_NAME = 'brokerage_bank_name', // 佣金提现银行
-  BROKERAGE_WITHDRAW_TYPE = 'brokerage_withdraw_type', // 佣金冻结时间
-  BROKERAGE_RECORD_BIZ_TYPE = 'brokerage_record_biz_type', // 佣金业务类型
-  BROKERAGE_RECORD_STATUS = 'brokerage_record_status', // 佣金状态
 
   // ========== MALL - 商品模块 ==========
   PRODUCT_UNIT = 'product_unit', // 商品单位
@@ -172,6 +165,12 @@ export enum DICT_TYPE {
   TRADE_ORDER_STATUS = 'trade_order_status', // 订单 - 状态
   TRADE_ORDER_ITEM_AFTER_SALE_STATUS = 'trade_order_item_after_sale_status', // 订单项 - 售后状态
   TRADE_DELIVERY_TYPE = 'trade_delivery_type', // 配送方式
+  BROKERAGE_ENABLED_CONDITION = 'brokerage_enabled_condition', // 分佣模式
+  BROKERAGE_BIND_MODE = 'brokerage_bind_mode', // 分销关系绑定模式
+  BROKERAGE_BANK_NAME = 'brokerage_bank_name', // 佣金提现银行
+  BROKERAGE_WITHDRAW_TYPE = 'brokerage_withdraw_type', // 佣金冻结时间
+  BROKERAGE_RECORD_BIZ_TYPE = 'brokerage_record_biz_type', // 佣金业务类型
+  BROKERAGE_RECORD_STATUS = 'brokerage_record_status', // 佣金状态
 
   // ========== MALL - 营销模块 ==========
   PROMOTION_DISCOUNT_TYPE = 'promotion_discount_type', // 优惠类型

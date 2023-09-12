@@ -56,12 +56,7 @@
         </template>
       </el-table-column>
       <el-table-column label="昵称" align="center" prop="nickname" min-width="80px" />
-      <el-table-column
-        label="推广用户数量（一级）"
-        align="center"
-        prop="brokerageUserCount"
-        min-width="110px"
-      />
+      <el-table-column label="推广人数" align="center" prop="brokerageUserCount" width="80px" />
       <el-table-column
         label="推广订单数量"
         align="center"
@@ -104,8 +99,8 @@
             active-text="有"
             inactive-text="无"
             inline-prompt
-            :disabled="!checkPermi(['trade:brokerage-user:update-brokerage-user'])"
-            @change="handleBrokerageEnabledChange(scope.row.id, !scope.row.brokerageEnabled)"
+            :disabled="!checkPermi(['trade:brokerage-user:update-bind-user'])"
+            @change="handleBrokerageEnabledChange(scope.row)"
           />
         </template>
       </el-table-column>
@@ -131,10 +126,14 @@
             v-hasPermi="[
               'trade:brokerage-user:user-query',
               'trade:brokerage-user:order-query',
-              'trade:brokerage-user:update-brokerage-user',
-              'trade:brokerage-user:clear-brokerage-user'
+              'trade:brokerage-user:update-bind-user',
+              'trade:brokerage-user:clear-bind-user'
             ]"
           >
+            <el-button link type="primary">
+              <Icon icon="ep:d-arrow-right" />
+              更多
+            </el-button>
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item
@@ -150,14 +149,16 @@
                   推广订单
                 </el-dropdown-item>
                 <el-dropdown-item
-                  command="openUpdateBindUser"
-                  v-if="checkPermi(['trade:brokerage-user:update-brokerage-user'])"
+                  command="openUpdateBindUserForm"
+                  v-if="checkPermi(['trade:brokerage-user:update-bind-user'])"
                 >
                   修改上级推广人
                 </el-dropdown-item>
                 <el-dropdown-item
-                  command="openClearBindUser"
-                  v-if="checkPermi(['trade:brokerage-user:clear-brokerage-user'])"
+                  command="handleClearBindUser"
+                  v-if="
+                    scope.row.bindUserId && checkPermi(['trade:brokerage-user:clear-bind-user'])
+                  "
                 >
                   清除上级推广人
                 </el-dropdown-item>
@@ -175,6 +176,12 @@
       @pagination="getList"
     />
   </ContentWrap>
+  <!-- 修改上级推广人表单 -->
+  <UpdateBindUserForm ref="updateBindUserFormRef" @success="getList" />
+  <!-- 推广人列表 -->
+  <BrokerageUserListDialog ref="brokerageUserListDialogRef" />
+  <!-- 推广订单列表 -->
+  <BrokerageOrderListDialog ref="brokerageOrderListDialogRef" />
 </template>
 
 <script setup lang="ts">
@@ -182,11 +189,13 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as BrokerageUserApi from '@/api/mall/trade/brokerage/user'
 import { checkPermi } from '@/utils/permission'
 import { fenToYuanFormat } from '@/utils/formatter'
+import UpdateBindUserForm from '@/views/mall/trade/brokerage/user/UpdateBindUserForm.vue'
+import BrokerageUserListDialog from '@/views/mall/trade/brokerage/user/BrokerageUserListDialog.vue'
+import BrokerageOrderListDialog from '@/views/mall/trade/brokerage/user/BrokerageOrderListDialog.vue'
 
 defineOptions({ name: 'TradeBrokerageUser' })
 
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -232,29 +241,62 @@ const handleCommand = (command: string, row: BrokerageUserApi.BrokerageUserVO) =
     case 'openBrokerageOrderTable':
       openBrokerageOrderTable(row.id)
       break
-    case 'openUpdateBindUser':
-      openUpdateBindUser(row.id)
+    case 'openUpdateBindUserForm':
+      openUpdateBindUserForm(row)
       break
-    case 'openClearBindUser':
-      openClearBindUser(row.id)
+    case 'handleClearBindUser':
+      handleClearBindUser(row)
       break
   }
 }
 
 /** 打开推广人列表 */
-const openBrokerageUserTable = (id: number) => {}
+const brokerageUserListDialogRef = ref()
+const openBrokerageUserTable = (id: number) => {
+  brokerageUserListDialogRef.value.open(id)
+}
 
 /** 打开推广订单列表 */
-const openBrokerageOrderTable = (id: number) => {}
+const brokerageOrderListDialogRef = ref()
+const openBrokerageOrderTable = (id: number) => {
+  brokerageOrderListDialogRef.value.open(id)
+}
 
 /** 打开表单：修改上级推广人 */
-const openUpdateBindUser = (id: number) => {}
+const updateBindUserFormRef = ref()
+const openUpdateBindUserForm = (row: BrokerageUserApi.BrokerageUserVO) => {
+  updateBindUserFormRef.value.open(row)
+}
 
-/** 打开表单：清除上级推广人 */
-const openClearBindUser = (id: number) => {}
+/** 清除上级推广人 */
+const handleClearBindUser = async (row: BrokerageUserApi.BrokerageUserVO) => {
+  try {
+    // 二次确认
+    await message.confirm(`确认要清除"${row.nickname}"的上级推广人吗？`)
+    // 发起修改
+    await BrokerageUserApi.clearBindUser({ id: row.id })
+    message.success('清除成功')
+    // 刷新列表
+    await getList()
+  } catch {}
+}
 
 /** 推广资格 开通/关闭 */
-const handleBrokerageEnabledChange = (id: number, enabled: boolean) => {}
+const handleBrokerageEnabledChange = async (row: BrokerageUserApi.BrokerageUserVO) => {
+  try {
+    // 二次确认
+    const text = row.brokerageEnabled ? '开通' : '关闭'
+    await message.confirm(`确认要${text}"${row.nickname}"的推广资格吗？`)
+    // 发起修改
+    await BrokerageUserApi.updateBrokerageEnabled({ id: row.id, enabled: row.brokerageEnabled })
+    message.success(text + '成功')
+    // 刷新列表
+    await getList()
+  } catch {
+    // 异常时，需要重置回之前的值
+    row.brokerageEnabled = !row.brokerageEnabled
+  }
+}
 
 /** 初始化 **/
 onMounted(() => {
