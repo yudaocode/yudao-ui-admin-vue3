@@ -101,6 +101,7 @@
         </el-select>
       </el-form-item>
       <!-- TODO puhui 聚合搜索等售后结束后实现-->
+      <!-- TODO puhui999：尽量不要用 .k 这样的参数，完整拼写，有完整的业务含义 -->
       <el-form-item label="聚合搜索">
         <el-input
           v-show="true"
@@ -356,6 +357,7 @@ const queryParams = ref({
 const queryType = reactive({ k: '' }) // 订单搜索类型 k
 
 // 订单聚合搜索 select 类型配置
+// TODO @puhui999：dynamicSearchList，动态搜索；其它相关的变量和方法，都可以朝着这个变量靠哈；这样更容易理解；
 const searchList = ref([
   { value: 'no', label: '订单号' },
   { value: 'userId', label: '用户UID' },
