@@ -332,8 +332,8 @@ defineExpose({ validate })
 const changeSubCommissionType = () => {
   // 默认为零，类型切换后也要重置为零
   for (const item of formData.skus) {
-    item.firstBrokerageRecord = 0
-    item.secondBrokerageRecord = 0
+    item.firstBrokeragePrice = 0
+    item.secondBrokeragePrice = 0
   }
 }
 
@@ -352,8 +352,8 @@ const onChangeSpec = () => {
       stock: 0,
       weight: 0,
       volume: 0,
-      firstBrokerageRecord: 0,
-      secondBrokerageRecord: 0
+      firstBrokeragePrice: 0,
+      secondBrokeragePrice: 0
     }
   ]
 }
