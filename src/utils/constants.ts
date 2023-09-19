@@ -300,23 +300,6 @@ export const BrokerageEnabledConditionEnum = {
   }
 }
 /**
- * 分销用户类型枚举
- */
-export const BrokerageUserTypeEnum = {
-  ALL: {
-    type: 0,
-    name: '全部'
-  },
-  FIRST: {
-    type: 1,
-    name: '一级推广人'
-  },
-  SECOND: {
-    type: 2,
-    name: '二级推广人'
-  }
-}
-/**
  * 佣金记录业务类型枚举
  */
 export const BrokerageRecordBizTypeEnum = {
