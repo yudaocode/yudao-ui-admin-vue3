@@ -171,6 +171,7 @@ export enum DICT_TYPE {
   BROKERAGE_WITHDRAW_TYPE = 'brokerage_withdraw_type', // 佣金冻结时间
   BROKERAGE_RECORD_BIZ_TYPE = 'brokerage_record_biz_type', // 佣金业务类型
   BROKERAGE_RECORD_STATUS = 'brokerage_record_status', // 佣金状态
+  BROKERAGE_WITHDRAW_STATUS = 'brokerage_withdraw_status', // 佣金提现状态
 
   // ========== MALL - 营销模块 ==========
   PROMOTION_DISCOUNT_TYPE = 'promotion_discount_type', // 优惠类型
