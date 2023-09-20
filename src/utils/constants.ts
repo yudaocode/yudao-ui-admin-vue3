@@ -299,3 +299,62 @@ export const BrokerageEnabledConditionEnum = {
     name: '指定分销'
   }
 }
+/**
+ * 佣金记录业务类型枚举
+ */
+export const BrokerageRecordBizTypeEnum = {
+  ORDER: {
+    type: 1,
+    name: '获得推广佣金'
+  },
+  WITHDRAW: {
+    type: 2,
+    name: '提现申请'
+  }
+}
+/**
+ * 佣金提现状态枚举
+ */
+export const BrokerageWithdrawStatusEnum = {
+  AUDITING: {
+    status: 0,
+    name: '审核中'
+  },
+  AUDIT_SUCCESS: {
+    status: 10,
+    name: '审核通过'
+  },
+  AUDIT_FAIL: {
+    status: 20,
+    name: '审核不通过'
+  },
+  WITHDRAW_SUCCESS: {
+    status: 11,
+    name: '提现成功'
+  },
+  WITHDRAW_FAIL: {
+    status: 21,
+    name: '提现失败'
+  }
+}
+/**
+ * 佣金提现类型枚举
+ */
+export const BrokerageWithdrawTypeEnum = {
+  WALLET: {
+    type: 1,
+    name: '钱包'
+  },
+  BANK: {
+    type: 2,
+    name: '银行卡'
+  },
+  WECHAT: {
+    type: 3,
+    name: '微信'
+  },
+  ALIPAY: {
+    type: 4,
+    name: '支付宝'
+  }
+}

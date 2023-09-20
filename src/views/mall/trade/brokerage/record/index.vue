@@ -65,6 +65,12 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="编号" align="center" prop="id" min-width="60" />
       <el-table-column label="用户编号" align="center" prop="userId" min-width="80" />
+      <el-table-column label="头像" align="center" prop="userAvatar" width="70px">
+        <template #default="scope">
+          <el-avatar :src="scope.row.userAvatar" />
+        </template>
+      </el-table-column>
+      <el-table-column label="昵称" align="center" prop="userNickname" min-width="80px" />
       <el-table-column label="业务类型" align="center" prop="bizType" min-width="85">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BROKERAGE_RECORD_BIZ_TYPE" :value="scope.row.bizType" />
@@ -72,7 +78,13 @@
       </el-table-column>
       <el-table-column label="业务编号" align="center" prop="bizId" min-width="80" />
       <el-table-column label="标题" align="center" prop="title" min-width="110" />
-      <el-table-column label="金额" align="center" prop="price" min-width="60" />
+      <el-table-column
+        label="金额"
+        align="center"
+        prop="price"
+        min-width="60"
+        :formatter="fenToYuanFormat"
+      />
       <el-table-column label="说明" align="center" prop="description" min-width="120" />
       <el-table-column label="状态" align="center" prop="status" min-width="85">
         <template #default="scope">
@@ -108,6 +120,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as BrokerageRecordApi from '@/api/mall/trade/brokerage/record'
+import { fenToYuanFormat } from '@/utils/formatter'
 
 defineOptions({ name: 'TradeBrokerageRecord' })
 
