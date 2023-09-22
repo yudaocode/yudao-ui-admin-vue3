@@ -26,7 +26,7 @@
         v-if="formData.productScope === PromotionProductScopeEnum.SPU.scope"
         prop="productSpuIds"
       >
-        <div class="flex items-center gap-1 flex-wrap">
+        <div class="flex flex-wrap items-center gap-1">
           <div class="select-box spu-pic" v-for="(spu, index) in productSpus" :key="spu.id">
             <el-image :src="spu.picUrl" />
             <Icon icon="ep:circle-close-filled" class="del-icon" @click="handleRemoveSpu(index)" />
@@ -62,7 +62,7 @@
         <el-input-number
           v-model="formData.discountPrice"
           placeholder="请输入优惠金额，单位：元"
-          class="!w-400px mr-2"
+          class="mr-2 !w-400px"
           :precision="2"
           :min="0"
         />
@@ -76,7 +76,7 @@
         <el-input-number
           v-model="formData.discountPercent"
           placeholder="优惠券折扣不能小于 1 折，且不可大于 9.9 折"
-          class="!w-400px mr-2"
+          class="mr-2 !w-400px"
           :precision="1"
           :min="1"
           :max="9.9"
@@ -91,7 +91,7 @@
         <el-input-number
           v-model="formData.discountLimitPrice"
           placeholder="请输入最多优惠"
-          class="!w-400px mr-2"
+          class="mr-2 !w-400px"
           :precision="2"
           :min="0"
         />
@@ -101,7 +101,7 @@
         <el-input-number
           v-model="formData.usePrice"
           placeholder="无门槛请设为 0"
-          class="!w-400px mr-2"
+          class="mr-2 !w-400px"
           :precision="2"
           :min="0"
         />
@@ -117,7 +117,7 @@
         <el-input-number
           v-model="formData.totalCount"
           placeholder="发放数量，没有之后不能领取或发放，-1 为不限制"
-          class="!w-400px mr-2"
+          class="mr-2 !w-400px"
           :precision="0"
           :min="-1"
         />
@@ -127,7 +127,7 @@
         <el-input-number
           v-model="formData.takeLimitCount"
           placeholder="设置为 -1 时，可无限领取"
-          class="!w-400px mr-2"
+          class="mr-2 !w-400px"
           :precision="0"
           :min="-1"
         />

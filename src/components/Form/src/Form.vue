@@ -203,7 +203,7 @@ export default defineComponent({
                       icon="ep:warning"
                       size={16}
                       color="var(--el-color-primary)"
-                      class="ml-2px relative top-1px"
+                      class="relative top-1px ml-2px"
                     ></Icon>
                   )
                 }}

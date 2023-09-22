@@ -5,7 +5,7 @@
         <el-row :gutter="20" justify="space-between">
           <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
             <div class="flex items-center">
-              <img :src="avatar" alt="" class="w-70px h-70px rounded-[50%] mr-20px" />
+              <img :src="avatar" alt="" class="mr-20px h-70px w-70px rounded-[50%]" />
               <div>
                 <div class="text-20px">
                   {{ t('workplace.welcome') }} {{ username }} {{ t('workplace.happyDay') }}
@@ -17,9 +17,9 @@
             </div>
           </el-col>
           <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
-            <div class="flex h-70px items-center justify-end lt-sm:mt-10px">
+            <div class="h-70px flex items-center justify-end lt-sm:mt-10px">
               <div class="px-8px text-right">
-                <div class="text-14px text-gray-400 mb-20px">{{ t('workplace.project') }}</div>
+                <div class="mb-20px text-14px text-gray-400">{{ t('workplace.project') }}</div>
                 <CountTo
                   class="text-20px"
                   :start-val="0"
@@ -29,7 +29,7 @@
               </div>
               <el-divider direction="vertical" />
               <div class="px-8px text-right">
-                <div class="text-14px text-gray-400 mb-20px">{{ t('workplace.toDo') }}</div>
+                <div class="mb-20px text-14px text-gray-400">{{ t('workplace.toDo') }}</div>
                 <CountTo
                   class="text-20px"
                   :start-val="0"
@@ -39,7 +39,7 @@
               </div>
               <el-divider direction="vertical" border-style="dashed" />
               <div class="px-8px text-right">
-                <div class="text-14px text-gray-400 mb-20px">{{ t('workplace.access') }}</div>
+                <div class="mb-20px text-14px text-gray-400">{{ t('workplace.access') }}</div>
                 <CountTo
                   class="text-20px"
                   :start-val="0"
@@ -58,7 +58,7 @@
     <el-col :xl="16" :lg="16" :md="24" :sm="24" :xs="24" class="mb-10px">
       <el-card shadow="never">
         <template #header>
-          <div class="flex justify-between h-3">
+          <div class="h-3 flex justify-between">
             <span>{{ t('workplace.project') }}</span>
             <el-link type="primary" :underline="false">{{ t('action.more') }}</el-link>
           </div>
@@ -80,7 +80,7 @@
                   <span class="text-16px">{{ item.name }}</span>
                 </div>
                 <div class="mt-15px text-14px text-gray-400">{{ t(item.message) }}</div>
-                <div class="mt-20px text-12px text-gray-400 flex justify-between">
+                <div class="mt-20px flex justify-between text-12px text-gray-400">
                   <span>{{ item.personal }}</span>
                   <span>{{ formatTime(item.time, 'yyyy-MM-dd') }}</span>
                 </div>
@@ -114,7 +114,7 @@
     <el-col :xl="8" :lg="8" :md="24" :sm="24" :xs="24" class="mb-10px">
       <el-card shadow="never">
         <template #header>
-          <div class="flex justify-between h-3">
+          <div class="h-3 flex justify-between">
             <span>{{ t('workplace.shortcutOperation') }}</span>
           </div>
         </template>
@@ -133,7 +133,7 @@
       </el-card>
       <el-card shadow="never" class="mt-10px">
         <template #header>
-          <div class="flex justify-between h-3">
+          <div class="h-3 flex justify-between">
             <span>{{ t('workplace.notice') }}</span>
             <el-link type="primary" :underline="false">{{ t('action.more') }}</el-link>
           </div>
@@ -141,7 +141,7 @@
         <el-skeleton :loading="loading" animated>
           <div v-for="(item, index) in notice" :key="`dynamics-${index}`">
             <div class="flex items-center">
-              <img :src="avatar" alt="" class="w-35px h-35px rounded-[50%] mr-20px" />
+              <img :src="avatar" alt="" class="mr-20px h-35px w-35px rounded-[50%]" />
               <div>
                 <div class="text-14px">
                   <Highlight :keys="item.keys.map((v) => t(v))">

@@ -36,7 +36,7 @@
           v-for="(item, index) in row.sliderPicUrls"
           :key="index"
           :src="item"
-          class="w-60px h-60px mr-10px"
+          class="mr-10px h-60px w-60px"
           @click="imagePreview(row.sliderPicUrls)"
         />
       </template>

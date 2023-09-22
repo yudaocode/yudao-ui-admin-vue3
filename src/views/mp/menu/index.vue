@@ -10,13 +10,13 @@
   </ContentWrap>
 
   <ContentWrap>
-    <div class="public-account-management clearfix" v-loading="loading">
+    <div class="clearfix public-account-management" v-loading="loading">
       <!--左边配置菜单-->
       <div class="left">
         <div class="weixin-hd">
           <div class="weixin-title">{{ accountName }}</div>
         </div>
-        <div class="weixin-menu clearfix">
+        <div class="clearfix weixin-menu">
           <MenuPreviewer
             v-model="menuList"
             :account-id="accountId"

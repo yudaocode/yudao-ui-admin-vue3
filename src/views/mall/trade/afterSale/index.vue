@@ -123,7 +123,7 @@
           <div class="flex items-center">
             <el-image
               :src="row.picUrl"
-              class="w-30px h-30px mr-10px"
+              class="mr-10px h-30px w-30px"
               @click="imagePreview(row.picUrl)"
             />
             <span class="mr-10px">{{ row.spuName }}</span>

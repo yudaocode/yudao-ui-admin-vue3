@@ -1,6 +1,6 @@
 <template>
   <div class="flex">
-    <el-card class="w-1/3 user" shadow="hover">
+    <el-card class="user w-1/3" shadow="hover">
       <template #header>
         <div class="card-header">
           <span>{{ t('profile.user.title') }}</span>
@@ -8,7 +8,7 @@
       </template>
       <ProfileUser />
     </el-card>
-    <el-card class="w-2/3 user ml-3" shadow="hover">
+    <el-card class="user ml-3 w-2/3" shadow="hover">
       <template #header>
         <div class="card-header">
           <span>{{ t('profile.info.title') }}</span>

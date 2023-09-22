@@ -70,23 +70,23 @@ const dialogStyle = computed(() => {
     :show-close="false"
   >
     <template #header="{ close }">
-      <div class="flex justify-between items-center h-54px pl-15px pr-15px relative">
+      <div class="relative h-54px flex items-center justify-between pl-15px pr-15px">
         <slot name="title">
           {{ title }}
         </slot>
         <div
-          class="h-54px flex justify-between items-center absolute top-[50%] right-15px translate-y-[-50%]"
+          class="absolute right-15px top-[50%] h-54px flex translate-y-[-50%] items-center justify-between"
         >
           <Icon
             v-if="fullscreen"
-            class="cursor-pointer is-hover mr-10px"
+            class="is-hover mr-10px cursor-pointer"
             :icon="isFullscreen ? 'radix-icons:exit-full-screen' : 'radix-icons:enter-full-screen'"
             color="var(--el-color-info)"
             hover-color="var(--el-color-primary)"
             @click="toggleFull"
           />
           <Icon
-            class="cursor-pointer is-hover"
+            class="is-hover cursor-pointer"
             icon="ep:close"
             hover-color="var(--el-color-primary)"
             color="var(--el-color-info)"

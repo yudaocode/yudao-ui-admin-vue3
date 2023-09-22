@@ -8,7 +8,7 @@
       v-loading="formLoading"
     >
       <el-form-item label="商品" prop="spuId">
-        <div @click="handleSelectSpu" class="w-60px h-60px">
+        <div @click="handleSelectSpu" class="h-60px w-60px">
           <div v-if="spuData && spuData.picUrl">
             <el-image :src="spuData.picUrl" />
           </div>
@@ -18,7 +18,7 @@
         </div>
       </el-form-item>
       <el-form-item label="商品规格" prop="skuId" v-if="formData.spuId">
-        <div @click="handleSelectSku" class="w-60px h-60px">
+        <div @click="handleSelectSku" class="h-60px w-60px">
           <div v-if="skuData && skuData.picUrl">
             <el-image :src="skuData.picUrl" />
           </div>

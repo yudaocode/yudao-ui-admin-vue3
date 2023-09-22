@@ -227,10 +227,10 @@ const disabledClick = () => {
     <div
       v-if="disabled"
       :class="`${prefixCls}--disabled`"
-      class="absolute top-0 left-0 flex w-full h-full items-center justify-center"
+      class="absolute left-0 top-0 h-full w-full flex items-center justify-center"
       @click="disabledClick"
     >
-      <div class="absolute top-[50%] left-[50%] font-bold">
+      <div class="absolute left-[50%] top-[50%] font-bold">
         <Icon :size="30" color="var(--el-color-primary)" icon="ep:refresh-right" />
         <div>{{ disabledText }}</div>
       </div>

@@ -15,7 +15,7 @@
     <!--字段列表-->
     <div class="element-property list-property">
       <el-divider><Icon icon="ep:coin" /> 表单字段</el-divider>
-      <el-table :data="fieldList" max-height="240" border fit>
+      <el-table :data="fieldList" max-height="240" fit border>
         <el-table-column label="序号" type="index" width="50px" />
         <el-table-column label="字段名称" prop="label" min-width="80px" show-overflow-tooltip />
         <el-table-column
@@ -97,7 +97,7 @@
             >添加枚举值</el-button
           >
         </p>
-        <el-table :data="fieldEnumList" key="enum-table" max-height="240" border fit>
+        <el-table :data="fieldEnumList" key="enum-table" max-height="240" fit border>
           <el-table-column label="序号" width="50px" type="index" />
           <el-table-column label="枚举值编号" prop="id" min-width="100px" show-overflow-tooltip />
           <el-table-column label="枚举值名称" prop="name" min-width="100px" show-overflow-tooltip />
@@ -130,7 +130,7 @@
           >添加约束</el-button
         >
       </p>
-      <el-table :data="fieldConstraintsList" key="validation-table" max-height="240" border fit>
+      <el-table :data="fieldConstraintsList" key="validation-table" max-height="240" fit border>
         <el-table-column label="序号" width="50px" type="index" />
         <el-table-column label="约束名称" prop="name" min-width="100px" show-overflow-tooltip />
         <el-table-column label="约束配置" prop="config" min-width="100px" show-overflow-tooltip />
@@ -162,7 +162,7 @@
           >添加属性</el-button
         >
       </p>
-      <el-table :data="fieldPropertiesList" key="property-table" max-height="240" border fit>
+      <el-table :data="fieldPropertiesList" key="property-table" max-height="240" fit border>
         <el-table-column label="序号" width="50px" type="index" />
         <el-table-column label="属性编号" prop="id" min-width="100px" show-overflow-tooltip />
         <el-table-column label="属性值" prop="value" min-width="100px" show-overflow-tooltip />

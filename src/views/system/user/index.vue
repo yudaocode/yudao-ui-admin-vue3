@@ -136,7 +136,7 @@
           />
           <el-table-column label="操作" align="center" width="160">
             <template #default="scope">
-              <div class="flex justify-center items-center">
+              <div class="flex items-center justify-center">
                 <el-button
                   type="primary"
                   link

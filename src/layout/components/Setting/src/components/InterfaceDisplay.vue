@@ -141,84 +141,84 @@ watch(
 
 <template>
   <div :class="prefixCls">
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.breadcrumb') }}</span>
       <ElSwitch v-model="breadcrumb" @change="breadcrumbChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.breadcrumbIcon') }}</span>
       <ElSwitch v-model="breadcrumbIcon" @change="breadcrumbIconChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.hamburgerIcon') }}</span>
       <ElSwitch v-model="hamburger" @change="hamburgerChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.screenfullIcon') }}</span>
       <ElSwitch v-model="screenfull" @change="screenfullChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.sizeIcon') }}</span>
       <ElSwitch v-model="size" @change="sizeChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.localeIcon') }}</span>
       <ElSwitch v-model="locale" @change="localeChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.messageIcon') }}</span>
       <ElSwitch v-model="message" @change="messageChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.tagsView') }}</span>
       <ElSwitch v-model="tagsView" @change="tagsViewChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.tagsViewIcon') }}</span>
       <ElSwitch v-model="tagsViewIcon" @change="tagsViewIconChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.logo') }}</span>
       <ElSwitch v-model="logo" @change="logoChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.uniqueOpened') }}</span>
       <ElSwitch v-model="uniqueOpened" @change="uniqueOpenedChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.fixedHeader') }}</span>
       <ElSwitch v-model="fixedHeader" @change="fixedHeaderChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.footer') }}</span>
       <ElSwitch v-model="footer" @change="footerChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.greyMode') }}</span>
       <ElSwitch v-model="greyMode" @change="greyModeChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.fixedMenu') }}</span>
       <ElSwitch v-model="fixedMenu" @change="fixedMenuChange" />
     </div>
 
-    <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('watermark.watermark') }}</span>
-      <ElInput v-model="water" class="w-20 right-1" @change="setWater()" />
+      <ElInput v-model="water" class="right-1 w-20" @change="setWater()" />
     </div>
   </div>
 </template>

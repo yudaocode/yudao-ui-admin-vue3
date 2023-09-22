@@ -57,7 +57,7 @@
           v-for="(item, index) in formData.applyPicUrls"
           :key="index"
           :src="item.url"
-          class="w-60px h-60px mr-10px"
+          class="mr-10px h-60px w-60px"
           @click="imagePreview(formData.applyPicUrls)"
         />
       </el-descriptions-item>

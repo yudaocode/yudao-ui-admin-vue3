@@ -289,7 +289,7 @@ export default defineComponent({
           <ElPagination
             v-model:pageSize={pageSizeRef.value}
             v-model:currentPage={currentPageRef.value}
-            class="float-right mt-15px mb-15px"
+            class="float-right mb-15px mt-15px"
             {...unref(pagination)}
           ></ElPagination>
         ) : undefined}
