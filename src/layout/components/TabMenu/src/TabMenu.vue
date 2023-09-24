@@ -176,7 +176,7 @@ export default defineComponent({
                       <Icon icon={item?.meta?.icon}></Icon>
                     </div>
                     {!unref(showTitle) ? undefined : (
-                      <p class="break-words mt-5px px-2px">{t(item.meta?.title)}</p>
+                      <p class="mt-5px break-words px-2px">{t(item.meta?.title)}</p>
                     )}
                   </div>
                 )

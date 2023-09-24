@@ -28,13 +28,13 @@
               <!--   区域数据太多，用赖加载方式，要不然性能有问题 -->
               <el-tree-select
                 v-model="row.areaIds"
-                lazy
                 :load="loadChargeArea"
                 :props="defaultProps"
-                multiple
                 node-key="id"
+                multiple
                 check-strictly
                 show-checkbox
+                lazy
                 check-on-click-node
                 :render-after-expand="false"
                 :cache-data="areaCache"

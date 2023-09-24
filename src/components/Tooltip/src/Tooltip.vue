@@ -12,6 +12,6 @@ defineProps({
 <template>
   <span>{{ titel }}</span>
   <ElTooltip :content="message" placement="top">
-    <Icon :icon="icon" class="ml-1px relative top-1px" />
+    <Icon :icon="icon" class="relative top-1px ml-1px" />
   </ElTooltip>
 </template>

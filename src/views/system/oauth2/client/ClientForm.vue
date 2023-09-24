@@ -58,9 +58,9 @@
       <el-form-item label="授权范围" prop="scopes">
         <el-select
           v-model="formData.scopes"
-          allow-create
           filterable
           multiple
+          allow-create
           placeholder="请输入授权范围"
           style="width: 500px"
         >

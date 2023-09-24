@@ -117,7 +117,7 @@
           />
         </el-form-item>
         <el-form-item v-if="formData.specType" label="商品属性">
-          <el-button class="mr-15px mb-10px" @click="attributesAddFormRef.open">添加规格</el-button>
+          <el-button class="mb-10px mr-15px" @click="attributesAddFormRef.open">添加规格</el-button>
           <ProductAttributes :propertyList="propertyList" @success="generateSkus" />
         </el-form-item>
         <template v-if="formData.specType && propertyList.length > 0">
@@ -153,14 +153,14 @@
       {{ row.subCommissionType ? '自行设置' : '默认设置' }}
     </template>
     <template #picUrl="{ row }">
-      <el-image :src="row.picUrl" class="w-60px h-60px" @click="imagePreview(row.picUrl)" />
+      <el-image :src="row.picUrl" class="h-60px w-60px" @click="imagePreview(row.picUrl)" />
     </template>
     <template #sliderPicUrls="{ row }">
       <el-image
         v-for="(item, index) in row.sliderPicUrls"
         :key="index"
         :src="item.url"
-        class="w-60px h-60px mr-10px"
+        class="mr-10px h-60px w-60px"
         @click="imagePreview(row.sliderPicUrls)"
       />
     </template>

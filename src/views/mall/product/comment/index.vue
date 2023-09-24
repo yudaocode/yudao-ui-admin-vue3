@@ -63,12 +63,12 @@
       <el-table-column label="用户名称" align="center" prop="userNickname" width="80" />
       <el-table-column label="商品信息" align="center" min-width="300">
         <template #default="scope">
-          <div class="flex row items-center gap-x-4px">
+          <div class="row flex items-center gap-x-4px">
             <el-image
               v-if="scope.row.skuPicUrl"
               :src="scope.row.skuPicUrl"
               :preview-src-list="[scope.row.skuPicUrl]"
-              class="w-40px h-40px shrink-0"
+              class="h-40px w-40px shrink-0"
               preview-teleported
             />
             <div>{{ scope.row.spuName }}</div>
@@ -95,7 +95,7 @@
               :src="picUrl"
               :preview-src-list="scope.row.picUrls"
               :initial-index="index"
-              class="w-40px h-40px"
+              class="h-40px w-40px"
               preview-teleported
             />
           </div>

@@ -7,7 +7,7 @@
         </div>
       </template>
       <div class="flex items-center">
-        <span class="text-lg font-medium mr-4"> 连接状态: </span>
+        <span class="mr-4 text-lg font-medium"> 连接状态: </span>
         <el-tag :color="getTagColor">{{ status }}</el-tag>
       </div>
       <hr class="my-4" />
@@ -20,7 +20,7 @@
           {{ getIsOpen ? '关闭连接' : '开启连接' }}
         </el-button>
       </div>
-      <p class="text-lg font-medium mt-4">设置</p>
+      <p class="mt-4 text-lg font-medium">设置</p>
       <hr class="my-4" />
       <el-input
         v-model="sendValue"
@@ -43,7 +43,7 @@
         <ul>
           <li v-for="item in getList" :key="item.time" class="mt-2">
             <div class="flex items-center">
-              <span class="mr-2 text-primary font-medium">收到消息:</span>
+              <span class="text-primary mr-2 font-medium">收到消息:</span>
               <span>{{ formatDate(item.time) }}</span>
             </div>
             <div>

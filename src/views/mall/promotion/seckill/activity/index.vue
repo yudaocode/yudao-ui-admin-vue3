@@ -36,7 +36,7 @@
       <template #spuId="{ row }">
         <el-image
           :src="row.picUrl"
-          class="w-30px h-30px align-middle mr-5px"
+          class="mr-5px h-30px w-30px align-middle"
           @click="imagePreview(row.picUrl)"
         />
         <span class="align-middle">{{ row.spuName }}</span>

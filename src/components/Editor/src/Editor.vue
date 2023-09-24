@@ -180,12 +180,12 @@ defineExpose({
 </script>
 
 <template>
-  <div class="border-1 border-solid border-[var(--el-border-color)] z-99">
+  <div class="z-99 border-1 border-[var(--el-border-color)] border-solid">
     <!-- 工具栏 -->
     <Toolbar
       :editor="editorRef"
       :editorId="editorId"
-      class="border-0 b-b-1 border-solid border-[var(--el-border-color)]"
+      class="border-0 b-b-1 border-[var(--el-border-color)] border-solid"
     />
     <!-- 编辑器 -->
     <Editor
