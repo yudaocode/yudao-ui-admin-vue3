@@ -4,7 +4,7 @@ export interface ConfigVO {
   brokerageEnabled: boolean
   brokerageEnabledCondition: number
   brokerageBindMode: number
-  brokeragePostUrls: string
+  brokeragePosterUrls: string
   brokerageFirstPercent: number
   brokerageSecondPercent: number
   brokerageWithdrawMinPrice: number

@@ -66,7 +66,7 @@
             </el-text>
           </el-form-item>
           <el-form-item label="分销海报图">
-            <UploadImgs v-model="formData.brokeragePostUrls" width="75px" height="125px" />
+            <UploadImgs v-model="formData.brokeragePosterUrls" width="75px" height="125px" />
             <el-text class="w-full" size="small" type="info">
               个人中心分销海报图片，建议尺寸600x1000
             </el-text>
@@ -172,7 +172,7 @@ const formData = ref({
   brokerageEnabled: true,
   brokerageEnabledCondition: BrokerageEnabledConditionEnum.ALL.condition,
   brokerageBindMode: BrokerageBindModeEnum.ANYTIME.mode,
-  brokeragePostUrls: [],
+  brokeragePosterUrls: [],
   brokerageFirstPercent: 0,
   brokerageSecondPercent: 0,
   brokerageWithdrawMinPrice: 0,
@@ -212,7 +212,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as ConfigApi.ConfigVO
-    data.brokeragePostUrls = formData.value.brokeragePostUrls.map((item: any) => {
+    data.brokeragePosterUrls = formData.value.brokeragePosterUrls.map((item: any) => {
       return item?.url ? item.url : item
     })
     await ConfigApi.saveTradeConfig(data)
@@ -228,7 +228,7 @@ const getConfig = async () => {
   try {
     const data = await ConfigApi.getTradeConfig()
     if (data != null) {
-      data.brokeragePostUrls = data.brokeragePostUrls.map((url) => ({ url }))
+      data.brokeragePosterUrls = data.brokeragePosterUrls.map((url) => ({ url }))
       formData.value = data
     }
   } finally {
