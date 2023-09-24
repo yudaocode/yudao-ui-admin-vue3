@@ -54,6 +54,6 @@ export const getReturnList = async (params) => {
  * 确认回退
  * @param params
  */
-export const okRollback = async (data) => {
-  return await request.put({ url: '/bpm/task/rollback', data })
+export const okReturnTask = async (data) => {
+  return await request.put({ url: '/bpm/task/return', data })
 }

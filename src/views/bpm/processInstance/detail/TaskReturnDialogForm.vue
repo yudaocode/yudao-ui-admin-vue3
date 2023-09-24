@@ -11,9 +11,9 @@
         <el-select v-model="formData.targetDefinitionKey" clearable style="width: 100%">
           <el-option
             v-for="item in returnList"
-            :key="item.taskDefinitionKey"
+            :key="item.definitionKey"
             :label="item.name"
-            :value="item.taskDefinitionKey"
+            :value="item.definitionKey"
           />
         </el-select>
       </el-form-item>
@@ -68,7 +68,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    await TaskApi.okRollback(formData.value)
+    await TaskApi.okReturnTask(formData.value)
     message.success('回退成功')
     dialogVisible.value = false
     // 发送操作成功的事件
