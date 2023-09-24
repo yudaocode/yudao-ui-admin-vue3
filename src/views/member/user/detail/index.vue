@@ -75,7 +75,7 @@ defineOptions({ name: 'MemberDetail' })
 
 const activeName = ref('point') // 账户明细 选中的 tabs
 const loading = ref(true) // 加载中
-const user = ref<UserApi.UserVO>()
+const user = ref<UserApi.UserVO>({})
 
 /** 添加/修改操作 */
 const formRef = ref()
