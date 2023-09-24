@@ -12,6 +12,20 @@
       </el-form-item>
 
       <el-tabs>
+        <el-tab-pane label="配送">
+          <el-form-item label="启用包邮" prop="deliveryExpressFreeEnabled">
+            <el-switch v-model="formData.deliveryExpressFreeEnabled" style="user-select: none" />
+            <el-text class="w-full" size="small" type="info"> 商城是否启用全场包邮 </el-text>
+          </el-form-item>
+          <el-form-item label="满额包邮" prop="deliveryExpressFreePrice">
+            <el-input-number
+              v-model="formData.deliveryExpressFreePrice"
+              placeholder="请输入满额包邮"
+              class="!w-xs"
+            />
+            <el-text class="w-full" size="small" type="info"> 商城商品满多少金额即可包邮 </el-text>
+          </el-form-item>
+        </el-tab-pane>
         <el-tab-pane label="分销">
           <el-form-item label="分佣启用" prop="brokerageEnabled">
             <el-switch v-model="formData.brokerageEnabled" style="user-select: none" />
@@ -61,6 +75,7 @@
             <el-input-number
               v-model="formData.brokerageFirstPercent"
               placeholder="请输入一级返佣比例"
+              class="!w-xs"
             />
             <el-text class="w-full" size="small" type="info">
               订单交易成功后给推广人返佣的百分比
@@ -70,6 +85,7 @@
             <el-input-number
               v-model="formData.brokerageSecondPercent"
               placeholder="请输入二级返佣比例"
+              class="!w-xs"
             />
             <el-text class="w-full" size="small" type="info">
               订单交易成功后给推广人的推荐人返佣的百分比
@@ -79,6 +95,7 @@
             <el-input-number
               v-model="formData.brokerageFrozenDays"
               placeholder="请输入佣金冻结天数"
+              class="!w-xs"
             />
             <el-text class="w-full" size="small" type="info">
               防止用户退款，佣金被提现了，所以需要设置佣金冻结时间，单位：天
@@ -87,10 +104,21 @@
           <el-form-item label="提现最低金额" prop="brokerageWithdrawMinPrice">
             <el-input-number
               v-model="formData.brokerageWithdrawMinPrice"
-              placeholder="请输入用户提现最低金额"
+              placeholder="请输入提现最低金额"
+              class="!w-xs"
             />
             <el-text class="w-full" size="small" type="info">
               用户提现最低金额限制，单位：元
+            </el-text>
+          </el-form-item>
+          <el-form-item label="提现手续费" prop="brokerageWithdrawFeePercent">
+            <el-input-number
+              v-model="formData.brokerageWithdrawFeePercent"
+              placeholder="请输入提现手续费"
+              class="!w-xs"
+            />
+            <el-text class="w-full" size="small" type="info">
+              提现手续费百分比，范围0-100，0为无提现手续费，例：设置10，即收取10%手续费，提现100元，到账90元，10元手续费
             </el-text>
           </el-form-item>
           <el-form-item label="提现方式" prop="brokerageWithdrawType">
@@ -138,6 +166,9 @@ const message = useMessage() // 消息弹窗
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formRef = ref()
 const formData = ref({
+  id: null,
+  deliveryExpressFreeEnabled: true,
+  deliveryExpressFreePrice: 0,
   brokerageEnabled: true,
   brokerageEnabledCondition: BrokerageEnabledConditionEnum.ALL.condition,
   brokerageBindMode: BrokerageBindModeEnum.ANYTIME.mode,
@@ -145,11 +176,13 @@ const formData = ref({
   brokerageFirstPercent: 0,
   brokerageSecondPercent: 0,
   brokerageWithdrawMinPrice: 0,
+  brokerageWithdrawFeePercent: 0,
   brokerageBankNames: [],
   brokerageFrozenDays: 0,
   brokerageWithdrawType: []
 })
 const formRules = reactive({
+  deliveryExpressFreePrice: [{ required: true, message: '满额包邮不能为空', trigger: 'blur' }],
   brokerageEnabledCondition: [{ required: true, message: '分佣模式不能为空', trigger: 'blur' }],
   brokerageBindMode: [{ required: true, message: '分销关系绑定模式不能为空', trigger: 'blur' }],
   brokerageFirstPercent: [{ required: true, message: '一级返佣比例不能为空', trigger: 'blur' }],
@@ -157,6 +190,7 @@ const formRules = reactive({
   brokerageWithdrawMinPrice: [
     { required: true, message: '用户提现最低金额不能为空', trigger: 'blur' }
   ],
+  brokerageWithdrawFeePercent: [{ required: true, message: '提现手续费不能为空', trigger: 'blur' }],
   brokerageBankNames: [{ required: true, message: '提现银行不能为空', trigger: 'blur' }],
   brokerageFrozenDays: [{ required: true, message: '佣金冻结时间不能为空', trigger: 'blur' }],
   brokerageWithdrawType: [

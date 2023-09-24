@@ -102,11 +102,11 @@
       </el-table-column>
       <el-table-column label="提现方式" align="left" prop="type" min-width="120px">
         <template #default="scope">
-          <div
-            >{{ getDictLabel(DICT_TYPE.BROKERAGE_WITHDRAW_TYPE, scope.row.type) }}账号：{{
-              scope.row.accountNo
-            }}</div
-          >
+          <div v-if="scope.row.type === BrokerageWithdrawTypeEnum.WALLET.type"> 余额 </div>
+          <div v-else>
+            {{ getDictLabel(DICT_TYPE.BROKERAGE_WITHDRAW_TYPE, scope.row.type) }}账号：
+            {{ scope.row.accountNo }}
+          </div>
           <template v-if="scope.row.type === BrokerageWithdrawTypeEnum.BANK.type">
             <div>真实姓名：{{ scope.row.name }}</div>
             <div>
