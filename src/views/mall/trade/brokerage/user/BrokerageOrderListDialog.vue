@@ -9,15 +9,11 @@
         :inline="true"
         label-width="85px"
       >
-        <el-form-item label="用户类型" prop="userType">
-          <el-radio-group v-model="queryParams.userType" @change="handleQuery">
-            <el-radio-button
-              v-for="item in BrokerageUserTypeEnum"
-              :key="item.type"
-              :label="item.type"
-            >
-              {{ item.name }}
-            </el-radio-button>
+        <el-form-item label="用户类型" prop="level">
+          <el-radio-group v-model="queryParams.level" @change="handleQuery">
+            <el-radio-button checked>全部</el-radio-button>
+            <el-radio-button label="1">一级推广人</el-radio-button>
+            <el-radio-button label="2">二级推广人</el-radio-button>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="状态" prop="status">
@@ -98,7 +94,7 @@
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import * as BrokerageRecordApi from '@/api/mall/trade/brokerage/record'
-import { BrokerageRecordBizTypeEnum, BrokerageUserTypeEnum } from '@/utils/constants'
+import { BrokerageRecordBizTypeEnum } from '@/utils/constants'
 import { fenToYuanFormat } from '@/utils/formatter'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
@@ -115,14 +111,15 @@ const queryParams = reactive({
   pageSize: 10,
   userId: null,
   bizType: BrokerageRecordBizTypeEnum.ORDER.type,
-  userType: BrokerageUserTypeEnum.ALL.type,
-  createTime: []
+  level: '',
+  createTime: [],
+  status: null
 })
 const queryFormRef = ref() // 搜索的表单
 
 /** 打开弹窗 */
 const dialogVisible = ref(false) // 弹窗的是否展示
-const open = async (userId: number) => {
+const open = async (userId: any) => {
   dialogVisible.value = true
   queryParams.userId = userId
   resetQuery()
