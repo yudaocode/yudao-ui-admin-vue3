@@ -229,6 +229,9 @@ const getResultCss = (result) => {
   } else if (result === 4) {
     // 已取消
     return 'highlight-cancel'
+  } else if (result === 5) {
+    // 退回
+    return 'highlight-rollback'
   }
   return ''
 }
@@ -562,6 +565,45 @@ watch(
 
 :deep(.highlight-cancel.djs-connection > .djs-visual > path) {
   stroke: grey !important;
+}
+
+/** 回退 */
+.highlight-rollback.djs-shape .djs-visual > :nth-child(1) {
+  fill: #e6a23c !important;
+  stroke: #e6a23c !important;
+  fill-opacity: 0.2 !important;
+}
+.highlight-rollback.djs-shape .djs-visual > :nth-child(2) {
+  fill: #e6a23c !important;
+}
+.highlight-rollback.djs-shape .djs-visual > path {
+  fill: #e6a23c !important;
+  fill-opacity: 0.2 !important;
+  stroke: #e6a23c !important;
+}
+.highlight-rollback.djs-connection > .djs-visual > path {
+  stroke: #e6a23c !important;
+}
+
+.highlight-rollback:not(.djs-connection) .djs-visual > :nth-child(1) {
+  fill: #e6a23c !important; /* color elements as green */
+}
+
+:deep(.highlight-rollback.djs-shape .djs-visual > :nth-child(1)) {
+  fill: #e6a23c !important;
+  stroke: #e6a23c !important;
+  fill-opacity: 0.2 !important;
+}
+:deep(.highlight-rollback.djs-shape .djs-visual > :nth-child(2)) {
+  fill: #e6a23c !important;
+}
+:deep(.highlight-rollback.djs-shape .djs-visual > path) {
+  fill: #e6a23c !important;
+  fill-opacity: 0.2 !important;
+  stroke: #e6a23c !important;
+}
+:deep(.highlight-rollback.djs-connection > .djs-visual > path) {
+  stroke: #e6a23c !important;
 }
 
 .element-overlays {
