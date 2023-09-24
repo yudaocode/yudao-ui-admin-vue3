@@ -60,13 +60,19 @@ export const getBoolDictOptions = (dictType: string) => {
   return dictOption
 }
 
-export const getDictObj = (dictType: string, value: any) => {
+/**
+ * 获取指定字典类型的指定值对应的字典对象
+ * @param dictType 字典类型
+ * @param value 字典值
+ * @return DictDataType 字典对象
+ */
+export const getDictObj = (dictType: string, value: any): DictDataType | undefined => {
   const dictOptions: DictDataType[] = getDictOptions(dictType)
-  dictOptions.forEach((dict: DictDataType) => {
-    if (dict.value === value.toString()) {
+  for (const dict of dictOptions) {
+    if (dict.value === value + '') {
       return dict
     }
-  })
+  }
 }
 
 /**
@@ -74,12 +80,13 @@ export const getDictObj = (dictType: string, value: any) => {
  *
  * @param dictType 字典类型
  * @param value 字典数据的值
+ * @return 字典名称
  */
-export const getDictLabel = (dictType: string, value: any) => {
+export const getDictLabel = (dictType: string, value: any): string => {
   const dictOptions: DictDataType[] = getDictOptions(dictType)
   const dictLabel = ref('')
   dictOptions.forEach((dict: DictDataType) => {
-    if (dict.value === value) {
+    if (dict.value === value + '') {
       dictLabel.value = dict.label
     }
   })
@@ -131,7 +138,7 @@ export enum DICT_TYPE {
   BPM_OA_LEAVE_TYPE = 'bpm_oa_leave_type',
 
   // ========== PAY 模块 ==========
-  PAY_CHANNEL_CODE = 'pay_channel_code_type', // 支付渠道编码类型
+  PAY_CHANNEL_CODE = 'pay_channel_code', // 支付渠道编码类型
   PAY_ORDER_STATUS = 'pay_order_status', // 商户支付订单状态
   PAY_REFUND_STATUS = 'pay_refund_status', // 退款订单状态
   PAY_NOTIFY_STATUS = 'pay_notify_status', // 商户支付回调状态
@@ -143,6 +150,7 @@ export enum DICT_TYPE {
 
   // ========== MALL - 会员模块 ==========
   MEMBER_POINT_BIZ_TYPE = 'member_point_biz_type', // 积分的业务类型
+  MEMBER_EXPERIENCE_BIZ_TYPE = 'member_experience_biz_type', // 会员经验业务类型
 
   // ========== MALL - 商品模块 ==========
   PRODUCT_UNIT = 'product_unit', // 商品单位
@@ -157,6 +165,13 @@ export enum DICT_TYPE {
   TRADE_ORDER_STATUS = 'trade_order_status', // 订单 - 状态
   TRADE_ORDER_ITEM_AFTER_SALE_STATUS = 'trade_order_item_after_sale_status', // 订单项 - 售后状态
   TRADE_DELIVERY_TYPE = 'trade_delivery_type', // 配送方式
+  BROKERAGE_ENABLED_CONDITION = 'brokerage_enabled_condition', // 分佣模式
+  BROKERAGE_BIND_MODE = 'brokerage_bind_mode', // 分销关系绑定模式
+  BROKERAGE_BANK_NAME = 'brokerage_bank_name', // 佣金提现银行
+  BROKERAGE_WITHDRAW_TYPE = 'brokerage_withdraw_type', // 佣金提现类型
+  BROKERAGE_RECORD_BIZ_TYPE = 'brokerage_record_biz_type', // 佣金业务类型
+  BROKERAGE_RECORD_STATUS = 'brokerage_record_status', // 佣金状态
+  BROKERAGE_WITHDRAW_STATUS = 'brokerage_withdraw_status', // 佣金提现状态
 
   // ========== MALL - 营销模块 ==========
   PROMOTION_DISCOUNT_TYPE = 'promotion_discount_type', // 优惠类型

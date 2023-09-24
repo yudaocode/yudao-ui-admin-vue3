@@ -160,6 +160,7 @@
 import { dateFormatter } from '@/utils/formatTime'
 import * as UserApi from '@/api/member/user'
 import { DICT_TYPE } from '@/utils/dict'
+import UserForm from './UserForm.vue'
 import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
 import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
 import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect.vue'
@@ -216,6 +217,12 @@ const resetQuery = () => {
 const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'MemberUserDetail', params: { id } })
+}
+
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
 }
 
 /** 表格选中事件 */
