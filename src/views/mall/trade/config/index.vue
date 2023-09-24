@@ -121,8 +121,8 @@
               提现手续费百分比，范围0-100，0为无提现手续费，例：设置10，即收取10%手续费，提现100元，到账90元，10元手续费
             </el-text>
           </el-form-item>
-          <el-form-item label="提现方式" prop="brokerageWithdrawType">
-            <el-checkbox-group v-model="formData.brokerageWithdrawType">
+          <el-form-item label="提现方式" prop="brokerageWithdrawTypes">
+            <el-checkbox-group v-model="formData.brokerageWithdrawTypes">
               <el-checkbox
                 v-for="dict in getIntDictOptions(DICT_TYPE.BROKERAGE_WITHDRAW_TYPE)"
                 :key="dict.value"
@@ -179,7 +179,7 @@ const formData = ref({
   brokerageWithdrawFeePercent: 0,
   brokerageBankNames: [],
   brokerageFrozenDays: 0,
-  brokerageWithdrawType: []
+  brokerageWithdrawTypes: []
 })
 const formRules = reactive({
   deliveryExpressFreePrice: [{ required: true, message: '满额包邮不能为空', trigger: 'blur' }],
@@ -193,7 +193,7 @@ const formRules = reactive({
   brokerageWithdrawFeePercent: [{ required: true, message: '提现手续费不能为空', trigger: 'blur' }],
   brokerageBankNames: [{ required: true, message: '提现银行不能为空', trigger: 'blur' }],
   brokerageFrozenDays: [{ required: true, message: '佣金冻结时间不能为空', trigger: 'blur' }],
-  brokerageWithdrawType: [
+  brokerageWithdrawTypes: [
     {
       required: true,
       message: '提现方式不能为空',

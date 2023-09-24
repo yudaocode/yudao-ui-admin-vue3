@@ -10,7 +10,7 @@ export interface ConfigVO {
   brokerageWithdrawMinPrice: number
   brokerageBankNames: string
   brokerageFrozenDays: number
-  brokerageWithdrawType: string
+  brokerageWithdrawTypes: string
 }
 
 // 查询交易中心配置详情
