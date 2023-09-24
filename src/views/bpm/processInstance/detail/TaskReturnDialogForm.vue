@@ -68,7 +68,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    await TaskApi.okReturnTask(formData.value)
+    await TaskApi.returnTask(formData.value)
     message.success('回退成功')
     dialogVisible.value = false
     // 发送操作成功的事件
