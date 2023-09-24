@@ -11,6 +11,7 @@ import BpmnViewer from 'bpmn-js/lib/Viewer'
 import DefaultEmptyXML from './plugins/defaultEmpty'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
+import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'MyProcessViewer' })
 
@@ -85,6 +86,7 @@ const createNewDiagram = async (xml) => {
     // console.error(`[Process Designer Warn]: ${e?.message || e}`);
   }
 }
+
 /* 高亮流程图 */
 // TODO 芋艿：如果多个 endActivity 的话，目前的逻辑可能有一定的问题。https://www.jdon.com/workflow/multi-events.html
 const highlightDiagram = async () => {
@@ -97,6 +99,9 @@ const highlightDiagram = async () => {
   let canvas = bpmnModeler.get('canvas')
   let todoActivity: any = activityList.find((m: any) => !m.endTime) // 找到待办的任务
   let endActivity: any = activityList[activityList.length - 1] // 获得最后一个任务
+  let findProcessTask = false //是否已经高亮了进行中的任务
+  //进行中高亮之后的任务 key 集合，用于过滤掉 taskList 进行中后面的任务，避免进行中后面的数据 Hover 还有数据
+  let removeTaskDefinitionKeyList = []
   // debugger
   bpmnModeler.getDefinitions().rootElements[0].flowElements?.forEach((n: any) => {
     let activity: any = activityList.find((m: any) => m.key === n.id) // 找到对应的活动
@@ -110,9 +115,17 @@ const highlightDiagram = async () => {
       if (!task) {
         return
       }
+      //进行中的任务已经高亮过了，则不高亮后面的任务了
+      if (findProcessTask) {
+        removeTaskDefinitionKeyList.push(n.id)
+        return
+      }
       // 高亮任务
       canvas.addMarker(n.id, getResultCss(task.result))
-
+      //标记是否高亮了进行中任务
+      if (task.result === 1) {
+        findProcessTask = true
+      }
       // 如果非通过，就不走后面的线条了
       if (task.result !== 2) {
         return
@@ -212,6 +225,11 @@ const highlightDiagram = async () => {
       }
     }
   })
+  if (!isEmpty(removeTaskDefinitionKeyList)) {
+    taskList.value = taskList.value.filter(
+      (item) => !removeTaskDefinitionKeyList.includes(item.definitionKey)
+    )
+  }
 }
 const getActivityHighlightCss = (activity) => {
   return activity.endTime ? 'highlight' : 'highlight-todo'
@@ -276,9 +294,9 @@ const elementHover = (element) => {
   console.log(element.value, 'element.value')
   const activity = activityLists.value.find((m) => m.key === element.value.id)
   console.log(activity, 'activityactivityactivityactivity')
-  // if (!activity) {
-  //   return
-  // }
+  if (!activity) {
+    return
+  }
   if (!elementOverlayIds.value[element.value.id] && element.value.type !== 'bpmn:Process') {
     let html = `<div class="element-overlays">
             <p>Elemet id: ${element.value.id}</p>
