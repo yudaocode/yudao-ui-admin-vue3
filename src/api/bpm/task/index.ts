@@ -42,20 +42,14 @@ export const exportTask = async (params) => {
   return await request.download({ url: '/bpm/task/export', params })
 }
 
-/**
- * 获取所有可回退的节点
- * @param params
- */
+// 获取所有可回退的节点
 export const getReturnList = async (params) => {
   return await request.get({ url: '/bpm/task/get-return-list', params })
 }
 
-/**
- * 确认回退
- * @param params
- */
-export const okRollback = async (data) => {
-  return await request.put({ url: '/bpm/task/rollback', data })
+// 回退
+export const returnTask = async (data) => {
+  return await request.put({ url: '/bpm/task/return', data })
 }
 
 /**
