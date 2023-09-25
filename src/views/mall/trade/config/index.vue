@@ -66,7 +66,7 @@
             </el-text>
           </el-form-item>
           <el-form-item label="分销海报图">
-            <UploadImgs v-model="formData.brokeragePostUrls" width="75px" height="125px" />
+            <UploadImgs v-model="formData.brokeragePosterUrls" width="75px" height="125px" />
             <el-text class="w-full" size="small" type="info">
               个人中心分销海报图片，建议尺寸600x1000
             </el-text>
@@ -121,8 +121,8 @@
               提现手续费百分比，范围0-100，0为无提现手续费，例：设置10，即收取10%手续费，提现100元，到账90元，10元手续费
             </el-text>
           </el-form-item>
-          <el-form-item label="提现方式" prop="brokerageWithdrawType">
-            <el-checkbox-group v-model="formData.brokerageWithdrawType">
+          <el-form-item label="提现方式" prop="brokerageWithdrawTypes">
+            <el-checkbox-group v-model="formData.brokerageWithdrawTypes">
               <el-checkbox
                 v-for="dict in getIntDictOptions(DICT_TYPE.BROKERAGE_WITHDRAW_TYPE)"
                 :key="dict.value"
@@ -172,14 +172,14 @@ const formData = ref({
   brokerageEnabled: true,
   brokerageEnabledCondition: BrokerageEnabledConditionEnum.ALL.condition,
   brokerageBindMode: BrokerageBindModeEnum.ANYTIME.mode,
-  brokeragePostUrls: [],
+  brokeragePosterUrls: [],
   brokerageFirstPercent: 0,
   brokerageSecondPercent: 0,
   brokerageWithdrawMinPrice: 0,
   brokerageWithdrawFeePercent: 0,
   brokerageBankNames: [],
   brokerageFrozenDays: 0,
-  brokerageWithdrawType: []
+  brokerageWithdrawTypes: []
 })
 const formRules = reactive({
   deliveryExpressFreePrice: [{ required: true, message: '满额包邮不能为空', trigger: 'blur' }],
@@ -193,7 +193,7 @@ const formRules = reactive({
   brokerageWithdrawFeePercent: [{ required: true, message: '提现手续费不能为空', trigger: 'blur' }],
   brokerageBankNames: [{ required: true, message: '提现银行不能为空', trigger: 'blur' }],
   brokerageFrozenDays: [{ required: true, message: '佣金冻结时间不能为空', trigger: 'blur' }],
-  brokerageWithdrawType: [
+  brokerageWithdrawTypes: [
     {
       required: true,
       message: '提现方式不能为空',
@@ -212,7 +212,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as ConfigApi.ConfigVO
-    data.brokeragePostUrls = formData.value.brokeragePostUrls.map((item: any) => {
+    data.brokeragePosterUrls = formData.value.brokeragePosterUrls.map((item: any) => {
       return item?.url ? item.url : item
     })
     await ConfigApi.saveTradeConfig(data)
@@ -228,7 +228,7 @@ const getConfig = async () => {
   try {
     const data = await ConfigApi.getTradeConfig()
     if (data != null) {
-      data.brokeragePostUrls = data.brokeragePostUrls.map((url) => ({ url }))
+      data.brokeragePosterUrls = data.brokeragePosterUrls.map((url) => ({ url }))
       formData.value = data
     }
   } finally {

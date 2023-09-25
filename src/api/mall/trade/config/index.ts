@@ -4,13 +4,13 @@ export interface ConfigVO {
   brokerageEnabled: boolean
   brokerageEnabledCondition: number
   brokerageBindMode: number
-  brokeragePostUrls: string
+  brokeragePosterUrls: string
   brokerageFirstPercent: number
   brokerageSecondPercent: number
   brokerageWithdrawMinPrice: number
   brokerageBankNames: string
   brokerageFrozenDays: number
-  brokerageWithdrawType: string
+  brokerageWithdrawTypes: string
 }
 
 // 查询交易中心配置详情
