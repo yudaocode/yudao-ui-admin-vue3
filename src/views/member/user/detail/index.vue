@@ -39,6 +39,7 @@
           <el-tab-pane label="成长值" name="experience" lazy>
             <UserExperienceRecordList :user-id="id"
           /></el-tab-pane>
+          <!-- TODO @jason：增加一个余额变化； -->
           <el-tab-pane label="余额" name="fourth">余额(WIP)</el-tab-pane>
           <el-tab-pane label="收货地址" name="address" lazy>
             <UserAddressList :user-id="id" />
@@ -48,7 +49,9 @@
           </el-tab-pane>
           <el-tab-pane label="售后管理" name="fourth">售后管理(WIP)</el-tab-pane>
           <el-tab-pane label="收藏记录" name="fourth">收藏记录(WIP)</el-tab-pane>
+          <!-- TODO @疯狂：优惠劵的读取 -->
           <el-tab-pane label="优惠劵" name="fourth">优惠劵(WIP)</el-tab-pane>
+          <!-- TODO @疯狂：增加获得分校用户；直接查询出所有；需要体现出是一级还是二级；用户编号、昵称、级别、绑定时间 -->
         </el-tabs>
       </el-card>
     </el-row>

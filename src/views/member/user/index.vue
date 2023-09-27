@@ -128,6 +128,8 @@
           >
             编辑
           </el-button>
+          <!-- todo @jason：增加一个【修改余额】 -->
+          <!-- todo @疯狂：增加一个【修改积分】，表单是：radio 增加/减少；input 具体的变化积分 -->
           <!-- todo 放到更多菜单中 -->
           <el-button
             link
