@@ -92,6 +92,9 @@ const getTimelineItemType = (item) => {
   if (item.result === 5) {
     return 'warning'
   }
+  if (item.result === 6) {
+    return 'default'
+  }
   return ''
 }
 </script>
