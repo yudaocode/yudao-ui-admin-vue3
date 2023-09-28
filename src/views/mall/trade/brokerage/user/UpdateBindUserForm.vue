@@ -19,6 +19,7 @@
         </el-input>
       </el-form-item>
     </el-form>
+    <!-- 展示上级推广人的信息 -->
     <el-descriptions v-if="bindUser" :column="1" border>
       <el-descriptions-item label="头像">
         <el-avatar :src="bindUser.avatar" />
@@ -79,7 +80,7 @@ const submitForm = async () => {
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
-
+  // 未查找到合适的上级
   if (!bindUser.value) {
     message.error('请先查询并确认推广人')
     return
@@ -116,7 +117,6 @@ const handleGetUser = async () => {
     message.error('不能绑定自己为推广人')
     return
   }
-
   formLoading.value = true
   bindUser.value = await BrokerageUserApi.getBrokerageUser(formData.value.bindUserId)
   if (!bindUser.value) {

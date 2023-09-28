@@ -204,7 +204,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   bindUserId: null,
-  brokerageEnabled: null,
+  brokerageEnabled: true,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -281,7 +281,7 @@ const handleClearBindUser = async (row: BrokerageUserApi.BrokerageUserVO) => {
   } catch {}
 }
 
-/** 推广资格 开通/关闭 */
+/** 推广资格：开通/关闭 */
 const handleBrokerageEnabledChange = async (row: BrokerageUserApi.BrokerageUserVO) => {
   try {
     // 二次确认

@@ -132,7 +132,7 @@
         align="left"
         prop="createTime"
         :formatter="dateFormatter"
-        width="170px"
+        width="180px"
       />
       <el-table-column label="备注" align="left" prop="remark" />
       <el-table-column label="状态" align="left" prop="status" min-width="120px">
