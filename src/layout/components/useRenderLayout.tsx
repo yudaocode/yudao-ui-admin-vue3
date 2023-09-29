@@ -107,7 +107,7 @@ export const useRenderLayout = () => {
               ></ToolHeader>
 
               {tagsView.value ? (
-                <TagsView class="layout-border__bottom layout-border__top"></TagsView>
+                <TagsView class="layout-border__top layout-border__bottom"></TagsView>
               ) : undefined}
             </div>
 
@@ -121,13 +121,13 @@ export const useRenderLayout = () => {
   const renderTopLeft = () => {
     return (
       <>
-        <div class="flex items-center bg-[var(--top-header-bg-color)] relative layout-border__bottom dark:bg-[var(--el-bg-color)]">
+        <div class="relative flex items-center bg-[var(--top-header-bg-color)] layout-border__bottom dark:bg-[var(--el-bg-color)]">
           {logo.value ? <Logo class="custom-hover"></Logo> : undefined}
 
           <ToolHeader class="flex-1"></ToolHeader>
         </div>
-        <div class="absolute top-[var(--logo-height)+1px] left-0 w-full h-[calc(100%-1px-var(--logo-height))] flex">
-          <Menu class="!h-full relative layout-border__right"></Menu>
+        <div class="absolute left-0 top-[var(--logo-height)+1px] h-[calc(100%-1px-var(--logo-height))] w-full flex">
+          <Menu class="relative layout-border__right !h-full"></Menu>
           <div
             class={[
               `${prefixCls}-content`,
@@ -187,7 +187,7 @@ export const useRenderLayout = () => {
           ]}
         >
           {logo.value ? <Logo class="custom-hover"></Logo> : undefined}
-          <Menu class="flex-1 px-10px h-[var(--top-tool-height)]"></Menu>
+          <Menu class="h-[var(--top-tool-height)] flex-1 px-10px"></Menu>
           <ToolHeader></ToolHeader>
         </div>
         <div
@@ -233,12 +233,12 @@ export const useRenderLayout = () => {
   const renderCutMenu = () => {
     return (
       <>
-        <div class="flex items-center bg-[var(--top-header-bg-color)] relative layout-border__bottom">
+        <div class="relative flex items-center bg-[var(--top-header-bg-color)] layout-border__bottom">
           {logo.value ? <Logo class="custom-hover !pr-15px"></Logo> : undefined}
 
           <ToolHeader class="flex-1"></ToolHeader>
         </div>
-        <div class="absolute top-[var(--logo-height)] left-0 w-[calc(100%-2px)] h-[calc(100%-var(--logo-height))] flex">
+        <div class="absolute left-0 top-[var(--logo-height)] h-[calc(100%-var(--logo-height))] w-[calc(100%-2px)] flex">
           <TabMenu></TabMenu>
           <div
             class={[
