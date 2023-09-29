@@ -278,12 +278,16 @@ export const PromotionDiscountTypeEnum = {
  */
 export const BrokerageBindModeEnum = {
   ANYTIME: {
-    mode: 0,
-    name: '没有推广人'
+    mode: 1,
+    name: '首次绑定'
   },
   REGISTER: {
-    mode: 1,
-    name: '新用户'
+    mode: 2,
+    name: '注册绑定'
+  },
+  OVERRIDE: {
+    mode: 3,
+    name: '覆盖绑定'
   }
 }
 /**
@@ -291,11 +295,11 @@ export const BrokerageBindModeEnum = {
  */
 export const BrokerageEnabledConditionEnum = {
   ALL: {
-    condition: 0,
+    condition: 1,
     name: '人人分销'
   },
   ADMIN: {
-    condition: 1,
+    condition: 2,
     name: '指定分销'
   }
 }
