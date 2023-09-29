@@ -51,3 +51,10 @@ export const getReturnList = async (params) => {
 export const returnTask = async (data) => {
   return await request.put({ url: '/bpm/task/return', data })
 }
+
+/**
+ * 委派
+ */
+export const delegateTask = async (data) => {
+  return await request.put({ url: '/bpm/task/delegate', data })
+}

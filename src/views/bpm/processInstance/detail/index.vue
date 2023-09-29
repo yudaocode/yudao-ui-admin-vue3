@@ -92,7 +92,9 @@
     <!-- 弹窗：转派审批人 -->
     <TaskUpdateAssigneeForm ref="taskUpdateAssigneeFormRef" @success="getDetail" />
     <!-- 弹窗，回退节点 -->
-    <TaskReturnDialog ref="taskReturnDialogRef" @success="getDetail" />
+    <TaskRollbackDialog ref="taskRollbackRef" @success="getDetail" />
+    <!-- 委派，将任务委派给别人处理，处理完成后，会重新回到原审批人手中-->
+    <TaskDelegateForm ref="taskDelegateForm" @success="getDetail" />
   </ContentWrap>
 </template>
 <script lang="ts" setup>
@@ -105,7 +107,8 @@ import * as TaskApi from '@/api/bpm/task'
 import TaskUpdateAssigneeForm from './TaskUpdateAssigneeForm.vue'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
-import TaskReturnDialog from './TaskReturnDialogForm.vue'
+import TaskRollbackDialog from './TaskRollbackDialogForm.vue'
+import TaskDelegateForm from './taskDelegateForm.vue'
 import { registerComponent } from '@/utils/routerHelper'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
@@ -169,17 +172,17 @@ const openTaskUpdateAssigneeForm = (id: string) => {
   taskUpdateAssigneeFormRef.value.open(id)
 }
 
+const taskDelegateForm = ref()
 /** 处理审批退回的操作 */
 const handleDelegate = async (task) => {
-  message.error('暂不支持【委派】功能，可以使用【转派】替代！')
-  console.log(task)
+  taskDelegateForm.value.open(task.id)
 }
 
 //回退弹框组件
-const taskReturnDialogRef = ref()
+const taskRollbackRef = ref()
 /** 处理审批退回的操作 */
 const handleBack = async (task) => {
-  taskReturnDialogRef.value.open(task.id)
+  taskRollbackRef.value.open(task.id)
 }
 
 /** 获得详情 */
@@ -260,7 +263,7 @@ const getTaskList = async () => {
     auditForms.value = []
     tasks.value.forEach((task) => {
       // 2.1 只有待处理才需要
-      if (task.result !== 1) {
+      if (task.result !== 1 && task.result !== 6) {
         return
       }
       // 2.2 自己不是处理人
