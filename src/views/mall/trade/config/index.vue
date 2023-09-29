@@ -10,8 +10,43 @@
       <el-form-item label="hideId" v-show="false">
         <el-input v-model="formData.id" />
       </el-form-item>
-      <!-- 配送 -->
       <el-tabs>
+        <!-- 售后 -->
+        <el-tab-pane label="售后">
+          <el-form-item label="退款理由" prop="afterSaleRefundReasons">
+            <el-select
+              v-model="formData.afterSaleRefundReasons"
+              allow-create
+              filterable
+              multiple
+              placeholder="请直接输入退款理由"
+            >
+              <el-option
+                v-for="reason in formData.afterSaleRefundReasons"
+                :key="reason"
+                :label="reason"
+                :value="reason"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="退货理由" prop="afterSaleReturnReasons">
+            <el-select
+              v-model="formData.afterSaleReturnReasons"
+              allow-create
+              filterable
+              multiple
+              placeholder="请直接输入退货理由"
+            >
+              <el-option
+                v-for="reason in formData.afterSaleReturnReasons"
+                :key="reason"
+                :label="reason"
+                :value="reason"
+              />
+            </el-select>
+          </el-form-item>
+        </el-tab-pane>
+        <!-- 配送 -->
         <el-tab-pane label="配送">
           <el-form-item label="启用包邮" prop="deliveryExpressFreeEnabled">
             <el-switch v-model="formData.deliveryExpressFreeEnabled" style="user-select: none" />
@@ -182,6 +217,8 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formRef = ref()
 const formData = ref({
   id: null,
+  afterSaleRefundReasons: [],
+  afterSaleReturnReasons: [],
   deliveryExpressFreeEnabled: false,
   deliveryExpressFreePrice: 0,
   brokerageEnabled: false,
