@@ -24,7 +24,7 @@
       </template>
       {{ user.totalPoint || 0 }}
     </el-descriptions-item>
-    <!-- TODO 芋艿：后续接入余额、支付金额 -->
+    <!-- TODO @疯狂：从 wallet 读取下对应字段 -->
     <el-descriptions-item>
       <template #label>
         <descriptions-item-label label=" 当前余额 " icon="svg-icon:member_balance" />

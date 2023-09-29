@@ -92,7 +92,7 @@
     <!-- 弹窗：转派审批人 -->
     <TaskUpdateAssigneeForm ref="taskUpdateAssigneeFormRef" @success="getDetail" />
     <!-- 弹窗，回退节点 -->
-    <TaskRollbackDialog ref="taskRollbackRef" @success="getDetail" />
+    <TaskReturnDialog ref="taskReturnDialogRef" @success="getDetail" />
     <!-- 委派，将任务委派给别人处理，处理完成后，会重新回到原审批人手中-->
     <TaskDelegateForm ref="taskDelegateForm" @success="getDetail" />
   </ContentWrap>
@@ -107,7 +107,7 @@ import * as TaskApi from '@/api/bpm/task'
 import TaskUpdateAssigneeForm from './TaskUpdateAssigneeForm.vue'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
-import TaskRollbackDialog from './TaskRollbackDialogForm.vue'
+import TaskReturnDialog from './TaskReturnDialogForm.vue'
 import TaskDelegateForm from './taskDelegateForm.vue'
 import { registerComponent } from '@/utils/routerHelper'
 
@@ -179,10 +179,10 @@ const handleDelegate = async (task) => {
 }
 
 //回退弹框组件
-const taskRollbackRef = ref()
+const taskReturnDialogRef = ref()
 /** 处理审批退回的操作 */
 const handleBack = async (task) => {
-  taskRollbackRef.value.open(task.id)
+  taskReturnDialogRef.value.open(task.id)
 }
 
 /** 获得详情 */

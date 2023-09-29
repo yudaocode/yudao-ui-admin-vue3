@@ -7,8 +7,8 @@
       :rules="formRules"
       label-width="110px"
     >
-      <el-form-item label="接收人" prop="receiveId">
-        <el-select v-model="formData.receiveId" clearable style="width: 100%">
+      <el-form-item label="接收人" prop="delegateUserId">
+        <el-select v-model="formData.delegateUserId" clearable style="width: 100%">
           <el-option
             v-for="item in userList"
             :key="item.id"
@@ -37,10 +37,10 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formData = ref({
   id: '',
-  receiveId: undefined
+  delegateUserId: undefined
 })
 const formRules = ref({
-  receiveId: [{ required: true, message: '接收人不能为空', trigger: 'change' }]
+  delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }]
 })
 
 const formRef = ref() // 表单 Ref
@@ -79,7 +79,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: '',
-    receiveId: undefined
+    delegateUserId: undefined
   }
   formRef.value?.resetFields()
 }
