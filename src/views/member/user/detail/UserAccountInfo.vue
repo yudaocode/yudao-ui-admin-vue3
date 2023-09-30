@@ -24,31 +24,56 @@
       </template>
       {{ user.totalPoint || 0 }}
     </el-descriptions-item>
-    <!-- TODO @疯狂：从 wallet 读取下对应字段 -->
     <el-descriptions-item>
       <template #label>
         <descriptions-item-label label=" 当前余额 " icon="svg-icon:member_balance" />
       </template>
-      {{ 0 }}
+      {{ wallet.balance || 0 }}
     </el-descriptions-item>
     <el-descriptions-item>
       <template #label>
         <descriptions-item-label label=" 支出金额 " icon="svg-icon:member_expenditure_balance" />
       </template>
-      {{ 0 }}
+      {{ wallet.totalExpense || 0 }}
     </el-descriptions-item>
     <el-descriptions-item>
       <template #label>
         <descriptions-item-label label=" 充值金额 " icon="svg-icon:member_recharge_balance" />
       </template>
-      {{ 0 }}
+      {{ wallet.totalRecharge || 0 }}
     </el-descriptions-item>
   </el-descriptions>
 </template>
 <script setup lang="ts">
 import { DescriptionsItemLabel } from '@/components/Descriptions'
 import * as UserApi from '@/api/member/user'
-const { user } = defineProps<{ user: UserApi.UserVO }>()
+import * as WalletApi from '@/api/pay/wallet'
+import { UserTypeEnum } from '@/utils/constants'
+
+const props = defineProps<{ user: UserApi.UserVO }>() // 用户信息
+const WALLET_INIT_DATA = {
+  balance: 0,
+  totalExpense: 0,
+  totalRecharge: 0
+} as WalletApi.WalletVO // 钱包初始化数据
+const wallet = ref<WalletApi.WalletVO>(WALLET_INIT_DATA) // 钱包信息
+
+/** 查询用户钱包信息 */
+const getUserWallet = async () => {
+  if (!props.user.id) {
+    wallet.value = WALLET_INIT_DATA
+    return
+  }
+  const params = { userId: props.user.id, userType: UserTypeEnum.MEMBER }
+  wallet.value = (await WalletApi.getUserWallet(params)) || WALLET_INIT_DATA
+}
+
+/** 监听用户编号变化 */
+watch(
+  () => props.user.id,
+  () => getUserWallet(),
+  { immediate: true }
+)
 </script>
 <style scoped lang="scss">
 .cell-item {
