@@ -52,7 +52,9 @@
           <el-tab-pane label="优惠劵" lazy>
             <UserCouponList :user-id="id" />
           </el-tab-pane>
-          <!-- TODO @疯狂：增加获得分校用户；直接查询出所有；需要体现出是一级还是二级；用户编号、昵称、级别、绑定时间 -->
+          <el-tab-pane label="推广用户" lazy>
+            <UserBrokerageList :bind-user-id="id" />
+          </el-tab-pane>
         </el-tabs>
       </el-card>
     </el-row>
@@ -68,6 +70,7 @@ import UserForm from '@/views/member/user/UserForm.vue'
 import UserAccountInfo from './UserAccountInfo.vue'
 import UserAddressList from './UserAddressList.vue'
 import UserBasicInfo from './UserBasicInfo.vue'
+import UserBrokerageList from './UserBrokerageList.vue'
 import UserCouponList from './UserCouponList.vue'
 import UserExperienceRecordList from './UserExperienceRecordList.vue'
 import UserOrderList from './UserOrderList.vue'
