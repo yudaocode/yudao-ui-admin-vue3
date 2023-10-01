@@ -55,9 +55,9 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
-import * as ConfigApi from '@/api/member/point/config'
+import * as ConfigApi from '@/api/member/config'
 
-defineOptions({ name: 'MemberPointConfig' })
+defineOptions({ name: 'MemberConfig' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -75,7 +75,7 @@ const formData = ref({
 // 创建一个计算属性，用于将 tradeDeductUnitPrice 显示为带两位小数的形式
 const computedTradeDeductUnitPrice = computed({
   get: () => (formData.value.tradeDeductUnitPrice / 100).toFixed(2),
-  set: (newValue) => {
+  set: (newValue: number) => {
     formData.value.tradeDeductUnitPrice = Math.round(newValue * 100)
   }
 })
