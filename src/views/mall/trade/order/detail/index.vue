@@ -75,11 +75,11 @@
                 </template>
               </el-table-column>
               <el-table-column label="商品原价" prop="price" width="150">
-                <template #default="{ row }">{{ floatToFixed2(row.price) }}元</template>
+                <template #default="{ row }">{{ fenToYuan(row.price) }}元</template>
               </el-table-column>
               <el-table-column label="数量" prop="count" width="100" />
               <el-table-column label="合计" prop="payPrice" width="150">
-                <template #default="{ row }">{{ floatToFixed2(row.payPrice) }}元</template>
+                <template #default="{ row }">{{ fenToYuan(row.payPrice) }}元</template>
               </el-table-column>
               <el-table-column label="售后状态" prop="afterSaleStatus" width="120">
                 <template #default="{ row }">
@@ -97,32 +97,32 @@
     </el-descriptions>
     <el-descriptions :column="6">
       <el-descriptions-item label="商品总额: ">
-        {{ floatToFixed2(formData.totalPrice!) }}元
+        {{ fenToYuan(formData.totalPrice!) }}元
       </el-descriptions-item>
       <el-descriptions-item label="运费金额: ">
-        {{ floatToFixed2(formData.deliveryPrice!) }}元
+        {{ fenToYuan(formData.deliveryPrice!) }}元
       </el-descriptions-item>
       <el-descriptions-item label="订单调价: ">
-        {{ floatToFixed2(formData.adjustPrice!) }}元
+        {{ fenToYuan(formData.adjustPrice!) }}元
       </el-descriptions-item>
 
       <el-descriptions-item>
         <template #label><span style="color: red">商品优惠: </span></template>
-        {{ floatToFixed2(formData.couponPrice!) }}元
+        {{ fenToYuan(formData.couponPrice!) }}元
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">订单优惠: </span></template>
-        {{ floatToFixed2(formData.discountPrice!) }}元
+        {{ fenToYuan(formData.discountPrice!) }}元
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">积分抵扣: </span></template>
-        {{ floatToFixed2(formData.pointPrice!) }}元
+        {{ fenToYuan(formData.pointPrice!) }}元
       </el-descriptions-item>
 
       <el-descriptions-item v-for="item in 5" :key="item" label-class-name="no-colon" />
       <!-- 占位 -->
       <el-descriptions-item label="应付金额: ">
-        {{ floatToFixed2(formData.payPrice!) }}元
+        {{ fenToYuan(formData.payPrice!) }}元
       </el-descriptions-item>
     </el-descriptions>
 
@@ -187,7 +187,7 @@
 </template>
 <script lang="ts" setup>
 import * as TradeOrderApi from '@/api/mall/trade/order'
-import { floatToFixed2 } from '@/utils'
+import { fenToYuan } from '@/utils'
 import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel, getDictObj } from '@/utils/dict'
 import OrderUpdateRemarkForm from '@/views/mall/trade/order/form/OrderUpdateRemarkForm.vue'
@@ -243,11 +243,11 @@ const updatePrice = () => {
 /** 获得详情 */
 const { params } = useRoute() // 查询参数
 const getDetail = async () => {
-  const id = params.orderId as unknown as number
+  const id = params.id as unknown as number
   if (id) {
     const res = (await TradeOrderApi.getOrder(id)) as TradeOrderApi.OrderVO
     // 没有表单信息则关闭页面返回
-    if (res === null) {
+    if (!res) {
       message.error('交易订单不存在')
       close()
     }

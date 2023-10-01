@@ -28,19 +28,19 @@
       <template #label>
         <descriptions-item-label label=" 当前余额 " icon="svg-icon:member_balance" />
       </template>
-      {{ wallet.balance || 0 }}
+      {{ fenToYuan(wallet.balance || 0) }}
     </el-descriptions-item>
     <el-descriptions-item>
       <template #label>
         <descriptions-item-label label=" 支出金额 " icon="svg-icon:member_expenditure_balance" />
       </template>
-      {{ wallet.totalExpense || 0 }}
+      {{ fenToYuan(wallet.totalExpense || 0) }}
     </el-descriptions-item>
     <el-descriptions-item>
       <template #label>
         <descriptions-item-label label=" 充值金额 " icon="svg-icon:member_recharge_balance" />
       </template>
-      {{ wallet.totalRecharge || 0 }}
+      {{ fenToYuan(wallet.totalRecharge || 0) }}
     </el-descriptions-item>
   </el-descriptions>
 </template>
@@ -49,6 +49,7 @@ import { DescriptionsItemLabel } from '@/components/Descriptions'
 import * as UserApi from '@/api/member/user'
 import * as WalletApi from '@/api/pay/wallet'
 import { UserTypeEnum } from '@/utils/constants'
+import { fenToYuan } from '@/utils'
 
 const props = defineProps<{ user: UserApi.UserVO }>() // 用户信息
 const WALLET_INIT_DATA = {
@@ -65,7 +66,7 @@ const getUserWallet = async () => {
     return
   }
   const params = { userId: props.user.id, userType: UserTypeEnum.MEMBER }
-  wallet.value = (await WalletApi.getUserWallet(params)) || WALLET_INIT_DATA
+  wallet.value = (await WalletApi.getWallet(params)) || WALLET_INIT_DATA
 }
 
 /** 监听用户编号变化 */

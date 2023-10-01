@@ -392,23 +392,23 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/trade', // 交易中心
+    path: '/mall/trade', // 交易中心
     component: Layout,
     meta: {
       hidden: true
     },
     children: [
       {
-        path: 'order/detail/:orderId(\\d+)',
+        path: 'order/detail/:id(\\d+)',
         component: () => import('@/views/mall/trade/order/detail/index.vue'),
         name: 'TradeOrderDetail',
-        meta: { title: '订单详情', icon: '', activeMenu: '/trade/trade/order' }
+        meta: { title: '订单详情', icon: 'ep:view', activeMenu: '/mall/trade/order' }
       },
       {
         path: 'after-sale/detail/:orderId(\\d+)',
         component: () => import('@/views/mall/trade/afterSale/detail/index.vue'),
         name: 'TradeAfterSaleDetail',
-        meta: { title: '退款详情', icon: '', activeMenu: '/trade/trade/after-sale' }
+        meta: { title: '退款详情', icon: 'ep:view', activeMenu: '/mall/trade/after-sale' }
       }
     ]
   },

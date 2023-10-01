@@ -182,9 +182,9 @@
   <!-- 表单弹窗：添加/修改 -->
   <UserForm ref="formRef" @success="getList" />
   <!-- 修改用户等级弹窗 -->
-  <UpdateLevelForm ref="updateLevelFormRef" @success="getList" />
+  <UserLevelUpdateForm ref="updateLevelFormRef" @success="getList" />
   <!-- 修改用户积分弹窗 -->
-  <UpdatePointForm ref="updatePointFormRef" @success="getList" />
+  <UserPointUpdateForm ref="updatePointFormRef" @success="getList" />
   <!-- 发送优惠券弹窗 -->
   <CouponSendForm ref="couponSendFormRef" />
 </template>
@@ -196,8 +196,8 @@ import UserForm from './UserForm.vue'
 import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
 import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
 import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect.vue'
-import UpdateLevelForm from './UpdateLevelForm.vue'
-import UpdatePointForm from './UpdatePointForm.vue'
+import UserLevelUpdateForm from './UserLevelUpdateForm.vue'
+import UserPointUpdateForm from './UserPointUpdateForm.vue'
 import CouponSendForm from '@/views/mall/promotion/coupon/components/CouponSendForm.vue'
 import { checkPermi } from '@/utils/permission'
 
