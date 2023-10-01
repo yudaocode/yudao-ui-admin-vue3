@@ -53,8 +53,8 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column align="center" label="编号" prop="id" />
-      <el-table-column align="center" label="名称" prop="name" />
+      <el-table-column align="center" label="编号" min-width="60" prop="id" />
+      <el-table-column align="center" label="属性名称" prop="name" min-width="150" />
       <el-table-column :show-overflow-tooltip="true" align="center" label="备注" prop="remark" />
       <el-table-column
         :formatter="dateFormatter"
@@ -165,7 +165,7 @@ const handleDelete = async (id: number) => {
 
 /** 跳转商品属性列表 */
 const goValueList = (id: number) => {
-  push({ path: '/product/property/value/' + id })
+  push({ name: 'ProductPropertyValue', params: { propertyId: id } })
 }
 
 /** 初始化 **/
