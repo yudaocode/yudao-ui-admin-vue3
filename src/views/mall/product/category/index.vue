@@ -35,14 +35,14 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" row-key="id" default-expand-all>
-      <el-table-column label="分类名称" prop="name" sortable />
-      <el-table-column label="移动端分类图" align="center" prop="picUrl">
+      <el-table-column label="名称" min-width="240" prop="name" sortable />
+      <el-table-column label="分类图标" align="center" min-width="80" prop="picUrl">
         <template #default="scope">
-          <img v-if="scope.row.picUrl" :src="scope.row.picUrl" alt="移动端分类图" class="h-30px" />
+          <img v-if="scope.row.picUrl" :src="scope.row.picUrl" alt="移动端分类图" class="h-36px" />
         </template>
       </el-table-column>
-      <el-table-column label="分类排序" align="center" prop="sort" />
-      <el-table-column label="开启状态" align="center" prop="status">
+      <el-table-column label="排序" align="center" min-width="150" prop="sort" />
+      <el-table-column label="状态" align="center" min-width="150" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
