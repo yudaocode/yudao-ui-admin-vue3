@@ -20,7 +20,8 @@
         prop="day"
         :formatter="(_, __, cellValue) => ['第', cellValue, '天'].join(' ')"
       />
-      <el-table-column label="获得积分" align="center" prop="point" />
+      <el-table-column label="奖励积分" align="center" prop="point" />
+      <el-table-column label="奖励经验" align="center" prop="experience" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
