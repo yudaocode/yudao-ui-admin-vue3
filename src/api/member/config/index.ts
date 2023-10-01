@@ -2,10 +2,10 @@ import request from '@/config/axios'
 
 export interface ConfigVO {
   id: number
-  tradeDeductEnable: number
-  tradeDeductUnitPrice: number
-  tradeDeductMaxPrice: number
-  tradeGivePoint: number
+  pointTradeDeductEnable: number
+  pointTradeDeductUnitPrice: number
+  pointTradeDeductMaxPrice: number
+  pointTradeGivePoint: number
 }
 
 // 查询积分设置详情
