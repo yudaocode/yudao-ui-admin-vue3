@@ -230,6 +230,7 @@ export const yuanToFen = (amount: string | number): number => {
 /**
  * 分转元
  */
-export const fenToYuan = (amount: string | number): number => {
-  return Number((Number(amount) / 100).toFixed(2))
+export const fenToYuan = (price: string | number): number => {
+  price = Number(price)
+  return (price / 100.0).toFixed(2)
 }

@@ -331,9 +331,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/product',
+    path: '/mall/product', // 商品中心
     component: Layout,
-    name: 'Product',
     meta: {
       hidden: true
     },
@@ -348,11 +347,11 @@ const remainingRouter: AppRouteRecordRaw[] = [
           canTo: true,
           icon: 'ep:edit',
           title: '添加商品',
-          activeMenu: '/product/product-spu'
+          activeMenu: '/mall/product/spu'
         }
       },
       {
-        path: 'spu/edit/:spuId(\\d+)',
+        path: 'spu/edit/:id(\\d+)',
         component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuEdit',
         meta: {
@@ -361,11 +360,11 @@ const remainingRouter: AppRouteRecordRaw[] = [
           canTo: true,
           icon: 'ep:edit',
           title: '编辑商品',
-          activeMenu: '/product/product-spu'
+          activeMenu: '/mall/product/spu'
         }
       },
       {
-        path: 'spu/detail/:spuId(\\d+)',
+        path: 'spu/detail/:id(\\d+)',
         component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuDetail',
         meta: {
@@ -374,7 +373,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           canTo: true,
           icon: 'ep:view',
           title: '商品详情',
-          activeMenu: '/product/product-spu'
+          activeMenu: '/mall/product/spu'
         }
       },
       {
@@ -393,9 +392,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/trade',
+    path: '/trade', // 交易中心
     component: Layout,
-    name: 'Order',
     meta: {
       hidden: true
     },

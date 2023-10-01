@@ -18,15 +18,14 @@
         />
       </el-form-item>
       <el-form-item label="商品分类" prop="categoryId">
-        <el-tree-select
+        <el-cascader
           v-model="queryParams.categoryId"
-          :data="categoryList"
+          :options="categoryList"
           :props="defaultProps"
-          check-strictly
           class="w-1/1"
-          node-key="id"
+          clearable
           placeholder="请选择商品分类"
-          @change="nodeClick"
+          filterable
         />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
@@ -78,7 +77,7 @@
       />
     </el-tabs>
     <el-table v-loading="loading" :data="list">
-      <el-table-column type="expand" width="30">
+      <el-table-column type="expand">
         <template #default="{ row }">
           <el-form class="spu-table-expand" label-position="left">
             <el-row>
@@ -86,17 +85,17 @@
                 <el-row>
                   <el-col :span="8">
                     <el-form-item label="商品分类:">
-                      <span>{{ categoryString(row.categoryId) }}</span>
+                      <span>{{ formatCategoryName(row.categoryId) }}</span>
                     </el-form-item>
                   </el-col>
                   <el-col :span="8">
                     <el-form-item label="市场价:">
-                      <span>{{ floatToFixed2(row.marketPrice) }}元</span>
+                      <span>{{ fenToYuan(row.marketPrice) }}</span>
                     </el-form-item>
                   </el-col>
                   <el-col :span="8">
                     <el-form-item label="成本价:">
-                      <span>{{ floatToFixed2(row.costPrice) }}元</span>
+                      <span>{{ fenToYuan(row.costPrice) }}</span>
                     </el-form-item>
                   </el-col>
                 </el-row>
@@ -106,9 +105,8 @@
               <el-col :span="24">
                 <el-row>
                   <el-col :span="8">
-                    <el-form-item label="收藏:">
-                      <!-- TODO 没有这个属性，暂时写死 5 个 -->
-                      <span>5</span>
+                    <el-form-item label="浏览量:">
+                      <span>{{ row.browseCount }}</span>
                     </el-form-item>
                   </el-col>
                   <el-col :span="8">
@@ -122,7 +120,7 @@
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column key="id" align="center" label="商品编号" prop="id" />
+      <el-table-column align="center" label="商品编号" min-width="60" prop="id" />
       <el-table-column label="商品图" min-width="80">
         <template #default="{ row }">
           <el-image :src="row.picUrl" class="h-30px w-30px" @click="imagePreview(row.picUrl)" />
@@ -130,7 +128,7 @@
       </el-table-column>
       <el-table-column :show-overflow-tooltip="true" label="商品名称" min-width="300" prop="name" />
       <el-table-column align="center" label="商品售价" min-width="90" prop="price">
-        <template #default="{ row }"> {{ floatToFixed2(row.price) }}元</template>
+        <template #default="{ row }"> {{ fenToYuan(row.price) }}元</template>
       </el-table-column>
       <el-table-column align="center" label="销量" min-width="90" prop="salesCount" />
       <el-table-column align="center" label="库存" min-width="90" prop="stock" />
@@ -152,7 +150,7 @@
               active-text="上架"
               inactive-text="下架"
               inline-prompt
-              @change="changeStatus(row)"
+              @change="handleStatusChange(row)"
             />
           </template>
           <template v-else>
@@ -191,7 +189,7 @@
               v-hasPermi="['product:spu:update']"
               link
               type="primary"
-              @click="changeStatus(row, ProductSpuStatusEnum.DISABLE.status)"
+              @click="handleStatus02Change(row, ProductSpuStatusEnum.DISABLE.status)"
             >
               恢复到仓库
             </el-button>
@@ -201,7 +199,7 @@
               v-hasPermi="['product:spu:update']"
               link
               type="primary"
-              @click="changeStatus(row, ProductSpuStatusEnum.RECYCLE.status)"
+              @click="handleStatus02Change(row, ProductSpuStatusEnum.RECYCLE.status)"
             >
               加入回收站
             </el-button>
@@ -220,12 +218,11 @@
 </template>
 <script lang="ts" setup>
 import { TabsPaneContext } from 'element-plus'
-import { cloneDeep } from 'lodash-es'
 import { createImageViewer } from '@/components/ImageViewer'
 import { dateFormatter } from '@/utils/formatTime'
-import { checkSelectedNode, defaultProps, handleTree, treeToString } from '@/utils/tree'
+import { defaultProps, handleTree, treeToString } from '@/utils/tree'
 import { ProductSpuStatusEnum } from '@/utils/constants'
-import { floatToFixed2 } from '@/utils'
+import { fenToYuan } from '@/utils'
 import download from '@/utils/download'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
@@ -254,7 +251,7 @@ const tabsData = ref([
   },
   {
     count: 0,
-    name: '已经售空商品',
+    name: '已售罄商品',
     type: 2
   },
   {
@@ -303,43 +300,37 @@ const getList = async () => {
   }
 }
 
-/**
- * 更改 SPU 状态
- *
- * @param row
- * @param status 更改前的值
- */
-const changeStatus = async (row, status?: number) => {
-  const deepCopyValue = cloneDeep(unref(row))
-  if (typeof status !== 'undefined') deepCopyValue.status = status
+/** 添加到仓库 / 回收站的状态 */
+const handleStatus02Change = async (row, newStatus: number) => {
   try {
-    let text = ''
-    switch (deepCopyValue.status) {
-      case ProductSpuStatusEnum.DISABLE.status:
-        text = ProductSpuStatusEnum.DISABLE.name
-        break
-      case ProductSpuStatusEnum.ENABLE.status:
-        text = ProductSpuStatusEnum.ENABLE.name
-        break
-      case ProductSpuStatusEnum.RECYCLE.status:
-        text = `加入${ProductSpuStatusEnum.RECYCLE.name}`
-        break
-    }
-    await message.confirm(
-      deepCopyValue.status === -1
-        ? `确认要将[${row.name}]${text}吗？`
-        : row.status === -1 // 再判断一次原对象是否等于-1，例: 把回收站中的商品恢复到仓库中，事件触发时原对象status为-1 深拷贝对象status被赋值为0
-        ? `确认要将[${row.name}]恢复到仓库吗？`
-        : `确认要${text}[${row.name}]吗？`
-    )
-    await ProductSpuApi.updateStatus({ id: deepCopyValue.id, status: deepCopyValue.status })
-    message.success('更新状态成功')
+    // 二次确认
+    const text = newStatus === ProductSpuStatusEnum.RECYCLE.status ? '加入到回收站' : '恢复到仓库'
+    await message.confirm(`确认要"${row.name}"${text}吗？`)
+    // 发起修改
+    await ProductSpuApi.updateStatus({ id: row.id, status: newStatus })
+    message.success(text + '成功')
+    // 刷新 tabs 数据
+    await getTabsCount()
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 更新上架/下架状态 */
+const handleStatusChange = async (row) => {
+  try {
+    // 二次确认
+    const text = row.status ? '上架' : '下架'
+    await message.confirm(`确认要${text}"${row.name}"吗？`)
+    // 发起修改
+    await ProductSpuApi.updateStatus({ id: row.id, status: row.status })
+    message.success(text + '成功')
     // 刷新 tabs 数据
     await getTabsCount()
     // 刷新列表
     await getList()
   } catch {
-    // 取消更改状态时回显数据
+    // 异常时，需要重置回之前的值
     row.status =
       row.status === ProductSpuStatusEnum.DISABLE.status
         ? ProductSpuStatusEnum.ENABLE.status
@@ -380,26 +371,20 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/**
- * 新增或修改
- *
- * @param id 商品 SPU 编号
- */
+/** 新增或修改 */
 const openForm = (id?: number) => {
   // 修改
   if (typeof id === 'number') {
-    push({ name: 'ProductSpuEdit', params: { spuId: id } })
+    push({ name: 'ProductSpuEdit', params: { id } })
     return
   }
   // 新增
   push({ name: 'ProductSpuAdd' })
 }
 
-/**
- * 查看商品详情
- */
+/** 查看商品详情 */
 const openDetail = (id: number) => {
-  push({ name: 'ProductSpuDetail', params: { spuId: id } })
+  push({ name: 'ProductSpuDetail', params: { id } })
 }
 
 /** 导出按钮操作 */
@@ -417,6 +402,12 @@ const handleExport = async () => {
   }
 }
 
+const categoryList = ref() // 分类树
+/** 获取分类的节点的完整结构 */
+const formatCategoryName = (categoryId) => {
+  return treeToString(categoryList.value, categoryId)
+}
+
 // 监听路由变化更新列表，解决商品保存后，列表不刷新的问题。
 watch(
   () => currentRoute.value,
@@ -424,25 +415,6 @@ watch(
     getList()
   }
 )
-
-const categoryList = ref() // 分类树
-/**
- * 获取分类的节点的完整结构
- * @param categoryId 分类id
- */
-const categoryString = (categoryId) => {
-  return treeToString(categoryList.value, categoryId)
-}
-
-/**
- * 校验所选是否为二级及以下节点
- */
-const nodeClick = () => {
-  if (!checkSelectedNode(categoryList.value, queryParams.value.categoryId)) {
-    queryParams.value.categoryId = null
-    message.warning('必须选择二级及以下节点！！')
-  }
-}
 
 /** 初始化 **/
 onMounted(async () => {
