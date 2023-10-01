@@ -4,12 +4,20 @@
  * 枚举类
  */
 
+// ========== COMMON 模块 ==========
 // 全局通用状态枚举
 export const CommonStatusEnum = {
   ENABLE: 0, // 开启
   DISABLE: 1 // 禁用
 }
 
+// 全局用户类型枚举
+export const UserTypeEnum = {
+  MEMBER: 1, // 会员
+  ADMIN: 2 // 管理员
+}
+
+// ========== SYSTEM 模块 ==========
 /**
  * 菜单的类型枚举
  */
@@ -39,6 +47,25 @@ export const SystemDataScopeEnum = {
 }
 
 /**
+ * 用户的社交平台的类型枚举
+ */
+export const SystemUserSocialTypeEnum = {
+  DINGTALK: {
+    title: '钉钉',
+    type: 20,
+    source: 'dingtalk',
+    img: 'https://s1.ax1x.com/2022/05/22/OzMDRs.png'
+  },
+  WECHAT_ENTERPRISE: {
+    title: '企业微信',
+    type: 30,
+    source: 'wechat_enterprise',
+    img: 'https://s1.ax1x.com/2022/05/22/OzMrzn.png'
+  }
+}
+
+// ========== INFRA 模块 ==========
+/**
  * 代码生成模板类型
  */
 export const InfraCodegenTemplateTypeEnum = {
@@ -65,24 +92,7 @@ export const InfraApiErrorLogProcessStatusEnum = {
   IGNORE: 2 // 已忽略
 }
 
-/**
- * 用户的社交平台的类型枚举
- */
-export const SystemUserSocialTypeEnum = {
-  DINGTALK: {
-    title: '钉钉',
-    type: 20,
-    source: 'dingtalk',
-    img: 'https://s1.ax1x.com/2022/05/22/OzMDRs.png'
-  },
-  WECHAT_ENTERPRISE: {
-    title: '企业微信',
-    type: 30,
-    source: 'wechat_enterprise',
-    img: 'https://s1.ax1x.com/2022/05/22/OzMrzn.png'
-  }
-}
-
+// ========== PAY 模块 ==========
 /**
  * 支付渠道枚举
  */
@@ -177,6 +187,7 @@ export const PayOrderStatusEnum = {
   }
 }
 
+// ========== MALL - 商品模块 ==========
 /**
  * 商品 SPU 状态
  */
@@ -195,6 +206,7 @@ export const ProductSpuStatusEnum = {
   }
 }
 
+// ========== MALL - 营销模块 ==========
 /**
  * 优惠劵模板的有限期类型的枚举
  */
@@ -273,6 +285,7 @@ export const PromotionDiscountTypeEnum = {
   }
 }
 
+// ========== MALL - 交易模块 ==========
 /**
  * 分销关系绑定模式枚举
  */

@@ -13,8 +13,11 @@
           只允许设置 1-7，默认签到 7 天为一个周期
         </el-text>
       </el-form-item>
-      <el-form-item label="签到分数" prop="point">
-        <el-input-number v-model="formData.point" :precision="0" />
+      <el-form-item label="奖励积分" prop="point">
+        <el-input-number v-model="formData.point" :min="0" :precision="0" />
+      </el-form-item>
+      <el-form-item label="奖励经验" prop="experience">
+        <el-input-number v-model="formData.experience" :min="0" :precision="0" />
       </el-form-item>
       <el-form-item label="开启状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -46,12 +49,30 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
-  id: undefined,
-  day: undefined,
-  point: undefined
+const formData = ref<SignInConfigApi.SignInConfigVO>({} as SignInConfigApi.SignInConfigVO)
+// 奖励校验规则
+const awardValidator = (rule: any, _value: any, callback: any) => {
+  if (!formData.value.point && !formData.value.experience) {
+    callback(new Error('奖励积分与奖励经验至少配置一个'))
+    return
+  }
+
+  // 清除另一个字段的错误提示
+  const otherAwardField = rule?.field === 'point' ? 'experience' : 'point'
+  formRef.value.validateField(otherAwardField, () => null)
+  callback()
+}
+const formRules = reactive({
+  day: [{ required: true, message: '签到天数不能空', trigger: 'blur' }],
+  point: [
+    { required: true, message: '奖励积分不能空', trigger: 'blur' },
+    { validator: awardValidator, trigger: 'blur' }
+  ],
+  experience: [
+    { required: true, message: '奖励经验不能空', trigger: 'blur' },
+    { validator: awardValidator, trigger: 'blur' }
+  ]
 })
-const formRules = reactive({})
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
@@ -82,14 +103,11 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as SignInConfigApi.SignInConfigVO
     if (formType.value === 'create') {
-      //默认新创建的自动启动
-      data.enable = true
-      await SignInConfigApi.createSignInConfig(data)
+      await SignInConfigApi.createSignInConfig(formData.value)
       message.success(t('common.createSuccess'))
     } else {
-      await SignInConfigApi.updateSignInConfig(data)
+      await SignInConfigApi.updateSignInConfig(formData.value)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -105,7 +123,8 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     day: undefined,
-    point: undefined,
+    point: 0,
+    experience: 0,
     status: CommonStatusEnum.ENABLE
   }
   formRef.value?.resetFields()
