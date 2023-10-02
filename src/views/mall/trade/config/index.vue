@@ -64,6 +64,9 @@
               商城商品满多少金额即可包邮，单位：元
             </el-text>
           </el-form-item>
+          <el-form-item label="启用门店自提" prop="deliveryPickUpEnabled">
+            <el-switch v-model="formData.deliveryPickUpEnabled" style="user-select: none" />
+          </el-form-item>
         </el-tab-pane>
         <!-- 分销 -->
         <el-tab-pane label="分销">
@@ -206,7 +209,6 @@
 
 <script setup lang="ts">
 import * as ConfigApi from '@/api/mall/trade/config'
-import { BrokerageBindModeEnum, BrokerageEnabledConditionEnum } from '@/utils/constants'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'TradeConfig' })
@@ -221,6 +223,7 @@ const formData = ref({
   afterSaleReturnReasons: [],
   deliveryExpressFreeEnabled: false,
   deliveryExpressFreePrice: 0,
+  deliveryPickUpEnabled: false,
   brokerageEnabled: false,
   brokerageEnabledCondition: undefined,
   brokerageBindMode: undefined,
