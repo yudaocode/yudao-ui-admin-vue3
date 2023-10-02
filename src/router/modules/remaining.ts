@@ -405,7 +405,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         meta: { title: '订单详情', icon: 'ep:view', activeMenu: '/mall/trade/order' }
       },
       {
-        path: 'after-sale/detail/:orderId(\\d+)',
+        path: 'after-sale/detail/:id(\\d+)',
         component: () => import('@/views/mall/trade/afterSale/detail/index.vue'),
         name: 'TradeAfterSaleDetail',
         meta: { title: '退款详情', icon: 'ep:view', activeMenu: '/mall/trade/after-sale' }

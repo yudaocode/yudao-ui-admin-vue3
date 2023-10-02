@@ -53,11 +53,11 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="快递公司编号" prop="code" />
-      <el-table-column label="快递公司名称" prop="name" />
-      <el-table-column label="快递公司 logo " prop="logo">
+      <el-table-column label="公司编码" prop="code" />
+      <el-table-column label="公司名称" prop="name" />
+      <el-table-column label="公司 logo " prop="logo">
         <template #default="scope">
-          <img v-if="scope.row.logo" :src="scope.row.logo" alt="快递公司logo" class="h-100px" />
+          <img v-if="scope.row.logo" :src="scope.row.logo" alt="公司logo" class="h-40px" />
         </template>
       </el-table-column>
       <el-table-column label="排序" align="center" prop="sort" />

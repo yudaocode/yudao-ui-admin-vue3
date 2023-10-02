@@ -49,7 +49,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = unref(formData)
-    await TradeOrderApi.updateRemark(data)
+    await TradeOrderApi.updateOrderRemark(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
     // 发送操作成功的事件

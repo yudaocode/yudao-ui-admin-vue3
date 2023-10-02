@@ -69,7 +69,7 @@ const submitForm = async () => {
     data.adjustPrice = convertToInteger(data.adjustPrice)
     delete data.payPrice
     delete data.newPayPrice
-    await TradeOrderApi.updatePrice(data)
+    await TradeOrderApi.updateOrderPrice(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
     // 发送操作成功的事件
