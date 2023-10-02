@@ -375,3 +375,17 @@ export const BrokerageWithdrawTypeEnum = {
     name: '支付宝'
   }
 }
+
+/**
+ * 配送方式枚举
+ */
+export const DeliveryTypeEnum = {
+  EXPRESS: {
+    type: 1,
+    name: '快递发货'
+  },
+  PICK_UP: {
+    type: 2,
+    name: '到店自提'
+  }
+}

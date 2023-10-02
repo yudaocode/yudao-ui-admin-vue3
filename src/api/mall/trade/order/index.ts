@@ -41,11 +41,18 @@ export interface OrderVO {
   refundPrice?: number | null // 退款金额
   couponId?: number | null // 优惠劵编号
   couponPrice?: number | null // 优惠劵减免金额
+  vipPrice?: number | null // VIP 减免金额
   pointPrice?: number | null // 积分抵扣的金额
   receiverAreaName?: string //收件人地区名字
   items?: OrderItemRespVO[] // 订单项列表
-  // 用户信息
+  // 下单用户信息
   user?: {
+    id?: number | null
+    nickname?: string
+    avatar?: string
+  }
+  // 推广用户信息
+  brokerageUser?: {
     id?: number | null
     nickname?: string
     avatar?: string
@@ -114,21 +121,21 @@ export interface DeliveryVO {
 }
 
 // 订单发货
-export const delivery = async (data: DeliveryVO) => {
+export const deliveryOrder = async (data: DeliveryVO) => {
   return await request.put({ url: `/trade/order/delivery`, data })
 }
 
 // 订单备注
-export const updateRemark = async (data: any) => {
+export const updateOrderRemark = async (data: any) => {
   return await request.put({ url: `/trade/order/update-remark`, data })
 }
 
 // 订单调价
-export const updatePrice = async (data: any) => {
+export const updateOrderPrice = async (data: any) => {
   return await request.put({ url: `/trade/order/update-price`, data })
 }
 
 // 修改订单地址
-export const updateAddress = async (data: any) => {
+export const updateOrderAddress = async (data: any) => {
   return await request.put({ url: `/trade/order/update-address`, data })
 }
