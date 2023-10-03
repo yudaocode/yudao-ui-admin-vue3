@@ -104,8 +104,8 @@
         <template #default="scope">
           <div v-if="scope.row.type === BrokerageWithdrawTypeEnum.WALLET.type"> 余额 </div>
           <div v-else>
-            {{ getDictLabel(DICT_TYPE.BROKERAGE_WITHDRAW_TYPE, scope.row.type) }}账号：
-            {{ scope.row.accountNo }}
+            {{ getDictLabel(DICT_TYPE.BROKERAGE_WITHDRAW_TYPE, scope.row.type) }}
+            <span v-if="scope.row.accountNo">账号：{{ scope.row.accountNo }}</span>
           </div>
           <template v-if="scope.row.type === BrokerageWithdrawTypeEnum.BANK.type">
             <div>真实姓名：{{ scope.row.name }}</div>
@@ -117,14 +117,16 @@
           </template>
         </template>
       </el-table-column>
-      <el-table-column label="收款码" align="left" prop="accountQrCodeUrl" width="70px">
+      <el-table-column label="收款码" align="left" prop="accountQrCodeUrl" min-width="70px">
         <template #default="scope">
           <el-image
+            v-if="scope.row.accountQrCodeUrl"
             :src="scope.row.accountQrCodeUrl"
             class="w-40px h-40px"
             :preview-src-list="[scope.row.accountQrCodeUrl]"
             preview-teleported
           />
+          <span v-else>无</span>
         </template>
       </el-table-column>
       <el-table-column

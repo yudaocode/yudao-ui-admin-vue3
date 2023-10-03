@@ -109,7 +109,7 @@
         align="center"
         prop="brokerageTime"
         :formatter="dateFormatter"
-        width="170px"
+        width="180px"
       />
       <el-table-column label="上级推广员编号" align="center" prop="bindUserId" width="150px" />
       <el-table-column
@@ -117,7 +117,7 @@
         align="center"
         prop="bindUserTime"
         :formatter="dateFormatter"
-        width="170px"
+        width="180px"
       />
       <el-table-column label="操作" align="center" width="150px" fixed="right">
         <template #default="scope">
