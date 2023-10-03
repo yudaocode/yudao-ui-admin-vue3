@@ -9,7 +9,7 @@ export const discountFormat = (row: CouponTemplateVO) => {
     return `￥${floatToFixed2(row.discountPrice)}`
   }
   if (row.discountType === PromotionDiscountTypeEnum.PERCENT.type) {
-    return `${row.discountPrice}%`
+    return `${row.discountPercent}%`
   }
   return '未知【' + row.discountType + '】'
 }
