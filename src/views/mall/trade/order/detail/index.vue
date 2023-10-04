@@ -27,24 +27,40 @@
         <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="formData.status!" />
       </el-descriptions-item>
       <el-descriptions-item label-class-name="no-colon">
-        <el-button v-if="formData.status! === 0" type="primary" @click="updatePrice">
+        <el-button
+          v-if="formData.status! === TradeOrderStatusEnum.UNPAID.status"
+          type="primary"
+          @click="updatePrice"
+        >
           调整价格
         </el-button>
         <el-button type="primary" @click="remark">备注</el-button>
-        <el-button
-          v-if="formData.status! === 10 && formData.deliveryType === DeliveryTypeEnum.EXPRESS.type"
-          type="primary"
-          @click="delivery"
-        >
-          发货
-        </el-button>
-        <el-button
-          v-if="formData.status! === 10 && formData.deliveryType === DeliveryTypeEnum.EXPRESS.type"
-          type="primary"
-          @click="updateAddress"
-        >
-          修改地址
-        </el-button>
+        <!-- 待发货 -->
+        <template v-if="formData.status! === TradeOrderStatusEnum.UNDELIVERED.status">
+          <!-- 快递发货 -->
+          <el-button
+            v-if="formData.deliveryType === DeliveryTypeEnum.EXPRESS.type"
+            type="primary"
+            @click="delivery"
+          >
+            发货
+          </el-button>
+          <el-button
+            v-if="formData.deliveryType === DeliveryTypeEnum.EXPRESS.type"
+            type="primary"
+            @click="updateAddress"
+          >
+            修改地址
+          </el-button>
+          <!-- 到店自提 -->
+          <el-button
+            v-if="formData.deliveryType === DeliveryTypeEnum.PICK_UP.type"
+            type="primary"
+            @click="handlePickUp"
+          >
+            核销
+          </el-button>
+        </template>
       </el-descriptions-item>
       <el-descriptions-item>
         <template #label><span style="color: red">提醒: </span></template>
@@ -168,7 +184,7 @@
       <!-- 自提门店 -->
       <div v-if="formData.deliveryType === DeliveryTypeEnum.PICK_UP.type">
         <el-descriptions-item label="自提门店: " v-if="formData.pickUpStoreId">
-          {{ pickUpStore.name }}
+          {{ pickUpStore?.name }}
         </el-descriptions-item>
       </div>
     </el-descriptions>
@@ -217,7 +233,7 @@ import OrderUpdateAddressForm from '@/views/mall/trade/order/form/OrderUpdateAdd
 import OrderUpdatePriceForm from '@/views/mall/trade/order/form/OrderUpdatePriceForm.vue'
 import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 import { useTagsViewStore } from '@/store/modules/tagsView'
-import { DeliveryTypeEnum } from '@/utils/constants'
+import { DeliveryTypeEnum, TradeOrderStatusEnum } from '@/utils/constants'
 import * as DeliveryPickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
 
 defineOptions({ name: 'TradeOrderDetail' })
@@ -261,6 +277,19 @@ const updateAddress = () => {
 const updatePriceFormRef = ref() // 订单调价表单 Ref
 const updatePrice = () => {
   updatePriceFormRef.value?.open(formData.value)
+}
+
+/** 核销 */
+const handlePickUp = async () => {
+  try {
+    // 二次确认
+    await message.confirm('确认核销订单吗？')
+    // 提交
+    await TradeOrderApi.pickUpOrder(formData.value.id!)
+    message.success('核销成功')
+    // 刷新列表
+    await getDetail()
+  } catch {}
 }
 
 /** 获得详情 */

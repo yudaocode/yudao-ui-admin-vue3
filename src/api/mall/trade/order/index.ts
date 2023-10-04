@@ -139,3 +139,8 @@ export const updateOrderPrice = async (data: any) => {
 export const updateOrderAddress = async (data: any) => {
   return await request.put({ url: `/trade/order/update-address`, data })
 }
+
+// 订单核销
+export const pickUpOrder = async (id: number) => {
+  return await request.put({ url: `/trade/order/pick-up?id=${id}` })
+}

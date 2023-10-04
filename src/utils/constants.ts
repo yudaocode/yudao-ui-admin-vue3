@@ -389,3 +389,28 @@ export const DeliveryTypeEnum = {
     name: '到店自提'
   }
 }
+/**
+ * 交易订单 - 状态
+ */
+export const TradeOrderStatusEnum = {
+  UNPAID: {
+    status: 0,
+    name: '待支付'
+  },
+  UNDELIVERED: {
+    status: 10,
+    name: '待发货'
+  },
+  DELIVERED: {
+    status: 20,
+    name: '已发货'
+  },
+  COMPLETED: {
+    status: 30,
+    name: '已完成'
+  },
+  CANCELED: {
+    status: 40,
+    name: '已取消'
+  }
+}
