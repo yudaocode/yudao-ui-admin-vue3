@@ -95,42 +95,6 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    label: '新增订单数',
-    field: 'orderCount',
-    isForm: false,
-    form: {
-      component: 'InputNumber',
-      value: 0
-    },
-    table: {
-      width: 120
-    }
-  },
-  {
-    label: '付款人数',
-    field: 'userCount',
-    isForm: false,
-    form: {
-      component: 'InputNumber',
-      value: 0
-    },
-    table: {
-      width: 120
-    }
-  },
-  {
-    label: '订单实付金额',
-    field: 'totalPrice',
-    isForm: false,
-    form: {
-      component: 'InputNumber',
-      value: 0
-    },
-    table: {
-      width: 120
-    }
-  },
-  {
     label: '总限购数量',
     field: 'totalLimitCount',
     form: {
@@ -164,26 +128,6 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    label: '秒杀库存',
-    field: 'stock',
-    isForm: false,
-    form: {
-      component: 'InputNumber',
-      value: 0
-    },
-    table: {
-      width: 120
-    }
-  },
-  {
-    label: '秒杀总库存',
-    field: 'totalStock',
-    isForm: false,
-    table: {
-      width: 120
-    }
-  },
-  {
     label: '秒杀活动商品',
     field: 'spuId',
     isTable: true,
@@ -195,37 +139,6 @@ const crudSchemas = reactive<CrudSchema[]>([
     },
     table: {
       width: 300
-    }
-  },
-  {
-    label: '创建时间',
-    field: 'createTime',
-    formatter: dateFormatter,
-    search: {
-      component: 'DatePicker',
-      componentProps: {
-        valueFormat: 'YYYY-MM-DD HH:mm:ss',
-        type: 'daterange',
-        defaultTime: [new Date('1 00:00:00'), new Date('1 23:59:59')]
-      }
-    },
-    isForm: false,
-    table: {
-      width: 120
-    }
-  },
-  {
-    label: '状态',
-    field: 'status',
-    dictType: DICT_TYPE.COMMON_STATUS,
-    dictClass: 'number',
-    isForm: false,
-    isSearch: true,
-    form: {
-      component: 'Radio'
-    },
-    table: {
-      width: 80
     }
   },
   {
@@ -244,15 +157,6 @@ const crudSchemas = reactive<CrudSchema[]>([
     },
     table: {
       width: 300
-    }
-  },
-  {
-    label: '操作',
-    field: 'action',
-    isForm: false,
-    table: {
-      width: 120,
-      fixed: 'right'
     }
   }
 ])
