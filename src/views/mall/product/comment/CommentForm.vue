@@ -8,7 +8,7 @@
       v-loading="formLoading"
     >
       <el-form-item label="商品" prop="spuId">
-        <div @click="handleSelectSpu" class="w-60px h-60px">
+        <div @click="handleSelectSpu" class="h-60px w-60px">
           <div v-if="spuData && spuData.picUrl">
             <el-image :src="spuData.picUrl" />
           </div>
@@ -18,7 +18,7 @@
         </div>
       </el-form-item>
       <el-form-item label="商品规格" prop="skuId" v-if="formData.spuId">
-        <div @click="handleSelectSku" class="w-60px h-60px">
+        <div @click="handleSelectSku" class="h-60px w-60px">
           <div v-if="skuData && skuData.picUrl">
             <el-image :src="skuData.picUrl" />
           </div>
@@ -150,6 +150,7 @@ const resetForm = () => {
     userNickname: undefined,
     userAvatar: undefined,
     spuId: undefined,
+    spuName: undefined,
     skuId: undefined,
     descriptionScores: 5,
     benefitScores: 5,
@@ -182,11 +183,11 @@ const handleSkuChange = (sku: ProductSpuApi.Sku) => {
 <style>
 .select-box {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed var(--el-border-color-darker);
-  border-radius: 8px;
   width: 100%;
   height: 100%;
+  border: 1px dashed var(--el-border-color-darker);
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
 }
 </style>

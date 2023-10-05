@@ -45,7 +45,7 @@
         <template #default="scope">
           <el-image
             :src="scope.row.icon"
-            class="w-30px h-30px"
+            class="h-30px w-30px"
             :preview-src-list="[scope.row.icon]"
           />
         </template>
@@ -54,7 +54,7 @@
         <template #default="scope">
           <el-image
             :src="scope.row.backgroundUrl"
-            class="w-30px h-30px"
+            class="h-30px w-30px"
             :preview-src-list="[scope.row.backgroundUrl]"
           />
         </template>

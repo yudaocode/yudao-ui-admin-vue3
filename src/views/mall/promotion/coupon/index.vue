@@ -19,7 +19,7 @@
           @keyup="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
+      <el-form-item label="领取时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
           value-format="YYYY-MM-DD HH:mm:ss"
@@ -50,12 +50,17 @@
 
     <!-- 列表 -->
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="会员信息" align="center" prop="nickname" />
-      <!-- TODO 芋艿：以后支持头像，支持跳转 -->
-      <el-table-column label="优惠劵" align="center" prop="name" />
-      <el-table-column label="优惠券类型" align="center" prop="discountType">
+      <el-table-column label="会员昵称" align="center" min-width="100" prop="nickname" />
+      <el-table-column label="优惠券名称" align="center" min-width="140" prop="name" />
+      <el-table-column label="类型" align="center" prop="discountType">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.PROMOTION_PRODUCT_SCOPE" :value="scope.row.productScope" />
+        </template>
+      </el-table-column>
+      <el-table-column label="优惠" min-width="100" prop="discount">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.PROMOTION_DISCOUNT_TYPE" :value="scope.row.discountType" />
+          {{ discountFormat(scope.row) }}
         </template>
       </el-table-column>
       <el-table-column label="领取方式" align="center" prop="takeType">
@@ -109,6 +114,7 @@
 import { deleteCoupon, getCouponPage } from '@/api/mall/promotion/coupon/coupon'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
+import { discountFormat } from '@/views/mall/promotion/coupon/formatter'
 
 defineOptions({ name: 'PromotionCoupon' })
 

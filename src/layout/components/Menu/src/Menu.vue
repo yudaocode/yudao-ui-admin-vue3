@@ -172,7 +172,7 @@ $prefix-cls: #{$namespace}-menu;
     .#{$elNamespace}-menu-item.is-active {
       position: relative;
 
-      &:after {
+      &::after {
         @extend .is-active--after;
       }
     }
@@ -195,7 +195,7 @@ $prefix-cls: #{$namespace}-menu;
       position: relative;
       background-color: var(--left-menu-collapse-bg-active-color) !important;
 
-      &:after {
+      &::after {
         @extend .is-active--after;
       }
     }
@@ -226,7 +226,7 @@ $prefix-cls: #{$namespace}-menu;
       .#{$elNamespace}-menu-item.is-active {
         position: relative;
 
-        &:after {
+        &::after {
           display: none !important;
         }
       }
@@ -282,7 +282,7 @@ $prefix-cls: #{$namespace}-menu-popper;
       background-color: var(--left-menu-bg-active-color) !important;
     }
 
-    &:after {
+    &::after {
       @extend .is-active--after;
     }
   }

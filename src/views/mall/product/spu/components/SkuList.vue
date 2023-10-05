@@ -124,7 +124,7 @@
     <el-table-column v-if="isComponent" type="selection" width="45" />
     <el-table-column align="center" label="图片" min-width="80">
       <template #default="{ row }">
-        <el-image :src="row.picUrl" class="w-60px h-60px" @click="imagePreview(row.picUrl)" />
+        <el-image :src="row.picUrl" class="h-60px w-60px" @click="imagePreview(row.picUrl)" />
       </template>
     </el-table-column>
     <template v-if="formData!.specType && !isBatch">
@@ -204,7 +204,7 @@
     <el-table-column v-if="isComponent" type="selection" width="45" />
     <el-table-column align="center" label="图片" min-width="80">
       <template #default="{ row }">
-        <el-image :src="row.picUrl" class="w-60px h-60px" @click="imagePreview(row.picUrl)" />
+        <el-image :src="row.picUrl" class="h-60px w-60px" @click="imagePreview(row.picUrl)" />
       </template>
     </el-table-column>
     <template v-if="formData!.specType">

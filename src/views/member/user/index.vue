@@ -117,26 +117,56 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="180px" fixed="right">
+      <el-table-column
+        label="操作"
+        align="center"
+        width="100px"
+        fixed="right"
+        :show-overflow-tooltip="false"
+      >
         <template #default="scope">
-          <el-button link type="primary" @click="openDetail(scope.row.id)">详情</el-button>
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['member:user:update']"
-          >
-            编辑
-          </el-button>
-          <!-- todo 放到更多菜单中 -->
-          <el-button
-            link
-            type="primary"
-            @click="updateLevelFormRef.open(scope.row.id)"
-            v-hasPermi="['member:user:update-level']"
-          >
-            修改等级
-          </el-button>
+          <div class="flex items-center justify-center">
+            <el-button link type="primary" @click="openDetail(scope.row.id)">详情</el-button>
+            <el-dropdown
+              @command="(command) => handleCommand(command, scope.row)"
+              v-hasPermi="[
+                'member:user:update',
+                'member:user:update-level',
+                'member:user:update-point',
+                'member:user:update-balance'
+              ]"
+            >
+              <el-button type="primary" link><Icon icon="ep:d-arrow-right" /> 更多</el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                    command="handleUpdate"
+                    v-if="checkPermi(['member:user:update'])"
+                  >
+                    编辑
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    command="handleUpdateLevel"
+                    v-if="checkPermi(['member:user:update-level'])"
+                  >
+                    修改等级
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    command="handleUpdatePoint"
+                    v-if="checkPermi(['member:user:update-point'])"
+                  >
+                    修改积分
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    command="handleUpdateBlance"
+                    v-if="checkPermi(['member:user:update-balance'])"
+                  >
+                    修改余额(WIP)
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -152,7 +182,9 @@
   <!-- 表单弹窗：添加/修改 -->
   <UserForm ref="formRef" @success="getList" />
   <!-- 修改用户等级弹窗 -->
-  <UpdateLevelForm ref="updateLevelFormRef" @success="getList" />
+  <UserLevelUpdateForm ref="updateLevelFormRef" @success="getList" />
+  <!-- 修改用户积分弹窗 -->
+  <UserPointUpdateForm ref="updatePointFormRef" @success="getList" />
   <!-- 发送优惠券弹窗 -->
   <CouponSendForm ref="couponSendFormRef" />
 </template>
@@ -160,11 +192,14 @@
 import { dateFormatter } from '@/utils/formatTime'
 import * as UserApi from '@/api/member/user'
 import { DICT_TYPE } from '@/utils/dict'
+import UserForm from './UserForm.vue'
 import MemberTagSelect from '@/views/member/tag/components/MemberTagSelect.vue'
 import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect.vue'
 import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect.vue'
-import UpdateLevelForm from '@/views/member/user/UpdateLevelForm.vue'
+import UserLevelUpdateForm from './UserLevelUpdateForm.vue'
+import UserPointUpdateForm from './UserPointUpdateForm.vue'
 import CouponSendForm from '@/views/mall/promotion/coupon/components/CouponSendForm.vue'
+import { checkPermi } from '@/utils/permission'
 
 defineOptions({ name: 'MemberUser' })
 
@@ -186,6 +221,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const updateLevelFormRef = ref() // 修改会员等级表单
+const updatePointFormRef = ref() // 修改会员积分表单
 const selectedIds = ref<number[]>([]) // 表格的选中 ID 数组
 
 /** 查询列表 */
@@ -218,6 +254,12 @@ const openDetail = (id: number) => {
   push({ name: 'MemberUserDetail', params: { id } })
 }
 
+/** 添加/修改操作 */
+const formRef = ref()
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
 /** 表格选中事件 */
 const handleSelectionChange = (rows: UserApi.UserVO[]) => {
   selectedIds.value = rows.map((row) => row.id)
@@ -231,6 +273,26 @@ const openCoupon = () => {
     return
   }
   couponSendFormRef.value.open(selectedIds.value)
+}
+
+/** 操作分发 */
+const handleCommand = (command: string, row: UserApi.UserVO) => {
+  switch (command) {
+    case 'handleUpdate':
+      openForm('update', row.id)
+      break
+    case 'handleUpdateLevel':
+      updateLevelFormRef.value.open(row.id)
+      break
+    case 'handleUpdatePoint':
+      updatePointFormRef.value.open(row.id)
+      break
+    case 'handleUpdateBlance':
+      // todo @jason：增加一个【修改余额】
+      break
+    default:
+      break
+  }
 }
 
 /** 初始化 **/

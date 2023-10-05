@@ -168,7 +168,7 @@ export enum DICT_TYPE {
   BROKERAGE_ENABLED_CONDITION = 'brokerage_enabled_condition', // 分佣模式
   BROKERAGE_BIND_MODE = 'brokerage_bind_mode', // 分销关系绑定模式
   BROKERAGE_BANK_NAME = 'brokerage_bank_name', // 佣金提现银行
-  BROKERAGE_WITHDRAW_TYPE = 'brokerage_withdraw_type', // 佣金冻结时间
+  BROKERAGE_WITHDRAW_TYPE = 'brokerage_withdraw_type', // 佣金提现类型
   BROKERAGE_RECORD_BIZ_TYPE = 'brokerage_record_biz_type', // 佣金业务类型
   BROKERAGE_RECORD_STATUS = 'brokerage_record_status', // 佣金状态
   BROKERAGE_WITHDRAW_STATUS = 'brokerage_withdraw_status', // 佣金提现状态
@@ -180,5 +180,6 @@ export enum DICT_TYPE {
   PROMOTION_COUPON_STATUS = 'promotion_coupon_status', // 优惠劵的状态
   PROMOTION_COUPON_TAKE_TYPE = 'promotion_coupon_take_type', // 优惠劵的领取方式
   PROMOTION_ACTIVITY_STATUS = 'promotion_activity_status', // 优惠活动的状态
-  PROMOTION_CONDITION_TYPE = 'promotion_condition_type' // 营销的条件类型枚举
+  PROMOTION_CONDITION_TYPE = 'promotion_condition_type', // 营销的条件类型枚举
+  PROMOTION_BARGAIN_RECORD_STATUS = 'promotion_bargain_record_status' // 砍价记录的状态
 }

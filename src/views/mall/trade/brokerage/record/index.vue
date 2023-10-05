@@ -96,14 +96,14 @@
         align="center"
         prop="unfreezeTime"
         :formatter="dateFormatter"
-        width="170px"
+        width="180px"
       />
       <el-table-column
         label="创建时间"
         align="center"
         prop="createTime"
         :formatter="dateFormatter"
-        width="170px"
+        width="180px"
       />
     </el-table>
     <!-- 分页 -->

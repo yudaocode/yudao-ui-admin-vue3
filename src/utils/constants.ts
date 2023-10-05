@@ -4,12 +4,20 @@
  * 枚举类
  */
 
+// ========== COMMON 模块 ==========
 // 全局通用状态枚举
 export const CommonStatusEnum = {
   ENABLE: 0, // 开启
   DISABLE: 1 // 禁用
 }
 
+// 全局用户类型枚举
+export const UserTypeEnum = {
+  MEMBER: 1, // 会员
+  ADMIN: 2 // 管理员
+}
+
+// ========== SYSTEM 模块 ==========
 /**
  * 菜单的类型枚举
  */
@@ -39,6 +47,25 @@ export const SystemDataScopeEnum = {
 }
 
 /**
+ * 用户的社交平台的类型枚举
+ */
+export const SystemUserSocialTypeEnum = {
+  DINGTALK: {
+    title: '钉钉',
+    type: 20,
+    source: 'dingtalk',
+    img: 'https://s1.ax1x.com/2022/05/22/OzMDRs.png'
+  },
+  WECHAT_ENTERPRISE: {
+    title: '企业微信',
+    type: 30,
+    source: 'wechat_enterprise',
+    img: 'https://s1.ax1x.com/2022/05/22/OzMrzn.png'
+  }
+}
+
+// ========== INFRA 模块 ==========
+/**
  * 代码生成模板类型
  */
 export const InfraCodegenTemplateTypeEnum = {
@@ -65,24 +92,7 @@ export const InfraApiErrorLogProcessStatusEnum = {
   IGNORE: 2 // 已忽略
 }
 
-/**
- * 用户的社交平台的类型枚举
- */
-export const SystemUserSocialTypeEnum = {
-  DINGTALK: {
-    title: '钉钉',
-    type: 20,
-    source: 'dingtalk',
-    img: 'https://s1.ax1x.com/2022/05/22/OzMDRs.png'
-  },
-  WECHAT_ENTERPRISE: {
-    title: '企业微信',
-    type: 30,
-    source: 'wechat_enterprise',
-    img: 'https://s1.ax1x.com/2022/05/22/OzMrzn.png'
-  }
-}
-
+// ========== PAY 模块 ==========
 /**
  * 支付渠道枚举
  */
@@ -177,6 +187,7 @@ export const PayOrderStatusEnum = {
   }
 }
 
+// ========== MALL - 商品模块 ==========
 /**
  * 商品 SPU 状态
  */
@@ -195,6 +206,7 @@ export const ProductSpuStatusEnum = {
   }
 }
 
+// ========== MALL - 营销模块 ==========
 /**
  * 优惠劵模板的有限期类型的枚举
  */
@@ -273,17 +285,22 @@ export const PromotionDiscountTypeEnum = {
   }
 }
 
+// ========== MALL - 交易模块 ==========
 /**
  * 分销关系绑定模式枚举
  */
 export const BrokerageBindModeEnum = {
   ANYTIME: {
-    mode: 0,
-    name: '没有推广人'
+    mode: 1,
+    name: '首次绑定'
   },
   REGISTER: {
-    mode: 1,
-    name: '新用户'
+    mode: 2,
+    name: '注册绑定'
+  },
+  OVERRIDE: {
+    mode: 3,
+    name: '覆盖绑定'
   }
 }
 /**
@@ -291,11 +308,11 @@ export const BrokerageBindModeEnum = {
  */
 export const BrokerageEnabledConditionEnum = {
   ALL: {
-    condition: 0,
+    condition: 1,
     name: '人人分销'
   },
   ADMIN: {
-    condition: 1,
+    condition: 2,
     name: '指定分销'
   }
 }
@@ -356,5 +373,44 @@ export const BrokerageWithdrawTypeEnum = {
   ALIPAY: {
     type: 4,
     name: '支付宝'
+  }
+}
+
+/**
+ * 配送方式枚举
+ */
+export const DeliveryTypeEnum = {
+  EXPRESS: {
+    type: 1,
+    name: '快递发货'
+  },
+  PICK_UP: {
+    type: 2,
+    name: '到店自提'
+  }
+}
+/**
+ * 交易订单 - 状态
+ */
+export const TradeOrderStatusEnum = {
+  UNPAID: {
+    status: 0,
+    name: '待支付'
+  },
+  UNDELIVERED: {
+    status: 10,
+    name: '待发货'
+  },
+  DELIVERED: {
+    status: 20,
+    name: '已发货'
+  },
+  COMPLETED: {
+    status: 30,
+    name: '已完成'
+  },
+  CANCELED: {
+    status: 40,
+    name: '已取消'
   }
 }

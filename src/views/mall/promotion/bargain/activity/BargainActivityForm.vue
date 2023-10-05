@@ -30,7 +30,7 @@
           <el-table-column align="center" label="砍价底价(元)" min-width="168">
             <template #default="{ row: sku }">
               <el-input-number
-                v-model="sku.productConfig.bargainPrice"
+                v-model="sku.productConfig.bargainMinPrice"
                 :min="0"
                 :precision="2"
                 :step="0.1"
@@ -86,7 +86,7 @@ const ruleConfig: RuleConfig[] = [
     message: '商品砍价起始价格不能小于 0 ！！！'
   },
   {
-    name: 'productConfig.bargainPrice',
+    name: 'productConfig.bargainMinPrice',
     rule: (arg) => arg >= 0,
     message: '商品砍价底价不能小于 0 ！！！'
   },
@@ -123,14 +123,14 @@ const getSpuDetails = async (
       spuId: spu.id!,
       skuId: sku.id!,
       bargainFirstPrice: 1,
-      bargainPrice: 1,
+      bargainMinPrice: 1,
       stock: 1
     }
     if (typeof products !== 'undefined') {
       const product = products.find((item) => item.skuId === sku.id)
       if (product) {
         product.bargainFirstPrice = formatToFraction(product.bargainFirstPrice)
-        product.bargainPrice = formatToFraction(product.bargainPrice)
+        product.bargainMinPrice = formatToFraction(product.bargainMinPrice)
       }
       config = product || config
     }
@@ -173,7 +173,7 @@ const open = async (type: string, id?: number) => {
             spuId: data.spuId!,
             skuId: data.skuId,
             bargainFirstPrice: data.bargainFirstPrice, // 砍价起始价格，单位分
-            bargainPrice: data.bargainPrice, // 砍价底价
+            bargainMinPrice: data.bargainMinPrice, // 砍价底价
             stock: data.stock // 活动库存
           }
         ]
@@ -204,12 +204,13 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
+    // TODO @puhui999: 这样要深克隆
     const data = formRef.value.formModel as BargainActivityApi.BargainActivityVO
     const products = spuAndSkuListRef.value.getSkuConfigs('productConfig')
     products.forEach((item: BargainProductVO) => {
       // 砍价价格元转分
       item.bargainFirstPrice = convertToInteger(item.bargainFirstPrice)
-      item.bargainPrice = convertToInteger(item.bargainPrice)
+      item.bargainMinPrice = convertToInteger(item.bargainMinPrice)
     })
     // 用户每次砍价金额分转元, 元转分
     data.randomMinPrice = convertToInteger(data.randomMinPrice)

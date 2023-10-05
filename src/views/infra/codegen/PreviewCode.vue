@@ -20,8 +20,8 @@
             ref="treeRef"
             :data="preview.fileTree"
             :expand-on-click-node="false"
-            default-expand-all
             highlight-current
+            default-expand-all
             node-key="id"
             @node-click="handleNodeClick"
           />
@@ -31,7 +31,7 @@
       <el-card
         v-loading="loading"
         :gutter="12"
-        class="w-2/3 ml-3"
+        class="ml-3 w-2/3"
         element-loading-text="加载代码中..."
         shadow="hover"
       >

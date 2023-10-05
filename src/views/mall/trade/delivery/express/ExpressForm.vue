@@ -7,17 +7,17 @@
       label-width="120px"
       v-loading="formLoading"
     >
-      <el-form-item label="快递公司编码" prop="code">
+      <el-form-item label="公司编码" prop="code">
         <el-input v-model="formData.code" placeholder="请输入快递编码" />
       </el-form-item>
-      <el-form-item label="快递公司名称" prop="name">
+      <el-form-item label="公司名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入快递名称" />
       </el-form-item>
-      <el-form-item label="快递公司 logo" prop="logo">
+      <el-form-item label="公司 logo" prop="logo">
         <UploadImg v-model="formData.logo" :limit="1" :is-show-tip="false" />
         <div style="font-size: 10px" class="pl-10px">推荐 180x180 图片分辨率</div>
       </el-form-item>
-      <el-form-item label="分类排序" prop="sort">
+      <el-form-item label="排序" prop="sort">
         <el-input-number v-model="formData.sort" controls-position="right" :min="0" />
       </el-form-item>
       <el-form-item label="开启状态" prop="status">

@@ -9,7 +9,7 @@
 
 ## 🐶 新手必读
 
-* nodejs > 16.0.0 && pnpm > 8.6.0 (强制使用pnpm)
+* nodejs > 16.18.0 && pnpm > 8.6.0 (强制使用pnpm)
 * 演示地址【Vue3 + element-plus】：<http://dashboard-vue3.yudao.iocoder.cn>
 * 演示地址【Vue3 + vben(ant-design-vue)】：<http://dashboard-vben.yudao.iocoder.cn>
 * 演示地址【Vue2 + element-ui】：<http://dashboard.yudao.iocoder.cn>
@@ -40,13 +40,13 @@
 |----------------------------------------------------------------------|------------------|--------|
 | [Vue](https://staging-cn.vuejs.org/)                                 | Vue 框架           | 3.3.4 |
 | [Vite](https://cn.vitejs.dev//)                                      | 开发与构建工具          | 4.4.9  |
-| [Element Plus](https://element-plus.org/zh-CN/)                      | Element Plus     | 2.3.12 |
-| [TypeScript](https://www.typescriptlang.org/docs/)                   | JavaScript 的超集   | 5.1.6  |
+| [Element Plus](https://element-plus.org/zh-CN/)                      | Element Plus     | 2.3.14 |
+| [TypeScript](https://www.typescriptlang.org/docs/)                   | JavaScript 的超集   | 5.2.2  |
 | [pinia](https://pinia.vuejs.org/)                                    | Vue 存储库 替代 vuex5 | 2.1.6 |
 | [vueuse](https://vueuse.org/)                                        | 常用工具集            | 10.4.1 |
-| [vue-i18n](https://kazupon.github.io/vue-i18n/zh/introduction.html/) | 国际化              | 9.2.2  |
-| [vue-router](https://router.vuejs.org/)                              | Vue 路由           | 4.2.4  |
-| [unocss](https://uno.antfu.me/)                                      | 原子 css          | 0.55.3  |
+| [vue-i18n](https://kazupon.github.io/vue-i18n/zh/introduction.html/) | 国际化              | 9.4.1  |
+| [vue-router](https://router.vuejs.org/)                              | Vue 路由           | 4.2.5  |
+| [unocss](https://uno.antfu.me/)                                      | 原子 css          | 0.56.1  |
 | [iconify](https://icon-sets.iconify.design/)                         | 在线图标库            | 3.1.1  |
 | [wangeditor](https://www.wangeditor.com/)                            | 富文本编辑器           | 5.1.23 |
 

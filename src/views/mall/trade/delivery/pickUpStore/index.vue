@@ -65,16 +65,21 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="编号" prop="id" />
-      <el-table-column label="门店 logo" prop="logo">
+      <el-table-column label="编号" min-width="80" prop="id" />
+      <el-table-column label="门店 logo" min-width="100" prop="logo">
         <template #default="scope">
-          <img v-if="scope.row.logo" :src="scope.row.logo" alt="门店 logo" class="h-100px" />
+          <img v-if="scope.row.logo" :src="scope.row.logo" alt="门店 logo" class="h-50px" />
         </template>
       </el-table-column>
-      <el-table-column label="门店名称" prop="name" />
-      <el-table-column label="门店手机" prop="phone" />
-      <el-table-column align="center" label="门店详细地址" prop="detailAddress" />
-      <el-table-column align="center" label="开启状态" prop="status">
+      <el-table-column label="门店名称" min-width="150" prop="name" />
+      <el-table-column label="门店手机" min-width="100" prop="phone" />
+      <el-table-column label="地址" min-width="100" prop="detailAddress" />
+      <el-table-column label="营业时间" min-width="180">
+        <template #default="scope">
+          {{ scope.row.openingTime }} ~ {{ scope.row.closingTime }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="开启状态" min-width="100" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>

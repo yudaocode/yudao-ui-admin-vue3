@@ -74,7 +74,11 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item v-if="queryParams.deliveryType === 1" label="快递公司">
+      <el-form-item
+        v-if="queryParams.deliveryType === DeliveryTypeEnum.EXPRESS.type"
+        label="快递公司"
+        prop="logisticsId"
+      >
         <el-select v-model="queryParams.logisticsId" class="!w-280px" clearable placeholder="全部">
           <el-option
             v-for="item in deliveryExpressList"
@@ -84,7 +88,11 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item v-if="queryParams.deliveryType === 2" label="自提门店">
+      <el-form-item
+        v-if="queryParams.deliveryType === DeliveryTypeEnum.PICK_UP.type"
+        label="自提门店"
+        prop="pickUpStoreId"
+      >
         <el-select
           v-model="queryParams.pickUpStoreId"
           class="!w-280px"
@@ -99,6 +107,19 @@
             :value="item.id"
           />
         </el-select>
+      </el-form-item>
+      <el-form-item
+        v-if="queryParams.deliveryType === DeliveryTypeEnum.PICK_UP.type"
+        label="核销码"
+        prop="pickUpVerifyCode"
+      >
+        <el-input
+          v-model="queryParams.pickUpVerifyCode"
+          class="!w-280px"
+          clearable
+          placeholder="请输入自提核销码"
+          @keyup.enter="handleQuery"
+        />
       </el-form-item>
       <!-- TODO puhui 聚合搜索等售后结束后实现-->
       <!-- TODO puhui999：尽量不要用 .k 这样的参数，完整拼写，有完整的业务含义 -->
@@ -199,7 +220,7 @@
                 <div class="flex items-center">
                   <el-image
                     :src="row.picUrl"
-                    class="w-30px h-30px mr-10px"
+                    class="mr-10px h-30px w-30px"
                     @click="imagePreview(row.picUrl)"
                   />
                   <span class="mr-10px">{{ row.spuName }}</span>
@@ -234,7 +255,10 @@
             <el-table-column label="买家/收货人" min-width="160">
               <template #default>
                 <!-- 快递发货  -->
-                <div v-if="scope.row.deliveryType === 1" class="flex flex-col">
+                <div
+                  v-if="scope.row.deliveryType === DeliveryTypeEnum.EXPRESS.type"
+                  class="flex flex-col"
+                >
                   <span>买家：{{ scope.row.user.nickname }}</span>
                   <span>
                     收货人：{{ scope.row.receiverName }} {{ scope.row.receiverMobile }}
@@ -242,7 +266,10 @@
                   </span>
                 </div>
                 <!-- 自提  -->
-                <div v-if="scope.row.deliveryType === 2" class="flex flex-col">
+                <div
+                  v-if="scope.row.deliveryType === DeliveryTypeEnum.PICK_UP.type"
+                  class="flex flex-col"
+                >
                   <span>
                     门店名称：
                     {{ pickUpStoreList.find((p) => p.id === scope.row.pickUpStoreId)?.name }}
@@ -273,7 +300,7 @@
             <el-table-column align="center" fixed="right" label="操作" width="160">
               <template #default>
                 <!-- TODO 权限后续补齐 -->
-                <div class="flex justify-center items-center">
+                <div class="flex items-center justify-center">
                   <el-button link type="primary" @click="openDetail(scope.row.id)">
                     <Icon icon="ep:notification" />
                     详情
@@ -287,7 +314,10 @@
                       <el-dropdown-menu>
                         <!-- 如果是【快递】，并且【未发货】，则展示【发货】按钮 -->
                         <el-dropdown-item
-                          v-if="scope.row.deliveryType === 1 && scope.row.status === 10"
+                          v-if="
+                            scope.row.deliveryType === DeliveryTypeEnum.EXPRESS.type &&
+                            scope.row.status === TradeOrderStatusEnum.UNDELIVERED.status
+                          "
                           command="delivery"
                         >
                           <Icon icon="ep:takeaway-box" />
@@ -332,6 +362,7 @@ import { formatDate } from '@/utils/formatTime'
 import { floatToFixed2 } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
+import { DeliveryTypeEnum, TradeOrderStatusEnum } from '@/utils/constants'
 
 defineOptions({ name: 'TradeOrder' })
 
@@ -352,7 +383,8 @@ const queryParams = ref({
   type: null, // 订单类型
   deliveryType: null, // 配送方式
   logisticsId: null, // 快递公司
-  pickUpStoreId: null // 自提门店
+  pickUpStoreId: null, // 自提门店
+  pickUpVerifyCode: null // 自提核销码
 })
 const queryType = reactive({ k: '' }) // 订单搜索类型 k
 
@@ -466,7 +498,7 @@ const imagePreview = (imgUrl: string) => {
 
 /** 查看订单详情 */
 const openDetail = (id: number) => {
-  push({ name: 'TradeOrderDetail', params: { orderId: id } })
+  push({ name: 'TradeOrderDetail', params: { id } })
 }
 
 /** 操作分发 */

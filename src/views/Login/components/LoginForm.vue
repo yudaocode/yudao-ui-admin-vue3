@@ -112,13 +112,13 @@
       <el-divider content-position="center">{{ t('login.otherLogin') }}</el-divider>
       <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item>
-          <div class="flex justify-between w-[100%]">
+          <div class="w-[100%] flex justify-between">
             <Icon
               v-for="(item, key) in socialList"
               :key="key"
               :icon="item.icon"
               :size="30"
-              class="cursor-pointer anticon"
+              class="anticon cursor-pointer"
               color="#999"
               @click="doSocialLogin(item.type)"
             />
@@ -128,7 +128,7 @@
       <el-divider content-position="center">萌新必读</el-divider>
       <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item>
-          <div class="flex justify-between w-[100%]">
+          <div class="w-[100%] flex justify-between">
             <el-link href="https://doc.iocoder.cn/" target="_blank">📚开发指南</el-link>
             <el-link href="https://doc.iocoder.cn/video/" target="_blank">🔥视频教程</el-link>
             <el-link href="https://www.iocoder.cn/Interview/good-collection/" target="_blank">

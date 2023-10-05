@@ -57,6 +57,11 @@ export const updateSeckillActivity = async (data: SeckillActivityVO) => {
   return await request.put({ url: '/promotion/seckill-activity/update', data })
 }
 
+// 关闭秒杀活动
+export const closeSeckillActivity = async (id: number) => {
+  return await request.put({ url: '/promotion/seckill-activity/close?id=' + id })
+}
+
 // 删除秒杀活动
 export const deleteSeckillActivity = async (id: number) => {
   return await request.delete({ url: '/promotion/seckill-activity/delete?id=' + id })

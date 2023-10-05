@@ -41,3 +41,13 @@ export const updateUser = async (data: UserVO) => {
 export const updateUserLevel = async (data: any) => {
   return await request.put({ url: `/member/user/update-level`, data })
 }
+
+// 修改会员用户积分
+export const updateUserPoint = async (data: any) => {
+  return await request.put({ url: `/member/user/update-point`, data })
+}
+
+// 修改会员用户余额
+export const updateUserBalance = async (data: any) => {
+  return await request.put({ url: `/member/user/update-balance`, data })
+}

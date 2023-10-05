@@ -73,7 +73,7 @@
           <template #default="{ row }">
             <el-image
               :src="row.picUrl"
-              class="w-30px h-30px"
+              class="h-30px w-30px"
               :preview-src-list="[row.picUrl]"
               preview-teleported
             />

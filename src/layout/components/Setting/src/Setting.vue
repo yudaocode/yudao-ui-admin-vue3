@@ -200,7 +200,7 @@ const clear = () => {
 <template>
   <div
     :class="prefixCls"
-    class="fixed top-[45%] right-0 w-40px h-40px text-center leading-40px bg-[var(--el-color-primary)] cursor-pointer"
+    class="fixed right-0 top-[45%] h-40px w-40px cursor-pointer bg-[var(--el-color-primary)] text-center leading-40px"
     @click="drawer = true"
   >
     <Icon color="#fff" icon="ep:setting" />

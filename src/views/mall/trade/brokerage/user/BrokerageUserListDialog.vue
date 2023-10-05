@@ -67,7 +67,7 @@
           align="center"
           prop="bindUserTime"
           :formatter="dateFormatter"
-          width="170px"
+          width="180px"
         />
       </el-table>
       <!-- 分页 -->

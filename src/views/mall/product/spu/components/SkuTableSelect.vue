@@ -12,7 +12,7 @@
         <template #default="{ row }">
           <el-image
             :src="row.picUrl"
-            class="w-30px h-30px"
+            class="h-30px w-30px"
             :preview-src-list="[row.picUrl]"
             preview-teleported
           />
@@ -25,7 +25,7 @@
       </el-table-column>
       <el-table-column align="center" label="销售价(元)" min-width="80">
         <template #default="{ row }">
-          {{ row.price }}
+          {{ fenToYuan(row.price) }}
         </template>
       </el-table-column>
     </el-table>
@@ -36,6 +36,7 @@
 import { ElTable } from 'element-plus'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { propTypes } from '@/utils/propTypes'
+import { fenToYuan } from '@/utils'
 
 defineOptions({ name: 'SkuTableSelect' })
 

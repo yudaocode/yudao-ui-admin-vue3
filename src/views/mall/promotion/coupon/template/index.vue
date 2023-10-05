@@ -19,7 +19,7 @@
           @keyup="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="优惠券类型" prop="discountType">
+      <el-form-item label="优惠类型" prop="discountType">
         <el-select
           v-model="queryParams.discountType"
           class="!w-240px"
@@ -71,14 +71,6 @@
         >
           <Icon class="mr-5px" icon="ep:plus" /> 新增
         </el-button>
-        <el-button
-          plain
-          type="success"
-          @click="$router.push('/promotion/coupon')"
-          v-hasPermi="['promotion:coupon:query']"
-        >
-          <Icon icon="ep:operation" class="mr-5px" />会员优惠劵
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -86,17 +78,29 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="优惠券名称" align="center" prop="name" />
-      <el-table-column label="优惠券类型" align="center" prop="discountType">
+      <el-table-column label="优惠券名称" min-width="140" prop="name" />
+      <el-table-column label="类型" min-width="80" prop="productScope">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.PROMOTION_PRODUCT_SCOPE" :value="scope.row.productScope" />
+        </template>
+      </el-table-column>
+      <el-table-column label="优惠" min-width="100" prop="discount">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.PROMOTION_DISCOUNT_TYPE" :value="scope.row.discountType" />
+          {{ discountFormat(scope.row) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="领取方式" min-width="100" prop="takeType">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.PROMOTION_COUPON_TAKE_TYPE" :value="scope.row.takeType" />
         </template>
       </el-table-column>
       <el-table-column
-        label="优惠金额 / 折扣"
+        label="使用时间"
         align="center"
-        prop="discount"
-        :formatter="discountFormat"
+        prop="validityType"
+        width="185"
+        :formatter="validityTypeFormat"
       />
       <el-table-column label="发放数量" align="center" prop="totalCount" />
       <el-table-column
@@ -110,13 +114,6 @@
         align="center"
         prop="takeLimitCount"
         :formatter="takeLimitCountFormat"
-      />
-      <el-table-column
-        label="有效期限"
-        align="center"
-        prop="validityType"
-        width="190"
-        :formatter="validityTypeFormat"
       />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
