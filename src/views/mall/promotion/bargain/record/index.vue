@@ -113,10 +113,10 @@
           <el-button
             link
             type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['promotion:bargain-record:update']"
+            @click="openRecordListDialog(scope.row.id)"
+            v-hasPermi="['promotion:bargain-help:query']"
           >
-            编辑
+            助力
           </el-button>
         </template>
       </el-table-column>
@@ -130,8 +130,8 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改 -->
-  <!--  <BargainRecordForm ref="formRef" @success="getList" />-->
+  <!-- 表单弹窗 -->
+  <BargainRecordListDialog ref="recordListDialogRef" />
 </template>
 
 <script setup lang="ts">
@@ -139,7 +139,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as BargainRecordApi from '@/api/mall/promotion/bargain/bargainRecord'
 import { fenToYuanFormat } from '@/utils/formatter'
-// import BargainRecordForm from './BargainRecordForm.vue'
+import BargainRecordListDialog from './BargainRecordListDialog.vue'
 
 defineOptions({ name: 'PromotionBargainRecord' })
 
@@ -182,10 +182,10 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
+/** 打开[助力]弹窗 */
+const recordListDialogRef = ref()
+const openRecordListDialog = (id?: number) => {
+  recordListDialogRef.value.open(id)
 }
 
 /** 初始化 **/
