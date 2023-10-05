@@ -180,5 +180,6 @@ export enum DICT_TYPE {
   PROMOTION_COUPON_STATUS = 'promotion_coupon_status', // 优惠劵的状态
   PROMOTION_COUPON_TAKE_TYPE = 'promotion_coupon_take_type', // 优惠劵的领取方式
   PROMOTION_ACTIVITY_STATUS = 'promotion_activity_status', // 优惠活动的状态
-  PROMOTION_CONDITION_TYPE = 'promotion_condition_type' // 营销的条件类型枚举
+  PROMOTION_CONDITION_TYPE = 'promotion_condition_type', // 营销的条件类型枚举
+  PROMOTION_BARGAIN_RECORD_STATUS = 'promotion_bargain_record_status' // 砍价记录的状态
 }

@@ -6,7 +6,7 @@ export const rules = reactive({
   name: [required],
   startTime: [required],
   endTime: [required],
-  userSize: [required],
+  helpMaxCount: [required],
   bargainCount: [required],
   singleLimitCount: [required]
 })
@@ -72,7 +72,7 @@ const crudSchemas = reactive<CrudSchema[]>([
   },
   {
     label: '砍价人数',
-    field: 'userSize',
+    field: 'helpMaxCount',
     isSearch: false,
     form: {
       component: 'InputNumber',
