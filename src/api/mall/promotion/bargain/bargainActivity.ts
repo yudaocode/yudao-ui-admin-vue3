@@ -57,6 +57,11 @@ export const updateBargainActivity = async (data: BargainActivityVO) => {
   return await request.put({ url: '/promotion/bargain-activity/update', data })
 }
 
+// 关闭砍价活动
+export const closeBargainActivity = async (id: number) => {
+  return await request.put({ url: '/promotion/bargain-activity/close?id=' + id })
+}
+
 // 删除砍价活动
 export const deleteBargainActivity = async (id: number) => {
   return await request.delete({ url: '/promotion/bargain-activity/delete?id=' + id })
