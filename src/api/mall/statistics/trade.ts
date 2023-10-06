@@ -2,8 +2,6 @@ import request from '@/config/axios'
 import dayjs from 'dayjs'
 import { formatDate } from '@/utils/formatTime'
 
-// todo @疯狂：挪到 mall 里哈
-
 /** 交易统计对照 Response VO */
 export interface TradeStatisticsComparisonRespVO<T> {
   value: T
