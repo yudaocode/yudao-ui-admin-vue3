@@ -71,26 +71,23 @@
       <el-table-column label="商品标题" prop="spuName" min-width="300" />
       <el-table-column
         label="原价"
-        prop="combinationFirstPrice"
+        prop="marketPrice"
         min-width="100"
         :formatter="fenToYuanFormat"
       />
-      <el-table-column
-        label="拼团价"
-        prop="combinationMinPrice"
-        min-width="100"
-        :formatter="fenToYuanFormat"
-      />
-      <el-table-column label="拼团人数" prop="recordUserCount" min-width="100" />
-      <el-table-column label="参与人数" prop="recordSuccessUserCount" min-width="110" />
-      <el-table-column label="成团人数" prop="helpUserCount" min-width="100" />
+      <el-table-column label="拼团价" prop="seckillPrice" min-width="100">
+        <template #default="scope">
+          {{ formatCombinationPrice(scope.row.products) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="开团组数" prop="groupCount" min-width="100" />
+      <el-table-column label="成团组数" prop="groupSuccessCount" min-width="100" />
+      <el-table-column label="购买次数" prop="recordCount" min-width="100" />
       <el-table-column label="活动状态" align="center" prop="status" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="库存" align="center" prop="stock" min-width="80" />
-      <el-table-column label="总库存" align="center" prop="totalStock" min-width="80" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -149,6 +146,7 @@ import * as CombinationActivityApi from '@/api/mall/promotion/combination/combin
 import CombinationActivityForm from './CombinationActivityForm.vue'
 import { formatDate } from '@/utils/formatTime'
 import { fenToYuanFormat } from '@/utils/formatter'
+import { fenToYuan } from '@/utils'
 
 defineOptions({ name: 'PromotionBargainActivity' })
 
@@ -222,6 +220,11 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+const formatCombinationPrice = (products) => {
+  const combinationPrice = Math.min(...products.map((item) => item.combinationPrice))
+  return `￥${fenToYuan(combinationPrice)}`
 }
 
 /** 初始化 **/
