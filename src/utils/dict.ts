@@ -24,7 +24,7 @@ export const getDictOptions = (dictType: string) => {
   return dictStore.getDictByType(dictType) || []
 }
 
-export const getIntDictOptions = (dictType: string) => {
+export const getIntDictOptions = (dictType: string): DictDataType[] => {
   const dictOption: DictDataType[] = []
   const dictOptions: DictDataType[] = getDictOptions(dictType)
   dictOptions.forEach((dict: DictDataType) => {
