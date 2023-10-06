@@ -55,6 +55,11 @@ export const updateCombinationActivity = async (data: CombinationActivityVO) => 
   return await request.put({ url: '/promotion/combination-activity/update', data })
 }
 
+// 关闭拼团活动
+export const closeCombinationActivity = async (id: number) => {
+  return await request.put({ url: '/promotion/bargain-combination/close?id=' + id })
+}
+
 // 删除拼团活动
 export const deleteCombinationActivity = async (id: number) => {
   return await request.delete({ url: '/promotion/combination-activity/delete?id=' + id })

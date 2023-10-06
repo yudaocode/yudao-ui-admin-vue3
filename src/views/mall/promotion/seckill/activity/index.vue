@@ -87,7 +87,8 @@
         min-width="100"
         :formatter="fenToYuanFormat"
       />
-      <el-table-column label="秒杀价" prop="marketPrice" min-width="100">
+      <el-table-column label="原价" prop="marketPrice" min-width="100" />
+      <el-table-column label="秒杀价" prop="seckillPrice" min-width="100">
         <template #default="scope">
           {{ formatSeckillPrice(scope.row.products) }}
         </template>
