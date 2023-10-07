@@ -26,8 +26,3 @@ export const getCombinationRecordPage = async (params) => {
 export const getCombinationRecordSummary = async () => {
   return await request.get({ url: '/promotion/combination-record/get-summary' })
 }
-
-// 获得拼团记录分页 tab count
-export const getCombinationRecordCount = async () => {
-  return await request.get({ url: '/promotion/combination-record/get-count' })
-}

@@ -65,8 +65,9 @@
       </ContentWrap>
     </el-col>
   </el-row>
+
+  <!-- 搜索工作栏 -->
   <ContentWrap>
-    <!-- 搜索工作栏 -->
     <el-form
       ref="queryFormRef"
       :inline="true"
@@ -109,12 +110,13 @@
       </el-form-item>
     </el-form>
   </ContentWrap>
+
+  <!-- 分页列表数据展示 -->
   <ContentWrap>
-    <!--   分页列表数据展示   -->
     <el-table v-loading="loading" :data="pageList">
       <el-table-column align="center" label="编号" prop="id" />
-      <!-- TODO 是否需要做一个点击用户头像跳转或查看用户信息的功能  -->
       <el-table-column align="center" label="头像" prop="avatar" />
+      <el-table-column align="center" label="昵称" prop="nickname" />
       <el-table-column align="center" label="开团团长" prop="headId">
         <template #default="{ row }: { row: CombinationRecordApi.CombinationRecordVO }">
           {{
@@ -150,6 +152,13 @@
       <el-table-column
         :formatter="dateFormatter"
         align="center"
+        label="参团时间"
+        prop="createTime"
+        width="180"
+      />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
         label="结束时间"
         prop="endTime"
         width="180"
@@ -162,6 +171,7 @@
           />
         </template>
       </el-table-column>
+      <!-- TODO puhui999：这里加个查看拼团？点击后，查看完整的拼团列表？ -->
       <el-table-column align="center" fixed="right" label="操作">
         <template #default></template>
       </el-table-column>
@@ -175,7 +185,6 @@
     />
   </ContentWrap>
 </template>
-
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
@@ -183,6 +192,7 @@ import { createImageViewer } from '@/components/ImageViewer'
 import * as CombinationRecordApi from '@/api/mall/promotion/combination/combinationRecord'
 
 defineOptions({ name: 'CombinationRecord' })
+
 const queryParams = ref({
   dateType: 0, // 日期类型
   status: undefined, // 拼团状态
@@ -216,6 +226,7 @@ const getSummary = async () => {
   recordSummary.value = await CombinationRecordApi.getCombinationRecordSummary()
 }
 // 日期快捷选项
+// TODO @puhui999：不用 dateType，而是 shortcuts 选择后，设置到对应的 date 就 ok 啦。直接通过它查询。然后，看看怎么把 shortcuts 变成一个公共变量，类似 defaultProps 一样
 const shortcuts = ref([
   {
     text: '今天',
@@ -246,7 +257,7 @@ const shortcuts = ref([
     }
   },
   {
-    text: '最近30天',
+    text: '最近 30 天',
     type: 'last30Days',
     value: () => {
       const date = new Date()
@@ -276,14 +287,6 @@ const shortcuts = ref([
   }
 ])
 
-/** 获得每个 Tab 的数量 */
-const getTabsCount = async () => {
-  const res = await CombinationRecordApi.getCombinationRecordCount()
-  shortcuts.value.forEach((tab) => {
-    tab.text += `(${res[tab.type]})`
-  })
-}
-
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.value.pageNo = 1
@@ -306,7 +309,6 @@ const imagePreview = (imgUrl: string) => {
 /** 初始化 **/
 onMounted(async () => {
   await getSummary()
-  await getTabsCount()
   await getList()
 })
 </script>
