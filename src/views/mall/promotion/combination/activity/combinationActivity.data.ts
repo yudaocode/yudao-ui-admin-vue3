@@ -9,7 +9,8 @@ export const rules = reactive({
   startTime: [required],
   endTime: [required],
   userSize: [required],
-  limitDuration: [required]
+  limitDuration: [required],
+  virtualGroup: [required]
 })
 
 // CrudSchema https://doc.iocoder.cn/vue3/crud-schema/
@@ -112,6 +113,17 @@ const crudSchemas = reactive<CrudSchema[]>([
     form: {
       component: 'InputNumber',
       value: 0
+    }
+  },
+  {
+    label: '虚拟成团',
+    field: 'virtualGroup',
+    dictType: DICT_TYPE.INFRA_BOOLEAN_STRING,
+    dictClass: 'boolean',
+    isSearch: true,
+    form: {
+      component: 'Radio',
+      value: false
     }
   },
   {
