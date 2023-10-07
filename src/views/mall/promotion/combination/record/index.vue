@@ -65,44 +65,63 @@
       </ContentWrap>
     </el-col>
   </el-row>
-
   <ContentWrap>
-    <!-- 检索条件 -->
-    <div class="mb-[10px]">
-      <span class="font-size-[14px]" style="font-weight: bold; color: #606266">时间段：</span>
-      <el-date-picker
-        v-model="queryParams.createTime"
-        :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-        class="!w-240px"
-        end-placeholder="结束日期"
-        start-placeholder="开始日期"
-        type="daterange"
-        value-format="YYYY-MM-DD HH:mm:ss"
-      />
-      <span class="ml-[10px] font-size-[14px] font-bold" style="color: #606266">拼团状态：</span>
-      <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="全部">
-        <el-option
-          v-for="(dict, index) in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-          :key="index"
-          :label="dict.label"
-          :value="dict.value"
+    <!-- 搜索工作栏 -->
+    <el-form
+      ref="queryFormRef"
+      :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
+      label-width="68px"
+    >
+      <el-form-item label="创建时间" prop="createTime">
+        <el-date-picker
+          v-model="queryParams.createTime"
+          :shortcuts="shortcuts"
+          class="!w-240px"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="daterange"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
-      </el-select>
-    </div>
+      </el-form-item>
+      <el-form-item label="拼团状态" prop="status">
+        <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="全部">
+          <el-option
+            v-for="(dict, index) in getIntDictOptions(
+              DICT_TYPE.PROMOTION_COMBINATION_RECORD_STATUS
+            )"
+            :key="index"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+      </el-form-item>
+    </el-form>
+  </ContentWrap>
+  <ContentWrap>
     <!--   分页列表数据展示   -->
-    <el-tabs v-model="queryParams.dateType" @tab-click="handleTabClick">
-      <el-tab-pane
-        v-for="item in tabsData"
-        :key="item.type"
-        :label="item.name + '(' + item.count + ')'"
-        :name="item.value"
-      />
-    </el-tabs>
     <el-table v-loading="loading" :data="pageList">
       <el-table-column align="center" label="编号" prop="id" />
       <!-- TODO 是否需要做一个点击用户头像跳转或查看用户信息的功能  -->
-      <el-table-column align="center" label="头像" prop="avatars" />
-      <el-table-column align="center" label="开团团长" prop="avatar" />
+      <el-table-column align="center" label="头像" prop="avatar" />
+      <el-table-column align="center" label="开团团长" prop="headId">
+        <template #default="{ row }: { row: CombinationRecordApi.CombinationRecordVO }">
+          {{
+            row.headId ? pageList.find((item) => item.id === row.headId)?.nickname : row.nickname
+          }}
+        </template>
+      </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -137,10 +156,13 @@
       />
       <el-table-column align="center" label="拼团状态" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          <dict-tag
+            :type="DICT_TYPE.PROMOTION_COMBINATION_RECORD_STATUS"
+            :value="scope.row.status"
+          />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作">
+      <el-table-column align="center" fixed="right" label="操作">
         <template #default></template>
       </el-table-column>
     </el-table>
@@ -159,7 +181,6 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as CombinationRecordApi from '@/api/mall/promotion/combination/combinationRecord'
-import { TabsPaneContext } from 'element-plus'
 
 defineOptions({ name: 'CombinationRecord' })
 const queryParams = ref({
@@ -169,15 +190,16 @@ const queryParams = ref({
   pageSize: 10,
   pageNo: 1
 })
+const queryFormRef = ref() // 搜索的表单
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 总记录数
-const pageList = ref([]) // 分页数据
+const pageList = ref<CombinationRecordApi.CombinationRecordVO[]>([]) // 分页数据
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
     const data = await CombinationRecordApi.getCombinationRecordPage(queryParams.value)
-    pageList.value = data.list
+    pageList.value = data.list as CombinationRecordApi.CombinationRecordVO[]
     total.value = data.total
   } finally {
     loading.value = false
@@ -193,64 +215,85 @@ const recordSummary = ref({
 const getSummary = async () => {
   recordSummary.value = await CombinationRecordApi.getCombinationRecordSummary()
 }
-
-// tabs 数据
-const tabsData = ref([
+// 日期快捷选项
+const shortcuts = ref([
   {
-    count: 0,
-    name: '全部',
-    type: 'all',
-    value: 0
-  },
-  {
-    count: 0,
-    name: '今天',
+    text: '今天',
     type: 'toDay',
-    value: 1
+    value: () => {
+      queryParams.value.dateType = 1
+      return new Date()
+    }
   },
   {
-    count: 0,
-    name: '昨天',
+    text: '昨天',
     type: 'yesterday',
-    value: 2
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24)
+      queryParams.value.dateType = 2
+      return [date, date]
+    }
   },
   {
-    count: 0,
-    name: '最近七天',
+    text: '最近七天',
     type: 'lastSevenDays',
-    value: 3
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+      queryParams.value.dateType = 3
+      return [date, new Date()]
+    }
   },
   {
-    count: 0,
-    name: '最近30天',
+    text: '最近30天',
     type: 'last30Days',
-    value: 4
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 30)
+      queryParams.value.dateType = 4
+      return [date, new Date()]
+    }
   },
   {
-    count: 0,
-    name: '本月',
+    text: '本月',
     type: 'thisMonth',
-    value: 5
+    value: () => {
+      const date = new Date()
+      date.setDate(1) // 设置为当前月的第一天
+      queryParams.value.dateType = 5
+      return [date, new Date()]
+    }
   },
   {
-    count: 0,
-    name: '今年',
+    text: '今年',
     type: 'thisYear',
-    value: 6
+    value: () => {
+      const date = new Date()
+      queryParams.value.dateType = 6
+      return [new Date(`${date.getFullYear()}-01-01`), date]
+    }
   }
 ])
 
 /** 获得每个 Tab 的数量 */
 const getTabsCount = async () => {
   const res = await CombinationRecordApi.getCombinationRecordCount()
-  tabsData.value.forEach((tab) => {
-    tab.count = res[tab.type]
+  shortcuts.value.forEach((tab) => {
+    tab.text += `(${res[tab.type]})`
   })
 }
 
-const handleTabClick = async (tab: TabsPaneContext) => {
-  queryParams.value.dateType = tab.paneName as number
-  await getList()
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.value.pageNo = 1
+  getList()
+}
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
 }
 
 /** 商品图预览 */
