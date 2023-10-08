@@ -58,3 +58,24 @@ export const returnTask = async (data) => {
 export const delegateTask = async (data) => {
   return await request.put({ url: '/bpm/task/delegate', data })
 }
+
+/**
+ * 加签
+ */
+export const taskAddSign = async (data) => {
+  return await request.put({ url: '/bpm/task/add-sign', data })
+}
+
+/**
+ * 获取减签任务列表
+ */
+export const getSubSignTaskList = async (id: string) => {
+  return await request.get({ url: '/bpm/task/get-sub-sign?taskId=' + id })
+}
+
+/**
+ * 减签
+ */
+export const taskSubSign = async (data) => {
+  return await request.put({ url: '/bpm/task/sub-sign', data })
+}

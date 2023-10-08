@@ -250,6 +250,12 @@ const getResultCss = (result) => {
   } else if (result === 5) {
     // 退回
     return 'highlight-return'
+  } else if (result === 6) {
+    // 委派
+    return 'highlight-return'
+  } else if (result === 7 || result === 8 || result === 9) {
+    // 待后加签任务完成/待前加签任务完成/待前置任务完成
+    return 'highlight-return'
   }
   return ''
 }
@@ -362,7 +368,7 @@ const elementHover = (element) => {
       }
     }
     console.log(html, 'html111111111111111')
-    elementOverlayIds.value[element.value.id] = toRaw(overlays.value).add(element.value, {
+    elementOverlayIds.value[element.value.id] = toRaw(overlays.value)?.add(element.value, {
       position: { left: 0, bottom: 0 },
       html: `<div class="element-overlays">${html}</div>`
     })
