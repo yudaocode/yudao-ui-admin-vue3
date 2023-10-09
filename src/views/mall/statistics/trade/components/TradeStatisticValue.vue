@@ -1,5 +1,5 @@
 <template>
-  <div class="bg flex flex-col gap-2 p-6">
+  <div class="flex flex-col gap-2 bg-[var(--el-bg-color-overlay)] p-6">
     <div class="flex items-center justify-between text-gray-500">
       <span>{{ title }}</span>
       <el-tooltip :content="tooltip" placement="top-start" v-if="tooltip">
@@ -34,8 +34,3 @@ defineProps({
   percent: propTypes.oneOfType([Number, String]).def(0)
 })
 </script>
-<style scoped>
-.bg {
-  background-color: var(--el-bg-color-overlay);
-}
-</style>

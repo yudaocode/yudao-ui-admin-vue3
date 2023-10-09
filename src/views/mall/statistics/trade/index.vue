@@ -218,7 +218,7 @@
           />
         </el-col>
       </el-row>
-      <!-- 拆线图 -->
+      <!-- 折线图 -->
       <el-skeleton :loading="trendLoading" animated>
         <Echart :height="500" :options="lineChartOptions" />
       </el-skeleton>
