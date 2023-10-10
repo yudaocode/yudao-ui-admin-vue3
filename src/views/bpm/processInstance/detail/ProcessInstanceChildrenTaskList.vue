@@ -2,7 +2,7 @@
   <el-drawer v-model="drawerVisible" title="子任务" size="70%">
     <template #header>
       <h4>【{{ baseTask.name }} 】审批人：{{ baseTask.assigneeUser?.nickname }}</h4>
-      <el-button style="margin-left: 5px" type="danger" plain @click="handleSubSign(baseTask)">
+      <el-button style="margin-left: 5px" v-if="showSubSignButton(baseTask)" type="danger" plain @click="handleSubSign(baseTask)">
         <Icon icon="ep:remove" />
         减签
       </el-button>
@@ -32,7 +32,7 @@
       <el-table-column label="操作" prop="operation">
         <template #default="scope">
           <el-button
-            v-if="!isEmpty(scope.row.children)"
+            v-if="showSubSignButton(scope.row)"
             type="danger"
             plain
             @click="handleSubSign(scope.row)"
@@ -82,5 +82,18 @@ const emit = defineEmits(['success']) // 定义 success 事件，用于操作成
 const taskSubSignDialogForm = ref()
 const handleSubSign = (item) => {
   taskSubSignDialogForm.value.open(item.id)
+}
+
+/**
+ * 显示减签按钮
+ * @param task
+ */
+const showSubSignButton = (task:any) => {
+  if(!isEmpty(task.children)){
+    //有子任务，且子任务有任意一个是 待处理 和 待前置任务完成 则显示减签按钮
+    const subTask = task.children.find((item) => item.result === 1 || item.result === 9)
+    return !isEmpty(subTask)
+  }
+  return false
 }
 </script>

@@ -44,7 +44,7 @@ const formRef = ref() // 表单 Ref
 const subTaskList = ref([])
 /** 打开弹窗 */
 const open = async (id: string) => {
-  subTaskList.value = await TaskApi.getSubSignTaskList(id)
+  subTaskList.value = await TaskApi.getChildrenTaskList(id)
   if (isEmpty(subTaskList.value)) {
     message.warning('当前没有可减签的任务')
     return false

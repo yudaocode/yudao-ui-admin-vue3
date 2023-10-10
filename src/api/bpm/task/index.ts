@@ -69,8 +69,8 @@ export const taskAddSign = async (data) => {
 /**
  * 获取减签任务列表
  */
-export const getSubSignTaskList = async (id: string) => {
-  return await request.get({ url: '/bpm/task/get-sub-sign?taskId=' + id })
+export const getChildrenTaskList = async (id: string) => {
+  return await request.get({ url: '/bpm/task/get-children-task-list?taskId=' + id })
 }
 
 /**
