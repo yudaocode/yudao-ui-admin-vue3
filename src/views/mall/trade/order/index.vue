@@ -121,26 +121,24 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <!-- TODO puhui 聚合搜索等售后结束后实现-->
-      <!-- TODO puhui999：尽量不要用 .k 这样的参数，完整拼写，有完整的业务含义 -->
       <el-form-item label="聚合搜索">
         <el-input
           v-show="true"
-          v-model="queryParams[queryType.k]"
+          v-model="queryParams[queryType.queryParam]"
           class="!w-280px"
           clearable
           placeholder="请输入"
         >
           <template #prepend>
             <el-select
-              v-model="queryType.k"
+              v-model="queryType.queryParam"
               class="!w-110px"
               clearable
               placeholder="全部"
               @change="inputChangeSelect"
             >
               <el-option
-                v-for="dict in searchList"
+                v-for="dict in dynamicSearchList"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -386,11 +384,10 @@ const queryParams = ref({
   pickUpStoreId: null, // 自提门店
   pickUpVerifyCode: null // 自提核销码
 })
-const queryType = reactive({ k: '' }) // 订单搜索类型 k
+const queryType = reactive({ queryParam: '' }) // 订单搜索类型 queryParam
 
-// 订单聚合搜索 select 类型配置
-// TODO @puhui999：dynamicSearchList，动态搜索；其它相关的变量和方法，都可以朝着这个变量靠哈；这样更容易理解；
-const searchList = ref([
+// 订单聚合搜索 select 类型配置（动态搜索）
+const dynamicSearchList = ref([
   { value: 'no', label: '订单号' },
   { value: 'userId', label: '用户UID' },
   { value: 'userNickname', label: '用户昵称' },
@@ -401,7 +398,7 @@ const searchList = ref([
  * @param val
  */
 const inputChangeSelect = (val: string) => {
-  searchList.value
+  dynamicSearchList.value
     .filter((item) => item.value !== val)
     ?.forEach((item1) => {
       // 清除集合搜索无用属性
@@ -475,6 +472,7 @@ const handleQuery = async () => {
 const resetQuery = () => {
   queryFormRef.value?.resetFields()
   queryParams.value = {
+    pickUpVerifyCode: null, // 自提核销码
     pageNo: 1, // 页数
     pageSize: 10, // 每页显示数量
     status: null, // 订单状态

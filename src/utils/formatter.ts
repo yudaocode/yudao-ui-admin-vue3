@@ -1,12 +1,7 @@
-import { fenToYuan } from '@/utils'
-import { TableColumnCtx } from 'element-plus'
+import { floatToFixed2 } from '@/utils'
 
 // 格式化金额【分转元】
-export const fenToYuanFormat = (
-  row: any,
-  column: TableColumnCtx<any>,
-  cellValue: any,
-  index: number
-) => {
-  return `￥${fenToYuan(cellValue)}`
+// @ts-ignore
+export const fenToYuanFormat = (_, _, cellValue: any, _) => {
+  return `￥${floatToFixed2(cellValue)}`
 }
