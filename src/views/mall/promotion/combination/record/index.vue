@@ -114,10 +114,14 @@
   <!-- 分页列表数据展示 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="pageList">
-      <el-table-column align="center" label="编号" prop="id" />
-      <el-table-column align="center" label="头像" prop="avatar" />
-      <el-table-column align="center" label="昵称" prop="nickname" />
-      <el-table-column align="center" label="开团团长" prop="headId">
+      <el-table-column align="center" label="编号" prop="id" min-width="50" />
+      <el-table-column align="center" label="头像" prop="avatar" min-width="80">
+        <template #default="scope">
+          <el-avatar :src="scope.row.avatar" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="昵称" prop="nickname" min-width="100" />
+      <el-table-column align="center" label="开团团长" prop="headId" min-width="100">
         <template #default="{ row }: { row: CombinationRecordApi.CombinationRecordVO }">
           {{
             row.headId ? pageList.find((item) => item.id === row.headId)?.nickname : row.nickname
@@ -136,7 +140,7 @@
         label="拼团商品"
         prop="type"
         show-overflow-tooltip
-        width="300"
+        min-width="300"
       >
         <template #defaul="{ row }">
           <el-image
@@ -147,8 +151,8 @@
           <span class="align-middle">{{ row.spuName }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="几人团" prop="userSize" />
-      <el-table-column align="center" label="参与人数" prop="userCount" />
+      <el-table-column align="center" label="几人团" prop="userSize" min-width="100" />
+      <el-table-column align="center" label="参与人数" prop="userCount" min-width="100" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -163,7 +167,7 @@
         prop="endTime"
         width="180"
       />
-      <el-table-column align="center" label="拼团状态" prop="status">
+      <el-table-column align="center" label="拼团状态" prop="status" min-width="150">
         <template #default="scope">
           <dict-tag
             :type="DICT_TYPE.PROMOTION_COMBINATION_RECORD_STATUS"
@@ -203,7 +207,7 @@ import { dateFormatter, defaultShortcuts } from '@/utils/formatTime'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as CombinationRecordApi from '@/api/mall/promotion/combination/combinationRecord'
 
-defineOptions({ name: 'CombinationRecord' })
+defineOptions({ name: 'PromotionCombinationRecord' })
 
 const queryParams = ref({
   status: undefined, // 拼团状态
