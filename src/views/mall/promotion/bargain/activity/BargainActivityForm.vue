@@ -61,6 +61,7 @@ import { SpuAndSkuList, SpuProperty, SpuSelect } from '@/views/mall/promotion/co
 import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { convertToInteger, formatToFraction } from '@/utils'
+import { cloneDeep } from 'lodash-es'
 
 defineOptions({ name: 'PromotionBargainActivityForm' })
 
@@ -204,8 +205,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    // TODO @puhui999: 这样要深克隆
-    const data = formRef.value.formModel as BargainActivityApi.BargainActivityVO
+    const data = cloneDeep(formRef.value.formModel) as BargainActivityApi.BargainActivityVO
     const products = spuAndSkuListRef.value.getSkuConfigs('productConfig')
     products.forEach((item: BargainProductVO) => {
       // 砍价价格元转分

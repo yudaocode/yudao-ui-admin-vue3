@@ -24,7 +24,7 @@ export interface BargainProductVO {
   spuId: number
   skuId: number
   bargainFirstPrice: number // 砍价起始价格，单位分
-  bargainPrice: number // 砍价底价
+  bargainMinPrice: number // 砍价底价
   stock: number // 活动库存
 }
 

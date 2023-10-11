@@ -1,6 +1,57 @@
 import dayjs from 'dayjs'
 
 /**
+ * 日期快捷选项适用于 el-date-picker
+ */
+export const defaultShortcuts = [
+  {
+    text: '今天',
+    value: () => {
+      return new Date()
+    }
+  },
+  {
+    text: '昨天',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24)
+      return [date, date]
+    }
+  },
+  {
+    text: '最近七天',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+      return [date, new Date()]
+    }
+  },
+  {
+    text: '最近 30 天',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 30)
+      return [date, new Date()]
+    }
+  },
+  {
+    text: '本月',
+    value: () => {
+      const date = new Date()
+      date.setDate(1) // 设置为当前月的第一天
+      return [date, new Date()]
+    }
+  },
+  {
+    text: '今年',
+    value: () => {
+      const date = new Date()
+      return [new Date(`${date.getFullYear()}-01-01`), date]
+    }
+  }
+]
+
+/**
  * 时间日期转换
  * @param date 当前时间，new Date() 格式
  * @param format 需要转换的时间格式字符串

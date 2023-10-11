@@ -78,7 +78,7 @@
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          :shortcuts="shortcuts"
+          :shortcuts="defaultShortcuts"
           class="!w-240px"
           end-placeholder="结束日期"
           start-placeholder="开始日期"
@@ -171,9 +171,17 @@
           />
         </template>
       </el-table-column>
-      <!-- TODO puhui999：这里加个查看拼团？点击后，查看完整的拼团列表？ -->
       <el-table-column align="center" fixed="right" label="操作">
-        <template #default></template>
+        <template #default="scope">
+          <el-button
+            v-hasPermi="['promotion:combination-record:query']"
+            link
+            type="primary"
+            @click="openRecordListDialog(scope.row)"
+          >
+            查看拼团
+          </el-button>
+        </template>
       </el-table-column>
     </el-table>
     <!-- 分页 -->
@@ -184,23 +192,27 @@
       @pagination="getList"
     />
   </ContentWrap>
+
+  <!-- 表单弹窗 -->
+  <CombinationRecordListDialog ref="combinationRecordListRef" />
 </template>
 <script lang="ts" setup>
+import CombinationRecordListDialog from './CombinationRecordListDialog.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter, defaultShortcuts } from '@/utils/formatTime'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as CombinationRecordApi from '@/api/mall/promotion/combination/combinationRecord'
 
 defineOptions({ name: 'CombinationRecord' })
 
 const queryParams = ref({
-  dateType: 0, // 日期类型
   status: undefined, // 拼团状态
   createTime: undefined, // 创建时间
   pageSize: 10,
   pageNo: 1
 })
 const queryFormRef = ref() // 搜索的表单
+const combinationRecordListRef = ref() // 查询表单 Ref
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 总记录数
 const pageList = ref<CombinationRecordApi.CombinationRecordVO[]>([]) // 分页数据
@@ -225,68 +237,10 @@ const recordSummary = ref({
 const getSummary = async () => {
   recordSummary.value = await CombinationRecordApi.getCombinationRecordSummary()
 }
-// 日期快捷选项
-// TODO @puhui999：不用 dateType，而是 shortcuts 选择后，设置到对应的 date 就 ok 啦。直接通过它查询。然后，看看怎么把 shortcuts 变成一个公共变量，类似 defaultProps 一样
-const shortcuts = ref([
-  {
-    text: '今天',
-    type: 'toDay',
-    value: () => {
-      queryParams.value.dateType = 1
-      return new Date()
-    }
-  },
-  {
-    text: '昨天',
-    type: 'yesterday',
-    value: () => {
-      const date = new Date()
-      date.setTime(date.getTime() - 3600 * 1000 * 24)
-      queryParams.value.dateType = 2
-      return [date, date]
-    }
-  },
-  {
-    text: '最近七天',
-    type: 'lastSevenDays',
-    value: () => {
-      const date = new Date()
-      date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
-      queryParams.value.dateType = 3
-      return [date, new Date()]
-    }
-  },
-  {
-    text: '最近 30 天',
-    type: 'last30Days',
-    value: () => {
-      const date = new Date()
-      date.setTime(date.getTime() - 3600 * 1000 * 24 * 30)
-      queryParams.value.dateType = 4
-      return [date, new Date()]
-    }
-  },
-  {
-    text: '本月',
-    type: 'thisMonth',
-    value: () => {
-      const date = new Date()
-      date.setDate(1) // 设置为当前月的第一天
-      queryParams.value.dateType = 5
-      return [date, new Date()]
-    }
-  },
-  {
-    text: '今年',
-    type: 'thisYear',
-    value: () => {
-      const date = new Date()
-      queryParams.value.dateType = 6
-      return [new Date(`${date.getFullYear()}-01-01`), date]
-    }
-  }
-])
 
+const openRecordListDialog = (row: CombinationRecordApi.CombinationRecordVO) => {
+  combinationRecordListRef.value?.open(row.headId)
+}
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.value.pageNo = 1
