@@ -218,7 +218,7 @@
           />
         </el-col>
       </el-row>
-      <!-- 拆线图 -->
+      <!-- 折线图 -->
       <el-skeleton :loading="trendLoading" animated>
         <Echart :height="500" :options="lineChartOptions" />
       </el-skeleton>
@@ -226,7 +226,7 @@
   </div>
 </template>
 <script lang="ts" setup>
-import * as TradeStatisticsApi from '@/api/statistics/trade'
+import * as TradeStatisticsApi from '@/api/mall/statistics/trade'
 import TradeStatisticValue from './components/TradeStatisticValue.vue'
 import TradeTrendValue from './components/TradeTrendValue.vue'
 import { EChartsOption } from 'echarts'
@@ -235,7 +235,7 @@ import {
   TradeSummaryRespVO,
   TradeTrendReqVO,
   TradeTrendSummaryRespVO
-} from '@/api/statistics/trade'
+} from '@/api/mall/statistics/trade'
 import dayjs from 'dayjs'
 import { fenToYuan } from '@/utils'
 import * as DateUtil from '@/utils/formatTime'
