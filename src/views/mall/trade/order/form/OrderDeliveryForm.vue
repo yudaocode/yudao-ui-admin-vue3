@@ -54,7 +54,7 @@ const open = async (row: TradeOrderApi.OrderVO) => {
   resetForm()
   // 设置数据
   copyValueToTarget(formData.value, row)
-  if (row.logisticsId === null || row.logisticsId === 0) {
+  if (row.logisticsId === 0) {
     expressType.value = 'none'
   }
   dialogVisible.value = true
@@ -73,7 +73,7 @@ const submitForm = async () => {
       data.logisticsId = 0
       data.logisticsNo = ''
     }
-    await TradeOrderApi.delivery(data)
+    await TradeOrderApi.deliveryOrder(data)
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
     // 发送操作成功的事件

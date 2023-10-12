@@ -41,7 +41,7 @@
         </el-form-item>
       </el-col>
       <el-col :span="24">
-        <!--   TODO tag展示暂时不考虑排序 -->
+        <!--   TODO @puhui999：tag展示暂时不考虑排序；支持拖动排序 -->
         <el-form-item label="活动优先级">
           <el-tag>默认</el-tag>
           <el-tag class="ml-2" type="success">秒杀</el-tag>

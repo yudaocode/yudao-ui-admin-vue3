@@ -331,9 +331,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/product',
+    path: '/mall/product', // 商品中心
     component: Layout,
-    name: 'Product',
     meta: {
       hidden: true
     },
@@ -347,12 +346,12 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           icon: 'ep:edit',
-          title: '添加商品',
-          activeMenu: '/product/product-spu'
+          title: '商品添加',
+          activeMenu: '/mall/product/spu'
         }
       },
       {
-        path: 'spu/edit/:spuId(\\d+)',
+        path: 'spu/edit/:id(\\d+)',
         component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuEdit',
         meta: {
@@ -360,12 +359,12 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           icon: 'ep:edit',
-          title: '编辑商品',
-          activeMenu: '/product/product-spu'
+          title: '商品编辑',
+          activeMenu: '/mall/product/spu'
         }
       },
       {
-        path: 'spu/detail/:spuId(\\d+)',
+        path: 'spu/detail/:id(\\d+)',
         component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuDetail',
         meta: {
@@ -374,7 +373,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           canTo: true,
           icon: 'ep:view',
           title: '商品详情',
-          activeMenu: '/product/product-spu'
+          activeMenu: '/mall/product/spu'
         }
       },
       {
@@ -393,24 +392,23 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/trade',
+    path: '/mall/trade', // 交易中心
     component: Layout,
-    name: 'Order',
     meta: {
       hidden: true
     },
     children: [
       {
-        path: 'order/detail/:orderId(\\d+)',
+        path: 'order/detail/:id(\\d+)',
         component: () => import('@/views/mall/trade/order/detail/index.vue'),
         name: 'TradeOrderDetail',
-        meta: { title: '订单详情', icon: '', activeMenu: '/trade/trade/order' }
+        meta: { title: '订单详情', icon: 'ep:view', activeMenu: '/mall/trade/order' }
       },
       {
-        path: 'after-sale/detail/:orderId(\\d+)',
+        path: 'after-sale/detail/:id(\\d+)',
         component: () => import('@/views/mall/trade/afterSale/detail/index.vue'),
         name: 'TradeAfterSaleDetail',
-        meta: { title: '退款详情', icon: '', activeMenu: '/trade/trade/after-sale' }
+        meta: { title: '退款详情', icon: 'ep:view', activeMenu: '/mall/trade/after-sale' }
       }
     ]
   },

@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="80%">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="1300px">
     <el-form
       ref="formRef"
       :model="formData"
@@ -21,23 +21,19 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="运费" prop="templateCharge">
-        <el-table border style="width: 100%" :data="formData.templateCharge">
-          <el-table-column align="center" label="区域" width="180">
+      <el-form-item label="运费" prop="charges">
+        <el-table border style="width: 100%" :data="formData.charges">
+          <el-table-column align="center" label="区域" width="360">
             <template #default="{ row }">
-              <!--   区域数据太多，用赖加载方式，要不然性能有问题 -->
-              <el-tree-select
+              <el-cascader
                 v-model="row.areaIds"
-                :load="loadChargeArea"
-                :props="defaultProps"
-                node-key="id"
-                multiple
-                check-strictly
-                show-checkbox
-                lazy
-                check-on-click-node
-                :render-after-expand="false"
-                :cache-data="areaCache"
+                :options="areaTree"
+                :props="defaultProps2"
+                class="w-1/1"
+                clearable
+                placeholder="请选择商品分类"
+                filterable
+                collapse-tags
               />
             </template>
           </el-table-column>
@@ -85,23 +81,19 @@
           <Icon icon="ep:plus" class="mr-5px" /> 添加区域
         </el-button>
       </el-form-item>
-      <el-form-item label="包邮区域" prop="templateFree">
-        <el-table border style="width: 100%" :data="formData.templateFree">
-          <el-table-column align="center" label="区域">
+      <el-form-item label="包邮区域" prop="frees">
+        <el-table border style="width: 100%" :data="formData.frees">
+          <el-table-column align="center" label="区域" width="360">
             <template #default="{ row }">
-              <!-- 区域数据太多，用赖加载方式，要不然性能有问题 -->
-              <el-tree-select
+              <el-cascader
                 v-model="row.areaIds"
-                multiple
-                lazy
-                :load="loadFreeArea"
-                :props="defaultProps"
-                node-key="id"
-                check-strictly
-                show-checkbox
-                check-on-click-node
-                :render-after-expand="true"
-                :cache-data="areaCache"
+                :options="areaTree"
+                :props="defaultProps2"
+                class="w-1/1"
+                clearable
+                placeholder="请选择商品分类"
+                filterable
+                collapse-tags
               />
             </template>
           </el-table-column>
@@ -140,12 +132,17 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as DeliveryExpressTemplateApi from '@/api/mall/trade/delivery/expressTemplate'
+import * as AreaApi from '@/api/system/area'
 import { defaultProps } from '@/utils/tree'
 import { yuanToFen, fenToYuan } from '@/utils'
-import { getChildrenArea, getAreaListByIds } from '@/api/system/area'
 import { cloneDeep } from 'lodash-es'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
+const defaultProps2 = {
+  ...defaultProps,
+  multiple: true
+}
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
@@ -156,8 +153,8 @@ const formData = ref({
   name: '',
   chargeMode: 1,
   sort: 0,
-  templateCharge: [],
-  templateFree: []
+  charges: [],
+  frees: []
 })
 const columnTitleMap = new Map()
 const columnTitle = ref({
@@ -171,9 +168,6 @@ const formRules = reactive({
   sort: [{ required: true, message: '分类排序不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const areaCache = ref([]) // 由于区域节点懒加载，已选区域节点需要缓存展示
-// TODO @jason：配送的时候，只允许选择省市级别，不允许选择区；如果这样的话，是不是打开弹窗，直接把城市都请求过来；
-// TODO @jaosn：因为只有省市两级，感觉就不用特殊做全国逻辑；选择全国，就默认把子节点都选择上；另外，选择父节点，要把子节点选中哈；
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -187,30 +181,14 @@ const open = async (type: string, id?: number) => {
       formLoading.value = true
       formData.value = await DeliveryExpressTemplateApi.getDeliveryExpressTemplate(id)
       columnTitle.value = columnTitleMap.get(formData.value.chargeMode)
-      const chargeAreaIds = []
-      const freeAreaIds = []
-      formData.value.templateCharge.forEach((item) => {
-        for (let i = 0; i < item.areaIds.length; i++) {
-          if (!chargeAreaIds.includes(item.areaIds[i])) {
-            chargeAreaIds.push(item.areaIds[i])
-          }
-        }
-        //前端价格以元展示
+      formData.value.charges.forEach((item) => {
+        // 前端价格以元展示
         item.startPrice = fenToYuan(item.startPrice)
         item.extraPrice = fenToYuan(item.extraPrice)
       })
-      formData.value.templateFree.forEach((item) => {
-        for (let i = 0; i < item.areaIds.length; i++) {
-          if (!chargeAreaIds.includes(item.areaIds[i]) && !freeAreaIds.includes(item.areaIds[i])) {
-            freeAreaIds.push(item.areaIds[i])
-          }
-        }
+      formData.value.frees.forEach((item) => {
         item.freePrice = fenToYuan(item.freePrice)
       })
-      // 已选的区域节点
-      const areaIds = chargeAreaIds.concat(freeAreaIds)
-      // 区域节点，懒加载方式。已选节点需要缓存展示
-      areaCache.value = await getAreaListByIds(areaIds.join(','))
     }
   } finally {
     formLoading.value = false
@@ -228,14 +206,13 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as DeliveryExpressTemplateApi.DeliveryExpressTemplateVO
+    const data = cloneDeep(formData.value) as DeliveryExpressTemplateApi.DeliveryExpressTemplateVO
     // 前端价格以元展示，提交到后端。用分计算
-    // TODO @jason：不能直接这样改，要复制出来改。不然后端操作失败，数据已经被改了
-    data.templateCharge.forEach((item) => {
+    data.charges.forEach((item) => {
       item.startPrice = yuanToFen(item.startPrice)
       item.extraPrice = yuanToFen(item.extraPrice)
     })
-    data.templateFree.forEach((item) => {
+    data.frees.forEach((item) => {
       item.freePrice = yuanToFen(item.freePrice)
     })
     if (formType.value === 'create') {
@@ -259,7 +236,7 @@ const resetForm = () => {
     id: undefined,
     name: '',
     chargeMode: 1,
-    templateCharge: [
+    charges: [
       {
         areaIds: [1],
         startCount: 2,
@@ -268,7 +245,7 @@ const resetForm = () => {
         extraPrice: 10
       }
     ],
-    templateFree: [],
+    frees: [],
     sort: 0
   }
   columnTitle.value = columnTitleMap.get(1)
@@ -279,37 +256,10 @@ const resetForm = () => {
 const changeChargeMode = (chargeMode: number) => {
   columnTitle.value = columnTitleMap.get(chargeMode)
 }
-const defaultArea = [{ id: 1, name: '全国', disabled: false }]
 
 /** 初始化数据 */
-// TODO @jason：是不是不用写这样一个初始化方法，columnTitleMap 直接就可以了呀
-// const columnTitleMap = {
-//   '1': {
-//     startCountTitle: '首件',
-//     extraCountTitle: '续件',
-//     freeCountTitle: '包邮件数'
-//   },
-//   '2': {
-//     startCountTitle: '首件重量(kg)',
-//     extraCountTitle: '续件重量(kg)',
-//     freeCountTitle: '包邮重量(kg)'
-//   },
-//   '3': {
-//     startCountTitle: '首件体积(m³)',
-//     extraCountTitle: '续件体积(m³)',
-//     freeCountTitle: '包邮体积(m³)'
-//   }
-// }
+const areaTree = ref([])
 const initData = async () => {
-  // TODO 从服务端全量加载数据， 后面看懒加载是不是可以从前端获取数据。 目前从后端获取数据
-  // formLoading.value = true
-  // try {
-  //   const data = await getAreaTree()
-  //   areaTree = data
-  //   console.log('areaTree', areaTree)
-  // } finally {
-  //   formLoading.value = false
-  // }
   // 表头标题和计费方式的映射
   columnTitleMap.set(1, {
     startCountTitle: '首件',
@@ -326,77 +276,14 @@ const initData = async () => {
     extraCountTitle: '续件体积(m³)',
     freeCountTitle: '包邮体积(m³)'
   })
+  // 加载区域数据
+  areaTree.value = await AreaApi.getAreaTree()
 }
 
-/** 懒加载运费区域树 */
-const loadChargeArea = async (node, resolve) => {
-  //已选区域需要禁止再次选择
-  const areaIds = []
-  formData.value.templateCharge.forEach((item) => {
-    if (item.areaIds.length > 0) {
-      item.areaIds.forEach((areaId) => areaIds.push(areaId))
-    }
-  })
-  if (node.isLeaf) return resolve([])
-  const length = node.data.length
-  if (length === 0) {
-    const data = cloneDeep(defaultArea)
-    const item = data[0]
-    if (areaIds.includes(item.id)) {
-      // TODO 禁止选中的区域有些问题， 导致修改时候不能重新选择 不知道如何处理。 暂时注释掉 @芋艿 有空瞅瞅
-      // TODO @jason：先不做这个功能哈。
-      //item.disabled = true
-    }
-    resolve(data)
-  } else {
-    const id = node.data.id
-    const data = await getChildrenArea(id)
-    data.forEach((item) => {
-      if (areaIds.includes(item.id)) {
-        //item.disabled = true
-      }
-    })
-    resolve(data)
-  }
-}
-
-/** 懒加载包邮区域树 */
-const loadFreeArea = async (node, resolve) => {
-  if (node.isLeaf) return resolve([])
-  //已选区域需要禁止再次选择
-  const areaIds = []
-  formData.value.templateFree.forEach((item) => {
-    if (item.areaIds.length > 0) {
-      item.areaIds.forEach((areaId) => areaIds.push(areaId))
-    }
-  })
-  const length = node.data.length
-  if (length === 0) {
-    // 为空，从全国开始选择。全国 id == 1
-    const data = cloneDeep(defaultArea)
-    const item = data[0]
-    if (areaIds.includes(item.id)) {
-      //item.disabled = true
-    }
-    resolve(data)
-  } else {
-    const id = node.data.id
-    const data = await getChildrenArea(id)
-    // 已选区域需要禁止再次选择
-    data.forEach((item) => {
-      if (areaIds.includes(item.id)) {
-        // TODO 禁止选中的区域有些问题， 导致修改时候不能重新选择 不知道如何处理。 暂时注释掉 @芋艿 有空瞅瞅
-        // TODO @jason：先不做这个功能哈。
-        //item.disabled = true
-      }
-    })
-    resolve(data)
-  }
-}
 /** 添加计费区域 */
 const addChargeArea = () => {
   const data = formData.value
-  data.templateCharge.push({
+  data.charges.push({
     areaIds: [],
     startCount: 1,
     startPrice: 1,
@@ -408,13 +295,13 @@ const addChargeArea = () => {
 /** 删除计费区域 */
 const deleteChargeArea = (index) => {
   const data = formData.value
-  data.templateCharge.splice(index, 1)
+  data.charges.splice(index, 1)
 }
 
 /** 添加包邮区域 */
 const addFreeArea = () => {
   const data = formData.value
-  data.templateFree.push({
+  data.frees.push({
     areaIds: [],
     freeCount: 1,
     freePrice: 1
@@ -424,7 +311,7 @@ const addFreeArea = () => {
 /** 删除包邮区域 */
 const deleteFreeArea = (index) => {
   const data = formData.value
-  data.templateFree.splice(index, 1)
+  data.frees.splice(index, 1)
 }
 
 /** 初始化 **/

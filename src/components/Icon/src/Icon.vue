@@ -32,6 +32,7 @@ const getIconifyStyle = computed(() => {
   const { color, size } = props
   return {
     fontSize: `${size}px`,
+    height: '1em',
     color
   }
 })

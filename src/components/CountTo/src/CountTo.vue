@@ -11,21 +11,21 @@ const { getPrefixCls } = useDesign()
 const prefixCls = getPrefixCls('count-to')
 
 const props = defineProps({
-  startVal: propTypes.number.def(0),
-  endVal: propTypes.number.def(2021),
-  duration: propTypes.number.def(3000),
-  autoplay: propTypes.bool.def(true),
-  decimals: propTypes.number.validate((value: number) => value >= 0).def(0),
-  decimal: propTypes.string.def('.'),
-  separator: propTypes.string.def(','),
-  prefix: propTypes.string.def(''),
-  suffix: propTypes.string.def(''),
-  useEasing: propTypes.bool.def(true),
+  startVal: propTypes.number.def(0), // 开始播放值
+  endVal: propTypes.number.def(2021), // 最终值
+  duration: propTypes.number.def(3000), // 动画时长
+  autoplay: propTypes.bool.def(true), // 是否自动播放动画, 默认播放
+  decimals: propTypes.number.validate((value: number) => value >= 0).def(0), // 显示的小数位数, 默认不显示小数
+  decimal: propTypes.string.def('.'), // 小数分隔符号, 默认为点
+  separator: propTypes.string.def(','), // 数字每三位的分隔符, 默认为逗号
+  prefix: propTypes.string.def(''), // 前缀, 数值前面显示的内容
+  suffix: propTypes.string.def(''), // 后缀, 数值后面显示的内容
+  useEasing: propTypes.bool.def(true), // 是否使用缓动效果, 默认启用
   easingFn: {
     type: Function as PropType<(t: number, b: number, c: number, d: number) => number>,
     default(t: number, b: number, c: number, d: number) {
       return (c * (-Math.pow(2, (-10 * t) / d) + 1) * 1024) / 1023 + b
-    }
+    } // 缓动函数
   }
 })
 

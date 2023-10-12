@@ -224,12 +224,12 @@ export const convertToInteger = (num: number | string | undefined): number => {
  * 元转分
  */
 export const yuanToFen = (amount: string | number): number => {
-  return Math.round(Number(amount) * 100)
+  return convertToInteger(amount)
 }
 
 /**
  * 分转元
  */
-export const fenToYuan = (amount: string | number): number => {
-  return Number((Number(amount) / 100).toFixed(2))
+export const fenToYuan = (price: string | number): number => {
+  return formatToFraction(price)
 }

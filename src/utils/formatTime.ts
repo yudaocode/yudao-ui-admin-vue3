@@ -1,6 +1,57 @@
 import dayjs from 'dayjs'
 
 /**
+ * 日期快捷选项适用于 el-date-picker
+ */
+export const defaultShortcuts = [
+  {
+    text: '今天',
+    value: () => {
+      return new Date()
+    }
+  },
+  {
+    text: '昨天',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24)
+      return [date, date]
+    }
+  },
+  {
+    text: '最近七天',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+      return [date, new Date()]
+    }
+  },
+  {
+    text: '最近 30 天',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 30)
+      return [date, new Date()]
+    }
+  },
+  {
+    text: '本月',
+    value: () => {
+      const date = new Date()
+      date.setDate(1) // 设置为当前月的第一天
+      return [date, new Date()]
+    }
+  },
+  {
+    text: '今年',
+    value: () => {
+      const date = new Date()
+      return [new Date(`${date.getFullYear()}-01-01`), date]
+    }
+  }
+]
+
+/**
  * 时间日期转换
  * @param date 当前时间，new Date() 格式
  * @param format 需要转换的时间格式字符串
@@ -11,7 +62,7 @@ import dayjs from 'dayjs'
  * @description format 季度 + 星期 + 几周："YYYY-mm-dd HH:MM:SS WWW QQQQ ZZZ"
  * @returns 返回拼接后的时间字符串
  */
-export function formatDate(date: Date | number, format?: string): string {
+export function formatDate(date: dayjs.ConfigType, format?: string): string {
   // 日期不存在，则返回空
   if (!date) {
     return ''
@@ -220,4 +271,69 @@ export function convertDate(param: Date | string) {
     return new Date(param)
   }
   return param
+}
+
+/**
+ * 指定的两个日期, 是否为同一天
+ * @param a 日期 A
+ * @param b 日期 B
+ */
+export function isSameDay(a: dayjs.ConfigType, b: dayjs.ConfigType): boolean {
+  if (!a || !b) return false
+
+  const aa = dayjs(a)
+  const bb = dayjs(b)
+  return aa.year() == bb.year() && aa.month() == bb.month() && aa.day() == bb.day()
+}
+
+/**
+ * 获取一天的开始时间、截止时间
+ * @param date 日期
+ * @param days 天数
+ */
+export function getDayRange(
+  date: dayjs.ConfigType,
+  days: number
+): [dayjs.ConfigType, dayjs.ConfigType] {
+  const day = dayjs(date).add(days, 'd')
+  return getDateRange(day, day)
+}
+
+/**
+ * 获取最近7天的开始时间、截止时间
+ */
+export function getLast7Days(): [dayjs.ConfigType, dayjs.ConfigType] {
+  const lastWeekDay = dayjs().subtract(7, 'd')
+  const yesterday = dayjs().subtract(1, 'd')
+  return getDateRange(lastWeekDay, yesterday)
+}
+
+/**
+ * 获取最近30天的开始时间、截止时间
+ */
+export function getLast30Days(): [dayjs.ConfigType, dayjs.ConfigType] {
+  const lastMonthDay = dayjs().subtract(30, 'd')
+  const yesterday = dayjs().subtract(1, 'd')
+  return getDateRange(lastMonthDay, yesterday)
+}
+
+/**
+ * 获取最近1年的开始时间、截止时间
+ */
+export function getLast1Year(): [dayjs.ConfigType, dayjs.ConfigType] {
+  const lastYearDay = dayjs().subtract(1, 'y')
+  const yesterday = dayjs().subtract(1, 'd')
+  return getDateRange(lastYearDay, yesterday)
+}
+
+/**
+ * 获取指定日期的开始时间、截止时间
+ * @param beginDate 开始日期
+ * @param endDate 截止日期
+ */
+export function getDateRange(
+  beginDate: dayjs.ConfigType,
+  endDate: dayjs.ConfigType
+): [dayjs.ConfigType, dayjs.ConfigType] {
+  return [dayjs(beginDate).startOf('d'), dayjs(endDate).endOf('d')]
 }

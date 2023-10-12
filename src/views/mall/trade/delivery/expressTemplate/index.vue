@@ -51,14 +51,14 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="编号" prop="id" />
-      <el-table-column label="模板名称" prop="name" />
-      <el-table-column label="计费方式" prop="chargeMode" align="center">
+      <el-table-column label="编号" min-width="60" prop="id" />
+      <el-table-column label="模板名称" min-width="100" prop="name" />
+      <el-table-column label="计费方式" prop="chargeMode" min-width="100" align="center">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.EXPRESS_CHARGE_MODE" :value="scope.row.chargeMode" />
         </template>
       </el-table-column>
-      <el-table-column label="排序" prop="sort" />
+      <el-table-column label="排序" min-width="100" prop="sort" />
       <el-table-column
         label="创建时间"
         align="center"

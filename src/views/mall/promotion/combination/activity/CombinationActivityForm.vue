@@ -167,7 +167,7 @@ const submitForm = async () => {
     products.forEach((item: CombinationActivityApi.CombinationProductVO) => {
       item.combinationPrice = convertToInteger(item.combinationPrice)
     })
-    const data = formRef.value.formModel as CombinationActivityApi.CombinationActivityVO
+    const data = cloneDeep(formRef.value.formModel) as CombinationActivityApi.CombinationActivityVO
     data.products = products
     // 真正提交
     if (formType.value === 'create') {

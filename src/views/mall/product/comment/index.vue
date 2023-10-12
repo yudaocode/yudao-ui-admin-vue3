@@ -59,9 +59,8 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="false">
-      <el-table-column label="评论编号" align="center" prop="id" min-width="60" />
-      <el-table-column label="用户名称" align="center" prop="userNickname" width="80" />
-      <el-table-column label="商品信息" align="center" min-width="300">
+      <el-table-column label="评论编号" align="center" prop="id" min-width="50" />
+      <el-table-column label="商品信息" align="center" min-width="400">
         <template #default="scope">
           <div class="row flex items-center gap-x-4px">
             <el-image
@@ -82,10 +81,10 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="评分星级" align="center" prop="scores" width="80" />
-      <el-table-column label="描述星级" align="center" prop="descriptionScores" width="80" />
-      <el-table-column label="服务星级" align="center" prop="benefitScores" width="80" />
-      <el-table-column label="评论内容" align="center" prop="content" min-width="80">
+      <el-table-column label="用户名称" align="center" prop="userNickname" width="100" />
+      <el-table-column label="商品评分" align="center" prop="descriptionScores" width="90" />
+      <el-table-column label="服务评分" align="center" prop="benefitScores" width="90" />
+      <el-table-column label="评论内容" align="center" prop="content" min-width="210">
         <template #default="scope">
           <p>{{ scope.row.content }}</p>
           <div class="flex justify-center gap-x-4px">
@@ -105,7 +104,7 @@
         label="回复内容"
         align="center"
         prop="replyContent"
-        min-width="100"
+        min-width="250"
         show-overflow-tooltip
       />
       <el-table-column
@@ -113,7 +112,7 @@
         align="center"
         prop="createTime"
         :formatter="dateFormatter"
-        width="170"
+        width="180"
       />
       <el-table-column label="是否展示" align="center" width="80px">
         <template #default="scope">
