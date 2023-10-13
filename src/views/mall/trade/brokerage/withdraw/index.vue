@@ -122,7 +122,7 @@
           <el-image
             v-if="scope.row.accountQrCodeUrl"
             :src="scope.row.accountQrCodeUrl"
-            class="w-40px h-40px"
+            class="h-40px w-40px"
             :preview-src-list="[scope.row.accountQrCodeUrl]"
             preview-teleported
           />

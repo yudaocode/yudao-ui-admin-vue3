@@ -16,9 +16,9 @@
           <el-form-item label="退款理由" prop="afterSaleRefundReasons">
             <el-select
               v-model="formData.afterSaleRefundReasons"
-              allow-create
               filterable
               multiple
+              allow-create
               placeholder="请直接输入退款理由"
             >
               <el-option
