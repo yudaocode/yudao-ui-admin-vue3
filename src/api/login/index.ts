@@ -47,6 +47,18 @@ export const smsLogin = (data: SmsLoginVO) => {
   return request.post({ url: '/system/auth/sms-login', data })
 }
 
+// 社交快捷登录，使用 code 授权码
+export function socialLogin(type: string, code: string, state: string) {
+  return request.post({
+    url: '/system/auth/social-login',
+    data: {
+      type,
+      code,
+      state
+    }
+  })
+}
+
 // 社交授权的跳转
 export const socialAuthRedirect = (type: number, redirectUri: string) => {
   return request.get({

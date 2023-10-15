@@ -186,12 +186,12 @@ const remainingRouter: AppRouteRecordRaw[] = [
     }
   },
   {
-    path: '/sso',
-    component: () => import('@/views/Login/Login.vue'),
-    name: 'SSOLogin',
+    path: '/social-login',
+    component: () => import('@/views/Login/SocialLogin.vue'),
+    name: 'SocialLogin',
     meta: {
       hidden: true,
-      title: t('router.login'),
+      title: t('router.socialLogin'),
       noTagsView: true
     }
   },
