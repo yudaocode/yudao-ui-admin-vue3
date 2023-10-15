@@ -284,8 +284,13 @@ const doSocialLogin = async (type: number) => {
       })
     }
     // 计算 redirectUri
+    // tricky: type、redirect需要先encode一次，否则钉钉回调会丢失。
+    // 配合 Login/SocialLogin.vue#getUrlValue() 使用
     const redirectUri =
-      location.origin + '/social-login?type=' + type + '&redirect=' + (redirect.value || '/')
+      location.origin +
+      '/social-login?' +
+      encodeURIComponent(`type=${type}&redirect=${redirect.value || '/'}`)
+
     // 进行跳转
     const res = await LoginApi.socialAuthRedirect(type, encodeURIComponent(redirectUri))
     window.location.href = res

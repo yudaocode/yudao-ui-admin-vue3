@@ -2,6 +2,9 @@ export type UserLoginVO = {
   username: string
   password: string
   captchaVerification: string
+  socialType?: string
+  socialCode?: string
+  socialState?: string
 }
 
 export type TokenType = {
