@@ -135,7 +135,7 @@ import * as ArticleCategoryApi from '@/api/mall/promotion/articleCategory'
 import ArticleCategoryForm from './ArticleCategoryForm.vue'
 import { createImageViewer } from '@/components/ImageViewer'
 
-defineOptions({ name: 'ArticleCategory' })
+defineOptions({ name: 'PromotionArticleCategory' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化

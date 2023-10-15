@@ -38,6 +38,8 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as ArticleCategoryApi from '@/api/mall/promotion/articleCategory'
 
+defineOptions({ name: 'PromotionArticleCategoryForm' })
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
