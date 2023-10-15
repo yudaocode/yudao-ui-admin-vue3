@@ -186,6 +186,16 @@ const remainingRouter: AppRouteRecordRaw[] = [
     }
   },
   {
+    path: '/sso',
+    component: () => import('@/views/Login/Login.vue'),
+    name: 'SSOLogin',
+    meta: {
+      hidden: true,
+      title: t('router.login'),
+      noTagsView: true
+    }
+  },
+  {
     path: '/social-login',
     component: () => import('@/views/Login/SocialLogin.vue'),
     name: 'SocialLogin',
@@ -333,7 +343,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
   {
     path: '/mall/product', // 商品中心
     component: Layout,
-    name: 'Product',
+    name: 'ProductCenter',
     meta: {
       hidden: true
     },
@@ -395,7 +405,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
   {
     path: '/mall/trade', // 交易中心
     component: Layout,
-    name: 'Trade',
+    name: 'TradeCenter',
     meta: {
       hidden: true
     },
@@ -417,7 +427,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
   {
     path: '/member',
     component: Layout,
-    name: 'member',
+    name: 'MemberCenter',
     meta: { hidden: true },
     children: [
       {
