@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { DescriptionsItemLabel } from '@/components/Descriptions'
 import * as UserApi from '@/api/member/user'
-import * as WalletApi from '@/api/pay/wallet'
+import * as WalletApi from '@/api/pay/wallet/balance'
 import { UserTypeEnum } from '@/utils/constants'
 import { fenToYuan } from '@/utils'
 

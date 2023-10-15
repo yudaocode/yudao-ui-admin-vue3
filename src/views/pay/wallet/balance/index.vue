@@ -8,19 +8,24 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="套餐名" prop="name">
+      <el-form-item label="用户编号" prop="userId">
         <el-input
-          v-model="queryParams.name"
-          placeholder="请输入套餐名"
+          v-model="queryParams.userId"
+          placeholder="请输入用户编号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
+      <el-form-item label="用户类型" prop="userType">
+        <el-select
+          v-model="queryParams.userType"
+          placeholder="请选择用户类型"
+          clearable
+          class="!w-240px"
+        >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -41,12 +46,7 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['pay:wallet-recharge-package:create']"
-        >
+        <el-button type="primary" @click="openForm('create')" v-hasPermi="['pay:wallet:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
@@ -57,17 +57,23 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="套餐名" align="center" prop="name" />
-      <el-table-column label="支付金额" align="center" prop="payPrice">
-        <template #default="{ row }"> {{ fenToYuan(row.payPrice) }} 元</template>
-      </el-table-column>
-      <el-table-column label="赠送金额" align="center" prop="bonusPrice">
-        <template #default="{ row }"> {{ fenToYuan(row.bonusPrice) }} 元</template>
-      </el-table-column>
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="用户编号" align="center" prop="userId" />
+      <el-table-column label="用户类型" align="center" prop="userType">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.USER_TYPE" :value="scope.row.userType" />
         </template>
+      </el-table-column>
+      <el-table-column label="余额" align="center" prop="balance">
+        <template #default="{ row }"> {{ fenToYuan(row.balance) }} 元</template>
+      </el-table-column>
+      <el-table-column label="累计支出" align="center" prop="totalExpense">
+        <template #default="{ row }"> {{ fenToYuan(row.totalExpense) }} 元</template>
+      </el-table-column>
+      <el-table-column label="累计充值" align="center" prop="totalRecharge">
+        <template #default="{ row }"> {{ fenToYuan(row.totalRecharge) }} 元</template>
+      </el-table-column>
+      <el-table-column label="冻结金额" align="center" prop="freezePrice">
+        <template #default="{ row }"> {{ fenToYuan(row.freezePrice) }} 元</template>
       </el-table-column>
       <el-table-column
         label="创建时间"
@@ -82,17 +88,9 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['pay:wallet-recharge-package:update']"
+            v-hasPermi="['pay:wallet:update']"
           >
             编辑
-          </el-button>
-          <el-button
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-            v-hasPermi="['pay:wallet-recharge-package:delete']"
-          >
-            删除
           </el-button>
         </template>
       </el-table-column>
@@ -107,17 +105,17 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <WalletRechargePackageForm ref="formRef" @success="getList" />
+  <WalletForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import * as WalletRechargePackageApi from '@/api/pay/wallet/rechargePackage'
-import WalletRechargePackageForm from './WalletRechargePackageForm.vue'
 import { fenToYuan } from '@/utils'
+import * as WalletApi from '@/api/pay/wallet/balance'
+import WalletForm from './WalletForm.vue'
 
-defineOptions({ name: 'WalletRechargePackage' })
+defineOptions({ name: 'WalletBalance' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -128,19 +126,22 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  payPrice: null,
-  bonusPrice: null,
-  status: null,
+  userId: null,
+  userType: null,
+  balance: null,
+  totalExpense: null,
+  totalRecharge: null,
+  freezePrice: null,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await WalletRechargePackageApi.getWalletRechargePackagePage(queryParams)
+    const data = await WalletApi.getWalletPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -166,18 +167,6 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await WalletRechargePackageApi.deleteWalletRechargePackage(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
-}
 /** 初始化 **/
 onMounted(() => {
   getList()
