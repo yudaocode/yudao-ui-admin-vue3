@@ -333,6 +333,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
   {
     path: '/mall/product', // 商品中心
     component: Layout,
+    name: 'Product',
     meta: {
       hidden: true
     },
@@ -394,6 +395,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
   {
     path: '/mall/trade', // 交易中心
     component: Layout,
+    name: 'Trade',
     meta: {
       hidden: true
     },
