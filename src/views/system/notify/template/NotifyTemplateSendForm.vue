@@ -15,7 +15,21 @@
           type="textarea"
         />
       </el-form-item>
-      <el-form-item label="接收人" prop="userId">
+      <el-form-item label="用户类型" prop="userType">
+        <el-radio-group v-model="formData.userType">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
+            :key="dict.value"
+            :label="dict.value as number"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item v-show="formData.userType === 1" label="接收人ID" prop="userId">
+        <el-input v-model="formData.userId" style="width: 160px" />
+      </el-form-item>
+      <el-form-item v-show="formData.userType === 2" label="接收人" prop="userId">
         <el-select v-model="formData.userId" placeholder="请选择接收人">
           <el-option
             v-for="item in userOption"
@@ -46,6 +60,7 @@
 <script lang="ts" setup>
 import * as UserApi from '@/api/system/user'
 import * as NotifyTemplateApi from '@/api/system/notify/template'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'SystemNotifyTemplateSendForm' })
 
@@ -57,6 +72,7 @@ const formData = ref({
   content: '',
   params: {},
   userId: null,
+  userType: 1,
   templateCode: '',
   templateParams: new Map()
 })
@@ -122,7 +138,8 @@ const resetForm = () => {
     params: {},
     mobile: '',
     templateCode: '',
-    templateParams: new Map()
+    templateParams: new Map(),
+    userType: 1
   } as any
   formRef.value?.resetFields()
 }
