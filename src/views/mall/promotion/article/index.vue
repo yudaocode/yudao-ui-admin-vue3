@@ -32,54 +32,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="文章作者" prop="author">
-        <el-input
-          v-model="queryParams.author"
-          class="!w-240px"
-          clearable
-          placeholder="请输入文章作者"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状态">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="关联商品" prop="spuId">
-        <el-select
-          v-model="queryParams.spuId"
-          class="!w-240px"
-          placeholder="全部"
-          @keyup.enter="handleQuery"
-        >
-          <el-option v-for="item in spuList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="热门" prop="recommendHot">
-        <el-select v-model="queryParams.recommendHot" class="!w-240px" clearable placeholder="全部">
-          <el-option
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="轮播图" prop="recommendBanner">
-        <el-select
-          v-model="queryParams.recommendBanner"
-          class="!w-240px"
-          clearable
-          placeholder="全部"
-        >
-          <el-option
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -114,16 +70,6 @@
         >
           <Icon class="mr-5px" icon="ep:plus" />
           新增
-        </el-button>
-        <el-button
-          v-hasPermi="['promotion:article:export']"
-          :loading="exportLoading"
-          plain
-          type="success"
-          @click="handleExport"
-        >
-          <Icon class="mr-5px" icon="ep:download" />
-          导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -215,9 +161,8 @@
 </template>
 
 <script lang="ts" setup>
-import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import * as ArticleApi from '@/api/mall/promotion/article'
 import ArticleForm from './ArticleForm.vue'
 import * as ArticleCategoryApi from '@/api/mall/promotion/articleCategory'
@@ -236,12 +181,9 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   categoryId: undefined,
-  spuId: undefined,
   title: null,
-  author: null,
   status: undefined,
-  recommendHot: undefined,
-  recommendBanner: undefined,
+  spuId: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -295,25 +237,11 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await ArticleApi.exportArticle(queryParams)
-    download.excel(data, '文章管理.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
-}
-
 const categoryList = ref<ArticleCategoryApi.ArticleCategoryVO[]>([])
 const spuList = ref<ProductSpuApi.Spu[]>([])
 onMounted(async () => {
   await getList()
+  // 加载分类、商品列表
   categoryList.value =
     (await ArticleCategoryApi.getSimpleArticleCategoryList()) as ArticleCategoryApi.ArticleCategoryVO[]
   spuList.value = (await ProductSpuApi.getSpuSimpleList()) as ProductSpuApi.Spu[]

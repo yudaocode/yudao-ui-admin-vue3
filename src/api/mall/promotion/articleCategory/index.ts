@@ -37,8 +37,3 @@ export const updateArticleCategory = async (data: ArticleCategoryVO) => {
 export const deleteArticleCategory = async (id: number) => {
   return await request.delete({ url: `/promotion/article-category/delete?id=` + id })
 }
-
-// 导出文章分类 Excel
-export const exportArticleCategory = async (params) => {
-  return await request.download({ url: `/promotion/article-category/export-excel`, params })
-}
