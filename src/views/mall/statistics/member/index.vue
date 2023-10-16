@@ -145,7 +145,7 @@ const summary = ref<MemberSummaryRespVO>() // 会员统计数据
 const areaStatisticsList = shallowRef<MemberAreaStatisticsRespVO[]>() // 省份会员统计
 
 // 注册地图
-echarts?.registerMap('china', china!)
+echarts?.registerMap('china', china as any)
 
 /** 会员终端统计图配置 */
 const terminalChartOptions = reactive<EChartsOption>({
@@ -207,8 +207,8 @@ const areaChartOptions = reactive<EChartsOption>({
     formatter: (params: any) => {
       return `${params?.data?.areaName || params?.name}<br/>
 会员数量：${params?.data?.userCount || 0}<br/>
-订单创建数量：${params?.data?.orderCreateCount || 0}<br/>
-订单支付数量：${params?.data?.orderPayCount || 0}<br/>
+订单创建数量：${params?.data?.orderCreateUserCount || 0}<br/>
+订单支付数量：${params?.data?.orderPayUserCount || 0}<br/>
 订单支付金额：${fenToYuan(params?.data?.orderPayPrice || 0)}`
     }
   },
@@ -254,20 +254,20 @@ const getMemberAreaStatisticsList = async () => {
   })
   let min = 0
   let max = 0
-  areaChartOptions.series[0].data = areaStatisticsList.value.map((item) => {
-    min = Math.min(min, item.orderPayCount)
-    max = Math.max(max, item.orderPayCount)
-    return { ...item, name: item.areaName, value: item.orderPayCount || 0 }
+  areaChartOptions.series![0].data = areaStatisticsList.value.map((item) => {
+    min = Math.min(min, item.orderPayUserCount || 0)
+    max = Math.max(max, item.orderPayUserCount || 0)
+    return { ...item, name: item.areaName, value: item.orderPayUserCount || 0 }
   })
-  areaChartOptions.visualMap.min = min
-  areaChartOptions.visualMap.max = max
+  areaChartOptions.visualMap!['min'] = min
+  areaChartOptions.visualMap!['max'] = max
 }
 
 /** 按照性别，查询会员统计列表 */
 const getMemberSexStatisticsList = async () => {
   const list = await MemberStatisticsApi.getMemberSexStatisticsList()
   const dictDataList = getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)
-  sexChartOptions.series[0].data = dictDataList.map((dictData: DictDataType) => {
+  sexChartOptions.series![0].data = dictDataList.map((dictData: DictDataType) => {
     const userCount = list.find((item: MemberSexStatisticsRespVO) => item.sex === dictData.value)
       ?.userCount
     return {

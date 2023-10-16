@@ -225,7 +225,6 @@ defineOptions({ name: 'TradeStatistics' })
 
 const message = useMessage() // 消息弹窗
 
-const loading = ref(true) // 加载中
 const trendLoading = ref(true) // 交易状态加载中
 const exportLoading = ref(false) // 导出的加载中
 const summary = ref<DataComparisonRespVO<TradeSummaryRespVO>>() // 交易统计数据
