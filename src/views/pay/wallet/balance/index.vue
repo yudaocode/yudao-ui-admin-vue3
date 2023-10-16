@@ -46,9 +46,6 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openForm('create')" v-hasPermi="['pay:wallet:create']">
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -84,14 +81,7 @@
       />
       <el-table-column label="操作" align="center">
         <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['pay:wallet:update']"
-          >
-            编辑
-          </el-button>
+          <el-button link type="primary" @click="openForm(scope.row.id)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -104,8 +94,8 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改 -->
-  <WalletForm ref="formRef" @success="getList" />
+  <!-- 弹窗 -->
+  <WalletForm ref="formRef" />
 </template>
 
 <script setup lang="ts">
@@ -163,8 +153,8 @@ const resetQuery = () => {
 
 /** 添加/修改操作 */
 const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
+const openForm = (id?: number) => {
+  formRef.value.open(id)
 }
 
 /** 初始化 **/
