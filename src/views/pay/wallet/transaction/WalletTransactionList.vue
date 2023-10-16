@@ -11,7 +11,7 @@
         <template #default="{ row }"> {{ fenToYuan(row.balance) }} 元</template>
       </el-table-column>
       <el-table-column
-        label="创建时间"
+        label="交易时间"
         align="center"
         prop="createTime"
         :formatter="dateFormatter"
