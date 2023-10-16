@@ -591,14 +591,17 @@ watch(
   stroke: #e6a23c !important;
   fill-opacity: 0.2 !important;
 }
+
 .highlight-return.djs-shape .djs-visual > :nth-child(2) {
   fill: #e6a23c !important;
 }
+
 .highlight-return.djs-shape .djs-visual > path {
   fill: #e6a23c !important;
   fill-opacity: 0.2 !important;
   stroke: #e6a23c !important;
 }
+
 .highlight-return.djs-connection > .djs-visual > path {
   stroke: #e6a23c !important;
 }
@@ -612,14 +615,17 @@ watch(
   stroke: #e6a23c !important;
   fill-opacity: 0.2 !important;
 }
+
 :deep(.highlight-return.djs-shape .djs-visual > :nth-child(2)) {
   fill: #e6a23c !important;
 }
+
 :deep(.highlight-return.djs-shape .djs-visual > path) {
   fill: #e6a23c !important;
   fill-opacity: 0.2 !important;
   stroke: #e6a23c !important;
 }
+
 :deep(.highlight-return.djs-connection > .djs-visual > path) {
   stroke: #e6a23c !important;
 }
