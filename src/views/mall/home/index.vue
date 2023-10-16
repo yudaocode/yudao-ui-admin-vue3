@@ -32,8 +32,8 @@
         <ComparisonCard
           tag="今日"
           title="新增用户"
-          :value="userComparison?.value?.createUserCount || 0"
-          :reference="userComparison?.reference?.createUserCount || 0"
+          :value="userComparison?.value?.registerUserCount || 0"
+          :reference="userComparison?.reference?.registerUserCount || 0"
         />
       </el-col>
     </el-row>

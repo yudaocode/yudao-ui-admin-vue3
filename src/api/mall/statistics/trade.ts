@@ -25,7 +25,7 @@ export interface TradeTrendSummaryRespVO {
   expensePrice: number
   orderWalletPayPrice: number
   brokerageSettlementPrice: number
-  orderRefundPrice: number
+  afterSaleRefundPrice: number
 }
 
 /** 交易订单数量 Response VO */

@@ -192,11 +192,11 @@
             icon-bg-color="text-blue-500"
             prefix="￥"
             :decimals="2"
-            :value="fenToYuan(trendSummary?.value?.orderRefundPrice || 0)"
+            :value="fenToYuan(trendSummary?.value?.afterSaleRefundPrice || 0)"
             :percent="
               calculateRelativeRate(
-                trendSummary?.value?.orderRefundPrice,
-                trendSummary?.reference?.orderRefundPrice
+                trendSummary?.value?.afterSaleRefundPrice,
+                trendSummary?.reference?.afterSaleRefundPrice
               )
             "
           />

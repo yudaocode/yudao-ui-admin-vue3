@@ -70,7 +70,8 @@ const getProductData = async () => {
 
 /** 查询钱包充值数据 */
 const getWalletRechargeData = async () => {
-  data.rechargePrice.value = await PayStatisticsApi.getWalletRechargePrice()
+  const paySummary = await PayStatisticsApi.getWalletRechargePrice();
+  data.rechargePrice.value = paySummary.rechargePrice
 }
 
 /**
