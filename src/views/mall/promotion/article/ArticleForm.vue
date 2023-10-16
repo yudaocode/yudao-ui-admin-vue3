@@ -9,6 +9,11 @@
     >
       <el-row>
         <el-col :span="12">
+          <el-form-item label="文章标题" prop="title">
+            <el-input v-model="formData.title" placeholder="请输入文章标题" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
           <el-form-item label="文章分类" prop="categoryId">
             <el-select v-model="formData.categoryId" placeholder="请选择">
               <el-option
@@ -18,11 +23,6 @@
                 :value="item.id"
               />
             </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="文章标题" prop="title">
-            <el-input v-model="formData.title" placeholder="请输入文章标题" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -40,6 +40,7 @@
             <UploadImg v-model="formData.picUrl" height="80px" />
           </el-form-item>
         </el-col>
+        <!-- TODO @puhui999：浏览次数，不能修改 -->
         <el-col :span="12">
           <el-form-item label="浏览次数" prop="browseCount">
             <el-input-number
@@ -68,6 +69,7 @@
             </el-radio-group>
           </el-form-item>
         </el-col>
+        <!-- TODO @puhui999：可以使用 SpuTableSelect -->
         <el-col :span="12">
           <el-form-item label="商品关联" prop="spuId">
             <el-select v-model="formData.spuId" placeholder="请选择">
