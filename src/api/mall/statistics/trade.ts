@@ -23,7 +23,7 @@ export interface TradeTrendSummaryRespVO {
   orderPayPrice: number
   rechargePrice: number
   expensePrice: number
-  orderWalletPayPrice: number
+  walletPayPrice: number
   brokerageSettlementPrice: number
   afterSaleRefundPrice: number
 }
