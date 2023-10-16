@@ -54,6 +54,20 @@ export interface MemberTerminalStatisticsRespVO {
   userCount: number
 }
 
+/** 会员数量统计 Response VO */
+export interface MemberCountRespVO {
+  /** 用户访问量 */
+  visitUserCount: string
+  /** 新增用户数量 */
+  createUserCount: number
+}
+
+/** 会员注册数量 Response VO */
+export interface MemberRegisterCountRespVO {
+  date: string
+  count: number
+}
+
 // 查询会员统计
 export const getMemberSummary = () => {
   return request.get<MemberSummaryRespVO>({
@@ -87,5 +101,23 @@ export const getMemberSexStatisticsList = () => {
 export const getMemberTerminalStatisticsList = () => {
   return request.get<MemberTerminalStatisticsRespVO[]>({
     url: '/statistics/member/get-terminal-statistics-list'
+  })
+}
+
+// 获得用户数量量对照
+export const getUserCountComparison = () => {
+  return request.get<TradeStatisticsComparisonRespVO<MemberCountRespVO>>({
+    url: '/statistics/member/user-count-comparison'
+  })
+}
+
+// 获得会员注册数量列表
+export const getMemberRegisterCountList = (
+  beginTime: dayjs.ConfigType,
+  endTime: dayjs.ConfigType
+) => {
+  return request.get<MemberRegisterCountRespVO[]>({
+    url: '/statistics/member/register-count-list',
+    params: { times: [formatDate(beginTime), formatDate(endTime)] }
   })
 }

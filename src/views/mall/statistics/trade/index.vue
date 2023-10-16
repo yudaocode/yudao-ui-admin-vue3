@@ -59,25 +59,9 @@
       <template #header>
         <!-- 标题 -->
         <div class="flex flex-row items-center justify-between">
-          <span>交易状况</span>
+          <CardTitle title="交易状况" />
           <!-- 查询条件 -->
-          <div class="flex flex-row items-center gap-2">
-            <el-radio-group v-model="shortcutDays" @change="handleDateTypeChange">
-              <el-radio-button :label="1">昨天</el-radio-button>
-              <el-radio-button :label="7">最近7天</el-radio-button>
-              <el-radio-button :label="30">最近30天</el-radio-button>
-            </el-radio-group>
-            <el-date-picker
-              v-model="queryParams.times"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              type="daterange"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-              :shortcuts="shortcuts"
-              class="!w-240px"
-              @change="getTradeTrendData"
-            />
+          <ShortcutDateRangePicker ref="shortcutDateRangePicker" @change="getTradeTrendData">
             <el-button
               class="ml-4"
               @click="handleExport"
@@ -86,7 +70,7 @@
             >
               <Icon icon="ep:download" class="mr-1" />导出
             </el-button>
-          </div>
+          </ShortcutDateRangePicker>
         </div>
       </template>
       <!-- 统计值 -->
@@ -233,13 +217,11 @@ import { EChartsOption } from 'echarts'
 import {
   TradeStatisticsComparisonRespVO,
   TradeSummaryRespVO,
-  TradeTrendReqVO,
   TradeTrendSummaryRespVO
 } from '@/api/mall/statistics/trade'
-import dayjs from 'dayjs'
-import { fenToYuan } from '@/utils'
-import * as DateUtil from '@/utils/formatTime'
+import { calculateRelativeRate, fenToYuan } from '@/utils'
 import download from '@/utils/download'
+import { CardTitle } from '@/components/Card'
 
 /** 交易统计 */
 defineOptions({ name: 'TradeStatistics' })
@@ -249,34 +231,9 @@ const message = useMessage() // 消息弹窗
 const loading = ref(true) // 加载中
 const trendLoading = ref(true) // 交易状态加载中
 const exportLoading = ref(false) // 导出的加载中
-const queryParams = reactive<TradeTrendReqVO>({ times: ['', ''] }) // 交易状况查询参数
-const shortcutDays = ref(7) // 日期快捷天数（单选按钮组）, 默认7天
 const summary = ref<TradeStatisticsComparisonRespVO<TradeSummaryRespVO>>() // 交易统计数据
 const trendSummary = ref<TradeStatisticsComparisonRespVO<TradeTrendSummaryRespVO>>() // 交易状况统计数据
-
-/** 日期快捷选择 */
-const shortcuts = [
-  {
-    text: '昨天',
-    value: () => DateUtil.getDayRange(new Date(), -1)
-  },
-  {
-    text: '最近7天',
-    value: () => DateUtil.getLast7Days()
-  },
-  {
-    text: '本月',
-    value: () => [dayjs().startOf('M'), dayjs().subtract(1, 'd')]
-  },
-  {
-    text: '最近30天',
-    value: () => DateUtil.getLast30Days()
-  },
-  {
-    text: '最近1年',
-    value: () => DateUtil.getLast1Year()
-  }
-]
+const shortcutDateRangePicker = ref()
 
 /** 折线图配置 */
 const lineChartOptions = reactive<EChartsOption>({
@@ -333,29 +290,6 @@ const lineChartOptions = reactive<EChartsOption>({
   }
 }) as EChartsOption
 
-/** 计算环比 */
-const calculateRelativeRate = (value?: number, reference?: number) => {
-  // 防止除0
-  if (!reference) return 0
-
-  return ((100 * ((value || 0) - reference)) / reference).toFixed(0)
-}
-
-/** 设置时间范围 */
-function setTimes() {
-  const beginDate = dayjs().subtract(shortcutDays.value, 'd')
-  const yesterday = dayjs().subtract(1, 'd')
-  queryParams.times = DateUtil.getDateRange(beginDate, yesterday)
-}
-
-/** 处理交易状况查询（日期单选按钮组选择后） */
-const handleDateTypeChange = async () => {
-  // 设置时间范围
-  setTimes()
-  // 查询数据
-  await getTradeTrendData()
-}
-
 /** 处理交易状况查询 */
 const getTradeTrendData = async () => {
   trendLoading.value = true
@@ -370,20 +304,14 @@ const getTradeStatisticsSummary = async () => {
 
 /** 查询交易状况数据统计 */
 const getTradeTrendSummary = async () => {
-  loading.value = true
-  trendSummary.value = await TradeStatisticsApi.getTradeTrendSummary(queryParams)
-  loading.value = false
+  const times = shortcutDateRangePicker.value.times
+  trendSummary.value = await TradeStatisticsApi.getTradeTrendSummary({ times })
 }
 
 /** 查询交易状况数据列表 */
 const getTradeTrendList = async () => {
-  const times = queryParams.times
-  // 开始与截止在同一天的, 折线图出不来, 需要延长一天
-  if (DateUtil.isSameDay(times[0], times[1])) {
-    // 前天
-    times[0] = DateUtil.formatDate(dayjs(times[0]).subtract(1, 'd'))
-  }
   // 查询数据
+  const times = shortcutDateRangePicker.value.times
   const list = await TradeStatisticsApi.getTradeTrendList({ times })
   // 处理数据
   for (let item of list) {
@@ -405,7 +333,8 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await TradeStatisticsApi.exportTradeTrend(queryParams)
+    const times = shortcutDateRangePicker.value.times
+    const data = await TradeStatisticsApi.exportTradeTrend({ times })
     download.excel(data, '交易状况.xls')
   } catch {
   } finally {
@@ -416,7 +345,6 @@ const handleExport = async () => {
 /** 初始化 **/
 onMounted(async () => {
   await getTradeStatisticsSummary()
-  await handleDateTypeChange()
 })
 </script>
 <style lang="scss" scoped>
