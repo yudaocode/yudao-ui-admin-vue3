@@ -282,6 +282,7 @@ const getMemberSexStatisticsList = async () => {
 const getMemberTerminalStatisticsList = async () => {
   const list = await MemberStatisticsApi.getMemberTerminalStatisticsList()
   const dictDataList = getIntDictOptions(DICT_TYPE.TERMINAL)
+  dictDataList.push({ label: '未知', value: null } as any)
   terminalChartOptions.series![0].data = dictDataList.map((dictData: DictDataType) => {
     const userCount = list.find(
       (item: MemberTerminalStatisticsRespVO) => item.terminal === dictData.value
