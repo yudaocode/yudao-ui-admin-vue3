@@ -1,6 +1,6 @@
 import request from '@/config/axios'
 import dayjs from 'dayjs'
-import { TradeStatisticsComparisonRespVO } from '@/api/mall/statistics/trade'
+import { DataComparisonRespVO } from '@/api/mall/statistics/common'
 import { formatDate } from '@/utils/formatTime'
 
 /** 会员分析 Request VO */
@@ -10,17 +10,17 @@ export interface MemberAnalyseReqVO {
 
 /** 会员分析 Response VO */
 export interface MemberAnalyseRespVO {
-  visitorCount: number
+  visitUserCount: number
   orderUserCount: number
   payUserCount: number
   atv: number
-  comparison: TradeStatisticsComparisonRespVO<MemberAnalyseComparisonRespVO>
+  comparison: DataComparisonRespVO<MemberAnalyseComparisonRespVO>
 }
 
 /** 会员分析对照数据 Response VO */
 export interface MemberAnalyseComparisonRespVO {
-  userCount: number
-  activeUserCount: number
+  registerUserCount: number
+  visitUserCount: number
   rechargeUserCount: number
 }
 
@@ -29,8 +29,8 @@ export interface MemberAreaStatisticsRespVO {
   areaId: number
   areaName: string
   userCount: number
-  orderCreateCount: number
-  orderPayCount: number
+  orderCreateUserCount: number
+  orderPayUserCount: number
   orderPayPrice: number
 }
 
@@ -52,6 +52,20 @@ export interface MemberSummaryRespVO {
 export interface MemberTerminalStatisticsRespVO {
   terminal: number
   userCount: number
+}
+
+/** 会员数量统计 Response VO */
+export interface MemberCountRespVO {
+  /** 用户访问量 */
+  visitUserCount: string
+  /** 新增用户数量 */
+  createUserCount: number
+}
+
+/** 会员注册数量 Response VO */
+export interface MemberRegisterCountRespVO {
+  date: string
+  count: number
 }
 
 // 查询会员统计
@@ -87,5 +101,23 @@ export const getMemberSexStatisticsList = () => {
 export const getMemberTerminalStatisticsList = () => {
   return request.get<MemberTerminalStatisticsRespVO[]>({
     url: '/statistics/member/get-terminal-statistics-list'
+  })
+}
+
+// 获得用户数量量对照
+export const getUserCountComparison = () => {
+  return request.get<DataComparisonRespVO<MemberCountRespVO>>({
+    url: '/statistics/member/user-count-comparison'
+  })
+}
+
+// 获得会员注册数量列表
+export const getMemberRegisterCountList = (
+  beginTime: dayjs.ConfigType,
+  endTime: dayjs.ConfigType
+) => {
+  return request.get<MemberRegisterCountRespVO[]>({
+    url: '/statistics/member/register-count-list',
+    params: { times: [formatDate(beginTime), formatDate(endTime)] }
   })
 }

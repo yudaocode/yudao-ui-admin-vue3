@@ -233,3 +233,16 @@ export const yuanToFen = (amount: string | number): number => {
 export const fenToYuan = (price: string | number): number => {
   return formatToFraction(price)
 }
+
+/**
+ * 计算环比
+ *
+ * @param value 当前数值
+ * @param reference 对比数值
+ */
+export const calculateRelativeRate = (value?: number, reference?: number) => {
+  // 防止除0
+  if (!reference) return 0
+
+  return ((100 * ((value || 0) - reference)) / reference).toFixed(0)
+}
