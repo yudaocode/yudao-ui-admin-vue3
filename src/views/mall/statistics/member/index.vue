@@ -82,14 +82,14 @@
                 />
                 <el-table-column
                   label="订单创建数量"
-                  prop="orderCreateCount"
+                  prop="orderCreateUserCount"
                   align="center"
                   min-width="135"
                   sortable
                 />
                 <el-table-column
                   label="订单支付数量"
-                  prop="orderPayCount"
+                  prop="orderPayUserCount"
                   align="center"
                   min-width="135"
                   sortable

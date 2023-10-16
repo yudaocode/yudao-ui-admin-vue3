@@ -84,11 +84,11 @@
             icon-bg-color="text-blue-500"
             prefix="￥"
             :decimals="2"
-            :value="fenToYuan(trendSummary?.value?.turnover || 0)"
+            :value="fenToYuan(trendSummary?.value?.turnoverPrice || 0)"
             :percent="
               calculateRelativeRate(
-                trendSummary?.value?.turnover,
-                trendSummary?.reference?.turnover
+                trendSummary?.value?.turnoverPrice,
+                trendSummary?.reference?.turnoverPrice
               )
             "
           />
@@ -156,11 +156,11 @@
             icon-bg-color="text-cyan-500"
             prefix="￥"
             :decimals="2"
-            :value="fenToYuan(trendSummary?.value?.balancePrice || 0)"
+            :value="fenToYuan(trendSummary?.value?.orderWalletPayPrice || 0)"
             :percent="
               calculateRelativeRate(
-                trendSummary?.value?.balancePrice,
-                trendSummary?.reference?.balancePrice
+                trendSummary?.value?.orderWalletPayPrice,
+                trendSummary?.reference?.orderWalletPayPrice
               )
             "
           />
@@ -214,11 +214,8 @@ import * as TradeStatisticsApi from '@/api/mall/statistics/trade'
 import TradeStatisticValue from './components/TradeStatisticValue.vue'
 import TradeTrendValue from './components/TradeTrendValue.vue'
 import { EChartsOption } from 'echarts'
-import {
-  TradeStatisticsComparisonRespVO,
-  TradeSummaryRespVO,
-  TradeTrendSummaryRespVO
-} from '@/api/mall/statistics/trade'
+import { DataComparisonRespVO } from '@/api/mall/statistics/common'
+import { TradeSummaryRespVO, TradeTrendSummaryRespVO } from '@/api/mall/statistics/trade'
 import { calculateRelativeRate, fenToYuan } from '@/utils'
 import download from '@/utils/download'
 import { CardTitle } from '@/components/Card'
@@ -231,14 +228,14 @@ const message = useMessage() // 消息弹窗
 const loading = ref(true) // 加载中
 const trendLoading = ref(true) // 交易状态加载中
 const exportLoading = ref(false) // 导出的加载中
-const summary = ref<TradeStatisticsComparisonRespVO<TradeSummaryRespVO>>() // 交易统计数据
-const trendSummary = ref<TradeStatisticsComparisonRespVO<TradeTrendSummaryRespVO>>() // 交易状况统计数据
+const summary = ref<DataComparisonRespVO<TradeSummaryRespVO>>() // 交易统计数据
+const trendSummary = ref<DataComparisonRespVO<TradeTrendSummaryRespVO>>() // 交易状况统计数据
 const shortcutDateRangePicker = ref()
 
 /** 折线图配置 */
 const lineChartOptions = reactive<EChartsOption>({
   dataset: {
-    dimensions: ['date', 'turnover', 'orderPayPrice', 'rechargePrice', 'expensePrice'],
+    dimensions: ['date', 'turnoverPrice', 'orderPayPrice', 'rechargePrice', 'expensePrice'],
     source: []
   },
   grid: {
@@ -293,7 +290,7 @@ const lineChartOptions = reactive<EChartsOption>({
 /** 处理交易状况查询 */
 const getTradeTrendData = async () => {
   trendLoading.value = true
-  await Promise.all([getTradeTrendSummary(), getTradeTrendList()])
+  await Promise.all([getTradeTrendSummary(), getTradeStatisticsList()])
   trendLoading.value = false
 }
 
@@ -309,13 +306,13 @@ const getTradeTrendSummary = async () => {
 }
 
 /** 查询交易状况数据列表 */
-const getTradeTrendList = async () => {
+const getTradeStatisticsList = async () => {
   // 查询数据
   const times = shortcutDateRangePicker.value.times
-  const list = await TradeStatisticsApi.getTradeTrendList({ times })
+  const list = await TradeStatisticsApi.getTradeStatisticsList({ times })
   // 处理数据
   for (let item of list) {
-    item.turnover = fenToYuan(item.turnover)
+    item.turnoverPrice = fenToYuan(item.turnoverPrice)
     item.orderPayPrice = fenToYuan(item.orderPayPrice)
     item.rechargePrice = fenToYuan(item.rechargePrice)
     item.expensePrice = fenToYuan(item.expensePrice)
@@ -334,7 +331,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const times = shortcutDateRangePicker.value.times
-    const data = await TradeStatisticsApi.exportTradeTrend({ times })
+    const data = await TradeStatisticsApi.exportTradeStatisticsExcel({ times })
     download.excel(data, '交易状况.xls')
   } catch {
   } finally {

@@ -66,10 +66,8 @@
 <script lang="ts" setup>
 import * as TradeStatisticsApi from '@/api/mall/statistics/trade'
 import * as MemberStatisticsApi from '@/api/mall/statistics/member'
-import {
-  TradeOrderSummaryRespVO,
-  TradeStatisticsComparisonRespVO
-} from '@/api/mall/statistics/trade'
+import { DataComparisonRespVO } from '@/api/mall/statistics/common'
+import { TradeOrderSummaryRespVO } from '@/api/mall/statistics/trade'
 import { MemberCountRespVO } from '@/api/mall/statistics/member'
 import { fenToYuan } from '@/utils'
 import ComparisonCard from './components/ComparisonCard.vue'
@@ -84,8 +82,8 @@ import MemberFunnelCard from '@/views/mall/statistics/member/components/MemberFu
 defineOptions({ name: 'MallHome' })
 
 const loading = ref(true) // 加载中
-const orderComparison = ref<TradeStatisticsComparisonRespVO<TradeOrderSummaryRespVO>>() // 交易对照数据
-const userComparison = ref<TradeStatisticsComparisonRespVO<MemberCountRespVO>>() // 用户对照数据
+const orderComparison = ref<DataComparisonRespVO<TradeOrderSummaryRespVO>>() // 交易对照数据
+const userComparison = ref<DataComparisonRespVO<MemberCountRespVO>>() // 用户对照数据
 
 /** 查询交易对照卡片数据 */
 const getOrderComparison = async () => {

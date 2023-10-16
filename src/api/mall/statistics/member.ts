@@ -1,6 +1,6 @@
 import request from '@/config/axios'
 import dayjs from 'dayjs'
-import { TradeStatisticsComparisonRespVO } from '@/api/mall/statistics/trade'
+import { DataComparisonRespVO } from '@/api/mall/statistics/common'
 import { formatDate } from '@/utils/formatTime'
 
 /** 会员分析 Request VO */
@@ -10,17 +10,17 @@ export interface MemberAnalyseReqVO {
 
 /** 会员分析 Response VO */
 export interface MemberAnalyseRespVO {
-  visitorCount: number
+  visitUserCount: number
   orderUserCount: number
   payUserCount: number
   atv: number
-  comparison: TradeStatisticsComparisonRespVO<MemberAnalyseComparisonRespVO>
+  comparison: DataComparisonRespVO<MemberAnalyseComparisonRespVO>
 }
 
 /** 会员分析对照数据 Response VO */
 export interface MemberAnalyseComparisonRespVO {
-  userCount: number
-  activeUserCount: number
+  registerUserCount: number
+  visitUserCount: number
   rechargeUserCount: number
 }
 
@@ -29,8 +29,8 @@ export interface MemberAreaStatisticsRespVO {
   areaId: number
   areaName: string
   userCount: number
-  orderCreateCount: number
-  orderPayCount: number
+  orderCreateUserCount: number
+  orderPayUserCount: number
   orderPayPrice: number
 }
 
@@ -106,7 +106,7 @@ export const getMemberTerminalStatisticsList = () => {
 
 // 获得用户数量量对照
 export const getUserCountComparison = () => {
-  return request.get<TradeStatisticsComparisonRespVO<MemberCountRespVO>>({
+  return request.get<DataComparisonRespVO<MemberCountRespVO>>({
     url: '/statistics/member/user-count-comparison'
   })
 }
