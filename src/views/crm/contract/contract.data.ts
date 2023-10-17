@@ -6,6 +6,7 @@ export const rules = reactive({
   name: [required]
 })
 
+// TODO @dbh52：不使用 crud 模式哈，使用标准的 ep 代码哈；主要后续 crud schema 可能会改
 // CrudSchema https://doc.iocoder.cn/vue3/crud-schema/
 const crudSchemas = reactive<CrudSchema[]>([
   {
