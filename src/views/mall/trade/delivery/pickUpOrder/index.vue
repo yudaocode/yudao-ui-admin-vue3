@@ -76,7 +76,7 @@
   <!-- 统计卡片 -->
   <el-row :gutter="16" class="summary">
     <el-col :sm="6" :xs="12" v-loading="loading">
-      <TradeTrendValue
+      <SummaryCard
         title="订单数量"
         icon="icon-park-outline:transaction-order"
         icon-color="bg-blue-100"
@@ -85,7 +85,7 @@
       />
     </el-col>
     <el-col :sm="6" :xs="12" v-loading="loading">
-      <TradeTrendValue
+      <SummaryCard
         title="订单金额"
         icon="streamline:money-cash-file-dollar-common-money-currency-cash-file"
         icon-color="bg-purple-100"
@@ -96,7 +96,7 @@
       />
     </el-col>
     <el-col :sm="6" :xs="12" v-loading="loading">
-      <TradeTrendValue
+      <SummaryCard
         title="退款单数"
         icon="heroicons:receipt-refund"
         icon-color="bg-yellow-100"
@@ -105,7 +105,7 @@
       />
     </el-col>
     <el-col :sm="6" :xs="12" v-loading="loading">
-      <TradeTrendValue
+      <SummaryCard
         title="退款金额"
         icon="ri:refund-2-line"
         icon-color="bg-green-100"
@@ -199,7 +199,7 @@ import * as PickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
 import { DICT_TYPE } from '@/utils/dict'
 import { fenToYuan, floatToFixed2 } from '@/utils'
 import { fenToYuanFormat } from '@/utils/formatter'
-import TradeTrendValue from '@/views/mall/statistics/trade/components/TradeTrendValue.vue'
+import SummaryCard from '@/components/SummaryCard/index.vue'
 import { dateFormatter } from '@/utils/formatTime'
 import { DeliveryTypeEnum } from '@/utils/constants'
 import { TradeOrderSummaryRespVO } from '@/api/mall/trade/order'
