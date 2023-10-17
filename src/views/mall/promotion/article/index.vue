@@ -78,51 +78,31 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="文章分类" prop="categoryId">
-        <template #default="scope">
-          {{ categoryList.find((item) => item.id === scope.row.categoryId)?.name }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="关联商品" prop="spuId" width="300">
-        <template #default="scope">
-          <el-image
-            :preview-src-list="[spuList.find((item) => item.id === scope.row.spuId)?.picUrl]"
-            :src="spuList.find((item) => item.id === scope.row.spuId)?.picUrl"
-            class="mr-[10px] h-40px w-40px v-middle"
-            preview-teleported
-          />
-          {{ spuList.find((item) => item.id === scope.row.spuId)?.name }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="文章标题" prop="title" />
-      <el-table-column align="center" label="文章作者" prop="author" />
-      <el-table-column align="center" label="文章封面" prop="picUrl">
+      <el-table-column align="center" label="编号" prop="id" min-width="60" />
+      <el-table-column align="center" label="封面" prop="picUrl" min-width="80">
         <template #default="{ row }">
           <el-image :src="row.picUrl" class="h-30px w-30px" @click="imagePreview(row.picUrl)" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="文章简介" prop="introduction" />
-      <el-table-column align="center" label="浏览次数" prop="browseCount" />
-      <el-table-column align="center" label="排序" prop="sort" />
-      <el-table-column align="center" label="状态" prop="status">
+      <el-table-column align="center" label="标题" prop="title" min-width="180" />
+      <el-table-column align="center" label="分类" prop="categoryId" min-width="180">
+        <template #default="scope">
+          {{ categoryList.find((item) => item.id === scope.row.categoryId)?.name }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="浏览量" prop="browseCount" min-width="180" />
+      <el-table-column align="center" label="作者" prop="author" min-width="180" />
+      <el-table-column align="center" label="文章简介" prop="introduction" min-width="250" />
+      <el-table-column align="center" label="排序" prop="sort" min-width="60" />
+      <el-table-column align="center" label="状态" prop="status" min-width="60">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="热门" prop="recommendHot">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.recommendHot" />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="轮播图" prop="recommendBanner">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.recommendBanner" />
         </template>
       </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
-        label="创建时间"
+        label="发布时间"
         prop="createTime"
         width="180px"
       />
