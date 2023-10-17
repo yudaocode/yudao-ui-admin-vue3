@@ -114,6 +114,7 @@ $prefix-cls: #{$elNamespace}-breadcrumb;
       }
     }
   }
+
   :deep(&__item):last-child {
     .#{$prefix-cls}__inner {
       display: flex;

@@ -19,6 +19,9 @@ export const isObject = (val: any): val is Record<any, any> => {
 }
 
 export const isEmpty = <T = unknown>(val: T): val is T => {
+  if (val === null) {
+    return true
+  }
   if (isArray(val) || isString(val)) {
     return val.length === 0
   }
@@ -102,4 +105,13 @@ export const isUrl = (path: string): boolean => {
 
 export const isDark = (): boolean => {
   return window.matchMedia('(prefers-color-scheme: dark)').matches
+}
+
+// 是否是图片链接
+export const isImgPath = (path: string): boolean => {
+  return /(https?:\/\/|data:image\/).*?\.(png|jpg|jpeg|gif|svg|webp|ico)/gi.test(path)
+}
+
+export const isEmptyVal = (val: any): boolean => {
+  return val === '' || val === null || val === undefined
 }

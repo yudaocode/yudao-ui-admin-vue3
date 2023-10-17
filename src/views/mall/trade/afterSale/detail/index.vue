@@ -307,7 +307,7 @@ onMounted(async () => {
 
 // 时间线样式调整
 :deep(.el-timeline) {
-  margin: 10px 0px 0px 160px;
+  margin: 10px 0 0 160px;
 
   .el-timeline-item__wrapper {
     position: relative;
@@ -328,27 +328,27 @@ onMounted(async () => {
     background-color: #f7f8fa;
 
     &::before {
-      content: '';
       position: absolute;
       top: 10px;
       left: 13px;
-      border-width: 8px; /* 调整尖角大小 */
-      border-style: solid;
       border-color: transparent #f7f8fa transparent transparent; /* 尖角颜色，左侧朝向 */
+      border-style: solid;
+      border-width: 8px; /* 调整尖角大小 */
+      content: '';
     }
   }
 
   .dot-node-style {
-    width: 20px;
-    height: 20px;
     position: absolute;
     left: -5px;
     display: flex;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    color: #fff;
+    border-radius: 50%;
     justify-content: center;
     align-items: center;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 10px;
   }
 }
 </style>
