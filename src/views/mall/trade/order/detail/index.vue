@@ -54,7 +54,7 @@
           </el-button>
           <!-- 到店自提 -->
           <el-button
-            v-if="formData.deliveryType === DeliveryTypeEnum.PICK_UP.type"
+            v-if="formData.deliveryType === DeliveryTypeEnum.PICK_UP.type && showPickUp"
             type="primary"
             @click="handlePickUp"
           >
@@ -235,6 +235,7 @@ import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DeliveryTypeEnum, TradeOrderStatusEnum } from '@/utils/constants'
 import * as DeliveryPickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
+import { propTypes } from '@/utils/propTypes'
 
 defineOptions({ name: 'TradeOrderDetail' })
 
@@ -294,8 +295,12 @@ const handlePickUp = async () => {
 
 /** 获得详情 */
 const { params } = useRoute() // 查询参数
+const props = defineProps({
+  id: propTypes.number.def(undefined), // 订单ID
+  showPickUp: propTypes.bool.def(true) // 显示核销按钮
+})
+const id = (params.id || props.id) as unknown as number
 const getDetail = async () => {
-  const id = params.id as unknown as number
   if (id) {
     const res = (await TradeOrderApi.getOrder(id)) as TradeOrderApi.OrderVO
     // 没有表单信息则关闭页面返回

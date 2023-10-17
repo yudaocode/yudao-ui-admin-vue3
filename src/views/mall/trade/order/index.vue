@@ -156,6 +156,10 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
+        <el-button @click="handlePickup" type="success" plain>
+          <Icon class="mr-5px" icon="ep:check" />
+          核销
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -347,6 +351,7 @@
   <!-- 各种操作的弹窗 -->
   <OrderDeliveryForm ref="deliveryFormRef" @success="getList" />
   <OrderUpdateRemarkForm ref="updateRemarkForm" @success="getList" />
+  <OrderPickUpForm ref="pickUpForm" @success="getList" />
 </template>
 
 <script lang="ts" setup>
@@ -361,6 +366,7 @@ import { floatToFixed2 } from '@/utils'
 import { createImageViewer } from '@/components/ImageViewer'
 import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 import { DeliveryTypeEnum, TradeOrderStatusEnum } from '@/utils/constants'
+import OrderPickUpForm from './form/OrderPickUpForm.vue'
 
 defineOptions({ name: 'TradeOrder' })
 
@@ -520,6 +526,12 @@ watch(
     getList()
   }
 )
+
+/** 显示核销表单 */
+const pickUpForm = ref()
+const handlePickup = () => {
+  pickUpForm.value.open()
+}
 
 const pickUpStoreList = ref([]) // 自提门店精简列表
 const deliveryExpressList = ref([]) // 物流公司
