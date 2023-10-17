@@ -156,11 +156,11 @@
             icon-bg-color="text-cyan-500"
             prefix="￥"
             :decimals="2"
-            :value="fenToYuan(trendSummary?.value?.orderWalletPayPrice || 0)"
+            :value="fenToYuan(trendSummary?.value?.walletPayPrice || 0)"
             :percent="
               calculateRelativeRate(
-                trendSummary?.value?.orderWalletPayPrice,
-                trendSummary?.reference?.orderWalletPayPrice
+                trendSummary?.value?.walletPayPrice,
+                trendSummary?.reference?.walletPayPrice
               )
             "
           />
@@ -192,11 +192,11 @@
             icon-bg-color="text-blue-500"
             prefix="￥"
             :decimals="2"
-            :value="fenToYuan(trendSummary?.value?.orderRefundPrice || 0)"
+            :value="fenToYuan(trendSummary?.value?.afterSaleRefundPrice || 0)"
             :percent="
               calculateRelativeRate(
-                trendSummary?.value?.orderRefundPrice,
-                trendSummary?.reference?.orderRefundPrice
+                trendSummary?.value?.afterSaleRefundPrice,
+                trendSummary?.reference?.afterSaleRefundPrice
               )
             "
           />

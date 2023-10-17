@@ -1,6 +1,7 @@
 import request from '@/config/axios'
 
 export interface OrderVO {
+  // ========== 订单基本信息 ==========
   id?: number | null // 订单编号
   no?: string // 订单流水号
   createTime?: Date | null // 下单时间
@@ -15,35 +16,43 @@ export interface OrderVO {
   cancelTime?: Date | null // 订单取消时间
   cancelType?: number | null // 取消类型
   remark?: string // 商家备注
+
+  // ========== 价格 + 支付基本信息 ==========
   payOrderId?: number | null // 支付订单编号
-  payed?: boolean // 是否已支付
+  payStatus?: boolean // 是否已支付
   payTime?: Date | null // 付款时间
   payChannelCode?: string // 支付渠道
   totalPrice?: number | null // 商品原价（总）
-  orderPrice?: number | null // 订单原价（总）
   discountPrice?: number | null // 订单优惠（总）
   deliveryPrice?: number | null // 运费金额
   adjustPrice?: number | null // 订单调价（总）
   payPrice?: number | null // 应付金额（总）
+  // ========== 收件 + 物流基本信息 ==========
   deliveryType?: number | null // 发货方式
+  pickUpStoreId?: number // 自提门店编号
+  pickUpVerifyCode?: string // 自提核销码
   deliveryTemplateId?: number | null // 配送模板编号
-  logisticsId?: number | null | null // 发货物流公司编号
+  logisticsId?: number | null // 发货物流公司编号
   logisticsNo?: string // 发货物流单号
-  deliveryStatus?: number | null // 发货状态
   deliveryTime?: Date | null // 发货时间
   receiveTime?: Date | null // 收货时间
   receiverName?: string // 收件人名称
   receiverMobile?: string // 收件人手机
-  receiverAreaId?: number | null // 收件人地区编号
   receiverPostCode?: number | null // 收件人邮编
+  receiverAreaId?: number | null // 收件人地区编号
+  receiverAreaName?: string //收件人地区名字
   receiverDetailAddress?: string // 收件人详细地址
+
+  // ========== 售后基本信息 ==========
   afterSaleStatus?: number | null // 售后状态
   refundPrice?: number | null // 退款金额
+
+  // ========== 营销基本信息 ==========
   couponId?: number | null // 优惠劵编号
   couponPrice?: number | null // 优惠劵减免金额
-  vipPrice?: number | null // VIP 减免金额
   pointPrice?: number | null // 积分抵扣的金额
-  receiverAreaName?: string //收件人地区名字
+  vipPrice?: number | null // VIP 减免金额
+
   items?: OrderItemRespVO[] // 订单项列表
   // 下单用户信息
   user?: {
@@ -142,5 +151,21 @@ export const updateOrderAddress = async (data: any) => {
 
 // 订单核销
 export const pickUpOrder = async (id: number) => {
-  return await request.put({ url: `/trade/order/pick-up?id=${id}` })
+  return await request.put({ url: `/trade/order/pick-up-by-id?id=${id}` })
+}
+
+// 订单核销
+export const pickUpOrderByVerifyCode = async (pickUpVerifyCode: string) => {
+  return await request.put({
+    url: `/trade/order/pick-up-by-verify-code`,
+    params: { pickUpVerifyCode }
+  })
+}
+
+// 查询核销码对应的订单
+export const getOrderByPickUpVerifyCode = async (pickUpVerifyCode: string) => {
+  return await request.get<OrderVO>({
+    url: `/trade/order/get-by-pick-up-verify-code`,
+    params: { pickUpVerifyCode }
+  })
 }

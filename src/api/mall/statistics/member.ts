@@ -58,8 +58,8 @@ export interface MemberTerminalStatisticsRespVO {
 export interface MemberCountRespVO {
   /** 用户访问量 */
   visitUserCount: string
-  /** 新增用户数量 */
-  createUserCount: number
+  /** 注册用户数量 */
+  registerUserCount: number
 }
 
 /** 会员注册数量 Response VO */
@@ -86,21 +86,21 @@ export const getMemberAnalyse = (params: MemberAnalyseReqVO) => {
 // 按照省份，查询会员统计列表
 export const getMemberAreaStatisticsList = () => {
   return request.get<MemberAreaStatisticsRespVO[]>({
-    url: '/statistics/member/get-area-statistics-list'
+    url: '/statistics/member/area-statistics-list'
   })
 }
 
 // 按照性别，查询会员统计列表
 export const getMemberSexStatisticsList = () => {
   return request.get<MemberSexStatisticsRespVO[]>({
-    url: '/statistics/member/get-sex-statistics-list'
+    url: '/statistics/member/sex-statistics-list'
   })
 }
 
 // 按照终端，查询会员统计列表
 export const getMemberTerminalStatisticsList = () => {
   return request.get<MemberTerminalStatisticsRespVO[]>({
-    url: '/statistics/member/get-terminal-statistics-list'
+    url: '/statistics/member/terminal-statistics-list'
   })
 }
 
