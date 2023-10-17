@@ -128,6 +128,7 @@
           class="!w-280px"
           clearable
           placeholder="请输入"
+          :type="queryType.queryParam === 'userId' ? 'number' : 'text'"
         >
           <template #prepend>
             <el-select

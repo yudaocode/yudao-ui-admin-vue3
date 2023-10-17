@@ -108,9 +108,26 @@ export interface ProductPropertiesVO {
   valueName?: string // 属性值的名称
 }
 
+/** 交易订单统计 */
+export interface TradeOrderSummaryRespVO {
+  /** 订单数量 */
+  orderCount?: number
+  /** 订单金额 */
+  orderPayPrice?: string
+  /** 退款单数 */
+  afterSaleCount?: number
+  /** 退款金额 */
+  afterSalePrice?: string
+}
+
 // 查询交易订单列表
-export const getOrderPage = async (params) => {
+export const getOrderPage = async (params: any) => {
   return await request.get({ url: `/trade/order/page`, params })
+}
+
+// 查询交易订单统计
+export const getOrderSummary = async (params: any) => {
+  return await request.get<TradeOrderSummaryRespVO>({ url: `/trade/order/summary`, params })
 }
 
 // 查询交易订单详情
