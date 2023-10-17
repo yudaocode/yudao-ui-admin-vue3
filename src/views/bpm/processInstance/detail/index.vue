@@ -49,6 +49,10 @@
             <Icon icon="ep:position" />
             委派
           </el-button>
+          <el-button type="primary" @click="handleSign(item)">
+            <Icon icon="ep:plus" />
+            加签
+          </el-button>
           <el-button type="warning" @click="handleBack(item)">
             <Icon icon="ep:back" />
             回退
@@ -95,6 +99,8 @@
     <TaskReturnDialog ref="taskReturnDialogRef" @success="getDetail" />
     <!-- 委派，将任务委派给别人处理，处理完成后，会重新回到原审批人手中-->
     <TaskDelegateForm ref="taskDelegateForm" @success="getDetail" />
+    <!-- 加签，当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
+    <TaskAddSignDialogForm ref="taskAddSignDialogForm" @success="getDetail" />
   </ContentWrap>
 </template>
 <script lang="ts" setup>
@@ -109,7 +115,9 @@ import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
 import TaskReturnDialog from './TaskReturnDialogForm.vue'
 import TaskDelegateForm from './taskDelegateForm.vue'
+import TaskAddSignDialogForm from './TaskAddSignDialogForm.vue'
 import { registerComponent } from '@/utils/routerHelper'
+import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 
@@ -183,6 +191,12 @@ const taskReturnDialogRef = ref()
 /** 处理审批退回的操作 */
 const handleBack = async (task) => {
   taskReturnDialogRef.value.open(task.id)
+}
+
+const taskAddSignDialogForm = ref()
+/** 处理审批加签的操作 */
+const handleSign = async (task) => {
+  taskAddSignDialogForm.value.open(task.id)
 }
 
 /** 获得详情 */
@@ -261,24 +275,34 @@ const getTaskList = async () => {
     // 获得需要自己审批的任务
     runningTasks.value = []
     auditForms.value = []
-    tasks.value.forEach((task) => {
-      // 2.1 只有待处理才需要
-      if (task.result !== 1 && task.result !== 6) {
-        return
-      }
-      // 2.2 自己不是处理人
-      if (!task.assigneeUser || task.assigneeUser.id !== userId) {
-        return
-      }
-      // 2.3 添加到处理任务
-      runningTasks.value.push({ ...task })
-      auditForms.value.push({
-        reason: ''
-      })
-    })
+    loadRunningTask(tasks.value)
   } finally {
     tasksLoad.value = false
   }
+}
+
+/**
+ * 设置 runningTasks 中的任务
+ */
+const loadRunningTask = (tasks) => {
+  tasks.forEach((task) => {
+    if (!isEmpty(task.children)) {
+      loadRunningTask(task.children)
+    }
+    // 2.1 只有待处理才需要
+    if (task.result !== 1 && task.result !== 6) {
+      return
+    }
+    // 2.2 自己不是处理人
+    if (!task.assigneeUser || task.assigneeUser.id !== userId) {
+      return
+    }
+    // 2.3 添加到处理任务
+    runningTasks.value.push({ ...task })
+    auditForms.value.push({
+      reason: ''
+    })
+  })
 }
 
 /** 初始化 */

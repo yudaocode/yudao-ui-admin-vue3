@@ -19,6 +19,9 @@ export const isObject = (val: any): val is Record<any, any> => {
 }
 
 export const isEmpty = <T = unknown>(val: T): val is T => {
+  if (val === null) {
+    return true
+  }
   if (isArray(val) || isString(val)) {
     return val.length === 0
   }
