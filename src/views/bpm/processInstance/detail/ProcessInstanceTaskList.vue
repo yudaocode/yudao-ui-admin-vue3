@@ -12,7 +12,18 @@
             :icon="getTimelineItemIcon(item)"
             :type="getTimelineItemType(item)"
           >
-            <p style="font-weight: 700">任务：{{ item.name }}</p>
+            <p style="font-weight: 700">
+              任务：{{ item.name }}
+              <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="item.result" />
+              <el-button
+                style="margin-left: 5px"
+                v-if="!isEmpty(item.children)"
+                @click="openChildrenTask(item)"
+              >
+                <Icon icon="ep:memo" />
+                子任务
+              </el-button>
+            </p>
             <el-card :body-style="{ padding: '10px' }">
               <label v-if="item.assigneeUser" style="margin-right: 30px; font-weight: normal">
                 审批人：{{ item.assigneeUser.nickname }}
@@ -42,11 +53,16 @@
         </el-timeline>
       </div>
     </el-col>
+    <!-- 子任务  -->
+    <ProcessInstanceChildrenTaskList ref="processInstanceChildrenTaskList" />
   </el-card>
 </template>
 <script lang="ts" setup>
 import { formatDate, formatPast2 } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'
+import { DICT_TYPE } from '@/utils/dict'
+import { isEmpty } from '@/utils/is'
+import ProcessInstanceChildrenTaskList from './ProcessInstanceChildrenTaskList.vue'
 
 defineOptions({ name: 'BpmProcessInstanceTaskList' })
 
@@ -95,6 +111,18 @@ const getTimelineItemType = (item) => {
   if (item.result === 6) {
     return 'default'
   }
+  if (item.result === 7 || item.result === 8) {
+    return 'warning'
+  }
   return ''
+}
+
+/**
+ * 子任务
+ */
+const processInstanceChildrenTaskList = ref()
+
+const openChildrenTask = (item) => {
+  processInstanceChildrenTaskList.value.open(item)
 }
 </script>

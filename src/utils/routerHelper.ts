@@ -93,7 +93,10 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
       meta.alwaysShow = true
       const childrenData: AppRouteRecordRaw = {
         path: '',
-        name: toCamelCase(route.path, true),
+        name:
+          route.componentName && route.componentName.length > 0
+            ? route.componentName
+            : toCamelCase(route.path, true),
         redirect: route.redirect,
         meta: meta
       }
