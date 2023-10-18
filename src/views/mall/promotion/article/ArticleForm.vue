@@ -41,16 +41,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="浏览次数" prop="browseCount">
-            <el-input-number
-              v-model="formData.browseCount"
-              :min="0"
-              clearable
-              controls-position="right"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
           <el-form-item label="排序" prop="sort">
             <el-input-number v-model="formData.sort" :min="0" clearable controls-position="right" />
           </el-form-item>
@@ -141,7 +131,6 @@ const formData = ref({
   author: undefined,
   picUrl: undefined,
   introduction: undefined,
-  browseCount: 0,
   sort: 0,
   status: 0,
   spuId: undefined,
@@ -215,7 +204,6 @@ const resetForm = () => {
     author: undefined,
     picUrl: undefined,
     introduction: undefined,
-    browseCount: 0,
     sort: 0,
     status: 0,
     spuId: undefined,
