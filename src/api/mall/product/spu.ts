@@ -28,14 +28,14 @@ export interface Sku {
 export interface Spu {
   id?: number
   name?: string // 商品名称
-  categoryId?: number | null // 商品分类
+  categoryId?: number | undefined // 商品分类
   keyword?: string // 关键字
-  unit?: number | null // 单位
+  unit?: number | undefined // 单位
   picUrl?: string // 商品封面图
   sliderPicUrls?: string[] // 商品轮播图
   introduction?: string // 商品简介
-  deliveryTemplateId?: number | null // 运费模版
-  brandId?: number | null // 商品品牌编号
+  deliveryTemplateId?: number | undefined // 运费模版
+  brandId?: number | undefined // 商品品牌编号
   specType?: boolean // 商品规格
   subCommissionType?: boolean // 分销类型
   skus?: Sku[] // sku数组

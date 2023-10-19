@@ -43,16 +43,22 @@
       <el-col :span="24">
         <!--   TODO @puhui999：tag展示暂时不考虑排序；支持拖动排序 -->
         <el-form-item label="活动优先级">
-          <el-tag>默认</el-tag>
-          <el-tag class="ml-2" type="success">秒杀</el-tag>
-          <el-tag class="ml-2" type="info">砍价</el-tag>
-          <el-tag class="ml-2" type="warning">拼团</el-tag>
+          <el-tag
+            v-for="type in getIntDictOptions(DICT_TYPE.PROMOTION_TYPE_ENUM)"
+            :key="type.value as number"
+            :type="type.colorType"
+            class="mr-[10px]"
+          >
+            {{ type.label }}
+          </el-tag>
         </el-form-item>
       </el-col>
-      <!-- TODO @puhui999：等优惠劵 ok 在搞 -->
       <el-col :span="24">
         <el-form-item label="赠送优惠劵">
-          <el-button>选择优惠券</el-button>
+          <el-tag v-for="coupon in couponTemplateList" :key="coupon.id as number" class="mr-[10px]">
+            {{ coupon.name }}
+          </el-tag>
+          <el-button @click="openCouponSelect">选择优惠券</el-button>
         </el-form-item>
       </el-col>
     </el-row>
@@ -82,6 +88,7 @@
       <el-tag class="ml-2" type="warning">拼团</el-tag>
     </template>
   </Descriptions>
+  <CouponSelect ref="couponSelectRef" />
 </template>
 <script lang="ts" setup>
 import type { Spu } from '@/api/mall/product/spu'
@@ -89,6 +96,8 @@ import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
 import { otherSettingsSchema } from './spu.data'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import CouponSelect from './CouponSelect.vue'
 
 defineOptions({ name: 'OtherSettingsForm' })
 
@@ -104,6 +113,11 @@ const props = defineProps({
   activeName: propTypes.string.def(''),
   isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
+const couponSelectRef = ref() // 优惠卷模版选择
+const couponTemplateList = ref<{ id: number; name: string }[]>([]) // 选择的优惠卷
+const openCouponSelect = () => {
+  couponSelectRef.value?.open()
+}
 
 const otherSettingsFormRef = ref() // 表单Ref
 // 表单数据

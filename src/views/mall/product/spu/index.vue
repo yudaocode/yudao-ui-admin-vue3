@@ -24,8 +24,8 @@
           :props="defaultProps"
           class="w-1/1"
           clearable
-          placeholder="请选择商品分类"
           filterable
+          placeholder="请选择商品分类"
         />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
@@ -48,7 +48,12 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <el-button v-hasPermi="['product:spu:create']" plain type="primary" @click="openForm">
+        <el-button
+          v-hasPermi="['product:spu:create']"
+          plain
+          type="primary"
+          @click="openForm(undefined)"
+        >
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
@@ -278,8 +283,8 @@ const queryParams = ref({
   pageSize: 10,
   tabType: 0,
   name: '',
-  categoryId: null,
-  createTime: []
+  categoryId: undefined,
+  createTime: undefined
 }) // 查询参数
 const queryFormRef = ref() // 搜索的表单Ref
 
