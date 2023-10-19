@@ -63,14 +63,18 @@
             </div>
           </template>
           <template #default="{ row }">
-            <div class="flex items-center">
+            <div class="flex flex-wrap">
               <el-image
                 :src="row.picUrl"
-                class="mr-10px h-30px w-30px"
+                class="mb-[13px] mr-[10px] h-[40px] w-[40px] v-middle"
                 @click="imagePreview(row.picUrl)"
               />
-              <span class="mr-10px">{{ row.spuName }}</span>
-              <el-tag v-for="property in row.properties" :key="property.propertyId" class="mr-10px">
+              <span class="mb-[13px] mr-[10px]">{{ row.spuName }}</span>
+              <el-tag
+                v-for="property in row.properties"
+                :key="property.propertyId"
+                class="mb-[13px] mr-[10px]"
+              >
                 {{ property.propertyName }}: {{ property.valueName }}
               </el-tag>
             </div>
