@@ -2,7 +2,7 @@
   <div class="flex flex-col">
     <el-row :gutter="16" class="summary">
       <el-col :sm="6" :xs="12" v-loading="loading">
-        <TradeTrendValue
+        <SummaryCard
           title="累计会员数"
           icon="fa-solid:users"
           icon-color="bg-blue-100"
@@ -11,7 +11,7 @@
         />
       </el-col>
       <el-col :sm="6" :xs="12" v-loading="loading">
-        <TradeTrendValue
+        <SummaryCard
           title="累计充值人数"
           icon="fa-solid:user"
           icon-color="bg-purple-100"
@@ -20,7 +20,7 @@
         />
       </el-col>
       <el-col :sm="6" :xs="12" v-loading="loading">
-        <TradeTrendValue
+        <SummaryCard
           title="累计充值金额"
           icon="fa-solid:money-check-alt"
           icon-color="bg-yellow-100"
@@ -31,7 +31,7 @@
         />
       </el-col>
       <el-col :sm="6" :xs="12" v-loading="loading">
-        <TradeTrendValue
+        <SummaryCard
           title="累计消费金额"
           icon="fa-solid:yen-sign"
           icon-color="bg-green-100"
@@ -120,7 +120,7 @@
 </template>
 <script lang="ts" setup>
 import * as MemberStatisticsApi from '@/api/mall/statistics/member'
-import TradeTrendValue from '../trade/components/TradeTrendValue.vue'
+import SummaryCard from '@/components/SummaryCard/index.vue'
 import { EChartsOption } from 'echarts'
 import china from '@/assets/map/json/china.json'
 import { fenToYuan } from '@/utils'

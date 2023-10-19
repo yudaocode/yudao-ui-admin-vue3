@@ -76,7 +76,7 @@
       <!-- 统计值 -->
       <el-row :gutter="16">
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="营业额"
             tooltip="商品支付金额、充值金额"
             icon="fa-solid:yen-sign"
@@ -94,7 +94,7 @@
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="商品支付金额"
             tooltip="用户购买商品的实际支付金额，包括微信支付、余额支付、支付宝支付、线下支付金额（拼团商品在成团之后计入，线下支付订单在后台确认支付后计入）"
             icon="fa-solid:shopping-cart"
@@ -112,7 +112,7 @@
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="充值金额"
             tooltip="用户成功充值的金额"
             icon="fa-solid:money-check-alt"
@@ -130,7 +130,7 @@
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="支出金额"
             tooltip="余额支付金额、支付佣金金额、商品退款金额"
             icon="ep:warning-filled"
@@ -148,7 +148,7 @@
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="余额支付金额"
             tooltip="用户下单时使用余额实际支付的金额"
             icon="fa-solid:wallet"
@@ -166,7 +166,7 @@
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="支付佣金金额"
             tooltip="后台给推广员支付的推广佣金，以实际支付为准"
             icon="fa-solid:award"
@@ -184,7 +184,7 @@
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="商品退款金额"
             tooltip="用户成功退款的商品金额"
             icon="fa-solid:times-circle"
@@ -212,7 +212,7 @@
 <script lang="ts" setup>
 import * as TradeStatisticsApi from '@/api/mall/statistics/trade'
 import TradeStatisticValue from './components/TradeStatisticValue.vue'
-import TradeTrendValue from './components/TradeTrendValue.vue'
+import SummaryCard from '@/components/SummaryCard/index.vue'
 import { EChartsOption } from 'echarts'
 import { DataComparisonRespVO } from '@/api/mall/statistics/common'
 import { TradeSummaryRespVO, TradeTrendSummaryRespVO } from '@/api/mall/statistics/trade'

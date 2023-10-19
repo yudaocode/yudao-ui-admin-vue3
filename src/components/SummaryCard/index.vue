@@ -35,8 +35,8 @@
 import { propTypes } from '@/utils/propTypes'
 import { toNumber } from 'lodash-es'
 
-/** 交易状况统计值组件 */
-defineOptions({ name: 'TradeTrendValue' })
+/** 统计卡片 */
+defineOptions({ name: 'SummaryCard' })
 
 defineProps({
   title: propTypes.string.def(''),
