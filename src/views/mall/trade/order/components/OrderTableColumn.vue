@@ -40,8 +40,8 @@
         <el-table-column min-width="300" prop="spuName">
           <template #header>
             <div
-              class="flex items-center"
-              style="width: 100%; height: 35px; background-color: #f7f7f7"
+              class="mr-[20px] h-[35px] flex items-center pl-[10px] pr-[10px]"
+              style="background-color: #f7f7f7"
             >
               <span class="mr-20px">订单号：{{ scope.row.no }} </span>
               <span class="mr-20px">下单时间：{{ formatDate(scope.row.createTime) }}</span>
@@ -64,16 +64,31 @@
           </template>
           <template #default="{ row }">
             <div class="flex flex-wrap">
-              <el-image
-                :src="row.picUrl"
-                class="mb-[13px] mr-[10px] h-[40px] w-[40px] v-middle"
-                @click="imagePreview(row.picUrl)"
-              />
-              <span class="mb-[13px] mr-[10px]">{{ row.spuName }}</span>
+              <div class="mb-[10px] mr-[10px] flex items-start">
+                <div class="mr-[10px]">
+                  <el-image
+                    :src="row.picUrl"
+                    class="!h-[45px] !w-[45px]"
+                    fit="contain"
+                    @click="imagePreview(row.picUrl)"
+                  >
+                    <template #error>
+                      <div class="image-slot">
+                        <icon icon="ep:picture" />
+                      </div>
+                    </template>
+                  </el-image>
+                </div>
+                <ElTooltip :content="row.spuName" placement="top">
+                  <span class="overflow-ellipsis max-h-[45px] overflow-hidden">
+                    {{ row.spuName }}
+                  </span>
+                </ElTooltip>
+              </div>
               <el-tag
                 v-for="property in row.properties"
                 :key="property.propertyId"
-                class="mb-[13px] mr-[10px]"
+                class="mb-[10px] mr-[10px]"
               >
                 {{ property.propertyName }}: {{ property.valueName }}
               </el-tag>
