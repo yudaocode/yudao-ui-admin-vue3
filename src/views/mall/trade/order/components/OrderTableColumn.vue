@@ -1,27 +1,43 @@
 <template>
   <el-table-column class-name="order-table-col">
     <template #header>
-      <!-- TODO @puhui999：小屏幕下，会有偏移，后续看看 -->
       <div class="flex items-center" style="width: 100%">
-        <div class="ml-100px mr-200px">商品信息</div>
-        <div class="mr-60px">单价(元)/数量</div>
-        <div class="mr-60px">售后状态</div>
-        <div class="mr-60px">实付金额(元)</div>
-        <div class="mr-60px">买家/收货人</div>
-        <div class="mr-60px">配送方式</div>
-        <div class="mr-60px">订单状态</div>
-        <div class="mr-60px">操作</div>
+        <div :style="{ width: orderTableHeadWidthList[0] + 'px' }" class="flex justify-center">
+          商品信息
+        </div>
+        <div :style="{ width: orderTableHeadWidthList[1] + 'px' }" class="flex justify-center">
+          单价(元)/数量
+        </div>
+        <div :style="{ width: orderTableHeadWidthList[2] + 'px' }" class="flex justify-center">
+          售后状态
+        </div>
+        <div :style="{ width: orderTableHeadWidthList[3] + 'px' }" class="flex justify-center">
+          实付金额(元)
+        </div>
+        <div :style="{ width: orderTableHeadWidthList[4] + 'px' }" class="flex justify-center">
+          买家/收货人
+        </div>
+        <div :style="{ width: orderTableHeadWidthList[5] + 'px' }" class="flex justify-center">
+          配送方式
+        </div>
+        <div :style="{ width: orderTableHeadWidthList[6] + 'px' }" class="flex justify-center">
+          订单状态
+        </div>
+        <div :style="{ width: orderTableHeadWidthList[7] + 'px' }" class="flex justify-center">
+          操作
+        </div>
       </div>
     </template>
     <template #default="scope">
       <el-table
+        :ref="setOrderTableRef"
         :border="true"
         :data="scope.row.items"
         :header-cell-style="headerStyle"
         :span-method="spanMethod"
         style="width: 100%"
       >
-        <el-table-column class-name="table-col-1" min-width="300" prop="spuName">
+        <el-table-column min-width="300" prop="spuName">
           <template #header>
             <div
               class="flex items-center"
@@ -60,17 +76,12 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column class-name="table-col-2" label="商品原价*数量" prop="price" width="150">
+        <el-table-column label="商品原价*数量" prop="price" width="150">
           <template #default="{ row }">
             {{ floatToFixed2(row.price) }} 元 / {{ row.count }}
           </template>
         </el-table-column>
-        <el-table-column
-          class-name="table-col-3"
-          label="售后状态"
-          prop="afterSaleStatus"
-          width="120"
-        >
+        <el-table-column label="售后状态" prop="afterSaleStatus" width="120">
           <template #default="{ row }">
             <dict-tag
               :type="DICT_TYPE.TRADE_ORDER_ITEM_AFTER_SALE_STATUS"
@@ -78,18 +89,12 @@
             />
           </template>
         </el-table-column>
-        <el-table-column
-          align="center"
-          class-name="table-col-4"
-          label="实际支付"
-          min-width="120"
-          prop="payPrice"
-        >
+        <el-table-column align="center" label="实际支付" min-width="120" prop="payPrice">
           <template #default>
             {{ floatToFixed2(scope.row.payPrice) + '元' }}
           </template>
         </el-table-column>
-        <el-table-column class-name="table-col-5" label="买家/收货人" min-width="160">
+        <el-table-column label="买家/收货人" min-width="160">
           <template #default>
             <!-- 快递发货  -->
             <div
@@ -122,23 +127,17 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column align="center" class-name="table-col-6" label="配送方式" width="120">
+        <el-table-column align="center" label="配送方式" width="120">
           <template #default>
             <dict-tag :type="DICT_TYPE.TRADE_DELIVERY_TYPE" :value="scope.row.deliveryType" />
           </template>
         </el-table-column>
-        <el-table-column align="center" class-name="table-col-7" label="订单状态" width="120">
+        <el-table-column align="center" label="订单状态" width="120">
           <template #default>
             <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="scope.row.status" />
           </template>
         </el-table-column>
-        <el-table-column
-          align="center"
-          class-name="table-col-8"
-          fixed="right"
-          label="操作"
-          width="160"
-        >
+        <el-table-column align="center" fixed="right" label="操作" width="160">
           <template #default>
             <slot :row="scope.row"></slot>
           </template>
@@ -154,7 +153,7 @@ import { formatDate } from '@/utils/formatTime'
 import { floatToFixed2 } from '@/utils'
 import * as TradeOrderApi from '@/api/mall/trade/order'
 import { OrderVO } from '@/api/mall/trade/order'
-import { TableColumnCtx } from 'element-plus'
+import type { TableColumnCtx, TableInstance } from 'element-plus'
 import { createImageViewer } from '@/components/ImageViewer'
 import type { DeliveryPickUpStoreVO } from '@/api/mall/trade/delivery/pickUpStore'
 
@@ -208,6 +207,29 @@ const spanMethod = ({ row, rowIndex, columnIndex }: SpanMethodProps): spanMethod
   }
 }
 
+/** 解决 ref 在 v-for 中的获取问题*/
+const setOrderTableRef = (el: TableInstance) => {
+  if (!el) return
+  // 只要第一个表也就是开始的第一行
+  if (el.tableId !== 'el-table_2') {
+    return
+  }
+  tableHeadWidthAuto(el)
+}
+// 头部 col 宽度初始化
+const orderTableHeadWidthList = ref([300, 150, 120, 120, 160, 120, 120, 160])
+// 头部宽度自适应
+const tableHeadWidthAuto = (el: TableInstance) => {
+  const columns = el.store.states.columns.value
+  if (columns.length === 0) {
+    return
+  }
+  columns.forEach((col: TableColumnCtx<TableInstance>, index: number) => {
+    if (col.realWidth) {
+      orderTableHeadWidthList.value[index] = col.realWidth
+    }
+  })
+}
 /** 商品图预览 */
 const imagePreview = (imgUrl: string) => {
   createImageViewer({
