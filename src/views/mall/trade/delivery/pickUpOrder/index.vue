@@ -70,9 +70,14 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
+        <el-button @click="handlePickup" type="success" plain v-hasPermi="['trade:order:pick-up']">
+          <Icon class="mr-5px" icon="ep:check" />
+          核销
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
+
   <!-- 统计卡片 -->
   <el-row :gutter="16" class="summary">
     <el-col :sm="6" :xs="12" v-loading="loading">
@@ -190,6 +195,9 @@
       @pagination="getList"
     />
   </ContentWrap>
+
+  <!-- 各种操作的弹窗 -->
+  <OrderPickUpForm ref="pickUpForm" @success="getList" />
 </template>
 
 <script lang="ts" setup>
@@ -204,6 +212,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import { DeliveryTypeEnum } from '@/utils/constants'
 import { TradeOrderSummaryRespVO } from '@/api/mall/trade/order'
 import { DeliveryPickUpStoreVO } from '@/api/mall/trade/delivery/pickUpStore'
+import OrderPickUpForm from '@/views/mall/trade/order/form/OrderPickUpForm.vue'
 
 defineOptions({ name: 'PickUpOrder' })
 
@@ -289,6 +298,12 @@ const resetQuery = () => {
 const pickUpStoreList = ref<DeliveryPickUpStoreVO[]>([])
 const getPickUpStoreList = async () => {
   pickUpStoreList.value = await PickUpStoreApi.getListAllSimple()
+}
+
+/** 显示核销表单 */
+const pickUpForm = ref()
+const handlePickup = () => {
+  pickUpForm.value.open()
 }
 
 /** 初始化 **/
