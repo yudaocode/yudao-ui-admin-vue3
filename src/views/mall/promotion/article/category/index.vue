@@ -56,16 +56,6 @@
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
-        <el-button
-          v-hasPermi="['promotion:article-category:export']"
-          :loading="exportLoading"
-          plain
-          type="success"
-          @click="handleExport"
-        >
-          <Icon class="mr-5px" icon="ep:download" />
-          导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -73,19 +63,19 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="编号" prop="id" />
-      <el-table-column align="center" label="分类名称" prop="name" />
+      <el-table-column align="center" label="编号" prop="id" min-width="100" />
+      <el-table-column align="center" label="分类名称" prop="name" min-width="240" />
       <el-table-column label="分类图图" min-width="80">
         <template #default="{ row }">
           <el-image :src="row.picUrl" class="h-30px w-30px" @click="imagePreview(row.picUrl)" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="状态" prop="status">
+      <el-table-column align="center" label="状态" prop="status" min-width="150">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="排序" prop="sort" />
+      <el-table-column align="center" label="排序" prop="sort" min-width="150" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -130,7 +120,6 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import * as ArticleCategoryApi from '@/api/mall/promotion/articleCategory'
 import ArticleCategoryForm from './ArticleCategoryForm.vue'
 import { createImageViewer } from '@/components/ImageViewer'
@@ -201,21 +190,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await ArticleCategoryApi.exportArticleCategory(queryParams)
-    download.excel(data, '分类.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /** 初始化 **/

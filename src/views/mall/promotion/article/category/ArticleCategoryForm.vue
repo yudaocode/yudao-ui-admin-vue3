@@ -37,6 +37,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as ArticleCategoryApi from '@/api/mall/promotion/articleCategory'
+import { CommonStatusEnum } from '@/utils/constants'
 
 defineOptions({ name: 'PromotionArticleCategoryForm' })
 
@@ -111,8 +112,8 @@ const resetForm = () => {
     id: undefined,
     name: undefined,
     picUrl: undefined,
-    status: undefined,
-    sort: undefined
+    status: CommonStatusEnum.ENABLE,
+    sort: 0
   }
   formRef.value?.resetFields()
 }

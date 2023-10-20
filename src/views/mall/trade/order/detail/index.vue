@@ -54,7 +54,7 @@
           </el-button>
           <!-- 到店自提 -->
           <el-button
-            v-if="formData.deliveryType === DeliveryTypeEnum.PICK_UP.type"
+            v-if="formData.deliveryType === DeliveryTypeEnum.PICK_UP.type && showPickUp"
             type="primary"
             @click="handlePickUp"
           >
@@ -235,6 +235,7 @@ import * as DeliveryExpressApi from '@/api/mall/trade/delivery/express'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DeliveryTypeEnum, TradeOrderStatusEnum } from '@/utils/constants'
 import * as DeliveryPickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
+import { propTypes } from '@/utils/propTypes'
 
 defineOptions({ name: 'TradeOrderDetail' })
 
@@ -294,8 +295,12 @@ const handlePickUp = async () => {
 
 /** 获得详情 */
 const { params } = useRoute() // 查询参数
+const props = defineProps({
+  id: propTypes.number.def(undefined), // 订单ID
+  showPickUp: propTypes.bool.def(true) // 显示核销按钮
+})
+const id = (params.id || props.id) as unknown as number
 const getDetail = async () => {
-  const id = params.id as unknown as number
   if (id) {
     const res = (await TradeOrderApi.getOrder(id)) as TradeOrderApi.OrderVO
     // 没有表单信息则关闭页面返回
@@ -395,27 +400,27 @@ onMounted(async () => {
     background-color: #f7f8fa;
 
     &::before {
-      content: ''; /* 必须设置 content 属性 */
       position: absolute;
       top: 10px;
       left: 13px; /* 将伪元素水平居中 */
-      border-width: 8px; /* 调整尖角大小 */
-      border-style: solid;
       border-color: transparent #f7f8fa transparent transparent; /* 尖角颜色，左侧朝向 */
+      border-style: solid;
+      border-width: 8px; /* 调整尖角大小 */
+      content: ''; /* 必须设置 content 属性 */
     }
   }
 
   .dot-node-style {
-    width: 20px;
-    height: 20px;
     position: absolute;
     left: -5px;
     display: flex;
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    color: #fff;
+    border-radius: 50%;
     justify-content: center;
     align-items: center;
-    border-radius: 50%;
-    color: #fff;
-    font-size: 10px;
   }
 }
 </style>

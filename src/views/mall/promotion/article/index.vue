@@ -32,54 +32,10 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="文章作者" prop="author">
-        <el-input
-          v-model="queryParams.author"
-          class="!w-240px"
-          clearable
-          placeholder="请输入文章作者"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状态">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="关联商品" prop="spuId">
-        <el-select
-          v-model="queryParams.spuId"
-          class="!w-240px"
-          placeholder="全部"
-          @keyup.enter="handleQuery"
-        >
-          <el-option v-for="item in spuList" :key="item.id" :label="item.name" :value="item.id" />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="热门" prop="recommendHot">
-        <el-select v-model="queryParams.recommendHot" class="!w-240px" clearable placeholder="全部">
-          <el-option
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="轮播图" prop="recommendBanner">
-        <el-select
-          v-model="queryParams.recommendBanner"
-          class="!w-240px"
-          clearable
-          placeholder="全部"
-        >
-          <el-option
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -115,16 +71,6 @@
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
-        <el-button
-          v-hasPermi="['promotion:article:export']"
-          :loading="exportLoading"
-          plain
-          type="success"
-          @click="handleExport"
-        >
-          <Icon class="mr-5px" icon="ep:download" />
-          导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -132,51 +78,31 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="文章分类" prop="categoryId">
-        <template #default="scope">
-          {{ categoryList.find((item) => item.id === scope.row.categoryId)?.name }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="关联商品" prop="spuId" width="300">
-        <template #default="scope">
-          <el-image
-            :preview-src-list="[spuList.find((item) => item.id === scope.row.spuId)?.picUrl]"
-            :src="spuList.find((item) => item.id === scope.row.spuId)?.picUrl"
-            class="mr-[10px] h-40px w-40px v-middle"
-            preview-teleported
-          />
-          {{ spuList.find((item) => item.id === scope.row.spuId)?.name }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="文章标题" prop="title" />
-      <el-table-column align="center" label="文章作者" prop="author" />
-      <el-table-column align="center" label="文章封面" prop="picUrl">
+      <el-table-column align="center" label="编号" prop="id" min-width="60" />
+      <el-table-column align="center" label="封面" prop="picUrl" min-width="80">
         <template #default="{ row }">
           <el-image :src="row.picUrl" class="h-30px w-30px" @click="imagePreview(row.picUrl)" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="文章简介" prop="introduction" />
-      <el-table-column align="center" label="浏览次数" prop="browseCount" />
-      <el-table-column align="center" label="排序" prop="sort" />
-      <el-table-column align="center" label="状态" prop="status">
+      <el-table-column align="center" label="标题" prop="title" min-width="180" />
+      <el-table-column align="center" label="分类" prop="categoryId" min-width="180">
+        <template #default="scope">
+          {{ categoryList.find((item) => item.id === scope.row.categoryId)?.name }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="浏览量" prop="browseCount" min-width="180" />
+      <el-table-column align="center" label="作者" prop="author" min-width="180" />
+      <el-table-column align="center" label="文章简介" prop="introduction" min-width="250" />
+      <el-table-column align="center" label="排序" prop="sort" min-width="60" />
+      <el-table-column align="center" label="状态" prop="status" min-width="60">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="热门" prop="recommendHot">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.recommendHot" />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="轮播图" prop="recommendBanner">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.recommendBanner" />
         </template>
       </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
-        label="创建时间"
+        label="发布时间"
         prop="createTime"
         width="180px"
       />
@@ -215,9 +141,8 @@
 </template>
 
 <script lang="ts" setup>
-import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import * as ArticleApi from '@/api/mall/promotion/article'
 import ArticleForm from './ArticleForm.vue'
 import * as ArticleCategoryApi from '@/api/mall/promotion/articleCategory'
@@ -236,12 +161,9 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   categoryId: undefined,
-  spuId: undefined,
   title: null,
-  author: null,
   status: undefined,
-  recommendHot: undefined,
-  recommendBanner: undefined,
+  spuId: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -295,25 +217,11 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await ArticleApi.exportArticle(queryParams)
-    download.excel(data, '文章管理.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
-}
-
 const categoryList = ref<ArticleCategoryApi.ArticleCategoryVO[]>([])
 const spuList = ref<ProductSpuApi.Spu[]>([])
 onMounted(async () => {
   await getList()
+  // 加载分类、商品列表
   categoryList.value =
     (await ArticleCategoryApi.getSimpleArticleCategoryList()) as ArticleCategoryApi.ArticleCategoryVO[]
   spuList.value = (await ProductSpuApi.getSpuSimpleList()) as ProductSpuApi.Spu[]

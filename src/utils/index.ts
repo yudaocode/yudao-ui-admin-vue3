@@ -205,6 +205,9 @@ export const floatToFixed2 = (num: number | string | undefined): string => {
     case 1:
       str = f.toString() + '0'
       break
+    case 2:
+      str = f.toString()
+      break
   }
   return str
 }
@@ -232,4 +235,17 @@ export const yuanToFen = (amount: string | number): number => {
  */
 export const fenToYuan = (price: string | number): number => {
   return formatToFraction(price)
+}
+
+/**
+ * 计算环比
+ *
+ * @param value 当前数值
+ * @param reference 对比数值
+ */
+export const calculateRelativeRate = (value?: number, reference?: number) => {
+  // 防止除0
+  if (!reference) return 0
+
+  return ((100 * ((value || 0) - reference)) / reference).toFixed(0)
 }

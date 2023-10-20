@@ -40,8 +40,3 @@ export const updateArticle = async (data: ArticleVO) => {
 export const deleteArticle = async (id: number) => {
   return await request.delete({ url: `/promotion/article/delete?id=` + id })
 }
-
-// 导出文章管理 Excel
-export const exportArticle = async (params) => {
-  return await request.download({ url: `/promotion/article/export-excel`, params })
-}

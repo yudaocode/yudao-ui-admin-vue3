@@ -59,25 +59,9 @@
       <template #header>
         <!-- 标题 -->
         <div class="flex flex-row items-center justify-between">
-          <span>交易状况</span>
+          <CardTitle title="交易状况" />
           <!-- 查询条件 -->
-          <div class="flex flex-row items-center gap-2">
-            <el-radio-group v-model="shortcutDays" @change="handleDateTypeChange">
-              <el-radio-button :label="1">昨天</el-radio-button>
-              <el-radio-button :label="7">最近7天</el-radio-button>
-              <el-radio-button :label="30">最近30天</el-radio-button>
-            </el-radio-group>
-            <el-date-picker
-              v-model="queryParams.times"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              type="daterange"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-              :shortcuts="shortcuts"
-              class="!w-240px"
-              @change="getTradeTrendData"
-            />
+          <ShortcutDateRangePicker ref="shortcutDateRangePicker" @change="getTradeTrendData">
             <el-button
               class="ml-4"
               @click="handleExport"
@@ -86,13 +70,13 @@
             >
               <Icon icon="ep:download" class="mr-1" />导出
             </el-button>
-          </div>
+          </ShortcutDateRangePicker>
         </div>
       </template>
       <!-- 统计值 -->
       <el-row :gutter="16">
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="营业额"
             tooltip="商品支付金额、充值金额"
             icon="fa-solid:yen-sign"
@@ -100,17 +84,17 @@
             icon-bg-color="text-blue-500"
             prefix="￥"
             :decimals="2"
-            :value="fenToYuan(trendSummary?.value?.turnover || 0)"
+            :value="fenToYuan(trendSummary?.value?.turnoverPrice || 0)"
             :percent="
               calculateRelativeRate(
-                trendSummary?.value?.turnover,
-                trendSummary?.reference?.turnover
+                trendSummary?.value?.turnoverPrice,
+                trendSummary?.reference?.turnoverPrice
               )
             "
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="商品支付金额"
             tooltip="用户购买商品的实际支付金额，包括微信支付、余额支付、支付宝支付、线下支付金额（拼团商品在成团之后计入，线下支付订单在后台确认支付后计入）"
             icon="fa-solid:shopping-cart"
@@ -128,7 +112,7 @@
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="充值金额"
             tooltip="用户成功充值的金额"
             icon="fa-solid:money-check-alt"
@@ -146,7 +130,7 @@
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="支出金额"
             tooltip="余额支付金额、支付佣金金额、商品退款金额"
             icon="ep:warning-filled"
@@ -164,7 +148,7 @@
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="余额支付金额"
             tooltip="用户下单时使用余额实际支付的金额"
             icon="fa-solid:wallet"
@@ -172,17 +156,17 @@
             icon-bg-color="text-cyan-500"
             prefix="￥"
             :decimals="2"
-            :value="fenToYuan(trendSummary?.value?.balancePrice || 0)"
+            :value="fenToYuan(trendSummary?.value?.walletPayPrice || 0)"
             :percent="
               calculateRelativeRate(
-                trendSummary?.value?.balancePrice,
-                trendSummary?.reference?.balancePrice
+                trendSummary?.value?.walletPayPrice,
+                trendSummary?.reference?.walletPayPrice
               )
             "
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="支付佣金金额"
             tooltip="后台给推广员支付的推广佣金，以实际支付为准"
             icon="fa-solid:award"
@@ -200,7 +184,7 @@
           />
         </el-col>
         <el-col :md="6" :sm="12" :xs="24">
-          <TradeTrendValue
+          <SummaryCard
             title="商品退款金额"
             tooltip="用户成功退款的商品金额"
             icon="fa-solid:times-circle"
@@ -208,11 +192,11 @@
             icon-bg-color="text-blue-500"
             prefix="￥"
             :decimals="2"
-            :value="fenToYuan(trendSummary?.value?.orderRefundPrice || 0)"
+            :value="fenToYuan(trendSummary?.value?.afterSaleRefundPrice || 0)"
             :percent="
               calculateRelativeRate(
-                trendSummary?.value?.orderRefundPrice,
-                trendSummary?.reference?.orderRefundPrice
+                trendSummary?.value?.afterSaleRefundPrice,
+                trendSummary?.reference?.afterSaleRefundPrice
               )
             "
           />
@@ -228,60 +212,29 @@
 <script lang="ts" setup>
 import * as TradeStatisticsApi from '@/api/mall/statistics/trade'
 import TradeStatisticValue from './components/TradeStatisticValue.vue'
-import TradeTrendValue from './components/TradeTrendValue.vue'
+import SummaryCard from '@/components/SummaryCard/index.vue'
 import { EChartsOption } from 'echarts'
-import {
-  TradeStatisticsComparisonRespVO,
-  TradeSummaryRespVO,
-  TradeTrendReqVO,
-  TradeTrendSummaryRespVO
-} from '@/api/mall/statistics/trade'
-import dayjs from 'dayjs'
-import { fenToYuan } from '@/utils'
-import * as DateUtil from '@/utils/formatTime'
+import { DataComparisonRespVO } from '@/api/mall/statistics/common'
+import { TradeSummaryRespVO, TradeTrendSummaryRespVO } from '@/api/mall/statistics/trade'
+import { calculateRelativeRate, fenToYuan } from '@/utils'
 import download from '@/utils/download'
+import { CardTitle } from '@/components/Card'
 
 /** 交易统计 */
 defineOptions({ name: 'TradeStatistics' })
 
 const message = useMessage() // 消息弹窗
 
-const loading = ref(true) // 加载中
 const trendLoading = ref(true) // 交易状态加载中
 const exportLoading = ref(false) // 导出的加载中
-const queryParams = reactive<TradeTrendReqVO>({ times: ['', ''] }) // 交易状况查询参数
-const shortcutDays = ref(7) // 日期快捷天数（单选按钮组）, 默认7天
-const summary = ref<TradeStatisticsComparisonRespVO<TradeSummaryRespVO>>() // 交易统计数据
-const trendSummary = ref<TradeStatisticsComparisonRespVO<TradeTrendSummaryRespVO>>() // 交易状况统计数据
-
-/** 日期快捷选择 */
-const shortcuts = [
-  {
-    text: '昨天',
-    value: () => DateUtil.getDayRange(new Date(), -1)
-  },
-  {
-    text: '最近7天',
-    value: () => DateUtil.getLast7Days()
-  },
-  {
-    text: '本月',
-    value: () => [dayjs().startOf('M'), dayjs().subtract(1, 'd')]
-  },
-  {
-    text: '最近30天',
-    value: () => DateUtil.getLast30Days()
-  },
-  {
-    text: '最近1年',
-    value: () => DateUtil.getLast1Year()
-  }
-]
+const summary = ref<DataComparisonRespVO<TradeSummaryRespVO>>() // 交易统计数据
+const trendSummary = ref<DataComparisonRespVO<TradeTrendSummaryRespVO>>() // 交易状况统计数据
+const shortcutDateRangePicker = ref()
 
 /** 折线图配置 */
 const lineChartOptions = reactive<EChartsOption>({
   dataset: {
-    dimensions: ['date', 'turnover', 'orderPayPrice', 'rechargePrice', 'expensePrice'],
+    dimensions: ['date', 'turnoverPrice', 'orderPayPrice', 'rechargePrice', 'expensePrice'],
     source: []
   },
   grid: {
@@ -333,33 +286,10 @@ const lineChartOptions = reactive<EChartsOption>({
   }
 }) as EChartsOption
 
-/** 计算环比 */
-const calculateRelativeRate = (value?: number, reference?: number) => {
-  // 防止除0
-  if (!reference) return 0
-
-  return ((100 * ((value || 0) - reference)) / reference).toFixed(0)
-}
-
-/** 设置时间范围 */
-function setTimes() {
-  const beginDate = dayjs().subtract(shortcutDays.value, 'd')
-  const yesterday = dayjs().subtract(1, 'd')
-  queryParams.times = DateUtil.getDateRange(beginDate, yesterday)
-}
-
-/** 处理交易状况查询（日期单选按钮组选择后） */
-const handleDateTypeChange = async () => {
-  // 设置时间范围
-  setTimes()
-  // 查询数据
-  await getTradeTrendData()
-}
-
 /** 处理交易状况查询 */
 const getTradeTrendData = async () => {
   trendLoading.value = true
-  await Promise.all([getTradeTrendSummary(), getTradeTrendList()])
+  await Promise.all([getTradeTrendSummary(), getTradeStatisticsList()])
   trendLoading.value = false
 }
 
@@ -370,24 +300,18 @@ const getTradeStatisticsSummary = async () => {
 
 /** 查询交易状况数据统计 */
 const getTradeTrendSummary = async () => {
-  loading.value = true
-  trendSummary.value = await TradeStatisticsApi.getTradeTrendSummary(queryParams)
-  loading.value = false
+  const times = shortcutDateRangePicker.value.times
+  trendSummary.value = await TradeStatisticsApi.getTradeTrendSummary({ times })
 }
 
 /** 查询交易状况数据列表 */
-const getTradeTrendList = async () => {
-  const times = queryParams.times
-  // 开始与截止在同一天的, 折线图出不来, 需要延长一天
-  if (DateUtil.isSameDay(times[0], times[1])) {
-    // 前天
-    times[0] = DateUtil.formatDate(dayjs(times[0]).subtract(1, 'd'))
-  }
+const getTradeStatisticsList = async () => {
   // 查询数据
-  const list = await TradeStatisticsApi.getTradeTrendList({ times })
+  const times = shortcutDateRangePicker.value.times
+  const list = await TradeStatisticsApi.getTradeStatisticsList({ times })
   // 处理数据
   for (let item of list) {
-    item.turnover = fenToYuan(item.turnover)
+    item.turnoverPrice = fenToYuan(item.turnoverPrice)
     item.orderPayPrice = fenToYuan(item.orderPayPrice)
     item.rechargePrice = fenToYuan(item.rechargePrice)
     item.expensePrice = fenToYuan(item.expensePrice)
@@ -405,7 +329,8 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await TradeStatisticsApi.exportTradeTrend(queryParams)
+    const times = shortcutDateRangePicker.value.times
+    const data = await TradeStatisticsApi.exportTradeStatisticsExcel({ times })
     download.excel(data, '交易状况.xls')
   } catch {
   } finally {
@@ -416,7 +341,6 @@ const handleExport = async () => {
 /** 初始化 **/
 onMounted(async () => {
   await getTradeStatisticsSummary()
-  await handleDateTypeChange()
 })
 </script>
 <style lang="scss" scoped>

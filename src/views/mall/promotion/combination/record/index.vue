@@ -6,7 +6,7 @@
         <div class="flex items-center">
           <div
             class="h-[50px] w-[50px] flex items-center justify-center"
-            style="color: rgb(24, 144, 255); background-color: rgba(24, 144, 255, 0.1)"
+            style="color: rgb(24 144 255); background-color: rgb(24 144 255 / 10%)"
           >
             <Icon :size="23" icon="fa:user-times" />
           </div>
@@ -27,7 +27,7 @@
         <div class="flex items-center">
           <div
             class="h-[50px] w-[50px] flex items-center justify-center"
-            style="color: rgb(162, 119, 255); background-color: rgba(162, 119, 255, 0.1)"
+            style="color: rgb(162 119 255); background-color: rgb(162 119 255 / 10%)"
           >
             <Icon :size="23" icon="fa:user-plus" />
           </div>
@@ -48,7 +48,7 @@
         <div class="flex items-center">
           <div
             class="h-[50px] w-[50px] flex items-center justify-center"
-            style="color: rgb(162, 119, 255); background-color: rgba(162, 119, 255, 0.1)"
+            style="color: rgb(162 119 255); background-color: rgb(162 119 255 / 10%)"
           >
             <Icon :size="23" icon="fa:user-plus" />
           </div>
