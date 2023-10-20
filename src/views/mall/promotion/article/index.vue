@@ -78,23 +78,23 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="编号" prop="id" min-width="60" />
-      <el-table-column align="center" label="封面" prop="picUrl" min-width="80">
+      <el-table-column align="center" label="编号" min-width="60" prop="id" />
+      <el-table-column align="center" label="封面" min-width="80" prop="picUrl">
         <template #default="{ row }">
           <el-image :src="row.picUrl" class="h-30px w-30px" @click="imagePreview(row.picUrl)" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="标题" prop="title" min-width="180" />
-      <el-table-column align="center" label="分类" prop="categoryId" min-width="180">
+      <el-table-column align="center" label="标题" min-width="180" prop="title" />
+      <el-table-column align="center" label="分类" min-width="180" prop="categoryId">
         <template #default="scope">
           {{ categoryList.find((item) => item.id === scope.row.categoryId)?.name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="浏览量" prop="browseCount" min-width="180" />
-      <el-table-column align="center" label="作者" prop="author" min-width="180" />
-      <el-table-column align="center" label="文章简介" prop="introduction" min-width="250" />
-      <el-table-column align="center" label="排序" prop="sort" min-width="60" />
-      <el-table-column align="center" label="状态" prop="status" min-width="60">
+      <el-table-column align="center" label="浏览量" min-width="180" prop="browseCount" />
+      <el-table-column align="center" label="作者" min-width="180" prop="author" />
+      <el-table-column align="center" label="文章简介" min-width="250" prop="introduction" />
+      <el-table-column align="center" label="排序" min-width="60" prop="sort" />
+      <el-table-column align="center" label="状态" min-width="60" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
@@ -167,7 +167,6 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 /** 文章封面预览 */
 const imagePreview = (imgUrl: string) => {
   createImageViewer({

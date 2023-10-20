@@ -40,7 +40,6 @@
             <UploadImg v-model="formData.picUrl" height="80px" />
           </el-form-item>
         </el-col>
-        <!-- TODO @puhui999：浏览次数，不能修改 -->
         <el-col :span="12">
           <el-form-item label="排序" prop="sort">
             <el-input-number v-model="formData.sort" :min="0" clearable controls-position="right" />
@@ -57,19 +56,6 @@
                 {{ dict.label }}
               </el-radio>
             </el-radio-group>
-          </el-form-item>
-        </el-col>
-        <!-- TODO @puhui999：可以使用 SpuTableSelect -->
-        <el-col :span="12">
-          <el-form-item label="商品关联" prop="spuId">
-            <el-select v-model="formData.spuId" placeholder="请选择">
-              <el-option
-                v-for="item in spuList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -99,6 +85,14 @@
           </el-form-item>
         </el-col>
         <el-col :span="24">
+          <el-form-item label="商品关联" prop="spuId">
+            <el-tag v-if="formData.spuId" class="mr-10px">
+              {{ spuList.find((item) => item.id === formData.spuId)?.name }}
+            </el-tag>
+            <el-button @click="spuSelectRef?.open()">选择商品</el-button>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
           <el-form-item label="文章内容">
             <Editor v-model="formData.content" height="150px" />
           </el-form-item>
@@ -110,12 +104,14 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+  <SpuSelect ref="spuSelectRef" @confirm="selectSpu" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 import * as ArticleApi from '@/api/mall/promotion/article'
 import * as ArticleCategoryApi from '@/api/mall/promotion/articleCategory'
 import * as ProductSpuApi from '@/api/mall/product/spu'
+import { SpuSelect } from '@/views/mall/promotion/components'
 
 defineOptions({ name: 'PromotionArticleForm' })
 
@@ -135,7 +131,7 @@ const formData = ref({
   introduction: undefined,
   sort: 0,
   status: 0,
-  spuId: undefined,
+  spuId: 0,
   recommendHot: false,
   recommendBanner: false,
   content: undefined
@@ -152,7 +148,10 @@ const formRules = reactive({
   content: [{ required: true, message: '文章内容不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-
+const spuSelectRef = ref() // 商品和属性选择 Ref
+const selectSpu = (spuId: number) => {
+  formData.value.spuId = spuId
+}
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -208,7 +207,7 @@ const resetForm = () => {
     introduction: undefined,
     sort: 0,
     status: 0,
-    spuId: undefined,
+    spuId: 0,
     recommendHot: false,
     recommendBanner: false,
     content: undefined
