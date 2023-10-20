@@ -41,16 +41,11 @@
         </el-form-item>
       </el-col>
       <el-col :span="24">
-        <!--   TODO @puhui999：tag展示暂时不考虑排序；支持拖动排序 -->
         <el-form-item label="活动优先级">
-          <el-tag
-            v-for="type in promotionTypes"
-            :key="type.value as number"
-            :type="type.colorType"
-            class="mr-[10px]"
-          >
-            {{ type.label }}
-          </el-tag>
+          <ActivityOrdersSort
+            v-model:activity-orders="formData.activityOrders"
+            :promotion-types="promotionTypes"
+          />
         </el-form-item>
       </el-col>
       <el-col :span="24">
@@ -115,6 +110,7 @@ import { copyValueToTarget } from '@/utils'
 import { otherSettingsSchema } from './spu.data'
 import { DICT_TYPE, DictDataType, getIntDictOptions } from '@/utils/dict'
 import CouponSelect from './CouponSelect.vue'
+import ActivityOrdersSort from './ActivityOrdersSort.vue'
 
 defineOptions({ name: 'OtherSettingsForm' })
 
