@@ -62,14 +62,14 @@ const otherSettingsRef = ref() // 其他设置Ref
 // spu 表单数据
 const formData = ref<ProductSpuApi.Spu>({
   name: '', // 商品名称
-  categoryId: null, // 商品分类
+  categoryId: undefined, // 商品分类
   keyword: '', // 关键字
-  unit: null, // 单位
+  unit: undefined, // 单位
   picUrl: '', // 商品封面图
   sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
-  deliveryTemplateId: null, // 运费模版
-  brandId: null, // 商品品牌
+  deliveryTemplateId: undefined, // 运费模版
+  brandId: undefined, // 商品品牌
   specType: false, // 商品规格
   subCommissionType: false, // 分销类型
   skus: [
@@ -94,7 +94,8 @@ const formData = ref<ProductSpuApi.Spu>({
   recommendBenefit: false, // 是否优惠
   recommendBest: false, // 是否精品
   recommendNew: false, // 是否新品
-  recommendGood: false // 是否优品
+  recommendGood: false, // 是否优品
+  giveCouponTemplate: [] // 赠送的优惠券
 })
 
 /** 获得详情 */

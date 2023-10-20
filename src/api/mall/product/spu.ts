@@ -25,6 +25,11 @@ export interface Sku {
   salesCount?: number // 商品销量
 }
 
+export interface GiveCouponTemplate {
+  id?: number
+  name?: string // 优惠券名称
+}
+
 export interface Spu {
   id?: number
   name?: string // 商品名称
@@ -55,6 +60,7 @@ export interface Spu {
   stock?: number // 商品库存
   createTime?: Date // 商品创建时间
   status?: number // 商品状态
+  giveCouponTemplate?: GiveCouponTemplate[]
 }
 
 // 获得 Spu 列表

@@ -82,16 +82,15 @@
       {{ row.recommendGood ? '是' : '否' }}
     </template>
     <template #activityOrders>
-      <el-tag>默认</el-tag>
-      <el-tag class="ml-2" type="success">秒杀</el-tag>
-      <el-tag class="ml-2" type="info">砍价</el-tag>
-      <el-tag class="ml-2" type="warning">拼团</el-tag>
+      <el-tag v-for="coupon in couponTemplateList" :key="coupon.id as number" class="mr-[10px]">
+        {{ coupon.name }}
+      </el-tag>
     </template>
   </Descriptions>
-  <CouponSelect ref="couponSelectRef" />
+  <CouponSelect ref="couponSelectRef" v-model:multiple-selection="couponTemplateList" />
 </template>
 <script lang="ts" setup>
-import type { Spu } from '@/api/mall/product/spu'
+import type { GiveCouponTemplate, Spu } from '@/api/mall/product/spu'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
@@ -113,8 +112,8 @@ const props = defineProps({
   activeName: propTypes.string.def(''),
   isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
-const couponSelectRef = ref() // 优惠卷模版选择
-const couponTemplateList = ref<{ id: number; name: string }[]>([]) // 选择的优惠卷
+const couponSelectRef = ref() // 优惠卷模版选择 Ref
+const couponTemplateList = ref<GiveCouponTemplate[]>([]) // 选择的优惠卷
 const openCouponSelect = () => {
   couponSelectRef.value?.open()
 }
@@ -129,7 +128,8 @@ const formData = ref<Spu>({
   recommendBenefit: false, // 是否优惠
   recommendBest: false, // 是否精品
   recommendNew: false, // 是否新品
-  recommendGood: false // 是否优品
+  recommendGood: false, // 是否优品
+  giveCouponTemplate: [] // 赠送的优惠券
 })
 // 表单规则
 const rules = reactive({
@@ -163,6 +163,9 @@ watch(
       return
     }
     copyValueToTarget(formData.value, data)
+    if (data.giveCouponTemplate) {
+      couponTemplateList.value = data.giveCouponTemplate
+    }
     recommendOptions.forEach(({ value }) => {
       if (formData.value[value] && !checkboxGroup.value.includes(value)) {
         checkboxGroup.value.push(value)
@@ -189,6 +192,7 @@ const validate = async () => {
       throw new Error('商品其他设置未完善！！')
     } else {
       // 校验通过更新数据
+      formData.value.giveCouponTemplate = couponTemplateList.value
       Object.assign(props.propFormData, formData.value)
     }
   })
