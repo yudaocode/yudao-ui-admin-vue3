@@ -96,7 +96,7 @@ export const otherSettingsSchema = reactive<CrudSchema[]>([
   },
   {
     label: '赠送的优惠劵',
-    field: 'giveCouponTemplate'
+    field: 'giveCouponTemplates'
   },
   {
     label: '活动显示排序',

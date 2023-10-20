@@ -95,7 +95,8 @@ const formData = ref<ProductSpuApi.Spu>({
   recommendBest: false, // 是否精品
   recommendNew: false, // 是否新品
   recommendGood: false, // 是否优品
-  giveCouponTemplate: [] // 赠送的优惠券
+  activityOrders: [], // 活动排序
+  giveCouponTemplates: [] // 赠送的优惠券
 })
 
 /** 获得详情 */
@@ -109,7 +110,7 @@ const getDetail = async () => {
     try {
       const res = (await ProductSpuApi.getSpu(id)) as ProductSpuApi.Spu
       res.skus?.forEach((item) => {
-        if (isDetail.value === true) {
+        if (isDetail.value) {
           item.price = floatToFixed2(item.price)
           item.marketPrice = floatToFixed2(item.marketPrice)
           item.costPrice = floatToFixed2(item.costPrice)

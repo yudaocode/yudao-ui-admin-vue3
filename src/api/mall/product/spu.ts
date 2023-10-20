@@ -60,7 +60,8 @@ export interface Spu {
   stock?: number // 商品库存
   createTime?: Date // 商品创建时间
   status?: number // 商品状态
-  giveCouponTemplate?: GiveCouponTemplate[]
+  activityOrders: number[] // 活动排序
+  giveCouponTemplates: GiveCouponTemplate[] // 优惠卷
 }
 
 // 获得 Spu 列表

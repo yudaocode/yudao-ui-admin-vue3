@@ -44,7 +44,7 @@
         <!--   TODO @puhui999：tag展示暂时不考虑排序；支持拖动排序 -->
         <el-form-item label="活动优先级">
           <el-tag
-            v-for="type in getIntDictOptions(DICT_TYPE.PROMOTION_TYPE_ENUM)"
+            v-for="type in promotionTypes"
             :key="type.value as number"
             :type="type.colorType"
             class="mr-[10px]"
@@ -55,7 +55,11 @@
       </el-col>
       <el-col :span="24">
         <el-form-item label="赠送优惠劵">
-          <el-tag v-for="coupon in couponTemplateList" :key="coupon.id as number" class="mr-[10px]">
+          <el-tag
+            v-for="coupon in formData.giveCouponTemplates"
+            :key="coupon.id as number"
+            class="mr-[10px]"
+          >
             {{ coupon.name }}
           </el-tag>
           <el-button @click="openCouponSelect">选择优惠券</el-button>
@@ -67,35 +71,49 @@
   <!-- 情况二：详情 -->
   <Descriptions v-if="isDetail" :data="formData" :schema="allSchemas.detailSchema">
     <template #recommendHot="{ row }">
-      {{ row.recommendHot ? '是' : '否' }}
+      <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.recommendHot" />
     </template>
     <template #recommendBenefit="{ row }">
-      {{ row.recommendBenefit ? '是' : '否' }}
+      <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.recommendBenefit" />
     </template>
     <template #recommendBest="{ row }">
-      {{ row.recommendBest ? '是' : '否' }}
+      <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.recommendBest" />
     </template>
     <template #recommendNew="{ row }">
-      {{ row.recommendNew ? '是' : '否' }}
+      <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.recommendNew" />
     </template>
     <template #recommendGood="{ row }">
-      {{ row.recommendGood ? '是' : '否' }}
+      <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.recommendGood" />
     </template>
-    <template #activityOrders>
-      <el-tag v-for="coupon in couponTemplateList" :key="coupon.id as number" class="mr-[10px]">
+    <template #activityOrders="{ row }">
+      <el-tag
+        v-for="activityType in row.activityOrders"
+        :key="activityType"
+        :type="promotionTypes.find((item) => item.value === activityType)?.colorType"
+        class="mr-[10px]"
+      >
+        {{ promotionTypes.find((item) => item.value === activityType)?.label }}
+      </el-tag>
+    </template>
+    <template #giveCouponTemplates="{ row }">
+      <el-tag
+        v-for="coupon in row.giveCouponTemplates"
+        :key="coupon.id as number"
+        class="mr-[10px]"
+      >
         {{ coupon.name }}
       </el-tag>
     </template>
   </Descriptions>
-  <CouponSelect ref="couponSelectRef" v-model:multiple-selection="couponTemplateList" />
+  <CouponSelect ref="couponSelectRef" v-model:multiple-selection="formData.giveCouponTemplates" />
 </template>
 <script lang="ts" setup>
-import type { GiveCouponTemplate, Spu } from '@/api/mall/product/spu'
+import type { Spu } from '@/api/mall/product/spu'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
 import { otherSettingsSchema } from './spu.data'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, DictDataType, getIntDictOptions } from '@/utils/dict'
 import CouponSelect from './CouponSelect.vue'
 
 defineOptions({ name: 'OtherSettingsForm' })
@@ -112,11 +130,15 @@ const props = defineProps({
   activeName: propTypes.string.def(''),
   isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
+
+// 优惠卷
 const couponSelectRef = ref() // 优惠卷模版选择 Ref
-const couponTemplateList = ref<GiveCouponTemplate[]>([]) // 选择的优惠卷
 const openCouponSelect = () => {
   couponSelectRef.value?.open()
 }
+
+// 活动优先级处理
+const promotionTypes = ref<DictDataType[]>(getIntDictOptions(DICT_TYPE.PROMOTION_TYPE_ENUM))
 
 const otherSettingsFormRef = ref() // 表单Ref
 // 表单数据
@@ -129,7 +151,8 @@ const formData = ref<Spu>({
   recommendBest: false, // 是否精品
   recommendNew: false, // 是否新品
   recommendGood: false, // 是否优品
-  giveCouponTemplate: [] // 赠送的优惠券
+  activityOrders: [], // 活动排序
+  giveCouponTemplates: [] // 赠送的优惠券
 })
 // 表单规则
 const rules = reactive({
@@ -163,9 +186,6 @@ watch(
       return
     }
     copyValueToTarget(formData.value, data)
-    if (data.giveCouponTemplate) {
-      couponTemplateList.value = data.giveCouponTemplate
-    }
     recommendOptions.forEach(({ value }) => {
       if (formData.value[value] && !checkboxGroup.value.includes(value)) {
         checkboxGroup.value.push(value)
@@ -192,7 +212,6 @@ const validate = async () => {
       throw new Error('商品其他设置未完善！！')
     } else {
       // 校验通过更新数据
-      formData.value.giveCouponTemplate = couponTemplateList.value
       Object.assign(props.propFormData, formData.value)
     }
   })
