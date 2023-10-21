@@ -47,12 +47,7 @@
       <el-form-item>
         <el-button @click="handleQuery"> <Icon icon="ep:search" class="mr-5px" />搜索 </el-button>
         <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" />重置 </el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['system:tenant:create']"
-        >
+        <el-button type="primary" plain @click="openForm('create')" v-hasPermi="['pay:app:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
@@ -266,7 +261,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['system:tenant:update']"
+            v-hasPermi="['pay:app:update']"
           >
             编辑
           </el-button>
@@ -274,7 +269,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['system:tenant:delete']"
+            v-hasPermi="['pay:app:delete']"
           >
             删除
           </el-button>

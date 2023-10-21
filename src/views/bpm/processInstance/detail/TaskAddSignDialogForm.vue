@@ -22,12 +22,12 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button :disabled="formLoading" type="primary" @click="submitForm('before')"
-        >向前加签</el-button
-      >
-      <el-button :disabled="formLoading" type="primary" @click="submitForm('after')"
-        >向后加签</el-button
-      >
+      <el-button :disabled="formLoading" type="primary" @click="submitForm('before')">
+        向前加签
+      </el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm('after')">
+        向后加签
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
