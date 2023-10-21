@@ -8,6 +8,10 @@
       :schema="allSchemas.formSchema"
     >
       <!-- 先选择 -->
+      <!-- TODO @zhangshuai：商品允许选择多个 -->
+      <!-- TODO @zhangshuai：选择后的 SKU，需要后面加个【删除】按钮 -->
+      <!-- TODO @zhangshuai：展示的金额，貌似不对，大了 100 倍，需要看下 -->
+      <!-- TODO @zhangshuai：“优惠类型”，是每个 SKU 可以自定义已设置哈。因为每个商品 SKU 的折扣和减少价格，可能不同。具体交互，可以注册一个 youzan.com 看看；它的交互方式是，如果设置了“优惠金额”，则算“减价”；如果再次设置了“折扣百分比”，就算“打折”；这样形成一个互斥的优惠类型 -->
       <template #spuId>
         <el-button @click="spuSelectRef.open()">选择商品</el-button>
         <SpuAndSkuList
