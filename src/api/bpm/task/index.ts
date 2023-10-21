@@ -63,19 +63,19 @@ export const delegateTask = async (data) => {
  * 加签
  */
 export const taskAddSign = async (data) => {
-  return await request.put({ url: '/bpm/task/add-sign', data })
+  return await request.put({ url: '/bpm/task/create-sign', data })
 }
 
 /**
  * 获取减签任务列表
  */
 export const getChildrenTaskList = async (id: string) => {
-  return await request.get({ url: '/bpm/task/get-children-task-list?taskId=' + id })
+  return await request.get({ url: '/bpm/task/children-list?taskId=' + id })
 }
 
 /**
  * 减签
  */
 export const taskSubSign = async (data) => {
-  return await request.put({ url: '/bpm/task/sub-sign', data })
+  return await request.delete({ url: '/bpm/task/delete-sign', data })
 }
