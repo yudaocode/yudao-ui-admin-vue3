@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { DescriptionsItemLabel } from '@/components/Descriptions'
 import * as UserApi from '@/api/member/user'
-import * as WalletApi from '@/api/pay/wallet'
+import * as WalletApi from '@/api/pay/wallet/balance'
 import { UserTypeEnum } from '@/utils/constants'
 import { fenToYuan } from '@/utils'
 
@@ -65,7 +65,7 @@ const getUserWallet = async () => {
     wallet.value = WALLET_INIT_DATA
     return
   }
-  const params = { userId: props.user.id, userType: UserTypeEnum.MEMBER }
+  const params = { userId: props.user.id }
   wallet.value = (await WalletApi.getWallet(params)) || WALLET_INIT_DATA
 }
 
