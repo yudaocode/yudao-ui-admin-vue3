@@ -201,20 +201,23 @@ const resetQuery = () => {
   queryFormRef?.value?.resetFields()
   handleQuery()
 }
+
 /** 打开弹窗 */
 const open = async () => {
   dialogVisible.value = true
   resetQuery()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
 const handleSelectionChange = (val: CouponTemplateApi.CouponTemplateVO[]) => {
   emit(
     'update:multipleSelection',
     val.map((item) => ({ id: item.id, name: item.name }))
   )
 }
+
 const submitForm = () => {
   dialogVisible.value = false
 }
+// TODO @puhui999：提前 todo，先不用改；未来单独成组件，其它模块可以服用；例如说，满减送，可以选择优惠劵；
 </script>
-<style lang="scss" scoped></style>

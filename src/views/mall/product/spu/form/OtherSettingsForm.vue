@@ -42,6 +42,7 @@
       </el-col>
       <el-col :span="24">
         <el-form-item label="活动优先级">
+          <!-- TODO @puhui999：这个目前先写死；主要是，这个优惠类型不好用 promotion_type_enum；因为优惠劵、会员折扣都算。 -->
           <ActivityOrdersSort
             v-model:activity-orders="formData.activityOrders"
             :promotion-types="promotionTypes"
