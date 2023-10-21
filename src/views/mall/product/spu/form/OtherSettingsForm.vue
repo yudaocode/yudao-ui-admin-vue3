@@ -41,18 +41,23 @@
         </el-form-item>
       </el-col>
       <el-col :span="24">
-        <!--   TODO @puhui999：tag展示暂时不考虑排序；支持拖动排序 -->
         <el-form-item label="活动优先级">
-          <el-tag>默认</el-tag>
-          <el-tag class="ml-2" type="success">秒杀</el-tag>
-          <el-tag class="ml-2" type="info">砍价</el-tag>
-          <el-tag class="ml-2" type="warning">拼团</el-tag>
+          <ActivityOrdersSort
+            v-model:activity-orders="formData.activityOrders"
+            :promotion-types="promotionTypes"
+          />
         </el-form-item>
       </el-col>
-      <!-- TODO @puhui999：等优惠劵 ok 在搞 -->
       <el-col :span="24">
         <el-form-item label="赠送优惠劵">
-          <el-button>选择优惠券</el-button>
+          <el-tag
+            v-for="coupon in formData.giveCouponTemplates"
+            :key="coupon.id as number"
+            class="mr-[10px]"
+          >
+            {{ coupon.name }}
+          </el-tag>
+          <el-button @click="openCouponSelect">选择优惠券</el-button>
         </el-form-item>
       </el-col>
     </el-row>
@@ -61,27 +66,41 @@
   <!-- 情况二：详情 -->
   <Descriptions v-if="isDetail" :data="formData" :schema="allSchemas.detailSchema">
     <template #recommendHot="{ row }">
-      {{ row.recommendHot ? '是' : '否' }}
+      <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.recommendHot" />
     </template>
     <template #recommendBenefit="{ row }">
-      {{ row.recommendBenefit ? '是' : '否' }}
+      <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.recommendBenefit" />
     </template>
     <template #recommendBest="{ row }">
-      {{ row.recommendBest ? '是' : '否' }}
+      <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.recommendBest" />
     </template>
     <template #recommendNew="{ row }">
-      {{ row.recommendNew ? '是' : '否' }}
+      <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.recommendNew" />
     </template>
     <template #recommendGood="{ row }">
-      {{ row.recommendGood ? '是' : '否' }}
+      <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="row.recommendGood" />
     </template>
-    <template #activityOrders>
-      <el-tag>默认</el-tag>
-      <el-tag class="ml-2" type="success">秒杀</el-tag>
-      <el-tag class="ml-2" type="info">砍价</el-tag>
-      <el-tag class="ml-2" type="warning">拼团</el-tag>
+    <template #activityOrders="{ row }">
+      <el-tag
+        v-for="activityType in row.activityOrders"
+        :key="activityType"
+        :type="promotionTypes.find((item) => item.value === activityType)?.colorType"
+        class="mr-[10px]"
+      >
+        {{ promotionTypes.find((item) => item.value === activityType)?.label }}
+      </el-tag>
+    </template>
+    <template #giveCouponTemplates="{ row }">
+      <el-tag
+        v-for="coupon in row.giveCouponTemplates"
+        :key="coupon.id as number"
+        class="mr-[10px]"
+      >
+        {{ coupon.name }}
+      </el-tag>
     </template>
   </Descriptions>
+  <CouponSelect ref="couponSelectRef" v-model:multiple-selection="formData.giveCouponTemplates" />
 </template>
 <script lang="ts" setup>
 import type { Spu } from '@/api/mall/product/spu'
@@ -89,6 +108,9 @@ import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
 import { otherSettingsSchema } from './spu.data'
+import { DICT_TYPE, DictDataType, getIntDictOptions } from '@/utils/dict'
+import CouponSelect from './CouponSelect.vue'
+import ActivityOrdersSort from './ActivityOrdersSort.vue'
 
 defineOptions({ name: 'OtherSettingsForm' })
 
@@ -105,6 +127,15 @@ const props = defineProps({
   isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
 
+// 优惠卷
+const couponSelectRef = ref() // 优惠卷模版选择 Ref
+const openCouponSelect = () => {
+  couponSelectRef.value?.open()
+}
+
+// 活动优先级处理
+const promotionTypes = ref<DictDataType[]>(getIntDictOptions(DICT_TYPE.PROMOTION_TYPE_ENUM))
+
 const otherSettingsFormRef = ref() // 表单Ref
 // 表单数据
 const formData = ref<Spu>({
@@ -115,7 +146,9 @@ const formData = ref<Spu>({
   recommendBenefit: false, // 是否优惠
   recommendBest: false, // 是否精品
   recommendNew: false, // 是否新品
-  recommendGood: false // 是否优品
+  recommendGood: false, // 是否优品
+  activityOrders: [], // 活动排序
+  giveCouponTemplates: [] // 赠送的优惠券
 })
 // 表单规则
 const rules = reactive({

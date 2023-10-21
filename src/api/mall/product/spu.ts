@@ -25,17 +25,22 @@ export interface Sku {
   salesCount?: number // 商品销量
 }
 
+export interface GiveCouponTemplate {
+  id?: number
+  name?: string // 优惠券名称
+}
+
 export interface Spu {
   id?: number
   name?: string // 商品名称
-  categoryId?: number | null // 商品分类
+  categoryId?: number | undefined // 商品分类
   keyword?: string // 关键字
-  unit?: number | null // 单位
+  unit?: number | undefined // 单位
   picUrl?: string // 商品封面图
   sliderPicUrls?: string[] // 商品轮播图
   introduction?: string // 商品简介
-  deliveryTemplateId?: number | null // 运费模版
-  brandId?: number | null // 商品品牌编号
+  deliveryTemplateId?: number | undefined // 运费模版
+  brandId?: number | undefined // 商品品牌编号
   specType?: boolean // 商品规格
   subCommissionType?: boolean // 分销类型
   skus?: Sku[] // sku数组
@@ -55,6 +60,8 @@ export interface Spu {
   stock?: number // 商品库存
   createTime?: Date // 商品创建时间
   status?: number // 商品状态
+  activityOrders: number[] // 活动排序
+  giveCouponTemplates: GiveCouponTemplate[] // 优惠卷
 }
 
 // 获得 Spu 列表
