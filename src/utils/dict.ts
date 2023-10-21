@@ -183,5 +183,9 @@ export enum DICT_TYPE {
   PROMOTION_ACTIVITY_STATUS = 'promotion_activity_status', // 优惠活动的状态
   PROMOTION_CONDITION_TYPE = 'promotion_condition_type', // 营销的条件类型枚举
   PROMOTION_BARGAIN_RECORD_STATUS = 'promotion_bargain_record_status', // 砍价记录的状态
-  PROMOTION_COMBINATION_RECORD_STATUS = 'promotion_combination_record_status' // 拼团记录的状态
+  PROMOTION_COMBINATION_RECORD_STATUS = 'promotion_combination_record_status', // 拼团记录的状态
+
+  // ========== CRM - 客户管理模块 ==========
+  CRM_RECEIVABLE_CHECK_STATUS = 'crm_receivable_check_status',
+  CRM_RETURN_TYPE = 'crm_return_type'
 }
