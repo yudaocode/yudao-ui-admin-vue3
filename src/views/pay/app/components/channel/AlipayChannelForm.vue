@@ -69,6 +69,16 @@
           </el-form-item>
         </div>
         <div v-if="formData.config.mode === 2">
+          <el-form-item label-width="180px" label="应用私钥" prop="config.privateKey">
+            <el-input
+              type="textarea"
+              :autosize="{ minRows: 8, maxRows: 8 }"
+              v-model="formData.config.privateKey"
+              placeholder="请输入应用私钥"
+              clearable
+              :style="{ width: '100%' }"
+            />
+          </el-form-item>
           <el-form-item label-width="180px" label="商户公钥应用证书" prop="config.appCertContent">
             <el-input
               v-model="formData.config.appCertContent"

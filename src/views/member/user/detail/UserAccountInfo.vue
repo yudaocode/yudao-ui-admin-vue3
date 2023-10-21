@@ -65,7 +65,7 @@ const getUserWallet = async () => {
     wallet.value = WALLET_INIT_DATA
     return
   }
-  const params = { userId: props.user.id, userType: UserTypeEnum.MEMBER }
+  const params = { userId: props.user.id }
   wallet.value = (await WalletApi.getWallet(params)) || WALLET_INIT_DATA
 }
 

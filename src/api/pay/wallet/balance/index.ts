@@ -3,7 +3,6 @@ import request from '@/config/axios'
 /** 用户钱包查询参数 */
 export interface PayWalletUserReqVO {
   userId: number
-  userType: number
 }
 /** 钱包 VO */
 export interface WalletVO {
