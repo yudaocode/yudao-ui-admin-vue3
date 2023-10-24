@@ -42,6 +42,19 @@
           </el-form-item>
         </el-col>
         <el-col :span="24">
+          <el-form-item label="定位" prop="position">
+            <el-radio-group v-model="formData.position">
+              <el-radio
+                v-for="dict in getIntDictOptions(DICT_TYPE.BANNER_POSITION)"
+                :key="dict.value"
+                :label="dict.value"
+              >
+                {{ dict.label }}
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
           <el-form-item label="描述" prop="memo">
             <el-input v-model="formData.memo" placeholder="请输入描述" type="textarea" />
           </el-form-item>
@@ -70,6 +83,7 @@ const formData = ref({
   title: undefined,
   picUrl: undefined,
   status: 0,
+  position: 1,
   url: undefined,
   sort: 0,
   memo: undefined
@@ -133,6 +147,7 @@ const resetForm = () => {
     title: undefined,
     picUrl: undefined,
     status: 0,
+    position: 1,
     url: undefined,
     sort: 0,
     memo: undefined
