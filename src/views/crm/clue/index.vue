@@ -8,62 +8,12 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="转化状态" prop="transformStatus">
-        <el-select
-          v-model="queryParams.transformStatus"
-          placeholder="请选择转化状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="跟进状态" prop="followUpStatus">
-        <el-select
-          v-model="queryParams.followUpStatus"
-          placeholder="请选择跟进状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item label="线索名称" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入线索名称"
           clearable
           @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="客户id" prop="customerId">
-        <el-input
-          v-model="queryParams.customerId"
-          placeholder="请输入客户id"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="下次联系时间" prop="contactNextTime">
-        <el-date-picker
-          v-model="queryParams.contactNextTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
         />
       </el-form-item>
@@ -82,46 +32,6 @@
           placeholder="请输入手机号"
           clearable
           @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="地址" prop="address">
-        <el-input
-          v-model="queryParams.address"
-          placeholder="请输入地址"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="负责人" prop="ownerUserId">
-        <el-input
-          v-model="queryParams.ownerUserId"
-          placeholder="请输入负责人"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="最后跟进时间" prop="contactLastTime">
-        <el-date-picker
-          v-model="queryParams.contactLastTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
         />
       </el-form-item>
@@ -238,17 +148,9 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  transformStatus: null,
-  followUpStatus: null,
   name: null,
-  customerId: null,
-  contactNextTime: [],
   telephone: null,
-  mobile: null,
-  address: null,
-  ownerUserId: null,
-  contactLastTime: [],
-  createTime: []
+  mobile: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中

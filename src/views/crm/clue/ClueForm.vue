@@ -7,28 +7,6 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="转化状态" prop="transformStatus">
-        <el-radio-group v-model="formData.transformStatus">
-          <el-radio
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="跟进状态" prop="followUpStatus">
-        <el-radio-group v-model="formData.followUpStatus">
-          <el-radio
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
       <el-form-item label="线索名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入线索名称" />
       </el-form-item>
@@ -80,8 +58,6 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  transformStatus: undefined,
-  followUpStatus: undefined,
   name: undefined,
   customerId: undefined,
   contactNextTime: undefined,
@@ -93,10 +69,8 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
-  transformStatus: [{ required: true, message: '转化状态不能为空', trigger: 'blur' }],
-  followUpStatus: [{ required: true, message: '跟进状态不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '线索名称不能为空', trigger: 'blur' }],
-  customerId: [{ required: true, message: '客户id不能为空', trigger: 'blur' }]
+  customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -148,8 +122,6 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    transformStatus: undefined,
-    followUpStatus: undefined,
     name: undefined,
     customerId: undefined,
     contactNextTime: undefined,
