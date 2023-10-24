@@ -9,12 +9,12 @@
     >
       <el-row>
         <el-col :span="24">
-          <el-form-item label="Banner标题" prop="title">
-            <el-input v-model="formData.title" placeholder="请输入Banner标题" />
+          <el-form-item label="标题" prop="title">
+            <el-input v-model="formData.title" placeholder="请输入 Banner 标题" />
           </el-form-item>
         </el-col>
         <el-col :span="24">
-          <el-form-item label="图片">
+          <el-form-item label="图片" prop="picUrl">
             <UploadImg v-model="formData.picUrl" />
           </el-form-item>
         </el-col>
@@ -42,7 +42,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="24">
-          <el-form-item label="定位" prop="position">
+          <el-form-item label="位置" prop="position">
             <el-radio-group v-model="formData.position">
               <el-radio
                 v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_BANNER_POSITION)"
@@ -89,9 +89,11 @@ const formData = ref({
   memo: undefined
 })
 const formRules = reactive({
-  title: [{ required: true, message: 'Banner标题不能为空', trigger: 'blur' }],
-  picUrl: [{ required: true, message: '图片URL不能为空', trigger: 'blur' }],
+  title: [{ required: true, message: 'Banner 标题不能为空', trigger: 'blur' }],
+  picUrl: [{ required: true, message: '图片 URL 不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '活动状态不能为空', trigger: 'blur' }],
+  position: [{ required: true, message: '位置不能为空', trigger: 'blur' }],
+  sort: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
   url: [{ required: true, message: '跳转地址不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
