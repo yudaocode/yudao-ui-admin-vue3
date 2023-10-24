@@ -76,7 +76,7 @@
       </el-table-column>
       <el-table-column align="center" label="定位" prop="position">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BANNER_POSITION" :value="scope.row.position" />
+          <dict-tag :type="DICT_TYPE.PROMOTION_BANNER_POSITION" :value="scope.row.position" />
         </template>
       </el-table-column>
       <el-table-column align="center" label="跳转地址" prop="url" />

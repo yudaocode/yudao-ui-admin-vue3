@@ -109,57 +109,22 @@ const props = defineProps({
 const promotionTypes = ref<DictDataType[]>([
   {
     dictType: 'promotionTypes',
-    label: '秒杀活动',
+    label: '秒杀',
     value: 1,
     colorType: 'warning',
     cssClass: ''
   },
   {
     dictType: 'promotionTypes',
-    label: '砍价活动',
+    label: '砍价',
     value: 2,
     colorType: 'warning',
     cssClass: ''
   },
   {
     dictType: 'promotionTypes',
-    label: '拼团活动',
+    label: '拼团',
     value: 3,
-    colorType: 'warning',
-    cssClass: ''
-  },
-  {
-    dictType: 'promotionTypes',
-    label: '限时折扣',
-    value: 4,
-    colorType: 'warning',
-    cssClass: ''
-  },
-  {
-    dictType: 'promotionTypes',
-    label: '满减送',
-    value: 5,
-    colorType: 'warning',
-    cssClass: ''
-  },
-  {
-    dictType: 'promotionTypes',
-    label: '会员折扣',
-    value: 6,
-    colorType: 'warning',
-    cssClass: ''
-  },
-  {
-    dictType: 'promotionTypes',
-    label: '优惠劵',
-    value: 7,
-    colorType: 'warning',
-    cssClass: ''
-  },
-  {
-    dictType: 'promotionTypes',
-    label: '积分',
-    value: 8,
     colorType: 'warning',
     cssClass: ''
   }
