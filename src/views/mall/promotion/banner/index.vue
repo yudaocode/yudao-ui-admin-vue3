@@ -48,7 +48,7 @@
           重置
         </el-button>
         <el-button
-          v-hasPermi="['market:banner:create']"
+          v-hasPermi="['promotion:banner:create']"
           plain
           type="primary"
           @click="openForm('create')"
@@ -74,6 +74,11 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
+      <el-table-column align="center" label="定位" prop="position">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BANNER_POSITION" :value="scope.row.position" />
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="跳转地址" prop="url" />
       <el-table-column
         :formatter="dateFormatter"
@@ -87,7 +92,7 @@
       <el-table-column align="center" label="操作">
         <template #default="scope">
           <el-button
-            v-hasPermi="['market:banner:update']"
+            v-hasPermi="['promotion:banner:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
@@ -95,7 +100,7 @@
             编辑
           </el-button>
           <el-button
-            v-hasPermi="['market:banner:delete']"
+            v-hasPermi="['promotion:banner:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"

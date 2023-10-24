@@ -61,7 +61,6 @@ export interface Spu {
   createTime?: Date // 商品创建时间
   status?: number // 商品状态
   activityOrders: number[] // 活动排序
-  giveCouponTemplates: GiveCouponTemplate[] // 优惠卷
 }
 
 // 获得 Spu 列表

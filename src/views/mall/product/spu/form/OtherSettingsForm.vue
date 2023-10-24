@@ -42,23 +42,10 @@
       </el-col>
       <el-col :span="24">
         <el-form-item label="活动优先级">
-          <!-- TODO @puhui999：这个目前先写死；主要是，这个优惠类型不好用 promotion_type_enum；因为优惠劵、会员折扣都算。 -->
           <ActivityOrdersSort
             v-model:activity-orders="formData.activityOrders"
             :promotion-types="promotionTypes"
           />
-        </el-form-item>
-      </el-col>
-      <el-col :span="24">
-        <el-form-item label="赠送优惠劵">
-          <el-tag
-            v-for="coupon in formData.giveCouponTemplates"
-            :key="coupon.id as number"
-            class="mr-[10px]"
-          >
-            {{ coupon.name }}
-          </el-tag>
-          <el-button @click="openCouponSelect">选择优惠券</el-button>
         </el-form-item>
       </el-col>
     </el-row>
@@ -91,17 +78,7 @@
         {{ promotionTypes.find((item) => item.value === activityType)?.label }}
       </el-tag>
     </template>
-    <template #giveCouponTemplates="{ row }">
-      <el-tag
-        v-for="coupon in row.giveCouponTemplates"
-        :key="coupon.id as number"
-        class="mr-[10px]"
-      >
-        {{ coupon.name }}
-      </el-tag>
-    </template>
   </Descriptions>
-  <CouponSelect ref="couponSelectRef" v-model:multiple-selection="formData.giveCouponTemplates" />
 </template>
 <script lang="ts" setup>
 import type { Spu } from '@/api/mall/product/spu'
@@ -109,8 +86,7 @@ import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
 import { otherSettingsSchema } from './spu.data'
-import { DICT_TYPE, DictDataType, getIntDictOptions } from '@/utils/dict'
-import CouponSelect from './CouponSelect.vue'
+import { DICT_TYPE, DictDataType } from '@/utils/dict'
 import ActivityOrdersSort from './ActivityOrdersSort.vue'
 
 defineOptions({ name: 'OtherSettingsForm' })
@@ -128,14 +104,66 @@ const props = defineProps({
   isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
 
-// 优惠卷
-const couponSelectRef = ref() // 优惠卷模版选择 Ref
-const openCouponSelect = () => {
-  couponSelectRef.value?.open()
-}
-
+// TODO @puhui999：这个目前先写死；主要是，这个优惠类型不好用 promotion_type_enum；因为优惠劵、会员折扣都算
 // 活动优先级处理
-const promotionTypes = ref<DictDataType[]>(getIntDictOptions(DICT_TYPE.PROMOTION_TYPE_ENUM))
+const promotionTypes = ref<DictDataType[]>([
+  {
+    dictType: 'promotionTypes',
+    label: '秒杀活动',
+    value: 1,
+    colorType: 'warning',
+    cssClass: ''
+  },
+  {
+    dictType: 'promotionTypes',
+    label: '砍价活动',
+    value: 2,
+    colorType: 'warning',
+    cssClass: ''
+  },
+  {
+    dictType: 'promotionTypes',
+    label: '拼团活动',
+    value: 3,
+    colorType: 'warning',
+    cssClass: ''
+  },
+  {
+    dictType: 'promotionTypes',
+    label: '限时折扣',
+    value: 4,
+    colorType: 'warning',
+    cssClass: ''
+  },
+  {
+    dictType: 'promotionTypes',
+    label: '满减送',
+    value: 5,
+    colorType: 'warning',
+    cssClass: ''
+  },
+  {
+    dictType: 'promotionTypes',
+    label: '会员折扣',
+    value: 6,
+    colorType: 'warning',
+    cssClass: ''
+  },
+  {
+    dictType: 'promotionTypes',
+    label: '优惠劵',
+    value: 7,
+    colorType: 'warning',
+    cssClass: ''
+  },
+  {
+    dictType: 'promotionTypes',
+    label: '积分',
+    value: 8,
+    colorType: 'warning',
+    cssClass: ''
+  }
+])
 
 const otherSettingsFormRef = ref() // 表单Ref
 // 表单数据
@@ -148,8 +176,7 @@ const formData = ref<Spu>({
   recommendBest: false, // 是否精品
   recommendNew: false, // 是否新品
   recommendGood: false, // 是否优品
-  activityOrders: [], // 活动排序
-  giveCouponTemplates: [] // 赠送的优惠券
+  activityOrders: [] // 活动排序
 })
 // 表单规则
 const rules = reactive({

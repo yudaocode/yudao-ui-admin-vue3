@@ -54,6 +54,13 @@ const initSortable = () => {
 }
 onMounted(async () => {
   await nextTick()
+  // 如果活动排序为空也就是新增的时候加入活动
+  if (props.activityOrders && props.activityOrders.length === 0) {
+    emit(
+      'update:activityOrders',
+      props.promotionTypes.map((item) => item.value as number)
+    )
+  }
   initSortable()
 })
 </script>
