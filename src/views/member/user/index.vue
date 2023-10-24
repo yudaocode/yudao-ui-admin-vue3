@@ -2,50 +2,50 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="用户昵称" prop="nickname">
         <el-input
           v-model="queryParams.nickname"
-          placeholder="请输入用户昵称"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入用户昵称"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="手机号" prop="mobile">
         <el-input
           v-model="queryParams.mobile"
-          placeholder="请输入手机号"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入手机号"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="注册时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="daterange"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
       <el-form-item label="登录时间" prop="loginDate">
         <el-date-picker
           v-model="queryParams.loginDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="daterange"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
       <el-form-item label="用户标签" prop="tagIds">
@@ -58,9 +58,15 @@
         <MemberGroupSelect v-model="queryParams.groupId" />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button @click="openCoupon" v-hasPermi="['promotion:coupon:send']">发送优惠券</el-button>
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-button v-hasPermi="['promotion:coupon:send']" @click="openCoupon">发送优惠券</el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -70,26 +76,26 @@
     <el-table
       v-loading="loading"
       :data="list"
-      :stripe="true"
       :show-overflow-tooltip="true"
+      :stripe="true"
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column label="用户编号" align="center" prop="id" width="120px" />
-      <el-table-column label="头像" align="center" prop="avatar" width="80px">
+      <el-table-column align="center" label="用户编号" prop="id" width="120px" />
+      <el-table-column align="center" label="头像" prop="avatar" width="80px">
         <template #default="scope">
           <img :src="scope.row.avatar" style="width: 40px" />
         </template>
       </el-table-column>
-      <el-table-column label="手机号" align="center" prop="mobile" width="120px" />
-      <el-table-column label="昵称" align="center" prop="nickname" width="80px" />
-      <el-table-column label="等级" align="center" prop="levelName" width="100px" />
-      <el-table-column label="分组" align="center" prop="groupName" width="100px" />
+      <el-table-column align="center" label="手机号" prop="mobile" width="120px" />
+      <el-table-column align="center" label="昵称" prop="nickname" width="80px" />
+      <el-table-column align="center" label="等级" prop="levelName" width="100px" />
+      <el-table-column align="center" label="分组" prop="groupName" width="100px" />
       <el-table-column
-        label="用户标签"
-        align="center"
-        prop="tagNames"
         :show-overflow-tooltip="false"
+        align="center"
+        label="用户标签"
+        prop="tagNames"
       >
         <template #default="scope">
           <el-tag v-for="(tagName, index) in scope.row.tagNames" :key="index" class="mr-5px">
@@ -97,69 +103,72 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="积分" align="center" prop="point" width="100px" />
-      <el-table-column label="状态" align="center" prop="status" width="100px">
+      <el-table-column align="center" label="积分" prop="point" width="100px" />
+      <el-table-column align="center" label="状态" prop="status" width="100px">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
+        :formatter="dateFormatter"
+        align="center"
         label="登录时间"
-        align="center"
         prop="loginDate"
-        :formatter="dateFormatter"
         width="180px"
       />
       <el-table-column
+        :formatter="dateFormatter"
+        align="center"
         label="注册时间"
-        align="center"
         prop="createTime"
-        :formatter="dateFormatter"
         width="180px"
       />
       <el-table-column
-        label="操作"
-        align="center"
-        width="100px"
-        fixed="right"
         :show-overflow-tooltip="false"
+        align="center"
+        fixed="right"
+        label="操作"
+        width="100px"
       >
         <template #default="scope">
           <div class="flex items-center justify-center">
             <el-button link type="primary" @click="openDetail(scope.row.id)">详情</el-button>
             <el-dropdown
-              @command="(command) => handleCommand(command, scope.row)"
               v-hasPermi="[
                 'member:user:update',
                 'member:user:update-level',
                 'member:user:update-point',
                 'member:user:update-balance'
               ]"
+              @command="(command) => handleCommand(command, scope.row)"
             >
-              <el-button type="primary" link><Icon icon="ep:d-arrow-right" /> 更多</el-button>
+              <el-button link type="primary">
+                <Icon icon="ep:d-arrow-right" />
+                更多
+              </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item
-                    command="handleUpdate"
                     v-if="checkPermi(['member:user:update'])"
+                    command="handleUpdate"
                   >
                     编辑
                   </el-dropdown-item>
                   <el-dropdown-item
-                    command="handleUpdateLevel"
                     v-if="checkPermi(['member:user:update-level'])"
+                    command="handleUpdateLevel"
                   >
                     修改等级
                   </el-dropdown-item>
                   <el-dropdown-item
-                    command="handleUpdatePoint"
                     v-if="checkPermi(['member:user:update-point'])"
+                    command="handleUpdatePoint"
                   >
                     修改积分
                   </el-dropdown-item>
                   <el-dropdown-item
-                    command="handleUpdateBlance"
                     v-if="checkPermi(['member:user:update-balance'])"
+                    command="handleUpdateBlance"
                   >
                     修改余额(WIP)
                   </el-dropdown-item>
@@ -172,9 +181,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -188,7 +197,7 @@
   <!-- 发送优惠券弹窗 -->
   <CouponSendForm ref="couponSendFormRef" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import * as UserApi from '@/api/member/user'
 import { DICT_TYPE } from '@/utils/dict'
@@ -198,7 +207,7 @@ import MemberLevelSelect from '@/views/member/level/components/MemberLevelSelect
 import MemberGroupSelect from '@/views/member/group/components/MemberGroupSelect.vue'
 import UserLevelUpdateForm from './UserLevelUpdateForm.vue'
 import UserPointUpdateForm from './UserPointUpdateForm.vue'
-import CouponSendForm from '@/views/mall/promotion/coupon/components/CouponSendForm.vue'
+import { CouponSendForm } from '@/views/mall/promotion/coupon/components'
 import { checkPermi } from '@/utils/permission'
 
 defineOptions({ name: 'MemberUser' })
