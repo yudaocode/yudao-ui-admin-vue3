@@ -45,7 +45,7 @@
           <el-form-item label="定位" prop="position">
             <el-radio-group v-model="formData.position">
               <el-radio
-                v-for="dict in getIntDictOptions(DICT_TYPE.BANNER_POSITION)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_BANNER_POSITION)"
                 :key="dict.value"
                 :label="dict.value"
               >
