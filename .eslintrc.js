@@ -8,7 +8,6 @@ module.exports = defineConfig({
     es6: true
   },
   parser: 'vue-eslint-parser',
-  plugins: ['vue'],
   parserOptions: {
     parser: '@typescript-eslint/parser',
     ecmaVersion: 2020,
@@ -26,9 +25,9 @@ module.exports = defineConfig({
     '@unocss'
   ],
   rules: {
+    'vue/no-setup-props-destructure': 'off',
     'vue/script-setup-uses-vars': 'error',
     'vue/no-reserved-component-names': 'off',
-    'vue/no-setup-props-destructure': 'off',
     '@typescript-eslint/ban-ts-ignore': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
@@ -54,6 +53,7 @@ module.exports = defineConfig({
     'vue/attribute-hyphenation': 'off',
     'vue/require-default-prop': 'off',
     'vue/require-explicit-emits': 'off',
+    'vue/require-toggle-inside-transition': 'off',
     'vue/html-self-closing': [
       'error',
       {
