@@ -1,5 +1,5 @@
 {
-  "typescript.tsdk": "./node_modules/typescript/lib",
+  "typescript.tsdk": "node_modules/typescript/lib",
   "npm.packageManager": "pnpm",
   "editor.tabSize": 2,
   "prettier.printWidth": 100, // 超过最大值换行
@@ -86,15 +86,12 @@
     "source.fixAll.eslint": true
   },
   "[vue]": {
-    "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true,
-      "source.fixAll.stylelint": true
-    }
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
   },
   "i18n-ally.localesPaths": ["src/locales"],
   "i18n-ally.keystyle": "nested",
   "i18n-ally.sortKeys": true,
-  "i18n-ally.namespace": true,
+  "i18n-ally.namespace": false,
   "i18n-ally.enabledParsers": ["ts"],
   "i18n-ally.sourceLanguage": "en",
   "i18n-ally.displayLanguage": "zh-CN",
