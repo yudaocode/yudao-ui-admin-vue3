@@ -91,7 +91,6 @@
     "@vitejs/plugin-legacy": "^4.1.1",
     "@vitejs/plugin-vue": "^4.4.0",
     "@vitejs/plugin-vue-jsx": "^3.0.2",
-    "@vue-macros/volar": "^0.17.1",
     "autoprefixer": "^10.4.16",
     "bpmn-js": "8.9.0",
     "bpmn-js-properties-panel": "0.46.0",
