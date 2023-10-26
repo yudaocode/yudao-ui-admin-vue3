@@ -33,10 +33,16 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="客户端编号" prop="clientId">
-        <el-input v-model="formData.clientId" placeholder="请输入客户端编号" />
+        <el-input v-model="formData.clientId" placeholder="请输入客户端编号,对应各平台的appKey" />
       </el-form-item>
       <el-form-item label="客户端密钥" prop="clientSecret">
-        <el-input v-model="formData.clientSecret" placeholder="请输入客户端密钥" />
+        <el-input
+          v-model="formData.clientSecret"
+          placeholder="请输入客户端密钥,对应各平台的appSecret"
+        />
+      </el-form-item>
+      <el-form-item label="agentId" prop="agentId">
+        <el-input v-model="formData.agentId" placeholder="授权方的网页应用ID,有则填" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
@@ -74,6 +80,7 @@ const formData = ref({
   userType: undefined,
   clientId: undefined,
   clientSecret: undefined,
+  agentId: undefined,
   status: 0
 })
 const formRules = reactive({
@@ -139,6 +146,7 @@ const resetForm = () => {
     userType: undefined,
     clientId: undefined,
     clientSecret: undefined,
+    agentId: undefined,
     status: 0
   }
   formRef.value?.resetFields()
