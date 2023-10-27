@@ -1,6 +1,7 @@
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
+    <!-- TODO @wanwan：筛选条件，按照 docs 的再改下 -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -64,6 +65,7 @@
   </ContentWrap>
 
   <!-- 列表 -->
+  <!-- TODO @wanwan：列表，按照 docs 的再改下 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="编号" align="center" prop="id" />
