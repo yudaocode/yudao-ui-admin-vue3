@@ -65,6 +65,21 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
         </template>
       </el-table-column>
+      <el-table-column label="所属行业" align="center" prop="industryId">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
+        </template>
+      </el-table-column>
+      <el-table-column label="客户等级" align="center" prop="level">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
+        </template>
+      </el-table-column>
+      <el-table-column label="客户来源" align="center" prop="source">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
+        </template>
+      </el-table-column>
       <el-table-column label="手机" align="center" prop="mobile" />
       <el-table-column label="电话" align="center" prop="telephone" />
       <el-table-column label="网址" align="center" prop="website" />

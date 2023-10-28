@@ -3,6 +3,9 @@ import request from '@/config/axios'
 export interface CustomerVO {
   id: number
   name: string
+  industryId: number
+  level: number
+  source: number
   followUpStatus: boolean
   lockStatus: boolean
   mobile: string

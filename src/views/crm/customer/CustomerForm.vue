@@ -13,6 +13,36 @@
       <el-form-item label="手机" prop="mobile">
         <el-input v-model="formData.mobile" placeholder="请输入手机" />
       </el-form-item>
+      <el-form-item label="所属行业" prop="industryId">
+        <el-select v-model="formData.industryId" placeholder="请选择所属行业">
+          <el-option
+              v-for="dict in getStrDictOptions(DICT_TYPE.CRM_CUSTOMER_INDUSTRY)"
+              :key="dict.value + ''"
+              :label="dict.label"
+              :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="客户等级" prop="level">
+        <el-select v-model="formData.level" placeholder="请选择客户等级">
+          <el-option
+              v-for="dict in getStrDictOptions(DICT_TYPE.CRM_CUSTOMER_LEVEL)"
+              :key="dict.value + ''"
+              :label="dict.label"
+              :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="客户来源" prop="source">
+        <el-select v-model="formData.source" placeholder="请选择客户来源">
+          <el-option
+              v-for="dict in getStrDictOptions(DICT_TYPE.CRM_CUSTOMER_SOURCE)"
+              :key="dict.value + ''"
+              :label="dict.label"
+              :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="电话" prop="telephone">
         <el-input v-model="formData.telephone" placeholder="请输入电话" />
       </el-form-item>
@@ -56,7 +86,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getBoolDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 import * as CustomerApi from '@/api/crm/customer'
 
 const { t } = useI18n() // 国际化
@@ -70,6 +100,9 @@ const formData = ref({
   id: undefined,
   name: undefined,
   mobile: undefined,
+  industryId: undefined,
+  level: undefined,
+  source: undefined,
   telephone: undefined,
   website: undefined,
   qq: undefined,
@@ -135,9 +168,10 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: undefined,
-    followUpStatus: undefined,
-    lockStatus: undefined,
     mobile: undefined,
+    industryId: undefined,
+    level: undefined,
+    source: undefined,
     telephone: undefined,
     website: undefined,
     qq: undefined,
