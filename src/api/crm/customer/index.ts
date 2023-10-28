@@ -8,14 +8,16 @@ export interface CustomerVO {
   mobile: string
   telephone: string
   website: string
+  qq: string
+  wechat: string
+  email: string
+  description: string
   remark: string
   ownerUserId: number
   roUserIds: string
   rwUserIds: string
   areaId: number
   detailAddress: string
-  longitude: string
-  latitude: string
   contactLastTime: Date
   contactNextTime: Date
 }

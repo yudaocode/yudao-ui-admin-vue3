@@ -26,24 +26,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="电话" prop="telephone">
-        <el-input
-          v-model="queryParams.telephone"
-          placeholder="请输入电话"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="网址" prop="website">
-        <el-input
-          v-model="queryParams.website"
-          placeholder="请输入网址"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -86,12 +68,14 @@
       <el-table-column label="手机" align="center" prop="mobile" />
       <el-table-column label="电话" align="center" prop="telephone" />
       <el-table-column label="网址" align="center" prop="website" />
+      <el-table-column label="QQ" align="center" prop="qq" />
+      <el-table-column label="微信" align="center" prop="wechat" />
+      <el-table-column label="邮箱" align="center" prop="email" />
+      <el-table-column label="客户描述" align="center" prop="description" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="负责人的用户编号" align="center" prop="ownerUserId" />
       <el-table-column label="地区编号" align="center" prop="areaId" />
       <el-table-column label="详细地址" align="center" prop="detailAddress" />
-      <el-table-column label="地理位置经度" align="center" prop="longitude" />
-      <el-table-column label="地理位置维度" align="center" prop="latitude" />
       <el-table-column
         label="最后跟进时间"
         align="center"
@@ -166,9 +150,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: null,
-  mobile: null,
-  telephone: null,
-  website: null
+  mobile: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中

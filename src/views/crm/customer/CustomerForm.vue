@@ -10,28 +10,6 @@
       <el-form-item label="客户名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入客户名称" />
       </el-form-item>
-      <el-form-item label="跟进状态" prop="followUpStatus">
-        <el-radio-group v-model="formData.followUpStatus">
-          <el-radio
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="锁定状态" prop="lockStatus">
-        <el-radio-group v-model="formData.lockStatus">
-          <el-radio
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
       <el-form-item label="手机" prop="mobile">
         <el-input v-model="formData.mobile" placeholder="请输入手机" />
       </el-form-item>
@@ -41,37 +19,26 @@
       <el-form-item label="网址" prop="website">
         <el-input v-model="formData.website" placeholder="请输入网址" />
       </el-form-item>
+      <el-form-item label="QQ" prop="qq">
+        <el-input v-model="formData.qq" placeholder="请输入QQ" />
+      </el-form-item>
+      <el-form-item label="微信" prop="wechat">
+        <el-input v-model="formData.wechat" placeholder="请输入微信" />
+      </el-form-item>
+      <el-form-item label="邮箱" prop="email">
+        <el-input v-model="formData.email" placeholder="请输入邮箱" />
+      </el-form-item>
+      <el-form-item label="客户描述" prop="description">
+        <el-input v-model="formData.description" placeholder="请输入客户描述" />
+      </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" placeholder="请输入备注" />
-      </el-form-item>
-      <el-form-item label="负责人的用户编号" prop="ownerUserId">
-        <el-input v-model="formData.ownerUserId" placeholder="请输入负责人的用户编号" />
-      </el-form-item>
-      <el-form-item label="只读权限的用户编号数组" prop="roUserIds">
-        <el-input v-model="formData.roUserIds" placeholder="请输入只读权限的用户编号数组" />
-      </el-form-item>
-      <el-form-item label="读写权限的用户编号数组" prop="rwUserIds">
-        <el-input v-model="formData.rwUserIds" placeholder="请输入读写权限的用户编号数组" />
       </el-form-item>
       <el-form-item label="地区编号" prop="areaId">
         <el-input v-model="formData.areaId" placeholder="请输入地区编号" />
       </el-form-item>
       <el-form-item label="详细地址" prop="detailAddress">
         <el-input v-model="formData.detailAddress" placeholder="请输入详细地址" />
-      </el-form-item>
-      <el-form-item label="地理位置经度" prop="longitude">
-        <el-input v-model="formData.longitude" placeholder="请输入地理位置经度" />
-      </el-form-item>
-      <el-form-item label="地理位置维度" prop="latitude">
-        <el-input v-model="formData.latitude" placeholder="请输入地理位置维度" />
-      </el-form-item>
-      <el-form-item label="最后跟进时间" prop="contactLastTime">
-        <el-date-picker
-          v-model="formData.contactLastTime"
-          type="date"
-          value-format="x"
-          placeholder="选择最后跟进时间"
-        />
       </el-form-item>
       <el-form-item label="下次联系时间" prop="contactNextTime">
         <el-date-picker
@@ -102,26 +69,20 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   name: undefined,
-  followUpStatus: undefined,
-  lockStatus: undefined,
   mobile: undefined,
   telephone: undefined,
   website: undefined,
+  qq: undefined,
+  wechat: undefined,
+  email: undefined,
+  description: undefined,
   remark: undefined,
-  ownerUserId: undefined,
-  roUserIds: undefined,
-  rwUserIds: undefined,
   areaId: undefined,
   detailAddress: undefined,
-  longitude: undefined,
-  latitude: undefined,
-  contactLastTime: undefined,
   contactNextTime: undefined
 })
 const formRules = reactive({
-  name: [{ require: true, message: '跟进状态不能为空', trigger: 'blur' }],
-  followUpStatus: [{ required: true, message: '跟进状态不能为空', trigger: 'blur' }],
-  lockStatus: [{ required: true, message: '锁定状态不能为空', trigger: 'blur' }]
+  name: [{ require: true, message: '客户名称不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -179,15 +140,13 @@ const resetForm = () => {
     mobile: undefined,
     telephone: undefined,
     website: undefined,
+    qq: undefined,
+    wechat: undefined,
+    email: undefined,
+    description: undefined,
     remark: undefined,
-    ownerUserId: undefined,
-    roUserIds: undefined,
-    rwUserIds: undefined,
     areaId: undefined,
     detailAddress: undefined,
-    longitude: undefined,
-    latitude: undefined,
-    contactLastTime: undefined,
     contactNextTime: undefined
   }
   formRef.value?.resetFields()
