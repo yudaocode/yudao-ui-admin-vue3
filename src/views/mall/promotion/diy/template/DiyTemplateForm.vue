@@ -7,36 +7,14 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="线索名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入线索名称" />
-      </el-form-item>
-      <!-- TODO 客户选择 -->
-      <el-form-item label="客户" prop="customerId">
-        <el-input v-model="formData.customerId" placeholder="请选择客户" />
-      </el-form-item>
-      <el-form-item label="下次联系时间" prop="contactNextTime">
-        <el-date-picker
-          v-model="formData.contactNextTime"
-          type="date"
-          value-format="x"
-          placeholder="选择下次联系时间"
-        />
-      </el-form-item>
-      <el-form-item label="电话" prop="telephone">
-        <el-input v-model="formData.telephone" placeholder="请输入电话" />
-      </el-form-item>
-      <el-form-item label="手机号" prop="mobile">
-        <el-input v-model="formData.mobile" placeholder="请输入手机号" />
-      </el-form-item>
-      <el-form-item label="地址" prop="address">
-        <el-input v-model="formData.address" placeholder="请输入地址" />
-      </el-form-item>
-      <!-- TODO 负责人选择 -->
-      <el-form-item label="负责人" prop="ownerUserId">
-        <el-input v-model="formData.ownerUserId" placeholder="请输入负责人" />
+      <el-form-item label="模板名称" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入模板名称" />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" placeholder="请输入备注" />
+        <el-input v-model="formData.remark" placeholder="请输入备注" type="textarea" />
+      </el-form-item>
+      <el-form-item label="预览图" prop="previewImageUrls">
+        <UploadImgs v-model="formData.previewImageUrls" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -46,8 +24,10 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getBoolDictOptions } from '@/utils/dict'
-import * as ClueApi from '@/api/crm/clue'
+import * as DiyTemplateApi from '@/api/mall/promotion/diy/template'
+
+/** 装修模板表单 */
+defineOptions({ name: 'DiyTemplateForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -59,18 +39,11 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   name: undefined,
-  customerId: undefined,
-  contactNextTime: undefined,
-  telephone: undefined,
-  mobile: undefined,
-  address: undefined,
-  ownerUserId: undefined,
-  contactLastTime: undefined,
-  remark: undefined
+  remark: undefined,
+  previewImageUrls: []
 })
 const formRules = reactive({
-  name: [{ required: true, message: '线索名称不能为空', trigger: 'blur' }],
-  customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: '模板名称不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -84,7 +57,14 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ClueApi.getClue(id)
+      const diyTemplate = await DiyTemplateApi.getDiyTemplate(id)
+      // 处理预览图
+      if (diyTemplate?.previewImageUrls?.length > 0) {
+        diyTemplate.previewImageUrls = diyTemplate.previewImageUrls.map((url: string) => {
+          return { url }
+        })
+      }
+      formData.value = diyTemplate
     } finally {
       formLoading.value = false
     }
@@ -102,12 +82,16 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ClueApi.ClueVO
+    // 处理预览图
+    const previewImageUrls = formData.value.previewImageUrls.map((item) => {
+      return item['url'] ? item['url'] : item
+    })
+    const data = { ...formData.value, previewImageUrls } as unknown as DiyTemplateApi.DiyTemplateVO
     if (formType.value === 'create') {
-      await ClueApi.createClue(data)
+      await DiyTemplateApi.createDiyTemplate(data)
       message.success(t('common.createSuccess'))
     } else {
-      await ClueApi.updateClue(data)
+      await DiyTemplateApi.updateDiyTemplate(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -123,14 +107,8 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: undefined,
-    customerId: undefined,
-    contactNextTime: undefined,
-    telephone: undefined,
-    mobile: undefined,
-    address: undefined,
-    ownerUserId: undefined,
-    contactLastTime: undefined,
-    remark: undefined
+    remark: undefined,
+    previewImageUrls: []
   }
   formRef.value?.resetFields()
 }

@@ -102,6 +102,7 @@ import { usePermissionStore } from '@/store/modules/permission'
 import { getTenantIdByName, sendSmsCode, smsLogin } from '@/api/login'
 import LoginFormTitle from './LoginFormTitle.vue'
 import { LoginStateEnum, useFormValid, useLoginState } from './useLogin'
+import { ElLoading } from 'element-plus'
 
 defineOptions({ name: 'MobileForm' })
 

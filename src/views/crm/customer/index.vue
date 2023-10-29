@@ -1,6 +1,7 @@
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
+    <!-- TODO @wanwan：看看怎么表单可以对齐一点； -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -8,57 +9,29 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="合同名称" prop="name">
+      <el-form-item label="客户名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入合同名称"
+          placeholder="请输入客户名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="客户编号" prop="customerId">
+      <el-form-item label="手机" prop="mobile">
         <el-input
-          v-model="queryParams.customerId"
-          placeholder="请输入客户编号"
+          v-model="queryParams.mobile"
+          placeholder="请输入手机"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="商机编号" prop="businessId">
-        <el-input
-          v-model="queryParams.businessId"
-          placeholder="请输入商机编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="下单日期" prop="orderDate">
-        <el-date-picker
-          v-model="queryParams.orderDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="合同编号" prop="no">
-        <el-input
-          v-model="queryParams.no"
-          placeholder="请输入合同编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
+      <!-- TODO @wanwan：筛选字段，加所属行业、客户等级、客户来源 -->
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:contract:create']">
+        <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:customer:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
@@ -66,7 +39,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['crm:contract:export']"
+          v-hasPermi="['crm:customer:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -75,48 +48,30 @@
   </ContentWrap>
 
   <!-- 列表 -->
+  <!-- TODO @wanwan：列表，按照 docs 的再改下 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="合同编号" align="center" prop="id" />
-      <el-table-column label="合同名称" align="center" prop="name" />
-      <el-table-column label="客户名称" align="center" prop="customerId" />
-      <el-table-column label="商机名称" align="center" prop="businessId" />
-      <el-table-column label="工作流名称" align="center" prop="processInstanceId" />
-      <el-table-column
-        label="下单时间"
-        align="center"
-        prop="orderDate"
-        :formatter="dateFormatter"
-        width="180px"
-      />
+      <el-table-column label="编号" align="center" prop="id" />
+      <el-table-column label="客户名称" align="center" prop="name" width="160" />
+      <el-table-column label="所属行业" align="center" prop="industryId" width="120">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
+        </template>
+      </el-table-column>
+      <el-table-column label="客户来源" align="center" prop="source" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
+        </template>
+      </el-table-column>
+      <el-table-column label="客户等级" align="center" prop="level" width="120">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
+        </template>
+      </el-table-column>
+      <el-table-column label="手机" align="center" prop="mobile" width="120" />
+      <el-table-column label="详细地址" align="center" prop="detailAddress" width="200" />
+      <!--  TODO @Wanwan 负责人回显，所属部门，创建人    -->
       <el-table-column label="负责人" align="center" prop="ownerUserId" />
-      <el-table-column label="合同编号" align="center" prop="no" />
-      <el-table-column
-        label="开始时间"
-        align="center"
-        prop="startTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column
-        label="结束时间"
-        align="center"
-        prop="endTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column label="合同金额" align="center" prop="price" />
-      <el-table-column label="整单折扣" align="center" prop="discountPercent" />
-      <el-table-column label="产品总金额" align="center" prop="productPrice" />
-      <el-table-column label="联系人" align="center" prop="contactId" />
-      <el-table-column label="公司签约人" align="center" prop="signUserId" />
-      <el-table-column
-        label="最后跟进时间"
-        align="center"
-        prop="contactLastTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
       <el-table-column
         label="创建时间"
         align="center"
@@ -124,15 +79,39 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="备注" align="center" prop="remark" />
-
-      <el-table-column label="操作" width="120px">
+      <el-table-column label="成交状态" align="center" prop="dealStatus">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="下次联系时间"
+        align="center"
+        prop="contactNextTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column
+        label="最后跟进时间"
+        align="center"
+        prop="contactLastTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column label="锁定状态" align="center" prop="lockStatus">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.lockStatus" />
+        </template>
+      </el-table-column>
+      <!--  TODO @wanwan 距进入公海天数    -->
+      <!-- TODO @wanwan：操作要 fixed 再右侧哈； -->
+      <el-table-column label="操作" align="center" width="160">
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['crm:contract:update']"
+            v-hasPermi="['crm:customer:update']"
           >
             编辑
           </el-button>
@@ -140,7 +119,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['crm:contract:delete']"
+            v-hasPermi="['crm:customer:delete']"
           >
             删除
           </el-button>
@@ -157,16 +136,17 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <ContractForm ref="formRef" @success="getList" />
+  <CustomerForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
+import { DICT_TYPE, getBoolDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as ContractApi from '@/api/crm/contract'
-import ContractForm from './ContractForm.vue'
+import * as CustomerApi from '@/api/crm/customer'
+import CustomerForm from './CustomerForm.vue'
 
-defineOptions({ name: 'CrmContract' })
+defineOptions({ name: 'CrmCustomer' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -178,12 +158,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: null,
-  customerId: null,
-  businessId: null,
-  orderDate: [],
-  no: null,
-  discountPercent: null,
-  productPrice: null
+  mobile: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -192,7 +167,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ContractApi.getContractPage(queryParams)
+    const data = await CustomerApi.getCustomerPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -224,7 +199,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ContractApi.deleteContract(id)
+    await CustomerApi.deleteCustomer(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -238,8 +213,8 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await ContractApi.exportContract(queryParams)
-    download.excel(data, '合同.xls')
+    const data = await CustomerApi.exportCustomer(queryParams)
+    download.excel(data, '客户.xls')
   } catch {
   } finally {
     exportLoading.value = false
