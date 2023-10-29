@@ -26,24 +26,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="电话" prop="telephone">
-        <el-input
-          v-model="queryParams.telephone"
-          placeholder="请输入电话"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="网址" prop="website">
-        <el-input
-          v-model="queryParams.website"
-          placeholder="请输入网址"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -67,38 +49,38 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="客户名称" align="center" prop="name" />
-      <el-table-column label="跟进状态" align="center" prop="followUpStatus">
+      <el-table-column label="客户名称" align="center" prop="name" width="160" />
+      <el-table-column label="所属行业" align="center" prop="industryId" width="120">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.followUpStatus" />
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
         </template>
       </el-table-column>
-      <el-table-column label="锁定状态" align="center" prop="lockStatus">
+      <el-table-column label="客户来源" align="center" prop="source" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.lockStatus" />
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
         </template>
       </el-table-column>
+      <el-table-column label="客户等级" align="center" prop="level" width="120">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
+        </template>
+      </el-table-column>
+      <el-table-column label="手机" align="center" prop="mobile" width="120" />
+      <el-table-column label="详细地址" align="center" prop="detailAddress" width="200" />
+      <!--  TODO @Wanwan 负责人回显，所属部门，创建人    -->
+      <el-table-column label="负责人" align="center" prop="ownerUserId" />
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
       <el-table-column label="成交状态" align="center" prop="dealStatus">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
         </template>
       </el-table-column>
-      <el-table-column label="手机" align="center" prop="mobile" />
-      <el-table-column label="电话" align="center" prop="telephone" />
-      <el-table-column label="网址" align="center" prop="website" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="负责人的用户编号" align="center" prop="ownerUserId" />
-      <el-table-column label="地区编号" align="center" prop="areaId" />
-      <el-table-column label="详细地址" align="center" prop="detailAddress" />
-      <el-table-column label="地理位置经度" align="center" prop="longitude" />
-      <el-table-column label="地理位置维度" align="center" prop="latitude" />
-      <el-table-column
-        label="最后跟进时间"
-        align="center"
-        prop="contactLastTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
       <el-table-column
         label="下次联系时间"
         align="center"
@@ -107,13 +89,19 @@
         width="180px"
       />
       <el-table-column
-        label="创建时间"
+        label="最后跟进时间"
         align="center"
-        prop="createTime"
+        prop="contactLastTime"
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column label="锁定状态" align="center" prop="lockStatus">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.lockStatus" />
+        </template>
+      </el-table-column>
+      <!--  TODO @Wanwan 距进入公海天数    -->
+      <el-table-column label="操作" align="center" width="160">
         <template #default="scope">
           <el-button
             link
@@ -166,9 +154,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: null,
-  mobile: null,
-  telephone: null,
-  website: null
+  mobile: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
