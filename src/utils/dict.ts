@@ -143,6 +143,8 @@ export enum DICT_TYPE {
   PAY_REFUND_STATUS = 'pay_refund_status', // 退款订单状态
   PAY_NOTIFY_STATUS = 'pay_notify_status', // 商户支付回调状态
   PAY_NOTIFY_TYPE = 'pay_notify_type', // 商户支付回调状态
+  PAY_TRANSFER_STATUS = 'pay_transfer_status', // 转账订单状态
+  PAY_TRANSFER_TYPE = 'pay_transfer_type', // 转账订单状态
 
   // ========== MP 模块 ==========
   MP_AUTO_REPLY_REQUEST_MATCH = 'mp_auto_reply_request_match', // 自动回复请求匹配类型
