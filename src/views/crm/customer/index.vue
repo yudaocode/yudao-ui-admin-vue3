@@ -1,7 +1,7 @@
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
-    <!-- TODO @wanwan：筛选条件，按照 docs 的再改下 -->
+    <!-- TODO @wanwan：看看怎么表单可以对齐一点； -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -27,6 +27,7 @@
           class="!w-240px"
         />
       </el-form-item>
+      <!-- TODO @wanwan：筛选字段，加所属行业、客户等级、客户来源 -->
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -102,7 +103,8 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.lockStatus" />
         </template>
       </el-table-column>
-      <!--  TODO @Wanwan 距进入公海天数    -->
+      <!--  TODO @wanwan 距进入公海天数    -->
+      <!-- TODO @wanwan：操作要 fixed 再右侧哈； -->
       <el-table-column label="操作" align="center" width="160">
         <template #default="scope">
           <el-button

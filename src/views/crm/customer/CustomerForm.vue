@@ -1,6 +1,5 @@
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible">
-    <!-- TODO @wanwan：表单按照 docs 提供的再改下 -->
     <el-form
       ref="formRef"
       :model="formData"
@@ -9,6 +8,7 @@
       v-loading="formLoading"
     >
       <el-row>
+        <!-- TODO @wanwan：name 参数校验，必填 -->
         <el-form-item label="客户名称" prop="name">
           <el-input v-model="formData.name" placeholder="请输入客户名称" />
         </el-form-item>
@@ -70,6 +70,7 @@
         </el-form-item>
       </el-row>
       <el-row>
+        <!-- TODO @wanwan：地区的多级选择，可以参考 UserForm.vue 的 所在地 areaId -->
         <el-form-item label="地区编号" prop="areaId">
           <el-input v-model="formData.areaId" placeholder="请输入地区编号" />
         </el-form-item>
@@ -77,7 +78,7 @@
           <el-input v-model="formData.detailAddress" placeholder="请输入详细地址" />
         </el-form-item>
       </el-row>
-      <!-- TODO @Wanwan 少一个负责人字段，默认先选中自己 -->
+      <!-- TODO @wanwan： 少一个负责人字段，默认先选中自己；可以先参考 TaskAssignRuleForm.vue 的 formData.userIds；注意，新增的时候，可以选择；修改的时候，只展示 -->
       <el-row>
         <el-form-item label="下次联系时间" prop="contactNextTime">
           <el-date-picker
