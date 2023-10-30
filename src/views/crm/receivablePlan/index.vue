@@ -8,9 +8,9 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="期数" prop="indexNo">
+      <el-form-item label="期数" prop="period">
         <el-input
-          v-model="queryParams.indexNo"
+          v-model="queryParams.period"
           placeholder="请输入期数"
           clearable
           @keyup.enter="handleQuery"
@@ -152,23 +152,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="ID" align="center" prop="id" />
-      <el-table-column label="期数" align="center" prop="indexNo" />
-      <!--<el-table-column label="回款ID" align="center" prop="receivableId" />-->
-      <el-table-column label="完成状态" align="center" prop="status">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column label="审批状态" align="center" prop="checkStatus" width="130px">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_RECEIVABLE_CHECK_STATUS" :value="scope.row.checkStatus" />
-        </template>
-      </el-table-column>
-      <!--<el-table-column label="工作流编号" align="center" prop="processInstanceId" />-->
-      <el-table-column label="回款金额" align="center" prop="price" />
+      <!--<el-table-column label="ID" align="center" prop="id" />-->
+      <el-table-column label="客户名称" align="center" prop="customerId" width="150px" />
+      <el-table-column label="合同名称" align="center" prop="contractId" width="150px" />
+      <el-table-column label="期数" align="center" prop="period" />
+      <el-table-column label="计划回款" align="center" prop="price" />
       <el-table-column
-        label="回款日期"
+        label="计划回款日期"
         align="center"
         prop="returnTime"
         :formatter="dateFormatter2"
@@ -182,10 +172,24 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="客户ID" align="center" prop="customerId" />
-      <el-table-column label="合同ID" align="center" prop="contractId" />
-      <el-table-column label="负责人" align="center" prop="ownerUserId" />
-      <!--<el-table-column label="显示顺序" align="center" prop="sort" />-->
+      <!--<el-table-column label="回款ID" align="center" prop="receivableId" />-->
+      <el-table-column label="完成状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column label="审批状态" align="center" prop="checkStatus" width="130px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_RECEIVABLE_CHECK_STATUS" :value="scope.row.checkStatus" />
+        </template>
+      </el-table-column>
+      <!--<el-table-column label="工作流编号" align="center" prop="processInstanceId" />-->
+      <el-table-column prop="ownerUserId" label="负责人" width="120">
+        <template #default="scope">
+          {{ userList.find((user) => user.id === scope.row.ownerUserId)?.nickname }}
+        </template>
+      </el-table-column>
+      <el-table-column label="显示顺序" align="center" prop="sort" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column
         label="创建时间"
@@ -234,6 +238,7 @@ import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ReceivablePlanApi from '@/api/crm/receivablePlan'
 import ReceivablePlanForm from './ReceivablePlanForm.vue'
+import * as UserApi from '@/api/system/user'
 
 defineOptions({ name: 'ReceivablePlan' })
 
@@ -243,10 +248,11 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
+const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  indexNo: null,
+  period: null,
   status: null,
   checkStatus: null,
   returnTime: [],
@@ -320,7 +326,9 @@ const handleExport = async () => {
 }
 
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  // 获取用户列表
+  userList.value = await UserApi.getSimpleUserList()
 })
 </script>

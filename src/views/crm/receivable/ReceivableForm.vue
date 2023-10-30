@@ -54,15 +54,22 @@
         <el-input-number v-model="formData.price" placeholder="请输入回款金额" />
       </el-form-item>
       <el-form-item label="负责人" prop="ownerUserId">
-        <el-input v-model="formData.ownerUserId" placeholder="请输入负责人" />
+        <el-select v-model="formData.ownerUserId" clearable placeholder="请输入负责人">
+          <el-option
+            v-for="item in userList"
+            :key="item.id"
+            :label="item.nickname"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="批次" prop="batchId">
-        <el-input v-model="formData.batchId" placeholder="请输入批次" />
+        <el-input-number v-model="formData.batchId" placeholder="请输入批次" />
       </el-form-item>
-      <!--<el-form-item label="显示顺序" prop="sort">
-        <el-input v-model="formData.sort" placeholder="请输入显示顺序" />
-      </el-form-item>-->
-      <el-form-item label="状态" prop="status">
+      <el-form-item label="显示排序" prop="sort">
+        <el-input-number v-model="formData.sort" :min="0" controls-position="right" />
+      </el-form-item>
+      <!--<el-form-item label="状态" prop="status">
         <el-select v-model="formData.status" placeholder="请选择状态">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -71,7 +78,7 @@
             :value="dict.value"
           />
         </el-select>
-      </el-form-item>
+      </el-form-item>-->
       <el-form-item label="备注" prop="remark">
         <el-input type="textarea" :rows="3" v-model="formData.remark" placeholder="请输入备注" />
       </el-form-item>
@@ -85,10 +92,11 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import * as ReceivableApi from '@/api/crm/receivable'
+import * as UserApi from '@/api/system/user'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-
+const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
@@ -112,9 +120,9 @@ const formData = ref({
   status: undefined,
   remark: undefined
 })
-const formRules = reactive({
-  status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
-})
+// const formRules = reactive({
+//   status: [{ required: true, message: '状态不能为空', trigger: 'change' }]
+// })
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
@@ -132,6 +140,8 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 获得用户列表
+  userList.value = await UserApi.getSimpleUserList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
