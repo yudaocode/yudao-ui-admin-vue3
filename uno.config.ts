@@ -101,5 +101,8 @@ ${selector}:after {
     ]
   ],
   presets: [presetUno({ dark: 'class', attributify: false })],
-  transformers: [transformerVariantGroup()]
+  transformers: [transformerVariantGroup()],
+  shortcuts: {
+    'wh-full': 'w-full h-full'
+  }
 })

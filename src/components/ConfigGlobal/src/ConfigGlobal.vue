@@ -1,20 +1,19 @@
-<script lang="ts" setup>
+<script setup lang="ts">
+import { provide, computed, watch, onMounted } from 'vue'
 import { propTypes } from '@/utils/propTypes'
+import { ComponentSize, ElConfigProvider } from 'element-plus'
 import { useLocaleStore } from '@/store/modules/locale'
+import { useWindowSize } from '@vueuse/core'
 import { useAppStore } from '@/store/modules/app'
 import { setCssVar } from '@/utils'
 import { useDesign } from '@/hooks/web/useDesign'
-import { ElementPlusSize } from '@/types/elementPlus'
-import { useWindowSize } from '@vueuse/core'
-
-defineOptions({ name: 'ConfigGlobal' })
 
 const { variables } = useDesign()
 
 const appStore = useAppStore()
 
 const props = defineProps({
-  size: propTypes.oneOf<ElementPlusSize>(['default', 'small', 'large']).def('default')
+  size: propTypes.oneOf<ComponentSize>(['default', 'small', 'large']).def('default')
 })
 
 provide('configGlobal', props)
@@ -53,9 +52,9 @@ const currentLocale = computed(() => localeStore.currentLocale)
 
 <template>
   <ElConfigProvider
+    :namespace="variables.elNamespace"
     :locale="currentLocale.elLocale"
     :message="{ max: 1 }"
-    :namespace="variables.elNamespace"
     :size="size"
   >
     <slot></slot>

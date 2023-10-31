@@ -27,7 +27,6 @@
       "@intlify/unplugin-vue-i18n/types",
       "vite/client",
       "element-plus/global",
-      "@types/intro.js",
       "@types/qrcode",
       "vite-plugin-svg-icons/client"
     ],
