@@ -8,10 +8,19 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="期数" prop="period">
+      <el-form-item label="客户" prop="customerId">
         <el-input
-          v-model="queryParams.period"
-          placeholder="请输入期数"
+          v-model="queryParams.customerId"
+          placeholder="请输入客户"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="合同" prop="contractId">
+        <el-input
+          v-model="queryParams.contractId"
+          placeholder="请输入合同"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -67,7 +76,7 @@
           class="!w-240px"
         />
       </el-form-item>-->
-      <el-form-item label="提醒日期" prop="remindTime">
+      <!--<el-form-item label="提醒日期" prop="remindTime">
         <el-date-picker
           v-model="queryParams.remindTime"
           value-format="YYYY-MM-DD HH:mm:ss"
@@ -77,26 +86,8 @@
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
         />
-      </el-form-item>
-      <el-form-item label="客户" prop="customerId">
-        <el-input
-          v-model="queryParams.customerId"
-          placeholder="请输入客户"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="合同" prop="contractId">
-        <el-input
-          v-model="queryParams.contractId"
-          placeholder="请输入合同"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="负责人" prop="ownerUserId">
+      </el-form-item>-->
+      <!--<el-form-item label="负责人" prop="ownerUserId">
         <el-input
           v-model="queryParams.ownerUserId"
           placeholder="请输入负责人"
@@ -105,7 +96,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!--<el-form-item label="备注" prop="remark">
+      <el-form-item label="备注" prop="remark">
         <el-input
           v-model="queryParams.remark"
           placeholder="请输入备注"
@@ -165,13 +156,13 @@
         width="180px"
       />
       <el-table-column label="提前几天提醒" align="center" prop="remindDays" />
-      <el-table-column
+      <!--<el-table-column
         label="提醒日期"
         align="center"
         prop="remindTime"
         :formatter="dateFormatter"
         width="180px"
-      />
+      />-->
       <!--<el-table-column label="回款ID" align="center" prop="receivableId" />-->
       <el-table-column label="完成状态" align="center" prop="status">
         <template #default="scope">

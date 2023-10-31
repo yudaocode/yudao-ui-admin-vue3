@@ -103,7 +103,7 @@
           class="!w-240px"
         />
       </el-form-item>-->
-      <el-form-item label="负责人" prop="ownerUserId">
+      <!--<el-form-item label="负责人" prop="ownerUserId">
         <el-input
           v-model="queryParams.ownerUserId"
           placeholder="请输入负责人"
@@ -112,7 +112,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!--<el-form-item label="批次" prop="batchId">
+      <el-form-item label="批次" prop="batchId">
         <el-input
           v-model="queryParams.batchId"
           placeholder="请输入批次"
@@ -229,9 +229,9 @@
       />
       <el-table-column label="操作" align="center" width="180px">
         <template #default="scope">
-          <router-link :to="'/crm/receivable-plan?receivableId=' + scope.row.receivableId">
+          <!--<router-link :to="'/crm/receivable-plan?receivableId=' + scope.row.receivableId">
             <el-button link type="primary">详情</el-button>
-          </router-link>
+          </router-link>-->
           <el-button
             link
             type="primary"

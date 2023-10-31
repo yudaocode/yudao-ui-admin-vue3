@@ -10,14 +10,14 @@
       <el-form-item label="回款编号" prop="no">
         <el-input v-model="formData.no" placeholder="请输入回款编号" />
       </el-form-item>
-      <!--<el-form-item label="回款计划ID" prop="planId">
-        <el-input v-model="formData.planId" placeholder="请输入回款计划ID" />
-      </el-form-item>-->
-      <el-form-item label="客户ID" prop="customerId">
-        <el-input v-model="formData.customerId" placeholder="请输入客户ID" />
+      <el-form-item label="回款计划" prop="planId">
+        <el-input v-model="formData.planId" placeholder="请输入回款计划" />
       </el-form-item>
-      <el-form-item label="合同ID" prop="contractId">
-        <el-input v-model="formData.contractId" placeholder="请输入合同ID" />
+      <el-form-item label="客户名称" prop="customerId">
+        <el-input v-model="formData.customerId" placeholder="请输入客户名称" />
+      </el-form-item>
+      <el-form-item label="合同名称" prop="contractId">
+        <el-input v-model="formData.contractId" placeholder="请输入合同名称" />
       </el-form-item>
       <!--<el-form-item label="审批状态" prop="checkStatus">
         <el-select v-model="formData.checkStatus" placeholder="请选择审批状态">
