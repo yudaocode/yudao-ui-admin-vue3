@@ -59,7 +59,7 @@
               }"
             >
               <draggable
-                class="drag-area page-prop-area"
+                class="page-prop-area drag-area"
                 v-model="pageComponents"
                 item-key="index"
                 :animation="200"
@@ -200,18 +200,25 @@ const navigationBarComponent = ref<DiyComponent<any>>(cloneDeep(NAVIGATION_BAR_C
 const tabBarComponent = ref<DiyComponent<any>>(cloneDeep(TAB_BAR_COMPONENT))
 
 // 选中的组件，默认选中顶部导航栏
-const selectedComponent = ref<DiyComponent<any>>(unref(pageConfigComponent))
+const selectedComponent = ref<DiyComponent<any>>()
 // 选中的组件索引
 const selectedComponentIndex = ref<number>(-1)
 // 组件列表
 const pageComponents = ref<DiyComponent<any>[]>([])
 // 定义属性
 const props = defineProps<{
+  // 页面配置，支持Json字符串
   modelValue: string | PageConfig
+  // 标题
   title: string
-  libs: DiyComponentLibrary[] // 组件库
+  // 组件库
+  libs: DiyComponentLibrary[]
+  // 是否显示顶部导航栏
   showNavigationBar: boolean
+  // 是否显示底部导航菜单
   showTabBar: boolean
+  // 是否显示页面配置
+  showPageConfig: boolean
 }>()
 
 // 监听传入的页面配置
@@ -255,6 +262,8 @@ const handleSave = () => {
 
 // 处理页面选中：显示属性表单
 const handlePageSelected = (event: any) => {
+  if (!props.showPageConfig) return
+
   // 配置了样式 page-prop-area 的元素，才显示页面设置
   if (includes(event?.target?.classList, 'page-prop-area')) {
     handleComponentSelected(unref(pageConfigComponent))
@@ -351,6 +360,22 @@ const handlePreview = () => {
   message.warning('开发中~')
   emits('preview')
 }
+
+// 设置默认选中的组件
+const setDefaultSelectedComponent = () => {
+  if (props.showPageConfig) {
+    selectedComponent.value = unref(pageConfigComponent)
+  } else if (props.showNavigationBar) {
+    selectedComponent.value = unref(navigationBarComponent)
+  } else if (props.showTabBar) {
+    selectedComponent.value = unref(tabBarComponent)
+  }
+}
+watch(
+  () => [props.showPageConfig, props.showNavigationBar, props.showTabBar],
+  () => setDefaultSelectedComponent()
+)
+onMounted(() => setDefaultSelectedComponent())
 </script>
 <style lang="scss" scoped>
 .editor {

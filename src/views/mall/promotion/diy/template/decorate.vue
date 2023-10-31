@@ -1,11 +1,12 @@
 <template>
   <DiyEditor
     v-if="formData && !formLoading"
-    v-model="formData.property"
+    v-model="currentFormData!.property"
     :title="templateItems[selectedTemplateItem].name"
     :libs="libs"
+    :show-page-config="selectedTemplateItem !== 0"
     :show-tab-bar="selectedTemplateItem === 0"
-    :show-navigation-bar="selectedTemplateItem > 0"
+    :show-navigation-bar="selectedTemplateItem !== 0"
     @save="submitForm"
   >
     <template #toolBarLeft>
@@ -25,6 +26,7 @@
 </template>
 <script setup lang="ts">
 import * as DiyTemplateApi from '@/api/mall/promotion/diy/template'
+import * as DiyPageApi from '@/api/mall/promotion/diy/page'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DiyComponentLibrary } from '@/components/DiyEditor/util'
 
@@ -42,14 +44,17 @@ const templateItems = reactive([
 const message = useMessage() // 消息弹窗
 
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formData = ref<DiyTemplateApi.DiyTemplateVO>()
+const formData = ref<DiyTemplateApi.DiyTemplatePropertyVO>()
 const formRef = ref() // 表单 Ref
+// 当前编辑的属性
+const currentFormData = ref<DiyTemplateApi.DiyTemplatePropertyVO | DiyPageApi.DiyPageVO>()
 
 // 获取详情
 const getPageDetail = async (id: any) => {
   formLoading.value = true
   try {
-    formData.value = await DiyTemplateApi.getDiyTemplate(id)
+    formData.value = await DiyTemplateApi.getDiyTemplateProperty(id)
+    currentFormData.value = formData.value
   } finally {
     formLoading.value = false
   }
@@ -82,12 +87,21 @@ const pageLibs = [
 ] as DiyComponentLibrary[]
 // 当前组件库
 const libs = ref<DiyComponentLibrary[]>(templateLibs)
+// 模板选项切换
 const handleTemplateItemChange = () => {
+  // 编辑模板
   if (selectedTemplateItem.value === 0) {
     libs.value = templateLibs
-  } else {
-    libs.value = pageLibs
+    currentFormData.value = formData.value
+    return
   }
+
+  // 编辑页面
+  libs.value = pageLibs
+  currentFormData.value = formData.value!.pages.find(
+    (page: DiyPageApi.DiyPageVO) => page.name === templateItems[selectedTemplateItem.value].name
+  )
+  console.log(currentFormData.value)
 }
 
 // 提交表单
@@ -97,7 +111,13 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    await DiyTemplateApi.updateDiyTemplate(unref(formData)!)
+    if (selectedTemplateItem.value === 0) {
+      // 提交模板属性
+      await DiyTemplateApi.updateDiyTemplateProperty(unref(formData)!)
+    } else {
+      // 提交页面属性
+      await DiyPageApi.updateDiyPageProperty(unref(currentFormData)!)
+    }
     message.success('保存成功')
   } finally {
     formLoading.value = false
@@ -113,8 +133,9 @@ const resetForm = () => {
     usedTime: undefined,
     remark: '',
     previewImageUrls: [],
-    property: ''
-  } as DiyTemplateApi.DiyTemplateVO
+    property: '',
+    pages: []
+  } as DiyTemplateApi.DiyTemplatePropertyVO
   formRef.value?.resetFields()
 }
 

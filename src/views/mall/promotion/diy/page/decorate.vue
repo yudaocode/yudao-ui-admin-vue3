@@ -4,6 +4,7 @@
     v-model="formData.property"
     :title="formData.name"
     :libs="componentLibs"
+    :show-page-config="true"
     :show-navigation-bar="true"
     :show-tab-bar="false"
     @save="submitForm"
@@ -51,7 +52,7 @@ const formRef = ref() // 表单 Ref
 const getPageDetail = async (id: any) => {
   formLoading.value = true
   try {
-    formData.value = await DiyPageApi.getDiyPage(id)
+    formData.value = await DiyPageApi.getDiyPageProperty(id)
   } finally {
     formLoading.value = false
   }
@@ -63,7 +64,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    await DiyPageApi.updateDiyPage(unref(formData)!)
+    await DiyPageApi.updateDiyPageProperty(unref(formData)!)
     message.success('保存成功')
   } finally {
     formLoading.value = false
