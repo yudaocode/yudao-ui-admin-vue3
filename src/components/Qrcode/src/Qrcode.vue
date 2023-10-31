@@ -227,7 +227,7 @@ const disabledClick = () => {
     <div
       v-if="disabled"
       :class="`${prefixCls}--disabled`"
-      class="wh-full absolute left-0 top-0 flex items-center justify-center"
+      class="absolute left-0 top-0 h-full w-full flex items-center justify-center"
       @click="disabledClick"
     >
       <div class="absolute left-[50%] top-[50%] font-bold">
