@@ -48,7 +48,9 @@
             <UserOrderList :user-id="id" />
           </el-tab-pane>
           <el-tab-pane label="售后管理" lazy>售后管理(WIP)</el-tab-pane>
-          <el-tab-pane label="收藏记录" lazy>收藏记录(WIP)</el-tab-pane>
+          <el-tab-pane label="收藏记录" lazy>
+            <UserFavoriteList :user-id="id" />
+          </el-tab-pane>
           <el-tab-pane label="优惠劵" lazy>
             <UserCouponList :user-id="id" />
           </el-tab-pane>
@@ -76,6 +78,7 @@ import UserExperienceRecordList from './UserExperienceRecordList.vue'
 import UserOrderList from './UserOrderList.vue'
 import UserPointList from './UserPointList.vue'
 import UserSignList from './UserSignList.vue'
+import UserFavoriteList from './UserFavoriteList.vue'
 import { CardTitle } from '@/components/Card/index'
 import { ElMessage } from 'element-plus'
 
