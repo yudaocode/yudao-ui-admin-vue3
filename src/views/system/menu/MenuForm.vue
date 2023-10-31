@@ -38,7 +38,7 @@
         <template #label>
           <Tooltip
             message="访问的路由地址，如：`user`。如需外网地址时，则以 `http(s)://` 开头"
-            titel="路由地址"
+            title="路由地址"
           />
         </template>
         <el-input v-model="formData.path" clearable placeholder="请输入路由地址" />
@@ -53,7 +53,7 @@
         <template #label>
           <Tooltip
             message="Controller 方法上的权限字符，如：@PreAuthorize(`@ss.hasPermission('system:user:list')`)"
-            titel="权限标识"
+            title="权限标识"
           />
         </template>
         <el-input v-model="formData.permission" clearable placeholder="请输入权限标识" />
@@ -74,7 +74,7 @@
       </el-form-item>
       <el-form-item v-if="formData.type !== 3" label="显示状态" prop="visible">
         <template #label>
-          <Tooltip message="选择隐藏时，路由将不会出现在侧边栏，但仍然可以访问" titel="显示状态" />
+          <Tooltip message="选择隐藏时，路由将不会出现在侧边栏，但仍然可以访问" title="显示状态" />
         </template>
         <el-radio-group v-model="formData.visible">
           <el-radio key="true" :label="true" border>显示</el-radio>
@@ -85,7 +85,7 @@
         <template #label>
           <Tooltip
             message="选择不是时，当该菜单只有一个子菜单时，不展示自己，直接展示子菜单"
-            titel="总是显示"
+            title="总是显示"
           />
         </template>
         <el-radio-group v-model="formData.alwaysShow">
@@ -97,7 +97,7 @@
         <template #label>
           <Tooltip
             message="选择缓存时，则会被 `keep-alive` 缓存，必须填写「组件名称」字段"
-            titel="缓存状态"
+            title="缓存状态"
           />
         </template>
         <el-radio-group v-model="formData.keepAlive">
