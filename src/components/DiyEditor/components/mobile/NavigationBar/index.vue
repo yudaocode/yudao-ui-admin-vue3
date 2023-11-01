@@ -40,7 +40,6 @@ defineProps<{ property: NavigationBarProperty }>()
   display: flex;
   justify-content: space-between;
   align-items: center;
-  cursor: pointer;
   /* 左边 */
   .left {
     margin-left: 8px;

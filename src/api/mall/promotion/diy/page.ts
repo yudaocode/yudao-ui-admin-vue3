@@ -33,3 +33,13 @@ export const updateDiyPage = async (data: DiyPageVO) => {
 export const deleteDiyPage = async (id: number) => {
   return await request.delete({ url: `/promotion/diy-page/delete?id=` + id })
 }
+
+// 获得装修页面属性
+export const getDiyPageProperty = async (id: number) => {
+  return await request.get({ url: `/promotion/diy-page/get-property?id=` + id })
+}
+
+// 更新装修页面属性
+export const updateDiyPageProperty = async (data: DiyPageVO) => {
+  return await request.put({ url: `/promotion/diy-page/update-property`, data })
+}

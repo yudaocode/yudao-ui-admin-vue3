@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex items-center text-12px"
+    class="flex items-center p-y-4px text-12px"
     :style="{ backgroundColor: property.backgroundColor, color: property.textColor }"
   >
     <el-image :src="property.iconUrl" class="h-18px" />
