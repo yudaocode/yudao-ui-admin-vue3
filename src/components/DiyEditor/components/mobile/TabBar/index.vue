@@ -4,9 +4,9 @@
       class="tab-bar-bg"
       :style="{
         background:
-          property.style.backgroundType === 'color'
-            ? property.style.background
-            : `url(${property.style.background})`,
+          property.style.bgType === 'color'
+            ? property.style.bgColor
+            : `url(${property.style.bgImg})`,
         backgroundSize: '100% 100%',
         backgroundRepeat: 'no-repeat'
       }"
@@ -14,7 +14,7 @@
       <div v-for="(item, index) in property.items" :key="index" class="tab-bar-item">
         <img :src="index === 0 ? item.activeIconUrl : item.iconUrl" alt="" />
         <span :style="{ color: index === 0 ? property.style.activeColor : property.style.color }">
-          {{ item.name }}
+          {{ item.text }}
         </span>
       </div>
     </div>

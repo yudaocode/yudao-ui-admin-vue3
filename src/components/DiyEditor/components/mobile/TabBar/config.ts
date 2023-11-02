@@ -12,18 +12,24 @@ export interface TabBarProperty {
 
 // 选项属性
 export interface TabBarItemProperty {
-  name: string // 标签名称
-  link: string // 链接
-  iconUrl: string // 默认图标链接
-  activeIconUrl: string // 选中的图标链接
+  // 标签文字
+  text: string
+  // 链接
+  url: string
+  // 默认图标链接
+  iconUrl: string
+  // 选中的图标链接
+  activeIconUrl: string
 }
 
 // 样式
 export interface TabBarStyle {
   // 背景类型
-  backgroundType: 'color' | 'img'
-  // 背景颜色 或 图片链接
-  background: string
+  bgType: 'color' | 'img'
+  // 背景颜色
+  bgColor: string
+  // 图片链接
+  bgImg: string
   // 默认颜色
   color: string
   // 选中的颜色
@@ -38,33 +44,33 @@ export const component = {
   property: {
     theme: 'red',
     style: {
-      backgroundType: 'color',
-      background: '#fff',
+      bgType: 'color',
+      bgColor: '#fff',
       color: '#282828',
       activeColor: '#fc4141'
     },
     items: [
       {
-        name: '首页',
-        link: '/',
+        text: '首页',
+        url: '/pages/index/index',
         iconUrl: 'http://mall.yudao.iocoder.cn/static/images/1-001.png',
         activeIconUrl: 'http://mall.yudao.iocoder.cn/static/images/1-002.png'
       },
       {
-        name: '分类',
-        link: '/pages/goods_cate/goods_cate',
+        text: '分类',
+        url: '/pages/index/category?id=3',
         iconUrl: 'http://mall.yudao.iocoder.cn/static/images/2-001.png',
         activeIconUrl: 'http://mall.yudao.iocoder.cn/static/images/2-002.png'
       },
       {
-        name: '购物车',
-        link: '/pages/order_addcart/order_addcart',
+        text: '购物车',
+        url: '/pages/index/cart',
         iconUrl: 'http://mall.yudao.iocoder.cn/static/images/3-001.png',
         activeIconUrl: 'http://mall.yudao.iocoder.cn/static/images/3-002.png'
       },
       {
-        name: '我的',
-        link: '/pages/user/index',
+        text: '我的',
+        url: '/pages/index/user',
         iconUrl: 'http://mall.yudao.iocoder.cn/static/images/4-001.png',
         activeIconUrl: 'http://mall.yudao.iocoder.cn/static/images/4-002.png'
       }
