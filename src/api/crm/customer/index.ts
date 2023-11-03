@@ -1,13 +1,14 @@
 import request from '@/config/axios'
 
 export interface CustomerVO {
-  id: number
+  id?: number
   name: string
   industryId: number
   level: number
   source: number
-  followUpStatus: boolean
-  lockStatus: boolean
+  followUpStatus?: boolean
+  lockStatus?: boolean
+  dealStatus?: boolean
   mobile: string
   telephone: string
   website: string
@@ -16,13 +17,20 @@ export interface CustomerVO {
   email: string
   description: string
   remark: string
-  ownerUserId: number
-  roUserIds: string
-  rwUserIds: string
-  areaId: number
+  ownerUserId?: number
+  ownerUserName?: string
+  ownerUserDept?: string
+  roUserIds?: string
+  rwUserIds?: string
+  areaId?: number
+  areaName?: string
   detailAddress: string
-  contactLastTime: Date
+  contactLastTime?: Date
   contactNextTime: Date
+  createTime?: Date
+  updateTime?: Date
+  creator?: string
+  creatorName?: string
 }
 
 // 查询客户列表
