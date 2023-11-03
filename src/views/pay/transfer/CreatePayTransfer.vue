@@ -64,14 +64,10 @@ const formLoading = ref(false) // 提交的按钮禁用
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 defineOptions({ name: 'CreatePayTransfer' })
 
-const props = defineProps({
-  payTransfer: {
-    type: Object as PropType<PayTransferApi.TransferVO>,
-    required: true
-  }
-})
 // 提交数据
-let submitTransferData = {
+let submitTransferData: PayTransferApi.TransferVO
+
+const transfer = reactive({
   appId: undefined,
   channelCode: undefined,
   merchantTransferId: undefined,
@@ -81,9 +77,7 @@ let submitTransferData = {
   userName: undefined,
   alipayLogonId: undefined,
   openid: undefined
-} as PayTransferApi.TransferVO
-
-const transfer = reactive(props.payTransfer)
+})
 const dialogVisible = ref(false)
 const typeName = computed(() => {
   return getDictLabel(DICT_TYPE.PAY_TRANSFER_TYPE, transfer.type)

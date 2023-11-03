@@ -49,13 +49,20 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column
+        label="操作"
+        align="center"
+        class-name="small-padding fixed-width"
+        width="100"
+        fixed="right"
+      >
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="handleTransfer(scope.row)"
             v-if="scope.row.transferStatus === 0"
+            v-hasPermi="['pay:transfer:create']"
           >
             发起转账
           </el-button>
@@ -73,7 +80,7 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <DemoTransferForm ref="demoFormRef" @success="getList" />
-  <CreatePayTransfer ref="payTransferRef" :payTransfer="payTransfer" @success="getList" />
+  <CreatePayTransfer ref="payTransferRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
