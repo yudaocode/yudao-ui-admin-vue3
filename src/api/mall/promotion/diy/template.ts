@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import { DiyPageVO } from '@/api/mall/promotion/diy/page'
 
 export interface DiyTemplateVO {
   id?: number
@@ -8,6 +9,10 @@ export interface DiyTemplateVO {
   remark: string
   previewImageUrls: string[]
   property: string
+}
+
+export interface DiyTemplatePropertyVO extends DiyTemplateVO {
+  pages: DiyPageVO[]
 }
 
 // 查询装修模板列表
@@ -38,4 +43,16 @@ export const deleteDiyTemplate = async (id: number) => {
 // 使用装修模板
 export const useDiyTemplate = async (id: number) => {
   return await request.put({ url: `/promotion/diy-template/use?id=` + id })
+}
+
+// 获得装修模板属性
+export const getDiyTemplateProperty = async (id: number) => {
+  return await request.get<DiyTemplatePropertyVO>({
+    url: `/promotion/diy-template/get-property?id=` + id
+  })
+}
+
+// 更新装修模板属性
+export const updateDiyTemplateProperty = async (data: DiyTemplateVO) => {
+  return await request.put({ url: `/promotion/diy-template/update-property`, data })
 }

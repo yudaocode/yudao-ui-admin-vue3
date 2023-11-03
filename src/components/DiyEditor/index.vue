@@ -45,6 +45,7 @@
               @click="handleNavigationBarSelected"
               :class="[
                 'component',
+                'cursor-pointer!',
                 { active: selectedComponent?.id === navigationBarComponent.id }
               ]"
             />
@@ -59,7 +60,7 @@
               }"
             >
               <draggable
-                class="drag-area page-prop-area"
+                class="page-prop-area drag-area"
                 v-model="pageComponents"
                 item-key="index"
                 :animation="200"
@@ -70,7 +71,7 @@
                 @change="handleComponentChange"
               >
                 <template #item="{ element, index }">
-                  <div class="component-box" @click="handleComponentSelected(element, index)">
+                  <div class="component-container" @click="handleComponentSelected(element, index)">
                     <!-- 左侧组件名 -->
                     <div
                       :class="['component-name', { active: selectedComponentIndex === index }]"
@@ -79,12 +80,13 @@
                       {{ element.name }}
                     </div>
                     <!-- 组件内容区 -->
-                    <component
-                      :is="element.id"
-                      :property="element.property"
-                      :class="['component', { active: selectedComponentIndex === index }]"
-                      :data-type="element.id"
-                    />
+                    <div :class="['component', { active: selectedComponentIndex === index }]">
+                      <component
+                        :is="element.id"
+                        :property="element.property"
+                        :data-type="element.id"
+                      />
+                    </div>
                     <!-- 左侧：组件操作工具栏 -->
                     <div
                       class="component-toolbar"
@@ -130,6 +132,7 @@
             :class="[
               'editor-design-bottom',
               'component',
+              'cursor-pointer!',
               { active: selectedComponent?.id === tabBarComponent.id }
             ]"
           >
@@ -200,18 +203,25 @@ const navigationBarComponent = ref<DiyComponent<any>>(cloneDeep(NAVIGATION_BAR_C
 const tabBarComponent = ref<DiyComponent<any>>(cloneDeep(TAB_BAR_COMPONENT))
 
 // 选中的组件，默认选中顶部导航栏
-const selectedComponent = ref<DiyComponent<any>>(unref(pageConfigComponent))
+const selectedComponent = ref<DiyComponent<any>>()
 // 选中的组件索引
 const selectedComponentIndex = ref<number>(-1)
 // 组件列表
 const pageComponents = ref<DiyComponent<any>[]>([])
 // 定义属性
 const props = defineProps<{
+  // 页面配置，支持Json字符串
   modelValue: string | PageConfig
+  // 标题
   title: string
-  libs: DiyComponentLibrary[] // 组件库
+  // 组件库
+  libs: DiyComponentLibrary[]
+  // 是否显示顶部导航栏
   showNavigationBar: boolean
+  // 是否显示底部导航菜单
   showTabBar: boolean
+  // 是否显示页面配置
+  showPageConfig: boolean
 }>()
 
 // 监听传入的页面配置
@@ -255,6 +265,8 @@ const handleSave = () => {
 
 // 处理页面选中：显示属性表单
 const handlePageSelected = (event: any) => {
+  if (!props.showPageConfig) return
+
   // 配置了样式 page-prop-area 的元素，才显示页面设置
   if (includes(event?.target?.classList, 'page-prop-area')) {
     handleComponentSelected(unref(pageConfigComponent))
@@ -351,183 +363,227 @@ const handlePreview = () => {
   message.warning('开发中~')
   emits('preview')
 }
+
+// 设置默认选中的组件
+const setDefaultSelectedComponent = () => {
+  if (props.showPageConfig) {
+    selectedComponent.value = unref(pageConfigComponent)
+  } else if (props.showNavigationBar) {
+    selectedComponent.value = unref(navigationBarComponent)
+  } else if (props.showTabBar) {
+    selectedComponent.value = unref(tabBarComponent)
+  }
+}
+watch(
+  () => [props.showPageConfig, props.showNavigationBar, props.showTabBar],
+  () => setDefaultSelectedComponent()
+)
+onMounted(() => setDefaultSelectedComponent())
 </script>
 <style lang="scss" scoped>
+/* 手机宽度 */
+$phone-width: 375px;
+/* 根节点样式 */
 .editor {
   height: 100%;
   margin: calc(0px - var(--app-content-padding));
   display: flex;
   flex-direction: column;
-}
-.editor-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: auto;
-  padding: 0;
-  border-bottom: solid 1px var(--el-border-color);
-  background-color: var(--el-bg-color);
-
-  .header-right {
-    height: 100%;
-    .el-button {
-      height: 100%;
-    }
-  }
-
-  :deep(.el-radio-button__inner),
-  :deep(.el-button) {
-    border-top: none !important;
-    border-bottom: none !important;
-    border-radius: 0 !important;
-  }
-}
-.editor-container {
-  height: calc(
-    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 42px
-  );
-  /* 右侧属性面板 */
-  .editor-right {
-    flex-shrink: 0;
-    box-shadow: -8px 0 8px -8px rgba(0, 0, 0, 0.12);
-
-    :deep(.el-card__header) {
-      padding: 8px 16px;
-    }
-
-    .property-group {
-      /* 属性分组 */
-      :deep(.el-card__header) {
-        border: none;
-        background: var(--el-bg-color-page);
-      }
-    }
-  }
-
-  /* 中心 */
-  .editor-center {
-    flex: 1 1 0;
-    padding: 16px 0;
-    background-color: var(--app-content-bg-color);
+  /* 顶部：工具栏 */
+  .editor-header {
     display: flex;
-    justify-content: center;
-
-    .editor-design {
-      position: relative;
+    align-items: center;
+    justify-content: space-between;
+    height: auto;
+    padding: 0;
+    border-bottom: solid 1px var(--el-border-color);
+    background-color: var(--el-bg-color);
+    /* 工具栏：右侧按钮 */
+    .header-right {
       height: 100%;
-      width: 100%;
+      .el-button {
+        height: 100%;
+      }
+    }
+    /* 隐藏工具栏按钮的边框 */
+    :deep(.el-radio-button__inner),
+    :deep(.el-button) {
+      border-top: none !important;
+      border-bottom: none !important;
+      border-radius: 0 !important;
+    }
+  }
+  /* 中心操作区 */
+  .editor-container {
+    height: calc(
+      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 42px
+    );
+    /* 右侧属性面板 */
+    .editor-right {
+      flex-shrink: 0;
+      box-shadow: -8px 0 8px -8px rgba(0, 0, 0, 0.12);
+      /* 属性面板顶部：减少内边距 */
+      :deep(.el-card__header) {
+        padding: 8px 16px;
+      }
+      /* 属性面板分组 */
+      .property-group {
+        /* 属性分组 */
+        :deep(.el-card__header) {
+          border: none;
+          background: var(--el-bg-color-page);
+        }
+      }
+    }
+
+    /* 中心区域 */
+    .editor-center {
+      flex: 1 1 0;
+      padding: 16px 0;
+      background-color: var(--app-content-bg-color);
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow: hidden;
-
-      /* 组件 */
-      .component {
-        border: 1px solid #fff;
-        width: 375px !important;
-
-        &:hover {
-          border: 1px dashed #155bd4;
-        }
-      }
-      .component.active {
-        border: 2px solid #155bd4 !important;
-      }
-
-      .editor-design-top {
-        width: 379px;
-
-        .status-bar {
-          height: 20px;
-          width: 100%;
-          background-color: #fff;
-        }
-
-        .navigation-bar {
-          width: 100%;
-        }
-      }
-
-      .editor-design-bottom {
-        width: 379px;
-      }
-
-      .editor-design-center {
+      justify-content: center;
+      /* 中心设计区域 */
+      .editor-design {
+        position: relative;
+        height: 100%;
         width: 100%;
-        flex: 1 1 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow: hidden;
 
-        :deep(.el-scrollbar__view) {
-          height: 100%;
-        }
-
-        /* 主体内容 */
-        .phone-container {
-          height: 100%;
-          box-sizing: border-box;
+        /* 组件 */
+        .component {
+          border: 1px solid #fff;
+          width: $phone-width;
           cursor: move;
-          position: relative;
-          background-repeat: no-repeat;
-          background-size: 100% 100%;
-          width: 379px;
-          margin: 0 auto;
+          /* 鼠标放到组件上时 */
+          &:hover {
+            border: 1px dashed var(--el-color-primary);
+          }
+        }
+        /* 组件选中 */
+        .component.active {
+          border: 2px solid var(--el-color-primary);
+        }
+        /* 手机顶部 */
+        .editor-design-top {
+          width: $phone-width;
+          /* 手机顶部状态栏 */
+          .status-bar {
+            height: 20px;
+            width: $phone-width;
+            background-color: #fff;
+          }
+        }
+        /* 手机底部导航 */
+        .editor-design-bottom {
+          width: $phone-width;
+        }
+        /* 手机页面编辑区域 */
+        .editor-design-center {
+          width: 100%;
+          flex: 1 1 0;
 
-          .drag-area {
+          :deep(.el-scrollbar__view) {
             height: 100%;
           }
 
-          /* 组件容器 */
-          .component-box {
-            width: 100%;
+          /* 主体内容 */
+          .phone-container {
+            height: 100%;
+            box-sizing: border-box;
             position: relative;
-            /* 组件名称 */
-            .component-name {
-              position: absolute;
-              width: 80px;
-              text-align: center;
-              line-height: 25px;
-              height: 25px;
-              background: #fff;
-              font-size: 12px;
-              left: -80px;
-              top: 0;
-              box-shadow:
-                0 0 4px #00000014,
-                0 2px 6px #0000000f,
-                0 4px 8px 2px #0000000a;
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            width: $phone-width;
+            margin: 0 auto;
+            .drag-area {
+              height: 100%;
             }
-            .component-name.active {
-              background: #2d8cf0;
-              color: #fff;
-            }
-            /* 组件操作按钮 */
-            .component-toolbar {
-              position: absolute;
-              top: 0;
-              right: -50px;
 
-              .el-button-group {
-                display: inline-flex;
-                flex-direction: column;
+            /* 组件容器（左侧：组件名称，中间：组件，右侧：操作工具栏） */
+            .component-container {
+              width: 100%;
+              position: relative;
+              /* 左侧：组件名称 */
+              .component-name {
+                position: absolute;
+                width: 80px;
+                text-align: center;
+                line-height: 25px;
+                height: 25px;
+                background: #fff;
+                font-size: 12px;
+                left: -85px;
+                top: 0;
+                box-shadow:
+                  0 0 4px #00000014,
+                  0 2px 6px #0000000f,
+                  0 4px 8px 2px #0000000a;
+                /* 右侧小三角 */
+                &:after {
+                  position: absolute;
+                  top: 7.5px;
+                  right: -10px;
+                  content: ' ';
+                  height: 0;
+                  width: 0;
+                  border: 5px solid transparent;
+                  border-left-color: #fff;
+                }
               }
-              .el-button-group > .el-button:first-child {
-                border-bottom-left-radius: 0;
-                border-bottom-right-radius: 0;
-                border-top-right-radius: var(--el-border-radius-base);
-                border-bottom-color: var(--el-button-divide-border-color);
+              /* 组件选中按钮 */
+              .component-name.active {
+                background: var(--el-color-primary);
+                color: #fff;
+                &:after {
+                  border-left-color: var(--el-color-primary);
+                }
               }
-              .el-button-group > .el-button:last-child {
-                border-top-left-radius: 0;
-                border-top-right-radius: 0;
-                border-bottom-left-radius: var(--el-border-radius-base);
-                border-top-color: var(--el-button-divide-border-color);
-              }
-              .el-button-group .el-button--primary:not(:first-child):not(:last-child) {
-                border-top-color: var(--el-button-divide-border-color);
-                border-bottom-color: var(--el-button-divide-border-color);
-              }
-              .el-button-group > .el-button:not(:last-child) {
-                margin-bottom: -1px;
-                margin-right: 0;
+              /* 右侧：组件操作工具栏 */
+              .component-toolbar {
+                position: absolute;
+                top: 0;
+                right: -57px;
+                /* 左侧小三角 */
+                &:before {
+                  position: absolute;
+                  top: 10px;
+                  left: -10px;
+                  content: ' ';
+                  height: 0;
+                  width: 0;
+                  border: 5px solid transparent;
+                  border-right-color: #2d8cf0;
+                }
+
+                /* 重写 Element 按钮组的样式（官方只支持水平显示，增加垂直显示的样式） */
+                .el-button-group {
+                  display: inline-flex;
+                  flex-direction: column;
+                }
+                .el-button-group > .el-button:first-child {
+                  border-bottom-left-radius: 0;
+                  border-bottom-right-radius: 0;
+                  border-top-right-radius: var(--el-border-radius-base);
+                  border-bottom-color: var(--el-button-divide-border-color);
+                }
+                .el-button-group > .el-button:last-child {
+                  border-top-left-radius: 0;
+                  border-top-right-radius: 0;
+                  border-bottom-left-radius: var(--el-border-radius-base);
+                  border-top-color: var(--el-button-divide-border-color);
+                }
+                .el-button-group .el-button--primary:not(:first-child):not(:last-child) {
+                  border-top-color: var(--el-button-divide-border-color);
+                  border-bottom-color: var(--el-button-divide-border-color);
+                }
+                .el-button-group > .el-button:not(:last-child) {
+                  margin-bottom: -1px;
+                  margin-right: 0;
+                }
               }
             }
           }
