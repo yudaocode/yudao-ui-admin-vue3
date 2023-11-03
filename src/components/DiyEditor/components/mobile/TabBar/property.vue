@@ -2,7 +2,7 @@
   <div class="tab-bar">
     <!-- 表单 -->
     <el-form :model="formData" label-width="80px">
-      <el-form-item label="主题">
+      <el-form-item label="主题" prop="theme">
         <el-select v-model="formData!.theme" @change="handleThemeChange">
           <el-option
             v-for="(theme, index) in THEME_LIST"
@@ -26,24 +26,16 @@
         <ColorInput v-model="formData!.style.activeColor" />
       </el-form-item>
       <el-form-item label="导航背景">
-        <el-radio-group
-          v-model="formData!.style.backgroundType"
-          @change="handleBackgroundTypeChange"
-        >
+        <el-radio-group v-model="formData!.style.bgType">
           <el-radio-button label="color">纯色</el-radio-button>
           <el-radio-button label="img">图片</el-radio-button>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="选择颜色" v-if="formData!.style.backgroundType === 'color'">
-        <ColorInput v-model="formData!.style.background" />
+      <el-form-item label="选择颜色" v-if="formData!.style.bgType === 'color'">
+        <ColorInput v-model="formData!.style.bgColor" />
       </el-form-item>
-      <el-form-item label="选择图片" v-if="formData!.style.backgroundType === 'img'">
-        <UploadImg
-          v-model="formData!.style.background"
-          width="100%"
-          height="50px"
-          class="min-w-200px"
-        >
+      <el-form-item label="选择图片" v-if="formData!.style.bgType === 'img'">
+        <UploadImg v-model="formData!.style.bgImg" width="100%" height="50px" class="min-w-200px">
           <template #tip> 建议尺寸 375 * 50 </template>
         </UploadImg>
       </el-form-item>
@@ -92,11 +84,11 @@
                   <el-text>选中图片</el-text>
                 </div>
               </div>
-              <el-form-item draggable="false" label-width="0" class="m-b-8px!">
-                <el-input v-model="element.name" placeholder="请输入文字" />
+              <el-form-item prop="text" label-width="0" class="m-b-8px!">
+                <el-input v-model="element.text" placeholder="请输入文字" />
               </el-form-item>
-              <el-form-item draggable="false" label-width="0" class="m-b-0!">
-                <el-input v-model="element.link" placeholder="请选择链接" />
+              <el-form-item prop="url" label-width="0" class="m-b-0!">
+                <el-input v-model="element.url" placeholder="请选择链接" />
               </el-form-item>
             </div>
           </div>
@@ -131,14 +123,6 @@ defineOptions({ name: 'TabBarProperty' })
 const props = defineProps<{ modelValue: TabBarProperty }>()
 const emit = defineEmits(['update:modelValue'])
 const { formData } = usePropertyForm(props.modelValue, emit)
-
-// 缓存背景：当背景类型切换时，防止参数丢失
-const backgroundCache = ref('')
-const handleBackgroundTypeChange = () => {
-  const background = formData.value!.style.background
-  formData.value!.style.background = backgroundCache.value
-  backgroundCache.value = background
-}
 
 /** 添加导航项 */
 const handleAddItem = () => {
