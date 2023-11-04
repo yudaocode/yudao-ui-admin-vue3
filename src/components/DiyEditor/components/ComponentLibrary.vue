@@ -1,5 +1,5 @@
 <template>
-  <el-aside class="editor-left" width="260px">
+  <el-aside class="editor-left" width="261px">
     <el-scrollbar>
       <el-collapse v-model="extendGroups">
         <el-collapse-item

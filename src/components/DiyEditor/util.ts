@@ -16,6 +16,34 @@ export interface DiyComponentLibrary {
   components: string[]
 }
 
+// 组件样式
+export interface ComponentStyle {
+  // 背景类型
+  bgType: 'color' | 'img'
+  // 背景颜色
+  bgColor: string
+  // 背景图片
+  bgImg: string
+  // 外边距
+  margin: number
+  marginTop: number
+  marginRight: number
+  marginBottom: number
+  marginLeft: number
+  // 内边距
+  padding: number
+  paddingTop: number
+  paddingRight: number
+  paddingBottom: number
+  paddingLeft: number
+  // 边框圆角
+  borderRadius: number
+  borderTopLeftRadius: number
+  borderTopRightRadius: number
+  borderBottomRightRadius: number
+  borderBottomLeftRadius: number
+}
+
 // 页面配置
 export interface PageConfig {
   // 页面属性

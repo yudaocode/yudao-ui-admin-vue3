@@ -427,11 +427,13 @@ $phone-width: 375px;
         padding: 8px 16px;
       }
       /* 属性面板分组 */
-      .property-group {
-        /* 属性分组 */
-        :deep(.el-card__header) {
+      :deep(.property-group) {
+        margin: 0 -20px;
+        /* 属性分组名称 */
+        .el-card__header {
           border: none;
           background: var(--el-bg-color-page);
+          padding: 8px 32px;
         }
       }
     }

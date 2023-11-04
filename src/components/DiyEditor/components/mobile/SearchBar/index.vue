@@ -2,8 +2,6 @@
   <div
     class="search-bar"
     :style="{
-      background: property.backgroundColor,
-      border: `1px solid ${property.backgroundColor}`,
       color: property.textColor
     }"
   >
@@ -12,7 +10,7 @@
       class="inner"
       :style="{
         height: `${property.height}px`,
-        background: property.borderColor,
+        background: property.backgroundColor,
         borderRadius: `${property.borderRadius}px`
       }"
     >
@@ -44,13 +42,11 @@ defineProps<{ property: SearchProperty }>()
 
 <style scoped lang="scss">
 .search-bar {
-  position: relative;
+  width: 375px;
   /* 搜索框 */
   .inner {
     position: relative;
-    width: calc(100% - 16px);
     min-height: 28px;
-    margin: 5px auto;
     display: flex;
     align-items: center;
     font-size: 14px;
