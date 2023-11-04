@@ -13,7 +13,7 @@
       <el-form-item label="社交平台" prop="socialType">
         <el-radio-group v-model="formData.socialType">
           <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_SOCIAL_CLIENT_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_SOCIAL_TYPE)"
             :key="dict.value"
             :label="dict.value"
           >
@@ -41,8 +41,8 @@
           placeholder="请输入客户端密钥,对应各平台的appSecret"
         />
       </el-form-item>
-      <el-form-item label="agentId" prop="agentId">
-        <el-input v-model="formData.agentId" placeholder="授权方的网页应用ID,有则填" />
+      <el-form-item label="agentId" prop="agentId" v-if="formData!.socialType === 30">
+        <el-input v-model="formData.agentId" placeholder="授权方的网页应用 ID，有则填" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">

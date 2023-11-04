@@ -22,13 +22,3 @@ export const getSocialUserPage = async (params) => {
 export const getSocialUser = async (id: number) => {
   return await request.get({ url: `/system/social-user/get?id=` + id })
 }
-
-// 修改社交用户
-export const updateSocialUser = async (data: SocialUserVO) => {
-  return await request.put({ url: `/system/social-user/update`, data })
-}
-
-// 删除社交用户
-export const deleteSocialUser = async (id: number) => {
-  return await request.delete({ url: `/system/social-user/delete?id=` + id })
-}

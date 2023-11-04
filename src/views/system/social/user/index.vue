@@ -6,7 +6,7 @@
       :inline="true"
       :model="queryParams"
       class="-mb-15px"
-      label-width="68px"
+      label-width="120px"
     >
       <el-form-item label="社交平台" prop="type">
         <el-select
@@ -16,7 +16,7 @@
           placeholder="请选择社交平台"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_SOCIAL_CLIENT_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_SOCIAL_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -29,6 +29,15 @@
           class="!w-240px"
           clearable
           placeholder="请输入用户昵称"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="社交 openid" prop="openid">
+        <el-input
+          v-model="queryParams.openid"
+          class="!w-240px"
+          clearable
+          placeholder="请输入社交 openid"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
@@ -61,21 +70,16 @@
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
       <el-table-column align="center" label="社交平台" prop="type">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.SYSTEM_SOCIAL_CLIENT_TYPE" :value="scope.row.type" />
+          <dict-tag :type="DICT_TYPE.SYSTEM_SOCIAL_TYPE" :value="scope.row.type" />
         </template>
       </el-table-column>
       <el-table-column align="center" label="社交 openid" prop="openid" />
-      <el-table-column align="center" label="社交 token" prop="token" />
-      <el-table-column align="center" label="原始 Token 数据" prop="rawTokenInfo" />
       <el-table-column align="center" label="用户昵称" prop="nickname" />
       <el-table-column align="center" label="用户头像" prop="avatar">
         <template #default="{ row }">
           <el-image :src="row.avatar" class="h-30px w-30px" @click="imagePreview(row.avatar)" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="原始用户数据" prop="rawUserInfo" />
-      <el-table-column align="center" label="最后一次的认证 code" prop="code" />
-      <el-table-column align="center" label="最后一次的认证 state" prop="state" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -83,23 +87,22 @@
         prop="createTime"
         width="180px"
       />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="更新时间"
+        prop="updateTime"
+        width="180px"
+      />
       <el-table-column align="center" fixed="right" label="操作">
         <template #default="scope">
           <el-button
-            v-hasPermi="['system:social-user:update']"
+            v-hasPermi="['system:social-user:query']"
             link
             type="primary"
-            @click="openForm('update', scope.row.id)"
+            @click="openDetail(scope.row.id)"
           >
-            编辑
-          </el-button>
-          <el-button
-            v-hasPermi="['system:social-user:delete']"
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-          >
-            删除
+            详情
           </el-button>
         </template>
       </el-table-column>
@@ -113,15 +116,15 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改 -->
-  <SocialUserForm ref="formRef" @success="getList" />
+  <!-- 表单弹窗：详情 -->
+  <SocialUserDetail ref="detailRef" />
 </template>
 
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as SocialUserApi from '@/api/system/social/user'
-import SocialUserForm from './SocialUserForm.vue'
+import SocialUserDetail from './SocialUserDetail.vue'
 import { createImageViewer } from '@/components/ImageViewer'
 
 defineOptions({ name: 'SocialUser' })
@@ -137,13 +140,7 @@ const queryParams = reactive({
   pageSize: 10,
   type: undefined,
   openid: undefined,
-  token: undefined,
-  rawTokenInfo: undefined,
   nickname: undefined,
-  avatar: undefined,
-  rawUserInfo: undefined,
-  code: undefined,
-  state: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -178,23 +175,10 @@ const imagePreview = (imgUrl: string) => {
   })
 }
 
-/** 修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await SocialUserApi.deleteSocialUser(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
+/** 详情操作 */
+const detailRef = ref()
+const openDetail = (id: number) => {
+  detailRef.value.open(id)
 }
 
 /** 初始化 **/

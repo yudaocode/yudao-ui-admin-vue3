@@ -25,7 +25,7 @@
           placeholder="请选择社交平台"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_SOCIAL_CLIENT_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_SOCIAL_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -56,15 +56,6 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="客户端密钥" prop="clientSecret">
-        <el-input
-          v-model="queryParams.clientSecret"
-          class="!w-240px"
-          clearable
-          placeholder="请输入客户端密钥"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状态">
           <el-option
@@ -74,17 +65,6 @@
             :value="dict.value"
           />
         </el-select>
-      </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-          end-placeholder="结束日期"
-          start-placeholder="开始日期"
-          type="daterange"
-          value-format="YYYY-MM-DD HH:mm:ss"
-        />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery">
@@ -115,7 +95,7 @@
       <el-table-column align="center" label="应用名" prop="name" />
       <el-table-column align="center" label="社交平台" prop="socialType">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.SYSTEM_SOCIAL_CLIENT_TYPE" :value="scope.row.socialType" />
+          <dict-tag :type="DICT_TYPE.SYSTEM_SOCIAL_TYPE" :value="scope.row.socialType" />
         </template>
       </el-table-column>
       <el-table-column align="center" label="用户类型" prop="userType">
@@ -123,8 +103,7 @@
           <dict-tag :type="DICT_TYPE.USER_TYPE" :value="scope.row.userType" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="客户端编号" prop="clientId" />
-      <el-table-column align="center" label="客户端密钥" prop="clientSecret" />
+      <el-table-column align="center" label="客户端编号" prop="clientId" width="180px" />
       <el-table-column align="center" label="状态" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -192,9 +171,7 @@ const queryParams = reactive({
   socialType: null,
   userType: null,
   clientId: null,
-  clientSecret: null,
-  status: null,
-  createTime: []
+  status: null
 })
 const queryFormRef = ref() // 搜索的表单
 
