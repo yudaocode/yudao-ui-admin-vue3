@@ -16,7 +16,7 @@
       <el-descriptions-item label="付款方式: ">
         <dict-tag :type="DICT_TYPE.PAY_CHANNEL_CODE" :value="formData.payChannelCode!" />
       </el-descriptions-item>
-      <el-descriptions-item label="推广用户: " v-if="formData.brokerageUser">
+      <el-descriptions-item v-if="formData.brokerageUser" label="推广用户: ">
         {{ formData.brokerageUser?.nickname }}
       </el-descriptions-item>
     </el-descriptions>
@@ -26,7 +26,7 @@
       <el-descriptions-item label="订单状态: ">
         <dict-tag :type="DICT_TYPE.TRADE_ORDER_STATUS" :value="formData.status!" />
       </el-descriptions-item>
-      <el-descriptions-item label-class-name="no-colon">
+      <el-descriptions-item v-hasPermi="['trade:order:update']" label-class-name="no-colon">
         <el-button
           v-if="formData.status! === TradeOrderStatusEnum.UNPAID.status"
           type="primary"
@@ -150,7 +150,7 @@
       <el-descriptions-item label="联系电话: ">{{ formData.receiverMobile }}</el-descriptions-item>
       <!-- 快递配送 -->
       <div v-if="formData.deliveryType === DeliveryTypeEnum.EXPRESS.type">
-        <el-descriptions-item label="收货地址: " v-if="formData.receiverDetailAddress">
+        <el-descriptions-item v-if="formData.receiverDetailAddress" label="收货地址: ">
           {{ formData.receiverAreaName }} {{ formData.receiverDetailAddress }}
           <el-link
             v-clipboard:copy="formData.receiverAreaName + ' ' + formData.receiverDetailAddress"
@@ -159,17 +159,17 @@
             type="primary"
           />
         </el-descriptions-item>
-        <el-descriptions-item label="物流公司: " v-if="formData.logisticsId">
+        <el-descriptions-item v-if="formData.logisticsId" label="物流公司: ">
           {{ deliveryExpressList.find((item) => item.id === formData.logisticsId)?.name }}
         </el-descriptions-item>
-        <el-descriptions-item label="运单号: " v-if="formData.logisticsId">
+        <el-descriptions-item v-if="formData.logisticsId" label="运单号: ">
           {{ formData.logisticsNo }}
         </el-descriptions-item>
-        <el-descriptions-item label="发货时间: " v-if="formatDate.deliveryTime">
+        <el-descriptions-item v-if="formatDate.deliveryTime" label="发货时间: ">
           {{ formatDate(formData.deliveryTime) }}
         </el-descriptions-item>
         <el-descriptions-item v-for="item in 2" :key="item" label-class-name="no-colon" />
-        <el-descriptions-item label="物流详情: " v-if="expressTrackList.length > 0">
+        <el-descriptions-item v-if="expressTrackList.length > 0" label="物流详情: ">
           <el-timeline>
             <el-timeline-item
               v-for="(express, index) in expressTrackList"
@@ -183,7 +183,7 @@
       </div>
       <!-- 自提门店 -->
       <div v-if="formData.deliveryType === DeliveryTypeEnum.PICK_UP.type">
-        <el-descriptions-item label="自提门店: " v-if="formData.pickUpStoreId">
+        <el-descriptions-item v-if="formData.pickUpStoreId" label="自提门店: ">
           {{ pickUpStore?.name }}
         </el-descriptions-item>
       </div>

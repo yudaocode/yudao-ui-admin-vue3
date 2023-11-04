@@ -125,10 +125,10 @@
         <el-input
           v-show="true"
           v-model="queryParams[queryType.queryParam]"
+          :type="queryType.queryParam === 'userId' ? 'number' : 'text'"
           class="!w-280px"
           clearable
           placeholder="请输入"
-          :type="queryType.queryParam === 'userId' ? 'number' : 'text'"
         >
           <template #prepend>
             <el-select
@@ -163,16 +163,24 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
+    <!-- 添加 row-key="id" 解决列数据中的 table#header 数据不刷新的问题  -->
+    <el-table v-loading="loading" :data="list" row-key="id">
       <OrderTableColumn :list="list" :pick-up-store-list="pickUpStoreList">
         <template #default="{ row }">
-          <!-- TODO 权限后续补齐 -->
           <div class="flex items-center justify-center">
-            <el-button link type="primary" @click="openDetail(row.id)">
+            <el-button
+              v-hasPermi="['trade:order:query']"
+              link
+              type="primary"
+              @click="openDetail(row.id)"
+            >
               <Icon icon="ep:notification" />
               详情
             </el-button>
-            <el-dropdown @command="(command) => handleCommand(command, row)">
+            <el-dropdown
+              v-hasPermi="['trade:order:update']"
+              @command="(command) => handleCommand(command, row)"
+            >
               <el-button link type="primary">
                 <Icon icon="ep:d-arrow-right" />
                 更多

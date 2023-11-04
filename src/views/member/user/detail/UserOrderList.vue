@@ -162,7 +162,8 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list">
+    <!-- 添加 row-key="id" 解决列数据中的 table#header 数据不刷新的问题  -->
+    <el-table v-loading="loading" :data="list" row-key="id">
       <OrderTableColumn :list="list" :pick-up-store-list="pickUpStoreList">
         <template #default="{ row }">
           <el-button link type="primary" @click="openDetail(row.id)">
