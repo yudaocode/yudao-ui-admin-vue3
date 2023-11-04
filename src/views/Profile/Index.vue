@@ -15,7 +15,7 @@
         </div>
       </template>
       <div>
-        <el-tabs v-model="activeName" tab-position="top" style="height: 400px" class="profile-tabs">
+        <el-tabs v-model="activeName" class="profile-tabs" style="height: 400px" tab-position="top">
           <el-tab-pane :label="t('profile.info.basicInfo')" name="basicInfo">
             <BasicInfo />
           </el-tab-pane>
@@ -23,17 +23,18 @@
             <ResetPwd />
           </el-tab-pane>
           <el-tab-pane :label="t('profile.info.userSocial')" name="userSocial">
-            <UserSocial />
+            <UserSocial v-model:activeName="activeName" />
           </el-tab-pane>
         </el-tabs>
       </div>
     </el-card>
   </div>
 </template>
-<script setup lang="ts" name="Profile">
-import { BasicInfo, ProfileUser, ResetPwd, UserSocial } from './components/'
-const { t } = useI18n()
+<script lang="ts" setup>
+import { BasicInfo, ProfileUser, ResetPwd, UserSocial } from './components'
 
+const { t } = useI18n()
+defineOptions({ name: 'Profile' })
 const activeName = ref('basicInfo')
 </script>
 <style scoped>
