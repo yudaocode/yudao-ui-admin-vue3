@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="三方登录" url="https://doc.iocoder.cn/social-user/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
