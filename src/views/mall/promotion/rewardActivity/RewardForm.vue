@@ -30,7 +30,7 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="优惠设置">
-        <!-- TODO 芋艿：待实现！ -->
+        <!-- TODO 待实现！这个实现下哈 -->
       </el-form-item>
       <el-form-item label="活动商品" prop="productScope">
         <el-radio-group v-model="formData.productScope">
@@ -42,6 +42,7 @@
           >
         </el-radio-group>
       </el-form-item>
+      <!-- TODO：活动商品的开发，可以参考优惠劵的，已经搞好啦； -->
       <el-form-item
         v-if="formData.productScope === PromotionProductScopeEnum.SPU.scope"
         prop="productSpuIds"
