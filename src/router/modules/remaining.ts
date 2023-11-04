@@ -487,6 +487,24 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/mall/promotion/diy/page/decorate.vue')
       }
     ]
+  },
+  {
+    path: '/crm',
+    component: Layout,
+    name: 'CrmCenter',
+    meta: { hidden: true },
+    children: [
+      {
+        path: 'customer/detail/:id',
+        name: 'CrmCustomerDetail',
+        meta: {
+          title: '客户详情',
+          noCache: true,
+          hidden: true
+        },
+        component: () => import('@/views/crm/customer/detail/index.vue')
+      }
+    ]
   }
 ]
 
