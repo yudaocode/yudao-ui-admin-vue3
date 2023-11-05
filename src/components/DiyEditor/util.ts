@@ -51,7 +51,7 @@ export interface PageConfig {
   // 顶部导航栏属性
   navigationBar: NavigationBarProperty
   // 底部导航菜单属性
-  tabBar: TabBarProperty
+  tabBar?: TabBarProperty
   // 页面组件列表
   components: PageComponent[]
 }
