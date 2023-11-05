@@ -33,111 +33,111 @@
       <ComponentLibrary ref="componentLibrary" :list="libs" v-if="libs && libs.length > 0" />
       <!-- 中心设计区域 -->
       <div class="editor-center page-prop-area" @click="handlePageSelected">
-        <div class="editor-design">
-          <!-- 手机顶部 -->
-          <div class="editor-design-top">
-            <!-- 手机顶部状态栏 -->
-            <img src="@/assets/imgs/diy/statusBar.png" alt="" class="status-bar" />
-            <!-- 手机顶部导航栏 -->
-            <NavigationBar
-              v-if="showNavigationBar"
-              :property="navigationBarComponent.property"
-              @click="handleNavigationBarSelected"
-              :class="[
-                'component',
-                'cursor-pointer!',
-                { active: selectedComponent?.id === navigationBarComponent.id }
-              ]"
-            />
-          </div>
-          <!-- 手机页面编辑区域 -->
-          <el-scrollbar class="editor-design-center" height="100%" view-class="page-prop-area">
-            <div
-              class="phone-container"
-              :style="{
-                backgroundColor: pageConfigComponent.property.backgroundColor,
-                backgroundImage: `url(${pageConfigComponent.property.backgroundImage})`
-              }"
-            >
-              <draggable
-                class="page-prop-area drag-area"
-                v-model="pageComponents"
-                item-key="index"
-                :animation="200"
-                filter=".component-toolbar"
-                ghost-class="draggable-ghost"
-                :force-fallback="true"
-                group="component"
-                @change="handleComponentChange"
-              >
-                <template #item="{ element, index }">
-                  <div class="component-container" @click="handleComponentSelected(element, index)">
-                    <!-- 左侧组件名 -->
-                    <div
-                      :class="['component-name', { active: selectedComponentIndex === index }]"
-                      v-if="element.name"
-                    >
-                      {{ element.name }}
-                    </div>
-                    <!-- 组件内容区 -->
-                    <div :class="['component', { active: selectedComponentIndex === index }]">
-                      <component
-                        :is="element.id"
-                        :property="element.property"
-                        :data-type="element.id"
-                      />
-                    </div>
-                    <!-- 左侧：组件操作工具栏 -->
-                    <div
-                      class="component-toolbar"
-                      v-if="element.name && selectedComponentIndex === index"
-                    >
-                      <el-button-group type="primary">
-                        <el-tooltip content="上移" placement="right">
-                          <el-button
-                            :disabled="index === 0"
-                            @click.stop="handleMoveComponent(index, -1)"
-                          >
-                            <Icon icon="ep:arrow-up" />
-                          </el-button>
-                        </el-tooltip>
-                        <el-tooltip content="下移" placement="right">
-                          <el-button
-                            :disabled="index === pageComponents.length - 1"
-                            @click.stop="handleMoveComponent(index, 1)"
-                          >
-                            <Icon icon="ep:arrow-down" />
-                          </el-button>
-                        </el-tooltip>
-                        <el-tooltip content="复制" placement="right">
-                          <el-button @click.stop="handleCopyComponent(index)">
-                            <Icon icon="ep:copy-document" />
-                          </el-button>
-                        </el-tooltip>
-                        <el-tooltip content="删除" placement="right">
-                          <el-button @click.stop="handleDeleteComponent(index)">
-                            <Icon icon="ep:delete" />
-                          </el-button>
-                        </el-tooltip>
-                      </el-button-group>
-                    </div>
-                  </div>
-                </template>
-              </draggable>
-            </div>
-          </el-scrollbar>
-          <!-- 手机底部导航 -->
-          <div
-            v-if="showTabBar"
+        <!-- 手机顶部 -->
+        <div class="editor-design-top">
+          <!-- 手机顶部状态栏 -->
+          <img src="@/assets/imgs/diy/statusBar.png" alt="" class="status-bar" />
+          <!-- 手机顶部导航栏 -->
+          <NavigationBar
+            v-if="showNavigationBar"
+            :property="navigationBarComponent.property"
+            @click="handleNavigationBarSelected"
             :class="[
-              'editor-design-bottom',
               'component',
               'cursor-pointer!',
-              { active: selectedComponent?.id === tabBarComponent.id }
+              { active: selectedComponent?.id === navigationBarComponent.id }
             ]"
+          />
+        </div>
+        <!-- 手机页面编辑区域 -->
+        <el-scrollbar
+          height="100%"
+          wrap-class="editor-design-center page-prop-area"
+          view-class="phone-container"
+          :view-style="{
+            backgroundColor: pageConfigComponent.property.backgroundColor,
+            backgroundImage: `url(${pageConfigComponent.property.backgroundImage})`
+          }"
+        >
+          <draggable
+            class="page-prop-area drag-area"
+            v-model="pageComponents"
+            item-key="index"
+            :animation="200"
+            filter=".component-toolbar"
+            ghost-class="draggable-ghost"
+            :force-fallback="true"
+            group="component"
+            @change="handleComponentChange"
           >
-            <TabBar :property="tabBarComponent.property" @click="handleTabBarSelected" />
-          </div>
+            <template #item="{ element, index }">
+              <div class="component" @click="handleComponentSelected(element, index)">
+                <!-- 组件内容区 -->
+                <ComponentContainer :property="element.property.style">
+                  <component
+                    :is="element.id"
+                    :property="element.property"
+                    :data-type="element.id"
+                  />
+                </ComponentContainer>
+                <div :class="['component-wrap', { active: selectedComponentIndex === index }]">
+                  <!-- 左侧组件名 -->
+                  <div
+                    :class="['component-name', { active: selectedComponentIndex === index }]"
+                    v-if="element.name"
+                  >
+                    {{ element.name }}
+                  </div>
+                  <!-- 左侧：组件操作工具栏 -->
+                  <div
+                    class="component-toolbar"
+                    v-if="element.name && selectedComponentIndex === index"
+                  >
+                    <el-button-group type="primary">
+                      <el-tooltip content="上移" placement="right">
+                        <el-button
+                          :disabled="index === 0"
+                          @click.stop="handleMoveComponent(index, -1)"
+                        >
+                          <Icon icon="ep:arrow-up" />
+                        </el-button>
+                      </el-tooltip>
+                      <el-tooltip content="下移" placement="right">
+                        <el-button
+                          :disabled="index === pageComponents.length - 1"
+                          @click.stop="handleMoveComponent(index, 1)"
+                        >
+                          <Icon icon="ep:arrow-down" />
+                        </el-button>
+                      </el-tooltip>
+                      <el-tooltip content="复制" placement="right">
+                        <el-button @click.stop="handleCopyComponent(index)">
+                          <Icon icon="ep:copy-document" />
+                        </el-button>
+                      </el-tooltip>
+                      <el-tooltip content="删除" placement="right">
+                        <el-button @click.stop="handleDeleteComponent(index)">
+                          <Icon icon="ep:delete" />
+                        </el-button>
+                      </el-tooltip>
+                    </el-button-group>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </draggable>
+        </el-scrollbar>
+        <!-- 手机底部导航 -->
+        <div
+          v-if="showTabBar"
+          :class="[
+            'editor-design-bottom',
+            'component',
+            'cursor-pointer!',
+            { active: selectedComponent?.id === tabBarComponent.id }
+          ]"
+        >
+          <TabBar :property="tabBarComponent.property" @click="handleTabBarSelected" />
         </div>
       </div>
       <!-- 右侧属性面板 -->
@@ -383,6 +383,7 @@ onMounted(() => setDefaultSelectedComponent())
 <style lang="scss" scoped>
 /* 手机宽度 */
 $phone-width: 375px;
+$toolbar-height: 42px;
 /* 根节点样式 */
 .editor {
   height: 100%;
@@ -394,7 +395,7 @@ $phone-width: 375px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: auto;
+    height: $toolbar-height;
     padding: 0;
     border-bottom: solid 1px var(--el-border-color);
     background-color: var(--el-bg-color);
@@ -416,12 +417,14 @@ $phone-width: 375px;
   /* 中心操作区 */
   .editor-container {
     height: calc(
-      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 42px
+      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) -
+        $toolbar-height
     );
     /* 右侧属性面板 */
     .editor-right {
       flex-shrink: 0;
       box-shadow: -8px 0 8px -8px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
       /* 属性面板顶部：减少内边距 */
       :deep(.el-card__header) {
         padding: 8px 16px;
@@ -440,75 +443,80 @@ $phone-width: 375px;
 
     /* 中心区域 */
     .editor-center {
+      position: relative;
       flex: 1 1 0;
-      padding: 16px 0;
       background-color: var(--app-content-bg-color);
       display: flex;
+      flex-direction: column;
       justify-content: center;
-      /* 中心设计区域 */
-      .editor-design {
-        position: relative;
-        height: 100%;
+      margin: 16px 0 0 0;
+      overflow: hidden;
+      width: 100%;
+
+      /* 组件 */
+      .component {
+        width: $phone-width;
+        cursor: move;
+        /* 鼠标放到组件上时 */
+        &:hover {
+          border: 1px dashed var(--el-color-primary);
+          box-shadow: 0 0 5px 0 rgba(24, 144, 255, 0.3);
+        }
+      }
+      /* 组件选中 */
+      .component.active {
+        border: 2px solid var(--el-color-primary);
+      }
+      /* 手机顶部 */
+      .editor-design-top {
+        width: $phone-width;
+        margin: 0 auto;
+        /* 手机顶部状态栏 */
+        .status-bar {
+          height: 20px;
+          width: $phone-width;
+          background-color: #fff;
+        }
+      }
+      /* 手机底部导航 */
+      .editor-design-bottom {
+        width: $phone-width;
+        margin: 0 auto;
+      }
+      /* 手机页面编辑区域 */
+      :deep(.editor-design-center) {
         width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        overflow: hidden;
 
-        /* 组件 */
-        .component {
-          border: 1px solid #fff;
+        /* 主体内容 */
+        .phone-container {
+          position: relative;
+          background-repeat: no-repeat;
+          background-size: 100% 100%;
+          height: 100%;
           width: $phone-width;
-          cursor: move;
-          /* 鼠标放到组件上时 */
-          &:hover {
-            border: 1px dashed var(--el-color-primary);
-          }
-        }
-        /* 组件选中 */
-        .component.active {
-          border: 2px solid var(--el-color-primary);
-        }
-        /* 手机顶部 */
-        .editor-design-top {
-          width: $phone-width;
-          /* 手机顶部状态栏 */
-          .status-bar {
-            height: 20px;
-            width: $phone-width;
-            background-color: #fff;
-          }
-        }
-        /* 手机底部导航 */
-        .editor-design-bottom {
-          width: $phone-width;
-        }
-        /* 手机页面编辑区域 */
-        .editor-design-center {
-          width: 100%;
-          flex: 1 1 0;
-
-          :deep(.el-scrollbar__view) {
+          margin: 0 auto;
+          .drag-area {
             height: 100%;
+            width: 100%;
           }
 
-          /* 主体内容 */
-          .phone-container {
-            height: 100%;
-            box-sizing: border-box;
+          .component {
             position: relative;
-            background-repeat: no-repeat;
-            background-size: 100% 100%;
-            width: $phone-width;
-            margin: 0 auto;
-            .drag-area {
-              height: 100%;
-            }
+            cursor: move;
 
-            /* 组件容器（左侧：组件名称，中间：组件，右侧：操作工具栏） */
-            .component-container {
+            .component-wrap {
+              display: none;
+              position: absolute;
+              left: -2px;
+              top: 0;
               width: 100%;
-              position: relative;
+              height: 100%;
+
+              &.active {
+                display: block;
+                border: 2px solid var(--el-color-primary);
+                box-shadow: 0 0 10px 0 rgba(24, 144, 255, 0.3);
+              }
               /* 左侧：组件名称 */
               .component-name {
                 position: absolute;
@@ -518,7 +526,7 @@ $phone-width: 375px;
                 height: 25px;
                 background: #fff;
                 font-size: 12px;
-                left: -85px;
+                left: -88px;
                 top: 0;
                 box-shadow:
                   0 0 4px #00000014,
@@ -548,7 +556,7 @@ $phone-width: 375px;
               .component-toolbar {
                 position: absolute;
                 top: 0;
-                right: -57px;
+                right: -55px;
                 /* 左侧小三角 */
                 &:before {
                   position: absolute;

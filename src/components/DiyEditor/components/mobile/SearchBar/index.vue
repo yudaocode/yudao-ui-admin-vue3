@@ -42,7 +42,6 @@ defineProps<{ property: SearchProperty }>()
 
 <style scoped lang="scss">
 .search-bar {
-  width: 375px;
   /* 搜索框 */
   .inner {
     position: relative;

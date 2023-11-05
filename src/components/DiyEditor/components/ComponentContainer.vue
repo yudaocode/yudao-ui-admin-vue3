@@ -1,8 +1,7 @@
 <template>
   <div
     :style="{
-      ...style,
-      background: property.bgType === 'color' ? property.bgColor : `url(${property.bgImg})`
+      ...style
     }"
   >
     <slot></slot>
@@ -18,7 +17,7 @@ import { ComponentStyle } from '@/components/DiyEditor/util'
  */
 defineOptions({ name: 'ComponentContainer' })
 
-const props = defineProps<{ property: ComponentStyle }>()
+const props = defineProps<{ property: ComponentStyle | undefined }>()
 
 const style = computed(() => {
   if (!props.property) {
@@ -37,7 +36,9 @@ const style = computed(() => {
     borderTopRightRadius: `${props.property.borderTopRightRadius || 0}px`,
     borderBottomRightRadius: `${props.property.borderBottomRightRadius || 0}px`,
     borderBottomLeftRadius: `${props.property.borderBottomLeftRadius || 0}px`,
-    overflow: 'hidden'
+    overflow: 'hidden',
+    background:
+      props.property.bgType === 'color' ? props.property.bgColor : `url(${props.property.bgImg})`
   }
 })
 </script>

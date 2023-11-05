@@ -11,6 +11,7 @@
           <draggable
             class="component-container"
             ghost-class="draggable-ghost"
+            item-key="index"
             :list="group.components"
             :sort="false"
             :group="{ name: 'component', pull: 'clone', put: false }"
