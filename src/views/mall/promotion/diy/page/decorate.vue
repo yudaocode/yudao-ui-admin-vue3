@@ -3,7 +3,7 @@
     v-if="formData && !formLoading"
     v-model="formData.property"
     :title="formData.name"
-    :libs="componentLibs"
+    :libs="PAGE_LIBS"
     :show-page-config="true"
     :show-navigation-bar="true"
     :show-tab-bar="false"
@@ -13,34 +13,10 @@
 <script setup lang="ts">
 import * as DiyPageApi from '@/api/mall/promotion/diy/page'
 import { useTagsViewStore } from '@/store/modules/tagsView'
-import { DiyComponentLibrary } from '@/components/DiyEditor/util'
+import { PAGE_LIBS } from '@/components/DiyEditor/util'
 
 /** 装修页面表单 */
 defineOptions({ name: 'DiyPageDecorate' })
-
-// 组件库
-const componentLibs = [
-  {
-    name: '基础组件',
-    extended: true,
-    components: [
-      'SearchBar',
-      'NoticeBar',
-      'GridNavigation',
-      'ListNavigation',
-      'Divider',
-      'TitleBar'
-    ]
-  },
-  { name: '图文组件', extended: true, components: ['Carousel'] },
-  { name: '商品组件', extended: true, components: ['ProductCard'] },
-  {
-    name: '会员组件',
-    extended: true,
-    components: ['UserCard', 'OrderCard', 'WalletCard', 'CouponCard']
-  },
-  { name: '营销组件', extended: true, components: ['Combination', 'Seckill', 'Point', 'Coupon'] }
-] as DiyComponentLibrary[]
 
 const message = useMessage() // 消息弹窗
 

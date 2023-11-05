@@ -3,16 +3,25 @@ import { PageConfigProperty } from '@/components/DiyEditor/components/mobile/Pag
 import { NavigationBarProperty } from '@/components/DiyEditor/components/mobile/NavigationBar/config'
 import { TabBarProperty } from '@/components/DiyEditor/components/mobile/TabBar/config'
 
+// 页面装修组件
 export interface DiyComponent<T> {
+  // 组件唯一标识
   id: string
+  // 组件名称
   name: string
+  // 组件图标
   icon: string
+  // 组件属性
   property: T
 }
 
+// 页面装修组件库
 export interface DiyComponentLibrary {
+  // 组件库名称
   name: string
+  // 是否展开
   extended: boolean
+  // 组件列表
   components: string[]
 }
 
@@ -85,3 +94,27 @@ export function usePropertyForm<T>(modelValue: T, emit: Function): { formData: R
 
   return { formData }
 }
+
+// 页面组件库
+export const PAGE_LIBS = [
+  {
+    name: '基础组件',
+    extended: true,
+    components: [
+      'SearchBar',
+      'NoticeBar',
+      'GridNavigation',
+      'ListNavigation',
+      'Divider',
+      'TitleBar'
+    ]
+  },
+  { name: '图文组件', extended: true, components: ['ImageBar', 'Carousel'] },
+  { name: '商品组件', extended: true, components: ['ProductCard'] },
+  {
+    name: '会员组件',
+    extended: true,
+    components: ['UserCard', 'OrderCard', 'WalletCard', 'CouponCard']
+  },
+  { name: '营销组件', extended: true, components: ['Combination', 'Seckill', 'Point', 'Coupon'] }
+] as DiyComponentLibrary[]
