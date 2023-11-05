@@ -26,7 +26,7 @@
                 :label="data.label"
                 :prop="data.prop"
                 :label-width="node.level === 1 ? '80px' : '62px'"
-                class="tree-form-item w-full m-b-0!"
+                class="w-full m-b-0!"
               >
                 <el-slider
                   v-model="formData[data.prop]"
@@ -40,6 +40,7 @@
               </el-form-item>
             </template>
           </el-tree>
+          <slot name="style" :formData="formData"></slot>
         </el-form>
       </el-card>
     </el-tab-pane>
@@ -153,12 +154,10 @@ const handleSliderChange = (prop: string) => {
 </script>
 
 <style scoped lang="scss">
-.tree-form-item {
-  :deep(.el-slider__runway) {
-    margin-right: 16px;
-  }
-  :deep(.el-input-number) {
-    width: 50px;
-  }
+:deep(.el-slider__runway) {
+  margin-right: 16px;
+}
+:deep(.el-input-number) {
+  width: 50px;
 }
 </style>

@@ -109,7 +109,7 @@ export const PAGE_LIBS = [
       'TitleBar'
     ]
   },
-  { name: '图文组件', extended: true, components: ['ImageBar', 'Carousel'] },
+  { name: '图文组件', extended: true, components: ['ImageBar', 'Carousel', 'VideoPlayer'] },
   { name: '商品组件', extended: true, components: ['ProductCard'] },
   {
     name: '会员组件',
