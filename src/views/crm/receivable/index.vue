@@ -229,6 +229,7 @@
       />
       <el-table-column label="操作" align="center" width="180px">
         <template #default="scope">
+          <!-- todo @liuhongfeng：用路径参数哈，receivableId -->
           <!--<router-link :to="'/crm/receivable-plan?receivableId=' + scope.row.receivableId">
             <el-button link type="primary">详情</el-button>
           </router-link>-->
