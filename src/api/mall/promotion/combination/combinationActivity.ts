@@ -57,7 +57,7 @@ export const updateCombinationActivity = async (data: CombinationActivityVO) => 
 
 // 关闭拼团活动
 export const closeCombinationActivity = async (id: number) => {
-  return await request.put({ url: '/promotion/bargain-combination/close?id=' + id })
+  return await request.put({ url: '/promotion/combination-activity/close?id=' + id })
 }
 
 // 删除拼团活动
