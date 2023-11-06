@@ -44,6 +44,9 @@
         <el-descriptions-item label="下次联系时间">
           {{ customer.contactNextTime ? formatDate(customer.contactNextTime, 'YYYY-MM-DD') : '空' }}
         </el-descriptions-item>
+        <el-descriptions-item label="最后跟进时间">
+          {{ customer.contactLastTime ? formatDate(customer.contactLastTime) : '空' }}
+        </el-descriptions-item>
       </el-descriptions>
       <el-descriptions :column="1">
         <el-descriptions-item label="客户描述">
@@ -70,10 +73,6 @@
         </el-descriptions-item>
         <el-descriptions-item label="更新时间">
           {{ customer.updateTime ? formatDate(customer.updateTime) : '空' }}
-        </el-descriptions-item>
-        <!-- TODO wanwan：要不把“最后跟进时间”放到“下次联系时间”后面 -->
-        <el-descriptions-item label="最后跟进时间">
-          {{ customer.contactLastTime ? formatDate(customer.contactLastTime) : '空' }}
         </el-descriptions-item>
       </el-descriptions>
     </el-collapse-item>

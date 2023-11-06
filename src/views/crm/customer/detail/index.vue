@@ -63,8 +63,7 @@
       </el-descriptions-item>
     </el-descriptions>
   </ContentWrap>
-  <!-- TODO wanwan：这个 tab 拉满哈，可以更好看； -->
-  <el-col :span="18">
+  <el-col>
     <el-tabs>
       <el-tab-pane label="详细资料">
         <!-- TODO wanwan：这个 ml-2 是不是可以优化下，不要整个左移，而是里面的内容有个几 px 的偏移，不顶在框里 -->
