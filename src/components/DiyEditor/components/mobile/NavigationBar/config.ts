@@ -29,7 +29,7 @@ export const component = {
     title: '页面标题',
     description: '',
     navBarHeight: 35,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     backgroundImage: '',
     styleType: 'default',
     alwaysShow: true,

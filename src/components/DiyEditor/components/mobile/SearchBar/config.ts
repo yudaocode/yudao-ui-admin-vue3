@@ -1,4 +1,4 @@
-import { DiyComponent } from '@/components/DiyEditor/util'
+import { ComponentStyle, DiyComponent } from '@/components/DiyEditor/util'
 
 /** 搜索框属性 */
 export interface SearchProperty {
@@ -7,10 +7,10 @@ export interface SearchProperty {
   borderRadius: number // 框体样式
   placeholder: string // 占位文字
   placeholderPosition: PlaceholderPosition // 占位文字位置
-  backgroundColor: string // 背景颜色
-  borderColor: string // 框体颜色
+  backgroundColor: string // 框体颜色
   textColor: string // 字体颜色
   hotKeywords: string[] // 热词
+  style: ComponentStyle
 }
 
 // 文字位置
@@ -27,9 +27,17 @@ export const component = {
     borderRadius: 0,
     placeholder: '搜索商品',
     placeholderPosition: 'left',
-    backgroundColor: 'rgb(249, 249, 249)',
-    borderColor: 'rgb(255, 255, 255)',
+    backgroundColor: 'rgb(238, 238, 238)',
     textColor: 'rgb(150, 151, 153)',
-    hotKeywords: []
+    hotKeywords: [],
+    style: {
+      bgType: 'color',
+      bgColor: '#fff',
+      marginBottom: 8,
+      paddingTop: 8,
+      paddingRight: 8,
+      paddingBottom: 8,
+      paddingLeft: 8
+    } as ComponentStyle
   }
 } as DiyComponent<SearchProperty>
