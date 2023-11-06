@@ -1,5 +1,6 @@
 import request from '@/config/axios'
 
+// TODO @zange：挪到 product 下，建个 category 包，挪进去哈；
 export interface ProductCategoryVO {
   id: number
   name: string

@@ -10,7 +10,7 @@
       <el-form-item label="线索名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入线索名称" />
       </el-form-item>
-      <!-- TODO 客户选择 -->
+      <!-- TODO wanwan 客户选择 -->
       <el-form-item label="客户" prop="customerId">
         <el-input v-model="formData.customerId" placeholder="请选择客户" />
       </el-form-item>
@@ -31,7 +31,7 @@
       <el-form-item label="地址" prop="address">
         <el-input v-model="formData.address" placeholder="请输入地址" />
       </el-form-item>
-      <!-- TODO 负责人选择 -->
+      <!-- TODO wanwan 负责人选择 -->
       <el-form-item label="负责人" prop="ownerUserId">
         <el-input v-model="formData.ownerUserId" placeholder="请输入负责人" />
       </el-form-item>
@@ -46,7 +46,6 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getBoolDictOptions } from '@/utils/dict'
 import * as ClueApi from '@/api/crm/clue'
 
 const { t } = useI18n() // 国际化

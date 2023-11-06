@@ -26,6 +26,51 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="所属行业" prop="industryId">
+        <el-select
+          v-model="queryParams.industryId"
+          placeholder="请选择所属行业"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_INDUSTRY)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="客户等级" prop="level">
+        <el-select
+          v-model="queryParams.level"
+          placeholder="请选择客户等级"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_LEVEL)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="客户来源" prop="source">
+        <el-select
+          v-model="queryParams.source"
+          placeholder="请选择客户来源"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_SOURCE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -67,8 +112,9 @@
       </el-table-column>
       <el-table-column label="手机" align="center" prop="mobile" width="120" />
       <el-table-column label="详细地址" align="center" prop="detailAddress" width="200" />
-      <!--  TODO @Wanwan 负责人回显，所属部门，创建人    -->
-      <el-table-column label="负责人" align="center" prop="ownerUserId" />
+      <el-table-column label="负责人" align="center" prop="ownerUserName" />
+      <el-table-column label="所属部门" align="center" prop="ownerUserDept" />
+      <el-table-column label="创建人" align="center" prop="creatorName" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -100,9 +146,10 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.lockStatus" />
         </template>
       </el-table-column>
-      <!--  TODO @Wanwan 距进入公海天数    -->
-      <el-table-column label="操作" align="center" width="160">
+      <!--  TODO @wanwan 距进入公海天数    -->
+      <el-table-column label="操作" align="center" min-width="150" fixed="right">
         <template #default="scope">
+          <el-button link type="primary" @click="openDetail(scope.row.id)">详情</el-button>
           <el-button
             link
             type="primary"
@@ -136,7 +183,7 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getBoolDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CustomerApi from '@/api/crm/customer'
@@ -154,7 +201,10 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: null,
-  mobile: null
+  mobile: null,
+  industryId: null,
+  level: null,
+  source: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -181,6 +231,12 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
+}
+
+/** 打开客户详情 */
+const { push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'CrmCustomerDetail', params: { id } })
 }
 
 /** 添加/修改操作 */
