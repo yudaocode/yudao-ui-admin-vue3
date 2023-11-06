@@ -138,7 +138,7 @@ watch(
       // 情况1.1：逗号分隔的多值
       if (props.modelValue.includes(',')) {
         files.concat(props.modelValue.split(','))
-      } else {
+      } else if (props.modelValue.length > 0) {
         files.push(props.modelValue)
       }
     } else if (isArray(props.modelValue)) {

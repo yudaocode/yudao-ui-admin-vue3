@@ -1,27 +1,30 @@
-import { DiyComponent } from '@/components/DiyEditor/util'
+import { ComponentStyle, DiyComponent } from '@/components/DiyEditor/util'
 
 /** 轮播图属性 */
 export interface CarouselProperty {
-  // 选择模板
-  swiperType: number
-  // 图片圆角
-  borderRadius: number
-  // 页面边距
-  pageMargin: number
-  // 图片边距
-  imageMargin: number
-  // 分页类型
-  pagingType: 'bullets' | 'fraction' | 'progressbar'
-  // 一行个数
-  rowIndividual: number
-  // 添加图片
+  // 类型：默认 | 卡片
+  type: 'default' | 'card'
+  // 指示器样式：点 | 数字
+  indicator: 'dot' | 'number'
+  // 是否自动播放
+  autoplay: boolean
+  // 播放间隔
+  interval: number
+  // 轮播内容
   items: CarouselItemProperty[]
+  // 组件样式
+  style: ComponentStyle
 }
-
+// 轮播内容属性
 export interface CarouselItemProperty {
-  title: string
+  // 类型：图片 | 视频
+  type: 'img' | 'video'
+  // 图片链接
   imgUrl: string
-  link: string
+  // 视频链接
+  videoUrl: string
+  // 跳转链接
+  url: string
 }
 
 // 定义组件
@@ -30,15 +33,18 @@ export const component = {
   name: '轮播图',
   icon: 'system-uicons:carousel',
   property: {
-    swiperType: 0, // 选择模板
-    borderRadius: 0, // 图片圆角
-    pageMargin: 0, // 页面边距
-    imageMargin: 0, // 图片边距
-    pagingType: 'bullets', // 分页类型
-    rowIndividual: 2, // 一行个数
+    type: 'default',
+    indicator: 'dot',
+    autoplay: false,
+    interval: 3,
     items: [
-      { imgUrl: 'https://static.iocoder.cn/mall/banner-01.jpg' },
-      { imgUrl: 'https://static.iocoder.cn/mall/banner-02.jpg' }
-    ] as CarouselItemProperty[]
+      { type: 'img', imgUrl: 'https://static.iocoder.cn/mall/banner-01.jpg', videoUrl: '' },
+      { type: 'img', imgUrl: 'https://static.iocoder.cn/mall/banner-02.jpg', videoUrl: '' }
+    ] as CarouselItemProperty[],
+    style: {
+      bgType: 'color',
+      bgColor: '#fff',
+      marginBottom: 8
+    } as ComponentStyle
   }
 } as DiyComponent<CarouselProperty>

@@ -385,11 +385,17 @@ $toolbar-height: 42px;
       /* 属性面板分组 */
       :deep(.property-group) {
         margin: 0 -20px;
+        &.el-card {
+          border: none;
+        }
         /* 属性分组名称 */
         .el-card__header {
           border: none;
           background: var(--el-bg-color-page);
           padding: 8px 32px;
+        }
+        .el-card__body {
+          border: none;
         }
       }
     }
