@@ -193,10 +193,10 @@ const loginData = reactive({
 })
 
 const socialList = [
-  { icon: 'ant-design:github-filled', type: 0 },
   { icon: 'ant-design:wechat-filled', type: 30 },
-  { icon: 'ant-design:alipay-circle-filled', type: 0 },
-  { icon: 'ant-design:dingtalk-circle-filled', type: 20 }
+  { icon: 'ant-design:dingtalk-circle-filled', type: 20 },
+  { icon: 'ant-design:github-filled', type: 0 },
+  { icon: 'ant-design:alipay-circle-filled', type: 0 }
 ]
 
 // 获取验证码
@@ -210,7 +210,7 @@ const getCode = async () => {
     verify.value.show()
   }
 }
-//获取租户ID
+// 获取租户 ID
 const getTenantId = async () => {
   if (loginData.tenantEnable === 'true') {
     const res = await LoginApi.getTenantIdByName(loginData.loginForm.tenantName)
@@ -228,6 +228,15 @@ const getCookie = () => {
       rememberMe: loginForm.rememberMe ? true : false,
       tenantName: loginForm.tenantName ? loginForm.tenantName : loginData.loginForm.tenantName
     }
+  }
+}
+// 根据域名，获得租户信息
+const getTenantByWebsite = async () => {
+  const website = location.host
+  const res = await LoginApi.getTenantByWebsite(website)
+  if (res) {
+    loginData.loginForm.tenantName = res.name
+    authUtil.setTenantId(res.id)
   }
 }
 const loading = ref() // ElLoading.service 返回的实例
@@ -278,10 +287,15 @@ const doSocialLogin = async (type: number) => {
   } else {
     loginLoading.value = true
     if (loginData.tenantEnable === 'true') {
-      await message.prompt('请输入租户名称', t('common.reminder')).then(async ({ value }) => {
-        const res = await LoginApi.getTenantIdByName(value)
-        authUtil.setTenantId(res)
-      })
+      // 尝试先通过 tenantName 获取租户
+      await getTenantId()
+      // 如果获取不到，则需要弹出提示，进行处理
+      if (!authUtil.getTenantId()) {
+        await message.prompt('请输入租户名称', t('common.reminder')).then(async ({ value }) => {
+          const res = await LoginApi.getTenantIdByName(value)
+          authUtil.setTenantId(res)
+        })
+      }
     }
     // 计算 redirectUri
     // tricky: type、redirect需要先encode一次，否则钉钉回调会丢失。
@@ -307,6 +321,7 @@ watch(
 )
 onMounted(() => {
   getCookie()
+  getTenantByWebsite()
 })
 </script>
 
