@@ -334,6 +334,6 @@ export function getLast1Year(): [dayjs.ConfigType, dayjs.ConfigType] {
 export function getDateRange(
   beginDate: dayjs.ConfigType,
   endDate: dayjs.ConfigType
-): [dayjs.ConfigType, dayjs.ConfigType] {
-  return [dayjs(beginDate).startOf('d'), dayjs(endDate).endOf('d')]
+): [string, string] {
+  return [dayjs(beginDate).startOf('d').toString(), dayjs(endDate).endOf('d').toString()]
 }

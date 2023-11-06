@@ -7,8 +7,24 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="期数" prop="indexNo">
-        <el-input-number v-model="formData.indexNo" placeholder="请输入期数" />
+      <el-form-item label="客户名称" prop="customerId">
+        <el-input v-model="formData.customerId" placeholder="请输入客户名称" />
+      </el-form-item>
+      <el-form-item label="合同名称" prop="contractId">
+        <el-input v-model="formData.contractId" placeholder="请输入合同名称" />
+      </el-form-item>
+      <el-form-item label="负责人" prop="ownerUserId">
+        <el-select v-model="formData.ownerUserId" clearable placeholder="请输入负责人">
+          <el-option
+            v-for="item in userList"
+            :key="item.id"
+            :label="item.nickname"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="期数" prop="period">
+        <el-input-number v-model="formData.period" placeholder="请输入期数" />
       </el-form-item>
       <!--<el-form-item label="回款ID" prop="receivableId">
         <el-input v-model="formData.receivableId" placeholder="请输入回款ID" />
@@ -58,18 +74,9 @@
           placeholder="选择提醒日期"
         />
       </el-form-item>
-      <el-form-item label="客户ID" prop="customerId">
-        <el-input v-model="formData.customerId" placeholder="请输入客户ID" />
+      <el-form-item label="显示排序" prop="sort">
+        <el-input-number v-model="formData.sort" :min="0" controls-position="right" />
       </el-form-item>
-      <el-form-item label="合同ID" prop="contractId">
-        <el-input v-model="formData.contractId" placeholder="请输入合同ID" />
-      </el-form-item>
-      <el-form-item label="负责人" prop="ownerUserId">
-        <el-input v-model="formData.ownerUserId" placeholder="请输入负责人" />
-      </el-form-item>
-      <!--<el-form-item label="显示顺序" prop="sort">
-        <el-input v-model="formData.sort" placeholder="请输入显示顺序" />
-      </el-form-item>-->
       <el-form-item label="备注" prop="remark">
         <el-input type="textarea" :rows="3" v-model="formData.remark" placeholder="请输入备注" />
       </el-form-item>
@@ -81,19 +88,18 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import * as ReceivablePlanApi from '@/api/crm/receivablePlan'
-
+import * as UserApi from '@/api/system/user'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-
+const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  indexNo: undefined,
+  period: undefined,
   receivableId: undefined,
   status: undefined,
   checkStatus: undefined,
@@ -128,6 +134,9 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+
+  // 获得用户列表
+  userList.value = await UserApi.getSimpleUserList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -161,7 +170,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    indexNo: undefined,
+    period: undefined,
     receivableId: undefined,
     status: undefined,
     checkStatus: undefined,

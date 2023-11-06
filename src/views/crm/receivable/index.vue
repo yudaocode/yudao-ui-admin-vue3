@@ -26,19 +26,19 @@
           class="!w-240px"
         />
       </el-form-item>-->
-      <el-form-item label="客户" prop="customerId">
+      <el-form-item label="客户名称" prop="customerId">
         <el-input
           v-model="queryParams.customerId"
-          placeholder="请输入客户"
+          placeholder="请输入客户名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="合同" prop="contractId">
+      <el-form-item label="合同名称" prop="contractId">
         <el-input
           v-model="queryParams.contractId"
-          placeholder="请输入合同"
+          placeholder="请输入合同名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -103,7 +103,7 @@
           class="!w-240px"
         />
       </el-form-item>-->
-      <el-form-item label="负责人" prop="ownerUserId">
+      <!--<el-form-item label="负责人" prop="ownerUserId">
         <el-input
           v-model="queryParams.ownerUserId"
           placeholder="请输入负责人"
@@ -112,7 +112,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!--<el-form-item label="批次" prop="batchId">
+      <el-form-item label="批次" prop="batchId">
         <el-input
           v-model="queryParams.batchId"
           placeholder="请输入批次"
@@ -227,8 +227,12 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="130px">
+      <el-table-column label="操作" align="center" width="180px">
         <template #default="scope">
+          <!-- todo @liuhongfeng：用路径参数哈，receivableId -->
+          <!--<router-link :to="'/crm/receivable-plan?receivableId=' + scope.row.receivableId">
+            <el-button link type="primary">详情</el-button>
+          </router-link>-->
           <el-button
             link
             type="primary"

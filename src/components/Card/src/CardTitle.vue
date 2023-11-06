@@ -3,7 +3,7 @@ defineComponent({
   name: 'CardTitle'
 })
 
-const { title } = defineProps({
+defineProps({
   title: {
     type: String,
     required: true

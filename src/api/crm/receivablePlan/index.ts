@@ -2,7 +2,7 @@ import request from '@/config/axios'
 
 export interface ReceivablePlanVO {
   id: number
-  indexNo: number
+  period: number
   receivableId: number
   status: number
   checkStatus: string

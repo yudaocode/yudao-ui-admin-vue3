@@ -31,7 +31,7 @@
                 :props="defaultProps2"
                 class="w-1/1"
                 clearable
-                placeholder="请选择商品分类"
+                placeholder="请选择地区"
                 filterable
                 collapse-tags
               />
