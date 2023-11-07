@@ -28,7 +28,7 @@
 import * as DiyTemplateApi from '@/api/mall/promotion/diy/template'
 import * as DiyPageApi from '@/api/mall/promotion/diy/page'
 import { useTagsViewStore } from '@/store/modules/tagsView'
-import { DiyComponentLibrary } from '@/components/DiyEditor/util'
+import { DiyComponentLibrary, PAGE_LIBS } from '@/components/DiyEditor/util'
 
 /** 装修模板表单 */
 defineOptions({ name: 'DiyTemplateDecorate' })
@@ -62,29 +62,6 @@ const getPageDetail = async (id: any) => {
 
 // 模板组件库
 const templateLibs = [] as DiyComponentLibrary[]
-// 页面组件库
-const pageLibs = [
-  {
-    name: '基础组件',
-    extended: true,
-    components: [
-      'SearchBar',
-      'NoticeBar',
-      'GridNavigation',
-      'ListNavigation',
-      'Divider',
-      'TitleBar'
-    ]
-  },
-  { name: '图文组件', extended: true, components: ['Carousel'] },
-  { name: '商品组件', extended: true, components: ['ProductCard'] },
-  {
-    name: '会员组件',
-    extended: true,
-    components: ['UserCard', 'OrderCard', 'WalletCard', 'CouponCard']
-  },
-  { name: '营销组件', extended: true, components: ['Combination', 'Seckill', 'Point', 'Coupon'] }
-] as DiyComponentLibrary[]
 // 当前组件库
 const libs = ref<DiyComponentLibrary[]>(templateLibs)
 // 模板选项切换
@@ -97,7 +74,7 @@ const handleTemplateItemChange = () => {
   }
 
   // 编辑页面
-  libs.value = pageLibs
+  libs.value = PAGE_LIBS
   currentFormData.value = formData.value!.pages.find(
     (page: DiyPageApi.DiyPageVO) => page.name === templateItems[selectedTemplateItem.value].name
   )

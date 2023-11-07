@@ -6,70 +6,38 @@
   >
     <Icon icon="tdesign:image" class="text-gray-8 text-120px!" />
   </div>
-  <!-- 一行一个 -->
-  <div
-    v-if="property.swiperType === 0"
-    class="flex flex-col"
-    :style="{
-      paddingLeft: property.pageMargin + 'px',
-      paddingRight: property.pageMargin + 'px'
-    }"
-  >
-    <div v-for="(item, index) in property.items" :key="index">
-      <div
-        class="img-item"
-        :style="{
-          marginBottom: property.imageMargin + 'px',
-          borderRadius: property.borderRadius + 'px'
-        }"
-      >
-        <img alt="" :src="item.imgUrl" />
-        <div v-if="item.title" class="title">{{ item.title }}</div>
-      </div>
-    </div>
+  <div v-else class="relative">
+    <el-carousel
+      height="174px"
+      :type="property.type === 'card' ? 'card' : ''"
+      :autoplay="property.autoplay"
+      :interval="property.interval * 1000"
+      :indicator-position="property.indicator === 'number' ? 'none' : undefined"
+      @change="handleIndexChange"
+    >
+      <el-carousel-item v-for="(item, index) in property.items" :key="index">
+        <el-image class="h-full w-full" :src="item.imgUrl" />
+      </el-carousel-item>
+    </el-carousel>
+    <div
+      v-if="property.indicator === 'number'"
+      class="absolute p-y-2px bottom-10px right-10px rounded-xl bg-black p-x-8px text-10px text-white opacity-40"
+      >{{ currentIndex }} / {{ property.items.length }}</div
+    >
   </div>
-  <el-carousel height="174px" v-else :type="property.swiperType === 3 ? 'card' : ''">
-    <el-carousel-item v-for="(item, index) in property.items" :key="index">
-      <div class="img-item" :style="{ borderRadius: property.borderRadius + 'px' }">
-        <img alt="" :src="item.imgUrl" />
-        <div v-if="item.title" class="title">{{ item.title }}</div>
-      </div>
-    </el-carousel-item>
-  </el-carousel>
 </template>
 <script setup lang="ts">
 import { CarouselProperty } from './config'
 
-/** 页面顶部导航栏 */
-defineOptions({ name: 'NavigationBar' })
+/** 轮播图 */
+defineOptions({ name: 'Carousel' })
 
-const props = defineProps<{ property: CarouselProperty }>()
+defineProps<{ property: CarouselProperty }>()
+
+const currentIndex = ref(0)
+const handleIndexChange = (index: number) => {
+  currentIndex.value = index + 1
+}
 </script>
 
-<style scoped lang="scss">
-.img-item {
-  width: 100%;
-  position: relative;
-  overflow: hidden;
-  &:last-child {
-    margin: 0 !important;
-  }
-  /* 图片 */
-  img {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-  .title {
-    height: 36px;
-    width: 100%;
-    background-color: rgba(51, 51, 51, 0.8);
-    text-align: center;
-    line-height: 36px;
-    color: #fff;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-  }
-}
-</style>
+<style scoped lang="scss"></style>

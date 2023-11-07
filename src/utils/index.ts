@@ -34,6 +34,13 @@ export const underlineToHump = (str: string): string => {
   })
 }
 
+/**
+ * 驼峰转横杠
+ */
+export const humpToDash = (str: string): string => {
+  return str.replace(/([A-Z])/g, '-$1').toLowerCase()
+}
+
 export const setCssVar = (prop: string, val: any, dom = document.documentElement) => {
   dom.style.setProperty(prop, val)
 }
@@ -67,7 +74,7 @@ export const trim = (str: string) => {
  * @param {Date | number | string} time 需要转换的时间
  * @param {String} fmt 需要转换的格式 如 yyyy-MM-dd、yyyy-MM-dd HH:mm:ss
  */
-export const formatTime = (time: Date | number | string, fmt: string) => {
+export function formatTime(time: Date | number | string, fmt: string) {
   if (!time) return ''
   else {
     const date = new Date(time)
@@ -98,13 +105,20 @@ export const formatTime = (time: Date | number | string, fmt: string) => {
 /**
  * 生成随机字符串
  */
-export const toAnyString = () => {
+export function toAnyString() {
   const str: string = 'xxxxx-xxxxx-4xxxx-yxxxx-xxxxx'.replace(/[xy]/g, (c: string) => {
     const r: number = (Math.random() * 16) | 0
     const v: number = c === 'x' ? r : (r & 0x3) | 0x8
     return v.toString()
   })
   return str
+}
+
+/**
+ * 首字母大写
+ */
+export function firstUpperCase(str: string) {
+  return str.toLowerCase().replace(/( |^)[a-z]/g, (L) => L.toUpperCase())
 }
 
 export const generateUUID = () => {

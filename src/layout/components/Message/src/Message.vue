@@ -53,7 +53,7 @@ onMounted(() => {
       </template>
       <ElTabs v-model="activeName">
         <ElTabPane label="我的站内信" name="notice">
-          <div class="message-list">
+          <el-scrollbar class="message-list">
             <template v-for="item in list" :key="item.id">
               <div class="message-item">
                 <img alt="" class="message-icon" src="@/assets/imgs/avatar.gif" />
@@ -67,7 +67,7 @@ onMounted(() => {
                 </div>
               </div>
             </template>
-          </div>
+          </el-scrollbar>
         </ElTabPane>
       </ElTabs>
       <!-- 更多 -->
@@ -88,6 +88,7 @@ onMounted(() => {
 }
 
 .message-list {
+  height: 400px;
   display: flex;
   flex-direction: column;
 

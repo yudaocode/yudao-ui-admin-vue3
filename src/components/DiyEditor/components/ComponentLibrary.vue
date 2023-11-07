@@ -1,5 +1,5 @@
 <template>
-  <el-aside class="editor-left" width="260px">
+  <el-aside class="editor-left" width="261px">
     <el-scrollbar>
       <el-collapse v-model="extendGroups">
         <el-collapse-item
@@ -11,6 +11,7 @@
           <draggable
             class="component-container"
             ghost-class="draggable-ghost"
+            item-key="index"
             :list="group.components"
             :sort="false"
             :group="{ name: 'component', pull: 'clone', put: false }"
