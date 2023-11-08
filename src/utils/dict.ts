@@ -116,6 +116,7 @@ export enum DICT_TYPE {
   SYSTEM_OAUTH2_GRANT_TYPE = 'system_oauth2_grant_type',
   SYSTEM_MAIL_SEND_STATUS = 'system_mail_send_status',
   SYSTEM_NOTIFY_TEMPLATE_TYPE = 'system_notify_template_type',
+  SYSTEM_SOCIAL_TYPE = 'system_social_type',
 
   // ========== INFRA 模块 ==========
   INFRA_BOOLEAN_STRING = 'infra_boolean_string',
@@ -143,6 +144,8 @@ export enum DICT_TYPE {
   PAY_REFUND_STATUS = 'pay_refund_status', // 退款订单状态
   PAY_NOTIFY_STATUS = 'pay_notify_status', // 商户支付回调状态
   PAY_NOTIFY_TYPE = 'pay_notify_type', // 商户支付回调状态
+  PAY_TRANSFER_STATUS = 'pay_transfer_status', // 转账订单状态
+  PAY_TRANSFER_TYPE = 'pay_transfer_type', // 转账订单状态
 
   // ========== MP 模块 ==========
   MP_AUTO_REPLY_REQUEST_MATCH = 'mp_auto_reply_request_match', // 自动回复请求匹配类型
@@ -191,5 +194,6 @@ export enum DICT_TYPE {
   CRM_RETURN_TYPE = 'crm_return_type',
   CRM_CUSTOMER_INDUSTRY = 'crm_customer_industry',
   CRM_CUSTOMER_LEVEL = 'crm_customer_level',
-  CRM_CUSTOMER_SOURCE = 'crm_customer_source'
+  CRM_CUSTOMER_SOURCE = 'crm_customer_source',
+  CRM_PRODUCT_STATUS = 'crm_product_status'
 }

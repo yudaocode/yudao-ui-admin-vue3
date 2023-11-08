@@ -459,6 +459,52 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/pay/cashier/index.vue')
       }
     ]
+  },
+  {
+    path: '/diy',
+    name: 'DiyCenter',
+    meta: { hidden: true },
+    component: Layout,
+    children: [
+      {
+        path: 'template/decorate/:id',
+        name: 'DiyTemplateDecorate',
+        meta: {
+          title: '模板装修',
+          noCache: true,
+          hidden: true
+        },
+        component: () => import('@/views/mall/promotion/diy/template/decorate.vue')
+      },
+      {
+        path: 'page/decorate/:id',
+        name: 'DiyPageDecorate',
+        meta: {
+          title: '页面装修',
+          noCache: true,
+          hidden: true
+        },
+        component: () => import('@/views/mall/promotion/diy/page/decorate.vue')
+      }
+    ]
+  },
+  {
+    path: '/crm',
+    component: Layout,
+    name: 'CrmCenter',
+    meta: { hidden: true },
+    children: [
+      {
+        path: 'customer/detail/:id',
+        name: 'CrmCustomerDetail',
+        meta: {
+          title: '客户详情',
+          noCache: true,
+          hidden: true
+        },
+        component: () => import('@/views/crm/customer/detail/index.vue')
+      }
+    ]
   }
 ]
 

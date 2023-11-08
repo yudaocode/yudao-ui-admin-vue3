@@ -27,12 +27,15 @@ import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
 import { socialAuthRedirect, socialBind, socialUnbind } from '@/api/system/user/socialUser'
 
 defineOptions({ name: 'UserSocial' })
-
+defineProps<{
+  activeName: string
+}>()
 const message = useMessage()
 const socialUsers = ref<any[]>([])
 const userInfo = ref<ProfileVO>()
 
 const initSocial = async () => {
+  socialUsers.value = [] // 重置避免无限增长
   const res = await getUserProfile()
   userInfo.value = res
   for (const i in SystemUserSocialTypeEnum) {
@@ -49,9 +52,12 @@ const initSocial = async () => {
   }
 }
 const route = useRoute()
+const emit = defineEmits<{
+  (e: 'update:activeName', v: string): void
+}>()
 const bindSocial = () => {
   // 社交绑定
-  const type = route.query.type
+  const type = getUrlValue('type')
   const code = route.query.code
   const state = route.query.state
   if (!code) {
@@ -59,11 +65,20 @@ const bindSocial = () => {
   }
   socialBind(type, code, state).then(() => {
     message.success('绑定成功')
+    emit('update:activeName', 'userSocial')
     initSocial()
   })
 }
+
+// 双层 encode 需要在回调后进行 decode
+function getUrlValue(key: string): string {
+  const url = new URL(decodeURIComponent(location.href))
+  return url.searchParams.get(key) ?? ''
+}
+
 const bind = (row) => {
-  const redirectUri = location.origin + '/user/profile?type=' + row.type
+  // 双层 encode 解决钉钉回调 type 参数丢失的问题
+  const redirectUri = location.origin + '/user/profile?' + encodeURIComponent(`type=${row.type}`)
   // 进行跳转
   socialAuthRedirect(row.type, encodeURIComponent(redirectUri)).then((res) => {
     window.location.href = res
@@ -83,9 +98,8 @@ onMounted(async () => {
 
 watch(
   () => route,
-  (newRoute) => {
+  () => {
     bindSocial()
-    console.log(newRoute)
   },
   {
     immediate: true

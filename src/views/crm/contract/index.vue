@@ -166,7 +166,7 @@ import download from '@/utils/download'
 import * as ContractApi from '@/api/crm/contract'
 import ContractForm from './ContractForm.vue'
 
-defineOptions({ name: 'Contract' })
+defineOptions({ name: 'CrmContract' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
