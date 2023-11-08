@@ -1,12 +1,19 @@
 <template>
   <ComponentContainerProperty v-model="formData.style">
-    <el-text tag="p"> 菜单设置 </el-text>
-    <el-text type="info" size="small"> 拖动左侧的小圆点可以调整顺序 </el-text>
-
     <!-- 表单 -->
-    <el-form label-width="60px" :model="formData" class="m-t-8px">
-      <div v-if="formData.list.length">
+    <el-form label-width="80px" :model="formData" class="m-t-8px">
+      <el-form-item label="每行数量" prop="column">
+        <el-radio-group v-model="formData.column">
+          <el-radio :label="3">3个</el-radio>
+          <el-radio :label="4">4个</el-radio>
+        </el-radio-group>
+      </el-form-item>
+
+      <el-text tag="p"> 菜单设置 </el-text>
+      <el-text type="info" size="small"> 拖动左侧的小圆点可以调整顺序 </el-text>
+      <template v-if="formData.list.length">
         <VueDraggable
+          class="m-t-8px"
           :list="formData.list"
           item-key="index"
           handle=".drag-icon"
@@ -33,10 +40,24 @@
               <el-form-item label="链接" prop="url">
                 <el-input v-model="element.url" />
               </el-form-item>
+              <el-form-item label="显示角标" prop="badge.show">
+                <el-switch v-model="element.badge.show" />
+              </el-form-item>
+              <template v-if="element.badge.show">
+                <el-form-item label="角标内容" prop="badge.text">
+                  <InputWithColor
+                    v-model="element.badge.text"
+                    v-model:color="element.badge.textColor"
+                  />
+                </el-form-item>
+                <el-form-item label="背景颜色" prop="badge.bgColor">
+                  <ColorInput v-model="element.badge.bgColor" />
+                </el-form-item>
+              </template>
             </div>
           </template>
         </VueDraggable>
-      </div>
+      </template>
       <el-form-item label-width="0">
         <el-button @click="handleAddMenu" type="primary" plain class="m-t-8px w-full">
           <Icon icon="ep:plus" class="mr-5px" /> 添加菜单
@@ -50,21 +71,21 @@
 import VueDraggable from 'vuedraggable'
 import { usePropertyForm } from '@/components/DiyEditor/util'
 import {
-  EMPTY_MENU_LIST_ITEM_PROPERTY,
-  MenuListProperty
-} from '@/components/DiyEditor/components/mobile/MenuList/config'
+  EMPTY_MENU_GRID_ITEM_PROPERTY,
+  MenuGridProperty
+} from '@/components/DiyEditor/components/mobile/MenuGrid/config'
 import { cloneDeep } from 'lodash-es'
 
-/** 列表导航属性面板 */
-defineOptions({ name: 'MenuListProperty' })
+/** 宫格导航属性面板 */
+defineOptions({ name: 'MenuGridProperty' })
 
-const props = defineProps<{ modelValue: MenuListProperty }>()
+const props = defineProps<{ modelValue: MenuGridProperty }>()
 const emit = defineEmits(['update:modelValue'])
 const { formData } = usePropertyForm(props.modelValue, emit)
 
 /* 添加菜单 */
 const handleAddMenu = () => {
-  formData.value.list.push(cloneDeep(EMPTY_MENU_LIST_ITEM_PROPERTY))
+  formData.value.list.push(cloneDeep(EMPTY_MENU_GRID_ITEM_PROPERTY))
 }
 /* 删除菜单 */
 const handleDeleteMenu = (index: number) => {
