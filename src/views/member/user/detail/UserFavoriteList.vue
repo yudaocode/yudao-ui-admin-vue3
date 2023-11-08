@@ -1,46 +1,4 @@
 <template>
-  <ContentWrap>
-    <!-- 搜索工作栏 -->
-    <el-form
-      class="-mb-15px"
-      :model="queryParams"
-      ref="queryFormRef"
-      :inline="true"
-      label-width="68px"
-    >
-      <el-form-item label="商品名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入商品名称"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="收藏时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon icon="ep:refresh" class="mr-5px" />
-          重置
-        </el-button>
-      </el-form-item>
-    </el-form>
-  </ContentWrap>
-
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
@@ -65,28 +23,6 @@
       <el-table-column align="center" label="状态" min-width="80">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.PRODUCT_SPU_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" fixed="right" label="操作" min-width="200">
-        <template #default="{ row }">
-          <el-button
-            v-if="row.favoriteStatus === 0"
-            v-hasPermi="['product:spu:delete']"
-            link
-            type="danger"
-            @click="handleAdd(row)"
-          >
-            收藏
-          </el-button>
-          <el-button
-            v-if="row.favoriteStatus === 1"
-            v-hasPermi="['product:spu:delete']"
-            link
-            type="danger"
-            @click="handleDelete(row)"
-          >
-            取消收藏
-          </el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -143,41 +79,6 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
-}
-
-/** 取消收藏按钮操作 */
-const handleDelete = async (row: object) => {
-  try {
-    console.log(row)
-    // 取消的二次确认
-    await message.delStarConfirm()
-    // 发起取消
-    await FavoriteApi.delFavorite({ userId: queryParams.userId, spuId: row.spuId })
-    message.success(t('common.delStarSuccess'))
-    row.favoriteStatus = 0
-    // 刷新列表
-    // await getList()
-  } catch {}
-}
-
-/** 收藏按钮操作 */
-const handleAdd = async (row: object) => {
-  try {
-    const data = { userId: queryParams.userId, spuId: row.spuId }
-    // 发起收藏
-    const result = await FavoriteApi.exitsFavorite(data)
-    if (result === false) {
-      // 发起收藏
-      await FavoriteApi.createFavorite(data)
-      message.success(t('common.starSuccess'))
-      row.favoriteStatus = 1
-      // 刷新列表
-      // await getList()
-    } else {
-      message.warning(t('common.existStar'))
-      row.favoriteStatus = 1
-    }
-  } catch {}
 }
 
 const { userId } = defineProps({
