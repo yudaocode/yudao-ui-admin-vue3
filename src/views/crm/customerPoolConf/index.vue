@@ -11,7 +11,12 @@
         <template #header>
           <div class="flex items-center justify-between">
             <CardTitle title="客户公海规则设置" />
-            <el-button type="primary" @click="onSubmit">保存</el-button>
+            <el-button
+              type="primary"
+              @click="onSubmit"
+              v-hasPermi="['crm:customer-pool-config:update']"
+              >保存</el-button
+            >
           </div>
         </template>
 
