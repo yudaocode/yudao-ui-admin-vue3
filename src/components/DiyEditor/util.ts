@@ -103,8 +103,9 @@ export const PAGE_LIBS = [
     components: [
       'SearchBar',
       'NoticeBar',
-      'GridNavigation',
-      'ListNavigation',
+      'MenuSwiper',
+      'MenuGrid',
+      'MenuList',
       'Divider',
       'TitleBar'
     ]
