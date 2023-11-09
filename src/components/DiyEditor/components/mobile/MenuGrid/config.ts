@@ -53,7 +53,7 @@ export const EMPTY_MENU_GRID_ITEM_PROPERTY = {
 export const component = {
   id: 'MenuGrid',
   name: '宫格导航',
-  icon: 'fa-solid:list',
+  icon: 'bi:grid-3x3-gap',
   property: {
     column: 3,
     list: [cloneDeep(EMPTY_MENU_GRID_ITEM_PROPERTY)],

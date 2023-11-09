@@ -100,17 +100,13 @@ export const PAGE_LIBS = [
   {
     name: '基础组件',
     extended: true,
-    components: [
-      'SearchBar',
-      'NoticeBar',
-      'MenuSwiper',
-      'MenuGrid',
-      'MenuList',
-      'Divider',
-      'TitleBar'
-    ]
+    components: ['SearchBar', 'NoticeBar', 'MenuSwiper', 'MenuGrid', 'MenuList']
   },
-  { name: '图文组件', extended: true, components: ['ImageBar', 'Carousel', 'VideoPlayer'] },
+  {
+    name: '图文组件',
+    extended: true,
+    components: ['ImageBar', 'Carousel', 'TitleBar', 'VideoPlayer', 'Divider']
+  },
   { name: '商品组件', extended: true, components: ['ProductCard'] },
   {
     name: '会员组件',

@@ -1,13 +1,14 @@
 <template>
   <el-input v-model="valueRef" v-bind="$attrs">
     <template #append>
-      <el-color-picker v-model="colorRef" :predefine="COLORS" />
+      <el-color-picker v-model="colorRef" :predefine="PREDEFINE_COLORS" />
     </template>
   </el-input>
 </template>
 
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
+import { PREDEFINE_COLORS } from '@/utils/color'
 
 /**
  * 带颜色选择器输入框
