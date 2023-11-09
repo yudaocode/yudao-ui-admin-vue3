@@ -7,16 +7,21 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="表描述" prop="tableComment">
-        <el-input v-model="formData.tableComment" placeholder="请输入" />
+      <el-form-item label="字段 1" prop="field1">
+        <el-input v-model="formData.field1" placeholder="请输入字段 1" />
+      </el-form-item>
+      <el-form-item label="字段 2" prop="field2">
+        <el-input v-model="formData.field2" placeholder="请输入字段 2" />
+      </el-form-item>
+      <el-form-item label="字段 3" prop="field3">
+        <el-input v-model="formData.field3" placeholder="请输入字段 3" />
       </el-form-item>
       <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-        <el-tab-pane label="User" name="first">
-          <DemoStudentContactForm />
+        <el-tab-pane label="联系人信息" name="first">
+          <DemoStudentContactForm v-model:form-data="formData.demoStudentContactList" />
         </el-tab-pane>
-        <el-tab-pane label="Config" name="second">Config</el-tab-pane>
-        <el-tab-pane label="Role" name="third">Role</el-tab-pane>
-        <el-tab-pane label="Task" name="fourth">Task</el-tab-pane>
+        <el-tab-pane label="地址信息" name="third">地址信息</el-tab-pane>
+        <el-tab-pane label="其它信息" name="fourth">其它信息</el-tab-pane>
       </el-tabs>
     </el-form>
     <template #footer>
@@ -38,7 +43,12 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  demoStudentContactList: []
+  demoStudentContactList: [
+    {
+      name: '芋艿',
+      mobile: '15601691300'
+    }
+  ]
 })
 const formRules = reactive({})
 const formRef = ref() // 表单 Ref
