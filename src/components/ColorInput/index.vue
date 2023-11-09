@@ -1,37 +1,17 @@
 <template>
   <el-input v-model="color">
     <template #prepend>
-      <el-color-picker v-model="color" :predefine="COLORS" />
+      <el-color-picker v-model="color" :predefine="PREDEFINE_COLORS" />
     </template>
   </el-input>
 </template>
 
 <script setup lang="ts">
 import { propTypes } from '@/utils/propTypes'
+import { PREDEFINE_COLORS } from '@/utils/color'
 
 // 颜色输入框
 defineOptions({ name: 'ColorInput' })
-
-// 预设颜色
-const COLORS = [
-  '#ff4500',
-  '#ff8c00',
-  '#ffd700',
-  '#90ee90',
-  '#00ced1',
-  '#1e90ff',
-  '#c71585',
-  '#409EFF',
-  '#909399',
-  '#C0C4CC',
-  '#b7390b',
-  '#ff7800',
-  '#fad400',
-  '#5b8c5f',
-  '#00babd',
-  '#1f73c3',
-  '#711f57'
-]
 
 const props = defineProps({
   modelValue: propTypes.string.def('')
