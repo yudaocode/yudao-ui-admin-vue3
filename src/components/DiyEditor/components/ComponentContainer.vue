@@ -1,6 +1,7 @@
 <template>
   <div :class="['component', { active: active }]">
     <div
+      class="component-inner"
       :style="{
         ...style
       }"
@@ -130,23 +131,19 @@ $toolbar-position: -55px;
 .component {
   position: relative;
   cursor: move;
+  .component-inner {
+    position: relative;
+    z-index: 1;
+  }
   .component-wrap {
+    z-index: 0;
+    pointer-events: none;
     display: block;
     position: absolute;
     left: -$active-border-width;
     top: 0;
     width: 100%;
     height: 100%;
-    /* 鼠标放到组件上时 */
-    &:hover {
-      border: $hover-border-width dashed var(--el-color-primary);
-      box-shadow: 0 0 5px 0 rgba(24, 144, 255, 0.3);
-      .component-name {
-        /* 防止加了边框之后，位置移动 */
-        left: $name-position - $hover-border-width;
-        top: $hover-border-width;
-      }
-    }
     /* 左侧：组件名称 */
     .component-name {
       display: block;
@@ -199,6 +196,7 @@ $toolbar-position: -55px;
     margin-bottom: 4px;
 
     .component-wrap {
+      z-index: 2;
       border: $active-border-width solid var(--el-color-primary) !important;
       box-shadow: 0 0 10px 0 rgba(24, 144, 255, 0.3);
       margin-bottom: $active-border-width + $active-border-width;
@@ -215,6 +213,19 @@ $toolbar-position: -55px;
       }
       .component-toolbar {
         display: block;
+      }
+    }
+  }
+  /* 鼠标放到组件上时 */
+  &:hover {
+    .component-wrap {
+      z-index: 2;
+      border: $hover-border-width dashed var(--el-color-primary);
+      box-shadow: 0 0 5px 0 rgba(24, 144, 255, 0.3);
+      .component-name {
+        /* 防止加了边框之后，位置移动 */
+        left: $name-position - $hover-border-width;
+        top: $hover-border-width;
       }
     }
   }
