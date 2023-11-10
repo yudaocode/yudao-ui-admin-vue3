@@ -9,17 +9,70 @@
   >
     <el-table :data="formData" class="-mt-10px">
       <el-table-column label="序号" type="index" width="100" />
-      <el-table-column label="名字" prop="name" width="300">
+      <el-table-column label="名字" prop="name" width="50">
         <template #default="row">
           <el-form-item class="mb-0px!">
             <el-input v-model="row.name" placeholder="请输入名字" />
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="手机号码">
+      <el-table-column label="手机号码" width="150">
         <template #default="{ row, $index }">
           <el-form-item :prop="`${$index}.mobile`" :rules="formRules.mobile" class="mb-0px!">
             <el-input type="number" placeholder="输入手机号码" v-model="row.mobile" />
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="类型" width="150">
+        <template #default="{ row, $index }">
+          <el-form-item :prop="`${$index}.javaType`" :rules="formRules.javaType" class="mb-0px!">
+            <el-select v-model="row.javaType">
+              <el-option label="Long" value="Long" />
+              <el-option label="String" value="String" />
+              <el-option label="Integer" value="Integer" />
+              <el-option label="Double" value="Double" />
+              <el-option label="BigDecimal" value="BigDecimal" />
+              <el-option label="LocalDateTime" value="LocalDateTime" />
+              <el-option label="Boolean" value="Boolean" />
+            </el-select>
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="多选" width="150">
+        <template #default="{ row, $index }">
+          <el-form-item :prop="`${$index}.sex`" :rules="formRules.sex" class="mb-0px!">
+            <el-checkbox-group v-model="row.sex">
+              <el-checkbox key="Long" label="Long">Long</el-checkbox>
+              <el-checkbox key="String" label="String">String</el-checkbox>
+            </el-checkbox-group>
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="图片上传" width="200">
+        <template #default="{ row, $index }">
+          <el-form-item :prop="`${$index}.pic`" :rules="formRules.pic" class="mb-0px!">
+            <UploadImg v-model="row.pic" />
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="文件上传" width="200">
+        <template #default="{ row, $index }">
+          <el-form-item :prop="`${$index}.file`" :rules="formRules.file" class="mb-0px!">
+            <UploadFile v-model="row.file" />
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="大输入框" width="200">
+        <template #default="{ row, $index }">
+          <el-form-item :prop="`${$index}.content`" :rules="formRules.content" class="mb-0px!">
+            <el-input v-model="row.content" type="textarea" placeholder="请输入 content" />
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="HTML" width="1024">
+        <template #default="{ row, $index }">
+          <el-form-item :prop="`${$index}.html`" :rules="formRules.html" class="mb-0px!">
+            <Editor v-model="row.html" height="150px" />
           </el-form-item>
         </template>
       </el-table-column>
@@ -41,7 +94,10 @@ const props = defineProps<{
 const formLoading = ref(false) // 表单的加载中
 const formData = ref([])
 const formRules = reactive({
-  mobile: [required]
+  mobile: [required],
+  javaType: [required],
+  sex: [required],
+  pic: [required]
 })
 const formRef = ref() // 表单 Ref
 
@@ -53,7 +109,11 @@ watch(
       formData.value = [
         {
           name: '芋艿',
-          mobile: '15601691300'
+          mobile: '15601691300',
+          javaType: undefined,
+          sex: [],
+          pic: undefined,
+          file: undefined
         }
       ]
     } else {
