@@ -29,7 +29,26 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      row-key="id"
+    >
+      <el-table-column type="expand">
+        <template #default="scope">
+          <!-- 子表的表单 -->
+          <el-tabs model-value="DemoStudentContact">
+            <el-tab-pane label="联系人信息" name="DemoStudentContact">
+              <DemoStudentContactList :student-id="scope.row.id" />
+            </el-tab-pane>
+            <el-tab-pane label="地址信息" name="DemoStudentAddress">
+              <DemoStudentAddressList :student-id="scope.row.id" />
+            </el-tab-pane>
+          </el-tabs>
+        </template>
+      </el-table-column>
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="操作" align="center">
         <template #default="scope">
@@ -64,6 +83,8 @@
 import download from '@/utils/download'
 import * as DemoStudentApi from '@/api/infra/demo02'
 import DemoStudentForm from './DemoStudentForm.vue'
+import DemoStudentContactList from './DemoStudentContactList.vue'
+import DemoStudentAddressList from './DemoStudentAddressList.vue'
 
 defineOptions({ name: 'InfraDemoStudent' })
 
@@ -88,6 +109,9 @@ const getList = async () => {
     list.value = [
       {
         id: 1
+      },
+      {
+        id: 10
       }
     ]
     total.value = 10

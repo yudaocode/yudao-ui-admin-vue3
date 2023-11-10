@@ -10,22 +10,7 @@
       <el-form-item label="字段 1" prop="field1">
         <el-input v-model="formData.field1" placeholder="请输入字段 1" />
       </el-form-item>
-      <el-form-item label="字段 2" prop="field2">
-        <el-input v-model="formData.field2" placeholder="请输入字段 2" />
-      </el-form-item>
-      <el-form-item label="字段 3" prop="field3">
-        <el-input v-model="formData.field3" placeholder="请输入字段 3" />
-      </el-form-item>
     </el-form>
-    <!-- 子表的表单 -->
-    <el-tabs v-model="subTabsName">
-      <el-tab-pane label="联系人信息" name="DemoStudentContact">
-        <DemoStudentContactForm ref="demoStudentContactFormRef" :student-id="formData.id" />
-      </el-tab-pane>
-      <el-tab-pane label="地址信息" name="DemoStudentAddress">
-        <DemoStudentAddressForm ref="demoStudentAddressFormRef" :student-id="formData.id" />
-      </el-tab-pane>
-    </el-tabs>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -51,11 +36,6 @@ const formRules = reactive({
   field2: [required]
 })
 const formRef = ref() // 表单 Ref
-
-/** 子表的表单 */
-const demoStudentContactFormRef = ref()
-const demoStudentAddressFormRef = ref()
-const subTabsName = ref('DemoStudentContact')
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -87,28 +67,12 @@ const emit = defineEmits(['success']) // 定义 success 事件，用于操作成
 const submitForm = async () => {
   // 校验表单
   await formRef.value.validate()
-  // 校验子表单
-  try {
-    await demoStudentContactFormRef.value.validate()
-  } catch (e) {
-    subTabsName.value = 'DemoStudentContact'
-    return
-  }
-  try {
-    await demoStudentAddressFormRef.value.validate()
-  } catch (e) {
-    subTabsName.value = 'DemoStudentAddress'
-    return
-  }
   // 提交请求
   formLoading.value = true
   try {
     const data = formData.value as unknown as DemoStudentApi.DemoStudentVO
-    // 拼接子表的数据
-    data.demoStudentContacts = demoStudentContactFormRef.value.getData()
-    data.demoStudentAddress = demoStudentAddressFormRef.value.getData()
     if (formType.value === 'create') {
-      await DemoStudentApi.createDemoStudent(data)
+      // await DemoStudentApi.createDemoStudent(data) // TODO 芋艿：临时去掉
       message.success(t('common.createSuccess'))
     } else {
       await DemoStudentApi.updateDemoStudent(data)

@@ -29,7 +29,14 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      highlight-current-row
+      @current-change="handleCurrentChange"
+    >
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="操作" align="center">
         <template #default="scope">
@@ -56,6 +63,18 @@
     />
   </ContentWrap>
 
+  <!-- 子列表 -->
+  <ContentWrap>
+    <el-tabs model-value="DemoStudentContact">
+      <el-tab-pane label="联系人信息" name="DemoStudentContact">
+        <DemoStudentContactList :student-id="currentRow.id" />
+      </el-tab-pane>
+      <el-tab-pane label="地址信息" name="DemoStudentAddress">
+        <DemoStudentAddressList :student-id="currentRow.id" />
+      </el-tab-pane>
+    </el-tabs>
+  </ContentWrap>
+
   <!-- 表单弹窗：添加/修改 -->
   <DemoStudentForm ref="formRef" @success="getList" />
 </template>
@@ -64,6 +83,8 @@
 import download from '@/utils/download'
 import * as DemoStudentApi from '@/api/infra/demo02'
 import DemoStudentForm from './DemoStudentForm.vue'
+import DemoStudentContactList from './DemoStudentContactList.vue'
+import DemoStudentAddressList from './DemoStudentAddressList.vue'
 
 defineOptions({ name: 'InfraDemoStudent' })
 
@@ -79,6 +100,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const currentRow = ref({}) // 选中行
 
 /** 查询列表 */
 const getList = async () => {
@@ -88,6 +110,9 @@ const getList = async () => {
     list.value = [
       {
         id: 1
+      },
+      {
+        id: 10
       }
     ]
     total.value = 10
@@ -143,6 +168,13 @@ const handleExport = async () => {
   } finally {
     exportLoading.value = false
   }
+}
+
+/** 选中行操作 */
+const handleCurrentChange = (row) => {
+  console.log(currentRow.value, '==== currentRow.value ====')
+  console.log(row, '==== row ====')
+  currentRow.value = row
 }
 
 /** 初始化 **/
