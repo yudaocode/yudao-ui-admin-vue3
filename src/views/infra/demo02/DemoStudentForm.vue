@@ -16,14 +16,14 @@
       <el-form-item label="字段 3" prop="field3">
         <el-input v-model="formData.field3" placeholder="请输入字段 3" />
       </el-form-item>
-      <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-        <el-tab-pane label="联系人信息" name="first">
-          <DemoStudentContactForm v-model:form-data="formData.demoStudentContactList" />
-        </el-tab-pane>
-        <el-tab-pane label="地址信息" name="third">地址信息</el-tab-pane>
-        <el-tab-pane label="其它信息" name="fourth">其它信息</el-tab-pane>
-      </el-tabs>
     </el-form>
+    <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
+      <el-tab-pane label="联系人信息" name="first">
+        <DemoStudentContactForm v-model:form-data="formData.demoStudentContactList" />
+      </el-tab-pane>
+      <el-tab-pane label="地址信息" name="third">地址信息</el-tab-pane>
+      <el-tab-pane label="其它信息" name="fourth">其它信息</el-tab-pane>
+    </el-tabs>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>

@@ -1,12 +1,6 @@
 <template>
-  <el-table
-    :data="formData"
-    @selection-change="handleDemoStudentContactSelectionChange"
-    ref="demoStudentContactRef"
-    :stripe="true"
-    class="-mt-10px"
-  >
-    <el-table-column label="序号" type="index" width="100" />
+  <el-table :data="formData" :stripe="true" class="-mt-10px">
+    <el-table-column label="序号" type="index" width="60" />
     <el-table-column label="名字" prop="name" width="300">
       <template #default="scope">
         <el-form-item label-width="0px" :inline-message="true" class="mb-0px!">
@@ -28,7 +22,9 @@
       </template>
     </el-table-column>
     <el-table-column align="center" fixed="right" label="操作" width="60">
-      <el-button @click="handleAdd" link>—</el-button>
+      <template #default="{ $index }">
+        <el-button @click="handleRemove($index)" link>—</el-button>
+      </template>
     </el-table-column>
   </el-table>
   <el-row justify="center" class="mt-3">
@@ -53,12 +49,6 @@ const formRules = reactive({
   mobile: [required]
 })
 
-const handleDemoStudentContactSelectionChange = (val) => {
-  demoStudentContactList.value = val
-}
-
-const demoStudentContactRef = ref()
-
 /** 新增按钮操作 */
 const emit = defineEmits(['update:formData'])
 const handleAdd = () => {
@@ -71,9 +61,8 @@ const handleAdd = () => {
 }
 
 /** 删除按钮操作 */
-const handleRemove = () => {
-  formData.push({
-    name: '测试'
-  })
+const handleRemove = (index) => {
+  const formData = props.formData.filter((_, i) => i !== index)
+  emit('update:formData', formData)
 }
 </script>
