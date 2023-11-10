@@ -54,13 +54,7 @@ export default {
     updateTime: 'Update Time',
     copy: 'Copy',
     copySuccess: 'Copy Success',
-    copyError: 'Copy Error',
-    confirmDelStar: 'Delete the Star?',
-    starSuccess: 'Star Success',
-    starFail: 'Star Error',
-    delStarSuccess: 'Del Star Success',
-    delStarFail: 'Del Star Error',
-    existStar: 'exist Star'
+    copyError: 'Copy Error'
   },
   error: {
     noPermission: `Sorry, you don't have permission to access this page.`,
