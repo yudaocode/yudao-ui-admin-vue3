@@ -54,13 +54,7 @@ export default {
     updateTime: '更新时间',
     copy: '复制',
     copySuccess: '复制成功',
-    copyError: '复制失败',
-    confirmDelStar: '是否取消收藏？',
-    starSuccess: '收藏成功',
-    starFail: '收藏失败',
-    delStarSuccess: '取消收藏成功',
-    delStarFail: '取消收藏失败',
-    existStar: '收藏已存在'
+    copyError: '复制失败'
   },
   error: {
     noPermission: `抱歉，您无权访问此页面。`,
