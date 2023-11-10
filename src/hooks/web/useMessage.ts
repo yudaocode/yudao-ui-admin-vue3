@@ -90,18 +90,6 @@ export const useMessage = () => {
         cancelButtonText: t('common.cancel'),
         type: 'warning'
       })
-    },
-    // 取消收藏窗体
-    delStarConfirm(content?: string, tip?: string) {
-      return ElMessageBox.confirm(
-        content ? content : t('common.confirmDelStar'),
-        tip ? tip : t('common.confirmTitle'),
-        {
-          confirmButtonText: t('common.ok'),
-          cancelButtonText: t('common.cancel'),
-          type: 'warning'
-        }
-      )
     }
   }
 }
