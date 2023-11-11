@@ -1,7 +1,7 @@
 <template>
   <!-- 列表 -->
   <ContentWrap>
-    <el-tabs tab-position="left" style="height: 200px">
+    <el-tabs tab-position="left">
       <el-tab-pane label="拥有客户数限制">
         <CustomerQuantityLimit :confType="LimitConfType.CUSTOMER_QUANTITY_LIMIT" />
       </el-tab-pane>

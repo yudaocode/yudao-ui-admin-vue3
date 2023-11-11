@@ -66,8 +66,7 @@
   <el-col>
     <el-tabs>
       <el-tab-pane label="详细资料">
-        <!-- TODO wanwan：这个 ml-2 是不是可以优化下，不要整个左移，而是里面的内容有个几 px 的偏移，不顶在框里 -->
-        <CustomerDetails class="ml-2" :customer="customer" />
+        <CustomerDetails :customer="customer" />
       </el-tab-pane>
       <el-tab-pane label="活动" lazy> 活动</el-tab-pane>
       <el-tab-pane label="邮件" lazy> 邮件</el-tab-pane>

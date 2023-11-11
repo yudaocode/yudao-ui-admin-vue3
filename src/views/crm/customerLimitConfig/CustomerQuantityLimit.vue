@@ -1,4 +1,7 @@
 <template>
+  <el-button type="primary" plain @click="handleQuery">
+    <Icon icon="ep:refresh" class="mr-5px" /> 刷新
+  </el-button>
   <el-button
     type="primary"
     plain
@@ -7,7 +10,13 @@
   >
     <Icon icon="ep:plus" class="mr-5px" /> 新增
   </el-button>
-  <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+  <el-table
+    v-loading="loading"
+    :data="list"
+    :stripe="true"
+    :show-overflow-tooltip="true"
+    class="mt-4"
+  >
     <el-table-column label="编号" align="center" prop="id" />
     <el-table-column label="规则类型" align="center" prop="type" />
     <el-table-column label="规则适用人群" align="center" prop="userNames" />
@@ -121,6 +130,12 @@ const handleDelete = async (id: number) => {
 }
 
 const { confType } = defineProps<{ confType: LimitConfType }>()
+
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
+}
 
 /** 初始化 **/
 onMounted(() => {
