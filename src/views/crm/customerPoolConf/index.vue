@@ -87,7 +87,6 @@ const getConfig = async () => {
       return
     }
     formData.value = data
-    console.log(formData.value)
   } finally {
     formLoading.value = false
   }
@@ -107,7 +106,8 @@ const onSubmit = async () => {
     const data = formData.value as unknown as CustomerPoolConfApi.CustomerPoolConfigVO
     await CustomerPoolConfApi.updateCustomerPoolConfig(data)
     message.success(t('common.updateSuccess'))
-    dialogVisible.value = false
+    await getConfig()
+    formLoading.value = false
   } finally {
     formLoading.value = false
   }
