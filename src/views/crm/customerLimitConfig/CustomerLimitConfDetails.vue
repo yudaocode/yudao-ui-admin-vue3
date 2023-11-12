@@ -84,6 +84,8 @@ import CustomerLimitConfigForm from '@/views/crm/customerLimitConfig/CustomerLim
 import { LimitConfType } from '@/views/crm/customerLimitConfig/customerLimitConf'
 import { DICT_TYPE } from '@/utils/dict'
 
+defineOptions({ name: 'CustomerLimitConfDetails' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
