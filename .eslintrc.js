@@ -21,7 +21,7 @@ module.exports = defineConfig({
     'plugin:vue/vue3-recommended',
     'plugin:@typescript-eslint/recommended',
     'prettier',
-    'plugin:prettier/recommended', 
+    'plugin:prettier/recommended',
     '@unocss'
   ],
   rules: {
@@ -67,6 +67,7 @@ module.exports = defineConfig({
       }
     ],
     'vue/multi-word-component-names': 'off',
-    'vue/no-v-html': 'off'
+    'vue/no-v-html': 'off',
+    'prettier/prettier': 'off' // 芋艿：默认关闭 prettier 的 ESLint 校验，因为我们使用的是 IDE 的 Prettier 插件
   }
 })
