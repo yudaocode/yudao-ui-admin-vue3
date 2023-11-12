@@ -6,23 +6,13 @@
       :rules="formRules"
       label-width="100px"
       v-loading="formLoading"
-    >
-      <el-form-item label="字段 1" prop="field1">
-        <el-input v-model="formData.field1" placeholder="请输入字段 1" />
-      </el-form-item>
-      <el-form-item label="字段 2" prop="field2">
-        <el-input v-model="formData.field2" placeholder="请输入字段 2" />
-      </el-form-item>
-      <el-form-item label="字段 3" prop="field3">
-        <el-input v-model="formData.field3" placeholder="请输入字段 3" />
-      </el-form-item>
-    </el-form>
+    />
     <!-- 子表的表单 -->
     <el-tabs v-model="subTabsName">
-      <el-tab-pane label="联系人信息" name="DemoStudentContact">
+      <el-tab-pane label="学生联系人" name="demoStudentContact">
         <DemoStudentContactForm ref="demoStudentContactFormRef" :student-id="formData.id" />
       </el-tab-pane>
-      <el-tab-pane label="地址信息" name="DemoStudentAddress">
+      <el-tab-pane label="学生地址" name="demoStudentAddress">
         <DemoStudentAddressForm ref="demoStudentAddressFormRef" :student-id="formData.id" />
       </el-tab-pane>
     </el-tabs>
@@ -47,15 +37,13 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined
 })
-const formRules = reactive({
-  field2: [required]
-})
+const formRules = reactive({})
 const formRef = ref() // 表单 Ref
 
 /** 子表的表单 */
+const subTabsName = ref('demoStudentContact')
 const demoStudentContactFormRef = ref()
 const demoStudentAddressFormRef = ref()
-const subTabsName = ref('DemoStudentContact')
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -65,16 +53,9 @@ const open = async (type: string, id?: number) => {
   resetForm()
   // 修改时，设置数据
   if (id) {
-    // debugger
     formLoading.value = true
     try {
-      // formData.value = await DemoStudentApi.getDemoStudent(id)
-      formData.value = {
-        id: id,
-        field1: '1',
-        field2: '22',
-        field3: '333'
-      }
+      formData.value = await DemoStudentApi.getDemoStudent(id)
     } finally {
       formLoading.value = false
     }
@@ -91,13 +72,13 @@ const submitForm = async () => {
   try {
     await demoStudentContactFormRef.value.validate()
   } catch (e) {
-    subTabsName.value = 'DemoStudentContact'
+    subTabsName.value = 'demoStudentContact'
     return
   }
   try {
     await demoStudentAddressFormRef.value.validate()
   } catch (e) {
-    subTabsName.value = 'DemoStudentAddress'
+    subTabsName.value = 'demoStudentAddress'
     return
   }
   // 提交请求

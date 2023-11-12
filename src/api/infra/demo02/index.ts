@@ -33,3 +33,17 @@ export const deleteDemoStudent = async (id: number) => {
 export const exportDemoStudent = async (params) => {
   return await request.download({ url: `/infra/demo-student/export-excel`, params })
 }
+
+// 获得学生联系人列表
+export const getDemoStudentContactListByStudentId = async (studentId) => {
+  return await request.get({
+    url: `/infra/demo-student/demo-student/list-by-student-id?studentId=` + studentId
+  })
+}
+
+// 获得学生地址
+export const getDemoStudentAddressByStudentId = async (studentId) => {
+  return await request.get({
+    url: `/infra/demo-student/demo-student/get-by-student-id?studentId=` + studentId
+  })
+}

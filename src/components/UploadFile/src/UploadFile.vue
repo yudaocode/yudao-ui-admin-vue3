@@ -144,7 +144,7 @@ watch(
     } else if (isArray(props.modelValue)) {
       // 情况2：字符串
       files.concat(props.modelValue)
-    } else if (props.modelValue === undefined) {
+    } else if (props.modelValue == null) {
       // 情况3：undefined 不处理
     } else {
       throw new Error('不支持的 modelValue 类型')
