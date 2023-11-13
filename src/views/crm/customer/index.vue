@@ -2,36 +2,36 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="客户名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入客户名称"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入客户名称"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="手机" prop="mobile">
         <el-input
           v-model="queryParams.mobile"
-          placeholder="请输入手机"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入手机"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="所属行业" prop="industryId">
         <el-select
           v-model="queryParams.industryId"
-          placeholder="请选择所属行业"
-          clearable
           class="!w-240px"
+          clearable
+          placeholder="请选择所属行业"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_INDUSTRY)"
@@ -44,9 +44,9 @@
       <el-form-item label="客户等级" prop="level">
         <el-select
           v-model="queryParams.level"
-          placeholder="请选择客户等级"
-          clearable
           class="!w-240px"
+          clearable
+          placeholder="请选择客户等级"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_LEVEL)"
@@ -59,9 +59,9 @@
       <el-form-item label="客户来源" prop="source">
         <el-select
           v-model="queryParams.source"
-          placeholder="请选择客户来源"
-          clearable
           class="!w-240px"
+          clearable
+          placeholder="请选择客户来源"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_SOURCE)"
@@ -72,19 +72,27 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:customer:create']">
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-button v-hasPermi="['crm:customer:create']" type="primary" @click="openForm('create')">
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
         </el-button>
         <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
           v-hasPermi="['crm:customer:export']"
+          :loading="exportLoading"
+          plain
+          type="success"
+          @click="handleExport"
         >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -92,77 +100,77 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="客户名称" align="center" prop="name" width="160" />
-      <el-table-column label="所属行业" align="center" prop="industryId" width="120">
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column align="center" label="编号" prop="id" />
+      <el-table-column align="center" label="客户名称" prop="name" width="160" />
+      <el-table-column align="center" label="所属行业" prop="industryId" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
         </template>
       </el-table-column>
-      <el-table-column label="客户来源" align="center" prop="source" width="100">
+      <el-table-column align="center" label="客户来源" prop="source" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
         </template>
       </el-table-column>
-      <el-table-column label="客户等级" align="center" prop="level" width="120">
+      <el-table-column align="center" label="客户等级" prop="level" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
         </template>
       </el-table-column>
-      <el-table-column label="手机" align="center" prop="mobile" width="120" />
-      <el-table-column label="详细地址" align="center" prop="detailAddress" width="200" />
-      <el-table-column label="负责人" align="center" prop="ownerUserName" />
-      <el-table-column label="所属部门" align="center" prop="ownerUserDept" />
-      <el-table-column label="创建人" align="center" prop="creatorName" />
+      <el-table-column align="center" label="手机" prop="mobile" width="120" />
+      <el-table-column align="center" label="详细地址" prop="detailAddress" width="200" />
+      <el-table-column align="center" label="负责人" prop="ownerUserName" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDept" />
+      <el-table-column align="center" label="创建人" prop="creatorName" />
       <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
         :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
         width="180px"
       />
-      <el-table-column label="成交状态" align="center" prop="dealStatus">
+      <el-table-column align="center" label="成交状态" prop="dealStatus">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
         </template>
       </el-table-column>
       <el-table-column
-        label="下次联系时间"
-        align="center"
-        prop="contactNextTime"
         :formatter="dateFormatter"
+        align="center"
+        label="下次联系时间"
+        prop="contactNextTime"
         width="180px"
       />
       <el-table-column
-        label="最后跟进时间"
-        align="center"
-        prop="contactLastTime"
         :formatter="dateFormatter"
+        align="center"
+        label="最后跟进时间"
+        prop="contactLastTime"
         width="180px"
       />
-      <el-table-column label="锁定状态" align="center" prop="lockStatus">
+      <el-table-column align="center" label="锁定状态" prop="lockStatus">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.lockStatus" />
         </template>
       </el-table-column>
       <!--  TODO @wanwan 距进入公海天数    -->
-      <el-table-column label="操作" align="center" min-width="150" fixed="right">
+      <el-table-column align="center" fixed="right" label="操作" min-width="150">
         <template #default="scope">
           <el-button link type="primary" @click="openDetail(scope.row.id)">详情</el-button>
           <el-button
+            v-hasPermi="['crm:customer:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['crm:customer:update']"
           >
             编辑
           </el-button>
           <el-button
+            v-hasPermi="['crm:customer:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['crm:customer:delete']"
           >
             删除
           </el-button>
@@ -171,23 +179,26 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
+  <!-- TODO 方便查看效果 -->
+  <CrmTeam :biz-id="1" :biz-type="CrmBizTypeEnum.CRM_CUSTOMER" />
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts">
-import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
+<script lang="ts" setup>
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CustomerApi from '@/api/crm/customer'
 import CustomerForm from './CustomerForm.vue'
+import { CrmBizTypeEnum, CrmTeam } from '@/views/crm/components'
 
 defineOptions({ name: 'CrmCustomer' })
 
