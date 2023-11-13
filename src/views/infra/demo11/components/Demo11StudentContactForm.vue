@@ -85,6 +85,11 @@
           </el-form-item>
         </template>
       </el-table-column>
+      <el-table-column align="center" fixed="right" label="操作" width="60">
+        <template #default="{ $index }">
+          <el-button @click="handleDelete($index)" link>—</el-button>
+        </template>
+      </el-table-column>
     </el-table>
   </el-form>
   <el-row justify="center" class="mt-3">
