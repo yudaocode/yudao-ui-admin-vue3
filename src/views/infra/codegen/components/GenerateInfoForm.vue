@@ -3,7 +3,7 @@
     <el-row>
       <el-col :span="12">
         <el-form-item label="生成模板" prop="templateType">
-          <el-select v-model="formData.templateType" @change="tplSelectChange">
+          <el-select v-model="formData.templateType">
             <el-option
               v-for="dict in getIntDictOptions(DICT_TYPE.INFRA_CODEGEN_TEMPLATE_TYPE)"
               :key="dict.value"
@@ -246,46 +246,66 @@
         </el-form-item>
       </el-col>
     </el-row>
-    <el-row v-show="formData.tplCategory === 'sub'">
-      <h4 class="form-header">关联信息</h4>
+
+    <!-- 主表信息 -->
+    <el-row v-if="formData.templateType === 15">
+      <el-col :span="24">
+        <h4 class="form-header">主表信息</h4>
+      </el-col>
       <el-col :span="12">
-        <el-form-item>
+        <el-form-item prop="masterTableId">
           <template #label>
             <span>
-              关联子表的表名
-              <el-tooltip content="关联子表的表名， 如：sys_user" placement="top">
+              关联的主表
+              <el-tooltip content="关联主表（父表）的表名， 如：system_user" placement="top">
                 <Icon icon="ep:question-filled" />
               </el-tooltip>
             </span>
           </template>
-          <el-select v-model="formData.subTableName" placeholder="请选择" @change="subSelectChange">
+          <el-select v-model="formData.masterTableId" placeholder="请选择">
             <el-option
               v-for="(table0, index) in tables"
               :key="index"
               :label="table0.tableName + '：' + table0.tableComment"
-              :value="table0.tableName"
+              :value="table0.id"
             />
           </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item>
+        <el-form-item prop="subJoinColumnId">
           <template #label>
             <span>
-              子表关联的外键名
-              <el-tooltip content="子表关联的外键名， 如：user_id" placement="top">
+              子表关联的字段
+              <el-tooltip content="子表关联的字段， 如：user_id" placement="top">
                 <Icon icon="ep:question-filled" />
               </el-tooltip>
             </span>
           </template>
-          <el-select v-model="formData.subTableFkName" placeholder="请选择">
+          <el-select v-model="formData.subJoinColumnId" placeholder="请选择">
             <el-option
-              v-for="(column, index) in subColumns"
+              v-for="(column, index) in props.columns"
               :key="index"
               :label="column.columnName + '：' + column.columnComment"
-              :value="column.columnName"
+              :value="column.id"
             />
           </el-select>
+        </el-form-item>
+      </el-col>
+      <el-col :span="12">
+        <el-form-item prop="subJoinMany">
+          <template #label>
+            <span>
+              关联关系
+              <el-tooltip content="主表与子表的关联关系" placement="top">
+                <Icon icon="ep:question-filled" />
+              </el-tooltip>
+            </span>
+          </template>
+          <el-radio-group v-model="formData.subJoinMany" placeholder="请选择">
+            <el-radio :label="true">一对多</el-radio>
+            <el-radio :label="false">一对一</el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-col>
     </el-row>
@@ -305,6 +325,10 @@ const props = defineProps({
   table: {
     type: Object as PropType<Nullable<CodegenApi.CodegenTableVO>>,
     default: () => null
+  },
+  columns: {
+    type: Array as unknown as PropType<CodegenApi.CodegenColumnVO[]>,
+    default: () => null
   }
 })
 
@@ -323,9 +347,10 @@ const formData = ref({
   treeParentCode: '',
   treeName: '',
   tplCategory: '',
-  subTableName: '',
-  subTableFkName: '',
-  genType: ''
+  genType: '',
+  masterTableId: undefined,
+  subJoinColumnId: undefined,
+  subJoinMany: undefined
 })
 
 const rules = reactive({
@@ -336,41 +361,27 @@ const rules = reactive({
   businessName: [required],
   businessPackage: [required],
   className: [required],
-  classComment: [required]
+  classComment: [required],
+  masterTableId: [required],
+  subJoinColumnId: [required],
+  subJoinMany: [required]
 })
 
-const tables = ref([])
-const subColumns = ref([])
+const tables = ref([]) // 表定义列表
 const menus = ref<any[]>([])
 const menuTreeProps = {
   label: 'name'
 }
 
-/** 选择子表名触发 */
-const subSelectChange = () => {
-  formData.value.subTableFkName = ''
-}
-
-/** 选择生成模板触发 */
-const tplSelectChange = (value) => {
-  if (value !== 1) {
-    // TODO 芋艿：暂时不考虑支持树形结构
-    message.error(
-      '暂时不考虑支持【树形】和【主子表】的代码生成。原因是：导致 vm 模板过于复杂，不利于胖友二次开发'
-    )
-    return false
-  }
-  if (value !== 'sub') {
-    formData.value.subTableName = ''
-    formData.value.subTableFkName = ''
-  }
-}
-
 watch(
   () => props.table,
-  (table) => {
+  async (table) => {
     if (!table) return
     formData.value = table as any
+    // 加载表列表
+    if (table.dataSourceConfigId >= 0) {
+      tables.value = await CodegenApi.getCodegenTableList(formData.value.dataSourceConfigId)
+    }
   },
   {
     deep: true,
@@ -380,6 +391,7 @@ watch(
 
 onMounted(async () => {
   try {
+    // 加载菜单
     const resp = await MenuApi.getSimpleMenusList()
     menus.value = handleTree(resp)
   } catch {}

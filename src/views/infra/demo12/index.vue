@@ -94,7 +94,14 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      highlight-current-row
+      @current-change="handleCurrentChange"
+    >
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="名字" align="center" prop="name" />
       <el-table-column label="简介" align="center" prop="description" />
@@ -157,6 +164,17 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <Demo12StudentForm ref="formRef" @success="getList" />
+  <!-- 子表的列表 -->
+  <ContentWrap>
+    <el-tabs model-value="demo12StudentContact">
+      <el-tab-pane label="学生联系人" name="demo12StudentContact">
+        <Demo12StudentContactList :student-id="currentRow.id" />
+      </el-tab-pane>
+      <el-tab-pane label="学生班主任" name="demo12StudentTeacher">
+        <Demo12StudentTeacherList :student-id="currentRow.id" />
+      </el-tab-pane>
+    </el-tabs>
+  </ContentWrap>
 </template>
 
 <script setup lang="ts">
@@ -165,6 +183,8 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as Demo12StudentApi from '@/api/infra/demo12'
 import Demo12StudentForm from './Demo12StudentForm.vue'
+import Demo12StudentContactList from './components/Demo12StudentContactList.vue'
+import Demo12StudentTeacherList from './components/Demo12StudentTeacherList.vue'
 
 defineOptions({ name: 'InfraDemo12Student' })
 
@@ -243,6 +263,12 @@ const handleExport = async () => {
   } finally {
     exportLoading.value = false
   }
+}
+
+/** 选中行操作 */
+const currentRow = ref({}) // 选中行
+const handleCurrentChange = (row) => {
+  currentRow.value = row
 }
 
 /** 初始化 **/

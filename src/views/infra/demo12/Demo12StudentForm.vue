@@ -42,7 +42,7 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="头像">
+      <el-form-item label="头像" prop="avatar">
         <UploadImg v-model="formData.avatar" />
       </el-form-item>
       <el-form-item label="附件" prop="video">
