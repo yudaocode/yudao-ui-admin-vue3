@@ -17,8 +17,8 @@ defineProps<{ property: ImageBarProperty }>()
 <style scoped lang="scss">
 /* 图片 */
 img {
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
 }
 </style>

@@ -337,28 +337,33 @@ onMounted(() => setDefaultSelectedComponent())
 /* 手机宽度 */
 $phone-width: 375px;
 $toolbar-height: 42px;
+
 /* 根节点样式 */
 .editor {
+  display: flex;
   height: 100%;
   margin: calc(0px - var(--app-content-padding));
-  display: flex;
   flex-direction: column;
+
   /* 顶部：工具栏 */
   .editor-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
     height: $toolbar-height;
     padding: 0;
-    border-bottom: solid 1px var(--el-border-color);
     background-color: var(--el-bg-color);
+    border-bottom: solid 1px var(--el-border-color);
+    align-items: center;
+    justify-content: space-between;
+
     /* 工具栏：右侧按钮 */
     .header-right {
       height: 100%;
+
       .el-button {
         height: 100%;
       }
     }
+
     /* 隐藏工具栏按钮的边框 */
     :deep(.el-radio-button__inner),
     :deep(.el-button) {
@@ -367,33 +372,40 @@ $toolbar-height: 42px;
       border-radius: 0 !important;
     }
   }
+
   /* 中心操作区 */
   .editor-container {
     height: calc(
       100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) -
         $toolbar-height
     );
+
     /* 右侧属性面板 */
     .editor-right {
-      flex-shrink: 0;
-      box-shadow: -8px 0 8px -8px rgba(0, 0, 0, 0.12);
       overflow: hidden;
+      box-shadow: -8px 0 8px -8px rgb(0 0 0 / 12%);
+      flex-shrink: 0;
+
       /* 属性面板顶部：减少内边距 */
       :deep(.el-card__header) {
         padding: 8px 16px;
       }
+
       /* 属性面板分组 */
       :deep(.property-group) {
         margin: 0 -20px;
+
         &.el-card {
           border: none;
         }
+
         /* 属性分组名称 */
         .el-card__header {
-          border: none;
-          background: var(--el-bg-color-page);
           padding: 8px 32px;
+          background: var(--el-bg-color-page);
+          border: none;
         }
+
         .el-card__body {
           border: none;
         }
@@ -403,33 +415,36 @@ $toolbar-height: 42px;
     /* 中心区域 */
     .editor-center {
       position: relative;
-      flex: 1 1 0;
-      background-color: var(--app-content-bg-color);
       display: flex;
+      width: 100%;
+      margin: 16px 0 0;
+      overflow: hidden;
+      background-color: var(--app-content-bg-color);
+      flex: 1 1 0;
       flex-direction: column;
       justify-content: center;
-      margin: 16px 0 0 0;
-      overflow: hidden;
-      width: 100%;
 
       /* 手机顶部 */
       .editor-design-top {
+        display: flex;
         width: $phone-width;
         margin: 0 auto;
-        display: flex;
         flex-direction: column;
+
         /* 手机顶部状态栏 */
         .status-bar {
-          height: 20px;
           width: $phone-width;
+          height: 20px;
           background-color: #fff;
         }
       }
+
       /* 手机底部导航 */
       .editor-design-bottom {
         width: $phone-width;
         margin: 0 auto;
       }
+
       /* 手机页面编辑区域 */
       :deep(.editor-design-center) {
         width: 100%;
@@ -437,14 +452,15 @@ $toolbar-height: 42px;
         /* 主体内容 */
         .phone-container {
           position: relative;
+          width: $phone-width;
+          height: 100%;
+          margin: 0 auto;
           background-repeat: no-repeat;
           background-size: 100% 100%;
-          height: 100%;
-          width: $phone-width;
-          margin: 0 auto;
+
           .drag-area {
-            height: 100%;
             width: 100%;
+            height: 100%;
           }
         }
       }

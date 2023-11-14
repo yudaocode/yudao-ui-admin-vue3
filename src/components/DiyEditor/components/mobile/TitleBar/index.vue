@@ -56,23 +56,23 @@ defineProps<{ property: TitleBarProperty }>()
 </script>
 <style scoped lang="scss">
 .title-bar {
+  position: relative;
+  width: 100%;
+  min-height: 20px;
+  padding: 8px 16px;
   border: 2px solid #fff;
   box-sizing: border-box;
-  width: 100%;
-  padding: 8px 16px;
-  min-height: 20px;
-  position: relative;
 
   /* 更多 */
   .more {
     position: absolute;
-    right: 8px;
     top: 0;
+    right: 8px;
     bottom: 0;
+    display: flex;
     margin: auto;
     font-size: 10px;
     color: #969799;
-    display: flex;
     align-items: center;
     justify-content: center;
   }

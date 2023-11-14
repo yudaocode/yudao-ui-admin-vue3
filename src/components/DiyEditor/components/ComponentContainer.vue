@@ -126,93 +126,106 @@ $active-border-width: 2px;
 $hover-border-width: 1px;
 $name-position: -85px;
 $toolbar-position: -55px;
+
 /* 组件 */
 .component {
   position: relative;
   cursor: move;
+
   .component-wrap {
-    display: block;
     position: absolute;
-    left: -$active-border-width;
     top: 0;
+    left: -$active-border-width;
+    display: block;
     width: 100%;
     height: 100%;
+
     /* 鼠标放到组件上时 */
     &:hover {
       border: $hover-border-width dashed var(--el-color-primary);
-      box-shadow: 0 0 5px 0 rgba(24, 144, 255, 0.3);
+      box-shadow: 0 0 5px 0 rgb(24 144 255 / 30%);
+
       .component-name {
+        top: $hover-border-width;
+
         /* 防止加了边框之后，位置移动 */
         left: $name-position - $hover-border-width;
-        top: $hover-border-width;
       }
     }
+
     /* 左侧：组件名称 */
     .component-name {
-      display: block;
       position: absolute;
-      width: 80px;
-      text-align: center;
-      line-height: 25px;
-      height: 25px;
-      background: #fff;
-      font-size: 12px;
-      left: $name-position;
       top: $active-border-width;
+      left: $name-position;
+      display: block;
+      width: 80px;
+      height: 25px;
+      font-size: 12px;
+      line-height: 25px;
+      text-align: center;
+      background: #fff;
       box-shadow:
         0 0 4px #00000014,
         0 2px 6px #0000000f,
         0 4px 8px 2px #0000000a;
+
       /* 右侧小三角 */
-      &:after {
+      &::after {
         position: absolute;
         top: 7.5px;
         right: -10px;
-        content: ' ';
-        height: 0;
         width: 0;
+        height: 0;
         border: 5px solid transparent;
         border-left-color: #fff;
+        content: ' ';
       }
     }
+
     /* 右侧：组件操作工具栏 */
     .component-toolbar {
-      display: none;
       position: absolute;
       top: 0;
       right: $toolbar-position;
+      display: none;
+
       /* 左侧小三角 */
-      &:before {
+      &::before {
         position: absolute;
         top: 10px;
         left: -10px;
-        content: ' ';
-        height: 0;
         width: 0;
+        height: 0;
         border: 5px solid transparent;
         border-right-color: #2d8cf0;
+        content: ' ';
       }
     }
   }
+
   /* 组件选中时 */
   &.active {
     margin-bottom: 4px;
 
     .component-wrap {
-      border: $active-border-width solid var(--el-color-primary) !important;
-      box-shadow: 0 0 10px 0 rgba(24, 144, 255, 0.3);
       margin-bottom: $active-border-width + $active-border-width;
+      border: $active-border-width solid var(--el-color-primary) !important;
+      box-shadow: 0 0 10px 0 rgb(24 144 255 / 30%);
 
       .component-name {
-        background: var(--el-color-primary);
-        color: #fff;
+        top: 0 !important;
+
         /* 防止加了边框之后，位置移动 */
         left: $name-position - $active-border-width !important;
-        top: 0 !important;
-        &:after {
+        color: #fff;
+        background: var(--el-color-primary);
+
+        &::after {
           border-left-color: var(--el-color-primary);
         }
       }
+
       .component-toolbar {
         display: block;
       }

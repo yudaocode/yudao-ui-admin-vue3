@@ -30,8 +30,9 @@ defineProps<{ property: TabBarProperty }>()
 </script>
 <style lang="scss" scoped>
 .tab-bar {
-  width: 100%;
   z-index: 2;
+  width: 100%;
+
   .tab-bar-bg {
     display: flex;
     flex-direction: row;
@@ -41,11 +42,11 @@ defineProps<{ property: TabBarProperty }>()
 
     .tab-bar-item {
       display: flex;
+      width: 100%;
+      font-size: 12px;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
-      width: 100%;
 
       img {
         width: 26px;

@@ -90,23 +90,26 @@ const handleCloneComponent = (component: DiyComponent<any>) => {
 .editor-left {
   z-index: 1;
   flex-shrink: 0;
-  box-shadow: 8px 0 8px -8px rgba(0, 0, 0, 0.12);
+  box-shadow: 8px 0 8px -8px rgb(0 0 0 / 12%);
 
   :deep(.el-collapse) {
     border-top: none;
   }
+
   :deep(.el-collapse-item__wrap) {
     border-bottom: none;
   }
+
   :deep(.el-collapse-item__content) {
     padding-bottom: 0;
   }
+
   :deep(.el-collapse-item__header) {
-    border-bottom: none;
-    background-color: var(--el-bg-color-page);
-    padding: 0 24px;
     height: 32px;
+    padding: 0 24px;
     line-height: 32px;
+    background-color: var(--el-bg-color-page);
+    border-bottom: none;
   }
 
   .component-container {
@@ -116,25 +119,26 @@ const handleCloneComponent = (component: DiyComponent<any>) => {
   }
 
   .component {
+    display: flex;
     width: 86px;
     height: 86px;
-    display: flex;
+    cursor: move;
+    border-right: 1px solid var(--el-border-color-lighter);
+    border-bottom: 1px solid var(--el-border-color-lighter);
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    border-right: 1px solid var(--el-border-color-lighter);
-    border-bottom: 1px solid var(--el-border-color-lighter);
-    cursor: move;
 
     .el-icon {
       margin-bottom: 4px;
       color: gray;
     }
   }
+
   .component.active,
   .component:hover {
-    background: var(--el-color-primary);
     color: var(--el-color-white);
+    background: var(--el-color-primary);
 
     .el-icon {
       color: var(--el-color-white);
@@ -155,11 +159,10 @@ const handleCloneComponent = (component: DiyComponent<any>) => {
 .drag-area {
   /* 拖拽到手机区域时的样式 */
   .draggable-ghost {
+    display: flex;
     width: 100%;
     height: 40px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+
     /* 条纹背景 */
     background: linear-gradient(
       45deg,
@@ -174,20 +177,25 @@ const handleCloneComponent = (component: DiyComponent<any>) => {
     );
     background-size: 1rem 1rem;
     transition: all 0.5s;
+    justify-content: center;
+    align-items: center;
+
     span {
-      color: #fff;
       display: inline-block;
       width: 140px;
       height: 25px;
       font-size: 12px;
-      text-align: center;
       line-height: 25px;
+      color: #fff;
+      text-align: center;
       background: #5487df;
     }
+
     /* 拖拽时隐藏组件 */
     .component {
       display: none;
     }
+
     /* 拖拽时显示占位提示 */
     .drag-placement {
       display: block;
