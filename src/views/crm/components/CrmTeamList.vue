@@ -28,7 +28,11 @@
     <el-table-column align="center" label="姓名" prop="nickname" />
     <el-table-column align="center" label="部门" prop="deptName" />
     <el-table-column align="center" label="岗位" prop="postNames" />
-    <el-table-column align="center" label="权限级别" prop="level" />
+    <el-table-column align="center" label="权限级别" prop="level">
+      <template #default="{ row }">
+        <el-tag>{{ getLevelName(row.level) }}</el-tag>
+      </template>
+    </el-table-column>
     <el-table-column :formatter="dateFormatter" align="center" label="加入时间" prop="createTime" />
   </el-table>
   <CrmPermissionForm ref="crmPermissionFormRef" />
@@ -47,7 +51,20 @@ const props = defineProps<{
   bizId: number
 }>()
 const loading = ref(true) // 列表的加载中
-const list = ref<PermissionApi.PermissionVO[]>([]) // 列表的数据
+const list = ref<PermissionApi.PermissionVO[]>([
+  // TODO 测试数据
+  {
+    id: 1, // 数据权限编号
+    userId: 1, // 用户编号
+    bizType: 1, // Crm 类型
+    bizId: 1, // Crm 类型数据编号
+    level: 1, // 权限级别
+    deptName: '研发部门', // 部门名称
+    nickname: '芋道源码', // 用户昵称
+    postNames: '全栈开发工程师', // 岗位名称数组
+    createTime: new Date()
+  }
+]) // 列表的数据
 const getList = async () => {
   loading.value = true
   try {
@@ -60,7 +77,22 @@ const getList = async () => {
     loading.value = false
   }
 }
-
+/**
+ * 获得权限级别名称
+ * @param level 权限级别
+ */
+const getLevelName = computed(() => (level: number) => {
+  switch (level) {
+    case CrmPermissionLevelEnum.OWNER:
+      return '负责人'
+    case CrmPermissionLevelEnum.READ:
+      return '只读'
+    case CrmPermissionLevelEnum.WRITE:
+      return '读写'
+    default:
+      break
+  }
+})
 const multipleSelection = ref<PermissionApi.PermissionVO[]>([])
 const handleSelectionChange = (val: PermissionApi.PermissionVO[]) => {
   multipleSelection.value = val

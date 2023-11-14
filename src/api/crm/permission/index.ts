@@ -9,6 +9,7 @@ export interface PermissionVO {
   deptName?: string // 部门名称
   nickname?: string // 用户昵称
   postNames?: string // 岗位名称数组
+  createTime?: Date
 }
 
 // 查询团队成员列表
