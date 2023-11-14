@@ -78,7 +78,6 @@ const handleTemplateItemChange = () => {
   currentFormData.value = formData.value!.pages.find(
     (page: DiyPageApi.DiyPageVO) => page.name === templateItems[selectedTemplateItem.value].name
   )
-  console.log(currentFormData.value)
 }
 
 // 提交表单

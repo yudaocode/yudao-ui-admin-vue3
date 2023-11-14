@@ -135,8 +135,11 @@ $toolbar-position: -55px;
     position: relative;
     z-index: 1;
   }
+  /* 用于包裹组件，为组件提供 组件名称、工具栏、边框等样式 */
   .component-wrap {
     z-index: 0;
+    // 不可以被点击
+    // component-wrap会遮挡组件，导致组件不能触发鼠标事件，所以这里要先禁用，然后在组件名称、工具栏上开启。
     pointer-events: none;
     display: block;
     position: absolute;
@@ -146,6 +149,8 @@ $toolbar-position: -55px;
     height: 100%;
     /* 左侧：组件名称 */
     .component-name {
+      // 可以被点击
+      pointer-events: auto;
       display: block;
       position: absolute;
       width: 80px;
@@ -174,6 +179,8 @@ $toolbar-position: -55px;
     }
     /* 右侧：组件操作工具栏 */
     .component-toolbar {
+      // 可以被点击
+      pointer-events: auto;
       display: none;
       position: absolute;
       top: 0;
