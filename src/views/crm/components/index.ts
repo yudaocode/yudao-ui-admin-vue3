@@ -8,4 +8,10 @@ enum CrmBizTypeEnum {
   CRM_CONTRACT = 6 // 合同
 }
 
-export { CrmTeam, CrmBizTypeEnum }
+enum CrmPermissionLevelEnum {
+  OWNER = 1, // 负责人
+  READ = 2, // 读
+  WRITE = 3 // 写
+}
+
+export { CrmTeam, CrmBizTypeEnum, CrmPermissionLevelEnum }

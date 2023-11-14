@@ -25,10 +25,10 @@
     @selection-change="handleSelectionChange"
   >
     <el-table-column type="selection" width="55" />
-    <el-table-column align="center" label="姓名" prop="mobile" />
-    <el-table-column align="center" label="部门" prop="detailAddress" />
-    <el-table-column align="center" label="岗位" prop="detailAddress" />
-    <el-table-column align="center" label="权限级别" prop="creatorName" />
+    <el-table-column align="center" label="姓名" prop="nickname" />
+    <el-table-column align="center" label="部门" prop="deptName" />
+    <el-table-column align="center" label="岗位" prop="postNames" />
+    <el-table-column align="center" label="权限级别" prop="level" />
     <el-table-column :formatter="dateFormatter" align="center" label="加入时间" prop="createTime" />
   </el-table>
   <CrmPermissionForm ref="crmPermissionFormRef" />
@@ -39,6 +39,7 @@ import { ElTable } from 'element-plus'
 import * as PermissionApi from '@/api/crm/permission'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import CrmPermissionForm from './CrmPermissionForm.vue'
+import { CrmPermissionLevelEnum } from './index'
 
 defineOptions({ name: 'CrmTeam' })
 const props = defineProps<{
@@ -65,14 +66,14 @@ const handleSelectionChange = (val: PermissionApi.PermissionVO[]) => {
   multipleSelection.value = val
 }
 const message = useMessage()
-const crmPermissionFormRef = ref<InstanceType<typeof CrmPermissionForm | null>>(null)
+const crmPermissionFormRef = ref<InstanceType<typeof CrmPermissionForm>>()
 const handleEdit = () => {
   if (multipleSelection.value?.length === 0) {
     message.warning('请先选择团队成员后操作！')
     return
   }
   const ids = multipleSelection.value?.map((item) => item.id)
-  crmPermissionFormRef.value?.open('update', props.bizType, props.bizId, ids[0])
+  crmPermissionFormRef.value?.open('update', props.bizType, props.bizId, ids)
 }
 const handleRemove = async () => {
   if (multipleSelection.value?.length === 0) {
@@ -81,13 +82,10 @@ const handleRemove = async () => {
   }
   await message.delConfirm()
   const ids = multipleSelection.value?.map((item) => item.id)
-  ids?.forEach((id) => {
-    // TODO 还不确定要不要搞个批量删除，还是一次只能删除一个，先用循环弄一下
-    PermissionApi.deletePermission({
-      bizType: props.bizType,
-      bizId: props.bizId,
-      id
-    })
+  await PermissionApi.deletePermission({
+    bizType: props.bizType,
+    bizId: props.bizId,
+    ids
   })
 }
 const handleAdd = () => {
@@ -95,14 +93,16 @@ const handleAdd = () => {
 }
 
 const userStore = useUserStoreWithOut()
-const handleQuit = () => {
+const handleQuit = async () => {
   const permission = list.value.find(
-    (item) => item.userId === userStore.getUser.id && item.level === 1
+    (item) => item.userId === userStore.getUser.id && item.level === CrmPermissionLevelEnum.OWNER
   )
   if (permission) {
     message.warning('负责人不能退出团队！')
     return
   }
+  const userPermission = list.value.find((item) => item.userId === userStore.getUser.id)
+  await PermissionApi.quitTeam(userPermission?.id)
 }
 
 watch(
@@ -113,4 +113,3 @@ watch(
   { immediate: true, deep: true }
 )
 </script>
-<style lang="scss" scoped></style>
