@@ -182,50 +182,33 @@
       </el-col>
     </el-row>
 
-    <el-row v-show="formData.tplCategory === 'tree'">
-      <h4 class="form-header">其他信息</h4>
-      <el-col :span="12">
-        <el-form-item>
-          <template #label>
-            <span>
-              树编码字段
-              <el-tooltip content="树显示的编码字段名， 如：dept_id" placement="top">
-                <Icon icon="ep:question-filled" />
-              </el-tooltip>
-            </span>
-          </template>
-          <el-select v-model="formData.treeCode" placeholder="请选择">
-            <el-option
-              v-for="(column, index) in formData.columns"
-              :key="index"
-              :label="column.columnName + '：' + column.columnComment"
-              :value="column.columnName"
-            />
-          </el-select>
-        </el-form-item>
+    <!-- 树表信息 -->
+    <el-row v-show="formData.templateType == 2">
+      <el-col :span="24">
+        <h4 class="form-header">树表信息</h4>
       </el-col>
       <el-col :span="12">
-        <el-form-item>
+        <el-form-item prop="treeParentColumnId">
           <template #label>
             <span>
-              树父编码字段
+              父编号字段
               <el-tooltip content="树显示的父编码字段名， 如：parent_Id" placement="top">
                 <Icon icon="ep:question-filled" />
               </el-tooltip>
             </span>
           </template>
-          <el-select v-model="formData.treeParentCode" placeholder="请选择">
+          <el-select v-model="formData.treeParentColumnId" placeholder="请选择">
             <el-option
-              v-for="(column, index) in formData.columns"
+              v-for="(column, index) in props.columns"
               :key="index"
               :label="column.columnName + '：' + column.columnComment"
-              :value="column.columnName"
+              :value="column.id"
             />
           </el-select>
         </el-form-item>
       </el-col>
       <el-col :span="12">
-        <el-form-item>
+        <el-form-item prop="treeNameColumnId">
           <template #label>
             <span>
               树名称字段
@@ -234,13 +217,12 @@
               </el-tooltip>
             </span>
           </template>
-
-          <el-select v-model="formData.treeName" placeholder="请选择">
+          <el-select v-model="formData.treeNameColumnId" placeholder="请选择">
             <el-option
-              v-for="(column, index) in formData.columns"
+              v-for="(column, index) in props.columns"
               :key="index"
               :label="column.columnName + '：' + column.columnComment"
-              :value="column.columnName"
+              :value="column.id"
             />
           </el-select>
         </el-form-item>
@@ -248,7 +230,7 @@
     </el-row>
 
     <!-- 主表信息 -->
-    <el-row v-if="formData.templateType === 15">
+    <el-row v-if="formData.templateType == 15">
       <el-col :span="24">
         <h4 class="form-header">主表信息</h4>
       </el-col>
@@ -343,14 +325,12 @@ const formData = ref({
   classComment: '',
   parentMenuId: null,
   genPath: '',
-  treeCode: '',
-  treeParentCode: '',
-  treeName: '',
-  tplCategory: '',
   genType: '',
   masterTableId: undefined,
   subJoinColumnId: undefined,
-  subJoinMany: undefined
+  subJoinMany: undefined,
+  treeParentColumnId: undefined,
+  treeNameColumnId: undefined
 })
 
 const rules = reactive({
@@ -364,7 +344,9 @@ const rules = reactive({
   classComment: [required],
   masterTableId: [required],
   subJoinColumnId: [required],
-  subJoinMany: [required]
+  subJoinMany: [required],
+  treeParentColumnId: [required],
+  treeNameColumnId: [required]
 })
 
 const tables = ref([]) // 表定义列表
