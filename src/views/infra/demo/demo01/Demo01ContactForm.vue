@@ -10,31 +10,10 @@
       <el-form-item label="名字" prop="name">
         <el-input v-model="formData.name" placeholder="请输入名字" />
       </el-form-item>
-      <el-form-item label="简介" prop="description">
-        <el-input v-model="formData.description" type="textarea" placeholder="请输入简介" />
-      </el-form-item>
-      <el-form-item label="出生日期" prop="birthday">
-        <el-date-picker
-          v-model="formData.birthday"
-          type="date"
-          value-format="x"
-          placeholder="选择出生日期"
-        />
-      </el-form-item>
       <el-form-item label="性别" prop="sex">
-        <el-select v-model="formData.sex" placeholder="请选择性别">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="是否有效" prop="enabled">
-        <el-radio-group v-model="formData.enabled">
+        <el-radio-group v-model="formData.sex">
           <el-radio
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
             :key="dict.value"
             :label="dict.value"
           >
@@ -42,14 +21,19 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="头像">
+      <el-form-item label="出生年" prop="birthday">
+        <el-date-picker
+          v-model="formData.birthday"
+          type="date"
+          value-format="x"
+          placeholder="选择出生年"
+        />
+      </el-form-item>
+      <el-form-item label="简介" prop="description">
+        <Editor v-model="formData.description" height="150px" />
+      </el-form-item>
+      <el-form-item label="头像" prop="avatar">
         <UploadImg v-model="formData.avatar" />
-      </el-form-item>
-      <el-form-item label="附件" prop="video">
-        <UploadFile v-model="formData.video" />
-      </el-form-item>
-      <el-form-item label="备注" prop="memo">
-        <Editor v-model="formData.memo" height="150px" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -59,8 +43,8 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { getIntDictOptions, getStrDictOptions, getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
-import * as Demo01StudentApi from '@/api/infra/demo01'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import * as Demo01ContactApi from '@/api/infra/demo/demo01'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -72,21 +56,16 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   name: undefined,
-  description: undefined,
-  birthday: undefined,
   sex: undefined,
-  enabled: undefined,
-  avatar: undefined,
-  video: undefined,
-  memo: undefined
+  birthday: undefined,
+  description: undefined,
+  avatar: undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '名字不能为空', trigger: 'blur' }],
-  birthday: [{ required: true, message: '出生日期不能为空', trigger: 'blur' }],
-  sex: [{ required: true, message: '性别不能为空', trigger: 'change' }],
-  enabled: [{ required: true, message: '是否有效不能为空', trigger: 'blur' }],
-  avatar: [{ required: true, message: '头像不能为空', trigger: 'blur' }],
-  memo: [{ required: true, message: '备注不能为空', trigger: 'blur' }]
+  sex: [{ required: true, message: '性别不能为空', trigger: 'blur' }],
+  birthday: [{ required: true, message: '出生年不能为空', trigger: 'blur' }],
+  description: [{ required: true, message: '简介不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -100,7 +79,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await Demo01StudentApi.getDemo01Student(id)
+      formData.value = await Demo01ContactApi.getDemo01Contact(id)
     } finally {
       formLoading.value = false
     }
@@ -116,12 +95,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as Demo01StudentApi.Demo01StudentVO
+    const data = formData.value as unknown as Demo01ContactApi.Demo01ContactVO
     if (formType.value === 'create') {
-      await Demo01StudentApi.createDemo01Student(data)
+      await Demo01ContactApi.createDemo01Contact(data)
       message.success(t('common.createSuccess'))
     } else {
-      await Demo01StudentApi.updateDemo01Student(data)
+      await Demo01ContactApi.updateDemo01Contact(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -137,13 +116,10 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: undefined,
-    description: undefined,
-    birthday: undefined,
     sex: undefined,
-    enabled: undefined,
-    avatar: undefined,
-    video: undefined,
-    memo: undefined
+    birthday: undefined,
+    description: undefined,
+    avatar: undefined
   }
   formRef.value?.resetFields()
 }
