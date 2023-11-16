@@ -17,16 +17,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="出生日期" prop="birthday">
-        <el-date-picker
-          v-model="queryParams.birthday"
-          value-format="YYYY-MM-DD"
-          type="date"
-          placeholder="选择出生日期"
-          clearable
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="性别" prop="sex">
         <el-select
           v-model="queryParams.sex"
@@ -36,21 +26,6 @@
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="是否有效" prop="enabled">
-        <el-select
-          v-model="queryParams.enabled"
-          placeholder="请选择是否有效"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -75,7 +50,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['infra:demo11-student:create']"
+          v-hasPermi="['infra:demo03-student:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -84,7 +59,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['infra:demo11-student:export']"
+          v-hasPermi="['infra:demo03-student:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -95,9 +70,26 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <!-- 子表的列表 -->
+      <el-table-column type="expand">
+        <template #default="scope">
+          <el-tabs model-value="demo03Course">
+            <el-tab-pane label="学生课程" name="demo03Course">
+              <Demo03CourseList :student-id="scope.row.id" />
+            </el-tab-pane>
+            <el-tab-pane label="学生班级" name="demo03Grade">
+              <Demo03GradeList :student-id="scope.row.id" />
+            </el-tab-pane>
+          </el-tabs>
+        </template>
+      </el-table-column>
       <el-table-column label="编号" align="center" prop="id" />
       <el-table-column label="名字" align="center" prop="name" />
-      <el-table-column label="简介" align="center" prop="description" />
+      <el-table-column label="性别" align="center" prop="sex">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="scope.row.sex" />
+        </template>
+      </el-table-column>
       <el-table-column
         label="出生日期"
         align="center"
@@ -105,19 +97,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="性别" align="center" prop="sex">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="scope.row.sex" />
-        </template>
-      </el-table-column>
-      <el-table-column label="是否有效" align="center" prop="enabled">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.enabled" />
-        </template>
-      </el-table-column>
-      <el-table-column label="头像" align="center" prop="avatar" />
-      <el-table-column label="附件" align="center" prop="video" />
-      <el-table-column label="备注" align="center" prop="memo" />
+      <el-table-column label="简介" align="center" prop="description" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -131,7 +111,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['infra:demo11-student:update']"
+            v-hasPermi="['infra:demo03-student:update']"
           >
             编辑
           </el-button>
@@ -139,7 +119,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['infra:demo11-student:delete']"
+            v-hasPermi="['infra:demo03-student:delete']"
           >
             删除
           </el-button>
@@ -156,32 +136,32 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <Demo11StudentForm ref="formRef" @success="getList" />
+  <Demo03StudentForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
-import { getIntDictOptions, getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as Demo11StudentApi from '@/api/infra/demo11'
-import Demo11StudentForm from './Demo11StudentForm.vue'
+import * as Demo03StudentApi from '@/api/infra/demo/demo03/inner'
+import Demo03StudentForm from './Demo03StudentForm.vue'
+import Demo03CourseList from './components/Demo03CourseList.vue'
+import Demo03GradeList from './components/Demo03GradeList.vue'
 
-defineOptions({ name: 'InfraDemo11Student' })
+defineOptions({ name: 'Demo03Student' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: null,
-  birthday: null,
-  birthday: [],
   sex: null,
-  enabled: null,
+  description: null,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -191,7 +171,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await Demo11StudentApi.getDemo11StudentPage(queryParams)
+    const data = await Demo03StudentApi.getDemo03StudentPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -223,7 +203,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await Demo11StudentApi.deleteDemo11Student(id)
+    await Demo03StudentApi.deleteDemo03Student(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -237,7 +217,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await Demo11StudentApi.exportDemo11Student(queryParams)
+    const data = await Demo03StudentApi.exportDemo03Student(queryParams)
     download.excel(data, '学生.xls')
   } catch {
   } finally {
