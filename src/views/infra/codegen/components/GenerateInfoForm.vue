@@ -183,7 +183,7 @@
     </el-row>
 
     <!-- 树表信息 -->
-    <el-row v-show="formData.templateType == 2">
+    <el-row v-if="formData.templateType == 2">
       <el-col :span="24">
         <h4 class="form-header">树表信息</h4>
       </el-col>
