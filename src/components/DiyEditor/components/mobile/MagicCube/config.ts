@@ -33,7 +33,7 @@ export interface MagicCubeItemProperty {
 export const component = {
   id: 'MagicCube',
   name: '广告魔方',
-  icon: 'fluent:puzzle-cube-piece-20-filled',
+  icon: 'bi:columns',
   property: {
     borderRadiusTop: 0,
     borderRadiusBottom: 0,
