@@ -35,22 +35,25 @@ defineProps<{ property: NavigationBarProperty }>()
 </script>
 <style lang="scss" scoped>
 .navigation-bar {
+  display: flex;
   height: 35px;
   background: #fff;
-  display: flex;
   justify-content: space-between;
   align-items: center;
+
   /* 左边 */
   .left {
     margin-left: 8px;
   }
+
   .center {
-    flex: 1;
-    text-align: center;
     font-size: 14px;
     line-height: 35px;
-    color: #333333;
+    color: #333;
+    text-align: center;
+    flex: 1;
   }
+
   /* 右边 */
   .right {
     margin-right: 8px;

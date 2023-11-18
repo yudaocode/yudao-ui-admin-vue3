@@ -88,8 +88,8 @@ onMounted(() => {
 }
 
 .message-list {
-  height: 400px;
   display: flex;
+  height: 400px;
   flex-direction: column;
 
   .message-item {

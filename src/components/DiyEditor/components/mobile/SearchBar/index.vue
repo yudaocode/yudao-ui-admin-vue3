@@ -45,21 +45,21 @@ defineProps<{ property: SearchProperty }>()
   /* 搜索框 */
   .inner {
     position: relative;
-    min-height: 28px;
     display: flex;
-    align-items: center;
+    min-height: 28px;
     font-size: 14px;
+    align-items: center;
 
     .placeholder {
       display: flex;
-      align-items: center;
       width: 100%;
       padding: 0 8px;
-      gap: 2px;
-      text-overflow: ellipsis;
       overflow: hidden;
+      text-overflow: ellipsis;
       word-break: break-all;
       white-space: nowrap;
+      align-items: center;
+      gap: 2px;
     }
 
     .right {

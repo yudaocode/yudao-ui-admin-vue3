@@ -20,8 +20,8 @@
             ref="treeRef"
             :data="preview.fileTree"
             :expand-on-click-node="false"
-            highlight-current
             default-expand-all
+            highlight-current
             node-key="id"
             @node-click="handleNodeClick"
           />

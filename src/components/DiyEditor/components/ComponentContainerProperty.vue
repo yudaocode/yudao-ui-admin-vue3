@@ -157,6 +157,7 @@ const handleSliderChange = (prop: string) => {
 :deep(.el-slider__runway) {
   margin-right: 16px;
 }
+
 :deep(.el-input-number) {
   width: 50px;
 }

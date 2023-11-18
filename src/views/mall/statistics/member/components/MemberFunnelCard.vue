@@ -110,9 +110,11 @@ const handleTimeRangeChange = async (times: [dayjs.ConfigType, dayjs.ConfigType]
 .trapezoid1 {
   transform: perspective(5em) rotateX(-11deg);
 }
+
 .trapezoid2 {
   transform: perspective(7em) rotateX(-20deg);
 }
+
 .trapezoid3 {
   transform: perspective(3em) rotateX(-13deg);
 }
