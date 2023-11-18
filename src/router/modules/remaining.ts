@@ -503,6 +503,16 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true
         },
         component: () => import('@/views/crm/customer/detail/index.vue')
+      },
+      {
+        path: 'contact/detail/:id',
+        name: 'CrmContactDetail',
+        meta: {
+          title: '联系人详情',
+          noCache: true,
+          hidden: true
+        },
+        component: () => import('@/views/crm/contact/detail/index.vue')
       }
     ]
   }
