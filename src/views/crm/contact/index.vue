@@ -1,6 +1,7 @@
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
+    <!-- TODO zyna：筛选项，按照需求简化下 -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -214,6 +215,7 @@ import * as UserApi from '@/api/system/user'
 import * as CustomerApi from '@/api/crm/customer'
 
 defineOptions({ name: 'CrmContact' })
+
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
@@ -244,6 +246,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const userList = ref<UserApi.UserVO[]>([]) // 用户列表
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -301,6 +304,8 @@ const handleExport = async () => {
     exportLoading.value = false
   }
 }
+
+// TODO @zyna：这个负责人的读取，放在后端好点
 const gotOwnerUser = (owerUserId: string) => {
   let ownerName = ''
   if (owerUserId !== null) {
@@ -315,13 +320,14 @@ const gotOwnerUser = (owerUserId: string) => {
   }
   return ownerName
 }
-/** 详情页面 */
+
 /** 打开客户详情 */
 const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmContactDetail', params: { id } })
 }
 
+// TODO @zyna：这个上级的读取，放在后端读取，更合适；因为可能数据量比较大
 const allContactList = ref([]) //所有联系人列表
 const allCustomerList = ref([]) //客户列表
 /** 初始化 **/

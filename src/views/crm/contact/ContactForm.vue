@@ -28,6 +28,7 @@
           />
         </el-select>
       </el-form-item>
+      <!-- TODO 芋艿：封装成一个组件 -->
       <el-form-item label="客户名称" prop="customerName">
         <el-popover
           placement="bottom"
@@ -89,7 +90,6 @@
           />
         </el-select>
       </el-form-item>
-
       <el-form-item label="手机号" prop="mobile">
         <el-input v-model="formData.mobile" placeholder="请输入手机号" />
       </el-form-item>
@@ -212,6 +212,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const ownerUserList = ref<any[]>([])
 const userList = ref<UserApi.UserVO[]>([]) // 用户列表
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -231,6 +232,8 @@ const open = async (type: string, id?: number) => {
     }
   }
 }
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -242,7 +245,7 @@ const getList = async () => {
     loading.value = false
   }
 }
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
 const gotOwnerUser = (owerUserId: any) => {
   if (owerUserId !== null) {
     owerUserId.split(',').forEach((item: string) => {
@@ -254,6 +257,7 @@ const gotOwnerUser = (owerUserId: any) => {
     })
   }
 }
+
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
@@ -305,12 +309,13 @@ const resetForm = () => {
   formRef.value?.resetFields()
   ownerUserList.value = []
 }
+
 /** 添加/修改操作 */
+// TODO @zyna：owner？拼写要注意哈；
 const owerRef = ref()
 const openOwerForm = (type: string) => {
   owerRef.value.open(type, ownerUserList.value)
 }
-
 const owerSelectValue = (value) => {
   ownerUserList.value = value.value
   formData.value.ownerUserId = undefined
@@ -322,7 +327,7 @@ const owerSelectValue = (value) => {
     }
   })
 }
-//选择客户
+// 选择客户
 const showCustomer = ref(false)
 const openCustomerSelect = () => {
   showCustomer.value = !showCustomer.value
@@ -341,7 +346,7 @@ const selectCustomer = () => {
   formData.value.customerName = multipleSelection.value.name
   showCustomer.value = !showCustomer.value
 }
-const allContactList = ref([]) //所有联系人列表
+const allContactList = ref([]) // 所有联系人列表
 onMounted(async () => {
   allContactList.value = await ContactApi.simpleAlllist()
 })
