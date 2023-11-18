@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="代码生成（主子表）" url="https://doc.iocoder.cn/new-feature/master-sub/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -18,12 +20,7 @@
         />
       </el-form-item>
       <el-form-item label="性别" prop="sex">
-        <el-select
-          v-model="queryParams.sex"
-          placeholder="请选择性别"
-          clearable
-          class="!w-240px"
-        >
+        <el-select v-model="queryParams.sex" placeholder="请选择性别" clearable class="!w-240px">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
             :key="dict.value"
