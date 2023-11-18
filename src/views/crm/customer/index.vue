@@ -185,8 +185,8 @@
       @pagination="getList"
     />
   </ContentWrap>
-  <!-- TODO 方便查看效果 -->
-  <CrmTeam :biz-id="1" :biz-type="CrmBizTypeEnum.CRM_CUSTOMER" />
+  <!-- TODO 方便查看效果 TODO 芋艿：先注释了，避免演示环境报错 -->
+  <!--  <CrmTeam :biz-id="1" :biz-type="CrmBizTypeEnum.CRM_CUSTOMER" />-->
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getList" />

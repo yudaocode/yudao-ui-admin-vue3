@@ -38,6 +38,7 @@
   <CrmPermissionForm ref="crmPermissionFormRef" />
 </template>
 <script lang="ts" setup>
+// TODO @puhui999：改成 CrmPermissionList
 import { dateFormatter } from '@/utils/formatTime'
 import { ElTable } from 'element-plus'
 import * as PermissionApi from '@/api/crm/permission'
@@ -46,6 +47,9 @@ import CrmPermissionForm from './CrmPermissionForm.vue'
 import { CrmPermissionLevelEnum } from './index'
 
 defineOptions({ name: 'CrmTeam' })
+
+const message = useMessage() // 消息
+
 const props = defineProps<{
   bizType: number
   bizId: number
@@ -65,18 +69,22 @@ const list = ref<PermissionApi.PermissionVO[]>([
     createTime: new Date()
   }
 ]) // 列表的数据
+
+/** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const res = await PermissionApi.getPermissionList({
+    const data = await PermissionApi.getPermissionList({
       bizType: props.bizType,
       bizId: props.bizId
     })
-    list.value = res
+    list.value = data
   } finally {
     loading.value = false
   }
 }
+
+// TODO @puhui999：字典格式化
 /**
  * 获得权限级别名称
  * @param level 权限级别
@@ -93,11 +101,12 @@ const getLevelName = computed(() => (level: number) => {
       break
   }
 })
+// TODO @puhui999：空行稍微注意下哈；一些注释补齐下；
 const multipleSelection = ref<PermissionApi.PermissionVO[]>([])
 const handleSelectionChange = (val: PermissionApi.PermissionVO[]) => {
   multipleSelection.value = val
 }
-const message = useMessage()
+// TODO @puhui999：一些变量命名，看看有没可能跟列表界面的 index.vue 保持他统一的风格；
 const crmPermissionFormRef = ref<InstanceType<typeof CrmPermissionForm>>()
 const handleEdit = () => {
   if (multipleSelection.value?.length === 0) {

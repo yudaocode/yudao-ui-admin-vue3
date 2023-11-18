@@ -6,9 +6,9 @@ export interface PermissionVO {
   bizType: number | undefined // Crm 类型
   bizId: number | undefined // Crm 类型数据编号
   level: number | undefined // 权限级别
-  deptName?: string // 部门名称
+  deptName?: string // 部门名称 // 岗位名称数组 TODO @puhui999：数组？
   nickname?: string // 用户昵称
-  postNames?: string // 岗位名称数组
+  postNames?: string // 岗位名称数组 TODO @puhui999：数组？
   createTime?: Date
 }
 

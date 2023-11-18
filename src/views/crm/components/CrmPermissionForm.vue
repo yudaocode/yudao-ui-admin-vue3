@@ -19,6 +19,7 @@
       </el-form-item>
       <el-form-item label="权限级别" prop="level">
         <el-radio-group v-model="formData.level">
+          <!-- TODO @puhui999：搞个字典配置？然后这里 remove 掉负责人 -->
           <el-radio :label="CrmPermissionLevelEnum.READ">只读</el-radio>
           <el-radio :label="CrmPermissionLevelEnum.WRITE">读写</el-radio>
         </el-radio-group>
@@ -36,6 +37,7 @@ import * as PermissionApi from '@/api/crm/permission'
 import { CrmPermissionLevelEnum } from './index'
 
 defineOptions({ name: 'CrmPermissionForm' })
+
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -107,6 +109,7 @@ const resetForm = (bizType: number, bizId: number) => {
 }
 onMounted(async () => {
   // 获得用户列表
+  // TODO 芋艿：用户列表的选择组件
   userOptions.value = await UserApi.getSimpleUserList()
 })
 </script>
