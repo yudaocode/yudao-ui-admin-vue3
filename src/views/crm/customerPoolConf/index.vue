@@ -8,6 +8,7 @@
       v-loading="formLoading"
     >
       <el-card shadow="never">
+        <!-- 操作 -->
         <template #header>
           <div class="flex items-center justify-between">
             <CardTitle title="客户公海规则设置" />
@@ -15,11 +16,12 @@
               type="primary"
               @click="onSubmit"
               v-hasPermi="['crm:customer-pool-config:update']"
-              >保存</el-button
             >
+              保存
+            </el-button>
           </div>
         </template>
-
+        <!-- 表单 -->
         <el-form-item label="客户公海规则设置" prop="enabled">
           <el-radio-group v-model="formData.enabled" class="ml-4">
             <el-radio :label="false" size="large">不启用</el-radio>
@@ -41,9 +43,7 @@
           </el-form-item>
           <div v-if="formData.notifyEnabled">
             <el-form-item>
-              提前
-              <el-input-number class="mx-2" v-model="formData.notifyDays" />
-              天提醒
+              提前 <el-input-number class="mx-2" v-model="formData.notifyDays" /> 天提醒
             </el-form-item>
           </div>
         </div>
@@ -51,12 +51,11 @@
     </el-form>
   </ContentWrap>
 </template>
-
 <script setup lang="ts">
 import * as CustomerPoolConfApi from '@/api/crm/customerPoolConf'
 import { CardTitle } from '@/components/Card'
-import { CustomerPoolConfigVO } from '@/api/crm/customerPoolConf'
 
+// TODO @wanwan：CustomerPoolConf =》 CustomerPoolConfig；另外，我们在 crm 目录下，新建一个 config 目录，然后把 customerPoolConfig 和 customerLimitConfig 都挪进
 defineOptions({ name: 'CustomerPoolConf' })
 
 const message = useMessage() // 消息弹窗
@@ -70,15 +69,12 @@ const formData = ref({
   notifyEnabled: false,
   notifyDays: 0
 })
-
 const formRules = reactive({
   enabled: [{ required: true, message: '是否启用客户公海不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
-/**
- * 获取配置
- */
+/** 获取配置 */
 const getConfig = async () => {
   try {
     formLoading.value = true
@@ -92,9 +88,7 @@ const getConfig = async () => {
   }
 }
 
-/**
- * 提交配置
- */
+/** 提交配置 */
 const onSubmit = async () => {
   // 校验表单
   if (!formRef) return
@@ -113,6 +107,7 @@ const onSubmit = async () => {
   }
 }
 
+// TODO @wanwan：el-radio-group 选择后，触发会不会更好哈；
 watch(
   () => formData.value.enabled,
   (val: boolean) => {
@@ -124,6 +119,7 @@ watch(
     }
   }
 )
+// TODO @wanwan：el-radio-group 选择后，触发会不会更好哈；
 watch(
   () => formData.value.notifyEnabled,
   (val: boolean) => {

@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO @wanwan：要不要把上面这一整块，搞成一个组件，就是把 下面 + Details + BasitcInfo 合并成一个 -->
   <div v-loading="loading">
     <div class="flex items-start justify-between">
       <div>
@@ -74,20 +75,20 @@
       <el-tab-pane label="客户关系" lazy> 客户关系</el-tab-pane>
       <!-- TODO wanwan 以下标签上的数量需要接口统计返回 -->
       <el-tab-pane label="联系人" lazy>
-        <template #label> 联系人<el-badge :value="12" class="item" type="primary" /> </template>
+        <template #label> 联系人<el-badge class="item" type="primary" /> </template>
         联系人
       </el-tab-pane>
       <el-tab-pane label="团队成员" lazy>
-        <template #label> 团队成员<el-badge :value="2" class="item" type="primary" /> </template>
+        <template #label> 团队成员<el-badge class="item" type="primary" /> </template>
         团队成员
       </el-tab-pane>
       <el-tab-pane label="商机" lazy> 商机</el-tab-pane>
       <el-tab-pane label="合同" lazy>
-        <template #label> 合同<el-badge :value="3" class="item" type="primary" /> </template>
+        <template #label> 合同<el-badge class="item" type="primary" /> </template>
         合同
       </el-tab-pane>
       <el-tab-pane label="回款" lazy>
-        <template #label> 回款<el-badge :value="4" class="item" type="primary" /> </template>
+        <template #label> 回款<el-badge class="item" type="primary" /> </template>
         回款
       </el-tab-pane>
       <el-tab-pane label="回访" lazy> 回访</el-tab-pane>
@@ -116,14 +117,12 @@ const { currentRoute } = useRouter() // 路由
 const id = Number(route.params.id)
 const loading = ref(true) // 加载中
 
-// 客户详情
-const customer = ref<CustomerApi.CustomerVO>({} as CustomerApi.CustomerVO)
-
 /**
  * 获取详情
  *
  * @param id
  */
+const customer = ref<CustomerApi.CustomerVO>({} as CustomerApi.CustomerVO) // 客户详情
 const getCustomerData = async (id: number) => {
   loading.value = true
   try {

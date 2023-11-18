@@ -83,6 +83,7 @@ const formRules = reactive({
   maxCount: [{ required: true, message: '数量上限不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+// TODO @芋艿：看看怎么搞个部门选择组件
 const deptTree = ref() // 部门树形结构
 const userTree = ref() // 用户树形结构
 
@@ -179,6 +180,7 @@ const getUserTree = async () => {
   handleUserData(userTree.value, deptUserMap)
 }
 
+// TODO @芋艿：看看怎么搞个用户选择的组件
 /**
  * 处理用户树
  *
