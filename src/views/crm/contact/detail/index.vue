@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO 芋艿：要不要把 3 到 62 合并成一个组件 -->
   <div v-loading="loading">
     <div class="flex items-start justify-between">
       <div>
@@ -105,6 +106,7 @@ import ContactDetails from '@/views/crm/contact/detail/ContactDetails.vue'
 import ContactForm from '@/views/crm/contact/ContactForm.vue'
 import { formatDate } from '@/utils/formatTime'
 import * as CustomerApi from '@/api/crm/customer'
+// TODO 芋艿：后面在 review 么？
 
 defineOptions({ name: 'ContactDetail' })
 const { delView } = useTagsViewStore() // 视图操作
