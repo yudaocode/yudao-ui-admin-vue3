@@ -59,7 +59,6 @@ watch(
       productSpus.value.length === 0 ||
       productSpus.value.some((spu) => !props.modelValue.includes(spu.id))
     ) {
-      debugger
       productSpus.value = await ProductSpuApi.getSpuDetailList(props.modelValue)
     }
   },
