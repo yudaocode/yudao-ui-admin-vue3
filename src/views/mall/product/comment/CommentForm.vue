@@ -8,14 +8,7 @@
       v-loading="formLoading"
     >
       <el-form-item label="商品" prop="spuId">
-        <div @click="handleSelectSpu" class="h-60px w-60px">
-          <div v-if="spuData && spuData.picUrl">
-            <el-image :src="spuData.picUrl" />
-          </div>
-          <div v-else class="select-box">
-            <Icon icon="ep:plus" />
-          </div>
-        </div>
+        <SpuShowcase v-model="formData.spuId" :limit="1" />
       </el-form-item>
       <el-form-item label="商品规格" prop="skuId" v-if="formData.spuId">
         <div @click="handleSelectSku" class="h-60px w-60px">
@@ -51,12 +44,11 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <SpuTableSelect ref="spuTableSelectRef" @change="handleSpuChange" />
-  <SkuTableSelect ref="skuTableSelectRef" @change="handleSkuChange" :spu-id="spuData.id" />
+  <SkuTableSelect ref="skuTableSelectRef" @change="handleSkuChange" :spu-id="formData.spuId" />
 </template>
 <script setup lang="ts">
 import * as CommentApi from '@/api/mall/product/comment'
-import SpuTableSelect from '@/views/mall/product/spu/components/SpuTableSelect.vue'
+import SpuShowcase from "@/views/mall/product/spu/components/SpuShowcase.vue";
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import SkuTableSelect from '@/views/mall/product/spu/components/SkuTableSelect.vue'
 
@@ -72,8 +64,7 @@ const formData = ref({
   userId: undefined,
   userNickname: undefined,
   userAvatar: undefined,
-  spuId: undefined,
-  spuName: undefined,
+  spuId: 0,
   skuId: undefined,
   descriptionScores: 5,
   benefitScores: 5,
@@ -90,7 +81,6 @@ const formRules = reactive({
   benefitScores: [{ required: true, message: '服务星级不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const spuData = ref<ProductSpuApi.Spu>({})
 const skuData = ref({
   id: -1,
   name: '',
@@ -149,8 +139,7 @@ const resetForm = () => {
     userId: undefined,
     userNickname: undefined,
     userAvatar: undefined,
-    spuId: undefined,
-    spuName: undefined,
+    spuId: 0,
     skuId: undefined,
     descriptionScores: 5,
     benefitScores: 5,
@@ -158,16 +147,6 @@ const resetForm = () => {
     picUrls: []
   }
   formRef.value?.resetFields()
-}
-
-/** SPU 表格选择 */
-const spuTableSelectRef = ref()
-const handleSelectSpu = () => {
-  spuTableSelectRef.value.open()
-}
-const handleSpuChange = (spu: ProductSpuApi.Spu) => {
-  spuData.value = spu
-  formData.value.spuId = spu.id
 }
 
 /** SKU 表格选择 */
