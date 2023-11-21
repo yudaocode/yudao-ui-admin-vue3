@@ -20,7 +20,7 @@
     </el-tooltip>
   </div>
   <!-- 商品选择对话框（表格形式） -->
-  <SpuTableSelect ref="spuTableSelectRef" multiple @change="handleSpuSelected" />
+  <SpuTableSelect ref="spuTableSelectRef" :multiple="limit != 1" @change="handleSpuSelected" />
 </template>
 <script lang="ts" setup>
 import * as ProductSpuApi from '@/api/mall/product/spu'
@@ -88,8 +88,8 @@ const openSpuTableSelect = () => {
  * 选择商品后触发
  * @param spus 选中的商品列表
  */
-const handleSpuSelected = (spus: ProductSpuApi.Spu[]) => {
-  productSpus.value = spus
+const handleSpuSelected = (spus: ProductSpuApi.Spu | ProductSpuApi.Spu[]) => {
+  productSpus.value = isArray(spus) ? spus : [spus]
   emitSpuChange()
 }
 
