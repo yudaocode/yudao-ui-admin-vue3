@@ -48,7 +48,7 @@
 </template>
 <script setup lang="ts">
 import * as CommentApi from '@/api/mall/product/comment'
-import SpuShowcase from "@/views/mall/product/spu/components/SpuShowcase.vue";
+import SpuShowcase from '@/views/mall/product/spu/components/SpuShowcase.vue'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import SkuTableSelect from '@/views/mall/product/spu/components/SkuTableSelect.vue'
 

@@ -187,7 +187,7 @@ import {
   PromotionDiscountTypeEnum,
   PromotionProductScopeEnum
 } from '@/utils/constants'
-import SpuShowcase from "@/views/mall/product/spu/components/SpuShowcase.vue";
+import SpuShowcase from '@/views/mall/product/spu/components/SpuShowcase.vue'
 import ProductCategorySelect from '@/views/mall/product/category/components/ProductCategorySelect.vue'
 import { convertToInteger, formatToFraction } from '@/utils'
 
@@ -385,5 +385,4 @@ function setProductScopeValues(data: CouponTemplateApi.CouponTemplateVO) {
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

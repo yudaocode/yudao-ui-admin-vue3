@@ -41,7 +41,7 @@ export interface ProductListFieldProperty {
 export const component = {
   id: 'ProductList',
   name: '商品栏',
-  icon: 'system-uicons:carousel',
+  icon: 'fluent:text-column-two-24-filled',
   property: {
     layoutType: 'twoCol',
     fields: {

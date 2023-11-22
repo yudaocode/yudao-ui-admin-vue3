@@ -1,13 +1,13 @@
 <template>
   <el-scrollbar class="z-1 min-h-30px" wrap-class="w-full" ref="containerRef">
-   <!-- 商品网格 -->
+    <!-- 商品网格 -->
     <div
       class="grid overflow-x-auto"
       :style="{
         gridGap: `${property.space}px`,
         gridTemplateColumns,
-        width: scrollbarWidth,
-       }"
+        width: scrollbarWidth
+      }"
     >
       <!-- 商品 -->
       <div
@@ -63,11 +63,11 @@
   </el-scrollbar>
 </template>
 <script setup lang="ts">
-import { ProductListProperty } from "./config"
-import * as ProductSpuApi from "@/api/mall/product/spu"
+import { ProductListProperty } from './config'
+import * as ProductSpuApi from '@/api/mall/product/spu'
 
 /** 商品卡片 */
-defineOptions({ name: "ProductList" })
+defineOptions({ name: 'ProductList' })
 // 定义属性
 const props = defineProps<{ property: ProductListProperty }>()
 // 商品列表
@@ -89,39 +89,42 @@ const containerRef = ref()
 // 商品的列数
 const columns = ref(2)
 // 滚动条宽度
-const scrollbarWidth = ref("100%")
+const scrollbarWidth = ref('100%')
 // 商品图大小
-const imageSize = ref("0")
+const imageSize = ref('0')
 // 商品网络列数
-const gridTemplateColumns = ref("")
+const gridTemplateColumns = ref('')
 // 计算布局参数
 watch(
   () => [props.property, phoneWidth, spuList.value.length],
   () => {
     // 计算列数
-    columns.value = props.property.layoutType === "twoCol" ? 2 : 3
-    // 提取手机宽度
+    columns.value = props.property.layoutType === 'twoCol' ? 2 : 3
     // 每列的宽度为：（总宽度 - 间距 * (列数 - 1)）/ 列数
-    const productWidth = (phoneWidth.value - props.property.space * (columns.value - 1)) / columns.value
+    const productWidth =
+      (phoneWidth.value - props.property.space * (columns.value - 1)) / columns.value
     // 商品图布局：2列时，左右布局 3列时，上下布局
-    imageSize.value = columns.value === 2 ? "64px" : `${productWidth}px`
+    imageSize.value = columns.value === 2 ? '64px' : `${productWidth}px`
     // 根据布局类型，计算行数、列数
-    if (props.property.layoutType === "horizSwiper") {
+    if (props.property.layoutType === 'horizSwiper') {
       // 单行显示
       gridTemplateColumns.value = `repeat(auto-fill, ${productWidth}px)`
       // 显示滚动条
-      scrollbarWidth.value = `${productWidth * spuList.value.length + props.property.space * (spuList.value.length - 1)}px`
+      scrollbarWidth.value = `${
+        productWidth * spuList.value.length + props.property.space * (spuList.value.length - 1)
+      }px`
     } else {
       // 指定列数
       gridTemplateColumns.value = `repeat(${columns.value}, auto)`
       // 不滚动
-      scrollbarWidth.value = "100%"
+      scrollbarWidth.value = '100%'
     }
   },
   { immediate: true, deep: true }
 )
 onMounted(() => {
-  phoneWidth.value = containerRef.value?.wrapRef?.offsetWidth || 375;
+  // 提取手机宽度
+  phoneWidth.value = containerRef.value?.wrapRef?.offsetWidth || 375
 })
 </script>
 

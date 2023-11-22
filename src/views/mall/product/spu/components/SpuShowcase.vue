@@ -27,7 +27,7 @@ import * as ProductSpuApi from '@/api/mall/product/spu'
 import SpuTableSelect from '@/views/mall/product/spu/components/SpuTableSelect.vue'
 import { propTypes } from '@/utils/propTypes'
 import { oneOfType } from 'vue-types'
-import { isArray } from "@/utils/is";
+import { isArray } from '@/utils/is'
 
 // 商品橱窗，一般用于与商品建立关系时使用
 // 提供功能：展示商品列表、添加商品、移除商品
@@ -43,9 +43,9 @@ const props = defineProps({
 // 计算是否可以添加
 const canAdd = computed(() => {
   // 情况一：禁用时不可以添加
-  if(props.disabled) return false
+  if (props.disabled) return false
   // 情况二：未指定限制数量时，可以添加
-  if(!props.limit) return true
+  if (!props.limit) return true
   // 情况三：检查已添加数量是否小于限制数量
   return productSpus.value.length < props.limit
 })
@@ -57,20 +57,19 @@ watch(
   () => props.modelValue,
   async () => {
     const ids = isArray(props.modelValue)
-        // 情况一：多选
-        ? props.modelValue
-        // 情况二：单选
-        : props.modelValue ? [props.modelValue]: []
+      ? // 情况一：多选
+        props.modelValue
+      : // 情况二：单选
+        props.modelValue
+        ? [props.modelValue]
+        : []
     // 不需要返显
-    if(ids.length === 0) {
+    if (ids.length === 0) {
       productSpus.value = []
       return
     }
     // 只有商品发生变化之后，才去查询商品
-    if (
-      productSpus.value.length === 0 ||
-      productSpus.value.some((spu) => !ids.includes(spu.id!))
-    ) {
+    if (productSpus.value.length === 0 || productSpus.value.some((spu) => !ids.includes(spu.id!))) {
       productSpus.value = await ProductSpuApi.getSpuDetailList(ids)
     }
   },
@@ -103,12 +102,15 @@ const handleRemoveSpu = (index: number) => {
 }
 const emit = defineEmits(['update:modelValue', 'change'])
 const emitSpuChange = () => {
-  if(props.limit === 1) {
+  if (props.limit === 1) {
     const spu = productSpus.value.length > 0 ? productSpus.value[0] : null
     emit('update:modelValue', spu?.id || 0)
     emit('change', spu)
   } else {
-    emit('update:modelValue', productSpus.value.map((spu) => spu.id))
+    emit(
+      'update:modelValue',
+      productSpus.value.map((spu) => spu.id)
+    )
     emit('change', productSpus.value)
   }
 }

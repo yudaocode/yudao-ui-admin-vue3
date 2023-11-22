@@ -150,15 +150,14 @@ import {
 } from '@/views/mall/promotion/coupon/formatter'
 import { dateFormatter } from '@/utils/formatTime'
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
-import type { GiveCouponTemplate } from '@/api/mall/product/spu'
 
 defineOptions({ name: 'CouponSelect' })
 
 defineProps<{
-  multipleSelection: GiveCouponTemplate[]
+  multipleSelection: CouponTemplateApi.CouponTemplateVO[]
 }>()
 const emit = defineEmits<{
-  (e: 'update:multipleSelection', v: GiveCouponTemplate[])
+  (e: 'update:multipleSelection', v: CouponTemplateApi.CouponTemplateVO[])
 }>()
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('选择优惠卷') // 弹窗的标题
@@ -210,10 +209,7 @@ const open = async () => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 const handleSelectionChange = (val: CouponTemplateApi.CouponTemplateVO[]) => {
-  emit(
-    'update:multipleSelection',
-    val.map((item) => ({ id: item.id, name: item.name }))
-  )
+  emit('update:multipleSelection', val)
 }
 
 const submitForm = () => {

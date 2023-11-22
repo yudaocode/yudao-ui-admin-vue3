@@ -167,7 +167,7 @@ const open = (spuList?: Spu[]) => {
   // 处理已选中
   if (spuList && spuList.length > 0) {
     checkedSpus.value = [...spuList]
-    checkedStatus.value = Object.fromEntries(spuList.map(spu => [spu.id, true]))
+    checkedStatus.value = Object.fromEntries(spuList.map((spu) => [spu.id, true]))
   }
 
   dialogVisible.value = true
@@ -184,7 +184,9 @@ const getList = async () => {
     list.value = data.list
     total.value = data.total
     // checkbox绑定undefined会有问题，需要给一个bool值
-    list.value.forEach( spu => checkedStatus.value[spu.id] = checkedStatus.value[spu.id] || false)
+    list.value.forEach(
+      (spu) => (checkedStatus.value[spu.id] = checkedStatus.value[spu.id] || false)
+    )
     // 计算全选框状态
     calculateIsCheckAll()
   } finally {
@@ -272,23 +274,19 @@ const handleCheckOne = (checked: boolean, spu: Spu, isCalcCheckAll: boolean) => 
   }
 
   // 计算全选框状态
-  if(isCalcCheckAll){
+  if (isCalcCheckAll) {
     calculateIsCheckAll()
   }
 }
 
 // 查找商品在已选中商品列表中的索引
-const findCheckedIndex = (spu: Spu) => checkedSpus.value.findIndex(item => item.id === spu.id)
+const findCheckedIndex = (spu: Spu) => checkedSpus.value.findIndex((item) => item.id === spu.id)
 
 // 计算全选框状态
 const calculateIsCheckAll = () => {
-  isCheckAll.value = list.value.every(spu => {
-    let valueElement = checkedStatus.value[spu.id];
-    debugger
-    return valueElement;
-  });
+  isCheckAll.value = list.value.every((spu) => checkedStatus.value[spu.id])
   // 计算中间状态：不是全部选中 && 任意一个选中
-  isIndeterminate.value = !isCheckAll.value && list.value.some(spu => checkedStatus.value[spu.id])
+  isIndeterminate.value = !isCheckAll.value && list.value.some((spu) => checkedStatus.value[spu.id])
 }
 
 // 分类列表
