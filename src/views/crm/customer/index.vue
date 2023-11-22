@@ -121,7 +121,7 @@
       <el-table-column align="center" label="手机" prop="mobile" width="120" />
       <el-table-column align="center" label="详细地址" prop="detailAddress" width="200" />
       <el-table-column align="center" label="负责人" prop="ownerUserName" />
-      <el-table-column align="center" label="所属部门" prop="ownerUserDept" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" />
       <el-table-column align="center" label="创建人" prop="creatorName" />
       <el-table-column
         :formatter="dateFormatter"
@@ -185,8 +185,6 @@
       @pagination="getList"
     />
   </ContentWrap>
-  <!-- TODO 方便查看效果 TODO 芋艿：先注释了，避免演示环境报错 -->
-  <!--  <CrmTeam :biz-id="1" :biz-type="CrmBizTypeEnum.CRM_CUSTOMER" />-->
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getList" />
@@ -198,7 +196,6 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CustomerApi from '@/api/crm/customer'
 import CustomerForm from './CustomerForm.vue'
-import { CrmBizTypeEnum, CrmTeam } from '@/views/crm/components'
 
 defineOptions({ name: 'CrmCustomer' })
 
