@@ -22,6 +22,11 @@ export const getUserPage = (params: PageParam) => {
   return request.get({ url: '/system/user/page', params })
 }
 
+// 查询所有用户列表
+export const getAllUser = () => {
+  return request.get({ url: '/system/user/all' })
+}
+
 // 查询用户详情
 export const getUser = (id: number) => {
   return request.get({ url: '/system/user/get?id=' + id })

@@ -19,6 +19,6 @@ const title = computed(() => appStore.getTitle)
     :class="prefixCls"
     class="h-[var(--app-footer-height)] bg-[var(--app-content-bg-color)] text-center leading-[var(--app-footer-height)] text-[var(--el-text-color-placeholder)] dark:bg-[var(--el-bg-color)]"
   >
-    <p style="font-size: 14px">Copyright ©2022-{{ title }}</p>
+    <span class="text-14px">Copyright ©2022-{{ title }}</span>
   </div>
 </template>

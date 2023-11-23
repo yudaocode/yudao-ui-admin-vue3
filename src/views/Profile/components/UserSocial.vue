@@ -66,7 +66,6 @@ const bindSocial = () => {
   socialBind(type, code, state).then(() => {
     message.success('绑定成功')
     emit('update:activeName', 'userSocial')
-    initSocial()
   })
 }
 

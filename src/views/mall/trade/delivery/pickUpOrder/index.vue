@@ -316,6 +316,7 @@ onMounted(() => {
 :deep(.order-table-col > .cell) {
   padding: 0;
 }
+
 .summary {
   .el-col {
     margin-bottom: 1rem;

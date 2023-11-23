@@ -125,7 +125,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="绑定域名" align="center" prop="domain" width="180" />
+      <el-table-column label="绑定域名" align="center" prop="website" width="180" />
       <el-table-column label="租户状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />

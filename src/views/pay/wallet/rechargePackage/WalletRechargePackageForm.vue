@@ -90,7 +90,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as WalletRechargePackageApi.WalletRechargePackageVO
+    const data = { ...formData.value }
     data.payPrice = yuanToFen(data.payPrice)
     data.bonusPrice = yuanToFen(data.bonusPrice)
     if (formType.value === 'create') {
