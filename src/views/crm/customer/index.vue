@@ -208,11 +208,12 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  mobile: null,
-  industryId: null,
-  level: null,
-  source: null
+  pool: false,
+  name: '',
+  mobile: '',
+  industryId: undefined,
+  level: undefined,
+  source: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -238,6 +239,7 @@ const handleQuery = () => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
+  queryParams.pool = false
   handleQuery()
 }
 
