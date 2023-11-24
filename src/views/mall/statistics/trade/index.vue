@@ -219,6 +219,8 @@ import { TradeSummaryRespVO, TradeTrendSummaryRespVO } from '@/api/mall/statisti
 import { calculateRelativeRate, fenToYuan } from '@/utils'
 import download from '@/utils/download'
 import { CardTitle } from '@/components/Card'
+import * as DateUtil from '@/utils/formatTime'
+import dayjs from 'dayjs'
 
 /** 交易统计 */
 defineOptions({ name: 'TradeStatistics' })
@@ -289,6 +291,13 @@ const lineChartOptions = reactive<EChartsOption>({
 /** 处理交易状况查询 */
 const getTradeTrendData = async () => {
   trendLoading.value = true
+  // 1. 处理时间: 开始与截止在同一天的, 折线图出不来, 需要延长一天
+  const times = shortcutDateRangePicker.value.times
+  if (DateUtil.isSameDay(times[0], times[1])) {
+    // 前天
+    times[0] = DateUtil.formatDate(dayjs(times[0]).subtract(1, 'd'))
+  }
+  // 查询数据
   await Promise.all([getTradeTrendSummary(), getTradeStatisticsList()])
   trendLoading.value = false
 }
