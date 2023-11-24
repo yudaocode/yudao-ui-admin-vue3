@@ -37,9 +37,6 @@
       <el-descriptions-item label="发送时间">
         {{ formatDate(detailData.sendTime) }}
       </el-descriptions-item>
-      <el-descriptions-item label="发送结果">
-        {{ detailData.sendCode }} | {{ detailData.sendMsg }}
-      </el-descriptions-item>
       <el-descriptions-item label="API 发送结果">
         {{ detailData.apiSendCode }} | {{ detailData.apiSendMsg }}
       </el-descriptions-item>
