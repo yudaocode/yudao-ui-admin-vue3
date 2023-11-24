@@ -13,35 +13,41 @@
         </div>
       </el-tooltip>
     </div>
-    <el-tooltip content="选择商品">
-      <div
-        v-show="!disabled"
-        v-if="!limit || limit <= productSpus.length"
-        class="select-box"
-        @click="openSpuTableSelect"
-      >
+    <el-tooltip content="选择商品" v-if="canAdd">
+      <div class="select-box" @click="openSpuTableSelect">
         <Icon icon="ep:plus" />
       </div>
     </el-tooltip>
   </div>
   <!-- 商品选择对话框（表格形式） -->
-  <SpuTableSelect ref="spuTableSelectRef" multiple @change="handleSpuSelected" />
+  <SpuTableSelect ref="spuTableSelectRef" :multiple="limit != 1" @change="handleSpuSelected" />
 </template>
 <script lang="ts" setup>
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import SpuTableSelect from '@/views/mall/product/spu/components/SpuTableSelect.vue'
 import { propTypes } from '@/utils/propTypes'
-import { array } from 'vue-types'
+import { oneOfType } from 'vue-types'
+import { isArray } from '@/utils/is'
 
 // 商品橱窗，一般用于与商品建立关系时使用
 // 提供功能：展示商品列表、添加商品、移除商品
 defineOptions({ name: 'SpuShowcase' })
 
 const props = defineProps({
-  modelValue: array<number>().def([]).isRequired,
+  modelValue: oneOfType<number | Array<number>>([Number, Array]).isRequired,
   // 限制数量：默认不限制
-  limit: propTypes.number.def(0),
+  limit: propTypes.number.def(Number.MAX_VALUE),
   disabled: propTypes.bool.def(false)
+})
+
+// 计算是否可以添加
+const canAdd = computed(() => {
+  // 情况一：禁用时不可以添加
+  if (props.disabled) return false
+  // 情况二：未指定限制数量时，可以添加
+  if (!props.limit) return true
+  // 情况三：检查已添加数量是否小于限制数量
+  return productSpus.value.length < props.limit
 })
 
 // 商品列表
@@ -50,17 +56,21 @@ const productSpus = ref<ProductSpuApi.Spu[]>([])
 watch(
   () => props.modelValue,
   async () => {
-    if (props.modelValue.length === 0) {
+    const ids = isArray(props.modelValue)
+      ? // 情况一：多选
+        props.modelValue
+      : // 情况二：单选
+        props.modelValue
+        ? [props.modelValue]
+        : []
+    // 不需要返显
+    if (ids.length === 0) {
       productSpus.value = []
       return
     }
     // 只有商品发生变化之后，才去查询商品
-    if (
-      productSpus.value.length === 0 ||
-      productSpus.value.some((spu) => !props.modelValue.includes(spu.id))
-    ) {
-      debugger
-      productSpus.value = await ProductSpuApi.getSpuDetailList(props.modelValue)
+    if (productSpus.value.length === 0 || productSpus.value.some((spu) => !ids.includes(spu.id!))) {
+      productSpus.value = await ProductSpuApi.getSpuDetailList(ids)
     }
   },
   { immediate: true }
@@ -77,8 +87,8 @@ const openSpuTableSelect = () => {
  * 选择商品后触发
  * @param spus 选中的商品列表
  */
-const handleSpuSelected = (spus: ProductSpuApi.Spu[]) => {
-  productSpus.value = spus
+const handleSpuSelected = (spus: ProductSpuApi.Spu | ProductSpuApi.Spu[]) => {
+  productSpus.value = isArray(spus) ? spus : [spus]
   emitSpuChange()
 }
 
@@ -92,11 +102,17 @@ const handleRemoveSpu = (index: number) => {
 }
 const emit = defineEmits(['update:modelValue', 'change'])
 const emitSpuChange = () => {
-  emit(
-    'update:modelValue',
-    productSpus.value.map((spu) => spu.id)
-  )
-  emit('change', productSpus.value)
+  if (props.limit === 1) {
+    const spu = productSpus.value.length > 0 ? productSpus.value[0] : null
+    emit('update:modelValue', spu?.id || 0)
+    emit('change', spu)
+  } else {
+    emit(
+      'update:modelValue',
+      productSpus.value.map((spu) => spu.id)
+    )
+    emit('change', productSpus.value)
+  }
 }
 </script>
 

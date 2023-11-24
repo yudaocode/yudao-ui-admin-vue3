@@ -59,7 +59,7 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="false">
-      <el-table-column label="评论编号" align="center" prop="id" min-width="50" />
+      <el-table-column label="评论编号" align="center" prop="id" min-width="80" />
       <el-table-column label="商品信息" align="center" min-width="400">
         <template #default="scope">
           <div class="row flex items-center gap-x-4px">

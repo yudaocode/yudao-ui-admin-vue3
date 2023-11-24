@@ -335,5 +335,8 @@ export function getDateRange(
   beginDate: dayjs.ConfigType,
   endDate: dayjs.ConfigType
 ): [string, string] {
-  return [dayjs(beginDate).startOf('d').toString(), dayjs(endDate).endOf('d').toString()]
+  return [
+    dayjs(beginDate).startOf('d').format('YYYY-MM-DD HH:mm:ss'),
+    dayjs(endDate).endOf('d').format('YYYY-MM-DD HH:mm:ss')
+  ]
 }

@@ -73,6 +73,13 @@ export function getCouponTemplatePage(params: PageParam) {
   })
 }
 
+// 获得优惠劵模板分页
+export function getCouponTemplateList(ids: number[]) {
+  return request.get({
+    url: `/promotion/coupon-template/list?ids=${ids}`
+  })
+}
+
 // 导出优惠劵模板 Excel
 export function exportCouponTemplateExcel(params: PageParam) {
   return request.get({

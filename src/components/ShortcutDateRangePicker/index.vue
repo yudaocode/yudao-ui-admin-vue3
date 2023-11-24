@@ -74,11 +74,6 @@ const emits = defineEmits<{
 }>()
 /** 触发时间范围选中事件 */
 const emitDateRangePicker = async () => {
-  // 开始与截止在同一天的, 折线图出不来, 需要延长一天
-  if (DateUtil.isSameDay(times.value[0], times.value[1])) {
-    // 前天
-    times.value[0] = DateUtil.formatDate(dayjs(times.value[0]).subtract(1, 'd'))
-  }
   emits('change', times.value)
 }
 

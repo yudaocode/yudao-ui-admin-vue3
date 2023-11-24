@@ -62,7 +62,7 @@ export interface ProductCardFieldProperty {
 export const component = {
   id: 'ProductCard',
   name: '商品卡片',
-  icon: 'system-uicons:carousel',
+  icon: 'fluent:text-column-two-left-24-filled',
   property: {
     layoutType: 'oneColBigImg',
     fields: {
