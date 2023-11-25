@@ -8,7 +8,7 @@
       </div>
       <div>
         <!-- 右上：按钮 -->
-        <el-button @click="openForm('update', customer.id)" v-hasPermi="['crm:customer:update']">
+        <el-button v-hasPermi="['crm:customer:update']" @click="openForm('update', customer.id)">
           编辑
         </el-button>
         <el-button>更改成交状态</el-button>
@@ -16,31 +16,31 @@
     </div>
     <el-row class="mt-10px">
       <el-button>
-        <Icon icon="ph:calendar-fill" class="mr-5px" />
+        <Icon class="mr-5px" icon="ph:calendar-fill" />
         创建任务
       </el-button>
       <el-button>
-        <Icon icon="carbon:email" class="mr-5px" />
+        <Icon class="mr-5px" icon="carbon:email" />
         发送邮件
       </el-button>
       <el-button>
-        <Icon icon="system-uicons:contacts" class="mr-5px" />
+        <Icon class="mr-5px" icon="system-uicons:contacts" />
         创建联系人
       </el-button>
       <el-button>
-        <Icon icon="ep:opportunity" class="mr-5px" />
+        <Icon class="mr-5px" icon="ep:opportunity" />
         创建商机
       </el-button>
       <el-button>
-        <Icon icon="clarity:contract-line" class="mr-5px" />
+        <Icon class="mr-5px" icon="clarity:contract-line" />
         创建合同
       </el-button>
       <el-button>
-        <Icon icon="icon-park:income-one" class="mr-5px" />
+        <Icon class="mr-5px" icon="icon-park:income-one" />
         创建回款
       </el-button>
       <el-button>
-        <Icon icon="fluent:people-team-add-20-filled" class="mr-5px" />
+        <Icon class="mr-5px" icon="fluent:people-team-add-20-filled" />
         添加团队成员
       </el-button>
     </el-row>
@@ -75,20 +75,32 @@
       <el-tab-pane label="客户关系" lazy> 客户关系</el-tab-pane>
       <!-- TODO wanwan 以下标签上的数量需要接口统计返回 -->
       <el-tab-pane label="联系人" lazy>
-        <template #label> 联系人<el-badge class="item" type="primary" /> </template>
+        <template #label>
+          联系人
+          <el-badge class="item" type="primary" />
+        </template>
         联系人
       </el-tab-pane>
       <el-tab-pane label="团队成员" lazy>
-        <template #label> 团队成员<el-badge class="item" type="primary" /> </template>
-        团队成员
+        <template #label>
+          团队成员
+          <el-badge class="item" type="primary" />
+        </template>
+        <CrmPermissionList :biz-id="customer.id" :biz-type="CrmBizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
       <el-tab-pane label="商机" lazy> 商机</el-tab-pane>
       <el-tab-pane label="合同" lazy>
-        <template #label> 合同<el-badge class="item" type="primary" /> </template>
+        <template #label>
+          合同
+          <el-badge class="item" type="primary" />
+        </template>
         合同
       </el-tab-pane>
       <el-tab-pane label="回款" lazy>
-        <template #label> 回款<el-badge class="item" type="primary" /> </template>
+        <template #label>
+          回款
+          <el-badge class="item" type="primary" />
+        </template>
         回款
       </el-tab-pane>
       <el-tab-pane label="回访" lazy> 回访</el-tab-pane>
@@ -100,7 +112,7 @@
   <CustomerForm ref="formRef" @success="getCustomerData(id)" />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ElMessage } from 'element-plus'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as CustomerApi from '@/api/crm/customer'
@@ -108,6 +120,7 @@ import CustomerBasicInfo from '@/views/crm/customer/detail/CustomerBasicInfo.vue
 import { DICT_TYPE } from '@/utils/dict'
 import CustomerDetails from '@/views/crm/customer/detail/CustomerDetails.vue'
 import CustomerForm from '@/views/crm/customer/CustomerForm.vue'
+import { CrmBizTypeEnum, CrmPermissionList } from '@/views/crm/components'
 
 defineOptions({ name: 'CustomerDetail' })
 
