@@ -5,7 +5,7 @@
       <Icon class="mr-5px" icon="ep:plus" />
       新增
     </el-button>
-    <el-button @click="handleEdit">
+    <el-button @click="handleUpdate">
       <Icon class="mr-5px" icon="ep:edit" />
       编辑
     </el-button>
@@ -15,7 +15,7 @@
     </el-button>
     <el-button type="danger" @click="handleQuit"> 退出团队</el-button>
   </el-row>
-  <!--  团队成员展示 -->
+  <!-- 团队成员展示 -->
   <el-table
     v-loading="loading"
     :data="list"
@@ -35,7 +35,9 @@
     </el-table-column>
     <el-table-column :formatter="dateFormatter" align="center" label="加入时间" prop="createTime" />
   </el-table>
-  <CrmPermissionForm ref="permissionFormRef" @success="getList" />
+
+  <!-- 表单弹窗：添加/修改 -->
+  <CrmPermissionForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
@@ -75,22 +77,18 @@ const handleSelectionChange = (val: PermissionApi.PermissionVO[]) => {
   multipleSelection.value = val
 }
 
-const permissionFormRef = ref<InstanceType<typeof CrmPermissionForm>>() // 权限表单 Ref
-/**
- * 编辑团队成员
- */
-const handleEdit = () => {
+/** 编辑团队成员 */
+const formRef = ref<InstanceType<typeof CrmPermissionForm>>() // 权限表单 Ref
+const handleUpdate = () => {
   if (multipleSelection.value?.length === 0) {
     message.warning('请先选择团队成员后操作！')
     return
   }
   const ids = multipleSelection.value?.map((item) => item.id)
-  permissionFormRef.value?.open('update', props.bizType, props.bizId, ids)
+  formRef.value?.open('update', props.bizType, props.bizId, ids)
 }
 
-/**
- * 移除团队成员
- */
+/** 移除团队成员 */
 const handleDelete = async () => {
   if (multipleSelection.value?.length === 0) {
     message.warning('请先选择团队成员后操作！')
@@ -105,17 +103,13 @@ const handleDelete = async () => {
   })
 }
 
-/**
- * 添加团队成员
- */
+/** 添加团队成员 */
 const openForm = () => {
-  permissionFormRef.value?.open('create', props.bizType, props.bizId)
+  formRef.value?.open('create', props.bizType, props.bizId)
 }
 
+/** 退出团队 */
 const userStore = useUserStoreWithOut() // 用户信息缓存
-/**
- * 退出团队
- */
 const handleQuit = async () => {
   const permission = list.value.find(
     (item) => item.userId === userStore.getUser.id && item.level === CrmPermissionLevelEnum.OWNER
