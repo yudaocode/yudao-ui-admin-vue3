@@ -50,7 +50,17 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column label="文件名" align="center" prop="name" :show-overflow-tooltip="true" />
       <el-table-column label="文件路径" align="center" prop="path" :show-overflow-tooltip="true" />
-      <el-table-column label="URL" align="center" prop="url" :show-overflow-tooltip="true" />
+      <el-table-column label="URL" align="center" prop="url" width="110px">
+        <template #default="{ row }">
+          <el-image
+            class="h-80px w-80px"
+            :src="row.url"
+            :preview-src-list="[row.url]"
+            preview-teleported
+            fit="cover"
+          />
+        </template>
+      </el-table-column>
       <el-table-column
         label="文件大小"
         align="center"
