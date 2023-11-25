@@ -116,6 +116,6 @@ export const PAGE_LIBS = [
   {
     name: '营销组件',
     extended: true,
-    components: ['CombinationCard', 'SeckillCard', 'PointCard', 'CouponCard']
+    components: ['CombinationCard', 'SeckillCard', 'PointCard', 'CouponCard', 'PromotionArticle']
   }
 ] as DiyComponentLibrary[]

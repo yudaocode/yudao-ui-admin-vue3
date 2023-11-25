@@ -66,7 +66,7 @@
 import { ProductListProperty } from './config'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 
-/** 商品卡片 */
+/** 商品栏 */
 defineOptions({ name: 'ProductList' })
 // 定义属性
 const props = defineProps<{ property: ProductListProperty }>()
