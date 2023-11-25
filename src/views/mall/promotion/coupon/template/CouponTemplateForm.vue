@@ -26,15 +26,7 @@
         label="商品"
         prop="productSpuIds"
       >
-        <div class="flex flex-wrap items-center gap-1">
-          <div v-for="(spu, index) in productSpus" :key="spu.id" class="select-box spu-pic">
-            <el-image :src="spu.picUrl" />
-            <Icon class="del-icon" icon="ep:circle-close-filled" @click="handleRemoveSpu(index)" />
-          </div>
-          <div class="select-box" @click="openSpuTableSelect">
-            <Icon icon="ep:plus" />
-          </div>
-        </div>
+        <SpuShowcase v-model="formData.productSpuIds" />
       </el-form-item>
       <el-form-item
         v-if="formData.productScope === PromotionProductScopeEnum.CATEGORY.scope"
@@ -186,18 +178,16 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <SpuTableSelect ref="spuTableSelectRef" multiple @change="handleSpuSelected" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
-import * as ProductSpuApi from '@/api/mall/product/spu'
 import {
   CouponTemplateValidityTypeEnum,
   PromotionDiscountTypeEnum,
   PromotionProductScopeEnum
 } from '@/utils/constants'
-import SpuTableSelect from '@/views/mall/product/spu/components/SpuTableSelect.vue'
+import SpuShowcase from '@/views/mall/product/spu/components/SpuShowcase.vue'
 import ProductCategorySelect from '@/views/mall/product/category/components/ProductCategorySelect.vue'
 import { convertToInteger, formatToFraction } from '@/utils'
 
@@ -251,7 +241,6 @@ const formRules = reactive({
   productCategoryIds: [{ required: true, message: '分类不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const productSpus = ref<ProductSpuApi.Spu[]>([]) // 商品列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -354,7 +343,6 @@ const resetForm = () => {
     productCategoryIds: []
   }
   formRef.value?.resetFields()
-  productSpus.value = []
 }
 
 /** 获得商品范围 */
@@ -363,8 +351,6 @@ const getProductScope = async () => {
     case PromotionProductScopeEnum.SPU.scope:
       // 设置商品编号
       formData.value.productSpuIds = formData.value.productScopeValues
-      // 获得商品列表
-      productSpus.value = await ProductSpuApi.getSpuDetailList(formData.value.productScopeValues)
       break
     case PromotionProductScopeEnum.CATEGORY.scope:
       await nextTick(() => {
@@ -397,47 +383,6 @@ function setProductScopeValues(data: CouponTemplateApi.CouponTemplateVO) {
       break
   }
 }
-
-/** 活动商品的按钮 */
-const spuTableSelectRef = ref()
-const openSpuTableSelect = () => {
-  spuTableSelectRef.value.open(productSpus.value)
-}
-
-/** 选择商品后触发 */
-const handleSpuSelected = (spus: ProductSpuApi.Spu[]) => {
-  productSpus.value = spus
-  formData.value.productSpuIds = spus.map((spu) => spu.id) as []
-}
-
-/** 选择商品后触发 */
-const handleRemoveSpu = (index: number) => {
-  productSpus.value.splice(index, 1)
-  formData.value.productSpuIds.splice(index, 1)
-}
 </script>
 
-<style lang="scss" scoped>
-.select-box {
-  display: flex;
-  width: 60px;
-  height: 60px;
-  border: 1px dashed var(--el-border-color-darker);
-  border-radius: 8px;
-  align-items: center;
-  justify-content: center;
-}
-
-.spu-pic {
-  position: relative;
-}
-
-.del-icon {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  z-index: 1;
-  width: 20px !important;
-  height: 20px !important;
-}
-</style>
+<style lang="scss" scoped></style>
