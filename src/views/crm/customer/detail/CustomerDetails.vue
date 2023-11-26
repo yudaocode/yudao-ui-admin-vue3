@@ -87,7 +87,9 @@ import * as CustomerApi from '@/api/crm/customer'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 
-const { customer } = defineProps<{ customer: CustomerApi.CustomerVO }>()
+const { customer } = defineProps<{
+  customer: CustomerApi.CustomerVO
+}>()
 
 // 展示的折叠面板
 const activeNames = ref(['basicInfo', 'systemInfo'])

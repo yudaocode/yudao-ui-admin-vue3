@@ -12,5 +12,7 @@
 <script setup lang="ts">
 import * as CustomerApi from '@/api/crm/customer'
 
-const { customer } = defineProps<{ customer: CustomerApi.CustomerVO }>()
+const { customer } = defineProps<{
+  customer: CustomerApi.CustomerVO
+}>()
 </script>
