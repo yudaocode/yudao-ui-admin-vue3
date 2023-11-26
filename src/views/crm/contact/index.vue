@@ -55,9 +55,9 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="微信" prop="webchat">
+      <el-form-item label="微信" prop="wechat">
         <el-input
-          v-model="queryParams.webchat"
+          v-model="queryParams.wechat"
           placeholder="请输入微信"
           clearable
           @keyup.enter="handleQuery"
@@ -109,20 +109,16 @@
         </template>
       </el-table-column>
       <el-table-column label="职位" align="center" prop="post" />
-      <el-table-column label="是否关键决策人" align="center" prop="policyMakers">
+      <el-table-column label="是否关键决策人" align="center" prop="master">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.policyMakers" />
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.master" />
         </template>
       </el-table-column>
-      <el-table-column label="直属上级" align="center" prop="parentId">
-        <template #default="scope">
-          {{ allContactList.find((contact) => contact.id === scope.row.parentId)?.name }}
-        </template>
-      </el-table-column>
+      <el-table-column label="直属上级" align="center" prop="parentName"/>
       <el-table-column label="手机号" align="center" prop="mobile" />
       <el-table-column label="座机" align="center" prop="telephone" />
       <el-table-column label="QQ" align="center" prop="qq" />
-      <el-table-column label="微信" align="center" prop="webchat" />
+      <el-table-column label="微信" align="center" prop="wechat" />
       <el-table-column label="邮箱" align="center" prop="email" />
       <el-table-column label="地址" align="center" prop="address" />
       <el-table-column
@@ -142,7 +138,7 @@
       />
       <el-table-column label="负责人" align="center" prop="ownerUserId">
         <template #default="scope">
-          {{ gotOwnerUser(scope.row.ownerUserId) }}
+          {{ scope.row.ownerUserName}}
         </template>
       </el-table-column>
       <!-- <el-table-column label="所属部门" align="center" prop="ownerUserId" /> -->
@@ -239,13 +235,12 @@ const queryParams = reactive({
   name: null,
   post: null,
   qq: null,
-  webchat: null,
+  wechat: null,
   sex: null,
   policyMakers: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -305,35 +300,15 @@ const handleExport = async () => {
   }
 }
 
-// TODO @zyna：这个负责人的读取，放在后端好点
-const gotOwnerUser = (owerUserId: string) => {
-  let ownerName = ''
-  if (owerUserId !== null) {
-    owerUserId.split(',').forEach((item: string, index: number) => {
-      if (index != 0) {
-        ownerName =
-          ownerName + ',' + userList.value.find((user: { id: any }) => user.id == item)?.nickname
-      } else {
-        ownerName = userList.value.find((user: { id: any }) => user.id == item)?.nickname || ''
-      }
-    })
-  }
-  return ownerName
-}
-
 /** 打开客户详情 */
 const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmContactDetail', params: { id } })
 }
 
-// TODO @zyna：这个上级的读取，放在后端读取，更合适；因为可能数据量比较大
-const allContactList = ref([]) //所有联系人列表
-const allCustomerList = ref([]) //客户列表
+
 /** 初始化 **/
 onMounted(async () => {
   await getList()
-  userList.value = await UserApi.getSimpleUserList()
-  allContactList.value = await ContactApi.simpleAlllist()
 })
 </script>

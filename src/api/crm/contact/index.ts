@@ -1,7 +1,7 @@
 /*
  * @Author: zyna
  * @Date: 2023-11-05 13:34:41
- * @LastEditTime: 2023-11-11 16:20:19
+ * @LastEditTime: 2023-11-26 20:47:04
  * @FilePath: \yudao-ui-admin-vue3\src\api\crm\contact\index.ts
  * @Description:
  */
@@ -22,13 +22,15 @@ export interface ContactVO {
   id: number
   parentId: number
   qq: number
-  webchat: string
+  wechat: string
   sex: number
-  policyMakers: boolean
+  master: boolean
   creatorName: string
   updateTime?: Date
   createTime?: Date
-  customerName: string
+  customerName: string,
+  areaName: string,
+  ownerUserName: string
 }
 
 // 查询crm联系人列表
@@ -60,6 +62,6 @@ export const deleteContact = async (id: number) => {
 export const exportContact = async (params) => {
   return await request.download({ url: `/crm/contact/export-excel`, params })
 }
-export const simpleAlllist = async () => {
-  return await request.get({ url: `/crm/contact/simpleAlllist` })
+export const simpleAllList = async () => {
+  return await request.get({ url: `/crm/contact/simple-all-list` })
 }
