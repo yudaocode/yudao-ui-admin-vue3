@@ -9,6 +9,20 @@ export interface CustomerLimitConfigVO {
   dealCountEnabled?: boolean
 }
 
+/**
+ * 客户限制配置类型
+ */
+export enum LimitConfType {
+  /**
+   * 拥有客户数限制
+   */
+  CUSTOMER_QUANTITY_LIMIT = 1,
+  /**
+   * 锁定客户数限制
+   */
+  CUSTOMER_LOCK_LIMIT = 2
+}
+
 // 查询客户限制配置列表
 export const getCustomerLimitConfigPage = async (params) => {
   return await request.get({ url: `/crm/customer-limit-config/page`, params })
