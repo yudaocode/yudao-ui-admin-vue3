@@ -10,6 +10,7 @@
       <el-form-item label="线索名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入线索名称" />
       </el-form-item>
+      <!-- TODO 芋艿：后续客户的选择 -->
       <el-form-item label="客户" prop="customerId">
         <el-select v-model="formData.customerId" clearable placeholder="请选择客户">
           <el-option
