@@ -19,8 +19,16 @@
   >
     <el-table-column label="编号" align="center" prop="id" />
     <el-table-column label="规则类型" align="center" prop="type" />
-    <el-table-column label="规则适用人群" align="center" prop="userNames" />
-    <el-table-column label="规则适用部门" align="center" prop="deptNames" />
+    <el-table-column
+      label="规则适用人群"
+      align="center"
+      :formatter="(row) => row.users?.map((user: any) => user.nickname).join('，')"
+    />
+    <el-table-column
+      label="规则适用部门"
+      align="center"
+      :formatter="(row) => row.depts?.map((dept: any) => dept.name).join('，')"
+    />
     <el-table-column
       :label="
         confType === LimitConfType.CUSTOMER_QUANTITY_LIMIT ? '拥有客户数上限' : '锁定客户数上限'
@@ -80,11 +88,11 @@
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import * as CustomerLimitConfigApi from '@/api/crm/customerLimitConfig'
-import CustomerLimitConfigForm from '@/views/crm/customerLimitConfig/CustomerLimitConfigForm.vue'
-import { LimitConfType } from '@/views/crm/customerLimitConfig/customerLimitConf'
+import CustomerLimitConfigForm from '@/views/crm/config/customerLimitConfig/CustomerLimitConfigForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
+import { LimitConfType } from '@/api/crm/customerLimitConfig'
 
-defineOptions({ name: 'CustomerLimitConfDetails' })
+defineOptions({ name: 'CustomerLimitConfigList' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化

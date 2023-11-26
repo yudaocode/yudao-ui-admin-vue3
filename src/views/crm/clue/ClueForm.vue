@@ -10,9 +10,15 @@
       <el-form-item label="线索名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入线索名称" />
       </el-form-item>
-      <!-- TODO wanwan 客户选择 -->
       <el-form-item label="客户" prop="customerId">
-        <el-input v-model="formData.customerId" placeholder="请选择客户" />
+        <el-select v-model="formData.customerId" clearable placeholder="请选择客户">
+          <el-option
+            v-for="item in customerList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="下次联系时间" prop="contactNextTime">
         <el-date-picker
@@ -47,6 +53,7 @@
 </template>
 <script setup lang="ts">
 import * as ClueApi from '@/api/crm/clue'
+import * as CustomerApi from '@/api/crm/customer'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -55,6 +62,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const customerList = ref([]) // 客户列表
 const formData = ref({
   id: undefined,
   name: undefined,
@@ -79,6 +87,12 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
+  const customerData = await CustomerApi.getCustomerPage({
+    pageNo: 1,
+    pageSize: 100,
+    pool: false
+  })
+  customerList.value = customerData.list
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
