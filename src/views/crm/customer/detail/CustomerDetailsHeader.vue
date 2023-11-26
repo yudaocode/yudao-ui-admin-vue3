@@ -7,7 +7,7 @@
       </div>
       <div>
         <!-- 右上：按钮 -->
-        <el-button v-hasPermi="['crm:customer:update']" @click="openForm('update', customer.id)">
+        <el-button v-hasPermi="['crm:customer:update']" @click="openForm(customer.id)">
           编辑
         </el-button>
         <el-button>更改成交状态</el-button>
@@ -70,16 +70,20 @@
 <script setup lang="ts">
 import * as CustomerApi from '@/api/crm/customer'
 import { DICT_TYPE } from '@/utils/dict'
+// TODO @wanwan：是不是把 CustomerBasicInfo 也放进来。
 import CustomerBasicInfo from '@/views/crm/customer/detail/CustomerBasicInfo.vue'
 import CustomerForm from '@/views/crm/customer/CustomerForm.vue'
 
-const { customer, loading } = defineProps<{ customer: CustomerApi.CustomerVO; loading: boolean }>()
+const { customer, loading } = defineProps<{
+  customer: CustomerApi.CustomerVO
+  loading: boolean
+}>()
 
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
-
+/** 修改操作 */
 const formRef = ref()
+const openForm = (id?: number) => {
+  formRef.value.open('update', id)
+}
 
 const emit = defineEmits(['refresh']) // 定义 success 事件，用于操作成功后的回调
 </script>

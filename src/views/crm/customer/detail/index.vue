@@ -1,5 +1,5 @@
 <template>
-  <CustomerDetailsTop :customer="customer" :loading="loading" @refresh="getCustomerData(id)" />
+  <CustomerDetailsHeader :customer="customer" :loading="loading" @refresh="getCustomerData(id)" />
   <el-col>
     <el-tabs>
       <el-tab-pane label="详细资料">
@@ -66,7 +66,7 @@ const loading = ref(true) // 加载中
 /**
  * 获取详情
  *
- * @param id
+ * @param id 客户编号
  */
 const customer = ref<CustomerApi.CustomerVO>({} as CustomerApi.CustomerVO) // 客户详情
 const getCustomerData = async (id: number) => {
