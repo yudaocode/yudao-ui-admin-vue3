@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import { ConfigVO } from '@/api/infra/config'
 
 export interface CustomerPoolConfigVO {
   enabled?: boolean
@@ -14,6 +15,6 @@ export const getCustomerPoolConfig = async () => {
 }
 
 // 更新客户公海规则设置
-export const updateCustomerPoolConfig = async (data: ConfigVO) => {
-  return await request.put({ url: `/crm/customer-pool-config/update`, data })
+export const saveCustomerPoolConfig = async (data: ConfigVO) => {
+  return await request.put({ url: `/crm/customer-pool-config/save`, data })
 }

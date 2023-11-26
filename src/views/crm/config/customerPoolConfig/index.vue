@@ -23,7 +23,7 @@
         </template>
         <!-- 表单 -->
         <el-form-item label="客户公海规则设置" prop="enabled">
-          <el-radio-group v-model="formData.enabled" class="ml-4">
+          <el-radio-group v-model="formData.enabled" @change="changeEnable" class="ml-4">
             <el-radio :label="false" size="large">不启用</el-radio>
             <el-radio :label="true" size="large">启用</el-radio>
           </el-radio-group>
@@ -36,7 +36,11 @@
             天未成交
           </el-form-item>
           <el-form-item label="提前提醒设置" prop="notifyEnabled">
-            <el-radio-group v-model="formData.notifyEnabled" class="ml-4">
+            <el-radio-group
+              v-model="formData.notifyEnabled"
+              @change="changeNotifyEnable"
+              class="ml-4"
+            >
               <el-radio :label="false" size="large">不提醒</el-radio>
               <el-radio :label="true" size="large">提醒</el-radio>
             </el-radio-group>
@@ -52,11 +56,10 @@
   </ContentWrap>
 </template>
 <script setup lang="ts">
-import * as CustomerPoolConfApi from '@/api/crm/customerPoolConf'
+import * as CustomerPoolConfigApi from '@/api/crm/customerPoolConfig'
 import { CardTitle } from '@/components/Card'
 
-// TODO @wanwan：CustomerPoolConf =》 CustomerPoolConfig；另外，我们在 crm 目录下，新建一个 config 目录，然后把 customerPoolConfig 和 customerLimitConfig 都挪进
-defineOptions({ name: 'CustomerPoolConf' })
+defineOptions({ name: 'CrmCustomerPoolConfig' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -78,7 +81,7 @@ const formRef = ref() // 表单 Ref
 const getConfig = async () => {
   try {
     formLoading.value = true
-    const data = await CustomerPoolConfApi.getCustomerPoolConfig()
+    const data = await CustomerPoolConfigApi.getCustomerPoolConfig()
     if (data === null) {
       return
     }
@@ -97,8 +100,8 @@ const onSubmit = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as CustomerPoolConfApi.CustomerPoolConfigVO
-    await CustomerPoolConfApi.updateCustomerPoolConfig(data)
+    const data = formData.value as unknown as CustomerPoolConfigApi.CustomerPoolConfigVO
+    await CustomerPoolConfigApi.saveCustomerPoolConfig(data)
     message.success(t('common.updateSuccess'))
     await getConfig()
     formLoading.value = false
@@ -107,27 +110,22 @@ const onSubmit = async () => {
   }
 }
 
-// TODO @wanwan：el-radio-group 选择后，触发会不会更好哈；
-watch(
-  () => formData.value.enabled,
-  (val: boolean) => {
-    if (!val) {
-      formData.value.contactExpireDays = undefined
-      formData.value.dealExpireDays = undefined
-      formData.value.notifyEnabled = false
-      formData.value.notifyDays = undefined
-    }
+/** 更改客户公海规则设置 */
+const changeEnable = () => {
+  if (!formData.value.enabled) {
+    formData.value.contactExpireDays = undefined
+    formData.value.dealExpireDays = undefined
+    formData.value.notifyEnabled = false
+    formData.value.notifyDays = undefined
   }
-)
-// TODO @wanwan：el-radio-group 选择后，触发会不会更好哈；
-watch(
-  () => formData.value.notifyEnabled,
-  (val: boolean) => {
-    if (!val) {
-      formData.value.notifyDays = undefined
-    }
+}
+
+/** 更改提前提醒设置 */
+const changeNotifyEnable = () => {
+  if (!formData.value.notifyEnabled) {
+    formData.value.notifyDays = undefined
   }
-)
+}
 
 onMounted(() => {
   getConfig()

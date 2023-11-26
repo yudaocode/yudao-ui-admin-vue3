@@ -1,69 +1,5 @@
 <template>
-  <!-- TODO @wanwan：要不要把上面这一整块，搞成一个组件，就是把 下面 + Details + BasitcInfo 合并成一个 -->
-  <div v-loading="loading">
-    <div class="flex items-start justify-between">
-      <div>
-        <!-- 左上：客户基本信息 -->
-        <CustomerBasicInfo :customer="customer" />
-      </div>
-      <div>
-        <!-- 右上：按钮 -->
-        <el-button v-hasPermi="['crm:customer:update']" @click="openForm('update', customer.id)">
-          编辑
-        </el-button>
-        <el-button>更改成交状态</el-button>
-      </div>
-    </div>
-    <el-row class="mt-10px">
-      <el-button>
-        <Icon class="mr-5px" icon="ph:calendar-fill" />
-        创建任务
-      </el-button>
-      <el-button>
-        <Icon class="mr-5px" icon="carbon:email" />
-        发送邮件
-      </el-button>
-      <el-button>
-        <Icon class="mr-5px" icon="system-uicons:contacts" />
-        创建联系人
-      </el-button>
-      <el-button>
-        <Icon class="mr-5px" icon="ep:opportunity" />
-        创建商机
-      </el-button>
-      <el-button>
-        <Icon class="mr-5px" icon="clarity:contract-line" />
-        创建合同
-      </el-button>
-      <el-button>
-        <Icon class="mr-5px" icon="icon-park:income-one" />
-        创建回款
-      </el-button>
-      <el-button>
-        <Icon class="mr-5px" icon="fluent:people-team-add-20-filled" />
-        添加团队成员
-      </el-button>
-    </el-row>
-  </div>
-  <ContentWrap class="mt-10px">
-    <el-descriptions :column="5" direction="vertical">
-      <el-descriptions-item label="客户级别">
-        <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="customer.level" />
-      </el-descriptions-item>
-      <el-descriptions-item label="成交状态">
-        {{ customer.dealStatus ? '已成交' : '未成交' }}
-      </el-descriptions-item>
-      <el-descriptions-item label="负责人">
-        {{ customer.ownerUserName }}
-      </el-descriptions-item>
-      <!-- TODO wanwan 首要联系人? -->
-      <el-descriptions-item label="首要联系人" />
-      <!-- TODO wanwan 首要联系人电话? -->
-      <el-descriptions-item label="首要联系人电话">
-        {{ customer.mobile }}
-      </el-descriptions-item>
-    </el-descriptions>
-  </ContentWrap>
+  <CustomerDetailsTop :customer="customer" :loading="loading" @refresh="getCustomerData(id)" />
   <el-col>
     <el-tabs>
       <el-tab-pane label="详细资料">
@@ -107,9 +43,6 @@
       <el-tab-pane label="发票" lazy> 发票</el-tab-pane>
     </el-tabs>
   </el-col>
-
-  <!-- 表单弹窗：添加/修改 -->
-  <CustomerForm ref="formRef" @success="getCustomerData(id)" />
 </template>
 
 <script lang="ts" setup>
@@ -143,11 +76,6 @@ const getCustomerData = async (id: number) => {
   } finally {
     loading.value = false
   }
-}
-
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
 }
 
 /**

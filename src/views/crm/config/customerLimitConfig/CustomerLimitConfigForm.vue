@@ -57,11 +57,11 @@
 </template>
 <script setup lang="ts">
 import * as CustomerLimitConfigApi from '@/api/crm/customerLimitConfig'
-import { LimitConfType } from '@/views/crm/customerLimitConfig/customerLimitConf'
 import * as DeptApi from '@/api/system/dept'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as UserApi from '@/api/system/user'
 import { cloneDeep } from 'lodash-es'
+import { LimitConfType } from '@/api/crm/customerLimitConfig'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
