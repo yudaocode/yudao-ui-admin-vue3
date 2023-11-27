@@ -62,7 +62,8 @@ export const deleteCustomer = async (id: number) => {
 export const exportCustomer = async (params) => {
   return await request.download({ url: `/crm/customer/export-excel`, params })
 }
-//客户列表
+
+// 客户列表
 export const queryAllList = async () => {
   return await request.get({ url: `/crm/customer/query-all-list` })
 }
