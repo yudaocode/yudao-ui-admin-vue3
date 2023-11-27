@@ -1,10 +1,3 @@
-<!--
- * @Author: zyna
- * @Date: 2023-11-26 10:39:46
- * @LastEditTime: 2023-11-27 23:43:25
- * @FilePath: \yudao-ui-admin-vue3\src\views\crm\contact\detail\ContactDetails.vue
- * @Description: 
--->
 <template>
   <el-collapse v-model="activeNames">
     <el-collapse-item name="basicInfo">

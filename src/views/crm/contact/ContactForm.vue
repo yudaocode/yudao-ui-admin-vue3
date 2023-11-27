@@ -1,6 +1,12 @@
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" :width="820">
-    <el-form ref="formRef" :model="formData" :rules="formRules" label-width="110px" v-loading="formLoading">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="110px"
+      v-loading="formLoading"
+    >
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="姓名" prop="name">
@@ -9,8 +15,18 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="负责人" prop="ownerUserId">
-            <el-select v-model="formData.ownerUserId" placeholder="请选择负责人" value-key="id" lable-key="nickname">
-              <el-option v-for="item in userList" :key="item.id" :label="item.nickname" :value="item.id" />
+            <el-select
+              v-model="formData.ownerUserId"
+              placeholder="请选择负责人"
+              value-key="id"
+              lable-key="nickname"
+            >
+              <el-option
+                v-for="item in userList"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              />
             </el-select>
           </el-form-item>
         </el-col>
@@ -23,18 +39,26 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="12"><el-form-item label="性别" prop="sex">
+        <el-col :span="12"
+          ><el-form-item label="性别" prop="sex">
             <el-select v-model="formData.sex" placeholder="请选择">
               <el-option
-v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)" :key="dict.value"
-                :label="dict.label" :value="dict.value" />
-            </el-select>
-          </el-form-item></el-col>
+                v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select> </el-form-item
+        ></el-col>
       </el-row>
       <el-row>
         <el-col :span="12">
           <el-form-item label="手机号" prop="mobile">
-            <el-input input-style="width:190px;" v-model="formData.mobile" placeholder="请输入手机号" />
+            <el-input
+              input-style="width:190px;"
+              v-model="formData.mobile"
+              placeholder="请输入手机号"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -46,7 +70,11 @@ v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)" :key="dict.value"
       <el-row>
         <el-col :span="12">
           <el-form-item label="邮箱" prop="email">
-            <el-input input-style="width:190px;" v-model="formData.email" placeholder="请输入邮箱" />
+            <el-input
+              input-style="width:190px;"
+              v-model="formData.email"
+              placeholder="请输入邮箱"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -58,11 +86,21 @@ v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)" :key="dict.value"
       <el-row>
         <el-col :span="12">
           <el-form-item label="微信" prop="wechat">
-            <el-input input-style="width:190px;" v-model="formData.wechat" placeholder="请输入微信" />
+            <el-input
+              input-style="width:190px;"
+              v-model="formData.wechat"
+              placeholder="请输入微信"
+            />
           </el-form-item>
         </el-col>
-        <el-col :span="12"> <el-form-item label="下次联系时间" prop="nextTime">
-            <el-date-picker v-model="formData.nextTime" type="date" value-format="x" placeholder="选择下次联系时间" />
+        <el-col :span="12">
+          <el-form-item label="下次联系时间" prop="nextTime">
+            <el-date-picker
+              v-model="formData.nextTime"
+              type="date"
+              value-format="x"
+              placeholder="选择下次联系时间"
+            />
           </el-form-item>
         </el-col>
       </el-row>
@@ -70,35 +108,50 @@ v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)" :key="dict.value"
         <el-col :span="12">
           <el-form-item label="所在地" prop="areaId">
             <el-tree-select
-v-model="formData.areaId" :data="areaList" :props="defaultProps"
-              :render-after-expand="true" />
+              v-model="formData.areaId"
+              :data="areaList"
+              :props="defaultProps"
+              :render-after-expand="true"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="地址" prop="address">
-            <el-input input-style="width:190px;" v-model="formData.address" placeholder="请输入地址" />
+            <el-input
+              input-style="width:190px;"
+              v-model="formData.address"
+              placeholder="请输入地址"
+            />
           </el-form-item>
-        </el-col>
-      </el-row><el-row>
+        </el-col> </el-row
+      ><el-row>
         <el-col :span="12">
           <el-form-item label="直属上级" prop="parentId">
             <el-select v-model="formData.parentId" placeholder="请选择">
               <el-option
-v-for="item in allContactList" :key="item.id" :label="item.name" :value="item.id"
-                :disabled="item.id == formData.id" />
+                v-for="item in allContactList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+                :disabled="item.id == formData.id"
+              />
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="12"> <el-form-item label="职位" prop="post">
+        <el-col :span="12">
+          <el-form-item label="职位" prop="post">
             <el-input input-style="width:190px;" v-model="formData.post" placeholder="请输入职位" />
           </el-form-item>
-        </el-col>
-      </el-row><el-row>
-        <el-col :span="12"><el-form-item label="是否关键决策人" prop="master" style="width: 400px">
+        </el-col> </el-row
+      ><el-row>
+        <el-col :span="12"
+          ><el-form-item label="是否关键决策人" prop="master" style="width: 400px">
             <el-radio-group v-model="formData.master">
               <el-radio
-v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)" :key="dict.value"
-                :label="dict.value">
+                v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
+                :key="dict.value"
+                :label="dict.value"
+              >
                 {{ dict.label }}
               </el-radio>
             </el-radio-group>
@@ -106,7 +159,8 @@ v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)" :key="dict.va
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="24"><el-form-item label="备注" prop="remark">
+        <el-col :span="24"
+          ><el-form-item label="备注" prop="remark">
             <el-input v-model="formData.remark" placeholder="请输入备注" />
           </el-form-item>
         </el-col>
@@ -123,7 +177,6 @@ import * as ContactApi from '@/api/crm/contact'
 import { DICT_TYPE, getIntDictOptions, getBoolDictOptions } from '@/utils/dict'
 import * as UserApi from '@/api/system/user'
 import * as CustomerApi from '@/api/crm/customer'
-import { ElTable } from 'element-plus'
 import * as AreaApi from '@/api/system/area'
 import { defaultProps } from '@/utils/tree'
 
@@ -163,6 +216,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const ownerUserList = ref<any[]>([])
 const userList = ref<UserApi.UserVO[]>([]) // 用户列表
+// TODO 芋艿：统一的客户选择面板
 const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 const allContactList = ref([]) // 所有联系人列表
 /** 打开弹窗 */

@@ -1,10 +1,3 @@
-/*
- * @Author: zyna
- * @Date: 2023-11-05 13:34:41
- * @LastEditTime: 2023-11-26 20:47:04
- * @FilePath: \yudao-ui-admin-vue3\src\api\crm\contact\index.ts
- * @Description:
- */
 import request from '@/config/axios'
 
 export interface ContactVO {
@@ -28,8 +21,8 @@ export interface ContactVO {
   creatorName: string
   updateTime?: Date
   createTime?: Date
-  customerName: string,
-  areaName: string,
+  customerName: string
+  areaName: string
   ownerUserName: string
 }
 
@@ -62,6 +55,7 @@ export const deleteContact = async (id: number) => {
 export const exportContact = async (params) => {
   return await request.download({ url: `/crm/contact/export-excel`, params })
 }
+
 export const simpleAllList = async () => {
   return await request.get({ url: `/crm/contact/simple-all-list` })
 }
