@@ -17,7 +17,7 @@
       </el-row>
       <el-row>
         <el-col :span="12">
-          <el-form-item label="客户名称" prop="customerName">
+          <el-form-item label="客户" prop="customerName">
             <el-select v-model="formData.customerId" placeholder="请选择客户" value-key="id" lable-key="name">
               <el-option v-for="item in customerList" :key="item.id" :label="item.name" :value="item.id" />
             </el-select>

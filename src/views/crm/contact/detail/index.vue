@@ -46,7 +46,7 @@
   </div>
   <ContentWrap class="mt-10px">
     <el-descriptions :column="5" direction="vertical">
-      <el-descriptions-item label="客户名称">
+      <el-descriptions-item label="客户">
         {{ contact.customerName }}
       </el-descriptions-item>
       <el-descriptions-item label="职务">
