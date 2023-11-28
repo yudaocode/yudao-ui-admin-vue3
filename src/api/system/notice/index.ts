@@ -35,3 +35,8 @@ export const updateNotice = (data: NoticeVO) => {
 export const deleteNotice = (id: number) => {
   return request.delete({ url: '/system/notice/delete?id=' + id })
 }
+
+// 推送公告
+export const pushNotice = (id: number) => {
+  return request.post({ url: '/system/notice/push?id=' + id })
+}

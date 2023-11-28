@@ -1,4 +1,4 @@
-import CrmTeam from './CrmTeamList.vue'
+import CrmPermissionList from './CrmPermissionList.vue'
 
 enum CrmBizTypeEnum {
   CRM_LEADS = 1, // 线索
@@ -9,9 +9,7 @@ enum CrmBizTypeEnum {
 }
 
 enum CrmPermissionLevelEnum {
-  OWNER = 1, // 负责人
-  READ = 2, // 读
-  WRITE = 3 // 写
+  OWNER = 1 // 负责人
 }
 
-export { CrmTeam, CrmBizTypeEnum, CrmPermissionLevelEnum }
+export { CrmPermissionList, CrmBizTypeEnum, CrmPermissionLevelEnum }

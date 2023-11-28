@@ -107,11 +107,15 @@ export const PAGE_LIBS = [
     extended: true,
     components: ['ImageBar', 'Carousel', 'TitleBar', 'VideoPlayer', 'Divider', 'MagicCube']
   },
-  { name: '商品组件', extended: true, components: ['ProductCard'] },
+  { name: '商品组件', extended: true, components: ['ProductCard', 'ProductList'] },
   {
     name: '会员组件',
     extended: true,
-    components: ['UserCard', 'OrderCard', 'WalletCard', 'CouponCard']
+    components: ['UserCard', 'UserOrder', 'UserWallet', 'UserCoupon']
   },
-  { name: '营销组件', extended: true, components: ['Combination', 'Seckill', 'Point', 'Coupon'] }
+  {
+    name: '营销组件',
+    extended: true,
+    components: ['CombinationCard', 'SeckillCard', 'PointCard', 'CouponCard']
+  }
 ] as DiyComponentLibrary[]

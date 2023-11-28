@@ -19,9 +19,14 @@
       </el-form-item>
       <el-form-item label="权限级别" prop="level">
         <el-radio-group v-model="formData.level">
-          <!-- TODO @puhui999：搞个字典配置？然后这里 remove 掉负责人 -->
-          <el-radio :label="CrmPermissionLevelEnum.READ">只读</el-radio>
-          <el-radio :label="CrmPermissionLevelEnum.WRITE">读写</el-radio>
+          <template
+            v-for="dict in getIntDictOptions(DICT_TYPE.CRM_PERMISSION_LEVEL)"
+            :key="dict.value"
+          >
+            <el-radio v-if="dict.value != CrmPermissionLevelEnum.OWNER" :label="dict.value">
+              {{ dict.label }}
+            </el-radio>
+          </template>
         </el-radio-group>
       </el-form-item>
     </el-form>
@@ -34,7 +39,8 @@
 <script lang="ts" setup>
 import * as UserApi from '@/api/system/user'
 import * as PermissionApi from '@/api/crm/permission'
-import { CrmPermissionLevelEnum } from './index'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { CrmPermissionLevelEnum } from '@/views/crm/components/index'
 
 defineOptions({ name: 'CrmPermissionForm' })
 

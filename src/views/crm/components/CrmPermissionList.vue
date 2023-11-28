@@ -1,7 +1,7 @@
 <template>
   <!-- 操作栏 -->
   <el-row justify="end">
-    <el-button type="primary" @click="handleAdd">
+    <el-button type="primary" @click="openForm">
       <Icon class="mr-5px" icon="ep:plus" />
       新增
     </el-button>
@@ -9,7 +9,7 @@
       <Icon class="mr-5px" icon="ep:edit" />
       编辑
     </el-button>
-    <el-button @click="handleRemove">
+    <el-button @click="handleDelete">
       <Icon class="mr-5px" icon="ep:delete" />
       移除
     </el-button>
@@ -30,45 +30,32 @@
     <el-table-column align="center" label="岗位" prop="postNames" />
     <el-table-column align="center" label="权限级别" prop="level">
       <template #default="{ row }">
-        <el-tag>{{ getLevelName(row.level) }}</el-tag>
+        <dict-tag :type="DICT_TYPE.CRM_PERMISSION_LEVEL" :value="row.level" />
       </template>
     </el-table-column>
     <el-table-column :formatter="dateFormatter" align="center" label="加入时间" prop="createTime" />
   </el-table>
-  <CrmPermissionForm ref="crmPermissionFormRef" />
+  <CrmPermissionForm ref="permissionFormRef" @success="getList" />
 </template>
 <script lang="ts" setup>
-// TODO @puhui999：改成 CrmPermissionList
 import { dateFormatter } from '@/utils/formatTime'
 import { ElTable } from 'element-plus'
 import * as PermissionApi from '@/api/crm/permission'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import CrmPermissionForm from './CrmPermissionForm.vue'
 import { CrmPermissionLevelEnum } from './index'
+import { DICT_TYPE } from '@/utils/dict'
 
-defineOptions({ name: 'CrmTeam' })
+defineOptions({ name: 'CrmPermissionList' })
 
 const message = useMessage() // 消息
 
 const props = defineProps<{
-  bizType: number
-  bizId: number
+  bizType: number // 模块类型
+  bizId: number // 模块数据编号
 }>()
 const loading = ref(true) // 列表的加载中
-const list = ref<PermissionApi.PermissionVO[]>([
-  // TODO 测试数据
-  {
-    id: 1, // 数据权限编号
-    userId: 1, // 用户编号
-    bizType: 1, // Crm 类型
-    bizId: 1, // Crm 类型数据编号
-    level: 1, // 权限级别
-    deptName: '研发部门', // 部门名称
-    nickname: '芋道源码', // 用户昵称
-    postNames: '全栈开发工程师', // 岗位名称数组
-    createTime: new Date()
-  }
-]) // 列表的数据
+const list = ref<PermissionApi.PermissionVO[]>([]) // 列表的数据
 
 /** 查询列表 */
 const getList = async () => {
@@ -83,40 +70,28 @@ const getList = async () => {
     loading.value = false
   }
 }
-
-// TODO @puhui999：字典格式化
-/**
- * 获得权限级别名称
- * @param level 权限级别
- */
-const getLevelName = computed(() => (level: number) => {
-  switch (level) {
-    case CrmPermissionLevelEnum.OWNER:
-      return '负责人'
-    case CrmPermissionLevelEnum.READ:
-      return '只读'
-    case CrmPermissionLevelEnum.WRITE:
-      return '读写'
-    default:
-      break
-  }
-})
-// TODO @puhui999：空行稍微注意下哈；一些注释补齐下；
-const multipleSelection = ref<PermissionApi.PermissionVO[]>([])
+const multipleSelection = ref<PermissionApi.PermissionVO[]>([]) // 选择的团队成员
 const handleSelectionChange = (val: PermissionApi.PermissionVO[]) => {
   multipleSelection.value = val
 }
-// TODO @puhui999：一些变量命名，看看有没可能跟列表界面的 index.vue 保持他统一的风格；
-const crmPermissionFormRef = ref<InstanceType<typeof CrmPermissionForm>>()
+
+const permissionFormRef = ref<InstanceType<typeof CrmPermissionForm>>() // 权限表单 Ref
+/**
+ * 编辑团队成员
+ */
 const handleEdit = () => {
   if (multipleSelection.value?.length === 0) {
     message.warning('请先选择团队成员后操作！')
     return
   }
   const ids = multipleSelection.value?.map((item) => item.id)
-  crmPermissionFormRef.value?.open('update', props.bizType, props.bizId, ids)
+  permissionFormRef.value?.open('update', props.bizType, props.bizId, ids)
 }
-const handleRemove = async () => {
+
+/**
+ * 移除团队成员
+ */
+const handleDelete = async () => {
   if (multipleSelection.value?.length === 0) {
     message.warning('请先选择团队成员后操作！')
     return
@@ -129,11 +104,18 @@ const handleRemove = async () => {
     ids
   })
 }
-const handleAdd = () => {
-  crmPermissionFormRef.value?.open('create', props.bizType, props.bizId)
+
+/**
+ * 添加团队成员
+ */
+const openForm = () => {
+  permissionFormRef.value?.open('create', props.bizType, props.bizId)
 }
 
-const userStore = useUserStoreWithOut()
+const userStore = useUserStoreWithOut() // 用户信息缓存
+/**
+ * 退出团队
+ */
 const handleQuit = async () => {
   const permission = list.value.find(
     (item) => item.userId === userStore.getUser.id && item.level === CrmPermissionLevelEnum.OWNER
