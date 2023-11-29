@@ -15,6 +15,7 @@
     </el-button>
     <el-button type="danger" @click="handleQuit"> 退出团队</el-button>
   </el-row>
+
   <!-- 团队成员展示 -->
   <el-table
     v-loading="loading"

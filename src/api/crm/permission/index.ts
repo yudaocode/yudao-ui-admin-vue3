@@ -12,6 +12,14 @@ export interface PermissionVO {
   createTime?: Date
 }
 
+export enum BizTypeEnum {
+  CRM_LEADS = 1, // 线索
+  CRM_CUSTOMER = 2, // 客户
+  CRM_CONTACTS = 3, // 联系人
+  CRM_BUSINESS = 5, // 商机
+  CRM_CONTRACT = 6 // 合同
+}
+
 // 查询团队成员列表
 export const getPermissionList = async (params) => {
   return await request.get({ url: `/crm/permission/list`, params })

@@ -1,5 +1,6 @@
 import CrmPermissionList from './CrmPermissionList.vue'
 
+// TODO @puhui999：迁移到 api/permission/index.ts 里；我已经迁移了一部分哈
 enum CrmBizTypeEnum {
   CRM_LEADS = 1, // 线索
   CRM_CUSTOMER = 2, // 客户
