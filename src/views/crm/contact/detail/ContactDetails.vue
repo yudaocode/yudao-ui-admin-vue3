@@ -1,7 +1,7 @@
 <!--
  * @Author: zyna
  * @Date: 2023-11-26 10:39:46
- * @LastEditTime: 2023-11-26 20:43:43
+ * @LastEditTime: 2023-11-27 23:43:25
  * @FilePath: \yudao-ui-admin-vue3\src\views\crm\contact\detail\ContactDetails.vue
  * @Description: 
 -->
@@ -15,7 +15,7 @@
         <el-descriptions-item label="姓名">
           {{ contact.name }}
         </el-descriptions-item>
-        <el-descriptions-item label="客户名称">
+        <el-descriptions-item label="客户">
           {{ contact.customerName }}
         </el-descriptions-item>
         <el-descriptions-item label="手机">
