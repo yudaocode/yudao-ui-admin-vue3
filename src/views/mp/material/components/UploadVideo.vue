@@ -59,6 +59,8 @@ import { HEADERS, UploadData, UPLOAD_URL, UploadType, beforeVideoUpload } from '
 
 const message = useMessage()
 
+const accountId = inject<number>('accountId')
+
 const uploadRules: FormRules = {
   title: [{ required: true, message: '请输入标题', trigger: 'blur' }],
   introduction: [{ required: true, message: '请输入描述', trigger: 'blur' }]
@@ -89,7 +91,8 @@ const fileList = ref<UploadUserFile[]>([])
 const uploadData: UploadData = reactive({
   type: UploadType.Video,
   title: '',
-  introduction: ''
+  introduction: '',
+  accountId: accountId!
 })
 
 const uploadFormRef = ref<FormInstance | null>(null)
