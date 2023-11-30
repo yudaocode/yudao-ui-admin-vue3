@@ -90,10 +90,10 @@ import ContactBasicInfo from '@/views/crm/contact/detail/ContactBasicInfo.vue'
 import ContactDetails from '@/views/crm/contact/detail/ContactDetails.vue'
 import ContactForm from '@/views/crm/contact/ContactForm.vue'
 import { formatDate } from '@/utils/formatTime'
-import * as CustomerApi from '@/api/crm/customer'
 // TODO 芋艿：后面在 review 么？
 
-defineOptions({ name: 'ContactDetail' })
+defineOptions({ name: 'CrmContactDetail' })
+
 const { delView } = useTagsViewStore() // 视图操作
 const route = useRoute()
 const { currentRoute } = useRouter() // 路由

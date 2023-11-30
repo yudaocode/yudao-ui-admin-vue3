@@ -1,14 +1,14 @@
 <template>
   <!-- 操作栏 -->
   <el-row justify="end">
-    <el-button class="mb-10px">
+    <el-button>
       <Icon class="mr-5px" icon="system-uicons:contacts" />
       创建联系人
     </el-button>
   </el-row>
 
   <!-- 列表 -->
-  <ContentWrap>
+  <ContentWrap class="mt-10px">
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="姓名" fixed="left" align="center" prop="name">
         <template #default="scope">
@@ -136,6 +136,7 @@ const openDetail = (id: number) => {
   push({ name: 'CrmContactDetail', params: { id } })
 }
 
+/** 监听打开的 bizId + bizType，从而加载最新的列表 */
 watch(
   () => [props.bizId, props.bizType],
   () => {

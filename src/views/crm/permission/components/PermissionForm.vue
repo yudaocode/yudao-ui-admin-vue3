@@ -23,12 +23,13 @@
             v-for="dict in getIntDictOptions(DICT_TYPE.CRM_PERMISSION_LEVEL)"
             :key="dict.value"
           >
-            <el-radio v-if="dict.value != CrmPermissionLevelEnum.OWNER" :label="dict.value">
+            <el-radio v-if="dict.value != PermissionLevelEnum.OWNER" :label="dict.value">
               {{ dict.label }}
             </el-radio>
           </template>
         </el-radio-group>
       </el-form-item>
+      <!-- TODO @puhui999：同时添加至 -->
     </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -39,8 +40,8 @@
 <script lang="ts" setup>
 import * as UserApi from '@/api/system/user'
 import * as PermissionApi from '@/api/crm/permission'
+import { PermissionLevelEnum } from '@/api/crm/permission'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { CrmPermissionLevelEnum } from '@/views/crm/components/index'
 
 defineOptions({ name: 'CrmPermissionForm' })
 
@@ -54,8 +55,8 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const formData = ref<PermissionApi.PermissionVO & { ids?: number[] }>({
   userId: undefined, // 用户编号
-  bizType: undefined, // Crm 类型
-  bizId: undefined, // Crm 类型数据编号
+  bizType: undefined, // CRM 类型
+  bizId: undefined, // CRM 类型数据编号
   level: undefined // 权限级别
 })
 const formRules = reactive({

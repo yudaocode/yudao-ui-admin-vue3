@@ -61,8 +61,7 @@ export const exportContact = async (params) => {
   return await request.download({ url: `/crm/contact/export-excel`, params })
 }
 
-export const simpleAllList = async () => {
+// 获得 CRM 联系人列表（精简）
+export const getSimpleContactList = async () => {
   return await request.get({ url: `/crm/contact/simple-all-list` })
 }
-
-//

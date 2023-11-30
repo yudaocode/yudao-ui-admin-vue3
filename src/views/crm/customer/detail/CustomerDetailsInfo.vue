@@ -18,29 +18,15 @@
           <el-descriptions-item label="客户等级">
             <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="customer.level" />
           </el-descriptions-item>
-          <el-descriptions-item label="手机">
-            {{ customer.mobile }}
-          </el-descriptions-item>
-          <el-descriptions-item label="电话">
-            {{ customer.telephone }}
-          </el-descriptions-item>
-          <el-descriptions-item label="邮箱">
-            {{ customer.email }}
-          </el-descriptions-item>
-          <el-descriptions-item label="QQ">
-            {{ customer.qq }}
-          </el-descriptions-item>
-          <el-descriptions-item label="微信">
-            {{ customer.wechat }}
-          </el-descriptions-item>
-          <el-descriptions-item label="网址">
-            {{ customer.website }}
-          </el-descriptions-item>
-          <el-descriptions-item label="所在地">
-            {{ customer.areaName }}
-          </el-descriptions-item>
-          <el-descriptions-item label="详细地址">
-            {{ customer.detailAddress }}
+          <el-descriptions-item label="手机">{{ customer.mobile }}</el-descriptions-item>
+          <el-descriptions-item label="电话">{{ customer.telephone }}</el-descriptions-item>
+          <el-descriptions-item label="邮箱">{{ customer.email }} </el-descriptions-item>
+          <el-descriptions-item label="QQ">{{ customer.qq }} </el-descriptions-item>
+          <el-descriptions-item label="微信">{{ customer.wechat }} </el-descriptions-item>
+          <el-descriptions-item label="网址">{{ customer.website }} </el-descriptions-item>
+          <el-descriptions-item label="所在地">{{ customer.areaName }} </el-descriptions-item>
+          <el-descriptions-item label="详细地址"
+            >{{ customer.detailAddress }}
           </el-descriptions-item>
           <el-descriptions-item label="下次联系时间">
             {{
@@ -52,12 +38,8 @@
           </el-descriptions-item>
         </el-descriptions>
         <el-descriptions :column="1">
-          <el-descriptions-item label="客户描述">
-            {{ customer.description }}
-          </el-descriptions-item>
-          <el-descriptions-item label="备注">
-            {{ customer.remark }}
-          </el-descriptions-item>
+          <el-descriptions-item label="客户描述">{{ customer.description }} </el-descriptions-item>
+          <el-descriptions-item label="备注">{{ customer.remark }} </el-descriptions-item>
         </el-descriptions>
       </el-collapse-item>
       <el-collapse-item name="systemInfo">
@@ -65,12 +47,8 @@
           <span class="text-base font-bold">系统信息</span>
         </template>
         <el-descriptions :column="2">
-          <el-descriptions-item label="负责人">
-            {{ customer.ownerUserName }}
-          </el-descriptions-item>
-          <el-descriptions-item label="创建人">
-            {{ customer.creatorName }}
-          </el-descriptions-item>
+          <el-descriptions-item label="负责人">{{ customer.ownerUserName }} </el-descriptions-item>
+          <el-descriptions-item label="创建人">{{ customer.creatorName }} </el-descriptions-item>
           <el-descriptions-item label="创建时间">
             {{ customer.createTime ? formatDate(customer.createTime) : '空' }}
           </el-descriptions-item>
@@ -88,10 +66,9 @@ import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 
 const { customer } = defineProps<{
-  customer: CustomerApi.CustomerVO
+  customer: CustomerApi.CustomerVO // 客户明细
 }>()
 
-// 展示的折叠面板
-const activeNames = ref(['basicInfo', 'systemInfo'])
+const activeNames = ref(['basicInfo', 'systemInfo']) // 展示的折叠面板
 </script>
 <style scoped lang="scss"></style>

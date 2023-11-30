@@ -235,7 +235,7 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  allContactList.value = await ContactApi.simpleAllList()
+  allContactList.value = await ContactApi.getSimpleContactList()
   userList.value = await UserApi.getSimpleUserList()
   customerList.value = await CustomerApi.queryAllList()
   areaList.value = await AreaApi.getAreaTree()

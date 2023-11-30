@@ -1,54 +1,98 @@
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
-    <el-form class="-mb-15px" :model="queryParams" ref="queryFormRef" :inline="true" label-width="68px">
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="68px"
+    >
       <el-form-item label="客户" prop="customerId">
         <el-select
-v-model="queryParams.customerId" placeholder="请选择客户" value-key="id" lable-key="name"
-          @keyup.enter="handleQuery" clearable>
-          <el-option v-for="item in customerList" :key="item.id" :label="item.name" :value="item.id" />
+          v-model="queryParams.customerId"
+          placeholder="请选择客户"
+          value-key="id"
+          lable-key="name"
+          @keyup.enter="handleQuery"
+          clearable
+        >
+          <el-option
+            v-for="item in customerList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="姓名" prop="name">
-        <el-input v-model="queryParams.name" placeholder="请输入姓名" clearable @keyup.enter="handleQuery" class="!w-240px" />
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入姓名"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="手机号" prop="mobile">
         <el-input
-v-model="queryParams.mobile" placeholder="请输入手机号" clearable @keyup.enter="handleQuery"
-          class="!w-240px" />
+          v-model="queryParams.mobile"
+          placeholder="请输入手机号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="座机" prop="telephone">
         <el-input
-v-model="queryParams.telephone" placeholder="请输入电话" clearable @keyup.enter="handleQuery"
-          class="!w-240px" />
+          v-model="queryParams.telephone"
+          placeholder="请输入电话"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
 
       <el-form-item label="QQ" prop="qq">
-        <el-input v-model="queryParams.qq" placeholder="请输入QQ" clearable @keyup.enter="handleQuery" class="!w-240px" />
+        <el-input
+          v-model="queryParams.qq"
+          placeholder="请输入QQ"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="微信" prop="wechat">
         <el-input
-v-model="queryParams.wechat" placeholder="请输入微信" clearable @keyup.enter="handleQuery"
-          class="!w-240px" />
+          v-model="queryParams.wechat"
+          placeholder="请输入微信"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="电子邮箱" prop="email">
         <el-input
-v-model="queryParams.email" placeholder="请输入电子邮箱" clearable @keyup.enter="handleQuery"
-          class="!w-240px" />
+          v-model="queryParams.email"
+          placeholder="请输入电子邮箱"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon icon="ep:search" class="mr-5px" /> 搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon icon="ep:refresh" class="mr-5px" /> 重置
-        </el-button>
+        <el-button @click="handleQuery"> <Icon icon="ep:search" class="mr-5px" /> 搜索 </el-button>
+        <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" /> 重置 </el-button>
         <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:contact:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
-type="success" plain @click="handleExport" :loading="exportLoading"
-          v-hasPermi="['crm:contact:export']">
+          type="success"
+          plain
+          @click="handleExport"
+          :loading="exportLoading"
+          v-hasPermi="['crm:contact:export']"
+        >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
       </el-form-item>
@@ -60,9 +104,9 @@ type="success" plain @click="handleExport" :loading="exportLoading"
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="姓名" fixed="left" align="center" prop="name">
         <template #default="scope">
-          <el-link type="primary" :underline="false" @click="openDetail(scope.row.id)">{{
-            scope.row.name
-          }}</el-link>
+          <el-link type="primary" :underline="false" @click="openDetail(scope.row.id)">
+            {{ scope.row.name }}
+          </el-link>
         </template>
       </el-table-column>
       <el-table-column label="客户" fixed="left" align="center" prop="customerName" />
@@ -84,17 +128,41 @@ type="success" plain @click="handleExport" :loading="exportLoading"
       <el-table-column label="微信" align="center" prop="wechat" />
       <el-table-column label="邮箱" align="center" prop="email" />
       <el-table-column label="地址" align="center" prop="address" />
-      <el-table-column label="下次联系时间" align="center" prop="nextTime" width="180px" :formatter="dateFormatter" />
+      <el-table-column
+        label="下次联系时间"
+        align="center"
+        prop="nextTime"
+        width="180px"
+        :formatter="dateFormatter"
+      />
       <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="最后跟进时间" align="center" prop="lastTime" :formatter="dateFormatter" width="180px" />
+      <el-table-column
+        label="最后跟进时间"
+        align="center"
+        prop="lastTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
       <el-table-column label="负责人" align="center" prop="ownerUserId">
         <template #default="scope">
           {{ scope.row.ownerUserName }}
         </template>
       </el-table-column>
       <!-- <el-table-column label="所属部门" align="center" prop="ownerUserId" /> -->
-      <el-table-column label="更新时间" align="center" prop="updateTime" :formatter="dateFormatter" width="180px" />
-      <el-table-column label="创建时间" align="center" prop="createTime" :formatter="dateFormatter" width="180px" />
+      <el-table-column
+        label="更新时间"
+        align="center"
+        prop="updateTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
       <!-- <el-table-column
         label="创建人"
         align="center"
@@ -108,10 +176,20 @@ type="success" plain @click="handleExport" :loading="exportLoading"
       </el-table-column> -->
       <el-table-column label="操作" align="center" fixed="right" width="200">
         <template #default="scope">
-          <el-button plain type="primary" @click="openForm('update', scope.row.id)" v-hasPermi="['crm:contact:update']">
+          <el-button
+            plain
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['crm:contact:update']"
+          >
             编辑
           </el-button>
-          <el-button plain type="danger" @click="handleDelete(scope.row.id)" v-hasPermi="['crm:contact:delete']">
+          <el-button
+            plain
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['crm:contact:delete']"
+          >
             删除
           </el-button>
         </template>
@@ -119,8 +197,11 @@ type="success" plain @click="handleExport" :loading="exportLoading"
     </el-table>
     <!-- 分页 -->
     <Pagination
-:total="total" v-model:page="queryParams.pageNo" v-model:limit="queryParams.pageSize"
-      @pagination="getList" />
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
@@ -208,7 +289,7 @@ const handleDelete = async (id: number) => {
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
-  } catch { }
+  } catch {}
 }
 
 /** 导出按钮操作 */
@@ -231,7 +312,6 @@ const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmContactDetail', params: { id } })
 }
-
 
 /** 初始化 **/
 onMounted(async () => {

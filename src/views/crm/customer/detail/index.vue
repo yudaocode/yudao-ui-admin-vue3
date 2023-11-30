@@ -1,16 +1,16 @@
 <template>
-  <CustomerDetailsHeader :customer="customer" :loading="loading" @refresh="getCustomerData(id)" />
+  <CustomerDetailsHeader :customer="customer" :loading="loading" @refresh="getCustomer(id)" />
   <el-col>
     <el-tabs>
       <el-tab-pane label="详细资料">
-        <CustomerDetails :customer="customer" />
+        <CustomerDetailsInfo :customer="customer" />
       </el-tab-pane>
       <el-tab-pane label="操作日志" lazy>TODO 待开发</el-tab-pane>
       <el-tab-pane label="联系人" lazy>
         <ContactList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
       <el-tab-pane label="团队成员" lazy>
-        <CrmPermissionList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
+        <PermissionList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
       <el-tab-pane label="商机" lazy> 商机</el-tab-pane>
       <el-tab-pane label="合同" lazy>TODO 待开发</el-tab-pane>
@@ -20,31 +20,24 @@
     </el-tabs>
   </el-col>
 </template>
-
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as CustomerApi from '@/api/crm/customer'
-import CustomerDetails from '@/views/crm/customer/detail/CustomerDetails.vue'
-import { CrmPermissionList } from '@/views/crm/components'
-import ContactList from '@/views/crm/contact/components/ContactList.vue'
-import CustomerDetailsHeader from './CustomerDetailsHeader.vue'
+import CustomerDetailsInfo from './CustomerDetailsInfo.vue' // 客户明细 - 详细信息
+import CustomerDetailsHeader from './CustomerDetailsHeader.vue' // 客户明细 - 头部
+import ContactList from '@/views/crm/contact/components/ContactList.vue' // 联系人列表
+import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 权限列表
 import { BizTypeEnum } from '@/api/crm/permission'
 
-defineOptions({ name: 'CustomerDetail' })
+defineOptions({ name: 'CrmCustomerDetail' })
 
-const { delView } = useTagsViewStore() // 视图操作
 const route = useRoute()
-const { currentRoute } = useRouter() // 路由
-const id = Number(route.params.id)
+const id = Number(route.params.id) // 客户编号
 const loading = ref(true) // 加载中
 
-/**
- * 获取详情
- *
- * @param id 客户编号
- */
+/** 获取详情 */
 const customer = ref<CustomerApi.CustomerVO>({} as CustomerApi.CustomerVO) // 客户详情
-const getCustomerData = async (id: number) => {
+const getCustomer = async (id: number) => {
   loading.value = true
   try {
     customer.value = await CustomerApi.getCustomer(id)
@@ -53,15 +46,15 @@ const getCustomerData = async (id: number) => {
   }
 }
 
-/**
- * 初始化
- */
+/** 初始化 */
+const { delView } = useTagsViewStore() // 视图操作
+const { currentRoute } = useRouter() // 路由
 onMounted(() => {
   if (!id) {
     ElMessage.warning('参数错误，客户不能为空！')
     delView(unref(currentRoute))
     return
   }
-  getCustomerData(id)
+  getCustomer(id)
 })
 </script>

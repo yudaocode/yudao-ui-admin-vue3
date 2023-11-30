@@ -198,6 +198,6 @@ export enum DICT_TYPE {
   CRM_PRODUCT_STATUS = 'crm_product_status',
 
   // ========== CRM - 数据权限模块 ==========
-  CRM_BIZ_TYPE = 'crm_biz_type', // 数据模块类型
-  CRM_PERMISSION_LEVEL = 'crm_permission_level' // 用户数据权限类型
+  CRM_BIZ_TYPE = 'crm_biz_type', // CRM 业务类型
+  CRM_PERMISSION_LEVEL = 'crm_permission_level' // CRM 数据权限的级别
 }
