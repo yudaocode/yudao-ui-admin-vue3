@@ -49,7 +49,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.CRM_RECEIVABLE_CHECK_STATUS)"
+            v-for="dict in getStrDictOptions(DICT_TYPE.CRM_AUDIT_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -171,7 +171,7 @@
       </el-table-column>
       <el-table-column label="审批状态" align="center" prop="checkStatus" width="130px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_RECEIVABLE_CHECK_STATUS" :value="scope.row.checkStatus" />
+          <dict-tag :type="DICT_TYPE.CRM_AUDIT_STATUS" :value="scope.row.checkStatus" />
         </template>
       </el-table-column>
       <!--<el-table-column label="工作流编号" align="center" prop="processInstanceId" />-->

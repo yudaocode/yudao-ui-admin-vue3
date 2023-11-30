@@ -1,7 +1,6 @@
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
-    <!-- TODO zyna：筛选项，按照需求简化下 -->
     <el-form
       class="-mb-15px"
       :model="queryParams"
@@ -9,14 +8,22 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="客户编号" prop="customerId">
-        <el-input
+      <el-form-item label="客户" prop="customerId">
+        <el-select
           v-model="queryParams.customerId"
-          placeholder="请输入客户编号"
-          clearable
+          placeholder="请选择客户"
+          value-key="id"
+          lable-key="name"
           @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
+          clearable
+        >
+          <el-option
+            v-for="item in customerList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="姓名" prop="name">
         <el-input
@@ -55,9 +62,9 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="微信" prop="webchat">
+      <el-form-item label="微信" prop="wechat">
         <el-input
-          v-model="queryParams.webchat"
+          v-model="queryParams.wechat"
           placeholder="请输入微信"
           clearable
           @keyup.enter="handleQuery"
@@ -74,8 +81,8 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery"> <Icon icon="ep:search" class="mr-5px" /> 搜索 </el-button>
+        <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" /> 重置 </el-button>
         <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:contact:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -97,32 +104,28 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="姓名" fixed="left" align="center" prop="name">
         <template #default="scope">
-          <el-link type="primary" :underline="false" @click="openDetail(scope.row.id)">{{
-            scope.row.name
-          }}</el-link>
+          <el-link type="primary" :underline="false" @click="openDetail(scope.row.id)">
+            {{ scope.row.name }}
+          </el-link>
         </template>
       </el-table-column>
-      <el-table-column label="客户名称" fixed="left" align="center" prop="customerName" />
+      <el-table-column label="客户" fixed="left" align="center" prop="customerName" />
       <el-table-column label="性别" align="center" prop="sex">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="scope.row.sex" />
         </template>
       </el-table-column>
       <el-table-column label="职位" align="center" prop="post" />
-      <el-table-column label="是否关键决策人" align="center" prop="policyMakers">
+      <el-table-column label="是否关键决策人" align="center" prop="master">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.policyMakers" />
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.master" />
         </template>
       </el-table-column>
-      <el-table-column label="直属上级" align="center" prop="parentId">
-        <template #default="scope">
-          {{ allContactList.find((contact) => contact.id === scope.row.parentId)?.name }}
-        </template>
-      </el-table-column>
+      <el-table-column label="直属上级" align="center" prop="parentName" />
       <el-table-column label="手机号" align="center" prop="mobile" />
       <el-table-column label="座机" align="center" prop="telephone" />
       <el-table-column label="QQ" align="center" prop="qq" />
-      <el-table-column label="微信" align="center" prop="webchat" />
+      <el-table-column label="微信" align="center" prop="wechat" />
       <el-table-column label="邮箱" align="center" prop="email" />
       <el-table-column label="地址" align="center" prop="address" />
       <el-table-column
@@ -142,7 +145,7 @@
       />
       <el-table-column label="负责人" align="center" prop="ownerUserId">
         <template #default="scope">
-          {{ gotOwnerUser(scope.row.ownerUserId) }}
+          {{ scope.row.ownerUserName }}
         </template>
       </el-table-column>
       <!-- <el-table-column label="所属部门" align="center" prop="ownerUserId" /> -->
@@ -211,7 +214,6 @@ import download from '@/utils/download'
 import * as ContactApi from '@/api/crm/contact'
 import ContactForm from './ContactForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
-import * as UserApi from '@/api/system/user'
 import * as CustomerApi from '@/api/crm/customer'
 
 defineOptions({ name: 'CrmContact' })
@@ -222,6 +224,7 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
+const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -239,13 +242,12 @@ const queryParams = reactive({
   name: null,
   post: null,
   qq: null,
-  webchat: null,
+  wechat: null,
   sex: null,
   policyMakers: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -305,35 +307,15 @@ const handleExport = async () => {
   }
 }
 
-// TODO @zyna：这个负责人的读取，放在后端好点
-const gotOwnerUser = (owerUserId: string) => {
-  let ownerName = ''
-  if (owerUserId !== null) {
-    owerUserId.split(',').forEach((item: string, index: number) => {
-      if (index != 0) {
-        ownerName =
-          ownerName + ',' + userList.value.find((user: { id: any }) => user.id == item)?.nickname
-      } else {
-        ownerName = userList.value.find((user: { id: any }) => user.id == item)?.nickname || ''
-      }
-    })
-  }
-  return ownerName
-}
-
 /** 打开客户详情 */
 const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmContactDetail', params: { id } })
 }
 
-// TODO @zyna：这个上级的读取，放在后端读取，更合适；因为可能数据量比较大
-const allContactList = ref([]) //所有联系人列表
-const allCustomerList = ref([]) //客户列表
 /** 初始化 **/
 onMounted(async () => {
   await getList()
-  userList.value = await UserApi.getSimpleUserList()
-  allContactList.value = await ContactApi.simpleAlllist()
+  customerList.value = await CustomerApi.queryAllList()
 })
 </script>

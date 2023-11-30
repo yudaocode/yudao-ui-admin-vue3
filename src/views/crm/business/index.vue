@@ -8,19 +8,10 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="合同编号" prop="no">
-        <el-input
-          v-model="queryParams.no"
-          placeholder="请输入合同编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="合同名称" prop="name">
+      <el-form-item label="商机名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入合同名称"
+          placeholder="请输入商机名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -29,7 +20,7 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:contract:create']">
+        <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:business:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
         <el-button
@@ -37,7 +28,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['crm:contract:export']"
+          v-hasPermi="['crm:business:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -46,46 +37,25 @@
   </ContentWrap>
 
   <!-- 列表 -->
-  <!-- TODO 芋艿：各种字段要调整 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="合同编号" align="center" prop="id" />
-      <el-table-column label="合同名称" align="center" prop="name" />
-      <el-table-column label="客户名称" align="center" prop="customerId" />
-      <el-table-column label="商机名称" align="center" prop="businessId" />
-      <el-table-column label="工作流名称" align="center" prop="processInstanceId" />
+      <el-table-column label="商机名称" align="center" prop="name" />
+      <el-table-column label="客户名称" align="center" prop="customerName" />
+      <el-table-column label="商机金额" align="center" prop="price" />
       <el-table-column
-        label="下单时间"
+        label="预计成交日期"
         align="center"
-        prop="orderDate"
+        prop="dealTime"
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="负责人" align="center" prop="ownerUserId" />
-      <el-table-column label="合同编号" align="center" prop="no" />
+      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column label="商机状态类型" align="center" prop="statusTypeName" />
+      <el-table-column label="商机状态" align="center" prop="statusName" />
       <el-table-column
-        label="开始时间"
+        label="更新时间"
         align="center"
-        prop="startTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column
-        label="结束时间"
-        align="center"
-        prop="endTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column label="合同金额" align="center" prop="price" />
-      <el-table-column label="整单折扣" align="center" prop="discountPercent" />
-      <el-table-column label="产品总金额" align="center" prop="productPrice" />
-      <el-table-column label="联系人" align="center" prop="contactId" />
-      <el-table-column label="公司签约人" align="center" prop="signUserId" />
-      <el-table-column
-        label="最后跟进时间"
-        align="center"
-        prop="contactLastTime"
+        prop="updateTime"
         :formatter="dateFormatter"
         width="180px"
       />
@@ -96,14 +66,16 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" width="120px">
+      <el-table-column label="负责人" align="center" prop="ownerUserId" />
+      <el-table-column label="创建人" align="center" prop="creator" />
+      <el-table-column label="跟进状态" align="center" prop="followUpStatus" />
+      <el-table-column label="操作" align="center" fixed="right" width="130px">
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['crm:contract:update']"
+            v-hasPermi="['crm:business:update']"
           >
             编辑
           </el-button>
@@ -111,7 +83,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['crm:contract:delete']"
+            v-hasPermi="['crm:business:delete']"
           >
             删除
           </el-button>
@@ -128,15 +100,16 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <ContractForm ref="formRef" @success="getList" />
+  <BusinessForm ref="formRef" @success="getList" />
 </template>
+
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as ContractApi from '@/api/crm/contract'
-import ContractForm from './ContractForm.vue'
+import * as BusinessApi from '@/api/crm/business'
+import BusinessForm from './BusinessForm.vue'
 
-defineOptions({ name: 'CrmContract' })
+defineOptions({ name: 'CrmBusiness' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -148,12 +121,23 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: null,
+  statusTypeId: null,
+  statusId: null,
+  contactNextTime: [],
   customerId: null,
-  businessId: null,
-  orderDate: [],
-  no: null,
+  dealTime: [],
+  price: null,
   discountPercent: null,
-  productPrice: null
+  productPrice: null,
+  remark: null,
+  ownerUserId: null,
+  createTime: [],
+  roUserIds: null,
+  rwUserIds: null,
+  endStatus: null,
+  endRemark: null,
+  contactLastTime: [],
+  followUpStatus: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -162,7 +146,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ContractApi.getContractPage(queryParams)
+    const data = await BusinessApi.getBusinessPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -194,7 +178,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ContractApi.deleteContract(id)
+    await BusinessApi.deleteBusiness(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -208,8 +192,8 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await ContractApi.exportContract(queryParams)
-    download.excel(data, '合同.xls')
+    const data = await BusinessApi.exportBusiness(queryParams)
+    download.excel(data, '商机.xls')
   } catch {
   } finally {
     exportLoading.value = false

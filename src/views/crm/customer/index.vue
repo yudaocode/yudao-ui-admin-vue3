@@ -72,17 +72,10 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon class="mr-5px" icon="ep:search" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon class="mr-5px" icon="ep:refresh" />
-          重置
-        </el-button>
+        <el-button @click="handleQuery"> <Icon class="mr-5px" icon="ep:search" /> 搜索 </el-button>
+        <el-button @click="resetQuery"> <Icon class="mr-5px" icon="ep:refresh" />重置 </el-button>
         <el-button v-hasPermi="['crm:customer:create']" type="primary" @click="openForm('create')">
-          <Icon class="mr-5px" icon="ep:plus" />
-          新增
+          <Icon class="mr-5px" icon="ep:plus" /> 新增
         </el-button>
         <el-button
           v-hasPermi="['crm:customer:export']"
@@ -91,8 +84,7 @@
           type="success"
           @click="handleExport"
         >
-          <Icon class="mr-5px" icon="ep:download" />
-          导出
+          <Icon class="mr-5px" icon="ep:download" /> 导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -102,7 +94,13 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
       <el-table-column align="center" label="编号" prop="id" />
-      <el-table-column align="center" label="客户名称" prop="name" width="160" />
+      <el-table-column align="center" label="客户名称" prop="name" width="160">
+        <template #default="scope">
+          <el-link type="primary" :underline="false" @click="openDetail(scope.row.id)">
+            {{ scope.row.name }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="所属行业" prop="industryId" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
@@ -121,7 +119,7 @@
       <el-table-column align="center" label="手机" prop="mobile" width="120" />
       <el-table-column align="center" label="详细地址" prop="detailAddress" width="200" />
       <el-table-column align="center" label="负责人" prop="ownerUserName" />
-      <el-table-column align="center" label="所属部门" prop="ownerUserDept" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" />
       <el-table-column align="center" label="创建人" prop="creatorName" />
       <el-table-column
         :formatter="dateFormatter"
@@ -157,7 +155,6 @@
       <!--  TODO @wanwan 距进入公海天数    -->
       <el-table-column align="center" fixed="right" label="操作" min-width="150">
         <template #default="scope">
-          <el-button link type="primary" @click="openDetail(scope.row.id)">详情</el-button>
           <el-button
             v-hasPermi="['crm:customer:update']"
             link
@@ -185,8 +182,6 @@
       @pagination="getList"
     />
   </ContentWrap>
-  <!-- TODO 方便查看效果 TODO 芋艿：先注释了，避免演示环境报错 -->
-  <!--  <CrmTeam :biz-id="1" :biz-type="CrmBizTypeEnum.CRM_CUSTOMER" />-->
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getList" />
@@ -198,7 +193,6 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CustomerApi from '@/api/crm/customer'
 import CustomerForm from './CustomerForm.vue'
-import { CrmBizTypeEnum, CrmTeam } from '@/views/crm/components'
 
 defineOptions({ name: 'CrmCustomer' })
 
@@ -211,11 +205,12 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  mobile: null,
-  industryId: null,
-  level: null,
-  source: null
+  pool: false,
+  name: '',
+  mobile: '',
+  industryId: undefined,
+  level: undefined,
+  source: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -241,6 +236,7 @@ const handleQuery = () => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
+  queryParams.pool = false
   handleQuery()
 }
 

@@ -16,6 +16,7 @@ interface AppState {
   uniqueOpened: boolean
   hamburger: boolean
   screenfull: boolean
+  search: boolean
   size: boolean
   locale: boolean
   message: boolean
@@ -52,6 +53,7 @@ export const useAppStore = defineStore('app', {
       uniqueOpened: true, // 是否只保持一个子菜单的展开
       hamburger: true, // 折叠图标
       screenfull: true, // 全屏图标
+      search: true, // 搜索图标
       size: true, // 尺寸图标
       locale: true, // 多语言图标
       message: true, // 消息图标

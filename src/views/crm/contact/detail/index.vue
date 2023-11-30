@@ -46,7 +46,7 @@
   </div>
   <ContentWrap class="mt-10px">
     <el-descriptions :column="5" direction="vertical">
-      <el-descriptions-item label="客户名称">
+      <el-descriptions-item label="客户">
         {{ contact.customerName }}
       </el-descriptions-item>
       <el-descriptions-item label="职务">
@@ -63,33 +63,18 @@
   <!-- TODO wanwan：这个 tab 拉满哈，可以更好看； -->
   <el-col :span="18">
     <el-tabs>
-      <el-tab-pane label="详细资料">
+      <el-tab-pane label="基本信息">
         <!-- TODO wanwan：这个 ml-2 是不是可以优化下，不要整个左移，而是里面的内容有个几 px 的偏移，不顶在框里 -->
         <ContactDetails class="ml-2" :contact="contact" />
       </el-tab-pane>
-      <el-tab-pane label="活动" lazy> 活动</el-tab-pane>
-      <el-tab-pane label="邮件" lazy> 邮件</el-tab-pane>
-      <el-tab-pane label="工商信息" lazy> 工商信息</el-tab-pane>
-      <!-- TODO wanwan 以下标签上的数量需要接口统计返回 -->
-      <el-tab-pane label="客户" lazy>
-        <template #label> 客户<el-badge :value="12" class="item" type="primary" /> </template>
-        客户
-      </el-tab-pane>
-      <el-tab-pane label="团队成员" lazy>
-        <template #label> 团队成员<el-badge :value="2" class="item" type="primary" /> </template>
-        团队成员
-      </el-tab-pane>
+      <el-tab-pane label="跟进记录" lazy> 跟进记录</el-tab-pane>
       <el-tab-pane label="商机" lazy> 商机</el-tab-pane>
-      <el-tab-pane label="合同" lazy>
-        <template #label> 合同<el-badge :value="3" class="item" type="primary" /> </template>
-        合同
+      <el-tab-pane label="附件" lazy> 附件</el-tab-pane>
+      <!-- TODO wanwan 以下标签上的数量需要接口统计返回 -->
+      <el-tab-pane label="操作记录" lazy>
+        <template #label> 操作记录<el-badge :value="12" class="item" type="primary" /> </template>
+        操作记录
       </el-tab-pane>
-      <el-tab-pane label="回款" lazy>
-        <template #label> 回款<el-badge :value="4" class="item" type="primary" /> </template>
-        回款
-      </el-tab-pane>
-      <el-tab-pane label="回访" lazy> 回访</el-tab-pane>
-      <el-tab-pane label="发票" lazy> 发票</el-tab-pane>
     </el-tabs>
   </el-col>
 
@@ -105,10 +90,10 @@ import ContactBasicInfo from '@/views/crm/contact/detail/ContactBasicInfo.vue'
 import ContactDetails from '@/views/crm/contact/detail/ContactDetails.vue'
 import ContactForm from '@/views/crm/contact/ContactForm.vue'
 import { formatDate } from '@/utils/formatTime'
-import * as CustomerApi from '@/api/crm/customer'
 // TODO 芋艿：后面在 review 么？
 
-defineOptions({ name: 'ContactDetail' })
+defineOptions({ name: 'CrmContactDetail' })
+
 const { delView } = useTagsViewStore() // 视图操作
 const route = useRoute()
 const { currentRoute } = useRouter() // 路由
