@@ -17,12 +17,6 @@
         <el-button>更改成交状态</el-button>
       </div>
     </div>
-    <!-- TODO 芋艿： -->
-    <el-row class="mt-10px">
-      <el-button> <Icon class="mr-5px" icon="ph:calendar-fill" /> 创建任务 </el-button>
-      <el-button> <Icon class="mr-5px" icon="ep:opportunity" /> 创建商机 </el-button>
-      <el-button> <Icon class="mr-5px" icon="icon-park:income-one" />创建回款 </el-button>
-    </el-row>
   </div>
   <ContentWrap class="mt-10px">
     <el-descriptions :column="5" direction="vertical">

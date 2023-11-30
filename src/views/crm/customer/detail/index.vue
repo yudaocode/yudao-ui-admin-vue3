@@ -12,13 +12,14 @@
       <el-tab-pane label="团队成员" lazy>
         <PermissionList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
-      <el-tab-pane label="商机" lazy> 商机</el-tab-pane>
+      <el-tab-pane label="商机" lazy>
+        <BusinessList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
+      </el-tab-pane>
       <el-tab-pane label="合同" lazy>
         <ContractList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
-      <el-tab-pane label="回款" lazy>TODO 待开发</el-tab-pane>
+      <el-tab-pane label="回款" lazy>TODO待开发 </el-tab-pane>
       <el-tab-pane label="回访" lazy>TODO 待开发</el-tab-pane>
-      <el-tab-pane label="发票" lazy>TODO 待开发</el-tab-pane>
     </el-tabs>
   </el-col>
 </template>
@@ -28,8 +29,9 @@ import * as CustomerApi from '@/api/crm/customer'
 import CustomerDetailsInfo from './CustomerDetailsInfo.vue' // 客户明细 - 详细信息
 import CustomerDetailsHeader from './CustomerDetailsHeader.vue' // 客户明细 - 头部
 import ContactList from '@/views/crm/contact/components/ContactList.vue' // 联系人列表
-import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
 import ContractList from '@/views/crm/contract/components/ContractList.vue' // 合同列表
+import BusinessList from '@/views/crm/business/components/BusinessList.vue' // 商机列表
+import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
 import { BizTypeEnum } from '@/api/crm/permission'
 
 defineOptions({ name: 'CrmCustomerDetail' })
