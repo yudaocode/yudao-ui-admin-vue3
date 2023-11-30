@@ -20,13 +20,8 @@
     <!-- TODO 芋艿： -->
     <el-row class="mt-10px">
       <el-button> <Icon class="mr-5px" icon="ph:calendar-fill" /> 创建任务 </el-button>
-      <el-button> <Icon class="mr-5px" icon="carbon:email" /> 发送邮件 </el-button>
       <el-button> <Icon class="mr-5px" icon="ep:opportunity" /> 创建商机 </el-button>
-      <el-button> <Icon class="mr-5px" icon="clarity:contract-line" />创建合同 </el-button>
       <el-button> <Icon class="mr-5px" icon="icon-park:income-one" />创建回款 </el-button>
-      <el-button>
-        <Icon class="mr-5px" icon="fluent:people-team-add-20-filled" /> 添加团队成员
-      </el-button>
     </el-row>
   </div>
   <ContentWrap class="mt-10px">

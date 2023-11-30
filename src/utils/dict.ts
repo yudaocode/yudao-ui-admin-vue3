@@ -190,14 +190,12 @@ export enum DICT_TYPE {
   PROMOTION_BANNER_POSITION = 'promotion_banner_position', // banner 定位
 
   // ========== CRM - 客户管理模块 ==========
-  CRM_RECEIVABLE_CHECK_STATUS = 'crm_receivable_check_status',
+  CRM_AUDIT_STATUS = 'crm_audit_status', // CRM 审批状态
+  CRM_BIZ_TYPE = 'crm_biz_type', // CRM 业务类型
   CRM_RETURN_TYPE = 'crm_return_type',
   CRM_CUSTOMER_INDUSTRY = 'crm_customer_industry',
   CRM_CUSTOMER_LEVEL = 'crm_customer_level',
   CRM_CUSTOMER_SOURCE = 'crm_customer_source',
   CRM_PRODUCT_STATUS = 'crm_product_status',
-
-  // ========== CRM - 数据权限模块 ==========
-  CRM_BIZ_TYPE = 'crm_biz_type', // CRM 业务类型
   CRM_PERMISSION_LEVEL = 'crm_permission_level' // CRM 数据权限的级别
 }
