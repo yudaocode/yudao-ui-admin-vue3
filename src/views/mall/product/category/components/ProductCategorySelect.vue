@@ -20,8 +20,12 @@ import { propTypes } from '@/utils/propTypes'
 defineOptions({ name: 'ProductCategorySelect' })
 
 const props = defineProps({
-  modelValue: oneOfType([propTypes.number.def(undefined), propTypes.array.def([])]).def(undefined), // 选中的ID
-  multiple: propTypes.bool.def(false) // 是否多选
+  // 选中的ID
+  modelValue: oneOfType<number | number[]>([Number, Array<Number>]),
+  // 是否多选
+  multiple: propTypes.bool.def(false),
+  // 上级品类的编号
+  parentId: propTypes.number.def(undefined)
 })
 
 /** 选中的分类 ID */
@@ -38,10 +42,10 @@ const selectCategoryId = computed({
 const emit = defineEmits(['update:modelValue'])
 
 /** 初始化 **/
-const categoryList = ref([]) // 分类树
+const categoryList = ref<ProductCategoryApi.CategoryVO[]>([]) // 分类树
 onMounted(async () => {
   // 获得分类树
-  const data = await ProductCategoryApi.getCategoryList({})
+  const data = await ProductCategoryApi.getCategoryList({ parentId: props.parentId })
   categoryList.value = handleTree(data, 'id', 'parentId')
 })
 </script>

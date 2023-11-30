@@ -103,7 +103,7 @@
                   </el-form-item>
                 </template>
                 <el-form-item label="链接" class="m-b-8px!" label-width="50px">
-                  <el-input placeholder="链接" v-model="element.url" />
+                  <AppLinkInput v-model="element.url" />
                 </el-form-item>
               </div>
             </template>

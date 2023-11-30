@@ -13,7 +13,7 @@
         </UploadImg>
       </el-form-item>
       <el-form-item label="链接" prop="url">
-        <el-input placeholder="链接" v-model="formData.url" />
+        <AppLinkInput v-model="formData.url" />
       </el-form-item>
     </el-form>
   </ComponentContainerProperty>
