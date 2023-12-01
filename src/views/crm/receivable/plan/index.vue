@@ -26,96 +26,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="完成状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择完成状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="审批状态" prop="checkStatus">
-        <el-select
-          v-model="queryParams.checkStatus"
-          placeholder="请选择审批状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.CRM_AUDIT_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="回款日期" prop="returnTime">
-        <el-date-picker
-          v-model="queryParams.returnTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <!--<el-form-item label="提前几天提醒" prop="remindDays">
-        <el-input
-          v-model="queryParams.remindDays"
-          placeholder="请输入提前几天提醒"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>-->
-      <!--<el-form-item label="提醒日期" prop="remindTime">
-        <el-date-picker
-          v-model="queryParams.remindTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>-->
-      <!--<el-form-item label="负责人" prop="ownerUserId">
-        <el-input
-          v-model="queryParams.ownerUserId"
-          placeholder="请输入负责人"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="备注" prop="remark">
-        <el-input
-          v-model="queryParams.remark"
-          placeholder="请输入备注"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>-->
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -224,10 +134,10 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as ReceivablePlanApi from '@/api/crm/receivablePlan'
+import * as ReceivablePlanApi from '@/api/crm/receivable/plan'
 import ReceivablePlanForm from './ReceivablePlanForm.vue'
 import * as UserApi from '@/api/system/user'
 
@@ -243,17 +153,8 @@ const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  period: null,
-  status: null,
-  checkStatus: null,
-  returnTime: [],
-  remindDays: null,
-  remindTime: [],
   customerId: null,
-  contractId: null,
-  ownerUserId: null,
-  remark: null,
-  createTime: []
+  contractId: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中

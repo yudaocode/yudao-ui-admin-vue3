@@ -43,7 +43,7 @@
       <el-form-item label="回款方式" prop="returnType">
         <el-select v-model="formData.returnType" placeholder="请选择回款方式">
           <el-option
-            v-for="dict in getStrDictOptions(DICT_TYPE.CRM_RETURN_TYPE)"
+            v-for="dict in getStrDictOptions(DICT_TYPE.CRM_RECEIVABLE_RETURN_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
