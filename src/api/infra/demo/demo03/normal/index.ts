@@ -42,12 +42,16 @@ export const exportDemo03Student = async (params) => {
 
 // 获得学生课程列表
 export const getDemo03CourseListByStudentId = async (studentId) => {
-  return await request.get({ url: `/infra/demo03-student/demo03-course/list-by-student-id?studentId=` + studentId })
+  return await request.get({
+    url: `/infra/demo03-student/demo03-course/list-by-student-id?studentId=` + studentId
+  })
 }
 
 // ==================== 子表（学生班级） ====================
 
 // 获得学生班级
 export const getDemo03GradeByStudentId = async (studentId) => {
-  return await request.get({ url: `/infra/demo03-student/demo03-grade/get-by-student-id?studentId=` + studentId })
+  return await request.get({
+    url: `/infra/demo03-student/demo03-grade/get-by-student-id?studentId=` + studentId
+  })
 }

@@ -9,7 +9,7 @@
   >
     <el-table :data="formData" class="-mt-10px">
       <el-table-column label="序号" type="index" width="100" />
-       <el-table-column label="名字" min-width="150">
+      <el-table-column label="名字" min-width="150">
         <template #default="{ row, $index }">
           <el-form-item :prop="`${$index}.name`" :rules="formRules.name" class="mb-0px!">
             <el-input v-model="row.name" placeholder="请输入名字" />
@@ -57,7 +57,7 @@ watch(
     formData.value = []
     // 2. val 非空，则加载数据
     if (!val) {
-      return;
+      return
     }
     try {
       formLoading.value = true
