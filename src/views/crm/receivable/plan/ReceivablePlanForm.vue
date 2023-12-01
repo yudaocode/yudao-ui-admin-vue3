@@ -88,7 +88,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as ReceivablePlanApi from '@/api/crm/receivablePlan'
+import * as ReceivablePlanApi from '@/api/crm/receivable/plan'
 import * as UserApi from '@/api/system/user'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

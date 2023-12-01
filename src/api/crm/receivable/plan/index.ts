@@ -23,6 +23,11 @@ export const getReceivablePlanPage = async (params) => {
   return await request.get({ url: `/crm/receivable-plan/page`, params })
 }
 
+// 查询回款计划列表
+export const getReceivablePlanPageByCustomer = async (params) => {
+  return await request.get({ url: `/crm/receivable-plan/page-by-customer`, params })
+}
+
 // 查询回款计划详情
 export const getReceivablePlan = async (id: number) => {
   return await request.get({ url: `/crm/receivable-plan/get?id=` + id })

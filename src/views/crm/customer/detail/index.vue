@@ -19,6 +19,7 @@
         <ContractList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
       <el-tab-pane label="回款" lazy>
+        <ReceivablePlanList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
         <ReceivableList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
       <el-tab-pane label="回访" lazy>TODO 待开发</el-tab-pane>
@@ -34,6 +35,7 @@ import ContactList from '@/views/crm/contact/components/ContactList.vue' // 联�
 import ContractList from '@/views/crm/contract/components/ContractList.vue' // 合同列表
 import BusinessList from '@/views/crm/business/components/BusinessList.vue' // 商机列表
 import ReceivableList from '@/views/crm/receivable/components/ReceivableList.vue' // 回款列表
+import ReceivablePlanList from '@/views/crm/receivable/plan/components/ReceivablePlanList.vue' // 回款计划列表
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
 import { BizTypeEnum } from '@/api/crm/permission'
 

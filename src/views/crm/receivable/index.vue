@@ -73,7 +73,7 @@
       />
       <el-table-column label="回款方式" align="center" prop="returnType" width="130px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_RETURN_TYPE" :value="scope.row.returnType" />
+          <dict-tag :type="DICT_TYPE.CRM_RECEIVABLE_RETURN_TYPE" :value="scope.row.returnType" />
         </template>
       </el-table-column>
       <el-table-column label="回款金额(元)" align="center" prop="price" />
