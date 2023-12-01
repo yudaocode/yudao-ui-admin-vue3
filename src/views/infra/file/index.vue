@@ -70,7 +70,7 @@
             preview-teleported
             fit="cover"
           />
-          <el-link v-else-if="row.type.includes('pdf')" type="primary" :href="row.url" :underline="false">预览</el-link>
+          <el-link v-else-if="row.type.includes('pdf')" type="primary" :href="row.url" :underline="false" target="_blank">预览</el-link>
           <el-link v-else type="primary" download :href="row.url" :underline="false" target="_blank">下载</el-link>
         </template>
       </el-table-column>
