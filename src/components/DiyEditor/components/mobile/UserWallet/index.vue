@@ -1,6 +1,6 @@
 <template>
   <el-image
-    src="https://shopro.sheepjs.com/admin/static/images/shop/decorate/couponCardStyle.png"
+    src="https://shopro.sheepjs.com/admin/static/images/shop/decorate/walletCardStyle.png"
   />
 </template>
 <script setup lang="ts">
