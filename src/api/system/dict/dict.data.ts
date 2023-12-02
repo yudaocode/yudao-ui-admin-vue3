@@ -14,8 +14,8 @@ export type DictDataVO = {
 }
 
 // 查询字典数据（精简)列表
-export const listSimpleDictData = () => {
-  return request.get({ url: '/system/dict-data/list-all-simple' })
+export const getSimpleDictDataList = () => {
+  return request.get({ url: '/system/dict-data/simple-list' })
 }
 
 // 查询字典数据列表
