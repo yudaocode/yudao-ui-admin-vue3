@@ -1,17 +1,17 @@
 <template>
   <div class="upload-box">
     <el-upload
-      :action="updateUrl"
       :id="uuid"
-      :class="['upload', drag ? 'no-border' : '']"
-      :multiple="false"
-      :show-file-list="false"
-      :headers="uploadHeaders"
-      :before-upload="beforeUpload"
-      :on-success="uploadSuccess"
-      :on-error="uploadError"
-      :drag="drag"
       :accept="fileType.join(',')"
+      :action="updateUrl"
+      :before-upload="beforeUpload"
+      :class="['upload', drag ? 'no-border' : '']"
+      :drag="drag"
+      :headers="uploadHeaders"
+      :multiple="false"
+      :on-error="uploadError"
+      :on-success="uploadSuccess"
+      :show-file-list="false"
     >
       <template v-if="modelValue">
         <img :src="modelValue" class="upload-image" />
@@ -20,11 +20,11 @@
             <Icon icon="ep:edit" />
             <span v-if="showBtnText">{{ t('action.edit') }}</span>
           </div>
-          <div class="handle-icon" @click="imgViewVisible = true">
+          <div class="handle-icon" @click="imagePreview(modelValue)">
             <Icon icon="ep:zoom-in" />
             <span v-if="showBtnText">{{ t('action.detail') }}</span>
           </div>
-          <div class="handle-icon" @click="deleteImg" v-if="showDelete">
+          <div v-if="showDelete" class="handle-icon" @click="deleteImg">
             <Icon icon="ep:delete" />
             <span v-if="showBtnText">{{ t('action.del') }}</span>
           </div>
@@ -42,11 +42,6 @@
     <div class="el-upload__tip">
       <slot name="tip"></slot>
     </div>
-    <el-image-viewer
-      v-if="imgViewVisible"
-      @close="imgViewVisible = false"
-      :url-list="[modelValue]"
-    />
   </div>
 </template>
 
@@ -56,6 +51,7 @@ import type { UploadProps } from 'element-plus'
 import { generateUUID } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
 import { getAccessToken, getTenantId } from '@/utils/auth'
+import { createImageViewer } from '@/components/ImageViewer'
 
 defineOptions({ name: 'UploadImg' })
 
@@ -92,7 +88,12 @@ const message = useMessage() // 消息弹窗
 // 生成组件唯一id
 const uuid = ref('id-' + generateUUID())
 // 查看图片
-const imgViewVisible = ref(false)
+const imagePreview = (imgUrl: string) => {
+  createImageViewer({
+    zIndex: 9999999,
+    urlList: [imgUrl]
+  })
+}
 
 const emit = defineEmits(['update:modelValue'])
 
@@ -130,7 +131,7 @@ const uploadError = () => {
   message.notifyError('图片上传失败，请您重新上传！')
 }
 </script>
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .is-error {
   .upload {
     :deep(.el-upload),
