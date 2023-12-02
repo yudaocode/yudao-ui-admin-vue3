@@ -47,7 +47,7 @@
             >
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-                :key="dict.value"
+                :key="dict.value as number"
                 :label="dict.label"
                 :value="dict.value"
               />
@@ -113,7 +113,7 @@
             label="部门"
             align="center"
             key="deptName"
-            prop="dept.name"
+            prop="deptName"
             :show-overflow-tooltip="true"
           />
           <el-table-column label="手机号码" align="center" prop="mobile" width="120" />
