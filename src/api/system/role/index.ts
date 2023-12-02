@@ -24,7 +24,7 @@ export const getRolePage = async (params: PageParam) => {
 
 // 查询角色（精简)列表
 export const getSimpleRoleList = async (): Promise<RoleVO[]> => {
-  return await request.get({ url: '/system/role/list-all-simple' })
+  return await request.get({ url: '/system/role/simple-list' })
 }
 
 // 查询角色详情
