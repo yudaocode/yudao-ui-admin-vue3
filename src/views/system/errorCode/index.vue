@@ -14,7 +14,7 @@
         <el-select v-model="queryParams.type" placeholder="请选择错误码类型" clearable>
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_ERROR_CODE_TYPE)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.label"
             :value="dict.value"
             class="!w-240px"
