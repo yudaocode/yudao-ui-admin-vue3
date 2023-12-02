@@ -23,7 +23,7 @@
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.label"
             :value="dict.value"
           />
@@ -123,9 +123,9 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  status: null,
-  remark: null,
+  name: undefined,
+  status: undefined,
+  remark: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -134,7 +134,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await TenantPackageApi.getTenantPackagePage(queryParams.value)
+    const data = await TenantPackageApi.getTenantPackagePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
