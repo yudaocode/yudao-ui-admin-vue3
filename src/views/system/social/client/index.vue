@@ -28,7 +28,7 @@
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_SOCIAL_TYPE)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.label"
             :value="dict.value"
           />
@@ -43,7 +43,7 @@
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.label"
             :value="dict.value"
           />
@@ -62,7 +62,7 @@
         <el-select v-model="queryParams.status" class="!w-240px" clearable placeholder="请选择状态">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.label"
             :value="dict.value"
           />
@@ -169,11 +169,11 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  socialType: null,
-  userType: null,
-  clientId: null,
-  status: null
+  name: undefined,
+  socialType: undefined,
+  userType: undefined,
+  clientId: undefined,
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 

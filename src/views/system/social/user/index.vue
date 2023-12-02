@@ -19,7 +19,7 @@
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_SOCIAL_TYPE)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.label"
             :value="dict.value"
           />
@@ -130,9 +130,6 @@ import SocialUserDetail from './SocialUserDetail.vue'
 import { createImageViewer } from '@/components/ImageViewer'
 
 defineOptions({ name: 'SocialUser' })
-
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
