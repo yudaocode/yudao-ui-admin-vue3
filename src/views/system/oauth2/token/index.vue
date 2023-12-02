@@ -28,7 +28,7 @@
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.label"
             :value="dict.value"
           />
@@ -115,7 +115,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   userId: null,
-  userType: null,
+  userType: undefined,
   clientId: null
 })
 const queryFormRef = ref() // 搜索的表单
