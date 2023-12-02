@@ -35,7 +35,7 @@
             </div>
             <div class="w-full flex flex-col gap-8px">
               <el-input v-model="element.text" placeholder="请输入公告" />
-              <el-input v-model="element.url" placeholder="请输入链接" />
+              <AppLinkInput v-model="element.url" />
             </div>
           </div>
         </template>

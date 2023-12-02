@@ -12,9 +12,9 @@
           v-model="formData.userIds"
           :data="userTree"
           :props="defaultProps"
-          check-on-click-node
           multiple
           filterable
+          check-on-click-node
           node-key="id"
           placeholder="请选择规则适用人群"
         />
@@ -25,8 +25,8 @@
           :data="deptTree"
           :props="defaultProps"
           multiple
-          check-strictly
           filterable
+          check-strictly
           node-key="id"
           placeholder="请选择规则适用部门"
         />

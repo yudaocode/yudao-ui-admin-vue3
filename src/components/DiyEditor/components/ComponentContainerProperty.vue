@@ -1,6 +1,6 @@
 <template>
   <el-tabs stretch>
-    <el-tab-pane label="内容">
+    <el-tab-pane label="内容" v-if="$slots.default">
       <slot></slot>
     </el-tab-pane>
     <el-tab-pane label="样式" lazy>

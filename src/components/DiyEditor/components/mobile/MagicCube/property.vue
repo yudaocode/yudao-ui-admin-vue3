@@ -17,7 +17,7 @@
             <UploadImg v-model="hotArea.imgUrl" height="80px" width="80px" />
           </el-form-item>
           <el-form-item label="链接" :prop="`list[${index}].url`">
-            <el-input v-model="hotArea.url" placeholder="请输入链接" />
+            <AppLinkInput v-model="hotArea.url" />
           </el-form-item>
         </template>
       </template>

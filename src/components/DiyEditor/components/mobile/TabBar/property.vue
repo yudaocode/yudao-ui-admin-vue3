@@ -88,7 +88,7 @@
                 <el-input v-model="element.text" placeholder="请输入文字" />
               </el-form-item>
               <el-form-item prop="url" label-width="0" class="m-b-0!">
-                <el-input v-model="element.url" placeholder="请选择链接" />
+                <AppLinkInput v-model="element.url" />
               </el-form-item>
             </div>
           </div>

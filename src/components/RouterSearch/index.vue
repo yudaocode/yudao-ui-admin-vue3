@@ -29,7 +29,12 @@
       :class="showTopSearch ? 'w-220px ml2' : 'w-0'"
       @change="handleChange"
     >
-      <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
+      <el-option
+        v-for="item in options"
+        :key="item.value"
+        :label="item.label"
+        :value="item.value"
+      />
     </el-select>
   </div>
 </template>
@@ -73,7 +78,7 @@ function remoteMethod(data) {
 
 function handleChange(path) {
   router.push({ path })
-  hiddenTopSearch();
+  hiddenTopSearch()
 }
 
 function hiddenTopSearch() {
