@@ -21,7 +21,7 @@
         <el-radio-group v-model="formData.status">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.value"
           >
             {{ dict.label }}

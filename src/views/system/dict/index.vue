@@ -35,7 +35,7 @@
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.label"
             :value="dict.value"
           />
@@ -161,7 +161,7 @@ const queryParams = reactive({
   name: '',
   type: '',
   status: undefined,
-  createTime: []
+  createTime: [undefined, undefined]
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
