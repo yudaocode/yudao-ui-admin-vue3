@@ -19,7 +19,7 @@
         <el-radio-group v-model="formData.userType">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.value as number"
           >
             {{ dict.label }}
@@ -71,7 +71,7 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formData = ref({
   content: '',
   params: {},
-  userId: null,
+  userId: undefined,
   userType: 1,
   templateCode: '',
   templateParams: new Map()

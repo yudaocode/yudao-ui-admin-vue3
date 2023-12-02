@@ -23,7 +23,7 @@
         <el-select v-model="formData.type" placeholder="请选择类型">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_NOTIFY_TEMPLATE_TYPE)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.label"
             :value="dict.value"
           />
@@ -33,7 +33,7 @@
         <el-radio-group v-model="formData.status">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
+            :key="dict.value as number"
             :label="dict.value as string"
           >
             {{ dict.label }}
@@ -61,12 +61,12 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型
 const formData = ref<NotifyTemplateApi.NotifyTemplateVO>({
-  id: null,
+  id: undefined,
   name: '',
   nickname: '',
   code: '',
   content: '',
-  type: null,
+  type: undefined,
   params: '',
   status: CommonStatusEnum.ENABLE,
   remark: ''
@@ -126,12 +126,12 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: null,
+    id: undefined,
     name: '',
     nickname: '',
     code: '',
     content: '',
-    type: null,
+    type: undefined,
     params: '',
     status: CommonStatusEnum.ENABLE,
     remark: ''
