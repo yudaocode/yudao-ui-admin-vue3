@@ -8,9 +8,9 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="文件名称" prop="fileName">
+      <el-form-item label="文件名称" prop="name">
         <el-input
-          v-model="queryParams.fileName"
+          v-model="queryParams.name"
           placeholder="请输入文件名称"
           clearable
           @keyup.enter="handleQuery"
@@ -59,7 +59,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['report:ureport-file:create']"
+          v-hasPermi="['report:ureport-data:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -68,7 +68,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['report:ureport-file:export']"
+          v-hasPermi="['report:ureport-data:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -80,12 +80,13 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="ID" align="center" prop="id" />
-      <el-table-column label="文件名称" align="center" prop="fileName" />
+      <el-table-column label="文件名称" align="center" prop="name" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
+      <el-table-column label="文件内容" align="center" prop="content" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column
         label="创建时间"
@@ -100,7 +101,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['report:ureport-file:update']"
+            v-hasPermi="['report:ureport-data:update']"
           >
             编辑
           </el-button>
@@ -108,7 +109,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['report:ureport-file:delete']"
+            v-hasPermi="['report:ureport-data:delete']"
           >
             删除
           </el-button>
@@ -125,17 +126,17 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <UreportFileForm ref="formRef" @success="getList" />
+  <UReportDataForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as UreportFileApi from '@/api/report/ureport'
-import UreportFileForm from './UreportFileForm.vue'
+import * as UReportDataApi from '@/api/report/ureport'
+import UReportDataForm from './UReportDataForm.vue'
 
-defineOptions({ name: 'UreportFile' })
+defineOptions({ name: 'UReportData' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -146,7 +147,7 @@ const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  fileName: null,
+  name: null,
   status: null,
   remark: null,
   createTime: [],
@@ -158,7 +159,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await UreportFileApi.getUreportFilePage(queryParams)
+    const data = await UReportDataApi.getUReportDataPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -190,7 +191,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await UreportFileApi.deleteUreportFile(id)
+    await UReportDataApi.deleteUReportData(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -204,7 +205,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await UreportFileApi.exportUreportFile(queryParams)
+    const data = await UReportDataApi.exportUReportData(queryParams)
     download.excel(data, 'Ureport2报表.xls')
   } catch {
   } finally {

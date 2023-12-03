@@ -7,8 +7,8 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="文件名称" prop="fileName">
-        <el-input v-model="formData.fileName" placeholder="请输入文件名称" />
+      <el-form-item label="文件名称" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入文件名称" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="formData.status" placeholder="请选择状态">
@@ -20,8 +20,8 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="文件内容" prop="fileContent">
-        <Editor v-model="formData.fileContent" height="150px" />
+      <el-form-item label="文件内容" prop="content">
+        <Editor v-model="formData.content" height="150px" />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" placeholder="请输入备注" />
@@ -35,7 +35,7 @@
 </template>
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import * as UreportFileApi from '@/api/report/ureport'
+import * as UReportDataApi from '@/api/report/ureport'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -46,13 +46,13 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  fileName: undefined,
+  name: undefined,
   status: undefined,
-  fileContent: undefined,
+  content: undefined,
   remark: undefined,
 })
 const formRules = reactive({
-  fileName: [{ required: true, message: '文件名称不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '文件名称不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
 })
 const formRef = ref() // 表单 Ref
@@ -67,7 +67,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await UreportFileApi.getUreportFile(id)
+      formData.value = await UReportDataApi.getUReportData(id)
     } finally {
       formLoading.value = false
     }
@@ -83,12 +83,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as UreportFileApi.UreportFileVO
+    const data = formData.value as unknown as UReportDataApi.UReportDataVO
     if (formType.value === 'create') {
-      await UreportFileApi.createUreportFile(data)
+      await UReportDataApi.createUReportData(data)
       message.success(t('common.createSuccess'))
     } else {
-      await UreportFileApi.updateUreportFile(data)
+      await UReportDataApi.updateUReportData(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -103,9 +103,9 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    fileName: undefined,
+    name: undefined,
     status: undefined,
-    fileContent: undefined,
+    content: undefined,
     remark: undefined,
   }
   formRef.value?.resetFields()
