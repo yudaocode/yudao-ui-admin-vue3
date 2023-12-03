@@ -40,5 +40,5 @@ export const deleteDictType = (id: number) => {
 }
 // 导出字典类型
 export const exportDictType = (params) => {
-  return request.get({ url: '/system/dict-type/export', params })
+  return request.download({ url: '/system/dict-type/export', params })
 }

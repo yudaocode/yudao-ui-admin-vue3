@@ -38,7 +38,7 @@
                 <InputWithColor v-model="element.subtitle" v-model:color="element.subtitleColor" />
               </el-form-item>
               <el-form-item label="链接" prop="url">
-                <el-input v-model="element.url" />
+                <AppLinkInput v-model="element.url" />
               </el-form-item>
               <el-form-item label="显示角标" prop="badge.show">
                 <el-switch v-model="element.badge.show" />

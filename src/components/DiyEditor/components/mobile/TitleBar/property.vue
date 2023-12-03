@@ -92,7 +92,7 @@
           <el-input v-model="formData.more.text" />
         </el-form-item>
         <el-form-item label="跳转链接" prop="more.url">
-          <el-input v-model="formData.more.url" placeholder="请输入跳转链接" />
+          <AppLinkInput v-model="formData.more.url" />
         </el-form-item>
       </template>
     </el-form>

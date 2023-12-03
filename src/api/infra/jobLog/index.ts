@@ -7,8 +7,8 @@ export interface JobLogVO {
   handlerParam: string
   cronExpression: string
   executeIndex: string
-  beginTime: string
-  endTime: string
+  beginTime: Date
+  endTime: Date
   duration: string
   status: number
   createTime: string

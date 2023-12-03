@@ -50,8 +50,8 @@
           clearable
           class="!w-240px"
         >
-          <el-option :key="true" label="成功" :value="true" />
-          <el-option :key="false" label="失败" :value="false" />
+          <el-option key="true" label="成功" :value="true" />
+          <el-option key="false" label="失败" :value="false" />
         </el-select>
       </el-form-item>
       <el-form-item label="操作时间" prop="startTime">

@@ -169,11 +169,11 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  socialType: null,
-  userType: null,
-  clientId: null,
-  status: null
+  name: undefined,
+  socialType: undefined,
+  userType: undefined,
+  clientId: undefined,
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 

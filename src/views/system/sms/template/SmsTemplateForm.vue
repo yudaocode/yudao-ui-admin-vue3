@@ -44,7 +44,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
-            :label="parseInt(dict.value as string)"
+            :label="dict.value"
           >
             {{ dict.label }}
           </el-radio>
@@ -79,15 +79,15 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型
 const formData = ref<SmsTemplateApi.SmsTemplateVO>({
-  id: null,
-  type: null,
+  id: undefined,
+  type: undefined,
   status: CommonStatusEnum.ENABLE,
   code: '',
   name: '',
   content: '',
   remark: '',
   apiTemplateId: '',
-  channelId: null
+  channelId: undefined
 })
 const formRules = reactive({
   type: [{ required: true, message: '短信类型不能为空', trigger: 'change' }],
@@ -148,15 +148,15 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: null,
-    type: null,
+    id: undefined,
+    type: undefined,
     status: CommonStatusEnum.ENABLE,
     code: '',
     name: '',
     content: '',
     remark: '',
     apiTemplateId: '',
-    channelId: null
+    channelId: undefined
   }
   formRef.value?.resetFields()
 }

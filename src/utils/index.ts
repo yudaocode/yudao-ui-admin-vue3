@@ -1,3 +1,5 @@
+import { toNumber } from 'lodash-es'
+
 /**
  *
  * @param component 需要注册的组件
@@ -262,4 +264,24 @@ export const calculateRelativeRate = (value?: number, reference?: number) => {
   if (!reference) return 0
 
   return ((100 * ((value || 0) - reference)) / reference).toFixed(0)
+}
+
+/**
+ * 获取链接的参数值
+ * @param key 参数键名
+ * @param urlStr 链接地址，默认为当前浏览器的地址
+ */
+export const getUrlValue = (key: string, urlStr: string = location.href): string => {
+  if (!urlStr || !key) return ''
+  const url = new URL(decodeURIComponent(urlStr))
+  return url.searchParams.get(key) ?? ''
+}
+
+/**
+ * 获取链接的参数值（值类型）
+ * @param key 参数键名
+ * @param urlStr 链接地址，默认为当前浏览器的地址
+ */
+export const getUrlNumberValue = (key: string, urlStr: string = location.href): number => {
+  return toNumber(getUrlValue(key, urlStr))
 }

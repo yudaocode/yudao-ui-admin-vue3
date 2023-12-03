@@ -98,7 +98,10 @@ const formData = ref({
   accountCount: undefined,
   expireTime: undefined,
   website: undefined,
-  status: CommonStatusEnum.ENABLE
+  status: CommonStatusEnum.ENABLE,
+  // 新增专属
+  username: undefined,
+  password: undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '租户名不能为空', trigger: 'blur' }],
@@ -112,7 +115,7 @@ const formRules = reactive({
   password: [{ required: true, message: '用户密码不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const packageList = ref([]) // 租户套餐
+const packageList = ref([] as TenantPackageApi.TenantPackageVO[]) // 租户套餐
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -171,7 +174,9 @@ const resetForm = () => {
     accountCount: undefined,
     expireTime: undefined,
     website: undefined,
-    status: CommonStatusEnum.ENABLE
+    status: CommonStatusEnum.ENABLE,
+    username: undefined,
+    password: undefined
   }
   formRef.value?.resetFields()
 }

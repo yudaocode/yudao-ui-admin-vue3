@@ -137,7 +137,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: null,
-  status: null
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 

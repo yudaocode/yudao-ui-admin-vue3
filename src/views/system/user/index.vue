@@ -113,7 +113,7 @@
             label="部门"
             align="center"
             key="deptName"
-            prop="dept.name"
+            prop="deptName"
             :show-overflow-tooltip="true"
           />
           <el-table-column label="手机号码" align="center" prop="mobile" width="120" />

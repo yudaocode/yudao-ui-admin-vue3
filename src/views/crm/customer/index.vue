@@ -72,17 +72,10 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon class="mr-5px" icon="ep:search" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon class="mr-5px" icon="ep:refresh" />
-          重置
-        </el-button>
+        <el-button @click="handleQuery"> <Icon class="mr-5px" icon="ep:search" /> 搜索 </el-button>
+        <el-button @click="resetQuery"> <Icon class="mr-5px" icon="ep:refresh" />重置 </el-button>
         <el-button v-hasPermi="['crm:customer:create']" type="primary" @click="openForm('create')">
-          <Icon class="mr-5px" icon="ep:plus" />
-          新增
+          <Icon class="mr-5px" icon="ep:plus" /> 新增
         </el-button>
         <el-button
           v-hasPermi="['crm:customer:export']"
@@ -91,8 +84,7 @@
           type="success"
           @click="handleExport"
         >
-          <Icon class="mr-5px" icon="ep:download" />
-          导出
+          <Icon class="mr-5px" icon="ep:download" /> 导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -102,7 +94,13 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
       <el-table-column align="center" label="编号" prop="id" />
-      <el-table-column align="center" label="客户名称" prop="name" width="160" />
+      <el-table-column align="center" label="客户名称" prop="name" width="160">
+        <template #default="scope">
+          <el-link type="primary" :underline="false" @click="openDetail(scope.row.id)">
+            {{ scope.row.name }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="所属行业" prop="industryId" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
@@ -157,7 +155,6 @@
       <!--  TODO @wanwan 距进入公海天数    -->
       <el-table-column align="center" fixed="right" label="操作" min-width="150">
         <template #default="scope">
-          <el-button link type="primary" @click="openDetail(scope.row.id)">详情</el-button>
           <el-button
             v-hasPermi="['crm:customer:update']"
             link

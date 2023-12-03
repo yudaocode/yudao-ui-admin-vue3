@@ -99,17 +99,22 @@ const type = ref<UploadType>(UploadType.Image) // 素材类型
 const loading = ref(false) // 遮罩层
 const list = ref<any[]>([]) // 总条数
 const total = ref(0) // 数据列表
+
+const accountId = ref(-1)
+provide('accountId', accountId)
+
 // 查询参数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  accountId: -1,
+  accountId: accountId,
   permanent: true
 })
 const showCreateVideo = ref(false) // 是否新建视频的弹窗
 
 /** 侦听公众号变化 **/
 const onAccountChanged = (id: number) => {
+  accountId.value = id
   queryParams.accountId = id
   queryParams.pageNo = 1
   getList()

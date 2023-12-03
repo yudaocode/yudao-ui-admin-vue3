@@ -88,7 +88,7 @@ import { ProductListProperty } from './config'
 import { usePropertyForm } from '@/components/DiyEditor/util'
 import SpuShowcase from '@/views/mall/product/spu/components/SpuShowcase.vue'
 
-// 商品卡片属性面板
+// 商品栏属性面板
 defineOptions({ name: 'ProductListProperty' })
 
 const props = defineProps<{ modelValue: ProductListProperty }>()

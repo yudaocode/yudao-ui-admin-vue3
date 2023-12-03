@@ -1,37 +1,25 @@
 import request from '@/config/axios'
 
-export interface ProfileDept {
-  id: number
-  name: string
-}
-export interface ProfileRole {
-  id: number
-  name: string
-}
-export interface ProfilePost {
-  id: number
-  name: string
-}
-export interface SocialUser {
-  id: number
-  type: number
-  openid: string
-  token: string
-  rawTokenInfo: string
-  nickname: string
-  avatar: string
-  rawUserInfo: string
-  code: string
-  state: string
-}
 export interface ProfileVO {
   id: number
   username: string
   nickname: string
-  dept: ProfileDept
-  roles: ProfileRole[]
-  posts: ProfilePost[]
-  socialUsers: SocialUser[]
+  dept: {
+    id: number
+    name: string
+  }
+  roles: {
+    id: number
+    name: string
+  }[]
+  posts: {
+    id: number
+    name: string
+  }[]
+  socialUsers: {
+    type: number
+    openid: string
+  }[]
   email: string
   mobile: string
   sex: number

@@ -37,5 +37,5 @@ export const deleteMailAccount = async (id: number) => {
 
 // 获得邮箱账号精简列表
 export const getSimpleMailAccountList = async () => {
-  return request.get({ url: '/system/mail-account/list-all-simple' })
+  return request.get({ url: '/system/mail-account/simple-list' })
 }

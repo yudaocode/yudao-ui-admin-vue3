@@ -232,12 +232,12 @@ const queryFormRef = ref() // 搜索的表单
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  type: null,
-  status: null,
+  type: undefined,
+  status: undefined,
   code: '',
   content: '',
   apiTemplateId: '',
-  channelId: null,
+  channelId: undefined,
   createTime: []
 })
 const exportLoading = ref(false) // 导出的加载中

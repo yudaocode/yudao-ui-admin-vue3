@@ -7,6 +7,7 @@ import { Screenfull } from '@/layout/components/Screenfull'
 import { Breadcrumb } from '@/layout/components/Breadcrumb'
 import { SizeDropdown } from '@/layout/components/SizeDropdown'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
+import RouterSearch from '@/components/RouterSearch/index.vue'
 import { useAppStore } from '@/store/modules/app'
 import { useDesign } from '@/hooks/web/useDesign'
 
@@ -24,6 +25,9 @@ const hamburger = computed(() => appStore.getHamburger)
 
 // 全屏图标
 const screenfull = computed(() => appStore.getScreenfull)
+
+// 搜索图片
+const search = computed(() => appStore.search)
 
 // 尺寸图标
 const size = computed(() => appStore.getSize)
@@ -61,6 +65,7 @@ export default defineComponent({
           {screenfull.value ? (
             <Screenfull class="custom-hover" color="var(--top-header-text-color)"></Screenfull>
           ) : undefined}
+          {search.value ? <RouterSearch isModal={false} /> : undefined}
           {size.value ? (
             <SizeDropdown class="custom-hover" color="var(--top-header-text-color)"></SizeDropdown>
           ) : undefined}

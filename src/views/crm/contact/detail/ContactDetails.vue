@@ -8,7 +8,7 @@
         <el-descriptions-item label="姓名">
           {{ contact.name }}
         </el-descriptions-item>
-        <el-descriptions-item label="客户名称">
+        <el-descriptions-item label="客户">
           {{ contact.customerName }}
         </el-descriptions-item>
         <el-descriptions-item label="手机">
@@ -24,13 +24,16 @@
           {{ contact.qq }}
         </el-descriptions-item>
         <el-descriptions-item label="微信">
-          {{ contact.webchat }}
-        </el-descriptions-item>
-        <el-descriptions-item label="详细地址">
-          {{ contact.address }}
+          {{ contact.wechat }}
         </el-descriptions-item>
         <el-descriptions-item label="下次联系时间">
           {{ contact.nextTime ? formatDate(contact.nextTime) : '空' }}
+        </el-descriptions-item>
+        <el-descriptions-item label="所在地">
+          {{ contact.areaName }}
+        </el-descriptions-item>
+        <el-descriptions-item label="详细地址">
+          {{ contact.address }}
         </el-descriptions-item>
         <el-descriptions-item label="性别">
           <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="contact.sex" />
@@ -46,7 +49,7 @@
       </template>
       <el-descriptions :column="2">
         <el-descriptions-item label="负责人">
-          {{ gotOwnerUser(contact.ownerUserId) }}
+          {{ contact.ownerUserName }}
         </el-descriptions-item>
         <el-descriptions-item label="创建人">
           {{ contact.creatorName }}
@@ -66,29 +69,9 @@
 import * as ContactApi from '@/api/crm/contact'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
-import * as UserApi from '@/api/system/user'
 const { contact } = defineProps<{ contact: ContactApi.ContactVO }>()
 
 // 展示的折叠面板
 const activeNames = ref(['basicInfo', 'systemInfo'])
-const gotOwnerUser = (owerUserId: string) => {
-  let ownerName = ''
-  if (owerUserId !== null && owerUserId != undefined) {
-    owerUserId.split(',').forEach((item: string, index: number) => {
-      if (index != 0) {
-        ownerName =
-          ownerName + ',' + userList.value.find((user: { id: any }) => user.id == item)?.nickname
-      } else {
-        ownerName = userList.value.find((user: { id: any }) => user.id == item)?.nickname || ''
-      }
-    })
-  }
-  return ownerName
-}
-const userList = ref<UserApi.UserVO[]>([]) // 用户列表
-/** 初始化 **/
-onMounted(async () => {
-  userList.value = await UserApi.getSimpleUserList()
-})
 </script>
 <style scoped lang="scss"></style>

@@ -6,7 +6,7 @@
     label-width="100px"
     v-loading="formLoading"
   >
-     <el-form-item label="名字" prop="name">
+    <el-form-item label="名字" prop="name">
       <el-input v-model="formData.name" placeholder="请输入名字" />
     </el-form-item>
     <el-form-item label="班主任" prop="teacher">
@@ -38,11 +38,11 @@ watch(
       id: undefined,
       studentId: undefined,
       name: undefined,
-      teacher: undefined,
+      teacher: undefined
     }
     // 2. val 非空，则加载数据
     if (!val) {
-      return;
+      return
     }
     try {
       formLoading.value = true

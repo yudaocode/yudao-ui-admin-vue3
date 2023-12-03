@@ -8,7 +8,11 @@
         <colum-info-form ref="columInfoRef" :columns="formData.columns" />
       </el-tab-pane>
       <el-tab-pane label="生成信息" name="generateInfo">
-        <generate-info-form ref="generateInfoRef" :table="formData.table" :columns="formData.columns" />
+        <generate-info-form
+          ref="generateInfoRef"
+          :table="formData.table"
+          :columns="formData.columns"
+        />
       </el-tab-pane>
     </el-tabs>
     <el-form>

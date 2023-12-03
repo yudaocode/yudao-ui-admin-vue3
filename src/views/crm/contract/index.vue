@@ -8,48 +8,19 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="合同名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入合同名称"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="客户编号" prop="customerId">
-        <el-input
-          v-model="queryParams.customerId"
-          placeholder="请输入客户编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="商机编号" prop="businessId">
-        <el-input
-          v-model="queryParams.businessId"
-          placeholder="请输入商机编号"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="下单日期" prop="orderDate">
-        <el-date-picker
-          v-model="queryParams.orderDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="合同编号" prop="no">
         <el-input
           v-model="queryParams.no"
           placeholder="请输入合同编号"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="合同名称" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入合同名称"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -75,6 +46,7 @@
   </ContentWrap>
 
   <!-- 列表 -->
+  <!-- TODO 芋艿：各种字段要调整 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="合同编号" align="center" prop="id" />
@@ -125,7 +97,6 @@
         width="180px"
       />
       <el-table-column label="备注" align="center" prop="remark" />
-
       <el-table-column label="操作" width="120px">
         <template #default="scope">
           <el-button
@@ -159,7 +130,6 @@
   <!-- 表单弹窗：添加/修改 -->
   <ContractForm ref="formRef" @success="getList" />
 </template>
-
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
