@@ -44,7 +44,7 @@
         <el-select v-model="formData.status" clearable placeholder="请选择状态">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value as number"
+            :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />

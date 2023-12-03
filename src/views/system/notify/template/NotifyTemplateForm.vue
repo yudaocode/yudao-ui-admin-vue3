@@ -23,7 +23,7 @@
         <el-select v-model="formData.type" placeholder="请选择类型">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_NOTIFY_TEMPLATE_TYPE)"
-            :key="dict.value as number"
+            :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
@@ -33,8 +33,8 @@
         <el-radio-group v-model="formData.status">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value as number"
-            :label="dict.value as string"
+            :key="dict.value"
+            :label="dict.value"
           >
             {{ dict.label }}
           </el-radio>

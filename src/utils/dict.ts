@@ -20,13 +20,20 @@ export interface DictDataType {
   cssClass: string
 }
 
+export interface NumberDictDataType extends DictDataType {
+  value: number
+}
+
 export const getDictOptions = (dictType: string) => {
   return dictStore.getDictByType(dictType) || []
 }
 
-export const getIntDictOptions = (dictType: string): DictDataType[] => {
-  const dictOption: DictDataType[] = []
+export const getIntDictOptions = (dictType: string): NumberDictDataType[] => {
+  // 获得通用的 DictDataType 列表
   const dictOptions: DictDataType[] = getDictOptions(dictType)
+  // 转换成 number 类型的 NumberDictDataType 类型
+  // why 需要特殊转换：避免 IDEA 在 v-for="dict in getIntDictOptions(...)" 时，el-option 的 key 会告警
+  const dictOption: NumberDictDataType[] = []
   dictOptions.forEach((dict: DictDataType) => {
     dictOption.push({
       ...dict,

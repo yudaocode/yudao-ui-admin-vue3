@@ -30,7 +30,7 @@
         <el-select v-model="queryParams.status" placeholder="数据状态" clearable class="!w-240px">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value as number"
+            :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />

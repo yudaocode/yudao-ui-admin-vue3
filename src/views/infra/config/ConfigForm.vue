@@ -23,7 +23,7 @@
         <el-radio-group v-model="formData.visible">
           <el-radio
             v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
+            :key="dict.value as string"
             :label="dict.value"
           >
             {{ dict.label }}

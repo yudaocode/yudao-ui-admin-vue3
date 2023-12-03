@@ -19,7 +19,7 @@
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_SOCIAL_TYPE)"
-            :key="dict.value as number"
+            :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />

@@ -19,8 +19,8 @@
         <el-radio-group v-model="formData.userType">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
-            :key="dict.value as number"
-            :label="dict.value as number"
+            :key="dict.value"
+            :label="dict.value"
           >
             {{ dict.label }}
           </el-radio>
