@@ -29,7 +29,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as ProductCategoryApi from '@/api/crm/productCategory'
+import * as ProductCategoryApi from '@/api/crm/product/productCategory'
 
 defineOptions({ name: 'CrmProductCategoryForm' })
 
