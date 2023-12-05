@@ -17,15 +17,6 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="产品编码" prop="no">
-        <el-input
-          v-model="queryParams.no"
-          placeholder="请输入产品编码"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
@@ -35,26 +26,6 @@
             :value="dict.value"
           />
         </el-select>
-      </el-form-item>
-      <el-form-item label="产品分类" prop="categoryId">
-        <el-input
-          v-model="queryParams.categoryId"
-          placeholder="请选择产品分类"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -167,7 +138,7 @@ import * as ProductApi from '@/api/crm/product'
 import ProductForm from './ProductForm.vue'
 import ProductDetail from './ProductDetail.vue'
 import { fenToYuan } from '@/utils'
-import * as ProductCategoryApi from '@/api/crm/productCategory'
+import * as ProductCategoryApi from '@/api/crm/product/productCategory'
 import { getSimpleUserList, UserVO } from '@/api/system/user'
 
 defineOptions({ name: 'CrmProduct' })

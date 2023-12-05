@@ -8,63 +8,87 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="产品名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入产品名称" />
-      </el-form-item>
-      <el-form-item label="产品编码" prop="no">
-        <el-input v-model="formData.no" placeholder="请输入产品编码" />
-      </el-form-item>
-      <el-form-item label="单位" prop="unit">
-        <el-select v-model="formData.unit" class="w-1/1" placeholder="请选择单位">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.PRODUCT_UNIT)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="价格" prop="price">
-        <el-input type="number" v-model="formData.price" placeholder="请输入价格" />
-      </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="formData.status" placeholder="请选择状态">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.CRM_PRODUCT_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="产品分类" prop="categoryId">
-        <el-cascader
-          v-model="formData.categoryId"
-          :options="productCategoryList"
-          :props="defaultProps"
-          class="w-1/1"
-          clearable
-          placeholder="请选择产品分类"
-          filterable
-        />
-      </el-form-item>
-      <el-form-item label="产品描述" prop="description">
-        <el-input v-model="formData.description" placeholder="请输入产品描述" />
-      </el-form-item>
-      <el-form-item label="负责人" prop="ownerUserId">
-        <el-select
-          v-model="formData.ownerUserId"
-          placeholder="请选择负责人"
-          :disabled="formData.id"
-        >
-          <el-option
-            v-for="user in userList"
-            :key="user.id"
-            :label="user.nickname"
-            :value="user.id"
-          />
-        </el-select>
-      </el-form-item>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="产品名称" prop="name">
+            <el-input v-model="formData.name" placeholder="请输入产品名称" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="产品编码" prop="no">
+            <el-input v-model="formData.no" placeholder="请输入产品编码" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="单位" prop="unit">
+            <el-select v-model="formData.unit" class="w-1/1" placeholder="请选择单位">
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.PRODUCT_UNIT)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="价格" prop="price">
+            <el-input type="number" v-model="formData.price" placeholder="请输入价格" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="状态" prop="status">
+            <el-select v-model="formData.status" placeholder="请选择状态">
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_PRODUCT_STATUS)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="产品分类" prop="categoryId">
+            <el-cascader
+              v-model="formData.categoryId"
+              :options="productCategoryList"
+              :props="defaultProps"
+              class="w-1/1"
+              clearable
+              placeholder="请选择产品分类"
+              filterable
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="产品描述" prop="description">
+            <el-input v-model="formData.description" placeholder="请输入产品描述" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="负责人" prop="ownerUserId">
+            <el-select
+              v-model="formData.ownerUserId"
+              placeholder="请选择负责人"
+              :disabled="formData.id"
+            >
+              <el-option
+                v-for="user in userList"
+                :key="user.id"
+                :label="user.nickname"
+                :value="user.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -75,7 +99,7 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as ProductApi from '@/api/crm/product'
-import * as ProductCategoryApi from '@/api/crm/productCategory'
+import * as ProductCategoryApi from '@/api/crm/product/productCategory'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { getSimpleUserList, UserVO } from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'

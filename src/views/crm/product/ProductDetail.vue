@@ -33,7 +33,7 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
-import * as ProductCategoryApi from '@/api/crm/productCategory'
+import * as ProductCategoryApi from '@/api/crm/product/productCategory'
 import * as ProductApi from '@/api/crm/product'
 import { formatDate } from '@/utils/formatTime'
 import { fenToYuan } from '@/utils'

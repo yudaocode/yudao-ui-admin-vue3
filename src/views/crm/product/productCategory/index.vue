@@ -74,7 +74,7 @@
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as ProductCategoryApi from '@/api/crm/productCategory'
+import * as ProductCategoryApi from '@/api/crm/product/productCategory'
 import ProductCategoryForm from './ProductCategoryForm.vue'
 import { handleTree } from '@/utils/tree'
 
