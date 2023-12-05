@@ -28,7 +28,7 @@ export type CodegenColumnVO = {
   columnComment: string
   nullable: number
   primaryKey: number
-  autoIncrement: string
+  autoIncrement: boolean
   ordinalPosition: number
   javaType: string
   javaField: string
