@@ -10,12 +10,11 @@
         <PermissionList :biz-id="contact.id!" :biz-type="BizTypeEnum.CRM_CONTACT" />
       </el-tab-pane>
       <el-tab-pane label="商机" lazy>
-        <BusinessList :biz-id="contact.id!" :biz-type="BizTypeEnum.CRM_CONTACT"/>
+        <BusinessList :biz-id="contact.id!" :biz-type="BizTypeEnum.CRM_CONTACT" />
       </el-tab-pane>
     </el-tabs>
   </el-col>
 </template>
-
 <script setup lang="ts">
 import { ElMessage } from 'element-plus'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -27,18 +26,13 @@ import PermissionList from '@/views/crm/permission/components/PermissionList.vue
 import { BizTypeEnum } from '@/api/crm/permission'
 
 defineOptions({ name: 'CrmContactDetail' })
-const { delView } = useTagsViewStore() // 视图操作
+
 const route = useRoute()
-const { currentRoute } = useRouter() // 路由
-const id = Number(route.params.id)
+const id = Number(route.params.id) // 联系人编号
 const loading = ref(true) // 加载中
-// 联系人详情
-const contact = ref<ContactApi.ContactVO>({} as ContactApi.ContactVO)
-/**
- * 获取详情
- *
- * @param id
- */
+const contact = ref<ContactApi.ContactVO>({} as ContactApi.ContactVO) // 联系人详情
+
+/** 获取详情 */
 const getContactData = async (id: number) => {
   loading.value = true
   try {
@@ -47,9 +41,10 @@ const getContactData = async (id: number) => {
     loading.value = false
   }
 }
-/**
- * 初始化
- */
+
+/** 初始化 */
+const { delView } = useTagsViewStore() // 视图操作
+const { currentRoute } = useRouter() // 路由
 onMounted(async () => {
   if (!id) {
     ElMessage.warning('参数错误，联系人不能为空！')

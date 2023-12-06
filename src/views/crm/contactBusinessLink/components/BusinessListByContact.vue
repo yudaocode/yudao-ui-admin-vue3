@@ -5,17 +5,19 @@
       <Icon class="mr-5px" icon="ep:opportunity" />
       创建商机
     </el-button>
-    <el-button @click="openBusinessLink">
-      关联
-    </el-button>
-    <el-button @click="deleteBusinessLink">
-      解除关联
-    </el-button>
+    <el-button @click="openBusinessLink"> 关联 </el-button>
+    <el-button @click="deleteBusinessLink"> 解除关联 </el-button>
   </el-row>
 
   <!-- 列表 -->
   <ContentWrap class="mt-10px">
-    <el-table v-loading="loading" ref="businessRef" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      v-loading="loading"
+      ref="businessRef"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+    >
       <el-table-column type="selection" width="55" />
       <el-table-column label="商机名称" fixed="left" align="center" prop="name">
         <template #default="scope">
@@ -39,9 +41,9 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加 -->
-  <BusinessForm ref="formRef" @success="getList"/>
+  <BusinessForm ref="formRef" @success="getList" />
   <!---->
-  <BusinessLink ref="businessLinkRef" @success="getList"/>
+  <BusinessLink ref="businessLinkRef" @success="getList" />
 </template>
 <script setup lang="ts">
 import * as ContactBusinessLinkApi from '@/api/crm/contactbusinesslink'
@@ -50,6 +52,7 @@ import { BizTypeEnum } from '@/api/crm/permission'
 import { fenToYuanFormat } from '@/utils/formatter'
 import BusinessLink from './BusinessLinkContactList.vue'
 const message = useMessage() // 消息弹窗
+// TODO @zyna：这个组件，可以服用 BusinessList，然后根据传入的编号类型，做一些判断？
 defineOptions({ name: 'CrmBusinessContactList' })
 const props = defineProps<{
   bizType: number // 业务类型
@@ -107,18 +110,18 @@ const openBusinessLink = () => {
 /**解除关联 */
 const businessRef = ref()
 const deleteBusinessLink = async () => {
-  if(businessRef.value.getSelectionRows().length === 0){
+  if (businessRef.value.getSelectionRows().length === 0) {
     message.success('未选择商机')
-  }else{
+  } else {
     const postData = ref<ContactBusinessLinkApi.ContactBusinessLinkVO[]>([])
-    businessRef.value.getSelectionRows().forEach(element => {
+    businessRef.value.getSelectionRows().forEach((element) => {
       let data = {
-        id:undefined,
-        businessId : element.id,
-        contactId : props.bizId
+        id: undefined,
+        businessId: element.id,
+        contactId: props.bizId
       }
       postData.value.push(data)
-    });
+    })
     await ContactBusinessLinkApi.deleteContactBusinessLink(postData.value)
     handleQuery()
   }

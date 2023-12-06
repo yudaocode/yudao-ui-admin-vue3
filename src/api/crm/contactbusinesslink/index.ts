@@ -1,4 +1,3 @@
-import { getBusiness } from './../business/index';
 import request from '@/config/axios'
 
 export interface ContactBusinessLinkVO {
@@ -29,7 +28,7 @@ export const updateContactBusinessLink = async (data: ContactBusinessLinkVO) => 
 
 // 删除联系人商机关联
 export const deleteContactBusinessLink = async (data: ContactBusinessLinkVO) => {
-  return await request.delete({ url: `/crm/contact-business-link/delete-batch` , data })
+  return await request.delete({ url: `/crm/contact-business-link/delete-batch`, data })
 }
 
 // 导出联系人商机关联 Excel
@@ -43,5 +42,6 @@ export const createContactBusinessLinkBatch = async (data: ContactBusinessLinkVO
 }
 // 查询联系人关联商机列表
 export const getBusinessByContactPage = async (params) => {
-  return await request.get({ url: `/crm/contact-business-link/page-by-contact` , params })
+  return await request.get({ url: `/crm/contact-business-link/page-by-contact`, params })
 }
+// TODO @zyna：根据后端，调整下请求

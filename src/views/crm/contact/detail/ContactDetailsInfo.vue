@@ -65,13 +65,13 @@
   </el-collapse>
 </template>
 <script setup lang="ts">
-// TODO 芋艿：后面在 review 么？
 import * as ContactApi from '@/api/crm/contact'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
-const { contact } = defineProps<{ contact: ContactApi.ContactVO }>()
+const { contact } = defineProps<{
+  contact: ContactApi.ContactVO
+}>()
 
 // 展示的折叠面板
 const activeNames = ref(['basicInfo', 'systemInfo'])
 </script>
-<style scoped lang="scss"></style>
