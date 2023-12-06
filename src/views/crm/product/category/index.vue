@@ -1,5 +1,4 @@
 <template>
-  <!-- TODO @zange：挪到 product 下，建个 category 包，挪进去哈； -->
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -36,7 +35,8 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" row-key="id" default-expand-all>
-      <el-table-column label="名称" align="center" prop="name" />
+      <el-table-column label="分类编号" align="center" prop="id" />
+      <el-table-column label="分类名称" align="center" prop="name" />
       <el-table-column
         label="创建时间"
         align="center"
@@ -73,7 +73,6 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import * as ProductCategoryApi from '@/api/crm/product/productCategory'
 import ProductCategoryForm from './ProductCategoryForm.vue'
 import { handleTree } from '@/utils/tree'
