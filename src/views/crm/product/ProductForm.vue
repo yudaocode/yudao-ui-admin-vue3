@@ -1,6 +1,5 @@
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible">
-    <!-- TODO @zange：改成每行两个哈； -->
     <el-form
       ref="formRef"
       :model="formData"
@@ -15,14 +14,37 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="产品编码" prop="no">
-            <el-input v-model="formData.no" placeholder="请输入产品编码" />
+          <el-form-item label="负责人" prop="ownerUserId">
+            <el-select
+              v-model="formData.ownerUserId"
+              placeholder="请选择负责人"
+              :disabled="formData.id"
+              class="w-1/1"
+            >
+              <el-option
+                v-for="user in userList"
+                :key="user.id"
+                :label="user.nickname"
+                :value="user.id"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="12">
-          <el-form-item label="单位" prop="unit">
+          <el-form-item label="产品类型" prop="categoryId">
+            <el-cascader
+              v-model="formData.categoryId"
+              :options="productCategoryList"
+              :props="defaultProps"
+              class="w-1/1"
+              clearable
+              placeholder="请选择产品类型"
+              filterable
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="产品单位" prop="unit">
             <el-select v-model="formData.unit" class="w-1/1" placeholder="请选择单位">
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.PRODUCT_UNIT)"
@@ -34,56 +56,35 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
+          <el-form-item label="产品编码" prop="no">
+            <el-input v-model="formData.no" placeholder="请输入产品编码" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
           <el-form-item label="价格" prop="price">
-            <el-input type="number" v-model="formData.price" placeholder="请输入价格" />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12">
-          <el-form-item label="状态" prop="status">
-            <el-select v-model="formData.status" placeholder="请选择状态">
-              <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_PRODUCT_STATUS)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="产品分类" prop="categoryId">
-            <el-cascader
-              v-model="formData.categoryId"
-              :options="productCategoryList"
-              :props="defaultProps"
-              class="w-1/1"
-              clearable
-              placeholder="请选择产品分类"
-              filterable
+            <el-input
+              type="number"
+              v-model="formData.price"
+              placeholder="请输入价格"
+              :min="0"
+              :precision="2"
+              :step="0.1"
             />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="12">
           <el-form-item label="产品描述" prop="description">
             <el-input v-model="formData.description" placeholder="请输入产品描述" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="负责人" prop="ownerUserId">
-            <el-select
-              v-model="formData.ownerUserId"
-              placeholder="请选择负责人"
-              :disabled="formData.id"
-            >
+          <el-form-item label="上架状态" prop="status">
+            <el-select v-model="formData.status" placeholder="请选择状态" class="w-1/1">
               <el-option
-                v-for="user in userList"
-                :key="user.id"
-                :label="user.nickname"
-                :value="user.id"
+                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_PRODUCT_STATUS)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
               />
             </el-select>
           </el-form-item>
@@ -103,6 +104,7 @@ import * as ProductCategoryApi from '@/api/crm/product/productCategory'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { getSimpleUserList, UserVO } from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
+import { fenToYuan, yuanToFen } from '@/utils'
 
 defineOptions({ name: 'CrmProductForm' })
 
@@ -119,11 +121,11 @@ const formData = ref({
   name: undefined,
   no: undefined,
   unit: undefined,
-  price: undefined,
+  price: Number(undefined),
   status: undefined,
   categoryId: undefined,
   description: undefined,
-  ownerUserId: undefined
+  ownerUserId: -1
 })
 const formRules = reactive({
   name: [{ required: true, message: '产品名称不能为空', trigger: 'blur' }],
@@ -131,7 +133,6 @@ const formRules = reactive({
   status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
   categoryId: [{ required: true, message: '产品分类ID不能为空', trigger: 'blur' }],
   ownerUserId: [{ required: true, message: '负责人不能为空', trigger: 'blur' }],
-  unit: [{ required: true, message: '单位不能为空', trigger: 'blur' }],
   price: [{ required: true, message: '价格不能为空', trigger: 'blur' }]
 })
 
@@ -143,22 +144,23 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  formData.value.ownerUserId = userId
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
     try {
       formData.value = await ProductApi.getProduct(id)
+      formData.value.price = fenToYuan(formData.value.price)
     } finally {
       formLoading.value = false
     }
+  } else {
+    formData.value.ownerUserId = userId
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-
 const submitForm = async () => {
   // 校验表单
   if (!formRef) return
@@ -167,7 +169,10 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ProductApi.ProductVO
+    const data = {
+      ...formData.value,
+      price: yuanToFen(formData.value.price)
+    } as unknown as ProductApi.ProductVO
     if (formType.value === 'create') {
       await ProductApi.createProduct(data)
       message.success(t('common.createSuccess'))
@@ -190,20 +195,23 @@ const resetForm = () => {
     name: undefined,
     no: undefined,
     unit: undefined,
-    price: undefined,
+    price: Number(undefined),
     status: undefined,
     categoryId: undefined,
     description: undefined,
-    ownerUserId: undefined
+    ownerUserId: -1
   }
   formRef.value?.resetFields()
 }
+
+/** 初始化 */
 const productCategoryList = ref<any[]>([]) // 产品分类树
 const userList = ref<UserVO[]>([]) // 系统用户
-
 onMounted(async () => {
+  // 产品分类树
   const data = await ProductCategoryApi.getProductCategoryList({})
   productCategoryList.value = handleTree(data, 'id', 'parentId')
-  userList.value = await getSimpleUserList()
+  // 系统用户列表
+  userList.value = await getSimpleUserList() // TODO 芋艿：替换成用户组件
 })
 </script>

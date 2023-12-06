@@ -32,6 +32,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
+// TODO 芋艿：统一改成，独立 tab
 import { DICT_TYPE } from '@/utils/dict'
 import * as ProductCategoryApi from '@/api/crm/product/productCategory'
 import * as ProductApi from '@/api/crm/product'

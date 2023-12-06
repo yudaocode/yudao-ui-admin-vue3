@@ -4,7 +4,7 @@ export interface ProductVO {
   id: number
   name: string
   no: string
-  unit: string
+  unit: number
   price: number
   status: number
   categoryId: number
