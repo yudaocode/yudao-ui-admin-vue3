@@ -8,6 +8,7 @@
     :show-tab-bar="selectedTemplateItem === 0"
     :show-navigation-bar="selectedTemplateItem !== 0"
     @save="submitForm"
+    @reset="handleEditorReset"
   >
     <template #toolBarLeft>
       <el-radio-group
@@ -29,6 +30,7 @@ import * as DiyTemplateApi from '@/api/mall/promotion/diy/template'
 import * as DiyPageApi from '@/api/mall/promotion/diy/page'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DiyComponentLibrary, PAGE_LIBS } from '@/components/DiyEditor/util'
+import { toNumber } from 'lodash-es'
 
 /** 装修模板表单 */
 defineOptions({ name: 'DiyTemplateDecorate' })
@@ -115,17 +117,43 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 
+// 重置时记录当前编辑的页面
+const handleEditorReset = () => storePageIndex()
+
+//#region 无感刷新
+// 记录标识
+const DIY_PAGE_INDEX_KEY = 'diy_page_index'
+// 1. 记录
+const storePageIndex = () =>
+  sessionStorage.setItem(DIY_PAGE_INDEX_KEY, `${selectedTemplateItem.value}`)
+// 2. 恢复
+const recoverPageIndex = () => {
+  // 恢复重置前的页面，默认是第一个页面
+  const pageIndex = toNumber(sessionStorage.getItem(DIY_PAGE_INDEX_KEY)) || 0
+  // 移除标记
+  sessionStorage.removeItem(DIY_PAGE_INDEX_KEY)
+  // 切换页面
+  if (pageIndex !== selectedTemplateItem.value) {
+    selectedTemplateItem.value = pageIndex
+    handleTemplateItemChange()
+  }
+}
+//#endregion
+
 /** 初始化 **/
 const { currentRoute } = useRouter() // 路由
 const { delView } = useTagsViewStore() // 视图操作
-const route = useRoute()
-onMounted(() => {
+onMounted(async () => {
   resetForm()
-  if (!route.params.id) {
+  if (!currentRoute.value.params.id) {
     message.warning('参数错误，页面编号不能为空！')
     delView(unref(currentRoute))
     return
   }
-  getPageDetail(route.params.id)
+
+  // 查询详情
+  await getPageDetail(currentRoute.value.params.id)
+  // 恢复重置前的页面
+  recoverPageIndex()
 })
 </script>

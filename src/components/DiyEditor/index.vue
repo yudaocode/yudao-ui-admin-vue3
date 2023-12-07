@@ -102,8 +102,8 @@
           <!-- 组件名称 -->
           <template #header>
             <div class="flex items-center gap-8px">
-              <Icon :icon="selectedComponent.icon" color="gray" />
-              <span>{{ selectedComponent.name }}</span>
+              <Icon :icon="selectedComponent?.icon" color="gray" />
+              <span>{{ selectedComponent?.name }}</span>
             </div>
           </template>
           <el-scrollbar
@@ -111,7 +111,7 @@
             view-class="p-[var(--el-card-padding)] p-b-[calc(var(--el-card-padding)+var(--el-card-padding))] property"
           >
             <component
-              :is="selectedComponent.id + 'Property'"
+              :is="selectedComponent?.id + 'Property'"
               v-model="selectedComponent.property"
             />
           </el-scrollbar>
@@ -306,9 +306,12 @@ const handleDeleteComponent = (index: number) => {
 
 // 工具栏操作
 const emits = defineEmits(['reset', 'preview', 'save', 'update:modelValue'])
+
+// 注入无感刷新页面函数
+const reload = inject<() => void>('reload')
 // 重置
 const handleReset = () => {
-  message.warning('开发中~')
+  if (reload) reload()
   emits('reset')
 }
 // 预览
