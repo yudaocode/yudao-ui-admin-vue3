@@ -111,6 +111,7 @@
             view-class="p-[var(--el-card-padding)] p-b-[calc(var(--el-card-padding)+var(--el-card-padding))] property"
           >
             <component
+              :key="selectedComponent?.uid || selectedComponent?.id"
               :is="selectedComponent?.id + 'Property'"
               v-model="selectedComponent.property"
             />
@@ -296,6 +297,7 @@ const handleMoveComponent = (index: number, direction: number) => {
 /** 复制组件 */
 const handleCopyComponent = (index: number) => {
   const component = cloneDeep(pageComponents.value[index])
+  component.uid = new Date().getTime()
   pageComponents.value.splice(index + 1, 0, component)
 }
 /**

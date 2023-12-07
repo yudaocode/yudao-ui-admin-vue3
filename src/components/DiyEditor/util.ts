@@ -5,6 +5,8 @@ import { TabBarProperty } from '@/components/DiyEditor/components/mobile/TabBar/
 
 // 页面装修组件
 export interface DiyComponent<T> {
+  // 用于区分同一种组件的不同实例
+  uid: number
   // 组件唯一标识
   id: string
   // 组件名称

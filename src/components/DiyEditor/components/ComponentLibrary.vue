@@ -82,7 +82,9 @@ watch(
 
 // 克隆组件
 const handleCloneComponent = (component: DiyComponent<any>) => {
-  return cloneDeep(component)
+  const instance = cloneDeep(component)
+  instance.uid = new Date().getTime()
+  return instance
 }
 </script>
 
