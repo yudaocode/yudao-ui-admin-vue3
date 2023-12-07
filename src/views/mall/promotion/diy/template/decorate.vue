@@ -7,6 +7,7 @@
     :show-page-config="selectedTemplateItem !== 0"
     :show-tab-bar="selectedTemplateItem === 0"
     :show-navigation-bar="selectedTemplateItem !== 0"
+    :preview-url="previewUrl"
     @save="submitForm"
     @reset="handleEditorReset"
   >
@@ -50,6 +51,8 @@ const formData = ref<DiyTemplateApi.DiyTemplatePropertyVO>()
 const formRef = ref() // 表单 Ref
 // 当前编辑的属性
 const currentFormData = ref<DiyTemplateApi.DiyTemplatePropertyVO | DiyPageApi.DiyPageVO>()
+// 商城H5预览地址
+const previewUrl = ref('')
 
 // 获取详情
 const getPageDetail = async (id: any) => {
@@ -57,6 +60,10 @@ const getPageDetail = async (id: any) => {
   try {
     formData.value = await DiyTemplateApi.getDiyTemplateProperty(id)
     currentFormData.value = formData.value
+
+    // 拼接手机预览链接
+    const domain = import.meta.env.VITE_MALL_H5_DOMAIN
+    previewUrl.value = `${domain}/#/pages/index/index?templateId=${formData.value.id}`
   } finally {
     formLoading.value = false
   }
