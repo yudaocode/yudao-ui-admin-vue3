@@ -12,7 +12,13 @@
       }"
     >
       <div v-for="(item, index) in property.items" :key="index" class="tab-bar-item">
-        <img :src="index === 0 ? item.activeIconUrl : item.iconUrl" alt="" />
+        <el-image :src="index === 0 ? item.activeIconUrl : item.iconUrl">
+          <template #error>
+            <div class="h-full w-full flex items-center justify-center">
+              <Icon icon="ep:picture" />
+            </div>
+          </template>
+        </el-image>
         <span :style="{ color: index === 0 ? property.style.activeColor : property.style.color }">
           {{ item.text }}
         </span>
@@ -48,7 +54,8 @@ defineProps<{ property: TabBarProperty }>()
       align-items: center;
       justify-content: center;
 
-      img {
+      :deep(img),
+      .el-icon {
         width: 26px;
         height: 26px;
         border-radius: 4px;
