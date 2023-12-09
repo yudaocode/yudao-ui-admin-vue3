@@ -47,6 +47,18 @@
             class="cursor-pointer!"
           />
         </div>
+        <!-- 绝对定位的组件：例如 弹窗、浮动按钮等 -->
+        <div
+          v-for="(component, index) in pageComponents"
+          :key="index"
+          @click="handleComponentSelected(component, index)"
+        >
+          <component
+            v-if="component.position === 'fixed' && selectedComponent?.uid === component.uid"
+            :is="component.id"
+            :property="component.property"
+          />
+        </div>
         <!-- 手机页面编辑区域 -->
         <el-scrollbar
           height="100%"
@@ -70,6 +82,7 @@
           >
             <template #item="{ element, index }">
               <ComponentContainer
+                v-if="!element.position || element.position === 'center'"
                 :component="element"
                 :active="selectedComponentIndex === index"
                 :can-move-up="index > 0"
@@ -90,6 +103,33 @@
             :active="selectedComponent?.id === tabBarComponent.id"
             @click="handleTabBarSelected"
           />
+        </div>
+        <!-- 固定布局的组件 操作按钮区 -->
+        <div class="fixed-component-action-group">
+          <el-tag
+            v-if="showPageConfig"
+            size="large"
+            :effect="selectedComponent?.uid === pageConfigComponent.uid ? 'dark' : 'plain'"
+            :type="selectedComponent?.uid === pageConfigComponent.uid ? '' : 'info'"
+            @click="handleComponentSelected(pageConfigComponent)"
+          >
+            <Icon :icon="pageConfigComponent.icon" :size="12" />
+            <span>{{ pageConfigComponent.name }}</span>
+          </el-tag>
+          <template v-for="(component, index) in pageComponents" :key="index">
+            <el-tag
+              v-if="component.position === 'fixed'"
+              size="large"
+              closable
+              :effect="selectedComponent?.uid === component.uid ? 'dark' : 'plain'"
+              :type="selectedComponent?.uid === component.uid ? '' : 'info'"
+              @click="handleComponentSelected(component)"
+              @close="handleDeleteComponent(index)"
+            >
+              <Icon :icon="component.icon" :size="12" />
+              <span>{{ component.name }}</span>
+            </el-tag>
+          </template>
         </div>
       </div>
       <!-- 右侧属性面板 -->
@@ -482,6 +522,31 @@ $toolbar-height: 42px;
           .drag-area {
             width: 100%;
             height: 100%;
+          }
+        }
+      }
+
+      /* 固定布局的组件 操作按钮区 */
+      .fixed-component-action-group {
+        position: absolute;
+        top: 0;
+        right: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+
+        :deep(.el-tag) {
+          box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+          border: none;
+          .el-tag__content {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+
+            .el-icon {
+              margin-right: 4px;
+            }
           }
         }
       }

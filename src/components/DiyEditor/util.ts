@@ -13,6 +13,15 @@ export interface DiyComponent<T> {
   name: string
   // 组件图标
   icon: string
+  /*
+   组件位置：
+   top: 固定于手机顶部，例如 顶部的导航栏
+   bottom: 固定于手机底部，例如 底部的菜单导航栏
+   center: 位于手机中心，每个组件占一行，顺序向下排列
+   空：同center
+   fixed: 由组件自己决定位置，如弹窗位于手机中心、浮动按钮一般位于手机右下角
+  */
+  position: 'top' | 'bottom' | 'center' | '' | 'fixed'
   // 组件属性
   property: T
 }
@@ -102,7 +111,7 @@ export const PAGE_LIBS = [
   {
     name: '基础组件',
     extended: true,
-    components: ['SearchBar', 'NoticeBar', 'MenuSwiper', 'MenuGrid', 'MenuList']
+    components: ['SearchBar', 'NoticeBar', 'MenuSwiper', 'MenuGrid', 'MenuList', 'Popover']
   },
   {
     name: '图文组件',
