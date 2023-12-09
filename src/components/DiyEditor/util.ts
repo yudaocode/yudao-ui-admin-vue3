@@ -111,7 +111,15 @@ export const PAGE_LIBS = [
   {
     name: '基础组件',
     extended: true,
-    components: ['SearchBar', 'NoticeBar', 'MenuSwiper', 'MenuGrid', 'MenuList', 'Popover']
+    components: [
+      'SearchBar',
+      'NoticeBar',
+      'MenuSwiper',
+      'MenuGrid',
+      'MenuList',
+      'Popover',
+      'FloatingActionButton'
+    ]
   },
   {
     name: '图文组件',
