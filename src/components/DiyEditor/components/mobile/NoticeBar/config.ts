@@ -1,4 +1,4 @@
-import { DiyComponent } from '@/components/DiyEditor/util'
+import { ComponentStyle, DiyComponent } from '@/components/DiyEditor/util'
 
 /** 公告栏属性 */
 export interface NoticeBarProperty {
@@ -10,6 +10,8 @@ export interface NoticeBarProperty {
   backgroundColor: string
   // 文字颜色
   textColor: string
+  // 组件样式
+  style: ComponentStyle
 }
 
 /** 内容属性 */
@@ -34,6 +36,11 @@ export const component = {
       }
     ],
     backgroundColor: '#fff',
-    textColor: '#333'
+    textColor: '#333',
+    style: {
+      bgType: 'color',
+      bgColor: '#fff',
+      marginBottom: 8
+    } as ComponentStyle
   }
 } as DiyComponent<NoticeBarProperty>

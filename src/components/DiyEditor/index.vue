@@ -15,7 +15,7 @@
             <Icon icon="system-uicons:reset-alt" :size="24" />
           </el-button>
         </el-tooltip>
-        <el-tooltip content="预览">
+        <el-tooltip content="预览" v-if="previewUrl">
           <el-button @click="handlePreview">
             <Icon icon="ep:view" :size="24" />
           </el-button>
@@ -102,8 +102,8 @@
           <!-- 组件名称 -->
           <template #header>
             <div class="flex items-center gap-8px">
-              <Icon :icon="selectedComponent.icon" color="gray" />
-              <span>{{ selectedComponent.name }}</span>
+              <Icon :icon="selectedComponent?.icon" color="gray" />
+              <span>{{ selectedComponent?.name }}</span>
             </div>
           </template>
           <el-scrollbar
@@ -111,7 +111,8 @@
             view-class="p-[var(--el-card-padding)] p-b-[calc(var(--el-card-padding)+var(--el-card-padding))] property"
           >
             <component
-              :is="selectedComponent.id + 'Property'"
+              :key="selectedComponent?.uid || selectedComponent?.id"
+              :is="selectedComponent?.id + 'Property'"
               v-model="selectedComponent.property"
             />
           </el-scrollbar>
@@ -119,6 +120,19 @@
       </el-aside>
     </el-container>
   </el-container>
+  <!-- 预览弹框 -->
+  <Dialog v-model="previewDialogVisible" title="预览" width="700">
+    <div class="flex justify-around">
+      <IFrame
+        class="w-375px border-4px border-rounded-8px border-solid p-2px h-667px!"
+        :src="previewUrl"
+      />
+      <div class="flex flex-col">
+        <el-text>手机扫码预览</el-text>
+        <Qrcode :text="previewUrl" logo="/logo.gif" />
+      </div>
+    </div>
+  </Dialog>
 </template>
 <script lang="ts">
 // 注册所有的组件
@@ -137,12 +151,12 @@ import { component as TAB_BAR_COMPONENT } from './components/mobile/TabBar/confi
 import { isString } from '@/utils/is'
 import { DiyComponent, DiyComponentLibrary, PageConfig } from '@/components/DiyEditor/util'
 import { componentConfigs } from '@/components/DiyEditor/components/mobile'
+import { array, oneOfType } from 'vue-types'
+import { propTypes } from '@/utils/propTypes'
 
 /** 页面装修详情页 */
 defineOptions({ name: 'DiyPageDetail' })
 
-// 消息弹窗
-const message = useMessage()
 // 左侧组件库
 const componentLibrary = ref()
 // 页面设置组件
@@ -159,20 +173,22 @@ const selectedComponentIndex = ref<number>(-1)
 // 组件列表
 const pageComponents = ref<DiyComponent<any>[]>([])
 // 定义属性
-const props = defineProps<{
+const props = defineProps({
   // 页面配置，支持Json字符串
-  modelValue: string | PageConfig
+  modelValue: oneOfType<string | PageConfig>([String, Object]).isRequired,
   // 标题
-  title: string
+  title: propTypes.string.def(''),
   // 组件库
-  libs: DiyComponentLibrary[]
+  libs: array<DiyComponentLibrary>(),
   // 是否显示顶部导航栏
-  showNavigationBar: boolean
+  showNavigationBar: propTypes.bool.def(true),
   // 是否显示底部导航菜单
-  showTabBar: boolean
+  showTabBar: propTypes.bool.def(false),
   // 是否显示页面配置
-  showPageConfig: boolean
-}>()
+  showPageConfig: propTypes.bool.def(true),
+  // 预览地址：提供了预览地址，才会显示预览按钮
+  previewUrl: propTypes.string.def('')
+})
 
 // 监听传入的页面配置
 watch(
@@ -281,6 +297,7 @@ const handleMoveComponent = (index: number, direction: number) => {
 /** 复制组件 */
 const handleCopyComponent = (index: number) => {
   const component = cloneDeep(pageComponents.value[index])
+  component.uid = new Date().getTime()
   pageComponents.value.splice(index + 1, 0, component)
 }
 /**
@@ -306,14 +323,18 @@ const handleDeleteComponent = (index: number) => {
 
 // 工具栏操作
 const emits = defineEmits(['reset', 'preview', 'save', 'update:modelValue'])
+
+// 注入无感刷新页面函数
+const reload = inject<() => void>('reload')
 // 重置
 const handleReset = () => {
-  message.warning('开发中~')
+  if (reload) reload()
   emits('reset')
 }
 // 预览
+const previewDialogVisible = ref(false)
 const handlePreview = () => {
-  message.warning('开发中~')
+  previewDialogVisible.value = true
   emits('preview')
 }
 
