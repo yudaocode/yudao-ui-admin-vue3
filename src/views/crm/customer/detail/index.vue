@@ -5,7 +5,9 @@
       <el-tab-pane label="详细资料">
         <CustomerDetailsInfo :customer="customer" />
       </el-tab-pane>
-      <el-tab-pane label="操作日志" lazy>TODO 待开发</el-tab-pane>
+      <el-tab-pane label="操作日志">
+        <OperateLogV2 :log-list="logList" />
+      </el-tab-pane>
       <el-tab-pane label="联系人" lazy>
         <ContactList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
@@ -38,24 +40,34 @@ import ReceivableList from '@/views/crm/receivable/components/ReceivableList.vue
 import ReceivablePlanList from '@/views/crm/receivable/plan/components/ReceivablePlanList.vue' // 回款计划列表
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
 import { BizTypeEnum } from '@/api/crm/permission'
+import { OperateLogV2VO } from '@/api/system/operatelog'
 
 defineOptions({ name: 'CrmCustomerDetail' })
 
 const route = useRoute()
 const id = Number(route.params.id) // 客户编号
 const loading = ref(true) // 加载中
-
 /** 获取详情 */
 const customer = ref<CustomerApi.CustomerVO>({} as CustomerApi.CustomerVO) // 客户详情
 const getCustomer = async (id: number) => {
   loading.value = true
   try {
     customer.value = await CustomerApi.getCustomer(id)
+    await getOperateLog(id)
   } finally {
     loading.value = false
   }
 }
-
+const logList = ref<OperateLogV2VO[]>([]) // 操作日志列表
+/**
+ * 获取操作日志
+ */
+const getOperateLog = async (customerId: number) => {
+  if (!customerId) {
+    return
+  }
+  logList.value = await CustomerApi.getOperateLog(customerId)
+}
 /** 初始化 */
 const { delView } = useTagsViewStore() // 视图操作
 const { currentRoute } = useRouter() // 路由
