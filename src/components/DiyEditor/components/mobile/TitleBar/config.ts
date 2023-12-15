@@ -1,7 +1,13 @@
-import { DiyComponent } from '@/components/DiyEditor/util'
+import { ComponentStyle, DiyComponent } from '@/components/DiyEditor/util'
 
 /** 标题栏属性 */
 export interface TitleBarProperty {
+  // 背景图
+  bgImgUrl: string
+  // 偏移
+  marginLeft: number
+  // 显示位置
+  textAlign: 'left' | 'center'
   // 主标题
   title: string
   // 副标题
@@ -12,18 +18,12 @@ export interface TitleBarProperty {
   descriptionSize: number
   // 标题粗细
   titleWeight: number
-  // 显示位置
-  position: 'left' | 'center'
   // 描述粗细
   descriptionWeight: number
   // 标题颜色
   titleColor: string
   // 描述颜色
   descriptionColor: string
-  // 背景颜色
-  backgroundColor: string
-  // 底部分割线
-  showBottomBorder: false
   // 查看更多
   more: {
     // 是否显示查看更多
@@ -35,6 +35,8 @@ export interface TitleBarProperty {
     // 链接
     url: string
   }
+  // 组件样式
+  style: ComponentStyle
 }
 
 // 定义组件
@@ -48,18 +50,20 @@ export const component = {
     titleSize: 16,
     descriptionSize: 12,
     titleWeight: 400,
-    position: 'left',
+    textAlign: 'left',
     descriptionWeight: 200,
     titleColor: 'rgba(50, 50, 51, 10)',
     descriptionColor: 'rgba(150, 151, 153, 10)',
-    backgroundColor: 'rgba(255, 255, 255, 10)',
-    showBottomBorder: false,
     more: {
       //查看更多
       show: false,
       type: 'icon',
       text: '查看更多',
       url: ''
-    }
+    },
+    style: {
+      bgType: 'color',
+      bgColor: '#fff'
+    } as ComponentStyle
   }
 } as DiyComponent<TitleBarProperty>

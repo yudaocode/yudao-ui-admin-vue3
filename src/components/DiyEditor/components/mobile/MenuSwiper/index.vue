@@ -28,7 +28,7 @@
           <!-- 标题 -->
           <span
             v-if="property.layout === 'iconText'"
-            class="text-14px"
+            class="text-12px"
             :style="{
               color: item.titleColor,
               height: `${TITLE_HEIGHT}px`,
@@ -51,7 +51,7 @@ const props = defineProps<{ property: MenuSwiperProperty }>()
 // 标题的高度
 const TITLE_HEIGHT = 20
 // 图标的高度
-const ICON_SIZE = 50
+const ICON_SIZE = 42
 // 垂直间距：一行上下的间距
 const SPACE_Y = 16
 

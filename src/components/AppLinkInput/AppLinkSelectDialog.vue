@@ -29,10 +29,11 @@
             :key="appLinkIndex"
             :content="appLink.path"
             placement="bottom"
+            :show-after="300"
           >
             <el-button
               class="m-b-8px m-r-8px m-l-0px!"
-              :type="isSameLink(appLink.path, activeAppLink) ? 'primary' : 'default'"
+              :type="isSameLink(appLink.path, activeAppLink.path) ? 'primary' : 'default'"
               @click="handleAppLinkSelected(appLink)"
             >
               {{ appLink.name }}
@@ -63,7 +64,7 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import { APP_LINK_GROUP_LIST, APP_LINK_TYPE_ENUM } from './data'
+import { APP_LINK_GROUP_LIST, APP_LINK_TYPE_ENUM, AppLink } from './data'
 import { ButtonInstance, ScrollbarInstance } from 'element-plus'
 import { split } from 'lodash-es'
 import ProductCategorySelect from '@/views/mall/product/category/components/ProductCategorySelect.vue'
@@ -74,17 +75,23 @@ defineOptions({ name: 'AppLinkSelectDialog' })
 // 选中的分组，默认选中第一个
 const activeGroup = ref(APP_LINK_GROUP_LIST[0].name)
 // 选中的 APP 链接
-const activeAppLink = ref('')
+const activeAppLink = ref({} as AppLink)
 
 /** 打开弹窗 */
 const dialogVisible = ref(false)
 const open = (link: string) => {
-  activeAppLink.value = link
+  activeAppLink.value.path = link
   dialogVisible.value = true
 
   // 滚动到当前的链接
   const group = APP_LINK_GROUP_LIST.find((group) =>
-    group.links.some((linkItem) => isSameLink(linkItem.path, link))
+    group.links.some((linkItem) => {
+      const sameLink = isSameLink(linkItem.path, link)
+      if (sameLink) {
+        activeAppLink.value = { ...linkItem, path: link }
+      }
+      return sameLink
+    })
   )
   if (group) {
     // 使用 nextTick 的原因：可能 Dom 还没生成，导致滚动失败
@@ -94,9 +101,9 @@ const open = (link: string) => {
 defineExpose({ open })
 
 // 处理 APP 链接选中
-const handleAppLinkSelected = (appLink: any) => {
-  if (!isSameLink(appLink.path, activeAppLink.value)) {
-    activeAppLink.value = appLink.path
+const handleAppLinkSelected = (appLink: AppLink) => {
+  if (!isSameLink(appLink.path, activeAppLink.value.path)) {
+    activeAppLink.value = appLink
   }
   switch (appLink.type) {
     case APP_LINK_TYPE_ENUM.PRODUCT_CATEGORY_LIST:
@@ -104,7 +111,7 @@ const handleAppLinkSelected = (appLink: any) => {
       detailSelectDialog.value.type = appLink.type
       // 返显
       detailSelectDialog.value.id =
-        getUrlNumberValue('id', 'http://127.0.0.1' + activeAppLink.value) || undefined
+        getUrlNumberValue('id', 'http://127.0.0.1' + activeAppLink.value.path) || undefined
       break
     default:
       break
@@ -114,10 +121,12 @@ const handleAppLinkSelected = (appLink: any) => {
 // 处理绑定值更新
 const emit = defineEmits<{
   change: [link: string]
+  appLinkChange: [appLink: AppLink]
 }>()
 const handleSubmit = () => {
   dialogVisible.value = false
-  emit('change', activeAppLink.value)
+  emit('change', activeAppLink.value.path)
+  emit('appLinkChange', activeAppLink.value)
 }
 
 // 分组标题引用列表
@@ -127,7 +136,7 @@ const groupTitleRefs = ref<HTMLInputElement[]>([])
  * @param scrollTop 滚动条的位置
  */
 const handleScroll = ({ scrollTop }: { scrollTop: number }) => {
-  const titleEl = groupTitleRefs.value.find((titleEl) => {
+  const titleEl = groupTitleRefs.value.find((titleEl: HTMLInputElement) => {
     // 获取标题的位置信息
     const { offsetHeight, offsetTop } = titleEl
     // 判断标题是否在可视范围内
@@ -146,7 +155,7 @@ const linkScrollbar = ref<ScrollbarInstance>()
 // 处理分组选中
 const handleGroupSelected = (group: string) => {
   activeGroup.value = group
-  const titleRef = groupTitleRefs.value.find((item) => item.textContent === group)
+  const titleRef = groupTitleRefs.value.find((item: HTMLInputElement) => item.textContent === group)
   if (titleRef) {
     // 滚动分组标题
     linkScrollbar.value?.setScrollTop(titleRef.offsetTop)
@@ -160,8 +169,8 @@ const groupBtnRefs = ref<ButtonInstance[]>([])
 // 自动滚动分组按钮，确保分组按钮保持在可视区域内
 const scrollToGroupBtn = (group: string) => {
   const groupBtn = groupBtnRefs.value
-    .map((btn) => btn['ref'])
-    .find((ref) => ref.textContent === group)
+    .map((btn: ButtonInstance) => btn['ref'])
+    .find((ref: Node) => ref.textContent === group)
   if (groupBtn) {
     groupScrollbar.value?.setScrollTop(groupBtn.offsetTop)
   }
@@ -184,11 +193,11 @@ const detailSelectDialog = ref<{
 })
 // 处理详情选择
 const handleProductCategorySelected = (id: number) => {
-  const url = new URL(activeAppLink.value, 'http://127.0.0.1')
+  const url = new URL(activeAppLink.value.path, 'http://127.0.0.1')
   // 修改 id 参数
   url.searchParams.set('id', `${id}`)
   // 排除域名
-  activeAppLink.value = `${url.pathname}${url.search}`
+  activeAppLink.value.path = `${url.pathname}${url.search}`
   // 关闭对话框
   detailSelectDialog.value.visible = false
   // 重置 id

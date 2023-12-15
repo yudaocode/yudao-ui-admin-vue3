@@ -124,7 +124,15 @@ export const PAGE_LIBS = [
   {
     name: '图文组件',
     extended: true,
-    components: ['ImageBar', 'Carousel', 'TitleBar', 'VideoPlayer', 'Divider', 'MagicCube']
+    components: [
+      'ImageBar',
+      'Carousel',
+      'TitleBar',
+      'VideoPlayer',
+      'Divider',
+      'MagicCube',
+      'HotZone'
+    ]
   },
   { name: '商品组件', extended: true, components: ['ProductCard', 'ProductList'] },
   {

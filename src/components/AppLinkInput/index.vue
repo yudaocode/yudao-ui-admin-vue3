@@ -37,7 +37,7 @@ const emit = defineEmits<{
   'update:modelValue': [link: string]
 }>()
 watch(
-  () => appLink,
+  () => appLink.value,
   () => emit('update:modelValue', appLink.value)
 )
 </script>
