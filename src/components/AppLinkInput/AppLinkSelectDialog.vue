@@ -29,6 +29,7 @@
             :key="appLinkIndex"
             :content="appLink.path"
             placement="bottom"
+            :show-after="300"
           >
             <el-button
               class="m-b-8px m-r-8px m-l-0px!"

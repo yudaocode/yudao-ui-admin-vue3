@@ -1,6 +1,6 @@
 <template>
   <div class="title-bar">
-    <el-image :src="property.bgImgUrl" fit="cover" class="w-full" />
+    <el-image v-if="property.bgImgUrl" :src="property.bgImgUrl" fit="cover" class="w-full" />
     <div class="absolute left-0 top-0 w-full">
       <!-- 标题 -->
       <div

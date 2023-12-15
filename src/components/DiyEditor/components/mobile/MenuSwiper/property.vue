@@ -23,7 +23,7 @@
       </el-form-item>
 
       <el-card header="菜单设置" class="property-group" shadow="never">
-        <Draggable v-model="formData.list" :empty-item="cloneDeep(EMPTY_MENU_SWIPER_ITEM_PROPERTY">
+        <Draggable v-model="formData.list" :empty-item="cloneDeep(EMPTY_MENU_SWIPER_ITEM_PROPERTY)">
           <template #default="{ element }">
             <el-form-item label="图标" prop="iconUrl">
               <UploadImg v-model="element.iconUrl" height="80px" width="80px">
