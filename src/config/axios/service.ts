@@ -70,27 +70,11 @@ service.interceptors.request.use(
     }
     // get参数编码
     if (config.method?.toUpperCase() === 'GET' && params) {
-      let url = config.url + '?'
-      for (const propName of Object.keys(params)) {
-        const value = params[propName]
-        if (value !== void 0 && value !== null && typeof value !== 'undefined') {
-          if (typeof value === 'object') {
-            for (const val of Object.keys(value)) {
-              const params = propName + '[' + val + ']'
-              const subPart = encodeURIComponent(params) + '='
-              url += subPart + encodeURIComponent(value[val]) + '&'
-            }
-          } else {
-            url += `${propName}=${encodeURIComponent(value)}&`
-          }
-        }
-      }
-      // 给 get 请求加上时间戳参数，避免从缓存中拿数据
-      // const now = new Date().getTime()
-      // params = params.substring(0, url.length - 1) + `?_t=${now}`
-      url = url.slice(0, -1)
       config.params = {}
-      config.url = url
+      const paramsStr = qs.stringify(params, { allowDots: true })
+      if (paramsStr) {
+        config.url = config.url + '?' + paramsStr
+      }
     }
     return config
   },

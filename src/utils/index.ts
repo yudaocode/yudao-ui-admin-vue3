@@ -285,3 +285,12 @@ export const getUrlValue = (key: string, urlStr: string = location.href): string
 export const getUrlNumberValue = (key: string, urlStr: string = location.href): number => {
   return toNumber(getUrlValue(key, urlStr))
 }
+
+/**
+ * 构建排序字段
+ * @param prop 字段名称
+ * @param order 顺序
+ */
+export const buildSortingField = ({ prop, order }) => {
+  return { field: prop, order: order === 'ascending' ? 'asc' : 'desc' }
+}
