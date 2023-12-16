@@ -1,3 +1,20 @@
+// APP 链接分组
+export interface AppLinkGroup {
+  // 分组名称
+  name: string
+  // 链接列表
+  links: AppLink[]
+}
+// APP 链接
+export interface AppLink {
+  // 链接名称
+  name: string
+  // 链接地址
+  path: string
+  // 链接的类型
+  type?: APP_LINK_TYPE_ENUM
+}
+
 // APP 链接类型（需要特殊处理，例如商品详情）
 export const enum APP_LINK_TYPE_ENUM {
   // 拼团活动
@@ -243,4 +260,4 @@ export const APP_LINK_GROUP_LIST = [
       }
     ]
   }
-]
+] as AppLinkGroup[]

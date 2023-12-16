@@ -2,10 +2,12 @@
   <div>
     <el-card shadow="never">
       <el-skeleton :loading="loading" animated>
-        <el-row :gutter="20" justify="space-between">
+        <el-row :gutter="16" justify="space-between">
           <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
             <div class="flex items-center">
-              <img :src="avatar" alt="" class="mr-20px h-70px w-70px rounded-[50%]" />
+              <el-avatar :src="avatar" :size="70" class="mr-16px">
+                <img src="@/assets/imgs/avatar.gif" alt="" />
+              </el-avatar>
               <div>
                 <div class="text-20px">
                   {{ t('workplace.welcome') }} {{ username }} {{ t('workplace.happyDay') }}
@@ -19,7 +21,7 @@
           <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
             <div class="h-70px flex items-center justify-end lt-sm:mt-10px">
               <div class="px-8px text-right">
-                <div class="mb-20px text-14px text-gray-400">{{ t('workplace.project') }}</div>
+                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.project') }}</div>
                 <CountTo
                   class="text-20px"
                   :start-val="0"
@@ -29,7 +31,7 @@
               </div>
               <el-divider direction="vertical" />
               <div class="px-8px text-right">
-                <div class="mb-20px text-14px text-gray-400">{{ t('workplace.toDo') }}</div>
+                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.toDo') }}</div>
                 <CountTo
                   class="text-20px"
                   :start-val="0"
@@ -39,7 +41,7 @@
               </div>
               <el-divider direction="vertical" border-style="dashed" />
               <div class="px-8px text-right">
-                <div class="mb-20px text-14px text-gray-400">{{ t('workplace.access') }}</div>
+                <div class="mb-16px text-14px text-gray-400">{{ t('workplace.access') }}</div>
                 <CountTo
                   class="text-20px"
                   :start-val="0"
@@ -54,8 +56,8 @@
     </el-card>
   </div>
 
-  <el-row class="mt-5px" :gutter="20" justify="space-between">
-    <el-col :xl="16" :lg="16" :md="24" :sm="24" :xs="24" class="mb-10px">
+  <el-row class="mt-8px" :gutter="8" justify="space-between">
+    <el-col :xl="16" :lg="16" :md="24" :sm="24" :xs="24" class="mb-8px">
       <el-card shadow="never">
         <template #header>
           <div class="h-3 flex justify-between">
@@ -76,11 +78,11 @@
             >
               <el-card shadow="hover">
                 <div class="flex items-center">
-                  <Icon :icon="item.icon" :size="25" class="mr-10px" />
+                  <Icon :icon="item.icon" :size="25" class="mr-8px" />
                   <span class="text-16px">{{ item.name }}</span>
                 </div>
-                <div class="mt-15px text-14px text-gray-400">{{ t(item.message) }}</div>
-                <div class="mt-20px flex justify-between text-12px text-gray-400">
+                <div class="mt-16px text-14px text-gray-400">{{ t(item.message) }}</div>
+                <div class="mt-16px flex justify-between text-12px text-gray-400">
                   <span>{{ item.personal }}</span>
                   <span>{{ formatTime(item.time, 'yyyy-MM-dd') }}</span>
                 </div>
@@ -90,18 +92,18 @@
         </el-skeleton>
       </el-card>
 
-      <el-card shadow="never" class="mt-5px">
+      <el-card shadow="never" class="mt-8px">
         <el-skeleton :loading="loading" animated>
           <el-row :gutter="20" justify="space-between">
             <el-col :xl="10" :lg="10" :md="24" :sm="24" :xs="24">
-              <el-card shadow="hover" class="mb-10px">
+              <el-card shadow="hover" class="mb-8px">
                 <el-skeleton :loading="loading" animated>
                   <Echart :options="pieOptionsData" :height="280" />
                 </el-skeleton>
               </el-card>
             </el-col>
             <el-col :xl="14" :lg="14" :md="24" :sm="24" :xs="24">
-              <el-card shadow="hover" class="mb-10px">
+              <el-card shadow="hover" class="mb-8px">
                 <el-skeleton :loading="loading" animated>
                   <Echart :options="barOptionsData" :height="280" />
                 </el-skeleton>
@@ -111,7 +113,7 @@
         </el-skeleton>
       </el-card>
     </el-col>
-    <el-col :xl="8" :lg="8" :md="24" :sm="24" :xs="24" class="mb-10px">
+    <el-col :xl="8" :lg="8" :md="24" :sm="24" :xs="24" class="mb-8px">
       <el-card shadow="never">
         <template #header>
           <div class="h-3 flex justify-between">
@@ -120,9 +122,9 @@
         </template>
         <el-skeleton :loading="loading" animated>
           <el-row>
-            <el-col v-for="item in shortcut" :key="`team-${item.name}`" :span="8" class="mb-10px">
+            <el-col v-for="item in shortcut" :key="`team-${item.name}`" :span="8" class="mb-8px">
               <div class="flex items-center">
-                <Icon :icon="item.icon" class="mr-10px" />
+                <Icon :icon="item.icon" class="mr-8px" />
                 <el-link type="default" :underline="false" @click="setWatermark(item.name)">
                   {{ item.name }}
                 </el-link>
@@ -131,7 +133,7 @@
           </el-row>
         </el-skeleton>
       </el-card>
-      <el-card shadow="never" class="mt-10px">
+      <el-card shadow="never" class="mt-8px">
         <template #header>
           <div class="h-3 flex justify-between">
             <span>{{ t('workplace.notice') }}</span>
@@ -141,14 +143,16 @@
         <el-skeleton :loading="loading" animated>
           <div v-for="(item, index) in notice" :key="`dynamics-${index}`">
             <div class="flex items-center">
-              <img :src="avatar" alt="" class="mr-20px h-35px w-35px rounded-[50%]" />
+              <el-avatar :src="avatar" :size="35" class="mr-16px">
+                <img src="@/assets/imgs/avatar.gif" alt="" />
+              </el-avatar>
               <div>
                 <div class="text-14px">
                   <Highlight :keys="item.keys.map((v) => t(v))">
                     {{ item.type }} : {{ item.title }}
                   </Highlight>
                 </div>
-                <div class="mt-15px text-12px text-gray-400">
+                <div class="mt-16px text-12px text-gray-400">
                   {{ formatTime(item.date, 'yyyy-MM-dd') }}
                 </div>
               </div>
@@ -167,7 +171,6 @@ import { formatTime } from '@/utils'
 
 import { useUserStore } from '@/store/modules/user'
 import { useWatermark } from '@/hooks/web/useWatermark'
-import avatarImg from '@/assets/imgs/avatar.gif'
 import type { WorkplaceTotal, Project, Notice, Shortcut } from './types'
 import { pieOptions, barOptions } from './echarts-data'
 
@@ -177,7 +180,7 @@ const { t } = useI18n()
 const userStore = useUserStore()
 const { setWatermark } = useWatermark()
 const loading = ref(true)
-const avatar = userStore.getUser.avatar ? userStore.getUser.avatar : avatarImg
+const avatar = userStore.getUser.avatar
 const username = userStore.getUser.nickname
 const pieOptionsData = reactive<EChartsOption>(pieOptions) as EChartsOption
 // 获取统计数

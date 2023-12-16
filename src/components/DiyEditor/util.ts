@@ -5,12 +5,23 @@ import { TabBarProperty } from '@/components/DiyEditor/components/mobile/TabBar/
 
 // 页面装修组件
 export interface DiyComponent<T> {
+  // 用于区分同一种组件的不同实例
+  uid: number
   // 组件唯一标识
   id: string
   // 组件名称
   name: string
   // 组件图标
   icon: string
+  /*
+   组件位置：
+   top: 固定于手机顶部，例如 顶部的导航栏
+   bottom: 固定于手机底部，例如 底部的菜单导航栏
+   center: 位于手机中心，每个组件占一行，顺序向下排列
+   空：同center
+   fixed: 由组件自己决定位置，如弹窗位于手机中心、浮动按钮一般位于手机右下角
+  */
+  position: 'top' | 'bottom' | 'center' | '' | 'fixed'
   // 组件属性
   property: T
 }
@@ -100,12 +111,28 @@ export const PAGE_LIBS = [
   {
     name: '基础组件',
     extended: true,
-    components: ['SearchBar', 'NoticeBar', 'MenuSwiper', 'MenuGrid', 'MenuList']
+    components: [
+      'SearchBar',
+      'NoticeBar',
+      'MenuSwiper',
+      'MenuGrid',
+      'MenuList',
+      'Popover',
+      'FloatingActionButton'
+    ]
   },
   {
     name: '图文组件',
     extended: true,
-    components: ['ImageBar', 'Carousel', 'TitleBar', 'VideoPlayer', 'Divider', 'MagicCube']
+    components: [
+      'ImageBar',
+      'Carousel',
+      'TitleBar',
+      'VideoPlayer',
+      'Divider',
+      'MagicCube',
+      'HotZone'
+    ]
   },
   { name: '商品组件', extended: true, components: ['ProductCard', 'ProductList'] },
   {

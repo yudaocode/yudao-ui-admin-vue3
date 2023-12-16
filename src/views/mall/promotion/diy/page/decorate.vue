@@ -4,9 +4,6 @@
     v-model="formData.property"
     :title="formData.name"
     :libs="PAGE_LIBS"
-    :show-page-config="true"
-    :show-navigation-bar="true"
-    :show-tab-bar="false"
     @save="submitForm"
   />
 </template>
