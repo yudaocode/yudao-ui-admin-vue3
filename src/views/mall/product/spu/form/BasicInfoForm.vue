@@ -197,7 +197,7 @@ defineOptions({ name: 'ProductSpuBasicInfoForm' })
 const ruleConfig: RuleConfig[] = [
   {
     name: 'stock',
-    rule: (arg) => arg >= 1,
+    rule: (arg) => arg >= 0,
     message: '商品库存必须大于等于 1 ！！！'
   },
   {
@@ -213,7 +213,7 @@ const ruleConfig: RuleConfig[] = [
   {
     name: 'costPrice',
     rule: (arg) => arg >= 0.01,
-    message: '商品成本价格必须大于等于 0.01 元！！！'
+    message: '商品成本价格必须大于等于 0.00 元！！！'
   }
 ]
 
