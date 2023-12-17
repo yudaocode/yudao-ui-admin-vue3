@@ -111,7 +111,6 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const getList = async () => {
   loading.value = true
   try {
-    console.log(queryParams)
     const data = await BusinessApi.getBusinessPageByCustomer(queryParams)
     list.value = data.list
     total.value = data.total

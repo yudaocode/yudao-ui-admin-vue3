@@ -75,7 +75,6 @@ const queryParams = reactive({
 const getList = async () => {
   loading.value = true
   try {
-     console.log(props.customerId)
     // 置空参数
     queryParams.contactId = undefined
     // 执行查询
