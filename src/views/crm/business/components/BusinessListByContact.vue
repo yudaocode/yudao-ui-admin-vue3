@@ -5,8 +5,8 @@
       <Icon class="mr-5px" icon="ep:opportunity" />
       创建商机
     </el-button>
-    <el-button @click="openBusinessLink">  <Icon class="mr-5px" icon="ep:remove" />关联 </el-button>
-    <el-button @click="deleteBusinessLink">  <Icon class="mr-5px" icon="ep:circle-plus" />解除关联 </el-button>
+    <el-button @click="openBusinessLink">  <Icon class="mr-5px" icon="ep:circle-plus"/>关联 </el-button>
+    <el-button @click="deleteBusinessLink">  <Icon class="mr-5px" icon="ep:remove"  />解除关联 </el-button>
   </el-row>
 
   <!-- 列表 -->
