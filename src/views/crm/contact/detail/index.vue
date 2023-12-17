@@ -10,7 +10,7 @@
         <PermissionList :biz-id="contact.id!" :biz-type="BizTypeEnum.CRM_CONTACT" />
       </el-tab-pane>
       <el-tab-pane label="商机" lazy>
-        <BusinessList :biz-id="contact.id!" :biz-type="BizTypeEnum.CRM_CONTACT" />
+        <BusinessList :biz-id="contact.id!" :biz-type="BizTypeEnum.CRM_CONTACT" :customer-id="contact.customerId" />
       </el-tab-pane>
     </el-tabs>
   </el-col>
@@ -21,7 +21,7 @@ import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ContactApi from '@/api/crm/contact'
 import ContactDetailsHeader from '@/views/crm/contact/detail/ContactDetailsHeader.vue'
 import ContactDetailsInfo from '@/views/crm/contact/detail/ContactDetailsInfo.vue'
-import BusinessList from '@/views/crm/contactBusinessLink/components/BusinessListByContact.vue' // 商机列表
+import BusinessList from '@/views/crm/business/components/BusinessListByContact.vue' // 商机列表
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
 import { BizTypeEnum } from '@/api/crm/permission'
 

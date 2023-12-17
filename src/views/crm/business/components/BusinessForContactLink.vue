@@ -29,7 +29,6 @@
     </ContentWrap>
 
     <!-- 列表 -->
-    <!-- TODO @zyna：字段按照他们对齐下 -->
     <ContentWrap class="mt-10px">
       <el-table
         v-loading="loading"
@@ -75,12 +74,14 @@
 </template>
 <script setup lang="ts">
 import * as BusinessApi from '@/api/crm/business'
-import BusinessForm from '../../business/BusinessForm.vue'
+import BusinessForm from '../BusinessForm.vue'
 import { fenToYuanFormat } from '@/utils/formatter'
-// TODO @zyna：下面这个拼接，要注意大小写哈
-import * as ContactbusinesslinkApi from '@/api/crm/contactbusinesslink'
-const message = useMessage() // 消息弹窗
+import * as ContactApi from '@/api/crm/contact'
 
+const message = useMessage() // 消息弹窗
+const props = defineProps<{
+  customerId: number
+}>()
 defineOptions({ name: 'CrmBusinessLinkContactList' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
@@ -93,8 +94,8 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  // TODO @zyna：是不是要根据 customerId 筛选？
-  name: undefined
+  name: undefined,
+  customerId: props.customerId
 })
 const contactIdProp = ref(0) // 联系人编号
 
@@ -102,8 +103,7 @@ const contactIdProp = ref(0) // 联系人编号
 const open = async (contactId: number) => {
   dialogVisible.value = true
   contactIdProp.value = contactId
-  // TODO @zyna：下面要 await 下；一般 idea 如果有黄色警告，最好都看看哈
-  getList()
+  await getList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -111,7 +111,8 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const getList = async () => {
   loading.value = true
   try {
-    const data = await BusinessApi.getBusinessPage(queryParams)
+    console.log(queryParams)
+    const data = await BusinessApi.getBusinessPageByCustomer(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -141,25 +142,19 @@ const openForm = () => {
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const businessRef = ref()
 const submitForm = async () => {
-  // TODO @zyna：可以 if return，这样括号层级简单一点
   if (businessRef.value.getSelectionRows().length === 0) {
-    message.success('未选择商机')
-  } else {
-    // TODO @zyna：这里 postData 应该不用 ref，搞个 数组就好了？
-    const postData = ref<ContactbusinesslinkApi.ContactBusinessLinkVO[]>([])
-    businessRef.value.getSelectionRows().forEach((element) => {
-      // TODO @zyna：可以直接 push，不用声明 data
-      let data = {
-        id: undefined,
-        businessId: element.id,
-        contactId: contactIdProp.value
-      }
-      postData.value.push(data)
-    })
-    await ContactbusinesslinkApi.createContactBusinessLinkBatch(postData.value)
-    dialogVisible.value = false
-    emit('success')
+    return message.success('未选择商机')
   }
+  const postData = []
+  businessRef.value.getSelectionRows().forEach((element) => {
+    postData.push({
+      businessId: element.id,
+      contactId: contactIdProp.value
+    })
+  })
+  await ContactApi.createContactBusinessLinkBatch(postData)
+  dialogVisible.value = false
+  emit('success')
 }
 
 /** 打开联系人详情 */

@@ -5,8 +5,8 @@
       <Icon class="mr-5px" icon="ep:opportunity" />
       创建商机
     </el-button>
-    <el-button @click="openBusinessLink"> 关联 </el-button>
-    <el-button @click="deleteBusinessLink"> 解除关联 </el-button>
+    <el-button @click="openBusinessLink">  <Icon class="mr-5px" icon="ep:remove" />关联 </el-button>
+    <el-button @click="deleteBusinessLink">  <Icon class="mr-5px" icon="ep:circle-plus" />解除关联 </el-button>
   </el-row>
 
   <!-- 列表 -->
@@ -41,22 +41,25 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加 -->
-  <BusinessForm ref="formRef" @success="getList" />
-  <!---->
-  <BusinessLink ref="businessLinkRef" @success="getList" />
+  <BusinessForm ref="formRef" @success="getList"/>
+  <!--关联商机选择弹框-->
+  <BusinessLink ref="businessLinkRef" @success="getList" :customer-id="props.customerId"/>
 </template>
 <script setup lang="ts">
-import * as ContactBusinessLinkApi from '@/api/crm/contactbusinesslink'
-import BusinessForm from '../../business/BusinessForm.vue'
+import * as BusinessApi from '@/api/crm/business'
+import BusinessForm from '../BusinessForm.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
 import { fenToYuanFormat } from '@/utils/formatter'
-import BusinessLink from './BusinessLinkContactList.vue'
+import BusinessLink from './BusinessForContactLink.vue'
+import * as ContactApi from '@/api/crm/contact'
+import { el } from 'element-plus/es/locale'
+
 const message = useMessage() // 消息弹窗
-// TODO @zyna：这个组件，可以服用 BusinessList，然后根据传入的编号类型，做一些判断？
 defineOptions({ name: 'CrmBusinessContactList' })
 const props = defineProps<{
   bizType: number // 业务类型
   bizId: number // 业务编号
+  customerId: number 
 }>()
 
 const loading = ref(true) // 列表的加载中
@@ -72,6 +75,7 @@ const queryParams = reactive({
 const getList = async () => {
   loading.value = true
   try {
+     console.log(props.customerId)
     // 置空参数
     queryParams.contactId = undefined
     // 执行查询
@@ -79,7 +83,7 @@ const getList = async () => {
     switch (props.bizType) {
       case BizTypeEnum.CRM_CONTACT:
         queryParams.contactId = props.bizId
-        data = await ContactBusinessLinkApi.getBusinessByContactPage(queryParams)
+        data = await BusinessApi.getBusinessPageByContact(queryParams)
         break
       default:
         return
@@ -113,16 +117,11 @@ const deleteBusinessLink = async () => {
   if (businessRef.value.getSelectionRows().length === 0) {
     message.success('未选择商机')
   } else {
-    const postData = ref<ContactBusinessLinkApi.ContactBusinessLinkVO[]>([])
+    const postData = []
     businessRef.value.getSelectionRows().forEach((element) => {
-      let data = {
-        id: undefined,
-        businessId: element.id,
-        contactId: props.bizId
-      }
-      postData.value.push(data)
+      postData.push(element.businessContactId)
     })
-    await ContactBusinessLinkApi.deleteContactBusinessLink(postData.value)
+    await ContactApi.deleteContactBusinessLink(postData)
     handleQuery()
   }
 }
