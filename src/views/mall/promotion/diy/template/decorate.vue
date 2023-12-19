@@ -27,10 +27,11 @@
   </DiyEditor>
 </template>
 <script setup lang="ts">
+// TODO @疯狂：要不要建个 decorate 目录，然后挪进去，改成 index.vue，这样可以更明确看到是个独立界面哈，更好找
 import * as DiyTemplateApi from '@/api/mall/promotion/diy/template'
 import * as DiyPageApi from '@/api/mall/promotion/diy/page'
 import { useTagsViewStore } from '@/store/modules/tagsView'
-import { DiyComponentLibrary, PAGE_LIBS } from '@/components/DiyEditor/util'
+import { DiyComponentLibrary, PAGE_LIBS } from '@/components/DiyEditor/util' // 商城的 DIY 组件，在 DiyEditor 目录下
 import { toNumber } from 'lodash-es'
 
 /** 装修模板表单 */
@@ -51,7 +52,7 @@ const formData = ref<DiyTemplateApi.DiyTemplatePropertyVO>()
 const formRef = ref() // 表单 Ref
 // 当前编辑的属性
 const currentFormData = ref<DiyTemplateApi.DiyTemplatePropertyVO | DiyPageApi.DiyPageVO>()
-// 商城H5预览地址
+// 商城 H5 预览地址
 const previewUrl = ref('')
 
 // 获取详情

@@ -205,7 +205,7 @@ const handleUse = async (row: DiyTemplateApi.DiyTemplateVO) => {
     // 使用模板的二次确认
     await message.confirm(`是否使用模板“${row.name}”?`)
     // 发起删除
-    await DiyTemplateApi.useDiyTemplate(row.id)
+    await DiyTemplateApi.useDiyTemplate(row.id!)
     message.success('使用成功')
     // 刷新列表
     await getList()

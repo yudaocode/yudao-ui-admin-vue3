@@ -9,6 +9,7 @@ export interface HotZoneProperty {
   // 组件样式
   style: ComponentStyle
 }
+
 /** 热区项目属性 */
 export interface HotZoneItemProperty {
   // 链接的名称

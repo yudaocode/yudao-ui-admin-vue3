@@ -134,6 +134,7 @@ watch(
     deep: true
   }
 )
+
 /**
  * 计算商品的间距
  * @param index 商品索引

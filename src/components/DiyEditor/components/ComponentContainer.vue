@@ -100,6 +100,7 @@ const emits = defineEmits<{
   (e: 'copy'): void
   (e: 'delete'): void
 }>()
+
 /**
  * 移动组件
  * @param direction 移动方向
@@ -107,12 +108,14 @@ const emits = defineEmits<{
 const handleMoveComponent = (direction: number) => {
   emits('move', direction)
 }
+
 /**
  * 复制组件
  */
 const handleCopyComponent = () => {
   emits('copy')
 }
+
 /**
  * 删除组件
  */

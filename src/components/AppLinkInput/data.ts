@@ -35,8 +35,6 @@ export const enum APP_LINK_TYPE_ENUM {
   PRODUCT_DETAIL_NORMAL,
   // 拼团商品详情
   PRODUCT_DETAIL_COMBINATION,
-  // 积分商品详情
-  PRODUCT_DETAIL_POINT,
   // 秒杀商品详情
   PRODUCT_DETAIL_SECKILL
 }
@@ -81,10 +79,6 @@ export const APP_LINK_GROUP_LIST = [
         path: '/pages/public/setting'
       },
       {
-        name: '问题反馈',
-        path: '/pages/public/feedback'
-      },
-      {
         name: '常见问题',
         path: '/pages/public/faq'
       }
@@ -112,11 +106,6 @@ export const APP_LINK_GROUP_LIST = [
         name: '秒杀商品详情',
         path: '/pages/goods/seckill',
         type: APP_LINK_TYPE_ENUM.PRODUCT_DETAIL_SECKILL
-      },
-      {
-        name: '积分商品详情',
-        path: '/pages/goods/score',
-        type: APP_LINK_TYPE_ENUM.PRODUCT_DETAIL_POINT
       }
     ]
   },
@@ -144,10 +133,6 @@ export const APP_LINK_GROUP_LIST = [
       {
         name: '签到中心',
         path: '/pages/app/sign'
-      },
-      {
-        name: '积分商城',
-        path: '/pages/app/score-shop'
       },
       {
         name: '优惠券中心',
@@ -241,10 +226,6 @@ export const APP_LINK_GROUP_LIST = [
       {
         name: '地址管理',
         path: '/pages/user/address/list'
-      },
-      {
-        name: '发票管理',
-        path: '/pages/user/invoice/list'
       },
       {
         name: '用户佣金',

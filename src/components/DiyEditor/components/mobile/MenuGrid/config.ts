@@ -10,6 +10,7 @@ export interface MenuGridProperty {
   // 组件样式
   style: ComponentStyle
 }
+
 /** 宫格导航项目属性 */
 export interface MenuGridItemProperty {
   // 图标链接

@@ -4,6 +4,7 @@ import { floatToFixed2 } from '@/utils'
 import { formatDate } from '@/utils/formatTime'
 
 // 优惠值
+// TODO @疯狂：idea 有告警
 export const CouponDiscount = defineComponent({
   name: 'CouponDiscount',
   props: {

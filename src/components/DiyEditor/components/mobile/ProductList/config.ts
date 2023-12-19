@@ -38,6 +38,7 @@ export interface ProductListFieldProperty {
 }
 
 // 定义组件
+// TODO @疯狂：idea 有告警
 export const component = {
   id: 'ProductList',
   name: '商品栏',

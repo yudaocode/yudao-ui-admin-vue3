@@ -17,6 +17,7 @@ export interface SearchProperty {
 export type PlaceholderPosition = 'left' | 'center'
 
 // 定义组件
+// TODO @疯狂：idea 这里爆红，可以卡看咋优化下哇：is missing the following properties from type DiyComponent<SearchProperty>: uid, position
 export const component = {
   id: 'SearchBar',
   name: '搜索框',
