@@ -1,8 +1,11 @@
 <template>
   <el-tabs stretch>
+    <!-- 每个组件的自定义内容 -->
     <el-tab-pane label="内容" v-if="$slots.default">
       <slot></slot>
     </el-tab-pane>
+
+    <!-- 每个组件的通用内容 -->
     <el-tab-pane label="样式" lazy>
       <el-card header="组件样式" class="property-group">
         <el-form :model="formData" label-width="80px">
@@ -51,7 +54,7 @@
 import { ComponentStyle, usePropertyForm } from '@/components/DiyEditor/util'
 
 /**
- * 组件容器属性
+ * 组件容器属性：目前右边部分
  * 用于包裹组件，为组件提供 背景、外边距、内边距、边框等样式
  */
 defineOptions({ name: 'ComponentContainer' })

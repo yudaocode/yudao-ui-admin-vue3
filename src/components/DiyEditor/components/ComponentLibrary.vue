@@ -41,16 +41,19 @@ import { componentConfigs } from '../components/mobile/index'
 import { cloneDeep } from 'lodash-es'
 import { DiyComponent, DiyComponentLibrary } from '@/components/DiyEditor/util'
 
-/** 组件库 */
+/** 组件库：目前左侧的【基础组件】、【图文组件】部分 */
 defineOptions({ name: 'ComponentLibrary' })
 
 // 组件列表
 const props = defineProps<{
   list: DiyComponentLibrary[]
 }>()
+// 组件分组
 const groups = reactive<any[]>([])
 // 展开的折叠面板
 const extendGroups = reactive<string[]>([])
+
+// 监听 list 属性，按照 DiyComponentLibrary 的 name 分组
 watch(
   () => props.list,
   () => {
