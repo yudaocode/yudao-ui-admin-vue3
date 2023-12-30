@@ -29,10 +29,11 @@ export type OperateLogV2VO = {
   traceId: string
   userType: number
   userId: number
-  module: string
-  name: string
+  userName: string
+  type: string
+  subType: string
   bizId: number
-  content: string
+  action: string
   extra: string
   requestMethod: string
   requestUrl: string

@@ -4,14 +4,14 @@
       <el-timeline-item
         v-for="(log, index) in logDataList"
         :key="index"
-        :timestamp="formatDate(log.createTime!)"
+        :timestamp="formatDate(log.createTime)"
         placement="top"
       >
         <div class="el-timeline-right-content">
           <el-row>
             <el-col :span="24" class="mb-10px">
               =======================
-              <el-tag class="mr-10px" type="success">{{ log.creatorName }}</el-tag>
+              <el-tag class="mr-10px" type="success">{{ log.userName }}</el-tag>
               <span>{{ log.title }}</span>
               =======================
             </el-col>
@@ -91,11 +91,11 @@ const renderTags = (content: string) => {
 }
 const initLog = () => {
   logDataList.value = props.logList.map((logItem) => {
-    const keyValue = renderTags(logItem.content)
+    const keyValue = renderTags(logItem.action)
     // 挂载数据
     logItem.contentStrList = keyValue[0]
     if (keyValue[0][0] === '从') {
-      logItem.title = logItem.name
+      logItem.title = logItem.subType
     } else {
       logItem.title = keyValue[0][0]
       logItem.contentStrList.splice(0, 1)

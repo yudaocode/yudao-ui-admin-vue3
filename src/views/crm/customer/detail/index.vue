@@ -66,7 +66,12 @@ const getOperateLog = async (customerId: number) => {
   if (!customerId) {
     return
   }
-  logList.value = await CustomerApi.getOperateLog(customerId)
+  const data = await CustomerApi.getOperateLogPage({
+    pageNo: 1,
+    pageSize: 10,
+    bizId: customerId
+  })
+  logList.value = data.list
 }
 /** 初始化 */
 const { delView } = useTagsViewStore() // 视图操作

@@ -69,6 +69,6 @@ export const queryAllList = async () => {
 }
 
 // 查询客户操作日志
-export const getOperateLog = async (id: number) => {
-  return await request.get({ url: `/crm/customer/operate-log?id=` + id })
+export const getOperateLogPage = async (params) => {
+  return await request.get({ url: '/crm/customer/operate-log-page', params })
 }
