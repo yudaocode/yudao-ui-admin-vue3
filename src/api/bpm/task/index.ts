@@ -44,7 +44,7 @@ export const exportTask = async (params) => {
 
 // 获取所有可回退的节点
 export const getReturnList = async (params) => {
-  return await request.get({ url: '/bpm/task/get-return-list', params })
+  return await request.get({ url: '/bpm/task/return-list', params })
 }
 
 // 回退
