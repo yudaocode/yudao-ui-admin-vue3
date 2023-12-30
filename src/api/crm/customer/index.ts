@@ -67,3 +67,8 @@ export const exportCustomer = async (params) => {
 export const queryAllList = async () => {
   return await request.get({ url: `/crm/customer/query-all-list` })
 }
+
+// 查询客户操作日志
+export const getOperateLogPage = async (params) => {
+  return await request.get({ url: '/crm/customer/operate-log-page', params })
+}

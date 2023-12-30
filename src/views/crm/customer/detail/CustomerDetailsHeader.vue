@@ -14,6 +14,7 @@
         <el-button v-hasPermi="['crm:customer:update']" @click="openForm(customer.id)">
           编辑
         </el-button>
+        <el-button @click="transfer">转移</el-button>
         <el-button>更改成交状态</el-button>
       </div>
     </div>
@@ -26,21 +27,23 @@
       <el-descriptions-item label="成交状态">
         {{ customer.dealStatus ? '已成交' : '未成交' }}
       </el-descriptions-item>
-      <el-descriptions-item label="负责人">{{ customer.ownerUserName }} </el-descriptions-item>
+      <el-descriptions-item label="负责人">{{ customer.ownerUserName }}</el-descriptions-item>
       <!-- TODO wanwan 首要联系人? -->
       <el-descriptions-item label="首要联系人" />
       <!-- TODO wanwan 首要联系人电话? -->
-      <el-descriptions-item label="首要联系人电话">{{ customer.mobile }} </el-descriptions-item>
+      <el-descriptions-item label="首要联系人电话">{{ customer.mobile }}</el-descriptions-item>
     </el-descriptions>
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="emit('refresh')" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import * as CustomerApi from '@/api/crm/customer'
 import CustomerForm from '../CustomerForm.vue'
+
+defineOptions({ name: 'CustomerDetailsHeader' })
 
 const { customer, loading } = defineProps<{
   customer: CustomerApi.CustomerVO // 客户信息
