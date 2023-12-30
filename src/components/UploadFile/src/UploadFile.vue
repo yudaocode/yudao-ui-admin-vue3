@@ -2,25 +2,27 @@
   <div class="upload-file">
     <el-upload
       ref="uploadRef"
-      :multiple="props.limit > 1"
-      name="file"
-      v-model="valueRef"
       v-model:file-list="fileList"
-      :show-file-list="true"
-      :auto-upload="autoUpload"
       :action="updateUrl"
+      :auto-upload="autoUpload"
+      :before-upload="beforeUpload"
+      :drag="drag"
       :headers="uploadHeaders"
       :limit="props.limit"
-      :drag="drag"
-      :before-upload="beforeUpload"
-      :on-exceed="handleExceed"
-      :on-success="handleFileSuccess"
+      :multiple="props.limit > 1"
       :on-error="excelUploadError"
-      :on-remove="handleRemove"
+      :on-exceed="handleExceed"
       :on-preview="handlePreview"
+      :on-remove="handleRemove"
+      :on-success="handleFileSuccess"
+      :show-file-list="true"
       class="upload-file-uploader"
+      name="file"
     >
-      <el-button type="primary"><Icon icon="ep:upload-filled" />选取文件</el-button>
+      <el-button type="primary">
+        <Icon icon="ep:upload-filled" />
+        选取文件
+      </el-button>
       <template v-if="isShowTip" #tip>
         <div style="font-size: 8px">
           大小不超过 <b style="color: #f56c6c">{{ fileSize }}MB</b>
@@ -35,8 +37,8 @@
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { getAccessToken, getTenantId } from '@/utils/auth'
-import type { UploadInstance, UploadUserFile, UploadProps, UploadRawFile } from 'element-plus'
-import { isArray, isString } from '@/utils/is'
+import type { UploadInstance, UploadProps, UploadRawFile, UploadUserFile } from 'element-plus'
+import { isString } from '@/utils/is'
 
 defineOptions({ name: 'UploadFile' })
 
@@ -54,8 +56,8 @@ const props = defineProps({
   drag: propTypes.bool.def(false), // 拖拽上传
   isShowTip: propTypes.bool.def(true) // 是否显示提示
 })
+
 // ========== 上传相关 ==========
-const valueRef = ref(props.modelValue)
 const uploadRef = ref<UploadInstance>()
 const uploadList = ref<UploadUserFile[]>([])
 const fileList = ref<UploadUserFile[]>([])
@@ -64,6 +66,7 @@ const uploadHeaders = ref({
   Authorization: 'Bearer ' + getAccessToken(),
   'tenant-id': getTenantId()
 })
+
 // 文件上传之前判断
 const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
   if (fileList.value.length >= props.limit) {
@@ -97,12 +100,10 @@ const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
 // 文件上传成功
 const handleFileSuccess: UploadProps['onSuccess'] = (res: any): void => {
   message.success('上传成功')
-  const fileListNew = fileList.value
-  fileListNew.pop()
-  fileList.value = fileListNew
+  fileList.value.shift()
   uploadList.value.push({ name: res.data, url: res.data })
   if (uploadList.value.length == uploadNumber.value) {
-    fileList.value = fileList.value.concat(uploadList.value)
+    fileList.value.push(...uploadList.value)
     uploadList.value = []
     uploadNumber.value = 0
     emitUpdateModelValue()
@@ -131,29 +132,25 @@ const handlePreview: UploadProps['onPreview'] = (uploadFile) => {
 // 监听模型绑定值变动
 watch(
   () => props.modelValue,
-  () => {
-    const files: string[] = []
-    // 情况1：字符串
-    if (isString(props.modelValue)) {
-      // 情况1.1：逗号分隔的多值
-      if (props.modelValue.includes(',')) {
-        files.concat(props.modelValue.split(','))
-      } else if (props.modelValue.length > 0) {
-        files.push(props.modelValue)
-      }
-    } else if (isArray(props.modelValue)) {
-      // 情况2：字符串
-      files.concat(props.modelValue)
-    } else if (props.modelValue == null) {
-      // 情况3：undefined 不处理
-    } else {
-      throw new Error('不支持的 modelValue 类型')
+  (val: string | string[]) => {
+    if (!val) {
+      fileList.value = [] // fix：处理掉缓存，表单重置后上传组件的内容并没有重置
+      return
     }
-    fileList.value = files.map((url: string) => {
-      return { url, name: url.substring(url.lastIndexOf('/') + 1) } as UploadUserFile
-    })
+
+    fileList.value = [] // 保障数据为空
+    // 情况1：字符串
+    if (isString(val)) {
+      fileList.value.push(
+        ...val.split(',').map((url) => ({ name: url.substring(url.lastIndexOf('/') + 1), url }))
+      )
+    }
+    // 情况2：数组
+    fileList.value.push(
+      ...(val as string[]).map((url) => ({ name: url.substring(url.lastIndexOf('/') + 1), url }))
+    )
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 )
 // 发送文件链接列表更新
 const emitUpdateModelValue = () => {
@@ -166,7 +163,7 @@ const emitUpdateModelValue = () => {
   emit('update:modelValue', result)
 }
 </script>
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .upload-file-uploader {
   margin-bottom: 5px;
 }
