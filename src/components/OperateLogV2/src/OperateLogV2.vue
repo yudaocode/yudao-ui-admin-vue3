@@ -49,10 +49,13 @@ import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel, getDictObj } from '@/utils/dict'
 import { ElTag } from 'element-plus'
 
+defineOptions({ name: 'OperateLogV2' })
+
 const props = defineProps<{
   logList: OperateLogV2VO[] // 操作日志列表
 }>()
-defineOptions({ name: 'OperateLogV2' })
+
+const logDataList = ref<OperateLogV2VO[]>([]) // 操作日志列表
 
 /** 获得 userType 颜色 */
 const getUserTypeColor = (type: number) => {
@@ -69,7 +72,7 @@ const getUserTypeColor = (type: number) => {
   }
   return '#409EFF'
 }
-const logDataList = ref<OperateLogV2VO[]>([]) // 操作日志列表
+
 // 提取 tag 所需内容和位置
 const renderTags = (content: string) => {
   let newStr = unref(content).slice() // 去掉引用
@@ -89,6 +92,7 @@ const renderTags = (content: string) => {
   })
   return [newStr.split(fg), matchStr]
 }
+
 const initLog = () => {
   logDataList.value = props.logList.map((logItem) => {
     const keyValue = renderTags(logItem.action)
@@ -105,6 +109,7 @@ const initLog = () => {
     return logItem
   })
 }
+
 watch(
   () => props.logList.length,
   (newObj) => {

@@ -158,20 +158,12 @@ export const APP_LINK_GROUP_LIST = [
         path: '/pages/commission/index'
       },
       {
-        name: '申请分销商',
-        path: '/pages/commission/apply'
-      },
-      {
         name: '推广商品',
         path: '/pages/commission/goods'
       },
       {
         name: '分销订单',
         path: '/pages/commission/order'
-      },
-      {
-        name: '分享记录',
-        path: '/pages/commission/share-log'
       },
       {
         name: '我的团队',
@@ -193,10 +185,6 @@ export const APP_LINK_GROUP_LIST = [
       {
         name: '申请提现',
         path: '/pages/pay/withdraw'
-      },
-      {
-        name: '提现记录',
-        path: '/pages/pay/withdraw-log'
       }
     ]
   },

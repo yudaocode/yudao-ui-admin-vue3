@@ -42,7 +42,7 @@ export type OperateLogV2VO = {
   creator: string
   creatorName: string
   createTime: Date
-  // 数据扩展-渲染时使用
+  // 数据扩展，渲染时使用
   title: string // 操作标题（如果为空则取 name 值）
   colSize: number // 变更记录行数
   contentStrList: string[]
