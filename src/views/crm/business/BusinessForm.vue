@@ -242,7 +242,8 @@ const queryParams = reactive({
   mobile: null,
   industryId: null,
   level: null,
-  source: null
+  source: null,
+  pool:false
 })
 // 选择客户
 const showCustomer = ref(false)

@@ -39,6 +39,7 @@ import * as BusinessApi from '@/api/crm/business'
 import BusinessForm from './../BusinessForm.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
 import { fenToYuanFormat } from '@/utils/formatter'
+import * as ContactApi from '@/api/crm/contact'
 
 defineOptions({ name: 'CrmBusinessList' })
 const props = defineProps<{
@@ -67,12 +68,15 @@ const getList = async () => {
       case BizTypeEnum.CRM_CUSTOMER:
         queryParams.customerId = props.bizId
         data = await BusinessApi.getBusinessPageByCustomer(queryParams)
+        
+        console.log(data)
         break
       default:
         return
     }
     list.value = data.list
     total.value = data.total
+    console.log(list.value)
   } finally {
     loading.value = false
   }
