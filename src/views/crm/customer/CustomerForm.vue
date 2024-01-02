@@ -121,7 +121,7 @@
             <el-date-picker
               v-model="formData.contactNextTime"
               placeholder="选择下次联系时间"
-              type="date"
+              type="datetime"
               value-format="x"
             />
           </el-form-item>

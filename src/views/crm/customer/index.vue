@@ -101,14 +101,16 @@
           </el-link>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="所属行业" prop="industryId" width="120">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
-        </template>
-      </el-table-column>
+      <el-table-column align="center" label="手机" prop="mobile" width="120" />
+      <el-table-column align="center" label="电话" prop="telephone" width="120" />
       <el-table-column align="center" label="客户来源" prop="source" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="所属行业" prop="industryId" width="120">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
         </template>
       </el-table-column>
       <el-table-column align="center" label="客户等级" prop="level" width="120">
@@ -116,23 +118,7 @@
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="手机" prop="mobile" width="120" />
-      <el-table-column align="center" label="详细地址" prop="detailAddress" width="200" />
-      <el-table-column align="center" label="负责人" prop="ownerUserName" />
-      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" />
-      <el-table-column align="center" label="创建人" prop="creatorName" />
-      <el-table-column
-        :formatter="dateFormatter"
-        align="center"
-        label="创建时间"
-        prop="createTime"
-        width="180px"
-      />
-      <el-table-column align="center" label="成交状态" prop="dealStatus">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
-        </template>
-      </el-table-column>
+      <el-table-column align="center" label="网址" prop="website" width="200" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -140,6 +126,13 @@
         prop="contactNextTime"
         width="180px"
       />
+      <el-table-column align="center" label="备注" prop="remark" width="200" />
+      <el-table-column align="center" label="成交状态" prop="dealStatus">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
+        </template>
+      </el-table-column>
+      <!-- TODO @puhui999：距进入公海天数 -->
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -147,12 +140,23 @@
         prop="contactLastTime"
         width="180px"
       />
-      <el-table-column align="center" label="锁定状态" prop="lockStatus">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.lockStatus" />
-        </template>
-      </el-table-column>
-      <!--  TODO @wanwan 距进入公海天数    -->
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="updateTime"
+        width="180px"
+      />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
+        width="180px"
+      />
+      <el-table-column align="center" label="负责人" prop="ownerUserName" width="100px" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" width="100px" />
+      <el-table-column align="center" label="创建人" prop="creatorName" width="100px" />
       <el-table-column align="center" fixed="right" label="操作" min-width="150">
         <template #default="scope">
           <el-button
