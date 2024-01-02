@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO @zyna：少了一个外边框 -->
   <el-collapse v-model="activeNames">
     <el-collapse-item name="basicInfo">
       <template #title>

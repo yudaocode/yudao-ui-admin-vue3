@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog title="关联商机" v-model="dialogVisible">
     <!-- 搜索工作栏 -->
     <ContentWrap>
       <el-form
@@ -76,16 +76,14 @@
 import * as BusinessApi from '@/api/crm/business'
 import BusinessForm from '../BusinessForm.vue'
 import { fenToYuanFormat } from '@/utils/formatter'
-import * as ContactApi from '@/api/crm/contact'
 
 const message = useMessage() // 消息弹窗
 const props = defineProps<{
   customerId: number
 }>()
-defineOptions({ name: 'CrmBusinessLinkContactList' })
+defineOptions({ name: 'BusinessListModal' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题 TODO @zyna：是不是搞个标题？
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
@@ -97,12 +95,10 @@ const queryParams = reactive({
   name: undefined,
   customerId: props.customerId
 })
-const contactIdProp = ref(0) // 联系人编号
 
 /** 打开弹窗 */
-const open = async (contactId: number) => {
+const open = async () => {
   dialogVisible.value = true
-  contactIdProp.value = contactId
   await getList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -141,19 +137,14 @@ const openForm = () => {
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const businessRef = ref()
 const submitForm = async () => {
-  if (businessRef.value.getSelectionRows().length === 0) {
-    return message.success('未选择商机')
+  const businessIds = businessRef.value
+    .getSelectionRows()
+    .map((row: BusinessApi.BusinessVO) => row.id)
+  if (businessIds.length === 0) {
+    return message.error('未选择商机')
   }
-  const postData = []
-  businessRef.value.getSelectionRows().forEach((element) => {
-    postData.push({
-      businessId: element.id,
-      contactId: contactIdProp.value
-    })
-  })
-  await ContactApi.createContactBusinessLinkBatch(postData)
   dialogVisible.value = false
-  emit('success')
+  emit('success', businessIds)
 }
 
 /** 打开联系人详情 */

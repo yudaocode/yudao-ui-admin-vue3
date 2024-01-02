@@ -25,11 +25,12 @@ export interface ContactVO {
   areaName: string
   ownerUserName: string
 }
-export interface ContactBusinessLinkVO {
-  id: number
+
+export interface ContactBusinessReqVO {
   contactId: number
-  businessId: number
+  businessIds: number[]
 }
+
 // 查询 CRM 联系人列表
 export const getContactPage = async (params) => {
   return await request.get({ url: `/crm/contact/page`, params })
@@ -70,12 +71,12 @@ export const getSimpleContactList = async () => {
   return await request.get({ url: `/crm/contact/simple-all-list` })
 }
 
-//批量新增联系人商机关联
-export const createContactBusinessLinkBatch = async (data: ContactBusinessLinkVO[]) => {
-  return await request.post({ url: `/crm/contact/create-batch-business`, data })
+// 批量新增联系人商机关联
+export const createContactBusinessList = async (data: ContactBusinessReqVO) => {
+  return await request.post({ url: `/crm/contact/create-business-list`, data })
 }
 
-//解除联系人商机关联
-export const deleteContactBusinessLink = async (data: ContactBusinessLinkVO) => {
-  return await request.delete({ url: `/crm/contact/delete-batch-business`, data })
+// 解除联系人商机关联
+export const deleteContactBusinessList = async (data: ContactBusinessReqVO) => {
+  return await request.delete({ url: `/crm/contact/delete-business-list`, data })
 }
