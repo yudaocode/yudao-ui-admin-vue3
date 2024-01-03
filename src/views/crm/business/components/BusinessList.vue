@@ -75,7 +75,7 @@ defineOptions({ name: 'CrmBusinessList' })
 const props = defineProps<{
   bizType: number // 业务类型
   bizId: number // 业务编号
-  customerId: number // 关联联系人与商机时，需要传入 customerId 进行筛选
+  customerId?: number // 关联联系人与商机时，需要传入 customerId 进行筛选
 }>()
 
 const loading = ref(true) // 列表的加载中

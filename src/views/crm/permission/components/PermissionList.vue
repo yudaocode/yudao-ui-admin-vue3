@@ -24,6 +24,7 @@
       :stripe="true"
       @selection-change="handleSelectionChange"
     >
+      <!-- TODO @puhui999：负责人不允许选中 -->
       <el-table-column type="selection" width="55" />
       <el-table-column align="center" label="姓名" prop="nickname" />
       <el-table-column align="center" label="部门" prop="deptName" />
