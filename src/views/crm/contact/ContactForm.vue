@@ -49,8 +49,8 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="12"
-          ><el-form-item label="性别" prop="sex">
+        <el-col :span="12">
+          <el-form-item label="性别" prop="sex">
             <el-select v-model="formData.sex" placeholder="请选择">
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
@@ -58,8 +58,9 @@
                 :label="dict.label"
                 :value="dict.value"
               />
-            </el-select> </el-form-item
-        ></el-col>
+            </el-select>
+          </el-form-item>
+        </el-col>
       </el-row>
       <el-row>
         <el-col :span="12">
@@ -72,8 +73,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="座机" prop="telephone">
-            <el-input v-model="formData.telephone" placeholder="请输入座机" style="width: 215px" />
+          <el-form-item label="电话" prop="telephone">
+            <el-input v-model="formData.telephone" placeholder="请输入电话" style="width: 215px" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -104,10 +105,10 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="下次联系时间" prop="nextTime">
+          <el-form-item label="下次联系时间" prop="contactNextTime">
             <el-date-picker
-              v-model="formData.nextTime"
-              type="date"
+              v-model="formData.contactNextTime"
+              type="datetime"
               value-format="x"
               placeholder="选择下次联系时间"
             />
@@ -126,15 +127,17 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="地址" prop="address">
+          <el-form-item label="地址" prop="detailAddress">
             <el-input
               input-style="width:190px;"
-              v-model="formData.address"
+              v-model="formData.detailAddress"
               placeholder="请输入地址"
             />
           </el-form-item>
-        </el-col> </el-row
-      ><el-row>
+        </el-col>
+      </el-row>
+      <!-- TODO @zyna：解决下 ide 报错 -->
+      <el-row>
         <el-col :span="12">
           <el-form-item label="直属上级" prop="parentId">
             <el-select v-model="formData.parentId" placeholder="请选择">
@@ -152,10 +155,11 @@
           <el-form-item label="职位" prop="post">
             <el-input input-style="width:190px;" v-model="formData.post" placeholder="请输入职位" />
           </el-form-item>
-        </el-col> </el-row
-      ><el-row>
-        <el-col :span="12"
-          ><el-form-item label="是否关键决策人" prop="master" style="width: 400px">
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="关键决策人" prop="master" style="width: 400px">
             <el-radio-group v-model="formData.master">
               <el-radio
                 v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
@@ -169,8 +173,8 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="24"
-          ><el-form-item label="备注" prop="remark">
+        <el-col :span="24">
+          <el-form-item label="备注" prop="remark">
             <el-input v-model="formData.remark" placeholder="请输入备注" />
           </el-form-item>
         </el-col>
@@ -192,19 +196,20 @@ import { defaultProps } from '@/utils/tree'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const areaList = ref([]) // 地区列表
 const formData = ref({
-  nextTime: undefined,
+  contactNextTime: undefined,
   mobile: undefined,
   telephone: undefined,
   email: undefined,
   customerId: undefined,
   customerName: undefined,
-  address: undefined,
+  detailAddress: undefined,
   remark: undefined,
   ownerUserId: undefined,
   lastTime: undefined,
@@ -279,13 +284,14 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
+  // TODO zyna：ide 告警，看看怎么去掉哈；
   formData.value = {
-    nextTime: undefined,
+    contactNextTime: undefined,
     mobile: undefined,
     telephone: undefined,
     email: undefined,
     customerId: undefined,
-    address: undefined,
+    detailAddress: undefined,
     remark: undefined,
     ownerUserId: undefined,
     lastTime: undefined,

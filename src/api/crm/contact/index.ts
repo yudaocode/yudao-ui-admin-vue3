@@ -8,7 +8,7 @@ export interface ContactVO {
   email: string
   post: string
   customerId: number
-  address: string
+  detailAddress: string
   remark: string
   ownerUserId: string
   lastTime: Date
