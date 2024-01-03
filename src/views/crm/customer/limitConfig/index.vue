@@ -12,8 +12,8 @@
   </ContentWrap>
 </template>
 <script setup lang="ts">
-import CustomerLimitConfigList from '@/views/crm/config/customerLimitConfig/CustomerLimitConfigList.vue'
-import { LimitConfType } from '@/api/crm/customerLimitConfig'
+import CustomerLimitConfigList from './CustomerLimitConfigList.vue'
+import { LimitConfType } from '@/api/crm/customer/limitConfig'
 
 defineOptions({ name: 'CrmCustomerLimitConfig' })
 </script>

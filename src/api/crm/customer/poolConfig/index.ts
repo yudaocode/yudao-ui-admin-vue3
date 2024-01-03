@@ -1,12 +1,11 @@
 import request from '@/config/axios'
-import { ConfigVO } from '@/api/infra/config'
 
 export interface CustomerPoolConfigVO {
   enabled?: boolean
   contactExpireDays?: number
   dealExpireDays?: number
   notifyEnabled?: boolean
-  notifyDays: number
+  notifyDays?: number
 }
 
 // 获取客户公海规则设置
@@ -15,6 +14,6 @@ export const getCustomerPoolConfig = async () => {
 }
 
 // 更新客户公海规则设置
-export const saveCustomerPoolConfig = async (data: ConfigVO) => {
+export const saveCustomerPoolConfig = async (data: CustomerPoolConfigVO) => {
   return await request.put({ url: `/crm/customer-pool-config/save`, data })
 }
