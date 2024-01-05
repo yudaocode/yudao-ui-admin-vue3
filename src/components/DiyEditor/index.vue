@@ -27,11 +27,12 @@
         </el-tooltip>
       </el-button-group>
     </el-header>
+
     <!-- 中心区域 -->
     <el-container class="editor-container">
-      <!-- 左侧：组件库 -->
+      <!-- 左侧：组件库（ComponentLibrary） -->
       <ComponentLibrary ref="componentLibrary" :list="libs" v-if="libs && libs.length > 0" />
-      <!-- 中心设计区域 -->
+      <!-- 中心：设计区域（ComponentContainer） -->
       <div class="editor-center page-prop-area" @click="handlePageSelected">
         <!-- 手机顶部 -->
         <div class="editor-design-top">
@@ -132,7 +133,7 @@
           </template>
         </div>
       </div>
-      <!-- 右侧属性面板 -->
+      <!-- 右侧：属性面板（ComponentContainerProperty） -->
       <el-aside class="editor-right" width="350px" v-if="selectedComponent?.property">
         <el-card
           shadow="never"
@@ -160,6 +161,7 @@
       </el-aside>
     </el-container>
   </el-container>
+
   <!-- 预览弹框 -->
   <Dialog v-model="previewDialogVisible" title="预览" width="700">
     <div class="flex justify-around">
@@ -231,6 +233,7 @@ const props = defineProps({
 })
 
 // 监听传入的页面配置
+// 解析出 pageConfigComponent 页面整体的配置，navigationBarComponent、pageComponents、tabBarComponent 页面上、中、下的配置
 watch(
   () => props.modelValue,
   () => {
@@ -251,6 +254,7 @@ watch(
     immediate: true
   }
 )
+
 // 保存
 const handleSave = () => {
   const pageConfig = {
@@ -303,7 +307,7 @@ const handleTabBarSelected = () => {
   handleComponentSelected(unref(tabBarComponent))
 }
 
-// 组件变动
+// 组件变动（拖拽）
 const handleComponentChange = (dragEvent: any) => {
   // 新增，即从组件库拖拽添加组件
   if (dragEvent.added) {
@@ -327,19 +331,21 @@ const swapComponent = (oldIndex: number, newIndex: number) => {
   selectedComponentIndex.value = newIndex
 }
 
-/** 移动组件 */
+/** 移动组件（上移、下移） */
 const handleMoveComponent = (index: number, direction: number) => {
   const newIndex = index + direction
   if (newIndex < 0 || newIndex >= pageComponents.value.length) return
 
   swapComponent(index, newIndex)
 }
+
 /** 复制组件 */
 const handleCopyComponent = (index: number) => {
   const component = cloneDeep(pageComponents.value[index])
   component.uid = new Date().getTime()
   pageComponents.value.splice(index + 1, 0, component)
 }
+
 /**
  * 删除组件
  * @param index 当前组件index
@@ -371,6 +377,7 @@ const handleReset = () => {
   if (reload) reload()
   emits('reset')
 }
+
 // 预览
 const previewDialogVisible = ref(false)
 const handlePreview = () => {
@@ -388,10 +395,12 @@ const setDefaultSelectedComponent = () => {
     selectedComponent.value = unref(tabBarComponent)
   }
 }
+
 watch(
   () => [props.showPageConfig, props.showNavigationBar, props.showTabBar],
   () => setDefaultSelectedComponent()
 )
+
 onMounted(() => setDefaultSelectedComponent())
 </script>
 <style lang="scss" scoped>

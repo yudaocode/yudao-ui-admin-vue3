@@ -19,6 +19,7 @@ export interface VideoPlayerStyle extends ComponentStyle {
 }
 
 // 定义组件
+// TODO @疯狂：idea 有告警
 export const component = {
   id: 'VideoPlayer',
   name: '视频播放',

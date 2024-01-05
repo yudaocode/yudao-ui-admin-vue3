@@ -8,11 +8,11 @@
       <component :is="component.id" :property="component.property" />
     </div>
     <div class="component-wrap">
-      <!-- 左侧组件名 -->
+      <!-- 左侧：组件名（悬浮的小贴条） -->
       <div class="component-name" v-if="component.name">
         {{ component.name }}
       </div>
-      <!-- 左侧：组件操作工具栏 -->
+      <!-- 右侧：组件操作工具栏 -->
       <div class="component-toolbar" v-if="showToolbar && component.name && active">
         <VerticalButtonGroup type="primary">
           <el-tooltip content="上移" placement="right">
@@ -54,7 +54,7 @@ import { propTypes } from '@/utils/propTypes'
 import { object } from 'vue-types'
 
 /**
- * 组件容器
+ * 组件容器：目前在中间部分
  * 用于包裹组件，为组件提供 背景、外边距、内边距、边框等样式
  */
 defineOptions({ name: 'ComponentContainer' })
@@ -100,6 +100,7 @@ const emits = defineEmits<{
   (e: 'copy'): void
   (e: 'delete'): void
 }>()
+
 /**
  * 移动组件
  * @param direction 移动方向
@@ -107,12 +108,14 @@ const emits = defineEmits<{
 const handleMoveComponent = (direction: number) => {
   emits('move', direction)
 }
+
 /**
  * 复制组件
  */
 const handleCopyComponent = () => {
   emits('copy')
 }
+
 /**
  * 删除组件
  */

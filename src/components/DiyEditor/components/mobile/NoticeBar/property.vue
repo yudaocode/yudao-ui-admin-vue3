@@ -12,7 +12,6 @@
       <el-form-item label="文字颜色" prop="文字颜色">
         <ColorInput v-model="formData.textColor" />
       </el-form-item>
-
       <el-card header="公告内容" class="property-group" shadow="never">
         <Draggable v-model="formData.contents">
           <template #default="{ element }">

@@ -29,6 +29,7 @@ export interface PromotionCombinationProperty {
   // 组件样式
   style: ComponentStyle
 }
+
 // 商品字段
 export interface PromotionCombinationFieldProperty {
   // 是否显示
@@ -38,6 +39,7 @@ export interface PromotionCombinationFieldProperty {
 }
 
 // 定义组件
+// TODO @疯狂：idea 有告警
 export const component = {
   id: 'PromotionCombination',
   name: '拼团',

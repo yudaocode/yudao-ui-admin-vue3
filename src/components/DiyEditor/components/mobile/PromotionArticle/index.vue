@@ -6,6 +6,7 @@ import { PromotionArticleProperty } from './config'
 import * as ArticleApi from '@/api/mall/promotion/article/index'
 
 /** 营销文章 */
+// TODO @疯狂：idea 有告警
 defineOptions({ name: 'PromotionArticle' })
 // 定义属性
 const props = defineProps<{ property: PromotionArticleProperty }>()

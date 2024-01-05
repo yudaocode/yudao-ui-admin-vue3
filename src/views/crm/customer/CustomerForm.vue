@@ -1,11 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="100px"
-      v-loading="formLoading"
     >
       <el-row>
         <el-col :span="12">
@@ -17,7 +17,7 @@
           <el-form-item label="所属行业" prop="industryId">
             <el-select v-model="formData.industryId" placeholder="请选择所属行业">
               <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.CRM_CUSTOMER_INDUSTRY)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_INDUSTRY)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -31,7 +31,7 @@
           <el-form-item label="客户来源" prop="source">
             <el-select v-model="formData.source" placeholder="请选择客户来源">
               <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.CRM_CUSTOMER_SOURCE)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_SOURCE)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -43,7 +43,7 @@
           <el-form-item label="客户等级" prop="level">
             <el-select v-model="formData.level" placeholder="请选择客户等级">
               <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.CRM_CUSTOMER_LEVEL)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_LEVEL)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -120,9 +120,9 @@
           <el-form-item label="下次联系时间" prop="contactNextTime">
             <el-date-picker
               v-model="formData.contactNextTime"
-              type="date"
-              value-format="x"
               placeholder="选择下次联系时间"
+              type="datetime"
+              value-format="x"
             />
           </el-form-item>
         </el-col>
@@ -139,13 +139,13 @@
       </el-col>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
-import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+<script lang="ts" setup>
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as CustomerApi from '@/api/crm/customer'
 import * as AreaApi from '@/api/system/area'
 import { defaultProps } from '@/utils/tree'

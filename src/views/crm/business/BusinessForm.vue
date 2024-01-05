@@ -62,12 +62,12 @@
           </el-row>
         </el-popover>
       </el-form-item>
+      <!-- TODO @ljlleo：idea 红色的报错，可以解决下 -->
       <el-form-item label="商机状态类型" prop="statusTypeId">
         <el-select
           v-model="formData.statusTypeId"
           placeholder="请选择商机状态类型"
           clearable
-          size="small"
           @change="changeBusinessStatusType"
         >
           <el-option
@@ -79,7 +79,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="商机状态" prop="statusId">
-        <el-select v-model="formData.statusId" placeholder="请选择商机状态" clearable size="small">
+        <el-select v-model="formData.statusId" placeholder="请选择商机状态" clearable>
           <el-option
             v-for="item in businessStatusList"
             :key="item.id"
@@ -242,7 +242,8 @@ const queryParams = reactive({
   mobile: null,
   industryId: null,
   level: null,
-  source: null
+  source: null,
+  pool: false
 })
 // 选择客户
 const showCustomer = ref(false)
@@ -251,12 +252,12 @@ const openCustomerSelect = () => {
   queryParams.pageNo = 1
   getCustomerList()
 }
+
 /** 查询客户列表 */
 const getCustomerList = async () => {
   loading.value = true
   try {
     const data = await CustomerApi.getCustomerPage(queryParams)
-    console.log(JSON.stringify(data))
     customerList.value = data.list
     total.value = data.total
   } finally {

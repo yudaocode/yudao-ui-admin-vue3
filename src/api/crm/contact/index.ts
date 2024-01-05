@@ -8,7 +8,7 @@ export interface ContactVO {
   email: string
   post: string
   customerId: number
-  address: string
+  detailAddress: string
   remark: string
   ownerUserId: string
   lastTime: Date
@@ -24,6 +24,11 @@ export interface ContactVO {
   customerName: string
   areaName: string
   ownerUserName: string
+}
+
+export interface ContactBusinessReqVO {
+  contactId: number
+  businessIds: number[]
 }
 
 // 查询 CRM 联系人列表
@@ -64,4 +69,14 @@ export const exportContact = async (params) => {
 // 获得 CRM 联系人列表（精简）
 export const getSimpleContactList = async () => {
   return await request.get({ url: `/crm/contact/simple-all-list` })
+}
+
+// 批量新增联系人商机关联
+export const createContactBusinessList = async (data: ContactBusinessReqVO) => {
+  return await request.post({ url: `/crm/contact/create-business-list`, data })
+}
+
+// 解除联系人商机关联
+export const deleteContactBusinessList = async (data: ContactBusinessReqVO) => {
+  return await request.delete({ url: `/crm/contact/delete-business-list`, data })
 }

@@ -1,7 +1,5 @@
 <template>
-  <el-button type="primary" plain @click="handleQuery">
-    <Icon icon="ep:refresh" class="mr-5px" /> 刷新
-  </el-button>
+  <el-button plain @click="handleQuery"> <Icon icon="ep:refresh" class="mr-5px" /> 刷新 </el-button>
   <el-button
     type="primary"
     plain
@@ -87,10 +85,10 @@
 </template>
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import * as CustomerLimitConfigApi from '@/api/crm/customerLimitConfig'
-import CustomerLimitConfigForm from '@/views/crm/config/customerLimitConfig/CustomerLimitConfigForm.vue'
+import * as CustomerLimitConfigApi from '@/api/crm/customer/limitConfig'
+import CustomerLimitConfigForm from './CustomerLimitConfigForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
-import { LimitConfType } from '@/api/crm/customerLimitConfig'
+import { LimitConfType } from '@/api/crm/customer/limitConfig'
 
 defineOptions({ name: 'CustomerLimitConfigList' })
 
@@ -107,8 +105,6 @@ const queryParams = reactive({
   pageSize: 10,
   type: confType
 })
-const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -125,7 +121,7 @@ const getList = async () => {
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id, confType)
+  formRef.value.open(type, confType, id)
 }
 
 /** 删除按钮操作 */

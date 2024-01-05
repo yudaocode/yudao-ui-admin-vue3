@@ -13,6 +13,7 @@ export interface MagicCubeProperty {
   // 组件样式
   style: ComponentStyle
 }
+
 /** 广告魔方项目属性 */
 export interface MagicCubeItemProperty {
   // 图标链接
@@ -30,6 +31,7 @@ export interface MagicCubeItemProperty {
 }
 
 // 定义组件
+// TODO @疯狂：有 idea 爆红告警
 export const component = {
   id: 'MagicCube',
   name: '广告魔方',

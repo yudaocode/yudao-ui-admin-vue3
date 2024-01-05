@@ -56,7 +56,7 @@
   </ContentWrap>
 </template>
 <script setup lang="ts">
-import * as CustomerPoolConfigApi from '@/api/crm/customerPoolConfig'
+import * as CustomerPoolConfigApi from '@/api/crm/customer/poolConfig'
 import { CardTitle } from '@/components/Card'
 
 defineOptions({ name: 'CrmCustomerPoolConfig' })
@@ -67,10 +67,10 @@ const { t } = useI18n() // 国际化
 const formLoading = ref(false)
 const formData = ref({
   enabled: false,
-  contactExpireDays: 0,
-  dealExpireDays: 0,
+  contactExpireDays: undefined,
+  dealExpireDays: undefined,
   notifyEnabled: false,
-  notifyDays: 0
+  notifyDays: undefined
 })
 const formRules = reactive({
   enabled: [{ required: true, message: '是否启用客户公海不能为空', trigger: 'blur' }]
@@ -100,7 +100,7 @@ const onSubmit = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as CustomerPoolConfigApi.CustomerPoolConfigVO
+    const data = formData.value as CustomerPoolConfigApi.CustomerPoolConfigVO
     await CustomerPoolConfigApi.saveCustomerPoolConfig(data)
     message.success(t('common.updateSuccess'))
     await getConfig()

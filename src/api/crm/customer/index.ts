@@ -59,11 +59,21 @@ export const deleteCustomer = async (id: number) => {
 }
 
 // 导出客户 Excel
-export const exportCustomer = async (params) => {
+export const exportCustomer = async (params: any) => {
   return await request.download({ url: `/crm/customer/export-excel`, params })
 }
 
 // 客户列表
 export const queryAllList = async () => {
   return await request.get({ url: `/crm/customer/query-all-list` })
+}
+
+// 查询客户操作日志
+export const getOperateLogPage = async (params: any) => {
+  return await request.get({ url: '/crm/customer/operate-log-page', params })
+}
+
+// 锁定/解锁客户
+export const lockCustomer = async (id: number, lockStatus: boolean) => {
+  return await request.put({ url: `/crm/customer/lock`, data: { id, lockStatus } })
 }

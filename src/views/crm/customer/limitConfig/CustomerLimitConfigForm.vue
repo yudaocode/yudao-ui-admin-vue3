@@ -56,12 +56,12 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as CustomerLimitConfigApi from '@/api/crm/customerLimitConfig'
+import * as CustomerLimitConfigApi from '@/api/crm/customer/limitConfig'
 import * as DeptApi from '@/api/system/dept'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as UserApi from '@/api/system/user'
 import { cloneDeep } from 'lodash-es'
-import { LimitConfType } from '@/api/crm/customerLimitConfig'
+import { LimitConfType } from '@/api/crm/customer/limitConfig'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -72,7 +72,7 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  type: undefined,
+  type: LimitConfType.CUSTOMER_LOCK_LIMIT, // 给个默认值，避免 IDE 报错
   userIds: undefined,
   deptIds: undefined,
   maxCount: undefined,
@@ -88,15 +88,11 @@ const deptTree = ref() // 部门树形结构
 const userTree = ref() // 用户树形结构
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number, limitConfType?: LimitConfType) => {
+const open = async (type: string, limitConfType: LimitConfType, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  // 获得部门树
-  await getDeptTree()
-  // 获得用户
-  await getUserTree()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -108,6 +104,10 @@ const open = async (type: string, id?: number, limitConfType?: LimitConfType) =>
   } else {
     formData.value.type = limitConfType
   }
+  // 获得部门树
+  await getDeptTree()
+  // 获得用户
+  await getUserTree()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -141,7 +141,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    type: undefined,
+    type: LimitConfType.CUSTOMER_LOCK_LIMIT,
     userIds: undefined,
     deptIds: undefined,
     maxCount: undefined,
