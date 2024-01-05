@@ -186,17 +186,6 @@
             </el-checkbox-group>
             <el-text class="w-full" size="small" type="info"> 商城开通提现的付款方式 </el-text>
           </el-form-item>
-          <el-form-item label="提现银行" prop="brokerageBankNames">
-            <el-select v-model="formData.brokerageBankNames" placeholder="请选择提现银行" multiple>
-              <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.BROKERAGE_BANK_NAME)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
-            <el-text class="w-full" size="small" type="info"> 商城开通提现的银行列表 </el-text>
-          </el-form-item>
         </el-tab-pane>
       </el-tabs>
       <!-- 保存 -->
@@ -232,7 +221,6 @@ const formData = ref({
   brokerageSecondPercent: 0,
   brokerageWithdrawMinPrice: 0,
   brokerageWithdrawFeePercent: 0,
-  brokerageBankNames: [],
   brokerageFrozenDays: 0,
   brokerageWithdrawTypes: []
 })
@@ -246,7 +234,6 @@ const formRules = reactive({
     { required: true, message: '用户提现最低金额不能为空', trigger: 'blur' }
   ],
   brokerageWithdrawFeePercent: [{ required: true, message: '提现手续费不能为空', trigger: 'blur' }],
-  brokerageBankNames: [{ required: true, message: '提现银行不能为空', trigger: 'blur' }],
   brokerageFrozenDays: [{ required: true, message: '佣金冻结时间不能为空', trigger: 'blur' }],
   brokerageWithdrawTypes: [
     {

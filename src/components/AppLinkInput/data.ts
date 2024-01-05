@@ -181,10 +181,6 @@ export const APP_LINK_GROUP_LIST = [
       {
         name: '充值记录',
         path: '/pages/pay/recharge-log'
-      },
-      {
-        name: '申请提现',
-        path: '/pages/pay/withdraw'
       }
     ]
   },
