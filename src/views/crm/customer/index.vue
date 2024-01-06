@@ -72,10 +72,17 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"> <Icon class="mr-5px" icon="ep:search" /> 搜索 </el-button>
-        <el-button @click="resetQuery"> <Icon class="mr-5px" icon="ep:refresh" />重置 </el-button>
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery(undefined)">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
         <el-button v-hasPermi="['crm:customer:create']" type="primary" @click="openForm('create')">
-          <Icon class="mr-5px" icon="ep:plus" /> 新增
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
         </el-button>
         <el-button
           v-hasPermi="['crm:customer:export']"
@@ -84,7 +91,8 @@
           type="success"
           @click="handleExport"
         >
-          <Icon class="mr-5px" icon="ep:download" /> 导出
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -92,11 +100,19 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <el-tabs v-model="activeName" @tab-click="handleClick">
+      <el-tab-pane label="客户列表" name="1" />
+      <el-tab-pane label="我负责人的" name="2" />
+      <el-tab-pane label="我关注的" name="3" />
+      <el-tab-pane label="我参与的" name="4" />
+      <el-tab-pane label="下属负责的" name="5" />
+      <el-tab-pane label="客户公海" name="6" />
+    </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
       <el-table-column align="center" label="编号" prop="id" />
       <el-table-column align="center" label="客户名称" prop="name" width="160">
         <template #default="scope">
-          <el-link type="primary" :underline="false" @click="openDetail(scope.row.id)">
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
             {{ scope.row.name }}
           </el-link>
         </template>
@@ -197,6 +213,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CustomerApi from '@/api/crm/customer'
 import CustomerForm from './CustomerForm.vue'
+import { TabsPaneContext } from 'element-plus'
 
 defineOptions({ name: 'CrmCustomer' })
 
@@ -206,24 +223,75 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const queryParams = reactive({
+const queryParams = ref<{
+  pageNo: number
+  pageSize: number
+  name: string
+  mobile: string
+  industryId: number | undefined
+  level: number | undefined
+  source: number | undefined
+  sceneType: number | undefined
+  pool: boolean | undefined
+}>({
   pageNo: 1,
   pageSize: 10,
-  pool: false,
   name: '',
   mobile: '',
   industryId: undefined,
   level: undefined,
-  source: undefined
+  source: undefined,
+  sceneType: undefined,
+  pool: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const activeName = ref('1') // 列表 tab
 
+enum CrmSceneTypeEnum {
+  OWNER = 1,
+  FOLLOW = 2,
+  INVOLVED = 3,
+  SUBORDINATE = 4
+}
+
+const handleClick = (tab: TabsPaneContext) => {
+  switch (tab.paneName) {
+    case '1':
+      resetQuery()
+      break
+    case '2':
+      resetQuery(() => {
+        queryParams.value.sceneType = CrmSceneTypeEnum.OWNER
+      })
+      break
+    case '3':
+      resetQuery(() => {
+        queryParams.value.sceneType = CrmSceneTypeEnum.FOLLOW
+      })
+      break
+    case '4':
+      resetQuery(() => {
+        queryParams.value.sceneType = CrmSceneTypeEnum.INVOLVED
+      })
+      break
+    case '5':
+      resetQuery(() => {
+        queryParams.value.sceneType = CrmSceneTypeEnum.SUBORDINATE
+      })
+      break
+    case '6':
+      resetQuery(() => {
+        queryParams.value.pool = true
+      })
+      break
+  }
+}
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await CustomerApi.getCustomerPage(queryParams)
+    const data = await CustomerApi.getCustomerPage(queryParams.value)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -233,19 +301,30 @@ const getList = async () => {
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
-  queryParams.pageNo = 1
+  queryParams.value.pageNo = 1
   getList()
 }
 
 /** 重置按钮操作 */
-const resetQuery = () => {
+const resetQuery = (func: Function | undefined = undefined) => {
   queryFormRef.value.resetFields()
-  queryParams.pool = false
+  queryParams.value = {
+    pageNo: 1,
+    pageSize: 10,
+    name: '',
+    mobile: '',
+    industryId: undefined,
+    level: undefined,
+    source: undefined,
+    sceneType: undefined,
+    pool: undefined
+  }
+  func && func()
   handleQuery()
 }
 
 /** 打开客户详情 */
-const { push } = useRouter()
+const { currentRoute, push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmCustomerDetail', params: { id } })
 }
@@ -276,14 +355,20 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await CustomerApi.exportCustomer(queryParams)
+    const data = await CustomerApi.exportCustomer(queryParams.value)
     download.excel(data, '客户.xls')
   } catch {
   } finally {
     exportLoading.value = false
   }
 }
-
+// 监听路由变化更新列表
+watch(
+  () => currentRoute.value,
+  () => {
+    getList()
+  }
+)
 /** 初始化 **/
 onMounted(() => {
   getList()
