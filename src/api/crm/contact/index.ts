@@ -80,3 +80,8 @@ export const createContactBusinessList = async (data: ContactBusinessReqVO) => {
 export const deleteContactBusinessList = async (data: ContactBusinessReqVO) => {
   return await request.delete({ url: `/crm/contact/delete-business-list`, data })
 }
+
+// 查询联系人操作日志
+export const getOperateLogPage = async (params: any) => {
+  return await request.get({ url: '/crm/contact/operate-log-page', params })
+}
