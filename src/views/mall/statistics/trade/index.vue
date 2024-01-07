@@ -298,7 +298,7 @@ const getTradeTrendData = async () => {
     times[0] = DateUtil.formatDate(dayjs(times[0]).subtract(1, 'd'))
   }
   // 查询数据
-  await Promise.all([getTradeTrendSummary(), getTradeStatisticsList()])
+  await Promise.all([getTradeStatisticsAnalyse(), getTradeStatisticsList()])
   trendLoading.value = false
 }
 
@@ -308,9 +308,9 @@ const getTradeStatisticsSummary = async () => {
 }
 
 /** 查询交易状况数据统计 */
-const getTradeTrendSummary = async () => {
+const getTradeStatisticsAnalyse = async () => {
   const times = shortcutDateRangePicker.value.times
-  trendSummary.value = await TradeStatisticsApi.getTradeTrendSummary({ times })
+  trendSummary.value = await TradeStatisticsApi.getTradeStatisticsAnalyse({ times })
 }
 
 /** 查询交易状况数据列表 */
