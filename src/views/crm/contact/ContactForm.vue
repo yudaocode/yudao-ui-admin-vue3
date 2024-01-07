@@ -136,7 +136,6 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <!-- TODO @zyna：解决下 ide 报错 -->
       <el-row>
         <el-col :span="12">
           <el-form-item label="直属上级" prop="parentId">
@@ -233,7 +232,7 @@ const ownerUserList = ref<any[]>([])
 const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 // TODO 芋艿：统一的客户选择面板
 const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
-const allContactList = ref([]) // 所有联系人列表
+const allContactList = ref<ContactApi.ContactVO[]>([]) // 所有联系人列表
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
