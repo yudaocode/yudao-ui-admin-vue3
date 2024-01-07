@@ -69,11 +69,23 @@ export const queryAllList = async () => {
 }
 
 // 查询客户操作日志
-export const getOperateLogPage = async (params: any) => {
-  return await request.get({ url: '/crm/customer/operate-log-page', params })
+export const getOperateLogPage = async (id: number) => {
+  return await request.get({ url: '/crm/customer/operate-log-page?id=' + id })
 }
+
+//======================= 业务操作 =======================
 
 // 锁定/解锁客户
 export const lockCustomer = async (id: number, lockStatus: boolean) => {
   return await request.put({ url: `/crm/customer/lock`, data: { id, lockStatus } })
+}
+
+// 领取公海客户
+export const receive = async (ids: any[]) => {
+  return await request.put({ url: '/crm/customer/receive', params: { ids: ids.join(',') } })
+}
+
+// 客户放入公海
+export const putPool = async (id: number) => {
+  return await request.put({ url: `/crm/customer/put-pool?id=${id}` })
 }

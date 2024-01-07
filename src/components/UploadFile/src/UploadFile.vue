@@ -100,7 +100,9 @@ const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
 // 文件上传成功
 const handleFileSuccess: UploadProps['onSuccess'] = (res: any): void => {
   message.success('上传成功')
-  fileList.value.shift()
+  // 删除自身
+  const index = fileList.value.findIndex((item) => item.response?.data === res.data)
+  fileList.value.splice(index, 1)
   uploadList.value.push({ name: res.data, url: res.data })
   if (uploadList.value.length == uploadNumber.value) {
     fileList.value.push(...uploadList.value)
@@ -144,6 +146,7 @@ watch(
       fileList.value.push(
         ...val.split(',').map((url) => ({ name: url.substring(url.lastIndexOf('/') + 1), url }))
       )
+      return
     }
     // 情况2：数组
     fileList.value.push(

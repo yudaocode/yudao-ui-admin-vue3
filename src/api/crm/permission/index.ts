@@ -58,15 +58,3 @@ export const deletePermissionBatch = async (params) => {
 export const deleteSelfPermission = async (id) => {
   return await request.delete({ url: '/crm/permission/quit-team?id=' + id })
 }
-
-// TODO @puhui999：调整下位置
-// 领取公海数据
-export const receive = async (data: { bizType: number; bizId: number }) => {
-  return await request.put({ url: `/crm/permission/receive`, data })
-}
-
-// TODO @puhui999：调整下位置
-// 数据放入公海
-export const putPool = async (data: { bizType: number; bizId: number }) => {
-  return await request.put({ url: `/crm/permission/put-pool`, data })
-}
