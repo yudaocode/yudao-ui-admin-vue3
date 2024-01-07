@@ -244,15 +244,15 @@ export const CouponTemplateTakeTypeEnum = {
  */
 export const PromotionProductScopeEnum = {
   ALL: {
-    scope: 1,
+    scope: 10,
     name: '通用劵'
   },
   SPU: {
-    scope: 2,
+    scope: 20,
     name: '商品劵'
   },
   CATEGORY: {
-    scope: 3,
+    scope: 30,
     name: '品类劵'
   }
 }
