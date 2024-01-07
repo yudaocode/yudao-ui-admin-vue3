@@ -1,5 +1,6 @@
 <template>
   <CustomerDetailsHeader :customer="customer" :loading="loading">
+    <!-- @puhui999：返回是不是可以去掉哈，貌似用途可能不大 -->
     <el-button @click="close">返回</el-button>
     <!-- TODO puhui999: 按钮数据权限收尾统一完善，需要按权限分级和客户状态来动态显示匹配的按钮 -->
     <el-button v-hasPermi="['crm:customer:update']" type="primary" @click="openForm">
@@ -12,7 +13,7 @@
     <el-button v-if="customer.lockStatus" @click="handleUnlock">解锁</el-button>
     <el-button v-if="!customer.lockStatus" @click="handleLock">锁定</el-button>
     <el-button v-if="!customer.ownerUserId" type="primary" @click="receive">领取客户</el-button>
-    <el-button v-if="customer.ownerUserId" type="primary" @click="putPool">客户放入公海</el-button>
+    <el-button v-if="customer.ownerUserId" @click="putPool">客户放入公海</el-button>
   </CustomerDetailsHeader>
   <el-col>
     <el-tabs>
@@ -67,6 +68,7 @@ const loading = ref(true) // 加载中
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
 const { currentRoute, push } = useRouter() // 路由
+
 /** 获取详情 */
 const customer = ref<CustomerApi.CustomerVO>({} as CustomerApi.CustomerVO) // 客户详情
 const getCustomer = async () => {
@@ -78,45 +80,51 @@ const getCustomer = async () => {
     loading.value = false
   }
 }
+
+/** 编辑客户 */
 const formRef = ref<InstanceType<typeof CustomerForm>>() // 客户表单 Ref
-// 编辑客户
 const openForm = () => {
   formRef.value?.open('update', customerId.value)
 }
-// 客户转移
+
+/** 客户转移 */
 const transfer = () => {}
-// 锁定客户
+
+/** 锁定客户 */
 const handleLock = async () => {
   await message.confirm(`确定锁定客户【${customer.value.name}】 吗？`)
   await CustomerApi.lockCustomer(unref(customerId.value), true)
   message.success(`锁定客户【${customer.value.name}】成功`)
   await getCustomer()
 }
-// 解锁客户
+
+/** 解锁客户 */
 const handleUnlock = async () => {
   await message.confirm(`确定解锁客户【${customer.value.name}】 吗？`)
   await CustomerApi.lockCustomer(unref(customerId.value), false)
   message.success(`解锁客户【${customer.value.name}】成功`)
   await getCustomer()
 }
-// 领取客户
+
+// TODO @puhui999：下面两个方法的命名，也用 handleXXX 风格哈
+/** 领取客户 */
 const receive = async () => {
   await message.confirm(`确定领取客户【${customer.value.name}】 吗？`)
   await CustomerApi.receive([unref(customerId.value)])
   message.success(`领取客户【${customer.value.name}】成功`)
   await getCustomer()
 }
-// 客户放入公海
+
+/** 客户放入公海 */
 const putPool = async () => {
   await message.confirm(`确定将客户【${customer.value.name}】放入公海吗？`)
   await CustomerApi.putPool(unref(customerId.value))
   message.success(`客户【${customer.value.name}】放入公海成功`)
   close()
 }
+
+/** 获取操作日志 */
 const logList = ref<OperateLogV2VO[]>([]) // 操作日志列表
-/**
- * 获取操作日志
- */
 const getOperateLog = async () => {
   if (!customerId.value) {
     return
@@ -124,11 +132,13 @@ const getOperateLog = async () => {
   const data = await CustomerApi.getOperateLogPage(customerId.value)
   logList.value = data.list
 }
+
 const close = () => {
   delView(unref(currentRoute))
   // TODO 先返回到客户列表
   push({ name: 'CrmCustomer' })
 }
+
 /** 初始化 */
 const { params } = useRoute()
 onMounted(() => {

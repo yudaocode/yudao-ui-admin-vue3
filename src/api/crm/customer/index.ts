@@ -73,13 +73,14 @@ export const getOperateLogPage = async (id: number) => {
   return await request.get({ url: '/crm/customer/operate-log-page?id=' + id })
 }
 
-//======================= 业务操作 =======================
+// ======================= 业务操作 =======================
 
 // 锁定/解锁客户
 export const lockCustomer = async (id: number, lockStatus: boolean) => {
   return await request.put({ url: `/crm/customer/lock`, data: { id, lockStatus } })
 }
 
+// TODO @puhui999：方法名，改成和后端一致哈
 // 领取公海客户
 export const receive = async (ids: any[]) => {
   return await request.put({ url: '/crm/customer/receive', params: { ids: ids.join(',') } })

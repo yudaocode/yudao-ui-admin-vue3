@@ -100,9 +100,10 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <!-- TODO @puhui999：是不是就 3 重呀，我负责的，我参与的，我下属的 -->
     <el-tabs v-model="activeName" @tab-click="handleClick">
       <el-tab-pane label="客户列表" name="1" />
-      <el-tab-pane label="我负责人的" name="2" />
+      <el-tab-pane label="我负责的" name="2" />
       <el-tab-pane label="我关注的" name="3" />
       <el-tab-pane label="我参与的" name="4" />
       <el-tab-pane label="下属负责的" name="5" />
@@ -270,6 +271,7 @@ const handleClick = (tab: TabsPaneContext) => {
         queryParams.value.sceneType = CrmSceneTypeEnum.FOLLOW
       })
       break
+    // TODO @puhui999：这个貌似报错？
     case '4':
       resetQuery(() => {
         queryParams.value.sceneType = CrmSceneTypeEnum.INVOLVED
@@ -280,6 +282,7 @@ const handleClick = (tab: TabsPaneContext) => {
         queryParams.value.sceneType = CrmSceneTypeEnum.SUBORDINATE
       })
       break
+    // TODO @puhui999：公海单独一个菜单哈。
     case '6':
       resetQuery(() => {
         queryParams.value.pool = true
@@ -287,6 +290,7 @@ const handleClick = (tab: TabsPaneContext) => {
       break
   }
 }
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -362,13 +366,15 @@ const handleExport = async () => {
     exportLoading.value = false
   }
 }
-// 监听路由变化更新列表
+
+/** 监听路由变化更新列表 */
 watch(
   () => currentRoute.value,
   () => {
     getList()
   }
 )
+
 /** 初始化 **/
 onMounted(() => {
   getList()
