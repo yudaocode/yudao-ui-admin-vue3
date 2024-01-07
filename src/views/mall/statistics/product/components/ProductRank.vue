@@ -77,12 +77,9 @@ const queryParams = reactive({
   times: [],
   sortingFields: {}
 })
-// 列表的加载中
-const loading = ref(false)
-// 列表的总页数
-const total = ref(0)
-// 列表的数据
-const list = ref<ProductStatisticsVO[]>([])
+const loading = ref(false) // 列表的加载中
+const total = ref(0) // 列表的总页数
+const list = ref<ProductStatisticsVO[]>([]) // 列表的数据
 
 /** 查询商品列表 */
 const getSpuList = async () => {
