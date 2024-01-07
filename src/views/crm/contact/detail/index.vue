@@ -48,10 +48,11 @@ const getContactData = async (id: number) => {
     loading.value = false
   }
 }
-const logList = ref<OperateLogV2VO[]>([]) // 操作日志列表
+
 /**
  * 获取操作日志
  */
+const logList = ref<OperateLogV2VO[]>([]) // 操作日志列表
 const getOperateLog = async (contactId: number) => {
   if (!contactId) {
     return
@@ -61,6 +62,7 @@ const getOperateLog = async (contactId: number) => {
   })
   logList.value = data.list
 }
+
 /** 初始化 */
 const { delView } = useTagsViewStore() // 视图操作
 const { currentRoute } = useRouter() // 路由

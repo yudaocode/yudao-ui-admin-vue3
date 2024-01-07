@@ -70,6 +70,7 @@
 import * as ContactApi from '@/api/crm/contact'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
+
 const { contact } = defineProps<{
   contact: ContactApi.ContactVO
 }>()

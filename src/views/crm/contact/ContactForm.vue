@@ -233,6 +233,7 @@ const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 // TODO 芋艿：统一的客户选择面板
 const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 const allContactList = ref<ContactApi.ContactVO[]>([]) // 所有联系人列表
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
@@ -254,6 +255,7 @@ const open = async (type: string, id?: number) => {
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
