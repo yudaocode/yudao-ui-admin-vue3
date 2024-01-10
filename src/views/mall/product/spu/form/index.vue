@@ -33,8 +33,7 @@
           :propFormData="formData"
         />
       </el-tab-pane>
-      <!-- TODO 芋艿：物流设置 -->
-      <el-tab-pane label="其他设置" name="otherSettings">
+      <el-tab-pane label="其它设置" name="otherSettings">
         <OtherSettingsForm
           ref="otherSettingsRef"
           v-model:activeName="activeName"

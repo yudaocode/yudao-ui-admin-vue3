@@ -1,11 +1,10 @@
 <template>
-  <!-- 情况一：添加/修改 -->
   <el-form
-    v-if="!isDetail"
     ref="otherSettingsFormRef"
     :model="formData"
     :rules="rules"
     label-width="120px"
+    :disabled="isDetail"
   >
     <el-form-item label="商品排序" prop="sort">
       <el-input-number v-model="formData.sort" :min="0" />
@@ -17,22 +16,16 @@
       <el-input-number v-model="formData.virtualSalesCount" :min="0" placeholder="请输入虚拟销量" />
     </el-form-item>
   </el-form>
-
-  <!-- 情况二：详情 -->
-  <Descriptions v-if="isDetail" :data="formData" :schema="allSchemas.detailSchema" />
 </template>
 <script lang="ts" setup>
 import type { Spu } from '@/api/mall/product/spu'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
-import { otherSettingsSchema } from './spu.data'
 
 defineOptions({ name: 'OtherSettingsForm' })
 
 const message = useMessage() // 消息弹窗
-
-const { allSchemas } = useCrudSchemas(otherSettingsSchema)
 
 const props = defineProps({
   propFormData: {

@@ -1,11 +1,10 @@
 <template>
-  <!-- 情况一：添加/修改 -->
   <el-form
-    v-if="!isDetail"
     ref="productSpuBasicInfoRef"
     :model="formData"
     :rules="rules"
     label-width="120px"
+    :disabled="isDetail"
   >
     <!-- TODO 芋艿：宽度！！ -->
     <!-- TODO 芋艿：这里要挪出去 -->
@@ -20,28 +19,15 @@
       </el-select>
     </el-form-item>
   </el-form>
-
-  <!-- 情况二：详情 -->
-  <Descriptions v-if="isDetail" :data="formData" :schema="allSchemas.detailSchema">
-    <template #deliveryTemplateId="{ row }">
-      {{ deliveryTemplateList.find((item) => item.id === row.deliveryTemplateId)?.name }}
-    </template>
-  </Descriptions>
 </template>
 <script lang="ts" setup>
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
-import { basicInfoSchema } from './spu.data'
 import type { Spu } from '@/api/mall/product/spu'
 import * as ExpressTemplateApi from '@/api/mall/trade/delivery/expressTemplate'
 
 defineOptions({ name: 'ProductSpuBasicInfoForm' })
-
-// ====== 商品详情相关操作 ======
-const { allSchemas } = useCrudSchemas(basicInfoSchema)
-
-// ====== end ======
 
 const message = useMessage() // 消息弹窗
 
@@ -55,7 +41,7 @@ const props = defineProps({
 })
 const productSpuBasicInfoRef = ref() // 表单 Ref
 const formData = reactive<Spu>({
-  deliveryTemplateId: null // 运费模版
+  deliveryTemplateId: undefined // 运费模版
 })
 const rules = reactive({
   deliveryTemplateId: [required]

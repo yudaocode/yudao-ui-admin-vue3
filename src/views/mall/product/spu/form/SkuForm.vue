@@ -1,11 +1,11 @@
 <template>
   <!-- 情况一：添加/修改 -->
   <el-form
-    v-if="!isDetail"
     ref="productSpuSkuRef"
     :model="formData"
     :rules="rules"
     label-width="120px"
+    :disabled="isDetail"
   >
     <el-row>
       <el-col :span="12">
@@ -55,46 +55,16 @@
     </el-row>
   </el-form>
 
-  <!-- 情况二：详情 -->
-  <Descriptions v-if="isDetail" :data="formData" :schema="allSchemas.detailSchema">
-    <template #specType="{ row }">
-      {{ row.specType ? '多规格' : '单规格' }}
-    </template>
-    <template #subCommissionType="{ row }">
-      {{ row.subCommissionType ? '单独设置' : '默认设置' }}
-    </template>
-    <template #sliderPicUrls="{ row }">
-      <el-image
-        v-for="(item, index) in row.sliderPicUrls"
-        :key="index"
-        :src="item.url"
-        class="mr-10px h-60px w-60px"
-        @click="imagePreview(row.sliderPicUrls)"
-      />
-    </template>
-    <template #skus>
-      <SkuList
-        ref="skuDetailListRef"
-        :is-detail="isDetail"
-        :prop-form-data="formData"
-        :propertyList="propertyList"
-      />
-    </template>
-  </Descriptions>
-
   <!-- 商品属性添加 Form 表单 -->
   <ProductPropertyAddForm ref="attributesAddFormRef" :propertyList="propertyList" />
 </template>
 <script lang="ts" setup>
 import { PropType } from 'vue'
-import { isArray } from '@/utils/is'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
-import { createImageViewer } from '@/components/ImageViewer'
 import { getPropertyList, RuleConfig, SkuList } from '@/views/mall/product/spu/components/index.ts'
 import ProductAttributes from './ProductAttributes.vue'
 import ProductPropertyAddForm from './ProductPropertyAddForm.vue'
-import { basicInfoSchema } from './spu.data'
 import type { Spu } from '@/api/mall/product/spu'
 
 defineOptions({ name: 'ProductSpuSkuForm' })
@@ -122,25 +92,6 @@ const ruleConfig: RuleConfig[] = [
     message: '商品成本价格必须大于等于 0.00 元！！！'
   }
 ]
-
-// ====== 商品详情相关操作 ======
-const { allSchemas } = useCrudSchemas(basicInfoSchema)
-/** 商品图预览 */
-const imagePreview = (args) => {
-  const urlList = []
-  if (isArray(args)) {
-    args.forEach((item) => {
-      urlList.push(item.url)
-    })
-  } else {
-    urlList.push(args)
-  }
-  createImageViewer({
-    urlList
-  })
-}
-
-// ====== end ======
 
 const message = useMessage() // 消息弹窗
 
