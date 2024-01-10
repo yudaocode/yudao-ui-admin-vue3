@@ -194,10 +194,10 @@ export const copyValueToTarget = (target, source) => {
  * 将一个整数转换为分数保留两位小数
  * @param num
  */
-export const formatToFraction = (num: number | string | undefined): number => {
-  if (typeof num === 'undefined') return 0
+export const formatToFraction = (num: number | string | undefined): string => {
+  if (typeof num === 'undefined') return '0.00'
   const parsedNumber = typeof num === 'string' ? parseFloat(num) : num
-  return parseFloat((parsedNumber / 100).toFixed(2))
+  return (parsedNumber / 100.0).toFixed(2)
 }
 
 /**
@@ -249,7 +249,7 @@ export const yuanToFen = (amount: string | number): number => {
 /**
  * 分转元
  */
-export const fenToYuan = (price: string | number): number => {
+export const fenToYuan = (price: string | number): string => {
   return formatToFraction(price)
 }
 

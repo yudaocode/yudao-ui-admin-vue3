@@ -1,3 +1,4 @@
+<!-- 商品中心 - 商品列表  -->
 <template>
   <!-- 搜索工作栏 -->
   <ContentWrap>
@@ -125,27 +126,33 @@
           </el-form>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="商品编号" min-width="60" prop="id" />
-      <el-table-column label="商品图" min-width="80">
+      <el-table-column label="商品编号" min-width="140" prop="id" />
+      <el-table-column label="商品信息" min-width="300">
         <template #default="{ row }">
-          <el-image :src="row.picUrl" class="h-30px w-30px" @click="imagePreview(row.picUrl)" />
+          <div class="flex">
+            <el-image
+              fit="cover"
+              :src="row.picUrl"
+              class="flex-none w-50px h-50px"
+              @click="imagePreview(row.picUrl)"
+            />
+            <div class="ml-4 overflow-hidden">
+              <el-tooltip effect="dark" :content="row.name" placement="top">
+                <div>
+                  {{ row.name }}
+                </div>
+              </el-tooltip>
+            </div>
+          </div>
         </template>
       </el-table-column>
-      <el-table-column :show-overflow-tooltip="true" label="商品名称" min-width="300" prop="name" />
-      <el-table-column align="center" label="商品售价" min-width="90" prop="price">
-        <template #default="{ row }"> {{ fenToYuan(row.price) }}元</template>
+      <el-table-column align="center" label="价格" min-width="160" prop="price">
+        <template #default="{ row }"> ¥ {{ fenToYuan(row.price) }}</template>
       </el-table-column>
       <el-table-column align="center" label="销量" min-width="90" prop="salesCount" />
       <el-table-column align="center" label="库存" min-width="90" prop="stock" />
       <el-table-column align="center" label="排序" min-width="70" prop="sort" />
-      <el-table-column
-        :formatter="dateFormatter"
-        align="center"
-        label="创建时间"
-        prop="createTime"
-        width="180"
-      />
-      <el-table-column align="center" label="状态" min-width="80">
+      <el-table-column align="center" label="销售状态" min-width="80">
         <template #default="{ row }">
           <template v-if="row.status >= 0">
             <el-switch
@@ -163,16 +170,16 @@
           </template>
         </template>
       </el-table-column>
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
+        width="180"
+      />
       <el-table-column align="center" fixed="right" label="操作" min-width="200">
         <template #default="{ row }">
-          <el-button
-            v-hasPermi="['product:spu:update']"
-            link
-            type="primary"
-            @click="openDetail(row.id)"
-          >
-            详情
-          </el-button>
+          <el-button link type="primary" @click="openDetail(row.id)"> 详情 </el-button>
           <el-button
             v-hasPermi="['product:spu:update']"
             link
@@ -196,17 +203,17 @@
               type="primary"
               @click="handleStatus02Change(row, ProductSpuStatusEnum.DISABLE.status)"
             >
-              恢复到仓库
+              恢复
             </el-button>
           </template>
           <template v-else>
             <el-button
               v-hasPermi="['product:spu:update']"
               link
-              type="primary"
+              type="danger"
               @click="handleStatus02Change(row, ProductSpuStatusEnum.RECYCLE.status)"
             >
-              加入回收站
+              回收
             </el-button>
           </template>
         </template>
@@ -236,48 +243,41 @@ defineOptions({ name: 'ProductSpu' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-const { currentRoute, push } = useRouter() // 路由跳转
+const { push } = useRouter() // 路由跳转
 
 const loading = ref(false) // 列表的加载中
 const exportLoading = ref(false) // 导出的加载中
 const total = ref(0) // 列表的总页数
-const list = ref<any[]>([]) // 列表的数据
+const list = ref<ProductSpuApi.Spu[]>([]) // 列表的数据
 // tabs 数据
 const tabsData = ref([
   {
-    count: 0,
-    name: '出售中商品',
-    type: 0
+    name: '出售中',
+    type: 0,
+    count: 0
   },
   {
-    count: 0,
-    name: '仓库中商品',
-    type: 1
+    name: '仓库中',
+    type: 1,
+    count: 0
   },
   {
-    count: 0,
-    name: '已售罄商品',
-    type: 2
+    name: '已售罄',
+    type: 2,
+    count: 0
   },
   {
-    count: 0,
     name: '警戒库存',
-    type: 3
+    type: 3,
+    count: 0
   },
   {
-    count: 0,
-    name: '商品回收站',
-    type: 4
+    name: '回收站',
+    type: 4,
+    count: 0
   }
 ])
 
-/** 获得每个 Tab 的数量 */
-const getTabsCount = async () => {
-  const res = await ProductSpuApi.getTabsCount()
-  for (let objName in res) {
-    tabsData.value[Number(objName)].count = res[objName]
-  }
-}
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
@@ -287,11 +287,6 @@ const queryParams = ref({
   createTime: undefined
 }) // 查询参数
 const queryFormRef = ref() // 搜索的表单Ref
-
-const handleTabClick = (tab: TabsPaneContext) => {
-  queryParams.value.tabType = tab.paneName as number
-  getList()
-}
 
 /** 查询列表 */
 const getList = async () => {
@@ -305,8 +300,22 @@ const getList = async () => {
   }
 }
 
+/** 切换 Tab */
+const handleTabClick = (tab: TabsPaneContext) => {
+  queryParams.value.tabType = tab.paneName as number
+  getList()
+}
+
+/** 获得每个 Tab 的数量 */
+const getTabsCount = async () => {
+  const res = await ProductSpuApi.getTabsCount()
+  for (let objName in res) {
+    tabsData.value[Number(objName)].count = res[objName]
+  }
+}
+
 /** 添加到仓库 / 回收站的状态 */
-const handleStatus02Change = async (row, newStatus: number) => {
+const handleStatus02Change = async (row: any, newStatus: number) => {
   try {
     // 二次确认
     const text = newStatus === ProductSpuStatusEnum.RECYCLE.status ? '加入到回收站' : '恢复到仓库'
@@ -322,7 +331,7 @@ const handleStatus02Change = async (row, newStatus: number) => {
 }
 
 /** 更新上架/下架状态 */
-const handleStatusChange = async (row) => {
+const handleStatusChange = async (row: any) => {
   try {
     // 二次确认
     const text = row.status ? '上架' : '下架'
@@ -407,19 +416,16 @@ const handleExport = async () => {
   }
 }
 
-const categoryList = ref() // 分类树
 /** 获取分类的节点的完整结构 */
-const formatCategoryName = (categoryId) => {
+const categoryList = ref() // 分类树
+const formatCategoryName = (categoryId: number) => {
   return treeToString(categoryList.value, categoryId)
 }
 
-// 监听路由变化更新列表，解决商品保存后，列表不刷新的问题。
-watch(
-  () => currentRoute.value,
-  () => {
-    getList()
-  }
-)
+/** 激活时 */
+onActivated(() => {
+  getList()
+})
 
 /** 初始化 **/
 onMounted(async () => {
