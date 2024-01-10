@@ -1,9 +1,17 @@
 <template>
   <ContentWrap v-loading="formLoading">
     <el-tabs v-model="activeName">
-      <el-tab-pane label="商品信息" name="basicInfo">
+      <el-tab-pane label="基础信息" name="basicInfo">
         <BasicInfoForm
           ref="basicInfoRef"
+          v-model:activeName="activeName"
+          :is-detail="isDetail"
+          :propFormData="formData"
+        />
+      </el-tab-pane>
+      <el-tab-pane label="价格库存" name="sku">
+        <SkuForm
+          ref="skuRef"
           v-model:activeName="activeName"
           :is-detail="isDetail"
           :propFormData="formData"
@@ -17,6 +25,7 @@
           :propFormData="formData"
         />
       </el-tab-pane>
+      <!-- TODO 芋艿：物流设置 -->
       <el-tab-pane label="其他设置" name="otherSettings">
         <OtherSettingsForm
           ref="otherSettingsRef"
@@ -43,6 +52,7 @@ import * as ProductSpuApi from '@/api/mall/product/spu'
 import BasicInfoForm from './BasicInfoForm.vue'
 import DescriptionForm from './DescriptionForm.vue'
 import OtherSettingsForm from './OtherSettingsForm.vue'
+import SkuForm from './SkuForm.vue'
 import { convertToInteger, floatToFixed2, formatToFraction } from '@/utils'
 
 defineOptions({ name: 'ProductSpuForm' })
@@ -56,15 +66,15 @@ const { delView } = useTagsViewStore() // 视图操作
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const activeName = ref('basicInfo') // Tag 激活的窗口
 const isDetail = ref(false) // 是否查看详情
-const basicInfoRef = ref() // 商品信息Ref
-const descriptionRef = ref() // 商品详情Ref
-const otherSettingsRef = ref() // 其他设置Ref
+const basicInfoRef = ref() // 商品信息 Ref
+const skuRef = ref() // 商品规格 Ref
+const descriptionRef = ref() // 商品详情 Ref
+const otherSettingsRef = ref() // 其他设置 Ref
 // spu 表单数据
 const formData = ref<ProductSpuApi.Spu>({
   name: '', // 商品名称
   categoryId: undefined, // 商品分类
   keyword: '', // 关键字
-  unit: undefined, // 单位
   picUrl: '', // 商品封面图
   sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
@@ -89,13 +99,7 @@ const formData = ref<ProductSpuApi.Spu>({
   description: '', // 商品详情
   sort: 0, // 商品排序
   giveIntegral: 0, // 赠送积分
-  virtualSalesCount: 0, // 虚拟销量
-  recommendHot: false, // 是否热卖
-  recommendBenefit: false, // 是否优惠
-  recommendBest: false, // 是否精品
-  recommendNew: false, // 是否新品
-  recommendGood: false, // 是否优品
-  activityOrders: [] // 活动排序
+  virtualSalesCount: 0 // 虚拟销量
 })
 
 /** 获得详情 */
@@ -139,6 +143,7 @@ const submitForm = async () => {
   // 校验各表单
   try {
     await unref(basicInfoRef)?.validate()
+    await unref(skuRef)?.validate()
     await unref(descriptionRef)?.validate()
     await unref(otherSettingsRef)?.validate()
     // 深拷贝一份, 这样最终 server 端不满足，不需要恢复，
@@ -181,6 +186,7 @@ const close = () => {
   delView(unref(currentRoute))
   push({ name: 'ProductSpu' })
 }
+
 /** 初始化 */
 onMounted(async () => {
   await getDetail()

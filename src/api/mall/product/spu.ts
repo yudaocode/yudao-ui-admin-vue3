@@ -48,11 +48,6 @@ export interface Spu {
   sort?: number // 商品排序
   giveIntegral?: number // 赠送积分
   virtualSalesCount?: number // 虚拟销量
-  recommendHot?: boolean // 是否热卖
-  recommendBenefit?: boolean // 是否优惠
-  recommendBest?: boolean // 是否精品
-  recommendNew?: boolean // 是否新品
-  recommendGood?: boolean // 是否优品
   price?: number // 商品价格
   salesCount?: number // 商品销量
   marketPrice?: number // 市场价
@@ -60,7 +55,6 @@ export interface Spu {
   stock?: number // 商品库存
   createTime?: Date // 商品创建时间
   status?: number // 商品状态
-  activityOrders: number[] // 活动排序
 }
 
 // 获得 Spu 列表

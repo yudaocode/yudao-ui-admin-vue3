@@ -34,11 +34,6 @@ export const basicInfoSchema = reactive<CrudSchema[]>([
     field: 'videoUrl'
   },
   {
-    label: '单位',
-    field: 'unit',
-    dictType: DICT_TYPE.PRODUCT_UNIT
-  },
-  {
     label: '规格类型',
     field: 'specType'
   },
@@ -73,29 +68,5 @@ export const otherSettingsSchema = reactive<CrudSchema[]>([
   {
     label: '虚拟销量',
     field: 'virtualSalesCount'
-  },
-  {
-    label: '是否热卖推荐',
-    field: 'recommendHot'
-  },
-  {
-    label: '是否优惠推荐',
-    field: 'recommendBenefit'
-  },
-  {
-    label: '是否精品推荐',
-    field: 'recommendBest'
-  },
-  {
-    label: '是否新品推荐',
-    field: 'recommendNew'
-  },
-  {
-    label: '是否优品推荐',
-    field: 'recommendGood'
-  },
-  {
-    label: '活动显示排序',
-    field: 'activityOrders'
   }
 ])
