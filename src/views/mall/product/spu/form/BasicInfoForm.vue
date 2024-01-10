@@ -47,17 +47,6 @@
     <el-form-item label="商品轮播图" prop="sliderPicUrls">
       <UploadImgs v-model:modelValue="formData.sliderPicUrls" />
     </el-form-item>
-    <!-- TODO 芋艿：这里要挪出去 -->
-    <el-form-item label="运费模板" prop="deliveryTemplateId">
-      <el-select v-model="formData.deliveryTemplateId" placeholder="请选择">
-        <el-option
-          v-for="item in deliveryTemplateList"
-          :key="item.id"
-          :label="item.name"
-          :value="item.id"
-        />
-      </el-select>
-    </el-form-item>
     <el-form-item label="品牌" prop="brandId">
       <el-select v-model="formData.brandId" placeholder="请选择">
         <el-option v-for="item in brandList" :key="item.id" :label="item.name" :value="item.id" />
@@ -70,15 +59,6 @@
     <template #categoryId="{ row }"> {{ formatCategoryName(row.categoryId) }}</template>
     <template #brandId="{ row }">
       {{ brandList.find((item) => item.id === row.brandId)?.name }}
-    </template>
-    <template #deliveryTemplateId="{ row }">
-      {{ deliveryTemplateList.find((item) => item.id === row.deliveryTemplateId)?.name }}
-    </template>
-    <template #specType="{ row }">
-      {{ row.specType ? '多规格' : '单规格' }}
-    </template>
-    <template #subCommissionType="{ row }">
-      {{ row.subCommissionType ? '单独设置' : '默认设置' }}
     </template>
     <template #picUrl="{ row }">
       <el-image :src="row.picUrl" class="h-60px w-60px" @click="imagePreview(row.picUrl)" />
@@ -146,7 +126,6 @@ const formData = reactive<Spu>({
   picUrl: '', // 商品封面图
   sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
-  deliveryTemplateId: null, // 运费模版
   brandId: null // 商品品牌
 })
 const rules = reactive({
@@ -156,7 +135,6 @@ const rules = reactive({
   introduction: [required],
   picUrl: [required],
   sliderPicUrls: [required],
-  deliveryTemplateId: [required],
   brandId: [required]
 })
 
@@ -207,14 +185,11 @@ const formatCategoryName = (categoryId: number) => {
 }
 
 const brandList = ref([]) // 精简商品品牌列表
-const deliveryTemplateList = ref([]) // 运费模版
 onMounted(async () => {
   // 获得分类树
   const data = await ProductCategoryApi.getCategoryList({})
   categoryList.value = handleTree(data, 'id', 'parentId')
   // 获取商品品牌列表
   brandList.value = await ProductBrandApi.getSimpleBrandList()
-  // 获取运费模版
-  deliveryTemplateList.value = await ExpressTemplateApi.getSimpleTemplateList()
 })
 </script>

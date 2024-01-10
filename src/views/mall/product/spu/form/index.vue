@@ -1,7 +1,7 @@
 <template>
   <ContentWrap v-loading="formLoading">
     <el-tabs v-model="activeName">
-      <el-tab-pane label="基础信息" name="basicInfo">
+      <el-tab-pane label="基础设置" name="basicInfo">
         <BasicInfoForm
           ref="basicInfoRef"
           v-model:activeName="activeName"
@@ -12,6 +12,14 @@
       <el-tab-pane label="价格库存" name="sku">
         <SkuForm
           ref="skuRef"
+          v-model:activeName="activeName"
+          :is-detail="isDetail"
+          :propFormData="formData"
+        />
+      </el-tab-pane>
+      <el-tab-pane label="物流设置" name="delivery">
+        <DeliveryForm
+          ref="deliveryRef"
           v-model:activeName="activeName"
           :is-detail="isDetail"
           :propFormData="formData"
@@ -35,6 +43,7 @@
         />
       </el-tab-pane>
     </el-tabs>
+    <!-- TODO 芋艿：位置 -->
     <el-form>
       <el-form-item style="float: right">
         <el-button v-if="!isDetail" :loading="formLoading" type="primary" @click="submitForm">
@@ -53,6 +62,7 @@ import BasicInfoForm from './BasicInfoForm.vue'
 import DescriptionForm from './DescriptionForm.vue'
 import OtherSettingsForm from './OtherSettingsForm.vue'
 import SkuForm from './SkuForm.vue'
+import DeliveryForm from './DeliveryForm.vue'
 import { convertToInteger, floatToFixed2, formatToFraction } from '@/utils'
 
 defineOptions({ name: 'ProductSpuForm' })
@@ -68,6 +78,7 @@ const activeName = ref('basicInfo') // Tag 激活的窗口
 const isDetail = ref(false) // 是否查看详情
 const basicInfoRef = ref() // 商品信息 Ref
 const skuRef = ref() // 商品规格 Ref
+const deliveryRef = ref() // 物流设置 Ref
 const descriptionRef = ref() // 商品详情 Ref
 const otherSettingsRef = ref() // 其他设置 Ref
 // spu 表单数据
@@ -144,6 +155,7 @@ const submitForm = async () => {
   try {
     await unref(basicInfoRef)?.validate()
     await unref(skuRef)?.validate()
+    await unref(deliveryRef)?.validate()
     await unref(descriptionRef)?.validate()
     await unref(otherSettingsRef)?.validate()
     // 深拷贝一份, 这样最终 server 端不满足，不需要恢复，
