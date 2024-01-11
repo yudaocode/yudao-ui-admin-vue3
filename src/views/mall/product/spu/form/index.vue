@@ -1,9 +1,9 @@
 <template>
   <ContentWrap v-loading="formLoading">
     <el-tabs v-model="activeName">
-      <el-tab-pane label="基础设置" name="basicInfo">
-        <BasicInfoForm
-          ref="basicInfoRef"
+      <el-tab-pane label="基础设置" name="info">
+        <InfoForm
+          ref="infoRef"
           v-model:activeName="activeName"
           :is-detail="isDetail"
           :propFormData="formData"
@@ -57,7 +57,7 @@
 import { cloneDeep } from 'lodash-es'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProductSpuApi from '@/api/mall/product/spu'
-import BasicInfoForm from './BasicInfoForm.vue'
+import InfoForm from './InfoForm.vue'
 import DescriptionForm from './DescriptionForm.vue'
 import OtherSettingsForm from './OtherSettingsForm.vue'
 import SkuForm from './SkuForm.vue'
@@ -73,9 +73,9 @@ const { params, name } = useRoute() // 查询参数
 const { delView } = useTagsViewStore() // 视图操作
 
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const activeName = ref('basicInfo') // Tag 激活的窗口
+const activeName = ref('info') // Tag 激活的窗口
 const isDetail = ref(false) // 是否查看详情
-const basicInfoRef = ref() // 商品信息 Ref
+const infoRef = ref() // 商品信息 Ref
 const skuRef = ref() // 商品规格 Ref
 const deliveryRef = ref() // 物流设置 Ref
 const descriptionRef = ref() // 商品详情 Ref
@@ -149,15 +149,14 @@ const getDetail = async () => {
 const submitForm = async () => {
   // 提交请求
   formLoading.value = true
-  // 三个表单逐一校验，如果有一个表单校验不通过则切换到对应表单，如果有两个及以上的情况则切换到最前面的一个并弹出提示消息
-  // 校验各表单
   try {
-    await unref(basicInfoRef)?.validate()
+    // 校验各表单
+    await unref(infoRef)?.validate()
     await unref(skuRef)?.validate()
     await unref(deliveryRef)?.validate()
     await unref(descriptionRef)?.validate()
     await unref(otherSettingsRef)?.validate()
-    // 深拷贝一份, 这样最终 server 端不满足，不需要恢复，
+    // 深拷贝一份, 这样最终 server 端不满足，不需要影响原始数据
     const deepCopyFormData = cloneDeep(unref(formData.value)) as ProductSpuApi.Spu
     deepCopyFormData.skus!.forEach((item) => {
       // 给sku name赋值

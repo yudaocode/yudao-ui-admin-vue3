@@ -1,3 +1,4 @@
+<!-- 商品发布 - 基础设置 -->
 <template>
   <el-form ref="formRef" :model="formData" :rules="rules" label-width="120px" :disabled="isDetail">
     <el-form-item label="商品名称" prop="name">
@@ -49,10 +50,10 @@
       />
     </el-form-item>
     <el-form-item label="商品封面图" prop="picUrl">
-      <UploadImg v-model="formData.picUrl" height="80px" />
+      <UploadImg v-model="formData.picUrl" height="80px" :disabled="isDetail" />
     </el-form-item>
     <el-form-item label="商品轮播图" prop="sliderPicUrls">
-      <UploadImgs v-model:modelValue="formData.sliderPicUrls" />
+      <UploadImgs v-model:modelValue="formData.sliderPicUrls" :disabled="isDetail" />
     </el-form-item>
   </el-form>
 </template>
@@ -60,16 +61,14 @@
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
-import { defaultProps, handleTree, treeToString } from '@/utils/tree'
+import { defaultProps, handleTree } from '@/utils/tree'
 import type { Spu } from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
 import * as ProductBrandApi from '@/api/mall/product/brand'
 import { BrandVO } from '@/api/mall/product/brand'
+import { CategoryVO } from '@/api/mall/product/category'
 
 defineOptions({ name: 'ProductSpuBasicInfoForm' })
-
-const message = useMessage() // 消息弹窗
-
 const props = defineProps({
   propFormData: {
     type: Object as PropType<Spu>,
@@ -78,6 +77,8 @@ const props = defineProps({
   activeName: propTypes.string.def(''),
   isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
+
+const message = useMessage() // 消息弹窗
 
 const formRef = ref() // 表单 Ref
 const formData = reactive<Spu>({
@@ -109,6 +110,7 @@ watch(
       return
     }
     copyValueToTarget(formData, data)
+    // TODO @puhui999：优化多文件上传，看看有没可能搞成返回 v-model 图片列表这种
     formData.sliderPicUrls = data['sliderPicUrls']?.map((item) => ({
       url: item
     }))
@@ -118,38 +120,30 @@ watch(
   }
 )
 
-/**
- * 表单校验
- */
+/** 表单校验 */
 const emit = defineEmits(['update:activeName'])
 const validate = async () => {
   // 校验表单
   if (!formRef) return
-  return await unref(formRef).validate((valid) => {
-    if (!valid) {
-      message.warning('商品信息未完善！！')
-      emit('update:activeName', 'basicInfo')
-      // 目的截断之后的校验
-      throw new Error('商品信息未完善！！')
-    } else {
-      // 校验通过更新数据
-      Object.assign(props.propFormData, formData)
-    }
-  })
+  try {
+    await unref(formRef)?.validate()
+    // 校验通过更新数据
+    Object.assign(props.propFormData, formData)
+  } catch (e) {
+    message.error('【基础设置】不完善，请填写相关信息')
+    emit('update:activeName', 'info')
+    throw e // 目的截断之后的校验
+  }
 }
 defineExpose({ validate })
 
-/** 获取分类的节点的完整结构 */
-const categoryList = ref<any[]>([]) // 分类树
-const formatCategoryName = (categoryId: number) => {
-  return treeToString(categoryList.value, categoryId)
-}
-
-const brandList = ref<BrandVO[]>([]) // 精简商品品牌列表
+/** 初始化 */
+const brandList = ref<BrandVO[]>([]) // 商品品牌列表
+const categoryList = ref<CategoryVO[]>([]) // 商品分类树
 onMounted(async () => {
   // 获得分类树
   const data = await ProductCategoryApi.getCategoryList({})
-  categoryList.value = handleTree(data, 'id', 'parentId')
+  categoryList.value = handleTree(data, 'id')
   // 获取商品品牌列表
   brandList.value = await ProductBrandApi.getSimpleBrandList()
 })

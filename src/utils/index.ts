@@ -177,7 +177,7 @@ export const fileSizeFormatter = (row, column, cellValue) => {
  * @param target 目标对象
  * @param source 源对象
  */
-export const copyValueToTarget = (target, source) => {
+export const copyValueToTarget = (target: any, source: any) => {
   const newObj = Object.assign({}, target, source)
   // 删除多余属性
   Object.keys(newObj).forEach((key) => {
