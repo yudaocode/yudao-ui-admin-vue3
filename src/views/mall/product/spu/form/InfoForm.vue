@@ -100,9 +100,7 @@ const rules = reactive({
   brandId: [required]
 })
 
-/**
- * 将传进来的值赋值给 formData
- */
+/** 将传进来的值赋值给 formData */
 watch(
   () => props.propFormData,
   (data) => {

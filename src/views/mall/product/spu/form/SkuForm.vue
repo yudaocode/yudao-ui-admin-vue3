@@ -1,58 +1,49 @@
+<!-- 商品发布 - 库存价格 -->
 <template>
-  <!-- 情况一：添加/修改 -->
-  <el-form
-    ref="productSpuSkuRef"
-    :model="formData"
-    :rules="rules"
-    label-width="120px"
-    :disabled="isDetail"
-  >
-    <el-row>
-      <el-col :span="12">
-        <el-form-item label="商品规格" props="specType">
-          <el-radio-group v-model="formData.specType" @change="onChangeSpec">
-            <el-radio :label="false" class="radio">单规格</el-radio>
-            <el-radio :label="true">多规格</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-col>
-      <el-col :span="12">
-        <el-form-item label="分销类型" props="subCommissionType">
-          <el-radio-group v-model="formData.subCommissionType" @change="changeSubCommissionType">
-            <el-radio :label="false">默认设置</el-radio>
-            <el-radio :label="true" class="radio">单独设置</el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-col>
-      <!-- 多规格添加-->
-      <el-col :span="24">
-        <el-form-item v-if="!formData.specType">
-          <SkuList
-            ref="skuListRef"
-            :prop-form-data="formData"
-            :propertyList="propertyList"
-            :rule-config="ruleConfig"
-          />
-        </el-form-item>
-        <el-form-item v-if="formData.specType" label="商品属性">
-          <el-button class="mb-10px mr-15px" @click="attributesAddFormRef.open">添加属性</el-button>
-          <ProductAttributes :propertyList="propertyList" @success="generateSkus" />
-        </el-form-item>
-        <template v-if="formData.specType && propertyList.length > 0">
-          <el-form-item label="批量设置">
-            <SkuList :is-batch="true" :prop-form-data="formData" :propertyList="propertyList" />
-          </el-form-item>
-          <el-form-item label="属性列表">
-            <SkuList
-              ref="skuListRef"
-              :prop-form-data="formData"
-              :propertyList="propertyList"
-              :rule-config="ruleConfig"
-            />
-          </el-form-item>
-        </template>
-      </el-col>
-    </el-row>
+  <el-form ref="formRef" :model="formData" :rules="rules" label-width="120px" :disabled="isDetail">
+    <el-form-item label="分销类型" props="subCommissionType">
+      <el-radio-group v-model="formData.subCommissionType" @change="changeSubCommissionType">
+        <el-radio :label="false">默认设置</el-radio>
+        <el-radio :label="true" class="radio">单独设置</el-radio>
+      </el-radio-group>
+    </el-form-item>
+    <el-form-item label="商品规格" props="specType">
+      <el-radio-group v-model="formData.specType" @change="onChangeSpec">
+        <el-radio :label="false" class="radio">单规格</el-radio>
+        <el-radio :label="true">多规格</el-radio>
+      </el-radio-group>
+    </el-form-item>
+    <!-- 多规格添加-->
+    <el-form-item v-if="!formData.specType">
+      <SkuList
+        ref="skuListRef"
+        :prop-form-data="formData"
+        :property-list="propertyList"
+        :rule-config="ruleConfig"
+      />
+    </el-form-item>
+    <el-form-item v-if="formData.specType" label="商品属性">
+      <el-button class="mb-10px mr-15px" @click="attributesAddFormRef.open">添加属性</el-button>
+      <ProductAttributes
+        :property-list="propertyList"
+        @success="generateSkus"
+        :is-detail="isDetail"
+      />
+    </el-form-item>
+    <template v-if="formData.specType && propertyList.length > 0">
+      <el-form-item label="批量设置" v-if="!isDetail">
+        <SkuList :is-batch="true" :prop-form-data="formData" :property-list="propertyList" />
+      </el-form-item>
+      <el-form-item label="规格列表">
+        <SkuList
+          ref="skuListRef"
+          :prop-form-data="formData"
+          :property-list="propertyList"
+          :rule-config="ruleConfig"
+          :is-detail="isDetail"
+        />
+      </el-form-item>
+    </template>
   </el-form>
 
   <!-- 商品属性添加 Form 表单 -->
@@ -62,7 +53,12 @@
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
-import { getPropertyList, RuleConfig, SkuList } from '@/views/mall/product/spu/components/index.ts'
+import {
+  getPropertyList,
+  PropertyAndValues,
+  RuleConfig,
+  SkuList
+} from '@/views/mall/product/spu/components/index'
 import ProductAttributes from './ProductAttributes.vue'
 import ProductPropertyAddForm from './ProductPropertyAddForm.vue'
 import type { Spu } from '@/api/mall/product/spu'
@@ -100,17 +96,12 @@ const props = defineProps({
     type: Object as PropType<Spu>,
     default: () => {}
   },
-  activeName: propTypes.string.def(''),
   isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
 const attributesAddFormRef = ref() // 添加商品属性表单
-const productSpuSkuRef = ref() // 表单 Ref
-const propertyList = ref([]) // 商品属性列表
-const skuListRef = ref() // 商品属性列表Ref
-/** 调用 SkuList generateTableData 方法*/
-const generateSkus = (propertyList) => {
-  skuListRef.value.generateTableData(propertyList)
-}
+const formRef = ref() // 表单 Ref
+const propertyList = ref<PropertyAndValues[]>([]) // 商品属性列表
+const skuListRef = ref() // 商品属性列表 Ref
 const formData = reactive<Spu>({
   specType: false, // 商品规格
   subCommissionType: false, // 分销类型
@@ -121,9 +112,7 @@ const rules = reactive({
   subCommissionType: [required]
 })
 
-/**
- * 将传进来的值赋值给 formData
- */
+/** 将传进来的值赋值给 formData */
 watch(
   () => props.propFormData,
   (data) => {
@@ -131,6 +120,7 @@ watch(
       return
     }
     copyValueToTarget(formData, data)
+    // 将 SKU 的属性，整理成 PropertyAndValues 数组
     propertyList.value = getPropertyList(data)
   },
   {
@@ -144,25 +134,23 @@ const validate = async () => {
   // 校验 sku
   skuListRef.value.validateSku()
   // 校验表单
-  if (!productSpuSkuRef) return
-  return await unref(productSpuSkuRef).validate((valid) => {
-    if (!valid) {
-      message.warning('商品信息未完善！！')
-      emit('update:activeName', 'sku')
-      // 目的截断之后的校验
-      throw new Error('商品信息未完善！！')
-    } else {
-      // 校验通过更新数据
-      Object.assign(props.propFormData, formData)
-    }
-  })
+  if (!formRef) return
+  try {
+    await unref(formRef).validate()
+    // 校验通过更新数据
+    Object.assign(props.propFormData, formData)
+  } catch (e) {
+    message.error('【库存价格】不完善，请填写相关信息')
+    emit('update:activeName', 'sku')
+    throw e // 目的截断之后的校验
+  }
 }
 defineExpose({ validate })
 
 /** 分销类型 */
 const changeSubCommissionType = () => {
   // 默认为零，类型切换后也要重置为零
-  for (const item of formData.skus) {
+  for (const item of formData.skus!) {
     item.firstBrokeragePrice = 0
     item.secondBrokeragePrice = 0
   }
@@ -187,5 +175,10 @@ const onChangeSpec = () => {
       secondBrokeragePrice: 0
     }
   ]
+}
+
+/** 调用 SkuList generateTableData 方法*/
+const generateSkus = (propertyList) => {
+  skuListRef.value.generateTableData(propertyList)
 }
 </script>
