@@ -517,6 +517,16 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true
         },
         component: () => import('@/views/crm/contact/detail/index.vue')
+      },
+      {
+        path: 'product/detail/:id',
+        name: 'CrmProductDetail',
+        meta: {
+          title: '产品详情',
+          noCache: true,
+          hidden: true
+        },
+        component: () => import('@/views/crm/product/detail/index.vue')
       }
     ]
   }

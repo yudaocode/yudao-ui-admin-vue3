@@ -10,7 +10,7 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="产品名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入产品名称" />
+            <el-input v-model="formData.name" placeholder="请输入产品名称"/>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -57,7 +57,7 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="产品编码" prop="no">
-            <el-input v-model="formData.no" placeholder="请输入产品编码" />
+            <el-input v-model="formData.no" placeholder="请输入产品编码"/>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -74,7 +74,7 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="产品描述" prop="description">
-            <el-input v-model="formData.description" placeholder="请输入产品描述" />
+            <el-input v-model="formData.description" placeholder="请输入产品描述"/>
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -98,17 +98,17 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import {DICT_TYPE, getIntDictOptions} from '@/utils/dict'
 import * as ProductApi from '@/api/crm/product'
 import * as ProductCategoryApi from '@/api/crm/product/productCategory'
-import { defaultProps, handleTree } from '@/utils/tree'
-import { getSimpleUserList, UserVO } from '@/api/system/user'
-import { useUserStore } from '@/store/modules/user'
-import { fenToYuan, yuanToFen } from '@/utils'
+import {defaultProps, handleTree} from '@/utils/tree'
+import {getSimpleUserList, UserVO} from '@/api/system/user'
+import {useUserStore} from '@/store/modules/user'
+import {fenToYuan, yuanToFen} from '@/utils'
 
-defineOptions({ name: 'CrmProductForm' })
+defineOptions({name: 'CrmProductForm'})
 
-const { t } = useI18n() // 国际化
+const {t} = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
@@ -128,12 +128,12 @@ const formData = ref({
   ownerUserId: -1
 })
 const formRules = reactive({
-  name: [{ required: true, message: '产品名称不能为空', trigger: 'blur' }],
-  no: [{ required: true, message: '产品编码不能为空', trigger: 'blur' }],
-  status: [{ required: true, message: '状态不能为空', trigger: 'change' }],
-  categoryId: [{ required: true, message: '产品分类ID不能为空', trigger: 'blur' }],
-  ownerUserId: [{ required: true, message: '负责人不能为空', trigger: 'blur' }],
-  price: [{ required: true, message: '价格不能为空', trigger: 'blur' }]
+  name: [{required: true, message: '产品名称不能为空', trigger: 'blur'}],
+  no: [{required: true, message: '产品编码不能为空', trigger: 'blur'}],
+  status: [{required: true, message: '状态不能为空', trigger: 'change'}],
+  categoryId: [{required: true, message: '产品分类ID不能为空', trigger: 'blur'}],
+  ownerUserId: [{required: true, message: '负责人不能为空', trigger: 'blur'}],
+  price: [{required: true, message: '价格不能为空', trigger: 'blur'}]
 })
 
 const formRef = ref() // 表单 Ref
@@ -149,7 +149,7 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await ProductApi.getProduct(id)
-      formData.value.price = fenToYuan(formData.value.price)
+      formData.value.price = Number(fenToYuan(formData.value.price))
     } finally {
       formLoading.value = false
     }
@@ -157,7 +157,7 @@ const open = async (type: string, id?: number) => {
     formData.value.ownerUserId = userId
   }
 }
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+defineExpose({open}) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
