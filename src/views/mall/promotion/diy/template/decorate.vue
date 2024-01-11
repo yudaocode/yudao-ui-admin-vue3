@@ -118,7 +118,7 @@ const resetForm = () => {
     used: false,
     usedTime: undefined,
     remark: '',
-    previewImageUrls: [],
+    previewPicUrls: [],
     property: '',
     pages: []
   } as DiyTemplateApi.DiyTemplatePropertyVO

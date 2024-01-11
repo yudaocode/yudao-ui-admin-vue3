@@ -47,14 +47,14 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="预览图" align="center" prop="previewImageUrls">
+      <el-table-column label="预览图" align="center" prop="previewPicUrls">
         <template #default="scope">
           <el-image
             class="h-40px max-w-40px"
-            v-for="(url, index) in scope.row.previewImageUrls"
+            v-for="(url, index) in scope.row.previewPicUrls"
             :key="index"
             :src="url"
-            :preview-src-list="scope.row.previewImageUrls"
+            :preview-src-list="scope.row.previewPicUrls"
             :initial-index="index"
             preview-teleported
           />
