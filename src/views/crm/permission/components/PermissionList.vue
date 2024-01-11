@@ -2,7 +2,8 @@
   <!-- 操作栏 -->
   <el-row justify="end">
     <el-button @click="openForm">
-      <Icon class="mr-5px" icon="fluent:people-team-add-20-filled" /> 添加团队成员
+      <Icon class="mr-5px" icon="fluent:people-team-add-20-filled" />
+      添加团队成员
     </el-button>
     <el-button @click="handleUpdate">
       <Icon class="mr-5px" icon="ep:edit" />
@@ -105,14 +106,14 @@ const handleDelete = async () => {
     message.warning('请先选择团队成员后操作！')
     return
   }
-  // TODO @puhui999：应该有个提示哈
-  await message.delConfirm()
+  await message.delConfirm('是否删除选择的团队成员？')
   const ids = multipleSelection.value?.map((item) => item.id)
   await PermissionApi.deletePermissionBatch({
     bizType: props.bizType,
     bizId: props.bizId,
     ids
   })
+  message.success('删除成功')
 }
 
 /** 退出团队 */
@@ -125,7 +126,7 @@ const handleQuit = async () => {
     message.warning('负责人不能退出团队！')
     return
   }
-  // TODO @puhui999：应该有个提示哈
+  await message.confirm('确认退出团队吗？')
   const userPermission = list.value.find((item) => item.userId === userStore.getUser.id)
   await PermissionApi.deleteSelfPermission(userPermission?.id)
 }
@@ -133,7 +134,10 @@ const handleQuit = async () => {
 /** 监听打开的 bizId + bizType，从而加载最新的列表 */
 watch(
   () => [props.bizId, props.bizType],
-  () => {
+  (val) => {
+    if (!val[0]) {
+      return
+    }
     getList()
   },
   { immediate: true, deep: true }

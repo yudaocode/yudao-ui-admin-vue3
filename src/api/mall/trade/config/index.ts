@@ -8,7 +8,6 @@ export interface ConfigVO {
   brokerageFirstPercent: number
   brokerageSecondPercent: number
   brokerageWithdrawMinPrice: number
-  brokerageBankNames: string
   brokerageFrozenDays: number
   brokerageWithdrawTypes: string
 }

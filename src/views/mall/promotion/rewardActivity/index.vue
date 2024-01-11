@@ -65,13 +65,13 @@
       <el-table-column
         label="活动开始时间"
         align="center"
-        prop="sort[0]"
+        prop="startTime"
         :formatter="dateFormatter"
       />
       <el-table-column
         label="活动结束时间"
         align="center"
-        prop="sort[1]"
+        prop="endTime"
         :formatter="dateFormatter"
       />
       <el-table-column label="状态" align="center" prop="status">
@@ -122,7 +122,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as ProductBrandApi from '@/api/mall/product/brand'
+import * as RewardActivityApi from '@/api/mall/promotion/reward/rewardActivity'
 import RewardForm from './RewardForm.vue'
 
 defineOptions({ name: 'PromotionRewardActivity' })
@@ -146,22 +146,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    // const data = await ProductBrandApi.getBrandParam(queryParams)
-    const data = {
-      list: [
-        {
-          createTime: 1693463998000,
-          description: '',
-          id: 3,
-          name: '索尼',
-          picUrl:
-            'http://127.0.0.1:48080/admin-api/infra/file/4/get/f5b7a536306cd1180a42a2211a8212dc23de6b949d30c30d036caa063042f928.png',
-          sort: [+new Date(), +new Date('2023-12-31')],
-          status: 10
-        }
-      ],
-      total: 1
-    }
+    const data = await RewardActivityApi.getRewardActivityPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -171,16 +156,11 @@ const getList = async () => {
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
-  console.log(queryParams)
-  message.success('已打印搜索参数')
-  return
   getList()
 }
 
 /** 重置按钮操作 */
 const resetQuery = () => {
-  message.success('重置查询表单获取数据')
-  return
   queryFormRef.value.resetFields()
   handleQuery()
 }
@@ -196,10 +176,8 @@ const handleDelete = async (id: number) => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    message.success('您以确认删除')
-    return
     // 发起删除
-    await ProductBrandApi.deleteBrand(id)
+    await RewardActivityApi.deleteRewardActivity(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
