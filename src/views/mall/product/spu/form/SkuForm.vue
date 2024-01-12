@@ -135,11 +135,10 @@ watch(
 /** 表单校验 */
 const emit = defineEmits(['update:activeName'])
 const validate = async () => {
-  // 校验 sku
-  skuListRef.value.validateSku()
-  // 校验表单
   if (!formRef) return
   try {
+    // 校验 sku
+    skuListRef.value.validateSku()
     await unref(formRef).validate()
     // 校验通过更新数据
     Object.assign(props.propFormData, formData)

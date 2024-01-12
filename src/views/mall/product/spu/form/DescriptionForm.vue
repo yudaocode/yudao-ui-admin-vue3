@@ -70,7 +70,7 @@ const validate = async () => {
   try {
     await unref(formRef)?.validate()
     // 校验通过更新数据
-    Object.assign(props.propFormData, formData)
+    Object.assign(props.propFormData, formData.value)
   } catch (e) {
     message.error('【商品详情】不完善，请填写相关信息')
     emit('update:activeName', 'description')
