@@ -75,7 +75,6 @@ watch(
 /** 表单校验 */
 const emit = defineEmits(['update:activeName'])
 const validate = async () => {
-  // 校验表单
   if (!formRef) return
   try {
     await unref(formRef)?.validate()

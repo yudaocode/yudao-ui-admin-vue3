@@ -33,9 +33,9 @@
           :propFormData="formData"
         />
       </el-tab-pane>
-      <el-tab-pane label="其它设置" name="otherSettings">
-        <OtherSettingsForm
-          ref="otherSettingsRef"
+      <el-tab-pane label="其它设置" name="other">
+        <OtherForm
+          ref="otherRef"
           v-model:activeName="activeName"
           :is-detail="isDetail"
           :propFormData="formData"
@@ -58,7 +58,7 @@ import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import InfoForm from './InfoForm.vue'
 import DescriptionForm from './DescriptionForm.vue'
-import OtherSettingsForm from './OtherSettingsForm.vue'
+import OtherForm from './OtherForm.vue'
 import SkuForm from './SkuForm.vue'
 import DeliveryForm from './DeliveryForm.vue'
 import { convertToInteger, floatToFixed2, formatToFraction } from '@/utils'
@@ -78,7 +78,7 @@ const infoRef = ref() // 商品信息 Ref
 const skuRef = ref() // 商品规格 Ref
 const deliveryRef = ref() // 物流设置 Ref
 const descriptionRef = ref() // 商品详情 Ref
-const otherSettingsRef = ref() // 其他设置 Ref
+const otherRef = ref() // 其他设置 Ref
 // SPU 表单数据
 const formData = ref<ProductSpuApi.Spu>({
   name: '', // 商品名称
@@ -155,7 +155,7 @@ const submitForm = async () => {
     await unref(skuRef)?.validate()
     await unref(deliveryRef)?.validate()
     await unref(descriptionRef)?.validate()
-    await unref(otherSettingsRef)?.validate()
+    await unref(otherRef)?.validate()
     // 深拷贝一份, 这样最终 server 端不满足，不需要影响原始数据
     const deepCopyFormData = cloneDeep(unref(formData.value)) as ProductSpuApi.Spu
     deepCopyFormData.skus!.forEach((item) => {

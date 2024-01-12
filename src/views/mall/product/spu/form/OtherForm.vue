@@ -1,20 +1,39 @@
-<!-- 商品发布 - 商品详情 -->
+<!-- 商品发布 - 其它设置 -->
 <template>
   <el-form ref="formRef" :model="formData" :rules="rules" label-width="120px" :disabled="isDetail">
-    <!--富文本编辑器组件-->
-    <el-form-item label="商品详情" prop="description">
-      <Editor v-model:modelValue="formData.description" />
+    <el-form-item label="商品排序" prop="sort">
+      <el-input-number
+        v-model="formData.sort"
+        :min="0"
+        placeholder="请输入商品排序"
+        class="w-80!"
+      />
+    </el-form-item>
+    <el-form-item label="赠送积分" prop="giveIntegral">
+      <el-input-number
+        v-model="formData.giveIntegral"
+        :min="0"
+        placeholder="请输入赠送积分"
+        class="w-80!"
+      />
+    </el-form-item>
+    <el-form-item label="虚拟销量" prop="virtualSalesCount">
+      <el-input-number
+        v-model="formData.virtualSalesCount"
+        :min="0"
+        placeholder="请输入虚拟销量"
+        class="w-80!"
+      />
     </el-form-item>
   </el-form>
 </template>
 <script lang="ts" setup>
 import type { Spu } from '@/api/mall/product/spu'
-import { Editor } from '@/components/Editor'
 import { PropType } from 'vue'
 import { propTypes } from '@/utils/propTypes'
 import { copyValueToTarget } from '@/utils'
 
-defineOptions({ name: 'ProductDescriptionForm' })
+defineOptions({ name: 'ProductOtherForm' })
 
 const message = useMessage() // 消息弹窗
 
@@ -23,42 +42,33 @@ const props = defineProps({
     type: Object as PropType<Spu>,
     default: () => {}
   },
-  activeName: propTypes.string.def(''),
   isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
+
 const formRef = ref() // 表单Ref
+// 表单数据
 const formData = ref<Spu>({
-  description: '' // 商品详情
+  sort: 0, // 商品排序
+  giveIntegral: 0, // 赠送积分
+  virtualSalesCount: 0 // 虚拟销量
 })
 // 表单规则
 const rules = reactive({
-  description: [required]
+  sort: [required],
+  giveIntegral: [required],
+  virtualSalesCount: [required]
 })
-
-/** 富文本编辑器如果输入过再清空会有残留，需再重置一次 */
-watch(
-  () => formData.value.description,
-  (newValue) => {
-    if ('<p><br></p>' === newValue) {
-      formData.value.description = ''
-    }
-  },
-  {
-    deep: true,
-    immediate: true
-  }
-)
 
 /** 将传进来的值赋值给 formData */
 watch(
   () => props.propFormData,
   (data) => {
-    if (!data) return
-    // fix：三个表单组件监听赋值必须使用 copyValueToTarget 使用 formData.value = data 会监听非常多次
+    if (!data) {
+      return
+    }
     copyValueToTarget(formData.value, data)
   },
   {
-    // fix: 去掉深度监听只有对象引用发生改变的时候才执行,解决改一动多的问题
     immediate: true
   }
 )
@@ -72,8 +82,8 @@ const validate = async () => {
     // 校验通过更新数据
     Object.assign(props.propFormData, formData)
   } catch (e) {
-    message.error('【商品详情】不完善，请填写相关信息')
-    emit('update:activeName', 'description')
+    message.error('【其它设置】不完善，请填写相关信息')
+    emit('update:activeName', 'other')
     throw e // 目的截断之后的校验
   }
 }
