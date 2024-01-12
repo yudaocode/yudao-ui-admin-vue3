@@ -8,9 +8,9 @@
     max-height="500"
     size="small"
   >
-    <el-table-column align="center" fixed="left" label="图片" min-width="100">
+    <el-table-column align="center" label="图片" min-width="65">
       <template #default="{ row }">
-        <UploadImg v-model="row.picUrl" height="80px" width="100%" />
+        <UploadImg v-model="row.picUrl" height="50px" width="50px" />
       </template>
     </el-table-column>
     <template v-if="formData!.specType && !isBatch">
@@ -152,7 +152,7 @@
         <el-image
           v-if="row.picUrl"
           :src="row.picUrl"
-          class="h-60px w-60px"
+          class="h-50px w-50px"
           @click="imagePreview(row.picUrl)"
         />
       </template>

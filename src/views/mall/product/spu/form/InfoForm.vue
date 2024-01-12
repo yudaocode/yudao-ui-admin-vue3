@@ -68,13 +68,12 @@ import * as ProductBrandApi from '@/api/mall/product/brand'
 import { BrandVO } from '@/api/mall/product/brand'
 import { CategoryVO } from '@/api/mall/product/category'
 
-defineOptions({ name: 'ProductSpuBasicInfoForm' })
+defineOptions({ name: 'ProductSpuInfoForm' })
 const props = defineProps({
   propFormData: {
     type: Object as PropType<Spu>,
     default: () => {}
   },
-  activeName: propTypes.string.def(''),
   isDetail: propTypes.bool.def(false) // 是否作为详情组件
 })
 

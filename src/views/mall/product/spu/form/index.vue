@@ -42,7 +42,6 @@
         />
       </el-tab-pane>
     </el-tabs>
-    <!-- TODO 芋艿：位置 -->
     <el-form>
       <el-form-item style="float: right">
         <el-button v-if="!isDetail" :loading="formLoading" type="primary" @click="submitForm">
@@ -80,7 +79,7 @@ const skuRef = ref() // 商品规格 Ref
 const deliveryRef = ref() // 物流设置 Ref
 const descriptionRef = ref() // 商品详情 Ref
 const otherSettingsRef = ref() // 其他设置 Ref
-// spu 表单数据
+// SPU 表单数据
 const formData = ref<ProductSpuApi.Spu>({
   name: '', // 商品名称
   categoryId: undefined, // 商品分类
@@ -88,6 +87,7 @@ const formData = ref<ProductSpuApi.Spu>({
   picUrl: '', // 商品封面图
   sliderPicUrls: [], // 商品轮播图
   introduction: '', // 商品简介
+  deliveryTypes: [], // 配送方式数组
   deliveryTemplateId: undefined, // 运费模版
   brandId: undefined, // 商品品牌
   specType: false, // 商品规格

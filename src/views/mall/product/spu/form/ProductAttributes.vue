@@ -107,7 +107,7 @@ const showInput = async (index) => {
 
 /** 输入框失去焦点或点击回车时触发 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-const handleInputConfirm = async (index, propertyId) => {
+const handleInputConfirm = async (index: number, propertyId: number) => {
   if (inputValue.value) {
     // 保存属性值
     try {

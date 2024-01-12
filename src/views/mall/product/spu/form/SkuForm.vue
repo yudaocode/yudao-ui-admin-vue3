@@ -2,13 +2,17 @@
 <template>
   <el-form ref="formRef" :model="formData" :rules="rules" label-width="120px" :disabled="isDetail">
     <el-form-item label="分销类型" props="subCommissionType">
-      <el-radio-group v-model="formData.subCommissionType" @change="changeSubCommissionType">
+      <el-radio-group
+        v-model="formData.subCommissionType"
+        @change="changeSubCommissionType"
+        class="w-80"
+      >
         <el-radio :label="false">默认设置</el-radio>
         <el-radio :label="true" class="radio">单独设置</el-radio>
       </el-radio-group>
     </el-form-item>
     <el-form-item label="商品规格" props="specType">
-      <el-radio-group v-model="formData.specType" @change="onChangeSpec">
+      <el-radio-group v-model="formData.specType" @change="onChangeSpec" class="w-80">
         <el-radio :label="false" class="radio">单规格</el-radio>
         <el-radio :label="true">多规格</el-radio>
       </el-radio-group>
