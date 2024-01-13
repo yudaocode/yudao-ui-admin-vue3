@@ -119,7 +119,6 @@ const resetForm = () => {
     id: undefined,
     name: '',
     picUrl: '',
-    bigPicUrl: '',
     status: CommonStatusEnum.ENABLE
   }
   formRef.value?.resetFields()

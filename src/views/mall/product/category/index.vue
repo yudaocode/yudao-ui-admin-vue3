@@ -38,7 +38,7 @@
       <el-table-column label="名称" min-width="240" prop="name" sortable />
       <el-table-column label="分类图标" align="center" min-width="80" prop="picUrl">
         <template #default="scope">
-          <img v-if="scope.row.picUrl" :src="scope.row.picUrl" alt="移动端分类图" class="h-36px" />
+          <img :src="scope.row.picUrl" alt="移动端分类图" class="h-36px" />
         </template>
       </el-table-column>
       <el-table-column label="排序" align="center" min-width="150" prop="sort" />
