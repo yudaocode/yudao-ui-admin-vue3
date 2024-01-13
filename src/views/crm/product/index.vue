@@ -28,10 +28,17 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery">
+          <Icon icon="ep:search" class="mr-5px"/>
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon icon="ep:refresh" class="mr-5px"/>
+          重置
+        </el-button>
         <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:product:create']">
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+          <Icon icon="ep:plus" class="mr-5px"/>
+          新增
         </el-button>
         <el-button
           type="success"
@@ -40,7 +47,8 @@
           :loading="exportLoading"
           v-hasPermi="['crm:product:export']"
         >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon icon="ep:download" class="mr-5px"/>
+          导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -49,27 +57,33 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="产品名称" align="center" prop="name" />
-      <el-table-column label="产品类型" align="center" prop="categoryName" />
-      <el-table-column label="产品单位" align="center" prop="unit">
+      <el-table-column label="产品名称" align="center" prop="name" width="160">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PRODUCT_UNIT" :value="scope.row.unit" />
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
+            {{ scope.row.name }}
+          </el-link>
         </template>
       </el-table-column>
-      <el-table-column label="产品编码" align="center" prop="no" />
+      <el-table-column label="产品类型" align="center" prop="categoryName" width="160"/>
+      <el-table-column label="产品单位" align="center" prop="unit">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.PRODUCT_UNIT" :value="scope.row.unit"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="产品编码" align="center" prop="no"/>
       <el-table-column
         label="价格（元）"
         align="center"
         prop="price"
         :formatter="fenToYuanFormat"
       />
-      <el-table-column label="产品描述" align="center" prop="description" />
+      <el-table-column label="产品描述" align="center" prop="description"/>
       <el-table-column label="是否上下架" align="center" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_PRODUCT_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.CRM_PRODUCT_STATUS" :value="scope.row.status"/>
         </template>
       </el-table-column>
-      <el-table-column label="负责人" align="center" prop="ownerUserName" />
+      <el-table-column label="负责人" align="center" prop="ownerUserName"/>
       <el-table-column
         label="更新时间"
         align="center"
@@ -77,7 +91,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="创建" align="center" prop="creatorName" />
+      <el-table-column label="创建" align="center" prop="creatorName"/>
       <el-table-column
         label="创建时间"
         align="center"
@@ -85,16 +99,8 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="160">
+      <el-table-column label="操作" align="center" fixed="right" width="160">
         <template #default="scope">
-          <el-button
-            v-hasPermi="['crm:product:query']"
-            link
-            type="primary"
-            @click="openDetail(scope.row)"
-          >
-            详情
-          </el-button>
           <el-button
             link
             type="primary"
@@ -124,24 +130,21 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <ProductForm ref="formRef" @success="getList" />
-  <!-- 表单弹窗：详情 -->
-  <ProductDetail ref="detailRef" @success="getList" />
+  <ProductForm ref="formRef" @success="getList"/>
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
+import {DICT_TYPE, getIntDictOptions} from '@/utils/dict'
+import {dateFormatter} from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ProductApi from '@/api/crm/product'
 import ProductForm from './ProductForm.vue'
-import ProductDetail from './ProductDetail.vue'
-import { fenToYuanFormat } from '@/utils/formatter'
+import {fenToYuanFormat} from '@/utils/formatter'
 
-defineOptions({ name: 'CrmProduct' })
+defineOptions({name: 'CrmProduct'})
 
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
+const {t} = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -184,10 +187,11 @@ const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
-/** 详情操作 */
-const detailRef = ref()
-const openDetail = (data: ProductApi.ProductVO) => {
-  detailRef.value.open(data)
+
+/** 打开详情 */
+const {currentRoute, push} = useRouter()
+const openDetail = (id: number) => {
+  push({name: 'CrmProductDetail', params: {id}})
 }
 
 /** 删除按钮操作 */
@@ -200,7 +204,8 @@ const handleDelete = async (id: number) => {
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
-  } catch {}
+  } catch {
+  }
 }
 
 /** 导出按钮操作 */
@@ -217,6 +222,14 @@ const handleExport = async () => {
     exportLoading.value = false
   }
 }
+
+/** 监听路由变化更新列表 */
+watch(
+  () => currentRoute.value,
+  () => {
+    getList()
+  }
+)
 
 /** 初始化 **/
 onMounted(async () => {
