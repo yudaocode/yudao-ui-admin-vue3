@@ -13,8 +13,8 @@
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" placeholder="请输入备注" />
       </el-form-item>
-      <el-form-item label="预览图" prop="previewImageUrls">
-        <UploadImgs v-model="formData.previewImageUrls" />
+      <el-form-item label="预览图" prop="previewPicUrls">
+        <UploadImgs v-model="formData.previewPicUrls" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -40,7 +40,7 @@ const formData = ref({
   id: undefined,
   name: undefined,
   remark: undefined,
-  previewImageUrls: []
+  previewPicUrls: []
 })
 const formRules = reactive({
   name: [{ required: true, message: '页面名称不能为空', trigger: 'blur' }]
@@ -58,8 +58,8 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       const diyPage = await DiyPageApi.getDiyPage(id) // 处理预览图
-      if (diyPage?.previewImageUrls?.length > 0) {
-        diyPage.previewImageUrls = diyPage.previewImageUrls.map((url: string) => {
+      if (diyPage?.previewPicUrls?.length > 0) {
+        diyPage.previewPicUrls = diyPage.previewPicUrls.map((url: string) => {
           return { url }
         })
       }
@@ -82,10 +82,10 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     // 处理预览图
-    const previewImageUrls = formData.value.previewImageUrls.map((item) => {
+    const previewPicUrls = formData.value.previewPicUrls.map((item) => {
       return item['url'] ? item['url'] : item
     })
-    const data = { ...formData.value, previewImageUrls } as unknown as DiyPageApi.DiyPageVO
+    const data = { ...formData.value, previewPicUrls } as unknown as DiyPageApi.DiyPageVO
     if (formType.value === 'create') {
       await DiyPageApi.createDiyPage(data)
       message.success(t('common.createSuccess'))
@@ -107,7 +107,7 @@ const resetForm = () => {
     id: undefined,
     name: undefined,
     remark: undefined,
-    previewImageUrls: []
+    previewPicUrls: []
   }
   formRef.value?.resetFields()
 }

@@ -39,13 +39,11 @@ export interface PromotionCombinationFieldProperty {
 }
 
 // 定义组件
-// TODO @疯狂：idea 有告警
 export const component = {
   id: 'PromotionCombination',
   name: '拼团',
   icon: 'mdi:account-group',
   property: {
-    activityId: undefined,
     layoutType: 'oneCol',
     fields: {
       name: { show: true, color: '#000' },

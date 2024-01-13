@@ -24,7 +24,6 @@ export interface CouponCardProperty {
 }
 
 // 定义组件
-// TODO @疯狂：idea 有告警
 export const component = {
   id: 'CouponCard',
   name: '优惠券',

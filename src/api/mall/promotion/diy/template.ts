@@ -7,7 +7,7 @@ export interface DiyTemplateVO {
   used: boolean
   usedTime?: Date
   remark: string
-  previewImageUrls: string[]
+  previewPicUrls: string[]
   property: string
 }
 

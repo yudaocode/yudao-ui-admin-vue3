@@ -31,7 +31,6 @@ export interface MagicCubeItemProperty {
 }
 
 // 定义组件
-// TODO @疯狂：有 idea 爆红告警
 export const component = {
   id: 'MagicCube',
   name: '广告魔方',

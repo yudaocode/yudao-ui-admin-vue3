@@ -52,7 +52,7 @@ const resetForm = () => {
     templateId: undefined,
     name: '',
     remark: '',
-    previewImageUrls: [],
+    previewPicUrls: [],
     property: ''
   } as DiyPageApi.DiyPageVO
   formRef.value?.resetFields()

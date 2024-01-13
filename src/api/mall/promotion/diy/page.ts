@@ -5,7 +5,7 @@ export interface DiyPageVO {
   templateId?: number
   name: string
   remark: string
-  previewImageUrls: string[]
+  previewPicUrls: string[]
   property: string
 }
 

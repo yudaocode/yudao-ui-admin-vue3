@@ -59,7 +59,6 @@ export interface ProductCardFieldProperty {
 }
 
 // 定义组件
-// TODO @疯狂：idea 有告警
 export const component = {
   id: 'ProductCard',
   name: '商品卡片',
