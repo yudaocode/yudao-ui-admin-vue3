@@ -100,14 +100,10 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <!-- TODO @puhui999：是不是就 3 重呀，我负责的，我参与的，我下属的 -->
     <el-tabs v-model="activeName" @tab-click="handleClick">
-      <el-tab-pane label="客户列表" name="1" />
-      <el-tab-pane label="我负责的" name="2" />
-      <el-tab-pane label="我关注的" name="3" />
-      <el-tab-pane label="我参与的" name="4" />
-      <el-tab-pane label="下属负责的" name="5" />
-      <el-tab-pane label="客户公海" name="6" />
+      <el-tab-pane label="我负责的" name="1" />
+      <el-tab-pane label="我参与的" name="2" />
+      <el-tab-pane label="下属负责的" name="3" />
     </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
       <el-table-column align="center" label="编号" prop="id" />
@@ -149,7 +145,9 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
         </template>
       </el-table-column>
-      <!-- TODO @puhui999：距进入公海天数 -->
+      <el-table-column align="center" label="距离进入公海" prop="poolDay">
+        <template #default="scope"> {{ scope.row.poolDay }}天</template>
+      </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -251,41 +249,25 @@ const activeName = ref('1') // 列表 tab
 
 enum CrmSceneTypeEnum {
   OWNER = 1,
-  FOLLOW = 2,
-  INVOLVED = 3,
-  SUBORDINATE = 4
+  INVOLVED = 2,
+  SUBORDINATE = 3
 }
 
 const handleClick = (tab: TabsPaneContext) => {
   switch (tab.paneName) {
     case '1':
-      resetQuery()
-      break
-    case '2':
       resetQuery(() => {
         queryParams.value.sceneType = CrmSceneTypeEnum.OWNER
       })
       break
-    case '3':
-      resetQuery(() => {
-        queryParams.value.sceneType = CrmSceneTypeEnum.FOLLOW
-      })
-      break
-    // TODO @puhui999：这个貌似报错？
-    case '4':
+    case '2':
       resetQuery(() => {
         queryParams.value.sceneType = CrmSceneTypeEnum.INVOLVED
       })
       break
-    case '5':
+    case '3':
       resetQuery(() => {
         queryParams.value.sceneType = CrmSceneTypeEnum.SUBORDINATE
-      })
-      break
-    // TODO @puhui999：公海单独一个菜单哈。
-    case '6':
-      resetQuery(() => {
-        queryParams.value.pool = true
       })
       break
   }

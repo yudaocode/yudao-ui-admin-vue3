@@ -1,10 +1,3 @@
-/*
- * @Author: zyna
- * @Date: 2023-12-02 13:08:56
- * @LastEditTime: 2023-12-17 16:28:20
- * @FilePath: \yudao-ui-admin-vue3\src\api\crm\business\index.ts
- * @Description: 
- */
 import request from '@/config/axios'
 
 export interface BusinessVO {
@@ -66,4 +59,9 @@ export const exportBusiness = async (params) => {
 //联系人关联商机列表
 export const getBusinessPageByContact = async (params) => {
   return await request.get({ url: `/crm/business/page-by-contact`, params })
+}
+
+// 获得 CRM 商机列表
+export const getBusinessListByIds = async (val: number[]) => {
+  return await request.get({ url: '/crm/business/list-by-ids', params: { ids: val } })
 }

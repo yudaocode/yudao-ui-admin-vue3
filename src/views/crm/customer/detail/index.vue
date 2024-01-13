@@ -1,7 +1,5 @@
 <template>
   <CustomerDetailsHeader :customer="customer" :loading="loading">
-    <!-- @puhui999：返回是不是可以去掉哈，貌似用途可能不大 -->
-    <el-button @click="close">返回</el-button>
     <!-- TODO puhui999: 按钮数据权限收尾统一完善，需要按权限分级和客户状态来动态显示匹配的按钮 -->
     <el-button v-hasPermi="['crm:customer:update']" type="primary" @click="openForm">
       编辑
@@ -12,8 +10,10 @@
     <el-button>更改成交状态</el-button>
     <el-button v-if="customer.lockStatus" @click="handleUnlock">解锁</el-button>
     <el-button v-if="!customer.lockStatus" @click="handleLock">锁定</el-button>
-    <el-button v-if="!customer.ownerUserId" type="primary" @click="receive">领取客户</el-button>
-    <el-button v-if="customer.ownerUserId" @click="putPool">客户放入公海</el-button>
+    <el-button v-if="!customer.ownerUserId" type="primary" @click="handleReceive">
+      领取客户
+    </el-button>
+    <el-button v-if="customer.ownerUserId" @click="handlePutPool">客户放入公海</el-button>
   </CustomerDetailsHeader>
   <el-col>
     <el-tabs>
@@ -22,6 +22,9 @@
       </el-tab-pane>
       <el-tab-pane label="操作日志">
         <OperateLogV2 :log-list="logList" />
+      </el-tab-pane>
+      <el-tab-pane label="跟进">
+        <FollowUpList :biz-id="customerId" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
       <el-tab-pane label="联系人" lazy>
         <ContactList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
@@ -58,6 +61,7 @@ import BusinessList from '@/views/crm/business/components/BusinessList.vue' // �
 import ReceivableList from '@/views/crm/receivable/components/ReceivableList.vue' // 回款列表
 import ReceivablePlanList from '@/views/crm/receivable/plan/components/ReceivablePlanList.vue' // 回款计划列表
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
+import FollowUpList from '@/views/crm/followup/index.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
 import type { OperateLogV2VO } from '@/api/system/operatelog'
 
@@ -67,7 +71,7 @@ const customerId = ref(0) // 客户编号
 const loading = ref(true) // 加载中
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
-const { currentRoute, push } = useRouter() // 路由
+const { currentRoute } = useRouter() // 路由
 
 /** 获取详情 */
 const customer = ref<CustomerApi.CustomerVO>({} as CustomerApi.CustomerVO) // 客户详情
@@ -106,9 +110,8 @@ const handleUnlock = async () => {
   await getCustomer()
 }
 
-// TODO @puhui999：下面两个方法的命名，也用 handleXXX 风格哈
 /** 领取客户 */
-const receive = async () => {
+const handleReceive = async () => {
   await message.confirm(`确定领取客户【${customer.value.name}】 吗？`)
   await CustomerApi.receive([unref(customerId.value)])
   message.success(`领取客户【${customer.value.name}】成功`)
@@ -116,7 +119,7 @@ const receive = async () => {
 }
 
 /** 客户放入公海 */
-const putPool = async () => {
+const handlePutPool = async () => {
   await message.confirm(`确定将客户【${customer.value.name}】放入公海吗？`)
   await CustomerApi.putPool(unref(customerId.value))
   message.success(`客户【${customer.value.name}】放入公海成功`)
@@ -135,15 +138,13 @@ const getOperateLog = async () => {
 
 const close = () => {
   delView(unref(currentRoute))
-  // TODO 先返回到客户列表
-  push({ name: 'CrmCustomer' })
 }
 
 /** 初始化 */
 const { params } = useRoute()
 onMounted(() => {
   if (!params.id) {
-    ElMessage.warning('参数错误，客户不能为空！')
+    message.warning('参数错误，客户不能为空！')
     close()
     return
   }

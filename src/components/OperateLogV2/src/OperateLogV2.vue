@@ -1,6 +1,6 @@
 <template>
   <!-- TODO @puhui999：左边不用有空隙哈 -->
-  <div class="p-20px">
+  <div class="pt-20px">
     <el-timeline>
       <el-timeline-item
         v-for="(log, index) in logList"
@@ -58,7 +58,7 @@ const getUserTypeColor = (type: number) => {
 <style lang="scss" scoped>
 // 时间线样式调整
 :deep(.el-timeline) {
-  margin: 10px 0 0 160px;
+  margin: 10px 0 0 110px;
 
   .el-timeline-item__wrapper {
     position: relative;
