@@ -23,7 +23,7 @@
               <template #tip>建议宽度 750px</template>
             </UploadImg>
           </el-form-item>
-          <el-tree :data="treeData" :expand-on-click-node="false">
+          <el-tree :data="treeData" :expand-on-click-node="false" default-expand-all>
             <template #default="{ node, data }">
               <el-form-item
                 :label="data.label"
@@ -43,7 +43,7 @@
               </el-form-item>
             </template>
           </el-tree>
-          <slot name="style" :formData="formData"></slot>
+          <slot name="style" :style="formData"></slot>
         </el-form>
       </el-card>
     </el-tab-pane>

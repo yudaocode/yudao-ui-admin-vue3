@@ -6,7 +6,7 @@ import { TabBarProperty } from '@/components/DiyEditor/components/mobile/TabBar/
 // 页面装修组件
 export interface DiyComponent<T> {
   // 用于区分同一种组件的不同实例
-  uid: number
+  uid?: number
   // 组件唯一标识
   id: string
   // 组件名称
@@ -21,7 +21,7 @@ export interface DiyComponent<T> {
    空：同center
    fixed: 由组件自己决定位置，如弹窗位于手机中心、浮动按钮一般位于手机右下角
   */
-  position: 'top' | 'bottom' | 'center' | '' | 'fixed'
+  position?: 'top' | 'bottom' | 'center' | '' | 'fixed'
   // 组件属性
   property: T
 }
@@ -103,8 +103,7 @@ export function usePropertyForm<T>(modelValue: T, emit: Function): { formData: R
     }
   )
 
-  // TODO @疯狂：这个 idea 爆红，看看怎么可以解决哈
-  return { formData }
+  return { formData } as { formData: Ref<T> }
 }
 
 // 页面组件库

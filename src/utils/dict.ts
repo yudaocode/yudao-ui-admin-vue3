@@ -103,7 +103,6 @@ export const getDictLabel = (dictType: string, value: any): string => {
 export enum DICT_TYPE {
   USER_TYPE = 'user_type',
   COMMON_STATUS = 'common_status',
-  SYSTEM_TENANT_PACKAGE_ID = 'system_tenant_package_id',
   TERMINAL = 'terminal', // 终端
 
   // ========== SYSTEM 模块 ==========

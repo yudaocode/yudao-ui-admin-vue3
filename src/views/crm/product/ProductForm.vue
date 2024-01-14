@@ -62,13 +62,13 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="价格" prop="price">
-            <el-input
-              type="number"
+            <el-input-number
               v-model="formData.price"
               placeholder="请输入价格"
               :min="0"
               :precision="2"
               :step="0.1"
+              class="w-full!"
             />
           </el-form-item>
         </el-col>
@@ -149,7 +149,7 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await ProductApi.getProduct(id)
-      formData.value.price = fenToYuan(formData.value.price)
+      formData.value.price = Number(fenToYuan(formData.value.price))
     } finally {
       formLoading.value = false
     }

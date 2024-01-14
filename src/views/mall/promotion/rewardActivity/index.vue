@@ -122,8 +122,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as ProductBrandApi from '@/api/mall/product/brand'
-import * as RewardActivityApi from '@/api/mall/promotion/reward/rewardActivity'  
+import * as RewardActivityApi from '@/api/mall/promotion/reward/rewardActivity'
 import RewardForm from './RewardForm.vue'
 
 defineOptions({ name: 'PromotionRewardActivity' })
@@ -157,16 +156,11 @@ const getList = async () => {
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
-  // console.log(queryParams)
-  // message.success('已打印搜索参数')
-  // return
   getList()
 }
 
 /** 重置按钮操作 */
 const resetQuery = () => {
-  // message.success('重置查询表单获取数据')
-  // return
   queryFormRef.value.resetFields()
   handleQuery()
 }
@@ -182,8 +176,6 @@ const handleDelete = async (id: number) => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    // message.success('您以确认删除')
-    // return
     // 发起删除
     await RewardActivityApi.deleteRewardActivity(id)
     message.success(t('common.delSuccess'))

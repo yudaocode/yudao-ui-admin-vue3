@@ -1,5 +1,6 @@
+<!-- 商品发布 - 库存价格 - 添加属性 -->
 <template>
-  <Dialog v-model="dialogVisible" :title="dialogTitle">
+  <Dialog v-model="dialogVisible" title="添加商品属性">
     <el-form
       ref="formRef"
       v-loading="formLoading"
@@ -26,8 +27,7 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('添加商品属性') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formLoading = ref(false) // 表单的加载中
 const formData = ref({
   name: ''
 })
@@ -44,7 +44,7 @@ const props = defineProps({
 })
 
 watch(
-  () => props.propertyList,
+  () => props.propertyList, // 解决 props 无法直接修改父组件的问题
   (data) => {
     if (!data) return
     attributeList.value = data
@@ -54,6 +54,7 @@ watch(
     immediate: true
   }
 )
+
 /** 打开弹窗 */
 const open = async () => {
   dialogVisible.value = true
@@ -71,19 +72,13 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as PropertyApi.PropertyVO
-    // 检查属性是否已存在，如果有则返回属性和其下属性值
-    const res = await PropertyApi.getPropertyListAndValue({ name: data.name })
-    if (res.length === 0) {
-      const propertyId = await PropertyApi.createProperty(data)
-      attributeList.value.push({ id: propertyId, ...formData.value, values: [] })
-    } else {
-      if (res[0].values === null) {
-        res[0].values = []
-      }
-      // 不需要属性值
-      res[0].values = []
-      attributeList.value.push(res[0]) // 因为只用一个
-    }
+    const propertyId = await PropertyApi.createProperty(data)
+    // 添加到属性列表
+    attributeList.value.push({
+      id: propertyId,
+      ...formData.value,
+      values: []
+    })
     message.success(t('common.createSuccess'))
     dialogVisible.value = false
   } finally {

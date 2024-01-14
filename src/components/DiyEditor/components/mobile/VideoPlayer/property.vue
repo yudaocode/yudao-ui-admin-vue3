@@ -1,9 +1,9 @@
 <template>
   <ComponentContainerProperty v-model="formData.style">
-    <template #style="{ formData }">
+    <template #style>
       <el-form-item label="高度" prop="height">
         <el-slider
-          v-model="formData.height"
+          v-model="formData.style.height"
           :max="500"
           :min="100"
           show-input
