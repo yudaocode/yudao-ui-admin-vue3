@@ -65,16 +65,6 @@ export const getPropertyPage = (params: PageParam) => {
   return request.get({ url: '/product/property/page', params })
 }
 
-// 获得属性项列表
-export const getPropertyList = (params: any) => {
-  return request.get({ url: '/product/property/list', params })
-}
-
-// 获得属性项列表
-export const getPropertyListAndValue = (data: any) => {
-  return request.post({ url: '/product/property/get-value-list', data })
-}
-
 // ------------------------ 属性值 -------------------
 
 // 获得属性值分页

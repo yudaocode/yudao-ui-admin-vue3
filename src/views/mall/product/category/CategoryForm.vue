@@ -25,10 +25,6 @@
         <UploadImg v-model="formData.picUrl" :limit="1" :is-show-tip="false" />
         <div style="font-size: 10px" class="pl-10px">推荐 180x180 图片分辨率</div>
       </el-form-item>
-      <el-form-item label="PC 端分类图" prop="bigPicUrl">
-        <UploadImg v-model="formData.bigPicUrl" :limit="1" :is-show-tip="false" />
-        <div style="font-size: 10px" class="pl-10px">推荐 468x340 图片分辨率</div>
-      </el-form-item>
       <el-form-item label="分类排序" prop="sort">
         <el-input-number v-model="formData.sort" controls-position="right" :min="0" />
       </el-form-item>
@@ -68,7 +64,6 @@ const formData = ref({
   id: undefined,
   name: '',
   picUrl: '',
-  bigPicUrl: '',
   status: CommonStatusEnum.ENABLE
 })
 const formRules = reactive({
@@ -133,7 +128,6 @@ const resetForm = () => {
     id: undefined,
     name: '',
     picUrl: '',
-    bigPicUrl: '',
     status: CommonStatusEnum.ENABLE
   }
   formRef.value?.resetFields()

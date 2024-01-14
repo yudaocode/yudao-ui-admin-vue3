@@ -16,7 +16,7 @@
       <template v-if="modelValue">
         <img :src="modelValue" class="upload-image" />
         <div class="upload-handle" @click.stop>
-          <div class="handle-icon" @click="editImg">
+          <div class="handle-icon" @click="editImg" v-if="!disabled">
             <Icon icon="ep:edit" />
             <span v-if="showBtnText">{{ t('action.edit') }}</span>
           </div>
@@ -24,7 +24,7 @@
             <Icon icon="ep:zoom-in" />
             <span v-if="showBtnText">{{ t('action.detail') }}</span>
           </div>
-          <div v-if="showDelete" class="handle-icon" @click="deleteImg">
+          <div v-if="showDelete && !disabled" class="handle-icon" @click="deleteImg">
             <Icon icon="ep:delete" />
             <span v-if="showBtnText">{{ t('action.del') }}</span>
           </div>

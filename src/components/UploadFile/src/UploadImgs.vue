@@ -28,7 +28,7 @@
             <Icon icon="ep:zoom-in" />
             <span>查看</span>
           </div>
-          <div class="handle-icon" @click="handleRemove(file)">
+          <div class="handle-icon" @click="handleRemove(file)" v-if="!disabled">
             <Icon icon="ep:delete" />
             <span>删除</span>
           </div>
