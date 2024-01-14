@@ -113,7 +113,7 @@ const handleUnlock = async () => {
 /** 领取客户 */
 const handleReceive = async () => {
   await message.confirm(`确定领取客户【${customer.value.name}】 吗？`)
-  await CustomerApi.receive([unref(customerId.value)])
+  await CustomerApi.receiveCustomer([unref(customerId.value)])
   message.success(`领取客户【${customer.value.name}】成功`)
   await getCustomer()
 }
@@ -121,7 +121,7 @@ const handleReceive = async () => {
 /** 客户放入公海 */
 const handlePutPool = async () => {
   await message.confirm(`确定将客户【${customer.value.name}】放入公海吗？`)
-  await CustomerApi.putPool(unref(customerId.value))
+  await CustomerApi.putCustomerPool(unref(customerId.value))
   message.success(`客户【${customer.value.name}】放入公海成功`)
   close()
 }

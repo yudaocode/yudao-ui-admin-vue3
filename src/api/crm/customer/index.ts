@@ -64,8 +64,8 @@ export const exportCustomer = async (params: any) => {
 }
 
 // 客户列表
-export const queryAllList = async () => {
-  return await request.get({ url: `/crm/customer/query-all-list` })
+export const getSimpleCustomerList = async () => {
+  return await request.get({ url: `/crm/customer/list-all-simple` })
 }
 
 // 查询客户操作日志
@@ -80,13 +80,12 @@ export const lockCustomer = async (id: number, lockStatus: boolean) => {
   return await request.put({ url: `/crm/customer/lock`, data: { id, lockStatus } })
 }
 
-// TODO @puhui999：方法名，改成和后端一致哈
 // 领取公海客户
-export const receive = async (ids: any[]) => {
+export const receiveCustomer = async (ids: any[]) => {
   return await request.put({ url: '/crm/customer/receive', params: { ids: ids.join(',') } })
 }
 
 // 客户放入公海
-export const putPool = async (id: number) => {
+export const putCustomerPool = async (id: number) => {
   return await request.put({ url: `/crm/customer/put-pool?id=${id}` })
 }

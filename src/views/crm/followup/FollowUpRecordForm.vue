@@ -37,21 +37,43 @@
         </el-col>
         <el-col :span="24">
           <el-form-item label="关联联系人" prop="contactIds">
-            <el-button @click="submitForm">
-              <Icon class="mr-5px" icon="ep:plus" />
-              选择添加联系人
-            </el-button>
+            <el-select v-model="formData.contactIds" multiple placeholder="请选择">
+              <el-option
+                v-for="item in allContactList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
             <contact-list v-model:contactIds="formData.contactIds" />
           </el-form-item>
+          <!--          <el-form-item label="关联联系人" prop="contactIds">-->
+          <!--            <el-button @click="handleAddContact">-->
+          <!--              <Icon class="mr-5px" icon="ep:plus" />-->
+          <!--              选择添加联系人-->
+          <!--            </el-button>-->
+          <!--            <contact-list v-model:contactIds="formData.contactIds" />-->
+          <!--          </el-form-item>-->
         </el-col>
         <el-col :span="24">
           <el-form-item label="关联商机" prop="businessIds">
-            <el-button @click="submitForm">
-              <Icon class="mr-5px" icon="ep:plus" />
-              选择添加商机
-            </el-button>
+            <el-select v-model="formData.businessIds" multiple placeholder="请选择">
+              <el-option
+                v-for="item in allBusinessList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
             <business-list v-model:businessIds="formData.businessIds" />
           </el-form-item>
+          <!--          <el-form-item label="关联商机" prop="businessIds">-->
+          <!--            <el-button @click="handleAddBusiness">-->
+          <!--              <Icon class="mr-5px" icon="ep:plus" />-->
+          <!--              选择添加商机-->
+          <!--            </el-button>-->
+          <!--            <business-list v-model:businessIds="formData.businessIds" />-->
+          <!--          </el-form-item>-->
         </el-col>
       </el-row>
     </el-form>
@@ -65,6 +87,8 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { FollowUpRecordApi, FollowUpRecordVO } from '@/api/crm/followup'
 import { BusinessList, ContactList } from './components'
+import * as ContactApi from '@/api/crm/contact'
+import * as BusinessApi from '@/api/crm/business'
 
 /** 跟进记录 表单 */
 defineOptions({ name: 'FollowUpRecordForm' })
@@ -82,7 +106,10 @@ const formRules = reactive({
   content: [{ required: true, message: '跟进内容不能为空', trigger: 'blur' }],
   nextTime: [{ required: true, message: '下次联系时间不能为空', trigger: 'blur' }]
 })
+
 const formRef = ref() // 表单 Ref
+const allContactList = ref<ContactApi.ContactVO[]>([]) // 所有联系人列表
+const allBusinessList = ref<BusinessApi.BusinessVO[]>([]) // 所有商家列表
 
 /** 打开弹窗 */
 const open = async (bizType: number, bizId: number, type: string, id?: number) => {
@@ -92,6 +119,8 @@ const open = async (bizType: number, bizId: number, type: string, id?: number) =
   resetForm()
   formData.value.bizType = bizType
   formData.value.bizId = bizId
+  allContactList.value = await ContactApi.getSimpleContactList()
+  allBusinessList.value = await BusinessApi.getSimpleBusinessList()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true

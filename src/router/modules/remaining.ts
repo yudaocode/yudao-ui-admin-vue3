@@ -504,7 +504,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
         meta: {
           title: '客户详情',
           noCache: true,
-          hidden: true
+          hidden: true,
+          activeMenu: '/crm/customer/index'
         },
         component: () => import('@/views/crm/customer/detail/index.vue')
       },
@@ -514,7 +515,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
         meta: {
           title: '联系人详情',
           noCache: true,
-          hidden: true
+          hidden: true,
+          activeMenu: '/crm/contact'
         },
         component: () => import('@/views/crm/contact/detail/index.vue')
       }

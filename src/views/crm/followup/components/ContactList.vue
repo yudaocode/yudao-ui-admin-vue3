@@ -67,13 +67,18 @@ const props = withDefaults(defineProps<{ contactIds: number[] }>(), {
   contactIds: () => []
 })
 const list = ref<ContactApi.ContactVO[]>([] as ContactApi.ContactVO[])
+const getContactList = async () => {
+  list.value = (await ContactApi.getContactListByIds(
+    props.contactIds
+  )) as unknown as ContactApi.ContactVO[]
+}
 watch(
   () => props.contactIds,
   (val) => {
     if (!val || val.length === 0) {
       return
     }
-    list.value = ContactApi.getContactListByIds(val) as unknown as ContactApi.ContactVO[]
+    getContactList()
   }
 )
 const emits = defineEmits<{

@@ -36,6 +36,11 @@ export const getBusiness = async (id: number) => {
   return await request.get({ url: `/crm/business/get?id=` + id })
 }
 
+// 获得 CRM 商机列表（精简）
+export const getSimpleBusinessList = async () => {
+  return await request.get({ url: `/crm/business/simple-all-list` })
+}
+
 // 新增 CRM 商机
 export const createBusiness = async (data: BusinessVO) => {
   return await request.post({ url: `/crm/business/create`, data })
@@ -63,5 +68,5 @@ export const getBusinessPageByContact = async (params) => {
 
 // 获得 CRM 商机列表
 export const getBusinessListByIds = async (val: number[]) => {
-  return await request.get({ url: '/crm/business/list-by-ids', params: { ids: val } })
+  return await request.get({ url: '/crm/business/list-by-ids', params: { ids: val.join(',') } })
 }

@@ -1,25 +1,25 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" :width="820">
+  <Dialog v-model="dialogVisible" :title="dialogTitle" :width="820">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="110px"
-      v-loading="formLoading"
     >
       <el-row :gutter="20">
         <el-col :span="12">
           <el-form-item label="姓名" prop="name">
-            <el-input input-style="width:190px;" v-model="formData.name" placeholder="请输入姓名" />
+            <el-input v-model="formData.name" input-style="width:190px;" placeholder="请输入姓名" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="负责人" prop="ownerUserId">
             <el-select
               v-model="formData.ownerUserId"
+              lable-key="nickname"
               placeholder="请选择负责人"
               value-key="id"
-              lable-key="nickname"
             >
               <el-option
                 v-for="item in userList"
@@ -36,9 +36,9 @@
           <el-form-item label="客户名称" prop="customerName">
             <el-select
               v-model="formData.customerId"
+              lable-key="name"
               placeholder="请选择客户"
               value-key="id"
-              lable-key="name"
             >
               <el-option
                 v-for="item in customerList"
@@ -66,8 +66,8 @@
         <el-col :span="12">
           <el-form-item label="手机号" prop="mobile">
             <el-input
-              input-style="width:190px;"
               v-model="formData.mobile"
+              input-style="width:190px;"
               placeholder="请输入手机号"
             />
           </el-form-item>
@@ -82,8 +82,8 @@
         <el-col :span="12">
           <el-form-item label="邮箱" prop="email">
             <el-input
-              input-style="width:190px;"
               v-model="formData.email"
+              input-style="width:190px;"
               placeholder="请输入邮箱"
             />
           </el-form-item>
@@ -98,8 +98,8 @@
         <el-col :span="12">
           <el-form-item label="微信" prop="wechat">
             <el-input
-              input-style="width:190px;"
               v-model="formData.wechat"
+              input-style="width:190px;"
               placeholder="请输入微信"
             />
           </el-form-item>
@@ -108,9 +108,9 @@
           <el-form-item label="下次联系时间" prop="contactNextTime">
             <el-date-picker
               v-model="formData.contactNextTime"
+              placeholder="选择下次联系时间"
               type="datetime"
               value-format="x"
-              placeholder="选择下次联系时间"
             />
           </el-form-item>
         </el-col>
@@ -129,8 +129,8 @@
         <el-col :span="12">
           <el-form-item label="地址" prop="detailAddress">
             <el-input
-              input-style="width:190px;"
               v-model="formData.detailAddress"
+              input-style="width:190px;"
               placeholder="请输入地址"
             />
           </el-form-item>
@@ -143,16 +143,16 @@
               <el-option
                 v-for="item in allContactList"
                 :key="item.id"
+                :disabled="item.id == formData.id"
                 :label="item.name"
                 :value="item.id"
-                :disabled="item.id == formData.id"
               />
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="职位" prop="post">
-            <el-input input-style="width:190px;" v-model="formData.post" placeholder="请输入职位" />
+            <el-input v-model="formData.post" input-style="width:190px;" placeholder="请输入职位" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -180,14 +180,14 @@
       </el-row>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as ContactApi from '@/api/crm/contact'
-import { DICT_TYPE, getIntDictOptions, getBoolDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 import * as UserApi from '@/api/system/user'
 import * as CustomerApi from '@/api/crm/customer'
 import * as AreaApi from '@/api/system/area'
@@ -242,7 +242,7 @@ const open = async (type: string, id?: number) => {
   resetForm()
   allContactList.value = await ContactApi.getSimpleContactList()
   userList.value = await UserApi.getSimpleUserList()
-  customerList.value = await CustomerApi.queryAllList()
+  customerList.value = await CustomerApi.getSimpleCustomerList()
   areaList.value = await AreaApi.getAreaTree()
   // 修改时，设置数据
   if (id) {
