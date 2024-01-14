@@ -1,19 +1,38 @@
 <template>
   <CustomerDetailsHeader :customer="customer" :loading="loading">
-    <!-- TODO puhui999: 按钮数据权限收尾统一完善，需要按权限分级和客户状态来动态显示匹配的按钮 -->
-    <el-button v-hasPermi="['crm:customer:update']" type="primary" @click="openForm">
+    <el-button
+      v-if="permissionListRef?.validateWrite"
+      v-hasPermi="['crm:customer:update']"
+      type="primary"
+      @click="openForm"
+    >
       编辑
     </el-button>
-    <!-- TODO @puhui999：转移的操作接入 -->
-    <el-button type="primary" @click="transfer">转移</el-button>
-    <!-- TODO @puhui999：修改成交状态的接入 -->
-    <el-button>更改成交状态</el-button>
-    <el-button v-if="customer.lockStatus" @click="handleUnlock">解锁</el-button>
-    <el-button v-if="!customer.lockStatus" @click="handleLock">锁定</el-button>
+    <el-button v-if="permissionListRef?.validateOwnerUser" type="primary" @click="transfer">
+      转移
+    </el-button>
+    <el-button v-if="permissionListRef?.validateWrite">更改成交状态</el-button>
+    <el-button
+      v-if="customer.lockStatus && permissionListRef?.validateOwnerUser"
+      @click="handleUnlock"
+    >
+      解锁
+    </el-button>
+    <el-button
+      v-if="!customer.lockStatus && permissionListRef?.validateOwnerUser"
+      @click="handleLock"
+    >
+      锁定
+    </el-button>
     <el-button v-if="!customer.ownerUserId" type="primary" @click="handleReceive">
       领取客户
     </el-button>
-    <el-button v-if="customer.ownerUserId" @click="handlePutPool">客户放入公海</el-button>
+    <el-button
+      v-if="customer.ownerUserId && permissionListRef?.validateOwnerUser"
+      @click="handlePutPool"
+    >
+      客户放入公海
+    </el-button>
   </CustomerDetailsHeader>
   <el-col>
     <el-tabs>
@@ -30,7 +49,12 @@
         <ContactList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
       <el-tab-pane label="团队成员">
-        <PermissionList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
+        <PermissionList
+          ref="permissionListRef"
+          :biz-id="customer.id!"
+          :biz-type="BizTypeEnum.CRM_CUSTOMER"
+          :show-action="!permissionListRef?.isPool || false"
+        />
       </el-tab-pane>
       <el-tab-pane label="商机" lazy>
         <BusinessList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
@@ -48,6 +72,7 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getCustomer" />
+  <CrmTransferForm ref="crmTransferFormRef" @success="close" />
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -61,6 +86,7 @@ import BusinessList from '@/views/crm/business/components/BusinessList.vue' // �
 import ReceivableList from '@/views/crm/receivable/components/ReceivableList.vue' // 回款列表
 import ReceivablePlanList from '@/views/crm/receivable/plan/components/ReceivablePlanList.vue' // 回款计划列表
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
+import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
 import FollowUpList from '@/views/crm/followup/index.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
 import type { OperateLogV2VO } from '@/api/system/operatelog'
@@ -72,6 +98,8 @@ const loading = ref(true) // 加载中
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
 const { currentRoute } = useRouter() // 路由
+
+const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
 
 /** 获取详情 */
 const customer = ref<CustomerApi.CustomerVO>({} as CustomerApi.CustomerVO) // 客户详情
@@ -92,7 +120,10 @@ const openForm = () => {
 }
 
 /** 客户转移 */
-const transfer = () => {}
+const crmTransferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 客户转移表单 ref
+const transfer = () => {
+  crmTransferFormRef.value?.open('客户转移', customerId.value, CustomerApi.transfer)
+}
 
 /** 锁定客户 */
 const handleLock = async () => {

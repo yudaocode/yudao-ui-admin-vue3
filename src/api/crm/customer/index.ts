@@ -75,6 +75,17 @@ export const getOperateLogPage = async (id: number) => {
 
 // ======================= 业务操作 =======================
 
+export interface TransferReqVO {
+  id: number | undefined // 客户编号
+  newOwnerUserId: number | undefined // 新负责人的用户编号
+  oldOwnerPermissionLevel: number | undefined // 老负责人加入团队后的权限级别
+}
+
+// 客户转移
+export const transfer = async (data: TransferReqVO) => {
+  return await request.put({ url: '/crm/customer/transfer', data })
+}
+
 // 锁定/解锁客户
 export const lockCustomer = async (id: number, lockStatus: boolean) => {
   return await request.put({ url: `/crm/customer/lock`, data: { id, lockStatus } })
