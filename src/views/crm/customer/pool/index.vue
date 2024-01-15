@@ -187,7 +187,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CustomerApi from '@/api/crm/customer'
 
-defineOptions({ name: 'CrmCustomer' })
+defineOptions({ name: 'CrmCustomerPool' })
 
 const message = useMessage() // 消息弹窗
 

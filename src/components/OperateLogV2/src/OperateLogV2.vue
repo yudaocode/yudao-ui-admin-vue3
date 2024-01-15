@@ -1,5 +1,5 @@
+<!-- 某个记录的操作日志列表，目前主要用于 CRM 客户、商机等详情界面 -->
 <template>
-  <!-- TODO @puhui999：左边不用有空隙哈 -->
   <div class="pt-20px">
     <el-timeline>
       <el-timeline-item

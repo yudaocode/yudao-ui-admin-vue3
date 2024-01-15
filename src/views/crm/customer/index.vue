@@ -146,7 +146,7 @@
         </template>
       </el-table-column>
       <el-table-column align="center" label="距离进入公海" prop="poolDay">
-        <template #default="scope"> {{ scope.row.poolDay }}天</template>
+        <template #default="scope"> {{ scope.row.poolDay }} 天</template>
       </el-table-column>
       <el-table-column
         :formatter="dateFormatter"

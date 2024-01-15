@@ -1,3 +1,4 @@
+<!-- 某个记录的跟进记录列表，目前主要用于 CRM 客户、商机等详情界面 -->
 <template>
   <!-- 操作栏 -->
   <el-row class="mb-10px" justify="end">
@@ -24,7 +25,9 @@
         prop="nextTime"
         width="180px"
       />
+      <!-- TODO @puhui999：点击后，查看关联联系人 -->
       <el-table-column align="center" label="关联联系人" prop="contactIds" />
+      <!-- TODO @puhui999：点击后，查看关联商机 -->
       <el-table-column align="center" label="关联商机" prop="businessIds" />
       <el-table-column
         :formatter="dateFormatter"
@@ -73,7 +76,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { FollowUpRecordApi, FollowUpRecordVO } from '@/api/crm/followup'
 import FollowUpRecordForm from './FollowUpRecordForm.vue'
 
-/** 跟进记录 列表 */
+/** 跟进记录列表 */
 defineOptions({ name: 'FollowUpRecord' })
 const props = defineProps<{
   bizType: number
@@ -84,8 +87,7 @@ const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const list = ref<FollowUpRecordVO[]>([]) // 列表的数据
-// 列表的总页数
-const total = ref(0)
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,

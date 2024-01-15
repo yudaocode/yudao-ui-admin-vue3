@@ -1,3 +1,4 @@
+<!-- 转移数据的表单弹窗，目前主要用于 CRM 客户、商机等详情界面 -->
 <template>
   <Dialog v-model="dialogVisible" :title="dialogTitle" width="30%">
     <el-form
@@ -39,6 +40,7 @@
         </el-radio-group>
       </el-form-item>
     </el-form>
+    <!-- TODO 转移客户时，需要额外有【联系人】【商机】【合同】的 checkbox 选择 -->
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>

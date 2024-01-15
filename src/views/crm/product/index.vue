@@ -60,7 +60,7 @@
       <el-table-column label="产品类型" align="center" prop="categoryName" width="160" />
       <el-table-column label="产品单位" align="center" prop="unit">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PRODUCT_UNIT" :value="scope.row.unit" />
+          <dict-tag :type="DICT_TYPE.CRM_PRODUCT_UNIT" :value="scope.row.unit" />
         </template>
       </el-table-column>
       <el-table-column label="产品编码" align="center" prop="no" />

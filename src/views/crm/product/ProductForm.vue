@@ -47,7 +47,7 @@
           <el-form-item label="产品单位" prop="unit">
             <el-select v-model="formData.unit" class="w-1/1" placeholder="请选择单位">
               <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.PRODUCT_UNIT)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_PRODUCT_UNIT)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"

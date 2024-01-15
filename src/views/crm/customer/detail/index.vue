@@ -36,14 +36,11 @@
   </CustomerDetailsHeader>
   <el-col>
     <el-tabs>
-      <el-tab-pane label="详细资料">
-        <CustomerDetailsInfo :customer="customer" />
-      </el-tab-pane>
-      <el-tab-pane label="操作日志">
-        <OperateLogV2 :log-list="logList" />
-      </el-tab-pane>
-      <el-tab-pane label="跟进">
+      <el-tab-pane label="跟进记录">
         <FollowUpList :biz-id="customerId" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
+      </el-tab-pane>
+      <el-tab-pane label="基本信息">
+        <CustomerDetailsInfo :customer="customer" />
       </el-tab-pane>
       <el-tab-pane label="联系人" lazy>
         <ContactList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
@@ -65,6 +62,9 @@
       <el-tab-pane label="回款" lazy>
         <ReceivablePlanList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
         <ReceivableList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
+      </el-tab-pane>
+      <el-tab-pane label="操作日志">
+        <OperateLogV2 :log-list="logList" />
       </el-tab-pane>
       <el-tab-pane label="回访" lazy>TODO 待开发</el-tab-pane>
     </el-tabs>

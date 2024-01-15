@@ -2,22 +2,14 @@ import request from '@/config/axios'
 
 // 跟进记录 VO
 export interface FollowUpRecordVO {
-  // 编号
-  id: number
-  // 数据类型
-  bizType: number
-  // 数据编号
-  bizId: number
-  // 跟进类型
-  type: number
-  // 跟进内容
-  content: string
-  // 下次联系时间
-  nextTime: Date
-  // 关联的商机编号数组
-  businessIds: number[]
-  // 关联的联系人编号数组
-  contactIds: number[]
+  id: number // 编号
+  bizType: number // 数据类型
+  bizId: number // 数据编号
+  type: number // 跟进类型
+  content: string // 跟进内容
+  nextTime: Date // 下次联系时间
+  businessIds: number[] // 关联的商机编号数组
+  contactIds: number[] // 关联的联系人编号数组
 }
 
 // 跟进记录 API

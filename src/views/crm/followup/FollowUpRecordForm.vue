@@ -1,3 +1,4 @@
+<!-- 跟进记录的添加表单弹窗 -->
 <template>
   <Dialog v-model="dialogVisible" :title="dialogTitle" width="50%">
     <el-form
@@ -30,11 +31,13 @@
             />
           </el-form-item>
         </el-col>
+        <!-- TODO @puhui999：不搞富文本哈；然后加个附件、图片两个 form-item 哈 -->
         <el-col :span="24">
           <el-form-item label="跟进内容" prop="content">
             <Editor v-model="formData.content" height="300px" />
           </el-form-item>
         </el-col>
+        <!-- TODO @puhui999：因为不考虑编辑的情况，是不是关联要是个弹窗选择哈？ -->
         <el-col :span="24">
           <el-form-item label="关联联系人" prop="contactIds">
             <el-select v-model="formData.contactIds" multiple placeholder="请选择">
@@ -90,7 +93,6 @@ import { BusinessList, ContactList } from './components'
 import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
 
-/** 跟进记录 表单 */
 defineOptions({ name: 'FollowUpRecordForm' })
 
 const { t } = useI18n() // 国际化
