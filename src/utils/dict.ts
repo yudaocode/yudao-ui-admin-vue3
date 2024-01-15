@@ -1,8 +1,8 @@
 /**
  * 数据字典工具类
  */
-import { useDictStoreWithOut } from '@/store/modules/dict'
-import { ElementPlusInfoType } from '@/types/elementPlus'
+import {useDictStoreWithOut} from '@/store/modules/dict'
+import {ElementPlusInfoType} from '@/types/elementPlus'
 
 const dictStore = useDictStoreWithOut()
 
@@ -204,5 +204,6 @@ export enum DICT_TYPE {
   CRM_CUSTOMER_SOURCE = 'crm_customer_source',
   CRM_PRODUCT_STATUS = 'crm_product_status',
   CRM_PERMISSION_LEVEL = 'crm_permission_level', // CRM 数据权限的级别
-  CRM_PRODUCT_UNIT = 'crm_product_unit' // 产品单位
+  CRM_PRODUCT_UNIT = 'crm_product_unit', // 产品单位
+  CRM_FOLLOW_UP_TYPE = 'crm_follow_up_type' // 跟进方式
 }

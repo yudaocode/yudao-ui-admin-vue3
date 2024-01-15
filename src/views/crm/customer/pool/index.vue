@@ -80,10 +80,6 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <el-button v-hasPermi="['crm:customer:create']" type="primary" @click="openForm('create')">
-          <Icon class="mr-5px" icon="ep:plus" />
-          新增
-        </el-button>
         <el-button
           v-hasPermi="['crm:customer:export']"
           :loading="exportLoading"
@@ -100,11 +96,6 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-tabs v-model="activeName" @tab-click="handleClick">
-      <el-tab-pane label="我负责的" name="1" />
-      <el-tab-pane label="我参与的" name="2" />
-      <el-tab-pane label="下属负责的" name="3" />
-    </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
       <el-table-column align="center" label="编号" prop="id" />
       <el-table-column align="center" label="客户名称" prop="name" width="160">
@@ -174,22 +165,9 @@
       <el-table-column align="center" label="创建人" prop="creatorName" width="100px" />
       <el-table-column align="center" fixed="right" label="操作" min-width="150">
         <template #default="scope">
-          <el-button
-            v-hasPermi="['crm:customer:update']"
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-          >
-            编辑
-          </el-button>
-          <el-button
-            v-hasPermi="['crm:customer:delete']"
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-          >
-            删除
-          </el-button>
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
+            详情
+          </el-link>
         </template>
       </el-table-column>
     </el-table>
@@ -201,9 +179,6 @@
       @pagination="getList"
     />
   </ContentWrap>
-
-  <!-- 表单弹窗：添加/修改 -->
-  <CustomerForm ref="formRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
@@ -211,28 +186,15 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CustomerApi from '@/api/crm/customer'
-import CustomerForm from './CustomerForm.vue'
-import { TabsPaneContext } from 'element-plus'
 
 defineOptions({ name: 'CrmCustomer' })
 
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const queryParams = ref<{
-  pageNo: number
-  pageSize: number
-  name: string
-  mobile: string
-  industryId: number | undefined
-  level: number | undefined
-  source: number | undefined
-  sceneType: number | undefined
-  pool: boolean | undefined
-}>({
+const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
   name: '',
@@ -241,37 +203,10 @@ const queryParams = ref<{
   level: undefined,
   source: undefined,
   sceneType: undefined,
-  pool: undefined
+  pool: true
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const activeName = ref('1') // 列表 tab
-
-enum CrmSceneTypeEnum {
-  OWNER = 1,
-  INVOLVED = 2,
-  SUBORDINATE = 3
-}
-
-const handleClick = (tab: TabsPaneContext) => {
-  switch (tab.paneName) {
-    case '1':
-      resetQuery(() => {
-        queryParams.value.sceneType = CrmSceneTypeEnum.OWNER
-      })
-      break
-    case '2':
-      resetQuery(() => {
-        queryParams.value.sceneType = CrmSceneTypeEnum.INVOLVED
-      })
-      break
-    case '3':
-      resetQuery(() => {
-        queryParams.value.sceneType = CrmSceneTypeEnum.SUBORDINATE
-      })
-      break
-  }
-}
 
 /** 查询列表 */
 const getList = async () => {
@@ -292,7 +227,7 @@ const handleQuery = () => {
 }
 
 /** 重置按钮操作 */
-const resetQuery = (func: Function | undefined = undefined) => {
+const resetQuery = () => {
   queryFormRef.value.resetFields()
   queryParams.value = {
     pageNo: 1,
@@ -303,9 +238,8 @@ const resetQuery = (func: Function | undefined = undefined) => {
     level: undefined,
     source: undefined,
     sceneType: undefined,
-    pool: undefined
+    pool: true
   }
-  func && func()
   handleQuery()
 }
 
@@ -313,25 +247,6 @@ const resetQuery = (func: Function | undefined = undefined) => {
 const { currentRoute, push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmCustomerDetail', params: { id } })
-}
-
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await CustomerApi.deleteCustomer(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
 }
 
 /** 导出按钮操作 */
