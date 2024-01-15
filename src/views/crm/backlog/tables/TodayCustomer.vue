@@ -1,7 +1,7 @@
 <template>
   <ContentWrap>
     <div class="pb-5 text-xl">
-      {{ title }}
+      今日需联系客户
     </div>
     <!-- 搜索工作栏 -->
     <el-form
@@ -12,7 +12,7 @@
       label-width="68px"
     >
       <el-form-item label="状态" prop="contactStatus">
-        <el-select v-model="queryParams.contactStatus" class="!w-240px" placeholder="状态">
+        <el-select v-model="queryParams.contactStatus" class="!w-240px" placeholder="状态" @change="handleQuery">
           <el-option
             v-for="(option, index) in CONTACT_STATUS"
             :label="option.label"
@@ -22,7 +22,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="归属" prop="sceneType">
-        <el-select v-model="queryParams.sceneType" class="!w-240px" placeholder="归属">
+        <el-select v-model="queryParams.sceneType" class="!w-240px" placeholder="归属" @change="handleQuery">
           <el-option
             v-for="(option, index) in SCENE_TYPES"
             :label="option.label"
@@ -30,16 +30,6 @@
             :key="index"
           />
         </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon class="mr-5px" icon="ep:search" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery(undefined)">
-          <Icon class="mr-5px" icon="ep:refresh" />
-          重置
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -123,19 +113,12 @@
 <script lang="ts" setup name="TodayCustomer">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as MessageApi from '@/api/crm/message'
+import * as BacklogApi from '@/api/crm/backlog'
 
-const title = ref('今日需联系客户') // TODO @dbh52：这个不用枚举一个变量哈；
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const queryParams = ref<{
-  // TODO @dbh52：这个 ref 类型定义可以去掉哈。之前定义的原因，是因为 idea 报错了；默认 idea 可以推导出类型
-  pageNo: number
-  pageSize: number
-  contactStatus: number | undefined
-  sceneType: number | undefined
-}>({
+const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
   contactStatus: 1,
@@ -152,16 +135,15 @@ const CONTACT_STATUS = [
 const SCENE_TYPES = [
   // TODO 芋艿：貌似可以搞成全局枚举
   { label: '我负责的', value: 1 },
-  { label: '我跟进的', value: 2 },
-  { label: '我参与的', value: 3 },
-  { label: '下属负责的', value: 4 }
+  { label: '我参与的', value: 2 },
+  { label: '下属负责的', value: 3 }
 ]
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await MessageApi.getTodayCustomerPage(queryParams.value)
+    const data = await BacklogApi.getTodayCustomerPage(queryParams.value)
     list.value = data.list
     total.value = data.total
   } finally {
