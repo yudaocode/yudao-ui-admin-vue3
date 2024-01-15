@@ -14,10 +14,10 @@
             {{ productCategoryList?.find((c) => c.id === product.categoryId)?.name }}
           </el-descriptions-item>
           <el-descriptions-item label="是否上下架">
-            <dict-tag :type="DICT_TYPE.CRM_PRODUCT_STATUS" :value="product.status"/>
+            <dict-tag :type="DICT_TYPE.CRM_PRODUCT_STATUS" :value="product.status" />
           </el-descriptions-item>
           <el-descriptions-item label="单位">
-            <dict-tag :type="DICT_TYPE.PRODUCT_UNIT" :value="product.unit"/>
+            <dict-tag :type="DICT_TYPE.CRM_PRODUCT_UNIT" :value="product.unit" />
           </el-descriptions-item>
         </el-descriptions>
       </el-collapse-item>
@@ -25,12 +25,12 @@
   </ContentWrap>
 </template>
 <script setup lang="ts">
-import {DICT_TYPE} from '@/utils/dict'
+import { DICT_TYPE } from '@/utils/dict'
 import * as ProductApi from '@/api/crm/product'
-import {fenToYuan} from '@/utils'
+import { fenToYuan } from '@/utils'
 import * as ProductCategoryApi from '@/api/crm/product/productCategory'
 
-const {product} = defineProps<{
+const { product } = defineProps<{
   product: ProductApi.ProductVO
 }>()
 

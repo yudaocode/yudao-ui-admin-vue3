@@ -125,11 +125,12 @@ import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as MessageApi from '@/api/crm/message'
 
-const title = ref('今日需联系客户')
+const title = ref('今日需联系客户') // TODO @dbh52：这个不用枚举一个变量哈；
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = ref<{
+  // TODO @dbh52：这个 ref 类型定义可以去掉哈。之前定义的原因，是因为 idea 报错了；默认 idea 可以推导出类型
   pageNo: number
   pageSize: number
   contactStatus: number | undefined
@@ -149,6 +150,7 @@ const CONTACT_STATUS = [
 ]
 
 const SCENE_TYPES = [
+  // TODO 芋艿：貌似可以搞成全局枚举
   { label: '我负责的', value: 1 },
   { label: '我跟进的', value: 2 },
   { label: '我参与的', value: 3 },
@@ -182,6 +184,7 @@ const resetQuery = (func: Function | undefined = undefined) => {
     contactStatus: 1,
     sceneType: 1
   }
+  // TODO @dbh52：这里的 func 是不是可以去掉哈；
   func && func()
   handleQuery()
 }

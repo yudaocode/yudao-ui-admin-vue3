@@ -1,33 +1,57 @@
 <template>
   <CustomerDetailsHeader :customer="customer" :loading="loading">
-    <!-- @puhui999：返回是不是可以去掉哈，貌似用途可能不大 -->
-    <el-button @click="close">返回</el-button>
-    <!-- TODO puhui999: 按钮数据权限收尾统一完善，需要按权限分级和客户状态来动态显示匹配的按钮 -->
-    <el-button v-hasPermi="['crm:customer:update']" type="primary" @click="openForm">
+    <el-button
+      v-if="permissionListRef?.validateWrite"
+      v-hasPermi="['crm:customer:update']"
+      type="primary"
+      @click="openForm"
+    >
       编辑
     </el-button>
-    <!-- TODO @puhui999：转移的操作接入 -->
-    <el-button type="primary" @click="transfer">转移</el-button>
-    <!-- TODO @puhui999：修改成交状态的接入 -->
-    <el-button>更改成交状态</el-button>
-    <el-button v-if="customer.lockStatus" @click="handleUnlock">解锁</el-button>
-    <el-button v-if="!customer.lockStatus" @click="handleLock">锁定</el-button>
-    <el-button v-if="!customer.ownerUserId" type="primary" @click="receive">领取客户</el-button>
-    <el-button v-if="customer.ownerUserId" @click="putPool">客户放入公海</el-button>
+    <el-button v-if="permissionListRef?.validateOwnerUser" type="primary" @click="transfer">
+      转移
+    </el-button>
+    <el-button v-if="permissionListRef?.validateWrite">更改成交状态</el-button>
+    <el-button
+      v-if="customer.lockStatus && permissionListRef?.validateOwnerUser"
+      @click="handleUnlock"
+    >
+      解锁
+    </el-button>
+    <el-button
+      v-if="!customer.lockStatus && permissionListRef?.validateOwnerUser"
+      @click="handleLock"
+    >
+      锁定
+    </el-button>
+    <el-button v-if="!customer.ownerUserId" type="primary" @click="handleReceive">
+      领取客户
+    </el-button>
+    <el-button
+      v-if="customer.ownerUserId && permissionListRef?.validateOwnerUser"
+      @click="handlePutPool"
+    >
+      客户放入公海
+    </el-button>
   </CustomerDetailsHeader>
   <el-col>
     <el-tabs>
-      <el-tab-pane label="详细资料">
-        <CustomerDetailsInfo :customer="customer" />
+      <el-tab-pane label="跟进记录">
+        <FollowUpList :biz-id="customerId" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
-      <el-tab-pane label="操作日志">
-        <OperateLogV2 :log-list="logList" />
+      <el-tab-pane label="基本信息">
+        <CustomerDetailsInfo :customer="customer" />
       </el-tab-pane>
       <el-tab-pane label="联系人" lazy>
         <ContactList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
       <el-tab-pane label="团队成员">
-        <PermissionList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
+        <PermissionList
+          ref="permissionListRef"
+          :biz-id="customer.id!"
+          :biz-type="BizTypeEnum.CRM_CUSTOMER"
+          :show-action="!permissionListRef?.isPool || false"
+        />
       </el-tab-pane>
       <el-tab-pane label="商机" lazy>
         <BusinessList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
@@ -39,12 +63,16 @@
         <ReceivablePlanList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
         <ReceivableList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
+      <el-tab-pane label="操作日志">
+        <OperateLogV2 :log-list="logList" />
+      </el-tab-pane>
       <el-tab-pane label="回访" lazy>TODO 待开发</el-tab-pane>
     </el-tabs>
   </el-col>
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getCustomer" />
+  <CrmTransferForm ref="crmTransferFormRef" @success="close" />
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -58,6 +86,8 @@ import BusinessList from '@/views/crm/business/components/BusinessList.vue' // �
 import ReceivableList from '@/views/crm/receivable/components/ReceivableList.vue' // 回款列表
 import ReceivablePlanList from '@/views/crm/receivable/plan/components/ReceivablePlanList.vue' // 回款计划列表
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
+import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
+import FollowUpList from '@/views/crm/followup/index.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
 import type { OperateLogV2VO } from '@/api/system/operatelog'
 
@@ -67,7 +97,9 @@ const customerId = ref(0) // 客户编号
 const loading = ref(true) // 加载中
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
-const { currentRoute, push } = useRouter() // 路由
+const { currentRoute } = useRouter() // 路由
+
+const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
 
 /** 获取详情 */
 const customer = ref<CustomerApi.CustomerVO>({} as CustomerApi.CustomerVO) // 客户详情
@@ -88,7 +120,10 @@ const openForm = () => {
 }
 
 /** 客户转移 */
-const transfer = () => {}
+const crmTransferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 客户转移表单 ref
+const transfer = () => {
+  crmTransferFormRef.value?.open('客户转移', customerId.value, CustomerApi.transfer)
+}
 
 /** 锁定客户 */
 const handleLock = async () => {
@@ -106,19 +141,18 @@ const handleUnlock = async () => {
   await getCustomer()
 }
 
-// TODO @puhui999：下面两个方法的命名，也用 handleXXX 风格哈
 /** 领取客户 */
-const receive = async () => {
+const handleReceive = async () => {
   await message.confirm(`确定领取客户【${customer.value.name}】 吗？`)
-  await CustomerApi.receive([unref(customerId.value)])
+  await CustomerApi.receiveCustomer([unref(customerId.value)])
   message.success(`领取客户【${customer.value.name}】成功`)
   await getCustomer()
 }
 
 /** 客户放入公海 */
-const putPool = async () => {
+const handlePutPool = async () => {
   await message.confirm(`确定将客户【${customer.value.name}】放入公海吗？`)
-  await CustomerApi.putPool(unref(customerId.value))
+  await CustomerApi.putCustomerPool(unref(customerId.value))
   message.success(`客户【${customer.value.name}】放入公海成功`)
   close()
 }
@@ -135,15 +169,13 @@ const getOperateLog = async () => {
 
 const close = () => {
   delView(unref(currentRoute))
-  // TODO 先返回到客户列表
-  push({ name: 'CrmCustomer' })
 }
 
 /** 初始化 */
 const { params } = useRoute()
 onMounted(() => {
   if (!params.id) {
-    ElMessage.warning('参数错误，客户不能为空！')
+    message.warning('参数错误，客户不能为空！')
     close()
     return
   }

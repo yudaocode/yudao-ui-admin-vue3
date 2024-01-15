@@ -64,8 +64,8 @@ export const exportCustomer = async (params: any) => {
 }
 
 // 客户列表
-export const queryAllList = async () => {
-  return await request.get({ url: `/crm/customer/query-all-list` })
+export const getSimpleCustomerList = async () => {
+  return await request.get({ url: `/crm/customer/list-all-simple` })
 }
 
 // 查询客户操作日志
@@ -75,18 +75,28 @@ export const getOperateLogPage = async (id: number) => {
 
 // ======================= 业务操作 =======================
 
+export interface TransferReqVO {
+  id: number | undefined // 客户编号
+  newOwnerUserId: number | undefined // 新负责人的用户编号
+  oldOwnerPermissionLevel: number | undefined // 老负责人加入团队后的权限级别
+}
+
+// 客户转移
+export const transfer = async (data: TransferReqVO) => {
+  return await request.put({ url: '/crm/customer/transfer', data })
+}
+
 // 锁定/解锁客户
 export const lockCustomer = async (id: number, lockStatus: boolean) => {
   return await request.put({ url: `/crm/customer/lock`, data: { id, lockStatus } })
 }
 
-// TODO @puhui999：方法名，改成和后端一致哈
 // 领取公海客户
-export const receive = async (ids: any[]) => {
+export const receiveCustomer = async (ids: any[]) => {
   return await request.put({ url: '/crm/customer/receive', params: { ids: ids.join(',') } })
 }
 
 // 客户放入公海
-export const putPool = async (id: number) => {
+export const putCustomerPool = async (id: number) => {
   return await request.put({ url: `/crm/customer/put-pool?id=${id}` })
 }

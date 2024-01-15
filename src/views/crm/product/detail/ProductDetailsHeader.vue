@@ -22,7 +22,7 @@
         {{ productCategoryList?.find((c) => c.id === product.categoryId)?.name }}
       </el-descriptions-item>
       <el-descriptions-item label="产品单位">
-        <dict-tag :type="DICT_TYPE.PRODUCT_UNIT" :value="product.unit" />
+        <dict-tag :type="DICT_TYPE.CRM_PRODUCT_UNIT" :value="product.unit" />
       </el-descriptions-item>
       <el-descriptions-item label="产品价格">{{ fenToYuan(product.price) }}元</el-descriptions-item>
       <el-descriptions-item label="产品编码">{{ product.no }}</el-descriptions-item>

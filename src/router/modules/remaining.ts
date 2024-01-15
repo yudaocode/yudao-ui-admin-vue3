@@ -537,6 +537,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           noCache: true,
           hidden: true
         },
+        // TODO @db52：后面搞，搞成菜单
         component: () => import('@/views/crm/message/index.vue')
       }
     ]
