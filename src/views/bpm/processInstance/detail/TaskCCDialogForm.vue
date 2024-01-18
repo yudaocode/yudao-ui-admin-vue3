@@ -1,3 +1,4 @@
+<!-- TODO @kyle：需要在讨论下；可能直接选人更合适 -->
 <template>
   <Dialog v-model="dialogVisible" title="修改任务规则" width="600">
     <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
@@ -13,7 +14,6 @@
       <el-form-item label="流程标识" prop="processInstanceKey">
         <el-input v-model="formData.processInstanceKey" disabled placeholder="请输入流程标识" />
       </el-form-item>
-
       <el-form-item label="规则类型" prop="type">
         <el-select v-model="formData.type" clearable style="width: 100%">
           <el-option

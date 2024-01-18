@@ -1,3 +1,4 @@
+<!-- 工作流 - 抄送我的流程 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -106,7 +107,7 @@ const getList = async () => {
 }
 
 /** 处理审批按钮 */
-const handleAudit = (row) => {
+const handleAudit = (row: any) => {
   push({
     name: 'BpmProcessInstanceDetail',
     query: {
