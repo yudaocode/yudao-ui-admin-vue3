@@ -53,12 +53,9 @@
 import { dateFormatter } from '@/utils/formatTime'
 import * as CombinationRecordApi from '@/api/mall/promotion/combination/combinationRecord'
 import { DICT_TYPE } from '@/utils/dict'
-import { createImageViewer } from '@/components/ImageViewer'
 
 /** 助力列表 */
 defineOptions({ name: 'CombinationRecordListDialog' })
-
-const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -82,17 +79,11 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const getList = async () => {
   loading.value = true
   try {
-    const data = await CombinationRecordApi.getCombinationRecordPageByHeadId(queryParams)
+    const data = await CombinationRecordApi.getCombinationRecordPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
     loading.value = false
   }
-}
-/** 商品图预览 */
-const imagePreview = (imgUrl: string) => {
-  createImageViewer({
-    urlList: [imgUrl]
-  })
 }
 </script>
