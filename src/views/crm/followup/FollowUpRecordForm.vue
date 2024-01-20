@@ -31,7 +31,6 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO @puhui999：不搞富文本哈；然后加个附件、图片两个 form-item 哈 -->
         <el-col :span="24">
           <el-form-item label="跟进内容" prop="content">
             <el-input v-model="formData.content" :rows="3" type="textarea" />
@@ -72,13 +71,13 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+  <ContactTableSelect ref="contactTableSelectRef" v-model="formData.contactIds" />
+  <BusinessTableSelect ref="businessTableSelectRef" v-model="formData.businessIds" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { FollowUpRecordApi, FollowUpRecordVO } from '@/api/crm/followup'
-import { BusinessList, ContactList } from './components'
-import * as ContactApi from '@/api/crm/contact'
-import * as BusinessApi from '@/api/crm/business'
+import { BusinessList, BusinessTableSelect, ContactList, ContactTableSelect } from './components'
 
 defineOptions({ name: 'FollowUpRecordForm' })
 
@@ -97,8 +96,6 @@ const formRules = reactive({
 })
 
 const formRef = ref() // 表单 Ref
-const allContactList = ref<ContactApi.ContactVO[]>([]) // 所有联系人列表
-const allBusinessList = ref<BusinessApi.BusinessVO[]>([]) // 所有商家列表
 
 /** 打开弹窗 */
 const open = async (bizType: number, bizId: number, type: string, id?: number) => {
@@ -108,8 +105,6 @@ const open = async (bizType: number, bizId: number, type: string, id?: number) =
   resetForm()
   formData.value.bizType = bizType
   formData.value.bizId = bizId
-  allContactList.value = await ContactApi.getSimpleContactList()
-  allBusinessList.value = await BusinessApi.getSimpleBusinessList()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -146,8 +141,14 @@ const submitForm = async () => {
   }
 }
 
-const handleAddContact = () => {}
-const handleAddBusiness = () => {}
+const contactTableSelectRef = ref<InstanceType<typeof ContactTableSelect>>()
+const handleAddContact = () => {
+  contactTableSelectRef.value?.open()
+}
+const businessTableSelectRef = ref<InstanceType<typeof BusinessTableSelect>>()
+const handleAddBusiness = () => {
+  businessTableSelectRef.value?.open()
+}
 /** 重置表单 */
 const resetForm = () => {
   formRef.value?.resetFields()
