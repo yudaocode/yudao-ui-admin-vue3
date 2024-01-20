@@ -1,11 +1,11 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="100px"
-      v-loading="formLoading"
     >
       <el-form-item label="页面名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入页面名称" />
@@ -18,12 +18,12 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as DiyPageApi from '@/api/mall/promotion/diy/page'
 
 /** 装修页面表单 */
@@ -57,13 +57,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      const diyPage = await DiyPageApi.getDiyPage(id) // 处理预览图
-      if (diyPage?.previewPicUrls?.length > 0) {
-        diyPage.previewPicUrls = diyPage.previewPicUrls.map((url: string) => {
-          return { url }
-        })
-      }
-      formData.value = diyPage
+      formData.value = await DiyPageApi.getDiyPage(id)
     } finally {
       formLoading.value = false
     }
@@ -81,11 +75,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    // 处理预览图
-    const previewPicUrls = formData.value.previewPicUrls.map((item) => {
-      return item['url'] ? item['url'] : item
-    })
-    const data = { ...formData.value, previewPicUrls } as unknown as DiyPageApi.DiyPageVO
+    const data = formData.value as unknown as DiyPageApi.DiyPageVO
     if (formType.value === 'create') {
       await DiyPageApi.createDiyPage(data)
       message.success(t('common.createSuccess'))

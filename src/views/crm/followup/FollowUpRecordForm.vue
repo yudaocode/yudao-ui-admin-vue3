@@ -34,49 +34,36 @@
         <!-- TODO @puhui999：不搞富文本哈；然后加个附件、图片两个 form-item 哈 -->
         <el-col :span="24">
           <el-form-item label="跟进内容" prop="content">
-            <Editor v-model="formData.content" height="300px" />
+            <el-input v-model="formData.content" :rows="3" type="textarea" />
           </el-form-item>
         </el-col>
-        <!-- TODO @puhui999：因为不考虑编辑的情况，是不是关联要是个弹窗选择哈？ -->
+        <el-col :span="24">
+          <el-form-item label="图片" prop="content">
+            <UploadImgs v-model="formData.picUrls" class="min-w-80px" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="24">
+          <el-form-item label="附件" prop="content">
+            <UploadFile v-model="formData.fileUrls" class="min-w-80px" />
+          </el-form-item>
+        </el-col>
         <el-col :span="24">
           <el-form-item label="关联联系人" prop="contactIds">
-            <el-select v-model="formData.contactIds" multiple placeholder="请选择">
-              <el-option
-                v-for="item in allContactList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
+            <el-button @click="handleAddContact">
+              <Icon class="mr-5px" icon="ep:plus" />
+              添加联系人
+            </el-button>
             <contact-list v-model:contactIds="formData.contactIds" />
           </el-form-item>
-          <!--          <el-form-item label="关联联系人" prop="contactIds">-->
-          <!--            <el-button @click="handleAddContact">-->
-          <!--              <Icon class="mr-5px" icon="ep:plus" />-->
-          <!--              选择添加联系人-->
-          <!--            </el-button>-->
-          <!--            <contact-list v-model:contactIds="formData.contactIds" />-->
-          <!--          </el-form-item>-->
         </el-col>
         <el-col :span="24">
           <el-form-item label="关联商机" prop="businessIds">
-            <el-select v-model="formData.businessIds" multiple placeholder="请选择">
-              <el-option
-                v-for="item in allBusinessList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
+            <el-button @click="handleAddBusiness">
+              <Icon class="mr-5px" icon="ep:plus" />
+              添加商机
+            </el-button>
             <business-list v-model:businessIds="formData.businessIds" />
           </el-form-item>
-          <!--          <el-form-item label="关联商机" prop="businessIds">-->
-          <!--            <el-button @click="handleAddBusiness">-->
-          <!--              <Icon class="mr-5px" icon="ep:plus" />-->
-          <!--              选择添加商机-->
-          <!--            </el-button>-->
-          <!--            <business-list v-model:businessIds="formData.businessIds" />-->
-          <!--          </el-form-item>-->
         </el-col>
       </el-row>
     </el-form>
@@ -159,6 +146,8 @@ const submitForm = async () => {
   }
 }
 
+const handleAddContact = () => {}
+const handleAddBusiness = () => {}
 /** 重置表单 */
 const resetForm = () => {
   formRef.value?.resetFields()
