@@ -232,6 +232,48 @@
             </el-button>
           </template>
         </el-table-column>
+        <el-table-column :label="PayChannelEnum.WX_BAR.name" align="center">
+          <template #default="scope">
+            <el-button
+              type="success"
+              circle
+              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.WX_BAR.code)"
+              @click="openChannelForm(scope.row, PayChannelEnum.WX_BAR.code)"
+            >
+              <Icon icon="ep:check" />
+            </el-button>
+            <el-button
+              v-else
+              type="danger"
+              circle
+              @click="openChannelForm(scope.row, PayChannelEnum.WX_BAR.code)"
+            >
+              <Icon icon="ep:close" />
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table-column>
+      <el-table-column label="钱包支付配置" align="center">
+        <el-table-column :label="PayChannelEnum.WALLET.name" align="center">
+          <template #default="scope">
+            <el-button
+              type="success"
+              circle
+              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.WALLET.code)"
+              @click="openChannelForm(scope.row, PayChannelEnum.WALLET.code)"
+            >
+              <Icon icon="ep:check" />
+            </el-button>
+            <el-button
+              v-else
+              type="danger"
+              circle
+              @click="openChannelForm(scope.row, PayChannelEnum.WALLET.code)"
+            >
+              <Icon icon="ep:close" />
+            </el-button>
+          </template>
+        </el-table-column>
       </el-table-column>
       <el-table-column label="模拟支付配置" align="center">
         <el-table-column :label="PayChannelEnum.MOCK.name" align="center">
@@ -290,16 +332,17 @@
   <AlipayChannelForm ref="alipayFormRef" @success="getList" />
   <WeixinChannelForm ref="weixinFormRef" @success="getList" />
   <MockChannelForm ref="mockFormRef" @success="getList" />
+  <WalletChannelForm ref="walletFormRef" @success="getList" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import download from '@/utils/download'
 import * as AppApi from '@/api/pay/app'
 import AppForm from './components/AppForm.vue'
-import { PayChannelEnum, PayType } from '@/utils/constants'
+import { PayChannelEnum } from '@/utils/constants'
 import AlipayChannelForm from './components/channel/AlipayChannelForm.vue'
 import WeixinChannelForm from './components/channel/WeixinChannelForm.vue'
 import MockChannelForm from './components/channel/MockChannelForm.vue'
+import WalletChannelForm from './components/channel/WalletChannelForm.vue'
 import { CommonStatusEnum } from '@/utils/constants'
 
 defineOptions({ name: 'PayApp' })
@@ -397,6 +440,7 @@ const isChannelExists = (channels, channelCode) => {
 const alipayFormRef = ref()
 const weixinFormRef = ref()
 const mockFormRef = ref()
+const walletFormRef = ref()
 const channelParam = reactive({
   appId: null, // 应用 ID
   payCode: null // 渠道编码
@@ -413,6 +457,9 @@ const openChannelForm = async (row, payCode) => {
     return
   }
   if (payCode.indexOf('mock') === 0) {
+    mockFormRef.value.open(row.id, payCode)
+  }
+  if (payCode.indexOf('wallet') === 0) {
     mockFormRef.value.open(row.id, payCode)
   }
 }

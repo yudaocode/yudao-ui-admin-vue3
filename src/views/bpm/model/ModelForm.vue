@@ -96,17 +96,17 @@
         </el-form-item>
         <el-form-item
           v-if="formData.formType === 20"
-          label="表单查看路由"
+          label="表单查看地址"
           prop="formCustomViewPath"
         >
           <el-input
             v-model="formData.formCustomViewPath"
-            placeholder="请输入表单查看路由"
+            placeholder="请输入表单查看的组件地址"
             style="width: 330px"
           />
           <el-tooltip
             class="item"
-            content="自定义表单的查看路径，使用 Vue 的路由地址，例如说：bpm/oa/leave/view"
+            content="自定义表单的查看组件地址，使用 Vue 的组件地址，例如说：bpm/oa/leave/detail"
             effect="light"
             placement="top"
           >

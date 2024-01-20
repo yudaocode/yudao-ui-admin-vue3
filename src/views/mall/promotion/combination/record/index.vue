@@ -242,9 +242,11 @@ const getSummary = async () => {
   recordSummary.value = await CombinationRecordApi.getCombinationRecordSummary()
 }
 
+/** 查看拼团详情 */
 const openRecordListDialog = (row: CombinationRecordApi.CombinationRecordVO) => {
-  combinationRecordListRef.value?.open(row.headId)
+  combinationRecordListRef.value?.open(row.headId || row.id) // 多表达式的原因，团长的 headId 为空，就是自身的情况
 }
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.value.pageNo = 1
