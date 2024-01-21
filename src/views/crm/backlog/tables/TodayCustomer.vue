@@ -1,8 +1,6 @@
 <template>
   <ContentWrap>
-    <div class="pb-5 text-xl">
-      今日需联系客户
-    </div>
+    <div class="pb-5 text-xl"> 今日需联系客户 </div>
     <!-- 搜索工作栏 -->
     <el-form
       ref="queryFormRef"
@@ -12,7 +10,12 @@
       label-width="68px"
     >
       <el-form-item label="状态" prop="contactStatus">
-        <el-select v-model="queryParams.contactStatus" class="!w-240px" placeholder="状态" @change="handleQuery">
+        <el-select
+          v-model="queryParams.contactStatus"
+          class="!w-240px"
+          placeholder="状态"
+          @change="handleQuery"
+        >
           <el-option
             v-for="(option, index) in CONTACT_STATUS"
             :label="option.label"
@@ -22,7 +25,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="归属" prop="sceneType">
-        <el-select v-model="queryParams.sceneType" class="!w-240px" placeholder="归属" @change="handleQuery">
+        <el-select
+          v-model="queryParams.sceneType"
+          class="!w-240px"
+          placeholder="归属"
+          @change="handleQuery"
+        >
           <el-option
             v-for="(option, index) in SCENE_TYPES"
             :label="option.label"
@@ -111,9 +119,12 @@
 </template>
 
 <script lang="ts" setup name="TodayCustomer">
+import * as BacklogApi from '@/api/crm/backlog'
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as BacklogApi from '@/api/crm/backlog'
+import { CONTACT_STATUS, SCENE_TYPES } from './common'
+
+const { push } = useRouter()
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -125,19 +136,6 @@ const queryParams = ref({
   sceneType: 1
 })
 const queryFormRef = ref() // 搜索的表单
-
-const CONTACT_STATUS = [
-  { label: '今日需联系', value: 1 },
-  { label: '已逾期', value: 2 },
-  { label: '已联系', value: 3 }
-]
-
-const SCENE_TYPES = [
-  // TODO 芋艿：貌似可以搞成全局枚举
-  { label: '我负责的', value: 1 },
-  { label: '我参与的', value: 2 },
-  { label: '下属负责的', value: 3 }
-]
 
 /** 查询列表 */
 const getList = async () => {
@@ -157,22 +155,7 @@ const handleQuery = () => {
   getList()
 }
 
-/** 重置按钮操作 */
-const resetQuery = (func: Function | undefined = undefined) => {
-  queryFormRef.value.resetFields()
-  queryParams.value = {
-    pageNo: 1,
-    pageSize: 10,
-    contactStatus: 1,
-    sceneType: 1
-  }
-  // TODO @dbh52：这里的 func 是不是可以去掉哈；
-  func && func()
-  handleQuery()
-}
-
 /** 打开客户详情 */
-const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmCustomerDetail', params: { id } })
 }

@@ -1,4 +1,5 @@
 <!-- 分配给我的客户 -->
+<!-- WHERE followUpStatus = ? -->
 <template>
   <ContentWrap>
     <div class="pb-5 text-xl">分配给我的客户</div>
@@ -108,16 +109,13 @@
 </template>
 
 <script setup lang="ts" name="FollowCustomer">
+import * as CustomerApi from '@/api/crm/customer'
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as CustomerApi from '@/api/crm/customer'
+import { FOLLOWUP_STATUS } from './common'
+
 
 const { push } = useRouter()
-
-const FOLLOWUP_STATUS = [
-  { label: '已跟进', value: true },
-  { label: '待跟进', value: false }
-]
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数

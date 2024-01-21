@@ -1,4 +1,5 @@
 <!-- TODO: dhb52 待Clue页面更新后同步更新 -->
+<!-- WHERE transformStatus = 0 AND followUpStatus = ? -->
 <template>
   <ContentWrap>
     <div class="pb-5 text-xl">分配给我的线索</div>
@@ -81,14 +82,10 @@
 </template>
 
 <script setup lang="ts" name="FollowLeads">
+import * as ClueApi from '@/api/crm/clue'
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as ClueApi from '@/api/crm/clue'
-
-const FOLLOWUP_STATUS = [
-  { label: '已跟进', value: true },
-  { label: '待跟进', value: false }
-]
+import { FOLLOWUP_STATUS } from './common'
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -96,7 +93,8 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  followUpStatus: false
+  followUpStatus: false,
+  transformStatus: false // 固定为【未转移】
 })
 const queryFormRef = ref() // 搜索的表单
 
