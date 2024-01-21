@@ -27,9 +27,15 @@
       <el-form-item label="地址" prop="address">
         <el-input v-model="formData.address" placeholder="请输入地址" />
       </el-form-item>
-      <!-- TODO wanwan 负责人选择 -->
-      <el-form-item label="负责人" prop="ownerUserId">
-        <el-input v-model="formData.ownerUserId" placeholder="请输入负责人" />
+      <el-form-item v-if="formType === 'create'" label="负责人" prop="userIds" span="24">
+        <el-select v-model="formData.ownerUserId">
+          <el-option
+              v-for="item in userOptions"
+              :key="item.id"
+              :label="item.nickname"
+              :value="item.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" placeholder="请输入备注" />
@@ -43,14 +49,17 @@
 </template>
 <script setup lang="ts">
 import * as ClueApi from '@/api/crm/clue'
+import {CACHE_KEY, useCache} from "@/hooks/web/useCache";
+import * as UserApi from "@/api/system/user";
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formLoading = ref(false) // 表单加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const formData = ref({
   id: undefined,
   name: undefined,
@@ -63,7 +72,8 @@ const formData = ref({
   remark: undefined
 })
 const formRules = reactive({
-  name: [{ required: true, message: '线索名称不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: '线索名称不能为空', trigger: 'blur' }],
+  ownerUserId: [{ required: true, message: '负责人不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -81,6 +91,14 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  }
+  // 获得用户列表
+  userOptions.value = await UserApi.getSimpleUserList()
+  // 新建时负责人默认为登录人
+  if (formType.value === 'create') {
+    const { wsCache } = useCache()
+    const user = wsCache.get(CACHE_KEY.USER).user
+    formData.value.ownerUserId = user.id
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
