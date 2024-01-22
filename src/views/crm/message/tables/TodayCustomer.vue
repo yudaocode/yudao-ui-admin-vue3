@@ -15,9 +15,9 @@
         <el-select v-model="queryParams.contactStatus" class="!w-240px" placeholder="状态">
           <el-option
             v-for="(option, index) in CONTACT_STATUS"
+            :key="index"
             :label="option.label"
             :value="option.value"
-            :key="index"
           />
         </el-select>
       </el-form-item>
@@ -25,9 +25,9 @@
         <el-select v-model="queryParams.sceneType" class="!w-240px" placeholder="归属">
           <el-option
             v-for="(option, index) in SCENE_TYPES"
+            :key="index"
             :label="option.label"
             :value="option.value"
-            :key="index"
           />
         </el-select>
       </el-form-item>
@@ -84,7 +84,7 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
         </template>
       </el-table-column>
-      <!-- TODO @puhui999：距进入公海天数 -->
+      <el-table-column align="center" label="距进入公海天数" prop="poolDay" width="100px" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -120,7 +120,7 @@
   </ContentWrap>
 </template>
 
-<script lang="ts" setup name="TodayCustomer">
+<script lang="ts" name="TodayCustomer" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as MessageApi from '@/api/crm/message'

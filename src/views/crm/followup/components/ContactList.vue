@@ -69,7 +69,7 @@ const props = withDefaults(defineProps<{ contactIds: number[] }>(), {
 const list = ref<ContactApi.ContactVO[]>([] as ContactApi.ContactVO[])
 const getContactList = async () => {
   list.value = (await ContactApi.getContactListByIds(
-    props.contactIds
+    unref(props.contactIds)
   )) as unknown as ContactApi.ContactVO[]
 }
 watch(

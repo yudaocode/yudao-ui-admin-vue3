@@ -2,14 +2,15 @@ import request from '@/config/axios'
 
 export interface PermissionVO {
   id?: number // 数据权限编号
-  userId: number | undefined // 用户编号
-  bizType: number | undefined // Crm 类型
-  bizId: number | undefined // Crm 类型数据编号
-  level: number | undefined // 权限级别
+  userId: number // 用户编号
+  bizType: number // Crm 类型
+  bizId: number // Crm 类型数据编号
+  level: number // 权限级别
   deptName?: string // 部门名称
   nickname?: string // 用户昵称
   postNames?: string[] // 岗位名称数组
   createTime?: Date
+  ids?: number[]
 }
 
 /**
@@ -50,11 +51,11 @@ export const updatePermission = async (data) => {
 }
 
 // 删除数据权限（删除团队成员）
-export const deletePermissionBatch = async (params) => {
-  return await request.delete({ url: '/crm/permission/delete', params })
+export const deletePermissionBatch = async (val: number[]) => {
+  return await request.delete({ url: '/crm/permission/delete?ids=' + val.join(',') })
 }
 
 // 删除自己的数据权限（退出团队）
-export const deleteSelfPermission = async (id) => {
-  return await request.delete({ url: '/crm/permission/quit-team?id=' + id })
+export const deleteSelfPermission = async (id: number) => {
+  return await request.delete({ url: '/crm/permission/delete-self?id=' + id })
 }

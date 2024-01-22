@@ -51,6 +51,7 @@
           :biz-id="customer.id!"
           :biz-type="BizTypeEnum.CRM_CUSTOMER"
           :show-action="!permissionListRef?.isPool || false"
+          @quit-team="close"
         />
       </el-tab-pane>
       <el-tab-pane label="商机" lazy>
