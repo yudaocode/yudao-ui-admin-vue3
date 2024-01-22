@@ -7,8 +7,8 @@ export interface FollowUpRecordVO {
   bizId: number // 数据编号
   type: number // 跟进类型
   content: string // 跟进内容
-  picUrls: string[]
-  fileUrls: string[]
+  picUrls: string[] // 图片
+  fileUrls: string[] // 附件
   nextTime: Date // 下次联系时间
   businessIds: number[] // 关联的商机编号数组
   contactIds: number[] // 关联的联系人编号数组

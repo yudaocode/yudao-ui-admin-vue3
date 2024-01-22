@@ -1,3 +1,4 @@
+<!-- 商机的选择列表 TODO 芋艿：后面看看要不要搞到统一封装里 -->
 <template>
   <Dialog v-model="dialogVisible" :appendToBody="true" title="选择商机" width="700">
     <el-table
@@ -35,10 +36,12 @@ import { ElTable } from 'element-plus'
 
 defineOptions({ name: 'BusinessTableSelect' })
 withDefaults(defineProps<{ modelValue: number[] }>(), { modelValue: () => [] })
+
 const list = ref<BusinessApi.BusinessVO[]>([]) // 列表的数据
 const loading = ref(false) // 列表的加载中
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false)
+
 // 确认选择时的触发事件
 const emits = defineEmits<{
   (e: 'update:modelValue', v: number[]): void
@@ -71,6 +74,7 @@ const getList = async () => {
     loading.value = false
   }
 }
+
 /** 打开弹窗 */
 const open = async () => {
   dialogVisible.value = true
