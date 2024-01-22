@@ -17,13 +17,25 @@
     <el-col :span="20" :xs="24">
       <TodayCustomer v-if="leftType === 'todayCustomer'" />
       <FollowLeads v-if="leftType === 'followLeads'" />
+      <CheckContract v-if="leftType === 'checkContract'" />
+      <CheckReceivables v-if="leftType === 'checkReceivables'" />
+      <EndContract v-if="leftType === 'endContract'" />
+      <FollowCustomer v-if="leftType === 'followCustomer'" />
+      <PutInPoolRemind v-if="leftType === 'putInPoolRemind'" />
+      <RemindReceivables v-if="leftType === 'remindReceivables'" />
     </el-col>
   </el-row>
 </template>
-<!-- @dbh52：模块改成 backlog 会更合适，待办事项 -->
+
 <script lang="ts" setup>
-import TodayCustomer from './tables/TodayCustomer.vue'
+import CheckContract from './tables/CheckContract.vue'
+import CheckReceivables from './tables/CheckReceivables.vue'
+import EndContract from './tables/EndContract.vue'
+import FollowCustomer from './tables/FollowCustomer.vue'
 import FollowLeads from './tables/FollowLeads.vue'
+import PutInPoolRemind from './tables/PutInPoolRemind.vue'
+import RemindReceivables from './tables/RemindReceivables.vue'
+import TodayCustomer from './tables/TodayCustomer.vue'
 
 const leftType = ref('todayCustomer')
 const leftSides = ref([
@@ -66,7 +78,7 @@ const leftSides = ref([
   },
   {
     name: '待回款提醒',
-    infoType: 'remindReceivablesPlan',
+    infoType: 'remindReceivables',
     msgCount: 4,
     tips: ''
   },
