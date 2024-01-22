@@ -10,17 +10,6 @@
       <el-form-item label="线索名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入线索名称" />
       </el-form-item>
-      <!-- TODO 芋艿：后续客户的选择 -->
-      <el-form-item label="客户" prop="customerId">
-        <el-select v-model="formData.customerId" clearable placeholder="请选择客户">
-          <el-option
-            v-for="item in customerList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item label="下次联系时间" prop="contactNextTime">
         <el-date-picker
           v-model="formData.contactNextTime"
@@ -38,9 +27,15 @@
       <el-form-item label="地址" prop="address">
         <el-input v-model="formData.address" placeholder="请输入地址" />
       </el-form-item>
-      <!-- TODO wanwan 负责人选择 -->
-      <el-form-item label="负责人" prop="ownerUserId">
-        <el-input v-model="formData.ownerUserId" placeholder="请输入负责人" />
+      <el-form-item v-if="formType === 'create'" label="负责人" prop="userIds" span="24">
+        <el-select v-model="formData.ownerUserId">
+          <el-option
+              v-for="item in userOptions"
+              :key="item.id"
+              :label="item.nickname"
+              :value="item.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" placeholder="请输入备注" />
@@ -54,20 +49,20 @@
 </template>
 <script setup lang="ts">
 import * as ClueApi from '@/api/crm/clue'
-import * as CustomerApi from '@/api/crm/customer'
+import {CACHE_KEY, useCache} from "@/hooks/web/useCache";
+import * as UserApi from "@/api/system/user";
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
-const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formLoading = ref(false) // 表单加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const customerList = ref([]) // 客户列表
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const formData = ref({
   id: undefined,
   name: undefined,
-  customerId: undefined,
   contactNextTime: undefined,
   telephone: undefined,
   mobile: undefined,
@@ -78,7 +73,7 @@ const formData = ref({
 })
 const formRules = reactive({
   name: [{ required: true, message: '线索名称不能为空', trigger: 'blur' }],
-  customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }]
+  ownerUserId: [{ required: true, message: '负责人不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -88,12 +83,6 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  const customerData = await CustomerApi.getCustomerPage({
-    pageNo: 1,
-    pageSize: 100,
-    pool: false
-  })
-  customerList.value = customerData.list
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -102,6 +91,14 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  }
+  // 获得用户列表
+  userOptions.value = await UserApi.getSimpleUserList()
+  // 新建时负责人默认为登录人
+  if (formType.value === 'create') {
+    const { wsCache } = useCache()
+    const user = wsCache.get(CACHE_KEY.USER).user
+    formData.value.ownerUserId = user.id
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -137,7 +134,6 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: undefined,
-    customerId: undefined,
     contactNextTime: undefined,
     telephone: undefined,
     mobile: undefined,
