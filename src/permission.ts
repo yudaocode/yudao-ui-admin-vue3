@@ -12,6 +12,40 @@ import { usePermissionStoreWithOut } from '@/store/modules/permission'
 const { start, done } = useNProgress()
 
 const { loadStart, loadDone } = usePageLoading()
+
+const parseURL = (
+  url: string | null | undefined
+): { basePath: string; paramsObject: { [key: string]: string } } => {
+  // 如果输入为 null 或 undefined，返回空字符串和空对象
+  if (url == null) {
+    return { basePath: '', paramsObject: {} }
+  }
+
+  // 找到问号 (?) 的位置，它之前是基础路径，之后是查询参数
+  const questionMarkIndex = url.indexOf('?')
+  let basePath = url
+  const paramsObject: { [key: string]: string } = {}
+
+  // 如果找到了问号，说明有查询参数
+  if (questionMarkIndex !== -1) {
+    // 获取 basePath
+    basePath = url.substring(0, questionMarkIndex)
+
+    // 从 URL 中获取查询字符串部分
+    const queryString = url.substring(questionMarkIndex + 1)
+
+    // 使用 URLSearchParams 遍历参数
+    const searchParams = new URLSearchParams(queryString)
+    searchParams.forEach((value, key) => {
+      // 封装进 paramsObject 对象
+      paramsObject[key] = value
+    })
+  }
+
+  // 返回 basePath 和 paramsObject
+  return { basePath, paramsObject }
+}
+
 // 路由不重定向白名单
 const whiteList = [
   '/login',
@@ -47,8 +81,10 @@ router.beforeEach(async (to, from, next) => {
           router.addRoute(route as unknown as RouteRecordRaw) // 动态添加可访问路由表
         })
         const redirectPath = from.query.redirect || to.path
+        // 修复跳转时不带参数的问题
         const redirect = decodeURIComponent(redirectPath as string)
-        const nextData = to.path === redirect ? { ...to, replace: true } : { path: redirect }
+        const { basePath, paramsObject: query } = parseURL(redirect)
+        const nextData = to.path === redirect ? { ...to, replace: true } : { path: redirect, query }
         next(nextData)
       } else {
         next()
