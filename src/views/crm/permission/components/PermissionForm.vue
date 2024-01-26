@@ -17,7 +17,6 @@
           />
         </el-select>
       </el-form-item>
-      <!-- TODO @puhui999：编辑时，level 没带过来 -->
       <el-form-item label="权限级别" prop="level">
         <el-radio-group v-model="formData.level">
           <template
@@ -30,7 +29,13 @@
           </template>
         </el-radio-group>
       </el-form-item>
-      <!-- TODO @puhui999：同时添加至 -->
+      <!-- TODO @puhui999：同时添加至,还没想好下次搞 -->
+      <el-form-item v-if="formType === 'create'" label="同时添加至" prop="toBizType">
+        <el-select v-model="formData.userId">
+          <el-option :value="1" label="联系人" />
+          <el-option :value="1" label="商机" />
+        </el-select>
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -54,12 +59,7 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
-const formData = ref<PermissionApi.PermissionVO & { ids?: number[] }>({
-  userId: undefined, // 用户编号
-  bizType: undefined, // CRM 类型
-  bizId: undefined, // CRM 类型数据编号
-  level: undefined // 权限级别
-})
+const formData = ref<PermissionApi.PermissionVO>({} as PermissionApi.PermissionVO)
 const formRules = reactive({
   userId: [{ required: true, message: '人员不能为空', trigger: 'blur' }],
   level: [{ required: true, message: '权限级别不能为空', trigger: 'blur' }]
@@ -77,7 +77,23 @@ const open = async (type: 'create' | 'update', bizType: number, bizId: number, i
     formData.value.ids = ids
   }
 }
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+/** 打开修改权限弹窗 */
+const open0 = async (
+  type: 'create' | 'update',
+  bizType: number,
+  bizId: number,
+  id: number,
+  level: number
+) => {
+  dialogVisible.value = true
+  dialogTitle.value = t('action.' + type) + '团队成员'
+  formType.value = type
+  resetForm(bizType, bizId)
+  // 修改时，设置数据
+  formData.value.level = level
+  formData.value.ids = [id]
+}
+defineExpose({ open, open0 }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -108,12 +124,8 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = (bizType: number, bizId: number) => {
   formRef.value?.resetFields()
-  formData.value = {
-    userId: undefined, // 用户编号
-    bizType, // Crm 类型
-    bizId, // Crm 类型数据编号
-    level: undefined // 权限级别
-  }
+  formData.value = {} as PermissionApi.PermissionVO
+  formData.value = { ...formData.value, bizType, bizId }
 }
 onMounted(async () => {
   // 获得用户列表

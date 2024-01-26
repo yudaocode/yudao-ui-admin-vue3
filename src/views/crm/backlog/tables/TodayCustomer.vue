@@ -82,7 +82,7 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
         </template>
       </el-table-column>
-      <!-- TODO @puhui999：距进入公海天数 -->
+      <el-table-column align="center" label="距进入公海天数" prop="poolDay" width="100px" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"

@@ -28,7 +28,7 @@
             <Icon icon="ep:zoom-in" />
             <span>查看</span>
           </div>
-          <div class="handle-icon" @click="handleRemove(file)" v-if="!disabled">
+          <div v-if="!disabled" class="handle-icon" @click="handleRemove(file)">
             <Icon icon="ep:delete" />
             <span>删除</span>
           </div>
@@ -46,7 +46,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { PropType } from 'vue'
 import type { UploadFile, UploadProps, UploadUserFile } from 'element-plus'
 import { ElNotification } from 'element-plus'
 
@@ -70,10 +69,7 @@ type FileTypes =
   | 'image/x-icon'
 
 const props = defineProps({
-  modelValue: {
-    type: Array as PropType<UploadUserFile[]>,
-    required: true
-  },
+  modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
   updateUrl: propTypes.string.def(import.meta.env.VITE_UPLOAD_URL),
   drag: propTypes.bool.def(true), // 是否支持拖拽上传 ==> 非必传（默认为 true）
   disabled: propTypes.bool.def(false), // 是否禁用上传组件 ==> 非必传（默认为 false）
@@ -91,18 +87,8 @@ const uploadHeaders = ref({
 })
 
 const fileList = ref<UploadUserFile[]>([])
-// fix: 改为动态监听赋值解决图片回显问题
-watch(
-  () => props.modelValue,
-  (data) => {
-    if (!data) return
-    fileList.value = data
-  },
-  {
-    deep: true,
-    immediate: true
-  }
-)
+const uploadNumber = ref<number>(0)
+const uploadList = ref<UploadUserFile[]>([])
 /**
  * @description 文件上传之前判断
  * @param rawFile 上传的文件
@@ -122,29 +108,61 @@ const beforeUpload: UploadProps['beforeUpload'] = (rawFile) => {
       message: `上传图片大小不能超过 ${props.fileSize}M！`,
       type: 'warning'
     })
+  uploadNumber.value++
   return imgType.includes(rawFile.type as FileTypes) && imgSize
 }
 
 // 图片上传成功
 interface UploadEmits {
-  (e: 'update:modelValue', value: UploadUserFile[]): void
+  (e: 'update:modelValue', value: string[]): void
 }
 
 const emit = defineEmits<UploadEmits>()
-const uploadSuccess = (response, uploadFile: UploadFile) => {
-  if (!response) return
-  // TODO 多图上传组件成功后只是把保存成功后的url替换掉组件选图时的文件路径，所以返回的fileList包含的是一个包含文件信息的对象列表
-  uploadFile.url = response.data
-  emit('update:modelValue', fileList.value)
+const uploadSuccess: UploadProps['onSuccess'] = (res: any): void => {
   message.success('上传成功')
+  // 删除自身
+  debugger
+  const index = fileList.value.findIndex((item) => item.response?.data === res.data)
+  fileList.value.splice(index, 1)
+  uploadList.value.push({ name: res.data, url: res.data })
+  if (uploadList.value.length == uploadNumber.value) {
+    fileList.value.push(...uploadList.value)
+    uploadList.value = []
+    uploadNumber.value = 0
+    emitUpdateModelValue()
+  }
 }
 
+// 监听模型绑定值变动
+watch(
+  () => props.modelValue,
+  (val: string | string[]) => {
+    if (!val) {
+      fileList.value = [] // fix：处理掉缓存，表单重置后上传组件的内容并没有重置
+      return
+    }
+
+    fileList.value = [] // 保障数据为空
+    fileList.value.push(
+      ...(val as string[]).map((url) => ({ name: url.substring(url.lastIndexOf('/') + 1), url }))
+    )
+  },
+  { immediate: true, deep: true }
+)
+// 发送图片链接列表更新
+const emitUpdateModelValue = () => {
+  let result: string[] = fileList.value.map((file) => file.url!)
+  emit('update:modelValue', result)
+}
 // 删除图片
 const handleRemove = (uploadFile: UploadFile) => {
   fileList.value = fileList.value.filter(
     (item) => item.url !== uploadFile.url || item.name !== uploadFile.name
   )
-  emit('update:modelValue', fileList.value)
+  emit(
+    'update:modelValue',
+    fileList.value.map((file) => file.url!)
+  )
 }
 
 // 图片上传错误提示
