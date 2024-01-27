@@ -2,44 +2,52 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="合同编号" prop="no">
         <el-input
           v-model="queryParams.no"
-          placeholder="请输入合同编号"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入合同编号"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="合同名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入合同名称"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入合同名称"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:contract:create']">
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-button v-hasPermi="['crm:contract:create']" type="primary" @click="openForm('create')">
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
         </el-button>
         <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
           v-hasPermi="['crm:contract:export']"
+          :loading="exportLoading"
+          plain
+          type="success"
+          @click="handleExport"
         >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -48,70 +56,78 @@
   <!-- 列表 -->
   <!-- TODO 芋艿：各种字段要调整 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="合同编号" align="center" prop="id" />
-      <el-table-column label="合同名称" align="center" prop="name" />
-      <el-table-column label="客户名称" align="center" prop="customerId" />
-      <el-table-column label="商机名称" align="center" prop="businessId" />
-      <el-table-column label="工作流名称" align="center" prop="processInstanceId" />
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column align="center" label="合同编号" prop="id" />
+      <el-table-column align="center" label="合同名称" prop="name" />
+      <el-table-column align="center" label="客户名称" prop="customerId" />
+      <el-table-column align="center" label="商机名称" prop="businessId" />
+      <el-table-column align="center" label="工作流名称" prop="processInstanceId" />
       <el-table-column
+        :formatter="dateFormatter"
+        align="center"
         label="下单时间"
-        align="center"
         prop="orderDate"
-        :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="负责人" align="center" prop="ownerUserId" />
-      <el-table-column label="合同编号" align="center" prop="no" />
+      <el-table-column align="center" label="负责人" prop="ownerUserId" />
+      <el-table-column align="center" label="合同编号" prop="no" />
       <el-table-column
+        :formatter="dateFormatter"
+        align="center"
         label="开始时间"
-        align="center"
         prop="startTime"
-        :formatter="dateFormatter"
         width="180px"
       />
       <el-table-column
+        :formatter="dateFormatter"
+        align="center"
         label="结束时间"
-        align="center"
         prop="endTime"
-        :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="合同金额" align="center" prop="price" />
-      <el-table-column label="整单折扣" align="center" prop="discountPercent" />
-      <el-table-column label="产品总金额" align="center" prop="productPrice" />
-      <el-table-column label="联系人" align="center" prop="contactId" />
-      <el-table-column label="公司签约人" align="center" prop="signUserId" />
+      <el-table-column align="center" label="合同金额" prop="price" />
+      <el-table-column align="center" label="整单折扣" prop="discountPercent" />
+      <el-table-column align="center" label="产品总金额" prop="productPrice" />
+      <el-table-column align="center" label="联系人" prop="contactId" />
+      <el-table-column align="center" label="公司签约人" prop="signUserId" />
       <el-table-column
+        :formatter="dateFormatter"
+        align="center"
         label="最后跟进时间"
-        align="center"
         prop="contactLastTime"
-        :formatter="dateFormatter"
         width="180px"
       />
       <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
         :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
         width="180px"
       />
-      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column align="center" label="备注" prop="remark" />
       <el-table-column label="操作" width="120px">
         <template #default="scope">
           <el-button
+            v-hasPermi="['crm:contract:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['crm:contract:update']"
           >
             编辑
           </el-button>
           <el-button
+            v-hasPermi="['crm:contract:update']"
+            link
+            type="primary"
+            @click="handleApprove(scope.row.id)"
+          >
+            提交审核
+          </el-button>
+          <el-button
+            v-hasPermi="['crm:contract:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['crm:contract:delete']"
           >
             删除
           </el-button>
@@ -120,9 +136,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -130,7 +146,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <ContractForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ContractApi from '@/api/crm/contract'
@@ -216,6 +232,12 @@ const handleExport = async () => {
   }
 }
 
+/** 提交审核 **/
+const handleApprove = async (id: number) => {
+  await ContractApi.handleApprove(id)
+  message.success('提交审核成功！')
+  await getList()
+}
 /** 初始化 **/
 onMounted(() => {
   getList()

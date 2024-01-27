@@ -57,3 +57,8 @@ export const deleteContract = async (id: number) => {
 export const exportContract = async (params) => {
   return await request.download({ url: `/crm/contract/export-excel`, params })
 }
+
+// 提交审核
+export const handleApprove = async (id: number) => {
+  return await request.put({ url: `/crm/contract/approve?id=${id}` })
+}

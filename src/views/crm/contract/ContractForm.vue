@@ -145,15 +145,12 @@
           <CardTitle class="mb-10px" title="审批信息" />
         </el-col>
         <el-col :span="12">
-          <el-form-item label="工作流" prop="processInstanceId">
-            <el-input v-model="formData.processInstanceId" placeholder="请选择工作流" />
-          </el-form-item>
+          <el-button class="m-20px" link type="primary">查看工作流</el-button>
         </el-col>
       </el-row>
     </el-form>
     <template #footer>
-      <el-button :disabled="formLoading" type="primary" @click="submitForm(1)">提交审核</el-button>
-      <el-button :disabled="formLoading" type="primary" @click="submitForm(2)">保存草稿</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">保存</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -165,7 +162,6 @@ import * as UserApi from '@/api/system/user'
 import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
 import ProductList from './components/ProductList.vue'
-import { cloneDeep } from 'lodash-es'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -176,7 +172,11 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<ContractApi.ContractVO>({} as ContractApi.ContractVO)
 const formRules = reactive({
-  name: [{ required: true, message: '合同名称不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: '合同名称不能为空', trigger: 'blur' }],
+  customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }],
+  orderDate: [{ required: true, message: '下单日期不能为空', trigger: 'blur' }],
+  ownerUserId: [{ required: true, message: '负责人不能为空', trigger: 'blur' }],
+  no: [{ required: true, message: '合同编号不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 watch(
@@ -219,7 +219,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-const submitForm = async (status: number) => {
+const submitForm = async () => {
   // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
@@ -227,8 +227,7 @@ const submitForm = async (status: number) => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = cloneDeep(unref(formData.value)) as unknown as ContractApi.ContractVO
-    data.status = status
+    const data = unref(formData.value) as unknown as ContractApi.ContractVO
     if (formType.value === 'create') {
       await ContractApi.createContract(data)
       message.success(t('common.createSuccess'))
