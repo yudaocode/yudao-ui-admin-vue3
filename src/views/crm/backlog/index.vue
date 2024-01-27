@@ -1,3 +1,4 @@
+<!-- TODO @dhb52: 存在很多重复的 table 定义，如Customer: TodayCustomer,FollowCustomer,PutInPoolRemind -->
 <template>
   <el-row :gutter="20">
     <el-col :span="4" class="min-w-[200px]">
@@ -71,7 +72,6 @@ const leftSides = ref([
   },
   {
     name: '待审核回款',
-    crmType: 'receivables',
     infoType: 'checkReceivables',
     msgCount: 0,
     tips: ''
