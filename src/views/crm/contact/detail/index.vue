@@ -21,7 +21,7 @@
     </el-tabs>
   </el-col>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ContactApi from '@/api/crm/contact'
 import ContactDetailsHeader from '@/views/crm/contact/detail/ContactDetailsHeader.vue'
@@ -30,6 +30,7 @@ import BusinessList from '@/views/crm/business/components/BusinessList.vue' // �
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
 import { BizTypeEnum } from '@/api/crm/permission'
 import { OperateLogV2VO } from '@/api/system/operatelog'
+import { getOperateLogPage } from '@/api/crm/operateLog'
 
 defineOptions({ name: 'CrmContactDetail' })
 
@@ -57,7 +58,8 @@ const getOperateLog = async (contactId: number) => {
   if (!contactId) {
     return
   }
-  const data = await ContactApi.getOperateLogPage({
+  const data = await getOperateLogPage({
+    bizType: BizTypeEnum.CRM_CONTACT,
     bizId: contactId
   })
   logList.value = data.list

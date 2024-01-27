@@ -41,8 +41,3 @@ export const deleteProduct = async (id: number) => {
 export const exportProduct = async (params) => {
   return await request.download({ url: `/crm/product/export-excel`, params })
 }
-
-// 查询产品操作日志
-export const getOperateLogPage = async (params: any) => {
-  return await request.get({ url: '/crm/product/operate-log-page', params })
-}

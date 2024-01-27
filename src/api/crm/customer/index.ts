@@ -73,11 +73,6 @@ export const getSimpleCustomerList = async () => {
   return await request.get({ url: `/crm/customer/list-all-simple` })
 }
 
-// 查询客户操作日志
-export const getOperateLogPage = async (id: number) => {
-  return await request.get({ url: '/crm/customer/operate-log-page?id=' + id })
-}
-
 // ======================= 业务操作 =======================
 
 export interface TransferReqVO {
