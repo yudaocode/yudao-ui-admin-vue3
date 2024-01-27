@@ -15,11 +15,10 @@ export interface ContractVO {
   price: number
   discountPercent: number
   productPrice: number
-  roUserIds: string
-  rwUserIds: string
   contactId: number
   signUserId: number
   contactLastTime: Date
+  status: number
   remark: string
   productItems: ProductExpandVO[]
 }

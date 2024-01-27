@@ -5,7 +5,7 @@
       v-loading="formLoading"
       :model="formData"
       :rules="formRules"
-      label-width="100px"
+      label-width="110px"
     >
       <el-row>
         <el-col :span="24" class="mb-10px">
@@ -152,7 +152,8 @@
       </el-row>
     </el-form>
     <template #footer>
-      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm(1)">提交审核</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm(2)">保存草稿</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -164,6 +165,7 @@ import * as UserApi from '@/api/system/user'
 import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
 import ProductList from './components/ProductList.vue'
+import { cloneDeep } from 'lodash-es'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -217,7 +219,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-const submitForm = async () => {
+const submitForm = async (status: number) => {
   // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
@@ -225,7 +227,8 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ContractApi.ContractVO
+    const data = cloneDeep(unref(formData.value)) as unknown as ContractApi.ContractVO
+    data.status = status
     if (formType.value === 'create') {
       await ContractApi.createContract(data)
       message.success(t('common.createSuccess'))
