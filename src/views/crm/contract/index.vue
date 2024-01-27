@@ -105,7 +105,7 @@
         width="180px"
       />
       <el-table-column align="center" label="备注" prop="remark" />
-      <el-table-column label="操作" width="120px">
+      <el-table-column fixed="right" label="操作" width="250">
         <template #default="scope">
           <el-button
             v-hasPermi="['crm:contract:update']"
@@ -119,9 +119,17 @@
             v-hasPermi="['crm:contract:update']"
             link
             type="primary"
-            @click="handleApprove(scope.row.id)"
+            @click="handleApprove(scope.row)"
           >
             提交审核
+          </el-button>
+          <el-button
+            v-hasPermi="['crm:contract:query']"
+            link
+            type="primary"
+            @click="openDetail(scope.row.id)"
+          >
+            详情
           </el-button>
           <el-button
             v-hasPermi="['crm:contract:delete']"
@@ -233,10 +241,15 @@ const handleExport = async () => {
 }
 
 /** 提交审核 **/
-const handleApprove = async (id: number) => {
-  await ContractApi.handleApprove(id)
+const handleApprove = async (row: ContractApi.ContractVO) => {
+  await message.confirm(`您确定提交【${row.name}】审核吗？`)
+  await ContractApi.handleApprove(row.id)
   message.success('提交审核成功！')
   await getList()
+}
+const { push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'CrmContractDetail', params: { id } })
 }
 /** 初始化 **/
 onMounted(() => {

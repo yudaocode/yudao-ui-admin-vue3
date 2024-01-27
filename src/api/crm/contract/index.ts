@@ -1,5 +1,6 @@
 import request from '@/config/axios'
 import { ProductExpandVO } from '@/api/crm/product'
+import { TransferReqVO } from '@/api/crm/customer'
 
 export interface ContractVO {
   id: number
@@ -21,6 +22,12 @@ export interface ContractVO {
   status: number
   remark: string
   productItems: ProductExpandVO[]
+  creatorName: string
+  updateTime?: Date
+  createTime?: Date
+  customerName: string
+  contactName: string
+  ownerUserName: string
 }
 
 // 查询 CRM 合同列表
@@ -61,4 +68,9 @@ export const exportContract = async (params) => {
 // 提交审核
 export const handleApprove = async (id: number) => {
   return await request.put({ url: `/crm/contract/approve?id=${id}` })
+}
+
+// 合同转移
+export const transfer = async (data: TransferReqVO) => {
+  return await request.put({ url: '/crm/contract/transfer', data })
 }

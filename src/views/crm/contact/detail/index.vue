@@ -34,7 +34,7 @@
     </el-tabs>
   </el-col>
   <!-- 表单弹窗：添加/修改 -->
-  <ContactForm ref="formRef" @success="getContactData" />
+  <ContactForm ref="formRef" @success="getContactData(contact.id)" />
   <CrmTransferForm ref="crmTransferFormRef" @success="close" />
 </template>
 <script lang="ts" setup>
@@ -53,6 +53,7 @@ import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
 defineOptions({ name: 'CrmContactDetail' })
 
 const route = useRoute()
+const message = useMessage()
 const id = Number(route.params.id) // 联系人编号
 const loading = ref(true) // 加载中
 const contact = ref<ContactApi.ContactVO>({} as ContactApi.ContactVO) // 联系人详情
@@ -102,7 +103,7 @@ const { delView } = useTagsViewStore() // 视图操作
 const { currentRoute } = useRouter() // 路由
 onMounted(async () => {
   if (!id) {
-    ElMessage.warning('参数错误，联系人不能为空！')
+    message.warning('参数错误，联系人不能为空！')
     close()
     return
   }
