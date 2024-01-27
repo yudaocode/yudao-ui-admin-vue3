@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import { ProductExpandVO } from '@/api/crm/product'
 
 export interface ContractVO {
   id: number
@@ -20,6 +21,7 @@ export interface ContractVO {
   signUserId: number
   contactLastTime: Date
   remark: string
+  productItems: ProductExpandVO[]
 }
 
 // 查询 CRM 合同列表

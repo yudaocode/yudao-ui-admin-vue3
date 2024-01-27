@@ -12,6 +12,12 @@ export interface ProductVO {
   ownerUserId: number
 }
 
+export interface ProductExpandVO extends ProductVO {
+  count: number
+  discountPercent: number
+  totalPrice: number
+}
+
 // 查询产品列表
 export const getProductPage = async (params) => {
   return await request.get({ url: `/crm/product/page`, params })
