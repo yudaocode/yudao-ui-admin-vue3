@@ -145,7 +145,14 @@
           <CardTitle class="mb-10px" title="审批信息" />
         </el-col>
         <el-col :span="12">
-          <el-button class="m-20px" link type="primary">查看工作流</el-button>
+          <el-button
+            class="m-20px"
+            link
+            type="primary"
+            @click="BPMLModelRef?.handleBpmnDetail('contract-approve')"
+          >
+            查看工作流
+          </el-button>
         </el-col>
       </el-row>
     </el-form>
@@ -154,6 +161,7 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+  <BPMLModel ref="BPMLModelRef" />
 </template>
 <script lang="ts" setup>
 import * as CustomerApi from '@/api/crm/customer'
@@ -162,6 +170,7 @@ import * as UserApi from '@/api/system/user'
 import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
 import ProductList from './components/ProductList.vue'
+import BPMLModel from '@/views/crm/contract/components/BPMLModel.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -179,6 +188,7 @@ const formRules = reactive({
   no: [{ required: true, message: '合同编号不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const BPMLModelRef = ref<InstanceType<typeof BPMLModel>>()
 watch(
   () => formData.value.productItems,
   (val) => {

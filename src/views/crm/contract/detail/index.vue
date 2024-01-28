@@ -105,7 +105,7 @@ onMounted(async () => {
     close()
     return
   }
-  contractId.value = id
+  contractId.value = id as unknown as number
   await getContractData()
 })
 </script>
