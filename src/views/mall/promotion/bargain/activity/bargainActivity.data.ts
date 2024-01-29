@@ -133,7 +133,7 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    label: '拼团商品',
+    label: '砍价商品',
     field: 'spuId',
     isSearch: false,
     form: {
