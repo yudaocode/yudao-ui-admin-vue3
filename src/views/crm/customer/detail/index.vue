@@ -91,6 +91,7 @@ import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
 import FollowUpList from '@/views/crm/followup/index.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
 import type { OperateLogV2VO } from '@/api/system/operatelog'
+import { getOperateLogPage } from '@/api/crm/operateLog'
 
 defineOptions({ name: 'CrmCustomerDetail' })
 
@@ -164,7 +165,10 @@ const getOperateLog = async () => {
   if (!customerId.value) {
     return
   }
-  const data = await CustomerApi.getOperateLogPage(customerId.value)
+  const data = await getOperateLogPage({
+    bizType: BizTypeEnum.CRM_CUSTOMER,
+    bizId: customerId.value
+  })
   logList.value = data.list
 }
 

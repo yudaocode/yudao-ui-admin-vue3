@@ -203,5 +203,8 @@ export enum DICT_TYPE {
   CRM_PRODUCT_STATUS = 'crm_product_status',
   CRM_PERMISSION_LEVEL = 'crm_permission_level', // CRM 数据权限的级别
   CRM_PRODUCT_UNIT = 'crm_product_unit', // 产品单位
-  CRM_FOLLOW_UP_TYPE = 'crm_follow_up_type' // 跟进方式
+  CRM_FOLLOW_UP_TYPE = 'crm_follow_up_type', // 跟进方式
+
+  // ========== BI - 商业智能模块 ==========
+  BI_ANALYZE_TYPE = 'bi_analyze_type' // 分析类型
 }

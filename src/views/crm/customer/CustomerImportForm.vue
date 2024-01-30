@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="用户导入" width="400">
+  <Dialog v-model="dialogVisible" title="客户导入" width="400">
     <el-upload
       ref="uploadRef"
       v-model:file-list="fileList"
@@ -20,7 +20,7 @@
         <div class="el-upload__tip text-center">
           <div class="el-upload__tip">
             <el-checkbox v-model="updateSupport" />
-            是否更新已经存在的用户数据
+            是否更新已经存在的客户数据
           </div>
           <span>仅允许导入 xls、xlsx 格式文件。</span>
           <el-link
@@ -41,7 +41,7 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import * as UserApi from '@/api/system/user'
+import * as CustomerApi from '@/api/crm/customer'
 import { getAccessToken, getTenantId } from '@/utils/auth'
 import download from '@/utils/download'
 
@@ -53,10 +53,10 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const uploadRef = ref()
 const importUrl =
-  import.meta.env.VITE_BASE_URL + import.meta.env.VITE_API_URL + '/system/user/import'
+  import.meta.env.VITE_BASE_URL + import.meta.env.VITE_API_URL + '/crm/customer/import'
 const uploadHeaders = ref() // 上传 Header 头
 const fileList = ref([]) // 文件列表
-const updateSupport = ref(0) // 是否更新已经存在的用户数据
+const updateSupport = ref(0) // 是否更新已经存在的客户数据
 
 /** 打开弹窗 */
 const open = () => {
@@ -91,17 +91,17 @@ const submitFormSuccess = (response: any) => {
   }
   // 拼接提示语
   const data = response.data
-  let text = '上传成功数量：' + data.createUsernames.length + ';'
-  for (let username of data.createUsernames) {
-    text += '< ' + username + ' >'
+  let text = '上传成功数量：' + data.createCustomerNames.length + ';'
+  for (let customerName of data.createCustomerNames) {
+    text += '< ' + customerName + ' >'
   }
-  text += '更新成功数量：' + data.updateUsernames.length + ';'
-  for (const username of data.updateUsernames) {
-    text += '< ' + username + ' >'
+  text += '更新成功数量：' + data.updateCustomerNames.length + ';'
+  for (const customerName of data.updateCustomerNames) {
+    text += '< ' + customerName + ' >'
   }
-  text += '更新失败数量：' + Object.keys(data.failureUsernames).length + ';'
-  for (const username in data.failureUsernames) {
-    text += '< ' + username + ': ' + data.failureUsernames[username] + ' >'
+  text += '更新失败数量：' + Object.keys(data.failureCustomerNames).length + ';'
+  for (const customerName in data.failureCustomerNames) {
+    text += '< ' + customerName + ': ' + data.failureCustomerNames[customerName] + ' >'
   }
   message.alert(text)
   // 发送操作成功的事件
@@ -128,7 +128,7 @@ const handleExceed = (): void => {
 
 /** 下载模板操作 */
 const importTemplate = async () => {
-  const res = await UserApi.importUserTemplate()
-  download.excel(res, '用户导入模版.xls')
+  const res = await CustomerApi.importCustomerTemplate()
+  download.excel(res, '客户导入模版.xls')
 }
 </script>

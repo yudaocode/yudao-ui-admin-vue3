@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import { TransferReqVO } from '@/api/crm/customer'
 
 export interface BusinessVO {
   id: number
@@ -69,4 +70,9 @@ export const getBusinessPageByContact = async (params) => {
 // 获得 CRM 商机列表
 export const getBusinessListByIds = async (val: number[]) => {
   return await request.get({ url: '/crm/business/list-by-ids', params: { ids: val.join(',') } })
+}
+
+// 商机转移
+export const transfer = async (data: TransferReqVO) => {
+  return await request.put({ url: '/crm/business/transfer', data })
 }

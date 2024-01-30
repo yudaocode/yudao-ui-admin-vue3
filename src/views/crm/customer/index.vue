@@ -84,6 +84,10 @@
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
+        <el-button v-hasPermi="['crm:customer:import']" plain type="warning" @click="handleImport">
+          <Icon icon="ep:upload" />
+          导入
+        </el-button>
         <el-button
           v-hasPermi="['crm:customer:export']"
           :loading="exportLoading"
@@ -204,6 +208,7 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getList" />
+  <CustomerImportForm ref="customerImportFormRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
@@ -212,6 +217,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CustomerApi from '@/api/crm/customer'
 import CustomerForm from './CustomerForm.vue'
+import CustomerImportForm from './CustomerImportForm.vue'
 import { TabsPaneContext } from 'element-plus'
 
 defineOptions({ name: 'CrmCustomer' })
@@ -333,7 +339,10 @@ const handleDelete = async (id: number) => {
     await getList()
   } catch {}
 }
-
+const customerImportFormRef = ref<InstanceType<typeof CustomerImportForm>>()
+const handleImport = () => {
+  customerImportFormRef.value?.open()
+}
 /** 导出按钮操作 */
 const handleExport = async () => {
   try {

@@ -63,14 +63,14 @@ export const exportCustomer = async (params: any) => {
   return await request.download({ url: `/crm/customer/export-excel`, params })
 }
 
+// 下载客户导入模板
+export const importCustomerTemplate = () => {
+  return request.download({ url: '/crm/customer/get-import-template' })
+}
+
 // 客户列表
 export const getSimpleCustomerList = async () => {
   return await request.get({ url: `/crm/customer/list-all-simple` })
-}
-
-// 查询客户操作日志
-export const getOperateLogPage = async (id: number) => {
-  return await request.get({ url: '/crm/customer/operate-log-page?id=' + id })
 }
 
 // ======================= 业务操作 =======================
