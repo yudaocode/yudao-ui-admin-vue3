@@ -100,3 +100,8 @@ export const receiveCustomer = async (ids: any[]) => {
 export const putCustomerPool = async (id: number) => {
   return await request.put({ url: `/crm/customer/put-pool?id=${id}` })
 }
+
+// 进入公海客户提醒
+export const getPutInPoolRemindCustomerPage = async (params) => {
+  return await request.get({ url: `/crm/customer/put-in-pool-remind-page`, params })
+}
