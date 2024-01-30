@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import { TransferReqVO } from '@/api/crm/customer'
 
 export interface ContactVO {
   name: string
@@ -86,7 +87,7 @@ export const deleteContactBusinessList = async (data: ContactBusinessReqVO) => {
   return await request.delete({ url: `/crm/contact/delete-business-list`, data })
 }
 
-// 查询联系人操作日志
-export const getOperateLogPage = async (params: any) => {
-  return await request.get({ url: '/crm/contact/operate-log-page', params })
+// 联系人转移
+export const transfer = async (data: TransferReqVO) => {
+  return await request.put({ url: '/crm/contact/transfer', data })
 }

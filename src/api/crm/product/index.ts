@@ -12,6 +12,12 @@ export interface ProductVO {
   ownerUserId: number
 }
 
+export interface ProductExpandVO extends ProductVO {
+  count: number
+  discountPercent: number
+  totalPrice: number
+}
+
 // 查询产品列表
 export const getProductPage = async (params) => {
   return await request.get({ url: `/crm/product/page`, params })
@@ -40,9 +46,4 @@ export const deleteProduct = async (id: number) => {
 // 导出产品 Excel
 export const exportProduct = async (params) => {
   return await request.download({ url: `/crm/product/export-excel`, params })
-}
-
-// 查询产品操作日志
-export const getOperateLogPage = async (params: any) => {
-  return await request.get({ url: '/crm/product/operate-log-page', params })
 }

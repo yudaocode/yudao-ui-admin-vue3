@@ -4,7 +4,7 @@
       <div>
         <el-col>
           <el-row>
-            <span class="text-xl font-bold">{{ contact.name }}</span>
+            <span class="text-xl font-bold">{{ contract.name }}</span>
           </el-row>
         </el-col>
       </div>
@@ -17,23 +17,24 @@
   <ContentWrap class="mt-10px">
     <el-descriptions :column="5" direction="vertical">
       <el-descriptions-item label="客户">
-        {{ contact.customerName }}
+        {{ contract.customerName }}
       </el-descriptions-item>
-      <el-descriptions-item label="职务">
-        {{ contact.post }}
+      <el-descriptions-item label="客户签约人">
+        {{ contract.contactName }}
       </el-descriptions-item>
-      <el-descriptions-item label="手机">
-        {{ contact.mobile }}
+      <el-descriptions-item label="合同金额">
+        {{ contract.productPrice }}
       </el-descriptions-item>
       <el-descriptions-item label="创建时间">
-        {{ contact.createTime ? formatDate(contact.createTime) : '空' }}
+        {{ contract.createTime ? formatDate(contract.createTime) : '空' }}
       </el-descriptions-item>
     </el-descriptions>
   </ContentWrap>
 </template>
 <script lang="ts" setup>
-import * as ContactApi from '@/api/crm/contact'
+import * as ContractApi from '@/api/crm/contract'
 import { formatDate } from '@/utils/formatTime'
 
-const { contact } = defineProps<{ contact: ContactApi.ContactVO }>()
+defineOptions({ name: 'ContractDetailsHeader' })
+defineProps<{ contract: ContractApi.ContractVO }>()
 </script>
