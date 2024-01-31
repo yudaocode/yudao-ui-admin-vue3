@@ -18,14 +18,21 @@
 <script setup lang="ts">
 import { RankingStatisticsApi, BiContractRanKingRespVO, BiRankReqVO } from '@/api/crm/bi/ranking'
 import { EChartsOption } from 'echarts'
+import { beginOfDay, endOfDay, formatDate } from '@/utils/formatTime'
 
 /** 合同金额排行 */
 defineOptions({ name: 'RankingContractStatistics' })
 
+const params = reactive({
+  deptId: undefined,
+  startTime: undefined,
+  endTime: undefined
+})
+
 const trendLoading = ref(true) // 状态加载中
 const loading = ref(false) // 列表的加载中
 const list = ref<BiContractRanKingRespVO[]>([]) // 列表的数据
-const params = defineProps<{ queryParams: BiRankReqVO }>() // 搜索参数
+const queryParams = defineProps<{ queryParams: BiRankReqVO }>() // 搜索参数
 
 /** 柱状图配置 横向 */
 const barChartOptions = reactive<EChartsOption>({
@@ -98,7 +105,10 @@ const barChartOptions = reactive<EChartsOption>({
 const getRankingContractStatistics = async () => {
   trendLoading.value = true
   loading.value = true
-  const rankingList = await RankingStatisticsApi.contractAmountRanking(params.queryParams)
+  params.deptId = queryParams.queryParams.deptId
+  params.startTime = formatDate(beginOfDay(new Date(queryParams.queryParams.orderDate[0])))
+  params.endTime = formatDate(endOfDay(new Date(queryParams.queryParams.orderDate[1])))
+  const rankingList = await RankingStatisticsApi.contractAmountRanking(params)
   let source = rankingList.map((item: BiContractRanKingRespVO) => {
     return {
       name: item.nickname,

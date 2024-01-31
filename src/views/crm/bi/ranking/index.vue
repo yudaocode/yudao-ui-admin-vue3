@@ -8,15 +8,17 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择类型" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BI_ANALYZE_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+      <el-form-item label="时间" prop="orderDate">
+        <el-date-picker
+          v-model="queryParams.orderDate"
+          :shortcuts="defaultShortcuts"
+          class="!w-240px"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="daterange"
+          value-format="YYYY-MM-DD HH:mm:ss"
+          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+        />
       </el-form-item>
       <el-form-item label="归属部门" prop="deptId">
         <el-tree-select
@@ -54,15 +56,23 @@
 import RankingContractStatistics from './components/RankingContractStatistics.vue'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
+import RankingReceivablesStatistics from '@/views/crm/bi/ranking/components/RankingReceivablesStatistics.vue'
 
 /** 排行榜 */
 defineOptions({ name: 'RankingStatistics' })
 
 const queryParams = reactive({
-  type: 9, // 将 type 的初始值设置为 9 本年
-  deptId: null
+  deptId: undefined,
+  //默认显示最近一周的数据
+  orderDate: [
+    formatDate(beginOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24 * 7))),
+    formatDate(endOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24)))
+  ],
+  startTime: undefined,
+  endTime: undefined
 })
+
 const queryFormRef = ref() // 搜索的表单
 const deptList = ref<Tree[]>([]) // 树形结构
 const activeTab = ref('contractAmountRanking')
