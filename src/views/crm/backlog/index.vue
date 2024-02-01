@@ -96,8 +96,8 @@ const leftSides = ref([
 const sideClick = (item) => {
   leftType.value = item.infoType
 }
+// TODO @dhb52: 侧边栏样式，在黑暗模式下，颜色会不对。是不是可以读取主题色哈；
 </script>
-
 <style lang="scss" scoped>
 .side-item-list {
   top: 0;

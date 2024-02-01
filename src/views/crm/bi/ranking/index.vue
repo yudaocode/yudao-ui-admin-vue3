@@ -36,12 +36,12 @@
   </ContentWrap>
   <el-col>
     <el-tabs v-model="activeTab">
+      <!-- 合同金额排行 -->
       <el-tab-pane label="合同金额排行" name="contractAmountRanking">
-        <!-- 合同金额排行 -->
         <RankingContractStatistics :queryParams="queryParams" ref="rankingContractStatisticsRef" />
       </el-tab-pane>
+      <!-- 回款金额排行 -->
       <el-tab-pane label="回款金额排行" name="receivablesRanKing" lazy>
-        <!-- 回款金额排行 -->
         <RankingReceivablesStatistics
           :queryParams="queryParams"
           ref="rankingReceivablesStatisticsRef"
@@ -83,6 +83,7 @@ const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
 }
+
 // 加载部门树
 onMounted(async () => {
   deptList.value = handleTree(await DeptApi.getSimpleDeptList())

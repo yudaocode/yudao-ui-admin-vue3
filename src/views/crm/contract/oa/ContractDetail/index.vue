@@ -1,3 +1,4 @@
+<!-- TODO @puhui999：这个好像和 detail 重复了？？？ -->
 <template>
   <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="110px">
     <el-row>

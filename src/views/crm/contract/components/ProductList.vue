@@ -1,3 +1,4 @@
+<!-- 合同 Form 表单下的 Product 列表 -->
 <template>
   <el-row justify="end">
     <el-button plain type="primary" @click="openForm">添加产品</el-button>
@@ -71,23 +72,32 @@ withDefaults(defineProps<{ modelValue: any[] }>(), { modelValue: () => [] })
 const emits = defineEmits<{
   (e: 'update:modelValue', v: any[]): void
 }>()
-const list = ref<ProductApi.ProductExpandVO[]>([])
+
+const list = ref<ProductApi.ProductExpandVO[]>([]) //  TODO @puhui999
+const multipleSelection = ref<ProductApi.ProductExpandVO[]>([]) // 多选
+
+/** 处理删除 */
 const handleDelete = (id: number) => {
   const index = list.value.findIndex((item) => item.id === id)
   if (index !== -1) {
     list.value.splice(index, 1)
   }
 }
+
+/** 打开 Product 弹窗  */
 const tableSelectFormRef = ref<InstanceType<typeof TableSelectForm>>()
-const multipleSelection = ref<ProductApi.ProductExpandVO[]>([])
 const openForm = () => {
   tableSelectFormRef.value?.open(ProductApi.getProductPage)
 }
+
+/** 计算 totalPrice */
 const getTotalPrice = computed(() => (row: ProductApi.ProductExpandVO) => {
   const totalPrice = (row.price * row.count * row.discountPercent) / 100
   row.totalPrice = isNaN(totalPrice) ? 0 : totalPrice
   return isNaN(totalPrice) ? 0 : totalPrice
 })
+
+// TODO @puhui999：注释下
 watch(
   list,
   (val) => {
@@ -98,6 +108,8 @@ watch(
   },
   { deep: true }
 )
+
+// TODO @puhui999：注释下
 watch(
   multipleSelection,
   (val) => {

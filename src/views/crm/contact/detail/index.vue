@@ -57,6 +57,7 @@ const message = useMessage()
 const id = Number(route.params.id) // 联系人编号
 const loading = ref(true) // 加载中
 const contact = ref<ContactApi.ContactVO>({} as ContactApi.ContactVO) // 联系人详情
+const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
 
 /** 获取详情 */
 const getContactData = async (id: number) => {
@@ -68,22 +69,20 @@ const getContactData = async (id: number) => {
     loading.value = false
   }
 }
+
 /** 编辑 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
+
 /** 联系人转移 */
 const crmTransferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 联系人转移表单 ref
 const transfer = () => {
   crmTransferFormRef.value?.open('联系人转移', contact.value.id, ContactApi.transfer)
 }
 
-const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
-
-/**
- * 获取操作日志
- */
+/** 获取操作日志 */
 const logList = ref<OperateLogV2VO[]>([]) // 操作日志列表
 const getOperateLog = async (contactId: number) => {
   if (!contactId) {
@@ -95,9 +94,12 @@ const getOperateLog = async (contactId: number) => {
   })
   logList.value = data.list
 }
+
+/** 关闭窗口 */
 const close = () => {
   delView(unref(currentRoute))
 }
+
 /** 初始化 */
 const { delView } = useTagsViewStore() // 视图操作
 const { currentRoute } = useRouter() // 路由

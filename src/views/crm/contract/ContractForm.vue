@@ -144,6 +144,7 @@
         <el-col :span="24">
           <CardTitle class="mb-10px" title="审批信息" />
         </el-col>
+        <!-- TODO 芋艿：需要后面在 review 下，目前看不到信息 -->
         <el-col :span="12">
           <el-button
             class="m-20px"
@@ -188,7 +189,9 @@ const formRules = reactive({
   no: [{ required: true, message: '合同编号不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const BPMLModelRef = ref<InstanceType<typeof BPMLModel>>()
+const BPMLModelRef = ref<InstanceType<typeof BPMLModel>>() // TODO @puhui999：这个变量不太对；另外，可以不做 bpm model 窗口，而是可以点击跳转到工作流详情里；
+
+// TODO @puhui999：加个注释哈
 watch(
   () => formData.value.productItems,
   (val) => {
@@ -196,7 +199,7 @@ watch(
       formData.value.productPrice = 0
       return
     }
-    // 使用reduce函数进行累加
+    // 使用 reduce 函数进行累加
     formData.value.productPrice = val.reduce(
       (accumulator, currentValue) =>
         isNaN(accumulator + currentValue.totalPrice) ? 0 : accumulator + currentValue.totalPrice,
@@ -205,13 +208,13 @@ watch(
   },
   { deep: true }
 )
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  await getAllApi()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -221,10 +224,9 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  await getAllApi()
 }
-const getAllApi = async () => {
-  await Promise.all([getCustomerList(), getUserList(), getContactListList(), getBusinessList()])
-}
+
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
@@ -252,32 +254,42 @@ const submitForm = async () => {
     formLoading.value = false
   }
 }
-const customerList = ref<CustomerApi.CustomerVO[]>([])
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {} as ContractApi.ContractVO
+  formRef.value?.resetFields()
+}
+
+/** 获取其它相关数据 */
+const getAllApi = async () => {
+  await Promise.all([getCustomerList(), getUserList(), getContactListList(), getBusinessList()])
+}
+
 /** 获取客户 */
+const customerList = ref<CustomerApi.CustomerVO[]>([])
 const getCustomerList = async () => {
   customerList.value = await CustomerApi.getSimpleCustomerList()
 }
-const contactList = ref<ContactApi.ContactVO[]>([])
+
 /** 动态获取客户联系人 */
+const contactList = ref<ContactApi.ContactVO[]>([])
 const getContactOptions = computed(() =>
   contactList.value.filter((item) => item.customerId === formData.value.customerId)
 )
 const getContactListList = async () => {
   contactList.value = await ContactApi.getSimpleContactList()
 }
-const userList = ref<UserApi.UserVO[]>([])
+
 /** 获取用户列表 */
+const userList = ref<UserApi.UserVO[]>([])
 const getUserList = async () => {
   userList.value = await UserApi.getSimpleUserList()
 }
-const businessList = ref<BusinessApi.BusinessVO[]>([])
+
 /** 获取商机 */
+const businessList = ref<BusinessApi.BusinessVO[]>([])
 const getBusinessList = async () => {
   businessList.value = await BusinessApi.getSimpleBusinessList()
-}
-/** 重置表单 */
-const resetForm = () => {
-  formData.value = {} as ContractApi.ContractVO
-  formRef.value?.resetFields()
 }
 </script>

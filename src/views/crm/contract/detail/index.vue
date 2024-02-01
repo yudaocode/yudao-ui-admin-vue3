@@ -1,3 +1,4 @@
+<!-- TODO @puhui999：这个组件的注释加下，方便大家打开就知道哈 -->
 <template>
   <ContractDetailsHeader v-loading="loading" :contract="contract">
     <el-button v-if="permissionListRef?.validateWrite" @click="openForm('update', contract.id)">
@@ -57,11 +58,14 @@ const message = useMessage()
 const contractId = ref(0) // 编号
 const loading = ref(true) // 加载中
 const contract = ref<ContractApi.ContractVO>({} as ContractApi.ContractVO) // 详情
+const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
+
 /** 编辑 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
+
 /** 获取详情 */
 const getContractData = async () => {
   loading.value = true
@@ -86,18 +90,21 @@ const getOperateLog = async (contractId: number) => {
   logList.value = data.list
 }
 
+/** 转移 */
+// TODO @puhui999：transferFormRef 简洁一点哈
 const crmTransferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 合同转移表单 ref
 const transfer = () => {
   crmTransferFormRef.value?.open('合同转移', contract.value.id, ContractApi.transfer)
 }
 
-const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
-/** 初始化 */
+/** 关闭 */
 const { delView } = useTagsViewStore() // 视图操作
 const { currentRoute } = useRouter() // 路由
 const close = () => {
   delView(unref(currentRoute))
 }
+
+/** 初始化 */
 onMounted(async () => {
   const id = route.params.id
   if (!id) {

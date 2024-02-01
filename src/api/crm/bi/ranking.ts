@@ -5,11 +5,13 @@ export interface BiContractRanKingRespVO {
   nickname: string
   deptName: string
 }
+
 export interface BiReceivablesRanKingRespVO {
   price: number
   nickname: string
   deptName: string
 }
+
 export interface BiRankReqVO {
   deptId: number
   type: string
