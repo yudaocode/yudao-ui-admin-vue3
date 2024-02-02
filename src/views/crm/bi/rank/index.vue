@@ -1,3 +1,4 @@
+<!-- BI 排行版 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -8,9 +9,9 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="时间" prop="orderDate">
+      <el-form-item label="时间范围" prop="orderDate">
         <el-date-picker
-          v-model="queryParams.orderDate"
+          v-model="queryParams.times"
           :shortcuts="defaultShortcuts"
           class="!w-240px"
           end-placeholder="结束日期"
@@ -36,55 +37,52 @@
       </el-form-item>
     </el-form>
   </ContentWrap>
+
+  <!-- 排行数据 -->
   <el-col>
     <el-tabs v-model="activeTab">
       <!-- 合同金额排行 -->
-      <el-tab-pane label="合同金额排行" name="contractAmountRanking">
-        <RankingContractStatistics :queryParams="queryParams" ref="rankingContractStatisticsRef" />
+      <el-tab-pane label="合同金额排行" name="contractPriceRank" lazy>
+        <ContractPriceRank :query-params="queryParams" ref="contractPriceRankRef" />
       </el-tab-pane>
       <!-- 回款金额排行 -->
-      <el-tab-pane label="回款金额排行" name="receivablesRanKing" lazy>
-        <RankingReceivablesStatistics
-          :queryParams="queryParams"
-          ref="rankingReceivablesStatisticsRef"
-        />
+      <el-tab-pane label="回款金额排行" name="receivablePriceRank" lazy>
+        <ReceivablePriceRank :query-params="queryParams" ref="receivablePriceRankRef" />
       </el-tab-pane>
     </el-tabs>
   </el-col>
 </template>
 <script lang="ts" setup>
-import RankingContractStatistics from './components/RankingContractStatistics.vue'
+import ContractPriceRank from './ContractPriceRank.vue'
+import ReceivablePriceRank from './ReceivablePriceRank.vue'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
-import RankingReceivablesStatistics from '@/views/crm/bi/ranking/components/RankingReceivablesStatistics.vue'
+import { useUserStore } from '@/store/modules/user'
 
-/** 排行榜 */
-defineOptions({ name: 'RankingStatistics' })
+defineOptions({ name: 'CrmBiRank' })
 
 const queryParams = reactive({
-  deptId: undefined,
-  //默认显示最近一周的数据
-  orderDate: [
+  deptId: useUserStore().getUser.deptId,
+  times: [
+    // 默认显示最近一周的数据
     formatDate(beginOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24 * 7))),
     formatDate(endOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24)))
-  ],
-  startTime: undefined,
-  endTime: undefined
+  ]
 })
 
 const queryFormRef = ref() // 搜索的表单
 const deptList = ref<Tree[]>([]) // 树形结构
-const activeTab = ref('contractAmountRanking')
-const rankingContractStatisticsRef = ref() // RankingContractStatistics组件的引用
-const rankingReceivablesStatisticsRef = ref() // RankingReceivablesStatistics组件的引用
+const activeTab = ref('contractPriceRank')
+const contractPriceRankRef = ref() // ContractPriceRank 组件的引用
+const receivablePriceRankRef = ref() // ReceivablePriceRank 组件的引用
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
-  if (activeTab.value === 'contractAmountRanking') {
-    rankingContractStatisticsRef.value.reloadData()
-  } else if (activeTab.value === 'receivablesRanKing') {
-    rankingReceivablesStatisticsRef.value.reloadData()
+  if (activeTab.value === 'contractPriceRank') {
+    contractPriceRankRef.value.loadData()
+  } else if (activeTab.value === 'receivablePriceRank') {
+    receivablePriceRankRef.value.loadData()
   }
 }
 
