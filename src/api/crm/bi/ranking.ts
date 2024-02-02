@@ -14,7 +14,9 @@ export interface BiReceivablesRanKingRespVO {
 
 export interface BiRankReqVO {
   deptId: number
-  type: string
+  orderDate: Date[]
+  startTime: Date
+  endTime: Date
 }
 
 // 排行 API
@@ -22,14 +24,14 @@ export const RankingStatisticsApi = {
   // 获得合同排行榜
   contractAmountRanking: (params: any) => {
     return request.get({
-      url: '/bi/ranking/contract-ranking',
+      url: '/crm/bi-ranking/contract-ranking',
       params
     })
   },
   // 获得回款排行榜
   receivablesAmountRanking: (params: any) => {
     return request.get({
-      url: '/bi/ranking/receivables-ranking',
+      url: '/crm/bi-ranking/receivables-ranking',
       params
     })
   }
