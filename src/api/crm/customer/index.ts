@@ -83,7 +83,7 @@ export interface TransferReqVO {
 
 // 客户转移
 export const transferCustomer = async (data: TransferReqVO) => {
-  return await request.put({ url: '/crm/customer/transfer-customer', data })
+  return await request.put({ url: '/crm/customer/transfer', data })
 }
 
 // 锁定/解锁客户

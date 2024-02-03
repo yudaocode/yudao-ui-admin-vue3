@@ -89,5 +89,5 @@ export const deleteContactBusinessList = async (data: ContactBusinessReqVO) => {
 
 // 联系人转移
 export const transferContact = async (data: TransferReqVO) => {
-  return await request.put({ url: '/crm/contact/transfer-contact', data })
+  return await request.put({ url: '/crm/contact/transfer', data })
 }

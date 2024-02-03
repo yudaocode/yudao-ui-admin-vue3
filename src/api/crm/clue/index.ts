@@ -48,5 +48,5 @@ export const exportClue = async (params) => {
 
 // 线索转移
 export const transferClue = async (data: TransferReqVO) => {
-  return await request.put({ url: '/crm/clue/transfer-clue', data })
+  return await request.put({ url: '/crm/clue/transfer', data })
 }

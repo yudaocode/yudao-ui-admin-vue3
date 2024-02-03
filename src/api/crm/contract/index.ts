@@ -74,5 +74,5 @@ export const handleApprove = async (id: number) => {
 
 // 合同转移
 export const transferContract = async (data: TransferReqVO) => {
-  return await request.put({ url: '/crm/contract/transfer-contract', data })
+  return await request.put({ url: '/crm/contract/transfer', data })
 }
