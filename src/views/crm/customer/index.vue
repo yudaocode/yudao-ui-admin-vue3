@@ -208,7 +208,7 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getList" />
-  <CustomerImportForm ref="customerImportFormRef" @success="getList" />
+  <CustomerImportForm ref="importFormRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
@@ -341,10 +341,9 @@ const handleDelete = async (id: number) => {
 }
 
 /** 导入按钮操作 */
-// TODO @puhui999：importFormRef 简化下
-const customerImportFormRef = ref<InstanceType<typeof CustomerImportForm>>()
+const importFormRef = ref<InstanceType<typeof CustomerImportForm>>()
 const handleImport = () => {
-  customerImportFormRef.value?.open()
+  importFormRef.value?.open()
 }
 
 /** 导出按钮操作 */

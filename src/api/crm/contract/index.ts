@@ -7,6 +7,7 @@ export interface ContractVO {
   name: string
   customerId: number
   businessId: number
+  businessName: string
   processInstanceId: number
   orderDate: Date
   ownerUserId: number
@@ -18,8 +19,9 @@ export interface ContractVO {
   productPrice: number
   contactId: number
   signUserId: number
+  signUserName: string
   contactLastTime: Date
-  status: number
+  auditStatus: number
   remark: string
   productItems: ProductExpandVO[]
   creatorName: string
@@ -71,7 +73,6 @@ export const handleApprove = async (id: number) => {
 }
 
 // 合同转移
-// TODO @puhui999：transfer 相关方法，这块要补充下；
-export const transfer = async (data: TransferReqVO) => {
-  return await request.put({ url: '/crm/contract/transfer', data })
+export const transferContract = async (data: TransferReqVO) => {
+  return await request.put({ url: '/crm/contract/transfer-contract', data })
 }

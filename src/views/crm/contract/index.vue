@@ -57,54 +57,44 @@
   <!-- TODO 芋艿：各种字段要调整 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="合同编号" prop="id" />
-      <el-table-column align="center" label="合同名称" prop="name" />
-      <el-table-column align="center" label="客户名称" prop="customerId" />
-      <el-table-column align="center" label="商机名称" prop="businessId" />
-      <el-table-column align="center" label="工作流名称" prop="processInstanceId" />
+      <el-table-column align="center" label="合同编号" prop="no" width="130" />
+      <el-table-column align="center" label="合同名称" prop="name" width="130" />
+      <el-table-column align="center" label="合同状态" prop="auditStatus" width="130" />
+      <el-table-column align="center" label="客户名称" prop="customerName" width="130" />
+      <el-table-column align="center" label="商机名称" prop="businessName" width="130" />
+      <el-table-column align="center" label="合同金额（元）" prop="price" width="130" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
         label="下单时间"
         prop="orderDate"
-        width="180px"
+        width="180"
       />
-      <el-table-column align="center" label="负责人" prop="ownerUserId" />
-      <el-table-column align="center" label="合同编号" prop="no" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
         label="开始时间"
         prop="startTime"
-        width="180px"
+        width="180"
       />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
         label="结束时间"
         prop="endTime"
-        width="180px"
+        width="180"
       />
-      <el-table-column align="center" label="合同金额" prop="price" />
-      <el-table-column align="center" label="整单折扣" prop="discountPercent" />
-      <el-table-column align="center" label="产品总金额" prop="productPrice" />
-      <el-table-column align="center" label="联系人" prop="contactId" />
-      <el-table-column align="center" label="公司签约人" prop="signUserId" />
+      <el-table-column align="center" label="客户签约人" prop="contactName" width="130" />
+      <el-table-column align="center" label="公司签约人" prop="signUserName" width="130" />
+      <el-table-column align="center" label="备注" prop="remark" width="130" />
+      <el-table-column align="center" label="审核状态" prop="auditStatus" width="130" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
         label="最后跟进时间"
         prop="contactLastTime"
-        width="180px"
+        width="180"
       />
-      <el-table-column
-        :formatter="dateFormatter"
-        align="center"
-        label="创建时间"
-        prop="createTime"
-        width="180px"
-      />
-      <el-table-column align="center" label="备注" prop="remark" />
       <el-table-column fixed="right" label="操作" width="250">
         <template #default="scope">
           <el-button

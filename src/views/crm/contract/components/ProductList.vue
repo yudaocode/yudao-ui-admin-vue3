@@ -66,14 +66,17 @@ import * as ProductApi from '@/api/crm/product'
 import { DICT_TYPE } from '@/utils/dict'
 import { fenToYuanFormat } from '@/utils/formatter'
 import { TableSelectForm } from '@/components/Table/index'
+import { floatToFixed2, yuanToFen } from '@/utils'
 
 defineOptions({ name: 'ProductList' })
-withDefaults(defineProps<{ modelValue: any[] }>(), { modelValue: () => [] })
+const props = withDefaults(defineProps<{ modelValue: ProductApi.ProductExpandVO[] }>(), {
+  modelValue: () => []
+})
 const emits = defineEmits<{
   (e: 'update:modelValue', v: any[]): void
 }>()
 
-const list = ref<ProductApi.ProductExpandVO[]>([]) //  TODO @puhui999
+const list = ref<ProductApi.ProductExpandVO[]>([]) // 列表数量
 const multipleSelection = ref<ProductApi.ProductExpandVO[]>([]) // 多选
 
 /** 处理删除 */
@@ -92,12 +95,30 @@ const openForm = () => {
 
 /** 计算 totalPrice */
 const getTotalPrice = computed(() => (row: ProductApi.ProductExpandVO) => {
-  const totalPrice = (row.price * row.count * row.discountPercent) / 100
-  row.totalPrice = isNaN(totalPrice) ? 0 : totalPrice
-  return isNaN(totalPrice) ? 0 : totalPrice
+  const totalPrice =
+    (Number(row.price) / 100) * Number(row.count) * (1 - Number(row.discountPercent) / 100)
+  row.totalPrice = isNaN(totalPrice) ? 0 : yuanToFen(totalPrice)
+  return isNaN(totalPrice) ? 0 : totalPrice.toFixed(2)
 })
-
-// TODO @puhui999：注释下
+const isSetListValue = ref(false) // 判断是否已经给 list 赋值过，用于编辑表单商品回显
+// 编辑时合同商品回显
+watch(
+  () => props.modelValue,
+  (val) => {
+    if (!val || val.length === 0 || isSetListValue.value) {
+      return
+    }
+    list.value = [
+      ...props.modelValue.map((item) => {
+        item.totalPrice = floatToFixed2(item.totalPrice) as unknown as number
+        return item
+      })
+    ]
+    isSetListValue.value = true
+  },
+  { immediate: true, deep: true }
+)
+// 监听列表变化，动态更新合同商品列表
 watch(
   list,
   (val) => {
@@ -109,15 +130,20 @@ watch(
   { deep: true }
 )
 
-// TODO @puhui999：注释下
+// 监听商品选择结果动态添加商品到列表中,如果商品存在则不放入列表中
 watch(
   multipleSelection,
   (val) => {
     if (!val || val.length === 0) {
       return
     }
+    // 过滤出不在列表中的商品
     const ids = list.value.map((item) => item.id)
-    list.value.push(...multipleSelection.value.filter((item) => ids.indexOf(item.id) === -1))
+    const productList = multipleSelection.value.filter((item) => ids.indexOf(item.id) === -1)
+    if (!productList || productList.length === 0) {
+      return
+    }
+    list.value.push(...productList)
   },
   { deep: true }
 )
