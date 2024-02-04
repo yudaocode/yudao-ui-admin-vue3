@@ -1,4 +1,4 @@
-<!-- TODO @puhui999：这个组件的注释加下，方便大家打开就知道哈 -->
+<!-- 合同详情头部组件-->
 <template>
   <div>
     <div class="flex items-start justify-between">
@@ -17,17 +17,20 @@
   </div>
   <ContentWrap class="mt-10px">
     <el-descriptions :column="5" direction="vertical">
-      <el-descriptions-item label="客户">
+      <el-descriptions-item label="客户名称">
         {{ contract.customerName }}
       </el-descriptions-item>
-      <el-descriptions-item label="客户签约人">
-        {{ contract.contactName }}
+      <el-descriptions-item label="合同金额（元）">
+        {{ floatToFixed2(contract.price) }}
       </el-descriptions-item>
-      <el-descriptions-item label="合同金额">
-        {{ contract.productPrice }}
+      <el-descriptions-item label="下单时间">
+        {{ contract.orderDate ? formatDate(contract.orderDate) : '空' }}
       </el-descriptions-item>
-      <el-descriptions-item label="创建时间">
-        {{ contract.createTime ? formatDate(contract.createTime) : '空' }}
+      <el-descriptions-item label="回款金额（元）">
+        {{ floatToFixed2(contract.price) }}
+      </el-descriptions-item>
+      <el-descriptions-item label="负责人">
+        {{ contract.ownerUserName }}
       </el-descriptions-item>
     </el-descriptions>
   </ContentWrap>
@@ -35,6 +38,7 @@
 <script lang="ts" setup>
 import * as ContractApi from '@/api/crm/contract'
 import { formatDate } from '@/utils/formatTime'
+import { floatToFixed2 } from '@/utils'
 
 defineOptions({ name: 'ContractDetailsHeader' })
 defineProps<{ contract: ContractApi.ContractVO }>()

@@ -7,7 +7,7 @@
       :rules="formRules"
       label-width="110px"
     >
-      <el-row>
+      <el-row :gutter="20">
         <el-col :span="24" class="mb-10px">
           <CardTitle title="基本信息" />
         </el-col>
@@ -138,7 +138,7 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="产品总金额(元)" prop="productPrice">
-            <el-input v-model="formData.productPrice" placeholder="请输入产品总金额" />
+            {{ floatToFixed2(formData.productPrice) }}
           </el-form-item>
         </el-col>
         <el-col :span="24">
@@ -172,6 +172,7 @@ import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
 import ProductList from './components/ProductList.vue'
 import BPMLModel from '@/views/crm/contract/components/BPMLModel.vue'
+import { floatToFixed2 } from '@/utils'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -191,7 +192,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const BPMLModelRef = ref<InstanceType<typeof BPMLModel>>() // TODO @puhui999：这个变量不太对；另外，可以不做 bpm model 窗口，而是可以点击跳转到工作流详情里；
 
-// TODO @puhui999：加个注释哈
+// 监听合同商品变化，计算合同商品总价
 watch(
   () => formData.value.productItems,
   (val) => {

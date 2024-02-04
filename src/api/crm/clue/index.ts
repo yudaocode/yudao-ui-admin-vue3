@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import { TransferReqVO } from '@/api/crm/customer'
 
 export interface ClueVO {
   id: number
@@ -43,4 +44,9 @@ export const deleteClue = async (id: number) => {
 // 导出线索 Excel
 export const exportClue = async (params) => {
   return await request.download({ url: `/crm/clue/export-excel`, params })
+}
+
+// 线索转移
+export const transferClue = async (data: TransferReqVO) => {
+  return await request.put({ url: '/crm/clue/transfer', data })
 }

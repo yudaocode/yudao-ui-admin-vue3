@@ -1,4 +1,4 @@
-<!-- TODO @puhui999：这个组件的注释加下，方便大家打开就知道哈 -->
+<!-- 合同详情组件 -->
 <template>
   <ContentWrap>
     <el-collapse v-model="activeNames">
@@ -6,13 +6,42 @@
         <template #title>
           <span class="text-base font-bold">基本信息</span>
         </template>
-        <!-- TODO puhui999: 先出详情样式后补全 -->
-        <el-descriptions :column="4">
+        <el-descriptions :column="3">
+          <el-descriptions-item label="合同编号">
+            {{ contract.no }}
+          </el-descriptions-item>
           <el-descriptions-item label="合同名称">
             {{ contract.name }}
           </el-descriptions-item>
+          <el-descriptions-item label="客户名称">
+            {{ contract.customerName }}
+          </el-descriptions-item>
+          <el-descriptions-item label="商机名称">
+            {{ contract.businessName }}
+          </el-descriptions-item>
+          <el-descriptions-item label="合同金额（元）">
+            {{ contract.price }}
+          </el-descriptions-item>
+          <el-descriptions-item label="下单时间">
+            {{ formatDate(contract.orderDate) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="开始时间">
+            {{ formatDate(contract.startTime) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="结束时间">
+            {{ formatDate(contract.endTime) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="客户签约人">
+            {{ contract.contactName }}
+          </el-descriptions-item>
+          <el-descriptions-item label="公司签约人">
+            {{ contract.signUserName }}
+          </el-descriptions-item>
           <el-descriptions-item label="备注">
             {{ contract.remark }}
+          </el-descriptions-item>
+          <el-descriptions-item label="合同状态">
+            {{ contract.auditStatus }}
           </el-descriptions-item>
         </el-descriptions>
       </el-collapse-item>

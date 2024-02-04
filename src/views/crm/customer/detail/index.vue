@@ -124,7 +124,7 @@ const openForm = () => {
 /** 客户转移 */
 const crmTransferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 客户转移表单 ref
 const transfer = () => {
-  crmTransferFormRef.value?.open('客户转移', customerId.value, CustomerApi.transfer)
+  crmTransferFormRef.value?.open('客户转移', customerId.value, CustomerApi.transferCustomer)
 }
 
 /** 锁定客户 */

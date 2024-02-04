@@ -79,7 +79,7 @@ const openForm = (type: string, id?: number) => {
 /** 联系人转移 */
 const crmTransferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 联系人转移表单 ref
 const transfer = () => {
-  crmTransferFormRef.value?.open('联系人转移', contact.value.id, ContactApi.transfer)
+  crmTransferFormRef.value?.open('联系人转移', contact.value.id, ContactApi.transferContact)
 }
 
 /** 获取操作日志 */

@@ -1,4 +1,4 @@
-<!-- TODO @puhui999：这个最好加个注释哈 -->
+<!-- 列表选择通用组件，参考 ProductList 组件使用 -->
 <template>
   <Dialog v-model="dialogVisible" :appendToBody="true" :scroll="true" :title="title" width="60%">
     <el-table
