@@ -2,32 +2,19 @@ import request from '@/config/axios'
 
 // ERP 产品 VO
 export interface ProductVO {
-  // 产品编号
-  id: number
-  // 产品名称
-  name: string
-  // 产品条码
-  barCode: string
-  // 产品类型编号
-  categoryId: number
-  // 单位编号
-  unitId: number
-  // 产品状态
-  status: number
-  // 产品规格
-  standard: string
-  // 产品备注
-  remark: string
-  // 保质期天数
-  expiryDay: number
-  // 基础重量（kg）
-  weight: number
-  // 采购价格，单位：元
-  purchasePrice: number
-  // 销售价格，单位：元
-  salePrice: number
-  // 最低价格，单位：元
-  minPrice: number
+  id: number // 产品编号
+  name: string // 产品名称
+  barCode: string // 产品条码
+  categoryId: number // 产品类型编号
+  unitId: number // 单位编号
+  status: number // 产品状态
+  standard: string // 产品规格
+  remark: string // 产品备注
+  expiryDay: number // 保质期天数
+  weight: number // 重量（kg）
+  purchasePrice: number // 采购价格，单位：元
+  salePrice: number // 销售价格，单位：元
+  minPrice: number // 最低价格，单位：元
 }
 
 // ERP 产品 API

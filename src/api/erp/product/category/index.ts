@@ -2,18 +2,12 @@ import request from '@/config/axios'
 
 // ERP 商品分类 VO
 export interface ProductCategoryVO {
-  // 分类编号
-  id: number
-  // 父分类编号
-  parentId: number
-  // 分类名称
-  name: string
-  // 分类编码
-  code: string
-  // 分类排序
-  sort: number
-  // 开启状态
-  status: number
+  id: number // 分类编号
+  parentId: number // 父分类编号
+  name: string // 分类名称
+  code: string // 分类编码
+  sort: number // 分类排序
+  status: number // 开启状态
 }
 
 // ERP 商品分类 API

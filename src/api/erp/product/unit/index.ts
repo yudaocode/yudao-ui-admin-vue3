@@ -2,12 +2,9 @@ import request from '@/config/axios'
 
 // ERP 产品单位 VO
 export interface ProductUnitVO {
-  // 单位编号
-  id: number
-  // 单位名字
-  name: string
-  // 单位状态
-  status: number
+  id: number // 单位编号
+  name: string // 单位名字
+  status: number // 单位状态
 }
 
 // ERP 产品单位 API
