@@ -22,8 +22,11 @@ export enum BizTypeEnum {
   CRM_LEADS = 1, // 线索
   CRM_CUSTOMER = 2, // 客户
   CRM_CONTACT = 3, // 联系人
-  CRM_BUSINESS = 5, // 商机
-  CRM_CONTRACT = 6 // 合同
+  CRM_BUSINESS = 4, // 商机
+  CRM_CONTRACT = 5, // 合同
+  CRM_PRODUCT = 6, // 产品
+  CRM_RECEIVABLE = 7, // 回款
+  CRM_RECEIVABLE_PLAN = 8 // 回款计划
 }
 
 /**

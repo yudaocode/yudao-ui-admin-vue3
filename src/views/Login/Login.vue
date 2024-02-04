@@ -1,7 +1,7 @@
 <template>
   <div
     :class="prefixCls"
-    class="relative h-[100%] lt-xl:px-10px lt-md:px-10px lt-sm:px-10px lt-xl:px-10px"
+    class="relative h-[100%] lt-md:px-10px lt-sm:px-10px lt-xl:px-10px lt-xl:px-10px"
   >
     <div class="relative mx-auto h-full flex">
       <div

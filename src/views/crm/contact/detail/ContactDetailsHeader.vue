@@ -10,9 +10,7 @@
       </div>
       <div>
         <!-- 右上：按钮 -->
-        <el-button @click="openForm('update', contact.id)" v-hasPermi="['crm:contact:update']">
-          编辑
-        </el-button>
+        <slot></slot>
       </div>
     </div>
   </div>
@@ -32,18 +30,10 @@
       </el-descriptions-item>
     </el-descriptions>
   </ContentWrap>
-  <!-- 表单弹窗：添加/修改 -->
-  <ContactForm ref="formRef" @success="emit('refresh')" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as ContactApi from '@/api/crm/contact'
-import ContactForm from '@/views/crm/contact/ContactForm.vue'
 import { formatDate } from '@/utils/formatTime'
-//操作修改
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
+
 const { contact } = defineProps<{ contact: ContactApi.ContactVO }>()
-const emit = defineEmits(['refresh']) // 定义 success 事件，用于操作成功后的回调
 </script>

@@ -63,14 +63,14 @@ export const exportCustomer = async (params: any) => {
   return await request.download({ url: `/crm/customer/export-excel`, params })
 }
 
+// 下载客户导入模板
+export const importCustomerTemplate = () => {
+  return request.download({ url: '/crm/customer/get-import-template' })
+}
+
 // 客户列表
 export const getSimpleCustomerList = async () => {
   return await request.get({ url: `/crm/customer/list-all-simple` })
-}
-
-// 查询客户操作日志
-export const getOperateLogPage = async (id: number) => {
-  return await request.get({ url: '/crm/customer/operate-log-page?id=' + id })
 }
 
 // ======================= 业务操作 =======================
@@ -82,7 +82,7 @@ export interface TransferReqVO {
 }
 
 // 客户转移
-export const transfer = async (data: TransferReqVO) => {
+export const transferCustomer = async (data: TransferReqVO) => {
   return await request.put({ url: '/crm/customer/transfer', data })
 }
 
@@ -99,4 +99,9 @@ export const receiveCustomer = async (ids: any[]) => {
 // 客户放入公海
 export const putCustomerPool = async (id: number) => {
   return await request.put({ url: `/crm/customer/put-pool?id=${id}` })
+}
+
+// 进入公海客户提醒
+export const getPutInPoolRemindCustomerPage = async (params) => {
+  return await request.get({ url: `/crm/customer/put-in-pool-remind-page`, params })
 }
