@@ -1,4 +1,4 @@
-<!-- TODO @puhui999：这个好像和 detail 重复了？？？ -->
+<!-- TODO @puhui999：这个好像和 detail 重复了？？？能不能复用 detail 哈？ -->
 <template>
   <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="110px">
     <el-row>

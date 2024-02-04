@@ -33,10 +33,6 @@ export const getModel = async (id: number) => {
   return await request.get({ url: '/bpm/model/get?id=' + id })
 }
 
-export const getModelByKey = async (key: string) => {
-  return await request.get({ url: '/bpm/model/get-by-key?key=' + key })
-}
-
 export const updateModel = async (data: ModelVO) => {
   return await request.put({ url: '/bpm/model/update', data: data })
 }

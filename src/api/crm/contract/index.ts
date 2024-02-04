@@ -68,8 +68,8 @@ export const exportContract = async (params) => {
 }
 
 // 提交审核
-export const handleApprove = async (id: number) => {
-  return await request.put({ url: `/crm/contract/approve?id=${id}` })
+export const submitContract = async (id: number) => {
+  return await request.put({ url: `/crm/contract/submit?id=${id}` })
 }
 
 // 合同转移

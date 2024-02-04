@@ -4,37 +4,56 @@
     <el-button plain type="primary" @click="openForm">添加产品</el-button>
   </el-row>
   <el-table :data="list" :show-overflow-tooltip="true" :stripe="true">
-    <el-table-column align="center" label="产品名称" prop="name" width="160" />
-    <el-table-column align="center" label="产品类型" prop="categoryName" width="160" />
+    <el-table-column align="center" label="产品名称" prop="name" width="120" />
+    <el-table-column
+      :formatter="fenToYuanFormat"
+      align="center"
+      label="价格"
+      prop="price"
+      width="100"
+    />
+    <el-table-column align="center" label="产品类型" prop="categoryName" width="100" />
     <el-table-column align="center" label="产品单位" prop="unit">
       <template #default="scope">
         <dict-tag :type="DICT_TYPE.CRM_PRODUCT_UNIT" :value="scope.row.unit" />
       </template>
     </el-table-column>
     <el-table-column align="center" label="产品编码" prop="no" />
+    <el-table-column align="center" fixed="right" label="数量" prop="count" width="100">
+      <template #default="{ row }: { row: ProductApi.ProductExpandVO }">
+        <el-input-number
+          v-model="row.count"
+          controls-position="right"
+          :min="0"
+          :precision="0"
+          class="!w-100%"
+        />
+      </template>
+    </el-table-column>
     <el-table-column
-      :formatter="fenToYuanFormat"
       align="center"
-      label="价格（元）"
-      prop="price"
-      width="100"
-    />
-    <el-table-column align="center" label="数量" prop="count" width="200">
+      fixed="right"
+      label="折扣(%)"
+      prop="discountPercent"
+      width="120"
+    >
       <template #default="{ row }: { row: ProductApi.ProductExpandVO }">
-        <el-input-number v-model="row.count" class="!w-100%" />
+        <el-input-number
+          v-model="row.discountPercent"
+          controls-position="right"
+          :min="0"
+          :max="100"
+          :precision="0"
+          class="!w-100%"
+        />
       </template>
     </el-table-column>
-    <el-table-column align="center" label="折扣(%)" prop="discountPercent" width="200">
+    <el-table-column align="center" fixed="right" label="合计" prop="totalPrice" width="100">
       <template #default="{ row }: { row: ProductApi.ProductExpandVO }">
-        <el-input-number v-model="row.discountPercent" class="!w-100%" />
+        {{ fenToYuan(getTotalPrice(row)) }}
       </template>
     </el-table-column>
-    <el-table-column align="center" label="合计" prop="totalPrice" width="100">
-      <template #default="{ row }: { row: ProductApi.ProductExpandVO }">
-        {{ getTotalPrice(row) }}
-      </template>
-    </el-table-column>
-    <el-table-column align="center" fixed="right" label="操作" width="130">
+    <el-table-column align="center" fixed="right" label="操作" width="60">
       <template #default="scope">
         <el-button link type="danger" @click="handleDelete(scope.row.id)"> 移除</el-button>
       </template>
@@ -66,7 +85,7 @@ import * as ProductApi from '@/api/crm/product'
 import { DICT_TYPE } from '@/utils/dict'
 import { fenToYuanFormat } from '@/utils/formatter'
 import { TableSelectForm } from '@/components/Table/index'
-import { floatToFixed2, yuanToFen } from '@/utils'
+import { fenToYuan, floatToFixed2, yuanToFen } from '@/utils'
 
 defineOptions({ name: 'ProductList' })
 const props = withDefaults(defineProps<{ modelValue: ProductApi.ProductExpandVO[] }>(), {

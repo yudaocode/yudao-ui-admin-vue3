@@ -10,15 +10,16 @@
   </ContractDetailsHeader>
   <el-col>
     <el-tabs>
-      <el-tab-pane label="详细资料">
+      <!-- TODO @puhui999：跟进记录 -->
+      <el-tab-pane label="基本信息">
         <ContractDetailsInfo :contract="contract" />
       </el-tab-pane>
+      <!-- TODO @puhui999：products 更合适哈 -->
       <el-tab-pane label="产品">
         <ContractProductList v-model="contract.productItems" />
       </el-tab-pane>
-      <el-tab-pane label="操作日志">
-        <OperateLogV2 :log-list="logList" />
-      </el-tab-pane>
+      <!-- TODO @puhui999：回款信息 -->
+      <!-- TODO @puhui999：这里是不是不用 isPool 哈 -->
       <el-tab-pane label="团队成员">
         <PermissionList
           ref="permissionListRef"
@@ -28,8 +29,12 @@
           @quit-team="close"
         />
       </el-tab-pane>
+      <el-tab-pane label="操作日志">
+        <OperateLogV2 :log-list="logList" />
+      </el-tab-pane>
     </el-tabs>
   </el-col>
+
   <!-- 表单弹窗：添加/修改 -->
   <ContractForm ref="formRef" @success="getContractData" />
   <CrmTransferForm ref="transferFormRef" @success="close" />

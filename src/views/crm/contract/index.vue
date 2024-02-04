@@ -54,7 +54,6 @@
   </ContentWrap>
 
   <!-- 列表 -->
-  <!-- TODO 芋艿：各种字段要调整 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
       <el-table-column align="center" fixed="left" label="合同编号" prop="no" width="130" />
@@ -145,12 +144,12 @@
           >
             编辑
           </el-button>
-          <!-- TODO @puhui999：可以加下判断，什么情况下，可以审批； -->
+          <!-- TODO @puhui999：可以加下判断，什么情况下，可以审批；然后加个【查看审批】按钮 -->
           <el-button
             v-hasPermi="['crm:contract:update']"
             link
             type="primary"
-            @click="handleApprove(scope.row)"
+            @click="handleSubmit(scope.row)"
           >
             提交审核
           </el-button>
@@ -274,9 +273,9 @@ const handleExport = async () => {
 }
 
 /** 提交审核 **/
-const handleApprove = async (row: ContractApi.ContractVO) => {
+const handleSubmit = async (row: ContractApi.ContractVO) => {
   await message.confirm(`您确定提交【${row.name}】审核吗？`)
-  await ContractApi.handleApprove(row.id)
+  await ContractApi.submitContract(row.id)
   message.success('提交审核成功！')
   await getList()
 }
