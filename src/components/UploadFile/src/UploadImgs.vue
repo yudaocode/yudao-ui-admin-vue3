@@ -3,16 +3,16 @@
     <el-upload
       v-model:file-list="fileList"
       :accept="fileType.join(',')"
-      :action="updateUrl"
+      :action="uploadUrl"
       :before-upload="beforeUpload"
       :class="['upload', drag ? 'no-border' : '']"
       :drag="drag"
-      :headers="uploadHeaders"
       :limit="limit"
       :multiple="true"
       :on-error="uploadError"
       :on-exceed="handleExceed"
       :on-success="uploadSuccess"
+      :http-request="httpRequest"
       list-type="picture-card"
     >
       <div class="upload-empty">
@@ -50,7 +50,7 @@ import type { UploadFile, UploadProps, UploadUserFile } from 'element-plus'
 import { ElNotification } from 'element-plus'
 
 import { propTypes } from '@/utils/propTypes'
-import { getAccessToken, getTenantId } from '@/utils/auth'
+import { useUpload } from '@/components/UploadFile/src/useUpload'
 
 defineOptions({ name: 'UploadImgs' })
 
@@ -70,7 +70,6 @@ type FileTypes =
 
 const props = defineProps({
   modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
-  updateUrl: propTypes.string.def(import.meta.env.VITE_UPLOAD_URL),
   drag: propTypes.bool.def(true), // 是否支持拖拽上传 ==> 非必传（默认为 true）
   disabled: propTypes.bool.def(false), // 是否禁用上传组件 ==> 非必传（默认为 false）
   limit: propTypes.number.def(5), // 最大图片上传数 ==> 非必传（默认为 5张）
@@ -81,10 +80,7 @@ const props = defineProps({
   borderradius: propTypes.string.def('8px') // 组件边框圆角 ==> 非必传（默认为 8px）
 })
 
-const uploadHeaders = ref({
-  Authorization: 'Bearer ' + getAccessToken(),
-  'tenant-id': getTenantId()
-})
+const { uploadUrl, httpRequest } = useUpload()
 
 const fileList = ref<UploadUserFile[]>([])
 const uploadNumber = ref<number>(0)
@@ -121,7 +117,6 @@ const emit = defineEmits<UploadEmits>()
 const uploadSuccess: UploadProps['onSuccess'] = (res: any): void => {
   message.success('上传成功')
   // 删除自身
-  debugger
   const index = fileList.value.findIndex((item) => item.response?.data === res.data)
   fileList.value.splice(index, 1)
   uploadList.value.push({ name: res.data, url: res.data })
