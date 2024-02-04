@@ -19,11 +19,11 @@ export const useUpload = () => {
       // 1.2 获取文件预签名地址
       const presignedInfo = await FileApi.getFilePresignedUrl(fileName)
       // 1.3 上传文件（不能使用ElUpload的ajaxUpload方法的原因：其使用的是FormData上传，Minio不支持）
-      return axios.put(presignedInfo.url, options.file).then(() => {
+      return axios.put(presignedInfo.uploadUrl, options.file).then(() => {
         // 1.4. 记录文件信息到后端
-        const fileVo = createFile(presignedInfo.configId, fileName, presignedInfo.url, options.file)
+        createFile(presignedInfo, fileName, options.file)
         // 通知成功，数据格式保持与后端上传的返回结果一致
-        return { data: fileVo.url }
+        return { data: presignedInfo.url }
       })
     } else {
       // 模式二：后端上传（需要增加后端身份认证请求头）
@@ -42,17 +42,15 @@ export const useUpload = () => {
 
 /**
  * 创建文件信息
- * @param configId 文件配置编号
+ * @param vo 文件预签名信息
  * @param name 文件名称
- * @param url 文件地址
  * @param file 文件
  */
-function createFile(configId: number, name: string, url: string, file: UploadRawFile) {
+function createFile(vo: FileApi.FilePresignedUrlRespVO, name: string, file: UploadRawFile) {
   const fileVo = {
-    configId: configId,
+    configId: vo.configId,
+    url: vo.url,
     path: name,
-    // 移除预签名参数：参数只在上传时有用，查看时不需要
-    url: url.substring(0, url.indexOf('?')),
     name: file.name,
     type: file.type,
     size: file.size

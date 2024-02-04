@@ -10,7 +10,9 @@ export interface FilePageReqVO extends PageParam {
 export interface FilePresignedUrlRespVO {
   // 文件配置编号
   configId: number
-  // 文件预签名地址
+  // 文件上传 URL
+  uploadUrl: string
+  // 文件 URL
   url: string
 }
 
