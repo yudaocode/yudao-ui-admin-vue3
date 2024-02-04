@@ -1,4 +1,4 @@
-<!-- 合同金额排行 -->
+<!-- 新增联系人数排行 -->
 <template>
   <!-- 柱状图 -->
   <el-card shadow="never">
@@ -11,9 +11,9 @@
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="list">
       <el-table-column label="公司排名" align="center" type="index" width="80" />
-      <el-table-column label="签订人" align="center" prop="nickname" min-width="200" />
+      <el-table-column label="创建人" align="center" prop="nickname" min-width="200" />
       <el-table-column label="部门" align="center" prop="deptName" min-width="200" />
-      <el-table-column label="合同金额（元）" align="center" prop="count" min-width="200" />
+      <el-table-column label="新增联系人数（个）" align="center" prop="count" min-width="200" />
     </el-table>
   </el-card>
 </template>
@@ -22,7 +22,7 @@ import { RankApi, BiRankRespVO } from '@/api/crm/bi/rank'
 import { EChartsOption } from 'echarts'
 import { clone } from 'unocss'
 
-defineOptions({ name: 'ContractPriceRank' })
+defineOptions({ name: 'ContactsCountRank' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
@@ -45,7 +45,7 @@ const echartsOption = reactive<EChartsOption>({
   },
   series: [
     {
-      name: '合同金额排行',
+      name: '新增联系人数排行',
       type: 'bar'
     }
   ],
@@ -57,7 +57,7 @@ const echartsOption = reactive<EChartsOption>({
       brush: {
         type: ['lineX', 'clear'] // 区域缩放按钮、还原按钮
       },
-      saveAsImage: { show: true, name: '合同金额排行' } // 保存为图片
+      saveAsImage: { show: true, name: '新增联系人数排行' } // 保存为图片
     }
   },
   tooltip: {
@@ -68,19 +68,19 @@ const echartsOption = reactive<EChartsOption>({
   },
   xAxis: {
     type: 'value',
-    name: '合同金额（元）'
+    name: '新增联系人数（个）'
   },
   yAxis: {
     type: 'category',
-    name: '签订人'
+    name: '创建人'
   }
 }) as EChartsOption
 
-/** 获取合同金额排行 */
+/** 获取新增联系人数排行 */
 const loadData = async () => {
   // 1. 加载排行数据
   loading.value = true
-  const rankingList = await RankApi.getContractPriceRank(props.queryParams)
+  const rankingList = await RankApi.getContactsCountRank(props.queryParams)
   // 2.1 更新 Echarts 数据
   if (echartsOption.dataset && echartsOption.dataset['source']) {
     echartsOption.dataset['source'] = clone(rankingList).reverse()
