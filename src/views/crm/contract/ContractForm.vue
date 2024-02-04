@@ -192,7 +192,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const BPMLModelRef = ref<InstanceType<typeof BPMLModel>>() // TODO @puhui999：这个变量不太对；另外，可以不做 bpm model 窗口，而是可以点击跳转到工作流详情里；
 
-// 监听合同商品变化，计算合同商品总价
+// 监听合同产品变化，计算合同产品总价
 watch(
   () => formData.value.productItems,
   (val) => {

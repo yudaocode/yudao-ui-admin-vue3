@@ -87,6 +87,7 @@ const getOperateLog = async (contractId: number) => {
 }
 
 /** 转移 */
+// TODO @puhui999：这个组件，要不传递业务类型，然后组件里判断 title 和 api 能调用哪个；整体治理掉；
 const transferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 合同转移表单 ref
 const transferContract = () => {
   transferFormRef.value?.open('合同转移', contract.value.id, ContractApi.transferContract)

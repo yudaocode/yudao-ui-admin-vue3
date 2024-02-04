@@ -42,7 +42,7 @@
   </el-table>
 
   <!-- table 选择表单 -->
-  <TableSelectForm ref="tableSelectFormRef" v-model="multipleSelection" title="选择商品">
+  <TableSelectForm ref="tableSelectFormRef" v-model="multipleSelection" title="选择产品">
     <el-table-column align="center" label="产品名称" prop="name" width="160" />
     <el-table-column align="center" label="产品类型" prop="categoryName" width="160" />
     <el-table-column align="center" label="产品单位" prop="unit">
@@ -76,7 +76,7 @@ const emits = defineEmits<{
   (e: 'update:modelValue', v: any[]): void
 }>()
 
-const list = ref<ProductApi.ProductExpandVO[]>([]) // 列表数量
+const list = ref<ProductApi.ProductExpandVO[]>([]) // 已添加的产品列表
 const multipleSelection = ref<ProductApi.ProductExpandVO[]>([]) // 多选
 
 /** 处理删除 */
@@ -100,8 +100,9 @@ const getTotalPrice = computed(() => (row: ProductApi.ProductExpandVO) => {
   row.totalPrice = isNaN(totalPrice) ? 0 : yuanToFen(totalPrice)
   return isNaN(totalPrice) ? 0 : totalPrice.toFixed(2)
 })
-const isSetListValue = ref(false) // 判断是否已经给 list 赋值过，用于编辑表单商品回显
-// 编辑时合同商品回显
+
+/** 编辑时合同产品回显 */
+const isSetListValue = ref(false) // 判断是否已经给 list 赋值过，用于编辑表单产品回显
 watch(
   () => props.modelValue,
   (val) => {
@@ -118,7 +119,8 @@ watch(
   },
   { immediate: true, deep: true }
 )
-// 监听列表变化，动态更新合同商品列表
+
+/** 监听列表变化，动态更新合同产品列表 */
 watch(
   list,
   (val) => {
@@ -130,14 +132,14 @@ watch(
   { deep: true }
 )
 
-// 监听商品选择结果动态添加商品到列表中,如果商品存在则不放入列表中
+// 监听产品选择结果动态添加产品到列表中,如果产品存在则不放入列表中
 watch(
   multipleSelection,
   (val) => {
     if (!val || val.length === 0) {
       return
     }
-    // 过滤出不在列表中的商品
+    // 过滤出不在列表中的产品
     const ids = list.value.map((item) => item.id)
     const productList = multipleSelection.value.filter((item) => ids.indexOf(item.id) === -1)
     if (!productList || productList.length === 0) {

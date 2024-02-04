@@ -1,3 +1,4 @@
+<!-- 合同详情：产品列表 -->
 <template>
   <el-table :data="list" :show-overflow-tooltip="true" :stripe="true">
     <el-table-column align="center" label="产品名称" prop="name" width="160" />
@@ -35,7 +36,8 @@ defineOptions({ name: 'ContractProductList' })
 const props = withDefaults(defineProps<{ modelValue: ProductApi.ProductExpandVO[] }>(), {
   modelValue: () => []
 })
-const list = ref<ProductApi.ProductExpandVO[]>([]) // 列表数量
+const list = ref<ProductApi.ProductExpandVO[]>([]) // 产品列表
+
 /** 计算 totalPrice */
 const getTotalPrice = computed(() => (row: ProductApi.ProductExpandVO) => {
   const totalPrice =
@@ -43,8 +45,9 @@ const getTotalPrice = computed(() => (row: ProductApi.ProductExpandVO) => {
   row.totalPrice = isNaN(totalPrice) ? 0 : yuanToFen(totalPrice)
   return isNaN(totalPrice) ? 0 : totalPrice.toFixed(2)
 })
-const isSetListValue = ref(false) // 判断是否已经给 list 赋值过，用于编辑表单商品回显
-// 编辑时合同商品回显
+
+/** 编辑时合同产品回显 */
+const isSetListValue = ref(false) // 判断是否已经给 list 赋值过，用于编辑表单产品回显
 watch(
   () => props.modelValue,
   (val) => {
