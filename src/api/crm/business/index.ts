@@ -73,6 +73,6 @@ export const getBusinessListByIds = async (val: number[]) => {
 }
 
 // 商机转移
-export const transfer = async (data: TransferReqVO) => {
+export const transferBusiness = async (data: TransferReqVO) => {
   return await request.put({ url: '/crm/business/transfer', data })
 }

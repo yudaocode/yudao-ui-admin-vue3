@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" :title="dialogTitle" width="70%">
+  <Dialog v-model="dialogVisible" :title="dialogTitle" width="820">
     <el-form
       ref="formRef"
       v-loading="formLoading"
@@ -7,9 +7,11 @@
       :rules="formRules"
       label-width="110px"
     >
-      <el-row>
-        <el-col :span="24" class="mb-10px">
-          <CardTitle title="基本信息" />
+      <el-row :gutter="20">
+        <el-col :span="12">
+          <el-form-item label="合同编号" prop="no">
+            <el-input v-model="formData.no" placeholder="请输入合同编号" />
+          </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="合同名称" prop="name">
@@ -17,53 +19,12 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="合同编号" prop="no">
-            <el-input v-model="formData.no" placeholder="请输入合同编号" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="客户" prop="customerId">
+          <el-form-item label="客户名称" prop="customerId">
             <el-select v-model="formData.customerId">
               <el-option
                 v-for="item in customerList"
                 :key="item.id"
                 :label="item.name"
-                :value="item.id!"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="客户签约人" prop="contactId">
-            <el-select v-model="formData.contactId" :disabled="!formData.customerId">
-              <el-option
-                v-for="item in getContactOptions"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id!"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="公司签约人" prop="signUserId">
-            <el-select v-model="formData.signUserId">
-              <el-option
-                v-for="item in userList"
-                :key="item.id"
-                :label="item.nickname"
-                :value="item.id!"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="负责人" prop="ownerUserId">
-            <el-select v-model="formData.ownerUserId">
-              <el-option
-                v-for="item in userList"
-                :key="item.id"
-                :label="item.nickname"
                 :value="item.id!"
               />
             </el-select>
@@ -82,11 +43,6 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="合同金额(元)" prop="price">
-            <el-input v-model="formData.price" placeholder="请输入合同金额" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
           <el-form-item label="下单日期" prop="orderDate">
             <el-date-picker
               v-model="formData.orderDate"
@@ -94,6 +50,11 @@
               type="date"
               value-format="x"
             />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="合同金额" prop="price">
+            <el-input v-model="formData.price" placeholder="请输入合同金额" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -116,6 +77,42 @@
             />
           </el-form-item>
         </el-col>
+        <el-col :span="12">
+          <el-form-item label="公司签约人" prop="signUserId">
+            <el-select v-model="formData.signUserId">
+              <el-option
+                v-for="item in userList"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id!"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="客户签约人" prop="contactId">
+            <el-select v-model="formData.contactId" :disabled="!formData.customerId">
+              <el-option
+                v-for="item in getContactOptions"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id!"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="负责人" prop="ownerUserId">
+            <el-select v-model="formData.ownerUserId">
+              <el-option
+                v-for="item in userList"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id!"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
             <el-input
@@ -126,6 +123,7 @@
             />
           </el-form-item>
         </el-col>
+        <!-- TODO @puhui999：productItems 改成 products 会更好点；因为它不是 item 哈 -->
         <el-col :span="24">
           <el-form-item label="产品列表" prop="productList">
             <ProductList v-model="formData.productItems" />
@@ -133,26 +131,20 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="整单折扣(%)" prop="discountPercent">
-            <el-input v-model="formData.discountPercent" placeholder="请输入整单折扣" />
+            <el-input-number
+              v-model="formData.discountPercent"
+              :min="0"
+              :max="100"
+              :precision="0"
+              placeholder="请输入整单折扣"
+              class="!w-100%"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="产品总金额(元)" prop="productPrice">
-            <el-input v-model="formData.productPrice" placeholder="请输入产品总金额" />
+            {{ fenToYuan(formData.productPrice) }}
           </el-form-item>
-        </el-col>
-        <el-col :span="24">
-          <CardTitle class="mb-10px" title="审批信息" />
-        </el-col>
-        <el-col :span="12">
-          <el-button
-            class="m-20px"
-            link
-            type="primary"
-            @click="BPMLModelRef?.handleBpmnDetail('contract-approve')"
-          >
-            查看工作流
-          </el-button>
         </el-col>
       </el-row>
     </el-form>
@@ -161,7 +153,6 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <BPMLModel ref="BPMLModelRef" />
 </template>
 <script lang="ts" setup>
 import * as CustomerApi from '@/api/crm/customer'
@@ -170,7 +161,7 @@ import * as UserApi from '@/api/system/user'
 import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
 import ProductList from './components/ProductList.vue'
-import BPMLModel from '@/views/crm/contract/components/BPMLModel.vue'
+import { fenToYuan } from '@/utils'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -188,7 +179,8 @@ const formRules = reactive({
   no: [{ required: true, message: '合同编号不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const BPMLModelRef = ref<InstanceType<typeof BPMLModel>>()
+
+/** 监听合同产品变化，计算合同产品总价 */
 watch(
   () => formData.value.productItems,
   (val) => {
@@ -196,7 +188,7 @@ watch(
       formData.value.productPrice = 0
       return
     }
-    // 使用reduce函数进行累加
+    // 使用 reduce 函数进行累加
     formData.value.productPrice = val.reduce(
       (accumulator, currentValue) =>
         isNaN(accumulator + currentValue.totalPrice) ? 0 : accumulator + currentValue.totalPrice,
@@ -205,13 +197,13 @@ watch(
   },
   { deep: true }
 )
+
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  await getAllApi()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -221,9 +213,7 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
-}
-const getAllApi = async () => {
-  await Promise.all([getCustomerList(), getUserList(), getContactListList(), getBusinessList()])
+  await getAllApi()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -252,32 +242,42 @@ const submitForm = async () => {
     formLoading.value = false
   }
 }
-const customerList = ref<CustomerApi.CustomerVO[]>([])
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {} as ContractApi.ContractVO
+  formRef.value?.resetFields()
+}
+
+/** 获取其它相关数据 */
+const getAllApi = async () => {
+  await Promise.all([getCustomerList(), getUserList(), getContactListList(), getBusinessList()])
+}
+
 /** 获取客户 */
+const customerList = ref<CustomerApi.CustomerVO[]>([])
 const getCustomerList = async () => {
   customerList.value = await CustomerApi.getSimpleCustomerList()
 }
-const contactList = ref<ContactApi.ContactVO[]>([])
+
 /** 动态获取客户联系人 */
+const contactList = ref<ContactApi.ContactVO[]>([])
 const getContactOptions = computed(() =>
   contactList.value.filter((item) => item.customerId === formData.value.customerId)
 )
 const getContactListList = async () => {
   contactList.value = await ContactApi.getSimpleContactList()
 }
-const userList = ref<UserApi.UserVO[]>([])
+
 /** 获取用户列表 */
+const userList = ref<UserApi.UserVO[]>([])
 const getUserList = async () => {
   userList.value = await UserApi.getSimpleUserList()
 }
-const businessList = ref<BusinessApi.BusinessVO[]>([])
+
 /** 获取商机 */
+const businessList = ref<BusinessApi.BusinessVO[]>([])
 const getBusinessList = async () => {
   businessList.value = await BusinessApi.getSimpleBusinessList()
-}
-/** 重置表单 */
-const resetForm = () => {
-  formData.value = {} as ContractApi.ContractVO
-  formRef.value?.resetFields()
 }
 </script>

@@ -7,6 +7,7 @@ export interface ContractVO {
   name: string
   customerId: number
   businessId: number
+  businessName: string
   processInstanceId: number
   orderDate: Date
   ownerUserId: number
@@ -18,8 +19,9 @@ export interface ContractVO {
   productPrice: number
   contactId: number
   signUserId: number
+  signUserName: string
   contactLastTime: Date
-  status: number
+  auditStatus: number
   remark: string
   productItems: ProductExpandVO[]
   creatorName: string
@@ -66,11 +68,11 @@ export const exportContract = async (params) => {
 }
 
 // 提交审核
-export const handleApprove = async (id: number) => {
-  return await request.put({ url: `/crm/contract/approve?id=${id}` })
+export const submitContract = async (id: number) => {
+  return await request.put({ url: `/crm/contract/submit?id=${id}` })
 }
 
 // 合同转移
-export const transfer = async (data: TransferReqVO) => {
+export const transferContract = async (data: TransferReqVO) => {
   return await request.put({ url: '/crm/contract/transfer', data })
 }

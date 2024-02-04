@@ -54,47 +54,72 @@
   </ContentWrap>
 
   <!-- 列表 -->
-  <!-- TODO 芋艿：各种字段要调整 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="合同编号" prop="id" />
-      <el-table-column align="center" label="合同名称" prop="name" />
-      <el-table-column align="center" label="客户名称" prop="customerId" />
-      <el-table-column align="center" label="商机名称" prop="businessId" />
-      <el-table-column align="center" label="工作流名称" prop="processInstanceId" />
+      <el-table-column align="center" fixed="left" label="合同编号" prop="no" width="130" />
+      <el-table-column align="center" label="合同名称" prop="name" width="130" />
+      <el-table-column align="center" label="客户名称" prop="customerName" width="120">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openCustomerDetail(scope.row.customerId)"
+          >
+            {{ scope.row.customerName }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <!-- TODO @puhui999：做了商机详情后，可以把这个超链接加上 -->
+      <el-table-column align="center" label="商机名称" prop="businessName" width="130" />
       <el-table-column
-        :formatter="dateFormatter"
         align="center"
         label="下单时间"
         prop="orderDate"
-        width="180px"
+        width="120"
+        :formatter="dateFormatter2"
       />
-      <el-table-column align="center" label="负责人" prop="ownerUserId" />
-      <el-table-column align="center" label="合同编号" prop="no" />
       <el-table-column
-        :formatter="dateFormatter"
         align="center"
-        label="开始时间"
+        label="合同金额"
+        prop="price"
+        width="130"
+        :formatter="fenToYuanFormat"
+      />
+      <el-table-column
+        align="center"
+        label="合同开始时间"
         prop="startTime"
-        width="180px"
+        width="120"
+        :formatter="dateFormatter2"
       />
       <el-table-column
-        :formatter="dateFormatter"
         align="center"
-        label="结束时间"
+        label="合同结束时间"
         prop="endTime"
-        width="180px"
+        width="120"
+        :formatter="dateFormatter2"
       />
-      <el-table-column align="center" label="合同金额" prop="price" />
-      <el-table-column align="center" label="整单折扣" prop="discountPercent" />
-      <el-table-column align="center" label="产品总金额" prop="productPrice" />
-      <el-table-column align="center" label="联系人" prop="contactId" />
-      <el-table-column align="center" label="公司签约人" prop="signUserId" />
+      <el-table-column align="center" label="客户签约人" prop="contactName" width="130">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openContactDetail(scope.row.contactId)"
+          >
+            {{ scope.row.contactName }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="公司签约人" prop="signUserName" width="130" />
+      <el-table-column align="center" label="备注" prop="remark" width="130" />
+      <!-- TODO @puhui999：后续可加 【已收款金额】、【未收款金额】 -->
+      <el-table-column align="center" label="负责人" prop="ownerUserName" width="120" />
+      <el-table-column align="center" label="创建人" prop="creatorName" width="120" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
-        label="最后跟进时间"
-        prop="contactLastTime"
+        label="更新时间"
+        prop="updateTime"
         width="180px"
       />
       <el-table-column
@@ -104,7 +129,11 @@
         prop="createTime"
         width="180px"
       />
-      <el-table-column align="center" label="备注" prop="remark" />
+      <el-table-column align="center" fixed="right" label="合同状态" prop="auditStatus" width="120">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_AUDIT_STATUS" :value="scope.row.auditStatus" />
+        </template>
+      </el-table-column>
       <el-table-column fixed="right" label="操作" width="250">
         <template #default="scope">
           <el-button
@@ -115,11 +144,12 @@
           >
             编辑
           </el-button>
+          <!-- TODO @puhui999：可以加下判断，什么情况下，可以审批；然后加个【查看审批】按钮 -->
           <el-button
             v-hasPermi="['crm:contract:update']"
             link
             type="primary"
-            @click="handleApprove(scope.row)"
+            @click="handleSubmit(scope.row)"
           >
             提交审核
           </el-button>
@@ -155,10 +185,12 @@
   <ContractForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ContractApi from '@/api/crm/contract'
 import ContractForm from './ContractForm.vue'
+import { fenToYuanFormat } from '@/utils/formatter'
+import { DICT_TYPE } from '@/utils/dict'
 
 defineOptions({ name: 'CrmContract' })
 
@@ -241,16 +273,29 @@ const handleExport = async () => {
 }
 
 /** 提交审核 **/
-const handleApprove = async (row: ContractApi.ContractVO) => {
+const handleSubmit = async (row: ContractApi.ContractVO) => {
   await message.confirm(`您确定提交【${row.name}】审核吗？`)
-  await ContractApi.handleApprove(row.id)
+  await ContractApi.submitContract(row.id)
   message.success('提交审核成功！')
   await getList()
 }
+
+/** 打开合同详情 */
 const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmContractDetail', params: { id } })
 }
+
+/** 打开客户详情 */
+const openCustomerDetail = (id: number) => {
+  push({ name: 'CrmCustomerDetail', params: { id } })
+}
+
+/** 打开联系人详情 */
+const openContactDetail = (id: number) => {
+  push({ name: 'CrmContactDetail', params: { id } })
+}
+
 /** 初始化 **/
 onMounted(() => {
   getList()

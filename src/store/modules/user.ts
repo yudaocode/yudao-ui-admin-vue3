@@ -10,7 +10,9 @@ interface UserVO {
   id: number
   avatar: string
   nickname: string
+  deptId: number
 }
+
 interface UserInfoVO {
   permissions: string[]
   roles: string[]
@@ -26,7 +28,8 @@ export const useUserStore = defineStore('admin-user', {
     user: {
       id: 0,
       avatar: '',
-      nickname: ''
+      nickname: '',
+      deptId: 0
     }
   }),
   getters: {
@@ -73,7 +76,8 @@ export const useUserStore = defineStore('admin-user', {
       this.user = {
         id: 0,
         avatar: '',
-        nickname: ''
+        nickname: '',
+        deptId: 0
       }
     }
   }

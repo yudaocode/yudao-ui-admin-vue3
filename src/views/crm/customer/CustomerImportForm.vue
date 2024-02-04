@@ -1,3 +1,4 @@
+<!-- 客户导入窗口 -->
 <template>
   <Dialog v-model="dialogVisible" title="客户导入" width="400">
     <el-upload
@@ -20,7 +21,7 @@
         <div class="el-upload__tip text-center">
           <div class="el-upload__tip">
             <el-checkbox v-model="updateSupport" />
-            是否更新已经存在的客户数据
+            是否更新已经存在的客户数据（“客户名称”重复）
           </div>
           <span>仅允许导入 xls、xlsx 格式文件。</span>
           <el-link
