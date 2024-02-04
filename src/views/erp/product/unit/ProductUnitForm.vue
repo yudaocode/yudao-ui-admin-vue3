@@ -12,7 +12,13 @@
       </el-form-item>
       <el-form-item label="单位状态" prop="status">
         <el-radio-group v-model="formData.status">
-          <el-radio label="1">请选择字典生成</el-radio>
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
@@ -24,6 +30,8 @@
 </template>
 <script setup lang="ts">
 import { ProductUnitApi } from '@/api/erp/product/unit'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { CommonStatusEnum } from '@/utils/constants'
 
 /** ERP 产品单位表单 */
 defineOptions({ name: 'ProductUnitForm' })
@@ -93,7 +101,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: undefined,
-    status: undefined
+    status: CommonStatusEnum.ENABLE
   }
   formRef.value?.resetFields()
 }

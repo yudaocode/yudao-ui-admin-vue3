@@ -24,19 +24,13 @@
           clearable
           class="!w-240px"
         >
-          <el-option label="请选择字典生成" value="" />
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
         </el-select>
-      </el-form-item>
-      <el-form-item label="创建时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
@@ -65,9 +59,12 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="单位编号" align="center" prop="id" />
-      <el-table-column label="单位名字" align="center" prop="name" />
-      <el-table-column label="单位状态" align="center" prop="status" />
+      <el-table-column label="名字" align="center" prop="name" />
+      <el-table-column label="状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
       <el-table-column
         label="创建时间"
         align="center"
@@ -114,6 +111,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { ProductUnitApi, ProductUnitVO } from '@/api/erp/product/unit'
 import ProductUnitForm from './ProductUnitForm.vue'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 /** ERP 产品单位列表 */
 defineOptions({ name: 'ErpProductUnit' })
@@ -129,8 +127,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: undefined,
-  status: undefined,
-  createTime: []
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -186,7 +183,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await ProductUnitApi.exportProductUnit(queryParams)
-    download.excel(data, 'ERP 产品单位.xls')
+    download.excel(data, '产品单位.xls')
   } catch {
   } finally {
     exportLoading.value = false
