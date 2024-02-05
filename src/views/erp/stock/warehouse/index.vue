@@ -138,8 +138,7 @@ const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const list = ref<WarehouseVO[]>([]) // 列表的数据
-// 列表的总页数
-const total = ref(0)
+const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,

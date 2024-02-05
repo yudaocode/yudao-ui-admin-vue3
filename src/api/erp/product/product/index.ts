@@ -24,6 +24,11 @@ export const ProductApi = {
     return await request.get({ url: `/erp/product/page`, params })
   },
 
+  // 查询产品精简列表
+  getProductSimpleList: async (params: any) => {
+    return await request.get({ url: `/erp/product/simple-list`, params })
+  },
+
   // 查询产品详情
   getProduct: async (id: number) => {
     return await request.get({ url: `/erp/product/get?id=` + id })

@@ -130,7 +130,7 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { ProductApi, ProductVO } from '@/api/erp/product'
+import { ProductApi, ProductVO } from '@/api/erp/product/product'
 import { ProductCategoryApi, ProductCategoryVO } from '@/api/erp/product/category'
 import { ProductUnitApi, ProductUnitVO } from '@/api/erp/product/unit'
 import { CommonStatusEnum } from '@/utils/constants'

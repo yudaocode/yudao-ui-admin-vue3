@@ -1,3 +1,4 @@
+<!-- ERP 产品库存列表 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -8,27 +9,33 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="单位名字" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          placeholder="请输入单位名字"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="单位状态" prop="status">
+      <el-form-item label="产品" prop="productId">
         <el-select
-          v-model="queryParams.status"
-          placeholder="请选择单位状态"
-          clearable
+          v-model="queryParams.productId"
+          filterable
+          placeholder="请选择产品"
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
+            v-for="item in productList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="仓库" prop="warehouseId">
+        <el-select
+          v-model="queryParams.warehouseId"
+          filterable
+          placeholder="请选择仓库"
+          class="!w-240px"
+        >
+          <el-option
+            v-for="item in warehouseList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
@@ -39,7 +46,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['erp:product-unit:create']"
+          v-hasPermi="['erp:stock:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -48,7 +55,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['erp:product-unit:export']"
+          v-hasPermi="['erp:stock:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -59,39 +66,11 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="名字" align="center" prop="name" />
-      <el-table-column label="状态" align="center" prop="status">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column label="操作" align="center">
-        <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['erp:product-unit:update']"
-          >
-            编辑
-          </el-button>
-          <el-button
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-            v-hasPermi="['erp:product-unit:delete']"
-          >
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
+      <el-table-column label="产品名称" align="center" prop="productName" />
+      <el-table-column label="产品单位" align="center" prop="unitName" />
+      <el-table-column label="产品分类" align="center" prop="categoryName" />
+      <el-table-column label="库存量" align="center" prop="count" />
+      <el-table-column label="仓库" align="center" prop="warehouseName" />
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -101,41 +80,39 @@
       @pagination="getList"
     />
   </ContentWrap>
-
-  <!-- 表单弹窗：添加/修改 -->
-  <ProductUnitForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
-import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { ProductUnitApi, ProductUnitVO } from '@/api/erp/product/unit'
-import ProductUnitForm from './ProductUnitForm.vue'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { StockApi, StockVO } from '@/api/erp/stock/stock'
+import { ProductApi, ProductVO } from '@/api/erp/product/product'
+import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
 
-/** ERP 产品单位列表 */
-defineOptions({ name: 'ErpProductUnit' })
+/** ERP 产品库存列表 */
+defineOptions({ name: 'ErpStock' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<ProductUnitVO[]>([]) // 列表的数据
+const list = ref<StockVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: undefined,
-  status: undefined
+  productId: undefined,
+  warehouseId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const productList = ref<ProductVO[]>([]) // 产品列表
+const warehouseList = ref<WarehouseVO[]>([]) // 仓库列表
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ProductUnitApi.getProductUnitPage(queryParams)
+    const data = await StockApi.getStockPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -167,7 +144,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ProductUnitApi.deleteProductUnit(id)
+    await StockApi.deleteStock(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -181,8 +158,8 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await ProductUnitApi.exportProductUnit(queryParams)
-    download.excel(data, '产品单位.xls')
+    const data = await StockApi.exportStock(queryParams)
+    download.excel(data, '产品库存.xls')
   } catch {
   } finally {
     exportLoading.value = false
@@ -190,7 +167,10 @@ const handleExport = async () => {
 }
 
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  // 加载产品、仓库列表
+  productList.value = await ProductApi.getProductSimpleList()
+  warehouseList.value = await WarehouseApi.getWarehouseSimpleList()
 })
 </script>
