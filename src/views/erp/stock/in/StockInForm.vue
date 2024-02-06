@@ -9,10 +9,9 @@
       :disabled="disabled"
     >
       <el-row :gutter="20">
-        <!-- TODO 芋艿：待接入 -->
         <el-col :span="8">
           <el-form-item label="入库单号" prop="no">
-            <el-input v-model="formData.no" placeholder="请输入入库单号" />
+            <el-input disabled v-model="formData.no" placeholder="保存时自动生成" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -93,7 +92,6 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const formData = ref({
   id: undefined,
-  no: undefined,
   supplierId: undefined,
   inTime: undefined,
   remark: undefined,
@@ -101,7 +99,6 @@ const formData = ref({
   items: []
 })
 const formRules = reactive({
-  no: [{ required: true, message: '入库单号不能为空', trigger: 'blur' }],
   inTime: [{ required: true, message: '入库时间不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
@@ -161,11 +158,8 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    no: undefined,
     supplierId: undefined,
     inTime: undefined,
-    totalCount: undefined,
-    totalPrice: undefined,
     remark: undefined,
     fileUrl: undefined,
     items: []

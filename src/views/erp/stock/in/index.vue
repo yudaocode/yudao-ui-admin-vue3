@@ -150,7 +150,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column width="30" label="选择" type="selection" />
-      <el-table-column label="入库单号" align="center" prop="no" />
+      <el-table-column min-width="140" label="入库单号" align="center" prop="no" />
       <el-table-column label="产品信息" align="center" prop="productNames" min-width="200" />
       <el-table-column label="供应商" align="center" prop="supplierName" />
       <el-table-column
@@ -163,12 +163,12 @@
       <el-table-column label="创建人" align="center" prop="creatorName" />
       <el-table-column label="数量" align="center" prop="totalCount" />
       <el-table-column label="金额" align="center" prop="totalPrice" />
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="状态" align="center" fixed="right" width="90" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.ERP_AUDIT_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" min-width="150">
+      <el-table-column label="操作" align="center" fixed="right" width="220">
         <template #default="scope">
           <el-button
             link
