@@ -12,43 +12,35 @@ export interface StockInVO {
   remark: string // 备注
 }
 
-// TODO 芋艿：稍后清理字段
 // ERP 其它入库单 API
 export const StockInApi = {
-  // 查询ERP 其它入库单分页
+  // 查询其它入库单分页
   getStockInPage: async (params: any) => {
     return await request.get({ url: `/erp/stock-in/page`, params })
   },
 
-  // 查询ERP 其它入库单详情
+  // 查询其它入库单详情
   getStockIn: async (id: number) => {
     return await request.get({ url: `/erp/stock-in/get?id=` + id })
   },
 
-  // 新增ERP 其它入库单
+  // 新增其它入库单
   createStockIn: async (data: StockInVO) => {
     return await request.post({ url: `/erp/stock-in/create`, data })
   },
 
-  // 修改ERP 其它入库单
+  // 修改其它入库单
   updateStockIn: async (data: StockInVO) => {
     return await request.put({ url: `/erp/stock-in/update`, data })
   },
 
-  // 删除ERP 其它入库单
+  // 删除其它入库单
   deleteStockIn: async (id: number) => {
     return await request.delete({ url: `/erp/stock-in/delete?id=` + id })
   },
 
-  // 导出ERP 其它入库单 Excel
+  // 导出其它入库单 Excel
   exportStockIn: async (params) => {
     return await request.download({ url: `/erp/stock-in/export-excel`, params })
-  },
-
-  // ==================== 子表（ERP 其它入库单项） ====================
-
-  // 获得ERP 其它入库单项列表
-  getStockInItemListByInId: async (inId) => {
-    return await request.get({ url: `/erp/stock-in/stock-in-item/list-by-in-id?inId=` + inId })
   }
 }

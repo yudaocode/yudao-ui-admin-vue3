@@ -25,10 +25,21 @@
             />
           </el-form-item>
         </el-col>
-        <!-- TODO 芋艿：待接入 -->
         <el-col :span="8">
           <el-form-item label="供应商" prop="supplierId">
-            <el-input v-model="formData.supplierId" placeholder="请输入供应商" />
+            <el-select
+              v-model="formData.supplierId"
+              filterable
+              placeholder="请选择供应商"
+              class="!w-1/1"
+            >
+              <el-option
+                v-for="item in supplierList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="16">
@@ -63,9 +74,9 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { StockInApi, StockInVO } from '@/api/erp/stock/in'
 import StockInItemForm from './components/StockInItemForm.vue'
+import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 
 /** ERP 其它入库单 表单 */
 defineOptions({ name: 'StockInForm' })
@@ -91,6 +102,7 @@ const formRules = reactive({
   inTime: [{ required: true, message: '入库时间不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const supplierList = ref<SupplierVO[]>([]) // 供应商列表
 
 /** 子表的表单 */
 const subTabsName = ref('stockInItem')
@@ -111,6 +123,8 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 加载供应商列表
+  supplierList.value = await SupplierApi.getSupplierSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 

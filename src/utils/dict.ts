@@ -206,5 +206,6 @@ export enum DICT_TYPE {
   CRM_FOLLOW_UP_TYPE = 'crm_follow_up_type', // 跟进方式
 
   // ========== ERP - 企业资源计划模块  ==========
+  ERP_AUDIT_STATUS = 'erp_audit_status', // ERP 审批状态
   ERP_STOCK_RECORD_BIZ_TYPE = 'erp_stock_record_biz_type' // 库存明细的业务类型
 }

@@ -17,7 +17,21 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO 芋艿：产品信息 -->
+      <el-form-item label="产品" prop="productId">
+        <el-select
+          v-model="queryParams.productId"
+          filterable
+          placeholder="请选择产品"
+          class="!w-240px"
+        >
+          <el-option
+            v-for="item in productList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="入库时间" prop="inTime">
         <el-date-picker
           v-model="queryParams.inTime"
@@ -30,23 +44,49 @@
         />
       </el-form-item>
       <el-form-item label="供应商" prop="supplierId">
-        <el-input
+        <el-select
           v-model="queryParams.supplierId"
-          placeholder="请输入供应商"
-          clearable
-          @keyup.enter="handleQuery"
+          filterable
+          placeholder="请选择供应商"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="item in supplierList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
-      <!-- TODO 芋艿：仓库信息 -->
-      <el-form-item label="创建人" prop="creator">
-        <el-input
-          v-model="queryParams.creator"
-          placeholder="请输入创建人"
-          clearable
-          @keyup.enter="handleQuery"
+      <el-form-item label="仓库" prop="warehouseId">
+        <el-select
+          v-model="queryParams.warehouseId"
+          filterable
+          placeholder="请选择仓库"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="item in warehouseList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="创建人" prop="creator">
+        <el-select
+          v-model="queryParams.creator"
+          filterable
+          placeholder="请选择创建人"
+          class="!w-240px"
+        >
+          <el-option
+            v-for="item in userList"
+            :key="item.id"
+            :label="item.nickname"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
@@ -96,7 +136,7 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="入库单号" align="center" prop="no" />
       <el-table-column label="产品信息" align="center" prop="productNames" min-width="200" />
-      <el-table-column label="供应商" align="center" prop="supplierId" />
+      <el-table-column label="供应商" align="center" prop="supplierName" />
       <el-table-column
         label="入库时间"
         align="center"
@@ -152,6 +192,11 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { StockInApi, StockInVO } from '@/api/erp/stock/in'
 import StockInForm from './StockInForm.vue'
+import { ProductApi, ProductVO } from '@/api/erp/product/product'
+import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
+import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
+import { UserVO } from '@/api/system/user'
+import * as UserApi from '@/api/system/user'
 
 /** ERP 其它入库单 列表 */
 defineOptions({ name: 'ErpStockIn' })
@@ -174,6 +219,10 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const productList = ref<ProductVO[]>([]) // 产品列表
+const warehouseList = ref<WarehouseVO[]>([]) // 仓库列表
+const supplierList = ref<SupplierVO[]>([]) // 供应商列表
+const userList = ref<UserVO[]>([]) // 用户列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -234,7 +283,12 @@ const handleExport = async () => {
 }
 
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  // 加载产品、仓库列表、供应商
+  productList.value = await ProductApi.getProductSimpleList()
+  warehouseList.value = await WarehouseApi.getWarehouseSimpleList()
+  supplierList.value = await SupplierApi.getSupplierSimpleList()
+  userList.value = await UserApi.getSimpleUserList()
 })
 </script>
