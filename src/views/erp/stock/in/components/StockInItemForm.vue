@@ -6,6 +6,7 @@
     v-loading="formLoading"
     label-width="0px"
     :inline-message="true"
+    :disabled="disabled"
   >
     <el-table :data="formData" show-summary class="-mt-10px">
       <el-table-column label="序号" type="index" align="center" width="60" />
@@ -120,24 +121,25 @@
       </el-table-column>
     </el-table>
   </el-form>
-  <el-row justify="center" class="mt-3">
+  <el-row justify="center" class="mt-3" v-if="!disabled">
     <el-button @click="handleAdd" round>+ 添加入库产品</el-button>
   </el-row>
 </template>
 <script setup lang="ts">
-import { StockInApi } from '@/api/erp/stock/in'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
 import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
 import { StockApi } from '@/api/erp/stock/stock'
 
 const props = defineProps<{
   items: undefined
+  disabled: false
 }>()
 const formLoading = ref(false) // 表单的加载中
 const formData = ref([])
 const formRules = reactive({
   inId: [{ required: true, message: '入库编号不能为空', trigger: 'blur' }],
   warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'blur' }],
+  productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
   count: [{ required: true, message: '产品数量不能为空', trigger: 'blur' }]
 })
@@ -146,7 +148,7 @@ const productList = ref<ProductVO[]>([]) // 产品列表
 const warehouseList = ref<WarehouseVO[]>([]) // 仓库列表
 const defaultWarehouse = ref<WarehouseVO>(undefined) // 默认仓库
 
-/** 监听主表的关联字段的变化，加载对应的子表数据 */
+/** 初始化设置入库项 */
 watch(
   () => props.items,
   async (val) => {
@@ -164,16 +166,11 @@ watch(
     }
     // 循环处理
     val.forEach((item) => {
-      // const product = productList.value.find((product) => product.id === item.productId)
-      // if (product) {
-      //   item.productUnitName = product.unitName
-      //   item.productBarCode = product.barCode
-      //   item.productPrice = product.minPrice
-      //   // TODO 芋艿：加载库存
-      //   item.stockCount = 10
-      // }
+      // TODO 芋艿：后面处理下相乘问题；包括后端的；
       if (item.productPrice && item.count) {
         item.totalPrice = item.productPrice * item.count
+      } else {
+        item.totalPrice = undefined
       }
     })
   },
@@ -237,9 +234,12 @@ defineExpose({ validate })
 
 /** 初始化 */
 onMounted(async () => {
-  // 加载产品、仓库列表
   productList.value = await ProductApi.getProductSimpleList()
   warehouseList.value = await WarehouseApi.getWarehouseSimpleList()
   defaultWarehouse.value = warehouseList.value.find((item) => item.defaultStatus)
+  // 默认添加一个
+  if (formData.value.length === 0) {
+    handleAdd()
+  }
 })
 </script>

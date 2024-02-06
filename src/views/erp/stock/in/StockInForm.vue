@@ -6,6 +6,7 @@
       :rules="formRules"
       label-width="100px"
       v-loading="formLoading"
+      :disabled="disabled"
     >
       <el-row :gutter="20">
         <!-- TODO 芋艿：待接入 -->
@@ -63,12 +64,14 @@
     <ContentWrap>
       <el-tabs v-model="subTabsName" class="-mt-15px -mb-10px">
         <el-tab-pane label="入库产品清单" name="stockInItem">
-          <StockInItemForm ref="stockInItemFormRef" :items="formData.items" />
+          <StockInItemForm ref="stockInItemFormRef" :items="formData.items" :disabled="disabled" />
         </el-tab-pane>
       </el-tabs>
     </ContentWrap>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!disabled">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -87,7 +90,7 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const formData = ref({
   id: undefined,
   no: undefined,
@@ -101,6 +104,7 @@ const formRules = reactive({
   no: [{ required: true, message: '入库单号不能为空', trigger: 'blur' }],
   inTime: [{ required: true, message: '入库时间不能为空', trigger: 'blur' }]
 })
+const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
 const supplierList = ref<SupplierVO[]>([]) // 供应商列表
 

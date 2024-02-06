@@ -34,9 +34,25 @@ export const StockInApi = {
     return await request.put({ url: `/erp/stock-in/update`, data })
   },
 
+  // 更新其它入库单的状态
+  updateStockInStatus: async (id: number, status: number) => {
+    return await request.put({
+      url: `/erp/stock-in/update-status`,
+      params: {
+        id,
+        status
+      }
+    })
+  },
+
   // 删除其它入库单
-  deleteStockIn: async (id: number) => {
-    return await request.delete({ url: `/erp/stock-in/delete?id=` + id })
+  deleteStockIn: async (ids: number[]) => {
+    return await request.delete({
+      url: `/erp/stock-in/delete`,
+      params: {
+        ids: ids.join(',')
+      }
+    })
   },
 
   // 导出其它入库单 Excel
