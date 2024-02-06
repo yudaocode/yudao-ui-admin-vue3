@@ -136,7 +136,7 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { StockRecordApi, StockRecordVO } from '@/api/erp/stock/stockRecord'
+import { StockRecordApi, StockRecordVO } from '@/api/erp/stock/record'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
 import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
 
@@ -214,7 +214,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await StockRecordApi.exportStockRecord(queryParams)
-    download.excel(data, 'ERP 产品库存明细.xls')
+    download.excel(data, '产品库存明细.xls')
   } catch {
   } finally {
     exportLoading.value = false

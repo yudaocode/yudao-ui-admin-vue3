@@ -14,7 +14,7 @@ export const ProductUnitApi = {
     return await request.get({ url: `/erp/product-unit/page`, params })
   },
 
-  // 查询商品单位精简列表
+  // 查询产品单位精简列表
   getProductUnitSimpleList: async () => {
     return await request.get({ url: `/erp/product-unit/simple-list` })
   },

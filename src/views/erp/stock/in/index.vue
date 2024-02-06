@@ -17,7 +17,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <!-- TODO 芋艿：商品信息 -->
+      <!-- TODO 芋艿：产品信息 -->
       <el-form-item label="入库时间" prop="inTime">
         <el-date-picker
           v-model="queryParams.inTime"
@@ -95,8 +95,8 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="入库单号" align="center" prop="no" />
+      <el-table-column label="产品信息" align="center" prop="productNames" min-width="200" />
       <el-table-column label="供应商" align="center" prop="supplierId" />
-      <!-- TODO 商品信息 -->
       <el-table-column
         label="入库时间"
         align="center"
@@ -104,14 +104,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column
-        label="入库时间"
-        align="center"
-        prop="inTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <!-- TODO 芋艿：创建人 -->
+      <el-table-column label="创建人" align="center" prop="creatorName" />
       <el-table-column label="数量" align="center" prop="totalCount" />
       <el-table-column label="金额合计" align="center" prop="totalPrice" />
       <el-table-column label="状态" align="center" prop="status">
@@ -233,7 +226,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await StockInApi.exportStockIn(queryParams)
-    download.excel(data, 'ERP 其它入库单.xls')
+    download.excel(data, '其它入库单.xls')
   } catch {
   } finally {
     exportLoading.value = false

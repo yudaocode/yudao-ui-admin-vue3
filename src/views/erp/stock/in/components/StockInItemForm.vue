@@ -84,7 +84,7 @@
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="商品单价" fixed="right" min-width="120">
+      <el-table-column label="产品单价" fixed="right" min-width="120">
         <template #default="{ row, $index }">
           <el-form-item
             :prop="`${$index}.productPrice`"
@@ -139,7 +139,7 @@ const formRules = reactive({
   inId: [{ required: true, message: '入库编号不能为空', trigger: 'blur' }],
   warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'blur' }],
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
-  count: [{ required: true, message: '商品数量不能为空', trigger: 'blur' }]
+  count: [{ required: true, message: '产品数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref([]) // 表单 Ref
 const productList = ref<ProductVO[]>([]) // 产品列表
