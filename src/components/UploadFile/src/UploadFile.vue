@@ -160,7 +160,7 @@ const emitUpdateModelValue = () => {
   // 情况1：数组结果
   let result: string | string[] = fileList.value.map((file) => file.url!)
   // 情况2：逗号分隔的字符串
-  if (isString(props.modelValue)) {
+  if (props.limit === 1 || isString(props.modelValue)) {
     result = result.join(',')
   }
   emit('update:modelValue', result)

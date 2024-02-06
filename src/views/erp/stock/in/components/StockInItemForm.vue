@@ -8,65 +8,101 @@
     :inline-message="true"
   >
     <el-table :data="formData" show-summary class="-mt-10px">
-      <el-table-column label="序号" type="index" width="60" />
-      <el-table-column label="仓库名称" min-width="150">
+      <el-table-column label="序号" type="index" align="center" width="60" />
+      <el-table-column label="仓库名称" min-width="125">
         <template #default="{ row, $index }">
           <el-form-item
             :prop="`${$index}.warehouseId`"
             :rules="formRules.warehouseId"
             class="mb-0px!"
           >
-            <el-input v-model="row.warehouseId" placeholder="请输入仓库编号" />
+            <el-select
+              v-model="row.warehouseId"
+              filterable
+              placeholder="请选择仓库"
+              @change="onChangeWarehouse($event, row)"
+            >
+              <el-option
+                v-for="item in warehouseList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="产品名称" min-width="150">
+      <el-table-column label="产品名称" min-width="180">
         <template #default="{ row, $index }">
           <el-form-item :prop="`${$index}.productId`" :rules="formRules.productId" class="mb-0px!">
-            <el-input v-model="row.productId" placeholder="请输入产品编号" />
+            <el-select
+              v-model="row.productId"
+              filterable
+              @change="onChangeProduct($event, row)"
+              placeholder="请选择产品"
+            >
+              <el-option
+                v-for="item in productList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="库存" min-width="100">
+        <template #default="{ row }">
+          <el-form-item class="mb-0px!">
+            <el-input disabled v-model="row.stockCount" />
           </el-form-item>
         </template>
       </el-table-column>
       <el-table-column label="条码" min-width="150">
         <template #default="{ row }">
           <el-form-item class="mb-0px!">
-            <el-input disabled v-model="row.productId" placeholder="请输入条码" />
+            <el-input disabled v-model="row.productBarCode" />
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="单位" min-width="150">
+      <el-table-column label="单位" min-width="80">
         <template #default="{ row }">
           <el-form-item class="mb-0px!">
-            <el-input disabled v-model="row.productUnitId" placeholder="请输入单位编号" />
+            <el-input disabled v-model="row.productUnitName" />
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="数量" prop="count" min-width="150">
+      <el-table-column label="数量" prop="count" fixed="right" min-width="120">
         <template #default="{ row, $index }">
           <el-form-item :prop="`${$index}.count`" :rules="formRules.count" class="mb-0px!">
-            <el-input v-model="row.count" placeholder="请输入商品数量" />
+            <el-input-number
+              v-model="row.count"
+              controls-position="right"
+              :min="1"
+              class="!w-100%"
+            />
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="商品单价" min-width="150">
+      <el-table-column label="商品单价" fixed="right" min-width="120">
         <template #default="{ row, $index }">
           <el-form-item
             :prop="`${$index}.productPrice`"
             :rules="formRules.productPrice"
             class="mb-0px!"
           >
-            <el-input v-model="row.productPrice" placeholder="请输入商品单价" />
+            <el-input-number v-model="row.productPrice" controls-position="right" :min="1" />
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="合计金额" min-width="150">
+      <el-table-column label="合计金额" prop="totalPrice" fixed="right" min-width="100">
         <template #default="{ row, $index }">
           <el-form-item
             :prop="`${$index}.totalPrice`"
             :rules="formRules.totalPrice"
             class="mb-0px!"
           >
-            <el-input v-model="row.totalPrice" placeholder="请输入合计金额，单位：元" />
+            <el-input disabled v-model="row.totalPrice" />
           </el-form-item>
         </template>
       </el-table-column>
@@ -90,57 +126,74 @@
 </template>
 <script setup lang="ts">
 import { StockInApi } from '@/api/erp/stock/in'
+import { ProductApi, ProductVO } from '@/api/erp/product/product'
+import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
+import { StockApi } from '@/api/erp/stock/stock'
 
 const props = defineProps<{
-  inId: undefined // 入库编号（主表的关联字段）
+  items: undefined
 }>()
 const formLoading = ref(false) // 表单的加载中
 const formData = ref([])
 const formRules = reactive({
   inId: [{ required: true, message: '入库编号不能为空', trigger: 'blur' }],
-  warehouseId: [{ required: true, message: '仓库编号不能为空', trigger: 'blur' }],
-  productId: [{ required: true, message: '产品编号不能为空', trigger: 'blur' }],
-  productUnitId: [{ required: true, message: '商品单位编号不能为空', trigger: 'blur' }],
-  productPrice: [{ required: true, message: '商品单价不能为空', trigger: 'blur' }],
-  count: [{ required: true, message: '商品数量不能为空', trigger: 'blur' }],
-  totalPrice: [{ required: true, message: '合计金额，单位：元不能为空', trigger: 'blur' }]
+  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'blur' }],
+  productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
+  count: [{ required: true, message: '商品数量不能为空', trigger: 'blur' }]
 })
-const formRef = ref() // 表单 Ref
+const formRef = ref([]) // 表单 Ref
+const productList = ref<ProductVO[]>([]) // 产品列表
+const warehouseList = ref<WarehouseVO[]>([]) // 仓库列表
+const defaultWarehouse = ref<WarehouseVO>(undefined) // 默认仓库
 
 /** 监听主表的关联字段的变化，加载对应的子表数据 */
 watch(
-  () => props.inId,
+  () => props.items,
   async (val) => {
-    // 1. 重置表单
-    formData.value = []
-    // 2. val 非空，则加载数据
-    if (!val) {
-      return
-    }
-    try {
-      formLoading.value = true
-      formData.value = await StockInApi.getStockInItemListByInId(val)
-    } finally {
-      formLoading.value = false
-    }
+    formData.value = val
   },
   { immediate: true }
+)
+
+/** 监听合同产品变化，计算合同产品总价 */
+watch(
+  () => formData.value,
+  (val) => {
+    if (!val || val.length === 0) {
+      return
+    }
+    // 循环处理
+    val.forEach((item) => {
+      // const product = productList.value.find((product) => product.id === item.productId)
+      // if (product) {
+      //   item.productUnitName = product.unitName
+      //   item.productBarCode = product.barCode
+      //   item.productPrice = product.minPrice
+      //   // TODO 芋艿：加载库存
+      //   item.stockCount = 10
+      // }
+      if (item.productPrice && item.count) {
+        item.totalPrice = item.productPrice * item.count
+      }
+    })
+  },
+  { deep: true }
 )
 
 /** 新增按钮操作 */
 const handleAdd = () => {
   const row = {
     id: undefined,
-    inId: undefined,
-    warehouseId: undefined,
+    warehouseId: defaultWarehouse.value?.id,
     productId: undefined,
-    productUnitId: undefined,
+    productUnitName: undefined, // 产品单位
+    productBarCode: undefined, // 产品条码
     productPrice: undefined,
-    count: undefined,
+    stockCount: undefined,
+    count: 1,
     totalPrice: undefined,
     remark: undefined
   }
-  row.inId = props.inId
   formData.value.push(row)
 }
 
@@ -149,15 +202,44 @@ const handleDelete = (index) => {
   formData.value.splice(index, 1)
 }
 
+/** 处理仓库变更 */
+const onChangeWarehouse = (warehouseId, row) => {
+  // 加载库存
+  setStockCount(row)
+}
+
+/** 处理产品变更 */
+const onChangeProduct = (productId, row) => {
+  const product = productList.value.find((item) => item.id === productId)
+  if (product) {
+    row.productUnitName = product.unitName
+    row.productBarCode = product.barCode
+    row.productPrice = product.minPrice
+  }
+  // 加载库存
+  setStockCount(row)
+}
+
+/** 加载库存 */
+const setStockCount = async (row) => {
+  if (!row.productId || !row.warehouseId) {
+    return
+  }
+  const stock = await StockApi.getStock2(row.productId, row.warehouseId)
+  row.stockCount = stock ? stock.count : 0
+}
+
 /** 表单校验 */
 const validate = () => {
   return formRef.value.validate()
 }
+defineExpose({ validate })
 
-/** 表单值 */
-const getData = () => {
-  return formData.value
-}
-
-defineExpose({ validate, getData })
+/** 初始化 */
+onMounted(async () => {
+  // 加载产品、仓库列表
+  productList.value = await ProductApi.getProductSimpleList()
+  warehouseList.value = await WarehouseApi.getWarehouseSimpleList()
+  defaultWarehouse.value = warehouseList.value.find((item) => item.defaultStatus)
+})
 </script>
