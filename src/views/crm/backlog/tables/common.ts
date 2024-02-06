@@ -17,3 +17,9 @@ export const CONTACT_STATUS = [
   { label: '已逾期', value: 2 },
   { label: '已联系', value: 3 }
 ]
+
+/** 合同审批状态 */
+export const CONTRACT_AUDIT_STATUS = [
+  { label: '已审批', value: 20 },
+  { label: '待审批', value: 10 }
+]
