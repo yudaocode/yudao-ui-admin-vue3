@@ -61,9 +61,24 @@
       <el-table-column label="规格" align="center" prop="standard" />
       <el-table-column label="分类" align="center" prop="categoryName" />
       <el-table-column label="单位" align="center" prop="unitName" />
-      <el-table-column label="采购价格" align="center" prop="purchasePrice" />
-      <el-table-column label="销售价格" align="center" prop="salePrice" />
-      <el-table-column label="最低价格" align="center" prop="minPrice" />
+      <el-table-column
+        label="采购价格"
+        align="center"
+        prop="purchasePrice"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column
+        label="销售价格"
+        align="center"
+        prop="salePrice"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column
+        label="最低价格"
+        align="center"
+        prop="minPrice"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -118,6 +133,7 @@ import { ProductCategoryApi, ProductCategoryVO } from '@/api/erp/product/categor
 import ProductForm from './ProductForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 import { defaultProps, handleTree } from '@/utils/tree'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 /** ERP 产品列表 */
 defineOptions({ name: 'ErpProduct' })

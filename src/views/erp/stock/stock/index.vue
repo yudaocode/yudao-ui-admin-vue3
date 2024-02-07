@@ -69,7 +69,12 @@
       <el-table-column label="产品名称" align="center" prop="productName" />
       <el-table-column label="产品单位" align="center" prop="unitName" />
       <el-table-column label="产品分类" align="center" prop="categoryName" />
-      <el-table-column label="库存量" align="center" prop="count" />
+      <el-table-column
+        label="库存量"
+        align="center"
+        prop="count"
+        :formatter="erpCountTableColumnFormatter"
+      />
       <el-table-column label="仓库" align="center" prop="warehouseName" />
     </el-table>
     <!-- 分页 -->
@@ -87,6 +92,7 @@ import download from '@/utils/download'
 import { StockApi, StockVO } from '@/api/erp/stock/stock'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
 import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
+import { erpCountTableColumnFormatter } from '@/utils'
 
 /** ERP 产品库存列表 */
 defineOptions({ name: 'ErpStock' })

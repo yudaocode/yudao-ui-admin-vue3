@@ -62,8 +62,18 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="仓库名称" align="center" prop="name" />
       <el-table-column label="仓库地址" align="center" prop="address" />
-      <el-table-column label="仓储费" align="center" prop="warehousePrice" />
-      <el-table-column label="搬运费" align="center" prop="truckagePrice" />
+      <el-table-column
+        label="仓储费"
+        align="center"
+        prop="warehousePrice"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column
+        label="搬运费"
+        align="center"
+        prop="truckagePrice"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column label="负责人" align="center" prop="principal" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="排序" align="center" prop="sort" />
@@ -129,6 +139,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
 import WarehouseForm from './WarehouseForm.vue'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 /** ERP 仓库列表 */
 defineOptions({ name: 'ErpWarehouse' })

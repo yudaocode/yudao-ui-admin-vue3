@@ -110,7 +110,7 @@
           <dict-tag :type="DICT_TYPE.ERP_STOCK_RECORD_BIZ_TYPE" :value="scope.row.bizType" />
         </template>
       </el-table-column>
-      <el-table-column label="出入库单号" align="center" prop="bizNo" />
+      <el-table-column label="出入库单号" align="center" prop="bizNo" width="200" />
       <el-table-column
         label="出入库日期"
         align="center"
@@ -118,8 +118,18 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="出入库数量" align="center" prop="count" />
-      <el-table-column label="库存量" align="center" prop="totalCount" />
+      <el-table-column
+        label="出入库数量"
+        align="center"
+        prop="count"
+        :formatter="erpCountTableColumnFormatter"
+      />
+      <el-table-column
+        label="库存量"
+        align="center"
+        prop="totalCount"
+        :formatter="erpCountTableColumnFormatter"
+      />
       <el-table-column label="操作人" align="center" prop="creatorName" />
     </el-table>
     <!-- 分页 -->
@@ -139,6 +149,7 @@ import download from '@/utils/download'
 import { StockRecordApi, StockRecordVO } from '@/api/erp/stock/record'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
 import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
+import { erpCountTableColumnFormatter } from '@/utils'
 
 /** ERP 产品库存明细列表 */
 defineOptions({ name: 'ErpStockRecord' })

@@ -71,6 +71,7 @@
             <el-input-number
               v-model="formData.taxPercent"
               :min="0"
+              :precision="2"
               placeholder="请输入税率"
               class="!w-1/1"
             />
