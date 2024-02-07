@@ -157,12 +157,22 @@
         label="入库时间"
         align="center"
         prop="inTime"
-        :formatter="dateFormatter"
-        width="180px"
+        :formatter="dateFormatter2"
+        width="120px"
       />
       <el-table-column label="创建人" align="center" prop="creatorName" />
-      <el-table-column label="数量" align="center" prop="totalCount" />
-      <el-table-column label="金额" align="center" prop="totalPrice" />
+      <el-table-column
+        label="数量"
+        align="center"
+        prop="totalCount"
+        :formatter="erpCountTableColumnFormatter"
+      />
+      <el-table-column
+        label="金额"
+        align="center"
+        prop="totalPrice"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column label="状态" align="center" fixed="right" width="90" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.ERP_AUDIT_STATUS" :value="scope.row.status" />
@@ -229,7 +239,7 @@
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { StockInApi, StockInVO } from '@/api/erp/stock/in'
 import StockInForm from './StockInForm.vue'
@@ -239,6 +249,7 @@ import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 import { UserVO } from '@/api/system/user'
 import * as UserApi from '@/api/system/user'
 import * as BusinessApi from '@/api/crm/business'
+import { erpCountTableColumnFormatter, erpPriceTableColumnFormatter } from '@/utils'
 
 /** ERP 其它入库单 列表 */
 defineOptions({ name: 'ErpStockIn' })

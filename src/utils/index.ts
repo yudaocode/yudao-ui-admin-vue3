@@ -191,6 +191,56 @@ export const copyValueToTarget = (target: any, source: any) => {
 }
 
 /**
+ * 获取链接的参数值
+ * @param key 参数键名
+ * @param urlStr 链接地址，默认为当前浏览器的地址
+ */
+export const getUrlValue = (key: string, urlStr: string = location.href): string => {
+  if (!urlStr || !key) return ''
+  const url = new URL(decodeURIComponent(urlStr))
+  return url.searchParams.get(key) ?? ''
+}
+
+/**
+ * 获取链接的参数值（值类型）
+ * @param key 参数键名
+ * @param urlStr 链接地址，默认为当前浏览器的地址
+ */
+export const getUrlNumberValue = (key: string, urlStr: string = location.href): number => {
+  return toNumber(getUrlValue(key, urlStr))
+}
+
+/**
+ * 构建排序字段
+ * @param prop 字段名称
+ * @param order 顺序
+ */
+export const buildSortingField = ({ prop, order }) => {
+  return { field: prop, order: order === 'ascending' ? 'asc' : 'desc' }
+}
+
+// ========== NumberUtils 数字方法 ==========
+
+/**
+ * 数组求和
+ *
+ * @param values 数字数组
+ * @return 求和结果，默认为 0
+ */
+export const getSumValue = (values: number[]): number => {
+  return values.reduce((prev, curr) => {
+    const value = Number(curr)
+    if (!Number.isNaN(value)) {
+      return prev + curr
+    } else {
+      return prev
+    }
+  }, 0)
+}
+
+// ========== 通用金额方法 ==========
+
+/**
  * 将一个整数转换为分数保留两位小数
  * @param num
  */
@@ -206,6 +256,7 @@ export const formatToFraction = (num: number | string | undefined): string => {
  *
  * @param num 整数
  */
+// TODO @芋艿：看看怎么融合掉
 export const floatToFixed2 = (num: number | string | undefined): string => {
   let str = '0.00'
   if (typeof num === 'undefined') {
@@ -232,6 +283,7 @@ export const floatToFixed2 = (num: number | string | undefined): string => {
  * 将一个分数转换为整数
  * @param num
  */
+// TODO @芋艿：看看怎么融合掉
 export const convertToInteger = (num: number | string | undefined): number => {
   if (typeof num === 'undefined') return 0
   const parsedNumber = typeof num === 'string' ? parseFloat(num) : num
@@ -266,31 +318,89 @@ export const calculateRelativeRate = (value?: number, reference?: number) => {
   return ((100 * ((value || 0) - reference)) / reference).toFixed(0)
 }
 
+// ========== ERP 专属方法 ==========
+
+const ERP_COUNT_DIGIT = 3
+const ERP_PRICE_DIGIT = 2
+
 /**
- * 获取链接的参数值
- * @param key 参数键名
- * @param urlStr 链接地址，默认为当前浏览器的地址
+ * 【ERP】格式化 Input 数字
+ *
+ * 例如说：库存数量
+ *
+ * @param num 数量
+ * @return 格式化后的数量
  */
-export const getUrlValue = (key: string, urlStr: string = location.href): string => {
-  if (!urlStr || !key) return ''
-  const url = new URL(decodeURIComponent(urlStr))
-  return url.searchParams.get(key) ?? ''
+export const erpNumberFormatter = (num: number | string | undefined, digit: number) => {
+  if (num === null) {
+    return ''
+  }
+  if (typeof num === 'string') {
+    num = parseFloat(num)
+  }
+  // 如果非 number，则直接返回空串
+  if (isNaN(num)) {
+    return ''
+  }
+  return num.toFixed(digit)
 }
 
 /**
- * 获取链接的参数值（值类型）
- * @param key 参数键名
- * @param urlStr 链接地址，默认为当前浏览器的地址
+ * 【ERP】格式化数量，保留三位小数
+ *
+ * 例如说：库存数量
+ *
+ * @param num 数量
+ * @return 格式化后的数量
  */
-export const getUrlNumberValue = (key: string, urlStr: string = location.href): number => {
-  return toNumber(getUrlValue(key, urlStr))
+export const erpCountInputFormatter = (num: number | string | undefined) => {
+  return erpNumberFormatter(num, ERP_COUNT_DIGIT)
+}
+
+// noinspection JSCommentMatchesSignature
+/**
+ * 【ERP】格式化数量，保留三位小数
+ *
+ * @param cellValue 数量
+ * @return 格式化后的数量
+ */
+export const erpCountTableColumnFormatter = (_, __, cellValue: any, ___) => {
+  return erpNumberFormatter(cellValue, ERP_COUNT_DIGIT)
 }
 
 /**
- * 构建排序字段
- * @param prop 字段名称
- * @param order 顺序
+ * 【ERP】格式化金额，保留二位小数
+ *
+ * 例如说：库存数量
+ *
+ * @param num 数量
+ * @return 格式化后的数量
  */
-export const buildSortingField = ({ prop, order }) => {
-  return { field: prop, order: order === 'ascending' ? 'asc' : 'desc' }
+export const erpPriceInputFormatter = (num: number | string | undefined) => {
+  return erpNumberFormatter(num, ERP_PRICE_DIGIT)
+}
+
+// noinspection JSCommentMatchesSignature
+/**
+ * 【ERP】格式化金额，保留二位小数
+ *
+ * @param cellValue 数量
+ * @return 格式化后的数量
+ */
+export const erpPriceTableColumnFormatter = (_, __, cellValue: any, ___) => {
+  return erpNumberFormatter(cellValue, ERP_PRICE_DIGIT)
+}
+
+/**
+ * 【ERP】价格计算，四舍五入保留两位小数
+ *
+ * @param price 价格
+ * @param count 数量
+ * @return 总价格。如果有任一为空，则返回 undefined
+ */
+export const erpPriceMultiply = (price: number, count: number) => {
+  if (price == null || count == null) {
+    return undefined
+  }
+  return parseFloat((price * count).toFixed(ERP_PRICE_DIGIT))
 }
