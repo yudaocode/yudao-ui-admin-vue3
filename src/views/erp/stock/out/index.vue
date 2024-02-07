@@ -192,6 +192,7 @@
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['erp:stock-out:update']"
+            :disabled="scope.row.status === 20"
           >
             编辑
           </el-button>

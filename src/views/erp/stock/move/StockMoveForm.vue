@@ -10,36 +10,19 @@
     >
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="出库单号" prop="no">
+          <el-form-item label="调度单号" prop="no">
             <el-input disabled v-model="formData.no" placeholder="保存时自动生成" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="出库时间" prop="outTime">
+          <el-form-item label="调度时间" prop="moveTime">
             <el-date-picker
-              v-model="formData.outTime"
+              v-model="formData.moveTime"
               type="date"
               value-format="x"
-              placeholder="选择出库时间"
+              placeholder="选择调度时间"
               class="!w-1/1"
             />
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="客户" prop="customerId">
-            <el-select
-              v-model="formData.customerId"
-              filterable
-              placeholder="请选择客户"
-              class="!w-1/1"
-            >
-              <el-option
-                v-for="item in customerList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="16">
@@ -62,8 +45,8 @@
     <!-- 子表的表单 -->
     <ContentWrap>
       <el-tabs v-model="subTabsName" class="-mt-15px -mb-10px">
-        <el-tab-pane label="出库产品清单" name="item">
-          <StockOutItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
+        <el-tab-pane label="调度产品清单" name="item">
+          <StockMoveItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
         </el-tab-pane>
       </el-tabs>
     </ContentWrap>
@@ -76,12 +59,11 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { StockOutApi, StockOutVO } from '@/api/erp/stock/out'
-import StockOutItemForm from './components/StockOutItemForm.vue'
-import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
+import { StockMoveApi, StockMoveVO } from '@/api/erp/stock/move'
+import StockMoveItemForm from './components/StockMoveItemForm.vue'
 
-/** ERP 其它出库单表单 */
-defineOptions({ name: 'StockOutForm' })
+/** ERP 其它调度单表单 */
+defineOptions({ name: 'StockMoveForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -93,17 +75,16 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改�
 const formData = ref({
   id: undefined,
   customerId: undefined,
-  outTime: undefined,
+  moveTime: undefined,
   remark: undefined,
   fileUrl: '',
   items: []
 })
 const formRules = reactive({
-  outTime: [{ required: true, message: '出库时间不能为空', trigger: 'blur' }]
+  moveTime: [{ required: true, message: '调度时间不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
-const customerList = ref<CustomerVO[]>([]) // 客户列表
 
 /** 子表的表单 */
 const subTabsName = ref('item')
@@ -119,13 +100,11 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await StockOutApi.getStockOut(id)
+      formData.value = await StockMoveApi.getStockMove(id)
     } finally {
       formLoading.value = false
     }
   }
-  // 加载客户列表
-  customerList.value = await CustomerApi.getCustomerSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -138,12 +117,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as StockOutVO
+    const data = formData.value as unknown as StockMoveVO
     if (formType.value === 'create') {
-      await StockOutApi.createStockOut(data)
+      await StockMoveApi.createStockMove(data)
       message.success(t('common.createSuccess'))
     } else {
-      await StockOutApi.updateStockOut(data)
+      await StockMoveApi.updateStockMove(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -159,7 +138,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     customerId: undefined,
-    outTime: undefined,
+    moveTime: undefined,
     remark: undefined,
     fileUrl: undefined,
     items: []
