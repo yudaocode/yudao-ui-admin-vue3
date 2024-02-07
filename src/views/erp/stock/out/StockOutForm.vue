@@ -10,27 +10,27 @@
     >
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="入库单号" prop="no">
+          <el-form-item label="出库单号" prop="no">
             <el-input disabled v-model="formData.no" placeholder="保存时自动生成" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="入库时间" prop="inTime">
+          <el-form-item label="出库时间" prop="outTime">
             <el-date-picker
-              v-model="formData.inTime"
+              v-model="formData.outTime"
               type="date"
               value-format="x"
-              placeholder="选择入库时间"
+              placeholder="选择出库时间"
               class="!w-1/1"
             />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="供应商" prop="supplierId">
+          <el-form-item label="客户" prop="customerId">
             <el-select
-              v-model="formData.supplierId"
+              v-model="formData.customerId"
               filterable
-              placeholder="请选择供应商"
+              placeholder="请选择客户"
               class="!w-1/1"
             >
               <el-option
@@ -62,8 +62,8 @@
     <!-- 子表的表单 -->
     <ContentWrap>
       <el-tabs v-model="subTabsName" class="-mt-15px -mb-10px">
-        <el-tab-pane label="入库产品清单" name="item">
-          <StockInItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
+        <el-tab-pane label="出库产品清单" name="item">
+          <StockOutItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
         </el-tab-pane>
       </el-tabs>
     </ContentWrap>
@@ -76,12 +76,12 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { StockInApi, StockInVO } from '@/api/erp/stock/in'
-import StockInItemForm from './components/StockInItemForm.vue'
+import { StockOutApi, StockOutVO } from '@/api/erp/stock/out'
+import StockOutItemForm from './components/StockOutItemForm.vue'
 import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 
-/** ERP 其它入库单 表单 */
-defineOptions({ name: 'StockInForm' })
+/** ERP 其它出库单表单 */
+defineOptions({ name: 'StockOutForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -92,18 +92,18 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const formData = ref({
   id: undefined,
-  supplierId: undefined,
-  inTime: undefined,
+  customerId: undefined,
+  outTime: undefined,
   remark: undefined,
   fileUrl: '',
   items: []
 })
 const formRules = reactive({
-  inTime: [{ required: true, message: '入库时间不能为空', trigger: 'blur' }]
+  outTime: [{ required: true, message: '出库时间不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
-const supplierList = ref<SupplierVO[]>([]) // 供应商列表
+const supplierList = ref<SupplierVO[]>([]) // 客户列表
 
 /** 子表的表单 */
 const subTabsName = ref('item')
@@ -119,12 +119,12 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await StockInApi.getStockIn(id)
+      formData.value = await StockOutApi.getStockOut(id)
     } finally {
       formLoading.value = false
     }
   }
-  // 加载供应商列表
+  // 加载客户列表
   supplierList.value = await SupplierApi.getSupplierSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -138,12 +138,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as StockInVO
+    const data = formData.value as unknown as StockOutVO
     if (formType.value === 'create') {
-      await StockInApi.createStockIn(data)
+      await StockOutApi.createStockOut(data)
       message.success(t('common.createSuccess'))
     } else {
-      await StockInApi.updateStockIn(data)
+      await StockOutApi.updateStockOut(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -158,8 +158,8 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    supplierId: undefined,
-    inTime: undefined,
+    customerId: undefined,
+    outTime: undefined,
     remark: undefined,
     fileUrl: undefined,
     items: []

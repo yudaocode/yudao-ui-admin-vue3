@@ -129,7 +129,7 @@
     </el-table>
   </el-form>
   <el-row justify="center" class="mt-3" v-if="!disabled">
-    <el-button @click="handleAdd" round>+ 添加入库产品</el-button>
+    <el-button @click="handleAdd" round>+ 添加出库产品</el-button>
   </el-row>
 </template>
 <script setup lang="ts">
@@ -150,7 +150,7 @@ const props = defineProps<{
 const formLoading = ref(false) // 表单的加载中
 const formData = ref([])
 const formRules = reactive({
-  inId: [{ required: true, message: '入库编号不能为空', trigger: 'blur' }],
+  inId: [{ required: true, message: '出库编号不能为空', trigger: 'blur' }],
   warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'blur' }],
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
@@ -161,7 +161,7 @@ const productList = ref<ProductVO[]>([]) // 产品列表
 const warehouseList = ref<WarehouseVO[]>([]) // 仓库列表
 const defaultWarehouse = ref<WarehouseVO>(undefined) // 默认仓库
 
-/** 初始化设置入库项 */
+/** 初始化设置出库项 */
 watch(
   () => props.items,
   async (val) => {
