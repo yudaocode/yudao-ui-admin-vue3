@@ -34,7 +34,7 @@
               class="!w-1/1"
             >
               <el-option
-                v-for="item in supplierList"
+                v-for="item in customerList"
                 :key="item.id"
                 :label="item.name"
                 :value="item.id"
@@ -79,6 +79,7 @@
 import { StockOutApi, StockOutVO } from '@/api/erp/stock/out'
 import StockOutItemForm from './components/StockOutItemForm.vue'
 import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
+import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
 
 /** ERP 其它出库单表单 */
 defineOptions({ name: 'StockOutForm' })
@@ -103,7 +104,7 @@ const formRules = reactive({
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
-const supplierList = ref<SupplierVO[]>([]) // 客户列表
+const customerList = ref<CustomerVO[]>([]) // 客户列表
 
 /** 子表的表单 */
 const subTabsName = ref('item')
@@ -125,7 +126,7 @@ const open = async (type: string, id?: number) => {
     }
   }
   // 加载客户列表
-  supplierList.value = await SupplierApi.getSupplierSimpleList()
+  customerList.value = await CustomerApi.getCustomerSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 

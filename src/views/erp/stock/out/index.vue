@@ -51,7 +51,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="item in supplierList"
+            v-for="item in customerList"
             :key="item.id"
             :label="item.name"
             :value="item.id"
@@ -152,7 +152,7 @@
       <el-table-column width="30" label="选择" type="selection" />
       <el-table-column min-width="140" label="出库单号" align="center" prop="no" />
       <el-table-column label="产品信息" align="center" prop="productNames" min-width="200" />
-      <el-table-column label="客户" align="center" prop="supplierName" />
+      <el-table-column label="客户" align="center" prop="customerName" />
       <el-table-column
         label="出库时间"
         align="center"
@@ -199,7 +199,7 @@
             link
             type="primary"
             @click="handleUpdateStatus(scope.row.id, 20)"
-            v-hasPermi="['erp:stock-out:update']"
+            v-hasPermi="['erp:stock-out:update-status']"
             v-if="scope.row.status === 10"
           >
             审批
@@ -208,7 +208,7 @@
             link
             type="danger"
             @click="handleUpdateStatus(scope.row.id, 10)"
-            v-hasPermi="['erp:stock-out:update']"
+            v-hasPermi="['erp:stock-out:update-status']"
             v-else
           >
             反审批
@@ -249,6 +249,7 @@ import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 import { UserVO } from '@/api/system/user'
 import * as UserApi from '@/api/system/user'
 import { erpCountTableColumnFormatter, erpPriceTableColumnFormatter } from '@/utils'
+import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
 
 /** ERP 其它出库单列表 */
 defineOptions({ name: 'ErpStockOut' })
@@ -273,7 +274,7 @@ const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const productList = ref<ProductVO[]>([]) // 产品列表
 const warehouseList = ref<WarehouseVO[]>([]) // 仓库列表
-const supplierList = ref<SupplierVO[]>([]) // 客户列表 TODO 芋艿：需要改下
+const customerList = ref<CustomerVO[]>([]) // 客户列表
 const userList = ref<UserVO[]>([]) // 用户列表
 
 /** 查询列表 */
@@ -360,7 +361,7 @@ onMounted(async () => {
   // 加载产品、仓库列表、客户
   productList.value = await ProductApi.getProductSimpleList()
   warehouseList.value = await WarehouseApi.getWarehouseSimpleList()
-  supplierList.value = await SupplierApi.getSupplierSimpleList()
+  customerList.value = await CustomerApi.getCustomerSimpleList()
   userList.value = await UserApi.getSimpleUserList()
 })
 // TODO 芋艿：可优化功能：列表界面，支持导入

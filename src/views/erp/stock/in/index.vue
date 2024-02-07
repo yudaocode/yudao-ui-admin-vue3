@@ -199,7 +199,7 @@
             link
             type="primary"
             @click="handleUpdateStatus(scope.row.id, 20)"
-            v-hasPermi="['erp:stock-in:update']"
+            v-hasPermi="['erp:stock-in:update-status']"
             v-if="scope.row.status === 10"
           >
             审批
@@ -208,7 +208,7 @@
             link
             type="danger"
             @click="handleUpdateStatus(scope.row.id, 10)"
-            v-hasPermi="['erp:stock-in:update']"
+            v-hasPermi="['erp:stock-in:update-status']"
             v-else
           >
             反审批
