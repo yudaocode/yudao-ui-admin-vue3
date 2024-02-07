@@ -119,7 +119,7 @@ const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
   sceneType: 1, // 我负责的
-  pool: true, // 固定 公海参数为 true
+  pool: true // 固定 公海参数为 true
 })
 const queryFormRef = ref() // 搜索的表单
 

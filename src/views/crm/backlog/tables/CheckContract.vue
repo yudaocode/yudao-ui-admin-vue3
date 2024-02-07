@@ -18,7 +18,7 @@
           @change="handleQuery"
         >
           <el-option
-            v-for="(option, index) in CONTRACT_AUDIT_STATUS"
+            v-for="(option, index) in AUDIT_STATUS"
             :label="option.label"
             :value="option.value"
             :key="index"
@@ -124,7 +124,7 @@ import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import * as ContractApi from '@/api/crm/contract'
 import { fenToYuanFormat } from '@/utils/formatter'
 import { DICT_TYPE } from '@/utils/dict'
-import { CONTRACT_AUDIT_STATUS } from './common'
+import { AUDIT_STATUS } from './common'
 
 const { push } = useRouter() // 路由
 
