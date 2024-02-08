@@ -52,7 +52,7 @@
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="库存" min-width="100">
+      <el-table-column label="账面库存" min-width="100">
         <template #default="{ row }">
           <el-form-item class="mb-0px!">
             <el-input disabled v-model="row.stockCount" :formatter="erpCountInputFormatter" />
@@ -73,14 +73,29 @@
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="数量" prop="count" fixed="right" min-width="140">
+      <el-table-column label="实际库存" fixed="right" min-width="140">
+        <template #default="{ row, $index }">
+          <el-form-item
+            :prop="`${$index}.actualCount`"
+            :rules="formRules.actualCount"
+            class="mb-0px!"
+          >
+            <el-input-number
+              v-model="row.actualCount"
+              controls-position="right"
+              :precision="3"
+              class="!w-100%"
+            />
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="盈亏数量" prop="count" fixed="right" min-width="110">
         <template #default="{ row, $index }">
           <el-form-item :prop="`${$index}.count`" :rules="formRules.count" class="mb-0px!">
-            <el-input-number
+            <el-input
+              disabled
               v-model="row.count"
-              controls-position="right"
-              :min="0.001"
-              :precision="3"
+              :formatter="erpCountInputFormatter"
               class="!w-100%"
             />
           </el-form-item>
@@ -179,6 +194,11 @@ watch(
     }
     // 循环处理
     val.forEach((item) => {
+      if (item.stockCount != null && item.actualCount != null) {
+        item.count = item.actualCount - item.stockCount
+      } else {
+        item.count = undefined
+      }
       item.totalPrice = erpPriceMultiply(item.productPrice, item.count)
     })
   },
@@ -216,7 +236,8 @@ const handleAdd = () => {
     productBarCode: undefined, // 产品条码
     productPrice: undefined,
     stockCount: undefined,
-    count: 1,
+    actualCount: undefined,
+    count: undefined,
     totalPrice: undefined,
     remark: undefined
   }
@@ -253,6 +274,7 @@ const setStockCount = async (row) => {
   }
   const stock = await StockApi.getStock2(row.productId, row.warehouseId)
   row.stockCount = stock ? stock.count : 0
+  row.actualCount = row.stockCount
 }
 
 /** 表单校验 */
