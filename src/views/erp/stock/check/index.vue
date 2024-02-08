@@ -8,10 +8,10 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="调度单号" prop="no">
+      <el-form-item label="盘点单号" prop="no">
         <el-input
           v-model="queryParams.no"
-          placeholder="请输入调度单号"
+          placeholder="请输入盘点单号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -32,7 +32,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="调度时间" prop="moveTime">
+      <el-form-item label="盘点时间" prop="checkTime">
         <el-date-picker
           v-model="queryParams.inTime"
           value-format="YYYY-MM-DD HH:mm:ss"
@@ -43,9 +43,9 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="仓库" prop="fromWarehouseId">
+      <el-form-item label="仓库" prop="warehouseId">
         <el-select
-          v-model="queryParams.fromWarehouseId"
+          v-model="queryParams.warehouseId"
           filterable
           placeholder="请选择仓库"
           class="!w-240px"
@@ -99,7 +99,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['erp:stock-move:create']"
+          v-hasPermi="['erp:stock-check:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -108,7 +108,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['erp:stock-move:export']"
+          v-hasPermi="['erp:stock-check:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -116,7 +116,7 @@
           type="danger"
           plain
           @click="handleDelete(selectionList.map((item) => item.id))"
-          v-hasPermi="['erp:stock-move:delete']"
+          v-hasPermi="['erp:stock-check:delete']"
           :disabled="selectionList.length === 0"
         >
           <Icon icon="ep:delete" class="mr-5px" /> 删除
@@ -135,12 +135,12 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column width="30" label="选择" type="selection" />
-      <el-table-column min-width="140" label="调度单号" align="center" prop="no" />
+      <el-table-column min-width="140" label="盘点单号" align="center" prop="no" />
       <el-table-column label="产品信息" align="center" prop="productNames" min-width="200" />
       <el-table-column
-        label="调度时间"
+        label="盘点时间"
         align="center"
-        prop="moveTime"
+        prop="checkTime"
         :formatter="dateFormatter2"
         width="120px"
       />
@@ -167,7 +167,7 @@
           <el-button
             link
             @click="openForm('detail', scope.row.id)"
-            v-hasPermi="['erp:stock-move:query']"
+            v-hasPermi="['erp:stock-check:query']"
           >
             详情
           </el-button>
@@ -175,7 +175,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['erp:stock-move:update']"
+            v-hasPermi="['erp:stock-check:update']"
             :disabled="scope.row.status === 20"
           >
             编辑
@@ -184,7 +184,7 @@
             link
             type="primary"
             @click="handleUpdateStatus(scope.row.id, 20)"
-            v-hasPermi="['erp:stock-move:update-status']"
+            v-hasPermi="['erp:stock-check:update-status']"
             v-if="scope.row.status === 10"
           >
             审批
@@ -193,7 +193,7 @@
             link
             type="danger"
             @click="handleUpdateStatus(scope.row.id, 10)"
-            v-hasPermi="['erp:stock-move:update-status']"
+            v-hasPermi="['erp:stock-check:update-status']"
             v-else
           >
             反审批
@@ -202,7 +202,7 @@
             link
             type="danger"
             @click="handleDelete([scope.row.id])"
-            v-hasPermi="['erp:stock-move:delete']"
+            v-hasPermi="['erp:stock-check:delete']"
           >
             删除
           </el-button>
@@ -219,36 +219,36 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <StockMoveForm ref="formRef" @success="getList" />
+  <StockCheckForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { StockMoveApi, StockMoveVO } from '@/api/erp/stock/move'
-import StockMoveForm from './StockMoveForm.vue'
+import { StockCheckApi, StockCheckVO } from '@/api/erp/stock/check'
+import StockCheckForm from './StockCheckForm.vue'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
 import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
 import { UserVO } from '@/api/system/user'
 import * as UserApi from '@/api/system/user'
 import { erpCountTableColumnFormatter, erpPriceTableColumnFormatter } from '@/utils'
 
-/** ERP 库存调度单列表 */
-defineOptions({ name: 'ErpStockMove' })
+/** ERP 其它盘点单列表 */
+defineOptions({ name: 'ErpStockCheck' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<StockMoveVO[]>([]) // 列表的数据
+const list = ref<StockCheckVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   no: undefined,
-  fromWarehouseId: undefined,
-  moveTime: [],
+  warehouseId: undefined,
+  checkTime: [],
   status: undefined,
   remark: undefined,
   creator: undefined
@@ -263,7 +263,7 @@ const userList = ref<UserVO[]>([]) // 用户列表
 const getList = async () => {
   loading.value = true
   try {
-    const data = await StockMoveApi.getStockMovePage(queryParams)
+    const data = await StockCheckApi.getStockCheckPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -295,7 +295,7 @@ const handleDelete = async (ids: number[]) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await StockMoveApi.deleteStockMove(ids)
+    await StockCheckApi.deleteStockCheck(ids)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -307,9 +307,9 @@ const handleDelete = async (ids: number[]) => {
 const handleUpdateStatus = async (id: number, status: number) => {
   try {
     // 审批的二次确认
-    await message.confirm(`确定${status === 20 ? '审批' : '反审批'}该调度单吗？`)
+    await message.confirm(`确定${status === 20 ? '审批' : '反审批'}该盘点单吗？`)
     // 发起审批
-    await StockMoveApi.updateStockMoveStatus(id, status)
+    await StockCheckApi.updateStockCheckStatus(id, status)
     message.success(`${status === 20 ? '审批' : '反审批'}成功`)
     // 刷新列表
     await getList()
@@ -323,8 +323,8 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await StockMoveApi.exportStockMove(queryParams)
-    download.excel(data, '库存调度单.xls')
+    const data = await StockCheckApi.exportStockCheck(queryParams)
+    download.excel(data, '其它盘点单.xls')
   } catch {
   } finally {
     exportLoading.value = false
@@ -332,8 +332,8 @@ const handleExport = async () => {
 }
 
 /** 选中操作 */
-const selectionList = ref<StockMoveVO[]>([])
-const handleSelectionChange = (rows: StockMoveVO[]) => {
+const selectionList = ref<StockCheckVO[]>([])
+const handleSelectionChange = (rows: StockCheckVO[]) => {
   selectionList.value = rows
 }
 

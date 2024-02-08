@@ -10,17 +10,17 @@
     >
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="调度单号" prop="no">
+          <el-form-item label="盘点单号" prop="no">
             <el-input disabled v-model="formData.no" placeholder="保存时自动生成" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="调度时间" prop="moveTime">
+          <el-form-item label="盘点时间" prop="checkTime">
             <el-date-picker
-              v-model="formData.moveTime"
+              v-model="formData.checkTime"
               type="date"
               value-format="x"
-              placeholder="选择调度时间"
+              placeholder="选择盘点时间"
               class="!w-1/1"
             />
           </el-form-item>
@@ -45,8 +45,8 @@
     <!-- 子表的表单 -->
     <ContentWrap>
       <el-tabs v-model="subTabsName" class="-mt-15px -mb-10px">
-        <el-tab-pane label="调度产品清单" name="item">
-          <StockMoveItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
+        <el-tab-pane label="盘点产品清单" name="item">
+          <StockCheckItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
         </el-tab-pane>
       </el-tabs>
     </ContentWrap>
@@ -59,11 +59,11 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { StockMoveApi, StockMoveVO } from '@/api/erp/stock/move'
-import StockMoveItemForm from './components/StockMoveItemForm.vue'
+import { StockCheckApi, StockCheckVO } from '@/api/erp/stock/check'
+import StockCheckItemForm from './components/StockCheckItemForm.vue'
 
-/** ERP 库存调度单表单 */
-defineOptions({ name: 'StockMoveForm' })
+/** ERP 其它盘点单表单 */
+defineOptions({ name: 'StockCheckForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -75,13 +75,13 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改�
 const formData = ref({
   id: undefined,
   customerId: undefined,
-  moveTime: undefined,
+  checkTime: undefined,
   remark: undefined,
   fileUrl: '',
   items: []
 })
 const formRules = reactive({
-  moveTime: [{ required: true, message: '调度时间不能为空', trigger: 'blur' }]
+  checkTime: [{ required: true, message: '盘点时间不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
@@ -100,7 +100,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await StockMoveApi.getStockMove(id)
+      formData.value = await StockCheckApi.getStockCheck(id)
     } finally {
       formLoading.value = false
     }
@@ -117,12 +117,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as StockMoveVO
+    const data = formData.value as unknown as StockCheckVO
     if (formType.value === 'create') {
-      await StockMoveApi.createStockMove(data)
+      await StockCheckApi.createStockCheck(data)
       message.success(t('common.createSuccess'))
     } else {
-      await StockMoveApi.updateStockMove(data)
+      await StockCheckApi.updateStockCheck(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -138,7 +138,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     customerId: undefined,
-    moveTime: undefined,
+    checkTime: undefined,
     remark: undefined,
     fileUrl: undefined,
     items: []
