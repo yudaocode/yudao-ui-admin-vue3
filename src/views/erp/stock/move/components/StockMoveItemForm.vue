@@ -106,11 +106,7 @@
       </el-table-column>
       <el-table-column label="产品单价" fixed="right" min-width="120">
         <template #default="{ row, $index }">
-          <el-form-item
-            :prop="`${$index}.productPrice`"
-            :rules="formRules.productPrice"
-            class="mb-0px!"
-          >
+          <el-form-item :prop="`${$index}.productPrice`" class="mb-0px!">
             <el-input-number
               v-model="row.productPrice"
               controls-position="right"
@@ -123,18 +119,14 @@
       </el-table-column>
       <el-table-column label="合计金额" prop="totalPrice" fixed="right" min-width="100">
         <template #default="{ row, $index }">
-          <el-form-item
-            :prop="`${$index}.totalPrice`"
-            :rules="formRules.totalPrice"
-            class="mb-0px!"
-          >
+          <el-form-item :prop="`${$index}.totalPrice`" class="mb-0px!">
             <el-input disabled v-model="row.totalPrice" :formatter="erpPriceInputFormatter" />
           </el-form-item>
         </template>
       </el-table-column>
       <el-table-column label="备注" min-width="150">
         <template #default="{ row, $index }">
-          <el-form-item :prop="`${$index}.remark`" :rules="formRules.remark" class="mb-0px!">
+          <el-form-item :prop="`${$index}.remark`" class="mb-0px!">
             <el-input v-model="row.remark" placeholder="请输入备注" />
           </el-form-item>
         </template>
@@ -171,7 +163,6 @@ const formRules = reactive({
   inId: [{ required: true, message: '调度编号不能为空', trigger: 'blur' }],
   fromWarehouseId: [{ required: true, message: '调出仓库不能为空', trigger: 'blur' }],
   toWarehouseId: [{ required: true, message: '调入仓库不能为空', trigger: 'blur' }],
-  productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
   count: [{ required: true, message: '产品数量不能为空', trigger: 'blur' }]
 })

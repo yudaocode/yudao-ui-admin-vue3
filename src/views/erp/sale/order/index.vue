@@ -284,7 +284,7 @@ import * as UserApi from '@/api/system/user'
 import { erpCountTableColumnFormatter, erpPriceTableColumnFormatter } from '@/utils'
 import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
 
-/** ERP 其它订单单列表 */
+/** ERP 销售订单列表 */
 defineOptions({ name: 'ErpSaleOrder' })
 
 const message = useMessage() // 消息弹窗
@@ -359,7 +359,7 @@ const handleDelete = async (ids: number[]) => {
 const handleUpdateStatus = async (id: number, status: number) => {
   try {
     // 审批的二次确认
-    await message.confirm(`确定${status === 20 ? '审批' : '反审批'}该订单单吗？`)
+    await message.confirm(`确定${status === 20 ? '审批' : '反审批'}该订单吗？`)
     // 发起审批
     await SaleOrderApi.updateSaleOrderStatus(id, status)
     message.success(`${status === 20 ? '审批' : '反审批'}成功`)
@@ -376,7 +376,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await SaleOrderApi.exportSaleOrder(queryParams)
-    download.excel(data, '其它订单单.xls')
+    download.excel(data, '销售订单.xls')
   } catch {
   } finally {
     exportLoading.value = false

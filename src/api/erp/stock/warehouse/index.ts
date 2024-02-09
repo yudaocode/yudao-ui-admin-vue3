@@ -22,8 +22,8 @@ export const WarehouseApi = {
   },
 
   // 查询仓库精简列表
-  getWarehouseSimpleList: async (params: any) => {
-    return await request.get({ url: `/erp/warehouse/simple-list`, params })
+  getWarehouseSimpleList: async () => {
+    return await request.get({ url: `/erp/warehouse/simple-list` })
   },
 
   // 查询仓库详情

@@ -10,29 +10,6 @@
   >
     <el-table :data="formData" show-summary :summary-method="getSummaries" class="-mt-10px">
       <el-table-column label="序号" type="index" align="center" width="60" />
-      <el-table-column label="仓库名称" min-width="125">
-        <template #default="{ row, $index }">
-          <el-form-item
-            :prop="`${$index}.warehouseId`"
-            :rules="formRules.warehouseId"
-            class="mb-0px!"
-          >
-            <el-select
-              v-model="row.warehouseId"
-              filterable
-              placeholder="请选择仓库"
-              @change="onChangeWarehouse($event, row)"
-            >
-              <el-option
-                v-for="item in warehouseList"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-        </template>
-      </el-table-column>
       <el-table-column label="产品名称" min-width="180">
         <template #default="{ row, $index }">
           <el-form-item :prop="`${$index}.productId`" :rules="formRules.productId" class="mb-0px!">
@@ -88,11 +65,7 @@
       </el-table-column>
       <el-table-column label="产品单价" fixed="right" min-width="120">
         <template #default="{ row, $index }">
-          <el-form-item
-            :prop="`${$index}.productPrice`"
-            :rules="formRules.productPrice"
-            class="mb-0px!"
-          >
+          <el-form-item :prop="`${$index}.productPrice`" class="mb-0px!">
             <el-input-number
               v-model="row.productPrice"
               controls-position="right"
@@ -103,20 +76,55 @@
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="合计金额" prop="totalPrice" fixed="right" min-width="100">
+      <el-table-column label="金额" prop="totalProductPrice" fixed="right" min-width="100">
         <template #default="{ row, $index }">
-          <el-form-item
-            :prop="`${$index}.totalPrice`"
-            :rules="formRules.totalPrice"
-            class="mb-0px!"
-          >
+          <el-form-item :prop="`${$index}.totalProductPrice`" class="mb-0px!">
+            <el-input
+              disabled
+              v-model="row.totalProductPrice"
+              :formatter="erpPriceInputFormatter"
+            />
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="税率（%）" fixed="right" min-width="115">
+        <template #default="{ row, $index }">
+          <el-form-item :prop="`${$index}.taxPercent`" class="mb-0px!">
+            <el-input-number
+              v-model="row.taxPercent"
+              controls-position="right"
+              :min="0.01"
+              :precision="2"
+              class="!w-100%"
+            />
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="税额" prop="taxPrice" fixed="right" min-width="120">
+        <template #default="{ row, $index }">
+          <el-form-item :prop="`${$index}.taxPrice`" class="mb-0px!">
+            <el-form-item :prop="`${$index}.taxPrice`" class="mb-0px!">
+              <el-input-number
+                v-model="row.taxPrice"
+                controls-position="right"
+                :min="0.01"
+                :precision="2"
+                class="!w-100%"
+              />
+            </el-form-item>
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="税额合计" prop="totalPrice" fixed="right" min-width="100">
+        <template #default="{ row, $index }">
+          <el-form-item :prop="`${$index}.totalPrice`" class="mb-0px!">
             <el-input disabled v-model="row.totalPrice" :formatter="erpPriceInputFormatter" />
           </el-form-item>
         </template>
       </el-table-column>
       <el-table-column label="备注" min-width="150">
         <template #default="{ row, $index }">
-          <el-form-item :prop="`${$index}.remark`" :rules="formRules.remark" class="mb-0px!">
+          <el-form-item :prop="`${$index}.remark`" class="mb-0px!">
             <el-input v-model="row.remark" placeholder="请输入备注" />
           </el-form-item>
         </template>
@@ -134,7 +142,6 @@
 </template>
 <script setup lang="ts">
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
-import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
 import { StockApi } from '@/api/erp/stock/stock'
 import {
   erpCountInputFormatter,
@@ -153,13 +160,10 @@ const formRules = reactive({
   inId: [{ required: true, message: '出库编号不能为空', trigger: 'blur' }],
   warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'blur' }],
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
-  productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
   count: [{ required: true, message: '产品数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref([]) // 表单 Ref
 const productList = ref<ProductVO[]>([]) // 产品列表
-const warehouseList = ref<WarehouseVO[]>([]) // 仓库列表
-const defaultWarehouse = ref<WarehouseVO>(undefined) // 默认仓库
 
 /** 初始化设置出库项 */
 watch(
@@ -179,7 +183,13 @@ watch(
     }
     // 循环处理
     val.forEach((item) => {
-      item.totalPrice = erpPriceMultiply(item.productPrice, item.count)
+      item.totalProductPrice = erpPriceMultiply(item.productPrice, item.count)
+      item.taxPrice = erpPriceMultiply(item.totalProductPrice, item.taxPercent / 100.0)
+      if (item.totalProductPrice != null) {
+        item.totalPrice = item.totalProductPrice + (item.taxPrice || 0)
+      } else {
+        item.totalPrice = undefined
+      }
     })
   },
   { deep: true }
@@ -189,12 +199,12 @@ watch(
 const getSummaries = (param: SummaryMethodProps) => {
   const { columns, data } = param
   const sums: string[] = []
-  columns.forEach((column, index) => {
+  columns.forEach((column, index: number) => {
     if (index === 0) {
       sums[index] = '合计'
       return
     }
-    if (['count', 'totalPrice'].includes(column.property)) {
+    if (['count', 'totalProductPrice', 'taxPrice', 'totalPrice'].includes(column.property)) {
       const sum = getSumValue(data.map((item) => Number(item[column.property])))
       sums[index] =
         column.property === 'count' ? erpCountInputFormatter(sum) : erpPriceInputFormatter(sum)
@@ -210,13 +220,15 @@ const getSummaries = (param: SummaryMethodProps) => {
 const handleAdd = () => {
   const row = {
     id: undefined,
-    warehouseId: defaultWarehouse.value?.id,
     productId: undefined,
     productUnitName: undefined, // 产品单位
     productBarCode: undefined, // 产品条码
     productPrice: undefined,
     stockCount: undefined,
     count: 1,
+    totalProductPrice: undefined,
+    taxPercent: undefined,
+    taxPrice: undefined,
     totalPrice: undefined,
     remark: undefined
   }
@@ -224,14 +236,8 @@ const handleAdd = () => {
 }
 
 /** 删除按钮操作 */
-const handleDelete = (index) => {
+const handleDelete = (index: number) => {
   formData.value.splice(index, 1)
-}
-
-/** 处理仓库变更 */
-const onChangeWarehouse = (warehouseId, row) => {
-  // 加载库存
-  setStockCount(row)
 }
 
 /** 处理产品变更 */
@@ -247,12 +253,12 @@ const onChangeProduct = (productId, row) => {
 }
 
 /** 加载库存 */
-const setStockCount = async (row) => {
-  if (!row.productId || !row.warehouseId) {
+const setStockCount = async (row: any) => {
+  if (!row.productId) {
     return
   }
-  const stock = await StockApi.getStock2(row.productId, row.warehouseId)
-  row.stockCount = stock ? stock.count : 0
+  const count = await StockApi.getStockCount(row.productId)
+  row.stockCount = count || 0
 }
 
 /** 表单校验 */
@@ -264,8 +270,6 @@ defineExpose({ validate })
 /** 初始化 */
 onMounted(async () => {
   productList.value = await ProductApi.getProductSimpleList()
-  warehouseList.value = await WarehouseApi.getWarehouseSimpleList()
-  defaultWarehouse.value = warehouseList.value.find((item) => item.defaultStatus)
   // 默认添加一个
   if (formData.value.length === 0) {
     handleAdd()

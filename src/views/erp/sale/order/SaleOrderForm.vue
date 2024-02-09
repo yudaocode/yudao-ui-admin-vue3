@@ -10,17 +10,17 @@
     >
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="出库单号" prop="no">
+          <el-form-item label="订单单号" prop="no">
             <el-input disabled v-model="formData.no" placeholder="保存时自动生成" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="出库时间" prop="outTime">
+          <el-form-item label="订单时间" prop="outTime">
             <el-date-picker
-              v-model="formData.outTime"
+              v-model="formData.orderTime"
               type="date"
               value-format="x"
-              placeholder="选择出库时间"
+              placeholder="选择订单时间"
               class="!w-1/1"
             />
           </el-form-item>
@@ -62,7 +62,7 @@
     <!-- 子表的表单 -->
     <ContentWrap>
       <el-tabs v-model="subTabsName" class="-mt-15px -mb-10px">
-        <el-tab-pane label="出库产品清单" name="item">
+        <el-tab-pane label="订单产品清单" name="item">
           <SaleOrderItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
         </el-tab-pane>
       </el-tabs>
@@ -80,7 +80,7 @@ import { SaleOrderApi, SaleOrderVO } from '@/api/erp/sale/order'
 import SaleOrderItemForm from './components/SaleOrderItemForm.vue'
 import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
 
-/** ERP 其它出库单表单 */
+/** ERP 销售订单表单 */
 defineOptions({ name: 'SaleOrderForm' })
 
 const { t } = useI18n() // 国际化
@@ -96,10 +96,11 @@ const formData = ref({
   orderTime: undefined,
   remark: undefined,
   fileUrl: '',
-  items: []
+  items: [],
+  no: undefined // 订单单号，后端返回
 })
 const formRules = reactive({
-  orderTime: [{ required: true, message: '出库时间不能为空', trigger: 'blur' }]
+  orderTime: [{ required: true, message: '订单时间不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
