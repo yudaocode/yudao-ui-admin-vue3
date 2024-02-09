@@ -58,15 +58,43 @@
           </el-form-item>
         </el-col>
       </el-row>
+      <!-- 子表的表单 -->
+      <ContentWrap>
+        <el-tabs v-model="subTabsName" class="-mt-15px -mb-10px">
+          <el-tab-pane label="订单产品清单" name="item">
+            <SaleOrderItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
+          </el-tab-pane>
+        </el-tabs>
+      </ContentWrap>
+      <el-row :gutter="20">
+        <el-col :span="8">
+          <el-form-item label="优惠率（%）" prop="discountPercent">
+            <el-input-number
+              v-model="formData.discountPercent"
+              controls-position="right"
+              :min="0"
+              :precision="2"
+              placeholder="请输入优惠率"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="收款优惠" prop="discountPrice">
+            <el-input
+              disabled
+              v-model="formData.discountPrice"
+              :formatter="erpPriceInputFormatter"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="优惠后金额">
+            <el-input disabled v-model="formData.totalPrice" :formatter="erpPriceInputFormatter" />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
-    <!-- 子表的表单 -->
-    <ContentWrap>
-      <el-tabs v-model="subTabsName" class="-mt-15px -mb-10px">
-        <el-tab-pane label="订单产品清单" name="item">
-          <SaleOrderItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
-        </el-tab-pane>
-      </el-tabs>
-    </ContentWrap>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading" v-if="!disabled">
         确 定
@@ -79,6 +107,7 @@
 import { SaleOrderApi, SaleOrderVO } from '@/api/erp/sale/order'
 import SaleOrderItemForm from './components/SaleOrderItemForm.vue'
 import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
+import { erpPriceInputFormatter, erpPriceMultiply, getSumValue } from '@/utils'
 
 /** ERP 销售订单表单 */
 defineOptions({ name: 'SaleOrderForm' })
@@ -96,6 +125,9 @@ const formData = ref({
   orderTime: undefined,
   remark: undefined,
   fileUrl: '',
+  discountPercent: 0,
+  discountPrice: 0,
+  totalPrice: 0,
   items: [],
   no: undefined // 订单单号，后端返回
 })
@@ -109,6 +141,22 @@ const customerList = ref<CustomerVO[]>([]) // 客户列表
 /** 子表的表单 */
 const subTabsName = ref('item')
 const itemFormRef = ref()
+
+/** 计算 discountPrice、totalPrice 价格 */
+watch(
+  () => formData.value,
+  (val) => {
+    if (!val) {
+      return
+    }
+    const totalPrice = val.items.reduce((prev, curr) => prev + curr.totalPrice, 0)
+    const discountPrice =
+      val.discountPercent != null ? erpPriceMultiply(totalPrice, val.discountPercent / 100.0) : 0
+    formData.value.discountPrice = discountPrice
+    formData.value.totalPrice = totalPrice - discountPrice
+  },
+  { deep: true }
+)
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -163,6 +211,9 @@ const resetForm = () => {
     orderTime: undefined,
     remark: undefined,
     fileUrl: undefined,
+    discountPercent: 0,
+    discountPrice: 0,
+    totalPrice: 0,
     items: []
   }
   formRef.value?.resetFields()

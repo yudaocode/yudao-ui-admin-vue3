@@ -104,13 +104,7 @@
         <template #default="{ row, $index }">
           <el-form-item :prop="`${$index}.taxPrice`" class="mb-0px!">
             <el-form-item :prop="`${$index}.taxPrice`" class="mb-0px!">
-              <el-input-number
-                v-model="row.taxPrice"
-                controls-position="right"
-                :min="0.01"
-                :precision="2"
-                class="!w-100%"
-              />
+              <el-input disabled v-model="row.taxPrice" :formatter="erpPriceInputFormatter" />
             </el-form-item>
           </el-form-item>
         </template>
