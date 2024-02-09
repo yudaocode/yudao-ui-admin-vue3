@@ -20,6 +20,7 @@
       <el-form-item label="产品" prop="productId">
         <el-select
           v-model="queryParams.productId"
+          clearable
           filterable
           placeholder="请选择产品"
           class="!w-240px"
@@ -34,7 +35,7 @@
       </el-form-item>
       <el-form-item label="盘点时间" prop="checkTime">
         <el-date-picker
-          v-model="queryParams.inTime"
+          v-model="queryParams.checkTime"
           value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           start-placeholder="开始日期"
@@ -247,6 +248,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   no: undefined,
+  productId: undefined,
   warehouseId: undefined,
   checkTime: [],
   status: undefined,

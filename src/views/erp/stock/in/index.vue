@@ -20,6 +20,7 @@
       <el-form-item label="产品" prop="productId">
         <el-select
           v-model="queryParams.productId"
+          clearable
           filterable
           placeholder="请选择产品"
           class="!w-240px"
@@ -264,6 +265,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   no: undefined,
+  productId: undefined,
   supplierId: undefined,
   inTime: [],
   status: undefined,

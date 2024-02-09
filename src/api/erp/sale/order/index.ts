@@ -2,14 +2,16 @@ import request from '@/config/axios'
 
 // ERP 销售订单 VO
 export interface SaleOrderVO {
-  id: number // 迪卡侬工单编号
+  id: number // 订单工单编号
   no: string // 销售订单号
   customerId: number // 客户编号
-  orderTime: Date // 迪卡侬工单时间
+  orderTime: Date // 订单工单时间
   totalCount: number // 合计数量
   totalPrice: number // 合计金额，单位：元
   status: number // 状态
   remark: string // 备注
+  inCount: number // 销售入库数量
+  returnCount: number // 销售退货数量
 }
 
 // ERP 销售订单 API
