@@ -92,6 +92,42 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="关联订单" prop="orderNo">
+        <el-input
+          v-model="queryParams.orderNo"
+          placeholder="请输入关联订单"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="结算账户" prop="accountId">
+        <el-select
+          v-model="queryParams.accountId"
+          clearable
+          filterable
+          placeholder="请选择结算账户"
+          class="!w-240px"
+        >
+          <el-option
+            v-for="item in accountList"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="有无欠款" prop="debtStatus">
+        <el-select
+          v-model="queryParams.debtStatus"
+          placeholder="请选择有无欠款"
+          clearable
+          class="!w-240px"
+        >
+          <el-option label="有欠款" value="true" />
+          <el-option label="无欠款" value="false" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
@@ -118,7 +154,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['erp:stock-out:create']"
+          v-hasPermi="['erp:sale-out:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -127,7 +163,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['erp:stock-out:export']"
+          v-hasPermi="['erp:sale-out:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -135,7 +171,7 @@
           type="danger"
           plain
           @click="handleDelete(selectionList.map((item) => item.id))"
-          v-hasPermi="['erp:stock-out:delete']"
+          v-hasPermi="['erp:sale-out:delete']"
           :disabled="selectionList.length === 0"
         >
           <Icon icon="ep:delete" class="mr-5px" /> 删除
@@ -166,17 +202,40 @@
       />
       <el-table-column label="创建人" align="center" prop="creatorName" />
       <el-table-column
-        label="数量"
+        label="总数量"
         align="center"
         prop="totalCount"
         :formatter="erpCountTableColumnFormatter"
       />
       <el-table-column
-        label="金额"
+        label="金额合计"
+        align="center"
+        prop="totalProductPrice"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column
+        label="含税金额"
         align="center"
         prop="totalPrice"
         :formatter="erpPriceTableColumnFormatter"
       />
+      <el-table-column label="待收金额" align="center">
+        <template #default="scope">
+          {{ erpPriceInputFormatter(scope.row.payPrice + scope.row.debtPrice) }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="本次收款"
+        align="center"
+        prop="payPrice"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column label="本次欠款" align="center" prop="debtPrice">
+        <template #default="scope">
+          <span v-if="scope.row.debtPrice === 0">0</span>
+          <el-tag type="danger" v-else>{{ erpPriceInputFormatter(scope.row.debtPrice) }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" align="center" fixed="right" width="90" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.ERP_AUDIT_STATUS" :value="scope.row.status" />
@@ -187,7 +246,7 @@
           <el-button
             link
             @click="openForm('detail', scope.row.id)"
-            v-hasPermi="['erp:stock-out:query']"
+            v-hasPermi="['erp:sale-out:query']"
           >
             详情
           </el-button>
@@ -195,7 +254,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['erp:stock-out:update']"
+            v-hasPermi="['erp:sale-out:update']"
             :disabled="scope.row.status === 20"
           >
             编辑
@@ -204,7 +263,7 @@
             link
             type="primary"
             @click="handleUpdateStatus(scope.row.id, 20)"
-            v-hasPermi="['erp:stock-out:update-status']"
+            v-hasPermi="['erp:sale-out:update-status']"
             v-if="scope.row.status === 10"
           >
             审批
@@ -213,7 +272,7 @@
             link
             type="danger"
             @click="handleUpdateStatus(scope.row.id, 10)"
-            v-hasPermi="['erp:stock-out:update-status']"
+            v-hasPermi="['erp:sale-out:update-status']"
             v-else
           >
             反审批
@@ -222,7 +281,7 @@
             link
             type="danger"
             @click="handleDelete([scope.row.id])"
-            v-hasPermi="['erp:stock-out:delete']"
+            v-hasPermi="['erp:sale-out:delete']"
           >
             删除
           </el-button>
@@ -239,40 +298,47 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <StockOutForm ref="formRef" @success="getList" />
+  <SaleOutForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { StockOutApi, StockOutVO } from '@/api/erp/stock/out'
-import StockOutForm from './StockOutForm.vue'
+import { SaleOutApi, SaleOutVO } from '@/api/erp/sale/out'
+import SaleOutForm from './SaleOutForm.vue'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
-import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
-import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 import { UserVO } from '@/api/system/user'
 import * as UserApi from '@/api/system/user'
-import { erpCountTableColumnFormatter, erpPriceTableColumnFormatter } from '@/utils'
+import {
+  erpCountTableColumnFormatter,
+  erpPriceInputFormatter,
+  erpPriceTableColumnFormatter
+} from '@/utils'
 import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
+import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
+import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 
-/** ERP 其它出库单列表 */
-defineOptions({ name: 'ErpStockOut' })
+/** ERP 销售出库列表 */
+defineOptions({ name: 'ErpSaleOut' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<StockOutVO[]>([]) // 列表的数据
+const list = ref<SaleOutVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   no: undefined,
-  productId: undefined,
   customerId: undefined,
+  productId: undefined,
   warehouseId: undefined,
   outTime: [],
+  orderNo: undefined,
+  debtStatus: undefined,
+  accountId: undefined,
   status: undefined,
   remark: undefined,
   creator: undefined
@@ -280,15 +346,16 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const productList = ref<ProductVO[]>([]) // 产品列表
-const warehouseList = ref<WarehouseVO[]>([]) // 仓库列表
 const customerList = ref<CustomerVO[]>([]) // 客户列表
 const userList = ref<UserVO[]>([]) // 用户列表
+const warehouseList = ref<WarehouseVO[]>([]) // 仓库列表
+const accountList = ref<AccountVO[]>([]) // 账户列表
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await StockOutApi.getStockOutPage(queryParams)
+    const data = await SaleOutApi.getSaleOutPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -320,7 +387,7 @@ const handleDelete = async (ids: number[]) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await StockOutApi.deleteStockOut(ids)
+    await SaleOutApi.deleteSaleOut(ids)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -332,9 +399,9 @@ const handleDelete = async (ids: number[]) => {
 const handleUpdateStatus = async (id: number, status: number) => {
   try {
     // 审批的二次确认
-    await message.confirm(`确定${status === 20 ? '审批' : '反审批'}该出库单吗？`)
+    await message.confirm(`确定${status === 20 ? '审批' : '反审批'}该出库吗？`)
     // 发起审批
-    await StockOutApi.updateStockOutStatus(id, status)
+    await SaleOutApi.updateSaleOutStatus(id, status)
     message.success(`${status === 20 ? '审批' : '反审批'}成功`)
     // 刷新列表
     await getList()
@@ -348,8 +415,8 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await StockOutApi.exportStockOut(queryParams)
-    download.excel(data, '其它出库单.xls')
+    const data = await SaleOutApi.exportSaleOut(queryParams)
+    download.excel(data, '销售出库.xls')
   } catch {
   } finally {
     exportLoading.value = false
@@ -357,8 +424,8 @@ const handleExport = async () => {
 }
 
 /** 选中操作 */
-const selectionList = ref<StockOutVO[]>([])
-const handleSelectionChange = (rows: StockOutVO[]) => {
+const selectionList = ref<SaleOutVO[]>([])
+const handleSelectionChange = (rows: SaleOutVO[]) => {
   selectionList.value = rows
 }
 
@@ -367,9 +434,10 @@ onMounted(async () => {
   await getList()
   // 加载产品、仓库列表、客户
   productList.value = await ProductApi.getProductSimpleList()
-  warehouseList.value = await WarehouseApi.getWarehouseSimpleList()
   customerList.value = await CustomerApi.getCustomerSimpleList()
   userList.value = await UserApi.getSimpleUserList()
+  warehouseList.value = await WarehouseApi.getWarehouseSimpleList()
+  accountList.value = await AccountApi.getAccountSimpleList()
 })
 // TODO 芋艿：可优化功能：列表界面，支持导入
 // TODO 芋艿：可优化功能：详情界面，支持打印
