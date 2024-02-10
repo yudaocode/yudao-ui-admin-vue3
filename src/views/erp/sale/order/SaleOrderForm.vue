@@ -15,7 +15,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="订单时间" prop="outTime">
+          <el-form-item label="订单时间" prop="orderTime">
             <el-date-picker
               v-model="formData.orderTime"
               type="date"
@@ -93,6 +93,18 @@
             <el-input disabled v-model="formData.totalPrice" :formatter="erpPriceInputFormatter" />
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="收取订金" prop="depositPrice">
+            <el-input-number
+              v-model="formData.depositPrice"
+              controls-position="right"
+              :min="0"
+              :precision="2"
+              placeholder="请输入收取订金"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
       </el-row>
     </el-form>
     <template #footer>
@@ -128,10 +140,12 @@ const formData = ref({
   discountPercent: 0,
   discountPrice: 0,
   totalPrice: 0,
+  depositPrice: 0,
   items: [],
   no: undefined // 订单单号，后端返回
 })
 const formRules = reactive({
+  customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }],
   orderTime: [{ required: true, message: '订单时间不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
@@ -214,6 +228,7 @@ const resetForm = () => {
     discountPercent: 0,
     discountPrice: 0,
     totalPrice: 0,
+    depositPrice: 0,
     items: []
   }
   formRef.value?.resetFields()

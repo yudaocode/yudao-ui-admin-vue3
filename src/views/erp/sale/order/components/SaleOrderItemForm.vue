@@ -240,7 +240,7 @@ const onChangeProduct = (productId, row) => {
   if (product) {
     row.productUnitName = product.unitName
     row.productBarCode = product.barCode
-    row.productPrice = product.minPrice
+    row.productPrice = product.salePrice
   }
   // 加载库存
   setStockCount(row)

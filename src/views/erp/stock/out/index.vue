@@ -151,7 +151,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column width="30" label="选择" type="selection" />
-      <el-table-column min-width="140" label="出库单号" align="center" prop="no" />
+      <el-table-column min-width="180" label="出库单号" align="center" prop="no" />
       <el-table-column label="产品信息" align="center" prop="productNames" min-width="200" />
       <el-table-column label="客户" align="center" prop="customerName" />
       <el-table-column
