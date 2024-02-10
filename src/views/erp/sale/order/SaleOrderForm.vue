@@ -29,6 +29,7 @@
           <el-form-item label="客户" prop="customerId">
             <el-select
               v-model="formData.customerId"
+              clearable
               filterable
               placeholder="请选择客户"
               class="!w-1/1"
@@ -94,6 +95,24 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
+          <el-form-item label="结算账户" prop="accountId">
+            <el-select
+              v-model="formData.accountId"
+              clearable
+              filterable
+              placeholder="请选择结算账户"
+              class="!w-1/1"
+            >
+              <el-option
+                v-for="item in accountList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="收取订金" prop="depositPrice">
             <el-input-number
               v-model="formData.depositPrice"
@@ -119,7 +138,8 @@
 import { SaleOrderApi, SaleOrderVO } from '@/api/erp/sale/order'
 import SaleOrderItemForm from './components/SaleOrderItemForm.vue'
 import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
-import { erpPriceInputFormatter, erpPriceMultiply, getSumValue } from '@/utils'
+import { AccountApi, AccountVO } from '@/api/erp/finance/account'
+import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
 
 /** ERP 销售订单表单 */
 defineOptions({ name: 'SaleOrderForm' })
@@ -134,6 +154,7 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改�
 const formData = ref({
   id: undefined,
   customerId: undefined,
+  accountId: undefined,
   orderTime: undefined,
   remark: undefined,
   fileUrl: '',
@@ -151,6 +172,7 @@ const formRules = reactive({
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
 const customerList = ref<CustomerVO[]>([]) // 客户列表
+const accountList = ref<AccountVO[]>([]) // 账户列表
 
 /** 子表的表单 */
 const subTabsName = ref('item')
@@ -189,6 +211,12 @@ const open = async (type: string, id?: number) => {
   }
   // 加载客户列表
   customerList.value = await CustomerApi.getCustomerSimpleList()
+  // 加载账户列表
+  accountList.value = await AccountApi.getAccountSimpleList()
+  const defaultAccount = accountList.value.find((item) => item.defaultStatus)
+  if (defaultAccount) {
+    formData.value.accountId = defaultAccount.id
+  }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -222,6 +250,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     customerId: undefined,
+    accountId: undefined,
     orderTime: undefined,
     remark: undefined,
     fileUrl: undefined,

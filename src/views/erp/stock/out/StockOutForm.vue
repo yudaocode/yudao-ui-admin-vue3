@@ -29,6 +29,7 @@
           <el-form-item label="客户" prop="customerId">
             <el-select
               v-model="formData.customerId"
+              clearable
               filterable
               placeholder="请选择客户"
               class="!w-1/1"

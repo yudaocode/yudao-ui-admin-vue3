@@ -28,6 +28,7 @@
       <el-form-item label="仓库" prop="warehouseId">
         <el-select
           v-model="queryParams.warehouseId"
+          clearable
           filterable
           placeholder="请选择仓库"
           class="!w-240px"

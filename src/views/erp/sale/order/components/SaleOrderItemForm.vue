@@ -15,6 +15,7 @@
           <el-form-item :prop="`${$index}.productId`" :rules="formRules.productId" class="mb-0px!">
             <el-select
               v-model="row.productId"
+              clearable
               filterable
               @change="onChangeProduct($event, row)"
               placeholder="请选择产品"

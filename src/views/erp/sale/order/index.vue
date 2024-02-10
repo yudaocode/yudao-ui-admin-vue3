@@ -47,6 +47,7 @@
       <el-form-item label="客户" prop="customerId">
         <el-select
           v-model="queryParams.customerId"
+          clearable
           filterable
           placeholder="请选择供客户"
           class="!w-240px"
@@ -62,6 +63,7 @@
       <el-form-item label="创建人" prop="creator">
         <el-select
           v-model="queryParams.creator"
+          clearable
           filterable
           placeholder="请选择创建人"
           class="!w-240px"

@@ -19,6 +19,7 @@
           >
             <el-select
               v-model="row.fromWarehouseId"
+              clearable
               filterable
               placeholder="请选择调出仓库"
               @change="onChangeWarehouse($event, row)"
@@ -40,7 +41,12 @@
             :rules="formRules.toWarehouseId"
             class="mb-0px!"
           >
-            <el-select v-model="row.toWarehouseId" filterable placeholder="请选择调入仓库">
+            <el-select
+              v-model="row.toWarehouseId"
+              clearable
+              filterable
+              placeholder="请选择调入仓库"
+            >
               <el-option
                 v-for="item in warehouseList"
                 :key="item.id"
@@ -56,6 +62,7 @@
           <el-form-item :prop="`${$index}.productId`" :rules="formRules.productId" class="mb-0px!">
             <el-select
               v-model="row.productId"
+              clearable
               filterable
               @change="onChangeProduct($event, row)"
               placeholder="请选择产品"

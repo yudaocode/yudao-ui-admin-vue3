@@ -20,7 +20,7 @@
       <el-form-item label="产品" prop="productId">
         <el-select
           v-model="queryParams.productId"
-          productId
+          clearable
           filterable
           placeholder="请选择产品"
           class="!w-240px"
@@ -47,6 +47,7 @@
       <el-form-item label="仓库" prop="fromWarehouseId">
         <el-select
           v-model="queryParams.fromWarehouseId"
+          clearable
           filterable
           placeholder="请选择仓库"
           class="!w-240px"
@@ -62,6 +63,7 @@
       <el-form-item label="创建人" prop="creator">
         <el-select
           v-model="queryParams.creator"
+          clearable
           filterable
           placeholder="请选择创建人"
           class="!w-240px"

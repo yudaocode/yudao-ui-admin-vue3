@@ -18,6 +18,11 @@ export const AccountApi = {
     return await request.get({ url: `/erp/account/page`, params })
   },
 
+  // 查询结算账户精简列表
+  getAccountSimpleList: async () => {
+    return await request.get({ url: `/erp/account/simple-list` })
+  },
+
   // 查询结算账户详情
   getAccount: async (id: number) => {
     return await request.get({ url: `/erp/account/get?id=` + id })

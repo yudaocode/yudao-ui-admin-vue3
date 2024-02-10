@@ -29,6 +29,7 @@
           <el-form-item label="供应商" prop="supplierId">
             <el-select
               v-model="formData.supplierId"
+              clearable
               filterable
               placeholder="请选择供应商"
               class="!w-1/1"
