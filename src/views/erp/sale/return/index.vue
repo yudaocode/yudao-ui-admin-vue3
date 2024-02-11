@@ -287,7 +287,7 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <SaleOutForm ref="formRef" @success="getList" />
+  <SaleReturnForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">

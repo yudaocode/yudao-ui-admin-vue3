@@ -10,17 +10,17 @@
     >
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-form-item label="出库单号" prop="no">
+          <el-form-item label="退货单号" prop="no">
             <el-input disabled v-model="formData.no" placeholder="保存时自动生成" />
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="出库时间" prop="outTime">
+          <el-form-item label="退货时间" prop="outTime">
             <el-date-picker
-              v-model="formData.outTime"
+              v-model="formData.returnTime"
               type="date"
               value-format="x"
-              placeholder="选择出库时间"
+              placeholder="选择退货时间"
               class="!w-1/1"
             />
           </el-form-item>
@@ -29,7 +29,7 @@
           <el-form-item label="关联订单" prop="orderNo">
             <el-input v-model="formData.orderNo" readonly>
               <template #append>
-                <el-button @click="openSaleOrderOutEnableList">
+                <el-button @click="openSaleOrderReturnEnableList">
                   <Icon icon="ep:search" /> 选择
                 </el-button>
               </template>
@@ -91,8 +91,8 @@
       <!-- 子表的表单 -->
       <ContentWrap>
         <el-tabs v-model="subTabsName" class="-mt-15px -mb-10px">
-          <el-tab-pane label="出库产品清单" name="item">
-            <SaleOutItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
+          <el-tab-pane label="退货产品清单" name="item">
+            <SaleReturnItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
           </el-tab-pane>
         </el-tabs>
       </ContentWrap>
@@ -110,7 +110,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="收款优惠" prop="discountPrice">
+          <el-form-item label="退款优惠" prop="discountPrice">
             <el-input
               disabled
               v-model="formData.discountPrice"
@@ -154,13 +154,13 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="本次收款" prop="payPrice">
+          <el-form-item label="本次退款" prop="refundPrice">
             <el-input-number
-              v-model="formData.payPrice"
+              v-model="formData.refundPrice"
               controls-position="right"
               :min="0"
               :precision="2"
-              placeholder="请输入本次收款"
+              placeholder="请输入本次退款"
               class="!w-1/1"
             />
           </el-form-item>
@@ -175,21 +175,21 @@
     </template>
   </Dialog>
 
-  <!-- 可出库的订单列表 -->
-  <SaleOrderOutEnableList ref="saleOrderOutEnableListRef" @success="handleSaleOrderChange" />
+  <!-- 可退货的订单列表 -->
+  <!--  <SaleOrderReturnEnableList ref="saleOrderReturnEnableListRef" @success="handleSaleOrderChange" />-->
 </template>
 <script setup lang="ts">
-import { SaleOutApi, SaleOutVO } from '@/api/erp/sale/out'
-import SaleOutItemForm from './components/SaleOutItemForm.vue'
+import { SaleReturnApi, SaleReturnVO } from '@/api/erp/sale/return'
+import SaleReturnItemForm from './components/SaleReturnItemForm.vue'
 import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
-import SaleOrderOutEnableList from '@/views/erp/sale/order/components/SaleOrderOutEnableList.vue'
+// import SaleOrderReturnEnableList from '@/views/erp/sale/order/components/SaleOrderReturnEnableList.vue'
 import { SaleOrderVO } from '@/api/erp/sale/order'
 import * as UserApi from '@/api/system/user'
 
-/** ERP 销售出库表单 */
-defineOptions({ name: 'SaleOutForm' })
+/** ERP 销售退货表单 */
+defineOptions({ name: 'SaleReturnForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -203,22 +203,22 @@ const formData = ref({
   customerId: undefined,
   accountId: undefined,
   saleUserId: undefined,
-  outTime: undefined,
+  returnTime: undefined,
   remark: undefined,
   fileUrl: '',
   discountPercent: 0,
   discountPrice: 0,
   totalPrice: 0,
   otherPrice: 0,
-  payPrice: undefined,
+  refundPrice: undefined,
   orderNo: undefined,
   items: [],
-  no: undefined // 出库单号，后端返回
+  no: undefined // 退货单号，后端返回
 })
 const formRules = reactive({
   customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }],
-  outTime: [{ required: true, message: '出库时间不能为空', trigger: 'blur' }],
-  payPrice: [{ required: true, message: '本次收款不能为空', trigger: 'blur' }]
+  returnTime: [{ required: true, message: '退货时间不能为空', trigger: 'blur' }],
+  refundPrice: [{ required: true, message: '本次退款不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
@@ -242,13 +242,13 @@ watch(
     const discountPrice =
       val.discountPercent != null ? erpPriceMultiply(totalPrice, val.discountPercent / 100.0) : 0
     // debugger
-    // TODO 芋艿：payPrice 自动计算会有问题，界面上看到修改了，传递到后端还是没改过来
-    // const payPrice = totalPrice - discountPrice + val.otherPrice
+    // TODO 芋艿：refundPrice 自动计算会有问题，界面上看到修改了，传递到后端还是没改过来
+    // const refundPrice = totalPrice - discountPrice + val.otherPrice
     // 赋值
     formData.value.discountPrice = discountPrice
     formData.value.totalPrice = totalPrice - discountPrice
-    // val.payPrice = payPrice
-    // formData.value.payPrice = payPrice
+    // val.refundPrice = refundPrice
+    // formData.value.refundPrice = refundPrice
   },
   { deep: true }
 )
@@ -263,7 +263,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await SaleOutApi.getSaleOut(id)
+      formData.value = await SaleReturnApi.getSaleReturn(id)
     } finally {
       formLoading.value = false
     }
@@ -281,14 +281,14 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
-/** 打开【可出库的订单列表】弹窗 */
-const saleOrderOutEnableListRef = ref() // 可出库的订单列表 Ref
-const openSaleOrderOutEnableList = () => {
-  saleOrderOutEnableListRef.value.open()
+/** 打开【可退货的订单列表】弹窗 */
+const saleOrderReturnEnableListRef = ref() // 可退货的订单列表 Ref
+const openSaleOrderReturnEnableList = () => {
+  saleOrderReturnEnableListRef.value.open()
 }
 
 const handleSaleOrderChange = (order: SaleOrderVO) => {
-  // 将订单设置到出库单
+  // 将订单设置到退货单
   formData.value.orderId = order.id
   formData.value.orderNo = order.no
   formData.value.customerId = order.customerId
@@ -297,10 +297,10 @@ const handleSaleOrderChange = (order: SaleOrderVO) => {
   formData.value.discountPercent = order.discountPercent
   formData.value.remark = order.remark
   formData.value.fileUrl = order.fileUrl
-  // 将订单项设置到出库单项
+  // 将订单项设置到退货单项
   order.items.forEach((item) => {
     item.totalCount = item.count
-    item.count = item.totalCount - item.outCount
+    item.count = item.totalCount - item.returnCount
     item.orderItemId = item.id
     item.id = undefined
   })
@@ -316,12 +316,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as SaleOutVO
+    const data = formData.value as unknown as SaleReturnVO
     if (formType.value === 'create') {
-      await SaleOutApi.createSaleOut(data)
+      await SaleReturnApi.createSaleReturn(data)
       message.success(t('common.createSuccess'))
     } else {
-      await SaleOutApi.updateSaleOut(data)
+      await SaleReturnApi.updateSaleReturn(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -339,14 +339,14 @@ const resetForm = () => {
     customerId: undefined,
     accountId: undefined,
     saleUserId: undefined,
-    outTime: undefined,
+    returnTime: undefined,
     remark: undefined,
     fileUrl: undefined,
     discountPercent: 0,
     discountPrice: 0,
     totalPrice: 0,
     otherPrice: 0,
-    payPrice: undefined,
+    refundPrice: undefined,
     items: []
   }
   formRef.value?.resetFields()
