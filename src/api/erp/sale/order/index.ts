@@ -10,7 +10,7 @@ export interface SaleOrderVO {
   totalPrice: number // 合计金额，单位：元
   status: number // 状态
   remark: string // 备注
-  inCount: number // 销售入库数量
+  outCount: number // 销售出库数量
   returnCount: number // 销售退货数量
 }
 

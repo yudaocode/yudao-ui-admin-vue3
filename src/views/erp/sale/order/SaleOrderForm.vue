@@ -43,6 +43,24 @@
             </el-select>
           </el-form-item>
         </el-col>
+        <el-col :span="8">
+          <el-form-item label="销售人员" prop="saleUserId">
+            <el-select
+              v-model="formData.saleUserId"
+              clearable
+              filterable
+              placeholder="请选择销售人员"
+              class="!w-1/1"
+            >
+              <el-option
+                v-for="item in userList"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
         <el-col :span="16">
           <el-form-item label="备注" prop="remark">
             <el-input
@@ -140,6 +158,7 @@ import SaleOrderItemForm from './components/SaleOrderItemForm.vue'
 import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
+import * as UserApi from '@/api/system/user'
 
 /** ERP 销售订单表单 */
 defineOptions({ name: 'SaleOrderForm' })
@@ -155,6 +174,7 @@ const formData = ref({
   id: undefined,
   customerId: undefined,
   accountId: undefined,
+  saleUserId: undefined,
   orderTime: undefined,
   remark: undefined,
   fileUrl: '',
@@ -173,6 +193,7 @@ const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
 const customerList = ref<CustomerVO[]>([]) // 客户列表
 const accountList = ref<AccountVO[]>([]) // 账户列表
+const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
 /** 子表的表单 */
 const subTabsName = ref('item')
@@ -211,6 +232,8 @@ const open = async (type: string, id?: number) => {
   }
   // 加载客户列表
   customerList.value = await CustomerApi.getCustomerSimpleList()
+  // 加载用户列表
+  userList.value = await UserApi.getSimpleUserList()
   // 加载账户列表
   accountList.value = await AccountApi.getAccountSimpleList()
   const defaultAccount = accountList.value.find((item) => item.defaultStatus)
@@ -251,6 +274,7 @@ const resetForm = () => {
     id: undefined,
     customerId: undefined,
     accountId: undefined,
+    saleUserId: undefined,
     orderTime: undefined,
     remark: undefined,
     fileUrl: undefined,

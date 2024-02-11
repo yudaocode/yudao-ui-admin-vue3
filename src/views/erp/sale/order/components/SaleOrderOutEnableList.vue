@@ -92,7 +92,7 @@
         <el-table-column
           label="出库数量"
           align="center"
-          prop="inCount"
+          prop="outCount"
           :formatter="erpCountTableColumnFormatter"
         />
         <el-table-column

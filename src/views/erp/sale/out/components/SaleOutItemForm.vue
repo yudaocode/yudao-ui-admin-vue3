@@ -10,23 +10,34 @@
   >
     <el-table :data="formData" show-summary :summary-method="getSummaries" class="-mt-10px">
       <el-table-column label="序号" type="index" align="center" width="60" />
-      <el-table-column label="产品名称" min-width="180">
+      <el-table-column label="仓库名称" min-width="125">
         <template #default="{ row, $index }">
-          <el-form-item :prop="`${$index}.productId`" :rules="formRules.productId" class="mb-0px!">
+          <el-form-item
+            :prop="`${$index}.warehouseId`"
+            :rules="formRules.warehouseId"
+            class="mb-0px!"
+          >
             <el-select
-              v-model="row.productId"
+              v-model="row.warehouseId"
               clearable
               filterable
-              @change="onChangeProduct($event, row)"
-              placeholder="请选择产品"
+              placeholder="请选择仓库"
+              @change="onChangeWarehouse($event, row)"
             >
               <el-option
-                v-for="item in productList"
+                v-for="item in warehouseList"
                 :key="item.id"
                 :label="item.name"
                 :value="item.id"
               />
             </el-select>
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="产品名称" min-width="180">
+        <template #default="{ row }">
+          <el-form-item class="mb-0px!">
+            <el-input disabled v-model="row.productName" />
           </el-form-item>
         </template>
       </el-table-column>
@@ -48,6 +59,20 @@
         <template #default="{ row }">
           <el-form-item class="mb-0px!">
             <el-input disabled v-model="row.productUnitName" />
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="原数量" fixed="right" min-width="80">
+        <template #default="{ row }">
+          <el-form-item class="mb-0px!">
+            <el-input disabled v-model="row.totalCount" :formatter="erpCountInputFormatter" />
+          </el-form-item>
+        </template>
+      </el-table-column>
+      <el-table-column label="已出库" fixed="right" min-width="80">
+        <template #default="{ row }">
+          <el-form-item class="mb-0px!">
+            <el-input disabled v-model="row.outCount" :formatter="erpCountInputFormatter" />
           </el-form-item>
         </template>
       </el-table-column>
@@ -126,17 +151,15 @@
       </el-table-column>
       <el-table-column align="center" fixed="right" label="操作" width="60">
         <template #default="{ $index }">
-          <el-button @click="handleDelete($index)" link>—</el-button>
+          <el-button :disabled="formData.length === 1" @click="handleDelete($index)" link>
+            —
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
   </el-form>
-  <el-row justify="center" class="mt-3" v-if="!disabled">
-    <el-button @click="handleAdd" round>+ 添加出库产品</el-button>
-  </el-row>
 </template>
 <script setup lang="ts">
-import { ProductApi, ProductVO } from '@/api/erp/product/product'
 import { StockApi } from '@/api/erp/stock/stock'
 import {
   erpCountInputFormatter,
@@ -144,6 +167,7 @@ import {
   erpPriceMultiply,
   getSumValue
 } from '@/utils'
+import { WarehouseApi, WarehouseVO } from '@/api/erp/stock/warehouse'
 
 const props = defineProps<{
   items: undefined
@@ -158,13 +182,26 @@ const formRules = reactive({
   count: [{ required: true, message: '产品数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref([]) // 表单 Ref
-const productList = ref<ProductVO[]>([]) // 产品列表
+const warehouseList = ref<WarehouseVO[]>([]) // 仓库列表
+const defaultWarehouse = ref<WarehouseVO>(undefined) // 默认仓库
 
 /** 初始化设置出库项 */
 watch(
   () => props.items,
   async (val) => {
+    val.forEach((item) => {
+      item.totalCount = item.count
+      item.count = item.totalCount - item.outCount
+      if (item.warehouseId == null) {
+        item.warehouseId = defaultWarehouse.value?.id
+      }
+      if (item.stockCount === null && item.warehouseId != null) {
+        setStockCount(item)
+      }
+    })
     formData.value = val
+
+    // TODO 芋艿：这里添加逻辑
   },
   { immediate: true }
 )
@@ -235,18 +272,6 @@ const handleDelete = (index: number) => {
   formData.value.splice(index, 1)
 }
 
-/** 处理产品变更 */
-const onChangeProduct = (productId, row) => {
-  const product = productList.value.find((item) => item.id === productId)
-  if (product) {
-    row.productUnitName = product.unitName
-    row.productBarCode = product.barCode
-    row.productPrice = product.salePrice
-  }
-  // 加载库存
-  setStockCount(row)
-}
-
 /** 加载库存 */
 const setStockCount = async (row: any) => {
   if (!row.productId) {
@@ -264,10 +289,7 @@ defineExpose({ validate })
 
 /** 初始化 */
 onMounted(async () => {
-  productList.value = await ProductApi.getProductSimpleList()
-  // 默认添加一个
-  if (formData.value.length === 0) {
-    handleAdd()
-  }
+  warehouseList.value = await WarehouseApi.getWarehouseSimpleList()
+  defaultWarehouse.value = warehouseList.value.find((item) => item.defaultStatus)
 })
 </script>

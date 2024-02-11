@@ -153,7 +153,6 @@ const formLoading = ref(false) // 表单的加载中
 const formData = ref([])
 const formRules = reactive({
   inId: [{ required: true, message: '出库编号不能为空', trigger: 'blur' }],
-  warehouseId: [{ required: true, message: '仓库不能为空', trigger: 'blur' }],
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
   count: [{ required: true, message: '产品数量不能为空', trigger: 'blur' }]
 })

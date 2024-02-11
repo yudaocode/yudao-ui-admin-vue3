@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible" width="1080">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="1440">
     <el-form
       ref="formRef"
       :model="formData"
@@ -26,6 +26,17 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
+          <el-form-item label="关联订单" prop="orderNo">
+            <el-input v-model="formData.orderNo" readonly>
+              <template #append>
+                <el-button @click="openSaleOrderOutEnableList">
+                  <Icon icon="ep:search" /> 选择
+                </el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="客户" prop="customerId">
             <el-select
               v-model="formData.customerId"
@@ -44,17 +55,24 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="关联订单" prop="orderNo">
-            <el-input v-model="formData.orderNo" readonly>
-              <template #append>
-                <el-button @click="openSaleOrderOutEnableList">
-                  <Icon icon="ep:search" /> 选择
-                </el-button>
-              </template>
-            </el-input>
+          <el-form-item label="销售人员" prop="saleUserId">
+            <el-select
+              v-model="formData.saleUserId"
+              clearable
+              filterable
+              placeholder="请选择销售人员"
+              class="!w-1/1"
+            >
+              <el-option
+                v-for="item in userList"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="8">
+        <el-col :span="16">
           <el-form-item label="备注" prop="remark">
             <el-input
               type="textarea"
@@ -106,6 +124,18 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
+          <el-form-item label="其它费用" prop="otherPrice">
+            <el-input-number
+              v-model="formData.otherPrice"
+              controls-position="right"
+              :min="0"
+              :precision="2"
+              placeholder="请输入其它费用"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="结算账户" prop="accountId">
             <el-select
               v-model="formData.accountId"
@@ -124,13 +154,13 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="收取订金" prop="depositPrice">
+          <el-form-item label="本次收款" prop="payPrice">
             <el-input-number
-              v-model="formData.depositPrice"
+              v-model="formData.payPrice"
               controls-position="right"
               :min="0"
               :precision="2"
-              placeholder="请输入收取订金"
+              placeholder="请输入本次收款"
               class="!w-1/1"
             />
           </el-form-item>
@@ -156,6 +186,7 @@ import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
 import SaleOrderOutEnableList from '@/views/erp/sale/order/components/SaleOrderOutEnableList.vue'
 import { SaleOrderVO } from '@/api/erp/sale/order'
+import * as UserApi from '@/api/system/user'
 
 /** ERP 销售出库表单 */
 defineOptions({ name: 'SaleOutForm' })
@@ -171,25 +202,29 @@ const formData = ref({
   id: undefined,
   customerId: undefined,
   accountId: undefined,
+  saleUserId: undefined,
   outTime: undefined,
   remark: undefined,
   fileUrl: '',
   discountPercent: 0,
   discountPrice: 0,
   totalPrice: 0,
-  depositPrice: 0,
+  otherPrice: 0,
+  payPrice: 0,
   orderNo: undefined,
   items: [],
   no: undefined // 出库单号，后端返回
 })
 const formRules = reactive({
   customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }],
-  outTime: [{ required: true, message: '出库时间不能为空', trigger: 'blur' }]
+  outTime: [{ required: true, message: '出库时间不能为空', trigger: 'blur' }],
+  payPrice: [{ required: true, message: '本次收款不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
 const customerList = ref<CustomerVO[]>([]) // 客户列表
 const accountList = ref<AccountVO[]>([]) // 账户列表
+const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
 /** 子表的表单 */
 const subTabsName = ref('item')
@@ -202,11 +237,17 @@ watch(
     if (!val) {
       return
     }
+    // 计算
     const totalPrice = val.items.reduce((prev, curr) => prev + curr.totalPrice, 0)
     const discountPrice =
       val.discountPercent != null ? erpPriceMultiply(totalPrice, val.discountPercent / 100.0) : 0
+    // debugger
+    // TODO 芋艿：这里有问题
+    const payPrice = totalPrice - discountPrice + val.otherPrice
+    // 赋值
     formData.value.discountPrice = discountPrice
     formData.value.totalPrice = totalPrice - discountPrice
+    formData.value.payPrice = payPrice
   },
   { deep: true }
 )
@@ -228,15 +269,14 @@ const open = async (type: string, id?: number) => {
   }
   // 加载客户列表
   customerList.value = await CustomerApi.getCustomerSimpleList()
+  // 加载用户列表
+  userList.value = await UserApi.getSimpleUserList()
   // 加载账户列表
   accountList.value = await AccountApi.getAccountSimpleList()
   const defaultAccount = accountList.value.find((item) => item.defaultStatus)
   if (defaultAccount) {
     formData.value.accountId = defaultAccount.id
   }
-
-  // TODO 芋艿：单独搞
-  // saleOrderOutEnableListRef.value.open()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -247,18 +287,17 @@ const openSaleOrderOutEnableList = () => {
 }
 
 const handleSaleOrderChange = (order: SaleOrderVO) => {
-  debugger
+  // 将订单设置到出库单
+  formData.value.orderId = order.id
   formData.value.orderNo = order.no
-  // formData.value.customerId = order.customerId
-  // formData.value.accountId = order.accountId
-  // formData.value.items = order.items.map((item) => {
-  //   return {
-  //     productId: item.productId,
-  //     count: item.count,
-  //     productPrice: item.productPrice,
-  //     taxPercent: item.taxPercent
-  //   }
-  // })
+  formData.value.customerId = order.customerId
+  formData.value.accountId = order.accountId
+  formData.value.saleUserId = order.saleUserId
+  formData.value.discountPercent = order.discountPercent
+  formData.value.remark = order.remark
+  formData.value.fileUrl = order.fileUrl
+  // 将订单项设置到出库单项
+  formData.value.items = order.items.filter((item) => item.count > item.outCount)
 }
 
 /** 提交表单 */
@@ -292,13 +331,15 @@ const resetForm = () => {
     id: undefined,
     customerId: undefined,
     accountId: undefined,
+    saleUserId: undefined,
     outTime: undefined,
     remark: undefined,
     fileUrl: undefined,
     discountPercent: 0,
     discountPrice: 0,
     totalPrice: 0,
-    depositPrice: 0,
+    otherPrice: 0,
+    payPrice: 0,
     items: []
   }
   formRef.value?.resetFields()
