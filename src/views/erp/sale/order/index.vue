@@ -180,7 +180,7 @@
         :formatter="erpCountTableColumnFormatter"
       />
       <el-table-column
-        label="入库数量"
+        label="出库数量"
         align="center"
         prop="inCount"
         :formatter="erpCountTableColumnFormatter"

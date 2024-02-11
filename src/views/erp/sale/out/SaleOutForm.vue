@@ -43,7 +43,18 @@
             </el-select>
           </el-form-item>
         </el-col>
-        <el-col :span="16">
+        <el-col :span="8">
+          <el-form-item label="关联订单" prop="orderNo">
+            <el-input v-model="formData.orderNo" readonly>
+              <template #append>
+                <el-button @click="openSaleOrderOutEnableList">
+                  <Icon icon="ep:search" /> 选择
+                </el-button>
+              </template>
+            </el-input>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
           <el-form-item label="备注" prop="remark">
             <el-input
               type="textarea"
@@ -133,6 +144,9 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+
+  <!-- 可出库的订单列表 -->
+  <SaleOrderOutEnableList ref="saleOrderOutEnableListRef" @success="handleSaleOrderChange" />
 </template>
 <script setup lang="ts">
 import { SaleOutApi, SaleOutVO } from '@/api/erp/sale/out'
@@ -140,6 +154,8 @@ import SaleOutItemForm from './components/SaleOutItemForm.vue'
 import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
+import SaleOrderOutEnableList from '@/views/erp/sale/order/components/SaleOrderOutEnableList.vue'
+import { SaleOrderVO } from '@/api/erp/sale/order'
 
 /** ERP 销售出库表单 */
 defineOptions({ name: 'SaleOutForm' })
@@ -162,6 +178,7 @@ const formData = ref({
   discountPrice: 0,
   totalPrice: 0,
   depositPrice: 0,
+  orderNo: undefined,
   items: [],
   no: undefined // 出库单号，后端返回
 })
@@ -217,8 +234,32 @@ const open = async (type: string, id?: number) => {
   if (defaultAccount) {
     formData.value.accountId = defaultAccount.id
   }
+
+  // TODO 芋艿：单独搞
+  // saleOrderOutEnableListRef.value.open()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+/** 打开【可出库的订单列表】弹窗 */
+const saleOrderOutEnableListRef = ref() // 可出库的订单列表 Ref
+const openSaleOrderOutEnableList = () => {
+  saleOrderOutEnableListRef.value.open()
+}
+
+const handleSaleOrderChange = (order: SaleOrderVO) => {
+  debugger
+  formData.value.orderNo = order.no
+  // formData.value.customerId = order.customerId
+  // formData.value.accountId = order.accountId
+  // formData.value.items = order.items.map((item) => {
+  //   return {
+  //     productId: item.productId,
+  //     count: item.count,
+  //     productPrice: item.productPrice,
+  //     taxPercent: item.taxPercent
+  //   }
+  // })
+}
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
