@@ -15,7 +15,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="退货时间" prop="outTime">
+          <el-form-item label="退货时间" prop="returnTime">
             <el-date-picker
               v-model="formData.returnTime"
               type="date"
@@ -42,6 +42,7 @@
               v-model="formData.customerId"
               clearable
               filterable
+              disabled
               placeholder="请选择客户"
               class="!w-1/1"
             >
@@ -176,7 +177,7 @@
   </Dialog>
 
   <!-- 可退货的订单列表 -->
-  <!--  <SaleOrderReturnEnableList ref="saleOrderReturnEnableListRef" @success="handleSaleOrderChange" />-->
+  <SaleOrderReturnEnableList ref="saleOrderReturnEnableListRef" @success="handleSaleOrderChange" />
 </template>
 <script setup lang="ts">
 import { SaleReturnApi, SaleReturnVO } from '@/api/erp/sale/return'
@@ -184,7 +185,7 @@ import SaleReturnItemForm from './components/SaleReturnItemForm.vue'
 import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
-// import SaleOrderReturnEnableList from '@/views/erp/sale/order/components/SaleOrderReturnEnableList.vue'
+import SaleOrderReturnEnableList from '@/views/erp/sale/order/components/SaleOrderReturnEnableList.vue'
 import { SaleOrderVO } from '@/api/erp/sale/order'
 import * as UserApi from '@/api/system/user'
 
@@ -299,8 +300,7 @@ const handleSaleOrderChange = (order: SaleOrderVO) => {
   formData.value.fileUrl = order.fileUrl
   // 将订单项设置到退货单项
   order.items.forEach((item) => {
-    item.totalCount = item.count
-    item.count = item.totalCount - item.returnCount
+    item.count = item.outCount - item.returnCount
     item.orderItemId = item.id
     item.id = undefined
   })
