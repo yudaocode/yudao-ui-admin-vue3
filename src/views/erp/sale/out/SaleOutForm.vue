@@ -210,7 +210,7 @@ const formData = ref({
   discountPrice: 0,
   totalPrice: 0,
   otherPrice: 0,
-  payPrice: 0,
+  payPrice: undefined,
   orderNo: undefined,
   items: [],
   no: undefined // 出库单号，后端返回
@@ -242,12 +242,13 @@ watch(
     const discountPrice =
       val.discountPercent != null ? erpPriceMultiply(totalPrice, val.discountPercent / 100.0) : 0
     // debugger
-    // TODO 芋艿：这里有问题
-    const payPrice = totalPrice - discountPrice + val.otherPrice
+    // TODO 芋艿：payPrice 自动计算会有问题，界面上看到修改了，传递到后端还是没改过来
+    // const payPrice = totalPrice - discountPrice + val.otherPrice
     // 赋值
     formData.value.discountPrice = discountPrice
     formData.value.totalPrice = totalPrice - discountPrice
-    formData.value.payPrice = payPrice
+    // val.payPrice = payPrice
+    // formData.value.payPrice = payPrice
   },
   { deep: true }
 )
@@ -297,7 +298,13 @@ const handleSaleOrderChange = (order: SaleOrderVO) => {
   formData.value.remark = order.remark
   formData.value.fileUrl = order.fileUrl
   // 将订单项设置到出库单项
-  formData.value.items = order.items.filter((item) => item.count > item.outCount)
+  order.items.forEach((item) => {
+    item.totalCount = item.count
+    item.count = item.totalCount - item.outCount
+    item.orderItemId = item.id
+    item.id = undefined
+  })
+  formData.value.items = order.items.filter((item) => item.count > 0)
 }
 
 /** 提交表单 */
@@ -339,7 +346,7 @@ const resetForm = () => {
     discountPrice: 0,
     totalPrice: 0,
     otherPrice: 0,
-    payPrice: 0,
+    payPrice: undefined,
     items: []
   }
   formRef.value?.resetFields()

@@ -62,14 +62,24 @@
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="原数量" fixed="right" min-width="80">
+      <el-table-column
+        label="原数量"
+        fixed="right"
+        min-width="80"
+        v-if="formData[0]?.totalCount != null"
+      >
         <template #default="{ row }">
           <el-form-item class="mb-0px!">
             <el-input disabled v-model="row.totalCount" :formatter="erpCountInputFormatter" />
           </el-form-item>
         </template>
       </el-table-column>
-      <el-table-column label="已出库" fixed="right" min-width="80">
+      <el-table-column
+        label="已出库"
+        fixed="right"
+        min-width="80"
+        v-if="formData[0]?.outCount != null"
+      >
         <template #default="{ row }">
           <el-form-item class="mb-0px!">
             <el-input disabled v-model="row.outCount" :formatter="erpCountInputFormatter" />
@@ -190,8 +200,6 @@ watch(
   () => props.items,
   async (val) => {
     val.forEach((item) => {
-      item.totalCount = item.count
-      item.count = item.totalCount - item.outCount
       if (item.warehouseId == null) {
         item.warehouseId = defaultWarehouse.value?.id
       }
@@ -200,8 +208,6 @@ watch(
       }
     })
     formData.value = val
-
-    // TODO 芋艿：这里添加逻辑
   },
   { immediate: true }
 )
