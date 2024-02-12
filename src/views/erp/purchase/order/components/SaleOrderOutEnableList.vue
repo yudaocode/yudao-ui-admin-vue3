@@ -125,14 +125,14 @@
 
 <script lang="ts" setup>
 import { ElTable } from 'element-plus'
-import { SaleOrderApi, SaleOrderVO } from '@/api/erp/sale/order'
+import { PurchaseOrderApi, PurchaseOrderVO } from '@/api/erp/purchase/order'
 import { dateFormatter2 } from '@/utils/formatTime'
 import { erpCountTableColumnFormatter, erpPriceTableColumnFormatter } from '@/utils'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
 
-defineOptions({ name: 'ErpSaleOrderOutEnableList' })
+defineOptions({ name: 'ErpPurchaseOrderOutEnableList' })
 
-const list = ref<SaleOrderVO[]>([]) // 列表的数据
+const list = ref<PurchaseOrderVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const loading = ref(false) // 列表的加载中
 const dialogVisible = ref(false) // 弹窗的是否展示
@@ -167,7 +167,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交选择 */
 const emits = defineEmits<{
-  (e: 'success', value: SaleOrderVO): void
+  (e: 'success', value: PurchaseOrderVO): void
 }>()
 const submitForm = () => {
   try {
@@ -182,7 +182,7 @@ const submitForm = () => {
 const getList = async () => {
   loading.value = true
   try {
-    const data = await SaleOrderApi.getSaleOrderPage(queryParams)
+    const data = await PurchaseOrderApi.getPurchaseOrderPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {

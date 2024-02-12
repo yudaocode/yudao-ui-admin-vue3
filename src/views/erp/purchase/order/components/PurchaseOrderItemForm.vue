@@ -94,7 +94,7 @@
             <el-input-number
               v-model="row.taxPercent"
               controls-position="right"
-              :min="0.01"
+              :min="0"
               :precision="2"
               class="!w-100%"
             />
@@ -132,7 +132,7 @@
     </el-table>
   </el-form>
   <el-row justify="center" class="mt-3" v-if="!disabled">
-    <el-button @click="handleAdd" round>+ 添加入库产品</el-button>
+    <el-button @click="handleAdd" round>+ 添加采购产品</el-button>
   </el-row>
 </template>
 <script setup lang="ts">
@@ -239,7 +239,7 @@ const onChangeProduct = (productId, row) => {
   if (product) {
     row.productUnitName = product.unitName
     row.productBarCode = product.barCode
-    row.productPrice = product.salePrice
+    row.productPrice = product.purchasePrice
   }
   // 加载库存
   setStockCount(row)

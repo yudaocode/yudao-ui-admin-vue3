@@ -26,36 +26,18 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="客户" prop="customerId">
+          <el-form-item label="供应商" prop="supplierId">
             <el-select
-              v-model="formData.customerId"
+              v-model="formData.supplierId"
               clearable
               filterable
-              placeholder="请选择客户"
+              placeholder="请选择供应商"
               class="!w-1/1"
             >
               <el-option
-                v-for="item in customerList"
+                v-for="item in supplierList"
                 :key="item.id"
                 :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="销售人员" prop="saleUserId">
-            <el-select
-              v-model="formData.saleUserId"
-              clearable
-              filterable
-              placeholder="请选择销售人员"
-              class="!w-1/1"
-            >
-              <el-option
-                v-for="item in userList"
-                :key="item.id"
-                :label="item.nickname"
                 :value="item.id"
               />
             </el-select>
@@ -81,7 +63,7 @@
       <ContentWrap>
         <el-tabs v-model="subTabsName" class="-mt-15px -mb-10px">
           <el-tab-pane label="订单产品清单" name="item">
-            <SaleOrderItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
+            <PurchaseOrderItemForm ref="itemFormRef" :items="formData.items" :disabled="disabled" />
           </el-tab-pane>
         </el-tabs>
       </ContentWrap>
@@ -131,13 +113,13 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="收取订金" prop="depositPrice">
+          <el-form-item label="支付订金" prop="depositPrice">
             <el-input-number
               v-model="formData.depositPrice"
               controls-position="right"
               :min="0"
               :precision="2"
-              placeholder="请输入收取订金"
+              placeholder="请输入支付订金"
               class="!w-1/1"
             />
           </el-form-item>
@@ -153,15 +135,15 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { SaleOrderApi, SaleOrderVO } from '@/api/erp/sale/order'
-import SaleOrderItemForm from './components/SaleOrderItemForm.vue'
-import { CustomerApi, CustomerVO } from '@/api/erp/sale/customer'
-import { AccountApi, AccountVO } from '@/api/erp/finance/account'
+import { PurchaseOrderApi, PurchaseOrderVO } from '@/api/erp/purchase/order'
+import PurchaseOrderItemForm from './components/PurchaseOrderItemForm.vue'
+import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
 import * as UserApi from '@/api/system/user'
+import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 
 /** ERP 销售订单表单 */
-defineOptions({ name: 'SaleOrderForm' })
+defineOptions({ name: 'PurchaseOrderForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -172,9 +154,8 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const formData = ref({
   id: undefined,
-  customerId: undefined,
+  supplierId: undefined,
   accountId: undefined,
-  saleUserId: undefined,
   orderTime: undefined,
   remark: undefined,
   fileUrl: '',
@@ -186,12 +167,12 @@ const formData = ref({
   no: undefined // 订单单号，后端返回
 })
 const formRules = reactive({
-  customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }],
+  supplierId: [{ required: true, message: '供应商不能为空', trigger: 'blur' }],
   orderTime: [{ required: true, message: '订单时间不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
-const customerList = ref<CustomerVO[]>([]) // 客户列表
+const supplierList = ref<SupplierVO[]>([]) // 供应商列表
 const accountList = ref<AccountVO[]>([]) // 账户列表
 const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
@@ -225,13 +206,13 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await SaleOrderApi.getSaleOrder(id)
+      formData.value = await PurchaseOrderApi.getPurchaseOrder(id)
     } finally {
       formLoading.value = false
     }
   }
-  // 加载客户列表
-  customerList.value = await CustomerApi.getCustomerSimpleList()
+  // 加载供应商列表
+  supplierList.value = await SupplierApi.getSupplierSimpleList()
   // 加载用户列表
   userList.value = await UserApi.getSimpleUserList()
   // 加载账户列表
@@ -252,12 +233,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as SaleOrderVO
+    const data = formData.value as unknown as PurchaseOrderVO
     if (formType.value === 'create') {
-      await SaleOrderApi.createSaleOrder(data)
+      await PurchaseOrderApi.createPurchaseOrder(data)
       message.success(t('common.createSuccess'))
     } else {
-      await SaleOrderApi.updateSaleOrder(data)
+      await PurchaseOrderApi.updatePurchaseOrder(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -272,9 +253,8 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    customerId: undefined,
+    supplierId: undefined,
     accountId: undefined,
-    saleUserId: undefined,
     orderTime: undefined,
     remark: undefined,
     fileUrl: undefined,

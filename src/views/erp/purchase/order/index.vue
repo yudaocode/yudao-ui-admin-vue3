@@ -182,7 +182,7 @@
       <el-table-column
         label="入库数量"
         align="center"
-        prop="outCount"
+        prop="inCount"
         :formatter="erpCountTableColumnFormatter"
       />
       <el-table-column
@@ -204,7 +204,7 @@
         :formatter="erpPriceTableColumnFormatter"
       />
       <el-table-column
-        label="收取订金"
+        label="支付订金"
         align="center"
         prop="depositPrice"
         :formatter="erpPriceTableColumnFormatter"
@@ -271,7 +271,7 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <!--  <PurchaseOrderForm ref="formRef" @success="getList" />-->
+  <PurchaseOrderForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
@@ -279,7 +279,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { PurchaseOrderApi, PurchaseOrderVO } from '@/api/erp/purchase/order'
-// import PurchaseOrderForm from './PurchaseOrderForm.vue'
+import PurchaseOrderForm from './PurchaseOrderForm.vue'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
 import { UserVO } from '@/api/system/user'
 import * as UserApi from '@/api/system/user'
