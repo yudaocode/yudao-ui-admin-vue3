@@ -95,9 +95,9 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="入库数量" prop="outStatus">
+      <el-form-item label="入库数量" prop="inStatus">
         <el-select
-          v-model="queryParams.outStatus"
+          v-model="queryParams.inStatus"
           placeholder="请选择入库数量"
           clearable
           class="!w-240px"
@@ -305,7 +305,7 @@ const queryParams = reactive({
   status: undefined,
   remark: undefined,
   creator: undefined,
-  outStatus: undefined,
+  inStatus: undefined,
   returnStatus: undefined
 })
 const queryFormRef = ref() // 搜索的表单

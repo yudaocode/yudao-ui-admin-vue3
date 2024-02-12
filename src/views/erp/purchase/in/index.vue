@@ -221,13 +221,13 @@
       />
       <el-table-column label="待收金额" align="center">
         <template #default="scope">
-          {{ erpPriceInputFormatter(scope.row.payPrice + scope.row.debtPrice) }}
+          {{ erpPriceInputFormatter(scope.row.refundPrice + scope.row.debtPrice) }}
         </template>
       </el-table-column>
       <el-table-column
-        label="本次收款"
+        label="本次付款"
         align="center"
-        prop="payPrice"
+        prop="refundPrice"
         :formatter="erpPriceTableColumnFormatter"
       />
       <el-table-column label="本次欠款" align="center" prop="debtPrice">

@@ -1,7 +1,7 @@
 <!-- 可入库的订单列表 -->
 <template>
   <Dialog
-    title="选择销售订单（仅展示可入库）"
+    title="选择采购订单（仅展示可入库）"
     v-model="dialogVisible"
     :appendToBody="true"
     :scroll="true"
@@ -92,7 +92,7 @@
         <el-table-column
           label="入库数量"
           align="center"
-          prop="outCount"
+          prop="inCount"
           :formatter="erpCountTableColumnFormatter"
         />
         <el-table-column
@@ -122,7 +122,6 @@
     </template>
   </Dialog>
 </template>
-
 <script lang="ts" setup>
 import { ElTable } from 'element-plus'
 import { PurchaseOrderApi, PurchaseOrderVO } from '@/api/erp/purchase/order'
@@ -142,7 +141,7 @@ const queryParams = reactive({
   no: undefined,
   productId: undefined,
   orderTime: [],
-  outEnable: true
+  inEnable: true
 })
 const queryFormRef = ref() // 搜索的表单
 const productList = ref<ProductVO[]>([]) // 产品列表

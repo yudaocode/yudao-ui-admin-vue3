@@ -37,9 +37,9 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="供应商" prop="customerId">
+          <el-form-item label="供应商" prop="supplierId">
             <el-select
-              v-model="formData.customerId"
+              v-model="formData.supplierId"
               clearable
               filterable
               disabled
@@ -47,27 +47,9 @@
               class="!w-1/1"
             >
               <el-option
-                v-for="item in customerList"
+                v-for="item in supplierList"
                 :key="item.id"
                 :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="销售人员" prop="purchaseUserId">
-            <el-select
-              v-model="formData.purchaseUserId"
-              clearable
-              filterable
-              placeholder="请选择销售人员"
-              class="!w-1/1"
-            >
-              <el-option
-                v-for="item in userList"
-                :key="item.id"
-                :label="item.nickname"
                 :value="item.id"
               />
             </el-select>
@@ -111,7 +93,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="收款优惠" prop="discountPrice">
+          <el-form-item label="付款优惠" prop="discountPrice">
             <el-input
               disabled
               v-model="formData.discountPrice"
@@ -155,13 +137,13 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="本次收款" prop="payPrice">
+          <el-form-item label="本次付款" prop="refundPrice">
             <el-input-number
-              v-model="formData.payPrice"
+              v-model="formData.refundPrice"
               controls-position="right"
               :min="0"
               :precision="2"
-              placeholder="请输入本次收款"
+              placeholder="请输入本次付款"
               class="!w-1/1"
             />
           </el-form-item>
@@ -177,10 +159,10 @@
   </Dialog>
 
   <!-- 可入库的订单列表 -->
-  <!--  <PurchaseOrderInEnableList-->
-  <!--    ref="purchaseOrderInEnableListRef"-->
-  <!--    @success="handlePurchaseOrderChange"-->
-  <!--  />-->
+  <PurchaseOrderInEnableList
+    ref="purchaseOrderInEnableListRef"
+    @success="handlePurchaseOrderChange"
+  />
 </template>
 <script setup lang="ts">
 import { PurchaseInApi, PurchaseInVO } from '@/api/erp/purchase/in'
@@ -188,9 +170,10 @@ import PurchaseInItemForm from './components/PurchaseInItemForm.vue'
 // import { CustomerApi, CustomerVO } from '@/api/erp/purchase/customer'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
-// import PurchaseOrderInEnableList from '@/views/erp/purchase/order/components/PurchaseOrderInEnableList.vue'
+import PurchaseOrderInEnableList from '@/views/erp/purchase/order/components/PurchaseOrderInEnableList.vue'
 import { PurchaseOrderVO } from '@/api/erp/purchase/order'
 import * as UserApi from '@/api/system/user'
+import { SupplierApi } from '@/api/erp/purchase/supplier'
 
 /** ERP 销售入库表单 */
 defineOptions({ name: 'PurchaseInForm' })
@@ -204,9 +187,8 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const formData = ref({
   id: undefined,
-  customerId: undefined,
+  supplierId: undefined,
   accountId: undefined,
-  purchaseUserId: undefined,
   inTime: undefined,
   remark: undefined,
   fileUrl: '',
@@ -214,19 +196,19 @@ const formData = ref({
   discountPrice: 0,
   totalPrice: 0,
   otherPrice: 0,
-  payPrice: undefined,
+  refundPrice: undefined,
   orderNo: undefined,
   items: [],
   no: undefined // 入库单号，后端返回
 })
 const formRules = reactive({
-  customerId: [{ required: true, message: '供应商不能为空', trigger: 'blur' }],
+  supplierId: [{ required: true, message: '供应商不能为空', trigger: 'blur' }],
   inTime: [{ required: true, message: '入库时间不能为空', trigger: 'blur' }],
-  payPrice: [{ required: true, message: '本次收款不能为空', trigger: 'blur' }]
+  refundPrice: [{ required: true, message: '本次付款不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
-const customerList = ref<CustomerVO[]>([]) // 供应商列表
+const supplierList = ref<CustomerVO[]>([]) // 供应商列表
 const accountList = ref<AccountVO[]>([]) // 账户列表
 const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
@@ -246,13 +228,13 @@ watch(
     const discountPrice =
       val.discountPercent != null ? erpPriceMultiply(totalPrice, val.discountPercent / 100.0) : 0
     // debugger
-    // TODO 芋艿：payPrice 自动计算会有问题，界面上看到修改了，传递到后端还是没改过来
-    // const payPrice = totalPrice - discountPrice + val.otherPrice
+    // TODO 芋艿：refundPrice 自动计算会有问题，界面上看到修改了，传递到后端还是没改过来
+    // const refundPrice = totalPrice - discountPrice + val.otherPrice
     // 赋值
     formData.value.discountPrice = discountPrice
     formData.value.totalPrice = totalPrice - discountPrice
-    // val.payPrice = payPrice
-    // formData.value.payPrice = payPrice
+    // val.refundPrice = refundPrice
+    // formData.value.refundPrice = refundPrice
   },
   { deep: true }
 )
@@ -273,7 +255,7 @@ const open = async (type: string, id?: number) => {
     }
   }
   // 加载供应商列表
-  customerList.value = await CustomerApi.getCustomerSimpleList()
+  supplierList.value = await SupplierApi.getSupplierSimpleList()
   // 加载用户列表
   userList.value = await UserApi.getSimpleUserList()
   // 加载账户列表
@@ -295,9 +277,8 @@ const handlePurchaseOrderChange = (order: PurchaseOrderVO) => {
   // 将订单设置到入库单
   formData.value.orderId = order.id
   formData.value.orderNo = order.no
-  formData.value.customerId = order.customerId
+  formData.value.supplierId = order.supplierId
   formData.value.accountId = order.accountId
-  formData.value.purchaseUserId = order.purchaseUserId
   formData.value.discountPercent = order.discountPercent
   formData.value.remark = order.remark
   formData.value.fileUrl = order.fileUrl
@@ -340,9 +321,8 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    customerId: undefined,
+    supplierId: undefined,
     accountId: undefined,
-    purchaseUserId: undefined,
     inTime: undefined,
     remark: undefined,
     fileUrl: undefined,
@@ -350,7 +330,7 @@ const resetForm = () => {
     discountPrice: 0,
     totalPrice: 0,
     otherPrice: 0,
-    payPrice: undefined,
+    refundPrice: undefined,
     items: []
   }
   formRef.value?.resetFields()

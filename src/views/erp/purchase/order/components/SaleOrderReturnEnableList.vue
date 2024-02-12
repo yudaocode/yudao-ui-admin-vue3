@@ -1,7 +1,7 @@
 <!-- 可退货的订单列表 -->
 <template>
   <Dialog
-    title="选择销售订单（仅展示可退货）"
+    title="选择采购订单（仅展示可退货）"
     v-model="dialogVisible"
     :appendToBody="true"
     :scroll="true"
@@ -92,7 +92,7 @@
         <el-table-column
           label="入库数量"
           align="center"
-          prop="outCount"
+          prop="inCount"
           :formatter="erpCountTableColumnFormatter"
         />
         <el-table-column

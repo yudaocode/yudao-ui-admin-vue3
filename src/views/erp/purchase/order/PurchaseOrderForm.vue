@@ -81,7 +81,7 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="收款优惠" prop="discountPrice">
+          <el-form-item label="付款优惠" prop="discountPrice">
             <el-input
               disabled
               v-model="formData.discountPrice"
