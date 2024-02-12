@@ -163,10 +163,10 @@
   </Dialog>
 
   <!-- 可退货的订单列表 -->
-  <!--  <PurchaseOrderReturnEnableList-->
-  <!--    ref="purchaseOrderReturnEnableListRef"-->
-  <!--    @success="handlePurchaseOrderChange"-->
-  <!--  />-->
+  <PurchaseOrderReturnEnableList
+    ref="purchaseOrderReturnEnableListRef"
+    @success="handlePurchaseOrderChange"
+  />
 </template>
 <script setup lang="ts">
 import { PurchaseReturnApi, PurchaseReturnVO } from '@/api/erp/purchase/return'
@@ -174,7 +174,7 @@ import PurchaseReturnItemForm from './components/PurchaseReturnItemForm.vue'
 import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
-// import PurchaseOrderReturnEnableList from '@/views/erp/purchase/order/components/PurchaseOrderReturnEnableList.vue'
+import PurchaseOrderReturnEnableList from '@/views/erp/purchase/order/components/PurchaseOrderReturnEnableList.vue'
 import { PurchaseOrderVO } from '@/api/erp/purchase/order'
 import * as UserApi from '@/api/system/user'
 
