@@ -37,37 +37,19 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="客户" prop="customerId">
+          <el-form-item label="供应商" prop="supplierId">
             <el-select
-              v-model="formData.customerId"
+              v-model="formData.supplierId"
               clearable
               filterable
               disabled
-              placeholder="请选择客户"
+              placeholder="请选择供应商"
               class="!w-1/1"
             >
               <el-option
-                v-for="item in customerList"
+                v-for="item in supplierList"
                 :key="item.id"
                 :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="8">
-          <el-form-item label="采购人员" prop="purchaseUserId">
-            <el-select
-              v-model="formData.purchaseUserId"
-              clearable
-              filterable
-              placeholder="请选择采购人员"
-              class="!w-1/1"
-            >
-              <el-option
-                v-for="item in userList"
-                :key="item.id"
-                :label="item.nickname"
                 :value="item.id"
               />
             </el-select>
@@ -181,18 +163,18 @@
   </Dialog>
 
   <!-- 可退货的订单列表 -->
-  <PurchaseOrderReturnEnableList
-    ref="purchaseOrderReturnEnableListRef"
-    @success="handlePurchaseOrderChange"
-  />
+  <!--  <PurchaseOrderReturnEnableList-->
+  <!--    ref="purchaseOrderReturnEnableListRef"-->
+  <!--    @success="handlePurchaseOrderChange"-->
+  <!--  />-->
 </template>
 <script setup lang="ts">
 import { PurchaseReturnApi, PurchaseReturnVO } from '@/api/erp/purchase/return'
 import PurchaseReturnItemForm from './components/PurchaseReturnItemForm.vue'
-import { CustomerApi, CustomerVO } from '@/api/erp/purchase/customer'
+import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
-import PurchaseOrderReturnEnableList from '@/views/erp/purchase/order/components/PurchaseOrderReturnEnableList.vue'
+// import PurchaseOrderReturnEnableList from '@/views/erp/purchase/order/components/PurchaseOrderReturnEnableList.vue'
 import { PurchaseOrderVO } from '@/api/erp/purchase/order'
 import * as UserApi from '@/api/system/user'
 
@@ -208,9 +190,8 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改；detail - 详情
 const formData = ref({
   id: undefined,
-  customerId: undefined,
+  supplierId: undefined,
   accountId: undefined,
-  purchaseUserId: undefined,
   returnTime: undefined,
   remark: undefined,
   fileUrl: '',
@@ -224,13 +205,13 @@ const formData = ref({
   no: undefined // 退货单号，后端返回
 })
 const formRules = reactive({
-  customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }],
+  supplierId: [{ required: true, message: '供应商不能为空', trigger: 'blur' }],
   returnTime: [{ required: true, message: '退货时间不能为空', trigger: 'blur' }],
   refundPrice: [{ required: true, message: '本次退款不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
-const customerList = ref<CustomerVO[]>([]) // 客户列表
+const supplierList = ref<SupplierVO[]>([]) // 供应商列表
 const accountList = ref<AccountVO[]>([]) // 账户列表
 const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
@@ -276,8 +257,8 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
-  // 加载客户列表
-  customerList.value = await CustomerApi.getCustomerSimpleList()
+  // 加载供应商列表
+  supplierList.value = await SupplierApi.getSupplierSimpleList()
   // 加载用户列表
   userList.value = await UserApi.getSimpleUserList()
   // 加载账户列表
@@ -299,9 +280,8 @@ const handlePurchaseOrderChange = (order: PurchaseOrderVO) => {
   // 将订单设置到退货单
   formData.value.orderId = order.id
   formData.value.orderNo = order.no
-  formData.value.customerId = order.customerId
+  formData.value.supplierId = order.supplierId
   formData.value.accountId = order.accountId
-  formData.value.purchaseUserId = order.purchaseUserId
   formData.value.discountPercent = order.discountPercent
   formData.value.remark = order.remark
   formData.value.fileUrl = order.fileUrl
@@ -343,9 +323,8 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    customerId: undefined,
+    supplierId: undefined,
     accountId: undefined,
-    purchaseUserId: undefined,
     returnTime: undefined,
     remark: undefined,
     fileUrl: undefined,

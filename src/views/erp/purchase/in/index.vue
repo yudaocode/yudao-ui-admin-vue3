@@ -44,9 +44,9 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="供应商" prop="customerId">
+      <el-form-item label="供应商" prop="supplierId">
         <el-select
-          v-model="queryParams.customerId"
+          v-model="queryParams.supplierId"
           clearable
           filterable
           placeholder="请选择供供应商"
@@ -332,7 +332,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   no: undefined,
-  customerId: undefined,
+  supplierId: undefined,
   productId: undefined,
   warehouseId: undefined,
   inTime: [],

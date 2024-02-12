@@ -73,7 +73,7 @@
           </template>
         </el-table-column>
         <el-table-column min-width="180" label="订单单号" align="center" prop="no" />
-        <el-table-column label="客户" align="center" prop="customerName" />
+        <el-table-column label="供应商" align="center" prop="supplierName" />
         <el-table-column label="产品信息" align="center" prop="productNames" min-width="200" />
         <el-table-column
           label="订单时间"

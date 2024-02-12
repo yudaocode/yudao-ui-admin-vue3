@@ -287,7 +287,7 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <!--  <PurchaseReturnForm ref="formRef" @success="getList" />-->
+  <PurchaseReturnForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
@@ -295,7 +295,7 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { PurchaseReturnApi, PurchaseReturnVO } from '@/api/erp/purchase/return'
-// import PurchaseReturnForm from './PurchaseReturnForm.vue'
+import PurchaseReturnForm from './PurchaseReturnForm.vue'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
 import { UserVO } from '@/api/system/user'
 import * as UserApi from '@/api/system/user'

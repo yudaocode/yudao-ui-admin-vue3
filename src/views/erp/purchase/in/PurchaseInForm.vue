@@ -167,13 +167,12 @@
 <script setup lang="ts">
 import { PurchaseInApi, PurchaseInVO } from '@/api/erp/purchase/in'
 import PurchaseInItemForm from './components/PurchaseInItemForm.vue'
-// import { CustomerApi, CustomerVO } from '@/api/erp/purchase/customer'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
 import PurchaseOrderInEnableList from '@/views/erp/purchase/order/components/PurchaseOrderInEnableList.vue'
 import { PurchaseOrderVO } from '@/api/erp/purchase/order'
 import * as UserApi from '@/api/system/user'
-import { SupplierApi } from '@/api/erp/purchase/supplier'
+import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 
 /** ERP 销售入库表单 */
 defineOptions({ name: 'PurchaseInForm' })
@@ -208,7 +207,7 @@ const formRules = reactive({
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
-const supplierList = ref<CustomerVO[]>([]) // 供应商列表
+const supplierList = ref<SupplierVO[]>([]) // 供应商列表
 const accountList = ref<AccountVO[]>([]) // 账户列表
 const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
