@@ -103,7 +103,11 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="优惠后金额">
-            <el-input disabled v-model="formData.totalPrice" :formatter="erpPriceInputFormatter" />
+            <el-input
+              disabled
+              :model-value="formData.totalPrice - formData.otherPrice"
+              :formatter="erpPriceInputFormatter"
+            />
           </el-form-item>
         </el-col>
         <el-col :span="8">
@@ -137,15 +141,8 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="本次付款" prop="refundPrice">
-            <el-input-number
-              v-model="formData.refundPrice"
-              controls-position="right"
-              :min="0"
-              :precision="2"
-              placeholder="请输入本次付款"
-              class="!w-1/1"
-            />
+          <el-form-item label="应付金额">
+            <el-input disabled v-model="formData.totalPrice" :formatter="erpPriceInputFormatter" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -195,15 +192,13 @@ const formData = ref({
   discountPrice: 0,
   totalPrice: 0,
   otherPrice: 0,
-  refundPrice: undefined,
   orderNo: undefined,
   items: [],
   no: undefined // 入库单号，后端返回
 })
 const formRules = reactive({
   supplierId: [{ required: true, message: '供应商不能为空', trigger: 'blur' }],
-  inTime: [{ required: true, message: '入库时间不能为空', trigger: 'blur' }],
-  refundPrice: [{ required: true, message: '本次付款不能为空', trigger: 'blur' }]
+  inTime: [{ required: true, message: '入库时间不能为空', trigger: 'blur' }]
 })
 const disabled = computed(() => formType.value === 'detail')
 const formRef = ref() // 表单 Ref
@@ -226,14 +221,8 @@ watch(
     const totalPrice = val.items.reduce((prev, curr) => prev + curr.totalPrice, 0)
     const discountPrice =
       val.discountPercent != null ? erpPriceMultiply(totalPrice, val.discountPercent / 100.0) : 0
-    // debugger
-    // TODO 芋艿：refundPrice 自动计算会有问题，界面上看到修改了，传递到后端还是没改过来
-    // const refundPrice = totalPrice - discountPrice + val.otherPrice
-    // 赋值
     formData.value.discountPrice = discountPrice
-    formData.value.totalPrice = totalPrice - discountPrice
-    // val.refundPrice = refundPrice
-    // formData.value.refundPrice = refundPrice
+    formData.value.totalPrice = totalPrice - discountPrice + val.otherPrice
   },
   { deep: true }
 )
@@ -329,7 +318,6 @@ const resetForm = () => {
     discountPrice: 0,
     totalPrice: 0,
     otherPrice: 0,
-    refundPrice: undefined,
     items: []
   }
   formRef.value?.resetFields()
