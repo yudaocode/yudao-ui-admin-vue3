@@ -1,7 +1,7 @@
-<!-- 可入库的订单列表 -->
+<!-- 可付款的采购入库单列表 -->
 <template>
   <Dialog
-    title="选择采购订单（仅展示可入库）"
+    title="选择采购入库（仅展示可付款）"
     v-model="dialogVisible"
     :appendToBody="true"
     :scroll="true"
@@ -16,10 +16,10 @@
         :inline="true"
         label-width="68px"
       >
-        <el-form-item label="订单单号" prop="no">
+        <el-form-item label="入库单号" prop="no">
           <el-input
             v-model="queryParams.no"
-            placeholder="请输入订单单号"
+            placeholder="请输入入库单号"
             clearable
             @keyup.enter="handleQuery"
             class="!w-160px"
@@ -41,9 +41,9 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="订单时间" prop="orderTime">
+        <el-form-item label="入库时间" prop="orderTime">
           <el-date-picker
-            v-model="queryParams.orderTime"
+            v-model="queryParams.inTime"
             value-format="YYYY-MM-DD HH:mm:ss"
             type="daterange"
             start-placeholder="开始日期"
@@ -60,53 +60,45 @@
     </ContentWrap>
 
     <ContentWrap>
-      <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-        <el-table-column align="center" width="65">
-          <template #default="scope">
-            <el-radio
-              :label="scope.row.id"
-              v-model="currentRowValue"
-              @change="handleCurrentChange(scope.row)"
-            >
-              &nbsp;
-            </el-radio>
-          </template>
-        </el-table-column>
-        <el-table-column min-width="180" label="订单单号" align="center" prop="no" />
+      <el-table
+        v-loading="loading"
+        :data="list"
+        :show-overflow-tooltip="true"
+        :stripe="true"
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column width="30" label="选择" type="selection" />
+        <el-table-column min-width="180" label="入库单号" align="center" prop="no" />
         <el-table-column label="供应商" align="center" prop="supplierName" />
         <el-table-column label="产品信息" align="center" prop="productNames" min-width="200" />
         <el-table-column
-          label="订单时间"
+          label="入库时间"
           align="center"
-          prop="orderTime"
+          prop="inTime"
           :formatter="dateFormatter2"
           width="120px"
         />
         <el-table-column label="创建人" align="center" prop="creatorName" />
         <el-table-column
-          label="总数量"
-          align="center"
-          prop="totalCount"
-          :formatter="erpCountTableColumnFormatter"
-        />
-        <el-table-column
-          label="入库数量"
-          align="center"
-          prop="inCount"
-          :formatter="erpCountTableColumnFormatter"
-        />
-        <el-table-column
-          label="金额合计"
-          align="center"
-          prop="totalProductPrice"
-          :formatter="erpPriceTableColumnFormatter"
-        />
-        <el-table-column
-          label="含税金额"
+          label="应付金额"
           align="center"
           prop="totalPrice"
           :formatter="erpPriceTableColumnFormatter"
         />
+        <el-table-column
+          label="已付金额"
+          align="center"
+          prop="paymentPrice"
+          :formatter="erpPriceTableColumnFormatter"
+        />
+        <el-table-column label="未付金额" align="center">
+          <template #default="scope">
+            <span v-if="scope.row.paymentPrice === scope.row.totalPrice">0</span>
+            <el-tag type="danger" v-else>
+              {{ erpPriceInputFormatter(scope.row.totalPrice - scope.row.paymentPrice) }}
+            </el-tag>
+          </template>
+        </el-table-column>
       </el-table>
       <!-- 分页 -->
       <Pagination
@@ -117,21 +109,23 @@
       />
     </ContentWrap>
     <template #footer>
-      <el-button :disabled="!currentRow" type="primary" @click="submitForm">确 定</el-button>
+      <el-button :disabled="!selectionList.length" type="primary" @click="submitForm">
+        确 定
+      </el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
 <script lang="ts" setup>
 import { ElTable } from 'element-plus'
-import { PurchaseOrderApi, PurchaseOrderVO } from '@/api/erp/purchase/order'
 import { dateFormatter2 } from '@/utils/formatTime'
-import { erpCountTableColumnFormatter, erpPriceTableColumnFormatter } from '@/utils'
+import { erpPriceInputFormatter, erpPriceTableColumnFormatter } from '@/utils'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
+import { PurchaseInApi, PurchaseInVO } from '@/api/erp/purchase/in'
 
-defineOptions({ name: 'ErpPurchaseOrderOutEnableList' })
+defineOptions({ name: 'PurchaseInPaymentEnableList' })
 
-const list = ref<PurchaseOrderVO[]>([]) // 列表的数据
+const list = ref<PurchaseInVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const loading = ref(false) // 列表的加载中
 const dialogVisible = ref(false) // 弹窗的是否展示
@@ -140,24 +134,25 @@ const queryParams = reactive({
   pageSize: 10,
   no: undefined,
   productId: undefined,
-  orderTime: [],
-  inEnable: true
+  inTime: [],
+  paymentEnable: true,
+  supplierId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const productList = ref<ProductVO[]>([]) // 产品列表
 
-/** 选中行 */
-const currentRowValue = ref(undefined) // 选中行的 value
-const currentRow = ref(undefined) // 选中行
-const handleCurrentChange = (row) => {
-  currentRow.value = row
+/** 选中操作 */
+const selectionList = ref<PurchaseInVO[]>([])
+const handleSelectionChange = (rows: PurchaseInVO[]) => {
+  selectionList.value = rows
 }
 
 /** 打开弹窗 */
-const open = async () => {
+const open = async (supplierId: number) => {
   dialogVisible.value = true
   await nextTick() // 等待，避免 queryFormRef 为空
   // 加载可入库的订单列表
+  queryParams.supplierId = supplierId
   await resetQuery()
   // 加载产品列表
   productList.value = await ProductApi.getProductSimpleList()
@@ -166,11 +161,11 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交选择 */
 const emits = defineEmits<{
-  (e: 'success', value: PurchaseOrderVO): void
+  (e: 'success', value: PurchaseInVO[]): void
 }>()
 const submitForm = () => {
   try {
-    emits('success', currentRow.value)
+    emits('success', selectionList.value)
   } finally {
     // 关闭弹窗
     dialogVisible.value = false
@@ -181,7 +176,7 @@ const submitForm = () => {
 const getList = async () => {
   loading.value = true
   try {
-    const data = await PurchaseOrderApi.getPurchaseOrderPage(queryParams)
+    const data = await PurchaseInApi.getPurchaseInPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -198,8 +193,7 @@ const resetQuery = () => {
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
-  currentRowValue.value = undefined
-  currentRow.value = undefined
+  selectionList.value = []
   getList()
 }
 </script>

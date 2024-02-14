@@ -83,6 +83,7 @@
           <el-tab-pane label="采购入库、退货单" name="item">
             <FinancePaymentItemForm
               ref="itemFormRef"
+              :supplier-id="formData.supplierId"
               :items="formData.items"
               :disabled="disabled"
             />
@@ -196,11 +197,9 @@ watch(
     if (!val) {
       return
     }
-    const totalPrice = val.items.reduce((prev, curr) => prev + curr.totalPrice, 0)
-    const discountPrice =
-      val.discountPercent != null ? erpPriceMultiply(totalPrice, val.discountPercent / 100.0) : 0
-    formData.value.discountPrice = discountPrice
-    formData.value.totalPrice = totalPrice - discountPrice
+    const totalPrice = val.items.reduce((prev, curr) => prev + curr.paymentPrice, 0)
+    formData.value.totalPrice = totalPrice
+    formData.value.paymentPrice = totalPrice - val.discountPrice
   },
   { deep: true }
 )

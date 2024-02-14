@@ -59,24 +59,29 @@
     </el-table>
   </el-form>
   <el-row justify="center" class="mt-3" v-if="!disabled">
-    <el-button @click="handleAdd" round>+ 添加采购入库单</el-button>
+    <el-button @click="handleOpenPurchaseIn" round>+ 添加采购入库单</el-button>
     <el-button @click="handleAdd" round>+ 添加采购退货单</el-button>
   </el-row>
+
+  <PurchaseInPaymentEnableList
+    ref="purchaseInPaymentEnableListRef"
+    @success="handleAddPurchaseIn"
+  />
 </template>
 <script setup lang="ts">
-import { ProductApi, ProductVO } from '@/api/erp/product/product'
-import { StockApi } from '@/api/erp/stock/stock'
-import {
-  erpCountInputFormatter,
-  erpPriceInputFormatter,
-  erpPriceMultiply,
-  getSumValue
-} from '@/utils'
+import { ProductVO } from '@/api/erp/product/product'
+import { erpPriceInputFormatter, getSumValue } from '@/utils'
+import PurchaseInPaymentEnableList from '@/views/erp/purchase/in/components/PurchaseInPaymentEnableList.vue'
+import { PurchaseInVO } from '@/api/erp/purchase/in'
+import { ErpBizType } from '@/utils/constants'
 
 const props = defineProps<{
   items: undefined
+  supplierId: undefined
   disabled: false
 }>()
+const message = useMessage()
+
 const formLoading = ref(false) // 表单的加载中
 const formData = ref([])
 const formRules = reactive({
@@ -114,17 +119,26 @@ const getSummaries = (param: SummaryMethodProps) => {
   return sums
 }
 
-/** 新增按钮操作 */
-const handleAdd = () => {
-  const row = {
-    id: undefined,
-    totalPrice: undefined,
-    paidPrice: undefined,
-    paymentPrice: undefined,
-    totalPrice: undefined,
-    remark: undefined
+/** 新增【采购入库】按钮操作 */
+const purchaseInPaymentEnableListRef = ref()
+const handleOpenPurchaseIn = () => {
+  if (!props.supplierId) {
+    message.error('请选择供应商')
+    return
   }
-  formData.value.push(row)
+  purchaseInPaymentEnableListRef.value.open(props.supplierId)
+}
+const handleAddPurchaseIn = (rows: PurchaseInVO[]) => {
+  rows.forEach((row) => {
+    formData.value.push({
+      bizId: row.id,
+      bizType: ErpBizType.PURCHASE_IN,
+      bizNo: row.no,
+      totalPrice: row.totalPrice,
+      paidPrice: row.paymentPrice,
+      paymentPrice: row.totalPrice - row.paymentPrice
+    })
+  })
 }
 
 /** 删除按钮操作 */
