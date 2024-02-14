@@ -37,7 +37,6 @@
             <el-input-number
               v-model="row.paymentPrice"
               controls-position="right"
-              :min="0"
               :precision="2"
               class="!w-100%"
             />
@@ -60,20 +59,28 @@
   </el-form>
   <el-row justify="center" class="mt-3" v-if="!disabled">
     <el-button @click="handleOpenPurchaseIn" round>+ 添加采购入库单</el-button>
-    <el-button @click="handleAdd" round>+ 添加采购退货单</el-button>
+    <el-button @click="handleOpenPurchaseReturn" round>+ 添加采购退货单</el-button>
   </el-row>
 
+  <!-- 可付款的【采购入库单】列表 -->
   <PurchaseInPaymentEnableList
     ref="purchaseInPaymentEnableListRef"
     @success="handleAddPurchaseIn"
+  />
+  <!-- 可付款的【采购入库单】列表 -->
+  <PurchaseReturnRefundEnableList
+    ref="purchaseReturnRefundEnableListRef"
+    @success="handleAddPurchaseReturn"
   />
 </template>
 <script setup lang="ts">
 import { ProductVO } from '@/api/erp/product/product'
 import { erpPriceInputFormatter, getSumValue } from '@/utils'
 import PurchaseInPaymentEnableList from '@/views/erp/purchase/in/components/PurchaseInPaymentEnableList.vue'
+import PurchaseReturnRefundEnableList from '@/views/erp/purchase/return/components/PurchaseReturnRefundEnableList.vue'
 import { PurchaseInVO } from '@/api/erp/purchase/in'
 import { ErpBizType } from '@/utils/constants'
+import { PurchaseReturnVO } from '@/api/erp/purchase/return'
 
 const props = defineProps<{
   items: undefined
@@ -115,7 +122,6 @@ const getSummaries = (param: SummaryMethodProps) => {
       sums[index] = ''
     }
   })
-
   return sums
 }
 
@@ -137,6 +143,28 @@ const handleAddPurchaseIn = (rows: PurchaseInVO[]) => {
       totalPrice: row.totalPrice,
       paidPrice: row.paymentPrice,
       paymentPrice: row.totalPrice - row.paymentPrice
+    })
+  })
+}
+
+/** 新增【采购退货】按钮操作 */
+const purchaseReturnRefundEnableListRef = ref()
+const handleOpenPurchaseReturn = () => {
+  if (!props.supplierId) {
+    message.error('请选择供应商')
+    return
+  }
+  purchaseReturnRefundEnableListRef.value.open(props.supplierId)
+}
+const handleAddPurchaseReturn = (rows: PurchaseReturnVO[]) => {
+  rows.forEach((row) => {
+    formData.value.push({
+      bizId: row.id,
+      bizType: ErpBizType.PURCHASE_RETURN,
+      bizNo: row.no,
+      totalPrice: -row.totalPrice,
+      paidPrice: -row.refundPrice,
+      paymentPrice: -row.totalPrice + row.refundPrice
     })
   })
 }

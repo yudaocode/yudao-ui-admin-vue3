@@ -334,7 +334,7 @@ const handleDelete = async (ids: number[]) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await FinancePaymentApi.deletePurchaseOrder(ids)
+    await FinancePaymentApi.deleteFinancePayment(ids)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -348,7 +348,7 @@ const handleUpdateStatus = async (id: number, status: number) => {
     // 审批的二次确认
     await message.confirm(`确定${status === 20 ? '审批' : '反审批'}该付款单吗？`)
     // 发起审批
-    await FinancePaymentApi.updatePurchaseOrderStatus(id, status)
+    await FinancePaymentApi.updateFinancePaymentStatus(id, status)
     message.success(`${status === 20 ? '审批' : '反审批'}成功`)
     // 刷新列表
     await getList()
@@ -362,7 +362,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await FinancePaymentApi.exportPurchaseOrder(queryParams)
+    const data = await FinancePaymentApi.exportFinancePayment(queryParams)
     download.excel(data, '付款单.xls')
   } catch {
   } finally {
