@@ -255,7 +255,7 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <!--  <PurchaseOrderForm ref="formRef" @success="getList" />-->
+  <FinancePaymentForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
@@ -263,10 +263,10 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { FinancePaymentApi, FinancePaymentVO } from '@/api/erp/finance/payment'
-// import PurchaseOrderForm from './PurchaseOrderForm.vue'
+import FinancePaymentForm from './FinancePaymentForm.vue'
 import { UserVO } from '@/api/system/user'
 import * as UserApi from '@/api/system/user'
-import { erpCountTableColumnFormatter, erpPriceTableColumnFormatter } from '@/utils'
+import { erpPriceTableColumnFormatter } from '@/utils'
 import { SupplierApi, SupplierVO } from '@/api/erp/purchase/supplier'
 import { AccountApi, AccountVO } from '@/api/erp/finance/account'
 
