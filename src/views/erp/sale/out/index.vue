@@ -41,7 +41,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
+          class="!w-220px"
         />
       </el-form-item>
       <el-form-item label="客户" prop="customerId">
@@ -117,18 +117,19 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="有无欠款" prop="debtStatus">
+      <el-form-item label="收款状态" prop="receiptStatus">
         <el-select
-          v-model="queryParams.debtStatus"
-          placeholder="请选择有无欠款"
+          v-model="queryParams.receiptStatus"
+          placeholder="请选择有款状态"
           clearable
           class="!w-240px"
         >
-          <el-option label="有欠款" value="true" />
-          <el-option label="无欠款" value="false" />
+          <el-option label="未收款" value="0" />
+          <el-option label="部分收款" value="1" />
+          <el-option label="全部收款" value="2" />
         </el-select>
       </el-form-item>
-      <el-form-item label="状态" prop="status">
+      <el-form-item label="审核状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.ERP_AUDIT_STATUS)"
@@ -208,35 +209,26 @@
         :formatter="erpCountTableColumnFormatter"
       />
       <el-table-column
-        label="金额合计"
-        align="center"
-        prop="totalProductPrice"
-        :formatter="erpPriceTableColumnFormatter"
-      />
-      <el-table-column
-        label="含税金额"
+        label="应收金额"
         align="center"
         prop="totalPrice"
         :formatter="erpPriceTableColumnFormatter"
       />
-      <el-table-column label="待收金额" align="center">
-        <template #default="scope">
-          {{ erpPriceInputFormatter(scope.row.payPrice + scope.row.debtPrice) }}
-        </template>
-      </el-table-column>
       <el-table-column
-        label="本次收款"
+        label="已收金额"
         align="center"
-        prop="payPrice"
+        prop="receiptPrice"
         :formatter="erpPriceTableColumnFormatter"
       />
-      <el-table-column label="本次欠款" align="center" prop="debtPrice">
+      <el-table-column label="未收金额" align="center">
         <template #default="scope">
-          <span v-if="scope.row.debtPrice === 0">0</span>
-          <el-tag type="danger" v-else>{{ erpPriceInputFormatter(scope.row.debtPrice) }}</el-tag>
+          <span v-if="scope.row.receiptPrice === scope.row.totalPrice">0</span>
+          <el-tag type="danger" v-else>
+            {{ erpPriceInputFormatter(scope.row.totalPrice - scope.row.receiptPrice) }}
+          </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" fixed="right" width="90" prop="status">
+      <el-table-column label="审核状态" align="center" fixed="right" width="90" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.ERP_AUDIT_STATUS" :value="scope.row.status" />
         </template>
@@ -337,7 +329,7 @@ const queryParams = reactive({
   warehouseId: undefined,
   outTime: [],
   orderNo: undefined,
-  debtStatus: undefined,
+  receiptStatus: undefined,
   accountId: undefined,
   status: undefined,
   remark: undefined,
