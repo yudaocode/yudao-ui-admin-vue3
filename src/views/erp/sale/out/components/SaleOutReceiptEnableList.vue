@@ -1,7 +1,7 @@
-<!-- 可退款的采购退货单列表 -->
+<!-- 可收款的销售出库单列表 -->
 <template>
   <Dialog
-    title="选择采购退货（仅展示可退款）"
+    title="选择销售出库（仅展示可收款）"
     v-model="dialogVisible"
     :appendToBody="true"
     :scroll="true"
@@ -16,10 +16,10 @@
         :inline="true"
         label-width="68px"
       >
-        <el-form-item label="退货单号" prop="no">
+        <el-form-item label="出库单号" prop="no">
           <el-input
             v-model="queryParams.no"
-            placeholder="请输入退货单号"
+            placeholder="请输入出库单号"
             clearable
             @keyup.enter="handleQuery"
             class="!w-160px"
@@ -41,9 +41,9 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="退货时间" prop="orderTime">
+        <el-form-item label="出库时间" prop="orderTime">
           <el-date-picker
-            v-model="queryParams.returnTime"
+            v-model="queryParams.outTime"
             value-format="YYYY-MM-DD HH:mm:ss"
             type="daterange"
             start-placeholder="开始日期"
@@ -68,34 +68,34 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column width="30" label="选择" type="selection" />
-        <el-table-column min-width="180" label="退货单号" align="center" prop="no" />
-        <el-table-column label="供应商" align="center" prop="supplierName" />
+        <el-table-column min-width="180" label="出库单号" align="center" prop="no" />
+        <el-table-column label="客户" align="center" prop="customerName" />
         <el-table-column label="产品信息" align="center" prop="productNames" min-width="200" />
         <el-table-column
-          label="退货时间"
+          label="出库时间"
           align="center"
-          prop="returnTime"
+          prop="outTime"
           :formatter="dateFormatter2"
           width="120px"
         />
         <el-table-column label="创建人" align="center" prop="creatorName" />
         <el-table-column
-          label="应退金额"
+          label="应收金额"
           align="center"
           prop="totalPrice"
           :formatter="erpPriceTableColumnFormatter"
         />
         <el-table-column
-          label="已退金额"
+          label="已收金额"
           align="center"
-          prop="refundPrice"
+          prop="receiptPrice"
           :formatter="erpPriceTableColumnFormatter"
         />
-        <el-table-column label="未退金额" align="center">
+        <el-table-column label="未收金额" align="center">
           <template #default="scope">
-            <span v-if="scope.row.refundPrice === scope.row.totalPrice">0</span>
+            <span v-if="scope.row.receiptPrice === scope.row.totalPrice">0</span>
             <el-tag type="danger" v-else>
-              {{ erpPriceInputFormatter(scope.row.totalPrice - scope.row.refundPrice) }}
+              {{ erpPriceInputFormatter(scope.row.totalPrice - scope.row.receiptPrice) }}
             </el-tag>
           </template>
         </el-table-column>
@@ -121,12 +121,11 @@ import { ElTable } from 'element-plus'
 import { dateFormatter2 } from '@/utils/formatTime'
 import { erpPriceInputFormatter, erpPriceTableColumnFormatter } from '@/utils'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
-import { PurchaseReturnApi, PurchaseReturnVO } from '@/api/erp/purchase/return'
-import { SaleReturnVO } from '@/api/erp/sale/return'
+import { SaleOutApi, SaleOutVO } from '@/api/erp/sale/out'
 
-defineOptions({ name: 'PurchaseInPaymentEnableList' })
+defineOptions({ name: 'SaleOutReceiptEnableList' })
 
-const list = ref<PurchaseReturnVO[]>([]) // 列表的数据
+const list = ref<SaleOutVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const loading = ref(false) // 列表的加载中
 const dialogVisible = ref(false) // 弹窗的是否展示
@@ -135,25 +134,25 @@ const queryParams = reactive({
   pageSize: 10,
   no: undefined,
   productId: undefined,
-  returnTime: [],
-  refundEnable: true,
-  supplierId: undefined
+  outTime: [],
+  receiptEnable: true,
+  customerId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const productList = ref<ProductVO[]>([]) // 产品列表
 
 /** 选中操作 */
-const selectionList = ref<SaleReturnVO[]>([])
-const handleSelectionChange = (rows: SaleReturnVO[]) => {
+const selectionList = ref<SaleOutVO[]>([])
+const handleSelectionChange = (rows: SaleOutVO[]) => {
   selectionList.value = rows
 }
 
 /** 打开弹窗 */
-const open = async (supplierId: number) => {
+const open = async (customerId: number) => {
   dialogVisible.value = true
   await nextTick() // 等待，避免 queryFormRef 为空
-  // 加载列表
-  queryParams.supplierId = supplierId
+  // 加载可出库的订单列表
+  queryParams.customerId = customerId
   await resetQuery()
   // 加载产品列表
   productList.value = await ProductApi.getProductSimpleList()
@@ -162,7 +161,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交选择 */
 const emits = defineEmits<{
-  (e: 'success', value: SaleReturnVO[]): void
+  (e: 'success', value: SaleOutVO[]): void
 }>()
 const submitForm = () => {
   try {
@@ -177,7 +176,7 @@ const submitForm = () => {
 const getList = async () => {
   loading.value = true
   try {
-    const data = await PurchaseReturnApi.getPurchaseReturnPage(queryParams)
+    const data = await SaleOutApi.getSaleOutPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {

@@ -1,7 +1,7 @@
-<!-- 可退款的采购退货单列表 -->
+<!-- 可退款的销售退货单列表 -->
 <template>
   <Dialog
-    title="选择采购退货（仅展示可退款）"
+    title="选择销售退货（仅展示可退款）"
     v-model="dialogVisible"
     :appendToBody="true"
     :scroll="true"
@@ -69,7 +69,7 @@
       >
         <el-table-column width="30" label="选择" type="selection" />
         <el-table-column min-width="180" label="退货单号" align="center" prop="no" />
-        <el-table-column label="供应商" align="center" prop="supplierName" />
+        <el-table-column label="客户" align="center" prop="customerName" />
         <el-table-column label="产品信息" align="center" prop="productNames" min-width="200" />
         <el-table-column
           label="退货时间"
@@ -121,12 +121,11 @@ import { ElTable } from 'element-plus'
 import { dateFormatter2 } from '@/utils/formatTime'
 import { erpPriceInputFormatter, erpPriceTableColumnFormatter } from '@/utils'
 import { ProductApi, ProductVO } from '@/api/erp/product/product'
-import { PurchaseReturnApi, PurchaseReturnVO } from '@/api/erp/purchase/return'
-import { SaleReturnVO } from '@/api/erp/sale/return'
+import { SaleReturnApi, SaleReturnVO } from '@/api/erp/sale/return'
 
-defineOptions({ name: 'PurchaseInPaymentEnableList' })
+defineOptions({ name: 'SaleReturnPaymentEnableList' })
 
-const list = ref<PurchaseReturnVO[]>([]) // 列表的数据
+const list = ref<SaleReturnVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const loading = ref(false) // 列表的加载中
 const dialogVisible = ref(false) // 弹窗的是否展示
@@ -137,7 +136,7 @@ const queryParams = reactive({
   productId: undefined,
   returnTime: [],
   refundEnable: true,
-  supplierId: undefined
+  customerId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const productList = ref<ProductVO[]>([]) // 产品列表
@@ -149,11 +148,11 @@ const handleSelectionChange = (rows: SaleReturnVO[]) => {
 }
 
 /** 打开弹窗 */
-const open = async (supplierId: number) => {
+const open = async (customerId: number) => {
   dialogVisible.value = true
   await nextTick() // 等待，避免 queryFormRef 为空
   // 加载列表
-  queryParams.supplierId = supplierId
+  queryParams.customerId = customerId
   await resetQuery()
   // 加载产品列表
   productList.value = await ProductApi.getProductSimpleList()
@@ -177,7 +176,7 @@ const submitForm = () => {
 const getList = async () => {
   loading.value = true
   try {
-    const data = await PurchaseReturnApi.getPurchaseReturnPage(queryParams)
+    const data = await SaleReturnApi.getSaleReturnPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
