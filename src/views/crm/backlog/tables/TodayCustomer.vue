@@ -43,8 +43,8 @@
   </ContentWrap>
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="编号" prop="id" />
-      <el-table-column align="center" label="客户名称" prop="name" width="160">
+      <el-table-column align="center" label="编号" fixed="left" prop="id" />
+      <el-table-column align="center" label="客户名称" fixed="left" prop="name" width="160">
         <template #default="scope">
           <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
             {{ scope.row.name }}
@@ -82,7 +82,7 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="距进入公海天数" prop="poolDay" width="100px" />
+      <el-table-column align="center" label="距进入公海天数" prop="poolDay" width="130" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -123,6 +123,8 @@ import * as BacklogApi from '@/api/crm/backlog'
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { CONTACT_STATUS, SCENE_TYPES } from './common'
+
+// defineOptions({ name: 'TodayCustomer' }) TODO @dhb52：1）定义改成这种；2）命名要不要改成 CustomerTodayTable，就是 模块+形容词+表格（更容易识别），然后把 tables 目录改成 components 目录
 
 const { push } = useRouter()
 

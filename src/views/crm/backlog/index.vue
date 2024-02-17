@@ -1,4 +1,3 @@
-<!-- TODO @dhb52: 存在很多重复的 table 定义，如Customer: TodayCustomer,FollowCustomer,PutInPoolRemind -->
 <template>
   <el-row :gutter="20">
     <el-col :span="4" class="min-w-[200px]">
@@ -90,10 +89,8 @@ const leftSides = ref([
   }
 ])
 
-/**
- * 侧边点击
- */
-const sideClick = (item) => {
+/** 侧边点击 */
+const sideClick = (item: any) => {
   leftType.value = item.infoType
 }
 // TODO @dhb52: 侧边栏样式，在黑暗模式下，颜色会不对。是不是可以读取主题色哈；

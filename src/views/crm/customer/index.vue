@@ -110,8 +110,8 @@
       <el-tab-pane label="下属负责的" name="3" />
     </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="编号" prop="id" />
-      <el-table-column align="center" label="客户名称" prop="name" width="160">
+      <el-table-column align="center" label="编号" fixed="left" prop="id" />
+      <el-table-column align="center" label="客户名称" fixed="left" prop="name" width="160">
         <template #default="scope">
           <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
             {{ scope.row.name }}
@@ -149,7 +149,7 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="距离进入公海" prop="poolDay">
+      <el-table-column align="center" label="距离进入公海" prop="poolDay" width="120">
         <template #default="scope"> {{ scope.row.poolDay }} 天</template>
       </el-table-column>
       <el-table-column

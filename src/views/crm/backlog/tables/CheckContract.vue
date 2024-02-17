@@ -126,8 +126,6 @@ import { fenToYuanFormat } from '@/utils/formatter'
 import { DICT_TYPE } from '@/utils/dict'
 import { AUDIT_STATUS } from './common'
 
-const { push } = useRouter() // 路由
-
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
@@ -157,6 +155,7 @@ const handleQuery = () => {
 }
 
 /** 打开客户详情 */
+const { push } = useRouter() // 路由
 const openCustomerDetail = (id: number) => {
   push({ name: 'CrmCustomerDetail', params: { id } })
 }
