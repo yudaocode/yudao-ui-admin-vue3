@@ -27,10 +27,10 @@ export const deleteFile = (id: number) => {
 }
 
 // 获取文件预签名地址
-export const getFilePresignedUrl = (fileName: string) => {
+export const getFilePresignedUrl = (path: string) => {
   return request.get<FilePresignedUrlRespVO>({
     url: '/infra/file/presigned-url',
-    params: { fileName }
+    params: { path }
   })
 }
 
