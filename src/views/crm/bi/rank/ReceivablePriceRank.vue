@@ -13,21 +13,13 @@
       <el-table-column label="公司排名" align="center" type="index" width="80" />
       <el-table-column label="签订人" align="center" prop="nickname" min-width="200" />
       <el-table-column label="部门" align="center" prop="deptName" min-width="200" />
-      <el-table-column
-        label="回款金额（元）"
-        align="center"
-        prop="count"
-        min-width="200"
-        :formatter="fenToYuanFormat"
-      />
+      <el-table-column label="回款金额（元）" align="center" prop="count" min-width="200" />
     </el-table>
   </el-card>
 </template>
 <script setup lang="ts">
 import { RankApi, BiRankRespVO } from '@/api/crm/bi/rank'
 import { EChartsOption } from 'echarts'
-import { fenToYuanFormat } from '@/utils/formatter'
-import { fenToYuan } from '@/utils'
 import { clone } from 'unocss'
 
 defineOptions({ name: 'ReceivablePriceRank' })
@@ -72,8 +64,7 @@ const echartsOption = reactive<EChartsOption>({
     trigger: 'axis',
     axisPointer: {
       type: 'shadow'
-    },
-    valueFormatter: fenToYuan
+    }
   },
   xAxis: {
     type: 'value',
