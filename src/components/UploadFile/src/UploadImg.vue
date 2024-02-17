@@ -3,15 +3,15 @@
     <el-upload
       :id="uuid"
       :accept="fileType.join(',')"
-      :action="updateUrl"
+      :action="uploadUrl"
       :before-upload="beforeUpload"
       :class="['upload', drag ? 'no-border' : '']"
       :drag="drag"
-      :headers="uploadHeaders"
       :multiple="false"
       :on-error="uploadError"
       :on-success="uploadSuccess"
       :show-file-list="false"
+      :http-request="httpRequest"
     >
       <template v-if="modelValue">
         <img :src="modelValue" class="upload-image" />
@@ -50,8 +50,8 @@ import type { UploadProps } from 'element-plus'
 
 import { generateUUID } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
-import { getAccessToken, getTenantId } from '@/utils/auth'
 import { createImageViewer } from '@/components/ImageViewer'
+import { useUpload } from '@/components/UploadFile/src/useUpload'
 
 defineOptions({ name: 'UploadImg' })
 
@@ -70,7 +70,6 @@ type FileTypes =
 // 接受父组件参数
 const props = defineProps({
   modelValue: propTypes.string.def(''),
-  updateUrl: propTypes.string.def(import.meta.env.VITE_UPLOAD_URL),
   drag: propTypes.bool.def(true), // 是否支持拖拽上传 ==> 非必传（默认为 true）
   disabled: propTypes.bool.def(false), // 是否禁用上传组件 ==> 非必传（默认为 false）
   fileSize: propTypes.number.def(5), // 图片大小限制 ==> 非必传（默认为 5M）
@@ -101,10 +100,7 @@ const deleteImg = () => {
   emit('update:modelValue', '')
 }
 
-const uploadHeaders = ref({
-  Authorization: 'Bearer ' + getAccessToken(),
-  'tenant-id': getTenantId()
-})
+const { uploadUrl, httpRequest } = useUpload()
 
 const editImg = () => {
   const dom = document.querySelector(`#${uuid.value} .el-upload__input`)

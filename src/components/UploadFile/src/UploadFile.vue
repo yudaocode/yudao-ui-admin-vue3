@@ -3,11 +3,10 @@
     <el-upload
       ref="uploadRef"
       v-model:file-list="fileList"
-      :action="updateUrl"
+      :action="uploadUrl"
       :auto-upload="autoUpload"
       :before-upload="beforeUpload"
       :drag="drag"
-      :headers="uploadHeaders"
       :limit="props.limit"
       :multiple="props.limit > 1"
       :on-error="excelUploadError"
@@ -16,6 +15,7 @@
       :on-remove="handleRemove"
       :on-success="handleFileSuccess"
       :show-file-list="true"
+      :http-request="httpRequest"
       class="upload-file-uploader"
       name="file"
     >
@@ -36,9 +36,10 @@
 </template>
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
-import { getAccessToken, getTenantId } from '@/utils/auth'
 import type { UploadInstance, UploadProps, UploadRawFile, UploadUserFile } from 'element-plus'
 import { isString } from '@/utils/is'
+import { useUpload } from '@/components/UploadFile/src/useUpload'
+import { UploadFile } from 'element-plus/es/components/upload/src/upload'
 
 defineOptions({ name: 'UploadFile' })
 
@@ -48,7 +49,6 @@ const emit = defineEmits(['update:modelValue'])
 const props = defineProps({
   modelValue: propTypes.oneOfType<string | string[]>([String, Array<String>]).isRequired,
   title: propTypes.string.def('文件上传'),
-  updateUrl: propTypes.string.def(import.meta.env.VITE_UPLOAD_URL),
   fileType: propTypes.array.def(['doc', 'xls', 'ppt', 'txt', 'pdf']), // 文件类型, 例如['png', 'jpg', 'jpeg']
   fileSize: propTypes.number.def(5), // 大小限制(MB)
   limit: propTypes.number.def(5), // 数量限制
@@ -62,10 +62,8 @@ const uploadRef = ref<UploadInstance>()
 const uploadList = ref<UploadUserFile[]>([])
 const fileList = ref<UploadUserFile[]>([])
 const uploadNumber = ref<number>(0)
-const uploadHeaders = ref({
-  Authorization: 'Bearer ' + getAccessToken(),
-  'tenant-id': getTenantId()
-})
+
+const { uploadUrl, httpRequest } = useUpload()
 
 // 文件上传之前判断
 const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
@@ -120,10 +118,10 @@ const excelUploadError: UploadProps['onError'] = (): void => {
   message.error('导入数据失败，请您重新上传！')
 }
 // 删除上传文件
-const handleRemove = (file) => {
-  const findex = fileList.value.map((f) => f.name).indexOf(file.name)
-  if (findex > -1) {
-    fileList.value.splice(findex, 1)
+const handleRemove = (file: UploadFile) => {
+  const index = fileList.value.map((f) => f.name).indexOf(file.name)
+  if (index > -1) {
+    fileList.value.splice(index, 1)
     emitUpdateModelValue()
   }
 }
