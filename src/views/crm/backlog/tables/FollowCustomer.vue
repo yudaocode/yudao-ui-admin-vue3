@@ -114,7 +114,6 @@ import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { FOLLOWUP_STATUS } from './common'
 
-
 const { push } = useRouter()
 
 const loading = ref(true) // 列表的加载中
