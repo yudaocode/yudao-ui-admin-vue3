@@ -52,7 +52,7 @@ watch(
     if (!val || val.length === 0) {
       return
     }
-    list.value = BusinessApi.getBusinessListByIds(val) as unknown as BusinessApi.BusinessVO[]
+    list.value = BusinessApi.getBusinessListByIds(unref(val)) as unknown as BusinessApi.BusinessVO[]
   }
 )
 const emits = defineEmits<{

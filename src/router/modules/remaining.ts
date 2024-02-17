@@ -508,6 +508,17 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/crm/customer/detail/index.vue')
       },
       {
+        path: 'contract/detail/:id',
+        name: 'CrmContractDetail',
+        meta: {
+          title: '合同详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/contract'
+        },
+        component: () => import('@/views/crm/contract/detail/index.vue')
+      },
+      {
         path: 'contact/detail/:id',
         name: 'CrmContactDetail',
         meta: {
@@ -528,17 +539,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
           activeMenu: '/crm/product'
         },
         component: () => import('@/views/crm/product/detail/index.vue')
-      },
-      {
-        path: 'message',
-        name: 'CrmMessage',
-        meta: {
-          title: '待办事项',
-          noCache: true,
-          hidden: true
-        },
-        // TODO @db52：后面搞，搞成菜单
-        component: () => import('@/views/crm/message/index.vue')
       }
     ]
   }

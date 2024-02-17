@@ -105,8 +105,17 @@ const handleUpdate = () => {
     message.warning('请先选择团队成员后操作！')
     return
   }
-  const ids = multipleSelection.value?.map((item) => item.id) as unknown as number[]
-  formRef.value?.open('update', props.bizType, props.bizId!, ids)
+  if (multipleSelection.value?.length > 1) {
+    message.warning('编辑团队成员时只能选择一个！')
+    return
+  }
+  formRef.value?.open0(
+    'update',
+    props.bizType,
+    props.bizId!,
+    multipleSelection.value[0].id!,
+    multipleSelection.value[0].level
+  )
 }
 
 /** 移除团队成员 */
@@ -116,12 +125,10 @@ const handleDelete = async () => {
     return
   }
   await message.delConfirm()
-  const ids = multipleSelection.value?.map((item) => item.id)
-  await PermissionApi.deletePermissionBatch({
-    bizType: props.bizType,
-    bizId: props.bizId,
-    ids
-  })
+  const ids = multipleSelection.value?.map((item) => item.id) as unknown as number[]
+  await PermissionApi.deletePermissionBatch(ids)
+  message.success('移除团队成员成功！')
+  await getList()
 }
 
 /** 添加团队成员 */
@@ -164,6 +171,9 @@ watch(
 )
 
 defineExpose({ openForm, validateOwnerUser, validateWrite, isPool })
+const emits = defineEmits<{
+  (e: 'quitTeam'): void
+}>()
 /** 退出团队 */
 const handleQuit = async () => {
   const permission = list.value.find(
@@ -175,9 +185,12 @@ const handleQuit = async () => {
     return
   }
   const userPermission = list.value.find((item) => item.userId === userStore.getUser.id)
-  if (userPermission) {
-    await PermissionApi.deleteSelfPermission(userPermission.id!)
+  if (!userPermission) {
+    return
   }
+  await PermissionApi.deleteSelfPermission(userPermission.id!)
+  message.success('退出团队成员成功！')
+  emits('quitTeam')
 }
 
 watch(

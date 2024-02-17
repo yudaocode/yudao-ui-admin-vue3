@@ -10,7 +10,9 @@ interface UserVO {
   id: number
   avatar: string
   nickname: string
+  deptId: number
 }
+
 interface UserInfoVO {
   permissions: string[]
   roles: string[]
@@ -26,7 +28,8 @@ export const useUserStore = defineStore('admin-user', {
     user: {
       id: 0,
       avatar: '',
-      nickname: ''
+      nickname: '',
+      deptId: 0
     }
   }),
   getters: {
@@ -60,6 +63,20 @@ export const useUserStore = defineStore('admin-user', {
       wsCache.set(CACHE_KEY.USER, userInfo)
       wsCache.set(CACHE_KEY.ROLE_ROUTERS, userInfo.menus)
     },
+    async setUserAvatarAction(avatar: string) {
+      const userInfo = wsCache.get(CACHE_KEY.USER)
+      // NOTE: 是否需要像`setUserInfoAction`一样判断`userInfo != null`
+      this.user.avatar = avatar
+      userInfo.user.avatar = avatar
+      wsCache.set(CACHE_KEY.USER, userInfo)
+    },
+    async setUserNicknameAction(nickname: string) {
+      const userInfo = wsCache.get(CACHE_KEY.USER)
+      // NOTE: 是否需要像`setUserInfoAction`一样判断`userInfo != null`
+      this.user.nickname = nickname
+      userInfo.user.nickname = nickname
+      wsCache.set(CACHE_KEY.USER, userInfo)
+    },
     async loginOut() {
       await loginOut()
       removeToken()
@@ -73,7 +90,8 @@ export const useUserStore = defineStore('admin-user', {
       this.user = {
         id: 0,
         avatar: '',
-        nickname: ''
+        nickname: '',
+        deptId: 0
       }
     }
   }

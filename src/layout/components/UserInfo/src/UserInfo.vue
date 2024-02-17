@@ -1,17 +1,14 @@
 <script lang="ts" setup>
 import { ElMessageBox } from 'element-plus'
 
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
-import { useDesign } from '@/hooks/web/useDesign'
 import avatarImg from '@/assets/imgs/avatar.gif'
-import { useUserStore } from '@/store/modules/user'
+import { useDesign } from '@/hooks/web/useDesign'
 import { useTagsViewStore } from '@/store/modules/tagsView'
+import { useUserStore } from '@/store/modules/user'
 
 defineOptions({ name: 'UserInfo' })
 
 const { t } = useI18n()
-
-const { wsCache } = useCache()
 
 const { push, replace } = useRouter()
 
@@ -23,24 +20,21 @@ const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('user-info')
 
-const user = wsCache.get(CACHE_KEY.USER)
+const avatar = computed(() => userStore.user.avatar ?? avatarImg)
+const userName = computed(() => userStore.user.nickname ?? 'Admin')
 
-const avatar = user.user.avatar ? user.user.avatar : avatarImg
-
-const userName = user.user.nickname ? user.user.nickname : 'Admin'
-
-const loginOut = () => {
-  ElMessageBox.confirm(t('common.loginOutMessage'), t('common.reminder'), {
-    confirmButtonText: t('common.ok'),
-    cancelButtonText: t('common.cancel'),
-    type: 'warning'
-  })
-    .then(async () => {
-      await userStore.loginOut()
-      tagsViewStore.delAllViews()
-      replace('/login?redirect=/index')
+const loginOut = async () => {
+  try {
+    await ElMessageBox.confirm(t('common.loginOutMessage'), t('common.reminder'), {
+      confirmButtonText: t('common.ok'),
+      cancelButtonText: t('common.cancel'),
+      type: 'warning'
     })
-    .catch(() => {})
+    await userStore.loginOut()
+    tagsViewStore.delAllViews()
+    replace('/login?redirect=/index')
+  }
+  catch { }
 }
 const toProfile = async () => {
   push('/user/profile')

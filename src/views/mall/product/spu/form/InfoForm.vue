@@ -1,16 +1,16 @@
 <!-- 商品发布 - 基础设置 -->
 <template>
-  <el-form ref="formRef" :model="formData" :rules="rules" label-width="120px" :disabled="isDetail">
+  <el-form ref="formRef" :disabled="isDetail" :model="formData" :rules="rules" label-width="120px">
     <el-form-item label="商品名称" prop="name">
       <el-input
         v-model="formData.name"
+        :autosize="{ minRows: 2, maxRows: 2 }"
+        :clearable="true"
+        :show-word-limit="true"
+        class="w-80!"
+        maxlength="64"
         placeholder="请输入商品名称"
         type="textarea"
-        :autosize="{ minRows: 2, maxRows: 2 }"
-        maxlength="64"
-        :show-word-limit="true"
-        :clearable="true"
-        class="w-80!"
       />
     </el-form-item>
     <el-form-item label="商品分类" prop="categoryId">
@@ -20,12 +20,12 @@
         :props="defaultProps"
         class="w-80"
         clearable
-        placeholder="请选择商品分类"
         filterable
+        placeholder="请选择商品分类"
       />
     </el-form-item>
     <el-form-item label="商品品牌" prop="brandId">
-      <el-select v-model="formData.brandId" placeholder="请选择商品品牌" class="w-80">
+      <el-select v-model="formData.brandId" class="w-80" placeholder="请选择商品品牌">
         <el-option
           v-for="item in brandList"
           :key="item.id"
@@ -35,25 +35,25 @@
       </el-select>
     </el-form-item>
     <el-form-item label="商品关键字" prop="keyword">
-      <el-input v-model="formData.keyword" placeholder="请输入商品关键字" class="w-80!" />
+      <el-input v-model="formData.keyword" class="w-80!" placeholder="请输入商品关键字" />
     </el-form-item>
     <el-form-item label="商品简介" prop="introduction">
       <el-input
         v-model="formData.introduction"
+        :autosize="{ minRows: 2, maxRows: 2 }"
+        :clearable="true"
+        :show-word-limit="true"
+        class="w-80!"
+        maxlength="128"
         placeholder="请输入商品名称"
         type="textarea"
-        :autosize="{ minRows: 2, maxRows: 2 }"
-        maxlength="128"
-        :show-word-limit="true"
-        :clearable="true"
-        class="w-80!"
       />
     </el-form-item>
     <el-form-item label="商品封面图" prop="picUrl">
-      <UploadImg v-model="formData.picUrl" height="80px" :disabled="isDetail" />
+      <UploadImg v-model="formData.picUrl" :disabled="isDetail" height="80px" />
     </el-form-item>
     <el-form-item label="商品轮播图" prop="sliderPicUrls">
-      <UploadImgs v-model:modelValue="formData.sliderPicUrls" :disabled="isDetail" />
+      <UploadImgs v-model="formData.sliderPicUrls" :disabled="isDetail" />
     </el-form-item>
   </el-form>
 </template>
@@ -64,9 +64,9 @@ import { propTypes } from '@/utils/propTypes'
 import { defaultProps, handleTree } from '@/utils/tree'
 import type { Spu } from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
+import { CategoryVO } from '@/api/mall/product/category'
 import * as ProductBrandApi from '@/api/mall/product/brand'
 import { BrandVO } from '@/api/mall/product/brand'
-import { CategoryVO } from '@/api/mall/product/category'
 
 defineOptions({ name: 'ProductSpuInfoForm' })
 const props = defineProps({
@@ -107,10 +107,6 @@ watch(
       return
     }
     copyValueToTarget(formData, data)
-    // TODO @puhui999：优化多文件上传，看看有没可能搞成返回 v-model 图片列表这种
-    formData.sliderPicUrls = data['sliderPicUrls']?.map((item) => ({
-      url: item
-    }))
   },
   {
     immediate: true

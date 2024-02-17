@@ -21,11 +21,13 @@ import {
   updateUserProfile,
   UserProfileUpdateReqVO
 } from '@/api/system/user/profile'
+import { useUserStore } from '@/store/modules/user'
 
 defineOptions({ name: 'BasicInfo' })
 
 const { t } = useI18n()
 const message = useMessage() // 消息弹窗
+const userStore = useUserStore() 
 // 表单校验
 const rules = reactive<FormRules>({
   nickname: [{ required: true, message: t('profile.rules.nickname'), trigger: 'blur' }],
@@ -78,13 +80,15 @@ const submit = () => {
       const data = unref(formRef)?.formModel as UserProfileUpdateReqVO
       await updateUserProfile(data)
       message.success(t('common.updateSuccess'))
-      await init()
+      const profile = await init()
+      userStore.setUserNicknameAction(profile.nickname)
     }
   })
 }
 const init = async () => {
   const res = await getUserProfile()
   unref(formRef)?.setValues(res)
+  return res
 }
 onMounted(async () => {
   await init()

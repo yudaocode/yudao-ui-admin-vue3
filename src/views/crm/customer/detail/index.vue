@@ -51,6 +51,7 @@
           :biz-id="customer.id!"
           :biz-type="BizTypeEnum.CRM_CUSTOMER"
           :show-action="!permissionListRef?.isPool || false"
+          @quit-team="close"
         />
       </el-tab-pane>
       <el-tab-pane label="商机" lazy>
@@ -90,6 +91,7 @@ import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
 import FollowUpList from '@/views/crm/followup/index.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
 import type { OperateLogV2VO } from '@/api/system/operatelog'
+import { getOperateLogPage } from '@/api/crm/operateLog'
 
 defineOptions({ name: 'CrmCustomerDetail' })
 
@@ -122,7 +124,7 @@ const openForm = () => {
 /** 客户转移 */
 const crmTransferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 客户转移表单 ref
 const transfer = () => {
-  crmTransferFormRef.value?.open('客户转移', customerId.value, CustomerApi.transfer)
+  crmTransferFormRef.value?.open('客户转移', customerId.value, CustomerApi.transferCustomer)
 }
 
 /** 锁定客户 */
@@ -163,7 +165,10 @@ const getOperateLog = async () => {
   if (!customerId.value) {
     return
   }
-  const data = await CustomerApi.getOperateLogPage(customerId.value)
+  const data = await getOperateLogPage({
+    bizType: BizTypeEnum.CRM_CUSTOMER,
+    bizId: customerId.value
+  })
   logList.value = data.list
 }
 

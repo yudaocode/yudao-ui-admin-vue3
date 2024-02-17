@@ -1,10 +1,13 @@
 import request from '@/config/axios'
+import { ProductExpandVO } from '@/api/crm/product'
+import { TransferReqVO } from '@/api/crm/customer'
 
 export interface ContractVO {
   id: number
   name: string
   customerId: number
   businessId: number
+  businessName: string
   processInstanceId: number
   orderDate: Date
   ownerUserId: number
@@ -14,12 +17,19 @@ export interface ContractVO {
   price: number
   discountPercent: number
   productPrice: number
-  roUserIds: string
-  rwUserIds: string
   contactId: number
   signUserId: number
+  signUserName: string
   contactLastTime: Date
+  auditStatus: number
   remark: string
+  productItems: ProductExpandVO[]
+  creatorName: string
+  updateTime?: Date
+  createTime?: Date
+  customerName: string
+  contactName: string
+  ownerUserName: string
 }
 
 // 查询 CRM 合同列表
@@ -55,4 +65,14 @@ export const deleteContract = async (id: number) => {
 // 导出 CRM 合同 Excel
 export const exportContract = async (params) => {
   return await request.download({ url: `/crm/contract/export-excel`, params })
+}
+
+// 提交审核
+export const submitContract = async (id: number) => {
+  return await request.put({ url: `/crm/contract/submit?id=${id}` })
+}
+
+// 合同转移
+export const transferContract = async (data: TransferReqVO) => {
+  return await request.put({ url: '/crm/contract/transfer', data })
 }

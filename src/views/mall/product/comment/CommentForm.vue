@@ -1,17 +1,17 @@
 <template>
-  <Dialog title="添加虚拟评论" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" title="添加虚拟评论">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="100px"
-      v-loading="formLoading"
     >
       <el-form-item label="商品" prop="spuId">
         <SpuShowcase v-model="formData.spuId" :limit="1" />
       </el-form-item>
-      <el-form-item label="商品规格" prop="skuId" v-if="formData.spuId">
-        <div @click="handleSelectSku" class="h-60px w-60px">
+      <el-form-item v-if="formData.spuId" label="商品规格" prop="skuId">
+        <div class="h-60px w-60px" @click="handleSelectSku">
           <div v-if="skuData && skuData.picUrl">
             <el-image :src="skuData.picUrl" />
           </div>
@@ -27,7 +27,7 @@
         <el-input v-model="formData.userNickname" placeholder="请输入用户名称" />
       </el-form-item>
       <el-form-item label="评论内容" prop="content">
-        <el-input type="textarea" v-model="formData.content" />
+        <el-input v-model="formData.content" type="textarea" />
       </el-form-item>
       <el-form-item label="描述星级" prop="descriptionScores">
         <el-rate v-model="formData.descriptionScores" />
@@ -40,13 +40,13 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <SkuTableSelect ref="skuTableSelectRef" @change="handleSkuChange" :spu-id="formData.spuId" />
+  <SkuTableSelect ref="skuTableSelectRef" :spu-id="formData.spuId" @change="handleSkuChange" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as CommentApi from '@/api/mall/product/comment'
 import SpuShowcase from '@/views/mall/product/spu/components/SpuShowcase.vue'
 import * as ProductSpuApi from '@/api/mall/product/spu'
@@ -115,13 +115,8 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    //处理评论图片
-    const picUrls = formData.value.picUrls.map((item) => {
-      return item?.url ? item.url : item
-    })
-    const data = { ...formData.value, picUrls }
     if (formType.value === 'create') {
-      await CommentApi.createComment(data)
+      await CommentApi.createComment(unref(formData.value) as any)
       message.success(t('common.createSuccess'))
     }
     dialogVisible.value = false
