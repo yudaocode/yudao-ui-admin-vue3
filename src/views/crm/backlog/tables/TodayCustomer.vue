@@ -119,7 +119,7 @@
 </template>
 
 <script lang="ts" setup name="TodayCustomer">
-import * as BacklogApi from '@/api/crm/backlog'
+import * as CustomerApi from '@/api/crm/customer'
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { CONTACT_STATUS, SCENE_TYPES } from './common'
@@ -135,7 +135,8 @@ const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
   contactStatus: 1,
-  sceneType: 1
+  sceneType: 1,
+  pool: null // 是否公海数据
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -143,7 +144,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await BacklogApi.getTodayCustomerPage(queryParams.value)
+    const data = await CustomerApi.getCustomerPage(queryParams.value)
     list.value = data.list
     total.value = data.total
   } finally {

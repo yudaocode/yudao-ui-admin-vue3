@@ -28,6 +28,7 @@
 </template>
 
 <script lang="ts" setup>
+import * as BacklogApi from '@/api/crm/backlog'
 import CheckContract from './tables/CheckContract.vue'
 import CheckReceivables from './tables/CheckReceivables.vue'
 import EndContract from './tables/EndContract.vue'
@@ -38,54 +39,56 @@ import RemindReceivables from './tables/RemindReceivables.vue'
 import TodayCustomer from './tables/TodayCustomer.vue'
 
 const leftType = ref('todayCustomer')
+
+const todayCustomerCountRef = ref(0)
+const followLeadsCountRef = ref(0)
+const followCustomerCountRef = ref(0)
+const putInPoolCustomerRemindCountRef = ref(0)
+const checkContractCountRef = ref(0)
+const checkReceivablesCountRef = ref(0)
+const remindReceivablesCountRef = ref(0)
+const endContractCountRef = ref(0)
+
 const leftSides = ref([
   {
     name: '今日需联系客户',
     infoType: 'todayCustomer',
-    msgCount: 1,
-    tips: '下次跟进时间为今日的客户'
+    msgCount: todayCustomerCountRef
   },
   {
     name: '分配给我的线索',
     infoType: 'followLeads',
-    msgCount: 0,
-    tips: '转移之后未跟进的线索'
+    msgCount: followLeadsCountRef
   },
   {
     name: '分配给我的客户',
     infoType: 'followCustomer',
-    msgCount: 0,
-    tips: '转移、领取、分配之后未跟进的客户，默认显示自己负责的客户'
+    msgCount: followCustomerCountRef
   },
   {
     name: '待进入公海的客户',
     infoType: 'putInPoolRemind',
-    msgCount: 0,
-    tips: ''
+    msgCount: putInPoolCustomerRemindCountRef
   },
   {
     name: '待审核合同',
     infoType: 'checkContract',
-    msgCount: 0,
-    tips: ''
+    msgCount: checkContractCountRef
   },
   {
     name: '待审核回款',
     infoType: 'checkReceivables',
-    msgCount: 0,
-    tips: ''
+    msgCount: checkReceivablesCountRef
   },
   {
     name: '待回款提醒',
     infoType: 'remindReceivables',
-    msgCount: 4,
-    tips: ''
+    msgCount: remindReceivablesCountRef
   },
   {
     name: '即将到期的合同',
     infoType: 'endContract',
-    msgCount: 20,
-    tips: '根据“合同到期时间”及设置的“提前提醒天数”提醒'
+    msgCount: endContractCountRef
   }
 ])
 
@@ -93,8 +96,20 @@ const leftSides = ref([
 const sideClick = (item: any) => {
   leftType.value = item.infoType
 }
-// TODO @dhb52: 侧边栏样式，在黑暗模式下，颜色会不对。是不是可以读取主题色哈；
+
+/** 加载时读取待办数量 */
+onMounted(async () => {
+  BacklogApi.getTodayCustomerCount().then(count => todayCustomerCountRef.value = count)
+  BacklogApi.getFollowLeadsCount().then(count => followLeadsCountRef.value = count)
+  BacklogApi.getFollowCustomerCount().then(count => followCustomerCountRef.value = count)
+  BacklogApi.getPutInPoolCustomerRemindCount().then(count => putInPoolCustomerRemindCountRef.value = count)
+  BacklogApi.getCheckContractCount().then(count => checkContractCountRef.value = count)
+  BacklogApi.getCheckReceivablesCount().then(count => checkReceivablesCountRef.value = count)
+  BacklogApi.getRemindReceivablePlanCount().then(count => remindReceivablesCountRef.value = count)
+  BacklogApi.getEndContractCount().then(count => endContractCountRef.value = count)
+})
 </script>
+
 <style lang="scss" scoped>
 .side-item-list {
   top: 0;
@@ -102,8 +117,8 @@ const sideClick = (item: any) => {
   left: 0;
   z-index: 1;
   font-size: 14px;
-  background-color: white;
-  border: 1px solid #e6e6e6;
+  background-color: var(--el-bg-color);
+  border: 1px solid var(--el-border-color);
   border-radius: 5px;
 
   .side-item {
@@ -112,21 +127,17 @@ const sideClick = (item: any) => {
     padding: 0 20px;
     line-height: 50px;
     cursor: pointer;
-
-    i {
-      color: #999;
-    }
   }
 }
 
 .side-item-default {
-  color: #333;
+  color: var(--el-text-color-primary);
   border-right: 2px solid transparent;
 }
 
 .side-item-select {
-  color: #409eff;
-  background-color: #ecf5ff;
+  color: var(--el-color-primary);
+  background-color: var(--el-color-primary-light-9);
   border-right: 2px solid var(--el-color-primary);
 }
 
