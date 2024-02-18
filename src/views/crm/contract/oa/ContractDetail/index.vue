@@ -154,7 +154,7 @@ import * as UserApi from '@/api/system/user'
 import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
 import ProductList from '@/views/crm/contract/components/ProductList.vue'
-import BPMLModel from '@/views/crm/contract/components/BPMLModel.vue'
+// import BPMLModel from '@/views/crm/contract/components/BPMLModel.vue'
 
 defineOptions({ name: 'ContractDetailOA' })
 const props = defineProps<{ id?: number }>()

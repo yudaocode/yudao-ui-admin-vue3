@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { RankApi, BiRankRespVO } from '@/api/crm/bi/rank'
 import { EChartsOption } from 'echarts'
-import { clone } from 'unocss'
+import { clone } from 'lodash-es'
 
 defineOptions({ name: 'ReceivablePriceRank' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
