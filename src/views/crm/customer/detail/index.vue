@@ -67,7 +67,6 @@
       <el-tab-pane label="操作日志">
         <OperateLogV2 :log-list="logList" />
       </el-tab-pane>
-      <el-tab-pane label="回访" lazy>TODO 待开发</el-tab-pane>
     </el-tabs>
   </el-col>
 

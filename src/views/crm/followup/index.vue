@@ -11,6 +11,7 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
       <el-table-column align="center" label="编号" prop="id" />
+      <!-- TODO @puhui999：展示不出来 -->
       <el-table-column align="center" label="跟进人" prop="creatorName" />
       <el-table-column align="center" label="跟进类型" prop="type">
         <template #default="scope">

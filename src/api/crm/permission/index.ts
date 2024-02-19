@@ -19,7 +19,7 @@ export interface PermissionVO {
  * @author HUIHUI
  */
 export enum BizTypeEnum {
-  CRM_LEADS = 1, // 线索
+  CRM_CLUE = 1, // 线索
   CRM_CUSTOMER = 2, // 客户
   CRM_CONTACT = 3, // 联系人
   CRM_BUSINESS = 4, // 商机

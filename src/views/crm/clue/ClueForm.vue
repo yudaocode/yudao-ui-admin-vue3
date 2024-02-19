@@ -128,12 +128,12 @@
             />
           </el-form-item>
         </el-col>
+        <el-col :span="12">
+          <el-form-item label="备注" prop="remark">
+            <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
+          </el-form-item>
+        </el-col>
       </el-row>
-      <el-col :span="24">
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="formData.remark" placeholder="请输入备注" />
-        </el-form-item>
-      </el-col>
     </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>

@@ -17,6 +17,12 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="转化状态" prop="transformStatus">
+        <el-select v-model="queryParams.transformStatus" class="!w-240px">
+          <el-option :value="false" label="未转化" />
+          <el-option :value="true" label="已转化" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="手机号" prop="mobile">
         <el-input
           v-model="queryParams.mobile"
@@ -56,9 +62,19 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <el-tabs v-model="activeName" @tab-click="handleTabClick">
+      <el-tab-pane label="我负责的" name="1" />
+      <el-tab-pane label="我参与的" name="2" />
+      <el-tab-pane label="下属负责的" name="3" />
+    </el-tabs>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <!-- TODO 芋艿：打开详情 -->
-      <el-table-column label="线索名称" align="center" prop="name" fixed="left" width="120" />
+      <el-table-column label="线索名称" align="center" prop="name" fixed="left" width="120">
+        <template #default="scope">
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
+            {{ scope.row.name }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="线索来源" align="center" prop="source" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
@@ -146,11 +162,12 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getBoolDictOptions } from '@/utils/dict'
+import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ClueApi from '@/api/crm/clue'
 import ClueForm from './ClueForm.vue'
+import { TabsPaneContext } from 'element-plus'
 
 defineOptions({ name: 'CrmClue' })
 
@@ -163,12 +180,15 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
+  sceneType: '1', // 默认和 activeName 相等
   name: null,
   telephone: null,
-  mobile: null
+  mobile: null,
+  transformStatus: false
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const activeName = ref('1') // 列表 tab
 
 /** 查询列表 */
 const getList = async () => {
@@ -192,6 +212,18 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
+}
+
+/** tab 切换 */
+const handleTabClick = (tab: TabsPaneContext) => {
+  queryParams.sceneType = tab.paneName
+  handleQuery()
+}
+
+/** 打开线索详情 */
+const { push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'CrmClueDetail', params: { id } })
 }
 
 /** 添加/修改操作 */

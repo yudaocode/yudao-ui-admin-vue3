@@ -20,11 +20,16 @@ export interface ClueVO {
   wechat: string // wechat
   email: string // email
   areaId: number // 所在地
+  areaName?: string // 所在地名称
   detailAddress: string // 详细地址
   industryId: number // 所属行业
   level: number // 客户等级
   source: number // 客户来源
   remark: string // 备注
+  creator: string // 创建人
+  creatorName?: string // 创建人名称
+  createTime: Date // 创建时间
+  updateTime: Date // 更新时间
 }
 
 // 查询线索列表
@@ -60,4 +65,9 @@ export const exportClue = async (params) => {
 // 线索转移
 export const transferClue = async (data: TransferReqVO) => {
   return await request.put({ url: '/crm/clue/transfer', data })
+}
+
+// 线索转化为客户
+export const transformClue = async (ids: number[]) => {
+  return await request.put({ url: '/crm/clue/transform?ids=' + ids.join(',') })
 }

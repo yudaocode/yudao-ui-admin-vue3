@@ -497,6 +497,17 @@ const remainingRouter: AppRouteRecordRaw[] = [
     meta: { hidden: true },
     children: [
       {
+        path: 'clue/detail/:id',
+        name: 'CrmClueDetail',
+        meta: {
+          title: '线索详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/clue'
+        },
+        component: () => import('@/views/crm/clue/detail/index.vue')
+      },
+      {
         path: 'customer/detail/:id',
         name: 'CrmCustomerDetail',
         meta: {
