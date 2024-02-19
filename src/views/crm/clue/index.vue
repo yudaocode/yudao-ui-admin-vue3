@@ -17,19 +17,19 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="电话" prop="telephone">
+      <el-form-item label="手机号" prop="mobile">
         <el-input
-          v-model="queryParams.telephone"
-          placeholder="请输入电话"
+          v-model="queryParams.mobile"
+          placeholder="请输入手机号"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="手机号" prop="mobile">
+      <el-form-item label="电话" prop="telephone">
         <el-input
-          v-model="queryParams.mobile"
-          placeholder="请输入手机号"
+          v-model="queryParams.telephone"
+          placeholder="请输入电话"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -57,30 +57,35 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="转化状态" align="center" prop="transformStatus">
+      <!-- TODO 芋艿：打开详情 -->
+      <el-table-column label="线索名称" align="center" prop="name" fixed="left" width="120" />
+      <el-table-column label="线索来源" align="center" prop="source" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.transformStatus" />
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
         </template>
       </el-table-column>
-      <el-table-column label="跟进状态" align="center" prop="followUpStatus">
+      <el-table-column label="手机号" align="center" prop="mobile" width="120" />
+      <el-table-column label="电话" align="center" prop="telephone" width="130" />
+      <el-table-column label="邮箱" align="center" prop="email" width="180" />
+      <el-table-column label="地址" align="center" prop="address" width="180" />
+      <el-table-column align="center" label="客户行业" prop="industryId" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.followUpStatus" />
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
         </template>
       </el-table-column>
-      <el-table-column label="线索名称" align="center" prop="name" />
-      <el-table-column label="客户id" align="center" prop="customerId" />
+      <el-table-column align="center" label="客户等级" prop="level" width="130">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
+        </template>
+      </el-table-column>
       <el-table-column
-        label="下次联系时间"
-        align="center"
-        prop="contactNextTime"
         :formatter="dateFormatter"
+        align="center"
+        label="下次联系时间"
+        prop="contactNextTime"
         width="180px"
       />
-      <el-table-column label="电话" align="center" prop="telephone" />
-      <el-table-column label="手机号" align="center" prop="mobile" />
-      <el-table-column label="地址" align="center" prop="address" />
-      <el-table-column label="负责人" align="center" prop="ownerUserId" />
+      <el-table-column align="center" label="备注" prop="remark" width="200" />
       <el-table-column
         label="最后跟进时间"
         align="center"
@@ -88,7 +93,16 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="备注" align="center" prop="remark" />
+      <el-table-column align="center" label="最后跟进记录" prop="contactLastContent" width="200" />
+      <el-table-column align="center" label="负责人" prop="ownerUserName" width="100px" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" width="100" />
+      <el-table-column
+        label="更新时间"
+        align="center"
+        prop="updateTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
       <el-table-column
         label="创建时间"
         align="center"
@@ -96,6 +110,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
+      <el-table-column align="center" label="创建人" prop="creatorName" width="100px" />
       <el-table-column label="操作" align="center" min-width="110" fixed="right">
         <template #default="scope">
           <el-button

@@ -130,7 +130,7 @@
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="客户等级" prop="level" width="120">
+      <el-table-column align="center" label="客户等级" prop="level" width="130">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
         </template>
