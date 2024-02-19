@@ -6,11 +6,6 @@ export const getTodayCustomerCount = async () => {
   return await request.get({ url: '/crm/customer/today-customer-count' })
 }
 
-// 2. 获得分配给我的线索数量
-export const getFollowLeadsCount = async () => {
-  return await request.get({ url: '/crm/clue/follow-leads-count' })
-}
-
 // 3. 获得分配给我的客户数量
 export const getFollowCustomerCount = async () => {
   return await request.get({ url: '/crm/customer/follow-customer-count' })

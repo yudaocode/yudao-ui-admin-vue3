@@ -68,6 +68,11 @@ export const transferClue = async (data: TransferReqVO) => {
 }
 
 // 线索转化为客户
-export const transformClue = async (ids: number[]) => {
-  return await request.put({ url: '/crm/clue/transform?ids=' + ids.join(',') })
+export const transformClue = async (id: number) => {
+  return await request.put({ url: '/crm/clue/transform', params: { id } })
+}
+
+// 获得分配给我的、待跟进的线索数量
+export const getFollowClueCount = async () => {
+  return await request.get({ url: '/crm/clue/follow-count' })
 }

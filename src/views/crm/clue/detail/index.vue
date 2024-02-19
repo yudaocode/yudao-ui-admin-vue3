@@ -18,7 +18,7 @@
     >
       转化为客户
     </el-button>
-    <el-button type="success" disabled>已转化客户</el-button>
+    <el-button v-else type="success" disabled>已转化客户</el-button>
   </ClueDetailsHeader>
   <el-col>
     <el-tabs>
@@ -97,7 +97,7 @@ const transfer = () => {
 /** 转化为客户 */
 const handleTransform = async () => {
   await message.confirm(`确定将【${clue.value.name}】转化为客户吗？`)
-  await ClueApi.transformClue([clueId.value])
+  await ClueApi.transformClue(clueId.value)
   message.success(`转化客户【${clue.value.name}】成功`)
   await getClue()
 }
