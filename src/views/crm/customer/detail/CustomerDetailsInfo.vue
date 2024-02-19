@@ -15,7 +15,7 @@
           <el-descriptions-item label="客户来源">
             <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="customer.source" />
           </el-descriptions-item>
-          <el-descriptions-item label="客户等级">
+          <el-descriptions-item label="客户级别">
             <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="customer.level" />
           </el-descriptions-item>
           <el-descriptions-item label="手机">{{ customer.mobile }}</el-descriptions-item>

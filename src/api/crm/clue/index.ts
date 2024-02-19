@@ -2,22 +2,33 @@ import request from '@/config/axios'
 import { TransferReqVO } from '@/api/crm/customer'
 
 export interface ClueVO {
-  id: number
-  transformStatus: boolean
-  followUpStatus: boolean
-  name: string
-  customerId: number
-  contactNextTime: Date
-  telephone: string
-  mobile: string
-  address: string
-  ownerUserId: number
-  contactLastTime: Date
-  remark: string
+  id: number // 编号
+  name: string // 线索名称
+  followUpStatus: boolean // 跟进状态
+  contactLastTime: Date // 最后跟进时间
+  contactLastContent: string // 最后跟进内容
+  contactNextTime: Date // 下次联系时间
+  ownerUserId: number // 负责人的用户编号
+  ownerUserName?: string // 负责人的用户名称
+  ownerUserDept?: string // 负责人的部门名称
+  transformStatus: boolean // 转化状态
+  customerId: number // 客户编号
+  customerName?: string // 客户名称
+  mobile: string // 手机号
+  telephone: string // 电话
+  qq: string // QQ
+  wechat: string // wechat
+  email: string // email
+  areaId: number // 所在地
+  detailAddress: string // 详细地址
+  industryId: number // 所属行业
+  level: number // 客户等级
+  source: number // 客户来源
+  remark: string // 备注
 }
 
 // 查询线索列表
-export const getCluePage = async (params) => {
+export const getCluePage = async (params: any) => {
   return await request.get({ url: `/crm/clue/page`, params })
 }
 

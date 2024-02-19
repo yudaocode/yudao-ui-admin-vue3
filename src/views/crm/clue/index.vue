@@ -67,13 +67,13 @@
       <el-table-column label="手机号" align="center" prop="mobile" width="120" />
       <el-table-column label="电话" align="center" prop="telephone" width="130" />
       <el-table-column label="邮箱" align="center" prop="email" width="180" />
-      <el-table-column label="地址" align="center" prop="address" width="180" />
+      <el-table-column label="地址" align="center" prop="detailAddress" width="180" />
       <el-table-column align="center" label="客户行业" prop="industryId" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="客户等级" prop="level" width="130">
+      <el-table-column align="center" label="客户级别" prop="level" width="135">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
         </template>

@@ -36,7 +36,7 @@
                 <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
               </template>
             </el-table-column>
-            <el-table-column label="客户等级" align="center" prop="level" width="120">
+            <el-table-column label="客户级别" align="center" prop="level" width="120">
               <template #default="scope">
                 <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
               </template>
