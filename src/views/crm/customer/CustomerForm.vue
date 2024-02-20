@@ -14,36 +14,10 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="所属行业" prop="industryId">
-            <el-select v-model="formData.industryId" placeholder="请选择所属行业">
-              <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_INDUSTRY)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12">
           <el-form-item label="客户来源" prop="source">
-            <el-select v-model="formData.source" placeholder="请选择客户来源">
+            <el-select v-model="formData.source" placeholder="请选择客户来源" class="w-1/1">
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_SOURCE)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="客户级别" prop="level">
-            <el-select v-model="formData.level" placeholder="请选择客户级别">
-              <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_LEVEL)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -59,20 +33,31 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="电话" prop="telephone">
-            <el-input v-model="formData.telephone" placeholder="请输入电话" />
+          <el-form-item label="负责人" prop="ownerUserId">
+            <el-select
+              v-model="formData.ownerUserId"
+              :disabled="formType !== 'create'"
+              class="w-1/1"
+            >
+              <el-option
+                v-for="item in userOptions"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              />
+            </el-select>
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="12">
-          <el-form-item label="邮箱" prop="email">
-            <el-input v-model="formData.email" placeholder="请输入邮箱" />
+          <el-form-item label="电话" prop="telephone">
+            <el-input v-model="formData.telephone" placeholder="请输入电话" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="QQ" prop="qq">
-            <el-input v-model="formData.qq" placeholder="请输入QQ" />
+          <el-form-item label="邮箱" prop="email">
+            <el-input v-model="formData.email" placeholder="请输入邮箱" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -83,19 +68,46 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="网址" prop="website">
-            <el-input v-model="formData.website" placeholder="请输入网址" />
+          <el-form-item label="QQ" prop="qq">
+            <el-input v-model="formData.qq" placeholder="请输入 QQ" />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="12">
-          <el-form-item label="所在地" prop="areaId">
+          <el-form-item label="客户行业" prop="industryId">
+            <el-select v-model="formData.industryId" placeholder="请选择客户行业" class="w-1/1">
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_INDUSTRY)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="客户级别" prop="level">
+            <el-select v-model="formData.level" placeholder="请选择客户级别" class="w-1/1">
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_CUSTOMER_LEVEL)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="地址" prop="areaId">
             <el-tree-select
               v-model="formData.areaId"
               :data="areaList"
               :props="defaultProps"
               :render-after-expand="true"
+              class="w-1/1"
             />
           </el-form-item>
         </el-col>
@@ -105,16 +117,7 @@
           </el-form-item>
         </el-col>
       </el-row>
-      <el-form-item v-if="formType === 'create'" label="负责人" prop="userIds" span="24">
-        <el-select v-model="formData.ownerUserId">
-          <el-option
-            v-for="item in userOptions"
-            :key="parseInt(item.id)"
-            :label="item.nickname"
-            :value="parseInt(item.id)"
-          />
-        </el-select>
-      </el-form-item>
+      <!-- TODO 芋艿：待整理 -->
       <el-row>
         <el-col :span="12">
           <el-form-item label="下次联系时间" prop="contactNextTime">
@@ -126,17 +129,12 @@
             />
           </el-form-item>
         </el-col>
+        <el-col :span="12">
+          <el-form-item label="备注" prop="remark">
+            <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
+          </el-form-item>
+        </el-col>
       </el-row>
-      <el-col :span="24">
-        <el-form-item label="客户描述" prop="description">
-          <el-input v-model="formData.description" placeholder="请输入客户描述" />
-        </el-form-item>
-      </el-col>
-      <el-col :span="24">
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="formData.remark" placeholder="请输入备注" />
-        </el-form-item>
-      </el-col>
     </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -150,7 +148,7 @@ import * as CustomerApi from '@/api/crm/customer'
 import * as AreaApi from '@/api/system/area'
 import { defaultProps } from '@/utils/tree'
 import * as UserApi from '@/api/system/user'
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
+import { useUserStore } from '@/store/modules/user'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -164,21 +162,19 @@ const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const formData = ref({
   id: undefined,
   name: undefined,
+  contactNextTime: undefined,
+  ownerUserId: 0,
   mobile: undefined,
-  industryId: undefined,
-  level: undefined,
-  source: undefined,
   telephone: undefined,
-  website: undefined,
   qq: undefined,
   wechat: undefined,
   email: undefined,
-  description: undefined,
-  remark: undefined,
   areaId: undefined,
   detailAddress: undefined,
-  contactNextTime: undefined,
-  ownerUserId: undefined
+  industryId: undefined,
+  level: undefined,
+  source: undefined,
+  remark: undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '客户名称不能为空', trigger: 'blur' }],
@@ -207,9 +203,7 @@ const open = async (type: string, id?: number) => {
   userOptions.value = await UserApi.getSimpleUserList()
   // 默认新建时选中自己
   if (formType.value === 'create') {
-    const { wsCache } = useCache()
-    const user = wsCache.get(CACHE_KEY.USER).user
-    formData.value.ownerUserId = user.id
+    formData.value.ownerUserId = useUserStore().getUser.id
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -245,21 +239,19 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: undefined,
+    contactNextTime: undefined,
+    ownerUserId: 0,
     mobile: undefined,
-    industryId: undefined,
-    level: undefined,
-    source: undefined,
     telephone: undefined,
-    website: undefined,
     qq: undefined,
     wechat: undefined,
     email: undefined,
-    description: undefined,
-    remark: undefined,
     areaId: undefined,
     detailAddress: undefined,
-    contactNextTime: undefined,
-    ownerUserId: undefined
+    industryId: undefined,
+    level: undefined,
+    source: undefined,
+    remark: undefined
   }
   formRef.value?.resetFields()
 }

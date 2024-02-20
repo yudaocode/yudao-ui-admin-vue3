@@ -104,13 +104,12 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-tabs v-model="activeName" @tab-click="handleClick">
+    <el-tabs v-model="activeName" @tab-click="handleTabClick">
       <el-tab-pane label="我负责的" name="1" />
       <el-tab-pane label="我参与的" name="2" />
       <el-tab-pane label="下属负责的" name="3" />
     </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="编号" fixed="left" prop="id" />
       <el-table-column align="center" label="客户名称" fixed="left" prop="name" width="160">
         <template #default="scope">
           <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
@@ -118,24 +117,24 @@
           </el-link>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="手机" prop="mobile" width="120" />
-      <el-table-column align="center" label="电话" prop="telephone" width="120" />
       <el-table-column align="center" label="客户来源" prop="source" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="所属行业" prop="industryId" width="120">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="客户级别" prop="level" width="130">
+      <el-table-column label="手机" align="center" prop="mobile" width="120" />
+      <el-table-column label="电话" align="center" prop="telephone" width="130" />
+      <el-table-column label="邮箱" align="center" prop="email" width="180" />
+      <el-table-column align="center" label="客户级别" prop="level" width="135">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="网址" prop="website" width="200" />
+      <el-table-column align="center" label="客户行业" prop="industryId" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
+        </template>
+      </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -144,13 +143,15 @@
         width="180px"
       />
       <el-table-column align="center" label="备注" prop="remark" width="200" />
+      <el-table-column align="center" label="锁定状态" prop="lockStatus">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.lockStatus" />
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="成交状态" prop="dealStatus">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
         </template>
-      </el-table-column>
-      <el-table-column align="center" label="距离进入公海" prop="poolDay" width="120">
-        <template #default="scope"> {{ scope.row.poolDay }} 天</template>
       </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
@@ -159,10 +160,17 @@
         prop="contactLastTime"
         width="180px"
       />
+      <el-table-column align="center" label="最后跟进记录" prop="contactLastContent" width="200" />
+      <el-table-column label="地址" align="center" prop="detailAddress" width="180" />
+      <el-table-column align="center" label="距离进入公海天数" prop="poolDay" width="140">
+        <template #default="scope"> {{ scope.row.poolDay }} 天</template>
+      </el-table-column>
+      <el-table-column align="center" label="负责人" prop="ownerUserName" width="100px" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" width="100px" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
-        label="创建时间"
+        label="更新时间"
         prop="updateTime"
         width="180px"
       />
@@ -173,8 +181,6 @@
         prop="createTime"
         width="180px"
       />
-      <el-table-column align="center" label="负责人" prop="ownerUserName" width="100px" />
-      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" width="100px" />
       <el-table-column align="center" label="创建人" prop="creatorName" width="100px" />
       <el-table-column align="center" fixed="right" label="操作" min-width="150">
         <template #default="scope">
@@ -228,62 +234,32 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const queryParams = ref<{
-  pageNo: number
-  pageSize: number
-  name: string
-  mobile: string
-  industryId: number | undefined
-  level: number | undefined
-  source: number | undefined
-  sceneType: number | undefined
-  pool: boolean | undefined
-}>({
+const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
+  sceneType: '1', // 默认和 activeName 相等
   name: '',
   mobile: '',
   industryId: undefined,
   level: undefined,
   source: undefined,
-  sceneType: undefined,
   pool: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const activeName = ref('1') // 列表 tab
 
-enum CrmSceneTypeEnum {
-  OWNER = 1,
-  INVOLVED = 2,
-  SUBORDINATE = 3
-}
-
-const handleClick = (tab: TabsPaneContext) => {
-  switch (tab.paneName) {
-    case '1':
-      resetQuery(() => {
-        queryParams.value.sceneType = CrmSceneTypeEnum.OWNER
-      })
-      break
-    case '2':
-      resetQuery(() => {
-        queryParams.value.sceneType = CrmSceneTypeEnum.INVOLVED
-      })
-      break
-    case '3':
-      resetQuery(() => {
-        queryParams.value.sceneType = CrmSceneTypeEnum.SUBORDINATE
-      })
-      break
-  }
+/** tab 切换 */
+const handleTabClick = (tab: TabsPaneContext) => {
+  queryParams.sceneType = tab.paneName
+  handleQuery()
 }
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await CustomerApi.getCustomerPage(queryParams.value)
+    const data = await CustomerApi.getCustomerPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -293,25 +269,13 @@ const getList = async () => {
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
-  queryParams.value.pageNo = 1
+  queryParams.pageNo = 1
   getList()
 }
 
 /** 重置按钮操作 */
-const resetQuery = (func: Function | undefined = undefined) => {
+const resetQuery = () => {
   queryFormRef.value.resetFields()
-  queryParams.value = {
-    pageNo: 1,
-    pageSize: 10,
-    name: '',
-    mobile: '',
-    industryId: undefined,
-    level: undefined,
-    source: undefined,
-    sceneType: undefined,
-    pool: undefined
-  }
-  func && func()
   handleQuery()
 }
 
@@ -353,7 +317,7 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await CustomerApi.exportCustomer(queryParams.value)
+    const data = await CustomerApi.exportCustomer(queryParams)
     download.excel(data, '客户.xls')
   } catch {
   } finally {

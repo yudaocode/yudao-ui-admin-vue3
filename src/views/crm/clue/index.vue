@@ -68,7 +68,7 @@
       <el-tab-pane label="下属负责的" name="3" />
     </el-tabs>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="线索名称" align="center" prop="name" fixed="left" width="120">
+      <el-table-column label="线索名称" align="center" prop="name" fixed="left" width="160">
         <template #default="scope">
           <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
             {{ scope.row.name }}
@@ -80,7 +80,7 @@
           <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
         </template>
       </el-table-column>
-      <el-table-column label="手机号" align="center" prop="mobile" width="120" />
+      <el-table-column label="手机" align="center" prop="mobile" width="120" />
       <el-table-column label="电话" align="center" prop="telephone" width="130" />
       <el-table-column label="邮箱" align="center" prop="email" width="180" />
       <el-table-column label="地址" align="center" prop="detailAddress" width="180" />
