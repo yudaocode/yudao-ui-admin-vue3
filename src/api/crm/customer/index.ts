@@ -35,6 +35,26 @@ export const getCustomerPage = async (params) => {
   return await request.get({ url: `/crm/customer/page`, params })
 }
 
+// 进入公海客户提醒的客户列表
+export const getPutPoolRemindCustomerPage = async (params) => {
+  return await request.get({ url: `/crm/customer/put-pool-remind-page`, params })
+}
+
+// 获得待进入公海客户数量
+export const getPutPoolRemindCustomerCount = async () => {
+  return await request.get({ url: `/crm/customer/put-pool-remind-count` })
+}
+
+// 获得今日需联系客户数量
+export const getTodayContactCustomerCount = async () => {
+  return await request.get({ url: `/crm/customer/today-contact-count` })
+}
+
+// 获得分配给我、待跟进的线索数量的客户数量
+export const getFollowCustomerCount = async () => {
+  return await request.get({ url: `/crm/customer/follow-count` })
+}
+
 // 查询客户详情
 export const getCustomer = async (id: number) => {
   return await request.get({ url: `/crm/customer/get?id=` + id })
@@ -71,8 +91,8 @@ export const importCustomerTemplate = () => {
 }
 
 // 客户列表
-export const getSimpleCustomerList = async () => {
-  return await request.get({ url: `/crm/customer/list-all-simple` })
+export const getCustomerSimpleList = async () => {
+  return await request.get({ url: `/crm/customer/simple-list` })
 }
 
 // ======================= 业务操作 =======================
@@ -98,12 +118,15 @@ export const receiveCustomer = async (ids: any[]) => {
   return await request.put({ url: '/crm/customer/receive', params: { ids: ids.join(',') } })
 }
 
+// 分配公海给对应负责人
+export const distributeCustomer = async (ids: any[], ownerUserId: number) => {
+  return await request.put({
+    url: '/crm/customer/distribute',
+    data: { ids: ids, ownerUserId }
+  })
+}
+
 // 客户放入公海
 export const putCustomerPool = async (id: number) => {
   return await request.put({ url: `/crm/customer/put-pool?id=${id}` })
-}
-
-// 进入公海客户提醒
-export const getPutInPoolRemindCustomerPage = async (params) => {
-  return await request.get({ url: `/crm/customer/put-in-pool-remind-page`, params })
 }

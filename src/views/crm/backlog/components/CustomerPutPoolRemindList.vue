@@ -1,6 +1,7 @@
+<!-- 待进入公海的客户 -->
 <template>
   <ContentWrap>
-    <div class="pb-5 text-xl"> 今日需联系客户 </div>
+    <div class="pb-5 text-xl"> 待进入公海的客户 </div>
     <!-- 搜索工作栏 -->
     <el-form
       ref="queryFormRef"
@@ -9,21 +10,6 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <el-form-item label="状态" prop="contactStatus">
-        <el-select
-          v-model="queryParams.contactStatus"
-          class="!w-240px"
-          placeholder="状态"
-          @change="handleQuery"
-        >
-          <el-option
-            v-for="(option, index) in CONTACT_STATUS"
-            :label="option.label"
-            :value="option.value"
-            :key="index"
-          />
-        </el-select>
-      </el-form-item>
       <el-form-item label="归属" prop="sceneType">
         <el-select
           v-model="queryParams.sceneType"
@@ -43,8 +29,8 @@
   </ContentWrap>
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="编号" fixed="left" prop="id" />
-      <el-table-column align="center" label="客户名称" fixed="left" prop="name" width="160">
+      <el-table-column align="center" label="编号" prop="id" />
+      <el-table-column align="center" label="客户名称" prop="name" width="160">
         <template #default="scope">
           <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
             {{ scope.row.name }}
@@ -82,7 +68,7 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealStatus" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="距进入公海天数" prop="poolDay" width="130" />
+      <el-table-column align="center" label="距进入公海天数" prop="poolDay" width="100px" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -118,15 +104,13 @@
   </ContentWrap>
 </template>
 
-<script lang="ts" setup name="TodayCustomer">
+<script lang="ts" setup>
 import * as CustomerApi from '@/api/crm/customer'
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { CONTACT_STATUS, SCENE_TYPES } from './common'
+import { SCENE_TYPES } from './common'
 
-// defineOptions({ name: 'TodayCustomer' }) TODO @dhb52：1）定义改成这种；2）命名要不要改成 CustomerTodayTable，就是 模块+形容词+表格（更容易识别），然后把 tables 目录改成 components 目录
-
-const { push } = useRouter()
+defineOptions({ name: 'CrmCustomerPutPoolRemindList' })
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -134,9 +118,8 @@ const list = ref([]) // 列表的数据
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
-  contactStatus: 1,
-  sceneType: 1,
-  pool: null // 是否公海数据
+  sceneType: 1, // 我负责的
+  pool: true // 固定 公海参数为 true
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -144,7 +127,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await CustomerApi.getCustomerPage(queryParams.value)
+    const data = await CustomerApi.getPutPoolRemindCustomerPage(queryParams.value)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -159,9 +142,15 @@ const handleQuery = () => {
 }
 
 /** 打开客户详情 */
+const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmCustomerDetail', params: { id } })
 }
+
+/** 激活时 */
+onActivated(async () => {
+  await getList()
+})
 
 /** 初始化 **/
 onMounted(() => {

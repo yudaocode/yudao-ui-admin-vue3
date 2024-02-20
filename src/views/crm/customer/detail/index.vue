@@ -26,14 +26,15 @@
     >
       锁定
     </el-button>
-    <el-button v-if="!customer.ownerUserId" type="primary" @click="handleReceive">
-      领取客户
+    <el-button v-if="!customer.ownerUserId" type="primary" @click="handleReceive"> 领取 </el-button>
+    <el-button v-if="!customer.ownerUserId" type="primary" @click="handleDistributeForm">
+      分配
     </el-button>
     <el-button
       v-if="customer.ownerUserId && permissionListRef?.validateOwnerUser"
       @click="handlePutPool"
     >
-      客户放入公海
+      放入公海
     </el-button>
   </CustomerDetailsHeader>
   <el-col>
@@ -74,7 +75,8 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getCustomer" />
-  <CrmTransferForm ref="transferFormRef" @success="close" />
+  <CustomerDistributeForm ref="distributeForm" @success="getCustomer" />
+  <CrmTransferForm ref="transferFormRef" @success="getCustomer" />
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -93,6 +95,7 @@ import FollowUpList from '@/views/crm/followup/index.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
 import type { OperateLogV2VO } from '@/api/system/operatelog'
 import { getOperateLogPage } from '@/api/crm/operateLog'
+import CustomerDistributeForm from '@/views/crm/customer/pool/CustomerDistributeForm.vue'
 
 defineOptions({ name: 'CrmCustomerDetail' })
 
@@ -164,6 +167,12 @@ const handleReceive = async () => {
   await CustomerApi.receiveCustomer([unref(customerId.value)])
   message.success(`领取客户【${customer.value.name}】成功`)
   await getCustomer()
+}
+
+/** 分配客户 */
+const distributeForm = ref<InstanceType<typeof CustomerDistributeForm>>() // 分配客户表单 Ref
+const handleDistributeForm = async () => {
+  distributeForm.value?.open(customerId.value)
 }
 
 /** 客户放入公海 */

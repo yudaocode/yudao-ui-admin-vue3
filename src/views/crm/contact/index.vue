@@ -312,6 +312,6 @@ const openCustomerDetail = (id: number) => {
 /** 初始化 **/
 onMounted(async () => {
   await getList()
-  customerList.value = await CustomerApi.getSimpleCustomerList()
+  customerList.value = await CustomerApi.getCustomerSimpleList()
 })
 </script>

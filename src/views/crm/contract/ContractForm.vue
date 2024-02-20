@@ -257,7 +257,7 @@ const getAllApi = async () => {
 /** 获取客户 */
 const customerList = ref<CustomerApi.CustomerVO[]>([])
 const getCustomerList = async () => {
-  customerList.value = await CustomerApi.getSimpleCustomerList()
+  customerList.value = await CustomerApi.getCustomerSimpleList()
 }
 
 /** 动态获取客户联系人 */

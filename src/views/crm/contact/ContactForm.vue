@@ -242,7 +242,7 @@ const open = async (type: string, id?: number) => {
   resetForm()
   allContactList.value = await ContactApi.getSimpleContactList()
   userList.value = await UserApi.getSimpleUserList()
-  customerList.value = await CustomerApi.getSimpleCustomerList()
+  customerList.value = await CustomerApi.getCustomerSimpleList()
   areaList.value = await AreaApi.getAreaTree()
   // 修改时，设置数据
   if (id) {

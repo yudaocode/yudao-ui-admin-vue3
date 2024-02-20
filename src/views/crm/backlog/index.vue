@@ -15,13 +15,13 @@
       </div>
     </el-col>
     <el-col :span="20" :xs="24">
-      <TodayCustomer v-if="leftMenu === 'todayCustomer'" />
+      <CustomerTodayContactList v-if="leftMenu === 'customerTodayContact'" />
       <ClueFollowList v-if="leftMenu === 'clueFollow'" />
       <CheckContract v-if="leftMenu === 'checkContract'" />
       <CheckReceivables v-if="leftMenu === 'checkReceivables'" />
       <EndContract v-if="leftMenu === 'endContract'" />
-      <FollowCustomer v-if="leftMenu === 'followCustomer'" />
-      <PutInPoolRemind v-if="leftMenu === 'putInPoolRemind'" />
+      <CustomerFollowList v-if="leftMenu === 'customerFollow'" />
+      <CustomerPutPoolRemindList v-if="leftMenu === 'customerPutPoolRemind'" />
       <RemindReceivables v-if="leftMenu === 'remindReceivables'" />
     </el-col>
   </el-row>
@@ -29,34 +29,35 @@
 
 <script lang="ts" setup>
 import * as BacklogApi from '@/api/crm/backlog'
+import CustomerFollowList from './components/CustomerFollowList.vue'
+import CustomerTodayContactList from './components/CustomerTodayContactList.vue'
+import CustomerPutPoolRemindList from './components/CustomerPutPoolRemindList.vue'
+import ClueFollowList from './components/ClueFollowList.vue'
 import CheckContract from './tables/CheckContract.vue'
 import CheckReceivables from './tables/CheckReceivables.vue'
 import EndContract from './tables/EndContract.vue'
-import FollowCustomer from './tables/FollowCustomer.vue'
-import ClueFollowList from './components/ClueFollowList.vue'
-import PutInPoolRemind from './tables/PutInPoolRemind.vue'
 import RemindReceivables from './tables/RemindReceivables.vue'
-import TodayCustomer from './tables/TodayCustomer.vue'
+import * as CustomerApi from '@/api/crm/customer'
 import * as ClueApi from '@/api/crm/clue'
 
 defineOptions({ name: 'CrmBacklog' })
 
-const leftMenu = ref('todayCustomer')
+const leftMenu = ref('customerTodayContact')
 
-const todayCustomerCountRef = ref(0)
+const customerTodayContactCount = ref(0)
 const clueFollowCount = ref(0)
-const followCustomerCountRef = ref(0)
-const putInPoolCustomerRemindCountRef = ref(0)
-const checkContractCountRef = ref(0)
-const checkReceivablesCountRef = ref(0)
-const remindReceivablesCountRef = ref(0)
-const endContractCountRef = ref(0)
+const customerFollowCount = ref(0)
+const customerPutPoolRemindCount = ref(0)
+const checkContractCount = ref(0)
+const checkReceivablesCount = ref(0)
+const remindReceivablesCount = ref(0)
+const endContractCount = ref(0)
 
 const leftSides = ref([
   {
     name: '今日需联系客户',
-    menu: 'todayCustomer',
-    count: todayCustomerCountRef
+    menu: 'customerTodayContact',
+    count: customerTodayContactCount
   },
   {
     name: '分配给我的线索',
@@ -65,33 +66,33 @@ const leftSides = ref([
   },
   {
     name: '分配给我的客户',
-    menu: 'followCustomer',
-    count: followCustomerCountRef
+    menu: 'customerFollow',
+    count: customerFollowCount
   },
   {
     name: '待进入公海的客户',
-    menu: 'putInPoolRemind',
-    count: putInPoolCustomerRemindCountRef
+    menu: 'customerPutPoolRemind',
+    count: customerPutPoolRemindCount
   },
   {
     name: '待审核合同',
     menu: 'checkContract',
-    count: checkContractCountRef
+    count: checkContractCount
   },
   {
     name: '待审核回款',
     menu: 'checkReceivables',
-    count: checkReceivablesCountRef
+    count: checkReceivablesCount
   },
   {
     name: '待回款提醒',
     menu: 'remindReceivables',
-    count: remindReceivablesCountRef
+    count: remindReceivablesCount
   },
   {
     name: '即将到期的合同',
     menu: 'endContract',
-    count: endContractCountRef
+    count: endContractCount
   }
 ])
 
@@ -101,19 +102,18 @@ const sideClick = (item: any) => {
 }
 
 const getCount = () => {
-  BacklogApi.getTodayCustomerCount().then((count) => (todayCustomerCountRef.value = count))
+  CustomerApi.getTodayContactCustomerCount().then(
+    (count) => (customerTodayContactCount.value = count)
+  )
+  CustomerApi.getPutPoolRemindCustomerCount().then(
+    (count) => (customerPutPoolRemindCount.value = count)
+  )
+  CustomerApi.getFollowCustomerCount().then((count) => (customerFollowCount.value = count))
   ClueApi.getFollowClueCount().then((count) => (clueFollowCount.value = count))
-  BacklogApi.getClueFollowListCount().then((count) => (clueFollowCount.value = count))
-  BacklogApi.getFollowCustomerCount().then((count) => (followCustomerCountRef.value = count))
-  BacklogApi.getPutInPoolCustomerRemindCount().then(
-    (count) => (putInPoolCustomerRemindCountRef.value = count)
-  )
-  BacklogApi.getCheckContractCount().then((count) => (checkContractCountRef.value = count))
-  BacklogApi.getCheckReceivablesCount().then((count) => (checkReceivablesCountRef.value = count))
-  BacklogApi.getRemindReceivablePlanCount().then(
-    (count) => (remindReceivablesCountRef.value = count)
-  )
-  BacklogApi.getEndContractCount().then((count) => (endContractCountRef.value = count))
+  BacklogApi.getCheckContractCount().then((count) => (checkContractCount.value = count))
+  BacklogApi.getCheckReceivablesCount().then((count) => (checkReceivablesCount.value = count))
+  BacklogApi.getRemindReceivablePlanCount().then((count) => (remindReceivablesCount.value = count))
+  BacklogApi.getEndContractCount().then((count) => (endContractCount.value = count))
 }
 
 /** 激活时 */

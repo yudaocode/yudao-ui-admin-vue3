@@ -1,19 +1,9 @@
 import request from '@/config/axios'
 // TODO 芋艿：融合下
 
-// 1. 获得今日需联系客户数量
-export const getTodayCustomerCount = async () => {
-  return await request.get({ url: '/crm/customer/today-customer-count' })
-}
-
 // 3. 获得分配给我的客户数量
 export const getFollowCustomerCount = async () => {
   return await request.get({ url: '/crm/customer/follow-customer-count' })
-}
-
-// 4. 获得待进入公海的客户数量
-export const getPutInPoolCustomerRemindCount = async () => {
-  return await request.get({ url: '/crm/customer/put-in-pool-remind-count' })
 }
 
 // 5. 获得待审核合同数量
