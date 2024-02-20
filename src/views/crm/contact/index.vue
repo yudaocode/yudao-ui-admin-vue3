@@ -110,7 +110,7 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" fixed="left" label="姓名" prop="name" width="140">
+      <el-table-column align="center" fixed="left" label="联系人姓名" prop="name" width="160">
         <template #default="scope">
           <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
             {{ scope.row.name }}
@@ -129,10 +129,23 @@
         </template>
       </el-table-column>
       <el-table-column align="center" label="手机" prop="mobile" width="120" />
-      <el-table-column align="center" label="电话" prop="telephone" width="120" />
-      <el-table-column align="center" label="邮箱" prop="email" width="120" />
+      <el-table-column align="center" label="电话" prop="telephone" width="130" />
+      <el-table-column align="center" label="邮箱" prop="email" width="180" />
       <el-table-column align="center" label="职位" prop="post" width="120" />
       <el-table-column align="center" label="地址" prop="detailAddress" width="120" />
+      <el-table-column align="center" label="关键决策人" prop="master" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.master" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="直属上级" prop="parentName" width="160">
+        <template #default="scope">
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.parentId)">
+            {{ scope.row.parentName }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column label="地址" align="center" prop="detailAddress" width="180" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -140,13 +153,12 @@
         prop="contactNextTime"
         width="180px"
       />
-      <el-table-column align="center" label="备注" prop="remark" />
-      <el-table-column align="center" label="关键决策人" prop="master" width="100">
+      <el-table-column align="center" label="性别" prop="sex">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.master" />
+          <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="scope.row.sex" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="直属上级" prop="parentName" width="140" />
+      <el-table-column align="center" label="备注" prop="remark" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -154,13 +166,8 @@
         prop="contactLastTime"
         width="180px"
       />
-      <el-table-column align="center" label="性别" prop="sex">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="scope.row.sex" />
-        </template>
-      </el-table-column>
       <el-table-column align="center" label="负责人" prop="ownerUserName" width="120" />
-      <el-table-column align="center" label="创建人" prop="creatorName" width="120" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" width="100" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -175,6 +182,7 @@
         prop="createTime"
         width="180px"
       />
+      <el-table-column align="center" label="创建人" prop="creatorName" width="120" />
       <el-table-column align="center" fixed="right" label="操作" width="200">
         <template #default="scope">
           <el-button
