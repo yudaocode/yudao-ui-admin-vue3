@@ -50,6 +50,11 @@ export const updateCustomer = async (data: CustomerVO) => {
   return await request.put({ url: `/crm/customer/update`, data })
 }
 
+// 更新客户的成交状态
+export const updateCustomerDealStatus = async (id: number, dealStatus: boolean) => {
+  return await request.put({ url: `/crm/customer/update-deal-status`, params: { id, dealStatus } })
+}
+
 // 删除客户
 export const deleteCustomer = async (id: number) => {
   return await request.delete({ url: `/crm/customer/delete?id=` + id })

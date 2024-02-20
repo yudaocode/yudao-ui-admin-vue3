@@ -62,7 +62,7 @@ import * as ClueApi from '@/api/crm/clue'
 import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 
-defineOptions({ name: 'ClueDetailsInfo' })
+defineOptions({ name: 'CrmClueDetailsInfo' })
 const { clue } = defineProps<{
   clue: ClueApi.ClueVO // 线索明细
 }>()

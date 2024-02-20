@@ -11,7 +11,9 @@
     <el-button v-if="permissionListRef?.validateOwnerUser" type="primary" @click="transfer">
       转移
     </el-button>
-    <el-button v-if="permissionListRef?.validateWrite">更改成交状态</el-button>
+    <el-button v-if="permissionListRef?.validateWrite" @click="handleUpdateDealStatus">
+      更改成交状态
+    </el-button>
     <el-button
       v-if="customer.lockStatus && permissionListRef?.validateOwnerUser"
       @click="handleUnlock"
@@ -72,7 +74,7 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getCustomer" />
-  <CrmTransferForm ref="crmTransferFormRef" @success="close" />
+  <CrmTransferForm ref="transferFormRef" @success="close" />
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -120,10 +122,24 @@ const openForm = () => {
   formRef.value?.open('update', customerId.value)
 }
 
+/** 更新成交状态操作 */
+const handleUpdateDealStatus = async () => {
+  const dealStatus = !customer.value.dealStatus
+  try {
+    // 更新状态的二次确认
+    await message.confirm(`确定更新成交状态为【${dealStatus ? '已成交' : '未成交'}】吗？`)
+    // 发起更新
+    await CustomerApi.updateCustomerDealStatus(customerId.value, dealStatus)
+    message.success(`更新成交状态成功`)
+    // 刷新数据
+    await getCustomer()
+  } catch {}
+}
+
 /** 客户转移 */
-const crmTransferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 客户转移表单 ref
+const transferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 客户转移表单 ref
 const transfer = () => {
-  crmTransferFormRef.value?.open('客户转移', customerId.value, CustomerApi.transferCustomer)
+  transferFormRef.value?.open('客户转移', customerId.value, CustomerApi.transferCustomer)
 }
 
 /** 锁定客户 */

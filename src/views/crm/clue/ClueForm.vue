@@ -102,12 +102,14 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="地址" prop="areaId">
-            <el-tree-select
+            <el-cascader
               v-model="formData.areaId"
-              :data="areaList"
+              :options="areaList"
               :props="defaultProps"
-              :render-after-expand="true"
               class="w-1/1"
+              clearable
+              filterable
+              placeholder="请选择城市"
             />
           </el-form-item>
         </el-col>

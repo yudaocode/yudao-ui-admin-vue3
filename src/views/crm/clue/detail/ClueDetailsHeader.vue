@@ -35,7 +35,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import * as ClueApi from '@/api/crm/clue'
 import { formatDate } from '@/utils/formatTime'
 
-defineOptions({ name: 'ClueDetailsHeader' })
+defineOptions({ name: 'CrmClueDetailsHeader' })
 defineProps<{
   clue: ClueApi.ClueVO // 线索信息
   loading: boolean // 加载中

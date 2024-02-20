@@ -24,18 +24,18 @@
         {{ customer.dealStatus ? '已成交' : '未成交' }}
       </el-descriptions-item>
       <el-descriptions-item label="负责人">{{ customer.ownerUserName }}</el-descriptions-item>
-      <!-- TODO wanwan 首要联系人? -->
-      <el-descriptions-item label="首要联系人" />
-      <!-- TODO wanwan 首要联系人电话? -->
-      <el-descriptions-item label="首要联系人电话">{{ customer.mobile }}</el-descriptions-item>
+      <el-descriptions-item label="创建时间">
+        {{ formatDate(customer.createTime) }}
+      </el-descriptions-item>
     </el-descriptions>
   </ContentWrap>
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import * as CustomerApi from '@/api/crm/customer'
+import { formatDate } from '@/utils/formatTime'
 
-defineOptions({ name: 'CustomerDetailsHeader' })
+defineOptions({ name: 'CrmCustomerDetailsHeader' })
 defineProps<{
   customer: CustomerApi.CustomerVO // 客户信息
   loading: boolean // 加载中
