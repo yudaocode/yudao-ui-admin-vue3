@@ -53,15 +53,6 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="QQ" prop="qq">
-        <el-input
-          v-model="queryParams.qq"
-          class="!w-240px"
-          clearable
-          placeholder="请输入QQ"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="微信" prop="wechat">
         <el-input
           v-model="queryParams.wechat"
@@ -109,6 +100,11 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <el-tabs v-model="activeName" @tab-click="handleTabClick">
+      <el-tab-pane label="我负责的" name="1" />
+      <el-tab-pane label="我参与的" name="2" />
+      <el-tab-pane label="下属负责的" name="3" />
+    </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
       <el-table-column align="center" fixed="left" label="联系人姓名" prop="name" width="160">
         <template #default="scope">
@@ -224,6 +220,7 @@ import * as ContactApi from '@/api/crm/contact'
 import ContactForm from './ContactForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 import * as CustomerApi from '@/api/crm/customer'
+import { TabsPaneContext } from 'element-plus'
 
 defineOptions({ name: 'CrmContact' })
 
@@ -237,16 +234,17 @@ const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
+  sceneType: '1', // 默认和 activeName 相等
   mobile: undefined,
   telephone: undefined,
   email: undefined,
   customerId: undefined,
   name: undefined,
-  qq: undefined,
   wechat: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const activeName = ref('1') // 列表 tab
 
 /** 查询列表 */
 const getList = async () => {
@@ -269,6 +267,12 @@ const handleQuery = () => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/** tab 切换 */
+const handleTabClick = (tab: TabsPaneContext) => {
+  queryParams.sceneType = tab.paneName
   handleQuery()
 }
 

@@ -1,28 +1,27 @@
 <template>
-  <Dialog v-model="dialogVisible" :title="dialogTitle" :width="820">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
       v-loading="formLoading"
       :model="formData"
       :rules="formRules"
-      label-width="110px"
+      label-width="100px"
     >
-      <el-row :gutter="20">
+      <el-row>
         <el-col :span="12">
-          <el-form-item label="姓名" prop="name">
-            <el-input v-model="formData.name" input-style="width:190px;" placeholder="请输入姓名" />
+          <el-form-item label="联系人姓名" prop="name">
+            <el-input v-model="formData.name" placeholder="请输入姓名" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="负责人" prop="ownerUserId">
             <el-select
               v-model="formData.ownerUserId"
-              lable-key="nickname"
-              placeholder="请选择负责人"
-              value-key="id"
+              :disabled="formType !== 'create'"
+              class="w-1/1"
             >
               <el-option
-                v-for="item in userList"
+                v-for="item in userOptions"
                 :key="item.id"
                 :label="item.nickname"
                 :value="item.id"
@@ -33,13 +32,8 @@
       </el-row>
       <el-row>
         <el-col :span="12">
-          <el-form-item label="客户名称" prop="customerName">
-            <el-select
-              v-model="formData.customerId"
-              lable-key="name"
-              placeholder="请选择客户"
-              value-key="id"
-            >
+          <el-form-item label="客户名称" prop="customerId">
+            <el-select v-model="formData.customerId" placeholder="请选择客户" class="w-1/1">
               <el-option
                 v-for="item in customerList"
                 :key="item.id"
@@ -50,113 +44,41 @@
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="性别" prop="sex">
-            <el-select v-model="formData.sex" placeholder="请选择">
-              <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
+          <el-form-item label="手机" prop="mobile">
+            <el-input v-model="formData.mobile" placeholder="请输入手机" />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="12">
-          <el-form-item label="手机号" prop="mobile">
-            <el-input
-              v-model="formData.mobile"
-              input-style="width:190px;"
-              placeholder="请输入手机号"
-            />
-          </el-form-item>
-        </el-col>
         <el-col :span="12">
           <el-form-item label="电话" prop="telephone">
-            <el-input v-model="formData.telephone" placeholder="请输入电话" style="width: 215px" />
+            <el-input v-model="formData.telephone" placeholder="请输入电话" />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="12">
           <el-form-item label="邮箱" prop="email">
-            <el-input
-              v-model="formData.email"
-              input-style="width:190px;"
-              placeholder="请输入邮箱"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="QQ" prop="qq">
-            <el-input v-model="formData.qq" placeholder="请输入QQ" style="width: 215px" />
+            <el-input v-model="formData.email" placeholder="请输入邮箱" />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="12">
           <el-form-item label="微信" prop="wechat">
-            <el-input
-              v-model="formData.wechat"
-              input-style="width:190px;"
-              placeholder="请输入微信"
-            />
+            <el-input v-model="formData.wechat" placeholder="请输入微信" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
-          <el-form-item label="下次联系时间" prop="contactNextTime">
-            <el-date-picker
-              v-model="formData.contactNextTime"
-              placeholder="选择下次联系时间"
-              type="datetime"
-              value-format="x"
-            />
+          <el-form-item label="QQ" prop="qq">
+            <el-input v-model="formData.qq" placeholder="请输入 QQ" />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="12">
-          <el-form-item label="所在地" prop="areaId">
-            <el-tree-select
-              v-model="formData.areaId"
-              :data="areaList"
-              :props="defaultProps"
-              :render-after-expand="true"
-            />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="地址" prop="detailAddress">
-            <el-input
-              v-model="formData.detailAddress"
-              input-style="width:190px;"
-              placeholder="请输入地址"
-            />
-          </el-form-item>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="12">
-          <el-form-item label="直属上级" prop="parentId">
-            <el-select v-model="formData.parentId" placeholder="请选择">
-              <el-option
-                v-for="item in allContactList"
-                :key="item.id"
-                :disabled="item.id == formData.id"
-                :label="item.name"
-                :value="item.id"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
         <el-col :span="12">
           <el-form-item label="职位" prop="post">
-            <el-input v-model="formData.post" input-style="width:190px;" placeholder="请输入职位" />
+            <el-input v-model="formData.post" placeholder="请输入职位" />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row>
         <el-col :span="12">
           <el-form-item label="关键决策人" prop="master" style="width: 400px">
             <el-radio-group v-model="formData.master">
@@ -172,9 +94,66 @@
         </el-col>
       </el-row>
       <el-row>
-        <el-col :span="24">
+        <el-col :span="12">
+          <el-form-item label="性别" prop="sex">
+            <el-select v-model="formData.sex" placeholder="请选择" class="w-1/1">
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="直属上级" prop="parentId">
+            <el-select v-model="formData.parentId" placeholder="请选择直属上级" class="w-1/1">
+              <el-option
+                v-for="item in contactList"
+                :key="item.id"
+                :disabled="item.id == formData.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="地址" prop="areaId">
+            <el-cascader
+              v-model="formData.areaId"
+              :options="areaList"
+              :props="defaultProps"
+              class="w-1/1"
+              clearable
+              filterable
+              placeholder="请选择城市"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="详细地址" prop="detailAddress">
+            <el-input v-model="formData.detailAddress" placeholder="请输入详细地址" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
+          <el-form-item label="下次联系时间" prop="contactNextTime">
+            <el-date-picker
+              v-model="formData.contactNextTime"
+              placeholder="选择下次联系时间"
+              type="datetime"
+              value-format="x"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
           <el-form-item label="备注" prop="remark">
-            <el-input v-model="formData.remark" placeholder="请输入备注" />
+            <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -192,6 +171,7 @@ import * as UserApi from '@/api/system/user'
 import * as CustomerApi from '@/api/crm/customer'
 import * as AreaApi from '@/api/system/area'
 import { defaultProps } from '@/utils/tree'
+import { useUserStore } from '@/store/modules/user'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -202,25 +182,23 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const areaList = ref([]) // 地区列表
 const formData = ref({
+  id: undefined,
+  name: undefined,
+  customerId: undefined,
   contactNextTime: undefined,
+  ownerUserId: 0,
   mobile: undefined,
   telephone: undefined,
-  email: undefined,
-  customerId: undefined,
-  customerName: undefined,
-  detailAddress: undefined,
-  remark: undefined,
-  ownerUserId: undefined,
-  lastTime: undefined,
-  id: undefined,
-  parentId: undefined,
-  name: undefined,
-  post: undefined,
   qq: undefined,
   wechat: undefined,
+  email: undefined,
+  areaId: undefined,
+  detailAddress: undefined,
   sex: undefined,
   master: false,
-  areaId: undefined
+  post: undefined,
+  parentId: undefined,
+  remark: undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '姓名不能为空', trigger: 'blur' }],
@@ -229,10 +207,10 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const ownerUserList = ref<any[]>([])
-const userList = ref<UserApi.UserVO[]>([]) // 用户列表
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 // TODO 芋艿：统一的客户选择面板
 const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
-const allContactList = ref<ContactApi.ContactVO[]>([]) // 所有联系人列表
+const contactList = ref<ContactApi.ContactVO[]>([]) // 联系人列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -240,10 +218,6 @@ const open = async (type: string, id?: number) => {
   dialogTitle.value = t('action.' + type)
   formType.value = type
   resetForm()
-  allContactList.value = await ContactApi.getSimpleContactList()
-  userList.value = await UserApi.getSimpleUserList()
-  customerList.value = await CustomerApi.getCustomerSimpleList()
-  areaList.value = await AreaApi.getAreaTree()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
@@ -253,13 +227,22 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  contactList.value = await ContactApi.getSimpleContactList()
+  customerList.value = await CustomerApi.getCustomerSimpleList()
+  // 获得地区列表
+  areaList.value = await AreaApi.getAreaTree()
+  // 获得用户列表
+  userOptions.value = await UserApi.getSimpleUserList()
+  // 默认新建时选中自己
+  if (formType.value === 'create') {
+    formData.value.ownerUserId = useUserStore().getUser.id
+  }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
-  // owerSelectValue(ownerUserList)
   // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
@@ -285,25 +268,24 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
-  // TODO zyna：ide 告警，看看怎么去掉哈；
   formData.value = {
+    id: undefined,
+    name: undefined,
+    customerId: undefined,
     contactNextTime: undefined,
+    ownerUserId: 0,
     mobile: undefined,
     telephone: undefined,
-    email: undefined,
-    customerId: undefined,
-    detailAddress: undefined,
-    remark: undefined,
-    ownerUserId: undefined,
-    lastTime: undefined,
-    id: undefined,
-    parentId: undefined,
-    name: undefined,
-    post: undefined,
     qq: undefined,
     wechat: undefined,
+    email: undefined,
+    areaId: undefined,
+    detailAddress: undefined,
     sex: undefined,
-    master: false
+    master: false,
+    post: undefined,
+    parentId: undefined,
+    remark: undefined
   }
   formRef.value?.resetFields()
   ownerUserList.value = []

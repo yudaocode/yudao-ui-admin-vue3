@@ -2,29 +2,34 @@ import request from '@/config/axios'
 import { TransferReqVO } from '@/api/crm/customer'
 
 export interface ContactVO {
-  name: string
-  nextTime: Date
-  mobile: string
-  telephone: string
-  email: string
-  post: string
-  customerId: number
-  detailAddress: string
-  remark: string
-  ownerUserId: string
-  lastTime: Date
-  id: number
-  parentId: number
-  qq: number
-  wechat: string
-  sex: number
-  master: boolean
-  creatorName: string
-  updateTime?: Date
-  createTime?: Date
-  customerName: string
-  areaName: string
-  ownerUserName: string
+  id: number // 编号
+  name: string // 联系人名称
+  customerId: number // 客户编号
+  customerName?: string // 客户名称
+  contactLastTime: Date // 最后跟进时间
+  contactLastContent: string // 最后跟进内容
+  contactNextTime: Date // 下次联系时间
+  ownerUserId: number // 负责人的用户编号
+  ownerUserName?: string // 负责人的用户名称
+  ownerUserDept?: string // 负责人的部门名称
+  mobile: string // 手机号
+  telephone: string // 电话
+  qq: string // QQ
+  wechat: string // wechat
+  email: string // email
+  areaId: number // 所在地
+  areaName?: string // 所在地名称
+  detailAddress: string // 详细地址
+  sex: number // 性别
+  master: boolean // 是否主联系人
+  post: string // 职务
+  parentId: number // 上级联系人编号
+  parentName?: string // 上级联系人名称
+  remark: string // 备注
+  creator: string // 创建人
+  creatorName?: string // 创建人名称
+  createTime: Date // 创建时间
+  updateTime: Date // 更新时间
 }
 
 export interface ContactBusinessReqVO {
