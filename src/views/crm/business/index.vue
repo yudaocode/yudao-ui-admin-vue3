@@ -39,9 +39,31 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="商机名称" align="center" prop="name" />
-      <el-table-column label="客户名称" align="center" prop="customerName" />
-      <el-table-column label="商机金额" align="center" prop="price" />
+      <el-table-column align="center" label="商机名称" fixed="left" prop="name" width="160">
+        <template #default="scope">
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
+            {{ scope.row.name }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" fixed="left" label="客户名称" prop="customerName" width="120">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openCustomerDetail(scope.row.customerId)"
+          >
+            {{ scope.row.customerName }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="商机金额（元）"
+        align="center"
+        prop="totalPrice"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column
         label="预计成交日期"
         align="center"
@@ -49,9 +71,23 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="商机状态类型" align="center" prop="statusTypeName" />
-      <el-table-column label="商机状态" align="center" prop="statusName" />
+      <el-table-column align="center" label="备注" prop="remark" width="200" />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="下次联系时间"
+        prop="contactNextTime"
+        width="180px"
+      />
+      <el-table-column align="center" label="负责人" prop="ownerUserName" width="100px" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" width="100px" />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="最后跟进时间"
+        prop="contactLastTime"
+        width="180px"
+      />
       <el-table-column
         label="更新时间"
         align="center"
@@ -66,9 +102,21 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="负责人" align="center" prop="ownerUserId" />
-      <el-table-column label="创建人" align="center" prop="creator" />
-      <el-table-column label="跟进状态" align="center" prop="followUpStatus" />
+      <el-table-column align="center" label="创建人" prop="creatorName" width="100px" />
+      <el-table-column
+        label="商机状态组"
+        align="center"
+        prop="statusTypeName"
+        fixed="right"
+        width="140"
+      />
+      <el-table-column
+        label="商机阶段"
+        align="center"
+        prop="statusName"
+        fixed="right"
+        width="120"
+      />
       <el-table-column label="操作" align="center" fixed="right" width="130px">
         <template #default="scope">
           <el-button
@@ -108,6 +156,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as BusinessApi from '@/api/crm/business'
 import BusinessForm from './BusinessForm.vue'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'CrmBusiness' })
 
@@ -164,6 +213,17 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
+}
+
+/** 打开客户详情 */
+const { currentRoute, push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'CrmBusinessDetail', params: { id } })
+}
+
+/** 打开客户详情 */
+const openCustomerDetail = (id: number) => {
+  push({ name: 'CrmCustomerDetail', params: { id } })
 }
 
 /** 添加/修改操作 */

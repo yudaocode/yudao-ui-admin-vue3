@@ -23,6 +23,11 @@ export const getProductPage = async (params) => {
   return await request.get({ url: `/crm/product/page`, params })
 }
 
+// 获得产品精简列表
+export const getProductSimpleList = async () => {
+  return await request.get({ url: `/crm/product/simple-list` })
+}
+
 // 查询产品详情
 export const getProduct = async (id: number) => {
   return await request.get({ url: `/crm/product/get?id=` + id })

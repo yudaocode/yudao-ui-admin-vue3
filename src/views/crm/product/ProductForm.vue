@@ -104,7 +104,6 @@ import * as ProductCategoryApi from '@/api/crm/product/productCategory'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { getSimpleUserList, UserVO } from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
-import { fenToYuan, yuanToFen } from '@/utils'
 
 defineOptions({ name: 'CrmProductForm' })
 
@@ -149,7 +148,6 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await ProductApi.getProduct(id)
-      formData.value.price = Number(fenToYuan(formData.value.price))
     } finally {
       formLoading.value = false
     }
@@ -169,10 +167,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = {
-      ...formData.value,
-      price: yuanToFen(formData.value.price)
-    } as unknown as ProductApi.ProductVO
+    const data = formData.value as unknown as ProductApi.ProductVO
     if (formType.value === 'create') {
       await ProductApi.createProduct(data)
       message.success(t('common.createSuccess'))

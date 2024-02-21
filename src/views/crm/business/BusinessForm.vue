@@ -1,113 +1,127 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog :title="dialogTitle" v-model="dialogVisible" width="1280">
     <el-form
       ref="formRef"
       :model="formData"
       :rules="formRules"
-      label-width="100px"
+      label-width="120px"
       v-loading="formLoading"
     >
-      <el-form-item label="商机名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入商机名称" />
-      </el-form-item>
-      <!-- TODO 芋艿：客户列表的组件 -->
-      <el-form-item label="客户名称" prop="customerName">
-        <el-popover
-          placement="bottom"
-          :width="600"
-          trigger="click"
-          :teleported="false"
-          :visible="showCustomer"
-          :offset="10"
-        >
-          <template #reference>
-            <el-input
-              placeholder="请选择客户"
-              @click="openCustomerSelect"
-              v-model="formData.customerName"
-            />
-          </template>
-          <el-table :data="customerList" ref="multipleTableRef" @select="handleSelectionChange">
-            <el-table-column width="55" label="选择" type="selection" />
-            <el-table-column width="100" label="编号" property="id" />
-            <el-table-column width="150" label="客户名称" property="name" />
-            <el-table-column width="100" label="客户来源" prop="source" align="center">
-              <template #default="scope">
-                <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
-              </template>
-            </el-table-column>
-            <el-table-column label="客户级别" align="center" prop="level" width="120">
-              <template #default="scope">
-                <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
-              </template>
-            </el-table-column>
-          </el-table>
-          <!-- 分页 -->
-          <el-row :gutter="20">
-            <el-col>
-              <Pagination
-                :total="total"
-                v-model:page="queryParams.pageNo"
-                v-model:limit="queryParams.pageSize"
-                @pagination="getCustomerList"
-                layout="sizes, prev, pager, next"
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="商机名称" prop="name">
+            <el-input v-model="formData.name" placeholder="请输入商机名称" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="负责人" prop="ownerUserId">
+            <el-select
+              v-model="formData.ownerUserId"
+              :disabled="formType !== 'create'"
+              class="w-1/1"
+            >
+              <el-option
+                v-for="item in userOptions"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
               />
-            </el-col>
-          </el-row>
-          <el-row :gutter="20">
-            <el-col :span="10" :offset="13">
-              <el-button @click="selectCustomer">确认</el-button>
-              <el-button @click="showCustomer = false">取消</el-button>
-            </el-col>
-          </el-row>
-        </el-popover>
-      </el-form-item>
-      <!-- TODO @ljlleo：idea 红色的报错，可以解决下 -->
-      <el-form-item label="商机状态类型" prop="statusTypeId">
-        <el-select
-          v-model="formData.statusTypeId"
-          placeholder="请选择商机状态类型"
-          clearable
-          @change="changeBusinessStatusType"
-        >
-          <el-option
-            v-for="item in businessStatusTypeList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="商机状态" prop="statusId">
-        <el-select v-model="formData.statusId" placeholder="请选择商机状态" clearable>
-          <el-option
-            v-for="item in businessStatusList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="预计成交日期" prop="dealTime">
-        <el-date-picker
-          v-model="formData.dealTime"
-          type="date"
-          value-format="x"
-          placeholder="选择预计成交日期"
-        />
-      </el-form-item>
-      <el-form-item label="商机金额" prop="price">
-        <el-input v-model="formData.price" placeholder="请输入商机金额" />
-      </el-form-item>
-      <el-form-item label="整单折扣" prop="discountPercent">
-        <el-input v-model="formData.discountPercent" placeholder="请输入整单折扣" />
-      </el-form-item>
-      <el-form-item label="产品总金额" prop="productPrice">
-        <el-input v-model="formData.productPrice" placeholder="请输入产品总金额" />
-      </el-form-item>
-      <el-form-item label="备注" prop="remark">
-        <el-input v-model="formData.remark" placeholder="请输入备注" />
-      </el-form-item>
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="客户名称" prop="customerId">
+            <el-select v-model="formData.customerId" placeholder="请选择客户" class="w-1/1">
+              <el-option
+                v-for="item in customerList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="商机状态组" prop="statusTypeId">
+            <el-select
+              v-model="formData.statusTypeId"
+              placeholder="请选择商机状态组"
+              clearable
+              class="w-1/1"
+            >
+              <el-option
+                v-for="item in statusTypeList"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="预计成交日期" prop="dealTime">
+            <el-date-picker
+              v-model="formData.dealTime"
+              type="date"
+              value-format="x"
+              placeholder="选择预计成交日期"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="备注" prop="remark">
+            <el-input type="textarea" v-model="formData.remark" placeholder="请输入备注" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <!-- 子表的表单 -->
+      <ContentWrap>
+        <el-tabs v-model="subTabsName" class="-mt-15px -mb-10px">
+          <el-tab-pane label="产品清单" name="product">
+            <BusinessProductForm
+              ref="productFormRef"
+              :products="formData.products"
+              :disabled="disabled"
+            />
+          </el-tab-pane>
+        </el-tabs>
+      </ContentWrap>
+      <el-row>
+        <el-col :span="8">
+          <el-form-item label="产品总金额" prop="totalProductPrice">
+            <el-input
+              disabled
+              v-model="formData.totalProductPrice"
+              :formatter="erpPriceInputFormatter"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="整单折扣（%）" prop="discountPercent">
+            <el-input-number
+              v-model="formData.discountPercent"
+              placeholder="请输入整单折扣"
+              controls-position="right"
+              :min="0"
+              :precision="2"
+              class="!w-1/1"
+            />
+          </el-form-item>
+        </el-col>
+        <el-col :span="8">
+          <el-form-item label="折扣后金额" prop="price">
+            <el-input
+              disabled
+              v-model="formData.totalPrice"
+              placeholder="请输入商机金额"
+              :formatter="erpPriceInputFormatter"
+            />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -119,8 +133,10 @@
 import * as BusinessApi from '@/api/crm/business'
 import * as BusinessStatusTypeApi from '@/api/crm/businessStatusType'
 import * as CustomerApi from '@/api/crm/customer'
-import { DICT_TYPE } from '@/utils/dict'
-import { ElTable } from 'element-plus'
+import * as UserApi from '@/api/system/user'
+import { useUserStore } from '@/store/modules/user'
+import BusinessProductForm from './components/BusinessProductForm.vue'
+import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -132,32 +148,52 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   name: undefined,
-  statusTypeId: undefined,
-  statusId: undefined,
-  contactNextTime: undefined,
   customerId: undefined,
-  dealTime: undefined,
-  price: undefined,
-  discountPercent: undefined,
-  productPrice: undefined,
-  remark: undefined,
+  contactNextTime: undefined,
   ownerUserId: undefined,
-  roUserIds: undefined,
-  rwUserIds: undefined,
-  endStatus: undefined,
-  endRemark: undefined,
-  contactLastTime: undefined,
-  followUpStatus: undefined
+  statusTypeId: undefined,
+  dealTime: undefined,
+  discountPercent: 0,
+  totalProductPrice: undefined,
+  totalPrice: undefined,
+  remark: undefined,
+  products: []
 })
 const formRules = reactive({
-  name: [{ required: true, message: '商机名称不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: '商机名称不能为空', trigger: 'blur' }],
+  customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }],
+  ownerUserId: [{ required: true, message: '负责人不能为空', trigger: 'blur' }],
+  statusTypeId: [{ required: true, message: '商机状态组不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const businessStatusList = ref([]) // 商机状态列表
-const businessStatusTypeList = ref([]) //商机状态类型列表
-const loading = ref(true) // 列表的加载中
-const total = ref(0) // 列表的总页数
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
+const statusTypeList = ref([]) // 商机状态类型列表
+// TODO 芋艿：统一的客户选择面板
 const customerList = ref([]) // 客户列表的数据
+
+/** 子表的表单 */
+const subTabsName = ref('product')
+const productFormRef = ref()
+
+/** 计算 discountPrice、totalPrice 价格 */
+watch(
+  () => formData.value,
+  (val) => {
+    if (!val) {
+      return
+    }
+    const totalProductPrice = val.products.reduce((prev, curr) => prev + curr.totalPrice, 0)
+    const discountPrice =
+      val.discountPercent != null
+        ? erpPriceMultiply(totalProductPrice, val.discountPercent / 100.0)
+        : 0
+    const totalPrice = totalProductPrice - discountPrice
+    // 赋值
+    formData.value.totalProductPrice = totalProductPrice
+    formData.value.totalPrice = totalPrice
+  },
+  { deep: true }
+)
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -174,8 +210,15 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  customerList.value = await CustomerApi.getCustomerSimpleList()
   // 加载商机状态类型列表
-  businessStatusTypeList.value = await BusinessStatusTypeApi.getBusinessStatusTypeList()
+  statusTypeList.value = await BusinessStatusTypeApi.getBusinessStatusTypeList()
+  // 获得用户列表
+  userOptions.value = await UserApi.getSimpleUserList()
+  // 默认新建时选中自己
+  if (formType.value === 'create') {
+    formData.value.ownerUserId = useUserStore().getUser.id
+  }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -186,6 +229,7 @@ const submitForm = async () => {
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
+  await productFormRef.value.validate()
   // 提交请求
   formLoading.value = true
   try {
@@ -210,71 +254,17 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: undefined,
-    statusTypeId: undefined,
-    statusId: undefined,
-    contactNextTime: undefined,
     customerId: undefined,
-    dealTime: undefined,
-    price: undefined,
-    discountPercent: undefined,
-    productPrice: undefined,
-    remark: undefined,
+    contactNextTime: undefined,
     ownerUserId: undefined,
-    roUserIds: undefined,
-    rwUserIds: undefined,
-    endStatus: undefined,
-    endRemark: undefined,
-    contactLastTime: undefined,
-    followUpStatus: undefined
+    statusTypeId: undefined,
+    dealTime: undefined,
+    discountPercent: 0,
+    totalProductPrice: undefined,
+    totalPrice: undefined,
+    remark: undefined,
+    products: []
   }
   formRef.value?.resetFields()
-}
-
-/** 加载商机状态列表 */
-const changeBusinessStatusType = async (typeId: number) => {
-  businessStatusList.value = await BusinessStatusTypeApi.getBusinessStatusListByTypeId(typeId)
-}
-
-const queryParams = reactive({
-  pageNo: 1,
-  pageSize: 10,
-  name: null,
-  mobile: null,
-  industryId: null,
-  level: null,
-  source: null,
-  pool: false
-})
-// 选择客户
-const showCustomer = ref(false)
-const openCustomerSelect = () => {
-  showCustomer.value = !showCustomer.value
-  queryParams.pageNo = 1
-  getCustomerList()
-}
-
-/** 查询客户列表 */
-const getCustomerList = async () => {
-  loading.value = true
-  try {
-    const data = await CustomerApi.getCustomerPage(queryParams)
-    customerList.value = data.list
-    total.value = data.total
-  } finally {
-    loading.value = false
-  }
-}
-const multipleTableRef = ref<InstanceType<typeof ElTable>>()
-const multipleSelection = ref()
-const handleSelectionChange = ({}, row) => {
-  multipleSelection.value = row
-  multipleTableRef.value!.clearSelection()
-  multipleTableRef.value!.toggleRowSelection(row, undefined)
-}
-
-const selectCustomer = () => {
-  formData.value.customerId = multipleSelection.value.id
-  formData.value.customerName = multipleSelection.value.name
-  showCustomer.value = !showCustomer.value
 }
 </script>

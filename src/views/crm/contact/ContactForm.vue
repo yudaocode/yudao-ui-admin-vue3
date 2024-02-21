@@ -206,7 +206,6 @@ const formRules = reactive({
   ownerUserId: [{ required: true, message: '负责人不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const ownerUserList = ref<any[]>([])
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 // TODO 芋艿：统一的客户选择面板
 const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
@@ -288,6 +287,5 @@ const resetForm = () => {
     remark: undefined
   }
   formRef.value?.resetFields()
-  ownerUserList.value = []
 }
 </script>
