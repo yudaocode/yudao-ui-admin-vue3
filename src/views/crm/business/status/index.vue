@@ -9,24 +9,13 @@
       label-width="68px"
     >
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
         <el-button
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['crm:business-status-type:create']"
+          v-hasPermi="['crm:business-status:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['crm:business-status-type:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -35,8 +24,15 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="状态类型名" align="center" prop="name" />
-      <el-table-column label="使用的部门" align="center" prop="deptNames" />
+      <el-table-column label="状态组名" align="center" prop="name" />
+      <el-table-column label="应用部门" align="center" prop="deptNames">
+        <template #default="scope">
+          <span v-if="scope.row?.deptNames?.length > 0">
+            {{ scope.row.deptNames.join(' ') }}
+          </span>
+          <span v-else>全公司</span>
+        </template>
+      </el-table-column>
       <el-table-column label="创建人" align="center" prop="creator" />
       <el-table-column
         label="创建时间"
@@ -51,7 +47,7 @@
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['crm:business-status-type:update']"
+            v-hasPermi="['crm:business-status:update']"
           >
             编辑
           </el-button>
@@ -59,7 +55,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['crm:business-status-type:delete']"
+            v-hasPermi="['crm:business-status:delete']"
           >
             删除
           </el-button>
@@ -76,16 +72,16 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <BusinessStatusTypeForm ref="formRef" @success="getList" />
+  <BusinessStatusForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import * as BusinessStatusTypeApi from '@/api/crm/businessStatusType'
-import BusinessStatusTypeForm from './BusinessStatusTypeForm.vue'
+import * as BusinessStatusApi from '@/api/crm/business/status'
+import BusinessStatusForm from './BusinessStatusForm.vue'
 
-defineOptions({ name: 'BusinessStatusType' })
+defineOptions({ name: 'CrmBusinessStatus' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -104,7 +100,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await BusinessStatusTypeApi.getBusinessStatusTypePage(queryParams)
+    const data = await BusinessStatusApi.getBusinessStatusPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -157,7 +153,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await BusinessStatusTypeApi.exportBusinessStatusType(queryParams)
-    download.excel(data, '商机状态类型.xls')
+    download.excel(data, '商机状态组.xls')
   } catch {
   } finally {
     exportLoading.value = false

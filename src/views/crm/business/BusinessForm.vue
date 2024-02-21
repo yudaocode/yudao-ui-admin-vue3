@@ -131,7 +131,7 @@
 </template>
 <script setup lang="ts">
 import * as BusinessApi from '@/api/crm/business'
-import * as BusinessStatusTypeApi from '@/api/crm/businessStatusType'
+import * as BusinessStatusApi from '@/api/crm/business/status'
 import * as CustomerApi from '@/api/crm/customer'
 import * as UserApi from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
@@ -212,7 +212,7 @@ const open = async (type: string, id?: number) => {
   }
   customerList.value = await CustomerApi.getCustomerSimpleList()
   // 加载商机状态类型列表
-  statusTypeList.value = await BusinessStatusTypeApi.getBusinessStatusTypeList()
+  statusTypeList.value = await BusinessStatusApi.getBusinessStatusTypeSimpleList()
   // 获得用户列表
   userOptions.value = await UserApi.getSimpleUserList()
   // 默认新建时选中自己
