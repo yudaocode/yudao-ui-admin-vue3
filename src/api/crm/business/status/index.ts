@@ -11,6 +11,27 @@ export interface BusinessStatusTypeVO {
   }
 }
 
+export const DEFAULT_STATUSES = [
+  {
+    endStatus: 1,
+    key: '结束',
+    name: '赢单',
+    percent: 100
+  },
+  {
+    endStatus: 2,
+    key: '结束',
+    name: '输单',
+    percent: 0
+  },
+  {
+    endStatus: 3,
+    key: '结束',
+    name: '无效',
+    percent: 0
+  }
+]
+
 // 查询商机状态组列表
 export const getBusinessStatusPage = async (params: any) => {
   return await request.get({ url: `/crm/business-status/page`, params })
@@ -29,6 +50,11 @@ export const updateBusinessStatus = async (data: BusinessStatusTypeVO) => {
 // 查询商机状态类型详情
 export const getBusinessStatus = async (id: number) => {
   return await request.get({ url: `/crm/business-status/get?id=` + id })
+}
+
+// 删除商机状态
+export const deleteBusinessStatus = async (id: number) => {
+  return await request.delete({ url: `/crm/business-status/delete?id=` + id })
 }
 
 // 获得商机状态组列表

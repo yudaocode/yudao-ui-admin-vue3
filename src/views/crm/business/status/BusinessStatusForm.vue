@@ -25,20 +25,27 @@
         />
       </el-form-item>
       <el-form-item label="阶段设置" prop="statuses">
-        <el-table border style="width: 100%" :data="formData.statuses">
+        <el-table
+          border
+          style="width: 100%"
+          :data="formData.statuses.concat(BusinessStatusApi.DEFAULT_STATUSES)"
+        >
           <el-table-column align="center" label="阶段" width="70">
             <template #default="scope">
-              <el-text>阶段 {{ scope.$index + 1 }}</el-text>
+              <el-text v-if="!scope.row.defaultStatus">阶段 {{ scope.$index + 1 }}</el-text>
+              <el-text v-else>结束</el-text>
             </template>
           </el-table-column>
           <el-table-column align="center" label="阶段名称" width="160" prop="name">
             <template #default="{ row }">
-              <el-input v-model="row.name" placeholder="请输入状态名称" />
+              <el-input v-if="!row.endStatus" v-model="row.name" placeholder="请输入状态名称" />
+              <el-text v-else>{{ row.name }}</el-text>
             </template>
           </el-table-column>
-          <el-table-column width="140" align="center" label="赢单率" prop="percent">
+          <el-table-column width="140" align="center" label="赢单率（%）" prop="percent">
             <template #default="{ row }">
               <el-input-number
+                v-if="!row.endStatus"
                 v-model="row.percent"
                 placeholder="请输入赢单率"
                 controls-position="right"
@@ -47,12 +54,21 @@
                 :precision="2"
                 class="!w-1/1"
               />
+              <el-text v-else>{{ row.percent }}</el-text>
             </template>
           </el-table-column>
           <el-table-column label="操作" width="110" align="center">
             <template #default="scope">
-              <el-button link type="primary" @click="addStatusArea(scope.$index)"> 添加 </el-button>
               <el-button
+                v-if="!scope.row.endStatus"
+                link
+                type="primary"
+                @click="addStatus(scope.$index)"
+              >
+                添加
+              </el-button>
+              <el-button
+                v-if="!scope.row.endStatus"
                 link
                 type="danger"
                 @click="deleteStatusArea(scope.$index)"
@@ -110,13 +126,13 @@ const open = async (type: string, id?: number) => {
       formData.value = await BusinessStatusApi.getBusinessStatus(id)
       treeRef.value.setCheckedKeys(formData.value.deptIds)
       if (formData.value.statuses.length == 0) {
-        addStatusArea(0)
+        addStatus()
       }
     } finally {
       formLoading.value = false
     }
   } else {
-    addStatusArea(0)
+    addStatus()
   }
   // 加载部门树
   deptList.value = handleTree(await DeptApi.getSimpleDeptList())
@@ -162,7 +178,7 @@ const resetForm = () => {
 }
 
 /** 添加状态 */
-const addStatusArea = () => {
+const addStatus = () => {
   const data = formData.value
   data.statuses.push({
     name: '',

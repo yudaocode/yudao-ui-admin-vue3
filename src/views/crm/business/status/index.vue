@@ -80,6 +80,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as BusinessStatusApi from '@/api/crm/business/status'
 import BusinessStatusForm from './BusinessStatusForm.vue'
+import { deleteBusinessStatus } from '@/api/crm/business/status'
 
 defineOptions({ name: 'CrmBusinessStatus' })
 
@@ -126,38 +127,17 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 选择客户操作 */
-const formCustomerRef = ref()
-const openCustomerForm = (id?: number) => {
-  formCustomerRef.value.open(id)
-}
-
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await BusinessStatusTypeApi.deleteBusinessStatusType(id)
+    await BusinessStatusApi.deleteBusinessStatus(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
   } catch {}
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await BusinessStatusTypeApi.exportBusinessStatusType(queryParams)
-    download.excel(data, '商机状态组.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /** 初始化 **/

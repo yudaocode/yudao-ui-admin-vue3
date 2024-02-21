@@ -50,6 +50,7 @@
               placeholder="请选择商机状态组"
               clearable
               class="w-1/1"
+              :disabled="formType !== 'create'"
             >
               <el-option
                 v-for="item in statusTypeList"
