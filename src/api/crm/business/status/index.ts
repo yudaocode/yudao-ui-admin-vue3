@@ -61,3 +61,8 @@ export const deleteBusinessStatus = async (id: number) => {
 export const getBusinessStatusTypeSimpleList = async () => {
   return await request.get({ url: `/crm/business-status/type-simple-list` })
 }
+
+// 获得商机阶段列表
+export const getBusinessStatusSimpleList = async (typeId: number) => {
+  return await request.get({ url: `/crm/business-status/status-simple-list`, params: { typeId } })
+}

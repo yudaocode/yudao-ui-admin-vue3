@@ -3,6 +3,14 @@
     <el-button v-if="permissionListRef?.validateWrite" @click="openForm('update', business.id)">
       编辑
     </el-button>
+    <el-button
+      :disabled="business.endStatus"
+      v-if="permissionListRef?.validateWrite"
+      type="success"
+      @click="openStatusForm()"
+    >
+      变更商机状态
+    </el-button>
     <el-button v-if="permissionListRef?.validateOwnerUser" type="primary" @click="transfer">
       转移
     </el-button>
@@ -41,8 +49,10 @@
       </el-tab-pane>
     </el-tabs>
   </el-col>
+
   <!-- 表单弹窗：添加/修改 -->
   <ContactForm ref="formRef" @success="getContact(business.id)" />
+  <BusinessUpdateStatusForm ref="statusFormRef" @success="getContact(business.id)" />
   <CrmTransferForm ref="transferFormRef" @success="close" />
 </template>
 <script lang="ts" setup>
@@ -59,6 +69,7 @@ import ContactForm from '@/views/crm/contact/ContactForm.vue'
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
 import FollowUpList from '@/views/crm/followup/index.vue'
 import ContactList from '@/views/crm/contact/components/ContactList.vue'
+import BusinessUpdateStatusForm from '@/views/crm/business/BusinessUpdateStatusForm.vue'
 
 defineOptions({ name: 'CrmBusinessDetail' })
 
@@ -84,6 +95,12 @@ const getContact = async (id: number) => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 变更商机状态 */
+const statusFormRef = ref()
+const openStatusForm = () => {
+  statusFormRef.value.open(business.value)
 }
 
 /** 联系人转移 */

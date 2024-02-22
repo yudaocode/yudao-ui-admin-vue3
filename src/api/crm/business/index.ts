@@ -72,6 +72,11 @@ export const updateBusiness = async (data: BusinessVO) => {
   return await request.put({ url: `/crm/business/update`, data })
 }
 
+// 修改 CRM 商机状态
+export const updateBusinessStatus = async (data: BusinessVO) => {
+  return await request.put({ url: `/crm/business/update-status`, data })
+}
+
 // 删除 CRM 商机
 export const deleteBusiness = async (id: number) => {
   return await request.delete({ url: `/crm/business/delete?id=` + id })
