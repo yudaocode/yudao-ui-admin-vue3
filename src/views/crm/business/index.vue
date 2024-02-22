@@ -38,6 +38,11 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <el-tabs v-model="activeName" @tab-click="handleTabClick">
+      <el-tab-pane label="我负责的" name="1" />
+      <el-tab-pane label="我参与的" name="2" />
+      <el-tab-pane label="下属负责的" name="3" />
+    </el-tabs>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column align="center" label="商机名称" fixed="left" prop="name" width="160">
         <template #default="scope">
@@ -157,6 +162,7 @@ import download from '@/utils/download'
 import * as BusinessApi from '@/api/crm/business'
 import BusinessForm from './BusinessForm.vue'
 import { erpPriceTableColumnFormatter } from '@/utils'
+import { TabsPaneContext } from 'element-plus'
 
 defineOptions({ name: 'CrmBusiness' })
 
@@ -169,27 +175,12 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  statusTypeId: null,
-  statusId: null,
-  contactNextTime: [],
-  customerId: null,
-  dealTime: [],
-  price: null,
-  discountPercent: null,
-  productPrice: null,
-  remark: null,
-  ownerUserId: null,
-  createTime: [],
-  roUserIds: null,
-  rwUserIds: null,
-  endStatus: null,
-  endRemark: null,
-  contactLastTime: [],
-  followUpStatus: null
+  sceneType: '1', // 默认和 activeName 相等
+  name: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const activeName = ref('1') // 列表 tab
 
 /** 查询列表 */
 const getList = async () => {
@@ -212,6 +203,12 @@ const handleQuery = () => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
+  handleQuery()
+}
+
+/** tab 切换 */
+const handleTabClick = (tab: TabsPaneContext) => {
+  queryParams.sceneType = tab.paneName
   handleQuery()
 }
 

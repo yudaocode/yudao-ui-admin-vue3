@@ -31,7 +31,12 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="客户名称" prop="customerId">
-            <el-select v-model="formData.customerId" placeholder="请选择客户" class="w-1/1">
+            <el-select
+              :disabled="formData.customerDefault"
+              v-model="formData.customerId"
+              placeholder="请选择客户"
+              class="w-1/1"
+            >
               <el-option
                 v-for="item in customerList"
                 :key="item.id"
@@ -158,7 +163,9 @@ const formData = ref({
   totalProductPrice: undefined,
   totalPrice: undefined,
   remark: undefined,
-  products: []
+  products: [],
+  contactId: undefined,
+  customerDefault: false
 })
 const formRules = reactive({
   name: [{ required: true, message: '商机名称不能为空', trigger: 'blur' }],
@@ -197,7 +204,7 @@ watch(
 )
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (type: string, id?: number, customerId?: number, contactId?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -210,7 +217,17 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  } else {
+    if (customerId) {
+      formData.value.customerId = customerId
+      formData.value.customerDefault = true // 默认客户的选择，不允许变
+    }
+    // 自动关联 contactId 联系人编号
+    if (contactId) {
+      formData.value.contactId = contactId
+    }
   }
+  // 获得客户列表
   customerList.value = await CustomerApi.getCustomerSimpleList()
   // 加载商机状态类型列表
   statusTypeList.value = await BusinessStatusApi.getBusinessStatusTypeSimpleList()
@@ -264,7 +281,9 @@ const resetForm = () => {
     totalProductPrice: undefined,
     totalPrice: undefined,
     remark: undefined,
-    products: []
+    products: [],
+    contactId: undefined,
+    customerDefault: false
   }
   formRef.value?.resetFields()
 }

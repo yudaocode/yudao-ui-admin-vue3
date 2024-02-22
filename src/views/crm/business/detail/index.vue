@@ -15,6 +15,14 @@
       <el-tab-pane label="详细资料">
         <BusinessDetailsInfo :business="business" />
       </el-tab-pane>
+      <el-tab-pane label="联系人" lazy>
+        <ContactList
+          :biz-id="business.id!"
+          :biz-type="BizTypeEnum.CRM_BUSINESS"
+          :business-id="business.id"
+          :customer-id="business.customerId"
+        />
+      </el-tab-pane>
       <el-tab-pane label="操作日志">
         <OperateLogV2 :log-list="logList" />
       </el-tab-pane>
@@ -25,13 +33,6 @@
           :biz-type="BizTypeEnum.CRM_BUSINESS"
           :show-action="true"
           @quit-team="close"
-        />
-      </el-tab-pane>
-      <el-tab-pane label="商机" lazy>
-        <BusinessList
-          :biz-id="business.id!"
-          :biz-type="BizTypeEnum.CRM_CONTACT"
-          :customer-id="business.customerId"
         />
       </el-tab-pane>
     </el-tabs>
@@ -46,7 +47,6 @@ import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
 import BusinessDetailsHeader from './BusinessDetailsHeader.vue'
 import BusinessDetailsInfo from './BusinessDetailsInfo.vue'
-import BusinessList from '@/views/crm/business/components/BusinessList.vue' // 商机列表
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
 import { BizTypeEnum } from '@/api/crm/permission'
 import { OperateLogV2VO } from '@/api/system/operatelog'
@@ -54,6 +54,7 @@ import { getOperateLogPage } from '@/api/crm/operateLog'
 import ContactForm from '@/views/crm/contact/ContactForm.vue'
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
 import FollowUpList from '@/views/crm/followup/index.vue'
+import ContactList from '@/views/crm/contact/components/ContactList.vue'
 
 defineOptions({ name: 'CrmBusinessDetail' })
 

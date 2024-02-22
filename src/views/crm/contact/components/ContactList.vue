@@ -25,7 +25,6 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.master" />
         </template>
       </el-table-column>
-      <!-- TODO 芋艿：【操作：设为首要联系人】 -->
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -49,6 +48,8 @@ defineOptions({ name: 'CrmContactList' })
 const props = defineProps<{
   bizType: number // 业务类型
   bizId: number // 业务编号
+  customerId: number // 特殊：客户编号；在【商机】详情中，可以传递客户编号，默认新建的联系人关联到该客户
+  businessId: number // 特殊：商机编号；在【商机】详情中，可以传递商机编号，默认新建的联系人关联到该商机
 }>()
 
 const loading = ref(true) // 列表的加载中
@@ -73,6 +74,10 @@ const getList = async () => {
         queryParams.customerId = props.bizId
         data = await ContactApi.getContactPageByCustomer(queryParams)
         break
+      case BizTypeEnum.CRM_BUSINESS:
+        queryParams.businessId = props.bizId
+        data = await ContactApi.getContactPageByBusiness(queryParams)
+        break
       default:
         return
     }
@@ -92,7 +97,7 @@ const handleQuery = () => {
 /** 添加操作 */
 const formRef = ref()
 const openForm = () => {
-  formRef.value.open('create')
+  formRef.value.open('create', undefined, props.customerId, props.businessId)
 }
 
 /** 打开联系人详情 */

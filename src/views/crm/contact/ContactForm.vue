@@ -33,7 +33,12 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="客户名称" prop="customerId">
-            <el-select v-model="formData.customerId" placeholder="请选择客户" class="w-1/1">
+            <el-select
+              :disabled="formData.customerDefault"
+              v-model="formData.customerId"
+              placeholder="请选择客户"
+              class="w-1/1"
+            >
               <el-option
                 v-for="item in customerList"
                 :key="item.id"
@@ -198,7 +203,9 @@ const formData = ref({
   master: false,
   post: undefined,
   parentId: undefined,
-  remark: undefined
+  remark: undefined,
+  businessId: undefined,
+  customerDefault: false
 })
 const formRules = reactive({
   name: [{ required: true, message: '姓名不能为空', trigger: 'blur' }],
@@ -212,7 +219,7 @@ const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 const contactList = ref<ContactApi.ContactVO[]>([]) // 联系人列表
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (type: string, id?: number, customerId?: number, businessId?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -225,8 +232,19 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  } else {
+    if (customerId) {
+      formData.value.customerId = customerId
+      formData.value.customerDefault = true // 默认客户的选择，不允许变
+    }
+    // 自动关联 businessId 商机编号
+    if (businessId) {
+      formData.value.businessId = businessId
+    }
   }
+  // 获得联系人列表
   contactList.value = await ContactApi.getSimpleContactList()
+  // 获得客户列表
   customerList.value = await CustomerApi.getCustomerSimpleList()
   // 获得地区列表
   areaList.value = await AreaApi.getAreaTree()
@@ -284,7 +302,9 @@ const resetForm = () => {
     master: false,
     post: undefined,
     parentId: undefined,
-    remark: undefined
+    remark: undefined,
+    businessId: undefined,
+    customerDefault: false
   }
   formRef.value?.resetFields()
 }

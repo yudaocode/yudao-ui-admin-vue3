@@ -32,6 +32,7 @@
           :biz-id="contact.id!"
           :biz-type="BizTypeEnum.CRM_CONTACT"
           :customer-id="contact.customerId"
+          :contact-id="contact.id"
         />
       </el-tab-pane>
     </el-tabs>

@@ -47,6 +47,11 @@ export const getContactPageByCustomer = async (params: any) => {
   return await request.get({ url: `/crm/contact/page-by-customer`, params })
 }
 
+// 查询 CRM 联系人列表，基于指定商机
+export const getContactPageByBusiness = async (params: any) => {
+  return await request.get({ url: `/crm/contact/page-by-business`, params })
+}
+
 // 查询 CRM 联系人详情
 export const getContact = async (id: number) => {
   return await request.get({ url: `/crm/contact/get?id=` + id })

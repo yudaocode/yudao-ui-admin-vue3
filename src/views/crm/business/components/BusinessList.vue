@@ -76,6 +76,7 @@ const props = defineProps<{
   bizType: number // 业务类型
   bizId: number // 业务编号
   customerId?: number // 关联联系人与商机时，需要传入 customerId 进行筛选
+  contactId?: number // 特殊：联系人编号；在【联系人】详情中，可以传递联系人编号，默认新建的商机关联到该联系人
 }>()
 
 const loading = ref(true) // 列表的加载中
@@ -125,7 +126,7 @@ const handleQuery = () => {
 /** 添加操作 */
 const formRef = ref()
 const openForm = () => {
-  formRef.value.open('create')
+  formRef.value.open('create', null, props.customerId, props.contactId)
 }
 
 /** 打开联系人详情 */
