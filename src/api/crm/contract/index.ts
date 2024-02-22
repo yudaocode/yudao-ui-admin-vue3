@@ -1,35 +1,48 @@
 import request from '@/config/axios'
-import { ProductExpandVO } from '@/api/crm/product'
 import { TransferReqVO } from '@/api/crm/customer'
 
 export interface ContractVO {
   id: number
   name: string
+  no: string
   customerId: number
+  customerName?: string
   businessId: number
   businessName: string
-  processInstanceId: number
-  orderDate: Date
+  contactLastTime: Date
   ownerUserId: number
-  no: string
+  ownerUserName?: string
+  ownerUserDeptName?: string
+  processInstanceId: number
+  auditStatus: number
+  orderDate: Date
   startTime: Date
   endTime: Date
-  price: number
+  totalProductPrice: number
   discountPercent: number
-  productPrice: number
-  contactId: number
+  totalPrice: number
+  signContactId: number
+  signContactName?: string
   signUserId: number
   signUserName: string
-  contactLastTime: Date
-  auditStatus: number
   remark: string
-  productItems: ProductExpandVO[]
+  createTime?: Date
+  creator: string
   creatorName: string
   updateTime?: Date
-  createTime?: Date
-  customerName: string
-  contactName: string
-  ownerUserName: string
+  products?: [
+    {
+      id: number
+      productId: number
+      productName: string
+      productNo: string
+      productUnit: number
+      productPrice: number
+      contractPrice: number
+      count: number
+      totalPrice: number
+    }
+  ]
 }
 
 // 查询 CRM 合同列表

@@ -12,6 +12,7 @@ export interface ProductVO {
   ownerUserId: number
 }
 
+// TODO 芋艿：待删除
 export interface ProductExpandVO extends ProductVO {
   count: number
   discountPercent: number

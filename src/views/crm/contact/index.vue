@@ -230,7 +230,6 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -245,6 +244,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const activeName = ref('1') // 列表 tab
+const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 
 /** 查询列表 */
 const getList = async () => {
