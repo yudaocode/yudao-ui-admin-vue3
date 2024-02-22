@@ -27,6 +27,19 @@ export interface BusinessVO {
   creatorName?: string // 创建人名称
   createTime: Date // 创建时间
   updateTime: Date // 更新时间
+  products?: [
+    {
+      id: number
+      productId: number
+      productName: string
+      productNo: string
+      productUnit: number
+      productPrice: number
+      businessPrice: number
+      count: number
+      totalPrice: number
+    }
+  ]
 }
 
 // 查询 CRM 商机列表

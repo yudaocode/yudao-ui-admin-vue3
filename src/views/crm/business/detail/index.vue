@@ -23,6 +23,10 @@
           :customer-id="business.customerId"
         />
       </el-tab-pane>
+      <!-- TODO 合同 -->
+      <el-tab-pane label="产品">
+        <BusinessProductList :business="business" />
+      </el-tab-pane>
       <el-tab-pane label="操作日志">
         <OperateLogV2 :log-list="logList" />
       </el-tab-pane>
