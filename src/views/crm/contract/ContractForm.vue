@@ -38,7 +38,12 @@
       <el-row>
         <el-col :span="8">
           <el-form-item label="客户名称" prop="customerId">
-            <el-select v-model="formData.customerId" placeholder="请选择客户" class="w-1/1">
+            <el-select
+              v-model="formData.customerId"
+              placeholder="请选择客户"
+              class="w-1/1"
+              @change="handleCustomerChange"
+            >
               <el-option
                 v-for="item in customerList"
                 :key="item.id"
@@ -50,7 +55,12 @@
         </el-col>
         <el-col :span="8">
           <el-form-item label="商机名称" prop="businessId">
-            <el-select :disabled="!formData.customerId" v-model="formData.businessId" class="w-1/1">
+            <el-select
+              @change="handleBusinessChange"
+              :disabled="!formData.customerId"
+              v-model="formData.businessId"
+              class="w-1/1"
+            >
               <el-option
                 v-for="item in getBusinessOptions"
                 :key="item.id"
@@ -192,6 +202,7 @@ import * as BusinessApi from '@/api/crm/business'
 import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
 import { useUserStore } from '@/store/modules/user'
 import ContractProductForm from '@/views/crm/contract/components/ContractProductForm.vue'
+import { bu } from '../../../../dist-prod/assets/index-9eac537b'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -333,15 +344,28 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 
-// TODO 芋艿：切换客户时，需要 reset 关联的几个字段
-// TODO 芋艿：选择商机时，需要自动设置
+/** 处理切换客户 */
+const handleCustomerChange = () => {
+  formData.value.businessId = undefined
+  formData.value.signContactId = undefined
+  formData.value.products = []
+}
+
+/** 处理商机变化 */
+const handleBusinessChange = async (businessId: number) => {
+  const business = await BusinessApi.getBusiness(businessId)
+  business.products.forEach((item) => {
+    item.contractPrice = item.businessPrice
+  })
+  formData.value.products = business.products
+}
 
 /** 动态获取客户联系人 */
 const getContactOptions = computed(() =>
-  contactList.value.filter((item) => item.customerId === formData.value.customerId)
+  contactList.value.filter((item) => item.customerId == formData.value.customerId)
 )
 /** 动态获取商机 */
 const getBusinessOptions = computed(() =>
-  businessList.value.filter((item) => item.customerId === formData.value.customerId)
+  businessList.value.filter((item) => item.customerId == formData.value.customerId)
 )
 </script>
