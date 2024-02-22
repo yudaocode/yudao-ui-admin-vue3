@@ -104,7 +104,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
       }
     ]
   },
-
   {
     path: '/dict',
     component: Layout,
@@ -517,6 +516,17 @@ const remainingRouter: AppRouteRecordRaw[] = [
           activeMenu: '/crm/customer'
         },
         component: () => import('@/views/crm/customer/detail/index.vue')
+      },
+      {
+        path: 'business/detail/:id',
+        name: 'CrmBusinessDetail',
+        meta: {
+          title: '商机详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/business'
+        },
+        component: () => import('@/views/crm/business/detail/index.vue')
       },
       {
         path: 'contract/detail/:id',

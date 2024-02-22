@@ -4,22 +4,29 @@ import { TransferReqVO } from '@/api/crm/customer'
 export interface BusinessVO {
   id: number
   name: string
-  statusTypeId: number
-  statusId: number
-  contactNextTime: Date
   customerId: number
-  dealTime: Date
-  price: number
-  discountPercent: number
-  productPrice: number
-  remark: string
+  customerName?: string
+  followUpStatus: boolean
+  contactLastTime: Date
+  contactNextTime: Date
   ownerUserId: number
-  roUserIds: string
-  rwUserIds: string
+  ownerUserName?: string // 负责人的用户名称
+  ownerUserDept?: string // 负责人的部门名称
+  statusTypeId: number
+  statusTypeName?: string
+  statusId: number
+  statusName?: string
   endStatus: number
   endRemark: string
-  contactLastTime: Date
-  followUpStatus: number
+  dealTime: Date
+  totalProductPrice: number
+  totalPrice: number
+  discountPercent: number
+  remark: string
+  creator: string // 创建人
+  creatorName?: string // 创建人名称
+  createTime: Date // 创建时间
+  updateTime: Date // 更新时间
 }
 
 // 查询 CRM 商机列表
