@@ -51,9 +51,9 @@
       </el-table-column>
       <el-table-column label="售价（元）" fixed="right" min-width="140">
         <template #default="{ row, $index }">
-          <el-form-item :prop="`${$index}.businessPrice`" class="mb-0px!">
+          <el-form-item :prop="`${$index}.contractPrice`" class="mb-0px!">
             <el-input-number
-              v-model="row.businessPrice"
+              v-model="row.contractPrice"
               controls-position="right"
               :min="0.001"
               :precision="2"
@@ -106,7 +106,7 @@ const formLoading = ref(false) // 表单的加载中
 const formData = ref([])
 const formRules = reactive({
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
-  businessPrice: [{ required: true, message: '合同价格不能为空', trigger: 'blur' }],
+  contractPrice: [{ required: true, message: '合同价格不能为空', trigger: 'blur' }],
   count: [{ required: true, message: '产品数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref([]) // 表单 Ref
@@ -130,8 +130,8 @@ watch(
     }
     // 循环处理
     val.forEach((item) => {
-      if (item.businessPrice != null && item.count != null) {
-        item.totalPrice = erpPriceMultiply(item.businessPrice, item.count)
+      if (item.contractPrice != null && item.count != null) {
+        item.totalPrice = erpPriceMultiply(item.contractPrice, item.count)
       } else {
         item.totalPrice = undefined
       }
@@ -148,7 +148,7 @@ const handleAdd = () => {
     productUnit: undefined, // 产品单位
     productNo: undefined, // 产品条码
     productPrice: undefined, // 产品价格
-    businessPrice: undefined,
+    contractPrice: undefined,
     count: 1
   }
   formData.value.push(row)
@@ -166,7 +166,7 @@ const onChangeProduct = (productId, row) => {
     row.productUnit = product.unit
     row.productNo = product.no
     row.productPrice = product.price
-    row.businessPrice = product.price
+    row.contractPrice = product.price
   }
 }
 
