@@ -183,6 +183,7 @@
       <el-table-column fixed="right" label="操作" width="250">
         <template #default="scope">
           <el-button
+            v-if="scope.row.auditStatus === 0"
             v-hasPermi="['crm:contract:update']"
             link
             type="primary"
@@ -190,14 +191,23 @@
           >
             编辑
           </el-button>
-          <!-- TODO @puhui999：可以加下判断，什么情况下，可以审批；然后加个【查看审批】按钮 -->
           <el-button
+            v-if="scope.row.auditStatus === 0"
             v-hasPermi="['crm:contract:update']"
             link
             type="primary"
             @click="handleSubmit(scope.row)"
           >
             提交审核
+          </el-button>
+          <el-button
+            v-else
+            link
+            v-hasPermi="['crm:contract:update']"
+            type="primary"
+            @click="handleProcessDetail(scope.row)"
+          >
+            查看审批
           </el-button>
           <el-button
             v-hasPermi="['crm:contract:query']"
@@ -326,6 +336,11 @@ const handleSubmit = async (row: ContractApi.ContractVO) => {
   await ContractApi.submitContract(row.id)
   message.success('提交审核成功！')
   await getList()
+}
+
+/** 查看审批 */
+const handleProcessDetail = (row: ContractApi.ContractVO) => {
+  push({ name: 'BpmProcessInstanceDetail', query: { id: row.processInstanceId } })
 }
 
 /** 打开合同详情 */

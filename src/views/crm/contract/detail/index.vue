@@ -43,8 +43,8 @@
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { OperateLogV2VO } from '@/api/system/operatelog'
 import * as ContractApi from '@/api/crm/contract'
-import ContractDetailsHeader from './ContractDetailsHeader.vue'
 import ContractDetailsInfo from './ContractDetailsInfo.vue'
+import ContractDetailsHeader from './ContractDetailsHeader.vue'
 import ContractProductList from './ContractProductList.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
 import { getOperateLogPage } from '@/api/crm/operateLog'
@@ -54,6 +54,7 @@ import PermissionList from '@/views/crm/permission/components/PermissionList.vue
 import FollowUpList from '@/views/crm/followup/index.vue'
 
 defineOptions({ name: 'CrmContractDetail' })
+const props = defineProps<{ id?: number }>()
 
 const route = useRoute()
 const message = useMessage()
@@ -72,8 +73,8 @@ const openForm = (type: string, id?: number) => {
 const getContractData = async () => {
   loading.value = true
   try {
-    await getOperateLog(contractId.value)
     contract.value = await ContractApi.getContract(contractId.value)
+    await getOperateLog(contractId.value)
   } finally {
     loading.value = false
   }
@@ -108,7 +109,7 @@ const close = () => {
 
 /** 初始化 */
 onMounted(async () => {
-  const id = route.params.id
+  const id = props.id || route.params.id
   if (!id) {
     message.warning('参数错误，合同不能为空！')
     close()

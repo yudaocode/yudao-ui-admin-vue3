@@ -540,6 +540,18 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/crm/contract/detail/index.vue')
       },
       {
+        path: 'contract/detail',
+        name: 'CrmContractDetail2', // 特殊：用于适配 BPM 打开详情
+        meta: {
+          title: '合同详情XXX',
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          activeMenu: '/crm/contract'
+        },
+        component: () => import('@/views/crm/contract/detail/index.vue')
+      },
+      {
         path: 'contact/detail/:id',
         name: 'CrmContactDetail',
         meta: {

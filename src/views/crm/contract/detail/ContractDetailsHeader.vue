@@ -24,7 +24,7 @@
         {{ erpPriceInputFormatter(contract.totalPrice) }}
       </el-descriptions-item>
       <el-descriptions-item label="下单时间">
-        {{ contract.orderDate ? formatDate(contract.orderDate) : '空' }}
+        {{ formatDate(contract.orderDate) }}
       </el-descriptions-item>
       <!-- TODO 芋艿：回款金额 -->
       <el-descriptions-item label="回款金额（元）"> 待实现 </el-descriptions-item>
@@ -37,7 +37,7 @@
 <script lang="ts" setup>
 import * as ContractApi from '@/api/crm/contract'
 import { formatDate } from '@/utils/formatTime'
-import { erpPriceInputFormatter, floatToFixed2 } from '@/utils'
+import { erpPriceInputFormatter } from '@/utils'
 
 defineOptions({ name: 'ContractDetailsHeader' })
 defineProps<{ contract: ContractApi.ContractVO }>()
