@@ -10,22 +10,22 @@
   </ContractDetailsHeader>
   <el-col>
     <el-tabs>
-      <!-- TODO @puhui999：跟进记录 -->
+      <el-tab-pane label="跟进记录">
+        <FollowUpList :biz-id="contract.id" :biz-type="BizTypeEnum.CRM_CONTRACT" />
+      </el-tab-pane>
       <el-tab-pane label="基本信息">
         <ContractDetailsInfo :contract="contract" />
       </el-tab-pane>
-      <!-- TODO @puhui999：products 更合适哈 -->
       <el-tab-pane label="产品">
-        <ContractProductList v-model="contract.productItems" />
+        <ContractProductList :contract="contract" />
       </el-tab-pane>
       <!-- TODO @puhui999：回款信息 -->
-      <!-- TODO @puhui999：这里是不是不用 isPool 哈 -->
       <el-tab-pane label="团队成员">
         <PermissionList
           ref="permissionListRef"
           :biz-id="contract.id!"
           :biz-type="BizTypeEnum.CRM_CONTRACT"
-          :show-action="!permissionListRef?.isPool || false"
+          :show-action="false"
           @quit-team="close"
         />
       </el-tab-pane>
@@ -51,6 +51,7 @@ import { getOperateLogPage } from '@/api/crm/operateLog'
 import ContractForm from '@/views/crm/contract/ContractForm.vue'
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue'
+import FollowUpList from '@/views/crm/followup/index.vue'
 
 defineOptions({ name: 'CrmContractDetail' })
 

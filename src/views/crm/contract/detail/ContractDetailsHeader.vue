@@ -21,14 +21,13 @@
         {{ contract.customerName }}
       </el-descriptions-item>
       <el-descriptions-item label="合同金额（元）">
-        {{ floatToFixed2(contract.price) }}
+        {{ erpPriceInputFormatter(contract.totalPrice) }}
       </el-descriptions-item>
       <el-descriptions-item label="下单时间">
         {{ contract.orderDate ? formatDate(contract.orderDate) : '空' }}
       </el-descriptions-item>
-      <el-descriptions-item label="回款金额（元）">
-        {{ floatToFixed2(contract.price) }}
-      </el-descriptions-item>
+      <!-- TODO 芋艿：回款金额 -->
+      <el-descriptions-item label="回款金额（元）"> 待实现 </el-descriptions-item>
       <el-descriptions-item label="负责人">
         {{ contract.ownerUserName }}
       </el-descriptions-item>
@@ -38,7 +37,7 @@
 <script lang="ts" setup>
 import * as ContractApi from '@/api/crm/contract'
 import { formatDate } from '@/utils/formatTime'
-import { floatToFixed2 } from '@/utils'
+import { erpPriceInputFormatter, floatToFixed2 } from '@/utils'
 
 defineOptions({ name: 'ContractDetailsHeader' })
 defineProps<{ contract: ContractApi.ContractVO }>()

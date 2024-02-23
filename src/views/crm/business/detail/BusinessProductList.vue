@@ -26,7 +26,7 @@
         :formatter="erpPriceTableColumnFormatter"
       />
       <el-table-column
-        label="合同价格（元）"
+        label="商机价格（元）"
         align="center"
         prop="businessPrice"
         min-width="140"
