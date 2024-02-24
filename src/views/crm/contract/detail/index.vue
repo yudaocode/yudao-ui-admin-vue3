@@ -19,9 +19,8 @@
       <el-tab-pane label="产品">
         <ContractProductList :contract="contract" />
       </el-tab-pane>
-      <!-- TODO 合同 -->
-      <el-tab-pane label="回款"> 123 </el-tab-pane>
       <!-- TODO @puhui999：回款信息 -->
+      <el-tab-pane label="回款"> 123 </el-tab-pane>
       <el-tab-pane label="团队成员">
         <PermissionList
           ref="permissionListRef"

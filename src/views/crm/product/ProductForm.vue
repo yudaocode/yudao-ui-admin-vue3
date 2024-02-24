@@ -100,7 +100,7 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as ProductApi from '@/api/crm/product'
-import * as ProductCategoryApi from '@/api/crm/product/productCategory'
+import * as ProductCategoryApi from '@/api/crm/product/category'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { getSimpleUserList, UserVO } from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'

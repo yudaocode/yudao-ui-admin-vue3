@@ -38,7 +38,12 @@
           </el-link>
         </template>
       </el-table-column>
-      <el-table-column label="商机金额" align="center" prop="price" :formatter="fenToYuanFormat" />
+      <el-table-column
+        label="商机金额"
+        align="center"
+        prop="price"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column label="客户名称" align="center" prop="customerName" />
       <el-table-column label="商机组" align="center" prop="statusTypeName" />
       <el-table-column label="商机阶段" align="center" prop="statusName" />
@@ -66,8 +71,8 @@ import * as BusinessApi from '@/api/crm/business'
 import * as ContactApi from '@/api/crm/contact'
 import BusinessForm from './../BusinessForm.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
-import { fenToYuanFormat } from '@/utils/formatter'
 import BusinessListModal from './BusinessListModal.vue'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 const message = useMessage() // 消息
 

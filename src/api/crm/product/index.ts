@@ -8,15 +8,9 @@ export interface ProductVO {
   price: number
   status: number
   categoryId: number
+  categoryName?: string
   description: string
   ownerUserId: number
-}
-
-// TODO 芋艿：待删除
-export interface ProductExpandVO extends ProductVO {
-  count: number
-  discountPercent: number
-  totalPrice: number
 }
 
 // 查询产品列表

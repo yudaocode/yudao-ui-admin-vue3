@@ -133,7 +133,6 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ProductApi from '@/api/crm/product'
 import ProductForm from './ProductForm.vue'
-import { fenToYuanFormat } from '@/utils/formatter'
 import { erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'CrmProduct' })

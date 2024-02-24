@@ -49,7 +49,7 @@
           label="商机金额"
           align="center"
           prop="price"
-          :formatter="fenToYuanFormat"
+          :formatter="erpPriceInputFormatter"
         />
         <el-table-column label="客户名称" align="center" prop="customerName" />
         <el-table-column label="商机组" align="center" prop="statusTypeName" />
@@ -75,7 +75,7 @@
 <script setup lang="ts">
 import * as BusinessApi from '@/api/crm/business'
 import BusinessForm from '../BusinessForm.vue'
-import { fenToYuanFormat } from '@/utils/formatter'
+import { erpPriceInputFormatter } from '@/utils'
 
 const message = useMessage() // 消息弹窗
 const props = defineProps<{

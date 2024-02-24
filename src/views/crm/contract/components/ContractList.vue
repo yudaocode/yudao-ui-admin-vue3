@@ -23,7 +23,7 @@
         label="合同金额（元）"
         align="center"
         prop="price"
-        :formatter="fenToYuanFormat"
+        :formatter="erpPriceInputFormatter"
       />
       <el-table-column
         label="开始时间"
@@ -61,9 +61,9 @@
 import * as ContractApi from '@/api/crm/contract'
 import ContractForm from './../ContractForm.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
-import { fenToYuanFormat } from '@/utils/formatter'
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
+import { erpPriceInputFormatter } from '@/utils'
 
 defineOptions({ name: 'CrmContractList' })
 const props = defineProps<{
