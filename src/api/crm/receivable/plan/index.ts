@@ -4,8 +4,7 @@ export interface ReceivablePlanVO {
   id: number
   period: number
   receivableId: number
-  status: number
-  checkStatus: string
+  finishStatus: number
   processInstanceId: number
   price: number
   returnTime: Date
@@ -14,7 +13,6 @@ export interface ReceivablePlanVO {
   customerId: number
   contractId: number
   ownerUserId: number
-  sort: number
   remark: string
 }
 
