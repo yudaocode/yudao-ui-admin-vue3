@@ -18,7 +18,7 @@
   </el-card>
 </template>
 <script setup lang="ts">
-import { RankApi, BiRankRespVO } from '@/api/crm/bi/rank'
+import { StatisticsRankApi, StatisticsRankRespVO } from '@/api/crm/statistics/rank'
 import { EChartsOption } from 'echarts'
 import { clone } from 'lodash-es'
 
@@ -26,7 +26,7 @@ defineOptions({ name: 'CustomerCountRank' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
-const list = ref<BiRankRespVO[]>([]) // 列表的数据
+const list = ref<StatisticsRankRespVO[]>([]) // 列表的数据
 
 /** 柱状图配置：横向 */
 const echartsOption = reactive<EChartsOption>({
@@ -80,7 +80,7 @@ const echartsOption = reactive<EChartsOption>({
 const loadData = async () => {
   // 1. 加载排行数据
   loading.value = true
-  const rankingList = await RankApi.getCustomerCountRank(props.queryParams)
+  const rankingList = await StatisticsRankApi.getCustomerCountRank(props.queryParams)
   // 2.1 更新 Echarts 数据
   if (echartsOption.dataset && echartsOption.dataset['source']) {
     echartsOption.dataset['source'] = clone(rankingList).reverse()

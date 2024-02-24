@@ -90,7 +90,7 @@ import * as DeptApi from '@/api/system/dept'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { useUserStore } from '@/store/modules/user'
 
-defineOptions({ name: 'CrmBiRank' })
+defineOptions({ name: 'CrmStatisticsRank' })
 
 const queryParams = reactive({
   deptId: useUserStore().getUser.deptId,
