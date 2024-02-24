@@ -101,3 +101,13 @@ export const submitContract = async (id: number) => {
 export const transferContract = async (data: TransferReqVO) => {
   return await request.put({ url: '/crm/contract/transfer', data })
 }
+
+// 获得待审核合同数量
+export const getAuditContractCount = async () => {
+  return await request.get({ url: '/crm/contract/audit-count' })
+}
+
+// 获得即将到期（提醒）的合同数量
+export const getRemindContractCount = async () => {
+  return await request.get({ url: '/crm/contract/remind-count' })
+}

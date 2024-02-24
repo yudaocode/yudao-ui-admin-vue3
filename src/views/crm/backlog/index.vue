@@ -17,9 +17,9 @@
     <el-col :span="20" :xs="24">
       <CustomerTodayContactList v-if="leftMenu === 'customerTodayContact'" />
       <ClueFollowList v-if="leftMenu === 'clueFollow'" />
-      <CheckContract v-if="leftMenu === 'checkContract'" />
+      <ContractAuditList v-if="leftMenu === 'contractAudit'" />
       <CheckReceivables v-if="leftMenu === 'checkReceivables'" />
-      <EndContract v-if="leftMenu === 'endContract'" />
+      <ContractRemindList v-if="leftMenu === 'contractRemind'" />
       <CustomerFollowList v-if="leftMenu === 'customerFollow'" />
       <CustomerPutPoolRemindList v-if="leftMenu === 'customerPutPoolRemind'" />
       <RemindReceivables v-if="leftMenu === 'remindReceivables'" />
@@ -33,25 +33,26 @@ import CustomerFollowList from './components/CustomerFollowList.vue'
 import CustomerTodayContactList from './components/CustomerTodayContactList.vue'
 import CustomerPutPoolRemindList from './components/CustomerPutPoolRemindList.vue'
 import ClueFollowList from './components/ClueFollowList.vue'
-import CheckContract from './tables/CheckContract.vue'
-import CheckReceivables from './tables/CheckReceivables.vue'
-import EndContract from './tables/EndContract.vue'
+import ContractAuditList from './components/ContractAuditList.vue'
+import ContractRemindList from './components/ContractRemindList.vue'
 import RemindReceivables from './tables/RemindReceivables.vue'
+import CheckReceivables from './tables/CheckReceivables.vue'
 import * as CustomerApi from '@/api/crm/customer'
 import * as ClueApi from '@/api/crm/clue'
+import * as ContractApi from '@/api/crm/contract'
 
 defineOptions({ name: 'CrmBacklog' })
 
 const leftMenu = ref('customerTodayContact')
 
-const customerTodayContactCount = ref(0)
 const clueFollowCount = ref(0)
 const customerFollowCount = ref(0)
 const customerPutPoolRemindCount = ref(0)
-const checkContractCount = ref(0)
+const customerTodayContactCount = ref(0)
+const contractAuditCount = ref(0)
+const contractRemindCount = ref(0)
 const checkReceivablesCount = ref(0)
 const remindReceivablesCount = ref(0)
-const endContractCount = ref(0)
 
 const leftSides = ref([
   {
@@ -76,8 +77,8 @@ const leftSides = ref([
   },
   {
     name: '待审核合同',
-    menu: 'checkContract',
-    count: checkContractCount
+    menu: 'contractAudit',
+    count: contractAuditCount
   },
   {
     name: '待审核回款',
@@ -91,8 +92,8 @@ const leftSides = ref([
   },
   {
     name: '即将到期的合同',
-    menu: 'endContract',
-    count: endContractCount
+    menu: 'contractRemind',
+    count: contractRemindCount
   }
 ])
 
@@ -110,10 +111,10 @@ const getCount = () => {
   )
   CustomerApi.getFollowCustomerCount().then((count) => (customerFollowCount.value = count))
   ClueApi.getFollowClueCount().then((count) => (clueFollowCount.value = count))
-  BacklogApi.getCheckContractCount().then((count) => (checkContractCount.value = count))
+  ContractApi.getAuditContractCount().then((count) => (contractAuditCount.value = count))
+  ContractApi.getRemindContractCount().then((count) => (contractRemindCount.value = count))
   BacklogApi.getCheckReceivablesCount().then((count) => (checkReceivablesCount.value = count))
   BacklogApi.getRemindReceivablePlanCount().then((count) => (remindReceivablesCount.value = count))
-  BacklogApi.getEndContractCount().then((count) => (endContractCount.value = count))
 }
 
 /** 激活时 */

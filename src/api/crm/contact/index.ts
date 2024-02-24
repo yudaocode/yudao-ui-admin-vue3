@@ -37,6 +37,11 @@ export interface ContactBusinessReqVO {
   businessIds: number[]
 }
 
+export interface ContactBusiness2ReqVO {
+  businessId: number
+  contactIds: number[]
+}
+
 // 查询 CRM 联系人列表
 export const getContactPage = async (params) => {
   return await request.get({ url: `/crm/contact/page`, params })
@@ -87,9 +92,19 @@ export const createContactBusinessList = async (data: ContactBusinessReqVO) => {
   return await request.post({ url: `/crm/contact/create-business-list`, data })
 }
 
+// 批量新增联系人商机关联
+export const createContactBusinessList2 = async (data: ContactBusiness2ReqVO) => {
+  return await request.post({ url: `/crm/contact/create-business-list2`, data })
+}
+
 // 解除联系人商机关联
 export const deleteContactBusinessList = async (data: ContactBusinessReqVO) => {
   return await request.delete({ url: `/crm/contact/delete-business-list`, data })
+}
+
+// 解除联系人商机关联
+export const deleteContactBusinessList2 = async (data: ContactBusiness2ReqVO) => {
+  return await request.delete({ url: `/crm/contact/delete-business-list2`, data })
 }
 
 // 联系人转移

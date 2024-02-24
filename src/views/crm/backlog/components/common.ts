@@ -20,8 +20,9 @@ export const CONTACT_STATUS = [
 
 /** 审批状态 */
 export const AUDIT_STATUS = [
-  { label: '已审批', value: 20 },
-  { label: '待审批', value: 10 }
+  { label: '待审批', value: 10 },
+  { label: '审核通过', value: 20 },
+  { label: '审核不通过', value: 30 }
 ]
 
 /** 回款提醒类型 */
