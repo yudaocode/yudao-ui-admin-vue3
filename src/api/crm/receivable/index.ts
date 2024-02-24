@@ -12,7 +12,6 @@ export interface ReceivableVO {
   returnType: string
   price: number
   ownerUserId: number
-  sort: number
   remark: string
 }
 
@@ -49,4 +48,9 @@ export const deleteReceivable = async (id: number) => {
 // 导出回款 Excel
 export const exportReceivable = async (params) => {
   return await request.download({ url: `/crm/receivable/export-excel`, params })
+}
+
+// 提交审核
+export const submitReceivable = async (id: number) => {
+  return await request.put({ url: `/crm/receivable/submit?id=${id}` })
 }

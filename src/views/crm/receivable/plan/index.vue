@@ -8,7 +8,7 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <el-form-item label="客户" prop="customerId">
+      <el-form-item label="客户名称" prop="customerId">
         <el-select
           v-model="queryParams.customerId"
           class="!w-240px"
@@ -70,7 +70,7 @@
       <el-table-column align="center" label="客户名称" prop="customerName" width="150px" />
       <el-table-column align="center" label="合同编号" prop="contractNo" width="200px" />
       <el-table-column align="center" label="期数" prop="period" />
-      <el-table-column align="center" label="计划回款" prop="price" />
+      <el-table-column align="center" label="计划回款(元)" prop="price" width="120" />
       <el-table-column
         :formatter="dateFormatter2"
         align="center"

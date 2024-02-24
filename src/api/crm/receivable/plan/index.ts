@@ -31,6 +31,13 @@ export const getReceivablePlan = async (id: number) => {
   return await request.get({ url: `/crm/receivable-plan/get?id=` + id })
 }
 
+// 查询回款计划下拉数据
+export const getReceivablePlanListByContractId = async (customerId: number, contractId: number) => {
+  return await request.get({
+    url: `/crm/receivable-plan/list-all-simple-by-customer?customerId=${customerId}&contractId=${contractId}`
+  })
+}
+
 // 新增回款计划
 export const createReceivablePlan = async (data: ReceivablePlanVO) => {
   return await request.post({ url: `/crm/receivable-plan/create`, data })
