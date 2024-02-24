@@ -1,5 +1,5 @@
 <template>
-  <Dialog title="关联商机" v-model="dialogVisible">
+  <Dialog title="关联联系人" v-model="dialogVisible">
     <!-- 搜索工作栏 -->
     <ContentWrap>
       <el-form
@@ -7,12 +7,12 @@
         :model="queryParams"
         ref="queryFormRef"
         :inline="true"
-        label-width="68px"
+        label-width="90px"
       >
-        <el-form-item label="商机名称" prop="name">
+        <el-form-item label="联系人名称" prop="name">
           <el-input
             v-model="queryParams.name"
-            placeholder="请输入商机名称"
+            placeholder="请输入联系人名称"
             clearable
             @keyup.enter="handleQuery"
             class="!w-240px"
@@ -32,28 +32,27 @@
     <ContentWrap class="mt-10px">
       <el-table
         v-loading="loading"
-        ref="businessRef"
+        ref="contactRef"
         :data="list"
         :stripe="true"
         :show-overflow-tooltip="true"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column label="商机名称" fixed="left" align="center" prop="name">
+        <el-table-column label="姓名" fixed="left" align="center" prop="name">
           <template #default="scope">
             <el-link type="primary" :underline="false" @click="openDetail(scope.row.id)">
               {{ scope.row.name }}
             </el-link>
           </template>
         </el-table-column>
-        <el-table-column
-          label="商机金额"
-          align="center"
-          prop="totalPrice"
-          :formatter="erpPriceTableColumnFormatter"
-        />
-        <el-table-column label="客户名称" align="center" prop="customerName" />
-        <el-table-column label="商机组" align="center" prop="statusTypeName" />
-        <el-table-column label="商机阶段" align="center" prop="statusName" />
+        <el-table-column label="手机号" align="center" prop="mobile" />
+        <el-table-column label="职位" align="center" prop="post" />
+        <el-table-column label="直属上级" align="center" prop="parentName" />
+        <el-table-column label="是否关键决策人" align="center" prop="master" min-width="100">
+          <template #default="scope">
+            <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.master" />
+          </template>
+        </el-table-column>
       </el-table>
       <!-- 分页 -->
       <Pagination
@@ -69,19 +68,20 @@
     </template>
 
     <!-- 表单弹窗：添加 -->
-    <BusinessForm ref="formRef" @success="getList" />
+    <ContactForm ref="formRef" @success="getList" />
   </Dialog>
 </template>
 <script setup lang="ts">
-import * as BusinessApi from '@/api/crm/business'
-import BusinessForm from '../BusinessForm.vue'
+import * as ContactApi from '@/api/crm/contact'
+import ContactForm from '../ContactForm.vue'
 import { erpPriceTableColumnFormatter } from '@/utils'
+import { DICT_TYPE } from '@/utils/dict'
 
 const message = useMessage() // 消息弹窗
 const props = defineProps<{
   customerId: number
 }>()
-defineOptions({ name: 'BusinessListModal' })
+defineOptions({ name: 'ContactListModal' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const loading = ref(true) // 列表的加载中
@@ -108,7 +108,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const getList = async () => {
   loading.value = true
   try {
-    const data = await BusinessApi.getBusinessPageByCustomer(queryParams)
+    const data = await ContactApi.getContactPageByCustomer(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -134,23 +134,21 @@ const openForm = () => {
   formRef.value.open('create')
 }
 
-/** 关联商机提交 */
+/** 关联联系人提交 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-const businessRef = ref()
+const contactRef = ref()
 const submitForm = async () => {
-  const businessIds = businessRef.value
-    .getSelectionRows()
-    .map((row: BusinessApi.BusinessVO) => row.id)
-  if (businessIds.length === 0) {
-    return message.error('未选择商机')
+  const contactIds = contactRef.value.getSelectionRows().map((row: ContactApi.ContactVO) => row.id)
+  if (contactIds.length === 0) {
+    return message.error('未选择联系人')
   }
   dialogVisible.value = false
-  emit('success', businessIds, businessRef.value.getSelectionRows())
+  emit('success', contactIds, contactRef.value.getSelectionRows())
 }
 
-/** 打开商机详情 */
+/** 打开联系人详情 */
 const { push } = useRouter()
 const openDetail = (id: number) => {
-  push({ name: 'CrmBusinessDetail', params: { id } })
+  push({ name: 'CrmContactDetail', params: { id } })
 }
 </script>

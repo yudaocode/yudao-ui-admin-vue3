@@ -71,14 +71,7 @@
       </el-table-column>
       <el-table-column align="center" label="操作">
         <template #default="scope">
-          <el-button
-            v-hasPermi="['crm:follow-up-record:delete']"
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-          >
-            删除
-          </el-button>
+          <el-button link type="danger" @click="handleDelete(scope.row.id)"> 删除 </el-button>
         </template>
       </el-table-column>
     </el-table>

@@ -20,7 +20,7 @@
       <el-table-column label="手机号" align="center" prop="mobile" />
       <el-table-column label="职位" align="center" prop="post" />
       <el-table-column label="直属上级" align="center" prop="parentName" />
-      <el-table-column label="是否关键决策人" align="center" prop="master">
+      <el-table-column label="是否关键决策人" align="center" prop="master" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.master" />
         </template>

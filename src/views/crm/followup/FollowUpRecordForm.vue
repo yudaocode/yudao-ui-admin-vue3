@@ -48,11 +48,11 @@
         </el-col>
         <el-col :span="24" v-if="formData.bizType == BizTypeEnum.CRM_CUSTOMER">
           <el-form-item label="关联联系人" prop="contactIds">
-            <el-button @click="handleAddContact">
+            <el-button @click="handleOpenContact">
               <Icon class="mr-5px" icon="ep:plus" />
               添加联系人
             </el-button>
-            <contact-list v-model:contactIds="formData.contactIds" />
+            <FollowUpRecordContactForm :contacts="formData.contacts" />
           </el-form-item>
         </el-col>
         <el-col :span="24" v-if="formData.bizType == BizTypeEnum.CRM_CUSTOMER">
@@ -73,7 +73,11 @@
   </Dialog>
 
   <!-- 弹窗 -->
-  <ContactTableSelect ref="contactTableSelectRef" v-model="formData.contactIds" />
+  <ContactListModal
+    ref="contactTableSelectRef"
+    :customer-id="formData.bizId"
+    @success="handleAddContact"
+  />
   <BusinessListModal
     ref="businessTableSelectRef"
     :customer-id="formData.bizId"
@@ -83,11 +87,13 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { FollowUpRecordApi, FollowUpRecordVO } from '@/api/crm/followup'
-import { ContactList, ContactTableSelect } from './components'
 import { BizTypeEnum } from '@/api/crm/permission'
 import FollowUpRecordBusinessForm from './components/FollowUpRecordBusinessForm.vue'
+import FollowUpRecordContactForm from './components/FollowUpRecordContactForm.vue'
 import BusinessListModal from '@/views/crm/business/components/BusinessListModal.vue'
 import * as BusinessApi from '@/api/crm/business'
+import ContactListModal from '@/views/crm/contact/components/ContactListModal.vue'
+import * as ContactApi from '@/api/crm/contact'
 
 defineOptions({ name: 'FollowUpRecordForm' })
 
@@ -128,7 +134,11 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as FollowUpRecordVO
+    const data = {
+      ...formData.value,
+      contactIds: formData.value.contacts.map((item) => item.id),
+      businessIds: formData.value.businesses.map((item) => item.id)
+    } as unknown as FollowUpRecordVO
     await FollowUpRecordApi.createFollowUpRecord(data)
     message.success(t('common.createSuccess'))
     dialogVisible.value = false
@@ -140,9 +150,16 @@ const submitForm = async () => {
 }
 
 /** 关联联系人 */
-const contactTableSelectRef = ref<InstanceType<typeof ContactTableSelect>>()
-const handleAddContact = () => {
+const contactTableSelectRef = ref<InstanceType<typeof ContactListModal>>()
+const handleOpenContact = () => {
   contactTableSelectRef.value?.open()
+}
+const handleAddContact = (contactId: [], newContacts: ContactApi.ContactVO[]) => {
+  newContacts.forEach((contact) => {
+    if (!formData.value.contacts.some((item) => item.id === contact.id)) {
+      formData.value.contacts.push(contact)
+    }
+  })
 }
 
 /** 关联商机 */
