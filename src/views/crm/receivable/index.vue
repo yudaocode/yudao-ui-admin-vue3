@@ -83,7 +83,7 @@
         </template>
       </el-table-column>
       <el-table-column align="center" label="回款金额(元)" prop="price" />
-      <el-table-column align="center" label="负责人" prop="ownerUserId" />
+      <el-table-column align="center" label="负责人" prop="ownerUserName" />
       <el-table-column align="center" label="备注" prop="remark" />
       <el-table-column align="center" fixed="right" label="回款状态" prop="auditStatus" width="120">
         <template #default="scope">

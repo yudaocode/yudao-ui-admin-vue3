@@ -86,11 +86,7 @@
         prop="remindTime"
         width="180px"
       />
-      <el-table-column label="负责人" prop="ownerUserId" width="120">
-        <template #default="scope">
-          {{ userList.find((user) => user.id === scope.row.ownerUserId)?.nickname }}
-        </template>
-      </el-table-column>
+      <el-table-column label="负责人" prop="ownerUserName" width="120" />
       <el-table-column align="center" label="备注" prop="remark" />
       <el-table-column
         align="center"

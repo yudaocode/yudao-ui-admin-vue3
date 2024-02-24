@@ -150,9 +150,8 @@ const formRef = ref() // 表单 Ref
 const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 const contractList = ref<ContractApi.ContractVO[]>([]) // 合同列表
 const receivablePlanList = ref<ReceivablePlanApi.ReceivablePlanVO[]>([]) // 回款计划列表
-
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (type: string, id?: number, planData?: ReceivablePlanApi.ReceivablePlanVO) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -173,6 +172,12 @@ const open = async (type: string, id?: number) => {
   // 默认新建时选中自己
   if (formType.value === 'create') {
     formData.value.ownerUserId = useUserStore().getUser.id
+  }
+  // 从回款计划创建回款
+  if (planData) {
+    formData.value.customerId = planData.customerId
+    formData.value.contractId = planData.contractId
+    formData.value.planId = planData.id
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -249,9 +254,12 @@ watch(
       return
     }
     const receivablePlan = receivablePlanList.value.find((item) => item.id === newVal)
+    if (!receivablePlan) {
+      return
+    }
     // 只有没有金额的时候才设置
     if (!formData.value.price || formData.value.price === 0) {
-      formData.value.price = receivablePlan!.price
+      formData.value.price = receivablePlan.price
     }
   }
 )
