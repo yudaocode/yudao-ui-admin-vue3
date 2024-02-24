@@ -1,6 +1,6 @@
 <!-- 跟进记录的添加表单弹窗 -->
 <template>
-  <Dialog v-model="dialogVisible" :title="dialogTitle" width="50%">
+  <Dialog v-model="dialogVisible" title="添加跟进记录" width="50%">
     <el-form
       ref="formRef"
       v-loading="formLoading"
@@ -36,17 +36,17 @@
             <el-input v-model="formData.content" :rows="3" type="textarea" />
           </el-form-item>
         </el-col>
-        <el-col :span="24">
-          <el-form-item label="图片" prop="content">
+        <el-col :span="12">
+          <el-form-item label="图片" prop="picUrls">
             <UploadImgs v-model="formData.picUrls" class="min-w-80px" />
           </el-form-item>
         </el-col>
-        <el-col :span="24">
-          <el-form-item label="附件" prop="content">
+        <el-col :span="12">
+          <el-form-item label="附件" prop="fileUrls">
             <UploadFile v-model="formData.fileUrls" class="min-w-80px" />
           </el-form-item>
         </el-col>
-        <el-col :span="24">
+        <el-col :span="24" v-if="formData.bizType == BizTypeEnum.CRM_CUSTOMER">
           <el-form-item label="关联联系人" prop="contactIds">
             <el-button @click="handleAddContact">
               <Icon class="mr-5px" icon="ep:plus" />
@@ -55,13 +55,13 @@
             <contact-list v-model:contactIds="formData.contactIds" />
           </el-form-item>
         </el-col>
-        <el-col :span="24">
+        <el-col :span="24" v-if="formData.bizType == BizTypeEnum.CRM_CUSTOMER">
           <el-form-item label="关联商机" prop="businessIds">
-            <el-button @click="handleAddBusiness">
+            <el-button @click="handleOpenBusiness">
               <Icon class="mr-5px" icon="ep:plus" />
               添加商机
             </el-button>
-            <business-list v-model:businessIds="formData.businessIds" />
+            <FollowUpRecordBusinessForm :businesses="formData.businesses" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -71,13 +71,23 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+
+  <!-- 弹窗 -->
   <ContactTableSelect ref="contactTableSelectRef" v-model="formData.contactIds" />
-  <BusinessTableSelect ref="businessTableSelectRef" v-model="formData.businessIds" />
+  <BusinessListModal
+    ref="businessTableSelectRef"
+    :customer-id="formData.bizId"
+    @success="handleAddBusiness"
+  />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { FollowUpRecordApi, FollowUpRecordVO } from '@/api/crm/followup'
-import { BusinessList, BusinessTableSelect, ContactList, ContactTableSelect } from './components'
+import { ContactList, ContactTableSelect } from './components'
+import { BizTypeEnum } from '@/api/crm/permission'
+import FollowUpRecordBusinessForm from './components/FollowUpRecordBusinessForm.vue'
+import BusinessListModal from '@/views/crm/business/components/BusinessListModal.vue'
+import * as BusinessApi from '@/api/crm/business'
 
 defineOptions({ name: 'FollowUpRecordForm' })
 
@@ -87,8 +97,12 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref<FollowUpRecordVO>({} as FollowUpRecordVO)
+const formData = ref({
+  bizType: undefined,
+  bizId: undefined,
+  businesses: [],
+  contacts: []
+})
 const formRules = reactive({
   type: [{ required: true, message: '跟进类型不能为空', trigger: 'change' }],
   content: [{ required: true, message: '跟进内容不能为空', trigger: 'blur' }],
@@ -98,22 +112,11 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
-const open = async (bizType: number, bizId: number, type: string, id?: number) => {
+const open = async (bizType: number, bizId: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
-  formType.value = type
   resetForm()
   formData.value.bizType = bizType
   formData.value.bizId = bizId
-  // 修改时，设置数据
-  if (id) {
-    formLoading.value = true
-    try {
-      formData.value = await FollowUpRecordApi.getFollowUpRecord(id)
-    } finally {
-      formLoading.value = false
-    }
-  }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -126,13 +129,8 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as FollowUpRecordVO
-    if (formType.value === 'create') {
-      await FollowUpRecordApi.createFollowUpRecord(data)
-      message.success(t('common.createSuccess'))
-    } else {
-      await FollowUpRecordApi.updateFollowUpRecord(data)
-      message.success(t('common.updateSuccess'))
-    }
+    await FollowUpRecordApi.createFollowUpRecord(data)
+    message.success(t('common.createSuccess'))
     dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
@@ -148,14 +146,26 @@ const handleAddContact = () => {
 }
 
 /** 关联商机 */
-const businessTableSelectRef = ref<InstanceType<typeof BusinessTableSelect>>()
-const handleAddBusiness = () => {
+const businessTableSelectRef = ref<InstanceType<typeof BusinessListModal>>()
+const handleOpenBusiness = () => {
   businessTableSelectRef.value?.open()
+}
+const handleAddBusiness = (businessId: [], newBusinesses: BusinessApi.BusinessVO[]) => {
+  newBusinesses.forEach((business) => {
+    if (!formData.value.businesses.some((item) => item.id === business.id)) {
+      formData.value.businesses.push(business)
+    }
+  })
 }
 
 /** 重置表单 */
 const resetForm = () => {
   formRef.value?.resetFields()
-  formData.value = {} as FollowUpRecordVO
+  formData.value = {
+    bizId: undefined,
+    bizType: undefined,
+    businesses: [],
+    contacts: []
+  }
 }
 </script>

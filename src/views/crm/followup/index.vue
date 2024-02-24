@@ -2,7 +2,7 @@
 <template>
   <!-- 操作栏 -->
   <el-row class="mb-10px" justify="end">
-    <el-button @click="openForm('create')">
+    <el-button @click="openForm">
       <Icon class="mr-5px" icon="ep:edit" />
       写跟进
     </el-button>
@@ -10,8 +10,13 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="编号" prop="id" />
-      <!-- TODO @puhui999：展示不出来 -->
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
+        width="180px"
+      />
       <el-table-column align="center" label="跟进人" prop="creatorName" />
       <el-table-column align="center" label="跟进类型" prop="type">
         <template #default="scope">
@@ -26,27 +31,46 @@
         prop="nextTime"
         width="180px"
       />
-      <!-- TODO @puhui999：点击后，查看关联联系人 -->
-      <el-table-column align="center" label="关联联系人" prop="contactIds" />
-      <!-- TODO @puhui999：点击后，查看关联商机 -->
-      <el-table-column align="center" label="关联商机" prop="businessIds" />
       <el-table-column
-        :formatter="dateFormatter"
         align="center"
-        label="创建时间"
-        prop="createTime"
-        width="180px"
-      />
+        label="关联联系人"
+        prop="contactIds"
+        v-if="bizType === BizTypeEnum.CRM_CUSTOMER"
+      >
+        <template #default="scope">
+          <el-link
+            v-for="contact in scope.row.contacts"
+            :key="`key-${contact.id}`"
+            :underline="false"
+            type="primary"
+            @click="openContactDetail(contact.id)"
+            class="ml-5px"
+          >
+            {{ contact.name }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column
+        align="center"
+        label="关联商机"
+        prop="businessIds"
+        v-if="bizType === BizTypeEnum.CRM_CUSTOMER"
+      >
+        <template #default="scope">
+          <el-link
+            v-for="business in scope.row.businesses"
+            :key="`key-${business.id}`"
+            :underline="false"
+            type="primary"
+            @click="openBusinessDetail(business.id)"
+            class="ml-5px"
+          >
+            {{ business.name }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="操作">
         <template #default="scope">
-          <el-button
-            v-hasPermi="['crm:follow-up-record:update']"
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-          >
-            编辑
-          </el-button>
           <el-button
             v-hasPermi="['crm:follow-up-record:delete']"
             link
@@ -76,6 +100,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { FollowUpRecordApi, FollowUpRecordVO } from '@/api/crm/followup'
 import FollowUpRecordForm from './FollowUpRecordForm.vue'
+import { BizTypeEnum } from '@/api/crm/permission'
 
 /** 跟进记录列表 */
 defineOptions({ name: 'FollowUpRecord' })
@@ -110,8 +135,8 @@ const getList = async () => {
 
 /** 添加/修改操作 */
 const formRef = ref<InstanceType<typeof FollowUpRecordForm>>()
-const openForm = (type: string, id?: number) => {
-  formRef.value?.open(props.bizType, props.bizId, type, id)
+const openForm = () => {
+  formRef.value?.open(props.bizType, props.bizId)
 }
 
 /** 删除按钮操作 */
@@ -125,6 +150,17 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 打开联系人详情 */
+const { push } = useRouter()
+const openContactDetail = (id: number) => {
+  push({ name: 'CrmContactDetail', params: { id } })
+}
+
+/** 打开商机详情 */
+const openBusinessDetail = (id: number) => {
+  push({ name: 'CrmBusinessDetail', params: { id } })
 }
 
 watch(
