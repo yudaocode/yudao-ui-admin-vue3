@@ -79,7 +79,7 @@
       <el-tab-pane label="下属负责的" name="3" />
     </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" fixed="left" label="合同编号" prop="no" width="160" />
+      <el-table-column align="center" fixed="left" label="合同编号" prop="no" width="180" />
       <el-table-column align="center" fixed="left" label="合同名称" prop="name" width="160">
         <template #default="scope">
           <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">

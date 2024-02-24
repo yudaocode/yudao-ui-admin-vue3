@@ -130,8 +130,8 @@ const list = ref([]) // 列表的数据
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
-  followUpStatus: false,
-  sceneType: 1
+  sceneType: 1,
+  followUpStatus: false
 })
 const queryFormRef = ref() // 搜索的表单
 
@@ -158,10 +158,13 @@ const openDetail = (id: number) => {
   push({ name: 'CrmCustomerDetail', params: { id } })
 }
 
+/** 激活时 */
+onActivated(async () => {
+  await getList()
+})
+
 /** 初始化 **/
 onMounted(() => {
   getList()
 })
 </script>
-
-<style scoped></style>
