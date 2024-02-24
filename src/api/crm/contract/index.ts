@@ -55,6 +55,11 @@ export const getContractPageByCustomer = async (params: any) => {
   return await request.get({ url: `/crm/contract/page-by-customer`, params })
 }
 
+// 查询 CRM 联系人列表，基于指定商机
+export const getContractPageByBusiness = async (params: any) => {
+  return await request.get({ url: `/crm/contract/page-by-business`, params })
+}
+
 // 查询 CRM 合同详情
 export const getContract = async (id: number) => {
   return await request.get({ url: `/crm/contract/get?id=` + id })

@@ -159,7 +159,7 @@
             <el-input
               disabled
               v-model="formData.totalProductPrice"
-              :formatter="erpPriceInputFormatter"
+              :formatter="erpPriceTableColumnFormatter"
             />
           </el-form-item>
         </el-col>
@@ -176,12 +176,12 @@
           </el-form-item>
         </el-col>
         <el-col :span="8">
-          <el-form-item label="折扣后金额" prop="price">
+          <el-form-item label="折扣后金额" prop="totalPrice">
             <el-input
               disabled
               v-model="formData.totalPrice"
               placeholder="请输入商机金额"
-              :formatter="erpPriceInputFormatter"
+              :formatter="erpPriceTableColumnFormattere"
             />
           </el-form-item>
         </el-col>
@@ -199,10 +199,9 @@ import * as ContractApi from '@/api/crm/contract'
 import * as UserApi from '@/api/system/user'
 import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
-import { erpPriceInputFormatter, erpPriceMultiply } from '@/utils'
+import { erpPriceMultiply, erpPriceTableColumnFormatter } from '@/utils'
 import { useUserStore } from '@/store/modules/user'
 import ContractProductForm from '@/views/crm/contract/components/ContractProductForm.vue'
-import { bu } from '../../../../dist-prod/assets/index-9eac537b'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

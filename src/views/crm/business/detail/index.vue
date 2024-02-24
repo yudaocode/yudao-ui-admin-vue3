@@ -34,8 +34,9 @@
       <el-tab-pane label="产品">
         <BusinessProductList :business="business" />
       </el-tab-pane>
-      <!-- TODO 合同 -->
-      <el-tab-pane label="合同"> 123 </el-tab-pane>
+      <el-tab-pane label="合同" lazy>
+        <ContractList :biz-id="business.id!" :biz-type="BizTypeEnum.CRM_BUSINESS" />
+      </el-tab-pane>
       <el-tab-pane label="操作日志">
         <OperateLogV2 :log-list="logList" />
       </el-tab-pane>
@@ -71,6 +72,7 @@ import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
 import FollowUpList from '@/views/crm/followup/index.vue'
 import ContactList from '@/views/crm/contact/components/ContactList.vue'
 import BusinessUpdateStatusForm from '@/views/crm/business/BusinessUpdateStatusForm.vue'
+import ContractList from '@/views/crm/contract/components/ContractList.vue'
 
 defineOptions({ name: 'CrmBusinessDetail' })
 
