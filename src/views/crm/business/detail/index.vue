@@ -31,10 +31,11 @@
           :customer-id="business.customerId"
         />
       </el-tab-pane>
-      <!-- TODO 合同 -->
       <el-tab-pane label="产品">
         <BusinessProductList :business="business" />
       </el-tab-pane>
+      <!-- TODO 合同 -->
+      <el-tab-pane label="合同"> 123 </el-tab-pane>
       <el-tab-pane label="操作日志">
         <OperateLogV2 :log-list="logList" />
       </el-tab-pane>
@@ -51,8 +52,8 @@
   </el-col>
 
   <!-- 表单弹窗：添加/修改 -->
-  <ContactForm ref="formRef" @success="getContact(business.id)" />
-  <BusinessUpdateStatusForm ref="statusFormRef" @success="getContact(business.id)" />
+  <BusinessForm ref="formRef" @success="getBusiness(business.id)" />
+  <BusinessUpdateStatusForm ref="statusFormRef" @success="getBusiness(business.id)" />
   <CrmTransferForm ref="transferFormRef" @success="close" />
 </template>
 <script lang="ts" setup>
@@ -65,7 +66,7 @@ import PermissionList from '@/views/crm/permission/components/PermissionList.vue
 import { BizTypeEnum } from '@/api/crm/permission'
 import { OperateLogV2VO } from '@/api/system/operatelog'
 import { getOperateLogPage } from '@/api/crm/operateLog'
-import ContactForm from '@/views/crm/contact/ContactForm.vue'
+import BusinessForm from '@/views/crm/business/BusinessForm.vue'
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
 import FollowUpList from '@/views/crm/followup/index.vue'
 import ContactList from '@/views/crm/contact/components/ContactList.vue'
@@ -81,7 +82,7 @@ const business = ref<ContactApi.ContactVO>({} as ContactApi.ContactVO) // 联系
 const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
 
 /** 获取详情 */
-const getContact = async (id: number) => {
+const getBusiness = async (id: number) => {
   loading.value = true
   try {
     business.value = await BusinessApi.getBusiness(id)
@@ -138,6 +139,6 @@ onMounted(async () => {
     return
   }
   businessId.value = params.id as unknown as number
-  await getContact(businessId.value)
+  await getBusiness(businessId.value)
 })
 </script>

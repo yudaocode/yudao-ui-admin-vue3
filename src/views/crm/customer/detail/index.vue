@@ -103,7 +103,7 @@ const customerId = ref(0) // 客户编号
 const loading = ref(true) // 加载中
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
-const { currentRoute } = useRouter() // 路由
+const { push, currentRoute } = useRouter() // 路由
 
 const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
 
@@ -180,6 +180,7 @@ const handlePutPool = async () => {
   await message.confirm(`确定将客户【${customer.value.name}】放入公海吗？`)
   await CustomerApi.putCustomerPool(unref(customerId.value))
   message.success(`客户【${customer.value.name}】放入公海成功`)
+  // 加载
   close()
 }
 
@@ -198,6 +199,7 @@ const getOperateLog = async () => {
 
 const close = () => {
   delView(unref(currentRoute))
+  push({ name: 'CrmCustomer' })
 }
 
 /** 初始化 */
