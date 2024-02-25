@@ -66,10 +66,35 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <el-tabs v-model="activeName" @tab-click="handleTabClick">
+      <el-tab-pane label="我负责的" name="1" />
+      <el-tab-pane label="我参与的" name="2" />
+      <el-tab-pane label="下属负责的" name="3" />
+    </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="回款编号" prop="no" />
-      <el-table-column align="center" label="客户" prop="customerName" />
-      <el-table-column align="center" label="合同" prop="contractName" />
+      <el-table-column align="center" fixed="left" label="回款编号" prop="no" width="180" />
+      <el-table-column align="center" label="客户名称" prop="customerName" width="120">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openCustomerDetail(scope.row.customerId)"
+          >
+            {{ scope.row.customerName }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="合同编号" prop="contractNo" width="180">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openContractDetail(scope.row.contractId)"
+          >
+            {{ scope.row.contract.no }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column
         :formatter="dateFormatter2"
         align="center"
@@ -77,14 +102,43 @@
         prop="returnTime"
         width="150px"
       />
+      <el-table-column
+        align="center"
+        label="回款金额(元)"
+        prop="price"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column align="center" label="回款方式" prop="returnType" width="130px">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_RECEIVABLE_RETURN_TYPE" :value="scope.row.returnType" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="回款金额(元)" prop="price" />
-      <el-table-column align="center" label="负责人" prop="ownerUserName" />
-      <el-table-column align="center" label="备注" prop="remark" />
+      <el-table-column align="center" label="备注" prop="remark" width="200" />
+      <el-table-column
+        align="center"
+        label="合同金额（元）"
+        prop="contract.totalPrice"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column align="center" label="负责人" prop="ownerUserName" width="120" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" width="100px" />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="更新时间"
+        prop="updateTime"
+        width="180px"
+      />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
+        width="180px"
+      />
+      <el-table-column align="center" label="创建人" prop="creatorName" width="120" />
       <el-table-column align="center" fixed="right" label="回款状态" prop="auditStatus" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_AUDIT_STATUS" :value="scope.row.auditStatus" />
@@ -144,28 +198,38 @@
 
 <script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
-import { dateFormatter2 } from '@/utils/formatTime'
+import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ReceivableApi from '@/api/crm/receivable'
 import ReceivableForm from './ReceivableForm.vue'
 import * as CustomerApi from '@/api/crm/customer'
+import { TabsPaneContext } from 'element-plus'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'Receivable' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
-const { push } = useRouter() // 路由
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
+  sceneType: '1', // 默认和 activeName 相等
   no: undefined,
   customerId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const activeName = ref('1') // 列表 tab
+const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
+
+/** tab 切换 */
+const handleTabClick = (tab: TabsPaneContext) => {
+  queryParams.sceneType = tab.paneName
+  handleQuery()
+}
 
 /** 查询列表 */
 const getList = async () => {
@@ -218,10 +282,27 @@ const handleSubmit = async (row: ReceivableApi.ReceivableVO) => {
   await getList()
 }
 
+/** 打开回款详情 */
+const { push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'CrmReceivableDetail', params: { id } })
+}
+
+/** 打开客户详情 */
+const openCustomerDetail = (id: number) => {
+  push({ name: 'CrmCustomerDetail', params: { id } })
+}
+
+/** 打开合同详情 */
+const openContractDetail = (id: number) => {
+  push({ name: 'CrmContractDetail', params: { id } })
+}
+
 /** 查看审批 */
 const handleProcessDetail = (row: ReceivableApi.ReceivableVO) => {
   push({ name: 'BpmProcessInstanceDetail', query: { id: row.processInstanceId } })
 }
+
 // TODO puhui999: 回款流程审批表单详情查看后面完善
 /** 导出按钮操作 */
 const handleExport = async () => {
@@ -237,7 +318,7 @@ const handleExport = async () => {
     exportLoading.value = false
   }
 }
-const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
+
 /** 初始化 **/
 onMounted(async () => {
   await getList()

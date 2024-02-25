@@ -66,6 +66,10 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <el-tabs v-model="activeName" @tab-click="handleTabClick">
+      <el-tab-pane label="我负责的" name="1" />
+      <el-tab-pane label="下属负责的" name="3" />
+    </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
       <el-table-column align="center" fixed="left" label="客户名称" prop="customerName" width="150">
         <template #default="scope">
@@ -217,6 +221,7 @@ import * as ReceivablePlanApi from '@/api/crm/receivable/plan'
 import ReceivablePlanForm from './ReceivablePlanForm.vue'
 import * as CustomerApi from '@/api/crm/customer'
 import { erpPriceInputFormatter, erpPriceTableColumnFormatter } from '@/utils'
+import { TabsPaneContext } from 'element-plus'
 
 defineOptions({ name: 'ReceivablePlan' })
 
@@ -229,12 +234,20 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
+  sceneType: '1', // 默认和 activeName 相等
   customerId: undefined,
   contractNo: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const activeName = ref('1') // 列表 tab
 const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
+
+/** tab 切换 */
+const handleTabClick = (tab: TabsPaneContext) => {
+  queryParams.sceneType = tab.paneName
+  handleQuery()
+}
 
 /** 查询列表 */
 const getList = async () => {
