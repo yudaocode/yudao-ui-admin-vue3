@@ -104,7 +104,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
       }
     ]
   },
-
   {
     path: '/dict',
     component: Layout,
@@ -519,6 +518,17 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/crm/customer/detail/index.vue')
       },
       {
+        path: 'business/detail/:id',
+        name: 'CrmBusinessDetail',
+        meta: {
+          title: '商机详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/business'
+        },
+        component: () => import('@/views/crm/business/detail/index.vue')
+      },
+      {
         path: 'contract/detail/:id',
         name: 'CrmContractDetail',
         meta: {
@@ -528,6 +538,28 @@ const remainingRouter: AppRouteRecordRaw[] = [
           activeMenu: '/crm/contract'
         },
         component: () => import('@/views/crm/contract/detail/index.vue')
+      },
+      {
+        path: 'receivable-plan/detail/:id',
+        name: 'CrmReceivablePlanDetail',
+        meta: {
+          title: '回款计划详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/receivable-plan'
+        },
+        component: () => import('@/views/crm/receivable/plan/detail/index.vue')
+      },
+      {
+        path: 'receivable/detail/:id',
+        name: 'CrmReceivableDetail',
+        meta: {
+          title: '回款详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/receivable'
+        },
+        component: () => import('@/views/crm/receivable/detail/index.vue')
       },
       {
         path: 'contact/detail/:id',

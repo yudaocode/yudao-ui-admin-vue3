@@ -9,6 +9,9 @@
   </ContactDetailsHeader>
   <el-col>
     <el-tabs>
+      <el-tab-pane label="跟进记录">
+        <FollowUpList :biz-id="contactId" :biz-type="BizTypeEnum.CRM_CONTACT" />
+      </el-tab-pane>
       <el-tab-pane label="详细资料">
         <ContactDetailsInfo :contact="contact" />
       </el-tab-pane>
@@ -20,7 +23,7 @@
           ref="permissionListRef"
           :biz-id="contact.id!"
           :biz-type="BizTypeEnum.CRM_CONTACT"
-          :show-action="!permissionListRef?.isPool || false"
+          :show-action="true"
           @quit-team="close"
         />
       </el-tab-pane>
@@ -29,13 +32,14 @@
           :biz-id="contact.id!"
           :biz-type="BizTypeEnum.CRM_CONTACT"
           :customer-id="contact.customerId"
+          :contact-id="contact.id"
         />
       </el-tab-pane>
     </el-tabs>
   </el-col>
   <!-- 表单弹窗：添加/修改 -->
-  <ContactForm ref="formRef" @success="getContactData(contact.id)" />
-  <CrmTransferForm ref="crmTransferFormRef" @success="close" />
+  <ContactForm ref="formRef" @success="getContact(contact.id)" />
+  <CrmTransferForm ref="transferFormRef" @success="close" />
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -49,18 +53,19 @@ import { OperateLogV2VO } from '@/api/system/operatelog'
 import { getOperateLogPage } from '@/api/crm/operateLog'
 import ContactForm from '@/views/crm/contact/ContactForm.vue'
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
+import FollowUpList from '@/views/crm/followup/index.vue'
 
 defineOptions({ name: 'CrmContactDetail' })
 
-const route = useRoute()
 const message = useMessage()
-const id = Number(route.params.id) // 联系人编号
+
+const contactId = ref(0) // 线索编号
 const loading = ref(true) // 加载中
 const contact = ref<ContactApi.ContactVO>({} as ContactApi.ContactVO) // 联系人详情
 const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
 
 /** 获取详情 */
-const getContactData = async (id: number) => {
+const getContact = async (id: number) => {
   loading.value = true
   try {
     contact.value = await ContactApi.getContact(id)
@@ -77,9 +82,9 @@ const openForm = (type: string, id?: number) => {
 }
 
 /** 联系人转移 */
-const crmTransferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 联系人转移表单 ref
+const transferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 联系人转移表单 ref
 const transfer = () => {
-  crmTransferFormRef.value?.open('联系人转移', contact.value.id, ContactApi.transferContact)
+  transferFormRef.value?.open('联系人转移', contact.value.id, ContactApi.transferContact)
 }
 
 /** 获取操作日志 */
@@ -96,19 +101,21 @@ const getOperateLog = async (contactId: number) => {
 }
 
 /** 关闭窗口 */
+const { delView } = useTagsViewStore() // 视图操作
+const { currentRoute } = useRouter() // 路由
 const close = () => {
   delView(unref(currentRoute))
 }
 
 /** 初始化 */
-const { delView } = useTagsViewStore() // 视图操作
-const { currentRoute } = useRouter() // 路由
+const { params } = useRoute()
 onMounted(async () => {
-  if (!id) {
+  if (!params.id) {
     message.warning('参数错误，联系人不能为空！')
     close()
     return
   }
-  await getContactData(id)
+  contactId.value = params.id as unknown as number
+  await getContact(contactId.value)
 })
 </script>

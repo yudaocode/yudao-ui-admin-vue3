@@ -90,6 +90,11 @@ export const importCustomerTemplate = () => {
   return request.download({ url: '/crm/customer/get-import-template' })
 }
 
+// 导入客户
+export const handleImport = async (formData) => {
+  return await request.upload({ url: `/crm/customer/import`, data: formData })
+}
+
 // 客户列表
 export const getCustomerSimpleList = async () => {
   return await request.get({ url: `/crm/customer/simple-list` })

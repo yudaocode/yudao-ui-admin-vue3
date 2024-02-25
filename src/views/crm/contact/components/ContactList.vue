@@ -5,11 +5,32 @@
       <Icon class="mr-5px" icon="system-uicons:contacts" />
       创建联系人
     </el-button>
+    <el-button
+      @click="openBusinessModal"
+      v-hasPermi="['crm:contact:create-business']"
+      v-if="queryParams.businessId"
+    >
+      <Icon class="mr-5px" icon="ep:circle-plus" />关联
+    </el-button>
+    <el-button
+      @click="deleteContactBusinessList"
+      v-hasPermi="['crm:contact:delete-business']"
+      v-if="queryParams.businessId"
+    >
+      <Icon class="mr-5px" icon="ep:remove" />解除关联
+    </el-button>
   </el-row>
 
   <!-- 列表 -->
   <ContentWrap class="mt-10px">
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      ref="contactRef"
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+    >
+      <el-table-column type="selection" width="55" v-if="queryParams.businessId" />
       <el-table-column label="姓名" fixed="left" align="center" prop="name">
         <template #default="scope">
           <el-link type="primary" :underline="false" @click="openDetail(scope.row.id)">
@@ -20,12 +41,11 @@
       <el-table-column label="手机号" align="center" prop="mobile" />
       <el-table-column label="职位" align="center" prop="post" />
       <el-table-column label="直属上级" align="center" prop="parentName" />
-      <el-table-column label="是否关键决策人" align="center" prop="master">
+      <el-table-column label="是否关键决策人" align="center" prop="master" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.master" />
         </template>
       </el-table-column>
-      <!-- TODO 芋艿：【操作：设为首要联系人】 -->
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -38,17 +58,26 @@
 
   <!-- 表单弹窗：添加 -->
   <ContactForm ref="formRef" @success="getList" />
+  <!-- 关联商机选择弹框 -->
+  <ContactListModal
+    ref="contactModalRef"
+    :customer-id="props.customerId"
+    @success="createContactBusinessList"
+  />
 </template>
 <script setup lang="ts">
 import * as ContactApi from '@/api/crm/contact'
 import ContactForm from './../ContactForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 import { BizTypeEnum } from '@/api/crm/permission'
+import ContactListModal from './ContactListModal.vue'
 
 defineOptions({ name: 'CrmContactList' })
 const props = defineProps<{
   bizType: number // 业务类型
   bizId: number // 业务编号
+  customerId: number // 特殊：客户编号；在【商机】详情中，可以传递客户编号，默认新建的联系人关联到该客户
+  businessId: number // 特殊：商机编号；在【商机】详情中，可以传递商机编号，默认新建的联系人关联到该商机
 }>()
 
 const loading = ref(true) // 列表的加载中
@@ -57,8 +86,10 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  customerId: undefined as unknown // 允许 undefined + number
+  customerId: undefined as unknown, // 允许 undefined + number
+  businessId: undefined as unknown // 允许 undefined + number
 })
+const message = useMessage()
 
 /** 查询列表 */
 const getList = async () => {
@@ -72,6 +103,10 @@ const getList = async () => {
       case BizTypeEnum.CRM_CUSTOMER:
         queryParams.customerId = props.bizId
         data = await ContactApi.getContactPageByCustomer(queryParams)
+        break
+      case BizTypeEnum.CRM_BUSINESS:
+        queryParams.businessId = props.bizId
+        data = await ContactApi.getContactPageByBusiness(queryParams)
         break
       default:
         return
@@ -92,13 +127,48 @@ const handleQuery = () => {
 /** 添加操作 */
 const formRef = ref()
 const openForm = () => {
-  formRef.value.open('create')
+  formRef.value.open('create', undefined, props.customerId, props.businessId)
 }
 
 /** 打开联系人详情 */
 const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmContactDetail', params: { id } })
+}
+
+/** 打开联系人与商机的关联弹窗 */
+const contactModalRef = ref()
+const openBusinessModal = () => {
+  contactModalRef.value.open()
+}
+const createContactBusinessList = async (contactIds: number[]) => {
+  const data = {
+    businessId: props.bizId,
+    contactIds: contactIds
+  } as ContactApi.ContactBusiness2ReqVO
+  contactRef.value.getSelectionRows().forEach((row: ContactApi.ContactVO) => {
+    data.businessIds.push(row.id)
+  })
+  await ContactApi.createContactBusinessList2(data)
+  // 刷新列表
+  message.success('关联联系人成功')
+  handleQuery()
+}
+
+/** 解除联系人与商机的关联 */
+const contactRef = ref()
+const deleteContactBusinessList = async () => {
+  const data = {
+    businessId: props.bizId,
+    contactIds: contactRef.value.getSelectionRows().map((row: ContactApi.ContactVO) => row.id)
+  } as ContactApi.ContactBusiness2ReqVO
+  if (data.contactIds.length === 0) {
+    return message.error('未选择联系人')
+  }
+  await ContactApi.deleteContactBusinessList2(data)
+  // 刷新列表
+  message.success('取关联系人成功')
+  handleQuery()
 }
 
 /** 监听打开的 bizId + bizType，从而加载最新的列表 */

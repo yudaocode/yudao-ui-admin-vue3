@@ -25,6 +25,24 @@
           placeholder="请输入合同名称"
           @keyup.enter="handleQuery"
         />
+        <el-form-item label="客户" prop="customerId">
+          <el-select
+            v-model="queryParams.customerId"
+            class="!w-240px"
+            clearable
+            lable-key="name"
+            placeholder="请选择客户"
+            value-key="id"
+            @keyup.enter="handleQuery"
+          >
+            <el-option
+              v-for="item in customerList"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id!"
+            />
+          </el-select>
+        </el-form-item>
       </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery">
@@ -55,9 +73,20 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <el-tabs v-model="activeName" @tab-click="handleTabClick">
+      <el-tab-pane label="我负责的" name="1" />
+      <el-tab-pane label="我参与的" name="2" />
+      <el-tab-pane label="下属负责的" name="3" />
+    </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" fixed="left" label="合同编号" prop="no" width="130" />
-      <el-table-column align="center" label="合同名称" prop="name" width="130" />
+      <el-table-column align="center" fixed="left" label="合同编号" prop="no" width="180" />
+      <el-table-column align="center" fixed="left" label="合同名称" prop="name" width="160">
+        <template #default="scope">
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
+            {{ scope.row.name }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="客户名称" prop="customerName" width="120">
         <template #default="scope">
           <el-link
@@ -69,21 +98,30 @@
           </el-link>
         </template>
       </el-table-column>
-      <!-- TODO @puhui999：做了商机详情后，可以把这个超链接加上 -->
-      <el-table-column align="center" label="商机名称" prop="businessName" width="130" />
+      <el-table-column align="center" label="商机名称" prop="businessName" width="130">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openBusinessDetail(scope.row.businessId)"
+          >
+            {{ scope.row.businessName }}
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column
+        align="center"
+        label="合同金额（元）"
+        prop="totalPrice"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column
         align="center"
         label="下单时间"
         prop="orderDate"
         width="120"
         :formatter="dateFormatter2"
-      />
-      <el-table-column
-        align="center"
-        label="合同金额"
-        prop="price"
-        width="130"
-        :formatter="fenToYuanFormat"
       />
       <el-table-column
         align="center"
@@ -104,17 +142,41 @@
           <el-link
             :underline="false"
             type="primary"
-            @click="openContactDetail(scope.row.contactId)"
+            @click="openContactDetail(scope.row.signContactId)"
           >
-            {{ scope.row.contactName }}
+            {{ scope.row.signContactName }}
           </el-link>
         </template>
       </el-table-column>
       <el-table-column align="center" label="公司签约人" prop="signUserName" width="130" />
-      <el-table-column align="center" label="备注" prop="remark" width="130" />
-      <!-- TODO @puhui999：后续可加 【已收款金额】、【未收款金额】 -->
+      <el-table-column align="center" label="备注" prop="remark" width="200" />
+      <el-table-column
+        align="center"
+        label="已回款金额（元）"
+        prop="totalReceivablePrice"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column
+        align="center"
+        label="未回款金额（元）"
+        prop="totalReceivablePrice"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      >
+        <template #default="scope">
+          {{ erpPriceInputFormatter(scope.row.totalPrice - scope.row.totalReceivablePrice) }}
+        </template>
+      </el-table-column>
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="最后跟进时间"
+        prop="contactLastTime"
+        width="180px"
+      />
       <el-table-column align="center" label="负责人" prop="ownerUserName" width="120" />
-      <el-table-column align="center" label="创建人" prop="creatorName" width="120" />
+      <el-table-column align="center" label="所属部门" prop="ownerUserDeptName" width="100px" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -129,6 +191,7 @@
         prop="createTime"
         width="180px"
       />
+      <el-table-column align="center" label="创建人" prop="creatorName" width="120" />
       <el-table-column align="center" fixed="right" label="合同状态" prop="auditStatus" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.CRM_AUDIT_STATUS" :value="scope.row.auditStatus" />
@@ -137,6 +200,7 @@
       <el-table-column fixed="right" label="操作" width="250">
         <template #default="scope">
           <el-button
+            v-if="scope.row.auditStatus === 0"
             v-hasPermi="['crm:contract:update']"
             link
             type="primary"
@@ -144,14 +208,23 @@
           >
             编辑
           </el-button>
-          <!-- TODO @puhui999：可以加下判断，什么情况下，可以审批；然后加个【查看审批】按钮 -->
           <el-button
+            v-if="scope.row.auditStatus === 0"
             v-hasPermi="['crm:contract:update']"
             link
             type="primary"
             @click="handleSubmit(scope.row)"
           >
             提交审核
+          </el-button>
+          <el-button
+            v-else
+            link
+            v-hasPermi="['crm:contract:update']"
+            type="primary"
+            @click="handleProcessDetail(scope.row)"
+          >
+            查看审批
           </el-button>
           <el-button
             v-hasPermi="['crm:contract:query']"
@@ -189,8 +262,10 @@ import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ContractApi from '@/api/crm/contract'
 import ContractForm from './ContractForm.vue'
-import { fenToYuanFormat } from '@/utils/formatter'
 import { DICT_TYPE } from '@/utils/dict'
+import { erpPriceInputFormatter, erpPriceTableColumnFormatter } from '@/utils'
+import * as CustomerApi from '@/api/crm/customer'
+import { TabsPaneContext } from 'element-plus'
 
 defineOptions({ name: 'CrmContract' })
 
@@ -203,16 +278,22 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
+  sceneType: '1', // 默认和 activeName 相等
   name: null,
   customerId: null,
-  businessId: null,
   orderDate: [],
-  no: null,
-  discountPercent: null,
-  productPrice: null
+  no: null
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const activeName = ref('1') // 列表 tab
+const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
+
+/** tab 切换 */
+const handleTabClick = (tab: TabsPaneContext) => {
+  queryParams.sceneType = tab.paneName
+  handleQuery()
+}
 
 /** 查询列表 */
 const getList = async () => {
@@ -280,6 +361,11 @@ const handleSubmit = async (row: ContractApi.ContractVO) => {
   await getList()
 }
 
+/** 查看审批 */
+const handleProcessDetail = (row: ContractApi.ContractVO) => {
+  push({ name: 'BpmProcessInstanceDetail', query: { id: row.processInstanceId } })
+}
+
 /** 打开合同详情 */
 const { push } = useRouter()
 const openDetail = (id: number) => {
@@ -296,8 +382,14 @@ const openContactDetail = (id: number) => {
   push({ name: 'CrmContactDetail', params: { id } })
 }
 
+/** 打开商机详情 */
+const openBusinessDetail = (id: number) => {
+  push({ name: 'CrmBusinessDetail', params: { id } })
+}
+
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  customerList.value = await CustomerApi.getCustomerSimpleList()
 })
 </script>

@@ -234,6 +234,7 @@ const getProcessInstance = async () => {
         fApi.value?.fapi?.disabled(true)
       })
     } else {
+      // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue
       BusinessFormComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
     }
 

@@ -38,7 +38,12 @@
           </el-link>
         </template>
       </el-table-column>
-      <el-table-column label="商机金额" align="center" prop="price" :formatter="fenToYuanFormat" />
+      <el-table-column
+        label="商机金额"
+        align="center"
+        prop="price"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column label="客户名称" align="center" prop="customerName" />
       <el-table-column label="商机组" align="center" prop="statusTypeName" />
       <el-table-column label="商机阶段" align="center" prop="statusName" />
@@ -66,8 +71,8 @@ import * as BusinessApi from '@/api/crm/business'
 import * as ContactApi from '@/api/crm/contact'
 import BusinessForm from './../BusinessForm.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
-import { fenToYuanFormat } from '@/utils/formatter'
 import BusinessListModal from './BusinessListModal.vue'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 const message = useMessage() // 消息
 
@@ -76,6 +81,7 @@ const props = defineProps<{
   bizType: number // 业务类型
   bizId: number // 业务编号
   customerId?: number // 关联联系人与商机时，需要传入 customerId 进行筛选
+  contactId?: number // 特殊：联系人编号；在【联系人】详情中，可以传递联系人编号，默认新建的商机关联到该联系人
 }>()
 
 const loading = ref(true) // 列表的加载中
@@ -125,7 +131,7 @@ const handleQuery = () => {
 /** 添加操作 */
 const formRef = ref()
 const openForm = () => {
-  formRef.value.open('create')
+  formRef.value.open('create', null, props.customerId, props.contactId)
 }
 
 /** 打开联系人详情 */

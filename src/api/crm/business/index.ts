@@ -4,22 +4,42 @@ import { TransferReqVO } from '@/api/crm/customer'
 export interface BusinessVO {
   id: number
   name: string
-  statusTypeId: number
-  statusId: number
-  contactNextTime: Date
   customerId: number
-  dealTime: Date
-  price: number
-  discountPercent: number
-  productPrice: number
-  remark: string
+  customerName?: string
+  followUpStatus: boolean
+  contactLastTime: Date
+  contactNextTime: Date
   ownerUserId: number
-  roUserIds: string
-  rwUserIds: string
+  ownerUserName?: string // 负责人的用户名称
+  ownerUserDept?: string // 负责人的部门名称
+  statusTypeId: number
+  statusTypeName?: string
+  statusId: number
+  statusName?: string
   endStatus: number
   endRemark: string
-  contactLastTime: Date
-  followUpStatus: number
+  dealTime: Date
+  totalProductPrice: number
+  totalPrice: number
+  discountPercent: number
+  remark: string
+  creator: string // 创建人
+  creatorName?: string // 创建人名称
+  createTime: Date // 创建时间
+  updateTime: Date // 更新时间
+  products?: [
+    {
+      id: number
+      productId: number
+      productName: string
+      productNo: string
+      productUnit: number
+      productPrice: number
+      businessPrice: number
+      count: number
+      totalPrice: number
+    }
+  ]
 }
 
 // 查询 CRM 商机列表
@@ -52,6 +72,11 @@ export const updateBusiness = async (data: BusinessVO) => {
   return await request.put({ url: `/crm/business/update`, data })
 }
 
+// 修改 CRM 商机状态
+export const updateBusinessStatus = async (data: BusinessVO) => {
+  return await request.put({ url: `/crm/business/update-status`, data })
+}
+
 // 删除 CRM 商机
 export const deleteBusiness = async (id: number) => {
   return await request.delete({ url: `/crm/business/delete?id=` + id })
@@ -65,11 +90,6 @@ export const exportBusiness = async (params) => {
 // 联系人关联商机列表
 export const getBusinessPageByContact = async (params) => {
   return await request.get({ url: `/crm/business/page-by-contact`, params })
-}
-
-// 获得 CRM 商机列表
-export const getBusinessListByIds = async (val: number[]) => {
-  return await request.get({ url: '/crm/business/list-by-ids', params: { ids: val.join(',') } })
 }
 
 // 商机转移

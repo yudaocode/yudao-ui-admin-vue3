@@ -4,7 +4,6 @@
     <el-upload
       ref="uploadRef"
       v-model:file-list="fileList"
-      :action="importUrl + '?updateSupport=' + updateSupport"
       :auto-upload="false"
       :disabled="formLoading"
       :headers="uploadHeaders"
@@ -13,6 +12,7 @@
       :on-exceed="handleExceed"
       :on-success="submitFormSuccess"
       accept=".xlsx, .xls"
+      action="none"
       drag
     >
       <Icon icon="ep:upload" />
@@ -45,6 +45,7 @@
 import * as CustomerApi from '@/api/crm/customer'
 import { getAccessToken, getTenantId } from '@/utils/auth'
 import download from '@/utils/download'
+import type { UploadUserFile } from 'element-plus'
 
 defineOptions({ name: 'SystemUserImportForm' })
 
@@ -53,11 +54,9 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const uploadRef = ref()
-const importUrl =
-  import.meta.env.VITE_BASE_URL + import.meta.env.VITE_API_URL + '/crm/customer/import'
 const uploadHeaders = ref() // 上传 Header 头
-const fileList = ref([]) // 文件列表
-const updateSupport = ref(0) // 是否更新已经存在的客户数据
+const fileList = ref<UploadUserFile[]>([]) // 文件列表
+const updateSupport = ref(false) // 是否更新已经存在的客户数据
 
 /** 打开弹窗 */
 const open = () => {
@@ -79,7 +78,11 @@ const submitForm = async () => {
     'tenant-id': getTenantId()
   }
   formLoading.value = true
-  uploadRef.value!.submit()
+  const formData = new FormData()
+  formData.append('updateSupport', updateSupport.value)
+  formData.append('file', fileList.value[0].raw)
+  // TODO @芋艿：后面是不是可以采用这种形式，去掉 uploadHeaders
+  await CustomerApi.handleImport(formData)
 }
 
 /** 文件上传成功 */

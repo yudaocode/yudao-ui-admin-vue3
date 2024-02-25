@@ -6,33 +6,25 @@
         <template #title>
           <span class="text-base font-bold">基本信息</span>
         </template>
-        <el-descriptions :column="3">
-          <el-descriptions-item label="合同编号">
-            {{ contract.no }}
-          </el-descriptions-item>
-          <el-descriptions-item label="合同名称">
-            {{ contract.name }}
-          </el-descriptions-item>
-          <el-descriptions-item label="客户名称">
-            {{ contract.customerName }}
-          </el-descriptions-item>
-          <el-descriptions-item label="商机名称">
-            {{ contract.businessName }}
-          </el-descriptions-item>
+        <el-descriptions :column="4">
+          <el-descriptions-item label="合同编号">{{ contract.no }}</el-descriptions-item>
+          <el-descriptions-item label="合同名称">{{ contract.name }}</el-descriptions-item>
+          <el-descriptions-item label="客户名称">{{ contract.customerName }}</el-descriptions-item>
+          <el-descriptions-item label="商机名称">{{ contract.businessName }}</el-descriptions-item>
           <el-descriptions-item label="合同金额（元）">
-            {{ contract.price }}
+            {{ erpPriceInputFormatter(contract.totalPrice) }}
           </el-descriptions-item>
           <el-descriptions-item label="下单时间">
             {{ formatDate(contract.orderDate) }}
           </el-descriptions-item>
-          <el-descriptions-item label="开始时间">
+          <el-descriptions-item label="合同开始时间">
             {{ formatDate(contract.startTime) }}
           </el-descriptions-item>
-          <el-descriptions-item label="结束时间">
+          <el-descriptions-item label="合同结束时间">
             {{ formatDate(contract.endTime) }}
           </el-descriptions-item>
           <el-descriptions-item label="客户签约人">
-            {{ contract.contactName }}
+            {{ contract.signContactName }}
           </el-descriptions-item>
           <el-descriptions-item label="公司签约人">
             {{ contract.signUserName }}
@@ -41,7 +33,7 @@
             {{ contract.remark }}
           </el-descriptions-item>
           <el-descriptions-item label="合同状态">
-            {{ contract.auditStatus }}
+            <dict-tag :type="DICT_TYPE.CRM_AUDIT_STATUS" :value="contract.auditStatus" />
           </el-descriptions-item>
         </el-descriptions>
       </el-collapse-item>
@@ -49,18 +41,19 @@
         <template #title>
           <span class="text-base font-bold">系统信息</span>
         </template>
-        <el-descriptions :column="2">
-          <el-descriptions-item label="负责人">
-            {{ contract.ownerUserName }}
+        <el-descriptions :column="4">
+          <el-descriptions-item label="负责人">{{ contract.ownerUserName }}</el-descriptions-item>
+          <el-descriptions-item label="最后跟进时间">
+            {{ formatDate(contract.contactLastTime) }}
           </el-descriptions-item>
-          <el-descriptions-item label="创建人">
-            {{ contract.creatorName }}
-          </el-descriptions-item>
+          <el-descriptions-item label="">&nbsp;</el-descriptions-item>
+          <el-descriptions-item label="">&nbsp;</el-descriptions-item>
+          <el-descriptions-item label="创建人">{{ contract.creatorName }}</el-descriptions-item>
           <el-descriptions-item label="创建时间">
-            {{ contract.createTime ? formatDate(contract.createTime) : '空' }}
+            {{ formatDate(contract.createTime) }}
           </el-descriptions-item>
           <el-descriptions-item label="更新时间">
-            {{ contract.updateTime ? formatDate(contract.updateTime) : '空' }}
+            {{ formatDate(contract.updateTime) }}
           </el-descriptions-item>
         </el-descriptions>
       </el-collapse-item>
@@ -70,6 +63,8 @@
 <script lang="ts" setup>
 import * as ContractApi from '@/api/crm/contract'
 import { formatDate } from '@/utils/formatTime'
+import { DICT_TYPE } from '@/utils/dict'
+import { erpPriceInputFormatter } from '@/utils'
 
 defineOptions({ name: 'ContractDetailsInfo' })
 defineProps<{

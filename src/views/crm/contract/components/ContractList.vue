@@ -22,8 +22,8 @@
       <el-table-column
         label="合同金额（元）"
         align="center"
-        prop="price"
-        :formatter="fenToYuanFormat"
+        prop="totalPrice"
+        :formatter="erpPriceTableColumnFormatter"
       />
       <el-table-column
         label="开始时间"
@@ -61,9 +61,9 @@
 import * as ContractApi from '@/api/crm/contract'
 import ContractForm from './../ContractForm.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
-import { fenToYuanFormat } from '@/utils/formatter'
 import { dateFormatter } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'CrmContractList' })
 const props = defineProps<{
@@ -92,6 +92,10 @@ const getList = async () => {
       case BizTypeEnum.CRM_CUSTOMER:
         queryParams.customerId = props.bizId
         data = await ContractApi.getContractPageByCustomer(queryParams)
+        break
+      case BizTypeEnum.CRM_BUSINESS:
+        queryParams.businessId = props.bizId
+        data = await ContractApi.getContractPageByBusiness(queryParams)
         break
       default:
         return

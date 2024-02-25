@@ -16,7 +16,6 @@
     class="mt-4"
   >
     <el-table-column label="编号" align="center" prop="id" />
-    <el-table-column label="规则类型" align="center" prop="type" />
     <el-table-column
       label="规则适用人群"
       align="center"
@@ -39,6 +38,7 @@
       label="成交客户是否占用拥有客户数"
       align="center"
       prop="dealCountEnabled"
+      min-width="100"
     >
       <template #default="scope">
         <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.dealCountEnabled" />

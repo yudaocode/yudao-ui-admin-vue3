@@ -8,19 +8,19 @@ export interface ProductVO {
   price: number
   status: number
   categoryId: number
+  categoryName?: string
   description: string
   ownerUserId: number
-}
-
-export interface ProductExpandVO extends ProductVO {
-  count: number
-  discountPercent: number
-  totalPrice: number
 }
 
 // 查询产品列表
 export const getProductPage = async (params) => {
   return await request.get({ url: `/crm/product/page`, params })
+}
+
+// 获得产品精简列表
+export const getProductSimpleList = async () => {
+  return await request.get({ url: `/crm/product/simple-list` })
 }
 
 // 查询产品详情

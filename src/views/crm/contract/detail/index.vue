@@ -10,22 +10,33 @@
   </ContractDetailsHeader>
   <el-col>
     <el-tabs>
-      <!-- TODO @puhui999：跟进记录 -->
+      <el-tab-pane label="跟进记录">
+        <FollowUpList :biz-id="contract.id" :biz-type="BizTypeEnum.CRM_CONTRACT" />
+      </el-tab-pane>
       <el-tab-pane label="基本信息">
         <ContractDetailsInfo :contract="contract" />
       </el-tab-pane>
-      <!-- TODO @puhui999：products 更合适哈 -->
       <el-tab-pane label="产品">
-        <ContractProductList v-model="contract.productItems" />
+        <ContractProductList :contract="contract" />
       </el-tab-pane>
-      <!-- TODO @puhui999：回款信息 -->
-      <!-- TODO @puhui999：这里是不是不用 isPool 哈 -->
+      <el-tab-pane label="回款">
+        <ReceivablePlanList
+          :contract-id="contract.id!"
+          :customer-id="contract.customerId"
+          @create-receivable="createReceivable"
+        />
+        <ReceivableList
+          ref="receivableListRef"
+          :contract-id="contract.id!"
+          :customer-id="contract.customerId"
+        />
+      </el-tab-pane>
       <el-tab-pane label="团队成员">
         <PermissionList
           ref="permissionListRef"
           :biz-id="contract.id!"
           :biz-type="BizTypeEnum.CRM_CONTRACT"
-          :show-action="!permissionListRef?.isPool || false"
+          :show-action="false"
           @quit-team="close"
         />
       </el-tab-pane>
@@ -43,16 +54,20 @@
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { OperateLogV2VO } from '@/api/system/operatelog'
 import * as ContractApi from '@/api/crm/contract'
-import ContractDetailsHeader from './ContractDetailsHeader.vue'
 import ContractDetailsInfo from './ContractDetailsInfo.vue'
+import ContractDetailsHeader from './ContractDetailsHeader.vue'
 import ContractProductList from './ContractProductList.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
 import { getOperateLogPage } from '@/api/crm/operateLog'
 import ContractForm from '@/views/crm/contract/ContractForm.vue'
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue'
+import FollowUpList from '@/views/crm/followup/index.vue'
+import ReceivableList from '@/views/crm/receivable/components/ReceivableList.vue'
+import ReceivablePlanList from '@/views/crm/receivable/plan/components/ReceivablePlanList.vue'
 
 defineOptions({ name: 'CrmContractDetail' })
+const props = defineProps<{ id?: number }>()
 
 const route = useRoute()
 const message = useMessage()
@@ -71,8 +86,8 @@ const openForm = (type: string, id?: number) => {
 const getContractData = async () => {
   loading.value = true
   try {
-    await getOperateLog(contractId.value)
     contract.value = await ContractApi.getContract(contractId.value)
+    await getOperateLog(contractId.value)
   } finally {
     loading.value = false
   }
@@ -91,8 +106,14 @@ const getOperateLog = async (contractId: number) => {
   logList.value = data.list
 }
 
+/** 从回款计划创建回款 */
+const receivableListRef = ref<InstanceType<typeof ReceivableList>>() // 回款列表 Ref
+const createReceivable = (planData: any) => {
+  receivableListRef.value?.createReceivable(planData)
+}
+
 /** 转移 */
-// TODO @puhui999：这个组件，要不传递业务类型，然后组件里判断 title 和 api 能调用哪个；整体治理掉；
+// TODO @puhui999：这个组件，要不传递业务类型，然后组件里判断 title 和 api 能调用哪个；整体治理掉；好呢
 const transferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 合同转移表单 ref
 const transferContract = () => {
   transferFormRef.value?.open('合同转移', contract.value.id, ContractApi.transferContract)
@@ -107,7 +128,7 @@ const close = () => {
 
 /** 初始化 */
 onMounted(async () => {
-  const id = route.params.id
+  const id = props.id || route.params.id
   if (!id) {
     message.warning('参数错误，合同不能为空！')
     close()

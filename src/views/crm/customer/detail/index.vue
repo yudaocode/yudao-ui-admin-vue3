@@ -26,7 +26,7 @@
     >
       锁定
     </el-button>
-    <el-button v-if="!customer.ownerUserId" type="primary" @click="handleReceive"> 领取 </el-button>
+    <el-button v-if="!customer.ownerUserId" type="primary" @click="handleReceive"> 领取</el-button>
     <el-button v-if="!customer.ownerUserId" type="primary" @click="handleDistributeForm">
       分配
     </el-button>
@@ -64,8 +64,8 @@
         <ContractList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
       <el-tab-pane label="回款" lazy>
-        <ReceivablePlanList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
-        <ReceivableList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
+        <ReceivablePlanList :customer-id="customer.id!" @create-receivable="createReceivable" />
+        <ReceivableList ref="receivableListRef" :customer-id="customer.id!" />
       </el-tab-pane>
       <el-tab-pane label="操作日志">
         <OperateLogV2 :log-list="logList" />
@@ -103,7 +103,7 @@ const customerId = ref(0) // 客户编号
 const loading = ref(true) // 加载中
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
-const { currentRoute } = useRouter() // 路由
+const { push, currentRoute } = useRouter() // 路由
 
 const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
 
@@ -180,6 +180,7 @@ const handlePutPool = async () => {
   await message.confirm(`确定将客户【${customer.value.name}】放入公海吗？`)
   await CustomerApi.putCustomerPool(unref(customerId.value))
   message.success(`客户【${customer.value.name}】放入公海成功`)
+  // 加载
   close()
 }
 
@@ -196,8 +197,15 @@ const getOperateLog = async () => {
   logList.value = data.list
 }
 
+/** 从回款计划创建回款 */
+const receivableListRef = ref<InstanceType<typeof ReceivableList>>() // 回款列表 Ref
+const createReceivable = (planData: any) => {
+  receivableListRef.value?.createReceivable(planData)
+}
+
 const close = () => {
   delView(unref(currentRoute))
+  push({ name: 'CrmCustomer' })
 }
 
 /** 初始化 */

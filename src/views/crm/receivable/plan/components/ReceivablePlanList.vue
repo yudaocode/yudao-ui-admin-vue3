@@ -1,7 +1,7 @@
 <template>
   <!-- 操作栏 -->
   <el-row justify="end">
-    <el-button @click="openForm">
+    <el-button @click="openForm('create', undefined)">
       <Icon class="mr-5px" icon="icon-park:income" />
       创建回款计划
     </el-button>
@@ -9,43 +9,69 @@
 
   <!-- 列表 -->
   <ContentWrap class="mt-10px">
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="期数" fixed="left" align="center" prop="no">
-        <template #default="scope">
-          <el-link type="primary" :underline="false" @click="openDetail(scope.row.id)">
-            {{ scope.row.period }}
-          </el-link>
-        </template>
-      </el-table-column>
-      <el-table-column label="客户名称" align="center" prop="customerName" />
-      <el-table-column label="合同编号" align="center" prop="contractNo" />
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column align="center" label="客户名称" prop="customerName" width="150px" />
+      <el-table-column align="center" label="合同编号" prop="contractNo" width="200px" />
+      <el-table-column align="center" label="期数" prop="period" />
       <el-table-column
-        label="计划还款金额（元）"
         align="center"
+        label="计划回款(元)"
         prop="price"
-        :formatter="fenToYuanFormat"
+        width="120"
+        :formatter="erpPriceTableColumnFormatter"
       />
       <el-table-column
-        label="计划还款日期"
+        :formatter="dateFormatter2"
         align="center"
+        label="计划回款日期"
         prop="returnTime"
-        :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column align="center" label="计划还款方式" prop="auditStatus">
+      <el-table-column align="center" label="提前几天提醒" prop="remindDays" width="150" />
+      <el-table-column
+        :formatter="dateFormatter2"
+        align="center"
+        label="提醒日期"
+        prop="remindTime"
+        width="180px"
+      />
+      <el-table-column label="负责人" prop="ownerUserName" width="120" />
+      <el-table-column align="center" label="备注" prop="remark" />
+      <el-table-column align="center" fixed="right" label="操作" width="200px">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_RECEIVABLE_RETURN_TYPE" :value="scope.row.returnType" />
+          <el-button
+            v-hasPermi="['crm:receivable:create']"
+            link
+            type="primary"
+            @click="createReceivable(scope.row)"
+            :disabled="scope.row.receivableId"
+          >
+            创建回款
+          </el-button>
+          <el-button
+            v-hasPermi="['crm:receivable-plan:update']"
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+          >
+            编辑
+          </el-button>
+          <el-button
+            v-hasPermi="['crm:receivable-plan:delete']"
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+          >
+            删除
+          </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="提前几日提醒" align="center" prop="remindDays" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <!-- TODO 芋艿：新建回款、编辑、删除 -->
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -53,45 +79,42 @@
   <!-- 表单弹窗：添加 -->
   <ReceivableForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as ReceivablePlanApi from '@/api/crm/receivable/plan'
 import ReceivableForm from './../ReceivablePlanForm.vue'
-import { BizTypeEnum } from '@/api/crm/permission'
-import { dateFormatter } from '@/utils/formatTime'
-import { fenToYuanFormat } from '@/utils/formatter'
-import { DICT_TYPE } from '@/utils/dict'
+import { dateFormatter2 } from '@/utils/formatTime'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'CrmReceivablePlanList' })
 const props = defineProps<{
-  bizType: number // 业务类型
-  bizId: number // 业务编号
+  customerId?: number // 客户编号
+  contractId?: number // 合同编号
 }>()
 
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  customerId: undefined as unknown // 允许 undefined + number
+  customerId: undefined as unknown, // 允许 undefined + number
+  contractId: undefined as unknown // 允许 undefined + number
 })
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    // 置空参数
-    queryParams.customerId = undefined
-    // 执行查询
-    let data = { list: [], total: 0 }
-    switch (props.bizType) {
-      case BizTypeEnum.CRM_CUSTOMER:
-        queryParams.customerId = props.bizId
-        data = await ReceivablePlanApi.getReceivablePlanPageByCustomer(queryParams)
-        break
-      default:
-        return
+    if (props.customerId && !props.contractId) {
+      queryParams.customerId = props.customerId
+    } else if (props.customerId && props.contractId) {
+      // 如果是合同的话客户编号也需要带上因为权限基于客户
+      queryParams.customerId = props.customerId
+      queryParams.contractId = props.contractId
     }
+    const data = await ReceivablePlanApi.getReceivablePlanPageByCustomer(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -102,25 +125,47 @@ const getList = async () => {
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
+  // 置空参数
+  queryParams.customerId = undefined
+  queryParams.contractId = undefined
   getList()
 }
 
-/** 添加 */
+/** 添加/修改操作 */
 const formRef = ref()
-const openForm = () => {
-  formRef.value.open('create')
+const openForm = (type: string, id?: number) => {
+  formRef.value.open(type, id, props.customerId, props.contractId)
 }
 
-/** 打开合同详情 */
-const { push } = useRouter()
-const openDetail = (id: number) => {
-  push({ name: 'CrmReceivablePlanDetail', params: { id } })
+/** 创建回款 */
+const emits = defineEmits<{
+  (e: 'createReceivable', v: ReceivablePlanApi.ReceivablePlanVO)
+}>()
+const createReceivable = (row: ReceivablePlanApi.ReceivablePlanVO) => {
+  emits('createReceivable', row)
 }
 
-/** 监听打开的 bizId + bizType，从而加载最新的列表 */
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await ReceivablePlanApi.deleteReceivablePlan(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
+}
+
+/** 监听打开的 customerId + contractId，从而加载最新的列表 */
 watch(
-  () => [props.bizId, props.bizType],
-  () => {
+  () => [props.customerId, props.contractId],
+  (newVal) => {
+    // 保证至少客户编号有值
+    if (!newVal[0]) {
+      return
+    }
     handleQuery()
   },
   { immediate: true, deep: true }

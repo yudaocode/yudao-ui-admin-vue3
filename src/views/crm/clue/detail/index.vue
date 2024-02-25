@@ -33,7 +33,7 @@
           ref="permissionListRef"
           :biz-id="clue.id!"
           :biz-type="BizTypeEnum.CRM_CLUE"
-          :show-action="!permissionListRef?.isPool || false"
+          :show-action="true"
           @quit-team="close"
         />
       </el-tab-pane>

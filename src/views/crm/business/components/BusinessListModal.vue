@@ -48,8 +48,8 @@
         <el-table-column
           label="商机金额"
           align="center"
-          prop="price"
-          :formatter="fenToYuanFormat"
+          prop="totalPrice"
+          :formatter="erpPriceTableColumnFormatter"
         />
         <el-table-column label="客户名称" align="center" prop="customerName" />
         <el-table-column label="商机组" align="center" prop="statusTypeName" />
@@ -75,7 +75,7 @@
 <script setup lang="ts">
 import * as BusinessApi from '@/api/crm/business'
 import BusinessForm from '../BusinessForm.vue'
-import { fenToYuanFormat } from '@/utils/formatter'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 const message = useMessage() // 消息弹窗
 const props = defineProps<{
@@ -99,6 +99,7 @@ const queryParams = reactive({
 /** 打开弹窗 */
 const open = async () => {
   dialogVisible.value = true
+  queryParams.customerId = props.customerId // 解决 props.customerId 没更新到 queryParams 上的问题
   await getList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -144,10 +145,10 @@ const submitForm = async () => {
     return message.error('未选择商机')
   }
   dialogVisible.value = false
-  emit('success', businessIds)
+  emit('success', businessIds, businessRef.value.getSelectionRows())
 }
 
-/** 打开联系人详情 */
+/** 打开商机详情 */
 const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmBusinessDetail', params: { id } })
