@@ -23,7 +23,7 @@
         <ReceivablePlanList
           :contract-id="contract.id!"
           :customer-id="contract.customerId"
-          @crate-receivable="crateReceivable"
+          @create-receivable="createReceivable"
         />
         <ReceivableList
           ref="receivableListRef"
@@ -108,8 +108,8 @@ const getOperateLog = async (contractId: number) => {
 
 /** 从回款计划创建回款 */
 const receivableListRef = ref<InstanceType<typeof ReceivableList>>() // 回款列表 Ref
-const crateReceivable = (planData: any) => {
-  receivableListRef.value?.crateReceivable(planData)
+const createReceivable = (planData: any) => {
+  receivableListRef.value?.createReceivable(planData)
 }
 
 /** 转移 */

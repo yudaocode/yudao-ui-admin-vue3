@@ -1,7 +1,7 @@
 <template>
   <!-- 操作栏 -->
   <el-row justify="end">
-    <el-button @click="openForm">
+    <el-button @click="openForm('create', undefined)">
       <Icon class="mr-5px" icon="icon-park:income" />
       创建回款计划
     </el-button>
@@ -13,7 +13,13 @@
       <el-table-column align="center" label="客户名称" prop="customerName" width="150px" />
       <el-table-column align="center" label="合同编号" prop="contractNo" width="200px" />
       <el-table-column align="center" label="期数" prop="period" />
-      <el-table-column align="center" label="计划回款(元)" prop="price" width="120" />
+      <el-table-column
+        align="center"
+        label="计划回款(元)"
+        prop="price"
+        width="120"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column
         :formatter="dateFormatter2"
         align="center"
@@ -37,7 +43,8 @@
             v-hasPermi="['crm:receivable:create']"
             link
             type="primary"
-            @click="crateReceivable(scope.row)"
+            @click="createReceivable(scope.row)"
+            :disabled="scope.row.receivableId"
           >
             创建回款
           </el-button>
@@ -75,8 +82,8 @@
 <script lang="ts" setup>
 import * as ReceivablePlanApi from '@/api/crm/receivable/plan'
 import ReceivableForm from './../ReceivablePlanForm.vue'
-import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter2 } from '@/utils/formatTime'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'CrmReceivablePlanList' })
 const props = defineProps<{
@@ -127,16 +134,15 @@ const handleQuery = () => {
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
+  formRef.value.open(type, id, props.customerId, props.contractId)
 }
 
-// todo @puhui999：拼写错误
-const emits = defineEmits<{
-  (e: 'crateReceivable', v: ReceivablePlanApi.ReceivablePlanVO)
-}>()
 /** 创建回款 */
-const crateReceivable = (row: ReceivablePlanApi.ReceivablePlanVO) => {
-  emits('crateReceivable', row)
+const emits = defineEmits<{
+  (e: 'createReceivable', v: ReceivablePlanApi.ReceivablePlanVO)
+}>()
+const createReceivable = (row: ReceivablePlanApi.ReceivablePlanVO) => {
+  emits('createReceivable', row)
 }
 
 /** 删除按钮操作 */

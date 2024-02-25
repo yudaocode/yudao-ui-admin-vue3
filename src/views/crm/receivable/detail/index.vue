@@ -87,12 +87,13 @@ const close = () => {
 /** 初始化 */
 const { params } = useRoute()
 onMounted(async () => {
-  if (!params.id) {
+  const id = props.id || route.params.id
+  if (!id) {
     message.warning('参数错误，回款不能为空！')
     close()
     return
   }
-  receivableId.value = params.id as unknown as number
+  receivableId.value = id
   await getReceivable(receivableId.value)
 })
 </script>

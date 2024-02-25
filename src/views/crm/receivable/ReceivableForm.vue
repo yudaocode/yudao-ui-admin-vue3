@@ -201,10 +201,14 @@ const open = async (
   // 从回款计划创建回款
   if (receivablePlan) {
     formData.value.customerId = receivablePlan.customerId
+    await handleCustomerChange(receivablePlan.customerId)
     formData.value.contractId = receivablePlan.contractId
-    formData.value.planId = receivablePlan.id
-    formData.value.price = receivablePlan.price
-    formData.value.returnType = receivablePlan.returnType
+    await handleContractChange(receivablePlan.contractId)
+    if (receivablePlan.id) {
+      formData.value.planId = receivablePlan.id
+      formData.value.price = receivablePlan.price
+      formData.value.returnType = receivablePlan.returnType
+    }
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗

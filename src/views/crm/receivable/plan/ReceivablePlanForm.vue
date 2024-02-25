@@ -136,6 +136,7 @@ import * as CustomerApi from '@/api/crm/customer'
 import * as ContractApi from '@/api/crm/contract'
 import { useUserStore } from '@/store/modules/user'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { aw } from '../../../../../dist-prod/assets/index-9eac537b'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -157,7 +158,7 @@ const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 const contractList = ref<ContractApi.ContractVO[]>([]) // 合同列表
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (type: string, id?: number, customerId?: number, contractId?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -178,6 +179,14 @@ const open = async (type: string, id?: number) => {
   // 默认新建时选中自己
   if (formType.value === 'create') {
     formData.value.ownerUserId = useUserStore().getUser.id
+  }
+  // 设置 customerId 和 contractId 默认值
+  if (customerId) {
+    formData.value.customerId = customerId
+    await handleCustomerChange(customerId)
+  }
+  if (contractId) {
+    formData.value.contractId = contractId
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
