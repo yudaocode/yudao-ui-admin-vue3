@@ -81,6 +81,7 @@ const submitForm = async () => {
   const formData = new FormData()
   formData.append('updateSupport', updateSupport.value)
   formData.append('file', fileList.value[0].raw)
+  // TODO @芋艿：后面是不是可以采用这种形式，去掉 uploadHeaders
   await CustomerApi.handleImport(formData)
 }
 

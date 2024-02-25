@@ -14,6 +14,10 @@ export interface ReceivablePlanVO {
   contractId: number
   ownerUserId: number
   remark: string
+  receivable?: {
+    price: number
+    returnTime: Date
+  }
 }
 
 // 查询回款计划列表

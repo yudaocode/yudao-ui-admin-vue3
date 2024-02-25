@@ -67,10 +67,27 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" label="客户名称" prop="customerName" width="150px" />
+      <el-table-column align="center" fixed="left" label="客户名称" prop="customerName" width="150">
+        <template #default="scope">
+          <el-link
+            :underline="false"
+            type="primary"
+            @click="openCustomerDetail(scope.row.customerId)"
+          >
+            {{ scope.row.customerName }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="合同编号" prop="contractNo" width="200px" />
+      <!-- TODO @puhui999：这里可以点到详情；最新版本，他有了单独的详情哈 -->
       <el-table-column align="center" label="期数" prop="period" />
-      <el-table-column align="center" label="计划回款(元)" prop="price" width="120" />
+      <el-table-column
+        align="center"
+        label="计划回款金额（元）"
+        prop="price"
+        width="160"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column
         :formatter="dateFormatter2"
         align="center"
@@ -80,14 +97,52 @@
       />
       <el-table-column align="center" label="提前几天提醒" prop="remindDays" width="150" />
       <el-table-column
-        :formatter="dateFormatter2"
         align="center"
         label="提醒日期"
         prop="remindTime"
         width="180px"
+        :formatter="dateFormatter2"
       />
-      <el-table-column label="负责人" prop="ownerUserName" width="120" />
+      <el-table-column align="center" label="回款方式" prop="returnType" width="130px">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_RECEIVABLE_RETURN_TYPE" :value="scope.row.returnType" />
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="备注" prop="remark" />
+      <el-table-column label="负责人" prop="ownerUserName" width="120" />
+      <el-table-column
+        align="center"
+        label="实际回款金额（元）"
+        prop="receivable.price"
+        width="160"
+      >
+        <template #default="scope">
+          <el-text v-if="scope.row.receivable">
+            {{ erpPriceInputFormatter(scope.row.receivable.price) }}
+          </el-text>
+          <el-text v-else>{{ erpPriceInputFormatter(0) }}</el-text>
+        </template>
+      </el-table-column>
+      <el-table-column
+        align="center"
+        label="实际回款日期"
+        prop="receivable.returnTime"
+        width="180px"
+        :formatter="dateFormatter2"
+      />
+      <el-table-column
+        align="center"
+        label="实际回款金额（元）"
+        prop="receivable.price"
+        width="160"
+      >
+        <template #default="scope">
+          <el-text v-if="scope.row.receivable">
+            {{ erpPriceInputFormatter(scope.row.price - scope.row.receivable.price) }}
+          </el-text>
+          <el-text v-else>{{ erpPriceInputFormatter(scope.row.price) }}</el-text>
+        </template>
+      </el-table-column>
       <el-table-column
         align="center"
         fixed="right"
@@ -99,7 +154,23 @@
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.finishStatus" />
         </template>
       </el-table-column>
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="更新时间"
+        prop="updateTime"
+        width="180px"
+      />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
+        width="180px"
+      />
+      <el-table-column align="center" label="创建人" prop="creatorName" width="100px" />
       <el-table-column align="center" fixed="right" label="操作" width="130px">
+        <!-- TODO @puhui999：新建回款 -->
         <template #default="scope">
           <el-button
             v-hasPermi="['crm:receivable-plan:update']"
@@ -135,12 +206,12 @@
 
 <script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
-import { dateFormatter2 } from '@/utils/formatTime'
+import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ReceivablePlanApi from '@/api/crm/receivable/plan'
 import ReceivablePlanForm from './ReceivablePlanForm.vue'
-import * as UserApi from '@/api/system/user'
 import * as CustomerApi from '@/api/crm/customer'
+import { erpPriceInputFormatter, erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'ReceivablePlan' })
 
@@ -150,7 +221,6 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -159,6 +229,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -217,12 +288,16 @@ const handleExport = async () => {
     exportLoading.value = false
   }
 }
-const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
+
+/** 打开客户详情 */
+const { push } = useRouter()
+const openCustomerDetail = (id: number) => {
+  push({ name: 'CrmCustomerDetail', params: { id } })
+}
+
 /** 初始化 **/
 onMounted(async () => {
   await getList()
-  // 获取用户列表
-  userList.value = await UserApi.getSimpleUserList()
   // 获得客户列表
   customerList.value = await CustomerApi.getCustomerSimpleList()
 })
