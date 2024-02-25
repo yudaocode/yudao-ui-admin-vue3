@@ -195,7 +195,6 @@
   <!-- 表单弹窗：添加/修改 -->
   <ReceivableForm ref="formRef" @success="getList" />
 </template>
-
 <script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'

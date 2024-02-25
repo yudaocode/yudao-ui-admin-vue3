@@ -31,17 +31,6 @@
       />
       <el-table-column label="负责人" prop="ownerUserName" width="120" />
       <el-table-column align="center" label="备注" prop="remark" />
-      <el-table-column
-        align="center"
-        fixed="right"
-        label="完成状态"
-        prop="finishStatus"
-        width="130px"
-      >
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.finishStatus" />
-        </template>
-      </el-table-column>
       <el-table-column align="center" fixed="right" label="操作" width="200px">
         <template #default="scope">
           <el-button
@@ -141,6 +130,7 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
+// todo @puhui999：拼写错误
 const emits = defineEmits<{
   (e: 'crateReceivable', v: ReceivablePlanApi.ReceivablePlanVO)
 }>()
@@ -161,6 +151,7 @@ const handleDelete = async (id: number) => {
     await getList()
   } catch {}
 }
+
 /** 监听打开的 customerId + contractId，从而加载最新的列表 */
 watch(
   () => [props.customerId, props.contractId],

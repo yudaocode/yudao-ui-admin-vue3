@@ -10,12 +10,37 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="回款编号" prop="no">
-            <el-input v-model="formData.no" placeholder="请输入回款编号" />
+            <el-input disabled v-model="formData.no" placeholder="保存时自动生成" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
+          <el-form-item label="负责人" prop="ownerUserId">
+            <el-select
+              v-model="formData.ownerUserId"
+              :disabled="formType !== 'create'"
+              class="w-1/1"
+            >
+              <el-option
+                v-for="item in userOptions"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="12">
           <el-form-item label="客户名称" prop="customerId">
-            <el-select v-model="formData.customerId" class="w-1/1" placeholder="请选择客户">
+            <el-select
+              v-model="formData.customerId"
+              :disabled="formType !== 'create'"
+              class="w-1/1"
+              filterable
+              @change="handleCustomerChange"
+              placeholder="请选择客户"
+            >
               <el-option
                 v-for="item in customerList"
                 :key="item.id"
@@ -29,8 +54,10 @@
           <el-form-item label="合同名称" prop="contractId">
             <el-select
               v-model="formData.contractId"
-              :disabled="!formData.customerId"
-              class="!w-100%"
+              :disabled="formType !== 'create' || !formData.customerId"
+              class="w-1/1"
+              filterable
+              @change="handleContractChange"
               placeholder="请选择合同"
             >
               <el-option
@@ -38,42 +65,35 @@
                 :key="data.id"
                 :label="data.name"
                 :value="data.id!"
+                :disabled="data.auditStatus !== 20"
               />
             </el-select>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="12">
           <el-form-item label="回款期数" prop="planId">
             <el-select
               v-model="formData.planId"
-              :disabled="!formData.contractId"
-              class="!w-100%"
+              :disabled="formType !== 'create' || !formData.contractId"
+              class="!w-1/1"
+              @change="handleReceivablePlanChange"
               placeholder="请选择回款期数"
             >
               <el-option
                 v-for="data in receivablePlanList"
                 :key="data.id"
-                :label="data.period + '期'"
+                :label="'第 ' + data.period + ' 期'"
                 :value="data.id!"
-              />
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="负责人" prop="ownerUserId">
-            <el-select v-model="formData.ownerUserId" clearable placeholder="请输入负责人">
-              <el-option
-                v-for="item in userList"
-                :key="item.id"
-                :label="item.nickname"
-                :value="item.id"
+                :disabled="data.receivableId"
               />
             </el-select>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="回款方式" prop="returnType">
-            <el-select v-model="formData.returnType" placeholder="请选择回款方式">
+            <el-select v-model="formData.returnType" class="w-1/1" placeholder="请选择回款方式">
               <el-option
                 v-for="dict in getIntDictOptions(DICT_TYPE.CRM_RECEIVABLE_RETURN_TYPE)"
                 :key="dict.value"
@@ -83,6 +103,8 @@
             </el-select>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="12">
           <el-form-item label="回款金额" prop="price">
             <el-input-number
@@ -90,6 +112,8 @@
               class="!w-100%"
               controls-position="right"
               placeholder="请输入回款金额"
+              :min="0.01"
+              :precision="2"
             />
           </el-form-item>
         </el-col>
@@ -103,14 +127,11 @@
             />
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row>
         <el-col :span="24">
           <el-form-item label="备注" prop="remark">
-            <el-input
-              v-model="formData.remark"
-              :rows="3"
-              placeholder="请输入备注"
-              type="textarea"
-            />
+            <el-input v-model="formData.remark" placeholder="请输入备注" type="textarea" />
           </el-form-item>
         </el-col>
       </el-row>
@@ -129,20 +150,19 @@ import * as CustomerApi from '@/api/crm/customer'
 import * as ContractApi from '@/api/crm/contract'
 import { useUserStore } from '@/store/modules/user'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import form from '@/components/Form/src/Form.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
-const userList = ref<UserApi.UserVO[]>([]) // 用户列表
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<ReceivableApi.ReceivableVO>({} as ReceivableApi.ReceivableVO)
 const formRules = reactive({
-  no: [{ required: true, message: '回款编号不能为空', trigger: 'blur' }],
   customerId: [{ required: true, message: '客户不能为空', trigger: 'blur' }],
   contractId: [{ required: true, message: '合同不能为空', trigger: 'blur' }],
-  auditStatus: [{ required: true, message: '审批状态不能为空', trigger: 'blur' }],
   returnTime: [{ required: true, message: '回款日期不能为空', trigger: 'blur' }],
   price: [{ required: true, message: '回款金额不能为空', trigger: 'blur' }]
 })
@@ -150,8 +170,13 @@ const formRef = ref() // 表单 Ref
 const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 const contractList = ref<ContractApi.ContractVO[]>([]) // 合同列表
 const receivablePlanList = ref<ReceivablePlanApi.ReceivablePlanVO[]>([]) // 回款计划列表
+
 /** 打开弹窗 */
-const open = async (type: string, id?: number, planData?: ReceivablePlanApi.ReceivablePlanVO) => {
+const open = async (
+  type: string,
+  id?: number,
+  receivablePlan?: ReceivablePlanApi.ReceivablePlanVO
+) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -166,7 +191,7 @@ const open = async (type: string, id?: number, planData?: ReceivablePlanApi.Rece
     }
   }
   // 获得用户列表
-  userList.value = await UserApi.getSimpleUserList()
+  userOptions.value = await UserApi.getSimpleUserList()
   // 获得客户列表
   customerList.value = await CustomerApi.getCustomerSimpleList()
   // 默认新建时选中自己
@@ -174,10 +199,12 @@ const open = async (type: string, id?: number, planData?: ReceivablePlanApi.Rece
     formData.value.ownerUserId = useUserStore().getUser.id
   }
   // 从回款计划创建回款
-  if (planData) {
-    formData.value.customerId = planData.customerId
-    formData.value.contractId = planData.contractId
-    formData.value.planId = planData.id
+  if (receivablePlan) {
+    formData.value.customerId = receivablePlan.customerId
+    formData.value.contractId = receivablePlan.contractId
+    formData.value.planId = receivablePlan.id
+    formData.value.price = receivablePlan.price
+    formData.value.returnType = receivablePlan.returnType
   }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -214,53 +241,47 @@ const resetForm = () => {
   formRef.value?.resetFields()
 }
 
-const getContractList = async (customerId: number) => {
-  contractList.value = await ContractApi.getContractSimpleList(customerId)
+/** 处理切换客户 */
+const handleCustomerChange = async (customerId: number) => {
+  // 重置合同编号
+  formData.value.contractId = undefined
+  // 获得合同列表
+  if (customerId) {
+    contractList.value = []
+    contractList.value = await ContractApi.getContractSimpleList(customerId)
+  }
 }
-const getReceivablePlanList = async (contractId: number) => {
-  receivablePlanList.value = await ReceivablePlanApi.getReceivablePlanListByContractId(
-    formData.value.customerId,
-    contractId
-  )
+
+/** 处理切换合同 */
+const handleContractChange = async (contractId: number) => {
+  // 重置回款计划编号
+  formData.value.planId = undefined
+  if (contractId) {
+    // 获得回款计划列表
+    receivablePlanList.value = []
+    receivablePlanList.value = await ReceivablePlanApi.getReceivablePlanSimpleList(
+      formData.value.customerId,
+      contractId
+    )
+    // 设置金额
+    const contract = contractList.value.find((item) => item.id === contractId)
+    if (contract) {
+      // TODO @芋艿：后续可以改成未还款金额
+      formData.value.price = contract.totalPrice
+    }
+  }
 }
-watch(
-  () => formData.value.customerId,
-  (newVal) => {
-    if (!newVal) {
-      return
-    }
-    getContractList(newVal)
-  },
-  {
-    immediate: true
+
+/** 处理切换回款计划 */
+const handleReceivablePlanChange = (planId: number) => {
+  if (!planId) {
+    return
   }
-)
-watch(
-  () => formData.value.contractId,
-  (newVal) => {
-    if (!newVal) {
-      return
-    }
-    getReceivablePlanList(newVal)
-  },
-  {
-    immediate: true
+  const receivablePlan = receivablePlanList.value.find((item) => item.id === planId)
+  if (!receivablePlan) {
+    return
   }
-)
-watch(
-  () => formData.value.planId,
-  (newVal) => {
-    if (!newVal) {
-      return
-    }
-    const receivablePlan = receivablePlanList.value.find((item) => item.id === newVal)
-    if (!receivablePlan) {
-      return
-    }
-    // 只有没有金额的时候才设置
-    if (!formData.value.price || formData.value.price === 0) {
-      formData.value.price = receivablePlan.price
-    }
-  }
-)
+  formData.value.price = receivablePlan.price
+  formData.value.returnType = receivablePlan.returnType
+}
 </script>

@@ -153,17 +153,6 @@
         </template>
       </el-table-column>
       <el-table-column
-        align="center"
-        fixed="right"
-        label="完成状态"
-        prop="finishStatus"
-        width="130px"
-      >
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.finishStatus" />
-        </template>
-      </el-table-column>
-      <el-table-column
         :formatter="dateFormatter"
         align="center"
         label="更新时间"
@@ -178,9 +167,17 @@
         width="180px"
       />
       <el-table-column align="center" label="创建人" prop="creatorName" width="100px" />
-      <el-table-column align="center" fixed="right" label="操作" width="130px">
-        <!-- TODO @puhui999：新建回款 -->
+      <el-table-column align="center" fixed="right" label="操作" width="180px">
         <template #default="scope">
+          <el-button
+            v-hasPermi="['crm:receivable:create']"
+            link
+            type="success"
+            @click="openReceivableForm(scope.row)"
+            :disabled="scope.row.receivableId"
+          >
+            创建回款
+          </el-button>
           <el-button
             v-hasPermi="['crm:receivable-plan:update']"
             link
@@ -211,6 +208,7 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <ReceivablePlanForm ref="formRef" @success="getList" />
+  <ReceivableForm ref="receivableFormRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
@@ -222,6 +220,7 @@ import ReceivablePlanForm from './ReceivablePlanForm.vue'
 import * as CustomerApi from '@/api/crm/customer'
 import { erpPriceInputFormatter, erpPriceTableColumnFormatter } from '@/utils'
 import { TabsPaneContext } from 'element-plus'
+import ReceivableForm from '@/views/crm/receivable/ReceivableForm.vue'
 
 defineOptions({ name: 'ReceivablePlan' })
 
@@ -277,6 +276,12 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 创建回款操作 */
+const receivableFormRef = ref()
+const openReceivableForm = (row: ReceivablePlanApi.ReceivablePlanVO) => {
+  receivableFormRef.value.open('create', undefined, row)
 }
 
 /** 删除按钮操作 */

@@ -4,7 +4,6 @@ export interface ReceivablePlanVO {
   id: number
   period: number
   receivableId: number
-  finishStatus: number
   price: number
   returnTime: Date
   remindDays: number
@@ -43,10 +42,9 @@ export const getReceivablePlan = async (id: number) => {
 }
 
 // 查询回款计划下拉数据
-// TODO @芋艿：再看看这里
-export const getReceivablePlanListByContractId = async (customerId: number, contractId: number) => {
+export const getReceivablePlanSimpleList = async (customerId: number, contractId: number) => {
   return await request.get({
-    url: `/crm/receivable-plan/list-all-simple-by-customer?customerId=${customerId}&contractId=${contractId}`
+    url: `/crm/receivable-plan/simple-list?customerId=${customerId}&contractId=${contractId}`
   })
 }
 
