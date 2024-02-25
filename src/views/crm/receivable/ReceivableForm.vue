@@ -75,7 +75,7 @@
           <el-form-item label="回款方式" prop="returnType">
             <el-select v-model="formData.returnType" placeholder="请选择回款方式">
               <el-option
-                v-for="dict in getStrDictOptions(DICT_TYPE.CRM_RECEIVABLE_RETURN_TYPE)"
+                v-for="dict in getIntDictOptions(DICT_TYPE.CRM_RECEIVABLE_RETURN_TYPE)"
                 :key="dict.value"
                 :label="dict.label"
                 :value="dict.value"
@@ -128,7 +128,7 @@ import * as UserApi from '@/api/system/user'
 import * as CustomerApi from '@/api/crm/customer'
 import * as ContractApi from '@/api/crm/contract'
 import { useUserStore } from '@/store/modules/user'
-import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -215,7 +215,7 @@ const resetForm = () => {
 }
 
 const getContractList = async (customerId: number) => {
-  contractList.value = await ContractApi.getCrmContractSimpleListByCustomerId(customerId)
+  contractList.value = await ContractApi.getContractSimpleList(customerId)
 }
 const getReceivablePlanList = async (contractId: number) => {
   receivablePlanList.value = await ReceivablePlanApi.getReceivablePlanListByContractId(
