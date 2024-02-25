@@ -72,7 +72,13 @@
       <el-tab-pane label="下属负责的" name="3" />
     </el-tabs>
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
-      <el-table-column align="center" fixed="left" label="回款编号" prop="no" width="180" />
+      <el-table-column align="center" fixed="left" label="回款编号" prop="no" width="180">
+        <template #default="scope">
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
+            {{ scope.row.no }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="客户名称" prop="customerName" width="120">
         <template #default="scope">
           <el-link

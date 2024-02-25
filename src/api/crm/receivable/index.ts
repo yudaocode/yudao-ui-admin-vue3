@@ -5,14 +5,24 @@ export interface ReceivableVO {
   no: string
   planId: number
   customerId: number
+  customerName?: string
   contractId: number
+  contract?: {
+    no: string
+    totalPrice: number
+  }
   auditStatus: number
   processInstanceId: number
   returnTime: Date
   returnType: string
   price: number
   ownerUserId: number
+  ownerUserName?: string
   remark: string
+  creator: string // 创建人
+  creatorName?: string // 创建人名称
+  createTime: Date // 创建时间
+  updateTime: Date // 更新时间
 }
 
 // 查询回款列表

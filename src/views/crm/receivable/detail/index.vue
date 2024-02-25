@@ -1,16 +1,13 @@
 <template>
-  <ReceivablePlanDetailsHeader v-loading="loading" :receivable-plan="receivablePlan">
-    <el-button
-      v-if="permissionListRef?.validateWrite"
-      @click="openForm('update', receivablePlan.id)"
-    >
+  <ReceivableDetailsHeader v-loading="loading" :receivable="receivable">
+    <el-button v-if="permissionListRef?.validateWrite" @click="openForm('update', receivable.id)">
       编辑
     </el-button>
-  </ReceivablePlanDetailsHeader>
+  </ReceivableDetailsHeader>
   <el-col>
     <el-tabs>
       <el-tab-pane label="详细资料">
-        <ReceivablePlanDetailsInfo :receivable-plan="receivablePlan" />
+        <ReceivableDetailsInfo :receivable="receivable" />
       </el-tab-pane>
       <el-tab-pane label="操作日志">
         <OperateLogV2 :log-list="logList" />
@@ -18,8 +15,8 @@
       <el-tab-pane label="团队成员">
         <PermissionList
           ref="permissionListRef"
-          :biz-id="receivablePlan.id!"
-          :biz-type="BizTypeEnum.CRM_RECEIVABLE_PLAN"
+          :biz-id="receivable.id!"
+          :biz-type="BizTypeEnum.CRM_RECEIVABLE"
           :show-action="true"
           @quit-team="close"
         />
@@ -28,35 +25,33 @@
   </el-col>
 
   <!-- 表单弹窗：添加/修改 -->
-  <ReceivablePlanForm ref="formRef" @success="getReceivablePlan(receivablePlan.id)" />
+  <ReceivableForm ref="formRef" @success="getReceivable(receivable.id)" />
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
-import * as ReceivablePlanApi from '@/api/crm/receivable/plan'
-import ReceivablePlanDetailsHeader from './ReceivablePlanDetailsHeader.vue'
-import ReceivablePlanDetailsInfo from './ReceivablePlanDetailsInfo.vue'
+import * as ReceivableApi from '@/api/crm/receivable'
+import ReceivableDetailsHeader from './ReceivableDetailsHeader.vue'
+import ReceivableDetailsInfo from './ReceivableDetailsInfo.vue'
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
 import { BizTypeEnum } from '@/api/crm/permission'
 import { OperateLogV2VO } from '@/api/system/operatelog'
 import { getOperateLogPage } from '@/api/crm/operateLog'
-import ReceivablePlanForm from '@/views/crm/receivable/plan/ReceivablePlanForm.vue'
+import ReceivableForm from '@/views/crm/receivable/ReceivableForm.vue'
 
 defineOptions({ name: 'CrmReceivablePlanDetail' })
 
 const message = useMessage()
 
-const receivablePlanId = ref(0) // 回款计划编号
+const receivableId = ref(0) // 回款编号
 const loading = ref(true) // 加载中
-const receivablePlan = ref<ReceivablePlanApi.ReceivablePlanVO>(
-  {} as ReceivablePlanApi.ReceivablePlanVO
-) // 回款计划详情
+const receivable = ref<ReceivableApi.ReceivableVO>({} as ReceivableApi.ReceivableVO) // 回款详情
 const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
 
 /** 获取详情 */
-const getReceivablePlan = async (id: number) => {
+const getReceivable = async (id: number) => {
   loading.value = true
   try {
-    receivablePlan.value = await ReceivablePlanApi.getReceivablePlan(id)
+    receivable.value = await ReceivableApi.getReceivable(id)
     await getOperateLog(id)
   } finally {
     loading.value = false
@@ -71,13 +66,13 @@ const openForm = (type: string, id?: number) => {
 
 /** 获取操作日志 */
 const logList = ref<OperateLogV2VO[]>([]) // 操作日志列表
-const getOperateLog = async (receivablePlanId: number) => {
-  if (!receivablePlanId) {
+const getOperateLog = async (receivableId: number) => {
+  if (!receivableId) {
     return
   }
   const data = await getOperateLogPage({
-    bizType: BizTypeEnum.CRM_RECEIVABLE_PLAN,
-    bizId: receivablePlanId
+    bizType: BizTypeEnum.CRM_RECEIVABLE,
+    bizId: receivableId
   })
   logList.value = data.list
 }
@@ -93,11 +88,11 @@ const close = () => {
 const { params } = useRoute()
 onMounted(async () => {
   if (!params.id) {
-    message.warning('参数错误，回款计划不能为空！')
+    message.warning('参数错误，回款不能为空！')
     close()
     return
   }
-  receivablePlanId.value = params.id as unknown as number
-  await getReceivablePlan(receivablePlanId.value)
+  receivableId.value = params.id as unknown as number
+  await getReceivable(receivableId.value)
 })
 </script>
