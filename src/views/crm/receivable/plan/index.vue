@@ -79,8 +79,13 @@
         </template>
       </el-table-column>
       <el-table-column align="center" label="合同编号" prop="contractNo" width="200px" />
-      <!-- TODO @puhui999：这里可以点到详情；最新版本，他有了单独的详情哈 -->
-      <el-table-column align="center" label="期数" prop="period" />
+      <el-table-column align="center" label="期数" prop="period">
+        <template #default="scope">
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
+            {{ scope.row.period }}
+          </el-link>
+        </template>
+      </el-table-column>
       <el-table-column
         align="center"
         label="计划回款金额（元）"
@@ -289,8 +294,13 @@ const handleExport = async () => {
   }
 }
 
-/** 打开客户详情 */
+/** 打开详情 */
 const { push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'CrmReceivablePlanDetail', params: { id } })
+}
+
+/** 打开客户详情 */
 const openCustomerDetail = (id: number) => {
   push({ name: 'CrmCustomerDetail', params: { id } })
 }

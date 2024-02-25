@@ -11,9 +11,16 @@ export interface ReceivablePlanVO {
   remindDays: number
   remindTime: Date
   customerId: number
+  customerName?: string
   contractId: number
+  contractNo?: string
   ownerUserId: number
+  ownerUserName?: string
   remark: string
+  creator: string // 创建人
+  creatorName?: string // 创建人名称
+  createTime: Date // 创建时间
+  updateTime: Date // 更新时间
   receivable?: {
     price: number
     returnTime: Date
