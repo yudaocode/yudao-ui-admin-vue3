@@ -150,7 +150,24 @@
       </el-table-column>
       <el-table-column align="center" label="公司签约人" prop="signUserName" width="130" />
       <el-table-column align="center" label="备注" prop="remark" width="200" />
-      <!-- TODO @puhui999：后续可加 【已收款金额】、【未收款金额】 -->
+      <el-table-column
+        align="center"
+        label="已回款金额（元）"
+        prop="totalReceivablePrice"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column
+        align="center"
+        label="未回款金额（元）"
+        prop="totalReceivablePrice"
+        width="140"
+        :formatter="erpPriceTableColumnFormatter"
+      >
+        <template #default="scope">
+          {{ erpPriceInputFormatter(scope.row.totalPrice - scope.row.totalReceivablePrice) }}
+        </template>
+      </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -246,7 +263,7 @@ import download from '@/utils/download'
 import * as ContractApi from '@/api/crm/contract'
 import ContractForm from './ContractForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
-import { erpPriceTableColumnFormatter } from '@/utils'
+import { erpPriceInputFormatter, erpPriceTableColumnFormatter } from '@/utils'
 import * as CustomerApi from '@/api/crm/customer'
 import { TabsPaneContext } from 'element-plus'
 

@@ -21,6 +21,7 @@ export interface ContractVO {
   totalProductPrice: number
   discountPercent: number
   totalPrice: number
+  totalReceivablePrice: number
   signContactId: number
   signContactName?: string
   signUserId: number

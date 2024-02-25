@@ -26,8 +26,9 @@
       <el-descriptions-item label="下单时间">
         {{ formatDate(contract.orderDate) }}
       </el-descriptions-item>
-      <!-- TODO 芋艿：回款金额 -->
-      <el-descriptions-item label="回款金额（元）"> 待实现 </el-descriptions-item>
+      <el-descriptions-item label="回款金额（元）">
+        {{ erpPriceInputFormatter(contract.totalReceivablePrice) }}
+      </el-descriptions-item>
       <el-descriptions-item label="负责人">
         {{ contract.ownerUserName }}
       </el-descriptions-item>

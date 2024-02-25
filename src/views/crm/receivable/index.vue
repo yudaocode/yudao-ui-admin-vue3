@@ -308,7 +308,6 @@ const handleProcessDetail = (row: ReceivableApi.ReceivableVO) => {
   push({ name: 'BpmProcessInstanceDetail', query: { id: row.processInstanceId } })
 }
 
-// TODO puhui999: 回款流程审批表单详情查看后面完善
 /** 导出按钮操作 */
 const handleExport = async () => {
   try {

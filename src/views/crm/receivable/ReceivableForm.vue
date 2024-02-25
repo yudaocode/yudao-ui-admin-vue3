@@ -270,8 +270,7 @@ const handleContractChange = async (contractId: number) => {
     // 设置金额
     const contract = contractList.value.find((item) => item.id === contractId)
     if (contract) {
-      // TODO @芋艿：后续可以改成未还款金额
-      formData.value.price = contract.totalPrice
+      formData.value.price = contract.totalPrice - contract.totalReceivablePrice
     }
   }
 }
