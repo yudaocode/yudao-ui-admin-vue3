@@ -4,8 +4,7 @@ export interface ReceivablePlanVO {
   id: number
   period: number
   receivableId: number
-  status: number
-  checkStatus: string
+  finishStatus: number
   processInstanceId: number
   price: number
   returnTime: Date
@@ -14,7 +13,6 @@ export interface ReceivablePlanVO {
   customerId: number
   contractId: number
   ownerUserId: number
-  sort: number
   remark: string
 }
 
@@ -31,6 +29,13 @@ export const getReceivablePlanPageByCustomer = async (params) => {
 // 查询回款计划详情
 export const getReceivablePlan = async (id: number) => {
   return await request.get({ url: `/crm/receivable-plan/get?id=` + id })
+}
+
+// 查询回款计划下拉数据
+export const getReceivablePlanListByContractId = async (customerId: number, contractId: number) => {
+  return await request.get({
+    url: `/crm/receivable-plan/list-all-simple-by-customer?customerId=${customerId}&contractId=${contractId}`
+  })
 }
 
 // 新增回款计划

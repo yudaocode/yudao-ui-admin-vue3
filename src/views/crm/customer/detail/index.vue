@@ -26,7 +26,7 @@
     >
       锁定
     </el-button>
-    <el-button v-if="!customer.ownerUserId" type="primary" @click="handleReceive"> 领取 </el-button>
+    <el-button v-if="!customer.ownerUserId" type="primary" @click="handleReceive"> 领取</el-button>
     <el-button v-if="!customer.ownerUserId" type="primary" @click="handleDistributeForm">
       分配
     </el-button>
@@ -64,8 +64,8 @@
         <ContractList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
       <el-tab-pane label="回款" lazy>
-        <ReceivablePlanList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
-        <ReceivableList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
+        <ReceivablePlanList :customer-id="customer.id!" @crate-receivable="crateReceivable" />
+        <ReceivableList ref="receivableListRef" :customer-id="customer.id!" />
       </el-tab-pane>
       <el-tab-pane label="操作日志">
         <OperateLogV2 :log-list="logList" />
@@ -195,6 +195,12 @@ const getOperateLog = async () => {
     bizId: customerId.value
   })
   logList.value = data.list
+}
+
+/** 从回款计划创建回款 */
+const receivableListRef = ref<InstanceType<typeof ReceivableList>>() // 回款列表 Ref
+const crateReceivable = (planData: any) => {
+  receivableListRef.value?.crateReceivable(planData)
 }
 
 const close = () => {
