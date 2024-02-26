@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【交易】售后退款" url="https://doc.iocoder.cn/mall/trade-aftersale/" />
+
   <!-- 搜索 -->
   <ContentWrap>
     <el-form ref="queryFormRef" :inline="true" :model="queryParams" label-width="68px">

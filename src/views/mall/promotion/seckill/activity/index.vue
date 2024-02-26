@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【营销】秒杀活动" url="https://doc.iocoder.cn/mall/promotion-seckill/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

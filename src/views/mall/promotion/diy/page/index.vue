@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【营销】商城装修" url="https://doc.iocoder.cn/mall/diy/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

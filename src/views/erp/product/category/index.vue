@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【产品】产品信息、分类、单位" url="https://doc.iocoder.cn/erp/product/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

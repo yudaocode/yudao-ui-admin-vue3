@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【销售】销售订单、出库、退货" url="https://doc.iocoder.cn/erp/sale/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

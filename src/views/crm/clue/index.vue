@@ -1,4 +1,7 @@
 <template>
+  <doc-alert title="【线索】线索管理" url="https://doc.iocoder.cn/crm/clue/" />
+  <doc-alert title="【通用】数据权限" url="https://doc.iocoder.cn/crm/permission/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
