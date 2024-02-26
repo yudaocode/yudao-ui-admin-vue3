@@ -67,3 +67,8 @@ export const deleteReceivablePlan = async (id: number) => {
 export const exportReceivablePlan = async (params) => {
   return await request.download({ url: `/crm/receivable-plan/export-excel`, params })
 }
+
+// 获得待回款提醒数量
+export const getReceivablePlanRemindCount = async () => {
+  return await request.get({ url: '/crm/receivable-plan/remind-count' })
+}

@@ -175,7 +175,6 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const statusTypeList = ref([]) // 商机状态类型列表
-// TODO 芋艿：统一的客户选择面板
 const customerList = ref([]) // 客户列表的数据
 
 /** 子表的表单 */

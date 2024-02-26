@@ -207,6 +207,6 @@ onMounted(async () => {
   const data = await ProductCategoryApi.getProductCategoryList({})
   productCategoryList.value = handleTree(data, 'id', 'parentId')
   // 系统用户列表
-  userList.value = await getSimpleUserList() // TODO 芋艿：替换成用户组件
+  userList.value = await getSimpleUserList()
 })
 </script>
