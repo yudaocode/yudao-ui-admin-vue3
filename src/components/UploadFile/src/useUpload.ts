@@ -1,8 +1,6 @@
-import { getAccessToken, getTenantId } from '@/utils/auth'
 import * as FileApi from '@/api/infra/file'
 import CryptoJS from 'crypto-js'
 import { UploadRawFile, UploadRequestOptions } from 'element-plus/es/components/upload/src/upload'
-import { ajaxUpload } from 'element-plus/es/components/upload/src/ajax'
 import axios from 'axios'
 
 export const useUpload = () => {
@@ -26,11 +24,21 @@ export const useUpload = () => {
         return { data: presignedInfo.url }
       })
     } else {
-      // 模式二：后端上传（需要增加后端身份认证请求头）
-      options.headers['Authorization'] = 'Bearer ' + getAccessToken()
-      options.headers['tenant-id'] = getTenantId()
-      // 使用 ElUpload 的上传方法
-      return ajaxUpload(options)
+      // 模式二：后端上传
+      // 重写 el-upload httpRequest 文件上传成功会走成功的钩子，失败走失败的钩子
+      return new Promise((resolve, reject) => {
+        FileApi.updateFile({ file: options.file })
+          .then((res) => {
+            if (res.code === 0) {
+              resolve(res)
+            } else {
+              reject(res)
+            }
+          })
+          .catch((res) => {
+            reject(res)
+          })
+      })
     }
   }
 
