@@ -186,6 +186,8 @@ const open = async (
     formLoading.value = true
     try {
       formData.value = await ReceivableApi.getReceivable(id)
+      await handleCustomerChange(formData.value.customerId)
+      formData.value.contractId = formData.value.contract.id
     } finally {
       formLoading.value = false
     }
