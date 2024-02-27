@@ -39,9 +39,10 @@ import { getOperateLogPage } from '@/api/crm/operateLog'
 import ReceivableForm from '@/views/crm/receivable/ReceivableForm.vue'
 
 defineOptions({ name: 'CrmReceivablePlanDetail' })
+const props = defineProps<{ id?: number }>()
 
+const route = useRoute()
 const message = useMessage()
-
 const receivableId = ref(0) // 回款编号
 const loading = ref(true) // 加载中
 const receivable = ref<ReceivableApi.ReceivableVO>({} as ReceivableApi.ReceivableVO) // 回款详情

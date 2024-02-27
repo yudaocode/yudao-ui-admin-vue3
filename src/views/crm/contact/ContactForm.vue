@@ -214,7 +214,6 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
-// TODO 芋艿：统一的客户选择面板
 const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
 const contactList = ref<ContactApi.ContactVO[]>([]) // 联系人列表
 

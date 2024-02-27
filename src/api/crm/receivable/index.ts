@@ -64,3 +64,8 @@ export const exportReceivable = async (params) => {
 export const submitReceivable = async (id: number) => {
   return await request.put({ url: `/crm/receivable/submit?id=${id}` })
 }
+
+// 获得待审核回款数量
+export const getAuditReceivableCount = async () => {
+  return await request.get({ url: '/crm/receivable/audit-count' })
+}

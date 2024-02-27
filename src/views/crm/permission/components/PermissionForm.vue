@@ -129,7 +129,6 @@ const resetForm = (bizType: number, bizId: number) => {
 }
 onMounted(async () => {
   // 获得用户列表
-  // TODO 芋艿：用户列表的选择组件
   userOptions.value = await UserApi.getSimpleUserList()
 })
 </script>
