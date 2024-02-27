@@ -1,5 +1,7 @@
+<!-- 待回款提醒 -->
 <template>
   <ContentWrap>
+    <div class="pb-5 text-xl">待回款提醒</div>
     <!-- 搜索工作栏 -->
     <el-form
       ref="queryFormRef"
@@ -8,69 +10,26 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <el-form-item label="客户名称" prop="customerId">
+      <el-form-item label="合同状态" prop="remindType">
         <el-select
-          v-model="queryParams.customerId"
+          v-model="queryParams.remindType"
           class="!w-240px"
-          placeholder="请选择客户"
-          @keyup.enter="handleQuery"
+          placeholder="状态"
+          @change="handleQuery"
         >
           <el-option
-            v-for="item in customerList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
+            v-for="(option, index) in RECEIVABLE_REMIND_TYPE"
+            :label="option.label"
+            :value="option.value"
+            :key="index"
           />
         </el-select>
-      </el-form-item>
-      <el-form-item label="合同编号" prop="contractNo">
-        <el-input
-          v-model="queryParams.contractNo"
-          class="!w-240px"
-          clearable
-          placeholder="请输入合同编号"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="handleQuery">
-          <Icon class="mr-5px" icon="ep:search" />
-          搜索
-        </el-button>
-        <el-button @click="resetQuery">
-          <Icon class="mr-5px" icon="ep:refresh" />
-          重置
-        </el-button>
-        <el-button
-          v-hasPermi="['crm:receivable-plan:create']"
-          plain
-          type="primary"
-          @click="openForm('create')"
-        >
-          <Icon class="mr-5px" icon="ep:plus" />
-          新增
-        </el-button>
-        <el-button
-          v-hasPermi="['crm:receivable-plan:export']"
-          :loading="exportLoading"
-          plain
-          type="success"
-          @click="handleExport"
-        >
-          <Icon class="mr-5px" icon="ep:download" />
-          导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
-  <!-- 列表 -->
   <ContentWrap>
-    <el-tabs v-model="activeName" @tab-click="handleTabClick">
-      <el-tab-pane label="我负责的" name="1" />
-      <el-tab-pane label="下属负责的" name="3" />
-    </el-tabs>
-    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column align="center" fixed="left" label="客户名称" prop="customerName" width="150">
         <template #default="scope">
           <el-link
@@ -178,54 +137,31 @@
           >
             创建回款
           </el-button>
-          <el-button
-            v-hasPermi="['crm:receivable-plan:update']"
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-          >
-            编辑
-          </el-button>
-          <el-button
-            v-hasPermi="['crm:receivable-plan:delete']"
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-          >
-            删除
-          </el-button>
         </template>
       </el-table-column>
     </el-table>
     <!-- 分页 -->
     <Pagination
-      v-model:limit="queryParams.pageSize"
-      v-model:page="queryParams.pageNo"
       :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
       @pagination="getList"
     />
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <ReceivablePlanForm ref="formRef" @success="getList" />
   <ReceivableForm ref="receivableFormRef" @success="getList" />
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
-import download from '@/utils/download'
 import * as ReceivablePlanApi from '@/api/crm/receivable/plan'
-import ReceivablePlanForm from './ReceivablePlanForm.vue'
-import * as CustomerApi from '@/api/crm/customer'
+import { RECEIVABLE_REMIND_TYPE } from './common'
 import { erpPriceInputFormatter, erpPriceTableColumnFormatter } from '@/utils'
-import { TabsPaneContext } from 'element-plus'
 import ReceivableForm from '@/views/crm/receivable/ReceivableForm.vue'
 
-defineOptions({ name: 'ReceivablePlan' })
-
-const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
+defineOptions({ name: 'ReceivablePlanRemindList' })
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -233,20 +169,9 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  sceneType: '1', // 默认和 activeName 相等
-  customerId: undefined,
-  contractNo: undefined
+  remindType: 1
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
-const activeName = ref('1') // 列表 tab
-const customerList = ref<CustomerApi.CustomerVO[]>([]) // 客户列表
-
-/** tab 切换 */
-const handleTabClick = (tab: TabsPaneContext) => {
-  queryParams.sceneType = tab.paneName
-  handleQuery()
-}
 
 /** 查询列表 */
 const getList = async () => {
@@ -266,50 +191,10 @@ const handleQuery = () => {
   getList()
 }
 
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  handleQuery()
-}
-
-/** 添加/修改操作 */
-const formRef = ref()
-const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
-}
-
 /** 创建回款操作 */
 const receivableFormRef = ref()
 const openReceivableForm = (row: ReceivablePlanApi.ReceivablePlanVO) => {
   receivableFormRef.value.open('create', undefined, row)
-}
-
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    await ReceivablePlanApi.deleteReceivablePlan(id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    await getList()
-  } catch {}
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await ReceivablePlanApi.exportReceivablePlan(queryParams)
-    download.excel(data, '回款计划.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /** 打开详情 */
@@ -323,10 +208,13 @@ const openCustomerDetail = (id: number) => {
   push({ name: 'CrmCustomerDetail', params: { id } })
 }
 
+/** 激活时 */
+onActivated(async () => {
+  await getList()
+})
+
 /** 初始化 **/
 onMounted(async () => {
   await getList()
-  // 获得客户列表
-  customerList.value = await CustomerApi.getCustomerSimpleList()
 })
 </script>

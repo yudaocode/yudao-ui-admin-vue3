@@ -5,14 +5,24 @@ export interface ReceivableVO {
   no: string
   planId: number
   customerId: number
+  customerName?: string
   contractId: number
+  contract?: {
+    no: string
+    totalPrice: number
+  }
   auditStatus: number
   processInstanceId: number
   returnTime: Date
   returnType: string
   price: number
   ownerUserId: number
+  ownerUserName?: string
   remark: string
+  creator: string // 创建人
+  creatorName?: string // 创建人名称
+  createTime: Date // 创建时间
+  updateTime: Date // 更新时间
 }
 
 // 查询回款列表
@@ -53,4 +63,9 @@ export const exportReceivable = async (params) => {
 // 提交审核
 export const submitReceivable = async (id: number) => {
   return await request.put({ url: `/crm/receivable/submit?id=${id}` })
+}
+
+// 获得待审核回款数量
+export const getAuditReceivableCount = async () => {
+  return await request.get({ url: '/crm/receivable/audit-count' })
 }

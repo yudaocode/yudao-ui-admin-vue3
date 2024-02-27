@@ -4,16 +4,26 @@ export interface ReceivablePlanVO {
   id: number
   period: number
   receivableId: number
-  finishStatus: number
-  processInstanceId: number
   price: number
   returnTime: Date
   remindDays: number
+  returnType: number
   remindTime: Date
   customerId: number
+  customerName?: string
   contractId: number
+  contractNo?: string
   ownerUserId: number
+  ownerUserName?: string
   remark: string
+  creator: string // 创建人
+  creatorName?: string // 创建人名称
+  createTime: Date // 创建时间
+  updateTime: Date // 更新时间
+  receivable?: {
+    price: number
+    returnTime: Date
+  }
 }
 
 // 查询回款计划列表
@@ -32,9 +42,9 @@ export const getReceivablePlan = async (id: number) => {
 }
 
 // 查询回款计划下拉数据
-export const getReceivablePlanListByContractId = async (customerId: number, contractId: number) => {
+export const getReceivablePlanSimpleList = async (customerId: number, contractId: number) => {
   return await request.get({
-    url: `/crm/receivable-plan/list-all-simple-by-customer?customerId=${customerId}&contractId=${contractId}`
+    url: `/crm/receivable-plan/simple-list?customerId=${customerId}&contractId=${contractId}`
   })
 }
 
@@ -56,4 +66,9 @@ export const deleteReceivablePlan = async (id: number) => {
 // 导出回款计划 Excel
 export const exportReceivablePlan = async (params) => {
   return await request.download({ url: `/crm/receivable-plan/export-excel`, params })
+}
+
+// 获得待回款提醒数量
+export const getReceivablePlanRemindCount = async () => {
+  return await request.get({ url: '/crm/receivable-plan/remind-count' })
 }

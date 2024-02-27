@@ -1,7 +1,7 @@
 <template>
   <!-- 操作栏 -->
   <el-row justify="end">
-    <el-button @click="openForm">
+    <el-button @click="openForm('create')">
       <Icon class="mr-5px" icon="icon-park:income-one" />
       创建回款
     </el-button>
@@ -12,7 +12,7 @@
     <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
       <el-table-column align="center" label="回款编号" prop="no" />
       <el-table-column align="center" label="客户" prop="customerName" />
-      <el-table-column align="center" label="合同" prop="contractName" />
+      <el-table-column align="center" label="合同" prop="contract.no" />
       <el-table-column
         :formatter="dateFormatter2"
         align="center"
@@ -25,7 +25,12 @@
           <dict-tag :type="DICT_TYPE.CRM_RECEIVABLE_RETURN_TYPE" :value="scope.row.returnType" />
         </template>
       </el-table-column>
-      <el-table-column align="center" label="回款金额(元)" prop="price" />
+      <el-table-column
+        align="center"
+        label="回款金额(元)"
+        prop="price"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column align="center" label="负责人" prop="ownerUserName" />
       <el-table-column align="center" label="备注" prop="remark" />
       <el-table-column align="center" fixed="right" label="操作" width="130px">
@@ -67,6 +72,7 @@ import * as ReceivableApi from '@/api/crm/receivable'
 import ReceivableForm from './../ReceivableForm.vue'
 import { dateFormatter2 } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
+import { erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'CrmReceivableList' })
 const props = defineProps<{
@@ -117,7 +123,10 @@ const handleQuery = () => {
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
+  formRef.value.open(type, id, {
+    customerId: props.customerId,
+    contractId: props.contractId
+  })
 }
 
 /** 删除按钮操作 */
@@ -134,11 +143,12 @@ const handleDelete = async (id: number) => {
 }
 
 /** 从回款计划创建回款 */
-const crateReceivable = (planData: any) => {
+const createReceivable = (planData: any) => {
   const data = planData as unknown as ReceivablePlanApi.ReceivablePlanVO
   formRef.value.open('create', undefined, data)
 }
-defineExpose({ crateReceivable })
+defineExpose({ createReceivable })
+
 /** 监听打开的 customerId + contractId，从而加载最新的列表 */
 watch(
   () => [props.customerId, props.contractId],

@@ -64,7 +64,7 @@
         <ContractList :biz-id="customer.id!" :biz-type="BizTypeEnum.CRM_CUSTOMER" />
       </el-tab-pane>
       <el-tab-pane label="回款" lazy>
-        <ReceivablePlanList :customer-id="customer.id!" @crate-receivable="crateReceivable" />
+        <ReceivablePlanList :customer-id="customer.id!" @create-receivable="createReceivable" />
         <ReceivableList ref="receivableListRef" :customer-id="customer.id!" />
       </el-tab-pane>
       <el-tab-pane label="操作日志">
@@ -199,8 +199,8 @@ const getOperateLog = async () => {
 
 /** 从回款计划创建回款 */
 const receivableListRef = ref<InstanceType<typeof ReceivableList>>() // 回款列表 Ref
-const crateReceivable = (planData: any) => {
-  receivableListRef.value?.crateReceivable(planData)
+const createReceivable = (planData: any) => {
+  receivableListRef.value?.createReceivable(planData)
 }
 
 const close = () => {

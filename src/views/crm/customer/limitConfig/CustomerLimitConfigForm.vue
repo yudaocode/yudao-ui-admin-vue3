@@ -82,7 +82,6 @@ const formRules = reactive({
   maxCount: [{ required: true, message: '数量上限不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-// TODO @芋艿：看看怎么搞个部门选择组件
 const deptTree = ref() // 部门树形结构
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 
