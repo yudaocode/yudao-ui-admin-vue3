@@ -24,13 +24,12 @@ const toggleCollapse = () => {
 </script>
 
 <template>
-  <div :class="prefixCls">
+  <div :class="prefixCls" @click="toggleCollapse">
     <Icon
       :color="color"
       :icon="collapse ? 'ep:expand' : 'ep:fold'"
       :size="18"
       class="cursor-pointer"
-      @click="toggleCollapse"
     />
   </div>
 </template>
