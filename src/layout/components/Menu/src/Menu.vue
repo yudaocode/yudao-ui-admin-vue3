@@ -124,16 +124,6 @@ export default defineComponent({
 <style lang="scss" scoped>
 $prefix-cls: #{$namespace}-menu;
 
-.is-active--after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 4px;
-  height: 100%;
-  background-color: var(--el-color-primary);
-  content: '';
-}
-
 .#{$prefix-cls} {
   position: relative;
   transition: width var(--transition-time-02);
@@ -171,10 +161,6 @@ $prefix-cls: #{$namespace}-menu;
 
     .#{$elNamespace}-menu-item.is-active {
       position: relative;
-
-      &::after {
-        @extend .is-active--after;
-      }
     }
 
     // 设置子菜单的背景颜色
@@ -194,10 +180,6 @@ $prefix-cls: #{$namespace}-menu;
     & > .is-active > .#{$elNamespace}-sub-menu__title {
       position: relative;
       background-color: var(--left-menu-collapse-bg-active-color) !important;
-
-      &::after {
-        @extend .is-active--after;
-      }
     }
   }
 
@@ -245,16 +227,6 @@ $prefix-cls: #{$namespace}-menu;
 <style lang="scss">
 $prefix-cls: #{$namespace}-menu-popper;
 
-.is-active--after {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 4px;
-  height: 100%;
-  background-color: var(--el-color-primary);
-  content: '';
-}
-
 .#{$prefix-cls}--vertical,
 .#{$prefix-cls}--horizontal {
   // 设置选中时子标题的颜色
@@ -280,10 +252,6 @@ $prefix-cls: #{$namespace}-menu-popper;
 
     &:hover {
       background-color: var(--left-menu-bg-active-color) !important;
-    }
-
-    &::after {
-      @extend .is-active--after;
     }
   }
 }
