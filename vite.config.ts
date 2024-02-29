@@ -25,10 +25,7 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
     root: root,
     // 服务端渲染
     server: {
-      // 是否开启 https
-      https: false,
-      // 端口号
-      port: env.VITE_PORT,
+      port: env.VITE_PORT, // 端口号
       host: "0.0.0.0",
       open: env.VITE_OPEN === 'true',
       // 本地跨域代理. 目前注释的原因：暂时没有用途，server 端已经支持跨域
