@@ -1,4 +1,4 @@
-<!-- 客户总量分析 -->
+<!-- 客户跟进次数分析 -->
 <template>
   <!-- Echarts图 -->
   <el-card shadow="never">
@@ -12,8 +12,8 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column label="序号" align="center" type="index" width="80" />
       <el-table-column label="日期" align="center" prop="category" min-width="200" />
-      <el-table-column label="新增客户数" align="center" prop="customerCount" min-width="200" />
-      <el-table-column label="成交客户数" align="center" prop="dealCustomerCount" min-width="200" />
+      <el-table-column label="跟进客户数" align="center" prop="distinctRecordCount" min-width="200" />
+      <el-table-column label="跟进次数" align="center" prop="recordCount" min-width="200" />
     </el-table>
   </el-card>
 </template>
@@ -21,7 +21,7 @@
 import { StatisticsCustomerApi, StatisticsCustomerRespVO } from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
 
-defineOptions({ name: 'TotalCustomerCount' })
+defineOptions({ name: 'FollowupCount' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
@@ -38,12 +38,12 @@ const echartsOption = reactive<EChartsOption>({
   legend: { },
   series: [
     {
-      name: '新增客户数',
+      name: '跟进客户数',
       type: 'bar',
       data: []
     },
     {
-      name: '成交客户数',
+      name: '跟进次数',
       type: 'bar',
       data: []
     },
@@ -56,7 +56,7 @@ const echartsOption = reactive<EChartsOption>({
       brush: {
         type: ['lineX', 'clear'] // 区域缩放按钮、还原按钮
       },
-      saveAsImage: { show: true, name: '客户总量分析' } // 保存为图片
+      saveAsImage: { show: true, name: '客户跟进次数分析' } // 保存为图片
     }
   },
   tooltip: {
@@ -80,24 +80,24 @@ const echartsOption = reactive<EChartsOption>({
 const loadData = async () => {
   // 1. 加载统计数据
   loading.value = true
-  const customerCount = await StatisticsCustomerApi.getTotalCustomerCount(props.queryParams)
-  const dealCustomerCount = await StatisticsCustomerApi.getDealTotalCustomerCount(props.queryParams)
+  const recordCount = await StatisticsCustomerApi.getRecordCount(props.queryParams)
+  const distinctRecordCount = await StatisticsCustomerApi.getDistinctRecordCount(props.queryParams)
   // 2.1 更新 Echarts 数据
   if (echartsOption.xAxis && echartsOption.xAxis['data']) {
-    echartsOption.xAxis['data'] = customerCount.map((s: StatisticsCustomerRespVO) => s.category)
+    echartsOption.xAxis['data'] = recordCount.map((s: StatisticsCustomerRespVO) => s.category)
   }
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
-    echartsOption.series[0]['data'] = customerCount.map((s: StatisticsCustomerRespVO) => s.count)
+    echartsOption.series[0]['data'] = distinctRecordCount.map((s: StatisticsCustomerRespVO) => s.count)
   }
   if (echartsOption.series && echartsOption.series[1] && echartsOption.series[1]['data']) {
-    echartsOption.series[1]['data'] = dealCustomerCount.map((s: StatisticsCustomerRespVO) => s.count)
+    echartsOption.series[1]['data'] = recordCount.map((s: StatisticsCustomerRespVO) => s.count)
   }
   // 2.2 更新列表数据
-  const tableData = customerCount.map((item: StatisticsCustomerRespVO, index: number) => {
+  const tableData = recordCount.map((item: StatisticsCustomerRespVO, index: number) => {
     return {
       category: item.category,
-      customerCount: item.count,
-      dealCustomerCount: dealCustomerCount[index].count,
+      recordCount: item.count,
+      distinctRecordCount: distinctRecordCount[index].count,
     }
   })
   list.value = tableData

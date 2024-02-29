@@ -56,6 +56,22 @@
       <el-tab-pane label="客户总量分析" name="totalCustomerCount" lazy>
         <TotalCustomerCount :query-params="queryParams" ref="totalCustomerCountRef" />
       </el-tab-pane>
+      <!-- 客户跟进次数分析 -->
+      <el-tab-pane label="客户跟进次数分析" name="followupCount" lazy>
+        <FollowupCount :query-params="queryParams" ref="followupCountRef" />
+      </el-tab-pane>
+      <!-- 客户跟进方式分析 -->
+      <el-tab-pane label="客户跟进方式分析" name="followupType" lazy>
+        <FollowupType :query-params="queryParams" ref="followupTypeRef" />
+      </el-tab-pane>
+      <!-- 客户转化率分析 -->
+      <el-tab-pane label="客户转化率分析" name="conversionRate" lazy>
+        <ConversionRate :query-params="queryParams" ref="conversionRateRef" />
+      </el-tab-pane>
+      <!-- 成交周期分析 -->
+      <el-tab-pane label="成交周期分析" name="customerCycle" lazy>
+        <CustomerCycle :query-params="queryParams" ref="customerCycleRef" />
+      </el-tab-pane>
     </el-tabs>
   </el-col>
 </template>
@@ -66,6 +82,11 @@ import { useUserStore } from '@/store/modules/user'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { defaultProps, handleTree } from '@/utils/tree'
 import TotalCustomerCount from './components/TotalCustomerCount.vue'
+import FollowupCount from './components/FollowupCount.vue'
+import FollowupType from './components/FollowupType.vue'
+import ConversionRate from './components/ConversionRate.vue'
+import CustomerCycle from './components/CustomerCycle.vue' 
+
 
 defineOptions({ name: 'CrmStatisticsCustomer' })
 
@@ -84,7 +105,7 @@ const deptList = ref<Tree[]>([]) // 部门树形结构
 const userList = ref<UserApi.UserVO[]>([]) // 全量用户清单
 // 根据选择的部门筛选员工清单
 const userListByDeptId = computed(() =>
-  queryParams.deptId ? userList.value.filter((u) => u.deptId === queryParams.deptId) : []
+  queryParams.deptId ? userList.value.filter((u: UserApi.UserVO) => u.deptId === queryParams.deptId) : []
 )
 
 // 活跃标签
@@ -92,16 +113,33 @@ const activeTab = ref('totalCustomerCount')
 // 1.客户总量分析
 const totalCustomerCountRef = ref()
 // 2.客户跟进次数分析
+const followupCountRef = ref()
 // 3.客户跟进方式分析
+const followupTypeRef = ref()
 // 4.客户转化率分析
+const conversionRateRef = ref()
 // 5.公海客户分析
+// 缺 crm_owner_record 表
 // 6.成交周期分析
+const customerCycleRef = ref()
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   switch (activeTab.value) {
     case 'totalCustomerCount':
       totalCustomerCountRef.value?.loadData?.()
+      break
+    case 'followupCount':
+      followupCountRef.value?.loadData?.()
+      break
+    case 'followupType':
+      followupTypeRef.value?.loadData?.()
+      break
+    case 'conversionRate':
+      conversionRateRef.value?.loadData?.()
+      break
+    case 'customerCycle':
+      customerCycleRef.value?.loadData?.()
       break
   }
 }

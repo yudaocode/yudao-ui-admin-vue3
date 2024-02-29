@@ -1,4 +1,4 @@
-<!-- 客户总量分析 -->
+<!-- 成交周期分析 -->
 <template>
   <!-- Echarts图 -->
   <el-card shadow="never">
@@ -12,7 +12,7 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column label="序号" align="center" type="index" width="80" />
       <el-table-column label="日期" align="center" prop="category" min-width="200" />
-      <el-table-column label="新增客户数" align="center" prop="customerCount" min-width="200" />
+      <el-table-column label="成交周期(天)" align="center" prop="customerCycle" min-width="200" />
       <el-table-column label="成交客户数" align="center" prop="dealCustomerCount" min-width="200" />
     </el-table>
   </el-card>
@@ -38,7 +38,7 @@ const echartsOption = reactive<EChartsOption>({
   legend: { },
   series: [
     {
-      name: '新增客户数',
+      name: '成交周期(天)',
       type: 'bar',
       data: []
     },
@@ -56,7 +56,7 @@ const echartsOption = reactive<EChartsOption>({
       brush: {
         type: ['lineX', 'clear'] // 区域缩放按钮、还原按钮
       },
-      saveAsImage: { show: true, name: '客户总量分析' } // 保存为图片
+      saveAsImage: { show: true, name: '成交周期分析' } // 保存为图片
     }
   },
   tooltip: {
@@ -80,23 +80,23 @@ const echartsOption = reactive<EChartsOption>({
 const loadData = async () => {
   // 1. 加载统计数据
   loading.value = true
-  const customerCount = await StatisticsCustomerApi.getTotalCustomerCount(props.queryParams)
+  const customerCycle = await StatisticsCustomerApi.getCustomerCycle(props.queryParams)
   const dealCustomerCount = await StatisticsCustomerApi.getDealTotalCustomerCount(props.queryParams)
   // 2.1 更新 Echarts 数据
   if (echartsOption.xAxis && echartsOption.xAxis['data']) {
-    echartsOption.xAxis['data'] = customerCount.map((s: StatisticsCustomerRespVO) => s.category)
+    echartsOption.xAxis['data'] = customerCycle.map((s: StatisticsCustomerRespVO) => s.category)
   }
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
-    echartsOption.series[0]['data'] = customerCount.map((s: StatisticsCustomerRespVO) => s.count)
+    echartsOption.series[0]['data'] = customerCycle.map((s: StatisticsCustomerRespVO) => s['cycle'])
   }
   if (echartsOption.series && echartsOption.series[1] && echartsOption.series[1]['data']) {
     echartsOption.series[1]['data'] = dealCustomerCount.map((s: StatisticsCustomerRespVO) => s.count)
   }
   // 2.2 更新列表数据
-  const tableData = customerCount.map((item: StatisticsCustomerRespVO, index: number) => {
+  const tableData = customerCycle.map((item: StatisticsCustomerRespVO, index: number) => {
     return {
       category: item.category,
-      customerCount: item.count,
+      customerCycle: item.cycle,
       dealCustomerCount: dealCustomerCount[index].count,
     }
   })
