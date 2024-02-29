@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【交易】快递发货" url="https://doc.iocoder.cn/mall/trade-delivery-express/" />
+
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form

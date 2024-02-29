@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【统计】会员、商品、交易统计" url="https://doc.iocoder.cn/mall/statistics/" />
+
   <!-- 商品概览 -->
   <ProductSummary />
   <!-- 商品排行 -->

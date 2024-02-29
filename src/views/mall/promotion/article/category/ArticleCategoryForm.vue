@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【营销】内容管理" url="https://doc.iocoder.cn/mall/promotion-content/" />
+
   <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"

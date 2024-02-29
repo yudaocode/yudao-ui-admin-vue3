@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【营销】拼团活动" url="https://doc.iocoder.cn/mall/promotion-combination/" />
+
   <!-- 统计信息展示 -->
   <el-row :gutter="12">
     <el-col :span="6">
