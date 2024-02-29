@@ -55,6 +55,7 @@
     "mitt": "^3.0.1",
     "nprogress": "^0.2.0",
     "pinia": "^2.1.7",
+    "pinia-plugin-persist": "^1.0.0",
     "qrcode": "^1.5.3",
     "qs": "^6.11.2",
     "steady-xml": "^0.1.0",

@@ -185,7 +185,7 @@ defineExpose({
     <Toolbar
       :editor="editorRef"
       :editorId="editorId"
-      class="border-0 b-b-1 border-[var(--el-border-color)] border-solid"
+      class="border-0 b-b-1 border-solid border-[var(--tags-view-border-color)]"
     />
     <!-- 编辑器 -->
     <Editor
