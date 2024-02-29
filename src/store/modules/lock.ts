@@ -10,7 +10,6 @@ interface LockState {
   lockInfo: lockInfo
 }
 
-// TODO 芋艿：【锁屏】这里有报错，后续解决下
 export const useLockStore = defineStore('lock', {
   state: (): LockState => {
     return {
@@ -41,10 +40,7 @@ export const useLockStore = defineStore('lock', {
       }
     }
   },
-  persist: {
-    enabled: true,
-    strategies: [{ key: 'lock', storage: localStorage }]
-  }
+  persist: true
 })
 
 export const useLockStoreWithOut = () => {
