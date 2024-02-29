@@ -1,7 +1,7 @@
-import { store } from '../index'
+import { store } from '@/store'
 import { defineStore } from 'pinia'
 import { getAccessToken, removeToken } from '@/utils/auth'
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
+import { CACHE_KEY, useCache, deleteUserCache } from '@/hooks/web/useCache'
 import { getInfo, loginOut } from '@/api/login'
 
 const { wsCache } = useCache()
@@ -13,11 +13,20 @@ interface UserVO {
   deptId: number
 }
 
+interface RememberMeInfo {
+  enable: boolean // 是否记住我
+  username: string
+  password: string
+}
+
 interface UserInfoVO {
+  // USER 缓存
   permissions: string[]
   roles: string[]
   isSetUser: boolean
   user: UserVO
+  // REMEMBER_ME 缓存
+  rememberMe: RememberMeInfo
 }
 
 export const useUserStore = defineStore('admin-user', {
@@ -30,6 +39,11 @@ export const useUserStore = defineStore('admin-user', {
       avatar: '',
       nickname: '',
       deptId: 0
+    },
+    rememberMe: {
+      enable: true,
+      username: '',
+      password: ''
     }
   }),
   getters: {
@@ -80,7 +94,7 @@ export const useUserStore = defineStore('admin-user', {
     async loginOut() {
       await loginOut()
       removeToken()
-      wsCache.clear()
+      deleteUserCache() // 删除用户缓存
       this.resetState()
     },
     resetState() {

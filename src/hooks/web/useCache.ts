@@ -25,3 +25,9 @@ export const useCache = (type: CacheType = 'localStorage') => {
     wsCache
   }
 }
+
+export const deleteUserCache = () => {
+  const { wsCache } = useCache()
+  wsCache.delete(CACHE_KEY.USER)
+  wsCache.delete(CACHE_KEY.ROLE_ROUTERS)
+}

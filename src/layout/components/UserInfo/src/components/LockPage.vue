@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { resetRouter } from '@/router'
-import { useCache } from '@/hooks/web/useCache'
+import { deleteUserCache } from '@/hooks/web/useCache'
 import { useLockStore } from '@/store/modules/lock'
 import { useNow } from '@/hooks/web/useNow'
 import { useDesign } from '@/hooks/web/useDesign'
@@ -9,8 +9,6 @@ import { useUserStore } from '@/store/modules/user'
 import avatarImg from '@/assets/imgs/avatar.gif'
 
 const tagsViewStore = useTagsViewStore()
-
-const { wsCache } = useCache()
 
 const { replace } = useRouter()
 
@@ -52,7 +50,7 @@ async function unLock() {
 async function goLogin() {
   await userStore.loginOut().catch(() => {})
   // 登出后清理
-  wsCache.clear()
+  deleteUserCache() // 清空用户缓存
   tagsViewStore.delAllViews()
   resetRouter() // 重置静态路由表
   lockStore.resetLockInfo()
