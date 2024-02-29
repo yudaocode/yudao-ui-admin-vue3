@@ -2,7 +2,7 @@
 import { resetRouter } from '@/router'
 import { useCache } from '@/hooks/web/useCache'
 import { useLockStore } from '@/store/modules/lock'
-import { useNow } from './useNow'
+import { useNow } from '@/hooks/web/useNow'
 import { useDesign } from '@/hooks/web/useDesign'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useUserStore } from '@/store/modules/user'
