@@ -13,20 +13,12 @@ interface UserVO {
   deptId: number
 }
 
-interface RememberMeInfo {
-  enable: boolean // 是否记住我
-  username: string
-  password: string
-}
-
 interface UserInfoVO {
   // USER 缓存
   permissions: string[]
   roles: string[]
   isSetUser: boolean
   user: UserVO
-  // REMEMBER_ME 缓存
-  rememberMe: RememberMeInfo
 }
 
 export const useUserStore = defineStore('admin-user', {
@@ -39,11 +31,6 @@ export const useUserStore = defineStore('admin-user', {
       avatar: '',
       nickname: '',
       deptId: 0
-    },
-    rememberMe: {
-      enable: true,
-      username: '',
-      password: ''
     }
   }),
   getters: {
