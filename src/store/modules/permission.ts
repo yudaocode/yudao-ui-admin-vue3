@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { store } from '../index'
+import { store } from '@/store'
 import { cloneDeep } from 'lodash-es'
 import remainingRouter from '@/router/modules/remaining'
 import { flatMultiLevelRoutes, generateRoute } from '@/utils/routerHelper'
