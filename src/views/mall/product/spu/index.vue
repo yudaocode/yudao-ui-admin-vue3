@@ -1,5 +1,7 @@
 <!-- 商品中心 - 商品列表  -->
 <template>
+  <doc-alert title="【商品】商品 SPU 与 SKU" url="https://doc.iocoder.cn/mall/product-spu-sku/" />
+
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form

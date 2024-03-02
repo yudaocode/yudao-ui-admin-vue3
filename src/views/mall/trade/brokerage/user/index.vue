@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【交易】分销返佣" url="https://doc.iocoder.cn/mall/trade-brokerage/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

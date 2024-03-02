@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【营销】内容管理" url="https://doc.iocoder.cn/mall/promotion-content/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

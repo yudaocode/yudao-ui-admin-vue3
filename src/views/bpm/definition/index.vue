@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="工作流手册" url="https://doc.iocoder.cn/bpm/" />
+
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column label="定义编号" align="center" prop="id" width="400" />

@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【采购】采购订单、入库、退货" url="https://doc.iocoder.cn/erp/purchase/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

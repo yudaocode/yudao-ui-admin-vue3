@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【统计】会员、商品、交易统计" url="https://doc.iocoder.cn/mall/statistics/" />
+
   <div class="flex flex-col">
     <el-row :gutter="16" class="summary">
       <el-col :sm="6" :xs="12" v-loading="loading">
@@ -269,8 +271,9 @@ const getMemberSexStatisticsList = async () => {
   const dictDataList = getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)
   dictDataList.push({ label: '未知', value: null } as any)
   sexChartOptions.series![0].data = dictDataList.map((dictData: DictDataType) => {
-    const userCount = list.find((item: MemberSexStatisticsRespVO) => item.sex === dictData.value)
-      ?.userCount
+    const userCount = list.find(
+      (item: MemberSexStatisticsRespVO) => item.sex === dictData.value
+    )?.userCount
     return {
       name: dictData.label,
       value: userCount || 0

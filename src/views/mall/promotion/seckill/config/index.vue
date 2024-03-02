@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="功能开启" url="https://doc.iocoder.cn/mall/build/" />
+  <doc-alert title="【营销】秒杀活动" url="https://doc.iocoder.cn/mall/promotion-seckill/" />
 
   <!-- 搜索工作栏 -->
   <ContentWrap>

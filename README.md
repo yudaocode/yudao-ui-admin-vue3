@@ -202,6 +202,12 @@ _前端基于 crmeb uniapp 经过授权重构，优化代码实现，接入芋�
 
 演示地址：<https://doc.iocoder.cn/erp-preview/>
 
+### CRM 系统
+
+![功能图](/.image/common/crm-feature.png)
+
+演示地址：<https://doc.iocoder.cn/crm-preview/>
+
 ## 🐷 演示图
 
 ### 系统功能
