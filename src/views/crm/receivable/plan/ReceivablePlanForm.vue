@@ -10,7 +10,7 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="还款期数" prop="period">
-            <el-input disabled v-model="formData.period" placeholder="保存时自动生成" />
+            <el-input v-model="formData.period" disabled placeholder="保存时自动生成" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -38,8 +38,8 @@
               :disabled="formType !== 'create'"
               class="w-1/1"
               filterable
-              @change="handleCustomerChange"
               placeholder="请选择客户"
+              @change="handleCustomerChange"
             >
               <el-option
                 v-for="item in customerList"
@@ -74,11 +74,11 @@
           <el-form-item label="计划回款金额" prop="price">
             <el-input-number
               v-model="formData.price"
+              :min="0.01"
+              :precision="2"
               class="!w-100%"
               controls-position="right"
               placeholder="请输入计划回款金额"
-              :min="0.01"
-              :precision="2"
             />
           </el-form-item>
         </el-col>
@@ -136,7 +136,7 @@ import * as CustomerApi from '@/api/crm/customer'
 import * as ContractApi from '@/api/crm/contract'
 import { useUserStore } from '@/store/modules/user'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { aw } from '../../../../../dist-prod/assets/index-9eac537b'
+import { cloneDeep } from 'lodash-es'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -167,7 +167,10 @@ const open = async (type: string, id?: number, customerId?: number, contractId?:
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ReceivablePlanApi.getReceivablePlan(id)
+      const data = await ReceivablePlanApi.getReceivablePlan(id)
+      formData.value = cloneDeep(data)
+      await handleCustomerChange(data.customerId!)
+      formData.value.contractId = data?.contractId
     } finally {
       formLoading.value = false
     }

@@ -3,18 +3,20 @@ import request from '@/config/axios'
 export interface ReceivableVO {
   id: number
   no: string
-  planId: number
-  customerId: number
+  planId?: number
+  customerId?: number
   customerName?: string
-  contractId: number
+  contractId?: number
   contract?: {
+    id?: number
+    name?: string
     no: string
     totalPrice: number
   }
   auditStatus: number
   processInstanceId: number
   returnTime: Date
-  returnType: string
+  returnType: number
   price: number
   ownerUserId: number
   ownerUserName?: string
