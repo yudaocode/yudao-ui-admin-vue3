@@ -29,12 +29,15 @@
           </template>
         </el-radio-group>
       </el-form-item>
-      <!-- TODO @puhui999：同时添加至,还没想好下次搞 -->
-      <el-form-item v-if="false && formType === 'create'" label="同时添加至" prop="toBizType">
-        <el-select v-model="formData.userId">
-          <el-option :value="1" label="联系人" />
-          <el-option :value="1" label="商机" />
-        </el-select>
+      <el-form-item
+        v-if="formType === 'create' && formData.bizType === BizTypeEnum.CRM_CUSTOMER"
+        label="同时添加至"
+      >
+        <el-checkbox-group v-model="formData.toBizTypes">
+          <el-checkbox :label="BizTypeEnum.CRM_CONTACT">联系人</el-checkbox>
+          <el-checkbox :label="BizTypeEnum.CRM_BUSINESS">商机</el-checkbox>
+          <el-checkbox :label="BizTypeEnum.CRM_CONTRACT">合同</el-checkbox>
+        </el-checkbox-group>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -46,7 +49,7 @@
 <script lang="ts" setup>
 import * as UserApi from '@/api/system/user'
 import * as PermissionApi from '@/api/crm/permission'
-import { PermissionLevelEnum } from '@/api/crm/permission'
+import { BizTypeEnum, PermissionLevelEnum } from '@/api/crm/permission'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'CrmPermissionForm' })

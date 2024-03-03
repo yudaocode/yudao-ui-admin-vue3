@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import { TransferReqVO } from '@/api/crm/permission'
 
 export interface CustomerVO {
   id: number // 编号
@@ -101,12 +102,6 @@ export const getCustomerSimpleList = async () => {
 }
 
 // ======================= 业务操作 =======================
-
-export interface TransferReqVO {
-  id: number | undefined // 客户编号
-  newOwnerUserId: number | undefined // 新负责人的用户编号
-  oldOwnerPermissionLevel: number | undefined // 老负责人加入团队后的权限级别
-}
 
 // 客户转移
 export const transferCustomer = async (data: TransferReqVO) => {
