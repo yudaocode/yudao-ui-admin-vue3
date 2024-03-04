@@ -11,22 +11,25 @@
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="list">
       <el-table-column label="序号" align="center" type="index" width="80" />
-      <el-table-column label="跟进方式" align="center" prop="category" min-width="200" />
-      <el-table-column label="个数" align="center" prop="count" min-width="200" />
+      <el-table-column label="跟进方式" align="center" prop="followupType" min-width="200" />
+      <el-table-column label="个数" align="center" prop="followupRecordCount" min-width="200" />
       <el-table-column label="占比(%)" align="center" prop="portion" min-width="200" />
     </el-table>
   </el-card>
 </template>
 <script setup lang="ts">
-import { StatisticsCustomerApi, StatisticsCustomerRespVO } from '@/api/crm/statistics/customer'
+import {
+  StatisticsCustomerApi,
+  CrmStatisticsFollowupSummaryByTypeRespVO
+} from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
 import { round, sumBy } from 'lodash-es'
 
-defineOptions({ name: 'FollowupType' })
+defineOptions({ name: 'CustomerFollowupType' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
-const list = ref<StatisticsCustomerRespVO[]>([]) // 列表的数据
+const list = ref<CrmStatisticsFollowupSummaryByTypeRespVO[]>([]) // 列表的数据
 
 /** 饼图配置 */
 const echartsOption = reactive<EChartsOption>({
@@ -68,23 +71,27 @@ const echartsOption = reactive<EChartsOption>({
 const loadData = async () => {
   // 1. 加载统计数据
   loading.value = true
-  const recordTypeCount = await StatisticsCustomerApi.getRecordTypeCount(props.queryParams)
+  const followupSummaryByType = await StatisticsCustomerApi.getFollowupSummaryByType(
+    props.queryParams
+  )
   // 2.1 更新 Echarts 数据
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
-    echartsOption.series[0]['data'] = recordTypeCount.map((r: StatisticsCustomerRespVO) => {
-      return {
-        name: r.category,
-        value: r.count
+    echartsOption.series[0]['data'] = followupSummaryByType.map(
+      (r: CrmStatisticsFollowupSummaryByTypeRespVO) => {
+        return {
+          name: r.followupType,
+          value: r.followupRecordCount
+        }
       }
-    })
+    )
   }
   // 2.2 更新列表数据
-  const totalCount = sumBy(recordTypeCount, 'count')
-  list.value = recordTypeCount.map((r: StatisticsCustomerRespVO) => {
+  const totalCount = sumBy(followupSummaryByType, 'followupRecordCount')
+  list.value = followupSummaryByType.map((r: CrmStatisticsFollowupSummaryByTypeRespVO) => {
     return {
-      category: r.category,
-      count: r.count,
-      portion: round((r.count / totalCount) * 100, 2)
+      followupType: r.followupType,
+      followupRecordCount: r.followupRecordCount,
+      portion: round((r.followupRecordCount / totalCount) * 100, 2)
     }
   })
   loading.value = false

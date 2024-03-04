@@ -1,4 +1,4 @@
-<!-- 成交周期分析 -->
+<!-- 客户跟进次数分析 -->
 <template>
   <!-- Echarts图 -->
   <el-card shadow="never">
@@ -11,21 +11,30 @@
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="list">
       <el-table-column label="序号" align="center" type="index" width="80" />
-      <el-table-column label="日期" align="center" prop="category" min-width="200" />
-      <el-table-column label="成交周期(天)" align="center" prop="customerCycle" min-width="200" />
-      <el-table-column label="成交客户数" align="center" prop="dealCustomerCount" min-width="200" />
+      <el-table-column label="员工姓名" align="center" prop="ownerUserName" min-width="200" />
+      <el-table-column label="跟进次数" align="right" prop="followupRecordCount" min-width="200" />
+      <el-table-column
+        label="跟进客户数"
+        align="right"
+        prop="followupCustomerCount"
+        min-width="200"
+      />
     </el-table>
   </el-card>
 </template>
 <script setup lang="ts">
-import { StatisticsCustomerApi, StatisticsCustomerRespVO } from '@/api/crm/statistics/customer'
+import {
+  StatisticsCustomerApi,
+  CrmStatisticsFollowupSummaryByDateRespVO,
+  CrmStatisticsFollowupSummaryByUserRespVO
+} from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
 
-defineOptions({ name: 'TotalCustomerCount' })
+defineOptions({ name: 'CustomerFollowupSummary' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
-const list = ref<StatisticsCustomerRespVO[]>([]) // 列表的数据
+const list = ref<CrmStatisticsFollowupSummaryByUserRespVO[]>([]) // 列表的数据
 
 /** 柱状图配置：纵向 */
 const echartsOption = reactive<EChartsOption>({
@@ -35,18 +44,18 @@ const echartsOption = reactive<EChartsOption>({
     bottom: 20,
     containLabel: true
   },
-  legend: { },
+  legend: {},
   series: [
     {
-      name: '成交周期(天)',
+      name: '跟进客户数',
       type: 'bar',
       data: []
     },
     {
-      name: '成交客户数',
+      name: '跟进次数',
       type: 'bar',
       data: []
-    },
+    }
   ],
   toolbox: {
     feature: {
@@ -56,7 +65,7 @@ const echartsOption = reactive<EChartsOption>({
       brush: {
         type: ['lineX', 'clear'] // 区域缩放按钮、还原按钮
       },
-      saveAsImage: { show: true, name: '成交周期分析' } // 保存为图片
+      saveAsImage: { show: true, name: '客户跟进次数分析' } // 保存为图片
     }
   },
   tooltip: {
@@ -80,27 +89,30 @@ const echartsOption = reactive<EChartsOption>({
 const loadData = async () => {
   // 1. 加载统计数据
   loading.value = true
-  const customerCycle = await StatisticsCustomerApi.getCustomerCycle(props.queryParams)
-  const dealCustomerCount = await StatisticsCustomerApi.getDealTotalCustomerCount(props.queryParams)
+  const followupSummaryByDate = await StatisticsCustomerApi.getFollowupSummaryByDate(
+    props.queryParams
+  )
+  const followupSummaryByUser = await StatisticsCustomerApi.getFollowupSummaryByUser(
+    props.queryParams
+  )
   // 2.1 更新 Echarts 数据
   if (echartsOption.xAxis && echartsOption.xAxis['data']) {
-    echartsOption.xAxis['data'] = customerCycle.map((s: StatisticsCustomerRespVO) => s.category)
+    echartsOption.xAxis['data'] = followupSummaryByDate.map(
+      (s: CrmStatisticsFollowupSummaryByDateRespVO) => s.time
+    )
   }
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
-    echartsOption.series[0]['data'] = customerCycle.map((s: StatisticsCustomerRespVO) => s['cycle'])
+    echartsOption.series[0]['data'] = followupSummaryByDate.map(
+      (s: CrmStatisticsFollowupSummaryByDateRespVO) => s.followupCustomerCount
+    )
   }
   if (echartsOption.series && echartsOption.series[1] && echartsOption.series[1]['data']) {
-    echartsOption.series[1]['data'] = dealCustomerCount.map((s: StatisticsCustomerRespVO) => s.count)
+    echartsOption.series[1]['data'] = followupSummaryByDate.map(
+      (s: CrmStatisticsFollowupSummaryByDateRespVO) => s.followupRecordCount
+    )
   }
   // 2.2 更新列表数据
-  const tableData = customerCycle.map((item: StatisticsCustomerRespVO, index: number) => {
-    return {
-      category: item.category,
-      customerCycle: item.cycle,
-      dealCustomerCount: dealCustomerCount[index].count,
-    }
-  })
-  list.value = tableData
+  list.value = followupSummaryByUser
   loading.value = false
 }
 defineExpose({ loadData })
