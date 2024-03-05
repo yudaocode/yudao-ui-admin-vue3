@@ -95,7 +95,7 @@ export const StatisticsCustomerApi = {
   // 4.1 合同摘要信息(客户转化率页面)
   getContractSummary: (params: any) => {
     return request.get({
-      url: '/crm/statistics-customer/get-followup-summary-by-type',
+      url: '/crm/statistics-customer/get-contract-summary',
       params
     })
   },
