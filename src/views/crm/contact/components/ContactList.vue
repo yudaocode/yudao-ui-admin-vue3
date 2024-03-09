@@ -6,18 +6,20 @@
       创建联系人
     </el-button>
     <el-button
-      @click="openBusinessModal"
-      v-hasPermi="['crm:contact:create-business']"
       v-if="queryParams.businessId"
+      v-hasPermi="['crm:contact:create-business']"
+      @click="openBusinessModal"
     >
-      <Icon class="mr-5px" icon="ep:circle-plus" />关联
+      <Icon class="mr-5px" icon="ep:circle-plus" />
+      关联
     </el-button>
     <el-button
-      @click="deleteContactBusinessList"
-      v-hasPermi="['crm:contact:delete-business']"
       v-if="queryParams.businessId"
+      v-hasPermi="['crm:contact:delete-business']"
+      @click="deleteContactBusinessList"
     >
-      <Icon class="mr-5px" icon="ep:remove" />解除关联
+      <Icon class="mr-5px" icon="ep:remove" />
+      解除关联
     </el-button>
   </el-row>
 
@@ -27,21 +29,21 @@
       ref="contactRef"
       v-loading="loading"
       :data="list"
-      :stripe="true"
       :show-overflow-tooltip="true"
+      :stripe="true"
     >
-      <el-table-column type="selection" width="55" v-if="queryParams.businessId" />
-      <el-table-column label="姓名" fixed="left" align="center" prop="name">
+      <el-table-column v-if="queryParams.businessId" type="selection" width="55" />
+      <el-table-column align="center" fixed="left" label="姓名" prop="name">
         <template #default="scope">
-          <el-link type="primary" :underline="false" @click="openDetail(scope.row.id)">
+          <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
             {{ scope.row.name }}
           </el-link>
         </template>
       </el-table-column>
-      <el-table-column label="手机号" align="center" prop="mobile" />
-      <el-table-column label="职位" align="center" prop="post" />
-      <el-table-column label="直属上级" align="center" prop="parentName" />
-      <el-table-column label="是否关键决策人" align="center" prop="master" min-width="100">
+      <el-table-column align="center" label="手机号" prop="mobile" />
+      <el-table-column align="center" label="职位" prop="post" />
+      <el-table-column align="center" label="直属上级" prop="parentName" />
+      <el-table-column align="center" label="是否关键决策人" min-width="100" prop="master">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.master" />
         </template>
@@ -49,9 +51,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -60,12 +62,13 @@
   <ContactForm ref="formRef" @success="getList" />
   <!-- 关联商机选择弹框 -->
   <ContactListModal
+    v-if="customerId"
     ref="contactModalRef"
-    :customer-id="props.customerId"
+    :customer-id="customerId"
     @success="createContactBusinessList"
   />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as ContactApi from '@/api/crm/contact'
 import ContactForm from './../ContactForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
@@ -76,8 +79,8 @@ defineOptions({ name: 'CrmContactList' })
 const props = defineProps<{
   bizType: number // 业务类型
   bizId: number // 业务编号
-  customerId: number // 特殊：客户编号；在【商机】详情中，可以传递客户编号，默认新建的联系人关联到该客户
-  businessId: number // 特殊：商机编号；在【商机】详情中，可以传递商机编号，默认新建的联系人关联到该商机
+  customerId?: number // 特殊：客户编号；在【商机】详情中，可以传递客户编号，默认新建的联系人关联到该客户
+  businessId?: number // 特殊：商机编号；在【商机】详情中，可以传递商机编号，默认新建的联系人关联到该商机
 }>()
 
 const loading = ref(true) // 列表的加载中
@@ -147,7 +150,7 @@ const createContactBusinessList = async (contactIds: number[]) => {
     contactIds: contactIds
   } as ContactApi.ContactBusiness2ReqVO
   contactRef.value.getSelectionRows().forEach((row: ContactApi.ContactVO) => {
-    data.businessIds.push(row.id)
+    data.contactIds.push(row.id)
   })
   await ContactApi.createContactBusinessList2(data)
   // 刷新列表

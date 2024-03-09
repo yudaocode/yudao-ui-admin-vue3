@@ -31,15 +31,15 @@
         <BusinessList
           :biz-id="contact.id!"
           :biz-type="BizTypeEnum.CRM_CONTACT"
-          :customer-id="contact.customerId"
           :contact-id="contact.id"
+          :customer-id="contact.customerId"
         />
       </el-tab-pane>
     </el-tabs>
   </el-col>
   <!-- 表单弹窗：添加/修改 -->
-  <ContactForm ref="formRef" @success="getContact(contact.id)" />
-  <CrmTransferForm ref="transferFormRef" @success="close" />
+  <ContactForm ref="formRef" @success="getContact" />
+  <CrmTransferForm ref="transferFormRef" :biz-type="BizTypeEnum.CRM_CONTACT" @success="close" />
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -65,11 +65,11 @@ const contact = ref<ContactApi.ContactVO>({} as ContactApi.ContactVO) // 联系�
 const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
 
 /** 获取详情 */
-const getContact = async (id: number) => {
+const getContact = async () => {
   loading.value = true
   try {
-    contact.value = await ContactApi.getContact(id)
-    await getOperateLog(id)
+    contact.value = await ContactApi.getContact(contactId.value)
+    await getOperateLog(contactId.value)
   } finally {
     loading.value = false
   }
@@ -84,7 +84,7 @@ const openForm = (type: string, id?: number) => {
 /** 联系人转移 */
 const transferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 联系人转移表单 ref
 const transfer = () => {
-  transferFormRef.value?.open('联系人转移', contact.value.id, ContactApi.transferContact)
+  transferFormRef.value?.open(contact.value.id)
 }
 
 /** 获取操作日志 */
@@ -116,6 +116,6 @@ onMounted(async () => {
     return
   }
   contactId.value = params.id as unknown as number
-  await getContact(contactId.value)
+  await getContact()
 })
 </script>

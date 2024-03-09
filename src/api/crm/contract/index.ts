@@ -1,5 +1,5 @@
 import request from '@/config/axios'
-import { TransferReqVO } from '@/api/crm/customer'
+import { TransferReqVO } from '@/api/crm/permission'
 
 export interface ContractVO {
   id: number
