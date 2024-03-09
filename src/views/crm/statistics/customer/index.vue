@@ -24,6 +24,7 @@
       <el-form-item label="归属部门" prop="deptId">
         <el-tree-select
           v-model="queryParams.deptId"
+          class="!w-240px"
           :data="deptList"
           :props="defaultProps"
           check-strictly

@@ -291,13 +291,13 @@ const doSocialLogin = async (type: number) => {
       await getTenantId()
       // 如果获取不到，则需要弹出提示，进行处理
       if (!authUtil.getTenantId()) {
-       try {
+        try {
           const data = await message.prompt('请输入租户名称', t('common.reminder'))
           if (data?.action !== 'confirm') throw 'cancel'
           const res = await LoginApi.getTenantIdByName(data.value)
           authUtil.setTenantId(res)
         } catch (error) {
-          if(error === 'cancel') return
+          if (error === 'cancel') return
         } finally {
           loginLoading.value = false
         }
