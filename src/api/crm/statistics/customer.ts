@@ -55,6 +55,22 @@ export interface CrmStatisticsCustomerDealCycleByUserRespVO {
   customerDealCount: number
 }
 
+export const DATE_INTERVAL_OPTIONS = [
+  { value: 1, name: '今天' },
+  { value: 2, name: '昨天' },
+  { value: 3, name: '本周' },
+  { value: 4, name: '上周' },
+  { value: 5, name: '本月' },
+  { value: 6, name: '上月' },
+  { value: 7, name: '本季度' },
+  { value: 8, name: '上季度' },
+  { value: 9, name: '本年' },
+  { value: 10, name: '去年' },
+  { value: 11, name: '自定义' }
+]
+
+export const CUSTOMER_INTERVAL = 11
+
 // 客户分析 API
 export const StatisticsCustomerApi = {
   // 1.1 客户总量分析(按日期)
