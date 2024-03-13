@@ -4,8 +4,8 @@
       编辑
     </el-button>
     <el-button
-      :disabled="business.endStatus"
       v-if="permissionListRef?.validateWrite"
+      :disabled="business.endStatus"
       type="success"
       @click="openStatusForm()"
     >
@@ -53,13 +53,12 @@
   </el-col>
 
   <!-- 表单弹窗：添加/修改 -->
-  <BusinessForm ref="formRef" @success="getBusiness(business.id)" />
-  <BusinessUpdateStatusForm ref="statusFormRef" @success="getBusiness(business.id)" />
-  <CrmTransferForm ref="transferFormRef" @success="close" />
+  <BusinessForm ref="formRef" @success="getBusiness" />
+  <BusinessUpdateStatusForm ref="statusFormRef" @success="getBusiness" />
+  <CrmTransferForm ref="transferFormRef" :biz-type="BizTypeEnum.CRM_BUSINESS" @success="close" />
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
-import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
 import BusinessDetailsHeader from './BusinessDetailsHeader.vue'
 import BusinessDetailsInfo from './BusinessDetailsInfo.vue'
@@ -73,6 +72,7 @@ import FollowUpList from '@/views/crm/followup/index.vue'
 import ContactList from '@/views/crm/contact/components/ContactList.vue'
 import BusinessUpdateStatusForm from '@/views/crm/business/BusinessUpdateStatusForm.vue'
 import ContractList from '@/views/crm/contract/components/ContractList.vue'
+import BusinessProductList from '@/views/crm/business/detail/BusinessProductList.vue'
 
 defineOptions({ name: 'CrmBusinessDetail' })
 
@@ -80,15 +80,15 @@ const message = useMessage()
 
 const businessId = ref(0) // 线索编号
 const loading = ref(true) // 加载中
-const business = ref<ContactApi.ContactVO>({} as ContactApi.ContactVO) // 联系人详情
+const business = ref<BusinessApi.BusinessVO>({} as BusinessApi.BusinessVO) // 商机详情
 const permissionListRef = ref<InstanceType<typeof PermissionList>>() // 团队成员列表 Ref
 
 /** 获取详情 */
-const getBusiness = async (id: number) => {
+const getBusiness = async () => {
   loading.value = true
   try {
-    business.value = await BusinessApi.getBusiness(id)
-    await getOperateLog(id)
+    business.value = await BusinessApi.getBusiness(businessId.value)
+    await getOperateLog(businessId.value)
   } finally {
     loading.value = false
   }
@@ -109,7 +109,7 @@ const openStatusForm = () => {
 /** 联系人转移 */
 const transferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 联系人转移表单 ref
 const transfer = () => {
-  transferFormRef.value?.open('商机转移', business.value.id, BusinessApi.transferBusiness)
+  transferFormRef.value?.open(business.value.id)
 }
 
 /** 获取操作日志 */
@@ -141,6 +141,6 @@ onMounted(async () => {
     return
   }
   businessId.value = params.id as unknown as number
-  await getBusiness(businessId.value)
+  await getBusiness()
 })
 </script>

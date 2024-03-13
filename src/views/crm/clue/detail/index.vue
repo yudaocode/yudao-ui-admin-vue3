@@ -18,7 +18,7 @@
     >
       转化为客户
     </el-button>
-    <el-button v-else type="success" disabled>已转化客户</el-button>
+    <el-button v-else disabled type="success">已转化客户</el-button>
   </ClueDetailsHeader>
   <el-col>
     <el-tabs>
@@ -45,7 +45,7 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <ClueForm ref="formRef" @success="getClue" />
-  <CrmTransferForm ref="transferFormRef" @success="close" />
+  <CrmTransferForm ref="transferFormRef" :biz-type="BizTypeEnum.CRM_CLUE" @success="close" />
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -91,7 +91,7 @@ const openForm = () => {
 /** 线索转移 */
 const transferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 线索转移表单 ref
 const transfer = () => {
-  transferFormRef.value?.open('线索转移', clueId.value, ClueApi.transferClue)
+  transferFormRef.value?.open(clueId.value)
 }
 
 /** 转化为客户 */

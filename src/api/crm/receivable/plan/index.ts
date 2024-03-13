@@ -11,7 +11,7 @@ export interface ReceivablePlanVO {
   remindTime: Date
   customerId: number
   customerName?: string
-  contractId: number
+  contractId?: number
   contractNo?: string
   ownerUserId: number
   ownerUserName?: string

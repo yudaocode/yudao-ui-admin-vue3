@@ -4,23 +4,23 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="名字" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入名字"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入名字"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="性别" prop="sex">
-        <el-select v-model="queryParams.sex" placeholder="请选择性别" clearable class="!w-240px">
+        <el-select v-model="queryParams.sex" class="!w-240px" clearable placeholder="请选择性别">
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_USER_SEX)"
             :key="dict.value"
@@ -32,33 +32,41 @@
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="daterange"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['infra:demo03-student:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
         </el-button>
         <el-button
-          type="success"
+          v-hasPermi="['infra:demo03-student:create']"
           plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['infra:demo03-student:export']"
+          type="primary"
+          @click="openForm('create')"
         >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
+        </el-button>
+        <el-button
+          v-hasPermi="['infra:demo03-student:export']"
+          :loading="exportLoading"
+          plain
+          type="success"
+          @click="handleExport"
+        >
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -69,48 +77,48 @@
     <el-table
       v-loading="loading"
       :data="list"
-      :stripe="true"
       :show-overflow-tooltip="true"
+      :stripe="true"
       highlight-current-row
       @current-change="handleCurrentChange"
     >
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="名字" align="center" prop="name" />
-      <el-table-column label="性别" align="center" prop="sex">
+      <el-table-column align="center" label="编号" prop="id" />
+      <el-table-column align="center" label="名字" prop="name" />
+      <el-table-column align="center" label="性别" prop="sex">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.SYSTEM_USER_SEX" :value="scope.row.sex" />
         </template>
       </el-table-column>
       <el-table-column
+        :formatter="dateFormatter"
+        align="center"
         label="出生日期"
-        align="center"
         prop="birthday"
-        :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="简介" align="center" prop="description" />
+      <el-table-column align="center" label="简介" prop="description" />
       <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
         :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
         width="180px"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column align="center" label="操作">
         <template #default="scope">
           <el-button
+            v-hasPermi="['infra:demo03-student:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['infra:demo03-student:update']"
           >
             编辑
           </el-button>
           <el-button
+            v-hasPermi="['infra:demo03-student:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['infra:demo03-student:delete']"
           >
             删除
           </el-button>
@@ -119,9 +127,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -132,17 +140,17 @@
   <ContentWrap>
     <el-tabs model-value="demo03Course">
       <el-tab-pane label="学生课程" name="demo03Course">
-        <Demo03CourseList :student-id="currentRow.id" />
+        <Demo03CourseList :student-id="currentRow?.id" />
       </el-tab-pane>
       <el-tab-pane label="学生班级" name="demo03Grade">
-        <Demo03GradeList :student-id="currentRow.id" />
+        <Demo03GradeList :student-id="currentRow?.id" />
       </el-tab-pane>
     </el-tabs>
   </ContentWrap>
 </template>
 
-<script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+<script lang="ts" setup>
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as Demo03StudentApi from '@/api/infra/demo/demo03/erp'
