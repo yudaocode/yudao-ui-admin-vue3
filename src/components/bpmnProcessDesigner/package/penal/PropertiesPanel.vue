@@ -32,7 +32,7 @@
         替代，提供更好的表单设计功能
       </el-collapse-item>
       <el-collapse-item name="task" v-if="elementType.indexOf('Task') !== -1" key="task">
-        <template #title><Icon icon="ep:checked" />任务</template>
+        <template #title><Icon icon="ep:checked" />任务（审批人）</template>
         <element-task :id="elementId" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item
@@ -40,7 +40,7 @@
         v-if="elementType.indexOf('Task') !== -1"
         key="multiInstance"
       >
-        <template #title><Icon icon="ep:help-filled" />多实例</template>
+        <template #title><Icon icon="ep:help-filled" />多实例（会签配置）</template>
         <element-multi-instance :business-object="elementBusinessObject" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item name="listeners" key="listeners">

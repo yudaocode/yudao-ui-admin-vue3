@@ -164,14 +164,6 @@
           <el-button
             link
             type="primary"
-            @click="handleAssignRule(scope.row)"
-            v-hasPermi="['bpm:task-assign-rule:query']"
-          >
-            分配规则
-          </el-button>
-          <el-button
-            link
-            type="primary"
             @click="handleDeploy(scope.row)"
             v-hasPermi="['bpm:model:deploy']"
           >
@@ -345,16 +337,6 @@ const handleDeploy = async (row) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-/** 点击任务分配按钮 */
-const handleAssignRule = (row) => {
-  push({
-    name: 'BpmTaskAssignRuleList',
-    query: {
-      modelId: row.id
-    }
-  })
 }
 
 /** 跳转到指定流程定义列表 */

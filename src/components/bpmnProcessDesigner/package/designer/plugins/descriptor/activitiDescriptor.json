@@ -332,6 +332,16 @@
           "name": "multiinstance_condition",
           "isAttr": true,
           "type": "String"
+        },
+        {
+          "name": "assignType",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "assignOptions",
+          "isAttr": true,
+          "type": "String"
         }
       ]
     },

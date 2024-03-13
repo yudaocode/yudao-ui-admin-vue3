@@ -279,17 +279,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/manager/task-assign-rule',
-        component: () => import('@/views/bpm/taskAssignRule/index.vue'),
-        name: 'BpmTaskAssignRuleList',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: '任务分配规则'
-        }
-      },
-      {
         path: '/process-instance/create',
         component: () => import('@/views/bpm/processInstance/create/index.vue'),
         name: 'BpmProcessInstanceCreate',

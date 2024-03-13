@@ -57,18 +57,6 @@
         width="300"
         show-overflow-tooltip
       />
-      <el-table-column label="操作" align="center" width="150" fixed="right">
-        <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="handleAssignRule(scope.row)"
-            v-hasPermi="['bpm:task-assign-rule:query']"
-          >
-            分配规则
-          </el-button>
-        </template>
-      </el-table-column>
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -127,16 +115,6 @@ const getList = async () => {
   } finally {
     loading.value = false
   }
-}
-
-/** 点击任务分配按钮 */
-const handleAssignRule = (row) => {
-  push({
-    name: 'BpmTaskAssignRuleList',
-    query: {
-      modelId: row.id
-    }
-  })
 }
 
 /** 流程表单的详情按钮操作 */

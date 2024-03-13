@@ -138,6 +138,8 @@ const updateBaseInfo = (key) => {
     bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), attrObj)
   }
 }
+
+// TODO 芋艿：这里延迟，可能存在覆盖 userTask 的问题。。例如说，打开的时候，立马选中某个 usertask，则它的 id 会被覆盖。。。
 onMounted(() => {
   // 针对上传的 bpmn 流程图时，需要延迟 1 秒的时间，保证 key 和 name 的更新
   setTimeout(() => {
