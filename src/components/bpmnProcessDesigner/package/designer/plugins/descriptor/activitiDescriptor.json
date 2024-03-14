@@ -334,12 +334,12 @@
           "type": "String"
         },
         {
-          "name": "assignType",
+          "name": "candidateStrategy",
           "isAttr": true,
           "type": "String"
         },
         {
-          "name": "assignOptions",
+          "name": "candidateParam",
           "isAttr": true,
           "type": "String"
         }

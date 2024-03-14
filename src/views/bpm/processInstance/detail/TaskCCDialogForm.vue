@@ -17,7 +17,7 @@
       <el-form-item label="规则类型" prop="type">
         <el-select v-model="formData.type" clearable style="width: 100%">
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_ASSIGN_RULE_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"

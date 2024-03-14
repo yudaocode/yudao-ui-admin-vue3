@@ -1,23 +1,27 @@
 <template>
   <el-form label-width="100px">
-    <el-form-item label="规则类型" prop="assignType">
+    <el-form-item label="规则类型" prop="candidateStrategy">
       <el-select
-        v-model="userTaskForm.assignType"
+        v-model="userTaskForm.candidateStrategy"
         clearable
         style="width: 100%"
-        @change="changeAssignType"
+        @change="changecandidateStrategy"
       >
         <el-option
-          v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_ASSIGN_RULE_TYPE)"
+          v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY)"
           :key="dict.value"
           :label="dict.label"
           :value="dict.value"
         />
       </el-select>
     </el-form-item>
-    <el-form-item v-if="userTaskForm.assignType == 10" label="指定角色" prop="assignOptions">
+    <el-form-item
+      v-if="userTaskForm.candidateStrategy == 10"
+      label="指定角色"
+      prop="candidateParam"
+    >
       <el-select
-        v-model="userTaskForm.assignOptions"
+        v-model="userTaskForm.candidateParam"
         clearable
         multiple
         style="width: 100%"
@@ -27,14 +31,14 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.assignType == 20 || userTaskForm.assignType == 21"
+      v-if="userTaskForm.candidateStrategy == 20 || userTaskForm.candidateStrategy == 21"
       label="指定部门"
-      prop="assignOptions"
+      prop="candidateParam"
       span="24"
     >
       <el-tree-select
         ref="treeRef"
-        v-model="userTaskForm.assignOptions"
+        v-model="userTaskForm.candidateParam"
         :data="deptTreeOptions"
         :props="defaultProps"
         empty-text="加载中，请稍后"
@@ -45,13 +49,13 @@
       />
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.assignType == 22"
+      v-if="userTaskForm.candidateStrategy == 22"
       label="指定岗位"
-      prop="assignOptions"
+      prop="candidateParam"
       span="24"
     >
       <el-select
-        v-model="userTaskForm.assignOptions"
+        v-model="userTaskForm.candidateParam"
         clearable
         multiple
         style="width: 100%"
@@ -62,16 +66,16 @@
     </el-form-item>
     <el-form-item
       v-if="
-        userTaskForm.assignType == 30 ||
-        userTaskForm.assignType == 31 ||
-        userTaskForm.assignType == 32
+        userTaskForm.candidateStrategy == 30 ||
+        userTaskForm.candidateStrategy == 31 ||
+        userTaskForm.candidateStrategy == 32
       "
       label="指定用户"
-      prop="assignOptions"
+      prop="candidateParam"
       span="24"
     >
       <el-select
-        v-model="userTaskForm.assignOptions"
+        v-model="userTaskForm.candidateParam"
         clearable
         multiple
         style="width: 100%"
@@ -85,9 +89,13 @@
         />
       </el-select>
     </el-form-item>
-    <el-form-item v-if="userTaskForm.assignType === 40" label="指定用户组" prop="assignOptions">
+    <el-form-item
+      v-if="userTaskForm.candidateStrategy === 40"
+      label="指定用户组"
+      prop="candidateParam"
+    >
       <el-select
-        v-model="userTaskForm.assignOptions"
+        v-model="userTaskForm.candidateParam"
         clearable
         multiple
         style="width: 100%"
@@ -101,26 +109,14 @@
         />
       </el-select>
     </el-form-item>
-    <el-form-item v-if="userTaskForm.assignType === 50" label="指定脚本" prop="assignOptions">
-      <el-select
-        v-model="userTaskForm.assignOptions"
-        clearable
-        multiple
-        style="width: 100%"
-        @change="updateElementTask"
-      >
-        <el-option
-          v-for="dict in taskAssignScriptDictDatas"
-          :key="dict.value"
-          :label="dict.label"
-          :value="dict.value"
-        />
-      </el-select>
-    </el-form-item>
-    <el-form-item v-if="userTaskForm.assignType === 60" label="流程表达式" prop="assignOptions">
+    <el-form-item
+      v-if="userTaskForm.candidateStrategy === 60"
+      label="流程表达式"
+      prop="candidateParam"
+    >
       <el-input
         type="textarea"
-        v-model="userTaskForm.assignOptions[0]"
+        v-model="userTaskForm.candidateParam[0]"
         clearable
         style="width: 100%"
         @change="updateElementTask"
@@ -144,10 +140,9 @@ const props = defineProps({
   type: String
 })
 const userTaskForm = ref({
-  assignType: undefined, // 分配规则
-  assignOptions: [] // 分配选项
+  candidateStrategy: undefined, // 分配规则
+  candidateParam: [] // 分配选项
 })
-// const mockData=ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 const bpmnElement = ref()
 const bpmnInstances = () => (window as any)?.bpmnInstances
 
@@ -156,42 +151,42 @@ const deptTreeOptions = ref() // 部门树
 const postOptions = ref<PostApi.PostVO[]>([]) // 岗位列表
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
-const taskAssignScriptDictDatas = getIntDictOptions(DICT_TYPE.BPM_TASK_ASSIGN_SCRIPT)
 
 const resetTaskForm = () => {
   const businessObject = bpmnElement.value.businessObject
   if (!businessObject) {
     return
   }
-  if (businessObject.assignType != undefined) {
-    userTaskForm.value.assignType = parseInt(businessObject.assignType) as any
+  if (businessObject.candidateStrategy != undefined) {
+    userTaskForm.value.candidateStrategy = parseInt(businessObject.candidateStrategy) as any
   } else {
-    userTaskForm.value.assignType = undefined
+    userTaskForm.value.candidateStrategy = undefined
   }
-  if (businessObject.assignOptions && businessObject.assignOptions.length > 0) {
-    if (userTaskForm.value.assignType === 60) {
-      userTaskForm.value.assignOptions = [businessObject.assignOptions]
+  if (businessObject.candidateParam && businessObject.candidateParam.length > 0) {
+    if (userTaskForm.value.candidateStrategy === 60) {
+      // 特殊：流程表达式，只有一个 input 输入框
+      userTaskForm.value.candidateParam = [businessObject.candidateParam]
     } else {
-      userTaskForm.value.assignOptions = businessObject.assignOptions
+      userTaskForm.value.candidateParam = businessObject.candidateParam
         .split(',')
         .map((item) => +item)
     }
   } else {
-    userTaskForm.value.assignOptions = []
+    userTaskForm.value.candidateParam = []
   }
 }
 
-/** 更新 assignType 字段时，需要清空 assignOptions，并触发 bpmn 图更新 */
-const changeAssignType = () => {
-  userTaskForm.value.assignOptions = []
+/** 更新 candidateStrategy 字段时，需要清空 candidateParam，并触发 bpmn 图更新 */
+const changecandidateStrategy = () => {
+  userTaskForm.value.candidateParam = []
   updateElementTask()
 }
 
 /** 选中某个 options 时候，更新 bpmn 图  */
 const updateElementTask = () => {
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
-    assignType: userTaskForm.value.assignType,
-    assignOptions: userTaskForm.value.assignOptions.join(',')
+    candidateStrategy: userTaskForm.value.candidateStrategy,
+    candidateParam: userTaskForm.value.candidateParam.join(',')
   })
 }
 
