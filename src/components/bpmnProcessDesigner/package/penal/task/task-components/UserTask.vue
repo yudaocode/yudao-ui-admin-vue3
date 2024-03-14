@@ -117,6 +117,15 @@
         />
       </el-select>
     </el-form-item>
+    <el-form-item v-if="userTaskForm.assignType === 60" label="流程表达式" prop="assignOptions">
+      <el-input
+        type="textarea"
+        v-model="userTaskForm.assignOptions[0]"
+        clearable
+        style="width: 100%"
+        @change="updateElementTask"
+      />
+    </el-form-item>
   </el-form>
 </template>
 
@@ -160,7 +169,13 @@ const resetTaskForm = () => {
     userTaskForm.value.assignType = undefined
   }
   if (businessObject.assignOptions && businessObject.assignOptions.length > 0) {
-    userTaskForm.value.assignOptions = businessObject.assignOptions?.split(',').map((item) => +item)
+    if (userTaskForm.value.assignType === 60) {
+      userTaskForm.value.assignOptions = [businessObject.assignOptions]
+    } else {
+      userTaskForm.value.assignOptions = businessObject.assignOptions
+        .split(',')
+        .map((item) => +item)
+    }
   } else {
     userTaskForm.value.assignOptions = []
   }
