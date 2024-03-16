@@ -43,20 +43,15 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable class="!w-240px">
+      <el-form-item label="流程状态" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择流程状态"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="结果" prop="result">
-        <el-select v-model="queryParams.result" placeholder="请选择结果" clearable class="!w-240px">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -106,20 +101,15 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="状态" prop="status">
+      <el-table-column label="流程" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column label="结果" prop="result">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="scope.row.result" />
         </template>
       </el-table-column>
       <el-table-column
         label="提交时间"
         align="center"
-        prop="createTime"
+        prop="startTime"
         width="180"
         :formatter="dateFormatter"
       />
@@ -183,7 +173,6 @@ const queryParams = reactive({
   processDefinitionId: undefined,
   category: undefined,
   status: undefined,
-  result: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单

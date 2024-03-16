@@ -10,7 +10,6 @@
         <el-select v-model="loopCharacteristics" @change="changeLoopCharacteristicsType">
           <el-option label="并行多重事件" value="ParallelMultiInstance" />
           <el-option label="时序多重事件" value="SequentialMultiInstance" />
-          <!--          <el-option label="循环事件" value="StandardLoop" />-->
           <el-option label="无" value="Null" />
         </el-select>
       </el-form-item>
