@@ -31,6 +31,16 @@
               type="textarea"
             />
           </el-form-item>
+          <el-form-item label="抄送人" prop="copyUserIds">
+            <el-select v-model="auditForms[index].copyUserIds" multiple placeholder="请选择抄送人">
+              <el-option
+                v-for="item in userOptions"
+                :key="item.id"
+                :label="item.nickname"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
         </el-form>
         <div style="margin-bottom: 20px; margin-left: 10%; font-size: 14px">
           <el-button type="success" @click="handleAudit(item, true)">
@@ -118,6 +128,7 @@ import TaskDelegateForm from './TaskDelegateForm.vue'
 import TaskAddSignDialogForm from './TaskAddSignDialogForm.vue'
 import { registerComponent } from '@/utils/routerHelper'
 import { isEmpty } from '@/utils/is'
+import * as UserApi from '@/api/system/user'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 
@@ -161,7 +172,8 @@ const handleAudit = async (task, pass) => {
   // 2.1 提交审批
   const data = {
     id: task.id,
-    reason: auditForms.value[index].reason
+    reason: auditForms.value[index].reason,
+    copyUserIds: auditForms.value[index].copyUserIds
   }
   if (pass) {
     await TaskApi.approveTask(data)
@@ -180,21 +192,20 @@ const openTaskUpdateAssigneeForm = (id: string) => {
   taskUpdateAssigneeFormRef.value.open(id)
 }
 
-const taskDelegateForm = ref()
 /** 处理审批退回的操作 */
+const taskDelegateForm = ref()
 const handleDelegate = async (task) => {
   taskDelegateForm.value.open(task.id)
 }
 
-//回退弹框组件
-const taskReturnDialogRef = ref()
 /** 处理审批退回的操作 */
+const taskReturnDialogRef = ref()
 const handleBack = async (task) => {
   taskReturnDialogRef.value.open(task.id)
 }
 
-const taskAddSignDialogForm = ref()
 /** 处理审批加签的操作 */
+const taskAddSignDialogForm = ref()
 const handleSign = async (task) => {
   taskAddSignDialogForm.value.open(task.id)
 }
@@ -304,13 +315,17 @@ const loadRunningTask = (tasks) => {
     // 2.3 添加到处理任务
     runningTasks.value.push({ ...task })
     auditForms.value.push({
-      reason: ''
+      reason: '',
+      copyUserIds: []
     })
   })
 }
 
 /** 初始化 */
-onMounted(() => {
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
+onMounted(async () => {
   getDetail()
+  // 获得用户列表
+  userOptions.value = await UserApi.getSimpleUserList()
 })
 </script>
