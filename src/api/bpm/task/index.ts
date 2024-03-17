@@ -43,12 +43,12 @@ export const exportTask = async (params) => {
 }
 
 // 获取所有可回退的节点
-export const getReturnList = async (params) => {
-  return await request.get({ url: '/bpm/task/return-list', params })
+export const getTaskListByReturn = async (id: string) => {
+  return await request.get({ url: '/bpm/task/list-by-return', params: { id } })
 }
 
 // 回退
-export const returnTask = async (data) => {
+export const returnTask = async (data: any) => {
   return await request.put({ url: '/bpm/task/return', data })
 }
 
@@ -70,7 +70,7 @@ export const taskAddSign = async (data) => {
  * 获取减签任务列表
  */
 export const getChildrenTaskList = async (id: string) => {
-  return await request.get({ url: '/bpm/task/children-list?taskId=' + id })
+  return await request.get({ url: '/bpm/task/children-list?parentId=' + id })
 }
 
 /**

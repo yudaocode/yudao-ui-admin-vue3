@@ -121,13 +121,13 @@ const highlightDiagram = async () => {
         return
       }
       // 高亮任务
-      canvas.addMarker(n.id, getResultCss(task.result))
+      canvas.addMarker(n.id, getResultCss(task.status))
       //标记是否高亮了进行中任务
-      if (task.result === 1) {
+      if (task.status === 1) {
         findProcessTask = true
       }
       // 如果非通过，就不走后面的线条了
-      if (task.result !== 2) {
+      if (task.status !== 2) {
         return
       }
       // 处理 outgoing 出线
@@ -205,10 +205,10 @@ const highlightDiagram = async () => {
       })
     } else if (n.$type === 'bpmn:EndEvent') {
       // 结束节点
-      if (!processInstance.value || processInstance.value.result === 1) {
+      if (!processInstance.value || processInstance.value.status === 1) {
         return
       }
-      canvas.addMarker(n.id, getResultCss(processInstance.value.result))
+      canvas.addMarker(n.id, getResultCss(processInstance.value.status))
     } else if (n.$type === 'bpmn:ServiceTask') {
       //服务任务
       if (activity.startTime > 0 && activity.endTime === 0) {
@@ -226,6 +226,7 @@ const highlightDiagram = async () => {
     }
   })
   if (!isEmpty(removeTaskDefinitionKeyList)) {
+    // TODO 芋艿：后面 .definitionKey 再看
     taskList.value = taskList.value.filter(
       (item) => !removeTaskDefinitionKeyList.includes(item.definitionKey)
     )
@@ -321,7 +322,7 @@ const elementHover = (element) => {
       let optionData = getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT)
       let dataResult = ''
       optionData.forEach((element) => {
-        if (element.value == task.result) {
+        if (element.value == task.status) {
           dataResult = element.label
         }
       })
@@ -333,7 +334,7 @@ const elementHover = (element) => {
       //             <p>部门：${task.assigneeUser.deptName}</p>
       //             <p>结果：${getIntDictOptions(
       //               DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT,
-      //               task.result
+      //               task.status
       //             )}</p>
       //             <p>创建时间：${formatDate(task.createTime)}</p>`
       if (task.endTime) {
@@ -354,14 +355,14 @@ const elementHover = (element) => {
       let optionData = getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT)
       let dataResult = ''
       optionData.forEach((element) => {
-        if (element.value == processInstance.value.result) {
+        if (element.value == processInstance.value.status) {
           dataResult = element.label
         }
       })
       html = `<p>结果：${dataResult}</p>`
       // html = `<p>结果：${getIntDictOptions(
       //   DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT,
-      //   processInstance.value.result
+      //   processInstance.value.status
       // )}</p>`
       if (processInstance.value.endTime) {
         html += `<p>结束时间：${formatDate(processInstance.value.endTime)}</p>`

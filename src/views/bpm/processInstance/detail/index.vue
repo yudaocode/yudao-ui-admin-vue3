@@ -254,7 +254,7 @@ const getTaskList = async () => {
     tasks.value = []
     // 1.1 移除已取消的审批
     data.forEach((task) => {
-      if (task.result !== 4) {
+      if (task.status !== 4) {
         tasks.value.push(task)
       }
     })
@@ -291,7 +291,10 @@ const loadRunningTask = (tasks) => {
       loadRunningTask(task.children)
     }
     // 2.1 只有待处理才需要
-    if (task.result !== 1 && task.result !== 6) {
+    // if (task.status !== 1 && task.status !== 6) {
+    //   return
+    // }
+    if (task.status !== 1 && task.status !== 6) {
       return
     }
     // 2.2 自己不是处理人

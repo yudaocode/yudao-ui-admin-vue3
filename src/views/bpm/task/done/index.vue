@@ -50,9 +50,9 @@
       <el-table-column align="center" label="任务名称" prop="name" />
       <el-table-column align="center" label="所属流程" prop="processInstance.name" />
       <el-table-column align="center" label="流程发起人" prop="processInstance.startUserNickname" />
-      <el-table-column align="center" label="状态" prop="result">
+      <el-table-column align="center" label="审批状态" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="scope.row.result" />
+          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column align="center" label="原因" prop="reason" />

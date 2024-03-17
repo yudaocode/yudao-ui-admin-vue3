@@ -7,13 +7,13 @@
       :rules="formRules"
       label-width="110px"
     >
-      <el-form-item label="退回节点" prop="targetDefinitionKey">
-        <el-select v-model="formData.targetDefinitionKey" clearable style="width: 100%">
+      <el-form-item label="退回节点" prop="targetTaskDefinitionKey">
+        <el-select v-model="formData.targetTaskDefinitionKey" clearable style="width: 100%">
           <el-option
             v-for="item in returnList"
-            :key="item.definitionKey"
+            :key="item.taskDefinitionKey"
             :label="item.name"
-            :value="item.definitionKey"
+            :value="item.taskDefinitionKey"
           />
         </el-select>
       </el-form-item>
@@ -35,19 +35,19 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formData = ref({
   id: '',
-  targetDefinitionKey: undefined,
+  targetTaskDefinitionKey: undefined,
   reason: ''
 })
 const formRules = ref({
-  targetDefinitionKey: [{ required: true, message: '必须选择回退节点', trigger: 'change' }],
+  targetTaskDefinitionKey: [{ required: true, message: '必须选择回退节点', trigger: 'change' }],
   reason: [{ required: true, message: '回退理由不能为空', trigger: 'blur' }]
 })
 
 const formRef = ref() // 表单 Ref
-const returnList = ref([])
+const returnList = ref([] as any)
 /** 打开弹窗 */
 const open = async (id: string) => {
-  returnList.value = await TaskApi.getReturnList({ taskId: id })
+  returnList.value = await TaskApi.getTaskListByReturn(id)
   if (returnList.value.length === 0) {
     message.warning('当前没有可回退的节点')
     return false
@@ -82,7 +82,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: '',
-    targetDefinitionKey: undefined,
+    targetTaskDefinitionKey: undefined,
     reason: ''
   }
   formRef.value?.resetFields()

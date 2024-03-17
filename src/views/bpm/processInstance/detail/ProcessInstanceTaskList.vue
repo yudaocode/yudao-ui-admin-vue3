@@ -14,7 +14,7 @@
           >
             <p style="font-weight: 700">
               任务：{{ item.name }}
-              <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="item.result" />
+              <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="item.status" />
               <el-button
                 style="margin-left: 5px"
                 v-if="!isEmpty(item.children)"
@@ -73,19 +73,19 @@ defineProps({
 
 /** 获得任务对应的 icon */
 const getTimelineItemIcon = (item) => {
-  if (item.result === 1) {
+  if (item.status === 1) {
     return 'el-icon-time'
   }
-  if (item.result === 2) {
+  if (item.status === 2) {
     return 'el-icon-check'
   }
-  if (item.result === 3) {
+  if (item.status === 3) {
     return 'el-icon-close'
   }
-  if (item.result === 4) {
+  if (item.status === 4) {
     return 'el-icon-remove-outline'
   }
-  if (item.result === 5) {
+  if (item.status === 5) {
     return 'el-icon-back'
   }
   return ''
@@ -93,25 +93,25 @@ const getTimelineItemIcon = (item) => {
 
 /** 获得任务对应的颜色 */
 const getTimelineItemType = (item) => {
-  if (item.result === 1) {
+  if (item.status === 1) {
     return 'primary'
   }
-  if (item.result === 2) {
+  if (item.status === 2) {
     return 'success'
   }
-  if (item.result === 3) {
+  if (item.status === 3) {
     return 'danger'
   }
-  if (item.result === 4) {
+  if (item.status === 4) {
     return 'info'
   }
-  if (item.result === 5) {
+  if (item.status === 5) {
     return 'warning'
   }
-  if (item.result === 6) {
+  if (item.status === 6) {
     return 'default'
   }
-  if (item.result === 7 || item.result === 8) {
+  if (item.status === 7 || item.status === 8) {
     return 'warning'
   }
   return ''

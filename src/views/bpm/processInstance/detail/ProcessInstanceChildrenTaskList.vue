@@ -17,9 +17,9 @@
     <el-table :data="baseTask.children" style="width: 100%" row-key="id" border>
       <el-table-column prop="assigneeUser.nickname" label="审批人" />
       <el-table-column prop="assigneeUser.deptName" label="所在部门" />
-      <el-table-column label="审批状态" prop="result">
+      <el-table-column label="审批状态" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="scope.row.result" />
+          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
@@ -88,7 +88,7 @@ const handleSubSign = (item) => {
 const isSubSignButtonVisible = (task: any) => {
   if (task && task.children && !isEmpty(task.children)) {
     // 有子任务，且子任务有任意一个是 待处理 和 待前置任务完成 则显示减签按钮
-    const subTask = task.children.find((item) => item.result === 1 || item.result === 9)
+    const subTask = task.children.find((item) => item.status === 1 || item.status === 9)
     return !isEmpty(subTask)
   }
   return false

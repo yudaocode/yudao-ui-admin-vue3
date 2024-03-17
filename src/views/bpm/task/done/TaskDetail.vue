@@ -14,7 +14,7 @@
         {{ detailData.processInstance.startUserNickname }}
       </el-descriptions-item>
       <el-descriptions-item label="状态">
-        <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="detailData.result" />
+        <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="detailData.status" />
       </el-descriptions-item>
       <el-descriptions-item label="原因">
         {{ detailData.reason }}
