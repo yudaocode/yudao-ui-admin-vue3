@@ -189,7 +189,7 @@ const emit = defineEmits(['update:modelValue', 'hotAreaSelected'])
 const emitUpdateModelValue = () => emit('update:modelValue', hotAreas)
 
 // 热区选中
-const selectedHotAreaIndex = ref(-1)
+const selectedHotAreaIndex = ref(0)
 const handleHotAreaSelected = (hotArea: Rect, index: number) => {
   selectedHotAreaIndex.value = index
   emit('hotAreaSelected', hotArea, index)

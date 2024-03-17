@@ -1,53 +1,73 @@
 <template>
   <el-form label-width="80px" :model="formData" :rules="rules">
-    <el-form-item label="页面标题" prop="title">
-      <el-input v-model="formData!.title" placeholder="页面标题" maxlength="25" show-word-limit />
-    </el-form-item>
-    <el-form-item label="页面描述" prop="description">
-      <el-input
-        type="textarea"
-        v-model="formData!.description"
-        placeholder="用户通过微信分享给朋友时，会自动显示页面描述"
-      />
-    </el-form-item>
     <el-form-item label="样式" prop="styleType">
       <el-radio-group v-model="formData!.styleType">
-        <el-radio label="default">默认</el-radio>
-        <el-radio label="immersion">沉浸式</el-radio>
+        <el-radio label="normal">标准</el-radio>
+        <el-tooltip
+          content="沉侵式头部仅支持微信小程序、APP，建议页面第一个组件为图片展示类组件"
+          placement="top"
+        >
+          <el-radio label="inner">沉浸式</el-radio>
+        </el-tooltip>
       </el-radio-group>
     </el-form-item>
-    <el-form-item label="常驻显示" prop="alwaysShow" v-if="formData.styleType === 'immersion'">
+    <el-form-item label="常驻显示" prop="alwaysShow" v-if="formData.styleType === 'inner'">
       <el-radio-group v-model="formData!.alwaysShow">
         <el-radio :label="false">关闭</el-radio>
-        <el-radio :label="true">开启</el-radio>
+        <el-tooltip content="常驻显示关闭后,头部小组件将在页面滑动时淡入" placement="top">
+          <el-radio :label="true">开启</el-radio>
+        </el-tooltip>
       </el-radio-group>
     </el-form-item>
-    <el-form-item label="高度" prop="navBarHeight">
-      <el-slider
-        v-model="formData!.navBarHeight"
-        :max="100"
-        :min="35"
-        show-input
-        input-size="small"
-      />
+    <el-form-item label="背景类型" prop="bgType">
+      <el-radio-group v-model="formData.bgType">
+        <el-radio label="color">纯色</el-radio>
+        <el-radio label="img">图片</el-radio>
+      </el-radio-group>
     </el-form-item>
-    <el-form-item label="返回按钮" prop="showGoBack">
-      <el-switch v-model="formData!.showGoBack" />
+    <el-form-item label="背景颜色" prop="bgColor" v-if="formData.bgType === 'color'">
+      <ColorInput v-model="formData.bgColor" />
     </el-form-item>
-    <el-form-item label="背景颜色" prop="backgroundColor">
-      <ColorInput v-model="formData!.backgroundColor" />
+    <el-form-item label="背景图片" prop="bgImg" v-else>
+      <UploadImg v-model="formData.bgImg" :limit="1" width="56px" height="56px" />
     </el-form-item>
-    <el-form-item label="背景图片" prop="backgroundImage">
-      <UploadImg v-model="formData!.backgroundImage" :limit="1">
-        <template #tip>建议宽度 750px</template>
-      </UploadImg>
-    </el-form-item>
+    <el-card class="property-group" shadow="never">
+      <template #header>
+        <div class="flex items-center justify-between">
+          <span>内容（小程序）</span>
+          <el-form-item prop="_local.previewMp" class="m-b-0!">
+            <el-checkbox
+              v-model="formData._local.previewMp"
+              @change="formData._local.previewOther = !formData._local.previewMp"
+              >预览</el-checkbox
+            >
+          </el-form-item>
+        </div>
+      </template>
+      <NavigationBarCellProperty v-model="formData.mpCells" is-mp />
+    </el-card>
+    <el-card class="property-group" shadow="never">
+      <template #header>
+        <div class="flex items-center justify-between">
+          <span>内容（非小程序）</span>
+          <el-form-item prop="_local.previewOther" class="m-b-0!">
+            <el-checkbox
+              v-model="formData._local.previewOther"
+              @change="formData._local.previewMp = !formData._local.previewOther"
+              >预览</el-checkbox
+            >
+          </el-form-item>
+        </div>
+      </template>
+      <NavigationBarCellProperty v-model="formData.otherCells" :is-mp="false" />
+    </el-card>
   </el-form>
 </template>
 
 <script setup lang="ts">
 import { NavigationBarProperty } from './config'
 import { usePropertyForm } from '@/components/DiyEditor/util'
+import NavigationBarCellProperty from '@/components/DiyEditor/components/mobile/NavigationBar/components/CellProperty.vue'
 // 导航栏属性面板
 defineOptions({ name: 'NavigationBarProperty' })
 // 表单校验
@@ -58,6 +78,9 @@ const rules = {
 const props = defineProps<{ modelValue: NavigationBarProperty }>()
 const emit = defineEmits(['update:modelValue'])
 const { formData } = usePropertyForm(props.modelValue, emit)
+if (!formData.value._local) {
+  formData.value._local = { previewMp: true, previewOther: false }
+}
 </script>
 
 <style scoped lang="scss"></style>
