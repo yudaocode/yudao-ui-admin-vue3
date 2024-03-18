@@ -47,7 +47,7 @@ export const cancelProcessInstance = async (id: number, reason: string) => {
   return await request.delete({ url: '/bpm/process-instance/cancel', data: data })
 }
 
-export const getProcessInstance = async (id: number) => {
+export const getProcessInstance = async (id: string) => {
   return await request.get({ url: '/bpm/process-instance/get?id=' + id })
 }
 

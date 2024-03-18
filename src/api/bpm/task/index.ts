@@ -4,23 +4,23 @@ export type TaskVO = {
   id: number
 }
 
-export const getTodoTaskPage = async (params) => {
+export const getTodoTaskPage = async (params: any) => {
   return await request.get({ url: '/bpm/task/todo-page', params })
 }
 
-export const getDoneTaskPage = async (params) => {
+export const getDoneTaskPage = async (params: any) => {
   return await request.get({ url: '/bpm/task/done-page', params })
 }
 
-export const approveTask = async (data) => {
+export const approveTask = async (data: any) => {
   return await request.put({ url: '/bpm/task/approve', data })
 }
 
-export const rejectTask = async (data) => {
+export const rejectTask = async (data: any) => {
   return await request.put({ url: '/bpm/task/reject', data })
 }
 
-export const getTaskListByProcessInstanceId = async (processInstanceId) => {
+export const getTaskListByProcessInstanceId = async (processInstanceId: string) => {
   return await request.get({
     url: '/bpm/task/list-by-process-instance-id?processInstanceId=' + processInstanceId
   })
@@ -46,23 +46,17 @@ export const transferTask = async (data: any) => {
   return await request.put({ url: '/bpm/task/transfer', data })
 }
 
-/**
- * 加签
- */
-export const taskAddSign = async (data) => {
+// 加签
+export const signCreateTask = async (data: any) => {
   return await request.put({ url: '/bpm/task/create-sign', data })
 }
 
-/**
- * 获取减签任务列表
- */
-export const getChildrenTaskList = async (id: string) => {
-  return await request.get({ url: '/bpm/task/children-list?parentId=' + id })
+// 减签
+export const signDeleteTask = async (data: any) => {
+  return await request.delete({ url: '/bpm/task/delete-sign', data })
 }
 
-/**
- * 减签
- */
-export const taskSubSign = async (data) => {
-  return await request.delete({ url: '/bpm/task/delete-sign', data })
+// 获取减签任务列表
+export const getChildrenTaskList = async (id: string) => {
+  return await request.get({ url: '/bpm/task/list-by-parent-task-id?parentTaskId=' + id })
 }

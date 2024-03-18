@@ -50,8 +50,9 @@
         </el-timeline>
       </div>
     </el-col>
-    <!-- 子任务  -->
-    <ProcessInstanceChildrenTaskList ref="processInstanceChildrenTaskList" />
+
+    <!-- 弹窗：子任务  -->
+    <TaskSignList ref="taskSignListRef" @success="refresh" />
   </el-card>
 </template>
 <script lang="ts" setup>
@@ -59,7 +60,7 @@ import { formatDate, formatPast2 } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'
 import { DICT_TYPE } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
-import ProcessInstanceChildrenTaskList from './ProcessInstanceChildrenTaskList.vue'
+import TaskSignList from './dialog/TaskSignList.vue'
 
 defineOptions({ name: 'BpmProcessInstanceTaskList' })
 
@@ -69,6 +70,7 @@ defineProps({
 })
 
 /** 获得任务对应的 icon */
+// TODO @芋艿：对应的 icon 需要调整
 const getTimelineItemIcon = (item) => {
   if (item.status === 1) {
     return 'el-icon-time'
@@ -114,12 +116,15 @@ const getTimelineItemType = (item: any) => {
   return ''
 }
 
-/**
- * 子任务
- */
-const processInstanceChildrenTaskList = ref()
+/** 子任务 */
+const taskSignListRef = ref()
+const openChildrenTask = (item: any) => {
+  taskSignListRef.value.open(item)
+}
 
-const openChildrenTask = (item) => {
-  processInstanceChildrenTaskList.value.open(item)
+/** 刷新数据 */
+const emit = defineEmits(['refresh']) // 定义 success 事件，用于操作成功后的回调
+const refresh = () => {
+  emit('refresh')
 }
 </script>

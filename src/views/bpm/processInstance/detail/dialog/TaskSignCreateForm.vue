@@ -7,8 +7,8 @@
       :rules="formRules"
       label-width="110px"
     >
-      <el-form-item label="加签处理人" prop="userIdList">
-        <el-select v-model="formData.userIdList" multiple clearable style="width: 100%">
+      <el-form-item label="加签处理人" prop="userIds">
+        <el-select v-model="formData.userIds" multiple clearable style="width: 100%">
           <el-option
             v-for="item in userList"
             :key="item.id"
@@ -36,18 +36,19 @@
 import * as TaskApi from '@/api/bpm/task'
 import * as UserApi from '@/api/system/user'
 
-const message = useMessage() // 消息弹窗
-defineOptions({ name: 'BpmTaskUpdateAssigneeForm' })
+defineOptions({ name: 'TaskSignCreateForm' })
 
+const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formData = ref({
   id: '',
-  userIdList: [],
-  type: ''
+  userIds: [],
+  type: '',
+  reason: ''
 })
 const formRules = ref({
-  userIdList: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }],
+  userIds: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }],
   reason: [{ required: true, message: '加签理由不能为空', trigger: 'change' }]
 })
 
@@ -75,7 +76,7 @@ const submitForm = async (type: string) => {
   formLoading.value = true
   formData.value.type = type
   try {
-    await TaskApi.taskAddSign(formData.value)
+    await TaskApi.signCreateTask(formData.value)
     message.success('加签成功')
     dialogVisible.value = false
     // 发送操作成功的事件
@@ -89,8 +90,9 @@ const submitForm = async (type: string) => {
 const resetForm = () => {
   formData.value = {
     id: '',
-    userIdList: [],
-    type: ''
+    userIds: [],
+    type: '',
+    reason: ''
   }
   formRef.value?.resetFields()
 }

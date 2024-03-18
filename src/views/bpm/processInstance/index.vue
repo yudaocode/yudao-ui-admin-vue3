@@ -133,7 +133,7 @@
           <el-button
             link
             type="primary"
-            v-if="scope.row.result === 1"
+            v-if="scope.row.status === 1"
             v-hasPermi="['bpm:process-instance:query']"
             @click="handleCancel(scope.row)"
           >
@@ -233,6 +233,11 @@ const handleCancel = async (row) => {
   // 刷新列表
   await getList()
 }
+
+/** 激活时 **/
+onActivated(() => {
+  getList()
+})
 
 /** 初始化 **/
 onMounted(() => {

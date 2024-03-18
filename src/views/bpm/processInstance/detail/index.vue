@@ -92,7 +92,7 @@
     </el-card>
 
     <!-- 审批记录 -->
-    <ProcessInstanceTaskList :loading="tasksLoad" :tasks="tasks" />
+    <ProcessInstanceTaskList :loading="tasksLoad" :tasks="tasks" @refresh="getTaskList" />
 
     <!-- 高亮流程图 -->
     <ProcessInstanceBpmnViewer
@@ -110,7 +110,7 @@
     <!-- 弹窗：委派，将任务委派给别人处理，处理完成后，会重新回到原审批人手中-->
     <TaskDelegateForm ref="taskDelegateForm" @success="getDetail" />
     <!-- 弹窗：加签，当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
-    <TaskAddSignDialogForm ref="taskAddSignDialogForm" @success="getDetail" />
+    <TaskSignCreateForm ref="taskSignCreateFormRef" @success="getDetail" />
   </ContentWrap>
 </template>
 <script lang="ts" setup>
@@ -125,7 +125,7 @@ import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
 import TaskReturnForm from './dialog/TaskReturnForm.vue'
 import TaskDelegateForm from './dialog/TaskDelegateForm.vue'
 import TaskTransferForm from './dialog/TaskTransferForm.vue'
-import TaskAddSignDialogForm from './TaskAddSignDialogForm.vue'
+import TaskSignCreateForm from './dialog/TaskSignCreateForm.vue'
 import { registerComponent } from '@/utils/routerHelper'
 import { isEmpty } from '@/utils/is'
 import * as UserApi from '@/api/system/user'
@@ -137,7 +137,7 @@ const message = useMessage() // 消息弹窗
 const { proxy } = getCurrentInstance() as any
 
 const userId = useUserStore().getUser.id // 当前登录的编号
-const id = query.id as unknown as number // 流程实例的编号
+const id = query.id as unknown as string // 流程实例的编号
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
 const bpmnXML = ref('') // BPMN XML
@@ -205,9 +205,9 @@ const handleBack = async (task: any) => {
 }
 
 /** 处理审批加签的操作 */
-const taskAddSignDialogForm = ref()
-const handleSign = async (task) => {
-  taskAddSignDialogForm.value.open(task.id)
+const taskSignCreateFormRef = ref()
+const handleSign = async (task: any) => {
+  taskSignCreateFormRef.value.open(task.id)
 }
 
 /** 获得详情 */
