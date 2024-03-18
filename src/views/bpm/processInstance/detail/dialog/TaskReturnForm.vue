@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="回退" width="500">
+  <Dialog v-model="dialogVisible" title="回退任务" width="500">
     <el-form
       ref="formRef"
       v-loading="formLoading"

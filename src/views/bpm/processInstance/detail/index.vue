@@ -104,12 +104,12 @@
     />
 
     <!-- 弹窗：转派审批人 -->
-    <TaskUpdateAssigneeForm ref="taskUpdateAssigneeFormRef" @success="getDetail" />
-    <!-- 弹窗，回退节点 -->
-    <TaskReturnDialog ref="taskReturnDialogRef" @success="getDetail" />
-    <!-- 委派，将任务委派给别人处理，处理完成后，会重新回到原审批人手中-->
+    <TaskTransferForm ref="taskTransferFormRef" @success="getDetail" />
+    <!-- 弹窗：回退节点 -->
+    <TaskReturnForm ref="taskReturnFormRef" @success="getDetail" />
+    <!-- 弹窗：委派，将任务委派给别人处理，处理完成后，会重新回到原审批人手中-->
     <TaskDelegateForm ref="taskDelegateForm" @success="getDetail" />
-    <!-- 加签，当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
+    <!-- 弹窗：加签，当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
     <TaskAddSignDialogForm ref="taskAddSignDialogForm" @success="getDetail" />
   </ContentWrap>
 </template>
@@ -120,11 +120,11 @@ import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as TaskApi from '@/api/bpm/task'
-import TaskUpdateAssigneeForm from './TaskUpdateAssigneeForm.vue'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
-import TaskReturnDialog from './TaskReturnDialogForm.vue'
-import TaskDelegateForm from './TaskDelegateForm.vue'
+import TaskReturnForm from './dialog/TaskReturnForm.vue'
+import TaskDelegateForm from './dialog/TaskDelegateForm.vue'
+import TaskTransferForm from './dialog/TaskTransferForm.vue'
 import TaskAddSignDialogForm from './TaskAddSignDialogForm.vue'
 import { registerComponent } from '@/utils/routerHelper'
 import { isEmpty } from '@/utils/is'
@@ -187,9 +187,9 @@ const handleAudit = async (task, pass) => {
 }
 
 /** 转派审批人 */
-const taskUpdateAssigneeFormRef = ref()
+const taskTransferFormRef = ref()
 const openTaskUpdateAssigneeForm = (id: string) => {
-  taskUpdateAssigneeFormRef.value.open(id)
+  taskTransferFormRef.value.open(id)
 }
 
 /** 处理审批退回的操作 */
@@ -199,9 +199,9 @@ const handleDelegate = async (task) => {
 }
 
 /** 处理审批退回的操作 */
-const taskReturnDialogRef = ref()
-const handleBack = async (task) => {
-  taskReturnDialogRef.value.open(task.id)
+const taskReturnFormRef = ref()
+const handleBack = async (task: any) => {
+  taskReturnFormRef.value.open(task.id)
 }
 
 /** 处理审批加签的操作 */

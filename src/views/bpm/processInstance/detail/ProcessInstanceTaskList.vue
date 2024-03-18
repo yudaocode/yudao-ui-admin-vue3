@@ -44,9 +44,7 @@
               <label v-if="item.durationInMillis" style="font-weight: normal; color: #8a909c">
                 {{ formatPast2(item?.durationInMillis) }}
               </label>
-              <p v-if="item.reason">
-                <el-tag :type="getTimelineItemType(item)">{{ item.reason }}</el-tag>
-              </p>
+              <p v-if="item.reason"> 审批建议：{{ item.reason }} </p>
             </el-card>
           </el-timeline-item>
         </el-timeline>

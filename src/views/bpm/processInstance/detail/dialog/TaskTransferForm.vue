@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="委派任务" width="500">
+  <Dialog v-model="dialogVisible" title="转派任务" width="500">
     <el-form
       ref="formRef"
       v-loading="formLoading"
@@ -7,8 +7,8 @@
       :rules="formRules"
       label-width="110px"
     >
-      <el-form-item label="接收人" prop="delegateUserId">
-        <el-select v-model="formData.delegateUserId" clearable style="width: 100%">
+      <el-form-item label="新审批人" prop="assigneeUserId">
+        <el-select v-model="formData.assigneeUserId" clearable style="width: 100%">
           <el-option
             v-for="item in userList"
             :key="item.id"
@@ -17,8 +17,8 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="委派理由" prop="reason">
-        <el-input v-model="formData.reason" clearable placeholder="请输入委派理由" />
+      <el-form-item label="转派理由" prop="reason">
+        <el-input v-model="formData.reason" clearable placeholder="请输入转派理由" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -31,16 +31,18 @@
 import * as TaskApi from '@/api/bpm/task'
 import * as UserApi from '@/api/system/user'
 
-defineOptions({ name: 'BpmTaskDelegateForm' })
+defineOptions({ name: 'TaskTransferForm' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formData = ref({
   id: '',
-  delegateUserId: undefined
+  assigneeUserId: undefined,
+  reason: ''
 })
 const formRules = ref({
-  delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }]
+  assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }],
+  reason: [{ required: true, message: '转派理由不能为空', trigger: 'blur' }]
 })
 
 const formRef = ref() // 表单 Ref
@@ -66,7 +68,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    await TaskApi.delegateTask(formData.value)
+    await TaskApi.transferTask(formData.value)
     dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
@@ -79,7 +81,8 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: '',
-    delegateUserId: undefined
+    assigneeUserId: undefined,
+    reason: ''
   }
   formRef.value?.resetFields()
 }
