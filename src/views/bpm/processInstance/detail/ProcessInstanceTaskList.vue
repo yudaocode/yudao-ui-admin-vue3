@@ -3,7 +3,7 @@
     <template #header>
       <span class="el-icon-picture-outline">审批记录</span>
     </template>
-    <el-col :offset="4" :span="16">
+    <el-col :offset="3" :span="17">
       <div class="block">
         <el-timeline>
           <el-timeline-item
@@ -20,8 +20,7 @@
                 v-if="!isEmpty(item.children)"
                 @click="openChildrenTask(item)"
               >
-                <Icon icon="ep:memo" />
-                子任务
+                <Icon icon="ep:memo" /> 子任务
               </el-button>
             </p>
             <el-card :body-style="{ padding: '10px' }">
@@ -92,7 +91,7 @@ const getTimelineItemIcon = (item) => {
 }
 
 /** 获得任务对应的颜色 */
-const getTimelineItemType = (item) => {
+const getTimelineItemType = (item: any) => {
   if (item.status === 1) {
     return 'primary'
   }

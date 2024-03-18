@@ -33,12 +33,6 @@ const bpmnControlForm = ref({
   prefix: 'flowable'
 })
 const activityList = ref([]) // 任务列表
-// const bpmnXML = computed(() => { // TODO 芋艿：不晓得为啊哈不能这么搞
-//   if (!props.processInstance || !props.processInstance.processDefinition) {
-//     return
-//   }
-//   return DefinitionApi.getProcessDefinitionBpmnXML(props.processInstance.processDefinition.id)
-// })
 
 /** 初始化 */
 onMounted(async () => {

@@ -75,14 +75,15 @@
         prop="endTime"
         width="180"
       />
+      <el-table-column align="center" label="审批状态" prop="status" width="120">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="审批建议" prop="reason" min-width="180" />
       <el-table-column align="center" label="耗时" prop="durationInMillis" width="120">
         <template #default="scope">
           {{ formatPast2(scope.row.durationInMillis) }}
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="审批状态" prop="status" width="100">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column align="center" label="流程编号" prop="id" :show-overflow-tooltip="true" />

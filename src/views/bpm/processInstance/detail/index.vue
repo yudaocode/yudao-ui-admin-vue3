@@ -302,9 +302,6 @@ const loadRunningTask = (tasks) => {
       loadRunningTask(task.children)
     }
     // 2.1 只有待处理才需要
-    // if (task.status !== 1 && task.status !== 6) {
-    //   return
-    // }
     if (task.status !== 1 && task.status !== 6) {
       return
     }
