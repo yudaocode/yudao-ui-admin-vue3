@@ -43,10 +43,10 @@
           style="width: 100%"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_MODEL_CATEGORY)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
+            v-for="category in categoryList"
+            :key="category.code"
+            :label="category.name"
+            :value="category.code"
           />
         </el-select>
       </el-form-item>
@@ -126,6 +126,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { ElMessageBox } from 'element-plus'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
+import { CategoryApi } from '@/api/bpm/category'
 
 defineOptions({ name: 'ModelForm' })
 
@@ -154,6 +155,7 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const formList = ref([]) // 流程表单的下拉框的数据
+const categoryList = ref([]) // 流程分类列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -172,6 +174,8 @@ const open = async (type: string, id?: number) => {
   }
   // 获得流程表单的下拉框的数据
   formList.value = await FormApi.getSimpleFormList()
+  // 查询流程分类列表
+  categoryList.value = await CategoryApi.getCategorySimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 

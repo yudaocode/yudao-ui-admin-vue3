@@ -279,18 +279,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/process-instance/create',
-        component: () => import('@/views/bpm/processInstance/create/index.vue'),
-        name: 'BpmProcessInstanceCreate',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: '发起流程',
-          activeMenu: 'bpm/processInstance/create'
-        }
-      },
-      {
         path: '/process-instance/detail',
         component: () => import('@/views/bpm/processInstance/detail/index.vue'),
         name: 'BpmProcessInstanceDetail',

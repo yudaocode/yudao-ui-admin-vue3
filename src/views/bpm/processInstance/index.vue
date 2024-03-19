@@ -36,10 +36,10 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_MODEL_CATEGORY)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
+            v-for="category in categoryList"
+            :key="category.code"
+            :label="category.name"
+            :value="category.code"
           />
         </el-select>
       </el-form-item>
@@ -89,11 +89,7 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column label="流程编号" align="center" prop="id" width="300px" />
       <el-table-column label="流程名称" align="center" prop="name" />
-      <el-table-column label="流程分类" align="center" prop="category">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_MODEL_CATEGORY" :value="scope.row.category" />
-        </template>
-      </el-table-column>
+      <el-table-column label="流程分类" align="center" prop="categoryName" />
       <el-table-column label="当前审批任务" align="center" prop="tasks">
         <template #default="scope">
           <el-button type="primary" v-for="task in scope.row.tasks" :key="task.id" link>
@@ -156,6 +152,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { ElMessageBox } from 'element-plus'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+import { CategoryApi } from '@/api/bpm/category'
 
 defineOptions({ name: 'BpmProcessInstance' })
 
@@ -176,6 +173,7 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
+const categoryList = ref([]) // 流程分类列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -240,7 +238,8 @@ onActivated(() => {
 })
 
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  categoryList.value = await CategoryApi.getCategorySimpleList()
 })
 </script>

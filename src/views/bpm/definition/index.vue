@@ -11,11 +11,7 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="定义分类" align="center" prop="category" width="100">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_MODEL_CATEGORY" :value="scope.row.category" />
-        </template>
-      </el-table-column>
+      <el-table-column label="定义分类" align="center" prop="categoryName" width="100" />
       <el-table-column label="表单信息" align="center" prop="formType" width="200">
         <template #default="scope">
           <el-button
@@ -85,7 +81,6 @@
 </template>
 
 <script lang="ts" setup>
-import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { MyProcessViewer } from '@/components/bpmnProcessDesigner/package'
 import * as DefinitionApi from '@/api/bpm/definition'
