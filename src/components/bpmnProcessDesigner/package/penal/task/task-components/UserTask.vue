@@ -212,7 +212,7 @@ onMounted(async () => {
   // 获得用户列表
   userOptions.value = await UserApi.getSimpleUserList()
   // 获得用户组列表
-  userGroupOptions.value = await UserGroupApi.getSimpleUserGroupList()
+  userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
 })
 
 onBeforeUnmount(() => {
