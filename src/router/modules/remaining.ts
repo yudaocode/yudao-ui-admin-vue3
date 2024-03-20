@@ -243,7 +243,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     },
     children: [
       {
-        path: '/manager/form/edit',
+        path: 'manager/form/edit',
         component: () => import('@/views/bpm/form/editor/index.vue'),
         name: 'BpmFormEditor',
         meta: {
@@ -255,7 +255,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/manager/model/edit',
+        path: 'manager/model/edit',
         component: () => import('@/views/bpm/model/editor/index.vue'),
         name: 'BpmModelEditor',
         meta: {
@@ -267,7 +267,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/manager/simple/workflow/model/edit',
+        path: 'manager/simple/workflow/model/edit',
         component: () => import('@/views/bpm/simpleWorkflow/index.vue'),
         name: 'SimpleWorkflowDesignEditor',
         meta: {
@@ -279,7 +279,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/manager/definition',
+        path: 'manager/definition',
         component: () => import('@/views/bpm/definition/index.vue'),
         name: 'BpmProcessDefinition',
         meta: {
@@ -291,7 +291,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/process-instance/detail',
+        path: 'process-instance/detail',
         component: () => import('@/views/bpm/processInstance/detail/index.vue'),
         name: 'BpmProcessInstanceDetail',
         meta: {
@@ -299,11 +299,11 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           title: '流程详情',
-          activeMenu: 'bpm/processInstance/detail'
+          activeMenu: '/bpm/task/my'
         }
       },
       {
-        path: '/bpm/oa/leave/create',
+        path: 'oa/leave/create',
         component: () => import('@/views/bpm/oa/leave/create.vue'),
         name: 'OALeaveCreate',
         meta: {
@@ -315,7 +315,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/bpm/oa/leave/detail',
+        path: 'oa/leave/detail',
         component: () => import('@/views/bpm/oa/leave/detail.vue'),
         name: 'OALeaveDetail',
         meta: {

@@ -51,6 +51,7 @@
         <form-create
           :rule="detailForm.rule"
           v-model:api="fApi"
+          v-model="detailForm.value"
           :option="detailForm.option"
           @submit="submitForm"
         />
@@ -67,12 +68,16 @@ import { setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
 import { CategoryApi } from '@/api/bpm/category'
+import { useTagsViewStore } from '@/store/modules/tagsView'
 
 defineOptions({ name: 'BpmProcessInstanceCreate' })
 
-const router = useRouter() // 路由
+const route = useRoute() // 路由
+const { push, currentRoute } = useRouter() // 路由
 const message = useMessage() // 消息
+const { delView } = useTagsViewStore() // 视图操作
 
+const processInstanceId = route.query.processInstanceId
 const loading = ref(true) // 加载中
 const categoryList = ref([]) // 分类的列表
 const categoryActive = ref('') // 选中的分类
@@ -91,6 +96,23 @@ const getList = async () => {
     processDefinitionList.value = await DefinitionApi.getProcessDefinitionList({
       suspensionState: 1
     })
+
+    // 如果 processInstanceId 非空，说明是重新发起
+    if (processInstanceId?.length > 0) {
+      const processInstance = await ProcessInstanceApi.getProcessInstance(processInstanceId)
+      if (!processInstance) {
+        message.error('重新发起流程失败，原因：流程实例不存在')
+        return
+      }
+      const processDefinition = processDefinitionList.value.find(
+        (item) => item.key == processInstance.processDefinition?.key
+      )
+      if (!processDefinition) {
+        message.error('重新发起流程失败，原因：流程定义不存在')
+        return
+      }
+      await handleSelect(processDefinition, processInstance.formVariables)
+    }
   } finally {
     loading.value = false
   }
@@ -105,26 +127,26 @@ const categoryProcessDefinitionList = computed(() => {
 const bpmnXML = ref(null) // BPMN 数据
 const fApi = ref<ApiAttrs>()
 const detailForm = ref({
-  // 流程表单详情
   rule: [],
-  option: {}
-})
+  option: {},
+  value: {}
+}) // 流程表单详情
 const selectProcessDefinition = ref() // 选择的流程定义
 
 /** 处理选择流程的按钮操作 **/
-const handleSelect = async (row) => {
+const handleSelect = async (row, formVariables) => {
   // 设置选择的流程
   selectProcessDefinition.value = row
 
   // 情况一：流程表单
   if (row.formType == 10) {
     // 设置表单
-    setConfAndFields2(detailForm, row.formConf, row.formFields)
+    setConfAndFields2(detailForm, row.formConf, row.formFields, formVariables)
     // 加载流程图
     bpmnXML.value = await DefinitionApi.getProcessDefinitionBpmnXML(row.id)
     // 情况二：业务表单
   } else if (row.formCustomCreatePath) {
-    await router.push({
+    await push({
       path: row.formCustomCreatePath
     })
     // 这里暂时无需加载流程图，因为跳出到另外个 Tab；
@@ -145,7 +167,11 @@ const submitForm = async (formData) => {
     })
     // 提示
     message.success('发起流程成功')
-    router.go(-1)
+    // 跳转回去
+    delView(unref(currentRoute))
+    await push({
+      name: 'BpmProcessInstance'
+    })
   } finally {
     fApi.value.btn.loading(false)
   }

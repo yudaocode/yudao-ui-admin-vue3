@@ -76,7 +76,7 @@
           type="primary"
           plain
           v-hasPermi="['bpm:process-instance:query']"
-          @click="handleCreate"
+          @click="handleCreate()"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 发起流程
         </el-button>
@@ -134,6 +134,9 @@
             @click="handleCancel(scope.row)"
           >
             取消
+          </el-button>
+          <el-button link type="primary" v-else @click="handleCreate(scope.row.id)">
+            重新发起
           </el-button>
         </template>
       </el-table-column>
@@ -200,9 +203,10 @@ const resetQuery = () => {
 }
 
 /** 发起流程操作 **/
-const handleCreate = () => {
+const handleCreate = (id) => {
   router.push({
-    name: 'BpmProcessInstanceCreate'
+    name: 'BpmProcessInstanceCreate',
+    query: { processInstanceId: id }
   })
 }
 
