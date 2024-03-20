@@ -49,7 +49,7 @@
 </template>
 <script lang="ts" setup>
 import * as UserApi from '@/api/system/user'
-import type { TransferReqVO } from '@/api/crm/customer'
+import type { TransferReqVO,TransferListReqVO } from '@/api/crm/customer'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { PermissionLevelEnum } from '@/api/crm/permission'
 
@@ -58,6 +58,7 @@ defineOptions({ name: 'CrmTransferForm' })
 const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
+const isTransferList = ref(false) //是否是多个线索或是客户id一起转移
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const oldOwnerHandler = ref(false) // 老负责人的处理方式
@@ -66,6 +67,13 @@ const formData = ref<TransferReqVO>({
   newOwnerUserId: undefined, // 新负责人的用户编号
   oldOwnerPermissionLevel: undefined // 老负责人加入团队后的权限级别
 })
+
+const formDataList = ref<TransferListReqVO>({
+  ids:undefined,// 线索或客户编号
+  newOwnerUserId: undefined, // 新负责人的用户编号
+  oldOwnerPermissionLevel: undefined // 老负责人加入团队后的权限级别
+})
+
 const formRules = reactive({
   newOwnerUserId: [{ required: true, message: '新负责人不能为空', trigger: 'blur' }],
   oldOwnerPermissionLevel: [
@@ -77,13 +85,24 @@ const transferFuncRef = ref<Function>(() => {}) // 转移所需回调
 
 /** 打开弹窗 */
 const open = async (title: string, bizId: number, transferFunc: Function) => {
+  isTransferList.value = false
   dialogVisible.value = true
   dialogTitle.value = title
   transferFuncRef.value = transferFunc
   resetForm()
   formData.value.id = bizId
 }
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+/** 打开弹窗,批量转移 */
+const openBizIds = async (title: string, bizIds: Array<number>, transferFunc: Function) => {
+  isTransferList.value = true
+  dialogVisible.value = true
+  dialogTitle.value = title
+  transferFuncRef.value = transferFunc
+  resetForm()
+  formDataList.value.ids = bizIds
+}
+
+defineExpose({ open,openBizIds }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
@@ -92,18 +111,40 @@ const submitForm = async () => {
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
-  // 提交请求
   formLoading.value = true
-  try {
-    const data = formData.value
-    await transferFuncRef.value(unref(data))
-    message.success(dialogTitle.value + '成功')
-    dialogVisible.value = false
-    // 发送操作成功的事件
-    emit('success')
-  } finally {
-    formLoading.value = false
+
+  //是否批量转移
+  if(isTransferList.value) {
+    // 提交请求
+    try {
+        formDataList.value.newOwnerUserId = formData.value.newOwnerUserId
+        formDataList.value.oldOwnerPermissionLevel = formData.value.oldOwnerPermissionLevel
+
+        const data = formDataList.value
+        await transferFuncRef.value(unref(data))
+        message.success(dialogTitle.value + '成功')
+        dialogVisible.value = false
+        // 发送操作成功的事件
+        emit('success')
+      } finally {
+        formLoading.value = false
+      }
+  } 
+  else 
+  {
+      // 提交请求
+      try {
+        const data = formData.value
+        await transferFuncRef.value(unref(data))
+        message.success(dialogTitle.value + '成功')
+        dialogVisible.value = false
+        // 发送操作成功的事件
+        emit('success')
+      } finally {
+        formLoading.value = false
+      }
   }
+
 }
 
 /** 重置表单 */

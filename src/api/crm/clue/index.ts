@@ -1,5 +1,6 @@
 import request from '@/config/axios'
 import { TransferReqVO } from '@/api/crm/customer'
+import { List } from 'echarts'
 
 export interface ClueVO {
   id: number // 编号
@@ -65,6 +66,12 @@ export const exportClue = async (params) => {
 // 线索转移
 export const transferClue = async (data: TransferReqVO) => {
   return await request.put({ url: '/crm/clue/transfer', data })
+}
+
+// 批量转移线索
+export const transferClueList = async (data: TransferReqVO[]) => {
+  console.log("aaaa",data)
+  return await request.put({ url: '/crm/clue/transferlist',data })
 }
 
 // 线索转化为客户

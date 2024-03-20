@@ -108,6 +108,12 @@ export interface TransferReqVO {
   oldOwnerPermissionLevel: number | undefined // 老负责人加入团队后的权限级别
 }
 
+export interface TransferListReqVO {
+  ids: Array<number> | undefined // 客户编号
+  newOwnerUserId: number | undefined // 新负责人的用户编号
+  oldOwnerPermissionLevel: number | undefined // 老负责人加入团队后的权限级别
+}
+
 // 客户转移
 export const transferCustomer = async (data: TransferReqVO) => {
   return await request.put({ url: '/crm/customer/transfer', data })

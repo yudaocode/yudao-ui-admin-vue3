@@ -50,6 +50,9 @@
         <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:clue:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
+        <el-button type="warning" @click="transfer()" v-hasPermi="['crm:clue:update']">
+          <Icon icon="ep:guide" class="mr-5px" /> 批量转移
+        </el-button>
         <el-button
           type="success"
           plain
@@ -70,7 +73,8 @@
       <el-tab-pane label="我参与的" name="2" />
       <el-tab-pane label="下属负责的" name="3" />
     </el-tabs>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55" />
       <el-table-column label="线索名称" align="center" prop="name" fixed="left" width="160">
         <template #default="scope">
           <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
@@ -162,6 +166,7 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <ClueForm ref="formRef" @success="getList" />
+  <CrmTransferForm ref="transferFormRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
@@ -171,6 +176,8 @@ import download from '@/utils/download'
 import * as ClueApi from '@/api/crm/clue'
 import ClueForm from './ClueForm.vue'
 import { TabsPaneContext } from 'element-plus'
+import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
+
 
 defineOptions({ name: 'CrmClue' })
 
@@ -182,7 +189,7 @@ const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
-  pageSize: 10,
+  pageSize: 100,
   sceneType: '1', // 默认和 activeName 相等
   name: null,
   telephone: null,
@@ -192,6 +199,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const activeName = ref('1') // 列表 tab
+
 
 /** 查询列表 */
 const getList = async () => {
@@ -261,6 +269,23 @@ const handleExport = async () => {
   } finally {
     exportLoading.value = false
   }
+}
+
+/** 批量线索转移 */
+const selectedList = ref([])
+const transferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 线索转移表单 ref
+const transfer = () => {
+  const ids = ref([])
+  selectedList.value.forEach(element => {
+     ids.value.push(element.id)
+  });
+  console.log(ids)
+  transferFormRef.value?.openBizIds('批量线索转移', ids.value, ClueApi.transferClueList)
+}
+
+/** 多选事件监听 */
+const handleSelectionChange = async (selection) => {
+  selectedList.value = selection
 }
 
 /** 初始化 **/
