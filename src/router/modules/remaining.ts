@@ -267,6 +267,18 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
+        path: '/manager/simple/workflow/model/edit',
+        component: () => import('@/views/bpm/simpleWorkflow/index.vue'),
+        name: 'SimpleWorkflowDesignEditor',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '仿钉钉设计流程',
+          activeMenu: '/bpm/manager/model'
+        }
+      },
+      {
         path: '/manager/definition',
         component: () => import('@/views/bpm/definition/index.vue'),
         name: 'BpmProcessDefinition',

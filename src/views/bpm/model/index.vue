@@ -160,6 +160,14 @@
           <el-button
             link
             type="primary"
+            @click="handleSimpleDesign(scope.row.id)"
+            v-hasPermi="['bpm:model:update']"
+          >
+            仿钉钉设计流程
+          </el-button>
+          <el-button
+            link
+            type="primary"
             @click="handleDeploy(scope.row)"
             v-hasPermi="['bpm:model:deploy']"
           >
@@ -317,6 +325,15 @@ const handleChangeState = async (row) => {
 const handleDesign = (row) => {
   push({
     name: 'BpmModelEditor',
+    query: {
+      modelId: row.id
+    }
+  })
+}
+
+const handleSimpleDesign = (row) => {
+  push({
+    name: 'SimpleWorkflowDesignEditor',
     query: {
       modelId: row.id
     }
