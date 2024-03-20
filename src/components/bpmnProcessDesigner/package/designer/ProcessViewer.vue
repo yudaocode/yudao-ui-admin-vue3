@@ -368,7 +368,7 @@ const elementHover = (element) => {
         html += `<p>结束时间：${formatDate(processInstance.value.endTime)}</p>`
       }
     }
-    console.log(html, 'html111111111111111')
+    // console.log(html, 'html111111111111111')
     elementOverlayIds.value[element.value.id] = toRaw(overlays.value)?.add(element.value, {
       position: { left: 0, bottom: 0 },
       html: `<div class="element-overlays">${html}</div>`

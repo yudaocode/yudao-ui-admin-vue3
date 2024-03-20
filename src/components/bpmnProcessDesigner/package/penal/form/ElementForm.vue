@@ -429,7 +429,7 @@ const saveField = () => {
 
 // 移除某个 字段的 配置项
 const removeFieldOptionItem = (option, index, type) => {
-  console.log(option, 'option')
+  // console.log(option, 'option')
   if (type === 'property') {
     fieldPropertiesList.value.splice(index, 1)
     return

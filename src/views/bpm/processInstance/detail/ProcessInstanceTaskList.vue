@@ -16,11 +16,20 @@
               任务：{{ item.name }}
               <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="item.status" />
               <el-button
-                style="margin-left: 5px"
+                class="ml-10px"
                 v-if="!isEmpty(item.children)"
                 @click="openChildrenTask(item)"
+                size="small"
               >
                 <Icon icon="ep:memo" /> 子任务
+              </el-button>
+              <el-button
+                class="ml-10px"
+                size="small"
+                v-if="item.formId > 0"
+                @click="handleFormDetail(item)"
+              >
+                <Icon icon="ep:document" /> 查看表单
               </el-button>
             </p>
             <el-card :body-style="{ padding: '10px' }">
@@ -50,10 +59,19 @@
         </el-timeline>
       </div>
     </el-col>
-
-    <!-- 弹窗：子任务  -->
-    <TaskSignList ref="taskSignListRef" @success="refresh" />
   </el-card>
+
+  <!-- 弹窗：子任务  -->
+  <TaskSignList ref="taskSignListRef" @success="refresh" />
+  <!-- 弹窗：表单 -->
+  <Dialog title="表单详情" v-model="taskFormVisible" width="600">
+    <form-create
+      ref="fApi"
+      v-model="taskForm.value"
+      :option="taskForm.option"
+      :rule="taskForm.rule"
+    />
+  </Dialog>
 </template>
 <script lang="ts" setup>
 import { formatDate, formatPast2 } from '@/utils/formatTime'
@@ -61,6 +79,8 @@ import { propTypes } from '@/utils/propTypes'
 import { DICT_TYPE } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
 import TaskSignList from './dialog/TaskSignList.vue'
+import type { ApiAttrs } from '@form-create/element-ui/types/config'
+import { setConfAndFields2 } from '@/utils/formCreate'
 
 defineOptions({ name: 'BpmProcessInstanceTaskList' })
 
@@ -120,6 +140,26 @@ const getTimelineItemType = (item: any) => {
 const taskSignListRef = ref()
 const openChildrenTask = (item: any) => {
   taskSignListRef.value.open(item)
+}
+
+/** 查看表单 */
+const fApi = ref<ApiAttrs>() // form-create 的 API 操作类
+const taskForm = ref({
+  rule: [],
+  option: {},
+  value: {}
+}) // 流程任务的表单详情
+const taskFormVisible = ref(false)
+const handleFormDetail = async (row) => {
+  // 设置表单
+  setConfAndFields2(taskForm, row.formConf, row.formFields, row.formVariables)
+  // 弹窗打开
+  taskFormVisible.value = true
+  // 隐藏提交、重置按钮，设置禁用只读
+  await nextTick()
+  fApi.value.fapi.btn.show(false)
+  fApi.value?.fapi?.resetBtn.show(false)
+  fApi.value?.fapi?.disabled(true)
 }
 
 /** 刷新数据 */

@@ -168,11 +168,10 @@ const approveFormFApis = ref<ApiAttrs[]>([]) // approveForms 的 fAPi
 // ========== 申请信息 ==========
 const fApi = ref<ApiAttrs>() //
 const detailForm = ref({
-  // 流程表单详情
   rule: [],
   option: {},
   value: {}
-})
+}) // 流程实例的表单详情
 
 /** 监听 approveFormFApis，实现它对应的 form-create 初始化后，隐藏掉对应的表单提交按钮 */
 watch(
