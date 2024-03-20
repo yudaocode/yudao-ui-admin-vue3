@@ -21,9 +21,22 @@
             {{ processInstance.name }}
           </el-form-item>
           <el-form-item v-if="processInstance && processInstance.startUser" label="流程发起人">
-            {{ processInstance.startUser.nickname }}
-            <el-tag size="small" type="info">{{ processInstance.startUser.deptName }}</el-tag>
+            {{ processInstance?.startUser.nickname }}
+            <el-tag size="small" type="info">{{ processInstance?.startUser.deptName }}</el-tag>
           </el-form-item>
+          <el-card class="mb-15px !-mt-10px" v-if="runningTasks[index].formId > 0">
+            <template #header>
+              <span class="el-icon-picture-outline">
+                填写表单【{{ runningTasks[index]?.formName }}】
+              </span>
+            </template>
+            <form-create
+              v-model:api="approveFormFApis[index]"
+              v-model="approveForms[index].value"
+              :option="approveForms[index].option"
+              :rule="approveForms[index].rule"
+            />
+          </el-card>
           <el-form-item label="审批建议" prop="reason">
             <el-input
               v-model="auditForms[index].reason"
@@ -149,6 +162,9 @@ const auditForms = ref<any[]>([]) // 审批任务的表单
 const auditRule = reactive({
   reason: [{ required: true, message: '审批建议不能为空', trigger: 'blur' }]
 })
+const approveForms = ref<any[]>([]) // 审批通过时，额外的补充信息
+const approveFormFApis = ref<ApiAttrs[]>([]) // approveForms 的 fAPi
+
 // ========== 申请信息 ==========
 const fApi = ref<ApiAttrs>() //
 const detailForm = ref({
@@ -157,6 +173,20 @@ const detailForm = ref({
   option: {},
   value: {}
 })
+
+/** 监听 approveFormFApis，实现它对应的 form-create 初始化后，隐藏掉对应的表单提交按钮 */
+watch(
+  () => approveFormFApis.value,
+  (value) => {
+    value?.forEach((api) => {
+      api.btn.show(false)
+      api.resetBtn.show(false)
+    })
+  },
+  {
+    deep: true
+  }
+)
 
 /** 处理审批通过和不通过的操作 */
 const handleAudit = async (task, pass) => {
@@ -176,6 +206,12 @@ const handleAudit = async (task, pass) => {
     copyUserIds: auditForms.value[index].copyUserIds
   }
   if (pass) {
+    // 审批通过，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
+    const formCreateApi = approveFormFApis.value[index]
+    if (formCreateApi) {
+      await formCreateApi.validate()
+      data.variables = approveForms.value[index].value
+    }
     await TaskApi.approveTask(data)
     message.success('审批通过成功')
   } else {
@@ -258,6 +294,10 @@ const getProcessInstance = async () => {
 
 /** 加载任务列表 */
 const getTaskList = async () => {
+  runningTasks.value = []
+  auditForms.value = []
+  approveForms.value = []
+  approveFormFApis.value = []
   try {
     // 获得未取消的任务
     tasksLoad.value = true
@@ -285,8 +325,6 @@ const getTaskList = async () => {
     })
 
     // 获得需要自己审批的任务
-    runningTasks.value = []
-    auditForms.value = []
     loadRunningTask(tasks.value)
   } finally {
     tasksLoad.value = false
@@ -315,6 +353,15 @@ const loadRunningTask = (tasks) => {
       reason: '',
       copyUserIds: []
     })
+
+    // 2.4 处理 approve 表单
+    if (task.formId && task.formConf) {
+      const approveForm = {}
+      setConfAndFields2(approveForm, task.formConf, task.formFields, task.formVariable)
+      approveForms.value.push(approveForm)
+    } else {
+      approveForms.value.push({}) // 占位，避免为空
+    }
   })
 }
 
