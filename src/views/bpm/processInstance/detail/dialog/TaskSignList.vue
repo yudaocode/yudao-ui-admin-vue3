@@ -27,7 +27,7 @@
       </el-table-column>
       <el-table-column label="审批状态" prop="status" width="120">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column

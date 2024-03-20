@@ -7,14 +7,25 @@
       <div class="block">
         <el-timeline>
           <el-timeline-item
-            v-for="(item, index) in tasks"
-            :key="index"
-            :icon="getTimelineItemIcon(item)"
-            :type="getTimelineItemType(item)"
+            v-if="processInstance.endTime"
+            :type="getProcessInstanceTimelineItemType(processInstance)"
           >
             <p style="font-weight: 700">
-              任务：{{ item.name }}
-              <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="item.status" />
+              结束流程：在 {{ formatDate(processInstance?.endTime) }} 结束
+              <dict-tag
+                :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS"
+                :value="processInstance.status"
+              />
+            </p>
+          </el-timeline-item>
+          <el-timeline-item
+            v-for="(item, index) in tasks"
+            :key="index"
+            :type="getTaskTimelineItemType(item)"
+          >
+            <p style="font-weight: 700">
+              审批任务：{{ item.name }}
+              <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="item.status" />
               <el-button
                 class="ml-10px"
                 v-if="!isEmpty(item.children)"
@@ -56,6 +67,12 @@
               <p v-if="item.reason"> 审批建议：{{ item.reason }} </p>
             </el-card>
           </el-timeline-item>
+          <el-timeline-item type="success">
+            <p style="font-weight: 700">
+              发起流程：【{{ processInstance.startUser?.nickname }}】在
+              {{ formatDate(processInstance?.startTime) }} 发起【 {{ processInstance.name }} 】流程
+            </p>
+          </el-timeline-item>
         </el-timeline>
       </div>
     </el-col>
@@ -86,33 +103,27 @@ defineOptions({ name: 'BpmProcessInstanceTaskList' })
 
 defineProps({
   loading: propTypes.bool, // 是否加载中
+  processInstance: propTypes.object, // 流程实例
   tasks: propTypes.arrayOf(propTypes.object) // 流程任务的数组
 })
 
-/** 获得任务对应的 icon */
-// TODO @芋艿：对应的 icon 需要调整
-const getTimelineItemIcon = (item) => {
-  if (item.status === 1) {
-    return 'el-icon-time'
-  }
+/** 获得流程实例对应的颜色 */
+const getProcessInstanceTimelineItemType = (item: any) => {
   if (item.status === 2) {
-    return 'el-icon-check'
+    return 'success'
   }
   if (item.status === 3) {
-    return 'el-icon-close'
+    return 'danger'
   }
   if (item.status === 4) {
-    return 'el-icon-remove-outline'
-  }
-  if (item.status === 5) {
-    return 'el-icon-back'
+    return 'warning'
   }
   return ''
 }
 
 /** 获得任务对应的颜色 */
-const getTimelineItemType = (item: any) => {
-  if (item.status === 1) {
+const getTaskTimelineItemType = (item: any) => {
+  if ([0, 1, 6, 7].includes(item.status)) {
     return 'primary'
   }
   if (item.status === 2) {
@@ -125,12 +136,6 @@ const getTimelineItemType = (item: any) => {
     return 'info'
   }
   if (item.status === 5) {
-    return 'warning'
-  }
-  if (item.status === 6) {
-    return 'default'
-  }
-  if (item.status === 7 || item.status === 8) {
     return 'warning'
   }
   return ''

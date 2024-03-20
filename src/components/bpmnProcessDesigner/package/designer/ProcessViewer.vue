@@ -115,7 +115,7 @@ const highlightDiagram = async () => {
       if (!task) {
         return
       }
-      //进行中的任务已经高亮过了，则不高亮后面的任务了
+      // 进行中的任务已经高亮过了，则不高亮后面的任务了
       if (findProcessTask) {
         removeTaskDefinitionKeyList.push(n.id)
         return
@@ -194,6 +194,7 @@ const highlightDiagram = async () => {
       })
     } else if (n.$type === 'bpmn:StartEvent') {
       // 开始节点
+      canvas.addMarker(n.id, 'highlight')
       n.outgoing?.forEach((nn) => {
         // outgoing 例如说【bpmn:SequenceFlow】连线
         // 获得连线是否有指向目标。如果有，则进行高亮
@@ -223,40 +224,49 @@ const highlightDiagram = async () => {
           canvas.addMarker(out.id, getResultCss(2))
         })
       }
+    } else if (n.$type === 'bpmn:SequenceFlow') {
+      let targetActivity = activityList.find((m: any) => m.key === n.targetRef.id)
+      if (targetActivity) {
+        canvas.addMarker(n.id, getActivityHighlightCss(targetActivity))
+      }
     }
   })
   if (!isEmpty(removeTaskDefinitionKeyList)) {
-    // TODO 芋艿：后面 .definitionKey 再看
     taskList.value = taskList.value.filter(
-      (item) => !removeTaskDefinitionKeyList.includes(item.definitionKey)
+      (item) => !removeTaskDefinitionKeyList.includes(item.taskDefinitionKey)
     )
   }
 }
+
 const getActivityHighlightCss = (activity) => {
   return activity.endTime ? 'highlight' : 'highlight-todo'
 }
-const getResultCss = (result) => {
-  if (result === 1) {
+
+const getResultCss = (status) => {
+  if (status === 1) {
     // 审批中
     return 'highlight-todo'
-  } else if (result === 2) {
+  } else if (status === 2) {
     // 已通过
     return 'highlight'
-  } else if (result === 3) {
+  } else if (status === 3) {
     // 不通过
     return 'highlight-reject'
-  } else if (result === 4) {
+  } else if (status === 4) {
     // 已取消
     return 'highlight-cancel'
-  } else if (result === 5) {
+  } else if (status === 5) {
     // 退回
     return 'highlight-return'
-  } else if (result === 6) {
+  } else if (status === 6) {
     // 委派
-    return 'highlight-return'
-  } else if (result === 7 || result === 8 || result === 9) {
-    // 待后加签任务完成/待前加签任务完成/待前置任务完成
-    return 'highlight-return'
+    return 'highlight-todo'
+  } else if (status === 7) {
+    // 审批通过中
+    return 'highlight-todo'
+  } else if (status === 0) {
+    // 待审批
+    return 'highlight-todo'
   }
   return ''
 }
@@ -297,10 +307,10 @@ const elementHover = (element) => {
   !elementOverlayIds.value && (elementOverlayIds.value = {})
   !overlays.value && (overlays.value = bpmnModeler.get('overlays'))
   // 展示信息
-  console.log(activityLists.value, 'activityLists.value')
-  console.log(element.value, 'element.value')
+  // console.log(activityLists.value, 'activityLists.value')
+  // console.log(element.value, 'element.value')
   const activity = activityLists.value.find((m) => m.key === element.value.id)
-  console.log(activity, 'activityactivityactivityactivity')
+  // console.log(activity, 'activityactivityactivityactivity')
   if (!activity) {
     return
   }
@@ -314,12 +324,11 @@ const elementHover = (element) => {
                   <p>部门：${processInstance.value.startUser.deptName}</p>
                   <p>创建时间：${formatDate(processInstance.value.createTime)}`
     } else if (element.value.type === 'bpmn:UserTask') {
-      // debugger
       let task = taskList.value.find((m) => m.id === activity.taskId) // 找到活动对应的 taskId
       if (!task) {
         return
       }
-      let optionData = getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT)
+      let optionData = getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)
       let dataResult = ''
       optionData.forEach((element) => {
         if (element.value == task.status) {
@@ -352,7 +361,7 @@ const elementHover = (element) => {
       }
       console.log(html)
     } else if (element.value.type === 'bpmn:EndEvent' && processInstance.value) {
-      let optionData = getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT)
+      let optionData = getIntDictOptions(DICT_TYPE.BPM_TASK_STATUS)
       let dataResult = ''
       optionData.forEach((element) => {
         if (element.value == processInstance.value.status) {
@@ -375,6 +384,7 @@ const elementHover = (element) => {
     })
   }
 }
+
 // 流程图的元素被 out
 const elementOut = (element) => {
   toRaw(overlays.value).remove({ element })
@@ -390,6 +400,7 @@ onMounted(() => {
   // 初始模型的监听器
   initModelListeners()
 })
+
 onBeforeUnmount(() => {
   // this.$once('hook:beforeDestroy', () => {
   // })
@@ -428,7 +439,7 @@ watch(
 )
 </script>
 
-<style>
+<style lang="scss">
 /** 处理中 */
 .highlight-todo.djs-connection > .djs-visual > path {
   stroke: #1890ff !important;
@@ -502,6 +513,10 @@ watch(
   stroke: green !important;
 }
 
+.djs-element.highlight > .djs-visual > path {
+  stroke: green !important;
+}
+
 /** 不通过 */
 .highlight-reject.djs-shape .djs-visual > :nth-child(1) {
   fill: red !important;
@@ -521,6 +536,7 @@ watch(
 
 .highlight-reject.djs-connection > .djs-visual > path {
   stroke: red !important;
+  marker-end: url(#sequenceflow-end-white-success) !important;
 }
 
 .highlight-reject:not(.djs-connection) .djs-visual > :nth-child(1) {

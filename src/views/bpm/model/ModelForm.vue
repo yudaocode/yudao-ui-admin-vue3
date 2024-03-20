@@ -173,7 +173,7 @@ const open = async (type: string, id?: number) => {
     }
   }
   // 获得流程表单的下拉框的数据
-  formList.value = await FormApi.getSimpleFormList()
+  formList.value = await FormApi.getFormSimpleList()
   // 查询流程分类列表
   categoryList.value = await CategoryApi.getCategorySimpleList()
 }

@@ -105,7 +105,12 @@
     </el-card>
 
     <!-- 审批记录 -->
-    <ProcessInstanceTaskList :loading="tasksLoad" :tasks="tasks" @refresh="getTaskList" />
+    <ProcessInstanceTaskList
+      :loading="tasksLoad"
+      :process-instance="processInstance"
+      :tasks="tasks"
+      @refresh="getTaskList"
+    />
 
     <!-- 高亮流程图 -->
     <ProcessInstanceBpmnViewer
