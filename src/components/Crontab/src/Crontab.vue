@@ -503,9 +503,13 @@ const submit = () => {
   emit('update:modelValue', defaultValue.value)
   dialogVisible.value = false
 }
+
+const inputChange = () => {
+  emit('update:modelValue', defaultValue.value)
+}
 </script>
 <template>
-  <el-input v-model="defaultValue" class="input-with-select" v-bind="$attrs">
+  <el-input v-model="defaultValue" class="input-with-select" v-bind="$attrs" @input="inputChange">
     <template #append>
       <el-select v-model="select" placeholder="生成器" style="width: 115px">
         <el-option label="每分钟" value="0 * * * * ?" />
