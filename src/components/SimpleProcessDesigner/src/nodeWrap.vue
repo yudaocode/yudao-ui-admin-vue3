@@ -55,7 +55,6 @@
                     class="ant-input editable-title-input"
                     @blur="blurEvent(index)"
                     @focus="$event.currentTarget.select()"
-                    v-focus
                     v-model="item.nodeName"
                   />
                   <span v-else class="editable-title" @click="clickEvent(index)">{{ item.nodeName }}</span>

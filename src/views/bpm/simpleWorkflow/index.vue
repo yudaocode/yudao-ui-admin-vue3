@@ -10,11 +10,9 @@
       </div>
     </section>
   </div>
-  <approverDrawer :directorMaxLevel="directorMaxLevel" />
 </template>
 <script lang="ts" setup>
 import nodeWrap from '@/components/SimpleProcessDesigner/src/nodeWrap.vue'
-import approverDrawer from '@/components/SimpleProcessDesigner/src/drawer/approverDrawer.vue'
 defineOptions({ name: 'SimpleWorkflowDesignEditor' })
 let nodeConfig = ref({
   nodeName: '发起人',
@@ -24,7 +22,6 @@ let nodeConfig = ref({
   nodeUserList: [],
   childNode: {}
 })
-let directorMaxLevel = ref(0)
 </script>
 <style>
 @import url('@/components/SimpleProcessDesigner/theme/workflow.css');
