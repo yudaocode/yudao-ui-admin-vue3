@@ -87,6 +87,9 @@
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
+        <el-button type="warning" @click="transfer()" v-hasPermi="['crm:clue:update']">
+          <Icon icon="ep:guide" class="mr-5px" /> 批量转移
+        </el-button>
         <el-button v-hasPermi="['crm:customer:import']" plain type="warning" @click="handleImport">
           <Icon icon="ep:upload" />
           导入
@@ -112,7 +115,8 @@
       <el-tab-pane label="我参与的" name="2" />
       <el-tab-pane label="下属负责的" name="3" />
     </el-tabs>
-    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55"/>
       <el-table-column align="center" label="客户名称" fixed="left" prop="name" width="160">
         <template #default="scope">
           <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
@@ -218,6 +222,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getList" />
   <CustomerImportForm ref="importFormRef" @success="getList" />
+  <CrmTransferForm ref="transferFormRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
@@ -228,6 +233,8 @@ import * as CustomerApi from '@/api/crm/customer'
 import CustomerForm from './CustomerForm.vue'
 import CustomerImportForm from './CustomerImportForm.vue'
 import { TabsPaneContext } from 'element-plus'
+import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
+
 
 defineOptions({ name: 'CrmCustomer' })
 
@@ -280,6 +287,23 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
+}
+
+/** 批量线索转移 */
+const selectedList = ref([])
+const transferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 线索转移表单 ref
+const transfer = () => {
+  const ids = ref([])
+  selectedList.value.forEach(element => {
+     ids.value.push(element.id)
+  });
+  console.log(ids)
+  transferFormRef.value?.openBizIds('批量线索转移', ids.value, CustomerApi.transferCustomerList)
+}
+
+/** 多选事件监听 */
+const handleSelectionChange = async (selection) => {
+  selectedList.value = selection
 }
 
 /** 打开客户详情 */
