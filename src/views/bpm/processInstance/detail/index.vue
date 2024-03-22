@@ -115,7 +115,7 @@
     <!-- 高亮流程图 -->
     <ProcessInstanceBpmnViewer
       :id="`${id}`"
-      :bpmn-xml="bpmnXML"
+      :bpmn-xml="bpmnXml"
       :loading="processInstanceLoading"
       :process-instance="processInstance"
       :tasks="tasks"
@@ -158,7 +158,7 @@ const userId = useUserStore().getUser.id // 当前登录的编号
 const id = query.id as unknown as string // 流程实例的编号
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
-const bpmnXML = ref('') // BPMN XML
+const bpmnXml = ref('') // BPMN XML
 const tasksLoad = ref(true) // 任务的加载中
 const tasks = ref<any[]>([]) // 任务列表
 // ========== 审批信息 ==========
@@ -290,7 +290,9 @@ const getProcessInstance = async () => {
     }
 
     // 加载流程图
-    bpmnXML.value = await DefinitionApi.getProcessDefinitionBpmnXML(processDefinition.id as number)
+    bpmnXml.value = (
+      await DefinitionApi.getProcessDefinition(processDefinition.id as number)
+    )?.bpmnXml
   } finally {
     processInstanceLoading.value = false
   }

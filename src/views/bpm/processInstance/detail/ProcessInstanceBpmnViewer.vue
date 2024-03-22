@@ -34,14 +34,17 @@ const bpmnControlForm = ref({
 })
 const activityList = ref([]) // 任务列表
 
-/** 初始化 */
-onMounted(async () => {
-  if (props.id) {
-    activityList.value = await ActivityApi.getActivityList({
-      processInstanceId: props.id
-    })
+/** 只有 loading 完成时，才去加载流程列表 */
+watch(
+  () => props.loading,
+  async (value) => {
+    if (value && props.id) {
+      activityList.value = await ActivityApi.getActivityList({
+        processInstanceId: props.id
+      })
+    }
   }
-})
+)
 </script>
 <style>
 .box-card {

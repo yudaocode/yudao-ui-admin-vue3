@@ -72,8 +72,8 @@
   <Dialog title="流程图" v-model="bpmnDetailVisible" width="800">
     <MyProcessViewer
       key="designer"
-      v-model="bpmnXML"
-      :value="bpmnXML as any"
+      v-model="bpmnXml"
+      :value="bpmnXml as any"
       v-bind="bpmnControlForm"
       :prefix="bpmnControlForm.prefix"
     />
@@ -133,12 +133,12 @@ const handleFormDetail = async (row) => {
 
 /** 流程图的详情按钮操作 */
 const bpmnDetailVisible = ref(false)
-const bpmnXML = ref(null)
+const bpmnXml = ref(null)
 const bpmnControlForm = ref({
   prefix: 'flowable'
 })
 const handleBpmnDetail = async (row) => {
-  bpmnXML.value = await DefinitionApi.getProcessDefinitionBpmnXML(row.id)
+  bpmnXml.value = (await DefinitionApi.getProcessDefinition(row.id))?.bpmnXml
   bpmnDetailVisible.value = true
 }
 

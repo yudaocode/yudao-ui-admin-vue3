@@ -65,11 +65,7 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="
-        userTaskForm.candidateStrategy == 30 ||
-        userTaskForm.candidateStrategy == 31 ||
-        userTaskForm.candidateStrategy == 32
-      "
+      v-if="userTaskForm.candidateStrategy == 30"
       label="指定用户"
       prop="candidateParam"
       span="24"
