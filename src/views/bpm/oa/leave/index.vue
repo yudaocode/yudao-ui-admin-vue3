@@ -226,7 +226,7 @@ const cancelLeave = async (row) => {
     inputErrorMessage: '取消原因不能为空'
   })
   // 发起取消
-  await ProcessInstanceApi.cancelProcessInstance(row.id, value)
+  await ProcessInstanceApi.cancelProcessInstanceByStartUser(row.id, value)
   message.success('取消成功')
   // 刷新列表
   await getList()
