@@ -114,7 +114,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column align="center" label="耗时" prop="durationInMillis" width="120">
+      <el-table-column align="center" label="耗时" prop="durationInMillis" width="160">
         <template #default="scope">
           {{ scope.row.durationInMillis > 0 ? formatPast2(scope.row.durationInMillis) : '-' }}
         </template>

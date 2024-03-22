@@ -109,7 +109,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await TaskApi.getTodoTaskPage(queryParams)
+    const data = await TaskApi.getTaskTodoPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {

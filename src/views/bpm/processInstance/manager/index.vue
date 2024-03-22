@@ -114,7 +114,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column align="center" label="耗时" prop="durationInMillis" width="120">
+      <el-table-column align="center" label="耗时" prop="durationInMillis" width="169">
         <template #default="scope">
           {{ scope.row.durationInMillis > 0 ? formatPast2(scope.row.durationInMillis) : '-' }}
         </template>
@@ -167,7 +167,7 @@ import { CategoryApi } from '@/api/bpm/category'
 import * as UserApi from '@/api/system/user'
 import { cancelProcessInstanceByAdmin } from '@/api/bpm/processInstance'
 
-// 它是【我的流程】的差异是，该菜单可以看全部的流程实例
+// 它和【我的流程】的差异是，该菜单可以看全部的流程实例
 defineOptions({ name: 'BpmProcessInstanceManager' })
 
 const router = useRouter() // 路由
