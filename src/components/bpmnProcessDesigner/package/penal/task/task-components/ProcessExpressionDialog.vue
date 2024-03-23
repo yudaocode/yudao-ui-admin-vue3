@@ -1,24 +1,10 @@
-<!-- 执行器选择 -->
+<!-- 表达式选择 -->
 <template>
-  <Dialog title="请选择监听器" v-model="dialogVisible" width="1024px">
+  <Dialog title="请选择表达式" v-model="dialogVisible" width="1024px">
     <ContentWrap>
       <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
         <el-table-column label="名字" align="center" prop="name" />
-        <el-table-column label="类型" align="center" prop="type">
-          <template #default="scope">
-            <dict-tag :type="DICT_TYPE.BPM_PROCESS_LISTENER_TYPE" :value="scope.row.type" />
-          </template>
-        </el-table-column>
-        <el-table-column label="事件" align="center" prop="event" />
-        <el-table-column label="值类型" align="center" prop="valueType">
-          <template #default="scope">
-            <dict-tag
-              :type="DICT_TYPE.BPM_PROCESS_LISTENER_VALUE_TYPE"
-              :value="scope.row.valueType"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column label="值" align="center" prop="value" />
+        <el-table-column label="表达式" align="center" prop="expression" />
         <el-table-column label="操作" align="center">
           <template #default="scope">
             <el-button link type="primary" @click="select(scope.row)"> 选择 </el-button>
@@ -36,19 +22,18 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { ProcessListenerApi, ProcessListenerVO } from '@/api/bpm/processListener'
-import { DICT_TYPE } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
+import { ProcessExpressionApi, ProcessExpressionVO } from '@/api/bpm/processExpression'
 
 /** BPM 流程 表单 */
-defineOptions({ name: 'ProcessListenerDialog' })
+defineOptions({ name: 'ProcessExpressionDialog' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const loading = ref(true) // 列表的加载中
-const list = ref<ProcessListenerVO[]>([]) // 列表的数据
+const list = ref<ProcessExpressionVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
@@ -64,7 +49,7 @@ const open = async (type: string) => {
   try {
     queryParams.pageNo = 1
     queryParams.type = type
-    const data = await ProcessListenerApi.getProcessListenerPage(queryParams)
+    const data = await ProcessExpressionApi.getProcessExpressionPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {

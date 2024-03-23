@@ -295,7 +295,7 @@
   </div>
 
   <!-- 选择弹窗 -->
-  <ProcessListenerDialog ref="processListenerDialogRef" @select="selectListener" />
+  <ProcessListenerDialog ref="processListenerDialogRef" @select="selectProcessListener" />
 </template>
 <script lang="ts" setup>
 import { ElMessageBox } from 'element-plus'
@@ -460,7 +460,7 @@ const processListenerDialogRef = ref()
 const openProcessListenerDialog = async () => {
   processListenerDialogRef.value.open('task')
 }
-const selectListener = (listener) => {
+const selectProcessListener = (listener) => {
   const listenerForm = initListenerForm2(listener)
   const listenerObject = createListenerObject(listenerForm, true, prefix)
   bpmnElementListeners.value.push(listenerObject)

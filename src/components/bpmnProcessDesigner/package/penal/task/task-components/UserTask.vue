@@ -5,7 +5,7 @@
         v-model="userTaskForm.candidateStrategy"
         clearable
         style="width: 100%"
-        @change="changecandidateStrategy"
+        @change="changeCandidateStrategy"
       >
         <el-option
           v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY)"
@@ -114,9 +114,14 @@
         type="textarea"
         v-model="userTaskForm.candidateParam[0]"
         clearable
-        style="width: 100%"
+        style="width: 72%"
         @change="updateElementTask"
       />
+      <el-button class="ml-5px" size="small" type="success" @click="openProcessExpressionDialog"
+        >选择表达式</el-button
+      >
+      <!-- 选择弹窗 -->
+      <ProcessExpressionDialog ref="processExpressionDialogRef" @select="selectProcessExpression" />
     </el-form-item>
   </el-form>
 </template>
@@ -129,6 +134,7 @@ import * as DeptApi from '@/api/system/dept'
 import * as PostApi from '@/api/system/post'
 import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
+import ProcessExpressionDialog from './ProcessExpressionDialog.vue'
 
 defineOptions({ name: 'UserTask' })
 const props = defineProps({
@@ -173,7 +179,7 @@ const resetTaskForm = () => {
 }
 
 /** 更新 candidateStrategy 字段时，需要清空 candidateParam，并触发 bpmn 图更新 */
-const changecandidateStrategy = () => {
+const changeCandidateStrategy = () => {
   userTaskForm.value.candidateParam = []
   updateElementTask()
 }
@@ -184,6 +190,15 @@ const updateElementTask = () => {
     candidateStrategy: userTaskForm.value.candidateStrategy,
     candidateParam: userTaskForm.value.candidateParam.join(',')
   })
+}
+
+// 打开监听器弹窗
+const processExpressionDialogRef = ref()
+const openProcessExpressionDialog = async () => {
+  processExpressionDialogRef.value.open()
+}
+const selectProcessExpression = (expression) => {
+  userTaskForm.value.candidateParam = [expression.expression]
 }
 
 watch(
