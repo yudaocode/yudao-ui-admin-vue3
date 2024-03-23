@@ -139,17 +139,25 @@ const updateBaseInfo = (key) => {
   }
 }
 
-watch(
-  () => props.businessObject,
-  (val) => {
-    // console.log(val, 'val11111111111111111111')
-    if (val) {
-      // nextTick(() => {
-      resetBaseInfo()
-      // })
-    }
-  }
-)
+onMounted(() => {
+  // 针对上传的 bpmn 流程图时，需要延迟 1 毫秒的时间，保证 key 和 name 的更新
+  setTimeout(() => {
+    handleKeyUpdate(props.model.key)
+    handleNameUpdate(props.model.name)
+  }, 1)
+})
+
+// watch(
+//   () => props.businessObject,
+//   (val) => {
+//     // console.log(val, 'val11111111111111111111')
+//     if (val) {
+//       // nextTick(() => {
+//       resetBaseInfo()
+//       // })
+//     }
+//   }
+// )
 
 watch(
   () => props.model?.key,
