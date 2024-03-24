@@ -23,11 +23,7 @@
             >
               <template #default>
                 <div class="flex">
-                  <!-- TODO 芋艿：流程图，增加 icon -->
-                  <el-image
-                    src="http://test.yudao.iocoder.cn/96c787a2ce88bf6d0ce3cd8b6cf5314e80e7703cd41bf4af8cd2e2909dbd6b6d.png"
-                    class="w-32px h-32px"
-                  />
+                  <el-image :src="definition.icon" class="w-32px h-32px" />
                   <el-text class="!ml-10px" size="large">{{ definition.name }}</el-text>
                 </div>
               </template>

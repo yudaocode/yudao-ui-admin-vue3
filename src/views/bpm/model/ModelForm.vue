@@ -50,6 +50,9 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item v-if="formData.id" label="流程图标" prop="icon">
+        <UploadImg v-model="formData.icon" :limit="1" height="128px" width="128px" />
+      </el-form-item>
       <el-form-item label="流程描述" prop="description">
         <el-input v-model="formData.description" clearable type="textarea" />
       </el-form-item>
@@ -141,15 +144,17 @@ const formData = ref({
   formType: 10,
   name: '',
   category: undefined,
+  icon: undefined,
   description: '',
   formId: '',
   formCustomCreatePath: '',
   formCustomViewPath: ''
 })
 const formRules = reactive({
-  category: [{ required: true, message: '参数分类不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '参数名称不能为空', trigger: 'blur' }],
   key: [{ required: true, message: '参数键名不能为空', trigger: 'blur' }],
+  category: [{ required: true, message: '参数分类不能为空', trigger: 'blur' }],
+  icon: [{ required: true, message: '参数图标不能为空', trigger: 'blur' }],
   value: [{ required: true, message: '参数键值不能为空', trigger: 'blur' }],
   visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }]
 })
@@ -223,6 +228,7 @@ const resetForm = () => {
     formType: 10,
     name: '',
     category: undefined,
+    icon: '',
     description: '',
     formId: '',
     formCustomCreatePath: '',
