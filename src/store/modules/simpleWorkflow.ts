@@ -14,7 +14,8 @@ export const useWorkFlowStore = defineStore('simpleWorkflow', {
     conditionDrawer: false,
     conditionsConfig1: {
       conditionNodes: []
-    }
+    },
+    userTaskConfig: {}
   }),
   actions: {
     setTableId(payload) {
@@ -46,6 +47,9 @@ export const useWorkFlowStore = defineStore('simpleWorkflow', {
     },
     setConditionsConfig(payload) {
       this.conditionsConfig1 = payload
+    },
+    setUserTaskConfig(payload) {
+      this.userTaskConfig = payload
     }
   }
 })

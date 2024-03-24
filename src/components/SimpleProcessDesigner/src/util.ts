@@ -1,3 +1,6 @@
+// @ts-ignore
+import { DictDataVO } from '@/api/system/dict/types'
+import { DICT_TYPE,  getDictLabel } from '@/utils/dict'
 /**
  * todo
  */
@@ -48,6 +51,32 @@ export const setApproverStr = (nodeConfig: any) => {
     return '发起人自己'
   } else if (nodeConfig.settype == 7) {
     return '从直接主管到通讯录中级别最高的第' + nodeConfig.examineEndDirectorLevel + '个层级主管'
+  }
+}
+
+
+export const approveMethods: DictDataVO [] = [
+  { label: '单人审批', value: 1 },
+  { label: '多人审批(所有人审批通过)', value: 2 }
+  // TODO 更多的类型
+];
+
+export const getApproverShowText = (approveMethod :number, candidateStrategy: number) => {
+  if(approveMethod && candidateStrategy) {
+    let appoveMethodText = ''
+    approveMethods.forEach((item) => {
+      if (item.value == approveMethod) {
+        appoveMethodText = item.label
+      }
+    })
+    const strategyText = getDictLabel(
+      DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY,
+      candidateStrategy
+    )
+    return `审批方式：${appoveMethodText} <br/>
+            审批人规则类型：按${strategyText}`
+  } else {
+      return ''
   }
 }
 

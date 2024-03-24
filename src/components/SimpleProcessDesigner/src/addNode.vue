@@ -32,7 +32,7 @@
     </div>
   </div>
 </template>
-<script setup>
+<script lang="ts" setup>
 import { ref } from 'vue'
 let props = defineProps({
   childNodeP: {
@@ -47,23 +47,36 @@ const addType = (type) => {
   if (type != 4) {
     var data
     if (type == 1) {
+      // data = {
+      //   name: '审核人',
+      //   error: true,
+      //   type: 1,
+      //   settype: 1,
+      //   selectMode: 0,
+      //   selectRange: 0,
+      //   directorLevel: 1,
+      //   examineMode: 1,
+      //   noHanderAction: 1,
+      //   examineEndDirectorLevel: 0,
+      //   childNode: props.childNodeP,
+      //   nodeUserList: []
+      // }
       data = {
-        nodeName: '审核人',
+        name: '审核人',
         error: true,
         type: 1,
-        settype: 1,
-        selectMode: 0,
-        selectRange: 0,
-        directorLevel: 1,
-        examineMode: 1,
-        noHanderAction: 1,
-        examineEndDirectorLevel: 0,
+        // 审批节点配置
+        attributes : {
+          approveMethod : undefined,
+          candidateStrategy: undefined,
+          candidateParam: []
+        },
         childNode: props.childNodeP,
         nodeUserList: []
       }
     } else if (type == 2) {
       data = {
-        nodeName: '抄送人',
+        name: '抄送人',
         type: 2,
         ccSelfSelectFlag: 1,
         childNode: props.childNodeP,
@@ -73,12 +86,12 @@ const addType = (type) => {
     emits('update:childNodeP', data)
   } else {
     emits('update:childNodeP', {
-      nodeName: '路由',
+      name: '路由',
       type: 4,
       childNode: null,
       conditionNodes: [
         {
-          nodeName: '条件1',
+          name: '条件1',
           error: true,
           type: 3,
           priorityLevel: 1,
@@ -87,7 +100,7 @@ const addType = (type) => {
           childNode: props.childNodeP
         },
         {
-          nodeName: '条件2',
+          name: '条件2',
           type: 3,
           priorityLevel: 2,
           conditionList: [],

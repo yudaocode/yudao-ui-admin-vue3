@@ -6,40 +6,48 @@
  * @FilePath: /Workflow-Vue3/src/components/nodeWrap.vue
 -->
 <template>
-     <div class="node-wrap" v-if="nodeConfig.type < 3">
-      <div class="node-wrap-box" :class="(nodeConfig.type == 0 ? 'start-node ' : '') +(isTried && nodeConfig.error ? 'active error' : '')">
-          <div class="title" :style="`background: rgb(${bgColors[nodeConfig.type]});`">
-            <span v-if="nodeConfig.type == 0">{{ nodeConfig.nodeName }}</span>
-            <template v-else>
-              <span class="iconfont">{{nodeConfig.type == 1?'':''}}</span>
-              <input
-                v-if="isInput"
-                type="text"
-                class="ant-input editable-title-input"
-                @blur="blurEvent()"
-                @focus="$event.currentTarget.select()"
-                v-focus
-                v-model="nodeConfig.nodeName"
-                :placeholder="defaultText"
-              />
-              <span v-else class="editable-title" @click="clickEvent()">{{ nodeConfig.nodeName }}</span>
-              <i class="anticon anticon-close close" @click="delNode"></i>
-            </template>
-          </div>
-          <div class="content" @click="setPerson">
-            <div class="text">
-                <span class="placeholder" v-if="!showText">请选择{{defaultText}}</span>
-                {{showText}}
-            </div>
-            <i class="anticon anticon-right arrow"></i>
-          </div>
-          <div class="error_tip" v-if="isTried && nodeConfig.error">
-            <i class="anticon anticon-exclamation-circle"></i>
-          </div>
+  <div class="node-wrap" v-if="nodeConfig.type < 3">
+    <div
+      class="node-wrap-box"
+      :class="
+        (nodeConfig.type == 0 ? 'start-node ' : '') +
+        (isTried && nodeConfig.error ? 'active error' : '')
+      "
+    >
+      <div class="title" :style="`background: rgb(${bgColors[nodeConfig.type]});`">
+        <span v-if="nodeConfig.type == 0">{{ nodeConfig.name }}</span>
+        <template v-else>
+          <span class="iconfont">{{ nodeConfig.type == 1 ? '' : '' }}</span>
+          <input
+            v-if="isInput"
+            type="text"
+            class="ant-input editable-title-input"
+            @blur="blurEvent()"
+            @focus="$event.currentTarget.select()"
+            v-model="nodeConfig.name"
+            :placeholder="defaultText"
+          />
+          <span v-else class="editable-title" @click="clickEvent()">{{ nodeConfig.name }}</span>
+          <i class="anticon anticon-close close" @click="delNode"></i>
+        </template>
       </div>
-      <addNode v-model:childNodeP="nodeConfig.childNode" />
+      <div class="content" @click="setPerson">
+        <div class="text">
+          <span class="placeholder" v-if="!showText">请选择{{ defaultText }}</span>
+          <span v-html="showText" class="ellipsis-text"  v-else></span>
+        </div>
+        <div class="icon-box">
+          <i class="anticon anticon-edit" @click="editNode"></i>
+        </div>
+        <i class="anticon anticon-right arrow"></i>
+      </div>
+      <div class="error_tip" v-if="isTried && nodeConfig.error">
+        <i class="anticon anticon-exclamation-circle"></i>
+      </div>
     </div>
-    <div class="branch-wrap" v-if="nodeConfig.type == 4">
+    <addNode v-model:childNodeP="nodeConfig.childNode" />
+  </div>
+  <div class="branch-wrap" v-if="nodeConfig.type == 4">
     <div class="branch-box-wrap">
       <div class="branch-box">
         <button class="add-branch" @click="addTerm">添加条件</button>
@@ -55,16 +63,27 @@
                     class="ant-input editable-title-input"
                     @blur="blurEvent(index)"
                     @focus="$event.currentTarget.select()"
-                    v-model="item.nodeName"
+                    v-model="item.name"
                   />
-                  <span v-else class="editable-title" @click="clickEvent(index)">{{ item.nodeName }}</span>
-                  <span class="priority-title" @click="setPerson(item.priorityLevel)">优先级{{ item.priorityLevel }}</span>
+                  <span v-else class="editable-title" @click="clickEvent(index)">{{
+                    item.name
+                  }}</span>
+                  <span class="priority-title" @click="setPerson(item.priorityLevel)"
+                    >优先级{{ item.priorityLevel }}</span
+                  >
                   <i class="anticon anticon-close close" @click="delTerm(index)"></i>
                 </div>
-                <div class="sort-right" v-if="index != nodeConfig.conditionNodes.length - 1" @click="arrTransfer(index)">&gt;</div>
-                <div class="content" @click="setPerson(item.priorityLevel)">{{ conditionStr(nodeConfig, index) }}</div>
+                <div
+                  class="sort-right"
+                  v-if="index != nodeConfig.conditionNodes.length - 1"
+                  @click="arrTransfer(index)"
+                  >&gt;</div
+                >
+                <div class="content" @click="setPerson(item.priorityLevel)">{{
+                  conditionStr(nodeConfig, index)
+                }}</div>
                 <div class="error_tip" v-if="isTried && item.error">
-                    <i class="anticon anticon-exclamation-circle"></i>
+                  <i class="anticon anticon-exclamation-circle"></i>
                 </div>
               </div>
               <addNode v-model:childNodeP="item.childNode" />
@@ -84,9 +103,9 @@
       <addNode v-model:childNodeP="nodeConfig.childNode" />
     </div>
   </div>
-    <nodeWrap v-if="nodeConfig.childNode" v-model:nodeConfig="nodeConfig.childNode" />
+  <nodeWrap v-if="nodeConfig.childNode" v-model:nodeConfig="nodeConfig.childNode" />
 </template>
-<script  setup>
+<script lang="ts" setup>
 import addNode from './addNode.vue'
 import { onMounted, ref, watch, getCurrentInstance, computed } from 'vue'
 import {
@@ -95,7 +114,8 @@ import {
   setApproverStr,
   copyerStr,
   bgColors,
-  placeholderList
+  placeholderList,
+  getApproverShowText
 } from './util'
 import { useWorkFlowStoreWithOut } from '@/store/modules/simpleWorkflow'
 let _uid = getCurrentInstance().uid
@@ -114,11 +134,6 @@ let props = defineProps({
 
 let defaultText = computed(() => {
   return placeholderList[props.nodeConfig.type]
-})
-let showText = computed(() => {
-  if (props.nodeConfig.type == 0) return arrToStr(props.flowPermission) || '所有人'
-  if (props.nodeConfig.type == 1) return setApproverStr(props.nodeConfig)
-  return copyerStr(props.nodeConfig)
 })
 
 let isInputList = ref([])
@@ -152,13 +167,32 @@ let {
   setFlowPermission,
   setApproverConfig,
   setCopyerConfig,
-  setConditionsConfig
+  setConditionsConfig,
+  setUserTaskConfig
 } = store
+// 审批节点的配置
+const userTaskConfig = computed(() => store.userTaskConfig)
 let isTried = computed(() => store.isTried)
 let flowPermission1 = computed(() => store.flowPermission1)
 let approverConfig1 = computed(() => store.approverConfig1)
 let copyerConfig1 = computed(() => store.copyerConfig1)
 let conditionsConfig1 = computed(() => store.conditionsConfig1)
+const showText = computed(() => {
+  if (props.nodeConfig.type == 0) return '发起人'
+  if (props.nodeConfig.type == 1) {
+    if(props.nodeConfig.attributes){
+      return getApproverShowText(props.nodeConfig.attributes.approveMethod, props.nodeConfig.attributes.candidateStrategy)
+    } else {
+      return ''
+    }
+  }
+  return copyerStr(props.nodeConfig)
+})
+watch(userTaskConfig, (approver) => {
+  if (approver.flag && approver.id === _uid) {
+    emits('update:nodeConfig', approver.value)
+  }
+})
 watch(flowPermission1, (flow) => {
   if (flow.flag && flow.id === _uid) {
     emits('update:flowPermission', flow.value)
@@ -191,12 +225,12 @@ const blurEvent = (index) => {
   if (index || index === 0) {
     isInputList.value[index] = false
     // eslint-disable-next-line vue/no-mutating-props
-    props.nodeConfig.conditionNodes[index].nodeName =
-      props.nodeConfig.conditionNodes[index].nodeName || '条件'
+    props.nodeConfig.conditionNodes[index].name =
+      props.nodeConfig.conditionNodes[index].name || '条件'
   } else {
     isInput.value = false
     // eslint-disable-next-line vue/no-mutating-props
-    props.nodeConfig.nodeName = props.nodeConfig.nodeName || defaultText
+    props.nodeConfig.name = props.nodeConfig.name || defaultText
   }
 }
 const delNode = () => {
@@ -206,7 +240,7 @@ const addTerm = () => {
   let len = props.nodeConfig.conditionNodes.length + 1
   // eslint-disable-next-line vue/no-mutating-props
   props.nodeConfig.conditionNodes.push({
-    nodeName: '条件' + len,
+    name: '条件' + len,
     type: 3,
     priorityLevel: len,
     conditionList: [],
@@ -221,7 +255,7 @@ const delTerm = (index) => {
   props.nodeConfig.conditionNodes.splice(index, 1)
   props.nodeConfig.conditionNodes.map((item, index) => {
     item.priorityLevel = index + 1
-    item.nodeName = `条件${index + 1}`
+    item.name = `条件${index + 1}`
   })
   resetConditionNodesErr()
   emits('update:nodeConfig', props.nodeConfig)
@@ -255,13 +289,17 @@ const setPerson = (priorityLevel) => {
     })
   } else if (type == 1) {
     setApprover(true)
-    setApproverConfig({
+    let showText = undefined;
+    if(_uid === userTaskConfig.value.id) {
+      showText = userTaskConfig.value.showText
+    }
+    setUserTaskConfig({
       value: {
-        ...JSON.parse(JSON.stringify(props.nodeConfig)),
-        ...{ settype: props.nodeConfig.settype ? props.nodeConfig.settype : 1 }
+        ...JSON.parse(JSON.stringify(props.nodeConfig))
       },
       flag: false,
-      id: _uid
+      id: _uid,
+      showText
     })
   } else if (type == 2) {
     setCopyer(true)
@@ -295,3 +333,10 @@ const arrTransfer = (index, type = 1) => {
   emits('update:nodeConfig', props.nodeConfig)
 }
 </script>
+<style lang="scss" scoped>
+.ellipsis-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+</style>
