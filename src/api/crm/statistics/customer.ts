@@ -49,6 +49,36 @@ export interface CrmStatisticsCustomerDealCycleByDateRespVO {
   customerDealCycle: number
 }
 
+export interface CrmStatisticCustomerBaseRespVO {
+  customerCount: number
+  dealCount: number
+  dealPortion: number
+}
+
+export interface CrmStatisticCustomerIndustryRespVO extends CrmStatisticCustomerBaseRespVO {
+  industryId: number
+  industryName: string
+  industryPortion: number
+}
+
+export interface CrmStatisticCustomerSourceRespVO extends CrmStatisticCustomerBaseRespVO {
+  source: number
+  sourceName: string
+  sourcePortion: number
+}
+
+export interface CrmStatisticCustomerLevelRespVO extends CrmStatisticCustomerBaseRespVO {
+  level: number
+  levelName: string
+  levelPortion: number
+}
+
+export interface CrmStatisticCustomerAreaRespVO extends CrmStatisticCustomerBaseRespVO {
+  areaId: number
+  areaName: string
+  areaPortion: number
+}
+
 export interface CrmStatisticsCustomerDealCycleByUserRespVO {
   ownerUserName: string
   customerDealCycle: number
@@ -110,6 +140,34 @@ export const StatisticsCustomerApi = {
   getCustomerDealCycleByUser: (params: any) => {
     return request.get({
       url: '/crm/statistics-customer/get-customer-deal-cycle-by-user',
+      params
+    })
+  },
+  // 6.1 获取客户行业统计数据
+  getCustomerIndustry: (params: any) => {
+    return request.get({
+      url: '/crm/statistics-customer/get-customer-industry-summary',
+      params
+    })
+  },
+  // 6.1 获取客户来源统计数据
+  getCustomerSource: (params: any) => {
+    return request.get({
+      url: '/crm/statistics-customer/get-customer-source-summary',
+      params
+    })
+  },
+  // 6.1 获取客户行业统计数据
+  getCustomerLevel: (params: any) => {
+    return request.get({
+      url: '/crm/statistics-customer/get-customer-level-summary',
+      params
+    })
+  },
+  // 6.1 获取客户行业统计数据
+  getCustomerArea: (params: any) => {
+    return request.get({
+      url: '/crm/statistics-customer/get-customer-area-summary',
       params
     })
   }
