@@ -9,8 +9,10 @@
     >
       <el-form-item label="减签任务" prop="id">
         <el-radio-group v-model="formData.id">
-          <el-radio-button v-for="item in subTaskList" :key="item.id" :label="item.id">
-            {{ item.name }}({{ item.assigneeUser.deptName }}{{ item.assigneeUser.nickname }}--审批)
+          <el-radio-button v-for="item in childrenTaskList" :key="item.id" :label="item.id">
+            {{ item.name }}
+            ({{ item.assigneeUser?.deptName || item.ownerUser?.deptName }} -
+            {{ item.assigneeUser?.nickname || item.ownerUser?.nickname }})
           </el-radio-button>
         </el-radio-group>
       </el-form-item>
@@ -24,9 +26,11 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="TaskRollbackDialogForm" setup>
+<script lang="ts" setup>
 import * as TaskApi from '@/api/bpm/task'
 import { isEmpty } from '@/utils/is'
+
+defineOptions({ name: 'TaskSignDeleteForm' })
 
 const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
@@ -41,11 +45,11 @@ const formRules = ref({
 })
 
 const formRef = ref() // 表单 Ref
-const subTaskList = ref([])
+const childrenTaskList = ref([])
 /** 打开弹窗 */
 const open = async (id: string) => {
-  subTaskList.value = await TaskApi.getChildrenTaskList(id)
-  if (isEmpty(subTaskList.value)) {
+  childrenTaskList.value = await TaskApi.getChildrenTaskList(id)
+  if (isEmpty(childrenTaskList.value)) {
     message.warning('当前没有可减签的任务')
     return false
   }
@@ -64,7 +68,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    await TaskApi.taskSubSign(formData.value)
+    await TaskApi.signDeleteTask(formData.value)
     message.success('减签成功')
     dialogVisible.value = false
     // 发送操作成功的事件

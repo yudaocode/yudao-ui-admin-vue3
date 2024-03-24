@@ -1,8 +1,9 @@
 import request from '@/config/axios'
 
-export const getProcessDefinitionBpmnXML = async (id: number) => {
+export const getProcessDefinition = async (id: number, key: string) => {
   return await request.get({
-    url: '/bpm/process-definition/get-bpmn-xml?id=' + id
+    url: '/bpm/process-definition/get',
+    params: { id, key }
   })
 }
 

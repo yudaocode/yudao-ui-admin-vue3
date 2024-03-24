@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="回退" width="500">
+  <Dialog v-model="dialogVisible" title="转派任务" width="500">
     <el-form
       ref="formRef"
       v-loading="formLoading"
@@ -7,18 +7,18 @@
       :rules="formRules"
       label-width="110px"
     >
-      <el-form-item label="退回节点" prop="targetDefinitionKey">
-        <el-select v-model="formData.targetDefinitionKey" clearable style="width: 100%">
+      <el-form-item label="新审批人" prop="assigneeUserId">
+        <el-select v-model="formData.assigneeUserId" clearable style="width: 100%">
           <el-option
-            v-for="item in returnList"
-            :key="item.definitionKey"
-            :label="item.name"
-            :value="item.definitionKey"
+            v-for="item in userList"
+            :key="item.id"
+            :label="item.nickname"
+            :value="item.id"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="回退理由" prop="reason">
-        <el-input v-model="formData.reason" clearable placeholder="请输入回退理由" />
+      <el-form-item label="转派理由" prop="reason">
+        <el-input v-model="formData.reason" clearable placeholder="请输入转派理由" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -27,34 +27,34 @@
     </template>
   </Dialog>
 </template>
-<script lang="ts" name="TaskRollbackDialogForm" setup>
+<script lang="ts" setup>
 import * as TaskApi from '@/api/bpm/task'
+import * as UserApi from '@/api/system/user'
 
-const message = useMessage() // 消息弹窗
+defineOptions({ name: 'TaskTransferForm' })
+
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formData = ref({
   id: '',
-  targetDefinitionKey: undefined,
+  assigneeUserId: undefined,
   reason: ''
 })
 const formRules = ref({
-  targetDefinitionKey: [{ required: true, message: '必须选择回退节点', trigger: 'change' }],
-  reason: [{ required: true, message: '回退理由不能为空', trigger: 'blur' }]
+  assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }],
+  reason: [{ required: true, message: '转派理由不能为空', trigger: 'blur' }]
 })
 
 const formRef = ref() // 表单 Ref
-const returnList = ref([])
+const userList = ref<any[]>([]) // 用户列表
+
 /** 打开弹窗 */
 const open = async (id: string) => {
-  returnList.value = await TaskApi.getReturnList({ taskId: id })
-  if (returnList.value.length === 0) {
-    message.warning('当前没有可回退的节点')
-    return false
-  }
   dialogVisible.value = true
   resetForm()
   formData.value.id = id
+  // 获得用户列表
+  userList.value = await UserApi.getSimpleUserList()
 }
 defineExpose({ open }) // 提供 openModal 方法，用于打开弹窗
 
@@ -68,8 +68,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    await TaskApi.returnTask(formData.value)
-    message.success('回退成功')
+    await TaskApi.transferTask(formData.value)
     dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
@@ -82,7 +81,7 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: '',
-    targetDefinitionKey: undefined,
+    assigneeUserId: undefined,
     reason: ''
   }
   formRef.value?.resetFields()

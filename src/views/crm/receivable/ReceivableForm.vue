@@ -10,7 +10,7 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="回款编号" prop="no">
-            <el-input disabled v-model="formData.no" placeholder="保存时自动生成" />
+            <el-input v-model="formData.no" disabled placeholder="保存时自动生成" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -38,8 +38,8 @@
               :disabled="formType !== 'create'"
               class="w-1/1"
               filterable
-              @change="handleCustomerChange"
               placeholder="请选择客户"
+              @change="handleCustomerChange"
             >
               <el-option
                 v-for="item in customerList"
@@ -57,15 +57,15 @@
               :disabled="formType !== 'create' || !formData.customerId"
               class="w-1/1"
               filterable
-              @change="handleContractChange"
               placeholder="请选择合同"
+              @change="handleContractChange"
             >
               <el-option
                 v-for="data in contractList"
                 :key="data.id"
+                :disabled="data.auditStatus !== 20"
                 :label="data.name"
                 :value="data.id!"
-                :disabled="data.auditStatus !== 20"
               />
             </el-select>
           </el-form-item>
@@ -78,15 +78,15 @@
               v-model="formData.planId"
               :disabled="formType !== 'create' || !formData.contractId"
               class="!w-1/1"
-              @change="handleReceivablePlanChange"
               placeholder="请选择回款期数"
+              @change="handleReceivablePlanChange"
             >
               <el-option
                 v-for="data in receivablePlanList"
                 :key="data.id"
+                :disabled="data.receivableId"
                 :label="'第 ' + data.period + ' 期'"
                 :value="data.id!"
-                :disabled="data.receivableId"
               />
             </el-select>
           </el-form-item>
@@ -109,11 +109,11 @@
           <el-form-item label="回款金额" prop="price">
             <el-input-number
               v-model="formData.price"
+              :min="0.01"
+              :precision="2"
               class="!w-100%"
               controls-position="right"
               placeholder="请输入回款金额"
-              :min="0.01"
-              :precision="2"
             />
           </el-form-item>
         </el-col>
@@ -145,12 +145,12 @@
 <script lang="ts" setup>
 import * as ReceivablePlanApi from '@/api/crm/receivable/plan'
 import * as ReceivableApi from '@/api/crm/receivable'
+import { ReceivableVO } from '@/api/crm/receivable'
 import * as UserApi from '@/api/system/user'
 import * as CustomerApi from '@/api/crm/customer'
 import * as ContractApi from '@/api/crm/contract'
 import { useUserStore } from '@/store/modules/user'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import form from '@/components/Form/src/Form.vue'
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -185,9 +185,10 @@ const open = async (
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ReceivableApi.getReceivable(id)
-      await handleCustomerChange(formData.value.customerId)
-      formData.value.contractId = formData.value.contract.id
+      const data = (await ReceivableApi.getReceivable(id)) as ReceivableVO
+      formData.value = data
+      await handleCustomerChange(data.customerId!)
+      formData.value.contractId = data?.contract?.id
     } finally {
       formLoading.value = false
     }
@@ -266,7 +267,7 @@ const handleContractChange = async (contractId: number) => {
     // 获得回款计划列表
     receivablePlanList.value = []
     receivablePlanList.value = await ReceivablePlanApi.getReceivablePlanSimpleList(
-      formData.value.customerId,
+      formData.value.customerId!,
       contractId
     )
     // 设置金额

@@ -43,12 +43,15 @@
           style="width: 100%"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_MODEL_CATEGORY)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
+            v-for="category in categoryList"
+            :key="category.code"
+            :label="category.name"
+            :value="category.code"
           />
         </el-select>
+      </el-form-item>
+      <el-form-item v-if="formData.id" label="流程图标" prop="icon">
+        <UploadImg v-model="formData.icon" :limit="1" height="128px" width="128px" />
       </el-form-item>
       <el-form-item label="流程描述" prop="description">
         <el-input v-model="formData.description" clearable type="textarea" />
@@ -126,6 +129,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { ElMessageBox } from 'element-plus'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
+import { CategoryApi } from '@/api/bpm/category'
 
 defineOptions({ name: 'ModelForm' })
 
@@ -140,20 +144,23 @@ const formData = ref({
   formType: 10,
   name: '',
   category: undefined,
+  icon: undefined,
   description: '',
   formId: '',
   formCustomCreatePath: '',
   formCustomViewPath: ''
 })
 const formRules = reactive({
-  category: [{ required: true, message: '参数分类不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '参数名称不能为空', trigger: 'blur' }],
   key: [{ required: true, message: '参数键名不能为空', trigger: 'blur' }],
+  category: [{ required: true, message: '参数分类不能为空', trigger: 'blur' }],
+  icon: [{ required: true, message: '参数图标不能为空', trigger: 'blur' }],
   value: [{ required: true, message: '参数键值不能为空', trigger: 'blur' }],
   visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const formList = ref([]) // 流程表单的下拉框的数据
+const categoryList = ref([]) // 流程分类列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -171,7 +178,9 @@ const open = async (type: string, id?: number) => {
     }
   }
   // 获得流程表单的下拉框的数据
-  formList.value = await FormApi.getSimpleFormList()
+  formList.value = await FormApi.getFormSimpleList()
+  // 查询流程分类列表
+  categoryList.value = await CategoryApi.getCategorySimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -190,11 +199,10 @@ const submitForm = async () => {
       await ModelApi.createModel(data)
       // 提示，引导用户做后续的操作
       await ElMessageBox.alert(
-        '<strong>新建模型成功！</strong>后续需要执行如下 4 个步骤：' +
+        '<strong>新建模型成功！</strong>后续需要执行如下 3 个步骤：' +
           '<div>1. 点击【修改流程】按钮，配置流程的分类、表单信息</div>' +
           '<div>2. 点击【设计流程】按钮，绘制流程图</div>' +
-          '<div>3. 点击【分配规则】按钮，设置每个用户任务的审批人</div>' +
-          '<div>4. 点击【发布流程】按钮，完成流程的最终发布</div>' +
+          '<div>3. 点击【发布流程】按钮，完成流程的最终发布</div>' +
           '另外，每次流程修改后，都需要点击【发布流程】按钮，才能正式生效！！！',
         '重要提示',
         {
@@ -220,6 +228,7 @@ const resetForm = () => {
     formType: 10,
     name: '',
     category: undefined,
+    icon: '',
     description: '',
     formId: '',
     formCustomCreatePath: '',

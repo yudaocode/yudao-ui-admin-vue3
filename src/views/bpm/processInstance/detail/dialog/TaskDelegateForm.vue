@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="加签" width="500">
+  <Dialog v-model="dialogVisible" title="委派任务" width="500">
     <el-form
       ref="formRef"
       v-loading="formLoading"
@@ -7,8 +7,8 @@
       :rules="formRules"
       label-width="110px"
     >
-      <el-form-item label="加签处理人" prop="userIdList">
-        <el-select v-model="formData.userIdList" multiple clearable style="width: 100%">
+      <el-form-item label="接收人" prop="delegateUserId">
+        <el-select v-model="formData.delegateUserId" clearable style="width: 100%">
           <el-option
             v-for="item in userList"
             :key="item.id"
@@ -17,17 +17,12 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="加签理由" prop="reason">
-        <el-input v-model="formData.reason" clearable placeholder="请输入加签理由" />
+      <el-form-item label="委派理由" prop="reason">
+        <el-input v-model="formData.reason" clearable placeholder="请输入委派理由" />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button :disabled="formLoading" type="primary" @click="submitForm('before')">
-        向前加签
-      </el-button>
-      <el-button :disabled="formLoading" type="primary" @click="submitForm('after')">
-        向后加签
-      </el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
@@ -36,19 +31,18 @@
 import * as TaskApi from '@/api/bpm/task'
 import * as UserApi from '@/api/system/user'
 
-const message = useMessage() // 消息弹窗
-defineOptions({ name: 'BpmTaskUpdateAssigneeForm' })
+defineOptions({ name: 'BpmTaskDelegateForm' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const formData = ref({
   id: '',
-  userIdList: [],
-  type: ''
+  delegateUserId: undefined,
+  reason: ''
 })
 const formRules = ref({
-  userIdList: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '加签理由不能为空', trigger: 'change' }]
+  delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }],
+  reason: [{ required: true, message: '委派理由不能为空', trigger: 'blur' }]
 })
 
 const formRef = ref() // 表单 Ref
@@ -66,17 +60,15 @@ defineExpose({ open }) // 提供 openModal 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-const submitForm = async (type: string) => {
+const submitForm = async () => {
   // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
   if (!valid) return
   // 提交请求
   formLoading.value = true
-  formData.value.type = type
   try {
-    await TaskApi.taskAddSign(formData.value)
-    message.success('加签成功')
+    await TaskApi.delegateTask(formData.value)
     dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
@@ -89,8 +81,8 @@ const submitForm = async (type: string) => {
 const resetForm = () => {
   formData.value = {
     id: '',
-    userIdList: [],
-    type: ''
+    delegateUserId: undefined,
+    reason: ''
   }
   formRef.value?.resetFields()
 }

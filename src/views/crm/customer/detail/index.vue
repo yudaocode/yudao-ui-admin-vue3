@@ -76,7 +76,7 @@
   <!-- 表单弹窗：添加/修改 -->
   <CustomerForm ref="formRef" @success="getCustomer" />
   <CustomerDistributeForm ref="distributeForm" @success="getCustomer" />
-  <CrmTransferForm ref="transferFormRef" @success="getCustomer" />
+  <CrmTransferForm ref="transferFormRef" :biz-type="BizTypeEnum.CRM_CUSTOMER" @success="close" />
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -142,7 +142,7 @@ const handleUpdateDealStatus = async () => {
 /** 客户转移 */
 const transferFormRef = ref<InstanceType<typeof CrmTransferForm>>() // 客户转移表单 ref
 const transfer = () => {
-  transferFormRef.value?.open('客户转移', customerId.value, CustomerApi.transferCustomer)
+  transferFormRef.value?.open(customerId.value)
 }
 
 /** 锁定客户 */

@@ -89,11 +89,11 @@ onMounted(async () => {
   }
   // 查询模型
   const data = await ModelApi.getModel(modelId)
-  xmlString.value = data.bpmnXml
   model.value = {
     ...data,
     bpmnXml: undefined // 清空 bpmnXml 属性
   }
+  xmlString.value = data.bpmnXml
 })
 </script>
 <style lang="scss">
