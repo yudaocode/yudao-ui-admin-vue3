@@ -141,6 +141,8 @@ export enum DICT_TYPE {
   BPM_PROCESS_INSTANCE_STATUS = 'bpm_process_instance_status',
   BPM_TASK_STATUS = 'bpm_task_status',
   BPM_OA_LEAVE_TYPE = 'bpm_oa_leave_type',
+  BPM_PROCESS_LISTENER_TYPE = 'bpm_process_listener_type',
+  BPM_PROCESS_LISTENER_VALUE_TYPE = 'bpm_process_listener_value_type',
 
   // ========== PAY 模块 ==========
   PAY_CHANNEL_CODE = 'pay_channel_code', // 支付渠道编码类型
@@ -155,7 +157,7 @@ export enum DICT_TYPE {
   MP_AUTO_REPLY_REQUEST_MATCH = 'mp_auto_reply_request_match', // 自动回复请求匹配类型
   MP_MESSAGE_TYPE = 'mp_message_type', // 消息类型
 
-  // ========== MALL - 会员模块 ==========
+  // ========== Member 会员模块 ==========
   MEMBER_POINT_BIZ_TYPE = 'member_point_biz_type', // 积分的业务类型
   MEMBER_EXPERIENCE_BIZ_TYPE = 'member_experience_biz_type', // 会员经验业务类型
 

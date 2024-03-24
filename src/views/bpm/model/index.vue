@@ -72,6 +72,11 @@
           </el-button>
         </template>
       </el-table-column>
+      <el-table-column label="流程图标" align="center" prop="icon" width="100">
+        <template #default="scope">
+          <el-image :src="scope.row.icon" class="w-32px h-32px" />
+        </template>
+      </el-table-column>
       <el-table-column label="流程分类" align="center" prop="categoryName" width="100" />
       <el-table-column label="表单信息" align="center" prop="formType" width="200">
         <template #default="scope">

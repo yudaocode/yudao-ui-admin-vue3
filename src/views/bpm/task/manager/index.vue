@@ -75,6 +75,7 @@
         prop="endTime"
         width="180"
       />
+      <el-table-column align="center" label="审批人" prop="assigneeUser.nickname" width="100" />
       <el-table-column align="center" label="审批状态" prop="status" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
@@ -108,7 +109,8 @@ import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter, formatPast2 } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
 
-defineOptions({ name: 'BpmTodoTask' })
+// 它和【待办任务】【已办任务】的差异是，该菜单可以看全部的流程任务
+defineOptions({ name: 'BpmManagerTask' })
 
 const { push } = useRouter() // 路由
 
@@ -127,7 +129,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await TaskApi.getTaskDonePage(queryParams)
+    const data = await TaskApi.getTaskManagerPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
