@@ -2,22 +2,23 @@
   <!-- 第一步，通过流程定义的列表，选择对应的流程 -->
   <ContentWrap v-if="!selectProcessInstance">
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="流程名称" align="center" prop="name" />
-      <el-table-column label="流程分类" align="center" prop="category">
+      <el-table-column align="center" label="流程名称" prop="name" />
+      <el-table-column align="center" label="流程分类" prop="category">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_MODEL_CATEGORY" :value="scope.row.category" />
         </template>
       </el-table-column>
-      <el-table-column label="流程版本" align="center" prop="version">
+      <el-table-column align="center" label="流程版本" prop="version">
         <template #default="scope">
           <el-tag>v{{ scope.row.version }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="流程描述" align="center" prop="description" />
-      <el-table-column label="操作" align="center">
+      <el-table-column align="center" label="流程描述" prop="description" />
+      <el-table-column align="center" label="操作">
         <template #default="scope">
           <el-button link type="primary" @click="handleSelect(scope.row)">
-            <Icon icon="ep:plus" /> 选择
+            <Icon icon="ep:plus" />
+            选择
           </el-button>
         </template>
       </el-table-column>
@@ -30,14 +31,15 @@
       <div class="clearfix">
         <span class="el-icon-document">申请信息【{{ selectProcessInstance.name }}】</span>
         <el-button style="float: right" type="primary" @click="selectProcessInstance = undefined">
-          <Icon icon="ep:delete" /> 选择其它流程
+          <Icon icon="ep:delete" />
+          选择其它流程
         </el-button>
       </div>
-      <el-col :span="16" :offset="6" style="margin-top: 20px">
-        <form-create
-          :rule="detailForm.rule"
+      <el-col :offset="6" :span="16" style="margin-top: 20px">
+        <my-form-create
           v-model:api="fApi"
           :option="detailForm.option"
+          :rule="detailForm.rule"
           @submit="submitForm"
         />
       </el-col>

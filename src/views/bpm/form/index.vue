@@ -88,7 +88,7 @@
 
   <!-- 表单详情的弹窗 -->
   <Dialog v-model="detailVisible" title="表单详情" width="800">
-    <form-create :option="detailData.option" :rule="detailData.rule" />
+    <my-form-create :option="detailData.option" :rule="detailData.rule" />
   </Dialog>
 </template>
 

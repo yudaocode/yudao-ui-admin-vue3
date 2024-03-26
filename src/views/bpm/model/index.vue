@@ -4,36 +4,36 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="流程标识" prop="key">
         <el-input
           v-model="queryParams.key"
-          placeholder="请输入流程标识"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入流程标识"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="流程名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入流程名称"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入流程名称"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="流程分类" prop="category">
         <el-select
           v-model="queryParams.category"
-          placeholder="请选择流程分类"
-          clearable
           class="!w-240px"
+          clearable
+          placeholder="请选择流程分类"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.BPM_MODEL_CATEGORY)"
@@ -44,18 +44,26 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['bpm:model:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新建流程
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
         </el-button>
-        <el-button type="success" plain @click="openImportForm" v-hasPermi="['bpm:model:import']">
-          <Icon icon="ep:upload" class="mr-5px" /> 导入流程
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-button
+          v-hasPermi="['bpm:model:create']"
+          plain
+          type="primary"
+          @click="openForm('create')"
+        >
+          <Icon class="mr-5px" icon="ep:plus" />
+          新建流程
+        </el-button>
+        <el-button v-hasPermi="['bpm:model:import']" plain type="success" @click="openImportForm">
+          <Icon class="mr-5px" icon="ep:upload" />
+          导入流程
         </el-button>
       </el-form-item>
     </el-form>
@@ -64,33 +72,33 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="流程标识" align="center" prop="key" width="200" />
-      <el-table-column label="流程名称" align="center" prop="name" width="200">
+      <el-table-column align="center" label="流程标识" prop="key" width="200" />
+      <el-table-column align="center" label="流程名称" prop="name" width="200">
         <template #default="scope">
-          <el-button type="primary" link @click="handleBpmnDetail(scope.row)">
+          <el-button link type="primary" @click="handleBpmnDetail(scope.row)">
             <span>{{ scope.row.name }}</span>
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="流程分类" align="center" prop="category" width="100">
+      <el-table-column align="center" label="流程分类" prop="category" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_MODEL_CATEGORY" :value="scope.row.category" />
         </template>
       </el-table-column>
-      <el-table-column label="表单信息" align="center" prop="formType" width="200">
+      <el-table-column align="center" label="表单信息" prop="formType" width="200">
         <template #default="scope">
           <el-button
             v-if="scope.row.formType === 10"
-            type="primary"
             link
+            type="primary"
             @click="handleFormDetail(scope.row)"
           >
             <span>{{ scope.row.formName }}</span>
           </el-button>
           <el-button
             v-else-if="scope.row.formType === 20"
-            type="primary"
             link
+            type="primary"
             @click="handleFormDetail(scope.row)"
           >
             <span>{{ scope.row.formCustomCreatePath }}</span>
@@ -99,16 +107,16 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="创建时间"
+        :formatter="dateFormatter"
         align="center"
+        label="创建时间"
         prop="createTime"
         width="180"
-        :formatter="dateFormatter"
       />
-      <el-table-column label="最新部署的流程定义" align="center">
+      <el-table-column align="center" label="最新部署的流程定义">
         <el-table-column
-          label="流程版本"
           align="center"
+          label="流程版本"
           prop="processDefinition.version"
           width="100"
         >
@@ -120,8 +128,8 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="激活状态"
           align="center"
+          label="激活状态"
           prop="processDefinition.version"
           width="85"
         >
@@ -135,7 +143,7 @@
             />
           </template>
         </el-table-column>
-        <el-table-column label="部署时间" align="center" prop="deploymentTime" width="180">
+        <el-table-column align="center" label="部署时间" prop="deploymentTime" width="180">
           <template #default="scope">
             <span v-if="scope.row.processDefinition">
               {{ formatDate(scope.row.processDefinition.deploymentTime) }}
@@ -143,53 +151,53 @@
           </template>
         </el-table-column>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="240" fixed="right">
+      <el-table-column align="center" fixed="right" label="操作" width="240">
         <template #default="scope">
           <el-button
+            v-hasPermi="['bpm:model:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['bpm:model:update']"
           >
             修改流程
           </el-button>
           <el-button
+            v-hasPermi="['bpm:model:update']"
             link
             type="primary"
             @click="handleDesign(scope.row)"
-            v-hasPermi="['bpm:model:update']"
           >
             设计流程
           </el-button>
           <el-button
+            v-hasPermi="['bpm:task-assign-rule:query']"
             link
             type="primary"
             @click="handleAssignRule(scope.row)"
-            v-hasPermi="['bpm:task-assign-rule:query']"
           >
             分配规则
           </el-button>
           <el-button
+            v-hasPermi="['bpm:model:deploy']"
             link
             type="primary"
             @click="handleDeploy(scope.row)"
-            v-hasPermi="['bpm:model:deploy']"
           >
             发布流程
           </el-button>
           <el-button
+            v-hasPermi="['bpm:process-definition:query']"
             link
             type="primary"
-            v-hasPermi="['bpm:process-definition:query']"
             @click="handleDefinitionList(scope.row)"
           >
             流程定义
           </el-button>
           <el-button
+            v-hasPermi="['bpm:model:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['bpm:model:delete']"
           >
             删除
           </el-button>
@@ -198,9 +206,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -212,18 +220,18 @@
   <ModelImportForm ref="importFormRef" @success="getList" />
 
   <!-- 弹窗：表单详情 -->
-  <Dialog title="表单详情" v-model="formDetailVisible" width="800">
-    <form-create :rule="formDetailPreview.rule" :option="formDetailPreview.option" />
+  <Dialog v-model="formDetailVisible" title="表单详情" width="800">
+    <my-form-create :option="formDetailPreview.option" :rule="formDetailPreview.rule" />
   </Dialog>
 
   <!-- 弹窗：流程模型图的预览 -->
-  <Dialog title="流程图" v-model="bpmnDetailVisible" width="800">
+  <Dialog v-model="bpmnDetailVisible" title="流程图" width="800">
     <MyProcessViewer
       key="designer"
       v-model="bpmnXML"
+      :prefix="bpmnControlForm.prefix"
       :value="bpmnXML as any"
       v-bind="bpmnControlForm"
-      :prefix="bpmnControlForm.prefix"
     />
   </Dialog>
 </template>
