@@ -83,6 +83,10 @@ const submitForm = async () => {
   formData.append('file', fileList.value[0].raw)
   // TODO @芋艿：后面是不是可以采用这种形式，去掉 uploadHeaders
   await CustomerApi.handleImport(formData)
+  formLoading.value = false
+  dialogVisible.value  = false
+  message.success("异步上传数据，上传结果清单还在建设中，您可以刷新列表查看导入的数据。")
+  emits('success')
 }
 
 /** 文件上传成功 */

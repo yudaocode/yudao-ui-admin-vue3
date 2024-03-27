@@ -4,6 +4,7 @@ dist
 dist-ssr
 *.local
 /dist*
+/web*
 *-lock.*
 pnpm-debug
 auto-*.d.ts

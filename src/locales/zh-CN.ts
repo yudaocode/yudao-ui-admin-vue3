@@ -113,8 +113,8 @@ export default {
     small: '小'
   },
   login: {
-    welcome: '欢迎使用本系统',
-    message: '开箱即用的中后台管理系统',
+    welcome: '欢迎使用Inao系统',
+    message: '这个系统可刺激了！',
     tenantname: '租户名称',
     username: '用户名',
     password: '密码',
