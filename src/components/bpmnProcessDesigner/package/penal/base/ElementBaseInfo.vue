@@ -3,13 +3,6 @@
     <el-form label-width="90px" :model="needProps" :rules="rules">
       <div v-if="needProps.type == 'bpmn:Process'">
         <!-- 如果是 Process 信息的时候，使用自定义表单 -->
-        <el-link
-          href="https://doc.iocoder.cn/bpm/#_3-%E6%B5%81%E7%A8%8B%E5%9B%BE%E7%A4%BA%E4%BE%8B"
-          type="danger"
-          target="_blank"
-        >
-          如何实现实现会签、或签？
-        </el-link>
         <el-form-item label="流程标识" prop="id">
           <el-input
             v-model="needProps.id"
@@ -138,14 +131,6 @@ const updateBaseInfo = (key) => {
     bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), attrObj)
   }
 }
-
-onMounted(() => {
-  // 针对上传的 bpmn 流程图时，需要延迟 1 毫秒的时间，保证 key 和 name 的更新
-  setTimeout(() => {
-    handleKeyUpdate(props.model.key)
-    handleNameUpdate(props.model.name)
-  }, 110)
-})
 
 watch(
   () => props.businessObject,
