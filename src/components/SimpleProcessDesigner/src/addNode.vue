@@ -10,6 +10,7 @@
             </div>
             <p>审批人</p>
           </a>
+          <!--  TODO 暂时去掉未完成
           <a class="add-node-popover-item notifier" @click="addType(2)">
             <div class="item-wrapper">
               <span class="iconfont"></span>
@@ -22,6 +23,7 @@
             </div>
             <p>条件分支</p>
           </a>
+          -->
         </div>
         <template #reference>
           <button class="btn" type="button">
@@ -71,8 +73,7 @@ const addType = (type) => {
           candidateStrategy: undefined,
           candidateParam: []
         },
-        childNode: props.childNodeP,
-        nodeUserList: []
+        // childNode: props.childNodeP
       }
     } else if (type == 2) {
       data = {
@@ -97,7 +98,7 @@ const addType = (type) => {
           priorityLevel: 1,
           conditionList: [],
           nodeUserList: [],
-          childNode: props.childNodeP
+          // childNode: props.childNodeP
         },
         {
           name: '条件2',

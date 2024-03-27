@@ -295,7 +295,8 @@ const setPerson = (priorityLevel) => {
     }
     setUserTaskConfig({
       value: {
-        ...JSON.parse(JSON.stringify(props.nodeConfig))
+        ...JSON.parse(JSON.stringify(props.nodeConfig)),
+        id: 'Activity_'+_uid,
       },
       flag: false,
       id: _uid,

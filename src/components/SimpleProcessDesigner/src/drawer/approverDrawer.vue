@@ -250,7 +250,7 @@ const saveApprover = () => {
   closeDrawer()
 }
 const saveConfig = () => {
-  console.log('before userTaskConfig is ', userTaskConfig.value.id)
+
   const rawConfig = toRaw(userTaskConfig.value)
   rawConfig.value.attributes = toRaw(candidateConfig.value)
   rawConfig.flag = true
