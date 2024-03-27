@@ -1,5 +1,10 @@
 <!-- 工作流 - 抄送我的流程 -->
 <template>
+  <doc-alert
+    title="审批转办、委派、抄送"
+    url="https://doc.iocoder.cn/bpm/task-delegation-and-cc/"
+  />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form ref="queryFormRef" :inline="true" class="-mb-15px" label-width="68px">

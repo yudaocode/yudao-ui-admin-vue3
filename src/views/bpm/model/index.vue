@@ -1,5 +1,11 @@
 <template>
-  <doc-alert title="工作流手册" url="https://doc.iocoder.cn/bpm/" />
+  <doc-alert title="流程设计器（BPMN）" url="https://doc.iocoder.cn/bpm/model-designer-dingding/" />
+  <doc-alert
+    title="流程设计器（钉钉、飞书）"
+    url="https://doc.iocoder.cn/bpm/model-designer-bpmn/"
+  />
+  <doc-alert title="选择审批人、发起人自选" url="https://doc.iocoder.cn/bpm/assignee/" />
+  <doc-alert title="会签、或签、依次审批" url="https://doc.iocoder.cn/bpm/multi-instance/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->
