@@ -436,7 +436,7 @@ const initBpmnModeler = () => {
 
   // bpmnModeler.createDiagram()
 
-  console.log(bpmnModeler, 'bpmnModeler111111')
+  // console.log(bpmnModeler, 'bpmnModeler111111')
   emit('init-finished', bpmnModeler)
   initModelListeners()
 }
@@ -666,10 +666,10 @@ const previewProcessJson = () => {
 }
 /* ------------------------------------------------ 芋道源码 methods ------------------------------------------------------ */
 const processSave = async () => {
-  console.log(bpmnModeler, 'bpmnModelerbpmnModelerbpmnModelerbpmnModeler')
+  // console.log(bpmnModeler, 'bpmnModelerbpmnModelerbpmnModelerbpmnModeler')
   const { err, xml } = await bpmnModeler.saveXML()
-  console.log(err, 'errerrerrerrerr')
-  console.log(xml, 'xmlxmlxmlxmlxml')
+  // console.log(err, 'errerrerrerrerr')
+  // console.log(xml, 'xmlxmlxmlxmlxml')
   // 读取异常时抛出异常
   if (err) {
     // this.$modal.msgError('保存模型失败，请重试！')

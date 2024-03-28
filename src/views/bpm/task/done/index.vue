@@ -1,5 +1,11 @@
 <template>
-  <doc-alert title="工作流手册" url="https://doc.iocoder.cn/bpm/" />
+  <doc-alert title="审批通过、不通过、驳回" url="https://doc.iocoder.cn/bpm/task-todo-done/" />
+  <doc-alert title="审批加签、减签" url="https://doc.iocoder.cn/bpm/sign/" />
+  <doc-alert
+    title="审批转办、委派、抄送"
+    url="https://doc.iocoder.cn/bpm/task-delegation-and-cc/"
+  />
+  <doc-alert title="审批加签、减签" url="https://doc.iocoder.cn/bpm/sign/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -46,27 +52,51 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column align="center" label="任务编号" prop="id" width="300px" />
-      <el-table-column align="center" label="任务名称" prop="name" />
-      <el-table-column align="center" label="所属流程" prop="processInstance.name" />
-      <el-table-column align="center" label="流程发起人" prop="processInstance.startUserNickname" />
-      <el-table-column align="center" label="状态" prop="result">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="scope.row.result" />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="原因" prop="reason" />
+      <el-table-column align="center" label="流程" prop="processInstance.name" width="180" />
+      <el-table-column
+        align="center"
+        label="发起人"
+        prop="processInstance.startUser.nickname"
+        width="100"
+      />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
-        label="创建时间"
+        label="发起时间"
         prop="createTime"
         width="180"
       />
-      <el-table-column align="center" label="操作">
+      <el-table-column align="center" label="当前任务" prop="name" width="180" />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="任务开始时间"
+        prop="createTime"
+        width="180"
+      />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="任务结束时间"
+        prop="endTime"
+        width="180"
+      />
+      <el-table-column align="center" label="审批状态" prop="status" width="120">
         <template #default="scope">
-          <el-button link type="primary" @click="openDetail(scope.row)">详情</el-button>
-          <el-button link type="primary" @click="handleAudit(scope.row)">流程</el-button>
+          <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="审批建议" prop="reason" min-width="180" />
+      <el-table-column align="center" label="耗时" prop="durationInMillis" width="160">
+        <template #default="scope">
+          {{ formatPast2(scope.row.durationInMillis) }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="流程编号" prop="id" :show-overflow-tooltip="true" />
+      <el-table-column align="center" label="任务编号" prop="id" :show-overflow-tooltip="true" />
+      <el-table-column align="center" label="操作" fixed="right" width="80">
+        <template #default="scope">
+          <el-button link type="primary" @click="handleAudit(scope.row)">历史</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -78,15 +108,11 @@
       @pagination="getList"
     />
   </ContentWrap>
-
-  <!-- 表单弹窗：详情 -->
-  <TaskDetail ref="detailRef" @success="getList" />
 </template>
 <script lang="ts" setup>
 import { DICT_TYPE } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter, formatPast2 } from '@/utils/formatTime'
 import * as TaskApi from '@/api/bpm/task'
-import TaskDetail from './TaskDetail.vue'
 
 defineOptions({ name: 'BpmTodoTask' })
 
@@ -107,7 +133,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await TaskApi.getDoneTaskPage(queryParams)
+    const data = await TaskApi.getTaskDonePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -127,14 +153,8 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 详情操作 */
-const detailRef = ref()
-const openDetail = (row: TaskApi.TaskVO) => {
-  detailRef.value.open(row)
-}
-
 /** 处理审批按钮 */
-const handleAudit = (row) => {
+const handleAudit = (row: any) => {
   push({
     name: 'BpmProcessInstanceDetail',
     query: {

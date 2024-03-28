@@ -1,7 +1,7 @@
-import { store } from '../index'
+import { store } from '@/store'
 import { defineStore } from 'pinia'
 import { getAccessToken, removeToken } from '@/utils/auth'
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
+import { CACHE_KEY, useCache, deleteUserCache } from '@/hooks/web/useCache'
 import { getInfo, loginOut } from '@/api/login'
 
 const { wsCache } = useCache()
@@ -14,6 +14,7 @@ interface UserVO {
 }
 
 interface UserInfoVO {
+  // USER 缓存
   permissions: string[]
   roles: string[]
   isSetUser: boolean
@@ -80,7 +81,7 @@ export const useUserStore = defineStore('admin-user', {
     async loginOut() {
       await loginOut()
       removeToken()
-      wsCache.clear()
+      deleteUserCache() // 删除用户缓存
       this.resetState()
     },
     resetState() {

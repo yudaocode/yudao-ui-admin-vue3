@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="工作流手册" url="https://doc.iocoder.cn/bpm/" />
+  <doc-alert title="审批接入（业务表单）" url="https://doc.iocoder.cn/bpm/use-business-form/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -36,10 +36,15 @@
           value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
-      <el-form-item label="结果" prop="result">
-        <el-select v-model="queryParams.result" class="!w-240px" clearable placeholder="请选择结果">
+      <el-form-item label="审批结果" prop="result">
+        <el-select
+          v-model="queryParams.result"
+          class="!w-240px"
+          clearable
+          placeholder="请选择审批结果"
+        >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -78,7 +83,7 @@
       <el-table-column align="center" label="申请编号" prop="id" />
       <el-table-column align="center" label="状态" prop="result">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_RESULT" :value="scope.row.result" />
+          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.result" />
         </template>
       </el-table-column>
       <el-table-column
@@ -166,7 +171,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   type: undefined,
-  result: undefined,
+  status: undefined,
   reason: undefined,
   createTime: []
 })
@@ -221,7 +226,7 @@ const cancelLeave = async (row) => {
     inputErrorMessage: '取消原因不能为空'
   })
   // 发起取消
-  await ProcessInstanceApi.cancelProcessInstance(row.id, value)
+  await ProcessInstanceApi.cancelProcessInstanceByStartUser(row.id, value)
   message.success('取消成功')
   // 刷新列表
   await getList()

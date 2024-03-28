@@ -40,6 +40,33 @@ export function initListenerType(listener) {
   }
 }
 
+/** 将 ProcessListenerDO 转换成 initListenerForm 想同的 Form 对象 */
+export function initListenerForm2(processListener) {
+  if (processListener.valueType === 'class') {
+    return {
+      listenerType: 'classListener',
+      class: processListener.value,
+      event: processListener.event,
+      fields: []
+    }
+  } else if (processListener.valueType === 'expression') {
+    return {
+      listenerType: 'expressionListener',
+      expression: processListener.value,
+      event: processListener.event,
+      fields: []
+    }
+  } else if (processListener.valueType === 'delegateExpression') {
+    return {
+      listenerType: 'delegateExpressionListener',
+      delegateExpression: processListener.value,
+      event: processListener.event,
+      fields: []
+    }
+  }
+  throw new Error('未知的监听器类型')
+}
+
 export const listenerType = {
   classListener: 'Java 类',
   expressionListener: '表达式',

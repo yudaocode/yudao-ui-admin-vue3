@@ -1,85 +1,204 @@
 <template>
-  <div style="margin-top: 16px">
-    <!--    <el-form-item label="处理用户">-->
-    <!--      <el-select v-model="userTaskForm.assignee" @change="updateElementTask('assignee')">-->
-    <!--        <el-option v-for="ak in mockData" :key="'ass-' + ak" :label="`用户${ak}`" :value="`user${ak}`" />-->
-    <!--      </el-select>-->
-    <!--    </el-form-item>-->
-    <!--    <el-form-item label="候选用户">-->
-    <!--      <el-select v-model="userTaskForm.candidateUsers" multiple collapse-tags @change="updateElementTask('candidateUsers')">-->
-    <!--        <el-option v-for="uk in mockData" :key="'user-' + uk" :label="`用户${uk}`" :value="`user${uk}`" />-->
-    <!--      </el-select>-->
-    <!--    </el-form-item>-->
-    <!--    <el-form-item label="候选分组">-->
-    <!--      <el-select v-model="userTaskForm.candidateGroups" multiple collapse-tags @change="updateElementTask('candidateGroups')">-->
-    <!--        <el-option v-for="gk in mockData" :key="'ass-' + gk" :label="`分组${gk}`" :value="`group${gk}`" />-->
-    <!--      </el-select>-->
-    <!--    </el-form-item>-->
-    <el-form-item label="到期时间">
-      <el-input v-model="userTaskForm.dueDate" clearable @change="updateElementTask('dueDate')" />
-    </el-form-item>
-    <el-form-item label="跟踪时间">
-      <el-input
-        v-model="userTaskForm.followUpDate"
+  <el-form label-width="100px">
+    <el-form-item label="规则类型" prop="candidateStrategy">
+      <el-select
+        v-model="userTaskForm.candidateStrategy"
         clearable
-        @change="updateElementTask('followUpDate')"
+        style="width: 100%"
+        @change="changeCandidateStrategy"
+      >
+        <el-option
+          v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY)"
+          :key="dict.value"
+          :label="dict.label"
+          :value="dict.value"
+        />
+      </el-select>
+    </el-form-item>
+    <el-form-item
+      v-if="userTaskForm.candidateStrategy == 10"
+      label="指定角色"
+      prop="candidateParam"
+    >
+      <el-select
+        v-model="userTaskForm.candidateParam"
+        clearable
+        multiple
+        style="width: 100%"
+        @change="updateElementTask"
+      >
+        <el-option v-for="item in roleOptions" :key="item.id" :label="item.name" :value="item.id" />
+      </el-select>
+    </el-form-item>
+    <el-form-item
+      v-if="userTaskForm.candidateStrategy == 20 || userTaskForm.candidateStrategy == 21"
+      label="指定部门"
+      prop="candidateParam"
+      span="24"
+    >
+      <el-tree-select
+        ref="treeRef"
+        v-model="userTaskForm.candidateParam"
+        :data="deptTreeOptions"
+        :props="defaultProps"
+        empty-text="加载中，请稍后"
+        multiple
+        node-key="id"
+        show-checkbox
+        @change="updateElementTask"
       />
     </el-form-item>
-    <el-form-item label="优先级">
-      <el-input v-model="userTaskForm.priority" clearable @change="updateElementTask('priority')" />
+    <el-form-item
+      v-if="userTaskForm.candidateStrategy == 22"
+      label="指定岗位"
+      prop="candidateParam"
+      span="24"
+    >
+      <el-select
+        v-model="userTaskForm.candidateParam"
+        clearable
+        multiple
+        style="width: 100%"
+        @change="updateElementTask"
+      >
+        <el-option v-for="item in postOptions" :key="item.id" :label="item.name" :value="item.id" />
+      </el-select>
     </el-form-item>
-    友情提示：任务的分配规则，使用
-    <router-link target="_blank" :to="{ path: '/bpm/manager/model' }"
-      ><el-link type="danger">流程模型</el-link>
-    </router-link>
-    下的【分配规则】替代，提供指定角色、部门负责人、部门成员、岗位、工作组、自定义脚本等 7
-    种维护的任务分配维度，更加灵活！
-  </div>
+    <el-form-item
+      v-if="userTaskForm.candidateStrategy == 30"
+      label="指定用户"
+      prop="candidateParam"
+      span="24"
+    >
+      <el-select
+        v-model="userTaskForm.candidateParam"
+        clearable
+        multiple
+        style="width: 100%"
+        @change="updateElementTask"
+      >
+        <el-option
+          v-for="item in userOptions"
+          :key="item.id"
+          :label="item.nickname"
+          :value="item.id"
+        />
+      </el-select>
+    </el-form-item>
+    <el-form-item
+      v-if="userTaskForm.candidateStrategy === 40"
+      label="指定用户组"
+      prop="candidateParam"
+    >
+      <el-select
+        v-model="userTaskForm.candidateParam"
+        clearable
+        multiple
+        style="width: 100%"
+        @change="updateElementTask"
+      >
+        <el-option
+          v-for="item in userGroupOptions"
+          :key="item.id"
+          :label="item.name"
+          :value="item.id"
+        />
+      </el-select>
+    </el-form-item>
+    <el-form-item
+      v-if="userTaskForm.candidateStrategy === 60"
+      label="流程表达式"
+      prop="candidateParam"
+    >
+      <el-input
+        type="textarea"
+        v-model="userTaskForm.candidateParam[0]"
+        clearable
+        style="width: 72%"
+        @change="updateElementTask"
+      />
+      <el-button class="ml-5px" size="small" type="success" @click="openProcessExpressionDialog"
+        >选择表达式</el-button
+      >
+      <!-- 选择弹窗 -->
+      <ProcessExpressionDialog ref="processExpressionDialogRef" @select="selectProcessExpression" />
+    </el-form-item>
+  </el-form>
 </template>
 
 <script lang="ts" setup>
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { defaultProps, handleTree } from '@/utils/tree'
+import * as RoleApi from '@/api/system/role'
+import * as DeptApi from '@/api/system/dept'
+import * as PostApi from '@/api/system/post'
+import * as UserApi from '@/api/system/user'
+import * as UserGroupApi from '@/api/bpm/userGroup'
+import ProcessExpressionDialog from './ProcessExpressionDialog.vue'
+
 defineOptions({ name: 'UserTask' })
 const props = defineProps({
   id: String,
   type: String
 })
-const defaultTaskForm = ref({
-  assignee: '',
-  candidateUsers: [],
-  candidateGroups: [],
-  dueDate: '',
-  followUpDate: '',
-  priority: ''
+const userTaskForm = ref({
+  candidateStrategy: undefined, // 分配规则
+  candidateParam: [] // 分配选项
 })
-const userTaskForm = ref<any>({})
-// const mockData=ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
 const bpmnElement = ref()
 const bpmnInstances = () => (window as any)?.bpmnInstances
 
+const roleOptions = ref<RoleApi.RoleVO[]>([]) // 角色列表
+const deptTreeOptions = ref() // 部门树
+const postOptions = ref<PostApi.PostVO[]>([]) // 岗位列表
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
+const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
+
 const resetTaskForm = () => {
-  for (let key in defaultTaskForm.value) {
-    let value
-    if (key === 'candidateUsers' || key === 'candidateGroups') {
-      value = bpmnElement.value?.businessObject[key]
-        ? bpmnElement.value.businessObject[key].split(',')
-        : []
+  const businessObject = bpmnElement.value.businessObject
+  if (!businessObject) {
+    return
+  }
+  if (businessObject.candidateStrategy != undefined) {
+    userTaskForm.value.candidateStrategy = parseInt(businessObject.candidateStrategy) as any
+  } else {
+    userTaskForm.value.candidateStrategy = undefined
+  }
+  if (businessObject.candidateParam && businessObject.candidateParam.length > 0) {
+    if (userTaskForm.value.candidateStrategy === 60) {
+      // 特殊：流程表达式，只有一个 input 输入框
+      userTaskForm.value.candidateParam = [businessObject.candidateParam]
     } else {
-      value = bpmnElement.value?.businessObject[key] || defaultTaskForm.value[key]
+      userTaskForm.value.candidateParam = businessObject.candidateParam
+        .split(',')
+        .map((item) => +item)
     }
-    userTaskForm.value[key] = value
+  } else {
+    userTaskForm.value.candidateParam = []
   }
 }
-const updateElementTask = (key) => {
-  const taskAttr = Object.create(null)
-  if (key === 'candidateUsers' || key === 'candidateGroups') {
-    taskAttr[key] =
-      userTaskForm.value[key] && userTaskForm.value[key].length
-        ? userTaskForm.value[key].join()
-        : null
-  } else {
-    taskAttr[key] = userTaskForm.value[key] || null
-  }
-  bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), taskAttr)
+
+/** 更新 candidateStrategy 字段时，需要清空 candidateParam，并触发 bpmn 图更新 */
+const changeCandidateStrategy = () => {
+  userTaskForm.value.candidateParam = []
+  updateElementTask()
+}
+
+/** 选中某个 options 时候，更新 bpmn 图  */
+const updateElementTask = () => {
+  bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
+    candidateStrategy: userTaskForm.value.candidateStrategy,
+    candidateParam: userTaskForm.value.candidateParam.join(',')
+  })
+}
+
+// 打开监听器弹窗
+const processExpressionDialogRef = ref()
+const openProcessExpressionDialog = async () => {
+  processExpressionDialogRef.value.open()
+}
+const selectProcessExpression = (expression) => {
+  userTaskForm.value.candidateParam = [expression.expression]
 }
 
 watch(
@@ -92,6 +211,21 @@ watch(
   },
   { immediate: true }
 )
+
+onMounted(async () => {
+  // 获得角色列表
+  roleOptions.value = await RoleApi.getSimpleRoleList()
+  // 获得部门列表
+  const deptOptions = await DeptApi.getSimpleDeptList()
+  deptTreeOptions.value = handleTree(deptOptions, 'id')
+  // 获得岗位列表
+  postOptions.value = await PostApi.getSimplePostList()
+  // 获得用户列表
+  userOptions.value = await UserApi.getSimpleUserList()
+  // 获得用户组列表
+  userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
+})
+
 onBeforeUnmount(() => {
   bpmnElement.value = null
 })

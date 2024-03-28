@@ -1,5 +1,10 @@
 <!-- 工作流 - 抄送我的流程 -->
 <template>
+  <doc-alert
+    title="审批转办、委派、抄送"
+    url="https://doc.iocoder.cn/bpm/task-delegation-and-cc/"
+  />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form ref="queryFormRef" :inline="true" class="-mb-15px" label-width="68px">
@@ -9,14 +14,6 @@
           class="!w-240px"
           clearable
           placeholder="请输入流程名称"
-        />
-      </el-form-item>
-      <el-form-item label="所属流程" prop="processDefinitionId">
-        <el-input
-          v-model="queryParams.processInstanceId"
-          placeholder="请输入流程定义的编号"
-          clearable
-          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="抄送时间" prop="createTime">
@@ -46,12 +43,17 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column align="center" label="所属流程" prop="processInstanceId" width="300px" />
-      <el-table-column align="center" label="流程名称" prop="processInstanceName" />
-      <el-table-column align="center" label="任务名称" prop="taskName" />
-      <el-table-column align="center" label="流程发起人" prop="startUserNickname" />
-      <el-table-column align="center" label="抄送发起人" prop="creatorNickname" />
-      <el-table-column align="center" label="抄送原因" prop="reason" />
+      <el-table-column align="center" label="流程名" prop="processInstanceName" min-width="180" />
+      <el-table-column align="center" label="流程发起人" prop="startUserName" min-width="100" />
+      <el-table-column
+        :formatter="dateFormatter"
+        align="center"
+        label="流程发起时间"
+        prop="processInstanceStartTime"
+        width="180"
+      />
+      <el-table-column align="center" label="抄送任务" prop="taskName" min-width="180" />
+      <el-table-column align="center" label="抄送人" prop="creatorName" min-width="100" />
       <el-table-column
         align="center"
         label="抄送时间"
@@ -59,9 +61,9 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column align="center" label="操作">
+      <el-table-column align="center" label="操作" fixed="right" width="80">
         <template #default="scope">
-          <el-button link type="primary" @click="handleAudit(scope.row)">跳转待办</el-button>
+          <el-button link type="primary" @click="handleAudit(scope.row)">详情</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -78,14 +80,14 @@
 import { dateFormatter } from '@/utils/formatTime'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 
-defineOptions({ name: 'BpmCCProcessInstance' })
+defineOptions({ name: 'BpmProcessInstanceCopy' })
 
 const { push } = useRouter() // 路由
 
 const loading = ref(false) // 列表的加载中
 const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
-const queryParams = ref({
+const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   processInstanceId: '',
@@ -98,7 +100,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ProcessInstanceApi.getProcessInstanceCCPage(queryParams)
+    const data = await ProcessInstanceApi.getProcessInstanceCopyPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -118,7 +120,7 @@ const handleAudit = (row: any) => {
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
-  queryParams.value.pageNo = 1
+  queryParams.pageNo = 1
   getList()
 }
 

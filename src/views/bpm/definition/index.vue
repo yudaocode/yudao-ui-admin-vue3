@@ -11,11 +11,7 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="定义分类" align="center" prop="category" width="100">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_MODEL_CATEGORY" :value="scope.row.category" />
-        </template>
-      </el-table-column>
+      <el-table-column label="定义分类" align="center" prop="categoryName" width="100" />
       <el-table-column label="表单信息" align="center" prop="formType" width="200">
         <template #default="scope">
           <el-button
@@ -57,18 +53,6 @@
         width="300"
         show-overflow-tooltip
       />
-      <el-table-column label="操作" align="center" width="150" fixed="right">
-        <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="handleAssignRule(scope.row)"
-            v-hasPermi="['bpm:task-assign-rule:query']"
-          >
-            分配规则
-          </el-button>
-        </template>
-      </el-table-column>
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -88,8 +72,8 @@
   <Dialog title="流程图" v-model="bpmnDetailVisible" width="800">
     <MyProcessViewer
       key="designer"
-      v-model="bpmnXML"
-      :value="bpmnXML as any"
+      v-model="bpmnXml"
+      :value="bpmnXml as any"
       v-bind="bpmnControlForm"
       :prefix="bpmnControlForm.prefix"
     />
@@ -97,7 +81,6 @@
 </template>
 
 <script lang="ts" setup>
-import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { MyProcessViewer } from '@/components/bpmnProcessDesigner/package'
 import * as DefinitionApi from '@/api/bpm/definition'
@@ -129,16 +112,6 @@ const getList = async () => {
   }
 }
 
-/** 点击任务分配按钮 */
-const handleAssignRule = (row) => {
-  push({
-    name: 'BpmTaskAssignRuleList',
-    query: {
-      modelId: row.id
-    }
-  })
-}
-
 /** 流程表单的详情按钮操作 */
 const formDetailVisible = ref(false)
 const formDetailPreview = ref({
@@ -160,12 +133,12 @@ const handleFormDetail = async (row) => {
 
 /** 流程图的详情按钮操作 */
 const bpmnDetailVisible = ref(false)
-const bpmnXML = ref(null)
+const bpmnXml = ref(null)
 const bpmnControlForm = ref({
   prefix: 'flowable'
 })
 const handleBpmnDetail = async (row) => {
-  bpmnXML.value = await DefinitionApi.getProcessDefinitionBpmnXML(row.id)
+  bpmnXml.value = (await DefinitionApi.getProcessDefinition(row.id))?.bpmnXml
   bpmnDetailVisible.value = true
 }
 

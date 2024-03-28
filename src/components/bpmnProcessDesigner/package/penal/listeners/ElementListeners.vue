@@ -26,7 +26,15 @@
         type="primary"
         preIcon="ep:plus"
         title="添加监听器"
+        size="small"
         @click="openListenerForm(null)"
+      />
+      <XButton
+        type="success"
+        preIcon="ep:select"
+        title="选择监听器"
+        size="small"
+        @click="openProcessListenerDialog"
       />
     </div>
 
@@ -240,11 +248,21 @@
       </template>
     </el-dialog>
   </div>
+
+  <!-- 选择弹窗 -->
+  <ProcessListenerDialog ref="processListenerDialogRef" @select="selectProcessListener" />
 </template>
 <script lang="ts" setup>
 import { ElMessageBox } from 'element-plus'
 import { createListenerObject, updateElementExtensions } from '../../utils'
-import { initListenerType, initListenerForm, listenerType, fieldType } from './utilSelf'
+import {
+  initListenerType,
+  initListenerForm,
+  listenerType,
+  fieldType,
+  initListenerForm2
+} from './utilSelf'
+import ProcessListenerDialog from './ProcessListenerDialog.vue'
 
 defineOptions({ name: 'ElementListeners' })
 
@@ -284,6 +302,7 @@ const resetListenersList = () => {
 }
 // 打开 监听器详情 侧边栏
 const openListenerForm = (listener, index?) => {
+  // debugger
   if (listener) {
     listenerForm.value = initListenerForm(listener)
     editingListenerIndex.value = index
@@ -321,6 +340,7 @@ const openListenerFieldForm = (field, index?) => {
 }
 // 保存监听器注入字段
 const saveListenerFiled = async () => {
+  // debugger
   let validateStatus = await listenerFieldFormRef.value.validate()
   if (!validateStatus) return // 验证不通过直接返回
   if (editingListenerFieldIndex.value === -1) {
@@ -337,6 +357,7 @@ const saveListenerFiled = async () => {
 }
 // 移除监听器字段
 const removeListenerField = (index) => {
+  // debugger
   ElMessageBox.confirm('确认移除该字段吗？', '提示', {
     confirmButtonText: '确 认',
     cancelButtonText: '取 消'
@@ -349,6 +370,7 @@ const removeListenerField = (index) => {
 }
 // 移除监听器
 const removeListener = (index) => {
+  debugger
   ElMessageBox.confirm('确认移除该监听器吗？', '提示', {
     confirmButtonText: '确 认',
     cancelButtonText: '取 消'
@@ -365,6 +387,7 @@ const removeListener = (index) => {
 }
 // 保存监听器配置
 const saveListenerConfig = async () => {
+  // debugger
   let validateStatus = await listenerFormRef.value.validate()
   if (!validateStatus) return // 验证不通过直接返回
   const listenerObject = createListenerObject(listenerForm.value, false, prefix)
@@ -387,6 +410,28 @@ const saveListenerConfig = async () => {
   // 4. 隐藏侧边栏
   listenerFormModelVisible.value = false
   listenerForm.value = {}
+}
+
+// 打开监听器弹窗
+const processListenerDialogRef = ref()
+const openProcessListenerDialog = async () => {
+  processListenerDialogRef.value.open('execution')
+}
+const selectProcessListener = (listener) => {
+  const listenerForm = initListenerForm2(listener)
+  const listenerObject = createListenerObject(listenerForm, false, prefix)
+  bpmnElementListeners.value.push(listenerObject)
+  elementListenersList.value.push(listenerForm)
+
+  // 保存其他配置
+  otherExtensionList.value =
+    bpmnElement.value.businessObject?.extensionElements?.values?.filter(
+      (ex) => ex.$type !== `${prefix}:ExecutionListener`
+    ) ?? []
+  updateElementExtensions(
+    bpmnElement.value,
+    otherExtensionList.value.concat(bpmnElementListeners.value)
+  )
 }
 
 watch(
