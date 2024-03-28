@@ -51,8 +51,8 @@
       </el-row>
       <el-row>
         <el-col :span="12">
-          <el-form-item label="电话" prop="telephone">
-            <el-input v-model="formData.telephone" placeholder="请输入电话" />
+          <el-form-item label="渠道名称" prop="channelName" >
+            <el-input v-model="formData.channelName" placeholder="渠道名在新建的时候必须确定不可修改" :disabled="formType !== 'create'" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -175,6 +175,7 @@ const formData = ref({
   industryId: undefined,
   level: undefined,
   source: undefined,
+  channelName: undefined,
   remark: undefined
 })
 const formRules = reactive({
@@ -252,6 +253,7 @@ const resetForm = () => {
     industryId: undefined,
     level: undefined,
     source: undefined,
+    channelName: undefined,
     remark: undefined
   }
   formRef.value?.resetFields()

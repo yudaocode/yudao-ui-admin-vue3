@@ -113,7 +113,7 @@
         </template>
       </el-table-column>
       <el-table-column label="手机" align="center" prop="mobile" width="120" />
-      <el-table-column label="电话" align="center" prop="telephone" width="130" />
+      <el-table-column label="渠道名称" align="center" prop="channelName" width="130" />
       <el-table-column label="邮箱" align="center" prop="email" width="180" />
       <el-table-column align="center" label="客户级别" prop="level" width="135">
         <template #default="scope">

@@ -23,6 +23,7 @@ export interface CustomerVO {
   industryId: number // 所属行业
   level: number // 客户等级
   source: number // 客户来源
+  channelName: string // 渠道名称
   remark: string // 备注
   creator: string // 创建人
   creatorName?: string // 创建人名称

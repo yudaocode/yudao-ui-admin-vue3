@@ -13,7 +13,7 @@
             <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="clue.source" />
           </el-descriptions-item>
           <el-descriptions-item label="手机">{{ clue.mobile }}</el-descriptions-item>
-          <el-descriptions-item label="电话">{{ clue.telephone }}</el-descriptions-item>
+          <el-descriptions-item label="渠道名称">{{ clue.channelName }}</el-descriptions-item>
           <el-descriptions-item label="邮箱">{{ clue.email }}</el-descriptions-item>
           <el-descriptions-item label="地址">
             {{ clue.areaName }} {{ clue.detailAddress }}
