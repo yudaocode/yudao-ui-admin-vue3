@@ -9,7 +9,17 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="时间范围" prop="orderDate">
+      <el-form-item label="间隔类型" prop="intervalType">
+        <el-select v-model="queryParams.intervalType" class="!w-240px" placeholder="间隔类型">
+          <el-option
+            v-for="(intervalType, index) in DATE_INTERVAL_OPTIONS"
+            :label="intervalType.name"
+            :value="intervalType.value"
+            :key="index"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="时间范围" prop="orderDate" v-show="queryParams.intervalType === CUSTOMER_INTERVAL">
         <el-date-picker
           v-model="queryParams.times"
           :shortcuts="defaultShortcuts"
@@ -88,10 +98,12 @@ import CustomerFollowupSummary from './components/CustomerFollowupSummary.vue'
 import CustomerFollowupType from './components/CustomerFollowupType.vue'
 import CustomerConversionStat from './components/CustomerConversionStat.vue'
 import CustomerDealCycle from './components/CustomerDealCycle.vue'
+import { DATE_INTERVAL_OPTIONS, CUSTOMER_INTERVAL } from '@/api/crm/statistics/customer'
 
 defineOptions({ name: 'CrmStatisticsCustomer' })
 
 const queryParams = reactive({
+  intervalType: CUSTOMER_INTERVAL,
   deptId: useUserStore().getUser.deptId,
   userId: undefined,
   times: [
