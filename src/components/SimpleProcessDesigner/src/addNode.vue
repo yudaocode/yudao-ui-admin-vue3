@@ -71,9 +71,9 @@ const addType = (type) => {
         attributes : {
           approveMethod : undefined,
           candidateStrategy: undefined,
-          candidateParam: []
+          candidateParam: undefined
         },
-        // childNode: props.childNodeP
+        childNode: props.childNodeP
       }
     } else if (type == 2) {
       data = {

@@ -6,14 +6,19 @@
  * @FilePath: /Workflow-Vue3/src/components/nodeWrap.vue
 -->
 <template>
+ 
   <div class="node-wrap" v-if="nodeConfig.type < 3">
+    <div class="start-event-node" v-if="nodeConfig.type === -1">
+        <div class="start-event-node-text">{{ nodeConfig.name }}</div>
+        <div class="start-event-node-circle"></div>
+    </div>
     <div
       class="node-wrap-box"
       :class="
         (nodeConfig.type == 0 ? 'start-node ' : '') +
         (isTried && nodeConfig.error ? 'active error' : '')
       "
-    >
+      v-else>
       <div class="title" :style="`background: rgb(${bgColors[nodeConfig.type]});`">
         <span v-if="nodeConfig.type == 0">{{ nodeConfig.name }}</span>
         <template v-else>
@@ -109,7 +114,6 @@
 import addNode from './addNode.vue'
 import { onMounted, ref, watch, getCurrentInstance, computed } from 'vue'
 import {
-  arrToStr,
   conditionStr,
   setApproverStr,
   copyerStr,
@@ -165,7 +169,6 @@ let {
   setCopyer,
   setCondition,
   setFlowPermission,
-  setApproverConfig,
   setCopyerConfig,
   setConditionsConfig,
   setUserTaskConfig
@@ -339,5 +342,25 @@ const arrTransfer = (index, type = 1) => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.start-event-node {
+  color: #191f2566;
+  text-align: left;
+  border-radius: 50%;
+}
+
+.start-event-node-circle {
+  width: 10px;
+  height: 10px;
+  margin: auto;
+  background: #dbdcdc;
+  border-radius: 50%;
+}
+
+.start-event-node-text {
+  margin-top: 5px;
+  font-size: 14px;
+  text-align: center;
 }
 </style>

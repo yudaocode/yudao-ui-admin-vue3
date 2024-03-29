@@ -7,3 +7,9 @@ export const saveBpmSimpleModel = async (data) => {
     data: data
   })
 }
+
+export const getBpmSimpleModel = async (modelId) => {
+  return await request.get({
+    url: '/bpm/simple/get?modelId=' + modelId
+  })
+}

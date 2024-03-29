@@ -202,7 +202,19 @@ let visible = computed({
 })
 watch(userTaskConfig, (val) => {
   if (val.value.attributes) {
-    candidateConfig.value = val.value.attributes
+    console.log('val.value.attributes', val.value.attributes);
+    candidateConfig.value.approveMethod = val.value.attributes.approveMethod
+    candidateConfig.value.candidateStrategy = val.value.attributes.candidateStrategy
+    const candidateParamStr =  val.value.attributes.candidateParam;
+    if(val.value.attributes.candidateStrategy === 60) {
+      candidateConfig.value.candidateParam = [candidateParamStr]
+    } else {
+      if(candidateParamStr){
+        candidateConfig.value.candidateParam =  candidateParamStr.split(',').map((item) => +item)
+      }
+    }
+    
+    // candidateConfig.value = val.value.attributes
   }
 })
 watch(approverConfig1, (val) => {
@@ -250,9 +262,14 @@ const saveApprover = () => {
   closeDrawer()
 }
 const saveConfig = () => {
-
   const rawConfig = toRaw(userTaskConfig.value)
-  rawConfig.value.attributes = toRaw(candidateConfig.value)
+  const { approveMethod, candidateStrategy , candidateParam} = toRaw(candidateConfig.value);
+  const candidateParamStr = candidateParam.join(',')
+  rawConfig.value.attributes = {
+    approveMethod,
+    candidateStrategy,
+    candidateParam: candidateParamStr
+  } 
   rawConfig.flag = true
   // TODO 进行校验
   // setApproverConfig({

@@ -56,14 +56,14 @@ export const setApproverStr = (nodeConfig: any) => {
 
 
 export const approveMethods: DictDataVO [] = [
-  { label: '单人审批', value: 1 },
-  { label: '多人审批(所有人审批通过)', value: 2 }
+  { label: '单人审批', value: 1 }
+  // { label: '多人审批(所有人审批通过)', value: 2 }
   // TODO 更多的类型
 ];
 
 export const getApproverShowText = (approveMethod :number, candidateStrategy: number) => {
-  if(approveMethod && candidateStrategy) {
-    let appoveMethodText = ''
+  let appoveMethodText = '单人审批'
+  if(candidateStrategy) {
     approveMethods.forEach((item) => {
       if (item.value == approveMethod) {
         appoveMethodText = item.label
