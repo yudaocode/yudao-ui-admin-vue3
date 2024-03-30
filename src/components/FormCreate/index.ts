@@ -1,3 +1,4 @@
-import MyFormCreate from './src/MyFormCreate.vue'
+import MyFormCreateDesigner from './src/MyFormCreateDesigner.vue'
+import { useFormCreateDesigner } from './src/useFormCreateDesigner'
 
-export { MyFormCreate }
+export { MyFormCreateDesigner, useFormCreateDesigner }

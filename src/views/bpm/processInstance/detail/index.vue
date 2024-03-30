@@ -24,15 +24,15 @@
             {{ processInstance?.startUser.nickname }}
             <el-tag size="small" type="info">{{ processInstance?.startUser.deptName }}</el-tag>
           </el-form-item>
-          <el-card class="mb-15px !-mt-10px" v-if="runningTasks[index].formId > 0">
+          <el-card v-if="runningTasks[index].formId > 0" class="mb-15px !-mt-10px">
             <template #header>
               <span class="el-icon-picture-outline">
                 填写表单【{{ runningTasks[index]?.formName }}】
               </span>
             </template>
             <form-create
-              v-model:api="approveFormFApis[index]"
               v-model="approveForms[index].value"
+              v-model:api="approveFormFApis[index]"
               :option="approveForms[index].option"
               :rule="approveForms[index].rule"
             />
@@ -91,7 +91,7 @@
       </template>
       <!-- 情况一：流程表单 -->
       <el-col v-if="processInstance?.processDefinition?.formType === 10" :offset="6" :span="16">
-        <my-form-create
+        <form-create
           v-model="detailForm.value"
           v-model:api="fApi"
           :option="detailForm.option"
