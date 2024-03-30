@@ -124,32 +124,31 @@ const userListByDeptId = computed(() =>
     : []
 )
 
-//
 const activeTab = ref('customerSummary') // 活跃标签
 const customerSummaryRef = ref() // 1. 客户总量分析
 const followUpSummaryRef = ref() // 2. 客户跟进次数分析
 const followUpTypeRef = ref() // 3. 客户跟进方式分析
 const conversionStatRef = ref() // 4. 客户转化率分析
 // 5. TODO 公海客户分析
-// 缺 crm_owner_record 表
+// 缺 crm_owner_record 表 TODO @dhb52：可以先做界面 + 接口，接口数据直接写死返回，相当于 mock 出来
 const dealCycleRef = ref() // 6. 成交周期分析
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   switch (activeTab.value) {
-    case 'customerSummary':
+    case 'customerSummary': // 客户总量分析
       customerSummaryRef.value?.loadData?.()
       break
-    case 'followUpSummary':
+    case 'followUpSummary': // 客户跟进次数分析
       followUpSummaryRef.value?.loadData?.()
       break
-    case 'followUpType':
+    case 'followUpType': // 客户跟进方式分析
       followUpTypeRef.value?.loadData?.()
       break
-    case 'conversionStat':
+    case 'conversionStat': // 客户转化率分析
       conversionStatRef.value?.loadData?.()
       break
-    case 'dealCycle':
+    case 'dealCycle': // 成交周期分析
       dealCycleRef.value?.loadData?.()
       break
   }

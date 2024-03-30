@@ -27,8 +27,9 @@ import {
   CrmStatisticsFollowUpSummaryByTypeRespVO
 } from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
-import { round, sumBy } from 'lodash-es'
+import { sumBy } from 'lodash-es'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
+import { erpCalculatePercentage } from '@/utils'
 
 defineOptions({ name: 'CustomerFollowupType' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
@@ -95,7 +96,7 @@ const loadData = async () => {
   list.value = followUpSummaryByType.map((row: CrmStatisticsFollowUpSummaryByTypeRespVO) => {
     return {
       ...row,
-      portion: round((row.followUpRecordCount / totalCount) * 100, 2)
+      portion: erpCalculatePercentage(row.followUpRecordCount, totalCount)
     }
   })
   loading.value = false

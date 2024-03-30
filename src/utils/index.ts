@@ -329,10 +329,11 @@ const ERP_PRICE_DIGIT = 2
  * 例如说：库存数量
  *
  * @param num 数量
+ * @package digit 保留的小数位数
  * @return 格式化后的数量
  */
 export const erpNumberFormatter = (num: number | string | undefined, digit: number) => {
-  if (num === null) {
+  if (num == null) {
     return ''
   }
   if (typeof num === 'string') {
@@ -403,4 +404,17 @@ export const erpPriceMultiply = (price: number, count: number) => {
     return undefined
   }
   return parseFloat((price * count).toFixed(ERP_PRICE_DIGIT))
+}
+
+/**
+ * 【ERP】百分比计算，四舍五入保留两位小数
+ *
+ * 如果 total 为 0，则返回 0
+ *
+ * @param value 当前值
+ * @param total 总值
+ */
+export const erpCalculatePercentage = (value: number, total: number) => {
+  if (total === 0) return 0
+  return ((value / total) * 100).toFixed(2)
 }
