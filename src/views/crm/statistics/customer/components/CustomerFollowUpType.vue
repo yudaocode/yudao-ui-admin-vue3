@@ -11,8 +11,12 @@
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="list">
       <el-table-column label="序号" align="center" type="index" width="80" />
-      <el-table-column label="跟进方式" align="center" prop="followupType" min-width="200" />
-      <el-table-column label="个数" align="center" prop="followupRecordCount" min-width="200" />
+      <el-table-column label="跟进方式" align="center" prop="followUpType" min-width="200">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_FOLLOW_UP_TYPE" :value="scope.row.followUpType" />
+        </template>
+      </el-table-column>
+      <el-table-column label="个数" align="center" prop="followUpRecordCount" min-width="200" />
       <el-table-column label="占比(%)" align="center" prop="portion" min-width="200" />
     </el-table>
   </el-card>
@@ -20,16 +24,17 @@
 <script setup lang="ts">
 import {
   StatisticsCustomerApi,
-  CrmStatisticsFollowupSummaryByTypeRespVO
+  CrmStatisticsFollowUpSummaryByTypeRespVO
 } from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
 import { round, sumBy } from 'lodash-es'
+import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 
 defineOptions({ name: 'CustomerFollowupType' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
-const list = ref<CrmStatisticsFollowupSummaryByTypeRespVO[]>([]) // 列表的数据
+const list = ref<CrmStatisticsFollowUpSummaryByTypeRespVO[]>([]) // 列表的数据
 
 /** 饼图配置 */
 const echartsOption = reactive<EChartsOption>({
@@ -71,27 +76,26 @@ const echartsOption = reactive<EChartsOption>({
 const loadData = async () => {
   // 1. 加载统计数据
   loading.value = true
-  const followupSummaryByType = await StatisticsCustomerApi.getFollowupSummaryByType(
+  const followUpSummaryByType = await StatisticsCustomerApi.getFollowUpSummaryByType(
     props.queryParams
   )
   // 2.1 更新 Echarts 数据
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
-    echartsOption.series[0]['data'] = followupSummaryByType.map(
-      (r: CrmStatisticsFollowupSummaryByTypeRespVO) => {
+    echartsOption.series[0]['data'] = followUpSummaryByType.map(
+      (row: CrmStatisticsFollowUpSummaryByTypeRespVO) => {
         return {
-          name: r.followupType,
-          value: r.followupRecordCount
+          name: getDictLabel(DICT_TYPE.CRM_FOLLOW_UP_TYPE, row.followUpType),
+          value: row.followUpRecordCount
         }
       }
     )
   }
   // 2.2 更新列表数据
-  const totalCount = sumBy(followupSummaryByType, 'followupRecordCount')
-  list.value = followupSummaryByType.map((r: CrmStatisticsFollowupSummaryByTypeRespVO) => {
+  const totalCount = sumBy(followUpSummaryByType, 'followUpRecordCount')
+  list.value = followUpSummaryByType.map((row: CrmStatisticsFollowUpSummaryByTypeRespVO) => {
     return {
-      followupType: r.followupType,
-      followupRecordCount: r.followupRecordCount,
-      portion: round((r.followupRecordCount / totalCount) * 100, 2)
+      ...row,
+      portion: round((row.followUpRecordCount / totalCount) * 100, 2)
     }
   })
   loading.value = false

@@ -9,17 +9,7 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="间隔类型" prop="intervalType">
-        <el-select v-model="queryParams.intervalType" class="!w-240px" placeholder="间隔类型">
-          <el-option
-            v-for="(intervalType, index) in DATE_INTERVAL_OPTIONS"
-            :label="intervalType.name"
-            :value="intervalType.value"
-            :key="index"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="时间范围" prop="orderDate" v-show="queryParams.intervalType === CUSTOMER_INTERVAL">
+      <el-form-item label="时间范围" prop="orderDate">
         <el-date-picker
           v-model="queryParams.times"
           :shortcuts="defaultShortcuts"
@@ -30,6 +20,16 @@
           value-format="YYYY-MM-DD HH:mm:ss"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
         />
+      </el-form-item>
+      <el-form-item label="时间间隔" prop="interval">
+        <el-select v-model="queryParams.interval" class="!w-240px" placeholder="间隔类型">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.DATE_INTERVAL)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="归属部门" prop="deptId">
         <el-tree-select
@@ -68,12 +68,12 @@
         <CustomerSummary :query-params="queryParams" ref="customerSummaryRef" />
       </el-tab-pane>
       <!-- 客户跟进次数分析 -->
-      <el-tab-pane label="客户跟进次数分析" name="followupSummary" lazy>
-        <CustomerFollowupSummary :query-params="queryParams" ref="followupSummaryRef" />
+      <el-tab-pane label="客户跟进次数分析" name="followUpSummary" lazy>
+        <CustomerFollowUpSummary :query-params="queryParams" ref="followUpSummaryRef" />
       </el-tab-pane>
       <!-- 客户跟进方式分析 -->
-      <el-tab-pane label="客户跟进方式分析" name="followupType" lazy>
-        <CustomerFollowupType :query-params="queryParams" ref="followupTypeRef" />
+      <el-tab-pane label="客户跟进方式分析" name="followUpType" lazy>
+        <CustomerFollowUpType :query-params="queryParams" ref="followUpTypeRef" />
       </el-tab-pane>
       <!-- 客户转化率分析 -->
       <el-tab-pane label="客户转化率分析" name="conversionStat" lazy>
@@ -94,16 +94,16 @@ import { useUserStore } from '@/store/modules/user'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { defaultProps, handleTree } from '@/utils/tree'
 import CustomerSummary from './components/CustomerSummary.vue'
-import CustomerFollowupSummary from './components/CustomerFollowupSummary.vue'
-import CustomerFollowupType from './components/CustomerFollowupType.vue'
+import CustomerFollowUpSummary from './components/CustomerFollowUpSummary.vue'
+import CustomerFollowUpType from './components/CustomerFollowUpType.vue'
 import CustomerConversionStat from './components/CustomerConversionStat.vue'
 import CustomerDealCycle from './components/CustomerDealCycle.vue'
-import { DATE_INTERVAL_OPTIONS, CUSTOMER_INTERVAL } from '@/api/crm/statistics/customer'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'CrmStatisticsCustomer' })
 
 const queryParams = reactive({
-  intervalType: CUSTOMER_INTERVAL,
+  interval: 1,
   deptId: useUserStore().getUser.deptId,
   userId: undefined,
   times: [
@@ -116,27 +116,23 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const deptList = ref<Tree[]>([]) // 部门树形结构
 const userList = ref<UserApi.UserVO[]>([]) // 全量用户清单
-// 根据选择的部门筛选员工清单
+
+/** 根据选择的部门筛选员工清单 */
 const userListByDeptId = computed(() =>
   queryParams.deptId
     ? userList.value.filter((u: UserApi.UserVO) => u.deptId === queryParams.deptId)
     : []
 )
 
-// 活跃标签
-const activeTab = ref('customerSummary')
-// 1.客户总量分析
-const customerSummaryRef = ref()
-// 2.客户跟进次数分析
-const followupSummaryRef = ref()
-// 3.客户跟进方式分析
-const followupTypeRef = ref()
-// 4.客户转化率分析
-const conversionStatRef = ref()
-// 5.公海客户分析
+//
+const activeTab = ref('customerSummary') // 活跃标签
+const customerSummaryRef = ref() // 1. 客户总量分析
+const followUpSummaryRef = ref() // 2. 客户跟进次数分析
+const followUpTypeRef = ref() // 3. 客户跟进方式分析
+const conversionStatRef = ref() // 4. 客户转化率分析
+// 5. TODO 公海客户分析
 // 缺 crm_owner_record 表
-// 6.成交周期分析
-const dealCycleRef = ref()
+const dealCycleRef = ref() // 6. 成交周期分析
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
@@ -144,11 +140,11 @@ const handleQuery = () => {
     case 'customerSummary':
       customerSummaryRef.value?.loadData?.()
       break
-    case 'followupSummary':
-      followupSummaryRef.value?.loadData?.()
+    case 'followUpSummary':
+      followUpSummaryRef.value?.loadData?.()
       break
-    case 'followupType':
-      followupTypeRef.value?.loadData?.()
+    case 'followUpType':
+      followUpTypeRef.value?.loadData?.()
       break
     case 'conversionStat':
       conversionStatRef.value?.loadData?.()
@@ -159,7 +155,7 @@ const handleQuery = () => {
   }
 }
 
-// 当 activeTab 改变时，刷新当前活动的 tab
+/** 当 activeTab 改变时，刷新当前活动的 tab */
 watch(activeTab, () => {
   handleQuery()
 })
@@ -170,7 +166,7 @@ const resetQuery = () => {
   handleQuery()
 }
 
-// 加载部门树
+/** 初始化 */
 onMounted(async () => {
   deptList.value = handleTree(await DeptApi.getSimpleDeptList())
   userList.value = handleTree(await UserApi.getSimpleUserList())
