@@ -178,6 +178,7 @@ const handleQuery = () => {
     case 'dealCycle': // 成交周期分析
       dealCycleRef.value?.loadData?.()
       break
+    // TODO @puhui999：这 4 个拆出去哈；独立一个【客户画像】菜单
     case 'addressRef':
       addressRef.value?.loadData?.()
       break

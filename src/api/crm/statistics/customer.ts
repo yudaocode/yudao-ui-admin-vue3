@@ -143,31 +143,32 @@ export const StatisticsCustomerApi = {
       params
     })
   },
+  // TODO @puhui999：下面这些拆出去哈；
   // 6.1 获取客户行业统计数据
   getCustomerIndustry: (params: any) => {
     return request.get({
-      url: '/crm/statistics-customer/get-customer-industry-summary',
+      url: '/crm/statistics-portrait/get-customer-industry-summary',
       params
     })
   },
   // 6.1 获取客户来源统计数据
   getCustomerSource: (params: any) => {
     return request.get({
-      url: '/crm/statistics-customer/get-customer-source-summary',
+      url: '/crm/statistics-portrait/get-customer-source-summary',
       params
     })
   },
   // 6.1 获取客户行业统计数据
   getCustomerLevel: (params: any) => {
     return request.get({
-      url: '/crm/statistics-customer/get-customer-level-summary',
+      url: '/crm/statistics-portrait/get-customer-level-summary',
       params
     })
   },
   // 6.1 获取客户行业统计数据
   getCustomerArea: (params: any) => {
     return request.get({
-      url: '/crm/statistics-customer/get-customer-area-summary',
+      url: '/crm/statistics-portrait/get-customer-area-summary',
       params
     })
   }
