@@ -80,8 +80,24 @@
         <CustomerConversionStat :query-params="queryParams" ref="conversionStatRef" />
       </el-tab-pane>
       <!-- 成交周期分析 -->
-      <el-tab-pane label="成交周期分析" name="dealCycle" lazy>
-        <CustomerDealCycle :query-params="queryParams" ref="dealCycleRef" />
+      <el-tab-pane label="成交周期分析" lazy name="dealCycle">
+        <CustomerDealCycle ref="dealCycleRef" :query-params="queryParams" />
+      </el-tab-pane>
+      <!-- 城市分布分析 -->
+      <el-tab-pane label="城市分布分析" lazy name="addressRef">
+        <CustomerAddress ref="addressRef" :query-params="queryParams" />
+      </el-tab-pane>
+      <!-- 客户级别分析 -->
+      <el-tab-pane label="客户级别分析" lazy name="levelRef">
+        <CustomerLevel ref="levelRef" :query-params="queryParams" />
+      </el-tab-pane>
+      <!-- 客户来源分析 -->
+      <el-tab-pane label="客户来源分析" lazy name="sourceRef">
+        <CustomerSource ref="sourceRef" :query-params="queryParams" />
+      </el-tab-pane>
+      <!-- 客户行业分析 -->
+      <el-tab-pane label="客户行业分析" lazy name="industryRef">
+        <CustomerIndustry ref="industryRef" :query-params="queryParams" />
       </el-tab-pane>
     </el-tabs>
   </el-col>
@@ -99,6 +115,10 @@ import CustomerFollowUpType from './components/CustomerFollowUpType.vue'
 import CustomerConversionStat from './components/CustomerConversionStat.vue'
 import CustomerDealCycle from './components/CustomerDealCycle.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import CustomerAddress from './components/CustomerAddress.vue'
+import CustomerIndustry from './components/CustomerIndustry.vue'
+import CustomerSource from './components/CustomerSource.vue'
+import CustomerLevel from './components/CustomerLevel.vue'
 
 defineOptions({ name: 'CrmStatisticsCustomer' })
 
@@ -132,6 +152,13 @@ const conversionStatRef = ref() // 4. 客户转化率分析
 // 5. TODO 公海客户分析
 // 缺 crm_owner_record 表 TODO @dhb52：可以先做界面 + 接口，接口数据直接写死返回，相当于 mock 出来
 const dealCycleRef = ref() // 6. 成交周期分析
+const addressRef = ref()
+// 客户级别
+const levelRef = ref()
+// 客户来源
+const sourceRef = ref()
+// 客户行业
+const industryRef = ref()
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
@@ -150,6 +177,18 @@ const handleQuery = () => {
       break
     case 'dealCycle': // 成交周期分析
       dealCycleRef.value?.loadData?.()
+      break
+    case 'addressRef':
+      addressRef.value?.loadData?.()
+      break
+    case 'levelRef':
+      levelRef.value?.loadData?.()
+      break
+    case 'sourceRef':
+      sourceRef.value?.loadData?.()
+      break
+    case 'industryRef':
+      industryRef.value?.loadData?.()
       break
   }
 }

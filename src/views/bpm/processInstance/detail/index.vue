@@ -91,9 +91,9 @@
       </template>
       <!-- 情况一：流程表单 -->
       <el-col v-if="processInstance?.processDefinition?.formType === 10" :offset="6" :span="16">
-        <form-create
-          ref="fApi"
+        <my-form-create
           v-model="detailForm.value"
+          v-model:api="fApi"
           :option="detailForm.option"
           :rule="detailForm.rule"
         />
@@ -280,9 +280,9 @@ const getProcessInstance = async () => {
         data.formVariables
       )
       nextTick().then(() => {
-        fApi.value?.fapi?.btn.show(false)
-        fApi.value?.fapi?.resetBtn.show(false)
-        fApi.value?.fapi?.disabled(true)
+        fApi.value?.btn.show(false)
+        fApi.value?.resetBtn.show(false)
+        fApi.value?.disabled(true)
       })
     } else {
       // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue

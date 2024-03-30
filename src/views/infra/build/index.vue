@@ -23,7 +23,7 @@
       </el-button>
       <el-scrollbar height="580">
         <div>
-          <pre><code class="hljs" v-dompurify-html="highlightedCode(formData)"></code></pre>
+          <pre><code v-dompurify-html="highlightedCode(formData)" class="hljs"></code></pre>
         </div>
       </el-scrollbar>
     </div>
@@ -81,15 +81,14 @@ const makeTemplate = () => {
   const rule = designer.value.getRule()
   const opt = designer.value.getOption()
   return `<template>
-    <form-create
-      v-model="fapi"
+    <my-form-create
+      v-model:api="fApi"
       :rule="rule"
       :option="option"
       @submit="onSubmit"
-    ></form-create>
+    ></my-form-create>
   </template>
   <script setup lang=ts>
-    import formCreate from "@form-create/element-ui";
     const faps = ref(null)
     const rule = ref('')
     const option = ref('')

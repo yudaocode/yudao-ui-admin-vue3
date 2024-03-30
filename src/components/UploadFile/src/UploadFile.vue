@@ -6,7 +6,9 @@
       :action="uploadUrl"
       :auto-upload="autoUpload"
       :before-upload="beforeUpload"
+      :disabled="disabled"
       :drag="drag"
+      :http-request="httpRequest"
       :limit="props.limit"
       :multiple="props.limit > 1"
       :on-error="excelUploadError"
@@ -15,15 +17,14 @@
       :on-remove="handleRemove"
       :on-success="handleFileSuccess"
       :show-file-list="true"
-      :http-request="httpRequest"
       class="upload-file-uploader"
       name="file"
     >
-      <el-button type="primary">
+      <el-button v-if="!disabled" type="primary">
         <Icon icon="ep:upload-filled" />
         选取文件
       </el-button>
-      <template v-if="isShowTip" #tip>
+      <template v-if="isShowTip && !disabled" #tip>
         <div style="font-size: 8px">
           大小不超过 <b style="color: #f56c6c">{{ fileSize }}MB</b>
         </div>
@@ -54,7 +55,8 @@ const props = defineProps({
   limit: propTypes.number.def(5), // 数量限制
   autoUpload: propTypes.bool.def(true), // 自动上传
   drag: propTypes.bool.def(false), // 拖拽上传
-  isShowTip: propTypes.bool.def(true) // 是否显示提示
+  isShowTip: propTypes.bool.def(true), // 是否显示提示
+  disabled: propTypes.bool.def(false) // 是否禁用上传组件 ==> 非必传（默认为 false）
 })
 
 // ========== 上传相关 ==========
