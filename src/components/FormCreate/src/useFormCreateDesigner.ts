@@ -14,13 +14,13 @@ export const useFormCreateDesigner = (designer: Ref) => {
   const uploadImgsRule = useUploadImgsRule()
 
   onMounted(() => {
-    // 移除自带的上传组件规则
+    // 移除自带的上传组件规则，使用 uploadFileRule、uploadImgRule、uploadImgsRule 替代
     designer.value?.removeMenuItem('upload')
     const components = [uploadFileRule, uploadImgRule, uploadImgsRule]
     components.forEach((component) => {
-      //插入组件规则
+      // 插入组件规则
       designer.value?.addComponent(component)
-      //插入拖拽按钮到`main`分类下
+      // 插入拖拽按钮到 `main` 分类下
       designer.value?.appendMenuItem('main', {
         icon: component.icon,
         name: component.name,

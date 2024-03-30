@@ -51,6 +51,7 @@ const dialogTitle = ref('') // 弹窗的标题
 const formType = ref(-1) // 表单的类型：0 - 生成 JSON；1 - 生成 Options；2 - 生成组件
 const formData = ref('') // 表单数据
 useFormCreateDesigner(designer) // 表单设计器增强
+
 /** 打开弹窗 */
 const openModel = (title: string) => {
   dialogVisible.value = true
