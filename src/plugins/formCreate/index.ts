@@ -19,6 +19,8 @@ import formCreate from '@form-create/element-ui'
 import install from '@form-create/element-ui/auto-import'
 //======================= 自定义组件 =======================
 import { UploadFile, UploadImg, UploadImgs } from '@/components/UploadFile'
+import { DictSelect } from '@/components/DictSelect'
+import UserSelect from '@/views/system/user/components/UserSelect.vue'
 
 const components = [
   ElAside,
@@ -35,7 +37,9 @@ const components = [
   ElTabPane,
   UploadImg,
   UploadImgs,
-  UploadFile
+  UploadFile,
+  DictSelect,
+  UserSelect
 ]
 
 // 参考 http://www.form-create.com/v3/element-ui/auto-import.html 文档
