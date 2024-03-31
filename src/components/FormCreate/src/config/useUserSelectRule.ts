@@ -1,22 +1,9 @@
 import { generateUUID } from '@/utils'
-import * as UserApi from '@/api/system/user'
-import { localeProps, makeOptionsRule, makeRequiredRule } from '@/components/FormCreate/src/utils'
+import { localeProps, makeRequiredRule } from '@/components/FormCreate/src/utils'
 
 export const useUserSelectRule = () => {
-  const label = 'aa选择器'
-  const name = 'select'
-  const userOptions = ref<{ label: string; value: number }[]>([]) // 用户下拉数据
-  onMounted(async () => {
-    const data = await UserApi.getSimpleUserList()
-    if (!data || data.length === 0) {
-      return
-    }
-    userOptions.value =
-      data?.map((item: UserApi.UserVO) => ({
-        label: item.nickname,
-        value: item.id
-      })) ?? []
-  })
+  const label = '用户选择器'
+  const name = 'UserSelect'
   return {
     icon: 'icon-select',
     label,
@@ -33,7 +20,6 @@ export const useUserSelectRule = () => {
     props(_, { t }) {
       return localeProps(t, name + '.props', [
         makeRequiredRule(),
-        makeOptionsRule(t, 'options', userOptions.value),
         { type: 'switch', field: 'multiple', title: '是否多选' },
         {
           type: 'switch',

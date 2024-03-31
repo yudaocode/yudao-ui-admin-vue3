@@ -1,5 +1,5 @@
 <template>
-  <el-select :model-value="modelValue" class="w-1/1" v-bind="attrs" @change="changeValue">
+  <el-select class="w-1/1" v-bind="attrs">
     <template v-if="valueType === 'int'">
       <el-option
         v-for="(dict, index) in getIntDictOptions(dictType)"
@@ -43,11 +43,4 @@ withDefaults(defineProps<Props>(), {
 })
 const attrs = useAttrs()
 defineOptions({ name: 'DictSelect' })
-const emits = defineEmits<{
-  (e: 'update:modelValue', v: any): void
-}>()
-const changeValue = (value: any) => {
-  console.log(value)
-  emits('update:modelValue', value)
-}
 </script>
