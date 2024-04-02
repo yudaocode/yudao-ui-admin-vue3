@@ -24,6 +24,12 @@
             <p>条件分支</p>
           </a>
           -->
+          <a class="add-node-popover-item condition" @click="addType(4)">
+            <div class="item-wrapper">
+              <span class="iconfont"></span>
+            </div>
+            <p>条件分支</p>
+          </a>
         </div>
         <template #reference>
           <button class="btn" type="button">
@@ -36,6 +42,7 @@
 </template>
 <script lang="ts" setup>
 import { ref } from 'vue'
+import { generateUUID } from '@/utils'
 let props = defineProps({
   childNodeP: {
     type: Object,
@@ -89,7 +96,8 @@ const addType = (type) => {
     emits('update:childNodeP', {
       name: '路由',
       type: 4,
-      childNode: null,
+      id : 'GateWay_'+ generateUUID(),
+      childNode: props.childNodeP,
       conditionNodes: [
         {
           name: '条件1',
@@ -97,15 +105,13 @@ const addType = (type) => {
           type: 3,
           priorityLevel: 1,
           conditionList: [],
-          nodeUserList: [],
-          // childNode: props.childNodeP
+          childNode: null
         },
         {
-          name: '条件2',
+          name: '其它情况',
           type: 3,
           priorityLevel: 2,
           conditionList: [],
-          nodeUserList: [],
           childNode: null
         }
       ]
@@ -115,55 +121,52 @@ const addType = (type) => {
 </script>
 <style scoped lang="scss">
 .add-node-btn-box {
-  width: 240px;
+  position: relative;
   display: inline-flex;
+  width: 240px;
   -ms-flex-negative: 0;
   flex-shrink: 0;
   -webkit-box-flex: 1;
   -ms-flex-positive: 1;
-  position: relative;
 
-  &:before {
-    content: '';
+  &::before {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     z-index: -1;
-    margin: auto;
     width: 2px;
     height: 100%;
+    margin: auto;
     background-color: #cacaca;
+    content: '';
   }
 
   .add-node-btn {
-    user-select: none;
+    display: flex;
     width: 240px;
     padding: 20px 0 32px;
-    display: flex;
-    -webkit-box-pack: center;
     justify-content: center;
     flex-shrink: 0;
     -webkit-box-flex: 1;
+    -webkit-box-pack: center;
+    user-select: none;
     flex-grow: 1;
 
     .btn {
-      outline: none;
-      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+      position: relative;
       width: 30px;
       height: 30px;
-      background: #3296fa;
-      border-radius: 50%;
-      position: relative;
-      border: none;
       line-height: 30px;
+      background: #3296fa;
+      border: none;
+      border-radius: 50%;
+      outline: none;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
       -webkit-transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
       transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-
+  
       .iconfont {
-        color: #fff;
         font-size: 16px;
+        color: #fff;
       }
 
       &:hover {
@@ -172,8 +175,8 @@ const addType = (type) => {
       }
 
       &:active {
-        transform: none;
         background: #1e83e9;
+        transform: none;
         box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
       }
     }
@@ -191,7 +194,6 @@ const addType = (type) => {
     color: #191f25 !important;
 
     .item-wrapper {
-      user-select: none;
       display: inline-block;
       width: 80px;
       height: 80px;
@@ -200,6 +202,7 @@ const addType = (type) => {
       border: 1px solid #e2e2e2;
       border-radius: 50%;
       transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+      user-select: none;
 
       .iconfont {
         font-size: 35px;
@@ -238,8 +241,8 @@ const addType = (type) => {
 
     &:active {
       .item-wrapper {
-        box-shadow: none;
         background: #eaeaea;
+        box-shadow: none;
       }
 
       .iconfont {

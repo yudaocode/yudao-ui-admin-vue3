@@ -1,5 +1,6 @@
 export enum NodeType {
-  //// 0 发起人 1审批 2抄送 3条件 4路由
+  //// -1 根节点流程开始节点 0 发起人 1审批 2抄送 3条件 4路由
+  ROOT_NODE = -1,
   /**
    * 发起人节点
    */
@@ -37,11 +38,10 @@ NODE_TITLE.set(NodeType.CC_USER_NODE, '抄送人')
 
 export type WorkFlowNode = {
   id: string,
-  parentId: string,
   type: NodeType,
   name: string,
-  attributes: Map<string,any>,
+  attributes: Object | undefined,
   // 操作人
-  childNode: WorkFlowNode,
-  conditionNodes: WorkFlowNode[]
+  childNode?: WorkFlowNode | undefined,
+  conditionNodes: WorkFlowNode[] | undefined
 }

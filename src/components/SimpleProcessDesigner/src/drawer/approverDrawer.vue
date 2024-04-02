@@ -156,7 +156,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, watch, computed, toRaw } from 'vue'
-import { approveMethods, setApproverStr } from '../util'
+import { approveMethods } from '../util'
 import { useWorkFlowStoreWithOut } from '@/store/modules/simpleWorkflow'
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { defaultProps, handleTree } from '@/utils/tree'
@@ -165,7 +165,7 @@ import * as DeptApi from '@/api/system/dept'
 import * as PostApi from '@/api/system/post'
 import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
-let props = defineProps({
+defineProps({
   directorMaxLevel: {
     type: Number,
     default: 0
@@ -182,12 +182,8 @@ const candidateConfig = ref({
   approveMethod: undefined
 })
 let approverConfig = ref({})
-let approverVisible = ref(false)
-let approverRoleVisible = ref(false)
-let checkedRoleList = ref([])
-let checkedList = ref([])
 let store = useWorkFlowStoreWithOut()
-let { setApproverConfig, setApprover, setUserTaskConfig } = store
+let { setApprover, setUserTaskConfig } = store
 let approverConfig1 = computed(() => store.approverConfig1)
 let approverDrawer = computed(() => store.approverDrawer)
 const userTaskConfig = computed(() => store.userTaskConfig)
@@ -220,47 +216,7 @@ watch(userTaskConfig, (val) => {
 watch(approverConfig1, (val) => {
   approverConfig.value = val.value
 })
-let changeRange = () => {
-  approverConfig.value.nodeUserList = []
-}
-const changeType = (val) => {
-  approverConfig.value.nodeUserList = []
-  approverConfig.value.examineMode = 1
-  approverConfig.value.noHanderAction = 2
-  if (val == 2) {
-    approverConfig.value.directorLevel = 1
-  } else if (val == 4) {
-    approverConfig.value.selectMode = 1
-    approverConfig.value.selectRange = 1
-  } else if (val == 7) {
-    approverConfig.value.examineEndDirectorLevel = 1
-  }
-}
-const addApprover = () => {
-  approverVisible.value = true
-  checkedList.value = approverConfig.value.nodeUserList
-}
-const addRoleApprover = () => {
-  approverRoleVisible.value = true
-  checkedRoleList.value = approverConfig.value.nodeUserList
-}
-const sureApprover = (data) => {
-  approverConfig.value.nodeUserList = data
-  approverVisible.value = false
-}
-const sureRoleApprover = (data) => {
-  approverConfig.value.nodeUserList = data
-  approverRoleVisible.value = false
-}
-const saveApprover = () => {
-  approverConfig.value.error = !setApproverStr(approverConfig.value)
-  setApproverConfig({
-    value: approverConfig.value,
-    flag: true,
-    id: approverConfig1.value.id
-  })
-  closeDrawer()
-}
+
 const saveConfig = () => {
   const rawConfig = toRaw(userTaskConfig.value)
   const { approveMethod, candidateStrategy , candidateParam} = toRaw(candidateConfig.value);

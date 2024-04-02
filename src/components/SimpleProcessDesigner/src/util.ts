@@ -92,10 +92,22 @@ export const copyerStr = (nodeConfig: any) => {
 export const conditionStr = (nodeConfig, index) => {
   const { conditionList, nodeUserList } = nodeConfig.conditionNodes[index]
   if (conditionList.length == 0) {
-    return index == nodeConfig.conditionNodes.length - 1 &&
-      nodeConfig.conditionNodes[0].conditionList.length != 0
-      ? '其他条件进入此流程'
-      : '请设置条件'
+    // return index == nodeConfig.conditionNodes.length - 1 &&
+    //   nodeConfig.conditionNodes[0].conditionList.length != 0
+    //   ? '其他条件进入此流程'
+    //   : '请设置条件'
+    // return index == nodeConfig.conditionNodes.length - 1 &&
+    //   nodeConfig.conditionNodes[0].conditionList.length != 0
+    //   ? '其他条件进入此流程'
+    //   : '请设置条件'
+    console.log('index===>', index);
+    console.log('nodeConfig.conditionNodes.length===>', nodeConfig.conditionNodes.length);
+    if( index === nodeConfig.conditionNodes.length - 1) {
+      return '其它情况将进入该分支'
+    } else {
+      return '请设置条件'
+    }
+    
   } else {
     let str = ''
     for (let i = 0; i < conditionList.length; i++) {
@@ -163,7 +175,7 @@ export const removeEle = (arr, elem, key = 'id') => {
   arr.splice(includesIndex, 1)
 }
 
-export const bgColors = ['87, 106, 149', '255, 148, 62', '50, 150, 250']
+export const bgColors = ['87, 106, 149', '255, 148, 62', '50, 150, 250','50, 150, 250','248, 107, 248']
 export const placeholderList = ['发起人', '审核人', '抄送人']
 export const setTypes = [
   { value: 1, label: '指定成员' },

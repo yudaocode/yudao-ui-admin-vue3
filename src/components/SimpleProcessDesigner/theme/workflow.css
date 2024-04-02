@@ -1174,15 +1174,47 @@ html {
     box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .1)
 }
 
-.dingflow-design .auto-judge .title-wrapper {
+/* .dingflow-design .auto-judge .title-wrapper {
     position: relative;
     font-size: 12px;
     color: #15bc83;
     text-align: left;
-    line-height: 16px
+    height: 24px;
+    line-height: 24px;
+    width: 258px;
+} */
+.dingflow-design  .title-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    font-size: 12px;
+    border-radius: 4px 4px 0 0;
+    text-align: left;
+    height: 24px;
+    line-height: 24px;
+    width: 220px;
+    color: #fff;
+}
+.dingflow-design  .title-wrapper .editable-title {
+    max-width: 120px;
+    padding-left: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis
+}
+.dingflow-design  .title-wrapper .close {
+    padding-right: 10px;
 }
 
-.dingflow-design .auto-judge .title-wrapper .editable-title {
+/* .dingflow-design  .title-wrapper .priority-title {
+    display: inline-block;
+    float: right;
+    margin-right: 10px;
+    color: rgba(25, 31, 37, .56)
+} */
+
+/* .dingflow-design .auto-judge .title-wrapper .editable-title {
     display: inline-block;
     max-width: 120px;
     overflow: hidden;
@@ -1195,7 +1227,7 @@ html {
     float: right;
     margin-right: 10px;
     color: rgba(25, 31, 37, .56)
-}
+} */
 
 .dingflow-design .auto-judge .placeholder {
     color: #bfbfbf

@@ -6,21 +6,16 @@
  * @FilePath: /Workflow-Vue3/src/components/nodeWrap.vue
 -->
 <template>
- 
   <div class="node-wrap" v-if="nodeConfig.type < 3">
-    <div class="start-event-node" v-if="nodeConfig.type === -1">
-        <div class="start-event-node-text">{{ nodeConfig.name }}</div>
-        <div class="start-event-node-circle"></div>
-    </div>
     <div
       class="node-wrap-box"
       :class="
         (nodeConfig.type == 0 ? 'start-node ' : '') +
         (isTried && nodeConfig.error ? 'active error' : '')
       "
-      v-else>
+    >
       <div class="title" :style="`background: rgb(${bgColors[nodeConfig.type]});`">
-        <span v-if="nodeConfig.type == 0">{{ nodeConfig.name }}</span>
+        <span v-if="nodeConfig.type == 0">发起人</span>
         <template v-else>
           <span class="iconfont">{{ nodeConfig.type == 1 ? '' : '' }}</span>
           <input
@@ -39,7 +34,7 @@
       <div class="content" @click="setPerson">
         <div class="text">
           <span class="placeholder" v-if="!showText">请选择{{ defaultText }}</span>
-          <span v-html="showText" class="ellipsis-text"  v-else></span>
+          <span v-html="showText" class="ellipsis-text" v-else></span>
         </div>
         <div class="icon-box">
           <i class="anticon anticon-edit" @click="editNode"></i>
@@ -59,31 +54,36 @@
         <div class="col-box" v-for="(item, index) in nodeConfig.conditionNodes" :key="index">
           <div class="condition-node">
             <div class="condition-node-box">
+              <div class="title-wrapper" :style="`background: rgb(${bgColors[nodeConfig.type]});`">
+                <input
+                  v-if="isInputList[index]"
+                  type="text"
+                  class="ant-input editable-title-input"
+                  @blur="blurEvent(index)"
+                  @focus="$event.currentTarget.select()"
+                  v-model="item.name"
+                />
+                <span v-else class="editable-title" @click="clickEvent(index)">{{
+                  item.name
+                }}</span>
+                <!-- <span class="priority-title" @click="setPerson(item.priorityLevel)"
+                      >优先级{{ index + 1 }}</span
+                    > -->
+                <i
+                  class="anticon anticon-close close"
+                  @click="delTerm(index)"
+                  v-if="index != nodeConfig.conditionNodes?.length - 1"
+                ></i>
+              </div>
               <div class="auto-judge" :class="isTried && item.error ? 'error active' : ''">
-                <div class="sort-left" v-if="index != 0" @click="arrTransfer(index, -1)">&lt;</div>
-                <div class="title-wrapper">
-                  <input
-                    v-if="isInputList[index]"
-                    type="text"
-                    class="ant-input editable-title-input"
-                    @blur="blurEvent(index)"
-                    @focus="$event.currentTarget.select()"
-                    v-model="item.name"
-                  />
-                  <span v-else class="editable-title" @click="clickEvent(index)">{{
-                    item.name
-                  }}</span>
-                  <span class="priority-title" @click="setPerson(item.priorityLevel)"
-                    >优先级{{ item.priorityLevel }}</span
-                  >
-                  <i class="anticon anticon-close close" @click="delTerm(index)"></i>
-                </div>
-                <div
+                <!-- <div class="sort-left" v-if="index != 0" @click="arrTransfer(index, -1)">&lt;</div> -->
+
+                <!-- <div
                   class="sort-right"
                   v-if="index != nodeConfig.conditionNodes.length - 1"
                   @click="arrTransfer(index)"
                   >&gt;</div
-                >
+                > -->
                 <div class="content" @click="setPerson(item.priorityLevel)">{{
                   conditionStr(nodeConfig, index)
                 }}</div>
@@ -121,18 +121,14 @@ import {
   placeholderList,
   getApproverShowText
 } from './util'
+import { WorkFlowNode } from './consts'
 import { useWorkFlowStoreWithOut } from '@/store/modules/simpleWorkflow'
 let _uid = getCurrentInstance().uid
 
 let props = defineProps({
   nodeConfig: {
-    type: Object,
-    default: () => ({})
-  },
-  flowPermission: {
-    type: Object,
-    // eslint-disable-next-line vue/require-valid-default-prop
-    default: () => []
+    type: Object as () => WorkFlowNode,
+    default: () => ({}) as WorkFlowNode
   }
 })
 
@@ -161,14 +157,13 @@ onMounted(() => {
     resetConditionNodesErr()
   }
 })
-let emits = defineEmits(['update:flowPermission', 'update:nodeConfig'])
+let emits = defineEmits(['update:nodeConfig'])
 let store = useWorkFlowStoreWithOut()
 let {
   setPromoter,
   setApprover,
   setCopyer,
   setCondition,
-  setFlowPermission,
   setCopyerConfig,
   setConditionsConfig,
   setUserTaskConfig
@@ -176,15 +171,17 @@ let {
 // 审批节点的配置
 const userTaskConfig = computed(() => store.userTaskConfig)
 let isTried = computed(() => store.isTried)
-let flowPermission1 = computed(() => store.flowPermission1)
 let approverConfig1 = computed(() => store.approverConfig1)
 let copyerConfig1 = computed(() => store.copyerConfig1)
 let conditionsConfig1 = computed(() => store.conditionsConfig1)
 const showText = computed(() => {
   if (props.nodeConfig.type == 0) return '发起人'
   if (props.nodeConfig.type == 1) {
-    if(props.nodeConfig.attributes){
-      return getApproverShowText(props.nodeConfig.attributes.approveMethod, props.nodeConfig.attributes.candidateStrategy)
+    if (props.nodeConfig.attributes) {
+      return getApproverShowText(
+        props.nodeConfig.attributes.approveMethod,
+        props.nodeConfig.attributes.candidateStrategy
+      )
     } else {
       return ''
     }
@@ -194,11 +191,6 @@ const showText = computed(() => {
 watch(userTaskConfig, (approver) => {
   if (approver.flag && approver.id === _uid) {
     emits('update:nodeConfig', approver.value)
-  }
-})
-watch(flowPermission1, (flow) => {
-  if (flow.flag && flow.id === _uid) {
-    emits('update:flowPermission', flow.value)
   }
 })
 watch(approverConfig1, (approver) => {
@@ -240,38 +232,42 @@ const delNode = () => {
   emits('update:nodeConfig', props.nodeConfig.childNode)
 }
 const addTerm = () => {
-  let len = props.nodeConfig.conditionNodes.length + 1
+  const len = props.nodeConfig.conditionNodes.length
+  let lastIndex = props.nodeConfig.conditionNodes.length - 1
   // eslint-disable-next-line vue/no-mutating-props
-  props.nodeConfig.conditionNodes.push({
+  props.nodeConfig.conditionNodes.splice(lastIndex, 0, {
     name: '条件' + len,
     type: 3,
     priorityLevel: len,
     conditionList: [],
-    nodeUserList: [],
     childNode: null
   })
   resetConditionNodesErr()
   emits('update:nodeConfig', props.nodeConfig)
 }
 const delTerm = (index) => {
-  // eslint-disable-next-line vue/no-mutating-props
-  props.nodeConfig.conditionNodes.splice(index, 1)
-  props.nodeConfig.conditionNodes.map((item, index) => {
-    item.priorityLevel = index + 1
-    item.name = `条件${index + 1}`
-  })
-  resetConditionNodesErr()
-  emits('update:nodeConfig', props.nodeConfig)
-  if (props.nodeConfig.conditionNodes.length == 1) {
-    if (props.nodeConfig.childNode) {
-      if (props.nodeConfig.conditionNodes[0].childNode) {
-        reData(props.nodeConfig.conditionNodes[0].childNode, props.nodeConfig.childNode)
-      } else {
-        // eslint-disable-next-line vue/no-mutating-props
-        props.nodeConfig.conditionNodes[0].childNode = props.nodeConfig.childNode
+  if (props.nodeConfig.conditionNodes) {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.nodeConfig.conditionNodes.splice(index, 1)
+    props.nodeConfig.conditionNodes.map((item, index) => {
+      // item.priorityLevel = index + 1
+      if (index !== props.nodeConfig.conditionNodes.length - 1) {
+        item.name = `条件${index + 1}`
       }
+    })
+    resetConditionNodesErr()
+    emits('update:nodeConfig', props.nodeConfig)
+    if (props.nodeConfig.conditionNodes.length == 1) {
+      if (props.nodeConfig.childNode) {
+        if (props.nodeConfig.conditionNodes[0].childNode) {
+          reData(props.nodeConfig.conditionNodes[0].childNode, props.nodeConfig.childNode)
+        } else {
+          // eslint-disable-next-line vue/no-mutating-props
+          props.nodeConfig.conditionNodes[0].childNode = props.nodeConfig.childNode
+        }
+      }
+      emits('update:nodeConfig', props.nodeConfig.conditionNodes[0].childNode)
     }
-    emits('update:nodeConfig', props.nodeConfig.conditionNodes[0].childNode)
   }
 }
 const reData = (data, addData) => {
@@ -285,21 +281,16 @@ const setPerson = (priorityLevel) => {
   var { type } = props.nodeConfig
   if (type == 0) {
     setPromoter(true)
-    setFlowPermission({
-      value: props.flowPermission,
-      flag: false,
-      id: _uid
-    })
   } else if (type == 1) {
     setApprover(true)
-    let showText = undefined;
-    if(_uid === userTaskConfig.value.id) {
+    let showText = undefined
+    if (_uid === userTaskConfig.value.id) {
       showText = userTaskConfig.value.showText
     }
     setUserTaskConfig({
       value: {
         ...JSON.parse(JSON.stringify(props.nodeConfig)),
-        id: 'Activity_'+_uid,
+        id: 'Activity_' + _uid
       },
       flag: false,
       id: _uid,
@@ -315,27 +306,30 @@ const setPerson = (priorityLevel) => {
   } else {
     setCondition(true)
     setConditionsConfig({
-      value: JSON.parse(JSON.stringify(props.nodeConfig)),
+      value: {
+        ...JSON.parse(JSON.stringify(props.nodeConfig)),
+        id: 'Gateway_' + _uid
+      },
       priorityLevel,
       flag: false,
       id: _uid
     })
   }
 }
-const arrTransfer = (index, type = 1) => {
-  //向左-1,向右1
-  // eslint-disable-next-line vue/no-mutating-props
-  props.nodeConfig.conditionNodes[index] = props.nodeConfig.conditionNodes.splice(
-    index + type,
-    1,
-    props.nodeConfig.conditionNodes[index]
-  )[0]
-  props.nodeConfig.conditionNodes.map((item, index) => {
-    item.priorityLevel = index + 1
-  })
-  resetConditionNodesErr()
-  emits('update:nodeConfig', props.nodeConfig)
-}
+// const arrTransfer = (index, type = 1) => {
+//   //向左-1,向右1
+//   // eslint-disable-next-line vue/no-mutating-props
+//   props.nodeConfig.conditionNodes[index] = props.nodeConfig.conditionNodes.splice(
+//     index + type,
+//     1,
+//     props.nodeConfig.conditionNodes[index]
+//   )[0]
+//   props.nodeConfig.conditionNodes.map((item, index) => {
+//     item.priorityLevel = index + 1
+//   })
+//   resetConditionNodesErr()
+//   emits('update:nodeConfig', props.nodeConfig)
+// }
 </script>
 <style lang="scss" scoped>
 .ellipsis-text {
@@ -351,10 +345,16 @@ const arrTransfer = (index, type = 1) => {
 }
 
 .start-event-node-circle {
-  width: 10px;
-  height: 10px;
-  margin: auto;
-  background: #dbdcdc;
+  display: flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  // margin: auto;
+  // background: #dbdcdc;
+  font-size: 16px;
+  color: #f8f8fa;
+  background-image: linear-gradient(90deg, #ff6a00, #f78b3e), linear-gradient(#ff6a00, #ff6a00);
   border-radius: 50%;
 }
 
