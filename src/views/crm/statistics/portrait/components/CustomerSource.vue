@@ -20,7 +20,11 @@
   <el-card class="mt-16px" shadow="never">
     <el-table v-loading="loading" :data="list">
       <el-table-column align="center" label="序号" type="index" width="80" />
-      <el-table-column align="center" label="客户来源" min-width="200" prop="sourceName" />
+      <el-table-column align="center" label="客户来源" prop="source" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="客户个数" min-width="200" prop="customerCount" />
       <el-table-column align="center" label="成交个数" min-width="200" prop="dealCount" />
       <el-table-column align="center" label="来源占比(%)" min-width="200" prop="sourcePortion" />
@@ -31,9 +35,12 @@
 <script lang="ts" setup>
 import {
   CrmStatisticCustomerSourceRespVO,
-  StatisticsCustomerApi
-} from '@/api/crm/statistics/customer'
+  StatisticsPortraitApi
+} from '@/api/crm/statistics/portrait'
 import { EChartsOption } from 'echarts'
+import { DICT_TYPE, getDictLabel } from '@/utils/dict'
+import { isEmpty } from '@/utils/is'
+import { getSumValue } from '@/utils'
 
 defineOptions({ name: 'CustomerSource' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
@@ -140,12 +147,12 @@ const echartsOption2 = reactive<EChartsOption>({
 const loadData = async () => {
   // 1. 加载统计数据
   loading.value = true
-  const sourceList = await StatisticsCustomerApi.getCustomerSource(props.queryParams)
+  const sourceList = await StatisticsPortraitApi.getCustomerSource(props.queryParams)
   // 2.1 更新 Echarts 数据
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
     echartsOption.series[0]['data'] = sourceList.map((r: CrmStatisticCustomerSourceRespVO) => {
       return {
-        name: r.sourceName,
+        name: getDictLabel(DICT_TYPE.CRM_CUSTOMER_SOURCE, r.source),
         value: r.customerCount
       }
     })
@@ -154,15 +161,35 @@ const loadData = async () => {
   if (echartsOption2.series && echartsOption2.series[0] && echartsOption2.series[0]['data']) {
     echartsOption2.series[0]['data'] = sourceList.map((r: CrmStatisticCustomerSourceRespVO) => {
       return {
-        name: r.sourceName,
+        name: getDictLabel(DICT_TYPE.CRM_CUSTOMER_SOURCE, r.source),
         value: r.dealCount
       }
     })
   }
+  // 3. 计算比例
+  calculateProportion(sourceList)
   list.value = sourceList
   loading.value = false
 }
 defineExpose({ loadData })
+
+/**
+ * 计算比例
+ */
+const calculateProportion = (sourceList: CrmStatisticCustomerSourceRespVO[]) => {
+  if (isEmpty(sourceList)) {
+    return
+  }
+  // 这里类型丢失了所以重新搞个变量
+  const list = sourceList as unknown as CrmStatisticCustomerSourceRespVO[]
+  const sumCustomerCount = getSumValue(list.map((item) => item.customerCount))
+  const sumDealCount = getSumValue(list.map((item) => item.dealCount))
+  list.forEach((item) => {
+    item.sourcePortion =
+      item.customerCount === 0 ? 0 : ((item.customerCount / sumCustomerCount) * 100).toFixed(2)
+    item.dealPortion = item.dealCount === 0 ? 0 : ((item.dealCount / sumDealCount) * 100).toFixed(2)
+  })
+}
 
 /** 初始化 */
 onMounted(() => {
