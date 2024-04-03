@@ -23,7 +23,7 @@
 </template>
 
 <script lang="ts" setup>
-import { OperateLogV2VO } from '@/api/system/operatelog'
+import { OperateLogVO } from '@/api/system/operatelog'
 import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE, getDictLabel, getDictObj } from '@/utils/dict'
 import { ElTag } from 'element-plus'
@@ -31,7 +31,7 @@ import { ElTag } from 'element-plus'
 defineOptions({ name: 'OperateLogV2' })
 
 interface Props {
-  logList: OperateLogV2VO[] // 操作日志列表
+  logList: OperateLogVO[] // 操作日志列表
 }
 
 withDefaults(defineProps<Props>(), {

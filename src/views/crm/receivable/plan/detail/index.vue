@@ -37,7 +37,7 @@ import ReceivablePlanDetailsHeader from './ReceivablePlanDetailsHeader.vue'
 import ReceivablePlanDetailsInfo from './ReceivablePlanDetailsInfo.vue'
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
 import { BizTypeEnum } from '@/api/crm/permission'
-import { OperateLogV2VO } from '@/api/system/operatelog'
+import { OperateLogVO } from '@/api/system/operatelog'
 import { getOperateLogPage } from '@/api/crm/operateLog'
 import ReceivablePlanForm from '@/views/crm/receivable/plan/ReceivablePlanForm.vue'
 
@@ -70,7 +70,7 @@ const openForm = (type: string, id?: number) => {
 }
 
 /** 获取操作日志 */
-const logList = ref<OperateLogV2VO[]>([]) // 操作日志列表
+const logList = ref<OperateLogVO[]>([]) // 操作日志列表
 const getOperateLog = async (receivablePlanId: number) => {
   if (!receivablePlanId) {
     return
