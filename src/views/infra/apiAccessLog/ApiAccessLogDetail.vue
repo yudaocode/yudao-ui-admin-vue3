@@ -46,7 +46,7 @@
         {{ detailData.operateName }}
       </el-descriptions-item>
       <el-descriptions-item label="操作名">
-        <dict-tag :type="DICT_TYPE.SYSTEM_OPERATE_TYPE" :value="detailData.operateType" />
+        <dict-tag :type="DICT_TYPE.INFRA_OPERATE_TYPE" :value="detailData.operateType" />
       </el-descriptions-item>
     </el-descriptions>
   </Dialog>

@@ -118,7 +118,7 @@
       <el-table-column label="操作名" align="center" prop="operateName" width="180" />
       <el-table-column label="操作类型" align="center" prop="operateType">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.SYSTEM_OPERATE_TYPE" :value="scope.row.operateType" />
+          <dict-tag :type="DICT_TYPE.INFRA_OPERATE_TYPE" :value="scope.row.operateType" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" fixed="right" width="60">
