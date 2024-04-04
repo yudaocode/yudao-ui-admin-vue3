@@ -102,8 +102,8 @@ const open = async (row: RoleApi.RoleVO) => {
   formData.name = row.name
   formData.code = row.code
   formData.dataScope = row.dataScope
-  nextTick((): void => {
-    row.dataScopeDeptIds?.forEach((deptId: number) => {
+  await nextTick((): void => {
+    row.dataScopeDeptIds?.forEach((deptId: number): void => {
       treeRef.value.setChecked(deptId, true, false)
     })
   })
