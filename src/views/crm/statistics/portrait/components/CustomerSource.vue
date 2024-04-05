@@ -48,7 +48,7 @@ const props = defineProps<{ queryParams: any }>() // 搜索参数
 const loading = ref(false) // 加载中
 const list = ref<CrmStatisticCustomerSourceRespVO[]>([]) // 列表的数据
 
-/** 饼图配置 */
+/** 饼图配置（全部客户） */
 const echartsOption = reactive<EChartsOption>({
   title: {
     text: '全部客户',
@@ -95,7 +95,8 @@ const echartsOption = reactive<EChartsOption>({
     }
   ]
 }) as EChartsOption
-/** 饼图配置 */
+
+/** 饼图配置（成交客户） */
 const echartsOption2 = reactive<EChartsOption>({
   title: {
     text: '成交客户',
@@ -173,9 +174,7 @@ const loadData = async () => {
 }
 defineExpose({ loadData })
 
-/**
- * 计算比例
- */
+/** 计算比例 */
 const calculateProportion = (sourceList: CrmStatisticCustomerSourceRespVO[]) => {
   if (isEmpty(sourceList)) {
     return

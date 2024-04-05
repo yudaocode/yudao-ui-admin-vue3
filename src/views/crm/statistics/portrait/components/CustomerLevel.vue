@@ -48,7 +48,7 @@ const props = defineProps<{ queryParams: any }>() // 搜索参数
 const loading = ref(false) // 加载中
 const list = ref<CrmStatisticCustomerLevelRespVO[]>([]) // 列表的数据
 
-/** 饼图配置 */
+/** 饼图配置（全部客户） */
 const echartsOption = reactive<EChartsOption>({
   title: {
     text: '全部客户',
@@ -95,7 +95,8 @@ const echartsOption = reactive<EChartsOption>({
     }
   ]
 }) as EChartsOption
-/** 饼图配置 */
+
+/** 饼图配置（成交客户） */
 const echartsOption2 = reactive<EChartsOption>({
   title: {
     text: '成交客户',
@@ -172,9 +173,8 @@ const loadData = async () => {
   loading.value = false
 }
 defineExpose({ loadData })
-/**
- * 计算比例
- */
+
+/** 计算比例 */
 const calculateProportion = (levelList: CrmStatisticCustomerLevelRespVO[]) => {
   if (isEmpty(levelList)) {
     return
@@ -184,6 +184,7 @@ const calculateProportion = (levelList: CrmStatisticCustomerLevelRespVO[]) => {
   const sumCustomerCount = getSumValue(list.map((item) => item.customerCount))
   const sumDealCount = getSumValue(list.map((item) => item.dealCount))
   list.forEach((item) => {
+    // TODO @puhui999：可以使用 erpCalculatePercentage 方法
     item.levelPortion =
       item.customerCount === 0 ? 0 : ((item.customerCount / sumCustomerCount) * 100).toFixed(2)
     item.dealPortion = item.dealCount === 0 ? 0 : ((item.dealCount / sumDealCount) * 100).toFixed(2)
