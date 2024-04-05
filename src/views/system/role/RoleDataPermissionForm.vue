@@ -102,10 +102,9 @@ const open = async (row: RoleApi.RoleVO) => {
   formData.name = row.name
   formData.code = row.code
   formData.dataScope = row.dataScope
-  await nextTick((): void => {
-    row.dataScopeDeptIds?.forEach((deptId: number): void => {
-      treeRef.value.setChecked(deptId, true, false)
-    })
+  await nextTick()
+  row.dataScopeDeptIds?.forEach((deptId: number): void => {
+    treeRef.value.setChecked(deptId, true, false)
   })
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
