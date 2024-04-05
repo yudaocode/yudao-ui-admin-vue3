@@ -86,9 +86,10 @@
                   @click="arrTransfer(index)"
                   >&gt;</div
                 > -->
-                <div class="content" @click="setPerson(item.priorityLevel)">{{
+                <!-- <div class="content" @click="setPerson(item.priorityLevel)">{{
                   conditionStr(nodeConfig, index)
-                }}</div>
+                }}</div> -->
+                <div class="content">{{conditionStr(nodeConfig, index) }}</div>
                 <div class="error_tip" v-if="isTried && item.error">
                   <i class="anticon anticon-exclamation-circle"></i>
                 </div>

@@ -89,7 +89,7 @@ export const copyerStr = ( candidateStrategy: number) => {
   //   }
   // }
   console.log('candidateStrategy', candidateStrategy);
-  
+
   if(candidateStrategy) {
     const strategyText = getDictLabel(
       DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY,
@@ -101,8 +101,8 @@ export const copyerStr = ( candidateStrategy: number) => {
   }
 }
 export const conditionStr = (nodeConfig, index) => {
-  const { conditionList, nodeUserList } = nodeConfig.conditionNodes[index]
-  if (conditionList.length == 0) {
+  // const { conditionList, nodeUserList } = nodeConfig.conditionNodes[index]
+  // if (conditionList.length == 0) {
     // return index == nodeConfig.conditionNodes.length - 1 &&
     //   nodeConfig.conditionNodes[0].conditionList.length != 0
     //   ? '其他条件进入此流程'
@@ -111,56 +111,57 @@ export const conditionStr = (nodeConfig, index) => {
     //   nodeConfig.conditionNodes[0].conditionList.length != 0
     //   ? '其他条件进入此流程'
     //   : '请设置条件'
-    console.log('index===>', index);
-    console.log('nodeConfig.conditionNodes.length===>', nodeConfig.conditionNodes.length);
+    // console.log('index===>', index);
+    // console.log('nodeConfig.conditionNodes.length===>', nodeConfig.conditionNodes.length);
     if( index === nodeConfig.conditionNodes.length - 1) {
       return '其它情况将进入该分支'
     } else {
       return '请设置条件'
     }
     
-  } else {
-    let str = ''
-    for (let i = 0; i < conditionList.length; i++) {
-      const {
-        columnId,
-        columnType,
-        showType,
-        showName,
-        optType,
-        zdy1,
-        opt1,
-        zdy2,
-        opt2,
-        fixedDownBoxValue
-      } = conditionList[i]
-      if (columnId == 0) {
-        if (nodeUserList.length != 0) {
-          str += '发起人属于：'
-          str +=
-            nodeUserList
-              .map((item) => {
-                return item.name
-              })
-              .join('或') + ' 并且 '
-        }
-      }
-      if (columnType == 'String' && showType == '3') {
-        if (zdy1) {
-          str += showName + '属于：' + dealStr(zdy1, JSON.parse(fixedDownBoxValue)) + ' 并且 '
-        }
-      }
-      if (columnType == 'Double') {
-        if (optType != 6 && zdy1) {
-          const optTypeStr = ['', '<', '>', '≤', '=', '≥'][optType]
-          str += `${showName} ${optTypeStr} ${zdy1} 并且 `
-        } else if (optType == 6 && zdy1 && zdy2) {
-          str += `${zdy1} ${opt1} ${showName} ${opt2} ${zdy2} 并且 `
-        }
-      }
-    }
-    return str ? str.substring(0, str.length - 4) : '请设置条件'
-  }
+  // } else {
+  //   let str = ''
+  //   for (let i = 0; i < conditionList.length; i++) {
+  //     const {
+  //       columnId,
+  //       columnType,
+  //       showType,
+  //       showName,
+  //       optType,
+  //       zdy1,
+  //       opt1,
+  //       zdy2,
+  //       opt2,
+  //       fixedDownBoxValue
+  //     } = conditionList[i]
+  //     if (columnId == 0) {
+  //       if (nodeUserList.length != 0) {
+  //         str += '发起人属于：'
+  //         str +=
+  //           nodeUserList
+  //             .map((item) => {
+  //               return item.name
+  //             })
+  //             .join('或') + ' 并且 '
+  //       }
+  //     }
+  //     if (columnType == 'String' && showType == '3') {
+  //       if (zdy1) {
+  //         str += showName + '属于：' + dealStr(zdy1, JSON.parse(fixedDownBoxValue)) + ' 并且 '
+  //       }
+  //     }
+  //     if (columnType == 'Double') {
+  //       if (optType != 6 && zdy1) {
+  //         const optTypeStr = ['', '<', '>', '≤', '=', '≥'][optType]
+  //         str += `${showName} ${optTypeStr} ${zdy1} 并且 `
+  //       } else if (optType == 6 && zdy1 && zdy2) {
+  //         str += `${zdy1} ${opt1} ${showName} ${opt2} ${zdy2} 并且 `
+  //       }
+  //     }
+  //   }
+  // str ? str.substring(0, str.length - 4) :
+  return '请设置条件'
+  // }
 }
 
 export const dealStr = (str: string, obj) => {
