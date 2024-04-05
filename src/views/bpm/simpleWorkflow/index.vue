@@ -24,10 +24,12 @@
     </section>
   </div>
   <approverDrawer />
+  <copyerDrawer />
 </template>
 <script lang="ts" setup>
 import nodeWrap from '@/components/SimpleProcessDesigner/src/nodeWrap.vue'
 import approverDrawer from '@/components/SimpleProcessDesigner/src/drawer/approverDrawer.vue'
+import copyerDrawer from '@/components/SimpleProcessDesigner/src/drawer/copyerDrawer.vue'
 import { WorkFlowNode } from '@/components/SimpleProcessDesigner/src/consts'
 import { ref } from 'vue'
 import { saveBpmSimpleModel, getBpmSimpleModel } from '@/api/bpm/simple'

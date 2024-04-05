@@ -1163,11 +1163,7 @@ html {
     box-shadow: 0 0 6px 0 rgba(50, 150, 250, .3)
 }
 
-.dingflow-design .auto-judge.active .close,
-.dingflow-design .auto-judge:active .close,
-.dingflow-design .auto-judge:hover .close {
-    display: block
-}
+
 
 .dingflow-design .auto-judge.error:after {
     border: 1px solid #f25643;
@@ -1183,6 +1179,7 @@ html {
     line-height: 24px;
     width: 258px;
 } */
+
 .dingflow-design  .title-wrapper {
     display: flex;
     justify-content: space-between;
@@ -1195,17 +1192,38 @@ html {
     line-height: 24px;
     width: 220px;
     color: #fff;
+    padding-right: 10px;
+    padding-left: 10px;
 }
+
 .dingflow-design  .title-wrapper .editable-title {
     max-width: 120px;
-    padding-left: 10px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis
 }
-.dingflow-design  .title-wrapper .close {
-    padding-right: 10px;
+
+.dingflow-design .title-wrapper .close {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 2px;
+    width: 20px;
+    height: 20px;
+    font-size: 14px;
+    color:#fff;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 20px;
+    z-index: 2
 }
+
+.dingflow-design .title-wrapper:hover .close {
+    display: block
+}
+/* .dingflow-design  .title-wrapper .close {
+    padding-right: 2px;
+} */
 
 /* .dingflow-design  .title-wrapper .priority-title {
     display: inline-block;
@@ -1231,21 +1249,6 @@ html {
 
 .dingflow-design .auto-judge .placeholder {
     color: #bfbfbf
-}
-
-.dingflow-design .auto-judge .close {
-    display: none;
-    position: absolute;
-    right: -10px;
-    top: -10px;
-    width: 20px;
-    height: 20px;
-    font-size: 14px;
-    color: rgba(0, 0, 0, .25);
-    border-radius: 50%;
-    text-align: center;
-    line-height: 20px;
-    z-index: 2
 }
 
 .dingflow-design .auto-judge .content {

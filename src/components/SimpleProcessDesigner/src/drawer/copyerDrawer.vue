@@ -7,22 +7,11 @@
     :before-close="saveConfig"
   >
     <template #header>
-      <div class="user-task-header">审批设置</div>
+      <div class="copy-task-header">抄送人设置</div>
     </template>
     <div>
       <el-form label-position="top" label-width="100px">
-        <el-form-item label="审批方式" prop="approveMethod">
-          <el-select v-model="candidateConfig.approveMethod" style="width: 100%" clearable>
-            <el-option
-              v-for="dict in approveMethods"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            />
-          </el-select>
-        </el-form-item>
-
-        <el-form-item label="审批人规则类型" prop="candidateStrategy">
+        <el-form-item label="选择抄送人" prop="candidateStrategy">
           <el-select v-model="candidateConfig.candidateStrategy" style="width: 100%" clearable @change="changecandidateStrategy">
             <el-option
               v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY)"
@@ -155,7 +144,6 @@
 </template>
 <script lang="ts" setup>
 import { ref, watch, computed, toRaw } from 'vue'
-import { approveMethods } from '../util'
 import { useWorkFlowStoreWithOut } from '@/store/modules/simpleWorkflow'
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { defaultProps, handleTree } from '@/utils/tree'
@@ -173,27 +161,24 @@ const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
 const candidateConfig = ref({
   candidateStrategy: undefined,
   candidateParam: [],
-  approveMethod: undefined
 })
-let approverConfig = ref({})
-let store = useWorkFlowStoreWithOut()
-let { setApproverDrawer, setUserTaskConfig } = store
-let approverConfig1 = computed(() => store.approverConfig1)
-let approverDrawer = computed(() => store.approverDrawer)
-const userTaskConfig = computed(() => store.userTaskConfig)
+const store = useWorkFlowStoreWithOut()
+const { setCopyerDrawer, setCopyerConfig } = store
 
-let visible = computed({
+const copyerDrawer = computed(() => store.copyerDrawer)
+const copyerConfig = computed(() => store.copyerConfig)
+
+const visible = computed({
   get() {
-    return approverDrawer.value
+    return copyerDrawer.value
   },
   set() {
     closeDrawer()
   }
 })
-watch(userTaskConfig, (val) => {
+watch(copyerConfig, (val) => {
   if (val.value.attributes) {
     console.log('val.value.attributes', val.value.attributes);
-    candidateConfig.value.approveMethod = val.value.attributes.approveMethod
     candidateConfig.value.candidateStrategy = val.value.attributes.candidateStrategy
     const candidateParamStr =  val.value.attributes.candidateParam;
     if(val.value.attributes.candidateStrategy === 60) {
@@ -207,16 +192,13 @@ watch(userTaskConfig, (val) => {
     // candidateConfig.value = val.value.attributes
   }
 })
-watch(approverConfig1, (val) => {
-  approverConfig.value = val.value
-})
+
 
 const saveConfig = () => {
-  const rawConfig = toRaw(userTaskConfig.value)
-  const { approveMethod, candidateStrategy , candidateParam} = toRaw(candidateConfig.value);
+  const rawConfig = toRaw(copyerConfig.value)
+  const { candidateStrategy , candidateParam} = toRaw(candidateConfig.value);
   const candidateParamStr = candidateParam.join(',')
   rawConfig.value.attributes = {
-    approveMethod,
     candidateStrategy,
     candidateParam: candidateParamStr
   } 
@@ -227,16 +209,18 @@ const saveConfig = () => {
   //     flag: true,
   //     id: approverConfig1.value.id
   // })
-  setUserTaskConfig({
+
+  setCopyerConfig({
     value: rawConfig.value,
     flag: true,
-    id: userTaskConfig.value.id,
+    id: copyerConfig.value.id,
   })
+  console.log('after is copyerConfig', copyerConfig.value)
   closeDrawer()
 }
 
 const closeDrawer = () => {
-  setApproverDrawer(false)
+  setCopyerDrawer(false)
 }
 const changecandidateStrategy = () => {
   candidateConfig.value.candidateParam = []
@@ -256,7 +240,7 @@ onMounted(async () => {
 })
 </script>
 <style lang="scss" scoped>
-.user-task-header {
+.copy-task-header {
   font-size: 16px !important;
 }
 </style>

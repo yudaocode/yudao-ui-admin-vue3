@@ -80,13 +80,24 @@ export const getApproverShowText = (approveMethod :number, candidateStrategy: nu
   }
 }
 
-export const copyerStr = (nodeConfig: any) => {
-  if (nodeConfig.nodeUserList.length != 0) {
-    return arrToStr(nodeConfig.nodeUserList)
+export const copyerStr = ( candidateStrategy: number) => {
+  // if (nodeConfig.nodeUserList.length != 0) {
+  //   return arrToStr(nodeConfig.nodeUserList)
+  // } else {
+  //   if (nodeConfig.ccSelfSelectFlag == 1) {
+  //     return '发起人自选'
+  //   }
+  // }
+  console.log('candidateStrategy', candidateStrategy);
+  
+  if(candidateStrategy) {
+    const strategyText = getDictLabel(
+      DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY,
+      candidateStrategy
+    )
+    return `抄送人类型：按${strategyText}`
   } else {
-    if (nodeConfig.ccSelfSelectFlag == 1) {
-      return '发起人自选'
-    }
+      return ''
   }
 }
 export const conditionStr = (nodeConfig, index) => {

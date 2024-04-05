@@ -22,12 +22,13 @@
             v-if="isInput"
             type="text"
             class="ant-input editable-title-input"
-            @blur="blurEvent()"
-            @focus="$event.currentTarget.select()"
+            @blur="blurEvent(-1)"
+            @focus="$event.currentTarget?.select()"
+            v-mountedFoucs
             v-model="nodeConfig.name"
             :placeholder="defaultText"
           />
-          <span v-else class="editable-title" @click="clickEvent()">{{ nodeConfig.name }}</span>
+          <span v-else class="editable-title" @click="clickEvent(-1)">{{ nodeConfig.name }}</span>
           <i class="anticon anticon-close close" @click="delNode"></i>
         </template>
       </div>
@@ -60,7 +61,8 @@
                   type="text"
                   class="ant-input editable-title-input"
                   @blur="blurEvent(index)"
-                  @focus="$event.currentTarget.select()"
+                  @focus="$event.currentTarget?.select()"
+                  v-mountedFoucs
                   v-model="item.name"
                 />
                 <span v-else class="editable-title" @click="clickEvent(index)">{{
@@ -135,9 +137,8 @@ let props = defineProps({
 let defaultText = computed(() => {
   return placeholderList[props.nodeConfig.type]
 })
-
-let isInputList = ref([])
-let isInput = ref(false)
+const isInputList = ref<boolean[]>([])
+const isInput = ref<boolean>(false)
 const resetConditionNodesErr = () => {
   for (var i = 0; i < props.nodeConfig.conditionNodes.length; i++) {
     // eslint-disable-next-line vue/no-mutating-props
@@ -160,20 +161,20 @@ onMounted(() => {
 let emits = defineEmits(['update:nodeConfig'])
 let store = useWorkFlowStoreWithOut()
 let {
-  setPromoter,
-  setApprover,
-  setCopyer,
-  setCondition,
+  setApproverDrawer,
+  setCopyerDrawer,
+  // setCondition,
   setCopyerConfig,
-  setConditionsConfig,
+  // setConditionsConfig,
   setUserTaskConfig
 } = store
+// ???
+const  isTried = computed(() => store.isTried) 
 // 审批节点的配置
 const userTaskConfig = computed(() => store.userTaskConfig)
-let isTried = computed(() => store.isTried)
-let approverConfig1 = computed(() => store.approverConfig1)
-let copyerConfig1 = computed(() => store.copyerConfig1)
-let conditionsConfig1 = computed(() => store.conditionsConfig1)
+// 抄送节点的配置
+const copyerConfig = computed(() => store.copyerConfig)
+// let conditionsConfig1 = computed(() => store.conditionsConfig1)
 const showText = computed(() => {
   if (props.nodeConfig.type == 0) return '发起人'
   if (props.nodeConfig.type == 1) {
@@ -186,42 +187,49 @@ const showText = computed(() => {
       return ''
     }
   }
-  return copyerStr(props.nodeConfig)
+  if(props.nodeConfig.type === 2) {
+    if(props.nodeConfig.attributes) {
+      return copyerStr( props.nodeConfig.attributes.candidateStrategy)
+    } else {
+      return ''
+    }
+    
+  }
+  return ''
 })
 watch(userTaskConfig, (approver) => {
   if (approver.flag && approver.id === _uid) {
     emits('update:nodeConfig', approver.value)
   }
 })
-watch(approverConfig1, (approver) => {
-  if (approver.flag && approver.id === _uid) {
-    emits('update:nodeConfig', approver.value)
-  }
-})
-watch(copyerConfig1, (copyer) => {
+watch(copyerConfig, (copyer) => {
+  console.log('copyer',copyer)
   if (copyer.flag && copyer.id === _uid) {
+    console.log('copyer id is equal',copyer)
     emits('update:nodeConfig', copyer.value)
   }
 })
-watch(conditionsConfig1, (condition) => {
-  if (condition.flag && condition.id === _uid) {
-    emits('update:nodeConfig', condition.value)
-  }
-})
+
+// watch(conditionsConfig1, (condition) => {
+//   if (condition.flag && condition.id === _uid) {
+//     emits('update:nodeConfig', condition.value)
+//   }
+// })
 
 const clickEvent = (index) => {
-  if (index || index === 0) {
+  if (index >= 0) {
     isInputList.value[index] = true
   } else {
     isInput.value = true
   }
 }
+
 const blurEvent = (index) => {
-  if (index || index === 0) {
+  if (index >= 0) {
     isInputList.value[index] = false
     // eslint-disable-next-line vue/no-mutating-props
     props.nodeConfig.conditionNodes[index].name =
-      props.nodeConfig.conditionNodes[index].name || '条件'
+    props.nodeConfig.conditionNodes[index].name || '条件'
   } else {
     isInput.value = false
     // eslint-disable-next-line vue/no-mutating-props
@@ -278,42 +286,45 @@ const reData = (data, addData) => {
   }
 }
 const setPerson = (priorityLevel) => {
-  var { type } = props.nodeConfig
+  console.log('priorityLevel',priorityLevel)
+  const { type } = props.nodeConfig
+  console.log('type',type)
   if (type == 0) {
-    setPromoter(true)
+    // setPromoter(true)
   } else if (type == 1) {
-    setApprover(true)
-    let showText = undefined
-    if (_uid === userTaskConfig.value.id) {
-      showText = userTaskConfig.value.showText
-    }
+    setApproverDrawer(true)
+    // if (_uid === userTaskConfig.value.id) {
+    //   showText = userTaskConfig.value.showText
+    // }
     setUserTaskConfig({
       value: {
         ...JSON.parse(JSON.stringify(props.nodeConfig)),
         id: 'Activity_' + _uid
       },
       flag: false,
-      id: _uid,
-      showText
+      id: _uid
     })
   } else if (type == 2) {
-    setCopyer(true)
+    setCopyerDrawer(true)
     setCopyerConfig({
-      value: JSON.parse(JSON.stringify(props.nodeConfig)),
+      value: {
+        ...JSON.parse(JSON.stringify(props.nodeConfig)),
+        id: 'Activity_' + _uid
+      },
       flag: false,
       id: _uid
     })
   } else {
-    setCondition(true)
-    setConditionsConfig({
-      value: {
-        ...JSON.parse(JSON.stringify(props.nodeConfig)),
-        id: 'Gateway_' + _uid
-      },
-      priorityLevel,
-      flag: false,
-      id: _uid
-    })
+    // setCondition(true)
+    // setConditionsConfig({
+    //   value: {
+    //     ...JSON.parse(JSON.stringify(props.nodeConfig)),
+    //     id: 'Gateway_' + _uid
+    //   },
+    //   priorityLevel,
+    //   flag: false,
+    //   id: _uid
+    // })
   }
 }
 // const arrTransfer = (index, type = 1) => {

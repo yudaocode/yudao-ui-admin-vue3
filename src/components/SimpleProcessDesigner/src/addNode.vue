@@ -24,6 +24,12 @@
             <p>条件分支</p>
           </a>
           -->
+          <a class="add-node-popover-item notifier" @click="addType(2)">
+            <div class="item-wrapper">
+              <span class="iconfont"></span>
+            </div>
+            <p>抄送人</p>
+          </a>
           <a class="add-node-popover-item condition" @click="addType(4)">
             <div class="item-wrapper">
               <span class="iconfont"></span>
@@ -86,9 +92,13 @@ const addType = (type) => {
       data = {
         name: '抄送人',
         type: 2,
-        ccSelfSelectFlag: 1,
-        childNode: props.childNodeP,
-        nodeUserList: []
+        error: true,
+         // 抄送节点配置
+        attributes : {
+          candidateStrategy: undefined,
+          candidateParam: undefined
+        },
+        childNode: props.childNodeP
       }
     }
     emits('update:childNodeP', data)
