@@ -63,7 +63,10 @@
       </el-tab-pane>
       <!-- 员工回款金额统计 -->
       <el-tab-pane label="员工回款金额统计" name="followupType" lazy>
-        <ReceivablePricePerformance :query-params="queryParams" ref="ReceivablePricePerformanceRef" />
+        <ReceivablePricePerformance
+          :query-params="queryParams"
+          ref="ReceivablePricePerformanceRef"
+        />
       </el-tab-pane>
     </el-tabs>
   </el-col>
@@ -78,11 +81,8 @@ import { defaultProps, handleTree } from '@/utils/tree'
 import ContractCountPerformance from './components/ContractCountPerformance.vue'
 import ContractPricePerformance from './components/ContractPricePerformance.vue'
 import ReceivablePricePerformance from './components/ReceivablePricePerformance.vue'
-import CustomerFollowupType from './components/CustomerFollowupType.vue'
-import CustomerConversionStat from './components/CustomerConversionStat.vue'
-import CustomerDealCycle from './components/CustomerDealCycle.vue'
 
-defineOptions({ name: 'CrmStatisticsCustomer' })
+defineOptions({ name: 'CrmStatisticsPerformance' })
 
 const queryParams = reactive({
   deptId: useUserStore().getUser.deptId,
@@ -112,7 +112,6 @@ const ContractCountPerformanceRef = ref()
 const ContractPricePerformanceRef = ref()
 // 3.员工回款金额统计
 const ReceivablePricePerformanceRef = ref()
-
 
 /** 搜索按钮操作 */
 const handleQuery = () => {

@@ -1,3 +1,4 @@
+<!-- 数据字典 Select 选择器 -->
 <template>
   <el-select class="w-1/1" v-bind="attrs">
     <template v-if="valueType === 'int'">
