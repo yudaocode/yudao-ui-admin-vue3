@@ -137,7 +137,7 @@ export enum DICT_TYPE {
   INFRA_FILE_STORAGE = 'infra_file_storage',
 
   // ========== BPM 模块 ==========
-  BPM_MODEL_FORM_TYPE = 'bpm_model_category',
+  BPM_MODEL_FORM_TYPE = 'bpm_model_form_type',
   BPM_TASK_CANDIDATE_STRATEGY = 'bpm_task_candidate_strategy',
   BPM_PROCESS_INSTANCE_STATUS = 'bpm_process_instance_status',
   BPM_TASK_STATUS = 'bpm_task_status',

@@ -1,4 +1,4 @@
-<!-- 数据统计 - 员工客户分析 -->
+<!-- 数据统计 - 客户画像 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -20,16 +20,6 @@
           type="daterange"
           value-format="YYYY-MM-DD HH:mm:ss"
         />
-      </el-form-item>
-      <el-form-item label="时间间隔" prop="interval">
-        <el-select v-model="queryParams.interval" class="!w-240px" placeholder="间隔类型">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.DATE_INTERVAL)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
       </el-form-item>
       <el-form-item label="归属部门" prop="deptId">
         <el-tree-select
@@ -69,25 +59,21 @@
   <!-- 客户统计 -->
   <el-col>
     <el-tabs v-model="activeTab">
-      <!-- 客户总量分析 -->
-      <el-tab-pane label="客户总量分析" lazy name="customerSummary">
-        <CustomerSummary ref="customerSummaryRef" :query-params="queryParams" />
+      <!-- 城市分布分析 -->
+      <el-tab-pane label="城市分布分析" lazy name="addressRef">
+        <CustomerAddress ref="addressRef" :query-params="queryParams" />
       </el-tab-pane>
-      <!-- 客户跟进次数分析 -->
-      <el-tab-pane label="客户跟进次数分析" lazy name="followUpSummary">
-        <CustomerFollowUpSummary ref="followUpSummaryRef" :query-params="queryParams" />
+      <!-- 客户级别分析 -->
+      <el-tab-pane label="客户级别分析" lazy name="levelRef">
+        <CustomerLevel ref="levelRef" :query-params="queryParams" />
       </el-tab-pane>
-      <!-- 客户跟进方式分析 -->
-      <el-tab-pane label="客户跟进方式分析" lazy name="followUpType">
-        <CustomerFollowUpType ref="followUpTypeRef" :query-params="queryParams" />
+      <!-- 客户来源分析 -->
+      <el-tab-pane label="客户来源分析" lazy name="sourceRef">
+        <CustomerSource ref="sourceRef" :query-params="queryParams" />
       </el-tab-pane>
-      <!-- 客户转化率分析 -->
-      <el-tab-pane label="客户转化率分析" lazy name="conversionStat">
-        <CustomerConversionStat ref="conversionStatRef" :query-params="queryParams" />
-      </el-tab-pane>
-      <!-- 成交周期分析 -->
-      <el-tab-pane label="成交周期分析" lazy name="dealCycle">
-        <CustomerDealCycle ref="dealCycleRef" :query-params="queryParams" />
+      <!-- 客户行业分析 -->
+      <el-tab-pane label="客户行业分析" lazy name="industryRef">
+        <CustomerIndustry ref="industryRef" :query-params="queryParams" />
       </el-tab-pane>
     </el-tabs>
   </el-col>
@@ -99,17 +85,14 @@ import * as UserApi from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { defaultProps, handleTree } from '@/utils/tree'
-import CustomerSummary from './components/CustomerSummary.vue'
-import CustomerFollowUpSummary from './components/CustomerFollowUpSummary.vue'
-import CustomerFollowUpType from './components/CustomerFollowUpType.vue'
-import CustomerConversionStat from './components/CustomerConversionStat.vue'
-import CustomerDealCycle from './components/CustomerDealCycle.vue'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import CustomerAddress from './components/CustomerAddress.vue'
+import CustomerIndustry from './components/CustomerIndustry.vue'
+import CustomerSource from './components/CustomerSource.vue'
+import CustomerLevel from './components/CustomerLevel.vue'
 
-defineOptions({ name: 'CrmStatisticsCustomer' })
+defineOptions({ name: 'CrmStatisticsPortrait' })
 
 const queryParams = reactive({
-  interval: 1,
   deptId: useUserStore().getUser.deptId,
   userId: undefined,
   times: [
@@ -130,32 +113,26 @@ const userListByDeptId = computed(() =>
     : []
 )
 
-const activeTab = ref('customerSummary') // 活跃标签
-const customerSummaryRef = ref() // 1. 客户总量分析
-const followUpSummaryRef = ref() // 2. 客户跟进次数分析
-const followUpTypeRef = ref() // 3. 客户跟进方式分析
-const conversionStatRef = ref() // 4. 客户转化率分析
-// 5. TODO 公海客户分析
-// 缺 crm_owner_record 表 TODO @dhb52：可以先做界面 + 接口，接口数据直接写死返回，相当于 mock 出来
-const dealCycleRef = ref() // 6. 成交周期分析
+const activeTab = ref('addressRef') // 活跃标签
+const addressRef = ref() // 客户地区分布
+const levelRef = ref() // 客户级别
+const sourceRef = ref() // 客户来源
+const industryRef = ref() // 客户行业
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   switch (activeTab.value) {
-    case 'customerSummary': // 客户总量分析
-      customerSummaryRef.value?.loadData?.()
+    case 'addressRef':
+      addressRef.value?.loadData?.()
       break
-    case 'followUpSummary': // 客户跟进次数分析
-      followUpSummaryRef.value?.loadData?.()
+    case 'levelRef':
+      levelRef.value?.loadData?.()
       break
-    case 'followUpType': // 客户跟进方式分析
-      followUpTypeRef.value?.loadData?.()
+    case 'sourceRef':
+      sourceRef.value?.loadData?.()
       break
-    case 'conversionStat': // 客户转化率分析
-      conversionStatRef.value?.loadData?.()
-      break
-    case 'dealCycle': // 成交周期分析
-      dealCycleRef.value?.loadData?.()
+    case 'industryRef':
+      industryRef.value?.loadData?.()
       break
   }
 }

@@ -22,8 +22,8 @@ import china from '@/assets/map/json/china.json'
 import echarts from '@/plugins/echarts'
 import {
   CrmStatisticCustomerAreaRespVO,
-  StatisticsCustomerApi
-} from '@/api/crm/statistics/customer'
+  StatisticsPortraitApi
+} from '@/api/crm/statistics/portrait'
 
 defineOptions({ name: 'CustomerAddress' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
@@ -102,7 +102,7 @@ const echartsOption2 = reactive<EChartsOption>({
 const loadData = async () => {
   // 1. 加载统计数据
   loading.value = true
-  const areaList = await StatisticsCustomerApi.getCustomerArea(props.queryParams)
+  const areaList = await StatisticsPortraitApi.getCustomerArea(props.queryParams)
   areaStatisticsList.value = areaList.map((item: CrmStatisticCustomerAreaRespVO) => {
     return {
       ...item,
