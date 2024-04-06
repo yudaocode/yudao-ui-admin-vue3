@@ -13,7 +13,7 @@ import { getAccessToken, getRefreshToken, getTenantId, removeToken, setToken } f
 import errorCode from './errorCode'
 
 import { resetRouter } from '@/router'
-import { useCache } from '@/hooks/web/useCache'
+import { deleteUserCache } from '@/hooks/web/useCache'
 
 const tenantEnable = import.meta.env.VITE_APP_TENANT_ENABLE
 const { result_code, base_url, request_timeout } = config
@@ -217,9 +217,8 @@ const handleAuthorized = () => {
       confirmButtonText: t('login.relogin'),
       type: 'warning'
     }).then(() => {
-      const { wsCache } = useCache()
       resetRouter() // 重置静态路由表
-      wsCache.clear()
+      deleteUserCache() // 删除用户缓存
       removeToken()
       isRelogin.show = false
       // 干掉token后再走一次路由让它过router.beforeEach的校验

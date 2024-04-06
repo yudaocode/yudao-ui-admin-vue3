@@ -28,7 +28,7 @@ export const decodeFields = (fields: string[]) => {
   return rule
 }
 
-// 设置表单的 Conf 和 Fields
+// 设置表单的 Conf 和 Fields，适用 FcDesigner 场景
 export const setConfAndFields = (designerRef: object, conf: string, fields: string) => {
   // @ts-ignore
   designerRef.value.setOption(JSON.parse(conf))
@@ -36,19 +36,22 @@ export const setConfAndFields = (designerRef: object, conf: string, fields: stri
   designerRef.value.setRule(decodeFields(fields))
 }
 
-// 设置表单的 Conf 和 Fields
+// 设置表单的 Conf 和 Fields，适用 form-create 场景
 export const setConfAndFields2 = (
   detailPreview: object,
   conf: string,
-  fields: string,
+  fields: string[],
   value?: object
 ) => {
+  if (isRef(detailPreview)) {
+    detailPreview = detailPreview.value
+  }
   // @ts-ignore
-  detailPreview.value.option = JSON.parse(conf)
+  detailPreview.option = JSON.parse(conf)
   // @ts-ignore
-  detailPreview.value.rule = decodeFields(fields)
+  detailPreview.rule = decodeFields(fields)
   if (value) {
     // @ts-ignore
-    detailPreview.value.value = value
+    detailPreview.value = value
   }
 }

@@ -10,11 +10,39 @@
   <!-- 统计列表 -->
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="序号" align="center" type="index" width="80" />
-      <el-table-column label="客户名称" align="center" prop="customerName" min-width="200" />
+      <el-table-column label="序号" align="center" type="index" width="80" fixed="left" />
+      <el-table-column
+        label="客户名称"
+        align="center"
+        prop="customerName"
+        min-width="200"
+        fixed="left"
+      />
       <el-table-column label="合同名称" align="center" prop="contractName" min-width="200" />
-      <el-table-column label="合同总金额" align="center" prop="totalPrice" min-width="200" />
-      <el-table-column label="回款金额" align="center" prop="receivablePrice" min-width="200" />
+      <el-table-column
+        label="合同总金额"
+        align="center"
+        prop="totalPrice"
+        min-width="200"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column
+        label="回款金额"
+        align="center"
+        prop="receivablePrice"
+        min-width="200"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column align="center" label="客户来源" prop="source" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="客户行业" prop="industryId" width="100">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_INDUSTRY" :value="scope.row.industryId" />
+        </template>
+      </el-table-column>
       <el-table-column label="负责人" align="center" prop="ownerUserName" min-width="200" />
       <el-table-column label="创建人" align="center" prop="creatorUserName" min-width="200" />
       <el-table-column
@@ -28,8 +56,9 @@
         label="下单日期"
         align="center"
         prop="orderDate"
-        :formatter="dateFormatter2"
+        :formatter="dateFormatter"
         min-width="200"
+        fixed="right"
       />
     </el-table>
   </el-card>
@@ -41,7 +70,9 @@ import {
 } from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
 import { round } from 'lodash-es'
-import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
+import { erpPriceTableColumnFormatter } from '@/utils'
+import { DICT_TYPE } from '@/utils/dict'
 
 defineOptions({ name: 'CustomerConversionStat' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
@@ -97,6 +128,7 @@ const echartsOption = reactive<EChartsOption>({
 const loadData = async () => {
   // 1. 加载统计数据
   loading.value = true
+  // TODO @ddhb52：这里调用 StatisticsCustomerApi.getCustomerSummaryByDate 好像不太对？？？
   const customerCount = await StatisticsCustomerApi.getCustomerSummaryByDate(props.queryParams)
   const contractSummary = await StatisticsCustomerApi.getContractSummary(props.queryParams)
   // 2.1 更新 Echarts 数据

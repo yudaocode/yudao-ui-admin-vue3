@@ -14,21 +14,21 @@ export interface CrmStatisticsCustomerSummaryByUserRespVO {
   receivablePrice: number
 }
 
-export interface CrmStatisticsFollowupSummaryByDateRespVO {
+export interface CrmStatisticsFollowUpSummaryByDateRespVO {
   time: string
-  followupRecordCount: number
-  followupCustomerCount: number
+  followUpRecordCount: number
+  followUpCustomerCount: number
 }
 
-export interface CrmStatisticsFollowupSummaryByUserRespVO {
+export interface CrmStatisticsFollowUpSummaryByUserRespVO {
   ownerUserName: string
   followupRecordCount: number
   followupCustomerCount: number
 }
 
-export interface CrmStatisticsFollowupSummaryByTypeRespVO {
-  followupType: string
-  followupRecordCount: number
+export interface CrmStatisticsFollowUpSummaryByTypeRespVO {
+  followUpType: string
+  followUpRecordCount: number
 }
 
 export interface CrmStatisticsCustomerContractSummaryRespVO {
@@ -72,23 +72,23 @@ export const StatisticsCustomerApi = {
     })
   },
   // 2.1 客户跟进次数分析(按日期)
-  getFollowupSummaryByDate: (params: any) => {
+  getFollowUpSummaryByDate: (params: any) => {
     return request.get({
-      url: '/crm/statistics-customer/get-followup-summary-by-date',
+      url: '/crm/statistics-customer/get-follow-up-summary-by-date',
       params
     })
   },
   // 2.2 客户跟进次数分析(按用户)
-  getFollowupSummaryByUser: (params: any) => {
+  getFollowUpSummaryByUser: (params: any) => {
     return request.get({
-      url: '/crm/statistics-customer/get-followup-summary-by-user',
+      url: '/crm/statistics-customer/get-follow-up-summary-by-user',
       params
     })
   },
   // 3.1 获取客户跟进方式统计数
-  getFollowupSummaryByType: (params: any) => {
+  getFollowUpSummaryByType: (params: any) => {
     return request.get({
-      url: '/crm/statistics-customer/get-followup-summary-by-type',
+      url: '/crm/statistics-customer/get-follow-up-summary-by-type',
       params
     })
   },

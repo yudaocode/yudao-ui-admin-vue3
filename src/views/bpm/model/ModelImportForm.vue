@@ -109,6 +109,7 @@ const submitFormSuccess = async (response: any) => {
   }
   // 提示成功
   message.success('导入流程成功！请点击【设计流程】按钮，进行编辑保存后，才可以进行【发布流程】')
+  dialogVisible.value = false
   // 发送操作成功的事件
   emit('success')
 }

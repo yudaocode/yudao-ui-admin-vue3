@@ -64,7 +64,7 @@ import BusinessDetailsHeader from './BusinessDetailsHeader.vue'
 import BusinessDetailsInfo from './BusinessDetailsInfo.vue'
 import PermissionList from '@/views/crm/permission/components/PermissionList.vue' // 团队成员列表（权限）
 import { BizTypeEnum } from '@/api/crm/permission'
-import { OperateLogV2VO } from '@/api/system/operatelog'
+import { OperateLogVO } from '@/api/system/operatelog'
 import { getOperateLogPage } from '@/api/crm/operateLog'
 import BusinessForm from '@/views/crm/business/BusinessForm.vue'
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
@@ -113,7 +113,7 @@ const transfer = () => {
 }
 
 /** 获取操作日志 */
-const logList = ref<OperateLogV2VO[]>([]) // 操作日志列表
+const logList = ref<OperateLogVO[]>([]) // 操作日志列表
 const getOperateLog = async (contactId: number) => {
   if (!contactId) {
     return

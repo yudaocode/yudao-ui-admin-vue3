@@ -10,8 +10,8 @@
   <!-- 统计列表 -->
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="序号" align="center" type="index" width="80" />
-      <el-table-column label="员工姓名" prop="ownerUserName" min-width="100" />
+      <el-table-column label="序号" align="center" type="index" width="80" fixed="left" />
+      <el-table-column label="员工姓名" prop="ownerUserName" min-width="100" fixed="left" />
       <el-table-column
         label="新增客户数"
         align="right"
@@ -21,28 +21,31 @@
       <el-table-column label="成交客户数" align="right" prop="customerDealCount" min-width="200" />
       <el-table-column label="客户成交率(%)" align="right" min-width="200">
         <template #default="scope">
-          {{
-            scope.row.customerCreateCount !== 0
-              ? round((scope.row.customerDealCount / scope.row.customerCreateCount) * 100, 2)
-              : 0
-          }}
+          {{ erpCalculatePercentage(scope.row.customerDealCount, scope.row.customerCreateCount) }}
         </template>
       </el-table-column>
-      <el-table-column label="合同总金额" align="right" prop="contractPrice" min-width="200" />
-      <el-table-column label="回款金额" align="right" prop="receivablePrice" min-width="200" />
+      <el-table-column
+        label="合同总金额"
+        align="right"
+        prop="contractPrice"
+        min-width="200"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column
+        label="回款金额"
+        align="right"
+        prop="receivablePrice"
+        min-width="200"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column label="未回款金额" align="right" min-width="200">
-        <!-- TODO @dhb52：参考 util/index.ts 的 // ========== ERP 专属方法 ========== 部分，搞个两个方法，一个格式化百分比，一个计算百分比  -->
         <template #default="scope">
-          {{ round(scope.row.contractPrice - scope.row.receivablePrice, 2) }}
+          {{ erpCalculatePercentage(scope.row.receivablePrice, scope.row.contractPrice) }}
         </template>
       </el-table-column>
-      <el-table-column label="回款完成率(%)" align="right" min-width="200">
+      <el-table-column label="回款完成率(%)" align="right" min-width="200" fixed="right">
         <template #default="scope">
-          {{
-            scope.row.contractPrice !== 0
-              ? round((scope.row.receivablePrice / scope.row.contractPrice) * 100, 2)
-              : 0
-          }}
+          {{ erpCalculatePercentage(scope.row.receivablePrice, scope.row.contractPrice) }}
         </template>
       </el-table-column>
     </el-table>
@@ -55,7 +58,7 @@ import {
   CrmStatisticsCustomerSummaryByUserRespVO
 } from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
-import { round } from 'lodash-es'
+import { erpCalculatePercentage, erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'CustomerSummary' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数

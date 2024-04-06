@@ -8,11 +8,15 @@ export interface ApiAccessLogVO {
   applicationName: string
   requestMethod: string
   requestParams: string
+  responseBody: string
   requestUrl: string
   userIp: string
   userAgent: string
+  operateModule: string
+  operateName: string
+  operateType: number
   beginTime: Date
-  endTIme: Date
+  endTime: Date
   duration: number
   resultCode: number
   resultMsg: string

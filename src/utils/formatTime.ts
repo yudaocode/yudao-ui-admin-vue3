@@ -175,18 +175,18 @@ export function formatPast2(ms: number): string {
   const minute = Math.floor(ms / (60 * 1000) - day * 24 * 60 - hour * 60)
   const second = Math.floor(ms / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - minute * 60)
   if (day > 0) {
-    return day + '天' + hour + '小时' + minute + '分钟'
+    return day + ' 天' + hour + ' 小时 ' + minute + ' 分钟'
   }
   if (hour > 0) {
-    return hour + '小时' + minute + '分钟'
+    return hour + ' 小时 ' + minute + ' 分钟'
   }
   if (minute > 0) {
-    return minute + '分钟'
+    return minute + ' 分钟'
   }
   if (second > 0) {
-    return second + '秒'
+    return second + ' 秒'
   } else {
-    return 0 + '秒'
+    return 0 + ' 秒'
   }
 }
 

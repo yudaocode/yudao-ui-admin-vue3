@@ -26,7 +26,7 @@
       placeholder="请输入菜单内容"
       :remote-method="remoteMethod"
       class="overflow-hidden transition-all-600"
-      :class="showTopSearch ? 'w-220px ml2' : 'w-0'"
+      :class="showTopSearch ? '!w-220px ml2' : '!w-0'"
       @change="handleChange"
     >
       <el-option
