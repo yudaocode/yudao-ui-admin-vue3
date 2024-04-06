@@ -102,6 +102,9 @@ const open = async (row: RoleApi.RoleVO) => {
   formData.name = row.name
   formData.code = row.code
   formData.dataScope = row.dataScope
+
+  await nextTick()
+  // 需要在 DOM 渲染完成后，再设置选中状态
   row.dataScopeDeptIds?.forEach((deptId: number) => {
     treeRef.value.setChecked(deptId, true, false)
   })

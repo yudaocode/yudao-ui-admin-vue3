@@ -13,7 +13,7 @@
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
-import { OperateLogV2VO } from '@/api/system/operatelog'
+import { OperateLogVO } from '@/api/system/operatelog'
 import * as ProductApi from '@/api/crm/product'
 import ProductDetailsHeader from '@/views/crm/product/detail/ProductDetailsHeader.vue'
 import ProductDetailsInfo from '@/views/crm/product/detail/ProductDetailsInfo.vue'
@@ -40,7 +40,7 @@ const getProductData = async (id: number) => {
 }
 
 /** 获取操作日志 */
-const logList = ref<OperateLogV2VO[]>([]) // 操作日志列表
+const logList = ref<OperateLogVO[]>([]) // 操作日志列表
 const getOperateLog = async (productId: number) => {
   if (!productId) {
     return
