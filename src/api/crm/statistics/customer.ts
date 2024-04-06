@@ -44,6 +44,18 @@ export interface CrmStatisticsCustomerContractSummaryRespVO {
   orderDate: Date
 }
 
+export interface CrmStatisticsPoolSummaryByDateRespVO {
+  time: string
+  customerPutCount: number
+  customerTakeCount: number
+}
+
+export interface CrmStatisticsPoolSummaryByUserRespVO {
+  ownerUserName: string
+  customerPutCount: number
+  customerTakeCount: number
+}
+
 export interface CrmStatisticsCustomerDealCycleByDateRespVO {
   time: string
   customerDealCycle: number
@@ -99,14 +111,28 @@ export const StatisticsCustomerApi = {
       params
     })
   },
-  // 5.1 获取客户成交周期(按日期)
+  // 5.1 获取客户公海分析(按日期)
+  getPoolSummaryByDate: (param: any) => {
+    return request.get({
+      url: '/crm/statistics-customer/get-pool-summary-by-date',
+      params: param
+    })
+  },
+  // 5.2 获取客户公海分析(按用户)
+  getPoolSummaryByUser: (param: any) => {
+    return request.get({
+      url: '/crm/statistics-customer/get-pool-summary-by-user',
+      params: param
+    })
+  },
+  // 6.1 获取客户成交周期(按日期)
   getCustomerDealCycleByDate: (params: any) => {
     return request.get({
       url: '/crm/statistics-customer/get-customer-deal-cycle-by-date',
       params
     })
   },
-  // 5.2 获取客户成交周期(按用户)
+  // 6.2 获取客户成交周期(按用户)
   getCustomerDealCycleByUser: (params: any) => {
     return request.get({
       url: '/crm/statistics-customer/get-customer-deal-cycle-by-user',

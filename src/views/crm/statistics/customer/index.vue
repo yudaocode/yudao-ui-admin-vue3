@@ -19,10 +19,16 @@
           start-placeholder="开始日期"
           type="daterange"
           value-format="YYYY-MM-DD HH:mm:ss"
+          @change="handleQuery"
         />
       </el-form-item>
       <el-form-item label="时间间隔" prop="interval">
-        <el-select v-model="queryParams.interval" class="!w-240px" placeholder="间隔类型">
+        <el-select
+          v-model="queryParams.interval"
+          class="!w-240px"
+          placeholder="间隔类型"
+          @change="handleQuery"
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.DATE_INTERVAL)"
             :key="dict.value"
@@ -40,11 +46,18 @@
           class="!w-240px"
           node-key="id"
           placeholder="请选择归属部门"
-          @change="queryParams.userId = undefined"
+          @change="queryParams.userId = undefined;handleQuery()
+          "
         />
       </el-form-item>
       <el-form-item label="员工" prop="userId">
-        <el-select v-model="queryParams.userId" class="!w-240px" clearable placeholder="员工">
+        <el-select
+          v-model="queryParams.userId"
+          class="!w-240px"
+          clearable
+          placeholder="员工"
+          @change="handleQuery"
+        >
           <el-option
             v-for="(user, index) in userListByDeptId"
             :key="index"
@@ -56,7 +69,7 @@
       <el-form-item>
         <el-button @click="handleQuery">
           <Icon class="mr-5px" icon="ep:search" />
-          搜索
+          查询
         </el-button>
         <el-button @click="resetQuery">
           <Icon class="mr-5px" icon="ep:refresh" />
@@ -85,6 +98,10 @@
       <el-tab-pane label="客户转化率分析" lazy name="conversionStat">
         <CustomerConversionStat ref="conversionStatRef" :query-params="queryParams" />
       </el-tab-pane>
+      <!-- 公海客户分析 -->
+      <el-tab-pane label="公海客户分析" lazy name="poolSummary">
+        <PoolSummary ref="poolSummaryRef" :query-params="queryParams" />
+      </el-tab-pane>
       <!-- 成交周期分析 -->
       <el-tab-pane label="成交周期分析" lazy name="dealCycle">
         <CustomerDealCycle ref="dealCycleRef" :query-params="queryParams" />
@@ -97,19 +114,20 @@
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { defaultProps, handleTree } from '@/utils/tree'
-import CustomerSummary from './components/CustomerSummary.vue'
-import CustomerFollowUpSummary from './components/CustomerFollowUpSummary.vue'
-import CustomerFollowUpType from './components/CustomerFollowUpType.vue'
 import CustomerConversionStat from './components/CustomerConversionStat.vue'
 import CustomerDealCycle from './components/CustomerDealCycle.vue'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import CustomerFollowUpSummary from './components/CustomerFollowUpSummary.vue'
+import CustomerFollowUpType from './components/CustomerFollowUpType.vue'
+import CustomerSummary from './components/CustomerSummary.vue'
+import PoolSummary from './components/PoolSummary.vue'
 
 defineOptions({ name: 'CrmStatisticsCustomer' })
 
 const queryParams = reactive({
-  interval: 1,
+  interval: 2, // WEEK, 周
   deptId: useUserStore().getUser.deptId,
   userId: undefined,
   times: [
@@ -135,8 +153,7 @@ const customerSummaryRef = ref() // 1. 客户总量分析
 const followUpSummaryRef = ref() // 2. 客户跟进次数分析
 const followUpTypeRef = ref() // 3. 客户跟进方式分析
 const conversionStatRef = ref() // 4. 客户转化率分析
-// 5. TODO 公海客户分析
-// 缺 crm_owner_record 表 TODO @dhb52：可以先做界面 + 接口，接口数据直接写死返回，相当于 mock 出来
+const poolSummaryRef = ref() // 5. 客户公海分析
 const dealCycleRef = ref() // 6. 成交周期分析
 
 /** 搜索按钮操作 */
@@ -153,6 +170,9 @@ const handleQuery = () => {
       break
     case 'conversionStat': // 客户转化率分析
       conversionStatRef.value?.loadData?.()
+      break
+    case 'poolSummary': // 公海客户分析
+      poolSummaryRef.value?.loadData?.()
       break
     case 'dealCycle': // 成交周期分析
       dealCycleRef.value?.loadData?.()
