@@ -32,6 +32,7 @@ import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { erpCalculatePercentage } from '@/utils'
 
 defineOptions({ name: 'CustomerFollowupType' })
+
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
@@ -73,10 +74,9 @@ const echartsOption = reactive<EChartsOption>({
   ]
 }) as EChartsOption
 
-/** 获取统计数据 */
-const loadData = async () => {
+/** 获取数据并填充图表 */
+const fetchAndFill = async () => {
   // 1. 加载统计数据
-  loading.value = true
   const followUpSummaryByType = await StatisticsCustomerApi.getFollowUpSummaryByType(
     props.queryParams
   )
@@ -99,8 +99,19 @@ const loadData = async () => {
       portion: erpCalculatePercentage(row.followUpRecordCount, totalCount)
     }
   })
-  loading.value = false
 }
+
+/** 获取统计数据 */
+const loadData = async () => {
+  loading.value = true
+  try {
+    fetchAndFill()
+  }
+  finally {
+    loading.value = false
+  }
+}
+
 defineExpose({ loadData })
 
 /** 初始化 */
