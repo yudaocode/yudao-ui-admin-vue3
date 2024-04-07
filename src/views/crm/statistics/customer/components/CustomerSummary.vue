@@ -71,7 +71,7 @@ const list = ref<CrmStatisticsCustomerSummaryByUserRespVO[]>([]) // 列表的数
 const echartsOption = reactive<EChartsOption>({
   grid: {
     left: 20,
-    right: 30, // 让X轴右侧显示完整
+    right: 30, // 让 X 轴右侧显示完整
     bottom: 20,
     containLabel: true
   },
@@ -112,7 +112,7 @@ const echartsOption = reactive<EChartsOption>({
       type: 'value',
       name: '新增客户数',
       min: 0,
-      minInterval: 1, // 显示整数刻度
+      minInterval: 1 // 显示整数刻度
     },
     {
       type: 'value',
@@ -122,7 +122,7 @@ const echartsOption = reactive<EChartsOption>({
       splitLine: {
         lineStyle: {
           type: 'dotted', // 右侧网格线虚化, 减少混乱
-          opacity: 0.7,
+          opacity: 0.7
         }
       }
     }
@@ -130,7 +130,7 @@ const echartsOption = reactive<EChartsOption>({
   xAxis: {
     type: 'category',
     name: '日期',
-    data: [],
+    data: []
   }
 }) as EChartsOption
 
@@ -168,7 +168,7 @@ const fetchAndFill = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    fetchAndFill()
+    await fetchAndFill()
   } finally {
     loading.value = false
   }

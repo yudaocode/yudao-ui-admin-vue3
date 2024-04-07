@@ -84,7 +84,7 @@ const list = ref<CrmStatisticsCustomerSummaryByDateRespVO[]>([]) // 列表的数
 const echartsOption = reactive<EChartsOption>({
   grid: {
     left: 20,
-    right: 40, // 让X轴右侧显示完整
+    right: 40, // 让 X 轴右侧显示完整
     bottom: 20,
     containLabel: true
   },
@@ -155,9 +155,8 @@ const fetchAndFill = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    fetchAndFill()
-  }
-  finally {
+    await fetchAndFill()
+  } finally {
     loading.value = false
   }
 }

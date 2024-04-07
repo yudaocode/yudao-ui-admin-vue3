@@ -1,7 +1,7 @@
 <!-- 客户跟进次数分析 -->
 <template>
   <!-- Echarts图 -->
-  <el-card shadow="never" >
+  <el-card shadow="never">
     <el-skeleton :loading="loading" animated>
       <Echart :height="500" :options="echartsOption" />
     </el-skeleton>
@@ -28,7 +28,7 @@ import {
   CrmStatisticsFollowUpSummaryByDateRespVO,
   CrmStatisticsFollowUpSummaryByUserRespVO
 } from '@/api/crm/statistics/customer'
-import Echart from '@/components/Echart/src/Echart.vue';
+import Echart from '@/components/Echart/src/Echart.vue'
 import { EChartsOption } from 'echarts'
 
 defineOptions({ name: 'CustomerFollowupSummary' })
@@ -42,7 +42,7 @@ const list = ref<CrmStatisticsFollowUpSummaryByUserRespVO[]>([]) // 列表的数
 const echartsOption = reactive<EChartsOption>({
   grid: {
     left: 20,
-    right: 30, // 让X轴右侧显示完整
+    right: 30, // 让 X 轴右侧显示完整
     bottom: 20,
     containLabel: true
   },
@@ -83,7 +83,7 @@ const echartsOption = reactive<EChartsOption>({
       type: 'value',
       name: '跟进客户数',
       min: 0,
-      minInterval: 1, // 显示整数刻度
+      minInterval: 1 // 显示整数刻度
     },
     {
       type: 'value',
@@ -93,7 +93,7 @@ const echartsOption = reactive<EChartsOption>({
       splitLine: {
         lineStyle: {
           type: 'dotted', // 右侧网格线虚化, 减少混乱
-          opacity: 0.7,
+          opacity: 0.7
         }
       }
     }
@@ -142,9 +142,8 @@ const fetchAndFill = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    fetchAndFill()
-  }
-  finally {
+    await fetchAndFill()
+  } finally {
     loading.value = false
   }
 }

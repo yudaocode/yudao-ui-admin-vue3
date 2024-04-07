@@ -12,8 +12,18 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column label="序号" align="center" type="index" width="80" fixed="left" />
       <el-table-column label="员工姓名" prop="ownerUserName" min-width="100" fixed="left" />
-      <el-table-column label="进入公海客户数" align="right" prop="customerPutCount" min-width="200" />
-      <el-table-column label="公海领取客户数" align="right" prop="customerTakeCount" min-width="200" />
+      <el-table-column
+        label="进入公海客户数"
+        align="right"
+        prop="customerPutCount"
+        min-width="200"
+      />
+      <el-table-column
+        label="公海领取客户数"
+        align="right"
+        prop="customerTakeCount"
+        min-width="200"
+      />
     </el-table>
   </el-card>
 </template>
@@ -25,7 +35,7 @@ import {
 } from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
 
-defineOptions({ name: 'CustomerSummary' })
+defineOptions({ name: 'CustomerPoolSummary' })
 
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
@@ -36,7 +46,7 @@ const list = ref<CrmStatisticsPoolSummaryByUserRespVO[]>([]) // 列表的数据
 const echartsOption = reactive<EChartsOption>({
   grid: {
     left: 20,
-    right: 40, // 让X轴右侧显示完整
+    right: 40, // 让 X 轴右侧显示完整
     bottom: 20,
     containLabel: true
   },
@@ -77,7 +87,7 @@ const echartsOption = reactive<EChartsOption>({
       type: 'value',
       name: '进入公海客户数',
       min: 0,
-      minInterval: 1, // 显示整数刻度
+      minInterval: 1 // 显示整数刻度
     },
     {
       type: 'value',
@@ -87,7 +97,7 @@ const echartsOption = reactive<EChartsOption>({
       splitLine: {
         lineStyle: {
           type: 'dotted', // 右侧网格线虚化, 减少混乱
-          opacity: 0.7,
+          opacity: 0.7
         }
       }
     }
@@ -95,19 +105,15 @@ const echartsOption = reactive<EChartsOption>({
   xAxis: {
     type: 'category',
     name: '日期',
-    data: [],
+    data: []
   }
 }) as EChartsOption
 
 /** 获取数据并填充图表 */
 const fetchAndFill = async () => {
   // 1. 加载统计数据
-  const poolSummaryByDate = await StatisticsCustomerApi.getPoolSummaryByDate(
-    props.queryParams
-  )
-  const poolSummaryByUser = await StatisticsCustomerApi.getPoolSummaryByUser(
-    props.queryParams
-  )
+  const poolSummaryByDate = await StatisticsCustomerApi.getPoolSummaryByDate(props.queryParams)
+  const poolSummaryByUser = await StatisticsCustomerApi.getPoolSummaryByUser(props.queryParams)
   // 2.1 更新 Echarts 数据
   if (echartsOption.xAxis && echartsOption.xAxis['data']) {
     echartsOption.xAxis['data'] = poolSummaryByDate.map(
@@ -133,7 +139,7 @@ const fetchAndFill = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    fetchAndFill()
+    await fetchAndFill()
   } finally {
     loading.value = false
   }

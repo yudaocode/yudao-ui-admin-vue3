@@ -26,7 +26,7 @@
 import {
   StatisticsCustomerApi,
   CrmStatisticsCustomerDealCycleByDateRespVO,
-  CrmStatisticsCustomerSummaryByDateRespVO,
+  CrmStatisticsCustomerSummaryByDateRespVO
 } from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
 
@@ -41,7 +41,7 @@ const list = ref<CrmStatisticsCustomerDealCycleByDateRespVO[]>([]) // 列表的�
 const echartsOption = reactive<EChartsOption>({
   grid: {
     left: 20,
-    right: 40, // 让X轴右侧显示完整
+    right: 40, // 让 X 轴右侧显示完整
     bottom: 20,
     containLabel: true
   },
@@ -51,13 +51,13 @@ const echartsOption = reactive<EChartsOption>({
       name: '成交周期(天)',
       type: 'bar',
       data: [],
-      yAxisIndex: 0,
+      yAxisIndex: 0
     },
     {
       name: '成交客户数',
       type: 'bar',
       data: [],
-      yAxisIndex: 1,
+      yAxisIndex: 1
     }
   ],
   toolbox: {
@@ -82,7 +82,7 @@ const echartsOption = reactive<EChartsOption>({
       type: 'value',
       name: '成交周期(天)',
       min: 0,
-      minInterval: 1, // 显示整数刻度
+      minInterval: 1 // 显示整数刻度
     },
     {
       type: 'value',
@@ -92,10 +92,10 @@ const echartsOption = reactive<EChartsOption>({
       splitLine: {
         lineStyle: {
           type: 'dotted', // 右侧网格线虚化, 减少混乱
-          opacity: 0.7,
+          opacity: 0.7
         }
       }
-    },
+    }
   ],
   xAxis: {
     type: 'category',
@@ -110,7 +110,7 @@ const fetchAndFill = async () => {
   const customerDealCycleByDate = await StatisticsCustomerApi.getCustomerDealCycleByDate(
     props.queryParams
   )
-    const customerSummaryByDate = await StatisticsCustomerApi.getCustomerSummaryByDate(
+  const customerSummaryByDate = await StatisticsCustomerApi.getCustomerSummaryByDate(
     props.queryParams
   )
   const customerDealCycleByUser = await StatisticsCustomerApi.getCustomerDealCycleByUser(
@@ -140,9 +140,8 @@ const fetchAndFill = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    fetchAndFill()
-  }
-  finally {
+    await fetchAndFill()
+  } finally {
     loading.value = false
   }
 }

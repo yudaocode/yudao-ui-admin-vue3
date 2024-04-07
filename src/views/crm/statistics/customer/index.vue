@@ -46,8 +46,7 @@
           class="!w-240px"
           node-key="id"
           placeholder="请选择归属部门"
-          @change="queryParams.userId = undefined;handleQuery()
-          "
+          @change="(queryParams.userId = undefined), handleQuery()"
         />
       </el-form-item>
       <el-form-item label="员工" prop="userId">
@@ -100,7 +99,7 @@
       </el-tab-pane>
       <!-- 公海客户分析 -->
       <el-tab-pane label="公海客户分析" lazy name="poolSummary">
-        <PoolSummary ref="poolSummaryRef" :query-params="queryParams" />
+        <CustomerPoolSummary ref="customerPoolSummaryRef" :query-params="queryParams" />
       </el-tab-pane>
       <!-- 成交周期分析 -->
       <el-tab-pane label="成交周期分析" lazy name="dealCycle">
@@ -122,7 +121,7 @@ import CustomerDealCycle from './components/CustomerDealCycle.vue'
 import CustomerFollowUpSummary from './components/CustomerFollowUpSummary.vue'
 import CustomerFollowUpType from './components/CustomerFollowUpType.vue'
 import CustomerSummary from './components/CustomerSummary.vue'
-import PoolSummary from './components/PoolSummary.vue'
+import CustomerPoolSummary from './components/CustomerPoolSummary.vue'
 
 defineOptions({ name: 'CrmStatisticsCustomer' })
 
@@ -153,7 +152,7 @@ const customerSummaryRef = ref() // 1. 客户总量分析
 const followUpSummaryRef = ref() // 2. 客户跟进次数分析
 const followUpTypeRef = ref() // 3. 客户跟进方式分析
 const conversionStatRef = ref() // 4. 客户转化率分析
-const poolSummaryRef = ref() // 5. 客户公海分析
+const customerPoolSummaryRef = ref() // 5. 客户公海分析
 const dealCycleRef = ref() // 6. 成交周期分析
 
 /** 搜索按钮操作 */
@@ -172,7 +171,7 @@ const handleQuery = () => {
       conversionStatRef.value?.loadData?.()
       break
     case 'poolSummary': // 公海客户分析
-      poolSummaryRef.value?.loadData?.()
+      customerPoolSummaryRef.value?.loadData?.()
       break
     case 'dealCycle': // 成交周期分析
       dealCycleRef.value?.loadData?.()

@@ -105,9 +105,8 @@ const fetchAndFill = async () => {
 const loadData = async () => {
   loading.value = true
   try {
-    fetchAndFill()
-  }
-  finally {
+    await fetchAndFill()
+  } finally {
     loading.value = false
   }
 }
