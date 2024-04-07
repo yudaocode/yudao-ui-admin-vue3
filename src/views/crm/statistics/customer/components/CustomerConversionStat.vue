@@ -69,12 +69,12 @@ import {
   CrmStatisticsCustomerSummaryByDateRespVO
 } from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
-import { round } from 'lodash-es'
 import { dateFormatter } from '@/utils/formatTime'
 import { erpPriceTableColumnFormatter } from '@/utils'
 import { DICT_TYPE } from '@/utils/dict'
 
 defineOptions({ name: 'CustomerConversionStat' })
+
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
@@ -84,7 +84,7 @@ const list = ref<CrmStatisticsCustomerSummaryByDateRespVO[]>([]) // 列表的数
 const echartsOption = reactive<EChartsOption>({
   grid: {
     left: 20,
-    right: 20,
+    right: 40, // 让X轴右侧显示完整
     bottom: 20,
     containLabel: true
   },
@@ -124,11 +124,9 @@ const echartsOption = reactive<EChartsOption>({
   }
 }) as EChartsOption
 
-/** 获取统计数据 */
-const loadData = async () => {
+/** 获取数据并填充图表 */
+const fetchAndFill = async () => {
   // 1. 加载统计数据
-  loading.value = true
-  // TODO @ddhb52：这里调用 StatisticsCustomerApi.getCustomerSummaryByDate 好像不太对？？？
   const customerCount = await StatisticsCustomerApi.getCustomerSummaryByDate(props.queryParams)
   const contractSummary = await StatisticsCustomerApi.getContractSummary(props.queryParams)
   // 2.1 更新 Echarts 数据
@@ -143,7 +141,7 @@ const loadData = async () => {
         return {
           name: item.time,
           value: item.customerCreateCount
-            ? round((item.customerDealCount / item.customerCreateCount) * 100, 2)
+            ? ((item.customerDealCount / item.customerCreateCount) * 100).toFixed(2)
             : 0
         }
       }
@@ -151,8 +149,19 @@ const loadData = async () => {
   }
   // 2.2 更新列表数据
   list.value = contractSummary
-  loading.value = false
 }
+
+/** 获取统计数据 */
+const loadData = async () => {
+  loading.value = true
+  try {
+    fetchAndFill()
+  }
+  finally {
+    loading.value = false
+  }
+}
+
 defineExpose({ loadData })
 
 /** 初始化 */

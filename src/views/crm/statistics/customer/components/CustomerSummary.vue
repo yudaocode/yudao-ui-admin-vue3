@@ -61,6 +61,7 @@ import { EChartsOption } from 'echarts'
 import { erpCalculatePercentage, erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'CustomerSummary' })
+
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
@@ -70,7 +71,7 @@ const list = ref<CrmStatisticsCustomerSummaryByUserRespVO[]>([]) // 列表的数
 const echartsOption = reactive<EChartsOption>({
   grid: {
     left: 20,
-    right: 20,
+    right: 30, // 让X轴右侧显示完整
     bottom: 20,
     containLabel: true
   },
@@ -79,11 +80,13 @@ const echartsOption = reactive<EChartsOption>({
     {
       name: '新增客户数',
       type: 'bar',
+      yAxisIndex: 0,
       data: []
     },
     {
       name: '成交客户数',
       type: 'bar',
+      yAxisIndex: 1,
       data: []
     }
   ],
@@ -104,21 +107,36 @@ const echartsOption = reactive<EChartsOption>({
       type: 'shadow'
     }
   },
-  yAxis: {
-    type: 'value',
-    name: '数量（个）'
-  },
+  yAxis: [
+    {
+      type: 'value',
+      name: '新增客户数',
+      min: 0,
+      minInterval: 1, // 显示整数刻度
+    },
+    {
+      type: 'value',
+      name: '成交客户数',
+      min: 0,
+      minInterval: 1, // 显示整数刻度
+      splitLine: {
+        lineStyle: {
+          type: 'dotted', // 右侧网格线虚化, 减少混乱
+          opacity: 0.7,
+        }
+      }
+    }
+  ],
   xAxis: {
     type: 'category',
     name: '日期',
-    data: []
+    data: [],
   }
 }) as EChartsOption
 
-/** 获取统计数据 */
-const loadData = async () => {
+/** 获取数据并填充图表 */
+const fetchAndFill = async () => {
   // 1. 加载统计数据
-  loading.value = true
   const customerSummaryByDate = await StatisticsCustomerApi.getCustomerSummaryByDate(
     props.queryParams
   )
@@ -141,10 +159,21 @@ const loadData = async () => {
       (s: CrmStatisticsCustomerSummaryByDateRespVO) => s.customerDealCount
     )
   }
+
   // 2.2 更新列表数据
   list.value = customerSummaryByUser
-  loading.value = false
 }
+
+/** 获取统计数据 */
+const loadData = async () => {
+  loading.value = true
+  try {
+    fetchAndFill()
+  } finally {
+    loading.value = false
+  }
+}
+
 defineExpose({ loadData })
 
 /** 初始化 */

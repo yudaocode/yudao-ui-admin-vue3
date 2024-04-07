@@ -31,6 +31,7 @@ import {
 import { EChartsOption } from 'echarts'
 
 defineOptions({ name: 'CustomerDealCycle' })
+
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
@@ -40,7 +41,7 @@ const list = ref<CrmStatisticsCustomerDealCycleByDateRespVO[]>([]) // 列表的�
 const echartsOption = reactive<EChartsOption>({
   grid: {
     left: 20,
-    right: 20,
+    right: 40, // 让X轴右侧显示完整
     bottom: 20,
     containLabel: true
   },
@@ -49,12 +50,14 @@ const echartsOption = reactive<EChartsOption>({
     {
       name: '成交周期(天)',
       type: 'bar',
-      data: []
+      data: [],
+      yAxisIndex: 0,
     },
     {
       name: '成交客户数',
       type: 'bar',
-      data: []
+      data: [],
+      yAxisIndex: 1,
     }
   ],
   toolbox: {
@@ -74,10 +77,26 @@ const echartsOption = reactive<EChartsOption>({
       type: 'shadow'
     }
   },
-  yAxis: {
-    type: 'value',
-    name: '数量（个）'
-  },
+  yAxis: [
+    {
+      type: 'value',
+      name: '成交周期(天)',
+      min: 0,
+      minInterval: 1, // 显示整数刻度
+    },
+    {
+      type: 'value',
+      name: '成交客户数',
+      min: 0,
+      minInterval: 1, // 显示整数刻度
+      splitLine: {
+        lineStyle: {
+          type: 'dotted', // 右侧网格线虚化, 减少混乱
+          opacity: 0.7,
+        }
+      }
+    },
+  ],
   xAxis: {
     type: 'category',
     name: '日期',
@@ -85,10 +104,9 @@ const echartsOption = reactive<EChartsOption>({
   }
 }) as EChartsOption
 
-/** 获取统计数据 */
-const loadData = async () => {
+/** 获取数据并填充图表 */
+const fetchAndFill = async () => {
   // 1. 加载统计数据
-  loading.value = true
   const customerDealCycleByDate = await StatisticsCustomerApi.getCustomerDealCycleByDate(
     props.queryParams
   )
@@ -116,7 +134,17 @@ const loadData = async () => {
   }
   // 2.2 更新列表数据
   list.value = customerDealCycleByUser
-  loading.value = false
+}
+
+/** 获取统计数据 */
+const loadData = async () => {
+  loading.value = true
+  try {
+    fetchAndFill()
+  }
+  finally {
+    loading.value = false
+  }
 }
 defineExpose({ loadData })
 
