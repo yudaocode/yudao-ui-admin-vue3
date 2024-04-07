@@ -7,17 +7,15 @@
 -->
 <template>
   <div class="node-wrap" v-if="nodeConfig.type < 3">
-    <div
-      class="node-wrap-box"
-      :class="
-        (nodeConfig.type == 0 ? 'start-node ' : '') +
-        (isTried && nodeConfig.error ? 'active error' : '')
-      "
-    >
+    <div class="node-wrap-box" :class="isTried && nodeConfig.error ? 'active error' : ''">
       <div class="title" :style="`background: rgb(${bgColors[nodeConfig.type]});`">
         <span v-if="nodeConfig.type == 0">发起人</span>
         <template v-else>
-          <span class="iconfont">{{ nodeConfig.type == 1 ? '' : '' }}</span>
+          <span
+            class="iconfont"
+            :class="nodeConfig.type === NodeType.APPROVE_USER_NODE ? 'icon-approve' : 'icon-copy'"
+          >
+          </span>
           <input
             v-if="isInput"
             type="text"
@@ -37,9 +35,9 @@
           <span class="placeholder" v-if="!showText">请选择{{ defaultText }}</span>
           <span v-html="showText" class="ellipsis-text" v-else></span>
         </div>
-        <div class="icon-box">
+        <!-- <div class="icon-box">
           <i class="anticon anticon-edit" @click="editNode"></i>
-        </div>
+        </div> -->
         <i class="anticon anticon-right arrow"></i>
       </div>
       <div class="error_tip" v-if="isTried && nodeConfig.error">
@@ -51,7 +49,7 @@
   <div class="branch-wrap" v-if="nodeConfig.type == 4">
     <div class="branch-box-wrap">
       <div class="branch-box">
-        <button class="add-branch" @click="addTerm">添加条件</button>
+        <button class="add-branch" @click="addTerm(nodeConfig.type)">添加条件</button>
         <div class="col-box" v-for="(item, index) in nodeConfig.conditionNodes" :key="index">
           <div class="condition-node">
             <div class="condition-node-box">
@@ -89,7 +87,7 @@
                 <!-- <div class="content" @click="setPerson(item.priorityLevel)">{{
                   conditionStr(nodeConfig, index)
                 }}</div> -->
-                <div class="content">{{conditionStr(nodeConfig, index) }}</div>
+                <div class="content">{{ conditionStr(nodeConfig, index) }}</div>
                 <div class="error_tip" v-if="isTried && item.error">
                   <i class="anticon anticon-exclamation-circle"></i>
                 </div>
@@ -111,6 +109,59 @@
       <addNode v-model:childNodeP="nodeConfig.childNode" />
     </div>
   </div>
+  <div class="branch-wrap" v-if="nodeConfig.type == 5">
+    <div class="branch-box-wrap">
+      <div class="branch-box">
+        <button class="add-branch" @click="addTerm(nodeConfig.type)">添加分支</button>
+        <div class="col-box" v-for="(item, index) in nodeConfig.conditionNodes" :key="index">
+          <div class="condition-node">
+            <div class="condition-node-box">
+              <div class="title-wrapper" :style="`background: rgb(${bgColors[nodeConfig.type]});`">
+                <input
+                  v-if="isInputList[index]"
+                  type="text"
+                  class="ant-input editable-title-input"
+                  @blur="blurEvent(index)"
+                  @focus="$event.currentTarget?.select()"
+                  v-mountedFoucs
+                  v-model="item.name"
+                />
+                <span v-else class="editable-title" @click="clickEvent(index)">{{
+                  item.name
+                }}</span>
+                <i class="anticon anticon-close close" @click="delTerm(nodeConfig.type, index)"></i>
+              </div>
+              <div class="auto-judge" :class="isTried && item.error ? 'error active' : ''">
+                <div class="content">并行执行</div>
+                <div class="error_tip" v-if="isTried && item.error">
+                  <i class="anticon anticon-exclamation-circle"></i>
+                </div>
+              </div>
+              <addNode v-model:childNodeP="item.childNode" />
+            </div>
+          </div>
+          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" />
+          <template v-if="index == 0">
+            <div class="top-left-cover-line"></div>
+            <div class="bottom-left-cover-line"></div>
+          </template>
+          <template v-if="index == nodeConfig.conditionNodes.length - 1">
+            <div class="top-right-cover-line"></div>
+            <div class="bottom-right-cover-line"></div>
+          </template>
+        </div>
+      </div>
+      <addNode v-model:childNodeP="nodeConfig.childNode" :show-add-button="false" />
+    </div>
+  </div>
+  <div class="node-wrap" v-if="nodeConfig.type === 6">
+    <div class="node-wrap-box">
+      <div class="content">
+        <div class="text">聚合</div>
+      </div>
+    </div>
+    <addNode v-model:childNodeP="nodeConfig.childNode" />
+  </div>
   <nodeWrap v-if="nodeConfig.childNode" v-model:nodeConfig="nodeConfig.childNode" />
 </template>
 <script lang="ts" setup>
@@ -124,7 +175,7 @@ import {
   placeholderList,
   getApproverShowText
 } from './util'
-import { WorkFlowNode } from './consts'
+import { WorkFlowNode, NodeType } from './consts'
 import { useWorkFlowStoreWithOut } from '@/store/modules/simpleWorkflow'
 let _uid = getCurrentInstance().uid
 
@@ -170,7 +221,7 @@ let {
   setUserTaskConfig
 } = store
 // ???
-const  isTried = computed(() => store.isTried) 
+const isTried = computed(() => store.isTried)
 // 审批节点的配置
 const userTaskConfig = computed(() => store.userTaskConfig)
 // 抄送节点的配置
@@ -188,13 +239,12 @@ const showText = computed(() => {
       return ''
     }
   }
-  if(props.nodeConfig.type === 2) {
-    if(props.nodeConfig.attributes) {
-      return copyerStr( props.nodeConfig.attributes.candidateStrategy)
+  if (props.nodeConfig.type === 2) {
+    if (props.nodeConfig.attributes) {
+      return copyerStr(props.nodeConfig.attributes.candidateStrategy)
     } else {
       return ''
     }
-    
   }
   return ''
 })
@@ -204,9 +254,9 @@ watch(userTaskConfig, (approver) => {
   }
 })
 watch(copyerConfig, (copyer) => {
-  console.log('copyer',copyer)
+  console.log('copyer', copyer)
   if (copyer.flag && copyer.id === _uid) {
-    console.log('copyer id is equal',copyer)
+    console.log('copyer id is equal', copyer)
     emits('update:nodeConfig', copyer.value)
   }
 })
@@ -230,7 +280,7 @@ const blurEvent = (index) => {
     isInputList.value[index] = false
     // eslint-disable-next-line vue/no-mutating-props
     props.nodeConfig.conditionNodes[index].name =
-    props.nodeConfig.conditionNodes[index].name || '条件'
+      props.nodeConfig.conditionNodes[index].name || '条件'
   } else {
     isInput.value = false
     // eslint-disable-next-line vue/no-mutating-props
@@ -240,42 +290,66 @@ const blurEvent = (index) => {
 const delNode = () => {
   emits('update:nodeConfig', props.nodeConfig.childNode)
 }
-const addTerm = () => {
+const addTerm = (type:number) => {
   const len = props.nodeConfig.conditionNodes.length
   let lastIndex = props.nodeConfig.conditionNodes.length - 1
+  let nodeName = '条件' + len
+  if(type === NodeType.PARALLEL_NODE_FORK) {
+    nodeName = '并行' + (len+1);
+    lastIndex = props.nodeConfig.conditionNodes.length;
+  }
   // eslint-disable-next-line vue/no-mutating-props
   props.nodeConfig.conditionNodes.splice(lastIndex, 0, {
-    name: '条件' + len,
+    name: nodeName,
     type: 3,
-    priorityLevel: len,
     conditionList: [],
     childNode: null
   })
   resetConditionNodesErr()
   emits('update:nodeConfig', props.nodeConfig)
 }
-const delTerm = (index) => {
+const delTerm = (nodeType: number, index: number) => {
   if (props.nodeConfig.conditionNodes) {
     // eslint-disable-next-line vue/no-mutating-props
     props.nodeConfig.conditionNodes.splice(index, 1)
-    props.nodeConfig.conditionNodes.map((item, index) => {
+    if (nodeType === NodeType.PARALLEL_NODE_FORK) {
+      props.nodeConfig.conditionNodes.map((item, index) => {
+          item.name = `并行${index + 1}`
+      })
+    } else {
+      props.nodeConfig.conditionNodes.map((item, index) => {
       // item.priorityLevel = index + 1
       if (index !== props.nodeConfig.conditionNodes.length - 1) {
         item.name = `条件${index + 1}`
       }
     })
+    }
+   
     resetConditionNodesErr()
     emits('update:nodeConfig', props.nodeConfig)
     if (props.nodeConfig.conditionNodes.length == 1) {
-      if (props.nodeConfig.childNode) {
-        if (props.nodeConfig.conditionNodes[0].childNode) {
-          reData(props.nodeConfig.conditionNodes[0].childNode, props.nodeConfig.childNode)
-        } else {
-          // eslint-disable-next-line vue/no-mutating-props
-          props.nodeConfig.conditionNodes[0].childNode = props.nodeConfig.childNode
+      if (nodeType === NodeType.PARALLEL_NODE_FORK) {
+        const joinNode = props.nodeConfig.childNode;
+        if (joinNode?.childNode) {
+          if (props.nodeConfig.conditionNodes[0].childNode) {
+            reData(props.nodeConfig.conditionNodes[0].childNode, joinNode?.childNode)
+          } else {
+            // eslint-disable-next-line vue/no-mutating-props
+            props.nodeConfig.conditionNodes[0].childNode = joinNode?.childNode
+          }
         }
+        emits('update:nodeConfig', props.nodeConfig.conditionNodes[0].childNode)
+      } else {
+        if (props.nodeConfig.childNode) {
+          if (props.nodeConfig.conditionNodes[0].childNode) {
+            reData(props.nodeConfig.conditionNodes[0].childNode, props.nodeConfig.childNode)
+          } else {
+            // eslint-disable-next-line vue/no-mutating-props
+            props.nodeConfig.conditionNodes[0].childNode = props.nodeConfig.childNode
+          }
+        }
+        emits('update:nodeConfig', props.nodeConfig.conditionNodes[0].childNode)
       }
-      emits('update:nodeConfig', props.nodeConfig.conditionNodes[0].childNode)
     }
   }
 }
@@ -287,9 +361,9 @@ const reData = (data, addData) => {
   }
 }
 const setPerson = (priorityLevel) => {
-  console.log('priorityLevel',priorityLevel)
+  console.log('priorityLevel', priorityLevel)
   const { type } = props.nodeConfig
-  console.log('type',type)
+  console.log('type', type)
   if (type == 0) {
     // setPromoter(true)
   } else if (type == 1) {

@@ -18,9 +18,17 @@ export enum NodeType {
    */
   CONDITION_NODE = 3,
   /**
-   * 路由节点
+   * 条件分支节点
    */
-  ROUTER_NODE = 4
+  EXCLUSIVE_NODE = 4,
+  /**
+   * 并行分支分叉节点
+   */
+  PARALLEL_NODE_FORK = 5,
+  /**
+   * 并行分支聚合
+   */
+  PARALLEL_NODE_JOIN = 6
 }
 
 export const NODE_BG_COLOR = new Map()

@@ -37,7 +37,7 @@
     font-family: anticon!important
 }
 .anticon-close:before {
-  content: "\E633"
+    content: "\E633"
 }
 .anticon-right:before {
     content: "\E61F"
@@ -486,7 +486,7 @@ html {
     height: 100%
 }
 
-@font-face {
+/* @font-face {
     font-family: IconFont;
     src: url("//at.alicdn.com/t/font_135284_ph2thxxbzgf.eot");
     src: url("//at.alicdn.com/t/font_135284_ph2thxxbzgf.eot?#iefix") format("embedded-opentype"), url("//at.alicdn.com/t/font_135284_ph2thxxbzgf.woff") format("woff"), url("//at.alicdn.com/t/font_135284_ph2thxxbzgf.ttf") format("truetype"), url("//at.alicdn.com/t/font_135284_ph2thxxbzgf.svg#IconFont") format("svg")
@@ -499,6 +499,45 @@ html {
     -webkit-font-smoothing: antialiased;
     -webkit-text-stroke-width: .2px;
     -moz-osx-font-smoothing: grayscale
+} */
+
+@font-face {
+    font-family: "iconfont"; /* Project id 4495938 */
+    src: url('iconfont.woff2?t=1712392083512') format('woff2'),
+        url('iconfont.woff?t=1712392083512') format('woff'),
+        url('iconfont.ttf?t=1712392083512') format('truetype');
+}
+  
+.iconfont {
+    font-family: "iconfont" !important;
+    font-size: 16px;
+    font-style: normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+  
+.icon-Inclusive:before {
+    content: "\e602";
+}
+  
+.icon-copy:before {
+    content: "\e7eb";
+}
+  
+.icon-handle:before {
+    content: "\e61c";
+}
+  
+.icon-exclusive:before {
+    content: "\e717";
+}
+  
+.icon-approve:before {
+    content: "\e715";
+}
+  
+.icon-parallel:before {
+    content: "\e688";
 }
 
 .fd-nav {

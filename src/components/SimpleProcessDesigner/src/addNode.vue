@@ -6,7 +6,7 @@
         <div class="add-node-popover-body">
           <a class="add-node-popover-item approver" @click="addType(1)">
             <div class="item-wrapper">
-              <span class="iconfont"></span>
+              <span class="iconfont icon-approve"></span>
             </div>
             <p>审批人</p>
           </a>
@@ -26,20 +26,26 @@
           -->
           <a class="add-node-popover-item notifier" @click="addType(2)">
             <div class="item-wrapper">
-              <span class="iconfont"></span>
+              <span class="iconfont icon-copy"></span>
             </div>
             <p>抄送人</p>
           </a>
           <a class="add-node-popover-item condition" @click="addType(4)">
             <div class="item-wrapper">
-              <span class="iconfont"></span>
+              <span class="iconfont icon-exclusive"></span>
             </div>
             <p>条件分支</p>
           </a>
+          <a class="add-node-popover-item condition" @click="addType(5)">
+            <div class="item-wrapper">
+              <span class="iconfont icon-parallel"></span>
+            </div>
+            <p>并行分支</p>
+          </a>
         </div>
         <template #reference>
-          <button class="btn" type="button">
-            <span class="iconfont"></span>
+          <button class="btn" type="button" v-if="showAddButton">
+            <span><Icon icon="ep:plus" class="addIcon" :size="14" /></span>
           </button>
         </template>
       </el-popover>
@@ -47,66 +53,60 @@
   </div>
 </template>
 <script lang="ts" setup>
+import { NodeType } from './consts'
 import { ref } from 'vue'
 import { generateUUID } from '@/utils'
 let props = defineProps({
   childNodeP: {
     type: Object,
     default: () => ({})
+  },
+  showAddButton:{
+    type:Boolean,
+    default:true
   }
 })
 let emits = defineEmits(['update:childNodeP'])
 let visible = ref(false)
-const addType = (type) => {
+const addType = (type: number) => {
   visible.value = false
-  if (type != 4) {
-    var data
-    if (type == 1) {
-      // data = {
-      //   name: '审核人',
-      //   error: true,
-      //   type: 1,
-      //   settype: 1,
-      //   selectMode: 0,
-      //   selectRange: 0,
-      //   directorLevel: 1,
-      //   examineMode: 1,
-      //   noHanderAction: 1,
-      //   examineEndDirectorLevel: 0,
-      //   childNode: props.childNodeP,
-      //   nodeUserList: []
-      // }
-      data = {
-        name: '审核人',
-        error: true,
-        type: 1,
-        // 审批节点配置
-        attributes : {
-          approveMethod : undefined,
-          candidateStrategy: undefined,
-          candidateParam: undefined
-        },
-        childNode: props.childNodeP
-      }
-    } else if (type == 2) {
-      data = {
-        name: '抄送人',
-        type: 2,
-        error: true,
-         // 抄送节点配置
-        attributes : {
-          candidateStrategy: undefined,
-          candidateParam: undefined
-        },
-        childNode: props.childNodeP
-      }
+  // 审核节点
+  if (type === NodeType.APPROVE_USER_NODE) {
+    const data = {
+      name: '审核人',
+      error: true,
+      type: 1,
+      // 审批节点配置
+      attributes: {
+        approveMethod: undefined,
+        candidateStrategy: undefined,
+        candidateParam: undefined
+      },
+      childNode: props.childNodeP
     }
     emits('update:childNodeP', data)
-  } else {
-    emits('update:childNodeP', {
-      name: '路由',
+  }
+  // 抄送节点
+  if (type === NodeType.CC_USER_NODE) {
+    const data = {
+      name: '抄送人',
+      type: 2,
+      error: true,
+      // 抄送节点配置
+      attributes: {
+        candidateStrategy: undefined,
+        candidateParam: undefined
+      },
+      childNode: props.childNodeP
+    }
+    emits('update:childNodeP', data)
+  }
+  // 条件分支
+  if (type === NodeType.EXCLUSIVE_NODE) {
+    const data = {
+      name: '条件分支',
       type: 4,
-      id : 'GateWay_'+ generateUUID(),
+      id: 'GateWay_' + generateUUID(),
       childNode: props.childNodeP,
       conditionNodes: [
         {
@@ -125,8 +125,92 @@ const addType = (type) => {
           childNode: null
         }
       ]
-    })
+    }
+    emits('update:childNodeP', data)
   }
+  // 并行分支 fork
+  if (type === NodeType.PARALLEL_NODE_FORK) {
+    const data = {
+      name: '并行分支_FORK',
+      type: 5,
+      id: 'GateWay_' + generateUUID(),
+      conditionNodes: [
+        {
+          name: '并行1',
+          error: true,
+          type: 3,
+          childNode: null
+        },
+        {
+          name: '并行2',
+          type: 3,
+          childNode: null
+        }
+      ],
+      childNode: {
+        id: 'GateWay_' + generateUUID(),
+        name: '并行分支_JOIN',
+        type: 6,
+        error: true,
+        childNode: props.childNodeP,
+      }
+    }
+    emits('update:childNodeP', data)
+  }
+  // if (type != 4) {
+  //   var data
+  //   if (type == 1) {
+  //     data = {
+  //       name: '审核人',
+  //       error: true,
+  //       type: 1,
+  //       // 审批节点配置
+  //       attributes : {
+  //         approveMethod : undefined,
+  //         candidateStrategy: undefined,
+  //         candidateParam: undefined
+  //       },
+  //       childNode: props.childNodeP
+  //     }
+  //   } else if (type == 2) {
+  //     data = {
+  //       name: '抄送人',
+  //       type: 2,
+  //       error: true,
+  //        // 抄送节点配置
+  //       attributes : {
+  //         candidateStrategy: undefined,
+  //         candidateParam: undefined
+  //       },
+  //       childNode: props.childNodeP
+  //     }
+  //   }
+  //   emits('update:childNodeP', data)
+  // } else {
+  //   emits('update:childNodeP', {
+  //     name: '路由',
+  //     type: 4,
+  //     id : 'GateWay_'+ generateUUID(),
+  //     childNode: props.childNodeP,
+  //     conditionNodes: [
+  //       {
+  //         name: '条件1',
+  //         error: true,
+  //         type: 3,
+  //         priorityLevel: 1,
+  //         conditionList: [],
+  //         childNode: null
+  //       },
+  //       {
+  //         name: '其它情况',
+  //         type: 3,
+  //         priorityLevel: 2,
+  //         conditionList: [],
+  //         childNode: null
+  //       }
+  //     ]
+  //   })
+  // }
 }
 </script>
 <style scoped lang="scss">
@@ -173,9 +257,9 @@ const addType = (type) => {
       box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
       -webkit-transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
       transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  
-      .iconfont {
-        font-size: 16px;
+
+      .addIcon {
+        line-height: 30px;
         color: #fff;
       }
 
