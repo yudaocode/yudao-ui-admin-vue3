@@ -71,8 +71,8 @@
                     > -->
                 <i
                   class="anticon anticon-close close"
-                  @click="delTerm(index)"
-                  v-if="index != nodeConfig.conditionNodes?.length - 1"
+                  @click="delTerm(nodeConfig.type,index)"
+                  v-if="nodeConfig.conditionNodes && index != nodeConfig.conditionNodes?.length - 1"
                 ></i>
               </div>
               <div class="auto-judge" :class="isTried && item.error ? 'error active' : ''">
@@ -145,6 +145,55 @@
             <div class="top-left-cover-line"></div>
             <div class="bottom-left-cover-line"></div>
           </template>
+          <template v-if="index === nodeConfig.conditionNodes.length - 1">
+            <div class="top-right-cover-line"></div>
+            <div class="bottom-right-cover-line"></div>
+          </template>
+        </div>
+      </div>
+      <addNode v-model:childNodeP="nodeConfig.childNode" :show-add-button="false" />
+    </div>
+  </div>
+  <div class="branch-wrap" v-if="nodeConfig.type == 7">
+    <div class="branch-box-wrap">
+      <div class="branch-box">
+        <button class="add-branch" @click="addTerm(nodeConfig.type)">添加分支</button>
+        <div class="col-box" v-for="(item, index) in nodeConfig.conditionNodes" :key="index">
+          <div class="condition-node">
+            <div class="condition-node-box">
+              <div class="title-wrapper" :style="`background: rgb(${bgColors[nodeConfig.type]});`">
+                <input
+                  v-if="isInputList[index]"
+                  type="text"
+                  class="ant-input editable-title-input"
+                  @blur="blurEvent(index)"
+                  @focus="$event.currentTarget?.select()"
+                  v-mountedFoucs
+                  v-model="item.name"
+                />
+                <span v-else class="editable-title" @click="clickEvent(index)">
+                  {{ item.name }}
+                </span>
+                 <i
+                  class="anticon anticon-close close"
+                  @click="delTerm(nodeConfig.type,index)"
+                  v-if="index != nodeConfig.conditionNodes?.length - 1"
+                  ></i>
+              </div>
+              <div class="auto-judge" :class="isTried && item.error ? 'error active' : ''">
+                <div class="content">{{ conditionStr(nodeConfig, index) }}</div>
+                <div class="error_tip" v-if="isTried && item.error">
+                  <i class="anticon anticon-exclamation-circle"></i>
+                </div>
+              </div>
+              <addNode v-model:childNodeP="item.childNode" />
+            </div>
+          </div>
+          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" />
+          <template v-if="index == 0">
+            <div class="top-left-cover-line"></div>
+            <div class="bottom-left-cover-line"></div>
+          </template>
           <template v-if="index == nodeConfig.conditionNodes.length - 1">
             <div class="top-right-cover-line"></div>
             <div class="bottom-right-cover-line"></div>
@@ -154,7 +203,7 @@
       <addNode v-model:childNodeP="nodeConfig.childNode" :show-add-button="false" />
     </div>
   </div>
-  <div class="node-wrap" v-if="nodeConfig.type === 6">
+  <div class="node-wrap" v-if="nodeConfig.type === NodeType.PARALLEL_NODE_JOIN || nodeConfig.type === NodeType.INCLUSIVE_NODE_JOIN">
     <div class="node-wrap-box">
       <div class="content">
         <div class="text">聚合</div>
@@ -178,7 +227,7 @@ import {
 import { WorkFlowNode, NodeType } from './consts'
 import { useWorkFlowStoreWithOut } from '@/store/modules/simpleWorkflow'
 let _uid = getCurrentInstance().uid
-
+import { generateUUID } from '@/utils'
 let props = defineProps({
   nodeConfig: {
     type: Object as () => WorkFlowNode,
@@ -293,18 +342,21 @@ const delNode = () => {
 const addTerm = (type:number) => {
   const len = props.nodeConfig.conditionNodes.length
   let lastIndex = props.nodeConfig.conditionNodes.length - 1
-  let nodeName = '条件' + len
+  let nodeName = '分支' + len
   if(type === NodeType.PARALLEL_NODE_FORK) {
     nodeName = '并行' + (len+1);
     lastIndex = props.nodeConfig.conditionNodes.length;
   }
-  // eslint-disable-next-line vue/no-mutating-props
-  props.nodeConfig.conditionNodes.splice(lastIndex, 0, {
+  const conditionData = {
+    id: 'SequenceFlow'+ generateUUID(),
     name: nodeName,
-    type: 3,
-    conditionList: [],
-    childNode: null
-  })
+    type: NodeType.CONDITION_NODE,
+    childNode: undefined,
+    conditionNodes:[],
+    attributes : undefined
+  };
+  // eslint-disable-next-line vue/no-mutating-props
+  props.nodeConfig.conditionNodes.splice(lastIndex, 0, conditionData)
   resetConditionNodesErr()
   emits('update:nodeConfig', props.nodeConfig)
 }
@@ -320,7 +372,7 @@ const delTerm = (nodeType: number, index: number) => {
       props.nodeConfig.conditionNodes.map((item, index) => {
       // item.priorityLevel = index + 1
       if (index !== props.nodeConfig.conditionNodes.length - 1) {
-        item.name = `条件${index + 1}`
+        item.name = `分支${index + 1}`
       }
     })
     }
@@ -328,7 +380,7 @@ const delTerm = (nodeType: number, index: number) => {
     resetConditionNodesErr()
     emits('update:nodeConfig', props.nodeConfig)
     if (props.nodeConfig.conditionNodes.length == 1) {
-      if (nodeType === NodeType.PARALLEL_NODE_FORK) {
+      if (nodeType === NodeType.PARALLEL_NODE_FORK || nodeType === NodeType.INCLUSIVE_NODE_FORK) {
         const joinNode = props.nodeConfig.childNode;
         if (joinNode?.childNode) {
           if (props.nodeConfig.conditionNodes[0].childNode) {

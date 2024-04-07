@@ -28,7 +28,15 @@ export enum NodeType {
   /**
    * 并行分支聚合
    */
-  PARALLEL_NODE_JOIN = 6
+  PARALLEL_NODE_JOIN = 6,
+  /**
+   * 包容分支分叉节点
+   */
+  INCLUSIVE_NODE_FORK = 7,
+  /**
+   * 包容分支聚合节点
+   */
+  INCLUSIVE_NODE_JOIN = 8
 }
 
 export const NODE_BG_COLOR = new Map()
@@ -48,8 +56,8 @@ export type WorkFlowNode = {
   id: string,
   type: NodeType,
   name: string,
-  attributes: Object | undefined,
+  attributes: any,
   // 操作人
   childNode?: WorkFlowNode | undefined,
-  conditionNodes: WorkFlowNode[] | undefined
+  conditionNodes: WorkFlowNode[]
 }

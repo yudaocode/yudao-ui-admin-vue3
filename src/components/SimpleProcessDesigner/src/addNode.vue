@@ -42,6 +42,12 @@
             </div>
             <p>并行分支</p>
           </a>
+          <a class="add-node-popover-item condition" @click="addType(7)">
+            <div class="item-wrapper">
+              <span class="iconfont icon-Inclusive"></span>
+            </div>
+            <p>包容分支</p>
+          </a>
         </div>
         <template #reference>
           <button class="btn" type="button" v-if="showAddButton">
@@ -110,7 +116,7 @@ const addType = (type: number) => {
       childNode: props.childNodeP,
       conditionNodes: [
         {
-          name: '条件1',
+          name: '分支1',
           error: true,
           type: 3,
           priorityLevel: 1,
@@ -151,6 +157,35 @@ const addType = (type: number) => {
         id: 'GateWay_' + generateUUID(),
         name: '并行分支_JOIN',
         type: 6,
+        error: true,
+        childNode: props.childNodeP,
+      }
+    }
+    emits('update:childNodeP', data)
+  }
+  // 包容分支 fork
+  if (type === NodeType.INCLUSIVE_NODE_FORK) {
+    const data = {
+      name: '包容分支_FORK',
+      type: 7,
+      id: 'GateWay_' + generateUUID(),
+      conditionNodes: [
+        {
+          name: '分支1',
+          error: true,
+          type: 3,
+          childNode: null
+        },
+        {
+          name: '其它情况',
+          type: 3,
+          childNode: null
+        }
+      ],
+      childNode: {
+        id: 'GateWay_' + generateUUID(),
+        name: '包容分支_JOIN',
+        type: 8,
         error: true,
         childNode: props.childNodeP,
       }

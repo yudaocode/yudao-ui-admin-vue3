@@ -164,18 +164,18 @@ export const conditionStr = (nodeConfig, index) => {
   // }
 }
 
-export const dealStr = (str: string, obj) => {
-  const arr = []
-  const list = str.split(',')
-  for (const elem in obj) {
-    list.map((item) => {
-      if (item == elem) {
-        arr.push(obj[elem].value)
-      }
-    })
-  }
-  return arr.join('或')
-}
+// export const dealStr = (str: string, obj) => {
+//   const arr = []
+//   const list = str.split(',')
+//   for (const elem in obj) {
+//     list.map((item) => {
+//       if (item == elem) {
+//         arr.push(obj[elem].value)
+//       }
+//     })
+//   }
+//   return arr.join('或')
+// }
 
 export const removeEle = (arr, elem, key = 'id') => {
   let includesIndex
@@ -187,7 +187,7 @@ export const removeEle = (arr, elem, key = 'id') => {
   arr.splice(includesIndex, 1)
 }
 
-export const bgColors = ['87, 106, 149', '255, 148, 62', '50, 150, 250','50, 150, 250','248, 107, 248','244, 118, 118']
+export const bgColors = ['87, 106, 149', '255, 148, 62', '50, 150, 250','50, 150, 250','248, 107, 248','244, 118, 118','23, 148, 46','23, 148, 46']
 export const placeholderList = ['发起人', '审核人', '抄送人']
 export const setTypes = [
   { value: 1, label: '指定成员' },
