@@ -11,13 +11,7 @@
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="list">
       <el-table-column label="序号" align="center" type="index" width="80" />
-      <el-table-column
-        label="区域"
-        align="center"
-        prop="areaName"
-        min-width="200"
-        :formatter="(_, __, val: any) => val ?? '未知'"
-      />
+      <el-table-column label="区域" align="center" prop="areaName" min-width="200" />
       <el-table-column
         label="成交周期(天)"
         align="center"
@@ -112,13 +106,19 @@ const echartsOption = reactive<EChartsOption>({
 /** 获取数据并填充图表 */
 const fetchAndFill = async () => {
   // 1. 加载统计数据
-  const customerDealCycleByArea = await StatisticsCustomerApi.getCustomerDealCycleByArea(
-    props.queryParams
-  )
+  const customerDealCycleByArea = (
+    await StatisticsCustomerApi.getCustomerDealCycleByArea(props.queryParams)
+  ).map((s: CrmStatisticsCustomerDealCycleByAreaRespVO) => {
+    return {
+      areaName: s.areaName,
+      customerDealCycle: s.customerDealCycle,
+      customerDealCount: s.customerDealCount
+    }
+  })
   // 2.1 更新 Echarts 数据
   if (echartsOption.xAxis && echartsOption.xAxis['data']) {
     echartsOption.xAxis['data'] = customerDealCycleByArea.map(
-      (s: CrmStatisticsCustomerDealCycleByAreaRespVO) => s.areaName ?? '未知'
+      (s: CrmStatisticsCustomerDealCycleByAreaRespVO) => s.areaName
     )
   }
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
