@@ -448,5 +448,8 @@ export default {
     btn_zoom_out: '缩小',
     preview: '预览'
   },
+  callcenter:{
+    callSuccess: '呼叫指令下达成功'
+  },
   'OAuth 2.0': 'OAuth 2.0' // 避免菜单名是 OAuth 2.0 时，一直 warn 报错
 }

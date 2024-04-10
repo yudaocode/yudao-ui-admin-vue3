@@ -113,6 +113,11 @@
         </template>
       </el-table-column>
       <el-table-column label="手机" align="center" prop="mobile" width="120" />
+      <el-table-column label="操作" align="center" width="110" >
+        <template #default="scope">
+          <el-button link type="danger" @click="call(scope.row.id)">呼出</el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="渠道名称" align="center" prop="channelName" width="130" />
       <el-table-column label="邮箱" align="center" prop="email" width="180" />
       <el-table-column align="center" label="客户级别" prop="level" width="135">
@@ -177,6 +182,9 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as CustomerApi from '@/api/crm/customer'
+import * as CallCenterApi from '@/api/crm/callcenter'
+import { TabsPaneContext } from 'element-plus'
+
 
 defineOptions({ name: 'CrmCustomerPool' })
 
@@ -198,6 +206,12 @@ const queryParams = ref({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+const calldata = ref({
+  manufacturerId: 1,
+  callId: 0,
+  callType: 1
+
+})
 
 /** 查询列表 */
 const getList = async () => {
@@ -267,4 +281,19 @@ watch(
 onMounted(() => {
   getList()
 })
+
+const call = async (callid: number)=>{
+  // await CallCenterApi.callCenterUserbyPhone("17710786247")
+  try{
+    calldata.value.callId = callid
+    const data = calldata.value as unknown as CallCenterApi.CallVo
+    const respdata = await CallCenterApi.callCenterCall(data)
+    console.log(respdata)
+    message.success(t('callcenter.callSuccess') + '请观注外呼手机状态')
+  }catch {
+  } finally {
+    exportLoading.value = false
+  }
+  // CallCenterApi.Callyunke()
+}
 </script>

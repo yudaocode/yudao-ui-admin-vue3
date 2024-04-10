@@ -130,6 +130,11 @@
         </template>
       </el-table-column>
       <el-table-column label="手机" align="center" prop="mobile" width="120" />
+      <el-table-column label="操作" align="center" width="110" >
+        <template #default="scope">
+          <el-button link type="danger" @click="call(scope.row.id)">呼出</el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="渠道名称" align="center" prop="channelName" width="130" />
       <el-table-column label="邮箱" align="center" prop="email" width="180" />
       <el-table-column align="center" label="客户级别" prop="level" width="135">
@@ -234,6 +239,7 @@ import CustomerForm from './CustomerForm.vue'
 import CustomerImportForm from './CustomerImportForm.vue'
 import { TabsPaneContext } from 'element-plus'
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
+import * as CallCenterApi from '@/api/crm/callcenter'
 
 
 defineOptions({ name: 'CrmCustomer' })
@@ -258,7 +264,12 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const activeName = ref('1') // 列表 tab
+const calldata = ref({
+  manufacturerId: 1,
+  callId: 0,
+  callType: 2
 
+})
 /** tab 切换 */
 const handleTabClick = (tab: TabsPaneContext) => {
   queryParams.sceneType = tab.paneName
@@ -350,6 +361,21 @@ const handleExport = async () => {
   } finally {
     exportLoading.value = false
   }
+}
+
+const call = async (callid: number)=>{
+  // await CallCenterApi.callCenterUserbyPhone("17710786247")
+  try{
+    calldata.value.callId = callid
+    const data = calldata.value as unknown as CallCenterApi.CallVo
+    const respdata = await CallCenterApi.callCenterCall(data)
+    console.log(respdata)
+    message.success(t('callcenter.callSuccess') + '请观注外呼手机状态')
+  }catch {
+  } finally {
+    exportLoading.value = false
+  }
+  // CallCenterApi.Callyunke()
 }
 
 /** 监听路由变化更新列表 */

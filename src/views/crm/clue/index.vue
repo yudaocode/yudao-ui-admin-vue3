@@ -84,10 +84,15 @@
       </el-table-column>
       <el-table-column label="线索来源" align="center" prop="source" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.scope" />
         </template>
       </el-table-column>
       <el-table-column label="手机" align="center" prop="mobile" width="120" />
+      <el-table-column label="操作" align="center" width="110" >
+        <template #default="scope">
+          <el-button link type="danger" @click="call(scope.row.id)">呼出</el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="渠道名称" align="center" prop="channelName" width="130" />
       <el-table-column label="邮箱" align="center" prop="email" width="180" />
       <el-table-column label="地址" align="center" prop="detailAddress" width="180" />
@@ -174,6 +179,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as ClueApi from '@/api/crm/clue'
+import * as CallCenterApi from '@/api/crm/callcenter'
 import ClueForm from './ClueForm.vue'
 import { TabsPaneContext } from 'element-plus'
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
@@ -199,6 +205,12 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const activeName = ref('1') // 列表 tab
+const calldata = ref({
+  manufacturerId: 1,
+  callId: 0,
+  callType: 1
+
+})
 
 
 /** 查询列表 */
@@ -286,6 +298,21 @@ const transfer = () => {
 /** 多选事件监听 */
 const handleSelectionChange = async (selection) => {
   selectedList.value = selection
+}
+
+const call = async (callid: number)=>{
+  // await CallCenterApi.callCenterUserbyPhone("17710786247")
+  try{
+    calldata.value.callId = callid
+    const data = calldata.value as unknown as CallCenterApi.CallVo
+    const respdata = await CallCenterApi.callCenterCall(data)
+    console.log(respdata)
+    message.success(t('callcenter.callSuccess') + '请观注外呼手机状态')
+  }catch {
+  } finally {
+    exportLoading.value = false
+  }
+  // CallCenterApi.Callyunke()
 }
 
 /** 初始化 **/
