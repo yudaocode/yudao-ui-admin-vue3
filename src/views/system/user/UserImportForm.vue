@@ -115,9 +115,10 @@ const submitFormError = (): void => {
 }
 
 /** 重置表单 */
-const resetForm = () => {
+const resetForm = async (): Promise<void> => {
   // 重置上传状态和文件
   formLoading.value = false
+  await nextTick()
   uploadRef.value?.clearFiles()
 }
 
