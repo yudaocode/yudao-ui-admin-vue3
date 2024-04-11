@@ -61,6 +61,7 @@ const updateSupport = ref(0) // 是否更新已经存在的用户数据
 /** 打开弹窗 */
 const open = () => {
   dialogVisible.value = true
+  updateSupport.value = 0
   fileList.value = []
   resetForm()
 }
