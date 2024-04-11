@@ -105,6 +105,8 @@ const submitFormSuccess = (response: any) => {
     text += '< ' + username + ': ' + data.failureUsernames[username] + ' >'
   }
   message.alert(text)
+  formLoading.value = false
+  dialogVisible.value = false
   // 发送操作成功的事件
   emits('success')
 }
