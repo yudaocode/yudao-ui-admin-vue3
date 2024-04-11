@@ -25,8 +25,7 @@ import {
   StatisticsPortraitApi
 } from '@/api/crm/statistics/portrait'
 
-// TODO @puhui999：address 换成 area 会更合适哈，
-defineOptions({ name: 'CustomerAddress' })
+defineOptions({ name: 'CustomerArea' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 // 注册地图
@@ -107,22 +106,21 @@ const loadData = async () => {
   areaStatisticsList.value = areaList.map((item: CrmStatisticCustomerAreaRespVO) => {
     return {
       ...item,
-      areaName: item.areaName // TODO @puhui999：这里最好注释下原因哈
-        .replace('维吾尔自治区', '')
-        .replace('壮族自治区', '')
-        .replace('回族自治区', '')
-        .replace('自治区', '')
-        .replace('省', '')
+      areaName: item.areaName // TODO @puhui999：这里最好注释下原因哈, 🤣 我从 mall copy 过来的
+      // .replace('维吾尔自治区', '')
+      // .replace('壮族自治区', '')
+      // .replace('回族自治区', '')
+      // .replace('自治区', '')
+      // .replace('省', '')
     }
   })
-  builderLeftMap()
-  builderRightMap()
+  buildLeftMap()
+  buildRightMap()
   loading.value = false
 }
 defineExpose({ loadData })
 
-// TODO @puhui999：builder 改成 build 更合理哈
-const builderLeftMap = () => {
+const buildLeftMap = () => {
   let min = 0
   let max = 0
   echartsOption.series![0].data = areaStatisticsList.value.map((item) => {
@@ -134,7 +132,7 @@ const builderLeftMap = () => {
   echartsOption.visualMap!['max'] = max
 }
 
-const builderRightMap = () => {
+const buildRightMap = () => {
   let min = 0
   let max = 0
   echartsOption2.series![0].data = areaStatisticsList.value.map((item) => {

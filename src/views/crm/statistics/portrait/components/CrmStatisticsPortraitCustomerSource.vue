@@ -20,33 +20,33 @@
   <el-card class="mt-16px" shadow="never">
     <el-table v-loading="loading" :data="list">
       <el-table-column align="center" label="序号" type="index" width="80" />
-      <el-table-column align="center" label="客户级别" prop="level" width="200">
+      <el-table-column align="center" label="客户来源" prop="source" width="100">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_LEVEL" :value="scope.row.level" />
+          <dict-tag :type="DICT_TYPE.CRM_CUSTOMER_SOURCE" :value="scope.row.source" />
         </template>
       </el-table-column>
       <el-table-column align="center" label="客户个数" min-width="200" prop="customerCount" />
       <el-table-column align="center" label="成交个数" min-width="200" prop="dealCount" />
-      <el-table-column align="center" label="级别占比(%)" min-width="200" prop="levelPortion" />
+      <el-table-column align="center" label="来源占比(%)" min-width="200" prop="sourcePortion" />
       <el-table-column align="center" label="成交占比(%)" min-width="200" prop="dealPortion" />
     </el-table>
   </el-card>
 </template>
 <script lang="ts" setup>
 import {
-  CrmStatisticCustomerLevelRespVO,
+  CrmStatisticCustomerSourceRespVO,
   StatisticsPortraitApi
 } from '@/api/crm/statistics/portrait'
 import { EChartsOption } from 'echarts'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
-import { getSumValue } from '@/utils'
 import { isEmpty } from '@/utils/is'
+import { erpCalculatePercentage, getSumValue } from '@/utils'
 
 defineOptions({ name: 'CustomerSource' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
-const list = ref<CrmStatisticCustomerLevelRespVO[]>([]) // 列表的数据
+const list = ref<CrmStatisticCustomerSourceRespVO[]>([]) // 列表的数据
 
 /** 饼图配置（全部客户） */
 const echartsOption = reactive<EChartsOption>({
@@ -148,46 +148,46 @@ const echartsOption2 = reactive<EChartsOption>({
 const loadData = async () => {
   // 1. 加载统计数据
   loading.value = true
-  const levelList = await StatisticsPortraitApi.getCustomerLevel(props.queryParams)
+  const sourceList = await StatisticsPortraitApi.getCustomerSource(props.queryParams)
   // 2.1 更新 Echarts 数据
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
-    echartsOption.series[0]['data'] = levelList.map((r: CrmStatisticCustomerLevelRespVO) => {
+    echartsOption.series[0]['data'] = sourceList.map((r: CrmStatisticCustomerSourceRespVO) => {
       return {
-        name: getDictLabel(DICT_TYPE.CRM_CUSTOMER_LEVEL, r.level),
+        name: getDictLabel(DICT_TYPE.CRM_CUSTOMER_SOURCE, r.source),
         value: r.customerCount
       }
     })
   }
   // 2.2 更新 Echarts2 数据
   if (echartsOption2.series && echartsOption2.series[0] && echartsOption2.series[0]['data']) {
-    echartsOption2.series[0]['data'] = levelList.map((r: CrmStatisticCustomerLevelRespVO) => {
+    echartsOption2.series[0]['data'] = sourceList.map((r: CrmStatisticCustomerSourceRespVO) => {
       return {
-        name: getDictLabel(DICT_TYPE.CRM_CUSTOMER_LEVEL, r.level),
+        name: getDictLabel(DICT_TYPE.CRM_CUSTOMER_SOURCE, r.source),
         value: r.dealCount
       }
     })
   }
   // 3. 计算比例
-  calculateProportion(levelList)
-  list.value = levelList
+  calculateProportion(sourceList)
+  list.value = sourceList
   loading.value = false
 }
 defineExpose({ loadData })
 
 /** 计算比例 */
-const calculateProportion = (levelList: CrmStatisticCustomerLevelRespVO[]) => {
-  if (isEmpty(levelList)) {
+const calculateProportion = (sourceList: CrmStatisticCustomerSourceRespVO[]) => {
+  if (isEmpty(sourceList)) {
     return
   }
   // 这里类型丢失了所以重新搞个变量
-  const list = levelList as unknown as CrmStatisticCustomerLevelRespVO[]
+  const list = sourceList as unknown as CrmStatisticCustomerSourceRespVO[]
   const sumCustomerCount = getSumValue(list.map((item) => item.customerCount))
   const sumDealCount = getSumValue(list.map((item) => item.dealCount))
   list.forEach((item) => {
-    // TODO @puhui999：可以使用 erpCalculatePercentage 方法
-    item.levelPortion =
-      item.customerCount === 0 ? 0 : ((item.customerCount / sumCustomerCount) * 100).toFixed(2)
-    item.dealPortion = item.dealCount === 0 ? 0 : ((item.dealCount / sumDealCount) * 100).toFixed(2)
+    item.sourcePortion =
+      item.customerCount === 0 ? 0 : erpCalculatePercentage(item.customerCount, sumCustomerCount)
+    item.dealPortion =
+      item.dealCount === 0 ? 0 : erpCalculatePercentage(item.dealCount, sumDealCount)
   })
 }
 

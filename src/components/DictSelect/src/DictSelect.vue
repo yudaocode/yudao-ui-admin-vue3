@@ -33,7 +33,6 @@ import { getBoolDictOptions, getIntDictOptions, getStrDictOptions } from '@/util
 
 // 接受父组件参数
 interface Props {
-  modelValue?: any // 值
   dictType: string // 字典类型
   valueType: string // 字典值类型
 }
