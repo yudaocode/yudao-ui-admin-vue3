@@ -6,17 +6,18 @@
       :action="uploadUrl"
       :before-upload="beforeUpload"
       :class="['upload', drag ? 'no-border' : '']"
+      :disabled="disabled"
       :drag="drag"
+      :http-request="httpRequest"
       :multiple="false"
       :on-error="uploadError"
       :on-success="uploadSuccess"
       :show-file-list="false"
-      :http-request="httpRequest"
     >
       <template v-if="modelValue">
         <img :src="modelValue" class="upload-image" />
         <div class="upload-handle" @click.stop>
-          <div class="handle-icon" @click="editImg" v-if="!disabled">
+          <div v-if="!disabled" class="handle-icon" @click="editImg">
             <Icon icon="ep:edit" />
             <span v-if="showBtnText">{{ t('action.edit') }}</span>
           </div>
@@ -77,10 +78,8 @@ const props = defineProps({
   height: propTypes.string.def('150px'), // 组件高度 ==> 非必传（默认为 150px）
   width: propTypes.string.def('150px'), // 组件宽度 ==> 非必传（默认为 150px）
   borderradius: propTypes.string.def('8px'), // 组件边框圆角 ==> 非必传（默认为 8px）
-  // 是否显示删除按钮
-  showDelete: propTypes.bool.def(true),
-  // 是否显示按钮文字
-  showBtnText: propTypes.bool.def(true)
+  showDelete: propTypes.bool.def(true), // 是否显示删除按钮
+  showBtnText: propTypes.bool.def(true) // 是否显示按钮文字
 })
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

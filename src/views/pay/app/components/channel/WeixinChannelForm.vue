@@ -18,10 +18,10 @@
             <template #append>%</template>
           </el-input>
         </el-form-item>
-        <el-form-item label-width="180px" label="公众号 APPID" prop="config.appId">
+        <el-form-item label-width="180px" label="微信 APPID" prop="config.appId">
           <el-input
             v-model="formData.config.appId"
-            placeholder="请输入公众号 APPID"
+            placeholder="请输入微信 APPID"
             clearable
             :style="{ width: '100%' }"
           />

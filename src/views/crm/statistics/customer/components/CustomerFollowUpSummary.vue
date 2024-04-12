@@ -12,11 +12,11 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column label="序号" align="center" type="index" width="80" />
       <el-table-column label="员工姓名" align="center" prop="ownerUserName" min-width="200" />
-      <el-table-column label="跟进次数" align="right" prop="followupRecordCount" min-width="200" />
+      <el-table-column label="跟进次数" align="right" prop="followUpRecordCount" min-width="200" />
       <el-table-column
         label="跟进客户数"
         align="right"
-        prop="followupCustomerCount"
+        prop="followUpCustomerCount"
         min-width="200"
       />
     </el-table>
@@ -25,22 +25,24 @@
 <script setup lang="ts">
 import {
   StatisticsCustomerApi,
-  CrmStatisticsFollowupSummaryByDateRespVO,
-  CrmStatisticsFollowupSummaryByUserRespVO
+  CrmStatisticsFollowUpSummaryByDateRespVO,
+  CrmStatisticsFollowUpSummaryByUserRespVO
 } from '@/api/crm/statistics/customer'
+import Echart from '@/components/Echart/src/Echart.vue'
 import { EChartsOption } from 'echarts'
 
 defineOptions({ name: 'CustomerFollowupSummary' })
+
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
-const list = ref<CrmStatisticsFollowupSummaryByUserRespVO[]>([]) // 列表的数据
+const list = ref<CrmStatisticsFollowUpSummaryByUserRespVO[]>([]) // 列表的数据
 
 /** 柱状图配置：纵向 */
 const echartsOption = reactive<EChartsOption>({
   grid: {
     left: 20,
-    right: 20,
+    right: 30, // 让 X 轴右侧显示完整
     bottom: 20,
     containLabel: true
   },
@@ -49,11 +51,13 @@ const echartsOption = reactive<EChartsOption>({
     {
       name: '跟进客户数',
       type: 'bar',
+      yAxisIndex: 0,
       data: []
     },
     {
       name: '跟进次数',
       type: 'bar',
+      yAxisIndex: 1,
       data: []
     }
   ],
@@ -74,46 +78,74 @@ const echartsOption = reactive<EChartsOption>({
       type: 'shadow'
     }
   },
-  yAxis: {
-    type: 'value',
-    name: '数量（个）'
-  },
+  yAxis: [
+    {
+      type: 'value',
+      name: '跟进客户数',
+      min: 0,
+      minInterval: 1 // 显示整数刻度
+    },
+    {
+      type: 'value',
+      name: '跟进次数',
+      min: 0,
+      minInterval: 1, // 显示整数刻度
+      splitLine: {
+        lineStyle: {
+          type: 'dotted', // 右侧网格线虚化, 减少混乱
+          opacity: 0.7
+        }
+      }
+    }
+  ],
   xAxis: {
     type: 'category',
     name: '日期',
+    axisTick: {
+      alignWithLabel: true
+    },
     data: []
   }
 }) as EChartsOption
 
-/** 获取统计数据 */
-const loadData = async () => {
+/** 获取数据并填充图表 */
+const fetchAndFill = async () => {
   // 1. 加载统计数据
   loading.value = true
-  const followupSummaryByDate = await StatisticsCustomerApi.getFollowupSummaryByDate(
+  const followUpSummaryByDate = await StatisticsCustomerApi.getFollowUpSummaryByDate(
     props.queryParams
   )
-  const followupSummaryByUser = await StatisticsCustomerApi.getFollowupSummaryByUser(
+  const followUpSummaryByUser = await StatisticsCustomerApi.getFollowUpSummaryByUser(
     props.queryParams
   )
   // 2.1 更新 Echarts 数据
   if (echartsOption.xAxis && echartsOption.xAxis['data']) {
-    echartsOption.xAxis['data'] = followupSummaryByDate.map(
-      (s: CrmStatisticsFollowupSummaryByDateRespVO) => s.time
+    echartsOption.xAxis['data'] = followUpSummaryByDate.map(
+      (s: CrmStatisticsFollowUpSummaryByDateRespVO) => s.time
     )
   }
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
-    echartsOption.series[0]['data'] = followupSummaryByDate.map(
-      (s: CrmStatisticsFollowupSummaryByDateRespVO) => s.followupCustomerCount
+    echartsOption.series[0]['data'] = followUpSummaryByDate.map(
+      (s: CrmStatisticsFollowUpSummaryByDateRespVO) => s.followUpCustomerCount
     )
   }
   if (echartsOption.series && echartsOption.series[1] && echartsOption.series[1]['data']) {
-    echartsOption.series[1]['data'] = followupSummaryByDate.map(
-      (s: CrmStatisticsFollowupSummaryByDateRespVO) => s.followupRecordCount
+    echartsOption.series[1]['data'] = followUpSummaryByDate.map(
+      (s: CrmStatisticsFollowUpSummaryByDateRespVO) => s.followUpRecordCount
     )
   }
   // 2.2 更新列表数据
-  list.value = followupSummaryByUser
-  loading.value = false
+  list.value = followUpSummaryByUser
+}
+
+/** 获取统计数据 */
+const loadData = async () => {
+  loading.value = true
+  try {
+    await fetchAndFill()
+  } finally {
+    loading.value = false
+  }
 }
 defineExpose({ loadData })
 

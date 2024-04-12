@@ -1,8 +1,8 @@
 /**
  * 数据字典工具类
  */
-import { useDictStoreWithOut } from '@/store/modules/dict'
-import { ElementPlusInfoType } from '@/types/elementPlus'
+import {useDictStoreWithOut} from '@/store/modules/dict'
+import {ElementPlusInfoType} from '@/types/elementPlus'
 
 const dictStore = useDictStoreWithOut()
 
@@ -104,6 +104,7 @@ export enum DICT_TYPE {
   USER_TYPE = 'user_type',
   COMMON_STATUS = 'common_status',
   TERMINAL = 'terminal', // 终端
+  DATE_INTERVAL = 'date_interval', // 数据间隔
 
   // ========== SYSTEM 模块 ==========
   SYSTEM_USER_SEX = 'system_user_sex',

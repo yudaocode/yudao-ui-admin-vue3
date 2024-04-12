@@ -29,6 +29,7 @@
           check-strictly
           node-key="id"
           placeholder="请选择归属部门"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>
@@ -62,8 +63,8 @@
         <CustomerCountRank :query-params="queryParams" ref="customerCountRankRef" />
       </el-tab-pane>
       <!-- 新增联系人数排行 -->
-      <el-tab-pane label="新增联系人数排行" name="contactsCountRank" lazy>
-        <ContactsCountRank :query-params="queryParams" ref="contactsCountRankRef" />
+      <el-tab-pane label="新增联系人数排行" name="contactCountRank" lazy>
+        <ContactCountRank :query-params="queryParams" ref="contactCountRankRef" />
       </el-tab-pane>
       <!-- 跟进次数排行 -->
       <el-tab-pane label="跟进次数排行" name="followCountRank" lazy>
@@ -77,14 +78,14 @@
   </el-col>
 </template>
 <script lang="ts" setup>
-import ContractPriceRank from './ContractPriceRank.vue'
-import ReceivablePriceRank from './ReceivablePriceRank.vue'
-import ContractCountRank from './ContractCountRank.vue'
-import ProductSalesRank from './ProductSalesRank.vue'
-import CustomerCountRank from './CustomerCountRank.vue'
-import ContactsCountRank from './ContactsCountRank.vue'
-import FollowCountRank from './FollowCountRank.vue'
-import FollowCustomerCountRank from './FollowCustomerCountRank.vue'
+import ContractPriceRank from './components/ContractPriceRank.vue'
+import ReceivablePriceRank from './components/ReceivablePriceRank.vue'
+import ContractCountRank from './components/ContractCountRank.vue'
+import ProductSalesRank from './components/ProductSalesRank.vue'
+import CustomerCountRank from './components/CustomerCountRank.vue'
+import ContactCountRank from './components/ContactCountRank.vue'
+import FollowCountRank from './components/FollowCountRank.vue'
+import FollowCustomerCountRank from './components/FollowCustomerCountRank.vue'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
@@ -109,35 +110,35 @@ const receivablePriceRankRef = ref() // ReceivablePriceRank 组件的引用
 const contractCountRankRef = ref() // ContractCountRank 组件的引用
 const productSalesRankRef = ref() // ProductSalesRank 组件的引用
 const customerCountRankRef = ref() // CustomerCountRank 组件的引用
-const contactsCountRankRef = ref() // ContactsCountRank 组件的引用
+const contactCountRankRef = ref() // ContactCountRank 组件的引用
 const followCountRankRef = ref() // FollowCountRank 组件的引用
 const followCustomerCountRankRef = ref() // FollowCustomerCountRank 组件的引用
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   switch (activeTab.value) {
-    case 'contractPriceRank':
+    case 'contractPriceRank': // 合同金额排行
       contractPriceRankRef.value?.loadData?.()
       break
-    case 'receivablePriceRank':
+    case 'receivablePriceRank': // 回款金额排行
       receivablePriceRankRef.value?.loadData?.()
       break
-    case 'contractCountRank':
+    case 'contractCountRank': // 签约合同排行
       contractCountRankRef.value?.loadData?.()
       break
-    case 'productSalesRank':
+    case 'productSalesRank': // 产品销量排行
       productSalesRankRef.value?.loadData?.()
       break
-    case 'customerCountRank':
+    case 'customerCountRank': // 新增客户数排行
       customerCountRankRef.value?.loadData?.()
       break
-    case 'contactsCountRank':
-      contactsCountRankRef.value?.loadData?.()
+    case 'contactCountRank': // 新增联系人数排行
+      contactCountRankRef.value?.loadData?.()
       break
-    case 'followCountRank':
+    case 'followCountRank': // 跟进次数排行
       followCountRankRef.value?.loadData?.()
       break
-    case 'followCustomerCountRank':
+    case 'followCustomerCountRank': // 跟进客户数排行
       followCustomerCountRankRef.value?.loadData?.()
       break
   }
