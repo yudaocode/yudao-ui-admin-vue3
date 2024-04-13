@@ -60,20 +60,20 @@
   <el-col>
     <el-tabs v-model="activeTab">
       <!-- 城市分布分析 -->
-      <el-tab-pane label="城市分布分析" lazy name="addressRef">
-        <CrmStatisticsPortraitCustomerArea ref="addressRef" :query-params="queryParams" />
+      <el-tab-pane label="城市分布分析" lazy name="areaRef">
+        <PortraitCustomerArea ref="areaRef" :query-params="queryParams" />
       </el-tab-pane>
       <!-- 客户级别分析 -->
       <el-tab-pane label="客户级别分析" lazy name="levelRef">
-        <CrmStatisticsPortraitCustomerLevel ref="levelRef" :query-params="queryParams" />
+        <PortraitCustomerLevel ref="levelRef" :query-params="queryParams" />
       </el-tab-pane>
       <!-- 客户来源分析 -->
       <el-tab-pane label="客户来源分析" lazy name="sourceRef">
-        <CrmStatisticsPortraitCustomerSource ref="sourceRef" :query-params="queryParams" />
+        <PortraitCustomerSource ref="sourceRef" :query-params="queryParams" />
       </el-tab-pane>
       <!-- 客户行业分析 -->
       <el-tab-pane label="客户行业分析" lazy name="industryRef">
-        <CrmStatisticsPortraitCustomerIndustry ref="industryRef" :query-params="queryParams" />
+        <PortraitCustomerIndustry ref="industryRef" :query-params="queryParams" />
       </el-tab-pane>
     </el-tabs>
   </el-col>
@@ -85,10 +85,10 @@ import * as UserApi from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { defaultProps, handleTree } from '@/utils/tree'
-import CrmStatisticsPortraitCustomerArea from './components/CrmStatisticsPortraitCustomerArea.vue'
-import CrmStatisticsPortraitCustomerIndustry from './components/CrmStatisticsPortraitCustomerIndustry.vue'
-import CrmStatisticsPortraitCustomerSource from './components/CrmStatisticsPortraitCustomerSource.vue'
-import CrmStatisticsPortraitCustomerLevel from './components/CrmStatisticsPortraitCustomerLevel.vue'
+import PortraitCustomerArea from './components/PortraitCustomerArea.vue'
+import PortraitCustomerIndustry from './components/PortraitCustomerIndustry.vue'
+import PortraitCustomerSource from './components/PortraitCustomerSource.vue'
+import PortraitCustomerLevel from './components/PortraitCustomerLevel.vue'
 
 defineOptions({ name: 'CrmStatisticsPortrait' })
 
@@ -113,8 +113,8 @@ const userListByDeptId = computed(() =>
     : []
 )
 
-const activeTab = ref('addressRef') // 活跃标签
-const addressRef = ref() // 客户地区分布
+const activeTab = ref('areaRef') // 活跃标签
+const areaRef = ref() // 客户地区分布
 const levelRef = ref() // 客户级别
 const sourceRef = ref() // 客户来源
 const industryRef = ref() // 客户行业
@@ -122,8 +122,8 @@ const industryRef = ref() // 客户行业
 /** 搜索按钮操作 */
 const handleQuery = () => {
   switch (activeTab.value) {
-    case 'addressRef':
-      addressRef.value?.loadData?.()
+    case 'areaRef':
+      areaRef.value?.loadData?.()
       break
     case 'levelRef':
       levelRef.value?.loadData?.()

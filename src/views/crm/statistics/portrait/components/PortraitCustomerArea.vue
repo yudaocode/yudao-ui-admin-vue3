@@ -25,7 +25,7 @@ import {
   StatisticsPortraitApi
 } from '@/api/crm/statistics/portrait'
 
-defineOptions({ name: 'CustomerArea' })
+defineOptions({ name: 'PortraitCustomerArea' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 // 注册地图

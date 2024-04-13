@@ -42,7 +42,7 @@ import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { erpCalculatePercentage, getSumValue } from '@/utils'
 import { isEmpty } from '@/utils/is'
 
-defineOptions({ name: 'CustomerIndustry' })
+defineOptions({ name: 'PortraitCustomerIndustry' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
