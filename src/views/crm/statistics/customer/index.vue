@@ -102,8 +102,14 @@
         <CustomerPoolSummary ref="customerPoolSummaryRef" :query-params="queryParams" />
       </el-tab-pane>
       <!-- 成交周期分析 -->
-      <el-tab-pane label="成交周期分析" lazy name="dealCycle">
-        <CustomerDealCycle ref="dealCycleRef" :query-params="queryParams" />
+      <el-tab-pane label="员工客户成交周期分析" lazy name="dealCycleByUser">
+        <CustomerDealCycleByUser ref="dealCycleByUserRef" :query-params="queryParams" />
+      </el-tab-pane>
+      <el-tab-pane label="地区客户成交周期分析" lazy name="dealCycleByArea">
+        <CustomerDealCycleByArea ref="dealCycleByAreaRef" :query-params="queryParams" />
+      </el-tab-pane>
+      <el-tab-pane label="产品客户成交周期分析" lazy name="dealCycleByProduct">
+        <CustomerDealCycleByProduct ref="dealCycleByProductRef" :query-params="queryParams" />
       </el-tab-pane>
     </el-tabs>
   </el-col>
@@ -117,7 +123,9 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { defaultProps, handleTree } from '@/utils/tree'
 import CustomerConversionStat from './components/CustomerConversionStat.vue'
-import CustomerDealCycle from './components/CustomerDealCycle.vue'
+import CustomerDealCycleByUser from './components/CustomerDealCycleByUser.vue'
+import CustomerDealCycleByArea from './components/CustomerDealCycleByArea.vue'
+import CustomerDealCycleByProduct from './components/CustomerDealCycleByProduct.vue'
 import CustomerFollowUpSummary from './components/CustomerFollowUpSummary.vue'
 import CustomerFollowUpType from './components/CustomerFollowUpType.vue'
 import CustomerSummary from './components/CustomerSummary.vue'
@@ -153,7 +161,9 @@ const followUpSummaryRef = ref() // 2. 客户跟进次数分析
 const followUpTypeRef = ref() // 3. 客户跟进方式分析
 const conversionStatRef = ref() // 4. 客户转化率分析
 const customerPoolSummaryRef = ref() // 5. 客户公海分析
-const dealCycleRef = ref() // 6. 成交周期分析
+const dealCycleByUserRef = ref() // 6. 成交周期分析(按员工)
+const dealCycleByAreaRef = ref() // 7. 成交周期分析(按地区)
+const dealCycleByProductRef = ref() // 8. 成交周期分析(按产品)
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
@@ -173,8 +183,14 @@ const handleQuery = () => {
     case 'poolSummary': // 公海客户分析
       customerPoolSummaryRef.value?.loadData?.()
       break
-    case 'dealCycle': // 成交周期分析
-      dealCycleRef.value?.loadData?.()
+    case 'dealCycleByUser': // 成交周期分析
+      dealCycleByUserRef.value?.loadData?.()
+      break
+    case 'dealCycleByArea': // 成交周期分析
+      dealCycleByAreaRef.value?.loadData?.()
+      break
+    case 'dealCycleByProduct': // 成交周期分析
+      dealCycleByProductRef.value?.loadData?.()
       break
   }
 }
