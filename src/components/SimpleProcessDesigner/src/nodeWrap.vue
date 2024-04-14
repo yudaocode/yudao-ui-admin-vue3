@@ -44,7 +44,7 @@
         <i class="anticon anticon-exclamation-circle"></i>
       </div>
     </div>
-    <addNode v-model:childNodeP="nodeConfig.childNode" />
+    <addNode v-model:childNodeP="nodeConfig.childNode" :default-fields-permission="props.defaultFieldsPermission" />
   </div>
   <div class="branch-wrap" v-if="nodeConfig.type == 4">
     <div class="branch-box-wrap">
@@ -92,10 +92,10 @@
                   <i class="anticon anticon-exclamation-circle"></i>
                 </div>
               </div>
-              <addNode v-model:childNodeP="item.childNode" />
+              <addNode v-model:childNodeP="item.childNode" :default-fields-permission="props.defaultFieldsPermission"/>
             </div>
           </div>
-          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" />
+          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" :default-fields-permission="props.defaultFieldsPermission"/>
           <template v-if="index == 0">
             <div class="top-left-cover-line"></div>
             <div class="bottom-left-cover-line"></div>
@@ -106,7 +106,7 @@
           </template>
         </div>
       </div>
-      <addNode v-model:childNodeP="nodeConfig.childNode" />
+      <addNode v-model:childNodeP="nodeConfig.childNode" :default-fields-permission="props.defaultFieldsPermission"/>
     </div>
   </div>
   <div class="branch-wrap" v-if="nodeConfig.type == 5">
@@ -137,10 +137,10 @@
                   <i class="anticon anticon-exclamation-circle"></i>
                 </div>
               </div>
-              <addNode v-model:childNodeP="item.childNode" />
+              <addNode v-model:childNodeP="item.childNode" :default-fields-permission="props.defaultFieldsPermission"/>
             </div>
           </div>
-          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" />
+          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" :default-fields-permission="props.defaultFieldsPermission" />
           <template v-if="index == 0">
             <div class="top-left-cover-line"></div>
             <div class="bottom-left-cover-line"></div>
@@ -151,7 +151,7 @@
           </template>
         </div>
       </div>
-      <addNode v-model:childNodeP="nodeConfig.childNode" :show-add-button="false" />
+      <addNode v-model:childNodeP="nodeConfig.childNode" :show-add-button="false" :default-fields-permission="props.defaultFieldsPermission"/>
     </div>
   </div>
   <div class="branch-wrap" v-if="nodeConfig.type == 7">
@@ -186,10 +186,10 @@
                   <i class="anticon anticon-exclamation-circle"></i>
                 </div>
               </div>
-              <addNode v-model:childNodeP="item.childNode" />
+              <addNode v-model:childNodeP="item.childNode"  :default-fields-permission="props.defaultFieldsPermission"/>
             </div>
           </div>
-          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" />
+          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" :default-fields-permission="props.defaultFieldsPermission" />
           <template v-if="index == 0">
             <div class="top-left-cover-line"></div>
             <div class="bottom-left-cover-line"></div>
@@ -200,7 +200,7 @@
           </template>
         </div>
       </div>
-      <addNode v-model:childNodeP="nodeConfig.childNode" :show-add-button="false" />
+      <addNode v-model:childNodeP="nodeConfig.childNode" :show-add-button="false" :default-fields-permission="props.defaultFieldsPermission" />
     </div>
   </div>
   <div class="node-wrap" v-if="nodeConfig.type === NodeType.PARALLEL_NODE_JOIN || nodeConfig.type === NodeType.INCLUSIVE_NODE_JOIN">
@@ -209,9 +209,9 @@
         <div class="text">聚合</div>
       </div>
     </div>
-    <addNode v-model:childNodeP="nodeConfig.childNode" />
+    <addNode v-model:childNodeP="nodeConfig.childNode" :default-fields-permission="props.defaultFieldsPermission" />
   </div>
-  <nodeWrap v-if="nodeConfig.childNode" v-model:nodeConfig="nodeConfig.childNode" />
+  <nodeWrap v-if="nodeConfig.childNode" v-model:nodeConfig="nodeConfig.childNode" :default-fields-permission="props.defaultFieldsPermission" />
 </template>
 <script lang="ts" setup>
 import addNode from './addNode.vue'
@@ -232,6 +232,10 @@ let props = defineProps({
   nodeConfig: {
     type: Object as () => WorkFlowNode,
     default: () => ({}) as WorkFlowNode
+  },
+  defaultFieldsPermission : {
+    type: Array,
+    default: () => ([])
   }
 })
 

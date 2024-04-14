@@ -12,7 +12,7 @@
           <div class="start-event-node-circle">开始</div>
         </div>
         <div class="start-event-node-line"></div>
-        <nodeWrap v-model:nodeConfig="nodeConfig" />
+        <nodeWrap v-model:nodeConfig="nodeConfig" :defaultFieldsPermission="defaultFieldsPermission" />
         <!-- <div class="end-node">
           <div class="end-node-circle"></div>
           <div class="end-node-text">流程结束</div>
@@ -23,7 +23,7 @@
       </div>
     </section>
   </div>
-  <approverDrawer />
+  <approverDrawer/>
   <copyerDrawer />
 </template>
 <script lang="ts" setup>
@@ -33,6 +33,8 @@ import copyerDrawer from '@/components/SimpleProcessDesigner/src/drawer/copyerDr
 import { WorkFlowNode } from '@/components/SimpleProcessDesigner/src/consts'
 import { ref } from 'vue'
 import { saveBpmSimpleModel, getBpmSimpleModel } from '@/api/bpm/simple'
+import { getModel } from '@/api/bpm/model'
+import { getForm, FormVO } from '@/api/bpm/form'
 defineOptions({ name: 'SimpleWorkflowDesignEditor' })
 const uid = getCurrentInstance().uid
 const router = useRouter() // 路由
@@ -40,33 +42,33 @@ const { query } = useRoute() // 路由的查询
 const modelId = query.modelId
 const message = useMessage() // 国际化
 const nodeConfig = ref<WorkFlowNode>({
-    name: '发起人',
-    type: 0,
-    id: 'StartEvent_' + uid,
-    childNode: undefined,
-    attributes: undefined,
-    conditionNodes: undefined
-  }
-)
+  name: '发起人',
+  type: 0,
+  id: 'StartEvent_' + uid,
+  childNode: undefined,
+  attributes: undefined,
+  conditionNodes: []
+})
+// 默认的表单字段权限
+const defaultFieldsPermission: any[] = []
 const test = async () => {
   if (!modelId) {
     message.error('缺少模型 modelId 编号')
     return
   }
-  const test = nodeConfig.value;
+  const test = nodeConfig.value
   console.log('test is ', test)
   console.log('nodeConfig.value ', nodeConfig.value)
-  const data = {
+  const data1 = {
     modelId: modelId,
     simpleModelBody: toRaw(nodeConfig.value)
   }
-  const data1 = {
+  const data = {
     modelId: modelId,
     simpleModelBody: nodeConfig.value
   }
-  console.log('request json data is ', data)
   console.log('request json data1 is ', data1)
-  const result = await saveBpmSimpleModel(data1)
+  const result = await saveBpmSimpleModel(data)
   console.log('save the result is ', result)
   if (result) {
     message.success('修改成功')
@@ -74,17 +76,35 @@ const test = async () => {
   } else {
     message.alert('修改失败')
   }
-  
 }
 const close = () => {
   router.push({ path: '/bpm/manager/model' })
 }
 onMounted(async () => {
+  const bpmnModel = await getModel(modelId)
+  if (bpmnModel) {
+    const formType = bpmnModel.formType
+    if (formType === 10) {
+      const bpmnForm = await getForm(bpmnModel.formId) as unknown as FormVO
+      const formFields = bpmnForm?.fields
+      if (formFields) {
+        formFields.forEach((fieldStr: string) => {
+          const { field, title } = JSON.parse(fieldStr)
+          defaultFieldsPermission.push({
+            field,
+            title,
+            permission: '2'
+          })
+        })
+      }
+      console.log('defaultFieldsPermissions', defaultFieldsPermission);
+    }
+  }
   console.log('the modelId is ', modelId)
   const result = await getBpmSimpleModel(modelId)
-  if(result){
+  if (result) {
     console.log('get the result is ', result)
-    nodeConfig.value = result;
+    nodeConfig.value = result
   }
 })
 </script>
@@ -104,7 +124,7 @@ onMounted(async () => {
   height: 40px;
   font-size: 14px;
   color: #f8f8fa;
-  background-image: linear-gradient(-30deg,#bbbbc4,#d5d5de),linear-gradient(#bcbcc5,#bcbcc5);
+  background-image: linear-gradient(-30deg, #bbbbc4, #d5d5de), linear-gradient(#bcbcc5, #bcbcc5);
   border-radius: 50%;
   justify-content: center;
   align-items: center;
@@ -130,19 +150,19 @@ onMounted(async () => {
   justify-content: center;
   font-size: 14px;
   color: #f8f8fa;
-  background-image: linear-gradient(90deg,#ff6a00,#f78b3e),linear-gradient(#ff6a00,#ff6a00);
+  background-image: linear-gradient(90deg, #ff6a00, #f78b3e), linear-gradient(#ff6a00, #ff6a00);
   border-radius: 50%;
 }
 
 .start-event-node-line::before {
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    width: 2px;
-    height: 100%;
-    margin: auto;
-    background-color: #cacaca;
-    content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 2px;
+  height: 100%;
+  margin: auto;
+  background-color: #cacaca;
+  content: '';
 }
 
 .start-event-node-line {
