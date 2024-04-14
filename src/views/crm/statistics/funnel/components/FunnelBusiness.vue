@@ -32,7 +32,6 @@ import { DICT_TYPE } from '@/utils/dict'
 import echarts from '@/plugins/echarts'
 import { FunnelChart } from 'echarts/charts'
 
-echarts?.use([FunnelChart])
 defineOptions({ name: 'FunnelBusiness' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
@@ -40,6 +39,7 @@ const loading = ref(false) // 加载中
 const list = ref<CrmStatisticFunnelRespVO[]>([]) // 列表的数据
 
 /** 销售漏斗 */
+echarts?.use([FunnelChart])
 const echartsOption = reactive<EChartsOption>({
   title: {
     text: '销售漏斗'
