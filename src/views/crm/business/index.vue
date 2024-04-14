@@ -5,35 +5,43 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="商机名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入商机名称"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入商机名称"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button type="primary" @click="openForm('create')" v-hasPermi="['crm:business:create']">
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-button v-hasPermi="['crm:business:create']" type="primary" @click="openForm('create')">
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
         </el-button>
         <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
           v-hasPermi="['crm:business:export']"
+          :loading="exportLoading"
+          plain
+          type="success"
+          @click="handleExport"
         >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
         </el-button>
       </el-form-item>
     </el-form>
@@ -46,8 +54,8 @@
       <el-tab-pane label="我参与的" name="2" />
       <el-tab-pane label="下属负责的" name="3" />
     </el-tabs>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column align="center" label="商机名称" fixed="left" prop="name" width="160">
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column align="center" fixed="left" label="商机名称" prop="name" width="160">
         <template #default="scope">
           <el-link :underline="false" type="primary" @click="openDetail(scope.row.id)">
             {{ scope.row.name }}
@@ -66,17 +74,17 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="商机金额（元）"
+        :formatter="erpPriceTableColumnFormatter"
         align="center"
+        label="商机金额（元）"
         prop="totalPrice"
         width="140"
-        :formatter="erpPriceTableColumnFormatter"
       />
       <el-table-column
-        label="预计成交日期"
-        align="center"
-        prop="dealTime"
         :formatter="dateFormatter"
+        align="center"
+        label="预计成交日期"
+        prop="dealTime"
         width="180px"
       />
       <el-table-column align="center" label="备注" prop="remark" width="200" />
@@ -97,49 +105,49 @@
         width="180px"
       />
       <el-table-column
-        label="更新时间"
-        align="center"
-        prop="updateTime"
         :formatter="dateFormatter"
+        align="center"
+        label="更新时间"
+        prop="updateTime"
         width="180px"
       />
       <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
         :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
         width="180px"
       />
       <el-table-column align="center" label="创建人" prop="creatorName" width="100px" />
       <el-table-column
-        label="商机状态组"
         align="center"
-        prop="statusTypeName"
         fixed="right"
+        label="商机状态组"
+        prop="statusTypeName"
         width="140"
       />
       <el-table-column
-        label="商机阶段"
         align="center"
-        prop="statusName"
         fixed="right"
+        label="商机阶段"
+        prop="statusName"
         width="120"
       />
-      <el-table-column label="操作" align="center" fixed="right" width="130px">
+      <el-table-column align="center" fixed="right" label="操作" width="130px">
         <template #default="scope">
           <el-button
+            v-hasPermi="['crm:business:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['crm:business:update']"
           >
             编辑
           </el-button>
           <el-button
+            v-hasPermi="['crm:business:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['crm:business:delete']"
           >
             删除
           </el-button>
@@ -148,9 +156,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -159,7 +167,7 @@
   <BusinessForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as BusinessApi from '@/api/crm/business'
@@ -216,7 +224,7 @@ const handleTabClick = (tab: TabsPaneContext) => {
 }
 
 /** 打开客户详情 */
-const { currentRoute, push } = useRouter()
+const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'CrmBusinessDetail', params: { id } })
 }
