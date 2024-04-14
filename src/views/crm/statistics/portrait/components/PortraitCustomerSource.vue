@@ -40,9 +40,9 @@ import {
 import { EChartsOption } from 'echarts'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
-import { getSumValue } from '@/utils'
+import { erpCalculatePercentage, getSumValue } from '@/utils'
 
-defineOptions({ name: 'CustomerSource' })
+defineOptions({ name: 'PortraitCustomerSource' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
@@ -185,8 +185,9 @@ const calculateProportion = (sourceList: CrmStatisticCustomerSourceRespVO[]) => 
   const sumDealCount = getSumValue(list.map((item) => item.dealCount))
   list.forEach((item) => {
     item.sourcePortion =
-      item.customerCount === 0 ? 0 : ((item.customerCount / sumCustomerCount) * 100).toFixed(2)
-    item.dealPortion = item.dealCount === 0 ? 0 : ((item.dealCount / sumDealCount) * 100).toFixed(2)
+      item.customerCount === 0 ? 0 : erpCalculatePercentage(item.customerCount, sumCustomerCount)
+    item.dealPortion =
+      item.dealCount === 0 ? 0 : erpCalculatePercentage(item.dealCount, sumDealCount)
   })
 }
 

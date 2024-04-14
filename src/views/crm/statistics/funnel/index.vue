@@ -19,7 +19,23 @@
           start-placeholder="开始日期"
           type="daterange"
           value-format="YYYY-MM-DD HH:mm:ss"
+          @change="handleQuery"
         />
+      </el-form-item>
+      <el-form-item label="时间间隔" prop="interval">
+        <el-select
+          v-model="queryParams.interval"
+          class="!w-240px"
+          placeholder="间隔类型"
+          @change="handleQuery"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.DATE_INTERVAL)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="归属部门" prop="deptId">
         <el-tree-select
@@ -30,11 +46,17 @@
           class="!w-240px"
           node-key="id"
           placeholder="请选择归属部门"
-          @change="queryParams.userId = undefined"
+          @change="(queryParams.userId = undefined), handleQuery()"
         />
       </el-form-item>
       <el-form-item label="员工" prop="userId">
-        <el-select v-model="queryParams.userId" class="!w-240px" clearable placeholder="员工">
+        <el-select
+          v-model="queryParams.userId"
+          class="!w-240px"
+          clearable
+          placeholder="员工"
+          @change="handleQuery"
+        >
           <el-option
             v-for="(user, index) in userListByDeptId"
             :key="index"
@@ -46,7 +68,7 @@
       <el-form-item>
         <el-button @click="handleQuery">
           <Icon class="mr-5px" icon="ep:search" />
-          搜索
+          查询
         </el-button>
         <el-button @click="resetQuery">
           <Icon class="mr-5px" icon="ep:refresh" />
@@ -59,22 +81,13 @@
   <!-- 客户统计 -->
   <el-col>
     <el-tabs v-model="activeTab">
-      <!-- 城市分布分析 -->
-      <el-tab-pane label="城市分布分析" lazy name="areaRef">
-        <PortraitCustomerArea ref="areaRef" :query-params="queryParams" />
+      <el-tab-pane label="销售漏斗分析" lazy name="funnelRef">
+        <FunnelBusiness ref="funnelRef" :query-params="queryParams" />
       </el-tab-pane>
-      <!-- 客户级别分析 -->
-      <el-tab-pane label="客户级别分析" lazy name="levelRef">
-        <PortraitCustomerLevel ref="levelRef" :query-params="queryParams" />
+      <el-tab-pane label="新增商机分析" lazy name="businessSummaryRef">
+        <BusinessSummary ref="businessSummaryRef" :query-params="queryParams" />
       </el-tab-pane>
-      <!-- 客户来源分析 -->
-      <el-tab-pane label="客户来源分析" lazy name="sourceRef">
-        <PortraitCustomerSource ref="sourceRef" :query-params="queryParams" />
-      </el-tab-pane>
-      <!-- 客户行业分析 -->
-      <el-tab-pane label="客户行业分析" lazy name="industryRef">
-        <PortraitCustomerIndustry ref="industryRef" :query-params="queryParams" />
-      </el-tab-pane>
+      <el-tab-pane label="商机转化率分析" lazy name="sourceRef" />
     </el-tabs>
   </el-col>
 </template>
@@ -85,14 +98,14 @@ import * as UserApi from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { defaultProps, handleTree } from '@/utils/tree'
-import PortraitCustomerArea from './components/PortraitCustomerArea.vue'
-import PortraitCustomerIndustry from './components/PortraitCustomerIndustry.vue'
-import PortraitCustomerSource from './components/PortraitCustomerSource.vue'
-import PortraitCustomerLevel from './components/PortraitCustomerLevel.vue'
+import FunnelBusiness from './components/FunnelBusiness.vue'
+import BusinessSummary from './components/BusinessSummary.vue'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
-defineOptions({ name: 'CrmStatisticsPortrait' })
+defineOptions({ name: 'CrmStatisticsFunnel' })
 
 const queryParams = reactive({
+  interval: 2, // WEEK, 周
   deptId: useUserStore().getUser.deptId,
   userId: undefined,
   times: [
@@ -113,26 +126,22 @@ const userListByDeptId = computed(() =>
     : []
 )
 
-const activeTab = ref('areaRef') // 活跃标签
-const areaRef = ref() // 客户地区分布
-const levelRef = ref() // 客户级别
+const activeTab = ref('funnelRef') // 活跃标签
+const funnelRef = ref() // 销售漏斗
+const businessSummaryRef = ref() // 新增商机分析
 const sourceRef = ref() // 客户来源
-const industryRef = ref() // 客户行业
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   switch (activeTab.value) {
-    case 'areaRef':
-      areaRef.value?.loadData?.()
+    case 'funnelRef':
+      funnelRef.value?.loadData?.()
       break
-    case 'levelRef':
-      levelRef.value?.loadData?.()
+    case 'businessSummaryRef':
+      businessSummaryRef.value?.loadData?.()
       break
     case 'sourceRef':
       sourceRef.value?.loadData?.()
-      break
-    case 'industryRef':
-      industryRef.value?.loadData?.()
       break
   }
 }
