@@ -3,13 +3,13 @@ import request from '@/config/axios'
 export interface CrmStatisticFunnelRespVO {
   customerCount: number // 客户数
   businessCount: number // 商机数
-  winCount: number // 赢单数
+  businessWinCount: number // 赢单数
 }
 
 export interface CrmStatisticsBusinessSummaryByDateRespVO {
   time: string // 时间
   businessCreateCount: number // 商机数
-  businessDealCount: number // 商机金额
+  totalPrice: number | string // 商机金额
 }
 
 // 客户分析 API
@@ -22,9 +22,9 @@ export const StatisticFunnelApi = {
     })
   },
   // 2. 获取商机结束状态统计
-  getBusinessEndStatusSummary: (params: any) => {
+  getBusinessSummaryByEndStatus: (params: any) => {
     return request.get({
-      url: '/crm/statistics-funnel/get-business-end-status-summary',
+      url: '/crm/statistics-funnel/get-business-summary-by-end-status',
       params
     })
   },

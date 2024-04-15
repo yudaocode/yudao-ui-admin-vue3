@@ -4,6 +4,10 @@
   <el-card shadow="never">
     <el-row>
       <el-col :span="24">
+        <el-button-group class="mb-10px">
+          <el-button type="primary" @click="handleActive(true)">客户视角</el-button>
+          <el-button type="primary" @click="handleActive(false)">动态视角</el-button>
+        </el-button-group>
         <el-skeleton :loading="loading" animated>
           <Echart :height="500" :options="echartsOption" />
         </el-skeleton>
@@ -35,6 +39,7 @@ import { FunnelChart } from 'echarts/charts'
 defineOptions({ name: 'FunnelBusiness' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
+const active = ref(true)
 const loading = ref(false) // 加载中
 const list = ref<CrmStatisticFunnelRespVO[]>([]) // 列表的数据
 
@@ -101,6 +106,11 @@ const echartsOption = reactive<EChartsOption>({
   ]
 }) as EChartsOption
 
+const handleActive = async (val: boolean) => {
+  active.value = val
+  await loadData()
+}
+
 /** 获取统计数据 */
 const loadData = async () => {
   loading.value = true
@@ -117,13 +127,20 @@ const loadData = async () => {
   ) {
     // tips：写死 value 值是为了保持漏斗顺序不变
     const list: { value: number; name: string }[] = []
-    list.push({ value: 60, name: `客户-${data.customerCount || 0}个` })
-    list.push({ value: 40, name: `商机-${data.businessCount || 0}个` })
-    list.push({ value: 20, name: `赢单-${data.winCount || 0}个` })
+    if (active.value) {
+      list.push({ value: 60, name: `客户-${data.customerCount || 0}个` })
+      list.push({ value: 40, name: `商机-${data.businessCount || 0}个` })
+      list.push({ value: 20, name: `赢单-${data.businessWinCount || 0}个` })
+    } else {
+      list.push({ value: data.customerCount || 0, name: `客户-${data.customerCount || 0}个` })
+      list.push({ value: data.businessCount || 0, name: `商机-${data.businessCount || 0}个` })
+      list.push({ value: data.businessWinCount || 0, name: `赢单-${data.businessWinCount || 0}个` })
+    }
+
     echartsOption.series[0]['data'] = list
   }
   // 2.2 获取商机结束状态统计
-  list.value = await StatisticFunnelApi.getBusinessEndStatusSummary(props.queryParams)
+  list.value = await StatisticFunnelApi.getBusinessSummaryByEndStatus(props.queryParams)
   loading.value = false
 }
 defineExpose({ loadData })

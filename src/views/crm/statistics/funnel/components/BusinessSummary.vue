@@ -118,7 +118,7 @@ const queryParams0 = reactive({
 const loading = ref(false) // 加载中
 const list = ref([]) // 列表的数据
 const total = ref(0)
-/** 将传进来的值赋值给 formData */
+/** 将传进来的值赋值给 queryParams0 */
 watch(
   () => props.queryParams,
   (data) => {
@@ -216,7 +216,7 @@ const fetchAndFill = async () => {
   }
   if (echartsOption.series && echartsOption.series[1] && echartsOption.series[1]['data']) {
     echartsOption.series[1]['data'] = businessSummaryByDate.map(
-      (s: CrmStatisticsBusinessSummaryByDateRespVO) => s.businessDealCount
+      (s: CrmStatisticsBusinessSummaryByDateRespVO) => s.totalPrice
     )
   }
 
