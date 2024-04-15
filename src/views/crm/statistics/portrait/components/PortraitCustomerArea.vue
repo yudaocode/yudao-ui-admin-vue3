@@ -106,7 +106,7 @@ const loadData = async () => {
   areaStatisticsList.value = areaList.map((item: CrmStatisticCustomerAreaRespVO) => {
     return {
       ...item,
-      areaName: item.areaName // TODO @puhui999：这里最好注释下原因哈, 🤣 我从 mall copy 过来的
+      areaName: item.areaName
       // .replace('维吾尔自治区', '')
       // .replace('壮族自治区', '')
       // .replace('回族自治区', '')

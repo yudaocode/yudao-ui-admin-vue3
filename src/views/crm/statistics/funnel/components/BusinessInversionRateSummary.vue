@@ -101,11 +101,11 @@
 </template>
 <script lang="ts" setup>
 import {
-  CrmStatisticsBusinessSummaryByDateRespVO,
+  CrmStatisticsBusinessInversionRateSummaryByDateRespVO,
   StatisticFunnelApi
 } from '@/api/crm/statistics/funnel'
 import { EChartsOption } from 'echarts'
-import { erpPriceTableColumnFormatter } from '@/utils'
+import { erpCalculatePercentage, erpPriceTableColumnFormatter } from '@/utils'
 import { dateFormatter } from '@/utils/formatTime'
 
 defineOptions({ name: 'BusinessSummary' })
@@ -143,15 +143,21 @@ const echartsOption = reactive<EChartsOption>({
   legend: {},
   series: [
     {
-      name: '新增商机数量',
+      name: '商机总数',
       type: 'bar',
       yAxisIndex: 0,
       data: []
     },
     {
-      name: '新增商机金额',
+      name: '赢单商机数',
       type: 'bar',
       yAxisIndex: 1,
+      data: []
+    },
+    {
+      name: '赢单转化率',
+      type: 'bar',
+      yAxisIndex: 2,
       data: []
     }
   ],
@@ -163,7 +169,7 @@ const echartsOption = reactive<EChartsOption>({
       brush: {
         type: ['lineX', 'clear'] // 区域缩放按钮、还原按钮
       },
-      saveAsImage: { show: true, name: '新增商机分析' } // 保存为图片
+      saveAsImage: { show: true, name: '商机转化率分析' } // 保存为图片
     }
   },
   tooltip: {
@@ -175,13 +181,19 @@ const echartsOption = reactive<EChartsOption>({
   yAxis: [
     {
       type: 'value',
-      name: '新增商机数量',
+      name: '商机总数',
       min: 0,
       minInterval: 1 // 显示整数刻度
     },
     {
       type: 'value',
-      name: '新增商机金额',
+      name: '赢单商机数',
+      min: 0,
+      minInterval: 1 // 显示整数刻度
+    },
+    {
+      type: 'value',
+      name: '赢单转化率',
       min: 0,
       minInterval: 1, // 显示整数刻度
       splitLine: {
@@ -202,24 +214,31 @@ const echartsOption = reactive<EChartsOption>({
 /** 获取数据并填充图表 */
 const fetchAndFill = async () => {
   // 1. 加载统计数据
-  const businessSummaryByDate = await StatisticFunnelApi.getBusinessSummaryByDate(props.queryParams)
+  const businessSummaryByDate = await StatisticFunnelApi.getBusinessInversionRateSummaryByDate(
+    props.queryParams
+  )
   // 2.1 更新 Echarts 数据
   if (echartsOption.xAxis && echartsOption.xAxis['data']) {
     echartsOption.xAxis['data'] = businessSummaryByDate.map(
-      (s: CrmStatisticsBusinessSummaryByDateRespVO) => s.time
+      (s: CrmStatisticsBusinessInversionRateSummaryByDateRespVO) => s.time
     )
   }
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
     echartsOption.series[0]['data'] = businessSummaryByDate.map(
-      (s: CrmStatisticsBusinessSummaryByDateRespVO) => s.businessCreateCount
+      (s: CrmStatisticsBusinessInversionRateSummaryByDateRespVO) => s.businessCount
     )
   }
   if (echartsOption.series && echartsOption.series[1] && echartsOption.series[1]['data']) {
     echartsOption.series[1]['data'] = businessSummaryByDate.map(
-      (s: CrmStatisticsBusinessSummaryByDateRespVO) => s.totalPrice
+      (s: CrmStatisticsBusinessInversionRateSummaryByDateRespVO) => s.businessWinCount
     )
   }
-
+  if (echartsOption.series && echartsOption.series[2] && echartsOption.series[2]['data']) {
+    echartsOption.series[2]['data'] = businessSummaryByDate.map(
+      (s: CrmStatisticsBusinessInversionRateSummaryByDateRespVO) =>
+        erpCalculatePercentage(s.businessWinCount, s.businessCount)
+    )
+  }
   // 2.2 更新列表数据
   await getList()
 }
