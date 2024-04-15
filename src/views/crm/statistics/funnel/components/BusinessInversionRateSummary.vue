@@ -134,81 +134,109 @@ watch(
 )
 /** 柱状图配置：纵向 */
 const echartsOption = reactive<EChartsOption>({
-  grid: {
-    left: 30,
-    right: 30, // 让 X 轴右侧显示完整
-    bottom: 20,
-    containLabel: true
+  color: ['#6ca2ff', '#6ac9d7', '#ff7474'],
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      // 坐标轴指示器，坐标轴触发有效
+      type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+    }
   },
-  legend: {},
+  legend: {
+    data: ['赢单转化率', '商机总数', '赢单商机数'],
+    bottom: '0px',
+    itemWidth: 14
+  },
+  grid: {
+    top: '40px',
+    left: '40px',
+    right: '40px',
+    bottom: '40px',
+    containLabel: true,
+    borderColor: '#fff'
+  },
+  xAxis: [
+    {
+      type: 'category',
+      data: [],
+      axisTick: {
+        alignWithLabel: true,
+        lineStyle: { width: 0 }
+      },
+      axisLabel: {
+        color: '#BDBDBD'
+      },
+      /** 坐标轴轴线相关设置 */
+      axisLine: {
+        lineStyle: { color: '#BDBDBD' }
+      },
+      splitLine: {
+        show: false
+      }
+    }
+  ],
+  yAxis: [
+    {
+      type: 'value',
+      name: '赢单转化率',
+      axisTick: {
+        alignWithLabel: true,
+        lineStyle: { width: 0 }
+      },
+      axisLabel: {
+        color: '#BDBDBD',
+        formatter: '{value}%'
+      },
+      /** 坐标轴轴线相关设置 */
+      axisLine: {
+        lineStyle: { color: '#BDBDBD' }
+      },
+      splitLine: {
+        show: false
+      }
+    },
+    {
+      type: 'value',
+      name: '商机数',
+      axisTick: {
+        alignWithLabel: true,
+        lineStyle: { width: 0 }
+      },
+      axisLabel: {
+        color: '#BDBDBD',
+        formatter: '{value}个'
+      },
+      /** 坐标轴轴线相关设置 */
+      axisLine: {
+        lineStyle: { color: '#BDBDBD' }
+      },
+      splitLine: {
+        show: false
+      }
+    }
+  ],
   series: [
+    {
+      name: '赢单转化率',
+      type: 'line',
+      yAxisIndex: 0,
+      data: []
+    },
     {
       name: '商机总数',
       type: 'bar',
-      yAxisIndex: 0,
+      yAxisIndex: 1,
+      barWidth: 15,
       data: []
     },
     {
       name: '赢单商机数',
       type: 'bar',
       yAxisIndex: 1,
-      data: []
-    },
-    {
-      name: '赢单转化率',
-      type: 'bar',
-      yAxisIndex: 2,
+      barWidth: 15,
       data: []
     }
-  ],
-  toolbox: {
-    feature: {
-      dataZoom: {
-        xAxisIndex: false // 数据区域缩放：Y 轴不缩放
-      },
-      brush: {
-        type: ['lineX', 'clear'] // 区域缩放按钮、还原按钮
-      },
-      saveAsImage: { show: true, name: '商机转化率分析' } // 保存为图片
-    }
-  },
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: {
-      type: 'shadow'
-    }
-  },
-  yAxis: [
-    {
-      type: 'value',
-      name: '商机总数',
-      min: 0,
-      minInterval: 1 // 显示整数刻度
-    },
-    {
-      type: 'value',
-      name: '赢单商机数',
-      min: 0,
-      minInterval: 1 // 显示整数刻度
-    },
-    {
-      type: 'value',
-      name: '赢单转化率',
-      min: 0,
-      minInterval: 1, // 显示整数刻度
-      splitLine: {
-        lineStyle: {
-          type: 'dotted', // 右侧网格线虚化, 减少混乱
-          opacity: 0.7
-        }
-      }
-    }
-  ],
-  xAxis: {
-    type: 'category',
-    name: '日期',
-    data: []
-  }
+  ]
 }) as EChartsOption
 
 /** 获取数据并填充图表 */
@@ -218,27 +246,28 @@ const fetchAndFill = async () => {
     props.queryParams
   )
   // 2.1 更新 Echarts 数据
-  if (echartsOption.xAxis && echartsOption.xAxis['data']) {
-    echartsOption.xAxis['data'] = businessSummaryByDate.map(
+  if (echartsOption.xAxis && echartsOption.xAxis[0] && echartsOption.xAxis[0]['data']) {
+    echartsOption.xAxis[0]['data'] = businessSummaryByDate.map(
       (s: CrmStatisticsBusinessInversionRateSummaryByDateRespVO) => s.time
     )
   }
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
     echartsOption.series[0]['data'] = businessSummaryByDate.map(
-      (s: CrmStatisticsBusinessInversionRateSummaryByDateRespVO) => s.businessCount
-    )
-  }
-  if (echartsOption.series && echartsOption.series[1] && echartsOption.series[1]['data']) {
-    echartsOption.series[1]['data'] = businessSummaryByDate.map(
-      (s: CrmStatisticsBusinessInversionRateSummaryByDateRespVO) => s.businessWinCount
-    )
-  }
-  if (echartsOption.series && echartsOption.series[2] && echartsOption.series[2]['data']) {
-    echartsOption.series[2]['data'] = businessSummaryByDate.map(
       (s: CrmStatisticsBusinessInversionRateSummaryByDateRespVO) =>
         erpCalculatePercentage(s.businessWinCount, s.businessCount)
     )
   }
+  if (echartsOption.series && echartsOption.series[1] && echartsOption.series[1]['data']) {
+    echartsOption.series[1]['data'] = businessSummaryByDate.map(
+      (s: CrmStatisticsBusinessInversionRateSummaryByDateRespVO) => s.businessCount
+    )
+  }
+  if (echartsOption.series && echartsOption.series[2] && echartsOption.series[2]['data']) {
+    echartsOption.series[2]['data'] = businessSummaryByDate.map(
+      (s: CrmStatisticsBusinessInversionRateSummaryByDateRespVO) => s.businessWinCount
+    )
+  }
+
   // 2.2 更新列表数据
   await getList()
 }
