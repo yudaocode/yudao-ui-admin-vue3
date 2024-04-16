@@ -80,7 +80,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['infra:api-error-log:export']"
+          v-hasPermi="['infra:api-access-log:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
