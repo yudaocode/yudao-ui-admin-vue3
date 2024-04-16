@@ -119,7 +119,7 @@
       <el-table-column align="center" label="操作">
         <template #default="scope">
           <el-button
-            v-hasPermi="['infra:config:update']"
+            v-hasPermi="['infra:sensitive-word:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
@@ -127,7 +127,7 @@
             编辑
           </el-button>
           <el-button
-            v-hasPermi="['infra:config:delete']"
+            v-hasPermi="['infra:sensitive-word:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
