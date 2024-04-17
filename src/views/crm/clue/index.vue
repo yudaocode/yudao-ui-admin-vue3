@@ -178,8 +178,8 @@
 import { DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
+import makercall from '@/utils/callUtils'
 import * as ClueApi from '@/api/crm/clue'
-import * as CallCenterApi from '@/api/crm/callcenter'
 import ClueForm from './ClueForm.vue'
 import { TabsPaneContext } from 'element-plus'
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
@@ -189,6 +189,7 @@ defineOptions({ name: 'CrmClue' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -205,12 +206,6 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const activeName = ref('1') // 列表 tab
-const calldata = ref({
-  manufacturerId: 1,
-  callId: 0,
-  callType: 1
-
-})
 
 
 /** 查询列表 */
@@ -301,18 +296,12 @@ const handleSelectionChange = async (selection) => {
 }
 
 const call = async (callid: number)=>{
-  // await CallCenterApi.callCenterUserbyPhone("17710786247")
   try{
-    calldata.value.callId = callid
-    const data = calldata.value as unknown as CallCenterApi.CallVo
-    const respdata = await CallCenterApi.callCenterCall(data)
-    console.log(respdata)
-    message.success(t('callcenter.callSuccess') + '请观注外呼手机状态')
+    makercall(callid,1)// callType 传1为线索
   }catch {
   } finally {
     exportLoading.value = false
   }
-  // CallCenterApi.Callyunke()
 }
 
 /** 初始化 **/
@@ -320,3 +309,4 @@ onMounted(() => {
   getList()
 })
 </script>
+@/utils/callUtils

@@ -239,8 +239,7 @@ import CustomerForm from './CustomerForm.vue'
 import CustomerImportForm from './CustomerImportForm.vue'
 import { TabsPaneContext } from 'element-plus'
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
-import * as CallCenterApi from '@/api/crm/callcenter'
-
+import makercall from '@/utils/callUtils'
 
 defineOptions({ name: 'CrmCustomer' })
 
@@ -264,12 +263,7 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
 const activeName = ref('1') // 列表 tab
-const calldata = ref({
-  manufacturerId: 1,
-  callId: 0,
-  callType: 2
 
-})
 /** tab 切换 */
 const handleTabClick = (tab: TabsPaneContext) => {
   queryParams.sceneType = tab.paneName
@@ -366,11 +360,7 @@ const handleExport = async () => {
 const call = async (callid: number)=>{
   // await CallCenterApi.callCenterUserbyPhone("17710786247")
   try{
-    calldata.value.callId = callid
-    const data = calldata.value as unknown as CallCenterApi.CallVo
-    const respdata = await CallCenterApi.callCenterCall(data)
-    console.log(respdata)
-    message.success(t('callcenter.callSuccess') + '请观注外呼手机状态')
+    makercall(callid,2) //客户为2
   }catch {
   } finally {
     exportLoading.value = false

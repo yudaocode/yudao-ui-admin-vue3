@@ -34,15 +34,8 @@
 import { DICT_TYPE } from '@/utils/dict'
 import * as ClueApi from '@/api/crm/clue'
 import { formatDate } from '@/utils/formatTime'
-import * as CallCenterApi from '@/api/crm/callcenter'
+import makercall from '@/utils/callUtils'
 
-const calldata = ref({
-  manufacturerId: 1,
-  callId: 0,
-  callType: 1
-})
-const { t } = useI18n() // 国际化
-const message = useMessage() // 消息弹窗
 
 
 defineOptions({ name: 'CrmClueDetailsHeader' })
@@ -54,14 +47,10 @@ defineProps<{
 const call = async (callid: number)=>{
   // await CallCenterApi.callCenterUserbyPhone("19223142566")
   try{
-    calldata.value.callId = callid
-    const data = calldata.value as unknown as CallCenterApi.CallVo
-    const respdata = await CallCenterApi.callCenterCall(data)
-    console.log(respdata)
-    message.success(t('callcenter.callSuccess') + '请观注外呼手机状态')
+    makercall(callid,1)
   }catch {
+
   } 
-  // CallCenterApi.Callyunke()
 }
 
 </script>
