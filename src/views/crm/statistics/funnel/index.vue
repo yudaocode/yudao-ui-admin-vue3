@@ -87,7 +87,12 @@
       <el-tab-pane label="新增商机分析" lazy name="businessSummaryRef">
         <BusinessSummary ref="businessSummaryRef" :query-params="queryParams" />
       </el-tab-pane>
-      <el-tab-pane label="商机转化率分析" lazy name="sourceRef" />
+      <el-tab-pane label="商机转化率分析" lazy name="businessInversionRateSummaryRef">
+        <BusinessInversionRateSummary
+          ref="businessInversionRateSummaryRef"
+          :query-params="queryParams"
+        />
+      </el-tab-pane>
     </el-tabs>
   </el-col>
 </template>
@@ -100,6 +105,7 @@ import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/form
 import { defaultProps, handleTree } from '@/utils/tree'
 import FunnelBusiness from './components/FunnelBusiness.vue'
 import BusinessSummary from './components/BusinessSummary.vue'
+import BusinessInversionRateSummary from './components/BusinessInversionRateSummary.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'CrmStatisticsFunnel' })
@@ -129,7 +135,7 @@ const userListByDeptId = computed(() =>
 const activeTab = ref('funnelRef') // 活跃标签
 const funnelRef = ref() // 销售漏斗
 const businessSummaryRef = ref() // 新增商机分析
-const sourceRef = ref() // 客户来源
+const businessInversionRateSummaryRef = ref() // 商机转化率分析
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
@@ -140,8 +146,8 @@ const handleQuery = () => {
     case 'businessSummaryRef':
       businessSummaryRef.value?.loadData?.()
       break
-    case 'sourceRef':
-      sourceRef.value?.loadData?.()
+    case 'businessInversionRateSummaryRef':
+      businessInversionRateSummaryRef.value?.loadData?.()
       break
   }
 }
