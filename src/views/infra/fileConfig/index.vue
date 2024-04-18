@@ -107,7 +107,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['infra:config:delete']"
+            v-hasPermi="['infra:file-config:delete']"
           >
             删除
           </el-button>
