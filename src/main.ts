@@ -29,7 +29,7 @@ import '@/plugins/animate.css'
 import router, { setupRouter } from '@/router'
 
 // 其它指令 
-import { setupAuth, setupMountedFoucs } from '@/directives'
+import { setupAuth, setupMountedFocus } from '@/directives'
 
 import { createApp } from 'vue'
 
@@ -60,7 +60,7 @@ const setupAll = async () => {
 
   setupAuth(app)
 
-  setupMountedFoucs(app)
+  setupMountedFocus(app)
 
   await router.isReady()
 

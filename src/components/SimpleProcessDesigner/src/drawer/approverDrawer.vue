@@ -162,7 +162,7 @@
           </el-form>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="设置字段权限">
+      <el-tab-pane label="设置字段权限" v-if ="formType === 10">
         <div class="field-setting-pane h-full w-full flex flex-col">
           <div class="field-setting-content mr-2 overflow-auto py-4 pr-2">
             <div class="field-container flex flex-col flex-items-start">
@@ -175,30 +175,43 @@
                     <span class="setting-title-label">只读</span>
                     <span class="setting-title-label">隐藏</span>
                   </div>
-                  <div class="field-setting-item">
+                  <!-- <div class="field-setting-item">
                     <span class="field-setting-item-label">全选</span>
                     <span class="all-checkbox-wrap">
-                      <el-checkbox label="" size="large" />
+                      <el-checkbox
+                        label=""
+                        size="large"
+                      />
                     </span>
                     <span class="all-checkbox-wrap">
-                      <el-checkbox label="" size="large" />
+                      <el-checkbox
+                        label=""
+                        size="large"
+                      />
                     </span>
                     <span class="all-checkbox-wrap">
-                      <el-checkbox label="" size="large" />
+                      <el-checkbox
+                        label=""
+                        size="large"
+                      />
                     </span>
-                  </div>
+                  </div> -->
                   <div class="field-setting-item-check">
-                    <div class="field-setting-item" v-for="(item,index) in candidateConfig.fieldsPermission" :key="index">
+                    <div
+                      class="field-setting-item"
+                      v-for="(item, index) in candidateConfig.fieldsPermission"
+                      :key="index"
+                    >
                       <span class="field-setting-item-label"> {{ item.title }}</span>
-                      <el-radio-group v-model="item.permission" >
+                      <el-radio-group v-model="item.permission">
                         <div class="item-radio-wrap">
-                            <el-radio value="1"  size="large" label="1"/>
+                          <el-radio value="1" size="large" label="1" />
                         </div>
                         <div class="item-radio-wrap">
-                            <el-radio value="2"  size="large" label="2"/>
+                          <el-radio value="2" size="large" label="2" />
                         </div>
                         <div class="item-radio-wrap">
-                            <el-radio value="3"  size="large" label="3"/>
+                          <el-radio value="3" size="large" label="3" />
                         </div>
                       </el-radio-group>
                     </div>
@@ -223,8 +236,8 @@
 <script lang="ts" setup>
 import { ref, watch, computed, toRaw } from 'vue'
 import { approveMethods } from '../util'
-import { useWorkFlowStoreWithOut } from '@/store/modules/simpleWorkflow'
-import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
+import { useWorkFlowStoreWithOut } from '@/store/modules/bpm/simpleWorkflow'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
@@ -241,15 +254,14 @@ const candidateConfig = ref({
   candidateStrategy: undefined,
   candidateParam: [],
   approveMethod: undefined,
-  fieldsPermission:[]
+  fieldsPermission: []
 })
-// let approverConfig = ref({})
-let store = useWorkFlowStoreWithOut()
+const store = useWorkFlowStoreWithOut()
 let { setApproverDrawer, setUserTaskConfig } = store
 // let approverConfig1 = computed(() => store.approverConfig1)
 let approverDrawer = computed(() => store.approverDrawer)
 const userTaskConfig = computed(() => store.userTaskConfig)
-
+const formType = inject('formType')
 let visible = computed({
   get() {
     return approverDrawer.value
@@ -280,7 +292,9 @@ watch(userTaskConfig, (val) => {
 
 const saveConfig = () => {
   const rawConfig = toRaw(userTaskConfig.value)
-  const { approveMethod, candidateStrategy, candidateParam, fieldsPermission } = toRaw(candidateConfig.value)
+  const { approveMethod, candidateStrategy, candidateParam, fieldsPermission } = toRaw(
+    candidateConfig.value
+  )
   const candidateParamStr = candidateParam.join(',')
   rawConfig.value.attributes = {
     approveMethod,
@@ -309,6 +323,24 @@ const closeDrawer = () => {
 const changecandidateStrategy = () => {
   candidateConfig.value.candidateParam = []
 }
+const handleAllCheck = (event, type) => {
+  console.log('event', event);
+  console.log('type', type);
+  event.target.checked = true;  
+  let permission = '1'
+  if (type === 'edit' && editAllChecked.value) {
+    permission = '1'
+  }
+  if (type === 'read' && readAllChecked.value) {
+    permission = '2'
+  }
+  if (type === 'hide' && hideAllChecked.value) {
+    permission = '3'
+  }
+  candidateConfig.value.fieldsPermission.forEach((item) => {
+    item.permission = permission
+  })
+}
 onMounted(async () => {
   // 获得角色列表
   roleOptions.value = await RoleApi.getSimpleRoleList()
@@ -321,7 +353,6 @@ onMounted(async () => {
   deptTreeOptions.value = handleTree(deptOptions, 'id')
   // 获得用户组列表
   userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
-
 })
 </script>
 <style lang="scss" scoped>
@@ -387,18 +418,17 @@ onMounted(async () => {
     padding-left: 6px;
     text-align: center;
   }
-
 }
 
-::v-deep(.el-radio__label) {  
-  opacity: 0; /* 隐藏标签文本 */  
+::v-deep(.el-radio__label) {
+  opacity: 0; /* 隐藏标签文本 */
 }
 
-::v-deep(.el-divider--horizontal) {  
+::v-deep(.el-divider--horizontal) {
   display: block;
   width: 100%;
   height: 1px;
   margin: 4px 0;
   border-top: 1px var(--el-border-color) var(--el-border-style);
-} 
+}
 </style>

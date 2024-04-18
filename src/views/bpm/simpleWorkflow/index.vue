@@ -1,22 +1,16 @@
 <template>
   <div>
     <section class="dingflow-design">
-      <el-row>
-        <el-col :span="20" />
-        <el-col :span="4">
-          <el-button type="primary" size="small" @click="test">保存(用于测试，还未完成)</el-button>
-        </el-col>
-      </el-row>
+      <div class="sticky right-0 top-0 z-10 w-full flex justify-end bg-white p-2 pr-4">
+        <el-button type="primary" size="small" @click="test">保存(测试中，待完善)</el-button>
+      </div>
       <div class="box-scale">
         <div class="start-event-node">
           <div class="start-event-node-circle">开始</div>
         </div>
         <div class="start-event-node-line"></div>
-        <nodeWrap v-model:nodeConfig="nodeConfig" :defaultFieldsPermission="defaultFieldsPermission" />
-        <!-- <div class="end-node">
-          <div class="end-node-circle"></div>
-          <div class="end-node-text">流程结束</div>
-        </div> -->
+        <nodeWrap v-model:nodeConfig="nodeConfig"/>
+       
         <div class="end-event">
           <div class="end-event-circle">结束</div>
         </div>
@@ -51,6 +45,9 @@ const nodeConfig = ref<WorkFlowNode>({
 })
 // 默认的表单字段权限
 const defaultFieldsPermission: any[] = []
+const  formType = ref(20);
+provide('defaultFieldsPermission', defaultFieldsPermission)
+provide('formType', formType)
 const test = async () => {
   if (!modelId) {
     message.error('缺少模型 modelId 编号')
@@ -83,8 +80,8 @@ const close = () => {
 onMounted(async () => {
   const bpmnModel = await getModel(modelId)
   if (bpmnModel) {
-    const formType = bpmnModel.formType
-    if (formType === 10) {
+    formType.value = bpmnModel.formType
+    if (formType.value === 10) {
       const bpmnForm = await getForm(bpmnModel.formId) as unknown as FormVO
       const formFields = bpmnForm?.fields
       if (formFields) {

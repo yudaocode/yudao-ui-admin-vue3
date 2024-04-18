@@ -22,7 +22,7 @@
             class="ant-input editable-title-input"
             @blur="blurEvent(-1)"
             @focus="$event.currentTarget?.select()"
-            v-mountedFoucs
+            v-mountedFocus
             v-model="nodeConfig.name"
             :placeholder="defaultText"
           />
@@ -44,7 +44,7 @@
         <i class="anticon anticon-exclamation-circle"></i>
       </div>
     </div>
-    <addNode v-model:childNodeP="nodeConfig.childNode" :default-fields-permission="props.defaultFieldsPermission" />
+    <addNode v-model:childNodeP="nodeConfig.childNode" />
   </div>
   <div class="branch-wrap" v-if="nodeConfig.type == 4">
     <div class="branch-box-wrap">
@@ -60,7 +60,7 @@
                   class="ant-input editable-title-input"
                   @blur="blurEvent(index)"
                   @focus="$event.currentTarget?.select()"
-                  v-mountedFoucs
+                  v-mountedFocus
                   v-model="item.name"
                 />
                 <span v-else class="editable-title" @click="clickEvent(index)">{{
@@ -92,10 +92,10 @@
                   <i class="anticon anticon-exclamation-circle"></i>
                 </div>
               </div>
-              <addNode v-model:childNodeP="item.childNode" :default-fields-permission="props.defaultFieldsPermission"/>
+              <addNode v-model:childNodeP="item.childNode" />
             </div>
           </div>
-          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" :default-fields-permission="props.defaultFieldsPermission"/>
+          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" />
           <template v-if="index == 0">
             <div class="top-left-cover-line"></div>
             <div class="bottom-left-cover-line"></div>
@@ -106,7 +106,7 @@
           </template>
         </div>
       </div>
-      <addNode v-model:childNodeP="nodeConfig.childNode" :default-fields-permission="props.defaultFieldsPermission"/>
+      <addNode v-model:childNodeP="nodeConfig.childNode" />
     </div>
   </div>
   <div class="branch-wrap" v-if="nodeConfig.type == 5">
@@ -123,7 +123,7 @@
                   class="ant-input editable-title-input"
                   @blur="blurEvent(index)"
                   @focus="$event.currentTarget?.select()"
-                  v-mountedFoucs
+                  v-mountedFocus
                   v-model="item.name"
                 />
                 <span v-else class="editable-title" @click="clickEvent(index)">{{
@@ -137,10 +137,10 @@
                   <i class="anticon anticon-exclamation-circle"></i>
                 </div>
               </div>
-              <addNode v-model:childNodeP="item.childNode" :default-fields-permission="props.defaultFieldsPermission"/>
+              <addNode v-model:childNodeP="item.childNode" />
             </div>
           </div>
-          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" :default-fields-permission="props.defaultFieldsPermission" />
+          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" />
           <template v-if="index == 0">
             <div class="top-left-cover-line"></div>
             <div class="bottom-left-cover-line"></div>
@@ -151,7 +151,7 @@
           </template>
         </div>
       </div>
-      <addNode v-model:childNodeP="nodeConfig.childNode" :show-add-button="false" :default-fields-permission="props.defaultFieldsPermission"/>
+      <addNode v-model:childNodeP="nodeConfig.childNode" :show-add-button="false" />
     </div>
   </div>
   <div class="branch-wrap" v-if="nodeConfig.type == 7">
@@ -168,7 +168,7 @@
                   class="ant-input editable-title-input"
                   @blur="blurEvent(index)"
                   @focus="$event.currentTarget?.select()"
-                  v-mountedFoucs
+                  v-mountedFocus
                   v-model="item.name"
                 />
                 <span v-else class="editable-title" @click="clickEvent(index)">
@@ -186,10 +186,10 @@
                   <i class="anticon anticon-exclamation-circle"></i>
                 </div>
               </div>
-              <addNode v-model:childNodeP="item.childNode"  :default-fields-permission="props.defaultFieldsPermission"/>
+              <addNode v-model:childNodeP="item.childNode" />
             </div>
           </div>
-          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" :default-fields-permission="props.defaultFieldsPermission" />
+          <nodeWrap v-if="item.childNode" v-model:nodeConfig="item.childNode" />
           <template v-if="index == 0">
             <div class="top-left-cover-line"></div>
             <div class="bottom-left-cover-line"></div>
@@ -200,7 +200,7 @@
           </template>
         </div>
       </div>
-      <addNode v-model:childNodeP="nodeConfig.childNode" :show-add-button="false" :default-fields-permission="props.defaultFieldsPermission" />
+      <addNode v-model:childNodeP="nodeConfig.childNode" :show-add-button="false" />
     </div>
   </div>
   <div class="node-wrap" v-if="nodeConfig.type === NodeType.PARALLEL_NODE_JOIN || nodeConfig.type === NodeType.INCLUSIVE_NODE_JOIN">
@@ -209,9 +209,9 @@
         <div class="text">聚合</div>
       </div>
     </div>
-    <addNode v-model:childNodeP="nodeConfig.childNode" :default-fields-permission="props.defaultFieldsPermission" />
+    <addNode v-model:childNodeP="nodeConfig.childNode"  />
   </div>
-  <nodeWrap v-if="nodeConfig.childNode" v-model:nodeConfig="nodeConfig.childNode" :default-fields-permission="props.defaultFieldsPermission" />
+  <nodeWrap v-if="nodeConfig.childNode" v-model:nodeConfig="nodeConfig.childNode" />
 </template>
 <script lang="ts" setup>
 import addNode from './addNode.vue'
@@ -225,17 +225,13 @@ import {
   getApproverShowText
 } from './util'
 import { WorkFlowNode, NodeType } from './consts'
-import { useWorkFlowStoreWithOut } from '@/store/modules/simpleWorkflow'
+import { useWorkFlowStoreWithOut } from '@/store/modules/bpm/simpleWorkflow'
 let _uid = getCurrentInstance().uid
 import { generateUUID } from '@/utils'
 let props = defineProps({
   nodeConfig: {
     type: Object as () => WorkFlowNode,
     default: () => ({}) as WorkFlowNode
-  },
-  defaultFieldsPermission : {
-    type: Array,
-    default: () => ([])
   }
 })
 

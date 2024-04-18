@@ -71,18 +71,15 @@ let props = defineProps({
     type:Boolean,
     default:true
   },
-  defaultFieldsPermission : {
-    type: Array,
-    default: () => ([])
-  }
 })
 let emits = defineEmits(['update:childNodeP'])
 let visible = ref(false)
+const defaultFieldsPermission = inject('defaultFieldsPermission')
+
 const addType = (type: number) => {
   visible.value = false
   // 审核节点
   if (type === NodeType.APPROVE_USER_NODE) {
-    console.log("props.defaultFieldsPermission", props.defaultFieldsPermission)
     const data = {
       name: '审核人',
       error: true,
@@ -92,7 +89,7 @@ const addType = (type: number) => {
         approveMethod: undefined,
         candidateStrategy: undefined,
         candidateParam: undefined,
-        fieldsPermission: props.defaultFieldsPermission,
+        fieldsPermission: defaultFieldsPermission,
       },
       childNode: props.childNodeP
     }

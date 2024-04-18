@@ -144,7 +144,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, watch, computed, toRaw } from 'vue'
-import { useWorkFlowStoreWithOut } from '@/store/modules/simpleWorkflow'
+import { useWorkFlowStoreWithOut } from '@/store/modules/bpm/simpleWorkflow'
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'

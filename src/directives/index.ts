@@ -12,12 +12,11 @@ export const setupAuth = (app: App<Element>) => {
   hasPermi(app)
 }
 
-// TODO @jason：拼写是不是 Focus 聚焦？
 /**
- * 导出指令：v-mountedFoucs
+ * 导出指令：v-mountedFocus
  */
-export const setupMountedFoucs = (app: App<Element>) => {
-  app.directive('mountedFoucs', {
+export const setupMountedFocus = (app: App<Element>) => {
+  app.directive('mountedFocus', {
     mounted(el) {
       el.focus()
     }
