@@ -82,8 +82,7 @@ const resetFlowCondition = () => {
   if (
     bpmnElementSourceRef.value &&
     bpmnElementSourceRef.value.default &&
-    bpmnElementSourceRef.value.default.id === bpmnElement.value.id &&
-    flowConditionForm.value.type == 'default'
+    bpmnElementSourceRef.value.default.id === bpmnElement.value.id
   ) {
     // 默认
     flowConditionForm.value = { type: 'default' }
