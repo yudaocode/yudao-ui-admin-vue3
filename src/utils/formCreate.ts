@@ -22,9 +22,11 @@ export const encodeFields = (designerRef: object) => {
 // 解码表单 Fields
 export const decodeFields = (fields: string[]) => {
   const rule: object[] = []
-  fields.forEach((item) => {
-    rule.push(JSON.parse(item))
-  })
+  if(fields){
+    fields.forEach((item) => {
+      rule.push(JSON.parse(item))
+    })
+  }
   return rule
 }
 
