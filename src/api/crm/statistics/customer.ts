@@ -67,6 +67,18 @@ export interface CrmStatisticsCustomerDealCycleByUserRespVO {
   customerDealCount: number
 }
 
+export interface CrmStatisticsCustomerDealCycleByAreaRespVO {
+  areaName: string
+  customerDealCycle: number
+  customerDealCount: number
+}
+
+export interface CrmStatisticsCustomerDealCycleByProductRespVO {
+  productName: string
+  customerDealCycle: number
+  customerDealCount: number
+}
+
 // 客户分析 API
 export const StatisticsCustomerApi = {
   // 1.1 客户总量分析(按日期)
@@ -136,6 +148,20 @@ export const StatisticsCustomerApi = {
   getCustomerDealCycleByUser: (params: any) => {
     return request.get({
       url: '/crm/statistics-customer/get-customer-deal-cycle-by-user',
+      params
+    })
+  },
+  // 6.2 获取客户成交周期(按用户)
+  getCustomerDealCycleByArea: (params: any) => {
+    return request.get({
+      url: '/crm/statistics-customer/get-customer-deal-cycle-by-area',
+      params
+    })
+  },
+  // 6.2 获取客户成交周期(按用户)
+  getCustomerDealCycleByProduct: (params: any) => {
+    return request.get({
+      url: '/crm/statistics-customer/get-customer-deal-cycle-by-product',
       params
     })
   }

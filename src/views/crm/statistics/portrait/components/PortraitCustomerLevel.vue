@@ -39,10 +39,10 @@ import {
 } from '@/api/crm/statistics/portrait'
 import { EChartsOption } from 'echarts'
 import { DICT_TYPE, getDictLabel } from '@/utils/dict'
-import { getSumValue } from '@/utils'
+import { erpCalculatePercentage, getSumValue } from '@/utils'
 import { isEmpty } from '@/utils/is'
 
-defineOptions({ name: 'CustomerSource' })
+defineOptions({ name: 'PortraitCustomerLevel' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
@@ -184,10 +184,10 @@ const calculateProportion = (levelList: CrmStatisticCustomerLevelRespVO[]) => {
   const sumCustomerCount = getSumValue(list.map((item) => item.customerCount))
   const sumDealCount = getSumValue(list.map((item) => item.dealCount))
   list.forEach((item) => {
-    // TODO @puhui999：可以使用 erpCalculatePercentage 方法
     item.levelPortion =
-      item.customerCount === 0 ? 0 : ((item.customerCount / sumCustomerCount) * 100).toFixed(2)
-    item.dealPortion = item.dealCount === 0 ? 0 : ((item.dealCount / sumDealCount) * 100).toFixed(2)
+      item.customerCount === 0 ? 0 : erpCalculatePercentage(item.customerCount, sumCustomerCount)
+    item.dealPortion =
+      item.dealCount === 0 ? 0 : erpCalculatePercentage(item.dealCount, sumDealCount)
   })
 }
 

@@ -197,14 +197,15 @@ export enum DICT_TYPE {
   // ========== CRM - 客户管理模块 ==========
   CRM_AUDIT_STATUS = 'crm_audit_status', // CRM 审批状态
   CRM_BIZ_TYPE = 'crm_biz_type', // CRM 业务类型
+  CRM_BUSINESS_END_STATUS_TYPE = 'crm_business_end_status_type', // CRM 商机结束状态类型
   CRM_RECEIVABLE_RETURN_TYPE = 'crm_receivable_return_type', // CRM 回款的还款方式
-  CRM_CUSTOMER_INDUSTRY = 'crm_customer_industry',
-  CRM_CUSTOMER_LEVEL = 'crm_customer_level',
-  CRM_CUSTOMER_SOURCE = 'crm_customer_source',
-  CRM_PRODUCT_STATUS = 'crm_product_status',
+  CRM_CUSTOMER_INDUSTRY = 'crm_customer_industry', // CRM 客户所属行业
+  CRM_CUSTOMER_LEVEL = 'crm_customer_level', // CRM 客户级别
+  CRM_CUSTOMER_SOURCE = 'crm_customer_source', // CRM 客户来源
+  CRM_PRODUCT_STATUS = 'crm_product_status', // CRM 商品状态
   CRM_PERMISSION_LEVEL = 'crm_permission_level', // CRM 数据权限的级别
-  CRM_PRODUCT_UNIT = 'crm_product_unit', // 产品单位
-  CRM_FOLLOW_UP_TYPE = 'crm_follow_up_type', // 跟进方式
+  CRM_PRODUCT_UNIT = 'crm_product_unit', // CRM 产品单位
+  CRM_FOLLOW_UP_TYPE = 'crm_follow_up_type', // CRM 跟进方式
 
   // ========== ERP - 企业资源计划模块  ==========
   ERP_AUDIT_STATUS = 'erp_audit_status', // ERP 审批状态

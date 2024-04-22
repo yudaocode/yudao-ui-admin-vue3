@@ -11,7 +11,7 @@
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="list">
       <el-table-column label="序号" align="center" type="index" width="80" />
-      <el-table-column label="日期" align="center" prop="ownerUserName" min-width="200" />
+      <el-table-column label="产品名称" align="center" prop="productName" min-width="200" />
       <el-table-column
         label="成交周期(天)"
         align="center"
@@ -25,17 +25,16 @@
 <script setup lang="ts">
 import {
   StatisticsCustomerApi,
-  CrmStatisticsCustomerDealCycleByDateRespVO,
-  CrmStatisticsCustomerSummaryByDateRespVO
+  CrmStatisticsCustomerDealCycleByProductRespVO
 } from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
 
-defineOptions({ name: 'CustomerDealCycle' })
+defineOptions({ name: 'CustomerDealCycleByProduct' })
 
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
-const list = ref<CrmStatisticsCustomerDealCycleByDateRespVO[]>([]) // 列表的数据
+const list = ref<CrmStatisticsCustomerDealCycleByProductRespVO[]>([]) // 列表的数据
 
 /** 柱状图配置：纵向 */
 const echartsOption = reactive<EChartsOption>({
@@ -99,7 +98,7 @@ const echartsOption = reactive<EChartsOption>({
   ],
   xAxis: {
     type: 'category',
-    name: '日期',
+    name: '产品名称',
     data: []
   }
 }) as EChartsOption
@@ -107,33 +106,33 @@ const echartsOption = reactive<EChartsOption>({
 /** 获取数据并填充图表 */
 const fetchAndFill = async () => {
   // 1. 加载统计数据
-  const customerDealCycleByDate = await StatisticsCustomerApi.getCustomerDealCycleByDate(
-    props.queryParams
-  )
-  const customerSummaryByDate = await StatisticsCustomerApi.getCustomerSummaryByDate(
-    props.queryParams
-  )
-  const customerDealCycleByUser = await StatisticsCustomerApi.getCustomerDealCycleByUser(
-    props.queryParams
-  )
+  const customerDealCycleByProduct = (
+    await StatisticsCustomerApi.getCustomerDealCycleByProduct(props.queryParams)
+  ).map((s: CrmStatisticsCustomerDealCycleByProductRespVO) => {
+    return {
+      productName: s.productName ?? '未知',
+      customerDealCycle: s.customerDealCount,
+      customerDealCount: s.customerDealCount
+    }
+  })
   // 2.1 更新 Echarts 数据
   if (echartsOption.xAxis && echartsOption.xAxis['data']) {
-    echartsOption.xAxis['data'] = customerDealCycleByDate.map(
-      (s: CrmStatisticsCustomerDealCycleByDateRespVO) => s.time
+    echartsOption.xAxis['data'] = customerDealCycleByProduct.map(
+      (s: CrmStatisticsCustomerDealCycleByProductRespVO) => s.productName
     )
   }
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
-    echartsOption.series[0]['data'] = customerDealCycleByDate.map(
-      (s: CrmStatisticsCustomerDealCycleByDateRespVO) => s.customerDealCycle
+    echartsOption.series[0]['data'] = customerDealCycleByProduct.map(
+      (s: CrmStatisticsCustomerDealCycleByProductRespVO) => s.customerDealCycle
     )
   }
   if (echartsOption.series && echartsOption.series[1] && echartsOption.series[1]['data']) {
-    echartsOption.series[1]['data'] = customerSummaryByDate.map(
-      (s: CrmStatisticsCustomerSummaryByDateRespVO) => s.customerDealCount
+    echartsOption.series[1]['data'] = customerDealCycleByProduct.map(
+      (s: CrmStatisticsCustomerDealCycleByProductRespVO) => s.customerDealCount
     )
   }
   // 2.2 更新列表数据
-  list.value = customerDealCycleByUser
+  list.value = customerDealCycleByProduct
 }
 
 /** 获取统计数据 */

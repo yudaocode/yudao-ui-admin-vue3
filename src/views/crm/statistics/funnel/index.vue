@@ -1,4 +1,4 @@
-<!-- 数据统计 - 员工客户分析 -->
+<!-- 数据统计 - 客户画像 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -81,35 +81,17 @@
   <!-- 客户统计 -->
   <el-col>
     <el-tabs v-model="activeTab">
-      <!-- 客户总量分析 -->
-      <el-tab-pane label="客户总量分析" lazy name="customerSummary">
-        <CustomerSummary ref="customerSummaryRef" :query-params="queryParams" />
+      <el-tab-pane label="销售漏斗分析" lazy name="funnelRef">
+        <FunnelBusiness ref="funnelRef" :query-params="queryParams" />
       </el-tab-pane>
-      <!-- 客户跟进次数分析 -->
-      <el-tab-pane label="客户跟进次数分析" lazy name="followUpSummary">
-        <CustomerFollowUpSummary ref="followUpSummaryRef" :query-params="queryParams" />
+      <el-tab-pane label="新增商机分析" lazy name="businessSummaryRef">
+        <BusinessSummary ref="businessSummaryRef" :query-params="queryParams" />
       </el-tab-pane>
-      <!-- 客户跟进方式分析 -->
-      <el-tab-pane label="客户跟进方式分析" lazy name="followUpType">
-        <CustomerFollowUpType ref="followUpTypeRef" :query-params="queryParams" />
-      </el-tab-pane>
-      <!-- 客户转化率分析 -->
-      <el-tab-pane label="客户转化率分析" lazy name="conversionStat">
-        <CustomerConversionStat ref="conversionStatRef" :query-params="queryParams" />
-      </el-tab-pane>
-      <!-- 公海客户分析 -->
-      <el-tab-pane label="公海客户分析" lazy name="poolSummary">
-        <CustomerPoolSummary ref="customerPoolSummaryRef" :query-params="queryParams" />
-      </el-tab-pane>
-      <!-- 成交周期分析 -->
-      <el-tab-pane label="员工客户成交周期分析" lazy name="dealCycleByUser">
-        <CustomerDealCycleByUser ref="dealCycleByUserRef" :query-params="queryParams" />
-      </el-tab-pane>
-      <el-tab-pane label="地区客户成交周期分析" lazy name="dealCycleByArea">
-        <CustomerDealCycleByArea ref="dealCycleByAreaRef" :query-params="queryParams" />
-      </el-tab-pane>
-      <el-tab-pane label="产品客户成交周期分析" lazy name="dealCycleByProduct">
-        <CustomerDealCycleByProduct ref="dealCycleByProductRef" :query-params="queryParams" />
+      <el-tab-pane label="商机转化率分析" lazy name="businessInversionRateSummaryRef">
+        <BusinessInversionRateSummary
+          ref="businessInversionRateSummaryRef"
+          :query-params="queryParams"
+        />
       </el-tab-pane>
     </el-tabs>
   </el-col>
@@ -119,19 +101,14 @@
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { defaultProps, handleTree } from '@/utils/tree'
-import CustomerConversionStat from './components/CustomerConversionStat.vue'
-import CustomerDealCycleByUser from './components/CustomerDealCycleByUser.vue'
-import CustomerDealCycleByArea from './components/CustomerDealCycleByArea.vue'
-import CustomerDealCycleByProduct from './components/CustomerDealCycleByProduct.vue'
-import CustomerFollowUpSummary from './components/CustomerFollowUpSummary.vue'
-import CustomerFollowUpType from './components/CustomerFollowUpType.vue'
-import CustomerSummary from './components/CustomerSummary.vue'
-import CustomerPoolSummary from './components/CustomerPoolSummary.vue'
+import FunnelBusiness from './components/FunnelBusiness.vue'
+import BusinessSummary from './components/BusinessSummary.vue'
+import BusinessInversionRateSummary from './components/BusinessInversionRateSummary.vue'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
-defineOptions({ name: 'CrmStatisticsCustomer' })
+defineOptions({ name: 'CrmStatisticsFunnel' })
 
 const queryParams = reactive({
   interval: 2, // WEEK, 周
@@ -155,42 +132,22 @@ const userListByDeptId = computed(() =>
     : []
 )
 
-const activeTab = ref('customerSummary') // 活跃标签
-const customerSummaryRef = ref() // 1. 客户总量分析
-const followUpSummaryRef = ref() // 2. 客户跟进次数分析
-const followUpTypeRef = ref() // 3. 客户跟进方式分析
-const conversionStatRef = ref() // 4. 客户转化率分析
-const customerPoolSummaryRef = ref() // 5. 客户公海分析
-const dealCycleByUserRef = ref() // 6. 成交周期分析(按员工)
-const dealCycleByAreaRef = ref() // 7. 成交周期分析(按地区)
-const dealCycleByProductRef = ref() // 8. 成交周期分析(按产品)
+const activeTab = ref('funnelRef') // 活跃标签
+const funnelRef = ref() // 销售漏斗
+const businessSummaryRef = ref() // 新增商机分析
+const businessInversionRateSummaryRef = ref() // 商机转化率分析
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   switch (activeTab.value) {
-    case 'customerSummary': // 客户总量分析
-      customerSummaryRef.value?.loadData?.()
+    case 'funnelRef':
+      funnelRef.value?.loadData?.()
       break
-    case 'followUpSummary': // 客户跟进次数分析
-      followUpSummaryRef.value?.loadData?.()
+    case 'businessSummaryRef':
+      businessSummaryRef.value?.loadData?.()
       break
-    case 'followUpType': // 客户跟进方式分析
-      followUpTypeRef.value?.loadData?.()
-      break
-    case 'conversionStat': // 客户转化率分析
-      conversionStatRef.value?.loadData?.()
-      break
-    case 'poolSummary': // 公海客户分析
-      customerPoolSummaryRef.value?.loadData?.()
-      break
-    case 'dealCycleByUser': // 成交周期分析
-      dealCycleByUserRef.value?.loadData?.()
-      break
-    case 'dealCycleByArea': // 成交周期分析
-      dealCycleByAreaRef.value?.loadData?.()
-      break
-    case 'dealCycleByProduct': // 成交周期分析
-      dealCycleByProductRef.value?.loadData?.()
+    case 'businessInversionRateSummaryRef':
+      businessInversionRateSummaryRef.value?.loadData?.()
       break
   }
 }
