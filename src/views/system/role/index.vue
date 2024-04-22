@@ -87,7 +87,11 @@
     <el-table v-loading="loading" :data="list">
       <el-table-column align="center" label="角色编号" prop="id" />
       <el-table-column align="center" label="角色名称" prop="name" />
-      <el-table-column align="center" label="角色类型" prop="type" />
+      <el-table-column label="角色类型" align="center" prop="type">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.SYSTEM_ROLE_TYPE" :value="scope.row.type" />
+        </template>
+      </el-table-column>
       <el-table-column align="center" label="角色标识" prop="code" />
       <el-table-column align="center" label="显示顺序" prop="sort" />
       <el-table-column align="center" label="备注" prop="remark" />
