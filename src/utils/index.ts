@@ -1,4 +1,4 @@
-import { toNumber } from 'lodash-es'
+import {toNumber} from 'lodash-es'
 
 /**
  *
@@ -417,4 +417,21 @@ export const erpPriceMultiply = (price: number, count: number) => {
 export const erpCalculatePercentage = (value: number, total: number) => {
   if (total === 0) return 0
   return ((value / total) * 100).toFixed(2)
+}
+
+/**
+ * 适配 echarts map 的地名
+ *
+ * @param areaName 地区名称
+ */
+export const areaReplace = (areaName: string) => {
+  if (!areaName) {
+    return areaName
+  }
+  return areaName
+    .replace('维吾尔自治区', '')
+    .replace('壮族自治区', '')
+    .replace('回族自治区', '')
+    .replace('自治区', '')
+    .replace('省', '')
 }

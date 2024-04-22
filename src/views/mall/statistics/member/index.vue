@@ -3,44 +3,44 @@
 
   <div class="flex flex-col">
     <el-row :gutter="16" class="summary">
-      <el-col :sm="6" :xs="12" v-loading="loading">
+      <el-col v-loading="loading" :sm="6" :xs="12">
         <SummaryCard
-          title="累计会员数"
-          icon="fa-solid:users"
-          icon-color="bg-blue-100"
-          icon-bg-color="text-blue-500"
           :value="summary?.userCount || 0"
+          icon="fa-solid:users"
+          icon-bg-color="text-blue-500"
+          icon-color="bg-blue-100"
+          title="累计会员数"
         />
       </el-col>
-      <el-col :sm="6" :xs="12" v-loading="loading">
+      <el-col v-loading="loading" :sm="6" :xs="12">
         <SummaryCard
-          title="累计充值人数"
-          icon="fa-solid:user"
-          icon-color="bg-purple-100"
-          icon-bg-color="text-purple-500"
           :value="summary?.rechargeUserCount || 0"
+          icon="fa-solid:user"
+          icon-bg-color="text-purple-500"
+          icon-color="bg-purple-100"
+          title="累计充值人数"
         />
       </el-col>
-      <el-col :sm="6" :xs="12" v-loading="loading">
+      <el-col v-loading="loading" :sm="6" :xs="12">
         <SummaryCard
-          title="累计充值金额"
-          icon="fa-solid:money-check-alt"
-          icon-color="bg-yellow-100"
-          icon-bg-color="text-yellow-500"
-          prefix="￥"
           :decimals="2"
           :value="fenToYuan(summary?.rechargePrice || 0)"
+          icon="fa-solid:money-check-alt"
+          icon-bg-color="text-yellow-500"
+          icon-color="bg-yellow-100"
+          prefix="￥"
+          title="累计充值金额"
         />
       </el-col>
-      <el-col :sm="6" :xs="12" v-loading="loading">
+      <el-col v-loading="loading" :sm="6" :xs="12">
         <SummaryCard
-          title="累计消费金额"
-          icon="fa-solid:yen-sign"
-          icon-color="bg-green-100"
-          icon-bg-color="text-green-500"
-          prefix="￥"
           :decimals="2"
           :value="fenToYuan(summary?.expensePrice || 0)"
+          icon="fa-solid:yen-sign"
+          icon-bg-color="text-green-500"
+          icon-color="bg-green-100"
+          prefix="￥"
+          title="累计消费金额"
         />
       </el-col>
     </el-row>
@@ -67,42 +67,42 @@
             <el-col :span="14">
               <el-table :data="areaStatisticsList" :height="300">
                 <el-table-column
-                  label="省份"
-                  prop="areaName"
+                  :sort-method="(obj1, obj2) => obj1.areaName.localeCompare(obj2.areaName, 'zh-CN')"
                   align="center"
+                  label="省份"
                   min-width="80"
+                  prop="areaName"
                   show-overflow-tooltip
                   sortable
-                  :sort-method="(obj1, obj2) => obj1.areaName.localeCompare(obj2.areaName, 'zh-CN')"
                 />
                 <el-table-column
+                  align="center"
                   label="会员数量"
-                  prop="userCount"
-                  align="center"
                   min-width="105"
+                  prop="userCount"
                   sortable
                 />
                 <el-table-column
+                  align="center"
                   label="订单创建数量"
+                  min-width="135"
                   prop="orderCreateUserCount"
-                  align="center"
-                  min-width="135"
                   sortable
                 />
                 <el-table-column
+                  align="center"
                   label="订单支付数量"
-                  prop="orderPayUserCount"
-                  align="center"
                   min-width="135"
+                  prop="orderPayUserCount"
                   sortable
                 />
                 <el-table-column
-                  label="订单支付金额"
-                  prop="orderPayPrice"
-                  align="center"
-                  min-width="135"
-                  sortable
                   :formatter="fenToYuanFormat"
+                  align="center"
+                  label="订单支付金额"
+                  min-width="135"
+                  prop="orderPayPrice"
+                  sortable
                 />
               </el-table>
             </el-col>
@@ -110,7 +110,7 @@
         </el-card>
       </el-col>
       <el-col :md="6" :sm="24">
-        <el-card shadow="never" v-loading="loading">
+        <el-card v-loading="loading" shadow="never">
           <template #header>
             <CardTitle title="会员性别比例" />
           </template>
@@ -122,16 +122,16 @@
 </template>
 <script lang="ts" setup>
 import * as MemberStatisticsApi from '@/api/mall/statistics/member'
-import SummaryCard from '@/components/SummaryCard/index.vue'
-import { EChartsOption } from 'echarts'
-import china from '@/assets/map/json/china.json'
-import { fenToYuan } from '@/utils'
 import {
   MemberAreaStatisticsRespVO,
   MemberSexStatisticsRespVO,
   MemberSummaryRespVO,
   MemberTerminalStatisticsRespVO
 } from '@/api/mall/statistics/member'
+import SummaryCard from '@/components/SummaryCard/index.vue'
+import { EChartsOption } from 'echarts'
+import china from '@/assets/map/json/china.json'
+import { areaReplace, fenToYuan } from '@/utils'
 import { DICT_TYPE, DictDataType, getIntDictOptions } from '@/utils/dict'
 import echarts from '@/plugins/echarts'
 import { fenToYuanFormat } from '@/utils/formatter'
@@ -246,12 +246,7 @@ const getMemberAreaStatisticsList = async () => {
   areaStatisticsList.value = list.map((item: MemberAreaStatisticsRespVO) => {
     return {
       ...item,
-      areaName: item.areaName
-        .replace('维吾尔自治区', '')
-        .replace('壮族自治区', '')
-        .replace('回族自治区', '')
-        .replace('自治区', '')
-        .replace('省', '')
+      areaName: areaReplace(item.areaName)
     }
   })
   let min = 0
