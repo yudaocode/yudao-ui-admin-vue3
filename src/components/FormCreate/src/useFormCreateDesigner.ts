@@ -1,5 +1,6 @@
 import {
   useDictSelectRule,
+  useEditorRule,
   useUploadFileRule,
   useUploadImgRule,
   useUploadImgsRule,
@@ -13,8 +14,12 @@ import { Ref } from 'vue'
  * - 文件上传
  * - 单图上传
  * - 多图上传
+ * - 字典选择器
+ * - 系统用户选择器
+ * - 富文本
  */
 export const useFormCreateDesigner = (designer: Ref) => {
+  const editorRule = useEditorRule()
   const uploadFileRule = useUploadFileRule()
   const uploadImgRule = useUploadImgRule()
   const uploadImgsRule = useUploadImgsRule()
@@ -24,7 +29,10 @@ export const useFormCreateDesigner = (designer: Ref) => {
   onMounted(() => {
     // 移除自带的上传组件规则，使用 uploadFileRule、uploadImgRule、uploadImgsRule 替代
     designer.value?.removeMenuItem('upload')
+    // 移除自带的富文本组件规则，使用 editorRule 替代
+    designer.value?.removeMenuItem('fc-editor')
     const components = [
+      editorRule,
       uploadFileRule,
       uploadImgRule,
       uploadImgsRule,

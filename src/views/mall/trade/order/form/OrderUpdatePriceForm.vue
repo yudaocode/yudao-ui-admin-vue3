@@ -6,7 +6,7 @@
       </el-form-item>
       <el-form-item label="订单调价">
         <el-input-number v-model="formData.adjustPrice" :precision="2" :step="0.1" class="w-100%" />
-        <el-tag class="mt-10px" type="warning">订单调价。 正数，加价；负数，减价</el-tag>
+        <el-tag class="ml-10px" type="warning">订单调价。 正数，加价；负数，减价</el-tag>
       </el-form-item>
       <el-form-item label="调价后">
         <el-input v-model="formData.newPayPrice" disabled />
@@ -38,10 +38,13 @@ const formData = ref({
 })
 watch(
   () => formData.value.adjustPrice,
-  (data: number) => {
-    const num = formData.value.payPrice!.replace('元', '')
-    // @ts-ignore
-    formData.value.newPayPrice = (num * 1 + data).toFixed(2) + '元'
+  (adjustPrice: number | string) => {
+    const numMatch = formData.value.payPrice.match(/\d+(\.\d+)?/)
+    if (numMatch) {
+      const payPriceNum = parseFloat(numMatch[0])
+      adjustPrice = typeof adjustPrice === 'string' ? parseFloat(adjustPrice) : adjustPrice
+      formData.value.newPayPrice = (payPriceNum + adjustPrice).toFixed(2) + '元'
+    }
   }
 )
 
