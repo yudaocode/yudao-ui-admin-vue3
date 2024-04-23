@@ -60,7 +60,10 @@
       </el-tab-pane>
       <!-- 员工回款金额统计 -->
       <el-tab-pane label="员工回款金额统计" name="ReceivablePricePerformance" lazy>
-        <ReceivablePricePerformance :query-params="queryParams" ref="ReceivablePricePerformanceRef" />
+        <ReceivablePricePerformance
+          :query-params="queryParams"
+          ref="ReceivablePricePerformanceRef"
+        />
       </el-tab-pane>
     </el-tabs>
   </el-col>
@@ -70,7 +73,7 @@
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
-import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
+import { beginOfDay, formatDate } from '@/utils/formatTime'
 import { defaultProps, handleTree } from '@/utils/tree'
 import ContractCountPerformance from './components/ContractCountPerformance.vue'
 import ContractPricePerformance from './components/ContractPricePerformance.vue'
@@ -97,6 +100,7 @@ const userListByDeptId = computed(() =>
     : []
 )
 
+// TODO @scholar：改成尾注释，保证 vue 内容短一点；变量名小写
 // 活跃标签
 const activeTab = ref('ContractCountPerformance')
 // 1.员工合同数量统计
@@ -107,7 +111,7 @@ const ContractPricePerformanceRef = ref()
 const ReceivablePricePerformanceRef = ref()
 
 /** 搜索按钮操作 */
-const handleQuery =  () => {
+const handleQuery = () => {
   // 从 queryParams.times[0] 中获取到了年份
   const selectYear = parseInt(queryParams.times[0])
 
@@ -115,9 +119,11 @@ const handleQuery =  () => {
   const fullDate = new Date(selectYear, 0, 1, 0, 0, 0)
 
   // 将完整的日期时间格式化为需要的字符串形式，比如 2004-01-01 00:00:00
-  queryParams.times[0] = `${fullDate.getFullYear()}-${
-    String(fullDate.getMonth() + 1).padStart(2, '0')
-  }-${String(fullDate.getDate()).padStart(2, '0')} ${String(fullDate.getHours()).padStart(2, '0')}:${String(fullDate.getMinutes()).padStart(2, '0')}:${String(fullDate.getSeconds()).padStart(2, '0')}`
+  // TODO @scholar：看看，是不是可以使用 year 哈
+  queryParams.times[0] = `${fullDate.getFullYear()}-${String(fullDate.getMonth() + 1).padStart(
+    2,
+    '0'
+  )}-${String(fullDate.getDate()).padStart(2, '0')} ${String(fullDate.getHours()).padStart(2, '0')}:${String(fullDate.getMinutes()).padStart(2, '0')}:${String(fullDate.getSeconds()).padStart(2, '0')}`
 
   switch (activeTab.value) {
     case 'ContractCountPerformance':
