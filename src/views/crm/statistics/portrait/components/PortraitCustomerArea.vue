@@ -24,6 +24,7 @@ import {
   CrmStatisticCustomerAreaRespVO,
   StatisticsPortraitApi
 } from '@/api/crm/statistics/portrait'
+import { areaReplace } from '@/utils'
 
 defineOptions({ name: 'PortraitCustomerArea' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
@@ -106,12 +107,7 @@ const loadData = async () => {
   areaStatisticsList.value = areaList.map((item: CrmStatisticCustomerAreaRespVO) => {
     return {
       ...item,
-      areaName: item.areaName // TODO @puhui999：这里最好注释下原因哈, 🤣 我从 mall copy 过来的；这块看着是适合 ercharts 的地名，要不抽个小的 js 方法，然后把涉及到的地方都替换掉。
-      // .replace('维吾尔自治区', '')
-      // .replace('壮族自治区', '')
-      // .replace('回族自治区', '')
-      // .replace('自治区', '')
-      // .replace('省', '')
+      areaName: areaReplace(item.areaName)
     }
   })
   buildLeftMap()
