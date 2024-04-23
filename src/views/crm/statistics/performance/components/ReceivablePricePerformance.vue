@@ -1,4 +1,4 @@
-<!-- 客户总量统计 -->
+<!-- 员工业绩统计 -->
 <template>
   <!-- Echarts图 -->
   <el-card shadow="never">
@@ -7,18 +7,12 @@
     </el-skeleton>
   </el-card>
 
-  <!-- 统计列表 TODO @scholar：统计列表的展示不对 -->
+  <!-- 统计列表 -->
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="tableData">
-      <el-table-column
-        v-for="item in columnsData"
-        :key="item.prop"
-        :label="item.label"
-        :prop="item.prop"
-        align="center"
-      >
+      <el-table-column v-for="item in columnsData" :key="item.prop" :label="item.label" :prop="item.prop" align="center">
         <template #default="scope">
-          {{ scope.row[item.prop] }}
+          {{scope.row[item.prop]}}
         </template>
       </el-table-column>
     </el-table>
@@ -29,7 +23,7 @@ import { EChartsOption } from 'echarts'
 import {
   StatisticsPerformanceApi,
   StatisticsPerformanceRespVO
-} from '@/api/crm/statistics/performance'
+} from "@/api/crm/statistics/performance"
 
 defineOptions({ name: 'ContractPricePerformance' })
 const props = defineProps<{ queryParams: any }>() // 搜索参数
@@ -92,30 +86,29 @@ const echartsOption = reactive<EChartsOption>({
       type: 'shadow'
     }
   },
-  yAxis: [
-    {
-      type: 'value',
-      name: '金额（元）',
-      axisTick: {
-        show: false
-      },
-      axisLabel: {
-        color: '#BDBDBD',
-        formatter: '{value}'
-      },
-      /** 坐标轴轴线相关设置 */
-      axisLine: {
-        lineStyle: {
-          color: '#BDBDBD'
-        }
-      },
-      splitLine: {
-        show: true,
-        lineStyle: {
-          color: '#e6e6e6'
-        }
+  yAxis: [{
+    type: 'value',
+    name: '金额（元）',
+    axisTick: {
+      show: false
+    },
+    axisLabel: {
+      color: '#BDBDBD',
+      formatter: '{value}'
+    },
+    /** 坐标轴轴线相关设置 */
+    axisLine: {
+      lineStyle: {
+        color: '#BDBDBD'
       }
     },
+    splitLine: {
+      show: true,
+      lineStyle: {
+        color: '#e6e6e6'
+      }
+    }
+  },
     {
       type: 'value',
       name: '',
@@ -141,8 +134,7 @@ const echartsOption = reactive<EChartsOption>({
           color: '#e6e6e6'
         }
       }
-    }
-  ],
+    }],
   xAxis: {
     type: 'category',
     name: '日期',
@@ -160,7 +152,9 @@ const loadData = async () => {
 
   // 2.1 更新 Echarts 数据
   if (echartsOption.xAxis && echartsOption.xAxis['data']) {
-    echartsOption.xAxis['data'] = performanceList.map((s: StatisticsPerformanceRespVO) => s.time)
+    echartsOption.xAxis['data'] = performanceList.map(
+      (s: StatisticsPerformanceRespVO) => s.time
+    )
   }
   if (echartsOption.series && echartsOption.series[0] && echartsOption.series[0]['data']) {
     echartsOption.series[0]['data'] = performanceList.map(
@@ -171,49 +165,45 @@ const loadData = async () => {
     echartsOption.series[1]['data'] = performanceList.map(
       (s: StatisticsPerformanceRespVO) => s.lastMonthCount
     )
-    echartsOption.series[3]['data'] = performanceList.map((s: StatisticsPerformanceRespVO) =>
-      s.lastMonthCount !== 0 ? ((s.currentMonthCount / s.lastMonthCount) * 100).toFixed(2) : 'NULL'
+    echartsOption.series[3]['data'] = performanceList.map(
+      (s: StatisticsPerformanceRespVO) => s.lastMonthCount !== 0 ? (s.currentMonthCount / s.lastMonthCount*100).toFixed(2) : 'NULL'
     )
   }
   if (echartsOption.series && echartsOption.series[2] && echartsOption.series[1]['data']) {
     echartsOption.series[2]['data'] = performanceList.map(
       (s: StatisticsPerformanceRespVO) => s.lastYearCount
     )
-    echartsOption.series[4]['data'] = performanceList.map((s: StatisticsPerformanceRespVO) =>
-      s.lastYearCount !== 0 ? ((s.currentMonthCount / s.lastYearCount) * 100).toFixed(2) : 'NULL'
+    echartsOption.series[4]['data'] = performanceList.map(
+      (s: StatisticsPerformanceRespVO) => s.lastYearCount !== 0 ? (s.currentMonthCount / s.lastYearCount*100).toFixed(2) : 'NULL'
     )
   }
 
   // 2.2 更新列表数据
   list.value = performanceList
+  convertListData()
   loading.value = false
+
 }
 
 // 初始化数据
-const columnsData = reactive([])
-const tableData = reactive([
-  { title: '当月回款金额统计（元）' },
-  { title: '上月回款金额统计（元）' },
-  { title: '去年当月回款金额统计（元）' },
-  { title: '同比增长率（%）' },
-  { title: '环比增长率（%）' }
-])
+const columnsData = reactive([]);
+const tableData = reactive([{title: '当月回款金额统计（元）'}, {title: '上月回款金额统计（元）'},
+  {title: '去年当月回款金额统计（元）'}, {title: '同比增长率（%）'}, {title: '环比增长率（%）'}]);
 
 // 定义 init 方法
-const init = () => {
-  const columnObj = { label: '日期', prop: 'title' }
+const convertListData = () => {
+  const columnObj = {label: '日期', prop: 'title'}
+  columnsData.splice(0, columnsData.length)//清空数组
   columnsData.push(columnObj)
 
   list.value.forEach((item, index) => {
-    const columnObj = { label: item.time, prop: 'prop' + index }
+    const columnObj = {label: item.time, prop: 'prop' + index}
     columnsData.push(columnObj)
     tableData[0]['prop' + index] = item.currentMonthCount
     tableData[1]['prop' + index] = item.lastMonthCount
     tableData[2]['prop' + index] = item.lastYearCount
-    tableData[3]['prop' + index] =
-      item.lastYearCount !== 0 ? (item.currentMonthCount / item.lastYearCount).toFixed(2) : 'NULL'
-    tableData[4]['prop' + index] =
-      item.lastMonthCount !== 0 ? (item.currentMonthCount / item.lastMonthCount).toFixed(2) : 'NULL'
+    tableData[3]['prop' + index] = item.lastMonthCount !== 0 ? (item.currentMonthCount / item.lastMonthCount).toFixed(2) : 'NULL'
+    tableData[4]['prop' + index] = item.lastYearCount !== 0 ? (item.currentMonthCount / item.lastYearCount).toFixed(2) : 'NULL'
   })
 }
 
@@ -222,6 +212,5 @@ defineExpose({ loadData })
 /** 初始化 */
 onMounted(async () => {
   await loadData()
-  init()
 })
 </script>

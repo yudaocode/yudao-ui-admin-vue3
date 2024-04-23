@@ -1,4 +1,4 @@
-<!-- 数据统计 - 员工客户分析 -->
+<!-- 数据统计 - 员工业绩分析 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -9,16 +9,13 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="时间范围" prop="orderDate">
+      <el-form-item label="选择年份" prop="orderDate">
         <el-date-picker
-          v-model="queryParams.times"
-          :shortcuts="defaultShortcuts"
+          v-model="queryParams.times[0]"
           class="!w-240px"
-          end-placeholder="结束日期"
-          start-placeholder="开始日期"
-          type="daterange"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          type="year"
+          value-format="YYYY"
+          :default-time="[new Date().getFullYear()]"
         />
       </el-form-item>
       <el-form-item label="归属部门" prop="deptId">
@@ -62,11 +59,8 @@
         <ContractPricePerformance :query-params="queryParams" ref="ContractPricePerformanceRef" />
       </el-tab-pane>
       <!-- 员工回款金额统计 -->
-      <el-tab-pane label="员工回款金额统计" name="followupType" lazy>
-        <ReceivablePricePerformance
-          :query-params="queryParams"
-          ref="ReceivablePricePerformanceRef"
-        />
+      <el-tab-pane label="员工回款金额统计" name="ReceivablePricePerformance" lazy>
+        <ReceivablePricePerformance :query-params="queryParams" ref="ReceivablePricePerformanceRef" />
       </el-tab-pane>
     </el-tabs>
   </el-col>
@@ -82,15 +76,14 @@ import ContractCountPerformance from './components/ContractCountPerformance.vue'
 import ContractPricePerformance from './components/ContractPricePerformance.vue'
 import ReceivablePricePerformance from './components/ReceivablePricePerformance.vue'
 
-defineOptions({ name: 'CrmStatisticsPerformance' })
+defineOptions({ name: 'CrmStatisticsCustomer' })
 
 const queryParams = reactive({
   deptId: useUserStore().getUser.deptId,
   userId: undefined,
   times: [
-    // 默认显示最近一周的数据
-    formatDate(beginOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24 * 7))),
-    formatDate(endOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24)))
+    // 默认显示当年的数据
+    formatDate(beginOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24 * 7)))
   ]
 })
 
@@ -114,7 +107,18 @@ const ContractPricePerformanceRef = ref()
 const ReceivablePricePerformanceRef = ref()
 
 /** 搜索按钮操作 */
-const handleQuery = () => {
+const handleQuery =  () => {
+  // 从 queryParams.times[0] 中获取到了年份
+  const selectYear = parseInt(queryParams.times[0])
+
+  // 创建一个新的 Date 对象，设置为指定的年份的第一天
+  const fullDate = new Date(selectYear, 0, 1, 0, 0, 0)
+
+  // 将完整的日期时间格式化为需要的字符串形式，比如 2004-01-01 00:00:00
+  queryParams.times[0] = `${fullDate.getFullYear()}-${
+    String(fullDate.getMonth() + 1).padStart(2, '0')
+  }-${String(fullDate.getDate()).padStart(2, '0')} ${String(fullDate.getHours()).padStart(2, '0')}:${String(fullDate.getMinutes()).padStart(2, '0')}:${String(fullDate.getSeconds()).padStart(2, '0')}`
+
   switch (activeTab.value) {
     case 'ContractCountPerformance':
       ContractCountPerformanceRef.value?.loadData?.()
