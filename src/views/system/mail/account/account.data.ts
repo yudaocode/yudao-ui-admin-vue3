@@ -16,7 +16,8 @@ export const rules = reactive({
   password: [required],
   host: [required],
   port: [required],
-  sslEnable: [required]
+  sslEnable: [required],
+  starttlsEnable: [required]
 })
 
 // CrudSchema：https://doc.iocoder.cn/vue3/crud-schema/
@@ -51,6 +52,15 @@ const crudSchemas = reactive<CrudSchema[]>([
   {
     label: '是否开启 SSL',
     field: 'sslEnable',
+    dictType: DICT_TYPE.INFRA_BOOLEAN_STRING,
+    dictClass: 'boolean',
+    form: {
+      component: 'Radio'
+    }
+  },
+  {
+    label: '是否开启 STARTTLS',
+    field: 'starttlsEnable',
     dictType: DICT_TYPE.INFRA_BOOLEAN_STRING,
     dictClass: 'boolean',
     form: {
