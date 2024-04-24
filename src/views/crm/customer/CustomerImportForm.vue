@@ -1,16 +1,24 @@
 <!-- 客户导入窗口 -->
 <template>
   <Dialog v-model="dialogVisible" title="客户导入" width="400">
+    <div class="flex items-center my-10px">
+      <span class="mr-10px">负责人</span>
+      <el-select v-model="ownerUserId" class="!w-240px" clearable>
+        <el-option
+          v-for="item in userOptions"
+          :key="item.id"
+          :label="item.nickname"
+          :value="item.id"
+        />
+      </el-select>
+    </div>
     <el-upload
       ref="uploadRef"
       v-model:file-list="fileList"
       :auto-upload="false"
       :disabled="formLoading"
-      :headers="uploadHeaders"
       :limit="1"
-      :on-error="submitFormError"
       :on-exceed="handleExceed"
-      :on-success="submitFormSuccess"
       accept=".xlsx, .xls"
       action="none"
       drag
@@ -43,9 +51,10 @@
 </template>
 <script lang="ts" setup>
 import * as CustomerApi from '@/api/crm/customer'
-import { getAccessToken, getTenantId } from '@/utils/auth'
 import download from '@/utils/download'
 import type { UploadUserFile } from 'element-plus'
+import * as UserApi from '@/api/system/user'
+import { useUserStore } from '@/store/modules/user'
 
 defineOptions({ name: 'SystemUserImportForm' })
 
@@ -54,15 +63,18 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const uploadRef = ref()
-const uploadHeaders = ref() // 上传 Header 头
 const fileList = ref<UploadUserFile[]>([]) // 文件列表
 const updateSupport = ref(false) // 是否更新已经存在的客户数据
+const ownerUserId = ref<undefined | number>() // 负责人编号
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 
 /** 打开弹窗 */
-const open = () => {
+const open = async () => {
   dialogVisible.value = true
-  fileList.value = []
-  resetForm()
+  await resetForm()
+  // 获得用户列表
+  userOptions.value = await UserApi.getSimpleUserList()
+  ownerUserId.value = useUserStore().getUser.id
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -72,17 +84,20 @@ const submitForm = async () => {
     message.error('请上传文件')
     return
   }
-  // 提交请求
-  uploadHeaders.value = {
-    Authorization: 'Bearer ' + getAccessToken(),
-    'tenant-id': getTenantId()
-  }
+
   formLoading.value = true
-  const formData = new FormData()
-  formData.append('updateSupport', updateSupport.value)
-  formData.append('file', fileList.value[0].raw)
-  // TODO @芋艿：后面是不是可以采用这种形式，去掉 uploadHeaders
-  await CustomerApi.handleImport(formData)
+  try {
+    const formData = new FormData()
+    formData.append('updateSupport', String(updateSupport.value))
+    formData.append('file', fileList.value[0].raw as Blob)
+    formData.append('ownerUserId', String(ownerUserId.value))
+    const res = await CustomerApi.handleImport(formData)
+    submitFormSuccess(res)
+  } catch {
+    submitFormError()
+  } finally {
+    formLoading.value = false
+  }
 }
 
 /** 文件上传成功 */
@@ -108,6 +123,8 @@ const submitFormSuccess = (response: any) => {
     text += '< ' + customerName + ': ' + data.failureCustomerNames[customerName] + ' >'
   }
   message.alert(text)
+  formLoading.value = false
+  dialogVisible.value = false
   // 发送操作成功的事件
   emits('success')
 }
@@ -119,9 +136,12 @@ const submitFormError = (): void => {
 }
 
 /** 重置表单 */
-const resetForm = () => {
+const resetForm = async () => {
   // 重置上传状态和文件
-  formLoading.value = false
+  fileList.value = []
+  updateSupport.value = false
+  ownerUserId.value = undefined
+  await nextTick()
   uploadRef.value?.clearFiles()
 }
 
