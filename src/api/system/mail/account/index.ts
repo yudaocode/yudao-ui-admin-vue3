@@ -8,6 +8,7 @@ export interface MailAccountVO {
   host: string
   port: number
   sslEnable: boolean
+  starttlsEnable: boolean
 }
 
 // 查询邮箱账号列表

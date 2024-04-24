@@ -17,7 +17,6 @@ interface ImportMetaEnv {
   readonly VITE_APP_DOCALERT_ENABLE: string
   readonly VITE_BASE_URL: string
   readonly VITE_UPLOAD_URL: string
-  readonly VITE_API_BASEPATH: string
   readonly VITE_API_URL: string
   readonly VITE_BASE_PATH: string
   readonly VITE_DROP_DEBUGGER: string
