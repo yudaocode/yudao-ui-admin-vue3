@@ -1,4 +1,4 @@
-<!-- 客户总量统计 -->
+<!-- 员工业绩统计 -->
 <template>
   <!-- Echarts图 -->
   <el-card shadow="never">
@@ -7,7 +7,7 @@
     </el-skeleton>
   </el-card>
 
-  <!-- 统计列表 TODO @scholar：统计列表的展示不对 -->
+  <!-- 统计列表 -->
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="tableData">
       <el-table-column
@@ -17,6 +17,7 @@
         :prop="item.prop"
         align="center"
       >
+        <!-- TODO @scholar：IDEA 爆红的处理 -->
         <template #default="scope">
           {{ scope.row[item.prop] }}
         </template>
@@ -120,6 +121,7 @@ const echartsOption = reactive<EChartsOption>({
       type: 'value',
       name: '',
       axisTick: {
+        // TODO @scholar：IDEA 爆红的处理
         alignWithLabel: true,
         lineStyle: {
           width: 0
@@ -186,11 +188,13 @@ const loadData = async () => {
 
   // 2.2 更新列表数据
   list.value = performanceList
+  convertListData()
   loading.value = false
 }
 
 // 初始化数据
-const columnsData = reactive([])
+// TODO @scholar：加个 as any[]，避免 idea 爆红
+const columnsData = reactive([] as any[])
 const tableData = reactive([
   { title: '当月回款金额统计（元）' },
   { title: '上月回款金额统计（元）' },
@@ -200,8 +204,9 @@ const tableData = reactive([
 ])
 
 // 定义 init 方法
-const init = () => {
+const convertListData = () => {
   const columnObj = { label: '日期', prop: 'title' }
+  columnsData.splice(0, columnsData.length) //清空数组
   columnsData.push(columnObj)
 
   list.value.forEach((item, index) => {
@@ -210,10 +215,11 @@ const init = () => {
     tableData[0]['prop' + index] = item.currentMonthCount
     tableData[1]['prop' + index] = item.lastMonthCount
     tableData[2]['prop' + index] = item.lastYearCount
+    // TODO @scholar：百分比，使用 erpCalculatePercentage 直接计算；如果是 0，则返回 0，统一就好哈；
     tableData[3]['prop' + index] =
-      item.lastYearCount !== 0 ? (item.currentMonthCount / item.lastYearCount).toFixed(2) : 'NULL'
-    tableData[4]['prop' + index] =
       item.lastMonthCount !== 0 ? (item.currentMonthCount / item.lastMonthCount).toFixed(2) : 'NULL'
+    tableData[4]['prop' + index] =
+      item.lastYearCount !== 0 ? (item.currentMonthCount / item.lastYearCount).toFixed(2) : 'NULL'
   })
 }
 
@@ -222,6 +228,5 @@ defineExpose({ loadData })
 /** 初始化 */
 onMounted(async () => {
   await loadData()
-  init()
 })
 </script>

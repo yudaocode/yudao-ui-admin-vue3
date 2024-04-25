@@ -1,4 +1,5 @@
-<!-- 客户总量统计 -->
+<!-- 员工业绩统计 -->
+<!-- TODO @scholar:参考 ReceivablePricePerformance 建议改 -->
 <template>
   <!-- Echarts图 -->
   <el-card shadow="never">
@@ -7,7 +8,7 @@
     </el-skeleton>
   </el-card>
 
-  <!-- 统计列表 TODO @scholar：统计列表的展示不对 -->
+  <!-- 统计列表 -->
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="tableData">
       <el-table-column
@@ -186,6 +187,7 @@ const loadData = async () => {
 
   // 2.2 更新列表数据
   list.value = performanceList
+  convertListData()
   loading.value = false
 }
 
@@ -199,9 +201,10 @@ const tableData = reactive([
   { title: '环比增长率（%）' }
 ])
 
-// 定义 init 方法
-const init = () => {
+// 定义 convertListData 方法，数据行列转置，展示每月数据
+const convertListData = () => {
   const columnObj = { label: '日期', prop: 'title' }
+  columnsData.splice(0, columnsData.length) //清空数组
   columnsData.push(columnObj)
 
   list.value.forEach((item, index) => {
@@ -211,9 +214,9 @@ const init = () => {
     tableData[1]['prop' + index] = item.lastMonthCount
     tableData[2]['prop' + index] = item.lastYearCount
     tableData[3]['prop' + index] =
-      item.lastYearCount !== 0 ? (item.currentMonthCount / item.lastYearCount).toFixed(2) : 'NULL'
-    tableData[4]['prop' + index] =
       item.lastMonthCount !== 0 ? (item.currentMonthCount / item.lastMonthCount).toFixed(2) : 'NULL'
+    tableData[4]['prop' + index] =
+      item.lastYearCount !== 0 ? (item.currentMonthCount / item.lastYearCount).toFixed(2) : 'NULL'
   })
 }
 
@@ -222,6 +225,5 @@ defineExpose({ loadData })
 /** 初始化 */
 onMounted(async () => {
   await loadData()
-  init()
 })
 </script>
