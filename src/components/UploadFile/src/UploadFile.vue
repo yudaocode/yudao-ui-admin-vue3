@@ -32,6 +32,25 @@
           格式为 <b style="color: #f56c6c">{{ fileType.join('/') }}</b> 的文件
         </div>
       </template>
+      <template #file="row">
+        <div class="flex items-center">
+          <span>{{ row.file.name }}</span>
+          <div class="ml-10px">
+            <el-link
+              :href="row.file.url"
+              :underline="false"
+              download
+              target="_blank"
+              type="primary"
+            >
+              下载
+            </el-link>
+          </div>
+          <div class="ml-10px">
+            <el-button link type="danger" @click="handleRemove(row.file)"> 删除</el-button>
+          </div>
+        </div>
+      </template>
     </el-upload>
   </div>
 </template>
