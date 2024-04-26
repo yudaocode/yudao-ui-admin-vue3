@@ -29,7 +29,7 @@ export const getModelPage = async (params) => {
   return await request.get({ url: '/bpm/model/page', params })
 }
 
-export const getModel = async (id: number) => {
+export const getModel = async (id: string) => {
   return await request.get({ url: '/bpm/model/get?id=' + id })
 }
 
