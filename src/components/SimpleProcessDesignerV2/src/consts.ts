@@ -15,6 +15,11 @@ export enum NodeType {
    * 审批人节点
    */
   USER_TASK_NODE = 1,
+
+  /**
+   * 抄送人节点
+   */
+  COPY_TASK_NODE = 2,
  
   /**
    * 条件节点
@@ -92,11 +97,13 @@ export type SimpleFlowNode = {
 }
 
 export const NODE_DEFAULT_TEXT = new Map<number,string>()
-NODE_DEFAULT_TEXT.set(NodeType.USER_TASK_NODE, '请配置该节点')
+NODE_DEFAULT_TEXT.set(NodeType.USER_TASK_NODE, '请配置审批人')
+NODE_DEFAULT_TEXT.set(NodeType.COPY_TASK_NODE, '请配置抄送人')
 NODE_DEFAULT_TEXT.set(NodeType.CONDITION_NODE, '请设置条件')
 
 export const NODE_DEFAULT_NAME = new Map<number,string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
+NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 
 

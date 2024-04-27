@@ -102,6 +102,12 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
       }
       validateNode(node.childNode, errorNodes)
     }
+    if (type === NodeType.COPY_TASK_NODE) {
+      if (!showText) {
+        errorNodes.push(node)
+      }
+      validateNode(node.childNode, errorNodes)
+    }
     if (type === NodeType.CONDITION_NODE) {
       if (!showText) {
         errorNodes.push(node)

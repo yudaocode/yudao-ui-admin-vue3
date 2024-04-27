@@ -5,7 +5,10 @@
   <UserTaskNode 
         v-if="currentNode && currentNode.type === NodeType.USER_TASK_NODE" 
         :flow-node ="currentNode" @update:model-value="handleModelValueUpdate"/>
-
+  <!-- 抄送节点 -->
+  <CopyTaskNode
+        v-if="currentNode && currentNode.type === NodeType.COPY_TASK_NODE" 
+        :flow-node ="currentNode" @update:model-value="handleModelValueUpdate"/>
   <!-- 递归显示孩子节点  -->
   <ProcessNodeTree v-if="currentNode && currentNode.childNode"  v-model:flow-node="currentNode.childNode"/>
 
@@ -16,6 +19,7 @@
 import StartEventNode from './nodes/StartEventNode.vue';
 import EndEventNode from './nodes/EndEventNode.vue';
 import UserTaskNode from './nodes/UserTaskNode.vue';
+import CopyTaskNode from './nodes/CopyTaskNode.vue';
 import { SimpleFlowNode, NodeType }  from './consts';
 defineOptions({
   name: 'ProcessNodeTree'

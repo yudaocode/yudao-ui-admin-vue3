@@ -1,9 +1,9 @@
 <template>
   <div class="node-wrapper">
     <div class="node-container">
-      <div class="node-box" :class="{'node-config-error': !flowNode.showText}">
+      <div class="node-box" :class="{'node-config-error': !currentNode.showText}">
         <div class="node-title-container">
-          <div class="node-title-icon user-task"><span class="iconfont icon-approve"></span></div>
+          <div class="node-title-icon copy-task"><span class="iconfont icon-copy"></span></div>
           <input
             v-if="showInput"
             type="text"
@@ -18,37 +18,37 @@
           </div>
         </div>
         <div class="node-content" @click="openNodeConfig">
-          <div class="node-text" :title="flowNode.showText" v-if="flowNode.showText">
-            {{ flowNode.showText }}
+          <div class="node-text" :title="currentNode.showText" v-if="currentNode.showText">
+            {{ currentNode.showText }}
           </div>
           <div class="node-text"  v-else>
-            {{ NODE_DEFAULT_TEXT.get(NodeType.USER_TASK_NODE) }}
+            {{ NODE_DEFAULT_TEXT.get(NodeType.COPY_TASK_NODE) }}
           </div>
           <Icon icon="ep:arrow-right-bold" />
         </div>
         <div class="node-toolbar">
-          <div class="toolbar-icon"><Icon icon="ep:document-copy" @click="copyNode" /></div>
+          <!-- <div class="toolbar-icon"><Icon icon="ep:document-copy" @click="copyNode" /></div> -->
           <div class="toolbar-icon"><Icon icon="ep:delete" @click="deleteNode" /></div>
         </div>
       </div>
+
       <!-- 传递子节点给添加节点组件。会在子节点前面添加节点 -->
       <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
     </div>
+    <CopyTaskNodeConfig
+      v-if="currentNode"
+      ref="nodeSetting"
+      :flow-node="currentNode"
+      @update:model-value="handleModelValueUpdate"
+     />
   </div>
-  <UserTaskNodeConfig
-    v-if="currentNode"
-    ref="nodeSetting"
-    :flow-node="currentNode"
-    @update:model-value="handleModelValueUpdate"
-  />
 </template>
-<script setup lang="ts">
+<script setup lang='ts'>
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT, NODE_DEFAULT_NAME } from '../consts'
 import NodeHandler from '../NodeHandler.vue'
-import UserTaskNodeConfig from '../nodes-config/UserTaskNodeConfig.vue';
-import { generateUUID } from '@/utils'
+import CopyTaskNodeConfig from '../nodes-config/CopyTaskNodeConfig.vue';
 defineOptions({
-  name: 'UserTaskNode'
+  name: 'CopyTaskNode'
 })
 const props = defineProps({
   flowNode: {
@@ -56,16 +56,13 @@ const props = defineProps({
     required: true
   }
 })
+// 定义事件，更新父组件。
 const emits = defineEmits<{
   'update:modelValue': [node: SimpleFlowNode | undefined]
 }>()
-
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
-const nodeSetting = ref()
-// 打开节点配置
-const openNodeConfig = () => {
-  nodeSetting.value.open()
-}
+
+// 监控当前节点的变化
 watch(
   () => props.flowNode,
   (newValue) => {
@@ -83,31 +80,24 @@ const blurEvent = (event) => {
 const clickEvent = () => {
   showInput.value = true
 }
-const handleModelValueUpdate = (updateValue) => {
-  emits('update:modelValue', updateValue)
-  console.log('user task node handleModelValueUpdate', updateValue)
+const nodeSetting = ref()
+// 打开节点配置
+const openNodeConfig = () => {
+  nodeSetting.value.open()
 }
+
+// 删除节点。更新当前节点为孩子节点
 const deleteNode = () => {
   console.log('the child node is ', currentNode.value.childNode)
   emits('update:modelValue', currentNode.value.childNode)
 }
-const copyNode = () => {
-  // const oldChildNode = currentNode.value.childNode
-  const newCopyNode: SimpleFlowNode = {
-    id: generateUUID(),
-    name: currentNode.value.name,
-    showText: currentNode.value.showText,
-    type: currentNode.value.type,
-    // 审批节点配置
-    attributes: {
-      approveMethod: currentNode.value.attributes?.approveMethod,
-      candidateStrategy: currentNode.value.attributes?.candidateStrategy,
-      candidateParam: currentNode.value.attributes?.candidateParam
-    },
-    childNode: currentNode.value
-  }
-  currentNode.value = newCopyNode
-  emits('update:modelValue', currentNode.value)
+// 接收抄送人配置组件传过来的事件，并且更新节点 信息
+const handleModelValueUpdate = (updateValue) => {
+  emits('update:modelValue', updateValue)
 }
+
 </script>
-<style lang="scss" scoped></style>
+
+<style lang='scss' scoped>
+
+</style>

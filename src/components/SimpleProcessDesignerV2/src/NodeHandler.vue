@@ -9,12 +9,12 @@
               </div>
               <div class="handler-item-text">审批人</div>
             </div>
-            <!-- <div class="handler-item" @click="addNode(NodeType.CONDITION_NODE)">
-              <div class="handler-item-icon">
-                <span class="iconfont icon-size icon-exclusive"></span>
+            <div class="handler-item" @click="addNode(NodeType.COPY_TASK_NODE)">
+              <div class="handler-item-icon copy">
+                <span class="iconfont icon-size icon-copy"></span>
               </div>
-              <div class="handler-item-text">条件分支</div>
-            </div> -->
+              <div class="handler-item-text">抄送</div>
+            </div>
           </div>
           <template #reference>
             <div class="add-icon"><Icon icon="ep:plus" /></div>
@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleFlowNode, NodeType, NODE_DEFAULT_NAME, CandidateStrategy, APPROVE_METHODS } from './consts'
+import { SimpleFlowNode, NodeType, NODE_DEFAULT_NAME, CandidateStrategy } from './consts'
 import { generateUUID } from '@/utils'
 defineOptions({
   name: 'NodeHandler'
@@ -57,6 +57,21 @@ const addNode = (type: number) => {
       // 审批节点配置
       attributes: {
         approveMethod: 1,
+        candidateStrategy: CandidateStrategy.USER,
+        candidateParam: undefined
+      },
+      childNode: props.childNode
+    }
+    emits('update:childNode', data)
+  }
+  if (type === NodeType.COPY_TASK_NODE) {
+    const data: SimpleFlowNode = {
+      id:  generateUUID(),
+      name: NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE) as string,
+      showText: '',
+      type: NodeType.COPY_TASK_NODE,
+      // 审批节点配置
+      attributes: {
         candidateStrategy: CandidateStrategy.USER,
         candidateParam: undefined
       },

@@ -14,16 +14,16 @@
       </div>
     </template>
     <el-tabs type="border-card">
-      <el-tab-pane label="审批人">
+      <el-tab-pane label="抄送人">
         <div>
           <el-form label-position="top">
-            <el-form-item label="审批人设置" prop="candidateStrategy">
+            <el-form-item label="抄送人设置" prop="candidateStrategy">
               <el-radio-group
                 v-model="currentNode.attributes.candidateStrategy"
                 @change="changeCandidateStrategy"
               >
                 <el-radio
-                  v-for="(dict, index) in getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY)"
+                  v-for="(dict, index) in copyUserStrategies"
                   :key="index"
                   :value="dict.value"
                   :label="dict.value"
@@ -94,7 +94,6 @@
                 clearable
                 multiple
                 style="width: 100%"
-                @change="changedCandidateUsers"
               >
                 <el-option
                   v-for="item in userOptions"
@@ -132,21 +131,6 @@
               />
             </el-form-item>
 
-            <el-form-item label="审批方式" prop="approveMethod">
-              <el-radio-group v-model="currentNode.attributes.approveMethod">
-                <div class="flex-col">
-                  <div v-for="(item, index) in APPROVE_METHODS" :key="index">
-                    <el-radio
-                      :value="item.value"
-                      :label="item.value"
-                      :disabled="item.value !== 1 && notAllowedMultiApprovers"
-                    >
-                      {{ item.label }}
-                    </el-radio>
-                  </div>
-                </div>
-              </el-radio-group>
-            </el-form-item>
           </el-form>
         </div>
       </el-tab-pane>
@@ -160,19 +144,17 @@
     </template>
   </el-drawer>
 </template>
-
-<script setup lang="ts">
-import { SimpleFlowNode, APPROVE_METHODS,CandidateStrategy } from '../consts'
+<script setup lang='ts'>
+import { SimpleFlowNode, CandidateStrategy } from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { defaultProps, handleTree } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
 import * as PostApi from '@/api/system/post'
 import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
-
+import { defaultProps, handleTree } from '@/utils/tree'
 defineOptions({
-  name: 'UserTaskNodeConfig'
+  name: 'CopyTaskNodeConfig'
 })
 const props = defineProps({
   flowNode: {
@@ -180,37 +162,58 @@ const props = defineProps({
     required: true
   }
 })
+// 定义事件，更新父组件
 const emits = defineEmits<{
   'update:modelValue': [node: SimpleFlowNode]
 }>()
-const notAllowedMultiApprovers = ref(false)
-const currentNode = ref<SimpleFlowNode>(props.flowNode)
+// 是否可见
 const settingVisible = ref(false)
-const roleOptions = ref<RoleApi.RoleVO[]>([]) // 角色列表
-const postOptions = ref<PostApi.PostVO[]>([]) // 岗位列表
-const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
-let   deptOptions: DeptApi.DeptVO[] = []// 部门列表
+// 当前节点信息，保存后，需要更新父组件
+const currentNode = ref<SimpleFlowNode>(props.flowNode)
+const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList') // 角色列表
+const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
+const userOptions = inject<Ref<UserApi.UserVO[]>>('userList') // 用户列表
+const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList')  // 部门列表
+const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList') // 用户组列表
 const deptTreeOptions = ref() // 部门树
-const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
+deptTreeOptions.value = handleTree(deptOptions?.value as DeptApi.DeptVO[], 'id')
+// 抄送人策略， 去掉发起人自选
+const copyUserStrategies = computed( ()=> {
+  return getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY)
+            .filter(item => item.value !== CandidateStrategy.START_USER_SELECT);
+})
+
+// 选中的参数
 const candidateParamArray = ref<any[]>([])
 
+// 关闭
 const closeDrawer = () => {
   settingVisible.value = false
 }
+// 保存配置
 const saveConfig = () => {
   currentNode.value.attributes.candidateParam = candidateParamArray.value?.join(',')
   currentNode.value.showText = getShowText()
-  console.log('currentNode value is ', currentNode.value)
   emits('update:modelValue', currentNode.value)
   settingVisible.value = false
 }
+
+const open = () => {
+  settingVisible.value = true
+}
+defineExpose({ open }) // 提供 open 方法，用于打开抄送人配置抽屉
+
+const changeCandidateStrategy = () => {
+  candidateParamArray.value = []
+}
+// TODO 貌似可以和 UserTaskNodeConfig 重复了， 如何共用??
 const getShowText = () : string => {
   let showText = ''
   // 指定成员
   if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
-      userOptions.value.forEach((item) => {
+      userOptions?.value.forEach((item) => {
         if (candidateParamArray.value.includes(item.id)) {
           candidateNames.push(item.nickname)
         }
@@ -220,10 +223,10 @@ const getShowText = () : string => {
     }
   }
   // 指定角色
-  if (currentNode.value.attributes.candidateStrategy === 10) {
+  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.ROLE) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
-      roleOptions.value.forEach((item) => {
+      roleOptions?.value.forEach((item) => {
         if (candidateParamArray.value.includes(item.id)) {
           candidateNames.push(item.name)
         }
@@ -236,7 +239,7 @@ const getShowText = () : string => {
       || currentNode.value.attributes.candidateStrategy === CandidateStrategy.DEPT_LEADER ) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
-      deptOptions.forEach((item) => {
+      deptOptions?.value.forEach((item) => {
         if (candidateParamArray.value.includes(item.id)) {
           candidateNames.push(item.name)
         }
@@ -248,12 +251,11 @@ const getShowText = () : string => {
       }
     }
   }
-
    // 指定岗位
    if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.POST) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
-      postOptions.value.forEach((item) => {
+      postOptions?.value.forEach((item) => {
         if (candidateParamArray.value.includes(item.id)) {
           candidateNames.push(item.name)
         }
@@ -265,7 +267,7 @@ const getShowText = () : string => {
   if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER_GROUP) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
-      userGroupOptions.value.forEach((item) => {
+      userGroupOptions?.value.forEach((item) => {
         if (candidateParamArray.value.includes(item.id)) {
           candidateNames.push(item.name)
         }
@@ -273,12 +275,6 @@ const getShowText = () : string => {
       showText = `指定用户组: ${candidateNames.join(',')}`
     }
   }
-
-  // 发起人自选
-  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.START_USER_SELECT ) {
-    showText = `发起人自选`
-  }
-
    // 流程表达式
   if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.EXPRESSION) {
     if (candidateParamArray.value?.length > 0) {
@@ -287,47 +283,12 @@ const getShowText = () : string => {
   }
    return showText
 }
-const open = () => {
-  settingVisible.value = true
-}
-defineExpose({ open }) // 提供 open 方法，用于打开抽屉
-const changeCandidateStrategy = () => {
-  candidateParamArray.value = []
-  currentNode.value.attributes.approveMethod = 1
-  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER) {
-    notAllowedMultiApprovers.value = true
-  } else {
-    notAllowedMultiApprovers.value = false
-  }
-}
 
-const changedCandidateUsers = () => {
-  if (candidateParamArray.value?.length <= 1 && currentNode.value.attributes?.candidateStrategy === CandidateStrategy.USER) {
-    currentNode.value.attributes.approveMethod = 1;
-    notAllowedMultiApprovers.value = true
-  } else {
-    notAllowedMultiApprovers.value = false
-  }
-}
 onMounted(async () => {
-  // 获得角色列表
-  roleOptions.value = await RoleApi.getSimpleRoleList()
-  postOptions.value = await PostApi.getSimplePostList()
-  // 获得用户列表
-  userOptions.value = await UserApi.getSimpleUserList()
-  // 获得部门列表
-  deptOptions = await DeptApi.getSimpleDeptList()
-  deptTreeOptions.value = handleTree(deptOptions, 'id')
-  // 获得用户组列表
-  userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
+
   console.log('candidateParam', currentNode.value.attributes?.candidateParam)
   candidateParamArray.value = currentNode.value.attributes?.candidateParam?.split(',').map(item=> +item)
   console.log('candidateParamArray.value', candidateParamArray.value)
-  if (currentNode.value.attributes?.candidateStrategy === CandidateStrategy.USER && candidateParamArray.value?.length <= 1) {
-    notAllowedMultiApprovers.value = true
-  } else {
-    notAllowedMultiApprovers.value = false
-  }
 })
 </script>
 

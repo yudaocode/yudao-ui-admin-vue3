@@ -108,6 +108,13 @@
           .node-title-icon {
             display: flex;
             align-items: center;
+
+            &.user-task {
+              color: #ff943e;
+            }
+            &.copy-task {
+              color: #3296fa;
+            }
           }
 
           .node-title {
@@ -118,7 +125,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             color: #1f1f1f;
-            // vertical-align: middle;
+            line-height: 18px;
           }
         }
 
@@ -458,7 +465,7 @@
    text-align: center;
 
    &:hover {
-    background: #3296fa;
+    background: #e2e2e2;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
    }
 
@@ -466,11 +473,14 @@
      font-size: 35px;
      line-height: 80px;
    }
- }
+  }
 
  .approve {
    color: #ff943e;
- }
+  }
+  .copy {
+    color: #3296fa;
+  }
 
  .handler-item-text {
    margin-top: 4px;
