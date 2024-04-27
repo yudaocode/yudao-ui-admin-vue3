@@ -19,8 +19,9 @@
       </div>
     </div>
     <Dialog v-model="errorDialogVisible" title="保存失败" width="400" :fullscreen="false">
-      <div v-for="(item, index) in errorNodes" :key="index">
-          {{ item.name }}
+      <div class="mb-2">以下节点内容不完善，请修改后保存</div>
+      <div class="mb-3 b-rounded-1 bg-gray-100 p-2 line-height-normal" v-for="(item, index) in errorNodes" :key="index">
+          {{ item.name }} : {{ NODE_DEFAULT_TEXT.get(item.type) }}
       </div>
       <template #footer>
         <el-button type="primary" @click="errorDialogVisible = false" >知道了</el-button>
@@ -32,7 +33,7 @@
 <script setup lang="ts">
 import ProcessNodeTree from './ProcessNodeTree.vue';
 import { saveBpmSimpleModel, getBpmSimpleModel } from '@/api/bpm/simple'
-import { SimpleFlowNode, NodeType } from './consts'
+import { SimpleFlowNode, NodeType,NODE_DEFAULT_TEXT } from './consts'
 
 defineOptions({
   name: 'SimpleProcessDesigner'
@@ -67,21 +68,24 @@ const saveSimpleFlowModel = async () => {
   console.log('errorNodes is ', errorNodes)
   if (errorNodes.length > 0) {
     errorDialogVisible.value = true
+    return;
   }
-  // const data = {
-  //   modelId: props.modelId,
-  //   simpleModelBody: simpleWorkFlowNodes.value
-  // }
-  // console.log('request json data1 is ', data)
-  // const result = await saveBpmSimpleModel(data)
-  // console.log('save the result is ', result)
-  // if (result) {
-  //   message.success('修改成功')
-  //   close()
-  // } else {
-  //   message.alert('修改失败')
-  // }
+  const data = {
+    modelId: props.modelId,
+    simpleModelBody: processNodeTree.value
+  }
+
+  const result = await saveBpmSimpleModel(data)
+  console.log('save the result is ', result)
+  if (result) {
+    message.success('修改成功')
+    close()
+  } else {
+    message.alert('修改失败')
+  }
+  
 }
+// 校验节点设置。 暂时以 showText 为空 未节点错误配置
 const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNode[]) => {
   if (node) {
     const { type, showText, conditionNodes } = node
@@ -113,23 +117,28 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
     }
   }
 }
+
 const close = () => {
   router.push({ path: '/bpm/manager/model' })
 }
 let scaleValue = ref(100)
-
+const MAX_SCALE_VALUE = 200
+const MIN_SCALE_VALUE = 50
+// 放大
 const zoomOut = () => {
-  if (scaleValue.value == 300) {
+  if (scaleValue.value == MAX_SCALE_VALUE) {
     return
   }
   scaleValue.value += 10
 }
+// 缩小
 const zoomIn = () => {
-  if (scaleValue.value == 50) {
+  if (scaleValue.value == MIN_SCALE_VALUE) {
     return
   }
   scaleValue.value -= 10
 }
+
 onMounted(async () => {
   const result = await getBpmSimpleModel(props.modelId)
   if (result) {

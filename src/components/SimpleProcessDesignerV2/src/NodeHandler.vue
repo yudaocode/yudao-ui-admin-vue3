@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleFlowNode, NodeType, NODE_DEFAULT_NAME } from './consts'
+import { SimpleFlowNode, NodeType, NODE_DEFAULT_NAME, CandidateStrategy, APPROVE_METHODS } from './consts'
 import { generateUUID } from '@/utils'
 defineOptions({
   name: 'NodeHandler'
@@ -57,7 +57,7 @@ const addNode = (type: number) => {
       // 审批节点配置
       attributes: {
         approveMethod: 1,
-        candidateStrategy: 30,
+        candidateStrategy: CandidateStrategy.USER,
         candidateParam: undefined
       },
       childNode: props.childNode

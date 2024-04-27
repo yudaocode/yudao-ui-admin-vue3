@@ -42,6 +42,43 @@ export enum NodeType {
   INCLUSIVE_NODE_JOIN = 8
 }
 
+// 候选人策略 （用于审批节点。抄送节点
+export enum CandidateStrategy {
+  /**
+   * 指定角色
+   */
+  ROLE = 10,
+  /**
+   * 指定部门成员
+   */
+  DEPT_MEMBER = 20,
+  /**
+   * 部门的负责人
+   */
+  DEPT_LEADER = 21,
+  /**
+   * 指定岗位
+   */
+  POST = 22,
+  /**
+   * 指定用户
+   */
+  USER = 30,
+  /**
+   * 发起人自选
+   */
+  START_USER_SELECT = 35,
+   /**
+   * 指定用户组
+   */
+   USER_GROUP = 40,
+   /**
+   * 流程表达式
+   */
+   EXPRESSION = 60
+}
+
+
 export type SimpleFlowNode = {
   id: string,
   type: NodeType,

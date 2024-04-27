@@ -1,8 +1,12 @@
 <template>
   <!-- 开始节点 -->
   <StartEventNode v-if="currentNode && currentNode.type === NodeType.START_EVENT_NODE" :flow-node ="currentNode" />
+  <!-- 审批节点 -->
+  <UserTaskNode 
+        v-if="currentNode && currentNode.type === NodeType.USER_TASK_NODE" 
+        :flow-node ="currentNode" @update:model-value="handleModelValueUpdate"/>
 
-  <!-- 递归显示子节点  -->
+  <!-- 递归显示孩子节点  -->
   <ProcessNodeTree v-if="currentNode && currentNode.childNode"  v-model:flow-node="currentNode.childNode"/>
 
   <!-- 结束节点 -->
@@ -11,7 +15,7 @@
 <script setup lang='ts'>
 import StartEventNode from './nodes/StartEventNode.vue';
 import EndEventNode from './nodes/EndEventNode.vue';
-
+import UserTaskNode from './nodes/UserTaskNode.vue';
 import { SimpleFlowNode, NodeType }  from './consts';
 defineOptions({
   name: 'ProcessNodeTree'
@@ -32,10 +36,10 @@ watch(() => props.flowNode, (newValue) => {
   currentNode.value = newValue;  
 });
 
-// const handleModelValueUpdate = (updateValue) => {
-//   console.log('handleModelValueUpdate', updateValue)
-//   emits('update:flowNode', updateValue);
-// } 
+const handleModelValueUpdate = (updateValue) => {
+  console.log('Process Node Tree handleModelValueUpdate', updateValue)
+  emits('update:flowNode', updateValue);
+} 
 </script>
 <style lang='scss' scoped>
 
