@@ -164,7 +164,7 @@
 <script setup lang="ts">
 import { SimpleFlowNode, APPROVE_METHODS,CandidateStrategy } from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { defaultProps, handleTree } from '@/utils/tree'
+import { defaultProps } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
 import * as PostApi from '@/api/system/post'
@@ -186,12 +186,12 @@ const emits = defineEmits<{
 const notAllowedMultiApprovers = ref(false)
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
 const settingVisible = ref(false)
-const roleOptions = ref<RoleApi.RoleVO[]>([]) // 角色列表
-const postOptions = ref<PostApi.PostVO[]>([]) // 岗位列表
-const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
-let   deptOptions: DeptApi.DeptVO[] = []// 部门列表
-const deptTreeOptions = ref() // 部门树
-const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
+const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList') // 角色列表
+const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
+const userOptions = inject<Ref<UserApi.UserVO[]>>('userList') // 用户列表
+const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList')  // 部门列表
+const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList') // 用户组列表
+const deptTreeOptions = inject('deptTree') // 部门树
 const candidateParamArray = ref<any[]>([])
 
 const closeDrawer = () => {
@@ -210,7 +210,7 @@ const getShowText = () : string => {
   if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
-      userOptions.value.forEach((item) => {
+      userOptions?.value.forEach((item) => {
         if (candidateParamArray.value.includes(item.id)) {
           candidateNames.push(item.nickname)
         }
@@ -223,7 +223,7 @@ const getShowText = () : string => {
   if (currentNode.value.attributes.candidateStrategy === 10) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
-      roleOptions.value.forEach((item) => {
+      roleOptions?.value.forEach((item) => {
         if (candidateParamArray.value.includes(item.id)) {
           candidateNames.push(item.name)
         }
@@ -236,7 +236,7 @@ const getShowText = () : string => {
       || currentNode.value.attributes.candidateStrategy === CandidateStrategy.DEPT_LEADER ) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
-      deptOptions.forEach((item) => {
+      deptOptions?.value.forEach((item) => {
         if (candidateParamArray.value.includes(item.id)) {
           candidateNames.push(item.name)
         }
@@ -253,7 +253,7 @@ const getShowText = () : string => {
    if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.POST) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
-      postOptions.value.forEach((item) => {
+      postOptions?.value.forEach((item) => {
         if (candidateParamArray.value.includes(item.id)) {
           candidateNames.push(item.name)
         }
@@ -265,7 +265,7 @@ const getShowText = () : string => {
   if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER_GROUP) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
-      userGroupOptions.value.forEach((item) => {
+      userGroupOptions?.value.forEach((item) => {
         if (candidateParamArray.value.includes(item.id)) {
           candidateNames.push(item.name)
         }
@@ -311,15 +311,15 @@ const changedCandidateUsers = () => {
 }
 onMounted(async () => {
   // 获得角色列表
-  roleOptions.value = await RoleApi.getSimpleRoleList()
-  postOptions.value = await PostApi.getSimplePostList()
-  // 获得用户列表
-  userOptions.value = await UserApi.getSimpleUserList()
-  // 获得部门列表
-  deptOptions = await DeptApi.getSimpleDeptList()
-  deptTreeOptions.value = handleTree(deptOptions, 'id')
-  // 获得用户组列表
-  userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
+  // roleOptions.value = await RoleApi.getSimpleRoleList()
+  // postOptions.value = await PostApi.getSimplePostList()
+  // // 获得用户列表
+  // userOptions.value = await UserApi.getSimpleUserList()
+  // // 获得部门列表
+  // deptOptions = await DeptApi.getSimpleDeptList()
+  // deptTreeOptions.value = handleTree(deptOptions, 'id')
+  // // 获得用户组列表
+  // userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
   console.log('candidateParam', currentNode.value.attributes?.candidateParam)
   candidateParamArray.value = currentNode.value.attributes?.candidateParam?.split(',').map(item=> +item)
   console.log('candidateParamArray.value', candidateParamArray.value)

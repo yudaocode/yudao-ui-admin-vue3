@@ -152,7 +152,7 @@ import * as DeptApi from '@/api/system/dept'
 import * as PostApi from '@/api/system/post'
 import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
-import { defaultProps, handleTree } from '@/utils/tree'
+import { defaultProps } from '@/utils/tree'
 defineOptions({
   name: 'CopyTaskNodeConfig'
 })
@@ -175,8 +175,8 @@ const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
 const userOptions = inject<Ref<UserApi.UserVO[]>>('userList') // 用户列表
 const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList')  // 部门列表
 const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList') // 用户组列表
-const deptTreeOptions = ref() // 部门树
-deptTreeOptions.value = handleTree(deptOptions?.value as DeptApi.DeptVO[], 'id')
+const deptTreeOptions = inject('deptTree') // 部门树
+
 // 抄送人策略， 去掉发起人自选
 const copyUserStrategies = computed( ()=> {
   return getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY)
@@ -285,7 +285,6 @@ const getShowText = () : string => {
 }
 
 onMounted(async () => {
-
   console.log('candidateParam', currentNode.value.attributes?.candidateParam)
   candidateParamArray.value = currentNode.value.attributes?.candidateParam?.split(',').map(item=> +item)
   console.log('candidateParamArray.value', candidateParamArray.value)

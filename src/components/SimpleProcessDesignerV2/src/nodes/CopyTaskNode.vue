@@ -28,7 +28,7 @@
         </div>
         <div class="node-toolbar">
           <!-- <div class="toolbar-icon"><Icon icon="ep:document-copy" @click="copyNode" /></div> -->
-          <div class="toolbar-icon"><Icon icon="ep:delete" @click="deleteNode" /></div>
+          <div class="toolbar-icon"><Icon icon="ep:circle-close" :size="18"  @click="deleteNode" /></div>
         </div>
       </div>
 
@@ -47,6 +47,7 @@
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT, NODE_DEFAULT_NAME } from '../consts'
 import NodeHandler from '../NodeHandler.vue'
 import CopyTaskNodeConfig from '../nodes-config/CopyTaskNodeConfig.vue';
+import { generateUUID } from '@/utils'
 defineOptions({
   name: 'CopyTaskNode'
 })
@@ -88,8 +89,24 @@ const openNodeConfig = () => {
 
 // 删除节点。更新当前节点为孩子节点
 const deleteNode = () => {
-  console.log('the child node is ', currentNode.value.childNode)
   emits('update:modelValue', currentNode.value.childNode)
+}
+// 复制节点
+const copyNode = () => {
+  const newCopyNode: SimpleFlowNode = {
+    id: generateUUID(),
+    name: currentNode.value.name,
+    showText: currentNode.value.showText,
+    type: currentNode.value.type,
+    // 抄送节点配置
+    attributes: {
+      candidateStrategy: currentNode.value.attributes?.candidateStrategy,
+      candidateParam: currentNode.value.attributes?.candidateParam
+    },
+    childNode: currentNode.value
+  }
+  currentNode.value = newCopyNode
+  emits('update:modelValue', currentNode.value)
 }
 // 接收抄送人配置组件传过来的事件，并且更新节点 信息
 const handleModelValueUpdate = (updateValue) => {

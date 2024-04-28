@@ -178,15 +178,14 @@
         .node-toolbar {
           opacity: 0;
           position: absolute;
-          top: -26px;
-          right: 10px;
+          top: -5px;
+          right: -8px;
           display: flex;
 
           .toolbar-icon {
             text-align: center;
             vertical-align: middle;
-            color: #000;
-            border-radius: 4px;
+            color: #6d6c6e;
           }
         }
       }
