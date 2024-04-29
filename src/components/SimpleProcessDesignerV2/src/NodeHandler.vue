@@ -100,7 +100,7 @@ const addNode = (type: number) => {
           childNode: undefined,
           attributes: {
             conditionType: 1,
-            defaultCondition: false
+            defaultFlow: false
           }
         },
         {
@@ -111,7 +111,7 @@ const addNode = (type: number) => {
           childNode: undefined,
           attributes: {
             conditionType: undefined,
-            defaultCondition: true
+            defaultFlow: true
           }
         }
       ]

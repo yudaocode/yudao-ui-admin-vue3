@@ -2,11 +2,7 @@
   <div class="branch-node-wrapper">
     <div class="branch-node-container">
       <div class="branch-node-add" @click="addCondition">添加条件</div>
-      <div
-        class="branch-node-item"
-        v-for="(item, index) in currentNode.conditionNodes"
-        :key="index"
-      >
+      <div class="branch-node-item" v-for="(item, index) in currentNode.conditionNodes" :key="index">
         <template v-if="index == 0">
           <div class="branch-line-first-top"></div>
           <div class="branch-line-first-bottom"></div>
@@ -17,31 +13,40 @@
         </template>
         <div class="node-wrapper">
           <div class="node-container">
-            <div class="node-box" :class="{'node-config-error': !item.showText}">
+            <div class="node-box" :class="{ 'node-config-error': !item.showText }">
               <div class="branch-node-title-container">
                 <div class="branch-title" v-if="showInputs[index]">
                   <input
-                    type="text"
-                    class="input-max-width editable-title-input"
-                    @blur="blurEvent(index)"
-                    v-mountedFocus
-                    v-model="item.name"
-                  />
+type="text" class="input-max-width editable-title-input" @blur="blurEvent(index)"
+                    v-mountedFocus v-model="item.name" />
                 </div>
                 <div v-else class="branch-title" @click="clickEvent(index)"> {{ item.name }} </div>
                 <div class="branch-priority"> 优先级{{ index + 1 }} </div>
               </div>
-              <div class="node-content" @click="conditionNodeConfig(item.id)">
-                <div class="node-text" :title="item.showText" v-if ="item.showText">
+              <div class="branch-node-content" @click="conditionNodeConfig(item.id)">
+                <div class="branch-node-text" :title="item.showText" v-if="item.showText">
                   {{ item.showText }}
                 </div>
-                <div class="node-text" v-else >
+                <div class="branch-node-text" v-else>
                   {{ NODE_DEFAULT_TEXT.get(NodeType.CONDITION_NODE) }}
                 </div>
-                <Icon icon="ep:arrow-right-bold" />
               </div>
               <div class="node-toolbar" v-if="index + 1 !== currentNode.conditionNodes?.length">
-                <div class="toolbar-icon"><Icon  icon="ep:circle-close"  @click="deleteCondition(index)"/></div>
+                <div class="toolbar-icon">
+                  <Icon icon="ep:delete" :size="16" @click="deleteCondition(index)" />
+                </div>
+              </div>
+              <div 
+                class="branch-node-move move-node-left"
+                v-if="index != 0 && index + 1 !== currentNode.conditionNodes?.length" @click="moveNode(index, -1)">
+                <Icon icon="ep:arrow-left" />
+              </div>
+
+              <div 
+                class="branch-node-move move-node-right"
+                v-if="currentNode.conditionNodes && index < currentNode.conditionNodes.length - 2"
+                @click="moveNode(index, 1)">
+                <Icon icon="ep:arrow-right" />
               </div>
             </div>
             <NodeHandler v-model:child-node="item.childNode" />
@@ -49,7 +54,7 @@
         </div>
         <ConditionNodeConfig :condition-node="item" :ref="item.id" />
         <!-- 递归显示子节点  -->
-        <ProcessNodeTree  v-if="item && item.childNode" v-model:flow-node="item.childNode" />
+        <ProcessNodeTree v-if="item && item.childNode" v-model:flow-node="item.childNode" />
       </div>
     </div>
     <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
@@ -74,14 +79,14 @@ const props = defineProps({
 })
 // 定义事件，更新父组件
 const emits = defineEmits<{
-  'update:modelValue': [node : SimpleFlowNode | undefined]
+  'update:modelValue': [node: SimpleFlowNode | undefined]
 }>()
 
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
 // const conditionNodes = computed(() => currentNode.value.conditionNodes);
 
-watch(() => props.flowNode, (newValue) => {  
-  currentNode.value = newValue;  
+watch(() => props.flowNode, (newValue) => {
+  currentNode.value = newValue;
 });
 // TODO 测试后续去掉
 // watch(() => conditionNodes, (newValue) => {  
@@ -90,17 +95,17 @@ watch(() => props.flowNode, (newValue) => {
 
 const showInputs = ref<boolean[]>([])
 // 失去焦点
-const blurEvent = (index:number) => {
+const blurEvent = (index: number) => {
   showInputs.value[index] = false
-  const conditionNode =  currentNode.value.conditionNodes?.at(index) as SimpleFlowNode;
-  conditionNode.name =  conditionNode.name || '条件' + index
+  const conditionNode = currentNode.value.conditionNodes?.at(index) as SimpleFlowNode;
+  conditionNode.name = conditionNode.name || '条件' + index
 }
 // 点击条件名称
-const clickEvent = (index:number) => {
+const clickEvent = (index: number) => {
   showInputs.value[index] = true
 }
 
-const conditionNodeConfig = (nodeId:string) => {
+const conditionNodeConfig = (nodeId: string) => {
   console.log('nodeId', nodeId);
   console.log("proxy.$refs", proxy.$refs);
   // TODO 测试后续去掉
@@ -109,29 +114,31 @@ const conditionNodeConfig = (nodeId:string) => {
   conditionNode.open()
 }
 
+// 新增条件
 const addCondition = () => {
-  const conditionNodes =  currentNode.value.conditionNodes;
+  const conditionNodes = currentNode.value.conditionNodes;
   if (conditionNodes) {
     const len = conditionNodes.length
     let lastIndex = len - 1
     const conditionData: SimpleFlowNode = {
-      id:  generateUUID(),
-      name: '条件'+len,
-      showText : '',
+      id: 'Flow_' + generateUUID(),
+      name: '条件' + len,
+      showText: '',
       type: NodeType.CONDITION_NODE,
       childNode: undefined,
       conditionNodes: [],
       attributes: {
         conditionType: 1,
-        defaultCondition: false
+        defaultFlow: false
       }
     }
     conditionNodes.splice(lastIndex, 0, conditionData)
   }
 }
 
-const deleteCondition = (index:number) => {
-  const conditionNodes =  currentNode.value.conditionNodes;
+// 删除条件
+const deleteCondition = (index: number) => {
+  const conditionNodes = currentNode.value.conditionNodes;
   if (conditionNodes) {
     conditionNodes.splice(index, 1)
     if (conditionNodes.length == 1) {
@@ -141,6 +148,17 @@ const deleteCondition = (index:number) => {
     }
   }
 }
+
+// 移动节点
+const moveNode = (index: number, to: number) => {
+  // -1 ：向左  1： 向右
+  if (currentNode.value.conditionNodes) {
+    currentNode.value.conditionNodes[index] = currentNode.value.conditionNodes.splice(index + to, 
+      1, currentNode.value.conditionNodes[index])[0]
+  }
+
+}
+
 
 </script>
 

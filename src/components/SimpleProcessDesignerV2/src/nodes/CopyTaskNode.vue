@@ -28,7 +28,7 @@
         </div>
         <div class="node-toolbar">
           <!-- <div class="toolbar-icon"><Icon icon="ep:document-copy" @click="copyNode" /></div> -->
-          <div class="toolbar-icon"><Icon icon="ep:circle-close" :size="18"  @click="deleteNode" /></div>
+          <div class="toolbar-icon"><Icon icon="ep:delete" :size="16"  @click="deleteNode" /></div>
         </div>
       </div>
 

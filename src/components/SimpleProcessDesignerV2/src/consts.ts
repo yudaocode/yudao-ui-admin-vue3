@@ -115,6 +115,5 @@ export const APPROVE_METHODS: DictDataVO [] = [
 ]
 
 export const CONDITION_CONFIG_TYPES: DictDataVO [] = [
-  { label: '条件规则', value: 1 },
-  { label: '条件表达式', value: 2 }
+  { label: '自定义条件表达式', value: 1 }
 ]

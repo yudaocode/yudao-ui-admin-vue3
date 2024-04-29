@@ -13,10 +13,10 @@
       </div>
    </template>
     <div> 
-      <div class="mb-3 text-size-sm" v-if="currentNode.attributes.defaultCondition">其它条件不满足进入此分支（该分支不可编辑和删除）</div>
+      <div class="mb-3 text-size-sm" v-if="currentNode.attributes.defaultFlow">其它条件不满足进入此分支（该分支不可编辑和删除）</div>
       <div v-else>
           <el-form label-position="top">
-            <el-form-item label="配置方式" prop="conditionType">
+            <el-form-item label="条件类型" prop="conditionType">
               <el-radio-group
                 v-model="currentNode.attributes.conditionType"
                 @change="changeConditionType"
@@ -33,7 +33,7 @@
             </el-form-item>
               
             <el-form-item
-              v-if="currentNode.attributes.conditionType === 2"
+              v-if="currentNode.attributes.conditionType === 1"
               label="条件表达式"
               prop="conditionExpression"
             >
@@ -44,13 +44,13 @@
                 style="width: 100%"
               />
             </el-form-item>
-            <el-form-item
+            <!-- <el-form-item
               v-if="currentNode.attributes.conditionType === 1"
               label="条件规则"
               prop="conditionExpression"
             >
               <span class="text-red-400">待实现</span>
-            </el-form-item>
+            </el-form-item> -->
           </el-form>
       </div>    
     </div>
@@ -93,17 +93,17 @@ const closeDrawer = () => {
 }
 // 保存配置
 const saveConfig = () => {
-  if (!currentNode.value.attributes.defaultCondition) {
+  if (!currentNode.value.attributes.defaultFlow) {
     currentNode.value.showText = getShowText();
   }
   settingVisible.value = false
 }
 const getShowText = () : string => {
   let showText ='';
+  // if (currentNode.value.attributes.conditionType === 1) {
+  //   showText = '待实现'
+  // } 
   if (currentNode.value.attributes.conditionType === 1) {
-    showText = '待实现'
-  } 
-  if (currentNode.value.attributes.conditionType === 2) {
     if (currentNode.value.attributes.conditionExpression) {
       showText = `表达式：${currentNode.value.attributes.conditionExpression}`
     }

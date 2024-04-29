@@ -95,6 +95,10 @@
           .node-toolbar {
             opacity: 1;
           }
+
+          .branch-node-move {
+            display: flex;
+          }
         }
 
         // 普通节点标题
@@ -181,24 +185,74 @@
           }
         }
 
+        //条件节点内容
+        .branch-node-content {
+          display: flex;
+          min-height: 32px;
+          padding: 4px 8px;
+          margin-top: 4px;
+          line-height: 32px;
+          align-items: center;
+          color: #111f2c;
+          border-radius: 4px;
+
+          .branch-node-text {
+            overflow: hidden;
+            font-size: 14px;
+            line-height: 24px;
+            text-overflow: ellipsis;
+            word-break: break-all;
+            -webkit-line-clamp: 2; /* 这将限制文本显示为两行 */
+            -webkit-box-orient: vertical;
+          }
+        }
+
+        // 节点操作 ：删除
         .node-toolbar {
           opacity: 0;
           position: absolute;
-          top: -5px;
-          right: -8px;
+          top: -25px;
+          right: 0px;
           display: flex;
 
           .toolbar-icon {
             text-align: center;
             vertical-align: middle;
-            color: #6d6c6e;
+            color:  #000;
           }
+        }
+
+        // 条件节点左右移动
+        .branch-node-move {
+          position: absolute;
+          width: 10px;
+          cursor: pointer;
+          display: none;
+          align-items: center;
+          height: 100%;
+          justify-content: center;
+        }
+
+        .move-node-left {
+          left: -2px;
+          top: 0px;
+          background: rgba(126, 134, 142, .08);
+          border-top-left-radius: 8px;
+          border-bottom-left-radius: 8px;
+        }
+
+        .move-node-right {
+          right: -2px;
+          top: 0px;
+          background: rgba(126,134,142,.08);
+          border-top-right-radius: 6px;
+          border-bottom-right-radius: 6px;
         }
       }
 
       
       .node-config-error {
-        border-color: #ff5219;
+        border-color: #ff5219 !important;
       }
       // 普通节点包装
       .node-wrapper {
