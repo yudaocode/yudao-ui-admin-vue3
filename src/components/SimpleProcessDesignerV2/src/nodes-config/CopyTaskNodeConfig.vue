@@ -5,7 +5,6 @@
     :show-close="false"
     :size="550"
     :before-close="saveConfig"
-    class="justify-start"
   >
     <template #header>
       <div class="w-full flex flex-col">

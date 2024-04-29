@@ -112,5 +112,9 @@ export const APPROVE_METHODS: DictDataVO [] = [
   { label: '多人会签(需所有审批人同意)', value: 2 },
   { label: '多人或签(一名审批人同意即可)', value: 3 },
   { label: '依次审批(按顺序依次审批)', value: 4 }
-  // TODO 更多的类型
+]
+
+export const CONDITION_CONFIG_TYPES: DictDataVO [] = [
+  { label: '条件规则', value: 1 },
+  { label: '条件表达式', value: 2 }
 ]

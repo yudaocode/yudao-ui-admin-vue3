@@ -132,16 +132,22 @@
         // 条件节点标题
         .branch-node-title-container {
           display: flex;
-          padding: 4px;
+          padding: 4px 0;
           cursor: pointer;
           border-radius: 4px 4px 0 0;
           align-items: center;
           justify-content: space-between;
 
+          .input-max-width {
+            max-width: 115px !important;
+          }
+
           .branch-title {
-            max-width: 120px;
             font-size: 13px;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
             color: #f60;
           }
 
@@ -425,6 +431,7 @@
       // 可编辑的 title 输入框
       .editable-title-input {
         height: 20px;
+        max-width: 145px;
         line-height: 20px;
         font-size: 12px;
         margin-left: 4px;
@@ -479,6 +486,10 @@
   }
   .copy {
     color: #3296fa;
+  }
+  
+  .condition {
+    color: #15bc83;
   }
 
  .handler-item-text {

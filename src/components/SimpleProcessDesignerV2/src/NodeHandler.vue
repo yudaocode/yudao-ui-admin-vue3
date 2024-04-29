@@ -15,6 +15,12 @@
               </div>
               <div class="handler-item-text">抄送</div>
             </div>
+            <div class="handler-item" @click="addNode(NodeType.EXCLUSIVE_NODE)">
+              <div class="handler-item-icon condition">
+                <span class="iconfont icon-size icon-exclusive"></span>
+              </div>
+              <div class="handler-item-text">条件分支</div>
+            </div>
           </div>
           <template #reference>
             <div class="add-icon"><Icon icon="ep:plus" /></div>
@@ -50,7 +56,7 @@ const addNode = (type: number) => {
   popoverShow.value = false
   if (type === NodeType.USER_TASK_NODE) {
     const data: SimpleFlowNode = {
-      id:  generateUUID(),
+      id:  'Activity_'+ generateUUID(),
       name: NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string,
       showText: '',
       type: NodeType.USER_TASK_NODE,
@@ -66,7 +72,7 @@ const addNode = (type: number) => {
   }
   if (type === NodeType.COPY_TASK_NODE) {
     const data: SimpleFlowNode = {
-      id:  generateUUID(),
+      id:  'Activity_'+ generateUUID(),
       name: NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE) as string,
       showText: '',
       type: NodeType.COPY_TASK_NODE,
@@ -76,6 +82,39 @@ const addNode = (type: number) => {
         candidateParam: undefined
       },
       childNode: props.childNode
+    }
+    emits('update:childNode', data)
+  }
+  if (type === NodeType.EXCLUSIVE_NODE) {
+    const data : SimpleFlowNode = {
+      name: '条件分支',
+      type: NodeType.EXCLUSIVE_NODE,
+      id: 'GateWay_' + generateUUID(),
+      childNode: props.childNode,
+      conditionNodes: [
+        {
+          id: 'Flow_'+ generateUUID(),
+          name: '条件1',
+          showText: '',
+          type: NodeType.CONDITION_NODE,
+          childNode: undefined,
+          attributes: {
+            conditionType: 1,
+            defaultCondition: false
+          }
+        },
+        {
+          id: 'Flow_'+ generateUUID(),
+          name: '其它情况',
+          showText: '其它情况进入此流程',
+          type: NodeType.CONDITION_NODE,
+          childNode: undefined,
+          attributes: {
+            conditionType: undefined,
+            defaultCondition: true
+          }
+        }
+      ]
     }
     emits('update:childNode', data)
   }
