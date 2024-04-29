@@ -2,7 +2,7 @@ import { useUploadFileRule } from './useUploadFileRule'
 import { useUploadImgRule } from './useUploadImgRule'
 import { useUploadImgsRule } from './useUploadImgsRule'
 import { useDictSelectRule } from './useDictSelectRule'
-import { useUserSelectRule } from './useUserSelectRule'
+import { useCurrencySelectRule } from './useCurrencySelectRule'
 import { useEditorRule } from './useEditorRule'
 
 export {
@@ -10,6 +10,6 @@ export {
   useUploadImgRule,
   useUploadImgsRule,
   useDictSelectRule,
-  useUserSelectRule,
+  useCurrencySelectRule,
   useEditorRule
 }

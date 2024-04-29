@@ -1,10 +1,10 @@
 import {
+  useCurrencySelectRule,
   useDictSelectRule,
   useEditorRule,
   useUploadFileRule,
   useUploadImgRule,
-  useUploadImgsRule,
-  useUserSelectRule
+  useUploadImgsRule
 } from './config'
 import { Ref } from 'vue'
 
@@ -24,20 +24,22 @@ export const useFormCreateDesigner = (designer: Ref) => {
   const uploadImgRule = useUploadImgRule()
   const uploadImgsRule = useUploadImgsRule()
   const dictSelectRule = useDictSelectRule()
-  const userSelectRule = useUserSelectRule()
+  const currencySelectRule = useCurrencySelectRule()
 
   onMounted(() => {
     // 移除自带的上传组件规则，使用 uploadFileRule、uploadImgRule、uploadImgsRule 替代
     designer.value?.removeMenuItem('upload')
     // 移除自带的富文本组件规则，使用 editorRule 替代
     designer.value?.removeMenuItem('fc-editor')
+    // 移除自带的下拉选择器组件，使用 currencySelectRule 替代
+    designer.value?.removeMenuItem('select')
     const components = [
       editorRule,
       uploadFileRule,
       uploadImgRule,
       uploadImgsRule,
       dictSelectRule,
-      userSelectRule
+      currencySelectRule
     ]
     components.forEach((component) => {
       // 插入组件规则

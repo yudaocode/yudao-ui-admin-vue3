@@ -20,7 +20,7 @@ import install from '@form-create/element-ui/auto-import'
 //======================= 自定义组件 =======================
 import { UploadFile, UploadImg, UploadImgs } from '@/components/UploadFile'
 import { DictSelect } from '@/components/DictSelect'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import { CurrencySelect } from '@/components/FormCreate'
 import { Editor } from '@/components/Editor'
 
 const components = [
@@ -40,7 +40,7 @@ const components = [
   UploadImgs,
   UploadFile,
   DictSelect,
-  UserSelect,
+  CurrencySelect,
   Editor
 ]
 

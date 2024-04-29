@@ -1,3 +1,4 @@
 import { useFormCreateDesigner } from './src/useFormCreateDesigner'
+import CurrencySelect from './src/CurrencySelect/index.vue'
 
-export { useFormCreateDesigner }
+export { useFormCreateDesigner, CurrencySelect }
