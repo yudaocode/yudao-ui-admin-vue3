@@ -54,7 +54,7 @@
       </template>
       <div class="max-h-80 overflow-auto">
         <ul>
-          <li v-for="msg in messageList.reverse()" :key="msg.time" class="mt-2">
+          <li v-for="msg in messageReverseList" :key="msg.time" class="mt-2">
             <div class="flex items-center">
               <span class="text-primary mr-2 font-medium">收到消息:</span>
               <span>{{ formatDate(msg.time) }}</span>
@@ -92,6 +92,7 @@ const { status, data, send, close, open } = useWebSocket(server.value, {
 
 /** 监听接收到的数据 */
 const messageList = ref([] as { time: number; text: string }[]) // 消息列表
+const messageReverseList = computed(() => messageList.value.slice().reverse())
 watchEffect(() => {
   if (!data.value) {
     return
