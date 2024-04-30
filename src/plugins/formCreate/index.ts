@@ -20,8 +20,21 @@ import install from '@form-create/element-ui/auto-import'
 //======================= 自定义组件 =======================
 import { UploadFile, UploadImg, UploadImgs } from '@/components/UploadFile'
 import { DictSelect } from '@/components/DictSelect'
-import { CurrencySelect } from '@/components/FormCreate'
+import { useCurrencySelect } from '@/components/FormCreate'
 import { Editor } from '@/components/Editor'
+
+const UserSelect = useCurrencySelect({
+  name: 'UserSelect',
+  labelField: 'nickname',
+  valueField: 'id',
+  restful: '/system/user/simple-list'
+})
+const DeptSelect = useCurrencySelect({
+  name: 'DeptSelect',
+  labelField: 'name',
+  valueField: 'id',
+  restful: '/system/dept/simple-list'
+})
 
 const components = [
   ElAside,
@@ -40,7 +53,8 @@ const components = [
   UploadImgs,
   UploadFile,
   DictSelect,
-  CurrencySelect,
+  UserSelect,
+  DeptSelect,
   Editor
 ]
 

@@ -1,8 +1,9 @@
 import { generateUUID } from '@/utils'
 import { localeProps, makeRequiredRule } from '@/components/FormCreate/src/utils'
 import selectRule from '@/components/FormCreate/src/config/selectRule'
+import { DragRule } from '@/components/FormCreate/src/type'
 
-export const useCurrencySelectRule = () => {
+export const useCurrencySelectRule = (): DragRule => {
   const label = '通用选择器'
   const name = 'CurrencySelect'
   return {
