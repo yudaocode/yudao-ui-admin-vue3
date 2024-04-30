@@ -6,10 +6,10 @@
   "private": false,
   "scripts": {
     "i": "pnpm install",
-    "dev": "vite --mode local-dev",
+    "dev": "vite",
     "dev-server": "vite --mode dev",
     "ts:check": "vue-tsc --noEmit",
-    "build:local-dev": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite.js build --mode local-dev",
+    "build:local": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite.js build",
     "build:dev": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite.js build --mode local-dev",
     "build:test": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite.js build --mode test",
     "build:stage": "node --max_old_space_size=8192 ./node_modules/vite/bin/vite.js build --mode stage",
