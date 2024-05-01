@@ -39,3 +39,10 @@ export interface CurrencySelectProps {
   valueField?: string // 字典值类型
   restful?: string // api 接口
 }
+
+// 选择组件规则配置类型
+export interface SelectRuleOption {
+  label: string // label 名称
+  name: string // 组件名称
+  props?: Rule[] // 组件规则
+}

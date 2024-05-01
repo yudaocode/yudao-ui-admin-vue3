@@ -1,11 +1,15 @@
 import { generateUUID } from '@/utils'
 import { localeProps, makeRequiredRule } from '@/components/FormCreate/src/utils'
 import selectRule from '@/components/FormCreate/src/config/selectRule'
-import { DragRule } from '@/components/FormCreate/src/type'
+import { SelectRuleOption } from '@/components/FormCreate/src/type'
 
-export const useDeptSelectRule = (): DragRule => {
-  const label = '部门选择器'
-  const name = 'DeptSelect'
+/**
+ * 通用选择器规则 hook
+ * @param option 规则配置
+ */
+export const useSelectRule = (option: SelectRuleOption) => {
+  const label = option.label
+  const name = option.name
   return {
     icon: 'icon-select',
     label,
@@ -20,7 +24,10 @@ export const useDeptSelectRule = (): DragRule => {
       }
     },
     props(_, { t }) {
-      return localeProps(t, name + '.props', [makeRequiredRule(), ...selectRule])
+      if (!option.props) {
+        option.props = []
+      }
+      return localeProps(t, name + '.props', [makeRequiredRule(), ...option.props, ...selectRule])
     }
   }
 }

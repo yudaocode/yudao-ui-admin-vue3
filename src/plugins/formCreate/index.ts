@@ -35,7 +35,9 @@ const DeptSelect = useCurrencySelect({
   valueField: 'id',
   restful: '/system/dept/simple-list'
 })
-
+const RestfulSelect = useCurrencySelect({
+  name: 'RestfulSelect'
+})
 const components = [
   ElAside,
   ElPopconfirm,
@@ -55,6 +57,7 @@ const components = [
   DictSelect,
   UserSelect,
   DeptSelect,
+  RestfulSelect,
   Editor
 ]
 

@@ -1,12 +1,10 @@
 import {
-  useCurrencySelectRule,
-  useDeptSelectRule,
   useDictSelectRule,
   useEditorRule,
+  useSelectRule,
   useUploadFileRule,
   useUploadImgRule,
-  useUploadImgsRule,
-  useUserSelectRule
+  useUploadImgsRule
 } from './config'
 import { Ref } from 'vue'
 import { Menu } from '@/components/FormCreate/src/type'
@@ -18,16 +16,46 @@ import { Menu } from '@/components/FormCreate/src/type'
  * - 单图上传
  * - 多图上传
  * - 字典选择器
- * - 系统用户选择器
+ * - 用户选择器
+ * - 部门选择器
  * - 富文本
  */
-export const useFormCreateDesigner = (designer: Ref) => {
+export const useFormCreateDesigner = async (designer: Ref) => {
   const editorRule = useEditorRule()
   const uploadFileRule = useUploadFileRule()
   const uploadImgRule = useUploadImgRule()
   const uploadImgsRule = useUploadImgsRule()
   const dictSelectRule = useDictSelectRule()
-  const currencySelectRule = useCurrencySelectRule()
+  const restfulSelectRule = useSelectRule({
+    name: 'RestfulSelect',
+    label: '接口选择器',
+    props: [
+      {
+        type: 'input',
+        field: 'restful',
+        title: 'restful api 接口',
+        props: {
+          placeholder: '/system/user/simple-list'
+        }
+      },
+      {
+        type: 'input',
+        field: 'labelField',
+        title: 'label 属性',
+        props: {
+          placeholder: 'nickname'
+        }
+      },
+      {
+        type: 'input',
+        field: 'valueField',
+        title: 'value 属性',
+        props: {
+          placeholder: 'id'
+        }
+      }
+    ]
+  })
 
   /**
    * 构建表单组件
@@ -45,7 +73,7 @@ export const useFormCreateDesigner = (designer: Ref) => {
       uploadImgRule,
       uploadImgsRule,
       dictSelectRule,
-      currencySelectRule
+      restfulSelectRule
     ]
     components.forEach((component) => {
       // 插入组件规则
@@ -59,8 +87,8 @@ export const useFormCreateDesigner = (designer: Ref) => {
     })
   }
 
-  const userSelectRule = useUserSelectRule()
-  const deptSelectRule = useDeptSelectRule()
+  const userSelectRule = useSelectRule({ name: 'UserSelect', label: '用户选择器' })
+  const deptSelectRule = useSelectRule({ name: 'DeptSelect', label: '部门选择器' })
   /**
    * 构建系统字段菜单
    */
