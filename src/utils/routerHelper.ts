@@ -2,6 +2,7 @@ import type { RouteLocationNormalized, Router, RouteRecordNormalized } from 'vue
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import { isUrl } from '@/utils/is'
 import { cloneDeep, omit } from 'lodash-es'
+import qs from 'qs'
 
 const modules = import.meta.glob('../views/**/*.{vue,tsx}')
 /**
@@ -64,6 +65,7 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
   const res: AppRouteRecordRaw[] = []
   const modulesRoutesKeys = Object.keys(modules)
   for (const route of routes) {
+    // 1. 生成 meta 菜单元数据
     const meta = {
       title: route.name,
       icon: route.icon,
@@ -73,10 +75,20 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
         route.children &&
         route.children.length === 1 &&
         (route.alwaysShow !== undefined ? route.alwaysShow : true)
+    } as any
+    // 特殊逻辑：如果后端配置的 MenuDO.component 包含 ?，则表示需要传递参数
+    // 此时，我们需要解析参数，并且将参数放到 meta.query 中
+    // 这样，后续在 Vue 文件中，可以通过 const { currentRoute } = useRouter() 中，通过 meta.query 获取到参数
+    if (route.component && route.component.indexOf('?') > -1) {
+      const query = route.component.split('?')[1]
+      route.component = route.component.split('?')[0]
+      meta.query = qs.parse(query)
     }
+
+    // 2. 生成 data（AppRouteRecordRaw）
     // 路由地址转首字母大写驼峰，作为路由名称，适配keepAlive
     let data: AppRouteRecordRaw = {
-      path: route.path,
+      path: route.path.indexOf('?') > -1 ? route.path.split('?')[0] : route.path,
       name:
         route.componentName && route.componentName.length > 0
           ? route.componentName
