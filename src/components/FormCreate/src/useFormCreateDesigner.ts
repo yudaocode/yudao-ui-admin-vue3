@@ -67,6 +67,8 @@ export const useFormCreateDesigner = async (designer: Ref) => {
     designer.value?.removeMenuItem('fc-editor')
     // 移除自带的下拉选择器组件，使用 currencySelectRule 替代
     designer.value?.removeMenuItem('select')
+    designer.value?.removeMenuItem('radio')
+    designer.value?.removeMenuItem('checkbox')
     const components = [
       editorRule,
       uploadFileRule,

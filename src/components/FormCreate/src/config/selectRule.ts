@@ -1,4 +1,15 @@
 const selectRule = [
+  {
+    type: 'select',
+    field: 'selectType',
+    title: '选择器类型',
+    value: 'select',
+    options: [
+      { label: '下拉框', value: 'select' },
+      { label: '单选框', value: 'radio' },
+      { label: '多选框', value: 'checkbox' }
+    ]
+  },
   { type: 'switch', field: 'multiple', title: '是否多选' },
   {
     type: 'switch',

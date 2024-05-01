@@ -35,9 +35,10 @@ export interface DragRule {
 // 通用下拉组件 Props 类型
 export interface CurrencySelectProps {
   name: string // 组件名称
-  labelField?: string // 字典类型
-  valueField?: string // 字典值类型
+  labelField?: string // 选项标签
+  valueField?: string // 选项的值
   restful?: string // api 接口
+  isDict?: boolean // 是否字典选择器
 }
 
 // 选择组件规则配置类型
