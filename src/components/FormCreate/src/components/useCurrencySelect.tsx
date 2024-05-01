@@ -37,6 +37,11 @@ export const useCurrencySelect = (option: CurrencySelectProps) => {
         type: String,
         default: 'select'
       }
+      // // 是否多选
+      // multiple: {
+      //   type: Boolean,
+      //   default: false
+      // }
     },
     setup(props) {
       const attrs = useAttrs()
@@ -79,15 +84,14 @@ export const useCurrencySelect = (option: CurrencySelectProps) => {
       onMounted(async () => {
         await getOptions()
       })
+      // TODO puhui999: 单下拉多选的时候页面会卡住报错，下次解决
       const buildSelect = () => {
         return (
-          <>
-            <el-select class="w-1/1" {...attrs}>
-              {options.value.map((item, index) => (
-                <el-option key={index} label={item.label} value={item.value} />
-              ))}
-            </el-select>
-          </>
+          <el-select class="w-1/1" {...attrs}>
+            {options.value.map((item, index) => (
+              <el-option key={index} label={item.label} value={item.value} />
+            ))}
+          </el-select>
         )
       }
       const buildCheckbox = () => {
@@ -98,13 +102,11 @@ export const useCurrencySelect = (option: CurrencySelectProps) => {
           ]
         }
         return (
-          <>
-            <el-checkbox-group class="w-1/1" {...attrs}>
-              {options.value.map((item, index) => (
-                <el-checkbox key={index} label={item.label} value={item.value} />
-              ))}
-            </el-checkbox-group>
-          </>
+          <el-checkbox-group class="w-1/1" {...attrs}>
+            {options.value.map((item, index) => (
+              <el-checkbox key={index} label={item.label} value={item.value} />
+            ))}
+          </el-checkbox-group>
         )
       }
       const buildRadio = () => {
@@ -115,15 +117,13 @@ export const useCurrencySelect = (option: CurrencySelectProps) => {
           ]
         }
         return (
-          <>
-            <el-radio-group class="w-1/1" {...attrs}>
-              {options.value.map((item, index) => (
-                <el-radio key={index} value={item.value}>
-                  {item.label}
-                </el-radio>
-              ))}
-            </el-radio-group>
-          </>
+          <el-radio-group class="w-1/1" {...attrs}>
+            {options.value.map((item, index) => (
+              <el-radio key={index} value={item.value}>
+                {item.label}
+              </el-radio>
+            ))}
+          </el-radio-group>
         )
       }
       return () => (

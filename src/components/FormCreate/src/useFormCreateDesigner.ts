@@ -25,6 +25,30 @@ export const useFormCreateDesigner = async (designer: Ref) => {
   const uploadFileRule = useUploadFileRule()
   const uploadImgRule = useUploadImgRule()
   const uploadImgsRule = useUploadImgsRule()
+
+  /**
+   * 构建表单组件
+   */
+  const buildFormComponents = () => {
+    // 移除自带的上传组件规则，使用 uploadFileRule、uploadImgRule、uploadImgsRule 替代
+    designer.value?.removeMenuItem('upload')
+    // 移除自带的富文本组件规则，使用 editorRule 替代
+    designer.value?.removeMenuItem('fc-editor')
+    const components = [editorRule, uploadFileRule, uploadImgRule, uploadImgsRule]
+    components.forEach((component) => {
+      // 插入组件规则
+      designer.value?.addComponent(component)
+      // 插入拖拽按钮到 `main` 分类下
+      designer.value?.appendMenuItem('main', {
+        icon: component.icon,
+        name: component.name,
+        label: component.label
+      })
+    })
+  }
+
+  const userSelectRule = useSelectRule({ name: 'UserSelect', label: '用户选择器' })
+  const deptSelectRule = useSelectRule({ name: 'DeptSelect', label: '部门选择器' })
   const dictSelectRule = useDictSelectRule()
   const restfulSelectRule = useSelectRule({
     name: 'RestfulSelect',
@@ -56,46 +80,15 @@ export const useFormCreateDesigner = async (designer: Ref) => {
       }
     ]
   })
-
-  /**
-   * 构建表单组件
-   */
-  const buildFormComponents = () => {
-    // 移除自带的上传组件规则，使用 uploadFileRule、uploadImgRule、uploadImgsRule 替代
-    designer.value?.removeMenuItem('upload')
-    // 移除自带的富文本组件规则，使用 editorRule 替代
-    designer.value?.removeMenuItem('fc-editor')
-    // 移除自带的下拉选择器组件，使用 currencySelectRule 替代
-    designer.value?.removeMenuItem('select')
-    designer.value?.removeMenuItem('radio')
-    designer.value?.removeMenuItem('checkbox')
-    const components = [
-      editorRule,
-      uploadFileRule,
-      uploadImgRule,
-      uploadImgsRule,
-      dictSelectRule,
-      restfulSelectRule
-    ]
-    components.forEach((component) => {
-      // 插入组件规则
-      designer.value?.addComponent(component)
-      // 插入拖拽按钮到 `main` 分类下
-      designer.value?.appendMenuItem('main', {
-        icon: component.icon,
-        name: component.name,
-        label: component.label
-      })
-    })
-  }
-
-  const userSelectRule = useSelectRule({ name: 'UserSelect', label: '用户选择器' })
-  const deptSelectRule = useSelectRule({ name: 'DeptSelect', label: '部门选择器' })
   /**
    * 构建系统字段菜单
    */
   const buildSystemMenu = () => {
-    const components = [userSelectRule, deptSelectRule]
+    // 移除自带的下拉选择器组件，使用 currencySelectRule 替代
+    designer.value?.removeMenuItem('select')
+    designer.value?.removeMenuItem('radio')
+    designer.value?.removeMenuItem('checkbox')
+    const components = [userSelectRule, deptSelectRule, dictSelectRule, restfulSelectRule]
     const menu: Menu = {
       name: 'system',
       title: '系统字段',
