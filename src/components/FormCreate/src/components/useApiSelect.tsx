@@ -1,9 +1,9 @@
 import request from '@/config/axios'
 import { isEmpty } from '@/utils/is'
-import { CurrencySelectProps } from '@/components/FormCreate/src/type'
-import { getBoolDictOptions, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
+import { ApiSelectProps } from '@/components/FormCreate/src/type'
+import { jsonParse } from '@/utils'
 
-export const useCurrencySelect = (option: CurrencySelectProps) => {
+export const useApiSelect = (option: ApiSelectProps) => {
   return defineComponent({
     name: option.name,
     props: {
@@ -18,47 +18,50 @@ export const useCurrencySelect = (option: CurrencySelectProps) => {
         default: () => option.valueField ?? 'value'
       },
       // api 接口
-      restful: {
+      url: {
         type: String,
-        default: () => option.restful ?? ''
+        default: () => option.url ?? ''
       },
-      // 字典类型
-      dictType: {
+      // 请求类型
+      method: {
+        type: String,
+        default: 'GET'
+      },
+      // 请求参数
+      data: {
         type: String,
         default: ''
-      },
-      // 字典值类型 'str' | 'int' | 'bool'
-      dictValueType: {
-        type: String,
-        default: 'str'
       },
       // 选择器类型，下拉框 select、多选框 checkbox、单选框 radio
       selectType: {
         type: String,
         default: 'select'
+      },
+      // 是否多选
+      multiple: {
+        type: Boolean,
+        default: false
       }
-      // // 是否多选
-      // multiple: {
-      //   type: Boolean,
-      //   default: false
-      // }
     },
     setup(props) {
       const attrs = useAttrs()
       const options = ref<any[]>([]) // 下拉数据
       const getOptions = async () => {
         options.value = []
-        // 字典选择器
-        if (option.isDict) {
-          options.value = getDictOptions()
-          return
-        }
         // 接口选择器
-        if (isEmpty(props.restful)) {
+        if (isEmpty(props.url)) {
           return
         }
-        // TODO 只支持 GET 查询，复杂下拉构建条件请使用业务表单
-        const data = await request.get({ url: props.restful })
+        let data = []
+        switch (props.method) {
+          case 'GET':
+            data = await request.get({ url: props.url })
+            break
+          case 'POST':
+            data = await request.post({ url: props.url, data: jsonParse(props.data) })
+            break
+        }
+
         if (Array.isArray(data)) {
           options.value = data.map((item: any) => ({
             label: item[props.labelField],
@@ -66,26 +69,24 @@ export const useCurrencySelect = (option: CurrencySelectProps) => {
           }))
           return
         }
-        console.log(`接口[${props.restful}] 返回结果不是一个数组`)
+        console.log(`接口[${props.url}] 返回结果不是一个数组`)
       }
-      // 获得字典配置
-      const getDictOptions = () => {
-        switch (props.dictValueType) {
-          case 'str':
-            return getStrDictOptions(props.dictType)
-          case 'int':
-            return getIntDictOptions(props.dictType)
-          case 'bool':
-            return getBoolDictOptions(props.dictType)
-          default:
-            return []
-        }
-      }
+
       onMounted(async () => {
         await getOptions()
       })
-      // TODO puhui999: 单下拉多选的时候页面会卡住报错，下次解决
+
       const buildSelect = () => {
+        if (props.multiple) {
+          // fix：多写此步是为了解决 multiple 属性问题
+          return (
+            <el-select class="w-1/1" {...attrs} multiple>
+              {options.value.map((item, index) => (
+                <el-option key={index} label={item.label} value={item.value} />
+              ))}
+            </el-select>
+          )
+        }
         return (
           <el-select class="w-1/1" {...attrs}>
             {options.value.map((item, index) => (

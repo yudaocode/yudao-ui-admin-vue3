@@ -19,28 +19,26 @@ import formCreate from '@form-create/element-ui'
 import install from '@form-create/element-ui/auto-import'
 //======================= 自定义组件 =======================
 import { UploadFile, UploadImg, UploadImgs } from '@/components/UploadFile'
-import { useCurrencySelect } from '@/components/FormCreate'
+import { useApiSelect } from '@/components/FormCreate'
 import { Editor } from '@/components/Editor'
+import DictSelect from '@/components/FormCreate/src/components/DictSelect.vue'
 
-const UserSelect = useCurrencySelect({
+const UserSelect = useApiSelect({
   name: 'UserSelect',
   labelField: 'nickname',
   valueField: 'id',
-  restful: '/system/user/simple-list'
+  url: '/system/user/simple-list'
 })
-const DeptSelect = useCurrencySelect({
+const DeptSelect = useApiSelect({
   name: 'DeptSelect',
   labelField: 'name',
   valueField: 'id',
-  restful: '/system/dept/simple-list'
+  url: '/system/dept/simple-list'
 })
-const RestfulSelect = useCurrencySelect({
-  name: 'RestfulSelect'
+const ApiSelect = useApiSelect({
+  name: 'ApiSelect'
 })
-const DictSelect = useCurrencySelect({
-  name: 'DictSelect',
-  isDict: true
-})
+
 const components = [
   ElAside,
   ElPopconfirm,
@@ -60,7 +58,7 @@ const components = [
   DictSelect,
   UserSelect,
   DeptSelect,
-  RestfulSelect,
+  ApiSelect,
   Editor
 ]
 

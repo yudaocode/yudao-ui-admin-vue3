@@ -1,6 +1,6 @@
 import { generateUUID } from '@/utils'
 import { localeProps, makeRequiredRule } from '@/components/FormCreate/src/utils'
-import selectRule from '@/components/FormCreate/src/config/selectRule'
+import { selectRule } from '@/components/FormCreate/src/config/selectRule'
 import { SelectRuleOption } from '@/components/FormCreate/src/type'
 
 /**

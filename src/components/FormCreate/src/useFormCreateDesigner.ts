@@ -8,6 +8,7 @@ import {
 } from './config'
 import { Ref } from 'vue'
 import { Menu } from '@/components/FormCreate/src/type'
+import { apiSelectRule } from '@/components/FormCreate/src/config/selectRule'
 
 /**
  * 表单设计器增强 hook
@@ -50,36 +51,12 @@ export const useFormCreateDesigner = async (designer: Ref) => {
   const userSelectRule = useSelectRule({ name: 'UserSelect', label: '用户选择器' })
   const deptSelectRule = useSelectRule({ name: 'DeptSelect', label: '部门选择器' })
   const dictSelectRule = useDictSelectRule()
-  const restfulSelectRule = useSelectRule({
-    name: 'RestfulSelect',
+  const apiSelectRule0 = useSelectRule({
+    name: 'ApiSelect',
     label: '接口选择器',
-    props: [
-      {
-        type: 'input',
-        field: 'restful',
-        title: 'restful api 接口',
-        props: {
-          placeholder: '/system/user/simple-list'
-        }
-      },
-      {
-        type: 'input',
-        field: 'labelField',
-        title: 'label 属性',
-        props: {
-          placeholder: 'nickname'
-        }
-      },
-      {
-        type: 'input',
-        field: 'valueField',
-        title: 'value 属性',
-        props: {
-          placeholder: 'id'
-        }
-      }
-    ]
+    props: [...apiSelectRule]
   })
+
   /**
    * 构建系统字段菜单
    */
@@ -88,7 +65,7 @@ export const useFormCreateDesigner = async (designer: Ref) => {
     designer.value?.removeMenuItem('select')
     designer.value?.removeMenuItem('radio')
     designer.value?.removeMenuItem('checkbox')
-    const components = [userSelectRule, deptSelectRule, dictSelectRule, restfulSelectRule]
+    const components = [userSelectRule, deptSelectRule, dictSelectRule, apiSelectRule0]
     const menu: Menu = {
       name: 'system',
       title: '系统字段',
