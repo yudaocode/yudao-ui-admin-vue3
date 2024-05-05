@@ -11,7 +11,7 @@ export const useSelectRule = (option: SelectRuleOption) => {
   const label = option.label
   const name = option.name
   return {
-    icon: 'icon-select',
+    icon: option.icon,
     label,
     name,
     rule() {

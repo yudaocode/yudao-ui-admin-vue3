@@ -22,7 +22,7 @@ export const useDictSelectRule = () => {
       })) ?? []
   })
   return {
-    icon: 'icon-select',
+    icon: 'icon-doc-text',
     label,
     name,
     rule() {

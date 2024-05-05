@@ -45,5 +45,6 @@ export interface ApiSelectProps {
 export interface SelectRuleOption {
   label: string // label 名称
   name: string // 组件名称
+  icon: string // 组件图标
   props?: any[] // 组件规则
 }
