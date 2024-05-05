@@ -17,6 +17,11 @@ export const SeckillConfigApi = {
     return await request.get({ url: `/promotion/seckill-config/page`, params })
   },
 
+  // 查询秒杀时段列表
+  getSimpleSeckillConfigList: async () => {
+    return await request.get({ url: `/promotion/seckill-config/simple-list` })
+  },
+
   // 查询秒杀时段详情
   getSeckillConfig: async (id: number) => {
     return await request.get({ url: `/promotion/seckill-config/get?id=` + id })
