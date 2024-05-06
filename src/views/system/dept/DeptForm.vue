@@ -167,7 +167,7 @@ const resetForm = () => {
 const getTree = async () => {
   deptTree.value = []
   const data = await DeptApi.getSimpleDeptList()
-  let dept: Tree = { id: 0, name: '顶级部门', children: [] }
+  let dept: Tree = { id: undefined, name: '顶级部门', children: [] }
   dept.children = handleTree(data)
   deptTree.value.push(dept)
 }

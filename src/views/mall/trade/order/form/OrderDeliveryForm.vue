@@ -43,7 +43,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const expressType = ref('express') // 如果值是 express，则是快递；none 则是无；未来做同城配送；
 const formData = ref<TradeOrderApi.DeliveryVO>({
-  id: 0, // 订单编号
+  id: undefined, // 订单编号
   logisticsId: null, // 物流公司编号
   logisticsNo: '' // 物流编号
 })
@@ -86,7 +86,7 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: 0, // 订单编号
+    id: undefined, // 订单编号
     logisticsId: null, // 物流公司编号
     logisticsNo: '' // 物流编号
   }

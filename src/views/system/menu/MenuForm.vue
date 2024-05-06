@@ -130,7 +130,7 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: 0,
+  id: undefined,
   name: '',
   permission: '',
   type: SystemMenuTypeEnum.DIR,
@@ -223,7 +223,7 @@ const menuTree = ref<Tree[]>([]) // 树形结构
 const getTree = async () => {
   menuTree.value = []
   const res = await MenuApi.getSimpleMenusList()
-  let menu: Tree = { id: 0, name: '主类目', children: [] }
+  let menu: Tree = { id: undefined, name: '主类目', children: [] }
   menu.children = handleTree(res)
   menuTree.value.push(menu)
 }
@@ -231,7 +231,7 @@ const getTree = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: 0,
+    id: undefined,
     name: '',
     permission: '',
     type: SystemMenuTypeEnum.DIR,
