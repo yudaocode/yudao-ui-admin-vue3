@@ -5,6 +5,7 @@ import { SelectRuleOption } from '@/components/FormCreate/src/type'
 
 /**
  * 通用选择器规则 hook
+ *
  * @param option 规则配置
  */
 export const useSelectRule = (option: SelectRuleOption) => {

@@ -69,7 +69,7 @@ export const useApiSelect = (option: ApiSelectProps) => {
           }))
           return
         }
-        console.log(`接口[${props.url}] 返回结果不是一个数组`)
+        console.error(`接口[${props.url}] 返回结果不是一个数组`)
       }
 
       onMounted(async () => {
