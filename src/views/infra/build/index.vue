@@ -8,11 +8,9 @@
           <el-button size="small" type="danger" @click="showTemplate">生成组件</el-button>
         </div>
       </el-col>
-      <!-- 表单设计器 -->
-      <el-col>
-        <FcDesigner ref="designer" height="780px" />
-      </el-col>
     </el-row>
+    <!-- 表单设计器 -->
+    <FcDesigner ref="designer" height="780px" />
   </ContentWrap>
 
   <!-- 弹窗：表单预览 -->
