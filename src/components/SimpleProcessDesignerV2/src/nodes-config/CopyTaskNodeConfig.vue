@@ -7,9 +7,19 @@
     :before-close="saveConfig"
   >
     <template #header>
-      <div class="w-full flex flex-col">
-        <div class="mb-2 text-size-2xl">{{ currentNode.name }}</div>
-        <el-divider />
+      <div class="config-header">
+        <input
+          v-if="showInput"
+          type="text"
+          class="config-editable-input"
+          @blur="blurEvent()"
+          v-mountedFocus
+          v-model="currentNode.name"
+          :placeholder="currentNode.name"
+          />
+        <div v-else class="node-name" >{{ currentNode.name }} <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()"/></div>
+        
+        <div class="divide-line"></div>
       </div>
     </template>
     <el-tabs type="border-card">
@@ -144,7 +154,7 @@
   </el-drawer>
 </template>
 <script setup lang='ts'>
-import { SimpleFlowNode, CandidateStrategy } from '../consts'
+import { SimpleFlowNode, CandidateStrategy,NodeType, NODE_DEFAULT_NAME } from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
@@ -282,6 +292,17 @@ const getShowText = () : string => {
   }
    return showText
 }
+// 显示名称输入框
+const showInput = ref(false)
+
+const clickIcon = () => {
+  showInput.value = true;
+}
+// 输入框失去焦点
+const blurEvent = () => {
+  showInput.value = false
+  currentNode.value.name = currentNode.value.name || NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE) as string
+}
 
 onMounted(async () => {
   console.log('candidateParam', currentNode.value.attributes?.candidateParam)
@@ -291,10 +312,10 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-::v-deep(.el-divider--horizontal) {
-  display: block;
-  height: 1px;
-  margin: 0;
-  border-top: 1px var(--el-border-color) var(--el-border-style);
-}
+// ::v-deep(.el-divider--horizontal) {
+//   display: block;
+//   height: 1px;
+//   margin: 0;
+//   border-top: 1px var(--el-border-color) var(--el-border-style);
+// }
 </style>

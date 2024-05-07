@@ -8,9 +8,19 @@
     class="justify-start"
   >
     <template #header>
-      <div class="w-full flex flex-col">
-        <div class="mb-2 text-size-2xl">{{ currentNode.name }}</div>
-        <el-divider />
+      <div class="config-header">
+        <input
+          v-if="showInput"
+          type="text"
+          class="config-editable-input"
+          @blur="blurEvent()"
+          v-mountedFocus
+          v-model="currentNode.name"
+          :placeholder="currentNode.name"
+          />
+        <div v-else class="node-name" >{{ currentNode.name }} <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()"/></div>
+        
+        <div class="divide-line"></div>
       </div>
     </template>
     <el-tabs type="border-card">
@@ -162,7 +172,7 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleFlowNode, APPROVE_METHODS,CandidateStrategy } from '../consts'
+import { SimpleFlowNode, APPROVE_METHODS, CandidateStrategy, NodeType, NODE_DEFAULT_NAME } from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { defaultProps } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'
@@ -309,18 +319,18 @@ const changedCandidateUsers = () => {
     notAllowedMultiApprovers.value = false
   }
 }
+// 显示名称输入框
+const showInput = ref(false)
+
+const clickIcon = () => {
+  showInput.value = true;
+}
+// 节点名称输入框失去焦点
+const blurEvent = () => {
+  showInput.value = false
+  currentNode.value.name = currentNode.value.name || NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string
+}
 onMounted(async () => {
-  // 获得角色列表
-  // roleOptions.value = await RoleApi.getSimpleRoleList()
-  // postOptions.value = await PostApi.getSimplePostList()
-  // // 获得用户列表
-  // userOptions.value = await UserApi.getSimpleUserList()
-  // // 获得部门列表
-  // deptOptions = await DeptApi.getSimpleDeptList()
-  // deptTreeOptions.value = handleTree(deptOptions, 'id')
-  // // 获得用户组列表
-  // userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
-  console.log('candidateParam', currentNode.value.attributes?.candidateParam)
   candidateParamArray.value = currentNode.value.attributes?.candidateParam?.split(',').map(item=> +item)
   console.log('candidateParamArray.value', candidateParamArray.value)
   if (currentNode.value.attributes?.candidateStrategy === CandidateStrategy.USER && candidateParamArray.value?.length <= 1) {
@@ -332,10 +342,4 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-::v-deep(.el-divider--horizontal) {
-  display: block;
-  height: 1px;
-  margin: 0;
-  border-top: 1px var(--el-border-color) var(--el-border-style);
-}
 </style>
