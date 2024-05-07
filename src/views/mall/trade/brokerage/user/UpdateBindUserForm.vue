@@ -103,7 +103,7 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: 0,
+    id: undefined,
     bindUserId: undefined
   }
   formRef.value?.resetFields()

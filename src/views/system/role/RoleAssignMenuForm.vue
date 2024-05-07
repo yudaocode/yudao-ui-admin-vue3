@@ -58,7 +58,7 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = reactive({
-  id: 0,
+  id: undefined,
   name: '',
   code: '',
   menuIds: []
@@ -126,7 +126,7 @@ const resetForm = () => {
   menuExpand.value = false
   // 重置表单
   formData.value = {
-    id: 0,
+    id: undefined,
     name: '',
     code: '',
     menuIds: []
