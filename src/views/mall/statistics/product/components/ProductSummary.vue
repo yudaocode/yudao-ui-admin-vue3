@@ -26,9 +26,9 @@
           icon="ep:view"
           icon-color="bg-blue-100"
           icon-bg-color="text-blue-500"
-          prefix="￥"
-          :decimals="2"
-          :value="fenToYuan(trendSummary?.value?.browseCount || 0)"
+          prefix=""
+          :decimals="0"
+          :value="trendSummary?.value?.browseCount || 0"
           :percent="
             calculateRelativeRate(
               trendSummary?.value?.browseCount,
@@ -44,9 +44,9 @@
           icon="ep:user-filled"
           icon-color="bg-purple-100"
           icon-bg-color="text-purple-500"
-          prefix="￥"
-          :decimals="2"
-          :value="fenToYuan(trendSummary?.value?.browseUserCount || 0)"
+          prefix=""
+          :decimals="0"
+          :value="trendSummary?.value?.browseUserCount || 0"
           :percent="
             calculateRelativeRate(
               trendSummary?.value?.browseUserCount,
@@ -62,9 +62,9 @@
           icon="fa-solid:money-check-alt"
           icon-color="bg-yellow-100"
           icon-bg-color="text-yellow-500"
-          prefix="￥"
-          :decimals="2"
-          :value="fenToYuan(trendSummary?.value?.orderPayCount || 0)"
+          prefix=""
+          :decimals="0"
+          :value="trendSummary?.value?.orderPayCount || 0"
           :percent="
             calculateRelativeRate(
               trendSummary?.value?.orderPayCount,
@@ -98,9 +98,9 @@
           icon="fa-solid:wallet"
           icon-color="bg-cyan-100"
           icon-bg-color="text-cyan-500"
-          prefix="￥"
-          :decimals="2"
-          :value="fenToYuan(trendSummary?.value?.afterSaleCount || 0)"
+          prefix=""
+          :decimals="0"
+          :value="trendSummary?.value?.afterSaleCount || 0"
           :percent="
             calculateRelativeRate(
               trendSummary?.value?.afterSaleCount,

@@ -157,7 +157,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
-import * as SeckillConfigApi from '@/api/mall/promotion/seckill/seckillConfig'
+import { SeckillConfigApi } from '@/api/mall/promotion/seckill/seckillConfig'
 import SeckillActivityForm from './SeckillActivityForm.vue'
 import { formatDate } from '@/utils/formatTime'
 import { fenToYuanFormat } from '@/utils/formatter'
