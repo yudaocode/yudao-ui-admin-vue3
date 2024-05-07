@@ -107,7 +107,7 @@ const resetForm = () => {
 const getDemo02CategoryTree = async () => {
   demo02CategoryTree.value = []
   const data = await Demo02CategoryApi.getDemo02CategoryList()
-  const root: Tree = { id: undefined, name: '顶级示例分类', children: [] }
+  const root: Tree = { id: 0, name: '顶级示例分类', children: [] }
   root.children = handleTree(data, 'id', 'parentId')
   demo02CategoryTree.value.push(root)
 }
