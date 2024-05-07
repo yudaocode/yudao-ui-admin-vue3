@@ -1,4 +1,24 @@
 const selectRule = [
+  {
+    type: 'select',
+    field: 'selectType',
+    title: '选择器类型',
+    value: 'select',
+    options: [
+      { label: '下拉框', value: 'select' },
+      { label: '单选框', value: 'radio' },
+      { label: '多选框', value: 'checkbox' }
+    ],
+    // 参考 https://www.form-create.com/v3/guide/control 组件联动，单选框和多选框不需要多选属性
+    control: [
+      {
+        value: 'select',
+        condition: '=',
+        method: 'hidden',
+        rule: ['multiple']
+      }
+    ]
+  },
   { type: 'switch', field: 'multiple', title: '是否多选' },
   {
     type: 'switch',
@@ -68,4 +88,60 @@ const selectRule = [
   }
 ]
 
-export default selectRule
+const apiSelectRule = [
+  {
+    type: 'input',
+    field: 'url',
+    title: 'url 地址',
+    props: {
+      placeholder: '/system/user/simple-list'
+    }
+  },
+  {
+    type: 'select',
+    field: 'method',
+    title: '请求类型',
+    value: 'GET',
+    options: [
+      { label: 'GET', value: 'GET' },
+      { label: 'POST', value: 'POST' }
+    ],
+    control: [
+      {
+        value: 'GET',
+        condition: '!=',
+        method: 'hidden',
+        rule: [
+          {
+            type: 'input',
+            field: 'data',
+            title: '请求参数 JSON 格式',
+            props: {
+              autosize: true,
+              type: 'textarea',
+              placeholder: '{"type": 1}'
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    type: 'input',
+    field: 'labelField',
+    title: 'label 属性',
+    props: {
+      placeholder: 'nickname'
+    }
+  },
+  {
+    type: 'input',
+    field: 'valueField',
+    title: 'value 属性',
+    props: {
+      placeholder: 'id'
+    }
+  }
+]
+
+export { selectRule, apiSelectRule }

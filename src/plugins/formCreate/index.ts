@@ -17,11 +17,28 @@ import {
 import FcDesigner from '@form-create/designer'
 import formCreate from '@form-create/element-ui'
 import install from '@form-create/element-ui/auto-import'
+
 //======================= 自定义组件 =======================
 import { UploadFile, UploadImg, UploadImgs } from '@/components/UploadFile'
-import { DictSelect } from '@/components/DictSelect'
-import UserSelect from '@/views/system/user/components/UserSelect.vue'
+import { useApiSelect } from '@/components/FormCreate'
 import { Editor } from '@/components/Editor'
+import DictSelect from '@/components/FormCreate/src/components/DictSelect.vue'
+
+const UserSelect = useApiSelect({
+  name: 'UserSelect',
+  labelField: 'nickname',
+  valueField: 'id',
+  url: '/system/user/simple-list'
+})
+const DeptSelect = useApiSelect({
+  name: 'DeptSelect',
+  labelField: 'name',
+  valueField: 'id',
+  url: '/system/dept/simple-list'
+})
+const ApiSelect = useApiSelect({
+  name: 'ApiSelect'
+})
 
 const components = [
   ElAside,
@@ -41,6 +58,8 @@ const components = [
   UploadFile,
   DictSelect,
   UserSelect,
+  DeptSelect,
+  ApiSelect,
   Editor
 ]
 

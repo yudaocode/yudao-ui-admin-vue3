@@ -100,7 +100,7 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的组：create - 新增；update - 修改
 const formData = ref({
-  id: 0,
+  id: undefined,
   name: '',
   deptIds: [],
   statuses: []
@@ -168,7 +168,7 @@ const submitForm = async () => {
 const resetForm = () => {
   checkStrictly.value = true
   formData.value = {
-    id: 0,
+    id: undefined,
     name: '',
     deptIds: [],
     statuses: []

@@ -1,4 +1,4 @@
-import {toNumber} from 'lodash-es'
+import { toNumber } from 'lodash-es'
 
 /**
  *
@@ -434,4 +434,18 @@ export const areaReplace = (areaName: string) => {
     .replace('回族自治区', '')
     .replace('自治区', '')
     .replace('省', '')
+}
+
+/**
+ * 解析 JSON 字符串
+ *
+ * @param str
+ */
+export function jsonParse(str: string) {
+  try {
+    return JSON.parse(str)
+  } catch (e) {
+    console.error(`str[${str}] 不是一个 JSON 字符串`)
+    return ''
+  }
 }

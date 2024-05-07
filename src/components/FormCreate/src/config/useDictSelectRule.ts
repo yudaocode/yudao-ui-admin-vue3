@@ -1,8 +1,11 @@
 import { generateUUID } from '@/utils'
 import * as DictDataApi from '@/api/system/dict/dict.type'
 import { localeProps, makeRequiredRule } from '@/components/FormCreate/src/utils'
-import selectRule from '@/components/FormCreate/src/config/selectRule'
+import { selectRule } from '@/components/FormCreate/src/config/selectRule'
 
+/**
+ * 字典选择器规则，如果规则使用到动态数据则需要单独配置不能使用 useSelectRule
+ */
 export const useDictSelectRule = () => {
   const label = '字典选择器'
   const name = 'DictSelect'
@@ -19,7 +22,7 @@ export const useDictSelectRule = () => {
       })) ?? []
   })
   return {
-    icon: 'icon-select',
+    icon: 'icon-doc-text',
     label,
     name,
     rule() {
@@ -43,7 +46,7 @@ export const useDictSelectRule = () => {
         },
         {
           type: 'select',
-          field: 'valueType',
+          field: 'dictValueType',
           title: '字典值类型',
           value: 'str',
           options: [

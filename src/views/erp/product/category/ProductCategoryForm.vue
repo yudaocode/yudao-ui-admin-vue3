@@ -46,7 +46,7 @@
 </template>
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
-import { ProductCategoryApi } from '@/api/erp/product/category'
+import { ProductCategoryApi, ProductCategoryVO } from '@/api/erp/product/category'
 import { defaultProps, handleTree } from '@/utils/tree'
 import { CommonStatusEnum } from '@/utils/constants'
 
@@ -66,7 +66,7 @@ const formData = ref({
   name: undefined,
   code: undefined,
   sort: undefined,
-  status: undefined
+  status: CommonStatusEnum.ENABLE
 })
 const formRules = reactive({
   parentId: [{ required: true, message: '上级编号不能为空', trigger: 'blur' }],
@@ -105,7 +105,7 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ProductCategoryApi.ProductCategoryVO
+    const data = formData.value as unknown as ProductCategoryVO
     if (formType.value === 'create') {
       await ProductCategoryApi.createProductCategory(data)
       message.success(t('common.createSuccess'))
