@@ -109,7 +109,8 @@ const formData = ref<ProductSpuApi.Spu>({
   description: '', // 商品详情
   sort: 0, // 商品排序
   giveIntegral: 0, // 赠送积分
-  virtualSalesCount: 0 // 虚拟销量
+  virtualSalesCount: 0, // 虚拟销量
+  status: 1 // 默认上架
 })
 
 /** 获得详情 */
