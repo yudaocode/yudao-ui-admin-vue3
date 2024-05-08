@@ -313,7 +313,7 @@ export const fenToYuan = (price: string | number): string => {
  */
 export const calculateRelativeRate = (value?: number, reference?: number) => {
   // 防止除0
-  if (!reference) return 0
+  if (!reference || reference == 0) return 0
 
   return ((100 * ((value || 0) - reference)) / reference).toFixed(0)
 }
