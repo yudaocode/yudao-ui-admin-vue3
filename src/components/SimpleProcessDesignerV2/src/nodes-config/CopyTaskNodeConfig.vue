@@ -143,6 +143,39 @@
           </el-form>
         </div>
       </el-tab-pane>
+      <el-tab-pane label="表单字段权限" v-if ="formType === 10">
+        <div class="field-setting-pane">
+          <div class="field-setting-desc">字段权限</div>
+          <div class="field-permit-title">
+            <div class="setting-title-label first-title">
+              字段名称
+            </div>
+            <div class="other-titles">
+              <span class="setting-title-label">可编辑</span>
+              <span class="setting-title-label">只读</span>
+              <span class="setting-title-label">隐藏</span>
+            </div>
+          </div>
+          <div
+            class="field-setting-item"
+            v-for="(item, index) in currentNode.attributes.fieldsPermission"
+            :key="index"
+          >
+            <div class="field-setting-item-label"> {{ item.title }} </div>
+            <el-radio-group class="field-setting-item-group" v-model="item.permission">
+              <div class="item-radio-wrap">
+                <el-radio value="1" size="large" label="1" disabled><span></span></el-radio>
+              </div>
+              <div class="item-radio-wrap">
+                <el-radio value="2" size="large" label="2"><span></span></el-radio>
+              </div>
+              <div class="item-radio-wrap">
+                <el-radio value="3" size="large" label="3"><span></span></el-radio>
+              </div>
+            </el-radio-group>
+          </div>
+        </div>
+      </el-tab-pane>
     </el-tabs>
     <template #footer>
       <el-divider />
@@ -155,6 +188,7 @@
 </template>
 <script setup lang='ts'>
 import { SimpleFlowNode, CandidateStrategy,NodeType, NODE_DEFAULT_NAME } from '../consts'
+import { getDefaultFieldsPermission } from '../utils'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
@@ -171,13 +205,9 @@ const props = defineProps({
     required: true
   }
 })
-// 定义事件，更新父组件
-const emits = defineEmits<{
-  'update:modelValue': [node: SimpleFlowNode]
-}>()
 // 是否可见
 const settingVisible = ref(false)
-// 当前节点信息，保存后，需要更新父组件
+// 当前节点信息
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
 const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList') // 角色列表
 const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
@@ -185,6 +215,8 @@ const userOptions = inject<Ref<UserApi.UserVO[]>>('userList') // 用户列表
 const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList')  // 部门列表
 const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList') // 用户组列表
 const deptTreeOptions = inject('deptTree') // 部门树
+const formType = inject('formType') // 表单类型
+const formFields = inject<Ref<string[]>>('formFields')
 
 // 抄送人策略， 去掉发起人自选
 const copyUserStrategies = computed( ()=> {
@@ -203,14 +235,24 @@ const closeDrawer = () => {
 const saveConfig = () => {
   currentNode.value.attributes.candidateParam = candidateParamArray.value?.join(',')
   currentNode.value.showText = getShowText()
-  emits('update:modelValue', currentNode.value)
   settingVisible.value = false
 }
 
 const open = () => {
   settingVisible.value = true
 }
-defineExpose({ open }) // 提供 open 方法，用于打开抄送人配置抽屉
+//  修改当前编辑的节点， 由父组件传过来
+const setCurrentNode = (node:SimpleFlowNode) => {
+  currentNode.value = node;
+  currentNode.value.attributes.fieldsPermission = node.attributes.fieldsPermission || getDefaultFieldsPermission(formFields?.value) 
+  const strCandidateParam = node.attributes?.candidateParam
+  if(strCandidateParam) {
+    candidateParamArray.value = strCandidateParam.split(',').map(item=> +item)
+  }
+}
+
+defineExpose({ open, setCurrentNode }) // 暴露方法给父组件
+
 
 const changeCandidateStrategy = () => {
   candidateParamArray.value = []
@@ -227,7 +269,6 @@ const getShowText = () : string => {
           candidateNames.push(item.nickname)
         }
       })
-      console.log("candidateNames is ", candidateNames)
       showText = `指定成员：${candidateNames.join(',')}`
     }
   }
@@ -304,11 +345,6 @@ const blurEvent = () => {
   currentNode.value.name = currentNode.value.name || NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE) as string
 }
 
-onMounted(async () => {
-  console.log('candidateParam', currentNode.value.attributes?.candidateParam)
-  candidateParamArray.value = currentNode.value.attributes?.candidateParam?.split(',').map(item=> +item)
-  console.log('candidateParamArray.value', candidateParamArray.value)
-})
 </script>
 
 <style lang="scss" scoped>

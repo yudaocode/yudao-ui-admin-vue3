@@ -65,7 +65,6 @@ const saveSimpleFlowModel = async () => {
   }
   errorNodes = []
   validateNode(processNodeTree.value, errorNodes)
-  console.log('errorNodes is ', errorNodes)
   if (errorNodes.length > 0) {
     errorDialogVisible.value = true
     return;
@@ -76,7 +75,6 @@ const saveSimpleFlowModel = async () => {
   }
 
   const result = await saveBpmSimpleModel(data)
-  console.log('save the result is ', result)
   if (result) {
     message.success('修改成功')
     close()
@@ -148,7 +146,7 @@ const zoomIn = () => {
 onMounted(async () => {
   const result = await getBpmSimpleModel(props.modelId)
   if (result) {
-    console.log('get the result is ', result)
+    console.log('the result is ', result)
     processNodeTree.value = result
   }
 })

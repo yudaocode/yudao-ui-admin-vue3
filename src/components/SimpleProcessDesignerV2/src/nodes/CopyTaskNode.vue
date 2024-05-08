@@ -8,7 +8,7 @@
             v-if="showInput"
             type="text"
             class="editable-title-input"
-            @blur="blurEvent($event)"
+            @blur="blurEvent()"
             v-mountedFocus
             v-model="currentNode.name"
             :placeholder="currentNode.name"
@@ -34,11 +34,11 @@
       <!-- 传递子节点给添加节点组件。会在子节点前面添加节点 -->
       <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
     </div>
+    <!-- 其实只需要一个全局抄送节点配置就行, 不需要多个。点击配置的时候传值.  TODO 后面优化 -->
     <CopyTaskNodeConfig
       v-if="currentNode"
       ref="nodeSetting"
       :flow-node="currentNode"
-      @update:model-value="handleModelValueUpdate"
      />
   </div>
 </template>
@@ -72,7 +72,7 @@ watch(
 // 显示节点名称输入框
 const showInput = ref(false)
 // 节点名称输入框失去焦点
-const blurEvent = (event) => {
+const blurEvent = () => {
   showInput.value = false
   currentNode.value.name = currentNode.value.name || NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string
 }
@@ -83,6 +83,7 @@ const clickEvent = () => {
 const nodeSetting = ref()
 // 打开节点配置
 const openNodeConfig = () => {
+  nodeSetting.value.setCurrentNode(currentNode.value);
   nodeSetting.value.open()
 }
 
@@ -107,11 +108,6 @@ const copyNode = () => {
   currentNode.value = newCopyNode
   emits('update:modelValue', currentNode.value)
 }
-// 接收抄送人配置组件传过来的事件，并且更新节点 信息
-const handleModelValueUpdate = (updateValue) => {
-  emits('update:modelValue', updateValue)
-}
-
 </script>
 
 <style lang='scss' scoped>

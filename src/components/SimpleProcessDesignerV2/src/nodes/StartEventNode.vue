@@ -7,7 +7,7 @@
         <Icon icon="ep:arrow-right-bold" />
       </div>
       <!-- 传递子节点给添加节点组件。会在子节点后面添加节点 -->
-      <node-handler v-if="currentNode" v-model:child-node="currentNode.childNode" />
+      <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
     </div>
   </div>
 </template>
@@ -23,12 +23,20 @@ const props = defineProps({
     default: () => null
   }
 });
+// 定义事件，更新父组件。
+const emits = defineEmits<{
+  'update:modelValue': [node: SimpleFlowNode | undefined]
+}>()
+
 const currentNode = ref<SimpleFlowNode>(props.flowNode);
 
-watch(() => props.flowNode, (newValue) => {  
-  console.log('start node value changed=================>', newValue);
-  currentNode.value = newValue;  
-}); 
+watch(
+  () => props.flowNode,
+  (newValue) => {
+    currentNode.value = newValue
+  }
+)
+
 </script>
 <style lang="scss" scoped>
 

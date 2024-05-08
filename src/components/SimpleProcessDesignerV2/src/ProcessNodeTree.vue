@@ -1,6 +1,9 @@
 <template>
   <!-- 开始节点 -->
-  <StartEventNode v-if="currentNode && currentNode.type === NodeType.START_EVENT_NODE" :flow-node ="currentNode" />
+  <StartEventNode
+        v-if="currentNode && currentNode.type === NodeType.START_EVENT_NODE" 
+        :flow-node ="currentNode" 
+        @update:model-value="handleModelValueUpdate" />
   <!-- 审批节点 -->
   <UserTaskNode 
         v-if="currentNode && currentNode.type === NodeType.USER_TASK_NODE" 
@@ -39,11 +42,11 @@ const emits = defineEmits(['update:flowNode'])
 
 const currentNode = ref<SimpleFlowNode>(props.flowNode);
 
-// 重要：监控节点变化. 能动态新增、删除节点
+// 重要：监控节点变化. 重新绘制节点
 watch(() => props.flowNode, (newValue) => {  
-  console.log("Flow Nodes changed", newValue);
   currentNode.value = newValue;  
-});
+}
+);
 
 const handleModelValueUpdate = (updateValue) => {
   console.log('Process Node Tree handleModelValueUpdate', updateValue)

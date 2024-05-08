@@ -108,7 +108,6 @@ const clickEvent = (index: number) => {
 }
 
 const conditionNodeConfig = (nodeId: string) => {
-  console.log("proxy.$refs", proxy.$refs);
   const conditionNode = proxy.$refs[nodeId][0];
   conditionNode.open()
 }

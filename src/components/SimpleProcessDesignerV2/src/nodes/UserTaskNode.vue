@@ -8,7 +8,7 @@
             v-if="showInput"
             type="text"
             class="editable-title-input"
-            @blur="blurEvent($event)"
+            @blur="blurEvent()"
             v-mountedFocus
             v-model="currentNode.name"
             :placeholder="currentNode.name"
@@ -34,11 +34,11 @@
       <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
     </div>
   </div>
+  <!-- 其实只需要一个全局审批节点配置就行, 不需要多个。点击配置的时候传值.  TODO 后面优化 -->
   <UserTaskNodeConfig
     v-if="currentNode"
     ref="nodeSetting"
     :flow-node="currentNode"
-    @update:model-value="handleModelValueUpdate"
   />
 </template>
 <script setup lang="ts">
@@ -63,8 +63,11 @@ const currentNode = ref<SimpleFlowNode>(props.flowNode)
 const nodeSetting = ref()
 // 打开节点配置
 const openNodeConfig = () => {
+  // 把当前节点传递给配置组件
+  nodeSetting.value.setCurrentNode(currentNode.value);
   nodeSetting.value.open()
 }
+// 监控节点变化
 watch(
   () => props.flowNode,
   (newValue) => {
@@ -74,7 +77,7 @@ watch(
 // 显示节点名称输入框
 const showInput = ref(false)
 // 节点名称输入框失去焦点
-const blurEvent = (event) => {
+const blurEvent = () => {
   showInput.value = false
   currentNode.value.name = currentNode.value.name || NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string
 }
@@ -82,16 +85,12 @@ const blurEvent = (event) => {
 const clickEvent = () => {
   showInput.value = true
 }
-const handleModelValueUpdate = (updateValue) => {
-  emits('update:modelValue', updateValue)
-  console.log('user task node handleModelValueUpdate', updateValue)
-}
+
 const deleteNode = () => {
-  console.log('the child node is ', currentNode.value.childNode)
   emits('update:modelValue', currentNode.value.childNode)
 }
+
 const copyNode = () => {
-  // const oldChildNode = currentNode.value.childNode
   const newCopyNode: SimpleFlowNode = {
     id: generateUUID(),
     name: currentNode.value.name,

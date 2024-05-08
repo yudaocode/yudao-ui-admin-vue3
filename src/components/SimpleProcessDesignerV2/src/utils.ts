@@ -5,3 +5,19 @@ export const getDefaultConditionNodeName = (index:number, defaultFlow: boolean) 
   }
   return '条件' + (index+1)
 }
+
+// 获得默认的表单字段权限.  
+export const getDefaultFieldsPermission = (formFields: string[] | undefined) =>{
+  const defaultFieldsPermission : any[] = [];
+  if(formFields){
+    formFields.forEach((fieldStr: string) => {
+      const { field, title } = JSON.parse(fieldStr)
+      defaultFieldsPermission.push({
+        field,
+        title,
+        permission: '2' // 只读
+      })
+    })
+  }
+  return  defaultFieldsPermission;
+}

@@ -52,11 +52,13 @@ const props = defineProps({
 
 const emits = defineEmits(['update:childNode'])
 
+
 const addNode = (type: number) => {
   popoverShow.value = false
   if (type === NodeType.USER_TASK_NODE) {
+    const id =  'Activity_'+ generateUUID();
     const data: SimpleFlowNode = {
-      id:  'Activity_'+ generateUUID(),
+      id:  id,
       name: NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string,
       showText: '',
       type: NodeType.USER_TASK_NODE,
@@ -64,11 +66,12 @@ const addNode = (type: number) => {
       attributes: {
         approveMethod: 1,
         candidateStrategy: CandidateStrategy.USER,
-        candidateParam: undefined
+        candidateParam: undefined,
+        fieldsPermission: undefined,
       },
       childNode: props.childNode
     }
-    emits('update:childNode', data)
+    emits('update:childNode', data);
   }
   if (type === NodeType.COPY_TASK_NODE) {
     const data: SimpleFlowNode = {
@@ -79,7 +82,8 @@ const addNode = (type: number) => {
       // 审批节点配置
       attributes: {
         candidateStrategy: CandidateStrategy.USER,
-        candidateParam: undefined
+        candidateParam: undefined,
+        fieldsPermission: undefined
       },
       childNode: props.childNode
     }

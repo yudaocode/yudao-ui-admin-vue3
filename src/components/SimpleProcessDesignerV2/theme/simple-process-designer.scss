@@ -517,6 +517,7 @@
     display: flex;
     height: 24px;
     line-height: 24px;
+    font-size: 16px;
     cursor: pointer;
     align-items: center;
   }
@@ -545,7 +546,82 @@
   }
 }
 
+// 表单字段权限
+.field-setting-pane {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  font-size: 14px;
 
+  .field-setting-desc {
+    padding-right: 8px;
+    margin-bottom: 16px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .field-permit-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 45px;
+    padding-left: 12px;
+    line-height: 45px;
+    background-color: #f8fafc0a;
+    border: 1px solid #1f38581a;
+   
+    .first-title {
+      text-align: left !important;
+    }
+
+    .other-titles {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .setting-title-label {
+      display: inline-block;
+      width: 110px;
+      padding: 5px 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+      text-align: center;
+    }
+    
+  }
+  
+  .field-setting-item {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    height: 38px;
+    padding-left: 12px;
+    border: 1px solid #1f38581a;
+    border-top: 0;
+
+    .field-setting-item-label {
+      display: inline-block;
+      width: 110px;
+      min-height: 16px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: text;
+    }
+
+    .field-setting-item-group {
+      display: flex;
+      justify-content: space-between;
+
+      .item-radio-wrap {
+        display: inline-block;
+        width: 110px;
+        text-align: center;
+      }
+    }
+  }
+}
 
 // 节点连线气泡卡片样式
 .handler-item-wrapper {
