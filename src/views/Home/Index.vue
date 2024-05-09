@@ -62,7 +62,14 @@
         <template #header>
           <div class="h-3 flex justify-between">
             <span>{{ t('workplace.project') }}</span>
-            <el-link type="primary" :underline="false">{{ t('action.more') }}</el-link>
+            <el-link
+              type="primary"
+              :underline="false"
+              href="https://github.com/yudaocode"
+              target="_blank"
+            >
+              {{ t('action.more') }}
+            </el-link>
           </div>
         </template>
         <el-skeleton :loading="loading" animated>
@@ -76,13 +83,13 @@
               :sm="24"
               :xs="24"
             >
-              <el-card shadow="hover">
+              <el-card shadow="hover" class="mr-5px mt-5px">
                 <div class="flex items-center">
                   <Icon :icon="item.icon" :size="25" class="mr-8px" />
                   <span class="text-16px">{{ item.name }}</span>
                 </div>
-                <div class="mt-16px text-14px text-gray-400">{{ t(item.message) }}</div>
-                <div class="mt-16px flex justify-between text-12px text-gray-400">
+                <div class="mt-12px text-9px text-gray-400">{{ t(item.message) }}</div>
+                <div class="mt-12px flex justify-between text-12px text-gray-400">
                   <span>{{ item.personal }}</span>
                   <span>{{ formatTime(item.time, 'yyyy-MM-dd') }}</span>
                 </div>
@@ -204,45 +211,45 @@ let projects = reactive<Project[]>([])
 const getProject = async () => {
   const data = [
     {
-      name: 'Github',
+      name: 'ruoyi-vue-pro',
       icon: 'akar-icons:github-fill',
-      message: 'workplace.introduction',
-      personal: 'Archer',
+      message: 'https://github.com/YunaiV/ruoyi-vue-pro',
+      personal: 'Spring Boot 单体架构',
       time: new Date()
     },
     {
-      name: 'Vue',
+      name: 'yudao-ui-admin-vue3',
       icon: 'logos:vue',
-      message: 'workplace.introduction',
-      personal: 'Archer',
+      message: 'https://github.com/yudaocode/yudao-ui-admin-vue3',
+      personal: 'Vue3 + element-plus',
       time: new Date()
     },
     {
-      name: 'Angular',
-      icon: 'logos:angular-icon',
-      message: 'workplace.introduction',
-      personal: 'Archer',
+      name: 'yudao-ui-admin-vben',
+      icon: 'logos:vue',
+      message: 'https://github.com/yudaocode/yudao-ui-admin-vben',
+      personal: 'Vue3 + vben(antd)',
       time: new Date()
     },
     {
-      name: 'React',
-      icon: 'logos:react',
-      message: 'workplace.introduction',
-      personal: 'Archer',
+      name: 'yudao-cloud',
+      icon: 'akar-icons:github',
+      message: 'https://github.com/YunaiV/yudao-cloud',
+      personal: 'Spring Cloud 微服务架构',
       time: new Date()
     },
     {
-      name: 'Webpack',
-      icon: 'logos:webpack',
-      message: 'workplace.introduction',
-      personal: 'Archer',
+      name: 'yudao-ui-mall-uniapp',
+      icon: 'logos:vue',
+      message: 'https://github.com/yudaocode/yudao-ui-admin-uniapp',
+      personal: 'Vue3 + uniapp',
       time: new Date()
     },
     {
-      name: 'Vite',
-      icon: 'vscode-icons:file-type-vite',
-      message: 'workplace.introduction',
-      personal: 'Archer',
+      name: 'yudao-ui-admin-vue2',
+      icon: 'logos:vue',
+      message: 'https://github.com/yudaocode/yudao-ui-admin-vue2',
+      personal: 'Vue2 + element-ui',
       time: new Date()
     }
   ]
@@ -254,27 +261,27 @@ let notice = reactive<Notice[]>([])
 const getNotice = async () => {
   const data = [
     {
-      title: '系统升级版本',
+      title: '系统支持 JDK 8/17/21，Vue 2/3',
       type: '通知',
-      keys: ['通知', '升级'],
+      keys: ['通知', '8', '17', '21', '2', '3'],
       date: new Date()
     },
     {
-      title: '系统凌晨维护',
+      title: '后端提供 Spring Boot 2.7/3.2 + Cloud 双架构',
       type: '公告',
-      keys: ['公告', '维护'],
+      keys: ['公告', 'Boot', 'Cloud'],
       date: new Date()
     },
     {
-      title: '系统升级版本',
+      title: '全部开源，个人与企业可 100% 直接使用，无需授权',
       type: '通知',
-      keys: ['通知', '升级'],
+      keys: ['通知', '无需授权'],
       date: new Date()
     },
     {
-      title: '系统凌晨维护',
+      title: '国内使用最广泛的快速开发平台，超 300+ 人贡献',
       type: '公告',
-      keys: ['公告', '维护'],
+      keys: ['公告', '最广泛'],
       date: new Date()
     }
   ]
