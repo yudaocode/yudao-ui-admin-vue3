@@ -391,6 +391,10 @@ export const DeliveryTypeEnum = {
   PICK_UP: {
     type: 2,
     name: '到店自提'
+  },
+  VIRTUAL: {
+    type: 3,
+    name: '虚拟发货'
   }
 }
 /**

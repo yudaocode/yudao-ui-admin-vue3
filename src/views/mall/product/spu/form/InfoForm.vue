@@ -68,16 +68,16 @@
   </el-form>
 </template>
 <script lang="ts" setup>
-import {PropType} from 'vue'
-import {copyValueToTarget} from '@/utils'
-import {propTypes} from '@/utils/propTypes'
-import {defaultProps, handleTree} from '@/utils/tree'
-import type {Spu} from '@/api/mall/product/spu'
+import { PropType } from 'vue'
+import { copyValueToTarget } from '@/utils'
+import { propTypes } from '@/utils/propTypes'
+import { defaultProps, handleTree } from '@/utils/tree'
+import type { Spu } from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
-import {CategoryVO} from '@/api/mall/product/category'
+import { CategoryVO } from '@/api/mall/product/category'
 import * as ProductBrandApi from '@/api/mall/product/brand'
-import {BrandVO} from '@/api/mall/product/brand'
-import {DictDataVO, getDictDataPage} from "@/api/system/dict/dict.data";
+import { BrandVO } from '@/api/mall/product/brand'
+import { DictDataVO, getDictDataPage } from '@/api/system/dict/dict.data'
 
 defineOptions({ name: 'ProductSpuInfoForm' })
 const props = defineProps({
@@ -152,7 +152,7 @@ onMounted(async () => {
   categoryList.value = handleTree(data, 'id')
   // 获取商品品牌列表
   brandList.value = await ProductBrandApi.getSimpleBrandList()
-  let productSpuStatus = await getDictDataPage({dictType: 'product_spu_status'});
+  let productSpuStatus = await getDictDataPage({ dictType: 'product_spu_status' })
   statusList.value = productSpuStatus.list
   formData.status = statusList.value[0].value
 })
