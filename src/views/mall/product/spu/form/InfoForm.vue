@@ -13,6 +13,16 @@
         type="textarea"
       />
     </el-form-item>
+    <el-form-item label="上架状态" prop="status">
+      <el-select v-model="formData.status" class="w-80" placeholder="请选择上架状态">
+        <el-option
+          v-for="item in statusList"
+          :key="item.id"
+          :label="item.label"
+          :value="item.value"
+        />
+      </el-select>
+    </el-form-item>
     <el-form-item label="商品分类" prop="categoryId">
       <el-cascader
         v-model="formData.categoryId"
@@ -58,15 +68,16 @@
   </el-form>
 </template>
 <script lang="ts" setup>
-import { PropType } from 'vue'
-import { copyValueToTarget } from '@/utils'
-import { propTypes } from '@/utils/propTypes'
-import { defaultProps, handleTree } from '@/utils/tree'
-import type { Spu } from '@/api/mall/product/spu'
+import {PropType} from 'vue'
+import {copyValueToTarget} from '@/utils'
+import {propTypes} from '@/utils/propTypes'
+import {defaultProps, handleTree} from '@/utils/tree'
+import type {Spu} from '@/api/mall/product/spu'
 import * as ProductCategoryApi from '@/api/mall/product/category'
-import { CategoryVO } from '@/api/mall/product/category'
+import {CategoryVO} from '@/api/mall/product/category'
 import * as ProductBrandApi from '@/api/mall/product/brand'
-import { BrandVO } from '@/api/mall/product/brand'
+import {BrandVO} from '@/api/mall/product/brand'
+import {DictDataVO, getDictDataPage} from "@/api/system/dict/dict.data";
 
 defineOptions({ name: 'ProductSpuInfoForm' })
 const props = defineProps({
@@ -82,6 +93,7 @@ const message = useMessage() // 消息弹窗
 const formRef = ref() // 表单 Ref
 const formData = reactive<Spu>({
   name: '', // 商品名称
+  status: undefined, // 上架状态
   categoryId: undefined, // 商品分类
   keyword: '', // 关键字
   picUrl: '', // 商品封面图
@@ -91,6 +103,7 @@ const formData = reactive<Spu>({
 })
 const rules = reactive({
   name: [required],
+  status: [required],
   categoryId: [required],
   keyword: [required],
   introduction: [required],
@@ -131,6 +144,7 @@ defineExpose({ validate })
 
 /** 初始化 */
 const brandList = ref<BrandVO[]>([]) // 商品品牌列表
+const statusList = ref<DictDataVO[]>([]) // 商品品牌列表
 const categoryList = ref<CategoryVO[]>([]) // 商品分类树
 onMounted(async () => {
   // 获得分类树
@@ -138,5 +152,8 @@ onMounted(async () => {
   categoryList.value = handleTree(data, 'id')
   // 获取商品品牌列表
   brandList.value = await ProductBrandApi.getSimpleBrandList()
+  let productSpuStatus = await getDictDataPage({dictType: 'product_spu_status'});
+  statusList.value = productSpuStatus.list
+  formData.status = statusList.value[0].value
 })
 </script>
