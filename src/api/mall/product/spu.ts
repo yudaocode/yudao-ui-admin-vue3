@@ -73,6 +73,11 @@ export const createSpu = (data: Spu) => {
   return request.post({ url: '/product/spu/create', data })
 }
 
+// 复制商品 Spu
+export const copySpu = (id: number) => {
+  return request.post({ url: `/product/spu/copy?id=${id}` })
+}
+
 // 更新商品 Spu
 export const updateSpu = (data: Spu) => {
   return request.put({ url: '/product/spu/update', data })

@@ -181,7 +181,15 @@
       />
       <el-table-column align="center" fixed="right" label="操作" min-width="200">
         <template #default="{ row }">
-          <el-button link type="primary" @click="openDetail(row.id)"> 详情 </el-button>
+          <el-button link type="primary" @click="openDetail(row.id)"> 详情</el-button>
+          <el-button
+            v-hasPermi="['product:spu:create']"
+            link
+            type="primary"
+            @click="copySpu(row.id)"
+          >
+            复制
+          </el-button>
           <el-button
             v-hasPermi="['product:spu:update']"
             link
@@ -401,6 +409,15 @@ const openForm = (id?: number) => {
 /** 查看商品详情 */
 const openDetail = (id: number) => {
   push({ name: 'ProductSpuDetail', params: { id } })
+}
+
+/** 复制商品 */
+const copySpu = async (id: number) => {
+  try {
+    await message.confirm('确认要复制这个商品吗? 复制成功后将自动展开新商品的编辑页.')
+    let newSpuId = await ProductSpuApi.copySpu(id)
+    openForm(newSpuId)
+  } catch (ignored) {}
 }
 
 /** 导出按钮操作 */
