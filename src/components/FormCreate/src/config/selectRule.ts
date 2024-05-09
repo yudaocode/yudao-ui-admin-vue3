@@ -32,6 +32,11 @@ const selectRule = [
       }
     ]
   },
+  {
+    type: 'switch',
+    field: 'filterable',
+    title: '是否可搜索'
+  },
   { type: 'switch', field: 'multiple', title: '是否多选' },
   {
     type: 'switch',
@@ -56,27 +61,11 @@ const selectRule = [
     title: 'autocomplete 属性'
   },
   { type: 'input', field: 'placeholder', title: '占位符' },
-  {
-    type: 'switch',
-    field: 'filterable',
-    title: '是否可搜索'
-  },
   { type: 'switch', field: 'allowCreate', title: '是否允许用户创建新条目' },
   {
     type: 'input',
     field: 'noMatchText',
     title: '搜索条件无匹配时显示的文字'
-  },
-  {
-    type: 'switch',
-    field: 'remote',
-    title: '其中的选项是否从服务器远程加载'
-  },
-  {
-    type: 'input',
-    field: 'remoteField',
-    title: '请求参数',
-    info: '远程请求时请求携带的参数名称，如：name'
   },
   { type: 'input', field: 'noDataText', title: '选项为空时显示的文字' },
   {
@@ -174,6 +163,18 @@ const apiSelectRule = [
             return data.list.map(item=> ({label: item.nickname,value: item.id}))
         }`
     }
+  },
+  {
+    type: 'switch',
+    field: 'remote',
+    info: '是否可搜索',
+    title: '其中的选项是否从服务器远程加载'
+  },
+  {
+    type: 'input',
+    field: 'remoteField',
+    title: '请求参数',
+    info: '远程请求时请求携带的参数名称，如：name'
   }
 ]
 
