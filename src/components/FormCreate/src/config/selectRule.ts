@@ -15,7 +15,20 @@ const selectRule = [
         value: 'select',
         condition: '==',
         method: 'hidden',
-        rule: ['multiple']
+        rule: [
+          'multiple',
+          'clearable',
+          'collapseTags',
+          'multipleLimit',
+          'allowCreate',
+          'filterable',
+          'noMatchText',
+          'remote',
+          'remoteMethod',
+          'reserveKeyword',
+          'defaultFirstOption',
+          'automaticDropdown'
+        ]
       }
     ]
   },
@@ -60,9 +73,10 @@ const selectRule = [
     title: '其中的选项是否从服务器远程加载'
   },
   {
-    type: 'Struct',
-    field: 'remoteMethod',
-    title: '自定义远程搜索方法'
+    type: 'input',
+    field: 'remoteField',
+    title: '请求参数',
+    info: '远程请求时请求携带的参数名称，如：name'
   },
   { type: 'input', field: 'noDataText', title: '选项为空时显示的文字' },
   {
@@ -130,6 +144,7 @@ const apiSelectRule = [
     type: 'input',
     field: 'labelField',
     title: 'label 属性',
+    info: '可以使用 el 表达式：${属性}，来实现复杂数据组合。如：${nickname}-${id}',
     props: {
       placeholder: 'nickname'
     }
@@ -138,6 +153,7 @@ const apiSelectRule = [
     type: 'input',
     field: 'valueField',
     title: 'value 属性',
+    info: '可以使用 el 表达式：${属性}，来实现复杂数据组合。如：${nickname}-${id}',
     props: {
       placeholder: 'id'
     }
@@ -146,11 +162,17 @@ const apiSelectRule = [
     type: 'input',
     field: 'parseFunc',
     title: '选项解析函数',
-    info: '(data: any)=>{ label: string; value: any }',
+    info: `data 为接口返回值,需要写一个匿名函数解析返回值为选择器 options 列表
+    (data: any)=>{ label: string; value: any }[]`,
     props: {
       autosize: true,
       rows: { minRows: 2, maxRows: 6 },
-      type: 'textarea'
+      type: 'textarea',
+      placeholder: `
+        function (data) {
+            console.log(data)
+            return data.list.map(item=> ({label: item.nickname,value: item.id}))
+        }`
     }
   }
 ]
