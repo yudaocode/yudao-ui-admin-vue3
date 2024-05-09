@@ -1,8 +1,8 @@
 /**
  * 数据字典工具类
  */
-import {useDictStoreWithOut} from '@/store/modules/dict'
-import {ElementPlusInfoType} from '@/types/elementPlus'
+import { useDictStoreWithOut } from '@/store/modules/dict'
+import { ElementPlusInfoType } from '@/types/elementPlus'
 
 const dictStore = useDictStoreWithOut()
 
@@ -209,5 +209,8 @@ export enum DICT_TYPE {
 
   // ========== ERP - 企业资源计划模块  ==========
   ERP_AUDIT_STATUS = 'erp_audit_status', // ERP 审批状态
-  ERP_STOCK_RECORD_BIZ_TYPE = 'erp_stock_record_biz_type' // 库存明细的业务类型
+  ERP_STOCK_RECORD_BIZ_TYPE = 'erp_stock_record_biz_type', // 库存明细的业务类型
+
+  // ========== AI - 人工智能模块  ==========
+  AI_PLATFORM = 'ai_platform' // AI 平台
 }
