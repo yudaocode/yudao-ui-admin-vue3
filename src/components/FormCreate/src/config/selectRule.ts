@@ -13,7 +13,7 @@ const selectRule = [
     control: [
       {
         value: 'select',
-        condition: '=',
+        condition: '==',
         method: 'hidden',
         rule: ['multiple']
       }
@@ -140,6 +140,17 @@ const apiSelectRule = [
     title: 'value 属性',
     props: {
       placeholder: 'id'
+    }
+  },
+  {
+    type: 'input',
+    field: 'parseFunc',
+    title: '选项解析函数',
+    info: '(data: any)=>{ label: string; value: any }',
+    props: {
+      autosize: true,
+      rows: { minRows: 2, maxRows: 6 },
+      type: 'textarea'
     }
   }
 ]

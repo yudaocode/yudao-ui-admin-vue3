@@ -1,4 +1,3 @@
-// TODO puhui999: 借鉴一下 form-create-designer utils 方法 🤣 (导入不了只能先 copy 过来用下)
 export function makeRequiredRule() {
   return {
     type: 'Required',
