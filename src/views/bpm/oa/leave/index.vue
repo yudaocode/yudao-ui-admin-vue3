@@ -83,7 +83,7 @@
       <el-table-column align="center" label="申请编号" prop="id" />
       <el-table-column align="center" label="状态" prop="result">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.result" />
+          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
