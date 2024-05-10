@@ -361,7 +361,7 @@ const searchConversation = () => {
     display: flex;
     flex-direction: column;
     text-align: left;
-    margin-left: 15px;
+    margin: 0 15px;
 
     .time {
       text-align: left;
