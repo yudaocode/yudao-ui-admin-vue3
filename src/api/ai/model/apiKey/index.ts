@@ -12,27 +12,27 @@ export interface ApiKeyVO {
 
 // AI API 密钥 API
 export const ApiKeyApi = {
-  // 查询AI API 密钥分页
+  // 查询 API 密钥分页
   getApiKeyPage: async (params: any) => {
     return await request.get({ url: `/ai/api-key/page`, params })
   },
 
-  // 查询AI API 密钥详情
+  // 查询 API 密钥详情
   getApiKey: async (id: number) => {
     return await request.get({ url: `/ai/api-key/get?id=` + id })
   },
 
-  // 新增AI API 密钥
+  // 新增 API 密钥
   createApiKey: async (data: ApiKeyVO) => {
     return await request.post({ url: `/ai/api-key/create`, data })
   },
 
-  // 修改AI API 密钥
+  // 修改 API 密钥
   updateApiKey: async (data: ApiKeyVO) => {
     return await request.put({ url: `/ai/api-key/update`, data })
   },
 
-  // 删除AI API 密钥
+  // 删除 API 密钥
   deleteApiKey: async (id: number) => {
     return await request.delete({ url: `/ai/api-key/delete?id=` + id })
   }
