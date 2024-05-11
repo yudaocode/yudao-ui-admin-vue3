@@ -60,10 +60,7 @@
       </el-tab-pane>
       <!-- 员工回款金额统计 -->
       <el-tab-pane label="员工回款金额统计" name="ReceivablePricePerformance" lazy>
-        <ReceivablePricePerformance
-          :query-params="queryParams"
-          ref="ReceivablePricePerformanceRef"
-        />
+        <ReceivablePricePerformance :query-params="queryParams" ref="ReceivablePricePerformanceRef" />
       </el-tab-pane>
     </el-tabs>
   </el-col>
@@ -73,11 +70,12 @@
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
 import { useUserStore } from '@/store/modules/user'
-import { beginOfDay, formatDate } from '@/utils/formatTime'
+import { beginOfDay, defaultShortcuts, endOfDay, formatDate } from '@/utils/formatTime'
 import { defaultProps, handleTree } from '@/utils/tree'
 import ContractCountPerformance from './components/ContractCountPerformance.vue'
 import ContractPricePerformance from './components/ContractPricePerformance.vue'
 import ReceivablePricePerformance from './components/ReceivablePricePerformance.vue'
+import dayjs from "dayjs"
 
 defineOptions({ name: 'CrmStatisticsCustomer' })
 
@@ -85,8 +83,8 @@ const queryParams = reactive({
   deptId: useUserStore().getUser.deptId,
   userId: undefined,
   times: [
-    // 默认显示当年的数据
-    formatDate(beginOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24 * 7)))
+    formatDate(beginOfDay(new Date(new Date().getFullYear(),0, 1, 0, 0, 0))), // 默认查询当年的数据，比如2024年，起始时间2024-01-01 00:00:00
+    formatDate(beginOfDay(new Date(new Date().getFullYear()+1,0, 1, 0, 0, 0))) //查询时间范围结束时间，2025-01-01 00:00:00
   ]
 })
 
@@ -100,7 +98,6 @@ const userListByDeptId = computed(() =>
     : []
 )
 
-// TODO @scholar：改成尾注释，保证 vue 内容短一点；变量名小写
 // 活跃标签
 const activeTab = ref('ContractCountPerformance')
 // 1.员工合同数量统计
@@ -111,19 +108,17 @@ const ContractPricePerformanceRef = ref()
 const ReceivablePricePerformanceRef = ref()
 
 /** 搜索按钮操作 */
-const handleQuery = () => {
+const handleQuery =  () => {
   // 从 queryParams.times[0] 中获取到了年份
   const selectYear = parseInt(queryParams.times[0])
 
-  // 创建一个新的 Date 对象，设置为指定的年份的第一天
-  const fullDate = new Date(selectYear, 0, 1, 0, 0, 0)
+  // 创建一个新的 Date 对象，设置为指定的年份的第一天，以及第二年的第一天，以时间段的方式，将查询时间传递给后端
+  const fullDate = new Date(selectYear, 0, 1, 0, 0, 0)            //比如2024年，起始时间2024-01-01 00:00:00
+  const nextFullDate = new Date(selectYear+1, 0, 1, 0, 0, 0) //查询时间范围结束时间，2025-01-01 00:00:00
 
   // 将完整的日期时间格式化为需要的字符串形式，比如 2004-01-01 00:00:00
-  // TODO @scholar：看看，是不是可以使用 year 哈
-  queryParams.times[0] = `${fullDate.getFullYear()}-${String(fullDate.getMonth() + 1).padStart(
-    2,
-    '0'
-  )}-${String(fullDate.getDate()).padStart(2, '0')} ${String(fullDate.getHours()).padStart(2, '0')}:${String(fullDate.getMinutes()).padStart(2, '0')}:${String(fullDate.getSeconds()).padStart(2, '0')}`
+  queryParams.times[0] = dayjs(fullDate).format('YYYY-MM-DD HH:mm:ss')
+  queryParams.times[1] = dayjs(nextFullDate).format('YYYY-MM-DD HH:mm:ss')
 
   switch (activeTab.value) {
     case 'ContractCountPerformance':
