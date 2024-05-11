@@ -64,7 +64,7 @@
                   </el-form-item>
                 </el-col>
                 <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
-                  <el-form-item v-if="loginData.tenantEnable === 'true'" prop="tenantName">
+                  <el-form-item v-if="loginData.tenantEnable" prop="tenantName">
                     <el-input
                       v-model="loginData.loginForm.tenantName"
                       :placeholder="t('login.tenantNamePlaceholder')"
@@ -207,7 +207,7 @@ const loginData = reactive({
 // 获取验证码
 const getCode = async () => {
   // 情况一，未开启：则直接登录
-  if (loginData.captchaEnable) {
+  if (!loginData.captchaEnable) {
     await handleLogin({})
   } else {
     // 情况二，已开启：则展示验证码；只有完成验证码的情况，才进行登录
