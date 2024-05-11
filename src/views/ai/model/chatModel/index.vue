@@ -53,23 +53,27 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="API 秘钥编号" align="center" prop="keyId" />
+      <el-table-column label="所属平台" align="center" prop="platform">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.AI_PLATFORM" :value="scope.row.platform" />
+        </template>
+      </el-table-column>
       <el-table-column label="模型名字" align="center" prop="name" />
       <el-table-column label="模型标识" align="center" prop="model" />
-      <el-table-column label="模型平台" align="center" prop="platform" />
+      <el-table-column label="API 秘钥" align="center" prop="keyId" min-width="140">
+        <template #default="scope">
+          <span>{{ apiKeyList.find((item) => item.id === scope.row.keyId)?.name }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="排序" align="center" prop="sort" />
-      <el-table-column label="状态" align="center" prop="status" />
+      <el-table-column label="状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
       <el-table-column label="温度参数" align="center" prop="temperature" />
-      <el-table-column label="回复数 Token 数" align="center" prop="maxTokens" />
+      <el-table-column label="回复数 Token 数" align="center" prop="maxTokens" min-width="140" />
       <el-table-column label="上下文数量" align="center" prop="maxContexts" />
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button
@@ -106,9 +110,10 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
 import ChatModelForm from './ChatModelForm.vue'
+import { DICT_TYPE } from '@/utils/dict'
+import { ApiKeyApi, ApiKeyVO } from '@/api/ai/model/apiKey'
 
 /** API 聊天模型 列表 */
 defineOptions({ name: 'AiChatModel' })
@@ -127,7 +132,7 @@ const queryParams = reactive({
   platform: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const apiKeyList = ref([] as ApiKeyVO[]) // API 密钥列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -173,7 +178,9 @@ const handleDelete = async (id: number) => {
 }
 
 /** 初始化 **/
-onMounted(() => {
+onMounted(async () => {
   getList()
+  // 获得下拉数据
+  apiKeyList.value = await ApiKeyApi.getApiKeyList()
 })
 </script>

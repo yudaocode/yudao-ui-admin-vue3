@@ -60,15 +60,14 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="名称" align="center" prop="name" />
-      <el-table-column label="密钥" align="center" prop="apiKey" />
-      <el-table-column label="平台" align="center" prop="platform">
+      <el-table-column label="所属平台" align="center" prop="platform">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.AI_PLATFORM" :value="scope.row.platform" />
         </template>
       </el-table-column>
-      <el-table-column label="自定义 API 地址" align="center" prop="url" />
+      <el-table-column label="名称" align="center" prop="name" />
+      <el-table-column label="密钥" align="center" prop="apiKey" />
+      <el-table-column label="自定义 API URL" align="center" prop="url" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />

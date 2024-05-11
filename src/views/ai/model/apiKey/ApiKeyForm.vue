@@ -7,13 +7,7 @@
       label-width="120px"
       v-loading="formLoading"
     >
-      <el-form-item label="名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入名称" />
-      </el-form-item>
-      <el-form-item label="密钥" prop="apiKey">
-        <el-input v-model="formData.apiKey" placeholder="请输入密钥" />
-      </el-form-item>
-      <el-form-item label="平台" prop="platform">
+      <el-form-item label="所属平台" prop="platform">
         <el-select v-model="formData.platform" placeholder="请输入平台" clearable>
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.AI_PLATFORM)"
@@ -23,8 +17,14 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="自定义 API 地址" prop="url">
-        <el-input v-model="formData.url" placeholder="请输入自定义 API 地址" />
+      <el-form-item label="名称" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入名称" />
+      </el-form-item>
+      <el-form-item label="密钥" prop="apiKey">
+        <el-input v-model="formData.apiKey" placeholder="请输入密钥" />
+      </el-form-item>
+      <el-form-item label="自定义 API URL" prop="url">
+        <el-input v-model="formData.url" placeholder="请输入自定义 API URL" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">

@@ -7,8 +7,25 @@
       label-width="120px"
       v-loading="formLoading"
     >
-      <el-form-item label="API 秘钥编号" prop="keyId">
-        <el-input v-model="formData.keyId" placeholder="请输入API 秘钥编号" />
+      <el-form-item label="所属平台" prop="platform">
+        <el-select v-model="formData.platform" placeholder="请输入平台" clearable>
+          <el-option
+            v-for="dict in getStrDictOptions(DICT_TYPE.AI_PLATFORM)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="API 秘钥" prop="keyId">
+        <el-select v-model="formData.keyId" placeholder="请选择 API 秘钥" clearable>
+          <el-option
+            v-for="apiKey in apiKeyList"
+            :key="apiKey.id"
+            :label="apiKey.name"
+            :value="apiKey.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="模型名字" prop="name">
         <el-input v-model="formData.name" placeholder="请输入模型名字" />
@@ -16,15 +33,18 @@
       <el-form-item label="模型标识" prop="model">
         <el-input v-model="formData.model" placeholder="请输入模型标识" />
       </el-form-item>
-      <el-form-item label="模型平台" prop="platform">
-        <el-input v-model="formData.platform" placeholder="请输入模型平台" />
-      </el-form-item>
       <el-form-item label="排序" prop="sort">
         <el-input v-model="formData.sort" placeholder="请输入排序" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-radio-group v-model="formData.status">
-          <el-radio label="1">请选择字典生成</el-radio>
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="温度参数" prop="temperature">
@@ -45,7 +65,9 @@
 </template>
 <script setup lang="ts">
 import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
+import { ApiKeyApi, ApiKeyVO } from '@/api/ai/model/apiKey'
 import { CommonStatusEnum } from '@/utils/constants'
+import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 
 /** API 聊天模型 表单 */
 defineOptions({ name: 'ChatModelForm' })
@@ -70,14 +92,15 @@ const formData = ref({
   maxContexts: undefined
 })
 const formRules = reactive({
-  keyId: [{ required: true, message: 'API 秘钥编号不能为空', trigger: 'blur' }],
+  keyId: [{ required: true, message: 'API 秘钥不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '模型名字不能为空', trigger: 'blur' }],
   model: [{ required: true, message: '模型标识不能为空', trigger: 'blur' }],
-  platform: [{ required: true, message: '模型平台不能为空', trigger: 'blur' }],
+  platform: [{ required: true, message: '所属平台不能为空', trigger: 'blur' }],
   sort: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const apiKeyList = ref([] as ApiKeyVO[]) // API 密钥列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -94,6 +117,8 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 获得下拉数据
+  apiKeyList.value = await ApiKeyApi.getApiKeyList(CommonStatusEnum.ENABLE)
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 

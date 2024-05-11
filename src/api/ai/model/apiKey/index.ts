@@ -17,6 +17,11 @@ export const ApiKeyApi = {
     return await request.get({ url: `/ai/api-key/page`, params })
   },
 
+  // 获得 API 密钥列表
+  getApiKeyList: async () => {
+    return await request.get({ url: `/ai/api-key/simple-list` })
+  },
+
   // 查询 API 密钥详情
   getApiKey: async (id: number) => {
     return await request.get({ url: `/ai/api-key/get?id=` + id })
