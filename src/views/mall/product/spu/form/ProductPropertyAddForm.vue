@@ -7,6 +7,7 @@
       :model="formData"
       :rules="formRules"
       label-width="80px"
+      @keydown.enter.prevent="submitForm"
     >
       <el-form-item label="属性名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入名称" />
