@@ -81,73 +81,10 @@
           </el-button>
         </div>
       </el-header>
-      <el-main>
 
-        <div class="chat-list">
-          <!--  靠左 message  -->
-          <div class="left-message message-item">
-            <div class="avatar">
-              <el-avatar
-                src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-              />
-            </div>
-            <div class="message">
-              <div>
-                <el-text class="time">2024-05-10 22:38</el-text>
-              </div>
-              <div class="left-text-container">
-                <el-text class="left-text">
-                  如果您想获取某个网页或程序的截图，可以使用浏览器自带的截图功能，或者使用第三方截图工具，如Snipping
-                  Tool、FastStone Capture等。如果您想将屏幕上的某个区域截取下来，可以使用键盘上的“Prt
-                  Sc”键（或“Print Screen”键）来获取整个屏幕的截图，并将其粘贴到图像编辑软件中进行编辑和保存。
-                  如果您需要更具体的帮助，例如如何使用特定的截图工具或如何编辑截图，请提供更多详细信息，我将尽力为您提供帮助。
-                </el-text>
-
-              </div>
-              <div class="left-btns">
-                <div class="btn-cus">
-                  <img class="btn-image" src="@/assets/ai/copy.svg"/>
-                  <el-text class="btn-cus-text">复制</el-text>
-                </div>
-                <div class="btn-cus" style="margin-left: 20px;">
-                  <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px;"/>
-                  <el-text class="btn-cus-text">删除</el-text>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!--  靠右 message  -->
-          <div class="right-message message-item">
-            <div class="avatar">
-              <el-avatar
-                src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-              />
-            </div>
-            <div class="message">
-              <div>
-                <el-text class="time">2024-05-10 22:38</el-text>
-              </div>
-              <div class="right-text-container">
-                <el-text class="right-text">
-                  今天天气
-                </el-text>
-              </div>
-              <div class="right-btns">
-                <div class="btn-cus">
-                  <img class="btn-image" src="@/assets/ai/copy.svg"/>
-                  <el-text class="btn-cus-text">复制</el-text>
-                </div>
-                <div class="btn-cus" style="margin-left: 20px;">
-                  <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px;"/>
-                  <el-text class="btn-cus-text">删除</el-text>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-
+      <!--  main    -->
+      <el-main class="main-container">
+        <MessageList />
       </el-main>
       <el-footer class="footer-container">
         <textarea placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
@@ -161,7 +98,10 @@
     </el-container>
   </el-container>
 </template>
+
 <script setup lang="ts">
+import MessageList from './components/MessageList.vue'
+
 const conversationList = [
   {
     id: 1,
@@ -199,6 +139,10 @@ const deleteConversationTitle = (conversation) => {
 const searchConversation = () => {
   // TODO 芋艿：待实现
 }
+
+/** 初始化 **/
+onMounted(() => {
+})
 </script>
 <style lang="scss" scoped>
 
@@ -331,106 +275,12 @@ const searchConversation = () => {
   }
 }
 
-// 中间
-.chat-list {
-  display: flex;
-  flex-direction: column;
-
-  .message-item {
-    margin-top: 50px;
-  }
-
-  .left-message {
-    display: flex;
-    flex-direction: row;
-
-  }
-
-  .right-message {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-start;
-  }
-
-  .avatar {
-    //height: 170px;
-    //width: 170px;
-  }
-
-  .message {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    margin: 0 15px;
-
-    .time {
-      text-align: left;
-      line-height: 30px;
-    }
-
-    .left-text-container {
-      display: flex;
-      flex-direction: column;
-      overflow-wrap: break-word;
-      background-color: #e4e4e4;
-      box-shadow: 0 0 0 1px #e4e4e4;
-      border-radius: 10px;
-      padding: 10px 10px 5px 10px;
-
-      .left-text {
-        color: #393939;
-      }
-    }
-
-    .right-text-container {
-      display: flex;
-      flex-direction: column;
-      overflow-wrap: break-word;
-      background-color: #267fff;
-      color: #FFF;
-      box-shadow: 0 0 0 1px #267fff;
-      border-radius: 10px;
-      padding: 10px;
-
-      .right-text {
-        color: #FFF;
-      }
-    }
-
-    .left-btns, .right-btns {
-      display: flex;
-      flex-direction: row;
-      margin-top: 8px;
-    }
-
-
-  }
-
-  // 复制、删除按钮
-  .btn-cus {
-    display: flex;
-    background-color: transparent;
-    align-items: center;
-
-    .btn-image {
-      height: 20px;
-      margin-right: 5px;
-    }
-
-    .btn-cus-text {
-      color: #757575;
-    }
-  }
-
-  .btn-cus:hover {
-    cursor: pointer;
-  }
-
-  .btn-cus:focus {
-    background-color: #8c939d;
-  }
+// main 容器
+.main-container {
+  margin: 0;
+  padding: 0;
+  position: relative;
 }
-
 
 // 底部
 .footer-container {
