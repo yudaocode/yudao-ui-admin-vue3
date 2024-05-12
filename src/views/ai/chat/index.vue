@@ -84,15 +84,73 @@
 
       <!--  main    -->
       <el-main class="main-container">
-        <MessageList />
+        <div class="message-container" ref="messageContainer">
+          <div class="chat-list" v-for="(item, index) in list" :key="index">
+            <!--  靠左 message  -->
+            <div class="left-message message-item" v-if="item.type === 'system'">
+              <div class="avatar" >
+                <el-avatar
+                  src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+                />
+              </div>
+              <div class="message">
+                <div>
+                  <el-text class="time">{{formatDate(item.createTime)}}</el-text>
+                </div>
+                <div class="left-text-container">
+                  <el-text class="left-text">
+                    {{item.content}}
+                  </el-text>
+                </div>
+                <div class="left-btns">
+                  <div class="btn-cus" @click="noCopy(item.content)">
+                    <img class="btn-image" src="@/assets/ai/copy.svg"/>
+                    <el-text class="btn-cus-text">复制</el-text>
+                  </div>
+                  <div class="btn-cus" style="margin-left: 20px;" @click="onDelete(item.id)">
+                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px;"/>
+                    <el-text class="btn-cus-text">删除</el-text>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!--  靠右 message  -->
+            <div class="right-message message-item" v-if="item.type === 'user'">
+              <div class="avatar">
+                <el-avatar
+                  src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+                />
+              </div>
+              <div class="message">
+                <div>
+                  <el-text class="time">{{formatDate(item.createTime)}}</el-text>
+                </div>
+                <div class="right-text-container">
+                  <el-text class="right-text">
+                    {{item.content}}
+                  </el-text>
+                </div>
+                <div class="right-btns">
+                  <div class="btn-cus"  @click="noCopy(item.content)">
+                    <img class="btn-image" src="@/assets/ai/copy.svg"/>
+                    <el-text class="btn-cus-text">复制</el-text>
+                  </div>
+                  <div class="btn-cus" style="margin-left: 20px;" @click="onDelete(item.id)">
+                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px;"/>
+                    <el-text class="btn-cus-text">删除</el-text>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
       </el-main>
       <el-footer class="footer-container">
-        <textarea placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
-                  class="prompt-input">
-        </textarea>
+        <textarea class="prompt-input" v-model="prompt" placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"></textarea>
         <div class="prompt-btns">
           <el-switch/>
-          <el-button type="primary" size="default">发送</el-button>
+          <el-button type="primary" size="default" @click="onSend()">发送</el-button>
         </div>
       </el-footer>
     </el-container>
@@ -100,25 +158,15 @@
 </template>
 
 <script setup lang="ts">
-import MessageList from './components/MessageList.vue'
+import {ChatMessageApi, ChatMessageSendVO, ChatMessageVO} from "@/api/ai/chat/message";
+import {formatDate} from "@/utils/formatTime";
+import {useClipboard} from '@vueuse/core'
 
-const conversationList = [
-  {
-    id: 1,
-    title: '测试标题',
-    avatar:
-      'http://test.yudao.iocoder.cn/96c787a2ce88bf6d0ce3cd8b6cf5314e80e7703cd41bf4af8cd2e2909dbd6b6d.png'
-  },
-  {
-    id: 2,
-    title: '测试对话',
-    avatar:
-      'http://test.yudao.iocoder.cn/96c787a2ce88bf6d0ce3cd8b6cf5314e80e7703cd41bf4af8cd2e2909dbd6b6d.png'
-  }
-]
-const conversationId = ref(1)
-const searchName = ref('')
-const leftHeight = window.innerHeight - 240 // TODO 芋艿：这里还不太对
+const searchName = ref('') // 查询的内容
+const conversationId = ref('1781604279872581648') // 对话id
+const conversationInProgress = ref<Boolean>() // 对话进行中
+const prompt = ref<string>() // prompt
+const promptRes = ref<string>() // prompt res
 
 const changeConversation = (conversation) => {
   console.log(conversation)
@@ -140,9 +188,154 @@ const searchConversation = () => {
   // TODO 芋艿：待实现
 }
 
+/** send */
+const onSend = async () => {
+  const requestParams = {
+    conversationId: conversationId.value,
+    content: prompt.value,
+  } as unknown as ChatMessageSendVO
+  // 添加 message
+  const userMessage = await ChatMessageApi.add(requestParams) as unknown as ChatMessageVO;
+  list.value.push(userMessage)
+  // 滚动到住下面
+  scrollToBottom();
+  //
+  await doSendStream(userMessage)
+}
+
+const doSendStream = async (userMessage: ChatMessageVO) => {
+  // 创建AbortController实例，以便中止请求
+  const ctrl = new AbortController()
+  // 发送 event stream
+  let isFirstMessage = true
+  ChatMessageApi.sendStream(userMessage.id, ctrl,(message) => {
+    console.log('message', message)
+    const data = JSON.parse(message.data) as unknown as ChatMessageVO
+    // 如果没有内容结束链接
+    if (data.content === '') {
+      ctrl.abort()
+    }
+    // 首次返回需要添加一个 message 到页面，后面的都是更新
+    if (isFirstMessage) {
+      isFirstMessage = false;
+      list.value.push(data)
+    } else {
+      const lastMessage = list.value[list.value.length - 1];
+      lastMessage.content = lastMessage.content + data.content
+      list.value[list.value - 1] = lastMessage
+    }
+    // 滚动到最下面
+    scrollToBottom();
+  }, (error) => {
+    console.log('error', error)
+  }, () => {
+    console.log('close')
+  })
+
+  // // 创建一个正在进行中的message
+  // const chatMessage = {
+  //   id: null, // 编号
+  //   conversationId: conversationId.value, // 会话编号
+  //   type: 'system', // 消息类型
+  //   userId: null, // 用户编号
+  //   roleId: null, // 角色编号
+  //   model: null, // 模型标志
+  //   modelId: null, // 模型编号
+  //   content: '加载中...', // 聊天内容
+  //   tokens: null, // 消耗 Token 数量
+  //   createTime: new Date(), // 创建时间
+  // } as unknown as ChatMessageVO
+  // list.value.push(chatMessage)
+  // // 滚动到最下面
+  // scrollToBottom();
+}
+
+/** Prompt */
+const onPromptInput = async (e) => {
+  console.log(e.data)
+  // prompt.value = e.data
+}
+
+
+// 初始化 copy 到粘贴板
+const { copy, isSupported } = useClipboard();
+/** chat message 列表 */
+defineOptions({ name: 'chatMessageList' })
+const list = ref<ChatMessageVO[]>([]) // 列表的数据
+
+// 对话id TODO @范 先写死
+const content = '苹果是什么颜色？'
+
+/** 查询列表 */
+const messageList = async () => {
+  try {
+    // 获取列表数据
+    const res = await ChatMessageApi.messageList(conversationId.value)
+    list.value = res;
+    // 滚动到最下面
+    scrollToBottom();
+  } finally {
+  }
+}
+// ref
+const messageContainer: any = ref(null);
+const isScrolling = ref(false)//用于判断用户是否在滚动
+
+function scrollToBottom() {
+  nextTick(() => {
+    //注意要使用nexttick以免获取不到dom
+    console.log('isScrolling.value', isScrolling.value)
+    if (!isScrolling.value) {
+      messageContainer.value.scrollTop = messageContainer.value.scrollHeight - messageContainer.value.offsetHeight
+    }
+  })
+}
+
+function handleScroll() {
+  const scrollContainer = messageContainer.value
+  const scrollTop = scrollContainer.scrollTop
+  const scrollHeight = scrollContainer.scrollHeight
+  const offsetHeight = scrollContainer.offsetHeight
+
+  if (scrollTop + offsetHeight < scrollHeight) {
+    // 用户开始滚动并在最底部之上，取消保持在最底部的效果
+    isScrolling.value = true
+  } else {
+    // 用户停止滚动并滚动到最底部，开启保持到最底部的效果
+    isScrolling.value = false
+  }
+}
+
+function noCopy(content) {
+  copy(content)
+  ElMessage({
+    message: '复制成功!',
+    type: 'success',
+  })
+}
+
+const onDelete = async (id) => {
+  // 删除 message
+  await ChatMessageApi.delete(id)
+  ElMessage({
+    message: '删除成功!',
+    type: 'success',
+  })
+  // 重新获取 message 列表
+  await messageList();
+}
+
 /** 初始化 **/
-onMounted(() => {
+onMounted(async () => {
+  // 获取列表数据
+  messageList();
+  // scrollToBottom();
+  // await nextTick
+  // 监听滚动事件，判断用户滚动状态
+  messageContainer.value.addEventListener('scroll', handleScroll)
 })
+
+
 </script>
 <style lang="scss" scoped>
 
@@ -280,6 +473,113 @@ onMounted(() => {
   margin: 0;
   padding: 0;
   position: relative;
+}
+
+
+.message-container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  overflow-y: scroll;
+  padding: 0 15px;
+}
+
+// 中间
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+
+  .message-item {
+    margin-top: 50px;
+  }
+
+  .left-message {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .right-message {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+  }
+
+  .avatar {
+    //height: 170px;
+    //width: 170px;
+  }
+
+  .message {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    margin: 0 15px;
+
+    .time {
+      text-align: left;
+      line-height: 30px;
+    }
+
+    .left-text-container {
+      display: flex;
+      flex-direction: column;
+      overflow-wrap: break-word;
+      background-color: #e4e4e4;
+      box-shadow: 0 0 0 1px #e4e4e4;
+      border-radius: 10px;
+      padding: 10px 10px 5px 10px;
+
+      .left-text {
+        color: #393939;
+      }
+    }
+
+    .right-text-container {
+      display: flex;
+      flex-direction: column;
+      overflow-wrap: break-word;
+      background-color: #267fff;
+      color: #FFF;
+      box-shadow: 0 0 0 1px #267fff;
+      border-radius: 10px;
+      padding: 10px;
+
+      .right-text {
+        color: #FFF;
+      }
+    }
+
+    .left-btns, .right-btns {
+      display: flex;
+      flex-direction: row;
+      margin-top: 8px;
+    }
+  }
+
+  // 复制、删除按钮
+  .btn-cus {
+    display: flex;
+    background-color: transparent;
+    align-items: center;
+
+    .btn-image {
+      height: 20px;
+      margin-right: 5px;
+    }
+
+    .btn-cus-text {
+      color: #757575;
+    }
+  }
+
+  .btn-cus:hover {
+    cursor: pointer;
+  }
+
+  .btn-cus:focus {
+    background-color: #8c939d;
+  }
 }
 
 // 底部

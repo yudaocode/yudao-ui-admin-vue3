@@ -62,12 +62,11 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
+
 import { useClipboard } from '@vueuse/core'
-import {ChatMessageApi, ChatMessageVO, ChatMessageSendVO} from '@/api/ai/chat/message'
+import { ChatMessageApi, ChatMessageVO, ChatMessageSendVO} from '@/api/ai/chat/message'
 import { formatDate } from '@/utils/formatTime'
-import {ApiKeyVO} from "@/api/ai/model/apiKey";
 
 // 初始化 copy 到粘贴板
 const { copy, isSupported } = useClipboard();
@@ -93,20 +92,6 @@ const messageList = async () => {
 // ref
 const messageContainer: any = ref(null);
 const isScrolling = ref(false)//用于判断用户是否在滚动
-
-/** send */
-const sendMessage = async () => {
-  try {
-    const requestParams = {
-      conversationId,
-      content,
-    }
-    const messageSendVO = requestParams as unknown as ChatMessageSendVO
-    const res = await ChatMessageApi.send(messageSendVO) as unknown as ChatMessageVO
-    console.log('---', res.content)
-  } finally {
-  }
-}
 
 function scrollToBottom() {
   nextTick(() => {
@@ -167,110 +152,5 @@ onMounted(async () => {
 
 <style scoped lang="scss">
 
-.message-container {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  overflow-y: scroll;
-  padding: 0 15px;
-}
-
-// 中间
-.chat-list {
-  display: flex;
-  flex-direction: column;
-  overflow-y: hidden;
-
-  .message-item {
-    margin-top: 50px;
-  }
-
-  .left-message {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .right-message {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-start;
-  }
-
-  .avatar {
-    //height: 170px;
-    //width: 170px;
-  }
-
-  .message {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    margin: 0 15px;
-
-    .time {
-      text-align: left;
-      line-height: 30px;
-    }
-
-    .left-text-container {
-      display: flex;
-      flex-direction: column;
-      overflow-wrap: break-word;
-      background-color: #e4e4e4;
-      box-shadow: 0 0 0 1px #e4e4e4;
-      border-radius: 10px;
-      padding: 10px 10px 5px 10px;
-
-      .left-text {
-        color: #393939;
-      }
-    }
-
-    .right-text-container {
-      display: flex;
-      flex-direction: column;
-      overflow-wrap: break-word;
-      background-color: #267fff;
-      color: #FFF;
-      box-shadow: 0 0 0 1px #267fff;
-      border-radius: 10px;
-      padding: 10px;
-
-      .right-text {
-        color: #FFF;
-      }
-    }
-
-    .left-btns, .right-btns {
-      display: flex;
-      flex-direction: row;
-      margin-top: 8px;
-    }
-  }
-
-  // 复制、删除按钮
-  .btn-cus {
-    display: flex;
-    background-color: transparent;
-    align-items: center;
-
-    .btn-image {
-      height: 20px;
-      margin-right: 5px;
-    }
-
-    .btn-cus-text {
-      color: #757575;
-    }
-  }
-
-  .btn-cus:hover {
-    cursor: pointer;
-  }
-
-  .btn-cus:focus {
-    background-color: #8c939d;
-  }
-}
 
 </style>
