@@ -147,11 +147,13 @@
         </div>
       </el-main>
       <el-footer class="footer-container">
-        <textarea class="prompt-input" v-model="prompt" placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"></textarea>
-        <div class="prompt-btns">
-          <el-switch/>
-          <el-button type="primary" size="default" @click="onSend()">发送</el-button>
-        </div>
+        <form @submit.prevent="onSend" class="prompt-from">
+          <textarea class="prompt-input" v-model="prompt" @keyup.enter="onSend" placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"></textarea>
+          <div class="prompt-btns">
+            <el-switch/>
+            <el-button type="primary" size="default" @click="onSend()">发送</el-button>
+          </div>
+        </form>
       </el-footer>
     </el-container>
   </el-container>
@@ -162,11 +164,23 @@ import {ChatMessageApi, ChatMessageSendVO, ChatMessageVO} from "@/api/ai/chat/me
 import {formatDate} from "@/utils/formatTime";
 import {useClipboard} from '@vueuse/core'
 
+// 初始化 copy 到粘贴板
+const { copy } = useClipboard();
+
 const searchName = ref('') // 查询的内容
 const conversationId = ref('1781604279872581648') // 对话id
 const conversationInProgress = ref<Boolean>() // 对话进行中
+const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
+
 const prompt = ref<string>() // prompt
-const promptRes = ref<string>() // prompt res
+
+// 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
+const messageContainer: any = ref(null);
+const isScrolling = ref(false)//用于判断用户是否在滚动
+
+/** chat message 列表 */
+defineOptions({ name: 'chatMessageList' })
+const list = ref<ChatMessageVO[]>([]) // 列表的数据
 
 const changeConversation = (conversation) => {
   console.log(conversation)
@@ -190,81 +204,70 @@ const searchConversation = () => {
 
 /** send */
 const onSend = async () => {
+  const content = prompt.value;
+  // 清空输入框
+  prompt.value = ''
   const requestParams = {
     conversationId: conversationId.value,
-    content: prompt.value,
+    content: content,
   } as unknown as ChatMessageSendVO
   // 添加 message
   const userMessage = await ChatMessageApi.add(requestParams) as unknown as ChatMessageVO;
   list.value.push(userMessage)
   // 滚动到住下面
   scrollToBottom();
-  //
+  // stream
   await doSendStream(userMessage)
+  //
 }
 
 const doSendStream = async (userMessage: ChatMessageVO) => {
   // 创建AbortController实例，以便中止请求
-  const ctrl = new AbortController()
-  // 发送 event stream
-  let isFirstMessage = true
-  ChatMessageApi.sendStream(userMessage.id, ctrl,(message) => {
-    console.log('message', message)
-    const data = JSON.parse(message.data) as unknown as ChatMessageVO
-    // 如果没有内容结束链接
-    if (data.content === '') {
-      ctrl.abort()
-    }
-    // 首次返回需要添加一个 message 到页面，后面的都是更新
-    if (isFirstMessage) {
-      isFirstMessage = false;
-      list.value.push(data)
-    } else {
-      const lastMessage = list.value[list.value.length - 1];
-      lastMessage.content = lastMessage.content + data.content
-      list.value[list.value - 1] = lastMessage
-    }
-    // 滚动到最下面
-    scrollToBottom();
-  }, (error) => {
-    console.log('error', error)
-  }, () => {
-    console.log('close')
-  })
+  conversationInAbortController.value = new AbortController()
+  // 标记对话进行中
+  conversationInProgress.value = true
+  try {
+    // 发送 event stream
+    let isFirstMessage = true
+    ChatMessageApi.sendStream(userMessage.id, conversationInAbortController.value,(message) => {
+      console.log('message', message)
+      const data = JSON.parse(message.data) as unknown as ChatMessageVO
+      // 如果没有内容结束链接
+      if (data.content === '') {
+        // 标记对话结束
+        conversationInProgress.value = false;
+        // 结束 stream 对话
+        conversationInAbortController.value.abort()
+      }
+      // 首次返回需要添加一个 message 到页面，后面的都是更新
+      if (isFirstMessage) {
+        isFirstMessage = false;
+        list.value.push(data)
+      } else {
+        const lastMessage = list.value[list.value.length - 1];
+        lastMessage.content = lastMessage.content + data.content
+        list.value[list.value - 1] = lastMessage
+      }
+      // 滚动到最下面
+      scrollToBottom();
+    }, (error) => {
+      console.log('error', error)
+      // 标记对话结束
+      conversationInProgress.value = false;
+      // 结束 stream 对话
+      conversationInAbortController.value.abort()
+    }, () => {
+      console.log('close')
+      // 标记对话结束
+      conversationInProgress.value = false;
+      // 结束 stream 对话
+      conversationInAbortController.value.abort()
+    })
+  } finally {
 
-  // // 创建一个正在进行中的message
-  // const chatMessage = {
-  //   id: null, // 编号
-  //   conversationId: conversationId.value, // 会话编号
-  //   type: 'system', // 消息类型
-  //   userId: null, // 用户编号
-  //   roleId: null, // 角色编号
-  //   model: null, // 模型标志
-  //   modelId: null, // 模型编号
-  //   content: '加载中...', // 聊天内容
-  //   tokens: null, // 消耗 Token 数量
-  //   createTime: new Date(), // 创建时间
-  // } as unknown as ChatMessageVO
-  // list.value.push(chatMessage)
-  // // 滚动到最下面
-  // scrollToBottom();
+  }
+
 }
-
-/** Prompt */
-const onPromptInput = async (e) => {
-  console.log(e.data)
-  // prompt.value = e.data
-}
-
-
-// 初始化 copy 到粘贴板
-const { copy, isSupported } = useClipboard();
-/** chat message 列表 */
-defineOptions({ name: 'chatMessageList' })
-const list = ref<ChatMessageVO[]>([]) // 列表的数据
-
-// 对话id TODO @范 先写死
-const content = '苹果是什么颜色？'
 
 /** 查询列表 */
 const messageList = async () => {
@@ -277,9 +280,7 @@ const messageList = async () => {
   } finally {
   }
 }
-// ref
-const messageContainer: any = ref(null);
-const isScrolling = ref(false)//用于判断用户是否在滚动
+
 
 function scrollToBottom() {
   nextTick(() => {
@@ -321,6 +322,10 @@ const onDelete = async (id) => {
     message: '删除成功!',
     type: 'success',
   })
+  // tip：如果 stream 进行中的 message，就需要调用 controller 结束
+  if (conversationInAbortController.value) {
+    conversationInAbortController.value.abort()
+  }
   // 重新获取 message 列表
   await messageList();
 }
@@ -525,8 +530,8 @@ onMounted(async () => {
       display: flex;
       flex-direction: column;
       overflow-wrap: break-word;
-      background-color: #e4e4e4;
-      box-shadow: 0 0 0 1px #e4e4e4;
+      background-color: rgba(228, 228, 228, 0.80);
+      box-shadow: 0 0 0 1px rgba(228, 228, 228, 0.80);
       border-radius: 10px;
       padding: 10px 10px 5px 10px;
 
@@ -587,10 +592,18 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   height: auto;
-  border: 1px solid #e3e3e3;
-  border-radius: 10px;
-  margin: 20px 20px;
-  padding: 9px 10px;
+  margin: 0;
+  padding: 0;
+
+  .prompt-from {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    border: 1px solid #e3e3e3;
+    border-radius: 10px;
+    margin: 20px 20px;
+    padding: 9px 10px;
+  }
 
   .prompt-input {
     height: 80px;
