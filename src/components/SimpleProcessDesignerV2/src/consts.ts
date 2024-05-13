@@ -47,7 +47,21 @@ export enum NodeType {
   INCLUSIVE_NODE_JOIN = 8
 }
 
-// 候选人策略 （用于审批节点。抄送节点
+// 条件配置类型 （ 用于条件节点配置 ）
+export enum ConditionConfigType  {
+
+   /**
+   * 条件表达式
+   */
+  EXPRESSION = 1,
+
+   /**
+   * 条件规则
+   */
+  RULE = 2
+}
+
+// 候选人策略 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
   /**
    * 指定角色
@@ -96,6 +110,31 @@ export type SimpleFlowNode = {
   conditionNodes?: SimpleFlowNode[]
 }
 
+// 条件组
+export type ConditionGroup =  {
+  // 条件组的逻辑关系是否为且
+  and : boolean,
+  // 条件数组
+  conditions: Condition[]
+}
+
+// 条件
+export type Condition = {
+  // 条件规则的逻辑关系是否为且
+  and : boolean,
+  rules: ConditionRule[]
+}
+
+// 条件规则
+export type ConditionRule = {
+  type : number,
+  opName: string,
+  opCode: string,
+  leftSide: string,
+  rightSide: string
+}
+
+
 export const NODE_DEFAULT_TEXT = new Map<number,string>()
 NODE_DEFAULT_TEXT.set(NodeType.USER_TASK_NODE, '请配置审批人')
 NODE_DEFAULT_TEXT.set(NodeType.COPY_TASK_NODE, '请配置抄送人')
@@ -115,5 +154,35 @@ export const APPROVE_METHODS: DictDataVO [] = [
 ]
 
 export const CONDITION_CONFIG_TYPES: DictDataVO [] = [
-  { label: '自定义条件表达式', value: 1 }
+  { label: '条件表达式', value: 1 },
+  { label: '条件规则', value: 2 }
+]
+
+// 比较运算符
+export const COMPARISON_OPERATORS : DictDataVO = [
+  {
+    value: '==',
+    label: '等于',
+  },
+  {
+    value: '!=',
+    label: '不等于',
+  }
+  // 待完善
+  // {
+  //   value: '>',
+  //   label: '大于',
+  // },
+  // {
+  //   value: '>=',
+  //   label: '大于等于',
+  // },
+  // {
+  //   value: '<',
+  //   label: '小于',
+  // },
+  // {
+  //   value: '<=',
+  //   label: '小于等于',
+  // }
 ]
