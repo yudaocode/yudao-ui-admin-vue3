@@ -167,22 +167,21 @@ export const COMPARISON_OPERATORS : DictDataVO = [
   {
     value: '!=',
     label: '不等于',
+  },
+  {
+    value: '>',
+    label: '大于',
+  },
+  {
+    value: '>=',
+    label: '大于等于',
+  },
+  {
+    value: '<',
+    label: '小于',
+  },
+  {
+    value: '<=',
+    label: '小于等于',
   }
-  // 待完善
-  // {
-  //   value: '>',
-  //   label: '大于',
-  // },
-  // {
-  //   value: '>=',
-  //   label: '大于等于',
-  // },
-  // {
-  //   value: '<',
-  //   label: '小于',
-  // },
-  // {
-  //   value: '<=',
-  //   label: '小于等于',
-  // }
 ]

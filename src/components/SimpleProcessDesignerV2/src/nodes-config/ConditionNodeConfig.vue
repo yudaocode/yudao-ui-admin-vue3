@@ -4,7 +4,7 @@
     v-model="settingVisible"
     :show-close="false"
     :size="588"
-    :before-close="handleClose"
+    :before-close=" handleClose"
    >
    <template #header>
       <div class="config-header">
@@ -216,12 +216,13 @@ const closeDrawer = () => {
   settingVisible.value = false
 }
 
-const handleClose = async (done: (cancel?: boolean) => void) => {
-  if( await saveConfig()){
-    done(false); // 传入 false 阻止关闭  
-  }else {
-    done();
-  }
+const handleClose = async  (done: (cancel?: boolean) => void) => {
+  const isSuccess = await saveConfig();
+  if ( !isSuccess) {
+      done(true); // 传入 true 阻止关闭  
+    } else {
+      done();
+    }
 }
 // 表单校验规则
 const formRules = reactive({
@@ -231,13 +232,12 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 
 // 保存配置
-const saveConfig = async () => {
+const saveConfig =  async () => {
   if (!currentNode.value.attributes.defaultFlow) {
-      // 校验表单
+    // 校验表单
     if (!formRef) return false
     const valid = await formRef.value.validate()
     if (!valid) return false
-    
     const showText = getShowText();
     if(!showText){
       return false;
@@ -269,7 +269,7 @@ const getShowText = () : string => {
     const conditionGroup = conditionGroups.value.conditions.map( item => {
       return  '(' + item.rules.map( rule => {
           if ( rule.leftSide  && rule.rightSide) {
-            return getFieldTitle(rule.leftSide) + " " + rule.opName + " " + rule.rightSide 
+            return getFieldTitle(rule.leftSide) + " " + getOpName(rule.opCode) + " " + rule.rightSide 
           }else {
             // 又一条规则不完善。提示错误
             warningMesg = '请完善条件规则'
@@ -368,6 +368,11 @@ const getFieldsInfo = () => {
 const getFieldTitle = (field:string) : string => {
   const item = fieldsInfo.find( item => item.field === field)
   return item?.title;
+}
+
+const getOpName = (opCode: string) : string => {
+  const opName = COMPARISON_OPERATORS.find( item => item.value === opCode)
+  return opName?.label
 }
 
 </script>
