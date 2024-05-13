@@ -98,11 +98,12 @@
                   <el-text class="time">{{formatDate(item.createTime)}}</el-text>
                 </div>
                 <div class="left-text-container">
-                  <div class="left-text" v-html="item.content"></div>
+<!--                  <div class="left-text md-preview" v-html="item.content"></div>-->
+                  <mdPreview :content="item.content" :delay="false" />
                 </div>
                 <div class="left-btns">
                   <div class="btn-cus" @click="noCopy(item.content)">
-                    <img class="btn-image" src="@/assets/ai/copy.svg"/>
+                    <img class="btn-image" src="../../../assets/ai/copy.svg"/>
                     <el-text class="btn-cus-text">复制</el-text>
                   </div>
                   <div class="btn-cus" style="margin-left: 20px;" @click="onDelete(item.id)">
@@ -124,7 +125,7 @@
                   <el-text class="time">{{formatDate(item.createTime)}}</el-text>
                 </div>
                 <div class="right-text-container">
-                  <div class="right-text" v-html="item.content"></div>
+                  <div class="right-text">{{item.content}}</div>
                 </div>
                 <div class="right-btns">
                   <div class="btn-cus"  @click="noCopy(item.content)">
@@ -161,21 +162,30 @@
 </template>
 
 <script setup lang="ts">
-import 'highlight.js/styles/idea.css'
 import {ChatMessageApi, ChatMessageSendVO, ChatMessageVO} from "@/api/ai/chat/message"
 import {formatDate} from "@/utils/formatTime"
 import {useClipboard} from '@vueuse/core'
-import { marked } from 'marked'
 
-
+const conversationList = [
+  {
+    id: 1,
+    title: '测试标题',
+    avatar:
+      'http://test.yudao.iocoder.cn/96c787a2ce88bf6d0ce3cd8b6cf5314e80e7703cd41bf4af8cd2e2909dbd6b6d.png'
+  },
+  {
+    id: 2,
+    title: '测试对话',
+    avatar:
+      'http://test.yudao.iocoder.cn/96c787a2ce88bf6d0ce3cd8b6cf5314e80e7703cd41bf4af8cd2e2909dbd6b6d.png'
+  }
+]
 // 初始化 copy 到粘贴板
 const { copy } = useClipboard();
 
 const searchName = ref('') // 查询的内容
 const conversationId = ref('1781604279872581648') // 对话id
-const conversationInProgress = ref<Boolean>() // 对话进行中
-conversationInProgress.value = false
-
+const conversationInProgress = ref<false>() // 对话进行中
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
 
 const prompt = ref<string>() // prompt
@@ -185,7 +195,7 @@ const messageContainer: any = ref(null);
 const isScrolling = ref(false)//用于判断用户是否在滚动
 
 /** chat message 列表 */
-defineOptions({ name: 'chatMessageList' })
+// defineOptions({ name: 'chatMessageList' })
 const list = ref<ChatMessageVO[]>([]) // 列表的数据
 
 const changeConversation = (conversation) => {
@@ -257,7 +267,7 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
         const lastMessage = list.value[list.value.length - 1];
         lastMessage.content = lastMessage.content + data.content
         // markdown
-        lastMessage.content = marked(lastMessage.content)
+        // lastMessage.content = marked(lastMessage.content)
         list.value[list.value - 1] = lastMessage
       }
       // 滚动到最下面
@@ -290,7 +300,8 @@ const messageList = async () => {
     // 处理 markdown
     // marked(this.markdownText)
     res.map(item => {
-      item.content = marked(item.content)
+      // item.content = marked(item.content)
+      // item.content = md.render(item.content)
     })
 
     list.value = res;
@@ -365,6 +376,14 @@ onMounted(async () => {
   // await nextTick
   // 监听滚动事件，判断用户滚动状态
   messageContainer.value.addEventListener('scroll', handleScroll)
+  //
+  // marked.use({
+  //   async: false,
+  //   pedantic: false,
+  //   gfm: true,
+  //   tokenizer: new Tokenizer(),
+  //   renderer: renderer,
+  // });
 })
 
 
@@ -567,22 +586,25 @@ onMounted(async () => {
 
       .left-text {
         color: #393939;
-        //font-size: 14px;
+        font-size: 0.95rem;
       }
     }
 
     .right-text-container {
       display: flex;
-      flex-direction: column;
-      overflow-wrap: break-word;
-      background-color: #267fff;
-      color: #FFF;
-      box-shadow: 0 0 0 1px #267fff;
-      border-radius: 10px;
-      padding: 10px;
+      flex-direction: row-reverse;
 
       .right-text {
+        font-size: 0.95rem;
         color: #FFF;
+        display: inline;
+        background-color: #267fff;
+        color: #FFF;
+        box-shadow: 0 0 0 1px #267fff;
+        border-radius: 10px;
+        padding: 10px;
+        width: auto;
+        overflow-wrap: break-word;
       }
     }
 
