@@ -162,7 +162,7 @@ const formType = inject<Ref<number>>('formType') // 表单类型
 
 const conditionConfigTypes = computed( ()=> {
   return CONDITION_CONFIG_TYPES.filter(item => {
-    // 业务表单暂时去掉条件规则 选项
+    // 业务表单暂时去掉条件规则选项
     if (formType?.value !== 10 ){
       return item.value === 1
     } else {
@@ -350,9 +350,10 @@ const deleteConditionRule = (condition:Condition, idx:number) => {
   condition.rules.splice(idx, 1)
 }
 
-const fieldsInfo : any[] = [];
+let fieldsInfo : any[] = [];
 
 const getFieldsInfo = () => {
+  fieldsInfo = [];
   if(formFields){
     formFields.value.forEach((fieldStr: string) => {
       const { field, title, type } = JSON.parse(fieldStr)
