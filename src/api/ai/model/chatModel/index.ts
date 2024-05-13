@@ -21,6 +21,16 @@ export const ChatModelApi = {
     return await request.get({ url: `/ai/chat-model/page`, params })
   },
 
+  // 获得聊天模型列表
+  getChatModelSimpleList: async (status?: number) => {
+    return await request.get({
+      url: `/ai/chat-model/simple-list`,
+      params: {
+        status
+      }
+    })
+  },
+
   // 查询聊天模型详情
   getChatModel: async (id: number) => {
     return await request.get({ url: `/ai/chat-model/get?id=` + id })

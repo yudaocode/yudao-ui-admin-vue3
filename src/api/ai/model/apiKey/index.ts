@@ -18,7 +18,7 @@ export const ApiKeyApi = {
   },
 
   // 获得 API 密钥列表
-  getApiKeyList: async () => {
+  getApiKeySimpleList: async () => {
     return await request.get({ url: `/ai/api-key/simple-list` })
   },
 

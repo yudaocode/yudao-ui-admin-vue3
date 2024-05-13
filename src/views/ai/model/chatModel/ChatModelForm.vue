@@ -33,10 +33,10 @@
       <el-form-item label="模型标识" prop="model">
         <el-input v-model="formData.model" placeholder="请输入模型标识" />
       </el-form-item>
-      <el-form-item label="排序" prop="sort">
-        <el-input v-model="formData.sort" placeholder="请输入排序" />
+      <el-form-item label="模型排序" prop="sort">
+        <el-input-number v-model="formData.sort" placeholder="请输入模型排序" class="!w-1/1" />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
+      <el-form-item label="开启状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -118,7 +118,7 @@ const open = async (type: string, id?: number) => {
     }
   }
   // 获得下拉数据
-  apiKeyList.value = await ApiKeyApi.getApiKeyList(CommonStatusEnum.ENABLE)
+  apiKeyList.value = await ApiKeyApi.getApiKeySimpleList(CommonStatusEnum.ENABLE)
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
