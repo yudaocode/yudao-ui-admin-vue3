@@ -88,18 +88,18 @@
           <div class="chat-list" v-for="(item, index) in list" :key="index">
             <!--  靠左 message  -->
             <div class="left-message message-item" v-if="item.type === 'system'">
-              <div class="avatar" >
+              <div class="avatar">
                 <el-avatar
                   src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
                 />
               </div>
               <div class="message">
                 <div>
-                  <el-text class="time">{{formatDate(item.createTime)}}</el-text>
+                  <el-text class="time">{{ formatDate(item.createTime) }}</el-text>
                 </div>
-                <div class="left-text-container">
-<!--                  <div class="left-text md-preview" v-html="item.content"></div>-->
-                  <mdPreview :content="item.content" :delay="false" />
+                <div class="left-text-container" ref="markdownViewRef">
+                  <div class="left-text markdown-view" v-html="item.content"></div>
+                  <!--                  <mdPreview :content="item.content" :delay="false" />-->
                 </div>
                 <div class="left-btns">
                   <div class="btn-cus" @click="noCopy(item.content)">
@@ -122,13 +122,13 @@
               </div>
               <div class="message">
                 <div>
-                  <el-text class="time">{{formatDate(item.createTime)}}</el-text>
+                  <el-text class="time">{{ formatDate(item.createTime) }}</el-text>
                 </div>
                 <div class="right-text-container">
-                  <div class="right-text">{{item.content}}</div>
+                  <div class="right-text">{{ item.content }}</div>
                 </div>
                 <div class="right-btns">
-                  <div class="btn-cus"  @click="noCopy(item.content)">
+                  <div class="btn-cus" @click="noCopy(item.content)">
                     <img class="btn-image" src="@/assets/ai/copy.svg"/>
                     <el-text class="btn-cus-text">复制</el-text>
                   </div>
@@ -145,13 +145,16 @@
       </el-main>
       <el-footer class="footer-container">
         <form @submit.prevent="onSend" class="prompt-from">
-          <textarea class="prompt-input" v-model="prompt" @keyup.enter="onSend" placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"></textarea>
+          <textarea class="prompt-input" v-model="prompt" @keyup.enter="onSend"
+                    placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"></textarea>
           <div class="prompt-btns">
             <el-switch/>
-            <el-button type="primary" size="default" @click="onSend()" :loading="conversationInProgress" v-if="conversationInProgress == false">
-              {{ conversationInProgress ? '进行中' : '发送'}}
+            <el-button type="primary" size="default" @click="onSend()"
+                       :loading="conversationInProgress" v-if="conversationInProgress == false">
+              {{ conversationInProgress ? '进行中' : '发送' }}
             </el-button>
-            <el-button type="danger" size="default" @click="stopStream()" v-if="conversationInProgress == true">
+            <el-button type="danger" size="default" @click="stopStream()"
+                       v-if="conversationInProgress == true">
               停止
             </el-button>
           </div>
@@ -164,7 +167,25 @@
 <script setup lang="ts">
 import {ChatMessageApi, ChatMessageSendVO, ChatMessageVO} from "@/api/ai/chat/message"
 import {formatDate} from "@/utils/formatTime"
-import {useClipboard} from '@vueuse/core'
+import {useClipboard} from "@vueuse/core";
+// 转换 markdown
+import {marked} from 'marked';
+// 代码高亮 https://highlightjs.org/
+import 'highlight.js/styles/vs2015.min.css';
+import hljs from 'highlight.js';
+
+
+// 自定义渲染器
+const renderer = {
+  code(code, language, c) {
+    const highlightHtml = hljs.highlight(code, {language: language, ignoreIllegals: true}).value
+    const copyHtml = `<div id="copy" data-copy='${code}' style="position: absolute; right: 10px; top: 5px; color: #fff;cursor: pointer;">复制</div>`
+    return `<pre>${copyHtml}<code class="hljs">${highlightHtml}</code></pre>`
+  },
+};
+marked.use({
+  renderer: renderer,
+})
 
 const conversationList = [
   {
@@ -181,11 +202,12 @@ const conversationList = [
   }
 ]
 // 初始化 copy 到粘贴板
-const { copy } = useClipboard();
+const {copy} = useClipboard();
 
 const searchName = ref('') // 查询的内容
 const conversationId = ref('1781604279872581648') // 对话id
-const conversationInProgress = ref<false>() // 对话进行中
+const conversationInProgress = ref<Boolean>() // 对话进行中
+conversationInProgress.value = false
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
 
 const prompt = ref<string>() // prompt
@@ -249,7 +271,8 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
   try {
     // 发送 event stream
     let isFirstMessage = true
-    ChatMessageApi.sendStream(userMessage.id, conversationInAbortController.value,(message) => {
+    let content = ''
+    ChatMessageApi.sendStream(userMessage.id, conversationInAbortController.value, (message) => {
       console.log('message', message)
       const data = JSON.parse(message.data) as unknown as ChatMessageVO
       // 如果没有内容结束链接
@@ -264,10 +287,9 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
         isFirstMessage = false;
         list.value.push(data)
       } else {
+        content = content + data.content
         const lastMessage = list.value[list.value.length - 1];
-        lastMessage.content = lastMessage.content + data.content
-        // markdown
-        // lastMessage.content = marked(lastMessage.content)
+        lastMessage.content = marked(content) as unknown as string
         list.value[list.value - 1] = lastMessage
       }
       // 滚动到最下面
@@ -301,7 +323,9 @@ const messageList = async () => {
     // marked(this.markdownText)
     res.map(item => {
       // item.content = marked(item.content)
-      // item.content = md.render(item.content)
+      if (item.type !== 'user') {
+        item.content = marked(item.content)
+      }
     })
 
     list.value = res;
@@ -376,7 +400,17 @@ onMounted(async () => {
   // await nextTick
   // 监听滚动事件，判断用户滚动状态
   messageContainer.value.addEventListener('scroll', handleScroll)
-  //
+  // 添加 copy 监听
+  messageContainer.value.addEventListener('click', (e: any) => {
+    console.log(e)
+    if (e.target.id === 'copy') {
+      copy(e.target?.dataset?.copy)
+      ElMessage({
+        message: '复制成功!',
+        type: 'success',
+      })
+    }
+  })
   // marked.use({
   //   async: false,
   //   pedantic: false,
@@ -679,6 +713,158 @@ onMounted(async () => {
     justify-content: space-between;
     padding-bottom: 0px;
     padding-top: 5px;
+  }
+}
+</style>
+
+<style lang="scss">
+.markdown-view {
+  font-family: PingFang SC;
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.6rem;
+  letter-spacing: 0em;
+  text-align: left;
+  color: #3B3E55;
+  max-width: 100%;
+
+  pre {
+    position: relative;
+  }
+
+  pre code.hljs {
+    width: auto;
+  }
+
+  code.hljs {
+    border-radius: 6px;
+    padding-top: 20px;
+    width: auto;
+    @media screen and (min-width: 1536px) {
+      width: 960px;
+    }
+
+    @media screen and (max-width: 1536px) and (min-width: 1024px) {
+      width: calc(100vw - 400px - 64px - 32px * 2);
+    }
+
+    @media screen and (max-width: 1024px) and (min-width: 768px) {
+      width: calc(100vw - 32px * 2);
+    }
+
+    @media screen and (max-width: 768px) {
+      width: calc(100vw - 16px * 2);
+    }
+  }
+
+  p,
+  code.hljs {
+    margin-bottom: 16px;
+  }
+
+  p {
+    margin-bottom: 1rem !important;
+  }
+
+  /* 标题通用格式 */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-G900);
+    margin: 24px 0 8px;
+    font-weight: 600;
+  }
+
+  h1 {
+    font-size: 22px;
+    line-height: 32px;
+  }
+
+  h2 {
+    font-size: 20px;
+    line-height: 30px;
+  }
+
+  h3 {
+    font-size: 18px;
+    line-height: 28px;
+  }
+
+  h4 {
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  h5 {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  h6 {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  /* 列表（有序，无序） */
+  ul,
+  ol {
+    margin: 0 0 8px 0;
+    padding: 0;
+    font-size: 16px;
+    line-height: 24px;
+    color: #3b3e55; // var(--color-CG600);
+  }
+
+  li {
+    margin: 4px 0 0 20px;
+    margin-bottom: 1rem;
+  }
+
+  ol > li {
+    list-style-type: decimal;
+    margin-bottom: 1rem;
+    // 表达式,修复有序列表序号展示不全的问题
+    // &:nth-child(n + 10) {
+    //     margin-left: 30px;
+    // }
+
+    // &:nth-child(n + 100) {
+    //     margin-left: 30px;
+    // }
+  }
+
+  ul > li {
+    list-style-type: disc;
+    font-size: 16px;
+    line-height: 24px;
+    margin-right: 11px;
+    margin-bottom: 1rem;
+    color: #3b3e55; // var(--color-G900);
+  }
+
+  ol ul,
+  ol ul > li,
+  ul ul,
+  ul ul li {
+    // list-style: circle;
+    font-size: 16px;
+    list-style: none;
+    margin-left: 6px;
+    margin-bottom: 1rem;
+  }
+
+  ul ul ul,
+  ul ul ul li,
+  ol ol,
+  ol ol > li,
+  ol ul ul,
+  ol ul ul > li,
+  ul ol,
+  ul ol > li {
+    list-style: square;
   }
 }
 </style>
