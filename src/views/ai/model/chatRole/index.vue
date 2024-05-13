@@ -59,13 +59,14 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="角色编号" align="center" prop="id" />
-      <el-table-column label="用户编号" align="center" prop="userId" />
-      <el-table-column label="模型编号" align="center" prop="modelId" />
       <el-table-column label="角色名称" align="center" prop="name" />
-      <el-table-column label="角色头像" align="center" prop="avatar" />
+      <el-table-column label="绑定模型" align="center" prop="modelName" />
+      <el-table-column label="角色头像" align="center" prop="avatar">
+        <template #default="scope">
+          <el-image :src="scope?.row.avatar" class="w-32px h-32px" />
+        </template>
+      </el-table-column>
       <el-table-column label="角色类别" align="center" prop="category" />
-      <el-table-column label="角色排序" align="center" prop="sort" />
       <el-table-column label="角色描述" align="center" prop="description" />
       <el-table-column label="角色欢迎语" align="center" prop="welcomeMessage" />
       <el-table-column label="角色上下文" align="center" prop="systemMessage" />
@@ -79,13 +80,7 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
+      <el-table-column label="角色排序" align="center" prop="sort" />
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button
@@ -122,7 +117,6 @@
 
 <script setup lang="ts">
 import { getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
 import { ChatRoleApi, ChatRoleVO } from '@/api/ai/model/chatRole'
 import ChatRoleForm from './ChatRoleForm.vue'
 
@@ -140,7 +134,7 @@ const queryParams = reactive({
   pageSize: 10,
   name: undefined,
   category: undefined,
-  publicStatus: undefined
+  publicStatus: true
 })
 const queryFormRef = ref() // 搜索的表单
 

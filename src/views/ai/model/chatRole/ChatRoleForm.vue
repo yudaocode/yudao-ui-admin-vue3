@@ -7,29 +7,37 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="模型编号" prop="modelId">
-        <el-input v-model="formData.modelId" placeholder="请输入模型编号" />
-      </el-form-item>
       <el-form-item label="角色名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入角色名称" />
       </el-form-item>
       <el-form-item label="角色头像" prop="avatar">
-        <el-input v-model="formData.avatar" placeholder="请输入角色头像" />
+        <UploadImg v-model="formData.avatar" height="60px" width="60px" />
+      </el-form-item>
+      <el-form-item label="绑定模型" prop="modelId">
+        <el-select v-model="formData.modelId" placeholder="请选择模型" clearable>
+          <el-option
+            v-for="chatModel in chatModelList"
+            :key="chatModel.id"
+            :label="chatModel.name"
+            :value="chatModel.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="角色类别" prop="category">
         <el-input v-model="formData.category" placeholder="请输入角色类别" />
       </el-form-item>
-      <el-form-item label="角色排序" prop="sort">
-        <el-input v-model="formData.sort" placeholder="请输入角色排序" />
-      </el-form-item>
       <el-form-item label="角色描述" prop="description">
-        <Editor v-model="formData.description" height="150px" />
+        <el-input type="textarea" v-model="formData.description" placeholder="请输入角色描述" />
       </el-form-item>
       <el-form-item label="角色欢迎语" prop="welcomeMessage">
-        <el-input v-model="formData.welcomeMessage" placeholder="请输入角色欢迎语" />
+        <el-input
+          type="textarea"
+          v-model="formData.welcomeMessage"
+          placeholder="请输入角色欢迎语"
+        />
       </el-form-item>
       <el-form-item label="角色上下文" prop="systemMessage">
-        <el-input v-model="formData.systemMessage" placeholder="请输入角色上下文" />
+        <el-input type="textarea" v-model="formData.systemMessage" placeholder="请输入角色上下文" />
       </el-form-item>
       <el-form-item label="是否公开" prop="publicStatus">
         <el-radio-group v-model="formData.publicStatus">
@@ -42,7 +50,10 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="状态" prop="status">
+      <el-form-item label="角色排序" prop="sort">
+        <el-input-number v-model="formData.sort" placeholder="请输入角色排序" class="!w-1/1" />
+      </el-form-item>
+      <el-form-item label="开启状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -63,6 +74,8 @@
 <script setup lang="ts">
 import { getIntDictOptions, getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ChatRoleApi, ChatRoleVO } from '@/api/ai/model/chatRole'
+import { CommonStatusEnum } from '@/utils/constants'
+import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
 
 /** AI 聊天角色 表单 */
 defineOptions({ name: 'ChatRoleForm' })
@@ -84,8 +97,8 @@ const formData = ref({
   description: undefined,
   welcomeMessage: undefined,
   systemMessage: undefined,
-  publicStatus: undefined,
-  status: undefined
+  publicStatus: true,
+  status: CommonStatusEnum.ENABLE
 })
 const formRules = reactive({
   name: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }],
@@ -98,6 +111,7 @@ const formRules = reactive({
   publicStatus: [{ required: true, message: '是否公开不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const chatModelList = ref([] as ChatModelVO[]) // 聊天模型列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -114,6 +128,8 @@ const open = async (type: string, id?: number) => {
       formLoading.value = false
     }
   }
+  // 获得下拉数据
+  chatModelList.value = await ChatModelApi.getChatModelSimpleList(CommonStatusEnum.ENABLE)
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -153,8 +169,8 @@ const resetForm = () => {
     description: undefined,
     welcomeMessage: undefined,
     systemMessage: undefined,
-    publicStatus: undefined,
-    status: undefined
+    publicStatus: true,
+    status: CommonStatusEnum.ENABLE
   }
   formRef.value?.resetFields()
 }

@@ -109,7 +109,6 @@
 </template>
 
 <script setup lang="ts">
-import { dateFormatter } from '@/utils/formatTime'
 import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
 import ChatModelForm from './ChatModelForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
@@ -181,6 +180,6 @@ const handleDelete = async (id: number) => {
 onMounted(async () => {
   getList()
   // 获得下拉数据
-  apiKeyList.value = await ApiKeyApi.getApiKeyList()
+  apiKeyList.value = await ApiKeyApi.getApiKeySimpleList()
 })
 </script>
