@@ -98,9 +98,7 @@
                   <el-text class="time">{{formatDate(item.createTime)}}</el-text>
                 </div>
                 <div class="left-text-container">
-                  <el-text class="left-text">
-                    {{item.content}}
-                  </el-text>
+                  <div class="left-text" v-html="item.content"></div>
                 </div>
                 <div class="left-btns">
                   <div class="btn-cus" @click="noCopy(item.content)">
@@ -126,9 +124,7 @@
                   <el-text class="time">{{formatDate(item.createTime)}}</el-text>
                 </div>
                 <div class="right-text-container">
-                  <el-text class="right-text">
-                    {{item.content}}
-                  </el-text>
+                  <div class="right-text" v-html="item.content"></div>
                 </div>
                 <div class="right-btns">
                   <div class="btn-cus"  @click="noCopy(item.content)">
@@ -165,9 +161,12 @@
 </template>
 
 <script setup lang="ts">
-import {ChatMessageApi, ChatMessageSendVO, ChatMessageVO} from "@/api/ai/chat/message";
-import {formatDate} from "@/utils/formatTime";
+import 'highlight.js/styles/idea.css'
+import {ChatMessageApi, ChatMessageSendVO, ChatMessageVO} from "@/api/ai/chat/message"
+import {formatDate} from "@/utils/formatTime"
 import {useClipboard} from '@vueuse/core'
+import { marked } from 'marked'
+
 
 // 初始化 copy 到粘贴板
 const { copy } = useClipboard();
@@ -257,6 +256,8 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       } else {
         const lastMessage = list.value[list.value.length - 1];
         lastMessage.content = lastMessage.content + data.content
+        // markdown
+        lastMessage.content = marked(lastMessage.content)
         list.value[list.value - 1] = lastMessage
       }
       // 滚动到最下面
@@ -285,7 +286,15 @@ const messageList = async () => {
   try {
     // 获取列表数据
     const res = await ChatMessageApi.messageList(conversationId.value)
+
+    // 处理 markdown
+    // marked(this.markdownText)
+    res.map(item => {
+      item.content = marked(item.content)
+    })
+
     list.value = res;
+
     // 滚动到最下面
     scrollToBottom();
   } finally {
@@ -558,6 +567,7 @@ onMounted(async () => {
 
       .left-text {
         color: #393939;
+        //font-size: 14px;
       }
     }
 
