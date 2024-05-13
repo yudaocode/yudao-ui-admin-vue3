@@ -151,7 +151,12 @@
           <textarea class="prompt-input" v-model="prompt" @keyup.enter="onSend" placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"></textarea>
           <div class="prompt-btns">
             <el-switch/>
-            <el-button type="primary" size="default" @click="onSend()">发送</el-button>
+            <el-button type="primary" size="default" @click="onSend()" :loading="conversationInProgress" v-if="conversationInProgress == false">
+              {{ conversationInProgress ? '进行中' : '发送'}}
+            </el-button>
+            <el-button type="danger" size="default" @click="stopStream()" v-if="conversationInProgress == true">
+              停止
+            </el-button>
           </div>
         </form>
       </el-footer>
@@ -170,6 +175,8 @@ const { copy } = useClipboard();
 const searchName = ref('') // 查询的内容
 const conversationId = ref('1781604279872581648') // 对话id
 const conversationInProgress = ref<Boolean>() // 对话进行中
+conversationInProgress.value = false
+
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
 
 const prompt = ref<string>() // prompt
@@ -204,6 +211,10 @@ const searchConversation = () => {
 
 /** send */
 const onSend = async () => {
+  // 进行中不允许发送
+  if (conversationInProgress.value) {
+    return
+  }
   const content = prompt.value;
   // 清空输入框
   prompt.value = ''
@@ -323,11 +334,18 @@ const onDelete = async (id) => {
     type: 'success',
   })
   // tip：如果 stream 进行中的 message，就需要调用 controller 结束
+  stopStream()
+  // 重新获取 message 列表
+  await messageList();
+}
+
+const stopStream = async () => {
+  // tip：如果 stream 进行中的 message，就需要调用 controller 结束
   if (conversationInAbortController.value) {
     conversationInAbortController.value.abort()
   }
-  // 重新获取 message 列表
-  await messageList();
+  // 设置为 false
+  conversationInProgress.value = false
 }
 
 /** 初始化 **/
