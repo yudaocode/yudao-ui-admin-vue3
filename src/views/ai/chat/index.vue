@@ -156,6 +156,9 @@
       <el-footer class="footer-container">
         <form @submit.prevent="onSend" class="prompt-from">
           <textarea class="prompt-input" v-model="prompt" @keyup.enter="onSend"
+                    @input="onPromptInput"
+                    @compositionstart="onCompositionstart"
+                    @compositionend="onCompositionend"
                     placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"></textarea>
           <div class="prompt-btns">
             <el-switch/>
@@ -217,6 +220,7 @@ const conversationList = [
 const {copy} = useClipboard();
 
 const searchName = ref('') // 查询的内容
+const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const conversationId = ref('1781604279872581648') // 对话id
 const conversationInProgress = ref<Boolean>() // 对话进行中
 conversationInProgress.value = false
@@ -227,6 +231,7 @@ const prompt = ref<string>() // prompt
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
 const messageContainer: any = ref(null);
 const isScrolling = ref(false)//用于判断用户是否在滚动
+const isComposing = ref(false) // 判断用户是否在输入
 
 /** chat message 列表 */
 // defineOptions({ name: 'chatMessageList' })
@@ -257,11 +262,22 @@ const searchConversation = () => {
 
 /** send */
 const onSend = async () => {
+  // 判断用户是否在输入
+  if (isComposing.value) {
+    return
+  }
   // 进行中不允许发送
   if (conversationInProgress.value) {
     return
   }
-  const content = prompt.value;
+  const content = prompt.value?.trim();
+  if (content?.length < 2) {
+    ElMessage({
+      message: '请输入内容!',
+      type: 'error',
+    })
+    return
+  }
   // 清空输入框
   prompt.value = ''
   const requestParams = {
@@ -427,6 +443,55 @@ const getModalList = async () => {
   }
 }
 
+// 输入
+const onCompositionstart = () => {
+  console.log('onCompositionstart。。。.')
+  isComposing.value= true
+}
+
+const onCompositionend = () => {
+  // console.log('输入结束...')
+  setTimeout(() => {
+    console.log('输入结束...')
+    isComposing.value = false
+  }, 200)
+}
+
+
+const onPromptInput = (event) => {
+  // 非输入法 输入设置为 true
+  if (!isComposing.value) {
+    // 回车 event data 是 null
+    if (event.data == null) {
+      return
+    }
+    console.log('setTimeout 输入开始...')
+    isComposing.value = true
+  }
+  // 清理定时器
+  if (inputTimeout.value) {
+    clearTimeout(inputTimeout.value)
+  }
+  // 重置定时器
+  inputTimeout.value = setTimeout(() => {
+    console.log('setTimeout 输入结束...')
+    isComposing.value = false
+  }, 400)
+  // isComposing.value= false
+  // setTimeout(() => {
+  //   console.log('输入结束...')
+  //   isComposing.value = false
+  // }, 200)
+  // isComposing.value = event.data && event.data === event.target.value.slice(-1);
+  //
+  // if (isComposing.value) {
+  //   console.log('用户正在使用输入法输入');
+  // } else {
+  //   console.log('用户正在直接输入');
+  // }
+}
+
+
 /** 初始化 **/
 onMounted(async () => {
   // 获取模型
@@ -448,6 +513,7 @@ onMounted(async () => {
       })
     }
   })
+
 })
 
 
