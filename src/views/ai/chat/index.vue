@@ -72,11 +72,11 @@
 <!--          </el-button>-->
           <el-dropdown style="margin-right: 12px;" @command="modalClick" >
             <el-button type="primary">
-              GPT3.5 <Icon icon="ep:setting" style="margin-left: 10px;"/>
+              <span v-html="useModal?.name"></span> <Icon icon="ep:setting" style="margin-left: 10px;"/>
             </el-button>
             <template #dropdown>
               <el-dropdown-menu v-for="(item, index) in modalList" :key="index" >
-                <el-dropdown-item :command="item.model" >{{item.model}}</el-dropdown-item>
+                <el-dropdown-item :command="item" >{{item.name}}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -176,7 +176,8 @@
 
 <script setup lang="ts">
 import {ChatMessageApi, ChatMessageSendVO, ChatMessageVO} from "@/api/ai/chat/message"
-import {ChatModelApi, ChatModelVO } from "@/api/ai/model/chatModel"
+import {ChatConversationApi, ChatConversationUpdateVO} from "@/api/ai/chat/conversation"
+import {ChatModelApi, ChatModelVO} from "@/api/ai/model/chatModel"
 import {formatDate} from "@/utils/formatTime"
 import {useClipboard} from "@vueuse/core";
 // 转换 markdown
@@ -230,6 +231,7 @@ const isScrolling = ref(false)//用于判断用户是否在滚动
 /** chat message 列表 */
 // defineOptions({ name: 'chatMessageList' })
 const list = ref<ChatMessageVO[]>([]) // 列表的数据
+const useModal = ref<ChatModelVO>() // 使用的modal
 const modalList = ref<ChatModelVO[]>([]) // 列表的数据
 
 
@@ -406,12 +408,23 @@ const stopStream = async () => {
 }
 
 const modalClick = async (command) => {
-  console.log('22', command)
+  const update = {
+    id: conversationId.value,
+    modelId: command.id,
+  } as unknown as ChatConversationUpdateVO
+  // 切换 modal
+  useModal.value = command
+  // 更新
+  await ChatConversationApi.update(update)
 }
 
 const getModalList = async () => {
   // 获取模型  as unknown as ChatModelVO
   modalList.value = await ChatModelApi.getChatModelSimpleList(0) as unknown as ChatModelVO[]
+  // 默认选中第一个模型
+  if (modalList.value.length) {
+    useModal.value = modalList.value[0]
+  }
 }
 
 /** 初始化 **/
