@@ -1,7 +1,7 @@
 import request from '@/config/axios'
-import {fetchEventSource} from '@microsoft/fetch-event-source';
-import {getAccessToken} from '@/utils/auth'
-import {config} from '@/config/axios/config'
+import { fetchEventSource } from '@microsoft/fetch-event-source'
+import { getAccessToken } from '@/utils/auth'
+import { config } from '@/config/axios/config'
 
 // 聊天VO
 export interface ChatMessageVO {
@@ -24,26 +24,28 @@ export interface ChatMessageSendVO {
 
 // AI chat 聊天
 export const ChatMessageApi = {
-
   // 消息列表
   messageList: async (conversationId: string) => {
-    return await request.get({ url: `/ai/chat/message/list-by-conversation-id?conversationId=${conversationId}`})
+    return await request.get({
+      url: `/ai/chat/message/list-by-conversation-id?conversationId=${conversationId}`
+    })
   },
 
   // 发送 add 消息
   add: async (data: ChatMessageSendVO) => {
-    return await request.post({ url: `/ai/chat/message/add`, data})
+    return await request.post({ url: `/ai/chat/message/add`, data })
   },
 
   // 发送 send 消息
   send: async (data: ChatMessageSendVO) => {
-    return await request.post({ url: `/ai/chat/message/send`, data})
+    return await request.post({ url: `/ai/chat/message/send`, data })
   },
 
   // 发送 send stream 消息
+  // TODO axios 可以么？ https://apifox.com/apiskills/how-to-create-axios-stream/
   sendStream: async (id: string, ctrl, onMessage, onError, onClose) => {
     const token = getAccessToken()
-    return fetchEventSource(`${ config.base_url}/ai/chat/message/send-stream`, {
+    return fetchEventSource(`${config.base_url}/ai/chat/message/send-stream`, {
       method: 'post',
       headers: {
         'Content-Type': 'application/json',
@@ -51,18 +53,17 @@ export const ChatMessageApi = {
       },
       openWhenHidden: true,
       body: JSON.stringify({
-        id: id,
+        id: id
       }),
       onmessage: onMessage,
-      onerror:onError,
+      onerror: onError,
       onclose: onClose,
-      signal: ctrl.signal,
-    });
+      signal: ctrl.signal
+    })
   },
 
   // 发送 send 消息
   delete: async (id: string) => {
     return await request.delete({ url: `/ai/chat/message/delete?id=${id}` })
-  },
-
+  }
 }

@@ -5,7 +5,7 @@
       <div>
         <!-- 左顶部：新建对话 -->
         <el-button class="w-1/1 btn-new-conversation" type="primary">
-          <Icon icon="ep:plus" class="mr-5px"/>
+          <Icon icon="ep:plus" class="mr-5px" />
           新建对话
         </el-button>
         <!-- 左顶部：搜索对话 -->
@@ -17,7 +17,7 @@
           @keyup="searchConversation"
         >
           <template #prefix>
-            <Icon icon="ep:search"/>
+            <Icon icon="ep:search" />
           </template>
         </el-input>
         <!-- 左中间：对话列表 -->
@@ -32,15 +32,15 @@
               @click="changeConversation(conversation)"
             >
               <div class="title-wrapper">
-                <img class="avatar" :src="conversation.avatar"/>
+                <img class="avatar" :src="conversation.avatar" />
                 <span class="title">{{ conversation.title }}</span>
               </div>
               <div class="button-wrapper">
                 <el-icon title="编辑" @click="updateConversationTitle(conversation)">
-                  <Icon icon="ep:edit"/>
+                  <Icon icon="ep:edit" />
                 </el-icon>
                 <el-icon title="删除会话" @click="deleteConversationTitle(conversation)">
-                  <Icon icon="ep:delete"/>
+                  <Icon icon="ep:delete" />
                 </el-icon>
               </div>
             </div>
@@ -50,11 +50,11 @@
       <!-- 左底部：工具栏 -->
       <div class="tool-box">
         <div>
-          <Icon icon="ep:user"/>
+          <Icon icon="ep:user" />
           <el-text size="small">角色仓库</el-text>
         </div>
         <div>
-          <Icon icon="ep:delete"/>
+          <Icon icon="ep:delete" />
           <el-text size="small">清空未置顶对话</el-text>
         </div>
       </div>
@@ -67,24 +67,25 @@
           {{ useConversation?.title }}
         </div>
         <div>
-          <el-dropdown style="margin-right: 12px;" @command="modalClick" >
+          <el-dropdown style="margin-right: 12px" @command="modalClick">
             <el-button type="primary">
-              <span v-html="useModal?.name"></span> <Icon icon="ep:setting" style="margin-left: 10px;"/>
+              <span v-html="useModal?.name"></span>
+              <Icon icon="ep:setting" style="margin-left: 10px" />
             </el-button>
             <template #dropdown>
-              <el-dropdown-menu v-for="(item, index) in modalList" :key="index" >
-                <el-dropdown-item :command="item" >{{item.name}}</el-dropdown-item>
+              <el-dropdown-menu v-for="(item, index) in modalList" :key="index">
+                <el-dropdown-item :command="item">{{ item.name }}</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
           <el-button>
-            <Icon icon="ep:user"/>
+            <Icon icon="ep:user" />
           </el-button>
           <el-button>
-            <Icon icon="ep:download"/>
+            <Icon icon="ep:download" />
           </el-button>
           <el-button>
-            <Icon icon="ep:arrow-up"/>
+            <Icon icon="ep:arrow-up" />
           </el-button>
         </div>
       </el-header>
@@ -110,11 +111,11 @@
                 </div>
                 <div class="left-btns">
                   <div class="btn-cus" @click="noCopy(item.content)">
-                    <img class="btn-image" src="../../../assets/ai/copy.svg"/>
+                    <img class="btn-image" src="../../../assets/ai/copy.svg" />
                     <el-text class="btn-cus-text">复制</el-text>
                   </div>
-                  <div class="btn-cus" style="margin-left: 20px;" @click="onDelete(item.id)">
-                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px;"/>
+                  <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
+                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px" />
                     <el-text class="btn-cus-text">删除</el-text>
                   </div>
                 </div>
@@ -136,35 +137,47 @@
                 </div>
                 <div class="right-btns">
                   <div class="btn-cus" @click="noCopy(item.content)">
-                    <img class="btn-image" src="@/assets/ai/copy.svg"/>
+                    <img class="btn-image" src="@/assets/ai/copy.svg" />
                     <el-text class="btn-cus-text">复制</el-text>
                   </div>
-                  <div class="btn-cus" style="margin-left: 20px;" @click="onDelete(item.id)">
-                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px;"/>
+                  <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
+                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px" />
                     <el-text class="btn-cus-text">删除</el-text>
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
         </div>
       </el-main>
       <el-footer class="footer-container">
         <form @submit.prevent="onSend" class="prompt-from">
-          <textarea class="prompt-input" v-model="prompt" @keyup.enter="onSend"
-                    @input="onPromptInput"
-                    @compositionstart="onCompositionstart"
-                    @compositionend="onCompositionend"
-                    placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"></textarea>
+          <textarea
+            class="prompt-input"
+            v-model="prompt"
+            @keyup.enter="onSend"
+            @input="onPromptInput"
+            @compositionstart="onCompositionstart"
+            @compositionend="onCompositionend"
+            placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
+          ></textarea>
           <div class="prompt-btns">
-            <el-switch/>
-            <el-button type="primary" size="default" @click="onSend()"
-                       :loading="conversationInProgress" v-if="conversationInProgress == false">
+            <el-switch />
+            <el-button
+              type="primary"
+              size="default"
+              @click="onSend()"
+              :loading="conversationInProgress"
+              v-if="conversationInProgress == false"
+            >
               {{ conversationInProgress ? '进行中' : '发送' }}
             </el-button>
-            <el-button type="danger" size="default" @click="stopStream()"
-                       v-if="conversationInProgress == true">
+            <el-button
+              type="danger"
+              size="default"
+              @click="stopStream()"
+              v-if="conversationInProgress == true"
+            >
               停止
             </el-button>
           </div>
@@ -175,32 +188,31 @@
 </template>
 
 <script setup lang="ts">
-import {ChatMessageApi, ChatMessageSendVO, ChatMessageVO} from "@/api/ai/chat/message"
+import { ChatMessageApi, ChatMessageSendVO, ChatMessageVO } from '@/api/ai/chat/message'
 import {
   ChatConversationApi,
   ChatConversationUpdateVO,
   ChatConversationVO
-} from "@/api/ai/chat/conversation"
-import {ChatModelApi, ChatModelVO} from "@/api/ai/model/chatModel"
-import {formatDate} from "@/utils/formatTime"
-import {useClipboard} from "@vueuse/core";
+} from '@/api/ai/chat/conversation'
+import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
+import { formatDate } from '@/utils/formatTime'
+import { useClipboard } from '@vueuse/core'
 // 转换 markdown
-import {marked} from 'marked';
+import { marked } from 'marked'
 // 代码高亮 https://highlightjs.org/
-import 'highlight.js/styles/vs2015.min.css';
-import hljs from 'highlight.js';
-
+import 'highlight.js/styles/vs2015.min.css'
+import hljs from 'highlight.js'
 
 // 自定义渲染器
 const renderer = {
   code(code, language, c) {
-    const highlightHtml = hljs.highlight(code, {language: language, ignoreIllegals: true}).value
+    const highlightHtml = hljs.highlight(code, { language: language, ignoreIllegals: true }).value
     const copyHtml = `<div id="copy" data-copy='${code}' style="position: absolute; right: 10px; top: 5px; color: #fff;cursor: pointer;">复制</div>`
     return `<pre>${copyHtml}<code class="hljs">${highlightHtml}</code></pre>`
-  },
-};
+  }
+}
 marked.use({
-  renderer: renderer,
+  renderer: renderer
 })
 
 const conversationList = [
@@ -218,7 +230,7 @@ const conversationList = [
   }
 ]
 // 初始化 copy 到粘贴板
-const {copy} = useClipboard();
+const { copy } = useClipboard()
 
 const searchName = ref('') // 查询的内容
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
@@ -230,8 +242,8 @@ const conversationInAbortController = ref<any>() // 对话进行中 abort 控制
 const prompt = ref<string>() // prompt
 
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
-const messageContainer: any = ref(null);
-const isScrolling = ref(false)//用于判断用户是否在滚动
+const messageContainer: any = ref(null)
+const isScrolling = ref(false) //用于判断用户是否在滚动
 const isComposing = ref(false) // 判断用户是否在输入
 
 /** chat message 列表 */
@@ -240,7 +252,6 @@ const list = ref<ChatMessageVO[]>([]) // 列表的数据
 const useModal = ref<ChatModelVO>() // 使用的modal
 const useConversation = ref<ChatConversationVO>() // 使用的 Conversation
 const modalList = ref<ChatModelVO[]>([]) // 列表的数据
-
 
 const changeConversation = (conversation) => {
   console.log(conversation)
@@ -272,11 +283,11 @@ const onSend = async () => {
   if (conversationInProgress.value) {
     return
   }
-  const content = prompt.value?.trim();
+  const content = prompt.value?.trim()
   if (content?.length < 2) {
     ElMessage({
       message: '请输入内容!',
-      type: 'error',
+      type: 'error'
     })
     return
   }
@@ -284,13 +295,13 @@ const onSend = async () => {
   prompt.value = ''
   const requestParams = {
     conversationId: conversationId.value,
-    content: content,
+    content: content
   } as unknown as ChatMessageSendVO
   // 添加 message
-  const userMessage = await ChatMessageApi.add(requestParams) as unknown as ChatMessageVO;
+  const userMessage = (await ChatMessageApi.add(requestParams)) as unknown as ChatMessageVO
   list.value.push(userMessage)
   // 滚动到住下面
-  scrollToBottom();
+  scrollToBottom()
   // stream
   await doSendStream(userMessage)
   //
@@ -305,45 +316,49 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
     // 发送 event stream
     let isFirstMessage = true
     let content = ''
-    ChatMessageApi.sendStream(userMessage.id, conversationInAbortController.value, (message) => {
-      console.log('message', message)
-      const data = JSON.parse(message.data) as unknown as ChatMessageVO
-      // 如果没有内容结束链接
-      if (data.content === '') {
+    ChatMessageApi.sendStream(
+      userMessage.id,
+      conversationInAbortController.value,
+      (message) => {
+        console.log('message', message)
+        const data = JSON.parse(message.data) as unknown as ChatMessageVO
+        // 如果没有内容结束链接
+        if (data.content === '') {
+          // 标记对话结束
+          conversationInProgress.value = false
+          // 结束 stream 对话
+          conversationInAbortController.value.abort()
+        }
+        // 首次返回需要添加一个 message 到页面，后面的都是更新
+        if (isFirstMessage) {
+          isFirstMessage = false
+          list.value.push(data)
+        } else {
+          content = content + data.content
+          const lastMessage = list.value[list.value.length - 1]
+          lastMessage.content = marked(content) as unknown as string
+          list.value[list.value - 1] = lastMessage
+        }
+        // 滚动到最下面
+        scrollToBottom()
+      },
+      (error) => {
+        console.log('error', error)
         // 标记对话结束
-        conversationInProgress.value = false;
+        conversationInProgress.value = false
+        // 结束 stream 对话
+        conversationInAbortController.value.abort()
+      },
+      () => {
+        console.log('close')
+        // 标记对话结束
+        conversationInProgress.value = false
         // 结束 stream 对话
         conversationInAbortController.value.abort()
       }
-      // 首次返回需要添加一个 message 到页面，后面的都是更新
-      if (isFirstMessage) {
-        isFirstMessage = false;
-        list.value.push(data)
-      } else {
-        content = content + data.content
-        const lastMessage = list.value[list.value.length - 1];
-        lastMessage.content = marked(content) as unknown as string
-        list.value[list.value - 1] = lastMessage
-      }
-      // 滚动到最下面
-      scrollToBottom();
-    }, (error) => {
-      console.log('error', error)
-      // 标记对话结束
-      conversationInProgress.value = false;
-      // 结束 stream 对话
-      conversationInAbortController.value.abort()
-    }, () => {
-      console.log('close')
-      // 标记对话结束
-      conversationInProgress.value = false;
-      // 结束 stream 对话
-      conversationInAbortController.value.abort()
-    })
+    )
   } finally {
-
   }
-
 }
 
 /** 查询列表 */
@@ -354,28 +369,28 @@ const messageList = async () => {
 
     // 处理 markdown
     // marked(this.markdownText)
-    res.map(item => {
+    res.map((item) => {
       // item.content = marked(item.content)
       if (item.type !== 'user') {
         item.content = marked(item.content)
       }
     })
 
-    list.value = res;
+    list.value = res
 
     // 滚动到最下面
-    scrollToBottom();
+    scrollToBottom()
   } finally {
   }
 }
-
 
 function scrollToBottom() {
   nextTick(() => {
     //注意要使用nexttick以免获取不到dom
     console.log('isScrolling.value', isScrolling.value)
     if (!isScrolling.value) {
-      messageContainer.value.scrollTop = messageContainer.value.scrollHeight - messageContainer.value.offsetHeight
+      messageContainer.value.scrollTop =
+        messageContainer.value.scrollHeight - messageContainer.value.offsetHeight
     }
   })
 }
@@ -399,7 +414,7 @@ function noCopy(content) {
   copy(content)
   ElMessage({
     message: '复制成功!',
-    type: 'success',
+    type: 'success'
   })
 }
 
@@ -408,12 +423,12 @@ const onDelete = async (id) => {
   await ChatMessageApi.delete(id)
   ElMessage({
     message: '删除成功!',
-    type: 'success',
+    type: 'success'
   })
   // tip：如果 stream 进行中的 message，就需要调用 controller 结束
   stopStream()
   // 重新获取 message 列表
-  await messageList();
+  await messageList()
 }
 
 const stopStream = async () => {
@@ -428,7 +443,7 @@ const stopStream = async () => {
 const modalClick = async (command) => {
   const update = {
     id: conversationId.value,
-    modelId: command.id,
+    modelId: command.id
   } as unknown as ChatConversationUpdateVO
   // 切换 modal
   useModal.value = command
@@ -438,13 +453,13 @@ const modalClick = async (command) => {
 
 const getModalList = async () => {
   // 获取模型  as unknown as ChatModelVO
-  modalList.value = await ChatModelApi.getChatModelSimpleList(0) as unknown as ChatModelVO[]
+  modalList.value = (await ChatModelApi.getChatModelSimpleList(0)) as unknown as ChatModelVO[]
 }
 
 // 输入
 const onCompositionstart = () => {
   console.log('onCompositionstart。。。.')
-  isComposing.value= true
+  isComposing.value = true
 }
 
 const onCompositionend = () => {
@@ -454,7 +469,6 @@ const onCompositionend = () => {
     isComposing.value = false
   }, 200)
 }
-
 
 const onPromptInput = (event) => {
   // 非输入法 输入设置为 true
@@ -483,7 +497,7 @@ const getConversation = async (conversationId: string) => {
   console.log('useConversation.value', useConversation.value)
   // 选中 modal
   if (useConversation.value) {
-    modalList.value.forEach(item => {
+    modalList.value.forEach((item) => {
       if (useConversation.value?.modelId === item.id) {
         useModal.value = item
       }
@@ -494,11 +508,11 @@ const getConversation = async (conversationId: string) => {
 /** 初始化 **/
 onMounted(async () => {
   // 获取模型
-  getModalList();
+  getModalList()
   // 获取对话信息
-  getConversation(conversationId.value);
+  getConversation(conversationId.value)
   // 获取列表数据
-  messageList();
+  messageList()
   // scrollToBottom();
   // await nextTick
   // 监听滚动事件，判断用户滚动状态
@@ -510,17 +524,13 @@ onMounted(async () => {
       copy(e.target?.dataset?.copy)
       ElMessage({
         message: '复制成功!',
-        type: 'success',
+        type: 'success'
       })
     }
   })
-
 })
-
-
 </script>
 <style lang="scss" scoped>
-
 .ai-layout {
   // TODO @范 这里height不能 100% 先这样临时处理
   position: absolute;
@@ -710,8 +720,8 @@ onMounted(async () => {
       display: flex;
       flex-direction: column;
       overflow-wrap: break-word;
-      background-color: rgba(228, 228, 228, 0.80);
-      box-shadow: 0 0 0 1px rgba(228, 228, 228, 0.80);
+      background-color: rgba(228, 228, 228, 0.8);
+      box-shadow: 0 0 0 1px rgba(228, 228, 228, 0.8);
       border-radius: 10px;
       padding: 10px 10px 5px 10px;
 
@@ -727,10 +737,10 @@ onMounted(async () => {
 
       .right-text {
         font-size: 0.95rem;
-        color: #FFF;
+        color: #fff;
         display: inline;
         background-color: #267fff;
-        color: #FFF;
+        color: #fff;
         box-shadow: 0 0 0 1px #267fff;
         border-radius: 10px;
         padding: 10px;
@@ -739,7 +749,8 @@ onMounted(async () => {
       }
     }
 
-    .left-btns, .right-btns {
+    .left-btns,
+    .right-btns {
       display: flex;
       flex-direction: row;
       margin-top: 8px;
@@ -822,7 +833,7 @@ onMounted(async () => {
   line-height: 1.6rem;
   letter-spacing: 0em;
   text-align: left;
-  color: #3B3E55;
+  color: #3b3e55;
   max-width: 100%;
 
   pre {
