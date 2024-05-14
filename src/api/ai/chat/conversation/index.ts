@@ -27,7 +27,7 @@ export interface ChatConversationUpdateVO {
 // AI chat 聊天
 export const ChatConversationApi = {
   // 获取 Conversation
-  get: async (id: number) => {
+  get: async (id: string) => {
     return await request.get({ url: `/ai/chat/conversation/get?id=${id}`})
   },
   // 更新 Conversation

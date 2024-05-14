@@ -179,7 +179,11 @@
 
 <script setup lang="ts">
 import {ChatMessageApi, ChatMessageSendVO, ChatMessageVO} from "@/api/ai/chat/message"
-import {ChatConversationApi, ChatConversationUpdateVO} from "@/api/ai/chat/conversation"
+import {
+  ChatConversationApi,
+  ChatConversationUpdateVO,
+  ChatConversationVO
+} from "@/api/ai/chat/conversation"
 import {ChatModelApi, ChatModelVO} from "@/api/ai/model/chatModel"
 import {formatDate} from "@/utils/formatTime"
 import {useClipboard} from "@vueuse/core";
@@ -237,6 +241,7 @@ const isComposing = ref(false) // 判断用户是否在输入
 // defineOptions({ name: 'chatMessageList' })
 const list = ref<ChatMessageVO[]>([]) // 列表的数据
 const useModal = ref<ChatModelVO>() // 使用的modal
+const useConversation = ref<ChatConversationVO>() // 使用的 Conversation
 const modalList = ref<ChatModelVO[]>([]) // 列表的数据
 
 
@@ -437,10 +442,6 @@ const modalClick = async (command) => {
 const getModalList = async () => {
   // 获取模型  as unknown as ChatModelVO
   modalList.value = await ChatModelApi.getChatModelSimpleList(0) as unknown as ChatModelVO[]
-  // 默认选中第一个模型
-  if (modalList.value.length) {
-    useModal.value = modalList.value[0]
-  }
 }
 
 // 输入
@@ -477,25 +478,28 @@ const onPromptInput = (event) => {
     console.log('setTimeout 输入结束...')
     isComposing.value = false
   }, 400)
-  // isComposing.value= false
-  // setTimeout(() => {
-  //   console.log('输入结束...')
-  //   isComposing.value = false
-  // }, 200)
-  // isComposing.value = event.data && event.data === event.target.value.slice(-1);
-  //
-  // if (isComposing.value) {
-  //   console.log('用户正在使用输入法输入');
-  // } else {
-  //   console.log('用户正在直接输入');
-  // }
 }
 
+const getConversation = async (conversationId: string) => {
+  // 获取对话信息
+  useConversation.value = await ChatConversationApi.get(conversationId)
+  console.log('useConversation.value', useConversation.value)
+  // 选中 modal
+  if (useConversation.value) {
+    modalList.value.forEach(item => {
+      if (useConversation.value?.modelId === item.id) {
+        useModal.value = item
+      }
+    })
+  }
+}
 
 /** 初始化 **/
 onMounted(async () => {
   // 获取模型
   getModalList();
+  // 获取对话信息
+  getConversation(conversationId.value);
   // 获取列表数据
   messageList();
   // scrollToBottom();
