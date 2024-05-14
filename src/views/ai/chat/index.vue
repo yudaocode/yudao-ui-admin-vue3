@@ -4,7 +4,7 @@
     <el-aside width="260px" class="conversation-container">
       <div>
         <!-- 左顶部：新建对话 -->
-        <el-button class="w-1/1 btn-new-conversation" type="primary">
+        <el-button class="w-1/1 btn-new-conversation" type="primary" @click="createConversation">
           <Icon icon="ep:plus" class="mr-5px" />
           新建对话
         </el-button>
@@ -29,10 +29,10 @@
           <el-row v-for="conversation in conversationList" :key="conversation.id">
             <div
               :class="conversation.id === conversationId ? 'conversation active' : 'conversation'"
-              @click="changeConversation(conversation)"
+              @click="changeConversation(conversation.id)"
             >
               <div class="title-wrapper">
-                <img class="avatar" :src="conversation.avatar" />
+                <img class="avatar" :src="conversation.roleAvatar" />
                 <span class="title">{{ conversation.title }}</span>
               </div>
               <div class="button-wrapper">
@@ -215,26 +215,13 @@ marked.use({
   renderer: renderer
 })
 
-const conversationList = [
-  {
-    id: 1,
-    title: '测试标题',
-    avatar:
-      'http://test.yudao.iocoder.cn/96c787a2ce88bf6d0ce3cd8b6cf5314e80e7703cd41bf4af8cd2e2909dbd6b6d.png'
-  },
-  {
-    id: 2,
-    title: '测试对话',
-    avatar:
-      'http://test.yudao.iocoder.cn/96c787a2ce88bf6d0ce3cd8b6cf5314e80e7703cd41bf4af8cd2e2909dbd6b6d.png'
-  }
-]
+const conversationList = ref([] as ChatConversationVO[])
 // 初始化 copy 到粘贴板
 const { copy } = useClipboard()
 
 const searchName = ref('') // 查询的内容
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
-const conversationId = ref('1781604279872581648') // 对话id
+const conversationId = ref(0) // 选中的对话编号
 const conversationInProgress = ref<Boolean>() // 对话进行中
 conversationInProgress.value = false
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
@@ -253,9 +240,19 @@ const useModal = ref<ChatModelVO>() // 使用的modal
 const useConversation = ref<ChatConversationVO>() // 使用的 Conversation
 const modalList = ref<ChatModelVO[]>([]) // 列表的数据
 
-const changeConversation = (conversation) => {
-  console.log(conversation)
-  conversationId.value = conversation.id
+/** 新建对话 */
+const createConversation = async () => {
+  // 新建对话
+  const conversationId = await ChatConversationApi.createChatConversationMy(
+    {} as unknown as ChatConversationVO
+  )
+  changeConversation(conversationId)
+  // 刷新对话列表
+  await getChatConversationList()
+}
+
+const changeConversation = (id: number) => {
+  conversationId.value = id
   // TODO 芋艿：待实现
 }
 
@@ -505,8 +502,25 @@ const getConversation = async (conversationId: string) => {
   }
 }
 
+/** 获得聊天会话列表 */
+const getChatConversationList = async () => {
+  conversationList.value = await ChatConversationApi.getChatConversationMyList()
+  // 默认选中第一条
+  if (conversationList.value.length === 0) {
+    conversationId.value = 0
+    // TODO 芋艿：清空对话
+  } else {
+    if (conversationId.value === 0) {
+      conversationId.value = conversationList.value[0].id
+      changeConversation(conversationList.value[0].id)
+    }
+  }
+}
+
 /** 初始化 **/
 onMounted(async () => {
+  // 获得聊天会话列表
+  await getChatConversationList()
   // 获取模型
   getModalList()
   // 获取对话信息
