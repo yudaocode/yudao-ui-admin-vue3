@@ -64,12 +64,9 @@
       <!-- 右顶部 TODO 芋艿：右对齐 -->
       <el-header class="header">
         <div class="title">
-          标题......
+          {{ useConversation?.title }}
         </div>
         <div>
-<!--          <el-button>3.5-turbo-0125-->
-<!--            <Icon icon="ep:setting"/>-->
-<!--          </el-button>-->
           <el-dropdown style="margin-right: 12px;" @command="modalClick" >
             <el-button type="primary">
               <span v-html="useModal?.name"></span> <Icon icon="ep:setting" style="margin-left: 10px;"/>
@@ -863,7 +860,9 @@ onMounted(async () => {
   }
 
   p {
-    margin-bottom: 1rem !important;
+    //margin-bottom: 1rem !important;
+    margin: 0;
+    margin-bottom: 3px;
   }
 
   /* 标题通用格式 */
