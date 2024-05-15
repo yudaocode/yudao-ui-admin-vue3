@@ -68,17 +68,10 @@
         </div>
         <div>
           <!-- TODO @fan：样式改下；这里我已经改成点击后，弹出了 -->
-          <el-dropdown style="margin-right: 12px" @command="openChatConversationUpdateForm">
-            <el-button type="primary">
-              <span v-html="useModal?.name"></span>
-              <Icon icon="ep:setting" style="margin-left: 10px" />
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu v-for="(item, index) in modalList" :key="index">
-                <el-dropdown-item :command="item">{{ item.name }}</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+          <el-button type="primary" @click="openChatConversationUpdateForm">
+            <span v-html="useModal?.name"></span>
+            <Icon icon="ep:setting" style="margin-left: 10px" />
+          </el-button>
           <el-button>
             <Icon icon="ep:user" />
           </el-button>
@@ -187,16 +180,15 @@
     </el-container>
   </el-container>
 
-  <ChatConversationUpdateForm ref="chatConversationUpdateFormRef" />
+  <ChatConversationUpdateForm
+    ref="chatConversationUpdateFormRef"
+    @success="getChatConversationList"
+  />
 </template>
 
 <script setup lang="ts">
 import { ChatMessageApi, ChatMessageSendVO, ChatMessageVO } from '@/api/ai/chat/message'
-import {
-  ChatConversationApi,
-  ChatConversationUpdateVO,
-  ChatConversationVO
-} from '@/api/ai/chat/conversation'
+import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
 import ChatConversationUpdateForm from './components/ChatConversationUpdateForm.vue'
 import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
 import { formatDate } from '@/utils/formatTime'
@@ -460,15 +452,7 @@ const stopStream = async () => {
 
 /** 修改聊天会话 */
 const chatConversationUpdateFormRef = ref()
-const openChatConversationUpdateForm = async (command) => {
-  // const update = {
-  //   id: conversationId.value,
-  //   modelId: command.id
-  // } as unknown as ChatConversationUpdateVO
-  // // 切换 modal
-  // useModal.value = command
-  // // 更新
-  // await ChatConversationApi.updateChatConversationMy(update)
+const openChatConversationUpdateForm = async () => {
   chatConversationUpdateFormRef.value.open(conversationId.value)
 }
 

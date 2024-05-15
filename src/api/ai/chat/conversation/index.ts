@@ -21,7 +21,7 @@ export interface ChatConversationVO {
 // AI 聊天会话 API
 export const ChatConversationApi = {
   // 获得【我的】聊天会话
-  getChatConversationMy: async (id: string) => {
+  getChatConversationMy: async (id: number) => {
     return await request.get({ url: `/ai/chat/conversation/get-my?id=${id}` })
   },
   // 更新【我的】聊天会话
