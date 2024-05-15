@@ -14,6 +14,15 @@ export interface ChatRoleVO {
   status: number // 状态
 }
 
+// AI 聊天角色 分页请求 vo
+export interface ChatRolePageReqVO {
+  name?: string // 角色名称
+  category?: string // 角色类别
+  publicStatus: boolean // 是否公开
+  pageNo: number // 是否公开
+  pageSize: number // 是否公开
+}
+
 // AI 聊天角色 API
 export const ChatRoleApi = {
   // 查询聊天角色分页
@@ -39,5 +48,10 @@ export const ChatRoleApi = {
   // 删除聊天角色
   deleteChatRole: async (id: number) => {
     return await request.delete({ url: `/ai/chat-role/delete?id=` + id })
+  },
+
+  // 获取 my role
+  getMyRole: async (params: ChatRolePageReqVO) => {
+    return await request.get({ url: `/ai/chat-role/my-page`, params})
   }
 }
