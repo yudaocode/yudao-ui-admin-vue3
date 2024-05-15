@@ -10,6 +10,7 @@ export interface ChatRoleVO {
   sort: number // 角色排序
   description: string // 角色描述
   systemMessage: string // 角色设定
+  welcomeMessage: string // 角色设定
   publicStatus: boolean // 是否公开
   status: number // 状态
 }
@@ -50,6 +51,8 @@ export const ChatRoleApi = {
     return await request.delete({ url: `/ai/chat-role/delete?id=` + id })
   },
 
+  // ======= chat 聊天
+
   // 获取 my role
   getMyPage: async (params: ChatRolePageReqVO) => {
     return await request.get({ url: `/ai/chat-role/my-page`, params})
@@ -58,5 +61,20 @@ export const ChatRoleApi = {
   // 获取角色分类
   getCategoryList: async () => {
     return await request.get({ url: `/ai/chat-role/category-list`})
-  }
+  },
+
+  // 创建角色
+  createMy: async (data: ChatRoleVO) => {
+    return await request.post({ url: `/ai/chat-role/create-my`, data})
+  },
+
+  // 更新角色
+  updateMy: async (data: ChatRoleVO) => {
+    return await request.put({ url: `/ai/chat-role/update-my`, data})
+  },
+
+  // 删除角色 my
+  deleteMy: async (id: number) => {
+    return await request.delete({ url: `/ai/chat-role/delete-my?id=` + id })
+  },
 }

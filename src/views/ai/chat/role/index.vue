@@ -1,30 +1,38 @@
 <!-- chat 角色仓库 -->
 <template>
   <el-container class="role-container">
+    <ChatRoleForm  ref="formRef" @success="handlerAddRoleSuccess"  />
+
     <Header title="角色仓库"/>
     <el-main class="role-main">
-      <!-- 搜索按钮 -->
-      <el-input
-        v-model="search"
-        class="search-input"
-        size="large"
-        placeholder="请输入搜索的内容"
-        :suffix-icon="Search"
-        @change="getActiveTabsRole"
-      />
+      <div class="search-container" @click="handlerAddRole">
+        <!-- 搜索按钮 -->
+        <el-input
+          v-model="search"
+          class="search-input"
+          size="default"
+          placeholder="请输入搜索的内容"
+          :suffix-icon="Search"
+          @change="getActiveTabsRole"
+        />
+        <el-button type="primary" style="margin-left: 20px;">
+          <el-icon><User /></el-icon>
+          添加角色
+        </el-button>
+      </div>
       <!-- tabs -->
       <el-tabs v-model="activeRole" class="tabs" @tab-click="handleTabsClick">
         <el-tab-pane class="role-pane" label="我的角色" name="my-role">
-          <RoleCategoryList :category-list="categoryList" :active="activeCategory" @onCategoryClick="handlerCategoryClick" />
-          <RoleList :role-list="myRoleList" style="margin-top: 20px;" />
+          <RoleList :role-list="myRoleList" @onDelete="handlerCardDelete" @onEdit="handlerCardEdit" style="margin-top: 20px;" />
         </el-tab-pane>
         <el-tab-pane label="公共角色" name="public-role">
           <RoleCategoryList :category-list="categoryList" :active="activeCategory" @onCategoryClick="handlerCategoryClick" />
-          <RoleList :role-list="publicRoleList" style="margin-top: 20px;" />
+          <RoleList :role-list="publicRoleList" @onDelete="handlerCardDelete" @onEdit="handlerCardEdit" style="margin-top: 20px;" />
         </el-tab-pane>
       </el-tabs>
     </el-main>
   </el-container>
+
 </template>
 
 <!--  setup  -->
@@ -32,10 +40,11 @@
 import {ref} from "vue";
 import Header from '@/views/ai/chat/components/Header.vue'
 import RoleList from './RoleList.vue'
+import ChatRoleForm from '@/views/ai/model/chatRole/ChatRoleForm.vue'
 import RoleCategoryList from './RoleCategoryList.vue'
 import {ChatRoleApi, ChatRolePageReqVO, ChatRoleVO} from '@/api/ai/model/chatRole'
 import {TabsPaneContext} from "element-plus";
-import {Search} from "@element-plus/icons-vue";
+import {Search, User} from "@element-plus/icons-vue";
 
 // 属性定义
 const activeRole = ref<string>('my-role') // 选中的角色
@@ -47,9 +56,10 @@ const myRoleList = ref<ChatRoleVO[]>([]) // my 分页大小
 const publicPageNo = ref<number>(1) // public 分页下标
 const publicPageSize = ref<number>(50) // public 分页大小
 const publicRoleList = ref<ChatRoleVO[]>([]) // public 分页大小
-const activeCategory = ref<string>('writing') // 选择中的分类
+const activeCategory = ref<string>('') // 选择中的分类
 const categoryList = ref<string[]>([]) // 角色分类类别
-
+/** 添加/修改操作 */
+const formRef = ref()
 // tabs 点击
 const handleTabsClick = async (tab: TabsPaneContext) => {
   // 设置切换状态
@@ -109,6 +119,31 @@ const handlerCategoryClick = async (category: string) => {
   await getActiveTabsRole()
 }
 
+// 添加角色
+const handlerAddRole = async () => {
+  formRef.value.open('my-create', null, '添加角色')
+}
+
+// card 删除
+const handlerCardDelete = async (role) => {
+  await ChatRoleApi.deleteMy(role.id)
+  // 刷新数据
+  await getActiveTabsRole()
+}
+
+// card 编辑
+const handlerCardEdit = async (role) => {
+  formRef.value.open('my-update', role.id, '编辑角色')
+}
+
+// 添加角色成功
+const handlerAddRoleSuccess = async  (e) => {
+  console.log(e)
+  // 刷新数据
+  await getActiveTabsRole()
+}
+
+
 //
 onMounted( async () => {
   // 获取分类
@@ -139,12 +174,15 @@ onMounted( async () => {
   .role-main {
     position: relative;
 
-    .search-input {
-      width: 240px;
+    .search-container {
       position: absolute;
       right: 20px;
       top: 10px;
       z-index: 100;
+    }
+
+    .search-input {
+      width: 240px;
     }
 
     .tabs {
