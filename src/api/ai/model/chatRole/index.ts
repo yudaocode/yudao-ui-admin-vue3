@@ -51,7 +51,12 @@ export const ChatRoleApi = {
   },
 
   // 获取 my role
-  getMyRole: async (params: ChatRolePageReqVO) => {
+  getMyPage: async (params: ChatRolePageReqVO) => {
     return await request.get({ url: `/ai/chat-role/my-page`, params})
+  },
+
+  // 获取角色分类
+  getCategoryList: async () => {
+    return await request.get({ url: `/ai/chat-role/category-list`})
   }
 }
