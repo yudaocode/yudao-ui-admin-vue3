@@ -4,23 +4,46 @@
       ref="formRef"
       :model="formData"
       :rules="formRules"
-      label-width="100px"
+      label-width="130px"
       v-loading="formLoading"
     >
-      <el-form-item label="角色设定" prop="systemContext">
-        <el-input type="textarea" v-model="formData.systemContext" placeholder="请输入角色设定" />
+      <el-form-item label="角色设定" prop="systemMessage">
+        <el-input type="textarea" v-model="formData.systemMessage" placeholder="请输入角色设定" />
       </el-form-item>
       <el-form-item label="模型" prop="modelId">
-        <UploadImg v-model="formData.modelId" />
+        <el-select v-model="formData.modelId" placeholder="请选择模型">
+          <el-option
+            v-for="chatModel in chatModelList"
+            :key="chatModel.id"
+            :label="chatModel.name"
+            :value="chatModel.id"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="上下文数量" prop="category">
-        <el-input v-model="formData.category" placeholder="请输入角色类别" />
+      <el-form-item label="温度参数" prop="temperature">
+        <el-input-number
+          v-model="formData.temperature"
+          placeholder="请输入温度参数"
+          :min="0"
+          :max="2"
+          :precision="2"
+        />
       </el-form-item>
-      <el-form-item label="话题随机性" prop="description">
-        <el-input type="textarea" v-model="formData.description" placeholder="请输入角色描述" />
+      <el-form-item label="回复数 Token 数" prop="maxTokens">
+        <el-input-number
+          v-model="formData.maxTokens"
+          placeholder="请输入回复数 Token 数"
+          :min="0"
+          :max="4096"
+        />
       </el-form-item>
-      <el-form-item label="回复数" prop="systemMessage">
-        <el-input type="textarea" v-model="formData.systemMessage" placeholder="请输入角色设定" />
+      <el-form-item label="上下文数量" prop="maxContexts">
+        <el-input-number
+          v-model="formData.maxContexts"
+          placeholder="请输入上下文数量"
+          :min="0"
+          :max="20"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -30,7 +53,6 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { ChatRoleApi, ChatRoleVO } from '@/api/ai/model/chatRole'
 import { CommonStatusEnum } from '@/utils/constants'
 import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
@@ -45,25 +67,18 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = ref({
   id: undefined,
-  systemContext: undefined,
-  modelId: undefined,
-  name: undefined,
-  avatar: undefined,
-  category: undefined,
-  sort: undefined,
-  description: undefined,
   systemMessage: undefined,
-  publicStatus: true,
-  status: CommonStatusEnum.ENABLE
+  modelId: undefined,
+  temperature: undefined,
+  maxTokens: undefined,
+  maxContexts: undefined
 })
 const formRules = reactive({
-  name: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }],
-  avatar: [{ required: true, message: '角色头像不能为空', trigger: 'blur' }],
-  category: [{ required: true, message: '角色类别不能为空', trigger: 'blur' }],
-  sort: [{ required: true, message: '角色排序不能为空', trigger: 'blur' }],
-  description: [{ required: true, message: '角色描述不能为空', trigger: 'blur' }],
-  systemMessage: [{ required: true, message: '角色设定不能为空', trigger: 'blur' }],
-  publicStatus: [{ required: true, message: '是否公开不能为空', trigger: 'blur' }]
+  modelId: [{ required: true, message: '模型不能为空', trigger: 'blur' }],
+  status: [{ required: true, message: '状态不能为空', trigger: 'blur' }],
+  temperature: [{ required: true, message: '温度参数不能为空', trigger: 'blur' }],
+  maxTokens: [{ required: true, message: '回复数 Token 数不能为空', trigger: 'blur' }],
+  maxContexts: [{ required: true, message: '上下文数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const chatModelList = ref([] as ChatModelVO[]) // 聊天模型列表
@@ -76,7 +91,13 @@ const open = async (id: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ChatConversationApi.getChatConversationMy(id)
+      const data = await ChatConversationApi.getChatConversationMy(id)
+      formData.value = Object.keys(formData.value).reduce((obj, key) => {
+        if (data.hasOwnProperty(key)) {
+          obj[key] = data[key]
+        }
+        return obj
+      }, {})
     } finally {
       formLoading.value = false
     }
@@ -94,9 +115,9 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ChatRoleVO
-    await ChatRoleApi.updateChatRole(data)
-    message.success(t('common.updateSuccess'))
+    const data = formData.value as unknown as ChatConversationVO
+    await ChatConversationApi.updateChatConversationMy(data)
+    message.success('对话配置已更新')
     dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')
@@ -109,15 +130,11 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    modelId: undefined,
-    name: undefined,
-    avatar: undefined,
-    category: undefined,
-    sort: undefined,
-    description: undefined,
     systemMessage: undefined,
-    publicStatus: true,
-    status: CommonStatusEnum.ENABLE
+    modelId: undefined,
+    temperature: undefined,
+    maxTokens: undefined,
+    maxContexts: undefined
   }
   formRef.value?.resetFields()
 }

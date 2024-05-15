@@ -31,19 +31,16 @@ export const ChatMessageApi = {
     })
   },
 
-  // 发送 add 消息
-  add: async (data: ChatMessageSendVO) => {
-    return await request.post({ url: `/ai/chat/message/add`, data })
-  },
-
-  // 发送 send 消息
-  send: async (data: ChatMessageSendVO) => {
-    return await request.post({ url: `/ai/chat/message/send`, data })
-  },
-
   // 发送 send stream 消息
   // TODO axios 可以么？ https://apifox.com/apiskills/how-to-create-axios-stream/
-  sendStream: async (id: string, ctrl, onMessage, onError, onClose) => {
+  sendStream: async (
+    conversationId: number,
+    content: string,
+    ctrl,
+    onMessage,
+    onError,
+    onClose
+  ) => {
     const token = getAccessToken()
     return fetchEventSource(`${config.base_url}/ai/chat/message/send-stream`, {
       method: 'post',
@@ -53,7 +50,8 @@ export const ChatMessageApi = {
       },
       openWhenHidden: true,
       body: JSON.stringify({
-        id: id
+        conversationId,
+        content
       }),
       onmessage: onMessage,
       onerror: onError,

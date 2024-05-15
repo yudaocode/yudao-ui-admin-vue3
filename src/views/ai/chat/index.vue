@@ -22,7 +22,7 @@
         </el-input>
         <!-- 左中间：对话列表 -->
         <div class="conversation-list">
-          <!-- TODO @芋艿，置顶、聊天记录、一星期钱、30天前，前端对数据重新做一下分组，或者后端接口改一下 -->
+          <!-- TODO @fain：置顶、聊天记录、一星期钱、30天前，前端对数据重新做一下分组，或者后端接口改一下 -->
           <div>
             <el-text class="mx-1" size="small" tag="b">置顶</el-text>
           </div>
@@ -35,11 +35,12 @@
                 <img class="avatar" :src="conversation.roleAvatar" />
                 <span class="title">{{ conversation.title }}</span>
               </div>
+              <!-- TODO @fan：缺一个【置顶】按钮，效果改成 hover 上去展示 -->
               <div class="button-wrapper">
                 <el-icon title="编辑" @click="updateConversationTitle(conversation)">
                   <Icon icon="ep:edit" />
                 </el-icon>
-                <el-icon title="删除会话" @click="deleteConversationTitle(conversation)">
+                <el-icon title="删除会话" @click="deleteChatConversation(conversation)">
                   <Icon icon="ep:delete" />
                 </el-icon>
               </div>
@@ -68,17 +69,10 @@
         </div>
         <div>
           <!-- TODO @fan：样式改下；这里我已经改成点击后，弹出了 -->
-          <el-dropdown style="margin-right: 12px" @command="openChatConversationUpdateForm">
-            <el-button type="primary">
-              <span v-html="useModal?.name"></span>
-              <Icon icon="ep:setting" style="margin-left: 10px" />
-            </el-button>
-            <template #dropdown>
-              <el-dropdown-menu v-for="(item, index) in modalList" :key="index">
-                <el-dropdown-item :command="item">{{ item.name }}</el-dropdown-item>
-              </el-dropdown-menu>
-            </template>
-          </el-dropdown>
+          <el-button type="primary" @click="openChatConversationUpdateForm">
+            <span v-html="useConversation?.modelName"></span>
+            <Icon icon="ep:setting" style="margin-left: 10px" />
+          </el-button>
           <el-button>
             <Icon icon="ep:user" />
           </el-button>
@@ -96,6 +90,7 @@
         <div class="message-container" ref="messageContainer">
           <div class="chat-list" v-for="(item, index) in list" :key="index">
             <!--  靠左 message  -->
+            <!-- TODO 芋艿：类型判断 -->
             <div class="left-message message-item" v-if="item.type === 'system'">
               <div class="avatar">
                 <el-avatar
@@ -187,18 +182,16 @@
     </el-container>
   </el-container>
 
-  <ChatConversationUpdateForm ref="chatConversationUpdateFormRef" />
+  <ChatConversationUpdateForm
+    ref="chatConversationUpdateFormRef"
+    @success="getChatConversationList"
+  />
 </template>
 
 <script setup lang="ts">
 import { ChatMessageApi, ChatMessageSendVO, ChatMessageVO } from '@/api/ai/chat/message'
-import {
-  ChatConversationApi,
-  ChatConversationUpdateVO,
-  ChatConversationVO
-} from '@/api/ai/chat/conversation'
+import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
 import ChatConversationUpdateForm from './components/ChatConversationUpdateForm.vue'
-import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
 import { formatDate } from '@/utils/formatTime'
 import { useClipboard } from '@vueuse/core'
 // 转换 markdown
@@ -207,7 +200,6 @@ import { marked } from 'marked'
 import 'highlight.js/styles/vs2015.min.css'
 import hljs from 'highlight.js'
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 // 自定义渲染器
@@ -229,8 +221,7 @@ const { copy } = useClipboard()
 const searchName = ref('') // 查询的内容
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const conversationId = ref(0) // 选中的对话编号
-const conversationInProgress = ref<Boolean>() // 对话进行中
-conversationInProgress.value = false
+const conversationInProgress = ref(false) // 对话进行中
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
 
 const prompt = ref<string>() // prompt
@@ -243,9 +234,7 @@ const isComposing = ref(false) // 判断用户是否在输入
 /** chat message 列表 */
 // defineOptions({ name: 'chatMessageList' })
 const list = ref<ChatMessageVO[]>([]) // 列表的数据
-const useModal = ref<ChatModelVO>() // 使用的modal
 const useConversation = ref<ChatConversationVO>() // 使用的 Conversation
-const modalList = ref<ChatModelVO[]>([]) // 列表的数据
 
 /** 新建对话 */
 const createConversation = async () => {
@@ -282,13 +271,20 @@ const updateConversationTitle = async (conversation: ChatConversationVO) => {
 }
 
 /** 删除聊天会话 */
-const deleteConversationTitle = async (conversation: ChatConversationVO) => {
-  console.log(conversation)
-  // TODO 芋艿：待实现
+const deleteChatConversation = async (conversation: ChatConversationVO) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm(`是否确认删除会话 - ${conversation.title}?`)
+    // 发起删除
+    await ChatConversationApi.deleteChatConversationMy(conversation.id)
+    message.success('会话已删除')
+    // 刷新列表
+    await getChatConversationList()
+  } catch {}
 }
 
 const searchConversation = () => {
-  // TODO 芋艿：待实现
+  // TODO fan：待实现
 }
 
 /** send */
@@ -302,24 +298,28 @@ const onSend = async () => {
     return
   }
   const content = prompt.value?.trim()
-  if (content?.length < 2) {
+  if (content.length < 2) {
     ElMessage({
       message: '请输入内容!',
       type: 'error'
     })
     return
   }
+  // TODO 芋艿：这块交互要在优化；应该是先插入到 UI 界面，里面会有当前的消息，和正在思考中；之后发起请求；
   // 清空输入框
   prompt.value = ''
-  const requestParams = {
+  // const requestParams = {
+  //   conversationId: conversationId.value,
+  //   content: content
+  // } as unknown as ChatMessageSendVO
+  // // 添加 message
+  const userMessage = {
     conversationId: conversationId.value,
     content: content
-  } as unknown as ChatMessageSendVO
-  // 添加 message
-  const userMessage = (await ChatMessageApi.add(requestParams)) as unknown as ChatMessageVO
-  list.value.push(userMessage)
-  // 滚动到住下面
-  scrollToBottom()
+  }
+  // list.value.push(userMessage)
+  // // 滚动到住下面
+  // scrollToBottom()
   // stream
   await doSendStream(userMessage)
   //
@@ -335,13 +335,15 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
     let isFirstMessage = true
     let content = ''
     ChatMessageApi.sendStream(
-      userMessage.id,
+      userMessage.conversationId, // TODO 芋艿：这里可能要在优化；
+      userMessage.content,
       conversationInAbortController.value,
       (message) => {
         console.log('message', message)
-        const data = JSON.parse(message.data) as unknown as ChatMessageVO
+        const data = JSON.parse(message.data) // TODO 芋艿：类型处理；
+        // debugger
         // 如果没有内容结束链接
-        if (data.content === '') {
+        if (data.receive.content === '') {
           // 标记对话结束
           conversationInProgress.value = false
           // 结束 stream 对话
@@ -350,9 +352,12 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
         // 首次返回需要添加一个 message 到页面，后面的都是更新
         if (isFirstMessage) {
           isFirstMessage = false
-          list.value.push(data)
+          // debugger
+          list.value.push(data.send)
+          list.value.push(data.receive)
         } else {
-          content = content + data.content
+          // debugger
+          content = content + data.receive.content
           const lastMessage = list.value[list.value.length - 1]
           lastMessage.content = marked(content) as unknown as string
           list.value[list.value - 1] = lastMessage
@@ -460,21 +465,8 @@ const stopStream = async () => {
 
 /** 修改聊天会话 */
 const chatConversationUpdateFormRef = ref()
-const openChatConversationUpdateForm = async (command) => {
-  // const update = {
-  //   id: conversationId.value,
-  //   modelId: command.id
-  // } as unknown as ChatConversationUpdateVO
-  // // 切换 modal
-  // useModal.value = command
-  // // 更新
-  // await ChatConversationApi.updateChatConversationMy(update)
+const openChatConversationUpdateForm = async () => {
   chatConversationUpdateFormRef.value.open(conversationId.value)
-}
-
-const getModalList = async () => {
-  // 获取模型  as unknown as ChatModelVO
-  modalList.value = (await ChatModelApi.getChatModelSimpleList(0)) as unknown as ChatModelVO[]
 }
 
 // 输入
@@ -516,14 +508,6 @@ const getConversation = async (conversationId: string) => {
   // 获取对话信息
   useConversation.value = await ChatConversationApi.getChatConversationMy(conversationId)
   console.log('useConversation.value', useConversation.value)
-  // 选中 modal
-  if (useConversation.value) {
-    modalList.value.forEach((item) => {
-      if (useConversation.value?.modelId === item.id) {
-        useModal.value = item
-      }
-    })
-  }
 }
 
 /** 获得聊天会话列表 */
@@ -545,8 +529,6 @@ const getChatConversationList = async () => {
 onMounted(async () => {
   // 获得聊天会话列表
   await getChatConversationList()
-  // 获取模型
-  getModalList()
   // 获取对话信息
   getConversation(conversationId.value)
   // 获取列表数据
