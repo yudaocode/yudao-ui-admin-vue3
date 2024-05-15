@@ -23,7 +23,7 @@
       <!-- tabs -->
       <el-tabs v-model="activeRole" class="tabs" @tab-click="handleTabsClick">
         <el-tab-pane class="role-pane" label="我的角色" name="my-role">
-          <RoleList :role-list="myRoleList" @onDelete="handlerCardDelete" @onEdit="handlerCardEdit" style="margin-top: 20px;" />
+          <RoleList :role-list="myRoleList" @onDelete="handlerCardDelete" @onEdit="handlerCardEdit" @onUse="handlerCardUse" style="margin-top: 20px;" />
         </el-tab-pane>
         <el-tab-pane label="公共角色" name="public-role">
           <RoleCategoryList :category-list="categoryList" :active="activeCategory" @onCategoryClick="handlerCategoryClick" />
@@ -43,8 +43,12 @@ import RoleList from './RoleList.vue'
 import ChatRoleForm from '@/views/ai/model/chatRole/ChatRoleForm.vue'
 import RoleCategoryList from './RoleCategoryList.vue'
 import {ChatRoleApi, ChatRolePageReqVO, ChatRoleVO} from '@/api/ai/model/chatRole'
+import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import {TabsPaneContext} from "element-plus";
 import {Search, User} from "@element-plus/icons-vue";
+
+// 获取路由
+const router = useRouter()
 
 // 属性定义
 const activeRole = ref<string>('my-role') // 选中的角色
@@ -136,13 +140,22 @@ const handlerCardEdit = async (role) => {
   formRef.value.open('my-update', role.id, '编辑角色')
 }
 
+// card 使用
+const handlerCardUse = async (role) => {
+  const data : ChatConversationVO = {
+    roleId: role.id
+  } as unknown as ChatConversationVO
+  // 创建对话
+  const conversation = await ChatConversationApi.createChatConversationMy(data)
+
+}
+
 // 添加角色成功
 const handlerAddRoleSuccess = async  (e) => {
   console.log(e)
   // 刷新数据
   await getActiveTabsRole()
 }
-
 
 //
 onMounted( async () => {

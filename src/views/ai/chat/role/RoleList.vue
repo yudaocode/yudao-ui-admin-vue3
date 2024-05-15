@@ -33,7 +33,7 @@
 
         </div>
         <div class="btn-container">
-          <el-button type="primary" size="small">使用</el-button>
+          <el-button type="primary" size="small" @click="handleUseClick(role)">使用</el-button>
         </div>
       </div>
     </el-card>
@@ -53,7 +53,8 @@ const props = defineProps({
   }
 })
 // 定义钩子
-const emits = defineEmits(['onDelete', 'onEdit'])
+const emits = defineEmits(['onDelete', 'onEdit', 'onUse'])
+
 // more 点击
 const handleMoreClick = async (data) => {
   const type = data[0]
@@ -63,6 +64,11 @@ const handleMoreClick = async (data) => {
   } else {
     emits('onEdit', role)
   }
+}
+
+// 使用
+const handleUseClick = (role) => {
+  emits('onUse', role)
 }
 
 onMounted(() => {
