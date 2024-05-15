@@ -5,8 +5,8 @@ import { config } from '@/config/axios/config'
 
 // 聊天VO
 export interface ChatMessageVO {
-  id: string // 编号
-  conversationId: string // 会话编号
+  id: number // 编号
+  conversationId: number // 会话编号
   type: string // 消息类型
   userId: string // 用户编号
   roleId: string // 角色编号
@@ -25,7 +25,7 @@ export interface ChatMessageSendVO {
 // AI chat 聊天
 export const ChatMessageApi = {
   // 消息列表
-  messageList: async (conversationId: string) => {
+  messageList: async (conversationId: number) => {
     return await request.get({
       url: `/ai/chat/message/list-by-conversation-id?conversationId=${conversationId}`
     })

@@ -199,7 +199,7 @@ import { marked } from 'marked'
 // 代码高亮 https://highlightjs.org/
 import 'highlight.js/styles/vs2015.min.css'
 import hljs from 'highlight.js'
-
+const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
 
 // 自定义渲染器
@@ -220,7 +220,7 @@ const { copy } = useClipboard()
 
 const searchName = ref('') // 查询的内容
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
-const conversationId = ref(0) // 选中的对话编号
+const conversationId = ref<number>(-1) // 选中的对话编号
 const conversationInProgress = ref(false) // 对话进行中
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
 
@@ -297,7 +297,7 @@ const onSend = async () => {
   if (conversationInProgress.value) {
     return
   }
-  const content = prompt.value?.trim()
+  const content = prompt.value?.trim() + ''
   if (content.length < 2) {
     ElMessage({
       message: '请输入内容!',
@@ -316,7 +316,7 @@ const onSend = async () => {
   const userMessage = {
     conversationId: conversationId.value,
     content: content
-  }
+  } as ChatMessageVO
   // list.value.push(userMessage)
   // // 滚动到住下面
   // scrollToBottom()
@@ -387,6 +387,9 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
 /** 查询列表 */
 const messageList = async () => {
   try {
+    if (!conversationId.value) {
+      return
+    }
     // 获取列表数据
     const res = await ChatMessageApi.messageList(conversationId.value)
 
@@ -504,7 +507,7 @@ const onPromptInput = (event) => {
   }, 400)
 }
 
-const getConversation = async (conversationId: string) => {
+const getConversation = async (conversationId: number) => {
   // 获取对话信息
   useConversation.value = await ChatConversationApi.getChatConversationMy(conversationId)
   console.log('useConversation.value', useConversation.value)
@@ -527,12 +530,16 @@ const getChatConversationList = async () => {
 
 /** 初始化 **/
 onMounted(async () => {
+  // 设置当前对话
+  if (route.query.conversationId) {
+    conversationId.value = route.query.conversationId as number
+  }
   // 获得聊天会话列表
   await getChatConversationList()
   // 获取对话信息
-  getConversation(conversationId.value)
+  await getConversation(conversationId.value)
   // 获取列表数据
-  messageList()
+  await messageList()
   // scrollToBottom();
   // await nextTick
   // 监听滚动事件，判断用户滚动状态

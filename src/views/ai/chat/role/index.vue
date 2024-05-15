@@ -149,7 +149,10 @@ const handlerCardUse = async (role) => {
   const conversation = await ChatConversationApi.createChatConversationMy(data)
   // 调整页面
   router.push({
-    path: `/ai/chat/index?conversationId=${conversation.id}`
+    path: `/ai/chat/index`,
+    query: {
+      conversationId: conversation,
+    }
   })
 }
 
