@@ -68,8 +68,7 @@
       </el-table-column>
       <el-table-column label="角色类别" align="center" prop="category" />
       <el-table-column label="角色描述" align="center" prop="description" />
-      <el-table-column label="角色欢迎语" align="center" prop="welcomeMessage" />
-      <el-table-column label="角色上下文" align="center" prop="systemMessage" />
+      <el-table-column label="角色设定" align="center" prop="systemMessage" />
       <el-table-column label="是否公开" align="center" prop="publicStatus">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.publicStatus" />

@@ -9,8 +9,7 @@ export interface ChatRoleVO {
   category: string // 角色类别
   sort: number // 角色排序
   description: string // 角色描述
-  welcomeMessage: string // 角色欢迎语
-  systemMessage: string // 角色上下文
+  systemMessage: string // 角色设定
   publicStatus: boolean // 是否公开
   status: number // 状态
 }

@@ -20,12 +20,12 @@ export interface ChatConversationVO {
 
 // AI 聊天会话 API
 export const ChatConversationApi = {
-  // 获取 Conversation
-  get: async (id: string) => {
-    return await request.get({ url: `/ai/chat/conversation/get?id=${id}` })
+  // 获得【我的】聊天会话
+  getChatConversationMy: async (id: string) => {
+    return await request.get({ url: `/ai/chat/conversation/get-my?id=${id}` })
   },
-  // 更新 Conversation
-  updateConversationMy: async (data: ChatConversationVO) => {
+  // 更新【我的】聊天会话
+  updateChatConversationMy: async (data: ChatConversationVO) => {
     return await request.put({ url: `/ai/chat/conversation/update-my`, data })
   },
 

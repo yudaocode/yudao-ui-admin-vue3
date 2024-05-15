@@ -1,5 +1,5 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog title="设定" v-model="dialogVisible">
     <el-form
       ref="formRef"
       :model="formData"
@@ -7,55 +7,20 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="角色名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入角色名称" />
+      <el-form-item label="角色设定" prop="systemContext">
+        <el-input type="textarea" v-model="formData.systemContext" placeholder="请输入角色设定" />
       </el-form-item>
-      <el-form-item label="角色头像" prop="avatar">
-        <UploadImg v-model="formData.avatar" height="60px" width="60px" />
+      <el-form-item label="模型" prop="modelId">
+        <UploadImg v-model="formData.modelId" />
       </el-form-item>
-      <el-form-item label="绑定模型" prop="modelId">
-        <el-select v-model="formData.modelId" placeholder="请选择模型" clearable>
-          <el-option
-            v-for="chatModel in chatModelList"
-            :key="chatModel.id"
-            :label="chatModel.name"
-            :value="chatModel.id"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="角色类别" prop="category">
+      <el-form-item label="上下文数量" prop="category">
         <el-input v-model="formData.category" placeholder="请输入角色类别" />
       </el-form-item>
-      <el-form-item label="角色描述" prop="description">
+      <el-form-item label="话题随机性" prop="description">
         <el-input type="textarea" v-model="formData.description" placeholder="请输入角色描述" />
       </el-form-item>
-      <el-form-item label="角色设定" prop="systemMessage">
+      <el-form-item label="回复数" prop="systemMessage">
         <el-input type="textarea" v-model="formData.systemMessage" placeholder="请输入角色设定" />
-      </el-form-item>
-      <el-form-item label="是否公开" prop="publicStatus">
-        <el-radio-group v-model="formData.publicStatus">
-          <el-radio
-            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="角色排序" prop="sort">
-        <el-input-number v-model="formData.sort" placeholder="请输入角色排序" class="!w-1/1" />
-      </el-form-item>
-      <el-form-item label="开启状态" prop="status">
-        <el-radio-group v-model="formData.status">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -65,23 +30,22 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { getIntDictOptions, getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ChatRoleApi, ChatRoleVO } from '@/api/ai/model/chatRole'
 import { CommonStatusEnum } from '@/utils/constants'
 import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
+import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
 
 /** AI 聊天角色 表单 */
-defineOptions({ name: 'ChatRoleForm' })
+defineOptions({ name: 'ChatConversationUpdateForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
+  systemContext: undefined,
   modelId: undefined,
   name: undefined,
   avatar: undefined,
@@ -105,16 +69,14 @@ const formRef = ref() // 表单 Ref
 const chatModelList = ref([] as ChatModelVO[]) // 聊天模型列表
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (id: number) => {
   dialogVisible.value = true
-  dialogTitle.value = t('action.' + type)
-  formType.value = type
   resetForm()
   // 修改时，设置数据
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ChatRoleApi.getChatRole(id)
+      formData.value = await ChatConversationApi.getChatConversationMy(id)
     } finally {
       formLoading.value = false
     }
@@ -133,13 +95,8 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as ChatRoleVO
-    if (formType.value === 'create') {
-      await ChatRoleApi.createChatRole(data)
-      message.success(t('common.createSuccess'))
-    } else {
-      await ChatRoleApi.updateChatRole(data)
-      message.success(t('common.updateSuccess'))
-    }
+    await ChatRoleApi.updateChatRole(data)
+    message.success(t('common.updateSuccess'))
     dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')

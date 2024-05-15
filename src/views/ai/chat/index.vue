@@ -67,7 +67,8 @@
           {{ useConversation?.title }}
         </div>
         <div>
-          <el-dropdown style="margin-right: 12px" @command="modalClick">
+          <!-- TODO @fan：样式改下；这里我已经改成点击后，弹出了 -->
+          <el-dropdown style="margin-right: 12px" @command="openChatConversationUpdateForm">
             <el-button type="primary">
               <span v-html="useModal?.name"></span>
               <Icon icon="ep:setting" style="margin-left: 10px" />
@@ -185,6 +186,8 @@
       </el-footer>
     </el-container>
   </el-container>
+
+  <ChatConversationUpdateForm ref="chatConversationUpdateFormRef" />
 </template>
 
 <script setup lang="ts">
@@ -194,6 +197,7 @@ import {
   ChatConversationUpdateVO,
   ChatConversationVO
 } from '@/api/ai/chat/conversation'
+import ChatConversationUpdateForm from './components/ChatConversationUpdateForm.vue'
 import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
 import { formatDate } from '@/utils/formatTime'
 import { useClipboard } from '@vueuse/core'
@@ -268,16 +272,17 @@ const updateConversationTitle = async (conversation: ChatConversationVO) => {
     inputValue: conversation.title
   })
   // 发起修改
-  await ChatConversationApi.updateConversationMy({
+  await ChatConversationApi.updateChatConversationMy({
     id: conversation.id,
     title: value
   } as ChatConversationVO)
-  message.success('修改标题成功')
+  message.success('重命名成功')
   // 刷新列表
   await getChatConversationList()
 }
 
-const deleteConversationTitle = (conversation) => {
+/** 删除聊天会话 */
+const deleteConversationTitle = async (conversation: ChatConversationVO) => {
   console.log(conversation)
   // TODO 芋艿：待实现
 }
@@ -453,15 +458,18 @@ const stopStream = async () => {
   conversationInProgress.value = false
 }
 
-const modalClick = async (command) => {
-  const update = {
-    id: conversationId.value,
-    modelId: command.id
-  } as unknown as ChatConversationUpdateVO
-  // 切换 modal
-  useModal.value = command
-  // 更新
-  await ChatConversationApi.updateConversationMy(update)
+/** 修改聊天会话 */
+const chatConversationUpdateFormRef = ref()
+const openChatConversationUpdateForm = async (command) => {
+  // const update = {
+  //   id: conversationId.value,
+  //   modelId: command.id
+  // } as unknown as ChatConversationUpdateVO
+  // // 切换 modal
+  // useModal.value = command
+  // // 更新
+  // await ChatConversationApi.updateChatConversationMy(update)
+  chatConversationUpdateFormRef.value.open(conversationId.value)
 }
 
 const getModalList = async () => {
@@ -506,7 +514,7 @@ const onPromptInput = (event) => {
 
 const getConversation = async (conversationId: string) => {
   // 获取对话信息
-  useConversation.value = await ChatConversationApi.get(conversationId)
+  useConversation.value = await ChatConversationApi.getChatConversationMy(conversationId)
   console.log('useConversation.value', useConversation.value)
   // 选中 modal
   if (useConversation.value) {
