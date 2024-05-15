@@ -203,6 +203,9 @@ import { marked } from 'marked'
 import 'highlight.js/styles/vs2015.min.css'
 import hljs from 'highlight.js'
 
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
+
 // 自定义渲染器
 const renderer = {
   code(code, language, c) {
@@ -256,9 +259,22 @@ const changeConversation = (id: number) => {
   // TODO 芋艿：待实现
 }
 
-const updateConversationTitle = (conversation) => {
-  console.log(conversation)
-  // TODO 芋艿：待实现
+/** 更新聊天会话的标题 */
+const updateConversationTitle = async (conversation: ChatConversationVO) => {
+  // 二次确认
+  const { value } = await ElMessageBox.prompt('修改标题', {
+    inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 判断非空，且非空格
+    inputErrorMessage: '标题不能为空',
+    inputValue: conversation.title
+  })
+  // 发起修改
+  await ChatConversationApi.updateConversationMy({
+    id: conversation.id,
+    title: value
+  } as ChatConversationVO)
+  message.success('修改标题成功')
+  // 刷新列表
+  await getChatConversationList()
 }
 
 const deleteConversationTitle = (conversation) => {
@@ -445,7 +461,7 @@ const modalClick = async (command) => {
   // 切换 modal
   useModal.value = command
   // 更新
-  await ChatConversationApi.update(update)
+  await ChatConversationApi.updateConversationMy(update)
 }
 
 const getModalList = async () => {

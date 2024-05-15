@@ -18,25 +18,15 @@ export interface ChatConversationVO {
   modelMaxContexts?: string // 模型的上下文的最大 Message 数量
 }
 
-export interface ChatConversationUpdateVO {
-  id: string // 会话编号
-  title: string // 会话标题
-  pinned: string // 是否置顶
-  modelId: number // 模型编号
-  temperature: string // 温度参数
-  maxTokens: string // 单条回复的最大 Token 数量
-  maxContexts: string // 上下文的最大 Message 数量
-}
-
 // AI 聊天会话 API
 export const ChatConversationApi = {
   // 获取 Conversation
   get: async (id: string) => {
-    return await request.get({ url: `/ai/chat/conversation/get?id=${id}`})
+    return await request.get({ url: `/ai/chat/conversation/get?id=${id}` })
   },
   // 更新 Conversation
-  update: async (data: ChatConversationUpdateVO) => {
-    return await request.put({ url: `/ai/chat/conversation/update`, data})
+  updateConversationMy: async (data: ChatConversationVO) => {
+    return await request.put({ url: `/ai/chat/conversation/update-my`, data })
   },
 
   // 新增【我的】聊天会话
