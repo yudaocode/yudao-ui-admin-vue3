@@ -90,6 +90,7 @@
         <div class="message-container" ref="messageContainer">
           <div class="chat-list" v-for="(item, index) in list" :key="index">
             <!--  靠左 message  -->
+            <!-- TODO 芋艿：类型判断 -->
             <div class="left-message message-item" v-if="item.type === 'system'">
               <div class="avatar">
                 <el-avatar
@@ -297,24 +298,28 @@ const onSend = async () => {
     return
   }
   const content = prompt.value?.trim()
-  if (content?.length < 2) {
+  if (content.length < 2) {
     ElMessage({
       message: '请输入内容!',
       type: 'error'
     })
     return
   }
+  // TODO 芋艿：这块交互要在优化；应该是先插入到 UI 界面，里面会有当前的消息，和正在思考中；之后发起请求；
   // 清空输入框
   prompt.value = ''
-  const requestParams = {
+  // const requestParams = {
+  //   conversationId: conversationId.value,
+  //   content: content
+  // } as unknown as ChatMessageSendVO
+  // // 添加 message
+  const userMessage = {
     conversationId: conversationId.value,
     content: content
-  } as unknown as ChatMessageSendVO
-  // 添加 message
-  const userMessage = (await ChatMessageApi.add(requestParams)) as unknown as ChatMessageVO
-  list.value.push(userMessage)
-  // 滚动到住下面
-  scrollToBottom()
+  }
+  // list.value.push(userMessage)
+  // // 滚动到住下面
+  // scrollToBottom()
   // stream
   await doSendStream(userMessage)
   //
@@ -330,13 +335,15 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
     let isFirstMessage = true
     let content = ''
     ChatMessageApi.sendStream(
-      userMessage.id,
+      userMessage.conversationId, // TODO 芋艿：这里可能要在优化；
+      userMessage.content,
       conversationInAbortController.value,
       (message) => {
         console.log('message', message)
-        const data = JSON.parse(message.data) as unknown as ChatMessageVO
+        const data = JSON.parse(message.data) // TODO 芋艿：类型处理；
+        // debugger
         // 如果没有内容结束链接
-        if (data.content === '') {
+        if (data.receive.content === '') {
           // 标记对话结束
           conversationInProgress.value = false
           // 结束 stream 对话
@@ -345,9 +352,12 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
         // 首次返回需要添加一个 message 到页面，后面的都是更新
         if (isFirstMessage) {
           isFirstMessage = false
-          list.value.push(data)
+          // debugger
+          list.value.push(data.send)
+          list.value.push(data.receive)
         } else {
-          content = content + data.content
+          // debugger
+          content = content + data.receive.content
           const lastMessage = list.value[list.value.length - 1]
           lastMessage.content = marked(content) as unknown as string
           list.value[list.value - 1] = lastMessage
