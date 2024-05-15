@@ -147,7 +147,10 @@ const handlerCardUse = async (role) => {
   } as unknown as ChatConversationVO
   // 创建对话
   const conversation = await ChatConversationApi.createChatConversationMy(data)
-
+  // 调整页面
+  router.push({
+    path: `/ai/chat/index?conversationId=${conversation.id}`
+  })
 }
 
 // 添加角色成功
