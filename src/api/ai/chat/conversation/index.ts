@@ -13,6 +13,7 @@ export interface ChatConversationVO {
   maxTokens: number // 单条回复的最大 Token 数量
   maxContexts: number // 上下文的最大 Message 数量
   // 额外字段
+  modelName?: string // 模型名字
   roleAvatar?: string // 角色头像
   modelMaxTokens?: string // 模型的单条回复的最大 Token 数量
   modelMaxContexts?: string // 模型的上下文的最大 Message 数量
@@ -24,14 +25,20 @@ export const ChatConversationApi = {
   getChatConversationMy: async (id: number) => {
     return await request.get({ url: `/ai/chat/conversation/get-my?id=${id}` })
   },
+
+  // 新增【我的】聊天会话
+  createChatConversationMy: async (data?: ChatConversationVO) => {
+    return await request.post({ url: `/ai/chat/conversation/create-my`, data })
+  },
+
   // 更新【我的】聊天会话
   updateChatConversationMy: async (data: ChatConversationVO) => {
     return await request.put({ url: `/ai/chat/conversation/update-my`, data })
   },
 
-  // 新增【我的】聊天会话
-  createChatConversationMy: async (data?: ChatConversationVO) => {
-    return await request.post({ url: `/ai/chat/conversation/create-my`, data })
+  // 删除【我的】聊天会话
+  deleteChatConversationMy: async (id: number) => {
+    return await request.delete({ url: `/ai/chat/conversation/delete-my?id=${id}` })
   },
 
   // 获得【我的】聊天会话列表
