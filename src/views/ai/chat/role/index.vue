@@ -3,13 +3,24 @@
   <el-container class="role-container">
     <Header title="角色仓库"/>
     <el-main class="role-main">
-      <el-tabs v-model="activeRole" class="demo-tabs" @tab-click="handleTabsClick">
+      <!-- 搜索按钮 -->
+      <el-input
+        v-model="search"
+        class="search-input"
+        size="large"
+        placeholder="请输入搜索的内容"
+        :suffix-icon="Search"
+        @change="getActiveTabsRole"
+      />
+      <!-- tabs -->
+      <el-tabs v-model="activeRole" class="tabs" @tab-click="handleTabsClick">
         <el-tab-pane class="role-pane" label="我的角色" name="my-role">
           <RoleCategoryList :category-list="categoryList" :active="activeCategory" @onCategoryClick="handlerCategoryClick" />
           <RoleList :role-list="myRoleList" style="margin-top: 20px;" />
         </el-tab-pane>
         <el-tab-pane label="公共角色" name="public-role">
-          <RoleList :role-list="publicRoleList" />
+          <RoleCategoryList :category-list="categoryList" :active="activeCategory" @onCategoryClick="handlerCategoryClick" />
+          <RoleList :role-list="publicRoleList" style="margin-top: 20px;" />
         </el-tab-pane>
       </el-tabs>
     </el-main>
@@ -24,10 +35,12 @@ import RoleList from './RoleList.vue'
 import RoleCategoryList from './RoleCategoryList.vue'
 import {ChatRoleApi, ChatRolePageReqVO, ChatRoleVO} from '@/api/ai/model/chatRole'
 import {TabsPaneContext} from "element-plus";
+import {Search} from "@element-plus/icons-vue";
 
 // 属性定义
 const activeRole = ref<string>('my-role') // 选中的角色
 const loadding = ref<boolean>(true) // 加载中
+const search = ref<string>('') // 加载中
 const myPageNo = ref<number>(1) // my 分页下标
 const myPageSize = ref<number>(50) // my 分页大小
 const myRoleList = ref<ChatRoleVO[]>([]) // my 分页大小
@@ -47,11 +60,12 @@ const handleTabsClick = async (tab: TabsPaneContext) => {
 }
 
 // 获取 my role
-const getMyRole = async (pageNo: number, pageSize: number, category?: string) => {
+const getMyRole = async () => {
   const params:ChatRolePageReqVO = {
-    pageNo,
-    pageSize,
-    category,
+    pageNo: myPageNo.value,
+    pageSize: myPageSize.value,
+    category: activeCategory.value,
+    name: search.value,
     publicStatus: false
   }
   const { total, list } = await ChatRoleApi.getMyPage(params)
@@ -59,11 +73,12 @@ const getMyRole = async (pageNo: number, pageSize: number, category?: string) =>
 }
 
 // 获取 public role
-const getPublicRole = async (pageNo: number, pageSize: number, category?: string) => {
+const getPublicRole = async () => {
   const params:ChatRolePageReqVO = {
-    pageNo,
-    pageSize,
-    category,
+    pageNo: publicPageNo.value,
+    pageSize: publicPageSize.value,
+    category: activeCategory.value,
+    name: search.value,
     publicStatus: true
   }
   const { total, list } = await ChatRoleApi.getMyPage(params)
@@ -71,11 +86,11 @@ const getPublicRole = async (pageNo: number, pageSize: number, category?: string
 }
 
 // 获取选中的 tabs 角色
-const getActiveTabsRole = async (category?: string) => {
+const getActiveTabsRole = async () => {
   if (activeRole.value === 'my-role') {
-    await getMyRole(myPageNo.value, myPageSize.value, category)
+    await getMyRole()
   } else {
-    await getPublicRole(publicPageNo.value, publicPageSize.value, category)
+    await getPublicRole()
   }
 }
 
@@ -91,7 +106,7 @@ const handlerCategoryClick = async (category: string) => {
   } else {
     activeCategory.value = category
   }
-  await getActiveTabsRole(activeCategory.value)
+  await getActiveTabsRole()
 }
 
 //
@@ -122,7 +137,19 @@ onMounted( async () => {
   flex-direction: column;
 
   .role-main {
+    position: relative;
 
+    .search-input {
+      width: 240px;
+      position: absolute;
+      right: 20px;
+      top: 10px;
+      z-index: 100;
+    }
+
+    .tabs {
+      position: relative;
+    }
 
     .role-pane {
       display: flex;
