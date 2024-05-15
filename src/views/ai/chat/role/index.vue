@@ -5,7 +5,7 @@
 
     <Header title="角色仓库"/>
     <el-main class="role-main">
-      <div class="search-container" @click="handlerAddRole">
+      <div class="search-container">
         <!-- 搜索按钮 -->
         <el-input
           v-model="search"
@@ -15,7 +15,7 @@
           :suffix-icon="Search"
           @change="getActiveTabsRole"
         />
-        <el-button type="primary" style="margin-left: 20px;">
+        <el-button type="primary" @click="handlerAddRole" style="margin-left: 20px;">
           <el-icon><User /></el-icon>
           添加角色
         </el-button>
