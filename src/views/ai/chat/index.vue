@@ -26,7 +26,7 @@
           <div>
             <el-text class="mx-1" size="small" tag="b">置顶</el-text>
           </div>
-          <el-row v-for="conversation in conversationList" :key="conversation.id">
+          <el-row v-for="conversation in conversationList" :key="conversation.id" @click="handleConversationClick(conversation.id)">
             <div
               :class="conversation.id === conversationId ? 'conversation active' : 'conversation'"
               @click="changeConversation(conversation.id)"
@@ -526,6 +526,15 @@ const getChatConversationList = async () => {
       changeConversation(conversationList.value[0].id)
     }
   }
+}
+
+// 对话点击
+const handleConversationClick = async (id: number) => {
+  // 切换对话
+  conversationId.value = id
+  console.log('conversationId.value', conversationId.value)
+  // 获取列表数据
+  await messageList()
 }
 
 /** 初始化 **/
