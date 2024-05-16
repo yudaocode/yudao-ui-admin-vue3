@@ -5,7 +5,7 @@
       <div>
         <!-- 左顶部：新建对话 -->
         <el-button class="w-1/1 btn-new-conversation" type="primary" @click="createConversation">
-          <Icon icon="ep:plus" class="mr-5px" />
+          <Icon icon="ep:plus" class="mr-5px"/>
           新建对话
         </el-button>
         <!-- 左顶部：搜索对话 -->
@@ -17,45 +17,50 @@
           @keyup="searchConversation"
         >
           <template #prefix>
-            <Icon icon="ep:search" />
+            <Icon icon="ep:search"/>
           </template>
         </el-input>
         <!-- 左中间：对话列表 -->
         <div class="conversation-list">
           <!-- TODO @fain：置顶、聊天记录、一星期钱、30天前，前端对数据重新做一下分组，或者后端接口改一下 -->
-          <div>
-            <el-text class="mx-1" size="small" tag="b">置顶</el-text>
-          </div>
-          <el-row v-for="conversation in conversationList" :key="conversation.id" @click="handleConversationClick(conversation.id)">
-            <div
-              :class="conversation.id === conversationId ? 'conversation active' : 'conversation'"
-              @click="changeConversation(conversation.id)"
-            >
-              <div class="title-wrapper">
-                <img class="avatar" :src="conversation.roleAvatar" />
-                <span class="title">{{ conversation.title }}</span>
-              </div>
-              <!-- TODO @fan：缺一个【置顶】按钮，效果改成 hover 上去展示 -->
-              <div class="button-wrapper">
-                <el-icon title="编辑" @click="updateConversationTitle(conversation)">
-                  <Icon icon="ep:edit" />
-                </el-icon>
-                <el-icon title="删除会话" @click="deleteChatConversation(conversation)">
-                  <Icon icon="ep:delete" />
-                </el-icon>
-              </div>
+          <div v-for="conversationKey in Object.keys(conversationMap)" :key="conversationKey" >
+            <div v-if="conversationMap[conversationKey].length">
+              <el-text class="mx-1" size="small" tag="b">{{conversationKey}}</el-text>
             </div>
-          </el-row>
+            <el-row
+              v-for="conversation in conversationMap[conversationKey]" 
+              :key="conversation.id"
+              @click="handleConversationClick(conversation.id)">
+              <div
+                :class="conversation.id === conversationId ? 'conversation active' : 'conversation'"
+                @click="changeConversation(conversation.id)"
+              >
+                <div class="title-wrapper">
+                  <img class="avatar" :src="conversation.roleAvatar"/>
+                  <span class="title">{{ conversation.title }}</span>
+                </div>
+                <!-- TODO @fan：缺一个【置顶】按钮，效果改成 hover 上去展示 -->
+                <div class="button-wrapper">
+                  <el-icon title="编辑" @click="updateConversationTitle(conversation)">
+                    <Icon icon="ep:edit"/>
+                  </el-icon>
+                  <el-icon title="删除会话" @click="deleteChatConversation(conversation)">
+                    <Icon icon="ep:delete"/>
+                  </el-icon>
+                </div>
+              </div>
+            </el-row>
+          </div>
         </div>
       </div>
       <!-- 左底部：工具栏 -->
       <div class="tool-box">
         <div @click="handleRoleRepository">
-          <Icon icon="ep:user" />
+          <Icon icon="ep:user"/>
           <el-text size="small">角色仓库</el-text>
         </div>
         <div>
-          <Icon icon="ep:delete" />
+          <Icon icon="ep:delete"/>
           <el-text size="small">清空未置顶对话</el-text>
         </div>
       </div>
@@ -71,16 +76,16 @@
           <!-- TODO @fan：样式改下；这里我已经改成点击后，弹出了 -->
           <el-button type="primary" @click="openChatConversationUpdateForm">
             <span v-html="useConversation?.modelName"></span>
-            <Icon icon="ep:setting" style="margin-left: 10px" />
+            <Icon icon="ep:setting" style="margin-left: 10px"/>
           </el-button>
           <el-button>
-            <Icon icon="ep:user" />
+            <Icon icon="ep:user"/>
           </el-button>
           <el-button>
-            <Icon icon="ep:download" />
+            <Icon icon="ep:download"/>
           </el-button>
           <el-button>
-            <Icon icon="ep:arrow-up" />
+            <Icon icon="ep:arrow-up"/>
           </el-button>
         </div>
       </el-header>
@@ -107,11 +112,11 @@
                 </div>
                 <div class="left-btns">
                   <div class="btn-cus" @click="noCopy(item.content)">
-                    <img class="btn-image" src="../../../assets/ai/copy.svg" />
+                    <img class="btn-image" src="../../../assets/ai/copy.svg"/>
                     <el-text class="btn-cus-text">复制</el-text>
                   </div>
                   <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
-                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px" />
+                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
                     <el-text class="btn-cus-text">删除</el-text>
                   </div>
                 </div>
@@ -133,11 +138,11 @@
                 </div>
                 <div class="right-btns">
                   <div class="btn-cus" @click="noCopy(item.content)">
-                    <img class="btn-image" src="@/assets/ai/copy.svg" />
+                    <img class="btn-image" src="@/assets/ai/copy.svg"/>
                     <el-text class="btn-cus-text">复制</el-text>
                   </div>
                   <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
-                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px" />
+                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
                     <el-text class="btn-cus-text">删除</el-text>
                   </div>
                 </div>
@@ -145,10 +150,10 @@
             </div>
           </div>
         </div>
-      <!--   角色仓库抽屉  -->
-      <el-drawer v-model="drawer" title="角色仓库" size="50%">
-        <Role />
-      </el-drawer>
+        <!--   角色仓库抽屉  -->
+        <el-drawer v-model="drawer" title="角色仓库" size="50%">
+          <Role/>
+        </el-drawer>
       </el-main>
       <el-footer class="footer-container">
         <form @submit.prevent="onSend" class="prompt-from">
@@ -162,7 +167,7 @@
             placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
           ></textarea>
           <div class="prompt-btns">
-            <el-switch />
+            <el-switch/>
             <el-button
               type="primary"
               size="default"
@@ -193,24 +198,25 @@
 </template>
 
 <script setup lang="ts">
-import { ChatMessageApi, ChatMessageSendVO, ChatMessageVO } from '@/api/ai/chat/message'
-import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
+import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
+import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import ChatConversationUpdateForm from './components/ChatConversationUpdateForm.vue'
 import Role from '@/views/ai/chat/role/index.vue'
-import { formatDate } from '@/utils/formatTime'
-import { useClipboard } from '@vueuse/core'
+import {formatDate} from '@/utils/formatTime'
+import {useClipboard} from '@vueuse/core'
 // 转换 markdown
-import { marked } from 'marked'
+import {marked} from 'marked'
 // 代码高亮 https://highlightjs.org/
 import 'highlight.js/styles/vs2015.min.css'
 import hljs from 'highlight.js'
+
 const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
 
 // 自定义渲染器
 const renderer = {
   code(code, language, c) {
-    const highlightHtml = hljs.highlight(code, { language: language, ignoreIllegals: true }).value
+    const highlightHtml = hljs.highlight(code, {language: language, ignoreIllegals: true}).value
     const copyHtml = `<div id="copy" data-copy='${code}' style="position: absolute; right: 10px; top: 5px; color: #fff;cursor: pointer;">复制</div>`
     return `<pre>${copyHtml}<code class="hljs">${highlightHtml}</code></pre>`
   }
@@ -220,8 +226,9 @@ marked.use({
 })
 
 const conversationList = ref([] as ChatConversationVO[])
+const conversationMap = ref<any>({})
 // 初始化 copy 到粘贴板
-const { copy } = useClipboard()
+const {copy} = useClipboard()
 
 const drawer = ref<boolean>(false) // 角色仓库抽屉
 const searchName = ref('') // 查询的内容
@@ -261,7 +268,7 @@ const changeConversation = (id: number) => {
 /** 更新聊天会话的标题 */
 const updateConversationTitle = async (conversation: ChatConversationVO) => {
   // 二次确认
-  const { value } = await ElMessageBox.prompt('修改标题', {
+  const {value} = await ElMessageBox.prompt('修改标题', {
     inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 判断非空，且非空格
     inputErrorMessage: '标题不能为空',
     inputValue: conversation.title
@@ -286,7 +293,8 @@ const deleteChatConversation = async (conversation: ChatConversationVO) => {
     message.success('会话已删除')
     // 刷新列表
     await getChatConversationList()
-  } catch {}
+  } catch {
+  }
 }
 
 const searchConversation = () => {
@@ -532,7 +540,53 @@ const getChatConversationList = async () => {
       changeConversation(conversationList.value[0].id)
     }
   }
+  // map  
+  const groupRes = await conversationTimeGroup(conversationList.value)
+  conversationMap.value = groupRes
 }
+
+const conversationTimeGroup = async (list: ChatConversationVO[]) => {
+  // 排序、指定、时间分组(今天、一天前、三天前、七天前、30天前)
+  const groupMap = {
+    '置顶': [],
+    '今天': [],
+    '一天前': [],
+    '三天前': [],
+    '七天前': [],
+    '三十天前': []
+  }
+  // 当前时间的时间戳
+  const now = Date.now();
+  // 定义时间间隔常量（单位：毫秒）
+  const oneDay = 24 * 60 * 60 * 1000;
+  const threeDays = 3 * oneDay;
+  const sevenDays = 7 * oneDay;
+  const thirtyDays = 30 * oneDay;
+  console.log('listlistlist', list)
+  for (const conversation: ChatConversationVO of list) {
+    // 置顶
+    if (conversation.pinned) {
+      groupMap['置顶'].push(conversation)
+      continue
+    }
+    // 计算时间差（单位：毫秒）
+    const diff = now - conversation.updateTime;
+    // 根据时间间隔判断
+    if (diff < oneDay) {
+      groupMap['今天'].push(conversation)
+    } else if (diff < threeDays) {
+      groupMap['一天前'].push(conversation)
+    } else if (diff < sevenDays) {
+      groupMap['三天前'].push(conversation)
+    } else if (diff < thirtyDays) {
+      groupMap['七天前'].push(conversation)
+    } else {
+      groupMap['三十天前'].push(conversation)
+    }
+  }
+  return groupMap
+}
+
 
 // 对话点击
 const handleConversationClick = async (id: number) => {
