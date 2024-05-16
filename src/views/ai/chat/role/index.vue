@@ -194,10 +194,10 @@ onMounted( async () => {
     position: relative;
 
     .search-container {
-      position: absolute;
-      right: 20px;
-      top: 10px;
-      z-index: 100;
+      //position: absolute;
+      //right: 20px;
+      //top: 10px;
+      //z-index: 100;
     }
 
     .search-input {
