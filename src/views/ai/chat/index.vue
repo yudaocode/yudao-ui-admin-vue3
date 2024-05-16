@@ -1,8 +1,11 @@
 <template>
   <el-container class="ai-layout">
     <!-- 左侧：会话列表 -->
-    <Conversation @onConversationClick="handleConversationClick"
-                  @onConversationClear="handlerConversationClear" />
+    <Conversation :active-id="activeConversationId"
+                  @onConversationClick="handleConversationClick"
+                  @onConversationClear="handlerConversationClear"
+                  @onConversationDelete="handlerConversationDelete"
+    />
     <!-- 右侧：会话详情 -->
     <el-container class="detail-container">
       <!-- 右顶部 TODO 芋艿：右对齐 -->
@@ -30,62 +33,8 @@
 
       <!--  main    -->
       <el-main class="main-container">
-        <div class="message-container" ref="messageContainer">
-          <div class="chat-list" v-for="(item, index) in list" :key="index">
-            <!--  靠左 message  -->
-            <!-- TODO 芋艿：类型判断 -->
-            <div class="left-message message-item" v-if="item.type === 'system'">
-              <div class="avatar">
-                <el-avatar
-                  src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-                />
-              </div>
-              <div class="message">
-                <div>
-                  <el-text class="time">{{ formatDate(item.createTime) }}</el-text>
-                </div>
-                <div class="left-text-container" ref="markdownViewRef">
-                  <MarkdownView class="left-text" :content="item.content" />
-                </div>
-                <div class="left-btns">
-                  <div class="btn-cus" @click="noCopy(item.content)">
-                    <img class="btn-image" src="../../../assets/ai/copy.svg"/>
-                    <el-text class="btn-cus-text">复制</el-text>
-                  </div>
-                  <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
-                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
-                    <el-text class="btn-cus-text">删除</el-text>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!--  靠右 message  -->
-            <div class="right-message message-item" v-if="item.type === 'user'">
-              <div class="avatar">
-                <el-avatar
-                  src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-                />
-              </div>
-              <div class="message">
-                <div>
-                  <el-text class="time">{{ formatDate(item.createTime) }}</el-text>
-                </div>
-                <div class="right-text-container">
-                  <div class="right-text">{{ item.content }}</div>
-                </div>
-                <div class="right-btns">
-                  <div class="btn-cus" @click="noCopy(item.content)">
-                    <img class="btn-image" src="@/assets/ai/copy.svg"/>
-                    <el-text class="btn-cus-text">复制</el-text>
-                  </div>
-                  <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
-                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
-                    <el-text class="btn-cus-text">删除</el-text>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="message-container" >
+          <Message ref="messageRef" :list="list" />
         </div>
       </el-main>
       <el-footer class="footer-container">
@@ -135,8 +84,9 @@
 <script setup lang="ts">
 import MarkdownView from '@/components/MarkdownView/index.vue'
 import Conversation from './Conversation.vue'
+import Message from './Message.vue'
 import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
-import {ChatConversationVO} from '@/api/ai/chat/conversation'
+import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import {formatDate} from '@/utils/formatTime'
 import {useClipboard} from '@vueuse/core'
 import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
@@ -146,7 +96,7 @@ const message = useMessage() // 消息弹窗
 const {copy} = useClipboard() // 初始化 copy 到粘贴板
 
 // ref 属性定义
-const activeConversationId = ref<number | null>(null) // 选中的对话编号
+const activeConversationId = ref<string | null>(null) // 选中的对话编号
 const activeConversation = ref<ChatConversationVO | null>(null) // 选中的 Conversation
 const conversationInProgress = ref(false) // 对话进行中
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
@@ -155,6 +105,7 @@ const prompt = ref<string>() // prompt
 
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
 const messageContainer: any = ref(null)
+const messageRef = ref()
 const isScrolling = ref(false) //用于判断用户是否在滚动
 const isComposing = ref(false) // 判断用户是否在输入
 
@@ -164,14 +115,14 @@ const list = ref<ChatMessageVO[]>([]) // 列表的数据
 // ============ 处理对话滚动 ==============
 
 function scrollToBottom() {
-  nextTick(() => {
-    //注意要使用nexttick以免获取不到dom
-    console.log('isScrolling.value', isScrolling.value)
-    if (!isScrolling.value) {
-      messageContainer.value.scrollTop =
-        messageContainer.value.scrollHeight - messageContainer.value.offsetHeight
-    }
-  })
+  // nextTick(() => {
+  //   //注意要使用nexttick以免获取不到dom
+  //   console.log('isScrolling.value', isScrolling.value)
+  //   if (!isScrolling.value) {
+  //     messageContainer.value.scrollTop =
+  //       messageContainer.value.scrollHeight - messageContainer.value.offsetHeight
+  //   }
+  // })
 }
 
 function handleScroll() {
@@ -179,6 +130,7 @@ function handleScroll() {
   const scrollTop = scrollContainer.scrollTop
   const scrollHeight = scrollContainer.scrollHeight
   const offsetHeight = scrollContainer.offsetHeight
+  console.log('scrollTop', scrollTop)
   if ((scrollTop + offsetHeight) < (scrollHeight - 50)) {
     // 用户开始滚动并在最底部之上，取消保持在最底部的效果
     isScrolling.value = true
@@ -338,7 +290,8 @@ const getMessageList = async () => {
     list.value = await ChatMessageApi.messageList(activeConversationId.value)
     // 滚动到最下面
     await nextTick(() => {
-      scrollToBottom()
+      // 滚动到最后
+      messageRef.value.scrollToBottom(true)
     })
   } finally {
   }
@@ -384,6 +337,8 @@ const handlerTitleSuccess = async () => {
  * 对话 - 点击
  */
 const handleConversationClick = async (conversation: ChatConversationVO) => {
+  // 滚动位置复位
+  isScrolling.value = false
   // 更新选中的对话 id
   activeConversationId.value = conversation.id
   activeConversation.value = conversation
@@ -400,12 +355,32 @@ const handlerConversationClear = async ()=> {
   list.value = []
 }
 
+/**
+ * 对话 - 删除
+ */
+const handlerConversationDelete = async (delConversation: ChatConversationVO) => {
+  // 删除的对话如果是当前选中的，那么久重置
+  if (activeConversationId.value === delConversation.id) {
+    await handlerConversationClear()
+  }
+}
+
+/**
+ * 对话 - 获取
+ */
+const getConversation = async (id: string) => {
+  const conversation: ChatConversationVO = await ChatConversationApi.getChatConversationMy(id)
+  return conversation
+}
+
 /** 初始化 **/
 onMounted(async () => {
   // 设置当前对话 TODO 角色仓库过来的，自带 conversationId 需要选中
-  // if (route.query.conversationId) {
-  //   conversationId.value = route.query.conversationId as number
-  // }
+  if (route.query.conversationId) {
+    const id = route.query.conversationId as string
+    activeConversationId.value = id
+    activeConversation.value = await getConversation(id) as ChatConversationVO
+  }
   // 获得聊天会话列表
   // await getChatConversationList()
   // 获取对话信息
@@ -415,18 +390,18 @@ onMounted(async () => {
   // scrollToBottom();
   // await nextTick
   // 监听滚动事件，判断用户滚动状态
-  messageContainer.value.addEventListener('scroll', handleScroll)
+  // messageContainer.value.addEventListener('scroll', handleScroll)
   // 添加 copy 监听
-  messageContainer.value.addEventListener('click', (e: any) => {
-    console.log(e)
-    if (e.target.id === 'copy') {
-      copy(e.target?.dataset?.copy)
-      ElMessage({
-        message: '复制成功!',
-        type: 'success'
-      })
-    }
-  })
+  // messageContainer.value.addEventListener('click', (e: any) => {
+  //   console.log(e)
+  //   if (e.target.id === 'copy') {
+  //     copy(e.target?.dataset?.copy)
+  //     ElMessage({
+  //       message: '复制成功!',
+  //       type: 'success'
+  //     })
+  //   }
+  // })
 })
 </script>
 
