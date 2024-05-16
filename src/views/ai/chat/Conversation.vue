@@ -87,7 +87,7 @@ const message = useMessage() // 消息弹窗
 
 // 定义属性
 const searchName = ref<string>('') // 对话搜索
-const activeConversationId = ref<number | null>(null) // 选中的对话，默认为 null
+const activeConversationId = ref<string | null>(null) // 选中的对话，默认为 null
 const conversationList = ref([] as ChatConversationVO[])  // 对话列表
 const conversationMap = ref<any>({})  // 对话分组 (置顶、今天、三天前、一星期前、一个月前)
 const drawer = ref<boolean>(false) // 角色仓库抽屉
@@ -95,13 +95,13 @@ const drawer = ref<boolean>(false) // 角色仓库抽屉
 // 定义组件 props
 const props = defineProps({
   activeId: {
-    type: Number || null,
+    type: String || null,
     required: true
   }
 })
 
 // 定义钩子
-const emits = defineEmits(['onConversationClick', 'onConversationClear'])
+const emits = defineEmits(['onConversationClick', 'onConversationClear', 'onConversationDelete'])
 
 /**
  * 对话 - 搜索
@@ -113,7 +113,7 @@ const searchConversation = () => {
 /**
  * 对话 - 点击
  */
-const handleConversationClick = async (id: number) => {
+const handleConversationClick = async (id: string) => {
   // 切换对话
   activeConversationId.value = id
   const filterConversation = conversationList.value.filter(item => {
@@ -227,6 +227,8 @@ const deleteChatConversation = async (conversation: ChatConversationVO) => {
     message.success('会话已删除')
     // 刷新列表
     await getChatConversationList()
+    // 回调
+    emits('onConversationDelete', conversation)
   } catch {
   }
 }
@@ -276,10 +278,16 @@ const handleClearConversation = async () => {
 
 // ============ 组件 onMounted
 
-onMounted(async () => {
-  //
-  if (props.activeId != null) {
+const { activeId } = toRefs(props)
+watch(activeId, async (newValue, oldValue) => {
+  // 更新选中
+  activeConversationId.value = newValue as string
+})
 
+onMounted(async () => {
+  // 默认选中
+  if (props.activeId != null) {
+    activeConversationId.value = props.activeId
   }
   // 获取 对话列表
   await getChatConversationList()
