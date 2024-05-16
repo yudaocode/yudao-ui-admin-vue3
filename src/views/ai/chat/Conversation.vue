@@ -116,9 +116,8 @@ const searchConversation = () => {
 const handleConversationClick = async (id: number) => {
   // 切换对话
   activeConversationId.value = id
-
   const filterConversation = conversationList.value.filter(item => {
-    return item.id !== id
+    return item.id === id
   })
   // 回调 onConversationClick
   emits('onConversationClick', filterConversation[0])
