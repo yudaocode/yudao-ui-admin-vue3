@@ -261,8 +261,11 @@ const createConversation = async () => {
 }
 
 const changeConversation = (id: number) => {
+  // 切换对话
   conversationId.value = id
   // TODO 芋艿：待实现
+  // 刷新 message 列表
+  messageList()
 }
 
 /** 更新聊天会话的标题 */
@@ -535,10 +538,10 @@ const getChatConversationList = async () => {
   conversationList.value = await ChatConversationApi.getChatConversationMyList()
   // 默认选中第一条
   if (conversationList.value.length === 0) {
-    conversationId.value = 0
-    // TODO 芋艿：清空对话
+    conversationId.value = null
+    list.value = []
   } else {
-    if (conversationId.value === 0) {
+    if (conversationId.value === null) {
       conversationId.value = conversationList.value[0].id
       changeConversation(conversationList.value[0].id)
     }
@@ -607,16 +610,30 @@ const handleRoleRepository = async () => {
 
 // 清空对话
 const handleClearConversation = async () => {
-  await ChatConversationApi.deleteMyAllExceptPinned()
-  ElMessage({
-    message: '操作成功!',
-    type: 'success'
+  ElMessageBox.confirm(
+    '确认后对话会全部清空，置顶的对话除外。',
+    '确认提示',
+    {
+      confirmButtonText: '确认',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
+  .then(async () => {
+    await ChatConversationApi.deleteMyAllExceptPinned()
+    ElMessage({
+      message: '操作成功!',
+      type: 'success'
+    })
+    // 清空选中的对话
+    useConversation.value = null
+    conversationId.value = null
+    list.value = []
+    // 获得聊天会话列表
+    await getChatConversationList()
   })
-  // 清空选中的对话
-  useConversation.value = null
-  conversationId.value = null
-  // 获得聊天会话列表
-  await getChatConversationList()
+  .catch(() => {
+  })
 }
 
 
