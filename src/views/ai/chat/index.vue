@@ -50,7 +50,7 @@
       </div>
       <!-- 左底部：工具栏 -->
       <div class="tool-box">
-        <div>
+        <div @click="handleRoleRepository">
           <Icon icon="ep:user" />
           <el-text size="small">角色仓库</el-text>
         </div>
@@ -145,6 +145,10 @@
             </div>
           </div>
         </div>
+      <!--   角色仓库抽屉  -->
+      <el-drawer v-model="drawer" title="角色仓库" size="50%">
+        <Role />
+      </el-drawer>
       </el-main>
       <el-footer class="footer-container">
         <form @submit.prevent="onSend" class="prompt-from">
@@ -192,6 +196,7 @@
 import { ChatMessageApi, ChatMessageSendVO, ChatMessageVO } from '@/api/ai/chat/message'
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
 import ChatConversationUpdateForm from './components/ChatConversationUpdateForm.vue'
+import Role from '@/views/ai/chat/role/index.vue'
 import { formatDate } from '@/utils/formatTime'
 import { useClipboard } from '@vueuse/core'
 // 转换 markdown
@@ -218,6 +223,7 @@ const conversationList = ref([] as ChatConversationVO[])
 // 初始化 copy 到粘贴板
 const { copy } = useClipboard()
 
+const drawer = ref<boolean>(false) // 角色仓库抽屉
 const searchName = ref('') // 查询的内容
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const conversationId = ref<number>(-1) // 选中的对话编号
@@ -537,6 +543,11 @@ const handleConversationClick = async (id: number) => {
   await messageList()
 }
 
+// 角色仓库
+const handleRoleRepository = async () => {
+  drawer.value = !drawer.value
+}
+
 /** 初始化 **/
 onMounted(async () => {
   // 设置当前对话
@@ -669,6 +680,7 @@ onMounted(async () => {
       color: #606266;
       padding: 0;
       margin: 0;
+      cursor: pointer;
 
       > span {
         margin-left: 5px;
