@@ -2,7 +2,7 @@ import request from '@/config/axios'
 
 // AI 聊天会话 VO
 export interface ChatConversationVO {
-  id: number // ID 编号
+  id: string // ID 编号
   userId: number // 用户编号
   title: string // 会话标题
   pinned: boolean // 是否置顶
@@ -23,7 +23,7 @@ export interface ChatConversationVO {
 // AI 聊天会话 API
 export const ChatConversationApi = {
   // 获得【我的】聊天会话
-  getChatConversationMy: async (id: number) => {
+  getChatConversationMy: async (id: string) => {
     return await request.get({ url: `/ai/chat/conversation/get-my?id=${id}` })
   },
 
@@ -38,7 +38,7 @@ export const ChatConversationApi = {
   },
 
   // 删除【我的】聊天会话
-  deleteChatConversationMy: async (id: number) => {
+  deleteChatConversationMy: async (id: string) => {
     return await request.delete({ url: `/ai/chat/conversation/delete-my?id=${id}` })
   },
 
