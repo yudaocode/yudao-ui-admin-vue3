@@ -25,7 +25,7 @@ export interface ChatMessageSendVO {
 // AI chat 聊天
 export const ChatMessageApi = {
   // 消息列表
-  messageList: async (conversationId: number | null) => {
+  messageList: async (conversationId: string | null) => {
     return await request.get({
       url: `/ai/chat/message/list-by-conversation-id?conversationId=${conversationId}`
     })
