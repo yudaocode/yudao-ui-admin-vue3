@@ -42,6 +42,11 @@ export const ChatConversationApi = {
     return await request.delete({ url: `/ai/chat/conversation/delete-my?id=${id}` })
   },
 
+  // 删除【我的】所有对话，置顶除外
+  deleteMyAllExceptPinned: async () => {
+    return await request.delete({ url: `/ai/chat/conversation/delete-my-all-except-pinned` })
+  },
+
   // 获得【我的】聊天会话列表
   getChatConversationMyList: async () => {
     return await request.get({ url: `/ai/chat/conversation/my-list` })

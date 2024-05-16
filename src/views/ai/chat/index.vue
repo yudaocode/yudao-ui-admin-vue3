@@ -59,7 +59,7 @@
           <Icon icon="ep:user"/>
           <el-text size="small">角色仓库</el-text>
         </div>
-        <div>
+        <div @click="handleClearConversation">
           <Icon icon="ep:delete"/>
           <el-text size="small">清空未置顶对话</el-text>
         </div>
@@ -233,7 +233,7 @@ const {copy} = useClipboard()
 const drawer = ref<boolean>(false) // 角色仓库抽屉
 const searchName = ref('') // 查询的内容
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
-const conversationId = ref<number>(-1) // 选中的对话编号
+const conversationId = ref<number | null>(null) // 选中的对话编号
 const conversationInProgress = ref(false) // 对话进行中
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
 
@@ -247,7 +247,7 @@ const isComposing = ref(false) // 判断用户是否在输入
 /** chat message 列表 */
 // defineOptions({ name: 'chatMessageList' })
 const list = ref<ChatMessageVO[]>([]) // 列表的数据
-const useConversation = ref<ChatConversationVO>() // 使用的 Conversation
+const useConversation = ref<ChatConversationVO | null>(null) // 使用的 Conversation
 
 /** 新建对话 */
 const createConversation = async () => {
@@ -521,7 +521,10 @@ const onPromptInput = (event) => {
   }, 400)
 }
 
-const getConversation = async (conversationId: number) => {
+const getConversation = async (conversationId: number | null) => {
+  if (!conversationId) {
+    return
+  }
   // 获取对话信息
   useConversation.value = await ChatConversationApi.getChatConversationMy(conversationId)
   console.log('useConversation.value', useConversation.value)
@@ -601,6 +604,21 @@ const handleConversationClick = async (id: number) => {
 const handleRoleRepository = async () => {
   drawer.value = !drawer.value
 }
+
+// 清空对话
+const handleClearConversation = async () => {
+  await ChatConversationApi.deleteMyAllExceptPinned()
+  ElMessage({
+    message: '操作成功!',
+    type: 'success'
+  })
+  // 清空选中的对话
+  useConversation.value = null
+  conversationId.value = null
+  // 获得聊天会话列表
+  await getChatConversationList()
+}
+
 
 /** 初始化 **/
 onMounted(async () => {
