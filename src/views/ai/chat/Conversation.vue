@@ -189,10 +189,10 @@ const createConversation = async () => {
   const conversationId = await ChatConversationApi.createChatConversationMy(
     {} as unknown as ChatConversationVO
   )
-  // 2、选中对话
-  await handleConversationClick(conversationId)
-  // 3、获取对话内容
+  // 2、获取对话内容
   await getChatConversationList()
+  // 3、选中对话
+  await handleConversationClick(conversationId)
 }
 
 /**
