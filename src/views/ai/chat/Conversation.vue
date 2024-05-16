@@ -128,14 +128,20 @@ const handleConversationClick = async (id: string) => {
  */
 const getChatConversationList = async () => {
   // 1、获取 对话数据
-  conversationList.value = await ChatConversationApi.getChatConversationMyList()
-  // 2、没有 任何对话情况
+  const res = await ChatConversationApi.getChatConversationMyList()
+  // 2、排序
+  res.sort((a, b) => {
+    console.log('sort', a, b)
+    return b.updateTime - a.updateTime
+  })
+  conversationList.value = res
+  // 3、没有 任何对话情况
   if (conversationList.value.length === 0) {
     activeConversationId.value = null
     conversationMap.value = {}
     return
   }
-  // 3、对话根据时间分组(置顶、今天、一天前、三天前、七天前、30天前)
+  // 4、对话根据时间分组(置顶、今天、一天前、三天前、七天前、30天前)
   conversationMap.value = await conversationTimeGroup(conversationList.value)
 }
 
