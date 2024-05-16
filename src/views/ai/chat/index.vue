@@ -386,6 +386,7 @@ const handlerTitleSuccess = async () => {
 const handleConversationClick = async (conversation: ChatConversationVO) => {
   // 更新选中的对话 id
   activeConversationId.value = conversation.id
+  activeConversation.value = conversation
   // 刷新 message 列表
   await getMessageList()
 }
