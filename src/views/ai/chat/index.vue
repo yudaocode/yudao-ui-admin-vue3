@@ -34,7 +34,7 @@
       <!--  main    -->
       <el-main class="main-container">
         <div class="message-container" >
-          <Message ref="messageRef" :list="list" />
+          <Message ref="messageRef" :list="list" @onDeleteSuccess="handlerMessageDelete" />
         </div>
       </el-main>
       <el-footer class="footer-container">
@@ -82,12 +82,10 @@
 </template>
 
 <script setup lang="ts">
-import MarkdownView from '@/components/MarkdownView/index.vue'
 import Conversation from './Conversation.vue'
 import Message from './Message.vue'
 import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
-import {formatDate} from '@/utils/formatTime'
 import {useClipboard} from '@vueuse/core'
 import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
 
@@ -104,9 +102,7 @@ const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
 
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
-const messageContainer: any = ref(null)
 const messageRef = ref()
-const isScrolling = ref(false) //用于判断用户是否在滚动
 const isComposing = ref(false) // 判断用户是否在输入
 
 /** chat message 列表 */
@@ -114,30 +110,10 @@ const list = ref<ChatMessageVO[]>([]) // 列表的数据
 
 // ============ 处理对话滚动 ==============
 
-function scrollToBottom() {
-  // nextTick(() => {
-  //   //注意要使用nexttick以免获取不到dom
-  //   console.log('isScrolling.value', isScrolling.value)
-  //   if (!isScrolling.value) {
-  //     messageContainer.value.scrollTop =
-  //       messageContainer.value.scrollHeight - messageContainer.value.offsetHeight
-  //   }
-  // })
-}
-
-function handleScroll() {
-  const scrollContainer = messageContainer.value
-  const scrollTop = scrollContainer.scrollTop
-  const scrollHeight = scrollContainer.scrollHeight
-  const offsetHeight = scrollContainer.offsetHeight
-  console.log('scrollTop', scrollTop)
-  if ((scrollTop + offsetHeight) < (scrollHeight - 50)) {
-    // 用户开始滚动并在最底部之上，取消保持在最底部的效果
-    isScrolling.value = true
-  } else {
-    // 用户停止滚动并滚动到最底部，开启保持到最底部的效果
-    isScrolling.value = false
-  }
+function scrollToBottom(isIgnore?: boolean) {
+  nextTick(() => {
+    messageRef.value.scrollToBottom(isIgnore)
+  })
 }
 
 // ============= 处理聊天输入回车发送 =============
@@ -203,7 +179,7 @@ const onSend = async () => {
   } as ChatMessageVO
   // list.value.push(userMessage)
   // 滚动到住下面
-  scrollToBottom()
+  await scrollToBottom()
   // stream
   await doSendStream(userMessage)
 }
@@ -221,7 +197,7 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       userMessage.conversationId, // TODO 芋艿：这里可能要在优化；
       userMessage.content,
       conversationInAbortController.value,
-      (message) => {
+      async (message) => {
         console.log('message', message)
         const data = JSON.parse(message.data) // TODO 芋艿：类型处理；
         // debugger
@@ -246,7 +222,7 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
           list.value[list.value - 1] = lastMessage
         }
         // 滚动到最下面
-        scrollToBottom()
+        await scrollToBottom()
       },
       (error) => {
         console.log('error', error)
@@ -291,33 +267,11 @@ const getMessageList = async () => {
     // 滚动到最下面
     await nextTick(() => {
       // 滚动到最后
-      messageRef.value.scrollToBottom(true)
+      scrollToBottom()
     })
   } finally {
   }
 }
-
-function noCopy(content) {
-  copy(content)
-  ElMessage({
-    message: '复制成功!',
-    type: 'success'
-  })
-}
-
-const onDelete = async (id) => {
-  // 删除 message
-  await ChatMessageApi.delete(id)
-  ElMessage({
-    message: '删除成功!',
-    type: 'success'
-  })
-  // tip：如果 stream 进行中的 message，就需要调用 controller 结束
-  await stopStream()
-  // 重新获取 message 列表
-  await getMessageList()
-}
-
 
 /** 修改聊天会话 */
 const chatConversationUpdateFormRef = ref()
@@ -337,13 +291,13 @@ const handlerTitleSuccess = async () => {
  * 对话 - 点击
  */
 const handleConversationClick = async (conversation: ChatConversationVO) => {
-  // 滚动位置复位
-  isScrolling.value = false
   // 更新选中的对话 id
   activeConversationId.value = conversation.id
   activeConversation.value = conversation
   // 刷新 message 列表
   await getMessageList()
+  // 滚动底部
+  scrollToBottom(true)
 }
 
 /**
@@ -373,6 +327,13 @@ const getConversation = async (id: string) => {
   return conversation
 }
 
+// ============ message ===========
+
+const handlerMessageDelete = async () => {
+  // 刷新 message
+  await getMessageList()
+}
+
 /** 初始化 **/
 onMounted(async () => {
   // 设置当前对话 TODO 角色仓库过来的，自带 conversationId 需要选中
@@ -381,10 +342,6 @@ onMounted(async () => {
     activeConversationId.value = id
     activeConversation.value = await getConversation(id) as ChatConversationVO
   }
-  // 获得聊天会话列表
-  // await getChatConversationList()
-  // 获取对话信息
-  // await getConversation(conversationId.value)
   // 获取列表数据
   await getMessageList()
   // scrollToBottom();
@@ -541,120 +498,17 @@ onMounted(async () => {
   margin: 0;
   padding: 0;
   position: relative;
-}
 
-.message-container {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  //width: 100%;
-  //height: 100%;
-  overflow-y: scroll;
-  padding: 0 15px;
-}
-
-// 中间
-.chat-list {
-  display: flex;
-  flex-direction: column;
-  overflow-y: hidden;
-
-  .message-item {
-    margin-top: 50px;
-  }
-
-  .left-message {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .right-message {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-start;
-  }
-
-  .avatar {
-    //height: 170px;
-    //width: 170px;
-  }
-
-  .message {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    margin: 0 15px;
-
-    .time {
-      text-align: left;
-      line-height: 30px;
-    }
-
-    .left-text-container {
-      display: flex;
-      flex-direction: column;
-      overflow-wrap: break-word;
-      background-color: rgba(228, 228, 228, 0.8);
-      box-shadow: 0 0 0 1px rgba(228, 228, 228, 0.8);
-      border-radius: 10px;
-      padding: 10px 10px 5px 10px;
-
-      .left-text {
-        color: #393939;
-        font-size: 0.95rem;
-      }
-    }
-
-    .right-text-container {
-      display: flex;
-      flex-direction: row-reverse;
-
-      .right-text {
-        font-size: 0.95rem;
-        color: #fff;
-        display: inline;
-        background-color: #267fff;
-        color: #fff;
-        box-shadow: 0 0 0 1px #267fff;
-        border-radius: 10px;
-        padding: 10px;
-        width: auto;
-        overflow-wrap: break-word;
-      }
-    }
-
-    .left-btns,
-    .right-btns {
-      display: flex;
-      flex-direction: row;
-      margin-top: 8px;
-    }
-  }
-
-  // 复制、删除按钮
-  .btn-cus {
-    display: flex;
-    background-color: transparent;
-    align-items: center;
-
-    .btn-image {
-      height: 20px;
-      margin-right: 5px;
-    }
-
-    .btn-cus-text {
-      color: #757575;
-    }
-  }
-
-  .btn-cus:hover {
-    cursor: pointer;
-  }
-
-  .btn-cus:focus {
-    background-color: #8c939d;
+  .message-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    //width: 100%;
+    //height: 100%;
+    overflow-y: scroll;
+    padding: 0 15px;
   }
 }
 

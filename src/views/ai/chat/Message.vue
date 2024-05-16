@@ -1,0 +1,269 @@
+<template>
+  <div ref="messageContainer" style="height: 100%;overflow-y: auto;">
+    <div class="chat-list" v-for="(item, index) in list" :key="index" >
+      <!--  靠左 message  -->
+      <!-- TODO 芋艿：类型判断 -->
+      <div class="left-message message-item" v-if="item.type === 'system'">
+        <div class="avatar">
+          <el-avatar
+            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+          />
+        </div>
+        <div class="message">
+          <div>
+            <el-text class="time">{{ formatDate(item.createTime) }}</el-text>
+          </div>
+          <div class="left-text-container" ref="markdownViewRef">
+            <MarkdownView class="left-text" :content="item.content" />
+          </div>
+          <div class="left-btns">
+            <div class="btn-cus" @click="noCopy(item.content)">
+              <img class="btn-image" src="@/assets/ai/copy.svg"/>
+              <el-text class="btn-cus-text">复制</el-text>
+            </div>
+            <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
+              <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
+              <el-text class="btn-cus-text">删除</el-text>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--  靠右 message  -->
+      <div class="right-message message-item" v-if="item.type === 'user'">
+        <div class="avatar">
+          <el-avatar
+            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+          />
+        </div>
+        <div class="message">
+          <div>
+            <el-text class="time">{{ formatDate(item.createTime) }}</el-text>
+          </div>
+          <div class="right-text-container">
+            <div class="right-text">{{ item.content }}</div>
+          </div>
+          <div class="right-btns">
+            <div class="btn-cus" @click="noCopy(item.content)">
+              <img class="btn-image" src="@/assets/ai/copy.svg"/>
+              <el-text class="btn-cus-text">复制</el-text>
+            </div>
+            <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
+              <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
+              <el-text class="btn-cus-text">删除</el-text>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script setup lang="ts">
+import {formatDate} from "@/utils/formatTime";
+import MarkdownView from "@/components/MarkdownView/index.vue";
+import {ChatMessageApi, ChatMessageVO} from "@/api/ai/chat/message";
+import {useClipboard} from "@vueuse/core";
+import {PropType} from "vue";
+
+const {copy} = useClipboard() // 初始化 copy 到粘贴板
+// 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
+const messageContainer: any = ref(null)
+const isScrolling = ref(false) //用于判断用户是否在滚动
+
+// 定义 props
+const props = defineProps({
+  list: {
+    type: Array as PropType<ChatMessageVO[]>,
+    required: true
+  }
+})
+
+
+// ============ 处理对话滚动 ==============
+
+const scrollToBottom = async (isIgnore?: boolean) =>{
+   await nextTick(() => {
+    //注意要使用nexttick以免获取不到dom
+    if (isIgnore || !isScrolling.value) {
+      messageContainer.value.scrollTop =
+        messageContainer.value.scrollHeight - messageContainer.value.offsetHeight
+    }
+  })
+}
+
+function handleScroll() {
+  const scrollContainer = messageContainer.value
+  const scrollTop = scrollContainer.scrollTop
+  const scrollHeight = scrollContainer.scrollHeight
+  const offsetHeight = scrollContainer.offsetHeight
+  console.log('scrollTop', scrollTop)
+  if ((scrollTop + offsetHeight) < (scrollHeight - 100)) {
+    // 用户开始滚动并在最底部之上，取消保持在最底部的效果
+    isScrolling.value = true
+  } else {
+    // 用户停止滚动并滚动到最底部，开启保持到最底部的效果
+    isScrolling.value = false
+  }
+}
+
+/**
+ * 复制
+ */
+const noCopy = async (content) => {
+  copy(content)
+  ElMessage({
+    message: '复制成功!',
+    type: 'success'
+  })
+}
+
+/**
+ * 删除
+ */
+const onDelete = async (id) => {
+  // 删除 message
+  await ChatMessageApi.delete(id)
+  ElMessage({
+    message: '删除成功!',
+    type: 'success'
+  })
+  // 回调
+  emits('onDeleteSuccess')
+}
+
+// 监听 list
+const { list, conversationId } = toRefs(props)
+watch(list, async (newValue, oldValue) => {
+  console.log('watch list', list)
+})
+
+// 提供方法给 parent 调用
+defineExpose({scrollToBottom})
+
+//
+const emits = defineEmits(['onDeleteSuccess'])
+//
+onMounted(async () => {
+  messageContainer.value.addEventListener('scroll', handleScroll)
+})
+</script>
+
+<style scoped lang="scss">
+.message-container {
+  position: relative;
+  //top: 0;
+  //bottom: 0;
+  //left: 0;
+  //right: 0;
+  //width: 100%;
+  //height: 100%;
+  overflow-y: scroll;
+  padding: 0 15px;
+  //z-index: -1;
+
+
+
+}
+
+// 中间
+.chat-list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+
+  .message-item {
+    margin-top: 50px;
+  }
+
+  .left-message {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .right-message {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+  }
+
+  .avatar {
+    //height: 170px;
+    //width: 170px;
+  }
+
+  .message {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    margin: 0 15px;
+
+    .time {
+      text-align: left;
+      line-height: 30px;
+    }
+
+    .left-text-container {
+      display: flex;
+      flex-direction: column;
+      overflow-wrap: break-word;
+      background-color: rgba(228, 228, 228, 0.8);
+      box-shadow: 0 0 0 1px rgba(228, 228, 228, 0.8);
+      border-radius: 10px;
+      padding: 10px 10px 5px 10px;
+
+      .left-text {
+        color: #393939;
+        font-size: 0.95rem;
+      }
+    }
+
+    .right-text-container {
+      display: flex;
+      flex-direction: row-reverse;
+
+      .right-text {
+        font-size: 0.95rem;
+        color: #fff;
+        display: inline;
+        background-color: #267fff;
+        color: #fff;
+        box-shadow: 0 0 0 1px #267fff;
+        border-radius: 10px;
+        padding: 10px;
+        width: auto;
+        overflow-wrap: break-word;
+      }
+    }
+
+    .left-btns,
+    .right-btns {
+      display: flex;
+      flex-direction: row;
+      margin-top: 8px;
+    }
+  }
+
+  // 复制、删除按钮
+  .btn-cus {
+    display: flex;
+    background-color: transparent;
+    align-items: center;
+
+    .btn-image {
+      height: 20px;
+      margin-right: 5px;
+    }
+
+    .btn-cus-text {
+      color: #757575;
+    }
+  }
+
+  .btn-cus:hover {
+    cursor: pointer;
+  }
+
+  .btn-cus:focus {
+    background-color: #8c939d;
+  }
+}
+</style>
