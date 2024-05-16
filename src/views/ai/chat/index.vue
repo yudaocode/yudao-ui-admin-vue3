@@ -179,8 +179,7 @@ function handleScroll() {
   const scrollTop = scrollContainer.scrollTop
   const scrollHeight = scrollContainer.scrollHeight
   const offsetHeight = scrollContainer.offsetHeight
-
-  if (scrollTop + offsetHeight < scrollHeight) {
+  if ((scrollTop + offsetHeight) < (scrollHeight - 50)) {
     // 用户开始滚动并在最底部之上，取消保持在最底部的效果
     isScrolling.value = true
   } else {
