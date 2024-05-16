@@ -1,0 +1,46 @@
+<template>
+  <div class="category-list">
+    <div class="category" v-for="category in categoryList" :key="category">
+      <el-button plain v-if="category !== active" @click="handleCategoryClick(category)">{{ category }}</el-button>
+      <el-button plain type="primary" v-else @click="handleCategoryClick(category)">{{ category }}</el-button>
+    </div>
+  </div>
+</template>
+<script setup lang="ts">
+import {PropType} from "vue";
+
+// 定义属性
+defineProps({
+  categoryList: {
+    type: Array as PropType<string[]>,
+    required: true
+  },
+  active: {
+    type: String,
+    required: false
+  }
+})
+
+// 定义回调
+const emits = defineEmits(['onCategoryClick'])
+
+// 处理分类点击事件
+const handleCategoryClick = async (category) => {
+  emits('onCategoryClick', category)
+}
+
+</script>
+<style scoped lang="scss">
+.category-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+
+  .category {
+    display: flex;
+    flex-direction: row;
+    margin-right: 20px;
+  }
+}
+</style>

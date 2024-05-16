@@ -17,16 +17,26 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入名称" />
+      <el-form-item label="API 秘钥" prop="keyId">
+        <el-select v-model="formData.keyId" placeholder="请选择 API 秘钥" clearable>
+          <el-option
+            v-for="apiKey in apiKeyList"
+            :key="apiKey.id"
+            :label="apiKey.name"
+            :value="apiKey.id"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="密钥" prop="apiKey">
-        <el-input v-model="formData.apiKey" placeholder="请输入密钥" />
+      <el-form-item label="模型名字" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入模型名字" />
       </el-form-item>
-      <el-form-item label="自定义 API URL" prop="url">
-        <el-input v-model="formData.url" placeholder="请输入自定义 API URL" />
+      <el-form-item label="模型标识" prop="model">
+        <el-input v-model="formData.model" placeholder="请输入模型标识" />
       </el-form-item>
-      <el-form-item label="状态" prop="status">
+      <el-form-item label="模型排序" prop="sort">
+        <el-input-number v-model="formData.sort" placeholder="请输入模型排序" class="!w-1/1" />
+      </el-form-item>
+      <el-form-item label="开启状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -37,6 +47,15 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
+      <el-form-item label="温度参数" prop="temperature">
+        <el-input v-model="formData.temperature" placeholder="请输入温度参数" />
+      </el-form-item>
+      <el-form-item label="回复数 Token 数" prop="maxTokens">
+        <el-input v-model="formData.maxTokens" placeholder="请输入回复数 Token 数" />
+      </el-form-item>
+      <el-form-item label="上下文数量" prop="maxContexts">
+        <el-input v-model="formData.maxContexts" placeholder="请输入上下文数量" />
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -45,12 +64,13 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { getIntDictOptions, DICT_TYPE, getStrDictOptions } from '@/utils/dict'
+import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
 import { ApiKeyApi, ApiKeyVO } from '@/api/ai/model/apiKey'
 import { CommonStatusEnum } from '@/utils/constants'
+import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 
-/** AI API 密钥 表单 */
-defineOptions({ name: 'ApiKeyForm' })
+/** API 聊天模型 表单 */
+defineOptions({ name: 'ChatModelForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -61,19 +81,26 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
+  keyId: undefined,
   name: undefined,
-  apiKey: undefined,
+  model: undefined,
   platform: undefined,
-  url: undefined,
-  status: CommonStatusEnum.ENABLE
+  sort: undefined,
+  status: CommonStatusEnum.ENABLE,
+  temperature: undefined,
+  maxTokens: undefined,
+  maxContexts: undefined
 })
 const formRules = reactive({
-  name: [{ required: true, message: '名称不能为空', trigger: 'blur' }],
-  apiKey: [{ required: true, message: '密钥不能为空', trigger: 'blur' }],
-  platform: [{ required: true, message: '平台不能为空', trigger: 'blur' }],
+  keyId: [{ required: true, message: 'API 秘钥不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '模型名字不能为空', trigger: 'blur' }],
+  model: [{ required: true, message: '模型标识不能为空', trigger: 'blur' }],
+  platform: [{ required: true, message: '所属平台不能为空', trigger: 'blur' }],
+  sort: [{ required: true, message: '排序不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
+const apiKeyList = ref([] as ApiKeyVO[]) // API 密钥列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -85,11 +112,13 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ApiKeyApi.getApiKey(id)
+      formData.value = await ChatModelApi.getChatModel(id)
     } finally {
       formLoading.value = false
     }
   }
+  // 获得下拉数据
+  apiKeyList.value = await ApiKeyApi.getApiKeySimpleList(CommonStatusEnum.ENABLE)
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -101,12 +130,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ApiKeyVO
+    const data = formData.value as unknown as ChatModelVO
     if (formType.value === 'create') {
-      await ApiKeyApi.createApiKey(data)
+      await ChatModelApi.createChatModel(data)
       message.success(t('common.createSuccess'))
     } else {
-      await ApiKeyApi.updateApiKey(data)
+      await ChatModelApi.updateChatModel(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -121,11 +150,15 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
+    keyId: undefined,
     name: undefined,
-    apiKey: undefined,
+    model: undefined,
     platform: undefined,
-    url: undefined,
-    status: CommonStatusEnum.ENABLE
+    sort: undefined,
+    status: CommonStatusEnum.ENABLE,
+    temperature: undefined,
+    maxTokens: undefined,
+    maxContexts: undefined
   }
   formRef.value?.resetFields()
 }

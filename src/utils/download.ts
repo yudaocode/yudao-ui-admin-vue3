@@ -29,7 +29,7 @@ const download = {
   html: (data: Blob, fileName: string) => {
     download0(data, fileName, 'text/html')
   },
-  // 下载 Markdown 方法
+  // 下载 MarkdownView 方法
   markdown: (data: Blob, fileName: string) => {
     download0(data, fileName, 'text/markdown')
   }
