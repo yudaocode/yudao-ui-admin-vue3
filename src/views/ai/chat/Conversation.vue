@@ -81,7 +81,6 @@
 <script setup lang="ts">
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import {ref} from "vue";
-import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
 import Role from "@/views/ai/chat/role/index.vue";
 
 const message = useMessage() // 消息弹窗
