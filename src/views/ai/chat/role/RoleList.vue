@@ -1,42 +1,44 @@
 <template>
   <div class="card-list" ref="tabsRef"  @scroll="handleTabsScroll">
-    <el-card class="card" body-class="card-body" v-for="role in roleList" :key="role.id">
-      <!--  更多 -->
-      <div class="more-container">
-        <el-dropdown @command="handleMoreClick">
+    <div class="card-item" v-for="role in roleList" :key="role.id">
+      <el-card class="card" body-class="card-body">
+        <!--  更多 -->
+        <div class="more-container">
+          <el-dropdown @command="handleMoreClick">
           <span class="el-dropdown-link">
              <el-button type="text" >
                 <el-icon><More /></el-icon>
               </el-button>
           </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item :command="['edit', role]" >
-                <el-icon><EditPen /></el-icon>编辑
-              </el-dropdown-item>
-              <el-dropdown-item :command="['delete', role]"  style="color: red;" >
-                <el-icon><Delete /></el-icon>
-                <span>删除</span>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-      <!--  头像 -->
-      <div>
-        <img class="avatar" :src="role.avatar"/>
-      </div>
-      <div class="right-container">
-        <div class="content-container">
-          <div class="title">{{ role.name }}</div>
-          <div class="description">{{ role.description }}</div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item :command="['edit', role]" >
+                  <el-icon><EditPen /></el-icon>编辑
+                </el-dropdown-item>
+                <el-dropdown-item :command="['delete', role]"  style="color: red;" >
+                  <el-icon><Delete /></el-icon>
+                  <span>删除</span>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+        <!--  头像 -->
+        <div>
+          <img class="avatar" :src="role.avatar"/>
+        </div>
+        <div class="right-container">
+          <div class="content-container">
+            <div class="title">{{ role.name }}</div>
+            <div class="description">{{ role.description }}</div>
 
+          </div>
+          <div class="btn-container">
+            <el-button type="primary" size="small" @click="handleUseClick(role)">使用</el-button>
+          </div>
         </div>
-        <div class="btn-container">
-          <el-button type="primary" size="small" @click="handleUseClick(role)">使用</el-button>
-        </div>
-      </div>
-    </el-card>
+      </el-card>
+    </div>
   </div>
 </template>
 
@@ -121,12 +123,17 @@ onMounted(() => {
   height: 100%;
   overflow: auto;
   padding: 0px 25px;
+  align-items: start;
+  align-content: flex-start;
+  justify-content: start;
 
   .card {
+    display: inline-block;
     margin-right: 20px;
     border-radius: 10px;
     margin-bottom: 30px;
     position: relative;
+    //max-height: 152px;
 
     .more-container {
       position: absolute;
