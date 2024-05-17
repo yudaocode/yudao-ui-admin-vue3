@@ -124,8 +124,9 @@ const textRoll = async () => {
     if (textRoleRunning.value) {
       return
     }
+    // 设置状态
     textRoleRunning.value = true
-
+    displayedText.value = ''
     const task = async () => {
       // 调整速度
       const diff = (fullText.value.length - displayedText.value.length) / 10
@@ -137,6 +138,10 @@ const textRoll = async () => {
         textSpeed.value = 50
       } else {
         textSpeed.value = 100
+      }
+      // 对话结束，就按30的速度
+      if (!conversationInProgress.value) {
+        textSpeed.value = 30
       }
 
       console.log(`diff ${diff} 速度 ${textSpeed.value} `)
