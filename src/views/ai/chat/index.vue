@@ -605,8 +605,7 @@ onMounted(async () => {
     resize: none;
     padding: 0px 2px;
     //padding: 5px 5px;
-
-    overflow: hidden;
+    overflow: auto;
   }
 
   .prompt-input:focus {
