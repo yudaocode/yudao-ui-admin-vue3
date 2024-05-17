@@ -106,17 +106,16 @@ const emits = defineEmits(['onConversationClick', 'onConversationClear', 'onConv
 /**
  * 对话 - 搜索
  */
-const searchConversation = (e) => {
+const searchConversation = async (e) => {
   // 恢复数据
   if (!searchName.value.trim().length) {
-    conversationMap.value = conversationTimeGroup(conversationList.value)
+    conversationMap.value = await conversationTimeGroup(conversationList.value)
   } else {
     // 过滤
     const filterValues = conversationList.value.filter(item => {
-      console.log('ss', item.title.indexOf(searchName.value))
-      return item.title.indexOf(searchName.value) !== -1
+      return item.title.includes(searchName.value.trim())
     })
-    conversationMap.value = conversationTimeGroup(filterValues)
+    conversationMap.value = await conversationTimeGroup(filterValues)
   }
 }
 
@@ -196,6 +195,7 @@ const conversationTimeGroup = async (list: ChatConversationVO[]) => {
       groupMap['三十天前'].push(conversation)
     }
   }
+  console.log('----groupMap', groupMap)
   return groupMap
 }
 
