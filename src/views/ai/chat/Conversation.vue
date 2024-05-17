@@ -106,8 +106,18 @@ const emits = defineEmits(['onConversationClick', 'onConversationClear', 'onConv
 /**
  * 对话 - 搜索
  */
-const searchConversation = () => {
-  // TODO fan：待实现
+const searchConversation = (e) => {
+  // 恢复数据
+  if (!searchName.value.trim().length) {
+    conversationMap.value = conversationTimeGroup(conversationList.value)
+  } else {
+    // 过滤
+    const filterValues = conversationList.value.filter(item => {
+      console.log('ss', item.title.indexOf(searchName.value))
+      return item.title.indexOf(searchName.value) !== -1
+    })
+    conversationMap.value = conversationTimeGroup(filterValues)
+  }
 }
 
 /**
