@@ -35,7 +35,7 @@
       <el-main class="main-container">
         <div class="message-container" >
           <Message v-if="list.length > 0" ref="messageRef" :list="list" @on-delete-success="handlerMessageDelete" />
-          <ChatEmpty  v-if="list.length === 0" @on-prompt="onSend"/>
+          <ChatEmpty  v-if="list.length === 0" @on-prompt="doSend"/>
         </div>
       </el-main>
 
@@ -158,7 +158,7 @@ const onPromptInput = (event) => {
 /**
  * 发送消息
  */
-const onSend = async (val?: string) => {
+const onSend = async () => {
   // 判断用户是否在输入
   if (isComposing.value) {
     return
@@ -167,7 +167,11 @@ const onSend = async (val?: string) => {
   if (conversationInProgress.value) {
     return
   }
-  const content = (val ? val : prompt.value?.trim()) as string
+  const content = prompt.value?.trim() as string
+  await doSend(content)
+}
+
+const doSend = async (content: string) => {
   if (content.length < 2) {
     ElMessage({
       message: '请输入内容!',
@@ -176,10 +180,10 @@ const onSend = async (val?: string) => {
     return
   }
   if (activeConversationId.value == null) {
-      ElMessage({
-        message: '还没创建对话，不能发送!',
-        type: 'error'
-      })
+    ElMessage({
+      message: '还没创建对话，不能发送!',
+      type: 'error'
+    })
     return
   }
   // TODO 芋艿：这块交互要在优化；应该是先插入到 UI 界面，里面会有当前的消息，和正在思考中；之后发起请求；
