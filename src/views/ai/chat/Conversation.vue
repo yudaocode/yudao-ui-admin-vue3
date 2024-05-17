@@ -134,13 +134,17 @@ const getChatConversationList = async () => {
     return b.updateTime - a.updateTime
   })
   conversationList.value = res
-  // 3、没有 任何对话情况
+  // 3、默认选中
+  if (!activeId?.value) {
+    await handleConversationClick(res[0].id)
+  }
+  // 4、没有 任何对话情况
   if (conversationList.value.length === 0) {
     activeConversationId.value = null
     conversationMap.value = {}
     return
   }
-  // 4、对话根据时间分组(置顶、今天、一天前、三天前、七天前、30天前)
+  // 5、对话根据时间分组(置顶、今天、一天前、三天前、七天前、30天前)
   conversationMap.value = await conversationTimeGroup(conversationList.value)
 }
 
