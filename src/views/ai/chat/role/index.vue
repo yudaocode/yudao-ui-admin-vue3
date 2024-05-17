@@ -133,8 +133,10 @@ const getPublicRole = async (append?: boolean) => {
 // 获取选中的 tabs 角色
 const getActiveTabsRole = async () => {
   if (activeRole.value === 'my-role') {
+    myPageNo.value = 1
     await getMyRole()
   } else {
+    publicPageNo.value = 1
     await getPublicRole()
   }
 }
