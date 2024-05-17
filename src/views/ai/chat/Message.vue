@@ -3,7 +3,7 @@
     <div class="chat-list" v-for="(item, index) in list" :key="index" >
       <!--  靠左 message  -->
       <!-- TODO 芋艿：类型判断 -->
-      <div class="left-message message-item" v-if="item.type === 'system'">
+      <div class="left-message message-item" v-if="item.type !== 'user'">
         <div class="avatar">
           <el-avatar
             src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
@@ -156,10 +156,8 @@ onMounted(async () => {
   //width: 100%;
   //height: 100%;
   overflow-y: scroll;
-  padding: 0 15px;
+  //padding: 0 15px;
   //z-index: -1;
-
-
 
 }
 
@@ -168,7 +166,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   overflow-y: hidden;
-
+  padding: 0 20px;
   .message-item {
     margin-top: 50px;
   }
