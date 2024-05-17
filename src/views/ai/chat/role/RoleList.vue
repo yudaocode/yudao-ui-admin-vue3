@@ -1,5 +1,5 @@
 <template>
-  <div class="card-list">
+  <div class="card-list" ref="tabsRef"  @scroll="handleTabsScroll">
     <el-card class="card" body-class="card-body" v-for="role in roleList" :key="role.id">
       <!--  更多 -->
       <div class="more-container">
@@ -42,18 +42,24 @@
 
 <script setup lang="ts">
 import {ChatRoleVO} from '@/api/ai/model/chatRole'
-import {PropType} from "vue";
+import {PropType, ref} from "vue";
 import {Delete, EditPen, More} from "@element-plus/icons-vue";
+
+const tabsRef = ref<any>() // tabs ref
 
 // 定义属性
 const props = defineProps({
+  loading: {
+    type: Boolean,
+    required: true
+  },
   roleList: {
     type: Array as PropType<ChatRoleVO[]>,
     required: true
   }
 })
 // 定义钩子
-const emits = defineEmits(['onDelete', 'onEdit', 'onUse'])
+const emits = defineEmits(['onDelete', 'onEdit', 'onUse', 'onPage'])
 
 // more 点击
 const handleMoreClick = async (data) => {
@@ -69,6 +75,19 @@ const handleMoreClick = async (data) => {
 // 使用
 const handleUseClick = (role) => {
   emits('onUse', role)
+}
+
+const handleTabsScroll = async () => {
+  if (tabsRef.value) {
+    const { scrollTop, scrollHeight, clientHeight } = tabsRef.value;
+    console.log('scrollTop', scrollTop)
+    if (scrollTop + clientHeight >= scrollHeight - 20 && !props.loading) {
+      console.log('分页')
+      // page.value++;
+      // fetchData(page.value);
+      await emits('onPage')
+    }
+  }
 }
 
 onMounted(() => {
@@ -99,6 +118,9 @@ onMounted(() => {
   flex-direction: row;
   flex-wrap: wrap;
   position: relative;
+  height: 100%;
+  overflow: auto;
+  padding: 0px 25px;
 
   .card {
     margin-right: 20px;

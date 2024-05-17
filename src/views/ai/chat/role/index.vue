@@ -1,13 +1,15 @@
 <!-- chat 角色仓库 -->
 <template>
   <el-container class="role-container">
-    <ChatRoleForm  ref="formRef" @success="handlerAddRoleSuccess"  />
-
-    <Header title="角色仓库"/>
+    <ChatRoleForm ref="formRef" @success="handlerAddRoleSuccess"/>
+    <!--  header  -->
+    <Header title="角色仓库" style="position: relative"/>
+    <!--  main  -->
     <el-main class="role-main">
       <div class="search-container">
         <!-- 搜索按钮 -->
         <el-input
+          :loading="loading"
           v-model="search"
           class="search-input"
           size="default"
@@ -16,18 +18,38 @@
           @change="getActiveTabsRole"
         />
         <el-button type="primary" @click="handlerAddRole" style="margin-left: 20px;">
-          <el-icon><User /></el-icon>
+          <el-icon>
+            <User/>
+          </el-icon>
           添加角色
         </el-button>
       </div>
       <!-- tabs -->
       <el-tabs v-model="activeRole" class="tabs" @tab-click="handleTabsClick">
         <el-tab-pane class="role-pane" label="我的角色" name="my-role">
-          <RoleList :role-list="myRoleList" @onDelete="handlerCardDelete" @onEdit="handlerCardEdit" @onUse="handlerCardUse" style="margin-top: 20px;" />
+          <RoleList
+            :loading="loading"
+            :role-list="myRoleList"
+            @on-delete="handlerCardDelete"
+            @on-edit="handlerCardEdit"
+            @on-use="handlerCardUse"
+            @on-page="handlerCardPage('my')"
+            style="margin-top: 20px;"/>
         </el-tab-pane>
         <el-tab-pane label="公共角色" name="public-role">
-          <RoleCategoryList :category-list="categoryList" :active="activeCategory" @onCategoryClick="handlerCategoryClick" />
-          <RoleList :role-list="publicRoleList" @onDelete="handlerCardDelete" @onEdit="handlerCardEdit" style="margin-top: 20px;" />
+          <RoleCategoryList
+            class="role-category-list"
+            :category-list="categoryList"
+            :active="activeCategory"
+            @on-category-click="handlerCategoryClick"
+          />
+          <RoleList
+            :role-list="publicRoleList"
+            @on-delete="handlerCardDelete"
+            @on-edit="handlerCardEdit"
+            @on-page="handlerCardPage('public')"
+            style="margin-top: 20px;"
+          />
         </el-tab-pane>
       </el-tabs>
     </el-main>
@@ -51,14 +73,14 @@ import {Search, User} from "@element-plus/icons-vue";
 const router = useRouter()
 
 // 属性定义
+const loading = ref<boolean>(false) // 加载中
 const activeRole = ref<string>('my-role') // 选中的角色
-const loadding = ref<boolean>(true) // 加载中
 const search = ref<string>('') // 加载中
 const myPageNo = ref<number>(1) // my 分页下标
-const myPageSize = ref<number>(20) // my 分页大小
+const myPageSize = ref<number>(50) // my 分页大小
 const myRoleList = ref<ChatRoleVO[]>([]) // my 分页大小
 const publicPageNo = ref<number>(1) // public 分页下标
-const publicPageSize = ref<number>(20) // public 分页大小
+const publicPageSize = ref<number>(50) // public 分页大小
 const publicRoleList = ref<ChatRoleVO[]>([]) // public 分页大小
 const activeCategory = ref<string>('') // 选择中的分类
 const categoryList = ref<string[]>([]) // 角色分类类别
@@ -74,29 +96,38 @@ const handleTabsClick = async (tab: TabsPaneContext) => {
 }
 
 // 获取 my role
-const getMyRole = async () => {
-  const params:ChatRolePageReqVO = {
+const getMyRole = async (append?: boolean) => {
+  const params: ChatRolePageReqVO = {
     pageNo: myPageNo.value,
     pageSize: myPageSize.value,
     category: activeCategory.value,
     name: search.value,
     publicStatus: false
   }
-  const { total, list } = await ChatRoleApi.getMyPage(params)
-  myRoleList.value = list
+  const {total, list} = await ChatRoleApi.getMyPage(params)
+  if (append) {
+    myRoleList.value.push.apply(myRoleList.value, list)
+    console.log('myRoleList.value.push', myRoleList.value)
+  } else {
+    myRoleList.value = list
+  }
 }
 
 // 获取 public role
-const getPublicRole = async () => {
-  const params:ChatRolePageReqVO = {
+const getPublicRole = async (append?: boolean) => {
+  const params: ChatRolePageReqVO = {
     pageNo: publicPageNo.value,
     pageSize: publicPageSize.value,
     category: activeCategory.value,
     name: search.value,
     publicStatus: true
   }
-  const { total, list } = await ChatRoleApi.getMyPage(params)
-  publicRoleList.value = list
+  const {total, list} = await ChatRoleApi.getMyPage(params)
+  if (append) {
+    publicRoleList.value.push.apply(publicRoleList.value, list)
+  } else {
+    publicRoleList.value = list
+  }
 }
 
 // 获取选中的 tabs 角色
@@ -140,9 +171,26 @@ const handlerCardEdit = async (role) => {
   formRef.value.open('my-update', role.id, '编辑角色')
 }
 
+// card 分页
+const handlerCardPage = async (type) => {
+  console.log('handlerCardPage', type)
+  try {
+    loading.value = true
+    if (type === 'public') {
+      publicPageNo.value++
+      await getPublicRole(true)
+    } else {
+      myPageNo.value++
+      await getMyRole(true)
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
 // card 使用
 const handlerCardUse = async (role) => {
-  const data : ChatConversationVO = {
+  const data: ChatConversationVO = {
     roleId: role.id
   } as unknown as ChatConversationVO
   // 创建对话
@@ -157,47 +205,60 @@ const handlerCardUse = async (role) => {
 }
 
 // 添加角色成功
-const handlerAddRoleSuccess = async  (e) => {
+const handlerAddRoleSuccess = async (e) => {
   console.log(e)
   // 刷新数据
   await getActiveTabsRole()
 }
 
 //
-onMounted( async () => {
+onMounted(async () => {
   // 获取分类
   await getRoleCategoryList()
   // 获取 role 数据
   await getActiveTabsRole()
 })
 </script>
+<style lang="css">
+
+.el-tabs__content {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.el-tabs__nav-scroll {
+  margin: 10px 20px;
+}
+
+</style>
 <!-- 样式 -->
 <style scoped lang="scss">
 
 // 跟容器
 .role-container {
   position: absolute;
-  margin: 0;
-  padding: 0;
   width: 100%;
   height: 100%;
+  margin: 0;
+  padding: 0;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
   background-color: #ffffff;
-
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 
   .role-main {
-    position: relative;
+    flex: 1;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
 
     .search-container {
-      //position: absolute;
-      //right: 20px;
-      //top: 10px;
-      //z-index: 100;
+      margin: 20px 20px 0px 20px;
     }
 
     .search-input {
@@ -206,11 +267,19 @@ onMounted( async () => {
 
     .tabs {
       position: relative;
+      height: 100%;
+
+      .role-category-list {
+        margin: 0 27px;
+      }
     }
 
     .role-pane {
       display: flex;
       flex-direction: column;
+      height: 100%;
+      overflow-y: auto;
+      position: relative;
     }
   }
 }
