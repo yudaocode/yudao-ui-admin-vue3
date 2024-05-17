@@ -32,10 +32,12 @@
       </el-header>
 
       <!-- main -->
-      <el-main class="main-container">
-        <div class="message-container" >
-          <Message v-if="list.length > 0" ref="messageRef" :list="list" @on-delete-success="handlerMessageDelete" />
-          <ChatEmpty  v-if="list.length === 0" @on-prompt="doSend"/>
+      <el-main class="main-container" >
+        <div >
+          <div class="message-container" >
+            <Message v-if="list.length > 0" ref="messageRef" :list="list" @on-delete-success="handlerMessageDelete" />
+            <ChatEmpty  v-if="list.length === 0" @on-prompt="doSend"/>
+          </div>
         </div>
       </el-main>
 
@@ -450,7 +452,6 @@ onMounted(async () => {
   left: 0;
   height: 100%;
   width: 100%;
-  //padding: 15px 15px;
 }
 
 .conversation-container {
@@ -577,6 +578,8 @@ onMounted(async () => {
   margin: 0;
   padding: 0;
   position: relative;
+  height: 100%;
+  width: 100%;
 
   .message-container {
     position: absolute;
@@ -586,8 +589,9 @@ onMounted(async () => {
     right: 0;
     //width: 100%;
     //height: 100%;
-    overflow-y: scroll;
-    padding: 0 15px;
+    overflow-y: hidden;
+    padding: 0;
+    margin: 0;
   }
 }
 
