@@ -259,9 +259,6 @@ const doSend = async (content: string) => {
     conversationId: activeConversationId.value,
     content: content
   } as ChatMessageVO
-  // list.value.push(userMessage)
-  // 滚动到住下面
-  // await scrollToBottom()
   // stream
   await doSendStream(userMessage)
 }
@@ -274,6 +271,21 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
   // 设置为空
   fullText.value = ''
   try {
+    // 先添加两个假数据，等 stream 返回再替换
+    list.value.push({
+      id: -1,
+      conversationId: activeConversationId.value,
+      type: 'user',
+      content: userMessage.content,
+      createTime: new Date()
+    } as ChatMessageVO)
+    list.value.push({
+      id: -2,
+      conversationId: activeConversationId.value,
+      type: 'system',
+      content: '思考中...',
+      createTime: new Date()
+    } as ChatMessageVO)
     // 开始滚动
     textRoll()
     // 发送 event stream
@@ -291,20 +303,20 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
           conversationInProgress.value = false
           // 结束 stream 对话
           conversationInAbortController.value.abort()
+          return
         }
         // 首次返回需要添加一个 message 到页面，后面的都是更新
         if (isFirstMessage) {
           isFirstMessage = false
-          // debugger
+          // 弹出两个 假数据
+          list.value.pop()
+          list.value.pop()
+          // 更新返回的数据
           list.value.push(data.send)
           list.value.push(data.receive)
-        } else {
-          // debugger
-          fullText.value = fullText.value + data.receive.content
-          // const lastMessage = list.value[list.value.length - 1]
-          // lastMessage.content = content
-          // list.value[list.value - 1] = lastMessage
         }
+        // debugger
+        fullText.value = fullText.value + data.receive.content
         // 滚动到最下面
         await scrollToBottom()
       },
