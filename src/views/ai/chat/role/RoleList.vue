@@ -123,6 +123,7 @@ onMounted(() => {
   height: 100%;
   overflow: auto;
   padding: 0px 25px;
+  padding-bottom: 140px;
   align-items: start;
   align-content: flex-start;
   justify-content: start;
