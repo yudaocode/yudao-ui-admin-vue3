@@ -42,8 +42,9 @@
               </div>
               <!-- TODO @fan：缺一个【置顶】按钮，效果改成 hover 上去展示 -->
               <div class="button-wrapper">
-                <el-button link>
-                  <el-icon title="置顶"><Top /></el-icon>
+                <el-button link @click="handlerTop(conversation)">
+                  <el-icon title="置顶" v-if="!conversation.pinned"><Top /></el-icon>
+                  <el-icon title="置顶" v-if="conversation.pinned"><Bottom /></el-icon>
                 </el-button>
                 <el-button link @click="updateConversationTitle(conversation)">
                   <el-icon title="编辑" >
@@ -89,7 +90,7 @@
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import {ref} from "vue";
 import Role from "@/views/ai/chat/role/index.vue";
-import {Top} from "@element-plus/icons-vue";
+import {Bottom, Top} from "@element-plus/icons-vue";
 
 const message = useMessage() // 消息弹窗
 
@@ -259,6 +260,16 @@ const deleteChatConversation = async (conversation: ChatConversationVO) => {
   }
 }
 
+/**
+ * 对话置顶
+ */
+const handlerTop = async (conversation: ChatConversationVO) => {
+  // 更新对话置顶
+  conversation.pinned = !conversation.pinned
+  await ChatConversationApi.updateChatConversationMy(conversation)
+  // 刷新对话
+  await getChatConversationList()
+}
 
 // ============ 角色仓库
 
