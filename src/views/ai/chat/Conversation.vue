@@ -71,7 +71,7 @@
     <!-- ============= 额外组件 ============= -->
 
     <!--   角色仓库抽屉  -->
-    <el-drawer v-model="drawer" title="角色仓库" size="50%">
+    <el-drawer v-model="drawer" title="角色仓库" size="754px">
       <Role/>
     </el-drawer>
 
