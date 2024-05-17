@@ -202,6 +202,7 @@ onMounted(async () => {
     }
 
     .left-text-container {
+      position: relative;
       display: flex;
       flex-direction: column;
       overflow-wrap: break-word;
