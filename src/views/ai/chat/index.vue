@@ -106,9 +106,70 @@ const conversationInAbortController = ref<any>() // 对话进行中 abort 控制
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
 
+const fullText = ref('');
+const displayedText = ref('');
+const textSpeed = ref<number>(50); // Typing speed in milliseconds
+const textRoleRunning = ref<boolean>(false); // Typing speed in milliseconds
+
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
 const messageRef = ref()
 const isComposing = ref(false) // 判断用户是否在输入
+
+// =========== 自提滚动效果
+
+const textRoll = async () => {
+  let index = 0;
+  try {
+    // 只能执行一次
+    if (textRoleRunning.value) {
+      return
+    }
+    textRoleRunning.value = true
+
+    const task = async () => {
+      // 调整速度
+      const diff = (fullText.value.length - displayedText.value.length) / 10
+      if (diff > 5) {
+        textSpeed.value = 10
+      } else if (diff > 2) {
+        textSpeed.value = 30
+      } else if (diff > 1.5) {
+        textSpeed.value = 50
+      } else {
+        textSpeed.value = 100
+      }
+
+      console.log(`diff ${diff} 速度 ${textSpeed.value} `)
+      // console.log('index < fullText.value.length', index < fullText.value.length, conversationInProgress.value)
+
+      if (index < fullText.value.length) {
+        displayedText.value += fullText.value[index];
+        index++;
+
+        // 更新 message
+        const lastMessage = list.value[list.value.length - 1]
+        lastMessage.content = displayedText.value
+        list.value[list.value - 1] = lastMessage
+        // 滚动到住下面
+        await scrollToBottom()
+        // 重新设置任务
+        timer = setTimeout(task, textSpeed.value);
+      } else {
+        // 不是对话中可以结束
+        if (!conversationInProgress.value) {
+          textRoleRunning.value = false
+          clearTimeout(timer);
+          console.log("字体滚动退出!")
+        } else {
+          // 重新设置任务
+          timer = setTimeout(task, textSpeed.value);
+        }
+      }
+    }
+    let timer = setTimeout(task, textSpeed.value);
+  } finally {
+  }
+};
 
 /** chat message 列表 */
 const list = ref<ChatMessageVO[]>([]) // 列表的数据
@@ -195,7 +256,7 @@ const doSend = async (content: string) => {
   } as ChatMessageVO
   // list.value.push(userMessage)
   // 滚动到住下面
-  await scrollToBottom()
+  // await scrollToBottom()
   // stream
   await doSendStream(userMessage)
 }
@@ -205,10 +266,13 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
   conversationInAbortController.value = new AbortController()
   // 标记对话进行中
   conversationInProgress.value = true
+  // 设置为空
+  fullText.value = ''
   try {
+    // 开始滚动
+    textRoll()
     // 发送 event stream
     let isFirstMessage = true
-    let content = ''
     ChatMessageApi.sendStream(
       userMessage.conversationId, // TODO 芋艿：这里可能要在优化；
       userMessage.content,
@@ -231,10 +295,10 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
           list.value.push(data.receive)
         } else {
           // debugger
-          content = content + data.receive.content
-          const lastMessage = list.value[list.value.length - 1]
-          lastMessage.content = content
-          list.value[list.value - 1] = lastMessage
+          fullText.value = fullText.value + data.receive.content
+          // const lastMessage = list.value[list.value.length - 1]
+          // lastMessage.content = content
+          // list.value[list.value - 1] = lastMessage
         }
         // 滚动到最下面
         await scrollToBottom()
