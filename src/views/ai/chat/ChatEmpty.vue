@@ -19,7 +19,7 @@ const router = useRouter()
 const promptList = ref<any[]>() // 角色列表
 promptList.value = [
   {
-    "prompt": "今天天气怎么样?",
+    "prompt": "今天气怎么样?",
   },
   {
     "prompt": "写一首好听的诗歌?",
