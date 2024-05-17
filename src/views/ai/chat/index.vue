@@ -198,7 +198,6 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       userMessage.content,
       conversationInAbortController.value,
       async (message) => {
-        console.log('message', message)
         const data = JSON.parse(message.data) // TODO 芋艿：类型处理；
         // debugger
         // 如果没有内容结束链接
@@ -225,14 +224,12 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
         await scrollToBottom()
       },
       (error) => {
-        console.log('error', error)
         // 标记对话结束
         conversationInProgress.value = false
         // 结束 stream 对话
         conversationInAbortController.value.abort()
       },
       () => {
-        console.log('close')
         // 标记对话结束
         conversationInProgress.value = false
         // 结束 stream 对话

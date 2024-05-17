@@ -131,7 +131,6 @@ const getChatConversationList = async () => {
   const res = await ChatConversationApi.getChatConversationMyList()
   // 2、排序
   res.sort((a, b) => {
-    console.log('sort', a, b)
     return b.updateTime - a.updateTime
   })
   conversationList.value = res
@@ -162,7 +161,6 @@ const conversationTimeGroup = async (list: ChatConversationVO[]) => {
   const threeDays = 3 * oneDay;
   const sevenDays = 7 * oneDay;
   const thirtyDays = 30 * oneDay;
-  console.log('listlistlist', list)
   for (const conversation: ChatConversationVO of list) {
     // 置顶
     if (conversation.pinned) {
