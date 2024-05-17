@@ -1,6 +1,6 @@
 
 <template>
-  <div ref="contentRef" v-html="contentHtml"></div>
+  <div ref="contentRef" class="markdown-view" v-html="contentHtml"></div>
 </template>
 
 <script setup lang="ts">
@@ -75,7 +75,7 @@ onMounted(async ()  => {
 </script>
 
 
-<style scoped lang="scss">
+<style lang="scss">
 .markdown-view {
   font-family: PingFang SC;
   font-size: 0.95rem;
