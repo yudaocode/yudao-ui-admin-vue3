@@ -42,12 +42,19 @@
               </div>
               <!-- TODO @fan：缺一个【置顶】按钮，效果改成 hover 上去展示 -->
               <div class="button-wrapper">
-                <el-icon title="编辑" @click="updateConversationTitle(conversation)">
-                  <Icon icon="ep:edit"/>
-                </el-icon>
-                <el-icon title="删除会话" @click="deleteChatConversation(conversation)">
-                  <Icon icon="ep:delete"/>
-                </el-icon>
+                <el-button link>
+                  <el-icon title="置顶"><Top /></el-icon>
+                </el-button>
+                <el-button link @click="updateConversationTitle(conversation)">
+                  <el-icon title="编辑" >
+                    <Icon icon="ep:edit"/>
+                  </el-icon>
+                </el-button>
+                <el-button link @click="deleteChatConversation(conversation)">
+                  <el-icon title="删除会话" >
+                    <Icon icon="ep:delete"/>
+                  </el-icon>
+                </el-button>
               </div>
             </div>
           </el-row>
@@ -82,6 +89,7 @@
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import {ref} from "vue";
 import Role from "@/views/ai/chat/role/index.vue";
+import {Top} from "@element-plus/icons-vue";
 
 const message = useMessage() // 消息弹窗
 
@@ -313,6 +321,12 @@ onMounted(async () => {
 
 </script>
 
+<style>
+.el-button--default {
+  margin: 0!important;
+}
+</style>
+
 <style scoped lang="scss">
 
 .conversation-container {
@@ -386,7 +400,7 @@ onMounted(async () => {
         color: #606266;
 
         .el-icon {
-          margin-right: 5px;
+          //margin-right: 5px;
         }
       }
     }
