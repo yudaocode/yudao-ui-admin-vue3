@@ -175,6 +175,13 @@ const onSend = async (val?: string) => {
     })
     return
   }
+  if (activeConversationId.value == null) {
+      ElMessage({
+        message: '还没创建对话，不能发送!',
+        type: 'error'
+      })
+    return
+  }
   // TODO 芋艿：这块交互要在优化；应该是先插入到 UI 界面，里面会有当前的消息，和正在思考中；之后发起请求；
   // 清空输入框
   prompt.value = ''
@@ -346,21 +353,6 @@ onMounted(async () => {
   }
   // 获取列表数据
   await getMessageList()
-  // scrollToBottom();
-  // await nextTick
-  // 监听滚动事件，判断用户滚动状态
-  // messageContainer.value.addEventListener('scroll', handleScroll)
-  // 添加 copy 监听
-  // messageContainer.value.addEventListener('click', (e: any) => {
-  //   console.log(e)
-  //   if (e.target.id === 'copy') {
-  //     copy(e.target?.dataset?.copy)
-  //     ElMessage({
-  //       message: '复制成功!',
-  //       type: 'success'
-  //     })
-  //   }
-  // })
 })
 </script>
 
