@@ -141,7 +141,7 @@ const textRoll = async () => {
       }
       // 对话结束，就按30的速度
       if (!conversationInProgress.value) {
-        textSpeed.value = 30
+        textSpeed.value = 10
       }
 
       console.log(`diff ${diff} 速度 ${textSpeed.value} `)
