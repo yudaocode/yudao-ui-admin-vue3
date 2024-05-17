@@ -72,12 +72,7 @@ $prefix-cls: #{$namespace}-layout;
 .#{$prefix-cls} {
   background-color: var(--app-content-bg-color);
   :deep(.#{$elNamespace}-scrollbar__view) {
-    //height: 100% !important;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    height: 99% !important;
   }
 }
 </style>
