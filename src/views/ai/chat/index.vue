@@ -31,12 +31,15 @@
         </div>
       </el-header>
 
-      <!--  main    -->
+      <!-- main -->
       <el-main class="main-container">
         <div class="message-container" >
-          <Message ref="messageRef" :list="list" @onDeleteSuccess="handlerMessageDelete" />
+          <Message v-if="list.length > 0" ref="messageRef" :list="list" @on-delete-success="handlerMessageDelete" />
+          <ChatEmpty  v-if="list.length === 0" @on-prompt="onSend"/>
         </div>
       </el-main>
+
+      <!-- 底部 -->
       <el-footer class="footer-container">
         <form @submit.prevent="onSend" class="prompt-from">
           <textarea
@@ -84,10 +87,12 @@
 <script setup lang="ts">
 import Conversation from './Conversation.vue'
 import Message from './Message.vue'
+import ChatEmpty from './ChatEmpty.vue'
 import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import {useClipboard} from '@vueuse/core'
 import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
+import {send} from "vite";
 
 const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
@@ -153,7 +158,7 @@ const onPromptInput = (event) => {
 /**
  * 发送消息
  */
-const onSend = async () => {
+const onSend = async (val?: string) => {
   // 判断用户是否在输入
   if (isComposing.value) {
     return
@@ -162,7 +167,7 @@ const onSend = async () => {
   if (conversationInProgress.value) {
     return
   }
-  const content = prompt.value?.trim() + ''
+  const content = (val ? val : prompt.value?.trim()) as string
   if (content.length < 2) {
     ElMessage({
       message: '请输入内容!',
