@@ -48,13 +48,29 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="温度参数" prop="temperature">
-        <el-input v-model="formData.temperature" placeholder="请输入温度参数" />
+        <el-input-number
+          v-model="formData.temperature"
+          placeholder="请输入温度参数"
+          :min="0"
+          :max="2"
+          :precision="2"
+        />
       </el-form-item>
       <el-form-item label="回复数 Token 数" prop="maxTokens">
-        <el-input v-model="formData.maxTokens" placeholder="请输入回复数 Token 数" />
+        <el-input-number
+          v-model="formData.maxTokens"
+          placeholder="请输入回复数 Token 数"
+          :min="0"
+          :max="4096"
+        />
       </el-form-item>
       <el-form-item label="上下文数量" prop="maxContexts">
-        <el-input v-model="formData.maxContexts" placeholder="请输入上下文数量" />
+        <el-input-number
+          v-model="formData.maxContexts"
+          placeholder="请输入上下文数量"
+          :min="0"
+          :max="20"
+        />
       </el-form-item>
     </el-form>
     <template #footer>
