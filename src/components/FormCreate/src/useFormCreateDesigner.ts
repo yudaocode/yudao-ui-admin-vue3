@@ -71,9 +71,9 @@ export const useFormCreateDesigner = async (designer: Ref) => {
    */
   const buildSystemMenu = () => {
     // 移除自带的下拉选择器组件，使用 currencySelectRule 替代
-    designer.value?.removeMenuItem('select')
-    designer.value?.removeMenuItem('radio')
-    designer.value?.removeMenuItem('checkbox')
+    // designer.value?.removeMenuItem('select')
+    // designer.value?.removeMenuItem('radio')
+    // designer.value?.removeMenuItem('checkbox')
     const components = [userSelectRule, deptSelectRule, dictSelectRule, apiSelectRule0]
     const menu: Menu = {
       name: 'system',
