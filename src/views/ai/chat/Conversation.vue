@@ -42,16 +42,16 @@
               </div>
               <!-- TODO @fan：缺一个【置顶】按钮，效果改成 hover 上去展示 -->
               <div class="button-wrapper">
-                <el-button link @click="handlerTop(conversation)">
+                <el-button class="btn" link @click="handlerTop(conversation)" >
                   <el-icon title="置顶" v-if="!conversation.pinned"><Top /></el-icon>
                   <el-icon title="置顶" v-if="conversation.pinned"><Bottom /></el-icon>
                 </el-button>
-                <el-button link @click="updateConversationTitle(conversation)">
+                <el-button class="btn" link @click="updateConversationTitle(conversation)">
                   <el-icon title="编辑" >
                     <Icon icon="ep:edit"/>
                   </el-icon>
                 </el-button>
-                <el-button link @click="deleteChatConversation(conversation)">
+                <el-button class="btn" link @click="deleteChatConversation(conversation)">
                   <el-icon title="删除会话" >
                     <Icon icon="ep:delete"/>
                   </el-icon>
@@ -332,12 +332,6 @@ onMounted(async () => {
 
 </script>
 
-<style>
-.el-button--default {
-  margin: 0!important;
-}
-</style>
-
 <style scoped lang="scss">
 
 .conversation-container {
@@ -409,6 +403,10 @@ onMounted(async () => {
         flex-direction: row;
         justify-items: center;
         color: #606266;
+
+        .btn {
+          margin: 0;
+        }
 
         .el-icon {
           //margin-right: 5px;
