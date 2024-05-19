@@ -24,15 +24,15 @@
             {{ processInstance?.startUser.nickname }}
             <el-tag size="small" type="info">{{ processInstance?.startUser.deptName }}</el-tag>
           </el-form-item>
-          <el-card class="mb-15px !-mt-10px" v-if="runningTasks[index].formId > 0">
+          <el-card v-if="runningTasks[index].formId > 0" class="mb-15px !-mt-10px">
             <template #header>
               <span class="el-icon-picture-outline">
                 填写表单【{{ runningTasks[index]?.formName }}】
               </span>
             </template>
             <form-create
-              v-model:api="approveFormFApis[index]"
               v-model="approveForms[index].value"
+              v-model:api="approveFormFApis[index]"
               :option="approveForms[index].option"
               :rule="approveForms[index].rule"
             />
@@ -92,8 +92,8 @@
       <!-- 情况一：流程表单 -->
       <el-col v-if="processInstance?.processDefinition?.formType === 10" :offset="6" :span="16">
         <form-create
-          ref="fApi"
           v-model="detailForm.value"
+          v-model:api="fApi"
           :option="detailForm.option"
           :rule="detailForm.rule"
         />
@@ -280,9 +280,9 @@ const getProcessInstance = async () => {
         data.formVariables
       )
       nextTick().then(() => {
-        fApi.value?.fapi?.btn.show(false)
-        fApi.value?.fapi?.resetBtn.show(false)
-        fApi.value?.fapi?.disabled(true)
+        fApi.value?.btn.show(false)
+        fApi.value?.resetBtn.show(false)
+        fApi.value?.disabled(true)
       })
     } else {
       // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue

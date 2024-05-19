@@ -139,7 +139,7 @@ export default defineComponent({
         id={`${variables.namespace}-menu`}
         class={[
           prefixCls,
-          'relative bg-[var(--left-menu-bg-color)] top-1px z-3000 layout-border__right',
+          'relative bg-[var(--left-menu-bg-color)] top-1px layout-border__right',
           {
             'w-[var(--tab-menu-max-width)]': !unref(collapse),
             'w-[var(--tab-menu-min-width)]': unref(collapse)
@@ -195,7 +195,7 @@ export default defineComponent({
         </div>
         <Menu
           class={[
-            '!absolute top-0',
+            '!absolute top-0 z-11',
             {
               '!left-[var(--tab-menu-min-width)]': unref(collapse),
               '!left-[var(--tab-menu-max-width)]': !unref(collapse),

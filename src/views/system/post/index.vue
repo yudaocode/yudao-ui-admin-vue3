@@ -41,7 +41,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['system:notice:create']"
+          v-hasPermi="['system:post:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -50,7 +50,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['infra:config:export']"
+          v-hasPermi="['system:post:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>

@@ -40,7 +40,7 @@ export const setConfAndFields = (designerRef: object, conf: string, fields: stri
 export const setConfAndFields2 = (
   detailPreview: object,
   conf: string,
-  fields: string,
+  fields: string[],
   value?: object
 ) => {
   if (isRef(detailPreview)) {

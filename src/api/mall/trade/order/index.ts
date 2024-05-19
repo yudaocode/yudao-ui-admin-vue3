@@ -141,7 +141,7 @@ export const getExpressTrackList = async (id: number | null) => {
 }
 
 export interface DeliveryVO {
-  id: number // 订单编号
+  id?: number // 订单编号
   logisticsId: number | null // 物流公司编号
   logisticsNo: string // 物流编号
 }

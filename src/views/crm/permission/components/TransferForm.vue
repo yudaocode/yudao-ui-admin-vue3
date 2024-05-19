@@ -19,7 +19,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="老负责人">
-        <el-radio-group v-model="oldOwnerHandler" @change="formData.oldOwnerPermissionLevel">
+        <el-radio-group v-model="oldOwnerHandler" @change="handleOwnerChange">
           <el-radio :label="false" size="large">移除</el-radio>
           <el-radio :label="true" size="large">加入团队</el-radio>
         </el-radio-group>
@@ -86,10 +86,16 @@ const open = async (bizId: number) => {
   dialogVisible.value = true
   dialogTitle.value = getDialogTitle()
   resetForm()
-  formData.value.bizId = bizId
+  formData.value.id = bizId
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
-
+// 老负责人负责方式
+const handleOwnerChange = (val: boolean) => {
+  if (!val) {
+    // 移除的话提交不带 oldOwnerPermissionLevel 参数
+    formData.value.oldOwnerPermissionLevel = undefined
+  }
+}
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {

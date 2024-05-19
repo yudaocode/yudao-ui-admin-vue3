@@ -8,7 +8,7 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="部门名称" prop="title">
+      <el-form-item label="部门名称" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入部门名称"

@@ -5,7 +5,7 @@ import { formatDate } from '@/utils/formatTime'
 
 /** 会员分析 Request VO */
 export interface MemberAnalyseReqVO {
-  times: [dayjs.ConfigType, dayjs.ConfigType]
+  times: dayjs.ConfigType[]
 }
 
 /** 会员分析 Response VO */

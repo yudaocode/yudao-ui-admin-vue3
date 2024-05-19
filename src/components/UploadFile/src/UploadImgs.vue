@@ -6,13 +6,14 @@
       :action="uploadUrl"
       :before-upload="beforeUpload"
       :class="['upload', drag ? 'no-border' : '']"
+      :disabled="disabled"
       :drag="drag"
+      :http-request="httpRequest"
       :limit="limit"
       :multiple="true"
       :on-error="uploadError"
       :on-exceed="handleExceed"
       :on-success="uploadSuccess"
-      :http-request="httpRequest"
       list-type="picture-card"
     >
       <div class="upload-empty">

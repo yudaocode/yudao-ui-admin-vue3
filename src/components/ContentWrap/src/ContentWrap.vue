@@ -25,6 +25,9 @@ defineProps({
           </template>
           <Icon :size="14" class="ml-5px" icon="ep:question-filled" />
         </ElTooltip>
+        <div class="flex flex-grow pl-20px">
+          <slot name="header"></slot>
+        </div>
       </div>
     </template>
     <div>

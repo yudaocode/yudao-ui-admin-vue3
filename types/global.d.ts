@@ -14,6 +14,9 @@ declare global {
 
   type LocaleType = 'zh-CN' | 'en'
 
+  declare type TimeoutHandle = ReturnType<typeof setTimeout>
+  declare type IntervalHandle = ReturnType<typeof setInterval>
+
   type AxiosHeaders =
     | 'application/json'
     | 'application/x-www-form-urlencoded'

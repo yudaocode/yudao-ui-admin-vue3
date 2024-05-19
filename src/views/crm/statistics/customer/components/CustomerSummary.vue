@@ -10,8 +10,8 @@
   <!-- 统计列表 -->
   <el-card shadow="never" class="mt-16px">
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="序号" align="center" type="index" width="80" />
-      <el-table-column label="员工姓名" prop="ownerUserName" min-width="100" />
+      <el-table-column label="序号" align="center" type="index" width="80" fixed="left" />
+      <el-table-column label="员工姓名" prop="ownerUserName" min-width="100" fixed="left" />
       <el-table-column
         label="新增客户数"
         align="right"
@@ -21,28 +21,31 @@
       <el-table-column label="成交客户数" align="right" prop="customerDealCount" min-width="200" />
       <el-table-column label="客户成交率(%)" align="right" min-width="200">
         <template #default="scope">
-          {{
-            scope.row.customerCreateCount !== 0
-              ? round((scope.row.customerDealCount / scope.row.customerCreateCount) * 100, 2)
-              : 0
-          }}
+          {{ erpCalculatePercentage(scope.row.customerDealCount, scope.row.customerCreateCount) }}
         </template>
       </el-table-column>
-      <el-table-column label="合同总金额" align="right" prop="contractPrice" min-width="200" />
-      <el-table-column label="回款金额" align="right" prop="receivablePrice" min-width="200" />
+      <el-table-column
+        label="合同总金额"
+        align="right"
+        prop="contractPrice"
+        min-width="200"
+        :formatter="erpPriceTableColumnFormatter"
+      />
+      <el-table-column
+        label="回款金额"
+        align="right"
+        prop="receivablePrice"
+        min-width="200"
+        :formatter="erpPriceTableColumnFormatter"
+      />
       <el-table-column label="未回款金额" align="right" min-width="200">
-        <!-- TODO @dhb52：参考 util/index.ts 的 // ========== ERP 专属方法 ========== 部分，搞个两个方法，一个格式化百分比，一个计算百分比  -->
         <template #default="scope">
-          {{ round(scope.row.contractPrice - scope.row.receivablePrice, 2) }}
+          {{ erpCalculatePercentage(scope.row.receivablePrice, scope.row.contractPrice) }}
         </template>
       </el-table-column>
-      <el-table-column label="回款完成率(%)" align="right" min-width="200">
+      <el-table-column label="回款完成率(%)" align="right" min-width="200" fixed="right">
         <template #default="scope">
-          {{
-            scope.row.contractPrice !== 0
-              ? round((scope.row.receivablePrice / scope.row.contractPrice) * 100, 2)
-              : 0
-          }}
+          {{ erpCalculatePercentage(scope.row.receivablePrice, scope.row.contractPrice) }}
         </template>
       </el-table-column>
     </el-table>
@@ -55,9 +58,10 @@ import {
   CrmStatisticsCustomerSummaryByUserRespVO
 } from '@/api/crm/statistics/customer'
 import { EChartsOption } from 'echarts'
-import { round } from 'lodash-es'
+import { erpCalculatePercentage, erpPriceTableColumnFormatter } from '@/utils'
 
 defineOptions({ name: 'CustomerSummary' })
+
 const props = defineProps<{ queryParams: any }>() // 搜索参数
 
 const loading = ref(false) // 加载中
@@ -67,7 +71,7 @@ const list = ref<CrmStatisticsCustomerSummaryByUserRespVO[]>([]) // 列表的数
 const echartsOption = reactive<EChartsOption>({
   grid: {
     left: 20,
-    right: 20,
+    right: 30, // 让 X 轴右侧显示完整
     bottom: 20,
     containLabel: true
   },
@@ -76,11 +80,13 @@ const echartsOption = reactive<EChartsOption>({
     {
       name: '新增客户数',
       type: 'bar',
+      yAxisIndex: 0,
       data: []
     },
     {
       name: '成交客户数',
       type: 'bar',
+      yAxisIndex: 1,
       data: []
     }
   ],
@@ -101,10 +107,26 @@ const echartsOption = reactive<EChartsOption>({
       type: 'shadow'
     }
   },
-  yAxis: {
-    type: 'value',
-    name: '数量（个）'
-  },
+  yAxis: [
+    {
+      type: 'value',
+      name: '新增客户数',
+      min: 0,
+      minInterval: 1 // 显示整数刻度
+    },
+    {
+      type: 'value',
+      name: '成交客户数',
+      min: 0,
+      minInterval: 1, // 显示整数刻度
+      splitLine: {
+        lineStyle: {
+          type: 'dotted', // 右侧网格线虚化, 减少混乱
+          opacity: 0.7
+        }
+      }
+    }
+  ],
   xAxis: {
     type: 'category',
     name: '日期',
@@ -112,10 +134,9 @@ const echartsOption = reactive<EChartsOption>({
   }
 }) as EChartsOption
 
-/** 获取统计数据 */
-const loadData = async () => {
+/** 获取数据并填充图表 */
+const fetchAndFill = async () => {
   // 1. 加载统计数据
-  loading.value = true
   const customerSummaryByDate = await StatisticsCustomerApi.getCustomerSummaryByDate(
     props.queryParams
   )
@@ -138,10 +159,21 @@ const loadData = async () => {
       (s: CrmStatisticsCustomerSummaryByDateRespVO) => s.customerDealCount
     )
   }
+
   // 2.2 更新列表数据
   list.value = customerSummaryByUser
-  loading.value = false
 }
+
+/** 获取统计数据 */
+const loadData = async () => {
+  loading.value = true
+  try {
+    await fetchAndFill()
+  } finally {
+    loading.value = false
+  }
+}
+
 defineExpose({ loadData })
 
 /** 初始化 */

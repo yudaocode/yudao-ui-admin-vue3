@@ -93,7 +93,7 @@ import PermissionList from '@/views/crm/permission/components/PermissionList.vue
 import CrmTransferForm from '@/views/crm/permission/components/TransferForm.vue'
 import FollowUpList from '@/views/crm/followup/index.vue'
 import { BizTypeEnum } from '@/api/crm/permission'
-import type { OperateLogV2VO } from '@/api/system/operatelog'
+import type { OperateLogVO } from '@/api/system/operatelog'
 import { getOperateLogPage } from '@/api/crm/operateLog'
 import CustomerDistributeForm from '@/views/crm/customer/pool/CustomerDistributeForm.vue'
 
@@ -185,7 +185,7 @@ const handlePutPool = async () => {
 }
 
 /** 获取操作日志 */
-const logList = ref<OperateLogV2VO[]>([]) // 操作日志列表
+const logList = ref<OperateLogVO[]>([]) // 操作日志列表
 const getOperateLog = async () => {
   if (!customerId.value) {
     return

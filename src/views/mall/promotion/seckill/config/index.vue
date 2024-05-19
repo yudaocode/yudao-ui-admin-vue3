@@ -1,94 +1,172 @@
 <template>
   <doc-alert title="【营销】秒杀活动" url="https://doc.iocoder.cn/mall/promotion-seckill/" />
 
-  <!-- 搜索工作栏 -->
   <ContentWrap>
-    <Search :schema="allSchemas.searchSchema" @reset="setSearchParams" @search="setSearchParams">
-      <!-- 新增等操作按钮 -->
-      <template #actionMore>
-        <el-button
-          v-hasPermi="['promotion:seckill-config:create']"
-          plain
-          type="primary"
-          @click="openForm('create')"
+    <!-- 搜索工作栏 -->
+    <el-form
+      class="-mb-15px"
+      :model="queryParams"
+      ref="queryFormRef"
+      :inline="true"
+      label-width="108px"
+    >
+      <el-form-item label="秒杀时段名称" prop="name">
+        <el-input
+          v-model="queryParams.name"
+          placeholder="请输入秒杀时段名称"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="活动状态" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择活动状态"
+          clearable
+          class="!w-240px"
         >
-          <Icon class="mr-5px" icon="ep:plus" />
-          新增
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
+        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button
+          type="primary"
+          plain
+          @click="openForm('create')"
+          v-hasPermi="['promotion:seckill-config:create']"
+        >
+          <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
-      </template>
-    </Search>
+      </el-form-item>
+    </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <Table
-      v-model:currentPage="tableObject.currentPage"
-      v-model:pageSize="tableObject.pageSize"
-      :columns="allSchemas.tableColumns"
-      :data="tableObject.tableList"
-      :loading="tableObject.loading"
-      :pagination="{
-        total: tableObject.total
-      }"
-    >
-      <template #sliderPicUrls="{ row }">
-        <el-image
-          v-for="(item, index) in row.sliderPicUrls"
-          :key="index"
-          :src="item"
-          class="mr-10px h-60px w-60px"
-          @click="imagePreview(row.sliderPicUrls)"
-        />
-      </template>
-      <template #status="{ row }">
-        <el-switch
-          v-model="row.status"
-          :active-value="0"
-          :inactive-value="1"
-          @change="handleStatusChange(row)"
-        />
-      </template>
-      <template #action="{ row }">
-        <el-button
-          v-hasPermi="['promotion:seckill-config:update']"
-          link
-          type="primary"
-          @click="openForm('update', row.id)"
-        >
-          编辑
-        </el-button>
-        <el-button
-          v-hasPermi="['promotion:seckill-config:delete']"
-          link
-          type="danger"
-          @click="handleDelete(row.id)"
-        >
-          删除
-        </el-button>
-      </template>
-    </Table>
+    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+      <el-table-column label="秒杀时段名称" align="center" prop="name" />
+      <el-table-column label="开始时间点" align="center" prop="startTime" />
+      <el-table-column label="结束时间点" align="center" prop="endTime" />
+      <el-table-column label="秒杀轮播图" align="center" prop="sliderPicUrls">
+        <template #default="scope">
+          <el-image
+            class="h-40px max-w-40px"
+            v-for="(url, index) in scope?.row.sliderPicUrls"
+            :key="index"
+            :src="url"
+            :preview-src-list="scope?.row.sliderPicUrls"
+            :initial-index="index"
+            preview-teleported
+          />
+        </template>
+      </el-table-column>
+      <el-table-column label="活动状态" align="center" prop="status">
+        <template #default="scope">
+          <el-switch
+            v-model="scope.row.status"
+            :active-value="0"
+            :inactive-value="1"
+            @change="handleStatusChange(scope.row)"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column
+        label="创建时间"
+        align="center"
+        prop="createTime"
+        :formatter="dateFormatter"
+        width="180px"
+      />
+      <el-table-column label="操作" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['promotion:seckill-config:update']"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click="handleDelete(scope.row.id)"
+            v-hasPermi="['promotion:seckill-config:delete']"
+          >
+            删除
+          </el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+    <!-- 分页 -->
+    <Pagination
+      :total="total"
+      v-model:page="queryParams.pageNo"
+      v-model:limit="queryParams.pageSize"
+      @pagination="getList"
+    />
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
   <SeckillConfigForm ref="formRef" @success="getList" />
 </template>
-<script lang="ts" name="PromotionSeckillConfig" setup>
-import { allSchemas } from './seckillConfig.data'
-import * as SeckillConfigApi from '@/api/mall/promotion/seckill/seckillConfig'
+
+<script setup lang="ts">
+import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
+import { dateFormatter } from '@/utils/formatTime'
+import { SeckillConfigApi, SeckillConfigVO } from '@/api/mall/promotion/seckill/seckillConfig.ts'
 import SeckillConfigForm from './SeckillConfigForm.vue'
-import { createImageViewer } from '@/components/ImageViewer'
 import { CommonStatusEnum } from '@/utils/constants'
 
+/** 秒杀时段 列表 */
+defineOptions({ name: 'SeckillConfig' })
+
 const message = useMessage() // 消息弹窗
-// tableObject：表格的属性对象，可获得分页大小、条数等属性
-// tableMethods：表格的操作对象，可进行获得分页、删除记录等操作
-// 详细可见：https://doc.iocoder.cn/vue3/crud-schema/
-const { tableObject, tableMethods } = useTable({
-  getListApi: SeckillConfigApi.getSeckillConfigPage, // 分页接口
-  delListApi: SeckillConfigApi.deleteSeckillConfig // 删除接口
+const { t } = useI18n() // 国际化
+
+const loading = ref(true) // 列表的加载中
+const list = ref<SeckillConfigVO[]>([]) // 列表的数据
+const total = ref(0) // 列表的总页数
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10,
+  name: undefined,
+  status: undefined
 })
-// 获得表格的各种操作
-const { getList, setSearchParams } = tableMethods
+const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出的加载中
+
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    const data = await SeckillConfigApi.getSeckillConfigPage(queryParams)
+    list.value = data.list
+    total.value = data.total
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 搜索按钮操作 */
+const handleQuery = () => {
+  queryParams.pageNo = 1
+  getList()
+}
+
+/** 重置按钮操作 */
+const resetQuery = () => {
+  queryFormRef.value.resetFields()
+  handleQuery()
+}
 
 /** 添加/修改操作 */
 const formRef = ref()
@@ -97,16 +175,24 @@ const openForm = (type: string, id?: number) => {
 }
 
 /** 删除按钮操作 */
-const handleDelete = (id: number) => {
-  tableMethods.delList(id, false)
+const handleDelete = async (id: number) => {
+  try {
+    // 删除的二次确认
+    await message.delConfirm()
+    // 发起删除
+    await SeckillConfigApi.deleteSeckillConfig(id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
 /** 修改用户状态 */
-const handleStatusChange = async (row: SeckillConfigApi.SeckillConfigVO) => {
+const handleStatusChange = async (row: SeckillConfigVO) => {
   try {
     // 修改状态的二次确认
     const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
-    await message.confirm('确认要"' + text + '""' + row.name + '?')
+    await message.confirm('确认要' + text + '"' + row.name + '"活动吗?')
     // 发起修改状态
     await SeckillConfigApi.updateSeckillConfigStatus(row.id, row.status)
     // 刷新列表
@@ -116,13 +202,6 @@ const handleStatusChange = async (row: SeckillConfigApi.SeckillConfigVO) => {
     row.status =
       row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
   }
-}
-
-/** 轮播图预览预览 */
-const imagePreview = (args) => {
-  createImageViewer({
-    urlList: args
-  })
 }
 
 /** 初始化 **/

@@ -268,7 +268,8 @@ export const useAppStore = defineStore('app', {
     setFooter(footer: boolean) {
       this.footer = footer
     }
-  }
+  },
+  persist: false
 })
 
 export const useAppStoreWithOut = () => {

@@ -10,58 +10,65 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="系统模块" prop="module">
-        <el-input
-          v-model="queryParams.module"
-          placeholder="请输入系统模块"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="操作人员" prop="userNickname">
-        <el-input
-          v-model="queryParams.userNickname"
-          placeholder="请输入操作人员"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="操作类型" prop="type">
+      <el-form-item label="操作人" prop="userId">
         <el-select
-          v-model="queryParams.type"
-          placeholder="请选择操作类型"
-          clearable
+          v-model="queryParams.userId"
+          multiple
+          placeholder="请输入操作人员"
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_OPERATE_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
+            v-for="user in userList"
+            :key="user.id"
+            :label="user.nickname"
+            :value="user.id"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="操作状态" prop="success">
-        <el-select
-          v-model="queryParams.success"
-          placeholder="请选择操作状态"
+      <el-form-item label="操作模块" prop="type">
+        <el-input
+          v-model="queryParams.type"
+          placeholder="请输入操作模块"
           clearable
+          @keyup.enter="handleQuery"
           class="!w-240px"
-        >
-          <el-option key="true" label="成功" :value="true" />
-          <el-option key="false" label="失败" :value="false" />
-        </el-select>
+        />
       </el-form-item>
-      <el-form-item label="操作时间" prop="startTime">
+      <el-form-item label="操作模块" prop="subType">
+        <el-input
+          v-model="queryParams.subType"
+          placeholder="请输入操作模块"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="操作内容" prop="action">
+        <el-input
+          v-model="queryParams.action"
+          placeholder="请输入操作名"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
+      </el-form-item>
+      <el-form-item label="操作时间" prop="createTime">
         <el-date-picker
-          v-model="queryParams.startTime"
+          v-model="queryParams.createTime"
           value-format="YYYY-MM-DD HH:mm:ss"
           type="daterange"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-220px"
+        />
+      </el-form-item>
+      <el-form-item label="业务编号" prop="bizId">
+        <el-input
+          v-model="queryParams.bizId"
+          placeholder="请输入业务编号"
+          clearable
+          @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
@@ -73,7 +80,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['infra:config:export']"
+          v-hasPermi="['infra:operate-log:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -84,39 +91,27 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="日志编号" align="center" prop="id" />
-      <el-table-column label="操作模块" align="center" prop="module" width="180" />
-      <el-table-column label="操作名" align="center" prop="name" width="180" />
-      <el-table-column label="操作类型" align="center" prop="type">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.SYSTEM_OPERATE_TYPE" :value="scope.row.type" />
-        </template>
-      </el-table-column>
-      <el-table-column label="操作人" align="center" prop="userNickname" />
-      <el-table-column label="操作结果" align="center" prop="status">
-        <template #default="scope">
-          <span>{{ scope.row.resultCode === 0 ? '成功' : '失败' }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column label="日志编号" align="center" prop="id" width="100" />
+      <el-table-column label="操作人" align="center" prop="userName" width="120" />
+      <el-table-column label="操作模块" align="center" prop="type" width="120" />
+      <el-table-column label="操作名" align="center" prop="subType" width="160" />
+      <el-table-column label="操作内容" align="center" prop="action" />
       <el-table-column
         label="操作时间"
         align="center"
-        prop="startTime"
+        prop="createTime"
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="执行时长" align="center" prop="startTime">
-        <template #default="scope">
-          <span>{{ scope.row.duration }} ms</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center">
+      <el-table-column label="业务编号" align="center" prop="bizId" width="120" />
+      <el-table-column label="IP" align="center" prop="userIp" width="120" />
+      <el-table-column label="操作" align="center" fixed="right" width="60">
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="openDetail(scope.row)"
-            v-hasPermi="['infra:config:query']"
+            v-hasPermi="['infra:operate-log:query']"
           >
             详情
           </el-button>
@@ -136,11 +131,12 @@
   <OperateLogDetail ref="detailRef" />
 </template>
 <script lang="ts" setup>
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import * as OperateLogApi from '@/api/system/operatelog'
 import OperateLogDetail from './OperateLogDetail.vue'
+import * as UserApi from '@/api/system/user'
+const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
 defineOptions({ name: 'SystemOperateLog' })
 
@@ -152,11 +148,12 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  module: undefined,
-  userNickname: undefined,
+  userId: undefined,
   type: undefined,
-  success: undefined,
-  startTime: []
+  subType: undefined,
+  action: undefined,
+  createTime: [],
+  bizId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -207,7 +204,9 @@ const handleExport = async () => {
 }
 
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
+  // 获得用户列表
+  userList.value = await UserApi.getSimpleUserList()
 })
 </script>

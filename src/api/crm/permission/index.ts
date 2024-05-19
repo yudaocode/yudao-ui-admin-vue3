@@ -15,9 +15,9 @@ export interface PermissionVO {
 }
 
 export interface TransferReqVO {
-  bizId: number // 模块编号
+  id: number // 模块编号
   newOwnerUserId: number // 新负责人的用户编号
-  oldOwnerPermissionLevel: number // 老负责人加入团队后的权限级别
+  oldOwnerPermissionLevel?: number // 老负责人加入团队后的权限级别
   toBizTypes?: number[] // 转移客户时，需要额外有【联系人】【商机】【合同】的 checkbox 选择
 }
 
