@@ -149,7 +149,7 @@
                     <el-radio
                       :value="item.value"
                       :label="item.value"
-                      :disabled="item.value !== 1 && notAllowedMultiApprovers"
+                      :disabled="item.value !== ApproveMethodType.SINGLE_PERSON_APPROVE && notAllowedMultiApprovers"
                     >
                       {{ item.label }}
                     </el-radio>
@@ -205,7 +205,7 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleFlowNode, APPROVE_METHODS, CandidateStrategy, NodeType, NODE_DEFAULT_NAME } from '../consts'
+import { SimpleFlowNode, APPROVE_METHODS, CandidateStrategy, NodeType, ApproveMethodType, NODE_DEFAULT_NAME } from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { getDefaultFieldsPermission } from '../utils'
 import { defaultProps } from '@/utils/tree'
@@ -261,7 +261,7 @@ const getShowText = () : string => {
     }
   }
   // 指定角色
-  if (currentNode.value.attributes.candidateStrategy === 10) {
+  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.ROLE) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
       roleOptions?.value.forEach((item) => {
@@ -319,6 +319,10 @@ const getShowText = () : string => {
   if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.START_USER_SELECT ) {
     showText = `发起人自选`
   }
+  // 发起人自己
+  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.START_USER ) {
+    showText = `发起人自己`
+  }
 
    // 流程表达式
   if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.EXPRESSION) {
@@ -339,7 +343,7 @@ const setCurrentNode = (node:SimpleFlowNode) => {
   if(strCandidateParam) {
     candidateParamArray.value = strCandidateParam.split(',').map(item=> +item)
   }
-  if (currentNode.value.attributes?.candidateStrategy === CandidateStrategy.USER && candidateParamArray.value?.length <= 1) {
+  if (currentNode.value.attributes?.candidateStrategy === CandidateStrategy.START_USER) {
     notAllowedMultiApprovers.value = true
   } else {
     notAllowedMultiApprovers.value = false
@@ -350,8 +354,9 @@ defineExpose({ open, setCurrentNode }) // 暴露方法给父组件
 
 const changeCandidateStrategy = () => {
   candidateParamArray.value = []
-  currentNode.value.attributes.approveMethod = 1
-  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER) {
+  currentNode.value.attributes.approveMethod = ApproveMethodType.SINGLE_PERSON_APPROVE
+  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.START_USER 
+        || currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER ) {
     notAllowedMultiApprovers.value = true
   } else {
     notAllowedMultiApprovers.value = false
@@ -360,7 +365,7 @@ const changeCandidateStrategy = () => {
 
 const changedCandidateUsers = () => {
   if (candidateParamArray.value?.length <= 1 && currentNode.value.attributes?.candidateStrategy === CandidateStrategy.USER) {
-    currentNode.value.attributes.approveMethod = 1;
+    currentNode.value.attributes.approveMethod = ApproveMethodType.SINGLE_PERSON_APPROVE
     notAllowedMultiApprovers.value = true
   } else {
     notAllowedMultiApprovers.value = false

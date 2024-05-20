@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleFlowNode, NodeType, NODE_DEFAULT_NAME, CandidateStrategy } from './consts'
+import { SimpleFlowNode, NodeType, NODE_DEFAULT_NAME, ApproveMethodType, CandidateStrategy } from './consts'
 import { generateUUID } from '@/utils'
 defineOptions({
   name: 'NodeHandler'
@@ -64,7 +64,7 @@ const addNode = (type: number) => {
       type: NodeType.USER_TASK_NODE,
       // 审批节点配置
       attributes: {
-        approveMethod: 1,
+        approveMethod: ApproveMethodType.SINGLE_PERSON_APPROVE,
         candidateStrategy: CandidateStrategy.USER,
         candidateParam: undefined,
         fieldsPermission: undefined,

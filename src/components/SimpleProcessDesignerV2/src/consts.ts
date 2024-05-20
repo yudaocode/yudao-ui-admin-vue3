@@ -60,6 +60,28 @@ export enum ConditionConfigType  {
    */
   RULE = 2
 }
+// 审批方式类型 （ 用于审批节点 ）
+export enum ApproveMethodType  {
+
+  /**
+  * 单人审批
+  */
+  SINGLE_PERSON_APPROVE = 1,
+
+  /**
+  * 多人会签(需所有审批人同意)
+  */
+  ALL_APPROVE = 2,
+  /**
+  * 多人或签(一名审批人同意即可)
+  */
+  ANY_OF_APPROVE = 3,
+   /**
+  * 多人依次审批
+  */
+  SEQUENTIAL_APPROVE = 4
+
+}
 
 // 候选人策略 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -87,6 +109,10 @@ export enum CandidateStrategy {
    * 发起人自选
    */
   START_USER_SELECT = 35,
+   /**
+   * 发起人自己
+   */
+  START_USER = 36,
    /**
    * 指定用户组
    */
