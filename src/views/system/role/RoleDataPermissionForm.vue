@@ -78,7 +78,7 @@ const message = useMessage() // 消息弹窗
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formData = reactive({
-  id: 0,
+  id: undefined,
   name: '',
   code: '',
   dataScope: undefined,
@@ -102,7 +102,9 @@ const open = async (row: RoleApi.RoleVO) => {
   formData.name = row.name
   formData.code = row.code
   formData.dataScope = row.dataScope
-  row.dataScopeDeptIds?.forEach((deptId: number) => {
+  await nextTick()
+  // 需要在 DOM 渲染完成后，再设置选中状态
+  row.dataScopeDeptIds?.forEach((deptId: number): void => {
     treeRef.value.setChecked(deptId, true, false)
   })
 }
@@ -139,7 +141,7 @@ const resetForm = () => {
   checkStrictly.value = true
   // 重置表单
   formData.value = {
-    id: 0,
+    id: undefined,
     name: '',
     code: '',
     dataScope: undefined,

@@ -56,6 +56,16 @@ export default {
     copySuccess: 'Copy Success',
     copyError: 'Copy Error'
   },
+  lock: {
+    lockScreen: 'Lock screen',
+    lock: 'Lock',
+    lockPassword: 'Lock screen password',
+    unlock: 'Click to unlock',
+    backToLogin: 'Back to login',
+    entrySystem: 'Entry the system',
+    placeholder: 'Please enter the lock screen password',
+    message: 'Lock screen password error'
+  },
   error: {
     noPermission: `Sorry, you don't have permission to access this page.`,
     pageError: 'Sorry, the page you visited does not exist.',

@@ -61,6 +61,7 @@ const updateSupport = ref(0) // 是否更新已经存在的用户数据
 /** 打开弹窗 */
 const open = () => {
   dialogVisible.value = true
+  updateSupport.value = 0
   fileList.value = []
   resetForm()
 }
@@ -104,6 +105,8 @@ const submitFormSuccess = (response: any) => {
     text += '< ' + username + ': ' + data.failureUsernames[username] + ' >'
   }
   message.alert(text)
+  formLoading.value = false
+  dialogVisible.value = false
   // 发送操作成功的事件
   emits('success')
 }
@@ -115,9 +118,10 @@ const submitFormError = (): void => {
 }
 
 /** 重置表单 */
-const resetForm = () => {
+const resetForm = async (): Promise<void> => {
   // 重置上传状态和文件
   formLoading.value = false
+  await nextTick()
   uploadRef.value?.clearFiles()
 }
 

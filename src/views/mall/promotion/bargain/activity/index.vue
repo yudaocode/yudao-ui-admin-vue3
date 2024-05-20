@@ -151,6 +151,7 @@ import * as BargainActivityApi from '@/api/mall/promotion/bargain/bargainActivit
 import BargainActivityForm from './BargainActivityForm.vue'
 import { formatDate } from '@/utils/formatTime'
 import { fenToYuanFormat } from '@/utils/formatter'
+import { closeBargainActivity } from '@/api/mall/promotion/bargain/bargainActivity'
 
 defineOptions({ name: 'PromotionBargainActivity' })
 
@@ -206,7 +207,7 @@ const handleClose = async (id: number) => {
     // 关闭的二次确认
     await message.confirm('确认关闭该砍价活动吗？')
     // 发起关闭
-    await BargainActivityApi.closeSeckillActivity(id)
+    await BargainActivityApi.closeBargainActivity(id)
     message.success('关闭成功')
     // 刷新列表
     await getList()

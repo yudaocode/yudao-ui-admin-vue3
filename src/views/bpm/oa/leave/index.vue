@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="工作流手册" url="https://doc.iocoder.cn/bpm/" />
+  <doc-alert title="审批接入（业务表单）" url="https://doc.iocoder.cn/bpm/use-business-form/" />
 
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -83,7 +83,7 @@
       <el-table-column align="center" label="申请编号" prop="id" />
       <el-table-column align="center" label="状态" prop="result">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.result" />
+          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column

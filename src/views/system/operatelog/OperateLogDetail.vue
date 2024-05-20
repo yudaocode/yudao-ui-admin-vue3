@@ -4,14 +4,14 @@
       <el-descriptions-item label="日志主键" min-width="120">
         {{ detailData.id }}
       </el-descriptions-item>
-      <el-descriptions-item label="链路追踪">
+      <el-descriptions-item label="链路追踪" v-if="detailData.traceId">
         {{ detailData.traceId }}
       </el-descriptions-item>
       <el-descriptions-item label="操作人编号">
         {{ detailData.userId }}
       </el-descriptions-item>
       <el-descriptions-item label="操作人名字">
-        {{ detailData.userNickname }}
+        {{ detailData.userName }}
       </el-descriptions-item>
       <el-descriptions-item label="操作人 IP">
         {{ detailData.userIp }}
@@ -20,39 +20,25 @@
         {{ detailData.userAgent }}
       </el-descriptions-item>
       <el-descriptions-item label="操作模块">
-        {{ detailData.module }}
+        {{ detailData.type }}
       </el-descriptions-item>
       <el-descriptions-item label="操作名">
-        {{ detailData.name }}
+        {{ detailData.subType }}
       </el-descriptions-item>
-      <el-descriptions-item v-if="detailData.content" label="操作内容">
-        {{ detailData.content }}
+      <el-descriptions-item label="操作内容">
+        {{ detailData.action }}
       </el-descriptions-item>
-      <el-descriptions-item v-if="detailData.exts" label="操作拓展参数">
-        {{ detailData.exts }}
+      <el-descriptions-item v-if="detailData.extra" label="操作拓展参数">
+        {{ detailData.extra }}
       </el-descriptions-item>
       <el-descriptions-item label="请求 URL">
         {{ detailData.requestMethod }} {{ detailData.requestUrl }}
       </el-descriptions-item>
-      <el-descriptions-item label="Java 方法名">
-        {{ detailData.javaMethod }}
-      </el-descriptions-item>
-      <el-descriptions-item label="Java 方法参数">
-        {{ detailData.javaMethodArgs }}
-      </el-descriptions-item>
       <el-descriptions-item label="操作时间">
-        {{ formatDate(detailData.startTime) }}
+        {{ formatDate(detailData.createTime) }}
       </el-descriptions-item>
-      <el-descriptions-item label="执行时长">{{ detailData.duration }} ms</el-descriptions-item>
-      <el-descriptions-item label="操作结果">
-        <div v-if="detailData.resultCode === 0">正常</div>
-        <div v-else>失败({{ detailData.resultCode }})</div>
-      </el-descriptions-item>
-      <el-descriptions-item v-if="detailData.resultCode === 0" label="操作结果">
-        {{ detailData.resultData }}
-      </el-descriptions-item>
-      <el-descriptions-item v-if="detailData.resultCode > 0" label="失败提示">
-        {{ detailData.resultMsg }}
+      <el-descriptions-item label="业务编号">
+        {{ detailData.bizId }}
       </el-descriptions-item>
     </el-descriptions>
   </Dialog>

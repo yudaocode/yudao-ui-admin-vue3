@@ -26,6 +26,9 @@
       <el-descriptions-item label="请求参数">
         {{ detailData.requestParams }}
       </el-descriptions-item>
+      <el-descriptions-item label="请求结果">
+        {{ detailData.responseBody }}
+      </el-descriptions-item>
       <el-descriptions-item label="请求时间">
         {{ formatDate(detailData.beginTime) }} ~ {{ formatDate(detailData.endTime) }}
       </el-descriptions-item>
@@ -35,6 +38,15 @@
         <div v-else-if="detailData.resultCode > 0">
           失败 | {{ detailData.resultCode }} | {{ detailData.resultMsg }}
         </div>
+      </el-descriptions-item>
+      <el-descriptions-item label="操作模块">
+        {{ detailData.operateModule }}
+      </el-descriptions-item>
+      <el-descriptions-item label="操作名">
+        {{ detailData.operateName }}
+      </el-descriptions-item>
+      <el-descriptions-item label="操作名">
+        <dict-tag :type="DICT_TYPE.INFRA_OPERATE_TYPE" :value="detailData.operateType" />
       </el-descriptions-item>
     </el-descriptions>
   </Dialog>
