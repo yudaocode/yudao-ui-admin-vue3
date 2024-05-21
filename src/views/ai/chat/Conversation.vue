@@ -1,9 +1,9 @@
 <!--  AI 对话  -->
 <template>
-  <el-aside width="260px" class="conversation-container">
+  <el-aside width="260px" class="conversation-container" style="height: 100%;">
 
     <!-- 左顶部：对话 -->
-    <div>
+    <div style="height: 100%;">
       <el-button class="w-1/1 btn-new-conversation" type="primary" @click="createConversation">
         <Icon icon="ep:plus" class="mr-5px"/>
         新建对话
@@ -65,6 +65,8 @@
             </div>
           </div>
         </div>
+        <!--  底部站位  -->
+        <div style="height: 160px; width: 100%;"></div>
       </div>
 
     </div>
@@ -368,6 +370,7 @@ onMounted(async () => {
   justify-content: space-between;
   padding: 0 10px;
   padding-top: 10px;
+  overflow: hidden;
 
   .btn-new-conversation {
     padding: 18px 0;
@@ -378,7 +381,8 @@ onMounted(async () => {
   }
 
   .conversation-list {
-    //margin-top: 20px;
+    overflow: auto;
+    height: 100%;
 
     .classify-title {
       padding-top: 10px;
@@ -451,6 +455,14 @@ onMounted(async () => {
 
   // 角色仓库、清空未设置对话
   .tool-box {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    //width: 100%;
+    padding: 0 20px;
+    background-color: #f4f4f4;
+    box-shadow: 0 0 1px 1px rgba(228, 228, 228, 0.8);
     line-height: 35px;
     display: flex;
     justify-content: space-between;
