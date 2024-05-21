@@ -21,7 +21,7 @@
               <img class="btn-image" src="@/assets/ai/copy.svg"/>
             </el-button>
             <el-button class="btn-cus" link @click="onDelete(item.id)">
-              <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
+              <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px; "/>
             </el-button>
           </div>
         </div>
@@ -45,7 +45,7 @@
               <img class="btn-image" src="@/assets/ai/copy.svg"/>
             </el-button>
             <el-button class="btn-cus" link @click="onDelete(item.id)">
-              <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
+              <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px;margin-right: 12px;"/>
             </el-button>
           </div>
         </div>
@@ -228,10 +228,15 @@ onMounted(async () => {
       }
     }
 
-    .left-btns,
-    .right-btns {
+    .left-btns {
       display: flex;
       flex-direction: row;
+      margin-top: 8px;
+    }
+
+    .right-btns {
+      display: flex;
+      flex-direction: row-reverse;
       margin-top: 8px;
     }
   }
