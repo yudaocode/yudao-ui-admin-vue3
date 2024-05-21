@@ -150,7 +150,6 @@ const textRoll = async () => {
         textSpeed.value = 10
       }
 
-      console.log(`diff ${diff} 速度 ${textSpeed.value} `)
       // console.log('index < fullText.value.length', index < fullText.value.length, conversationInProgress.value)
 
       if (index < fullText.value.length) {
@@ -341,12 +340,14 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
         await scrollToBottom()
       },
       (error) => {
+        console.log('onError')
         // 标记对话结束
         conversationInProgress.value = false
         // 结束 stream 对话
         conversationInAbortController.value.abort()
       },
       () => {
+        console.log('onClose')
         // 标记对话结束
         conversationInProgress.value = false
         // 结束 stream 对话
@@ -358,6 +359,7 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
 }
 
 const stopStream = async () => {
+  console.log('stopStream...')
   // tip：如果 stream 进行中的 message，就需要调用 controller 结束
   if (conversationInAbortController.value) {
     conversationInAbortController.value.abort()
@@ -416,13 +418,24 @@ const handlerTitleSuccess = async () => {
  * 对话 - 点击
  */
 const handleConversationClick = async (conversation: ChatConversationVO) => {
+  // 对话进行中，不允许切换
+  if (conversationInProgress.value) {
+    await message.alert("对话中，不允许切换!")
+    return false
+  }
+
   // 更新选中的对话 id
   activeConversationId.value = conversation.id
   activeConversation.value = conversation
+  // 处理进行中的对话
+  if (conversationInProgress.value) {
+    await stopStream()
+  }
   // 刷新 message 列表
   await getMessageList()
   // 滚动底部
   scrollToBottom(true)
+  return true
 }
 
 /**
