@@ -260,6 +260,13 @@ const updateConversationTitle = async (conversation: ChatConversationVO) => {
   message.success('重命名成功')
   // 刷新列表
   await getChatConversationList()
+  // 过滤当前切换的
+  const filterConversationList = conversationList.value.filter(item => {
+    return item.id === conversation.id
+  })
+  if (filterConversationList.length > 0) {
+    emits('onConversationClick', filterConversationList[0])
+  }
 }
 
 /**
