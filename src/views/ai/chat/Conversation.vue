@@ -26,13 +26,15 @@
       <div class="conversation-list">
         <!-- TODO @fain：置顶、聊天记录、一星期钱、30天前，前端对数据重新做一下分组，或者后端接口改一下 -->
         <div v-for="conversationKey in Object.keys(conversationMap)" :key="conversationKey">
-          <div v-if="conversationMap[conversationKey].length">
+          <div class="conversation-item classify-title" v-if="conversationMap[conversationKey].length">
             <el-text class="mx-1" size="small" tag="b">{{ conversationKey }}</el-text>
           </div>
-          <el-row
+          <div
+            class="conversation-item"
             v-for="conversation in conversationMap[conversationKey]"
             :key="conversation.id"
-            @click="handleConversationClick(conversation.id)">
+            @click="handleConversationClick(conversation.id)"
+          >
             <div
               :class="conversation.id === activeConversationId ? 'conversation active' : 'conversation'"
             >
@@ -58,7 +60,7 @@
                 </el-button>
               </div>
             </div>
-          </el-row>
+          </div>
         </div>
       </div>
 
@@ -351,7 +353,15 @@ onMounted(async () => {
   }
 
   .conversation-list {
-    margin-top: 20px;
+    //margin-top: 20px;
+
+    .classify-title {
+      padding-top: 10px;
+    }
+
+    .conversation-item {
+      margin-top: 5px;
+    }
 
     .conversation {
       display: flex;
@@ -359,7 +369,6 @@ onMounted(async () => {
       justify-content: space-between;
       flex: 1;
       padding: 0 5px;
-      margin-top: 10px;
       cursor: pointer;
       border-radius: 5px;
       align-items: center;
@@ -380,17 +389,20 @@ onMounted(async () => {
       }
 
       .title {
-        padding: 5px 10px;
+        padding: 2px 10px;
         max-width: 220px;
         font-size: 14px;
+        font-weight: 400;
+        color: rgba(0, 0, 0, 0.77);
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
       }
 
       .avatar {
-        width: 28px;
-        height: 28px;
+        width: 25px;
+        height: 25px;
+        border-radius: 5px;
         display: flex;
         flex-direction: row;
         justify-items: center;
