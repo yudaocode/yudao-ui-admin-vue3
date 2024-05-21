@@ -40,7 +40,7 @@
                 <img class="avatar" :src="conversation.roleAvatar"/>
                 <span class="title">{{ conversation.title }}</span>
               </div>
-              <!-- TODO @fan：缺一个【置顶】按钮，效果改成 hover 上去展示 -->
+              <!-- TODO done @fan：缺一个【置顶】按钮，效果改成 hover 上去展示 -->
               <div class="button-wrapper">
                 <el-button class="btn" link @click="handlerTop(conversation)" >
                   <el-icon title="置顶" v-if="!conversation.pinned"><Top /></el-icon>
@@ -408,9 +408,6 @@ onMounted(async () => {
           margin: 0;
         }
 
-        .el-icon {
-          //margin-right: 5px;
-        }
       }
     }
   }
