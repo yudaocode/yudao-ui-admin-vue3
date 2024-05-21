@@ -191,8 +191,11 @@ const textRoll = async () => {
 // ============ 处理对话滚动 ==============
 
 function scrollToBottom(isIgnore?: boolean) {
+  // isIgnore = isIgnore !== null ? isIgnore : false
   nextTick(() => {
-    messageRef.value.scrollToBottom(isIgnore)
+    if (messageRef.value) {
+      messageRef.value.scrollToBottom(isIgnore)
+    }
   })
 }
 
@@ -441,8 +444,10 @@ const getConversation = async (id: string | null) => {
     return
   }
   const conversation: ChatConversationVO = await ChatConversationApi.getChatConversationMy(id)
-  activeConversation.value = conversation
-  activeConversationId.value = conversation.id
+  if (conversation) {
+    activeConversation.value = conversation
+    activeConversationId.value = conversation.id
+  }
 }
 
 // ============ message ===========
