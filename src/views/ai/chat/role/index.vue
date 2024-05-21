@@ -48,6 +48,7 @@
             :role-list="publicRoleList"
             @on-delete="handlerCardDelete"
             @on-edit="handlerCardEdit"
+            @on-use="handlerCardUse"
             @on-page="handlerCardPage('public')"
             style="margin-top: 20px;"
            loading/>
@@ -198,7 +199,7 @@ const handlerCardUse = async (role) => {
   const conversation = await ChatConversationApi.createChatConversationMy(data)
   // 调整页面
   router.push({
-    path: `/ai/chat/index`,
+    path: `/ai/chat`,
     query: {
       conversationId: conversation,
     }
