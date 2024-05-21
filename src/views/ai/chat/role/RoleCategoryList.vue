@@ -1,8 +1,8 @@
 <template>
   <div class="category-list">
-    <div class="category" v-for="category in categoryList" :key="category">
-      <el-button plain v-if="category !== active" @click="handleCategoryClick(category)">{{ category }}</el-button>
-      <el-button plain type="primary" v-else @click="handleCategoryClick(category)">{{ category }}</el-button>
+    <div class="category" v-for="(category) in categoryList" :key="category">
+      <el-button plain round size="small" v-if="category !== active" @click="handleCategoryClick(category)">{{ category }}</el-button>
+      <el-button plain round size="small" v-else type="primary" @click="handleCategoryClick(category)">{{ category }}</el-button>
     </div>
   </div>
 </template>
@@ -17,7 +17,8 @@ defineProps({
   },
   active: {
     type: String,
-    required: false
+    required: false,
+    default: '全部'
   }
 })
 

@@ -83,7 +83,7 @@ const myRoleList = ref<ChatRoleVO[]>([]) // my 分页大小
 const publicPageNo = ref<number>(1) // public 分页下标
 const publicPageSize = ref<number>(50) // public 分页大小
 const publicRoleList = ref<ChatRoleVO[]>([]) // public 分页大小
-const activeCategory = ref<string>('') // 选择中的分类
+const activeCategory = ref<string>('全部') // 选择中的分类
 const categoryList = ref<string[]>([]) // 角色分类类别
 /** 添加/修改操作 */
 const formRef = ref()
@@ -101,14 +101,12 @@ const getMyRole = async (append?: boolean) => {
   const params: ChatRolePageReqVO = {
     pageNo: myPageNo.value,
     pageSize: myPageSize.value,
-    category: activeCategory.value,
     name: search.value,
     publicStatus: false
   }
   const {total, list} = await ChatRoleApi.getMyPage(params)
   if (append) {
     myRoleList.value.push.apply(myRoleList.value, list)
-    console.log('myRoleList.value.push', myRoleList.value)
   } else {
     myRoleList.value = list
   }
@@ -119,7 +117,7 @@ const getPublicRole = async (append?: boolean) => {
   const params: ChatRolePageReqVO = {
     pageNo: publicPageNo.value,
     pageSize: publicPageSize.value,
-    category: activeCategory.value,
+    category: activeCategory.value === '全部' ? '' : activeCategory.value,
     name: search.value,
     publicStatus: true
   }
@@ -144,16 +142,16 @@ const getActiveTabsRole = async () => {
 
 // 获取角色分类列表
 const getRoleCategoryList = async () => {
-  categoryList.value = await ChatRoleApi.getCategoryList()
+  const res = await ChatRoleApi.getCategoryList()
+  const defaultRole = ['全部']
+  categoryList.value = [...defaultRole, ...res]
 }
 
 // 处理分类点击
 const handlerCategoryClick = async (category: string) => {
-  if (activeCategory.value === category) {
-    activeCategory.value = ''
-  } else {
-    activeCategory.value = category
-  }
+  // 切换选择的分类
+  activeCategory.value = category
+  // 筛选
   await getActiveTabsRole()
 }
 
