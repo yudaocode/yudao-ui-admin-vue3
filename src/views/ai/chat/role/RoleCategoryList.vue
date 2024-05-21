@@ -41,7 +41,7 @@ const handleCategoryClick = async (category) => {
   .category {
     display: flex;
     flex-direction: row;
-    margin-right: 20px;
+    margin-right: 10px;
   }
 }
 </style>
