@@ -56,7 +56,7 @@
             <el-button
               type="primary"
               size="default"
-              @click="onSend"
+              @click="onSendBtn"
               :loading="conversationInProgress"
               v-if="conversationInProgress == false"
             >
@@ -254,6 +254,10 @@ const onSend = async (event) => {
   }
 }
 
+const onSendBtn = async () => {
+  await doSend(prompt.value?.trim() as string)
+}
+
 const doSend = async (content: string) => {
   if (content.length < 2) {
     ElMessage({
@@ -303,6 +307,10 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       content: '思考中...',
       createTime: new Date()
     } as ChatMessageVO)
+    // 滚动到最下面
+    nextTick(async () => {
+      await scrollToBottom()
+    })
     // 开始滚动
     textRoll()
     // 发送 event stream
