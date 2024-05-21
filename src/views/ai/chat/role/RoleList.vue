@@ -101,8 +101,8 @@ onMounted(() => {
 <style lang="scss">
 // 重写 card 组件 body 样式
 .card-body {
-  max-width: 300px;
-  width: 300px;
+  max-width: 240px;
+  width: 240px;
   padding: 15px;
 
   display: flex;
@@ -134,12 +134,11 @@ onMounted(() => {
     border-radius: 10px;
     margin-bottom: 30px;
     position: relative;
-    //max-height: 152px;
 
     .more-container {
       position: absolute;
+      top: 0;
       right: 12px;
-      top: 0px;
     }
 
     .avatar {
@@ -156,7 +155,6 @@ onMounted(() => {
 
       .content-container {
         height: 85px;
-        overflow: hidden;
 
         .title {
           font-size: 18px;
@@ -174,7 +172,7 @@ onMounted(() => {
       .btn-container {
         display: flex;
         flex-direction: row-reverse;
-        margin-top: 15px;
+        margin-top: 2px;
       }
     }
 
