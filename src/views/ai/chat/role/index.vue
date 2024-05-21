@@ -258,9 +258,14 @@ onMounted(async () => {
     overflow: hidden;
     margin: 0;
     padding: 0;
+    position: relative;
 
     .search-container {
       margin: 20px 20px 0px 20px;
+      position: absolute;
+      right: 0;
+      top: -5px;
+      z-index: 100;
     }
 
     .search-input {
