@@ -481,9 +481,11 @@ onMounted(async () => {
   // 设置当前对话 TODO 角色仓库过来的，自带 conversationId 需要选中
   if (route.query.conversationId) {
     const id = route.query.conversationId as string
+    activeConversationId.value = id
     await getConversation(id)
   }
   // 获取列表数据
+  listLoading.value = true
   await getMessageList()
 })
 </script>
