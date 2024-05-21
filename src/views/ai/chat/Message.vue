@@ -17,14 +17,12 @@
             <MarkdownView class="left-text" :content="item.content" />
           </div>
           <div class="left-btns">
-            <div class="btn-cus" @click="noCopy(item.content)">
+            <el-button class="btn-cus" link @click="noCopy(item.content)">
               <img class="btn-image" src="@/assets/ai/copy.svg"/>
-              <el-text class="btn-cus-text">复制</el-text>
-            </div>
-            <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
+            </el-button>
+            <el-button class="btn-cus" link @click="onDelete(item.id)">
               <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
-              <el-text class="btn-cus-text">删除</el-text>
-            </div>
+            </el-button>
           </div>
         </div>
       </div>
@@ -43,14 +41,12 @@
             <div class="right-text">{{ item.content }}</div>
           </div>
           <div class="right-btns">
-            <div class="btn-cus" @click="noCopy(item.content)">
+            <el-button class="btn-cus" link @click="noCopy(item.content)">
               <img class="btn-image" src="@/assets/ai/copy.svg"/>
-              <el-text class="btn-cus-text">复制</el-text>
-            </div>
-            <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
+            </el-button>
+            <el-button class="btn-cus" link @click="onDelete(item.id)">
               <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
-              <el-text class="btn-cus-text">删除</el-text>
-            </div>
+            </el-button>
           </div>
         </div>
       </div>
@@ -248,20 +244,12 @@ onMounted(async () => {
 
     .btn-image {
       height: 20px;
-      margin-right: 5px;
-    }
-
-    .btn-cus-text {
-      color: #757575;
     }
   }
 
   .btn-cus:hover {
     cursor: pointer;
-  }
-
-  .btn-cus:focus {
-    background-color: #8c939d;
+    background-color: #f6f6f6;
   }
 }
 </style>
