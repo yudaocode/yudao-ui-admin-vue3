@@ -20,7 +20,12 @@ const contentRef = ref()
 // marked 渲染器
 const renderer = {
   code(code, language, c) {
-    const highlightHtml = hljs.highlight(code, {language: language, ignoreIllegals: true}).value
+    let highlightHtml
+    try {
+      highlightHtml = hljs.highlight(code, {language: language, ignoreIllegals: true}).value
+    } catch (e) {
+      // skip
+    }
     const copyHtml = `<div id="copy" data-copy='${code}' style="position: absolute; right: 10px; top: 5px; color: #fff;cursor: pointer;">复制</div>`
     return `<pre style="position: relative;">${copyHtml}<code class="hljs">${highlightHtml}</code></pre>`
   }
