@@ -144,13 +144,16 @@ const searchConversation = async (e) => {
  * 对话 - 点击
  */
 const handleConversationClick = async (id: string) => {
-  // 切换对话
-  activeConversationId.value = id
+  // 过滤出选中的对话
   const filterConversation = conversationList.value.filter(item => {
     return item.id === id
   })
   // 回调 onConversationClick
-  emits('onConversationClick', filterConversation[0])
+  const res = emits('onConversationClick', filterConversation[0])
+  // 切换对话
+  if (res) {
+    activeConversationId.value = id
+  }
 }
 
 /**
