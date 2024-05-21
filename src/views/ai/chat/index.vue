@@ -308,13 +308,8 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       conversationInAbortController.value,
       async (message) => {
         const data = JSON.parse(message.data) // TODO 芋艿：类型处理；
-        // debugger
-        // 如果没有内容结束链接
+        // 如果内容为空，就不处理。
         if (data.receive.content === '') {
-          // 标记对话结束
-          conversationInProgress.value = false
-          // 结束 stream 对话
-          conversationInAbortController.value.abort()
           return
         }
         // 首次返回需要添加一个 message 到页面，后面的都是更新
