@@ -103,7 +103,7 @@ onMounted(() => {
 .card-body {
   max-width: 240px;
   width: 240px;
-  padding: 15px;
+  padding: 15px 15px 10px 15px;
 
   display: flex;
   flex-direction: row;
@@ -132,7 +132,7 @@ onMounted(() => {
     display: inline-block;
     margin-right: 20px;
     border-radius: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     position: relative;
 
     .more-container {
