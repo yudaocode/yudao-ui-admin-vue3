@@ -94,7 +94,6 @@ import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import {useClipboard} from '@vueuse/core'
 import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
-import {send} from "vite";
 
 const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
@@ -381,6 +380,7 @@ const openChatConversationUpdateForm = async () => {
  */
 const handlerTitleSuccess = async () => {
   // TODO 需要刷新 对话列表
+  await getConversation(activeConversationId.value)
 }
 
 /**
@@ -418,9 +418,13 @@ const handlerConversationDelete = async (delConversation: ChatConversationVO) =>
 /**
  * 对话 - 获取
  */
-const getConversation = async (id: string) => {
+const getConversation = async (id: string | null) => {
+  if (!id) {
+    return
+  }
   const conversation: ChatConversationVO = await ChatConversationApi.getChatConversationMy(id)
-  return conversation
+  activeConversation.value = conversation
+  activeConversationId.value = conversation.id
 }
 
 // ============ message ===========
@@ -435,8 +439,7 @@ onMounted(async () => {
   // 设置当前对话 TODO 角色仓库过来的，自带 conversationId 需要选中
   if (route.query.conversationId) {
     const id = route.query.conversationId as string
-    activeConversationId.value = id
-    activeConversation.value = await getConversation(id) as ChatConversationVO
+    await getConversation(id)
   }
   // 获取列表数据
   await getMessageList()
