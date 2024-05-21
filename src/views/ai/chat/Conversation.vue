@@ -151,7 +151,7 @@ const getChatConversationList = async () => {
   const res = await ChatConversationApi.getChatConversationMyList()
   // 2、排序
   res.sort((a, b) => {
-    return b.updateTime - a.updateTime
+    return b.createTime - a.createTime
   })
   conversationList.value = res
   // 3、默认选中
