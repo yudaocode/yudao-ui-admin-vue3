@@ -15,19 +15,13 @@
         </div>
         <div class="btns">
           <!-- TODO @fan：样式改下；这里我已经改成点击后，弹出了 -->
-            <el-button type="primary" @click="openChatConversationUpdateForm">
-              <span v-html="activeConversation?.modelName"></span>
-              <Icon icon="ep:setting" style="margin-left: 10px"/>
-            </el-button>
-          <el-button>
-            <Icon icon="ep:user"/>
+          <el-button type="primary" bg text="plain" size="small" @click="openChatConversationUpdateForm">
+            <span v-html="activeConversation?.modelName"></span>
+            <Icon icon="ep:setting" style="margin-left: 10px"/>
           </el-button>
-          <el-button>
-            <Icon icon="ep:download"/>
-          </el-button>
-          <el-button @click="handlerGoTop">
-            <Icon icon="ep:arrow-up"/>
-          </el-button>
+          <el-button size="small" :icon="User"  class="btn"  />
+          <el-button size="small" :icon="Download" class="btn"  />
+          <el-button size="small" :icon="Top" class="btn"  @click="handlerGoTop" />
         </div>
       </el-header>
 
@@ -99,6 +93,7 @@ import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import {useClipboard} from '@vueuse/core'
 import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
+import {Download, Top, User} from "@element-plus/icons-vue";
 
 const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
@@ -606,7 +601,13 @@ onMounted(async () => {
     .btns {
       display: flex;
       width: 300px;
-      justify-content: space-between;
+      flex-direction: row;
+      justify-content: flex-end;
+      //justify-content: space-between;
+
+      .btn {
+        padding: 10px;
+      }
     }
   }
 }
