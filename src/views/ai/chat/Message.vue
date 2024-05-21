@@ -246,6 +246,7 @@ onMounted(async () => {
         padding: 10px;
         width: auto;
         overflow-wrap: break-word;
+        white-space: pre-wrap;
       }
     }
 

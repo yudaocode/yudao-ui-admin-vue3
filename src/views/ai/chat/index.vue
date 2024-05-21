@@ -41,11 +41,11 @@
 
       <!-- 底部 -->
       <el-footer class="footer-container">
-        <form @submit.prevent="onSend" class="prompt-from">
+        <form class="prompt-from">
           <textarea
             class="prompt-input"
             v-model="prompt"
-            @keyup.enter="onSend"
+            @keydown="onSend"
             @input="onPromptInput"
             @compositionstart="onCompositionstart"
             @compositionend="onCompositionend"
@@ -56,7 +56,7 @@
             <el-button
               type="primary"
               size="default"
-              @click="onSend()"
+              @click="onSend"
               :loading="conversationInProgress"
               v-if="conversationInProgress == false"
             >
@@ -231,7 +231,7 @@ const onPromptInput = (event) => {
 /**
  * 发送消息
  */
-const onSend = async () => {
+const onSend = async (event) => {
   // 判断用户是否在输入
   if (isComposing.value) {
     return
@@ -241,7 +241,17 @@ const onSend = async () => {
     return
   }
   const content = prompt.value?.trim() as string
-  await doSend(content)
+  if (event.key === 'Enter') {
+    if (event.shiftKey) {
+      // 插入换行
+      prompt.value += '\r\n';
+      event.preventDefault(); // 防止默认的换行行为
+    } else {
+      // 发送消息
+      await doSend(content)
+      event.preventDefault(); // 防止默认的提交行为
+    }
+  }
 }
 
 const doSend = async (content: string) => {
