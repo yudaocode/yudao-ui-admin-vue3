@@ -25,7 +25,7 @@
           <el-button>
             <Icon icon="ep:download"/>
           </el-button>
-          <el-button>
+          <el-button @click="handlerGoTop">
             <Icon icon="ep:arrow-up"/>
           </el-button>
         </div>
@@ -36,7 +36,10 @@
         <div >
           <div class="message-container" >
             <MessageLoading v-if="listLoading" />
-            <Message v-if="!listLoading && list.length > 0" ref="messageRef" :list="list" @on-delete-success="handlerMessageDelete" />
+            <Message v-if="!listLoading && list.length > 0"
+                     ref="messageRef"
+                     :list="list"
+                     @on-delete-success="handlerMessageDelete" />
             <ChatEmpty  v-if="!listLoading && list.length === 0" @on-prompt="doSend"/>
           </div>
         </div>
@@ -444,10 +447,21 @@ const getConversation = async (id: string | null) => {
 
 // ============ message ===========
 
+/**
+ * 删除 message
+ */
 const handlerMessageDelete = async () => {
   // 刷新 message
   await getMessageList()
 }
+
+/**
+ * 回到顶部
+ */
+const handlerGoTop = async () => {
+  await messageRef.value.handlerGoTop()
+}
+
 
 /** 初始化 **/
 onMounted(async () => {
