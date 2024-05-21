@@ -37,6 +37,8 @@
             v-for="conversation in conversationMap[conversationKey]"
             :key="conversation.id"
             @click="handleConversationClick(conversation.id)"
+            @mouseover="hoverConversationId = conversation.id"
+            @mouseout="hoverConversationId = ''"
           >
             <div
               :class="conversation.id === activeConversationId ? 'conversation active' : 'conversation'"
@@ -46,7 +48,7 @@
                 <span class="title">{{ conversation.title }}</span>
               </div>
               <!-- TODO done @fan：缺一个【置顶】按钮，效果改成 hover 上去展示 -->
-              <div class="button-wrapper">
+              <div class="button-wrapper" v-show="hoverConversationId === conversation.id">
                 <el-button class="btn" link @click.stop="handlerTop(conversation)" >
                   <el-icon title="置顶" v-if="!conversation.pinned"><Top /></el-icon>
                   <el-icon title="置顶" v-if="conversation.pinned"><Bottom /></el-icon>
@@ -104,6 +106,7 @@ const message = useMessage() // 消息弹窗
 // 定义属性
 const searchName = ref<string>('') // 对话搜索
 const activeConversationId = ref<string | null>(null) // 选中的对话，默认为 null
+const hoverConversationId = ref<string | null>(null) // 悬浮上去的对话
 const conversationList = ref([] as ChatConversationVO[])  // 对话列表
 const conversationMap = ref<any>({})  // 对话分组 (置顶、今天、三天前、一星期前、一个月前)
 const drawer = ref<boolean>(false) // 角色仓库抽屉
@@ -456,7 +459,6 @@ onMounted(async () => {
         .btn {
           margin: 0;
         }
-
       }
     }
   }
