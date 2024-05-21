@@ -3,7 +3,7 @@
     <div class="card-item" v-for="role in roleList" :key="role.id">
       <el-card class="card" body-class="card-body">
         <!--  更多 -->
-        <div class="more-container">
+        <div class="more-container" v-if="showMore">
           <el-dropdown @command="handleMoreClick">
           <span class="el-dropdown-link">
              <el-button type="text" >
@@ -58,6 +58,11 @@ const props = defineProps({
   roleList: {
     type: Array as PropType<ChatRoleVO[]>,
     required: true
+  },
+  showMore: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 })
 // 定义钩子

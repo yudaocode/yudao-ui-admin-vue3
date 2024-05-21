@@ -30,6 +30,7 @@
           <RoleList
             :loading="loading"
             :role-list="myRoleList"
+            :show-more="true"
             @on-delete="handlerCardDelete"
             @on-edit="handlerCardEdit"
             @on-use="handlerCardUse"
@@ -49,7 +50,7 @@
             @on-edit="handlerCardEdit"
             @on-page="handlerCardPage('public')"
             style="margin-top: 20px;"
-          />
+           loading/>
         </el-tab-pane>
       </el-tabs>
     </el-main>
