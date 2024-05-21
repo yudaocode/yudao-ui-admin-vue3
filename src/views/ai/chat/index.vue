@@ -35,8 +35,9 @@
       <el-main class="main-container" >
         <div >
           <div class="message-container" >
-            <Message v-if="list.length > 0" ref="messageRef" :list="list" @on-delete-success="handlerMessageDelete" />
-            <ChatEmpty  v-if="list.length === 0" @on-prompt="doSend"/>
+            <MessageLoading v-if="listLoading" />
+            <Message v-if="!listLoading && list.length > 0" ref="messageRef" :list="list" @on-delete-success="handlerMessageDelete" />
+            <ChatEmpty  v-if="!listLoading && list.length === 0" @on-prompt="doSend"/>
           </div>
         </div>
       </el-main>
@@ -90,6 +91,7 @@
 import Conversation from './Conversation.vue'
 import Message from './Message.vue'
 import ChatEmpty from './ChatEmpty.vue'
+import MessageLoading from './MessageLoading.vue'
 import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import {useClipboard} from '@vueuse/core'
@@ -111,6 +113,11 @@ const fullText = ref('');
 const displayedText = ref('');
 const textSpeed = ref<number>(50); // Typing speed in milliseconds
 const textRoleRunning = ref<boolean>(false); // Typing speed in milliseconds
+
+// chat message 列表
+const list = ref<ChatMessageVO[]>([]) // 列表的数据
+const listLoading = ref<boolean>(false) // 是否加载中
+const listLoadingTime = ref<any>() // time定时器，如果加载速度很快，就不进入加载中
 
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
 const messageRef = ref()
@@ -177,8 +184,6 @@ const textRoll = async () => {
   }
 };
 
-/** chat message 列表 */
-const list = ref<ChatMessageVO[]>([]) // 列表的数据
 
 // ============ 处理对话滚动 ==============
 
@@ -354,6 +359,10 @@ const stopStream = async () => {
  */
 const getMessageList = async () => {
   try {
+    // time 定时器，如果加载速度很快，就不进入加载中
+    listLoadingTime.value = setTimeout(() => {
+      listLoading.value = true
+    }, 60)
     if (activeConversationId.value === null) {
       return
     }
@@ -365,6 +374,12 @@ const getMessageList = async () => {
       scrollToBottom()
     })
   } finally {
+    // time 定时器，如果加载速度很快，就不进入加载中
+    if (listLoadingTime.value) {
+      clearTimeout(listLoadingTime.value)
+    }
+    // 加载结束
+    listLoading.value = false
   }
 }
 
