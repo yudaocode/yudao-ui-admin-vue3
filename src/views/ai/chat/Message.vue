@@ -1,5 +1,5 @@
 <template>
-  <div ref="messageContainer" style="height: 100%;overflow-y: auto;">
+  <div ref="messageContainer" style="height: 100%;overflow-y: auto;position: relative;">
     <div class="chat-list" v-for="(item, index) in list" :key="index" >
       <!--  靠左 message  -->
       <!-- TODO 芋艿：类型判断 -->
@@ -52,6 +52,10 @@
       </div>
     </div>
   </div>
+  <!--  回到底部  -->
+  <div v-if="isScrolling" class="to-bottom" @click="handleGoBottom">
+    <el-button :icon="ArrowDownBold" circle />
+  </div>
 </template>
 <script setup lang="ts">
 import {formatDate} from "@/utils/formatTime";
@@ -59,6 +63,7 @@ import MarkdownView from "@/components/MarkdownView/index.vue";
 import {ChatMessageApi, ChatMessageVO} from "@/api/ai/chat/message";
 import {useClipboard} from "@vueuse/core";
 import {PropType} from "vue";
+import {ArrowDownBold} from "@element-plus/icons-vue";
 
 const {copy} = useClipboard() // 初始化 copy 到粘贴板
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
@@ -72,7 +77,6 @@ const props = defineProps({
     required: true
   }
 })
-
 
 // ============ 处理对话滚动 ==============
 
@@ -125,6 +129,22 @@ const onDelete = async (id) => {
   emits('onDeleteSuccess')
 }
 
+/**
+ * 回到底部
+ */
+const handleGoBottom = async () => {
+  const scrollContainer = messageContainer.value
+  scrollContainer.scrollTop = scrollContainer.scrollHeight
+}
+
+/**
+ * 回到顶部
+ */
+const handlerGoTop = async () => {
+  const scrollContainer = messageContainer.value
+  scrollContainer.scrollTop = 0
+}
+
 // 监听 list
 const { list, conversationId } = toRefs(props)
 watch(list, async (newValue, oldValue) => {
@@ -132,11 +152,12 @@ watch(list, async (newValue, oldValue) => {
 })
 
 // 提供方法给 parent 调用
-defineExpose({scrollToBottom})
+defineExpose({scrollToBottom, handlerGoTop})
 
-//
+// 定义 emits
 const emits = defineEmits(['onDeleteSuccess'])
-//
+
+// onMounted
 onMounted(async () => {
   messageContainer.value.addEventListener('scroll', handleScroll)
 })
@@ -256,5 +277,13 @@ onMounted(async () => {
     cursor: pointer;
     background-color: #f6f6f6;
   }
+}
+
+// 回到底部
+.to-bottom {
+  position: absolute;
+  z-index: 1000;
+  bottom: 0;
+  right: 50%;
 }
 </style>
