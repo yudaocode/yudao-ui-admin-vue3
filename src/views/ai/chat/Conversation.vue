@@ -169,6 +169,14 @@ const getChatConversationList = async () => {
     // 3、默认选中
     if (!activeId?.value) {
       await handleConversationClick(res[0].id)
+    } else {
+      // tip: 删除的刚好是选中的，那么需要重新挑选一个来进行选中
+      const filterConversationList = conversationList.value.filter(item => {
+        return item.id === activeId.value
+      })
+      if (filterConversationList.length <= 0) {
+        await handleConversationClick(res[0].id)
+      }
     }
     // 4、没有 任何对话情况
     if (conversationList.value.length === 0) {
