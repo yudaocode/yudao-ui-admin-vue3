@@ -24,7 +24,10 @@
 
       <!-- 左中间：对话列表 -->
       <div class="conversation-list">
-        <!-- TODO @fain：置顶、聊天记录、一星期钱、30天前，前端对数据重新做一下分组，或者后端接口改一下 -->
+
+        <el-empty v-if="loading" description="." :v-loading="loading" />
+
+        <!-- TODO done @fain：置顶、聊天记录、一星期钱、30天前，前端对数据重新做一下分组，或者后端接口改一下 -->
         <div v-for="conversationKey in Object.keys(conversationMap)" :key="conversationKey">
           <div class="conversation-item classify-title" v-if="conversationMap[conversationKey].length">
             <el-text class="mx-1" size="small" tag="b">{{ conversationKey }}</el-text>
@@ -102,6 +105,8 @@ const activeConversationId = ref<string | null>(null) // 选中的对话，默�
 const conversationList = ref([] as ChatConversationVO[])  // 对话列表
 const conversationMap = ref<any>({})  // 对话分组 (置顶、今天、三天前、一星期前、一个月前)
 const drawer = ref<boolean>(false) // 角色仓库抽屉
+const loading = ref<boolean>(false) // 加载中
+const loadingTime = ref<any>() // 加载中定时器
 
 // 定义组件 props
 const props = defineProps({
@@ -147,25 +152,38 @@ const handleConversationClick = async (id: string) => {
  * 对话 - 获取列表
  */
 const getChatConversationList = async () => {
-  // 1、获取 对话数据
-  const res = await ChatConversationApi.getChatConversationMyList()
-  // 2、排序
-  res.sort((a, b) => {
-    return b.createTime - a.createTime
-  })
-  conversationList.value = res
-  // 3、默认选中
-  if (!activeId?.value) {
-    await handleConversationClick(res[0].id)
+  try {
+    // 0、加载中
+    loadingTime.value = setTimeout(() => {
+      loading.value = true
+    }, 50)
+    // 1、获取 对话数据
+    const res = await ChatConversationApi.getChatConversationMyList()
+    // 2、排序
+    res.sort((a, b) => {
+      return b.createTime - a.createTime
+    })
+    conversationList.value = res
+    // 3、默认选中
+    if (!activeId?.value) {
+      await handleConversationClick(res[0].id)
+    }
+    // 4、没有 任何对话情况
+    if (conversationList.value.length === 0) {
+      activeConversationId.value = null
+      conversationMap.value = {}
+      return
+    }
+    // 5、对话根据时间分组(置顶、今天、一天前、三天前、七天前、30天前)
+    conversationMap.value = await conversationTimeGroup(conversationList.value)
+  } finally {
+    // 清理定时器
+    if (loadingTime.value) {
+      clearTimeout(loadingTime.value)
+    }
+    // 加载完成
+    loading.value = false
   }
-  // 4、没有 任何对话情况
-  if (conversationList.value.length === 0) {
-    activeConversationId.value = null
-    conversationMap.value = {}
-    return
-  }
-  // 5、对话根据时间分组(置顶、今天、一天前、三天前、七天前、30天前)
-  conversationMap.value = await conversationTimeGroup(conversationList.value)
 }
 
 const conversationTimeGroup = async (list: ChatConversationVO[]) => {
