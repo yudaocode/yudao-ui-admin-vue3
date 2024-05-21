@@ -17,7 +17,7 @@
           :suffix-icon="Search"
           @change="getActiveTabsRole"
         />
-        <el-button type="primary" @click="handlerAddRole" style="margin-left: 20px;">
+        <el-button v-if="activeRole == 'my-role'" type="primary" @click="handlerAddRole" style="margin-left: 20px;">
           <el-icon>
             <User/>
           </el-icon>
