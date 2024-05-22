@@ -13,6 +13,7 @@
       <el-header class="header">
         <div class="title">
           {{ activeConversation?.title ? activeConversation?.title : '对话' }}
+          <span v-if="list.length">({{list.length}})</span>
         </div>
         <div class="btns" v-if="activeConversation">
           <!-- TODO @fan：样式改下；这里我已经改成点击后，弹出了 -->
