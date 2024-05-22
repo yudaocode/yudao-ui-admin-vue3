@@ -109,6 +109,7 @@ const conversationInProgress = ref(false) // 对话进行中
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
+const userInfo = ref<ProfileVO>() // 用户信息
 
 const fullText = ref('');
 const displayedText = ref('');
@@ -123,6 +124,9 @@ const listLoadingTime = ref<any>() // time定时器，如果加载速度很快�
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
 const messageRef = ref()
 const isComposing = ref(false) // 判断用户是否在输入
+
+// 默认 role 头像
+const defaultRoleAvatar = 'http://test.yudao.iocoder.cn/eaef5f41acb911dd718429a0702dcc3c61160d16e57ba1d543132fab58934f9f.png'
 
 // =========== 自提滚动效果
 
@@ -300,6 +304,7 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       conversationId: activeConversationId.value,
       type: 'user',
       content: userMessage.content,
+      userAvatar: userInfo.value?.avatar,
       createTime: new Date()
     } as ChatMessageVO)
     list.value.push({
@@ -307,6 +312,7 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       conversationId: activeConversationId.value,
       type: 'system',
       content: '思考中...',
+      roleAvatar: defaultRoleAvatar,
       createTime: new Date()
     } as ChatMessageVO)
     // 滚动到最下面
@@ -388,12 +394,11 @@ const getMessageList = async () => {
     // 获取列表数据
     const messageListRes = await ChatMessageApi.messageList(activeConversationId.value)
     // 设置用户头像
-    const user = await getUserProfile()
     messageListRes.map(item => {
-      item.userAvatar = user?.avatar
+      // 设置 role 默认头像
+      item.roleAvatar = item.roleAvatar ? item.roleAvatar : defaultRoleAvatar
     })
     list.value = messageListRes
-    console.log("设置头像成功", messageListRes)
     // 滚动到最下面
     await nextTick(() => {
       // 滚动到最后
@@ -524,6 +529,8 @@ onMounted(async () => {
   // 获取列表数据
   listLoading.value = true
   await getMessageList()
+  // 获取用户信息
+  userInfo.value = await getUserProfile()
 })
 </script>
 
