@@ -281,7 +281,10 @@ const updateConversationTitle = async (conversation: ChatConversationVO) => {
     return item.id === conversation.id
   })
   if (filterConversationList.length > 0) {
-    emits('onConversationClick', filterConversationList[0])
+    // tip：避免切换对话
+    if (activeConversationId.value === filterConversationList[0].id) {
+      emits('onConversationClick', filterConversationList[0])
+    }
   }
 }
 
