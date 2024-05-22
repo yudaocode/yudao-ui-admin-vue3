@@ -312,7 +312,7 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       conversationId: activeConversationId.value,
       type: 'system',
       content: '思考中...',
-      roleAvatar: defaultRoleAvatar,
+      roleAvatar: (activeConversation.value as ChatConversationVO).roleAvatar,
       createTime: new Date()
     } as ChatMessageVO)
     // 滚动到最下面
