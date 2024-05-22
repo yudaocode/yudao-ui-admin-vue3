@@ -19,7 +19,9 @@
             <span v-html="activeConversation?.modelName"></span>
             <Icon icon="ep:setting" style="margin-left: 10px"/>
           </el-button>
-          <el-button size="small" :icon="User"  class="btn"  />
+          <el-button size="small" class="btn" @click="handlerMessageClear">
+            <img src="@/assets/ai/clear.svg" style="height: 14px;" />
+          </el-button>
           <el-button size="small" :icon="Download" class="btn"  />
           <el-button size="small" :icon="Top" class="btn"  @click="handlerGoTop" />
         </div>
@@ -93,7 +95,7 @@ import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import {useClipboard} from '@vueuse/core'
 import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
-import {Download, Top, User} from "@element-plus/icons-vue";
+import {Download, Top} from "@element-plus/icons-vue";
 
 const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
@@ -487,6 +489,22 @@ const handlerMessageDelete = async () => {
 const handlerGoTop = async () => {
   await messageRef.value.handlerGoTop()
 }
+
+/**
+ * message 清除
+ */
+const handlerMessageClear = async () => {
+  if (!activeConversationId.value) {
+    return
+  }
+  // 确认提示
+  await message.delConfirm("确认清空对话消息？")
+  // 清空对话
+  await ChatMessageApi.deleteByConversationId(activeConversationId.value as string)
+  // 刷新 message 列表
+  await getMessageList()
+}
+
 
 
 /** 初始化 **/

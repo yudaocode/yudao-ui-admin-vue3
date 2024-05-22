@@ -60,8 +60,14 @@ export const ChatMessageApi = {
     })
   },
 
-  // 发送 send 消息
+  // 删除消息
   delete: async (id: string) => {
     return await request.delete({ url: `/ai/chat/message/delete?id=${id}` })
+  },
+
+  // 删除消息 - 对话所有消息
+  deleteByConversationId: async (conversationId: string) => {
+    return await request.delete({ url: `/ai/chat/message/delete-by-conversation-id?conversationId=${conversationId}` })
   }
+
 }
