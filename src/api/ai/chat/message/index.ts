@@ -39,6 +39,7 @@ export const ChatMessageApi = {
     conversationId: number,
     content: string,
     ctrl,
+    enableContext: boolean,
     onMessage,
     onError,
     onClose
@@ -53,7 +54,8 @@ export const ChatMessageApi = {
       openWhenHidden: true,
       body: JSON.stringify({
         conversationId,
-        content
+        content,
+        useContext: enableContext,
       }),
       onmessage: onMessage,
       onerror: onError,

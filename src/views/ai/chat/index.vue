@@ -54,7 +54,9 @@
             placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
           ></textarea>
           <div class="prompt-btns">
-            <el-switch/>
+            <div>
+              <el-switch v-model="enableContext" /> <span style="font-size: 14px; color: #8f8f8f;">上下文</span>
+            </div>
             <el-button
               type="primary"
               size="default"
@@ -110,6 +112,7 @@ const conversationInAbortController = ref<any>() // 对话进行中 abort 控制
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
 const userInfo = ref<ProfileVO>() // 用户信息
+const enableContext = ref<boolean>(true) // 是否开启上下文
 
 const fullText = ref('');
 const displayedText = ref('');
@@ -327,6 +330,7 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       userMessage.conversationId, // TODO 芋艿：这里可能要在优化；
       userMessage.content,
       conversationInAbortController.value,
+      enableContext.value,
       async (message) => {
         const data = JSON.parse(message.data) // TODO 芋艿：类型处理；
         // 如果内容为空，就不处理。
