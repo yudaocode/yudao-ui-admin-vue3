@@ -93,6 +93,7 @@ import ChatEmpty from './ChatEmpty.vue'
 import MessageLoading from './MessageLoading.vue'
 import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
+import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
 import {useClipboard} from '@vueuse/core'
 import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
 import {Download, Top} from "@element-plus/icons-vue";
@@ -385,7 +386,14 @@ const getMessageList = async () => {
       return
     }
     // 获取列表数据
-    list.value = await ChatMessageApi.messageList(activeConversationId.value)
+    const messageListRes = await ChatMessageApi.messageList(activeConversationId.value)
+    // 设置用户头像
+    const user = await getUserProfile()
+    messageListRes.map(item => {
+      item.userAvatar = user?.avatar
+    })
+    list.value = messageListRes
+    console.log("设置头像成功", messageListRes)
     // 滚动到最下面
     await nextTick(() => {
       // 滚动到最后
@@ -504,8 +512,6 @@ const handlerMessageClear = async () => {
   // 刷新 message 列表
   await getMessageList()
 }
-
-
 
 /** 初始化 **/
 onMounted(async () => {

@@ -5,9 +5,7 @@
       <!-- TODO 芋艿：类型判断 -->
       <div class="left-message message-item" v-if="item.type !== 'user'">
         <div class="avatar">
-          <el-avatar
-            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-          />
+          <el-avatar :src="item.roleAvatar" />
         </div>
         <div class="message">
           <div>
@@ -29,9 +27,7 @@
       <!--  靠右 message  -->
       <div class="right-message message-item" v-if="item.type === 'user'">
         <div class="avatar">
-          <el-avatar
-            src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-          />
+          <el-avatar :src="item.userAvatar" />
         </div>
         <div class="message">
           <div>

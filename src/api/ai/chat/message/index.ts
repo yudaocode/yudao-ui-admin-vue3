@@ -15,6 +15,8 @@ export interface ChatMessageVO {
   content: string // 聊天内容
   tokens: number // 消耗 Token 数量
   createTime: Date // 创建时间
+  roleAvatar: string // 角色头像
+  userAvatar: string // 创建时间
 }
 
 export interface ChatMessageSendVO {
