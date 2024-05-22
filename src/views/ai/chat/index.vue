@@ -2,6 +2,7 @@
   <el-container class="ai-layout">
     <!-- 左侧：会话列表 -->
     <Conversation :active-id="activeConversationId"
+                  ref="conversationRef"
                   @onConversationClick="handleConversationClick"
                   @onConversationClear="handlerConversationClear"
                   @onConversationDelete="handlerConversationDelete"
@@ -11,9 +12,9 @@
       <!-- 右顶部 TODO 芋艿：右对齐 -->
       <el-header class="header">
         <div class="title">
-          {{ activeConversation?.title }}
+          {{ activeConversation?.title ? activeConversation?.title : '对话' }}
         </div>
-        <div class="btns">
+        <div class="btns" v-if="activeConversation">
           <!-- TODO @fan：样式改下；这里我已经改成点击后，弹出了 -->
           <el-button type="primary" bg text="plain" size="small" @click="openChatConversationUpdateForm">
             <span v-html="activeConversation?.modelName"></span>
@@ -32,11 +33,12 @@
         <div >
           <div class="message-container" >
             <MessageLoading v-if="listLoading" />
+            <MessageNewChat v-if="!activeConversation" @on-new-chat="handlerNewChat" />
+            <ChatEmpty v-if="!listLoading && list.length === 0 && activeConversation" @on-prompt="doSend"/>
             <Message v-if="!listLoading && list.length > 0"
                      ref="messageRef"
                      :list="list"
                      @on-delete-success="handlerMessageDelete" />
-            <ChatEmpty  v-if="!listLoading && list.length === 0" @on-prompt="doSend"/>
           </div>
         </div>
       </el-main>
@@ -93,6 +95,7 @@ import Conversation from './Conversation.vue'
 import Message from './Message.vue'
 import ChatEmpty from './ChatEmpty.vue'
 import MessageLoading from './MessageLoading.vue'
+import MessageNewChat from './MessageNewChat.vue'
 import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
@@ -126,6 +129,7 @@ const listLoadingTime = ref<any>() // time定时器，如果加载速度很快�
 
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
 const messageRef = ref()
+const conversationRef = ref()
 const isComposing = ref(false) // 判断用户是否在输入
 
 // 默认 role 头像
@@ -488,6 +492,14 @@ const getConversation = async (id: string | null) => {
     activeConversation.value = conversation
     activeConversationId.value = conversation.id
   }
+}
+
+/**
+ * 对话 - 新建
+ */
+const handlerNewChat = async () => {
+  // 创建对话
+  await conversationRef.value.createConversation()
 }
 
 // ============ message ===========
