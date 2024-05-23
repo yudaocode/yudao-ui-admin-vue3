@@ -17,9 +17,12 @@
           v-mountedFocus
           v-model="currentNode.name"
           :placeholder="currentNode.name"
-          />
-        <div v-else class="node-name" >{{ currentNode.name }} <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()"/></div>
-        
+        />
+        <div v-else class="node-name"
+          >{{ currentNode.name }}
+          <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()"
+        /></div>
+
         <div class="divide-line"></div>
       </div>
     </template>
@@ -149,7 +152,10 @@
                     <el-radio
                       :value="item.value"
                       :label="item.value"
-                      :disabled="item.value !== ApproveMethodType.SINGLE_PERSON_APPROVE && notAllowedMultiApprovers"
+                      :disabled="
+                        item.value !== ApproveMethodType.SINGLE_PERSON_APPROVE &&
+                        notAllowedMultiApprovers
+                      "
                     >
                       {{ item.label }}
                     </el-radio>
@@ -157,16 +163,79 @@
                 </div>
               </el-radio-group>
             </el-form-item>
+
+            <el-form-item label="超时处理" prop="timeoutHandlerEnable">
+              <el-switch
+                v-model="currentNode.attributes.timeoutHandler.enable"
+                active-text="开启"
+                inactive-text="关闭"
+                @change="timeoutHandlerChange"
+              />
+            </el-form-item>
+            <el-form-item
+              label="执行动作"
+              prop="timeoutHandlerAction"
+              v-if="currentNode.attributes.timeoutHandler.enable"
+            >
+              <el-radio-group v-model="currentNode.attributes.timeoutHandler.action">
+                <el-radio-button
+                  v-for="item in TIMEOUT_HANDLER_ACTION_TYPES"
+                  :key="item.value"
+                  :value="item.value"
+                  :label="item.label"
+                />
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item
+              label="超时时间设置"
+              prop="timeoutHandlerTimeDuration"
+              v-if="currentNode.attributes.timeoutHandler.enable"
+            >
+              <span class="mr-2">当超过</span>
+              <el-input-number
+                class="mr-2"
+                :style="{ width: '100px' }"
+                v-model="timeDuration"
+                :min="1"
+                controls-position="right"
+              />
+              <el-select
+                v-model="timeUnit"
+                class="mr-2"
+                :style="{ width: '100px' }"
+                @change="timeUnitChange"
+              >
+                <el-option
+                  v-for="item in TIME_UNIT_TYPES"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+              未处理
+            </el-form-item>
+            <el-form-item
+              label="最大提醒次数"
+              prop="timeoutHandlerMaxRemindCount"
+              v-if="
+                currentNode.attributes.timeoutHandler.enable &&
+                currentNode.attributes.timeoutHandler.action === 1
+              "
+            >
+              <el-input-number
+                v-model="currentNode.attributes.timeoutHandler.maxRemindCount"
+                :min="1"
+                :max="10"
+              />
+            </el-form-item>
           </el-form>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="表单字段权限" v-if ="formType === 10">
+      <el-tab-pane label="表单字段权限" v-if="formType === 10">
         <div class="field-setting-pane">
           <div class="field-setting-desc">字段权限</div>
           <div class="field-permit-title">
-            <div class="setting-title-label first-title">
-              字段名称
-            </div>
+            <div class="setting-title-label first-title"> 字段名称 </div>
             <div class="other-titles">
               <span class="setting-title-label">可编辑</span>
               <span class="setting-title-label">只读</span>
@@ -205,7 +274,17 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleFlowNode, APPROVE_METHODS, CandidateStrategy, NodeType, ApproveMethodType, NODE_DEFAULT_NAME } from '../consts'
+import {
+  SimpleFlowNode,
+  APPROVE_METHODS,
+  CandidateStrategy,
+  NodeType,
+  ApproveMethodType,
+  TimeUnitType,
+  TIMEOUT_HANDLER_ACTION_TYPES,
+  TIME_UNIT_TYPES,
+  NODE_DEFAULT_NAME
+} from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { getDefaultFieldsPermission } from '../utils'
 import { defaultProps } from '@/utils/tree'
@@ -226,12 +305,12 @@ const props = defineProps({
 })
 
 const notAllowedMultiApprovers = ref(false)
-const currentNode = ref<SimpleFlowNode>(props.flowNode);
+const currentNode = ref<SimpleFlowNode>(props.flowNode)
 const settingVisible = ref(false)
 const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList') // 角色列表
 const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
 const userOptions = inject<Ref<UserApi.UserVO[]>>('userList') // 用户列表
-const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList')  // 部门列表
+const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList') // 部门列表
 const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList') // 用户组列表
 const deptTreeOptions = inject('deptTree') // 部门树
 const formType = inject('formType') // 表单类型
@@ -243,10 +322,13 @@ const closeDrawer = () => {
 }
 const saveConfig = () => {
   currentNode.value.attributes.candidateParam = candidateParamArray.value?.join(',')
+  if (currentNode.value.attributes.timeoutHandler.enable) {
+    currentNode.value.attributes.timeoutHandler.timeDuration = isoTimeDuration.value
+  }
   currentNode.value.showText = getShowText()
   settingVisible.value = false
 }
-const getShowText = () : string => {
+const getShowText = (): string => {
   let showText = ''
   // 指定成员
   if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER) {
@@ -272,9 +354,11 @@ const getShowText = () : string => {
       showText = `指定角色：${candidateNames.join(',')}`
     }
   }
-   // 指定部门
-  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.DEPT_MEMBER 
-      || currentNode.value.attributes.candidateStrategy === CandidateStrategy.DEPT_LEADER ) {
+  // 指定部门
+  if (
+    currentNode.value.attributes.candidateStrategy === CandidateStrategy.DEPT_MEMBER ||
+    currentNode.value.attributes.candidateStrategy === CandidateStrategy.DEPT_LEADER
+  ) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
       deptOptions?.value.forEach((item) => {
@@ -282,7 +366,7 @@ const getShowText = () : string => {
           candidateNames.push(item.name)
         }
       })
-      if(currentNode.value.attributes.candidateStrategy === CandidateStrategy.DEPT_MEMBER){
+      if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.DEPT_MEMBER) {
         showText = `部门成员：${candidateNames.join(',')}`
       } else {
         showText = `部门的负责人：${candidateNames.join(',')}`
@@ -290,8 +374,8 @@ const getShowText = () : string => {
     }
   }
 
-   // 指定岗位
-   if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.POST) {
+  // 指定岗位
+  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.POST) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
       postOptions?.value.forEach((item) => {
@@ -302,7 +386,7 @@ const getShowText = () : string => {
       showText = `指定岗位: ${candidateNames.join(',')}`
     }
   }
-   // 指定用户组
+  // 指定用户组
   if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER_GROUP) {
     if (candidateParamArray.value?.length > 0) {
       const candidateNames: string[] = []
@@ -316,37 +400,48 @@ const getShowText = () : string => {
   }
 
   // 发起人自选
-  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.START_USER_SELECT ) {
+  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.START_USER_SELECT) {
     showText = `发起人自选`
   }
   // 发起人自己
-  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.START_USER ) {
+  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.START_USER) {
     showText = `发起人自己`
   }
 
-   // 流程表达式
+  // 流程表达式
   if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.EXPRESSION) {
     if (candidateParamArray.value?.length > 0) {
       showText = `流程表达式：${candidateParamArray.value[0]}`
     }
   }
-   return showText
+  return showText
 }
 const open = () => {
   settingVisible.value = true
 }
 //  修改当前编辑的节点， 由父组件传过来
-const setCurrentNode = (node:SimpleFlowNode) => {
-  currentNode.value = node;
-  currentNode.value.attributes.fieldsPermission = node.attributes.fieldsPermission || getDefaultFieldsPermission(formFields?.value) 
+const setCurrentNode = (node: SimpleFlowNode) => {
+  currentNode.value = node
+  currentNode.value.attributes.fieldsPermission =
+    node.attributes.fieldsPermission || getDefaultFieldsPermission(formFields?.value)
   const strCandidateParam = node.attributes?.candidateParam
-  if(strCandidateParam) {
-    candidateParamArray.value = strCandidateParam.split(',').map(item=> +item)
+  if (strCandidateParam) {
+    candidateParamArray.value = strCandidateParam.split(',').map((item) => +item)
   }
   if (currentNode.value.attributes?.candidateStrategy === CandidateStrategy.START_USER) {
     notAllowedMultiApprovers.value = true
   } else {
     notAllowedMultiApprovers.value = false
+  }
+  if (
+    currentNode.value.attributes?.timeoutHandler?.enable &&
+    currentNode.value.attributes?.timeoutHandler?.timeDuration
+  ) {
+    const strTimeDuration = currentNode.value.attributes.timeoutHandler.timeDuration
+    let parseTime = strTimeDuration.slice(2, strTimeDuration.length - 1)
+    let parseTimeUnit = strTimeDuration.slice(strTimeDuration.length - 1)
+    timeDuration.value = parseInt(parseTime)
+    timeUnit.value = convertTimeUnit(parseTimeUnit)
   }
 }
 
@@ -355,8 +450,10 @@ defineExpose({ open, setCurrentNode }) // 暴露方法给父组件
 const changeCandidateStrategy = () => {
   candidateParamArray.value = []
   currentNode.value.attributes.approveMethod = ApproveMethodType.SINGLE_PERSON_APPROVE
-  if (currentNode.value.attributes.candidateStrategy === CandidateStrategy.START_USER 
-        || currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER ) {
+  if (
+    currentNode.value.attributes.candidateStrategy === CandidateStrategy.START_USER ||
+    currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER
+  ) {
     notAllowedMultiApprovers.value = true
   } else {
     notAllowedMultiApprovers.value = false
@@ -364,7 +461,10 @@ const changeCandidateStrategy = () => {
 }
 
 const changedCandidateUsers = () => {
-  if (candidateParamArray.value?.length <= 1 && currentNode.value.attributes?.candidateStrategy === CandidateStrategy.USER) {
+  if (
+    candidateParamArray.value?.length <= 1 &&
+    currentNode.value.attributes?.candidateStrategy === CandidateStrategy.USER
+  ) {
     currentNode.value.attributes.approveMethod = ApproveMethodType.SINGLE_PERSON_APPROVE
     notAllowedMultiApprovers.value = true
   } else {
@@ -375,14 +475,69 @@ const changedCandidateUsers = () => {
 const showInput = ref(false)
 
 const clickIcon = () => {
-  showInput.value = true;
+  showInput.value = true
 }
 // 节点名称输入框失去焦点
 const blurEvent = () => {
   showInput.value = false
-  currentNode.value.name = currentNode.value.name || NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string
+  currentNode.value.name =
+    currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
+}
+// 默认 6小时
+const timeDuration = ref(6)
+const timeUnit = ref(TimeUnitType.HOUR)
+
+const isoTimeDuration = computed(() => {
+  let strTimeDuration = 'PT'
+  if (timeUnit.value === TimeUnitType.MINUTE) {
+    strTimeDuration += timeDuration.value + 'M'
+  }
+  if (timeUnit.value === TimeUnitType.HOUR) {
+    strTimeDuration += timeDuration.value + 'H'
+  }
+  if (timeUnit.value === TimeUnitType.DAY) {
+    strTimeDuration += timeDuration.value + 'D'
+  }
+  return strTimeDuration
+})
+// 超时开关改变
+const timeoutHandlerChange = () => {
+  if (currentNode.value.attributes.timeoutHandler.enable) {
+    timeUnit.value = 2
+    timeDuration.value = 6
+    currentNode.value.attributes.timeoutHandler.action = 1
+    currentNode.value.attributes.timeoutHandler.maxRemindCount = 1
+  }
+}
+
+// 时间单位改变
+const timeUnitChange = () => {
+  // 分钟，默认是 60 分钟
+  if (timeUnit.value === TimeUnitType.MINUTE) {
+    timeDuration.value = 60
+  }
+  // 小时，默认是 6 个小时
+  if (timeUnit.value === TimeUnitType.HOUR) {
+    timeDuration.value = 6
+  }
+  // 天， 默认 1天
+  if (timeUnit.value === TimeUnitType.DAY) {
+    timeDuration.value = 1
+  }
+}
+
+const convertTimeUnit = (strTimeUnit: string) => {
+  if (strTimeUnit === 'M') {
+    return TimeUnitType.MINUTE
+  }
+  if (strTimeUnit === 'H') {
+    return TimeUnitType.HOUR
+  }
+  if (strTimeUnit === 'D') {
+    return TimeUnitType.DAY
+  }
+  return TimeUnitType.HOUR
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>

@@ -34,7 +34,6 @@
       <!-- 传递子节点给添加节点组件。会在子节点前面添加节点 -->
       <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
     </div>
-    <!-- 其实只需要一个全局抄送节点配置就行, 不需要多个。点击配置的时候传值.  TODO 后面优化 -->
     <CopyTaskNodeConfig
       v-if="currentNode"
       ref="nodeSetting"

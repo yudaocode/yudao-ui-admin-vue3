@@ -46,6 +46,21 @@ export enum NodeType {
    */
   INCLUSIVE_NODE_JOIN = 8
 }
+// 时间单位枚举
+export enum TimeUnitType {
+  /**
+   * 分钟
+   */
+  MINUTE = 1,
+  /**
+   * 小时
+   */
+  HOUR = 2,
+  /**
+   * 天
+   */
+  DAY = 3
+}
 
 // 条件配置类型 （ 用于条件节点配置 ）
 export enum ConditionConfigType  {
@@ -171,6 +186,11 @@ NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
 NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 
+export const TIME_UNIT_MAP = new Map<number,string>()
+NODE_DEFAULT_NAME.set(1, 'M')
+NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
+NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
+
 
 export const APPROVE_METHODS: DictDataVO [] = [
   { label: '单人审批', value: 1 },
@@ -182,6 +202,19 @@ export const APPROVE_METHODS: DictDataVO [] = [
 export const CONDITION_CONFIG_TYPES: DictDataVO [] = [
   { label: '条件表达式', value: 1 },
   { label: '条件规则', value: 2 }
+]
+
+// 时间单位类型
+export const TIME_UNIT_TYPES: DictDataVO [] = [
+  { label: '分钟', value: TimeUnitType.MINUTE },
+  { label: '小时', value: TimeUnitType.HOUR },
+  { label: '天', value: TimeUnitType.DAY },
+]
+// 超时处理执行动作类型
+export const TIMEOUT_HANDLER_ACTION_TYPES: DictDataVO [] = [
+  { label: '自动提醒', value: 1 },
+  { label: '自动同意', value: 2 },
+  { label: '自动拒绝', value: 3 },
 ]
 
 // 比较运算符

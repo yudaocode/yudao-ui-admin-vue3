@@ -34,7 +34,6 @@
       <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
     </div>
   </div>
-  <!-- 其实只需要一个全局审批节点配置就行, 不需要多个。点击配置的时候传值.  TODO 后面优化 -->
   <UserTaskNodeConfig
     v-if="currentNode"
     ref="nodeSetting"

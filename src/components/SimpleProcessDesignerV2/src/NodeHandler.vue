@@ -68,6 +68,10 @@ const addNode = (type: number) => {
         candidateStrategy: CandidateStrategy.USER,
         candidateParam: undefined,
         fieldsPermission: undefined,
+         // 超时处理
+        timeoutHandler: {
+          enable: false
+        }
       },
       childNode: props.childNode
     }
