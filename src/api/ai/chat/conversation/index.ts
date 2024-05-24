@@ -12,8 +12,8 @@ export interface ChatConversationVO {
   temperature: number // 温度参数
   maxTokens: number // 单条回复的最大 Token 数量
   maxContexts: number // 上下文的最大 Message 数量
-  updateTime: number // 更新时间
   // 额外字段
+  systemMessage?: string // 角色设定
   modelName?: string // 模型名字
   roleAvatar?: string // 角色头像
   modelMaxTokens?: string // 模型的单条回复的最大 Token 数量

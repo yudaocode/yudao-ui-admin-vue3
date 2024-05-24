@@ -36,10 +36,11 @@
           <div class="message-container" >
             <MessageLoading v-if="listLoading" />
             <MessageNewChat v-if="!activeConversation" @on-new-chat="handlerNewChat" />
-            <ChatEmpty v-if="!listLoading && list.length === 0 && activeConversation" @on-prompt="doSend"/>
-            <Message v-if="!listLoading && list.length > 0"
+            <ChatEmpty v-if="!listLoading && messageList.length === 0 && activeConversation" @on-prompt="doSend"/>
+            <Message v-if="!listLoading && messageList.length > 0"
                      ref="messageRef"
-                     :list="list"
+                     :conversation="activeConversation"
+                     :list="messageList"
                      @on-delete-success="handlerMessageDelete"
                      @on-edit="handlerMessageEdit"
                      @on-refresh="handlerMessageRefresh"/>
@@ -103,13 +104,11 @@ import MessageNewChat from './MessageNewChat.vue'
 import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
-import {useClipboard} from '@vueuse/core'
 import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
 import {Download, Top} from "@element-plus/icons-vue";
 
 const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
-const {copy} = useClipboard() // 初始化 copy 到粘贴板
 
 // ref 属性定义
 const activeConversationId = ref<string | null>(null) // 选中的对话编号
@@ -390,6 +389,23 @@ const stopStream = async () => {
 }
 
 // ============== message 数据 =================
+
+/** 消息列表 */
+const messageList = computed(() => {
+  if (list.value.length > 0) {
+    return list.value
+  }
+  // 没有消息时，如果有 systemMessage 则展示它
+  // TODO add by 芋艿：这个消息下面，不能有复制、删除按钮
+  if (activeConversation.value?.systemMessage) {
+    return [{
+      id: 0,
+      type: 'system',
+      content: activeConversation.value.systemMessage
+    }]
+  }
+  return []
+})
 
 /**
  * 获取 - message 列表

@@ -1,8 +1,7 @@
 <template>
-  <div ref="messageContainer" style="height: 100%;overflow-y: auto;position: relative;">
-    <div class="chat-list" v-for="(item, index) in list" :key="index" >
+  <div ref="messageContainer" style="height: 100%; overflow-y: auto; position: relative">
+    <div class="chat-list" v-for="(item, index) in messageList" :key="index">
       <!--  靠左 message  -->
-      <!-- TODO 芋艿：类型判断 -->
       <div class="left-message message-item" v-if="item.type !== 'user'">
         <div class="avatar">
           <el-avatar :src="item.roleAvatar" />
@@ -16,10 +15,10 @@
           </div>
           <div class="left-btns">
             <el-button class="btn-cus" link @click="noCopy(item.content)">
-              <img class="btn-image" src="@/assets/ai/copy.svg"/>
+              <img class="btn-image" src="@/assets/ai/copy.svg" />
             </el-button>
             <el-button class="btn-cus" link @click="onDelete(item.id)">
-              <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px; "/>
+              <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px" />
             </el-button>
           </div>
         </div>
@@ -38,10 +37,14 @@
           </div>
           <div class="right-btns">
             <el-button class="btn-cus" link @click="noCopy(item.content)">
-              <img class="btn-image" src="@/assets/ai/copy.svg"/>
+              <img class="btn-image" src="@/assets/ai/copy.svg" />
             </el-button>
             <el-button class="btn-cus" link @click="onDelete(item.id)">
-              <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px;margin-right: 12px;"/>
+              <img
+                class="btn-image"
+                src="@/assets/ai/delete.svg"
+                style="height: 17px; margin-right: 12px"
+              />
             </el-button>
             <el-button class="btn-cus" link @click="onRefresh(item)">
               <el-icon size="17"><RefreshRight /></el-icon>
@@ -60,30 +63,49 @@
   </div>
 </template>
 <script setup lang="ts">
-import {formatDate} from "@/utils/formatTime";
-import MarkdownView from "@/components/MarkdownView/index.vue";
-import {ChatMessageApi, ChatMessageVO} from "@/api/ai/chat/message";
-import {useClipboard} from "@vueuse/core";
-import {PropType} from "vue";
-import {ArrowDownBold, Edit, RefreshRight} from "@element-plus/icons-vue";
+import { formatDate } from '@/utils/formatTime'
+import MarkdownView from '@/components/MarkdownView/index.vue'
+import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
+import { useClipboard } from '@vueuse/core'
+import { PropType } from 'vue'
+import { ArrowDownBold, Edit, RefreshRight } from '@element-plus/icons-vue'
+import { ChatConversationVO } from '@/api/ai/chat/conversation'
 
-const {copy} = useClipboard() // 初始化 copy 到粘贴板
+const { copy } = useClipboard() // 初始化 copy 到粘贴板
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
 const messageContainer: any = ref(null)
 const isScrolling = ref(false) //用于判断用户是否在滚动
 
 // 定义 props
 const props = defineProps({
+  conversation: {
+    type: Object as PropType<ChatConversationVO>,
+    required: true
+  },
   list: {
     type: Array as PropType<ChatMessageVO[]>,
     required: true
   }
 })
 
+const messageList = computed(() => {
+  if (props.list && props.list.length > 0) {
+    return props.list
+  }
+  if (props.conversation && props.conversation.systemMessage) {
+    return [{
+      id: 0,
+      type: 'system',
+      content: props.conversation.systemMessage
+    }]
+  }
+  return []
+})
+
 // ============ 处理对话滚动 ==============
 
-const scrollToBottom = async (isIgnore?: boolean) =>{
-   await nextTick(() => {
+const scrollToBottom = async (isIgnore?: boolean) => {
+  await nextTick(() => {
     //注意要使用nexttick以免获取不到dom
     if (isIgnore || !isScrolling.value) {
       messageContainer.value.scrollTop =
@@ -97,7 +119,7 @@ function handleScroll() {
   const scrollTop = scrollContainer.scrollTop
   const scrollHeight = scrollContainer.scrollHeight
   const offsetHeight = scrollContainer.offsetHeight
-  if ((scrollTop + offsetHeight) < (scrollHeight - 100)) {
+  if (scrollTop + offsetHeight < scrollHeight - 100) {
     // 用户开始滚动并在最底部之上，取消保持在最底部的效果
     isScrolling.value = true
   } else {
@@ -168,7 +190,7 @@ watch(list, async (newValue, oldValue) => {
 })
 
 // 提供方法给 parent 调用
-defineExpose({scrollToBottom, handlerGoTop})
+defineExpose({ scrollToBottom, handlerGoTop })
 
 // 定义 emits
 const emits = defineEmits(['onDeleteSuccess', 'onRefresh', 'onEdit'])
@@ -191,7 +213,6 @@ onMounted(async () => {
   overflow-y: scroll;
   //padding: 0 15px;
   //z-index: -1;
-
 }
 
 // 中间
