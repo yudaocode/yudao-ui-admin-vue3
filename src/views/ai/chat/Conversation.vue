@@ -387,6 +387,8 @@ onMounted(async () => {
     // 首次默认选中第一个
     if (conversationList.value.length) {
       activeConversationId.value = conversationList.value[0].id
+      // 回调 onConversationClick
+      await emits('onConversationClick', conversationList.value[0])
     }
   }
 })

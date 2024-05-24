@@ -36,11 +36,10 @@
           <div class="message-container" >
             <MessageLoading v-if="listLoading" />
             <MessageNewChat v-if="!activeConversation" @on-new-chat="handlerNewChat" />
-            <ChatEmpty v-if="!listLoading && messageList.length === 0 && activeConversation" @on-prompt="doSend"/>
-            <Message v-if="!listLoading && messageList.length > 0"
+            <ChatEmpty v-if="!listLoading && list.length === 0 && activeConversation" @on-prompt="doSend"/>
+            <Message v-if="!listLoading && list.length > 0"
                      ref="messageRef"
-                     :conversation="activeConversation"
-                     :list="messageList"
+                     :list="list"
                      @on-delete-success="handlerMessageDelete"
                      @on-edit="handlerMessageEdit"
                      @on-refresh="handlerMessageRefresh"/>
@@ -103,12 +102,14 @@ import MessageLoading from './MessageLoading.vue'
 import MessageNewChat from './MessageNewChat.vue'
 import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
-import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
+import {getUserProfile, ProfileVO} from '@/api/system/user/profile'
+import {useClipboard} from '@vueuse/core'
 import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
 import {Download, Top} from "@element-plus/icons-vue";
 
 const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
+const {copy} = useClipboard() // 初始化 copy 到粘贴板
 
 // ref 属性定义
 const activeConversationId = ref<string | null>(null) // 选中的对话编号
@@ -338,8 +339,14 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       userMessage.content,
       conversationInAbortController.value,
       enableContext.value,
-      async (message) => {
-        const data = JSON.parse(message.data) // TODO 芋艿：类型处理；
+      async (res) => {
+        console.log('res', res)
+        const { code, data, msg } = JSON.parse(res.data)
+        if (code !== 0) {
+          message.alert(`对话异常! ${msg}`)
+          return
+        }
+
         // 如果内容为空，就不处理。
         if (data.receive.content === '') {
           return
@@ -360,14 +367,13 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
         await scrollToBottom()
       },
       (error) => {
-        console.log('onError')
+        message.alert(`对话异常! ${error}`)
         // 标记对话结束
         conversationInProgress.value = false
         // 结束 stream 对话
         conversationInAbortController.value.abort()
       },
       () => {
-        console.log('onClose')
         // 标记对话结束
         conversationInProgress.value = false
         // 结束 stream 对话
@@ -389,23 +395,6 @@ const stopStream = async () => {
 }
 
 // ============== message 数据 =================
-
-/** 消息列表 */
-const messageList = computed(() => {
-  if (list.value.length > 0) {
-    return list.value
-  }
-  // 没有消息时，如果有 systemMessage 则展示它
-  // TODO add by 芋艿：这个消息下面，不能有复制、删除按钮
-  if (activeConversation.value?.systemMessage) {
-    return [{
-      id: 0,
-      type: 'system',
-      content: activeConversation.value.systemMessage
-    }]
-  }
-  return []
-})
 
 /**
  * 获取 - message 列表
@@ -486,6 +475,8 @@ const handleConversationClick = async (conversation: ChatConversationVO) => {
   await getMessageList()
   // 滚动底部
   scrollToBottom(true)
+  // 清空输入框
+  prompt.value = ''
   return true
 }
 
@@ -536,6 +527,10 @@ const handlerNewChat = async () => {
  * 删除 message
  */
 const handlerMessageDelete = async () => {
+  if (conversationInProgress.value) {
+    message.alert('回答中，不能删除!')
+    return
+  }
   // 刷新 message
   await getMessageList()
 }
