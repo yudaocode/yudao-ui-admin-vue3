@@ -39,7 +39,9 @@
             <Message v-if="!listLoading && list.length > 0"
                      ref="messageRef"
                      :list="list"
-                     @on-delete-success="handlerMessageDelete" />
+                     @on-delete-success="handlerMessageDelete"
+                     @on-edit="handlerMessageEdit"
+                     @on-refresh="handlerMessageRefresh"/>
           </div>
         </div>
       </el-main>
@@ -511,6 +513,20 @@ const handlerNewChat = async () => {
 const handlerMessageDelete = async () => {
   // 刷新 message
   await getMessageList()
+}
+
+/**
+ * 编辑 message
+ */
+const handlerMessageEdit = async (message: ChatMessageVO) => {
+  prompt.value = message.content
+}
+
+/**
+ * 编辑 message
+ */
+const handlerMessageRefresh = async (message: ChatMessageVO) => {
+  await doSend(message.content)
 }
 
 /**

@@ -43,6 +43,12 @@
             <el-button class="btn-cus" link @click="onDelete(item.id)">
               <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px;margin-right: 12px;"/>
             </el-button>
+            <el-button class="btn-cus" link @click="onRefresh(item)">
+              <el-icon size="17"><RefreshRight /></el-icon>
+            </el-button>
+            <el-button class="btn-cus" link @click="onEdit(item)">
+              <el-icon size="17"><Edit /></el-icon>
+            </el-button>
           </div>
         </div>
       </div>
@@ -59,7 +65,7 @@ import MarkdownView from "@/components/MarkdownView/index.vue";
 import {ChatMessageApi, ChatMessageVO} from "@/api/ai/chat/message";
 import {useClipboard} from "@vueuse/core";
 import {PropType} from "vue";
-import {ArrowDownBold} from "@element-plus/icons-vue";
+import {ArrowDownBold, Edit, RefreshRight} from "@element-plus/icons-vue";
 
 const {copy} = useClipboard() // 初始化 copy 到粘贴板
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
@@ -126,6 +132,20 @@ const onDelete = async (id) => {
 }
 
 /**
+ * 刷新
+ */
+const onRefresh = async (message: ChatMessageVO) => {
+  emits('onRefresh', message)
+}
+
+/**
+ * 编辑
+ */
+const onEdit = async (message: ChatMessageVO) => {
+  emits('onEdit', message)
+}
+
+/**
  * 回到底部
  */
 const handleGoBottom = async () => {
@@ -151,7 +171,7 @@ watch(list, async (newValue, oldValue) => {
 defineExpose({scrollToBottom, handlerGoTop})
 
 // 定义 emits
-const emits = defineEmits(['onDeleteSuccess'])
+const emits = defineEmits(['onDeleteSuccess', 'onRefresh', 'onEdit'])
 
 // onMounted
 onMounted(async () => {
