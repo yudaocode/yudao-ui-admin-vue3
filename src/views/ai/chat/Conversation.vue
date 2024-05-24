@@ -59,7 +59,7 @@
                   </el-icon>
                 </el-button>
                 <el-button class="btn" link @click.stop="deleteChatConversation(conversation)">
-                  <el-icon title="删除会话" >
+                  <el-icon title="删除对话" >
                     <Icon icon="ep:delete"/>
                   </el-icon>
                 </el-button>
@@ -296,15 +296,15 @@ const updateConversationTitle = async (conversation: ChatConversationVO) => {
 }
 
 /**
- * 删除聊天会话
+ * 删除聊天对话
  */
 const deleteChatConversation = async (conversation: ChatConversationVO) => {
   try {
     // 删除的二次确认
-    await message.delConfirm(`是否确认删除会话 - ${conversation.title}?`)
+    await message.delConfirm(`是否确认删除对话 - ${conversation.title}?`)
     // 发起删除
     await ChatConversationApi.deleteChatConversationMy(conversation.id)
-    message.success('会话已删除')
+    message.success('对话已删除')
     // 刷新列表
     await getChatConversationList()
     // 回调

@@ -6,7 +6,7 @@ import { config } from '@/config/axios/config'
 // 聊天VO
 export interface ChatMessageVO {
   id: number // 编号
-  conversationId: number // 会话编号
+  conversationId: number // 对话编号
   type: string // 消息类型
   userId: string // 用户编号
   roleId: string // 角色编号
@@ -20,7 +20,7 @@ export interface ChatMessageVO {
 }
 
 export interface ChatMessageSendVO {
-  conversationId: string // 会话编号
+  conversationId: string // 对话编号
   content: number // 聊天内容
 }
 

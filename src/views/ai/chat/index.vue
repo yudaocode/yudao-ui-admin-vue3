@@ -1,6 +1,6 @@
 <template>
   <el-container class="ai-layout">
-    <!-- 左侧：会话列表 -->
+    <!-- 左侧：对话列表 -->
     <Conversation :active-id="activeConversationId"
                   ref="conversationRef"
                   @onConversationCreate="handleConversationCreate"
@@ -8,7 +8,7 @@
                   @onConversationClear="handlerConversationClear"
                   @onConversationDelete="handlerConversationDelete"
     />
-    <!-- 右侧：会话详情 -->
+    <!-- 右侧：对话详情 -->
     <el-container class="detail-container">
       <!-- 右顶部 TODO 芋艿：右对齐 -->
       <el-header class="header">
@@ -104,7 +104,6 @@ import MessageNewChat from './MessageNewChat.vue'
 import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
 import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
-import {useClipboard} from '@vueuse/core'
 import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
 import {Download, Top} from "@element-plus/icons-vue";
 
@@ -448,7 +447,7 @@ const getMessageList = async () => {
   }
 }
 
-/** 修改聊天会话 */
+/** 修改聊天对话 */
 const chatConversationUpdateFormRef = ref()
 const openChatConversationUpdateForm = async () => {
   chatConversationUpdateFormRef.value.open(activeConversationId.value)
