@@ -122,7 +122,12 @@ const props = defineProps({
 })
 
 // 定义钩子
-const emits = defineEmits(['onConversationClick', 'onConversationClear', 'onConversationDelete'])
+const emits = defineEmits([
+  'onConversationCreate',
+  'onConversationClick',
+  'onConversationClear',
+  'onConversationDelete'
+])
 
 /**
  * 对话 - 搜索
@@ -256,6 +261,8 @@ const createConversation = async () => {
   await getChatConversationList()
   // 3、选中对话
   await handleConversationClick(conversationId)
+  // 4、回调
+  emits('onConversationCreate')
 }
 
 /**

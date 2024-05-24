@@ -3,6 +3,7 @@
     <!-- 左侧：会话列表 -->
     <Conversation :active-id="activeConversationId"
                   ref="conversationRef"
+                  @onConversationCreate="handleConversationCreate"
                   @onConversationClick="handleConversationClick"
                   @onConversationClear="handlerConversationClear"
                   @onConversationDelete="handlerConversationDelete"
@@ -438,6 +439,14 @@ const openChatConversationUpdateForm = async () => {
 const handlerTitleSuccess = async () => {
   // TODO 需要刷新 对话列表
   await getConversation(activeConversationId.value)
+}
+
+/**
+ * 对话 - 创建
+ */
+const handleConversationCreate = async () => {
+  // 创建新的对话，清空输入框
+  prompt.value = ''
 }
 
 /**
