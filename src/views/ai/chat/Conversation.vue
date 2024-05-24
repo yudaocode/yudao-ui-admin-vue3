@@ -378,12 +378,17 @@ watch(activeId, async (newValue, oldValue) => {
 defineExpose({createConversation})
 
 onMounted(async () => {
+  // 获取 对话列表
+  await getChatConversationList()
   // 默认选中
   if (props.activeId != null) {
     activeConversationId.value = props.activeId
+  } else {
+    // 首次默认选中第一个
+    if (conversationList.value.length) {
+      activeConversationId.value = conversationList.value[0].id
+    }
   }
-  // 获取 对话列表
-  await getChatConversationList()
 })
 
 </script>
