@@ -475,6 +475,8 @@ const handleConversationClick = async (conversation: ChatConversationVO) => {
   await getMessageList()
   // 滚动底部
   scrollToBottom(true)
+  // 清空输入框
+  prompt.value = ''
   return true
 }
 
