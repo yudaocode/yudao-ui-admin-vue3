@@ -102,7 +102,7 @@ import MessageLoading from './MessageLoading.vue'
 import MessageNewChat from './MessageNewChat.vue'
 import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
 import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
-import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
+import {getUserProfile, ProfileVO} from '@/api/system/user/profile'
 import {useClipboard} from '@vueuse/core'
 import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
 import {Download, Top} from "@element-plus/icons-vue";
@@ -339,8 +339,14 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       userMessage.content,
       conversationInAbortController.value,
       enableContext.value,
-      async (message) => {
-        const data = JSON.parse(message.data) // TODO 芋艿：类型处理；
+      async (res) => {
+        console.log('res', res)
+        const { code, data, msg } = JSON.parse(res.data)
+        if (code !== 0) {
+          message.alert(`对话异常! ${msg}`)
+          return
+        }
+
         // 如果内容为空，就不处理。
         if (data.receive.content === '') {
           return
@@ -361,14 +367,13 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
         await scrollToBottom()
       },
       (error) => {
-        console.log('onError')
+        message.alert(`对话异常! ${error}`)
         // 标记对话结束
         conversationInProgress.value = false
         // 结束 stream 对话
         conversationInAbortController.value.abort()
       },
       () => {
-        console.log('onClose')
         // 标记对话结束
         conversationInProgress.value = false
         // 结束 stream 对话
@@ -520,6 +525,10 @@ const handlerNewChat = async () => {
  * 删除 message
  */
 const handlerMessageDelete = async () => {
+  if (conversationInProgress.value) {
+    message.alert('回答中，不能删除!')
+    return
+  }
   // 刷新 message
   await getMessageList()
 }
