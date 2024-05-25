@@ -65,7 +65,10 @@
       </div>
     </el-space>
   </div>
-
+  <div class="btns">
+<!--    <el-button size="large" round>重置内容</el-button>-->
+    <el-button type="primary" size="large" round @click="handlerGenerateImage">生成内容</el-button>
+  </div>
 </template>
 <script setup lang="ts">
 
@@ -155,6 +158,12 @@ const handlerSizeClick = async (imageSize: ImageSizeVO) => {
   console.log(imageSize)
 }
 
+/**
+ * 图片生产
+ */
+const handlerGenerateImage = async () => {
+  // todo @范 图片生产逻辑
+}
 </script>
 <style scoped lang="scss">
 
@@ -248,5 +257,11 @@ const handlerSizeClick = async (imageSize: ImageSizeVO) => {
   .selectImageSize {
     border: 1px solid #1293ff !important;
   }
+}
+
+.btns {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
 }
 </style>
