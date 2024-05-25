@@ -17,14 +17,17 @@
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
 import Dall3 from './dall3/index.vue'
 
+// 定义属性
 const value = ref('DALL3绘画')
 const options = ['DALL3绘画', 'MJ绘画']
 
 
 </script>
+
 <style scoped lang="scss">
 
 .ai-image {
@@ -39,11 +42,14 @@ const options = ['DALL3绘画', 'MJ绘画']
   height: 100%;
   width: 100%;
 
-
   .left {
     display: flex;
     flex-direction: column;
     padding: 20px;
+    width: 350px;
+
+    .segmented {
+    }
 
     .segmented .el-segmented {
       --el-border-radius-base: 16px;
@@ -55,7 +61,7 @@ const options = ['DALL3绘画', 'MJ绘画']
     .modal-switch-container {
       height: 100%;
       overflow-y: auto;
-      margin-top: 15px;
+      margin-top: 30px;
     }
   }
 
