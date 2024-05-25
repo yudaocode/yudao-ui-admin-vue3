@@ -1,4 +1,3 @@
-
 <template>
   <div class="chat-empty">
 
@@ -15,7 +14,6 @@
 </template>
 <script setup lang="ts">
 
-const router = useRouter()
 const promptList = ref<any[]>() // 角色列表
 promptList.value = [
   {
@@ -31,9 +29,6 @@ const emits = defineEmits(['onPrompt'])
 const handlerPromptClick = async ({ prompt }) => {
   emits('onPrompt', prompt)
 }
-
-onMounted(async () => {
-})
 </script>
 <style scoped lang="scss">
 .chat-empty {

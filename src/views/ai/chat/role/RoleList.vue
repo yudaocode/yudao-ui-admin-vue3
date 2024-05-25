@@ -10,6 +10,7 @@
                 <el-icon><More /></el-icon>
               </el-button>
           </span>
+            <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item :command="['edit', role]" >
@@ -31,7 +32,6 @@
           <div class="content-container">
             <div class="title">{{ role.name }}</div>
             <div class="description">{{ role.description }}</div>
-
           </div>
           <div class="btn-container">
             <el-button type="primary" size="small" @click="handleUseClick(role)">使用</el-button>

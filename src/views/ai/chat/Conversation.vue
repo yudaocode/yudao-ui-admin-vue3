@@ -27,7 +27,6 @@
 
         <el-empty v-if="loading" description="." :v-loading="loading" />
 
-        <!-- TODO done @fain：置顶、聊天记录、一星期钱、30天前，前端对数据重新做一下分组，或者后端接口改一下 -->
         <div v-for="conversationKey in Object.keys(conversationMap)" :key="conversationKey">
           <div class="conversation-item classify-title" v-if="conversationMap[conversationKey].length">
             <el-text class="mx-1" size="small" tag="b">{{ conversationKey }}</el-text>
@@ -47,7 +46,6 @@
                 <img class="avatar" :src="conversation.roleAvatar"/>
                 <span class="title">{{ conversation.title }}</span>
               </div>
-              <!-- TODO done @fan：缺一个【置顶】按钮，效果改成 hover 上去展示 -->
               <div class="button-wrapper" v-show="hoverConversationId === conversation.id">
                 <el-button class="btn" link @click.stop="handlerTop(conversation)" >
                   <el-icon title="置顶" v-if="!conversation.pinned"><Top /></el-icon>
@@ -74,6 +72,7 @@
     </div>
 
     <!-- 左底部：工具栏 -->
+    <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
     <div class="tool-box">
       <div @click="handleRoleRepository">
         <Icon icon="ep:user"/>
@@ -87,7 +86,7 @@
 
     <!-- ============= 额外组件 ============= -->
 
-    <!--   角色仓库抽屉  -->
+    <!-- 角色仓库抽屉 -->
     <el-drawer v-model="drawer" title="角色仓库" size="754px">
       <Role/>
     </el-drawer>
@@ -109,7 +108,7 @@ const activeConversationId = ref<string | null>(null) // 选中的对话，默�
 const hoverConversationId = ref<string | null>(null) // 悬浮上去的对话
 const conversationList = ref([] as ChatConversationVO[])  // 对话列表
 const conversationMap = ref<any>({})  // 对话分组 (置顶、今天、三天前、一星期前、一个月前)
-const drawer = ref<boolean>(false) // 角色仓库抽屉
+const drawer = ref<boolean>(false) // 角色仓库抽屉 TODO @fan：roleDrawer 会不会好点哈
 const loading = ref<boolean>(false) // 加载中
 const loadingTime = ref<any>() // 加载中定时器
 
@@ -154,6 +153,7 @@ const handleConversationClick = async (id: string) => {
     return item.id === id
   })
   // 回调 onConversationClick
+  // TODO @fan: 这里 idea 会报黄色警告，有办法解下么？
   const res = emits('onConversationClick', filterConversation[0])
   // 切换对话
   if (res) {
@@ -166,18 +166,18 @@ const handleConversationClick = async (id: string) => {
  */
 const getChatConversationList = async () => {
   try {
-    // 0、加载中
+    // 0. 加载中
     loadingTime.value = setTimeout(() => {
       loading.value = true
     }, 50)
-    // 1、获取 对话数据
+    // 1. 获取 对话数据
     const res = await ChatConversationApi.getChatConversationMyList()
-    // 2、排序
+    // 2. 排序
     res.sort((a, b) => {
       return b.createTime - a.createTime
     })
     conversationList.value = res
-    // 3、默认选中
+    // 3. 默认选中
     if (!activeId?.value) {
       // await handleConversationClick(res[0].id)
     } else {
@@ -189,13 +189,13 @@ const getChatConversationList = async () => {
       //   await handleConversationClick(res[0].id)
       // }
     }
-    // 4、没有 任何对话情况
+    // 4. 没有任何对话情况
     if (conversationList.value.length === 0) {
       activeConversationId.value = null
       conversationMap.value = {}
       return
     }
-    // 5、对话根据时间分组(置顶、今天、一天前、三天前、七天前、30天前)
+    // 5. 对话根据时间分组(置顶、今天、一天前、三天前、七天前、30天前)
     conversationMap.value = await conversationTimeGroup(conversationList.value)
   } finally {
     // 清理定时器
@@ -253,15 +253,15 @@ const conversationTimeGroup = async (list: ChatConversationVO[]) => {
  * 对话 - 新建
  */
 const createConversation = async () => {
-  // 1、新建对话
+  // 1. 新建对话
   const conversationId = await ChatConversationApi.createChatConversationMy(
     {} as unknown as ChatConversationVO
   )
-  // 2、获取对话内容
+  // 2. 获取对话内容
   await getChatConversationList()
-  // 3、选中对话
+  // 3. 选中对话
   await handleConversationClick(conversationId)
-  // 4、回调
+  // 4. 回调
   emits('onConversationCreate')
 }
 
@@ -269,21 +269,21 @@ const createConversation = async () => {
  * 对话 - 更新标题
  */
 const updateConversationTitle = async (conversation: ChatConversationVO) => {
-  // 1、二次确认
+  // 1. 二次确认
   const {value} = await ElMessageBox.prompt('修改标题', {
     inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 判断非空，且非空格
     inputErrorMessage: '标题不能为空',
     inputValue: conversation.title
   })
-  // 2、发起修改
+  // 2. 发起修改
   await ChatConversationApi.updateChatConversationMy({
     id: conversation.id,
     title: value
   } as ChatConversationVO)
   message.success('重命名成功')
-  // 刷新列表
+  // 3. 刷新列表
   await getChatConversationList()
-  // 过滤当前切换的
+  // 4. 过滤当前切换的
   const filterConversationList = conversationList.value.filter(item => {
     return item.id === conversation.id
   })
@@ -316,6 +316,7 @@ const deleteChatConversation = async (conversation: ChatConversationVO) => {
 /**
  * 对话置顶
  */
+// TODO @fan：应该是 handleXXX，handler 是名词哈
 const handlerTop = async (conversation: ChatConversationVO) => {
   // 更新对话置顶
   conversation.pinned = !conversation.pinned
@@ -324,8 +325,8 @@ const handlerTop = async (conversation: ChatConversationVO) => {
   await getChatConversationList()
 }
 
+// TODO @fan:类似 ============ 分块的，最后后面也有 ============ 哈
 // ============ 角色仓库
-
 
 /**
  * 角色仓库抽屉
@@ -336,11 +337,11 @@ const handleRoleRepository = async () => {
 
 // ============= 清空对话
 
-
 /**
  * 清空对话
  */
 const handleClearConversation = async () => {
+  // TODO @fan：可以使用 await message.confirm( 简化，然后使用 await 改成同步的逻辑，会更简洁
   ElMessageBox.confirm(
     '确认后对话会全部清空，置顶的对话除外。',
     '确认提示',

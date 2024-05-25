@@ -57,7 +57,7 @@
       </div>
     </div>
   </div>
-  <!--  回到底部  -->
+  <!-- 回到底部 -->
   <div v-if="isScrolling" class="to-bottom" @click="handleGoBottom">
     <el-button :icon="ArrowDownBold" circle />
   </div>
@@ -106,6 +106,7 @@ const messageList = computed(() => {
 
 const scrollToBottom = async (isIgnore?: boolean) => {
   await nextTick(() => {
+    // TODO @fan：中文写作习惯，中英文之间要有空格；另外，nextick 哈，idea 如果有绿色波兰线，可以关注下
     //注意要使用nexttick以免获取不到dom
     if (isIgnore || !isScrolling.value) {
       messageContainer.value.scrollTop =
@@ -184,6 +185,7 @@ const handlerGoTop = async () => {
 }
 
 // 监听 list
+// TODO @fan：这个木有，是不是删除啦
 const { list, conversationId } = toRefs(props)
 watch(list, async (newValue, oldValue) => {
   console.log('watch list', list)

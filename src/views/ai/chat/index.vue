@@ -10,27 +10,27 @@
     />
     <!-- 右侧：对话详情 -->
     <el-container class="detail-container">
-      <!-- 右顶部 TODO 芋艿：右对齐 -->
       <el-header class="header">
         <div class="title">
           {{ activeConversation?.title ? activeConversation?.title : '对话' }}
           <span v-if="list.length">({{list.length}})</span>
         </div>
         <div class="btns" v-if="activeConversation">
-          <!-- TODO @fan：样式改下；这里我已经改成点击后，弹出了 -->
-          <el-button type="primary" bg text="plain" size="small" @click="openChatConversationUpdateForm">
+          <el-button type="primary" bg plain size="small" @click="openChatConversationUpdateForm">
             <span v-html="activeConversation?.modelName"></span>
             <Icon icon="ep:setting" style="margin-left: 10px"/>
           </el-button>
           <el-button size="small" class="btn" @click="handlerMessageClear">
+            <!-- TODO @fan：style 部分，可以考虑用 unocss 替代 -->
             <img src="@/assets/ai/clear.svg" style="height: 14px;" />
           </el-button>
+          <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
           <el-button size="small" :icon="Download" class="btn"  />
           <el-button size="small" :icon="Top" class="btn"  @click="handlerGoTop" />
         </div>
       </el-header>
 
-      <!-- main -->
+      <!-- main：消息列表 -->
       <el-main class="main-container" >
         <div >
           <div class="message-container" >
@@ -87,7 +87,7 @@
     </el-container>
 
     <!--  ========= 额外组件 ==========  -->
-    <!-- 更新对话 form -->
+    <!-- 更新对话 Form -->
     <ChatConversationUpdateForm
       ref="chatConversationUpdateFormRef"
       @success="handlerTitleSuccess"
@@ -96,6 +96,7 @@
 </template>
 
 <script setup lang="ts">
+// TODO @fan：是不是把 index.vue 相关的，在这里新建一个 index 目录，然后挪进去哈。因为 /ai/chat 还会有其它功能。例如说，现在的 /ai/chat/manager 管理
 import Conversation from './Conversation.vue'
 import Message from './Message.vue'
 import ChatEmpty from './ChatEmpty.vue'
@@ -120,15 +121,17 @@ const prompt = ref<string>() // prompt
 const userInfo = ref<ProfileVO>() // 用户信息
 const enableContext = ref<boolean>(true) // 是否开启上下文
 
+// TODO @fan：这几个变量，可以注释在补下哈；另外，fullText 可以明确是生成中的消息 Text，这样更容易理解哈；
 const fullText = ref('');
 const displayedText = ref('');
 const textSpeed = ref<number>(50); // Typing speed in milliseconds
 const textRoleRunning = ref<boolean>(false); // Typing speed in milliseconds
 
 // chat message 列表
+// TODO @fan：list、listLoading、listLoadingTime 不能体现出来是消息列表，是不是可以变量再优化下
 const list = ref<ChatMessageVO[]>([]) // 列表的数据
 const listLoading = ref<boolean>(false) // 是否加载中
-const listLoadingTime = ref<any>() // time定时器，如果加载速度很快，就不进入加载中
+const listLoadingTime = ref<any>() // time 定时器，如果加载速度很快，就不进入加载中
 
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
 const messageRef = ref()
@@ -140,6 +143,7 @@ const defaultRoleAvatar = 'http://test.yudao.iocoder.cn/eaef5f41acb911dd718429a0
 
 // =========== 自提滚动效果
 
+// TODO @fan：这个方法，要不加个方法注释
 const textRoll = async () => {
   let index = 0;
   try {
@@ -162,7 +166,7 @@ const textRoll = async () => {
       } else {
         textSpeed.value = 100
       }
-      // 对话结束，就按30的速度
+      // 对话结束，就按 30 的速度
       if (!conversationInProgress.value) {
         textSpeed.value = 10
       }
@@ -176,6 +180,7 @@ const textRoll = async () => {
         // 更新 message
         const lastMessage = list.value[list.value.length - 1]
         lastMessage.content = displayedText.value
+        // TODO @fan：ist.value？，还是 ist.value.length 哈？
         list.value[list.value - 1] = lastMessage
         // 滚动到住下面
         await scrollToBottom()
@@ -212,6 +217,7 @@ function scrollToBottom(isIgnore?: boolean) {
 
 // ============= 处理聊天输入回车发送 =============
 
+// TODO @fan：是不是可以通过 @keydown.enter、@keydown.shift.enter 来实现，回车发送、shift+回车换行；主要看看，是不是可以简化 isComposing 相关的逻辑
 const onCompositionstart = () => {
   isComposing.value = true
 }
@@ -276,12 +282,14 @@ const onSendBtn = async () => {
 
 const doSend = async (content: string) => {
   if (content.length < 2) {
+    // TODO @fan：这个 message.error(`上传文件大小不能超过${props.fileSize}MB!`) 可以替代，这种形式
     ElMessage({
       message: '请输入内容!',
       type: 'error'
     })
     return
   }
+  // TODO @fan：这个 message.error(`上传文件大小不能超过${props.fileSize}MB!`) 可以替代，这种形式
   if (activeConversationId.value == null) {
     ElMessage({
       message: '还没创建对话，不能发送!',
@@ -289,9 +297,9 @@ const doSend = async (content: string) => {
     })
     return
   }
-  // TODO 芋艿：这块交互要在优化；应该是先插入到 UI 界面，里面会有当前的消息，和正在思考中；之后发起请求；
   // 清空输入框
   prompt.value = ''
+  // TODO @fan：idea 这里会报类型错误，是不是可以解决下哈
   const userMessage = {
     conversationId: activeConversationId.value,
     content: content
@@ -309,6 +317,7 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
   fullText.value = ''
   try {
     // 先添加两个假数据，等 stream 返回再替换
+    // TODO @fan：idea 这里会报类型错误，是不是可以解决下哈
     list.value.push({
       id: -1,
       conversationId: activeConversationId.value,
@@ -326,13 +335,14 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       createTime: new Date()
     } as ChatMessageVO)
     // 滚动到最下面
+    // TODO @fan：可以 await nextTick()；然后同步调用 scrollToBottom()
     nextTick(async () => {
       await scrollToBottom()
     })
     // 开始滚动
     textRoll()
     // 发送 event stream
-    let isFirstMessage = true
+    let isFirstMessage = true // TODO @fan：isFirstChunk 会更精准
     ChatMessageApi.sendStream(
       userMessage.conversationId, // TODO 芋艿：这里可能要在优化；
       userMessage.content,
@@ -367,12 +377,14 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       },
       (error) => {
         message.alert(`对话异常! ${error}`)
+        // TODO @fan：是不是可以复用 stopStream 方法
         // 标记对话结束
         conversationInProgress.value = false
         // 结束 stream 对话
         conversationInAbortController.value.abort()
       },
       () => {
+        // TODO @fan：是不是可以复用 stopStream 方法
         // 标记对话结束
         conversationInProgress.value = false
         // 结束 stream 对话
@@ -412,6 +424,7 @@ const messageList = computed(() => {
   return []
 })
 
+// TODO @fan：一般情况下，项目方法注释用 /** */，啊哈，主要保持风格统一，= = 少占点行哈，
 /**
  * 获取 - message 列表
  */
@@ -500,6 +513,7 @@ const handleConversationClick = async (conversation: ChatConversationVO) => {
  * 对话 - 清理全部对话
  */
 const handlerConversationClear = async ()=> {
+  // TODO @fan：需要加一个 对话进行中，不允许切换
   activeConversationId.value = null
   activeConversation.value = null
   list.value = []
@@ -509,7 +523,7 @@ const handlerConversationClear = async ()=> {
  * 对话 - 删除
  */
 const handlerConversationDelete = async (delConversation: ChatConversationVO) => {
-  // 删除的对话如果是当前选中的，那么久重置
+  // 删除的对话如果是当前选中的，那么就重置
   if (activeConversationId.value === delConversation.id) {
     await handlerConversationClear()
   }
@@ -532,6 +546,7 @@ const getConversation = async (id: string | null) => {
 /**
  * 对话 - 新建
  */
+// TODO @fan：应该是 handleXXX，handler 是名词哈
 const handlerNewChat = async () => {
   // 创建对话
   await conversationRef.value.createConversation()
@@ -552,14 +567,14 @@ const handlerMessageDelete = async () => {
 }
 
 /**
- * 编辑 message
+ * 编辑 message：设置为 prompt，可以再次编辑
  */
 const handlerMessageEdit = async (message: ChatMessageVO) => {
   prompt.value = message.content
 }
 
 /**
- * 编辑 message
+ * 刷新 message：基于指定消息，再次发起对话
  */
 const handlerMessageRefresh = async (message: ChatMessageVO) => {
   await doSend(message.content)
@@ -579,10 +594,12 @@ const handlerMessageClear = async () => {
   if (!activeConversationId.value) {
     return
   }
+  // TODO @fan：需要 try catch 下，不然点击取消会报异常
   // 确认提示
   await message.delConfirm("确认清空对话消息？")
   // 清空对话
   await ChatMessageApi.deleteByConversationId(activeConversationId.value as string)
+  // TODO @fan：是不是直接置空就好啦；
   // 刷新 message 列表
   await getMessageList()
 }
