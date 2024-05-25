@@ -3,10 +3,11 @@
   <div class="ai-image">
     <div class="left">
       <div class="segmented">
-        <el-segmented v-model="value" :options="options" />
+        <el-segmented v-model="selectModel" :options="modelOptions" />
       </div>
       <div class="modal-switch-container">
-        <Dall3 />
+        <Dall3  v-if="selectModel === 'DALL3绘画'"/>
+        <Midjourney v-if="selectModel === 'MJ绘画'" />
       </div>
     </div>
     <div class="main">
@@ -20,10 +21,11 @@
 
 <script setup lang="ts">
 import Dall3 from './dall3/index.vue'
+import Midjourney from './midjourney/index.vue'
 
 // 定义属性
-const value = ref('DALL3绘画')
-const options = ['DALL3绘画', 'MJ绘画']
+const selectModel = ref('DALL3绘画')
+const modelOptions = ['DALL3绘画', 'MJ绘画']
 
 
 </script>
