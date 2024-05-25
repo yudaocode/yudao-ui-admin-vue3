@@ -49,6 +49,22 @@
       </div>
     </el-space>
   </div>
+  <div class="image-size">
+    <div>
+      <el-text tag="b">尺寸</el-text>
+    </div>
+    <el-space wrap class="size-list">
+      <div class="size-item"
+           v-for="imageSize in imageSizeList"
+           :key="imageSize.key"
+           @click="handlerSizeClick(imageSize)">
+        <div :class="selectImageSize === imageSize ? 'size-wrapper selectImageSize' : 'size-wrapper'">
+          <div :style="imageSize.style"></div>
+        </div>
+        <div class="size-font">{{ imageSize.key }}</div>
+      </div>
+    </el-space>
+  </div>
 
 </template>
 <script setup lang="ts">
@@ -60,12 +76,18 @@ interface ImageModelVO {
   image: string
 }
 
+// image 大小
+interface ImageSizeVO {
+  key: string
+  style: string,
+}
+
 // 定义属性
 const prompt = ref<string>('')  // 提示词
 const selectHotWord = ref<string>('') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
 const selectModel = ref<any>() // 选中的热词
-const models = ref<[ImageModelVO]>([
+const models = ref<ImageModelVO[]>([
   {
     key: 'qinxi',
     name: '清晰',
@@ -78,6 +100,21 @@ const models = ref<[ImageModelVO]>([
   },
 ])  // 模型
 
+const selectImageSize = ref<ImageSizeVO>({} as ImageSizeVO) // 选中 size
+const imageSizeList = ref<ImageSizeVO[]>([
+  {
+    key: '1:1',
+    style: 'width: 30px; height: 30px;background-color: #dcdcdc;',
+  },
+  {
+    key: '3:5',
+    style: 'width: 30px; height: 50px;background-color: #dcdcdc;',
+  },
+  {
+    key: '5:3',
+    style: 'width: 50px; height: 30px;background-color: #dcdcdc;',
+  }
+]) // size
 
 // 定义 Props
 const props = defineProps({})
@@ -99,13 +136,24 @@ const handlerHotWordClick = async (hotWord: string) => {
  * 模型 - click
  */
 const handlerModelClick = async (model: ImageModelVO) => {
-  if (selectModel.value === model.key) {
-    selectModel.value = ''
+  if (selectModel.value === model) {
+    selectModel.value = {} as ImageModelVO
     return
   }
   selectModel.value = model
 }
 
+/**
+ * size - click
+ */
+const handlerSizeClick = async (imageSize: ImageSizeVO) => {
+  if (selectImageSize.value === imageSize) {
+    selectImageSize.value = {} as ImageSizeVO
+    return
+  }
+  selectImageSize.value = imageSize
+  console.log(imageSize)
+}
 
 </script>
 <style scoped lang="scss">
@@ -155,9 +203,50 @@ const handlerModelClick = async (model: ImageModelVO) => {
       border-radius: 5px;
     }
   }
+}
 
-  // 比例
 
+// 尺寸
+.image-size {
+  width: 100%;
+  margin-top: 30px;
 
+  .size-list {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 20px;
+
+    .size-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+
+      .size-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+        padding: 4px;
+        width: 50px;
+        height: 50px;
+        background-color: #fff;
+        border: 1px solid #fff;
+      }
+
+      .size-font {
+        font-size: 14px;
+        color: #3e3e3e;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .selectImageSize {
+    border: 1px solid #1293ff !important;
+  }
 }
 </style>
