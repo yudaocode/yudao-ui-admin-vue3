@@ -46,6 +46,7 @@
           fit="contain"
           @click="handlerModelClick(model)"
         />
+        <div class="model-font">{{model.name}}</div>
       </div>
     </el-space>
   </div>
@@ -198,13 +199,20 @@ const handlerGenerateImage = async () => {
     margin-top: 15px;
 
     .modal-item {
-      width: 90px;
-      height: 50px;
+      width: 110px;
       //outline: 1px solid blue;
       overflow: hidden;
       display: flex;
+      flex-direction: column;
+      align-items: center;
       border: 3px solid transparent;
       cursor: pointer;
+
+      .model-font {
+        font-size: 14px;
+        color: #3e3e3e;
+        font-weight: bold;
+      }
     }
 
     .selectModel {
