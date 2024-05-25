@@ -55,7 +55,7 @@ export const ChatMessageApi = {
       body: JSON.stringify({
         conversationId,
         content,
-        useContext: enableContext,
+        useContext: enableContext
       }),
       onmessage: onMessage,
       onerror: onError,
@@ -71,7 +71,18 @@ export const ChatMessageApi = {
 
   // 删除消息 - 对话所有消息
   deleteByConversationId: async (conversationId: string) => {
-    return await request.delete({ url: `/ai/chat/message/delete-by-conversation-id?conversationId=${conversationId}` })
-  }
+    return await request.delete({
+      url: `/ai/chat/message/delete-by-conversation-id?conversationId=${conversationId}`
+    })
+  },
 
+  // 获得消息分页
+  getChatMessagePage: async (params: any) => {
+    return await request.get({ url: '/ai/chat/message/page', params })
+  },
+
+  // 管理员删除消息
+  deleteChatMessageByAdmin: async (id: number) => {
+    return await request.delete({ url: `/ai/chat/message/delete-by-admin?id=${id}` })
+  }
 }

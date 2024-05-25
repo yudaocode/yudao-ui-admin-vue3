@@ -55,5 +55,10 @@ export const ChatConversationApi = {
   // 获得对话分页
   getChatConversationPage: async (params: any) => {
     return await request.get({ url: `/ai/chat/conversation/page`, params })
+  },
+
+  // 管理员删除消息
+  deleteChatConversationByAdmin: async (id: number) => {
+    return await request.delete({ url: `/ai/chat/conversation/delete-by-admin?id=${id}` })
   }
 }
