@@ -1,49 +1,55 @@
 <template>
   <el-container class="ai-layout">
     <!-- 左侧：对话列表 -->
-    <Conversation :active-id="activeConversationId"
-                  ref="conversationRef"
-                  @onConversationCreate="handleConversationCreate"
-                  @onConversationClick="handleConversationClick"
-                  @onConversationClear="handlerConversationClear"
-                  @onConversationDelete="handlerConversationDelete"
+    <Conversation
+      :active-id="activeConversationId"
+      ref="conversationRef"
+      @onConversationCreate="handleConversationCreate"
+      @onConversationClick="handleConversationClick"
+      @onConversationClear="handlerConversationClear"
+      @onConversationDelete="handlerConversationDelete"
     />
     <!-- 右侧：对话详情 -->
     <el-container class="detail-container">
       <el-header class="header">
         <div class="title">
           {{ activeConversation?.title ? activeConversation?.title : '对话' }}
-          <span v-if="list.length">({{list.length}})</span>
+          <span v-if="list.length">({{ list.length }})</span>
         </div>
         <div class="btns" v-if="activeConversation">
           <el-button type="primary" bg plain size="small" @click="openChatConversationUpdateForm">
             <span v-html="activeConversation?.modelName"></span>
-            <Icon icon="ep:setting" style="margin-left: 10px"/>
+            <Icon icon="ep:setting" style="margin-left: 10px" />
           </el-button>
           <el-button size="small" class="btn" @click="handlerMessageClear">
             <!-- TODO @fan：style 部分，可以考虑用 unocss 替代 -->
-            <img src="@/assets/ai/clear.svg" style="height: 14px;" />
+            <img src="@/assets/ai/clear.svg" style="height: 14px" />
           </el-button>
           <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
-          <el-button size="small" :icon="Download" class="btn"  />
-          <el-button size="small" :icon="Top" class="btn"  @click="handlerGoTop" />
+          <el-button size="small" :icon="Download" class="btn" />
+          <el-button size="small" :icon="Top" class="btn" @click="handlerGoTop" />
         </div>
       </el-header>
 
       <!-- main：消息列表 -->
-      <el-main class="main-container" >
-        <div >
-          <div class="message-container" >
+      <el-main class="main-container">
+        <div>
+          <div class="message-container">
             <MessageLoading v-if="listLoading" />
             <MessageNewChat v-if="!activeConversation" @on-new-chat="handlerNewChat" />
-            <ChatEmpty v-if="!listLoading && messageList.length === 0 && activeConversation" @on-prompt="doSend"/>
-            <Message v-if="!listLoading && messageList.length > 0"
-                     ref="messageRef"
-                     :conversation="activeConversation"
-                     :list="messageList"
-                     @on-delete-success="handlerMessageDelete"
-                     @on-edit="handlerMessageEdit"
-                     @on-refresh="handlerMessageRefresh"/>
+            <ChatEmpty
+              v-if="!listLoading && messageList.length === 0 && activeConversation"
+              @on-prompt="doSend"
+            />
+            <Message
+              v-if="!listLoading && messageList.length > 0"
+              ref="messageRef"
+              :conversation="activeConversation"
+              :list="messageList"
+              @on-delete-success="handlerMessageDelete"
+              @on-edit="handlerMessageEdit"
+              @on-refresh="handlerMessageRefresh"
+            />
           </div>
         </div>
       </el-main>
@@ -62,7 +68,8 @@
           ></textarea>
           <div class="prompt-btns">
             <div>
-              <el-switch v-model="enableContext" /> <span style="font-size: 14px; color: #8f8f8f;">上下文</span>
+              <el-switch v-model="enableContext" />
+              <span style="font-size: 14px; color: #8f8f8f">上下文</span>
             </div>
             <el-button
               type="primary"
@@ -102,11 +109,10 @@ import Message from './Message.vue'
 import ChatEmpty from './ChatEmpty.vue'
 import MessageLoading from './MessageLoading.vue'
 import MessageNewChat from './MessageNewChat.vue'
-import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
-import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
-import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
-import ChatConversationUpdateForm from "@/views/ai/chat/components/ChatConversationUpdateForm.vue";
-import {Download, Top} from "@element-plus/icons-vue";
+import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
+import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
+import ChatConversationUpdateForm from '@/views/ai/chat/components/ChatConversationUpdateForm.vue'
+import { Download, Top } from '@element-plus/icons-vue'
 
 const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
@@ -118,14 +124,13 @@ const conversationInProgress = ref(false) // 对话进行中
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
-const userInfo = ref<ProfileVO>() // 用户信息
 const enableContext = ref<boolean>(true) // 是否开启上下文
 
 // TODO @fan：这几个变量，可以注释在补下哈；另外，fullText 可以明确是生成中的消息 Text，这样更容易理解哈；
-const fullText = ref('');
-const displayedText = ref('');
-const textSpeed = ref<number>(50); // Typing speed in milliseconds
-const textRoleRunning = ref<boolean>(false); // Typing speed in milliseconds
+const fullText = ref('')
+const displayedText = ref('')
+const textSpeed = ref<number>(50) // Typing speed in milliseconds
+const textRoleRunning = ref<boolean>(false) // Typing speed in milliseconds
 
 // chat message 列表
 // TODO @fan：list、listLoading、listLoadingTime 不能体现出来是消息列表，是不是可以变量再优化下
@@ -139,13 +144,14 @@ const conversationRef = ref()
 const isComposing = ref(false) // 判断用户是否在输入
 
 // 默认 role 头像
-const defaultRoleAvatar = 'http://test.yudao.iocoder.cn/eaef5f41acb911dd718429a0702dcc3c61160d16e57ba1d543132fab58934f9f.png'
+const defaultRoleAvatar =
+  'http://test.yudao.iocoder.cn/eaef5f41acb911dd718429a0702dcc3c61160d16e57ba1d543132fab58934f9f.png'
 
 // =========== 自提滚动效果
 
 // TODO @fan：这个方法，要不加个方法注释
 const textRoll = async () => {
-  let index = 0;
+  let index = 0
   try {
     // 只能执行一次
     if (textRoleRunning.value) {
@@ -174,8 +180,8 @@ const textRoll = async () => {
       // console.log('index < fullText.value.length', index < fullText.value.length, conversationInProgress.value)
 
       if (index < fullText.value.length) {
-        displayedText.value += fullText.value[index];
-        index++;
+        displayedText.value += fullText.value[index]
+        index++
 
         // 更新 message
         const lastMessage = list.value[list.value.length - 1]
@@ -185,24 +191,23 @@ const textRoll = async () => {
         // 滚动到住下面
         await scrollToBottom()
         // 重新设置任务
-        timer = setTimeout(task, textSpeed.value);
+        timer = setTimeout(task, textSpeed.value)
       } else {
         // 不是对话中可以结束
         if (!conversationInProgress.value) {
           textRoleRunning.value = false
-          clearTimeout(timer);
-          console.log("字体滚动退出!")
+          clearTimeout(timer)
+          console.log('字体滚动退出!')
         } else {
           // 重新设置任务
-          timer = setTimeout(task, textSpeed.value);
+          timer = setTimeout(task, textSpeed.value)
         }
       }
     }
-    let timer = setTimeout(task, textSpeed.value);
+    let timer = setTimeout(task, textSpeed.value)
   } finally {
   }
-};
-
+}
 
 // ============ 处理对话滚动 ==============
 
@@ -266,12 +271,12 @@ const onSend = async (event) => {
   if (event.key === 'Enter') {
     if (event.shiftKey) {
       // 插入换行
-      prompt.value += '\r\n';
-      event.preventDefault(); // 防止默认的换行行为
+      prompt.value += '\r\n'
+      event.preventDefault() // 防止默认的换行行为
     } else {
       // 发送消息
       await doSend(content)
-      event.preventDefault(); // 防止默认的提交行为
+      event.preventDefault() // 防止默认的提交行为
     }
   }
 }
@@ -317,13 +322,11 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
   fullText.value = ''
   try {
     // 先添加两个假数据，等 stream 返回再替换
-    // TODO @fan：idea 这里会报类型错误，是不是可以解决下哈
     list.value.push({
       id: -1,
       conversationId: activeConversationId.value,
       type: 'user',
       content: userMessage.content,
-      userAvatar: userInfo.value?.avatar,
       createTime: new Date()
     } as ChatMessageVO)
     list.value.push({
@@ -331,7 +334,6 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
       conversationId: activeConversationId.value,
       type: 'system',
       content: '思考中...',
-      roleAvatar: (activeConversation.value as ChatConversationVO).roleAvatar,
       createTime: new Date()
     } as ChatMessageVO)
     // 滚动到最下面
@@ -415,11 +417,13 @@ const messageList = computed(() => {
   // 没有消息时，如果有 systemMessage 则展示它
   // TODO add by 芋艿：这个消息下面，不能有复制、删除按钮
   if (activeConversation.value?.systemMessage) {
-    return [{
-      id: 0,
-      type: 'system',
-      content: activeConversation.value.systemMessage
-    }]
+    return [
+      {
+        id: 0,
+        type: 'system',
+        content: activeConversation.value.systemMessage
+      }
+    ]
   }
   return []
 })
@@ -438,13 +442,7 @@ const getMessageList = async () => {
       return
     }
     // 获取列表数据
-    const messageListRes = await ChatMessageApi.messageList(activeConversationId.value)
-    // 设置用户头像
-    messageListRes.map(item => {
-      // 设置 role 默认头像
-      item.roleAvatar = item.roleAvatar ? item.roleAvatar : defaultRoleAvatar
-    })
-    list.value = messageListRes
+    list.value = await ChatMessageApi.messageList(activeConversationId.value)
     // 滚动到最下面
     await nextTick(() => {
       // 滚动到最后
@@ -465,7 +463,6 @@ const chatConversationUpdateFormRef = ref()
 const openChatConversationUpdateForm = async () => {
   chatConversationUpdateFormRef.value.open(activeConversationId.value)
 }
-
 
 /**
  * 对话 - 标题修改成功
@@ -489,7 +486,7 @@ const handleConversationCreate = async () => {
 const handleConversationClick = async (conversation: ChatConversationVO) => {
   // 对话进行中，不允许切换
   if (conversationInProgress.value) {
-    await message.alert("对话中，不允许切换!")
+    await message.alert('对话中，不允许切换!')
     return false
   }
 
@@ -512,7 +509,7 @@ const handleConversationClick = async (conversation: ChatConversationVO) => {
 /**
  * 对话 - 清理全部对话
  */
-const handlerConversationClear = async ()=> {
+const handlerConversationClear = async () => {
   // TODO @fan：需要加一个 对话进行中，不允许切换
   activeConversationId.value = null
   activeConversation.value = null
@@ -596,7 +593,7 @@ const handlerMessageClear = async () => {
   }
   // TODO @fan：需要 try catch 下，不然点击取消会报异常
   // 确认提示
-  await message.delConfirm("确认清空对话消息？")
+  await message.delConfirm('确认清空对话消息？')
   // 清空对话
   await ChatMessageApi.deleteByConversationId(activeConversationId.value as string)
   // TODO @fan：是不是直接置空就好啦；
@@ -615,8 +612,6 @@ onMounted(async () => {
   // 获取列表数据
   listLoading.value = true
   await getMessageList()
-  // 获取用户信息
-  userInfo.value = await getUserProfile()
 })
 </script>
 

@@ -1,10 +1,10 @@
 <template>
   <div ref="messageContainer" style="height: 100%; overflow-y: auto; position: relative">
-    <div class="chat-list" v-for="(item, index) in messageList" :key="index">
+    <div class="chat-list" v-for="(item, index) in list" :key="index">
       <!--  靠左 message  -->
       <div class="left-message message-item" v-if="item.type !== 'user'">
         <div class="avatar">
-          <el-avatar :src="item.roleAvatar" />
+          <el-avatar :src="roleAvatar" />
         </div>
         <div class="message">
           <div>
@@ -26,7 +26,7 @@
       <!--  靠右 message  -->
       <div class="right-message message-item" v-if="item.type === 'user'">
         <div class="avatar">
-          <el-avatar :src="item.userAvatar" />
+          <el-avatar :src="userAvatar" />
         </div>
         <div class="message">
           <div>
@@ -70,11 +70,18 @@ import { useClipboard } from '@vueuse/core'
 import { PropType } from 'vue'
 import { ArrowDownBold, Edit, RefreshRight } from '@element-plus/icons-vue'
 import { ChatConversationVO } from '@/api/ai/chat/conversation'
+import {useUserStore} from '@/store/modules/user';
+import userAvatarDefaultImg from '@/assets/imgs/avatar.gif'
+import roleAvatarDefaultImg from '@/assets/ai/gpt.svg'
 
 const { copy } = useClipboard() // 初始化 copy 到粘贴板
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
 const messageContainer: any = ref(null)
 const isScrolling = ref(false) //用于判断用户是否在滚动
+
+const userStore = useUserStore()
+const userAvatar = computed(() => userStore.user.avatar ?? userAvatarDefaultImg)
+const roleAvatar = computed(() => props.conversation.roleAvatar ?? roleAvatarDefaultImg)
 
 // 定义 props
 const props = defineProps({
@@ -86,20 +93,6 @@ const props = defineProps({
     type: Array as PropType<ChatMessageVO[]>,
     required: true
   }
-})
-
-const messageList = computed(() => {
-  if (props.list && props.list.length > 0) {
-    return props.list
-  }
-  if (props.conversation && props.conversation.systemMessage) {
-    return [{
-      id: 0,
-      type: 'system',
-      content: props.conversation.systemMessage
-    }]
-  }
-  return []
 })
 
 // ============ 处理对话滚动 ==============

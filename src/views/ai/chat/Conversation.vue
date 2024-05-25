@@ -43,7 +43,7 @@
               :class="conversation.id === activeConversationId ? 'conversation active' : 'conversation'"
             >
               <div class="title-wrapper">
-                <img class="avatar" :src="conversation.roleAvatar"/>
+                <img class="avatar" :src="conversation.roleAvatar || roleAvatarDefaultImg"/>
                 <span class="title">{{ conversation.title }}</span>
               </div>
               <div class="button-wrapper" v-show="hoverConversationId === conversation.id">
@@ -99,6 +99,7 @@ import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversatio
 import {ref} from "vue";
 import Role from "@/views/ai/chat/role/index.vue";
 import {Bottom, Top} from "@element-plus/icons-vue";
+import roleAvatarDefaultImg from '@/assets/ai/gpt.svg'
 
 const message = useMessage() // 消息弹窗
 
