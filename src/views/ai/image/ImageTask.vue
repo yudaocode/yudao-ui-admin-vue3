@@ -2,22 +2,7 @@
 <template>
   <el-card class="dr-task" body-class="task-card" shadow="never">
     <template #header>绘画任务</template>
-
-    <el-card body-class="" class="image-card" >
-      <div class="image-operation">
-        <div>
-          <el-button type="" text bg >已完成</el-button>
-        </div>
-        <div>
-          <el-button class="btn" text :icon="Download" />
-          <el-button class="btn" text :icon="Delete" />
-          <el-button class="btn" text :icon="More" @click="handlerTaskDetail" />
-        </div>
-      </div>
-      <div class="image-wrapper">
-        <img class="image" src="https://img.bigpt8.com/uploads/thumbnail/20240509/b7802797e5f709f35a451a1591d4d495.png" />
-      </div>
-    </el-card>
+    <ImageTaskCard v-for="image in imageList" :key="image" :image-detail="image" />
   </el-card>
   <!-- 图片 detail 抽屉 -->
   <ImageDetailDrawer
@@ -26,10 +11,13 @@
   />
 </template>
 <script setup lang="ts">
+import {ImageApi, ImageDetailVO} from '@/api/ai/image';
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
+import ImageTaskCard from './ImageTaskCard.vue'
 import {Delete, Download, More} from "@element-plus/icons-vue";
 import {bool} from "vue-types";
 
+const imageList = ref<ImageDetailVO[]>([]) // image 列表
 const showTaskDetail = ref<bool>(false) // 是否显示 task 详情
 
 /**
@@ -40,13 +28,30 @@ const handlerTaskDetail = async () => {
 }
 
 /**
- * 抽屉 - 关闭
+ * 抽屉 - close
  */
 const handlerDrawerClose = async () => {
   showTaskDetail.value = false
 }
 
+/**
+ * 任务 - detail
+ */
+const handlerDrawerOpen = async () => {
+  showTaskDetail.value = true
+}
 
+/**
+ * 获取 - image 列表
+ */
+const getImageList = async () => {
+  imageList.value = await ImageApi.getImageList({pageNo: 1, pageSize: 20})
+}
+
+//
+onMounted(async () => {
+  await getImageList()
+})
 </script>
 
 <style scoped lang="scss">
@@ -57,33 +62,6 @@ const handlerDrawerClose = async () => {
 
   .task-card {
 
-  }
-}
-
-.image-card {
-  width: 360px;
-  border-radius: 10px;
-
-  .image-operation {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-
-    .btn {
-      //border: 1px solid red;
-      padding: 10px;
-      margin: 0;
-    }
-  }
-
-  .image-wrapper {
-    overflow: hidden;
-    margin-top: 20px;
-
-    .image {
-      width: 100%;
-      border-radius: 10px;
-    }
   }
 }
 
