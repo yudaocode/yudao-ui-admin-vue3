@@ -11,17 +11,18 @@
       </div>
     </div>
     <div class="main">
-      main
+      <ImageTask />
     </div>
-    <div class="right">
-      right
-    </div>
+<!--    <div class="right">-->
+<!--      right-->
+<!--    </div>-->
   </div>
 </template>
 
 <script setup lang="ts">
 import Dall3 from './dall3/index.vue'
 import Midjourney from './midjourney/index.vue'
+import ImageTask from './ImageTask.vue'
 
 // 定义属性
 const selectModel = ref('DALL3绘画')
