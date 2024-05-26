@@ -32,11 +32,11 @@ const props = defineProps({
  * 按钮 - 点击事件
  */
 const handlerBtnClick = async (type, imageDetail: ImageDetailVO ) => {
-  emits('handlerBtnClick', type, imageDetail)
+  emits('onBtnClick', type, imageDetail)
 }
 
 // emits
-const emits = defineEmits(['handlerBtnClick'])
+const emits = defineEmits(['onBtnClick'])
 
 </script>
 

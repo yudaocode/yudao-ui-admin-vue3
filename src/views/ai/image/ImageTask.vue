@@ -2,7 +2,7 @@
 <template>
   <el-card class="dr-task" body-class="task-card" shadow="never">
     <template #header>绘画任务</template>
-    <ImageTaskCard v-for="image in imageList" :key="image" :image-detail="image" />
+    <ImageTaskCard v-for="image in imageList" :key="image" :image-detail="image" @on-btn-click="handlerImageBtnClick" />
   </el-card>
   <!-- 图片 detail 抽屉 -->
   <ImageDetailDrawer
@@ -46,6 +46,15 @@ const handlerDrawerOpen = async () => {
  */
 const getImageList = async () => {
   imageList.value = await ImageApi.getImageList({pageNo: 1, pageSize: 20})
+}
+
+/**
+ * 图片 - btn click
+ */
+const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
+  if (type === 'more') {
+    await handlerDrawerOpen()
+  }
 }
 
 //
