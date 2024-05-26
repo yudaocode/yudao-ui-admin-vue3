@@ -62,6 +62,17 @@ export enum TimeUnitType {
   DAY = 3
 }
 
+export enum RejectHandlerType {
+  /**
+   * 结束流程
+   */
+  TERMINATION = 1,
+  /**
+   * 驳回到指定节点
+   */
+  RETURN_PRE_USER_TASK = 2
+}
+
 // 条件配置类型 （ 用于条件节点配置 ）
 export enum ConditionConfigType  {
 
@@ -186,12 +197,6 @@ NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
 NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 
-export const TIME_UNIT_MAP = new Map<number,string>()
-NODE_DEFAULT_NAME.set(1, 'M')
-NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
-NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
-
-
 export const APPROVE_METHODS: DictDataVO [] = [
   { label: '单人审批', value: 1 },
   { label: '多人会签(需所有审批人同意)', value: 2 },
@@ -215,6 +220,10 @@ export const TIMEOUT_HANDLER_ACTION_TYPES: DictDataVO [] = [
   { label: '自动提醒', value: 1 },
   { label: '自动同意', value: 2 },
   { label: '自动拒绝', value: 3 },
+]
+export const REJECT_HANDLER_TYPES: DictDataVO [] = [
+  { label: '结束流程', value: RejectHandlerType.TERMINATION },
+  { label: '驳回到指定节点', value: RejectHandlerType.RETURN_PRE_USER_TASK }
 ]
 
 // 比较运算符

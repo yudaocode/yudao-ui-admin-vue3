@@ -38,6 +38,7 @@
     v-if="currentNode"
     ref="nodeSetting"
     :flow-node="currentNode"
+    @find:return-task-nodes="findReturnTaskNodes"
   />
 </template>
 <script setup lang="ts">
@@ -55,7 +56,8 @@ const props = defineProps({
   }
 })
 const emits = defineEmits<{
-  'update:modelValue': [node: SimpleFlowNode | undefined]
+  'update:modelValue': [node: SimpleFlowNode | undefined],
+  'find:parentNode': [nodeList: SimpleFlowNode[], nodeType: NodeType]
 }>()
 
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
@@ -105,6 +107,13 @@ const copyNode = () => {
   }
   currentNode.value = newCopyNode
   emits('update:modelValue', currentNode.value)
+}
+// 查找可以驳回用户节点
+const findReturnTaskNodes = (
+  matchNodeList: SimpleFlowNode[], // 匹配的节点
+) => {
+  // 从父节点查找
+  emits('find:parentNode', matchNodeList, NodeType.USER_TASK_NODE);
 }
 </script>
 <style lang="scss" scoped></style>

@@ -1,37 +1,42 @@
 <template>
   <div class="node-handler-wrapper">
     <div class="node-handler" v-if="props.showAdd">
-     <el-popover  trigger="hover" v-model:visible="popoverShow"  placement="right-start"  width="auto"> 
-          <div class="handler-item-wrapper">
-            <div class="handler-item"  @click="addNode(NodeType.USER_TASK_NODE)">
-              <div class="approve handler-item-icon">
-                <span class="iconfont icon-approve icon-size"></span>
-              </div>
-              <div class="handler-item-text">审批人</div>
+      <el-popover
+        trigger="hover"
+        v-model:visible="popoverShow"
+        placement="right-start"
+        width="auto"
+      >
+        <div class="handler-item-wrapper">
+          <div class="handler-item" @click="addNode(NodeType.USER_TASK_NODE)">
+            <div class="approve handler-item-icon">
+              <span class="iconfont icon-approve icon-size"></span>
             </div>
-            <div class="handler-item" @click="addNode(NodeType.COPY_TASK_NODE)">
-              <div class="handler-item-icon copy">
-                <span class="iconfont icon-size icon-copy"></span>
-              </div>
-              <div class="handler-item-text">抄送</div>
-            </div>
-            <div class="handler-item" @click="addNode(NodeType.EXCLUSIVE_NODE)">
-              <div class="handler-item-icon condition">
-                <span class="iconfont icon-size icon-exclusive"></span>
-              </div>
-              <div class="handler-item-text">条件分支</div>
-            </div>
+            <div class="handler-item-text">审批人</div>
           </div>
-          <template #reference>
-            <div class="add-icon"><Icon icon="ep:plus" /></div>
-          </template>
+          <div class="handler-item" @click="addNode(NodeType.COPY_TASK_NODE)">
+            <div class="handler-item-icon copy">
+              <span class="iconfont icon-size icon-copy"></span>
+            </div>
+            <div class="handler-item-text">抄送</div>
+          </div>
+          <div class="handler-item" @click="addNode(NodeType.EXCLUSIVE_NODE)">
+            <div class="handler-item-icon condition">
+              <span class="iconfont icon-size icon-exclusive"></span>
+            </div>
+            <div class="handler-item-text">条件分支</div>
+          </div>
+        </div>
+        <template #reference>
+          <div class="add-icon"><Icon icon="ep:plus" /></div>
+        </template>
       </el-popover>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { SimpleFlowNode, NodeType, NODE_DEFAULT_NAME, ApproveMethodType, CandidateStrategy } from './consts'
+import { SimpleFlowNode, NodeType, NODE_DEFAULT_NAME, ApproveMethodType, RejectHandlerType, CandidateStrategy } from './consts'
 import { generateUUID } from '@/utils'
 defineOptions({
   name: 'NodeHandler'
@@ -71,6 +76,9 @@ const addNode = (type: number) => {
          // 超时处理
         timeoutHandler: {
           enable: false
+        },
+        rejectHandler: {
+          type: RejectHandlerType.TERMINATION
         }
       },
       childNode: props.childNode

@@ -131,7 +131,6 @@
                 />
               </el-select>
             </el-form-item>
-
             <el-form-item
               v-if="currentNode.attributes.candidateStrategy === CandidateStrategy.EXPRESSION"
               label="流程表达式"
@@ -144,7 +143,6 @@
                 style="width: 100%"
               />
             </el-form-item>
-
             <el-form-item label="审批方式" prop="approveMethod">
               <el-radio-group v-model="currentNode.attributes.approveMethod">
                 <div class="flex-col">
@@ -163,8 +161,35 @@
                 </div>
               </el-radio-group>
             </el-form-item>
-
-            <el-form-item label="超时处理" prop="timeoutHandlerEnable">
+            <el-divider content-position="left">审批人拒绝时</el-divider>
+            <el-form-item label="处理方式" prop="rejectHandler">
+              <el-radio-group v-model="currentNode.attributes.rejectHandler.type" @change="rejectHandlerTypeChange">
+                <el-radio
+                  :border="true"
+                  v-for="item in REJECT_HANDLER_TYPES"
+                  :key="item.value"
+                  :value="item.value"
+                  :label="item.label"
+                />
+              </el-radio-group>
+            </el-form-item>
+            
+            <el-form-item
+              v-if="currentNode.attributes.rejectHandler.type == RejectHandlerType.RETURN_PRE_USER_TASK"
+              label="驳回节点"
+              prop="rejectHandlerNode"
+            >
+              <el-select v-model="currentNode.attributes.rejectHandler.returnNodeId" clearable style="width: 100%">
+                <el-option
+                  v-for="item in returnTaskList"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+            <el-divider content-position="left">审批人超时未处理时</el-divider>
+            <el-form-item label="启用开关" prop="timeoutHandlerEnable">
               <el-switch
                 v-model="currentNode.attributes.timeoutHandler.enable"
                 active-text="开启"
@@ -281,8 +306,10 @@ import {
   NodeType,
   ApproveMethodType,
   TimeUnitType,
+  RejectHandlerType,
   TIMEOUT_HANDLER_ACTION_TYPES,
   TIME_UNIT_TYPES,
+  REJECT_HANDLER_TYPES,
   NODE_DEFAULT_NAME
 } from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
@@ -303,6 +330,9 @@ const props = defineProps({
     required: true
   }
 })
+const emits = defineEmits<{
+  'find:returnTaskNodes': [nodeList: SimpleFlowNode[]]
+}>()
 
 const notAllowedMultiApprovers = ref(false)
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
@@ -316,7 +346,7 @@ const deptTreeOptions = inject('deptTree') // 部门树
 const formType = inject('formType') // 表单类型
 const formFields = inject<Ref<string[]>>('formFields')
 const candidateParamArray = ref<any[]>([])
-
+const returnTaskList = ref<SimpleFlowNode[]>([])
 const closeDrawer = () => {
   settingVisible.value = false
 }
@@ -443,6 +473,10 @@ const setCurrentNode = (node: SimpleFlowNode) => {
     timeDuration.value = parseInt(parseTime)
     timeUnit.value = convertTimeUnit(parseTimeUnit)
   }
+  // 查找可以驳回的用户节点
+  const matchNodeList = [];
+  emits('find:returnTaskNodes', matchNodeList);
+  returnTaskList.value = matchNodeList;
 }
 
 defineExpose({ open, setCurrentNode }) // 暴露方法给父组件
@@ -482,6 +516,12 @@ const blurEvent = () => {
   showInput.value = false
   currentNode.value.name =
     currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
+}
+const rejectHandlerTypeChange = () => {
+  if (currentNode.value.attributes?.rejectHandler.type === RejectHandlerType.RETURN_PRE_USER_TASK) {
+    
+    console.log('nodeList is {}', returnTaskList.value);
+  }
 }
 // 默认 6小时
 const timeDuration = ref(6)

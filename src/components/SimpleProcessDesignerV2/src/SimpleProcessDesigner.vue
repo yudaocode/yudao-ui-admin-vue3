@@ -15,7 +15,7 @@
         </div>
       </div>
       <div class="scale-container" :style="`transform: scale(${scaleValue / 100});`">
-        <ProcessNodeTree v-if="processNodeTree" v-model:flow-node="processNodeTree" />
+        <ProcessNodeTree v-if="processNodeTree"  v-model:flow-node="processNodeTree" />
       </div>
     </div>
     <Dialog v-model="errorDialogVisible" title="保存失败" width="400" :fullscreen="false">
@@ -54,6 +54,18 @@ const processNodeTree = ref<SimpleFlowNode>({
     type: NodeType.END_EVENT_NODE
   }
 })
+
+// const rootNode = ref<SimpleFlowNode>({
+//   name: '开始',
+//   type: NodeType.START_EVENT_NODE,
+//   id: 'StartEvent_1'
+// })
+
+// const childNode = ref<SimpleFlowNode>({
+//   id: 'EndEvent_1',
+//   name: '结束',
+//   type: NodeType.END_EVENT_NODE
+// })
 
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
@@ -148,6 +160,8 @@ onMounted(async () => {
   if (result) {
     console.log('the result is ', result)
     processNodeTree.value = result
+    // rootNode.value = result
+    // childNode.value = result.childNode
   }
 })
 </script>

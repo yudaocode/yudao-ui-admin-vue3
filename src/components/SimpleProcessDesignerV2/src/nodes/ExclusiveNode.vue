@@ -57,7 +57,11 @@
         </div>
         <ConditionNodeConfig :node-index="index" :condition-node="item" :ref="item.id" />
         <!-- 递归显示子节点  -->
-        <ProcessNodeTree v-if="item && item.childNode" v-model:flow-node="item.childNode" />
+        <ProcessNodeTree 
+            v-if="item && item.childNode" 
+            :parent-node="item" 
+            v-model:flow-node="item.childNode" 
+            @find:recursive-find-parent-node="recursiveFindParentNode"/>
       </div>
     </div>
     <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
@@ -76,6 +80,10 @@ defineOptions({
   name: 'ExclusiveNode'
 })
 const props = defineProps({
+  // parentNode : {
+  //   type: Object as () => SimpleFlowNode,
+  //   required: true
+  // },
   flowNode: {
     type: Object as () => SimpleFlowNode,
     required: true
@@ -83,7 +91,9 @@ const props = defineProps({
 })
 // 定义事件，更新父组件
 const emits = defineEmits<{
-  'update:modelValue': [node: SimpleFlowNode | undefined]
+  'update:modelValue': [node: SimpleFlowNode | undefined],
+  'find:parentNode': [nodeList: SimpleFlowNode[], nodeType: number],
+  'find:recursiveFindParentNode': [nodeList: SimpleFlowNode[], curentNode: SimpleFlowNode, nodeType: number]
 }>()
 
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
@@ -156,7 +166,21 @@ const moveNode = (index: number, to: number) => {
   }
 
 }
-
+// 递归从父节点中查询匹配的节点
+const recursiveFindParentNode = (
+  nodeList: SimpleFlowNode[],
+  node: SimpleFlowNode,
+  nodeType: number
+) => {
+  if (!node || node.type === NodeType.START_EVENT_NODE) {
+    return
+  }
+  if (node.type === nodeType) {
+    nodeList.push(node)
+  }
+  // 条件节点 (NodeType.CONDITION_NODE) 比较特殊。需要调用其父节点条件分支节点（NodeType.EXCLUSIVE_NODE) 继续查找
+  emits('find:parentNode', nodeList, nodeType)
+}
 
 </script>
 
