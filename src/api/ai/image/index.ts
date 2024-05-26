@@ -14,8 +14,29 @@ export interface ImageDetailVO {
   model: string // 模型
 }
 
+export interface ImagePageReqVO {
+  pageNo: number // 分页编号
+  pageSize: number // 分页大小
+}
+
+
 // AI API 密钥 API
 export const ImageApi = {
+  getImageList: async (params: ImagePageReqVO) => {
+    return [
+      {
+        id: 1,
+        prompt: '童话里的小屋是什么样子？',
+        status: 'todo',
+        errorMessage: 'error 未登录',
+        type: 'qinxi',
+        taskId: 111,
+        imageUrl: 'https://img.bigpt8.com/uploads/thumbnail/20240509/b7802797e5f709f35a451a1591d4d495.png',
+        platform: 'dr',
+        model: 'dr'
+      }
+    ] as ImageDetailVO[]
+  },
   // 获取 image 详细信息
   getImageDetail: async (id: number) => {
     // return await request.get({ url: `/ai/api-key/page?`, params })
