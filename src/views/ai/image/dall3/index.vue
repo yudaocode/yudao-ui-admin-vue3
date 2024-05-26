@@ -99,7 +99,7 @@ const models = ref<ImageModelVO[]>([
   },
   {
     key: 'ziran',
-    name: '清晰',
+    name: '自然',
     image: 'https://h5.cxyhub.com/images/model_2.png',
   },
 ])  // 模型
