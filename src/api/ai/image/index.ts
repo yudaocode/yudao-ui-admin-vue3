@@ -15,10 +15,21 @@ export interface ImageDetailVO {
 }
 
 // AI API 密钥 API
-export const ApiKeyApi = {
-  // 查询 API 密钥分页
-  getApiKeyPage: async (params: any) => {
-    return await request.get({ url: `/ai/api-key/page`, params })
+export const ImageApi = {
+  // 获取 image 详细信息
+  getImageDetail: async (id: number) => {
+    // return await request.get({ url: `/ai/api-key/page?`, params })
+    return {
+      id: 1,
+      prompt: '童话里的小屋是什么样子？',
+      status: 'todo',
+      errorMessage: 'error 未登录',
+      type: 'qinxi',
+      taskId: 111,
+      imageUrl: 'https://img.bigpt8.com/uploads/thumbnail/20240509/b7802797e5f709f35a451a1591d4d495.png',
+      platform: 'dr',
+      model: 'dr'
+    } as ImageDetailVO
   },
 
 }
