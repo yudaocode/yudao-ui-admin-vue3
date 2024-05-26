@@ -95,12 +95,12 @@ const models = ref<ImageModelVO[]>([
   {
     key: 'qinxi',
     name: 'MJ',
-    image: 'https://h5.cxyhub.com/images/mj.jpeg',
+    image: 'https://bigpt8.com/pc/_nuxt/mj.34a61377.png',
   },
   {
     key: 'ziran',
     name: 'NIJI',
-    image: 'https://h5.cxyhub.com/images/niji.jpeg',
+    image: 'https://bigpt8.com/pc/_nuxt/nj.ca79b143.png',
   },
 ])  // 模型
 
@@ -210,7 +210,7 @@ const handlerGenerateImage = async () => {
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 110px;
+      width: 150px;
       //outline: 1px solid blue;
       overflow: hidden;
       border: 3px solid transparent;
