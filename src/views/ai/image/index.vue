@@ -6,16 +6,13 @@
         <el-segmented v-model="selectModel" :options="modelOptions" />
       </div>
       <div class="modal-switch-container">
-        <Dall3  v-if="selectModel === 'DALL3绘画'"/>
+        <Dall3 v-if="selectModel === 'DALL3绘画'" @on-draw-start="handlerDrawStart" @on-draw-complete="handlerDrawComplete" />
         <Midjourney v-if="selectModel === 'MJ绘画'" />
       </div>
     </div>
     <div class="main">
-      <ImageTask />
+      <ImageTask ref="imageTaskRef" />
     </div>
-<!--    <div class="right">-->
-<!--      right-->
-<!--    </div>-->
   </div>
 </template>
 
@@ -24,10 +21,32 @@ import Dall3 from './dall3/index.vue'
 import Midjourney from './midjourney/index.vue'
 import ImageTask from './ImageTask.vue'
 
+// ref
+const imageTaskRef = ref<any>() // image task ref
+
 // 定义属性
 const selectModel = ref('DALL3绘画')
 const modelOptions = ['DALL3绘画', 'MJ绘画']
 
+
+/**
+ * 绘画 - start
+ */
+const handlerDrawStart = async (type) => {
+  // todo
+}
+
+/**
+ * 绘画 - complete
+ */
+const handlerDrawComplete = async (type) => {
+  // todo
+  await imageTaskRef.value.getImageList()
+}
+
+//
+onMounted( async () => {
+})
 
 </script>
 
