@@ -1,15 +1,15 @@
 import request from '@/config/axios'
 
 
-export const saveBpmSimpleModel = async (data) => {
+export const updateBpmSimpleModel = async (data) => {
   return await request.post({
-    url: '/bpm/simple/save',
+    url: '/bpm/model/simple/update',
     data: data
   })
 }
 
 export const getBpmSimpleModel = async (modelId) => {
   return await request.get({
-    url: '/bpm/simple/get?modelId=' + modelId
+    url: '/bpm/model/simple/get?modelId=' + modelId
   })
 }

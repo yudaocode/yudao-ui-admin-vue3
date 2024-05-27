@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import ProcessNodeTree from './ProcessNodeTree.vue';
-import { saveBpmSimpleModel, getBpmSimpleModel } from '@/api/bpm/simple'
+import { updateBpmSimpleModel, getBpmSimpleModel } from '@/api/bpm/simple'
 import { SimpleFlowNode, NodeType,NODE_DEFAULT_TEXT } from './consts'
 
 defineOptions({
@@ -86,7 +86,7 @@ const saveSimpleFlowModel = async () => {
     simpleModelBody: processNodeTree.value
   }
 
-  const result = await saveBpmSimpleModel(data)
+  const result = await updateBpmSimpleModel(data)
   if (result) {
     message.success('修改成功')
     close()
