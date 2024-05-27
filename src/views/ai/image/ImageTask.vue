@@ -63,16 +63,21 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped lang="scss">
+<style lang="scss">
+.task-card {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 
+  >div {
+    margin-right: 20px;
+  }
+}
+</style>
+
+<style scoped lang="scss">
 .dr-task {
   width: 100%;
   height: 100%;
-
-  .task-card {
-
-  }
 }
-
-
 </style>
