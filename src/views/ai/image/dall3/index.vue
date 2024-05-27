@@ -50,6 +50,26 @@
       </div>
     </el-space>
   </div>
+  <div class="image-style">
+    <div>
+      <el-text tag="b">样式</el-text>
+    </div>
+    <el-space wrap class="image-style-list">
+      <div
+        :class="selectImageStyle === imageStyle ? 'image-style-item selectImageStyle' : 'image-style-item'"
+        v-for="imageStyle in imageStyleList"
+        :key="imageStyle"
+
+      >
+        <el-image
+          :src="imageStyle.image"
+          fit="contain"
+          @click="handlerStyleClick(imageStyle)"
+        />
+        <div class="style-font">{{imageStyle.name}}</div>
+      </div>
+    </el-space>
+  </div>
   <div class="image-size">
     <div>
       <el-text tag="b">尺寸</el-text>
@@ -72,6 +92,7 @@
   </div>
 </template>
 <script setup lang="ts">
+import {ImageApi, ImageDallReqVO} from '@/api/ai/image';
 
 // image 模型
 interface ImageModelVO {
@@ -90,10 +111,24 @@ interface ImageSizeVO {
 const prompt = ref<string>('')  // 提示词
 const selectHotWord = ref<string>('') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
-const selectModel = ref<any>() // 选中的热词
+const selectModel = ref<any>() // 模型
 const models = ref<ImageModelVO[]>([
   {
-    key: 'qinxi',
+    key: 'dall2',
+    name: 'dall2',
+    image: 'https://h5.cxyhub.com/images/model_1.png',
+  },
+  {
+    key: 'dall3',
+    name: 'dall3',
+    image: 'https://h5.cxyhub.com/images/model_2.png',
+  },
+])  // 模型
+
+const selectImageStyle = ref<any>() // style 样式
+const imageStyleList = ref<ImageModelVO[]>([
+  {
+    key: 'qingxi',
     name: '清晰',
     image: 'https://h5.cxyhub.com/images/model_1.png',
   },
@@ -148,6 +183,17 @@ const handlerModelClick = async (model: ImageModelVO) => {
 }
 
 /**
+ * 样式 - click
+ */
+const handlerStyleClick = async (imageStyle: ImageModelVO) => {
+  if (selectImageStyle.value === imageStyle) {
+    selectImageStyle.value = {} as ImageModelVO
+    return
+  }
+  selectImageStyle.value = imageStyle
+}
+
+/**
  * size - click
  */
 const handlerSizeClick = async (imageSize: ImageSizeVO) => {
@@ -156,7 +202,6 @@ const handlerSizeClick = async (imageSize: ImageSizeVO) => {
     return
   }
   selectImageSize.value = imageSize
-  console.log(imageSize)
 }
 
 /**
@@ -164,7 +209,16 @@ const handlerSizeClick = async (imageSize: ImageSizeVO) => {
  */
 const handlerGenerateImage = async () => {
   // todo @范 图片生产逻辑
+  const form = {
+    prompt: prompt.value, // 提示词
+    model: selectModel.value, // 模型
+    style: selectImageStyle.value, // 图像生成的风格
+    size: selectImageSize.value, // size不能为空
+  } as ImageDallReqVO
+  // 发送请求
+  await ImageApi.dall(form)
 }
+
 </script>
 <style scoped lang="scss">
 
@@ -222,6 +276,37 @@ const handlerGenerateImage = async () => {
   }
 }
 
+
+// 样式 style
+.image-style {
+  margin-top: 30px;
+
+  .image-style-list {
+    margin-top: 15px;
+
+    .image-style-item {
+      width: 110px;
+      //outline: 1px solid blue;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: 3px solid transparent;
+      cursor: pointer;
+
+      .style-font {
+        font-size: 14px;
+        color: #3e3e3e;
+        font-weight: bold;
+      }
+    }
+
+    .selectImageStyle {
+      border: 3px solid #1293ff;
+      border-radius: 5px;
+    }
+  }
+}
 
 // 尺寸
 .image-size {
