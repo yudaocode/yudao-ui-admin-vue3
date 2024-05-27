@@ -82,7 +82,7 @@
         <div :class="selectImageSize === imageSize ? 'size-wrapper selectImageSize' : 'size-wrapper'">
           <div :style="imageSize.style"></div>
         </div>
-        <div class="size-font">{{ imageSize.key }}</div>
+        <div class="size-font">{{ imageSize.name }}</div>
       </div>
     </el-space>
   </div>
@@ -111,49 +111,55 @@ interface ImageSizeVO {
 const prompt = ref<string>('')  // 提示词
 const selectHotWord = ref<string>('') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
-const selectModel = ref<any>() // 模型
+const selectModel = ref<any>({}) // 模型
 const models = ref<ImageModelVO[]>([
   {
-    key: 'dall2',
+    key: 'dall-e-2',
     name: 'dall2',
     image: 'https://h5.cxyhub.com/images/model_1.png',
   },
   {
-    key: 'dall3',
+    key: 'dall-e-3',
     name: 'dall3',
     image: 'https://h5.cxyhub.com/images/model_2.png',
   },
 ])  // 模型
+selectModel.value = models.value[0]
 
-const selectImageStyle = ref<any>() // style 样式
+const selectImageStyle = ref<any>({}) // style 样式
 const imageStyleList = ref<ImageModelVO[]>([
   {
-    key: 'qingxi',
+    key: 'vivid',
     name: '清晰',
     image: 'https://h5.cxyhub.com/images/model_1.png',
   },
   {
-    key: 'ziran',
+    key: 'natural',
     name: '自然',
     image: 'https://h5.cxyhub.com/images/model_2.png',
   },
-])  // 模型
+])  // style
+selectImageStyle.value = imageStyleList.value[0]
 
 const selectImageSize = ref<ImageSizeVO>({} as ImageSizeVO) // 选中 size
 const imageSizeList = ref<ImageSizeVO[]>([
   {
-    key: '1:1',
+    key: '1024x1024',
+    name: '1:1',
     style: 'width: 30px; height: 30px;background-color: #dcdcdc;',
   },
   {
-    key: '3:5',
+    key: '1024x1792',
+    name: '3:5',
     style: 'width: 30px; height: 50px;background-color: #dcdcdc;',
   },
   {
-    key: '5:3',
+    key: '1792x1024',
+    name: '5:3',
     style: 'width: 50px; height: 30px;background-color: #dcdcdc;',
   }
 ]) // size
+selectImageSize.value = imageSizeList.value[0]
 
 // 定义 Props
 const props = defineProps({})
@@ -209,11 +215,13 @@ const handlerSizeClick = async (imageSize: ImageSizeVO) => {
  */
 const handlerGenerateImage = async () => {
   // todo @范 图片生产逻辑
+  console.log('prompt.value', prompt)
+  console.log('prompt.value', prompt.value)
   const form = {
     prompt: prompt.value, // 提示词
-    model: selectModel.value, // 模型
-    style: selectImageStyle.value, // 图像生成的风格
-    size: selectImageSize.value, // size不能为空
+    model: selectModel.value.key, // 模型
+    style: selectImageStyle.value.key, // 图像生成的风格
+    size: selectImageSize.value.key, // size不能为空
   } as ImageDallReqVO
   // 发送请求
   await ImageApi.dall(form)

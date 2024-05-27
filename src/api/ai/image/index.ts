@@ -12,6 +12,7 @@ export interface ImageDetailVO {
   originalPicUrl: string // 绘制图片地址
   platform: string // 平台
   model: string // 模型
+  style: string // 图像生成的风格
 }
 
 export interface ImagePageReqVO {
@@ -19,6 +20,12 @@ export interface ImagePageReqVO {
   pageSize: number // 分页大小
 }
 
+export interface ImageDallReqVO {
+  prompt: string // 提示词
+  model: string // 模型
+  style: string // 图像生成的风格
+  size: string // size不能为空
+}
 
 // AI API 密钥 API
 export const ImageApi = {
@@ -52,5 +59,7 @@ export const ImageApi = {
       model: 'dr'
     } as ImageDetailVO
   },
-
+  dall: async (data: ImageDallReqVO)=> {
+    return await request.post({ url: `/ai/image/dall`, data })
+  },
 }
