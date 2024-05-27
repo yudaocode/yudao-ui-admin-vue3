@@ -8,7 +8,7 @@ export interface ImageDetailVO {
   errorMessage: string // 错误信息
   type: string // 模型下分不同的类型(清晰、真实...)
   taskId: number // dr 任务id
-  imageUrl: string // 任务地址
+  picUrl: string // 任务地址
   originalPicUrl: string // 绘制图片地址
   platform: string // 平台
   model: string // 模型
