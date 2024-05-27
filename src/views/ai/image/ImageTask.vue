@@ -58,6 +58,8 @@ const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
 }
 
 //
+defineExpose({getImageList})
+//
 onMounted(async () => {
   await getImageList()
 })
@@ -71,6 +73,7 @@ onMounted(async () => {
 
   >div {
     margin-right: 20px;
+    margin-bottom: 20px;
   }
 }
 </style>
