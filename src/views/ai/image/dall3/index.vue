@@ -163,6 +163,8 @@ selectImageSize.value = imageSizeList.value[0]
 
 // 定义 Props
 const props = defineProps({})
+// 定义 emits
+const emits = defineEmits(['onDrawStart', 'onDrawComplete'])
 
 /**
  * 热词 - click
@@ -225,6 +227,8 @@ const handlerGenerateImage = async () => {
   } as ImageDallReqVO
   // 发送请求
   await ImageApi.dall(form)
+  // 回调
+  emits('onDrawComplete', selectModel.value.key)
 }
 
 </script>
