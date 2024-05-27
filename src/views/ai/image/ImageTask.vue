@@ -70,6 +70,8 @@ onMounted(async () => {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  height: 100%;
+  overflow: auto;
 
   >div {
     margin-right: 20px;
