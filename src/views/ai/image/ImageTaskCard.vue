@@ -43,7 +43,7 @@ const emits = defineEmits(['onBtnClick'])
 <style scoped lang="scss">
 
 .image-card {
-  width: 360px;
+  width: 320px;
   border-radius: 10px;
 
   .image-operation {

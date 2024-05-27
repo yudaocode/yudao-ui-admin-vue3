@@ -3,20 +3,20 @@
     v-model="showDrawer"
     title="图片详细"
     @close="handlerDrawerClose"
+    custom-class="drawer-class"
   >
+    <!--  图片  -->
     <div class="item">
       <div class="header">
         <div>图片</div>
         <div>
-          <el-button class="btn" text :icon="Download" />
-          <el-button class="btn" text :icon="Delete" />
-          <el-button class="btn" text :icon="More" @click="handlerTaskDetail" />
         </div>
       </div>
       <div class="body">
         <ImageTaskCard :image-detail="imageDetail" />
       </div>
     </div>
+    <!--  提示词  -->
     <div class="item">
       <div class="tip">提示词</div>
       <div class="body">
@@ -81,24 +81,29 @@ onMounted(async () => {
 
 .item {
   margin-bottom: 20px;
+  width: 100%;
+  overflow: hidden;
+  word-wrap: break-word;
 
   .header {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    font-size: 16px;
+  }
+
+  .tip {
     font-weight: bold;
+    font-size: 16px;
   }
 
   .body {
     margin-top: 10px;
     color: #616161;
+
+
+    .taskImage {
+      border-radius: 10px;
+    }
   }
 }
-
-.taskImage {
-  border-radius: 10px;
-}
-
-
 </style>
