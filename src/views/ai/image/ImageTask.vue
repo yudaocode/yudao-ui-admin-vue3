@@ -14,7 +14,6 @@
 import {ImageApi, ImageDetailVO} from '@/api/ai/image';
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
-import {Delete, Download, More} from "@element-plus/icons-vue";
 import {bool} from "vue-types";
 
 const imageList = ref<ImageDetailVO[]>([]) // image 列表
@@ -45,7 +44,8 @@ const handlerDrawerOpen = async () => {
  * 获取 - image 列表
  */
 const getImageList = async () => {
-  imageList.value = await ImageApi.getImageList({pageNo: 1, pageSize: 20})
+  const { list } = await ImageApi.getImageList({pageNo: 1, pageSize: 20})
+  imageList.value = list
 }
 
 /**

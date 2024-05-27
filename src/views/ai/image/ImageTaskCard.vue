@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="image-wrapper">
-      <img class="image" :src="imageDetail?.imageUrl" />
+      <img class="image" :src="imageDetail?.picUrl" />
     </div>
   </el-card>
 </template>
