@@ -29,20 +29,9 @@ export interface ImageDallReqVO {
 
 // AI API 密钥 API
 export const ImageApi = {
+  // 获取 image 列表
   getImageList: async (params: ImagePageReqVO) => {
-    return [
-      {
-        id: 1,
-        prompt: '童话里的小屋是什么样子？',
-        status: 'todo',
-        errorMessage: 'error 未登录',
-        type: 'qinxi',
-        taskId: 111,
-        imageUrl: 'https://img.bigpt8.com/uploads/thumbnail/20240509/b7802797e5f709f35a451a1591d4d495.png',
-        platform: 'dr',
-        model: 'dr'
-      }
-    ] as ImageDetailVO[]
+    return await request.get({ url: `/ai/image/list`, params })
   },
   // 获取 image 详细信息
   getImageDetail: async (id: number) => {
@@ -59,6 +48,7 @@ export const ImageApi = {
       model: 'dr'
     } as ImageDetailVO
   },
+  // dall2、dall3 调用
   dall: async (data: ImageDallReqVO)=> {
     return await request.post({ url: `/ai/image/dall`, data })
   },
