@@ -27,6 +27,7 @@ const imageTaskRef = ref<any>() // image task ref
 // 定义属性
 const selectModel = ref('DALL3绘画')
 const modelOptions = ['DALL3绘画', 'MJ绘画']
+const drawIn = ref<boolean>(false)  // 生成中
 
 
 /**
@@ -34,12 +35,14 @@ const modelOptions = ['DALL3绘画', 'MJ绘画']
  */
 const handlerDrawStart = async (type) => {
   // todo
+  drawIn.value = true
 }
 
 /**
  * 绘画 - complete
  */
 const handlerDrawComplete = async (type) => {
+  drawIn.value = false
   // todo
   await imageTaskRef.value.getImageList()
 }
