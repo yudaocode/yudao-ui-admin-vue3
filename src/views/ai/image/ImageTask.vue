@@ -101,7 +101,7 @@ onMounted(async () => {
   // 自动刷新 image 列表
   imageListInterval.value = setInterval(async () => {
     await getImageList()
-  }, 3000)
+  }, 5000)
 })
 //
 onUnmounted(async () => {
