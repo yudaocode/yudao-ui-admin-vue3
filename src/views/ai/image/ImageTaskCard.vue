@@ -1,4 +1,3 @@
-
 <template>
   <el-card body-class="" class="image-card">
     <div class="image-operation">
@@ -8,13 +7,14 @@
         <el-button type="" text bg v-else-if="imageDetail.status === 'complete'">已完成</el-button>
       </div>
       <div>
-        <el-button class="btn" text :icon="Download" @click="handlerBtnClick('download', imageDetail)" />
-        <el-button class="btn" text :icon="Delete" @click="handlerBtnClick('delete', imageDetail)" />
-        <el-button class="btn" text :icon="More" @click="handlerBtnClick('more', imageDetail)" />
+        <el-button class="btn" text :icon="Download"
+                   @click="handlerBtnClick('download', imageDetail)"/>
+        <el-button class="btn" text :icon="Delete" @click="handlerBtnClick('delete', imageDetail)"/>
+        <el-button class="btn" text :icon="More" @click="handlerBtnClick('more', imageDetail)"/>
       </div>
     </div>
     <div class="image-wrapper" ref="cardImageRef">
-      <img class="image" :src="imageDetail?.picUrl" />
+      <img class="image" :src="imageDetail?.picUrl"/>
     </div>
   </el-card>
 </template>
@@ -37,22 +37,15 @@ const props = defineProps({
 /**
  * 按钮 - 点击事件
  */
-const handlerBtnClick = async (type, imageDetail: ImageDetailVO ) => {
+const handlerBtnClick = async (type, imageDetail: ImageDetailVO) => {
   emits('onBtnClick', type, imageDetail)
 }
-
-// 监听 imageDetail
-// const { imageDetail } = toRefs(props)
-// watch(imageDetail, async (newVal, oldValue) => {
-//   console.log('首次 watch')
-//
-// })
 
 // emits
 const emits = defineEmits(['onBtnClick'])
 
 //
-onMounted( async () => {
+onMounted(async () => {
   if (props.imageDetail.status === 'in_progress') {
     cardImageLoadingInstance.value = ElLoading.service({
       target: cardImageRef.value,

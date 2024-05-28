@@ -66,8 +66,32 @@ const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
     await ImageApi.deleteImage(imageDetail.id)
     await getImageList()
     await message.success("删除成功!")
+  } else if (type === 'download') {
+    downloadImage(imageDetail.picUrl)
   }
 }
+
+/**
+ * 下载 - image
+ */
+const downloadImage = async (imageUrl) => {
+  const image = new Image()
+  image.setAttribute('crossOrigin', 'anonymous')
+  image.src = imageUrl
+  image.onload = () => {
+    const canvas = document.createElement('canvas')
+    canvas.width = image.width
+    canvas.height = image.height
+    const ctx = canvas.getContext('2d')
+    ctx.drawImage(image, 0, 0, image.width, image.height)
+    const url = canvas.toDataURL('image/png')
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'image.png'
+    a.click()
+  }
+}
+
 //
 defineExpose({getImageList})
 //
