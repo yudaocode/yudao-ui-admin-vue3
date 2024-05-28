@@ -28,7 +28,7 @@
     <div class="item">
       <div class="tip">模型</div>
       <div class="body">
-        {{imageDetail.model}}
+        {{imageDetail.model}}({{imageDetail.size}})
       </div>
     </div>
     <!--  提示词  -->

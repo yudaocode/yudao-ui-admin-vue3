@@ -13,6 +13,7 @@ export interface ImageDetailVO {
   platform: string // 平台
   model: string // 模型
   style: string // 图像生成的风格
+  size: string // 图片尺寸
   createTime: string // 创建时间
   updateTime: string // 更新事件
 }
