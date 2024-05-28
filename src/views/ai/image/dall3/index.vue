@@ -183,6 +183,8 @@ const handlerHotWordClick = async (hotWord: string) => {
   }
   // 选中
   selectHotWord.value = hotWord
+  // 替换提示词
+  prompt.value = hotWord
 }
 
 /**
