@@ -16,11 +16,47 @@
         <ImageTaskCard :image-detail="imageDetail" />
       </div>
     </div>
+    <!--  时间  -->
+    <div class="item">
+      <div class="tip">时间</div>
+      <div class="body">
+        <div>提交时间：{{imageDetail.createTime}}</div>
+        <div>生成时间：{{imageDetail.updateTime}}</div>
+      </div>
+    </div>
+    <!--  模型  -->
+    <div class="item">
+      <div class="tip">模型</div>
+      <div class="body">
+        {{imageDetail.model}}
+      </div>
+    </div>
     <!--  提示词  -->
     <div class="item">
       <div class="tip">提示词</div>
       <div class="body">
         {{imageDetail.prompt}}
+      </div>
+    </div>
+    <!--  风格  -->
+    <div class="item">
+      <div class="tip">风格</div>
+      <div class="body">
+        {{imageDetail.style}}
+      </div>
+    </div>
+    <!--  地址  -->
+    <div class="item">
+      <div class="tip">地址</div>
+      <div class="body">
+        {{imageDetail.picUrl}}
+      </div>
+    </div>
+    <!--  生成地址  -->
+    <div class="item">
+      <div class="tip">生成地址</div>
+      <div class="body">
+        {{imageDetail.originalPicUrl}}
       </div>
     </div>
   </el-drawer>
@@ -39,6 +75,10 @@ const props = defineProps({
     type: Boolean,
     require: true,
     default: false
+  },
+  id: {
+    type: Number,
+    required: true
   }
 })
 
@@ -64,17 +104,24 @@ const handlerTaskDetail = async () => {
   showDrawer.value = true
 }
 
-// watch
+// watch show
 const { show } = toRefs(props)
 watch(show, async (newValue, oldValue) => {
   showDrawer.value = newValue as boolean
 })
+// watch id
+const { id } = toRefs(props)
+watch(id, async (newVal, oldVal) => {
+  console.log('newVal', newVal)
+  if (newVal) {
+    await getImageDetail(newVal)
+  }
+})
 //
 const emits = defineEmits(['handlerDrawerClose'])
-
 //
 onMounted(async () => {
-  await getImageDetail(1)
+
 })
 </script>
 <style scoped lang="scss">
