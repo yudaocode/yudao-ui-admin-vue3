@@ -7,11 +7,11 @@
   >
     <!--  图片  -->
     <div class="item">
-      <div class="header">
-        <div>图片</div>
-        <div>
-        </div>
-      </div>
+<!--      <div class="header">-->
+<!--        <div>图片</div>-->
+<!--        <div>-->
+<!--        </div>-->
+<!--      </div>-->
       <div class="body">
         <ImageTaskCard :image-detail="imageDetail" />
       </div>

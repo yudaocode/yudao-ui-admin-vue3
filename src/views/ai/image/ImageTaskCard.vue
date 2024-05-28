@@ -64,7 +64,7 @@ onMounted(async () => {
 
 .image-card {
   width: 320px;
-  max-height: 370px;
+  height: auto;
   border-radius: 10px;
   position: relative;
   display: flex;
