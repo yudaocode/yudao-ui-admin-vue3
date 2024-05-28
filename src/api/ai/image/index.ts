@@ -52,4 +52,8 @@ export const ImageApi = {
   dall: async (data: ImageDallReqVO)=> {
     return await request.post({ url: `/ai/image/dall`, data })
   },
+  // 删除
+  deleteImage: async (id: number)=> {
+    return await request.delete({ url: `/ai/image/delete?id=${id}`})
+  },
 }

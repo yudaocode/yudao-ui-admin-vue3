@@ -6,7 +6,9 @@
         <el-segmented v-model="selectModel" :options="modelOptions" />
       </div>
       <div class="modal-switch-container">
-        <Dall3 v-if="selectModel === 'DALL3绘画'" @on-draw-start="handlerDrawStart" @on-draw-complete="handlerDrawComplete" />
+        <Dall3 v-if="selectModel === 'DALL3绘画'"
+               @on-draw-start="handlerDrawStart"
+               @on-draw-complete="handlerDrawComplete" />
         <Midjourney v-if="selectModel === 'MJ绘画'" />
       </div>
     </div>

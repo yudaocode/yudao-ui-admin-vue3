@@ -2,7 +2,11 @@
 <template>
   <el-card class="dr-task" body-class="task-card" shadow="never">
     <template #header>绘画任务</template>
-    <ImageTaskCard v-for="image in imageList" :key="image" :image-detail="image" @on-btn-click="handlerImageBtnClick" />
+    <ImageTaskCard
+      v-for="image in imageList"
+      :key="image"
+      :image-detail="image"
+      @on-btn-click="handlerImageBtnClick" />
   </el-card>
   <!-- 图片 detail 抽屉 -->
   <ImageDetailDrawer
@@ -15,6 +19,8 @@ import {ImageApi, ImageDetailVO} from '@/api/ai/image';
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
 import {bool} from "vue-types";
+
+const message = useMessage() // 消息弹窗
 
 const imageList = ref<ImageDetailVO[]>([]) // image 列表
 const imageListInterval = ref<any>() // image 列表定时器，刷新列表
@@ -55,6 +61,11 @@ const getImageList = async () => {
 const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
   if (type === 'more') {
     await handlerDrawerOpen()
+  } else if (type === 'delete') {
+    await message.confirm(`是否删除照片?`)
+    await ImageApi.deleteImage(imageDetail.id)
+    await getImageList()
+    await message.success("删除成功!")
   }
 }
 //
