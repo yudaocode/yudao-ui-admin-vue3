@@ -41,12 +41,8 @@ const handlerBtnClick = async (type, imageDetail: ImageDetailVO) => {
   emits('onBtnClick', type, imageDetail)
 }
 
-// emits
-const emits = defineEmits(['onBtnClick'])
-
-//
-onMounted(async () => {
-  if (props.imageDetail.status === 'in_progress') {
+const handlerLoading = async (status: string) => {
+  if (status === 'in_progress') {
     cardImageLoadingInstance.value = ElLoading.service({
       target: cardImageRef.value,
       text: '生成中...'
@@ -57,6 +53,19 @@ onMounted(async () => {
       cardImageLoadingInstance.value = null;
     }
   }
+}
+// watch
+const { imageDetail } = toRefs(props)
+watch(imageDetail, async (newVal, oldVal) => {
+  await handlerLoading(newVal.status as string)
+})
+
+// emits
+const emits = defineEmits(['onBtnClick'])
+
+//
+onMounted(async () => {
+  await handlerLoading(props.imageDetail.status as string)
 })
 </script>
 

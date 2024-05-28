@@ -112,7 +112,6 @@ watch(show, async (newValue, oldValue) => {
 // watch id
 const { id } = toRefs(props)
 watch(id, async (newVal, oldVal) => {
-  console.log('newVal', newVal)
   if (newVal) {
     await getImageDetail(newVal)
   }
