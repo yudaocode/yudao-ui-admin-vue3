@@ -1,9 +1,11 @@
 
 <template>
-  <el-card body-class="" class="image-card" >
+  <el-card body-class="" class="image-card" v-loading="imageDetail.status === 'in_progress'" >
     <div class="image-operation">
       <div>
-        <el-button type="" text bg >已完成</el-button>
+        <el-button type="" text bg v-if="imageDetail.status === 'in_progress'">生成中</el-button>
+        <el-button type="" text bg v-else-if="imageDetail.status === 'fail'">已完成</el-button>
+        <el-button type="" text bg v-else-if="imageDetail.status === 'complete'">已完成</el-button>
       </div>
       <div>
         <el-button class="btn" text :icon="Download" @click="handlerBtnClick('download', imageDetail)" />
