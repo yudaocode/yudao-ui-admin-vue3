@@ -87,8 +87,13 @@
     </el-space>
   </div>
   <div class="btns">
-<!--    <el-button size="large" round>重置内容</el-button>-->
-    <el-button type="primary" size="large" round @click="handlerGenerateImage">生成内容</el-button>
+    <el-button type="primary"
+               size="large"
+               round
+               :loading="drawIn"
+               @click="handlerGenerateImage">
+      {{drawIn ? '生成中' : '生成内容'}}
+    </el-button>
   </div>
 </template>
 <script setup lang="ts">
@@ -109,6 +114,7 @@ interface ImageSizeVO {
 
 // 定义属性
 const prompt = ref<string>('')  // 提示词
+const drawIn = ref<boolean>(false)  // 生成中
 const selectHotWord = ref<string>('') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
 const selectModel = ref<any>({}) // 模型
@@ -216,19 +222,25 @@ const handlerSizeClick = async (imageSize: ImageSizeVO) => {
  * 图片生产
  */
 const handlerGenerateImage = async () => {
-  // todo @范 图片生产逻辑
-  console.log('prompt.value', prompt)
-  console.log('prompt.value', prompt.value)
-  const form = {
-    prompt: prompt.value, // 提示词
-    model: selectModel.value.key, // 模型
-    style: selectImageStyle.value.key, // 图像生成的风格
-    size: selectImageSize.value.key, // size不能为空
-  } as ImageDallReqVO
-  // 发送请求
-  await ImageApi.dall(form)
-  // 回调
-  emits('onDrawComplete', selectModel.value.key)
+  try {
+    // 加载中
+    drawIn.value = true
+    // 回调
+    emits('onDrawStart', selectModel.value.key)
+    const form = {
+      prompt: prompt.value, // 提示词
+      model: selectModel.value.key, // 模型
+      style: selectImageStyle.value.key, // 图像生成的风格
+      size: selectImageSize.value.key, // size不能为空
+    } as ImageDallReqVO
+    // 发送请求
+    await ImageApi.dall(form)
+  } finally {
+    // 回调
+    emits('onDrawComplete', selectModel.value.key)
+    // 加载结束
+    drawIn.value = false
+  }
 }
 
 </script>
