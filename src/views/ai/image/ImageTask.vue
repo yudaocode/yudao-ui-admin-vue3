@@ -17,6 +17,7 @@ import ImageTaskCard from './ImageTaskCard.vue'
 import {bool} from "vue-types";
 
 const imageList = ref<ImageDetailVO[]>([]) // image 列表
+const imageListInterval = ref<any>() // image 列表定时器，刷新列表
 const showTaskDetail = ref<bool>(false) // 是否显示 task 详情
 
 /**
@@ -56,12 +57,20 @@ const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
     await handlerDrawerOpen()
   }
 }
-
 //
 defineExpose({getImageList})
 //
 onMounted(async () => {
+  // 获取 image 列表
   await getImageList()
+  // 自动刷新 image 列表
+  imageListInterval.value = setInterval(async () => {
+    await getImageList()
+  }, 3000)
+})
+//
+onUnmounted(async () => {
+
 })
 </script>
 

@@ -29,7 +29,6 @@ const selectModel = ref('DALL3绘画')
 const modelOptions = ['DALL3绘画', 'MJ绘画']
 const drawIn = ref<boolean>(false)  // 生成中
 
-
 /**
  * 绘画 - start
  */
@@ -100,6 +99,5 @@ onMounted( async () => {
     background-color: #f7f8fa;
   }
 }
-
 
 </style>
