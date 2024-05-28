@@ -1,6 +1,6 @@
 
 <template>
-  <el-card body-class="" class="image-card" v-loading="imageDetail.status === 'in_progress'" >
+  <el-card body-class="" class="image-card">
     <div class="image-operation">
       <div>
         <el-button type="" text bg v-if="imageDetail.status === 'in_progress'">生成中</el-button>
@@ -13,7 +13,7 @@
         <el-button class="btn" text :icon="More" @click="handlerBtnClick('more', imageDetail)" />
       </div>
     </div>
-    <div class="image-wrapper">
+    <div class="image-wrapper" ref="cardImageRef">
       <img class="image" :src="imageDetail?.picUrl" />
     </div>
   </el-card>
@@ -22,6 +22,10 @@
 import {Delete, Download, More} from "@element-plus/icons-vue";
 import {ImageDetailVO} from "@/api/ai/image";
 import {PropType} from "vue";
+import {ElLoading} from "element-plus";
+
+const cardImageRef = ref<any>() // 卡片 image ref
+const cardImageLoadingInstance = ref<any>() // 卡片 image ref
 
 const props = defineProps({
   imageDetail: {
@@ -37,9 +41,30 @@ const handlerBtnClick = async (type, imageDetail: ImageDetailVO ) => {
   emits('onBtnClick', type, imageDetail)
 }
 
+// 监听 imageDetail
+// const { imageDetail } = toRefs(props)
+// watch(imageDetail, async (newVal, oldValue) => {
+//   console.log('首次 watch')
+//
+// })
+
 // emits
 const emits = defineEmits(['onBtnClick'])
 
+//
+onMounted( async () => {
+  if (props.imageDetail.status === 'in_progress') {
+    cardImageLoadingInstance.value = ElLoading.service({
+      target: cardImageRef.value,
+      text: '生成中...'
+    })
+  } else {
+    if (cardImageLoadingInstance.value) {
+      cardImageLoadingInstance.value.close();
+      cardImageLoadingInstance.value = null;
+    }
+  }
+})
 </script>
 
 <style scoped lang="scss">
@@ -47,6 +72,9 @@ const emits = defineEmits(['onBtnClick'])
 .image-card {
   width: 320px;
   border-radius: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 
   .image-operation {
     display: flex;
@@ -63,6 +91,8 @@ const emits = defineEmits(['onBtnClick'])
   .image-wrapper {
     overflow: hidden;
     margin-top: 20px;
+    height: 280px;
+    flex: 1;
 
     .image {
       width: 100%;
