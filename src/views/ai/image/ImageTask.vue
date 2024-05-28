@@ -10,7 +10,8 @@
   </el-card>
   <!-- 图片 detail 抽屉 -->
   <ImageDetailDrawer
-    :show="showTaskDetail"
+    :show="isShowImageDetail"
+    :id="showImageDetailId"
     @handler-drawer-close="handlerDrawerClose"
   />
 </template>
@@ -24,27 +25,21 @@ const message = useMessage() // 消息弹窗
 
 const imageList = ref<ImageDetailVO[]>([]) // image 列表
 const imageListInterval = ref<any>() // image 列表定时器，刷新列表
-const showTaskDetail = ref<bool>(false) // 是否显示 task 详情
-
-/**
- * 图片人物 - detail
- */
-const handlerTaskDetail = async () => {
-  showTaskDetail.value = !showTaskDetail.value
-}
+const isShowImageDetail = ref<bool>(false) // 是否显示 task 详情
+const showImageDetailId = ref<number>(0) // 是否显示 task 详情
 
 /**
  * 抽屉 - close
  */
 const handlerDrawerClose = async () => {
-  showTaskDetail.value = false
+  isShowImageDetail.value = false
 }
 
 /**
  * 任务 - detail
  */
 const handlerDrawerOpen = async () => {
-  showTaskDetail.value = true
+  isShowImageDetail.value = true
 }
 
 /**
@@ -59,6 +54,9 @@ const getImageList = async () => {
  * 图片 - btn click
  */
 const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
+  // 获取 image detail id
+  showImageDetailId.value = imageDetail.id
+  // 处理不用 btn
   if (type === 'more') {
     await handlerDrawerOpen()
   } else if (type === 'delete') {
@@ -67,7 +65,7 @@ const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
     await getImageList()
     await message.success("删除成功!")
   } else if (type === 'download') {
-    downloadImage(imageDetail.picUrl)
+    await downloadImage(imageDetail.picUrl)
   }
 }
 
