@@ -2,9 +2,9 @@
   <el-card body-class="" class="image-card">
     <div class="image-operation">
       <div>
-        <el-button type="" text bg v-if="imageDetail.status === 'in_progress'">生成中</el-button>
-        <el-button type="" text bg v-else-if="imageDetail.status === 'fail'">已完成</el-button>
-        <el-button type="" text bg v-else-if="imageDetail.status === 'complete'">已完成</el-button>
+        <el-button type="" text bg v-if="imageDetail.status === '10'">生成中</el-button>
+        <el-button type="" text bg v-else-if="imageDetail.status === '20'">已完成</el-button>
+        <el-button type="" text bg v-else-if="imageDetail.status === '30'">已完成</el-button>
       </div>
       <div>
         <el-button class="btn" text :icon="Download"
@@ -42,7 +42,7 @@ const handlerBtnClick = async (type, imageDetail: ImageDetailVO) => {
 }
 
 const handlerLoading = async (status: string) => {
-  if (status === 'in_progress') {
+  if (status === '10') {
     cardImageLoadingInstance.value = ElLoading.service({
       target: cardImageRef.value,
       text: '生成中...'

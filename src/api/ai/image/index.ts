@@ -34,11 +34,11 @@ export interface ImageDallReqVO {
 export const ImageApi = {
   // 获取 image 列表
   getImageList: async (params: ImagePageReqVO) => {
-    return await request.get({ url: `/ai/image/list`, params })
+    return await request.get({ url: `/ai/image/my-page`, params })
   },
   // 获取 image 详细信息
   getImageDetail: async (id: number) => {
-    return await request.get({ url: `/ai/image/get?id=${id}`})
+    return await request.get({ url: `/ai/image/get-my?id=${id}`})
   },
   // dall2、dall3 调用
   dall: async (data: ImageDallReqVO)=> {
@@ -46,6 +46,6 @@ export const ImageApi = {
   },
   // 删除
   deleteImage: async (id: number)=> {
-    return await request.delete({ url: `/ai/image/delete?id=${id}`})
+    return await request.delete({ url: `/ai/image/delete-my?id=${id}`})
   },
 }

@@ -110,6 +110,8 @@ interface ImageModelVO {
 interface ImageSizeVO {
   key: string
   style: string,
+  width: string,
+  height: string,
 }
 
 // 定义属性
@@ -152,16 +154,22 @@ const imageSizeList = ref<ImageSizeVO[]>([
   {
     key: '1024x1024',
     name: '1:1',
+    width: '1024',
+    height: '1024',
     style: 'width: 30px; height: 30px;background-color: #dcdcdc;',
   },
   {
     key: '1024x1792',
     name: '3:5',
+    width: '1024',
+    height: '1792',
     style: 'width: 30px; height: 50px;background-color: #dcdcdc;',
   },
   {
     key: '1792x1024',
     name: '5:3',
+    width: '1792',
+    height: '1024',
     style: 'width: 50px; height: 30px;background-color: #dcdcdc;',
   }
 ]) // size
@@ -233,7 +241,8 @@ const handlerGenerateImage = async () => {
       prompt: prompt.value, // 提示词
       model: selectModel.value.key, // 模型
       style: selectImageStyle.value.key, // 图像生成的风格
-      size: selectImageSize.value.key, // size不能为空
+      width: selectImageSize.value.width, // size不能为空
+      height: selectImageSize.value.height, // size不能为空
     } as ImageDallReqVO
     // 发送请求
     await ImageApi.dall(form)
