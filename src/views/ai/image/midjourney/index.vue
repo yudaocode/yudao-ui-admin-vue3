@@ -77,17 +77,17 @@ interface ImageSizeVO {
 
 // 定义属性
 const prompt = ref<string>('')  // 提示词
-const selectHotWord = ref<string>('') // 选中的热词
+const selectHotWord = ref<string>('midjourney') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
 const selectModel = ref<any>() // 选中的热词
 const models = ref<ImageModelVO[]>([
   {
-    key: 'qinxi',
+    key: 'midjourney',
     name: 'MJ',
     image: 'https://bigpt8.com/pc/_nuxt/mj.34a61377.png',
   },
   {
-    key: 'ziran',
+    key: 'niji',
     name: 'NIJI',
     image: 'https://bigpt8.com/pc/_nuxt/nj.ca79b143.png',
   },
@@ -123,18 +123,6 @@ const handlerModelClick = async (model: ImageModelVO) => {
 }
 
 /**
- * size - click
- */
-const handlerSizeClick = async (imageSize: ImageSizeVO) => {
-  if (selectImageSize.value === imageSize) {
-    selectImageSize.value = {} as ImageSizeVO
-    return
-  }
-  selectImageSize.value = imageSize
-  console.log(imageSize)
-}
-
-/**
  * 图片生产
  */
 const handlerGenerateImage = async () => {
@@ -145,6 +133,7 @@ const handlerGenerateImage = async () => {
     // 发送请求
     const req = {
       prompt: prompt.value,
+      model: selectModel.value.key,
       base64Array: [],
     } as ImageMidjourneyImagineReqVO
     await ImageApi.midjourneyImagine(req)

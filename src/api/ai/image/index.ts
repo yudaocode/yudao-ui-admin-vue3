@@ -40,6 +40,7 @@ export interface ImageDallReqVO {
 
 export interface ImageMidjourneyImagineReqVO {
   prompt: string // 提示词
+  model: string // 模型 mj nijj
   base64Array: string[] // size不能为空
 }
 
