@@ -74,6 +74,11 @@
 <script setup lang="ts">
 
 // image 模型
+import {ImageApi, ImageMidjourneyImagineReqVO} from "@/api/ai/image";
+
+// 定义 emits
+const emits = defineEmits(['onDrawStart', 'onDrawComplete'])
+
 interface ImageModelVO {
   key: string
   name: string
@@ -172,6 +177,19 @@ const handlerSizeClick = async (imageSize: ImageSizeVO) => {
  */
 const handlerGenerateImage = async () => {
   // todo @范 图片生产逻辑
+  try {
+    // 回调
+    // emits('onDrawStart', selectModel.value.key)
+    // 发送请求
+    const req = {
+      prompt: prompt.value,
+      base64Array: [],
+    } as ImageMidjourneyImagineReqVO
+    await ImageApi.midjourneyImagine(req)
+  } finally {
+    // 回调
+    // emits('onDrawComplete', selectModel.value.key)
+  }
 }
 </script>
 <style scoped lang="scss">

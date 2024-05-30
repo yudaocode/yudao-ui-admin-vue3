@@ -27,8 +27,22 @@ export interface ImageDallReqVO {
   prompt: string // 提示词
   model: string // 模型
   style: string // 图像生成的风格
+  width: string // 图片宽度
+  height: string // 图片高度
+}
+
+export interface ImageDallReqVO {
+  prompt: string // 提示词
+  model: string // 模型
+  style: string // 图像生成的风格
   size: string // size不能为空
 }
+
+export interface ImageMidjourneyImagineReqVO {
+  prompt: string // 提示词
+  base64Array: string[] // size不能为空
+}
+
 
 // AI API 密钥 API
 export const ImageApi = {
@@ -44,8 +58,12 @@ export const ImageApi = {
   dall: async (data: ImageDallReqVO)=> {
     return await request.post({ url: `/ai/image/dall`, data })
   },
+  // midjourney - imagine
+  midjourneyImagine: async (data: ImageMidjourneyImagineReqVO)=> {
+    return await request.post({ url: `/ai/image/midjourney/imagine`, data })
+  },
   // 删除
   deleteImage: async (id: number)=> {
-    return await request.delete({ url: `/ai/image/delete-my?id=${id}`})
+    return await request.delete({ url: `/ai/image/delete-id-my?id=${id}`})
   },
 }
