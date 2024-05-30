@@ -77,7 +77,7 @@ interface ImageSizeVO {
 
 // 定义属性
 const prompt = ref<string>('')  // 提示词
-const selectHotWord = ref<string>('midjourney') // 选中的热词
+const selectHotWord = ref<string>('') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
 const selectModel = ref<any>() // 选中的热词
 const models = ref<ImageModelVO[]>([
@@ -92,6 +92,7 @@ const models = ref<ImageModelVO[]>([
     image: 'https://bigpt8.com/pc/_nuxt/nj.ca79b143.png',
   },
 ])  // 模型
+selectModel.value = models.value[0] // 默认选中
 
 // 定义 Props
 const props = defineProps({})
@@ -115,10 +116,6 @@ const handlerHotWordClick = async (hotWord: string) => {
  * 模型 - click
  */
 const handlerModelClick = async (model: ImageModelVO) => {
-  if (selectModel.value === model) {
-    selectModel.value = {} as ImageModelVO
-    return
-  }
   selectModel.value = model
 }
 
