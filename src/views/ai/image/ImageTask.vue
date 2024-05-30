@@ -99,7 +99,7 @@ onMounted(async () => {
   // 自动刷新 image 列表
   imageListInterval.value = setInterval(async () => {
     await getImageList()
-  }, 5000)
+  }, 1000 * 20)
 })
 //
 onUnmounted(async () => {
