@@ -50,22 +50,6 @@
       </div>
     </el-space>
   </div>
-  <div class="image-size">
-    <div>
-      <el-text tag="b">尺寸</el-text>
-    </div>
-    <el-space wrap class="size-list">
-      <div class="size-item"
-           v-for="imageSize in imageSizeList"
-           :key="imageSize.key"
-           @click="handlerSizeClick(imageSize)">
-        <div :class="selectImageSize === imageSize ? 'size-wrapper selectImageSize' : 'size-wrapper'">
-          <div :style="imageSize.style"></div>
-        </div>
-        <div class="size-font">{{ imageSize.key }}</div>
-      </div>
-    </el-space>
-  </div>
   <div class="btns">
     <!--    <el-button size="large" round>重置内容</el-button>-->
     <el-button type="primary" size="large" round @click="handlerGenerateImage">生成内容</el-button>
@@ -109,30 +93,6 @@ const models = ref<ImageModelVO[]>([
   },
 ])  // 模型
 
-const selectImageSize = ref<ImageSizeVO>({} as ImageSizeVO) // 选中 size
-const imageSizeList = ref<ImageSizeVO[]>([
-  {
-    key: '1:1',
-    style: 'width: 30px; height: 30px;background-color: #dcdcdc;',
-  },
-  {
-    key: '3:4',
-    style: 'width: 30px; height: 40px;background-color: #dcdcdc;',
-  },
-  {
-    key: '4:3',
-    style: 'width: 40px; height: 30px;background-color: #dcdcdc;',
-  },
-  {
-    key: '9:16',
-    style: 'width: 30px; height: 50px;background-color: #dcdcdc;',
-  },
-  {
-    key: '16:9',
-    style: 'width: 50px; height: 30px;background-color: #dcdcdc;',
-  },
-]) // size
-
 // 定义 Props
 const props = defineProps({})
 
@@ -147,6 +107,8 @@ const handlerHotWordClick = async (hotWord: string) => {
   }
   // 选中
   selectHotWord.value = hotWord
+  // 设置提示次
+  prompt.value = hotWord
 }
 
 /**
