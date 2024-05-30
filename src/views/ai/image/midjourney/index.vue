@@ -129,7 +129,7 @@ const handlerGenerateImage = async () => {
   // todo @范 图片生产逻辑
   try {
     // 回调
-    // emits('onDrawStart', selectModel.value.key)
+    emits('onDrawStart', selectModel.value.key)
     // 发送请求
     const req = {
       prompt: prompt.value,
@@ -139,7 +139,7 @@ const handlerGenerateImage = async () => {
     await ImageApi.midjourneyImagine(req)
   } finally {
     // 回调
-    // emits('onDrawComplete', selectModel.value.key)
+    emits('onDrawComplete', selectModel.value.key)
   }
 }
 </script>
