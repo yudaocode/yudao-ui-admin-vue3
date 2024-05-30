@@ -4,7 +4,7 @@
       <div>
         <el-button type="" text bg v-if="imageDetail.status === '10'">生成中</el-button>
         <el-button type="" text bg v-else-if="imageDetail.status === '20'">已完成</el-button>
-        <el-button type="" text bg v-else-if="imageDetail.status === '30'">已完成</el-button>
+        <el-button type="danger" text bg v-else-if="imageDetail.status === '30'">异常</el-button>
       </div>
       <div>
         <el-button class="btn" text :icon="Download"
@@ -15,6 +15,7 @@
     </div>
     <div class="image-wrapper" ref="cardImageRef">
       <img class="image" :src="imageDetail?.picUrl"/>
+      <div v-if="imageDetail.status === '30'">{{imageDetail.errorMessage}}</div>
     </div>
   </el-card>
 </template>
