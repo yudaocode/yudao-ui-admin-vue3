@@ -48,6 +48,7 @@ export interface ImageMidjourneyImagineReqVO {
   base64Array: string[] // size不能为空
   width: string // 图片宽度
   height: string // 图片高度
+  version: string // 版本
 }
 
 // TODO 芋艿：review 下整体注释、方法名

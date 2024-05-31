@@ -46,6 +46,28 @@
       </div>
     </el-space>
   </div>
+  <div class="version">
+    <div>
+      <el-text tag="b">版本</el-text>
+    </div>
+    <el-space wrap class="version-list">
+      <el-select
+        v-model="selectVersion"
+        class="version-select"
+        clearable
+        placeholder="请选择版本"
+        style="width: 350px"
+        @change="handlerChangeVersion"
+      >
+        <el-option
+          v-for="item in versionList"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        />
+      </el-select>
+    </el-space>
+  </div>
   <div class="model">
     <div>
       <el-text tag="b">模型</el-text>
@@ -147,6 +169,32 @@ const imageSizeList = ref<ImageSizeVO[]>([
 ]) // size
 selectImageSize.value = imageSizeList.value[0]
 
+
+// version
+const versionList = ref<any>([
+  {
+    value: '6.0',
+    label: 'v6.0',
+  },
+  {
+    value: '5.2',
+    label: 'v5.2',
+  },
+  {
+    value: '5.1',
+    label: 'v5.1',
+  },
+  {
+    value: '5.0',
+    label: 'v5.0',
+  },
+  {
+    value: '4.0',
+    label: 'v4.0',
+  },
+]) // version 列表
+const selectVersion = ref<any>('6.0') // 选中的 version
+
 // 定义 Props
 const props = defineProps({})
 
@@ -184,6 +232,13 @@ const handlerModelClick = async (model: ImageModelVO) => {
 }
 
 /**
+ * version - click
+ */
+const handlerChangeVersion = async (version) => {
+  console.log('version', version)
+}
+
+/**
  * 图片生产
  */
 const handlerGenerateImage = async () => {
@@ -197,6 +252,7 @@ const handlerGenerateImage = async () => {
       model: selectModel.value.key,
       width: selectImageSize.value.width,
       height: selectImageSize.value.height,
+      version: selectVersion.value,
       base64Array: [],
     } as ImageMidjourneyImagineReqVO
     await ImageApi.midjourneyImagine(req)
@@ -228,6 +284,16 @@ const handlerGenerateImage = async () => {
     .btn {
       margin: 0;
     }
+  }
+}
+
+// version
+.version {
+  margin-top: 20px;
+
+  .version-list {
+    margin-top: 20px;
+    width: 100%;
   }
 }
 
