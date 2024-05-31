@@ -83,7 +83,7 @@ const saveSimpleFlowModel = async () => {
   }
   const data = {
     modelId: props.modelId,
-    simpleModelBody: processNodeTree.value
+    simpleModel: processNodeTree.value
   }
 
   const result = await updateBpmSimpleModel(data)

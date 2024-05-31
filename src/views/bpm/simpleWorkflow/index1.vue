@@ -26,7 +26,7 @@ import approverDrawer from '@/components/SimpleProcessDesigner/src/drawer/approv
 import copyerDrawer from '@/components/SimpleProcessDesigner/src/drawer/copyerDrawer.vue'
 import { WorkFlowNode } from '@/components/SimpleProcessDesigner/src/consts'
 import { ref } from 'vue'
-import { saveBpmSimpleModel, getBpmSimpleModel } from '@/api/bpm/simple'
+import { updateBpmSimpleModel, getBpmSimpleModel } from '@/api/bpm/simple'
 import { getModel } from '@/api/bpm/model'
 import { getForm, FormVO } from '@/api/bpm/form'
 defineOptions({ name: 'SimpleWorkflowDesignEditor2' })
@@ -65,7 +65,7 @@ const test = async () => {
     simpleModelBody: nodeConfig.value
   }
   console.log('request json data1 is ', data1)
-  const result = await saveBpmSimpleModel(data)
+  const result = await updateBpmSimpleModel(data)
   console.log('save the result is ', result)
   if (result) {
     message.success('修改成功')
