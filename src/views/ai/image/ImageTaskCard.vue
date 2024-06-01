@@ -2,10 +2,11 @@
   <el-card body-class="" class="image-card">
     <div class="image-operation">
       <div>
-        <el-button type="" text bg v-if="imageDetail.status === '10'">生成中</el-button>
-        <el-button type="" text bg v-else-if="imageDetail.status === '20'">已完成</el-button>
-        <el-button type="danger" text bg v-else-if="imageDetail.status === '30'">异常</el-button>
+        <el-button type="primary" text bg v-if="imageDetail?.status === 10">生成中</el-button>
+        <el-button text bg v-else-if="imageDetail?.status === 20">已完成</el-button>
+        <el-button type="danger" text bg v-else-if="imageDetail?.status === 30">异常</el-button>
       </div>
+      <!-- TODO @fan：1）按钮要不调整成详情、下载、再次生成、删除？；2）如果是再次生成，就把当前的参数填写到左侧的框框里？ -->
       <div>
         <el-button class="btn" text :icon="Download"
                    @click="handlerBtnClick('download', imageDetail)"/>
@@ -14,8 +15,9 @@
       </div>
     </div>
     <div class="image-wrapper" ref="cardImageRef">
+      <!-- TODO @fan：要不加个点击，大图预览？ -->
       <img class="image" :src="imageDetail?.picUrl"/>
-      <div v-if="imageDetail.status === '30'">{{imageDetail.errorMessage}}</div>
+      <div v-if="imageDetail?.status === 30">{{imageDetail?.errorMessage}}</div>
     </div>
   </el-card>
 </template>
@@ -42,8 +44,9 @@ const handlerBtnClick = async (type, imageDetail: ImageDetailVO) => {
   emits('onBtnClick', type, imageDetail)
 }
 
-const handlerLoading = async (status: string) => {
-  if (status === '10') {
+const handlerLoading = async (status: number) => {
+  // TODO @fan：这个搞成 Loading 组件，然后通过数据驱动，这样搞可以哇？
+  if (status === 10) {
     cardImageLoadingInstance.value = ElLoading.service({
       target: cardImageRef.value,
       text: '生成中...'

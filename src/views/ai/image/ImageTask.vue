@@ -1,4 +1,3 @@
-
 <template>
   <el-card class="dr-task" body-class="task-card" shadow="never">
     <template #header>绘画任务</template>
@@ -19,14 +18,15 @@
 import {ImageApi, ImageDetailVO} from '@/api/ai/image';
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
-import {bool} from "vue-types";
 
 const message = useMessage() // 消息弹窗
 
 const imageList = ref<ImageDetailVO[]>([]) // image 列表
 const imageListInterval = ref<any>() // image 列表定时器，刷新列表
-const isShowImageDetail = ref<bool>(false) // 是否显示 task 详情
+const isShowImageDetail = ref<boolean>(false) // 是否显示 task 详情
 const showImageDetailId = ref<number>(0) // 是否显示 task 详情
+
+// TODO @fan：如果是简单注释，建议用 /** */，主要是现在项目里是这种风格哈，保持一致好点~
 
 /**
  * 抽屉 - close
@@ -72,6 +72,7 @@ const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
 /**
  * 下载 - image
  */
+// TODO @fan：貌似可以考虑抽到 download 里面，作为一个方法
 const downloadImage = async (imageUrl) => {
   const image = new Image()
   image.setAttribute('crossOrigin', 'anonymous')

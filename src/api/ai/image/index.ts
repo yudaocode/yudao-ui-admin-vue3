@@ -1,10 +1,11 @@
 import request from '@/config/axios'
 
 // AI API 密钥 VO
+// TODO @fan：要不前端不弄太多 VO，就用这个 ImageDetailVO？！
 export interface ImageDetailVO {
   id: number // 编号
   prompt: string // 提示词
-  status: string // 状态
+  status: number // 状态
   errorMessage: string // 错误信息
   type: string // 模型下分不同的类型(清晰、真实...)
   taskId: number // dr 任务id
@@ -31,11 +32,14 @@ export interface ImageDallReqVO {
   height: string // 图片高度
 }
 
-export interface ImageDallReqVO {
+export interface ImageDrawReqVO {
+  platform: string // 平台
   prompt: string // 提示词
   model: string // 模型
   style: string // 图像生成的风格
-  size: string // size不能为空
+  width: string // 图片宽度
+  height: string // 图片高度
+  options: object // 绘制参数，Map<String, String>
 }
 
 export interface ImageMidjourneyImagineReqVO {
@@ -57,9 +61,9 @@ export const ImageApi = {
   getImageDetail: async (id: number) => {
     return await request.get({ url: `/ai/image/get-my?id=${id}`})
   },
-  // dall2、dall3 调用
-  dall: async (data: ImageDallReqVO)=> {
-    return await request.post({ url: `/ai/image/dall`, data })
+  // 生成图片
+  drawImage: async (data: ImageDrawReqVO)=> {
+    return await request.post({ url: `/ai/image/draw`, data })
   },
   // midjourney - imagine
   midjourneyImagine: async (data: ImageMidjourneyImagineReqVO)=> {

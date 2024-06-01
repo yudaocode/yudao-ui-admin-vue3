@@ -5,7 +5,7 @@
     @close="handlerDrawerClose"
     custom-class="drawer-class"
   >
-    <!--  图片  -->
+    <!-- 图片 -->
     <div class="item">
 <!--      <div class="header">-->
 <!--        <div>图片</div>-->
@@ -13,6 +13,7 @@
 <!--        </div>-->
 <!--      </div>-->
       <div class="body">
+        <!-- TODO @fan: 要不，这里只展示图片？？？不用 ImageTaskCard -->
         <ImageTaskCard :image-detail="imageDetail" />
       </div>
     </div>
@@ -21,6 +22,7 @@
       <div class="tip">时间</div>
       <div class="body">
         <div>提交时间：{{imageDetail.createTime}}</div>
+        <!-- TODO @fan：要不加个完成时间的字段 finishTime？updateTime 不算特别合理哈 -->
         <div>生成时间：{{imageDetail.updateTime}}</div>
       </div>
     </div>
@@ -38,25 +40,27 @@
         {{imageDetail.prompt}}
       </div>
     </div>
-    <!--  风格  -->
-    <div class="item">
-      <div class="tip">风格</div>
-      <div class="body">
-        {{imageDetail.style}}
-      </div>
-    </div>
     <!--  地址  -->
     <div class="item">
-      <div class="tip">地址</div>
+      <div class="tip">图片地址</div>
       <div class="body">
         {{imageDetail.picUrl}}
       </div>
     </div>
-    <!--  生成地址  -->
+    <!--  生成地址 TODO @fan：这个字段我删除了，要不干掉？ -->
     <div class="item">
       <div class="tip">生成地址</div>
       <div class="body">
         {{imageDetail.originalPicUrl}}
+      </div>
+    </div>
+    <!-- 风格 -->
+    <div class="item">
+      <div class="tip">风格</div>
+      <div class="body">
+        <!-- TODO @fan：貌似需要把 imageStyleList 搞到 api/image/index.ts 枚举起来？ -->
+        <!-- TODO @fan：这里的展示，可能需要按照平台做区分 -->
+        {{imageDetail.options.style}}
       </div>
     </div>
   </el-drawer>
@@ -65,7 +69,6 @@
 <script setup lang="ts">
 import {ImageApi, ImageDetailVO} from '@/api/ai/image';
 import ImageTaskCard from './ImageTaskCard.vue';
-import {Delete, Download, More} from "@element-plus/icons-vue";
 
 const showDrawer = ref<boolean>(false) // 是否显示
 const imageDetail = ref<ImageDetailVO>({} as ImageDetailVO) // 图片详细信息

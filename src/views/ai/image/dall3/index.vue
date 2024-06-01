@@ -2,7 +2,8 @@
 <template>
   <div class="prompt">
     <el-text tag="b">画面描述</el-text>
-    <el-text tag="p">建议使用“形容词+动词+风格”的格式，使用“，”隔开.</el-text>
+    <el-text tag="p">建议使用“形容词+动词+风格”的格式，使用“，”隔开</el-text>
+    <!-- TODO @fan：style 看看能不能哟 unocss 替代 -->
     <el-input
       v-model="prompt"
       maxlength="1024"
@@ -32,7 +33,7 @@
   </div>
   <div class="model">
     <div>
-      <el-text tag="b">模型</el-text>
+      <el-text tag="b">模型选择</el-text>
     </div>
     <el-space wrap class="model-list">
       <div
@@ -52,14 +53,13 @@
   </div>
   <div class="image-style">
     <div>
-      <el-text tag="b">样式</el-text>
+      <el-text tag="b">风格选择</el-text>
     </div>
     <el-space wrap class="image-style-list">
       <div
         :class="selectImageStyle === imageStyle ? 'image-style-item selectImageStyle' : 'image-style-item'"
         v-for="imageStyle in imageStyleList"
-        :key="imageStyle"
-
+        :key="imageStyle.key"
       >
         <el-image
           :src="imageStyle.image"
@@ -72,7 +72,7 @@
   </div>
   <div class="image-size">
     <div>
-      <el-text tag="b">尺寸</el-text>
+      <el-text tag="b">画面比例</el-text>
     </div>
     <el-space wrap class="size-list">
       <div class="size-item"
@@ -97,7 +97,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ImageApi, ImageDallReqVO} from '@/api/ai/image';
+import {ImageApi, ImageDrawReqVO} from '@/api/ai/image';
 
 // image 模型
 interface ImageModelVO {
@@ -109,6 +109,7 @@ interface ImageModelVO {
 // image 大小
 interface ImageSizeVO {
   key: string
+  name: string,
   style: string,
   width: string,
   height: string,
@@ -120,21 +121,24 @@ const drawIn = ref<boolean>(false)  // 生成中
 const selectHotWord = ref<string>('') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
 const selectModel = ref<any>({}) // 模型
+// TODO @fan：image 改成项目里自己的哈
+// TODO @fan：这个 image，要不看看网上有没合适的图片，作为占位符，啊哈哈
 const models = ref<ImageModelVO[]>([
   {
-    key: 'dall-e-2',
-    name: 'dall2',
-    image: 'https://h5.cxyhub.com/images/model_1.png',
+    key: 'dall-e-3',
+    name: 'DALL·E 3',
+    image: 'https://h5.cxyhub.com/images/model_2.png',
   },
   {
-    key: 'dall-e-3',
-    name: 'dall3',
-    image: 'https://h5.cxyhub.com/images/model_2.png',
+    key: 'dall-e-2',
+    name: 'DALL·E 2',
+    image: 'https://h5.cxyhub.com/images/model_1.png',
   },
 ])  // 模型
 selectModel.value = models.value[0]
 
 const selectImageStyle = ref<any>({}) // style 样式
+// TODO @fan：image 改成项目里自己的哈
 const imageStyleList = ref<ImageModelVO[]>([
   {
     key: 'vivid',
@@ -180,11 +184,13 @@ const props = defineProps({})
 // 定义 emits
 const emits = defineEmits(['onDrawStart', 'onDrawComplete'])
 
+// TODO @fan：如果是简单注释，建议用 /** */，主要是现在项目里是这种风格哈，保持一致好点~
+// TODO @fan：handler 应该改成 handle 哈
 /**
  * 热词 - click
  */
 const handlerHotWordClick = async (hotWord: string) => {
-  // 取消
+  // 取消选中
   if (selectHotWord.value == hotWord) {
     selectHotWord.value = ''
     return
@@ -238,14 +244,17 @@ const handlerGenerateImage = async () => {
     // 回调
     emits('onDrawStart', selectModel.value.key)
     const form = {
+      platform: 'OpenAI',
       prompt: prompt.value, // 提示词
       model: selectModel.value.key, // 模型
-      style: selectImageStyle.value.key, // 图像生成的风格
-      width: selectImageSize.value.width, // size不能为空
-      height: selectImageSize.value.height, // size不能为空
-    } as ImageDallReqVO
+      width: selectImageSize.value.width, // size 不能为空
+      height: selectImageSize.value.height, // size 不能为空
+      options: {
+        style: selectImageStyle.value.key, // 图像生成的风格
+      }
+    } as ImageDrawReqVO
     // 发送请求
-    await ImageApi.dall(form)
+    await ImageApi.drawImage(form)
   } finally {
     // 回调
     emits('onDrawComplete', selectModel.value.key)
