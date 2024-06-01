@@ -44,7 +44,7 @@ export interface ImageMidjourneyImagineReqVO {
   base64Array: string[] // size不能为空
 }
 
-
+// TODO 芋艿：review 下整体注释、方法名
 // AI API 密钥 API
 export const ImageApi = {
   // 获取 image 列表
@@ -65,6 +65,6 @@ export const ImageApi = {
   },
   // 删除
   deleteImage: async (id: number)=> {
-    return await request.delete({ url: `/ai/image/delete-id-my?id=${id}`})
+    return await request.delete({ url: `/ai/image/delete-my?id=${id}`})
   },
 }

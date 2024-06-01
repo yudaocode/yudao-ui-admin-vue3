@@ -12,6 +12,9 @@
 </template>
 
 <script setup lang="ts">
+import ChatConversationList from './ChatConversationList.vue'
+import ChatMessageList from './ChatMessageList.vue'
+
 /** AI 聊天对话 列表 */
 defineOptions({ name: 'ChatConversation' })
 </script>
