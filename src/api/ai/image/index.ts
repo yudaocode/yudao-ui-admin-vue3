@@ -42,6 +42,8 @@ export interface ImageMidjourneyImagineReqVO {
   prompt: string // 提示词
   model: string // 模型 mj nijj
   base64Array: string[] // size不能为空
+  width: string // 图片宽度
+  height: string // 图片高度
 }
 
 // TODO 芋艿：review 下整体注释、方法名

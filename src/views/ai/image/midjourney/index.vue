@@ -30,6 +30,22 @@
       </el-button>
     </el-space>
   </div>
+  <div class="image-size">
+    <div>
+      <el-text tag="b">尺寸</el-text>
+    </div>
+    <el-space wrap class="size-list">
+      <div class="size-item"
+           v-for="imageSize in imageSizeList"
+           :key="imageSize.key"
+           @click="handlerSizeClick(imageSize)">
+        <div :class="selectImageSize === imageSize ? 'size-wrapper selectImageSize' : 'size-wrapper'">
+          <div :style="imageSize.style"></div>
+        </div>
+        <div class="size-font">{{ imageSize.key }}</div>
+      </div>
+    </el-space>
+  </div>
   <div class="model">
     <div>
       <el-text tag="b">模型</el-text>
@@ -73,6 +89,8 @@ interface ImageModelVO {
 interface ImageSizeVO {
   key: string
   style: string,
+  width: string,
+  height: string,
 }
 
 // 定义属性
@@ -94,6 +112,41 @@ const models = ref<ImageModelVO[]>([
 ])  // 模型
 selectModel.value = models.value[0] // 默认选中
 
+const selectImageSize = ref<ImageSizeVO>({} as ImageSizeVO) // 选中 size
+const imageSizeList = ref<ImageSizeVO[]>([
+  {
+    key: '1:1',
+    width: "1",
+    height: "1",
+    style: 'width: 30px; height: 30px;background-color: #dcdcdc;',
+  },
+  {
+    key: '3:4',
+    width: "3",
+    height: "4",
+    style: 'width: 30px; height: 40px;background-color: #dcdcdc;',
+  },
+  {
+    key: '4:3',
+    width: "4",
+    height: "3",
+    style: 'width: 40px; height: 30px;background-color: #dcdcdc;',
+  },
+  {
+    key: '9:16',
+    width: "9",
+    height: "16",
+    style: 'width: 30px; height: 50px;background-color: #dcdcdc;',
+  },
+  {
+    key: '16:9',
+    width: "16",
+    height: "9",
+    style: 'width: 50px; height: 30px;background-color: #dcdcdc;',
+  },
+]) // size
+selectImageSize.value = imageSizeList.value[0]
+
 // 定义 Props
 const props = defineProps({})
 
@@ -110,6 +163,17 @@ const handlerHotWordClick = async (hotWord: string) => {
   selectHotWord.value = hotWord
   // 设置提示次
   prompt.value = hotWord
+}
+
+/**
+ * size - click
+ */
+const handlerSizeClick = async (imageSize: ImageSizeVO) => {
+  if (selectImageSize.value === imageSize) {
+    selectImageSize.value = {} as ImageSizeVO
+    return
+  }
+  selectImageSize.value = imageSize
 }
 
 /**
@@ -131,6 +195,8 @@ const handlerGenerateImage = async () => {
     const req = {
       prompt: prompt.value,
       model: selectModel.value.key,
+      width: selectImageSize.value.width,
+      height: selectImageSize.value.height,
       base64Array: [],
     } as ImageMidjourneyImagineReqVO
     await ImageApi.midjourneyImagine(req)
