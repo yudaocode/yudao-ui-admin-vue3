@@ -25,6 +25,13 @@
     @update:model-value="handleModelValueUpdate"
     @find:parent-node="findFromParentNode"
   />
+   <!-- 并行节点 -->
+   <ParallelNode
+    v-if="currentNode && currentNode.type === NodeType.PARALLEL_NODE_FORK"
+    :flow-node="currentNode"
+    @update:model-value="handleModelValueUpdate"
+    @find:parent-node="findFromParentNode"
+  />
   <!-- 递归显示孩子节点  -->
   <ProcessNodeTree
     v-if="currentNode && currentNode.childNode"
@@ -42,6 +49,7 @@ import EndEventNode from './nodes/EndEventNode.vue'
 import UserTaskNode from './nodes/UserTaskNode.vue'
 import CopyTaskNode from './nodes/CopyTaskNode.vue'
 import ExclusiveNode from './nodes/ExclusiveNode.vue'
+import ParallelNode from './nodes/ParallelNode.vue'
 import { SimpleFlowNode, NodeType } from './consts'
 defineOptions({
   name: 'ProcessNodeTree'

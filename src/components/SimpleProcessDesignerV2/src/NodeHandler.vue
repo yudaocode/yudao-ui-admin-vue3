@@ -26,6 +26,12 @@
             </div>
             <div class="handler-item-text">条件分支</div>
           </div>
+          <div class="handler-item" @click="addNode(NodeType.PARALLEL_NODE_FORK)">
+            <div class="handler-item-icon condition">
+              <span class="iconfont icon-size icon-parallel"></span>
+            </div>
+            <div class="handler-item-text">并行分支</div>
+          </div>
         </div>
         <template #reference>
           <div class="add-icon"><Icon icon="ep:plus" /></div>
@@ -129,6 +135,31 @@ const addNode = (type: number) => {
             conditionType: undefined,
             defaultFlow: true
           }
+        }
+      ]
+    }
+    emits('update:childNode', data)
+  }
+  if (type === NodeType.PARALLEL_NODE_FORK) {
+    const data : SimpleFlowNode = {
+      name: '并行分支',
+      type: NodeType.PARALLEL_NODE_FORK,
+      id: 'GateWay_' + generateUUID(),
+      childNode: props.childNode,
+      conditionNodes: [
+        {
+          id: 'Flow_'+ generateUUID(),
+          name: '并行1',
+          showText: '无需配置条件同时执行',
+          type: NodeType.CONDITION_NODE,
+          childNode: undefined,
+        },
+        {
+          id: 'Flow_'+ generateUUID(),
+          name: '并行2',
+          showText: '无需配置条件同时执行',
+          type: NodeType.CONDITION_NODE,
+          childNode: undefined,
         }
       ]
     }
