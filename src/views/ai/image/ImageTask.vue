@@ -26,8 +26,6 @@ const imageListInterval = ref<any>() // image 列表定时器，刷新列表
 const isShowImageDetail = ref<boolean>(false) // 是否显示 task 详情
 const showImageDetailId = ref<number>(0) // 是否显示 task 详情
 
-// TODO @fan：如果是简单注释，建议用 /** */，主要是现在项目里是这种风格哈，保持一致好点~
-
 /**  抽屉 - close  */
 const handlerDrawerClose = async () => {
   isShowImageDetail.value = false
