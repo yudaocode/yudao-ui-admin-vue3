@@ -85,24 +85,18 @@ const props = defineProps({
   }
 })
 
-/**
- * 抽屉 - close
- */
+/**  抽屉 - close  */
 const handlerDrawerClose = async () => {
   emits('handlerDrawerClose')
 }
 
-/**
- * 获取 - 图片 detail
- */
+/**  获取 - 图片 detail  */
 const getImageDetail = async (id) => {
   // 获取图片详细
   imageDetail.value = await ImageApi.getImageDetail(id)
 }
 
-/**
- * 任务 - detail
- */
+/**  任务 - detail  */
 const handlerTaskDetail = async () => {
   showDrawer.value = true
 }

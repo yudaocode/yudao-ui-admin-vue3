@@ -37,9 +37,7 @@ const props = defineProps({
   }
 })
 
-/**
- * 按钮 - 点击事件
- */
+/**  按钮 - 点击事件  */
 const handlerBtnClick = async (type, imageDetail: ImageDetailVO) => {
   emits('onBtnClick', type, imageDetail)
 }

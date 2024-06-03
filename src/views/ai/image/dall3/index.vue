@@ -186,9 +186,7 @@ const emits = defineEmits(['onDrawStart', 'onDrawComplete'])
 
 // TODO @fan：如果是简单注释，建议用 /** */，主要是现在项目里是这种风格哈，保持一致好点~
 // TODO @fan：handler 应该改成 handle 哈
-/**
- * 热词 - click
- */
+/** 热词 - click  */
 const handlerHotWordClick = async (hotWord: string) => {
   // 取消选中
   if (selectHotWord.value == hotWord) {
@@ -201,9 +199,7 @@ const handlerHotWordClick = async (hotWord: string) => {
   prompt.value = hotWord
 }
 
-/**
- * 模型 - click
- */
+/**  模型 - click  */
 const handlerModelClick = async (model: ImageModelVO) => {
   if (selectModel.value === model) {
     selectModel.value = {} as ImageModelVO
@@ -212,9 +208,7 @@ const handlerModelClick = async (model: ImageModelVO) => {
   selectModel.value = model
 }
 
-/**
- * 样式 - click
- */
+/**  样式 - click  */
 const handlerStyleClick = async (imageStyle: ImageModelVO) => {
   if (selectImageStyle.value === imageStyle) {
     selectImageStyle.value = {} as ImageModelVO
@@ -223,9 +217,7 @@ const handlerStyleClick = async (imageStyle: ImageModelVO) => {
   selectImageStyle.value = imageStyle
 }
 
-/**
- * size - click
- */
+/**  size - click  */
 const handlerSizeClick = async (imageSize: ImageSizeVO) => {
   if (selectImageSize.value === imageSize) {
     selectImageSize.value = {} as ImageSizeVO
@@ -234,9 +226,7 @@ const handlerSizeClick = async (imageSize: ImageSizeVO) => {
   selectImageSize.value = imageSize
 }
 
-/**
- * 图片生产
- */
+/**  图片生产  */
 const handlerGenerateImage = async () => {
   try {
     // 加载中

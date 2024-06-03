@@ -198,9 +198,7 @@ const selectVersion = ref<any>('6.0') // 选中的 version
 // 定义 Props
 const props = defineProps({})
 
-/**
- * 热词 - click
- */
+/**  热词 - click  */
 const handlerHotWordClick = async (hotWord: string) => {
   // 取消
   if (selectHotWord.value == hotWord) {
@@ -213,9 +211,7 @@ const handlerHotWordClick = async (hotWord: string) => {
   prompt.value = hotWord
 }
 
-/**
- * size - click
- */
+/**  size - click  */
 const handlerSizeClick = async (imageSize: ImageSizeVO) => {
   if (selectImageSize.value === imageSize) {
     selectImageSize.value = {} as ImageSizeVO
@@ -224,23 +220,17 @@ const handlerSizeClick = async (imageSize: ImageSizeVO) => {
   selectImageSize.value = imageSize
 }
 
-/**
- * 模型 - click
- */
+/**  模型 - click  */
 const handlerModelClick = async (model: ImageModelVO) => {
   selectModel.value = model
 }
 
-/**
- * version - click
- */
+/**  version - click  */
 const handlerChangeVersion = async (version) => {
   console.log('version', version)
 }
 
-/**
- * 图片生产
- */
+/** 图片生产  */
 const handlerGenerateImage = async () => {
   // todo @范 图片生产逻辑
   try {

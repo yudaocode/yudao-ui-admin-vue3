@@ -33,17 +33,13 @@ const selectModel = ref('DALL3绘画')
 const modelOptions = ['DALL3绘画', 'MJ绘画']
 const drawIn = ref<boolean>(false)  // 生成中
 
-/**
- * 绘画 - start
- */
+/**  绘画 - start  */
 const handlerDrawStart = async (type) => {
   // todo
   drawIn.value = true
 }
 
-/**
- * 绘画 - complete
- */
+/**  绘画 - complete  */
 const handlerDrawComplete = async (type) => {
   drawIn.value = false
   // todo

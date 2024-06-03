@@ -28,16 +28,12 @@ const showImageDetailId = ref<number>(0) // 是否显示 task 详情
 
 // TODO @fan：如果是简单注释，建议用 /** */，主要是现在项目里是这种风格哈，保持一致好点~
 
-/**
- * 抽屉 - close
- */
+/**  抽屉 - close  */
 const handlerDrawerClose = async () => {
   isShowImageDetail.value = false
 }
 
-/**
- * 任务 - detail
- */
+/**  任务 - detail  */
 const handlerDrawerOpen = async () => {
   isShowImageDetail.value = true
 }
@@ -50,9 +46,7 @@ const getImageList = async () => {
   imageList.value = list
 }
 
-/**
- * 图片 - btn click
- */
+/**  图片 - btn click  */
 const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
   // 获取 image detail id
   showImageDetailId.value = imageDetail.id
@@ -69,9 +63,7 @@ const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
   }
 }
 
-/**
- * 下载 - image
- */
+/**  下载 - image  */
 // TODO @fan：貌似可以考虑抽到 download 里面，作为一个方法
 const downloadImage = async (imageUrl) => {
   const image = new Image()
