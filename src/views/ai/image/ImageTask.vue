@@ -5,7 +5,8 @@
       v-for="image in imageList"
       :key="image"
       :image-detail="image"
-      @on-btn-click="handlerImageBtnClick" />
+      @on-btn-click="handlerImageBtnClick"
+      @on-mj-btn-click="handlerImageMjBtnClick"/>
   </el-card>
   <!-- 图片 detail 抽屉 -->
   <ImageDetailDrawer
@@ -15,7 +16,7 @@
   />
 </template>
 <script setup lang="ts">
-import {ImageApi, ImageDetailVO} from '@/api/ai/image';
+import {ImageApi, ImageDetailVO, ImageMjButtonsVO} from '@/api/ai/image';
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
 
@@ -59,6 +60,11 @@ const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
   } else if (type === 'download') {
     await downloadImage(imageDetail.picUrl)
   }
+}
+
+/**  图片 - mj btn click  */
+const handlerImageMjBtnClick = async (button: ImageMjButtonsVO) => {
+  console.log('mj click', button)
 }
 
 /**  下载 - image  */

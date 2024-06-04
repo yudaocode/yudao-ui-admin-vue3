@@ -15,8 +15,16 @@ export interface ImageDetailVO {
   model: string // 模型
   style: string // 图像生成的风格
   size: string // 图片尺寸
+  buttons: ImageMjButtonsVO[] // mj 操作按钮
   createTime: string // 创建时间
   updateTime: string // 更新事件
+}
+
+export interface ImageMjButtonsVO {
+  customId: string // MJ::JOB::upsample::1::85a4b4c1-8835-46c5-a15c-aea34fad1862 动作标识
+  emoji: string // 图标 emoji
+  label: string // Make Variations 文本
+  style: number // 样式: 2（Primary）、3（Green）
 }
 
 export interface ImagePageReqVO {
