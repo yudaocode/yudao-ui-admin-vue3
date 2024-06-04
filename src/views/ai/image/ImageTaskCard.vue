@@ -19,11 +19,19 @@
       <img class="image" :src="imageDetail?.picUrl"/>
       <div v-if="imageDetail?.status === 30">{{imageDetail?.errorMessage}}</div>
     </div>
+    <div class="image-mj-btns">
+      <el-button size="small" v-for="button in imageDetail?.buttons" :key="button"
+                 style="width: 40px;margin-left: 0; margin-right: 10px; margin-top: 5px;"
+                 @click="handlerMjBtnClick(button)"
+      >
+        {{ button.label }}{{ button.emoji }}
+      </el-button>
+    </div>
   </el-card>
 </template>
 <script setup lang="ts">
 import {Delete, Download, More} from "@element-plus/icons-vue";
-import {ImageDetailVO} from "@/api/ai/image";
+import {ImageDetailVO, ImageMjButtonsVO} from "@/api/ai/image";
 import {PropType} from "vue";
 import {ElLoading} from "element-plus";
 
@@ -56,6 +64,12 @@ const handlerLoading = async (status: number) => {
     }
   }
 }
+
+/**  mj 按钮 click  */
+const handlerMjBtnClick = async (button: ImageMjButtonsVO) => {
+  emits('onMjBtnClick', button)
+}
+
 // watch
 const { imageDetail } = toRefs(props)
 watch(imageDetail, async (newVal, oldVal) => {
@@ -63,7 +77,7 @@ watch(imageDetail, async (newVal, oldVal) => {
 })
 
 // emits
-const emits = defineEmits(['onBtnClick'])
+const emits = defineEmits(['onBtnClick', 'onMjBtnClick'])
 
 //
 onMounted(async () => {
@@ -103,6 +117,15 @@ onMounted(async () => {
       width: 100%;
       border-radius: 10px;
     }
+  }
+
+  .image-mj-btns {
+    margin-top: 5px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
   }
 }
 
