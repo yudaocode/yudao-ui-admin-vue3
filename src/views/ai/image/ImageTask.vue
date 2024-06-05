@@ -87,9 +87,10 @@ const downloadImage = async (imageUrl) => {
   }
 }
 
-//
+/** 暴露组件方法 */
 defineExpose({getImageList})
-//
+
+/** 组件挂在的时候 */
 onMounted(async () => {
   // 获取 image 列表
   await getImageList()
@@ -98,9 +99,12 @@ onMounted(async () => {
     await getImageList()
   }, 1000 * 20)
 })
-//
-onUnmounted(async () => {
 
+/** 组件取消挂在的时候 */
+onUnmounted(async () => {
+  if (imageListInterval.value) {
+    clearInterval(imageListInterval.value)
+  }
 })
 </script>
 
