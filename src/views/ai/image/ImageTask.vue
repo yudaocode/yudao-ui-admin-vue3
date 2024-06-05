@@ -77,7 +77,7 @@ const downloadImage = async (imageUrl) => {
     const canvas = document.createElement('canvas')
     canvas.width = image.width
     canvas.height = image.height
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d') as CanvasDrawImage
     ctx.drawImage(image, 0, 0, image.width, image.height)
     const url = canvas.toDataURL('image/png')
     const a = document.createElement('a')
