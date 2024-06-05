@@ -63,8 +63,8 @@ const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
 }
 
 /**  图片 - mj btn click  */
-const handlerImageMjBtnClick = async (button: ImageMjButtonsVO) => {
-  console.log('mj click', button)
+const handlerImageMjBtnClick = async (button: ImageMjButtonsVO, imageDetail: ImageDetailVO) => {
+  console.log('mj click', button, imageDetail)
 }
 
 /**  下载 - image  */

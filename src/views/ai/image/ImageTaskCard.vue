@@ -67,7 +67,7 @@ const handlerLoading = async (status: number) => {
 
 /**  mj 按钮 click  */
 const handlerMjBtnClick = async (button: ImageMjButtonsVO) => {
-  emits('onMjBtnClick', button)
+  emits('onMjBtnClick', button, props.imageDetail)
 }
 
 // watch
