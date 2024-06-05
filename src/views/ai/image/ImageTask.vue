@@ -16,7 +16,7 @@
   />
 </template>
 <script setup lang="ts">
-import {ImageApi, ImageDetailVO, ImageMjButtonsVO} from '@/api/ai/image';
+import {ImageApi, ImageDetailVO, ImageMjActionVO, ImageMjButtonsVO} from '@/api/ai/image';
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
 
@@ -64,7 +64,15 @@ const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
 
 /**  图片 - mj btn click  */
 const handlerImageMjBtnClick = async (button: ImageMjButtonsVO, imageDetail: ImageDetailVO) => {
-  console.log('mj click', button, imageDetail)
+  // 1、构建 params 参数
+  const params = {
+    id: imageDetail.id,
+    customId: button.customId,
+  } as ImageMjActionVO
+  // 2、发送 action
+  await ImageApi.midjourneyAction(params)
+  // 3、刷新列表
+  await getImageList()
 }
 
 /**  下载 - image  */

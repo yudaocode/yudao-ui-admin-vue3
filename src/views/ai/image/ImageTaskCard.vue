@@ -21,7 +21,7 @@
     </div>
     <div class="image-mj-btns">
       <el-button size="small" v-for="button in imageDetail?.buttons" :key="button"
-                 style="width: 40px;margin-left: 0; margin-right: 10px; margin-top: 5px;"
+                 style="min-width: 40px;margin-left: 0; margin-right: 10px; margin-top: 5px;"
                  @click="handlerMjBtnClick(button)"
       >
         {{ button.label }}{{ button.emoji }}

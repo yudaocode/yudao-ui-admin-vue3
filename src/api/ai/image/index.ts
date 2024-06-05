@@ -27,6 +27,12 @@ export interface ImageMjButtonsVO {
   style: number // 样式: 2（Primary）、3（Green）
 }
 
+export interface ImageMjActionVO {
+  id: string // MJ::JOB::upsample::1::85a4b4c1-8835-46c5-a15c-aea34fad1862 动作标识
+  customId: string // MJ::JOB::upsample::1::85a4b4c1-8835-46c5-a15c-aea34fad1862 动作标识
+}
+
+
 export interface ImagePageReqVO {
   pageNo: number // 分页编号
   pageSize: number // 分页大小
@@ -74,12 +80,19 @@ export const ImageApi = {
   drawImage: async (data: ImageDrawReqVO)=> {
     return await request.post({ url: `/ai/image/draw`, data })
   },
+  // 删除
+  deleteImage: async (id: number)=> {
+    return await request.delete({ url: `/ai/image/delete-my?id=${id}`})
+  },
+
+  // ------------ midjourney
+
   // midjourney - imagine
   midjourneyImagine: async (data: ImageMidjourneyImagineReqVO)=> {
     return await request.post({ url: `/ai/image/midjourney/imagine`, data })
   },
-  // 删除
-  deleteImage: async (id: number)=> {
-    return await request.delete({ url: `/ai/image/delete-my?id=${id}`})
+  // midjourney - action
+  midjourneyAction: async (params: ImageMjActionVO)=> {
+    return await request.get({ url: `/ai/image/midjourney/action`, params })
   },
 }
