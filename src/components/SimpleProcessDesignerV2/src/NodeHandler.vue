@@ -84,7 +84,7 @@ const addNode = (type: number) => {
           enable: false
         },
         rejectHandler: {
-          type: RejectHandlerType.TERMINATION
+          type: RejectHandlerType.FINISH_PROCESS
         }
       },
       childNode: props.childNode

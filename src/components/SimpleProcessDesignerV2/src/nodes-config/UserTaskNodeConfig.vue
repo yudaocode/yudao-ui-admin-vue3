@@ -144,7 +144,10 @@
               />
             </el-form-item>
             <el-form-item label="审批方式" prop="approveMethod">
-              <el-radio-group v-model="currentNode.attributes.approveMethod">
+              <el-radio-group
+                v-model="currentNode.attributes.approveMethod"
+                @change="approveMethodChanged"
+              >
                 <div class="flex-col">
                   <div v-for="(item, index) in APPROVE_METHODS" :key="index">
                     <el-radio
@@ -162,24 +165,33 @@
               </el-radio-group>
             </el-form-item>
             <el-divider content-position="left">审批人拒绝时</el-divider>
-            <el-form-item label="处理方式" prop="rejectHandler">
-              <el-radio-group v-model="currentNode.attributes.rejectHandler.type" @change="rejectHandlerTypeChange">
-                <el-radio
-                  :border="true"
-                  v-for="item in REJECT_HANDLER_TYPES"
-                  :key="item.value"
-                  :value="item.value"
-                  :label="item.label"
-                />
+            <el-form-item prop="rejectHandler">
+              <el-radio-group v-model="currentNode.attributes.rejectHandler.type">
+                <div class="flex-col">
+                  <div v-for="(item, index) in REJECT_HANDLER_TYPES" :key="index">
+                    <el-radio
+                      :key="item.value"
+                      :value="item.value"
+                      :label="item.label"
+                      :disabled="rejectHandlerOptionDisabled(item.value)"
+                    />
+                  </div>
+                </div>
               </el-radio-group>
             </el-form-item>
-            
+
             <el-form-item
-              v-if="currentNode.attributes.rejectHandler.type == RejectHandlerType.RETURN_PRE_USER_TASK"
+              v-if="
+                currentNode.attributes.rejectHandler.type == RejectHandlerType.RETURN_PRE_USER_TASK
+              "
               label="驳回节点"
               prop="rejectHandlerNode"
             >
-              <el-select v-model="currentNode.attributes.rejectHandler.returnNodeId" clearable style="width: 100%">
+              <el-select
+                v-model="currentNode.attributes.rejectHandler.returnNodeId"
+                clearable
+                style="width: 100%"
+              >
                 <el-option
                   v-for="item in returnTaskList"
                   :key="item.id"
@@ -474,9 +486,9 @@ const setCurrentNode = (node: SimpleFlowNode) => {
     timeUnit.value = convertTimeUnit(parseTimeUnit)
   }
   // 查找可以驳回的用户节点
-  const matchNodeList = [];
-  emits('find:returnTaskNodes', matchNodeList);
-  returnTaskList.value = matchNodeList;
+  const matchNodeList = []
+  emits('find:returnTaskNodes', matchNodeList)
+  returnTaskList.value = matchNodeList
 }
 
 defineExpose({ open, setCurrentNode }) // 暴露方法给父组件
@@ -517,12 +529,30 @@ const blurEvent = () => {
   currentNode.value.name =
     currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
 }
-const rejectHandlerTypeChange = () => {
-  if (currentNode.value.attributes?.rejectHandler.type === RejectHandlerType.RETURN_PRE_USER_TASK) {
-    
-    console.log('nodeList is {}', returnTaskList.value);
+const approveMethodChanged = () => {
+  const approveMethod =  currentNode.value.attributes?.approveMethod
+  if (approveMethod === ApproveMethodType.ANY_APPROVE_ALL_REJECT || approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
+    currentNode.value.attributes.rejectHandler.type =RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO
+  } else {
+    currentNode.value.attributes.rejectHandler.type = RejectHandlerType.FINISH_PROCESS
   }
 }
+const rejectHandlerOptionDisabled = computed(() => {
+  return (val: number) => {
+    const approveMethod =  currentNode.value.attributes?.approveMethod
+    if (val === RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO && approveMethod !== ApproveMethodType.APPROVE_BY_RATIO
+        && approveMethod !== ApproveMethodType.ANY_APPROVE_ALL_REJECT) {
+      return true
+    }
+    if ( approveMethod === ApproveMethodType.ANY_APPROVE_ALL_REJECT && 
+        val === RejectHandlerType.FINISH_PROCESS
+    ) {
+      return true
+    }
+  
+    return false
+  }
+})
 // 默认 6小时
 const timeDuration = ref(6)
 const timeUnit = ref(TimeUnitType.HOUR)
@@ -540,6 +570,7 @@ const isoTimeDuration = computed(() => {
   }
   return strTimeDuration
 })
+
 // 超时开关改变
 const timeoutHandlerChange = () => {
   if (currentNode.value.attributes.timeoutHandler.enable) {

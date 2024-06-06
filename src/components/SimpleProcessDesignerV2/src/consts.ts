@@ -66,11 +66,20 @@ export enum RejectHandlerType {
   /**
    * 结束流程
    */
-  TERMINATION = 1,
+  FINISH_PROCESS = 1,
   /**
    * 驳回到指定节点
    */
-  RETURN_PRE_USER_TASK = 2
+  RETURN_PRE_USER_TASK = 2,
+  /**
+   * 按拒绝人数比例终止流程
+   */
+  FINISH_PROCESS_BY_REJECT_RATIO = 3,
+   /**
+   * 结束任务
+   */
+  FINISH_TASK = 4
+  
 }
 
 // 条件配置类型 （ 用于条件节点配置 ）
@@ -99,13 +108,22 @@ export enum ApproveMethodType  {
   */
   ALL_APPROVE = 2,
   /**
-  * 多人或签(一名审批人同意即可)
+  * 多人会签(按比例投票)
   */
-  ANY_OF_APPROVE = 3,
+  APPROVE_BY_RATIO = 3,
+  /**
+  * 多人会签(通过只需一人，拒绝需要全员)
+  */
+  ANY_APPROVE_ALL_REJECT = 4,
+
+  /**
+  * 多人或签(一名审批人通过即可)
+  */
+  ANY_APPROVE = 5,
    /**
   * 多人依次审批
   */
-  SEQUENTIAL_APPROVE = 4
+  SEQUENTIAL_APPROVE = 6
 
 }
 
@@ -198,10 +216,12 @@ NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 
 export const APPROVE_METHODS: DictDataVO [] = [
-  { label: '单人审批', value: 1 },
-  { label: '多人会签(需所有审批人同意)', value: 2 },
-  { label: '多人或签(一名审批人同意即可)', value: 3 },
-  { label: '依次审批(按顺序依次审批)', value: 4 }
+  { label: '单人审批', value: ApproveMethodType.SINGLE_PERSON_APPROVE },
+  { label: '多人会签(需所有审批人同意)', value: ApproveMethodType.ALL_APPROVE },
+  // { label: '多人会签(按比例投票)', value: ApproveMethodType.APPROVE_BY_RATIO },
+  { label: '多人会签(通过只需一人,拒绝需要全员)', value: ApproveMethodType.ANY_APPROVE_ALL_REJECT },
+  { label: '多人或签(一名审批人通过即可)', value: ApproveMethodType.ANY_APPROVE },
+  { label: '依次审批(按顺序依次审批)', value: ApproveMethodType.SEQUENTIAL_APPROVE }
 ]
 
 export const CONDITION_CONFIG_TYPES: DictDataVO [] = [
@@ -222,8 +242,10 @@ export const TIMEOUT_HANDLER_ACTION_TYPES: DictDataVO [] = [
   { label: '自动拒绝', value: 3 },
 ]
 export const REJECT_HANDLER_TYPES: DictDataVO [] = [
-  { label: '结束流程', value: RejectHandlerType.TERMINATION },
-  { label: '驳回到指定节点', value: RejectHandlerType.RETURN_PRE_USER_TASK }
+  { label: '终止流程', value: RejectHandlerType.FINISH_PROCESS },
+  { label: '驳回到指定节点', value: RejectHandlerType.RETURN_PRE_USER_TASK },
+  { label: '按拒绝人数终止流程(用于会签)', value: RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO }
+  // { label: '结束任务', value: RejectHandlerType.FINISH_TASK }
 ]
 
 // 比较运算符
