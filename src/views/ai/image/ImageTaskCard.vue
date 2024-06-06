@@ -19,6 +19,7 @@
       <img class="image" :src="imageDetail?.picUrl"/>
       <div v-if="imageDetail?.status === 30">{{imageDetail?.errorMessage}}</div>
     </div>
+    <!-- TODO @fan：style 使用 unocss 替代下 -->
     <div class="image-mj-btns">
       <el-button size="small" v-for="button in imageDetail?.buttons" :key="button"
                  style="min-width: 40px;margin-left: 0; margin-right: 10px; margin-top: 5px;"
