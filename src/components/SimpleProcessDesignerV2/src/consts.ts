@@ -108,7 +108,7 @@ export enum ApproveMethodType  {
   */
   ALL_APPROVE = 2,
   /**
-  * 多人会签(按比例投票)
+  * 多人会签(按通过比例)
   */
   APPROVE_BY_RATIO = 3,
   /**
@@ -218,7 +218,7 @@ NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 export const APPROVE_METHODS: DictDataVO [] = [
   { label: '单人审批', value: ApproveMethodType.SINGLE_PERSON_APPROVE },
   { label: '多人会签(需所有审批人同意)', value: ApproveMethodType.ALL_APPROVE },
-  // { label: '多人会签(按比例投票)', value: ApproveMethodType.APPROVE_BY_RATIO },
+  { label: '多人会签(按通过比例%)', value: ApproveMethodType.APPROVE_BY_RATIO },
   { label: '多人会签(通过只需一人,拒绝需要全员)', value: ApproveMethodType.ANY_APPROVE_ALL_REJECT },
   { label: '多人或签(一名审批人通过即可)', value: ApproveMethodType.ANY_APPROVE },
   { label: '依次审批(按顺序依次审批)', value: ApproveMethodType.SEQUENTIAL_APPROVE }

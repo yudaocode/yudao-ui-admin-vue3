@@ -149,7 +149,7 @@
                 @change="approveMethodChanged"
               >
                 <div class="flex-col">
-                  <div v-for="(item, index) in APPROVE_METHODS" :key="index">
+                  <div v-for="(item, index) in APPROVE_METHODS" :key="index" class="flex items-center">
                     <el-radio
                       :value="item.value"
                       :label="item.value"
@@ -160,6 +160,14 @@
                     >
                       {{ item.label }}
                     </el-radio>
+                    <el-input-number
+                      v-model="currentNode.attributes.approveRatio"
+                      :min="10"
+                      :max="99"
+                      :step="10"
+                      size="small"
+                      v-if="item.value === ApproveMethodType.APPROVE_BY_RATIO && currentNode.attributes.approveMethod === ApproveMethodType.APPROVE_BY_RATIO"
+                    />
                   </div>
                 </div>
               </el-radio-group>
@@ -175,6 +183,7 @@
                       :label="item.label"
                       :disabled="rejectHandlerOptionDisabled(item.value)"
                     />
+                   
                   </div>
                 </div>
               </el-radio-group>
@@ -512,6 +521,7 @@ const changedCandidateUsers = () => {
     currentNode.value.attributes?.candidateStrategy === CandidateStrategy.USER
   ) {
     currentNode.value.attributes.approveMethod = ApproveMethodType.SINGLE_PERSON_APPROVE
+    currentNode.value.attributes.rejectHandler.type = RejectHandlerType.FINISH_PROCESS
     notAllowedMultiApprovers.value = true
   } else {
     notAllowedMultiApprovers.value = false
@@ -530,26 +540,35 @@ const blurEvent = () => {
     currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
 }
 const approveMethodChanged = () => {
-  const approveMethod =  currentNode.value.attributes?.approveMethod
-  if (approveMethod === ApproveMethodType.ANY_APPROVE_ALL_REJECT || approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
-    currentNode.value.attributes.rejectHandler.type =RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO
+  const approveMethod = currentNode.value.attributes?.approveMethod
+  if ( approveMethod === ApproveMethodType.ANY_APPROVE_ALL_REJECT || approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
+    currentNode.value.attributes.rejectHandler.type =
+    RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO
   } else {
     currentNode.value.attributes.rejectHandler.type = RejectHandlerType.FINISH_PROCESS
+  }
+
+  if (approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
+    currentNode.value.attributes.approveRatio = 50;
   }
 }
 const rejectHandlerOptionDisabled = computed(() => {
   return (val: number) => {
-    const approveMethod =  currentNode.value.attributes?.approveMethod
-    if (val === RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO && approveMethod !== ApproveMethodType.APPROVE_BY_RATIO
-        && approveMethod !== ApproveMethodType.ANY_APPROVE_ALL_REJECT) {
-      return true
-    }
-    if ( approveMethod === ApproveMethodType.ANY_APPROVE_ALL_REJECT && 
-        val === RejectHandlerType.FINISH_PROCESS
+    const approveMethod = currentNode.value.attributes?.approveMethod
+    if (
+      val === RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO &&
+      approveMethod !== ApproveMethodType.APPROVE_BY_RATIO &&
+      approveMethod !== ApproveMethodType.ANY_APPROVE_ALL_REJECT
     ) {
       return true
     }
-  
+    if (
+      approveMethod === ApproveMethodType.ANY_APPROVE_ALL_REJECT &&
+      val === RejectHandlerType.FINISH_PROCESS
+    ) {
+      return true
+    }
+
     return false
   }
 })
