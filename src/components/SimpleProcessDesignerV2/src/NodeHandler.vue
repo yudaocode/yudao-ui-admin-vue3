@@ -75,7 +75,7 @@ const addNode = (type: number) => {
       type: NodeType.USER_TASK_NODE,
       // 审批节点配置
       attributes: {
-        approveMethod: ApproveMethodType.SINGLE_PERSON_APPROVE,
+        approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
         candidateStrategy: CandidateStrategy.USER,
         candidateParam: undefined,
         fieldsPermission: undefined,

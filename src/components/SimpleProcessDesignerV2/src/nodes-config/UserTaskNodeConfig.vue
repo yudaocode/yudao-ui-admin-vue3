@@ -143,7 +143,7 @@
                 style="width: 100%"
               />
             </el-form-item>
-            <el-form-item label="审批方式" prop="approveMethod">
+            <el-form-item label="多人审批方式" prop="approveMethod">
               <el-radio-group
                 v-model="currentNode.attributes.approveMethod"
                 @change="approveMethodChanged"
@@ -154,7 +154,7 @@
                       :value="item.value"
                       :label="item.value"
                       :disabled="
-                        item.value !== ApproveMethodType.SINGLE_PERSON_APPROVE &&
+                        item.value !== ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE &&
                         notAllowedMultiApprovers
                       "
                     >
@@ -163,7 +163,7 @@
                     <el-input-number
                       v-model="currentNode.attributes.approveRatio"
                       :min="10"
-                      :max="99"
+                      :max="100"
                       :step="10"
                       size="small"
                       v-if="item.value === ApproveMethodType.APPROVE_BY_RATIO && currentNode.attributes.approveMethod === ApproveMethodType.APPROVE_BY_RATIO"
@@ -504,7 +504,7 @@ defineExpose({ open, setCurrentNode }) // 暴露方法给父组件
 
 const changeCandidateStrategy = () => {
   candidateParamArray.value = []
-  currentNode.value.attributes.approveMethod = ApproveMethodType.SINGLE_PERSON_APPROVE
+  currentNode.value.attributes.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
   if (
     currentNode.value.attributes.candidateStrategy === CandidateStrategy.START_USER ||
     currentNode.value.attributes.candidateStrategy === CandidateStrategy.USER
@@ -520,7 +520,7 @@ const changedCandidateUsers = () => {
     candidateParamArray.value?.length <= 1 &&
     currentNode.value.attributes?.candidateStrategy === CandidateStrategy.USER
   ) {
-    currentNode.value.attributes.approveMethod = ApproveMethodType.SINGLE_PERSON_APPROVE
+    currentNode.value.attributes.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
     currentNode.value.attributes.rejectHandler.type = RejectHandlerType.FINISH_PROCESS
     notAllowedMultiApprovers.value = true
   } else {
@@ -541,7 +541,7 @@ const blurEvent = () => {
 }
 const approveMethodChanged = () => {
   const approveMethod = currentNode.value.attributes?.approveMethod
-  if ( approveMethod === ApproveMethodType.ANY_APPROVE_ALL_REJECT || approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
+  if ( approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
     currentNode.value.attributes.rejectHandler.type =
     RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO
   } else {
@@ -549,7 +549,7 @@ const approveMethodChanged = () => {
   }
 
   if (approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
-    currentNode.value.attributes.approveRatio = 50;
+    currentNode.value.attributes.approveRatio = 100;
   }
 }
 const rejectHandlerOptionDisabled = computed(() => {
@@ -557,15 +557,12 @@ const rejectHandlerOptionDisabled = computed(() => {
     const approveMethod = currentNode.value.attributes?.approveMethod
     if (
       val === RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO &&
-      approveMethod !== ApproveMethodType.APPROVE_BY_RATIO &&
-      approveMethod !== ApproveMethodType.ANY_APPROVE_ALL_REJECT
+      approveMethod !== ApproveMethodType.APPROVE_BY_RATIO 
     ) {
       return true
     }
-    if (
-      approveMethod === ApproveMethodType.ANY_APPROVE_ALL_REJECT &&
-      val === RejectHandlerType.FINISH_PROCESS
-    ) {
+    if ( approveMethod === ApproveMethodType.APPROVE_BY_RATIO 
+    && val !== RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO) {
       return true
     }
 

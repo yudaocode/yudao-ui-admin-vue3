@@ -95,35 +95,27 @@ export enum ConditionConfigType  {
    */
   RULE = 2
 }
-// 审批方式类型 （ 用于审批节点 ）
+// 多人审批方式类型 （ 用于审批节点 ）
 export enum ApproveMethodType  {
 
   /**
-  * 单人审批
+  * 随机挑选一人审批
   */
-  SINGLE_PERSON_APPROVE = 1,
+  RRANDOM_SELECT_ONE_APPROVE = 1,
 
-  /**
-  * 多人会签(需所有审批人同意)
-  */
-  ALL_APPROVE = 2,
   /**
   * 多人会签(按通过比例)
   */
-  APPROVE_BY_RATIO = 3,
+  APPROVE_BY_RATIO = 2,
+  
   /**
-  * 多人会签(通过只需一人，拒绝需要全员)
+  * 多人或签(通过只需一人，拒绝只需一人)
   */
-  ANY_APPROVE_ALL_REJECT = 4,
-
-  /**
-  * 多人或签(一名审批人通过即可)
-  */
-  ANY_APPROVE = 5,
+  ANY_APPROVE = 3,
    /**
   * 多人依次审批
   */
-  SEQUENTIAL_APPROVE = 6
+  SEQUENTIAL_APPROVE = 4
 
 }
 
@@ -216,11 +208,9 @@ NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 
 export const APPROVE_METHODS: DictDataVO [] = [
-  { label: '单人审批', value: ApproveMethodType.SINGLE_PERSON_APPROVE },
-  { label: '多人会签(需所有审批人同意)', value: ApproveMethodType.ALL_APPROVE },
+  { label: '随机挑选一人审批', value: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE },
   { label: '多人会签(按通过比例%)', value: ApproveMethodType.APPROVE_BY_RATIO },
-  { label: '多人会签(通过只需一人,拒绝需要全员)', value: ApproveMethodType.ANY_APPROVE_ALL_REJECT },
-  { label: '多人或签(一名审批人通过即可)', value: ApproveMethodType.ANY_APPROVE },
+  { label: '多人或签(一人通过或拒绝)', value: ApproveMethodType.ANY_APPROVE },
   { label: '依次审批(按顺序依次审批)', value: ApproveMethodType.SEQUENTIAL_APPROVE }
 ]
 
