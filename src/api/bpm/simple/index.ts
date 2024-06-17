@@ -8,8 +8,8 @@ export const updateBpmSimpleModel = async (data) => {
   })
 }
 
-export const getBpmSimpleModel = async (modelId) => {
+export const getBpmSimpleModel = async (id) => {
   return await request.get({
-    url: '/bpm/model/simple/get?modelId=' + modelId
+    url: '/bpm/model/simple/get?id=' + id
   })
 }

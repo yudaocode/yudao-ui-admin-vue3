@@ -70,15 +70,7 @@ export enum RejectHandlerType {
   /**
    * 驳回到指定节点
    */
-  RETURN_PRE_USER_TASK = 2,
-  /**
-   * 按拒绝人数比例终止流程
-   */
-  FINISH_PROCESS_BY_REJECT_RATIO = 3,
-   /**
-   * 结束任务
-   */
-  FINISH_TASK = 4
+  RETURN_USER_TASK = 2
   
 }
 
@@ -233,8 +225,7 @@ export const TIMEOUT_HANDLER_ACTION_TYPES: DictDataVO [] = [
 ]
 export const REJECT_HANDLER_TYPES: DictDataVO [] = [
   { label: '终止流程', value: RejectHandlerType.FINISH_PROCESS },
-  { label: '驳回到指定节点', value: RejectHandlerType.RETURN_PRE_USER_TASK },
-  { label: '按拒绝人数终止流程(用于会签)', value: RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO }
+  { label: '驳回到指定节点', value: RejectHandlerType.RETURN_USER_TASK }
   // { label: '结束任务', value: RejectHandlerType.FINISH_TASK }
 ]
 

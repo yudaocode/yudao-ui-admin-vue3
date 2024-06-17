@@ -181,7 +181,6 @@
                       :key="item.value"
                       :value="item.value"
                       :label="item.label"
-                      :disabled="rejectHandlerOptionDisabled(item.value)"
                     />
                    
                   </div>
@@ -191,7 +190,7 @@
 
             <el-form-item
               v-if="
-                currentNode.attributes.rejectHandler.type == RejectHandlerType.RETURN_PRE_USER_TASK
+                currentNode.attributes.rejectHandler.type == RejectHandlerType.RETURN_USER_TASK
               "
               label="驳回节点"
               prop="rejectHandlerNode"
@@ -540,35 +539,12 @@ const blurEvent = () => {
     currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
 }
 const approveMethodChanged = () => {
+  currentNode.value.attributes.rejectHandler.type = RejectHandlerType.FINISH_PROCESS
   const approveMethod = currentNode.value.attributes?.approveMethod
-  if ( approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
-    currentNode.value.attributes.rejectHandler.type =
-    RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO
-  } else {
-    currentNode.value.attributes.rejectHandler.type = RejectHandlerType.FINISH_PROCESS
-  }
-
   if (approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
     currentNode.value.attributes.approveRatio = 100;
   }
 }
-const rejectHandlerOptionDisabled = computed(() => {
-  return (val: number) => {
-    const approveMethod = currentNode.value.attributes?.approveMethod
-    if (
-      val === RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO &&
-      approveMethod !== ApproveMethodType.APPROVE_BY_RATIO 
-    ) {
-      return true
-    }
-    if ( approveMethod === ApproveMethodType.APPROVE_BY_RATIO 
-    && val !== RejectHandlerType.FINISH_PROCESS_BY_REJECT_RATIO) {
-      return true
-    }
-
-    return false
-  }
-})
 // 默认 6小时
 const timeDuration = ref(6)
 const timeUnit = ref(TimeUnitType.HOUR)

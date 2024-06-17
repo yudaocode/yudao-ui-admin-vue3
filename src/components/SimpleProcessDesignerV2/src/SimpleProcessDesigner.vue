@@ -82,7 +82,7 @@ const saveSimpleFlowModel = async () => {
     return;
   }
   const data = {
-    modelId: props.modelId,
+    id: props.modelId,
     simpleModel: processNodeTree.value
   }
 

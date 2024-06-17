@@ -53,18 +53,14 @@ const test = async () => {
     message.error('缺少模型 modelId 编号')
     return
   }
-  const test = nodeConfig.value
-  console.log('test is ', test)
+
   console.log('nodeConfig.value ', nodeConfig.value)
-  const data1 = {
-    modelId: modelId,
-    simpleModelBody: toRaw(nodeConfig.value)
-  }
+
   const data = {
-    modelId: modelId,
+    id: modelId,
     simpleModelBody: nodeConfig.value
   }
-  console.log('request json data1 is ', data1)
+
   const result = await updateBpmSimpleModel(data)
   console.log('save the result is ', result)
   if (result) {
