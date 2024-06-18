@@ -70,6 +70,7 @@ const getImageList = async () => {
 const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
   // 获取 image detail id
   showImageDetailId.value = imageDetail.id
+  console.log('type', imageDetail.id)
   // 处理不用 btn
   if (type === 'more') {
     await handlerDrawerOpen()
@@ -119,7 +120,6 @@ const downloadImage = async (imageUrl) => {
 const handleTabsScroll = async () => {
   if (imageTaskRef.value) {
     const { scrollTop, scrollHeight, clientHeight } = imageTaskRef.value;
-    console.log('scrollTop', scrollTop, clientHeight, scrollHeight)
     if (scrollTop + clientHeight >= scrollHeight - 20 && !imageTaskLoading.value) {
       console.log('分页')
       pageNo.value = pageNo.value + 1

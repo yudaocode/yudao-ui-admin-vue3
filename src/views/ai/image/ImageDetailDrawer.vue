@@ -47,20 +47,13 @@
         {{imageDetail.picUrl}}
       </div>
     </div>
-    <!--  生成地址 TODO @fan：这个字段我删除了，要不干掉？ -->
-    <div class="item">
-      <div class="tip">生成地址</div>
-      <div class="body">
-        {{imageDetail.originalPicUrl}}
-      </div>
-    </div>
     <!-- 风格 -->
-    <div class="item">
+    <div class="item" v-if="imageDetail?.options?.style">
       <div class="tip">风格</div>
       <div class="body">
         <!-- TODO @fan：貌似需要把 imageStyleList 搞到 api/image/index.ts 枚举起来？ -->
         <!-- TODO @fan：这里的展示，可能需要按照平台做区分 -->
-        {{imageDetail.options.style}}
+        {{imageDetail?.options?.style}}
       </div>
     </div>
   </el-drawer>
