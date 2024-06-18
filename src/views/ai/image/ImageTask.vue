@@ -22,6 +22,7 @@
 import {ImageApi, ImageDetailVO, ImageMjActionVO, ImageMjButtonsVO} from '@/api/ai/image';
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
+import {ElLoading} from "element-plus";
 
 const message = useMessage() // 消息弹窗
 
@@ -30,6 +31,7 @@ const imageListInterval = ref<any>() // image 列表定时器，刷新列表
 const isShowImageDetail = ref<boolean>(false) // 是否显示 task 详情
 const showImageDetailId = ref<number>(0) // 是否显示 task 详情
 const imageTaskRef = ref<any>() // ref
+const imageTaskLoadingInstance = ref<any>() // loading
 const imageTaskLoading = ref<boolean>(false) // loading
 const pageNo = ref<number>(1) // page no
 const pageSize = ref<number>(20) // page size
@@ -50,10 +52,17 @@ const handlerDrawerOpen = async () => {
 const getImageList = async () => {
   imageTaskLoading.value = true
   try {
+    imageTaskLoadingInstance.value = ElLoading.service({
+      target: imageTaskRef.value,
+      text: '加载中...'
+    })
     const { list } = await ImageApi.getImageList({pageNo: pageNo.value, pageSize: pageSize.value})
     imageList.value.push.apply(imageList.value, list)
   } finally {
-    imageTaskLoading.value = false
+    if (imageTaskLoadingInstance.value) {
+      imageTaskLoadingInstance.value.close();
+      imageTaskLoadingInstance.value = null;
+    }
   }
 }
 
