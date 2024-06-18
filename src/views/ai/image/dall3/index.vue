@@ -121,6 +121,8 @@ const drawIn = ref<boolean>(false)  // 生成中
 const selectHotWord = ref<string>('') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
 const selectModel = ref<any>({}) // 模型
+// message
+const message = useMessage()
 // TODO @fan：image 改成项目里自己的哈
 // TODO @fan：这个 image，要不看看网上有没合适的图片，作为占位符，啊哈哈
 const models = ref<ImageModelVO[]>([
@@ -228,6 +230,8 @@ const handlerSizeClick = async (imageSize: ImageSizeVO) => {
 
 /**  图片生产  */
 const handlerGenerateImage = async () => {
+  // 二次确认
+  await message.confirm(`确认生成内容?`)
   try {
     // 加载中
     drawIn.value = true

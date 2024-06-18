@@ -97,7 +97,8 @@
 
 // image 模型
 import {ImageApi, ImageMidjourneyImagineReqVO} from "@/api/ai/image";
-
+// message
+const message = useMessage()
 // 定义 emits
 const emits = defineEmits(['onDrawStart', 'onDrawComplete'])
 
@@ -196,8 +197,8 @@ const midjourneyVersionList = ref<any>([
 ])
 const nijiVersionList = ref<any>([
   {
-    value: '5.0',
-    label: 'v5.0',
+    value: '5',
+    label: 'v5',
   },
 ])
 const selectVersion = ref<any>('6.0') // 选中的 version
@@ -246,6 +247,8 @@ const handlerChangeVersion = async (version) => {
 
 /** 图片生产  */
 const handlerGenerateImage = async () => {
+  // 二次确认
+  await message.confirm(`确认生成内容?`)
   // todo @范 图片生产逻辑
   try {
     // 回调
