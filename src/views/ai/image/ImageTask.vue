@@ -57,7 +57,8 @@ const getImageList = async () => {
       text: '加载中...'
     })
     const { list } = await ImageApi.getImageList({pageNo: pageNo.value, pageSize: pageSize.value})
-    imageList.value.push.apply(imageList.value, list)
+    // imageList.value.push.apply(imageList.value, list)
+    imageList.value = list
   } finally {
     if (imageTaskLoadingInstance.value) {
       imageTaskLoadingInstance.value.close();
@@ -118,14 +119,15 @@ const downloadImage = async (imageUrl) => {
 }
 
 const handleTabsScroll = async () => {
-  if (imageTaskRef.value) {
-    const { scrollTop, scrollHeight, clientHeight } = imageTaskRef.value;
-    if (scrollTop + clientHeight >= scrollHeight - 20 && !imageTaskLoading.value) {
-      console.log('分页')
-      pageNo.value = pageNo.value + 1
-      await getImageList();
-    }
-  }
+  // todo 先不分页，只显示 top 前多少
+  // if (imageTaskRef.value) {
+  //   const { scrollTop, scrollHeight, clientHeight } = imageTaskRef.value;
+  //   if (scrollTop + clientHeight >= scrollHeight - 20 && !imageTaskLoading.value) {
+  //     console.log('分页')
+  //     pageNo.value = pageNo.value + 1
+  //     await getImageList();
+  //   }
+  // }
 }
 
 /** 暴露组件方法 */
