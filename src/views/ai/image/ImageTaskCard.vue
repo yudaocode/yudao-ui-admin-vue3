@@ -34,11 +34,11 @@
 import {Delete, Download, More} from "@element-plus/icons-vue";
 import {ImageDetailVO, ImageMjButtonsVO} from "@/api/ai/image";
 import {PropType} from "vue";
-import {ElLoading} from "element-plus";
+import {ElLoading, ElMessageBox} from "element-plus";
 
 const cardImageRef = ref<any>() // 卡片 image ref
 const cardImageLoadingInstance = ref<any>() // 卡片 image ref
-
+const message = useMessage()
 const props = defineProps({
   imageDetail: {
     type: Object as PropType<ImageDetailVO>,
@@ -68,6 +68,8 @@ const handlerLoading = async (status: number) => {
 
 /**  mj 按钮 click  */
 const handlerMjBtnClick = async (button: ImageMjButtonsVO) => {
+  // 确认窗体
+  await message.confirm(`确认操作 "${button.label} ${button.emoji}" ?`)
   emits('onMjBtnClick', button, props.imageDetail)
 }
 
