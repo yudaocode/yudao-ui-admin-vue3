@@ -171,7 +171,8 @@ selectImageSize.value = imageSizeList.value[0]
 
 
 // version
-const versionList = ref<any>([
+let versionList = ref<any>([]) // version 列表
+const midjourneyVersionList = ref<any>([
   {
     value: '6.0',
     label: 'v6.0',
@@ -192,8 +193,15 @@ const versionList = ref<any>([
     value: '4.0',
     label: 'v4.0',
   },
-]) // version 列表
+])
+const nijiVersionList = ref<any>([
+  {
+    value: '5.0',
+    label: 'v5.0',
+  },
+])
 const selectVersion = ref<any>('6.0') // 选中的 version
+versionList.value = midjourneyVersionList.value // 默认选择 midjourney
 
 // 定义 Props
 const props = defineProps({})
@@ -223,6 +231,12 @@ const handlerSizeClick = async (imageSize: ImageSizeVO) => {
 /**  模型 - click  */
 const handlerModelClick = async (model: ImageModelVO) => {
   selectModel.value = model
+  if (model.key === 'niji') {
+    versionList.value = nijiVersionList.value // 默认选择 niji
+  } else {
+    versionList.value = midjourneyVersionList.value // 默认选择 midjourney
+  }
+  selectVersion.value = versionList.value[0].value
 }
 
 /**  version - click  */
