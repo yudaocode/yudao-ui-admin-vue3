@@ -1,12 +1,15 @@
 <template>
   <el-card class="dr-task" body-class="task-card" shadow="never">
     <template #header>绘画任务</template>
-    <ImageTaskCard
-      v-for="image in imageList"
-      :key="image"
-      :image-detail="image"
-      @on-btn-click="handlerImageBtnClick"
-      @on-mj-btn-click="handlerImageMjBtnClick"/>
+    <div class="task-image-list" ref="imageTaskRef" @scroll="handleTabsScroll">
+      <ImageTaskCard
+        v-for="image in imageList"
+        :key="image"
+        :image-detail="image"
+
+        @on-btn-click="handlerImageBtnClick"
+        @on-mj-btn-click="handlerImageMjBtnClick"/>
+    </div>
   </el-card>
   <!-- 图片 detail 抽屉 -->
   <ImageDetailDrawer
@@ -26,6 +29,10 @@ const imageList = ref<ImageDetailVO[]>([]) // image 列表
 const imageListInterval = ref<any>() // image 列表定时器，刷新列表
 const isShowImageDetail = ref<boolean>(false) // 是否显示 task 详情
 const showImageDetailId = ref<number>(0) // 是否显示 task 详情
+const imageTaskRef = ref<any>() // ref
+const imageTaskLoading = ref<boolean>(false) // loading
+const pageNo = ref<number>(1) // page no
+const pageSize = ref<number>(20) // page size
 
 /**  抽屉 - close  */
 const handlerDrawerClose = async () => {
@@ -41,8 +48,13 @@ const handlerDrawerOpen = async () => {
  * 获取 - image 列表
  */
 const getImageList = async () => {
-  const { list } = await ImageApi.getImageList({pageNo: 1, pageSize: 20})
-  imageList.value = list
+  imageTaskLoading.value = true
+  try {
+    const { list } = await ImageApi.getImageList({pageNo: pageNo.value, pageSize: pageSize.value})
+    imageList.value.push.apply(imageList.value, list)
+  } finally {
+    imageTaskLoading.value = false
+  }
 }
 
 /**  图片 - btn click  */
@@ -95,6 +107,18 @@ const downloadImage = async (imageUrl) => {
   }
 }
 
+const handleTabsScroll = async () => {
+  if (imageTaskRef.value) {
+    const { scrollTop, scrollHeight, clientHeight } = imageTaskRef.value;
+    console.log('scrollTop', scrollTop, clientHeight, scrollHeight)
+    if (scrollTop + clientHeight >= scrollHeight - 20 && !imageTaskLoading.value) {
+      console.log('分页')
+      pageNo.value = pageNo.value + 1
+      await getImageList();
+    }
+  }
+}
+
 /** 暴露组件方法 */
 defineExpose({getImageList})
 
@@ -118,12 +142,20 @@ onUnmounted(async () => {
 
 <style lang="scss">
 .task-card {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.task-image-list {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   align-content: flex-start;
   height: 100%;
   overflow: auto;
+  padding: 20px;
+  padding-bottom: 300px;
 
   >div {
     margin-right: 20px;
