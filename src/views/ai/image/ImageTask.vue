@@ -154,9 +154,11 @@ onUnmounted(async () => {
   margin: 0;
   padding: 0;
   height: 100%;
+  position: relative;
 }
 
 .task-image-list {
+  position: relative;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -164,11 +166,15 @@ onUnmounted(async () => {
   height: 100%;
   overflow: auto;
   padding: 20px;
-  padding-bottom: 300px;
+  padding-bottom: 100px;
+  box-sizing: border-box; /* 确保内边距不会增加高度 */
 
   >div {
     margin-right: 20px;
     margin-bottom: 20px;
+  }
+  >div:last-of-type {
+    //margin-bottom: 100px;
   }
 }
 </style>
