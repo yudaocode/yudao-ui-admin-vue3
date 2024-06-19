@@ -29,7 +29,7 @@
 import {ImageApi, ImageDetailVO, ImageMjActionVO, ImageMjButtonsVO} from '@/api/ai/image';
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
-import {ElLoading} from "element-plus";
+import {ElLoading, LoadingOptionsResolved} from "element-plus";
 
 const message = useMessage() // 消息弹窗
 
@@ -63,7 +63,7 @@ const getImageList = async (apply:boolean = false) => {
     imageTaskLoadingInstance.value = ElLoading.service({
       target: imageTaskRef.value,
       text: '加载中...'
-    })
+    } as LoadingOptionsResolved)
     const { list, total } = await ImageApi.getImageList({pageNo: pageNo.value, pageSize: pageSize.value})
     if (apply) {
       imageList.value = [...imageList.value, ...list]
