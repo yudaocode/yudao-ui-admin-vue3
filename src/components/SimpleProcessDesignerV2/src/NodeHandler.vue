@@ -42,7 +42,14 @@
 </template>
 
 <script setup lang="ts">
-import { SimpleFlowNode, NodeType, NODE_DEFAULT_NAME, ApproveMethodType, RejectHandlerType, CandidateStrategy } from './consts'
+import {
+  SimpleFlowNode,
+  NodeType,
+  NODE_DEFAULT_NAME,
+  ApproveMethodType,
+  RejectHandlerType,
+  CandidateStrategy
+} from './consts'
 import { generateUUID } from '@/utils'
 defineOptions({
   name: 'NodeHandler'
@@ -63,37 +70,47 @@ const props = defineProps({
 
 const emits = defineEmits(['update:childNode'])
 
-
 const addNode = (type: number) => {
   popoverShow.value = false
   if (type === NodeType.USER_TASK_NODE) {
-    const id =  'Activity_'+ generateUUID();
+    const id = 'Activity_' + generateUUID()
     const data: SimpleFlowNode = {
-      id:  id,
+      id: id,
       name: NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string,
       showText: '',
       type: NodeType.USER_TASK_NODE,
-      // 审批节点配置
-      attributes: {
-        approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
-        candidateStrategy: CandidateStrategy.USER,
-        candidateParam: undefined,
-        fieldsPermission: undefined,
-         // 超时处理
-        timeoutHandler: {
-          enable: false
-        },
-        rejectHandler: {
-          type: RejectHandlerType.FINISH_PROCESS
-        }
+      approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
+      candidateStrategy: CandidateStrategy.USER,
+      candidateParam: undefined,
+      fieldsPermission: undefined,
+      // 超时处理
+      timeoutHandler: {
+        enable: false
+      },
+      rejectHandler: {
+        type: RejectHandlerType.FINISH_PROCESS
       },
       childNode: props.childNode
+      // 审批节点配置
+      // attributes: {
+      //   approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
+      //   candidateStrategy: CandidateStrategy.USER,
+      //   candidateParam: undefined,
+      //   fieldsPermission: undefined,
+      //    // 超时处理
+      //   timeoutHandler: {
+      //     enable: false
+      //   },
+      //   rejectHandler: {
+      //     type: RejectHandlerType.FINISH_PROCESS
+      //   }
+      // },
     }
-    emits('update:childNode', data);
+    emits('update:childNode', data)
   }
   if (type === NodeType.COPY_TASK_NODE) {
     const data: SimpleFlowNode = {
-      id:  'Activity_'+ generateUUID(),
+      id: 'Activity_' + generateUUID(),
       name: NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE) as string,
       showText: '',
       type: NodeType.COPY_TASK_NODE,
@@ -108,14 +125,14 @@ const addNode = (type: number) => {
     emits('update:childNode', data)
   }
   if (type === NodeType.EXCLUSIVE_NODE) {
-    const data : SimpleFlowNode = {
+    const data: SimpleFlowNode = {
       name: '条件分支',
       type: NodeType.EXCLUSIVE_NODE,
       id: 'GateWay_' + generateUUID(),
       childNode: props.childNode,
       conditionNodes: [
         {
-          id: 'Flow_'+ generateUUID(),
+          id: 'Flow_' + generateUUID(),
           name: '条件1',
           showText: '',
           type: NodeType.CONDITION_NODE,
@@ -126,7 +143,7 @@ const addNode = (type: number) => {
           }
         },
         {
-          id: 'Flow_'+ generateUUID(),
+          id: 'Flow_' + generateUUID(),
           name: '其它情况',
           showText: '其它情况进入此流程',
           type: NodeType.CONDITION_NODE,
@@ -141,25 +158,25 @@ const addNode = (type: number) => {
     emits('update:childNode', data)
   }
   if (type === NodeType.PARALLEL_NODE_FORK) {
-    const data : SimpleFlowNode = {
+    const data: SimpleFlowNode = {
       name: '并行分支',
       type: NodeType.PARALLEL_NODE_FORK,
       id: 'GateWay_' + generateUUID(),
       childNode: props.childNode,
       conditionNodes: [
         {
-          id: 'Flow_'+ generateUUID(),
+          id: 'Flow_' + generateUUID(),
           name: '并行1',
           showText: '无需配置条件同时执行',
           type: NodeType.CONDITION_NODE,
-          childNode: undefined,
+          childNode: undefined
         },
         {
-          id: 'Flow_'+ generateUUID(),
+          id: 'Flow_' + generateUUID(),
           name: '并行2',
           showText: '无需配置条件同时执行',
           type: NodeType.CONDITION_NODE,
-          childNode: undefined,
+          childNode: undefined
         }
       ]
     }

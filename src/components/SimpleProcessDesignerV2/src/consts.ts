@@ -20,7 +20,7 @@ export enum NodeType {
    * 抄送人节点
    */
   COPY_TASK_NODE = 2,
- 
+
   /**
    * 条件节点
    */
@@ -71,44 +71,40 @@ export enum RejectHandlerType {
    * 驳回到指定节点
    */
   RETURN_USER_TASK = 2
-  
 }
 
 // 条件配置类型 （ 用于条件节点配置 ）
-export enum ConditionConfigType  {
-
-   /**
+export enum ConditionConfigType {
+  /**
    * 条件表达式
    */
   EXPRESSION = 1,
 
-   /**
+  /**
    * 条件规则
    */
   RULE = 2
 }
 // 多人审批方式类型 （ 用于审批节点 ）
-export enum ApproveMethodType  {
-
+export enum ApproveMethodType {
   /**
-  * 随机挑选一人审批
-  */
+   * 随机挑选一人审批
+   */
   RRANDOM_SELECT_ONE_APPROVE = 1,
 
   /**
-  * 多人会签(按通过比例)
-  */
+   * 多人会签(按通过比例)
+   */
   APPROVE_BY_RATIO = 2,
-  
-  /**
-  * 多人或签(通过只需一人，拒绝只需一人)
-  */
-  ANY_APPROVE = 3,
-   /**
-  * 多人依次审批
-  */
-  SEQUENTIAL_APPROVE = 4
 
+  /**
+   * 多人或签(通过只需一人，拒绝只需一人)
+   */
+  ANY_APPROVE = 3,
+  /**
+   * 多人依次审批
+   */
+  SEQUENTIAL_APPROVE = 4
 }
 
 // 候选人策略 （ 用于审批节点。抄送节点 )
@@ -137,37 +133,67 @@ export enum CandidateStrategy {
    * 发起人自选
    */
   START_USER_SELECT = 35,
-   /**
+  /**
    * 发起人自己
    */
   START_USER = 36,
-   /**
+  /**
    * 指定用户组
    */
-   USER_GROUP = 40,
-   /**
+  USER_GROUP = 40,
+  /**
    * 流程表达式
    */
-   EXPRESSION = 60
+  EXPRESSION = 60
 }
 
+export type RejectHandler = {
+  type: RejectHandlerType
+
+  returnNodeId?: string
+}
+
+export type TimeoutHandler = {
+  //是否开启超时处理
+  enable: boolean
+  // 超时执行的动作
+  action?: number
+  // 超时时间设置
+  timeDuration?: string
+  // 执行动作是自动提醒, 最大提醒次数
+  maxRemindCount?: number
+}
 
 export type SimpleFlowNode = {
-  id: string,
-  type: NodeType,
-  name: string,
-  showText?: string,
-  attributes?: any,
+  id: string
+  type: NodeType
+  name: string
+  showText?: string
+  attributes?: any
   // 孩子节点
-  childNode?: SimpleFlowNode,
+  childNode?: SimpleFlowNode
   // 条件节点
   conditionNodes?: SimpleFlowNode[]
+  // 候选人策略
+  candidateStrategy?: number
+  // 候选人参数
+  candidateParam?: string
+  // 多人审批方式
+  approveMethod?: ApproveMethodType
+  //通过比例
+  approveRatio: number
+  // 表单权限
+  fieldsPermission?: any[]
+  // 审批任务超时处理
+  timeoutHandler?: TimeoutHandler
+  // 审批任务拒绝处理
+  rejectHandler?: RejectHandler
 }
 
 // 条件组
-export type ConditionGroup =  {
+export type ConditionGroup = {
   // 条件组的逻辑关系是否为且
-  and : boolean,
+  and: boolean
   // 条件数组
   conditions: Condition[]
 }
@@ -175,84 +201,83 @@ export type ConditionGroup =  {
 // 条件
 export type Condition = {
   // 条件规则的逻辑关系是否为且
-  and : boolean,
+  and: boolean
   rules: ConditionRule[]
 }
 
 // 条件规则
 export type ConditionRule = {
-  type : number,
-  opName: string,
-  opCode: string,
-  leftSide: string,
+  type: number
+  opName: string
+  opCode: string
+  leftSide: string
   rightSide: string
 }
 
-
-export const NODE_DEFAULT_TEXT = new Map<number,string>()
+export const NODE_DEFAULT_TEXT = new Map<number, string>()
 NODE_DEFAULT_TEXT.set(NodeType.USER_TASK_NODE, '请配置审批人')
 NODE_DEFAULT_TEXT.set(NodeType.COPY_TASK_NODE, '请配置抄送人')
 NODE_DEFAULT_TEXT.set(NodeType.CONDITION_NODE, '请设置条件')
 
-export const NODE_DEFAULT_NAME = new Map<number,string>()
+export const NODE_DEFAULT_NAME = new Map<number, string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
 NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 
-export const APPROVE_METHODS: DictDataVO [] = [
+export const APPROVE_METHODS: DictDataVO[] = [
   { label: '随机挑选一人审批', value: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE },
   { label: '多人会签(按通过比例%)', value: ApproveMethodType.APPROVE_BY_RATIO },
   { label: '多人或签(一人通过或拒绝)', value: ApproveMethodType.ANY_APPROVE },
   { label: '依次审批(按顺序依次审批)', value: ApproveMethodType.SEQUENTIAL_APPROVE }
 ]
 
-export const CONDITION_CONFIG_TYPES: DictDataVO [] = [
+export const CONDITION_CONFIG_TYPES: DictDataVO[] = [
   { label: '条件表达式', value: 1 },
   { label: '条件规则', value: 2 }
 ]
 
 // 时间单位类型
-export const TIME_UNIT_TYPES: DictDataVO [] = [
+export const TIME_UNIT_TYPES: DictDataVO[] = [
   { label: '分钟', value: TimeUnitType.MINUTE },
   { label: '小时', value: TimeUnitType.HOUR },
-  { label: '天', value: TimeUnitType.DAY },
+  { label: '天', value: TimeUnitType.DAY }
 ]
 // 超时处理执行动作类型
-export const TIMEOUT_HANDLER_ACTION_TYPES: DictDataVO [] = [
+export const TIMEOUT_HANDLER_ACTION_TYPES: DictDataVO[] = [
   { label: '自动提醒', value: 1 },
   { label: '自动同意', value: 2 },
-  { label: '自动拒绝', value: 3 },
+  { label: '自动拒绝', value: 3 }
 ]
-export const REJECT_HANDLER_TYPES: DictDataVO [] = [
+export const REJECT_HANDLER_TYPES: DictDataVO[] = [
   { label: '终止流程', value: RejectHandlerType.FINISH_PROCESS },
   { label: '驳回到指定节点', value: RejectHandlerType.RETURN_USER_TASK }
   // { label: '结束任务', value: RejectHandlerType.FINISH_TASK }
 ]
 
 // 比较运算符
-export const COMPARISON_OPERATORS : DictDataVO = [
+export const COMPARISON_OPERATORS: DictDataVO = [
   {
     value: '==',
-    label: '等于',
+    label: '等于'
   },
   {
     value: '!=',
-    label: '不等于',
+    label: '不等于'
   },
   {
     value: '>',
-    label: '大于',
+    label: '大于'
   },
   {
     value: '>=',
-    label: '大于等于',
+    label: '大于等于'
   },
   {
     value: '<',
-    label: '小于',
+    label: '小于'
   },
   {
     value: '<=',
-    label: '小于等于',
+    label: '小于等于'
   }
 ]
