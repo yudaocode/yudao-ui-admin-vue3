@@ -149,7 +149,11 @@
                 @change="approveMethodChanged"
               >
                 <div class="flex-col">
-                  <div v-for="(item, index) in APPROVE_METHODS" :key="index" class="flex items-center">
+                  <div
+                    v-for="(item, index) in APPROVE_METHODS"
+                    :key="index"
+                    class="flex items-center"
+                  >
                     <el-radio
                       :value="item.value"
                       :label="item.value"
@@ -166,7 +170,10 @@
                       :max="100"
                       :step="10"
                       size="small"
-                      v-if="item.value === ApproveMethodType.APPROVE_BY_RATIO && currentNode.attributes.approveMethod === ApproveMethodType.APPROVE_BY_RATIO"
+                      v-if="
+                        item.value === ApproveMethodType.APPROVE_BY_RATIO &&
+                        currentNode.attributes.approveMethod === ApproveMethodType.APPROVE_BY_RATIO
+                      "
                     />
                   </div>
                 </div>
@@ -177,21 +184,14 @@
               <el-radio-group v-model="currentNode.attributes.rejectHandler.type">
                 <div class="flex-col">
                   <div v-for="(item, index) in REJECT_HANDLER_TYPES" :key="index">
-                    <el-radio
-                      :key="item.value"
-                      :value="item.value"
-                      :label="item.label"
-                    />
-                   
+                    <el-radio :key="item.value" :value="item.value" :label="item.label" />
                   </div>
                 </div>
               </el-radio-group>
             </el-form-item>
 
             <el-form-item
-              v-if="
-                currentNode.attributes.rejectHandler.type == RejectHandlerType.RETURN_USER_TASK
-              "
+              v-if="currentNode.attributes.rejectHandler.type == RejectHandlerType.RETURN_USER_TASK"
               label="驳回节点"
               prop="rejectHandlerNode"
             >
@@ -282,8 +282,8 @@
           <div class="field-permit-title">
             <div class="setting-title-label first-title"> 字段名称 </div>
             <div class="other-titles">
-              <span class="setting-title-label">可编辑</span>
               <span class="setting-title-label">只读</span>
+              <span class="setting-title-label">可编辑</span>
               <span class="setting-title-label">隐藏</span>
             </div>
           </div>
@@ -542,7 +542,7 @@ const approveMethodChanged = () => {
   currentNode.value.attributes.rejectHandler.type = RejectHandlerType.FINISH_PROCESS
   const approveMethod = currentNode.value.attributes?.approveMethod
   if (approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
-    currentNode.value.attributes.approveRatio = 100;
+    currentNode.value.attributes.approveRatio = 100
   }
 }
 // 默认 6小时
