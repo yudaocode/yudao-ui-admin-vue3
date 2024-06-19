@@ -1,7 +1,7 @@
 <template>
   <el-card class="dr-task" body-class="task-card" shadow="never">
     <template #header>绘画任务</template>
-    <div class="task-image-list" ref="imageTaskRef" @scroll="handleTabsScroll">
+    <div class="task-image-list" ref="imageTaskRef">
       <ImageTaskCard
         v-for="image in imageList"
         :key="image"
@@ -9,6 +9,13 @@
 
         @on-btn-click="handlerImageBtnClick"
         @on-mj-btn-click="handlerImageMjBtnClick"/>
+    </div>
+    <div class="task-image-pagination">
+      <el-pagination background layout="prev, pager, next"
+                     :default-page-size="pageSize"
+                     :total="pageTotal"
+                     @change="handlerPageChange"
+      />
     </div>
   </el-card>
   <!-- 图片 detail 抽屉 -->
@@ -34,7 +41,8 @@ const imageTaskRef = ref<any>() // ref
 const imageTaskLoadingInstance = ref<any>() // loading
 const imageTaskLoading = ref<boolean>(false) // loading
 const pageNo = ref<number>(1) // page no
-const pageSize = ref<number>(20) // page size
+const pageSize = ref<number>(10) // page size
+const pageTotal = ref<number>(0) // page size
 
 /**  抽屉 - close  */
 const handlerDrawerClose = async () => {
@@ -49,16 +57,20 @@ const handlerDrawerOpen = async () => {
 /**
  * 获取 - image 列表
  */
-const getImageList = async () => {
+const getImageList = async (apply:boolean = false) => {
   imageTaskLoading.value = true
   try {
     imageTaskLoadingInstance.value = ElLoading.service({
       target: imageTaskRef.value,
       text: '加载中...'
     })
-    const { list } = await ImageApi.getImageList({pageNo: pageNo.value, pageSize: pageSize.value})
-    // imageList.value.push.apply(imageList.value, list)
-    imageList.value = list
+    const { list, total } = await ImageApi.getImageList({pageNo: pageNo.value, pageSize: pageSize.value})
+    if (apply) {
+      imageList.value = [...imageList.value, ...list]
+    } else {
+      imageList.value = list
+    }
+    pageTotal.value = total
   } finally {
     if (imageTaskLoadingInstance.value) {
       imageTaskLoadingInstance.value.close();
@@ -118,16 +130,10 @@ const downloadImage = async (imageUrl) => {
   }
 }
 
-const handleTabsScroll = async () => {
-  // todo 先不分页，只显示 top 前多少
-  // if (imageTaskRef.value) {
-  //   const { scrollTop, scrollHeight, clientHeight } = imageTaskRef.value;
-  //   if (scrollTop + clientHeight >= scrollHeight - 20 && !imageTaskLoading.value) {
-  //     console.log('分页')
-  //     pageNo.value = pageNo.value + 1
-  //     await getImageList();
-  //   }
-  // }
+// page change
+const handlerPageChange = async (page) => {
+  pageNo.value = page
+  await getImageList(false)
 }
 
 /** 暴露组件方法 */
@@ -139,7 +145,7 @@ onMounted(async () => {
   await getImageList()
   // 自动刷新 image 列表
   imageListInterval.value = setInterval(async () => {
-    await getImageList()
+    await getImageList(false)
   }, 1000 * 20)
 })
 
@@ -168,7 +174,7 @@ onUnmounted(async () => {
   height: 100%;
   overflow: auto;
   padding: 20px;
-  padding-bottom: 100px;
+  padding-bottom: 140px;
   box-sizing: border-box; /* 确保内边距不会增加高度 */
 
   >div {
@@ -179,6 +185,21 @@ onUnmounted(async () => {
     //margin-bottom: 100px;
   }
 }
+
+.task-image-pagination {
+  position: absolute;
+  bottom: 60px;
+  height: 50px;
+  line-height: 90px;
+  width: 100%;
+  z-index: 999;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
 </style>
 
 <style scoped lang="scss">
