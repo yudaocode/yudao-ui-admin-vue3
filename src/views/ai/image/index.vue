@@ -11,6 +11,7 @@
                @on-draw-start="handlerDrawStart"
                @on-draw-complete="handlerDrawComplete" />
         <Midjourney v-if="selectModel === 'MJ绘画'" />
+        <StableDiffusion v-if="selectModel === 'Stable Diffusion'" />
       </div>
     </div>
     <div class="main">
@@ -23,14 +24,15 @@
 // TODO @fan：在整个挪到 /views/ai/image/index 目录。因为我想在 /views/ai/image/manager 做管理的功能，进行下区分！
 import Dall3 from './dall3/index.vue'
 import Midjourney from './midjourney/index.vue'
+import StableDiffusion from './stable-diffusion/index.vue'
 import ImageTask from './ImageTask.vue'
 
 // ref
 const imageTaskRef = ref<any>() // image task ref
 
 // 定义属性
-const selectModel = ref('DALL3绘画')
-const modelOptions = ['DALL3绘画', 'MJ绘画']
+const selectModel = ref('Stable Diffusion')
+const modelOptions = ['DALL3绘画', 'MJ绘画', 'Stable Diffusion']
 const drawIn = ref<boolean>(false)  // 生成中
 
 /**  绘画 - start  */
