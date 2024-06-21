@@ -81,15 +81,16 @@ const addNode = (type: number) => {
       type: NodeType.USER_TASK_NODE,
       approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
       candidateStrategy: CandidateStrategy.USER,
-      candidateParam: undefined,
-      fieldsPermission: undefined,
+      // candidateParam: undefined,
+      // fieldsPermission: undefined,
       // 超时处理
-      timeoutHandler: {
-        enable: false
-      },
       rejectHandler: {
         type: RejectHandlerType.FINISH_PROCESS
       },
+      timeoutHandler: {
+        enable: false
+      },
+
       childNode: props.childNode
       // 审批节点配置
       // attributes: {
@@ -114,12 +115,15 @@ const addNode = (type: number) => {
       name: NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE) as string,
       showText: '',
       type: NodeType.COPY_TASK_NODE,
+      candidateStrategy: CandidateStrategy.USER,
+      candidateParam: undefined,
+      fieldsPermission: undefined,
       // 审批节点配置
-      attributes: {
-        candidateStrategy: CandidateStrategy.USER,
-        candidateParam: undefined,
-        fieldsPermission: undefined
-      },
+      // attributes: {
+      //   candidateStrategy: CandidateStrategy.USER,
+      //   candidateParam: undefined,
+      //   fieldsPermission: undefined
+      // },
       childNode: props.childNode
     }
     emits('update:childNode', data)

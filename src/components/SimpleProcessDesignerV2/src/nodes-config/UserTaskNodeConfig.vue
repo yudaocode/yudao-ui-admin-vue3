@@ -26,13 +26,13 @@
         <div class="divide-line"></div>
       </div>
     </template>
-    <el-tabs type="border-card">
-      <el-tab-pane label="审批人">
+    <el-tabs type="border-card" v-model="activeTabName">
+      <el-tab-pane label="审批人" name="user">
         <div>
-          <el-form label-position="top">
+          <el-form ref="formRef" :model="configForm" label-position="top" :rules="formRules">
             <el-form-item label="审批人设置" prop="candidateStrategy">
               <el-radio-group
-                v-model="currentNode.candidateStrategy"
+                v-model="configForm.candidateStrategy"
                 @change="changeCandidateStrategy"
               >
                 <el-radio
@@ -47,11 +47,16 @@
             </el-form-item>
 
             <el-form-item
-              v-if="currentNode.candidateStrategy == CandidateStrategy.ROLE"
+              v-if="configForm.candidateStrategy == CandidateStrategy.ROLE"
               label="指定角色"
-              prop="candidateParam"
+              prop="candidateParamArray"
             >
-              <el-select v-model="candidateParamArray" clearable multiple style="width: 100%">
+              <el-select
+                v-model="configForm.candidateParamArray"
+                clearable
+                multiple
+                style="width: 100%"
+              >
                 <el-option
                   v-for="item in roleOptions"
                   :key="item.id"
@@ -62,16 +67,16 @@
             </el-form-item>
             <el-form-item
               v-if="
-                currentNode.candidateStrategy == CandidateStrategy.DEPT_MEMBER ||
-                currentNode.candidateStrategy == CandidateStrategy.DEPT_LEADER
+                configForm.candidateStrategy == CandidateStrategy.DEPT_MEMBER ||
+                configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER
               "
               label="指定部门"
-              prop="candidateParam"
+              prop="candidateParamArray"
               span="24"
             >
               <el-tree-select
                 ref="treeRef"
-                v-model="candidateParamArray"
+                v-model="configForm.candidateParamArray"
                 :data="deptTreeOptions"
                 :props="defaultProps"
                 empty-text="加载中，请稍后"
@@ -82,28 +87,33 @@
               />
             </el-form-item>
             <el-form-item
-              v-if="currentNode.candidateStrategy == CandidateStrategy.POST"
+              v-if="configForm.candidateStrategy == CandidateStrategy.POST"
               label="指定岗位"
-              prop="candidateParam"
+              prop="candidateParamArray"
               span="24"
             >
-              <el-select v-model="candidateParamArray" clearable multiple style="width: 100%">
+              <el-select
+                v-model="configForm.candidateParamArray"
+                clearable
+                multiple
+                style="width: 100%"
+              >
                 <el-option
                   v-for="item in postOptions"
                   :key="item.id"
                   :label="item.name"
-                  :value="item.id"
+                  :value="item.id!"
                 />
               </el-select>
             </el-form-item>
             <el-form-item
-              v-if="currentNode.candidateStrategy == CandidateStrategy.USER"
+              v-if="configForm.candidateStrategy == CandidateStrategy.USER"
               label="指定用户"
-              prop="candidateParam"
+              prop="candidateParamArray"
               span="24"
             >
               <el-select
-                v-model="candidateParamArray"
+                v-model="configForm.candidateParamArray"
                 clearable
                 multiple
                 style="width: 100%"
@@ -118,11 +128,16 @@
               </el-select>
             </el-form-item>
             <el-form-item
-              v-if="currentNode.candidateStrategy === CandidateStrategy.USER_GROUP"
+              v-if="configForm.candidateStrategy === CandidateStrategy.USER_GROUP"
               label="指定用户组"
-              prop="candidateParam"
+              prop="candidateParamArray"
             >
-              <el-select v-model="candidateParamArray" clearable multiple style="width: 100%">
+              <el-select
+                v-model="configForm.candidateParamArray"
+                clearable
+                multiple
+                style="width: 100%"
+              >
                 <el-option
                   v-for="item in userGroupOptions"
                   :key="item.id"
@@ -132,19 +147,19 @@
               </el-select>
             </el-form-item>
             <el-form-item
-              v-if="currentNode.candidateStrategy === CandidateStrategy.EXPRESSION"
+              v-if="configForm.candidateStrategy === CandidateStrategy.EXPRESSION"
               label="流程表达式"
-              prop="candidateParam"
+              prop="candidateParamArray"
             >
               <el-input
                 type="textarea"
-                v-model="candidateParamArray[0]"
+                v-model="configForm.candidateParamArray[0]"
                 clearable
                 style="width: 100%"
               />
             </el-form-item>
             <el-form-item label="多人审批方式" prop="approveMethod">
-              <el-radio-group v-model="currentNode.approveMethod" @change="approveMethodChanged">
+              <el-radio-group v-model="configForm.approveMethod" @change="approveMethodChanged">
                 <div class="flex-col">
                   <div
                     v-for="(item, index) in APPROVE_METHODS"
@@ -161,24 +176,26 @@
                     >
                       {{ item.label }}
                     </el-radio>
-                    <el-input-number
-                      v-model="currentNode.approveRatio"
-                      :min="10"
-                      :max="100"
-                      :step="10"
-                      size="small"
-                      v-if="
-                        item.value === ApproveMethodType.APPROVE_BY_RATIO &&
-                        currentNode.approveMethod === ApproveMethodType.APPROVE_BY_RATIO
-                      "
-                    />
+                    <el-form-item prop="approveRatio">
+                      <el-input-number
+                        v-model="configForm.approveRatio"
+                        :min="10"
+                        :max="100"
+                        :step="10"
+                        size="small"
+                        v-if="
+                          item.value === ApproveMethodType.APPROVE_BY_RATIO &&
+                          configForm.approveMethod === ApproveMethodType.APPROVE_BY_RATIO
+                        "
+                      />
+                    </el-form-item>
                   </div>
                 </div>
               </el-radio-group>
             </el-form-item>
             <el-divider content-position="left">审批人拒绝时</el-divider>
-            <el-form-item prop="rejectHandler">
-              <el-radio-group v-model="currentNode.rejectHandler!.type">
+            <el-form-item prop="rejectHandlerType">
+              <el-radio-group v-model="configForm.rejectHandlerType">
                 <div class="flex-col">
                   <div v-for="(item, index) in REJECT_HANDLER_TYPES" :key="index">
                     <el-radio :key="item.value" :value="item.value" :label="item.label" />
@@ -188,15 +205,11 @@
             </el-form-item>
 
             <el-form-item
-              v-if="currentNode.rejectHandler!.type == RejectHandlerType.RETURN_USER_TASK"
+              v-if="configForm.rejectHandlerType == RejectHandlerType.RETURN_USER_TASK"
               label="驳回节点"
-              prop="rejectHandlerNode"
+              prop="returnNodeId"
             >
-              <el-select
-                v-model="currentNode.rejectHandler!.returnNodeId"
-                clearable
-                style="width: 100%"
-              >
+              <el-select v-model="configForm.returnNodeId" clearable style="width: 100%">
                 <el-option
                   v-for="item in returnTaskList"
                   :key="item.id"
@@ -208,7 +221,7 @@
             <el-divider content-position="left">审批人超时未处理时</el-divider>
             <el-form-item label="启用开关" prop="timeoutHandlerEnable">
               <el-switch
-                v-model="currentNode.timeoutHandler!.enable"
+                v-model="configForm.timeoutHandlerEnable"
                 active-text="开启"
                 inactive-text="关闭"
                 @change="timeoutHandlerChange"
@@ -217,9 +230,12 @@
             <el-form-item
               label="执行动作"
               prop="timeoutHandlerAction"
-              v-if="currentNode.timeoutHandler?.enable"
+              v-if="configForm.timeoutHandlerEnable"
             >
-              <el-radio-group v-model="currentNode.timeoutHandler!.action">
+              <el-radio-group
+                v-model="configForm.timeoutHandlerAction"
+                @change="timeoutActionChanged"
+              >
                 <el-radio-button
                   v-for="item in TIMEOUT_HANDLER_ACTION_TYPES"
                   :key="item.value"
@@ -228,19 +244,17 @@
                 />
               </el-radio-group>
             </el-form-item>
-            <el-form-item
-              label="超时时间设置"
-              prop="timeoutHandlerTimeDuration"
-              v-if="currentNode.timeoutHandler?.enable"
-            >
+            <el-form-item label="超时时间设置" v-if="configForm.timeoutHandlerEnable">
               <span class="mr-2">当超过</span>
-              <el-input-number
-                class="mr-2"
-                :style="{ width: '100px' }"
-                v-model="timeDuration"
-                :min="1"
-                controls-position="right"
-              />
+              <el-form-item prop="timeDuration">
+                <el-input-number
+                  class="mr-2"
+                  :style="{ width: '100px' }"
+                  v-model="configForm.timeDuration"
+                  :min="1"
+                  controls-position="right"
+                />
+              </el-form-item>
               <el-select
                 v-model="timeUnit"
                 class="mr-2"
@@ -258,19 +272,15 @@
             </el-form-item>
             <el-form-item
               label="最大提醒次数"
-              prop="timeoutHandlerMaxRemindCount"
-              v-if="currentNode.timeoutHandler?.enable && currentNode.timeoutHandler?.action === 1"
+              prop="maxRemindCount"
+              v-if="configForm.timeoutHandlerEnable && configForm.timeoutHandlerAction === 1"
             >
-              <el-input-number
-                v-model="currentNode.timeoutHandler!.maxRemindCount"
-                :min="1"
-                :max="10"
-              />
+              <el-input-number v-model="configForm.maxRemindCount" :min="1" :max="10" />
             </el-form-item>
           </el-form>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="表单字段权限" v-if="formType === 10">
+      <el-tab-pane label="表单字段权限" name="fields" v-if="formType === 10">
         <div class="field-setting-pane">
           <div class="field-setting-desc">字段权限</div>
           <div class="field-permit-title">
@@ -283,7 +293,7 @@
           </div>
           <div
             class="field-setting-item"
-            v-for="(item, index) in currentNode.fieldsPermission"
+            v-for="(item, index) in configForm.fieldsPermission"
             :key="index"
           >
             <div class="field-setting-item-label"> {{ item.title }} </div>
@@ -334,6 +344,7 @@ import * as DeptApi from '@/api/system/dept'
 import * as PostApi from '@/api/system/post'
 import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
+import { cloneDeep } from 'lodash-es'
 
 defineOptions({
   name: 'UserTaskNodeConfig'
@@ -359,27 +370,76 @@ const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList'
 const deptTreeOptions = inject('deptTree') // 部门树
 const formType = inject('formType') // 表单类型
 const formFields = inject<Ref<string[]>>('formFields')
-const candidateParamArray = ref<any[]>([])
 const returnTaskList = ref<SimpleFlowNode[]>([])
+
+const formRef = ref() // 表单 Ref
+const activeTabName = ref('user') // 激活的 Tab 标签页
+const configForm = ref<any>({
+  candidateParamArray: [],
+  candidateStrategy: CandidateStrategy.USER,
+  approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
+  approveRatio: 100,
+  rejectHandlerType: RejectHandlerType.FINISH_PROCESS,
+  returnNodeId: '',
+  timeoutHandlerEnable: false,
+  timeoutHandlerAction: 1,
+  timeDuration: 6, // 默认 6小时
+  maxRemindCount: 1, // 默认 提醒 1次
+  fieldsPermission: []
+})
+// 表单校验规则
+const formRules = reactive({
+  candidateStrategy: [{ required: true }],
+  candidateParamArray: [{ required: true, message: '该选项不能为空', trigger: 'change' }],
+  approveMethod: [{ required: true, message: '多人审批方式不能为空', trigger: 'change' }],
+  approveRatio: [{ required: true, message: '通过比例不能为空', trigger: 'blur' }],
+  returnNodeId: [{ required: true, message: '驳回节点不能为空', trigger: 'change' }],
+  timeoutHandlerEnable: [{ required: true }],
+  timeoutHandlerAction: [{ required: true }],
+  timeDuration: [{ required: true, message: '超时时间不能为空', trigger: 'blur' }],
+  maxRemindCount: [{ required: true, message: '提醒次数不能为空', trigger: 'blur' }]
+})
+// 关闭
 const closeDrawer = () => {
   settingVisible.value = false
 }
-const saveConfig = () => {
-  currentNode.value.candidateParam = candidateParamArray.value?.join(',')
-  if (currentNode.value.timeoutHandler?.enable) {
-    currentNode.value.timeoutHandler.timeDuration = isoTimeDuration.value
+// 保存配置
+const saveConfig = async () => {
+  activeTabName.value = 'user'
+  if (!formRef) return false
+  const valid = await formRef.value.validate()
+  if (!valid) return false
+  const showText = getShowText()
+  if (!showText) return false
+  currentNode.value.candidateStrategy = configForm.value.candidateStrategy
+  currentNode.value.candidateParam = configForm.value.candidateParamArray?.join(',')
+  // 设置拒绝处理
+  currentNode.value.rejectHandler = {
+    type: configForm.value.rejectHandlerType,
+    returnNodeId: configForm.value.returnNodeId
   }
+  // 设置超时处理
+  currentNode.value.timeoutHandler = {
+    enable: configForm.value.timeoutHandlerEnable,
+    action: cTimeoutAction.value,
+    timeDuration: isoTimeDuration.value,
+    maxRemindCount: cTimeoutMaxRemindCount.value
+  }
+  // 设置表单权限
+  currentNode.value.fieldsPermission = configForm.value.fieldsPermission
+
   currentNode.value.showText = getShowText()
   settingVisible.value = false
+  return true
 }
 const getShowText = (): string => {
   let showText = ''
   // 指定成员
-  if (currentNode.value.candidateStrategy === CandidateStrategy.USER) {
-    if (candidateParamArray.value?.length > 0) {
+  if (configForm.value.candidateStrategy === CandidateStrategy.USER) {
+    if (configForm.value.candidateParamArray?.length > 0) {
       const candidateNames: string[] = []
       userOptions?.value.forEach((item) => {
-        if (candidateParamArray.value.includes(item.id)) {
+        if (configForm.value.candidateParamArray.includes(item.id)) {
           candidateNames.push(item.nickname)
         }
       })
@@ -387,11 +447,11 @@ const getShowText = (): string => {
     }
   }
   // 指定角色
-  if (currentNode.value.candidateStrategy === CandidateStrategy.ROLE) {
-    if (candidateParamArray.value?.length > 0) {
+  if (configForm.value.candidateStrategy === CandidateStrategy.ROLE) {
+    if (configForm.value.candidateParamArray?.length > 0) {
       const candidateNames: string[] = []
       roleOptions?.value.forEach((item) => {
-        if (candidateParamArray.value.includes(item.id)) {
+        if (configForm.value.candidateParamArray.includes(item.id)) {
           candidateNames.push(item.name)
         }
       })
@@ -400,17 +460,17 @@ const getShowText = (): string => {
   }
   // 指定部门
   if (
-    currentNode.value.candidateStrategy === CandidateStrategy.DEPT_MEMBER ||
-    currentNode.value.candidateStrategy === CandidateStrategy.DEPT_LEADER
+    configForm.value.candidateStrategy === CandidateStrategy.DEPT_MEMBER ||
+    configForm.value.candidateStrategy === CandidateStrategy.DEPT_LEADER
   ) {
-    if (candidateParamArray.value?.length > 0) {
+    if (configForm.value.candidateParamArray?.length > 0) {
       const candidateNames: string[] = []
       deptOptions?.value.forEach((item) => {
-        if (candidateParamArray.value.includes(item.id)) {
+        if (configForm.value.candidateParamArray.includes(item.id)) {
           candidateNames.push(item.name)
         }
       })
-      if (currentNode.value.candidateStrategy === CandidateStrategy.DEPT_MEMBER) {
+      if (configForm.value.candidateStrategy === CandidateStrategy.DEPT_MEMBER) {
         showText = `部门成员：${candidateNames.join(',')}`
       } else {
         showText = `部门的负责人：${candidateNames.join(',')}`
@@ -419,11 +479,11 @@ const getShowText = (): string => {
   }
 
   // 指定岗位
-  if (currentNode.value.candidateStrategy === CandidateStrategy.POST) {
-    if (candidateParamArray.value?.length > 0) {
+  if (configForm.value.candidateStrategy === CandidateStrategy.POST) {
+    if (configForm.value.candidateParamArray?.length > 0) {
       const candidateNames: string[] = []
       postOptions?.value.forEach((item) => {
-        if (candidateParamArray.value.includes(item.id)) {
+        if (configForm.value.candidateParamArray.includes(item.id)) {
           candidateNames.push(item.name)
         }
       })
@@ -431,11 +491,11 @@ const getShowText = (): string => {
     }
   }
   // 指定用户组
-  if (currentNode.value.candidateStrategy === CandidateStrategy.USER_GROUP) {
-    if (candidateParamArray.value?.length > 0) {
+  if (configForm.value.candidateStrategy === CandidateStrategy.USER_GROUP) {
+    if (configForm.value.candidateParamArray?.length > 0) {
       const candidateNames: string[] = []
       userGroupOptions?.value.forEach((item) => {
-        if (candidateParamArray.value.includes(item.id)) {
+        if (configForm.value.candidateParamArray.includes(item.id)) {
           candidateNames.push(item.name)
         }
       })
@@ -444,18 +504,18 @@ const getShowText = (): string => {
   }
 
   // 发起人自选
-  if (currentNode.value.candidateStrategy === CandidateStrategy.START_USER_SELECT) {
+  if (configForm.value.candidateStrategy === CandidateStrategy.START_USER_SELECT) {
     showText = `发起人自选`
   }
   // 发起人自己
-  if (currentNode.value.candidateStrategy === CandidateStrategy.START_USER) {
+  if (configForm.value.candidateStrategy === CandidateStrategy.START_USER) {
     showText = `发起人自己`
   }
 
   // 流程表达式
-  if (currentNode.value.candidateStrategy === CandidateStrategy.EXPRESSION) {
-    if (candidateParamArray.value?.length > 0) {
-      showText = `流程表达式：${candidateParamArray.value[0]}`
+  if (configForm.value.candidateStrategy === CandidateStrategy.EXPRESSION) {
+    if (configForm.value.candidateParamArray?.length > 0) {
+      showText = `流程表达式：${configForm.value.candidateParamArray[0]}`
     }
   }
   return showText
@@ -466,28 +526,39 @@ const open = () => {
 //  修改当前编辑的节点， 由父组件传过来
 const setCurrentNode = (node: SimpleFlowNode) => {
   currentNode.value = node
-  currentNode.value.fieldsPermission =
-    node.fieldsPermission || getDefaultFieldsPermission(formFields?.value)
+  configForm.value.fieldsPermission =
+    cloneDeep(node.fieldsPermission) || getDefaultFieldsPermission(formFields?.value)
+  configForm.value.candidateStrategy = node.candidateStrategy
   const strCandidateParam = node?.candidateParam
-  if (strCandidateParam) {
-    candidateParamArray.value = strCandidateParam.split(',').map((item) => +item)
+  if (node.candidateStrategy === CandidateStrategy.EXPRESSION) {
+    configForm.value.candidateParamArray[0] = strCandidateParam
+  } else {
+    if (strCandidateParam) {
+      configForm.value.candidateParamArray = strCandidateParam.split(',').map((item) => +item)
+    }
+    configForm.value.candidateStrategy = node.candidateStrategy
   }
   if (
-    (candidateParamArray.value.length <= 1 &&
-      currentNode.value.candidateStrategy === CandidateStrategy.USER) ||
-    currentNode.value.candidateStrategy === CandidateStrategy.START_USER
+    (configForm.value.candidateParamArray?.length <= 1 &&
+      node.candidateStrategy === CandidateStrategy.USER) ||
+    node.candidateStrategy === CandidateStrategy.START_USER
   ) {
     notAllowedMultiApprovers.value = true
   } else {
     notAllowedMultiApprovers.value = false
   }
-  if (currentNode.value.timeoutHandler?.enable && currentNode.value.timeoutHandler?.timeDuration) {
-    const strTimeDuration = currentNode.value.timeoutHandler.timeDuration
+  configForm.value.rejectHandlerType = node.rejectHandler?.type
+  configForm.value.returnNodeId = node.rejectHandler?.returnNodeId
+  configForm.value.timeoutHandlerEnable = node.timeoutHandler?.enable
+  if (node.timeoutHandler?.enable && node.timeoutHandler?.timeDuration) {
+    const strTimeDuration = node.timeoutHandler.timeDuration
     let parseTime = strTimeDuration.slice(2, strTimeDuration.length - 1)
     let parseTimeUnit = strTimeDuration.slice(strTimeDuration.length - 1)
-    timeDuration.value = parseInt(parseTime)
+    configForm.value.timeDuration = parseInt(parseTime)
     timeUnit.value = convertTimeUnit(parseTimeUnit)
   }
+  configForm.value.timeoutHandlerAction = node.timeoutHandler?.action
+  configForm.value.maxRemindCount = node.timeoutHandler?.maxRemindCount
   // 查找可以驳回的用户节点
   const matchNodeList = []
   emits('find:returnTaskNodes', matchNodeList)
@@ -497,11 +568,11 @@ const setCurrentNode = (node: SimpleFlowNode) => {
 defineExpose({ open, setCurrentNode }) // 暴露方法给父组件
 
 const changeCandidateStrategy = () => {
-  candidateParamArray.value = []
-  currentNode.value.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
+  configForm.value.candidateParamArray = []
+  configForm.value.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
   if (
-    currentNode.value.candidateStrategy === CandidateStrategy.START_USER ||
-    currentNode.value.candidateStrategy === CandidateStrategy.USER
+    configForm.value.candidateStrategy === CandidateStrategy.START_USER ||
+    configForm.value.candidateStrategy === CandidateStrategy.USER
   ) {
     notAllowedMultiApprovers.value = true
   } else {
@@ -511,11 +582,11 @@ const changeCandidateStrategy = () => {
 
 const changedCandidateUsers = () => {
   if (
-    candidateParamArray.value?.length <= 1 &&
-    currentNode.value.candidateStrategy === CandidateStrategy.USER
+    configForm.value.candidateParamArray?.length <= 1 &&
+    configForm.value.candidateStrategy === CandidateStrategy.USER
   ) {
-    currentNode.value.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
-    currentNode.value.rejectHandler!.type = RejectHandlerType.FINISH_PROCESS
+    configForm.value.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
+    configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
     notAllowedMultiApprovers.value = true
   } else {
     notAllowedMultiApprovers.value = false
@@ -534,37 +605,63 @@ const blurEvent = () => {
     currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
 }
 const approveMethodChanged = () => {
-  currentNode.value.rejectHandler!.type = RejectHandlerType.FINISH_PROCESS
-  const approveMethod = currentNode.value?.approveMethod
-  if (approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
-    currentNode.value.approveRatio = 100
+  configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
+  if (configForm.value.approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
+    configForm.value.approveRatio = 100
   }
+  formRef.value.clearValidate('approveRatio')
 }
-// 默认 6小时
-const timeDuration = ref(6)
+
 const timeUnit = ref(TimeUnitType.HOUR)
 
+// 超时时间的 ISO 表示
 const isoTimeDuration = computed(() => {
+  if (!configForm.value.timeoutHandlerEnable) {
+    return undefined
+  }
   let strTimeDuration = 'PT'
   if (timeUnit.value === TimeUnitType.MINUTE) {
-    strTimeDuration += timeDuration.value + 'M'
+    strTimeDuration += configForm.value.timeDuration + 'M'
   }
   if (timeUnit.value === TimeUnitType.HOUR) {
-    strTimeDuration += timeDuration.value + 'H'
+    strTimeDuration += configForm.value.timeDuration + 'H'
   }
   if (timeUnit.value === TimeUnitType.DAY) {
-    strTimeDuration += timeDuration.value + 'D'
+    strTimeDuration += configForm.value.timeDuration + 'D'
   }
   return strTimeDuration
+})
+// 超时执行的动作
+const cTimeoutAction = computed(() => {
+  if (!configForm.value.timeoutHandlerEnable) {
+    return undefined
+  }
+  return configForm.value.timeoutHandlerAction
+})
+// 超时最大提醒次数
+const cTimeoutMaxRemindCount = computed(() => {
+  if (!configForm.value.timeoutHandlerEnable) {
+    return undefined
+  }
+  if (configForm.value.timeoutHandlerAction !== 1) {
+    return undefined
+  }
+  return configForm.value.maxRemindCount
 })
 
 // 超时开关改变
 const timeoutHandlerChange = () => {
-  if (currentNode.value.timeoutHandler?.enable) {
+  if (configForm.value.timeoutHandlerEnable) {
     timeUnit.value = 2
-    timeDuration.value = 6
-    currentNode.value.timeoutHandler.action = 1
-    currentNode.value.timeoutHandler.maxRemindCount = 1
+    configForm.value.timeDuration = 6
+    configForm.value.timeoutHandlerAction = 1
+    configForm.value.maxRemindCount = 1
+  }
+}
+// 超时处理动作改变
+const timeoutActionChanged = () => {
+  if (configForm.value.timeoutHandlerAction === 1) {
+    configForm.value.maxRemindCount = 1 // 超时提醒次数，默认为1
   }
 }
 
@@ -572,15 +669,15 @@ const timeoutHandlerChange = () => {
 const timeUnitChange = () => {
   // 分钟，默认是 60 分钟
   if (timeUnit.value === TimeUnitType.MINUTE) {
-    timeDuration.value = 60
+    configForm.value.timeDuration = 60
   }
   // 小时，默认是 6 个小时
   if (timeUnit.value === TimeUnitType.HOUR) {
-    timeDuration.value = 6
+    configForm.value.timeDuration = 6
   }
   // 天， 默认 1天
   if (timeUnit.value === TimeUnitType.DAY) {
-    timeDuration.value = 1
+    configForm.value.timeDuration = 1
   }
 }
 

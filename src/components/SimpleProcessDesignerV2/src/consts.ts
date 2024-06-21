@@ -181,7 +181,7 @@ export type SimpleFlowNode = {
   // 多人审批方式
   approveMethod?: ApproveMethodType
   //通过比例
-  approveRatio: number
+  approveRatio?: number
   // 表单权限
   fieldsPermission?: any[]
   // 审批任务超时处理
