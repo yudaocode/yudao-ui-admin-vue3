@@ -363,7 +363,7 @@ const loadRunningTask = (tasks) => {
     // 2.4 处理 approve 表单
     if (task.formId && task.formConf) {
       const approveForm = {}
-      setConfAndFields2(approveForm, task.formConf, task.formFields, task.formVariable)
+      setConfAndFields2(approveForm, task.formConf, task.formFields, task.formVariables)
       approveForms.value.push(approveForm)
     } else {
       approveForms.value.push({}) // 占位，避免为空
