@@ -17,6 +17,9 @@ dependencies:
   '@iconify/iconify':
     specifier: ^3.1.1
     version: 3.1.1
+  '@microsoft/fetch-event-source':
+    specifier: ^2.0.1
+    version: 2.0.1
   '@videojs-player/vue':
     specifier: ^1.0.0
     version: 1.0.0(@types/video.js@7.3.58)(video.js@7.21.5)(vue@3.4.21)
@@ -69,8 +72,8 @@ dependencies:
     specifier: ^2.1.0
     version: 2.1.0(echarts@5.5.0)
   element-plus:
-    specifier: 2.6.1
-    version: 2.6.1(vue@3.4.21)
+    specifier: 2.7.0
+    version: 2.7.0(vue@3.4.21)
   fast-xml-parser:
     specifier: ^4.3.2
     version: 4.3.6
@@ -83,6 +86,9 @@ dependencies:
   lodash-es:
     specifier: ^4.17.21
     version: 4.17.21
+  marked:
+    specifier: ^12.0.2
+    version: 12.0.2
   min-dash:
     specifier: ^4.1.1
     version: 4.2.1
@@ -2359,6 +2365,10 @@ packages:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.4.15
     dev: true
+
+  /@microsoft/fetch-event-source@2.0.1:
+    resolution: {integrity: sha512-W6CLUJ2eBMw3Rec70qrsEW0jOm/3twwJv21mrmj2yORiaVmVYGS4sSS5yUwvQc1ZlDLYGPnClVWmUUMagKNsfA==, tarball: https://registry.npmmirror.com/@microsoft/fetch-event-source/-/fetch-event-source-2.0.1.tgz}
+    dev: false
 
   /@nodelib/fs.scandir@2.1.5:
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==, tarball: https://registry.npmmirror.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz}
@@ -5082,8 +5092,8 @@ packages:
     resolution: {integrity: sha512-9ItEpeu15hW5m8jKdriL+BQrgwDTXEL9pn4SkillWFu73ZNNNQ2BKKLS+ZHv2vC9UkNhosAeyfxOf/5OSeTCPA==, tarball: https://registry.npmmirror.com/electron-to-chromium/-/electron-to-chromium-1.4.750.tgz}
     dev: true
 
-  /element-plus@2.6.1(vue@3.4.21):
-    resolution: {integrity: sha512-6VRpLjwtIVdtUuITJPPKtpOH1NM6nuAkRE3q5O4Lrx0N1bYMhTkiqb2Jy7zfQuDPbOIkkF2OABTzegpNnzgsnQ==, tarball: https://registry.npmmirror.com/element-plus/-/element-plus-2.6.1.tgz}
+  /element-plus@2.7.0(vue@3.4.21):
+    resolution: {integrity: sha512-WAiaFLavuWFxof9qwkC27jvkh9nRcNnB506g1vvJSiVaVqjCBWUFCIyJKeN11M1qcv2cS5VV5PfSLjTIkrw87A==, tarball: https://registry.npmmirror.com/element-plus/-/element-plus-2.7.0.tgz}
     peerDependencies:
       vue: ^3.2.0
     dependencies:
@@ -6916,6 +6926,12 @@ packages:
     dependencies:
       object-visit: 1.0.1
     dev: true
+
+  /marked@12.0.2:
+    resolution: {integrity: sha512-qXUm7e/YKFoqFPYPa3Ukg9xlI5cyAtGmyEIzMfW//m6kXwCy2Ps9DYf5ioijFKQ8qyuscrHoY04iJGctu2Kg0Q==, tarball: https://registry.npmmirror.com/marked/-/marked-12.0.2.tgz}
+    engines: {node: '>= 18'}
+    hasBin: true
+    dev: false
 
   /matches-selector@1.2.0:
     resolution: {integrity: sha512-c4vLwYWyl+Ji+U43eU/G5FwxWd4ZH0ePUsFs5y0uwD9HUEFBXUQ1zUUan+78IpRD+y4pUfG0nAzNM292K7ItvA==, tarball: https://registry.npmmirror.com/matches-selector/-/matches-selector-1.2.0.tgz}

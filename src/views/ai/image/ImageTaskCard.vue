@@ -1,0 +1,135 @@
+<template>
+  <el-card body-class="" class="image-card">
+    <div class="image-operation">
+      <div>
+        <el-button type="primary" text bg v-if="imageDetail?.status === 10">生成中</el-button>
+        <el-button text bg v-else-if="imageDetail?.status === 20">已完成</el-button>
+        <el-button type="danger" text bg v-else-if="imageDetail?.status === 30">异常</el-button>
+      </div>
+      <!-- TODO @fan：1）按钮要不调整成详情、下载、再次生成、删除？；2）如果是再次生成，就把当前的参数填写到左侧的框框里？ -->
+      <div>
+        <el-button class="btn" text :icon="Download"
+                   @click="handlerBtnClick('download', imageDetail)"/>
+        <el-button class="btn" text :icon="Delete" @click="handlerBtnClick('delete', imageDetail)"/>
+        <el-button class="btn" text :icon="More" @click="handlerBtnClick('more', imageDetail)"/>
+      </div>
+    </div>
+    <div class="image-wrapper" ref="cardImageRef">
+      <!-- TODO @fan：要不加个点击，大图预览？ -->
+      <img class="image" :src="imageDetail?.picUrl"/>
+      <div v-if="imageDetail?.status === 30">{{imageDetail?.errorMessage}}</div>
+    </div>
+    <!-- TODO @fan：style 使用 unocss 替代下 -->
+    <div class="image-mj-btns">
+      <el-button size="small" v-for="button in imageDetail?.buttons" :key="button"
+                 style="min-width: 40px;margin-left: 0; margin-right: 10px; margin-top: 5px;"
+                 @click="handlerMjBtnClick(button)"
+      >
+        {{ button.label }}{{ button.emoji }}
+      </el-button>
+    </div>
+  </el-card>
+</template>
+<script setup lang="ts">
+import {Delete, Download, More} from "@element-plus/icons-vue";
+import {ImageDetailVO, ImageMjButtonsVO} from "@/api/ai/image";
+import {PropType} from "vue";
+import {ElLoading, ElMessageBox} from "element-plus";
+
+const cardImageRef = ref<any>() // 卡片 image ref
+const cardImageLoadingInstance = ref<any>() // 卡片 image ref
+const message = useMessage()
+const props = defineProps({
+  imageDetail: {
+    type: Object as PropType<ImageDetailVO>,
+    require: true
+  }
+})
+
+/**  按钮 - 点击事件  */
+const handlerBtnClick = async (type, imageDetail: ImageDetailVO) => {
+  emits('onBtnClick', type, imageDetail)
+}
+
+const handlerLoading = async (status: number) => {
+  // TODO @fan：这个搞成 Loading 组件，然后通过数据驱动，这样搞可以哇？
+  if (status === 10) {
+    cardImageLoadingInstance.value = ElLoading.service({
+      target: cardImageRef.value,
+      text: '生成中...'
+    })
+  } else {
+    if (cardImageLoadingInstance.value) {
+      cardImageLoadingInstance.value.close();
+      cardImageLoadingInstance.value = null;
+    }
+  }
+}
+
+/**  mj 按钮 click  */
+const handlerMjBtnClick = async (button: ImageMjButtonsVO) => {
+  // 确认窗体
+  await message.confirm(`确认操作 "${button.label} ${button.emoji}" ?`)
+  emits('onMjBtnClick', button, props.imageDetail)
+}
+
+// watch
+const { imageDetail } = toRefs(props)
+watch(imageDetail, async (newVal, oldVal) => {
+  await handlerLoading(newVal.status as string)
+})
+
+// emits
+const emits = defineEmits(['onBtnClick', 'onMjBtnClick'])
+
+//
+onMounted(async () => {
+  await handlerLoading(props.imageDetail.status as string)
+})
+</script>
+
+<style scoped lang="scss">
+
+.image-card {
+  width: 320px;
+  height: auto;
+  border-radius: 10px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  .image-operation {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    .btn {
+      //border: 1px solid red;
+      padding: 10px;
+      margin: 0;
+    }
+  }
+
+  .image-wrapper {
+    overflow: hidden;
+    margin-top: 20px;
+    height: 280px;
+    flex: 1;
+
+    .image {
+      width: 100%;
+      border-radius: 10px;
+    }
+  }
+
+  .image-mj-btns {
+    margin-top: 5px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+</style>
