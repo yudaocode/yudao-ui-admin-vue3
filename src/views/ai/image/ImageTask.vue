@@ -26,14 +26,14 @@
   />
 </template>
 <script setup lang="ts">
-import {ImageApi, ImageDetailVO, ImageMjActionVO, ImageMjButtonsVO} from '@/api/ai/image';
+import {ImageApi, ImageRespVO, ImageMjActionVO, ImageMjButtonsVO} from '@/api/ai/image';
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
 import {ElLoading, LoadingOptionsResolved} from "element-plus";
 
 const message = useMessage() // 消息弹窗
 
-const imageList = ref<ImageDetailVO[]>([]) // image 列表
+const imageList = ref<ImageRespVO[]>([]) // image 列表
 const imageListInterval = ref<any>() // image 列表定时器，刷新列表
 const isShowImageDetail = ref<boolean>(false) // 是否显示 task 详情
 const showImageDetailId = ref<number>(0) // 是否显示 task 详情
@@ -64,7 +64,7 @@ const getImageList = async (apply:boolean = false) => {
       target: imageTaskRef.value,
       text: '加载中...'
     } as LoadingOptionsResolved)
-    const { list, total } = await ImageApi.getImageList({pageNo: pageNo.value, pageSize: pageSize.value})
+    const { list, total } = await ImageApi.getImagePageMy({pageNo: pageNo.value, pageSize: pageSize.value})
     if (apply) {
       imageList.value = [...imageList.value, ...list]
     } else {
@@ -80,7 +80,7 @@ const getImageList = async (apply:boolean = false) => {
 }
 
 /**  图片 - btn click  */
-const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
+const handlerImageBtnClick = async (type, imageDetail: ImageRespVO) => {
   // 获取 image detail id
   showImageDetailId.value = imageDetail.id
   console.log('type', imageDetail.id)
@@ -89,7 +89,7 @@ const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
     await handlerDrawerOpen()
   } else if (type === 'delete') {
     await message.confirm(`是否删除照片?`)
-    await ImageApi.deleteImage(imageDetail.id)
+    await ImageApi.deleteImageMy(imageDetail.id)
     await getImageList()
     await message.success("删除成功!")
   } else if (type === 'download') {
@@ -98,14 +98,14 @@ const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
 }
 
 /**  图片 - mj btn click  */
-const handlerImageMjBtnClick = async (button: ImageMjButtonsVO, imageDetail: ImageDetailVO) => {
+const handlerImageMjBtnClick = async (button: ImageMjButtonsVO, imageDetail: ImageRespVO) => {
   // 1、构建 params 参数
-  const params = {
+  const data = {
     id: imageDetail.id,
     customId: button.customId,
   } as ImageMjActionVO
   // 2、发送 action
-  await ImageApi.midjourneyAction(params)
+  await ImageApi.midjourneyAction(data)
   // 3、刷新列表
   await getImageList()
 }
