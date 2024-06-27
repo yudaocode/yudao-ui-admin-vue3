@@ -7,11 +7,11 @@
   >
     <!-- 图片 -->
     <div class="item">
-<!--      <div class="header">-->
-<!--        <div>图片</div>-->
-<!--        <div>-->
-<!--        </div>-->
-<!--      </div>-->
+      <!--      <div class="header">-->
+      <!--        <div>图片</div>-->
+      <!--        <div>-->
+      <!--        </div>-->
+      <!--      </div>-->
       <div class="body">
         <!-- TODO @fan: 要不，这里只展示图片？？？不用 ImageTaskCard -->
         <ImageTaskCard :image-detail="imageDetail" />
@@ -21,30 +21,30 @@
     <div class="item">
       <div class="tip">时间</div>
       <div class="body">
-        <div>提交时间：{{imageDetail.createTime}}</div>
+        <div>提交时间：{{ imageDetail.createTime }}</div>
         <!-- TODO @fan：要不加个完成时间的字段 finishTime？updateTime 不算特别合理哈 -->
-        <div>生成时间：{{imageDetail.updateTime}}</div>
+        <div>生成时间：{{ imageDetail.updateTime }}</div>
       </div>
     </div>
     <!--  模型  -->
     <div class="item">
       <div class="tip">模型</div>
       <div class="body">
-        {{imageDetail.model}}({{imageDetail.height}}x{{imageDetail.width}})
+        {{ imageDetail.model }}({{ imageDetail.height }}x{{ imageDetail.width }})
       </div>
     </div>
     <!--  提示词  -->
     <div class="item">
       <div class="tip">提示词</div>
       <div class="body">
-        {{imageDetail.prompt}}
+        {{ imageDetail.prompt }}
       </div>
     </div>
     <!--  地址  -->
     <div class="item">
       <div class="tip">图片地址</div>
       <div class="body">
-        {{imageDetail.picUrl}}
+        {{ imageDetail.picUrl }}
       </div>
     </div>
     <!-- 风格 -->
@@ -53,18 +53,18 @@
       <div class="body">
         <!-- TODO @fan：貌似需要把 imageStyleList 搞到 api/image/index.ts 枚举起来？ -->
         <!-- TODO @fan：这里的展示，可能需要按照平台做区分 -->
-        {{imageDetail?.options?.style}}
+        {{ imageDetail?.options?.style }}
       </div>
     </div>
   </el-drawer>
 </template>
 
 <script setup lang="ts">
-import {ImageApi, ImageRespVO} from '@/api/ai/image';
-import ImageTaskCard from './ImageTaskCard.vue';
+import { ImageApi, ImageVO } from '@/api/ai/image'
+import ImageTaskCard from './ImageTaskCard.vue'
 
 const showDrawer = ref<boolean>(false) // 是否显示
-const imageDetail = ref<ImageRespVO>({} as ImageRespVO) // 图片详细信息
+const imageDetail = ref<ImageVO>({} as ImageVO) // 图片详细信息
 
 const props = defineProps({
   show: {
@@ -109,12 +109,9 @@ watch(id, async (newVal, oldVal) => {
 //
 const emits = defineEmits(['handlerDrawerClose'])
 //
-onMounted(async () => {
-
-})
+onMounted(async () => {})
 </script>
 <style scoped lang="scss">
-
 .item {
   margin-bottom: 20px;
   width: 100%;
@@ -135,7 +132,6 @@ onMounted(async () => {
   .body {
     margin-top: 10px;
     color: #616161;
-
 
     .taskImage {
       border-radius: 10px;

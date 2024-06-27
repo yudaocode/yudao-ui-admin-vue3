@@ -8,22 +8,34 @@
       </div>
       <!-- TODO @fan：1）按钮要不调整成详情、下载、再次生成、删除？；2）如果是再次生成，就把当前的参数填写到左侧的框框里？ -->
       <div>
-        <el-button class="btn" text :icon="Download"
-                   @click="handlerBtnClick('download', imageDetail)"/>
-        <el-button class="btn" text :icon="Delete" @click="handlerBtnClick('delete', imageDetail)"/>
-        <el-button class="btn" text :icon="More" @click="handlerBtnClick('more', imageDetail)"/>
+        <el-button
+          class="btn"
+          text
+          :icon="Download"
+          @click="handlerBtnClick('download', imageDetail)"
+        />
+        <el-button
+          class="btn"
+          text
+          :icon="Delete"
+          @click="handlerBtnClick('delete', imageDetail)"
+        />
+        <el-button class="btn" text :icon="More" @click="handlerBtnClick('more', imageDetail)" />
       </div>
     </div>
     <div class="image-wrapper" ref="cardImageRef">
       <!-- TODO @fan：要不加个点击，大图预览？ -->
-      <img class="image" :src="imageDetail?.picUrl"/>
-      <div v-if="imageDetail?.status === 30">{{imageDetail?.errorMessage}}</div>
+      <img class="image" :src="imageDetail?.picUrl" />
+      <div v-if="imageDetail?.status === 30">{{ imageDetail?.errorMessage }}</div>
     </div>
     <!-- TODO @fan：style 使用 unocss 替代下 -->
     <div class="image-mj-btns">
-      <el-button size="small" v-for="button in imageDetail?.buttons" :key="button"
-                 style="min-width: 40px;margin-left: 0; margin-right: 10px; margin-top: 5px;"
-                 @click="handlerMjBtnClick(button)"
+      <el-button
+        size="small"
+        v-for="button in imageDetail?.buttons"
+        :key="button"
+        style="min-width: 40px; margin-left: 0; margin-right: 10px; margin-top: 5px"
+        @click="handlerMjBtnClick(button)"
       >
         {{ button.label }}{{ button.emoji }}
       </el-button>
@@ -31,23 +43,23 @@
   </el-card>
 </template>
 <script setup lang="ts">
-import {Delete, Download, More} from "@element-plus/icons-vue";
-import {ImageRespVO, ImageMjButtonsVO} from "@/api/ai/image";
-import {PropType} from "vue";
-import {ElLoading, ElMessageBox} from "element-plus";
+import { Delete, Download, More } from '@element-plus/icons-vue'
+import { ImageVO, ImageMjButtonsVO } from '@/api/ai/image'
+import { PropType } from 'vue'
+import { ElLoading, ElMessageBox } from 'element-plus'
 
 const cardImageRef = ref<any>() // 卡片 image ref
 const cardImageLoadingInstance = ref<any>() // 卡片 image ref
 const message = useMessage()
 const props = defineProps({
   imageDetail: {
-    type: Object as PropType<ImageRespVO>,
+    type: Object as PropType<ImageVO>,
     require: true
   }
 })
 
 /**  按钮 - 点击事件  */
-const handlerBtnClick = async (type, imageDetail: ImageRespVO) => {
+const handlerBtnClick = async (type, imageDetail: ImageVO) => {
   emits('onBtnClick', type, imageDetail)
 }
 
@@ -60,8 +72,8 @@ const handlerLoading = async (status: number) => {
     })
   } else {
     if (cardImageLoadingInstance.value) {
-      cardImageLoadingInstance.value.close();
-      cardImageLoadingInstance.value = null;
+      cardImageLoadingInstance.value.close()
+      cardImageLoadingInstance.value = null
     }
   }
 }
@@ -89,7 +101,6 @@ onMounted(async () => {
 </script>
 
 <style scoped lang="scss">
-
 .image-card {
   width: 320px;
   height: auto;
@@ -131,5 +142,4 @@ onMounted(async () => {
     justify-content: flex-start;
   }
 }
-
 </style>

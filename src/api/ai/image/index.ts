@@ -1,7 +1,7 @@
 import request from '@/config/axios'
 
-// AI API 密钥 VO
-export interface ImageRespVO {
+// AI 绘图 VO
+export interface ImageVO {
   id: number // 编号
   platform: string // 平台
   model: string // 模型

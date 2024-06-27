@@ -6,15 +6,17 @@
         v-for="image in imageList"
         :key="image"
         :image-detail="image"
-
         @on-btn-click="handlerImageBtnClick"
-        @on-mj-btn-click="handlerImageMjBtnClick"/>
+        @on-mj-btn-click="handlerImageMjBtnClick"
+      />
     </div>
     <div class="task-image-pagination">
-      <el-pagination background layout="prev, pager, next"
-                     :default-page-size="pageSize"
-                     :total="pageTotal"
-                     @change="handlerPageChange"
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :default-page-size="pageSize"
+        :total="pageTotal"
+        @change="handlerPageChange"
       />
     </div>
   </el-card>
@@ -26,14 +28,14 @@
   />
 </template>
 <script setup lang="ts">
-import {ImageApi, ImageRespVO, ImageMjActionVO, ImageMjButtonsVO} from '@/api/ai/image';
+import { ImageApi, ImageVO, ImageMjActionVO, ImageMjButtonsVO } from '@/api/ai/image'
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
-import {ElLoading, LoadingOptionsResolved} from "element-plus";
+import { ElLoading, LoadingOptionsResolved } from 'element-plus'
 
 const message = useMessage() // 消息弹窗
 
-const imageList = ref<ImageRespVO[]>([]) // image 列表
+const imageList = ref<ImageVO[]>([]) // image 列表
 const imageListInterval = ref<any>() // image 列表定时器，刷新列表
 const isShowImageDetail = ref<boolean>(false) // 是否显示 task 详情
 const showImageDetailId = ref<number>(0) // 是否显示 task 详情
@@ -57,14 +59,17 @@ const handlerDrawerOpen = async () => {
 /**
  * 获取 - image 列表
  */
-const getImageList = async (apply:boolean = false) => {
+const getImageList = async (apply: boolean = false) => {
   imageTaskLoading.value = true
   try {
     imageTaskLoadingInstance.value = ElLoading.service({
       target: imageTaskRef.value,
       text: '加载中...'
     } as LoadingOptionsResolved)
-    const { list, total } = await ImageApi.getImagePageMy({pageNo: pageNo.value, pageSize: pageSize.value})
+    const { list, total } = await ImageApi.getImagePageMy({
+      pageNo: pageNo.value,
+      pageSize: pageSize.value
+    })
     if (apply) {
       imageList.value = [...imageList.value, ...list]
     } else {
@@ -73,14 +78,14 @@ const getImageList = async (apply:boolean = false) => {
     pageTotal.value = total
   } finally {
     if (imageTaskLoadingInstance.value) {
-      imageTaskLoadingInstance.value.close();
-      imageTaskLoadingInstance.value = null;
+      imageTaskLoadingInstance.value.close()
+      imageTaskLoadingInstance.value = null
     }
   }
 }
 
 /**  图片 - btn click  */
-const handlerImageBtnClick = async (type, imageDetail: ImageRespVO) => {
+const handlerImageBtnClick = async (type, imageDetail: ImageVO) => {
   // 获取 image detail id
   showImageDetailId.value = imageDetail.id
   console.log('type', imageDetail.id)
@@ -91,18 +96,18 @@ const handlerImageBtnClick = async (type, imageDetail: ImageRespVO) => {
     await message.confirm(`是否删除照片?`)
     await ImageApi.deleteImageMy(imageDetail.id)
     await getImageList()
-    await message.success("删除成功!")
+    await message.success('删除成功!')
   } else if (type === 'download') {
     await downloadImage(imageDetail.picUrl)
   }
 }
 
 /**  图片 - mj btn click  */
-const handlerImageMjBtnClick = async (button: ImageMjButtonsVO, imageDetail: ImageRespVO) => {
+const handlerImageMjBtnClick = async (button: ImageMjButtonsVO, imageDetail: ImageVO) => {
   // 1、构建 params 参数
   const data = {
     id: imageDetail.id,
-    customId: button.customId,
+    customId: button.customId
   } as ImageMjActionVO
   // 2、发送 action
   await ImageApi.midjourneyAction(data)
@@ -137,7 +142,7 @@ const handlerPageChange = async (page) => {
 }
 
 /** 暴露组件方法 */
-defineExpose({getImageList})
+defineExpose({ getImageList })
 
 /** 组件挂在的时候 */
 onMounted(async () => {
@@ -177,11 +182,11 @@ onUnmounted(async () => {
   padding-bottom: 140px;
   box-sizing: border-box; /* 确保内边距不会增加高度 */
 
-  >div {
+  > div {
     margin-right: 20px;
     margin-bottom: 20px;
   }
-  >div:last-of-type {
+  > div:last-of-type {
     //margin-bottom: 100px;
   }
 }
@@ -199,7 +204,6 @@ onUnmounted(async () => {
   justify-content: center;
   align-items: center;
 }
-
 </style>
 
 <style scoped lang="scss">

@@ -163,7 +163,7 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE, getStrDictOptions, getBoolDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { ImageApi, ImageRespVO } from '@/api/ai/image'
+import { ImageApi, ImageVO } from '@/api/ai/image'
 import * as UserApi from '@/api/system/user'
 
 /** AI 绘画 列表 */
@@ -173,7 +173,7 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<ImageRespVO[]>([]) // 列表的数据
+const list = ref<ImageVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
@@ -225,7 +225,7 @@ const handleDelete = async (id: number) => {
 }
 
 /** 修改是否发布 */
-const handleUpdatePublicStatusChange = async (row: ImageRespVO) => {
+const handleUpdatePublicStatusChange = async (row: ImageVO) => {
   try {
     // 修改状态的二次确认
     const text = row.publicStatus ? '公开' : '私有'
