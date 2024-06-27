@@ -71,6 +71,26 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
+    path: '/ai/music',
+    component: Layout,
+    redirect: '/index',
+    name: 'AIMusic',
+    meta: {},
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/ai//music/index.vue'),
+        name: 'AIMusicIndex',
+        meta: {
+          title: 'AI 音乐',
+          icon: 'ep:home-filled',
+          noCache: false,
+          affix: true
+        }
+      }
+    ]
+  },
+  {
     path: '/user',
     component: Layout,
     name: 'UserInfo',
