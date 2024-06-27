@@ -1,0 +1,94 @@
+<template>
+  <div class="flex flex-col h-full">
+    <div class="flex-auto flex overflow-hidden">
+      <el-tabs v-model="currentType" class="flex-auto px-[var(--app-content-padding)]">
+        <!-- 我的创作 -->
+        <el-tab-pane label="我的创作" v-loading="loading" name="mine">
+          <el-row v-if="mySongList.length" :gutter="12">
+            <el-col v-for="song in mySongList" :key="song.id" :md="24" :lg="12">
+              <songCard v-bind="song"/>
+            </el-col>
+          </el-row>
+          <el-empty v-else description="暂无音乐"/>
+        </el-tab-pane>
+
+        <!-- 试听广场 -->
+        <el-tab-pane label="试听广场" v-loading="loading" name="square">
+          <el-row v-if="squareSongList.length" v-loading="loading" :gutter="12">
+            <el-col v-for="song in squareSongList" :key="song.id" :md="24" :lg="12">
+              <songCard v-bind="song"/>
+            </el-col>
+          </el-row>
+          <el-empty v-else description="暂无音乐"/>
+        </el-tab-pane>
+      </el-tabs>
+      <!-- songInfo -->
+      <songInfo v-bind="squareSongList[0]" class="flex-none"/>
+    </div>
+    <audioBar class="flex-none"/>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import songCard from './songCard/index.vue'
+import songInfo from './songInfo/index.vue'
+import audioBar from './audioBar/index.vue'
+
+defineOptions({ name: 'Index' })
+
+const currentType = ref('mine')
+// loading 状态
+const loading = ref(false)
+
+const mySongList = ref<Recordable[]>([])
+const squareSongList = ref<Recordable[]>([])
+
+/*
+ *@Description: 调接口生成音乐列表
+ *@MethodAuthor: xiaohong
+ *@Date: 2024-06-27 17:06:44
+*/
+function generateMusic (formData: Recordable) {
+  console.log(formData);
+  loading.value = true
+  setTimeout(() => {
+    mySongList.value = Array.from({ length: 20 }, (_, index) => {
+      return {
+        id: index,
+        audioUrl: '',
+        videoUrl: '',
+        title: '我走后',
+        imageUrl: 'https://www.carsmp3.com/data/attachment/forum/201909/19/091020q5kgre20fidreqyt.jpg',
+        desc: 'Metal, symphony, film soundtrack, grand, majesticMetal, dtrack, grand, majestic',
+        date: '2024年04月30日 14:02:57',
+        lyric: `<div class="_words_17xen_66"><div>大江东去，浪淘尽，千古风流人物。
+          </div><div>故垒西边，人道是，三国周郎赤壁。
+          </div><div>乱石穿空，惊涛拍岸，卷起千堆雪。
+          </div><div>江山如画，一时多少豪杰。
+          </div><div>
+          </div><div>遥想公瑾当年，小乔初嫁了，雄姿英发。
+          </div><div>羽扇纶巾，谈笑间，樯橹灰飞烟灭。
+          </div><div>故国神游，多情应笑我，早生华发。
+          </div><div>人生如梦，一尊还酹江月。</div></div>`
+      }
+    })
+    loading.value = false
+  }, 3000)
+}
+
+defineExpose({
+  generateMusic
+})
+</script>
+
+
+<style lang="scss" scoped>
+:deep(.el-tabs) {
+  display: flex;
+  flex-direction: column;
+  .el-tabs__content{
+  padding: 0 7px;
+  overflow: auto;
+ }
+}
+</style>
