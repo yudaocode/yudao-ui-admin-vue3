@@ -5,7 +5,7 @@
         <!-- 我的创作 -->
         <el-tab-pane label="我的创作" v-loading="loading" name="mine">
           <el-row v-if="mySongList.length" :gutter="12">
-            <el-col v-for="song in mySongList" :key="song.id" :md="24" :lg="12">
+            <el-col v-for="song in mySongList" :key="song.id" :span="24">
               <songCard v-bind="song"/>
             </el-col>
           </el-row>
@@ -15,7 +15,7 @@
         <!-- 试听广场 -->
         <el-tab-pane label="试听广场" v-loading="loading" name="square">
           <el-row v-if="squareSongList.length" v-loading="loading" :gutter="12">
-            <el-col v-for="song in squareSongList" :key="song.id" :md="24" :lg="12">
+            <el-col v-for="song in squareSongList" :key="song.id" :span="24">
               <songCard v-bind="song"/>
             </el-col>
           </el-row>
