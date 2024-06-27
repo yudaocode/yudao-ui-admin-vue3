@@ -60,11 +60,11 @@
 </template>
 
 <script setup lang="ts">
-import {ImageApi, ImageDetailVO} from '@/api/ai/image';
+import {ImageApi, ImageRespVO} from '@/api/ai/image';
 import ImageTaskCard from './ImageTaskCard.vue';
 
 const showDrawer = ref<boolean>(false) // 是否显示
-const imageDetail = ref<ImageDetailVO>({} as ImageDetailVO) // 图片详细信息
+const imageDetail = ref<ImageRespVO>({} as ImageRespVO) // 图片详细信息
 
 const props = defineProps({
   show: {
@@ -86,7 +86,7 @@ const handlerDrawerClose = async () => {
 /**  获取 - 图片 detail  */
 const getImageDetail = async (id) => {
   // 获取图片详细
-  imageDetail.value = await ImageApi.getImageDetail(id)
+  imageDetail.value = await ImageApi.getImageMy(id)
 }
 
 /**  任务 - detail  */

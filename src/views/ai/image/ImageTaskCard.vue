@@ -32,7 +32,7 @@
 </template>
 <script setup lang="ts">
 import {Delete, Download, More} from "@element-plus/icons-vue";
-import {ImageDetailVO, ImageMjButtonsVO} from "@/api/ai/image";
+import {ImageRespVO, ImageMjButtonsVO} from "@/api/ai/image";
 import {PropType} from "vue";
 import {ElLoading, ElMessageBox} from "element-plus";
 
@@ -41,13 +41,13 @@ const cardImageLoadingInstance = ref<any>() // 卡片 image ref
 const message = useMessage()
 const props = defineProps({
   imageDetail: {
-    type: Object as PropType<ImageDetailVO>,
+    type: Object as PropType<ImageRespVO>,
     require: true
   }
 })
 
 /**  按钮 - 点击事件  */
-const handlerBtnClick = async (type, imageDetail: ImageDetailVO) => {
+const handlerBtnClick = async (type, imageDetail: ImageRespVO) => {
   emits('onBtnClick', type, imageDetail)
 }
 
