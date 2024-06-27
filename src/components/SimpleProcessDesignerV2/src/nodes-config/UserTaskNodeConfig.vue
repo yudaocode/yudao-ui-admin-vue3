@@ -413,6 +413,11 @@ const saveConfig = async () => {
   if (!showText) return false
   currentNode.value.candidateStrategy = configForm.value.candidateStrategy
   currentNode.value.candidateParam = configForm.value.candidateParamArray?.join(',')
+  // 设置审批方式
+  currentNode.value.approveMethod = configForm.value.approveMethod
+  if (configForm.value.approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
+    currentNode.value.approveRatio = configForm.value.approveRatio
+  }
   // 设置拒绝处理
   currentNode.value.rejectHandler = {
     type: configForm.value.rejectHandlerType,
@@ -546,6 +551,11 @@ const setCurrentNode = (node: SimpleFlowNode) => {
     notAllowedMultiApprovers.value = true
   } else {
     notAllowedMultiApprovers.value = false
+  }
+  // 设置审批方式
+  configForm.value.approveMethod = node.approveMethod
+  if (node.approveMethod == ApproveMethodType.APPROVE_BY_RATIO) {
+    configForm.value.approveRatio = node.approveRatio
   }
   configForm.value.rejectHandlerType = node.rejectHandler?.type
   configForm.value.returnNodeId = node.rejectHandler?.returnNodeId
