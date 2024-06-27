@@ -170,7 +170,6 @@ const imageSizeList = ref<ImageSizeVO[]>([
 ]) // size
 selectImageSize.value = imageSizeList.value[0]
 
-
 // version
 let versionList = ref<any>([]) // version 列表
 const midjourneyVersionList = ref<any>([
@@ -203,9 +202,6 @@ const nijiVersionList = ref<any>([
 ])
 const selectVersion = ref<any>('6.0') // 选中的 version
 versionList.value = midjourneyVersionList.value // 默认选择 midjourney
-
-// 定义 Props
-const props = defineProps({})
 
 /**  热词 - click  */
 const handlerHotWordClick = async (hotWord: string) => {
