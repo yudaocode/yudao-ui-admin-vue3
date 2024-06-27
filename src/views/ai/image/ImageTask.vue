@@ -34,6 +34,7 @@ import {ElLoading, LoadingOptionsResolved} from "element-plus";
 const message = useMessage() // 消息弹窗
 
 const imageList = ref<ImageDetailVO[]>([]) // image 列表
+const watchImageList = ref<ImageDetailVO[]>([]) // 监听的 image list，一般是生成中，需要轮训
 const imageListInterval = ref<any>() // image 列表定时器，刷新列表
 const isShowImageDetail = ref<boolean>(false) // 是否显示 task 详情
 const showImageDetailId = ref<number>(0) // 是否显示 task 详情
@@ -83,7 +84,6 @@ const getImageList = async (apply:boolean = false) => {
 const handlerImageBtnClick = async (type, imageDetail: ImageDetailVO) => {
   // 获取 image detail id
   showImageDetailId.value = imageDetail.id
-  console.log('type', imageDetail.id)
   // 处理不用 btn
   if (type === 'more') {
     await handlerDrawerOpen()
