@@ -8,7 +8,7 @@
       v-model="prompt"
       maxlength="1024"
       rows="5"
-      style="width: 100%; margin-top: 15px;"
+      style="width: 100%; margin-top: 15px"
       input-style="border-radius: 7px;"
       placeholder="例如：童话里的小屋应该是什么样子？"
       show-word-limit
@@ -20,12 +20,13 @@
       <el-text tag="b">随机热词</el-text>
     </div>
     <el-space wrap class="word-list">
-      <el-button round
-                 class="btn"
-                 :type="(selectHotWord === hotWord ? 'primary' : 'default')"
-                 v-for="hotWord in hotWords"
-                 :key="hotWord"
-                 @click="handlerHotWordClick(hotWord)"
+      <el-button
+        round
+        class="btn"
+        :type="selectHotWord === hotWord ? 'primary' : 'default'"
+        v-for="hotWord in hotWords"
+        :key="hotWord"
+        @click="handlerHotWordClick(hotWord)"
       >
         {{ hotWord }}
       </el-button>
@@ -33,36 +34,20 @@
   </div>
   <div class="group-item">
     <div>
-      <el-text tag="b">采样</el-text>
+      <el-text tag="b">采样方法</el-text>
     </div>
     <el-space wrap class="group-item-body">
-      <el-select
-        v-model="selectSampler"
-        placeholder="Select"
-        size="large"
-        style="width: 350px;"
-      >
-        <el-option
-          v-for="item in sampler"
-          :key="item.key"
-          :label="item.name"
-          :value="item.key"
-        />
+      <el-select v-model="selectSampler" placeholder="Select" size="large" style="width: 350px">
+        <el-option v-for="item in sampler" :key="item.key" :label="item.name" :value="item.key" />
       </el-select>
     </el-space>
   </div>
-
   <div class="group-item">
     <div>
       <el-text tag="b">图片尺寸</el-text>
     </div>
     <el-space wrap class="group-item-body">
-      <el-select
-        v-model="selectImageSize"
-        placeholder="Select"
-        size="large"
-        style="width: 350px;"
-      >
+      <el-select v-model="selectImageSize" placeholder="Select" size="large" style="width: 350px">
         <el-option
           v-for="item in imageSizeList"
           :key="item.key"
@@ -77,29 +62,37 @@
       <el-text tag="b">迭代步数</el-text>
     </div>
     <el-space wrap class="group-item-body">
-      <el-input v-model="steps" type="number" size="large" style="width: 350px" placeholder="Please input" />
+      <el-input
+        v-model="steps"
+        type="number"
+        size="large"
+        style="width: 350px"
+        placeholder="Please input"
+      />
     </el-space>
   </div>
   <div class="group-item">
     <div>
-      <el-text tag="b">随机性</el-text>
+      <el-text tag="b">随机因子</el-text>
     </div>
     <el-space wrap class="group-item-body">
-      <el-input v-model="seed" type="number" size="large" style="width: 350px" placeholder="Please input" />
+      <el-input
+        v-model="seed"
+        type="number"
+        size="large"
+        style="width: 350px"
+        placeholder="Please input"
+      />
     </el-space>
   </div>
   <div class="btns">
-    <el-button type="primary"
-               size="large"
-               round
-               :loading="drawIn"
-               @click="handlerGenerateImage">
-      {{drawIn ? '生成中' : '生成内容'}}
+    <el-button type="primary" size="large" round :loading="drawIn" @click="handlerGenerateImage">
+      {{ drawIn ? '生成中' : '生成内容' }}
     </el-button>
   </div>
 </template>
 <script setup lang="ts">
-import {ImageApi, ImageDrawReqVO} from '@/api/ai/image';
+import { ImageApi, ImageDrawReqVO } from '@/api/ai/image'
 
 // image 模型
 interface ImageModelVO {
@@ -110,91 +103,101 @@ interface ImageModelVO {
 // image 大小
 interface ImageSizeVO {
   key: string
-  width: string,
-  height: string,
+  width: string
+  height: string
 }
 
 // 定义属性
-const prompt = ref<string>('')  // 提示词
-const drawIn = ref<boolean>(false)  // 生成中
+const prompt = ref<string>('') // 提示词
+const drawIn = ref<boolean>(false) // 生成中
 const selectHotWord = ref<string>('') // 选中的热词
-const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
+const hotWords = ref<string[]>([
+  '中国旗袍',
+  '古装美女',
+  '卡通头像',
+  '机甲战士',
+  '童话小屋',
+  '中国长城'
+]) // 热词
 const selectSampler = ref<any>({}) // 模型
 // message
 const message = useMessage()
-// 模型
+// 采样方法 TODO @fan：有 Euler a；DPM++ 2S a；DPM++ 2M；DPM++ SDE；DPM++ 2M SDE；UniPC；Restart；另外，要不这种枚举，我们都放到 image 里？写成 stableDiffusionSampler ？
 const sampler = ref<ImageModelVO[]>([
   {
     key: 'Euler a',
-    name: 'Euler a',
+    name: 'Euler a'
   },
   {
     key: 'DPM++ 2S a Karras',
-    name: 'DPM++ 2S a Karras',
+    name: 'DPM++ 2S a Karras'
   },
   {
     key: 'DPM++ 2M Karras',
-    name: 'DPM++ 2M Karras',
+    name: 'DPM++ 2M Karras'
   },
   {
     key: 'DPM++ SDE Karras',
-    name: 'DPM++ SDE Karras',
+    name: 'DPM++ SDE Karras'
   },
   {
     key: 'DPM++ 2M SDE Karras',
-    name: 'DPM++ 2M SDE Karras',
-  },
-])  // 模型
+    name: 'DPM++ 2M SDE Karras'
+  }
+])
 selectSampler.value = sampler.value[0]
 
+// TODO @fan：是不是还有个，采样调度器
+// TODO @fan：是不是还有个，引导系数
 
 const selectImageSize = ref<ImageSizeVO>({} as ImageSizeVO) // 选中 size
+// TODO @fan：这个我们是不是只写 width、height 就好啦。key 可以在 option 拼接出来？
 const imageSizeList = ref<ImageSizeVO[]>([
   {
     key: '512x512',
     width: '512',
-    height: '512',
+    height: '512'
   },
   {
     key: '1024x1024',
     width: '1024',
-    height: '1024',
+    height: '1024'
   },
   {
     key: '1024x1792',
     width: '1024',
-    height: '1792',
+    height: '1792'
   },
   {
     key: '1792x1024',
     width: '1792',
-    height: '1024',
+    height: '1024'
   },
   {
     key: '2048x2048',
     width: '2048',
-    height: '2048',
+    height: '2048'
   },
   {
     key: '720x1280',
     width: '720',
-    height: '1280',
+    height: '1280'
   },
   {
     key: '1080x1920',
     width: '1080',
-    height: '1920',
+    height: '1920'
   },
   {
     key: '1440x2560',
     width: '1440',
-    height: '2560',
+    height: '2560'
   },
   {
     key: '2160x3840',
     width: '2160',
-    height: '3840',
-  },
+    height: '3840'
+  }
 ]) // size
 selectImageSize.value = imageSizeList.value[0]
 
@@ -239,8 +242,8 @@ const handlerGenerateImage = async () => {
       options: {
         sampler: selectSampler.value.key, // 采样算法
         seed: seed.value, // 随机种子
-        steps: steps.value, // 图片生成步数
-      },
+        steps: steps.value // 图片生成步数
+      }
     } as ImageDrawReqVO
     // 发送请求
     await ImageApi.drawImage(form)
@@ -251,10 +254,8 @@ const handlerGenerateImage = async () => {
     drawIn.value = false
   }
 }
-
 </script>
 <style scoped lang="scss">
-
 // 提示词
 .prompt {
 }
@@ -287,7 +288,6 @@ const handlerGenerateImage = async () => {
     width: 100%;
   }
 }
-
 
 .btns {
   display: flex;
