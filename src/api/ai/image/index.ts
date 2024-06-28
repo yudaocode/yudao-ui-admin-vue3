@@ -56,23 +56,23 @@ export interface ImageMjButtonsVO {
 
 // AI API 密钥 API
 export const ImageApi = {
-  // 获取我的图片列表
+  // 获取【我的】绘图分页
   getImagePageMy: async (params: ImagePageReqVO) => {
     return await request.get({ url: `/ai/image/my-page`, params })
   },
-  // 获取我的图片
+  // 获取【我的】绘图记录
   getImageMy: async (id: number) => {
     return await request.get({ url: `/ai/image/get-my?id=${id}` })
   },
-  // 获取我的图片
-  getImageMyIds: async (params) => {
-    return await request.get({ url: `/ai/image/get-my-ids`, params})
+  // 获取【我的】绘图记录列表
+  getImageListMyByIds: async (ids: number[]) => {
+    return await request.get({ url: `/ai/image/get-my-ids`, params: { ids: ids.join(',') } })
   },
   // 生成图片
   drawImage: async (data: ImageDrawReqVO) => {
     return await request.post({ url: `/ai/image/draw`, data })
   },
-  // 删除我的图片
+  // 删除【我的】绘画记录
   deleteImageMy: async (id: number) => {
     return await request.delete({ url: `/ai/image/delete-my?id=${id}` })
   },

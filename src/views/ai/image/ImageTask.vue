@@ -36,7 +36,7 @@ import { ElLoading, LoadingOptionsResolved } from 'element-plus'
 const message = useMessage() // 消息弹窗
 
 const imageList = ref<ImageVO[]>([]) // image 列表
-const watchImages = ref<{}>({}) // 监听的 image list，一般是生成中，需要轮训
+const inProgressImageMap = ref<{}>({}) // 监听的 image 映射，一般是生成中（需要轮询），key 为 image 编号，value 为 image
 const imageListInterval = ref<any>() // image 列表定时器，刷新列表
 const isShowImageDetail = ref<boolean>(false) // 是否显示 task 详情
 const showImageDetailId = ref<number>(0) // 是否显示 task 详情
@@ -79,12 +79,12 @@ const getImageList = async (apply: boolean = false) => {
     pageTotal.value = total
     // 需要 watch 的数据
     const newWatImages = {}
-    imageList.value.forEach(item => {
+    imageList.value.forEach((item) => {
       if (item.status === 10) {
         newWatImages[item.id] = item
       }
     })
-    watchImages.value = newWatImages
+    inProgressImageMap.value = newWatImages
   } finally {
     if (imageTaskLoadingInstance.value) {
       imageTaskLoadingInstance.value.close()
@@ -93,34 +93,30 @@ const getImageList = async (apply: boolean = false) => {
   }
 }
 
-/**
- * 获取 - image 列表
- */
+/** 轮询生成中的 image 列表 */
 const refreshWatchImages = async () => {
-  const imageIds = Object.keys(watchImages.value)
-  if (imageIds.length < 1) {
-    console.log('refreshWatchImages 不刷新', imageIds)
+  const imageIds = Object.keys(inProgressImageMap.value).map(Number)
+  if (imageIds.length == 0) {
     return
   }
-  const res  = await ImageApi.getImageMyIds({ids: imageIds.join(',')}) as ImageVO[]
+  const list = (await ImageApi.getImageListMyByIds(imageIds)) as ImageVO[]
   const newWatchImages = {}
-  res.forEach(image => {
+  list.forEach((image) => {
     if (image.status === 10) {
       newWatchImages[image.id] = image
     } else {
-      const index = imageList.value.findIndex(oldImage => image.id === oldImage.id)
-      if (index !== -1) {
+      const index = imageList.value.findIndex((oldImage) => image.id === oldImage.id)
+      if (index >= 0) {
         // 更新 imageList
         imageList.value[index] = image
       }
     }
   })
-  console.log('newWatchImages-done', newWatchImages)
-  watchImages.value = newWatchImages
+  inProgressImageMap.value = newWatchImages
 }
 
 /**  图片 - btn click  */
-const handlerImageBtnClick = async (type, imageDetail: ImageVO) => {
+const handlerImageBtnClick = async (type: string, imageDetail: ImageVO) => {
   // 获取 image detail id
   showImageDetailId.value = imageDetail.id
   // 处理不用 btn
@@ -130,7 +126,7 @@ const handlerImageBtnClick = async (type, imageDetail: ImageVO) => {
     await message.confirm(`是否删除照片?`)
     await ImageApi.deleteImageMy(imageDetail.id)
     await getImageList()
-    await message.success('删除成功!')
+    message.success('删除成功!')
   } else if (type === 'download') {
     await downloadImage(imageDetail.picUrl)
   }
