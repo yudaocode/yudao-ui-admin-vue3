@@ -8,8 +8,8 @@
 </template>
 
 <script lang="ts" setup>
-import Mode from './components/mode/index.vue'
-import List from './components/list/index.vue'
+import Mode from './mode/index.vue'
+import List from './list/index.vue'
 
 defineOptions({ name: 'Index' })
 

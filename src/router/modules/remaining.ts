@@ -79,7 +79,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     children: [
       {
         path: 'index',
-        component: () => import('@/views/ai//music/index.vue'),
+        component: () => import('@/views/ai/music/components/index.vue'),
         name: 'AIMusicIndex',
         meta: {
           title: 'AI 音乐',
