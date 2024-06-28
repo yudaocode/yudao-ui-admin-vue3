@@ -26,7 +26,7 @@
   />
 </template>
 <script setup lang="ts">
-import {ImageApi, ImageRespVO, ImageMjActionVO, ImageMjButtonsVO} from '@/api/ai/image';
+import {ImageApi, ImageMjActionVO, ImageMjButtonsVO, ImageRespVO} from '@/api/ai/image';
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
 import {ElLoading, LoadingOptionsResolved} from "element-plus";
@@ -34,7 +34,7 @@ import {ElLoading, LoadingOptionsResolved} from "element-plus";
 const message = useMessage() // 消息弹窗
 
 const imageList = ref<ImageRespVO[]>([]) // image 列表
-const watchImageList = ref<ImageRespVO[]>([]) // 监听的 image list，一般是生成中，需要轮训
+const watchImages = ref<{}>({}) // 监听的 image list，一般是生成中，需要轮训
 const imageListInterval = ref<any>() // image 列表定时器，刷新列表
 const isShowImageDetail = ref<boolean>(false) // 是否显示 task 详情
 const showImageDetailId = ref<number>(0) // 是否显示 task 详情
@@ -72,12 +72,39 @@ const getImageList = async (apply:boolean = false) => {
       imageList.value = list
     }
     pageTotal.value = total
+    // 需要 watch 的数据
+    imageList.value.map(item => {
+      if (item.status === 10) {
+        watchImages.value[item.id] = item
+      }
+    })
+
   } finally {
     if (imageTaskLoadingInstance.value) {
       imageTaskLoadingInstance.value.close();
       imageTaskLoadingInstance.value = null;
     }
   }
+}
+
+/**
+ * 获取 - image 列表
+ */
+const refreshWatchImages = async () => {
+  const imageIds = Object.keys(watchImages.value)
+  if (imageIds.length < 1) {
+    return
+  }
+  const res  = await ImageApi.getImageMyIds({ids: imageIds.join(',')}) as ImageRespVO[]
+  res.forEach(image => {
+    const index = imageList.value.findIndex(oldImage => image.id === oldImage.id)
+    if (index !== -1) {
+      // 更新 imageList
+      imageList.value[index] = image
+      // 删除 watchImages
+      delete watchImages.value[image.id];
+    }
+  })
 }
 
 /**  图片 - btn click  */
@@ -145,8 +172,8 @@ onMounted(async () => {
   await getImageList()
   // 自动刷新 image 列表
   imageListInterval.value = setInterval(async () => {
-    await getImageList(false)
-  }, 1000 * 20)
+    await refreshWatchImages()
+  }, 1000 * 3)
 })
 
 /** 组件取消挂在的时候 */

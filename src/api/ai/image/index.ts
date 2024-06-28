@@ -64,6 +64,10 @@ export const ImageApi = {
   getImageMy: async (id: number) => {
     return await request.get({ url: `/ai/image/get-my?id=${id}` })
   },
+  // 获取我的图片
+  getImageMyIds: async (params) => {
+    return await request.get({ url: `/ai/image/get-my-ids`, params})
+  },
   // 生成图片
   drawImage: async (data: ImageDrawReqVO) => {
     return await request.post({ url: `/ai/image/draw`, data })
