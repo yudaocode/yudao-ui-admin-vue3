@@ -28,9 +28,15 @@ export const MusicApi = {
     return await request.get({ url: `/ai/music/page`, params })
   },
 
-  // 修改音乐
-  updateMusic: async (data: MusicVO) => {
-    return await request.put({ url: `/ai/music/update`, data })
+  // 更新绘画发布状态
+  updateMusicPublicStatus: async (id: number, publicStatus: boolean) => {
+    return await request.put({
+      url: '/ai/music/update-public-status',
+      data: {
+        id,
+        publicStatus
+      }
+    })
   },
 
   // 删除音乐

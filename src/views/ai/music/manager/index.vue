@@ -42,13 +42,19 @@
         </el-select>
       </el-form-item>
       <el-form-item label="生成模式" prop="generateMode">
-        <el-input
+        <el-select
           v-model="queryParams.generateMode"
-          placeholder="请输入生成模式"
+          placeholder="请选择生成模式"
           clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.AI_GENERATE_MODE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
@@ -58,7 +64,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
+          class="!w-220px"
         />
       </el-form-item>
       <el-form-item label="是否发布" prop="publicStatus">
@@ -86,29 +92,76 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="编号" align="center" prop="id" />
-      <el-table-column label="用户编号" align="center" prop="userId" />
-      <el-table-column label="音乐名称" align="center" prop="title" />
-      <el-table-column label="歌词" align="center" prop="lyric" />
-      <el-table-column label="图片地址" align="center" prop="imageUrl" />
-      <el-table-column label="音频地址" align="center" prop="audioUrl" />
-      <el-table-column label="视频地址" align="center" prop="videoUrl" />
-      <el-table-column label="音乐状态" align="center" prop="status">
+      <el-table-column label="编号" align="center" prop="id" width="180" fixed="left" />
+      <el-table-column label="音乐名称" align="center" prop="title" width="180px" fixed="left" />
+      <el-table-column label="用户" align="center" prop="userId" width="180">
+        <template #default="scope">
+          <span>{{ userList.find((item) => item.id === scope.row.userId)?.nickname }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="音乐状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.AI_MUSIC_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <el-table-column label="描述词" align="center" prop="gptDescriptionPrompt" />
-      <el-table-column label="提示词" align="center" prop="prompt" />
-      <el-table-column label="模型平台" align="center" prop="platform" />
-      <el-table-column label="模型" align="center" prop="model" />
-      <el-table-column label="生成模式" align="center" prop="generateMode">
+      <el-table-column label="模型" align="center" prop="model" width="180" />
+      <el-table-column label="内容" align="center" width="180">
+        <template #default="{ row }">
+          <el-link
+            v-if="row.audioUrl?.length > 0"
+            type="primary"
+            :href="row.audioUrl"
+            target="_blank"
+          >
+            音乐
+          </el-link>
+          <el-link
+            v-if="row.videoUrl?.length > 0"
+            type="primary"
+            :href="row.videoUrl"
+            target="_blank"
+            class="!pl-5px"
+          >
+            视频
+          </el-link>
+          <el-link
+            v-if="row.imageUrl?.length > 0"
+            type="primary"
+            :href="row.imageUrl"
+            target="_blank"
+            class="!pl-5px"
+          >
+            封面
+          </el-link>
+        </template>
+      </el-table-column>
+      <el-table-column label="提示词" align="center" prop="prompt" width="180" />
+      <el-table-column label="歌词" align="center" prop="lyric" width="180" />
+      <el-table-column label="描述词" align="center" prop="gptDescriptionPrompt" width="180" />
+      <el-table-column label="生成模式" align="center" prop="generateMode" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.AI_GENERATE_MODE" :value="scope.row.generateMode" />
         </template>
       </el-table-column>
-      <el-table-column label="音乐风格标签" align="center" prop="tags" />
-      <el-table-column label="任务id" align="center" prop="taskId" />
+      <el-table-column label="风格标签" align="center" prop="tags" width="180">
+        <template #default="scope">
+          <el-tag v-for="tag in scope.row.tags" :key="tag" round class="ml-2px">
+            {{ tag }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="是否发布" align="center" prop="publicStatus">
+        <template #default="scope">
+          <el-switch
+            v-model="scope.row.publicStatus"
+            :active-value="true"
+            :inactive-value="false"
+            @change="handleUpdatePublicStatusChange(scope.row)"
+            :disabled="scope.row.status !== 20"
+          />
+        </template>
+      </el-table-column>
+      <el-table-column label="任务编号" align="center" prop="taskId" width="180" />
       <el-table-column label="错误信息" align="center" prop="errorMessage" />
       <el-table-column
         label="创建时间"
@@ -117,12 +170,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="是否发布" align="center" prop="publicStatus">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.INFRA_BOOLEAN_STRING" :value="scope.row.publicStatus" />
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" width="100" fixed="right">
         <template #default="scope">
           <el-button
             link
@@ -149,6 +197,7 @@
 import { getIntDictOptions, getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { MusicApi, MusicVO } from '@/api/ai/music'
+import * as UserApi from '@/api/system/user'
 
 /** AI 音乐 列表 */
 defineOptions({ name: 'AiMusicManager' })
@@ -170,6 +219,7 @@ const queryParams = reactive({
   publicStatus: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const userList = ref<UserApi.UserVO[]>([]) // 用户列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -208,8 +258,24 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
+/** 修改是否发布 */
+const handleUpdatePublicStatusChange = async (row: MusicVO) => {
+  try {
+    // 修改状态的二次确认
+    const text = row.publicStatus ? '公开' : '私有'
+    await message.confirm('确认要"' + text + '"该音乐吗?')
+    // 发起修改状态
+    await MusicApi.updateMusicPublicStatus(row.id, row.publicStatus)
+    await getList()
+  } catch {
+    row.publicStatus = !row.publicStatus
+  }
+}
+
 /** 初始化 **/
-onMounted(() => {
+onMounted(async () => {
   getList()
+  // 获得用户列表
+  userList.value = await UserApi.getSimpleUserList()
 })
 </script>
