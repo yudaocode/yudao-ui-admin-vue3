@@ -78,12 +78,13 @@ const getImageList = async (apply: boolean = false) => {
     }
     pageTotal.value = total
     // 需要 watch 的数据
-    imageList.value.map(item => {
+    const newWatImages = {}
+    imageList.value.forEach(item => {
       if (item.status === 10) {
-        watchImages.value[item.id] = item
+        newWatImages[item.id] = item
       }
     })
-
+    watchImages.value = newWatImages
   } finally {
     if (imageTaskLoadingInstance.value) {
       imageTaskLoadingInstance.value.close()
@@ -98,18 +99,24 @@ const getImageList = async (apply: boolean = false) => {
 const refreshWatchImages = async () => {
   const imageIds = Object.keys(watchImages.value)
   if (imageIds.length < 1) {
+    console.log('refreshWatchImages 不刷新', imageIds)
     return
   }
-  const res  = await ImageApi.getImageMyIds({ids: imageIds.join(',')}) as ImageRespVO[]
+  const res  = await ImageApi.getImageMyIds({ids: imageIds.join(',')}) as ImageVO[]
+  const newWatchImages = {}
   res.forEach(image => {
-    const index = imageList.value.findIndex(oldImage => image.id === oldImage.id)
-    if (index !== -1) {
-      // 更新 imageList
-      imageList.value[index] = image
-      // 删除 watchImages
-      delete watchImages.value[image.id];
+    if (image.status === 10) {
+      newWatchImages[image.id] = image
+    } else {
+      const index = imageList.value.findIndex(oldImage => image.id === oldImage.id)
+      if (index !== -1) {
+        // 更新 imageList
+        imageList.value[index] = image
+      }
     }
   })
+  console.log('newWatchImages-done', newWatchImages)
+  watchImages.value = newWatchImages
 }
 
 /**  图片 - btn click  */
