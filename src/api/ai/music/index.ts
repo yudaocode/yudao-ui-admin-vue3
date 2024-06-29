@@ -16,6 +16,7 @@ export interface MusicVO {
   model: string // 模型
   generateMode: number // 生成模式
   tags: string // 音乐风格标签
+  duration: number // 音乐时长
   publicStatus: boolean // 是否发布
   taskId: string // 任务id
   errorMessage: string // 错误信息
@@ -28,15 +29,9 @@ export const MusicApi = {
     return await request.get({ url: `/ai/music/page`, params })
   },
 
-  // 更新绘画发布状态
-  updateMusicPublicStatus: async (id: number, publicStatus: boolean) => {
-    return await request.put({
-      url: '/ai/music/update-public-status',
-      data: {
-        id,
-        publicStatus
-      }
-    })
+  // 更新音乐
+  updateMusic: async (data: any) => {
+    return await request.put({ url: '/ai/music/update', data })
   },
 
   // 删除音乐

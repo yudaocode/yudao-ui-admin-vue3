@@ -96,14 +96,8 @@ export const ImageApi = {
   },
 
   // 更新绘画发布状态
-  updateImagePublicStatus: async (id: number, publicStatus: boolean) => {
-    return await request.put({
-      url: '/ai/image/update-public-status',
-      data: {
-        id,
-        publicStatus
-      }
-    })
+  updateImage: async (data: any) => {
+    return await request.put({ url: '/ai/image/update-public-status', data })
   },
 
   // 删除绘画

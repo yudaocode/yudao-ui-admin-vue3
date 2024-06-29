@@ -231,7 +231,10 @@ const handleUpdatePublicStatusChange = async (row: ImageVO) => {
     const text = row.publicStatus ? '公开' : '私有'
     await message.confirm('确认要"' + text + '"该图片吗?')
     // 发起修改状态
-    await ImageApi.updateImagePublicStatus(row.id, row.publicStatus)
+    await ImageApi.updateImage({
+      id: row.id,
+      publicStatus: row.publicStatus
+    })
     await getList()
   } catch {
     row.publicStatus = !row.publicStatus

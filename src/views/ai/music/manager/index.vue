@@ -135,9 +135,10 @@
           </el-link>
         </template>
       </el-table-column>
+      <el-table-column label="时长（秒）" align="center" prop="duration" width="100" />
       <el-table-column label="提示词" align="center" prop="prompt" width="180" />
       <el-table-column label="歌词" align="center" prop="lyric" width="180" />
-      <el-table-column label="描述词" align="center" prop="gptDescriptionPrompt" width="180" />
+      <el-table-column label="描述" align="center" prop="gptDescriptionPrompt" width="180" />
       <el-table-column label="生成模式" align="center" prop="generateMode" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.AI_GENERATE_MODE" :value="scope.row.generateMode" />
@@ -265,7 +266,10 @@ const handleUpdatePublicStatusChange = async (row: MusicVO) => {
     const text = row.publicStatus ? '公开' : '私有'
     await message.confirm('确认要"' + text + '"该音乐吗?')
     // 发起修改状态
-    await MusicApi.updateMusicPublicStatus(row.id, row.publicStatus)
+    await MusicApi.updateMusic({
+      id: row.id,
+      publicStatus: row.publicStatus
+    })
     await getList()
   } catch {
     row.publicStatus = !row.publicStatus
