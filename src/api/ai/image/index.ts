@@ -66,7 +66,7 @@ export const ImageApi = {
   },
   // 获取【我的】绘图记录列表
   getImageListMyByIds: async (ids: number[]) => {
-    return await request.get({ url: `/ai/image/get-my-ids`, params: { ids: ids.join(',') } })
+    return await request.get({ url: `/ai/image/my-list-by-ids`, params: { ids: ids.join(',') } })
   },
   // 生成图片
   drawImage: async (data: ImageDrawReqVO) => {

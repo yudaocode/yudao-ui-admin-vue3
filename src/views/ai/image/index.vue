@@ -11,7 +11,7 @@
                @on-draw-start="handlerDrawStart"
                @on-draw-complete="handlerDrawComplete" />
         <Midjourney v-if="selectModel === 'MJ绘画'" />
-        <StableDiffusion v-if="selectModel === 'Stable Diffusion'" />
+        <StableDiffusion v-if="selectModel === 'Stable Diffusion'" @on-draw-complete="handlerDrawComplete" />
       </div>
     </div>
     <div class="main">

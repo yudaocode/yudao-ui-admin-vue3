@@ -26,7 +26,7 @@
         :type="selectHotWord === hotWord ? 'primary' : 'default'"
         v-for="hotWord in hotWords"
         :key="hotWord"
-        @click="handlerHotWordClick(hotWord)"
+        @click="handleHotWordClick(hotWord)"
       >
         {{ hotWord }}
       </el-button>
@@ -44,17 +44,31 @@
   </div>
   <div class="group-item">
     <div>
+      <el-text tag="b">CLIP</el-text>
+    </div>
+    <el-space wrap class="group-item-body">
+      <el-select v-model="selectClipGuidancePreset" placeholder="Select" size="large" style="width: 350px">
+        <el-option v-for="item in clipGuidancePresets" :key="item.key" :label="item.name" :value="item.key" />
+      </el-select>
+    </el-space>
+  </div>
+  <div class="group-item">
+    <div>
+      <el-text tag="b">风格</el-text>
+    </div>
+    <el-space wrap class="group-item-body">
+      <el-select v-model="selectStylePreset" placeholder="Select" size="large" style="width: 350px">
+        <el-option v-for="item in stylePresets" :key="item.key" :label="item.name" :value="item.key" />
+      </el-select>
+    </el-space>
+  </div>
+  <div class="group-item">
+    <div>
       <el-text tag="b">图片尺寸</el-text>
     </div>
     <el-space wrap class="group-item-body">
-      <el-select v-model="selectImageSize" placeholder="Select" size="large" style="width: 350px">
-        <el-option
-          v-for="item in imageSizeList"
-          :key="item.key"
-          :label="item.key"
-          :value="item.key"
-        />
-      </el-select>
+      <el-input v-model="imageWidth" style="width: 170px" placeholder="图片宽度" />
+      <el-input v-model="imageHeight" style="width: 170px" placeholder="图片高度" />
     </el-space>
   </div>
   <div class="group-item">
@@ -64,6 +78,20 @@
     <el-space wrap class="group-item-body">
       <el-input
         v-model="steps"
+        type="number"
+        size="large"
+        style="width: 350px"
+        placeholder="Please input"
+      />
+    </el-space>
+  </div>
+  <div class="group-item">
+    <div>
+      <el-text tag="b">引导系数</el-text>
+    </div>
+    <el-space wrap class="group-item-body">
+      <el-input
+        v-model="scale"
         type="number"
         size="large"
         style="width: 350px"
@@ -86,13 +114,13 @@
     </el-space>
   </div>
   <div class="btns">
-    <el-button type="primary" size="large" round :loading="drawIn" @click="handlerGenerateImage">
+    <el-button type="primary" size="large" round :loading="drawIn" @click="handleGenerateImage">
       {{ drawIn ? '生成中' : '生成内容' }}
     </el-button>
   </div>
 </template>
 <script setup lang="ts">
-import { ImageApi, ImageDrawReqVO } from '@/api/ai/image'
+import {ImageApi, ImageDrawReqVO} from '@/api/ai/image'
 
 // image 模型
 interface ImageModelVO {
@@ -100,17 +128,13 @@ interface ImageModelVO {
   name: string
 }
 
-// image 大小
-interface ImageSizeVO {
-  key: string
-  width: string
-  height: string
-}
-
 // 定义属性
 const prompt = ref<string>('') // 提示词
 const drawIn = ref<boolean>(false) // 生成中
 const selectHotWord = ref<string>('') // 选中的热词
+const imageWidth = ref<number>(512) // 图片宽度
+const imageHeight = ref<number>(512) // 图片高度
+
 const hotWords = ref<string[]>([
   '中国旗袍',
   '古装美女',
@@ -119,100 +143,181 @@ const hotWords = ref<string[]>([
   '童话小屋',
   '中国长城'
 ]) // 热词
-const selectSampler = ref<any>({}) // 模型
 // message
 const message = useMessage()
+
 // 采样方法 TODO @fan：有 Euler a；DPM++ 2S a；DPM++ 2M；DPM++ SDE；DPM++ 2M SDE；UniPC；Restart；另外，要不这种枚举，我们都放到 image 里？写成 stableDiffusionSampler ？
+const selectSampler = ref<any>({}) // 模型
+// DDIM DDPM K_DPMPP_2M K_DPMPP_2S_ANCESTRAL K_DPM_2 K_DPM_2_ANCESTRAL K_EULER K_EULER_ANCESTRAL K_HEUN K_LMS
 const sampler = ref<ImageModelVO[]>([
   {
-    key: 'Euler a',
-    name: 'Euler a'
+    key: 'DDIM',
+    name: 'DDIM'
   },
   {
-    key: 'DPM++ 2S a Karras',
-    name: 'DPM++ 2S a Karras'
+    key: 'DDPM',
+    name: 'DDPM'
   },
   {
-    key: 'DPM++ 2M Karras',
-    name: 'DPM++ 2M Karras'
+    key: 'K_DPMPP_2M',
+    name: 'K_DPMPP_2M'
   },
   {
-    key: 'DPM++ SDE Karras',
-    name: 'DPM++ SDE Karras'
+    key: 'K_DPMPP_2S_ANCESTRAL',
+    name: 'K_DPMPP_2S_ANCESTRAL'
   },
   {
-    key: 'DPM++ 2M SDE Karras',
-    name: 'DPM++ 2M SDE Karras'
-  }
+    key: 'K_DPM_2',
+    name: 'K_DPM_2'
+  },
+  {
+    key: 'K_DPM_2_ANCESTRAL',
+    name: 'K_DPM_2_ANCESTRAL'
+  },
+  {
+    key: 'K_EULER',
+    name: 'K_EULER'
+  },
+  {
+    key: 'K_EULER_ANCESTRAL',
+    name: 'K_EULER_ANCESTRAL'
+  },
+  {
+    key: 'K_HEUN',
+    name: 'K_HEUN'
+  },
+  {
+    key: 'K_LMS',
+    name: 'K_LMS'
+  },
 ])
 selectSampler.value = sampler.value[0]
 
-// TODO @fan：是不是还有个，采样调度器
-// TODO @fan：是不是还有个，引导系数
+// 风格
+// 3d-model analog-film anime cinematic comic-book digital-art enhance fantasy-art isometric
+// line-art low-poly modeling-compound neon-punk origami photographic pixel-art tile-texture
+const selectStylePreset = ref<any>({}) // 模型
+const stylePresets = ref<ImageModelVO[]>([
+  {
+    key: '3d-model',
+    name: '3d-model'
+  },
+  {
+    key: 'analog-film',
+    name: 'analog-film'
+  },
+  {
+    key: 'anime',
+    name: 'anime'
+  },
+  {
+    key: 'cinematic',
+    name: 'cinematic'
+  },
+  {
+    key: 'comic-book',
+    name: 'comic-book'
+  },
+  {
+    key: 'digital-art',
+    name: 'digital-art'
+  },
+  {
+    key: 'enhance',
+    name: 'enhance'
+  },
+  {
+    key: 'fantasy-art',
+    name: 'fantasy-art'
+  },
+  {
+    key: 'isometric',
+    name: 'isometric'
+  },
+  {
+    key: 'line-art',
+    name: 'line-art'
+  },
+  {
+    key: 'low-poly',
+    name: 'low-poly'
+  },
+  {
+    key: 'modeling-compound',
+    name: 'modeling-compound'
+  },
+  // neon-punk origami photographic pixel-art tile-texture
+  {
+    key: 'neon-punk',
+    name: 'neon-punk'
+  },
+  {
+    key: 'origami',
+    name: 'origami'
+  },
+  {
+    key: 'photographic',
+    name: 'photographic'
+  },
+  {
+    key: 'pixel-art',
+    name: 'pixel-art'
+  },
+  {
+    key: 'tile-texture',
+    name: 'tile-texture'
+  },
+])
+selectStylePreset.value = stylePresets.value[0]
 
-const selectImageSize = ref<ImageSizeVO>({} as ImageSizeVO) // 选中 size
-// TODO @fan：这个我们是不是只写 width、height 就好啦。key 可以在 option 拼接出来？
-const imageSizeList = ref<ImageSizeVO[]>([
+
+// 文本提示相匹配的图像(clip_guidance_preset) 简称 CLIP
+// https://platform.stability.ai/docs/api-reference#tag/SDXL-and-SD1.6/operation/textToImage
+// FAST_BLUE FAST_GREEN NONE SIMPLE SLOW SLOWER SLOWEST
+const selectClipGuidancePreset = ref<any>({}) // 模型
+const clipGuidancePresets = ref<ImageModelVO[]>([
   {
-    key: '512x512',
-    width: '512',
-    height: '512'
+    key: 'NONE',
+    name: 'NONE'
   },
   {
-    key: '1024x1024',
-    width: '1024',
-    height: '1024'
+    key: 'FAST_BLUE',
+    name: 'FAST_BLUE'
   },
   {
-    key: '1024x1792',
-    width: '1024',
-    height: '1792'
+    key: 'FAST_GREEN',
+    name: 'FAST_GREEN'
   },
   {
-    key: '1792x1024',
-    width: '1792',
-    height: '1024'
+    key: 'SIMPLE',
+    name: 'SIMPLE'
   },
   {
-    key: '2048x2048',
-    width: '2048',
-    height: '2048'
+    key: 'SLOW',
+    name: 'SLOW'
   },
   {
-    key: '720x1280',
-    width: '720',
-    height: '1280'
+    key: 'SLOWER',
+    name: 'SLOWER'
   },
   {
-    key: '1080x1920',
-    width: '1080',
-    height: '1920'
+    key: 'SLOWEST',
+    name: 'SLOWEST'
   },
-  {
-    key: '1440x2560',
-    width: '1440',
-    height: '2560'
-  },
-  {
-    key: '2160x3840',
-    width: '2160',
-    height: '3840'
-  }
-]) // size
-selectImageSize.value = imageSizeList.value[0]
+])
+selectClipGuidancePreset.value = clipGuidancePresets.value[0]
 
 const steps = ref<number>(20) // 迭代步数
-const seed = ref<number>(-1) // 控制生成图像的随机性
+const seed = ref<number>(42) // 控制生成图像的随机性
+const scale = ref<number>(7.5) // 引导系数
 
 // 定义 Props
 const props = defineProps({})
 // 定义 emits
 const emits = defineEmits(['onDrawStart', 'onDrawComplete'])
 
-// TODO @fan：如果是简单注释，建议用 /** */，主要是现在项目里是这种风格哈，保持一致好点~
-// TODO @fan：handler 应该改成 handle 哈
 /** 热词 - click  */
-const handlerHotWordClick = async (hotWord: string) => {
+const handleHotWordClick = async (hotWord: string) => {
   // 取消选中
   if (selectHotWord.value == hotWord) {
     selectHotWord.value = ''
@@ -225,7 +330,7 @@ const handlerHotWordClick = async (hotWord: string) => {
 }
 
 /**  图片生产  */
-const handlerGenerateImage = async () => {
+const handleGenerateImage = async () => {
   // 二次确认
   await message.confirm(`确认生成内容?`)
   try {
@@ -233,19 +338,22 @@ const handlerGenerateImage = async () => {
     drawIn.value = true
     // 回调
     emits('onDrawStart', 'StableDiffusion')
+    // 发送请求
     const form = {
       platform: 'StableDiffusion',
       model: 'stable-diffusion-v1-6',
       prompt: prompt.value, // 提示词
-      width: selectImageSize.value.width, // 图片宽度
-      height: selectImageSize.value.height, // 图片高度
+      width: imageWidth.value, // 图片宽度
+      height: imageHeight.value, // 图片高度
       options: {
-        sampler: selectSampler.value.key, // 采样算法
         seed: seed.value, // 随机种子
-        steps: steps.value // 图片生成步数
+        steps: steps.value, // 图片生成步数
+        scale: scale.value, // 引导系数
+        sampler: selectSampler.value.key, // 采样算法
+        clipGuidancePreset: selectClipGuidancePreset.value.key, // 文本提示相匹配的图像 CLIP
+        stylePreset: selectStylePreset.value.key, // 风格
       }
     } as ImageDrawReqVO
-    // 发送请求
     await ImageApi.drawImage(form)
   } finally {
     // 回调
