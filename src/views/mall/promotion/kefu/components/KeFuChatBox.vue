@@ -63,7 +63,7 @@
 </template>
 
 <script lang="ts" setup>
-import { KeFuMessageApi, KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
+import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { UserTypeEnum } from '@/utils/constants'
 import { replaceEmoji } from '@/views/mall/promotion/kefu/components/emoji'
@@ -77,10 +77,143 @@ const keFuConversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespV
 // 获得消息
 const getMessageList = async (conversation: KeFuConversationRespVO) => {
   keFuConversation.value = conversation
-  const { list } = await KeFuMessageApi.getKeFuMessagePage({
-    pageNo: 1,
-    conversationId: conversation.id
-  })
+  // const { list } = await KeFuMessageApi.getKeFuMessagePage({
+  //   pageNo: 1,
+  //   conversationId: conversation.id
+  // })
+  // TODO puhui999: 方便查看效果
+  const list = [
+    {
+      id: 19,
+      conversationId: 1,
+      senderId: 283,
+      senderAvatar: null,
+      senderType: 2,
+      receiverId: null,
+      receiverType: null,
+      contentType: 1,
+      content: '[爱心][爱心][坏笑][坏笑][天使][天使]',
+      readStatus: false,
+      createTime: 1718616705000
+    },
+    {
+      id: 18,
+      conversationId: 1,
+      senderId: 283,
+      senderAvatar: null,
+      senderType: 1,
+      receiverId: null,
+      receiverType: null,
+      contentType: 1,
+      content: '[瞌睡][瞌睡]',
+      readStatus: false,
+      createTime: 1718616690000
+    },
+    {
+      id: 17,
+      conversationId: 1,
+      senderId: 283,
+      senderAvatar: null,
+      senderType: 1,
+      receiverId: null,
+      receiverType: null,
+      contentType: 1,
+      content: '[冷酷][冷酷]',
+      readStatus: false,
+      createTime: 1718616350000
+    },
+    {
+      id: 16,
+      conversationId: 1,
+      senderId: 283,
+      senderAvatar: null,
+      senderType: 1,
+      receiverId: null,
+      receiverType: null,
+      contentType: 1,
+      content: '[天使]',
+      readStatus: false,
+      createTime: 1718615505000
+    },
+    {
+      id: 15,
+      conversationId: 1,
+      senderId: 283,
+      senderAvatar: null,
+      senderType: 2,
+      receiverId: null,
+      receiverType: null,
+      contentType: 1,
+      content: '[天使]',
+      readStatus: false,
+      createTime: 1718615485000
+    },
+    {
+      id: 14,
+      conversationId: 1,
+      senderId: 283,
+      senderAvatar: null,
+      senderType: 2,
+      receiverId: null,
+      receiverType: null,
+      contentType: 1,
+      content: '[心碎][心碎]',
+      readStatus: false,
+      createTime: 1718615453000
+    },
+    {
+      id: 13,
+      conversationId: 1,
+      senderId: 283,
+      senderAvatar: null,
+      senderType: 2,
+      receiverId: null,
+      receiverType: null,
+      contentType: 1,
+      content: '[心碎][心碎]',
+      readStatus: false,
+      createTime: 1718615430000
+    },
+    {
+      id: 12,
+      conversationId: 1,
+      senderId: 283,
+      senderAvatar: null,
+      senderType: 1,
+      receiverId: null,
+      receiverType: null,
+      contentType: 1,
+      content: '[心碎][心碎]',
+      readStatus: false,
+      createTime: 1718615425000
+    },
+    {
+      id: 11,
+      conversationId: 1,
+      senderId: 283,
+      senderAvatar: null,
+      senderType: 1,
+      receiverId: null,
+      receiverType: null,
+      contentType: 1,
+      content: '[困~][困~]',
+      readStatus: false,
+      createTime: 1718615413000
+    },
+    {
+      id: 10,
+      conversationId: 1,
+      senderId: 283,
+      senderAvatar: null,
+      senderType: 1,
+      receiverId: null,
+      receiverType: null,
+      contentType: 1,
+      content: '[睡着][睡着]',
+      readStatus: false,
+      createTime: 1718615407000
+    }
+  ]
   messageList.value = list
 }
 defineExpose({ getMessageList })
@@ -122,20 +255,26 @@ const showChatBox = computed(() => !isEmpty(keFuConversation.value))
     .ss-row-right {
       justify-content: flex-end;
 
-      .kefu-message::after {
-        content: '';
-        width: 10px;
-        height: 10px;
-        right: -19px;
-        top: calc(50% - 10px);
-        position: absolute;
-        border-left: 5px solid #ffffff;
-        border-bottom: 5px solid transparent;
-        border-top: 5px solid transparent;
-        border-right: 5px solid transparent;
+      .kefu-message {
+        margin-right: 20px;
+        position: relative;
+
+        &::after {
+          content: '';
+          width: 10px;
+          height: 10px;
+          right: -19px;
+          top: calc(50% - 10px);
+          position: absolute;
+          border-left: 5px solid #ffffff;
+          border-bottom: 5px solid transparent;
+          border-top: 5px solid transparent;
+          border-right: 5px solid transparent;
+        }
       }
     }
 
+    // 消息气泡
     .kefu-message {
       color: #333;
       border-radius: 5px;
