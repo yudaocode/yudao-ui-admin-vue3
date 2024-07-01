@@ -16,7 +16,7 @@ export interface KeFuConversationRespVO {
   /**
    * 会话所属用户昵称
    */
-  nickname: string
+  userNickname: string
   /**
    * 最后聊天时间
    */

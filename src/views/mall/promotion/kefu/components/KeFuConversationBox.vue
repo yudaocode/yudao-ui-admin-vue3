@@ -10,7 +10,7 @@
       <div class="kefu-conversation-left flex justify-center items-center">
         <el-avatar :src="item.userAvatar" alt="avatar" />
         <div class="ml-10px">
-          <div class="nickname">{{ item.nickname }}</div>
+          <div class="nickname">{{ item.userNickname }}</div>
           <div
             v-dompurify-html="replaceEmoji(item.lastMessageContent)"
             class="last-message flex items-center color-[#989EA6]"
@@ -41,7 +41,7 @@ const getConversationList = async () => {
       userId: 283,
       userAvatar:
         'https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKMezSxtOImrC9lbhwHiazYwck3xwrEcO7VJfG6WQo260whaeVNoByE5RreiaGsGfOMlIiaDhSaA991w/132',
-      nickname: '辉辉鸭' + i,
+      userNickname: '辉辉鸭' + i,
       lastMessageTime: getNowDateTime(),
       lastMessageContent: '[爱心][爱心]你好哇',
       lastMessageContentType: 1,
@@ -54,12 +54,12 @@ const getConversationList = async () => {
 }
 defineExpose({ getConversationList })
 const emits = defineEmits<{
-  (e: 'change', v: number): void
+  (e: 'change', v: KeFuConversationRespVO): void
 }>()
 // 打开右侧消息
 const openRightMessage = (item: KeFuConversationRespVO, index: number) => {
   activeConversationIndex.value = index
-  emits('change', item.id)
+  emits('change', item)
 }
 </script>
 

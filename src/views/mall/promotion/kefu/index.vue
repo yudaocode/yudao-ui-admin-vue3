@@ -15,12 +15,17 @@
 
 <script lang="ts" setup>
 import { KeFuChatBox, KeFuConversationBox } from './components'
+import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 
 defineOptions({ name: 'KeFu' })
 
+// 加载消息
 const keFuChatBoxRef = ref<InstanceType<typeof KeFuChatBox>>()
-const handleChange = () => {}
+const handleChange = (conversation: KeFuConversationRespVO) => {
+  keFuChatBoxRef.value?.getMessageList(conversation)
+}
 
+// 加载会话
 const keFuConversationRef = ref<InstanceType<typeof KeFuConversationBox>>()
 onMounted(() => {
   keFuConversationRef.value?.getConversationList()

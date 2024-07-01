@@ -8,7 +8,3 @@ export const KeFuMessageContentTypeEnum = {
   PRODUCT: 10, //  商品消息
   ORDER: 11 //  订单消息"
 }
-export const UserTypeEnum = {
-  MEMBER: 1, // 会员 面向 c 端，普通用户
-  ADMIN: 2 // 管理员 面向 b 端，管理后台
-}
