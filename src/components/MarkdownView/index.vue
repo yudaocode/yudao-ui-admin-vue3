@@ -1,13 +1,18 @@
 
 <template>
-  <div v-html="contentHtml"></div>
+  <div ref="contentRef" class="markdown-view" v-html="contentHtml"></div>
 </template>
 
 <script setup lang="ts">
+import {useClipboard} from "@vueuse/core";
+
 import {marked} from 'marked'
 import 'highlight.js/styles/vs2015.min.css'
 import hljs from 'highlight.js'
 import {ref} from "vue";
+
+const {copy} = useClipboard() // 初始化 copy 到粘贴板
+const contentRef = ref()
 
 // 代码高亮：https://highlightjs.org/
 // 转换 markdown：marked
@@ -15,9 +20,14 @@ import {ref} from "vue";
 // marked 渲染器
 const renderer = {
   code(code, language, c) {
-    const highlightHtml = hljs.highlight(code, {language: language, ignoreIllegals: true}).value
+    let highlightHtml
+    try {
+      highlightHtml = hljs.highlight(code, {language: language, ignoreIllegals: true}).value
+    } catch (e) {
+      // skip
+    }
     const copyHtml = `<div id="copy" data-copy='${code}' style="position: absolute; right: 10px; top: 5px; color: #fff;cursor: pointer;">复制</div>`
-    return `<pre>${copyHtml}<code class="hljs">${highlightHtml}</code></pre>`
+    return `<pre style="position: relative;">${copyHtml}<code class="hljs">${highlightHtml}</code></pre>`
   }
 }
 
@@ -54,11 +64,23 @@ const renderMarkdown = async (content: string) => {
 onMounted(async ()  => {
   // 解析转换 markdown
   await renderMarkdown(props.content as string);
+  //
+  // 添加 copy 监听
+  contentRef.value.addEventListener('click', (e: any) => {
+    console.log(e)
+    if (e.target.id === 'copy') {
+      copy(e.target?.dataset?.copy)
+      ElMessage({
+        message: '复制成功!',
+        type: 'success'
+      })
+    }
+  })
 })
 </script>
 
 
-<style scoped lang="scss">
+<style lang="scss">
 .markdown-view {
   font-family: PingFang SC;
   font-size: 0.95rem;

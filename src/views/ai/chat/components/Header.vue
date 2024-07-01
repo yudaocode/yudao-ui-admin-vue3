@@ -45,6 +45,4 @@ defineProps({
     flex-direction: row;
   }
 }
-
-
 </style>

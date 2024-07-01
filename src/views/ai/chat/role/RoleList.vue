@@ -1,59 +1,72 @@
 <template>
-  <div class="card-list">
-    <el-card class="card" body-class="card-body" v-for="role in roleList" :key="role.id">
-      <!--  更多 -->
-      <div class="more-container">
-        <el-dropdown @command="handleMoreClick">
+  <div class="card-list" ref="tabsRef"  @scroll="handleTabsScroll">
+    <div class="card-item" v-for="role in roleList" :key="role.id">
+      <el-card class="card" body-class="card-body">
+        <!--  更多 -->
+        <div class="more-container" v-if="showMore">
+          <el-dropdown @command="handleMoreClick">
           <span class="el-dropdown-link">
              <el-button type="text" >
                 <el-icon><More /></el-icon>
               </el-button>
           </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item :command="['edit', role]" >
-                <el-icon><EditPen /></el-icon>编辑
-              </el-dropdown-item>
-              <el-dropdown-item :command="['delete', role]"  style="color: red;" >
-                <el-icon><Delete /></el-icon>
-                <span>删除</span>
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-      <!--  头像 -->
-      <div>
-        <img class="avatar" :src="role.avatar"/>
-      </div>
-      <div class="right-container">
-        <div class="content-container">
-          <div class="title">{{ role.name }}</div>
-          <div class="description">{{ role.description }}</div>
-
+            <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item :command="['edit', role]" >
+                  <el-icon><EditPen /></el-icon>编辑
+                </el-dropdown-item>
+                <el-dropdown-item :command="['delete', role]"  style="color: red;" >
+                  <el-icon><Delete /></el-icon>
+                  <span>删除</span>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </div>
-        <div class="btn-container">
-          <el-button type="primary" size="small" @click="handleUseClick(role)">使用</el-button>
+        <!--  头像 -->
+        <div>
+          <img class="avatar" :src="role.avatar"/>
         </div>
-      </div>
-    </el-card>
+        <div class="right-container">
+          <div class="content-container">
+            <div class="title">{{ role.name }}</div>
+            <div class="description">{{ role.description }}</div>
+          </div>
+          <div class="btn-container">
+            <el-button type="primary" size="small" @click="handleUseClick(role)">使用</el-button>
+          </div>
+        </div>
+      </el-card>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import {ChatRoleVO} from '@/api/ai/model/chatRole'
-import {PropType} from "vue";
+import {PropType, ref} from "vue";
 import {Delete, EditPen, More} from "@element-plus/icons-vue";
+
+const tabsRef = ref<any>() // tabs ref
 
 // 定义属性
 const props = defineProps({
+  loading: {
+    type: Boolean,
+    required: true
+  },
   roleList: {
     type: Array as PropType<ChatRoleVO[]>,
     required: true
+  },
+  showMore: {
+    type: Boolean,
+    required: false,
+    default: false
   }
 })
 // 定义钩子
-const emits = defineEmits(['onDelete', 'onEdit', 'onUse'])
+const emits = defineEmits(['onDelete', 'onEdit', 'onUse', 'onPage'])
 
 // more 点击
 const handleMoreClick = async (data) => {
@@ -71,6 +84,19 @@ const handleUseClick = (role) => {
   emits('onUse', role)
 }
 
+const handleTabsScroll = async () => {
+  if (tabsRef.value) {
+    const { scrollTop, scrollHeight, clientHeight } = tabsRef.value;
+    console.log('scrollTop', scrollTop)
+    if (scrollTop + clientHeight >= scrollHeight - 20 && !props.loading) {
+      console.log('分页')
+      // page.value++;
+      // fetchData(page.value);
+      await emits('onPage')
+    }
+  }
+}
+
 onMounted(() => {
   console.log('props', props.roleList)
 })
@@ -80,9 +106,9 @@ onMounted(() => {
 <style lang="scss">
 // 重写 card 组件 body 样式
 .card-body {
-  max-width: 300px;
-  width: 300px;
-  padding: 15px;
+  max-width: 240px;
+  width: 240px;
+  padding: 15px 15px 10px 15px;
 
   display: flex;
   flex-direction: row;
@@ -99,17 +125,25 @@ onMounted(() => {
   flex-direction: row;
   flex-wrap: wrap;
   position: relative;
+  height: 100%;
+  overflow: auto;
+  padding: 0px 25px;
+  padding-bottom: 140px;
+  align-items: start;
+  align-content: flex-start;
+  justify-content: start;
 
   .card {
+    display: inline-block;
     margin-right: 20px;
     border-radius: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     position: relative;
 
     .more-container {
       position: absolute;
+      top: 0;
       right: 12px;
-      top: 0px;
     }
 
     .avatar {
@@ -126,7 +160,6 @@ onMounted(() => {
 
       .content-container {
         height: 85px;
-        overflow: hidden;
 
         .title {
           font-size: 18px;
@@ -144,7 +177,7 @@ onMounted(() => {
       .btn-container {
         display: flex;
         flex-direction: row-reverse;
-        margin-top: 15px;
+        margin-top: 2px;
       }
     }
 

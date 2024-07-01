@@ -8,7 +8,7 @@
       v-loading="formLoading"
     >
       <el-form-item label="角色设定" prop="systemMessage">
-        <el-input type="textarea" v-model="formData.systemMessage" placeholder="请输入角色设定" />
+        <el-input type="textarea" v-model="formData.systemMessage" rows="4" placeholder="请输入角色设定" />
       </el-form-item>
       <el-form-item label="模型" prop="modelId">
         <el-select v-model="formData.modelId" placeholder="请选择模型">

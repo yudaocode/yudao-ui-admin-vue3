@@ -54,4 +54,8 @@ body {
 .#{$prefix-cls}-grey-mode {
   filter: grayscale(100%);
 }
+
+.scrollbar__view {
+  height: 99%!important;
+}
 </style>

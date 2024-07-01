@@ -1,179 +1,80 @@
 <template>
   <el-container class="ai-layout">
-    <!-- 左侧：会话列表 -->
-    <el-aside width="260px" class="conversation-container">
-      <div>
-        <!-- 左顶部：新建对话 -->
-        <el-button class="w-1/1 btn-new-conversation" type="primary" @click="createConversation">
-          <Icon icon="ep:plus" class="mr-5px"/>
-          新建对话
-        </el-button>
-        <!-- 左顶部：搜索对话 -->
-        <el-input
-          v-model="searchName"
-          size="large"
-          class="mt-10px search-input"
-          placeholder="搜索历史记录"
-          @keyup="searchConversation"
-        >
-          <template #prefix>
-            <Icon icon="ep:search"/>
-          </template>
-        </el-input>
-        <!-- 左中间：对话列表 -->
-        <div class="conversation-list">
-          <!-- TODO @fain：置顶、聊天记录、一星期钱、30天前，前端对数据重新做一下分组，或者后端接口改一下 -->
-          <div v-for="conversationKey in Object.keys(conversationMap)" :key="conversationKey" >
-            <div v-if="conversationMap[conversationKey].length">
-              <el-text class="mx-1" size="small" tag="b">{{conversationKey}}</el-text>
-            </div>
-            <el-row
-              v-for="conversation in conversationMap[conversationKey]" 
-              :key="conversation.id"
-              @click="handleConversationClick(conversation.id)">
-              <div
-                :class="conversation.id === conversationId ? 'conversation active' : 'conversation'"
-                @click="changeConversation(conversation.id)"
-              >
-                <div class="title-wrapper">
-                  <img class="avatar" :src="conversation.roleAvatar"/>
-                  <span class="title">{{ conversation.title }}</span>
-                </div>
-                <!-- TODO @fan：缺一个【置顶】按钮，效果改成 hover 上去展示 -->
-                <div class="button-wrapper">
-                  <el-icon title="编辑" @click="updateConversationTitle(conversation)">
-                    <Icon icon="ep:edit"/>
-                  </el-icon>
-                  <el-icon title="删除会话" @click="deleteChatConversation(conversation)">
-                    <Icon icon="ep:delete"/>
-                  </el-icon>
-                </div>
-              </div>
-            </el-row>
-          </div>
-        </div>
-      </div>
-      <!-- 左底部：工具栏 -->
-      <div class="tool-box">
-        <div @click="handleRoleRepository">
-          <Icon icon="ep:user"/>
-          <el-text size="small">角色仓库</el-text>
-        </div>
-        <div @click="handleClearConversation">
-          <Icon icon="ep:delete"/>
-          <el-text size="small">清空未置顶对话</el-text>
-        </div>
-      </div>
-    </el-aside>
-    <!-- 右侧：会话详情 -->
+    <!-- 左侧：对话列表 -->
+    <Conversation
+      :active-id="activeConversationId"
+      ref="conversationRef"
+      @onConversationCreate="handleConversationCreate"
+      @onConversationClick="handleConversationClick"
+      @onConversationClear="handlerConversationClear"
+      @onConversationDelete="handlerConversationDelete"
+    />
+    <!-- 右侧：对话详情 -->
     <el-container class="detail-container">
-      <!-- 右顶部 TODO 芋艿：右对齐 -->
       <el-header class="header">
         <div class="title">
-          {{ useConversation?.title }}
+          {{ activeConversation?.title ? activeConversation?.title : '对话' }}
+          <span v-if="list.length">({{ list.length }})</span>
         </div>
-        <div>
-          <!-- TODO @fan：样式改下；这里我已经改成点击后，弹出了 -->
-          <el-button type="primary" @click="openChatConversationUpdateForm">
-            <span v-html="useConversation?.modelName"></span>
-            <Icon icon="ep:setting" style="margin-left: 10px"/>
+        <div class="btns" v-if="activeConversation">
+          <el-button type="primary" bg plain size="small" @click="openChatConversationUpdateForm">
+            <span v-html="activeConversation?.modelName"></span>
+            <Icon icon="ep:setting" style="margin-left: 10px" />
           </el-button>
-          <el-button>
-            <Icon icon="ep:user"/>
+          <el-button size="small" class="btn" @click="handlerMessageClear">
+            <!-- TODO @fan：style 部分，可以考虑用 unocss 替代 -->
+            <img src="@/assets/ai/clear.svg" style="height: 14px" />
           </el-button>
-          <el-button>
-            <Icon icon="ep:download"/>
-          </el-button>
-          <el-button>
-            <Icon icon="ep:arrow-up"/>
-          </el-button>
+          <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
+          <el-button size="small" :icon="Download" class="btn" />
+          <el-button size="small" :icon="Top" class="btn" @click="handlerGoTop" />
         </div>
       </el-header>
 
-      <!--  main    -->
+      <!-- main：消息列表 -->
       <el-main class="main-container">
-        <div class="message-container" ref="messageContainer">
-          <div class="chat-list" v-for="(item, index) in list" :key="index">
-            <!--  靠左 message  -->
-            <!-- TODO 芋艿：类型判断 -->
-            <div class="left-message message-item" v-if="item.type === 'system'">
-              <div class="avatar">
-                <el-avatar
-                  src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-                />
-              </div>
-              <div class="message">
-                <div>
-                  <el-text class="time">{{ formatDate(item.createTime) }}</el-text>
-                </div>
-                <div class="left-text-container" ref="markdownViewRef">
-<!--                  <div class="left-text markdown-view" v-html="item.content"></div>-->
-                  <!--                  <mdPreview :content="item.content" :delay="false" />-->
-                  <MarkdownView class="left-text" :content="item.content" />
-                </div>
-                <div class="left-btns">
-                  <div class="btn-cus" @click="noCopy(item.content)">
-                    <img class="btn-image" src="../../../assets/ai/copy.svg"/>
-                    <el-text class="btn-cus-text">复制</el-text>
-                  </div>
-                  <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
-                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
-                    <el-text class="btn-cus-text">删除</el-text>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <!--  靠右 message  -->
-            <div class="right-message message-item" v-if="item.type === 'user'">
-              <div class="avatar">
-                <el-avatar
-                  src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-                />
-              </div>
-              <div class="message">
-                <div>
-                  <el-text class="time">{{ formatDate(item.createTime) }}</el-text>
-                </div>
-                <div class="right-text-container">
-                  <div class="right-text">{{ item.content }}</div>
-<!--                  <MarkdownView class="right-text" :content="item.content" />-->
-                </div>
-                <div class="right-btns">
-                  <div class="btn-cus" @click="noCopy(item.content)">
-                    <img class="btn-image" src="@/assets/ai/copy.svg"/>
-                    <el-text class="btn-cus-text">复制</el-text>
-                  </div>
-                  <div class="btn-cus" style="margin-left: 20px" @click="onDelete(item.id)">
-                    <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px"/>
-                    <el-text class="btn-cus-text">删除</el-text>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div>
+          <div class="message-container">
+            <MessageLoading v-if="listLoading" />
+            <MessageNewChat v-if="!activeConversation" @on-new-chat="handlerNewChat" />
+            <ChatEmpty
+              v-if="!listLoading && messageList.length === 0 && activeConversation"
+              @on-prompt="doSend"
+            />
+            <Message
+              v-if="!listLoading && messageList.length > 0"
+              ref="messageRef"
+              :conversation="activeConversation"
+              :list="messageList"
+              @on-delete-success="handlerMessageDelete"
+              @on-edit="handlerMessageEdit"
+              @on-refresh="handlerMessageRefresh"
+            />
           </div>
         </div>
-        <!--   角色仓库抽屉  -->
-        <el-drawer v-model="drawer" title="角色仓库" size="50%">
-          <Role/>
-        </el-drawer>
       </el-main>
+
+      <!-- 底部 -->
       <el-footer class="footer-container">
-        <form @submit.prevent="onSend" class="prompt-from">
+        <form class="prompt-from">
           <textarea
             class="prompt-input"
             v-model="prompt"
-            @keyup.enter="onSend"
+            @keydown="onSend"
             @input="onPromptInput"
             @compositionstart="onCompositionstart"
             @compositionend="onCompositionend"
             placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
           ></textarea>
           <div class="prompt-btns">
-            <el-switch/>
+            <div>
+              <el-switch v-model="enableContext" />
+              <span style="font-size: 14px; color: #8f8f8f">上下文</span>
+            </div>
             <el-button
               type="primary"
               size="default"
-              @click="onSend()"
+              @click="onSendBtn"
               :loading="conversationInProgress"
               v-if="conversationInProgress == false"
             >
@@ -191,290 +92,144 @@
         </form>
       </el-footer>
     </el-container>
-  </el-container>
 
-  <ChatConversationUpdateForm
-    ref="chatConversationUpdateFormRef"
-    @success="getChatConversationList"
-  />
+    <!--  ========= 额外组件 ==========  -->
+    <!-- 更新对话 Form -->
+    <ChatConversationUpdateForm
+      ref="chatConversationUpdateFormRef"
+      @success="handlerTitleSuccess"
+    />
+  </el-container>
 </template>
 
 <script setup lang="ts">
-import MarkdownView from '@/components/MarkdownView/index.vue'
-import {ChatMessageApi, ChatMessageVO} from '@/api/ai/chat/message'
-import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
-import ChatConversationUpdateForm from './components/ChatConversationUpdateForm.vue'
-import Role from '@/views/ai/chat/role/index.vue'
-import {formatDate} from '@/utils/formatTime'
-import {useClipboard} from '@vueuse/core'
+// TODO @fan：是不是把 index.vue 相关的，在这里新建一个 index 目录，然后挪进去哈。因为 /ai/chat 还会有其它功能。例如说，现在的 /ai/chat/manager 管理
+import Conversation from './Conversation.vue'
+import Message from './Message.vue'
+import ChatEmpty from './ChatEmpty.vue'
+import MessageLoading from './MessageLoading.vue'
+import MessageNewChat from './MessageNewChat.vue'
+import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
+import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
+import ChatConversationUpdateForm from '@/views/ai/chat/components/ChatConversationUpdateForm.vue'
+import { Download, Top } from '@element-plus/icons-vue'
 
 const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
 
-const conversationList = ref([] as ChatConversationVO[])
-const conversationMap = ref<any>({})
-// 初始化 copy 到粘贴板
-const {copy} = useClipboard()
-
-const drawer = ref<boolean>(false) // 角色仓库抽屉
-const searchName = ref('') // 查询的内容
-const inputTimeout = ref<any>() // 处理输入中回车的定时器
-const conversationId = ref<number | null>(null) // 选中的对话编号
+// ref 属性定义
+const activeConversationId = ref<string | null>(null) // 选中的对话编号
+const activeConversation = ref<ChatConversationVO | null>(null) // 选中的 Conversation
 const conversationInProgress = ref(false) // 对话进行中
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
-
+const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
+const enableContext = ref<boolean>(true) // 是否开启上下文
+
+// TODO @fan：这几个变量，可以注释在补下哈；另外，fullText 可以明确是生成中的消息 Text，这样更容易理解哈；
+const fullText = ref('')
+const displayedText = ref('')
+const textSpeed = ref<number>(50) // Typing speed in milliseconds
+const textRoleRunning = ref<boolean>(false) // Typing speed in milliseconds
+
+// chat message 列表
+// TODO @fan：list、listLoading、listLoadingTime 不能体现出来是消息列表，是不是可以变量再优化下
+const list = ref<ChatMessageVO[]>([]) // 列表的数据
+const listLoading = ref<boolean>(false) // 是否加载中
+const listLoadingTime = ref<any>() // time 定时器，如果加载速度很快，就不进入加载中
 
 // 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
-const messageContainer: any = ref(null)
-const isScrolling = ref(false) //用于判断用户是否在滚动
+const messageRef = ref()
+const conversationRef = ref()
 const isComposing = ref(false) // 判断用户是否在输入
 
-/** chat message 列表 */
-// defineOptions({ name: 'chatMessageList' })
-const list = ref<ChatMessageVO[]>([]) // 列表的数据
-const useConversation = ref<ChatConversationVO | null>(null) // 使用的 Conversation
+// 默认 role 头像
+const defaultRoleAvatar =
+  'http://test.yudao.iocoder.cn/eaef5f41acb911dd718429a0702dcc3c61160d16e57ba1d543132fab58934f9f.png'
 
-/** 新建对话 */
-const createConversation = async () => {
-  // 新建对话
-  const conversationId = await ChatConversationApi.createChatConversationMy(
-    {} as unknown as ChatConversationVO
-  )
-  changeConversation(conversationId)
-  // 刷新对话列表
-  await getChatConversationList()
-}
+// =========== 自提滚动效果
 
-const changeConversation = (id: number) => {
-  // 切换对话
-  conversationId.value = id
-  // TODO 芋艿：待实现
-  // 刷新 message 列表
-  messageList()
-}
-
-/** 更新聊天会话的标题 */
-const updateConversationTitle = async (conversation: ChatConversationVO) => {
-  // 二次确认
-  const {value} = await ElMessageBox.prompt('修改标题', {
-    inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 判断非空，且非空格
-    inputErrorMessage: '标题不能为空',
-    inputValue: conversation.title
-  })
-  // 发起修改
-  await ChatConversationApi.updateChatConversationMy({
-    id: conversation.id,
-    title: value
-  } as ChatConversationVO)
-  message.success('重命名成功')
-  // 刷新列表
-  await getChatConversationList()
-}
-
-/** 删除聊天会话 */
-const deleteChatConversation = async (conversation: ChatConversationVO) => {
+// TODO @fan：这个方法，要不加个方法注释
+const textRoll = async () => {
+  let index = 0
   try {
-    // 删除的二次确认
-    await message.delConfirm(`是否确认删除会话 - ${conversation.title}?`)
-    // 发起删除
-    await ChatConversationApi.deleteChatConversationMy(conversation.id)
-    message.success('会话已删除')
-    // 刷新列表
-    await getChatConversationList()
-  } catch {
-  }
-}
-
-const searchConversation = () => {
-  // TODO fan：待实现
-}
-
-/** send */
-const onSend = async () => {
-  // 判断用户是否在输入
-  if (isComposing.value) {
-    return
-  }
-  // 进行中不允许发送
-  if (conversationInProgress.value) {
-    return
-  }
-  const content = prompt.value?.trim() + ''
-  if (content.length < 2) {
-    ElMessage({
-      message: '请输入内容!',
-      type: 'error'
-    })
-    return
-  }
-  // TODO 芋艿：这块交互要在优化；应该是先插入到 UI 界面，里面会有当前的消息，和正在思考中；之后发起请求；
-  // 清空输入框
-  prompt.value = ''
-  // const requestParams = {
-  //   conversationId: conversationId.value,
-  //   content: content
-  // } as unknown as ChatMessageSendVO
-  // // 添加 message
-  const userMessage = {
-    conversationId: conversationId.value,
-    content: content
-  } as ChatMessageVO
-  // list.value.push(userMessage)
-  // // 滚动到住下面
-  // scrollToBottom()
-  // stream
-  await doSendStream(userMessage)
-  //
-}
-
-const doSendStream = async (userMessage: ChatMessageVO) => {
-  // 创建AbortController实例，以便中止请求
-  conversationInAbortController.value = new AbortController()
-  // 标记对话进行中
-  conversationInProgress.value = true
-  try {
-    // 发送 event stream
-    let isFirstMessage = true
-    let content = ''
-    ChatMessageApi.sendStream(
-      userMessage.conversationId, // TODO 芋艿：这里可能要在优化；
-      userMessage.content,
-      conversationInAbortController.value,
-      (message) => {
-        console.log('message', message)
-        const data = JSON.parse(message.data) // TODO 芋艿：类型处理；
-        // debugger
-        // 如果没有内容结束链接
-        if (data.receive.content === '') {
-          // 标记对话结束
-          conversationInProgress.value = false
-          // 结束 stream 对话
-          conversationInAbortController.value.abort()
-        }
-        // 首次返回需要添加一个 message 到页面，后面的都是更新
-        if (isFirstMessage) {
-          isFirstMessage = false
-          // debugger
-          list.value.push(data.send)
-          list.value.push(data.receive)
-        } else {
-          // debugger
-          content = content + data.receive.content
-          const lastMessage = list.value[list.value.length - 1]
-          lastMessage.content = content
-          list.value[list.value - 1] = lastMessage
-        }
-        // 滚动到最下面
-        scrollToBottom()
-      },
-      (error) => {
-        console.log('error', error)
-        // 标记对话结束
-        conversationInProgress.value = false
-        // 结束 stream 对话
-        conversationInAbortController.value.abort()
-      },
-      () => {
-        console.log('close')
-        // 标记对话结束
-        conversationInProgress.value = false
-        // 结束 stream 对话
-        conversationInAbortController.value.abort()
-      }
-    )
-  } finally {
-  }
-}
-
-/** 查询列表 */
-const messageList = async () => {
-  try {
-    if (conversationId.value === null) {
+    // 只能执行一次
+    if (textRoleRunning.value) {
       return
     }
-    // 获取列表数据
-    const res = await ChatMessageApi.messageList(conversationId.value)
-    list.value = res
+    // 设置状态
+    textRoleRunning.value = true
+    displayedText.value = ''
+    const task = async () => {
+      // 调整速度
+      const diff = (fullText.value.length - displayedText.value.length) / 10
+      if (diff > 5) {
+        textSpeed.value = 10
+      } else if (diff > 2) {
+        textSpeed.value = 30
+      } else if (diff > 1.5) {
+        textSpeed.value = 50
+      } else {
+        textSpeed.value = 100
+      }
+      // 对话结束，就按 30 的速度
+      if (!conversationInProgress.value) {
+        textSpeed.value = 10
+      }
 
-    // 滚动到最下面
-    scrollToBottom()
+      // console.log('index < fullText.value.length', index < fullText.value.length, conversationInProgress.value)
+
+      if (index < fullText.value.length) {
+        displayedText.value += fullText.value[index]
+        index++
+
+        // 更新 message
+        const lastMessage = list.value[list.value.length - 1]
+        lastMessage.content = displayedText.value
+        // TODO @fan：ist.value？，还是 ist.value.length 哈？
+        list.value[list.value - 1] = lastMessage
+        // 滚动到住下面
+        await scrollToBottom()
+        // 重新设置任务
+        timer = setTimeout(task, textSpeed.value)
+      } else {
+        // 不是对话中可以结束
+        if (!conversationInProgress.value) {
+          textRoleRunning.value = false
+          clearTimeout(timer)
+          console.log('字体滚动退出!')
+        } else {
+          // 重新设置任务
+          timer = setTimeout(task, textSpeed.value)
+        }
+      }
+    }
+    let timer = setTimeout(task, textSpeed.value)
   } finally {
   }
 }
 
-function scrollToBottom() {
+// ============ 处理对话滚动 ==============
+
+function scrollToBottom(isIgnore?: boolean) {
+  // isIgnore = isIgnore !== null ? isIgnore : false
   nextTick(() => {
-    //注意要使用nexttick以免获取不到dom
-    console.log('isScrolling.value', isScrolling.value)
-    if (!isScrolling.value) {
-      messageContainer.value.scrollTop =
-        messageContainer.value.scrollHeight - messageContainer.value.offsetHeight
+    if (messageRef.value) {
+      messageRef.value.scrollToBottom(isIgnore)
     }
   })
 }
 
-function handleScroll() {
-  const scrollContainer = messageContainer.value
-  const scrollTop = scrollContainer.scrollTop
-  const scrollHeight = scrollContainer.scrollHeight
-  const offsetHeight = scrollContainer.offsetHeight
+// ============= 处理聊天输入回车发送 =============
 
-  if (scrollTop + offsetHeight < scrollHeight) {
-    // 用户开始滚动并在最底部之上，取消保持在最底部的效果
-    isScrolling.value = true
-  } else {
-    // 用户停止滚动并滚动到最底部，开启保持到最底部的效果
-    isScrolling.value = false
-  }
-}
-
-function noCopy(content) {
-  copy(content)
-  ElMessage({
-    message: '复制成功!',
-    type: 'success'
-  })
-}
-
-const onDelete = async (id) => {
-  // 删除 message
-  await ChatMessageApi.delete(id)
-  ElMessage({
-    message: '删除成功!',
-    type: 'success'
-  })
-  // tip：如果 stream 进行中的 message，就需要调用 controller 结束
-  stopStream()
-  // 重新获取 message 列表
-  await messageList()
-}
-
-const stopStream = async () => {
-  // tip：如果 stream 进行中的 message，就需要调用 controller 结束
-  if (conversationInAbortController.value) {
-    conversationInAbortController.value.abort()
-  }
-  // 设置为 false
-  conversationInProgress.value = false
-}
-
-/** 修改聊天会话 */
-const chatConversationUpdateFormRef = ref()
-const openChatConversationUpdateForm = async () => {
-  chatConversationUpdateFormRef.value.open(conversationId.value)
-}
-
-// 输入
+// TODO @fan：是不是可以通过 @keydown.enter、@keydown.shift.enter 来实现，回车发送、shift+回车换行；主要看看，是不是可以简化 isComposing 相关的逻辑
 const onCompositionstart = () => {
-  console.log('onCompositionstart。。。.')
   isComposing.value = true
 }
 
 const onCompositionend = () => {
   // console.log('输入结束...')
   setTimeout(() => {
-    console.log('输入结束...')
     isComposing.value = false
   }, 200)
 }
@@ -486,7 +241,6 @@ const onPromptInput = (event) => {
     if (event.data == null) {
       return
     }
-    console.log('setTimeout 输入开始...')
     isComposing.value = true
   }
   // 清理定时器
@@ -495,153 +249,372 @@ const onPromptInput = (event) => {
   }
   // 重置定时器
   inputTimeout.value = setTimeout(() => {
-    console.log('setTimeout 输入结束...')
     isComposing.value = false
   }, 400)
 }
 
-const getConversation = async (conversationId: number | null) => {
-  if (!conversationId) {
+// ============== 对话消息相关 =================
+
+/**
+ * 发送消息
+ */
+const onSend = async (event) => {
+  // 判断用户是否在输入
+  if (isComposing.value) {
     return
   }
-  // 获取对话信息
-  useConversation.value = await ChatConversationApi.getChatConversationMy(conversationId)
-  console.log('useConversation.value', useConversation.value)
-}
-
-/** 获得聊天会话列表 */
-const getChatConversationList = async () => {
-  conversationList.value = await ChatConversationApi.getChatConversationMyList()
-  // 默认选中第一条
-  if (conversationList.value.length === 0) {
-    conversationId.value = null
-    list.value = []
-  } else {
-    if (conversationId.value === null) {
-      conversationId.value = conversationList.value[0].id
-      changeConversation(conversationList.value[0].id)
-    }
+  // 进行中不允许发送
+  if (conversationInProgress.value) {
+    return
   }
-  // map  
-  const groupRes = await conversationTimeGroup(conversationList.value)
-  conversationMap.value = groupRes
-}
-
-const conversationTimeGroup = async (list: ChatConversationVO[]) => {
-  // 排序、指定、时间分组(今天、一天前、三天前、七天前、30天前)
-  const groupMap = {
-    '置顶': [],
-    '今天': [],
-    '一天前': [],
-    '三天前': [],
-    '七天前': [],
-    '三十天前': []
-  }
-  // 当前时间的时间戳
-  const now = Date.now();
-  // 定义时间间隔常量（单位：毫秒）
-  const oneDay = 24 * 60 * 60 * 1000;
-  const threeDays = 3 * oneDay;
-  const sevenDays = 7 * oneDay;
-  const thirtyDays = 30 * oneDay;
-  console.log('listlistlist', list)
-  for (const conversation: ChatConversationVO of list) {
-    // 置顶
-    if (conversation.pinned) {
-      groupMap['置顶'].push(conversation)
-      continue
-    }
-    // 计算时间差（单位：毫秒）
-    const diff = now - conversation.updateTime;
-    // 根据时间间隔判断
-    if (diff < oneDay) {
-      groupMap['今天'].push(conversation)
-    } else if (diff < threeDays) {
-      groupMap['一天前'].push(conversation)
-    } else if (diff < sevenDays) {
-      groupMap['三天前'].push(conversation)
-    } else if (diff < thirtyDays) {
-      groupMap['七天前'].push(conversation)
+  const content = prompt.value?.trim() as string
+  if (event.key === 'Enter') {
+    if (event.shiftKey) {
+      // 插入换行
+      prompt.value += '\r\n'
+      event.preventDefault() // 防止默认的换行行为
     } else {
-      groupMap['三十天前'].push(conversation)
+      // 发送消息
+      await doSend(content)
+      event.preventDefault() // 防止默认的提交行为
     }
   }
-  return groupMap
 }
 
-
-// 对话点击
-const handleConversationClick = async (id: number) => {
-  // 切换对话
-  conversationId.value = id
-  console.log('conversationId.value', conversationId.value)
-  // 获取列表数据
-  await messageList()
+const onSendBtn = async () => {
+  await doSend(prompt.value?.trim() as string)
 }
 
-// 角色仓库
-const handleRoleRepository = async () => {
-  drawer.value = !drawer.value
-}
-
-// 清空对话
-const handleClearConversation = async () => {
-  ElMessageBox.confirm(
-    '确认后对话会全部清空，置顶的对话除外。',
-    '确认提示',
-    {
-      confirmButtonText: '确认',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
-  )
-  .then(async () => {
-    await ChatConversationApi.deleteMyAllExceptPinned()
+const doSend = async (content: string) => {
+  if (content.length < 2) {
+    // TODO @fan：这个 message.error(`上传文件大小不能超过${props.fileSize}MB!`) 可以替代，这种形式
     ElMessage({
-      message: '操作成功!',
-      type: 'success'
+      message: '请输入内容!',
+      type: 'error'
     })
-    // 清空选中的对话
-    useConversation.value = null
-    conversationId.value = null
-    list.value = []
-    // 获得聊天会话列表
-    await getChatConversationList()
-  })
-  .catch(() => {
-  })
+    return
+  }
+  // TODO @fan：这个 message.error(`上传文件大小不能超过${props.fileSize}MB!`) 可以替代，这种形式
+  if (activeConversationId.value == null) {
+    ElMessage({
+      message: '还没创建对话，不能发送!',
+      type: 'error'
+    })
+    return
+  }
+  // 清空输入框
+  prompt.value = ''
+  // TODO @fan：idea 这里会报类型错误，是不是可以解决下哈
+  const userMessage = {
+    conversationId: activeConversationId.value,
+    content: content
+  } as ChatMessageVO
+  // stream
+  await doSendStream(userMessage)
 }
 
+const doSendStream = async (userMessage: ChatMessageVO) => {
+  // 创建AbortController实例，以便中止请求
+  conversationInAbortController.value = new AbortController()
+  // 标记对话进行中
+  conversationInProgress.value = true
+  // 设置为空
+  fullText.value = ''
+  try {
+    // 先添加两个假数据，等 stream 返回再替换
+    list.value.push({
+      id: -1,
+      conversationId: activeConversationId.value,
+      type: 'user',
+      content: userMessage.content,
+      createTime: new Date()
+    } as ChatMessageVO)
+    list.value.push({
+      id: -2,
+      conversationId: activeConversationId.value,
+      type: 'system',
+      content: '思考中...',
+      createTime: new Date()
+    } as ChatMessageVO)
+    // 滚动到最下面
+    // TODO @fan：可以 await nextTick()；然后同步调用 scrollToBottom()
+    nextTick(async () => {
+      await scrollToBottom()
+    })
+    // 开始滚动
+    textRoll()
+    // 发送 event stream
+    let isFirstMessage = true // TODO @fan：isFirstChunk 会更精准
+    ChatMessageApi.sendStream(
+      userMessage.conversationId, // TODO 芋艿：这里可能要在优化；
+      userMessage.content,
+      conversationInAbortController.value,
+      enableContext.value,
+      async (res) => {
+        console.log('res', res)
+        const { code, data, msg } = JSON.parse(res.data)
+        if (code !== 0) {
+          message.alert(`对话异常! ${msg}`)
+          return
+        }
+
+        // 如果内容为空，就不处理。
+        if (data.receive.content === '') {
+          return
+        }
+        // 首次返回需要添加一个 message 到页面，后面的都是更新
+        if (isFirstMessage) {
+          isFirstMessage = false
+          // 弹出两个 假数据
+          list.value.pop()
+          list.value.pop()
+          // 更新返回的数据
+          list.value.push(data.send)
+          list.value.push(data.receive)
+        }
+        // debugger
+        fullText.value = fullText.value + data.receive.content
+        // 滚动到最下面
+        await scrollToBottom()
+      },
+      (error) => {
+        message.alert(`对话异常! ${error}`)
+        // TODO @fan：是不是可以复用 stopStream 方法
+        // 标记对话结束
+        conversationInProgress.value = false
+        // 结束 stream 对话
+        conversationInAbortController.value.abort()
+      },
+      () => {
+        // TODO @fan：是不是可以复用 stopStream 方法
+        // 标记对话结束
+        conversationInProgress.value = false
+        // 结束 stream 对话
+        conversationInAbortController.value.abort()
+      }
+    )
+  } finally {
+  }
+}
+
+const stopStream = async () => {
+  console.log('stopStream...')
+  // tip：如果 stream 进行中的 message，就需要调用 controller 结束
+  if (conversationInAbortController.value) {
+    conversationInAbortController.value.abort()
+  }
+  // 设置为 false
+  conversationInProgress.value = false
+}
+
+// ============== message 数据 =================
+
+/** 消息列表 */
+const messageList = computed(() => {
+  if (list.value.length > 0) {
+    return list.value
+  }
+  // 没有消息时，如果有 systemMessage 则展示它
+  // TODO add by 芋艿：这个消息下面，不能有复制、删除按钮
+  if (activeConversation.value?.systemMessage) {
+    return [
+      {
+        id: 0,
+        type: 'system',
+        content: activeConversation.value.systemMessage
+      }
+    ]
+  }
+  return []
+})
+
+// TODO @fan：一般情况下，项目方法注释用 /** */，啊哈，主要保持风格统一，= = 少占点行哈，
+/**
+ * 获取 - message 列表
+ */
+const getMessageList = async () => {
+  try {
+    // time 定时器，如果加载速度很快，就不进入加载中
+    listLoadingTime.value = setTimeout(() => {
+      listLoading.value = true
+    }, 60)
+    if (activeConversationId.value === null) {
+      return
+    }
+    // 获取列表数据
+    list.value = await ChatMessageApi.messageList(activeConversationId.value)
+    // 滚动到最下面
+    await nextTick(() => {
+      // 滚动到最后
+      scrollToBottom()
+    })
+  } finally {
+    // time 定时器，如果加载速度很快，就不进入加载中
+    if (listLoadingTime.value) {
+      clearTimeout(listLoadingTime.value)
+    }
+    // 加载结束
+    listLoading.value = false
+  }
+}
+
+/** 修改聊天对话 */
+const chatConversationUpdateFormRef = ref()
+const openChatConversationUpdateForm = async () => {
+  chatConversationUpdateFormRef.value.open(activeConversationId.value)
+}
+
+/**
+ * 对话 - 标题修改成功
+ */
+const handlerTitleSuccess = async () => {
+  // TODO 需要刷新 对话列表
+  await getConversation(activeConversationId.value)
+}
+
+/**
+ * 对话 - 创建
+ */
+const handleConversationCreate = async () => {
+  // 创建新的对话，清空输入框
+  prompt.value = ''
+}
+
+/**
+ * 对话 - 点击
+ */
+const handleConversationClick = async (conversation: ChatConversationVO) => {
+  // 对话进行中，不允许切换
+  if (conversationInProgress.value) {
+    await message.alert('对话中，不允许切换!')
+    return false
+  }
+
+  // 更新选中的对话 id
+  activeConversationId.value = conversation.id
+  activeConversation.value = conversation
+  // 处理进行中的对话
+  if (conversationInProgress.value) {
+    await stopStream()
+  }
+  // 刷新 message 列表
+  await getMessageList()
+  // 滚动底部
+  scrollToBottom(true)
+  // 清空输入框
+  prompt.value = ''
+  return true
+}
+
+/**
+ * 对话 - 清理全部对话
+ */
+const handlerConversationClear = async () => {
+  // TODO @fan：需要加一个 对话进行中，不允许切换
+  activeConversationId.value = null
+  activeConversation.value = null
+  list.value = []
+}
+
+/**
+ * 对话 - 删除
+ */
+const handlerConversationDelete = async (delConversation: ChatConversationVO) => {
+  // 删除的对话如果是当前选中的，那么就重置
+  if (activeConversationId.value === delConversation.id) {
+    await handlerConversationClear()
+  }
+}
+
+/**
+ * 对话 - 获取
+ */
+const getConversation = async (id: string | null) => {
+  if (!id) {
+    return
+  }
+  const conversation: ChatConversationVO = await ChatConversationApi.getChatConversationMy(id)
+  if (conversation) {
+    activeConversation.value = conversation
+    activeConversationId.value = conversation.id
+  }
+}
+
+/**
+ * 对话 - 新建
+ */
+// TODO @fan：应该是 handleXXX，handler 是名词哈
+const handlerNewChat = async () => {
+  // 创建对话
+  await conversationRef.value.createConversation()
+}
+
+// ============ message ===========
+
+/**
+ * 删除 message
+ */
+const handlerMessageDelete = async () => {
+  if (conversationInProgress.value) {
+    message.alert('回答中，不能删除!')
+    return
+  }
+  // 刷新 message
+  await getMessageList()
+}
+
+/**
+ * 编辑 message：设置为 prompt，可以再次编辑
+ */
+const handlerMessageEdit = async (message: ChatMessageVO) => {
+  prompt.value = message.content
+}
+
+/**
+ * 刷新 message：基于指定消息，再次发起对话
+ */
+const handlerMessageRefresh = async (message: ChatMessageVO) => {
+  await doSend(message.content)
+}
+
+/**
+ * 回到顶部
+ */
+const handlerGoTop = async () => {
+  await messageRef.value.handlerGoTop()
+}
+
+/**
+ * message 清除
+ */
+const handlerMessageClear = async () => {
+  if (!activeConversationId.value) {
+    return
+  }
+  // TODO @fan：需要 try catch 下，不然点击取消会报异常
+  // 确认提示
+  await message.delConfirm('确认清空对话消息？')
+  // 清空对话
+  await ChatMessageApi.deleteByConversationId(activeConversationId.value as string)
+  // TODO @fan：是不是直接置空就好啦；
+  // 刷新 message 列表
+  await getMessageList()
+}
 
 /** 初始化 **/
 onMounted(async () => {
-  // 设置当前对话
+  // 设置当前对话 TODO 角色仓库过来的，自带 conversationId 需要选中
   if (route.query.conversationId) {
-    conversationId.value = route.query.conversationId as number
+    const id = route.query.conversationId as string
+    activeConversationId.value = id
+    await getConversation(id)
   }
-  // 获得聊天会话列表
-  await getChatConversationList()
-  // 获取对话信息
-  await getConversation(conversationId.value)
   // 获取列表数据
-  await messageList()
-  // scrollToBottom();
-  // await nextTick
-  // 监听滚动事件，判断用户滚动状态
-  messageContainer.value.addEventListener('scroll', handleScroll)
-  // 添加 copy 监听
-  messageContainer.value.addEventListener('click', (e: any) => {
-    console.log(e)
-    if (e.target.id === 'copy') {
-      copy(e.target?.dataset?.copy)
-      ElMessage({
-        message: '复制成功!',
-        type: 'success'
-      })
-    }
-  })
+  listLoading.value = true
+  await getMessageList()
 })
 </script>
+
 <style lang="scss" scoped>
 .ai-layout {
   // TODO @范 这里height不能 100% 先这样临时处理
@@ -651,7 +624,6 @@ onMounted(async () => {
   left: 0;
   height: 100%;
   width: 100%;
-  //padding: 15px 15px;
 }
 
 .conversation-container {
@@ -770,6 +742,18 @@ onMounted(async () => {
       font-size: 18px;
       font-weight: bold;
     }
+
+    .btns {
+      display: flex;
+      width: 300px;
+      flex-direction: row;
+      justify-content: flex-end;
+      //justify-content: space-between;
+
+      .btn {
+        padding: 10px;
+      }
+    }
   }
 }
 
@@ -778,120 +762,20 @@ onMounted(async () => {
   margin: 0;
   padding: 0;
   position: relative;
-}
+  height: 100%;
+  width: 100%;
 
-.message-container {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  //width: 100%;
-  //height: 100%;
-  overflow-y: scroll;
-  padding: 0 15px;
-}
-
-// 中间
-.chat-list {
-  display: flex;
-  flex-direction: column;
-  overflow-y: hidden;
-
-  .message-item {
-    margin-top: 50px;
-  }
-
-  .left-message {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .right-message {
-    display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-start;
-  }
-
-  .avatar {
-    //height: 170px;
-    //width: 170px;
-  }
-
-  .message {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    margin: 0 15px;
-
-    .time {
-      text-align: left;
-      line-height: 30px;
-    }
-
-    .left-text-container {
-      display: flex;
-      flex-direction: column;
-      overflow-wrap: break-word;
-      background-color: rgba(228, 228, 228, 0.8);
-      box-shadow: 0 0 0 1px rgba(228, 228, 228, 0.8);
-      border-radius: 10px;
-      padding: 10px 10px 5px 10px;
-
-      .left-text {
-        color: #393939;
-        font-size: 0.95rem;
-      }
-    }
-
-    .right-text-container {
-      display: flex;
-      flex-direction: row-reverse;
-
-      .right-text {
-        font-size: 0.95rem;
-        color: #fff;
-        display: inline;
-        background-color: #267fff;
-        color: #fff;
-        box-shadow: 0 0 0 1px #267fff;
-        border-radius: 10px;
-        padding: 10px;
-        width: auto;
-        overflow-wrap: break-word;
-      }
-    }
-
-    .left-btns,
-    .right-btns {
-      display: flex;
-      flex-direction: row;
-      margin-top: 8px;
-    }
-  }
-
-  // 复制、删除按钮
-  .btn-cus {
-    display: flex;
-    background-color: transparent;
-    align-items: center;
-
-    .btn-image {
-      height: 20px;
-      margin-right: 5px;
-    }
-
-    .btn-cus-text {
-      color: #757575;
-    }
-  }
-
-  .btn-cus:hover {
-    cursor: pointer;
-  }
-
-  .btn-cus:focus {
-    background-color: #8c939d;
+  .message-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    //width: 100%;
+    //height: 100%;
+    overflow-y: hidden;
+    padding: 0;
+    margin: 0;
   }
 }
 
@@ -909,7 +793,7 @@ onMounted(async () => {
     height: auto;
     border: 1px solid #e3e3e3;
     border-radius: 10px;
-    margin: 20px 20px;
+    margin: 10px 20px 20px 20px;
     padding: 9px 10px;
   }
 
@@ -921,8 +805,7 @@ onMounted(async () => {
     resize: none;
     padding: 0px 2px;
     //padding: 5px 5px;
-
-    overflow: hidden;
+    overflow: auto;
   }
 
   .prompt-input:focus {

@@ -6,7 +6,7 @@ import { config } from '@/config/axios/config'
 // 聊天VO
 export interface ChatMessageVO {
   id: number // 编号
-  conversationId: number // 会话编号
+  conversationId: number // 对话编号
   type: string // 消息类型
   userId: string // 用户编号
   roleId: string // 角色编号
@@ -15,17 +15,19 @@ export interface ChatMessageVO {
   content: string // 聊天内容
   tokens: number // 消耗 Token 数量
   createTime: Date // 创建时间
+  roleAvatar: string // 角色头像
+  userAvatar: string // 创建时间
 }
 
 export interface ChatMessageSendVO {
-  conversationId: string // 会话编号
+  conversationId: string // 对话编号
   content: number // 聊天内容
 }
 
 // AI chat 聊天
 export const ChatMessageApi = {
   // 消息列表
-  messageList: async (conversationId: number | null) => {
+  messageList: async (conversationId: string | null) => {
     return await request.get({
       url: `/ai/chat/message/list-by-conversation-id?conversationId=${conversationId}`
     })
@@ -37,6 +39,7 @@ export const ChatMessageApi = {
     conversationId: number,
     content: string,
     ctrl,
+    enableContext: boolean,
     onMessage,
     onError,
     onClose
@@ -51,7 +54,8 @@ export const ChatMessageApi = {
       openWhenHidden: true,
       body: JSON.stringify({
         conversationId,
-        content
+        content,
+        useContext: enableContext
       }),
       onmessage: onMessage,
       onerror: onError,
@@ -60,8 +64,25 @@ export const ChatMessageApi = {
     })
   },
 
-  // 发送 send 消息
+  // 删除消息
   delete: async (id: string) => {
     return await request.delete({ url: `/ai/chat/message/delete?id=${id}` })
+  },
+
+  // 删除消息 - 对话所有消息
+  deleteByConversationId: async (conversationId: string) => {
+    return await request.delete({
+      url: `/ai/chat/message/delete-by-conversation-id?conversationId=${conversationId}`
+    })
+  },
+
+  // 获得消息分页
+  getChatMessagePage: async (params: any) => {
+    return await request.get({ url: '/ai/chat/message/page', params })
+  },
+
+  // 管理员删除消息
+  deleteChatMessageByAdmin: async (id: number) => {
+    return await request.delete({ url: `/ai/chat/message/delete-by-admin?id=${id}` })
   }
 }
