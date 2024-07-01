@@ -1,5 +1,5 @@
 <template>
-  <el-container class="kefu">
+  <el-container v-if="showChatBox" class="kefu">
     <el-header>
       <div class="kefu-title">{{ keFuConversation.userNickname }}</div>
     </el-header>
@@ -46,6 +46,7 @@
         />
       </div>
     </el-main>
+    <!-- TODO puhui999: 发送下次提交完善 -->
     <el-footer height="230px">
       <div class="h-[100%]">
         <div class="chat-tools">
@@ -58,7 +59,7 @@
       </div>
     </el-footer>
   </el-container>
-  <!-- 没选择左侧会话时显示空界面 -->
+  <el-empty v-else description="请选择左侧的一个会话后开始" />
 </template>
 
 <script lang="ts" setup>
@@ -67,6 +68,7 @@ import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { UserTypeEnum } from '@/utils/constants'
 import { replaceEmoji } from '@/views/mall/promotion/kefu/components/emoji'
 import { KeFuMessageContentTypeEnum } from '@/views/mall/promotion/kefu/components/constants'
+import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'KeFuMessageBox' })
 const message = ref('') // 消息
@@ -82,6 +84,8 @@ const getMessageList = async (conversation: KeFuConversationRespVO) => {
   messageList.value = list
 }
 defineExpose({ getMessageList })
+// 是否显示聊天区域
+const showChatBox = computed(() => !isEmpty(keFuConversation.value))
 </script>
 
 <style lang="scss" scoped>
