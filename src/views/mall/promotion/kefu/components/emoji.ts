@@ -49,6 +49,11 @@ export const emojiList = [
   { name: '[恶魔]', file: 'emo.png' }
 ]
 
+export interface Emoji {
+  name: string
+  url: string
+}
+
 export const emojiPage = {}
 emojiList.forEach((item, index) => {
   if (!emojiPage[Math.floor(index / 30) + 1]) {
@@ -59,6 +64,8 @@ emojiList.forEach((item, index) => {
 
 // 后端上传地址
 const staticUrl = import.meta.env.VITE_STATIC_URL
+// 后缀
+const suffix = '/static/img/chat/emoji/'
 
 // 处理表情
 export function replaceEmoji(data: string) {
@@ -72,13 +79,21 @@ export function replaceEmoji(data: string) {
         newData = newData.replace(
           item,
           `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;" src="${
-            staticUrl + '/static/img/chat/emoji/' + emojiFile
+            staticUrl + suffix + emojiFile
           }"/>`
         )
       })
     }
   }
   return newData
+}
+
+// 获得所有表情
+export function getEmojiList(): Emoji[] {
+  return emojiList.map((item) => ({
+    url: staticUrl + suffix + item.file,
+    name: item.name
+  })) as Emoji[]
 }
 
 function selEmojiFile(name: string) {

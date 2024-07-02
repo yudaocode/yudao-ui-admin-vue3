@@ -3,58 +3,61 @@
     <el-header>
       <div class="kefu-title">{{ keFuConversation.userNickname }}</div>
     </el-header>
-    <el-main class="kefu-content">
-      <div
-        v-for="item in messageList"
-        :key="item.id"
-        :class="[
-          item.senderType === UserTypeEnum.MEMBER
-            ? `ss-row-left`
-            : item.senderType === UserTypeEnum.ADMIN
-              ? `ss-row-right`
-              : ''
-        ]"
-        class="flex mb-20px w-[100%]"
-      >
-        <el-avatar
-          v-show="item.senderType === UserTypeEnum.MEMBER"
-          :src="keFuConversation.userAvatar"
-          alt="avatar"
-        />
-        <div class="kefu-message flex items-center p-10px">
-          <!-- 文本消息 -->
-          <template v-if="KeFuMessageContentTypeEnum.TEXT === item.contentType">
-            <div
-              v-dompurify-html="replaceEmoji(item.content)"
-              :class="[
-                item.senderType === UserTypeEnum.MEMBER
-                  ? `ml-10px`
-                  : item.senderType === UserTypeEnum.ADMIN
-                    ? `mr-10px`
-                    : ''
-              ]"
-            ></div>
-          </template>
-          <template v-else>
-            {{ item.content }}
-          </template>
+    <el-main class="kefu-content" style="overflow: visible">
+      <el-scrollbar ref="scrollbarRef" always height="calc(100vh - 495px)">
+        <div ref="innerRef" class="w-[100%] pb-3px">
+          <div
+            v-for="item in messageList"
+            :key="item.id"
+            :class="[
+              item.senderType === UserTypeEnum.MEMBER
+                ? `ss-row-left`
+                : item.senderType === UserTypeEnum.ADMIN
+                  ? `ss-row-right`
+                  : ''
+            ]"
+            class="flex mb-20px w-[100%]"
+          >
+            <el-avatar
+              v-show="item.senderType === UserTypeEnum.MEMBER"
+              :src="keFuConversation.userAvatar"
+              alt="avatar"
+            />
+            <div class="kefu-message flex items-center p-10px">
+              <!-- 文本消息 -->
+              <template v-if="KeFuMessageContentTypeEnum.TEXT === item.contentType">
+                <div
+                  v-dompurify-html="replaceEmoji(item.content)"
+                  :class="[
+                    item.senderType === UserTypeEnum.MEMBER
+                      ? `ml-10px`
+                      : item.senderType === UserTypeEnum.ADMIN
+                        ? `mr-10px`
+                        : ''
+                  ]"
+                ></div>
+              </template>
+              <template v-else>
+                {{ item.content }}
+              </template>
+            </div>
+            <el-avatar
+              v-show="item.senderType === UserTypeEnum.ADMIN"
+              :src="item.senderAvatar"
+              alt="avatar"
+            />
+          </div>
         </div>
-        <el-avatar
-          v-show="item.senderType === UserTypeEnum.ADMIN"
-          :src="item.senderAvatar"
-          alt="avatar"
-        />
-      </div>
+      </el-scrollbar>
     </el-main>
-    <!-- TODO puhui999: 发送下次提交完善 -->
     <el-footer height="230px">
       <div class="h-[100%]">
         <div class="chat-tools">
-          <Icon :size="30" class="ml-10px" icon="fa:frown-o" />
+          <EmojiSelectPopover @select-emoji="handleEmojiSelect" />
         </div>
         <el-input v-model="message" :rows="6" type="textarea" />
         <div class="h-45px flex justify-end">
-          <el-button class="mt-10px" type="primary">发送</el-button>
+          <el-button class="mt-10px" type="primary" @click="handleSendMessage">发送</el-button>
         </div>
       </div>
     </el-footer>
@@ -63,162 +66,66 @@
 </template>
 
 <script lang="ts" setup>
-import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
+import { ElScrollbar as ElScrollbarType } from 'element-plus'
+import { KeFuMessageApi, KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
-import { UserTypeEnum } from '@/utils/constants'
-import { replaceEmoji } from '@/views/mall/promotion/kefu/components/emoji'
-import { KeFuMessageContentTypeEnum } from '@/views/mall/promotion/kefu/components/constants'
+import EmojiSelectPopover from './EmojiSelectPopover.vue'
+import { Emoji, replaceEmoji } from './emoji'
+import { KeFuMessageContentTypeEnum } from './constants'
 import { isEmpty } from '@/utils/is'
+import { UserTypeEnum } from '@/utils/constants'
 
 defineOptions({ name: 'KeFuMessageBox' })
+const messageTool = useMessage()
 const message = ref('') // 消息
 const messageList = ref<KeFuMessageRespVO[]>([]) // 消息列表
 const keFuConversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
-// 获得消息
+
+// 获得消息 TODO puhui999:  先不考虑下拉加载历史消息
 const getMessageList = async (conversation: KeFuConversationRespVO) => {
   keFuConversation.value = conversation
-  // const { list } = await KeFuMessageApi.getKeFuMessagePage({
-  //   pageNo: 1,
-  //   conversationId: conversation.id
-  // })
-  // TODO puhui999: 方便查看效果
-  const list = [
-    {
-      id: 19,
-      conversationId: 1,
-      senderId: 283,
-      senderAvatar: null,
-      senderType: 2,
-      receiverId: null,
-      receiverType: null,
-      contentType: 1,
-      content: '[爱心][爱心][坏笑][坏笑][天使][天使]',
-      readStatus: false,
-      createTime: 1718616705000
-    },
-    {
-      id: 18,
-      conversationId: 1,
-      senderId: 283,
-      senderAvatar: null,
-      senderType: 1,
-      receiverId: null,
-      receiverType: null,
-      contentType: 1,
-      content: '[瞌睡][瞌睡]',
-      readStatus: false,
-      createTime: 1718616690000
-    },
-    {
-      id: 17,
-      conversationId: 1,
-      senderId: 283,
-      senderAvatar: null,
-      senderType: 1,
-      receiverId: null,
-      receiverType: null,
-      contentType: 1,
-      content: '[冷酷][冷酷]',
-      readStatus: false,
-      createTime: 1718616350000
-    },
-    {
-      id: 16,
-      conversationId: 1,
-      senderId: 283,
-      senderAvatar: null,
-      senderType: 1,
-      receiverId: null,
-      receiverType: null,
-      contentType: 1,
-      content: '[天使]',
-      readStatus: false,
-      createTime: 1718615505000
-    },
-    {
-      id: 15,
-      conversationId: 1,
-      senderId: 283,
-      senderAvatar: null,
-      senderType: 2,
-      receiverId: null,
-      receiverType: null,
-      contentType: 1,
-      content: '[天使]',
-      readStatus: false,
-      createTime: 1718615485000
-    },
-    {
-      id: 14,
-      conversationId: 1,
-      senderId: 283,
-      senderAvatar: null,
-      senderType: 2,
-      receiverId: null,
-      receiverType: null,
-      contentType: 1,
-      content: '[心碎][心碎]',
-      readStatus: false,
-      createTime: 1718615453000
-    },
-    {
-      id: 13,
-      conversationId: 1,
-      senderId: 283,
-      senderAvatar: null,
-      senderType: 2,
-      receiverId: null,
-      receiverType: null,
-      contentType: 1,
-      content: '[心碎][心碎]',
-      readStatus: false,
-      createTime: 1718615430000
-    },
-    {
-      id: 12,
-      conversationId: 1,
-      senderId: 283,
-      senderAvatar: null,
-      senderType: 1,
-      receiverId: null,
-      receiverType: null,
-      contentType: 1,
-      content: '[心碎][心碎]',
-      readStatus: false,
-      createTime: 1718615425000
-    },
-    {
-      id: 11,
-      conversationId: 1,
-      senderId: 283,
-      senderAvatar: null,
-      senderType: 1,
-      receiverId: null,
-      receiverType: null,
-      contentType: 1,
-      content: '[困~][困~]',
-      readStatus: false,
-      createTime: 1718615413000
-    },
-    {
-      id: 10,
-      conversationId: 1,
-      senderId: 283,
-      senderAvatar: null,
-      senderType: 1,
-      receiverId: null,
-      receiverType: null,
-      contentType: 1,
-      content: '[睡着][睡着]',
-      readStatus: false,
-      createTime: 1718615407000
-    }
-  ]
-  messageList.value = list
+  const { list } = await KeFuMessageApi.getKeFuMessagePage({
+    pageNo: 1,
+    conversationId: conversation.id
+  })
+  messageList.value = list.reverse()
+  // TODO puhui999: 首次加载时滚动到最新消息，如果加载的是历史消息则不滚动
+  await scrollToBottom()
 }
 defineExpose({ getMessageList })
 // 是否显示聊天区域
 const showChatBox = computed(() => !isEmpty(keFuConversation.value))
+// 处理表情选择
+const handleEmojiSelect = (item: Emoji) => {
+  message.value += item.name
+}
+// 发送消息
+const handleSendMessage = async () => {
+  // 1. 校验消息是否为空
+  if (isEmpty(unref(message.value))) {
+    messageTool.warning('请输入消息后再发送哦！')
+  }
+  // 2. 组织发送消息
+  const msg = {
+    conversationId: keFuConversation.value.id,
+    contentType: KeFuMessageContentTypeEnum.TEXT,
+    content: message.value
+  }
+  await KeFuMessageApi.sendKeFuMessage(msg)
+  message.value = ''
+  // 3. 加载消息列表
+  await getMessageList(keFuConversation.value)
+  // 滚动到最新消息处
+  await scrollToBottom()
+}
+
+const innerRef = ref<HTMLDivElement>()
+const scrollbarRef = ref<InstanceType<typeof ElScrollbarType>>()
+// 滚动到底部
+const scrollToBottom = async () => {
+  await nextTick()
+  scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight)
+}
 </script>
 
 <style lang="scss" scoped>

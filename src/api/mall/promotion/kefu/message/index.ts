@@ -51,7 +51,7 @@ export interface KeFuMessageRespVO {
 export const KeFuMessageApi = {
   // 发送客服消息
   sendKeFuMessage: async (data: any) => {
-    return await request.put({
+    return await request.post({
       url: '/promotion/kefu-message/send',
       data
     })
