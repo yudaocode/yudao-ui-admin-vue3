@@ -24,6 +24,7 @@
               alt="avatar"
             />
             <div class="kefu-message p-10px">
+              <!-- TODO puhui999: 消息相关等后续完成后统一抽离封装 -->
               <!-- 文本消息 -->
               <template v-if="KeFuMessageContentTypeEnum.TEXT === item.contentType">
                 <div
@@ -38,8 +39,25 @@
                   class="flex items-center"
                 ></div>
               </template>
-              <template v-else>
-                {{ item.content }}
+              <!-- 图片消息 -->
+              <template v-if="KeFuMessageContentTypeEnum.IMAGE === item.contentType">
+                <div
+                  :class="[
+                    item.senderType === UserTypeEnum.MEMBER
+                      ? `ml-10px`
+                      : item.senderType === UserTypeEnum.ADMIN
+                        ? `mr-10px`
+                        : ''
+                  ]"
+                  class="flex items-center"
+                >
+                  <el-image
+                    :src="item.content"
+                    fit="contain"
+                    style="width: 200px; height: 200px"
+                    @click="imagePreview(item.content)"
+                  />
+                </div>
               </template>
             </div>
             <el-avatar
@@ -75,6 +93,7 @@ import { Emoji, replaceEmoji } from './emoji'
 import { KeFuMessageContentTypeEnum } from './constants'
 import { isEmpty } from '@/utils/is'
 import { UserTypeEnum } from '@/utils/constants'
+import { createImageViewer } from '@/components/ImageViewer'
 
 defineOptions({ name: 'KeFuMessageBox' })
 const messageTool = useMessage()
@@ -132,6 +151,13 @@ const scrollbarRef = ref<InstanceType<typeof ElScrollbarType>>()
 const scrollToBottom = async () => {
   await nextTick()
   scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight)
+}
+
+/** 图预览 */
+const imagePreview = (imgUrl: string) => {
+  createImageViewer({
+    urlList: [imgUrl]
+  })
 }
 
 // TODO puhui999: 轮训相关，功能完善后移除

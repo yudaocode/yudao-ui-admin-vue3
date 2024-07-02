@@ -16,10 +16,17 @@
               {{ formatDate(item.lastMessageTime) }}
             </span>
           </div>
-          <div
-            v-dompurify-html="replaceEmoji(item.lastMessageContent)"
-            class="last-message flex items-center color-[#989EA6]"
-          ></div>
+          <!-- 文本消息 -->
+          <template v-if="KeFuMessageContentTypeEnum.TEXT === item.lastMessageContentType">
+            <div
+              v-dompurify-html="replaceEmoji(item.lastMessageContent)"
+              class="last-message flex items-center color-[#989EA6]"
+            ></div>
+          </template>
+          <!-- 图片消息 -->
+          <template v-if="KeFuMessageContentTypeEnum.IMAGE === item.lastMessageContentType">
+            <div class="last-message flex items-center color-[#989EA6]">【图片消息】</div>
+          </template>
         </div>
       </div>
     </div>
@@ -30,6 +37,7 @@
 import { KeFuConversationApi, KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { replaceEmoji } from '@/views/mall/promotion/kefu/components/emoji'
 import { formatDate, getNowDateTime } from '@/utils/formatTime'
+import { KeFuMessageContentTypeEnum } from '@/views/mall/promotion/kefu/components/constants'
 
 defineOptions({ name: 'KeFuConversationBox' })
 const activeConversationIndex = ref(-1) // 选中的会话
