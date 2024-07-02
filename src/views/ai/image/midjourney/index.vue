@@ -88,6 +88,14 @@
       </div>
     </el-space>
   </div>
+  <div class="model">
+    <div>
+      <el-text tag="b">参考图</el-text>
+    </div>
+    <el-space wrap class="model-list">
+      <UploadImg v-model="referImage" height="80px" width="80px" />
+    </el-space>
+  </div>
   <div class="btns">
     <!--    <el-button size="large" round>重置内容</el-button>-->
     <el-button type="primary" size="large" round @click="handlerGenerateImage">生成内容</el-button>
@@ -118,6 +126,7 @@ interface ImageSizeVO {
 
 // 定义属性
 const prompt = ref<string>('')  // 提示词
+const referImage = ref<any>()  // 参考图
 const selectHotWord = ref<string>('') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
 const selectModel = ref<any>() // 选中的热词
@@ -247,6 +256,7 @@ const handlerGenerateImage = async () => {
   await message.confirm(`确认生成内容?`)
   // todo @范 图片生产逻辑
   try {
+    console.log('referImage.value', referImage.value)
     // 回调
     emits('onDrawStart', selectModel.value.key)
     // 发送请求
@@ -256,7 +266,7 @@ const handlerGenerateImage = async () => {
       width: selectImageSize.value.width,
       height: selectImageSize.value.height,
       version: selectVersion.value,
-      base64Array: [],
+      referImageUrl: referImage.value,
     } as ImageMidjourneyImagineReqVO
     await ImageApi.midjourneyImagine(req)
   } finally {
