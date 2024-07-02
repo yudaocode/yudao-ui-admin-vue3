@@ -29,8 +29,8 @@
         :autosize="{ minRows: 2, maxRows: 4 }"
         :disabled="!getIsOpen"
         clearable
-        type="textarea"
         placeholder="请输入你要发送的消息"
+        type="textarea"
       />
       <el-select v-model="sendUserId" class="mt-4" placeholder="请选择发送人">
         <el-option key="" label="所有人" value="" />
@@ -71,7 +71,7 @@
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import { useWebSocket } from '@vueuse/core'
-import { getAccessToken } from '@/utils/auth'
+// import { getAccessToken } from '@/utils/auth'
 import * as UserApi from '@/api/system/user'
 
 defineOptions({ name: 'InfraWebSocket' })
