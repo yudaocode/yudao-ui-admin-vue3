@@ -329,10 +329,19 @@ const handleHotWordClick = async (hotWord: string) => {
   prompt.value = hotWord
 }
 
+/**  判断字符串是否包含中文  */
+function hasChinese(str) {
+  return /[\u4E00-\u9FA5]+/g.test(str)
+}
+
 /**  图片生产  */
 const handleGenerateImage = async () => {
   // 二次确认
   await message.confirm(`确认生成内容?`)
+  if (hasChinese(prompt.value)) {
+    message.alert('暂不支持中文！')
+    return
+  }
   try {
     // 加载中
     drawIn.value = true
