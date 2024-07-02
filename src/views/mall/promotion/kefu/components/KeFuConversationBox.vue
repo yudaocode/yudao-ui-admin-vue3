@@ -64,6 +64,22 @@ const openRightMessage = (item: KeFuConversationRespVO, index: number) => {
   activeConversationIndex.value = index
   emits('change', item)
 }
+const poller = ref<any>(null) // TODO puhui999: 轮训定时器，暂时模拟 websocket
+onMounted(() => {
+  // TODO puhui999: 轮训相关，功能完善后移除
+  if (!poller.value) {
+    poller.value = setInterval(() => {
+      getConversationList()
+    }, 1000)
+  }
+})
+// TODO puhui999: 轮训相关，功能完善后移除
+onBeforeUnmount(() => {
+  if (!poller.value) {
+    return
+  }
+  clearInterval(poller.value)
+})
 </script>
 
 <style lang="scss" scoped>

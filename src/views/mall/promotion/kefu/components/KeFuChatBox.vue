@@ -23,7 +23,7 @@
               :src="keFuConversation.userAvatar"
               alt="avatar"
             />
-            <div class="kefu-message flex items-center p-10px">
+            <div class="kefu-message p-10px">
               <!-- 文本消息 -->
               <template v-if="KeFuMessageContentTypeEnum.TEXT === item.contentType">
                 <div
@@ -35,6 +35,7 @@
                         ? `mr-10px`
                         : ''
                   ]"
+                  class="flex items-center"
                 ></div>
               </template>
               <template v-else>
@@ -80,7 +81,7 @@ const messageTool = useMessage()
 const message = ref('') // 消息
 const messageList = ref<KeFuMessageRespVO[]>([]) // 消息列表
 const keFuConversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
-
+const poller = ref<any>(null) // TODO puhui999: 轮训定时器，暂时模拟 websocket
 // 获得消息 TODO puhui999:  先不考虑下拉加载历史消息
 const getMessageList = async (conversation: KeFuConversationRespVO) => {
   keFuConversation.value = conversation
@@ -91,6 +92,12 @@ const getMessageList = async (conversation: KeFuConversationRespVO) => {
   messageList.value = list.reverse()
   // TODO puhui999: 首次加载时滚动到最新消息，如果加载的是历史消息则不滚动
   await scrollToBottom()
+  // TODO puhui999: 轮训相关，功能完善后移除
+  if (!poller.value) {
+    poller.value = setInterval(() => {
+      getMessageList(conversation)
+    }, 1000)
+  }
 }
 defineExpose({ getMessageList })
 // 是否显示聊天区域
@@ -126,6 +133,14 @@ const scrollToBottom = async () => {
   await nextTick()
   scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight)
 }
+
+// TODO puhui999: 轮训相关，功能完善后移除
+onBeforeUnmount(() => {
+  if (!poller.value) {
+    return
+  }
+  clearInterval(poller.value)
+})
 </script>
 
 <style lang="scss" scoped>
