@@ -71,7 +71,7 @@
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import { useWebSocket } from '@vueuse/core'
-// import { getAccessToken } from '@/utils/auth'
+import { getAccessToken } from '@/utils/auth'
 import * as UserApi from '@/api/system/user'
 
 defineOptions({ name: 'InfraWebSocket' })

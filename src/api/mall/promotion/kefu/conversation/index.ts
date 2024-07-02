@@ -1,5 +1,6 @@
 import request from '@/config/axios'
 
+// TODO @puhui999：注释要不放在属性后面，避免太长哈
 export interface KeFuConversationRespVO {
   /**
    * 编号
