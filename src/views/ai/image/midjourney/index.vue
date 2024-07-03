@@ -104,7 +104,7 @@
 <script setup lang="ts">
 
 // image 模型
-import {ImageApi, ImageMidjourneyImagineReqVO} from "@/api/ai/image";
+import {ImageApi, ImageMidjourneyImagineReqVO, ImageVO} from "@/api/ai/image";
 // message
 const message = useMessage()
 // 定义 emits
@@ -274,6 +274,14 @@ const handlerGenerateImage = async () => {
     emits('onDrawComplete', selectModel.value.key)
   }
 }
+
+/** 填充值 */
+const settingValues = async (imageDetail: ImageVO) => {
+  prompt.value = imageDetail.prompt
+}
+
+/** 暴露组件方法 */
+defineExpose({ settingValues })
 </script>
 <style scoped lang="scss">
 

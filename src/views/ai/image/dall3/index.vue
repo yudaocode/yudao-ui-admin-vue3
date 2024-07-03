@@ -97,7 +97,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ImageApi, ImageDrawReqVO} from '@/api/ai/image';
+import {ImageApi, ImageDrawReqVO, ImageVO} from '@/api/ai/image';
 
 // image 模型
 interface ImageModelVO {
@@ -257,6 +257,13 @@ const handlerGenerateImage = async () => {
   }
 }
 
+/** 填充值 */
+const settingValues = async (imageDetail: ImageVO) => {
+  prompt.value = imageDetail.prompt
+}
+
+/** 暴露组件方法 */
+defineExpose({ settingValues })
 </script>
 <style scoped lang="scss">
 

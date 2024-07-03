@@ -28,6 +28,12 @@
         <el-button
           class="btn"
           text
+          :icon="RefreshRight"
+          @click="handlerBtnClick('regeneration', imageDetail)"
+        />
+        <el-button
+          class="btn"
+          text
           :icon="Delete"
           @click="handlerBtnClick('delete', imageDetail)"
         />
@@ -56,7 +62,7 @@
   </el-card>
 </template>
 <script setup lang="ts">
-import { Delete, Download, More } from '@element-plus/icons-vue'
+import {Delete, Download, More, RefreshRight} from '@element-plus/icons-vue'
 import { ImageVO, ImageMjButtonsVO } from '@/api/ai/image'
 import { PropType } from 'vue'
 import { ElLoading } from 'element-plus'

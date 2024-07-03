@@ -130,6 +130,10 @@ const handlerImageBtnClick = async (type: string, imageDetail: ImageVO) => {
     message.success('删除成功!')
   } else if (type === 'download') {
     await downloadImage(imageDetail.picUrl)
+  } else if (type === 'regeneration') {
+    // Midjourney 平台
+    console.log('regeneration', imageDetail.id)
+    await emits('onRegeneration', imageDetail)
   }
 }
 
@@ -174,6 +178,9 @@ const handlerPageChange = async (page) => {
 
 /** 暴露组件方法 */
 defineExpose({ getImageList })
+
+// emits
+const emits = defineEmits(['onRegeneration'])
 
 /** 组件挂在的时候 */
 onMounted(async () => {
