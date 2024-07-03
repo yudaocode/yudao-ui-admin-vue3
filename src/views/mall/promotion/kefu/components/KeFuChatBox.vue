@@ -89,13 +89,14 @@ import { ElScrollbar as ElScrollbarType } from 'element-plus'
 import { KeFuMessageApi, KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import EmojiSelectPopover from './EmojiSelectPopover.vue'
-import { Emoji, replaceEmoji } from './emoji'
+import { Emoji, useEmoji } from './emoji'
 import { KeFuMessageContentTypeEnum } from './constants'
 import { isEmpty } from '@/utils/is'
 import { UserTypeEnum } from '@/utils/constants'
 import { createImageViewer } from '@/components/ImageViewer'
 
 defineOptions({ name: 'KeFuMessageBox' })
+const { replaceEmoji } = useEmoji()
 const messageTool = useMessage()
 const message = ref('') // 消息
 const messageList = ref<KeFuMessageRespVO[]>([]) // 消息列表
@@ -130,6 +131,7 @@ const handleSendMessage = async () => {
   // 1. 校验消息是否为空
   if (isEmpty(unref(message.value))) {
     messageTool.warning('请输入消息后再发送哦！')
+    return
   }
   // 2. 组织发送消息
   const msg = {

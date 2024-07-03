@@ -26,8 +26,9 @@
 
 <script lang="ts" setup>
 defineOptions({ name: 'EmojiSelectPopover' })
-import { Emoji, getEmojiList } from './emoji'
+import { Emoji, useEmoji } from './emoji'
 
+const { getEmojiList } = useEmoji()
 const emojiList = computed(() => getEmojiList())
 
 const emits = defineEmits<{

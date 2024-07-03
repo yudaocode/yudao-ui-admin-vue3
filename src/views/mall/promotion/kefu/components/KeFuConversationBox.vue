@@ -35,11 +35,12 @@
 
 <script lang="ts" setup>
 import { KeFuConversationApi, KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
-import { replaceEmoji } from '@/views/mall/promotion/kefu/components/emoji'
+import { useEmoji } from './emoji'
 import { formatDate, getNowDateTime } from '@/utils/formatTime'
 import { KeFuMessageContentTypeEnum } from '@/views/mall/promotion/kefu/components/constants'
 
 defineOptions({ name: 'KeFuConversationBox' })
+const { replaceEmoji } = useEmoji()
 const activeConversationIndex = ref(-1) // 选中的会话
 const conversationList = ref<KeFuConversationRespVO[]>([]) // 会话列表
 const getConversationList = async () => {
