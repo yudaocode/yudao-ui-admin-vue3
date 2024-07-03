@@ -32,6 +32,7 @@ import { ImageApi, ImageVO, ImageMjActionVO, ImageMjButtonsVO } from '@/api/ai/i
 import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
 import { ElLoading, LoadingOptionsResolved } from 'element-plus'
+import { AiImageStatusEnum } from '@/views/ai/utils/constants'
 
 const message = useMessage() // 消息弹窗
 
@@ -80,7 +81,7 @@ const getImageList = async (apply: boolean = false) => {
     // 需要 watch 的数据
     const newWatImages = {}
     imageList.value.forEach((item) => {
-      if (item.status === 10) {
+      if (item.status === AiImageStatusEnum.IN_PROGRESS) {
         newWatImages[item.id] = item
       }
     })
@@ -102,7 +103,7 @@ const refreshWatchImages = async () => {
   const list = (await ImageApi.getImageListMyByIds(imageIds)) as ImageVO[]
   const newWatchImages = {}
   list.forEach((image) => {
-    if (image.status === 10) {
+    if (image.status === AiImageStatusEnum.IN_PROGRESS) {
       newWatchImages[image.id] = image
     } else {
       const index = imageList.value.findIndex((oldImage) => image.id === oldImage.id)

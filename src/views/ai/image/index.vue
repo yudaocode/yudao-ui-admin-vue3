@@ -3,15 +3,19 @@
   <div class="ai-image">
     <div class="left">
       <div class="segmented">
-        <el-segmented v-model="selectModel" :options="modelOptions" />
+        <el-segmented v-model="selectPlatform" :options="platformOptions" />
       </div>
       <div class="modal-switch-container">
-        <!-- TODO @fan：1）建议 Dall3 改成 OpenAI 绘图。因为 dall3 其实本质是模型；2）涉及到中英文的地方，中文和英文之间，有个空格哈 -->
-        <Dall3 v-if="selectModel === 'DALL3绘画'"
-               @on-draw-start="handlerDrawStart"
-               @on-draw-complete="handlerDrawComplete" />
-        <Midjourney v-if="selectModel === 'MJ绘画'" />
-        <StableDiffusion v-if="selectModel === 'Stable Diffusion'" @on-draw-complete="handlerDrawComplete" />
+        <Dall3
+          v-if="selectPlatform === AiPlatformEnum.OPENAI"
+          @on-draw-start="handlerDrawStart"
+          @on-draw-complete="handlerDrawComplete"
+        />
+        <Midjourney v-if="selectPlatform === AiPlatformEnum.MIDJOURNEY" />
+        <StableDiffusion
+          v-if="selectPlatform === AiPlatformEnum.STABLE_DIFFUSION"
+          @on-draw-complete="handlerDrawComplete"
+        />
       </div>
     </div>
     <div class="main">
@@ -26,18 +30,31 @@ import Dall3 from './dall3/index.vue'
 import Midjourney from './midjourney/index.vue'
 import StableDiffusion from './stable-diffusion/index.vue'
 import ImageTask from './ImageTask.vue'
+import { AiPlatformEnum } from '@/views/ai/utils/constants'
 
-// ref
 const imageTaskRef = ref<any>() // image task ref
 
 // 定义属性
-const selectModel = ref('Stable Diffusion')
-const modelOptions = ['DALL3绘画', 'MJ绘画', 'Stable Diffusion']
-const drawIn = ref<boolean>(false)  // 生成中
+const selectPlatform = ref('StableDiffusion')
+const platformOptions = [
+  {
+    label: 'DALL3 绘画',
+    value: AiPlatformEnum.OPENAI
+  },
+  {
+    label: 'MJ 绘画',
+    value: AiPlatformEnum.MIDJOURNEY
+  },
+  {
+    label: 'Stable Diffusion',
+    value: AiPlatformEnum.STABLE_DIFFUSION
+  }
+]
+const drawIn = ref<boolean>(false) // 生成中
 
 /**  绘画 - start  */
 const handlerDrawStart = async (type) => {
-  // todo
+  // todo @fan：这个是不是没用啦？
   drawIn.value = true
 }
 
@@ -47,15 +64,9 @@ const handlerDrawComplete = async (type) => {
   // todo
   await imageTaskRef.value.getImageList()
 }
-
-//
-onMounted( async () => {
-})
-
 </script>
 
 <style scoped lang="scss">
-
 .ai-image {
   position: absolute;
   left: 0;
@@ -101,5 +112,4 @@ onMounted( async () => {
     background-color: #f7f8fa;
   }
 }
-
 </style>

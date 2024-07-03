@@ -158,7 +158,7 @@
             :active-value="true"
             :inactive-value="false"
             @change="handleUpdatePublicStatusChange(scope.row)"
-            :disabled="scope.row.status !== 20"
+            :disabled="scope.row.status !== AiMusicStatusEnum.SUCCESS"
           />
         </template>
       </el-table-column>
@@ -199,6 +199,7 @@ import { getIntDictOptions, getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { MusicApi, MusicVO } from '@/api/ai/music'
 import * as UserApi from '@/api/system/user'
+import { AiMusicStatusEnum } from '@/views/ai/utils/constants'
 
 /** AI 音乐 列表 */
 defineOptions({ name: 'AiMusicManager' })

@@ -121,7 +121,7 @@
             :active-value="true"
             :inactive-value="false"
             @change="handleUpdatePublicStatusChange(scope.row)"
-            :disabled="scope.row.status !== 20"
+            :disabled="scope.row.status !== AiImageStatusEnum.SUCCESS"
           />
         </template>
       </el-table-column>
@@ -165,6 +165,7 @@ import { getIntDictOptions, DICT_TYPE, getStrDictOptions, getBoolDictOptions } f
 import { dateFormatter } from '@/utils/formatTime'
 import { ImageApi, ImageVO } from '@/api/ai/image'
 import * as UserApi from '@/api/system/user'
+import { AiImageStatusEnum } from '@/views/ai/utils/constants'
 
 /** AI 绘画 列表 */
 defineOptions({ name: 'AiImageManager' })
