@@ -19,49 +19,18 @@
             class="flex mb-20px w-[100%]"
           >
             <el-avatar
-              v-show="item.senderType === UserTypeEnum.MEMBER"
+              v-if="item.senderType === UserTypeEnum.MEMBER"
               :src="keFuConversation.userAvatar"
               alt="avatar"
             />
             <div class="kefu-message p-10px">
-              <!-- TODO puhui999: 消息相关等后续完成后统一抽离封装 -->
               <!-- 文本消息 -->
-              <template v-if="KeFuMessageContentTypeEnum.TEXT === item.contentType">
-                <div
-                  v-dompurify-html="replaceEmoji(item.content)"
-                  :class="[
-                    item.senderType === UserTypeEnum.MEMBER
-                      ? `ml-10px`
-                      : item.senderType === UserTypeEnum.ADMIN
-                        ? `mr-10px`
-                        : ''
-                  ]"
-                  class="flex items-center"
-                ></div>
-              </template>
+              <TextMessageItem :message="item" />
               <!-- 图片消息 -->
-              <template v-if="KeFuMessageContentTypeEnum.IMAGE === item.contentType">
-                <div
-                  :class="[
-                    item.senderType === UserTypeEnum.MEMBER
-                      ? `ml-10px`
-                      : item.senderType === UserTypeEnum.ADMIN
-                        ? `mr-10px`
-                        : ''
-                  ]"
-                  class="flex items-center"
-                >
-                  <el-image
-                    :src="item.content"
-                    fit="contain"
-                    style="width: 200px; height: 200px"
-                    @click="imagePreview(item.content)"
-                  />
-                </div>
-              </template>
+              <ImageMessageItem :message="item" />
             </div>
             <el-avatar
-              v-show="item.senderType === UserTypeEnum.ADMIN"
+              v-if="item.senderType === UserTypeEnum.ADMIN"
               :src="item.senderAvatar"
               alt="avatar"
             />
@@ -94,14 +63,14 @@ import { KeFuMessageApi, KeFuMessageRespVO } from '@/api/mall/promotion/kefu/mes
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import EmojiSelectPopover from './tools/EmojiSelectPopover.vue'
 import PictureSelectUpload from './tools/PictureSelectUpload.vue'
-import { Emoji, useEmoji } from './tools/emoji'
+import TextMessageItem from './message/TextMessageItem.vue'
+import ImageMessageItem from './message/ImageMessageItem.vue'
+import { Emoji } from './tools/emoji'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 import { isEmpty } from '@/utils/is'
 import { UserTypeEnum } from '@/utils/constants'
-import { createImageViewer } from '@/components/ImageViewer'
 
 defineOptions({ name: 'KeFuMessageBox' })
-const { replaceEmoji } = useEmoji()
 const messageTool = useMessage()
 const message = ref('') // 消息
 const messageList = ref<KeFuMessageRespVO[]>([]) // 消息列表
@@ -173,13 +142,6 @@ const scrollbarRef = ref<InstanceType<typeof ElScrollbarType>>()
 const scrollToBottom = async () => {
   await nextTick()
   scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight)
-}
-
-/** 图预览 */
-const imagePreview = (imgUrl: string) => {
-  createImageViewer({
-    urlList: [imgUrl]
-  })
 }
 
 // TODO puhui999: 轮训相关，功能完善后移除
