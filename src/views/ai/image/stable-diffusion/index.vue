@@ -121,6 +121,7 @@
 </template>
 <script setup lang="ts">
 import {ImageApi, ImageDrawReqVO, ImageVO} from '@/api/ai/image'
+import {hasChinese} from '../../utils/common-utils'
 
 // image 模型
 interface ImageModelVO {
@@ -327,11 +328,6 @@ const handleHotWordClick = async (hotWord: string) => {
   selectHotWord.value = hotWord
   // 替换提示词
   prompt.value = hotWord
-}
-
-/**  判断字符串是否包含中文  */
-function hasChinese(str) {
-  return /[\u4E00-\u9FA5]+/g.test(str)
 }
 
 /**  图片生产  */
