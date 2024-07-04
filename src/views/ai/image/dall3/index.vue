@@ -123,33 +123,31 @@ const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', 
 const selectModel = ref<string>('dall-e-3') // 模型
 // message
 const message = useMessage()
-// TODO @fan：image 改成项目里自己的哈
-// TODO @fan：这个 image，要不看看网上有没合适的图片，作为占位符，啊哈哈
 const models = ref<ImageModelVO[]>([
   {
     key: 'dall-e-3',
     name: 'DALL·E 3',
-    image: 'https://h5.cxyhub.com/images/model_2.png',
+    image: `/src/assets/ai/dall2.jpg`,
   },
   {
     key: 'dall-e-2',
     name: 'DALL·E 2',
-    image: 'https://h5.cxyhub.com/images/model_1.png',
+    image: `/src/assets/ai/dall3.jpg`,
   },
 ])  // 模型
 
 const selectImageStyle = ref<string>('vivid') // style 样式
-// TODO @fan：image 改成项目里自己的哈
+
 const imageStyleList = ref<ImageModelVO[]>([
   {
     key: 'vivid',
     name: '清晰',
-    image: 'https://h5.cxyhub.com/images/model_1.png',
+    image: `/src/assets/ai/qingxi.jpg`,
   },
   {
     key: 'natural',
     name: '自然',
-    image: 'https://h5.cxyhub.com/images/model_2.png',
+    image: `/src/assets/ai/ziran.jpg`,
   },
 ])  // style
 
