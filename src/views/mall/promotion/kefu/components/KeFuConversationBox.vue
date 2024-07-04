@@ -35,9 +35,9 @@
 
 <script lang="ts" setup>
 import { KeFuConversationApi, KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
-import { useEmoji } from './emoji'
+import { useEmoji } from './tools/emoji'
 import { formatDate, getNowDateTime } from '@/utils/formatTime'
-import { KeFuMessageContentTypeEnum } from '@/views/mall/promotion/kefu/components/constants'
+import { KeFuMessageContentTypeEnum } from './tools/constants'
 
 defineOptions({ name: 'KeFuConversationBox' })
 const { replaceEmoji } = useEmoji()

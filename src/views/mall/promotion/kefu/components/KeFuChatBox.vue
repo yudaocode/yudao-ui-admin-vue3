@@ -71,10 +71,14 @@
     </el-main>
     <el-footer height="230px">
       <div class="h-[100%]">
-        <div class="chat-tools">
+        <div class="chat-tools flex items-center">
           <EmojiSelectPopover @select-emoji="handleEmojiSelect" />
+          <PictureSelectUpload
+            class="ml-15px mt-3px cursor-pointer"
+            @send-picture="handleSendPicture"
+          />
         </div>
-        <el-input v-model="message" :rows="6" type="textarea" />
+        <el-input v-model="message" :rows="6" style="border-style: none" type="textarea" />
         <div class="h-45px flex justify-end">
           <el-button class="mt-10px" type="primary" @click="handleSendMessage">发送</el-button>
         </div>
@@ -88,9 +92,10 @@
 import { ElScrollbar as ElScrollbarType } from 'element-plus'
 import { KeFuMessageApi, KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
-import EmojiSelectPopover from './EmojiSelectPopover.vue'
-import { Emoji, useEmoji } from './emoji'
-import { KeFuMessageContentTypeEnum } from './constants'
+import EmojiSelectPopover from './tools/EmojiSelectPopover.vue'
+import PictureSelectUpload from './tools/PictureSelectUpload.vue'
+import { Emoji, useEmoji } from './tools/emoji'
+import { KeFuMessageContentTypeEnum } from './tools/constants'
 import { isEmpty } from '@/utils/is'
 import { UserTypeEnum } from '@/utils/constants'
 import { createImageViewer } from '@/components/ImageViewer'
@@ -126,6 +131,16 @@ const showChatBox = computed(() => !isEmpty(keFuConversation.value))
 const handleEmojiSelect = (item: Emoji) => {
   message.value += item.name
 }
+// 处理图片发送
+const handleSendPicture = async (picUrl: string) => {
+  // 组织发送消息
+  const msg = {
+    conversationId: keFuConversation.value.id,
+    contentType: KeFuMessageContentTypeEnum.IMAGE,
+    content: picUrl
+  }
+  await sendMessage(msg)
+}
 // 发送消息
 const handleSendMessage = async () => {
   // 1. 校验消息是否为空
@@ -139,6 +154,11 @@ const handleSendMessage = async () => {
     contentType: KeFuMessageContentTypeEnum.TEXT,
     content: message.value
   }
+  await sendMessage(msg)
+}
+
+// 发送消息 【共用】
+const sendMessage = async (msg: any) => {
   await KeFuMessageApi.sendKeFuMessage(msg)
   message.value = ''
   // 3. 加载消息列表
@@ -248,9 +268,8 @@ onBeforeUnmount(() => {
   .chat-tools {
     width: 100%;
     border: #e4e0e0 solid 1px;
+    border-radius: 10px;
     height: 44px;
-    display: flex;
-    align-items: center;
   }
 
   ::v-deep(textarea) {

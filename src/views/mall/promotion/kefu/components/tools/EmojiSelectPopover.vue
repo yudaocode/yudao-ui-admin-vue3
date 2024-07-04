@@ -2,7 +2,7 @@
 <template>
   <el-popover :width="500" placement="top" trigger="click">
     <template #reference>
-      <Icon :size="30" class="ml-10px" icon="twemoji:grinning-face" />
+      <Icon :size="30" class="ml-10px cursor-pointer" icon="twemoji:grinning-face" />
     </template>
     <ElScrollbar height="300px">
       <ul class="ml-2 flex flex-wrap px-2">
