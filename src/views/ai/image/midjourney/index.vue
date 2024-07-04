@@ -39,7 +39,7 @@
            v-for="imageSize in imageSizeList"
            :key="imageSize.key"
            @click="handlerSizeClick(imageSize)">
-        <div :class="selectImageSize === imageSize ? 'size-wrapper selectImageSize' : 'size-wrapper'">
+        <div :class="selectImageSize === imageSize.key ? 'size-wrapper selectImageSize' : 'size-wrapper'">
           <div :style="imageSize.style"></div>
         </div>
         <div class="size-font">{{ imageSize.key }}</div>
@@ -74,7 +74,7 @@
     </div>
     <el-space wrap class="model-list">
       <div
-        :class="selectModel === model ? 'modal-item selectModel' : 'modal-item'"
+        :class="selectModel === model.key ? 'modal-item selectModel' : 'modal-item'"
         v-for="model in models"
         :key="model.key"
 
@@ -129,7 +129,7 @@ const prompt = ref<string>('')  // 提示词
 const referImage = ref<any>()  // 参考图
 const selectHotWord = ref<string>('') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
-const selectModel = ref<any>() // 选中的热词
+const selectModel = ref<string>('midjourney') // 选中的热词
 const models = ref<ImageModelVO[]>([
   {
     key: 'midjourney',
@@ -142,9 +142,8 @@ const models = ref<ImageModelVO[]>([
     image: 'https://bigpt8.com/pc/_nuxt/nj.ca79b143.png',
   },
 ])  // 模型
-selectModel.value = models.value[0] // 默认选中
 
-const selectImageSize = ref<ImageSizeVO>({} as ImageSizeVO) // 选中 size
+const selectImageSize = ref<string>('1:1') // 选中 size
 const imageSizeList = ref<ImageSizeVO[]>([
   {
     key: '1:1',
@@ -177,10 +176,8 @@ const imageSizeList = ref<ImageSizeVO[]>([
     style: 'width: 50px; height: 30px;background-color: #dcdcdc;',
   },
 ]) // size
-selectImageSize.value = imageSizeList.value[0]
 
 // version
-let versionList = ref<any>([]) // version 列表
 const midjourneyVersionList = ref<any>([
   {
     value: '6.0',
@@ -210,6 +207,7 @@ const nijiVersionList = ref<any>([
   },
 ])
 const selectVersion = ref<any>('6.0') // 选中的 version
+let versionList = ref<any>([]) // version 列表
 versionList.value = midjourneyVersionList.value // 默认选择 midjourney
 
 /**  热词 - click  */
@@ -227,16 +225,12 @@ const handlerHotWordClick = async (hotWord: string) => {
 
 /**  size - click  */
 const handlerSizeClick = async (imageSize: ImageSizeVO) => {
-  if (selectImageSize.value === imageSize) {
-    selectImageSize.value = {} as ImageSizeVO
-    return
-  }
-  selectImageSize.value = imageSize
+  selectImageSize.value = imageSize.key
 }
 
 /**  模型 - click  */
 const handlerModelClick = async (model: ImageModelVO) => {
-  selectModel.value = model
+  selectModel.value = model.key
   if (model.key === 'niji') {
     versionList.value = nijiVersionList.value // 默认选择 niji
   } else {
@@ -258,26 +252,38 @@ const handlerGenerateImage = async () => {
   try {
     console.log('referImage.value', referImage.value)
     // 回调
-    emits('onDrawStart', selectModel.value.key)
+    emits('onDrawStart', selectModel.value)
     // 发送请求
+    const imageSize = imageSizeList.value.find(item => selectImageSize === item.key) as ImageSizeVO
     const req = {
       prompt: prompt.value,
-      model: selectModel.value.key,
-      width: selectImageSize.value.width,
-      height: selectImageSize.value.height,
+      model: selectModel.value,
+      width: imageSize.width,
+      height: imageSize.height,
       version: selectVersion.value,
       referImageUrl: referImage.value,
     } as ImageMidjourneyImagineReqVO
     await ImageApi.midjourneyImagine(req)
   } finally {
     // 回调
-    emits('onDrawComplete', selectModel.value.key)
+    emits('onDrawComplete', selectModel.value)
   }
 }
 
 /** 填充值 */
 const settingValues = async (imageDetail: ImageVO) => {
+  // 提示词
   prompt.value = imageDetail.prompt
+  // image size
+  const imageSize = imageSizeList.value.find(item => item.key === `${imageDetail.width}:${imageDetail.height}`) as ImageSizeVO
+  selectImageSize.value = imageSize.key
+  // 选中模型
+  const model = models.value.find(item => item.key === imageDetail.options?.model) as ImageModelVO
+  await handlerModelClick(model)
+  // 版本
+  selectVersion.value = versionList.value.find(item => item.value === imageDetail.options?.version).value
+  // image
+  referImage.value = imageDetail.options.referImageUrl
 }
 
 /** 暴露组件方法 */
