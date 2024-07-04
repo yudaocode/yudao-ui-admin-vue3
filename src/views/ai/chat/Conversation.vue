@@ -1,11 +1,10 @@
 <!--  AI 对话  -->
 <template>
-  <el-aside width="260px" class="conversation-container" style="height: 100%;">
-
+  <el-aside width="260px" class="conversation-container" style="height: 100%">
     <!-- 左顶部：对话 -->
-    <div style="height: 100%;">
+    <div style="height: 100%">
       <el-button class="w-1/1 btn-new-conversation" type="primary" @click="createConversation">
-        <Icon icon="ep:plus" class="mr-5px"/>
+        <Icon icon="ep:plus" class="mr-5px" />
         新建对话
       </el-button>
 
@@ -18,17 +17,19 @@
         @keyup="searchConversation"
       >
         <template #prefix>
-          <Icon icon="ep:search"/>
+          <Icon icon="ep:search" />
         </template>
       </el-input>
 
       <!-- 左中间：对话列表 -->
       <div class="conversation-list">
-
         <el-empty v-if="loading" description="." :v-loading="loading" />
 
         <div v-for="conversationKey in Object.keys(conversationMap)" :key="conversationKey">
-          <div class="conversation-item classify-title" v-if="conversationMap[conversationKey].length">
+          <div
+            class="conversation-item classify-title"
+            v-if="conversationMap[conversationKey].length"
+          >
             <el-text class="mx-1" size="small" tag="b">{{ conversationKey }}</el-text>
           </div>
           <div
@@ -40,25 +41,27 @@
             @mouseout="hoverConversationId = ''"
           >
             <div
-              :class="conversation.id === activeConversationId ? 'conversation active' : 'conversation'"
+              :class="
+                conversation.id === activeConversationId ? 'conversation active' : 'conversation'
+              "
             >
               <div class="title-wrapper">
-                <img class="avatar" :src="conversation.roleAvatar || roleAvatarDefaultImg"/>
+                <img class="avatar" :src="conversation.roleAvatar || roleAvatarDefaultImg" />
                 <span class="title">{{ conversation.title }}</span>
               </div>
               <div class="button-wrapper" v-show="hoverConversationId === conversation.id">
-                <el-button class="btn" link @click.stop="handlerTop(conversation)" >
+                <el-button class="btn" link @click.stop="handlerTop(conversation)">
                   <el-icon title="置顶" v-if="!conversation.pinned"><Top /></el-icon>
                   <el-icon title="置顶" v-if="conversation.pinned"><Bottom /></el-icon>
                 </el-button>
                 <el-button class="btn" link @click.stop="updateConversationTitle(conversation)">
-                  <el-icon title="编辑" >
-                    <Icon icon="ep:edit"/>
+                  <el-icon title="编辑">
+                    <Icon icon="ep:edit" />
                   </el-icon>
                 </el-button>
                 <el-button class="btn" link @click.stop="deleteChatConversation(conversation)">
-                  <el-icon title="删除对话" >
-                    <Icon icon="ep:delete"/>
+                  <el-icon title="删除对话">
+                    <Icon icon="ep:delete" />
                   </el-icon>
                 </el-button>
               </div>
@@ -66,20 +69,19 @@
           </div>
         </div>
         <!--  底部站位  -->
-        <div style="height: 160px; width: 100%;"></div>
+        <div style="height: 160px; width: 100%"></div>
       </div>
-
     </div>
 
     <!-- 左底部：工具栏 -->
     <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
     <div class="tool-box">
       <div @click="handleRoleRepository">
-        <Icon icon="ep:user"/>
+        <Icon icon="ep:user" />
         <el-text size="small">角色仓库</el-text>
       </div>
       <div @click="handleClearConversation">
-        <Icon icon="ep:delete"/>
+        <Icon icon="ep:delete" />
         <el-text size="small">清空未置顶对话</el-text>
       </div>
     </div>
@@ -88,17 +90,16 @@
 
     <!-- 角色仓库抽屉 -->
     <el-drawer v-model="drawer" title="角色仓库" size="754px">
-      <Role/>
+      <Role />
     </el-drawer>
-
   </el-aside>
 </template>
 
 <script setup lang="ts">
-import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
-import {ref} from "vue";
-import Role from "@/views/ai/chat/role/index.vue";
-import {Bottom, Top} from "@element-plus/icons-vue";
+import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
+import { ref } from 'vue'
+import Role from '@/views/ai/chat/role/index.vue'
+import { Bottom, Top } from '@element-plus/icons-vue'
 import roleAvatarDefaultImg from '@/assets/ai/gpt.svg'
 
 const message = useMessage() // 消息弹窗
@@ -107,8 +108,8 @@ const message = useMessage() // 消息弹窗
 const searchName = ref<string>('') // 对话搜索
 const activeConversationId = ref<string | null>(null) // 选中的对话，默认为 null
 const hoverConversationId = ref<string | null>(null) // 悬浮上去的对话
-const conversationList = ref([] as ChatConversationVO[])  // 对话列表
-const conversationMap = ref<any>({})  // 对话分组 (置顶、今天、三天前、一星期前、一个月前)
+const conversationList = ref([] as ChatConversationVO[]) // 对话列表
+const conversationMap = ref<any>({}) // 对话分组 (置顶、今天、三天前、一星期前、一个月前)
 const drawer = ref<boolean>(false) // 角色仓库抽屉 TODO @fan：roleDrawer 会不会好点哈
 const loading = ref<boolean>(false) // 加载中
 const loadingTime = ref<any>() // 加载中定时器
@@ -138,7 +139,7 @@ const searchConversation = async (e) => {
     conversationMap.value = await conversationTimeGroup(conversationList.value)
   } else {
     // 过滤
-    const filterValues = conversationList.value.filter(item => {
+    const filterValues = conversationList.value.filter((item) => {
       return item.title.includes(searchName.value.trim())
     })
     conversationMap.value = await conversationTimeGroup(filterValues)
@@ -150,7 +151,7 @@ const searchConversation = async (e) => {
  */
 const handleConversationClick = async (id: string) => {
   // 过滤出选中的对话
-  const filterConversation = conversationList.value.filter(item => {
+  const filterConversation = conversationList.value.filter((item) => {
     return item.id === id
   })
   // 回调 onConversationClick
@@ -211,20 +212,20 @@ const getChatConversationList = async () => {
 const conversationTimeGroup = async (list: ChatConversationVO[]) => {
   // 排序、指定、时间分组(今天、一天前、三天前、七天前、30天前)
   const groupMap = {
-    '置顶': [],
-    '今天': [],
-    '一天前': [],
-    '三天前': [],
-    '七天前': [],
-    '三十天前': []
+    置顶: [],
+    今天: [],
+    一天前: [],
+    三天前: [],
+    七天前: [],
+    三十天前: []
   }
   // 当前时间的时间戳
-  const now = Date.now();
+  const now = Date.now()
   // 定义时间间隔常量（单位：毫秒）
-  const oneDay = 24 * 60 * 60 * 1000;
-  const threeDays = 3 * oneDay;
-  const sevenDays = 7 * oneDay;
-  const thirtyDays = 30 * oneDay;
+  const oneDay = 24 * 60 * 60 * 1000
+  const threeDays = 3 * oneDay
+  const sevenDays = 7 * oneDay
+  const thirtyDays = 30 * oneDay
   for (const conversation: ChatConversationVO of list) {
     // 置顶
     if (conversation.pinned) {
@@ -232,7 +233,7 @@ const conversationTimeGroup = async (list: ChatConversationVO[]) => {
       continue
     }
     // 计算时间差（单位：毫秒）
-    const diff = now - conversation.updateTime;
+    const diff = now - conversation.updateTime
     // 根据时间间隔判断
     if (diff < oneDay) {
       groupMap['今天'].push(conversation)
@@ -271,7 +272,7 @@ const createConversation = async () => {
  */
 const updateConversationTitle = async (conversation: ChatConversationVO) => {
   // 1. 二次确认
-  const {value} = await ElMessageBox.prompt('修改标题', {
+  const { value } = await ElMessageBox.prompt('修改标题', {
     inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 判断非空，且非空格
     inputErrorMessage: '标题不能为空',
     inputValue: conversation.title
@@ -285,7 +286,7 @@ const updateConversationTitle = async (conversation: ChatConversationVO) => {
   // 3. 刷新列表
   await getChatConversationList()
   // 4. 过滤当前切换的
-  const filterConversationList = conversationList.value.filter(item => {
+  const filterConversationList = conversationList.value.filter((item) => {
     return item.id === conversation.id
   })
   if (filterConversationList.length > 0) {
@@ -310,8 +311,7 @@ const deleteChatConversation = async (conversation: ChatConversationVO) => {
     await getChatConversationList()
     // 回调
     emits('onConversationDelete', conversation)
-  } catch {
-  }
+  } catch {}
 }
 
 /**
@@ -343,16 +343,13 @@ const handleRoleRepository = async () => {
  */
 const handleClearConversation = async () => {
   // TODO @fan：可以使用 await message.confirm( 简化，然后使用 await 改成同步的逻辑，会更简洁
-  ElMessageBox.confirm(
-    '确认后对话会全部清空，置顶的对话除外。',
-    '确认提示',
-    {
-      confirmButtonText: '确认',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
+  ElMessageBox.confirm('确认后对话会全部清空，置顶的对话除外。', '确认提示', {
+    confirmButtonText: '确认',
+    cancelButtonText: '取消',
+    type: 'warning'
+  })
     .then(async () => {
-      await ChatConversationApi.deleteMyAllExceptPinned()
+      await ChatConversationApi.deleteChatConversationMyByUnpinned()
       ElMessage({
         message: '操作成功!',
         type: 'success'
@@ -364,8 +361,7 @@ const handleClearConversation = async () => {
       // 回调 方法
       emits('onConversationClear')
     })
-    .catch(() => {
-    })
+    .catch(() => {})
 }
 
 // ============ 组件 onMounted
@@ -377,7 +373,7 @@ watch(activeId, async (newValue, oldValue) => {
 })
 
 // 定义 public 方法
-defineExpose({createConversation})
+defineExpose({ createConversation })
 
 onMounted(async () => {
   // 获取 对话列表
@@ -394,11 +390,9 @@ onMounted(async () => {
     }
   }
 })
-
 </script>
 
 <style scoped lang="scss">
-
 .conversation-container {
   position: relative;
   display: flex;
