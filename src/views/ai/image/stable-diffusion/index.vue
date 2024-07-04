@@ -351,7 +351,7 @@ const handleGenerateImage = async () => {
         steps: steps.value, // 图片生成步数
         scale: scale.value, // 引导系数
         sampler: selectSampler.value, // 采样算法
-        clipGuidancePreset: selectClipGuidancePreset.value.key, // 文本提示相匹配的图像 CLIP
+        clipGuidancePreset: selectClipGuidancePreset.value, // 文本提示相匹配的图像 CLIP
         stylePreset: selectStylePreset.value, // 风格
       }
     } as ImageDrawReqVO

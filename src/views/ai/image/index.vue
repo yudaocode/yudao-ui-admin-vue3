@@ -9,8 +9,8 @@
         <Dall3
           v-if="selectPlatform === AiPlatformEnum.OPENAI"
           ref="dall3Ref"
-          @on-draw-start="handlerDrawStart"
-          @on-draw-complete="handlerDrawComplete"
+          @on-draw-start="handleDrawStart"
+          @on-draw-complete="handleDrawComplete"
         />
         <Midjourney
           v-if="selectPlatform === AiPlatformEnum.MIDJOURNEY"
@@ -19,12 +19,12 @@
         <StableDiffusion
           v-if="selectPlatform === AiPlatformEnum.STABLE_DIFFUSION"
           ref="stableDiffusionRef"
-          @on-draw-complete="handlerDrawComplete"
+          @on-draw-complete="handleDrawComplete"
         />
       </div>
     </div>
     <div class="main">
-      <ImageTask ref="imageTaskRef" @on-regeneration="handlerRegeneration" />
+      <ImageTask ref="imageTaskRef" @on-regeneration="handleRegeneration" />
     </div>
   </div>
 </template>
@@ -63,20 +63,20 @@ const platformOptions = [
 const drawIn = ref<boolean>(false) // 生成中
 
 /**  绘画 - start  */
-const handlerDrawStart = async (type) => {
+const handleDrawStart = async (type) => {
   // todo @fan：这个是不是没用啦？
   drawIn.value = true
 }
 
 /**  绘画 - complete  */
-const handlerDrawComplete = async (type) => {
+const handleDrawComplete = async (type) => {
   drawIn.value = false
   // todo
   await imageTaskRef.value.getImageList()
 }
 
 /**  绘画 - 重新生成  */
-const handlerRegeneration = async (imageDetail: ImageVO) => {
+const handleRegeneration = async (imageDetail: ImageVO) => {
   // 切换平台
   selectPlatform.value = imageDetail.platform
   console.log('切换平台', imageDetail.platform)

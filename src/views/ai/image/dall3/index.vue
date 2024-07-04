@@ -25,7 +25,7 @@
                  :type="(selectHotWord === hotWord ? 'primary' : 'default')"
                  v-for="hotWord in hotWords"
                  :key="hotWord"
-                 @click="handlerHotWordClick(hotWord)"
+                 @click="handleHotWordClick(hotWord)"
       >
         {{ hotWord }}
       </el-button>
@@ -45,7 +45,7 @@
         <el-image
           :src="model.image"
           fit="contain"
-          @click="handlerModelClick(model)"
+          @click="handleModelClick(model)"
         />
         <div class="model-font">{{model.name}}</div>
       </div>
@@ -64,7 +64,7 @@
         <el-image
           :src="imageStyle.image"
           fit="contain"
-          @click="handlerStyleClick(imageStyle)"
+          @click="handleStyleClick(imageStyle)"
         />
         <div class="style-font">{{imageStyle.name}}</div>
       </div>
@@ -78,7 +78,7 @@
       <div class="size-item"
            v-for="imageSize in imageSizeList"
            :key="imageSize.key"
-           @click="handlerSizeClick(imageSize)">
+           @click="handleSizeClick(imageSize)">
         <div :class="selectImageSize === imageSize.key ? 'size-wrapper selectImageSize' : 'size-wrapper'">
           <div :style="imageSize.style"></div>
         </div>
@@ -91,7 +91,7 @@
                size="large"
                round
                :loading="drawIn"
-               @click="handlerGenerateImage">
+               @click="handleGenerateImage">
       {{drawIn ? '生成中' : '生成内容'}}
     </el-button>
   </div>
@@ -183,10 +183,8 @@ const props = defineProps({})
 // 定义 emits
 const emits = defineEmits(['onDrawStart', 'onDrawComplete'])
 
-// TODO @fan：如果是简单注释，建议用 /** */，主要是现在项目里是这种风格哈，保持一致好点~
-// TODO @fan：handler 应该改成 handle 哈
 /** 热词 - click  */
-const handlerHotWordClick = async (hotWord: string) => {
+const handleHotWordClick = async (hotWord: string) => {
   // 取消选中
   if (selectHotWord.value == hotWord) {
     selectHotWord.value = ''
@@ -199,22 +197,22 @@ const handlerHotWordClick = async (hotWord: string) => {
 }
 
 /**  模型 - click  */
-const handlerModelClick = async (model: ImageModelVO) => {
+const handleModelClick = async (model: ImageModelVO) => {
   selectModel.value = model.key
 }
 
 /**  样式 - click  */
-const handlerStyleClick = async (imageStyle: ImageModelVO) => {
+const handleStyleClick = async (imageStyle: ImageModelVO) => {
   selectImageStyle.value = imageStyle.key
 }
 
 /**  size - click  */
-const handlerSizeClick = async (imageSize: ImageSizeVO) => {
+const handleSizeClick = async (imageSize: ImageSizeVO) => {
   selectImageSize.value = imageSize.key
 }
 
 /**  图片生产  */
-const handlerGenerateImage = async () => {
+const handleGenerateImage = async () => {
   // 二次确认
   await message.confirm(`确认生成内容?`)
   try {
@@ -251,15 +249,14 @@ const settingValues = async (imageDetail: ImageVO) => {
   selectImageStyle.value = imageDetail.options?.style
   //
   const imageSize = imageSizeList.value.find(item => item.key === `${imageDetail.width}x${imageDetail.height}`) as ImageSizeVO
-  console.log('imageSize', imageSize)
-  await handlerSizeClick(imageSize)
+  await handleSizeClick(imageSize)
 }
 
 /** 暴露组件方法 */
 defineExpose({ settingValues })
+
 </script>
 <style scoped lang="scss">
-
 // 提示词
 .prompt {
 }

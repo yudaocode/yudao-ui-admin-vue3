@@ -2,7 +2,7 @@
   <el-drawer
     v-model="showDrawer"
     title="图片详细"
-    @close="handlerDrawerClose"
+    @close="handleDrawerClose"
     custom-class="drawer-class"
   >
     <!-- 图片 -->
@@ -79,8 +79,8 @@ const props = defineProps({
 })
 
 /**  抽屉 - close  */
-const handlerDrawerClose = async () => {
-  emits('handlerDrawerClose')
+const handleDrawerClose = async () => {
+  emits('handleDrawerClose')
 }
 
 /**  获取 - 图片 detail  */
@@ -90,7 +90,7 @@ const getImageDetail = async (id) => {
 }
 
 /**  任务 - detail  */
-const handlerTaskDetail = async () => {
+const handleTaskDetail = async () => {
   showDrawer.value = true
 }
 
@@ -107,7 +107,7 @@ watch(id, async (newVal, oldVal) => {
   }
 })
 //
-const emits = defineEmits(['handlerDrawerClose'])
+const emits = defineEmits(['handleDrawerClose'])
 //
 onMounted(async () => {})
 </script>

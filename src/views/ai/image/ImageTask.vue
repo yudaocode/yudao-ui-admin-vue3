@@ -6,8 +6,8 @@
         v-for="image in imageList"
         :key="image"
         :image-detail="image"
-        @on-btn-click="handlerImageBtnClick"
-        @on-mj-btn-click="handlerImageMjBtnClick"
+        @on-btn-click="handleImageBtnClick"
+        @on-mj-btn-click="handleImageMjBtnClick"
       />
     </div>
     <div class="task-image-pagination">
@@ -16,7 +16,7 @@
         layout="prev, pager, next"
         :default-page-size="pageSize"
         :total="pageTotal"
-        @change="handlerPageChange"
+        @change="handlePageChange"
       />
     </div>
   </el-card>
@@ -24,7 +24,7 @@
   <ImageDetailDrawer
     :show="isShowImageDetail"
     :id="showImageDetailId"
-    @handler-drawer-close="handlerDrawerClose"
+    @handle-drawer-close="handleDrawerClose"
   />
 </template>
 <script setup lang="ts">
@@ -49,12 +49,12 @@ const pageSize = ref<number>(10) // page size
 const pageTotal = ref<number>(0) // page size
 
 /**  抽屉 - close  */
-const handlerDrawerClose = async () => {
+const handleDrawerClose = async () => {
   isShowImageDetail.value = false
 }
 
 /**  任务 - detail  */
-const handlerDrawerOpen = async () => {
+const handleDrawerOpen = async () => {
   isShowImageDetail.value = true
 }
 
@@ -117,12 +117,12 @@ const refreshWatchImages = async () => {
 }
 
 /**  图片 - btn click  */
-const handlerImageBtnClick = async (type: string, imageDetail: ImageVO) => {
+const handleImageBtnClick = async (type: string, imageDetail: ImageVO) => {
   // 获取 image detail id
   showImageDetailId.value = imageDetail.id
   // 处理不用 btn
   if (type === 'more') {
-    await handlerDrawerOpen()
+    await handleDrawerOpen()
   } else if (type === 'delete') {
     await message.confirm(`是否删除照片?`)
     await ImageApi.deleteImageMy(imageDetail.id)
@@ -138,7 +138,7 @@ const handlerImageBtnClick = async (type: string, imageDetail: ImageVO) => {
 }
 
 /**  图片 - mj btn click  */
-const handlerImageMjBtnClick = async (button: ImageMjButtonsVO, imageDetail: ImageVO) => {
+const handleImageMjBtnClick = async (button: ImageMjButtonsVO, imageDetail: ImageVO) => {
   // 1、构建 params 参数
   const data = {
     id: imageDetail.id,
@@ -171,7 +171,7 @@ const downloadImage = async (imageUrl) => {
 }
 
 // page change
-const handlerPageChange = async (page) => {
+const handlePageChange = async (page) => {
   pageNo.value = page
   await getImageList(false)
 }
