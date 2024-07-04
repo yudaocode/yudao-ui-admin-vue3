@@ -37,7 +37,7 @@
     </div>
     <el-space wrap class="model-list">
       <div
-        :class="selectModel === model ? 'modal-item selectModel' : 'modal-item'"
+        :class="selectModel === model.key ? 'modal-item selectModel' : 'modal-item'"
         v-for="model in models"
         :key="model.key"
 
@@ -57,7 +57,7 @@
     </div>
     <el-space wrap class="image-style-list">
       <div
-        :class="selectImageStyle === imageStyle ? 'image-style-item selectImageStyle' : 'image-style-item'"
+        :class="selectImageStyle === imageStyle.key ? 'image-style-item selectImageStyle' : 'image-style-item'"
         v-for="imageStyle in imageStyleList"
         :key="imageStyle.key"
       >
@@ -79,7 +79,7 @@
            v-for="imageSize in imageSizeList"
            :key="imageSize.key"
            @click="handlerSizeClick(imageSize)">
-        <div :class="selectImageSize === imageSize ? 'size-wrapper selectImageSize' : 'size-wrapper'">
+        <div :class="selectImageSize === imageSize.key ? 'size-wrapper selectImageSize' : 'size-wrapper'">
           <div :style="imageSize.style"></div>
         </div>
         <div class="size-font">{{ imageSize.name }}</div>
@@ -120,7 +120,7 @@ const prompt = ref<string>('')  // 提示词
 const drawIn = ref<boolean>(false)  // 生成中
 const selectHotWord = ref<string>('') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
-const selectModel = ref<any>({}) // 模型
+const selectModel = ref<string>('dall-e-3') // 模型
 // message
 const message = useMessage()
 // TODO @fan：image 改成项目里自己的哈
@@ -137,9 +137,8 @@ const models = ref<ImageModelVO[]>([
     image: 'https://h5.cxyhub.com/images/model_1.png',
   },
 ])  // 模型
-selectModel.value = models.value[0]
 
-const selectImageStyle = ref<any>({}) // style 样式
+const selectImageStyle = ref<string>('vivid') // style 样式
 // TODO @fan：image 改成项目里自己的哈
 const imageStyleList = ref<ImageModelVO[]>([
   {
@@ -153,9 +152,8 @@ const imageStyleList = ref<ImageModelVO[]>([
     image: 'https://h5.cxyhub.com/images/model_2.png',
   },
 ])  // style
-selectImageStyle.value = imageStyleList.value[0]
 
-const selectImageSize = ref<ImageSizeVO>({} as ImageSizeVO) // 选中 size
+const selectImageSize = ref<string>('1024x1024') // 选中 size
 const imageSizeList = ref<ImageSizeVO[]>([
   {
     key: '1024x1024',
@@ -179,7 +177,6 @@ const imageSizeList = ref<ImageSizeVO[]>([
     style: 'width: 50px; height: 30px;background-color: #dcdcdc;',
   }
 ]) // size
-selectImageSize.value = imageSizeList.value[0]
 
 // 定义 Props
 const props = defineProps({})
@@ -203,29 +200,17 @@ const handlerHotWordClick = async (hotWord: string) => {
 
 /**  模型 - click  */
 const handlerModelClick = async (model: ImageModelVO) => {
-  if (selectModel.value === model) {
-    selectModel.value = {} as ImageModelVO
-    return
-  }
-  selectModel.value = model
+  selectModel.value = model.key
 }
 
 /**  样式 - click  */
 const handlerStyleClick = async (imageStyle: ImageModelVO) => {
-  if (selectImageStyle.value === imageStyle) {
-    selectImageStyle.value = {} as ImageModelVO
-    return
-  }
-  selectImageStyle.value = imageStyle
+  selectImageStyle.value = imageStyle.key
 }
 
 /**  size - click  */
 const handlerSizeClick = async (imageSize: ImageSizeVO) => {
-  if (selectImageSize.value === imageSize) {
-    selectImageSize.value = {} as ImageSizeVO
-    return
-  }
-  selectImageSize.value = imageSize
+  selectImageSize.value = imageSize.key
 }
 
 /**  图片生产  */
@@ -236,22 +221,23 @@ const handlerGenerateImage = async () => {
     // 加载中
     drawIn.value = true
     // 回调
-    emits('onDrawStart', selectModel.value.key)
+    emits('onDrawStart', selectModel.value)
+    const imageSize = imageSizeList.value.find(item => item.key === selectImageSize.value) as ImageSizeVO
     const form = {
       platform: 'OpenAI',
       prompt: prompt.value, // 提示词
-      model: selectModel.value.key, // 模型
-      width: selectImageSize.value.width, // size 不能为空
-      height: selectImageSize.value.height, // size 不能为空
+      model: selectModel.value, // 模型
+      width: imageSize.width, // size 不能为空
+      height: imageSize.height, // size 不能为空
       options: {
-        style: selectImageStyle.value.key, // 图像生成的风格
+        style: selectImageStyle.value, // 图像生成的风格
       }
     } as ImageDrawReqVO
     // 发送请求
     await ImageApi.drawImage(form)
   } finally {
     // 回调
-    emits('onDrawComplete', selectModel.value.key)
+    emits('onDrawComplete', selectModel.value)
     // 加载结束
     drawIn.value = false
   }
@@ -260,6 +246,13 @@ const handlerGenerateImage = async () => {
 /** 填充值 */
 const settingValues = async (imageDetail: ImageVO) => {
   prompt.value = imageDetail.prompt
+  selectModel.value = imageDetail.model
+  //
+  selectImageStyle.value = imageDetail.options?.style
+  //
+  const imageSize = imageSizeList.value.find(item => item.key === `${imageDetail.width}x${imageDetail.height}`) as ImageSizeVO
+  console.log('imageSize', imageSize)
+  await handlerSizeClick(imageSize)
 }
 
 /** 暴露组件方法 */
