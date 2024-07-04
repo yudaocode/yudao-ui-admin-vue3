@@ -9,5 +9,5 @@
 
 /**  判断字符串是否包含中文  */
 export const hasChinese = async (str) => {
-  return /[\u4E00-\u9FA5]+/g.test(str)
+  return /[\u4e00-\u9fa5]/.test(str)
 }
