@@ -16,19 +16,77 @@
 <script lang="ts" setup>
 import { KeFuChatBox, KeFuConversationBox } from './components'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
+import { getAccessToken } from '@/utils/auth'
+import { useWebSocket } from '@vueuse/core'
+import { WebSocketMessageTypeConstants } from '@/views/mall/promotion/kefu/components/tools/constants'
 
 defineOptions({ name: 'KeFu' })
-
+const message = useMessage()
 // 加载消息
 const keFuChatBoxRef = ref<InstanceType<typeof KeFuChatBox>>()
 const handleChange = (conversation: KeFuConversationRespVO) => {
   keFuChatBoxRef.value?.getMessageList(conversation)
 }
 
-// 加载会话
+//======================= websocket start=======================
+const server = ref(
+  (import.meta.env.VITE_BASE_URL + '/infra/ws/').replace('http', 'ws') +
+    '?token=' +
+    getAccessToken()
+) // WebSocket 服务地址
+
+/** 发起 WebSocket 连接 */
+const { data, close, open } = useWebSocket(server.value, {
+  autoReconnect: false,
+  heartbeat: true
+})
+watchEffect(() => {
+  if (!data.value) {
+    return
+  }
+  try {
+    // 1. 收到心跳
+    if (data.value === 'pong') {
+      // state.recordList.push({
+      //   text: '【心跳】',
+      //   time: new Date().getTime()
+      // })
+      return
+    }
+
+    // 2.1 解析 type 消息类型
+    const jsonMessage = JSON.parse(data.value)
+    const type = jsonMessage.type
+    if (!type) {
+      message.error('未知的消息类型：' + data.value)
+      return
+    }
+    // 2.2 消息类型：KEFU_MESSAGE_TYPE
+    if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_TYPE) {
+      // 刷新列表
+      getConversationList()
+      // 刷新消息列表
+      keFuChatBoxRef.value?.refreshMessageList()
+      return
+    }
+  } catch (error) {
+    console.error(error)
+  }
+})
+//======================= websocket end=======================
+// 加载会话列表
 const keFuConversationRef = ref<InstanceType<typeof KeFuConversationBox>>()
-onMounted(() => {
+const getConversationList = () => {
   keFuConversationRef.value?.getConversationList()
+}
+onMounted(() => {
+  getConversationList()
+  // 打开 websocket 连接
+  open()
+})
+onBeforeUnmount(() => {
+  // 关闭 websocket 连接
+  close()
 })
 </script>
 
