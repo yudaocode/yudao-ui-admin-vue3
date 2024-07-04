@@ -16,9 +16,8 @@ const emits = defineEmits<{
 // 选择并上传文件
 const selectAndUpload = async () => {
   const files: any = await getFiles()
-  message.success('图片发送请稍等。。。')
+  message.success('图片发送中请稍等。。。')
   const res = await FileApi.updateFile({ file: files[0].file })
-  message.success('图片发送成功!')
   emits('send-picture', res.data)
 }
 
@@ -34,7 +33,7 @@ const selectAndUpload = async () => {
 async function getFiles(options = {}) {
   const { multiple, accept, limit, fileSize } = {
     multiple: true,
-    accept: 'image/jpeg, image/png, image/gif',
+    accept: 'image/jpeg, image/png, image/gif', // 默认选择图片
     limit: 1,
     fileSize: 500,
     ...options

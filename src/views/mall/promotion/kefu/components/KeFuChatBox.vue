@@ -6,34 +6,55 @@
     <el-main class="kefu-content" style="overflow: visible">
       <el-scrollbar ref="scrollbarRef" always height="calc(100vh - 495px)">
         <div ref="innerRef" class="w-[100%] pb-3px">
-          <div
-            v-for="item in messageList"
-            :key="item.id"
-            :class="[
-              item.senderType === UserTypeEnum.MEMBER
-                ? `ss-row-left`
-                : item.senderType === UserTypeEnum.ADMIN
-                  ? `ss-row-right`
-                  : ''
-            ]"
-            class="flex mb-20px w-[100%]"
-          >
-            <el-avatar
-              v-if="item.senderType === UserTypeEnum.MEMBER"
-              :src="keFuConversation.userAvatar"
-              alt="avatar"
-            />
-            <div class="kefu-message p-10px">
-              <!-- 文本消息 -->
-              <TextMessageItem :message="item" />
-              <!-- 图片消息 -->
-              <ImageMessageItem :message="item" />
+          <div v-for="(item, index) in messageList" :key="item.id" class="w-[100%]">
+            <div class="flex justify-center items-center mb-20px">
+              <!-- 日期 -->
+              <div
+                v-if="
+                  item.contentType !== KeFuMessageContentTypeEnum.SYSTEM && showTime(item, index)
+                "
+                class="date-message"
+              >
+                {{ formatDate(item.createTime) }}
+              </div>
+              <!-- 系统消息 -->
+              <view
+                v-if="item.contentType === KeFuMessageContentTypeEnum.SYSTEM"
+                class="system-message"
+              >
+                {{ item.content }}
+              </view>
             </div>
-            <el-avatar
-              v-if="item.senderType === UserTypeEnum.ADMIN"
-              :src="item.senderAvatar"
-              alt="avatar"
-            />
+            <div
+              :class="[
+                item.senderType === UserTypeEnum.MEMBER
+                  ? `ss-row-left`
+                  : item.senderType === UserTypeEnum.ADMIN
+                    ? `ss-row-right`
+                    : ''
+              ]"
+              class="flex mb-20px w-[100%]"
+            >
+              <el-avatar
+                v-if="item.senderType === UserTypeEnum.MEMBER"
+                :src="keFuConversation.userAvatar"
+                alt="avatar"
+              />
+              <div
+                :class="{ 'kefu-message': KeFuMessageContentTypeEnum.TEXT === item.contentType }"
+                class="p-10px"
+              >
+                <!-- 文本消息 -->
+                <TextMessageItem :message="item" />
+                <!-- 图片消息 -->
+                <ImageMessageItem :message="item" />
+              </div>
+              <el-avatar
+                v-if="item.senderType === UserTypeEnum.ADMIN"
+                :src="item.senderAvatar"
+                alt="avatar"
+              />
+            </div>
           </div>
         </div>
       </el-scrollbar>
@@ -69,6 +90,11 @@ import { Emoji } from './tools/emoji'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 import { isEmpty } from '@/utils/is'
 import { UserTypeEnum } from '@/utils/constants'
+import { formatDate } from '@/utils/formatTime'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+
+dayjs.extend(relativeTime)
 
 defineOptions({ name: 'KeFuMessageBox' })
 const messageTool = useMessage()
@@ -90,7 +116,7 @@ const getMessageList = async (conversation: KeFuConversationRespVO) => {
   if (!poller.value) {
     poller.value = setInterval(() => {
       getMessageList(conversation)
-    }, 1000)
+    }, 2000)
   }
 }
 defineExpose({ getMessageList })
@@ -143,7 +169,18 @@ const scrollToBottom = async () => {
   await nextTick()
   scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight)
 }
-
+/**
+ * 是否显示时间
+ * @param {*} item - 数据
+ * @param {*} index - 索引
+ */
+const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
+  if (unref(messageList.value)[index + 1]) {
+    let dateString = dayjs(unref(messageList.value)[index + 1].createTime).fromNow()
+    return dateString !== dayjs(unref(item).createTime).fromNow()
+  }
+  return false
+})
 // TODO puhui999: 轮训相关，功能完善后移除
 onBeforeUnmount(() => {
   if (!poller.value) {
@@ -224,6 +261,17 @@ onBeforeUnmount(() => {
       &:hover {
         transform: scale(1.03);
       }
+    }
+
+    .date-message,
+    .system-message {
+      width: fit-content;
+      border-radius: 12rpx;
+      padding: 8rpx 16rpx;
+      margin-bottom: 16rpx;
+      background-color: #e8e8e8;
+      color: #999;
+      font-size: 24rpx;
     }
   }
 

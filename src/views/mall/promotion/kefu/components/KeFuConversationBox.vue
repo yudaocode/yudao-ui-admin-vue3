@@ -36,7 +36,7 @@
 <script lang="ts" setup>
 import { KeFuConversationApi, KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { useEmoji } from './tools/emoji'
-import { formatDate, getNowDateTime } from '@/utils/formatTime'
+import { formatDate } from '@/utils/formatTime'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 
 defineOptions({ name: 'KeFuConversationBox' })
@@ -45,24 +45,6 @@ const activeConversationIndex = ref(-1) // 选中的会话
 const conversationList = ref<KeFuConversationRespVO[]>([]) // 会话列表
 const getConversationList = async () => {
   conversationList.value = await KeFuConversationApi.getConversationList()
-  // 测试数据
-  for (let i = 0; i < 5; i++) {
-    conversationList.value.push({
-      id: 1,
-      userId: 283,
-      userAvatar:
-        'https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKMezSxtOImrC9lbhwHiazYwck3xwrEcO7VJfG6WQo260whaeVNoByE5RreiaGsGfOMlIiaDhSaA991w/132',
-      userNickname: '辉辉鸭' + i,
-      lastMessageTime: getNowDateTime(),
-      lastMessageContent:
-        '[爱心][爱心]你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇',
-      lastMessageContentType: 1,
-      adminPinned: false,
-      userDeleted: false,
-      adminDeleted: false,
-      adminUnreadMessageCount: 19
-    })
-  }
 }
 defineExpose({ getConversationList })
 const emits = defineEmits<{

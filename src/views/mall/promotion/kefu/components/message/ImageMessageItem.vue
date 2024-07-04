@@ -9,12 +9,11 @@
             ? `mr-10px`
             : ''
       ]"
-      class="flex messages-center"
     >
       <el-image
         :src="message.content"
         fit="contain"
-        style="width: 200px; height: 200px"
+        style="width: 200px"
         @click="imagePreview(message.content)"
       />
     </div>
