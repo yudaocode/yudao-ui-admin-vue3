@@ -148,7 +148,7 @@ const hotWords = ref<string[]>([
 const message = useMessage()
 
 // 采样方法 TODO @fan：有 Euler a；DPM++ 2S a；DPM++ 2M；DPM++ SDE；DPM++ 2M SDE；UniPC；Restart；另外，要不这种枚举，我们都放到 image 里？写成 stableDiffusionSampler ？
-const selectSampler = ref<any>({}) // 模型
+const selectSampler = ref<string>('DDIM') // 模型
 // DDIM DDPM K_DPMPP_2M K_DPMPP_2S_ANCESTRAL K_DPM_2 K_DPM_2_ANCESTRAL K_EULER K_EULER_ANCESTRAL K_HEUN K_LMS
 const sampler = ref<ImageModelVO[]>([
   {
@@ -192,12 +192,11 @@ const sampler = ref<ImageModelVO[]>([
     name: 'K_LMS'
   },
 ])
-selectSampler.value = sampler.value[0]
 
 // 风格
 // 3d-model analog-film anime cinematic comic-book digital-art enhance fantasy-art isometric
 // line-art low-poly modeling-compound neon-punk origami photographic pixel-art tile-texture
-const selectStylePreset = ref<any>({}) // 模型
+const selectStylePreset = ref<string>('3d-model') // 模型
 const stylePresets = ref<ImageModelVO[]>([
   {
     key: '3d-model',
@@ -269,13 +268,11 @@ const stylePresets = ref<ImageModelVO[]>([
     name: 'tile-texture'
   },
 ])
-selectStylePreset.value = stylePresets.value[0]
-
 
 // 文本提示相匹配的图像(clip_guidance_preset) 简称 CLIP
 // https://platform.stability.ai/docs/api-reference#tag/SDXL-and-SD1.6/operation/textToImage
 // FAST_BLUE FAST_GREEN NONE SIMPLE SLOW SLOWER SLOWEST
-const selectClipGuidancePreset = ref<any>({}) // 模型
+const selectClipGuidancePreset = ref<string>('NONE') // 模型
 const clipGuidancePresets = ref<ImageModelVO[]>([
   {
     key: 'NONE',
@@ -306,7 +303,6 @@ const clipGuidancePresets = ref<ImageModelVO[]>([
     name: 'SLOWEST'
   },
 ])
-selectClipGuidancePreset.value = clipGuidancePresets.value[0]
 
 const steps = ref<number>(20) // 迭代步数
 const seed = ref<number>(42) // 控制生成图像的随机性
@@ -334,7 +330,7 @@ const handleHotWordClick = async (hotWord: string) => {
 const handleGenerateImage = async () => {
   // 二次确认
   await message.confirm(`确认生成内容?`)
-  if (hasChinese(prompt.value)) {
+  if (await hasChinese(prompt.value)) {
     message.alert('暂不支持中文！')
     return
   }
@@ -354,9 +350,9 @@ const handleGenerateImage = async () => {
         seed: seed.value, // 随机种子
         steps: steps.value, // 图片生成步数
         scale: scale.value, // 引导系数
-        sampler: selectSampler.value.key, // 采样算法
+        sampler: selectSampler.value, // 采样算法
         clipGuidancePreset: selectClipGuidancePreset.value.key, // 文本提示相匹配的图像 CLIP
-        stylePreset: selectStylePreset.value.key, // 风格
+        stylePreset: selectStylePreset.value, // 风格
       }
     } as ImageDrawReqVO
     await ImageApi.drawImage(form)
@@ -371,6 +367,14 @@ const handleGenerateImage = async () => {
 /** 填充值 */
 const settingValues = async (imageDetail: ImageVO) => {
   prompt.value = imageDetail.prompt
+  imageWidth.value = imageDetail.width
+  imageHeight.value = imageDetail.height
+  seed.value = imageDetail.options?.seed
+  steps.value = imageDetail.options?.steps
+  scale.value = imageDetail.options?.scale
+  selectSampler.value = imageDetail.options?.sampler
+  selectClipGuidancePreset.value = imageDetail.options?.clipGuidancePreset
+  selectStylePreset.value = imageDetail.options?.stylePreset
 }
 
 /** 暴露组件方法 */

@@ -40,9 +40,9 @@ import {ImageVO} from "@/api/ai/image";
 
 
 const imageTaskRef = ref<any>() // image task ref
-const dall3Ref = ref<any>() // image task ref
-const midjourneyRef = ref<any>() // image task ref
-const stableDiffusionRef = ref<any>() // image task ref
+const dall3Ref = ref<any>() // openai ref
+const midjourneyRef = ref<any>() // midjourney ref
+const stableDiffusionRef = ref<any>() // stable diffusion ref
 
 // 定义属性
 const selectPlatform = ref('StableDiffusion')
@@ -79,7 +79,7 @@ const handlerDrawComplete = async (type) => {
 const handlerRegeneration = async (imageDetail: ImageVO) => {
   // 切换平台
   selectPlatform.value = imageDetail.platform
-
+  console.log('切换平台', imageDetail.platform)
   // 根据不同平台填充 imageDetail
   if (imageDetail.platform === AiPlatformEnum.MIDJOURNEY) {
     await nextTick(async () => {
