@@ -101,7 +101,6 @@ const messageTool = useMessage()
 const message = ref('') // 消息
 const messageList = ref<KeFuMessageRespVO[]>([]) // 消息列表
 const keFuConversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
-const poller = ref<any>(null) // TODO puhui999: 轮训定时器，暂时模拟 websocket
 // 获得消息 TODO puhui999:  先不考虑下拉加载历史消息
 const getMessageList = async (conversation: KeFuConversationRespVO) => {
   keFuConversation.value = conversation
@@ -112,14 +111,15 @@ const getMessageList = async (conversation: KeFuConversationRespVO) => {
   messageList.value = list.reverse()
   // TODO puhui999: 首次加载时滚动到最新消息，如果加载的是历史消息则不滚动
   await scrollToBottom()
-  // TODO puhui999: 轮训相关，功能完善后移除
-  if (!poller.value) {
-    poller.value = setInterval(() => {
-      getMessageList(conversation)
-    }, 2000)
-  }
 }
-defineExpose({ getMessageList })
+// 刷新消息列表
+const refreshMessageList = () => {
+  if (!keFuConversation.value) {
+    return
+  }
+  getMessageList(keFuConversation.value)
+}
+defineExpose({ getMessageList, refreshMessageList })
 // 是否显示聊天区域
 const showChatBox = computed(() => !isEmpty(keFuConversation.value))
 // 处理表情选择
@@ -180,13 +180,6 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
     return dateString !== dayjs(unref(item).createTime).fromNow()
   }
   return false
-})
-// TODO puhui999: 轮训相关，功能完善后移除
-onBeforeUnmount(() => {
-  if (!poller.value) {
-    return
-  }
-  clearInterval(poller.value)
 })
 </script>
 
