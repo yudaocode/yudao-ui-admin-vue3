@@ -3,9 +3,10 @@
     <div
       v-for="(item, index) in conversationList"
       :key="item.id"
-      :class="{ active: index === activeConversationIndex }"
-      class="kefu-conversation flex justify-between items-center"
+      :class="{ active: index === activeConversationIndex, pinned: item.adminPinned }"
+      class="kefu-conversation flex items-center"
       @click="openRightMessage(item, index)"
+      @contextmenu.prevent="rightClick($event as PointerEvent, item)"
     >
       <div class="flex justify-center items-center w-100%">
         <div class="flex justify-center items-center" style="width: 50px; height: 50px">
@@ -40,21 +41,67 @@
         </div>
       </div>
     </div>
+    <!-- 通过右击获取到的坐标定位 -->
+    <ul v-show="showRightMenu" :style="rightMenuStyle" class="right-menu-ul">
+      <li
+        v-show="!selectedConversation.adminPinned"
+        class="flex items-center"
+        @click.stop="updateConversationPinned(true)"
+      >
+        <Icon class="mr-5px" icon="ep:top" />
+        置顶会话
+      </li>
+      <li
+        v-show="selectedConversation.adminPinned"
+        class="flex items-center"
+        @click.stop="updateConversationPinned(false)"
+      >
+        <Icon class="mr-5px" icon="ep:bottom" />
+        取消置顶
+      </li>
+      <li class="flex items-center" @click.stop="deleteConversation">
+        <Icon class="mr-5px" color="red" icon="ep:delete" />
+        删除会话
+      </li>
+      <li class="flex items-center" @click.stop="closeRightMenu">
+        <Icon class="mr-5px" color="red" icon="ep:close" />
+        取消
+      </li>
+    </ul>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { KeFuConversationApi, KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { useEmoji } from './tools/emoji'
-import { formatDate } from '@/utils/formatTime'
+import { formatDate, getNowDateTime } from '@/utils/formatTime'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 
 defineOptions({ name: 'KeFuConversationBox' })
+const message = useMessage()
 const { replaceEmoji } = useEmoji()
 const activeConversationIndex = ref(-1) // 选中的会话
 const conversationList = ref<KeFuConversationRespVO[]>([]) // 会话列表
 const getConversationList = async () => {
   conversationList.value = await KeFuConversationApi.getConversationList()
+  // 测试数据
+  for (let i = 0; i < 5; i++) {
+    conversationList.value.push({
+      id: 1,
+      userId: 283,
+      userAvatar:
+        'https://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTKMezSxtOImrC9lbhwHiazYwck3xwrEcO7VJfG6WQo260whaeVNoByE5RreiaGsGfOMlIiaDhSaA991w/132',
+      userNickname: '辉辉鸭' + i,
+      lastMessageTime: getNowDateTime(),
+      lastMessageContent:
+        '[爱心][爱心]你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇你好哇',
+      lastMessageContentType: 1,
+      adminPinned: false,
+      userDeleted: false,
+      adminDeleted: false,
+      adminUnreadMessageCount: i
+    })
+  }
 }
 defineExpose({ getConversationList })
 const emits = defineEmits<{
@@ -84,6 +131,54 @@ const getContentType = computed(() => (lastMessageContentType: number) => {
       return ''
   }
 })
+
+//======================= 右键菜单 =======================
+const showRightMenu = ref(false) // 显示右键菜单
+const rightMenuStyle = ref<any>({}) // 右键菜单 Style
+const selectedConversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 右键选中的会话对象
+// 右键菜单
+const rightClick = (mouseEvent: PointerEvent, item: KeFuConversationRespVO) => {
+  selectedConversation.value = item
+  // 显示右键菜单
+  showRightMenu.value = true
+  rightMenuStyle.value = {
+    top: mouseEvent.clientY - 110 + 'px',
+    left: mouseEvent.clientX - 80 + 'px'
+  }
+}
+// 关闭菜单
+const closeRightMenu = () => {
+  showRightMenu.value = false
+}
+// 置顶会话
+const updateConversationPinned = async (adminPinned: boolean) => {
+  // 1. 会话置顶/取消置顶
+  await KeFuConversationApi.updateConversationPinned({
+    id: selectedConversation.value.id,
+    adminPinned
+  })
+  // TODO puhui999: 快速操作两次提示只会提示一次看看怎么优雅解决
+  message.success(adminPinned ? '置顶成功' : '取消置顶成功')
+  // 2. 关闭右键菜单，更新会话列表
+  closeRightMenu()
+  await getConversationList()
+}
+// 删除会话
+const deleteConversation = async () => {
+  // 1. 删除会话
+  await message.confirm('您确定要删除该会话吗？')
+  await KeFuConversationApi.deleteConversation(selectedConversation.value.id)
+  // 2. 关闭右键菜单，更新会话列表
+  closeRightMenu()
+  await getConversationList()
+}
+watch(showRightMenu, (val) => {
+  if (val) {
+    document.body.addEventListener('click', closeRightMenu)
+  } else {
+    document.body.removeEventListener('click', closeRightMenu)
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -105,6 +200,31 @@ const getContentType = computed(() => (lastMessageContentType: number) => {
   .active {
     border-left: 5px #3271ff solid;
     background-color: #eff0f1;
+  }
+
+  .pinned {
+    background-color: #eff0f1;
+  }
+
+  .right-menu-ul {
+    position: absolute;
+    background-color: #fff;
+    padding: 10px;
+    margin: 0;
+    list-style-type: none; /* 移除默认的项目符号 */
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影效果 */
+    width: 130px;
+
+    li {
+      padding: 8px 16px;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: background-color 0.3s; /* 平滑过渡 */
+      &:hover {
+        background-color: #e0e0e0; /* 悬停时的背景颜色 */
+      }
+    }
   }
 }
 </style>
