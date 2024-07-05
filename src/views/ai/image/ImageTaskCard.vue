@@ -64,7 +64,7 @@
 import {Delete, Download, More, RefreshRight} from '@element-plus/icons-vue'
 import { ImageVO, ImageMjButtonsVO } from '@/api/ai/image'
 import { PropType } from 'vue'
-import { ElLoading } from 'element-plus'
+import {ElLoading, LoadingOptionsResolved} from 'element-plus'
 import { AiImageStatusEnum } from '@/views/ai/utils/constants'
 
 const cardImageRef = ref<any>() // 卡片 image ref
@@ -83,12 +83,12 @@ const handleBtnClick = async (type, imageDetail: ImageVO) => {
 }
 
 const handleLoading = async (status: number) => {
-  // TODO @fan：这个搞成 Loading 组件，然后通过数据驱动，这样搞可以哇？
+  // TODO @芋艿：这个搞成 Loading 组件，然后通过数据驱动，这样搞可以哇？
   if (status === AiImageStatusEnum.IN_PROGRESS) {
     cardImageLoadingInstance.value = ElLoading.service({
       target: cardImageRef.value,
       text: '生成中...'
-    })
+    } as LoadingOptionsResolved)
   } else {
     if (cardImageLoadingInstance.value) {
       cardImageLoadingInstance.value.close()
