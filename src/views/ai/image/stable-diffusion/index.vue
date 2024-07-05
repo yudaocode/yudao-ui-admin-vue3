@@ -147,7 +147,7 @@ const hotWords = ref<string[]>([
 // message
 const message = useMessage()
 
-// 采样方法 TODO @fan：有 Euler a；DPM++ 2S a；DPM++ 2M；DPM++ SDE；DPM++ 2M SDE；UniPC；Restart；另外，要不这种枚举，我们都放到 image 里？写成 stableDiffusionSampler ？
+// 采样方法
 const selectSampler = ref<string>('DDIM') // 模型
 // DDIM DDPM K_DPMPP_2M K_DPMPP_2S_ANCESTRAL K_DPM_2 K_DPM_2_ANCESTRAL K_EULER K_EULER_ANCESTRAL K_HEUN K_LMS
 const sampler = ref<ImageModelVO[]>([
