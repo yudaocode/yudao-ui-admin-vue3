@@ -43,8 +43,8 @@ export const ChatConversationApi = {
   },
 
   // 删除【我的】所有对话，置顶除外
-  deleteMyAllExceptPinned: async () => {
-    return await request.delete({ url: `/ai/chat/conversation/delete-my-all-except-pinned` })
+  deleteChatConversationMyByUnpinned: async () => {
+    return await request.delete({ url: `/ai/chat/conversation/delete-by-unpinned` })
   },
 
   // 获得【我的】聊天对话列表

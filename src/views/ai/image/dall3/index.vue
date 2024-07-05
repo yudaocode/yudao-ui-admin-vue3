@@ -25,7 +25,7 @@
                  :type="(selectHotWord === hotWord ? 'primary' : 'default')"
                  v-for="hotWord in hotWords"
                  :key="hotWord"
-                 @click="handlerHotWordClick(hotWord)"
+                 @click="handleHotWordClick(hotWord)"
       >
         {{ hotWord }}
       </el-button>
@@ -37,7 +37,7 @@
     </div>
     <el-space wrap class="model-list">
       <div
-        :class="selectModel === model ? 'modal-item selectModel' : 'modal-item'"
+        :class="selectModel === model.key ? 'modal-item selectModel' : 'modal-item'"
         v-for="model in models"
         :key="model.key"
 
@@ -45,7 +45,7 @@
         <el-image
           :src="model.image"
           fit="contain"
-          @click="handlerModelClick(model)"
+          @click="handleModelClick(model)"
         />
         <div class="model-font">{{model.name}}</div>
       </div>
@@ -57,14 +57,14 @@
     </div>
     <el-space wrap class="image-style-list">
       <div
-        :class="selectImageStyle === imageStyle ? 'image-style-item selectImageStyle' : 'image-style-item'"
+        :class="selectImageStyle === imageStyle.key ? 'image-style-item selectImageStyle' : 'image-style-item'"
         v-for="imageStyle in imageStyleList"
         :key="imageStyle.key"
       >
         <el-image
           :src="imageStyle.image"
           fit="contain"
-          @click="handlerStyleClick(imageStyle)"
+          @click="handleStyleClick(imageStyle)"
         />
         <div class="style-font">{{imageStyle.name}}</div>
       </div>
@@ -78,8 +78,8 @@
       <div class="size-item"
            v-for="imageSize in imageSizeList"
            :key="imageSize.key"
-           @click="handlerSizeClick(imageSize)">
-        <div :class="selectImageSize === imageSize ? 'size-wrapper selectImageSize' : 'size-wrapper'">
+           @click="handleSizeClick(imageSize)">
+        <div :class="selectImageSize === imageSize.key ? 'size-wrapper selectImageSize' : 'size-wrapper'">
           <div :style="imageSize.style"></div>
         </div>
         <div class="size-font">{{ imageSize.name }}</div>
@@ -91,13 +91,13 @@
                size="large"
                round
                :loading="drawIn"
-               @click="handlerGenerateImage">
+               @click="handleGenerateImage">
       {{drawIn ? '生成中' : '生成内容'}}
     </el-button>
   </div>
 </template>
 <script setup lang="ts">
-import {ImageApi, ImageDrawReqVO} from '@/api/ai/image';
+import {ImageApi, ImageDrawReqVO, ImageVO} from '@/api/ai/image';
 
 // image 模型
 interface ImageModelVO {
@@ -120,42 +120,38 @@ const prompt = ref<string>('')  // 提示词
 const drawIn = ref<boolean>(false)  // 生成中
 const selectHotWord = ref<string>('') // 选中的热词
 const hotWords = ref<string[]>(['中国旗袍', '古装美女', '卡通头像', '机甲战士', '童话小屋', '中国长城'])  // 热词
-const selectModel = ref<any>({}) // 模型
+const selectModel = ref<string>('dall-e-3') // 模型
 // message
 const message = useMessage()
-// TODO @fan：image 改成项目里自己的哈
-// TODO @fan：这个 image，要不看看网上有没合适的图片，作为占位符，啊哈哈
 const models = ref<ImageModelVO[]>([
   {
     key: 'dall-e-3',
     name: 'DALL·E 3',
-    image: 'https://h5.cxyhub.com/images/model_2.png',
+    image: `/src/assets/ai/dall2.jpg`,
   },
   {
     key: 'dall-e-2',
     name: 'DALL·E 2',
-    image: 'https://h5.cxyhub.com/images/model_1.png',
+    image: `/src/assets/ai/dall3.jpg`,
   },
 ])  // 模型
-selectModel.value = models.value[0]
 
-const selectImageStyle = ref<any>({}) // style 样式
-// TODO @fan：image 改成项目里自己的哈
+const selectImageStyle = ref<string>('vivid') // style 样式
+
 const imageStyleList = ref<ImageModelVO[]>([
   {
     key: 'vivid',
     name: '清晰',
-    image: 'https://h5.cxyhub.com/images/model_1.png',
+    image: `/src/assets/ai/qingxi.jpg`,
   },
   {
     key: 'natural',
     name: '自然',
-    image: 'https://h5.cxyhub.com/images/model_2.png',
+    image: `/src/assets/ai/ziran.jpg`,
   },
 ])  // style
-selectImageStyle.value = imageStyleList.value[0]
 
-const selectImageSize = ref<ImageSizeVO>({} as ImageSizeVO) // 选中 size
+const selectImageSize = ref<string>('1024x1024') // 选中 size
 const imageSizeList = ref<ImageSizeVO[]>([
   {
     key: '1024x1024',
@@ -179,17 +175,14 @@ const imageSizeList = ref<ImageSizeVO[]>([
     style: 'width: 50px; height: 30px;background-color: #dcdcdc;',
   }
 ]) // size
-selectImageSize.value = imageSizeList.value[0]
 
 // 定义 Props
 const props = defineProps({})
 // 定义 emits
 const emits = defineEmits(['onDrawStart', 'onDrawComplete'])
 
-// TODO @fan：如果是简单注释，建议用 /** */，主要是现在项目里是这种风格哈，保持一致好点~
-// TODO @fan：handler 应该改成 handle 哈
 /** 热词 - click  */
-const handlerHotWordClick = async (hotWord: string) => {
+const handleHotWordClick = async (hotWord: string) => {
   // 取消选中
   if (selectHotWord.value == hotWord) {
     selectHotWord.value = ''
@@ -202,64 +195,66 @@ const handlerHotWordClick = async (hotWord: string) => {
 }
 
 /**  模型 - click  */
-const handlerModelClick = async (model: ImageModelVO) => {
-  if (selectModel.value === model) {
-    selectModel.value = {} as ImageModelVO
-    return
-  }
-  selectModel.value = model
+const handleModelClick = async (model: ImageModelVO) => {
+  selectModel.value = model.key
 }
 
 /**  样式 - click  */
-const handlerStyleClick = async (imageStyle: ImageModelVO) => {
-  if (selectImageStyle.value === imageStyle) {
-    selectImageStyle.value = {} as ImageModelVO
-    return
-  }
-  selectImageStyle.value = imageStyle
+const handleStyleClick = async (imageStyle: ImageModelVO) => {
+  selectImageStyle.value = imageStyle.key
 }
 
 /**  size - click  */
-const handlerSizeClick = async (imageSize: ImageSizeVO) => {
-  if (selectImageSize.value === imageSize) {
-    selectImageSize.value = {} as ImageSizeVO
-    return
-  }
-  selectImageSize.value = imageSize
+const handleSizeClick = async (imageSize: ImageSizeVO) => {
+  selectImageSize.value = imageSize.key
 }
 
 /**  图片生产  */
-const handlerGenerateImage = async () => {
+const handleGenerateImage = async () => {
   // 二次确认
   await message.confirm(`确认生成内容?`)
   try {
     // 加载中
     drawIn.value = true
     // 回调
-    emits('onDrawStart', selectModel.value.key)
+    emits('onDrawStart', selectModel.value)
+    const imageSize = imageSizeList.value.find(item => item.key === selectImageSize.value) as ImageSizeVO
     const form = {
       platform: 'OpenAI',
       prompt: prompt.value, // 提示词
-      model: selectModel.value.key, // 模型
-      width: selectImageSize.value.width, // size 不能为空
-      height: selectImageSize.value.height, // size 不能为空
+      model: selectModel.value, // 模型
+      width: imageSize.width, // size 不能为空
+      height: imageSize.height, // size 不能为空
       options: {
-        style: selectImageStyle.value.key, // 图像生成的风格
+        style: selectImageStyle.value, // 图像生成的风格
       }
     } as ImageDrawReqVO
     // 发送请求
     await ImageApi.drawImage(form)
   } finally {
     // 回调
-    emits('onDrawComplete', selectModel.value.key)
+    emits('onDrawComplete', selectModel.value)
     // 加载结束
     drawIn.value = false
   }
 }
 
+/** 填充值 */
+const settingValues = async (imageDetail: ImageVO) => {
+  prompt.value = imageDetail.prompt
+  selectModel.value = imageDetail.model
+  //
+  selectImageStyle.value = imageDetail.options?.style
+  //
+  const imageSize = imageSizeList.value.find(item => item.key === `${imageDetail.width}x${imageDetail.height}`) as ImageSizeVO
+  await handleSizeClick(imageSize)
+}
+
+/** 暴露组件方法 */
+defineExpose({ settingValues })
+
 </script>
 <style scoped lang="scss">
-
 // 提示词
 .prompt {
 }

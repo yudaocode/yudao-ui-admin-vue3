@@ -8,18 +8,23 @@
       <div class="modal-switch-container">
         <Dall3
           v-if="selectPlatform === AiPlatformEnum.OPENAI"
-          @on-draw-start="handlerDrawStart"
-          @on-draw-complete="handlerDrawComplete"
+          ref="dall3Ref"
+          @on-draw-start="handleDrawStart"
+          @on-draw-complete="handleDrawComplete"
         />
-        <Midjourney v-if="selectPlatform === AiPlatformEnum.MIDJOURNEY" />
+        <Midjourney
+          v-if="selectPlatform === AiPlatformEnum.MIDJOURNEY"
+          ref="midjourneyRef"
+        />
         <StableDiffusion
           v-if="selectPlatform === AiPlatformEnum.STABLE_DIFFUSION"
-          @on-draw-complete="handlerDrawComplete"
+          ref="stableDiffusionRef"
+          @on-draw-complete="handleDrawComplete"
         />
       </div>
     </div>
     <div class="main">
-      <ImageTask ref="imageTaskRef" />
+      <ImageTask ref="imageTaskRef" @on-regeneration="handleRegeneration" />
     </div>
   </div>
 </template>
@@ -31,8 +36,13 @@ import Midjourney from './midjourney/index.vue'
 import StableDiffusion from './stable-diffusion/index.vue'
 import ImageTask from './ImageTask.vue'
 import { AiPlatformEnum } from '@/views/ai/utils/constants'
+import {ImageVO} from "@/api/ai/image";
+
 
 const imageTaskRef = ref<any>() // image task ref
+const dall3Ref = ref<any>() // openai ref
+const midjourneyRef = ref<any>() // midjourney ref
+const stableDiffusionRef = ref<any>() // stable diffusion ref
 
 // 定义属性
 const selectPlatform = ref('StableDiffusion')
@@ -50,19 +60,36 @@ const platformOptions = [
     value: AiPlatformEnum.STABLE_DIFFUSION
   }
 ]
-const drawIn = ref<boolean>(false) // 生成中
 
 /**  绘画 - start  */
-const handlerDrawStart = async (type) => {
-  // todo @fan：这个是不是没用啦？
-  drawIn.value = true
+const handleDrawStart = async (type) => {
 }
 
 /**  绘画 - complete  */
-const handlerDrawComplete = async (type) => {
-  drawIn.value = false
-  // todo
+const handleDrawComplete = async (type) => {
   await imageTaskRef.value.getImageList()
+}
+
+/**  绘画 - 重新生成  */
+const handleRegeneration = async (imageDetail: ImageVO) => {
+  // 切换平台
+  selectPlatform.value = imageDetail.platform
+  console.log('切换平台', imageDetail.platform)
+  // 根据不同平台填充 imageDetail
+  if (imageDetail.platform === AiPlatformEnum.MIDJOURNEY) {
+    await nextTick(async () => {
+      midjourneyRef.value.settingValues(imageDetail)
+    })
+  } else if (imageDetail.platform === AiPlatformEnum.OPENAI) {
+    await nextTick(async () => {
+      dall3Ref.value.settingValues(imageDetail)
+    })
+  } else if (imageDetail.platform === AiPlatformEnum.STABLE_DIFFUSION) {
+    await nextTick(async () => {
+      stableDiffusionRef.value.settingValues(imageDetail)
+    })
+  }
+
 }
 </script>
 

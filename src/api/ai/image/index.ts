@@ -16,6 +16,7 @@ export interface ImageVO {
   taskId: number // 任务编号
   buttons: ImageMjButtonsVO[] // mj 操作按钮
   createTime: string // 创建时间
+  finishTime: string // 完成时间
 }
 
 export interface ImagePageReqVO {

@@ -17,21 +17,26 @@
           异常
         </el-button>
       </div>
-      <!-- TODO @fan：1）按钮要不调整成详情、下载、再次生成、删除？；2）如果是再次生成，就把当前的参数填写到左侧的框框里？ -->
       <div>
         <el-button
           class="btn"
           text
           :icon="Download"
-          @click="handlerBtnClick('download', imageDetail)"
+          @click="handleBtnClick('download', imageDetail)"
+        />
+        <el-button
+          class="btn"
+          text
+          :icon="RefreshRight"
+          @click="handleBtnClick('regeneration', imageDetail)"
         />
         <el-button
           class="btn"
           text
           :icon="Delete"
-          @click="handlerBtnClick('delete', imageDetail)"
+          @click="handleBtnClick('delete', imageDetail)"
         />
-        <el-button class="btn" text :icon="More" @click="handlerBtnClick('more', imageDetail)" />
+        <el-button class="btn" text :icon="More" @click="handleBtnClick('more', imageDetail)" />
       </div>
     </div>
     <div class="image-wrapper" ref="cardImageRef">
@@ -48,7 +53,7 @@
         v-for="button in imageDetail?.buttons"
         :key="button"
         style="min-width: 40px; margin-left: 0; margin-right: 10px; margin-top: 5px"
-        @click="handlerMjBtnClick(button)"
+        @click="handleMjBtnClick(button)"
       >
         {{ button.label }}{{ button.emoji }}
       </el-button>
@@ -56,10 +61,10 @@
   </el-card>
 </template>
 <script setup lang="ts">
-import { Delete, Download, More } from '@element-plus/icons-vue'
+import {Delete, Download, More, RefreshRight} from '@element-plus/icons-vue'
 import { ImageVO, ImageMjButtonsVO } from '@/api/ai/image'
 import { PropType } from 'vue'
-import { ElLoading } from 'element-plus'
+import {ElLoading, LoadingOptionsResolved} from 'element-plus'
 import { AiImageStatusEnum } from '@/views/ai/utils/constants'
 
 const cardImageRef = ref<any>() // 卡片 image ref
@@ -73,17 +78,17 @@ const props = defineProps({
 })
 
 /**  按钮 - 点击事件  */
-const handlerBtnClick = async (type, imageDetail: ImageVO) => {
+const handleBtnClick = async (type, imageDetail: ImageVO) => {
   emits('onBtnClick', type, imageDetail)
 }
 
-const handlerLoading = async (status: number) => {
-  // TODO @fan：这个搞成 Loading 组件，然后通过数据驱动，这样搞可以哇？
+const handleLoading = async (status: number) => {
+  // TODO @芋艿：这个搞成 Loading 组件，然后通过数据驱动，这样搞可以哇？
   if (status === AiImageStatusEnum.IN_PROGRESS) {
     cardImageLoadingInstance.value = ElLoading.service({
       target: cardImageRef.value,
       text: '生成中...'
-    })
+    } as LoadingOptionsResolved)
   } else {
     if (cardImageLoadingInstance.value) {
       cardImageLoadingInstance.value.close()
@@ -93,7 +98,7 @@ const handlerLoading = async (status: number) => {
 }
 
 /**  mj 按钮 click  */
-const handlerMjBtnClick = async (button: ImageMjButtonsVO) => {
+const handleMjBtnClick = async (button: ImageMjButtonsVO) => {
   // 确认窗体
   await message.confirm(`确认操作 "${button.label} ${button.emoji}" ?`)
   emits('onMjBtnClick', button, props.imageDetail)
@@ -102,7 +107,7 @@ const handlerMjBtnClick = async (button: ImageMjButtonsVO) => {
 // watch
 const { imageDetail } = toRefs(props)
 watch(imageDetail, async (newVal, oldVal) => {
-  await handlerLoading(newVal.status as string)
+  await handleLoading(newVal.status as string)
 })
 
 // emits
@@ -110,7 +115,7 @@ const emits = defineEmits(['onBtnClick', 'onMjBtnClick'])
 
 //
 onMounted(async () => {
-  await handlerLoading(props.imageDetail.status as string)
+  await handleLoading(props.imageDetail.status as string)
 })
 </script>
 
