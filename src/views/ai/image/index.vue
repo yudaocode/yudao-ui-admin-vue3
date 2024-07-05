@@ -60,18 +60,13 @@ const platformOptions = [
     value: AiPlatformEnum.STABLE_DIFFUSION
   }
 ]
-const drawIn = ref<boolean>(false) // 生成中
 
 /**  绘画 - start  */
 const handleDrawStart = async (type) => {
-  // todo @fan：这个是不是没用啦？
-  drawIn.value = true
 }
 
 /**  绘画 - complete  */
 const handleDrawComplete = async (type) => {
-  drawIn.value = false
-  // todo
   await imageTaskRef.value.getImageList()
 }
 
