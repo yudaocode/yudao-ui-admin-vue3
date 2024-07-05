@@ -248,7 +248,7 @@ const handleChangeVersion = async (version) => {
 const handleGenerateImage = async () => {
   // 二次确认
   await message.confirm(`确认生成内容?`)
-  // todo @范 图片生产逻辑
+  // todo @芋艿 图片生产逻辑
   try {
     // 回调
     emits('onDrawStart', selectModel.value)
