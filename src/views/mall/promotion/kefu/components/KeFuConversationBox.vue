@@ -8,7 +8,15 @@
       @click="openRightMessage(item, index)"
     >
       <div class="flex justify-center items-center w-100%">
-        <el-avatar :src="item.userAvatar" alt="avatar" />
+        <div class="flex justify-center items-center" style="width: 50px; height: 50px">
+          <el-badge
+            :hidden="item.adminUnreadMessageCount === 0"
+            :max="99"
+            :value="item.adminUnreadMessageCount"
+          >
+            <el-avatar :src="item.userAvatar" alt="avatar" />
+          </el-badge>
+        </div>
         <div class="ml-10px w-100%">
           <div class="flex justify-between items-center w-100%">
             <span>{{ item.userNickname }}</span>
@@ -24,8 +32,10 @@
             ></div>
           </template>
           <!-- 图片消息 -->
-          <template v-if="KeFuMessageContentTypeEnum.IMAGE === item.lastMessageContentType">
-            <div class="last-message flex items-center color-[#989EA6]">【图片消息】</div>
+          <template v-else>
+            <div class="last-message flex items-center color-[#989EA6]">
+              {{ getContentType(item.lastMessageContentType) }}
+            </div>
           </template>
         </div>
       </div>
@@ -55,6 +65,25 @@ const openRightMessage = (item: KeFuConversationRespVO, index: number) => {
   activeConversationIndex.value = index
   emits('change', item)
 }
+// 获得消息类型
+const getContentType = computed(() => (lastMessageContentType: number) => {
+  switch (lastMessageContentType) {
+    case KeFuMessageContentTypeEnum.SYSTEM:
+      return '[系统消息]'
+    case KeFuMessageContentTypeEnum.VIDEO:
+      return '[视频消息]'
+    case KeFuMessageContentTypeEnum.IMAGE:
+      return '[图片消息]'
+    case KeFuMessageContentTypeEnum.PRODUCT:
+      return '[商品消息]'
+    case KeFuMessageContentTypeEnum.ORDER:
+      return '[订单消息]'
+    case KeFuMessageContentTypeEnum.VOICE:
+      return '[语音消息]'
+    default:
+      return ''
+  }
+})
 </script>
 
 <style lang="scss" scoped>

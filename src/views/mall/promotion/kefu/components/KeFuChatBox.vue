@@ -18,12 +18,12 @@
                 {{ formatDate(item.createTime) }}
               </div>
               <!-- 系统消息 -->
-              <view
+              <div
                 v-if="item.contentType === KeFuMessageContentTypeEnum.SYSTEM"
                 class="system-message"
               >
                 {{ item.content }}
-              </view>
+              </div>
             </div>
             <div
               :class="[
@@ -154,9 +154,10 @@ const handleSendMessage = async () => {
 
 // 发送消息 【共用】
 const sendMessage = async (msg: any) => {
+  // 发送消息
   await KeFuMessageApi.sendKeFuMessage(msg)
   message.value = ''
-  // 3. 加载消息列表
+  // 加载消息列表
   await getMessageList(keFuConversation.value)
   // 滚动到最新消息处
   await scrollToBottom()
@@ -166,8 +167,11 @@ const innerRef = ref<HTMLDivElement>()
 const scrollbarRef = ref<InstanceType<typeof ElScrollbarType>>()
 // 滚动到底部
 const scrollToBottom = async () => {
+  // 1. 滚动到最新消息
   await nextTick()
   scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight)
+  // 2. 消息已读
+  await KeFuMessageApi.updateKeFuMessageReadStatus(keFuConversation.value.id)
 }
 /**
  * 是否显示时间
