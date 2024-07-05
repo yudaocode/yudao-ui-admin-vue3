@@ -36,3 +36,22 @@ const download = {
 }
 
 export default download
+
+/** 图片下载(通过浏览器图片下载)  */
+export const downloadImage = async (imageUrl) => {
+  const image = new Image()
+  image.setAttribute('crossOrigin', 'anonymous')
+  image.src = imageUrl
+  image.onload = () => {
+    const canvas = document.createElement('canvas')
+    canvas.width = image.width
+    canvas.height = image.height
+    const ctx = canvas.getContext('2d') as CanvasDrawImage
+    ctx.drawImage(image, 0, 0, image.width, image.height)
+    const url = canvas.toDataURL('image/png')
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'image.png'
+    a.click()
+  }
+}

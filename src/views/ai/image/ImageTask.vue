@@ -33,6 +33,7 @@ import ImageDetailDrawer from './ImageDetailDrawer.vue'
 import ImageTaskCard from './ImageTaskCard.vue'
 import { ElLoading, LoadingOptionsResolved } from 'element-plus'
 import { AiImageStatusEnum } from '@/views/ai/utils/constants'
+import { downloadImage } from '@/utils/download'
 
 const message = useMessage() // 消息弹窗
 
@@ -148,26 +149,6 @@ const handleImageMjBtnClick = async (button: ImageMjButtonsVO, imageDetail: Imag
   await ImageApi.midjourneyAction(data)
   // 3、刷新列表
   await getImageList()
-}
-
-/**  下载 - image  */
-// TODO @fan：貌似可以考虑抽到 download 里面，作为一个方法
-const downloadImage = async (imageUrl) => {
-  const image = new Image()
-  image.setAttribute('crossOrigin', 'anonymous')
-  image.src = imageUrl
-  image.onload = () => {
-    const canvas = document.createElement('canvas')
-    canvas.width = image.width
-    canvas.height = image.height
-    const ctx = canvas.getContext('2d') as CanvasDrawImage
-    ctx.drawImage(image, 0, 0, image.width, image.height)
-    const url = canvas.toDataURL('image/png')
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'image.png'
-    a.click()
-  }
 }
 
 // page change
