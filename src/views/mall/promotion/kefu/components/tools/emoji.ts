@@ -1,4 +1,6 @@
-export const emojiList = [
+import { isEmpty } from '@/utils/is'
+
+const emojiList = [
   { name: '[笑掉牙]', file: 'xiaodiaoya.png' },
   { name: '[可爱]', file: 'keai.png' },
   { name: '[冷酷]', file: 'lengku.png' },
@@ -54,53 +56,60 @@ export interface Emoji {
   url: string
 }
 
-export const emojiPage = {}
-emojiList.forEach((item, index) => {
-  if (!emojiPage[Math.floor(index / 30) + 1]) {
-    emojiPage[Math.floor(index / 30) + 1] = []
-  }
-  emojiPage[Math.floor(index / 30) + 1].push(item)
-})
-
-// 后端上传地址
-const staticUrl = import.meta.env.VITE_STATIC_URL
-// 后缀
-const suffix = '/static/img/chat/emoji/'
-
-// 处理表情
-export function replaceEmoji(data: string) {
-  let newData = data
-  if (typeof newData !== 'object') {
-    const reg = /\[(.+?)\]/g // [] 中括号
-    const zhEmojiName = newData.match(reg)
-    if (zhEmojiName) {
-      zhEmojiName.forEach((item) => {
-        const emojiFile = selEmojiFile(item)
-        newData = newData.replace(
-          item,
-          `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;" src="${
-            staticUrl + suffix + emojiFile
-          }"/>`
-        )
-      })
+export const useEmoji = () => {
+  const emojiPathList = ref<any[]>([])
+  // 加载本地图片
+  const getStaticEmojiPath = async () => {
+    const pathList = import.meta.glob(
+      '@/views/mall/promotion/kefu/components/images/*.{png,jpg,jpeg,svg}'
+    )
+    for (const path in pathList) {
+      const imageModule: any = await pathList[path]()
+      emojiPathList.value.push(imageModule.default)
     }
   }
-  return newData
-}
-
-// 获得所有表情
-export function getEmojiList(): Emoji[] {
-  return emojiList.map((item) => ({
-    url: staticUrl + suffix + item.file,
-    name: item.name
-  })) as Emoji[]
-}
-
-function selEmojiFile(name: string) {
-  for (const index in emojiList) {
-    if (emojiList[index].name === name) {
-      return emojiList[index].file
+  // 初始化
+  onMounted(async () => {
+    if (isEmpty(emojiPathList.value)) {
+      await getStaticEmojiPath()
     }
+  })
+
+  // 处理表情
+  function replaceEmoji(data: string) {
+    let newData = data
+    if (typeof newData !== 'object') {
+      const reg = /\[(.+?)\]/g // [] 中括号
+      const zhEmojiName = newData.match(reg)
+      if (zhEmojiName) {
+        zhEmojiName.forEach((item) => {
+          const emojiFile = selEmojiFile(item)
+          newData = newData.replace(
+            item,
+            `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;" src="${emojiFile}"/>`
+          )
+        })
+      }
+    }
+    return newData
   }
-  return false
+
+  // 获得所有表情
+  function getEmojiList(): Emoji[] {
+    return emojiList.map((item) => ({
+      url: selEmojiFile(item.name),
+      name: item.name
+    })) as Emoji[]
+  }
+
+  function selEmojiFile(name: string) {
+    for (const emoji of emojiList) {
+      if (emoji.name === name) {
+        return emojiPathList.value.find((item: string) => item.indexOf(emoji.file) > -1)
+      }
+    }
+    return false
+  }
+
+  return { replaceEmoji, getEmojiList }
 }
