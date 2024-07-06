@@ -1,55 +1,18 @@
 import request from '@/config/axios'
 
-// TODO @puhui999：注释要不放在属性后面，避免太长哈
 export interface KeFuConversationRespVO {
-  /**
-   * 编号
-   */
-  id: number
-  /**
-   * 会话所属用户
-   */
-  userId: number
-  /**
-   * 会话所属用户头像
-   */
-  userAvatar: string
-  /**
-   * 会话所属用户昵称
-   */
-  userNickname: string
-  /**
-   * 最后聊天时间
-   */
-  lastMessageTime: Date
-  /**
-   * 最后聊天内容
-   */
-  lastMessageContent: string
-  /**
-   * 最后发送的消息类型
-   */
-  lastMessageContentType: number
-  /**
-   * 管理端置顶
-   */
-  adminPinned: boolean
-  /**
-   * 用户是否可见
-   */
-  userDeleted: boolean
-  /**
-   * 管理员是否可见
-   */
-  adminDeleted: boolean
-  /**
-   * 管理员未读消息数
-   */
-  adminUnreadMessageCount: number
-  /**
-   * 创建时间
-   */
-  createTime?: string
+  id: number // 编号
+  userId: number // 会话所属用户
+  userAvatar: string // 会话所属用户头像
+  userNickname: string // 会话所属用户昵称
+  lastMessageTime: Date // 最后聊天时间
+  lastMessageContent: string // 最后聊天内容
+  lastMessageContentType: number // 最后发送的消息类型
+  adminPinned: boolean // 管理端置顶
+  userDeleted: boolean // 用户是否可见
+  adminDeleted: boolean // 管理员是否可见
+  adminUnreadMessageCount: number // 管理员未读消息数
+  createTime?: string // 创建时间
 }
 
 // 客服会话 API

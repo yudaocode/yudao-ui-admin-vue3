@@ -7,7 +7,7 @@
     </el-col>
     <el-col :span="16">
       <ContentWrap>
-        <KeFuChatBox ref="keFuChatBoxRef" />
+        <KeFuChatBox ref="keFuChatBoxRef" @change="getConversationList" />
       </ContentWrap>
     </el-col>
   </el-row>
@@ -15,13 +15,14 @@
 
 <script lang="ts" setup>
 import { KeFuChatBox, KeFuConversationBox } from './components'
+import { WebSocketMessageTypeConstants } from './components/tools/constants'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { getAccessToken } from '@/utils/auth'
 import { useWebSocket } from '@vueuse/core'
-import { WebSocketMessageTypeConstants } from '@/views/mall/promotion/kefu/components/tools/constants'
 
 defineOptions({ name: 'KeFu' })
 const message = useMessage()
+
 // 加载消息
 const keFuChatBoxRef = ref<InstanceType<typeof KeFuChatBox>>()
 const handleChange = (conversation: KeFuConversationRespVO) => {
@@ -47,10 +48,6 @@ watchEffect(() => {
   try {
     // 1. 收到心跳
     if (data.value === 'pong') {
-      // state.recordList.push({
-      //   text: '【心跳】',
-      //   time: new Date().getTime()
-      // })
       return
     }
 
@@ -63,11 +60,16 @@ watchEffect(() => {
     }
     // 2.2 消息类型：KEFU_MESSAGE_TYPE
     if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_TYPE) {
-      // 刷新列表
+      // 刷新会话列表
       getConversationList()
       // 刷新消息列表
       keFuChatBoxRef.value?.refreshMessageList()
       return
+    }
+    // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
+    if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_ADMIN_READ) {
+      // 刷新会话列表
+      getConversationList()
     }
   } catch (error) {
     console.error(error)
