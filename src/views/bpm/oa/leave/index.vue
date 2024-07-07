@@ -36,9 +36,9 @@
           value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
-      <el-form-item label="审批结果" prop="result">
+      <el-form-item label="审批结果" prop="status">
         <el-select
-          v-model="queryParams.result"
+          v-model="queryParams.status"
           class="!w-240px"
           clearable
           placeholder="请选择审批结果"
@@ -81,9 +81,9 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column align="center" label="申请编号" prop="id" />
-      <el-table-column align="center" label="状态" prop="result">
+      <el-table-column align="center" label="状态" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.result" />
+          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
