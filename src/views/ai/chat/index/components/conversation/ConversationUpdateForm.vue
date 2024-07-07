@@ -8,7 +8,12 @@
       v-loading="formLoading"
     >
       <el-form-item label="角色设定" prop="systemMessage">
-        <el-input type="textarea" v-model="formData.systemMessage" rows="4" placeholder="请输入角色设定" />
+        <el-input
+          type="textarea"
+          v-model="formData.systemMessage"
+          rows="4"
+          placeholder="请输入角色设定"
+        />
       </el-form-item>
       <el-form-item label="模型" prop="modelId">
         <el-select v-model="formData.modelId" placeholder="请选择模型">
@@ -57,10 +62,9 @@ import { CommonStatusEnum } from '@/utils/constants'
 import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
 
-/** AI 聊天角色 表单 */
+/** AI 聊天对话的更新表单 */
 defineOptions({ name: 'ChatConversationUpdateForm' })
 
-const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示

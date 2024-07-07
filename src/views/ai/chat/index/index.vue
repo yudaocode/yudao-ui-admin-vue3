@@ -1,12 +1,12 @@
 <template>
   <el-container class="ai-layout">
     <!-- 左侧：对话列表 -->
-    <Conversation
+    <ConversationList
       :active-id="activeConversationId"
-      ref="conversationRef"
+      ref="conversationListRef"
       @onConversationCreate="handleConversationCreate"
       @onConversationClick="handleConversationClick"
-      @onConversationClear="handlerConversationClear"
+      @onConversationClear="handleConversationClear"
       @onConversationDelete="handlerConversationDelete"
     />
     <!-- 右侧：对话详情 -->
@@ -14,7 +14,7 @@
       <el-header class="header">
         <div class="title">
           {{ activeConversation?.title ? activeConversation?.title : '对话' }}
-          <span v-if="list.length">({{ list.length }})</span>
+          <span v-if="activeMessageList.length">({{ activeMessageList.length }})</span>
         </div>
         <div class="btns" v-if="activeConversation">
           <el-button type="primary" bg plain size="small" @click="openChatConversationUpdateForm">
@@ -35,14 +35,18 @@
       <el-main class="main-container">
         <div>
           <div class="message-container">
-            <MessageLoading v-if="listLoading" />
+            <!-- 情况一：消息加载中 -->
+            <MessageLoading v-if="activeMessageListLoading" />
+            <!-- 情况二：未选中对话 -->
             <MessageNewChat v-if="!activeConversation" @on-new-chat="handlerNewChat" />
+            <!-- 情况三：消息列表为空 -->
             <ChatEmpty
-              v-if="!listLoading && messageList.length === 0 && activeConversation"
+              v-if="!activeMessageListLoading && messageList.length === 0 && activeConversation"
               @on-prompt="doSend"
             />
+            <!-- 情况四：消息列表不为空 -->
             <Message
-              v-if="!listLoading && messageList.length > 0"
+              v-if="!activeMessageListLoading && messageList.length > 0"
               ref="messageRef"
               :conversation="activeConversation"
               :list="messageList"
@@ -93,59 +97,182 @@
       </el-footer>
     </el-container>
 
-    <!--  ========= 额外组件 ==========  -->
     <!-- 更新对话 Form -->
-    <ChatConversationUpdateForm
-      ref="chatConversationUpdateFormRef"
-      @success="handlerTitleSuccess"
+    <ConversationUpdateForm
+      ref="conversationUpdateFormRef"
+      @success="handleConversationUpdateSuccess"
     />
   </el-container>
 </template>
 
 <script setup lang="ts">
-// TODO @fan：是不是把 index.vue 相关的，在这里新建一个 index 目录，然后挪进去哈。因为 /ai/chat 还会有其它功能。例如说，现在的 /ai/chat/manager 管理
-import Conversation from './Conversation.vue'
+import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
+import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
+import ConversationList from './components/conversation/ConversationList.vue'
+import ConversationUpdateForm from './components/conversation/ConversationUpdateForm.vue'
 import Message from './Message.vue'
 import ChatEmpty from './ChatEmpty.vue'
 import MessageLoading from './MessageLoading.vue'
 import MessageNewChat from './MessageNewChat.vue'
-import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
-import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
-import ChatConversationUpdateForm from './components/ChatConversationUpdateForm.vue'
 import { Download, Top } from '@element-plus/icons-vue'
 
 const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗
 
-// ref 属性定义
-const activeConversationId = ref<string | null>(null) // 选中的对话编号
+// 聊天对话
+const conversationListRef = ref()
+const activeConversationId = ref<number | null>(null) // 选中的对话编号
 const activeConversation = ref<ChatConversationVO | null>(null) // 选中的 Conversation
-const conversationInProgress = ref(false) // 对话进行中
+const conversationInProgress = ref(false) // 对话是否正在进行中。目前只有【发送】消息时，会更新为 true，避免切换对话、删除对话等操作
+
+// 消息列表
+const messageRef = ref()
+const activeMessageList = ref<ChatMessageVO[]>([]) // 选中对话的消息列表
+const activeMessageListLoading = ref<boolean>(false) // activeMessageList 是否正在加载中
+const activeMessageListLoadingTimer = ref<any>() // activeMessageListLoading Timer 定时器。如果加载速度很快，就不进入加载中
+// 消息滚动
+const textSpeed = ref<number>(50) // Typing speed in milliseconds
+const textRoleRunning = ref<boolean>(false) // Typing speed in milliseconds
+
+// 发送消息输入框
+const isComposing = ref(false) // 判断用户是否在输入
 const conversationInAbortController = ref<any>() // 对话进行中 abort 控制器(控制 stream 对话)
 const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
 const enableContext = ref<boolean>(true) // 是否开启上下文
-
-// TODO @fan：这几个变量，可以注释在补下哈；另外，fullText 可以明确是生成中的消息 Text，这样更容易理解哈；
+// 接收 Stream 消息
 const fullText = ref('')
 const displayedText = ref('')
-const textSpeed = ref<number>(50) // Typing speed in milliseconds
-const textRoleRunning = ref<boolean>(false) // Typing speed in milliseconds
 
-// chat message 列表
-// TODO @fan：list、listLoading、listLoadingTime 不能体现出来是消息列表，是不是可以变量再优化下
-const list = ref<ChatMessageVO[]>([]) // 列表的数据
-const listLoading = ref<boolean>(false) // 是否加载中
-const listLoadingTime = ref<any>() // time 定时器，如果加载速度很快，就不进入加载中
+// =========== 【聊天对话】相关 ===========
 
-// 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
-const messageRef = ref()
-const conversationRef = ref()
-const isComposing = ref(false) // 判断用户是否在输入
+/** 获取对话信息 */
+const getConversation = async (id: number | null) => {
+  if (!id) {
+    return
+  }
+  const conversation: ChatConversationVO = await ChatConversationApi.getChatConversationMy(id)
+  if (!conversation) {
+    return
+  }
+  activeConversation.value = conversation
+  activeConversationId.value = conversation.id
+}
 
-// 默认 role 头像
-const defaultRoleAvatar =
-  'http://test.yudao.iocoder.cn/eaef5f41acb911dd718429a0702dcc3c61160d16e57ba1d543132fab58934f9f.png'
+/**
+ * 点击某个对话
+ *
+ * @param conversation 选中的对话
+ * @return 是否切换成功
+ */
+const handleConversationClick = async (conversation: ChatConversationVO) => {
+  // 对话进行中，不允许切换
+  if (conversationInProgress.value) {
+    message.alert('对话中，不允许切换!')
+    return false
+  }
+
+  // 更新选中的对话 id
+  activeConversationId.value = conversation.id
+  activeConversation.value = conversation
+  // 处理进行中的对话
+  // TODO @fan：这里，和上面的 “对话进行中，不允许切换” 是不是重叠了？
+  if (conversationInProgress.value) {
+    await stopStream()
+  }
+  // 刷新 message 列表
+  await getMessageList()
+  // 滚动底部
+  scrollToBottom(true)
+  // 清空输入框
+  prompt.value = ''
+  return true
+}
+
+/** 删除某个对话*/
+const handlerConversationDelete = async (delConversation: ChatConversationVO) => {
+  // 删除的对话如果是当前选中的，那么就重置
+  if (activeConversationId.value === delConversation.id) {
+    await handleConversationClear()
+  }
+}
+/** 清空选中的对话 */
+const handleConversationClear = async () => {
+  // TODO @fan：需要加一个 对话进行中，不允许切换
+  activeConversationId.value = null
+  activeConversation.value = null
+  activeMessageList.value = []
+}
+
+/** 修改聊天对话 */
+const conversationUpdateFormRef = ref()
+const openChatConversationUpdateForm = async () => {
+  conversationUpdateFormRef.value.open(activeConversationId.value)
+}
+const handleConversationUpdateSuccess = async () => {
+  // 对话更新成功，刷新最新信息
+  await getConversation(activeConversationId.value)
+}
+
+/** 处理聊天对话的创建成功 */
+const handleConversationCreate = async () => {
+  // 创建新的对话，清空输入框
+  prompt.value = ''
+}
+
+// =========== 【消息列表】相关 ===========
+
+/** 获取消息 message 列表 */
+const getMessageList = async () => {
+  try {
+    if (activeConversationId.value === null) {
+      return
+    }
+    // Timer 定时器，如果加载速度很快，就不进入加载中
+    activeMessageListLoadingTimer.value = setTimeout(() => {
+      activeMessageListLoading.value = true
+    }, 60)
+
+    // 获取消息列表
+    activeMessageList.value = await ChatMessageApi.getChatMessageListByConversationId(
+      activeConversationId.value
+    )
+
+    // 滚动到最下面
+    await nextTick()
+    scrollToBottom()
+  } finally {
+    // time 定时器，如果加载速度很快，就不进入加载中
+    if (activeMessageListLoadingTimer.value) {
+      clearTimeout(activeMessageListLoadingTimer.value)
+    }
+    // 加载结束
+    activeMessageListLoading.value = false
+  }
+}
+
+/**
+ * 消息列表
+ *
+ * 和 {@link #getMessageList()} 的差异是，把 systemMessage 考虑进去
+ */
+const messageList = computed(() => {
+  if (activeMessageList.value.length > 0) {
+    return activeMessageList.value
+  }
+  // 没有消息时，如果有 systemMessage 则展示它
+  // TODO add by 芋艿：这个消息下面，不能有复制、删除按钮
+  if (activeConversation.value?.systemMessage) {
+    return [
+      {
+        id: 0,
+        type: 'system',
+        content: activeConversation.value.systemMessage
+      }
+    ]
+  }
+  return []
+})
 
 // =========== 自提滚动效果
 
@@ -184,10 +311,10 @@ const textRoll = async () => {
         index++
 
         // 更新 message
-        const lastMessage = list.value[list.value.length - 1]
+        const lastMessage = activeMessageList.value[activeMessageList.value.length - 1]
         lastMessage.content = displayedText.value
         // TODO @fan：ist.value？，还是 ist.value.length 哈？
-        list.value[list.value - 1] = lastMessage
+        activeMessageList.value[activeMessageList.value - 1] = lastMessage
         // 滚动到住下面
         await scrollToBottom()
         // 重新设置任务
@@ -314,7 +441,7 @@ const doSend = async (content: string) => {
 }
 
 const doSendStream = async (userMessage: ChatMessageVO) => {
-  // 创建AbortController实例，以便中止请求
+  // 创建 AbortController 实例，以便中止请求
   conversationInAbortController.value = new AbortController()
   // 标记对话进行中
   conversationInProgress.value = true
@@ -322,14 +449,14 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
   fullText.value = ''
   try {
     // 先添加两个假数据，等 stream 返回再替换
-    list.value.push({
+    activeMessageList.value.push({
       id: -1,
       conversationId: activeConversationId.value,
       type: 'user',
       content: userMessage.content,
       createTime: new Date()
     } as ChatMessageVO)
-    list.value.push({
+    activeMessageList.value.push({
       id: -2,
       conversationId: activeConversationId.value,
       type: 'system',
@@ -366,11 +493,11 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
         if (isFirstMessage) {
           isFirstMessage = false
           // 弹出两个 假数据
-          list.value.pop()
-          list.value.pop()
+          activeMessageList.value.pop()
+          activeMessageList.value.pop()
           // 更新返回的数据
-          list.value.push(data.send)
-          list.value.push(data.receive)
+          activeMessageList.value.push(data.send)
+          activeMessageList.value.push(data.receive)
         }
         // debugger
         fullText.value = fullText.value + data.receive.content
@@ -409,147 +536,14 @@ const stopStream = async () => {
 
 // ============== message 数据 =================
 
-/** 消息列表 */
-const messageList = computed(() => {
-  if (list.value.length > 0) {
-    return list.value
-  }
-  // 没有消息时，如果有 systemMessage 则展示它
-  // TODO add by 芋艿：这个消息下面，不能有复制、删除按钮
-  if (activeConversation.value?.systemMessage) {
-    return [
-      {
-        id: 0,
-        type: 'system',
-        content: activeConversation.value.systemMessage
-      }
-    ]
-  }
-  return []
-})
-
-// TODO @fan：一般情况下，项目方法注释用 /** */，啊哈，主要保持风格统一，= = 少占点行哈，
-/**
- * 获取 - message 列表
- */
-const getMessageList = async () => {
-  try {
-    // time 定时器，如果加载速度很快，就不进入加载中
-    listLoadingTime.value = setTimeout(() => {
-      listLoading.value = true
-    }, 60)
-    if (activeConversationId.value === null) {
-      return
-    }
-    // 获取列表数据
-    list.value = await ChatMessageApi.messageList(activeConversationId.value)
-    // 滚动到最下面
-    await nextTick(() => {
-      // 滚动到最后
-      scrollToBottom()
-    })
-  } finally {
-    // time 定时器，如果加载速度很快，就不进入加载中
-    if (listLoadingTime.value) {
-      clearTimeout(listLoadingTime.value)
-    }
-    // 加载结束
-    listLoading.value = false
-  }
-}
-
-/** 修改聊天对话 */
-const chatConversationUpdateFormRef = ref()
-const openChatConversationUpdateForm = async () => {
-  chatConversationUpdateFormRef.value.open(activeConversationId.value)
-}
-
-/**
- * 对话 - 标题修改成功
- */
-const handlerTitleSuccess = async () => {
-  // TODO 需要刷新 对话列表
-  await getConversation(activeConversationId.value)
-}
-
-/**
- * 对话 - 创建
- */
-const handleConversationCreate = async () => {
-  // 创建新的对话，清空输入框
-  prompt.value = ''
-}
-
-/**
- * 对话 - 点击
- */
-const handleConversationClick = async (conversation: ChatConversationVO) => {
-  // 对话进行中，不允许切换
-  if (conversationInProgress.value) {
-    await message.alert('对话中，不允许切换!')
-    return false
-  }
-
-  // 更新选中的对话 id
-  activeConversationId.value = conversation.id
-  activeConversation.value = conversation
-  // 处理进行中的对话
-  if (conversationInProgress.value) {
-    await stopStream()
-  }
-  // 刷新 message 列表
-  await getMessageList()
-  // 滚动底部
-  scrollToBottom(true)
-  // 清空输入框
-  prompt.value = ''
-  return true
-}
-
-/**
- * 对话 - 清理全部对话
- */
-const handlerConversationClear = async () => {
-  // TODO @fan：需要加一个 对话进行中，不允许切换
-  activeConversationId.value = null
-  activeConversation.value = null
-  list.value = []
-}
-
-/**
- * 对话 - 删除
- */
-const handlerConversationDelete = async (delConversation: ChatConversationVO) => {
-  // 删除的对话如果是当前选中的，那么就重置
-  if (activeConversationId.value === delConversation.id) {
-    await handlerConversationClear()
-  }
-}
-
-/**
- * 对话 - 获取
- */
-const getConversation = async (id: string | null) => {
-  if (!id) {
-    return
-  }
-  const conversation: ChatConversationVO = await ChatConversationApi.getChatConversationMy(id)
-  if (conversation) {
-    activeConversation.value = conversation
-    activeConversationId.value = conversation.id
-  }
-}
-
 /**
  * 对话 - 新建
  */
 // TODO @fan：应该是 handleXXX，handler 是名词哈
 const handlerNewChat = async () => {
   // 创建对话
-  await conversationRef.value.createConversation()
+  await conversationListRef.value.createConversation()
 }
-
-// ============ message ===========
 
 /**
  * 删除 message
@@ -595,7 +589,7 @@ const handlerMessageClear = async () => {
   // 确认提示
   await message.delConfirm('确认清空对话消息？')
   // 清空对话
-  await ChatMessageApi.deleteByConversationId(activeConversationId.value as string)
+  await ChatMessageApi.deleteByConversationId(activeConversationId.value)
   // TODO @fan：是不是直接置空就好啦；
   // 刷新 message 列表
   await getMessageList()
@@ -605,19 +599,19 @@ const handlerMessageClear = async () => {
 onMounted(async () => {
   // 设置当前对话 TODO 角色仓库过来的，自带 conversationId 需要选中
   if (route.query.conversationId) {
-    const id = route.query.conversationId as string
+    const id = route.query.conversationId as unknown as number
     activeConversationId.value = id
     await getConversation(id)
   }
   // 获取列表数据
-  listLoading.value = true
+  activeMessageListLoading.value = true
   await getMessageList()
 })
 </script>
 
 <style lang="scss" scoped>
 .ai-layout {
-  // TODO @范 这里height不能 100% 先这样临时处理
+  // TODO @范 这里height不能 100% 先这样临时处理 TODO @fan：这个目前要搞处理么？
   position: absolute;
   flex: 1;
   top: 0;
@@ -631,8 +625,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 0 10px;
-  padding-top: 10px;
+  padding: 10px 10px 0;
 
   .btn-new-conversation {
     padding: 18px 0;
@@ -771,8 +764,6 @@ onMounted(async () => {
     bottom: 0;
     left: 0;
     right: 0;
-    //width: 100%;
-    //height: 100%;
     overflow-y: hidden;
     padding: 0;
     margin: 0;
@@ -803,8 +794,7 @@ onMounted(async () => {
     border: none;
     box-sizing: border-box;
     resize: none;
-    padding: 0px 2px;
-    //padding: 5px 5px;
+    padding: 0 2px;
     overflow: auto;
   }
 
@@ -815,7 +805,7 @@ onMounted(async () => {
   .prompt-btns {
     display: flex;
     justify-content: space-between;
-    padding-bottom: 0px;
+    padding-bottom: 0;
     padding-top: 5px;
   }
 }

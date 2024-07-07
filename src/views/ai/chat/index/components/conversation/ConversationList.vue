@@ -98,7 +98,7 @@
 <script setup lang="ts">
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
 import { ref } from 'vue'
-import Role from './role/index.vue'
+import Role from '../../role/index.vue'
 import { Bottom, Top } from '@element-plus/icons-vue'
 import roleAvatarDefaultImg from '@/assets/ai/gpt.svg'
 
@@ -398,8 +398,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 0 10px;
-  padding-top: 10px;
+  padding: 10px 10px 0;
   overflow: hidden;
 
   .btn-new-conversation {

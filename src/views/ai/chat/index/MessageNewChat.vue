@@ -1,15 +1,16 @@
 <!-- message 新增对话 -->
 <template>
-  <div class="new-chat" >
+  <div class="new-chat">
     <div class="box-center">
       <div class="tip">点击下方按钮，开始你的对话吧</div>
-      <div class="btns"><el-button type="primary" round @click="handlerNewChat">新建对话</el-button></div>
+      <div class="btns">
+        <el-button type="primary" round @click="handlerNewChat">新建对话</el-button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-
 // 定义钩子
 const emits = defineEmits(['onNewChat'])
 
@@ -19,7 +20,6 @@ const emits = defineEmits(['onNewChat'])
 const handlerNewChat = async () => {
   await emits('onNewChat')
 }
-
 </script>
 <style scoped lang="scss">
 .new-chat {

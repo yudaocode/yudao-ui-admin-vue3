@@ -2,7 +2,7 @@ import request from '@/config/axios'
 
 // AI 聊天对话 VO
 export interface ChatConversationVO {
-  id: string // ID 编号
+  id: number // ID 编号
   userId: number // 用户编号
   title: string // 对话标题
   pinned: boolean // 是否置顶
@@ -23,7 +23,7 @@ export interface ChatConversationVO {
 // AI 聊天对话 API
 export const ChatConversationApi = {
   // 获得【我的】聊天对话
-  getChatConversationMy: async (id: string) => {
+  getChatConversationMy: async (id: number) => {
     return await request.get({ url: `/ai/chat/conversation/get-my?id=${id}` })
   },
 

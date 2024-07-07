@@ -19,22 +19,17 @@ export interface ChatMessageVO {
   userAvatar: string // 创建时间
 }
 
-export interface ChatMessageSendVO {
-  conversationId: string // 对话编号
-  content: number // 聊天内容
-}
-
 // AI chat 聊天
 export const ChatMessageApi = {
   // 消息列表
-  messageList: async (conversationId: string | null) => {
+  getChatMessageListByConversationId: async (conversationId: number | null) => {
     return await request.get({
       url: `/ai/chat/message/list-by-conversation-id?conversationId=${conversationId}`
     })
   },
 
-  // 发送 send stream 消息
-  // TODO axios 可以么？ https://apifox.com/apiskills/how-to-create-axios-stream/
+  // 发送 Stream 消息
+  // 为什么不用 axios 呢？因为它不支持 SSE 调用
   sendStream: async (
     conversationId: number,
     content: string,
@@ -70,7 +65,7 @@ export const ChatMessageApi = {
   },
 
   // 删除消息 - 对话所有消息
-  deleteByConversationId: async (conversationId: string) => {
+  deleteByConversationId: async (conversationId: number) => {
     return await request.delete({
       url: `/ai/chat/message/delete-by-conversation-id?conversationId=${conversationId}`
     })
