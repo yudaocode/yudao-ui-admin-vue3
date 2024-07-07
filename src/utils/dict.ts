@@ -24,6 +24,10 @@ export interface NumberDictDataType extends DictDataType {
   value: number
 }
 
+export interface StringDictDataType extends DictDataType {
+  value: string
+}
+
 export const getDictOptions = (dictType: string) => {
   return dictStore.getDictByType(dictType) || []
 }
@@ -44,8 +48,11 @@ export const getIntDictOptions = (dictType: string): NumberDictDataType[] => {
 }
 
 export const getStrDictOptions = (dictType: string) => {
-  const dictOption: DictDataType[] = []
+  // 获得通用的 DictDataType 列表
   const dictOptions: DictDataType[] = getDictOptions(dictType)
+  // 转换成 string 类型的 StringDictDataType 类型
+  // why 需要特殊转换：避免 IDEA 在 v-for="dict in getStrDictOptions(...)" 时，el-option 的 key 会告警
+  const dictOption: StringDictDataType[] = []
   dictOptions.forEach((dict: DictDataType) => {
     dictOption.push({
       ...dict,
@@ -212,5 +219,8 @@ export enum DICT_TYPE {
   ERP_STOCK_RECORD_BIZ_TYPE = 'erp_stock_record_biz_type', // 库存明细的业务类型
 
   // ========== AI - 人工智能模块  ==========
-  AI_PLATFORM = 'ai_platform' // AI 平台
+  AI_PLATFORM = 'ai_platform', // AI 平台
+  AI_IMAGE_STATUS = 'ai_image_status', // AI 图片状态
+  AI_MUSIC_STATUS = 'ai_music_status', // AI 音乐状态
+  AI_GENERATE_MODE = 'ai_generate_mode' // AI 生成模式
 }

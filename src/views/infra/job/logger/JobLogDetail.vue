@@ -26,7 +26,7 @@
         <dict-tag :type="DICT_TYPE.INFRA_JOB_LOG_STATUS" :value="detailData.status" />
       </el-descriptions-item>
       <el-descriptions-item label="执行结果">
-        {{ detailData.duration + ' result' }}
+        {{ detailData.result }}
       </el-descriptions-item>
     </el-descriptions>
   </Dialog>

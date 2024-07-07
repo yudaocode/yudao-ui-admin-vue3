@@ -19,7 +19,7 @@ export const SeckillConfigApi = {
 
   // 查询秒杀时段列表
   getSimpleSeckillConfigList: async () => {
-    return await request.get({ url: `/promotion/seckill-config/simple-list` })
+    return await request.get({ url: `/promotion/seckill-config/list` })
   },
 
   // 查询秒杀时段详情
