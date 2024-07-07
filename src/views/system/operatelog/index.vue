@@ -13,7 +13,8 @@
       <el-form-item label="操作人" prop="userId">
         <el-select
           v-model="queryParams.userId"
-          multiple
+          clearable
+          filterable
           placeholder="请输入操作人员"
           class="!w-240px"
         >
