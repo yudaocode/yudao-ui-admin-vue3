@@ -45,10 +45,17 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"> <Icon icon="ep:search" class="mr-5px" />搜索 </el-button>
-        <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" />重置 </el-button>
+        <el-button @click="handleQuery">
+          <Icon icon="ep:search" class="mr-5px" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon icon="ep:refresh" class="mr-5px" />
+          重置
+        </el-button>
         <el-button type="primary" plain @click="openForm('create')" v-hasPermi="['pay:app:create']">
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+          <Icon icon="ep:plus" class="mr-5px" />
+          新增
         </el-button>
       </el-form-item>
     </el-form>
@@ -70,12 +77,17 @@
         </template>
       </el-table-column>
       <el-table-column label="支付宝配置" align="center">
-        <el-table-column :label="PayChannelEnum.ALIPAY_APP.name" align="center">
+        <el-table-column
+          :label="channel.name"
+          align="center"
+          v-for="channel in alipayChannels"
+          :key="channel.code"
+        >
           <template #default="scope">
             <el-button
               type="success"
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.ALIPAY_APP.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_APP.code)"
+              v-if="isChannelExists(scope.row.channelCodes, channel.code)"
+              @click="openChannelForm(scope.row, channel.code)"
               circle
             >
               <Icon icon="ep:check" />
@@ -84,87 +96,7 @@
               v-else
               type="danger"
               circle
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_APP.code)"
-            >
-              <Icon icon="ep:close" />
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column :label="PayChannelEnum.ALIPAY_PC.name" align="center">
-          <template #default="scope">
-            <el-button
-              type="success"
-              circle
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.ALIPAY_PC.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_PC.code)"
-            >
-              <Icon icon="ep:check" />
-            </el-button>
-            <el-button
-              v-else
-              type="danger"
-              circle
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_PC.code)"
-            >
-              <Icon icon="ep:close" />
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column :label="PayChannelEnum.ALIPAY_WAP.name" align="center">
-          <template #default="scope">
-            <el-button
-              type="success"
-              circle
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.ALIPAY_WAP.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_WAP.code)"
-            >
-              <Icon icon="ep:check" />
-            </el-button>
-            <el-button
-              v-else
-              type="danger"
-              circle
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_WAP.code)"
-            >
-              <Icon icon="ep:close" />
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column :label="PayChannelEnum.ALIPAY_QR.name" align="center">
-          <template #default="scope">
-            <el-button
-              type="success"
-              circle
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.ALIPAY_QR.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_QR.code)"
-            >
-              <Icon icon="ep:check" />
-            </el-button>
-            <el-button
-              v-else
-              type="danger"
-              circle
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_QR.code)"
-            >
-              <Icon icon="ep:close" />
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column :label="PayChannelEnum.ALIPAY_BAR.name" align="center">
-          <template #default="scope">
-            <el-button
-              type="success"
-              circle
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.ALIPAY_BAR.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_BAR.code)"
-            >
-              <Icon icon="ep:check" />
-            </el-button>
-            <el-button
-              v-else
-              type="danger"
-              circle
-              @click="openChannelForm(scope.row, PayChannelEnum.ALIPAY_BAR.code)"
+              @click="openChannelForm(scope.row, channel.code)"
             >
               <Icon icon="ep:close" />
             </el-button>
@@ -172,13 +104,18 @@
         </el-table-column>
       </el-table-column>
       <el-table-column label="微信配置" align="center">
-        <el-table-column :label="PayChannelEnum.WX_LITE.name" align="center">
+        <el-table-column
+          :label="channel.name"
+          align="center"
+          v-for="channel in wxChannels"
+          :key="channel.code"
+        >
           <template #default="scope">
             <el-button
               type="success"
+              v-if="isChannelExists(scope.row.channelCodes, channel.code)"
+              @click="openChannelForm(scope.row, channel.code)"
               circle
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.WX_LITE.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_LITE.code)"
             >
               <Icon icon="ep:check" />
             </el-button>
@@ -186,67 +123,7 @@
               v-else
               type="danger"
               circle
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_LITE.code)"
-            >
-              <Icon icon="ep:close" />
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column :label="PayChannelEnum.WX_PUB.name" align="center">
-          <template #default="scope">
-            <el-button
-              type="success"
-              circle
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.WX_PUB.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_PUB.code)"
-            >
-              <Icon icon="ep:check" />
-            </el-button>
-            <el-button
-              v-else
-              type="danger"
-              circle
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_PUB.code)"
-            >
-              <Icon icon="ep:close" />
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column :label="PayChannelEnum.WX_APP.name" align="center">
-          <template #default="scope">
-            <el-button
-              type="success"
-              circle
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.WX_APP.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_APP.code)"
-            >
-              <Icon icon="ep:check" />
-            </el-button>
-            <el-button
-              v-else
-              type="danger"
-              circle
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_APP.code)"
-            >
-              <Icon icon="ep:close" />
-            </el-button>
-          </template>
-        </el-table-column>
-        <el-table-column :label="PayChannelEnum.WX_BAR.name" align="center">
-          <template #default="scope">
-            <el-button
-              type="success"
-              circle
-              v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.WX_BAR.code)"
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_BAR.code)"
-            >
-              <Icon icon="ep:check" />
-            </el-button>
-            <el-button
-              v-else
-              type="danger"
-              circle
-              @click="openChannelForm(scope.row, PayChannelEnum.WX_BAR.code)"
+              @click="openChannelForm(scope.row, channel.code)"
             >
               <Icon icon="ep:close" />
             </el-button>
@@ -338,12 +215,11 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as AppApi from '@/api/pay/app'
 import AppForm from './components/AppForm.vue'
-import { PayChannelEnum } from '@/utils/constants'
+import { CommonStatusEnum, PayChannelEnum } from '@/utils/constants'
 import AlipayChannelForm from './components/channel/AlipayChannelForm.vue'
 import WeixinChannelForm from './components/channel/WeixinChannelForm.vue'
 import MockChannelForm from './components/channel/MockChannelForm.vue'
 import WalletChannelForm from './components/channel/WalletChannelForm.vue'
-import { CommonStatusEnum } from '@/utils/constants'
 
 defineOptions({ name: 'PayApp' })
 
@@ -364,6 +240,23 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
+
+const alipayChannels = [
+  PayChannelEnum.ALIPAY_APP,
+  PayChannelEnum.ALIPAY_PC,
+  PayChannelEnum.ALIPAY_WAP,
+  PayChannelEnum.ALIPAY_QR,
+  PayChannelEnum.ALIPAY_BAR
+]
+
+const wxChannels = [
+  PayChannelEnum.WX_LITE,
+  PayChannelEnum.WX_PUB,
+  PayChannelEnum.WX_APP,
+  PayChannelEnum.WX_NATIVE,
+  PayChannelEnum.WX_WAP,
+  PayChannelEnum.WX_BAR,
+]
 
 /** 查询列表 */
 const getList = async () => {

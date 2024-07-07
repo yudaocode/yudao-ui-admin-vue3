@@ -147,7 +147,7 @@ const handlePay = (row: any) => {
     name: 'PayCashier',
     query: {
       id: row.payOrderId,
-      returnUrl: encodeURIComponent('/pay/demo-order?id=' + row.id)
+      returnUrl: encodeURIComponent('/pay/demo/order?id=' + row.id)
     }
   })
 }
