@@ -11,12 +11,13 @@
  * AI 平台的枚举
  */
 export const AiPlatformEnum = {
+  TONG_YI: 'TongYi', // 阿里
+  YI_YAN: 'YiYan', // 百度
+  DEEP_SEEK: 'DeepSeek', // DeepSeek
+  ZHI_PU: 'ZhiPu', // 智谱 AI
+  XING_HUO: 'XingHuo', // 讯飞
   OPENAI: 'OpenAI',
   Ollama: 'Ollama',
-  YI_YAN: 'YiYan', // 百度
-  XING_HUO: 'XingHuo', // 讯飞
-  QIAN_WEN: 'QianWen', // 阿里
-  GEMIR: 'gemir', // 谷歌
   STABLE_DIFFUSION: 'StableDiffusion', // Stability AI
   MIDJOURNEY: 'Midjourney', // Midjourney
   SUNO: 'Suno' // Suno AI
