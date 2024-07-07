@@ -47,8 +47,18 @@
       <el-text tag="b">CLIP</el-text>
     </div>
     <el-space wrap class="group-item-body">
-      <el-select v-model="selectClipGuidancePreset" placeholder="Select" size="large" style="width: 350px">
-        <el-option v-for="item in clipGuidancePresets" :key="item.key" :label="item.name" :value="item.key" />
+      <el-select
+        v-model="selectClipGuidancePreset"
+        placeholder="Select"
+        size="large"
+        style="width: 350px"
+      >
+        <el-option
+          v-for="item in clipGuidancePresets"
+          :key="item.key"
+          :label="item.name"
+          :value="item.key"
+        />
       </el-select>
     </el-space>
   </div>
@@ -58,7 +68,12 @@
     </div>
     <el-space wrap class="group-item-body">
       <el-select v-model="selectStylePreset" placeholder="Select" size="large" style="width: 350px">
-        <el-option v-for="item in stylePresets" :key="item.key" :label="item.name" :value="item.key" />
+        <el-option
+          v-for="item in stylePresets"
+          :key="item.key"
+          :label="item.name"
+          :value="item.key"
+        />
       </el-select>
     </el-space>
   </div>
@@ -120,8 +135,8 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ImageApi, ImageDrawReqVO, ImageVO} from '@/api/ai/image'
-import {hasChinese} from '../../utils/common-utils'
+import { ImageApi, ImageDrawReqVO, ImageVO } from '@/api/ai/image'
+import { hasChinese } from '@/views/ai/utils/utils'
 
 // image 模型
 interface ImageModelVO {
@@ -190,7 +205,7 @@ const sampler = ref<ImageModelVO[]>([
   {
     key: 'K_LMS',
     name: 'K_LMS'
-  },
+  }
 ])
 
 // 风格
@@ -266,7 +281,7 @@ const stylePresets = ref<ImageModelVO[]>([
   {
     key: 'tile-texture',
     name: 'tile-texture'
-  },
+  }
 ])
 
 // 文本提示相匹配的图像(clip_guidance_preset) 简称 CLIP
@@ -301,7 +316,7 @@ const clipGuidancePresets = ref<ImageModelVO[]>([
   {
     key: 'SLOWEST',
     name: 'SLOWEST'
-  },
+  }
 ])
 
 const steps = ref<number>(20) // 迭代步数
@@ -352,7 +367,7 @@ const handleGenerateImage = async () => {
         scale: scale.value, // 引导系数
         sampler: selectSampler.value, // 采样算法
         clipGuidancePreset: selectClipGuidancePreset.value, // 文本提示相匹配的图像 CLIP
-        stylePreset: selectStylePreset.value, // 风格
+        stylePreset: selectStylePreset.value // 风格
       }
     } as ImageDrawReqVO
     await ImageApi.drawImage(form)

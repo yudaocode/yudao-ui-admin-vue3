@@ -111,7 +111,7 @@ import MessageLoading from './MessageLoading.vue'
 import MessageNewChat from './MessageNewChat.vue'
 import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
-import ChatConversationUpdateForm from '@/views/ai/chat/components/ChatConversationUpdateForm.vue'
+import ChatConversationUpdateForm from './components/ChatConversationUpdateForm.vue'
 import { Download, Top } from '@element-plus/icons-vue'
 
 const route = useRoute() // 路由
