@@ -13,7 +13,11 @@
   <DefineLabel v-slot="{ label, hint, hintClick }">
     <h3 class="mt-5 mb-3 flex items-center justify-between text-[14px]">
       <span>{{ label }}</span>
-      <span @click="hintClick" v-if="hint" class="flex items-center text-[12px] text-[#846af7]">
+      <span
+        @click="hintClick"
+        v-if="hint"
+        class="flex items-center text-[12px] text-[#846af7] cursor-pointer select-none"
+      >
         <Icon icon="ep:question-filled" />
         {{ hint }}
       </span>
@@ -43,7 +47,7 @@
     >
       <div>
         <template v-if="selectedTab === 1">
-          <ReuseLabel label="写作内容" hint="示例" />
+          <ReuseLabel label="写作内容" hint="示例" :hint-click="() => example('write')" />
           <el-input
             type="textarea"
             :rows="5"
@@ -55,7 +59,7 @@
         </template>
 
         <template v-else>
-          <ReuseLabel label="原文" hint="示例" />
+          <ReuseLabel label="原文" hint="示例" :hint-click="() => example('reply')" />
           <el-input
             type="textarea"
             :rows="5"
@@ -86,8 +90,8 @@
         <Tag v-model="writeForm.language" :tags="writeTags.langTags" />
 
         <div class="flex items-center justify-center mt-3">
-          <el-button>重置</el-button>
-          <el-button @click="submit" color="#846af7">生成</el-button>
+          <el-button :disabled="isWriting">重置</el-button>
+          <el-button :loading="isWriting" @click="submit" color="#846af7">生成</el-button>
         </div>
       </div>
     </div>
@@ -97,17 +101,32 @@
 <script setup lang="ts">
   import { createReusableTemplate } from '@vueuse/core'
   import { ref } from 'vue'
-  import { ElMessage } from 'element-plus'
   import Tag from './Tag.vue'
   import { WriteParams } from '@/api/ai/writer'
   import { omit } from 'lodash-es'
   import { getIntDictOptions } from '@/utils/dict'
+  import dataJson from '../data.json'
 
   type TabType = WriteParams['type']
 
+  const message = useMessage()
+
+  defineProps<{
+    isWriting: boolean
+  }>()
+
   const emits = defineEmits<{
     (e: 'submit', params: Partial<WriteParams>)
+    (e: 'example', param: 'write' | 'reply')
   }>()
+
+  const example = (type: 'write' | 'reply') => {
+    writeForm.value = {
+      ...initData,
+      ...omit(dataJson[type], ['data'])
+    }
+    emits('example', type)
+  }
 
   const selectedTab = ref<TabType>(1)
   const tabs: {
@@ -129,12 +148,13 @@
     originalContent: '',
     tone: 1,
     language: 1,
-    length: 100,
+    length: 1,
     format: 1
   }
   const writeForm = ref<WriteParams>({ ...initData })
 
   const writeTags = {
+    // 长度
     lenTags: getIntDictOptions('ai_write_length'),
     // 格式
 
@@ -161,10 +181,10 @@
 
   const submit = () => {
     if (selectedTab.value === 2 && !writeForm.value.originalContent) {
-      ElMessage.warning('请输入原文')
+      message.warning('请输入原文')
       return
     } else if (!writeForm.value.prompt) {
-      ElMessage.warning(`请输入${selectedTab.value === 1 ? '写作' : '回复'}内容`)
+      message.warning(`请输入${selectedTab.value === 1 ? '写作' : '回复'}内容`)
       return
     }
     emits('submit', {

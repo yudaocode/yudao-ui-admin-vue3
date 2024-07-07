@@ -1,4 +1,3 @@
-import request from '@/config/axios'
 import { fetchEventSource } from '@microsoft/fetch-event-source'
 
 import { getAccessToken } from '@/utils/auth'
@@ -34,7 +33,19 @@ export interface WriteParams {
    */
   language: number
 }
-export const writeStream = (data: WriteParams, onMessage, onError, onClose, ctrl) => {
+export const writeStream = ({
+  data,
+  onClose,
+  onMessage,
+  onError,
+  ctrl
+}: {
+  data: WriteParams
+  onMessage?: (res: any) => void
+  onError?: (...args: any[]) => void
+  onClose?: (...args: any[]) => void
+  ctrl: AbortController
+}) => {
   // return request.post({ url: '/ai/write/generate-stream', data })
   const token = getAccessToken()
   return fetchEventSource(`${config.base_url}/ai/write/generate-stream`, {
