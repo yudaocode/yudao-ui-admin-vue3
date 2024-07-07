@@ -17,7 +17,7 @@
             <el-button class="btn-cus" link @click="noCopy(item.content)">
               <img class="btn-image" src="@/assets/ai/copy.svg" />
             </el-button>
-            <el-button class="btn-cus" link @click="onDelete(item.id)">
+            <el-button v-if="item.id > 0" class="btn-cus" link @click="onDelete(item.id)">
               <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px" />
             </el-button>
           </div>
@@ -70,7 +70,7 @@ import { useClipboard } from '@vueuse/core'
 import { PropType } from 'vue'
 import { ArrowDownBold, Edit, RefreshRight } from '@element-plus/icons-vue'
 import { ChatConversationVO } from '@/api/ai/chat/conversation'
-import {useUserStore} from '@/store/modules/user';
+import { useUserStore } from '@/store/modules/user'
 import userAvatarDefaultImg from '@/assets/imgs/avatar.gif'
 import roleAvatarDefaultImg from '@/assets/ai/gpt.svg'
 
@@ -138,7 +138,7 @@ const noCopy = async (content) => {
  */
 const onDelete = async (id) => {
   // 删除 message
-  await ChatMessageApi.delete(id)
+  await ChatMessageApi.deleteChatMessage(id)
   ElMessage({
     message: '删除成功!',
     type: 'success'

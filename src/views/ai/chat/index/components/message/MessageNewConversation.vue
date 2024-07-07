@@ -1,4 +1,4 @@
-<!-- message 新增对话 -->
+<!-- 无聊天对话时，在 message 区域，可以新增对话 -->
 <template>
   <div class="new-chat">
     <div class="box-center">
@@ -11,14 +11,13 @@
 </template>
 
 <script setup lang="ts">
-// 定义钩子
-const emits = defineEmits(['onNewChat'])
+const emits = defineEmits(['onNewConversation'])
 
 /**
- * 新建 chat
+ * 新建 conversation 聊天对话
  */
-const handlerNewChat = async () => {
-  await emits('onNewChat')
+const handlerNewChat = () => {
+  emits('onNewConversation')
 }
 </script>
 <style scoped lang="scss">

@@ -30,7 +30,7 @@ export const ChatMessageApi = {
 
   // 发送 Stream 消息
   // 为什么不用 axios 呢？因为它不支持 SSE 调用
-  sendStream: async (
+  sendChatMessageStream: async (
     conversationId: number,
     content: string,
     ctrl,
@@ -60,11 +60,11 @@ export const ChatMessageApi = {
   },
 
   // 删除消息
-  delete: async (id: string) => {
+  deleteChatMessage: async (id: string) => {
     return await request.delete({ url: `/ai/chat/message/delete?id=${id}` })
   },
 
-  // 删除消息 - 对话所有消息
+  // 删除指定对话的消息
   deleteByConversationId: async (conversationId: number) => {
     return await request.delete({
       url: `/ai/chat/message/delete-by-conversation-id?conversationId=${conversationId}`

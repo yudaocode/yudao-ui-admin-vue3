@@ -98,7 +98,7 @@
 <script setup lang="ts">
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
 import { ref } from 'vue'
-import Role from '../../role/index.vue'
+import Role from '../role/index.vue'
 import { Bottom, Top } from '@element-plus/icons-vue'
 import roleAvatarDefaultImg from '@/assets/ai/gpt.svg'
 

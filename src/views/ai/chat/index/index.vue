@@ -4,7 +4,7 @@
     <ConversationList
       :active-id="activeConversationId"
       ref="conversationListRef"
-      @onConversationCreate="handleConversationCreate"
+      @onConversationCreate="handleConversationCreateSuccess"
       @onConversationClick="handleConversationClick"
       @onConversationClear="handleConversationClear"
       @onConversationDelete="handlerConversationDelete"
@@ -27,7 +27,7 @@
           </el-button>
           <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
           <el-button size="small" :icon="Download" class="btn" />
-          <el-button size="small" :icon="Top" class="btn" @click="handlerGoTop" />
+          <el-button size="small" :icon="Top" class="btn" @click="handleGoTopMessage" />
         </div>
       </el-header>
 
@@ -37,22 +37,25 @@
           <div class="message-container">
             <!-- 情况一：消息加载中 -->
             <MessageLoading v-if="activeMessageListLoading" />
-            <!-- 情况二：未选中对话 -->
-            <MessageNewChat v-if="!activeConversation" @on-new-chat="handlerNewChat" />
+            <!-- 情况二：无聊天对话时 -->
+            <MessageNewConversation
+              v-if="!activeConversation"
+              @on-new-conversation="handleConversationCreate"
+            />
             <!-- 情况三：消息列表为空 -->
-            <ChatEmpty
+            <MessageListEmpty
               v-if="!activeMessageListLoading && messageList.length === 0 && activeConversation"
-              @on-prompt="doSend"
+              @on-prompt="doSendMessage"
             />
             <!-- 情况四：消息列表不为空 -->
-            <Message
+            <MessageList
               v-if="!activeMessageListLoading && messageList.length > 0"
               ref="messageRef"
               :conversation="activeConversation"
               :list="messageList"
-              @on-delete-success="handlerMessageDelete"
-              @on-edit="handlerMessageEdit"
-              @on-refresh="handlerMessageRefresh"
+              @on-delete-success="handleMessageDelete"
+              @on-edit="handleMessageEdit"
+              @on-refresh="handleMessageRefresh"
             />
           </div>
         </div>
@@ -64,8 +67,8 @@
           <textarea
             class="prompt-input"
             v-model="prompt"
-            @keydown="onSend"
-            @input="onPromptInput"
+            @keydown="handleSendByKeydown"
+            @input="handlePromptInput"
             @compositionstart="onCompositionstart"
             @compositionend="onCompositionend"
             placeholder="问我任何问题...（Shift+Enter 换行，按下 Enter 发送）"
@@ -78,7 +81,7 @@
             <el-button
               type="primary"
               size="default"
-              @click="onSendBtn"
+              @click="handleSendByButton"
               :loading="conversationInProgress"
               v-if="conversationInProgress == false"
             >
@@ -110,10 +113,10 @@ import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
 import ConversationList from './components/conversation/ConversationList.vue'
 import ConversationUpdateForm from './components/conversation/ConversationUpdateForm.vue'
-import Message from './Message.vue'
-import ChatEmpty from './ChatEmpty.vue'
-import MessageLoading from './MessageLoading.vue'
-import MessageNewChat from './MessageNewChat.vue'
+import MessageList from './components/message/MessageList.vue'
+import MessageListEmpty from './components/message/MessageListEmpty.vue'
+import MessageLoading from './components/message/MessageLoading.vue'
+import MessageNewConversation from './components/message/MessageNewConversation.vue'
 import { Download, Top } from '@element-plus/icons-vue'
 
 const route = useRoute() // 路由
@@ -141,8 +144,8 @@ const inputTimeout = ref<any>() // 处理输入中回车的定时器
 const prompt = ref<string>() // prompt
 const enableContext = ref<boolean>(true) // 是否开启上下文
 // 接收 Stream 消息
-const fullText = ref('')
-const displayedText = ref('')
+const receiveMessageFullText = ref('')
+const receiveMessageDisplayedText = ref('')
 
 // =========== 【聊天对话】相关 ===========
 
@@ -216,6 +219,11 @@ const handleConversationUpdateSuccess = async () => {
 
 /** 处理聊天对话的创建成功 */
 const handleConversationCreate = async () => {
+  // 创建对话
+  await conversationListRef.value.createConversation()
+}
+/** 处理聊天对话的创建成功 */
+const handleConversationCreateSuccess = async () => {
   // 创建新的对话，清空输入框
   prompt.value = ''
 }
@@ -240,7 +248,7 @@ const getMessageList = async () => {
 
     // 滚动到最下面
     await nextTick()
-    scrollToBottom()
+    await scrollToBottom()
   } finally {
     // time 定时器，如果加载速度很快，就不进入加载中
     if (activeMessageListLoadingTimer.value) {
@@ -261,7 +269,6 @@ const messageList = computed(() => {
     return activeMessageList.value
   }
   // 没有消息时，如果有 systemMessage 则展示它
-  // TODO add by 芋艿：这个消息下面，不能有复制、删除按钮
   if (activeConversation.value?.systemMessage) {
     return [
       {
@@ -274,94 +281,69 @@ const messageList = computed(() => {
   return []
 })
 
-// =========== 自提滚动效果
+/** 处理删除 message 消息 */
+const handleMessageDelete = () => {
+  if (conversationInProgress.value) {
+    message.alert('回答中，不能删除!')
+    return
+  }
+  // 刷新 message 列表
+  getMessageList()
+}
 
-// TODO @fan：这个方法，要不加个方法注释
-const textRoll = async () => {
-  let index = 0
+/** 处理 message 清空 */
+const handlerMessageClear = async () => {
+  if (!activeConversationId.value) {
+    return
+  }
   try {
-    // 只能执行一次
-    if (textRoleRunning.value) {
-      return
+    // 确认提示
+    await message.delConfirm('确认清空对话消息？')
+    // 清空对话
+    await ChatMessageApi.deleteByConversationId(activeConversationId.value)
+    // 刷新 message 列表
+    activeMessageList.value = []
+  } catch {}
+}
+
+/** 回到 message 列表的顶部 */
+const handleGoTopMessage = () => {
+  messageRef.value.handlerGoTop()
+}
+
+// =========== 【发送消息】相关 ===========
+
+/** 处理来自 keydown 的发送消息 */
+const handleSendByKeydown = async (event) => {
+  // 判断用户是否在输入
+  if (isComposing.value) {
+    return
+  }
+  // 进行中不允许发送
+  if (conversationInProgress.value) {
+    return
+  }
+  const content = prompt.value?.trim() as string
+  if (event.key === 'Enter') {
+    if (event.shiftKey) {
+      // 插入换行
+      prompt.value += '\r\n'
+      event.preventDefault() // 防止默认的换行行为
+    } else {
+      // 发送消息
+      await doSendMessage(content)
+      event.preventDefault() // 防止默认的提交行为
     }
-    // 设置状态
-    textRoleRunning.value = true
-    displayedText.value = ''
-    const task = async () => {
-      // 调整速度
-      const diff = (fullText.value.length - displayedText.value.length) / 10
-      if (diff > 5) {
-        textSpeed.value = 10
-      } else if (diff > 2) {
-        textSpeed.value = 30
-      } else if (diff > 1.5) {
-        textSpeed.value = 50
-      } else {
-        textSpeed.value = 100
-      }
-      // 对话结束，就按 30 的速度
-      if (!conversationInProgress.value) {
-        textSpeed.value = 10
-      }
-
-      // console.log('index < fullText.value.length', index < fullText.value.length, conversationInProgress.value)
-
-      if (index < fullText.value.length) {
-        displayedText.value += fullText.value[index]
-        index++
-
-        // 更新 message
-        const lastMessage = activeMessageList.value[activeMessageList.value.length - 1]
-        lastMessage.content = displayedText.value
-        // TODO @fan：ist.value？，还是 ist.value.length 哈？
-        activeMessageList.value[activeMessageList.value - 1] = lastMessage
-        // 滚动到住下面
-        await scrollToBottom()
-        // 重新设置任务
-        timer = setTimeout(task, textSpeed.value)
-      } else {
-        // 不是对话中可以结束
-        if (!conversationInProgress.value) {
-          textRoleRunning.value = false
-          clearTimeout(timer)
-          console.log('字体滚动退出!')
-        } else {
-          // 重新设置任务
-          timer = setTimeout(task, textSpeed.value)
-        }
-      }
-    }
-    let timer = setTimeout(task, textSpeed.value)
-  } finally {
   }
 }
 
-// ============ 处理对话滚动 ==============
-
-function scrollToBottom(isIgnore?: boolean) {
-  // isIgnore = isIgnore !== null ? isIgnore : false
-  nextTick(() => {
-    if (messageRef.value) {
-      messageRef.value.scrollToBottom(isIgnore)
-    }
-  })
+/** 处理来自【发送】按钮的发送消息 */
+const handleSendByButton = () => {
+  doSendMessage(prompt.value?.trim() as string)
 }
 
-// ============= 处理聊天输入回车发送 =============
-
-// TODO @fan：是不是可以通过 @keydown.enter、@keydown.shift.enter 来实现，回车发送、shift+回车换行；主要看看，是不是可以简化 isComposing 相关的逻辑
-const onCompositionstart = () => {
-  isComposing.value = true
-}
-
-const onCompositionend = () => {
-  // console.log('输入结束...')
-  setTimeout(() => {
-    isComposing.value = false
-  }, 200)
-}
-
-const onPromptInput = (event) => {
+/** 处理 prompt 输入变化 */
+const handlePromptInput = (event) => {
   // 非输入法 输入设置为 true
   if (!isComposing.value) {
     // 回车 event data 是 null
@@ -379,76 +361,49 @@ const onPromptInput = (event) => {
     isComposing.value = false
   }, 400)
 }
-
-// ============== 对话消息相关 =================
-
-/**
- * 发送消息
- */
-const onSend = async (event) => {
-  // 判断用户是否在输入
-  if (isComposing.value) {
-    return
-  }
-  // 进行中不允许发送
-  if (conversationInProgress.value) {
-    return
-  }
-  const content = prompt.value?.trim() as string
-  if (event.key === 'Enter') {
-    if (event.shiftKey) {
-      // 插入换行
-      prompt.value += '\r\n'
-      event.preventDefault() // 防止默认的换行行为
-    } else {
-      // 发送消息
-      await doSend(content)
-      event.preventDefault() // 防止默认的提交行为
-    }
-  }
+// TODO @fan：是不是可以通过 @keydown.enter、@keydown.shift.enter 来实现，回车发送、shift+回车换行；主要看看，是不是可以简化 isComposing 相关的逻辑
+const onCompositionstart = () => {
+  isComposing.value = true
+}
+const onCompositionend = () => {
+  // console.log('输入结束...')
+  setTimeout(() => {
+    isComposing.value = false
+  }, 200)
 }
 
-const onSendBtn = async () => {
-  await doSend(prompt.value?.trim() as string)
-}
-
-const doSend = async (content: string) => {
-  if (content.length < 2) {
-    // TODO @fan：这个 message.error(`上传文件大小不能超过${props.fileSize}MB!`) 可以替代，这种形式
-    ElMessage({
-      message: '请输入内容!',
-      type: 'error'
-    })
+/** 真正执行【发送】消息操作 */
+const doSendMessage = async (content: string) => {
+  // 校验
+  if (content.length < 1) {
+    message.error('发送失败，原因：内容为空！')
     return
   }
-  // TODO @fan：这个 message.error(`上传文件大小不能超过${props.fileSize}MB!`) 可以替代，这种形式
   if (activeConversationId.value == null) {
-    ElMessage({
-      message: '还没创建对话，不能发送!',
-      type: 'error'
-    })
+    message.error('还没创建对话，不能发送!')
     return
   }
   // 清空输入框
   prompt.value = ''
-  // TODO @fan：idea 这里会报类型错误，是不是可以解决下哈
-  const userMessage = {
+  // 执行发送
+  await doSendMessageStream({
     conversationId: activeConversationId.value,
     content: content
-  } as ChatMessageVO
-  // stream
-  await doSendStream(userMessage)
+  } as ChatMessageVO)
 }
 
-const doSendStream = async (userMessage: ChatMessageVO) => {
+// TODO @fan：= = 不知道哪里被改动了。点击【发送】后，不会跳转到消息最底部了。。
+/** 真正执行【发送】消息操作 */
+const doSendMessageStream = async (userMessage: ChatMessageVO) => {
   // 创建 AbortController 实例，以便中止请求
   conversationInAbortController.value = new AbortController()
   // 标记对话进行中
   conversationInProgress.value = true
   // 设置为空
-  fullText.value = ''
+  receiveMessageFullText.value = ''
+
   try {
-    // 先添加两个假数据，等 stream 返回再替换
+    // 1.1 先添加两个假数据，等 stream 返回再替换
     activeMessageList.value.push({
       id: -1,
       conversationId: activeConversationId.value,
@@ -459,26 +414,25 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
     activeMessageList.value.push({
       id: -2,
       conversationId: activeConversationId.value,
-      type: 'system',
+      type: 'assistant',
       content: '思考中...',
       createTime: new Date()
     } as ChatMessageVO)
-    // 滚动到最下面
-    // TODO @fan：可以 await nextTick()；然后同步调用 scrollToBottom()
+    // 1.2 滚动到最下面
     nextTick(async () => {
-      await scrollToBottom()
+      await scrollToBottom() // 底部
     })
-    // 开始滚动
+    // 1.3 开始滚动
     textRoll()
-    // 发送 event stream
-    let isFirstMessage = true // TODO @fan：isFirstChunk 会更精准
-    ChatMessageApi.sendStream(
-      userMessage.conversationId, // TODO 芋艿：这里可能要在优化；
+
+    // 2. 发送 event stream
+    let isFirstChunk = true // 是否是第一个 chunk 消息段
+    await ChatMessageApi.sendChatMessageStream(
+      userMessage.conversationId,
       userMessage.content,
       conversationInAbortController.value,
       enableContext.value,
       async (res) => {
-        console.log('res', res)
         const { code, data, msg } = JSON.parse(res.data)
         if (code !== 0) {
           message.alert(`对话异常! ${msg}`)
@@ -490,9 +444,9 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
           return
         }
         // 首次返回需要添加一个 message 到页面，后面的都是更新
-        if (isFirstMessage) {
-          isFirstMessage = false
-          // 弹出两个 假数据
+        if (isFirstChunk) {
+          isFirstChunk = false
+          // 弹出两个假数据
           activeMessageList.value.pop()
           activeMessageList.value.pop()
           // 更新返回的数据
@@ -500,32 +454,23 @@ const doSendStream = async (userMessage: ChatMessageVO) => {
           activeMessageList.value.push(data.receive)
         }
         // debugger
-        fullText.value = fullText.value + data.receive.content
+        receiveMessageFullText.value = receiveMessageFullText.value + data.receive.content
         // 滚动到最下面
         await scrollToBottom()
       },
       (error) => {
         message.alert(`对话异常! ${error}`)
-        // TODO @fan：是不是可以复用 stopStream 方法
-        // 标记对话结束
-        conversationInProgress.value = false
-        // 结束 stream 对话
-        conversationInAbortController.value.abort()
+        stopStream()
       },
       () => {
-        // TODO @fan：是不是可以复用 stopStream 方法
-        // 标记对话结束
-        conversationInProgress.value = false
-        // 结束 stream 对话
-        conversationInAbortController.value.abort()
+        stopStream()
       }
     )
-  } finally {
-  }
+  } catch {}
 }
 
+/** 停止 stream 流式调用 */
 const stopStream = async () => {
-  console.log('stopStream...')
   // tip：如果 stream 进行中的 message，就需要调用 controller 结束
   if (conversationInAbortController.value) {
     conversationInAbortController.value.abort()
@@ -534,75 +479,90 @@ const stopStream = async () => {
   conversationInProgress.value = false
 }
 
-// ============== message 数据 =================
-
-/**
- * 对话 - 新建
- */
-// TODO @fan：应该是 handleXXX，handler 是名词哈
-const handlerNewChat = async () => {
-  // 创建对话
-  await conversationListRef.value.createConversation()
-}
-
-/**
- * 删除 message
- */
-const handlerMessageDelete = async () => {
-  if (conversationInProgress.value) {
-    message.alert('回答中，不能删除!')
-    return
-  }
-  // 刷新 message
-  await getMessageList()
-}
-
-/**
- * 编辑 message：设置为 prompt，可以再次编辑
- */
-const handlerMessageEdit = async (message: ChatMessageVO) => {
+/** 编辑 message：设置为 prompt，可以再次编辑 */
+const handleMessageEdit = (message: ChatMessageVO) => {
   prompt.value = message.content
 }
 
-/**
- * 刷新 message：基于指定消息，再次发起对话
- */
-const handlerMessageRefresh = async (message: ChatMessageVO) => {
-  await doSend(message.content)
+/** 刷新 message：基于指定消息，再次发起对话 */
+const handleMessageRefresh = (message: ChatMessageVO) => {
+  doSendMessage(message.content)
 }
 
-/**
- * 回到顶部
- */
-const handlerGoTop = async () => {
-  await messageRef.value.handlerGoTop()
-}
+// ============== 【消息滚动】相关 =============
 
-/**
- * message 清除
- */
-const handlerMessageClear = async () => {
-  if (!activeConversationId.value) {
-    return
+/** 滚动到 message 底部 */
+const scrollToBottom = async (isIgnore?: boolean) => {
+  await nextTick()
+  if (messageRef.value) {
+    messageRef.value.scrollToBottom(isIgnore)
   }
-  // TODO @fan：需要 try catch 下，不然点击取消会报异常
-  // 确认提示
-  await message.delConfirm('确认清空对话消息？')
-  // 清空对话
-  await ChatMessageApi.deleteByConversationId(activeConversationId.value)
-  // TODO @fan：是不是直接置空就好啦；
-  // 刷新 message 列表
-  await getMessageList()
+}
+
+/** 自提滚动效果 */
+const textRoll = async () => {
+  let index = 0
+  try {
+    // 只能执行一次
+    if (textRoleRunning.value) {
+      return
+    }
+    // 设置状态
+    textRoleRunning.value = true
+    receiveMessageDisplayedText.value = ''
+    const task = async () => {
+      // 调整速度
+      const diff =
+        (receiveMessageFullText.value.length - receiveMessageDisplayedText.value.length) / 10
+      if (diff > 5) {
+        textSpeed.value = 10
+      } else if (diff > 2) {
+        textSpeed.value = 30
+      } else if (diff > 1.5) {
+        textSpeed.value = 50
+      } else {
+        textSpeed.value = 100
+      }
+      // 对话结束，就按 30 的速度
+      if (!conversationInProgress.value) {
+        textSpeed.value = 10
+      }
+
+      if (index < receiveMessageFullText.value.length) {
+        receiveMessageDisplayedText.value += receiveMessageFullText.value[index]
+        index++
+
+        // 更新 message
+        const lastMessage = activeMessageList.value[activeMessageList.value.length - 1]
+        lastMessage.content = receiveMessageDisplayedText.value
+        // 滚动到住下面
+        await scrollToBottom()
+        // 重新设置任务
+        timer = setTimeout(task, textSpeed.value)
+      } else {
+        // 不是对话中可以结束
+        if (!conversationInProgress.value) {
+          textRoleRunning.value = false
+          clearTimeout(timer)
+        } else {
+          // 重新设置任务
+          timer = setTimeout(task, textSpeed.value)
+        }
+      }
+    }
+    let timer = setTimeout(task, textSpeed.value)
+  } catch {}
 }
 
 /** 初始化 **/
 onMounted(async () => {
-  // 设置当前对话 TODO 角色仓库过来的，自带 conversationId 需要选中
+  // 如果有 conversationId 参数，则默认选中
   if (route.query.conversationId) {
     const id = route.query.conversationId as unknown as number
     activeConversationId.value = id
     await getConversation(id)
   }
+
   // 获取列表数据
   activeMessageListLoading.value = true
   await getMessageList()
