@@ -174,6 +174,7 @@ service.interceptors.response.use(
       if (msg === '无效的刷新令牌') {
         // hard coding：忽略这个提示，直接登出
         console.log(msg)
+        return handleAuthorized()
       } else {
         ElNotification.error({ title: msg })
       }
