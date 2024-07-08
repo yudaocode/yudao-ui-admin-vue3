@@ -226,7 +226,7 @@ const conversationTimeGroup = async (list: ChatConversationVO[]) => {
   const threeDays = 3 * oneDay
   const sevenDays = 7 * oneDay
   const thirtyDays = 30 * oneDay
-  for (const conversation: ChatConversationVO of list) {
+  for (const conversation of list) {
     // 置顶
     if (conversation.pinned) {
       groupMap['置顶'].push(conversation)
@@ -247,7 +247,6 @@ const conversationTimeGroup = async (list: ChatConversationVO[]) => {
       groupMap['三十天前'].push(conversation)
     }
   }
-  console.log('----groupMap', groupMap)
   return groupMap
 }
 

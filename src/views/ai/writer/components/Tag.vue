@@ -13,20 +13,19 @@
 </template>
 
 <script setup lang="ts">
-  const props = withDefaults(
-    defineProps<{
-      tags: { label: string; value: string }[]
-      modelValue: string
-      [k: string]: any
-    }>(),
-    {
-      tags: () => []
-    }
-  )
+const props = withDefaults(
+  defineProps<{
+    tags: { label: string; value: string }[]
+    modelValue: string
+    [k: string]: any
+  }>(),
+  {
+    tags: () => []
+  }
+)
 
-  const emits = defineEmits<{
-    (e: 'update:modelValue', value: string): void
-  }>()
+const emits = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+}>()
 </script>
-
 <style scoped></style>

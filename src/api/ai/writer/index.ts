@@ -3,7 +3,9 @@ import { fetchEventSource } from '@microsoft/fetch-event-source'
 import { getAccessToken } from '@/utils/auth'
 import { config } from '@/config/axios/config'
 
+// TODO @hhhero：可以改成 WriteVO 哈，主要是保持一致
 export interface WriteParams {
+  // TODO @hhhero：注释。每个属性的后面哈。会更简洁一点
   /**
    * 1:撰写 2:回复
    */
@@ -33,6 +35,7 @@ export interface WriteParams {
    */
   language: number
 }
+
 export const writeStream = ({
   data,
   onClose,
@@ -46,7 +49,6 @@ export const writeStream = ({
   onClose?: (...args: any[]) => void
   ctrl: AbortController
 }) => {
-  // return request.post({ url: '/ai/write/generate-stream', data })
   const token = getAccessToken()
   return fetchEventSource(`${config.base_url}/ai/write/generate-stream`, {
     method: 'post',

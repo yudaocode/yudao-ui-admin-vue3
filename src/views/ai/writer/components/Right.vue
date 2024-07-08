@@ -35,52 +35,52 @@
 </template>
 
 <script setup lang="ts">
-  import { useClipboard } from '@vueuse/core'
-  const message = useMessage()
-  const props = defineProps({
-    msg: {
-      type: String,
-      default: ''
-    },
-    isWriting: {
-      type: Boolean,
-      default: false
-    }
-  })
+import { useClipboard } from '@vueuse/core'
 
-  const emits = defineEmits(['update:msg', 'stopStream'])
+const message = useMessage()
+const { copied, copy } = useClipboard()
 
-  const { copied, copy } = useClipboard()
-
-  const compMsg = computed({
-    get() {
-      return props.msg
-    },
-    set(val) {
-      emits('update:msg', val)
-    }
-  })
-
-  const showCopy = computed(() => props.msg && !props.isWriting)
-
-  const inputId = computed(() => getCurrentInstance()?.uid)
-
-  const contentRef = ref<HTMLDivElement>()
-  defineExpose({
-    scrollToBottom() {
-      contentRef.value?.scrollTo(0, contentRef.value?.scrollHeight)
-    }
-  })
-
-  // 点击复制的时候复制msg
-  const copyMsg = () => {
-    copy(props.msg)
+const props = defineProps({
+  msg: {
+    type: String,
+    default: ''
+  },
+  isWriting: {
+    type: Boolean,
+    default: false
   }
+})
 
-  watch(copied, (val) => {
-    console.log({ copied: val })
-    if (val) {
-      message.success('复制成功')
-    }
-  })
+const emits = defineEmits(['update:msg', 'stopStream'])
+
+// TODO @hhhero：是不是 Msg 改成 Content 这种哈。或者 Message。
+const compMsg = computed({
+  get() {
+    return props.msg
+  },
+  set(val) {
+    emits('update:msg', val)
+  }
+})
+
+/** 滚动 */
+const contentRef = ref<HTMLDivElement>()
+defineExpose({
+  scrollToBottom() {
+    contentRef.value?.scrollTo(0, contentRef.value?.scrollHeight)
+  }
+})
+
+/** 点击复制的时候复制内容 */
+const showCopy = computed(() => props.msg && !props.isWriting) // 是否展示拷贝
+const inputId = computed(() => getCurrentInstance()?.uid) // TODO @hhhero：这个可以写个注释哈
+const copyMsg = () => {
+  copy(props.msg)
+}
+
+watch(copied, (val) => {
+  if (val) {
+    message.success('复制成功')
+  }
+})
 </script>

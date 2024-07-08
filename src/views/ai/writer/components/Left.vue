@@ -1,5 +1,5 @@
 <template>
-  <!-- 定义tab组件 -->
+  <!-- 定义 tab 组件：撰写/回复等 -->
   <DefineTab v-slot="{ active, text, itemClick }">
     <span
       class="inline-block w-1/2 rounded-full cursor-pointer text-center leading-[30px] relative z-1 text-[5C6370] hover:text-black"
@@ -9,7 +9,7 @@
       {{ text }}
     </span>
   </DefineTab>
-  <!-- 定义label组件 -->
+  <!-- 定义 label 组件：长度/格式/语气/语言等 -->
   <DefineLabel v-slot="{ label, hint, hintClick }">
     <h3 class="mt-5 mb-3 flex items-center justify-between text-[14px]">
       <span>{{ label }}</span>
@@ -23,6 +23,7 @@
       </span>
     </h3>
   </DefineLabel>
+
   <!-- TODO 小屏幕的时候是定位在左边的，大屏是分开的 -->
   <div class="relative" v-bind="$attrs">
     <!-- tab -->
@@ -99,97 +100,102 @@
 </template>
 
 <script setup lang="ts">
-  import { createReusableTemplate } from '@vueuse/core'
-  import { ref } from 'vue'
-  import Tag from './Tag.vue'
-  import { WriteParams } from '@/api/ai/writer'
-  import { omit } from 'lodash-es'
-  import { getIntDictOptions } from '@/utils/dict'
-  import dataJson from '../data.json'
+import { createReusableTemplate } from '@vueuse/core'
+import { ref } from 'vue'
+import Tag from './Tag.vue'
+import { WriteParams } from '@/api/ai/writer'
+import { omit } from 'lodash-es'
+import { getIntDictOptions } from '@/utils/dict'
+import dataJson from '../data.json'
 
-  type TabType = WriteParams['type']
+type TabType = WriteParams['type']
 
-  const message = useMessage()
+const message = useMessage()
 
-  defineProps<{
-    isWriting: boolean
-  }>()
+defineProps<{
+  isWriting: boolean
+}>()
 
-  const emits = defineEmits<{
-    (e: 'submit', params: Partial<WriteParams>)
-    (e: 'example', param: 'write' | 'reply')
-  }>()
+const emits = defineEmits<{
+  (e: 'submit', params: Partial<WriteParams>)
+  (e: 'example', param: 'write' | 'reply')
+}>()
 
-  const example = (type: 'write' | 'reply') => {
-    writeForm.value = {
-      ...initData,
-      ...omit(dataJson[type], ['data'])
-    }
-    emits('example', type)
+const example = (type: 'write' | 'reply') => {
+  writeForm.value = {
+    ...initData,
+    ...omit(dataJson[type], ['data'])
   }
+  emits('example', type)
+}
 
-  const selectedTab = ref<TabType>(1)
-  const tabs: {
-    text: string
-    value: TabType
-  }[] = [
-    { text: '撰写', value: 1 },
-    { text: '回复', value: 2 }
-  ]
-  const [DefineTab, ReuseTab] = createReusableTemplate<{
-    active?: boolean
-    text: string
-    itemClick: () => void
-  }>()
+const selectedTab = ref<TabType>(1)
+const tabs: {
+  text: string
+  value: TabType
+}[] = [
+  { text: '撰写', value: 1 }, // TODO @hhhero：1、2 这个枚举到 constants 里。方便后续万一要调整
+  { text: '回复', value: 2 }
+]
+const [DefineTab, ReuseTab] = createReusableTemplate<{
+  active?: boolean
+  text: string
+  itemClick: () => void
+}>()
 
-  const initData: WriteParams = {
-    type: 1,
-    prompt: '',
-    originalContent: '',
-    tone: 1,
-    language: 1,
-    length: 1,
-    format: 1
+const initData: WriteParams = {
+  type: 1,
+  prompt: '',
+  originalContent: '',
+  tone: 1,
+  language: 1,
+  length: 1,
+  format: 1
+}
+// TODO @hhhero：这个字段，要不叫 formData，和其他模块保持一致。然后 initData 和它也更好对应上
+const writeForm = ref<WriteParams>({ ...initData })
+
+// TODO @hhhero：这种一次性的变量，要不直接 vue template 直接调用。目的是：让 ts 这块，更专注逻辑哈。
+const writeTags = {
+  // 长度 TODO @hhhero：注释放在和面哈；
+  // TODO @hhhero：一般 length 不用缩写哈。更完整会更容易阅读；
+  lenTags: getIntDictOptions('ai_write_length'),
+  // 格式
+
+  formatTags: getIntDictOptions('ai_write_format'),
+  // 语气
+
+  toneTags: getIntDictOptions('ai_write_tone'),
+  // 语言
+  langTags: getIntDictOptions('ai_write_language')
+  //
+}
+
+// TODO @hhhero：这个写法不错。要不写个简单的注释，我怕很多人不懂哈。
+const [DefineLabel, ReuseLabel] = createReusableTemplate<{
+  label: string
+  class?: string
+  hint?: string
+  hintClick?: () => void
+}>()
+
+const switchTab = (value: TabType) => {
+  selectedTab.value = value
+  writeForm.value = { ...initData }
+}
+
+const submit = () => {
+  if (selectedTab.value === 2 && !writeForm.value.originalContent) {
+    message.warning('请输入原文')
+    return
   }
-  const writeForm = ref<WriteParams>({ ...initData })
-
-  const writeTags = {
-    // 长度
-    lenTags: getIntDictOptions('ai_write_length'),
-    // 格式
-
-    formatTags: getIntDictOptions('ai_write_format'),
-    // 语气
-
-    toneTags: getIntDictOptions('ai_write_tone'),
-    // 语言
-    langTags: getIntDictOptions('ai_write_language')
-    //
+  if (!writeForm.value.prompt) {
+    message.warning(`请输入${selectedTab.value === 1 ? '写作' : '回复'}内容`)
+    return
   }
-
-  const [DefineLabel, ReuseLabel] = createReusableTemplate<{
-    label: string
-    class?: string
-    hint?: string
-    hintClick?: () => void
-  }>()
-
-  const switchTab = (value: TabType) => {
-    selectedTab.value = value
-    writeForm.value = { ...initData }
-  }
-
-  const submit = () => {
-    if (selectedTab.value === 2 && !writeForm.value.originalContent) {
-      message.warning('请输入原文')
-      return
-    } else if (!writeForm.value.prompt) {
-      message.warning(`请输入${selectedTab.value === 1 ? '写作' : '回复'}内容`)
-      return
-    }
-    emits('submit', {
-      ...(selectedTab.value === 1 ? omit(writeForm.value, ['originalContent']) : writeForm.value),
-      type: selectedTab.value
-    })
-  }
+  emits('submit', {
+    ...(selectedTab.value === 1 ? omit(writeForm.value, ['originalContent']) : writeForm.value),
+    type: selectedTab.value
+  })
+}
 </script>
