@@ -14,14 +14,9 @@ export interface ImageVO {
   errorMessage: string // 错误信息
   options: object // 配置 Map<string, string>
   taskId: number // 任务编号
-  buttons: ImageMjButtonsVO[] // mj 操作按钮
+  buttons: ImageMidjourneyButtonsVO[] // mj 操作按钮
   createTime: string // 创建时间
   finishTime: string // 完成时间
-}
-
-export interface ImagePageReqVO {
-  pageNo: number // 分页编号
-  pageSize: number // 分页大小
 }
 
 export interface ImageDrawReqVO {
@@ -43,22 +38,22 @@ export interface ImageMidjourneyImagineReqVO {
   version: string // 版本
 }
 
-export interface ImageMjActionVO {
+export interface ImageMidjourneyActionVO {
   id: number // 图片编号
   customId: string // MJ::JOB::upsample::1::85a4b4c1-8835-46c5-a15c-aea34fad1862 动作标识
 }
 
-export interface ImageMjButtonsVO {
+export interface ImageMidjourneyButtonsVO {
   customId: string // MJ::JOB::upsample::1::85a4b4c1-8835-46c5-a15c-aea34fad1862 动作标识
   emoji: string // 图标 emoji
   label: string // Make Variations 文本
   style: number // 样式: 2（Primary）、3（Green）
 }
 
-// AI API 密钥 API
+// AI 图片 API
 export const ImageApi = {
   // 获取【我的】绘图分页
-  getImagePageMy: async (params: ImagePageReqVO) => {
+  getImagePageMy: async (params: PageParam) => {
     return await request.get({ url: `/ai/image/my-page`, params })
   },
   // 获取【我的】绘图记录
@@ -85,7 +80,7 @@ export const ImageApi = {
     return await request.post({ url: `/ai/image/midjourney/imagine`, data })
   },
   // 【Midjourney】Action 操作（二次生成图片）
-  midjourneyAction: async (data: ImageMjActionVO) => {
+  midjourneyAction: async (data: ImageMidjourneyActionVO) => {
     return await request.post({ url: `/ai/image/midjourney/action`, data })
   },
 

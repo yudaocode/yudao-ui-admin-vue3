@@ -30,12 +30,7 @@
           :icon="RefreshRight"
           @click="handleBtnClick('regeneration', imageDetail)"
         />
-        <el-button
-          class="btn"
-          text
-          :icon="Delete"
-          @click="handleBtnClick('delete', imageDetail)"
-        />
+        <el-button class="btn" text :icon="Delete" @click="handleBtnClick('delete', imageDetail)" />
         <el-button class="btn" text :icon="More" @click="handleBtnClick('more', imageDetail)" />
       </div>
     </div>
@@ -61,10 +56,10 @@
   </el-card>
 </template>
 <script setup lang="ts">
-import {Delete, Download, More, RefreshRight} from '@element-plus/icons-vue'
-import { ImageVO, ImageMjButtonsVO } from '@/api/ai/image'
+import { Delete, Download, More, RefreshRight } from '@element-plus/icons-vue'
+import { ImageVO, ImageMidjourneyButtonsVO } from '@/api/ai/image'
 import { PropType } from 'vue'
-import {ElLoading, LoadingOptionsResolved} from 'element-plus'
+import { ElLoading, LoadingOptionsResolved } from 'element-plus'
 import { AiImageStatusEnum } from '@/views/ai/utils/constants'
 
 const cardImageRef = ref<any>() // 卡片 image ref
@@ -98,7 +93,7 @@ const handleLoading = async (status: number) => {
 }
 
 /**  mj 按钮 click  */
-const handleMjBtnClick = async (button: ImageMjButtonsVO) => {
+const handleMjBtnClick = async (button: ImageMidjourneyButtonsVO) => {
   // 确认窗体
   await message.confirm(`确认操作 "${button.label} ${button.emoji}" ?`)
   emits('onMjBtnClick', button, props.imageDetail)

@@ -2,22 +2,21 @@
   <el-card class="dr-task" body-class="task-card" shadow="never">
     <template #header>绘画任务</template>
     <!-- 图片列表 -->
-    <div class="task-image-list" ref="imageTaskRef">
+    <div class="task-image-list" ref="imageListRef">
       <ImageCard
         v-for="image in imageList"
         :key="image.id"
         :image-detail="image"
-        @on-btn-click="handleImageBtnClick"
-        @on-mj-btn-click="handleImageMjBtnClick"
+        @on-btn-click="handleImageButtonClick"
+        @on-mj-btn-click="handleImageMidjourneyButtonClick"
       />
     </div>
     <div class="task-image-pagination">
-      <el-pagination
-        background
-        layout="prev, pager, next"
-        :default-page-size="pageSize"
+      <Pagination
         :total="pageTotal"
-        @change="handlePageChange"
+        v-model:page="queryParams.pageNo"
+        v-model:limit="queryParams.pageSize"
+        @pagination="getImageList"
       />
     </div>
   </el-card>
@@ -26,62 +25,63 @@
   <ImageDetail
     :show="isShowImageDetail"
     :id="showImageDetailId"
-    @handle-drawer-close="handleDrawerClose"
+    @handle-drawer-close="handleDetailClose"
   />
 </template>
 <script setup lang="ts">
-import { ImageApi, ImageVO, ImageMjActionVO, ImageMjButtonsVO } from '@/api/ai/image'
+import {
+  ImageApi,
+  ImageVO,
+  ImageMidjourneyActionVO,
+  ImageMidjourneyButtonsVO
+} from '@/api/ai/image'
 import ImageDetail from './ImageDetail.vue'
 import ImageCard from './ImageCard.vue'
 import { ElLoading, LoadingOptionsResolved } from 'element-plus'
 import { AiImageStatusEnum } from '@/views/ai/utils/constants'
-import { downloadImage } from '@/utils/download'
+import download from '@/utils/download'
 
 const message = useMessage() // 消息弹窗
 
-const imageList = ref<ImageVO[]>([]) // image 列表
-const inProgressImageMap = ref<{}>({}) // 监听的 image 映射，一般是生成中（需要轮询），key 为 image 编号，value 为 image
-const imageListInterval = ref<any>() // image 列表定时器，刷新列表
-const isShowImageDetail = ref<boolean>(false) // 是否显示 task 详情
-const showImageDetailId = ref<number>(0) // 是否显示 task 详情
-const imageTaskRef = ref<any>() // ref
-const imageTaskLoadingInstance = ref<any>() // loading
-const imageTaskLoading = ref<boolean>(false) // loading
-const pageNo = ref<number>(1) // page no
-const pageSize = ref<number>(10) // page size
+// 图片分页相关的参数
+const queryParams = reactive({
+  pageNo: 1,
+  pageSize: 10
+})
 const pageTotal = ref<number>(0) // page size
+const imageList = ref<ImageVO[]>([]) // image 列表
+const imageListLoadingInstance = ref<any>() // image 列表是否正在加载中
+const imageListRef = ref<any>() // ref
+// 图片轮询相关的参数（正在生成中的）
+const inProgressImageMap = ref<{}>({}) // 监听的 image 映射，一般是生成中（需要轮询），key 为 image 编号，value 为 image
+const inProgressTimer = ref<any>() // 生成中的 image 定时器，轮询生成进展
+// 图片详情相关的参数
+const isShowImageDetail = ref<boolean>(false) // 图片详情是否展示
+const showImageDetailId = ref<number>(0) // 图片详情的图片编号
 
-/**  抽屉 - close  */
-const handleDrawerClose = async () => {
-  isShowImageDetail.value = false
-}
-
-/**  任务 - detail  */
-const handleDrawerOpen = async () => {
+/** 查看图片的详情  */
+const handleDetailOpen = async () => {
   isShowImageDetail.value = true
 }
 
-/**
- * 获取 - image 列表
- */
-const getImageList = async (apply: boolean = false) => {
-  imageTaskLoading.value = true
+/** 关闭图片的详情  */
+const handleDetailClose = async () => {
+  isShowImageDetail.value = false
+}
+
+/** 获得 image 图片列表 */
+const getImageList = async () => {
   try {
-    imageTaskLoadingInstance.value = ElLoading.service({
-      target: imageTaskRef.value,
+    // 1. 加载图片列表
+    imageListLoadingInstance.value = ElLoading.service({
+      target: imageListRef.value,
       text: '加载中...'
     } as LoadingOptionsResolved)
-    const { list, total } = await ImageApi.getImagePageMy({
-      pageNo: pageNo.value,
-      pageSize: pageSize.value
-    })
-    if (apply) {
-      imageList.value = [...imageList.value, ...list]
-    } else {
-      imageList.value = list
-    }
+    const { list, total } = await ImageApi.getImagePageMy(queryParams)
+    imageList.value = list
     pageTotal.value = total
-    // 需要 watch 的数据
+
+    // 2. 计算需要轮询的图片
     const newWatImages = {}
     imageList.value.forEach((item) => {
       if (item.status === AiImageStatusEnum.IN_PROGRESS) {
@@ -90,9 +90,10 @@ const getImageList = async (apply: boolean = false) => {
     })
     inProgressImageMap.value = newWatImages
   } finally {
-    if (imageTaskLoadingInstance.value) {
-      imageTaskLoadingInstance.value.close()
-      imageTaskLoadingInstance.value = null
+    // 关闭正在“加载中”的 Loading
+    if (imageListLoadingInstance.value) {
+      imageListLoadingInstance.value.close()
+      imageListLoadingInstance.value = null
     }
   }
 }
@@ -119,50 +120,52 @@ const refreshWatchImages = async () => {
   inProgressImageMap.value = newWatchImages
 }
 
-/**  图片 - btn click  */
-const handleImageBtnClick = async (type: string, imageDetail: ImageVO) => {
-  // 获取 image detail id
-  showImageDetailId.value = imageDetail.id
-  // 处理不用 btn
+/** 图片的点击事件 */
+const handleImageButtonClick = async (type: string, imageDetail: ImageVO) => {
+  // 详情
   if (type === 'more') {
-    await handleDrawerOpen()
-  } else if (type === 'delete') {
+    showImageDetailId.value = imageDetail.id
+    await handleDetailOpen()
+    return
+  }
+  // 删除
+  if (type === 'delete') {
     await message.confirm(`是否删除照片?`)
     await ImageApi.deleteImageMy(imageDetail.id)
     await getImageList()
     message.success('删除成功!')
-  } else if (type === 'download') {
-    await downloadImage(imageDetail.picUrl)
-  } else if (type === 'regeneration') {
-    // Midjourney 平台
-    console.log('regeneration', imageDetail.id)
+    return
+  }
+  // 下载
+  if (type === 'download') {
+    await download.image(imageDetail.picUrl)
+    return
+  }
+  // 重新生成
+  if (type === 'regeneration') {
     await emits('onRegeneration', imageDetail)
+    return
   }
 }
 
-/**  图片 - mj btn click  */
-const handleImageMjBtnClick = async (button: ImageMjButtonsVO, imageDetail: ImageVO) => {
-  // 1、构建 params 参数
+/** 处理 Midjourney 按钮点击事件  */
+const handleImageMidjourneyButtonClick = async (
+  button: ImageMidjourneyButtonsVO,
+  imageDetail: ImageVO
+) => {
+  // 1. 构建 params 参数
   const data = {
     id: imageDetail.id,
     customId: button.customId
-  } as ImageMjActionVO
-  // 2、发送 action
+  } as ImageMidjourneyActionVO
+  // 2. 发送 action
   await ImageApi.midjourneyAction(data)
-  // 3、刷新列表
+  // 3. 刷新列表
   await getImageList()
 }
 
-// page change
-const handlePageChange = async (page) => {
-  pageNo.value = page
-  await getImageList(false)
-}
+defineExpose({ getImageList }) // 暴露组件方法
 
-/** 暴露组件方法 */
-defineExpose({ getImageList })
-
-// emits
 const emits = defineEmits(['onRegeneration'])
 
 /** 组件挂在的时候 */
@@ -170,15 +173,15 @@ onMounted(async () => {
   // 获取 image 列表
   await getImageList()
   // 自动刷新 image 列表
-  imageListInterval.value = setInterval(async () => {
+  inProgressTimer.value = setInterval(async () => {
     await refreshWatchImages()
   }, 1000 * 3)
 })
 
 /** 组件取消挂在的时候 */
 onUnmounted(async () => {
-  if (imageListInterval.value) {
-    clearInterval(imageListInterval.value)
+  if (inProgressTimer.value) {
+    clearInterval(inProgressTimer.value)
   }
 })
 </script>
