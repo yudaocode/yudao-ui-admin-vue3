@@ -9,13 +9,10 @@
     </div>
   </div>
 </template>
-
 <script setup lang="ts">
 const emits = defineEmits(['onNewConversation'])
 
-/**
- * 新建 conversation 聊天对话
- */
+/** 新建 conversation 聊天对话 */
 const handlerNewChat = () => {
   emits('onNewConversation')
 }

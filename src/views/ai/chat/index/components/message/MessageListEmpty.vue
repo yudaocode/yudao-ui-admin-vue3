@@ -1,31 +1,35 @@
+<!-- 消息列表为空时，展示 prompt 列表 -->
 <template>
   <div class="chat-empty">
-
-    <!--  title  -->
+    <!-- title -->
     <div class="center-container">
-      <div class="title">芋艿 AI</div>
+      <div class="title">芋道 AI</div>
       <div class="role-list">
-        <div class="role-item" v-for="prompt in promptList" :key="prompt.prompt" @click="handlerPromptClick(prompt)">
-          {{prompt.prompt}}
+        <div
+          class="role-item"
+          v-for="prompt in promptList"
+          :key="prompt.prompt"
+          @click="handlerPromptClick(prompt)"
+        >
+          {{ prompt.prompt }}
         </div>
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-
-const promptList = ref<any[]>() // 角色列表
-promptList.value = [
+const promptList = [
   {
-    "prompt": "今天气怎么样?",
+    prompt: '今天气怎么样?'
   },
   {
-    "prompt": "写一首好听的诗歌?",
+    prompt: '写一首好听的诗歌?'
   }
-]
+] // prompt 列表
 
 const emits = defineEmits(['onPrompt'])
 
+/** 选中 prompt 点击 */
 const handlerPromptClick = async ({ prompt }) => {
   emits('onPrompt', prompt)
 }

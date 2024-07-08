@@ -1,7 +1,7 @@
 <template>
-  <div ref="messageContainer" style="height: 100%; overflow-y: auto; position: relative">
+  <div ref="messageContainer" class="h-100% overflow-y relative">
     <div class="chat-list" v-for="(item, index) in list" :key="index">
-      <!--  靠左 message  -->
+      <!-- 靠左 message：system、assistant 类型 -->
       <div class="left-message message-item" v-if="item.type !== 'user'">
         <div class="avatar">
           <el-avatar :src="roleAvatar" />
@@ -14,16 +14,16 @@
             <MarkdownView class="left-text" :content="item.content" />
           </div>
           <div class="left-btns">
-            <el-button class="btn-cus" link @click="noCopy(item.content)">
+            <el-button class="btn-cus" link @click="copyContent(item.content)">
               <img class="btn-image" src="@/assets/ai/copy.svg" />
             </el-button>
             <el-button v-if="item.id > 0" class="btn-cus" link @click="onDelete(item.id)">
-              <img class="btn-image" src="@/assets/ai/delete.svg" style="height: 17px" />
+              <img class="btn-image h-17px" src="@/assets/ai/delete.svg" />
             </el-button>
           </div>
         </div>
       </div>
-      <!--  靠右 message  -->
+      <!-- 靠右 message：user 类型 -->
       <div class="right-message message-item" v-if="item.type === 'user'">
         <div class="avatar">
           <el-avatar :src="userAvatar" />
@@ -36,15 +36,11 @@
             <div class="right-text">{{ item.content }}</div>
           </div>
           <div class="right-btns">
-            <el-button class="btn-cus" link @click="noCopy(item.content)">
+            <el-button class="btn-cus" link @click="copyContent(item.content)">
               <img class="btn-image" src="@/assets/ai/copy.svg" />
             </el-button>
             <el-button class="btn-cus" link @click="onDelete(item.id)">
-              <img
-                class="btn-image"
-                src="@/assets/ai/delete.svg"
-                style="height: 17px; margin-right: 12px"
-              />
+              <img class="btn-image h-17px mr-12px" src="@/assets/ai/delete.svg" />
             </el-button>
             <el-button class="btn-cus" link @click="onRefresh(item)">
               <el-icon size="17"><RefreshRight /></el-icon>
@@ -63,23 +59,25 @@
   </div>
 </template>
 <script setup lang="ts">
+import { PropType } from 'vue'
 import { formatDate } from '@/utils/formatTime'
 import MarkdownView from '@/components/MarkdownView/index.vue'
-import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
 import { useClipboard } from '@vueuse/core'
-import { PropType } from 'vue'
 import { ArrowDownBold, Edit, RefreshRight } from '@element-plus/icons-vue'
+import { ChatMessageApi, ChatMessageVO } from '@/api/ai/chat/message'
 import { ChatConversationVO } from '@/api/ai/chat/conversation'
 import { useUserStore } from '@/store/modules/user'
 import userAvatarDefaultImg from '@/assets/imgs/avatar.gif'
 import roleAvatarDefaultImg from '@/assets/ai/gpt.svg'
 
+const message = useMessage() // 消息弹窗
 const { copy } = useClipboard() // 初始化 copy 到粘贴板
-// 判断 消息列表 滚动的位置(用于判断是否需要滚动到消息最下方)
+const userStore = useUserStore()
+
+// 判断“消息列表”滚动的位置(用于判断是否需要滚动到消息最下方)
 const messageContainer: any = ref(null)
 const isScrolling = ref(false) //用于判断用户是否在滚动
 
-const userStore = useUserStore()
 const userAvatar = computed(() => userStore.user.avatar ?? userAvatarDefaultImg)
 const roleAvatar = computed(() => props.conversation.roleAvatar ?? roleAvatarDefaultImg)
 
@@ -95,12 +93,16 @@ const props = defineProps({
   }
 })
 
+const { list } = toRefs(props) // 消息列表
+
+const emits = defineEmits(['onDeleteSuccess', 'onRefresh', 'onEdit']) // 定义 emits
+
 // ============ 处理对话滚动 ==============
 
+/** 滚动到底部 */
 const scrollToBottom = async (isIgnore?: boolean) => {
+  // 注意要使用 nextTick 以免获取不到dom
   await nextTick(() => {
-    // TODO @fan：中文写作习惯，中英文之间要有空格；另外，nextick 哈，idea 如果有绿色波兰线，可以关注下
-    //注意要使用nexttick以免获取不到dom
     if (isIgnore || !isScrolling.value) {
       messageContainer.value.scrollTop =
         messageContainer.value.scrollHeight - messageContainer.value.offsetHeight
@@ -122,75 +124,48 @@ function handleScroll() {
   }
 }
 
-/**
- * 复制
- */
-const noCopy = async (content) => {
-  copy(content)
-  ElMessage({
-    message: '复制成功!',
-    type: 'success'
-  })
-}
-
-/**
- * 删除
- */
-const onDelete = async (id) => {
-  // 删除 message
-  await ChatMessageApi.deleteChatMessage(id)
-  ElMessage({
-    message: '删除成功!',
-    type: 'success'
-  })
-  // 回调
-  emits('onDeleteSuccess')
-}
-
-/**
- * 刷新
- */
-const onRefresh = async (message: ChatMessageVO) => {
-  emits('onRefresh', message)
-}
-
-/**
- * 编辑
- */
-const onEdit = async (message: ChatMessageVO) => {
-  emits('onEdit', message)
-}
-
-/**
- * 回到底部
- */
+/** 回到底部 */
 const handleGoBottom = async () => {
   const scrollContainer = messageContainer.value
   scrollContainer.scrollTop = scrollContainer.scrollHeight
 }
 
-/**
- * 回到顶部
- */
+/** 回到顶部 */
 const handlerGoTop = async () => {
   const scrollContainer = messageContainer.value
   scrollContainer.scrollTop = 0
 }
 
-// 监听 list
-// TODO @fan：这个木有，是不是删除啦
-const { list, conversationId } = toRefs(props)
-watch(list, async (newValue, oldValue) => {
-  console.log('watch list', list)
-})
+defineExpose({ scrollToBottom, handlerGoTop }) // 提供方法给 parent 调用
 
-// 提供方法给 parent 调用
-defineExpose({ scrollToBottom, handlerGoTop })
+// ============ 处理消息操作 ==============
 
-// 定义 emits
-const emits = defineEmits(['onDeleteSuccess', 'onRefresh', 'onEdit'])
+/** 复制 */
+const copyContent = async (content) => {
+  await copy(content)
+  message.success('复制成功！')
+}
 
-// onMounted
+/** 删除 */
+const onDelete = async (id) => {
+  // 删除 message
+  await ChatMessageApi.deleteChatMessage(id)
+  message.success('删除成功！')
+  // 回调
+  emits('onDeleteSuccess')
+}
+
+/** 刷新 */
+const onRefresh = async (message: ChatMessageVO) => {
+  emits('onRefresh', message)
+}
+
+/** 编辑 */
+const onEdit = async (message: ChatMessageVO) => {
+  emits('onEdit', message)
+}
+
+/** 初始化 */
 onMounted(async () => {
   messageContainer.value.addEventListener('scroll', handleScroll)
 })
@@ -199,15 +174,7 @@ onMounted(async () => {
 <style scoped lang="scss">
 .message-container {
   position: relative;
-  //top: 0;
-  //bottom: 0;
-  //left: 0;
-  //right: 0;
-  //width: 100%;
-  //height: 100%;
   overflow-y: scroll;
-  //padding: 0 15px;
-  //z-index: -1;
 }
 
 // 中间
@@ -229,11 +196,6 @@ onMounted(async () => {
     display: flex;
     flex-direction: row-reverse;
     justify-content: flex-start;
-  }
-
-  .avatar {
-    //height: 170px;
-    //width: 170px;
   }
 
   .message {
@@ -272,7 +234,6 @@ onMounted(async () => {
         color: #fff;
         display: inline;
         background-color: #267fff;
-        color: #fff;
         box-shadow: 0 0 0 1px #267fff;
         border-radius: 10px;
         padding: 10px;
