@@ -5,9 +5,8 @@
       <el-button
         color="#846af7"
         v-show="showCopy"
-        @click="copyMsg"
-        class="absolute top-2 right-2 copy-btn"
-        :data-clipboard-target="inputId"
+        @click="copyContent"
+        class="absolute top-2 right-2"
       >
         复制
       </el-button>
@@ -23,7 +22,7 @@
         <el-input
           id="inputId"
           type="textarea"
-          v-model="compMsg"
+          v-model="compContent"
           autosize
           :input-style="{ boxShadow: 'none' }"
           resize="none"
@@ -41,25 +40,27 @@ const message = useMessage()
 const { copied, copy } = useClipboard()
 
 const props = defineProps({
-  msg: {
+  content: {
+    // 生成的结果
     type: String,
     default: ''
   },
   isWriting: {
+    // 是否正在生成文章
     type: Boolean,
     default: false
   }
 })
 
-const emits = defineEmits(['update:msg', 'stopStream'])
+const emits = defineEmits(['update:content', 'stopStream'])
 
-// TODO @hhhero：是不是 Msg 改成 Content 这种哈。或者 Message。
-const compMsg = computed({
+// 通过计算属性，双向绑定，更改生成的内容，考虑到用户想要更改生成文章的情况
+const compContent = computed({
   get() {
-    return props.msg
+    return props.content
   },
   set(val) {
-    emits('update:msg', val)
+    emits('update:content', val)
   }
 })
 
@@ -72,12 +73,12 @@ defineExpose({
 })
 
 /** 点击复制的时候复制内容 */
-const showCopy = computed(() => props.msg && !props.isWriting) // 是否展示拷贝
-const inputId = computed(() => getCurrentInstance()?.uid) // TODO @hhhero：这个可以写个注释哈
-const copyMsg = () => {
-  copy(props.msg)
+const showCopy = computed(() => props.content && !props.isWriting) // 是否展示复制按钮，在生成内容完成的时候展示
+const copyContent = () => {
+  copy(props.content)
 }
 
+// 复制成功的时候copied.value为true
 watch(copied, (val) => {
   if (val) {
     message.success('复制成功')

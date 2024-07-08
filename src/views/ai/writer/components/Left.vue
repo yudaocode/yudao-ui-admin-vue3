@@ -24,7 +24,7 @@
     </h3>
   </DefineLabel>
 
-  <!-- TODO 小屏幕的时候是定位在左边的，大屏是分开的 -->
+  <!-- TODO @hhhero 小屏幕的时候是定位在左边的，大屏是分开的 -->
   <div class="relative" v-bind="$attrs">
     <!-- tab -->
     <div
@@ -32,7 +32,7 @@
     >
       <div
         class="flex items-center relative after:content-[''] after:block after:bg-white after:h-[30px] after:w-1/2 after:absolute after:top-0 after:left-0 after:transition-transform after:rounded-full"
-        :class="selectedTab === 2 && 'after:transform after:translate-x-[100%]'"
+        :class="selectedTab === AiWriteTypeEnum.REPLY && 'after:transform after:translate-x-[100%]'"
       >
         <ReuseTab
           v-for="tab in tabs"
@@ -53,7 +53,7 @@
             type="textarea"
             :rows="5"
             :maxlength="500"
-            v-model="writeForm.prompt"
+            v-model="formData.prompt"
             placeholder="请输入写作内容"
             showWordLimit
           />
@@ -65,7 +65,7 @@
             type="textarea"
             :rows="5"
             :maxlength="500"
-            v-model="writeForm.originalContent"
+            v-model="formData.originalContent"
             placeholder="请输入原文"
             showWordLimit
           />
@@ -75,20 +75,20 @@
             type="textarea"
             :rows="5"
             :maxlength="500"
-            v-model="writeForm.prompt"
+            v-model="formData.prompt"
             placeholder="请输入回复内容"
             showWordLimit
           />
         </template>
 
         <ReuseLabel label="长度" />
-        <Tag v-model="writeForm.length" :tags="writeTags.lenTags" />
+        <Tag v-model="formData.length" :tags="getIntDictOptions('ai_write_length')" />
         <ReuseLabel label="格式" />
-        <Tag v-model="writeForm.format" :tags="writeTags.formatTags" />
+        <Tag v-model="formData.format" :tags="getIntDictOptions('ai_write_format')" />
         <ReuseLabel label="语气" />
-        <Tag v-model="writeForm.tone" :tags="writeTags.toneTags" />
+        <Tag v-model="formData.tone" :tags="getIntDictOptions('ai_write_tone')" />
         <ReuseLabel label="语言" />
-        <Tag v-model="writeForm.language" :tags="writeTags.langTags" />
+        <Tag v-model="formData.language" :tags="getIntDictOptions('ai_write_language')" />
 
         <div class="flex items-center justify-center mt-3">
           <el-button :disabled="isWriting">重置</el-button>
@@ -103,12 +103,13 @@
 import { createReusableTemplate } from '@vueuse/core'
 import { ref } from 'vue'
 import Tag from './Tag.vue'
-import { WriteParams } from '@/api/ai/writer'
+import { WriteVO } from '@/api/ai/writer'
 import { omit } from 'lodash-es'
 import { getIntDictOptions } from '@/utils/dict'
-import dataJson from '../data.json'
+import { WriteExampleDataJson } from '@/views/ai/utils/utils'
+import { AiWriteTypeEnum } from "@/views/ai/utils/constants";
 
-type TabType = WriteParams['type']
+type TabType = WriteVO['type']
 
 const message = useMessage()
 
@@ -117,25 +118,25 @@ defineProps<{
 }>()
 
 const emits = defineEmits<{
-  (e: 'submit', params: Partial<WriteParams>)
+  (e: 'submit', params: Partial<WriteVO>)
   (e: 'example', param: 'write' | 'reply')
 }>()
 
 const example = (type: 'write' | 'reply') => {
-  writeForm.value = {
+  formData.value = {
     ...initData,
-    ...omit(dataJson[type], ['data'])
+    ...omit(WriteExampleDataJson[type], ['data'])
   }
   emits('example', type)
 }
 
-const selectedTab = ref<TabType>(1)
+const selectedTab = ref<TabType>(AiWriteTypeEnum.WRITING)
 const tabs: {
   text: string
   value: TabType
 }[] = [
-  { text: '撰写', value: 1 }, // TODO @hhhero：1、2 这个枚举到 constants 里。方便后续万一要调整
-  { text: '回复', value: 2 }
+  { text: '撰写', value: AiWriteTypeEnum.WRITING },
+  { text: '回复', value: AiWriteTypeEnum.REPLY }
 ]
 const [DefineTab, ReuseTab] = createReusableTemplate<{
   active?: boolean
@@ -143,7 +144,21 @@ const [DefineTab, ReuseTab] = createReusableTemplate<{
   itemClick: () => void
 }>()
 
-const initData: WriteParams = {
+/**
+ * 可以在template里边定义可复用的组件，DefineLabel，ReuseLabel是采用的解构赋值，都是Vue组件
+ * 直接通过组件的形式使用，<DefineLabel v-slot="{ label, hint, hintClick }">中间是需要复用的组件代码</DefineLabel>，通过<ReuseLabel />来使用定义的组件
+ * DefineLabel里边的v-slot="{ label, hint, hintClick }“相当于是解构了组件的prop，需要注意的是boolean类型，需要显式的赋值比如 <ReuseLabel :flag="true" />
+ * 事件也得以prop形式传入，不能是@event的形式，比如下面的hintClick需要<ReuseLabel :hintClick="() => { doSomething }"/>
+ * @see https://vueuse.org/createReusableTemplate
+ */
+const [DefineLabel, ReuseLabel] = createReusableTemplate<{
+  label: string
+  class?: string
+  hint?: string
+  hintClick?: () => void
+}>()
+
+const initData: WriteVO = {
   type: 1,
   prompt: '',
   originalContent: '',
@@ -152,49 +167,26 @@ const initData: WriteParams = {
   length: 1,
   format: 1
 }
-// TODO @hhhero：这个字段，要不叫 formData，和其他模块保持一致。然后 initData 和它也更好对应上
-const writeForm = ref<WriteParams>({ ...initData })
-
-// TODO @hhhero：这种一次性的变量，要不直接 vue template 直接调用。目的是：让 ts 这块，更专注逻辑哈。
-const writeTags = {
-  // 长度 TODO @hhhero：注释放在和面哈；
-  // TODO @hhhero：一般 length 不用缩写哈。更完整会更容易阅读；
-  lenTags: getIntDictOptions('ai_write_length'),
-  // 格式
-
-  formatTags: getIntDictOptions('ai_write_format'),
-  // 语气
-
-  toneTags: getIntDictOptions('ai_write_tone'),
-  // 语言
-  langTags: getIntDictOptions('ai_write_language')
-  //
-}
-
-// TODO @hhhero：这个写法不错。要不写个简单的注释，我怕很多人不懂哈。
-const [DefineLabel, ReuseLabel] = createReusableTemplate<{
-  label: string
-  class?: string
-  hint?: string
-  hintClick?: () => void
-}>()
-
+const formData = ref<WriteVO>({ ...initData })
+/** 切换tab **/
 const switchTab = (value: TabType) => {
   selectedTab.value = value
-  writeForm.value = { ...initData }
+  formData.value = { ...initData }
 }
 
 const submit = () => {
-  if (selectedTab.value === 2 && !writeForm.value.originalContent) {
+  if (selectedTab.value === 2 && !formData.value.originalContent) {
     message.warning('请输入原文')
     return
   }
-  if (!writeForm.value.prompt) {
+  if (!formData.value.prompt) {
     message.warning(`请输入${selectedTab.value === 1 ? '写作' : '回复'}内容`)
     return
   }
   emits('submit', {
-    ...(selectedTab.value === 1 ? omit(writeForm.value, ['originalContent']) : writeForm.value),
+    /** 撰写的时候没有 originalContent 字段**/
+    ...(selectedTab.value === 1 ? omit(formData.value, ['originalContent']) : formData.value),
+    /** 使用选中tab值覆盖当前的type类型 **/
     type: selectedTab.value
   })
 }
