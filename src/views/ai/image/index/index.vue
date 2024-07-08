@@ -12,10 +12,7 @@
           @on-draw-start="handleDrawStart"
           @on-draw-complete="handleDrawComplete"
         />
-        <Midjourney
-          v-if="selectPlatform === AiPlatformEnum.MIDJOURNEY"
-          ref="midjourneyRef"
-        />
+        <Midjourney v-if="selectPlatform === AiPlatformEnum.MIDJOURNEY" ref="midjourneyRef" />
         <StableDiffusion
           v-if="selectPlatform === AiPlatformEnum.STABLE_DIFFUSION"
           ref="stableDiffusionRef"
@@ -24,22 +21,20 @@
       </div>
     </div>
     <div class="main">
-      <ImageTask ref="imageTaskRef" @on-regeneration="handleRegeneration" />
+      <ImageList ref="imageListRef" @on-regeneration="handleRegeneration" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// TODO @fan：在整个挪到 /views/ai/image/index 目录。因为我想在 /views/ai/image/manager 做管理的功能，进行下区分！
 import Dall3 from './dall3/index.vue'
 import Midjourney from './midjourney/index.vue'
 import StableDiffusion from './stable-diffusion/index.vue'
-import ImageTask from './ImageTask.vue'
+import ImageList from './components/ImageList.vue'
 import { AiPlatformEnum } from '@/views/ai/utils/constants'
-import {ImageVO} from "@/api/ai/image";
+import { ImageVO } from '@/api/ai/image'
 
-
-const imageTaskRef = ref<any>() // image task ref
+const imageListRef = ref<any>() // image 列表 ref
 const dall3Ref = ref<any>() // openai ref
 const midjourneyRef = ref<any>() // midjourney ref
 const stableDiffusionRef = ref<any>() // stable diffusion ref
@@ -61,35 +56,27 @@ const platformOptions = [
   }
 ]
 
-/**  绘画 - start  */
-const handleDrawStart = async (type) => {
-}
+/** 绘画 start  */
+const handleDrawStart = async (type) => {}
 
-/**  绘画 - complete  */
+/** 绘画 complete  */
 const handleDrawComplete = async (type) => {
-  await imageTaskRef.value.getImageList()
+  await imageListRef.value.getImageList()
 }
 
-/**  绘画 - 重新生成  */
-const handleRegeneration = async (imageDetail: ImageVO) => {
+/**  重新生成：将画图详情填充到对应平台  */
+const handleRegeneration = async (image: ImageVO) => {
   // 切换平台
-  selectPlatform.value = imageDetail.platform
-  console.log('切换平台', imageDetail.platform)
-  // 根据不同平台填充 imageDetail
-  if (imageDetail.platform === AiPlatformEnum.MIDJOURNEY) {
-    await nextTick(async () => {
-      midjourneyRef.value.settingValues(imageDetail)
-    })
-  } else if (imageDetail.platform === AiPlatformEnum.OPENAI) {
-    await nextTick(async () => {
-      dall3Ref.value.settingValues(imageDetail)
-    })
-  } else if (imageDetail.platform === AiPlatformEnum.STABLE_DIFFUSION) {
-    await nextTick(async () => {
-      stableDiffusionRef.value.settingValues(imageDetail)
-    })
+  selectPlatform.value = image.platform
+  // 根据不同平台填充 image
+  await nextTick()
+  if (image.platform === AiPlatformEnum.MIDJOURNEY) {
+    midjourneyRef.value.settingValues(image)
+  } else if (image.platform === AiPlatformEnum.OPENAI) {
+    dall3Ref.value.settingValues(image)
+  } else if (image.platform === AiPlatformEnum.STABLE_DIFFUSION) {
+    stableDiffusionRef.value.settingValues(image)
   }
-
 }
 </script>
 

@@ -13,8 +13,8 @@
       <!--        </div>-->
       <!--      </div>-->
       <div class="body">
-        <!-- TODO @fan: 要不，这里只展示图片？？？不用 ImageTaskCard -->
-        <ImageTaskCard :image-detail="imageDetail" />
+        <!-- TODO @fan: 要不，这里只展示图片？？？不用 ImageCard -->
+        <ImageCard :image-detail="imageDetail" />
       </div>
     </div>
     <!--  时间  -->
@@ -60,7 +60,7 @@
 
 <script setup lang="ts">
 import { ImageApi, ImageVO } from '@/api/ai/image'
-import ImageTaskCard from './ImageTaskCard.vue'
+import ImageCard from './ImageCard.vue'
 
 const showDrawer = ref<boolean>(false) // 是否显示
 const imageDetail = ref<ImageVO>({} as ImageVO) // 图片详细信息

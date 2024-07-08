@@ -1,10 +1,11 @@
 <template>
   <el-card class="dr-task" body-class="task-card" shadow="never">
     <template #header>绘画任务</template>
+    <!-- 图片列表 -->
     <div class="task-image-list" ref="imageTaskRef">
-      <ImageTaskCard
+      <ImageCard
         v-for="image in imageList"
-        :key="image"
+        :key="image.id"
         :image-detail="image"
         @on-btn-click="handleImageBtnClick"
         @on-mj-btn-click="handleImageMjBtnClick"
@@ -20,8 +21,9 @@
       />
     </div>
   </el-card>
-  <!-- 图片 detail 抽屉 -->
-  <ImageDetailDrawer
+
+  <!-- 图片详情 -->
+  <ImageDetail
     :show="isShowImageDetail"
     :id="showImageDetailId"
     @handle-drawer-close="handleDrawerClose"
@@ -29,8 +31,8 @@
 </template>
 <script setup lang="ts">
 import { ImageApi, ImageVO, ImageMjActionVO, ImageMjButtonsVO } from '@/api/ai/image'
-import ImageDetailDrawer from './ImageDetailDrawer.vue'
-import ImageTaskCard from './ImageTaskCard.vue'
+import ImageDetail from './ImageDetail.vue'
+import ImageCard from './ImageCard.vue'
 import { ElLoading, LoadingOptionsResolved } from 'element-plus'
 import { AiImageStatusEnum } from '@/views/ai/utils/constants'
 import { downloadImage } from '@/utils/download'
@@ -181,6 +183,7 @@ onUnmounted(async () => {
 })
 </script>
 
+<!-- TODO fan：这 2 个 scss 可以合并么？ -->
 <style lang="scss">
 .task-card {
   margin: 0;
@@ -197,8 +200,7 @@ onUnmounted(async () => {
   align-content: flex-start;
   height: 100%;
   overflow: auto;
-  padding: 20px;
-  padding-bottom: 140px;
+  padding: 20px 20px 140px;
   box-sizing: border-box; /* 确保内边距不会增加高度 */
 
   > div {
@@ -224,7 +226,6 @@ onUnmounted(async () => {
   align-items: center;
 }
 </style>
-
 <style scoped lang="scss">
 .dr-task {
   width: 100%;
