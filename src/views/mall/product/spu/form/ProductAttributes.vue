@@ -3,7 +3,7 @@
   <el-col v-for="(item, index) in attributeList" :key="index">
     <div>
       <el-text class="mx-1">属性名：</el-text>
-      <el-tag class="mx-1" :closable="!isDetail" type="success" @close="handleCloseProperty(index)">
+      <el-tag :closable="!isDetail" class="mx-1" type="success" @close="handleCloseProperty(index)">
         {{ item.name }}
       </el-tag>
     </div>
@@ -12,8 +12,8 @@
       <el-tag
         v-for="(value, valueIndex) in item.values"
         :key="value.id"
-        class="mx-1"
         :closable="!isDetail"
+        class="mx-1"
         @close="handleCloseValue(index, valueIndex)"
       >
         {{ value.name }}
@@ -44,7 +44,6 @@
 <script lang="ts" setup>
 import { ElInput } from 'element-plus'
 import * as PropertyApi from '@/api/mall/product/property'
-import { PropertyVO } from '@/api/mall/product/property'
 import { PropertyAndValues } from '@/views/mall/product/spu/components'
 import { propTypes } from '@/utils/propTypes'
 
@@ -59,9 +58,9 @@ const inputVisible = computed(() => (index: number) => {
   if (attributeIndex.value === null) return false
   if (attributeIndex.value === index) return true
 })
-const inputRef = ref([]) //标签输入框Ref
+const inputRef = ref<any[]>([]) //标签输入框Ref
 /** 解决 ref 在 v-for 中的获取问题*/
-const setInputRef = (el) => {
+const setInputRef = (el: any) => {
   if (el === null || typeof el === 'undefined') return
   // 如果不存在 id 相同的元素才添加
   if (!inputRef.value.some((item) => item.input?.attributes.id === el.input?.attributes.id)) {
@@ -81,7 +80,7 @@ watch(
   () => props.propertyList,
   (data) => {
     if (!data) return
-    attributeList.value = data
+    attributeList.value = data as any
   },
   {
     deep: true,
@@ -97,6 +96,7 @@ const handleCloseValue = (index: number, valueIndex: number) => {
 /** 删除属性*/
 const handleCloseProperty = (index: number) => {
   attributeList.value?.splice(index, 1)
+  emit('success', attributeList.value)
 }
 
 /** 显示输入框并获取焦点 */
