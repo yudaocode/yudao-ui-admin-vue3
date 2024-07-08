@@ -2,8 +2,8 @@
 <template>
   <el-container class="role-container">
     <ChatRoleForm ref="formRef" @success="handlerAddRoleSuccess" />
-    <!--  header  -->
-    <Header title="角色仓库" style="position: relative" />
+    <!-- header  -->
+    <RoleHeader title="角色仓库" class="relative" />
     <!--  main  -->
     <el-main class="role-main">
       <div class="search-container">
@@ -18,10 +18,10 @@
           @change="getActiveTabsRole"
         />
         <el-button
-          v-if="activeRole == 'my-role'"
+          v-if="activeTab == 'my-role'"
           type="primary"
           @click="handlerAddRole"
-          style="margin-left: 20px"
+          class="ml-20px"
         >
           <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
           <el-icon>
@@ -31,7 +31,7 @@
         </el-button>
       </div>
       <!-- tabs -->
-      <el-tabs v-model="activeRole" class="tabs" @tab-click="handleTabsClick">
+      <el-tabs v-model="activeTab" class="tabs" @tab-click="handleTabsClick">
         <el-tab-pane class="role-pane" label="我的角色" name="my-role">
           <RoleList
             :loading="loading"
@@ -41,7 +41,7 @@
             @on-edit="handlerCardEdit"
             @on-use="handlerCardUse"
             @on-page="handlerCardPage('my')"
-            style="margin-top: 20px"
+            class="mt-20px"
           />
         </el-tab-pane>
         <el-tab-pane label="公共角色" name="public-role">
@@ -57,7 +57,7 @@
             @on-edit="handlerCardEdit"
             @on-use="handlerCardUse"
             @on-page="handlerCardPage('public')"
-            style="margin-top: 20px"
+            class="mt-20px"
             loading
           />
         </el-tab-pane>
@@ -68,27 +68,30 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import Header from '../Header.vue'
+import RoleHeader from './RoleHeader.vue'
 import RoleList from './RoleList.vue'
 import ChatRoleForm from '@/views/ai/model/chatRole/ChatRoleForm.vue'
 import RoleCategoryList from './RoleCategoryList.vue'
 import { ChatRoleApi, ChatRolePageReqVO, ChatRoleVO } from '@/api/ai/model/chatRole'
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
-import { TabsPaneContext } from 'element-plus'
 import { Search, User } from '@element-plus/icons-vue'
+import { TabsPaneContext } from 'element-plus'
 
 const router = useRouter() // 路由对象
 
 // 属性定义
 const loading = ref<boolean>(false) // 加载中
-const activeRole = ref<string>('my-role') // 选中的角色 TODO @fan：是不是叫 activeTab 会更明确一点哈。选中的角色，会以为是某个角色
+const activeTab = ref<string>('my-role') // 选中的角色 Tab
 const search = ref<string>('') // 加载中
-// TODO @fan：要不 myPage、pubPage，搞成类似 const queryParams = reactive({ ，分别搞成两个大的参数哈？
-const myPageNo = ref<number>(1) // my 分页下标
-const myPageSize = ref<number>(50) // my 分页大小
+const myRoleParams = reactive({
+  pageNo: 1,
+  pageSize: 50
+})
 const myRoleList = ref<ChatRoleVO[]>([]) // my 分页大小
-const publicPageNo = ref<number>(1) // public 分页下标
-const publicPageSize = ref<number>(50) // public 分页大小
+const publicRoleParams = reactive({
+  pageNo: 1,
+  pageSize: 50
+})
 const publicRoleList = ref<ChatRoleVO[]>([]) // public 分页大小
 const activeCategory = ref<string>('全部') // 选择中的分类
 const categoryList = ref<string[]>([]) // 角色分类类别
@@ -96,7 +99,7 @@ const categoryList = ref<string[]>([]) // 角色分类类别
 /** tabs 点击 */
 const handleTabsClick = async (tab: TabsPaneContext) => {
   // 设置切换状态
-  activeRole.value = tab.paneName + ''
+  activeTab.value = tab.paneName + ''
   // 切换的时候重新加载数据
   await getActiveTabsRole()
 }
@@ -104,12 +107,11 @@ const handleTabsClick = async (tab: TabsPaneContext) => {
 /** 获取 my role 我的角色 */
 const getMyRole = async (append?: boolean) => {
   const params: ChatRolePageReqVO = {
-    pageNo: myPageNo.value,
-    pageSize: myPageSize.value,
+    ...myRoleParams,
     name: search.value,
     publicStatus: false
   }
-  const { total, list } = await ChatRoleApi.getMyPage(params)
+  const { list } = await ChatRoleApi.getMyPage(params)
   if (append) {
     myRoleList.value.push.apply(myRoleList.value, list)
   } else {
@@ -120,8 +122,7 @@ const getMyRole = async (append?: boolean) => {
 /** 获取 public role 公共角色 */
 const getPublicRole = async (append?: boolean) => {
   const params: ChatRolePageReqVO = {
-    pageNo: publicPageNo.value,
-    pageSize: publicPageSize.value,
+    ...publicRoleParams,
     category: activeCategory.value === '全部' ? '' : activeCategory.value,
     name: search.value,
     publicStatus: true
@@ -136,20 +137,18 @@ const getPublicRole = async (append?: boolean) => {
 
 /** 获取选中的 tabs 角色 */
 const getActiveTabsRole = async () => {
-  if (activeRole.value === 'my-role') {
-    myPageNo.value = 1
+  if (activeTab.value === 'my-role') {
+    myRoleParams.pageNo = 1
     await getMyRole()
   } else {
-    publicPageNo.value = 1
+    publicRoleParams.pageNo = 1
     await getPublicRole()
   }
 }
 
 /** 获取角色分类列表 */
 const getRoleCategoryList = async () => {
-  const res = await ChatRoleApi.getCategoryList()
-  const defaultRole = ['全部']
-  categoryList.value = [...defaultRole, ...res]
+  categoryList.value = ['全部', ...(await ChatRoleApi.getCategoryList())]
 }
 
 /** 处理分类点击 */
@@ -165,6 +164,10 @@ const formRef = ref()
 const handlerAddRole = async () => {
   formRef.value.open('my-create', null, '添加角色')
 }
+/** 编辑角色 */
+const handlerCardEdit = async (role) => {
+  formRef.value.open('my-update', role.id, '编辑角色')
+}
 
 /** 添加角色成功 */
 const handlerAddRoleSuccess = async (e) => {
@@ -172,28 +175,22 @@ const handlerAddRoleSuccess = async (e) => {
   await getActiveTabsRole()
 }
 
-// card 删除
+/** 删除角色 */
 const handlerCardDelete = async (role) => {
   await ChatRoleApi.deleteMy(role.id)
   // 刷新数据
   await getActiveTabsRole()
 }
 
-// card 编辑
-const handlerCardEdit = async (role) => {
-  formRef.value.open('my-update', role.id, '编辑角色')
-}
-
-/** card 分页：获取下一页 */
+/** 角色分页：获取下一页 */
 const handlerCardPage = async (type) => {
-  console.log('handlerCardPage', type)
   try {
     loading.value = true
     if (type === 'public') {
-      publicPageNo.value++
+      publicRoleParams.pageNo++
       await getPublicRole(true)
     } else {
-      myPageNo.value++
+      myRoleParams.pageNo++
       await getMyRole(true)
     }
   } finally {
@@ -208,10 +205,10 @@ const handlerCardUse = async (role) => {
     roleId: role.id
   } as unknown as ChatConversationVO
   const conversationId = await ChatConversationApi.createChatConversationMy(data)
+
   // 2. 跳转页面
-  // TODO @fan：最好用 name，后续可能会改~~~
   await router.push({
-    path: `/ai/chat`,
+    name: 'AiChat',
     query: {
       conversationId: conversationId
     }

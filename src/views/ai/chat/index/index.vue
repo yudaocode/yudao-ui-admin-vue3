@@ -19,11 +19,10 @@
         <div class="btns" v-if="activeConversation">
           <el-button type="primary" bg plain size="small" @click="openChatConversationUpdateForm">
             <span v-html="activeConversation?.modelName"></span>
-            <Icon icon="ep:setting" style="margin-left: 10px" />
+            <Icon icon="ep:setting" class="ml-10px" />
           </el-button>
           <el-button size="small" class="btn" @click="handlerMessageClear">
-            <!-- TODO @fan：style 部分，可以考虑用 unocss 替代 -->
-            <img src="@/assets/ai/clear.svg" style="height: 14px" />
+            <img src="@/assets/ai/clear.svg" class="h-14px" />
           </el-button>
           <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
           <el-button size="small" :icon="Download" class="btn" />
@@ -76,7 +75,7 @@
           <div class="prompt-btns">
             <div>
               <el-switch v-model="enableContext" />
-              <span style="font-size: 14px; color: #8f8f8f">上下文</span>
+              <span class="ml-5px text-14px text-#8f8f8f">上下文</span>
             </div>
             <el-button
               type="primary"
@@ -118,6 +117,9 @@ import MessageListEmpty from './components/message/MessageListEmpty.vue'
 import MessageLoading from './components/message/MessageLoading.vue'
 import MessageNewConversation from './components/message/MessageNewConversation.vue'
 import { Download, Top } from '@element-plus/icons-vue'
+
+/** AI 聊天对话 列表 */
+defineOptions({ name: 'AiChat' })
 
 const route = useRoute() // 路由
 const message = useMessage() // 消息弹窗

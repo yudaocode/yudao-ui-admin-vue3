@@ -1,8 +1,8 @@
 <!--  AI 对话  -->
 <template>
-  <el-aside width="260px" class="conversation-container" style="height: 100%">
+  <el-aside width="260px" class="conversation-container h-100%">
     <!-- 左顶部：对话 -->
-    <div style="height: 100%">
+    <div class="h-100%">
       <el-button class="w-1/1 btn-new-conversation" type="primary" @click="createConversation">
         <Icon icon="ep:plus" class="mr-5px" />
         新建对话
@@ -23,8 +23,9 @@
 
       <!-- 左中间：对话列表 -->
       <div class="conversation-list">
+        <!-- 情况一：加载中 -->
         <el-empty v-if="loading" description="." :v-loading="loading" />
-
+        <!-- 情况二：按照 group 分组，展示聊天会话 list 列表 -->
         <div v-for="conversationKey in Object.keys(conversationMap)" :key="conversationKey">
           <div
             class="conversation-item classify-title"
@@ -50,7 +51,7 @@
                 <span class="title">{{ conversation.title }}</span>
               </div>
               <div class="button-wrapper" v-show="hoverConversationId === conversation.id">
-                <el-button class="btn" link @click.stop="handlerTop(conversation)">
+                <el-button class="btn" link @click.stop="handleTop(conversation)">
                   <el-icon title="置顶" v-if="!conversation.pinned"><Top /></el-icon>
                   <el-icon title="置顶" v-if="conversation.pinned"><Bottom /></el-icon>
                 </el-button>
@@ -68,13 +69,12 @@
             </div>
           </div>
         </div>
-        <!--  底部站位  -->
-        <div style="height: 160px; width: 100%"></div>
+        <!-- 底部占位  -->
+        <div class="h-160px w-100%"></div>
       </div>
     </div>
 
     <!-- 左底部：工具栏 -->
-    <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
     <div class="tool-box">
       <div @click="handleRoleRepository">
         <Icon icon="ep:user" />
@@ -86,19 +86,16 @@
       </div>
     </div>
 
-    <!-- ============= 额外组件 ============= -->
-
     <!-- 角色仓库抽屉 -->
-    <el-drawer v-model="drawer" title="角色仓库" size="754px">
-      <Role />
+    <el-drawer v-model="roleRepositoryOpen" title="角色仓库" size="754px">
+      <RoleRepository />
     </el-drawer>
   </el-aside>
 </template>
 
 <script setup lang="ts">
 import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
-import { ref } from 'vue'
-import Role from '../role/index.vue'
+import RoleRepository from '../role/RoleRepository.vue'
 import { Bottom, Top } from '@element-plus/icons-vue'
 import roleAvatarDefaultImg from '@/assets/ai/gpt.svg'
 
@@ -106,11 +103,10 @@ const message = useMessage() // 消息弹窗
 
 // 定义属性
 const searchName = ref<string>('') // 对话搜索
-const activeConversationId = ref<string | null>(null) // 选中的对话，默认为 null
-const hoverConversationId = ref<string | null>(null) // 悬浮上去的对话
+const activeConversationId = ref<number | null>(null) // 选中的对话，默认为 null
+const hoverConversationId = ref<number | null>(null) // 悬浮上去的对话
 const conversationList = ref([] as ChatConversationVO[]) // 对话列表
 const conversationMap = ref<any>({}) // 对话分组 (置顶、今天、三天前、一星期前、一个月前)
-const drawer = ref<boolean>(false) // 角色仓库抽屉 TODO @fan：roleDrawer 会不会好点哈
 const loading = ref<boolean>(false) // 加载中
 const loadingTime = ref<any>() // 加载中定时器
 
@@ -130,75 +126,58 @@ const emits = defineEmits([
   'onConversationDelete'
 ])
 
-/**
- * 对话 - 搜索
- */
+/** 搜索对话 */
 const searchConversation = async (e) => {
   // 恢复数据
   if (!searchName.value.trim().length) {
-    conversationMap.value = await conversationTimeGroup(conversationList.value)
+    conversationMap.value = await getConversationGroupByCreateTime(conversationList.value)
   } else {
     // 过滤
     const filterValues = conversationList.value.filter((item) => {
       return item.title.includes(searchName.value.trim())
     })
-    conversationMap.value = await conversationTimeGroup(filterValues)
+    conversationMap.value = await getConversationGroupByCreateTime(filterValues)
   }
 }
 
-/**
- * 对话 - 点击
- */
-const handleConversationClick = async (id: string) => {
+/** 点击对话 */
+const handleConversationClick = async (id: number) => {
   // 过滤出选中的对话
   const filterConversation = conversationList.value.filter((item) => {
     return item.id === id
   })
   // 回调 onConversationClick
-  // TODO @fan: 这里 idea 会报黄色警告，有办法解下么？
-  const res = emits('onConversationClick', filterConversation[0])
+  // noinspection JSVoidFunctionReturnValueUsed
+  const success = emits('onConversationClick', filterConversation[0])
   // 切换对话
-  if (res) {
+  if (success) {
     activeConversationId.value = id
   }
 }
 
-/**
- * 对话 - 获取列表
- */
+/** 获取对话列表 */
 const getChatConversationList = async () => {
   try {
-    // 0. 加载中
+    // 加载中
     loadingTime.value = setTimeout(() => {
       loading.value = true
     }, 50)
-    // 1. 获取 对话数据
-    const res = await ChatConversationApi.getChatConversationMyList()
-    // 2. 排序
-    res.sort((a, b) => {
+
+    // 1.1 获取 对话数据
+    conversationList.value = await ChatConversationApi.getChatConversationMyList()
+    // 1.2 排序
+    conversationList.value.sort((a, b) => {
       return b.createTime - a.createTime
     })
-    conversationList.value = res
-    // 3. 默认选中
-    if (!activeId?.value) {
-      // await handleConversationClick(res[0].id)
-    } else {
-      // tip: 删除的刚好是选中的，那么需要重新挑选一个来进行选中
-      // const filterConversationList = conversationList.value.filter(item => {
-      //   return item.id === activeId.value
-      // })
-      // if (filterConversationList.length <= 0) {
-      //   await handleConversationClick(res[0].id)
-      // }
-    }
-    // 4. 没有任何对话情况
+    // 1.3 没有任何对话情况
     if (conversationList.value.length === 0) {
       activeConversationId.value = null
       conversationMap.value = {}
       return
     }
-    // 5. 对话根据时间分组(置顶、今天、一天前、三天前、七天前、30天前)
-    conversationMap.value = await conversationTimeGroup(conversationList.value)
+
+    // 2. 对话根据时间分组(置顶、今天、一天前、三天前、七天前、30 天前)
+    conversationMap.value = await getConversationGroupByCreateTime(conversationList.value)
   } finally {
     // 清理定时器
     if (loadingTime.value) {
@@ -209,8 +188,10 @@ const getChatConversationList = async () => {
   }
 }
 
-const conversationTimeGroup = async (list: ChatConversationVO[]) => {
+/** 按照 creteTime 创建时间，进行分组 */
+const getConversationGroupByCreateTime = async (list: ChatConversationVO[]) => {
   // 排序、指定、时间分组(今天、一天前、三天前、七天前、30天前)
+  // noinspection NonAsciiCharacters
   const groupMap = {
     置顶: [],
     今天: [],
@@ -233,7 +214,7 @@ const conversationTimeGroup = async (list: ChatConversationVO[]) => {
       continue
     }
     // 计算时间差（单位：毫秒）
-    const diff = now - conversation.updateTime
+    const diff = now - conversation.createTime
     // 根据时间间隔判断
     if (diff < oneDay) {
       groupMap['今天'].push(conversation)
@@ -250,9 +231,7 @@ const conversationTimeGroup = async (list: ChatConversationVO[]) => {
   return groupMap
 }
 
-/**
- * 对话 - 新建
- */
+/** 新建对话 */
 const createConversation = async () => {
   // 1. 新建对话
   const conversationId = await ChatConversationApi.createChatConversationMy(
@@ -266,9 +245,7 @@ const createConversation = async () => {
   emits('onConversationCreate')
 }
 
-/**
- * 对话 - 更新标题
- */
+/** 修改对话的标题 */
 const updateConversationTitle = async (conversation: ChatConversationVO) => {
   // 1. 二次确认
   const { value } = await ElMessageBox.prompt('修改标题', {
@@ -296,9 +273,7 @@ const updateConversationTitle = async (conversation: ChatConversationVO) => {
   }
 }
 
-/**
- * 删除聊天对话
- */
+/** 删除聊天对话 */
 const deleteChatConversation = async (conversation: ChatConversationVO) => {
   try {
     // 删除的二次确认
@@ -313,11 +288,26 @@ const deleteChatConversation = async (conversation: ChatConversationVO) => {
   } catch {}
 }
 
-/**
- * 对话置顶
- */
-// TODO @fan：应该是 handleXXX，handler 是名词哈
-const handlerTop = async (conversation: ChatConversationVO) => {
+/** 清空对话 */
+const handleClearConversation = async () => {
+  try {
+    await message.confirm('确认后对话会全部清空，置顶的对话除外。')
+    await ChatConversationApi.deleteChatConversationMyByUnpinned()
+    ElMessage({
+      message: '操作成功!',
+      type: 'success'
+    })
+    // 清空 对话 和 对话内容
+    activeConversationId.value = null
+    // 获取 对话列表
+    await getChatConversationList()
+    // 回调 方法
+    emits('onConversationClear')
+  } catch {}
+}
+
+/** 对话置顶 */
+const handleTop = async (conversation: ChatConversationVO) => {
   // 更新对话置顶
   conversation.pinned = !conversation.pinned
   await ChatConversationApi.updateChatConversationMy(conversation)
@@ -325,60 +315,29 @@ const handlerTop = async (conversation: ChatConversationVO) => {
   await getChatConversationList()
 }
 
-// TODO @fan:类似 ============ 分块的，最后后面也有 ============ 哈
-// ============ 角色仓库
+// ============ 角色仓库 ============
 
-/**
- * 角色仓库抽屉
- */
+/** 角色仓库抽屉 */
+const roleRepositoryOpen = ref<boolean>(false) // 角色仓库是否打开
 const handleRoleRepository = async () => {
-  drawer.value = !drawer.value
+  roleRepositoryOpen.value = !roleRepositoryOpen.value
 }
 
-// ============= 清空对话
-
-/**
- * 清空对话
- */
-const handleClearConversation = async () => {
-  // TODO @fan：可以使用 await message.confirm( 简化，然后使用 await 改成同步的逻辑，会更简洁
-  ElMessageBox.confirm('确认后对话会全部清空，置顶的对话除外。', '确认提示', {
-    confirmButtonText: '确认',
-    cancelButtonText: '取消',
-    type: 'warning'
-  })
-    .then(async () => {
-      await ChatConversationApi.deleteChatConversationMyByUnpinned()
-      ElMessage({
-        message: '操作成功!',
-        type: 'success'
-      })
-      // 清空 对话 和 对话内容
-      activeConversationId.value = null
-      // 获取 对话列表
-      await getChatConversationList()
-      // 回调 方法
-      emits('onConversationClear')
-    })
-    .catch(() => {})
-}
-
-// ============ 组件 onMounted
-
+/** 监听选中的对话 */
 const { activeId } = toRefs(props)
 watch(activeId, async (newValue, oldValue) => {
-  // 更新选中
   activeConversationId.value = newValue as string
 })
 
 // 定义 public 方法
 defineExpose({ createConversation })
 
+/** 初始化 */
 onMounted(async () => {
   // 获取 对话列表
   await getChatConversationList()
   // 默认选中
-  if (props.activeId != null) {
+  if (props.activeId) {
     activeConversationId.value = props.activeId
   } else {
     // 首次默认选中第一个

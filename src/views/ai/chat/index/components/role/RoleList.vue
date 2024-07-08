@@ -1,22 +1,22 @@
 <template>
-  <div class="card-list" ref="tabsRef"  @scroll="handleTabsScroll">
+  <div class="card-list" ref="tabsRef" @scroll="handleTabsScroll">
     <div class="card-item" v-for="role in roleList" :key="role.id">
       <el-card class="card" body-class="card-body">
-        <!--  更多 -->
+        <!-- 更多操作 -->
         <div class="more-container" v-if="showMore">
           <el-dropdown @command="handleMoreClick">
-          <span class="el-dropdown-link">
-             <el-button type="text" >
+            <span class="el-dropdown-link">
+              <el-button type="text">
                 <el-icon><More /></el-icon>
               </el-button>
-          </span>
+            </span>
             <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item :command="['edit', role]" >
+                <el-dropdown-item :command="['edit', role]">
                   <el-icon><EditPen /></el-icon>编辑
                 </el-dropdown-item>
-                <el-dropdown-item :command="['delete', role]"  style="color: red;" >
+                <el-dropdown-item :command="['delete', role]" style="color: red">
                   <el-icon><Delete /></el-icon>
                   <span>删除</span>
                 </el-dropdown-item>
@@ -24,9 +24,9 @@
             </template>
           </el-dropdown>
         </div>
-        <!--  头像 -->
+        <!-- 角色信息 -->
         <div>
-          <img class="avatar" :src="role.avatar"/>
+          <img class="avatar" :src="role.avatar" />
         </div>
         <div class="right-container">
           <div class="content-container">
@@ -43,9 +43,9 @@
 </template>
 
 <script setup lang="ts">
-import {ChatRoleVO} from '@/api/ai/model/chatRole'
-import {PropType, ref} from "vue";
-import {Delete, EditPen, More} from "@element-plus/icons-vue";
+import { ChatRoleVO } from '@/api/ai/model/chatRole'
+import { PropType, ref } from 'vue'
+import { Delete, EditPen, More } from '@element-plus/icons-vue'
 
 const tabsRef = ref<any>() // tabs ref
 
@@ -65,10 +65,11 @@ const props = defineProps({
     default: false
   }
 })
+
 // 定义钩子
 const emits = defineEmits(['onDelete', 'onEdit', 'onUse', 'onPage'])
 
-// more 点击
+/** 操作：编辑、删除 */
 const handleMoreClick = async (data) => {
   const type = data[0]
   const role = data[1]
@@ -79,28 +80,20 @@ const handleMoreClick = async (data) => {
   }
 }
 
-// 使用
+/** 选中 */
 const handleUseClick = (role) => {
   emits('onUse', role)
 }
 
+/** 滚动 */
 const handleTabsScroll = async () => {
   if (tabsRef.value) {
-    const { scrollTop, scrollHeight, clientHeight } = tabsRef.value;
-    console.log('scrollTop', scrollTop)
+    const { scrollTop, scrollHeight, clientHeight } = tabsRef.value
     if (scrollTop + clientHeight >= scrollHeight - 20 && !props.loading) {
-      console.log('分页')
-      // page.value++;
-      // fetchData(page.value);
       await emits('onPage')
     }
   }
 }
-
-onMounted(() => {
-  console.log('props', props.roleList)
-})
-
 </script>
 
 <style lang="scss">
@@ -114,11 +107,9 @@ onMounted(() => {
   flex-direction: row;
   justify-content: flex-start;
   position: relative;
-
 }
 </style>
 <style scoped lang="scss">
-
 // 卡片列表
 .card-list {
   display: flex;
@@ -180,9 +171,6 @@ onMounted(() => {
         margin-top: 2px;
       }
     }
-
   }
-
 }
-
 </style>

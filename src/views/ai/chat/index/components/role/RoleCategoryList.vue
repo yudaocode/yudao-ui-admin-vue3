@@ -1,13 +1,20 @@
 <template>
   <div class="category-list">
-    <div class="category" v-for="(category) in categoryList" :key="category">
-      <el-button plain round size="small" v-if="category !== active" @click="handleCategoryClick(category)">{{ category }}</el-button>
-      <el-button plain round size="small" v-else type="primary" @click="handleCategoryClick(category)">{{ category }}</el-button>
+    <div class="category" v-for="category in categoryList" :key="category">
+      <el-button
+        plain
+        round
+        size="small"
+        :type="category === active ? 'primary' : ''"
+        @click="handleCategoryClick(category)"
+      >
+        {{ category }}
+      </el-button>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import {PropType} from "vue";
+import { PropType } from 'vue'
 
 // 定义属性
 defineProps({
@@ -25,11 +32,10 @@ defineProps({
 // 定义回调
 const emits = defineEmits(['onCategoryClick'])
 
-// 处理分类点击事件
-const handleCategoryClick = async (category) => {
+/** 处理分类点击事件 */
+const handleCategoryClick = async (category: string) => {
   emits('onCategoryClick', category)
 }
-
 </script>
 <style scoped lang="scss">
 .category-list {
