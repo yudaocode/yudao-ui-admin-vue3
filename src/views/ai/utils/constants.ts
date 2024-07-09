@@ -63,6 +63,7 @@ export const ImageHotEnglishWords = [
 export interface ImageModelVO {
   key: string
   name: string
+  image?: string
 }
 
 export const StableDiffusionSamplers = ref<ImageModelVO[]>([
@@ -208,5 +209,18 @@ export const StableDiffusionClipGuidancePresets = ref<ImageModelVO[]>([
   {
     key: 'SLOWEST',
     name: 'SLOWEST'
+  }
+])
+
+export const Dall3Models = ref<ImageModelVO[]>([
+  {
+    key: 'dall-e-3',
+    name: 'DALL·E 3',
+    image: `/src/assets/ai/dall2.jpg`
+  },
+  {
+    key: 'dall-e-2',
+    name: 'DALL·E 2',
+    image: `/src/assets/ai/dall3.jpg`
   }
 ])
