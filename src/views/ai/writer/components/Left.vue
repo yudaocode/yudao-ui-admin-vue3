@@ -91,7 +91,7 @@
         <Tag v-model="formData.language" :tags="getIntDictOptions('ai_write_language')" />
 
         <div class="flex items-center justify-center mt-3">
-          <el-button :disabled="isWriting">重置</el-button>
+          <el-button :disabled="isWriting" @click="reset">重置</el-button>
           <el-button :loading="isWriting" @click="submit" color="#846af7">生成</el-button>
         </div>
       </div>
@@ -120,8 +120,10 @@ defineProps<{
 const emits = defineEmits<{
   (e: 'submit', params: Partial<WriteVO>)
   (e: 'example', param: 'write' | 'reply')
+  (e: 'reset')
 }>()
 
+/** 点击示例的时候，将定义好的文章作为示例展示出来 **/
 const example = (type: 'write' | 'reply') => {
   formData.value = {
     ...initData,
@@ -129,7 +131,11 @@ const example = (type: 'write' | 'reply') => {
   }
   emits('example', type)
 }
-
+/** 重置，将表单值作为初选值 **/
+const reset = () => {
+  formData.value = {...initData}
+  emits('reset')
+}
 const selectedTab = ref<TabType>(AiWriteTypeEnum.WRITING)
 const tabs: {
   text: string

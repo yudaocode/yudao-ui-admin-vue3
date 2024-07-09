@@ -1,24 +1,37 @@
 <template>
-  <div class="h-full box-border py-6 px-7">
-    <div class="w-full h-full relative bg-white box-border p-3 sm:p-16 pr-0">
+  <div class="h-full box-border flex flex-col px-7">
+    <h3 class="m-0 h-14 -mx-7 px-7 shrink-0 flex items-center justify-between bg-[#ecedef]">
+      <span>预览</span>
       <!-- 展示在右上角 -->
       <el-button
         color="#846af7"
         v-show="showCopy"
         @click="copyContent"
-        class="absolute top-2 right-2"
+        size="small"
       >
+        <template #icon>
+          <Icon icon="ph:copy-bold" />
+        </template>
         复制
       </el-button>
-      <!-- 展示在下面中间的位置 -->
-      <el-button
-        v-show="isWriting"
-        class="absolute bottom-2 left-1/2 -translate-x-1/2"
-        @click="emits('stopStream')"
-      >
-        终止生成
-      </el-button>
-      <div ref="contentRef" class="w-full h-full pr-3 sm:pr-16 overflow-y-auto">
+
+
+    </h3>
+
+    <div ref="contentRef" class="hide-scroll-bar flex-grow box-border overflow-y-auto ">
+      <div class="w-full min-h-full relative flex-grow bg-white box-border p-3 sm:p-7">
+        <!-- 终止生成内容的按钮 -->
+        <el-button
+          v-show="isWriting"
+          class="absolute bottom-2 sm:bottom-5 left-1/2 -translate-x-1/2 z-36"
+          @click="emits('stopStream')"
+          size="small"
+        >
+          <template #icon>
+            <Icon icon="material-symbols:stop" />
+          </template>
+          终止生成
+        </el-button>
         <el-input
           id="inputId"
           type="textarea"
@@ -85,3 +98,15 @@ watch(copied, (val) => {
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.hide-scroll-bar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+</style>
