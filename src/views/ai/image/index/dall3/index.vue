@@ -3,7 +3,7 @@
   <div class="prompt">
     <el-text tag="b">画面描述</el-text>
     <el-text tag="p">建议使用“形容词+动词+风格”的格式，使用“，”隔开</el-text>
-    <!-- TODO @fan：style 看看能不能哟 unocss 替代 -->
+    <!-- TODO @fan：style 看看能不能哟 unocss 替代 @芋艿 尝试了下没效果，哪个地方有使用么，我看看  -->
     <el-input
       v-model="prompt"
       maxlength="1024"
