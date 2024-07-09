@@ -23,10 +23,7 @@
           @click="handlerAddRole"
           class="ml-20px"
         >
-          <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
-          <el-icon>
-            <User />
-          </el-icon>
+          <Icon icon="ep:user" style="margin-right: 5px;" />
           添加角色
         </el-button>
       </div>
@@ -67,15 +64,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import {ref} from 'vue'
 import RoleHeader from './RoleHeader.vue'
 import RoleList from './RoleList.vue'
 import ChatRoleForm from '@/views/ai/model/chatRole/ChatRoleForm.vue'
 import RoleCategoryList from './RoleCategoryList.vue'
-import { ChatRoleApi, ChatRolePageReqVO, ChatRoleVO } from '@/api/ai/model/chatRole'
-import { ChatConversationApi, ChatConversationVO } from '@/api/ai/chat/conversation'
-import { Search, User } from '@element-plus/icons-vue'
-import { TabsPaneContext } from 'element-plus'
+import {ChatRoleApi, ChatRolePageReqVO, ChatRoleVO} from '@/api/ai/model/chatRole'
+import {ChatConversationApi, ChatConversationVO} from '@/api/ai/chat/conversation'
+import {Search} from '@element-plus/icons-vue'
+import {TabsPaneContext} from 'element-plus'
 
 const router = useRouter() // 路由对象
 
