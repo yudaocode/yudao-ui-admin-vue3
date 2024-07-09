@@ -365,7 +365,7 @@ const handlePromptInput = (event) => {
     isComposing.value = false
   }, 400)
 }
-// TODO @fan：是不是可以通过 @keydown.enter、@keydown.shift.enter 来实现，回车发送、shift+回车换行；主要看看，是不是可以简化 isComposing 相关的逻辑
+// TODO @芋艿：是不是可以通过 @keydown.enter、@keydown.shift.enter 来实现，回车发送、shift+回车换行；主要看看，是不是可以简化 isComposing 相关的逻辑
 const onCompositionstart = () => {
   isComposing.value = true
 }
