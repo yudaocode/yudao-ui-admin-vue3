@@ -198,7 +198,11 @@ const handlerConversationDelete = async (delConversation: ChatConversationVO) =>
 }
 /** 清空选中的对话 */
 const handleConversationClear = async () => {
-  // TODO @fan：需要加一个 对话进行中，不允许切换
+  // 对话进行中，不允许切换
+  if (conversationInProgress.value) {
+    message.alert('对话中，不允许切换!')
+    return false
+  }
   activeConversationId.value = null
   activeConversation.value = null
   activeMessageList.value = []
