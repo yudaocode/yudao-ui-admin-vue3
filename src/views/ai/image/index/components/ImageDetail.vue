@@ -107,8 +107,6 @@ watch(id, async (newVal, oldVal) => {
 })
 //
 const emits = defineEmits(['handleDrawerClose'])
-//
-onMounted(async () => {})
 </script>
 <style scoped lang="scss">
 .item {

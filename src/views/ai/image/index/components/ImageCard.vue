@@ -2,53 +2,53 @@
   <el-card body-class="" class="image-card">
     <div class="image-operation">
       <div>
-        <el-button
-          type="primary"
-          text
-          bg
-          v-if="imageDetail?.status === AiImageStatusEnum.IN_PROGRESS"
-        >
+        <el-button type="primary" text bg v-if="detail?.status === AiImageStatusEnum.IN_PROGRESS">
           生成中
         </el-button>
-        <el-button text bg v-else-if="imageDetail?.status === AiImageStatusEnum.SUCCESS">
+        <el-button text bg v-else-if="detail?.status === AiImageStatusEnum.SUCCESS">
           已完成
         </el-button>
-        <el-button type="danger" text bg v-else-if="imageDetail?.status === AiImageStatusEnum.FAIL">
+        <el-button type="danger" text bg v-else-if="detail?.status === AiImageStatusEnum.FAIL">
           异常
         </el-button>
       </div>
+      <!-- 操作区 -->
       <div>
         <el-button
           class="btn"
           text
           :icon="Download"
-          @click="handleBtnClick('download', imageDetail)"
+          @click="handleButtonClick('download', detail)"
         />
         <el-button
           class="btn"
           text
           :icon="RefreshRight"
-          @click="handleBtnClick('regeneration', imageDetail)"
+          @click="handleButtonClick('regeneration', detail)"
         />
-        <el-button class="btn" text :icon="Delete" @click="handleBtnClick('delete', imageDetail)" />
-        <el-button class="btn" text :icon="More" @click="handleBtnClick('more', imageDetail)" />
+        <el-button class="btn" text :icon="Delete" @click="handleButtonClick('delete', detail)" />
+        <el-button class="btn" text :icon="More" @click="handleButtonClick('more', detail)" />
       </div>
     </div>
     <div class="image-wrapper" ref="cardImageRef">
-      <!-- TODO @fan：要不加个点击，大图预览？ -->
-      <img class="image" :src="imageDetail?.picUrl" />
-      <div v-if="imageDetail?.status === AiImageStatusEnum.FAIL">
-        {{ imageDetail?.errorMessage }}
+      <el-image
+        class="image"
+        :src="detail?.picUrl"
+        :preview-src-list="[detail.picUrl]"
+        preview-teleported
+      />
+      <div v-if="detail?.status === AiImageStatusEnum.FAIL">
+        {{ detail?.errorMessage }}
       </div>
     </div>
-    <!-- TODO @fan：style 使用 unocss 替代下 -->
+    <!-- Midjourney 专属操作 -->
     <div class="image-mj-btns">
       <el-button
         size="small"
-        v-for="button in imageDetail?.buttons"
+        v-for="button in detail?.buttons"
         :key="button"
-        style="min-width: 40px; margin-left: 0; margin-right: 10px; margin-top: 5px"
-        @click="handleMjBtnClick(button)"
+        class="min-w-40px ml-0 mr-10px mt-5px"
+        @click="handleMidjourneyBtnClick(button)"
       >
         {{ button.label }}{{ button.emoji }}
       </el-button>
@@ -62,28 +62,47 @@ import { PropType } from 'vue'
 import { ElLoading, LoadingOptionsResolved } from 'element-plus'
 import { AiImageStatusEnum } from '@/views/ai/utils/constants'
 
-const cardImageRef = ref<any>() // 卡片 image ref
-const cardImageLoadingInstance = ref<any>() // 卡片 image ref
-const message = useMessage()
+const message = useMessage() // 消息
+
 const props = defineProps({
-  imageDetail: {
+  detail: {
     type: Object as PropType<ImageVO>,
     require: true
   }
 })
 
-/**  按钮 - 点击事件  */
-const handleBtnClick = async (type, imageDetail: ImageVO) => {
-  emits('onBtnClick', type, imageDetail)
+const cardImageRef = ref<any>() // 卡片 image ref
+const cardImageLoadingInstance = ref<any>() // 卡片 image ref
+
+/** 处理点击事件  */
+const handleButtonClick = async (type, detail: ImageVO) => {
+  emits('onBtnClick', type, detail)
 }
 
+/** 处理 Midjourney 按钮点击事件  */
+const handleMidjourneyBtnClick = async (button: ImageMidjourneyButtonsVO) => {
+  // 确认窗体
+  await message.confirm(`确认操作 "${button.label} ${button.emoji}" ?`)
+  emits('onMjBtnClick', button, props.detail)
+}
+
+const emits = defineEmits(['onBtnClick', 'onMjBtnClick']) // emits
+
+/** 监听详情 */
+const { detail } = toRefs(props)
+watch(detail, async (newVal, oldVal) => {
+  await handleLoading(newVal.status as string)
+})
+
+/** 处理加载状态 */
 const handleLoading = async (status: number) => {
-  // TODO @芋艿：这个搞成 Loading 组件，然后通过数据驱动，这样搞可以哇？
+  // 情况一：如果是生成中，则设置加载中的 loading
   if (status === AiImageStatusEnum.IN_PROGRESS) {
     cardImageLoadingInstance.value = ElLoading.service({
       target: cardImageRef.value,
       text: '生成中...'
     } as LoadingOptionsResolved)
+    // 情况二：如果已经生成结束，则移除 loading
   } else {
     if (cardImageLoadingInstance.value) {
       cardImageLoadingInstance.value.close()
@@ -92,25 +111,9 @@ const handleLoading = async (status: number) => {
   }
 }
 
-/**  mj 按钮 click  */
-const handleMjBtnClick = async (button: ImageMidjourneyButtonsVO) => {
-  // 确认窗体
-  await message.confirm(`确认操作 "${button.label} ${button.emoji}" ?`)
-  emits('onMjBtnClick', button, props.imageDetail)
-}
-
-// watch
-const { imageDetail } = toRefs(props)
-watch(imageDetail, async (newVal, oldVal) => {
-  await handleLoading(newVal.status as string)
-})
-
-// emits
-const emits = defineEmits(['onBtnClick', 'onMjBtnClick'])
-
-//
+/** 初始化 */
 onMounted(async () => {
-  await handleLoading(props.imageDetail.status as string)
+  await handleLoading(props.detail.status as string)
 })
 </script>
 

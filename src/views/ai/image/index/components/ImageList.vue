@@ -6,7 +6,7 @@
       <ImageCard
         v-for="image in imageList"
         :key="image.id"
-        :image-detail="image"
+        :detail="image"
         @on-btn-click="handleImageButtonClick"
         @on-mj-btn-click="handleImageMidjourneyButtonClick"
       />
