@@ -1,5 +1,5 @@
 <template>
-  <div ref="messageContainer" class="h-100% overflow-y relative">
+  <div ref="messageContainer" class="h-100% overflow-y-auto relative">
     <div class="chat-list" v-for="(item, index) in list" :key="index">
       <!-- 靠左 message：system、assistant 类型 -->
       <div class="left-message message-item" v-if="item.type !== 'user'">
@@ -101,13 +101,12 @@ const emits = defineEmits(['onDeleteSuccess', 'onRefresh', 'onEdit']) // 定义 
 
 /** 滚动到底部 */
 const scrollToBottom = async (isIgnore?: boolean) => {
-  // 注意要使用 nextTick 以免获取不到dom
-  await nextTick(() => {
-    if (isIgnore || !isScrolling.value) {
-      messageContainer.value.scrollTop =
-        messageContainer.value.scrollHeight - messageContainer.value.offsetHeight
-    }
-  })
+  // 注意要使用 nextTick 以免获取不到 dom
+  await nextTick()
+  if (isIgnore || !isScrolling.value) {
+    messageContainer.value.scrollTop =
+      messageContainer.value.scrollHeight - messageContainer.value.offsetHeight
+  }
 }
 
 function handleScroll() {

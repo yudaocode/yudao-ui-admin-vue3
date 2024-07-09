@@ -126,7 +126,6 @@
 <script setup lang="ts">
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import CategoryForm from './CategoryForm.vue'
 

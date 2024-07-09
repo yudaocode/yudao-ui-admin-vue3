@@ -22,11 +22,14 @@
             <Icon icon="ep:setting" class="ml-10px" />
           </el-button>
           <el-button size="small" class="btn" @click="handlerMessageClear">
-            <img src="@/assets/ai/clear.svg" class="h-14px" />
+            <Icon icon="heroicons-outline:archive-box-x-mark" color="#787878" />
           </el-button>
-          <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
-          <el-button size="small" :icon="Download" class="btn" />
-          <el-button size="small" :icon="Top" class="btn" @click="handleGoTopMessage" />
+          <el-button size="small" class="btn">
+            <Icon icon="ep:download" color="#787878" />
+          </el-button>
+          <el-button size="small" class="btn" @click="handleGoTopMessage" >
+            <Icon icon="ep:top" color="#787878" />
+          </el-button>
         </div>
       </el-header>
 
@@ -180,11 +183,6 @@ const handleConversationClick = async (conversation: ChatConversationVO) => {
   // 更新选中的对话 id
   activeConversationId.value = conversation.id
   activeConversation.value = conversation
-  // 处理进行中的对话
-  // TODO @fan：这里，和上面的 “对话进行中，不允许切换” 是不是重叠了？
-  if (conversationInProgress.value) {
-    await stopStream()
-  }
   // 刷新 message 列表
   await getMessageList()
   // 滚动底部
@@ -203,7 +201,11 @@ const handlerConversationDelete = async (delConversation: ChatConversationVO) =>
 }
 /** 清空选中的对话 */
 const handleConversationClear = async () => {
-  // TODO @fan：需要加一个 对话进行中，不允许切换
+  // 对话进行中，不允许切换
+  if (conversationInProgress.value) {
+    message.alert('对话中，不允许切换!')
+    return false
+  }
   activeConversationId.value = null
   activeConversation.value = null
   activeMessageList.value = []
@@ -363,7 +365,7 @@ const handlePromptInput = (event) => {
     isComposing.value = false
   }, 400)
 }
-// TODO @fan：是不是可以通过 @keydown.enter、@keydown.shift.enter 来实现，回车发送、shift+回车换行；主要看看，是不是可以简化 isComposing 相关的逻辑
+// TODO @芋艿：是不是可以通过 @keydown.enter、@keydown.shift.enter 来实现，回车发送、shift+回车换行；主要看看，是不是可以简化 isComposing 相关的逻辑
 const onCompositionstart = () => {
   isComposing.value = true
 }
@@ -394,7 +396,6 @@ const doSendMessage = async (content: string) => {
   } as ChatMessageVO)
 }
 
-// TODO @fan：= = 不知道哪里被改动了。点击【发送】后，不会跳转到消息最底部了。。
 /** 真正执行【发送】消息操作 */
 const doSendMessageStream = async (userMessage: ChatMessageVO) => {
   // 创建 AbortController 实例，以便中止请求
@@ -421,9 +422,8 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       createTime: new Date()
     } as ChatMessageVO)
     // 1.2 滚动到最下面
-    nextTick(async () => {
-      await scrollToBottom() // 底部
-    })
+    await nextTick()
+    await scrollToBottom() // 底部
     // 1.3 开始滚动
     textRoll()
 
@@ -573,7 +573,6 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .ai-layout {
-  // TODO @范 这里height不能 100% 先这样临时处理 TODO @fan：这个目前要搞处理么？
   position: absolute;
   flex: 1;
   top: 0;
