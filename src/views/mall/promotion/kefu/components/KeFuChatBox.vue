@@ -55,6 +55,10 @@
                 <TextMessageItem :message="item" />
                 <!-- 图片消息 -->
                 <ImageMessageItem :message="item" />
+                <!-- 商品消息 -->
+                <ProductMessageItem :message="item" />
+                <!-- 订单消息 -->
+                <OrderMessageItem :message="item" />
               </div>
               <el-avatar
                 v-if="item.senderType === UserTypeEnum.ADMIN"
@@ -101,6 +105,8 @@ import EmojiSelectPopover from './tools/EmojiSelectPopover.vue'
 import PictureSelectUpload from './tools/PictureSelectUpload.vue'
 import TextMessageItem from './message/TextMessageItem.vue'
 import ImageMessageItem from './message/ImageMessageItem.vue'
+import ProductMessageItem from './message/ProductMessageItem.vue'
+import OrderMessageItem from './message/OrderMessageItem.vue'
 import { Emoji } from './tools/emoji'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 import { isEmpty } from '@/utils/is'
