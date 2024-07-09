@@ -10,15 +10,13 @@
                 <el-icon><More /></el-icon>
               </el-button>
             </span>
-            <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item :command="['edit', role]">
-                  <el-icon><EditPen /></el-icon>编辑
+                  <Icon icon="ep:edit" color="#787878" />编辑
                 </el-dropdown-item>
                 <el-dropdown-item :command="['delete', role]" style="color: red">
-                  <el-icon><Delete /></el-icon>
-                  <span>删除</span>
+                  <Icon icon="ep:delete" color="red" />删除
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -43,9 +41,9 @@
 </template>
 
 <script setup lang="ts">
-import { ChatRoleVO } from '@/api/ai/model/chatRole'
-import { PropType, ref } from 'vue'
-import { Delete, EditPen, More } from '@element-plus/icons-vue'
+import {ChatRoleVO} from '@/api/ai/model/chatRole'
+import {PropType, ref} from 'vue'
+import {More} from '@element-plus/icons-vue'
 
 const tabsRef = ref<any>() // tabs ref
 
