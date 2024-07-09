@@ -116,6 +116,7 @@ const imagePrediv = (imgUrl: string) => {
 
 .ss-order-card-warp {
   padding: 20px;
+  border-radius: 10px;
   background-color: #e2e2e2;
 
   .img-box {

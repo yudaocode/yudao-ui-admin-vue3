@@ -28,7 +28,7 @@ import ProductItem from './ProductItem.vue'
 import { UserTypeEnum } from '@/utils/constants'
 import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
 
-defineOptions({ name: 'ImageMessageItem' })
+defineOptions({ name: 'ProductMessageItem' })
 const props = defineProps<{
   message: KeFuMessageRespVO
 }>()
