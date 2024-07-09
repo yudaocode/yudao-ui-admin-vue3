@@ -1,10 +1,13 @@
 <template>
   <el-row :gutter="10">
+    <!-- TODO @puhui999：KeFuConversationBox => KeFuConversationList ；KeFuChatBox => KeFuMessageList -->
+    <!-- 会话列表 -->
     <el-col :span="8">
       <ContentWrap>
         <KeFuConversationBox ref="keFuConversationRef" @change="handleChange" />
       </ContentWrap>
     </el-col>
+    <!-- 会话详情（选中会话的消息列表） -->
     <el-col :span="16">
       <ContentWrap>
         <KeFuChatBox ref="keFuChatBoxRef" @change="getConversationList" />
@@ -21,15 +24,10 @@ import { getAccessToken } from '@/utils/auth'
 import { useWebSocket } from '@vueuse/core'
 
 defineOptions({ name: 'KeFu' })
-const message = useMessage()
 
-// 加载消息
-const keFuChatBoxRef = ref<InstanceType<typeof KeFuChatBox>>()
-const handleChange = (conversation: KeFuConversationRespVO) => {
-  keFuChatBoxRef.value?.getMessageList(conversation)
-}
+const message = useMessage() // 消息弹窗
 
-//======================= websocket start=======================
+// ======================= WebSocket start =======================
 const server = ref(
   (import.meta.env.VITE_BASE_URL + '/infra/ws/').replace('http', 'ws') +
     '?token=' +
@@ -38,9 +36,11 @@ const server = ref(
 
 /** 发起 WebSocket 连接 */
 const { data, close, open } = useWebSocket(server.value, {
-  autoReconnect: false,
+  autoReconnect: false, // TODO @puhui999：重连要加下
   heartbeat: true
 })
+
+/** 监听 WebSocket 数据 */
 watchEffect(() => {
   if (!data.value) {
     return
@@ -75,17 +75,28 @@ watchEffect(() => {
     console.error(error)
   }
 })
-//======================= websocket end=======================
-// 加载会话列表
+// ======================= WebSocket end =======================
+
+/** 加载会话列表 */
 const keFuConversationRef = ref<InstanceType<typeof KeFuConversationBox>>()
 const getConversationList = () => {
   keFuConversationRef.value?.getConversationList()
 }
+
+/** 加载指定会话的消息列表 */
+const keFuChatBoxRef = ref<InstanceType<typeof KeFuChatBox>>()
+const handleChange = (conversation: KeFuConversationRespVO) => {
+  keFuChatBoxRef.value?.getMessageList(conversation)
+}
+
+/** 初始化 */
 onMounted(() => {
   getConversationList()
   // 打开 websocket 连接
   open()
 })
+
+/** 销毁 */
 onBeforeUnmount(() => {
   // 关闭 websocket 连接
   close()
@@ -104,17 +115,17 @@ onBeforeUnmount(() => {
   height: 6px;
 }
 
-/*定义滚动条轨道 内阴影+圆角*/
+/* 定义滚动条轨道 内阴影+圆角 */
 ::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 0px rgba(240, 240, 240, 0.5);
+  box-shadow: inset 0 0 0 rgba(240, 240, 240, 0.5);
   border-radius: 10px;
   background-color: #fff;
 }
 
-/*定义滑块 内阴影+圆角*/
+/* 定义滑块 内阴影+圆角 */
 ::-webkit-scrollbar-thumb {
   border-radius: 10px;
-  box-shadow: inset 0 0 0px rgba(240, 240, 240, 0.5);
+  box-shadow: inset 0 0 0 rgba(240, 240, 240, 0.5);
   background-color: rgba(240, 240, 240, 0.5);
 }
 </style>

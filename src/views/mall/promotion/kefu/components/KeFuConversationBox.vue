@@ -1,5 +1,6 @@
 <template>
   <div class="kefu">
+    <!-- TODO @puhui999：item => conversation 会不会更容易理解 -->
     <div
       v-for="(item, index) in conversationList"
       :key="item.id"
@@ -9,7 +10,9 @@
       @contextmenu.prevent="rightClick($event as PointerEvent, item)"
     >
       <div class="flex justify-center items-center w-100%">
+        <!-- TODO style 换成 unocss -->
         <div class="flex justify-center items-center" style="width: 50px; height: 50px">
+          <!-- 头像 + 未读 -->
           <el-badge
             :hidden="item.adminUnreadMessageCount === 0"
             :max="99"
@@ -41,7 +44,8 @@
         </div>
       </div>
     </div>
-    <!-- 通过右击获取到的坐标定位 -->
+
+    <!-- 右键，进行操作（类似微信） -->
     <ul v-show="showRightMenu" :style="rightMenuStyle" class="right-menu-ul">
       <li
         v-show="!selectedConversation.adminPinned"
@@ -78,23 +82,30 @@ import { formatDate } from '@/utils/formatTime'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 
 defineOptions({ name: 'KeFuConversationBox' })
-const message = useMessage()
+
+const message = useMessage() // 消息弹窗
+
 const { replaceEmoji } = useEmoji()
-const activeConversationIndex = ref(-1) // 选中的会话
 const conversationList = ref<KeFuConversationRespVO[]>([]) // 会话列表
+const activeConversationIndex = ref(-1) // 选中的会话 index 位置 TODO @puhui999：这个可以改成 activeConversationId 么？因为一般是选中的对话编号
+
+/** 加载会话列表 */
 const getConversationList = async () => {
   conversationList.value = await KeFuConversationApi.getConversationList()
 }
 defineExpose({ getConversationList })
+
+/** 打开右侧的消息列表 */
 const emits = defineEmits<{
   (e: 'change', v: KeFuConversationRespVO): void
 }>()
-// 打开右侧消息
 const openRightMessage = (item: KeFuConversationRespVO, index: number) => {
   activeConversationIndex.value = index
   emits('change', item)
 }
-// 获得消息类型
+
+// TODO @puhui999：这个，是不是改成 getConversationDisplayText，获取会话的展示文本。然后，把文本消息类型，也统一处理（包括上面的 replaceEmoji）。这样，更统一。
+/** 获得消息类型 */
 const getContentType = computed(() => (lastMessageContentType: number) => {
   switch (lastMessageContentType) {
     case KeFuMessageContentTypeEnum.SYSTEM:
@@ -117,8 +128,9 @@ const getContentType = computed(() => (lastMessageContentType: number) => {
 //======================= 右键菜单 =======================
 const showRightMenu = ref(false) // 显示右键菜单
 const rightMenuStyle = ref<any>({}) // 右键菜单 Style
-const selectedConversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 右键选中的会话对象
-// 右键菜单
+const selectedConversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 右键选中的会话对象 TODO puhui999：这个是不是叫 rightClickConversation 会好点。因为 selected 容易和选中的对话，定义上有点重叠
+
+/** 打开右键菜单 */
 const rightClick = (mouseEvent: PointerEvent, item: KeFuConversationRespVO) => {
   selectedConversation.value = item
   // 显示右键菜单
@@ -128,11 +140,12 @@ const rightClick = (mouseEvent: PointerEvent, item: KeFuConversationRespVO) => {
     left: mouseEvent.clientX - 80 + 'px'
   }
 }
-// 关闭菜单
+/** 关闭右键菜单 */
 const closeRightMenu = () => {
   showRightMenu.value = false
 }
-// 置顶会话
+
+/** 置顶会话 */
 const updateConversationPinned = async (adminPinned: boolean) => {
   // 1. 会话置顶/取消置顶
   await KeFuConversationApi.updateConversationPinned({
@@ -144,7 +157,8 @@ const updateConversationPinned = async (adminPinned: boolean) => {
   closeRightMenu()
   await getConversationList()
 }
-// 删除会话
+
+/** 删除会话 */
 const deleteConversation = async () => {
   // 1. 删除会话
   await message.confirm('您确定要删除该会话吗？')
@@ -153,6 +167,8 @@ const deleteConversation = async () => {
   closeRightMenu()
   await getConversationList()
 }
+
+/** 监听右键菜单的显示状态，添加点击事件监听器 */
 watch(showRightMenu, (val) => {
   if (val) {
     document.body.addEventListener('click', closeRightMenu)

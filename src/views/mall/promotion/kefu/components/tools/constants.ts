@@ -9,6 +9,7 @@ export const KeFuMessageContentTypeEnum = {
   PRODUCT: 10, //  商品消息
   ORDER: 11 //  订单消息"
 }
+
 // Promotion 的 WebSocket 消息类型枚举类
 export const WebSocketMessageTypeConstants = {
   KEFU_MESSAGE_TYPE: 'kefu_message_type', // 客服消息类型
