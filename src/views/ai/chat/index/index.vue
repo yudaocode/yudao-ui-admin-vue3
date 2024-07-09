@@ -180,11 +180,6 @@ const handleConversationClick = async (conversation: ChatConversationVO) => {
   // 更新选中的对话 id
   activeConversationId.value = conversation.id
   activeConversation.value = conversation
-  // 处理进行中的对话
-  // TODO @fan：这里，和上面的 “对话进行中，不允许切换” 是不是重叠了？
-  if (conversationInProgress.value) {
-    await stopStream()
-  }
   // 刷新 message 列表
   await getMessageList()
   // 滚动底部
