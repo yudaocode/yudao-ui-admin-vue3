@@ -137,6 +137,7 @@
 import { ImageApi, ImageDrawReqVO, ImageVO } from '@/api/ai/image'
 import { hasChinese } from '@/views/ai/utils/utils'
 import {
+  AiPlatformEnum,
   ImageHotEnglishWords,
   StableDiffusionClipGuidancePresets,
   StableDiffusionSamplers,
@@ -187,10 +188,10 @@ const handleGenerateImage = async () => {
     // 加载中
     drawIn.value = true
     // 回调
-    emits('onDrawStart', 'StableDiffusion')
+    emits('onDrawStart', AiPlatformEnum.STABLE_DIFFUSION)
     // 发送请求
     const form = {
-      platform: 'StableDiffusion',
+      platform: AiPlatformEnum.STABLE_DIFFUSION,
       model: 'stable-diffusion-v1-6',
       prompt: prompt.value, // 提示词
       width: width.value, // 图片宽度
@@ -207,7 +208,7 @@ const handleGenerateImage = async () => {
     await ImageApi.drawImage(form)
   } finally {
     // 回调
-    emits('onDrawComplete', 'StableDiffusion')
+    emits('onDrawComplete', AiPlatformEnum.STABLE_DIFFUSION)
     // 加载结束
     drawIn.value = false
   }

@@ -66,7 +66,7 @@ export interface ImageModelVO {
   image?: string
 }
 
-export const StableDiffusionSamplers = ref<ImageModelVO[]>([
+export const StableDiffusionSamplers: ImageModelVO[] = [
   {
     key: 'DDIM',
     name: 'DDIM'
@@ -107,9 +107,9 @@ export const StableDiffusionSamplers = ref<ImageModelVO[]>([
     key: 'K_LMS',
     name: 'K_LMS'
   }
-])
+]
 
-export const StableDiffusionStylePresets = ref<ImageModelVO[]>([
+export const StableDiffusionStylePresets: ImageModelVO[] = [
   {
     key: '3d-model',
     name: '3d-model'
@@ -179,9 +179,9 @@ export const StableDiffusionStylePresets = ref<ImageModelVO[]>([
     key: 'tile-texture',
     name: 'tile-texture'
   }
-])
+]
 
-export const StableDiffusionClipGuidancePresets = ref<ImageModelVO[]>([
+export const StableDiffusionClipGuidancePresets: ImageModelVO[] = [
   {
     key: 'NONE',
     name: 'NONE'
@@ -210,9 +210,9 @@ export const StableDiffusionClipGuidancePresets = ref<ImageModelVO[]>([
     key: 'SLOWEST',
     name: 'SLOWEST'
   }
-])
+]
 
-export const Dall3Models = ref<ImageModelVO[]>([
+export const Dall3Models: ImageModelVO[] = [
   {
     key: 'dall-e-3',
     name: 'DALL·E 3',
@@ -223,4 +223,49 @@ export const Dall3Models = ref<ImageModelVO[]>([
     name: 'DALL·E 2',
     image: `/src/assets/ai/dall3.jpg`
   }
-])
+]
+
+export const Dall3StyleList: ImageModelVO[] = [
+  {
+    key: 'vivid',
+    name: '清晰',
+    image: `/src/assets/ai/qingxi.jpg`
+  },
+  {
+    key: 'natural',
+    name: '自然',
+    image: `/src/assets/ai/ziran.jpg`
+  }
+]
+
+interface ImageSizeVO {
+  key: string
+  name: string
+  style: string
+  width: string
+  height: string
+}
+
+export const Dall3SizeList: ImageSizeVO[] = [
+  {
+    key: '1024x1024',
+    name: '1:1',
+    width: '1024',
+    height: '1024',
+    style: 'width: 30px; height: 30px;background-color: #dcdcdc;'
+  },
+  {
+    key: '1024x1792',
+    name: '3:5',
+    width: '1024',
+    height: '1792',
+    style: 'width: 30px; height: 50px;background-color: #dcdcdc;'
+  },
+  {
+    key: '1792x1024',
+    name: '5:3',
+    width: '1792',
+    height: '1024',
+    style: 'width: 50px; height: 30px;background-color: #dcdcdc;'
+  }
+]

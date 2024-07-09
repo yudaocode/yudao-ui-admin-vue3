@@ -37,7 +37,7 @@
     </div>
     <el-space wrap class="model-list">
       <div
-        :class="model === model.key ? 'modal-item selectModel' : 'modal-item'"
+        :class="selectModel === model.key ? 'modal-item selectModel' : 'modal-item'"
         v-for="model in Dall3Models"
         :key="model.key"
       >
@@ -52,12 +52,8 @@
     </div>
     <el-space wrap class="image-style-list">
       <div
-        :class="
-          selectImageStyle === imageStyle.key
-            ? 'image-style-item selectImageStyle'
-            : 'image-style-item'
-        "
-        v-for="imageStyle in imageStyleList"
+        :class="style === imageStyle.key ? 'image-style-item selectImageStyle' : 'image-style-item'"
+        v-for="imageStyle in Dall3StyleList"
         :key="imageStyle.key"
       >
         <el-image :src="imageStyle.image" fit="contain" @click="handleStyleClick(imageStyle)" />
@@ -72,11 +68,13 @@
     <el-space wrap class="size-list">
       <div
         class="size-item"
-        v-for="imageSize in imageSizeList"
+        v-for="imageSize in Dall3SizeList"
         :key="imageSize.key"
         @click="handleSizeClick(imageSize)"
       >
-        <div :class="size === imageSize.key ? 'size-wrapper selectImageSize' : 'size-wrapper'">
+        <div
+          :class="selectSize === imageSize.key ? 'size-wrapper selectImageSize' : 'size-wrapper'"
+        >
           <div :style="imageSize.style"></div>
         </div>
         <div class="size-font">{{ imageSize.name }}</div>
@@ -91,103 +89,53 @@
 </template>
 <script setup lang="ts">
 import { ImageApi, ImageDrawReqVO, ImageVO } from '@/api/ai/image'
-import { Dall3Models, ImageHotWords } from '@/views/ai/utils/constants'
+import {
+  Dall3Models,
+  Dall3StyleList,
+  ImageHotWords,
+  Dall3SizeList,
+  ImageModelVO,
+  AiPlatformEnum
+} from '@/views/ai/utils/constants'
 
 const message = useMessage() // 消息弹窗
-
-// image 模型
-interface ImageModelVO {
-  key: string
-  name: string
-  image: string
-}
-
-// image 大小
-interface ImageSizeVO {
-  key: string
-  name: string
-  style: string
-  width: string
-  height: string
-}
 
 // 定义属性
 const prompt = ref<string>('') // 提示词
 const drawIn = ref<boolean>(false) // 生成中
 const selectHotWord = ref<string>('') // 选中的热词
-const model = ref<string>('dall-e-3') // 模型
-const size = ref<string>('1024x1024') // 选中 size
+const selectModel = ref<string>('dall-e-3') // 模型
+const selectSize = ref<string>('1024x1024') // 选中 size
+const style = ref<string>('vivid') // style 样式
 
-const selectImageStyle = ref<string>('vivid') // style 样式
+const emits = defineEmits(['onDrawStart', 'onDrawComplete']) // 定义 emits
 
-const imageStyleList = ref<ImageModelVO[]>([
-  {
-    key: 'vivid',
-    name: '清晰',
-    image: `/src/assets/ai/qingxi.jpg`
-  },
-  {
-    key: 'natural',
-    name: '自然',
-    image: `/src/assets/ai/ziran.jpg`
-  }
-]) // style
-
-const imageSizeList = ref<ImageSizeVO[]>([
-  {
-    key: '1024x1024',
-    name: '1:1',
-    width: '1024',
-    height: '1024',
-    style: 'width: 30px; height: 30px;background-color: #dcdcdc;'
-  },
-  {
-    key: '1024x1792',
-    name: '3:5',
-    width: '1024',
-    height: '1792',
-    style: 'width: 30px; height: 50px;background-color: #dcdcdc;'
-  },
-  {
-    key: '1792x1024',
-    name: '5:3',
-    width: '1792',
-    height: '1024',
-    style: 'width: 50px; height: 30px;background-color: #dcdcdc;'
-  }
-]) // size
-
-// 定义 Props
-const props = defineProps({})
-// 定义 emits
-const emits = defineEmits(['onDrawStart', 'onDrawComplete'])
-
-/** 热词 - click  */
+/** 选择热词 */
 const handleHotWordClick = async (hotWord: string) => {
-  // 取消选中
+  // 情况一：取消选中
   if (selectHotWord.value == hotWord) {
     selectHotWord.value = ''
     return
   }
-  // 选中
+
+  // 情况二：选中
   selectHotWord.value = hotWord
-  // 替换提示词
   prompt.value = hotWord
 }
 
-/**  模型 - click  */
+/** 选择 model 模型 */
 const handleModelClick = async (model: ImageModelVO) => {
-  model.value = model.key
+  selectModel.value = model.key
 }
 
-/**  样式 - click  */
+/** 选择 style 样式  */
 const handleStyleClick = async (imageStyle: ImageModelVO) => {
-  selectImageStyle.value = imageStyle.key
+  style.value = imageStyle.key
 }
 
-/**  size - click  */
+/** 选择 size 大小  */
 const handleSizeClick = async (imageSize: ImageSizeVO) => {
-  size.value = imageSize.key
+  selectSize.value = imageSize.key
 }
 
 /**  图片生产  */
@@ -198,37 +146,35 @@ const handleGenerateImage = async () => {
     // 加载中
     drawIn.value = true
     // 回调
-    emits('onDrawStart', model.value)
-    const imageSize = imageSizeList.value.find((item) => item.key === size.value) as ImageSizeVO
+    emits('onDrawStart', AiPlatformEnum.OPENAI)
+    const imageSize = Dall3SizeList.find((item) => item.key === selectSize.value) as ImageSizeVO
     const form = {
-      platform: 'OpenAI',
+      platform: AiPlatformEnum.OPENAI,
       prompt: prompt.value, // 提示词
-      model: model.value, // 模型
+      model: selectModel.value, // 模型
       width: imageSize.width, // size 不能为空
       height: imageSize.height, // size 不能为空
       options: {
-        style: selectImageStyle.value // 图像生成的风格
+        style: style.value // 图像生成的风格
       }
     } as ImageDrawReqVO
     // 发送请求
     await ImageApi.drawImage(form)
   } finally {
     // 回调
-    emits('onDrawComplete', model.value)
+    emits('onDrawComplete', AiPlatformEnum.OPENAI)
     // 加载结束
     drawIn.value = false
   }
 }
 
 /** 填充值 */
-const settingValues = async (imageDetail: ImageVO) => {
-  prompt.value = imageDetail.prompt
-  model.value = imageDetail.model
-  //
-  selectImageStyle.value = imageDetail.options?.style
-  //
-  const imageSize = imageSizeList.value.find(
-    (item) => item.key === `${imageDetail.width}x${imageDetail.height}`
+const settingValues = async (detail: ImageVO) => {
+  prompt.value = detail.prompt
+  selectModel.value = detail.model
+  style.value = detail.options?.style
+  const imageSize = Dall3SizeList.find(
+    (item) => item.key === `${detail.width}x${detail.height}`
   ) as ImageSizeVO
   await handleSizeClick(imageSize)
 }

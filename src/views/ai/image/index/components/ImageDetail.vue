@@ -112,14 +112,21 @@
         {{ detail?.options?.seed }}
       </div>
     </div>
+    <!-- Dall3 专属区域 -->
+    <div class="item" v-if="detail.platform === AiPlatformEnum.OPENAI && detail?.options?.style">
+      <div class="tip">风格选择</div>
+      <div class="body">
+        {{ Dall3StyleList.find((item: ImageModelVO) => item.key === detail?.options?.style)?.name }}
+      </div>
+    </div>
   </el-drawer>
 </template>
 
 <script setup lang="ts">
 import { ImageApi, ImageVO } from '@/api/ai/image'
-import ImageCard from './ImageCard.vue'
 import {
   AiPlatformEnum,
+  Dall3StyleList,
   ImageModelVO,
   StableDiffusionClipGuidancePresets,
   StableDiffusionSamplers,
