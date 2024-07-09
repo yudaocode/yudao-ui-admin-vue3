@@ -40,3 +40,173 @@ export const AiMusicStatusEnum = {
   SUCCESS: 20, // 已完成
   FAIL: 30 // 已失败
 }
+
+// ========== 【图片 UI】相关的枚举 ==========
+export const ImageHotWords = [
+  '中国旗袍',
+  '古装美女',
+  '卡通头像',
+  '机甲战士',
+  '童话小屋',
+  '中国长城'
+] // 图片热词
+
+export const ImageHotEnglishWords = [
+  'Chinese Cheongsam',
+  'Ancient Beauty',
+  'Cartoon Avatar',
+  'Mech Warrior',
+  'Fairy Tale Cottage',
+  'The Great Wall of China'
+] // 图片热词（英文）
+
+export interface ImageModelVO {
+  key: string
+  name: string
+}
+
+export const StableDiffusionSamplers = ref<ImageModelVO[]>([
+  {
+    key: 'DDIM',
+    name: 'DDIM'
+  },
+  {
+    key: 'DDPM',
+    name: 'DDPM'
+  },
+  {
+    key: 'K_DPMPP_2M',
+    name: 'K_DPMPP_2M'
+  },
+  {
+    key: 'K_DPMPP_2S_ANCESTRAL',
+    name: 'K_DPMPP_2S_ANCESTRAL'
+  },
+  {
+    key: 'K_DPM_2',
+    name: 'K_DPM_2'
+  },
+  {
+    key: 'K_DPM_2_ANCESTRAL',
+    name: 'K_DPM_2_ANCESTRAL'
+  },
+  {
+    key: 'K_EULER',
+    name: 'K_EULER'
+  },
+  {
+    key: 'K_EULER_ANCESTRAL',
+    name: 'K_EULER_ANCESTRAL'
+  },
+  {
+    key: 'K_HEUN',
+    name: 'K_HEUN'
+  },
+  {
+    key: 'K_LMS',
+    name: 'K_LMS'
+  }
+])
+
+export const StableDiffusionStylePresets = ref<ImageModelVO[]>([
+  {
+    key: '3d-model',
+    name: '3d-model'
+  },
+  {
+    key: 'analog-film',
+    name: 'analog-film'
+  },
+  {
+    key: 'anime',
+    name: 'anime'
+  },
+  {
+    key: 'cinematic',
+    name: 'cinematic'
+  },
+  {
+    key: 'comic-book',
+    name: 'comic-book'
+  },
+  {
+    key: 'digital-art',
+    name: 'digital-art'
+  },
+  {
+    key: 'enhance',
+    name: 'enhance'
+  },
+  {
+    key: 'fantasy-art',
+    name: 'fantasy-art'
+  },
+  {
+    key: 'isometric',
+    name: 'isometric'
+  },
+  {
+    key: 'line-art',
+    name: 'line-art'
+  },
+  {
+    key: 'low-poly',
+    name: 'low-poly'
+  },
+  {
+    key: 'modeling-compound',
+    name: 'modeling-compound'
+  },
+  // neon-punk origami photographic pixel-art tile-texture
+  {
+    key: 'neon-punk',
+    name: 'neon-punk'
+  },
+  {
+    key: 'origami',
+    name: 'origami'
+  },
+  {
+    key: 'photographic',
+    name: 'photographic'
+  },
+  {
+    key: 'pixel-art',
+    name: 'pixel-art'
+  },
+  {
+    key: 'tile-texture',
+    name: 'tile-texture'
+  }
+])
+
+export const StableDiffusionClipGuidancePresets = ref<ImageModelVO[]>([
+  {
+    key: 'NONE',
+    name: 'NONE'
+  },
+  {
+    key: 'FAST_BLUE',
+    name: 'FAST_BLUE'
+  },
+  {
+    key: 'FAST_GREEN',
+    name: 'FAST_GREEN'
+  },
+  {
+    key: 'SIMPLE',
+    name: 'SIMPLE'
+  },
+  {
+    key: 'SLOW',
+    name: 'SLOW'
+  },
+  {
+    key: 'SLOWER',
+    name: 'SLOWER'
+  },
+  {
+    key: 'SLOWEST',
+    name: 'SLOWEST'
+  }
+])

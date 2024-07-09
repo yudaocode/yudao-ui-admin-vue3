@@ -20,8 +20,8 @@
     <div class="item">
       <div class="tip">时间</div>
       <div class="body">
-        <div>提交时间：{{ detail.createTime }}</div>
-        <div>生成时间：{{ detail.finishTime }}</div>
+        <div>提交时间：{{ formatTime(detail.createTime, 'yyyy-MM-dd HH:mm:ss') }}</div>
+        <div>生成时间：{{ formatTime(detail.finishTime, 'yyyy-MM-dd HH:mm:ss') }}</div>
       </div>
     </div>
     <!-- 模型 -->
@@ -43,13 +43,73 @@
         {{ detail.picUrl }}
       </div>
     </div>
-    <!-- 风格 -->
-    <div class="item" v-if="detail?.options?.style">
+    <!-- StableDiffusion 专属区域 -->
+    <div
+      class="item"
+      v-if="detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.sampler"
+    >
+      <div class="tip">采样方法</div>
+      <div class="body">
+        {{
+          StableDiffusionSamplers.find(
+            (item: ImageModelVO) => item.key === detail?.options?.sampler
+          )?.name
+        }}
+      </div>
+    </div>
+    <div
+      class="item"
+      v-if="
+        detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.clipGuidancePreset
+      "
+    >
+      <div class="tip">CLIP</div>
+      <div class="body">
+        {{
+          StableDiffusionClipGuidancePresets.find(
+            (item: ImageModelVO) => item.key === detail?.options?.clipGuidancePreset
+          )?.name
+        }}
+      </div>
+    </div>
+    <div
+      class="item"
+      v-if="detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.stylePreset"
+    >
       <div class="tip">风格</div>
       <div class="body">
-        <!-- TODO @fan：貌似需要把 imageStyleList 搞到 api/image/index.ts 枚举起来？ -->
-        <!-- TODO @fan：这里的展示，可能需要按照平台做区分 -->
-        {{ detail?.options?.style }}
+        {{
+          StableDiffusionStylePresets.find(
+            (item: ImageModelVO) => item.key === detail?.options?.stylePreset
+          )?.name
+        }}
+      </div>
+    </div>
+    <div
+      class="item"
+      v-if="detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.steps"
+    >
+      <div class="tip">迭代步数</div>
+      <div class="body">
+        {{ detail?.options?.steps }}
+      </div>
+    </div>
+    <div
+      class="item"
+      v-if="detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.scale"
+    >
+      <div class="tip">引导系数</div>
+      <div class="body">
+        {{ detail?.options?.scale }}
+      </div>
+    </div>
+    <div
+      class="item"
+      v-if="detail.platform === AiPlatformEnum.STABLE_DIFFUSION && detail?.options?.seed"
+    >
+      <div class="tip">随机因子</div>
+      <div class="body">
+        {{ detail?.options?.seed }}
       </div>
     </div>
   </el-drawer>
@@ -58,6 +118,14 @@
 <script setup lang="ts">
 import { ImageApi, ImageVO } from '@/api/ai/image'
 import ImageCard from './ImageCard.vue'
+import {
+  AiPlatformEnum,
+  ImageModelVO,
+  StableDiffusionClipGuidancePresets,
+  StableDiffusionSamplers,
+  StableDiffusionStylePresets
+} from '@/views/ai/utils/constants'
+import { formatTime } from '@/utils'
 
 const showDrawer = ref<boolean>(false) // 是否显示
 const detail = ref<ImageVO>({} as ImageVO) // 图片详细信息

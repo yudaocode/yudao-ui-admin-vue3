@@ -12,11 +12,11 @@ export interface ImageVO {
   publicStatus: boolean // 公开状态
   picUrl: string // 任务地址
   errorMessage: string // 错误信息
-  options: object // 配置 Map<string, string>
+  options: any // 配置 Map<string, string>
   taskId: number // 任务编号
   buttons: ImageMidjourneyButtonsVO[] // mj 操作按钮
-  createTime: string // 创建时间
-  finishTime: string // 完成时间
+  createTime: Date // 创建时间
+  finishTime: Date // 完成时间
 }
 
 export interface ImageDrawReqVO {

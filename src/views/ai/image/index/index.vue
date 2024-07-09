@@ -27,12 +27,12 @@
 </template>
 
 <script setup lang="ts">
-import Dall3 from './dall3/index.vue'
-import Midjourney from './midjourney/index.vue'
-import StableDiffusion from './stable-diffusion/index.vue'
 import ImageList from './components/ImageList.vue'
 import { AiPlatformEnum } from '@/views/ai/utils/constants'
 import { ImageVO } from '@/api/ai/image'
+import Dall3 from './dall3/index.vue'
+import Midjourney from './midjourney/index.vue'
+import StableDiffusion from './components/stableDiffusion/index.vue'
 
 const imageListRef = ref<any>() // image 列表 ref
 const dall3Ref = ref<any>() // openai ref
