@@ -570,7 +570,6 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .ai-layout {
-  // TODO @范 这里height不能 100% 先这样临时处理 TODO @fan：这个目前要搞处理么？
   position: absolute;
   flex: 1;
   top: 0;
