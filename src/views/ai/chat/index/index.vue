@@ -22,11 +22,14 @@
             <Icon icon="ep:setting" class="ml-10px" />
           </el-button>
           <el-button size="small" class="btn" @click="handlerMessageClear">
-            <img src="@/assets/ai/clear.svg" class="h-14px" />
+            <Icon icon="heroicons-outline:archive-box-x-mark" color="#787878" />
           </el-button>
-          <!-- TODO @fan：下面两个 icon，可以使用类似 <Icon icon="ep:question-filled" /> 替代哈 -->
-          <el-button size="small" :icon="Download" class="btn" />
-          <el-button size="small" :icon="Top" class="btn" @click="handleGoTopMessage" />
+          <el-button size="small" class="btn">
+            <Icon icon="ep:download" color="#787878" />
+          </el-button>
+          <el-button size="small" class="btn" @click="handleGoTopMessage" >
+            <Icon icon="ep:top" color="#787878" />
+          </el-button>
         </div>
       </el-header>
 
