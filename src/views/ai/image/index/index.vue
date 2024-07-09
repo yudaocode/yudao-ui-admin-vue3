@@ -31,7 +31,7 @@ import ImageList from './components/ImageList.vue'
 import { AiPlatformEnum } from '@/views/ai/utils/constants'
 import { ImageVO } from '@/api/ai/image'
 import Dall3 from './components/dall3/index.vue'
-import Midjourney from './midjourney/index.vue'
+import Midjourney from './components/midjourney/index.vue'
 import StableDiffusion from './components/stableDiffusion/index.vue'
 
 const imageListRef = ref<any>() // image 列表 ref
@@ -40,7 +40,7 @@ const midjourneyRef = ref<any>() // midjourney ref
 const stableDiffusionRef = ref<any>() // stable diffusion ref
 
 // 定义属性
-const selectPlatform = ref(AiPlatformEnum.OPENAI)
+const selectPlatform = ref(AiPlatformEnum.MIDJOURNEY)
 const platformOptions = [
   {
     label: 'DALL3 绘画',
@@ -57,10 +57,10 @@ const platformOptions = [
 ]
 
 /** 绘画 start  */
-const handleDrawStart = async (type) => {}
+const handleDrawStart = async (platform: string) => {}
 
-/** 绘画 complete  */
-const handleDrawComplete = async (type) => {
+/** 绘画 complete */
+const handleDrawComplete = async (platform: string) => {
   await imageListRef.value.getImageList()
 }
 

@@ -119,6 +119,25 @@
         {{ Dall3StyleList.find((item: ImageModelVO) => item.key === detail?.options?.style)?.name }}
       </div>
     </div>
+    <!-- Midjourney 专属区域 -->
+    <div
+      class="item"
+      v-if="detail.platform === AiPlatformEnum.MIDJOURNEY && detail?.options?.version"
+    >
+      <div class="tip">模型版本</div>
+      <div class="body">
+        {{ detail?.options?.version }}
+      </div>
+    </div>
+    <div
+      class="item"
+      v-if="detail.platform === AiPlatformEnum.MIDJOURNEY && detail?.options?.referImageUrl"
+    >
+      <div class="tip">参考图</div>
+      <div class="body">
+        <el-image :src="detail.options.referImageUrl" />
+      </div>
+    </div>
   </el-drawer>
 </template>
 

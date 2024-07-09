@@ -238,7 +238,7 @@ export const Dall3StyleList: ImageModelVO[] = [
   }
 ]
 
-interface ImageSizeVO {
+export interface ImageSizeVO {
   key: string
   name: string
   style: string
@@ -267,5 +267,81 @@ export const Dall3SizeList: ImageSizeVO[] = [
     width: '1792',
     height: '1024',
     style: 'width: 50px; height: 30px;background-color: #dcdcdc;'
+  }
+]
+
+export const MidjourneyModels: ImageModelVO[] = [
+  {
+    key: 'midjourney',
+    name: 'MJ',
+    image: 'https://bigpt8.com/pc/_nuxt/mj.34a61377.png'
+  },
+  {
+    key: 'niji',
+    name: 'NIJI',
+    image: 'https://bigpt8.com/pc/_nuxt/nj.ca79b143.png'
+  }
+]
+
+export const MidjourneySizeList: ImageSizeVO[] = [
+  {
+    key: '1:1',
+    width: '1',
+    height: '1',
+    style: 'width: 30px; height: 30px;background-color: #dcdcdc;'
+  },
+  {
+    key: '3:4',
+    width: '3',
+    height: '4',
+    style: 'width: 30px; height: 40px;background-color: #dcdcdc;'
+  },
+  {
+    key: '4:3',
+    width: '4',
+    height: '3',
+    style: 'width: 40px; height: 30px;background-color: #dcdcdc;'
+  },
+  {
+    key: '9:16',
+    width: '9',
+    height: '16',
+    style: 'width: 30px; height: 50px;background-color: #dcdcdc;'
+  },
+  {
+    key: '16:9',
+    width: '16',
+    height: '9',
+    style: 'width: 50px; height: 30px;background-color: #dcdcdc;'
+  }
+]
+
+export const MidjourneyVersions = [
+  {
+    value: '6.0',
+    label: 'v6.0'
+  },
+  {
+    value: '5.2',
+    label: 'v5.2'
+  },
+  {
+    value: '5.1',
+    label: 'v5.1'
+  },
+  {
+    value: '5.0',
+    label: 'v5.0'
+  },
+  {
+    value: '4.0',
+    label: 'v4.0'
+  }
+]
+
+export const NijiVersionList = [
+  {
+    value: '5',
+    label: 'v5'
   }
 ]
