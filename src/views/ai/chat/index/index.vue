@@ -394,7 +394,6 @@ const doSendMessage = async (content: string) => {
   } as ChatMessageVO)
 }
 
-// TODO @fan：= = 不知道哪里被改动了。点击【发送】后，不会跳转到消息最底部了。。
 /** 真正执行【发送】消息操作 */
 const doSendMessageStream = async (userMessage: ChatMessageVO) => {
   // 创建 AbortController 实例，以便中止请求
@@ -421,9 +420,8 @@ const doSendMessageStream = async (userMessage: ChatMessageVO) => {
       createTime: new Date()
     } as ChatMessageVO)
     // 1.2 滚动到最下面
-    nextTick(async () => {
-      await scrollToBottom() // 底部
-    })
+    await nextTick()
+    await scrollToBottom() // 底部
     // 1.3 开始滚动
     textRoll()
 
