@@ -219,15 +219,14 @@ onMounted(async () => {
   // 获取 role 数据
   await getActiveTabsRole()
 })
-// TODO @fan：css 是不是可以融合到 scss 里面呀？
 </script>
-<style lang="css">
+<!-- 覆盖 element ui css -->
+<style lang="scss">
 .el-tabs__content {
   position: relative;
   height: 100%;
   overflow: hidden;
 }
-
 .el-tabs__nav-scroll {
   margin: 10px 20px;
 }
