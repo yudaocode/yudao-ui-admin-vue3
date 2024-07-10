@@ -2,14 +2,6 @@
   <el-container v-if="showKeFuMessageList" class="kefu">
     <el-header>
       <div class="kefu-title">{{ conversation.userNickname }}</div>
-      <!-- 加载历史消息 -->
-      <div
-        v-show="loadingMore"
-        class="loadingMore flex justify-center items-center cursor-pointer"
-        @click="handleOldMessage"
-      >
-        加载更多
-      </div>
     </el-header>
     <el-main class="kefu-content overflow-visible">
       <el-scrollbar ref="scrollbarRef" always height="calc(100vh - 495px)" @scroll="handleScroll">
@@ -248,15 +240,16 @@ const handleToNewMessage = async () => {
 }
 
 /** 加载历史消息 */
-const loadingMore = ref(false) // 滚动到顶部加载更多
 const loadHistory = ref(false) // 加载历史消息
 const handleScroll = async ({ scrollTop }) => {
   const messageTotal = messageList.value.length
   if (total.value > 0 && messageTotal > 0 && messageTotal === total.value) {
     return
   }
-  // 距顶 20 加载下一页数据
-  loadingMore.value = scrollTop < 20
+  // 触顶自动加载下一页数据
+  if (scrollTop === 0) {
+    await handleOldMessage()
+  }
 }
 const handleOldMessage = async () => {
   // 记录已有页面高度
@@ -265,7 +258,6 @@ const handleOldMessage = async () => {
   // 加载消息列表
   queryParams.pageNo += 1
   await getMessageList(conversation.value)
-  loadingMore.value = false
   // 等页面加载完后，获得上一页最后一条消息的位置，控制滚动到它所在位置
   scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight - oldPageHeight)
 }
@@ -291,17 +283,6 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
     border-bottom: #e4e0e0 solid 1px;
     height: 60px;
     line-height: 60px;
-  }
-
-  .loadingMore {
-    width: 100%;
-    height: 50px;
-    background-color: #eee;
-    color: #666;
-    text-align: center;
-    line-height: 50px;
-    transform: translateY(-100%);
-    transition: transform 0.3s ease-in-out;
   }
 
   &-content {
