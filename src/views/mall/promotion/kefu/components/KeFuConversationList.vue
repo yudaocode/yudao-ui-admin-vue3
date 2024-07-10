@@ -73,7 +73,7 @@ import { useEmoji } from './tools/emoji'
 import { formatDate } from '@/utils/formatTime'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 
-defineOptions({ name: 'KeFuConversationBox' })
+defineOptions({ name: 'KeFuConversationList' })
 
 const message = useMessage() // 消息弹窗
 

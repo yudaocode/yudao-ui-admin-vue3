@@ -1,9 +1,7 @@
 <template>
-  <el-container v-if="showChatBox" class="kefu">
+  <el-container v-if="showKeFuMessageList" class="kefu">
     <el-header>
       <div class="kefu-title">{{ conversation.userNickname }}</div>
-    </el-header>
-    <el-main class="kefu-content overflow-visible">
       <!-- 加载历史消息 -->
       <div
         v-show="loadingMore"
@@ -12,6 +10,8 @@
       >
         加载更多
       </div>
+    </el-header>
+    <el-main class="kefu-content overflow-visible">
       <el-scrollbar ref="scrollbarRef" always height="calc(100vh - 495px)" @scroll="handleScroll">
         <div ref="innerRef" class="w-[100%] pb-3px">
           <!-- 消息列表 -->
@@ -119,7 +119,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.extend(relativeTime)
 
-defineOptions({ name: 'KeFuMessageBox' })
+defineOptions({ name: 'KeFuMessageList' })
 
 const message = ref('') // 消息弹窗
 
@@ -137,17 +137,24 @@ const total = ref(0) // 消息总条数
 const getMessageList = async (val: KeFuConversationRespVO) => {
   conversation.value = val
   queryParams.conversationId = val.id
+  // 情况一：已经加载完所有消息
   const messageTotal = messageList.value.length
   if (total.value > 0 && messageTotal > 0 && messageTotal === total.value) {
     return
   }
   const res = await KeFuMessageApi.getKeFuMessagePage(queryParams)
   total.value = res.total
-  for (const item of res.list) {
-    if (messageList.value.some((val) => val.id === item.id)) {
-      continue
+  // 情况二：加载最新消息
+  if (queryParams.pageNo === 1) {
+    messageList.value = res.list
+  } else {
+    // 情况三：加载历史消息
+    for (const item of res.list) {
+      if (messageList.value.some((val) => val.id === item.id)) {
+        continue
+      }
+      messageList.value.push(item)
     }
-    messageList.value.push(item)
   }
   await scrollToBottom()
 }
@@ -167,13 +174,13 @@ const refreshMessageList = async () => {
   queryParams.pageNo = 1
   await getMessageList(conversation.value)
   if (loadHistory.value) {
-    // 有下角显示有新消息提示
+    // 右下角显示有新消息提示
     showNewMessageTip.value = true
   }
 }
 
 defineExpose({ getMessageList, refreshMessageList })
-const showChatBox = computed(() => !isEmpty(conversation.value)) // 是否显示聊天区域
+const showKeFuMessageList = computed(() => !isEmpty(conversation.value)) // 是否显示聊天区域
 
 /** 处理表情选择 */
 const handleEmojiSelect = (item: Emoji) => {
@@ -252,12 +259,15 @@ const handleScroll = async ({ scrollTop }) => {
   loadingMore.value = scrollTop < 20
 }
 const handleOldMessage = async () => {
+  // 记录已有页面高度
+  const oldPageHeight = innerRef.value!.clientHeight
   loadHistory.value = true
   // 加载消息列表
   queryParams.pageNo += 1
   await getMessageList(conversation.value)
   loadingMore.value = false
-  // TODO puhui999: 等页面加载完后，获得上一页最后一条消息的位置，控制滚动到它所在位置
+  // 等页面加载完后，获得上一页最后一条消息的位置，控制滚动到它所在位置
+  scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight - oldPageHeight)
 }
 
 /**
@@ -283,23 +293,18 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
     line-height: 60px;
   }
 
+  .loadingMore {
+    width: 100%;
+    height: 50px;
+    background-color: #eee;
+    color: #666;
+    text-align: center;
+    line-height: 50px;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-in-out;
+  }
+
   &-content {
-    position: relative;
-
-    .loadingMore {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 50px;
-      background-color: #eee;
-      color: #666;
-      text-align: center;
-      line-height: 50px;
-      transform: translateY(-100%);
-      transition: transform 0.3s ease-in-out;
-    }
-
     .newMessageTip {
       position: absolute;
       bottom: 35px;
