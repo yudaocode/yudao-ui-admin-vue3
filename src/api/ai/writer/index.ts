@@ -3,37 +3,14 @@ import { fetchEventSource } from '@microsoft/fetch-event-source'
 import { getAccessToken } from '@/utils/auth'
 import { config } from '@/config/axios/config'
 
-// TODO @hhhero：可以改成 WriteVO 哈，主要是保持一致
-export interface WriteParams {
-  // TODO @hhhero：注释。每个属性的后面哈。会更简洁一点
-  /**
-   * 1:撰写 2:回复
-   */
-  type: 1 | 2
-  /**
-   * 写作内容提示 1。撰写 2回复
-   */
-  prompt: string
-  /**
-   *  原文
-   */
-  originalContent: string
-  /**
-   * 长度
-   */
-  length: number
-  /**
-   * 格式
-   */
-  format: number
-  /**
-   * 语气
-   */
-  tone: number
-  /**
-   * 语言
-   */
-  language: number
+export interface WriteVO {
+  type: 1 | 2 // 1:撰写 2:回复
+  prompt: string // 写作内容提示 1。撰写 2回复
+  originalContent: string // 原文
+  length: number // 长度
+  format: number // 格式
+  tone: number // 语气
+  language: number // 语言
 }
 
 export const writeStream = ({
@@ -43,7 +20,7 @@ export const writeStream = ({
   onError,
   ctrl
 }: {
-  data: WriteParams
+  data: WriteVO
   onMessage?: (res: any) => void
   onError?: (...args: any[]) => void
   onClose?: (...args: any[]) => void

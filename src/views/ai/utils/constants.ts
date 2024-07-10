@@ -41,6 +41,14 @@ export const AiMusicStatusEnum = {
   FAIL: 30 // 已失败
 }
 
+/**
+ * AI 写作类型的枚举
+ */
+export enum AiWriteTypeEnum {
+  WRITING = 1, // 撰写
+  REPLY // 回复
+}
+
 // ========== 【图片 UI】相关的枚举 ==========
 export const ImageHotWords = [
   '中国旗袍',
