@@ -21,17 +21,15 @@ export const AiPlatformEnum = {
   STABLE_DIFFUSION: 'StableDiffusion', // Stability AI
   MIDJOURNEY: 'Midjourney', // Midjourney
   SUNO: 'Suno', // Suno AI
-  TONG_YI_WAN_XIANG: 'TongYiWanXiang', //// 通义万相
-  YI_YAN_IMAGE: 'YiYanImage' //// 百度 image
 }
 
 export const OtherPlatformEnum:ImageModelVO [] = [
   {
-    key: AiPlatformEnum.TONG_YI_WAN_XIANG,
+    key: AiPlatformEnum.TONG_YI,
     name: '通义万相'
   },
   {
-    key: AiPlatformEnum.YI_YAN_IMAGE,
+    key: AiPlatformEnum.YI_YAN,
     name: '百度图片'
   }
 ]
@@ -203,6 +201,7 @@ export const StableDiffusionStylePresets: ImageModelVO[] = [
   }
 ]
 
+// todo @芋艿 这些是通义的风格，看要不要删除
 export const TongYiWanXiangStylePresets: ImageModelVO[] = [
   {
     key: '-1',

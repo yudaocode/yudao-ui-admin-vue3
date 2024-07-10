@@ -61,79 +61,13 @@
       </el-select>
     </el-space>
   </div>
-
-  <div class="group-item">
-    <div>
-      <el-text tag="b">风格</el-text>
-    </div>
-    <el-space wrap class="group-item-body">
-      <el-select v-model="stylePreset" placeholder="Select" size="large" class="!w-350px">
-        <el-option
-          v-for="item in stylePresetList"
-          :key="item.key"
-          :label="item.name"
-          :value="item.key"
-        />
-      </el-select>
-    </el-space>
-  </div>
   <div class="group-item">
     <div>
       <el-text tag="b">图片尺寸</el-text>
     </div>
     <el-space wrap class="group-item-body">
-      <el-input v-model="width" class="w-170px" placeholder="图片宽度" />
-      <el-input v-model="height" class="w-170px" placeholder="图片高度" />
-    </el-space>
-  </div>
-  <div class="group-item">
-    <div>
-      <el-text tag="b">迭代步数</el-text>
-    </div>
-    <el-space wrap class="group-item-body">
-      <el-input
-        v-model="steps"
-        type="number"
-        size="large"
-        class="!w-350px"
-        placeholder="Please input"
-      />
-    </el-space>
-  </div>
-  <div class="group-item">
-    <div>
-      <el-text tag="b">引导系数</el-text>
-    </div>
-    <el-space wrap class="group-item-body">
-      <el-input
-        v-model="scale"
-        type="number"
-        size="large"
-        class="!w-350px"
-        placeholder="Please input"
-      />
-    </el-space>
-  </div>
-  <div class="group-item">
-    <div>
-      <el-text tag="b">随机因子</el-text>
-    </div>
-    <el-space wrap class="group-item-body">
-      <el-input
-        v-model="seed"
-        type="number"
-        size="large"
-        class="!w-350px"
-        placeholder="Please input"
-      />
-    </el-space>
-  </div>
-  <div class="group-item">
-    <div>
-      <el-text tag="b">参考图</el-text>
-    </div>
-    <el-space wrap class="group-item-body">
-      <UploadImg v-model="referImageUrl" height="120px" width="120px" />
+      <el-input v-model="width" type="number" class="w-170px" placeholder="图片宽度" />
+      <el-input v-model="height" type="number" class="w-170px" placeholder="图片高度" />
     </el-space>
   </div>
   <div class="btns">
@@ -144,11 +78,12 @@
 </template>
 <script setup lang="ts">
 import {ImageApi, ImageDrawReqVO, ImageVO} from '@/api/ai/image'
-import {hasChinese} from '@/views/ai/utils/utils'
 import {
   AiPlatformEnum,
-  ImageHotWords, ImageModelVO, OtherPlatformEnum, TongYiWanXiangModels,
-  TongYiWanXiangStylePresets
+  ImageHotWords,
+  ImageModelVO,
+  OtherPlatformEnum,
+  TongYiWanXiangModels
 } from '@/views/ai/utils/constants'
 
 const message = useMessage() // 消息弹窗
@@ -160,13 +95,7 @@ const selectHotWord = ref<string>('') // 选中的热词
 const prompt = ref<string>('') // 提示词
 const width = ref<number>(512) // 图片宽度
 const height = ref<number>(512) // 图片高度
-const steps = ref<number>(20) // 迭代步数
-const seed = ref<number>(42) // 控制生成图像的随机性
-const scale = ref<number>(7.5) // 引导系数
-const referImageUrl = ref<any>() // 参考图
-const stylePreset = ref<string>('-1') // 风格
-const stylePresetList = ref<ImageModelVO[]>(TongYiWanXiangStylePresets) // 风格列表
-const otherPlatform = ref<string>(AiPlatformEnum.TONG_YI_WAN_XIANG) // 平台
+const otherPlatform = ref<string>(AiPlatformEnum.TONG_YI) // 平台
 const models = ref<ImageModelVO[]>(TongYiWanXiangModels) // 模型
 const model = ref<string>(models.value[0].key) // 模型
 
@@ -198,16 +127,11 @@ const handleGenerateImage = async () => {
     // 发送请求
     const form = {
       platform: otherPlatform.value,
-      model: '---', // 1
-      prompt: prompt.value, // 提示词 1
-      width: width.value, // 图片宽度 1
-      height: height.value, // 图片高度 1
+      model: model.value, // 模型
+      prompt: prompt.value, // 提示词
+      width: width.value, // 图片宽度
+      height: height.value, // 图片高度
       options: {
-        seed: seed.value, // 随机种子 1
-        steps: steps.value, // 图片生成步数 1
-        scale: scale.value, // 引导系数 1
-        stylePreset: stylePreset.value, // 风格
-        referImage: referImageUrl.value // 参考图
       }
     } as ImageDrawReqVO
     await ImageApi.drawImage(form)
@@ -224,29 +148,22 @@ const settingValues = async (detail: ImageVO) => {
   prompt.value = detail.prompt
   width.value = detail.width
   height.value = detail.height
-  seed.value = detail.options?.seed
-  steps.value = detail.options?.steps
-  scale.value = detail.options?.scale
-  stylePreset.value = detail.options?.stylePreset
+
 }
 
 /** 平台切换 */
 const handlerPlatformChange = async (platform) => {
   // 切换平台，切换模型、风格
-  if (AiPlatformEnum.TONG_YI_WAN_XIANG === platform) {
+  if (AiPlatformEnum.YI_YAN === platform) {
     models.value = TongYiWanXiangModels
-    stylePresetList.value = TongYiWanXiangStylePresets
   } else {
     models.value = []
-    stylePresetList.value = []
   }
   // 切换平台，默认选择一个风格
-  if (stylePresetList.value.length > 0) {
+  if (models.value.length > 0) {
     model.value = models.value[0].key
-    stylePreset.value = stylePresetList.value[0].key
   } else  {
     model.value = ''
-    stylePreset.value = ''
   }
 }
 
