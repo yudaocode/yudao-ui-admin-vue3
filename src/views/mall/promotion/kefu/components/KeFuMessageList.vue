@@ -138,17 +138,13 @@ const getMessageList = async (val: KeFuConversationRespVO, conversationChange: b
   }
   conversation.value = val
   queryParams.conversationId = val.id
-  // 情况一：已经加载完所有消息
-  if (skipGetMessageList.value) {
-    return
-  }
   const res = await KeFuMessageApi.getKeFuMessagePage(queryParams)
   total.value = res.total
-  // 情况二：加载最新消息
+  // 情况一：加载最新消息
   if (queryParams.pageNo === 1) {
     messageList.value = res.list
   } else {
-    // 情况三：加载历史消息
+    // 情况二：加载历史消息
     for (const item of res.list) {
       if (messageList.value.some((val) => val.id === item.id)) {
         continue
