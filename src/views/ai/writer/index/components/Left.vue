@@ -24,7 +24,6 @@
     </h3>
   </DefineLabel>
 
-  <!-- TODO @hhhero 小屏幕的时候是定位在左边的，大屏是分开的 -->
   <div class="relative" v-bind="$attrs">
     <!-- tab -->
     <div
@@ -106,12 +105,11 @@ import Tag from './Tag.vue'
 import { WriteVO } from '@/api/ai/writer'
 import { omit } from 'lodash-es'
 import { getIntDictOptions } from '@/utils/dict'
-import { WriteExampleDataJson } from '@/views/ai/utils/utils'
-import { AiWriteTypeEnum } from "@/views/ai/utils/constants";
+import { AiWriteTypeEnum, WriteExample } from '@/views/ai/utils/constants'
 
 type TabType = WriteVO['type']
 
-const message = useMessage()
+const message = useMessage() // 消息弹窗
 
 defineProps<{
   isWriting: boolean
@@ -127,15 +125,17 @@ const emits = defineEmits<{
 const example = (type: 'write' | 'reply') => {
   formData.value = {
     ...initData,
-    ...omit(WriteExampleDataJson[type], ['data'])
+    ...omit(WriteExample[type], ['data'])
   }
   emits('example', type)
 }
+
 /** 重置，将表单值作为初选值 **/
 const reset = () => {
-  formData.value = {...initData}
+  formData.value = { ...initData }
   emits('reset')
 }
+
 const selectedTab = ref<TabType>(AiWriteTypeEnum.WRITING)
 const tabs: {
   text: string
@@ -151,10 +151,12 @@ const [DefineTab, ReuseTab] = createReusableTemplate<{
 }>()
 
 /**
- * 可以在template里边定义可复用的组件，DefineLabel，ReuseLabel是采用的解构赋值，都是Vue组件
- * 直接通过组件的形式使用，<DefineLabel v-slot="{ label, hint, hintClick }">中间是需要复用的组件代码</DefineLabel>，通过<ReuseLabel />来使用定义的组件
- * DefineLabel里边的v-slot="{ label, hint, hintClick }“相当于是解构了组件的prop，需要注意的是boolean类型，需要显式的赋值比如 <ReuseLabel :flag="true" />
- * 事件也得以prop形式传入，不能是@event的形式，比如下面的hintClick需要<ReuseLabel :hintClick="() => { doSomething }"/>
+ * 可以在 template 里边定义可复用的组件，DefineLabel，ReuseLabel 是采用的解构赋值，都是 Vue 组件
+ *
+ * 直接通过组件的形式使用，<DefineLabel v-slot="{ label, hint, hintClick }"> 中间是需要复用的组件代码 <DefineLabel />，通过 <ReuseLabel /> 来使用定义的组件
+ * DefineLabel 里边的 v-slot="{ label, hint, hintClick }"相当于是解构了组件的 prop，需要注意的是 boolean 类型，需要显式的赋值比如 <ReuseLabel :flag="true" />
+ * 事件也得以 prop 形式传入，不能是 @event的形式，比如下面的 hintClick 需要<ReuseLabel :hintClick="() => { doSomething }"/>
+ *
  * @see https://vueuse.org/createReusableTemplate
  */
 const [DefineLabel, ReuseLabel] = createReusableTemplate<{
@@ -174,12 +176,14 @@ const initData: WriteVO = {
   format: 1
 }
 const formData = ref<WriteVO>({ ...initData })
+
 /** 切换tab **/
 const switchTab = (value: TabType) => {
   selectedTab.value = value
   formData.value = { ...initData }
 }
 
+/** 提交写作 */
 const submit = () => {
   if (selectedTab.value === 2 && !formData.value.originalContent) {
     message.warning('请输入原文')
@@ -192,7 +196,7 @@ const submit = () => {
   emits('submit', {
     /** 撰写的时候没有 originalContent 字段**/
     ...(selectedTab.value === 1 ? omit(formData.value, ['originalContent']) : formData.value),
-    /** 使用选中tab值覆盖当前的type类型 **/
+    /** 使用选中 tab 值覆盖当前的 type 类型 **/
     type: selectedTab.value
   })
 }

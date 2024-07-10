@@ -1,4 +1,5 @@
 <template>
+  <!-- TODO @hhhero：整体没啥问题了。感觉整体框框的样子可以优化下，可以参考下绘图界面。例如说：1）写作的“预览”和绘图的“绘图任务”的 header；2）左右的边界，有个竖线之类的。 -->
   <div class="h-[calc(100vh-var(--top-tool-height)-var(--app-footer-height)-40px)] -m-5 flex">
     <Left
       :is-writing="isWriting"
@@ -18,10 +19,10 @@
 </template>
 
 <script setup lang="ts">
-import Left from '../components/Left.vue'
-import Right from '../components/Right.vue'
+import Left from './components/Left.vue'
+import Right from './components/Right.vue'
 import * as WriteApi from '@/api/ai/writer'
-import { WriteExampleDataJson } from '@/views/ai/utils/utils'
+import { WriteExample } from '@/views/ai/utils/constants'
 
 const message = useMessage()
 
@@ -51,9 +52,9 @@ const submit = (data) => {
         return
       }
       writeResult.value = writeResult.value + data
-      nextTick(() => {
-        rightRef.value?.scrollToBottom()
-      })
+      // 滚动到底部
+      await nextTick()
+      rightRef.value?.scrollToBottom()
     },
     ctrl: abortController.value,
     onClose: stopStream,
@@ -66,7 +67,7 @@ const submit = (data) => {
 
 /** 点击示例触发 */
 const handleExampleClick = (type: keyof typeof WriteExampleDataJson) => {
-  writeResult.value = WriteExampleDataJson[type].data
+  writeResult.value = WriteExample[type].data
 }
 
 /** 点击重置的时候清空写作的结果**/

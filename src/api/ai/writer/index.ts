@@ -2,9 +2,10 @@ import { fetchEventSource } from '@microsoft/fetch-event-source'
 
 import { getAccessToken } from '@/utils/auth'
 import { config } from '@/config/axios/config'
+import { AiWriteTypeEnum } from '@/views/ai/utils/constants'
 
 export interface WriteVO {
-  type: 1 | 2 // 1:撰写 2:回复
+  type: AiWriteTypeEnum.WRITING | AiWriteTypeEnum.REPLY // 1:撰写 2:回复
   prompt: string // 写作内容提示 1。撰写 2回复
   originalContent: string // 原文
   length: number // 长度
@@ -13,6 +14,7 @@ export interface WriteVO {
   language: number // 语言
 }
 
+// TODO @hhero：搞成 WriteApi，类似 ConversationApi 一样。这样更有类的概念，后续引入某个 Api，然后调用它的方法就可以了。
 export const writeStream = ({
   data,
   onClose,
