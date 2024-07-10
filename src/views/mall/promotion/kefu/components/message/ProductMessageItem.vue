@@ -11,7 +11,7 @@
       ]"
     >
       <ProductItem
-        :img="getMessageContent.picUrl"
+        :picUrl="getMessageContent.picUrl"
         :price="getMessageContent.price"
         :skuText="getMessageContent.introduction"
         :title="getMessageContent.spuName"

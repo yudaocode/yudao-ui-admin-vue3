@@ -1,14 +1,12 @@
 <!-- 图片选择 -->
 <template>
   <div>
-    <!-- TODO @puhui999：unocss -->
-    <img :src="Picture" style="width: 35px; height: 35px" @click="selectAndUpload" />
+    <img :src="Picture" class="w-35px h-35px" @click="selectAndUpload" />
   </div>
 </template>
 
 <script lang="ts" setup>
-// TODO @puhui999：images 换成 asserts
-import Picture from '@/views/mall/promotion/kefu/components/images/picture.svg'
+import Picture from '@/views/mall/promotion/kefu/components/asserts/picture.svg'
 import * as FileApi from '@/api/infra/file'
 
 defineOptions({ name: 'PictureSelectUpload' })

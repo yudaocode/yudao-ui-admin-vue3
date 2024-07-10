@@ -1,23 +1,22 @@
 <template>
   <el-row :gutter="10">
-    <!-- TODO @puhui999：KeFuConversationBox => KeFuConversationList ；KeFuChatBox => KeFuMessageList -->
     <!-- 会话列表 -->
     <el-col :span="8">
       <ContentWrap>
-        <KeFuConversationBox ref="keFuConversationRef" @change="handleChange" />
+        <KeFuConversationList ref="keFuConversationRef" @change="handleChange" />
       </ContentWrap>
     </el-col>
     <!-- 会话详情（选中会话的消息列表） -->
     <el-col :span="16">
       <ContentWrap>
-        <KeFuChatBox ref="keFuChatBoxRef" @change="getConversationList" />
+        <KeFuMessageList ref="keFuChatBoxRef" @change="getConversationList" />
       </ContentWrap>
     </el-col>
   </el-row>
 </template>
 
 <script lang="ts" setup>
-import { KeFuChatBox, KeFuConversationBox } from './components'
+import { KeFuConversationList, KeFuMessageList } from './components'
 import { WebSocketMessageTypeConstants } from './components/tools/constants'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { getAccessToken } from '@/utils/auth'
@@ -36,7 +35,7 @@ const server = ref(
 
 /** 发起 WebSocket 连接 */
 const { data, close, open } = useWebSocket(server.value, {
-  autoReconnect: false, // TODO @puhui999：重连要加下
+  autoReconnect: true,
   heartbeat: true
 })
 
@@ -78,13 +77,13 @@ watchEffect(() => {
 // ======================= WebSocket end =======================
 
 /** 加载会话列表 */
-const keFuConversationRef = ref<InstanceType<typeof KeFuConversationBox>>()
+const keFuConversationRef = ref<InstanceType<typeof KeFuConversationList>>()
 const getConversationList = () => {
   keFuConversationRef.value?.getConversationList()
 }
 
 /** 加载指定会话的消息列表 */
-const keFuChatBoxRef = ref<InstanceType<typeof KeFuChatBox>>()
+const keFuChatBoxRef = ref<InstanceType<typeof KeFuMessageList>>()
 const handleChange = (conversation: KeFuConversationRespVO) => {
   keFuChatBoxRef.value?.getMessageList(conversation)
 }

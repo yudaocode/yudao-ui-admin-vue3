@@ -1,11 +1,9 @@
 <template>
   <el-container v-if="showChatBox" class="kefu">
     <el-header>
-      <!-- TODO @puhui999：keFuConversation => conversation -->
-      <div class="kefu-title">{{ keFuConversation.userNickname }}</div>
+      <div class="kefu-title">{{ conversation.userNickname }}</div>
     </el-header>
-    <!-- TODO @puhui999：unocss -->
-    <el-main class="kefu-content" style="overflow: visible">
+    <el-main class="kefu-content overflow-visible">
       <!-- 加载历史消息 -->
       <div
         v-show="loadingMore"
@@ -48,7 +46,7 @@
             >
               <el-avatar
                 v-if="item.senderType === UserTypeEnum.MEMBER"
-                :src="keFuConversation.userAvatar"
+                :src="conversation.userAvatar"
                 alt="avatar"
               />
               <div
@@ -127,7 +125,7 @@ const message = ref('') // 消息弹窗
 
 const messageTool = useMessage()
 const messageList = ref<KeFuMessageRespVO[]>([]) // 消息列表
-const keFuConversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
+const conversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
 const showNewMessageTip = ref(false) // 显示有新消息提示
 const queryParams = reactive({
   pageNo: 1,
@@ -136,9 +134,9 @@ const queryParams = reactive({
 const total = ref(0) // 消息总条数
 
 /** 获得消息列表 */
-const getMessageList = async (conversation: KeFuConversationRespVO) => {
-  keFuConversation.value = conversation
-  queryParams.conversationId = conversation.id
+const getMessageList = async (val: KeFuConversationRespVO) => {
+  conversation.value = val
+  queryParams.conversationId = val.id
   const messageTotal = messageList.value.length
   if (total.value > 0 && messageTotal > 0 && messageTotal === total.value) {
     return
@@ -162,12 +160,12 @@ const getMessageList0 = computed(() => {
 
 /** 刷新消息列表 */
 const refreshMessageList = async () => {
-  if (!keFuConversation.value) {
+  if (!conversation.value) {
     return
   }
 
   queryParams.pageNo = 1
-  await getMessageList(keFuConversation.value)
+  await getMessageList(conversation.value)
   if (loadHistory.value) {
     // 有下角显示有新消息提示
     showNewMessageTip.value = true
@@ -175,7 +173,7 @@ const refreshMessageList = async () => {
 }
 
 defineExpose({ getMessageList, refreshMessageList })
-const showChatBox = computed(() => !isEmpty(keFuConversation.value)) // 是否显示聊天区域
+const showChatBox = computed(() => !isEmpty(conversation.value)) // 是否显示聊天区域
 
 /** 处理表情选择 */
 const handleEmojiSelect = (item: Emoji) => {
@@ -186,7 +184,7 @@ const handleEmojiSelect = (item: Emoji) => {
 const handleSendPicture = async (picUrl: string) => {
   // 组织发送消息
   const msg = {
-    conversationId: keFuConversation.value.id,
+    conversationId: conversation.value.id,
     contentType: KeFuMessageContentTypeEnum.IMAGE,
     content: picUrl
   }
@@ -202,7 +200,7 @@ const handleSendMessage = async () => {
   }
   // 2. 组织发送消息
   const msg = {
-    conversationId: keFuConversation.value.id,
+    conversationId: conversation.value.id,
     contentType: KeFuMessageContentTypeEnum.TEXT,
     content: message.value
   }
@@ -215,7 +213,7 @@ const sendMessage = async (msg: any) => {
   await KeFuMessageApi.sendKeFuMessage(msg)
   message.value = ''
   // 加载消息列表
-  await getMessageList(keFuConversation.value)
+  await getMessageList(conversation.value)
   // 滚动到最新消息处
   await scrollToBottom()
 }
@@ -233,7 +231,7 @@ const scrollToBottom = async () => {
   scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight)
   showNewMessageTip.value = false
   // 2.2 消息已读
-  await KeFuMessageApi.updateKeFuMessageReadStatus(keFuConversation.value.id)
+  await KeFuMessageApi.updateKeFuMessageReadStatus(conversation.value.id)
 }
 
 /** 查看新消息 */
@@ -257,7 +255,7 @@ const handleOldMessage = async () => {
   loadHistory.value = true
   // 加载消息列表
   queryParams.pageNo += 1
-  await getMessageList(keFuConversation.value)
+  await getMessageList(conversation.value)
   loadingMore.value = false
   // TODO puhui999: 等页面加载完后，获得上一页最后一条消息的位置，控制滚动到它所在位置
 }
