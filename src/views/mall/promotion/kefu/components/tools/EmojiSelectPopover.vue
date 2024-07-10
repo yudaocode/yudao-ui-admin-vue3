@@ -17,6 +17,7 @@
           class="icon-item mr-2 mt-1 w-1/10 flex cursor-pointer items-center justify-center border border-solid p-2"
           @click="handleSelect(item)"
         >
+          <!-- TODO @puhui999：换成 unocss -->
           <img :src="item.url" style="width: 24px; height: 24px" />
         </li>
       </ul>
@@ -31,6 +32,7 @@ import { Emoji, useEmoji } from './emoji'
 const { getEmojiList } = useEmoji()
 const emojiList = computed(() => getEmojiList())
 
+/** 选择 emoji 表情 */
 const emits = defineEmits<{
   (e: 'select-emoji', v: Emoji)
 }>()

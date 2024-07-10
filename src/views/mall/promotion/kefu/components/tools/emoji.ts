@@ -58,8 +58,11 @@ export interface Emoji {
 
 export const useEmoji = () => {
   const emojiPathList = ref<any[]>([])
-  // 加载本地图片
+
+  // TODO @puhui999：initStaticEmoji 会不会更好
+  /** 加载本地图片 */
   const getStaticEmojiPath = async () => {
+    // TODO @puhui999：images 改成 asserts 更合适哈。
     const pathList = import.meta.glob(
       '@/views/mall/promotion/kefu/components/images/*.{png,jpg,jpeg,svg}'
     )
@@ -68,17 +71,25 @@ export const useEmoji = () => {
       emojiPathList.value.push(imageModule.default)
     }
   }
-  // 初始化
+
+  /** 初始化 */
   onMounted(async () => {
     if (isEmpty(emojiPathList.value)) {
       await getStaticEmojiPath()
     }
   })
 
-  // 处理表情
+  // TODO @puhui999：建议 function 都改成 const 这种来定义哈。保持统一风格
+  /**
+   * 将文本中的表情替换成图片
+   *
+   * @param data 文本 TODO @puhui999：data => content
+   * @return 替换后的文本
+   */
   function replaceEmoji(data: string) {
     let newData = data
     if (typeof newData !== 'object') {
+      // TODO @puhui999： \] 是不是可以简化成 ]。我看 idea 提示了哈
       const reg = /\[(.+?)\]/g // [] 中括号
       const zhEmojiName = newData.match(reg)
       if (zhEmojiName) {
@@ -94,7 +105,11 @@ export const useEmoji = () => {
     return newData
   }
 
-  // 获得所有表情
+  /**
+   * 获得所有表情
+   *
+   * @return 表情列表
+   */
   function getEmojiList(): Emoji[] {
     return emojiList.map((item) => ({
       url: selEmojiFile(item.name),
@@ -102,6 +117,7 @@ export const useEmoji = () => {
     })) as Emoji[]
   }
 
+  // TODO @puhui999：getEmojiFileByName 会不会更容易理解哈
   function selEmojiFile(name: string) {
     for (const emoji of emojiList) {
       if (emoji.name === name) {

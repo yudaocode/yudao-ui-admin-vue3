@@ -1,9 +1,12 @@
 <template>
   <el-container v-if="showChatBox" class="kefu">
     <el-header>
+      <!-- TODO @puhui999：keFuConversation => conversation -->
       <div class="kefu-title">{{ keFuConversation.userNickname }}</div>
     </el-header>
+    <!-- TODO @puhui999：unocss -->
     <el-main class="kefu-content" style="overflow: visible">
+      <!-- 加载历史消息 -->
       <div
         v-show="loadingMore"
         class="loadingMore flex justify-center items-center cursor-pointer"
@@ -13,6 +16,7 @@
       </div>
       <el-scrollbar ref="scrollbarRef" always height="calc(100vh - 495px)" @scroll="handleScroll">
         <div ref="innerRef" class="w-[100%] pb-3px">
+          <!-- 消息列表 -->
           <div v-for="(item, index) in getMessageList0" :key="item.id" class="w-[100%]">
             <div class="flex justify-center items-center mb-20px">
               <!-- 日期 -->
@@ -118,8 +122,10 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(relativeTime)
 
 defineOptions({ name: 'KeFuMessageBox' })
+
+const message = ref('') // 消息弹窗
+
 const messageTool = useMessage()
-const message = ref('') // 消息
 const messageList = ref<KeFuMessageRespVO[]>([]) // 消息列表
 const keFuConversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
 const showNewMessageTip = ref(false) // 显示有新消息提示
@@ -128,7 +134,8 @@ const queryParams = reactive({
   conversationId: 0
 })
 const total = ref(0) // 消息总条数
-// 获得消息
+
+/** 获得消息列表 */
 const getMessageList = async (conversation: KeFuConversationRespVO) => {
   keFuConversation.value = conversation
   queryParams.conversationId = conversation.id
@@ -146,12 +153,14 @@ const getMessageList = async (conversation: KeFuConversationRespVO) => {
   }
   await scrollToBottom()
 }
+
+/** 按照时间倒序，获取消息列表 */
 const getMessageList0 = computed(() => {
   messageList.value.sort((a: any, b: any) => a.createTime - b.createTime)
   return messageList.value
 })
 
-// 刷新消息列表
+/** 刷新消息列表 */
 const refreshMessageList = async () => {
   if (!keFuConversation.value) {
     return
@@ -164,14 +173,16 @@ const refreshMessageList = async () => {
     showNewMessageTip.value = true
   }
 }
+
 defineExpose({ getMessageList, refreshMessageList })
-// 是否显示聊天区域
-const showChatBox = computed(() => !isEmpty(keFuConversation.value))
-// 处理表情选择
+const showChatBox = computed(() => !isEmpty(keFuConversation.value)) // 是否显示聊天区域
+
+/** 处理表情选择 */
 const handleEmojiSelect = (item: Emoji) => {
   message.value += item.name
 }
-// 处理图片发送
+
+/** 处理图片发送 */
 const handleSendPicture = async (picUrl: string) => {
   // 组织发送消息
   const msg = {
@@ -181,7 +192,8 @@ const handleSendPicture = async (picUrl: string) => {
   }
   await sendMessage(msg)
 }
-// 发送消息
+
+/** 发送文本消息 */
 const handleSendMessage = async () => {
   // 1. 校验消息是否为空
   if (isEmpty(unref(message.value))) {
@@ -197,7 +209,7 @@ const handleSendMessage = async () => {
   await sendMessage(msg)
 }
 
-// 发送消息 【共用】
+/** 真正发送消息 【共用】*/
 const sendMessage = async (msg: any) => {
   // 发送消息
   await KeFuMessageApi.sendKeFuMessage(msg)
@@ -208,9 +220,9 @@ const sendMessage = async (msg: any) => {
   await scrollToBottom()
 }
 
+/** 滚动到底部 */
 const innerRef = ref<HTMLDivElement>()
 const scrollbarRef = ref<InstanceType<typeof ElScrollbarType>>()
-// 滚动到底部
 const scrollToBottom = async () => {
   // 1. 首次加载时滚动到最新消息，如果加载的是历史消息则不滚动
   if (loadHistory.value) {
@@ -223,12 +235,14 @@ const scrollToBottom = async () => {
   // 2.2 消息已读
   await KeFuMessageApi.updateKeFuMessageReadStatus(keFuConversation.value.id)
 }
-// 查看新消息
+
+/** 查看新消息 */
 const handleToNewMessage = async () => {
   loadHistory.value = false
   await scrollToBottom()
 }
 
+/** 加载历史消息 */
 const loadingMore = ref(false) // 滚动到顶部加载更多
 const loadHistory = ref(false) // 加载历史消息
 const handleScroll = async ({ scrollTop }) => {
@@ -247,8 +261,10 @@ const handleOldMessage = async () => {
   loadingMore.value = false
   // TODO puhui999: 等页面加载完后，获得上一页最后一条消息的位置，控制滚动到它所在位置
 }
+
 /**
  * 是否显示时间
+ *
  * @param {*} item - 数据
  * @param {*} index - 索引
  */

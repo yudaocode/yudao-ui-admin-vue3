@@ -32,5 +32,7 @@ defineOptions({ name: 'ProductMessageItem' })
 const props = defineProps<{
   message: KeFuMessageRespVO
 }>()
+
+/** 获悉消息内容 */
 const getMessageContent = computed(() => JSON.parse(props.message.content))
 </script>

@@ -90,6 +90,8 @@ const props = defineProps({
     default: ''
   }
 })
+
+/** SKU 展示字符串 */
 const skuString = computed(() => {
   if (!props.skuText) {
     return ''
@@ -99,6 +101,8 @@ const skuString = computed(() => {
   }
   return props.skuText
 })
+
+// TODO @puhui999：可以使用 preview-teleported
 /** 图预览 */
 const imagePrediv = (imgUrl: string) => {
   createImageViewer({

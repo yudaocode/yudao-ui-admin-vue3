@@ -1,6 +1,5 @@
 <template>
   <div class="kefu">
-    <!-- TODO @puhui999：item => conversation 会不会更容易理解 -->
     <div
       v-for="(item, index) in conversationList"
       :key="item.id"

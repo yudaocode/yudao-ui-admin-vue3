@@ -10,6 +10,7 @@
             : ''
       ]"
     >
+      <!-- TODO @puhui999：unocss -->
       <el-image
         :src="message.content"
         fit="contain"
@@ -30,6 +31,7 @@ defineOptions({ name: 'ImageMessageItem' })
 defineProps<{
   message: KeFuMessageRespVO
 }>()
+
 /** 图预览 */
 const imagePreview = (imgUrl: string) => {
   createImageViewer({

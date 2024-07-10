@@ -1,19 +1,24 @@
+<!-- 图片选择 -->
 <template>
   <div>
+    <!-- TODO @puhui999：unocss -->
     <img :src="Picture" style="width: 35px; height: 35px" @click="selectAndUpload" />
   </div>
 </template>
 
 <script lang="ts" setup>
+// TODO @puhui999：images 换成 asserts
 import Picture from '@/views/mall/promotion/kefu/components/images/picture.svg'
 import * as FileApi from '@/api/infra/file'
 
 defineOptions({ name: 'PictureSelectUpload' })
-const message = useMessage()
+
+const message = useMessage() // 消息弹窗
+
+/** 选择并上传文件 */
 const emits = defineEmits<{
   (e: 'send-picture', v: string): void
 }>()
-// 选择并上传文件
 const selectAndUpload = async () => {
   const files: any = await getFiles()
   message.success('图片发送中请稍等。。。')
@@ -23,6 +28,7 @@ const selectAndUpload = async () => {
 
 /**
  * 唤起文件选择窗口，并获取选择的文件
+ *
  * @param {Object} options - 配置选项
  * @param {boolean} [options.multiple=true] - 是否支持多选
  * @param {string} [options.accept=''] - 文件上传格式限制
@@ -54,7 +60,7 @@ async function getFiles(options = {}) {
 
   // 等待文件选择元素的 change 事件
   try {
-    const files = await new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       input.addEventListener('change', (event: any) => {
         const filesArray = Array.from(event?.target?.files || [])
 
@@ -68,9 +74,9 @@ async function getFiles(options = {}) {
         }
 
         // 判断是否超出上传文件大小限制
-        const oversizedFiles = filesArray.filter((file: File) => file.size / 1024 ** 2 > fileSize)
-        if (oversizedFiles.length > 0) {
-          reject({ errorType: 'fileSize', files: oversizedFiles })
+        const overSizedFiles = filesArray.filter((file: File) => file.size / 1024 ** 2 > fileSize)
+        if (overSizedFiles.length > 0) {
+          reject({ errorType: 'fileSize', files: overSizedFiles })
           return
         }
 
@@ -79,8 +85,6 @@ async function getFiles(options = {}) {
         resolve(fileList)
       })
     })
-
-    return files
   } catch (error) {
     console.error('选择文件出错:', error)
     throw error

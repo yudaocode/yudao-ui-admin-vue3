@@ -18,6 +18,7 @@
           </div>
         </div>
         <div v-for="item in getMessageContent.items" :key="item.id" class="border-bottom">
+          <!-- TODO @puhui999：要不把 img => picUrl 类似这种，搞的更匹配一点 -->
           <ProductItem
             :img="item.picUrl"
             :num="item.count"
@@ -29,10 +30,10 @@
         <div class="pay-box mt-30px flex justify-end pr-20px">
           <div class="flex items-center">
             <div class="discounts-title pay-color"
-              >共 {{ getMessageContent.productCount }} 件商品,总金额:
+              >共 {{ getMessageContent?.productCount }} 件商品,总金额:
             </div>
             <div class="discounts-money pay-color">
-              ￥{{ fenToYuan(getMessageContent.payPrice) }}
+              ￥{{ fenToYuan(getMessageContent?.payPrice) }}
             </div>
           </div>
         </div>
