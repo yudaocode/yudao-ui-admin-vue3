@@ -69,6 +69,7 @@ import { getIntDictOptions, getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ChatRoleApi, ChatRoleVO } from '@/api/ai/model/chatRole'
 import { CommonStatusEnum } from '@/utils/constants'
 import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
+import {FormRules} from "element-plus";
 
 /** AI 聊天角色 表单 */
 defineOptions({ name: 'ChatRoleForm' })
@@ -92,7 +93,6 @@ const formData = ref({
   publicStatus: true,
   status: CommonStatusEnum.ENABLE
 })
-const formRules = ref() // reactive(formRulesObj)
 const formRef = ref() // 表单 Ref
 const chatModelList = ref([] as ChatModelVO[]) // 聊天模型列表
 
@@ -101,20 +101,15 @@ const isUser = computed(() => {
   return formType.value === 'my-create' || formType.value === 'my-update'
 })
 
-// TODO @fan：直接使用 formRules；只要隐藏掉的字段，它是不会校验的哈；
-const getFormRules = async (type: string) => {
-  let formRulesObj = {
-    name: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }],
-    avatar: [{ required: true, message: '角色头像不能为空', trigger: 'blur' }],
-    category: [{ required: true, message: '角色类别不能为空', trigger: 'blur' }],
-    sort: [{ required: true, message: '角色排序不能为空', trigger: 'blur' }],
-    description: [{ required: true, message: '角色描述不能为空', trigger: 'blur' }],
-    systemMessage: [{ required: true, message: '角色设定不能为空', trigger: 'blur' }],
-    publicStatus: [{ required: true, message: '是否公开不能为空', trigger: 'blur' }]
-  }
-
-  formRules.value = reactive(formRulesObj)
-}
+const formRules = reactive<FormRules>({
+  name: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }],
+  avatar: [{ required: true, message: '角色头像不能为空', trigger: 'blur' }],
+  category: [{ required: true, message: '角色类别不能为空', trigger: 'blur' }],
+  sort: [{ required: true, message: '角色排序不能为空', trigger: 'blur' }],
+  description: [{ required: true, message: '角色描述不能为空', trigger: 'blur' }],
+  systemMessage: [{ required: true, message: '角色设定不能为空', trigger: 'blur' }],
+  publicStatus: [{ required: true, message: '是否公开不能为空', trigger: 'blur' }]
+})
 
 /** 打开弹窗 */
 // TODO @fan：title 是不是收敛到 type 判断生成 title，会更合理
@@ -122,7 +117,6 @@ const open = async (type: string, id?: number, title?: string) => {
   dialogVisible.value = true
   dialogTitle.value = title || t('action.' + type)
   formType.value = type
-  getFormRules(type)
   resetForm()
   // 修改时，设置数据
   if (id) {
