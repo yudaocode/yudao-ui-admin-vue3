@@ -185,9 +185,11 @@ onUnmounted(async () => {
   }
 })
 </script>
-
-<!-- TODO fan：这 2 个 scss 可以合并么？ -->
 <style lang="scss">
+.dr-task {
+  width: 100%;
+  height: 100%;
+}
 .task-card {
   margin: 0;
   padding: 0;
@@ -227,11 +229,5 @@ onUnmounted(async () => {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-}
-</style>
-<style scoped lang="scss">
-.dr-task {
-  width: 100%;
-  height: 100%;
 }
 </style>
