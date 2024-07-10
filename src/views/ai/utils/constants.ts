@@ -20,8 +20,22 @@ export const AiPlatformEnum = {
   Ollama: 'Ollama',
   STABLE_DIFFUSION: 'StableDiffusion', // Stability AI
   MIDJOURNEY: 'Midjourney', // Midjourney
-  SUNO: 'Suno' // Suno AI
+  SUNO: 'Suno', // Suno AI
+  TONG_YI_WAN_XIANG: 'TongYiWanXiang', //// 通义万相
+  YI_YAN_IMAGE: 'YiYanImage' //// 百度 image
 }
+
+export const OtherPlatformEnum:ImageModelVO [] = [
+  {
+    key: AiPlatformEnum.TONG_YI_WAN_XIANG,
+    name: '通义万相'
+  },
+  {
+    key: AiPlatformEnum.YI_YAN_IMAGE,
+    name: '百度图片'
+  }
+]
+
 
 /**
  * AI 图像生成状态的枚举
@@ -186,6 +200,64 @@ export const StableDiffusionStylePresets: ImageModelVO[] = [
   {
     key: 'tile-texture',
     name: 'tile-texture'
+  }
+]
+
+export const TongYiWanXiangStylePresets: ImageModelVO[] = [
+  {
+    key: '-1',
+    name: '上传图像风格'
+  },
+  {
+    key: '0',
+    name: '复古漫画'
+  },
+  {
+    key: '1',
+    name: '3D童话'
+  },
+  {
+    key: '2',
+    name: '二次元'
+  },
+  {
+    key: '3',
+    name: '小清新'
+  },
+  {
+    key: '4',
+    name: '未来科技'
+  },
+  {
+    key: '5',
+    name: '国画古风'
+  },
+  {
+    key: '6',
+    name: '将军百战'
+  },
+  {
+    key: '7',
+    name: '炫彩卡通'
+  },
+  {
+    key: '8',
+    name: '清雅国风'
+  },
+  {
+    key: '9',
+    name: '喜迎新年'
+  }
+]
+
+export const TongYiWanXiangModels: ImageModelVO[] = [
+  {
+    key: 'wanx-v1',
+    name: 'wanx-v1'
+  },
+  {
+    key: 'wanx-sketch-to-image-v1',
+    name: 'wanx-sketch-to-image-v1'
   }
 ]
 
