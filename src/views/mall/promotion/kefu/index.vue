@@ -75,7 +75,6 @@ watchEffect(() => {
   }
 })
 // ======================= WebSocket end =======================
-
 /** 加载会话列表 */
 const keFuConversationRef = ref<InstanceType<typeof KeFuConversationList>>()
 const getConversationList = () => {
@@ -85,7 +84,7 @@ const getConversationList = () => {
 /** 加载指定会话的消息列表 */
 const keFuChatBoxRef = ref<InstanceType<typeof KeFuMessageList>>()
 const handleChange = (conversation: KeFuConversationRespVO) => {
-  keFuChatBoxRef.value?.getMessageList(conversation)
+  keFuChatBoxRef.value?.getMessageList(conversation, true)
 }
 
 /** 初始化 */
