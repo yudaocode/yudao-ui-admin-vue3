@@ -72,18 +72,22 @@ import { KeFuConversationApi, KeFuConversationRespVO } from '@/api/mall/promotio
 import { useEmoji } from './tools/emoji'
 import { formatDate } from '@/utils/formatTime'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
+import { useAppStore } from '@/store/modules/app'
 
 defineOptions({ name: 'KeFuConversationList' })
 
 const message = useMessage() // 消息弹窗
-
+const appStore = useAppStore()
 const { replaceEmoji } = useEmoji()
 const conversationList = ref<KeFuConversationRespVO[]>([]) // 会话列表
 const activeConversationId = ref(-1) // 选中的会话
+const collapse = computed(() => appStore.getCollapse) // 折叠菜单
 
 /** 加载会话列表 */
 const getConversationList = async () => {
-  conversationList.value = await KeFuConversationApi.getConversationList()
+  const list = await KeFuConversationApi.getConversationList()
+  list.sort((a: KeFuConversationRespVO, _) => (a.adminPinned ? -1 : 1))
+  conversationList.value = list
 }
 defineExpose({ getConversationList })
 
@@ -132,7 +136,7 @@ const rightClick = (mouseEvent: PointerEvent, item: KeFuConversationRespVO) => {
   showRightMenu.value = true
   rightMenuStyle.value = {
     top: mouseEvent.clientY - 110 + 'px',
-    left: mouseEvent.clientX - 80 + 'px'
+    left: collapse.value ? mouseEvent.clientX - 80 + 'px' : mouseEvent.clientX - 210 + 'px'
   }
 }
 /** 关闭右键菜单 */
