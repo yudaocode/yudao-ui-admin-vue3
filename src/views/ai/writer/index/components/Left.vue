@@ -81,13 +81,13 @@
         </template>
 
         <ReuseLabel label="长度" />
-        <Tag v-model="formData.length" :tags="getIntDictOptions('ai_write_length')" />
+        <Tag v-model="formData.length" :tags="getIntDictOptions(DICT_TYPE.AI_WRITE_LENGTH)" />
         <ReuseLabel label="格式" />
-        <Tag v-model="formData.format" :tags="getIntDictOptions('ai_write_format')" />
+        <Tag v-model="formData.format" :tags="getIntDictOptions(DICT_TYPE.AI_WRITE_FORMAT)" />
         <ReuseLabel label="语气" />
-        <Tag v-model="formData.tone" :tags="getIntDictOptions('ai_write_tone')" />
+        <Tag v-model="formData.tone" :tags="getIntDictOptions(DICT_TYPE.AI_WRITE_TONE)" />
         <ReuseLabel label="语言" />
-        <Tag v-model="formData.language" :tags="getIntDictOptions('ai_write_language')" />
+        <Tag v-model="formData.language" :tags="getIntDictOptions(DICT_TYPE.AI_WRITE_LANGUAGE)" />
 
         <div class="flex items-center justify-center mt-3">
           <el-button :disabled="isWriting" @click="reset">重置</el-button>

@@ -1,4 +1,5 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source'
+import request from '@/config/axios'
 
 import { getAccessToken } from '@/utils/auth'
 import { config } from '@/config/axios/config'
@@ -12,6 +13,12 @@ export interface WriteVO {
   format: number // 格式
   tone: number // 语气
   language: number // 语言
+  userId?: number // 用户编号
+  platform?: string // 平台
+  model?: string // 模型
+  generatedContent?: string // 生成的内容
+  errorMessage: string // 错误信息
+  createTime?: Date // 创建时间
 }
 
 // TODO @hhero：搞成 WriteApi，类似 ConversationApi 一样。这样更有类的概念，后续引入某个 Api，然后调用它的方法就可以了。
@@ -42,4 +49,17 @@ export const writeStream = ({
     onclose: onClose,
     signal: ctrl.signal
   })
+}
+
+// AI 写作 API
+export const WriteApi = {
+  // 查询AI 写作分页
+  getWritePage: async (params: any) => {
+    return await request.get({ url: `/ai/write/page`, params })
+  },
+
+  // 删除AI 写作
+  deleteWrite: async (id: number) => {
+    return await request.delete({ url: `/ai/write/delete?id=` + id })
+  }
 }

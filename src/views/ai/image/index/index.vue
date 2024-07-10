@@ -23,7 +23,6 @@
           ref="otherRef"
           @on-draw-complete="handleDrawComplete"
         />
-
       </div>
     </div>
     <div class="main">
