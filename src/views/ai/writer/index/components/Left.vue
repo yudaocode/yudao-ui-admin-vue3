@@ -104,7 +104,7 @@ import { ref } from 'vue'
 import Tag from './Tag.vue'
 import { WriteVO } from '@/api/ai/writer'
 import { omit } from 'lodash-es'
-import { getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { AiWriteTypeEnum, WriteExample } from '@/views/ai/utils/constants'
 
 type TabType = WriteVO['type']
