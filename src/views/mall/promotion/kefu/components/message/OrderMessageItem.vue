@@ -18,10 +18,9 @@
           </div>
         </div>
         <div v-for="item in getMessageContent.items" :key="item.id" class="border-bottom">
-          <!-- TODO @puhui999：要不把 img => picUrl 类似这种，搞的更匹配一点 -->
           <ProductItem
-            :img="item.picUrl"
             :num="item.count"
+            :picUrl="item.picUrl"
             :price="item.price"
             :skuText="item.properties.map((property: any) => property.valueName).join(' ')"
             :title="item.spuName"
@@ -61,7 +60,7 @@ const getMessageContent = computed(() => JSON.parse(props.message.content))
  * @param order 订单
  * @return {string} 颜色的 class 名称
  */
-function formatOrderColor(order) {
+function formatOrderColor(order: any) {
   if (order.status === 0) {
     return 'info-color'
   }
@@ -79,7 +78,7 @@ function formatOrderColor(order) {
  *
  * @param order 订单
  */
-function formatOrderStatus(order) {
+function formatOrderStatus(order: any) {
   if (order.status === 0) {
     return '待付款'
   }
@@ -109,23 +108,23 @@ function formatOrderStatus(order) {
   background-color: #e2e2e2;
 
   .order-card-header {
-    height: 80rpx;
+    height: 80px;
 
     .order-no {
-      font-size: 26rpx;
+      font-size: 26px;
       font-weight: 500;
     }
   }
 
   .pay-box {
     .discounts-title {
-      font-size: 24rpx;
+      font-size: 24px;
       line-height: normal;
       color: #999999;
     }
 
     .discounts-money {
-      font-size: 24rpx;
+      font-size: 24px;
       line-height: normal;
       color: #999;
       font-family: OPPOSANS;
@@ -137,29 +136,29 @@ function formatOrderStatus(order) {
   }
 
   .order-card-footer {
-    height: 100rpx;
+    height: 100px;
 
     .more-item-box {
-      padding: 20rpx;
+      padding: 20px;
 
       .more-item {
-        height: 60rpx;
+        height: 60px;
 
         .title {
-          font-size: 26rpx;
+          font-size: 26px;
         }
       }
     }
 
     .more-btn {
       color: #999999;
-      font-size: 24rpx;
+      font-size: 24px;
     }
 
     .content {
-      width: 154rpx;
+      width: 154px;
       color: #333333;
-      font-size: 26rpx;
+      font-size: 26px;
       font-weight: 500;
     }
   }

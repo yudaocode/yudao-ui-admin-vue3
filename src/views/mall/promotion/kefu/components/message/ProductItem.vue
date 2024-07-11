@@ -8,7 +8,14 @@
       class="ss-order-card-warp flex items-stretch justify-between bg-white"
     >
       <div class="img-box mr-24px">
-        <el-image :src="img" class="order-img" fit="contain" @click="imagePrediv(img)" />
+        <el-image
+          :initial-index="0"
+          :preview-src-list="[picUrl]"
+          :src="picUrl"
+          class="order-img"
+          fit="contain"
+          preview-teleported
+        />
       </div>
       <div
         :style="[{ width: titleWidth ? titleWidth + 'px' : '' }]"
@@ -44,12 +51,11 @@
 </template>
 
 <script lang="ts" setup>
-import { createImageViewer } from '@/components/ImageViewer'
 import { fenToYuan } from '@/utils'
 
 defineOptions({ name: 'ProductItem' })
 const props = defineProps({
-  img: {
+  picUrl: {
     type: String,
     default: 'https://img1.baidu.com/it/u=1601695551,235775011&fm=26&fmt=auto'
   },
@@ -101,14 +107,6 @@ const skuString = computed(() => {
   }
   return props.skuText
 })
-
-// TODO @puhui999：可以使用 preview-teleported
-/** 图预览 */
-const imagePrediv = (imgUrl: string) => {
-  createImageViewer({
-    urlList: [imgUrl]
-  })
-}
 </script>
 
 <style lang="scss" scoped>

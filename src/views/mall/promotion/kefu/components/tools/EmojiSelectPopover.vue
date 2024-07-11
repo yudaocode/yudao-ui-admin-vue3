@@ -17,8 +17,7 @@
           class="icon-item mr-2 mt-1 w-1/10 flex cursor-pointer items-center justify-center border border-solid p-2"
           @click="handleSelect(item)"
         >
-          <!-- TODO @puhui999：换成 unocss -->
-          <img :src="item.url" style="width: 24px; height: 24px" />
+          <img :src="item.url" class="w-24px h-24px" />
         </li>
       </ul>
     </ElScrollbar>
