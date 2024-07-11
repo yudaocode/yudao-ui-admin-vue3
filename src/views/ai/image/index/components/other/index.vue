@@ -83,6 +83,7 @@ import {
   ImageHotWords,
   ImageModelVO,
   OtherPlatformEnum,
+  QianFanModels,
   TongYiWanXiangModels
 } from '@/views/ai/utils/constants'
 
@@ -96,7 +97,7 @@ const prompt = ref<string>('') // 提示词
 const width = ref<number>(512) // 图片宽度
 const height = ref<number>(512) // 图片高度
 const otherPlatform = ref<string>(AiPlatformEnum.TONG_YI) // 平台
-const models = ref<ImageModelVO[]>(TongYiWanXiangModels) // 模型
+const models = ref<ImageModelVO[]>(TongYiWanXiangModels) // 模型  TongYiWanXiangModels、QianFanModels
 const model = ref<string>(models.value[0].key) // 模型
 
 
@@ -154,8 +155,10 @@ const settingValues = async (detail: ImageVO) => {
 /** 平台切换 */
 const handlerPlatformChange = async (platform) => {
   // 切换平台，切换模型、风格
-  if (AiPlatformEnum.YI_YAN === platform) {
+  if (AiPlatformEnum.TONG_YI === platform) {
     models.value = TongYiWanXiangModels
+  } else if (AiPlatformEnum.YI_YAN === platform) {
+    models.value = QianFanModels
   } else {
     models.value = []
   }
