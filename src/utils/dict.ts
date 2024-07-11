@@ -1,8 +1,8 @@
 /**
  * 数据字典工具类
  */
-import {useDictStoreWithOut} from '@/store/modules/dict'
-import {ElementPlusInfoType} from '@/types/elementPlus'
+import { useDictStoreWithOut } from '@/store/modules/dict'
+import { ElementPlusInfoType } from '@/types/elementPlus'
 
 const dictStore = useDictStoreWithOut()
 
@@ -22,6 +22,10 @@ export interface DictDataType {
 
 export interface NumberDictDataType extends DictDataType {
   value: number
+}
+
+export interface StringDictDataType extends DictDataType {
+  value: string
 }
 
 export const getDictOptions = (dictType: string) => {
@@ -44,8 +48,11 @@ export const getIntDictOptions = (dictType: string): NumberDictDataType[] => {
 }
 
 export const getStrDictOptions = (dictType: string) => {
-  const dictOption: DictDataType[] = []
+  // 获得通用的 DictDataType 列表
   const dictOptions: DictDataType[] = getDictOptions(dictType)
+  // 转换成 string 类型的 StringDictDataType 类型
+  // why 需要特殊转换：避免 IDEA 在 v-for="dict in getStrDictOptions(...)" 时，el-option 的 key 会告警
+  const dictOption: StringDictDataType[] = []
   dictOptions.forEach((dict: DictDataType) => {
     dictOption.push({
       ...dict,
@@ -209,5 +216,16 @@ export enum DICT_TYPE {
 
   // ========== ERP - 企业资源计划模块  ==========
   ERP_AUDIT_STATUS = 'erp_audit_status', // ERP 审批状态
-  ERP_STOCK_RECORD_BIZ_TYPE = 'erp_stock_record_biz_type' // 库存明细的业务类型
+  ERP_STOCK_RECORD_BIZ_TYPE = 'erp_stock_record_biz_type', // 库存明细的业务类型
+
+  // ========== AI - 人工智能模块  ==========
+  AI_PLATFORM = 'ai_platform', // AI 平台
+  AI_IMAGE_STATUS = 'ai_image_status', // AI 图片状态
+  AI_MUSIC_STATUS = 'ai_music_status', // AI 音乐状态
+  AI_GENERATE_MODE = 'ai_generate_mode', // AI 生成模式
+  AI_WRITE_TYPE = 'ai_write_type', // AI 写作类型
+  AI_WRITE_LENGTH = 'ai_write_length', // AI 写作长度
+  AI_WRITE_FORMAT = 'ai_write_format', // AI 写作格式
+  AI_WRITE_TONE = 'ai_write_tone', // AI 写作语气
+  AI_WRITE_LANGUAGE = 'ai_write_language' // AI 写作语言
 }

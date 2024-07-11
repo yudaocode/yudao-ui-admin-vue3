@@ -2,6 +2,7 @@ import { generateUUID } from '@/utils'
 import { localeProps, makeRequiredRule } from '@/components/FormCreate/src/utils'
 import { selectRule } from '@/components/FormCreate/src/config/selectRule'
 import { SelectRuleOption } from '@/components/FormCreate/src/type'
+import { cloneDeep } from 'lodash-es'
 
 /**
  * 通用选择器规则 hook
@@ -11,6 +12,7 @@ import { SelectRuleOption } from '@/components/FormCreate/src/type'
 export const useSelectRule = (option: SelectRuleOption) => {
   const label = option.label
   const name = option.name
+  const rules = cloneDeep(selectRule)
   return {
     icon: option.icon,
     label,
@@ -28,7 +30,7 @@ export const useSelectRule = (option: SelectRuleOption) => {
       if (!option.props) {
         option.props = []
       }
-      return localeProps(t, name + '.props', [makeRequiredRule(), ...option.props, ...selectRule])
+      return localeProps(t, name + '.props', [makeRequiredRule(), ...option.props, ...rules])
     }
   }
 }

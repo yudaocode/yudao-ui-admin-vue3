@@ -83,7 +83,7 @@ router.beforeEach(async (to, from, next) => {
         const redirectPath = from.query.redirect || to.path
         // 修复跳转时不带参数的问题
         const redirect = decodeURIComponent(redirectPath as string)
-        const { basePath, paramsObject: query } = parseURL(redirect)
+        const { paramsObject: query } = parseURL(redirect)
         const nextData = to.path === redirect ? { ...to, replace: true } : { path: redirect, query }
         next(nextData)
       } else {

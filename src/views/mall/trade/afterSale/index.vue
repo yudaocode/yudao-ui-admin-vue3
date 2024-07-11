@@ -246,7 +246,7 @@ const openAfterSaleDetail = (id: number) => {
 
 /** 查看订单详情 */
 const openOrderDetail = (id: number) => {
-  push({ name: 'TradeOrderDetail', params: { orderId: id } })
+  push({ name: 'TradeOrderDetail', params: { id } })
 }
 
 /** 商品图预览 */
