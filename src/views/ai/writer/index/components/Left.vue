@@ -24,26 +24,28 @@
     </h3>
   </DefineLabel>
 
-  <div class="relative" v-bind="$attrs">
+  <div class="flex flex-col" v-bind="$attrs">
     <!-- tab -->
-    <div
-      class="absolute left-1/2 top-2 -translate-x-1/2 w-[303px] rounded-full bg-[#DDDFE3] p-1 z-10"
-    >
+    <div class="w-full pt-2 bg-[#f5f7f9] flex justify-center">
       <div
-        class="flex items-center relative after:content-[''] after:block after:bg-white after:h-[30px] after:w-1/2 after:absolute after:top-0 after:left-0 after:transition-transform after:rounded-full"
-        :class="selectedTab === AiWriteTypeEnum.REPLY && 'after:transform after:translate-x-[100%]'"
+        class="w-[303px] rounded-full bg-[#DDDFE3] p-1 z-10"
       >
-        <ReuseTab
-          v-for="tab in tabs"
-          :key="tab.value"
-          :text="tab.text"
-          :active="tab.value === selectedTab"
-          :itemClick="() => switchTab(tab.value)"
-        />
+        <div
+          class="flex items-center relative after:content-[''] after:block after:bg-white after:h-[30px] after:w-1/2 after:absolute after:top-0 after:left-0 after:transition-transform after:rounded-full"
+          :class="selectedTab === AiWriteTypeEnum.REPLY && 'after:transform after:translate-x-[100%]'"
+        >
+          <ReuseTab
+            v-for="tab in tabs"
+            :key="tab.value"
+            :text="tab.text"
+            :active="tab.value === selectedTab"
+            :itemClick="() => switchTab(tab.value)"
+          />
+        </div>
       </div>
     </div>
     <div
-      class="px-7 pb-2 pt-[46px] overflow-y-auto lg:block w-[380px] box-border bg-[#ECEDEF] h-full"
+      class="px-7 pb-2 flex-grow overflow-y-auto lg:block w-[380px] box-border bg-[#f5f7f9] h-full"
     >
       <div>
         <template v-if="selectedTab === 1">

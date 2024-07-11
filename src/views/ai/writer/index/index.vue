@@ -1,6 +1,5 @@
 <template>
-  <!-- TODO @hhhero：整体没啥问题了。感觉整体框框的样子可以优化下，可以参考下绘图界面。例如说：1）写作的“预览”和绘图的“绘图任务”的 header；2）左右的边界，有个竖线之类的。 -->
-  <div class="h-[calc(100vh-var(--top-tool-height)-var(--app-footer-height)-40px)] -m-5 flex">
+  <div class="absolute top-0 left-0 right-0 bottom-0 flex">
     <Left
       :is-writing="isWriting"
       class="h-full"
