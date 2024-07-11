@@ -1,28 +1,36 @@
-
 <template>
   <div ref="contentRef" class="markdown-view" v-html="contentHtml"></div>
 </template>
 
 <script setup lang="ts">
-import {useClipboard} from "@vueuse/core";
-
-import {marked} from 'marked'
+import { useClipboard } from '@vueuse/core'
+import { marked } from 'marked'
 import 'highlight.js/styles/vs2015.min.css'
 import hljs from 'highlight.js'
-import {ref} from "vue";
 
-const {copy} = useClipboard() // 初始化 copy 到粘贴板
+// 定义组件属性
+const props = defineProps({
+  content: {
+    type: String,
+    required: true
+  }
+})
+
+const message = useMessage() // 消息弹窗
+const { copy } = useClipboard() // 初始化 copy 到粘贴板
 const contentRef = ref()
+const contentHtml = ref<any>() // 渲染的html内容
+const { content } = toRefs(props) // 将 props 变为引用类型
 
 // 代码高亮：https://highlightjs.org/
 // 转换 markdown：marked
 
-// marked 渲染器
+/** marked 渲染器 */
 const renderer = {
   code(code, language, c) {
     let highlightHtml
     try {
-      highlightHtml = hljs.highlight(code, {language: language, ignoreIllegals: true}).value
+      highlightHtml = hljs.highlight(code, { language: language, ignoreIllegals: true }).value
     } catch (e) {
       // skip
     }
@@ -36,49 +44,29 @@ marked.use({
   renderer: renderer
 })
 
-// 渲染的html内容
-const contentHtml = ref<any>()
-
-// 定义组件属性
-const props = defineProps({
-  content: {
-    type: String,
-    required: true
-  }
-})
-
-// 将 props 变为引用类型
-const { content } = toRefs(props)
-
-// 监听 content 变化
+/** 监听 content 变化 */
 watch(content, async (newValue, oldValue) => {
-  await renderMarkdown(newValue);
+  await renderMarkdown(newValue)
 })
 
-// 渲染 markdown
+/** 渲染 markdown */
 const renderMarkdown = async (content: string) => {
   contentHtml.value = await marked(content)
 }
 
-// 组件挂在时
-onMounted(async ()  => {
+/** 初始化 **/
+onMounted(async () => {
   // 解析转换 markdown
-  await renderMarkdown(props.content as string);
-  //
+  await renderMarkdown(props.content as string)
   // 添加 copy 监听
   contentRef.value.addEventListener('click', (e: any) => {
-    console.log(e)
     if (e.target.id === 'copy') {
       copy(e.target?.dataset?.copy)
-      ElMessage({
-        message: '复制成功!',
-        type: 'success'
-      })
+      message.success('复制成功!')
     }
   })
 })
 </script>
-
 
 <style lang="scss">
 .markdown-view {
