@@ -20,11 +20,10 @@ export const AiPlatformEnum = {
   Ollama: 'Ollama',
   STABLE_DIFFUSION: 'StableDiffusion', // Stability AI
   MIDJOURNEY: 'Midjourney', // Midjourney
-  SUNO: 'Suno', // Suno AI
-  CHATGLM: 'ChatGlm', // ChatGlm
+  SUNO: 'Suno' // Suno AI
 }
 
-export const OtherPlatformEnum:ImageModelVO [] = [
+export const OtherPlatformEnum: ImageModelVO[] = [
   {
     key: AiPlatformEnum.TONG_YI,
     name: '通义万相'
@@ -34,8 +33,8 @@ export const OtherPlatformEnum:ImageModelVO [] = [
     name: '百度千帆'
   },
   {
-    key: AiPlatformEnum.CHATGLM,
-    name: '智铺 ChatGlm'
+    key: AiPlatformEnum.ZHI_PU,
+    name: '智谱 AI'
   }
 ]
 
@@ -205,54 +204,6 @@ export const StableDiffusionStylePresets: ImageModelVO[] = [
   }
 ]
 
-// todo @芋艿 这些是通义的风格，看要不要删除
-export const TongYiWanXiangStylePresets: ImageModelVO[] = [
-  {
-    key: '-1',
-    name: '上传图像风格'
-  },
-  {
-    key: '0',
-    name: '复古漫画'
-  },
-  {
-    key: '1',
-    name: '3D童话'
-  },
-  {
-    key: '2',
-    name: '二次元'
-  },
-  {
-    key: '3',
-    name: '小清新'
-  },
-  {
-    key: '4',
-    name: '未来科技'
-  },
-  {
-    key: '5',
-    name: '国画古风'
-  },
-  {
-    key: '6',
-    name: '将军百战'
-  },
-  {
-    key: '7',
-    name: '炫彩卡通'
-  },
-  {
-    key: '8',
-    name: '清雅国风'
-  },
-  {
-    key: '9',
-    name: '喜迎新年'
-  }
-]
-
 export const TongYiWanXiangModels: ImageModelVO[] = [
   {
     key: 'wanx-v1',
@@ -277,7 +228,6 @@ export const ChatGlmModels: ImageModelVO[] = [
     name: 'cogview-3'
   }
 ]
-
 
 export const StableDiffusionClipGuidancePresets: ImageModelVO[] = [
   {
@@ -338,7 +288,7 @@ export const Dall3StyleList: ImageModelVO[] = [
 
 export interface ImageSizeVO {
   key: string
-  name: string
+  name?: string
   style: string
   width: string
   height: string
