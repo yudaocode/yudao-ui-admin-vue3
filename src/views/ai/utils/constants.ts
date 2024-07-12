@@ -21,6 +21,7 @@ export const AiPlatformEnum = {
   STABLE_DIFFUSION: 'StableDiffusion', // Stability AI
   MIDJOURNEY: 'Midjourney', // Midjourney
   SUNO: 'Suno', // Suno AI
+  CHATGLM: 'ChatGlm', // ChatGlm
 }
 
 export const OtherPlatformEnum:ImageModelVO [] = [
@@ -31,6 +32,10 @@ export const OtherPlatformEnum:ImageModelVO [] = [
   {
     key: AiPlatformEnum.YI_YAN,
     name: '百度千帆'
+  },
+  {
+    key: AiPlatformEnum.CHATGLM,
+    name: '智铺 ChatGlm'
   }
 ]
 
@@ -263,6 +268,13 @@ export const QianFanModels: ImageModelVO[] = [
   {
     key: 'sd_xl',
     name: 'sd_xl'
+  }
+]
+
+export const ChatGlmModels: ImageModelVO[] = [
+  {
+    key: 'cogview-3',
+    name: 'cogview-3'
   }
 ]
 

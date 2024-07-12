@@ -61,7 +61,7 @@
       </el-select>
     </el-space>
   </div>
-  <div class="group-item">
+  <div class="group-item" v-if="otherPlatform !== AiPlatformEnum.CHATGLM">
     <div>
       <el-text tag="b">图片尺寸</el-text>
     </div>
@@ -79,7 +79,7 @@
 <script setup lang="ts">
 import {ImageApi, ImageDrawReqVO, ImageVO} from '@/api/ai/image'
 import {
-  AiPlatformEnum,
+  AiPlatformEnum, ChatGlmModels,
   ImageHotWords,
   ImageModelVO,
   OtherPlatformEnum,
@@ -159,6 +159,11 @@ const handlerPlatformChange = async (platform) => {
     models.value = TongYiWanXiangModels
   } else if (AiPlatformEnum.YI_YAN === platform) {
     models.value = QianFanModels
+  } else if (AiPlatformEnum.CHATGLM === platform) {
+    models.value = ChatGlmModels
+    // ChatGlm 模型没有 width、height 随便默认一个值过后台必填检测
+    height.value = 512
+    width.value = 512
   } else {
     models.value = []
   }
