@@ -182,6 +182,8 @@ export type SimpleFlowNode = {
   approveMethod?: ApproveMethodType
   //通过比例
   approveRatio?: number
+  // 审批按钮设置
+  buttonsSetting?: any[]
   // 表单权限
   fieldsPermission?: any[]
   // 审批任务超时处理
@@ -212,6 +214,40 @@ export type ConditionRule = {
   opCode: string
   leftSide: string
   rightSide: string
+}
+
+// 审批操作按钮类型
+export enum OpsButtonType {
+  /**
+   * 通过
+   */
+  APPROVE = 1,
+  /**
+   * 拒绝
+   */
+  REJECT = 2,
+  /**
+   * 转办
+   */
+  TRANSFER = 3,
+  /**
+   * 委派
+   */
+  DELEGATE = 4,
+  /**
+   * 加签
+   */
+  ADD_SIGN = 5,
+  /**
+   * 回退
+   */
+  RETURN = 6
+}
+
+export type ButtonSetting = {
+  id: OpsButtonType
+  displayName: string
+  enable: boolean
 }
 
 export const NODE_DEFAULT_TEXT = new Map<number, string>()
@@ -280,4 +316,22 @@ export const COMPARISON_OPERATORS: DictDataVO = [
     value: '<=',
     label: '小于等于'
   }
+]
+// 审批操作按钮名称
+export const OPERATION_BUTTON_NAME = new Map<number, string>()
+OPERATION_BUTTON_NAME.set(OpsButtonType.APPROVE, '通过')
+OPERATION_BUTTON_NAME.set(OpsButtonType.REJECT, '拒绝')
+OPERATION_BUTTON_NAME.set(OpsButtonType.TRANSFER, '转办')
+OPERATION_BUTTON_NAME.set(OpsButtonType.DELEGATE, '委派')
+OPERATION_BUTTON_NAME.set(OpsButtonType.ADD_SIGN, '加签')
+OPERATION_BUTTON_NAME.set(OpsButtonType.RETURN, '回退')
+
+// 默认的按钮权限设置
+export const DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
+  { id: OpsButtonType.APPROVE, displayName: '通过', enable: true },
+  { id: OpsButtonType.REJECT, displayName: '拒绝', enable: true },
+  { id: OpsButtonType.TRANSFER, displayName: '转办', enable: false },
+  { id: OpsButtonType.DELEGATE, displayName: '委派', enable: false },
+  { id: OpsButtonType.ADD_SIGN, displayName: '加签', enable: false },
+  { id: OpsButtonType.RETURN, displayName: '回退', enable: false }
 ]

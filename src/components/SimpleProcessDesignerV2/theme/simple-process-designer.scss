@@ -241,7 +241,7 @@
         .move-node-left {
           left: -2px;
           top: 0px;
-          background: rgba(126, 134, 142, .08);
+          background: rgba(126, 134, 142, 0.08);
           border-top-left-radius: 8px;
           border-bottom-left-radius: 8px;
         }
@@ -249,13 +249,12 @@
         .move-node-right {
           right: -2px;
           top: 0px;
-          background: rgba(126,134,142,.08);
+          background: rgba(126, 134, 142, 0.08);
           border-top-right-radius: 6px;
           border-bottom-right-radius: 6px;
         }
       }
 
-      
       .node-config-error {
         border-color: #ff5219 !important;
       }
@@ -306,12 +305,10 @@
             background-color: #0089ff;
             border-radius: 50%;
 
-            &:hover{
+            &:hover {
               transform: scale(1.1);
-              
             }
           }
-          
         }
 
         .node-handler-arrow {
@@ -323,7 +320,6 @@
         }
       }
 
-      
       // 条件节点包装
       .branch-node-wrapper {
         position: relative;
@@ -341,8 +337,8 @@
             position: absolute;
             height: 100%;
             width: 4px;
-            background-color:  #fafafa;
-            content: "";
+            background-color: #fafafa;
+            content: '';
             left: 50%;
             transform: translate(-50%);
           }
@@ -498,10 +494,10 @@
         border-radius: 4px;
         transition: all 0.3s;
 
-        &:focus   {
+        &:focus {
           border-color: #40a9ff;
           outline: 0;
-          box-shadow: 0 0 0 2px rgba(24, 144, 255, .2)
+          box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
         }
       }
     }
@@ -537,11 +533,11 @@
     border: 1px solid #d9d9d9;
     border-radius: 4px;
     transition: all 0.3s;
-  
-    &:focus   {
+
+    &:focus {
       border-color: #40a9ff;
       outline: 0;
-      box-shadow: 0 0 0 2px rgba(24, 144, 255, .2)
+      box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
     }
   }
 }
@@ -550,7 +546,6 @@
 .field-setting-pane {
   display: flex;
   flex-direction: column;
-  padding: 16px 0;
   font-size: 14px;
 
   .field-setting-desc {
@@ -569,7 +564,7 @@
     line-height: 45px;
     background-color: #f8fafc0a;
     border: 1px solid #1f38581a;
-   
+
     .first-title {
       text-align: left !important;
     }
@@ -588,9 +583,8 @@
       color: #000;
       text-align: center;
     }
-    
   }
-  
+
   .field-setting-item {
     align-items: center;
     display: flex;
@@ -632,56 +626,56 @@
     margin-right: 8px;
   }
 
- .handler-item-icon {
-   width: 80px;
-   height: 80px;
-   background: #fff;
-   border: 1px solid #e2e2e2;
-   border-radius: 50%;
-   transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-   user-select: none;
-   text-align: center;
+  .handler-item-icon {
+    width: 80px;
+    height: 80px;
+    background: #fff;
+    border: 1px solid #e2e2e2;
+    border-radius: 50%;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    user-select: none;
+    text-align: center;
 
-   &:hover {
-    background: #e2e2e2;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
-   }
+    &:hover {
+      background: #e2e2e2;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    }
 
-   .icon-size {
-     font-size: 35px;
-     line-height: 80px;
-   }
+    .icon-size {
+      font-size: 35px;
+      line-height: 80px;
+    }
   }
 
- .approve {
-   color: #ff943e;
+  .approve {
+    color: #ff943e;
   }
   .copy {
     color: #3296fa;
   }
-  
+
   .condition {
     color: #15bc83;
   }
 
- .handler-item-text {
-   margin-top: 4px;
-   width: 80px;
-   text-align: center;
- }
-
+  .handler-item-text {
+    margin-top: 4px;
+    width: 80px;
+    text-align: center;
+  }
 }
 
 // iconfont 样式
 @font-face {
-  font-family: "iconfont"; /* Project id 4495938 */
-  src: url('iconfont.woff2?t=1712392083512') format('woff2'),
-      url('iconfont.woff?t=1712392083512') format('woff'),
-      url('iconfont.ttf?t=1712392083512') format('truetype');
+  font-family: 'iconfont'; /* Project id 4495938 */
+  src:
+    url('iconfont.woff2?t=1712392083512') format('woff2'),
+    url('iconfont.woff?t=1712392083512') format('woff'),
+    url('iconfont.ttf?t=1712392083512') format('truetype');
 }
 
 .iconfont {
-  font-family: "iconfont" !important;
+  font-family: 'iconfont' !important;
   font-size: 16px;
   font-style: normal;
   -webkit-font-smoothing: antialiased;
@@ -689,25 +683,25 @@
 }
 
 .icon-Inclusive:before {
-  content: "\e602";
+  content: '\e602';
 }
 
 .icon-copy:before {
-  content: "\e7eb";
+  content: '\e7eb';
 }
 
 .icon-handle:before {
-  content: "\e61c";
+  content: '\e61c';
 }
 
 .icon-exclusive:before {
-  content: "\e717";
+  content: '\e717';
 }
 
 .icon-approve:before {
-  content: "\e715";
+  content: '\e715';
 }
 
 .icon-parallel:before {
-  content: "\e688";
+  content: '\e688';
 }

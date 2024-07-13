@@ -56,29 +56,71 @@
           </el-form-item>
         </el-form>
         <div style="margin-bottom: 20px; margin-left: 10%; font-size: 14px">
-          <el-button type="success" @click="handleAudit(item, true)">
+          <el-button
+            type="success"
+            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.APPROVE]?.enable"
+            @click="handleAudit(item, true)"
+          >
             <Icon icon="ep:select" />
-            通过
+            {{
+              item.buttonsSetting?.[OpsButtonType.APPROVE]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OpsButtonType.APPROVE)
+            }}
           </el-button>
-          <el-button type="danger" @click="handleAudit(item, false)">
+          <el-button
+            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.REJECT]?.enable"
+            type="danger"
+            @click="handleAudit(item, false)"
+          >
             <Icon icon="ep:close" />
-            不通过
+            {{
+              item.buttonsSetting?.[OpsButtonType.REJECT].displayName ||
+              OPERATION_BUTTON_NAME.get(OpsButtonType.REJECT)
+            }}
           </el-button>
-          <el-button type="primary" @click="openTaskUpdateAssigneeForm(item.id)">
+          <el-button
+            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.TRANSFER]?.enable"
+            type="primary"
+            @click="openTaskUpdateAssigneeForm(item.id)"
+          >
             <Icon icon="ep:edit" />
-            转办
+            {{
+              item.buttonsSetting?.[OpsButtonType.TRANSFER]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OpsButtonType.TRANSFER)
+            }}
           </el-button>
-          <el-button type="primary" @click="handleDelegate(item)">
+          <el-button
+            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.DELEGATE]?.enable"
+            type="primary"
+            @click="handleDelegate(item)"
+          >
             <Icon icon="ep:position" />
-            委派
+            {{
+              item.buttonsSetting?.[OpsButtonType.DELEGATE]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OpsButtonType.DELEGATE)
+            }}
           </el-button>
-          <el-button type="primary" @click="handleSign(item)">
+          <el-button
+            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.ADD_SIGN]?.enable"
+            type="primary"
+            @click="handleSign(item)"
+          >
             <Icon icon="ep:plus" />
-            加签
+            {{
+              item.buttonsSetting?.[OpsButtonType.ADD_SIGN]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OpsButtonType.ADD_SIGN)
+            }}
           </el-button>
-          <el-button type="warning" @click="handleBack(item)">
+          <el-button
+            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.RETURN]?.enable"
+            type="warning"
+            @click="handleBack(item)"
+          >
             <Icon icon="ep:back" />
-            回退
+            {{
+              item.buttonsSetting?.[OpsButtonType.RETURN]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OpsButtonType.RETURN)
+            }}
           </el-button>
         </div>
       </el-col>
@@ -147,6 +189,10 @@ import TaskSignCreateForm from './dialog/TaskSignCreateForm.vue'
 import { registerComponent } from '@/utils/routerHelper'
 import { isEmpty } from '@/utils/is'
 import * as UserApi from '@/api/system/user'
+import {
+  OpsButtonType,
+  OPERATION_BUTTON_NAME
+} from '@/components/SimpleProcessDesignerV2/src/consts'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 
@@ -280,12 +326,16 @@ const getProcessInstance = async () => {
     // 设置表单信息
     const processDefinition = data.processDefinition
     if (processDefinition.formType === 10) {
-      setConfAndFields2(
-        detailForm,
-        processDefinition.formConf,
-        processDefinition.formFields,
-        data.formVariables
-      )
+      if (detailForm.value.rule.length > 0) {
+        detailForm.value.value = data.formVariables
+      } else {
+        setConfAndFields2(
+          detailForm,
+          processDefinition.formConf,
+          processDefinition.formFields,
+          data.formVariables
+        )
+      }
       nextTick().then(() => {
         fApi.value?.btn.show(false)
         fApi.value?.resetBtn.show(false)

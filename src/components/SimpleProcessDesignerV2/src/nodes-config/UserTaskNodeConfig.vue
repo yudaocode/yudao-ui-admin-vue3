@@ -280,6 +280,40 @@
           </el-form>
         </div>
       </el-tab-pane>
+      <el-tab-pane label="操作按钮设置" name="buttons" v-if="formType === 10">
+        <div class="button-setting-pane">
+          <div class="button-setting-desc">操作按钮</div>
+          <div class="button-setting-title">
+            <div class="button-title-label">操作按钮</div>
+            <div class="pl-4 button-title-label">显示名称</div>
+            <div class="button-title-label">启用</div>
+          </div>
+          <div
+            class="button-setting-item"
+            v-for="(item, index) in configForm.buttonsSetting"
+            :key="index"
+          >
+            <div class="button-setting-item-label"> {{ OPERATION_BUTTON_NAME.get(item.id) }} </div>
+            <div class="button-setting-item-label">
+              <input
+                type="text"
+                class="editable-title-input"
+                @blur="btnDisplayNameBlurEvent(index)"
+                v-mountedFocus
+                v-model="item.displayName"
+                :placeholder="item.displayName"
+                v-if="btnDisplayNameEdit[index]"
+              />
+              <el-button v-else text @click="changeBtnDisplayName(index)"
+                >{{ item.displayName }} &nbsp;<Icon icon="ep:edit"
+              /></el-button>
+            </div>
+            <div class="button-setting-item-label">
+              <el-switch v-model="item.enable" />
+            </div>
+          </div>
+        </div>
+      </el-tab-pane>
       <el-tab-pane label="表单字段权限" name="fields" v-if="formType === 10">
         <div class="field-setting-pane">
           <div class="field-setting-desc">字段权限</div>
@@ -334,7 +368,9 @@ import {
   TIMEOUT_HANDLER_ACTION_TYPES,
   TIME_UNIT_TYPES,
   REJECT_HANDLER_TYPES,
-  NODE_DEFAULT_NAME
+  NODE_DEFAULT_NAME,
+  DEFAULT_BUTTON_SETTING,
+  OPERATION_BUTTON_NAME
 } from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { getDefaultFieldsPermission } from '../utils'
@@ -345,7 +381,6 @@ import * as PostApi from '@/api/system/post'
 import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
 import { cloneDeep } from 'lodash-es'
-
 defineOptions({
   name: 'UserTaskNodeConfig'
 })
@@ -385,7 +420,8 @@ const configForm = ref<any>({
   timeoutHandlerAction: 1,
   timeDuration: 6, // 默认 6小时
   maxRemindCount: 1, // 默认 提醒 1次
-  fieldsPermission: []
+  fieldsPermission: [],
+  buttonsSetting: []
 })
 // 表单校验规则
 const formRules = reactive({
@@ -432,6 +468,8 @@ const saveConfig = async () => {
   }
   // 设置表单权限
   currentNode.value.fieldsPermission = configForm.value.fieldsPermission
+  // 设置按钮权限
+  currentNode.value.buttonsSetting = configForm.value.buttonsSetting
 
   currentNode.value.showText = getShowText()
   settingVisible.value = false
@@ -533,6 +571,7 @@ const setCurrentNode = (node: SimpleFlowNode) => {
   currentNode.value = node
   configForm.value.fieldsPermission =
     cloneDeep(node.fieldsPermission) || getDefaultFieldsPermission(formFields?.value)
+  configForm.value.buttonsSetting = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
   configForm.value.candidateStrategy = node.candidateStrategy
   const strCandidateParam = node?.candidateParam
   if (node.candidateStrategy === CandidateStrategy.EXPRESSION) {
@@ -614,6 +653,7 @@ const blurEvent = () => {
   currentNode.value.name =
     currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
 }
+
 const approveMethodChanged = () => {
   configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
   if (configForm.value.approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
@@ -703,6 +743,99 @@ const convertTimeUnit = (strTimeUnit: string) => {
   }
   return TimeUnitType.HOUR
 }
+
+// 操作按钮显示名称可编辑
+const btnDisplayNameEdit = ref<boolean[]>([])
+const changeBtnDisplayName = (index: number) => {
+  btnDisplayNameEdit.value[index] = true
+}
+const btnDisplayNameBlurEvent = (index: number) => {
+  btnDisplayNameEdit.value[index] = false
+  const buttonItem = configForm.value.buttonPermission[index]
+  buttonItem.displayName = buttonItem.displayName || OPERATION_BUTTON_NAME.get(buttonItem.id)
+}
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.button-setting-pane {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+
+  .button-setting-desc {
+    padding-right: 8px;
+    margin-bottom: 16px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .button-setting-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 45px;
+    padding-left: 12px;
+    background-color: #f8fafc0a;
+    border: 1px solid #1f38581a;
+
+    & > :first-child {
+      width: 100px !important;
+      text-align: left !important;
+    }
+
+    & > :last-child {
+      text-align: center !important;
+    }
+
+    .button-title-label {
+      width: 150px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+      text-align: left;
+    }
+  }
+
+  .button-setting-item {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    height: 38px;
+    padding-left: 12px;
+    border: 1px solid #1f38581a;
+    border-top: 0;
+
+    & > :first-child {
+      width: 100px !important;
+    }
+
+    & > :last-child {
+      text-align: center !important;
+    }
+
+    .button-setting-item-label {
+      width: 150px;
+      overflow: hidden;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .editable-title-input {
+      height: 24px;
+      max-width: 130px;
+      margin-left: 4px;
+      line-height: 24px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      transition: all 0.3s;
+
+      &:focus {
+        border-color: #40a9ff;
+        outline: 0;
+        box-shadow: 0 0 0 2px rgb(24 144 255 / 20%);
+      }
+    }
+  }
+}
+</style>
