@@ -27,12 +27,12 @@
   <div class="flex flex-col" v-bind="$attrs">
     <!-- tab -->
     <div class="w-full pt-2 bg-[#f5f7f9] flex justify-center">
-      <div
-        class="w-[303px] rounded-full bg-[#DDDFE3] p-1 z-10"
-      >
+      <div class="w-[303px] rounded-full bg-[#DDDFE3] p-1 z-10">
         <div
           class="flex items-center relative after:content-[''] after:block after:bg-white after:h-[30px] after:w-1/2 after:absolute after:top-0 after:left-0 after:transition-transform after:rounded-full"
-          :class="selectedTab === AiWriteTypeEnum.REPLY && 'after:transform after:translate-x-[100%]'"
+          :class="
+            selectedTab === AiWriteTypeEnum.REPLY && 'after:transform after:translate-x-[100%]'
+          "
         >
           <ReuseTab
             v-for="tab in tabs"
@@ -179,10 +179,18 @@ const initData: WriteVO = {
 }
 const formData = ref<WriteVO>({ ...initData })
 
+/** 用来记录切换之前所填写的数据，切换的时候给赋值回来 **/
+const recordFormData = {} as Record<AiWriteTypeEnum, WriteVO>
+
 /** 切换tab **/
 const switchTab = (value: TabType) => {
-  selectedTab.value = value
-  formData.value = { ...initData }
+  if (value !== selectedTab.value) {
+    // 保存之前的久数据
+    recordFormData[selectedTab.value] = formData.value
+    selectedTab.value = value
+    // 将之前的旧数据赋值回来
+    formData.value = { ...initData, ...recordFormData[value] }
+  }
 }
 
 /** 提交写作 */
