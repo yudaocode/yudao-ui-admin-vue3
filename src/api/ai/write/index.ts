@@ -45,7 +45,7 @@ export interface AiWriteRespVo {
   createTime: string
 }
 
-const WriteApi = {
+export const WriteApi = {
   writeStream: ({
     data,
     onClose,
@@ -83,5 +83,3 @@ const WriteApi = {
     return request.delete({ url: `/ai/write/delete`, params: { id } })
   }
 }
-
-export default WriteApi

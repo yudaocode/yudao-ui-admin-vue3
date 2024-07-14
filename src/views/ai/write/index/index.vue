@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import Left from './components/Left.vue'
 import Right from './components/Right.vue'
-import WriteApi from '@/api/ai/writer'
+import { WriteApi } from '@/api/ai/write'
 import { WriteExample } from '@/views/ai/utils/constants'
 
 const message = useMessage()
@@ -65,7 +65,7 @@ const submit = (data) => {
 }
 
 /** 点击示例触发 */
-const handleExampleClick = (type: keyof typeof WriteExampleDataJson) => {
+const handleExampleClick = (type: keyof typeof WriteExample) => {
   writeResult.value = WriteExample[type].data
 }
 

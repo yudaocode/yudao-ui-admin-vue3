@@ -39,7 +39,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="平台" prop="platform">
-        <el-select v-model="queryParams.status" placeholder="请选择平台" clearable class="!w-240px">
+        <el-select v-model="queryParams.platform" placeholder="请选择平台" clearable class="!w-240px">
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.AI_PLATFORM)"
             :key="dict.value"
@@ -70,6 +70,7 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
+        <!-- TODO @YunaiV  目前没有导出接口，需要导出吗 -->
         <el-button
           type="success"
           plain
@@ -103,7 +104,13 @@
         </template>
       </el-table-column>
       <el-table-column label="模型" align="center" prop="model" width="180" />
-      <el-table-column label="生成内容提示" align="center" prop="prompt" width="180" />
+      <el-table-column
+        label="生成内容提示"
+        align="center"
+        prop="prompt"
+        width="180"
+        show-overflow-tooltip
+      />
       <el-table-column label="生成的内容" align="center" prop="generatedContent" width="180" />
       <el-table-column label="原文" align="center" prop="originalContent" width="180" />
       <el-table-column label="长度" align="center" prop="length">
@@ -136,6 +143,7 @@
       <el-table-column label="错误信息" align="center" prop="errorMessage" />
       <el-table-column label="操作" align="center">
         <template #default="scope">
+<!--          TODO @YunaiV 目前没有修改接口，写作要可以更改吗-->
           <el-button
             link
             type="primary"
@@ -168,8 +176,8 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions, getStrDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-// TODO 芋艿：这里应该是 write
-import { WriteApi, WriteVO } from '@/api/ai/writer'
+import { useRouter } from 'vue-router'
+import { WriteApi, AiWritePageReqVO, AiWriteRespVo } from '@/api/ai/write'
 import * as UserApi from '@/api/system/user'
 
 /** AI 写作列表 */
@@ -177,17 +185,18 @@ defineOptions({ name: 'AiWriteManager' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
+const router = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
-const list = ref<WriteVO[]>([]) // 列表的数据
+const list = ref<AiWriteRespVo[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
-const queryParams = reactive({
+const queryParams = reactive<AiWritePageReqVO>({
   pageNo: 1,
   pageSize: 10,
   userId: undefined,
   type: undefined,
   platform: undefined,
-  createTime: []
+  createTime: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const userList = ref<UserApi.UserVO[]>([]) // 用户列表
@@ -214,6 +223,15 @@ const handleQuery = () => {
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   handleQuery()
+}
+
+/** 新增方法，跳转到写作页面 **/
+const openForm = (type: string, id?: number) => {
+  switch (type) {
+    case 'create':
+      router.push('/ai/write')
+      break
+  }
 }
 
 /** 删除按钮操作 */
