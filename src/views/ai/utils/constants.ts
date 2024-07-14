@@ -61,6 +61,12 @@ export enum AiWriteTypeEnum {
   REPLY // 回复
 }
 
+// 表格展示对照map
+export const AiWriteTypeTableRender = {
+  [AiWriteTypeEnum.WRITING]: '撰写',
+  [AiWriteTypeEnum.REPLY]: '回复',
+}
+
 // ========== 【图片 UI】相关的枚举 ==========
 export const ImageHotWords = [
   '中国旗袍',

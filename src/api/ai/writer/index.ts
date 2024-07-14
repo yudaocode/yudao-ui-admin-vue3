@@ -3,6 +3,7 @@ import { fetchEventSource } from '@microsoft/fetch-event-source'
 import { getAccessToken } from '@/utils/auth'
 import { config } from '@/config/axios/config'
 import { AiWriteTypeEnum } from '@/views/ai/utils/constants'
+import request from '@/config/axios'
 
 export interface WriteVO {
   type: AiWriteTypeEnum.WRITING | AiWriteTypeEnum.REPLY // 1:撰写 2:回复
@@ -14,32 +15,67 @@ export interface WriteVO {
   language: number // 语言
 }
 
-// TODO @hhero：搞成 WriteApi，类似 ConversationApi 一样。这样更有类的概念，后续引入某个 Api，然后调用它的方法就可以了。
-export const writeStream = ({
-  data,
-  onClose,
-  onMessage,
-  onError,
-  ctrl
-}: {
-  data: WriteVO
-  onMessage?: (res: any) => void
-  onError?: (...args: any[]) => void
-  onClose?: (...args: any[]) => void
-  ctrl: AbortController
-}) => {
-  const token = getAccessToken()
-  return fetchEventSource(`${config.base_url}/ai/write/generate-stream`, {
-    method: 'post',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
-    openWhenHidden: true,
-    body: JSON.stringify(data),
-    onmessage: onMessage,
-    onerror: onError,
-    onclose: onClose,
-    signal: ctrl.signal
-  })
+export interface AiWritePageReqVO extends PageParam {
+  userId?: number // 用户编号
+  type?: AiWriteTypeEnum //  写作类型
+  platform?: string // 平台
+  createTime?: [string, string] // 创建时间
 }
+
+export interface AiWriteRespVo {
+  id: number
+  userId: number
+  type: number
+  platform: string
+  model: string
+  prompt: string
+  generatedContent: string
+  originalContent: string
+  length: number
+  format: number
+  tone: number
+  language: number
+  errorMessage: string
+  createTime: string
+}
+
+const WriteApi = {
+  writeStream: ({
+    data,
+    onClose,
+    onMessage,
+    onError,
+    ctrl
+  }: {
+    data: WriteVO
+    onMessage?: (res: any) => void
+    onError?: (...args: any[]) => void
+    onClose?: (...args: any[]) => void
+    ctrl: AbortController
+  }) => {
+    const token = getAccessToken()
+    return fetchEventSource(`${config.base_url}/ai/write/generate-stream`, {
+      method: 'post',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      openWhenHidden: true,
+      body: JSON.stringify(data),
+      onmessage: onMessage,
+      onerror: onError,
+      onclose: onClose,
+      signal: ctrl.signal
+    })
+  },
+  // 获取写作列表
+  getWritePage: (params: AiWritePageReqVO) => {
+    return request.get<PageResult<AiWriteRespVo[]>>({ url: `/ai/write/page`, params })
+  },
+  // 删除写作
+  deleteWrite(id: number) {
+    return request.delete({ url: `/ai/write/delete`, params: { id } })
+  }
+}
+
+export default WriteApi

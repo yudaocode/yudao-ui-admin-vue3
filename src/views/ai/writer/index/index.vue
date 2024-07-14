@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import Left from './components/Left.vue'
 import Right from './components/Right.vue'
-import * as WriteApi from '@/api/ai/writer'
+import WriteApi from '@/api/ai/writer'
 import { WriteExample } from '@/views/ai/utils/constants'
 
 const message = useMessage()
