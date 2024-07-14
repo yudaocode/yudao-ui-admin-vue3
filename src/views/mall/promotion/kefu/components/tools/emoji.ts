@@ -59,12 +59,10 @@ export interface Emoji {
 export const useEmoji = () => {
   const emojiPathList = ref<any[]>([])
 
-  // TODO @puhui999：initStaticEmoji 会不会更好
   /** 加载本地图片 */
-  const getStaticEmojiPath = async () => {
-    // TODO @puhui999：images 改成 asserts 更合适哈。
+  const initStaticEmoji = async () => {
     const pathList = import.meta.glob(
-      '@/views/mall/promotion/kefu/components/images/*.{png,jpg,jpeg,svg}'
+      '@/views/mall/promotion/kefu/components/asserts/*.{png,jpg,jpeg,svg}'
     )
     for (const path in pathList) {
       const imageModule: any = await pathList[path]()
@@ -75,26 +73,24 @@ export const useEmoji = () => {
   /** 初始化 */
   onMounted(async () => {
     if (isEmpty(emojiPathList.value)) {
-      await getStaticEmojiPath()
+      await initStaticEmoji()
     }
   })
 
-  // TODO @puhui999：建议 function 都改成 const 这种来定义哈。保持统一风格
   /**
    * 将文本中的表情替换成图片
    *
-   * @param data 文本 TODO @puhui999：data => content
+   * @param data 文本
    * @return 替换后的文本
    */
-  function replaceEmoji(data: string) {
-    let newData = data
+  const replaceEmoji = (content: string) => {
+    let newData = content
     if (typeof newData !== 'object') {
-      // TODO @puhui999： \] 是不是可以简化成 ]。我看 idea 提示了哈
-      const reg = /\[(.+?)\]/g // [] 中括号
+      const reg = /\[(.+?)]/g // [] 中括号
       const zhEmojiName = newData.match(reg)
       if (zhEmojiName) {
         zhEmojiName.forEach((item) => {
-          const emojiFile = selEmojiFile(item)
+          const emojiFile = getEmojiFileByName(item)
           newData = newData.replace(
             item,
             `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;" src="${emojiFile}"/>`
@@ -112,13 +108,12 @@ export const useEmoji = () => {
    */
   function getEmojiList(): Emoji[] {
     return emojiList.map((item) => ({
-      url: selEmojiFile(item.name),
+      url: getEmojiFileByName(item.name),
       name: item.name
     })) as Emoji[]
   }
 
-  // TODO @puhui999：getEmojiFileByName 会不会更容易理解哈
-  function selEmojiFile(name: string) {
+  function getEmojiFileByName(name: string) {
     for (const emoji of emojiList) {
       if (emoji.name === name) {
         return emojiPathList.value.find((item: string) => item.indexOf(emoji.file) > -1)

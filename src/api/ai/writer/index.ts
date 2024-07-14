@@ -13,6 +13,12 @@ export interface WriteVO {
   format: number // 格式
   tone: number // 语气
   language: number // 语言
+  userId?: number // 用户编号
+  platform?: string // 平台
+  model?: string // 模型
+  generatedContent?: string // 生成的内容
+  errorMessage: string // 错误信息
+  createTime?: Date // 创建时间
 }
 
 export interface AiWritePageReqVO extends PageParam {

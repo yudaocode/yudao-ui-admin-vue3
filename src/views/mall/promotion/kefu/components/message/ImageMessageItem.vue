@@ -10,12 +10,13 @@
             : ''
       ]"
     >
-      <!-- TODO @puhui999：unocss -->
       <el-image
+        :initial-index="0"
+        :preview-src-list="[message.content]"
         :src="message.content"
+        class="w-200px"
         fit="contain"
-        style="width: 200px"
-        @click="imagePreview(message.content)"
+        preview-teleported
       />
     </div>
   </template>
@@ -25,17 +26,9 @@
 import { KeFuMessageContentTypeEnum } from '../tools/constants'
 import { UserTypeEnum } from '@/utils/constants'
 import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
-import { createImageViewer } from '@/components/ImageViewer'
 
 defineOptions({ name: 'ImageMessageItem' })
 defineProps<{
   message: KeFuMessageRespVO
 }>()
-
-/** 图预览 */
-const imagePreview = (imgUrl: string) => {
-  createImageViewer({
-    urlList: [imgUrl]
-  })
-}
 </script>

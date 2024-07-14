@@ -36,7 +36,13 @@
       <el-text tag="b">平台</el-text>
     </div>
     <el-space wrap class="group-item-body">
-      <el-select v-model="otherPlatform" placeholder="Select" size="large" class="!w-350px" @change="handlerPlatformChange">
+      <el-select
+        v-model="otherPlatform"
+        placeholder="Select"
+        size="large"
+        class="!w-350px"
+        @change="handlerPlatformChange"
+      >
         <el-option
           v-for="item in OtherPlatformEnum"
           :key="item.key"
@@ -52,12 +58,7 @@
     </div>
     <el-space wrap class="group-item-body">
       <el-select v-model="model" placeholder="Select" size="large" class="!w-350px">
-        <el-option
-          v-for="item in models"
-          :key="item.key"
-          :label="item.name"
-          :value="item.key"
-        />
+        <el-option v-for="item in models" :key="item.key" :label="item.name" :value="item.key" />
       </el-select>
     </el-space>
   </div>
@@ -77,12 +78,14 @@
   </div>
 </template>
 <script setup lang="ts">
-import {ImageApi, ImageDrawReqVO, ImageVO} from '@/api/ai/image'
+import { ImageApi, ImageDrawReqVO, ImageVO } from '@/api/ai/image'
 import {
   AiPlatformEnum,
+  ChatGlmModels,
   ImageHotWords,
   ImageModelVO,
   OtherPlatformEnum,
+  QianFanModels,
   TongYiWanXiangModels
 } from '@/views/ai/utils/constants'
 
@@ -96,9 +99,8 @@ const prompt = ref<string>('') // 提示词
 const width = ref<number>(512) // 图片宽度
 const height = ref<number>(512) // 图片高度
 const otherPlatform = ref<string>(AiPlatformEnum.TONG_YI) // 平台
-const models = ref<ImageModelVO[]>(TongYiWanXiangModels) // 模型
+const models = ref<ImageModelVO[]>(TongYiWanXiangModels) // 模型  TongYiWanXiangModels、QianFanModels
 const model = ref<string>(models.value[0].key) // 模型
-
 
 const emits = defineEmits(['onDrawStart', 'onDrawComplete']) // 定义 emits
 
@@ -131,9 +133,8 @@ const handleGenerateImage = async () => {
       prompt: prompt.value, // 提示词
       width: width.value, // 图片宽度
       height: height.value, // 图片高度
-      options: {
-      }
-    } as ImageDrawReqVO
+      options: {}
+    } as unknown as ImageDrawReqVO
     await ImageApi.drawImage(form)
   } finally {
     // 回调
@@ -148,21 +149,24 @@ const settingValues = async (detail: ImageVO) => {
   prompt.value = detail.prompt
   width.value = detail.width
   height.value = detail.height
-
 }
 
 /** 平台切换 */
-const handlerPlatformChange = async (platform) => {
+const handlerPlatformChange = async (platform: string) => {
   // 切换平台，切换模型、风格
-  if (AiPlatformEnum.YI_YAN === platform) {
+  if (AiPlatformEnum.TONG_YI === platform) {
     models.value = TongYiWanXiangModels
+  } else if (AiPlatformEnum.YI_YAN === platform) {
+    models.value = QianFanModels
+  } else if (AiPlatformEnum.ZHI_PU === platform) {
+    models.value = ChatGlmModels
   } else {
     models.value = []
   }
   // 切换平台，默认选择一个风格
   if (models.value.length > 0) {
     model.value = models.value[0].key
-  } else  {
+  } else {
     model.value = ''
   }
 }

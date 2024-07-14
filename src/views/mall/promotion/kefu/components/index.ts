@@ -1,4 +1,4 @@
-import KeFuConversationBox from './KeFuConversationBox.vue'
-import KeFuChatBox from './KeFuChatBox.vue'
+import KeFuConversationList from './KeFuConversationList.vue'
+import KeFuMessageList from './KeFuMessageList.vue'
 
-export { KeFuConversationBox, KeFuChatBox }
+export { KeFuConversationList, KeFuMessageList }
