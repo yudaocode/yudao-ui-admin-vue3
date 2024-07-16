@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import Left from './components/Left.vue'
 import Right from './components/Right.vue'
-import { WriteApi } from '@/api/ai/write'
+import { WriteApi, WriteVO } from '@/api/ai/write'
 import { WriteExample } from '@/views/ai/utils/constants'
 
 const message = useMessage()
@@ -37,7 +37,7 @@ const stopStream = () => {
 
 /** 执行写作 */
 const rightRef = ref<InstanceType<typeof Right>>()
-const submit = (data) => {
+const submit = (data: WriteVO) => {
   abortController.value = new AbortController()
   writeResult.value = ''
   isWriting.value = true

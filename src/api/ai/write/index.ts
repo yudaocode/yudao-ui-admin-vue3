@@ -17,7 +17,7 @@ export interface WriteVO {
   platform?: string // 平台
   model?: string // 模型
   generatedContent?: string // 生成的内容
-  errorMessage: string // 错误信息
+  errorMessage?: string // 错误信息
   createTime?: Date // 创建时间
 }
 
