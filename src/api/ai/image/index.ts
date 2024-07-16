@@ -99,5 +99,10 @@ export const ImageApi = {
   // 删除绘画
   deleteImage: async (id: number) => {
     return await request.delete({ url: `/ai/image/delete?id=` + id })
-  }
+  },
+
+  // release 列表
+  publicList: async (params) => {
+    return await request.get({ url: `/ai/image/public-list`, params})
+  },
 }
