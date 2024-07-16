@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-1/1">
+  <div class="flex ">
     <!-- 模式 -->
     <Mode class="flex-none" @generate-music="generateMusic"/>
     <!-- 音频列表 -->
@@ -13,7 +13,7 @@ import List from './list/index.vue'
 
 defineOptions({ name: 'Index' })
 
-const listRef = ref<{generateMusic: (...args) => void} | null>(null)
+const listRef = ref<Nullable<{generateMusic: (...args) => void}>>(null)
 
 function generateMusic (args: {formData: Recordable}) {
  unref(listRef)?.generateMusic(args.formData)

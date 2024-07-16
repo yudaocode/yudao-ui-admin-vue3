@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col h-full">
+  <div class="flex flex-col h-[600px]">
     <div class="flex-auto flex overflow-hidden">
       <el-tabs v-model="currentType" class="flex-auto px-[var(--app-content-padding)]">
         <!-- 我的创作 -->
