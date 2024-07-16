@@ -62,7 +62,7 @@ const platformOptions = [
     value: AiPlatformEnum.STABLE_DIFFUSION
   },
   {
-    label: '其他',
+    label: '其它',
     value: 'other'
   }
 ]
@@ -88,6 +88,7 @@ const handleRegeneration = async (image: ImageVO) => {
   } else if (image.platform === AiPlatformEnum.STABLE_DIFFUSION) {
     stableDiffusionRef.value.settingValues(image)
   }
+  // TODO @fan：貌似 other 重新设置不行？
 }
 </script>
 
