@@ -50,4 +50,9 @@ declare global {
     name: string
     children?: Tree[] | any[]
   }
+  // 分页数据公共返回
+  interface PageResult<T> {
+    list: T // 数据
+    total: number // 总量
+  }
 }

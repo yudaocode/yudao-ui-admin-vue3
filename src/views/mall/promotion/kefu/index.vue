@@ -28,9 +28,7 @@ const message = useMessage() // 消息弹窗
 
 // ======================= WebSocket start =======================
 const server = ref(
-  (import.meta.env.VITE_BASE_URL + '/infra/ws/').replace('http', 'ws') +
-    '?token=' +
-    getAccessToken()
+  (import.meta.env.VITE_BASE_URL + '/infra/ws').replace('http', 'ws') + '?token=' + getAccessToken()
 ) // WebSocket 服务地址
 
 /** 发起 WebSocket 连接 */

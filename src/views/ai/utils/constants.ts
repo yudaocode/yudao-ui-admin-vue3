@@ -20,17 +20,21 @@ export const AiPlatformEnum = {
   Ollama: 'Ollama',
   STABLE_DIFFUSION: 'StableDiffusion', // Stability AI
   MIDJOURNEY: 'Midjourney', // Midjourney
-  SUNO: 'Suno', // Suno AI
+  SUNO: 'Suno' // Suno AI
 }
 
-export const OtherPlatformEnum:ImageModelVO [] = [
+export const OtherPlatformEnum: ImageModelVO[] = [
   {
     key: AiPlatformEnum.TONG_YI,
     name: '通义万相'
   },
   {
     key: AiPlatformEnum.YI_YAN,
-    name: '百度图片'
+    name: '百度千帆'
+  },
+  {
+    key: AiPlatformEnum.ZHI_PU,
+    name: '智谱 AI'
   }
 ]
 
@@ -58,6 +62,12 @@ export const AiMusicStatusEnum = {
 export enum AiWriteTypeEnum {
   WRITING = 1, // 撰写
   REPLY // 回复
+}
+
+// 表格展示对照map
+export const AiWriteTypeTableRender = {
+  [AiWriteTypeEnum.WRITING]: '撰写',
+  [AiWriteTypeEnum.REPLY]: '回复',
 }
 
 // ========== 【图片 UI】相关的枚举 ==========
@@ -200,54 +210,6 @@ export const StableDiffusionStylePresets: ImageModelVO[] = [
   }
 ]
 
-// todo @芋艿 这些是通义的风格，看要不要删除
-export const TongYiWanXiangStylePresets: ImageModelVO[] = [
-  {
-    key: '-1',
-    name: '上传图像风格'
-  },
-  {
-    key: '0',
-    name: '复古漫画'
-  },
-  {
-    key: '1',
-    name: '3D童话'
-  },
-  {
-    key: '2',
-    name: '二次元'
-  },
-  {
-    key: '3',
-    name: '小清新'
-  },
-  {
-    key: '4',
-    name: '未来科技'
-  },
-  {
-    key: '5',
-    name: '国画古风'
-  },
-  {
-    key: '6',
-    name: '将军百战'
-  },
-  {
-    key: '7',
-    name: '炫彩卡通'
-  },
-  {
-    key: '8',
-    name: '清雅国风'
-  },
-  {
-    key: '9',
-    name: '喜迎新年'
-  }
-]
-
 export const TongYiWanXiangModels: ImageModelVO[] = [
   {
     key: 'wanx-v1',
@@ -256,6 +218,20 @@ export const TongYiWanXiangModels: ImageModelVO[] = [
   {
     key: 'wanx-sketch-to-image-v1',
     name: 'wanx-sketch-to-image-v1'
+  }
+]
+
+export const QianFanModels: ImageModelVO[] = [
+  {
+    key: 'sd_xl',
+    name: 'sd_xl'
+  }
+]
+
+export const ChatGlmModels: ImageModelVO[] = [
+  {
+    key: 'cogview-3',
+    name: 'cogview-3'
   }
 ]
 
@@ -318,7 +294,7 @@ export const Dall3StyleList: ImageModelVO[] = [
 
 export interface ImageSizeVO {
   key: string
-  name: string
+  name?: string
   style: string
   width: string
   height: string
