@@ -5,10 +5,14 @@
       <el-tab-pane label="最近浏览" name="a" />
       <el-tab-pane label="订单列表" name="b" />
     </el-tabs>
-    <!--  最近浏览  -->
-    <ProductBrowsingHistory v-if="activeName === 'a'" ref="productBrowsingHistoryRef" />
-    <!--  订单列表  -->
-    <template v-if="activeName === 'b'"></template>
+    <div>
+      <el-scrollbar ref="scrollbarRef" always height="calc(100vh - 400px)" @scroll="handleScroll">
+        <!--  最近浏览  -->
+        <ProductBrowsingHistory v-if="activeName === 'a'" ref="productBrowsingHistoryRef" />
+        <!--  订单列表  -->
+        <OrderBrowsingHistory v-if="activeName === 'b'" ref="orderBrowsingHistoryRef" />
+      </el-scrollbar>
+    </div>
   </div>
   <el-empty v-show="isEmpty(conversation)" description="请选择左侧的一个会话后开始" />
 </template>
@@ -16,17 +20,22 @@
 <script lang="ts" setup>
 import type { TabsPaneContext } from 'element-plus'
 import ProductBrowsingHistory from './ProductBrowsingHistory.vue'
+import OrderBrowsingHistory from './OrderBrowsingHistory.vue'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { isEmpty } from '@/utils/is'
+import { debounce } from 'lodash-es'
+import { ElScrollbar as ElScrollbarType } from 'element-plus/es/components/scrollbar'
 
 defineOptions({ name: 'MemberBrowsingHistory' })
 
 const activeName = ref('a')
 /** tab 切换 */
 const productBrowsingHistoryRef = ref<InstanceType<typeof ProductBrowsingHistory>>()
-const handleClick = (tab: TabsPaneContext) => {
+const orderBrowsingHistoryRef = ref<InstanceType<typeof OrderBrowsingHistory>>()
+const handleClick = async (tab: TabsPaneContext) => {
   activeName.value = tab.paneName as string
-  getHistoryList()
+  await nextTick()
+  await getHistoryList()
 }
 /** 获得历史数据 */
 const getHistoryList = async () => {
@@ -35,6 +44,20 @@ const getHistoryList = async () => {
       await productBrowsingHistoryRef.value?.getHistoryList(conversation.value)
       break
     case 'b':
+      await orderBrowsingHistoryRef.value?.getHistoryList(conversation.value)
+      break
+    default:
+      break
+  }
+}
+/** 加载下一页数据 */
+const loadMore = async () => {
+  switch (activeName.value) {
+    case 'a':
+      await productBrowsingHistoryRef.value?.loadMore()
+      break
+    case 'b':
+      await orderBrowsingHistoryRef.value?.loadMore()
       break
     default:
       break
@@ -45,9 +68,20 @@ const conversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) /
 const initHistory = async (val: KeFuConversationRespVO) => {
   activeName.value = 'a'
   conversation.value = val
+  await nextTick()
   await getHistoryList()
 }
 defineExpose({ initHistory })
+
+/** 处理消息列表滚动事件(debounce 限流) */
+const scrollbarRef = ref<InstanceType<typeof ElScrollbarType>>()
+const handleScroll = debounce(() => {
+  const wrap = scrollbarRef.value?.wrapRef
+  // 触底重置
+  if (Math.abs(wrap!.scrollHeight - wrap!.clientHeight - wrap!.scrollTop) < 1) {
+    loadMore()
+  }
+}, 200)
 </script>
 
 <style lang="scss" scoped>

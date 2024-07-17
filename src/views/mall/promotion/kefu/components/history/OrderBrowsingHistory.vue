@@ -1,32 +1,21 @@
 <template>
-  <ProductItem
-    v-for="item in list"
-    :key="item.id"
-    :picUrl="item.picUrl"
-    :price="item.price"
-    :skuText="item.introduction"
-    :title="item.spuName"
-    :titleWidth="400"
-    class="mb-10px"
-    priceColor="#FF3000"
-  />
+  <OrderItem v-for="item in list" :key="item.id" :order="item" class="mb-10px" />
 </template>
 
 <script lang="ts" setup>
-import { getBrowseHistoryPage } from '@/api/mall/product/history'
-import ProductItem from '@/views/mall/promotion/kefu/components/message/ProductItem.vue'
+import OrderItem from '@/views/mall/promotion/kefu/components/message/OrderItem.vue'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
+import { getOrderPage } from '@/api/mall/trade/order'
 import { concat } from 'lodash-es'
 
-defineOptions({ name: 'ProductBrowsingHistory' })
+defineOptions({ name: 'OrderBrowsingHistory' })
 
 const list = ref<any>([]) // 列表
 const total = ref(0) // 总数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  userId: 0,
-  userDeleted: false
+  userId: 0
 })
 const skipGetMessageList = computed(() => {
   // 已加载到最后一页的话则不触发新的消息获取
@@ -35,7 +24,7 @@ const skipGetMessageList = computed(() => {
 /** 获得浏览记录 */
 const getHistoryList = async (val: KeFuConversationRespVO) => {
   queryParams.userId = val.userId
-  const res = await getBrowseHistoryPage(queryParams)
+  const res = await getOrderPage(queryParams)
   total.value = res.total
   list.value = res.list
 }
@@ -45,11 +34,9 @@ const loadMore = async () => {
     return
   }
   queryParams.pageNo += 1
-  const res = await getBrowseHistoryPage(queryParams)
+  const res = await getOrderPage(queryParams)
   total.value = res.total
   concat(list.value, res.list)
 }
 defineExpose({ getHistoryList, loadMore })
 </script>
-
-<style lang="scss" scoped></style>

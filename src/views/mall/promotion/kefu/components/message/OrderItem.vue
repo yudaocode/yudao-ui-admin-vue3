@@ -1,5 +1,5 @@
 <template>
-  <div :key="getMessageContent.id" class="order-list-card-box mt-14px max-w-70%">
+  <div :key="getMessageContent.id" class="order-list-card-box mt-14px">
     <div class="order-card-header flex items-center justify-between p-x-20px">
       <div class="order-no">订单号：{{ getMessageContent.no }}</div>
       <div :class="formatOrderColor(getMessageContent)" class="order-state font-16">
@@ -32,13 +32,17 @@
 import { fenToYuan } from '@/utils'
 import ProductItem from './ProductItem.vue'
 import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
+import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'OrderItem' })
 const props = defineProps<{
-  message: KeFuMessageRespVO
+  message?: KeFuMessageRespVO
+  order?: any
 }>()
 
-const getMessageContent = computed(() => JSON.parse(props.message.content))
+const getMessageContent = computed(() =>
+  isEmpty(props.order) ? JSON.parse(props!.message!.content) : props.order
+)
 
 /**
  * 格式化订单状态的颜色

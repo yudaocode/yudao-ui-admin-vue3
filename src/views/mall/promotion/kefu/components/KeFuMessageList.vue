@@ -78,7 +78,7 @@
                 </MessageItem>
                 <!-- 订单消息 -->
                 <MessageItem :content-type="KeFuMessageContentTypeEnum.ORDER" :message="item">
-                  <OrderItem :message="item" />
+                  <OrderItem :message="item" class="max-w-70%" />
                 </MessageItem>
               </div>
               <el-avatar
