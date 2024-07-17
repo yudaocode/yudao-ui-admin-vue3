@@ -110,33 +110,26 @@ const skuString = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-.score-img {
-  width: 36px;
-  height: 36px;
-  margin: 0 4px;
-}
-
 .ss-order-card-warp {
+  max-width: 60%;
   padding: 20px;
   border-radius: 10px;
   background-color: #e2e2e2;
 
   .img-box {
-    width: 164px;
-    height: 164px;
+    width: 80px;
+    height: 80px;
     border-radius: 10px;
     overflow: hidden;
 
     .order-img {
-      width: 164px;
-      height: 164px;
+      width: 80px;
+      height: 80px;
     }
   }
 
   .box-right {
     flex: 1;
-    // width: 500px;
-    // height: 164px;
     position: relative;
 
     .tool-box {
@@ -147,13 +140,13 @@ const skuString = computed(() => {
   }
 
   .title-text {
-    font-size: 28px;
+    font-size: 16px;
     font-weight: 500;
-    line-height: 40px;
+    line-height: 20px;
   }
 
   .spec-text {
-    font-size: 24px;
+    font-size: 16px;
     font-weight: 400;
     color: #999999;
     min-width: 0;
@@ -165,15 +158,15 @@ const skuString = computed(() => {
   }
 
   .price-text {
-    font-size: 24px;
+    font-size: 16px;
     font-weight: 500;
     font-family: OPPOSANS;
   }
 
   .total-text {
-    font-size: 24px;
+    font-size: 16px;
     font-weight: 400;
-    line-height: 24px;
+    line-height: 16px;
     color: #999999;
     margin-left: 8px;
   }

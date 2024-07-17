@@ -13,7 +13,7 @@
       <div :key="getMessageContent.id" class="order-list-card-box mt-14px">
         <div class="order-card-header flex items-center justify-between p-x-20px">
           <div class="order-no">订单号：{{ getMessageContent.no }}</div>
-          <div :class="formatOrderColor(getMessageContent)" class="order-state font-26">
+          <div :class="formatOrderColor(getMessageContent)" class="order-state font-16">
             {{ formatOrderStatus(getMessageContent) }}
           </div>
         </div>
@@ -26,7 +26,7 @@
             :title="item.spuName"
           />
         </div>
-        <div class="pay-box mt-30px flex justify-end pr-20px">
+        <div class="pay-box flex justify-end pr-20px">
           <div class="flex items-center">
             <div class="discounts-title pay-color"
               >共 {{ getMessageContent?.productCount }} 件商品,总金额:
@@ -108,23 +108,23 @@ function formatOrderStatus(order: any) {
   background-color: #e2e2e2;
 
   .order-card-header {
-    height: 80px;
+    height: 28px;
 
     .order-no {
-      font-size: 26px;
+      font-size: 16px;
       font-weight: 500;
     }
   }
 
   .pay-box {
     .discounts-title {
-      font-size: 24px;
+      font-size: 16px;
       line-height: normal;
       color: #999999;
     }
 
     .discounts-money {
-      font-size: 24px;
+      font-size: 16px;
       line-height: normal;
       color: #999;
       font-family: OPPOSANS;
@@ -132,34 +132,6 @@ function formatOrderStatus(order: any) {
 
     .pay-color {
       color: #333;
-    }
-  }
-
-  .order-card-footer {
-    height: 100px;
-
-    .more-item-box {
-      padding: 20px;
-
-      .more-item {
-        height: 60px;
-
-        .title {
-          font-size: 26px;
-        }
-      }
-    }
-
-    .more-btn {
-      color: #999999;
-      font-size: 24px;
-    }
-
-    .content {
-      width: 154px;
-      color: #333333;
-      font-size: 26px;
-      font-weight: 500;
     }
   }
 }
