@@ -111,7 +111,6 @@ const skuString = computed(() => {
 
 <style lang="scss" scoped>
 .ss-order-card-warp {
-  max-width: 60%;
   padding: 20px;
   border-radius: 10px;
   background-color: #e2e2e2;

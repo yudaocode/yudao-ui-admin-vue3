@@ -16,6 +16,7 @@
         :skuText="getMessageContent.introduction"
         :title="getMessageContent.spuName"
         :titleWidth="400"
+        class="max-w-70%"
         priceColor="#FF3000"
       />
     </div>

@@ -10,7 +10,7 @@
             : ''
       ]"
     >
-      <div :key="getMessageContent.id" class="order-list-card-box mt-14px">
+      <div :key="getMessageContent.id" class="order-list-card-box mt-14px max-w-70%">
         <div class="order-card-header flex items-center justify-between p-x-20px">
           <div class="order-no">订单号：{{ getMessageContent.no }}</div>
           <div :class="formatOrderColor(getMessageContent)" class="order-state font-16">
