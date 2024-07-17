@@ -21,6 +21,7 @@ const skipGetMessageList = computed(() => {
   // 已加载到最后一页的话则不触发新的消息获取
   return total.value > 0 && Math.ceil(total.value / queryParams.pageSize) === queryParams.pageNo
 }) // 跳过消息获取
+
 /** 获得浏览记录 */
 const getHistoryList = async (val: KeFuConversationRespVO) => {
   queryParams.userId = val.userId
@@ -28,6 +29,7 @@ const getHistoryList = async (val: KeFuConversationRespVO) => {
   total.value = res.total
   list.value = res.list
 }
+
 /** 加载下一页数据 */
 const loadMore = async () => {
   if (skipGetMessageList.value) {

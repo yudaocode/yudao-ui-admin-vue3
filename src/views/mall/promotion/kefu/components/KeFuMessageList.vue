@@ -161,6 +161,7 @@ const queryParams = reactive({
 })
 const total = ref(0) // 消息总条数
 const refreshContent = ref(false) // 内容刷新,主要解决会话消息页面高度不一致导致的滚动功能精度失效
+
 /** 获悉消息内容 */
 const getMessageContent = computed(() => (item: any) => jsonParse(item.content))
 /** 获得消息列表 */
@@ -178,6 +179,7 @@ const getMessageList = async () => {
   }
   refreshContent.value = true
 }
+
 /** 添加消息 */
 const pushMessage = (message: any) => {
   if (messageList.value.some((val) => val.id === message.id)) {
@@ -217,6 +219,7 @@ const refreshMessageList = async (message?: any) => {
     await handleToNewMessage()
   }
 }
+
 const getNewMessageList = async (val: KeFuConversationRespVO) => {
   // 会话切换,重置相关参数
   queryParams.pageNo = 1
@@ -231,6 +234,7 @@ const getNewMessageList = async (val: KeFuConversationRespVO) => {
   await refreshMessageList()
 }
 defineExpose({ getNewMessageList, refreshMessageList })
+
 const showKeFuMessageList = computed(() => !isEmpty(conversation.value)) // 是否显示聊天区域
 const skipGetMessageList = computed(() => {
   // 已加载到最后一页的话则不触发新的消息获取
