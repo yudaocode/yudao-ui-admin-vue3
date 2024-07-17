@@ -1,57 +1,43 @@
 <template>
-  <!-- 图片消息 -->
-  <template v-if="KeFuMessageContentTypeEnum.ORDER === message.contentType">
-    <div
-      :class="[
-        message.senderType === UserTypeEnum.MEMBER
-          ? `ml-10px`
-          : message.senderType === UserTypeEnum.ADMIN
-            ? `mr-10px`
-            : ''
-      ]"
-    >
-      <div :key="getMessageContent.id" class="order-list-card-box mt-14px max-w-70%">
-        <div class="order-card-header flex items-center justify-between p-x-20px">
-          <div class="order-no">订单号：{{ getMessageContent.no }}</div>
-          <div :class="formatOrderColor(getMessageContent)" class="order-state font-16">
-            {{ formatOrderStatus(getMessageContent) }}
-          </div>
+  <div :key="getMessageContent.id" class="order-list-card-box mt-14px max-w-70%">
+    <div class="order-card-header flex items-center justify-between p-x-20px">
+      <div class="order-no">订单号：{{ getMessageContent.no }}</div>
+      <div :class="formatOrderColor(getMessageContent)" class="order-state font-16">
+        {{ formatOrderStatus(getMessageContent) }}
+      </div>
+    </div>
+    <div v-for="item in getMessageContent.items" :key="item.id" class="border-bottom">
+      <ProductItem
+        :num="item.count"
+        :picUrl="item.picUrl"
+        :price="item.price"
+        :skuText="item.properties.map((property: any) => property.valueName).join(' ')"
+        :title="item.spuName"
+      />
+    </div>
+    <div class="pay-box flex justify-end pr-20px">
+      <div class="flex items-center">
+        <div class="discounts-title pay-color"
+          >共 {{ getMessageContent?.productCount }} 件商品,总金额:
         </div>
-        <div v-for="item in getMessageContent.items" :key="item.id" class="border-bottom">
-          <ProductItem
-            :num="item.count"
-            :picUrl="item.picUrl"
-            :price="item.price"
-            :skuText="item.properties.map((property: any) => property.valueName).join(' ')"
-            :title="item.spuName"
-          />
-        </div>
-        <div class="pay-box flex justify-end pr-20px">
-          <div class="flex items-center">
-            <div class="discounts-title pay-color"
-              >共 {{ getMessageContent?.productCount }} 件商品,总金额:
-            </div>
-            <div class="discounts-money pay-color">
-              ￥{{ fenToYuan(getMessageContent?.payPrice) }}
-            </div>
-          </div>
+        <div class="discounts-money pay-color">
+          ￥{{ fenToYuan(getMessageContent?.payPrice) }}
         </div>
       </div>
     </div>
-  </template>
+  </div>
 </template>
 
 <script lang="ts" setup>
-import { KeFuMessageContentTypeEnum } from '../tools/constants'
-import ProductItem from './ProductItem.vue'
-import { UserTypeEnum } from '@/utils/constants'
-import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
 import { fenToYuan } from '@/utils'
+import ProductItem from './ProductItem.vue'
+import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
 
-defineOptions({ name: 'OrderMessageItem' })
+defineOptions({ name: 'OrderItem' })
 const props = defineProps<{
   message: KeFuMessageRespVO
 }>()
+
 const getMessageContent = computed(() => JSON.parse(props.message.content))
 
 /**

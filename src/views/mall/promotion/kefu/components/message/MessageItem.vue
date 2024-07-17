@@ -1,6 +1,6 @@
 <template>
-  <!-- 图片消息 -->
-  <template v-if="KeFuMessageContentTypeEnum.IMAGE === message.contentType">
+  <!-- 消息组件 -->
+  <template v-if="contentType === message.contentType">
     <div
       :class="[
         message.senderType === UserTypeEnum.MEMBER
@@ -10,25 +10,18 @@
             : ''
       ]"
     >
-      <el-image
-        :initial-index="0"
-        :preview-src-list="[message.content]"
-        :src="message.content"
-        class="w-200px"
-        fit="contain"
-        preview-teleported
-      />
+      <slot></slot>
     </div>
   </template>
 </template>
 
 <script lang="ts" setup>
-import { KeFuMessageContentTypeEnum } from '../tools/constants'
 import { UserTypeEnum } from '@/utils/constants'
 import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
 
-defineOptions({ name: 'ImageMessageItem' })
+defineOptions({ name: 'MessageItem' })
 defineProps<{
   message: KeFuMessageRespVO
+  contentType: number
 }>()
 </script>

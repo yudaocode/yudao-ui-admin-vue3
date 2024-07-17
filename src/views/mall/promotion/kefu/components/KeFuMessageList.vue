@@ -40,19 +40,46 @@
                 v-if="item.senderType === UserTypeEnum.MEMBER"
                 :src="conversation.userAvatar"
                 alt="avatar"
+                class="w-60px h-60px"
               />
               <div
                 :class="{ 'kefu-message': KeFuMessageContentTypeEnum.TEXT === item.contentType }"
                 class="p-10px"
               >
                 <!-- 文本消息 -->
-                <TextMessageItem :message="item" />
+                <MessageItem :content-type="KeFuMessageContentTypeEnum.TEXT" :message="item">
+                  <div
+                    v-dompurify-html="replaceEmoji(item.content)"
+                    class="flex items-center"
+                  ></div>
+                </MessageItem>
                 <!-- 图片消息 -->
-                <ImageMessageItem :message="item" />
+                <MessageItem :content-type="KeFuMessageContentTypeEnum.IMAGE" :message="item">
+                  <el-image
+                    :initial-index="0"
+                    :preview-src-list="[item.content]"
+                    :src="item.content"
+                    class="w-200px"
+                    fit="contain"
+                    preview-teleported
+                  />
+                </MessageItem>
                 <!-- 商品消息 -->
-                <ProductMessageItem :message="item" />
+                <MessageItem :content-type="KeFuMessageContentTypeEnum.PRODUCT" :message="item">
+                  <ProductItem
+                    :picUrl="getMessageContent(item).picUrl"
+                    :price="getMessageContent(item).price"
+                    :skuText="getMessageContent(item).introduction"
+                    :title="getMessageContent(item).spuName"
+                    :titleWidth="400"
+                    class="max-w-70%"
+                    priceColor="#FF3000"
+                  />
+                </MessageItem>
                 <!-- 订单消息 -->
-                <OrderMessageItem :message="item" />
+                <MessageItem :content-type="KeFuMessageContentTypeEnum.ORDER" :message="item">
+                  <OrderItem :message="item" />
+                </MessageItem>
               </div>
               <el-avatar
                 v-if="item.senderType === UserTypeEnum.ADMIN"
@@ -97,11 +124,9 @@ import { KeFuMessageApi, KeFuMessageRespVO } from '@/api/mall/promotion/kefu/mes
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import EmojiSelectPopover from './tools/EmojiSelectPopover.vue'
 import PictureSelectUpload from './tools/PictureSelectUpload.vue'
-import TextMessageItem from './message/TextMessageItem.vue'
-import ImageMessageItem from './message/ImageMessageItem.vue'
-import ProductMessageItem from './message/ProductMessageItem.vue'
-import OrderMessageItem from './message/OrderMessageItem.vue'
-import { Emoji } from './tools/emoji'
+import ProductItem from './message/ProductItem.vue'
+import OrderItem from './message/OrderItem.vue'
+import { Emoji, useEmoji } from './tools/emoji'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 import { isEmpty } from '@/utils/is'
 import { UserTypeEnum } from '@/utils/constants'
@@ -115,7 +140,7 @@ dayjs.extend(relativeTime)
 defineOptions({ name: 'KeFuMessageList' })
 
 const message = ref('') // 消息弹窗
-
+const { replaceEmoji } = useEmoji()
 const messageTool = useMessage()
 const messageList = ref<KeFuMessageRespVO[]>([]) // 消息列表
 const conversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
@@ -127,6 +152,8 @@ const queryParams = reactive({
 })
 const total = ref(0) // 消息总条数
 const refreshContent = ref(false) // 内容刷新,主要解决会话消息页面高度不一致导致的滚动功能精度失效
+/** 获悉消息内容 */
+const getMessageContent = computed(() => (item: any) => JSON.parse(item.content))
 /** 获得消息列表 */
 const getMessageList = async () => {
   const res = await KeFuMessageApi.getKeFuMessagePage(queryParams)
