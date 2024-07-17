@@ -1,22 +1,28 @@
 <template>
   <el-row :gutter="10">
     <!-- 会话列表 -->
-    <el-col :span="8">
+    <el-col :span="6">
       <ContentWrap>
         <KeFuConversationList ref="keFuConversationRef" @change="handleChange" />
       </ContentWrap>
     </el-col>
     <!-- 会话详情（选中会话的消息列表） -->
-    <el-col :span="16">
+    <el-col :span="12">
       <ContentWrap>
         <KeFuMessageList ref="keFuChatBoxRef" @change="getConversationList" />
+      </ContentWrap>
+    </el-col>
+    <!-- 会员足迹（选中会话的会员足迹） -->
+    <el-col :span="6">
+      <ContentWrap>
+        <MemberBrowsingHistory ref="memberBrowsingHistoryRef" />
       </ContentWrap>
     </el-col>
   </el-row>
 </template>
 
 <script lang="ts" setup>
-import { KeFuConversationList, KeFuMessageList } from './components'
+import { KeFuConversationList, KeFuMessageList, MemberBrowsingHistory } from './components'
 import { WebSocketMessageTypeConstants } from './components/tools/constants'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { getAccessToken } from '@/utils/auth'
@@ -81,8 +87,10 @@ const getConversationList = () => {
 
 /** 加载指定会话的消息列表 */
 const keFuChatBoxRef = ref<InstanceType<typeof KeFuMessageList>>()
+const memberBrowsingHistoryRef = ref<InstanceType<typeof MemberBrowsingHistory>>()
 const handleChange = (conversation: KeFuConversationRespVO) => {
   keFuChatBoxRef.value?.getNewMessageList(conversation)
+  memberBrowsingHistoryRef.value?.initHistory(conversation)
 }
 
 /** 初始化 */
