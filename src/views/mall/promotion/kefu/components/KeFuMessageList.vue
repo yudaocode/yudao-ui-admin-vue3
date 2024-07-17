@@ -47,15 +47,18 @@
                 class="p-10px"
               >
                 <!-- 文本消息 -->
-                <MessageItem :content-type="KeFuMessageContentTypeEnum.TEXT" :message="item">
-                  <div
-                    v-dompurify-html="replaceEmoji(item.content)"
-                    class="flex items-center"
-                  ></div>
+                <MessageItem :message="item">
+                  <template v-if="KeFuMessageContentTypeEnum.TEXT === item.contentType">
+                    <div
+                      v-dompurify-html="replaceEmoji(item.content)"
+                      class="flex items-center"
+                    ></div>
+                  </template>
                 </MessageItem>
                 <!-- 图片消息 -->
-                <MessageItem :content-type="KeFuMessageContentTypeEnum.IMAGE" :message="item">
+                <MessageItem :message="item">
                   <el-image
+                    v-if="KeFuMessageContentTypeEnum.IMAGE === item.contentType"
                     :initial-index="0"
                     :preview-src-list="[item.content]"
                     :src="item.content"
@@ -65,8 +68,9 @@
                   />
                 </MessageItem>
                 <!-- 商品消息 -->
-                <MessageItem :content-type="KeFuMessageContentTypeEnum.PRODUCT" :message="item">
+                <MessageItem :message="item">
                   <ProductItem
+                    v-if="KeFuMessageContentTypeEnum.PRODUCT === item.contentType"
                     :picUrl="getMessageContent(item).picUrl"
                     :price="getMessageContent(item).price"
                     :skuText="getMessageContent(item).introduction"
@@ -77,8 +81,12 @@
                   />
                 </MessageItem>
                 <!-- 订单消息 -->
-                <MessageItem :content-type="KeFuMessageContentTypeEnum.ORDER" :message="item">
-                  <OrderItem :message="item" class="max-w-70%" />
+                <MessageItem :message="item">
+                  <OrderItem
+                    v-if="KeFuMessageContentTypeEnum.ORDER === item.contentType"
+                    :message="item"
+                    class="max-w-70%"
+                  />
                 </MessageItem>
               </div>
               <el-avatar
@@ -134,6 +142,7 @@ import { formatDate } from '@/utils/formatTime'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { debounce } from 'lodash-es'
+import { jsonParse } from '@/utils'
 
 dayjs.extend(relativeTime)
 
@@ -153,7 +162,7 @@ const queryParams = reactive({
 const total = ref(0) // 消息总条数
 const refreshContent = ref(false) // 内容刷新,主要解决会话消息页面高度不一致导致的滚动功能精度失效
 /** 获悉消息内容 */
-const getMessageContent = computed(() => (item: any) => JSON.parse(item.content))
+const getMessageContent = computed(() => (item: any) => jsonParse(item.content))
 /** 获得消息列表 */
 const getMessageList = async () => {
   const res = await KeFuMessageApi.getKeFuMessagePage(queryParams)
@@ -171,9 +180,6 @@ const getMessageList = async () => {
 }
 /** 添加消息 */
 const pushMessage = (message: any) => {
-  if (message.conversationId !== conversation.value.id) {
-    return
-  }
   if (messageList.value.some((val) => val.id === message.id)) {
     return
   }
@@ -193,6 +199,10 @@ const refreshMessageList = async (message?: any) => {
   }
 
   if (typeof message !== 'undefined') {
+    // 当前查询会话与消息所属会话不一致则不做处理
+    if (message.conversationId !== conversation.value.id) {
+      return
+    }
     pushMessage(message)
   } else {
     queryParams.pageNo = 1
@@ -297,7 +307,7 @@ const handleScroll = debounce(({ scrollTop }) => {
     return
   }
   // 触顶自动加载下一页数据
-  if (scrollTop === 0) {
+  if (Math.floor(scrollTop) === 0) {
     handleOldMessage()
   }
   const wrap = scrollbarRef.value?.wrapRef

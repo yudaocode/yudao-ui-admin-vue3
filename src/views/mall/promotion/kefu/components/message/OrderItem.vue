@@ -1,27 +1,29 @@
 <template>
-  <div :key="getMessageContent.id" class="order-list-card-box mt-14px">
-    <div class="order-card-header flex items-center justify-between p-x-20px">
-      <div class="order-no">订单号：{{ getMessageContent.no }}</div>
-      <div :class="formatOrderColor(getMessageContent)" class="order-state font-16">
-        {{ formatOrderStatus(getMessageContent) }}
-      </div>
-    </div>
-    <div v-for="item in getMessageContent.items" :key="item.id" class="border-bottom">
-      <ProductItem
-        :num="item.count"
-        :picUrl="item.picUrl"
-        :price="item.price"
-        :skuText="item.properties.map((property: any) => property.valueName).join(' ')"
-        :title="item.spuName"
-      />
-    </div>
-    <div class="pay-box flex justify-end pr-20px">
-      <div class="flex items-center">
-        <div class="discounts-title pay-color"
-          >共 {{ getMessageContent?.productCount }} 件商品,总金额:
+  <div v-if="isObject(getMessageContent)">
+    <div :key="getMessageContent.id" class="order-list-card-box mt-14px">
+      <div class="order-card-header flex items-center justify-between p-x-20px">
+        <div class="order-no">订单号：{{ getMessageContent.no }}</div>
+        <div :class="formatOrderColor(getMessageContent)" class="order-state font-16">
+          {{ formatOrderStatus(getMessageContent) }}
         </div>
-        <div class="discounts-money pay-color">
-          ￥{{ fenToYuan(getMessageContent?.payPrice) }}
+      </div>
+      <div v-for="item in getMessageContent.items" :key="item.id" class="border-bottom">
+        <ProductItem
+          :num="item.count"
+          :picUrl="item.picUrl"
+          :price="item.price"
+          :skuText="item.properties.map((property: any) => property.valueName).join(' ')"
+          :title="item.spuName"
+        />
+      </div>
+      <div class="pay-box flex justify-end pr-20px">
+        <div class="flex items-center">
+          <div class="discounts-title pay-color"
+            >共 {{ getMessageContent?.productCount }} 件商品,总金额:
+          </div>
+          <div class="discounts-money pay-color">
+            ￥{{ fenToYuan(getMessageContent?.payPrice) }}
+          </div>
         </div>
       </div>
     </div>
@@ -29,10 +31,10 @@
 </template>
 
 <script lang="ts" setup>
-import { fenToYuan } from '@/utils'
-import ProductItem from './ProductItem.vue'
+import { fenToYuan, jsonParse } from '@/utils'
 import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
-import { isEmpty } from '@/utils/is'
+import { isObject } from '@/utils/is'
+import ProductItem from '@/views/mall/promotion/kefu/components/message/ProductItem.vue'
 
 defineOptions({ name: 'OrderItem' })
 const props = defineProps<{
@@ -41,7 +43,7 @@ const props = defineProps<{
 }>()
 
 const getMessageContent = computed(() =>
-  isEmpty(props.order) ? JSON.parse(props!.message!.content) : props.order
+  typeof props.message !== 'undefined' ? jsonParse(props!.message!.content) : props.order
 )
 
 /**
