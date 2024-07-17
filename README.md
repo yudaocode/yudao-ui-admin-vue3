@@ -191,25 +191,23 @@ ps：核心功能已经实现，正在对接微信小程序中...
 
 ### 商城系统
 
+演示地址：<https://doc.iocoder.cn/mall-preview/>
+
 ![功能图](/.image/common/mall-feature.png)
 
 ![功能图](/.image/common/mall-preview.png)
 
-_前端基于 crmeb uniapp 经过授权重构，优化代码实现，接入芋道快速开发平台_
-
-演示地址：<https://doc.iocoder.cn/mall-preview/>
-
 ### ERP 系统
-
-![功能图](/.image/common/erp-feature.png)
 
 演示地址：<https://doc.iocoder.cn/erp-preview/>
 
+![功能图](/.image/common/erp-feature.png)
+
 ### CRM 系统
 
-![功能图](/.image/common/crm-feature.png)
-
 演示地址：<https://doc.iocoder.cn/crm-preview/>
+
+![功能图](/.image/common/crm-feature.png)
 
 ## 🐷 演示图
 

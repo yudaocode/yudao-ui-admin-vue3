@@ -1,24 +1,19 @@
 <template>
-  <div class="h-full box-border flex flex-col px-7">
-    <h3 class="m-0 h-14 -mx-7 px-7 shrink-0 flex items-center justify-between bg-[#ecedef]">
-      <span>预览</span>
-      <!-- 展示在右上角 -->
-      <el-button
-        color="#846af7"
-        v-show="showCopy"
-        @click="copyContent"
-        size="small"
-      >
-        <template #icon>
-          <Icon icon="ph:copy-bold" />
-        </template>
-        复制
-      </el-button>
+  <el-card class="my-card h-full">
+    <template #header>
+      <h3 class="m-0 px-7 shrink-0 flex items-center justify-between">
+        <span>预览</span>
+        <!-- 展示在右上角 -->
+        <el-button color="#846af7" v-show="showCopy" @click="copyContent" size="small">
+          <template #icon>
+            <Icon icon="ph:copy-bold" />
+          </template>
+          复制
+        </el-button>
+      </h3>
+    </template>
 
-
-    </h3>
-
-    <div ref="contentRef" class="hide-scroll-bar flex-grow box-border overflow-y-auto ">
+    <div ref="contentRef" class="hide-scroll-bar h-full box-border overflow-y-auto">
       <div class="w-full min-h-full relative flex-grow bg-white box-border p-3 sm:p-7">
         <!-- 终止生成内容的按钮 -->
         <el-button
@@ -43,14 +38,14 @@
         />
       </div>
     </div>
-  </div>
+  </el-card>
 </template>
 
 <script setup lang="ts">
 import { useClipboard } from '@vueuse/core'
 
-const message = useMessage()
-const { copied, copy } = useClipboard()
+const message = useMessage() // 消息弹窗
+const { copied, copy } = useClipboard() // 粘贴板
 
 const props = defineProps({
   content: {
@@ -67,7 +62,7 @@ const props = defineProps({
 
 const emits = defineEmits(['update:content', 'stopStream'])
 
-// 通过计算属性，双向绑定，更改生成的内容，考虑到用户想要更改生成文章的情况
+/** 通过计算属性，双向绑定，更改生成的内容，考虑到用户想要更改生成文章的情况 */
 const compContent = computed({
   get() {
     return props.content
@@ -91,7 +86,7 @@ const copyContent = () => {
   copy(props.content)
 }
 
-// 复制成功的时候copied.value为true
+/** 复制成功的时候 copied.value 为 true */
 watch(copied, (val) => {
   if (val) {
     message.success('复制成功')
@@ -107,6 +102,19 @@ watch(copied, (val) => {
   &::-webkit-scrollbar {
     width: 0;
     height: 0;
+  }
+}
+
+.my-card {
+  display: flex;
+  flex-direction: column;
+
+  :deep(.el-card__body) {
+    box-sizing: border-box;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0;
+    @extend .hide-scroll-bar;
   }
 }
 </style>

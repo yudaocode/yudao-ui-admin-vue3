@@ -24,27 +24,28 @@
     </h3>
   </DefineLabel>
 
-  <!-- TODO @hhhero 小屏幕的时候是定位在左边的，大屏是分开的 -->
-  <div class="relative" v-bind="$attrs">
+  <div class="flex flex-col" v-bind="$attrs">
     <!-- tab -->
-    <div
-      class="absolute left-1/2 top-2 -translate-x-1/2 w-[303px] rounded-full bg-[#DDDFE3] p-1 z-10"
-    >
-      <div
-        class="flex items-center relative after:content-[''] after:block after:bg-white after:h-[30px] after:w-1/2 after:absolute after:top-0 after:left-0 after:transition-transform after:rounded-full"
-        :class="selectedTab === AiWriteTypeEnum.REPLY && 'after:transform after:translate-x-[100%]'"
-      >
-        <ReuseTab
-          v-for="tab in tabs"
-          :key="tab.value"
-          :text="tab.text"
-          :active="tab.value === selectedTab"
-          :itemClick="() => switchTab(tab.value)"
-        />
+    <div class="w-full pt-2 bg-[#f5f7f9] flex justify-center">
+      <div class="w-[303px] rounded-full bg-[#DDDFE3] p-1 z-10">
+        <div
+          class="flex items-center relative after:content-[''] after:block after:bg-white after:h-[30px] after:w-1/2 after:absolute after:top-0 after:left-0 after:transition-transform after:rounded-full"
+          :class="
+            selectedTab === AiWriteTypeEnum.REPLY && 'after:transform after:translate-x-[100%]'
+          "
+        >
+          <ReuseTab
+            v-for="tab in tabs"
+            :key="tab.value"
+            :text="tab.text"
+            :active="tab.value === selectedTab"
+            :itemClick="() => switchTab(tab.value)"
+          />
+        </div>
       </div>
     </div>
     <div
-      class="px-7 pb-2 pt-[46px] overflow-y-auto lg:block w-[380px] box-border bg-[#ECEDEF] h-full"
+      class="px-7 pb-2 flex-grow overflow-y-auto lg:block w-[380px] box-border bg-[#f5f7f9] h-full"
     >
       <div>
         <template v-if="selectedTab === 1">
@@ -82,13 +83,13 @@
         </template>
 
         <ReuseLabel label="长度" />
-        <Tag v-model="formData.length" :tags="getIntDictOptions('ai_write_length')" />
+        <Tag v-model="formData.length" :tags="getIntDictOptions(DICT_TYPE.AI_WRITE_LENGTH)" />
         <ReuseLabel label="格式" />
-        <Tag v-model="formData.format" :tags="getIntDictOptions('ai_write_format')" />
+        <Tag v-model="formData.format" :tags="getIntDictOptions(DICT_TYPE.AI_WRITE_FORMAT)" />
         <ReuseLabel label="语气" />
-        <Tag v-model="formData.tone" :tags="getIntDictOptions('ai_write_tone')" />
+        <Tag v-model="formData.tone" :tags="getIntDictOptions(DICT_TYPE.AI_WRITE_TONE)" />
         <ReuseLabel label="语言" />
-        <Tag v-model="formData.language" :tags="getIntDictOptions('ai_write_language')" />
+        <Tag v-model="formData.language" :tags="getIntDictOptions(DICT_TYPE.AI_WRITE_LANGUAGE)" />
 
         <div class="flex items-center justify-center mt-3">
           <el-button :disabled="isWriting" @click="reset">重置</el-button>
@@ -103,15 +104,14 @@
 import { createReusableTemplate } from '@vueuse/core'
 import { ref } from 'vue'
 import Tag from './Tag.vue'
-import { WriteVO } from '@/api/ai/writer'
+import { WriteVO } from 'src/api/ai/write'
 import { omit } from 'lodash-es'
-import { getIntDictOptions } from '@/utils/dict'
-import { WriteExampleDataJson } from '@/views/ai/utils/utils'
-import { AiWriteTypeEnum } from "@/views/ai/utils/constants";
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { AiWriteTypeEnum, WriteExample } from '@/views/ai/utils/constants'
 
 type TabType = WriteVO['type']
 
-const message = useMessage()
+const message = useMessage() // 消息弹窗
 
 defineProps<{
   isWriting: boolean
@@ -127,15 +127,17 @@ const emits = defineEmits<{
 const example = (type: 'write' | 'reply') => {
   formData.value = {
     ...initData,
-    ...omit(WriteExampleDataJson[type], ['data'])
+    ...omit(WriteExample[type], ['data'])
   }
   emits('example', type)
 }
+
 /** 重置，将表单值作为初选值 **/
 const reset = () => {
-  formData.value = {...initData}
+  formData.value = { ...initData }
   emits('reset')
 }
+
 const selectedTab = ref<TabType>(AiWriteTypeEnum.WRITING)
 const tabs: {
   text: string
@@ -151,10 +153,12 @@ const [DefineTab, ReuseTab] = createReusableTemplate<{
 }>()
 
 /**
- * 可以在template里边定义可复用的组件，DefineLabel，ReuseLabel是采用的解构赋值，都是Vue组件
- * 直接通过组件的形式使用，<DefineLabel v-slot="{ label, hint, hintClick }">中间是需要复用的组件代码</DefineLabel>，通过<ReuseLabel />来使用定义的组件
- * DefineLabel里边的v-slot="{ label, hint, hintClick }“相当于是解构了组件的prop，需要注意的是boolean类型，需要显式的赋值比如 <ReuseLabel :flag="true" />
- * 事件也得以prop形式传入，不能是@event的形式，比如下面的hintClick需要<ReuseLabel :hintClick="() => { doSomething }"/>
+ * 可以在 template 里边定义可复用的组件，DefineLabel，ReuseLabel 是采用的解构赋值，都是 Vue 组件
+ *
+ * 直接通过组件的形式使用，<DefineLabel v-slot="{ label, hint, hintClick }"> 中间是需要复用的组件代码 <DefineLabel />，通过 <ReuseLabel /> 来使用定义的组件
+ * DefineLabel 里边的 v-slot="{ label, hint, hintClick }"相当于是解构了组件的 prop，需要注意的是 boolean 类型，需要显式的赋值比如 <ReuseLabel :flag="true" />
+ * 事件也得以 prop 形式传入，不能是 @event的形式，比如下面的 hintClick 需要<ReuseLabel :hintClick="() => { doSomething }"/>
+ *
  * @see https://vueuse.org/createReusableTemplate
  */
 const [DefineLabel, ReuseLabel] = createReusableTemplate<{
@@ -174,12 +178,22 @@ const initData: WriteVO = {
   format: 1
 }
 const formData = ref<WriteVO>({ ...initData })
+
+/** 用来记录切换之前所填写的数据，切换的时候给赋值回来 **/
+const recordFormData = {} as Record<AiWriteTypeEnum, WriteVO>
+
 /** 切换tab **/
 const switchTab = (value: TabType) => {
-  selectedTab.value = value
-  formData.value = { ...initData }
+  if (value !== selectedTab.value) {
+    // 保存之前的久数据
+    recordFormData[selectedTab.value] = formData.value
+    selectedTab.value = value
+    // 将之前的旧数据赋值回来
+    formData.value = { ...initData, ...recordFormData[value] }
+  }
 }
 
+/** 提交写作 */
 const submit = () => {
   if (selectedTab.value === 2 && !formData.value.originalContent) {
     message.warning('请输入原文')
@@ -192,7 +206,7 @@ const submit = () => {
   emits('submit', {
     /** 撰写的时候没有 originalContent 字段**/
     ...(selectedTab.value === 1 ? omit(formData.value, ['originalContent']) : formData.value),
-    /** 使用选中tab值覆盖当前的type类型 **/
+    /** 使用选中 tab 值覆盖当前的 type 类型 **/
     type: selectedTab.value
   })
 }

@@ -9,13 +9,19 @@
       label-width="68px"
     >
       <el-form-item label="用户编号" prop="userId">
-        <el-input
+        <el-select
           v-model="queryParams.userId"
-          placeholder="请输入用户编号"
           clearable
-          @keyup.enter="handleQuery"
+          placeholder="请输入用户编号"
           class="!w-240px"
-        />
+        >
+          <el-option
+            v-for="item in userList"
+            :key="item.id"
+            :label="item.nickname"
+            :value="item.id"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="音乐名称" prop="title">
         <el-input

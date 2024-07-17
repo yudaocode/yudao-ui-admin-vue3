@@ -18,6 +18,11 @@
           ref="stableDiffusionRef"
           @on-draw-complete="handleDrawComplete"
         />
+        <Other
+          v-if="selectPlatform === 'other'"
+          ref="otherRef"
+          @on-draw-complete="handleDrawComplete"
+        />
       </div>
     </div>
     <div class="main">
@@ -33,11 +38,13 @@ import { ImageVO } from '@/api/ai/image'
 import Dall3 from './components/dall3/index.vue'
 import Midjourney from './components/midjourney/index.vue'
 import StableDiffusion from './components/stableDiffusion/index.vue'
+import Other from './components/other/index.vue'
 
 const imageListRef = ref<any>() // image 列表 ref
 const dall3Ref = ref<any>() // dall3(openai) ref
 const midjourneyRef = ref<any>() // midjourney ref
 const stableDiffusionRef = ref<any>() // stable diffusion ref
+const otherRef = ref<any>() // stable diffusion ref
 
 // 定义属性
 const selectPlatform = ref(AiPlatformEnum.MIDJOURNEY)
@@ -53,6 +60,10 @@ const platformOptions = [
   {
     label: 'Stable Diffusion',
     value: AiPlatformEnum.STABLE_DIFFUSION
+  },
+  {
+    label: '其它',
+    value: 'other'
   }
 ]
 
@@ -77,6 +88,7 @@ const handleRegeneration = async (image: ImageVO) => {
   } else if (image.platform === AiPlatformEnum.STABLE_DIFFUSION) {
     stableDiffusionRef.value.settingValues(image)
   }
+  // TODO @fan：貌似 other 重新设置不行？
 }
 </script>
 

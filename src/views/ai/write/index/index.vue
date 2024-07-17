@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[calc(100vh-var(--top-tool-height)-var(--app-footer-height)-40px)] -m-5 flex">
+  <div class="absolute top-0 left-0 right-0 bottom-0 flex">
     <Left
       :is-writing="isWriting"
       class="h-full"
@@ -18,10 +18,10 @@
 </template>
 
 <script setup lang="ts">
-import Left from '../components/Left.vue'
-import Right from '../components/Right.vue'
-import * as WriteApi from '@/api/ai/writer'
-import { WriteExampleDataJson } from '@/views/ai/utils/utils'
+import Left from './components/Left.vue'
+import Right from './components/Right.vue'
+import { WriteApi, WriteVO } from '@/api/ai/write'
+import { WriteExample } from '@/views/ai/utils/constants'
 
 const message = useMessage()
 
@@ -37,7 +37,7 @@ const stopStream = () => {
 
 /** 执行写作 */
 const rightRef = ref<InstanceType<typeof Right>>()
-const submit = (data) => {
+const submit = (data: WriteVO) => {
   abortController.value = new AbortController()
   writeResult.value = ''
   isWriting.value = true
@@ -51,9 +51,9 @@ const submit = (data) => {
         return
       }
       writeResult.value = writeResult.value + data
-      nextTick(() => {
-        rightRef.value?.scrollToBottom()
-      })
+      // 滚动到底部
+      await nextTick()
+      rightRef.value?.scrollToBottom()
     },
     ctrl: abortController.value,
     onClose: stopStream,
@@ -65,8 +65,8 @@ const submit = (data) => {
 }
 
 /** 点击示例触发 */
-const handleExampleClick = (type: keyof typeof WriteExampleDataJson) => {
-  writeResult.value = WriteExampleDataJson[type].data
+const handleExampleClick = (type: keyof typeof WriteExample) => {
+  writeResult.value = WriteExample[type].data
 }
 
 /** 点击重置的时候清空写作的结果**/
