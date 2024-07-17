@@ -60,7 +60,7 @@ watchEffect(() => {
       // 刷新会话列表
       getConversationList()
       // 刷新消息列表
-      keFuChatBoxRef.value?.refreshMessageList()
+      keFuChatBoxRef.value?.refreshMessageList(JSON.parse(jsonMessage.content))
       return
     }
     // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
@@ -82,7 +82,7 @@ const getConversationList = () => {
 /** 加载指定会话的消息列表 */
 const keFuChatBoxRef = ref<InstanceType<typeof KeFuMessageList>>()
 const handleChange = (conversation: KeFuConversationRespVO) => {
-  keFuChatBoxRef.value?.getMessageList(conversation, true)
+  keFuChatBoxRef.value?.getNewMessageList(conversation)
 }
 
 /** 初始化 */
