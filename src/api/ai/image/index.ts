@@ -56,6 +56,10 @@ export const ImageApi = {
   getImagePageMy: async (params: PageParam) => {
     return await request.get({ url: `/ai/image/my-page`, params })
   },
+  // 获取公开的绘图记录
+  getImagePagePublic: async (params: PageParam) => {
+    return await request.get({ url: `/ai/image/public-page`, params })
+  },
   // 获取【我的】绘图记录
   getImageMy: async (id: number) => {
     return await request.get({ url: `/ai/image/get-my?id=${id}` })
@@ -99,10 +103,5 @@ export const ImageApi = {
   // 删除绘画
   deleteImage: async (id: number) => {
     return await request.delete({ url: `/ai/image/delete?id=` + id })
-  },
-
-  // release 列表
-  publicList: async (params) => {
-    return await request.get({ url: `/ai/image/public-list`, params})
-  },
+  }
 }
