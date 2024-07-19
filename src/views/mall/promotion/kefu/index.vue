@@ -64,6 +64,7 @@ watchEffect(() => {
     // 2.2 消息类型：KEFU_MESSAGE_TYPE
     if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_TYPE) {
       // 刷新会话列表
+      // TODO @puhui999：不应该刷新列表，而是根据消息，本地 update 列表的数据；
       getConversationList()
       // 刷新消息列表
       keFuChatBoxRef.value?.refreshMessageList(JSON.parse(jsonMessage.content))
@@ -72,6 +73,7 @@ watchEffect(() => {
     // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
     if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_ADMIN_READ) {
       // 刷新会话列表
+      // TODO @puhui999：不应该刷新列表，而是根据消息，本地 update 列表的数据；
       getConversationList()
     }
   } catch (error) {
