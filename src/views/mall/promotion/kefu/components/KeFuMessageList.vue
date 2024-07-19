@@ -207,6 +207,7 @@ const refreshMessageList = async (message?: any) => {
     }
     pushMessage(message)
   } else {
+    // TODO @puhui999：不基于 page 做。而是流式分页；通过 createTime 排序查询；
     queryParams.pageNo = 1
     await getMessageList()
   }
@@ -220,6 +221,8 @@ const refreshMessageList = async (message?: any) => {
   }
 }
 
+/** 获得新会话的消息列表 */
+// TODO @puhui999：可优化：可以考虑本地做每个会话的消息 list 缓存；然后点击切换时，读取缓存；然后异步获取新消息，merge 下；
 const getNewMessageList = async (val: KeFuConversationRespVO) => {
   // 会话切换,重置相关参数
   queryParams.pageNo = 1
