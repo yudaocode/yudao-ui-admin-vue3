@@ -1,29 +1,29 @@
 <template>
-  <div class="flex flex-col h-[600px]">
+  <div class="flex flex-col">
     <div class="flex-auto flex overflow-hidden">
       <el-tabs v-model="currentType" class="flex-auto px-[var(--app-content-padding)]">
         <!-- 我的创作 -->
-        <el-tab-pane label="我的创作" v-loading="loading" name="mine">
+        <el-tab-pane v-loading="loading" label="我的创作" name="mine">
           <el-row v-if="mySongList.length" :gutter="12">
             <el-col v-for="song in mySongList" :key="song.id" :span="24">
-              <songCard v-bind="song"/>
+              <songCard :songInfo="song" @click="setCurrentSong(song)"/>
             </el-col>
           </el-row>
           <el-empty v-else description="暂无音乐"/>
         </el-tab-pane>
 
         <!-- 试听广场 -->
-        <el-tab-pane label="试听广场" v-loading="loading" name="square">
+        <el-tab-pane v-loading="loading" label="试听广场" name="square">
           <el-row v-if="squareSongList.length" v-loading="loading" :gutter="12">
             <el-col v-for="song in squareSongList" :key="song.id" :span="24">
-              <songCard v-bind="song"/>
+              <songCard :songInfo="song" @click="setCurrentSong(song)"/>
             </el-col>
           </el-row>
           <el-empty v-else description="暂无音乐"/>
         </el-tab-pane>
       </el-tabs>
       <!-- songInfo -->
-      <songInfo v-bind="squareSongList[0]" class="flex-none"/>
+      <songInfo class="flex-none"/>
     </div>
     <audioBar class="flex-none"/>
   </div>
@@ -36,12 +36,17 @@ import audioBar from './audioBar/index.vue'
 
 defineOptions({ name: 'Index' })
 
+
 const currentType = ref('mine')
 // loading 状态
 const loading = ref(false)
+// 当前音乐
+const currentSong = ref({})
 
 const mySongList = ref<Recordable[]>([])
 const squareSongList = ref<Recordable[]>([])
+
+provide('currentSong', currentSong)
 
 /*
  *@Description: 调接口生成音乐列表
@@ -57,7 +62,7 @@ function generateMusic (formData: Recordable) {
         id: index,
         audioUrl: '',
         videoUrl: '',
-        title: '我走后',
+        title: '我走后' + index,
         imageUrl: 'https://www.carsmp3.com/data/attachment/forum/201909/19/091020q5kgre20fidreqyt.jpg',
         desc: 'Metal, symphony, film soundtrack, grand, majesticMetal, dtrack, grand, majestic',
         date: '2024年04月30日 14:02:57',
@@ -76,6 +81,15 @@ function generateMusic (formData: Recordable) {
   }, 3000)
 }
 
+/*
+ *@Description: 设置当前播放的音乐
+ *@MethodAuthor: xiaohong
+ *@Date: 2024-07-19 11:22:33
+*/
+function setCurrentSong (music: Recordable) {
+  currentSong.value = music
+}
+
 defineExpose({
   generateMusic
 })
@@ -86,9 +100,9 @@ defineExpose({
 :deep(.el-tabs) {
   display: flex;
   flex-direction: column;
-  .el-tabs__content{
-  padding: 0 7px;
-  overflow: auto;
- }
+  .el-tabs__content {
+    padding: 0 7px;
+    overflow: auto;
+  }
 }
 </style>

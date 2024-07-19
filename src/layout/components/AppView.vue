@@ -57,7 +57,8 @@ provide('reload', reload)
 
         '!min-h-[calc(100%-var(--top-tool-height)-var(--app-content-padding)-var(--app-content-padding)-var(--tags-view-height))]':
           !fixedHeader && layout === 'cutMenu' && footer
-      }
+      },
+      'h-0'
     ]"
   >
     <router-view v-if="routerAlive">

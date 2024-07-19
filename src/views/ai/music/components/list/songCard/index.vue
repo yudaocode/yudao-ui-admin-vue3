@@ -1,10 +1,10 @@
 <template>
   <div class="flex bg-[var(--el-bg-color-overlay)] p-12px mb-12px rounded-1">
-    <el-image :src="imageUrl" class="flex-none w-80px"/>
+    <el-image :src="songInfo.imageUrl" class="flex-none w-80px"/>
     <div class="ml-8px">
-      <div>{{ title }}</div>
+      <div>{{ songInfo.title }}</div>
       <div class="mt-8px text-12px text-[var(--el-text-color-secondary)] line-clamp-2">
-        {{ desc }}
+        {{ songInfo.desc }}
       </div>
     </div>
   </div>
@@ -15,15 +15,9 @@
 defineOptions({ name: 'Index' })
 
 defineProps({
-  imageUrl: {
-    type: String
-  },
-  title: {
-    type: String
-  },
-  desc: {
-    type: String
+  songInfo: {
+    type: Object,
+    default: () => ({})
   }
 })
-
 </script>
