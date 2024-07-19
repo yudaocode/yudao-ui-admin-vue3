@@ -40,19 +40,54 @@
                 v-if="item.senderType === UserTypeEnum.MEMBER"
                 :src="conversation.userAvatar"
                 alt="avatar"
+                class="w-60px h-60px"
               />
               <div
                 :class="{ 'kefu-message': KeFuMessageContentTypeEnum.TEXT === item.contentType }"
                 class="p-10px"
               >
                 <!-- 文本消息 -->
-                <TextMessageItem :message="item" />
+                <MessageItem :message="item">
+                  <template v-if="KeFuMessageContentTypeEnum.TEXT === item.contentType">
+                    <div
+                      v-dompurify-html="replaceEmoji(item.content)"
+                      class="flex items-center"
+                    ></div>
+                  </template>
+                </MessageItem>
                 <!-- 图片消息 -->
-                <ImageMessageItem :message="item" />
+                <MessageItem :message="item">
+                  <el-image
+                    v-if="KeFuMessageContentTypeEnum.IMAGE === item.contentType"
+                    :initial-index="0"
+                    :preview-src-list="[item.content]"
+                    :src="item.content"
+                    class="w-200px"
+                    fit="contain"
+                    preview-teleported
+                  />
+                </MessageItem>
                 <!-- 商品消息 -->
-                <ProductMessageItem :message="item" />
+                <MessageItem :message="item">
+                  <ProductItem
+                    v-if="KeFuMessageContentTypeEnum.PRODUCT === item.contentType"
+                    :picUrl="getMessageContent(item).picUrl"
+                    :price="getMessageContent(item).price"
+                    :skuText="getMessageContent(item).introduction"
+                    :title="getMessageContent(item).spuName"
+                    :titleWidth="400"
+                    class="max-w-70%"
+                    priceColor="#FF3000"
+                  />
+                </MessageItem>
                 <!-- 订单消息 -->
-                <OrderMessageItem :message="item" />
+                <MessageItem :message="item">
+                  <OrderItem
+                    v-if="KeFuMessageContentTypeEnum.ORDER === item.contentType"
+                    :message="item"
+                    class="max-w-70%"
+                  />
+                </MessageItem>
               </div>
               <el-avatar
                 v-if="item.senderType === UserTypeEnum.ADMIN"
@@ -97,24 +132,24 @@ import { KeFuMessageApi, KeFuMessageRespVO } from '@/api/mall/promotion/kefu/mes
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import EmojiSelectPopover from './tools/EmojiSelectPopover.vue'
 import PictureSelectUpload from './tools/PictureSelectUpload.vue'
-import TextMessageItem from './message/TextMessageItem.vue'
-import ImageMessageItem from './message/ImageMessageItem.vue'
-import ProductMessageItem from './message/ProductMessageItem.vue'
-import OrderMessageItem from './message/OrderMessageItem.vue'
-import { Emoji } from './tools/emoji'
+import ProductItem from './message/ProductItem.vue'
+import OrderItem from './message/OrderItem.vue'
+import { Emoji, useEmoji } from './tools/emoji'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 import { isEmpty } from '@/utils/is'
 import { UserTypeEnum } from '@/utils/constants'
 import { formatDate } from '@/utils/formatTime'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { debounce } from 'lodash-es'
+import { jsonParse } from '@/utils'
 
 dayjs.extend(relativeTime)
 
 defineOptions({ name: 'KeFuMessageList' })
 
 const message = ref('') // 消息弹窗
-
+const { replaceEmoji } = useEmoji()
 const messageTool = useMessage()
 const messageList = ref<KeFuMessageRespVO[]>([]) // 消息列表
 const conversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
@@ -126,18 +161,11 @@ const queryParams = reactive({
 })
 const total = ref(0) // 消息总条数
 const refreshContent = ref(false) // 内容刷新,主要解决会话消息页面高度不一致导致的滚动功能精度失效
+
+/** 获悉消息内容 */
+const getMessageContent = computed(() => (item: any) => jsonParse(item.content))
 /** 获得消息列表 */
-const getMessageList = async (val: KeFuConversationRespVO, conversationChange: boolean) => {
-  // 会话切换,重置相关参数
-  if (conversationChange) {
-    queryParams.pageNo = 1
-    messageList.value = []
-    total.value = 0
-    loadHistory.value = false
-    refreshContent.value = false
-  }
-  conversation.value = val
-  queryParams.conversationId = val.id
+const getMessageList = async () => {
   const res = await KeFuMessageApi.getKeFuMessagePage(queryParams)
   total.value = res.total
   // 情况一：加载最新消息
@@ -146,14 +174,18 @@ const getMessageList = async (val: KeFuConversationRespVO, conversationChange: b
   } else {
     // 情况二：加载历史消息
     for (const item of res.list) {
-      if (messageList.value.some((val) => val.id === item.id)) {
-        continue
-      }
-      messageList.value.push(item)
+      pushMessage(item)
     }
   }
   refreshContent.value = true
-  await scrollToBottom()
+}
+
+/** 添加消息 */
+const pushMessage = (message: any) => {
+  if (messageList.value.some((val) => val.id === message.id)) {
+    return
+  }
+  messageList.value.push(message)
 }
 
 /** 按照时间倒序，获取消息列表 */
@@ -163,20 +195,46 @@ const getMessageList0 = computed(() => {
 })
 
 /** 刷新消息列表 */
-const refreshMessageList = async () => {
+const refreshMessageList = async (message?: any) => {
   if (!conversation.value) {
     return
   }
 
-  queryParams.pageNo = 1
-  await getMessageList(conversation.value, false)
+  if (typeof message !== 'undefined') {
+    // 当前查询会话与消息所属会话不一致则不做处理
+    if (message.conversationId !== conversation.value.id) {
+      return
+    }
+    pushMessage(message)
+  } else {
+    queryParams.pageNo = 1
+    await getMessageList()
+  }
+
   if (loadHistory.value) {
     // 右下角显示有新消息提示
     showNewMessageTip.value = true
+  } else {
+    // 滚动到最新消息处
+    await handleToNewMessage()
   }
 }
 
-defineExpose({ getMessageList, refreshMessageList })
+const getNewMessageList = async (val: KeFuConversationRespVO) => {
+  // 会话切换,重置相关参数
+  queryParams.pageNo = 1
+  messageList.value = []
+  total.value = 0
+  loadHistory.value = false
+  refreshContent.value = false
+  // 设置会话相关属性
+  conversation.value = val
+  queryParams.conversationId = val.id
+  // 获取消息
+  await refreshMessageList()
+}
+defineExpose({ getNewMessageList, refreshMessageList })
+
 const showKeFuMessageList = computed(() => !isEmpty(conversation.value)) // 是否显示聊天区域
 const skipGetMessageList = computed(() => {
   // 已加载到最后一页的话则不触发新的消息获取
@@ -221,9 +279,7 @@ const sendMessage = async (msg: any) => {
   await KeFuMessageApi.sendKeFuMessage(msg)
   message.value = ''
   // 加载消息列表
-  await getMessageList(conversation.value, false)
-  // 滚动到最新消息处
-  await scrollToBottom()
+  await refreshMessageList()
 }
 
 /** 滚动到底部 */
@@ -248,17 +304,24 @@ const handleToNewMessage = async () => {
   await scrollToBottom()
 }
 
-/** 加载历史消息 */
 const loadHistory = ref(false) // 加载历史消息
-const handleScroll = async ({ scrollTop }) => {
+/** 处理消息列表滚动事件(debounce 限流) */
+const handleScroll = debounce(({ scrollTop }) => {
   if (skipGetMessageList.value) {
     return
   }
   // 触顶自动加载下一页数据
-  if (scrollTop === 0) {
-    await handleOldMessage()
+  if (Math.floor(scrollTop) === 0) {
+    handleOldMessage()
   }
-}
+  const wrap = scrollbarRef.value?.wrapRef
+  // 触底重置
+  if (Math.abs(wrap!.scrollHeight - wrap!.clientHeight - wrap!.scrollTop) < 1) {
+    loadHistory.value = false
+    refreshMessageList()
+  }
+}, 200)
+/** 加载历史消息 */
 const handleOldMessage = async () => {
   // 记录已有页面高度
   const oldPageHeight = innerRef.value?.clientHeight
@@ -268,7 +331,7 @@ const handleOldMessage = async () => {
   loadHistory.value = true
   // 加载消息列表
   queryParams.pageNo += 1
-  await getMessageList(conversation.value, false)
+  await getMessageList()
   // 等页面加载完后，获得上一页最后一条消息的位置，控制滚动到它所在位置
   scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight - oldPageHeight)
 }
