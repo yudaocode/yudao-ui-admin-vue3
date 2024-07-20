@@ -14,11 +14,11 @@
           class="config-editable-input"
           @blur="blurEvent()"
           v-mountedFocus
-          v-model="currentNode.name"
-          :placeholder="currentNode.name"
+          v-model="configForm.name"
+          :placeholder="configForm.name"
         />
         <div v-else class="node-name"
-          >{{ currentNode.name }}
+          >{{ configForm.name }}
           <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()"
         /></div>
 
@@ -223,8 +223,15 @@ const props = defineProps({
 })
 // 是否可见
 const settingVisible = ref(false)
-// 当前节点信息
+// 当前节点
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
+// 监控节点变化
+watch(
+  () => props.flowNode,
+  (newValue) => {
+    currentNode.value = newValue
+  }
+)
 const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList') // 角色列表
 const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
 const userOptions = inject<Ref<UserApi.UserVO[]>>('userList') // 用户列表
@@ -247,13 +254,14 @@ const activeTabName = ref('user')
 const formRef = ref() // 表单 Ref
 
 const configForm = ref<any>({
+  name: NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE),
   candidateParamArray: [],
   candidateStrategy: CandidateStrategy.USER,
   fieldsPermission: []
 })
 // 表单校验规则
 const formRules = reactive({
-  candidateStrategy: [{ required: true }],
+  candidateStrategy: [{ required: true, message: '抄送人设置不能为空', trigger: 'change' }],
   candidateParamArray: [{ required: true, message: '选项不能为空', trigger: 'blur' }]
 })
 
@@ -269,6 +277,7 @@ const saveConfig = async () => {
   if (!valid) return false
   const showText = getShowText()
   if (!showText) return false
+  currentNode.value.name = configForm.value.name
   currentNode.value.candidateParam = configForm.value.candidateParamArray?.join(',')
   currentNode.value.candidateStrategy = configForm.value.candidateStrategy
   currentNode.value.showText = showText
@@ -280,11 +289,10 @@ const saveConfig = async () => {
 const open = () => {
   settingVisible.value = true
 }
-//  修改当前编辑的节点， 由父组件传过来
+// 设置抄送节点
 const setCurrentNode = (node: SimpleFlowNode) => {
-  currentNode.value = node
-  configForm.value.fieldsPermission =
-    cloneDeep(node.fieldsPermission) || getDefaultFieldsPermission(formFields?.value)
+  configForm.value.name = node.name
+  // 抄送人设置
   configForm.value.candidateStrategy = node.candidateStrategy
   const strCandidateParam = node?.candidateParam
   if (node.candidateStrategy === CandidateStrategy.EXPRESSION) {
@@ -294,6 +302,9 @@ const setCurrentNode = (node: SimpleFlowNode) => {
       configForm.value.candidateParamArray = strCandidateParam.split(',').map((item) => +item)
     }
   }
+  // 表单字段权限
+  configForm.value.fieldsPermission =
+    cloneDeep(node.fieldsPermission) || getDefaultFieldsPermission(formFields?.value)
 }
 
 defineExpose({ open, setCurrentNode }) // 暴露方法给父组件
@@ -387,16 +398,9 @@ const clickIcon = () => {
 // 输入框失去焦点
 const blurEvent = () => {
   showInput.value = false
-  currentNode.value.name =
-    currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE) as string)
+  configForm.value.name =
+    configForm.value.name || (NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE) as string)
 }
 </script>
 
-<style lang="scss" scoped>
-// ::v-deep(.el-divider--horizontal) {
-//   display: block;
-//   height: 1px;
-//   margin: 0;
-//   border-top: 1px var(--el-border-color) var(--el-border-style);
-// }
-</style>
+<style lang="scss" scoped></style>

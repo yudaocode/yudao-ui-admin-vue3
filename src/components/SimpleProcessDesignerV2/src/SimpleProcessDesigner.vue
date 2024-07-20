@@ -15,25 +15,29 @@
         </div>
       </div>
       <div class="scale-container" :style="`transform: scale(${scaleValue / 100});`">
-        <ProcessNodeTree v-if="processNodeTree"  v-model:flow-node="processNodeTree" />
+        <ProcessNodeTree v-if="processNodeTree" v-model:flow-node="processNodeTree" />
       </div>
     </div>
     <Dialog v-model="errorDialogVisible" title="保存失败" width="400" :fullscreen="false">
       <div class="mb-2">以下节点内容不完善，请修改后保存</div>
-      <div class="mb-3 b-rounded-1 bg-gray-100 p-2 line-height-normal" v-for="(item, index) in errorNodes" :key="index">
-          {{ item.name }} : {{ NODE_DEFAULT_TEXT.get(item.type) }}
+      <div
+        class="mb-3 b-rounded-1 bg-gray-100 p-2 line-height-normal"
+        v-for="(item, index) in errorNodes"
+        :key="index"
+      >
+        {{ item.name }} : {{ NODE_DEFAULT_TEXT.get(item.type) }}
       </div>
       <template #footer>
-        <el-button type="primary" @click="errorDialogVisible = false" >知道了</el-button>
+        <el-button type="primary" @click="errorDialogVisible = false">知道了</el-button>
       </template>
     </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import ProcessNodeTree from './ProcessNodeTree.vue';
+import ProcessNodeTree from './ProcessNodeTree.vue'
 import { updateBpmSimpleModel, getBpmSimpleModel } from '@/api/bpm/simple'
-import { SimpleFlowNode, NodeType,NODE_DEFAULT_TEXT } from './consts'
+import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from './consts'
 
 defineOptions({
   name: 'SimpleProcessDesigner'
@@ -44,33 +48,11 @@ const props = defineProps({
   modelId: String
 })
 const message = useMessage() // 国际化
-const processNodeTree = ref<SimpleFlowNode>({
-  name: '开始',
-  type: NodeType.START_EVENT_NODE,
-  id: 'StartEvent_1',
-  childNode: {
-    id: 'EndEvent_1',
-    name: '结束',
-    type: NodeType.END_EVENT_NODE
-  }
-})
-
-// const rootNode = ref<SimpleFlowNode>({
-//   name: '开始',
-//   type: NodeType.START_EVENT_NODE,
-//   id: 'StartEvent_1'
-// })
-
-// const childNode = ref<SimpleFlowNode>({
-//   id: 'EndEvent_1',
-//   name: '结束',
-//   type: NodeType.END_EVENT_NODE
-// })
+const processNodeTree = ref<SimpleFlowNode | undefined>()
 
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
 const saveSimpleFlowModel = async () => {
-  console.log('processNodeTree===>', processNodeTree.value)
   if (!props.modelId) {
     message.error('缺少模型 modelId 编号')
     return
@@ -79,7 +61,7 @@ const saveSimpleFlowModel = async () => {
   validateNode(processNodeTree.value, errorNodes)
   if (errorNodes.length > 0) {
     errorDialogVisible.value = true
-    return;
+    return
   }
   const data = {
     id: props.modelId,
@@ -93,7 +75,6 @@ const saveSimpleFlowModel = async () => {
   } else {
     message.alert('修改失败')
   }
-  
 }
 // 校验节点设置。 暂时以 showText 为空 未节点错误配置
 const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNode[]) => {
@@ -158,10 +139,19 @@ const zoomIn = () => {
 onMounted(async () => {
   const result = await getBpmSimpleModel(props.modelId)
   if (result) {
-    console.log('the result is ', result)
     processNodeTree.value = result
-    // rootNode.value = result
-    // childNode.value = result.childNode
+  } else {
+    // 初始值
+    processNodeTree.value = {
+      name: '开始',
+      type: NodeType.START_EVENT_NODE,
+      id: 'StartEvent_1',
+      childNode: {
+        id: 'EndEvent_1',
+        name: '结束',
+        type: NodeType.END_EVENT_NODE
+      }
+    }
   }
 })
 </script>

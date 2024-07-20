@@ -3,20 +3,19 @@
   <StartEventNode
     v-if="currentNode && currentNode.type === NodeType.START_EVENT_NODE"
     :flow-node="currentNode"
-    @update:model-value="handleModelValueUpdate"
   />
   <!-- 审批节点 -->
   <UserTaskNode
     v-if="currentNode && currentNode.type === NodeType.USER_TASK_NODE"
     :flow-node="currentNode"
-    @update:model-value="handleModelValueUpdate"
+    @update:flow-node="handleModelValueUpdate"
     @find:parent-node="findFromParentNode"
   />
   <!-- 抄送节点 -->
   <CopyTaskNode
     v-if="currentNode && currentNode.type === NodeType.COPY_TASK_NODE"
     :flow-node="currentNode"
-    @update:model-value="handleModelValueUpdate"
+    @update:flow-node="handleModelValueUpdate"
   />
   <!-- 条件节点 -->
   <ExclusiveNode
@@ -25,8 +24,8 @@
     @update:model-value="handleModelValueUpdate"
     @find:parent-node="findFromParentNode"
   />
-   <!-- 并行节点 -->
-   <ParallelNode
+  <!-- 并行节点 -->
+  <ParallelNode
     v-if="currentNode && currentNode.type === NodeType.PARALLEL_NODE_FORK"
     :flow-node="currentNode"
     @update:model-value="handleModelValueUpdate"
@@ -36,7 +35,7 @@
   <ProcessNodeTree
     v-if="currentNode && currentNode.childNode"
     v-model:flow-node="currentNode.childNode"
-    :parent-node= "currentNode"
+    :parent-node="currentNode"
     @find:recursive-find-parent-node="recursiveFindParentNode"
   />
 
@@ -65,10 +64,13 @@ const props = defineProps({
   }
 })
 const emits = defineEmits<{
-  'update:flowNode',
-  'find:recursiveFindParentNode': [nodeList: SimpleFlowNode[], curentNode: SimpleFlowNode, nodeType: number]
+  'update:flowNode': [node: SimpleFlowNode | undefined]
+  'find:recursiveFindParentNode': [
+    nodeList: SimpleFlowNode[],
+    curentNode: SimpleFlowNode,
+    nodeType: number
+  ]
 }>()
-
 
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
 
@@ -79,16 +81,12 @@ watch(
     currentNode.value = newValue
   }
 )
-
+// 用于删除节点
 const handleModelValueUpdate = (updateValue) => {
-  console.log('Process Node Tree handleModelValueUpdate', updateValue)
   emits('update:flowNode', updateValue)
 }
 
-const findFromParentNode = (
-  nodeList: SimpleFlowNode[],
-  nodeType: number
-) => {
+const findFromParentNode = (nodeList: SimpleFlowNode[], nodeType: number) => {
   emits('find:recursiveFindParentNode', nodeList, props.parentNode, nodeType)
 }
 

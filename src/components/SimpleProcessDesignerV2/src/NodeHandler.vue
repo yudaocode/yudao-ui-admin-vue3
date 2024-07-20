@@ -47,8 +47,7 @@ import {
   NodeType,
   NODE_DEFAULT_NAME,
   ApproveMethodType,
-  RejectHandlerType,
-  CandidateStrategy
+  RejectHandlerType
 } from './consts'
 import { generateUUID } from '@/utils'
 defineOptions({
@@ -80,7 +79,6 @@ const addNode = (type: number) => {
       showText: '',
       type: NodeType.USER_TASK_NODE,
       approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
-      candidateStrategy: CandidateStrategy.USER,
       // 超时处理
       rejectHandler: {
         type: RejectHandlerType.FINISH_PROCESS
@@ -88,7 +86,6 @@ const addNode = (type: number) => {
       timeoutHandler: {
         enable: false
       },
-
       childNode: props.childNode
     }
     emits('update:childNode', data)
@@ -99,9 +96,6 @@ const addNode = (type: number) => {
       name: NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE) as string,
       showText: '',
       type: NodeType.COPY_TASK_NODE,
-      candidateStrategy: CandidateStrategy.USER,
-      candidateParam: undefined,
-      fieldsPermission: undefined,
       childNode: props.childNode
     }
     emits('update:childNode', data)

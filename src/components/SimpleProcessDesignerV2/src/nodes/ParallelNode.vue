@@ -2,7 +2,11 @@
   <div class="branch-node-wrapper">
     <div class="branch-node-container">
       <div class="branch-node-add" @click="addCondition">添加分支</div>
-      <div class="branch-node-item" v-for="(item, index) in currentNode.conditionNodes" :key="index">
+      <div
+        class="branch-node-item"
+        v-for="(item, index) in currentNode.conditionNodes"
+        :key="index"
+      >
         <template v-if="index == 0">
           <div class="branch-line-first-top"></div>
           <div class="branch-line-first-bottom"></div>
@@ -15,13 +19,14 @@
           <div class="node-container">
             <div class="node-box">
               <div class="branch-node-title-container">
-                <div  v-if="showInputs[index]">
+                <div v-if="showInputs[index]">
                   <input
                     type="text"
-                    class="input-max-width editable-title-input" 
+                    class="input-max-width editable-title-input"
                     @blur="blurEvent(index)"
-                    v-mountedFocus 
-                    v-model="item.name" />
+                    v-mountedFocus
+                    v-model="item.name"
+                  />
                 </div>
                 <div v-else class="branch-title" @click="clickEvent(index)"> {{ item.name }} </div>
                 <div class="branch-priority">无优先级</div>
@@ -36,7 +41,12 @@
               </div>
               <div class="node-toolbar">
                 <div class="toolbar-icon">
-                  <Icon color="#0089ff"  icon="ep:circle-close-filled" :size="18"  @click="deleteCondition(index)" />
+                  <Icon
+                    color="#0089ff"
+                    icon="ep:circle-close-filled"
+                    :size="18"
+                    @click="deleteCondition(index)"
+                  />
                 </div>
               </div>
               <!-- <div 
@@ -56,11 +66,12 @@
           </div>
         </div>
         <!-- 递归显示子节点  -->
-        <ProcessNodeTree 
-            v-if="item && item.childNode" 
-            :parent-node="item" 
-            v-model:flow-node="item.childNode" 
-            @find:recursive-find-parent-node="recursiveFindParentNode"/>
+        <ProcessNodeTree
+          v-if="item && item.childNode"
+          :parent-node="item"
+          v-model:flow-node="item.childNode"
+          @find:recursive-find-parent-node="recursiveFindParentNode"
+        />
       </div>
     </div>
     <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
@@ -85,24 +96,30 @@ const props = defineProps({
 })
 // 定义事件，更新父组件
 const emits = defineEmits<{
-  'update:modelValue': [node: SimpleFlowNode | undefined],
-  'find:parentNode': [nodeList: SimpleFlowNode[], nodeType: number],
-  'find:recursiveFindParentNode': [nodeList: SimpleFlowNode[], curentNode: SimpleFlowNode, nodeType: number]
+  'update:modelValue': [node: SimpleFlowNode | undefined]
+  'find:parentNode': [nodeList: SimpleFlowNode[], nodeType: number]
+  'find:recursiveFindParentNode': [
+    nodeList: SimpleFlowNode[],
+    curentNode: SimpleFlowNode,
+    nodeType: number
+  ]
 }>()
 
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
 
-watch(() => props.flowNode, (newValue) => {
-  currentNode.value = newValue;
-});
-
+watch(
+  () => props.flowNode,
+  (newValue) => {
+    currentNode.value = newValue
+  }
+)
 
 const showInputs = ref<boolean[]>([])
 // 失去焦点
 const blurEvent = (index: number) => {
   showInputs.value[index] = false
-  const conditionNode = currentNode.value.conditionNodes?.at(index) as SimpleFlowNode;
-  conditionNode.name = conditionNode.name || `并行${index+1}`
+  const conditionNode = currentNode.value.conditionNodes?.at(index) as SimpleFlowNode
+  conditionNode.name = conditionNode.name || `并行${index + 1}`
 }
 
 // 点击条件名称
@@ -111,13 +128,13 @@ const clickEvent = (index: number) => {
 }
 
 const conditionNodeConfig = (nodeId: string) => {
-  const conditionNode = proxy.$refs[nodeId][0];
+  const conditionNode = proxy.$refs[nodeId][0]
   conditionNode.open()
 }
 
 // 新增条件
 const addCondition = () => {
-  const conditionNodes = currentNode.value.conditionNodes;
+  const conditionNodes = currentNode.value.conditionNodes
   if (conditionNodes) {
     const len = conditionNodes.length
     let lastIndex = len - 1
@@ -127,7 +144,7 @@ const addCondition = () => {
       showText: '无需配置条件同时执行',
       type: NodeType.CONDITION_NODE,
       childNode: undefined,
-      conditionNodes: [],
+      conditionNodes: []
     }
     conditionNodes.splice(lastIndex, 0, conditionData)
   }
@@ -135,7 +152,7 @@ const addCondition = () => {
 
 // 删除条件
 const deleteCondition = (index: number) => {
-  const conditionNodes = currentNode.value.conditionNodes;
+  const conditionNodes = currentNode.value.conditionNodes
   if (conditionNodes) {
     conditionNodes.splice(index, 1)
     if (conditionNodes.length == 1) {
@@ -161,5 +178,4 @@ const recursiveFindParentNode = (
   // 条件节点 (NodeType.CONDITION_NODE) 比较特殊。需要调用其父节点并行节点（NodeType.PARALLEL_NODE) 继续查找
   emits('find:parentNode', nodeList, nodeType)
 }
-
 </script>

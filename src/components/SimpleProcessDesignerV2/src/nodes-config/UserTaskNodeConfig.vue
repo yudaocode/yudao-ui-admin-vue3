@@ -15,11 +15,11 @@
           class="config-editable-input"
           @blur="blurEvent()"
           v-mountedFocus
-          v-model="currentNode.name"
-          :placeholder="currentNode.name"
+          v-model="configForm.name"
+          :placeholder="configForm.name"
         />
         <div v-else class="node-name"
-          >{{ currentNode.name }}
+          >{{ configForm.name }}
           <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()"
         /></div>
 
@@ -394,8 +394,15 @@ const emits = defineEmits<{
   'find:returnTaskNodes': [nodeList: SimpleFlowNode[]]
 }>()
 
-const notAllowedMultiApprovers = ref(false)
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
+// 监控节点变化
+watch(
+  () => props.flowNode,
+  (newValue) => {
+    currentNode.value = newValue
+  }
+)
+const notAllowedMultiApprovers = ref(false)
 const settingVisible = ref(false)
 const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList') // 角色列表
 const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
@@ -410,6 +417,7 @@ const returnTaskList = ref<SimpleFlowNode[]>([])
 const formRef = ref() // 表单 Ref
 const activeTabName = ref('user') // 激活的 Tab 标签页
 const configForm = ref<any>({
+  name: NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE),
   candidateParamArray: [],
   candidateStrategy: CandidateStrategy.USER,
   approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
@@ -425,7 +433,7 @@ const configForm = ref<any>({
 })
 // 表单校验规则
 const formRules = reactive({
-  candidateStrategy: [{ required: true }],
+  candidateStrategy: [{ required: true, message: '审批人设置不能为空', trigger: 'change' }],
   candidateParamArray: [{ required: true, message: '该选项不能为空', trigger: 'change' }],
   approveMethod: [{ required: true, message: '多人审批方式不能为空', trigger: 'change' }],
   approveRatio: [{ required: true, message: '通过比例不能为空', trigger: 'blur' }],
@@ -447,6 +455,7 @@ const saveConfig = async () => {
   if (!valid) return false
   const showText = getShowText()
   if (!showText) return false
+  currentNode.value.name = configForm.value.name
   currentNode.value.candidateStrategy = configForm.value.candidateStrategy
   currentNode.value.candidateParam = configForm.value.candidateParamArray?.join(',')
   // 设置审批方式
@@ -566,12 +575,10 @@ const getShowText = (): string => {
 const open = () => {
   settingVisible.value = true
 }
-//  修改当前编辑的节点， 由父组件传过来
+// 配置审批节点， 由父组件传过来
 const setCurrentNode = (node: SimpleFlowNode) => {
-  currentNode.value = node
-  configForm.value.fieldsPermission =
-    cloneDeep(node.fieldsPermission) || getDefaultFieldsPermission(formFields?.value)
-  configForm.value.buttonsSetting = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
+  configForm.value.name = node.name
+  //1.1 审批人设置
   configForm.value.candidateStrategy = node.candidateStrategy
   const strCandidateParam = node?.candidateParam
   if (node.candidateStrategy === CandidateStrategy.EXPRESSION) {
@@ -580,7 +587,6 @@ const setCurrentNode = (node: SimpleFlowNode) => {
     if (strCandidateParam) {
       configForm.value.candidateParamArray = strCandidateParam.split(',').map((item) => +item)
     }
-    configForm.value.candidateStrategy = node.candidateStrategy
   }
   if (
     (configForm.value.candidateParamArray?.length <= 1 &&
@@ -591,13 +597,18 @@ const setCurrentNode = (node: SimpleFlowNode) => {
   } else {
     notAllowedMultiApprovers.value = false
   }
-  // 设置审批方式
+  //1.2 设置审批方式
   configForm.value.approveMethod = node.approveMethod
   if (node.approveMethod == ApproveMethodType.APPROVE_BY_RATIO) {
     configForm.value.approveRatio = node.approveRatio
   }
+  // 1.3 设置审批拒绝处理
   configForm.value.rejectHandlerType = node.rejectHandler?.type
   configForm.value.returnNodeId = node.rejectHandler?.returnNodeId
+  const matchNodeList = []
+  emits('find:returnTaskNodes', matchNodeList)
+  returnTaskList.value = matchNodeList
+  // 1.4 设置审批超时处理
   configForm.value.timeoutHandlerEnable = node.timeoutHandler?.enable
   if (node.timeoutHandler?.enable && node.timeoutHandler?.timeDuration) {
     const strTimeDuration = node.timeoutHandler.timeDuration
@@ -608,10 +619,11 @@ const setCurrentNode = (node: SimpleFlowNode) => {
   }
   configForm.value.timeoutHandlerAction = node.timeoutHandler?.action
   configForm.value.maxRemindCount = node.timeoutHandler?.maxRemindCount
-  // 查找可以驳回的用户节点
-  const matchNodeList = []
-  emits('find:returnTaskNodes', matchNodeList)
-  returnTaskList.value = matchNodeList
+  // 2. 操作按钮设置
+  configForm.value.buttonsSetting = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
+  // 3. 表单字段权限配置
+  configForm.value.fieldsPermission =
+    cloneDeep(node.fieldsPermission) || getDefaultFieldsPermission(formFields?.value)
 }
 
 defineExpose({ open, setCurrentNode }) // 暴露方法给父组件
@@ -650,8 +662,8 @@ const clickIcon = () => {
 // 节点名称输入框失去焦点
 const blurEvent = () => {
   showInput.value = false
-  currentNode.value.name =
-    currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
+  configForm.value.name =
+    configForm.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
 }
 
 const approveMethodChanged = () => {
