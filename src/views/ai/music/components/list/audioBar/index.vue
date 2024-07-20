@@ -4,8 +4,8 @@
     <div class="flex gap-[10px]">
       <el-image src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png" class="w-[45px]"/>
       <div>
-        <div>我很好</div>
-        <div class="text-[12px] text-gray-400">刘大壮</div>
+        <div>{{currentSong.name}}</div>
+        <div class="text-[12px] text-gray-400">{{currentSong.singer}}</div>
       </div>
     </div>
       
@@ -21,7 +21,7 @@
       </div>
       <!-- 音频 -->
       <audio v-bind="audioProps" ref="audioRef" controls v-show="!audioProps" @timeupdate="audioTimeUpdate">
-        <source :src="response"/>
+        <source :src="audioUrl"/>
       </audio>
     </div>
 
@@ -35,34 +35,36 @@
 
 <script lang="ts" setup>
 import { formatPast } from '@/utils/formatTime'
-import response from '@/assets/audio/response.mp3'
+import audioUrl from '@/assets/audio/response.mp3'
 
 defineOptions({ name: 'Index' })
 
-  const audioRef = ref<Nullable<HTMLElement>>(null)
-    // 音频相关属性https://www.runoob.com/tags/ref-av-dom.html
-  const audioProps = reactive({
-    autoplay: true,
-    paused: false,
-    currentTime: '00:00',
-    duration: '00:00',
-    muted:  false,
-    volume: 50,
-  })
+const currentSong = inject('currentSong', {})
 
-  function toggleStatus (type: string) {
-    audioProps[type] = !audioProps[type]
-    if (type === 'paused' && audioRef.value) {
-      if (audioProps[type]) {
-        audioRef.value.pause()
-      } else {
-        audioRef.value.play()
-      }
+const audioRef = ref<Nullable<HTMLElement>>(null)
+  // 音频相关属性https://www.runoob.com/tags/ref-av-dom.html
+const audioProps = reactive({
+  autoplay: true,
+  paused: false,
+  currentTime: '00:00',
+  duration: '00:00',
+  muted:  false,
+  volume: 50,
+})
+
+function toggleStatus (type: string) {
+  audioProps[type] = !audioProps[type]
+  if (type === 'paused' && audioRef.value) {
+    if (audioProps[type]) {
+      audioRef.value.pause()
+    } else {
+      audioRef.value.play()
     }
   }
+}
 
-  // 更新播放位置
-  function audioTimeUpdate (args) {
-    audioProps.currentTime = formatPast(new Date(args.timeStamp), 'mm:ss')
-  }
+// 更新播放位置
+function audioTimeUpdate (args) {
+  audioProps.currentTime = formatPast(new Date(args.timeStamp), 'mm:ss')
+}
 </script>

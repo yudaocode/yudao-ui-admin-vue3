@@ -36,6 +36,6 @@ const modeRef = ref<Nullable<{ formData: Recordable }>>(null)
  *@Date: 2024-06-27 16:40:16
 */
 function generateMusic () {
-  emits('generate-music', {formData: unref(modeRef)?.formData.value})
+  emits('generate-music', {formData: unref(modeRef)?.formData})
 }
 </script>
