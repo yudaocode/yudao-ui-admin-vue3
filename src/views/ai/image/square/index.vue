@@ -2,24 +2,25 @@
   <div class="square-container">
     <el-input
       v-model="searchText"
-      style="width: 100%;margin-bottom: 20px;"
+      style="width: 100%; margin-bottom: 20px"
       size="large"
       placeholder="请输入要搜索的内容"
       :suffix-icon="Search"
       @keyup.enter="handleSearch"
     />
     <div class="gallery">
-      <div v-for="item in publicList" :key="item" class="gallery-item">
-        <img :src="item.picUrl" class="img"/>
+      <div v-for="item in publicList" :key="item.id" class="gallery-item">
+        <img :src="item.picUrl" class="img" />
       </div>
     </div>
   </div>
 </template>
 <script setup lang="ts">
-import { ImageApi, ImageVO, ImageMidjourneyButtonsVO } from '@/api/ai/image'
-import {Search} from "@element-plus/icons-vue";
+import { ImageApi, ImageVO } from '@/api/ai/image'
+import { Search } from '@element-plus/icons-vue'
 
 /** 属性 */
+// TODO @fan：queryParams 里面搞分页哈。
 const pageNo = ref<number>(1)
 const pageSize = ref<number>(20)
 const publicList = ref<ImageVO[]>([])
@@ -27,13 +28,17 @@ const searchText = ref<string>('')
 
 /** 获取数据 */
 const getListData = async () => {
-  const res = await ImageApi.getImagePagePublic({pageNo: pageNo.value, pageSize: pageSize.value, prompt: searchText.value});
-  publicList.value = res.list as ImageVO[];
+  const res = await ImageApi.getImagePagePublic({
+    pageNo: pageNo.value,
+    pageSize: pageSize.value,
+    prompt: searchText.value
+  })
+  publicList.value = res.list as ImageVO[]
 }
 
 /** 搜索 */
 const handleSearch = async () => {
-  await getListData();
+  await getListData()
 }
 
 onMounted(async () => {
@@ -41,11 +46,9 @@ onMounted(async () => {
 })
 </script>
 <style scoped lang="scss">
-
 .square-container {
   background-color: #fff;
   padding: 20px;
-
 
   .gallery {
     display: grid;
@@ -53,7 +56,7 @@ onMounted(async () => {
     gap: 10px;
     //max-width: 1000px;
     background-color: #fff;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
 
   .gallery-item {
@@ -78,7 +81,5 @@ onMounted(async () => {
   .gallery-item:hover {
     transform: scale(1.05);
   }
-
 }
-
 </style>
