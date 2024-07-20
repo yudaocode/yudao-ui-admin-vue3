@@ -76,7 +76,7 @@
           type="primary"
           plain
           v-hasPermi="['bpm:process-instance:query']"
-          @click="handleCreate()"
+          @click="handleCreate(undefined)"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 发起流程
         </el-button>
@@ -146,7 +146,7 @@
           >
             取消
           </el-button>
-          <el-button link type="primary" v-else @click="handleCreate(scope.row.id)">
+          <el-button link type="primary" v-else @click="handleCreate(scope.row)">
             重新发起
           </el-button>
         </template>
@@ -167,6 +167,8 @@ import { dateFormatter, formatPast2 } from '@/utils/formatTime'
 import { ElMessageBox } from 'element-plus'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CategoryApi } from '@/api/bpm/category'
+import { ProcessInstanceVO } from '@/api/bpm/processInstance'
+import * as DefinitionApi from '@/api/bpm/definition'
 
 defineOptions({ name: 'BpmProcessInstanceMy' })
 
@@ -214,10 +216,22 @@ const resetQuery = () => {
 }
 
 /** 发起流程操作 **/
-const handleCreate = (id) => {
-  router.push({
+const handleCreate = async (row?: ProcessInstanceVO) => {
+  // 如果是【业务表单】，不支持重新发起
+  if (row?.id) {
+    const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
+      row.processDefinitionId
+    )
+    debugger
+    if (processDefinitionDetail.formType === 20) {
+      message.error('重新发起流程失败，原因：该流程使用业务表单，不支持重新发起')
+      return
+    }
+  }
+  // 跳转发起流程界面
+  await router.push({
     name: 'BpmProcessInstanceCreate',
-    query: { processInstanceId: id }
+    query: { processInstanceId: row?.id }
   })
 }
 
