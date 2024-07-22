@@ -86,7 +86,7 @@ const getTagColor = computed(() => (getIsOpen.value ? 'success' : 'red')) // Web
 
 /** 发起 WebSocket 连接 */
 const { status, data, send, close, open } = useWebSocket(server.value, {
-  autoReconnect: false,
+  autoReconnect: true,
   heartbeat: true
 })
 
