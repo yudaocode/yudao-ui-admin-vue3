@@ -18,7 +18,12 @@
         />
       </el-form-item>
       <el-form-item label="启用状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择启用状态" clearable>
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择启用状态"
+          class="!w-240px"
+          clearable
+        >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
