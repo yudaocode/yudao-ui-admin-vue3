@@ -15,14 +15,12 @@
           class="config-editable-input"
           @blur="blurEvent()"
           v-mountedFocus
-          v-model="configForm.name"
-          :placeholder="configForm.name"
+          v-model="nodeName"
+          :placeholder="nodeName"
         />
-        <div v-else class="node-name"
-          >{{ configForm.name }}
-          <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()"
-        /></div>
-
+        <div v-else class="node-name">
+          {{ nodeName }} <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()" />
+        </div>
         <div class="divide-line"></div>
       </div>
     </template>
@@ -280,7 +278,7 @@
           </el-form>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="操作按钮设置" name="buttons" v-if="formType === 10">
+      <el-tab-pane label="操作按钮设置" name="buttons">
         <div class="button-setting-pane">
           <div class="button-setting-desc">操作按钮</div>
           <div class="button-setting-title">
@@ -288,11 +286,7 @@
             <div class="pl-4 button-title-label">显示名称</div>
             <div class="button-title-label">启用</div>
           </div>
-          <div
-            class="button-setting-item"
-            v-for="(item, index) in configForm.buttonsSetting"
-            :key="index"
-          >
+          <div class="button-setting-item" v-for="(item, index) in buttonsSetting" :key="index">
             <div class="button-setting-item-label"> {{ OPERATION_BUTTON_NAME.get(item.id) }} </div>
             <div class="button-setting-item-label">
               <input
@@ -327,7 +321,7 @@
           </div>
           <div
             class="field-setting-item"
-            v-for="(item, index) in configForm.fieldsPermission"
+            v-for="(item, index) in fieldsPermissionConfig"
             :key="index"
           >
             <div class="field-setting-item-label"> {{ item.title }} </div>
@@ -368,19 +362,22 @@ import {
   TIMEOUT_HANDLER_ACTION_TYPES,
   TIME_UNIT_TYPES,
   REJECT_HANDLER_TYPES,
-  NODE_DEFAULT_NAME,
   DEFAULT_BUTTON_SETTING,
-  OPERATION_BUTTON_NAME
+  OPERATION_BUTTON_NAME,
+  ButtonSetting
 } from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { getDefaultFieldsPermission } from '../utils'
+import {
+  useWatchNode,
+  useNodeName,
+  useFormFieldsPermission,
+  useNodeForm,
+  UserTaskFormType,
+  useDrawer
+} from '../node'
 import { defaultProps } from '@/utils/tree'
-import * as RoleApi from '@/api/system/role'
-import * as DeptApi from '@/api/system/dept'
-import * as PostApi from '@/api/system/post'
-import * as UserApi from '@/api/system/user'
-import * as UserGroupApi from '@/api/bpm/userGroup'
 import { cloneDeep } from 'lodash-es'
+import { convertTimeUnit } from '../utils'
 defineOptions({
   name: 'UserTaskNodeConfig'
 })
@@ -393,44 +390,22 @@ const props = defineProps({
 const emits = defineEmits<{
   'find:returnTaskNodes': [nodeList: SimpleFlowNode[]]
 }>()
+// 监控节点的变化
+const currentNode = useWatchNode(props)
+// 抽屉配置
+const { settingVisible, closeDrawer, openDrawer } = useDrawer()
+// 节点名称配置
+const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.USER_TASK_NODE)
+// 激活的 Tab 标签页
+const activeTabName = ref('user')
+// 表单字段权限设置
+const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission()
+// 操作按钮设置
+const { buttonsSetting, btnDisplayNameEdit, changeBtnDisplayName, btnDisplayNameBlurEvent } =
+  useButtonsSetting()
 
-const currentNode = ref<SimpleFlowNode>(props.flowNode)
-// 监控节点变化
-watch(
-  () => props.flowNode,
-  (newValue) => {
-    currentNode.value = newValue
-  }
-)
-const notAllowedMultiApprovers = ref(false)
-const settingVisible = ref(false)
-const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList') // 角色列表
-const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
-const userOptions = inject<Ref<UserApi.UserVO[]>>('userList') // 用户列表
-const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList') // 部门列表
-const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList') // 用户组列表
-const deptTreeOptions = inject('deptTree') // 部门树
-const formType = inject('formType') // 表单类型
-const formFields = inject<Ref<string[]>>('formFields')
-const returnTaskList = ref<SimpleFlowNode[]>([])
-
+// 审批人表单设置
 const formRef = ref() // 表单 Ref
-const activeTabName = ref('user') // 激活的 Tab 标签页
-const configForm = ref<any>({
-  name: NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE),
-  candidateParamArray: [],
-  candidateStrategy: CandidateStrategy.USER,
-  approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
-  approveRatio: 100,
-  rejectHandlerType: RejectHandlerType.FINISH_PROCESS,
-  returnNodeId: '',
-  timeoutHandlerEnable: false,
-  timeoutHandlerAction: 1,
-  timeDuration: 6, // 默认 6小时
-  maxRemindCount: 1, // 默认 提醒 1次
-  fieldsPermission: [],
-  buttonsSetting: []
-})
 // 表单校验规则
 const formRules = reactive({
   candidateStrategy: [{ required: true, message: '审批人设置不能为空', trigger: 'change' }],
@@ -443,10 +418,66 @@ const formRules = reactive({
   timeDuration: [{ required: true, message: '超时时间不能为空', trigger: 'blur' }],
   maxRemindCount: [{ required: true, message: '提醒次数不能为空', trigger: 'blur' }]
 })
-// 关闭
-const closeDrawer = () => {
-  settingVisible.value = false
+
+const {
+  configForm: tempConfigForm,
+  roleOptions,
+  postOptions,
+  userOptions,
+  userGroupOptions,
+  deptTreeOptions,
+  getShowText
+} = useNodeForm(NodeType.USER_TASK_NODE)
+const configForm = tempConfigForm as Ref<UserTaskFormType>
+// 不允许多人审批
+const notAllowedMultiApprovers = ref(false)
+// 改变审批人设置策略
+const changeCandidateStrategy = () => {
+  configForm.value.candidateParamArray = []
+  configForm.value.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
+  if (
+    configForm.value.candidateStrategy === CandidateStrategy.START_USER ||
+    configForm.value.candidateStrategy === CandidateStrategy.USER
+  ) {
+    notAllowedMultiApprovers.value = true
+  } else {
+    notAllowedMultiApprovers.value = false
+  }
 }
+// 改变审批候选人
+const changedCandidateUsers = () => {
+  if (
+    configForm.value.candidateParamArray?.length <= 1 &&
+    configForm.value.candidateStrategy === CandidateStrategy.USER
+  ) {
+    configForm.value.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
+    configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
+    notAllowedMultiApprovers.value = true
+  } else {
+    notAllowedMultiApprovers.value = false
+  }
+}
+// 审批方式改变
+const approveMethodChanged = () => {
+  configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
+  if (configForm.value.approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
+    configForm.value.approveRatio = 100
+  }
+  formRef.value.clearValidate('approveRatio')
+}
+// 审批拒绝 可回退的节点
+const returnTaskList = ref<SimpleFlowNode[]>([])
+// 审批人超时未处理设置
+const {
+  timeoutHandlerChange,
+  cTimeoutAction,
+  timeoutActionChanged,
+  timeUnit,
+  timeUnitChange,
+  isoTimeDuration,
+  cTimeoutMaxRemindCount
+} = useTimeoutHandler()
+
 // 保存配置
 const saveConfig = async () => {
   activeTabName.value = 'user'
@@ -455,7 +486,7 @@ const saveConfig = async () => {
   if (!valid) return false
   const showText = getShowText()
   if (!showText) return false
-  currentNode.value.name = configForm.value.name
+  currentNode.value.name = nodeName.value!
   currentNode.value.candidateStrategy = configForm.value.candidateStrategy
   currentNode.value.candidateParam = configForm.value.candidateParamArray?.join(',')
   // 设置审批方式
@@ -465,121 +496,31 @@ const saveConfig = async () => {
   }
   // 设置拒绝处理
   currentNode.value.rejectHandler = {
-    type: configForm.value.rejectHandlerType,
+    type: configForm.value.rejectHandlerType!,
     returnNodeId: configForm.value.returnNodeId
   }
   // 设置超时处理
   currentNode.value.timeoutHandler = {
-    enable: configForm.value.timeoutHandlerEnable,
+    enable: configForm.value.timeoutHandlerEnable!,
     action: cTimeoutAction.value,
     timeDuration: isoTimeDuration.value,
     maxRemindCount: cTimeoutMaxRemindCount.value
   }
   // 设置表单权限
-  currentNode.value.fieldsPermission = configForm.value.fieldsPermission
+  currentNode.value.fieldsPermission = fieldsPermissionConfig.value
   // 设置按钮权限
-  currentNode.value.buttonsSetting = configForm.value.buttonsSetting
+  currentNode.value.buttonsSetting = buttonsSetting.value
 
-  currentNode.value.showText = getShowText()
+  currentNode.value.showText = showText
   settingVisible.value = false
   return true
 }
-const getShowText = (): string => {
-  let showText = ''
-  // 指定成员
-  if (configForm.value.candidateStrategy === CandidateStrategy.USER) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      const candidateNames: string[] = []
-      userOptions?.value.forEach((item) => {
-        if (configForm.value.candidateParamArray.includes(item.id)) {
-          candidateNames.push(item.nickname)
-        }
-      })
-      showText = `指定成员：${candidateNames.join(',')}`
-    }
-  }
-  // 指定角色
-  if (configForm.value.candidateStrategy === CandidateStrategy.ROLE) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      const candidateNames: string[] = []
-      roleOptions?.value.forEach((item) => {
-        if (configForm.value.candidateParamArray.includes(item.id)) {
-          candidateNames.push(item.name)
-        }
-      })
-      showText = `指定角色：${candidateNames.join(',')}`
-    }
-  }
-  // 指定部门
-  if (
-    configForm.value.candidateStrategy === CandidateStrategy.DEPT_MEMBER ||
-    configForm.value.candidateStrategy === CandidateStrategy.DEPT_LEADER
-  ) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      const candidateNames: string[] = []
-      deptOptions?.value.forEach((item) => {
-        if (configForm.value.candidateParamArray.includes(item.id)) {
-          candidateNames.push(item.name)
-        }
-      })
-      if (configForm.value.candidateStrategy === CandidateStrategy.DEPT_MEMBER) {
-        showText = `部门成员：${candidateNames.join(',')}`
-      } else {
-        showText = `部门的负责人：${candidateNames.join(',')}`
-      }
-    }
-  }
 
-  // 指定岗位
-  if (configForm.value.candidateStrategy === CandidateStrategy.POST) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      const candidateNames: string[] = []
-      postOptions?.value.forEach((item) => {
-        if (configForm.value.candidateParamArray.includes(item.id)) {
-          candidateNames.push(item.name)
-        }
-      })
-      showText = `指定岗位: ${candidateNames.join(',')}`
-    }
-  }
-  // 指定用户组
-  if (configForm.value.candidateStrategy === CandidateStrategy.USER_GROUP) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      const candidateNames: string[] = []
-      userGroupOptions?.value.forEach((item) => {
-        if (configForm.value.candidateParamArray.includes(item.id)) {
-          candidateNames.push(item.name)
-        }
-      })
-      showText = `指定用户组: ${candidateNames.join(',')}`
-    }
-  }
-
-  // 发起人自选
-  if (configForm.value.candidateStrategy === CandidateStrategy.START_USER_SELECT) {
-    showText = `发起人自选`
-  }
-  // 发起人自己
-  if (configForm.value.candidateStrategy === CandidateStrategy.START_USER) {
-    showText = `发起人自己`
-  }
-
-  // 流程表达式
-  if (configForm.value.candidateStrategy === CandidateStrategy.EXPRESSION) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      showText = `流程表达式：${configForm.value.candidateParamArray[0]}`
-    }
-  }
-  return showText
-}
-const open = () => {
-  settingVisible.value = true
-}
-// 配置审批节点， 由父组件传过来
-const setCurrentNode = (node: SimpleFlowNode) => {
-  configForm.value.name = node.name
+// 显示审批节点配置， 由父组件传过来
+const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
+  nodeName.value = node.name
   //1.1 审批人设置
-  configForm.value.candidateStrategy = node.candidateStrategy
+  configForm.value.candidateStrategy = node.candidateStrategy!
   const strCandidateParam = node?.candidateParam
   if (node.candidateStrategy === CandidateStrategy.EXPRESSION) {
     configForm.value.candidateParamArray[0] = strCandidateParam
@@ -598,18 +539,18 @@ const setCurrentNode = (node: SimpleFlowNode) => {
     notAllowedMultiApprovers.value = false
   }
   //1.2 设置审批方式
-  configForm.value.approveMethod = node.approveMethod
+  configForm.value.approveMethod = node.approveMethod!
   if (node.approveMethod == ApproveMethodType.APPROVE_BY_RATIO) {
-    configForm.value.approveRatio = node.approveRatio
+    configForm.value.approveRatio = node.approveRatio!
   }
   // 1.3 设置审批拒绝处理
-  configForm.value.rejectHandlerType = node.rejectHandler?.type
+  configForm.value.rejectHandlerType = node.rejectHandler!.type
   configForm.value.returnNodeId = node.rejectHandler?.returnNodeId
   const matchNodeList = []
   emits('find:returnTaskNodes', matchNodeList)
   returnTaskList.value = matchNodeList
   // 1.4 设置审批超时处理
-  configForm.value.timeoutHandlerEnable = node.timeoutHandler?.enable
+  configForm.value.timeoutHandlerEnable = node.timeoutHandler!.enable
   if (node.timeoutHandler?.enable && node.timeoutHandler?.timeDuration) {
     const strTimeDuration = node.timeoutHandler.timeDuration
     let parseTime = strTimeDuration.slice(2, strTimeDuration.length - 1)
@@ -620,151 +561,120 @@ const setCurrentNode = (node: SimpleFlowNode) => {
   configForm.value.timeoutHandlerAction = node.timeoutHandler?.action
   configForm.value.maxRemindCount = node.timeoutHandler?.maxRemindCount
   // 2. 操作按钮设置
-  configForm.value.buttonsSetting = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
+  buttonsSetting.value = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
   // 3. 表单字段权限配置
-  configForm.value.fieldsPermission =
-    cloneDeep(node.fieldsPermission) || getDefaultFieldsPermission(formFields?.value)
+  getNodeConfigFormFields(node.fieldsPermission)
 }
 
-defineExpose({ open, setCurrentNode }) // 暴露方法给父组件
+defineExpose({ openDrawer, showUserTaskNodeConfig }) // 暴露方法给父组件
 
-const changeCandidateStrategy = () => {
-  configForm.value.candidateParamArray = []
-  configForm.value.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
-  if (
-    configForm.value.candidateStrategy === CandidateStrategy.START_USER ||
-    configForm.value.candidateStrategy === CandidateStrategy.USER
-  ) {
-    notAllowedMultiApprovers.value = true
-  } else {
-    notAllowedMultiApprovers.value = false
+/**
+ * @description 操作按钮设置
+ */
+function useButtonsSetting() {
+  const buttonsSetting = ref<ButtonSetting[]>()
+  // 操作按钮显示名称可编辑
+  const btnDisplayNameEdit = ref<boolean[]>([])
+  const changeBtnDisplayName = (index: number) => {
+    btnDisplayNameEdit.value[index] = true
   }
-}
-
-const changedCandidateUsers = () => {
-  if (
-    configForm.value.candidateParamArray?.length <= 1 &&
-    configForm.value.candidateStrategy === CandidateStrategy.USER
-  ) {
-    configForm.value.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
-    configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
-    notAllowedMultiApprovers.value = true
-  } else {
-    notAllowedMultiApprovers.value = false
+  const btnDisplayNameBlurEvent = (index: number) => {
+    btnDisplayNameEdit.value[index] = false
+    const buttonItem = buttonsSetting.value![index]
+    buttonItem.displayName = buttonItem.displayName || OPERATION_BUTTON_NAME.get(buttonItem.id)!
   }
-}
-// 显示名称输入框
-const showInput = ref(false)
-
-const clickIcon = () => {
-  showInput.value = true
-}
-// 节点名称输入框失去焦点
-const blurEvent = () => {
-  showInput.value = false
-  configForm.value.name =
-    configForm.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
-}
-
-const approveMethodChanged = () => {
-  configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
-  if (configForm.value.approveMethod === ApproveMethodType.APPROVE_BY_RATIO) {
-    configForm.value.approveRatio = 100
-  }
-  formRef.value.clearValidate('approveRatio')
-}
-
-const timeUnit = ref(TimeUnitType.HOUR)
-
-// 超时时间的 ISO 表示
-const isoTimeDuration = computed(() => {
-  if (!configForm.value.timeoutHandlerEnable) {
-    return undefined
-  }
-  let strTimeDuration = 'PT'
-  if (timeUnit.value === TimeUnitType.MINUTE) {
-    strTimeDuration += configForm.value.timeDuration + 'M'
-  }
-  if (timeUnit.value === TimeUnitType.HOUR) {
-    strTimeDuration += configForm.value.timeDuration + 'H'
-  }
-  if (timeUnit.value === TimeUnitType.DAY) {
-    strTimeDuration += configForm.value.timeDuration + 'D'
-  }
-  return strTimeDuration
-})
-// 超时执行的动作
-const cTimeoutAction = computed(() => {
-  if (!configForm.value.timeoutHandlerEnable) {
-    return undefined
-  }
-  return configForm.value.timeoutHandlerAction
-})
-// 超时最大提醒次数
-const cTimeoutMaxRemindCount = computed(() => {
-  if (!configForm.value.timeoutHandlerEnable) {
-    return undefined
-  }
-  if (configForm.value.timeoutHandlerAction !== 1) {
-    return undefined
-  }
-  return configForm.value.maxRemindCount
-})
-
-// 超时开关改变
-const timeoutHandlerChange = () => {
-  if (configForm.value.timeoutHandlerEnable) {
-    timeUnit.value = 2
-    configForm.value.timeDuration = 6
-    configForm.value.timeoutHandlerAction = 1
-    configForm.value.maxRemindCount = 1
-  }
-}
-// 超时处理动作改变
-const timeoutActionChanged = () => {
-  if (configForm.value.timeoutHandlerAction === 1) {
-    configForm.value.maxRemindCount = 1 // 超时提醒次数，默认为1
+  return {
+    buttonsSetting,
+    btnDisplayNameEdit,
+    changeBtnDisplayName,
+    btnDisplayNameBlurEvent
   }
 }
 
-// 时间单位改变
-const timeUnitChange = () => {
-  // 分钟，默认是 60 分钟
-  if (timeUnit.value === TimeUnitType.MINUTE) {
-    configForm.value.timeDuration = 60
-  }
-  // 小时，默认是 6 个小时
-  if (timeUnit.value === TimeUnitType.HOUR) {
-    configForm.value.timeDuration = 6
-  }
-  // 天， 默认 1天
-  if (timeUnit.value === TimeUnitType.DAY) {
-    configForm.value.timeDuration = 1
-  }
-}
+/**
+ * @description 审批人超时未处理配置
+ */
+function useTimeoutHandler() {
+  // 时间单位
+  const timeUnit = ref(TimeUnitType.HOUR)
 
-const convertTimeUnit = (strTimeUnit: string) => {
-  if (strTimeUnit === 'M') {
-    return TimeUnitType.MINUTE
+  // 超时开关改变
+  const timeoutHandlerChange = () => {
+    if (configForm.value.timeoutHandlerEnable) {
+      timeUnit.value = 2
+      configForm.value.timeDuration = 6
+      configForm.value.timeoutHandlerAction = 1
+      configForm.value.maxRemindCount = 1
+    }
   }
-  if (strTimeUnit === 'H') {
-    return TimeUnitType.HOUR
-  }
-  if (strTimeUnit === 'D') {
-    return TimeUnitType.DAY
-  }
-  return TimeUnitType.HOUR
-}
+  // 超时执行的动作
+  const cTimeoutAction = computed(() => {
+    if (!configForm.value.timeoutHandlerEnable) {
+      return undefined
+    }
+    return configForm.value.timeoutHandlerAction
+  })
 
-// 操作按钮显示名称可编辑
-const btnDisplayNameEdit = ref<boolean[]>([])
-const changeBtnDisplayName = (index: number) => {
-  btnDisplayNameEdit.value[index] = true
-}
-const btnDisplayNameBlurEvent = (index: number) => {
-  btnDisplayNameEdit.value[index] = false
-  const buttonItem = configForm.value.buttonPermission[index]
-  buttonItem.displayName = buttonItem.displayName || OPERATION_BUTTON_NAME.get(buttonItem.id)
+  // 超时处理动作改变
+  const timeoutActionChanged = () => {
+    if (configForm.value.timeoutHandlerAction === 1) {
+      configForm.value.maxRemindCount = 1 // 超时提醒次数，默认为1
+    }
+  }
+
+  // 时间单位改变
+  const timeUnitChange = () => {
+    // 分钟，默认是 60 分钟
+    if (timeUnit.value === TimeUnitType.MINUTE) {
+      configForm.value.timeDuration = 60
+    }
+    // 小时，默认是 6 个小时
+    if (timeUnit.value === TimeUnitType.HOUR) {
+      configForm.value.timeDuration = 6
+    }
+    // 天， 默认 1天
+    if (timeUnit.value === TimeUnitType.DAY) {
+      configForm.value.timeDuration = 1
+    }
+  }
+  // 超时时间的 ISO 表示
+  const isoTimeDuration = computed(() => {
+    if (!configForm.value.timeoutHandlerEnable) {
+      return undefined
+    }
+    let strTimeDuration = 'PT'
+    if (timeUnit.value === TimeUnitType.MINUTE) {
+      strTimeDuration += configForm.value.timeDuration + 'M'
+    }
+    if (timeUnit.value === TimeUnitType.HOUR) {
+      strTimeDuration += configForm.value.timeDuration + 'H'
+    }
+    if (timeUnit.value === TimeUnitType.DAY) {
+      strTimeDuration += configForm.value.timeDuration + 'D'
+    }
+    return strTimeDuration
+  })
+
+  // 超时最大提醒次数
+  const cTimeoutMaxRemindCount = computed(() => {
+    if (!configForm.value.timeoutHandlerEnable) {
+      return undefined
+    }
+    if (configForm.value.timeoutHandlerAction !== 1) {
+      return undefined
+    }
+    return configForm.value.maxRemindCount
+  })
+
+  return {
+    timeoutHandlerChange,
+    cTimeoutAction,
+    timeoutActionChanged,
+    timeUnit,
+    timeUnitChange,
+    isoTimeDuration,
+    cTimeoutMaxRemindCount
+  }
 }
 </script>
 

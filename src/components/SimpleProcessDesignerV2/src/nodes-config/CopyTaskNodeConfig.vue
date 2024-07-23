@@ -14,14 +14,12 @@
           class="config-editable-input"
           @blur="blurEvent()"
           v-mountedFocus
-          v-model="configForm.name"
-          :placeholder="configForm.name"
+          v-model="nodeName"
+          :placeholder="nodeName"
         />
-        <div v-else class="node-name"
-          >{{ configForm.name }}
-          <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()"
-        /></div>
-
+        <div v-else class="node-name">
+          {{ nodeName }} <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()" />
+        </div>
         <div class="divide-line"></div>
       </div>
     </template>
@@ -173,7 +171,7 @@
           </div>
           <div
             class="field-setting-item"
-            v-for="(item, index) in configForm.fieldsPermission"
+            v-for="(item, index) in fieldsPermissionConfig"
             :key="index"
           >
             <div class="field-setting-item-label"> {{ item.title }} </div>
@@ -202,16 +200,17 @@
   </el-drawer>
 </template>
 <script setup lang="ts">
-import { SimpleFlowNode, CandidateStrategy, NodeType, NODE_DEFAULT_NAME } from '../consts'
-import { getDefaultFieldsPermission } from '../utils'
+import { SimpleFlowNode, CandidateStrategy, NodeType } from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import * as RoleApi from '@/api/system/role'
-import * as DeptApi from '@/api/system/dept'
-import * as PostApi from '@/api/system/post'
-import * as UserApi from '@/api/system/user'
-import * as UserGroupApi from '@/api/bpm/userGroup'
+import {
+  useWatchNode,
+  useDrawer,
+  useNodeName,
+  useFormFieldsPermission,
+  useNodeForm,
+  CopyTaskFormType
+} from '../node'
 import { defaultProps } from '@/utils/tree'
-import { cloneDeep } from 'lodash-es'
 defineOptions({
   name: 'CopyTaskNodeConfig'
 })
@@ -221,26 +220,34 @@ const props = defineProps({
     required: true
   }
 })
-// 是否可见
-const settingVisible = ref(false)
+// 抽屉配置
+const { settingVisible, closeDrawer, openDrawer } = useDrawer()
 // 当前节点
-const currentNode = ref<SimpleFlowNode>(props.flowNode)
-// 监控节点变化
-watch(
-  () => props.flowNode,
-  (newValue) => {
-    currentNode.value = newValue
-  }
-)
-const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList') // 角色列表
-const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
-const userOptions = inject<Ref<UserApi.UserVO[]>>('userList') // 用户列表
-const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList') // 部门列表
-const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList') // 用户组列表
-const deptTreeOptions = inject('deptTree') // 部门树
-const formType = inject('formType') // 表单类型
-const formFields = inject<Ref<string[]>>('formFields')
+const currentNode = useWatchNode(props)
+// 节点名称
+const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.COPY_TASK_NODE)
+// 激活的 Tab 标签页
+const activeTabName = ref('user')
+// 表单字段权限配置
+const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission()
+// 抄送人表单配置
+const formRef = ref() // 表单 Ref
+// 表单校验规则
+const formRules = reactive({
+  candidateStrategy: [{ required: true, message: '抄送人设置不能为空', trigger: 'change' }],
+  candidateParamArray: [{ required: true, message: '选项不能为空', trigger: 'blur' }]
+})
 
+const {
+  configForm: tempConfigForm,
+  roleOptions,
+  postOptions,
+  userOptions,
+  userGroupOptions,
+  deptTreeOptions,
+  getShowText
+} = useNodeForm(NodeType.COPY_TASK_NODE)
+const configForm = tempConfigForm as Ref<CopyTaskFormType>
 // 抄送人策略， 去掉发起人自选 和 发起人自己
 const copyUserStrategies = computed(() => {
   return getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY).filter(
@@ -249,25 +256,9 @@ const copyUserStrategies = computed(() => {
       item.value !== CandidateStrategy.START_USER
   )
 })
-// 激活的 Tab 标签页
-const activeTabName = ref('user')
-const formRef = ref() // 表单 Ref
-
-const configForm = ref<any>({
-  name: NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE),
-  candidateParamArray: [],
-  candidateStrategy: CandidateStrategy.USER,
-  fieldsPermission: []
-})
-// 表单校验规则
-const formRules = reactive({
-  candidateStrategy: [{ required: true, message: '抄送人设置不能为空', trigger: 'change' }],
-  candidateParamArray: [{ required: true, message: '选项不能为空', trigger: 'blur' }]
-})
-
-// 关闭
-const closeDrawer = () => {
-  settingVisible.value = false
+// 改变抄送人设置策略
+const changeCandidateStrategy = () => {
+  configForm.value.candidateParamArray = []
 }
 // 保存配置
 const saveConfig = async () => {
@@ -277,23 +268,19 @@ const saveConfig = async () => {
   if (!valid) return false
   const showText = getShowText()
   if (!showText) return false
-  currentNode.value.name = configForm.value.name
+  currentNode.value.name = nodeName.value!
   currentNode.value.candidateParam = configForm.value.candidateParamArray?.join(',')
   currentNode.value.candidateStrategy = configForm.value.candidateStrategy
   currentNode.value.showText = showText
-  currentNode.value.fieldsPermission = configForm.value.fieldsPermission
+  currentNode.value.fieldsPermission = fieldsPermissionConfig.value
   settingVisible.value = false
   return true
 }
-
-const open = () => {
-  settingVisible.value = true
-}
-// 设置抄送节点
-const setCurrentNode = (node: SimpleFlowNode) => {
-  configForm.value.name = node.name
+// 显示抄送节点配置， 由父组件传过来
+const showCopyTaskNodeConfig = (node: SimpleFlowNode) => {
+  nodeName.value = node.name
   // 抄送人设置
-  configForm.value.candidateStrategy = node.candidateStrategy
+  configForm.value.candidateStrategy = node.candidateStrategy!
   const strCandidateParam = node?.candidateParam
   if (node.candidateStrategy === CandidateStrategy.EXPRESSION) {
     configForm.value.candidateParamArray[0] = strCandidateParam
@@ -303,104 +290,10 @@ const setCurrentNode = (node: SimpleFlowNode) => {
     }
   }
   // 表单字段权限
-  configForm.value.fieldsPermission =
-    cloneDeep(node.fieldsPermission) || getDefaultFieldsPermission(formFields?.value)
+  getNodeConfigFormFields(node.fieldsPermission)
 }
 
-defineExpose({ open, setCurrentNode }) // 暴露方法给父组件
-const changeCandidateStrategy = () => {
-  configForm.value.candidateParamArray = []
-}
-// TODO 貌似可以和 UserTaskNodeConfig 重复了， 如何共用??
-const getShowText = (): string => {
-  let showText = ''
-  // 指定成员
-  if (configForm.value.candidateStrategy === CandidateStrategy.USER) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      const candidateNames: string[] = []
-      userOptions?.value.forEach((item) => {
-        if (configForm.value.candidateParamArray.includes(item.id)) {
-          candidateNames.push(item.nickname)
-        }
-      })
-      showText = `指定成员：${candidateNames.join(',')}`
-    }
-  }
-  // 指定角色
-  if (configForm.value.candidateStrategy === CandidateStrategy.ROLE) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      const candidateNames: string[] = []
-      roleOptions?.value.forEach((item) => {
-        if (configForm.value.candidateParamArray.includes(item.id)) {
-          candidateNames.push(item.name)
-        }
-      })
-      showText = `指定角色：${candidateNames.join(',')}`
-    }
-  }
-  // 指定部门
-  if (
-    configForm.value.candidateStrategy === CandidateStrategy.DEPT_MEMBER ||
-    configForm.value.candidateStrategy === CandidateStrategy.DEPT_LEADER
-  ) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      const candidateNames: string[] = []
-      deptOptions?.value.forEach((item) => {
-        if (configForm.value.candidateParamArray.includes(item.id)) {
-          candidateNames.push(item.name)
-        }
-      })
-      if (currentNode.value.candidateStrategy === CandidateStrategy.DEPT_MEMBER) {
-        showText = `部门成员：${candidateNames.join(',')}`
-      } else {
-        showText = `部门的负责人：${candidateNames.join(',')}`
-      }
-    }
-  }
-  // 指定岗位
-  if (configForm.value.candidateStrategy === CandidateStrategy.POST) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      const candidateNames: string[] = []
-      postOptions?.value.forEach((item) => {
-        if (configForm.value.candidateParamArray.includes(item.id)) {
-          candidateNames.push(item.name)
-        }
-      })
-      showText = `指定岗位: ${candidateNames.join(',')}`
-    }
-  }
-  // 指定用户组
-  if (configForm.value.candidateStrategy === CandidateStrategy.USER_GROUP) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      const candidateNames: string[] = []
-      userGroupOptions?.value.forEach((item) => {
-        if (configForm.value.candidateParamArray.includes(item.id)) {
-          candidateNames.push(item.name)
-        }
-      })
-      showText = `指定用户组: ${candidateNames.join(',')}`
-    }
-  }
-  // 流程表达式
-  if (configForm.value.candidateStrategy === CandidateStrategy.EXPRESSION) {
-    if (configForm.value.candidateParamArray?.length > 0) {
-      showText = `流程表达式：${configForm.value.candidateParamArray[0]}`
-    }
-  }
-  return showText
-}
-// 显示名称输入框
-const showInput = ref(false)
-
-const clickIcon = () => {
-  showInput.value = true
-}
-// 输入框失去焦点
-const blurEvent = () => {
-  showInput.value = false
-  configForm.value.name =
-    configForm.value.name || (NODE_DEFAULT_NAME.get(NodeType.COPY_TASK_NODE) as string)
-}
+defineExpose({ openDrawer, showCopyTaskNodeConfig }) // 暴露方法给父组件
 </script>
 
 <style lang="scss" scoped></style>

@@ -45,6 +45,7 @@
 </template>
 <script setup lang="ts">
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT, NODE_DEFAULT_NAME } from '../consts'
+import { useWatchNode } from '../node'
 import NodeHandler from '../NodeHandler.vue'
 import UserTaskNodeConfig from '../nodes-config/UserTaskNodeConfig.vue'
 defineOptions({
@@ -61,21 +62,16 @@ const emits = defineEmits<{
   'find:parentNode': [nodeList: SimpleFlowNode[], nodeType: NodeType]
 }>()
 
-const currentNode = ref<SimpleFlowNode>(props.flowNode)
+const currentNode = useWatchNode(props)
+
 const nodeSetting = ref()
 // 打开节点配置
 const openNodeConfig = () => {
   // 把当前节点传递给配置组件
-  nodeSetting.value.setCurrentNode(currentNode.value)
-  nodeSetting.value.open()
+  nodeSetting.value.showUserTaskNodeConfig(currentNode.value)
+  nodeSetting.value.openDrawer()
 }
-// 监控节点变化
-watch(
-  () => props.flowNode,
-  (newValue) => {
-    currentNode.value = newValue
-  }
-)
+
 // 显示节点名称输入框
 const showInput = ref(false)
 // 节点名称输入框失去焦点

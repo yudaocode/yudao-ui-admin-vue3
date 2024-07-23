@@ -138,6 +138,7 @@ const zoomIn = () => {
 
 onMounted(async () => {
   const result = await getBpmSimpleModel(props.modelId)
+  console.log('the result is :', result)
   if (result) {
     processNodeTree.value = result
   } else {

@@ -1,6 +1,8 @@
 // @ts-ignore
 import { DictDataVO } from '@/api/system/dict/types'
-
+/**
+ * 节点类型
+ */
 export enum NodeType {
   /**
    * 发起人节点
@@ -46,68 +48,37 @@ export enum NodeType {
    */
   INCLUSIVE_NODE_JOIN = 8
 }
-// 时间单位枚举
-export enum TimeUnitType {
-  /**
-   * 分钟
-   */
-  MINUTE = 1,
-  /**
-   * 小时
-   */
-  HOUR = 2,
-  /**
-   * 天
-   */
-  DAY = 3
+/**
+ *  节点结构定义
+ */
+export interface SimpleFlowNode {
+  id: string
+  type: NodeType
+  name: string
+  showText?: string
+  attributes?: any
+  // 孩子节点
+  childNode?: SimpleFlowNode
+  // 条件节点
+  conditionNodes?: SimpleFlowNode[]
+  // 候选人策略
+  candidateStrategy?: number
+  // 候选人参数
+  candidateParam?: string
+  // 多人审批方式
+  approveMethod?: ApproveMethodType
+  //通过比例
+  approveRatio?: number
+  // 审批按钮设置
+  buttonsSetting?: any[]
+  // 表单权限
+  fieldsPermission?: Array<Record<string, string>>
+  // 审批任务超时处理
+  timeoutHandler?: TimeoutHandler
+  // 审批任务拒绝处理
+  rejectHandler?: RejectHandler
 }
-
-export enum RejectHandlerType {
-  /**
-   * 结束流程
-   */
-  FINISH_PROCESS = 1,
-  /**
-   * 驳回到指定节点
-   */
-  RETURN_USER_TASK = 2
-}
-
-// 条件配置类型 （ 用于条件节点配置 ）
-export enum ConditionConfigType {
-  /**
-   * 条件表达式
-   */
-  EXPRESSION = 1,
-
-  /**
-   * 条件规则
-   */
-  RULE = 2
-}
-// 多人审批方式类型 （ 用于审批节点 ）
-export enum ApproveMethodType {
-  /**
-   * 随机挑选一人审批
-   */
-  RRANDOM_SELECT_ONE_APPROVE = 1,
-
-  /**
-   * 多人会签(按通过比例)
-   */
-  APPROVE_BY_RATIO = 2,
-
-  /**
-   * 多人或签(通过只需一人，拒绝只需一人)
-   */
-  ANY_APPROVE = 3,
-  /**
-   * 多人依次审批
-   */
-  SEQUENTIAL_APPROVE = 4
-}
-
-// 候选人策略 （ 用于审批节点。抄送节点 )
+// 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
   /**
    * 指定角色
@@ -147,12 +118,41 @@ export enum CandidateStrategy {
   EXPRESSION = 60
 }
 
-export type RejectHandler = {
-  type: RejectHandlerType
+// 多人审批方式类型枚举 （ 用于审批节点 ）
+export enum ApproveMethodType {
+  /**
+   * 随机挑选一人审批
+   */
+  RRANDOM_SELECT_ONE_APPROVE = 1,
 
+  /**
+   * 多人会签(按通过比例)
+   */
+  APPROVE_BY_RATIO = 2,
+
+  /**
+   * 多人或签(通过只需一人，拒绝只需一人)
+   */
+  ANY_APPROVE = 3,
+  /**
+   * 多人依次审批
+   */
+  SEQUENTIAL_APPROVE = 4
+}
+
+/**
+ * 审批拒绝结构定义
+ */
+export type RejectHandler = {
+  // 审批拒绝类型
+  type: RejectHandlerType
+  // 回退节点 Id
   returnNodeId?: string
 }
 
+/**
+ * 审批超时结构定义
+ */
 export type TimeoutHandler = {
   //是否开启超时处理
   enable: boolean
@@ -163,60 +163,57 @@ export type TimeoutHandler = {
   // 执行动作是自动提醒, 最大提醒次数
   maxRemindCount?: number
 }
-
-export type SimpleFlowNode = {
-  id: string
-  type: NodeType
-  name: string
-  showText?: string
-  attributes?: any
-  // 孩子节点
-  childNode?: SimpleFlowNode
-  // 条件节点
-  conditionNodes?: SimpleFlowNode[]
-  // 候选人策略
-  candidateStrategy?: number
-  // 候选人参数
-  candidateParam?: string
-  // 多人审批方式
-  approveMethod?: ApproveMethodType
-  //通过比例
-  approveRatio?: number
-  // 审批按钮设置
-  buttonsSetting?: any[]
-  // 表单权限
-  fieldsPermission?: any[]
-  // 审批任务超时处理
-  timeoutHandler?: TimeoutHandler
-  // 审批任务拒绝处理
-  rejectHandler?: RejectHandler
+// 审批拒绝类型枚举
+export enum RejectHandlerType {
+  /**
+   * 结束流程
+   */
+  FINISH_PROCESS = 1,
+  /**
+   * 驳回到指定节点
+   */
+  RETURN_USER_TASK = 2
 }
 
-// 条件组
-export type ConditionGroup = {
-  // 条件组的逻辑关系是否为且
-  and: boolean
-  // 条件数组
-  conditions: Condition[]
+// 时间单位枚举
+export enum TimeUnitType {
+  /**
+   * 分钟
+   */
+  MINUTE = 1,
+  /**
+   * 小时
+   */
+  HOUR = 2,
+  /**
+   * 天
+   */
+  DAY = 3
 }
 
-// 条件
-export type Condition = {
-  // 条件规则的逻辑关系是否为且
-  and: boolean
-  rules: ConditionRule[]
+// 条件配置类型 （ 用于条件节点配置 ）
+export enum ConditionConfigType {
+  /**
+   * 条件表达式
+   */
+  EXPRESSION = 1,
+
+  /**
+   * 条件规则
+   */
+  RULE = 2
 }
 
-// 条件规则
-export type ConditionRule = {
-  type: number
-  opName: string
-  opCode: string
-  leftSide: string
-  rightSide: string
+/**
+ * 操作按钮权限结构定义
+ */
+export type ButtonSetting = {
+  id: OpsButtonType
+  displayName: string
+  enable: boolean
 }
 
-// 审批操作按钮类型
+// 操作按钮类型枚举 (用于审批节点)
 export enum OpsButtonType {
   /**
    * 通过
@@ -243,11 +240,34 @@ export enum OpsButtonType {
    */
   RETURN = 6
 }
+/**
+ * 条件规则结构定义
+ */
+export type ConditionRule = {
+  type: number
+  opName: string
+  opCode: string
+  leftSide: string
+  rightSide: string
+}
 
-export type ButtonSetting = {
-  id: OpsButtonType
-  displayName: string
-  enable: boolean
+/**
+ * 条件组结构定义
+ */
+export type ConditionGroup = {
+  // 条件组的逻辑关系是否为且
+  and: boolean
+  // 条件数组
+  conditions: Condition[]
+}
+
+/**
+ * 条件结构定义
+ */
+export type Condition = {
+  // 条件规则的逻辑关系是否为且
+  and: boolean
+  rules: ConditionRule[]
 }
 
 export const NODE_DEFAULT_TEXT = new Map<number, string>()

@@ -50,6 +50,7 @@ import CopyTaskNode from './nodes/CopyTaskNode.vue'
 import ExclusiveNode from './nodes/ExclusiveNode.vue'
 import ParallelNode from './nodes/ParallelNode.vue'
 import { SimpleFlowNode, NodeType } from './consts'
+import { useWatchNode } from './node'
 defineOptions({
   name: 'ProcessNodeTree'
 })
@@ -72,15 +73,8 @@ const emits = defineEmits<{
   ]
 }>()
 
-const currentNode = ref<SimpleFlowNode>(props.flowNode)
+const currentNode = useWatchNode(props)
 
-// 重要：监控节点变化. 重新绘制节点
-watch(
-  () => props.flowNode,
-  (newValue) => {
-    currentNode.value = newValue
-  }
-)
 // 用于删除节点
 const handleModelValueUpdate = (updateValue) => {
   emits('update:flowNode', updateValue)

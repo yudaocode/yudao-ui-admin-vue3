@@ -43,7 +43,6 @@
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT, NODE_DEFAULT_NAME } from '../consts'
 import NodeHandler from '../NodeHandler.vue'
 import CopyTaskNodeConfig from '../nodes-config/CopyTaskNodeConfig.vue'
-import { generateUUID } from '@/utils'
 defineOptions({
   name: 'CopyTaskNode'
 })
@@ -81,8 +80,8 @@ const clickEvent = () => {
 const nodeSetting = ref()
 // 打开节点配置
 const openNodeConfig = () => {
-  nodeSetting.value.setCurrentNode(currentNode.value)
-  nodeSetting.value.open()
+  nodeSetting.value.showCopyTaskNodeConfig(currentNode.value)
+  nodeSetting.value.openDrawer()
 }
 
 // 删除节点。更新当前节点为孩子节点
