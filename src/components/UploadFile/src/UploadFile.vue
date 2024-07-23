@@ -32,6 +32,7 @@
           格式为 <b style="color: #f56c6c">{{ fileType.join('/') }}</b> 的文件
         </div>
       </template>
+      <!-- TODO @puhui999：1）表单展示的时候，位置会偏掉，已发微信；2）disable 的时候，应该把【删除】按钮也隐藏掉？ -->
       <template #file="row">
         <div class="flex items-center">
           <span>{{ row.file.name }}</span>
