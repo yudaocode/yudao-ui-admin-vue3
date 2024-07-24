@@ -1,10 +1,11 @@
 <template>
-  <div ref="contentRef" class="markdown-view" v-html="contentHtml"></div>
+<!--  <div ref="contentRef" class="markdown-view" v-html="contentHtml"></div>-->
+  <div ref="contentRef" class="markdown-view" v-html="renderedMarkdown"></div>
 </template>
 
 <script setup lang="ts">
-import { useClipboard } from '@vueuse/core'
-import { marked } from 'marked'
+import {useClipboard} from '@vueuse/core'
+import MarkdownIt from 'markdown-it'
 import 'highlight.js/styles/vs2015.min.css'
 import hljs from 'highlight.js'
 
@@ -19,45 +20,26 @@ const props = defineProps({
 const message = useMessage() // 消息弹窗
 const { copy } = useClipboard() // 初始化 copy 到粘贴板
 const contentRef = ref()
-const contentHtml = ref<any>() // 渲染的html内容
 const { content } = toRefs(props) // 将 props 变为引用类型
 
-// 代码高亮：https://highlightjs.org/
-// 转换 markdown：marked
-
-/** marked 渲染器 */
-const renderer = {
-  code(code, language, c) {
-    let highlightHtml
-    try {
-      highlightHtml = hljs.highlight(code, { language: language, ignoreIllegals: true }).value
-    } catch (e) {
-      // skip
+const md = new MarkdownIt({
+  highlight: function (str, lang) {
+    if (lang && hljs.getLanguage(lang)) {
+      try {
+        const copyHtml = `<div id="copy" data-copy='${str}' style="position: absolute; right: 10px; top: 5px; color: #fff;cursor: pointer;">复制</div>`
+        return `<pre style="position: relative;">${copyHtml}<code class="hljs">${hljs.highlight(lang, str, true).value}</code></pre>`
+      } catch (__) {}
     }
-    const copyHtml = `<div id="copy" data-copy='${code}' style="position: absolute; right: 10px; top: 5px; color: #fff;cursor: pointer;">复制</div>`
-    return `<pre style="position: relative;">${copyHtml}<code class="hljs">${highlightHtml}</code></pre>`
+    return ``
   }
-}
+});
 
-// 配置 marked
-marked.use({
-  renderer: renderer
-})
-
-/** 监听 content 变化 */
-watch(content, async (newValue, oldValue) => {
-  await renderMarkdown(newValue)
-})
-
-/** 渲染 markdown */
-const renderMarkdown = async (content: string) => {
-  contentHtml.value = await marked(content)
-}
+const renderedMarkdown = computed(() => {
+  return md.render(props.content);
+});
 
 /** 初始化 **/
 onMounted(async () => {
-  // 解析转换 markdown
-  await renderMarkdown(props.content as string)
   // 添加 copy 监听
   contentRef.value.addEventListener('click', (e: any) => {
     if (e.target.id === 'copy') {
