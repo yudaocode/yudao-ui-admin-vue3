@@ -1,7 +1,7 @@
 <template>
   <el-card class="my-card h-full">
-    <template #header
-      ><h3 class="m-0 px-7 shrink-0 flex items-center justify-between">
+    <template #header>
+      <h3 class="m-0 px-7 shrink-0 flex items-center justify-between">
         <span>预览</span>
         <!-- 展示在右上角 -->
         <el-button color="#846af7" v-show="showCopy" @click="copyContent" size="small">
@@ -10,8 +10,8 @@
           </template>
           复制
         </el-button>
-      </h3></template
-    >
+      </h3>
+    </template>
 
     <div ref="contentRef" class="hide-scroll-bar h-full box-border overflow-y-auto">
       <div class="w-full min-h-full relative flex-grow bg-white box-border p-3 sm:p-7">
@@ -105,7 +105,7 @@ watch(copied, (val) => {
   }
 }
 
-.my-card{
+.my-card {
   display: flex;
   flex-direction: column;
 

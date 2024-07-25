@@ -21,9 +21,9 @@
         </div>
         <div class="ml-10px w-100%">
           <div class="flex justify-between items-center w-100%">
-            <span>{{ item.userNickname }}</span>
+            <span class="username">{{ item.userNickname }}</span>
             <span class="color-[#989EA6]">
-              {{ formatDate(item.lastMessageTime) }}
+              {{ formatPast(item.lastMessageTime, 'YYYY-mm-dd') }}
             </span>
           </div>
           <!-- 最后聊天内容 -->
@@ -70,7 +70,7 @@
 <script lang="ts" setup>
 import { KeFuConversationApi, KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { useEmoji } from './tools/emoji'
-import { formatDate } from '@/utils/formatTime'
+import { formatPast } from '@/utils/formatTime'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 import { useAppStore } from '@/store/modules/app'
 
@@ -184,6 +184,16 @@ watch(showRightMenu, (val) => {
     padding: 10px;
     background-color: #fff;
     transition: border-left 0.05s ease-in-out; /* 设置过渡效果 */
+
+    .username {
+      min-width: 0;
+      max-width: 60%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+    }
 
     .last-message {
       width: 200px;

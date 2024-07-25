@@ -1,5 +1,5 @@
 <template>
-  <ContentWrap class="w-300px h-full">
+  <ContentWrap class="w-300px h-full mb-[0!important]">
     <el-radio-group v-model="generateMode" class="mb-15px">
       <el-radio-button label="desc">
         描述模式
@@ -28,10 +28,7 @@ const emits = defineEmits(['generate-music'])
 
 const generateMode = ref('lyric')
 
-interface ModeRef {
-  formData: Recordable
-}
-const modeRef = ref<ModeRef | null>(null)
+const modeRef = ref<Nullable<{ formData: Recordable }>>(null)
 
 /*
  *@Description: 根据信息生成音乐
@@ -39,6 +36,6 @@ const modeRef = ref<ModeRef | null>(null)
  *@Date: 2024-06-27 16:40:16
 */
 function generateMusic () {
-  emits('generate-music', {formData: unref(modeRef)?.formData.value})
+  emits('generate-music', {formData: unref(modeRef)?.formData})
 }
 </script>
