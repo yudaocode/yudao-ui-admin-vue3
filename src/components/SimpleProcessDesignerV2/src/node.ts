@@ -39,20 +39,46 @@ export function useFormFieldsPermission() {
     fieldsPermissionConfig.value =
       cloneDeep(nodeFormFields) || getDefaultFieldsPermission(unref(formFields))
   }
-  // 获取默认的表单权限。 所有字段只读
+  // 默认的表单权限： 获取表单的所有字段，设置字段默认权限为只读
   const getDefaultFieldsPermission = (formFields?: string[]) => {
     const defaultFieldsPermission: Array<Record<string, string>> = []
     if (formFields) {
       formFields.forEach((fieldStr: string) => {
-        const { field, title } = JSON.parse(fieldStr)
-        defaultFieldsPermission.push({
-          field,
-          title,
-          permission: '1' // 只读
-        })
+        parseFieldsSetDefaultPermission(JSON.parse(fieldStr), defaultFieldsPermission)
       })
     }
     return defaultFieldsPermission
+  }
+  // 解析字段。赋给默认权限
+  const parseFieldsSetDefaultPermission = (
+    rule: Record<string, any>,
+    fieldsPermission: Array<Record<string, string>>,
+    parentTitle: string = ''
+  ) => {
+    const { type, field, title: tempTitle, children } = rule
+    if (field && tempTitle) {
+      let title = tempTitle
+      if (parentTitle) {
+        title = `${parentTitle}.${tempTitle}`
+      }
+      fieldsPermission.push({
+        field,
+        title,
+        permission: '1' // 只读
+      })
+      // TODO 子表单 需要处理子表单字段
+      // if (type === 'group' && rule.props?.rule && Array.isArray(rule.props.rule)) {
+      //   // 解析子表单的字段
+      //   rule.props.rule.forEach((item) => {
+      //     parseFieldsSetDefaultPermission(item, fieldsPermission, title)
+      //   })
+      // }
+    }
+    if (children && Array.isArray(children)) {
+      children.forEach((rule) => {
+        parseFieldsSetDefaultPermission(rule, fieldsPermission)
+      })
+    }
   }
 
   return {
