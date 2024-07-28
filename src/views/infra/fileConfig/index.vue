@@ -131,7 +131,6 @@ import * as FileConfigApi from '@/api/infra/fileConfig'
 import FileConfigForm from './FileConfigForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import {ElMessageBox} from 'element-plus';
 
 defineOptions({ name: 'InfraFileConfig' })
 
