@@ -14,6 +14,7 @@ export type OperateLogVO = {
   requestMethod: string
   requestUrl: string
   userIp: string
+  userAgent: string
   creator: string
   creatorName: string
   createTime: Date
