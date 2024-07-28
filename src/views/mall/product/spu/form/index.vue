@@ -63,7 +63,7 @@ import SkuForm from './SkuForm.vue'
 import DeliveryForm from './DeliveryForm.vue'
 import { convertToInteger, floatToFixed2, formatToFraction } from '@/utils'
 
-defineOptions({ name: 'ProductSpuForm' })
+defineOptions({ name: 'ProductSpuAdd' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
