@@ -4,10 +4,10 @@
     <ConversationList
       :active-id="activeConversationId"
       ref="conversationListRef"
-      @onConversationCreate="handleConversationCreateSuccess"
-      @onConversationClick="handleConversationClick"
-      @onConversationClear="handleConversationClear"
-      @onConversationDelete="handlerConversationDelete"
+      @on-conversation-create="handleConversationCreateSuccess"
+      @on-conversation-click="handleConversationClick"
+      @on-conversation-clear="handleConversationClear"
+      @on-conversation-delete="handlerConversationDelete"
     />
     <!-- 右侧：对话详情 -->
     <el-container class="detail-container">
