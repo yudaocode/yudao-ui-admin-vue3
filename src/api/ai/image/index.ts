@@ -53,12 +53,8 @@ export interface ImageMidjourneyButtonsVO {
 // AI 图片 API
 export const ImageApi = {
   // 获取【我的】绘图分页
-  getImagePageMy: async (params: PageParam) => {
+  getImagePageMy: async (params: any) => {
     return await request.get({ url: `/ai/image/my-page`, params })
-  },
-  // 获取公开的绘图记录
-  getImagePagePublic: async (params) => {
-    return await request.get({ url: `/ai/image/public-page`, params })
   },
   // 获取【我的】绘图记录
   getImageMy: async (id: number) => {
@@ -97,7 +93,7 @@ export const ImageApi = {
 
   // 更新绘画发布状态
   updateImage: async (data: any) => {
-    return await request.put({ url: '/ai/image/update-public-status', data })
+    return await request.put({ url: '/ai/image/update', data })
   },
 
   // 删除绘画
