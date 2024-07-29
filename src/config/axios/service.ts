@@ -81,7 +81,7 @@ service.interceptors.request.use(
   (error: AxiosError) => {
     // Do something with request error
     console.log(error) // for debug
-    Promise.reject(error)
+    return Promise.reject(error)
   }
 )
 
