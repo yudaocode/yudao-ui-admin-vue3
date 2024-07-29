@@ -70,26 +70,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
       }
     ]
   },
-  // {
-  //   path: '/ai/music',
-  //   component: Layout,
-  //   redirect: '/index',
-  //   name: 'AIMusic',
-  //   meta: {},
-  //   children: [
-  //     {
-  //       path: 'index',
-  //       component: () => import('@/views/ai/music/components/index.vue'),
-  //       name: 'AIMusicIndex',
-  //       meta: {
-  //         title: 'AI 音乐',
-  //         icon: 'ep:home-filled',
-  //         noCache: false,
-  //         affix: true
-  //       }
-  //     }
-  //   ]
-  // },
   {
     path: '/user',
     component: Layout,
@@ -591,6 +571,27 @@ const remainingRouter: AppRouteRecordRaw[] = [
           activeMenu: '/crm/product'
         },
         component: () => import('@/views/crm/product/detail/index.vue')
+      }
+    ]
+  },
+  {
+    path: '/ai',
+    component: Layout,
+    name: 'Ai',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'image/square',
+        component: () => import('@/views/ai/image/square/index.vue'),
+        name: 'AiImageSquare',
+        meta: {
+          title: '绘图作品',
+          icon: 'ep:home-filled',
+          noCache: false,
+          affix: true
+        }
       }
     ]
   }
