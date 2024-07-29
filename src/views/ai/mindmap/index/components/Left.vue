@@ -20,13 +20,14 @@
           type="primary"
           :loading="isGenerating"
           @click="emits('submit', formData)"
-          >智能生成思维导图</el-button
         >
+          智能生成思维导图
+        </el-button>
       </div>
       <div class="mt-[30px]">
         <el-text tag="b">使用已有内容生成？</el-text>
         <el-input
-          v-model="existPrompt"
+          v-model="generatedContent"
           maxlength="1024"
           rows="5"
           class="w-100% mt-15px"
@@ -38,17 +39,18 @@
         <el-button
           class="!w-full mt-[15px]"
           type="primary"
-          @click="emits('directGenerate', existPrompt)"
+          @click="emits('directGenerate', generatedContent)"
           :disabled="isGenerating"
-          >直接生成</el-button
         >
+          直接生成
+        </el-button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { MindmapExitExample } from '@/views/ai/utils/constants'
+import { MindMapContentExample } from '@/views/ai/utils/constants'
 
 const emits = defineEmits(['submit', 'directGenerate'])
 defineProps<{
@@ -59,11 +61,12 @@ const formData = reactive({
   prompt: ''
 })
 
-const existPrompt = ref(MindmapExitExample) // 已有的内容
+const generatedContent = ref(MindMapContentExample) // 已有的内容
 
 defineExpose({
-  setExistPrompt(e: string){ // 设置已有的内容，在生成结束的时候将结果赋值给该值
-    existPrompt.value = e
+  setGeneratedContent(newContent: string) {
+    // 设置已有的内容，在生成结束的时候将结果赋值给该值
+    generatedContent.value = newContent
   }
 })
 </script>
