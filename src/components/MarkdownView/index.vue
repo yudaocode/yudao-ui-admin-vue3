@@ -1,10 +1,9 @@
 <template>
-<!--  <div ref="contentRef" class="markdown-view" v-html="contentHtml"></div>-->
   <div ref="contentRef" class="markdown-view" v-html="renderedMarkdown"></div>
 </template>
 
 <script setup lang="ts">
-import {useClipboard} from '@vueuse/core'
+import { useClipboard } from '@vueuse/core'
 import MarkdownIt from 'markdown-it'
 import 'highlight.js/styles/vs2015.min.css'
 import hljs from 'highlight.js'
@@ -20,7 +19,6 @@ const props = defineProps({
 const message = useMessage() // 消息弹窗
 const { copy } = useClipboard() // 初始化 copy 到粘贴板
 const contentRef = ref()
-const { content } = toRefs(props) // 将 props 变为引用类型
 
 const md = new MarkdownIt({
   highlight: function (str, lang) {
@@ -32,11 +30,12 @@ const md = new MarkdownIt({
     }
     return ``
   }
-});
+})
 
+/** 渲染 markdown */
 const renderedMarkdown = computed(() => {
-  return md.render(props.content);
-});
+  return md.render(props.content)
+})
 
 /** 初始化 **/
 onMounted(async () => {
