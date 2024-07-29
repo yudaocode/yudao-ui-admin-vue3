@@ -67,10 +67,11 @@ export enum AiWriteTypeEnum {
 // 表格展示对照map
 export const AiWriteTypeTableRender = {
   [AiWriteTypeEnum.WRITING]: '撰写',
-  [AiWriteTypeEnum.REPLY]: '回复',
+  [AiWriteTypeEnum.REPLY]: '回复'
 }
 
 // ========== 【图片 UI】相关的枚举 ==========
+
 export const ImageHotWords = [
   '中国旗袍',
   '古装美女',
@@ -414,8 +415,11 @@ export const WriteExample = {
     data: '您的请假申请已收悉，经核实和考虑，暂时无法批准您的请假申请。\n\n如有特殊情况或紧急事务，请及时与我联系。\n\n祝工作顺利。\n\n谢谢。'
   }
 }
+
+// ========== 【思维导图 UI】相关的枚举 ==========
+
 /** 思维导图已有内容生成示例 **/
-export const MindmapExitExample = `# Java 技术栈
+export const MindMapContentExample = `# Java 技术栈
 
 ## 核心技术
 ### Java SE

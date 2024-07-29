@@ -5,7 +5,6 @@ import { config } from '@/config/axios/config'
 export interface AiMindMapGenerateReqVO {
   prompt: string
 }
-//
 
 export const AiMindMapApi = {
   generateMindMap: ({

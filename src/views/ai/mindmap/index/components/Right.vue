@@ -1,7 +1,7 @@
 <template>
   <el-card class="my-card h-full flex-grow">
-    <template #header
-      ><h3 class="m-0 px-7 shrink-0 flex items-center justify-between">
+    <template #header>
+      <h3 class="m-0 px-7 shrink-0 flex items-center justify-between">
         <span>思维导图预览</span>
         <!-- 展示在右上角 -->
         <el-button type="primary" v-show="isEnd" @click="downloadImage" size="small">
@@ -10,13 +10,13 @@
           </template>
           下载图片
         </el-button>
-      </h3></template
-    >
+      </h3>
+    </template>
 
     <div ref="contentRef" class="hide-scroll-bar h-full box-border">
-      <!--展示markdown的容器，最终生成的是html字符串，直接用v-html嵌入-->
+      <!--展示 markdown 的容器，最终生成的是 html 字符串，直接用 v-html 嵌入-->
       <div v-if="isGenerating" ref="mdContainerRef" class="wh-full overflow-y-auto">
-        <div  class="flex flex-col items-center justify-center" v-html="html"></div>
+        <div class="flex flex-col items-center justify-center" v-html="html"></div>
       </div>
 
       <div ref="mindmapRef" class="wh-full">
@@ -34,23 +34,24 @@ import { Toolbar } from 'markmap-toolbar'
 import markdownit from 'markdown-it'
 
 const md = markdownit()
+const message = useMessage() // 消息弹窗
+
+// TODO @hhero：mindmap 改成 mindMap 更精准哈
 const props = defineProps<{
-  mindmapResult: string // 生成结果
+  mindmapResult: string // 生成结果 TODO @hhero 改成 generatedContent 会不会好点
   isEnd: boolean // 是否结束
   isGenerating: boolean // 是否正在生成
-  isStart: boolean // 开始状态，开始时需要清除html
+  isStart: boolean // 开始状态，开始时需要清除 html
 }>()
 const contentRef = ref<HTMLDivElement>() // 右侧出来header以下的区域
-const mdContainerRef = ref<HTMLDivElement>() // markdown的容器，用来滚动到底下的
+const mdContainerRef = ref<HTMLDivElement>() // markdown 的容器，用来滚动到底下的
 const mindmapRef = ref<HTMLDivElement>() // 思维导图的容器
-const svgRef = ref<SVGElement>() // 思维导图的渲染svg
+const svgRef = ref<SVGElement>() // 思维导图的渲染 svg
 const toolBarRef = ref<HTMLDivElement>() // 思维导图右下角的工具栏，缩放等
 const html = ref('') // 生成过程中的文本
-const contentAreaHeight = ref(0) // 生成区域的高度，出去header部分
+const contentAreaHeight = ref(0) // 生成区域的高度，出去 header 部分
 let markMap: Markmap | null = null
 const transformer = new Transformer()
-
-const message = useMessage()
 
 onMounted(() => {
   contentAreaHeight.value = contentRef.value?.clientHeight || 0 // 获取区域高度
@@ -66,11 +67,11 @@ onMounted(() => {
 })
 
 watch(props, ({ mindmapResult, isGenerating, isEnd, isStart }) => {
-  // 开始生成的时候清空一下markdown的内容
+  // 开始生成的时候清空一下 markdown 的内容
   if (isStart) {
     html.value = ''
   }
-  // 生成内容的时候使用markdown来渲染
+  // 生成内容的时候使用 markdown 来渲染
   if (isGenerating) {
     html.value = md.render(mindmapResult)
   }
@@ -79,6 +80,7 @@ watch(props, ({ mindmapResult, isGenerating, isEnd, isStart }) => {
   }
 })
 
+/** 更新思维导图的展示 */
 const update = () => {
   try {
     const { root } = transformer.transform(processContent(props.mindmapResult))
@@ -89,7 +91,8 @@ const update = () => {
   }
 }
 
-const processContent = (text) => {
+/** 处理内容 */
+const processContent = (text: string) => {
   const arr: string[] = []
   const lines = text.split('\n')
   for (let line of lines) {
@@ -101,6 +104,9 @@ const processContent = (text) => {
   }
   return arr.join('\n')
 }
+
+/** 下载图片 */
+// TODO @hhhero：可以抽到 download 这个里面，src/utils/download.ts 么？复用 image 方法？
 // download SVG to png file
 const downloadImage = () => {
   const svgElement = mindmapRef.value
@@ -121,7 +127,7 @@ const downloadImage = () => {
   image.onload = function () {
     context?.drawImage(image, 0, 0)
     const a = document.createElement('a')
-    a.download = 'ruoyi-mindmap.png'
+    a.download = 'mindmap.png'
     a.href = canvas.toDataURL(`image/png`)
     a.click()
   }
