@@ -15,6 +15,11 @@ export default defineComponent({
     value: {
       type: [String, Number, Boolean, Array],
       required: true
+    },
+    // 字符串分隔符 只有当 props.value 传入值为字符串时有效
+    sepSymbol: {
+      type: String as PropType<string>,
+      default: ','
     }
   },
   setup(props) {
@@ -23,9 +28,9 @@ export default defineComponent({
       if (isNumber(props.value)) {
         return [String(props.value)]
       }
-      // 2.是字符串（进一步判断是否有','）
+      // 2.是字符串（进一步判断是否有包含分隔符号 -> props.sepSymbol ）
       else if (isString(props.value)) {
-        return props.value.includes(',') ? props.value.split(',') : [String(props.value)]
+        return props.value.split(props.sepSymbol)
       }
       // 3.数组
       else if (isArray(props.value)) {
