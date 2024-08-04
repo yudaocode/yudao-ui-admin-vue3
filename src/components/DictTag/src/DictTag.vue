@@ -20,6 +20,11 @@ export default defineComponent({
     sepSymbol: {
       type: String as PropType<string>,
       default: ','
+    },
+    // 每个tag之间的间隔，默认为5px
+    tagSpacing: {
+      type: String as PropType<string>,
+      default: '5px'
     }
   },
   setup(props) {
@@ -49,7 +54,15 @@ export default defineComponent({
       const dictOptions = getDictOptions(props.type)
 
       return (
-        <div class="dict-tag">
+        <div
+          class="dict-tag"
+          style={{
+            display: 'flex',
+            gap: props.tagSpacing,
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
+        >
           {dictOptions.map((dict: DictDataType) => {
             if (valueArr.value.includes(dict.value)) {
               if (dict.colorType + '' === 'primary' || dict.colorType + '' === 'default') {
