@@ -1,8 +1,9 @@
 <script lang="tsx">
-import { defineComponent, PropType, ref } from 'vue'
+import { defineComponent, PropType, computed } from 'vue'
 import { isHexColor } from '@/utils/color'
 import { ElTag } from 'element-plus'
 import { DictDataType, getDictOptions } from '@/utils/dict'
+import { isArray, isString, isNumber } from '@/utils/is'
 
 export default defineComponent({
   name: 'DictTag',
@@ -12,46 +13,75 @@ export default defineComponent({
       required: true
     },
     value: {
-      type: [String, Number, Boolean] as PropType<string | number | boolean>,
+      type: [String, Number, Boolean, Array],
       required: true
+    },
+    // 字符串分隔符 只有当 props.value 传入值为字符串时有效
+    sepSymbol: {
+      type: String as PropType<string>,
+      default: ','
+    },
+    // 每个tag之间的间隔，默认为5px
+    tagSpacing: {
+      type: String as PropType<string>,
+      default: '5px'
     }
   },
   setup(props) {
-    const dictData = ref<DictDataType>()
-    const getDictObj = (dictType: string, value: string) => {
-      const dictOptions = getDictOptions(dictType)
-      dictOptions.forEach((dict: DictDataType) => {
-        if (dict.value === value) {
-          if (dict.colorType + '' === 'default') {
-            dict.colorType = 'info'
-          }
-          dictData.value = dict
-        }
-      })
-    }
+    const valueArr: any = computed(() => {
+      // 1.是Number类型的情况
+      if (isNumber(props.value)) {
+        return [String(props.value)]
+      }
+      // 2.是字符串（进一步判断是否有包含分隔符号 -> props.sepSymbol ）
+      else if (isString(props.value)) {
+        return props.value.split(props.sepSymbol)
+      }
+      // 3.数组
+      else if (isArray(props.value)) {
+        return props.value.map(String)
+      }
+      return []
+    })
     const rederDictTag = () => {
       if (!props.type) {
         return null
       }
       // 解决自定义字典标签值为零时标签不渲染的问题
-      if (props.value === undefined || props.value === null) {
+      if (props.value === undefined || props.value === null || props.value === '') {
         return null
       }
-      getDictObj(props.type, props.value.toString())
-      // 添加标签的文字颜色为白色，解决自定义背景颜色时标签文字看不清的问题
+      const dictOptions = getDictOptions(props.type)
+
       return (
-        <ElTag
-          style={dictData.value?.cssClass ? 'color: #fff' : ''}
-          type={dictData.value?.colorType}
-          color={
-            dictData.value?.cssClass && isHexColor(dictData.value?.cssClass)
-              ? dictData.value?.cssClass
-              : ''
-          }
-          disableTransitions={true}
+        <div
+          class="dict-tag"
+          style={{
+            display: 'flex',
+            gap: props.tagSpacing,
+            justifyContent: 'center',
+            alignItems: 'center'
+          }}
         >
-          {dictData.value?.label}
-        </ElTag>
+          {dictOptions.map((dict: DictDataType) => {
+            if (valueArr.value.includes(dict.value)) {
+              if (dict.colorType + '' === 'primary' || dict.colorType + '' === 'default') {
+                dict.colorType = ''
+              }
+              return (
+                // 添加标签的文字颜色为白色，解决自定义背景颜色时标签文字看不清的问题
+                <ElTag
+                  style={dict?.cssClass ? 'color: #fff' : ''}
+                  type={dict?.colorType}
+                  color={dict?.cssClass && isHexColor(dict?.cssClass) ? dict?.cssClass : ''}
+                  disableTransitions={true}
+                >
+                  {dict?.label}
+                </ElTag>
+              )
+            }
+          })}
+        </div>
       )
     }
     return () => rederDictTag()
