@@ -1,6 +1,6 @@
 import request from '@/config/axios'
 
-export const getProcessDefinition = async (id: number, key: string) => {
+export const getProcessDefinition = async (id?: string, key?: string) => {
   return await request.get({
     url: '/bpm/process-definition/get',
     params: { id, key }

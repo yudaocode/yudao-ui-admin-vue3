@@ -35,10 +35,10 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="操作模块" prop="subType">
+      <el-form-item label="操作名" prop="subType">
         <el-input
           v-model="queryParams.subType"
-          placeholder="请输入操作模块"
+          placeholder="请输入操作名"
           clearable
           @keyup.enter="handleQuery"
           class="!w-240px"
@@ -105,7 +105,7 @@
         :formatter="dateFormatter"
       />
       <el-table-column label="业务编号" align="center" prop="bizId" width="120" />
-      <el-table-column label="IP" align="center" prop="userIp" width="120" />
+      <el-table-column label="操作 IP" align="center" prop="userIp" width="120" />
       <el-table-column label="操作" align="center" fixed="right" width="60">
         <template #default="scope">
           <el-button

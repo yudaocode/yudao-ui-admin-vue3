@@ -341,7 +341,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuAdd',
         meta: {
-          noCache: true,
+          noCache: false, // 需要缓存
           hidden: true,
           canTo: true,
           icon: 'ep:edit',

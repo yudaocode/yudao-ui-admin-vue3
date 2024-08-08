@@ -22,8 +22,8 @@ export default defineComponent({
       const dictOptions = getDictOptions(dictType)
       dictOptions.forEach((dict: DictDataType) => {
         if (dict.value === value) {
-          if (dict.colorType + '' === 'primary' || dict.colorType + '' === 'default') {
-            dict.colorType = ''
+          if (dict.colorType + '' === 'default') {
+            dict.colorType = 'info'
           }
           dictData.value = dict
         }
