@@ -17,12 +17,12 @@ export default defineComponent({
       required: true
     },
     // 字符串分隔符 只有当 props.value 传入值为字符串时有效
-    sepSymbol: {
+    separator: {
       type: String as PropType<string>,
       default: ','
     },
-    // 每个tag之间的间隔，默认为5px
-    tagSpacing: {
+    // 每个 tag 之间的间隔，默认为 5px，参考的 el-row 的 gutter
+    gutter: {
       type: String as PropType<string>,
       default: '5px'
     }
@@ -35,7 +35,7 @@ export default defineComponent({
       }
       // 2.是字符串（进一步判断是否有包含分隔符号 -> props.sepSymbol ）
       else if (isString(props.value)) {
-        return props.value.split(props.sepSymbol)
+        return props.value.split(props.separator)
       }
       // 3.数组
       else if (isArray(props.value)) {
@@ -43,7 +43,7 @@ export default defineComponent({
       }
       return []
     })
-    const rederDictTag = () => {
+    const renderDictTag = () => {
       if (!props.type) {
         return null
       }
@@ -58,7 +58,7 @@ export default defineComponent({
           class="dict-tag"
           style={{
             display: 'flex',
-            gap: props.tagSpacing,
+            gap: props.gutter,
             justifyContent: 'center',
             alignItems: 'center'
           }}
@@ -84,7 +84,7 @@ export default defineComponent({
         </div>
       )
     }
-    return () => rederDictTag()
+    return () => renderDictTag()
   }
 })
 </script>
