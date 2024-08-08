@@ -47,10 +47,10 @@
           <el-form-item label="抄送人" prop="copyUserIds">
             <el-select v-model="auditForms[index].copyUserIds" multiple placeholder="请选择抄送人">
               <el-option
-                v-for="item in userOptions"
-                :key="item.id"
-                :label="item.nickname"
-                :value="item.id"
+                v-for="itemx in userOptions"
+                :key="itemx.id"
+                :label="itemx.nickname"
+                :value="itemx.id"
               />
             </el-select>
           </el-form-item>
