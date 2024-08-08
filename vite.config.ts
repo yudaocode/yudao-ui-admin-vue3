@@ -71,7 +71,14 @@ export default ({ command, mode }: ConfigEnv): UserConfig => {
           drop_debugger: env.VITE_DROP_DEBUGGER === 'true',
           drop_console: env.VITE_DROP_CONSOLE === 'true'
         }
-      }
+      },
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            echarts: ['echarts'] // 将 echarts 单独打包，参考 https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues/IAB1SX 讨论
+          }
+        },
+      },
     },
     optimizeDeps: { include, exclude }
   }
