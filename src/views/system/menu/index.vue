@@ -84,9 +84,18 @@
       <el-table-column :show-overflow-tooltip="true" label="权限标识" prop="permission" />
       <el-table-column :show-overflow-tooltip="true" label="组件路径" prop="component" />
       <el-table-column :show-overflow-tooltip="true" label="组件名称" prop="componentName" />
-      <el-table-column label="状态" prop="status" width="80">
+      <el-table-column label="状态" prop="status" width="160">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          <el-switch
+            class="ml-4px"
+            v-model="scope.row.status"
+            v-hasPermi="['system:menu:update']"
+            :active-value="CommonStatusEnum.ENABLE"
+            :inactive-value="CommonStatusEnum.DISABLE"
+            :loading="menuStatusUpdating[scope.row.id]"
+            @change="(val) => onMenuStatusChanged(scope.row, val as number)"
+          />
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作">
@@ -127,8 +136,10 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { handleTree } from '@/utils/tree'
 import * as MenuApi from '@/api/system/menu'
+import { MenuVO } from '@/api/system/menu'
 import MenuForm from './MenuForm.vue'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
+import { CommonStatusEnum } from '@/utils/constants'
 
 defineOptions({ name: 'SystemMenu' })
 
@@ -137,6 +148,7 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
+const menuStatusUpdating = ref({}) // 列表的加载中
 const list = ref<any>([]) // 列表的数据
 const queryParams = reactive({
   name: undefined,
@@ -206,6 +218,13 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+const onMenuStatusChanged = async (menu: MenuVO, val: number) => {
+  menuStatusUpdating.value[menu.id] = true
+  menu.status = val
+  await MenuApi.updateMenu(menu)
+  menuStatusUpdating.value[menu.id] = false
 }
 
 /** 初始化 **/
