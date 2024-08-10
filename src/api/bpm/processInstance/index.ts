@@ -1,4 +1,5 @@
 import request from '@/config/axios'
+import { ProcessDefinitionVO } from '@/api/bpm/model'
 
 export type Task = {
   id: string
@@ -18,17 +19,7 @@ export type ProcessInstanceVO = {
   businessKey: string
   createTime: string
   endTime: string
-}
-
-export type ProcessInstanceCopyVO = {
-  type: number
-  taskName: string
-  taskKey: string
-  processInstanceName: string
-  processInstanceKey: string
-  startUserId: string
-  options: string[]
-  reason: string
+  processDefinition?: ProcessDefinitionVO
 }
 
 export const getProcessInstanceMyPage = async (params: any) => {

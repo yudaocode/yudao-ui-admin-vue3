@@ -2,7 +2,7 @@ import request from '@/config/axios'
 
 // AI 聊天对话 VO
 export interface ChatConversationVO {
-  id: string // ID 编号
+  id: number // ID 编号
   userId: number // 用户编号
   title: string // 对话标题
   pinned: boolean // 是否置顶
@@ -12,6 +12,7 @@ export interface ChatConversationVO {
   temperature: number // 温度参数
   maxTokens: number // 单条回复的最大 Token 数量
   maxContexts: number // 上下文的最大 Message 数量
+  createTime?: Date // 创建时间
   // 额外字段
   systemMessage?: string // 角色设定
   modelName?: string // 模型名字
@@ -23,7 +24,7 @@ export interface ChatConversationVO {
 // AI 聊天对话 API
 export const ChatConversationApi = {
   // 获得【我的】聊天对话
-  getChatConversationMy: async (id: string) => {
+  getChatConversationMy: async (id: number) => {
     return await request.get({ url: `/ai/chat/conversation/get-my?id=${id}` })
   },
 
@@ -43,8 +44,8 @@ export const ChatConversationApi = {
   },
 
   // 删除【我的】所有对话，置顶除外
-  deleteMyAllExceptPinned: async () => {
-    return await request.delete({ url: `/ai/chat/conversation/delete-my-all-except-pinned` })
+  deleteChatConversationMyByUnpinned: async () => {
+    return await request.delete({ url: `/ai/chat/conversation/delete-by-unpinned` })
   },
 
   // 获得【我的】聊天对话列表

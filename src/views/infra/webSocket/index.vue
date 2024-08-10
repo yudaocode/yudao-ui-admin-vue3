@@ -29,8 +29,8 @@
         :autosize="{ minRows: 2, maxRows: 4 }"
         :disabled="!getIsOpen"
         clearable
-        type="textarea"
         placeholder="请输入你要发送的消息"
+        type="textarea"
       />
       <el-select v-model="sendUserId" class="mt-4" placeholder="请选择发送人">
         <el-option key="" label="所有人" value="" />
@@ -86,7 +86,7 @@ const getTagColor = computed(() => (getIsOpen.value ? 'success' : 'red')) // Web
 
 /** 发起 WebSocket 连接 */
 const { status, data, send, close, open } = useWebSocket(server.value, {
-  autoReconnect: false,
+  autoReconnect: true,
   heartbeat: true
 })
 

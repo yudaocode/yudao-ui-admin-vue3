@@ -186,7 +186,7 @@ const getOrderCountTrendComparison = async (
     dates.push(item.value.date)
     if (series.length === 2) {
       series[0].data.push(fenToYuan(item?.value?.orderPayPrice || 0)) // 当前金额
-      series[1].data.push(fenToYuan(item?.value?.orderPayCount || 0)) // 当前数量
+      series[1].data.push(item?.value?.orderPayCount || 0) // 当前数量
     } else {
       series[0].data.push(fenToYuan(item?.reference?.orderPayPrice || 0)) // 对照金额
       series[1].data.push(fenToYuan(item?.value?.orderPayPrice || 0)) // 当前金额

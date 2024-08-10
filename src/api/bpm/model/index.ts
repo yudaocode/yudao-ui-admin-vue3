@@ -5,6 +5,7 @@ export type ProcessDefinitionVO = {
   version: number
   deploymentTIme: string
   suspensionState: number
+  formType?: number
 }
 
 export type ModelVO = {

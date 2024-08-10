@@ -90,6 +90,11 @@ export default defineComponent({
           backgroundColor="var(--left-menu-bg-color)"
           textColor="var(--left-menu-text-color)"
           activeTextColor="var(--left-menu-text-active-color)"
+          popperClass={
+            unref(menuMode) === 'vertical'
+              ? `${prefixCls}-popper--vertical`
+              : `${prefixCls}-popper--horizontal`
+          }
           onSelect={menuSelect}
         >
           {{

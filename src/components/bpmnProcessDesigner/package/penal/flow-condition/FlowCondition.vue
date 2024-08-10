@@ -129,7 +129,7 @@ const updateFlowType = (flowType) => {
       conditionExpression: null
     })
     bpmnInstances().modeling.updateProperties(toRaw(bpmnElementSource.value), {
-      default: bpmnElement.value
+      default: toRaw(bpmnElement.value)
     })
     return
   }

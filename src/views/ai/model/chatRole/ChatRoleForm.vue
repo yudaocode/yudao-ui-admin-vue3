@@ -13,7 +13,7 @@
       <el-form-item label="角色头像" prop="avatar">
         <UploadImg v-model="formData.avatar" height="60px" width="60px" />
       </el-form-item>
-      <el-form-item label="绑定模型" prop="modelId" v-if="!isUser(formType)">
+      <el-form-item label="绑定模型" prop="modelId" v-if="!isUser">
         <el-select v-model="formData.modelId" placeholder="请选择模型" clearable>
           <el-option
             v-for="chatModel in chatModelList"
@@ -23,7 +23,7 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="角色类别" prop="category" v-if="!isUser(formType)">
+      <el-form-item label="角色类别" prop="category" v-if="!isUser">
         <el-input v-model="formData.category" placeholder="请输入角色类别" />
       </el-form-item>
       <el-form-item label="角色描述" prop="description">
@@ -32,7 +32,7 @@
       <el-form-item label="角色设定" prop="systemMessage">
         <el-input type="textarea" v-model="formData.systemMessage" placeholder="请输入角色设定" />
       </el-form-item>
-      <el-form-item label="是否公开" prop="publicStatus" v-if="!isUser(formType)">
+      <el-form-item label="是否公开" prop="publicStatus" v-if="!isUser">
         <el-radio-group v-model="formData.publicStatus">
           <el-radio
             v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
@@ -43,10 +43,10 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="角色排序" prop="sort" v-if="!isUser(formType)">
+      <el-form-item label="角色排序" prop="sort" v-if="!isUser">
         <el-input-number v-model="formData.sort" placeholder="请输入角色排序" class="!w-1/1" />
       </el-form-item>
-      <el-form-item label="开启状态" prop="status" v-if="!isUser(formType)">
+      <el-form-item label="开启状态" prop="status" v-if="!isUser">
         <el-radio-group v-model="formData.status">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -69,6 +69,7 @@ import { getIntDictOptions, getBoolDictOptions, DICT_TYPE } from '@/utils/dict'
 import { ChatRoleApi, ChatRoleVO } from '@/api/ai/model/chatRole'
 import { CommonStatusEnum } from '@/utils/constants'
 import { ChatModelApi, ChatModelVO } from '@/api/ai/model/chatModel'
+import {FormRules} from "element-plus";
 
 /** AI 聊天角色 表单 */
 defineOptions({ name: 'ChatRoleForm' })
@@ -92,30 +93,23 @@ const formData = ref({
   publicStatus: true,
   status: CommonStatusEnum.ENABLE
 })
-const formRules = ref() // reactive(formRulesObj)
 const formRef = ref() // 表单 Ref
 const chatModelList = ref([] as ChatModelVO[]) // 聊天模型列表
 
 /** 是否【我】自己创建，私有角色 */
-// TODO @fan：建议改成计算函数 computed
-const isUser = (type: string) => {
-  return type === 'my-create' || type === 'my-update'
-}
+const isUser = computed(() => {
+  return formType.value === 'my-create' || formType.value === 'my-update'
+})
 
-// TODO @fan：直接使用 formRules；只要隐藏掉的字段，它是不会校验的哈；
-const getFormRules = async (type: string) => {
-  let formRulesObj = {
-    name: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }],
-    avatar: [{ required: true, message: '角色头像不能为空', trigger: 'blur' }],
-    category: [{ required: true, message: '角色类别不能为空', trigger: 'blur' }],
-    sort: [{ required: true, message: '角色排序不能为空', trigger: 'blur' }],
-    description: [{ required: true, message: '角色描述不能为空', trigger: 'blur' }],
-    systemMessage: [{ required: true, message: '角色设定不能为空', trigger: 'blur' }],
-    publicStatus: [{ required: true, message: '是否公开不能为空', trigger: 'blur' }]
-  }
-
-  formRules.value = reactive(formRulesObj)
-}
+const formRules = reactive<FormRules>({
+  name: [{ required: true, message: '角色名称不能为空', trigger: 'blur' }],
+  avatar: [{ required: true, message: '角色头像不能为空', trigger: 'blur' }],
+  category: [{ required: true, message: '角色类别不能为空', trigger: 'blur' }],
+  sort: [{ required: true, message: '角色排序不能为空', trigger: 'blur' }],
+  description: [{ required: true, message: '角色描述不能为空', trigger: 'blur' }],
+  systemMessage: [{ required: true, message: '角色设定不能为空', trigger: 'blur' }],
+  publicStatus: [{ required: true, message: '是否公开不能为空', trigger: 'blur' }]
+})
 
 /** 打开弹窗 */
 // TODO @fan：title 是不是收敛到 type 判断生成 title，会更合理
@@ -123,7 +117,6 @@ const open = async (type: string, id?: number, title?: string) => {
   dialogVisible.value = true
   dialogTitle.value = title || t('action.' + type)
   formType.value = type
-  getFormRules(type)
   resetForm()
   // 修改时，设置数据
   if (id) {

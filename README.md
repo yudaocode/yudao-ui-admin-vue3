@@ -54,17 +54,16 @@
 
 推荐 VS Code 开发，配合插件如下：
 
-| 插件名                           | 功能                       |
-|-------------------------------|--------------------------|
-| TypeScript Vue Plugin (Volar) | 用于 TypeScript 的 Vue 插件  |
-| Vue Language Features (Volar) | Vue3.0 语法支持              |
-| unocss                        | unocss for vscode           |
-| Iconify IntelliSense          | Iconify 预览和搜索           |
-| i18n Ally                     | 国际化智能提示               |
-| Stylelint                     | Css    格式化               |
-| Prettier                      | 代码格式化                   |
-| ESLint                        | 脚本代码检查                  |
-| DotENV                        | env 文件高亮                 |
+| 插件名                           | 功能                  |
+|-------------------------------|---------------------|
+| Vue - Official                | Vue 与 TypeScript 支持 |
+| unocss                        | unocss for vscode   |
+| Iconify IntelliSense          | Iconify 预览和搜索       |
+| i18n Ally                     | 国际化智能提示             |
+| Stylelint                     | Css    格式化          |
+| Prettier                      | 代码格式化               |
+| ESLint                        | 脚本代码检查              |
+| DotENV                        | env 文件高亮            |
 
 ## 🔥 后端架构
 
@@ -192,25 +191,23 @@ ps：核心功能已经实现，正在对接微信小程序中...
 
 ### 商城系统
 
+演示地址：<https://doc.iocoder.cn/mall-preview/>
+
 ![功能图](/.image/common/mall-feature.png)
 
 ![功能图](/.image/common/mall-preview.png)
 
-_前端基于 crmeb uniapp 经过授权重构，优化代码实现，接入芋道快速开发平台_
-
-演示地址：<https://doc.iocoder.cn/mall-preview/>
-
 ### ERP 系统
-
-![功能图](/.image/common/erp-feature.png)
 
 演示地址：<https://doc.iocoder.cn/erp-preview/>
 
+![功能图](/.image/common/erp-feature.png)
+
 ### CRM 系统
 
-![功能图](/.image/common/crm-feature.png)
-
 演示地址：<https://doc.iocoder.cn/crm-preview/>
+
+![功能图](/.image/common/crm-feature.png)
 
 ## 🐷 演示图
 

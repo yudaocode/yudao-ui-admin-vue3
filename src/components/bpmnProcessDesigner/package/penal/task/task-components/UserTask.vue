@@ -135,6 +135,7 @@ import * as PostApi from '@/api/system/post'
 import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
 import ProcessExpressionDialog from './ProcessExpressionDialog.vue'
+import { ProcessExpressionVO } from '@/api/bpm/processExpression'
 
 defineOptions({ name: 'UserTask' })
 const props = defineProps({
@@ -197,8 +198,9 @@ const processExpressionDialogRef = ref()
 const openProcessExpressionDialog = async () => {
   processExpressionDialogRef.value.open()
 }
-const selectProcessExpression = (expression) => {
+const selectProcessExpression = (expression: ProcessExpressionVO) => {
   userTaskForm.value.candidateParam = [expression.expression]
+  updateElementTask()
 }
 
 watch(
