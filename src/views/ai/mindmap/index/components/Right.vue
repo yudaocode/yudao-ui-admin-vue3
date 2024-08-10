@@ -43,7 +43,7 @@ const props = defineProps<{
   isGenerating: boolean // 是否正在生成
   isStart: boolean // 开始状态，开始时需要清除 html
 }>()
-const contentRef = ref<HTMLDivElement>() // 右侧出来header以下的区域
+const contentRef = ref<HTMLDivElement>() // 右侧出来 header 以下的区域
 const mdContainerRef = ref<HTMLDivElement>() // markdown 的容器，用来滚动到底下的
 const mindMapRef = ref<HTMLDivElement>() // 思维导图的容器
 const svgRef = ref<SVGElement>() // 思维导图的渲染 svg
@@ -106,8 +106,7 @@ const processContent = (text: string) => {
   return arr.join('\n')
 }
 
-/** 下载图片 */
-// download SVG to png file
+/** 下载图片：download SVG to png file */
 const downloadImage = () => {
   const svgElement = mindMapRef.value
   // 将 SVG 渲染到图片对象

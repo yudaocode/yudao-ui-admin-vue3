@@ -70,8 +70,9 @@
         width="180px"
       />
       <el-table-column label="错误信息" align="center" prop="errorMessage" />
-      <el-table-column label="操作" align="center" width="100" fixed="right">
+      <el-table-column label="操作" align="center" width="120" fixed="right">
         <template #default="scope">
+          <el-button link type="primary" @click="openPreview(scope.row)"> 预览 </el-button>
           <el-button
             link
             type="danger"
@@ -91,12 +92,24 @@
       @pagination="getList"
     />
   </ContentWrap>
+
+  <!-- 思维导图的预览 -->
+  <el-drawer v-model="previewVisible" :with-header="false" size="800px">
+    <Right
+      ref="rightRef"
+      :generatedContent="previewContent"
+      :isEnd="true"
+      :isGenerating="false"
+      :isStart="false"
+    />
+  </el-drawer>
 </template>
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
 import { AiMindMapApi, MindMapVO } from '@/api/ai/mindmap'
 import * as UserApi from '@/api/system/user'
+import Right from '@/views/ai/mindmap/index/components/Right.vue'
 
 /** AI 思维导图 列表 */
 defineOptions({ name: 'AiMindMapManager' })
@@ -152,6 +165,15 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+// TODO 芋艿：预览会报错
+/** 预览操作按钮 */
+const previewVisible = ref(false)
+const previewContent = ref('')
+const openPreview = (row: MindMapVO) => {
+  previewContent.value = row.generatedContent
+  previewVisible.value = true
 }
 
 /** 初始化 **/
