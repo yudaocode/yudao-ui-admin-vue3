@@ -94,9 +94,16 @@
   </ContentWrap>
 
   <!-- 思维导图的预览 -->
-  <el-drawer v-model="previewVisible" :with-header="false" size="800px">
+  <el-drawer
+    v-model="previewVisible"
+    :with-header="false"
+    size="800px"
+    @opened="openedHandler"
+    @close="closeHandler"
+  >
     <Right
       ref="rightRef"
+      v-if="drawerOpened"
       :generatedContent="previewContent"
       :isEnd="true"
       :isGenerating="false"
@@ -167,13 +174,20 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-// TODO 芋艿：预览会报错
 /** 预览操作按钮 */
 const previewVisible = ref(false)
 const previewContent = ref('')
 const openPreview = (row: MindMapVO) => {
   previewContent.value = row.generatedContent
   previewVisible.value = true
+}
+
+const drawerOpened = ref(false) // drawer组件是否完全展开
+const openedHandler = () => { // drawer完全打开时再渲染预览组件
+  drawerOpened.value = true
+}
+const closeHandler = () => { // drawer关闭时回调，更改一下drawerOpened的值为false
+  drawerOpened.value = false
 }
 
 /** 初始化 **/
