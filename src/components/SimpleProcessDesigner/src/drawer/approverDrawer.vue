@@ -162,7 +162,7 @@
           </el-form>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="设置字段权限" v-if ="formType === 10">
+      <el-tab-pane label="设置字段权限" v-if="formType === 10">
         <div class="field-setting-pane h-full w-full flex flex-col">
           <div class="field-setting-content mr-2 overflow-auto py-4 pr-2">
             <div class="field-container flex flex-col flex-items-start">
@@ -324,12 +324,12 @@ const changecandidateStrategy = () => {
   candidateConfig.value.candidateParam = []
 }
 const handleAllCheck = (event, type) => {
-  console.log('event', event);
-  console.log('type', type);
-  event.target.checked = true;  
+  console.log('event', event)
+  console.log('type', type)
+  event.target.checked = true
   let permission = '1'
   if (type === 'edit' && editAllChecked.value) {
-    permission = '1'
+    permission = '1' // TODO @jaosn：这个要不要用枚举里的哈
   }
   if (type === 'read' && readAllChecked.value) {
     permission = '2'
@@ -344,7 +344,7 @@ const handleAllCheck = (event, type) => {
 onMounted(async () => {
   // 获得角色列表
   roleOptions.value = await RoleApi.getSimpleRoleList()
-
+  // 获得岗位列表
   postOptions.value = await PostApi.getSimplePostList()
   // 获得用户列表
   userOptions.value = await UserApi.getSimpleUserList()

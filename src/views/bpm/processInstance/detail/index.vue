@@ -56,12 +56,14 @@
           </el-form-item>
         </el-form>
         <div style="margin-bottom: 20px; margin-left: 10%; font-size: 14px">
+          <!-- TODO @jason：建议搞个 if 来判断，替代现有的 !item.buttonsSetting || item.buttonsSetting[OpsButtonType.APPROVE]?.enable -->
           <el-button
             type="success"
             v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.APPROVE]?.enable"
             @click="handleAudit(item, true)"
           >
             <Icon icon="ep:select" />
+            <!-- TODO @jason：这个也是类似哈，搞个方法来生成名字 -->
             {{
               item.buttonsSetting?.[OpsButtonType.APPROVE]?.displayName ||
               OPERATION_BUTTON_NAME.get(OpsButtonType.APPROVE)

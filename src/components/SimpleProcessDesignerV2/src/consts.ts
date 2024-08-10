@@ -213,7 +213,7 @@ export type ButtonSetting = {
   enable: boolean
 }
 
-// 操作按钮类型枚举 (用于审批节点)
+// 操作按钮类型枚举 (用于审批节点) // TODO @jason：建议不缩写哈
 export enum OpsButtonType {
   /**
    * 通过

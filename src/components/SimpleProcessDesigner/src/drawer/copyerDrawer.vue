@@ -12,7 +12,12 @@
     <div>
       <el-form label-position="top" label-width="100px">
         <el-form-item label="选择抄送人" prop="candidateStrategy">
-          <el-select v-model="candidateConfig.candidateStrategy" style="width: 100%" clearable @change="changecandidateStrategy">
+          <el-select
+            v-model="candidateConfig.candidateStrategy"
+            style="width: 100%"
+            clearable
+            @change="changecandidateStrategy"
+          >
             <el-option
               v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY)"
               :key="dict.value"
@@ -160,7 +165,7 @@ const deptTreeOptions = ref() // 部门树
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
 const candidateConfig = ref({
   candidateStrategy: undefined,
-  candidateParam: [],
+  candidateParam: []
 })
 const store = useWorkFlowStoreWithOut()
 const { setCopyerDrawer, setCopyerConfig } = store
@@ -178,30 +183,29 @@ const visible = computed({
 })
 watch(copyerConfig, (val) => {
   if (val.value.attributes) {
-    console.log('val.value.attributes', val.value.attributes);
+    console.log('val.value.attributes', val.value.attributes)
     candidateConfig.value.candidateStrategy = val.value.attributes.candidateStrategy
-    const candidateParamStr =  val.value.attributes.candidateParam;
-    if(val.value.attributes.candidateStrategy === 60) {
+    const candidateParamStr = val.value.attributes.candidateParam
+    if (val.value.attributes.candidateStrategy === 60) {
       candidateConfig.value.candidateParam = [candidateParamStr]
     } else {
-      if(candidateParamStr){
-        candidateConfig.value.candidateParam =  candidateParamStr.split(',').map((item) => +item)
+      if (candidateParamStr) {
+        candidateConfig.value.candidateParam = candidateParamStr.split(',').map((item) => +item)
       }
     }
-    
+
     // candidateConfig.value = val.value.attributes
   }
 })
 
-
 const saveConfig = () => {
   const rawConfig = toRaw(copyerConfig.value)
-  const { candidateStrategy , candidateParam} = toRaw(candidateConfig.value);
+  const { candidateStrategy, candidateParam } = toRaw(candidateConfig.value)
   const candidateParamStr = candidateParam.join(',')
   rawConfig.value.attributes = {
     candidateStrategy,
     candidateParam: candidateParamStr
-  } 
+  }
   rawConfig.flag = true
   // TODO 进行校验
   // setApproverConfig({
@@ -213,7 +217,7 @@ const saveConfig = () => {
   setCopyerConfig({
     value: rawConfig.value,
     flag: true,
-    id: copyerConfig.value.id,
+    id: copyerConfig.value.id
   })
   console.log('after is copyerConfig', copyerConfig.value)
   closeDrawer()
@@ -228,7 +232,7 @@ const changecandidateStrategy = () => {
 onMounted(async () => {
   // 获得角色列表
   roleOptions.value = await RoleApi.getSimpleRoleList()
-
+  // 获得岗位列表
   postOptions.value = await PostApi.getSimplePostList()
   // 获得用户列表
   userOptions.value = await UserApi.getSimpleUserList()

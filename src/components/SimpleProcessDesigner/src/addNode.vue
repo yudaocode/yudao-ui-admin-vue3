@@ -67,10 +67,10 @@ let props = defineProps({
     type: Object,
     default: () => ({})
   },
-  showAddButton:{
-    type:Boolean,
-    default:true
-  },
+  showAddButton: {
+    type: Boolean,
+    default: true
+  }
 })
 let emits = defineEmits(['update:childNodeP'])
 let visible = ref(false)
@@ -89,7 +89,7 @@ const addType = (type: number) => {
         approveMethod: undefined,
         candidateStrategy: undefined,
         candidateParam: undefined,
-        fieldsPermission: defaultFieldsPermission,
+        fieldsPermission: defaultFieldsPermission
       },
       childNode: props.childNodeP
     }
@@ -99,7 +99,7 @@ const addType = (type: number) => {
   if (type === NodeType.CC_USER_NODE) {
     const data = {
       name: '抄送人',
-      type: 2,
+      type: 2, // TODO @jason：这个要不要搞成枚举？NodeType 里貌似有枚举
       error: true,
       // 抄送节点配置
       attributes: {
@@ -161,7 +161,7 @@ const addType = (type: number) => {
         name: '并行分支_JOIN',
         type: 6,
         error: true,
-        childNode: props.childNodeP,
+        childNode: props.childNodeP
       }
     }
     emits('update:childNodeP', data)
@@ -190,7 +190,7 @@ const addType = (type: number) => {
         name: '包容分支_JOIN',
         type: 8,
         error: true,
-        childNode: props.childNodeP,
+        childNode: props.childNodeP
       }
     }
     emits('update:childNodeP', data)

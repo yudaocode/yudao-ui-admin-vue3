@@ -146,7 +146,7 @@ onMounted(async () => {
     processNodeTree.value = {
       name: '开始',
       type: NodeType.START_EVENT_NODE,
-      id: 'StartEvent_1',
+      id: 'StartEvent_1', // TODO @jason：这个我们要不要 StartEvent 哈？
       childNode: {
         id: 'EndEvent_1',
         name: '结束',
