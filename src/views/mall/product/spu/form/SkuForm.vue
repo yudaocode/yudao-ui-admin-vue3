@@ -1,6 +1,13 @@
 <!-- 商品发布 - 库存价格 -->
 <template>
-  <el-form ref="formRef" :disabled="isDetail" :model="formData" :rules="rules" label-width="120px">
+  <el-form
+    ref="formRef"
+    :disabled="isDetail"
+    :model="formData"
+    :rules="rules"
+    label-width="120px"
+    v-loading="formLoading"
+  >
     <el-form-item label="分销类型" props="subCommissionType">
       <el-radio-group
         v-model="formData.subCommissionType"
@@ -51,9 +58,14 @@
   </el-form>
 
   <!-- 商品属性添加 Form 表单 -->
-  <ProductPropertyAddForm ref="attributesAddFormRef" :propertyList="propertyList" />
+  <ProductPropertyAddForm
+    ref="attributesAddFormRef"
+    :propertyList="propertyList"
+    @success="getPropertyValueList"
+  />
 </template>
 <script lang="ts" setup>
+import * as PropertyApi from '@/api/mall/product/property'
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
@@ -94,7 +106,7 @@ const ruleConfig: RuleConfig[] = [
 ]
 
 const message = useMessage() // 消息弹窗
-
+const formLoading = ref(false)
 const props = defineProps({
   propFormData: {
     type: Object as PropType<Spu>,
@@ -183,5 +195,16 @@ const onChangeSpec = () => {
 /** 调用 SkuList generateTableData 方法*/
 const generateSkus = (propertyList: any[]) => {
   skuListRef.value.generateTableData(propertyList)
+}
+
+/* 获取属性值列表 */
+const getPropertyValueList = async (id, propertyId) => {
+  formLoading.value = true
+  try {
+    const data = await PropertyApi.getPropertyValuePage({ pageNo: 1, pageSize: 100, propertyId })
+    propertyList.value.find((item) => item.id === id).propertyOpts = data.list
+  } finally {
+    formLoading.value = false
+  }
 }
 </script>

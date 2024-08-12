@@ -24,7 +24,7 @@
       >
         <template #default="{ row }">
           <span style="font-weight: bold; color: #40aaff">
-            {{ row.properties[index]?.valueName }}
+            {{ row.properties?.[index]?.valueName }}
           </span>
         </template>
       </el-table-column>
@@ -168,7 +168,7 @@
       >
         <template #default="{ row }">
           <span style="font-weight: bold; color: #40aaff">
-            {{ row.properties[index]?.valueName }}
+            {{ row.properties?.[index]?.valueName }}
           </span>
         </template>
       </el-table-column>
@@ -248,7 +248,7 @@
       >
         <template #default="{ row }">
           <span style="font-weight: bold; color: #40aaff">
-            {{ row.properties[index]?.valueName }}
+            {{ row.properties?.[index]?.valueName }}
           </span>
         </template>
       </el-table-column>

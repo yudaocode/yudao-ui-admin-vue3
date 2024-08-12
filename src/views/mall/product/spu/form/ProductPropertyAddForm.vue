@@ -10,7 +10,22 @@
       @keydown.enter.prevent="submitForm"
     >
       <el-form-item label="属性名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入名称" />
+        <el-select
+          v-model="formData.name"
+          filterable
+          allow-create
+          default-first-option
+          :reserve-keyword="false"
+          placeholder="请选择属性名称"
+          style="width: 240px"
+        >
+          <el-option
+            v-for="item in attrOption"
+            :key="item.id"
+            :label="item.name"
+            :value="item.name"
+          />
+        </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -24,6 +39,7 @@ import * as PropertyApi from '@/api/mall/product/property'
 
 defineOptions({ name: 'ProductPropertyForm' })
 
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -37,6 +53,7 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const attributeList = ref([]) // 商品属性列表
+const attrOption = ref([]) // 属性名称下拉框
 const props = defineProps({
   propertyList: {
     type: Array,
@@ -59,6 +76,7 @@ watch(
 /** 打开弹窗 */
 const open = async () => {
   dialogVisible.value = true
+  getAttrOption()
   resetForm()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
@@ -80,6 +98,16 @@ const submitForm = async () => {
       ...formData.value,
       values: []
     })
+    // 判断最终提交的属性名称是否是选择的 自己手动输入的属性名称不执行emit
+    attrOption.value.forEach((item) => {
+      if (item.name === formData.value.name) {
+        emit('success', propertyId, item.id)
+        message.success(t('common.createSuccess'))
+        dialogVisible.value = false
+        // 中断循环
+        throw new Error()
+      }
+    })
     message.success(t('common.createSuccess'))
     dialogVisible.value = false
   } finally {
@@ -93,5 +121,16 @@ const resetForm = () => {
     name: ''
   }
   formRef.value?.resetFields()
+}
+
+/** 获取商品属性下拉选项 */
+const getAttrOption = async () => {
+  formLoading.value = true
+  try {
+    const data = await PropertyApi.getPropertyPage({ pageNo: 1, pageSize: 100 })
+    attrOption.value = data.list
+  } finally {
+    formLoading.value = false
+  }
 }
 </script>
