@@ -31,6 +31,7 @@
         class="!w-30"
         @blur="handleInputConfirm(index, item.id)"
         @keyup.enter="handleInputConfirm(index, item.id)"
+        @change="handleInputConfirm(index, item.id)"
       >
         <el-option
           v-for="item2 in item.propertyOpts"
@@ -39,7 +40,6 @@
           :value="item2.name"
         />
       </el-select>
-      <!-- <el-input :id="`input${index}`" v-model="inputValue" class="!w-20" /> -->
       <el-button
         v-show="!inputVisible(index)"
         class="button-new-tag ml-1"
@@ -54,7 +54,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ElInput } from 'element-plus'
 import * as PropertyApi from '@/api/mall/product/property'
 import { PropertyAndValues } from '@/views/mall/product/spu/components'
 import { propTypes } from '@/utils/propTypes'

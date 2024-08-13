@@ -201,6 +201,7 @@ const generateSkus = (propertyList: any[]) => {
 const getPropertyValueList = async (id, propertyId) => {
   formLoading.value = true
   try {
+    // TODO @芋艿：需要增加一个全列表接口
     const data = await PropertyApi.getPropertyValuePage({ pageNo: 1, pageSize: 100, propertyId })
     propertyList.value.find((item) => item.id === id).propertyOpts = data.list
   } finally {

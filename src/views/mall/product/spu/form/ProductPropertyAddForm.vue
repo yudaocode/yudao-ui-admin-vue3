@@ -99,15 +99,14 @@ const submitForm = async () => {
       values: []
     })
     // 判断最终提交的属性名称是否是选择的 自己手动输入的属性名称不执行emit
-    attrOption.value.forEach((item) => {
-      if (item.name === formData.value.name) {
-        emit('success', propertyId, item.id)
+    for (const element of attrOption.value) {
+      if (element.name === formData.value.name) {
+        emit('success', propertyId, element.id)
         message.success(t('common.createSuccess'))
         dialogVisible.value = false
-        // 中断循环
-        throw new Error()
+        return
       }
-    })
+    }
     message.success(t('common.createSuccess'))
     dialogVisible.value = false
   } finally {
@@ -127,6 +126,7 @@ const resetForm = () => {
 const getAttrOption = async () => {
   formLoading.value = true
   try {
+    // TODO @芋艿：需要增加一个全列表接口
     const data = await PropertyApi.getPropertyPage({ pageNo: 1, pageSize: 100 })
     attrOption.value = data.list
   } finally {
