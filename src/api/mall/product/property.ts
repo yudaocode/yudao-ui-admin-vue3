@@ -65,6 +65,11 @@ export const getPropertyPage = (params: PageParam) => {
   return request.get({ url: '/product/property/page', params })
 }
 
+// 获得属性项精简列表
+export const getPropertySimpleList = (): Promise<PropertyVO[]> => {
+  return request.get({ url: '/product/property/simple-list' })
+}
+
 // ------------------------ 属性值 -------------------
 
 // 获得属性值分页

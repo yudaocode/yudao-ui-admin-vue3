@@ -16,11 +16,11 @@
           allow-create
           default-first-option
           :reserve-keyword="false"
-          placeholder="请选择属性名称"
-          style="width: 240px"
+          placeholder="请选择属性名称。如果不存在，可手动输入选择"
+          class="!w-360px"
         >
           <el-option
-            v-for="item in attrOption"
+            v-for="item in attributeOptions"
             :key="item.id"
             :label="item.name"
             :value="item.name"
@@ -53,7 +53,7 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const attributeList = ref([]) // 商品属性列表
-const attrOption = ref([]) // 属性名称下拉框
+const attributeOptions = ref([] as PropertyApi.PropertyVO[]) // 商品属性名称下拉框
 const props = defineProps({
   propertyList: {
     type: Array,
@@ -76,13 +76,32 @@ watch(
 /** 打开弹窗 */
 const open = async () => {
   dialogVisible.value = true
-  getAttrOption()
   resetForm()
+  // 加载列表
+  await getAttributeOptions()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const submitForm = async () => {
+  // 情况一：如果是已存在的属性，直接结束，不提交表单新增
+  for (const option of attributeOptions.value) {
+    if (option.name === formData.value.name) {
+      // 添加到属性列表
+      attributeList.value.push({
+        id: option.id,
+        ...formData.value,
+        values: []
+      })
+      // 触发属性列表的加载
+      emit('success', option.id, option.id)
+      // 关闭弹窗
+      dialogVisible.value = false
+      return
+    }
+  }
+
+  // 情况二：如果是不存在的属性，则需要执行新增
   // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
@@ -98,15 +117,7 @@ const submitForm = async () => {
       ...formData.value,
       values: []
     })
-    // 判断最终提交的属性名称是否是选择的 自己手动输入的属性名称不执行emit
-    for (const element of attrOption.value) {
-      if (element.name === formData.value.name) {
-        emit('success', propertyId, element.id)
-        message.success(t('common.createSuccess'))
-        dialogVisible.value = false
-        return
-      }
-    }
+    // 关闭弹窗
     message.success(t('common.createSuccess'))
     dialogVisible.value = false
   } finally {
@@ -123,12 +134,10 @@ const resetForm = () => {
 }
 
 /** 获取商品属性下拉选项 */
-const getAttrOption = async () => {
+const getAttributeOptions = async () => {
   formLoading.value = true
   try {
-    // TODO @芋艿：需要增加一个全列表接口
-    const data = await PropertyApi.getPropertyPage({ pageNo: 1, pageSize: 100 })
-    attrOption.value = data.list
+    attributeOptions.value = await PropertyApi.getPropertySimpleList()
   } finally {
     formLoading.value = false
   }

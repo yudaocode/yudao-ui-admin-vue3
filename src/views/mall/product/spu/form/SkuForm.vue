@@ -197,6 +197,7 @@ const generateSkus = (propertyList: any[]) => {
   skuListRef.value.generateTableData(propertyList)
 }
 
+// TODO @GoldenZqqq：这里不建议使用 success 去刷新。而是改成点击【属性值】的【添加】后，进行加载列表。后端提供了 getPropertyValueSimpleList 接口哈。
 /* 获取属性值列表 */
 const getPropertyValueList = async (id, propertyId) => {
   formLoading.value = true

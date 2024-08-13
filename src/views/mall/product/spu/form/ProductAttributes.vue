@@ -122,6 +122,7 @@ const emit = defineEmits(['success']) // 定义 success 事件，用于操作成
 const handleInputConfirm = async (index: number, propertyId: number) => {
   if (inputValue.value) {
     // 重复添加校验
+    // TODO @芋艿：需要测试下
     if (isNumber(inputValue.value)) {
       if (attributeList.value[index].values?.some((item) => item.id === inputValue.value)) {
         message.warning('已存在相同属性值，请重试')
