@@ -29,15 +29,15 @@ export default defineComponent({
   },
   setup(props) {
     const valueArr: any = computed(() => {
-      // 1.是Number类型和Boolean类型的情况
+      // 1. 是 Number 类型和 Boolean 类型的情况
       if (isNumber(props.value) || isBoolean(props.value)) {
         return [String(props.value)]
       }
-      // 2.是字符串（进一步判断是否有包含分隔符号 -> props.sepSymbol ）
+      // 2. 是字符串（进一步判断是否有包含分隔符号 -> props.sepSymbol ）
       else if (isString(props.value)) {
         return props.value.split(props.separator)
       }
-      // 3.数组
+      // 3. 数组
       else if (isArray(props.value)) {
         return props.value.map(String)
       }
