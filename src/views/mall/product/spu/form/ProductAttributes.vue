@@ -18,16 +18,28 @@
       >
         {{ value.name }}
       </el-tag>
-      <el-input
-        v-show="inputVisible(index)"
+      <el-select
         :id="`input${index}`"
         :ref="setInputRef"
+        v-show="inputVisible(index)"
         v-model="inputValue"
-        class="!w-20"
+        filterable
+        allow-create
+        default-first-option
+        :reserve-keyword="false"
         size="small"
+        class="!w-30"
         @blur="handleInputConfirm(index, item.id)"
         @keyup.enter="handleInputConfirm(index, item.id)"
-      />
+        @change="handleInputConfirm(index, item.id)"
+      >
+        <el-option
+          v-for="item2 in item.propertyOpts"
+          :key="item2.id"
+          :label="item2.name"
+          :value="item2.id"
+        />
+      </el-select>
       <el-button
         v-show="!inputVisible(index)"
         class="button-new-tag ml-1"
@@ -42,10 +54,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ElInput } from 'element-plus'
 import * as PropertyApi from '@/api/mall/product/property'
 import { PropertyAndValues } from '@/views/mall/product/spu/components'
 import { propTypes } from '@/utils/propTypes'
+import { isNumber } from '@/utils/is'
 
 defineOptions({ name: 'ProductAttributes' })
 
@@ -109,6 +121,15 @@ const showInput = async (index) => {
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const handleInputConfirm = async (index: number, propertyId: number) => {
   if (inputValue.value) {
+    // 重复添加校验
+    if (isNumber(inputValue.value)) {
+      if (attributeList.value[index].values?.some((item) => item.id === inputValue.value)) {
+        message.warning('已存在相同属性值，请重试')
+        attributeIndex.value = null
+        inputValue.value = ''
+        return
+      }
+    }
     // 保存属性值
     try {
       const id = await PropertyApi.createPropertyValue({ propertyId, name: inputValue.value })
