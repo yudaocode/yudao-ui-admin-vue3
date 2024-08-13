@@ -57,7 +57,7 @@ export default defineComponent({
         <div
           class="dict-tag"
           style={{
-            display: 'flex',
+            display: 'inline-flex',
             gap: props.gutter,
             justifyContent: 'center',
             alignItems: 'center'
