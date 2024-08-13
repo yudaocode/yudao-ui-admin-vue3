@@ -3,7 +3,7 @@ import { defineComponent, PropType, computed } from 'vue'
 import { isHexColor } from '@/utils/color'
 import { ElTag } from 'element-plus'
 import { DictDataType, getDictOptions } from '@/utils/dict'
-import { isArray, isString, isNumber } from '@/utils/is'
+import { isArray, isString, isNumber, isBoolean } from '@/utils/is'
 
 export default defineComponent({
   name: 'DictTag',
@@ -29,8 +29,8 @@ export default defineComponent({
   },
   setup(props) {
     const valueArr: any = computed(() => {
-      // 1.是Number类型的情况
-      if (isNumber(props.value)) {
+      // 1.是Number类型和Boolean类型的情况
+      if (isNumber(props.value) || isBoolean(props.value)) {
         return [String(props.value)]
       }
       // 2.是字符串（进一步判断是否有包含分隔符号 -> props.sepSymbol ）
