@@ -37,7 +37,7 @@
           v-for="item2 in item.propertyOpts"
           :key="item2.id"
           :label="item2.name"
-          :value="item2.name"
+          :value="item2.id"
         />
       </el-select>
       <el-button
@@ -57,6 +57,7 @@
 import * as PropertyApi from '@/api/mall/product/property'
 import { PropertyAndValues } from '@/views/mall/product/spu/components'
 import { propTypes } from '@/utils/propTypes'
+import { isNumber } from '@/utils/is'
 
 defineOptions({ name: 'ProductAttributes' })
 
@@ -121,11 +122,13 @@ const emit = defineEmits(['success']) // 定义 success 事件，用于操作成
 const handleInputConfirm = async (index: number, propertyId: number) => {
   if (inputValue.value) {
     // 重复添加校验
-    if (attributeList.value[index].values.find((item) => item.name === inputValue.value)) {
-      message.warning('已存在相同属性值，请重试')
-      attributeIndex.value = null
-      inputValue.value = ''
-      return
+    if (isNumber(inputValue.value)) {
+      if (attributeList.value[index].values?.some((item) => item.id === inputValue.value)) {
+        message.warning('已存在相同属性值，请重试')
+        attributeIndex.value = null
+        inputValue.value = ''
+        return
+      }
     }
     // 保存属性值
     try {
