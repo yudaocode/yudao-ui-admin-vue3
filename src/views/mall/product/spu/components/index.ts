@@ -5,7 +5,6 @@ interface PropertyAndValues {
   id: number
   name: string
   values?: PropertyAndValues[]
-  propertyOpts?: PropertyAndValues[] // TODO @GoldenZqqq：建议直接复用 values；
 }
 
 interface RuleConfig {

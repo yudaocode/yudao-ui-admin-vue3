@@ -58,14 +58,9 @@
   </el-form>
 
   <!-- 商品属性添加 Form 表单 -->
-  <ProductPropertyAddForm
-    ref="attributesAddFormRef"
-    :propertyList="propertyList"
-    @success="getPropertyValueList"
-  />
+  <ProductPropertyAddForm ref="attributesAddFormRef" :propertyList="propertyList" />
 </template>
 <script lang="ts" setup>
-import * as PropertyApi from '@/api/mall/product/property'
 import { PropType } from 'vue'
 import { copyValueToTarget } from '@/utils'
 import { propTypes } from '@/utils/propTypes'
@@ -195,18 +190,5 @@ const onChangeSpec = () => {
 /** 调用 SkuList generateTableData 方法*/
 const generateSkus = (propertyList: any[]) => {
   skuListRef.value.generateTableData(propertyList)
-}
-
-// TODO @GoldenZqqq：这里不建议使用 success 去刷新。而是改成点击【属性值】的【添加】后，进行加载列表。后端提供了 getPropertyValueSimpleList 接口哈。
-/* 获取属性值列表 */
-const getPropertyValueList = async (id, propertyId) => {
-  formLoading.value = true
-  try {
-    // TODO @芋艿：需要增加一个全列表接口
-    const data = await PropertyApi.getPropertyValuePage({ pageNo: 1, pageSize: 100, propertyId })
-    propertyList.value.find((item) => item.id === id).propertyOpts = data.list
-  } finally {
-    formLoading.value = false
-  }
 }
 </script>

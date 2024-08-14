@@ -34,7 +34,7 @@
         @change="handleInputConfirm(index, item.id)"
       >
         <el-option
-          v-for="item2 in item.propertyOpts"
+          v-for="item2 in attributeOptions"
           :key="item2.id"
           :label="item2.name"
           :value="item2.name"
@@ -79,6 +79,7 @@ const setInputRef = (el: any) => {
   }
 }
 const attributeList = ref<PropertyAndValues[]>([]) // 商品属性列表
+const attributeOptions = ref([] as PropertyApi.PropertyValueVO[]) // 商品属性名称下拉框
 const props = defineProps({
   propertyList: {
     type: Array,
@@ -111,9 +112,11 @@ const handleCloseProperty = (index: number) => {
 }
 
 /** 显示输入框并获取焦点 */
-const showInput = async (index) => {
+const showInput = async (index: number) => {
   attributeIndex.value = index
   inputRef.value[index].focus()
+  // 获取属性下拉选项
+  await getAttributeOptions(attributeList.value[index].id)
 }
 
 /** 输入框失去焦点或点击回车时触发 */
@@ -140,5 +143,10 @@ const handleInputConfirm = async (index: number, propertyId: number) => {
   }
   attributeIndex.value = null
   inputValue.value = ''
+}
+
+/** 获取商品属性下拉选项 */
+const getAttributeOptions = async (propertyId: number) => {
+  attributeOptions.value = await PropertyApi.getPropertyValueSimpleList(propertyId)
 }
 </script>

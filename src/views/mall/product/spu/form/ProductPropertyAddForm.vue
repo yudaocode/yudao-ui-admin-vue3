@@ -39,7 +39,6 @@ import * as PropertyApi from '@/api/mall/product/property'
 
 defineOptions({ name: 'ProductPropertyForm' })
 
-const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -110,7 +109,6 @@ const submitForm = async () => {
     // 判断最终提交的属性名称是否是用户下拉选择的 自己手动输入的属性名称就不执行emit获取该属性名下属性值列表
     for (const element of attributeOptions.value) {
       if (element.name === formData.value.name) {
-        emit('success', propertyId, element.id)
         message.success(t('common.createSuccess'))
         dialogVisible.value = false
         return

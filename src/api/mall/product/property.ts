@@ -24,20 +24,6 @@ export interface PropertyValueVO {
   remark?: string
 }
 
-/**
- * 商品属性值的明细
- */
-export interface PropertyValueDetailVO {
-  /** 属性项的编号 */
-  propertyId: number // 属性的编号
-  /** 属性的名称 */
-  propertyName: string
-  /** 属性值的编号 */
-  valueId: number
-  /** 属性值的名称 */
-  valueName: string
-}
-
 // ------------------------ 属性项 -------------------
 
 // 创建属性项
@@ -95,4 +81,9 @@ export const updatePropertyValue = (data: PropertyValueVO) => {
 // 删除属性值
 export const deletePropertyValue = (id: number) => {
   return request.delete({ url: `/product/property/value/delete?id=${id}` })
+}
+
+// 获得属性值精简列表
+export const getPropertyValueSimpleList = (propertyId: number): Promise<PropertyValueVO[]> => {
+  return request.get({ url: '/product/property/value/simple-list', params: { propertyId } })
 }
