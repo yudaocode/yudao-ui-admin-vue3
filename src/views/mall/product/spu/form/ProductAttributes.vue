@@ -123,15 +123,25 @@ const showInput = async (index: number) => {
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const handleInputConfirm = async (index: number, propertyId: number) => {
   if (inputValue.value) {
-    // 重复添加校验
-    // TODO @芋艿：需要测试下
+    // 1. 重复添加校验
     if (attributeList.value[index].values.find((item) => item.name === inputValue.value)) {
       message.warning('已存在相同属性值，请重试')
       attributeIndex.value = null
       inputValue.value = ''
       return
     }
-    // 保存属性值
+
+    // 2.1 情况一：属性值已存在，则直接使用并结束
+    const existValue = attributeOptions.value.find((item) => item.name === inputValue.value)
+    if (existValue) {
+      attributeIndex.value = null
+      inputValue.value = ''
+      attributeList.value[index].values.push({ id: existValue.id, name: existValue.name })
+      emit('success', attributeList.value)
+      return
+    }
+
+    // 2.2 情况二：新属性值，则进行保存
     try {
       const id = await PropertyApi.createPropertyValue({ propertyId, name: inputValue.value })
       attributeList.value[index].values.push({ id, name: inputValue.value })
