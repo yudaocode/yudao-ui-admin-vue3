@@ -104,7 +104,7 @@
 import { createReusableTemplate } from '@vueuse/core'
 import { ref } from 'vue'
 import Tag from './Tag.vue'
-import { WriteVO } from 'src/api/ai/write'
+import { WriteVO } from '@/api/ai/write'
 import { omit } from 'lodash-es'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { AiWriteTypeEnum, WriteExample } from '@/views/ai/utils/constants'

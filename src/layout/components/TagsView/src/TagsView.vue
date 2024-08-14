@@ -358,12 +358,13 @@ watch(
                 >
                   <Icon
                     v-if="
-                      item?.matched &&
-                      item?.matched[1] &&
-                      item?.matched[1]?.meta?.icon &&
-                      tagsViewIcon
+                      tagsViewIcon &&
+                      (item?.meta?.icon ||
+                        (item?.matched &&
+                          item.matched[0] &&
+                          item.matched[item.matched.length - 1].meta?.icon))
                     "
-                    :icon="item?.matched[1]?.meta?.icon"
+                    :icon="item?.meta?.icon || item.matched[item.matched.length - 1].meta.icon"
                     :size="12"
                     class="mr-5px"
                   />

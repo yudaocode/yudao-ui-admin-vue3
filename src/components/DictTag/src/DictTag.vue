@@ -72,7 +72,7 @@ export default defineComponent({
                 // 添加标签的文字颜色为白色，解决自定义背景颜色时标签文字看不清的问题
                 <ElTag
                   style={dict?.cssClass ? 'color: #fff' : ''}
-                  type={dict?.colorType}
+                  type={dict?.colorType || null}
                   color={dict?.cssClass && isHexColor(dict?.cssClass) ? dict?.cssClass : ''}
                   disableTransitions={true}
                 >

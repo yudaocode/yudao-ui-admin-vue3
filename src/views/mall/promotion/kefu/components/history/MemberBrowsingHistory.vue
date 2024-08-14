@@ -25,7 +25,7 @@ import OrderBrowsingHistory from './OrderBrowsingHistory.vue'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { isEmpty } from '@/utils/is'
 import { debounce } from 'lodash-es'
-import { ElScrollbar as ElScrollbarType } from 'element-plus/es/components/scrollbar'
+import { ElScrollbar as ElScrollbarType } from 'element-plus/es/components/scrollbar/index'
 
 defineOptions({ name: 'MemberBrowsingHistory' })
 
