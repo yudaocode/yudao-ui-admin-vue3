@@ -1,6 +1,13 @@
 <!-- 商品发布 - 库存价格 -->
 <template>
-  <el-form ref="formRef" :disabled="isDetail" :model="formData" :rules="rules" label-width="120px">
+  <el-form
+    ref="formRef"
+    :disabled="isDetail"
+    :model="formData"
+    :rules="rules"
+    label-width="120px"
+    v-loading="formLoading"
+  >
     <el-form-item label="分销类型" props="subCommissionType">
       <el-radio-group
         v-model="formData.subCommissionType"
@@ -94,7 +101,7 @@ const ruleConfig: RuleConfig[] = [
 ]
 
 const message = useMessage() // 消息弹窗
-
+const formLoading = ref(false)
 const props = defineProps({
   propFormData: {
     type: Object as PropType<Spu>,

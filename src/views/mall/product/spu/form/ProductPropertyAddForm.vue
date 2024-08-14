@@ -10,7 +10,22 @@
       @keydown.enter.prevent="submitForm"
     >
       <el-form-item label="属性名称" prop="name">
-        <el-input v-model="formData.name" placeholder="请输入名称" />
+        <el-select
+          v-model="formData.name"
+          filterable
+          allow-create
+          default-first-option
+          :reserve-keyword="false"
+          placeholder="请选择属性名称。如果不存在，可手动输入选择"
+          class="!w-360px"
+        >
+          <el-option
+            v-for="item in attributeOptions"
+            :key="item.id"
+            :label="item.name"
+            :value="item.name"
+          />
+        </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -37,6 +52,7 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const attributeList = ref([]) // 商品属性列表
+const attributeOptions = ref([] as PropertyApi.PropertyVO[]) // 商品属性名称下拉框
 const props = defineProps({
   propertyList: {
     type: Array,
@@ -60,11 +76,21 @@ watch(
 const open = async () => {
   dialogVisible.value = true
   resetForm()
+  // 加载列表
+  await getAttributeOptions()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const submitForm = async () => {
+  // 情况一：如果是已存在的属性，直接结束，不提交表单新增
+  for (const attrItem of attributeList.value) {
+    if (attrItem.name === formData.value.name) {
+      return message.error('该属性已存在，请勿重复添加')
+    }
+  }
+
+  // 情况二：如果是不存在的属性，则需要执行新增
   // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
@@ -80,6 +106,15 @@ const submitForm = async () => {
       ...formData.value,
       values: []
     })
+    // 判断最终提交的属性名称是否是用户下拉选择的 自己手动输入的属性名称就不执行emit获取该属性名下属性值列表
+    for (const element of attributeOptions.value) {
+      if (element.name === formData.value.name) {
+        message.success(t('common.createSuccess'))
+        dialogVisible.value = false
+        return
+      }
+    }
+    // 关闭弹窗
     message.success(t('common.createSuccess'))
     dialogVisible.value = false
   } finally {
@@ -93,5 +128,15 @@ const resetForm = () => {
     name: ''
   }
   formRef.value?.resetFields()
+}
+
+/** 获取商品属性下拉选项 */
+const getAttributeOptions = async () => {
+  formLoading.value = true
+  try {
+    attributeOptions.value = await PropertyApi.getPropertySimpleList()
+  } finally {
+    formLoading.value = false
+  }
 }
 </script>
