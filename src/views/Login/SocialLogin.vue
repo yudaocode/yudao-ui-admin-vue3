@@ -276,10 +276,11 @@ const handleLogin = async (params) => {
     const code = route?.query?.code as string
     const state = route?.query?.state as string
 
+    const loginDataLoginForm = { ...loginData.loginForm }
     const res = await LoginApi.login({
       // 账号密码登录
-      username: loginData.loginForm.username,
-      password: loginData.loginForm.password,
+      username: loginDataLoginForm.username,
+      password: loginDataLoginForm.password,
       captchaVerification: params.captchaVerification,
       // 社交登录
       socialCode: code,
@@ -294,8 +295,8 @@ const handleLogin = async (params) => {
       text: '正在加载系统中...',
       background: 'rgba(0, 0, 0, 0.7)'
     })
-    if (loginData.loginForm.rememberMe) {
-      authUtil.setLoginForm(loginData.loginForm)
+    if (loginDataLoginForm.rememberMe) {
+      authUtil.setLoginForm(loginDataLoginForm)
     } else {
       authUtil.removeLoginForm()
     }
