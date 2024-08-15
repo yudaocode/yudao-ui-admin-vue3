@@ -6,7 +6,7 @@
         <!-- 查询条件 -->
         <div class="flex flex-row items-center gap-2">
           <el-radio-group v-model="timeRangeType" @change="handleTimeRangeTypeChange">
-            <el-radio-button v-for="[key, value] in timeRange.entries()" :key="key" :label="key">
+            <el-radio-button v-for="[key, value] in timeRange.entries()" :key="key" :value="key">
               {{ value.name }}
             </el-radio-button>
           </el-radio-group>

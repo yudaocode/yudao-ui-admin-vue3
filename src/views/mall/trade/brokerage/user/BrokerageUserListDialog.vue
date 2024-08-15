@@ -12,8 +12,8 @@
         <el-form-item label="用户类型" prop="level">
           <el-radio-group v-model="queryParams.level" @change="handleQuery">
             <el-radio-button checked>全部</el-radio-button>
-            <el-radio-button label="1">一级推广人</el-radio-button>
-            <el-radio-button label="2">二级推广人</el-radio-button>
+            <el-radio-button value="1">一级推广人</el-radio-button>
+            <el-radio-button value="2">二级推广人</el-radio-button>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="绑定时间" prop="bindUserTime">

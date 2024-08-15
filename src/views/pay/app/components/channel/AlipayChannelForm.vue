@@ -21,7 +21,7 @@
             <el-radio
               v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
               :key="parseInt(dict.value)"
-              :label="parseInt(dict.value)"
+              :value="parseInt(dict.value)"
             >
               {{ dict.label }}
             </el-radio>
@@ -29,21 +29,21 @@
         </el-form-item>
         <el-form-item label-width="180px" label="网关地址" prop="config.serverUrl">
           <el-radio-group v-model="formData.config.serverUrl">
-            <el-radio label="https://openapi.alipay.com/gateway.do">线上环境</el-radio>
-            <el-radio label="https://openapi-sandbox.dl.alipaydev.com/gateway.do">
+            <el-radio value="https://openapi.alipay.com/gateway.do">线上环境</el-radio>
+            <el-radio value="https://openapi-sandbox.dl.alipaydev.com/gateway.do">
               沙箱环境
             </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label-width="180px" label="算法类型" prop="config.signType">
           <el-radio-group v-model="formData.config.signType">
-            <el-radio key="RSA2" label="RSA2">RSA2</el-radio>
+            <el-radio key="RSA2" value="RSA2">RSA2</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label-width="180px" label="公钥类型" prop="config.mode">
           <el-radio-group v-model="formData.config.mode">
-            <el-radio key="公钥模式" :label="1">公钥模式</el-radio>
-            <el-radio key="证书模式" :label="2">证书模式</el-radio>
+            <el-radio key="公钥模式" :value="1">公钥模式</el-radio>
+            <el-radio key="证书模式" :value="2">证书模式</el-radio>
           </el-radio-group>
         </el-form-item>
         <div v-if="formData.config.mode === 1">

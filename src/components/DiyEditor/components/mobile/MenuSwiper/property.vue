@@ -4,21 +4,21 @@
     <el-form label-width="80px" :model="formData" class="m-t-8px">
       <el-form-item label="布局" prop="layout">
         <el-radio-group v-model="formData.layout">
-          <el-radio label="iconText">图标+文字</el-radio>
-          <el-radio label="icon">仅图标</el-radio>
+          <el-radio value="iconText">图标+文字</el-radio>
+          <el-radio value="icon">仅图标</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="行数" prop="row">
         <el-radio-group v-model="formData.row">
-          <el-radio :label="1">1行</el-radio>
-          <el-radio :label="2">2行</el-radio>
+          <el-radio :value="1">1行</el-radio>
+          <el-radio :value="2">2行</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="列数" prop="column">
         <el-radio-group v-model="formData.column">
-          <el-radio :label="3">3列</el-radio>
-          <el-radio :label="4">4列</el-radio>
-          <el-radio :label="5">5列</el-radio>
+          <el-radio :value="3">3列</el-radio>
+          <el-radio :value="4">4列</el-radio>
+          <el-radio :value="5">5列</el-radio>
         </el-radio-group>
       </el-form-item>
 
