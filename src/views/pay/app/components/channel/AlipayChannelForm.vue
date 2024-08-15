@@ -4,7 +4,7 @@
       <el-form
         ref="formRef"
         :model="formData"
-        :formRules="formRules"
+        :rules="formRules"
         label-width="100px"
         v-loading="formLoading"
       >
@@ -156,6 +156,20 @@
             </el-upload>
           </el-form-item>
         </div>
+
+        <el-form-item label-width="180px" label="接口内容加密方式" prop="config.encryptType">
+          <el-radio-group v-model="formData.config.encryptType">
+            <el-radio key="AES" label="AES">AES</el-radio>
+            <el-radio key="NONE" label="">无加密</el-radio>
+          </el-radio-group>
+        </el-form-item>
+
+        <div v-if="formData.config.encryptType === 'AES'">
+          <el-form-item label-width="180px" label="AES 密钥" prop="config.encryptKey">
+            <el-input v-model="formData.config.encryptKey" placeholder="请输入接口内容加密密钥" clearable />
+          </el-form-item>
+        </div>
+
         <el-form-item label-width="180px" label="备注" prop="remark">
           <el-input v-model="formData.remark" :style="{ width: '100%' }" />
         </el-form-item>
@@ -195,7 +209,9 @@ const formData = ref<any>({
     alipayPublicKey: '',
     appCertContent: '',
     alipayPublicCertContent: '',
-    rootCertContent: ''
+    rootCertContent: '',
+    encryptType: '',
+    encryptKey: '',
   }
 })
 const formRules = {
@@ -213,7 +229,8 @@ const formRules = {
   'config.alipayPublicCertContent': [
     { required: true, message: '请上传支付宝公钥证书', trigger: 'blur' }
   ],
-  'config.rootCertContent': [{ required: true, message: '请上传指定根证书', trigger: 'blur' }]
+  'config.rootCertContent': [{ required: true, message: '请上传指定根证书', trigger: 'blur' }],
+  'config.encryptKey': [{required: true, message: '请输入接口内容加密密钥', trigger: 'blur'}],
 }
 const fileAccept = '.crt'
 const formRef = ref() // 表单 Ref
@@ -281,7 +298,9 @@ const resetForm = (appId, code) => {
       alipayPublicKey: '',
       appCertContent: '',
       alipayPublicCertContent: '',
-      rootCertContent: ''
+      rootCertContent: '',
+      encryptType: 'AES',
+      encryptKey: '',
     }
   }
   formRef.value?.resetFields()
