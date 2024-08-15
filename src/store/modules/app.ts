@@ -21,6 +21,7 @@ interface AppState {
   locale: boolean
   message: boolean
   tagsView: boolean
+  tagsViewImmerse: boolean
   tagsViewIcon: boolean
   logo: boolean
   fixedHeader: boolean
@@ -58,6 +59,7 @@ export const useAppStore = defineStore('app', {
       locale: true, // 多语言图标
       message: true, // 消息图标
       tagsView: true, // 标签页
+      tagsViewImmerse: false, // 标签页沉浸
       tagsViewIcon: true, // 是否显示标签图标
       logo: true, // logo
       fixedHeader: true, // 固定toolheader
@@ -130,6 +132,9 @@ export const useAppStore = defineStore('app', {
     },
     getTagsView(): boolean {
       return this.tagsView
+    },
+    getTagsViewImmerse(): boolean {
+      return this.tagsViewImmerse
     },
     getTagsViewIcon(): boolean {
       return this.tagsViewIcon
@@ -207,6 +212,9 @@ export const useAppStore = defineStore('app', {
     },
     setTagsView(tagsView: boolean) {
       this.tagsView = tagsView
+    },
+    setTagsViewImmerse(tagsViewImmerse: boolean) {
+      this.tagsViewImmerse = tagsViewImmerse
     },
     setTagsViewIcon(tagsViewIcon: boolean) {
       this.tagsViewIcon = tagsViewIcon

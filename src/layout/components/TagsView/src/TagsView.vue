@@ -33,6 +33,8 @@ const affixTagArr = ref<RouteLocationNormalizedLoaded[]>([])
 
 const appStore = useAppStore()
 
+const tagsViewImmerse = computed(() => appStore.getTagsViewImmerse)
+
 const tagsViewIcon = computed(() => appStore.getTagsViewIcon)
 
 const isDark = computed(() => appStore.getIsDark)
@@ -266,7 +268,7 @@ watch(
     class="relative w-full flex bg-[#fff] dark:bg-[var(--el-bg-color)]"
   >
     <span
-      :class="`${prefixCls}__tool ${prefixCls}__tool--first`"
+      :class="tagsViewImmerse ? '' : `${prefixCls}__tool ${prefixCls}__tool--first`"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       @click="move(-200)"
     >
@@ -343,6 +345,9 @@ watch(
             :tag-item="item"
             :class="[
               `${prefixCls}__item`,
+              tagsViewImmerse ? `${prefixCls}__item--immerse` : '',
+              tagsViewIcon ? `${prefixCls}__item--icon` : '',
+              tagsViewImmerse && tagsViewIcon ? `${prefixCls}__item--immerse--icon` : '',
               item?.meta?.affix ? `${prefixCls}__item--affix` : '',
               {
                 'is-active': isActive(item)
@@ -354,7 +359,7 @@ watch(
               <router-link :ref="tagLinksRefs.set" :to="{ ...item }" custom v-slot="{ navigate }">
                 <div
                   @click="navigate"
-                  class="h-full flex items-center justify-center whitespace-nowrap pl-15px"
+                  :class="`h-full flex items-center justify-center whitespace-nowrap pl-15px ${prefixCls}__item--label`"
                 >
                   <Icon
                     v-if="
@@ -384,7 +389,7 @@ watch(
       </ElScrollbar>
     </div>
     <span
-      :class="`${prefixCls}__tool`"
+      :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       @click="move(200)"
     >
@@ -395,7 +400,7 @@ watch(
       />
     </span>
     <span
-      :class="`${prefixCls}__tool`"
+      :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       @click="refreshSelectedTag(selectedTag)"
     >
@@ -460,7 +465,7 @@ watch(
       ]"
     >
       <span
-        :class="`${prefixCls}__tool`"
+        :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
         class="block h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       >
         <Icon
@@ -512,7 +517,7 @@ $prefix-cls: #{$namespace}-tags-view;
     position: relative;
     top: 2px;
     height: calc(100% - 6px);
-    padding-right: 25px;
+    padding-right: 15px;
     margin-left: 4px;
     font-size: 12px;
     cursor: pointer;
@@ -533,6 +538,10 @@ $prefix-cls: #{$namespace}-tags-view;
     }
   }
 
+  &__item--icon {
+    padding-right: 20px;
+  }
+
   &__item:not(.is-active) {
     &:hover {
       color: var(--el-color-primary);
@@ -546,6 +555,37 @@ $prefix-cls: #{$namespace}-tags-view;
     .#{$prefix-cls}__item--close {
       :deep(span) {
         color: var(--el-color-white) !important;
+      }
+    }
+  }
+
+  &__item--immerse {
+    top: 3px;
+    padding-right: 35px;
+    margin: 0 -10px;
+    border: 1px solid transparent;
+    -webkit-mask-box-image: url("data:image/svg+xml,%3Csvg width='68' height='34' viewBox='0 0 68 34' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='m27,0c-7.99582,0 -11.95105,0.00205 -12,12l0,6c0,8.284 -0.48549,16.49691 -8.76949,16.49691l54.37857,-0.11145c-8.284,0 -8.60908,-8.10146 -8.60908,-16.38546l0,-6c0.11145,-12.08445 -4.38441,-12 -12,-12l-13,0z' fill='%23409eff'/%3E%3C/svg%3E")
+      12 27 15;
+    .#{$prefix-cls}__item--label {
+      padding-left: 35px;
+    }
+    .#{$prefix-cls}__item--close {
+      right: 20px;
+    }
+  }
+
+  &__item--immerse--icon {
+    padding-right: 35px;
+  }
+
+  &__item--immerse:not(.is-active) {
+    &:hover {
+      color: var(--el-color-white);
+      background-color: var(--el-color-primary);
+      .#{$prefix-cls}__item--close {
+        :deep(span) {
+          color: var(--el-color-white) !important;
+        }
       }
     }
   }
