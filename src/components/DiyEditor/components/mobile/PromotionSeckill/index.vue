@@ -54,7 +54,7 @@
               class="text-12px"
               :style="{ color: property.fields.price.color }"
             >
-              ￥{{ spu.price }}
+              ￥{{ fenToYuan(spu.seckillPrice || spu.price || 0) }}
             </span>
           </div>
         </div>
@@ -66,6 +66,9 @@
 import { PromotionSeckillProperty } from './config'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
+import { Spu } from '@/api/mall/product/spu'
+import { SeckillProductVO } from '@/api/mall/promotion/seckill/seckillActivity'
+import { fenToYuan } from '@/utils'
 
 /** 秒杀 */
 defineOptions({ name: 'PromotionSeckill' })
@@ -80,6 +83,13 @@ watch(
     const activity = await SeckillActivityApi.getSeckillActivity(props.property.activityId)
     if (!activity?.spuId) return
     spuList.value = [await ProductSpuApi.getSpu(activity.spuId)]
+    spuList.value = [await ProductSpuApi.getSpu(activity.spuId)]
+    // 循环活动信息，赋值秒杀最低价格
+    activity.products.forEach((product: SeckillProductVO) => {
+      spuList.value.forEach((spu: Spu) => {
+        spu.seckillPrice = Math.min(spu.seckillPrice || Infinity, product.seckillPrice) // 设置 SPU 的最低价格
+      })
+    })
   },
   {
     immediate: true,
