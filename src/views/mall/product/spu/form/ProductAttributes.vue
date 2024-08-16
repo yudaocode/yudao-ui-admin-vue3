@@ -74,7 +74,7 @@ const inputRef = ref<any[]>([]) //标签输入框Ref
 const setInputRef = (el: any) => {
   if (el === null || typeof el === 'undefined') return
   // 如果不存在 id 相同的元素才添加
-  if (!inputRef.value.some((item) => item.input?.attributes.id === el.input?.attributes.id)) {
+  if (!inputRef.value.some((item) => item.inputRef?.attributes.id === el.inputRef?.attributes.id)) {
     inputRef.value.push(el)
   }
 }
