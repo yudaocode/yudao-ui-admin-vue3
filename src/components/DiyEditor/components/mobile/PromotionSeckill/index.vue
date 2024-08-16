@@ -84,14 +84,10 @@ watch(
     if (!activity?.spuId) return
     spuList.value = [await ProductSpuApi.getSpu(activity.spuId)]
     spuList.value = [await ProductSpuApi.getSpu(activity.spuId)]
-    // 循环活动信息，赋值拼团价格
+    // 循环活动信息，赋值秒杀最低价格
     activity.products.forEach((product: SeckillProductVO) => {
       spuList.value.forEach((spu: Spu) => {
-        // 如果商品 SpuId 匹配
-        if (spu.id === product.spuId) {
-          // 商品原售价和拼团价，哪个便宜就赋值哪个
-          spu.seckillPrice = Math.min(spu.price || 0, product.seckillPrice); // 设置 SPU 的最低价格
-        }
+        spu.seckillPrice = Math.min(spu.seckillPrice || Infinity, product.seckillPrice);  // 设置 SPU 的最低价格
       })
     });
   },
