@@ -66,9 +66,9 @@
 import { PromotionCombinationProperty } from './config'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationActivity'
-import {Spu} from "@/api/mall/product/spu";
-import {CombinationProductVO} from "@/api/mall/promotion/combination/combinationActivity";
-import {fenToYuan} from "@/utils";
+import { Spu } from '@/api/mall/product/spu'
+import { CombinationProductVO } from '@/api/mall/promotion/combination/combinationActivity'
+import { fenToYuan } from '@/utils'
 
 /** 拼团 */
 defineOptions({ name: 'PromotionCombination' })
@@ -87,9 +87,9 @@ watch(
     activity.products.forEach((product: CombinationProductVO) => {
       spuList.value.forEach((spu: Spu) => {
         // 商品原售价和拼团价，哪个便宜就赋值哪个
-        spu.combinationPrice = Math.min(spu.combinationPrice || Infinity, product.combinationPrice); // 设置 SPU 的最低价格
+        spu.combinationPrice = Math.min(spu.combinationPrice || Infinity, product.combinationPrice) // 设置 SPU 的最低价格
       })
-    });
+    })
   },
   {
     immediate: true,
