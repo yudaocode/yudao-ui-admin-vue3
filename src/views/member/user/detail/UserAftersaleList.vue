@@ -198,7 +198,7 @@ const queryFormRef = ref() // 搜索的表单
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
-  userId: userId,
+  userId,
   no: null,
   status: '0',
   orderNo: null,
@@ -217,6 +217,7 @@ const getList = async () => {
       delete data.status
     }
     // 执行查询
+    // TODO @芋艿：接口需要通过userId进行筛选返回值
     const res = (await AfterSaleApi.getAfterSalePage(data)) as AfterSaleApi.TradeAfterSaleVO[]
     list.value = res.list
     total.value = res.total
