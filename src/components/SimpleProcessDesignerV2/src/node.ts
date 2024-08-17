@@ -293,7 +293,7 @@ export function useNodeForm(nodeType: NodeType) {
         break
       // 指定连续多级部门的负责人
       case CandidateStrategy.MULTI_LEVEL_DEPT_LEADER: {
-        // TODO 是否允许选多个部门
+        // 候选人参数格式 ,分隔。 被分隔的最后一个为部门层级
         const deptIds = configForm.value.deptIds!.join(',')
         candidateParam = deptIds.concat(',' + configForm.value.deptLevel + '')
         break
@@ -341,10 +341,13 @@ export function useNodeForm(nodeType: NodeType) {
         break
       // 指定连续多级部门的负责人
       case CandidateStrategy.MULTI_LEVEL_DEPT_LEADER: {
-        // 暂时只能选一个部门
+        // 候选人参数格式 ,分隔。 被分隔的最后一个为部门层级
         const paramArray = candidateParam.split(',')
-        configForm.value.deptIds = [+paramArray[0]]
-        configForm.value.deptLevel = +paramArray[1]
+        configForm.value.deptIds = []
+        for (let i = 0; i < paramArray.length - 1; i++) {
+          configForm.value.deptIds.push(+paramArray[i])
+        }
+        configForm.value.deptLevel = +paramArray[paramArray.length - 1]
         break
       }
       default:

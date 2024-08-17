@@ -76,6 +76,7 @@
                 empty-text="加载中，请稍后"
                 multiple
                 node-key="id"
+                check-strictly
                 style="width: 100%"
                 show-checkbox
               />
