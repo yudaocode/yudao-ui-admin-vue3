@@ -181,7 +181,6 @@
 </template>
 <script setup lang="ts">
 import { SimpleFlowNode, CandidateStrategy, NodeType, CANDIDATE_STRATEGY } from '../consts'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import {
   useWatchNode,
   useDrawer,
@@ -261,7 +260,7 @@ const saveConfig = async () => {
   const showText = getShowText()
   if (!showText) return false
   currentNode.value.name = nodeName.value!
-  handleCandidateParam()
+  currentNode.value.candidateParam = handleCandidateParam()
   currentNode.value.candidateStrategy = configForm.value.candidateStrategy
   currentNode.value.showText = showText
   currentNode.value.fieldsPermission = fieldsPermissionConfig.value

@@ -62,6 +62,8 @@ export interface SimpleFlowNode {
   childNode?: SimpleFlowNode
   // 条件节点
   conditionNodes?: SimpleFlowNode[]
+  // 审批类型
+  approveType?: ApproveType
   // 候选人策略
   candidateStrategy?: number
   // 候选人参数
@@ -249,7 +251,23 @@ export enum AssignStartUserHandlerType {
   /**
    * 转交给部门负责人审批
    */
-  ASSIGN_DEPT_LEADER
+  ASSIGN_DEPT_LEADER = 3
+}
+
+// 用户任务的审批类型。 【参考飞书】
+export enum ApproveType {
+  /**
+   * 人工审批
+   */
+  USER = 1,
+  /**
+   * 自动通过
+   */
+  AUTO_APPROVE = 2,
+  /**
+   * 自动拒绝
+   */
+  AUTO_REJECT = 3
 }
 
 // 时间单位枚举
@@ -285,13 +303,13 @@ export enum ConditionConfigType {
  * 操作按钮权限结构定义
  */
 export type ButtonSetting = {
-  id: OpsButtonType
+  id: OperationButtonType
   displayName: string
   enable: boolean
 }
 
-// 操作按钮类型枚举 (用于审批节点) // TODO @jason：建议不缩写哈
-export enum OpsButtonType {
+// 操作按钮类型枚举 (用于审批节点)
+export enum OperationButtonType {
   /**
    * 通过
    */
@@ -371,6 +389,12 @@ export const CANDIDATE_STRATEGY: DictDataVO[] = [
   { label: '用户组', value: CandidateStrategy.USER_GROUP },
   { label: '流程表达式', value: CandidateStrategy.EXPRESSION }
 ]
+// 审批节点 的审批类型
+export const APPROVE_TYPE: DictDataVO[] = [
+  { label: '人工审批', value: ApproveType.USER },
+  { label: '自动通过', value: ApproveType.AUTO_APPROVE },
+  { label: '自动拒绝', value: ApproveType.AUTO_REJECT }
+]
 
 export const APPROVE_METHODS: DictDataVO[] = [
   { label: '随机挑选一人审批', value: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE },
@@ -442,21 +466,21 @@ export const COMPARISON_OPERATORS: DictDataVO = [
 ]
 // 审批操作按钮名称
 export const OPERATION_BUTTON_NAME = new Map<number, string>()
-OPERATION_BUTTON_NAME.set(OpsButtonType.APPROVE, '通过')
-OPERATION_BUTTON_NAME.set(OpsButtonType.REJECT, '拒绝')
-OPERATION_BUTTON_NAME.set(OpsButtonType.TRANSFER, '转办')
-OPERATION_BUTTON_NAME.set(OpsButtonType.DELEGATE, '委派')
-OPERATION_BUTTON_NAME.set(OpsButtonType.ADD_SIGN, '加签')
-OPERATION_BUTTON_NAME.set(OpsButtonType.RETURN, '回退')
+OPERATION_BUTTON_NAME.set(OperationButtonType.APPROVE, '通过')
+OPERATION_BUTTON_NAME.set(OperationButtonType.REJECT, '拒绝')
+OPERATION_BUTTON_NAME.set(OperationButtonType.TRANSFER, '转办')
+OPERATION_BUTTON_NAME.set(OperationButtonType.DELEGATE, '委派')
+OPERATION_BUTTON_NAME.set(OperationButtonType.ADD_SIGN, '加签')
+OPERATION_BUTTON_NAME.set(OperationButtonType.RETURN, '回退')
 
 // 默认的按钮权限设置
 export const DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
-  { id: OpsButtonType.APPROVE, displayName: '通过', enable: true },
-  { id: OpsButtonType.REJECT, displayName: '拒绝', enable: true },
-  { id: OpsButtonType.TRANSFER, displayName: '转办', enable: false },
-  { id: OpsButtonType.DELEGATE, displayName: '委派', enable: false },
-  { id: OpsButtonType.ADD_SIGN, displayName: '加签', enable: false },
-  { id: OpsButtonType.RETURN, displayName: '回退', enable: false }
+  { id: OperationButtonType.APPROVE, displayName: '通过', enable: true },
+  { id: OperationButtonType.REJECT, displayName: '拒绝', enable: true },
+  { id: OperationButtonType.TRANSFER, displayName: '转办', enable: false },
+  { id: OperationButtonType.DELEGATE, displayName: '委派', enable: false },
+  { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: false },
+  { id: OperationButtonType.RETURN, displayName: '回退', enable: false }
 ]
 
 export const MULTI_LEVEL_DEPT: DictDataVO = [

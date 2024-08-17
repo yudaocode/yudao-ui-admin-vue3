@@ -59,69 +59,69 @@
           <!-- TODO @jason：建议搞个 if 来判断，替代现有的 !item.buttonsSetting || item.buttonsSetting[OpsButtonType.APPROVE]?.enable -->
           <el-button
             type="success"
-            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.APPROVE]?.enable"
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.APPROVE]?.enable"
             @click="handleAudit(item, true)"
           >
             <Icon icon="ep:select" />
             <!-- TODO @jason：这个也是类似哈，搞个方法来生成名字 -->
             {{
-              item.buttonsSetting?.[OpsButtonType.APPROVE]?.displayName ||
-              OPERATION_BUTTON_NAME.get(OpsButtonType.APPROVE)
+              item.buttonsSetting?.[OperationButtonType.APPROVE]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.APPROVE)
             }}
           </el-button>
           <el-button
-            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.REJECT]?.enable"
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.REJECT]?.enable"
             type="danger"
             @click="handleAudit(item, false)"
           >
             <Icon icon="ep:close" />
             {{
-              item.buttonsSetting?.[OpsButtonType.REJECT].displayName ||
-              OPERATION_BUTTON_NAME.get(OpsButtonType.REJECT)
+              item.buttonsSetting?.[OperationButtonType.REJECT].displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.REJECT)
             }}
           </el-button>
           <el-button
-            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.TRANSFER]?.enable"
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.TRANSFER]?.enable"
             type="primary"
             @click="openTaskUpdateAssigneeForm(item.id)"
           >
             <Icon icon="ep:edit" />
             {{
-              item.buttonsSetting?.[OpsButtonType.TRANSFER]?.displayName ||
-              OPERATION_BUTTON_NAME.get(OpsButtonType.TRANSFER)
+              item.buttonsSetting?.[OperationButtonType.TRANSFER]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.TRANSFER)
             }}
           </el-button>
           <el-button
-            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.DELEGATE]?.enable"
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.DELEGATE]?.enable"
             type="primary"
             @click="handleDelegate(item)"
           >
             <Icon icon="ep:position" />
             {{
-              item.buttonsSetting?.[OpsButtonType.DELEGATE]?.displayName ||
-              OPERATION_BUTTON_NAME.get(OpsButtonType.DELEGATE)
+              item.buttonsSetting?.[OperationButtonType.DELEGATE]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.DELEGATE)
             }}
           </el-button>
           <el-button
-            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.ADD_SIGN]?.enable"
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.ADD_SIGN]?.enable"
             type="primary"
             @click="handleSign(item)"
           >
             <Icon icon="ep:plus" />
             {{
-              item.buttonsSetting?.[OpsButtonType.ADD_SIGN]?.displayName ||
-              OPERATION_BUTTON_NAME.get(OpsButtonType.ADD_SIGN)
+              item.buttonsSetting?.[OperationButtonType.ADD_SIGN]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.ADD_SIGN)
             }}
           </el-button>
           <el-button
-            v-if="!item.buttonsSetting || item.buttonsSetting[OpsButtonType.RETURN]?.enable"
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.RETURN]?.enable"
             type="warning"
             @click="handleBack(item)"
           >
             <Icon icon="ep:back" />
             {{
-              item.buttonsSetting?.[OpsButtonType.RETURN]?.displayName ||
-              OPERATION_BUTTON_NAME.get(OpsButtonType.RETURN)
+              item.buttonsSetting?.[OperationButtonType.RETURN]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.RETURN)
             }}
           </el-button>
         </div>
@@ -192,7 +192,7 @@ import { registerComponent } from '@/utils/routerHelper'
 import { isEmpty } from '@/utils/is'
 import * as UserApi from '@/api/system/user'
 import {
-  OpsButtonType,
+  OperationButtonType,
   OPERATION_BUTTON_NAME
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 

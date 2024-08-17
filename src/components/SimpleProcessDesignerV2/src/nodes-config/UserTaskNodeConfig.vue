@@ -24,7 +24,20 @@
         <div class="divide-line"></div>
       </div>
     </template>
-    <el-tabs type="border-card" v-model="activeTabName">
+    <div class="flex flex-items-center mb-3">
+      <span class="font-size-4 mr-3">审批类型 :</span>
+      <el-radio-group v-model="approveType">
+        <el-radio
+          v-for="(item, index) in APPROVE_TYPE"
+          :key="index"
+          :value="item.value"
+          :label="item.value"
+        >
+          {{ item.label }}
+        </el-radio>
+      </el-radio-group>
+    </div>
+    <el-tabs type="border-card" v-model="activeTabName" v-if="approveType === ApproveType.USER">
       <el-tab-pane label="审批人" name="user">
         <div>
           <el-form ref="formRef" :model="configForm" label-position="top" :rules="formRules">
@@ -58,7 +71,6 @@
                 />
               </el-select>
             </el-form-item>
-            <!-- TODO @jason：指定部门的选择，不用联动父子。例如说：可能就是想某个比较高级别的部门审批。 -->
             <el-form-item
               v-if="
                 configForm.candidateStrategy == CandidateStrategy.DEPT_MEMBER ||
@@ -77,7 +89,7 @@
                 empty-text="加载中，请稍后"
                 multiple
                 node-key="id"
-                check-strictly
+                :check-strictly="true"
                 style="width: 100%"
                 show-checkbox
               />
@@ -404,6 +416,8 @@
 <script setup lang="ts">
 import {
   SimpleFlowNode,
+  APPROVE_TYPE,
+  ApproveType,
   APPROVE_METHODS,
   CandidateStrategy,
   NodeType,
@@ -434,7 +448,7 @@ import {
 } from '../node'
 import { defaultProps } from '@/utils/tree'
 import { cloneDeep } from 'lodash-es'
-import { convertTimeUnit } from '../utils'
+import { convertTimeUnit, getApproveTypeText } from '../utils'
 defineOptions({
   name: 'UserTaskNodeConfig'
 })
@@ -469,7 +483,7 @@ const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFie
 // 操作按钮设置
 const { buttonsSetting, btnDisplayNameEdit, changeBtnDisplayName, btnDisplayNameBlurEvent } =
   useButtonsSetting()
-
+const approveType = ref(ApproveType.USER)
 // 审批人表单设置
 const formRef = ref() // 表单 Ref
 // 表单校验规则
@@ -563,12 +577,23 @@ const {
 // 保存配置
 const saveConfig = async () => {
   activeTabName.value = 'user'
+  // 设置审批节点名称
+  currentNode.value.name = nodeName.value!
+  // 设置审批类型
+  currentNode.value.approveType = approveType.value
+  // 如果不是人工审批。返回
+  if (approveType.value !== ApproveType.USER) {
+    currentNode.value.showText = getApproveTypeText(approveType.value)
+    settingVisible.value = false
+    return true
+  }
+
   if (!formRef) return false
   const valid = await formRef.value.validate()
   if (!valid) return false
   const showText = getShowText()
   if (!showText) return false
-  currentNode.value.name = nodeName.value!
+
   currentNode.value.candidateStrategy = configForm.value.candidateStrategy
   // 处理 candidateParam 参数
   currentNode.value.candidateParam = handleCandidateParam()
@@ -612,7 +637,14 @@ const saveConfig = async () => {
 // 显示审批节点配置， 由父组件传过来
 const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   nodeName.value = node.name
-  //1.1 审批人设置
+  // 1 审批类型
+  approveType.value = node.approveType ? node.approveType : ApproveType.USER
+  // 如果审批类型不是人工审批返回
+  if (approveType.value !== ApproveType.USER) {
+    return
+  }
+
+  //2.1 审批人设置
   configForm.value.candidateStrategy = node.candidateStrategy!
   // 解析候选人参数
   parseCandidateParam(node.candidateStrategy!, node?.candidateParam)
@@ -621,18 +653,18 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   } else {
     notAllowedMultiApprovers.value = false
   }
-  // 1.2 设置审批方式
+  // 2.2 设置审批方式
   configForm.value.approveMethod = node.approveMethod!
   if (node.approveMethod == ApproveMethodType.APPROVE_BY_RATIO) {
     configForm.value.approveRatio = node.approveRatio!
   }
-  // 1.3 设置审批拒绝处理
+  // 2.3 设置审批拒绝处理
   configForm.value.rejectHandlerType = node.rejectHandler!.type
   configForm.value.returnNodeId = node.rejectHandler?.returnNodeId
   const matchNodeList = []
   emits('find:returnTaskNodes', matchNodeList)
   returnTaskList.value = matchNodeList
-  // 1.4 设置审批超时处理
+  // 2.4 设置审批超时处理
   configForm.value.timeoutHandlerEnable = node.timeoutHandler!.enable
   if (node.timeoutHandler?.enable && node.timeoutHandler?.timeDuration) {
     const strTimeDuration = node.timeoutHandler.timeDuration
@@ -643,14 +675,14 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   }
   configForm.value.timeoutHandlerType = node.timeoutHandler?.type
   configForm.value.maxRemindCount = node.timeoutHandler?.maxRemindCount
-  // 1.5 设置审批人为空时
+  // 2.5 设置审批人为空时
   configForm.value.assignEmptyHandlerType = node.assignEmptyHandler?.type
   configForm.value.assignEmptyHandlerUserIds = node.assignEmptyHandler?.userIds
-  // 1.6 设置用户任务的审批人与发起人相同时
+  // 2.6 设置用户任务的审批人与发起人相同时
   configForm.value.assignStartUserHandlerType = node.assignStartUserHandlerType
-  // 2. 操作按钮设置
+  // 3. 操作按钮设置
   buttonsSetting.value = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
-  // 3. 表单字段权限配置
+  // 4. 表单字段权限配置
   getNodeConfigFormFields(node.fieldsPermission)
 }
 
