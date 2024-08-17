@@ -12,7 +12,7 @@ import {
   RejectHandlerType,
   NODE_DEFAULT_NAME,
   AssignStartUserHandlerType,
-  ASSIGN_START_USER_HANDLER_TYPES
+  AssignEmptyHandlerType
 } from './consts'
 export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlowNode> {
   const node = ref<SimpleFlowNode>(props.flowNode)
@@ -57,7 +57,7 @@ export function useFormFieldsPermission() {
     fieldsPermission: Array<Record<string, string>>,
     parentTitle: string = ''
   ) => {
-    const { type, field, title: tempTitle, children } = rule
+    const { /**type,*/ field, title: tempTitle, children } = rule
     if (field && tempTitle) {
       let title = tempTitle
       if (parentTitle) {
@@ -106,6 +106,8 @@ export type UserTaskFormType = {
   returnNodeId?: string
   timeoutHandlerEnable?: boolean
   timeoutHandlerType?: number
+  assignEmptyHandlerType?: AssignEmptyHandlerType
+  assignEmptyHandlerUserIds?: number[]
   assignStartUserHandlerType?: AssignStartUserHandlerType
   timeDuration?: number
   maxRemindCount?: number

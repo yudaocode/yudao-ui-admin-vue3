@@ -78,6 +78,8 @@ export interface SimpleFlowNode {
   timeoutHandler?: TimeoutHandler
   // 审批任务拒绝处理
   rejectHandler?: RejectHandler
+  // 审批人为空的处理
+  assignEmptyHandler?: AssignEmptyHandler
   // 审批节点的审批人与发起人相同时，对应的处理类型
   assignStartUserHandlerType?: number
 }
@@ -169,7 +171,7 @@ export type RejectHandler = {
  * 审批超时结构定义
  */
 export type TimeoutHandler = {
-  //是否开启超时处理
+  // 是否开启超时处理
   enable: boolean
   // 超时执行的动作
   type?: number
@@ -178,6 +180,17 @@ export type TimeoutHandler = {
   // 执行动作是自动提醒, 最大提醒次数
   maxRemindCount?: number
 }
+
+/**
+ * 审批人为空的结构定义
+ */
+export type AssignEmptyHandler = {
+  // 审批人为空的处理类型
+  type: AssignEmptyHandlerType
+  // 指定用户的编号数组
+  userIds?: number[]
+}
+
 // 审批拒绝类型枚举
 export enum RejectHandlerType {
   /**
@@ -203,6 +216,25 @@ export enum TimeoutHandlerType {
    * 自动拒绝
    */
   REJECT = 3
+}
+// 用户任务的审批人为空时，处理类型枚举
+export enum AssignEmptyHandlerType {
+  /**
+   * 自动通过
+   */
+  APPROVE = 1,
+  /**
+   * 自动拒绝
+   */
+  REJECT = 2,
+  /**
+   * 指定人员审批
+   */
+  ASSIGN_USER,
+  /**
+   * 转交给流程管理员
+   */
+  ASSIGN_ADMIN = 4
 }
 // 用户任务的审批人与发起人相同时，处理类型枚举
 export enum AssignStartUserHandlerType {
@@ -368,6 +400,12 @@ export const REJECT_HANDLER_TYPES: DictDataVO[] = [
   { label: '终止流程', value: RejectHandlerType.FINISH_PROCESS },
   { label: '驳回到指定节点', value: RejectHandlerType.RETURN_USER_TASK }
   // { label: '结束任务', value: RejectHandlerType.FINISH_TASK }
+]
+export const ASSIGN_EMPTY_HANDLER_TYPES: DictDataVO[] = [
+  { label: '自动通过', value: 1 },
+  { label: '自动拒绝', value: 2 },
+  { label: '指定成员审批', value: 3 },
+  { label: '转交给流程管理员', value: 4 }
 ]
 export const ASSIGN_START_USER_HANDLER_TYPES: DictDataVO[] = [
   { label: '由发起人对自己审批', value: 1 },

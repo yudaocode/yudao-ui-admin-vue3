@@ -43,13 +43,16 @@
 
 <script setup lang="ts">
 import {
-  SimpleFlowNode,
-  NodeType,
-  NODE_DEFAULT_NAME,
   ApproveMethodType,
-  RejectHandlerType
+  AssignEmptyHandlerType,
+  AssignStartUserHandlerType,
+  NODE_DEFAULT_NAME,
+  NodeType,
+  RejectHandlerType,
+  SimpleFlowNode
 } from './consts'
 import { generateUUID } from '@/utils'
+
 defineOptions({
   name: 'NodeHandler'
 })
@@ -86,6 +89,10 @@ const addNode = (type: number) => {
       timeoutHandler: {
         enable: false
       },
+      assignEmptyHandler: {
+        type: AssignEmptyHandlerType.APPROVE
+      },
+      assignStartUserHandlerType: AssignStartUserHandlerType.START_USER_AUDIT,
       childNode: props.childNode
     }
     emits('update:childNode', data)
