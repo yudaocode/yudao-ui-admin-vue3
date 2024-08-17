@@ -10,7 +10,9 @@ import {
   NodeType,
   ApproveMethodType,
   RejectHandlerType,
-  NODE_DEFAULT_NAME
+  NODE_DEFAULT_NAME,
+  AssignStartUserHandlerType,
+  ASSIGN_START_USER_HANDLER_TYPES
 } from './consts'
 export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlowNode> {
   const node = ref<SimpleFlowNode>(props.flowNode)
@@ -103,7 +105,8 @@ export type UserTaskFormType = {
   rejectHandlerType?: RejectHandlerType
   returnNodeId?: string
   timeoutHandlerEnable?: boolean
-  timeoutHandlerAction?: number
+  timeoutHandlerType?: number
+  assignStartUserHandlerType?: AssignStartUserHandlerType
   timeDuration?: number
   maxRemindCount?: number
   buttonsSetting: any[]
@@ -139,9 +142,10 @@ export function useNodeForm(nodeType: NodeType) {
       approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
       approveRatio: 100,
       rejectHandlerType: RejectHandlerType.FINISH_PROCESS,
+      assignStartUserHandlerType: AssignStartUserHandlerType.START_USER_AUDIT,
       returnNodeId: '',
       timeoutHandlerEnable: false,
-      timeoutHandlerAction: 1,
+      timeoutHandlerType: 1,
       timeDuration: 6, // 默认 6小时
       maxRemindCount: 1, // 默认 提醒 1次
       buttonsSetting: []

@@ -232,15 +232,15 @@
             </el-form-item>
             <el-form-item
               label="执行动作"
-              prop="timeoutHandlerAction"
+              prop="timeoutHandlerType"
               v-if="configForm.timeoutHandlerEnable"
             >
               <el-radio-group
-                v-model="configForm.timeoutHandlerAction"
-                @change="timeoutActionChanged"
+                v-model="configForm.timeoutHandlerType"
+                @change="timeoutHandlerTypeChanged"
               >
                 <el-radio-button
-                  v-for="item in TIMEOUT_HANDLER_ACTION_TYPES"
+                  v-for="item in TIMEOUT_HANDLER_TYPES"
                   :key="item.value"
                   :value="item.value"
                   :label="item.label"
@@ -276,9 +276,20 @@
             <el-form-item
               label="最大提醒次数"
               prop="maxRemindCount"
-              v-if="configForm.timeoutHandlerEnable && configForm.timeoutHandlerAction === 1"
+              v-if="configForm.timeoutHandlerEnable && configForm.timeoutHandlerType === 1"
             >
               <el-input-number v-model="configForm.maxRemindCount" :min="1" :max="10" />
+            </el-form-item>
+
+            <el-divider content-position="left">审批人与提交人为同一人时</el-divider>
+            <el-form-item prop="assignStartUserHandlerType">
+              <el-radio-group v-model="configForm.assignStartUserHandlerType">
+                <div class="flex-col">
+                  <div v-for="(item, index) in ASSIGN_START_USER_HANDLER_TYPES" :key="index">
+                    <el-radio :key="item.value" :value="item.value" :label="item.label" />
+                  </div>
+                </div>
+              </el-radio-group>
             </el-form-item>
           </el-form>
         </div>
@@ -364,14 +375,16 @@ import {
   ApproveMethodType,
   TimeUnitType,
   RejectHandlerType,
-  TIMEOUT_HANDLER_ACTION_TYPES,
+  TIMEOUT_HANDLER_TYPES,
   TIME_UNIT_TYPES,
   REJECT_HANDLER_TYPES,
   DEFAULT_BUTTON_SETTING,
   OPERATION_BUTTON_NAME,
   ButtonSetting,
   MULTI_LEVEL_DEPT,
-  CANDIDATE_STRATEGY
+  CANDIDATE_STRATEGY,
+  ASSIGN_START_USER_HANDLER_TYPES,
+  TimeoutHandlerType
 } from '../consts'
 
 import {
@@ -435,7 +448,7 @@ const formRules = reactive({
   approveRatio: [{ required: true, message: '通过比例不能为空', trigger: 'blur' }],
   returnNodeId: [{ required: true, message: '驳回节点不能为空', trigger: 'change' }],
   timeoutHandlerEnable: [{ required: true }],
-  timeoutHandlerAction: [{ required: true }],
+  timeoutHandlerType: [{ required: true }],
   timeDuration: [{ required: true, message: '超时时间不能为空', trigger: 'blur' }],
   maxRemindCount: [{ required: true, message: '提醒次数不能为空', trigger: 'blur' }]
 })
@@ -499,8 +512,8 @@ const returnTaskList = ref<SimpleFlowNode[]>([])
 // 审批人超时未处理设置
 const {
   timeoutHandlerChange,
-  cTimeoutAction,
-  timeoutActionChanged,
+  cTimeoutType,
+  timeoutHandlerTypeChanged,
   timeUnit,
   timeUnitChange,
   isoTimeDuration,
@@ -532,10 +545,12 @@ const saveConfig = async () => {
   // 设置超时处理
   currentNode.value.timeoutHandler = {
     enable: configForm.value.timeoutHandlerEnable!,
-    action: cTimeoutAction.value,
+    type: cTimeoutType.value,
     timeDuration: isoTimeDuration.value,
     maxRemindCount: cTimeoutMaxRemindCount.value
   }
+  // 设置用户任务的审批人与发起人相同时
+  currentNode.value.assignStartUserHandlerType = configForm.value.assignStartUserHandlerType
   // 设置表单权限
   currentNode.value.fieldsPermission = fieldsPermissionConfig.value
   // 设置按钮权限
@@ -553,7 +568,7 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   configForm.value.candidateStrategy = node.candidateStrategy!
   // 解析候选人参数
   parseCandidateParam(node.candidateStrategy!, node?.candidateParam)
-  if (configForm.value.deptIds && configForm.value.deptIds.length > 1) {
+  if (configForm.value.userIds && configForm.value.userIds.length > 1) {
     notAllowedMultiApprovers.value = true
   } else {
     notAllowedMultiApprovers.value = false
@@ -578,8 +593,10 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
     configForm.value.timeDuration = parseInt(parseTime)
     timeUnit.value = convertTimeUnit(parseTimeUnit)
   }
-  configForm.value.timeoutHandlerAction = node.timeoutHandler?.action
+  configForm.value.timeoutHandlerType = node.timeoutHandler?.type
   configForm.value.maxRemindCount = node.timeoutHandler?.maxRemindCount
+  // 1.5 设置用户任务的审批人与发起人相同时
+  configForm.value.assignStartUserHandlerType = node.assignStartUserHandlerType
   // 2. 操作按钮设置
   buttonsSetting.value = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
   // 3. 表单字段权限配置
@@ -623,21 +640,21 @@ function useTimeoutHandler() {
     if (configForm.value.timeoutHandlerEnable) {
       timeUnit.value = 2
       configForm.value.timeDuration = 6
-      configForm.value.timeoutHandlerAction = 1
+      configForm.value.timeoutHandlerType = 1
       configForm.value.maxRemindCount = 1
     }
   }
   // 超时执行的动作
-  const cTimeoutAction = computed(() => {
+  const cTimeoutType = computed(() => {
     if (!configForm.value.timeoutHandlerEnable) {
       return undefined
     }
-    return configForm.value.timeoutHandlerAction
+    return configForm.value.timeoutHandlerType
   })
 
   // 超时处理动作改变
-  const timeoutActionChanged = () => {
-    if (configForm.value.timeoutHandlerAction === 1) {
+  const timeoutHandlerTypeChanged = () => {
+    if (configForm.value.timeoutHandlerType === TimeoutHandlerType.REMINDER) {
       configForm.value.maxRemindCount = 1 // 超时提醒次数，默认为1
     }
   }
@@ -680,7 +697,7 @@ function useTimeoutHandler() {
     if (!configForm.value.timeoutHandlerEnable) {
       return undefined
     }
-    if (configForm.value.timeoutHandlerAction !== 1) {
+    if (configForm.value.timeoutHandlerType !== TimeoutHandlerType.REMINDER) {
       return undefined
     }
     return configForm.value.maxRemindCount
@@ -688,8 +705,8 @@ function useTimeoutHandler() {
 
   return {
     timeoutHandlerChange,
-    cTimeoutAction,
-    timeoutActionChanged,
+    cTimeoutType,
+    timeoutHandlerTypeChanged,
     timeUnit,
     timeUnitChange,
     isoTimeDuration,
