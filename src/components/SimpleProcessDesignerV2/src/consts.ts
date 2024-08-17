@@ -1,5 +1,6 @@
 // @ts-ignore
 import { DictDataVO } from '@/api/system/dict/types'
+
 /**
  * 节点类型
  */
@@ -85,13 +86,17 @@ export enum CandidateStrategy {
    */
   ROLE = 10,
   /**
-   * 指定部门成员
+   * 部门成员
    */
   DEPT_MEMBER = 20,
   /**
    * 部门的负责人
    */
   DEPT_LEADER = 21,
+  /**
+   * 连续多级部门的负责人
+   */
+  MULTI_LEVEL_DEPT_LEADER = 23,
   /**
    * 指定岗位
    */
@@ -108,6 +113,14 @@ export enum CandidateStrategy {
    * 发起人自己
    */
   START_USER = 36,
+  /**
+   * 发起人部门负责人
+   */
+  START_USER_DEPT_LEADER = 37,
+  /**
+   * 发起人连续多级部门的负责人
+   */
+  START_USER_MULTI_LEVEL_DEPT_LEADER = 38,
   /**
    * 指定用户组
    */
@@ -280,6 +293,21 @@ NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
 NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 
+// 候选人策略。暂时不从字典中取。 后续可能调整。控制显示顺序
+export const CANDIDATE_STRATEGY: DictDataVO[] = [
+  { label: '指定成员', value: CandidateStrategy.USER },
+  { label: '指定角色', value: CandidateStrategy.ROLE },
+  { label: '部门成员', value: CandidateStrategy.DEPT_MEMBER },
+  { label: '部门负责人', value: CandidateStrategy.DEPT_LEADER },
+  { label: '连续多级部门负责人', value: CandidateStrategy.MULTI_LEVEL_DEPT_LEADER },
+  { label: '发起人自选', value: CandidateStrategy.START_USER_SELECT },
+  { label: '发起人本人', value: CandidateStrategy.START_USER },
+  { label: '发起人部门负责人', value: CandidateStrategy.START_USER_DEPT_LEADER },
+  { label: '发起人连续部门负责人', value: CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER },
+  { label: '用户组', value: CandidateStrategy.USER_GROUP },
+  { label: '流程表达式', value: CandidateStrategy.EXPRESSION }
+]
+
 export const APPROVE_METHODS: DictDataVO[] = [
   { label: '随机挑选一人审批', value: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE },
   { label: '多人会签(按通过比例%)', value: ApproveMethodType.APPROVE_BY_RATIO },
@@ -354,4 +382,22 @@ export const DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
   { id: OpsButtonType.DELEGATE, displayName: '委派', enable: false },
   { id: OpsButtonType.ADD_SIGN, displayName: '加签', enable: false },
   { id: OpsButtonType.RETURN, displayName: '回退', enable: false }
+]
+
+export const MULTI_LEVEL_DEPT: DictDataVO = [
+  { label: '第1级部门', value: 1 },
+  { label: '第2级部门', value: 2 },
+  { label: '第3级部门', value: 3 },
+  { label: '第4级部门', value: 4 },
+  { label: '第5级部门', value: 5 },
+  { label: '第6级部门', value: 6 },
+  { label: '第7级部门', value: 7 },
+  { label: '第8级部门', value: 8 },
+  { label: '第9级部门', value: 9 },
+  { label: '第10级部门', value: 10 },
+  { label: '第11级部门', value: 11 },
+  { label: '第12级部门', value: 12 },
+  { label: '第13级部门', value: 13 },
+  { label: '第14级部门', value: 14 },
+  { label: '第15级部门', value: 15 }
 ]

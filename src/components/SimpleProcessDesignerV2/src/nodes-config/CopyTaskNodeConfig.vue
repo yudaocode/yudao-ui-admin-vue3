@@ -46,14 +46,9 @@
             <el-form-item
               v-if="configForm.candidateStrategy == CandidateStrategy.ROLE"
               label="指定角色"
-              prop="candidateParamArray"
+              prop="roleIds"
             >
-              <el-select
-                v-model="configForm.candidateParamArray"
-                clearable
-                multiple
-                style="width: 100%"
-              >
+              <el-select v-model="configForm.roleIds" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in roleOptions"
                   :key="item.id"
@@ -68,12 +63,12 @@
                 configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER
               "
               label="指定部门"
-              prop="candidateParamArray"
+              prop="deptIds"
               span="24"
             >
               <el-tree-select
                 ref="treeRef"
-                v-model="configForm.candidateParamArray"
+                v-model="configForm.deptIds"
                 :data="deptTreeOptions"
                 :props="defaultProps"
                 empty-text="加载中，请稍后"
@@ -86,15 +81,10 @@
             <el-form-item
               v-if="configForm.candidateStrategy == CandidateStrategy.POST"
               label="指定岗位"
-              prop="candidateParamArray"
+              prop="postIds"
               span="24"
             >
-              <el-select
-                v-model="configForm.candidateParamArray"
-                clearable
-                multiple
-                style="width: 100%"
-              >
+              <el-select v-model="configForm.postIds" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in postOptions"
                   :key="item.id"
@@ -106,15 +96,10 @@
             <el-form-item
               v-if="configForm.candidateStrategy == CandidateStrategy.USER"
               label="指定用户"
-              prop="candidateParamArray"
+              prop="userIds"
               span="24"
             >
-              <el-select
-                v-model="configForm.candidateParamArray"
-                clearable
-                multiple
-                style="width: 100%"
-              >
+              <el-select v-model="configForm.userIds" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in userOptions"
                   :key="item.id"
@@ -126,14 +111,9 @@
             <el-form-item
               v-if="configForm.candidateStrategy === CandidateStrategy.USER_GROUP"
               label="指定用户组"
-              prop="candidateParamArray"
+              prop="userGroups"
             >
-              <el-select
-                v-model="configForm.candidateParamArray"
-                clearable
-                multiple
-                style="width: 100%"
-              >
+              <el-select v-model="configForm.userGroups" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in userGroupOptions"
                   :key="item.id"
@@ -146,11 +126,11 @@
             <el-form-item
               v-if="configForm.candidateStrategy === CandidateStrategy.EXPRESSION"
               label="流程表达式"
-              prop="candidateParamArray"
+              prop="expression"
             >
               <el-input
                 type="textarea"
-                v-model="configForm.candidateParamArray[0]"
+                v-model="configForm.expression"
                 clearable
                 style="width: 100%"
               />
@@ -200,7 +180,7 @@
   </el-drawer>
 </template>
 <script setup lang="ts">
-import { SimpleFlowNode, CandidateStrategy, NodeType } from '../consts'
+import { SimpleFlowNode, CandidateStrategy, NodeType, CANDIDATE_STRATEGY } from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import {
   useWatchNode,
@@ -235,7 +215,12 @@ const formRef = ref() // 表单 Ref
 // 表单校验规则
 const formRules = reactive({
   candidateStrategy: [{ required: true, message: '抄送人设置不能为空', trigger: 'change' }],
-  candidateParamArray: [{ required: true, message: '选项不能为空', trigger: 'blur' }]
+  userIds: [{ required: true, message: '用户不能为空', trigger: 'change' }],
+  roleIds: [{ required: true, message: '角色不能为空', trigger: 'change' }],
+  deptIds: [{ required: true, message: '部门不能为空', trigger: 'change' }],
+  userGroups: [{ required: true, message: '用户组不能为空', trigger: 'change' }],
+  postIds: [{ required: true, message: '岗位不能为空', trigger: 'change' }],
+  expression: [{ required: true, message: '流程表达式不能为空', trigger: 'blur' }]
 })
 
 const {
@@ -245,12 +230,14 @@ const {
   userOptions,
   userGroupOptions,
   deptTreeOptions,
-  getShowText
+  getShowText,
+  handleCandidateParam,
+  parseCandidateParam
 } = useNodeForm(NodeType.COPY_TASK_NODE)
 const configForm = tempConfigForm as Ref<CopyTaskFormType>
 // 抄送人策略， 去掉发起人自选 和 发起人自己
 const copyUserStrategies = computed(() => {
-  return getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY).filter(
+  return CANDIDATE_STRATEGY.filter(
     (item) =>
       item.value !== CandidateStrategy.START_USER_SELECT &&
       item.value !== CandidateStrategy.START_USER
@@ -258,7 +245,12 @@ const copyUserStrategies = computed(() => {
 })
 // 改变抄送人设置策略
 const changeCandidateStrategy = () => {
-  configForm.value.candidateParamArray = []
+  configForm.value.userIds = []
+  configForm.value.deptIds = []
+  configForm.value.roleIds = []
+  configForm.value.postIds = []
+  configForm.value.userGroups = []
+  configForm.value.deptLevel = 1
 }
 // 保存配置
 const saveConfig = async () => {
@@ -269,7 +261,7 @@ const saveConfig = async () => {
   const showText = getShowText()
   if (!showText) return false
   currentNode.value.name = nodeName.value!
-  currentNode.value.candidateParam = configForm.value.candidateParamArray?.join(',')
+  handleCandidateParam()
   currentNode.value.candidateStrategy = configForm.value.candidateStrategy
   currentNode.value.showText = showText
   currentNode.value.fieldsPermission = fieldsPermissionConfig.value
@@ -281,14 +273,7 @@ const showCopyTaskNodeConfig = (node: SimpleFlowNode) => {
   nodeName.value = node.name
   // 抄送人设置
   configForm.value.candidateStrategy = node.candidateStrategy!
-  const strCandidateParam = node?.candidateParam
-  if (node.candidateStrategy === CandidateStrategy.EXPRESSION) {
-    configForm.value.candidateParamArray[0] = strCandidateParam
-  } else {
-    if (strCandidateParam) {
-      configForm.value.candidateParamArray = strCandidateParam.split(',').map((item) => +item)
-    }
-  }
+  parseCandidateParam(node.candidateStrategy!, node?.candidateParam)
   // 表单字段权限
   getNodeConfigFormFields(node.fieldsPermission)
 }

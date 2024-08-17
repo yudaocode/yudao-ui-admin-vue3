@@ -89,9 +89,16 @@ export function useFormFieldsPermission() {
 }
 
 export type UserTaskFormType = {
-  candidateParamArray: any[]
+  //candidateParamArray: any[]
   candidateStrategy: CandidateStrategy
   approveMethod: ApproveMethodType
+  roleIds?: number[] // 角色
+  deptIds?: number[] // 部门
+  deptLevel?: number // 部门层级
+  userIds?: number[] // 用户
+  userGroups?: number[] // 用户组
+  postIds?: number[] // 岗位
+  expression?: string // 流程表达式
   approveRatio?: number
   rejectHandlerType?: RejectHandlerType
   returnNodeId?: string
@@ -103,8 +110,15 @@ export type UserTaskFormType = {
 }
 
 export type CopyTaskFormType = {
-  candidateParamArray: any[]
+  // candidateParamArray: any[]
   candidateStrategy: CandidateStrategy
+  roleIds?: number[] // 角色
+  deptIds?: number[] // 部门
+  deptLevel?: number // 部门层级
+  userIds?: number[] // 用户
+  userGroups?: number[] // 用户组
+  postIds?: number[] // 岗位
+  expression?: string // 流程表达式
 }
 
 /**
@@ -120,7 +134,7 @@ export function useNodeForm(nodeType: NodeType) {
   const configForm = ref<UserTaskFormType | CopyTaskFormType>()
   if (nodeType === NodeType.USER_TASK_NODE) {
     configForm.value = {
-      candidateParamArray: [],
+      //candidateParamArray: [],
       candidateStrategy: CandidateStrategy.USER,
       approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
       approveRatio: 100,
@@ -134,7 +148,7 @@ export function useNodeForm(nodeType: NodeType) {
     }
   } else {
     configForm.value = {
-      candidateParamArray: [],
+      //candidateParamArray: [],
       candidateStrategy: CandidateStrategy.USER
     }
   }
@@ -143,10 +157,10 @@ export function useNodeForm(nodeType: NodeType) {
     let showText = ''
     // 指定成员
     if (configForm.value?.candidateStrategy === CandidateStrategy.USER) {
-      if (configForm.value.candidateParamArray?.length > 0) {
+      if (configForm.value?.userIds!.length > 0) {
         const candidateNames: string[] = []
         userOptions?.value.forEach((item) => {
-          if (configForm.value?.candidateParamArray.includes(item.id)) {
+          if (configForm.value?.userIds!.includes(item.id)) {
             candidateNames.push(item.nickname)
           }
         })
@@ -155,10 +169,10 @@ export function useNodeForm(nodeType: NodeType) {
     }
     // 指定角色
     if (configForm.value?.candidateStrategy === CandidateStrategy.ROLE) {
-      if (configForm.value.candidateParamArray?.length > 0) {
+      if (configForm.value.roleIds!.length > 0) {
         const candidateNames: string[] = []
         roleOptions?.value.forEach((item) => {
-          if (configForm.value?.candidateParamArray.includes(item.id)) {
+          if (configForm.value?.roleIds!.includes(item.id)) {
             candidateNames.push(item.name)
           }
         })
@@ -168,29 +182,32 @@ export function useNodeForm(nodeType: NodeType) {
     // 指定部门
     if (
       configForm.value?.candidateStrategy === CandidateStrategy.DEPT_MEMBER ||
-      configForm.value?.candidateStrategy === CandidateStrategy.DEPT_LEADER
+      configForm.value?.candidateStrategy === CandidateStrategy.DEPT_LEADER ||
+      configForm.value?.candidateStrategy === CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
     ) {
-      if (configForm.value?.candidateParamArray?.length > 0) {
+      if (configForm.value?.deptIds!.length > 0) {
         const candidateNames: string[] = []
         deptOptions?.value.forEach((item) => {
-          if (configForm.value?.candidateParamArray.includes(item.id)) {
+          if (configForm.value?.deptIds!.includes(item.id!)) {
             candidateNames.push(item.name)
           }
         })
         if (configForm.value.candidateStrategy === CandidateStrategy.DEPT_MEMBER) {
           showText = `部门成员：${candidateNames.join(',')}`
-        } else {
+        } else if (configForm.value.candidateStrategy === CandidateStrategy.DEPT_LEADER) {
           showText = `部门的负责人：${candidateNames.join(',')}`
+        } else {
+          showText = `多级部门的负责人：${candidateNames.join(',')}`
         }
       }
     }
 
     // 指定岗位
     if (configForm.value?.candidateStrategy === CandidateStrategy.POST) {
-      if (configForm.value.candidateParamArray?.length > 0) {
+      if (configForm.value.postIds!.length > 0) {
         const candidateNames: string[] = []
         postOptions?.value.forEach((item) => {
-          if (configForm.value?.candidateParamArray.includes(item.id)) {
+          if (configForm.value?.postIds!.includes(item.id!)) {
             candidateNames.push(item.name)
           }
         })
@@ -199,10 +216,10 @@ export function useNodeForm(nodeType: NodeType) {
     }
     // 指定用户组
     if (configForm.value?.candidateStrategy === CandidateStrategy.USER_GROUP) {
-      if (configForm.value?.candidateParamArray?.length > 0) {
+      if (configForm.value?.userGroups!.length > 0) {
         const candidateNames: string[] = []
         userGroupOptions?.value.forEach((item) => {
-          if (configForm.value?.candidateParamArray.includes(item.id)) {
+          if (configForm.value?.userGroups!.includes(item.id)) {
             candidateNames.push(item.name)
           }
         })
@@ -218,16 +235,116 @@ export function useNodeForm(nodeType: NodeType) {
     if (configForm.value?.candidateStrategy === CandidateStrategy.START_USER) {
       showText = `发起人自己`
     }
-
+    // 发起人的部门负责人
+    if (configForm.value?.candidateStrategy === CandidateStrategy.START_USER_DEPT_LEADER) {
+      showText = `发起人的部门负责人`
+    }
+    // 发起人的部门负责人
+    if (
+      configForm.value?.candidateStrategy === CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER
+    ) {
+      showText = `发起人连续部门负责人`
+    }
     // 流程表达式
     if (configForm.value?.candidateStrategy === CandidateStrategy.EXPRESSION) {
-      if (configForm.value.candidateParamArray?.length > 0) {
-        showText = `流程表达式：${configForm.value.candidateParamArray[0]}`
-      }
+      showText = `流程表达式：${configForm.value.expression}`
     }
     return showText
   }
 
+  /**
+   *  处理候选人参数的赋值
+   */
+  const handleCandidateParam = () => {
+    let candidateParam: undefined | string = undefined
+    if (!configForm.value) {
+      return candidateParam
+    }
+    switch (configForm.value.candidateStrategy) {
+      case CandidateStrategy.USER:
+        candidateParam = configForm.value.userIds!.join(',')
+        break
+      case CandidateStrategy.ROLE:
+        candidateParam = configForm.value.roleIds!.join(',')
+        break
+      case CandidateStrategy.POST:
+        candidateParam = configForm.value.postIds!.join(',')
+        break
+      case CandidateStrategy.USER_GROUP:
+        candidateParam = configForm.value.userGroups!.join(',')
+        break
+      case CandidateStrategy.EXPRESSION:
+        candidateParam = configForm.value.expression!
+        break
+      case CandidateStrategy.DEPT_MEMBER:
+      case CandidateStrategy.DEPT_LEADER:
+        candidateParam = configForm.value.deptIds!.join(',')
+        break
+      // 发起人部门负责人
+      case CandidateStrategy.START_USER_DEPT_LEADER:
+      case CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER:
+        candidateParam = configForm.value.deptLevel + ''
+        break
+      // 指定连续多级部门的负责人
+      case CandidateStrategy.MULTI_LEVEL_DEPT_LEADER: {
+        // TODO 是否允许选多个部门
+        const deptIds = configForm.value.deptIds!.join(',')
+        candidateParam = deptIds.concat(',' + configForm.value.deptLevel + '')
+        break
+      }
+      default:
+        break
+    }
+    return candidateParam
+  }
+  /**
+   *  解析候选人参数
+   */
+  const parseCandidateParam = (
+    candidateStrategy: CandidateStrategy,
+    candidateParam: string | undefined
+  ) => {
+    if (!configForm.value || !candidateParam) {
+      return
+    }
+    switch (candidateStrategy) {
+      case CandidateStrategy.USER: {
+        configForm.value.userIds = candidateParam.split(',').map((item) => +item)
+        break
+      }
+      case CandidateStrategy.ROLE:
+        configForm.value.roleIds = candidateParam.split(',').map((item) => +item)
+        break
+      case CandidateStrategy.POST:
+        configForm.value.postIds = candidateParam.split(',').map((item) => +item)
+        break
+      case CandidateStrategy.USER_GROUP:
+        configForm.value.userGroups = candidateParam.split(',').map((item) => +item)
+        break
+      case CandidateStrategy.EXPRESSION:
+        configForm.value.expression = candidateParam
+        break
+      case CandidateStrategy.DEPT_MEMBER:
+      case CandidateStrategy.DEPT_LEADER:
+        configForm.value.deptIds = candidateParam.split(',').map((item) => +item)
+        break
+      // 发起人部门负责人
+      case CandidateStrategy.START_USER_DEPT_LEADER:
+      case CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER:
+        configForm.value.deptLevel = +candidateParam
+        break
+      // 指定连续多级部门的负责人
+      case CandidateStrategy.MULTI_LEVEL_DEPT_LEADER: {
+        // 暂时只能选一个部门
+        const paramArray = candidateParam.split(',')
+        configForm.value.deptIds = [+paramArray[0]]
+        configForm.value.deptLevel = +paramArray[1]
+        break
+      }
+      default:
+        break
+    }
+  }
   return {
     configForm,
     roleOptions,
@@ -235,6 +352,8 @@ export function useNodeForm(nodeType: NodeType) {
     userOptions,
     userGroupOptions,
     deptTreeOptions,
+    handleCandidateParam,
+    parseCandidateParam,
     getShowText
   }
 }
