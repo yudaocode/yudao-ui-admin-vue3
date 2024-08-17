@@ -460,19 +460,19 @@ export const DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
 ]
 
 export const MULTI_LEVEL_DEPT: DictDataVO = [
-  { label: '第1级部门', value: 1 },
-  { label: '第2级部门', value: 2 },
-  { label: '第3级部门', value: 3 },
-  { label: '第4级部门', value: 4 },
-  { label: '第5级部门', value: 5 },
-  { label: '第6级部门', value: 6 },
-  { label: '第7级部门', value: 7 },
-  { label: '第8级部门', value: 8 },
-  { label: '第9级部门', value: 9 },
-  { label: '第10级部门', value: 10 },
-  { label: '第11级部门', value: 11 },
-  { label: '第12级部门', value: 12 },
-  { label: '第13级部门', value: 13 },
-  { label: '第14级部门', value: 14 },
-  { label: '第15级部门', value: 15 }
+  { label: '第 1 级部门', value: 1 },
+  { label: '第 2 级部门', value: 2 },
+  { label: '第 3 级部门', value: 3 },
+  { label: '第 4 级部门', value: 4 },
+  { label: '第 5 级部门', value: 5 },
+  { label: '第 6 级部门', value: 6 },
+  { label: '第 7 级部门', value: 7 },
+  { label: '第 8 级部门', value: 8 },
+  { label: '第 9 级部门', value: 9 },
+  { label: '第 10 级部门', value: 10 },
+  { label: '第 11 级部门', value: 11 },
+  { label: '第 12 级部门', value: 12 },
+  { label: '第 13 级部门', value: 13 },
+  { label: '第 14 级部门', value: 14 },
+  { label: '第 15 级部门', value: 15 }
 ]

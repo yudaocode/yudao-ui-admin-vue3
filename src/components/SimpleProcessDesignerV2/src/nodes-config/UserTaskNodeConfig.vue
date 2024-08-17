@@ -58,6 +58,7 @@
                 />
               </el-select>
             </el-form-item>
+            <!-- TODO @jason：指定部门的选择，不用联动父子。例如说：可能就是想某个比较高级别的部门审批。 -->
             <el-form-item
               v-if="
                 configForm.candidateStrategy == CandidateStrategy.DEPT_MEMBER ||
@@ -150,6 +151,7 @@
                 />
               </el-select>
             </el-form-item>
+            <!-- TODO @jason：后续要支持选择已经存好的表达式 -->
             <el-form-item
               v-if="configForm.candidateStrategy === CandidateStrategy.EXPRESSION"
               label="流程表达式"
