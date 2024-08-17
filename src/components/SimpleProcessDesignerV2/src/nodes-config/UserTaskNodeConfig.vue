@@ -275,6 +275,17 @@
             >
               <el-input-number v-model="configForm.maxRemindCount" :min="1" :max="10" />
             </el-form-item>
+
+            <el-divider content-position="left">审批人与提交人为同一人时</el-divider>
+            <el-form-item prop="assignStartUserHandlerType">
+              <el-radio-group v-model="configForm.assignStartUserHandlerType">
+                <div class="flex-col">
+                  <div v-for="(item, index) in ASSIGN_START_USER_HANDLER_TYPES" :key="index">
+                    <el-radio :key="item.value" :value="item.value" :label="item.label" />
+                  </div>
+                </div>
+              </el-radio-group>
+            </el-form-item>
           </el-form>
         </div>
       </el-tab-pane>
@@ -364,7 +375,8 @@ import {
   REJECT_HANDLER_TYPES,
   DEFAULT_BUTTON_SETTING,
   OPERATION_BUTTON_NAME,
-  ButtonSetting
+  ButtonSetting,
+  ASSIGN_START_USER_HANDLER_TYPES
 } from '../consts'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import {
@@ -506,6 +518,8 @@ const saveConfig = async () => {
     timeDuration: isoTimeDuration.value,
     maxRemindCount: cTimeoutMaxRemindCount.value
   }
+  // 设置用户任务的审批人与发起人相同时
+  currentNode.value.assignStartUserHandlerType = configForm.value.assignStartUserHandlerType
   // 设置表单权限
   currentNode.value.fieldsPermission = fieldsPermissionConfig.value
   // 设置按钮权限
@@ -560,6 +574,8 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   }
   configForm.value.timeoutHandlerAction = node.timeoutHandler?.action
   configForm.value.maxRemindCount = node.timeoutHandler?.maxRemindCount
+  // 1.5 设置用户任务的审批人与发起人相同时
+  configForm.value.assignStartUserHandlerType = node.assignStartUserHandlerType
   // 2. 操作按钮设置
   buttonsSetting.value = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
   // 3. 表单字段权限配置

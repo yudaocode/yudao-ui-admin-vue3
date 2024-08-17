@@ -77,6 +77,8 @@ export interface SimpleFlowNode {
   timeoutHandler?: TimeoutHandler
   // 审批任务拒绝处理
   rejectHandler?: RejectHandler
+  // 审批节点的审批人与发起人相同时，对应的处理类型
+  assignStartUserHandlerType?: number
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -173,6 +175,21 @@ export enum RejectHandlerType {
    * 驳回到指定节点
    */
   RETURN_USER_TASK = 2
+}
+// 用户任务的审批人与发起人相同时，处理类型枚举
+export enum AssignStartUserHandlerType {
+  /**
+   * 由发起人对自己审批
+   */
+  START_USER_AUDIT = 1,
+  /**
+   * 自动跳过【参考飞书】：1）如果当前节点还有其他审批人，则交由其他审批人进行审批；2）如果当前节点没有其他审批人，则该节点自动通过
+   */
+  SKIP = 2,
+  /**
+   * 转交给部门负责人审批
+   */
+  ASSIGN_DEPT_LEADER
 }
 
 // 时间单位枚举
@@ -308,6 +325,11 @@ export const REJECT_HANDLER_TYPES: DictDataVO[] = [
   { label: '终止流程', value: RejectHandlerType.FINISH_PROCESS },
   { label: '驳回到指定节点', value: RejectHandlerType.RETURN_USER_TASK }
   // { label: '结束任务', value: RejectHandlerType.FINISH_TASK }
+]
+export const ASSIGN_START_USER_HANDLER_TYPES: DictDataVO[] = [
+  { label: '由发起人对自己审批', value: 1 },
+  { label: '自动跳过', value: 2 },
+  { label: '转交给部门负责人审批', value: 3 }
 ]
 
 // 比较运算符
