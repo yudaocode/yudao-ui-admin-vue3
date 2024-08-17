@@ -98,7 +98,7 @@ export type UserTaskFormType = {
   rejectHandlerType?: RejectHandlerType
   returnNodeId?: string
   timeoutHandlerEnable?: boolean
-  timeoutHandlerAction?: number
+  timeoutHandlerType?: number
   assignStartUserHandlerType?: AssignStartUserHandlerType
   timeDuration?: number
   maxRemindCount?: number
@@ -131,7 +131,7 @@ export function useNodeForm(nodeType: NodeType) {
       assignStartUserHandlerType: AssignStartUserHandlerType.START_USER_AUDIT,
       returnNodeId: '',
       timeoutHandlerEnable: false,
-      timeoutHandlerAction: 1,
+      timeoutHandlerType: 1,
       timeDuration: 6, // 默认 6小时
       maxRemindCount: 1, // 默认 提醒 1次
       buttonsSetting: []

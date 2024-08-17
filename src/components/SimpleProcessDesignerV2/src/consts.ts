@@ -159,7 +159,7 @@ export type TimeoutHandler = {
   //是否开启超时处理
   enable: boolean
   // 超时执行的动作
-  action?: number
+  type?: number
   // 超时时间设置
   timeDuration?: string
   // 执行动作是自动提醒, 最大提醒次数
@@ -175,6 +175,21 @@ export enum RejectHandlerType {
    * 驳回到指定节点
    */
   RETURN_USER_TASK = 2
+}
+// 用户任务超时处理类型枚举
+export enum TimeoutHandlerType {
+  /**
+   * 自动提醒
+   */
+  REMINDER = 1,
+  /**
+   * 自动同意
+   */
+  APPROVE = 2,
+  /**
+   * 自动拒绝
+   */
+  REJECT = 3
 }
 // 用户任务的审批人与发起人相同时，处理类型枚举
 export enum AssignStartUserHandlerType {
@@ -316,7 +331,7 @@ export const TIME_UNIT_TYPES: DictDataVO[] = [
   { label: '天', value: TimeUnitType.DAY }
 ]
 // 超时处理执行动作类型
-export const TIMEOUT_HANDLER_ACTION_TYPES: DictDataVO[] = [
+export const TIMEOUT_HANDLER_TYPES: DictDataVO[] = [
   { label: '自动提醒', value: 1 },
   { label: '自动同意', value: 2 },
   { label: '自动拒绝', value: 3 }
