@@ -159,14 +159,17 @@
 
         <el-form-item label-width="180px" label="接口内容加密方式" prop="config.encryptType">
           <el-radio-group v-model="formData.config.encryptType">
-            <el-radio key="AES" label="AES">AES</el-radio>
             <el-radio key="NONE" label="">无加密</el-radio>
+            <el-radio key="AES" label="AES">AES</el-radio>
           </el-radio-group>
         </el-form-item>
-
         <div v-if="formData.config.encryptType === 'AES'">
-          <el-form-item label-width="180px" label="AES 密钥" prop="config.encryptKey">
-            <el-input v-model="formData.config.encryptKey" placeholder="请输入接口内容加密密钥" clearable />
+          <el-form-item label-width="180px" label="接口内容加密密钥" prop="config.encryptKey">
+            <el-input
+              v-model="formData.config.encryptKey"
+              placeholder="请输入接口内容加密密钥"
+              clearable
+            />
           </el-form-item>
         </div>
 
@@ -211,7 +214,7 @@ const formData = ref<any>({
     alipayPublicCertContent: '',
     rootCertContent: '',
     encryptType: '',
-    encryptKey: '',
+    encryptKey: ''
   }
 })
 const formRules = {
@@ -230,7 +233,7 @@ const formRules = {
     { required: true, message: '请上传支付宝公钥证书', trigger: 'blur' }
   ],
   'config.rootCertContent': [{ required: true, message: '请上传指定根证书', trigger: 'blur' }],
-  'config.encryptKey': [{required: true, message: '请输入接口内容加密密钥', trigger: 'blur'}],
+  'config.encryptKey': [{ required: true, message: '请输入接口内容加密密钥', trigger: 'blur' }]
 }
 const fileAccept = '.crt'
 const formRef = ref() // 表单 Ref
@@ -299,8 +302,8 @@ const resetForm = (appId, code) => {
       appCertContent: '',
       alipayPublicCertContent: '',
       rootCertContent: '',
-      encryptType: 'AES',
-      encryptKey: '',
+      encryptType: '',
+      encryptKey: ''
     }
   }
   formRef.value?.resetFields()

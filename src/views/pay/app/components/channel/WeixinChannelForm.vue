@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Dialog v-model="dialogVisible" :title="dialogTitle" @close="close" width="800px">
+    <Dialog v-model="dialogVisible" :title="dialogTitle" width="800px">
       <el-form
         ref="formRef"
         :model="formData"
@@ -48,11 +48,7 @@
         </el-form-item>
         <div v-if="formData.config.apiVersion === 'v2'">
           <el-form-item label-width="180px" label="商户密钥" prop="config.mchKey">
-            <el-input
-              v-model="formData.config.mchKey"
-              placeholder="请输入商户密钥"
-              clearable
-            />
+            <el-input v-model="formData.config.mchKey" placeholder="请输入商户密钥" clearable />
           </el-form-item>
           <el-form-item
             label-width="180px"
@@ -182,9 +178,7 @@ const formRules = {
   'config.privateKeyContent': [
     { required: true, message: '请上传 apiclient_key.pem 证书', trigger: 'blur' }
   ],
-  'config.certSerialNo': [
-    { required: true, message: '请输入证书序列号', trigger: 'blur' }
-  ],
+  'config.certSerialNo': [{ required: true, message: '请输入证书序列号', trigger: 'blur' }],
   'config.apiV3Key': [{ required: true, message: '请上传 api V3 密钥值', trigger: 'blur' }]
 }
 const formRef = ref() // 表单 Ref

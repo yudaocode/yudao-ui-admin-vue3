@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Dialog v-model="dialogVisible" :title="dialogTitle" @closed="close" width="800px">
+    <Dialog v-model="dialogVisible" :title="dialogTitle" width="800px">
       <el-form
         ref="formRef"
         :model="formData"
