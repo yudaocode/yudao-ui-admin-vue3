@@ -133,12 +133,11 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="订单金额" prop="refundPrice">
+      <el-table-column align="center" label="订单金额" prop="refundPrice" min-width="120">
         <template #default="scope">
           <span>{{ fenToYuan(scope.row.refundPrice) }} 元</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="买家" prop="user.nickname" />
       <el-table-column align="center" label="申请时间" prop="createTime" width="180">
         <template #default="scope">
           <span>{{ formatDate(scope.row.createTime) }}</span>
@@ -207,6 +206,7 @@ const queryParams = ref({
   way: null,
   type: null
 })
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -218,24 +218,27 @@ const getList = async () => {
     }
     // 执行查询
     // TODO @芋艿：接口需要通过userId进行筛选返回值
-    const res = (await AfterSaleApi.getAfterSalePage(data)) as AfterSaleApi.TradeAfterSaleVO[]
-    list.value = res.list
+    const res = await AfterSaleApi.getAfterSalePage(data)
+    list.value = res.list as AfterSaleApi.TradeAfterSaleVO[]
     total.value = res.total
   } finally {
     loading.value = false
   }
 }
+
 /** 搜索按钮操作 */
 const handleQuery = async () => {
   queryParams.value.pageNo = 1
   await getList()
 }
+
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value?.resetFields()
   queryParams.value.userId = userId
   handleQuery()
 }
+
 /** tab 切换 */
 const tabClick = async (tab: TabsPaneContext) => {
   queryParams.value.status = tab.paneName

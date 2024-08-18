@@ -135,7 +135,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="订单金额" prop="refundPrice">
+      <el-table-column align="center" label="订单金额" prop="refundPrice" min-width="120">
         <template #default="scope">
           <span>{{ fenToYuan(scope.row.refundPrice) }} 元</span>
         </template>
@@ -206,6 +206,7 @@ const queryParams = reactive({
   way: null,
   type: null
 })
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -216,23 +217,26 @@ const getList = async () => {
       delete data.status
     }
     // 执行查询
-    const res = (await AfterSaleApi.getAfterSalePage(data)) as AfterSaleApi.TradeAfterSaleVO[]
-    list.value = res.list
+    const res = await AfterSaleApi.getAfterSalePage(data)
+    list.value = res.list as AfterSaleApi.TradeAfterSaleVO[]
     total.value = res.total
   } finally {
     loading.value = false
   }
 }
+
 /** 搜索按钮操作 */
 const handleQuery = async () => {
   queryParams.pageNo = 1
   await getList()
 }
+
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value?.resetFields()
   handleQuery()
 }
+
 /** tab 切换 */
 const tabClick = async (tab: TabsPaneContext) => {
   queryParams.status = tab.paneName
