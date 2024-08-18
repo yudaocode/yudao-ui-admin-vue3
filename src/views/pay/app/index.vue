@@ -64,8 +64,8 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="应用编号" align="center" prop="id" />
-      <el-table-column label="应用名" align="center" prop="name" />
+      <el-table-column label="应用标识" align="center" prop="appKey" />
+      <el-table-column label="应用名" align="center" prop="name" min-width="90" />
       <el-table-column label="开启状态" align="center" prop="status">
         <template #default="scope">
           <el-switch
@@ -78,7 +78,7 @@
       </el-table-column>
       <el-table-column label="支付宝配置" align="center">
         <el-table-column
-          :label="channel.name"
+          :label="channel.name.replace('支付宝', '')"
           align="center"
           v-for="channel in alipayChannels"
           :key="channel.code"
@@ -89,6 +89,7 @@
               v-if="isChannelExists(scope.row.channelCodes, channel.code)"
               @click="openChannelForm(scope.row, channel.code)"
               circle
+              size="small"
             >
               <Icon icon="ep:check" />
             </el-button>
@@ -96,6 +97,7 @@
               v-else
               type="danger"
               circle
+              size="small"
               @click="openChannelForm(scope.row, channel.code)"
             >
               <Icon icon="ep:close" />
@@ -105,7 +107,7 @@
       </el-table-column>
       <el-table-column label="微信配置" align="center">
         <el-table-column
-          :label="channel.name"
+          :label="channel.name.replace('微信', '')"
           align="center"
           v-for="channel in wxChannels"
           :key="channel.code"
@@ -116,6 +118,7 @@
               v-if="isChannelExists(scope.row.channelCodes, channel.code)"
               @click="openChannelForm(scope.row, channel.code)"
               circle
+              size="small"
             >
               <Icon icon="ep:check" />
             </el-button>
@@ -123,6 +126,7 @@
               v-else
               type="danger"
               circle
+              size="small"
               @click="openChannelForm(scope.row, channel.code)"
             >
               <Icon icon="ep:close" />
@@ -136,6 +140,7 @@
             <el-button
               type="success"
               circle
+              size="small"
               v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.WALLET.code)"
               @click="openChannelForm(scope.row, PayChannelEnum.WALLET.code)"
             >
@@ -145,6 +150,7 @@
               v-else
               type="danger"
               circle
+              size="small"
               @click="openChannelForm(scope.row, PayChannelEnum.WALLET.code)"
             >
               <Icon icon="ep:close" />
@@ -158,6 +164,7 @@
             <el-button
               type="success"
               circle
+              size="small"
               v-if="isChannelExists(scope.row.channelCodes, PayChannelEnum.MOCK.code)"
               @click="openChannelForm(scope.row, PayChannelEnum.MOCK.code)"
             >
@@ -167,6 +174,7 @@
               v-else
               type="danger"
               circle
+              size="small"
               @click="openChannelForm(scope.row, PayChannelEnum.MOCK.code)"
             >
               <Icon icon="ep:close" />
@@ -255,7 +263,7 @@ const wxChannels = [
   PayChannelEnum.WX_APP,
   PayChannelEnum.WX_NATIVE,
   PayChannelEnum.WX_WAP,
-  PayChannelEnum.WX_BAR,
+  PayChannelEnum.WX_BAR
 ]
 
 /** 查询列表 */

@@ -10,6 +10,9 @@
       <el-form-item label="应用名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入应用名" />
       </el-form-item>
+      <el-form-item label="应用标识" prop="name">
+        <el-input v-model="formData.appKey" placeholder="请输入应用标识" />
+      </el-form-item>
       <el-form-item label="开启状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
@@ -55,16 +58,15 @@ const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
   name: undefined,
-  packageId: undefined,
-  contactName: undefined,
-  contactMobile: undefined,
-  accountCount: undefined,
-  expireTime: undefined,
-  domain: undefined,
-  status: CommonStatusEnum.ENABLE
+  appKey: undefined,
+  status: CommonStatusEnum.ENABLE,
+  remark: undefined,
+  orderNotifyUrl: undefined,
+  refundNotifyUrl: undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '应用名不能为空', trigger: 'blur' }],
+  appKey: [{ required: true, message: '应用标识不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '开启状态不能为空', trigger: 'blur' }],
   orderNotifyUrl: [{ required: true, message: '支付结果的回调地址不能为空', trigger: 'blur' }],
   refundNotifyUrl: [{ required: true, message: '退款结果的回调地址不能为空', trigger: 'blur' }]
@@ -123,7 +125,8 @@ const resetForm = () => {
     status: CommonStatusEnum.ENABLE,
     remark: undefined,
     orderNotifyUrl: undefined,
-    refundNotifyUrl: undefined
+    refundNotifyUrl: undefined,
+    appKey: undefined
   }
   formRef.value?.resetFields()
 }
