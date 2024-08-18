@@ -126,6 +126,8 @@ const copyConfig = async () => {
       message: ${appStore.getMessage},
       // 标签页
       tagsView: ${appStore.getTagsView},
+      // 标签页
+      tagsViewImmerse: ${appStore.getTagsViewImmerse},
       // 标签页图标
       getTagsViewIcon: ${appStore.getTagsViewIcon},
       // logo

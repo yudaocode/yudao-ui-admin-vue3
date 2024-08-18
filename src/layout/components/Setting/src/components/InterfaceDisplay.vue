@@ -73,6 +73,13 @@ const tagsViewChange = (show: boolean) => {
   appStore.setTagsView(show)
 }
 
+// 标签页沉浸
+const tagsViewImmerse = ref(appStore.getTagsViewImmerse)
+
+const tagsViewImmerseChange = (immerse: boolean) => {
+  appStore.setTagsViewImmerse(immerse)
+}
+
 // 标签页图标
 const tagsViewIcon = ref(appStore.getTagsViewIcon)
 
@@ -179,6 +186,11 @@ watch(
     <div class="flex items-center justify-between">
       <span class="text-14px">{{ t('setting.tagsView') }}</span>
       <ElSwitch v-model="tagsView" @change="tagsViewChange" />
+    </div>
+
+    <div class="flex items-center justify-between">
+      <span class="text-14px">{{ t('setting.tagsViewImmerse') }}</span>
+      <ElSwitch v-model="tagsViewImmerse" @change="tagsViewImmerseChange" />
     </div>
 
     <div class="flex items-center justify-between">
