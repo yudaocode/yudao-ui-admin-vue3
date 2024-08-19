@@ -110,7 +110,7 @@ const submitForm = async () => {
   try {
     await UserApi.updateUserBalance({
       id: formData.value.id,
-      balance: convertToInteger(balanceResult.value)
+      balance: convertToInteger(formData.value.changeBalance) * formData.value.changeType
     })
 
     message.success(t('common.updateSuccess'))
