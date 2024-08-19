@@ -156,7 +156,7 @@
           <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_WAY" :value="scope.row.way" />
         </template>
       </el-table-column>
-      <el-table-column align="center" fixed="right" label="操作" width="160">
+      <el-table-column align="center" fixed="right" label="操作" width="120">
         <template #default="{ row }">
           <el-button link type="primary" @click="openAfterSaleDetail(row.id)">处理退款</el-button>
         </template>
@@ -181,6 +181,9 @@ import { cloneDeep } from 'lodash-es'
 import { fenToYuan } from '@/utils'
 
 defineOptions({ name: 'TradeAfterSale' })
+const props = defineProps<{
+  userId?: number
+}>()
 
 const { push } = useRouter() // 路由跳转
 
@@ -204,7 +207,8 @@ const queryParams = reactive({
   spuName: null,
   createTime: [],
   way: null,
-  type: null
+  type: null,
+  userId: null
 })
 /** 查询列表 */
 const getList = async () => {
@@ -215,8 +219,11 @@ const getList = async () => {
     if (data.status === '0') {
       delete data.status
     }
+    if (props.userId) {
+      data.userId = props.userId
+    }
     // 执行查询
-    const res = (await AfterSaleApi.getAfterSalePage(data)) as AfterSaleApi.TradeAfterSaleVO[]
+    const res = await AfterSaleApi.getAfterSalePage(data)
     list.value = res.list
     total.value = res.total
   } finally {

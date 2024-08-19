@@ -48,7 +48,9 @@
           <el-tab-pane label="订单管理" lazy>
             <UserOrderList :user-id="id" />
           </el-tab-pane>
-          <el-tab-pane label="售后管理" lazy>售后管理(WIP)</el-tab-pane>
+          <el-tab-pane label="售后管理" lazy>
+            <TradeAfterSale :user-id="id" />
+          </el-tab-pane>
           <el-tab-pane label="收藏记录" lazy>
             <UserFavoriteList :user-id="id" />
           </el-tab-pane>
@@ -81,6 +83,7 @@ import UserPointList from './UserPointList.vue'
 import UserSignList from './UserSignList.vue'
 import UserFavoriteList from './UserFavoriteList.vue'
 import WalletTransactionList from '@/views/pay/wallet/transaction/WalletTransactionList.vue'
+import TradeAfterSale from '@/views/mall/trade/afterSale/index.vue'
 import { CardTitle } from '@/components/Card/index'
 import { ElMessage } from 'element-plus'
 
