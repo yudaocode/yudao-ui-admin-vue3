@@ -1,11 +1,11 @@
 <template>
-  <Dialog title="修改用户积分" v-model="dialogVisible" width="600">
+  <Dialog v-model="dialogVisible" title="修改用户积分" width="600">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="100px"
-      v-loading="formLoading"
     >
       <el-form-item label="用户编号" prop="id">
         <el-input v-model="formData.id" class="!w-240px" disabled />
@@ -23,19 +23,19 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="变动积分" prop="changePoint">
-        <el-input-number v-model="formData.changePoint" class="!w-240px" :min="0" :precision="0" />
+        <el-input-number v-model="formData.changePoint" :min="0" :precision="0" class="!w-240px" />
       </el-form-item>
       <el-form-item label="变动后积分">
         <el-input-number v-model="pointResult" class="!w-240px" disabled />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as UserApi from '@/api/member/user'
 
 /** 修改用户积分表单 */
@@ -115,8 +115,9 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     nickname: undefined,
-    levelId: undefined,
-    reason: undefined
+    point: 0,
+    changePoint: 0,
+    changeType: 1
   }
   formRef.value?.resetFields()
 }
