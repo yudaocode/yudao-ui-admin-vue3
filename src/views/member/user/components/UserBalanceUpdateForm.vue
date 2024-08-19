@@ -57,7 +57,7 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formData = ref({
   id: undefined,
   nickname: undefined,
-  balance: '0',
+  balance: '0', // TODO @puhui999：貌似有 el-input-number 的报错，看看怎么解决。应该可以
   changeBalance: 0,
   changeType: 1
 })
