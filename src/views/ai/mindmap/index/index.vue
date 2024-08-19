@@ -3,9 +3,9 @@
     <!--表单区域-->
     <Left
       ref="leftRef"
+      :is-generating="isGenerating"
       @submit="submit"
       @direct-generate="directGenerate"
-      :is-generating="isGenerating"
     />
     <!--右边生成思维导图区域-->
     <Right
@@ -18,7 +18,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import Left from './components/Left.vue'
 import Right from './components/Right.vue'
 import { AiMindMapApi, AiMindMapGenerateReqVO } from '@/api/ai/mindmap'
@@ -40,7 +40,7 @@ const rightRef = ref<InstanceType<typeof Right>>() // 右边组件
 
 /** 使用已有内容直接生成 **/
 const directGenerate = (existPrompt: string) => {
-  isEnd.value = false // 先设置为false再设置为true，让子组建的watch能够监听到
+  isEnd.value = false // 先设置为 false 再设置为 true，让子组建的 watch 能够监听到
   generatedContent.value = existPrompt
   isEnd.value = true
 }

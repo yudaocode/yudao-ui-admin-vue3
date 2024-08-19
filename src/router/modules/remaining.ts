@@ -589,11 +589,20 @@ const remainingRouter: AppRouteRecordRaw[] = [
         meta: {
           title: '绘图作品',
           icon: 'ep:home-filled',
-          noCache: false,
-          affix: true
+          noCache: false
         }
       }
     ]
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    component: () => import('@/views/Error/404.vue'),
+    name: '',
+    meta: {
+      title: '404',
+      hidden: true,
+      breadcrumb: false
+    }
   }
 ]
 

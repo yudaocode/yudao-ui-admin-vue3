@@ -92,6 +92,7 @@ export default {
     localeIcon: '多语言图标',
     messageIcon: '消息图标',
     tagsView: '标签页',
+    tagsViewImmerse: '标签页沉浸',
     logo: '标志',
     greyMode: '灰色模式',
     fixedHeader: '固定头部',

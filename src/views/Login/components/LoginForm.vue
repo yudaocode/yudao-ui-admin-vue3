@@ -249,8 +249,9 @@ const handleLogin = async (params) => {
     if (!data) {
       return
     }
-    loginData.loginForm.captchaVerification = params.captchaVerification
-    const res = await LoginApi.login(loginData.loginForm)
+    const loginDataLoginForm = { ...loginData.loginForm }
+    loginDataLoginForm.captchaVerification = params.captchaVerification
+    const res = await LoginApi.login(loginDataLoginForm)
     if (!res) {
       return
     }
@@ -259,8 +260,8 @@ const handleLogin = async (params) => {
       text: '正在加载系统中...',
       background: 'rgba(0, 0, 0, 0.7)'
     })
-    if (loginData.loginForm.rememberMe) {
-      authUtil.setLoginForm(loginData.loginForm)
+    if (loginDataLoginForm.rememberMe) {
+      authUtil.setLoginForm(loginDataLoginForm)
     } else {
       authUtil.removeLoginForm()
     }

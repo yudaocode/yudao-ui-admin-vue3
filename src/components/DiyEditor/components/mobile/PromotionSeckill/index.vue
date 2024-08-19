@@ -1,35 +1,35 @@
 <template>
-  <el-scrollbar class="z-1 min-h-30px" wrap-class="w-full" ref="containerRef">
+  <el-scrollbar ref="containerRef" class="z-1 min-h-30px" wrap-class="w-full">
     <!-- 商品网格 -->
     <div
-      class="grid overflow-x-auto"
       :style="{
         gridGap: `${property.space}px`,
         gridTemplateColumns,
         width: scrollbarWidth
       }"
+      class="grid overflow-x-auto"
     >
       <!-- 商品 -->
       <div
-        class="relative box-content flex flex-row flex-wrap overflow-hidden bg-white"
+        v-for="(spu, index) in spuList"
+        :key="index"
         :style="{
           borderTopLeftRadius: `${property.borderRadiusTop}px`,
           borderTopRightRadius: `${property.borderRadiusTop}px`,
           borderBottomLeftRadius: `${property.borderRadiusBottom}px`,
           borderBottomRightRadius: `${property.borderRadiusBottom}px`
         }"
-        v-for="(spu, index) in spuList"
-        :key="index"
+        class="relative box-content flex flex-row flex-wrap overflow-hidden bg-white"
       >
         <!-- 角标 -->
         <div
           v-if="property.badge.show"
           class="absolute left-0 top-0 z-1 items-center justify-center"
         >
-          <el-image fit="cover" :src="property.badge.imgUrl" class="h-26px w-38px" />
+          <el-image :src="property.badge.imgUrl" class="h-26px w-38px" fit="cover" />
         </div>
         <!-- 商品封面图 -->
-        <el-image fit="cover" :src="spu.picUrl" :style="{ width: imageSize, height: imageSize }" />
+        <el-image :src="spu.picUrl" :style="{ width: imageSize, height: imageSize }" fit="cover" />
         <div
           :class="[
             'flex flex-col gap-8px p-8px box-border',
@@ -42,8 +42,8 @@
           <!-- 商品名称 -->
           <div
             v-if="property.fields.name.show"
-            class="truncate text-12px"
             :style="{ color: property.fields.name.color }"
+            class="truncate text-12px"
           >
             {{ spu.name }}
           </div>
@@ -51,10 +51,10 @@
             <!-- 商品价格 -->
             <span
               v-if="property.fields.price.show"
-              class="text-12px"
               :style="{ color: property.fields.price.color }"
+              class="text-12px"
             >
-              ￥{{ spu.price }}
+              ￥{{ fenToYuan(spu.seckillPrice || spu.price || 0) }}
             </span>
           </div>
         </div>
@@ -62,10 +62,13 @@
     </div>
   </el-scrollbar>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { PromotionSeckillProperty } from './config'
 import * as ProductSpuApi from '@/api/mall/product/spu'
+import { Spu } from '@/api/mall/product/spu'
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
+import { SeckillProductVO } from '@/api/mall/promotion/seckill/seckillActivity'
+import { fenToYuan } from '@/utils'
 
 /** 秒杀 */
 defineOptions({ name: 'PromotionSeckill' })
@@ -80,6 +83,13 @@ watch(
     const activity = await SeckillActivityApi.getSeckillActivity(props.property.activityId)
     if (!activity?.spuId) return
     spuList.value = [await ProductSpuApi.getSpu(activity.spuId)]
+    spuList.value = [await ProductSpuApi.getSpu(activity.spuId)]
+    // 循环活动信息，赋值秒杀最低价格
+    activity.products.forEach((product: SeckillProductVO) => {
+      spuList.value.forEach((spu: Spu) => {
+        spu.seckillPrice = Math.min(spu.seckillPrice || Infinity, product.seckillPrice) // 设置 SPU 的最低价格
+      })
+    })
   },
   {
     immediate: true,
@@ -122,4 +132,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped lang="scss"></style>
+<style lang="scss" scoped></style>

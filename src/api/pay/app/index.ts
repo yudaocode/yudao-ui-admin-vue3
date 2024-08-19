@@ -2,6 +2,7 @@ import request from '@/config/axios'
 
 export interface AppVO {
   id: number
+  appKey: string
   name: string
   status: number
   remark: string

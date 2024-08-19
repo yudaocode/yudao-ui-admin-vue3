@@ -18,16 +18,28 @@
       >
         {{ value.name }}
       </el-tag>
-      <el-input
+      <el-select
         v-show="inputVisible(index)"
         :id="`input${index}`"
         :ref="setInputRef"
         v-model="inputValue"
-        class="!w-20"
+        :reserve-keyword="false"
+        allow-create
+        class="!w-30"
+        default-first-option
+        filterable
         size="small"
         @blur="handleInputConfirm(index, item.id)"
+        @change="handleInputConfirm(index, item.id)"
         @keyup.enter="handleInputConfirm(index, item.id)"
-      />
+      >
+        <el-option
+          v-for="item2 in attributeOptions"
+          :key="item2.id"
+          :label="item2.name"
+          :value="item2.name"
+        />
+      </el-select>
       <el-button
         v-show="!inputVisible(index)"
         class="button-new-tag ml-1"
@@ -42,7 +54,6 @@
 </template>
 
 <script lang="ts" setup>
-import { ElInput } from 'element-plus'
 import * as PropertyApi from '@/api/mall/product/property'
 import { PropertyAndValues } from '@/views/mall/product/spu/components'
 import { propTypes } from '@/utils/propTypes'
@@ -63,11 +74,12 @@ const inputRef = ref<any[]>([]) //标签输入框Ref
 const setInputRef = (el: any) => {
   if (el === null || typeof el === 'undefined') return
   // 如果不存在 id 相同的元素才添加
-  if (!inputRef.value.some((item) => item.input?.attributes.id === el.input?.attributes.id)) {
+  if (!inputRef.value.some((item) => item.inputRef?.attributes.id === el.inputRef?.attributes.id)) {
     inputRef.value.push(el)
   }
 }
 const attributeList = ref<PropertyAndValues[]>([]) // 商品属性列表
+const attributeOptions = ref([] as PropertyApi.PropertyValueVO[]) // 商品属性名称下拉框
 const props = defineProps({
   propertyList: {
     type: Array,
@@ -100,16 +112,36 @@ const handleCloseProperty = (index: number) => {
 }
 
 /** 显示输入框并获取焦点 */
-const showInput = async (index) => {
+const showInput = async (index: number) => {
   attributeIndex.value = index
   inputRef.value[index].focus()
+  // 获取属性下拉选项
+  await getAttributeOptions(attributeList.value[index].id)
 }
 
 /** 输入框失去焦点或点击回车时触发 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const handleInputConfirm = async (index: number, propertyId: number) => {
   if (inputValue.value) {
-    // 保存属性值
+    // 1. 重复添加校验
+    if (attributeList.value[index].values.find((item) => item.name === inputValue.value)) {
+      message.warning('已存在相同属性值，请重试')
+      attributeIndex.value = null
+      inputValue.value = ''
+      return
+    }
+
+    // 2.1 情况一：属性值已存在，则直接使用并结束
+    const existValue = attributeOptions.value.find((item) => item.name === inputValue.value)
+    if (existValue) {
+      attributeIndex.value = null
+      inputValue.value = ''
+      attributeList.value[index].values.push({ id: existValue.id, name: existValue.name })
+      emit('success', attributeList.value)
+      return
+    }
+
+    // 2.2 情况二：新属性值，则进行保存
     try {
       const id = await PropertyApi.createPropertyValue({ propertyId, name: inputValue.value })
       attributeList.value[index].values.push({ id, name: inputValue.value })
@@ -121,5 +153,10 @@ const handleInputConfirm = async (index: number, propertyId: number) => {
   }
   attributeIndex.value = null
   inputValue.value = ''
+}
+
+/** 获取商品属性下拉选项 */
+const getAttributeOptions = async (propertyId: number) => {
+  attributeOptions.value = await PropertyApi.getPropertyValueSimpleList(propertyId)
 }
 </script>
