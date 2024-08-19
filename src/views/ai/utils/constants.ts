@@ -67,10 +67,11 @@ export enum AiWriteTypeEnum {
 // 表格展示对照map
 export const AiWriteTypeTableRender = {
   [AiWriteTypeEnum.WRITING]: '撰写',
-  [AiWriteTypeEnum.REPLY]: '回复',
+  [AiWriteTypeEnum.REPLY]: '回复'
 }
 
 // ========== 【图片 UI】相关的枚举 ==========
+
 export const ImageHotWords = [
   '中国旗袍',
   '古装美女',
@@ -414,3 +415,67 @@ export const WriteExample = {
     data: '您的请假申请已收悉，经核实和考虑，暂时无法批准您的请假申请。\n\n如有特殊情况或紧急事务，请及时与我联系。\n\n祝工作顺利。\n\n谢谢。'
   }
 }
+
+// ========== 【思维导图 UI】相关的枚举 ==========
+
+/** 思维导图已有内容生成示例 **/
+export const MindMapContentExample = `# Java 技术栈
+
+## 核心技术
+### Java SE
+### Java EE
+
+## 框架
+### Spring
+#### Spring Boot
+#### Spring MVC
+#### Spring Data
+### Hibernate
+### MyBatis
+
+## 构建工具
+### Maven
+### Gradle
+
+## 版本控制
+### Git
+### SVN
+
+## 测试工具
+### JUnit
+### Mockito
+### Selenium
+
+## 应用服务器
+### Tomcat
+### Jetty
+### WildFly
+
+## 数据库
+### MySQL
+### PostgreSQL
+### Oracle
+### MongoDB
+
+## 消息队列
+### Kafka
+### RabbitMQ
+### ActiveMQ
+
+## 微服务
+### Spring Cloud
+### Dubbo
+
+## 容器化
+### Docker
+### Kubernetes
+
+## 云服务
+### AWS
+### Azure
+### Google Cloud
+
+## 开发工具
+### IntelliJ IDEA
+### Eclipse
+### Visual Studio Code`

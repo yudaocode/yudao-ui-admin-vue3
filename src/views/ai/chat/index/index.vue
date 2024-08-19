@@ -4,10 +4,10 @@
     <ConversationList
       :active-id="activeConversationId"
       ref="conversationListRef"
-      @onConversationCreate="handleConversationCreateSuccess"
-      @onConversationClick="handleConversationClick"
-      @onConversationClear="handleConversationClear"
-      @onConversationDelete="handlerConversationDelete"
+      @on-conversation-create="handleConversationCreateSuccess"
+      @on-conversation-click="handleConversationClick"
+      @on-conversation-clear="handleConversationClear"
+      @on-conversation-delete="handlerConversationDelete"
     />
     <!-- 右侧：对话详情 -->
     <el-container class="detail-container">
@@ -27,7 +27,7 @@
           <el-button size="small" class="btn">
             <Icon icon="ep:download" color="#787878" />
           </el-button>
-          <el-button size="small" class="btn" @click="handleGoTopMessage" >
+          <el-button size="small" class="btn" @click="handleGoTopMessage">
             <Icon icon="ep:top" color="#787878" />
           </el-button>
         </div>
@@ -119,7 +119,6 @@ import MessageList from './components/message/MessageList.vue'
 import MessageListEmpty from './components/message/MessageListEmpty.vue'
 import MessageLoading from './components/message/MessageLoading.vue'
 import MessageNewConversation from './components/message/MessageNewConversation.vue'
-import { Download, Top } from '@element-plus/icons-vue'
 
 /** AI 聊天对话 列表 */
 defineOptions({ name: 'AiChat' })

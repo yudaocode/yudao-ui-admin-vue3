@@ -43,9 +43,6 @@ import { CommonStatusEnum } from '@/utils/constants'
 /** BPM 流程 表单 */
 defineOptions({ name: 'ProcessListenerDialog' })
 
-const { t } = useI18n() // 国际化
-const message = useMessage() // 消息弹窗
-
 const dialogVisible = ref(false) // 弹窗的是否展示
 const loading = ref(true) // 列表的加载中
 const list = ref<ProcessListenerVO[]>([]) // 列表的数据
@@ -53,17 +50,23 @@ const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  type: undefined,
+  type: '',
   status: CommonStatusEnum.ENABLE
 })
 
 /** 打开弹窗 */
 const open = async (type: string) => {
+  queryParams.pageNo = 1
+  queryParams.type = type
+  getList()
   dialogVisible.value = true
+}
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+/** 查询列表 */
+const getList = async () => {
   loading.value = true
   try {
-    queryParams.pageNo = 1
-    queryParams.type = type
     const data = await ProcessListenerApi.getProcessListenerPage(queryParams)
     list.value = data.list
     total.value = data.total
@@ -71,7 +74,6 @@ const open = async (type: string) => {
     loading.value = false
   }
 }
-defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调

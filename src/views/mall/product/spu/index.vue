@@ -244,6 +244,7 @@ import * as ProductCategoryApi from '@/api/mall/product/category'
 defineOptions({ name: 'ProductSpu' })
 
 const message = useMessage() // 消息弹窗
+const route = useRoute() // 路由
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由跳转
 
@@ -431,6 +432,11 @@ onActivated(() => {
 
 /** 初始化 **/
 onMounted(async () => {
+  // 解析路由的 categoryId
+  if (route.query.categoryId) {
+    queryParams.value.categoryId = Number(route.query.categoryId)
+  }
+  // 获得商品信息
   await getTabsCount()
   await getList()
   // 获得分类树

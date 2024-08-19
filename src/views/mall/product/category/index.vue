@@ -56,7 +56,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" min-width="180">
         <template #default="scope">
           <el-button
             link
@@ -65,6 +65,15 @@
             v-hasPermi="['product:category:update']"
           >
             编辑
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            v-if="scope.row.parentId > 0"
+            @click="handleViewSpu(scope.row.id)"
+            v-hasPermi="['product:spu:query']"
+          >
+            查看商品
           </el-button>
           <el-button
             link
@@ -140,6 +149,15 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 查看商品操作 */
+const router = useRouter() // 路由
+const handleViewSpu = (id: number) => {
+  router.push({
+    name: 'ProductSpu',
+    query: { categoryId: id }
+  })
 }
 
 /** 初始化 **/

@@ -1,6 +1,10 @@
 <template>
   <el-card class="dr-task" body-class="task-card" shadow="never">
-    <template #header>绘画任务</template>
+    <template #header>
+      绘画任务
+      <!-- TODO @fan：看看，怎么优化下这个样子哈。 -->
+      <el-button @click="handleViewPublic">绘画作品</el-button>
+    </template>
     <!-- 图片列表 -->
     <div class="task-image-list" ref="imageListRef">
       <ImageCard
@@ -42,6 +46,7 @@ import { AiImageStatusEnum } from '@/views/ai/utils/constants'
 import download from '@/utils/download'
 
 const message = useMessage() // 消息弹窗
+const router = useRouter() // 路由
 
 // 图片分页相关的参数
 const queryParams = reactive({
@@ -58,6 +63,13 @@ const inProgressTimer = ref<any>() // 生成中的 image 定时器，轮询生�
 // 图片详情相关的参数
 const isShowImageDetail = ref<boolean>(false) // 图片详情是否展示
 const showImageDetailId = ref<number>(0) // 图片详情的图片编号
+
+/** 处理查看绘图作品 */
+const handleViewPublic = () => {
+  router.push({
+    name: 'AiImageSquare'
+  })
+}
 
 /** 查看图片的详情  */
 const handleDetailOpen = async () => {
@@ -138,7 +150,7 @@ const handleImageButtonClick = async (type: string, imageDetail: ImageVO) => {
   }
   // 下载
   if (type === 'download') {
-    await download.image(imageDetail.picUrl)
+    await download.image({ url: imageDetail.picUrl })
     return
   }
   // 重新生成
