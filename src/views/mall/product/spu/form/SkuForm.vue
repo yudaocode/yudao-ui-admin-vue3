@@ -2,11 +2,11 @@
 <template>
   <el-form
     ref="formRef"
+    v-loading="formLoading"
     :disabled="isDetail"
     :model="formData"
     :rules="rules"
     label-width="120px"
-    v-loading="formLoading"
   >
     <el-form-item label="分销类型" props="subCommissionType">
       <el-radio-group

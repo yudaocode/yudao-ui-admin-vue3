@@ -133,7 +133,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="订单金额" prop="refundPrice" min-width="120">
+      <el-table-column align="center" label="订单金额" min-width="120" prop="refundPrice">
         <template #default="scope">
           <span>{{ fenToYuan(scope.row.refundPrice) }} 元</span>
         </template>
@@ -153,7 +153,7 @@
           <dict-tag :type="DICT_TYPE.TRADE_AFTER_SALE_WAY" :value="scope.row.way" />
         </template>
       </el-table-column>
-      <el-table-column align="center" fixed="right" label="操作" width="160">
+      <el-table-column align="center" fixed="right" label="操作" width="120">
         <template #default="{ row }">
           <el-button link type="primary" @click="openAfterSaleDetail(row.id)">处理退款</el-button>
         </template>
@@ -180,7 +180,7 @@ import { fenToYuan } from '@/utils'
 defineOptions({ name: 'UserAfterSaleList' })
 
 const { push } = useRouter() // 路由跳转
-const { userId } = defineProps<{
+const props = defineProps<{
   userId: number
 }>()
 const loading = ref(true) // 列表的加载中
@@ -197,14 +197,14 @@ const queryFormRef = ref() // 搜索的表单
 const queryParams = ref({
   pageNo: 1,
   pageSize: 10,
-  userId,
   no: null,
   status: '0',
   orderNo: null,
   spuName: null,
   createTime: [],
   way: null,
-  type: null
+  type: null,
+  userId: null
 })
 
 /** 查询列表 */
@@ -217,7 +217,9 @@ const getList = async () => {
       delete data.status
     }
     // 执行查询
-    // TODO @芋艿：接口需要通过userId进行筛选返回值
+    if (props.userId) {
+      data.userId = props.userId as any
+    }
     const res = await AfterSaleApi.getAfterSalePage(data)
     list.value = res.list as AfterSaleApi.TradeAfterSaleVO[]
     total.value = res.total
@@ -235,13 +237,12 @@ const handleQuery = async () => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value?.resetFields()
-  queryParams.value.userId = userId
   handleQuery()
 }
 
 /** tab 切换 */
 const tabClick = async (tab: TabsPaneContext) => {
-  queryParams.value.status = tab.paneName
+  queryParams.value.status = tab.paneName as any
   await getList()
 }
 

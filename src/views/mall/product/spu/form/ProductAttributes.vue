@@ -19,19 +19,19 @@
         {{ value.name }}
       </el-tag>
       <el-select
+        v-show="inputVisible(index)"
         :id="`input${index}`"
         :ref="setInputRef"
-        v-show="inputVisible(index)"
         v-model="inputValue"
-        filterable
-        allow-create
-        default-first-option
         :reserve-keyword="false"
-        size="small"
+        allow-create
         class="!w-30"
+        default-first-option
+        filterable
+        size="small"
         @blur="handleInputConfirm(index, item.id)"
-        @keyup.enter="handleInputConfirm(index, item.id)"
         @change="handleInputConfirm(index, item.id)"
+        @keyup.enter="handleInputConfirm(index, item.id)"
       >
         <el-option
           v-for="item2 in attributeOptions"

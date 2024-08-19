@@ -135,7 +135,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column align="center" label="订单金额" prop="refundPrice" min-width="120">
+      <el-table-column align="center" label="订单金额" min-width="120" prop="refundPrice">
         <template #default="scope">
           <span>{{ fenToYuan(scope.row.refundPrice) }} 元</span>
         </template>

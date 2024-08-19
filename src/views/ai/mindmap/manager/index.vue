@@ -2,18 +2,18 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="用户编号" prop="userId">
         <el-select
           v-model="queryParams.userId"
+          class="!w-240px"
           clearable
           placeholder="请输入用户编号"
-          class="!w-240px"
         >
           <el-option
             v-for="item in userList"
@@ -26,58 +26,64 @@
       <el-form-item label="提示词" prop="prompt">
         <el-input
           v-model="queryParams.prompt"
-          placeholder="请输入提示词"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入提示词"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-220px"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="daterange"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="编号" align="center" prop="id" width="180" fixed="left" />
-      <el-table-column label="用户" align="center" prop="userId" width="180">
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column align="center" fixed="left" label="编号" prop="id" width="180" />
+      <el-table-column align="center" label="用户" prop="userId" width="180">
         <template #default="scope">
           <span>{{ userList.find((item) => item.id === scope.row.userId)?.nickname }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="提示词" align="center" prop="prompt" width="180" />
-      <el-table-column label="思维导图" align="center" prop="generatedContent" min-width="300" />
-      <el-table-column label="模型" align="center" prop="model" width="180" />
+      <el-table-column align="center" label="提示词" prop="prompt" width="180" />
+      <el-table-column align="center" label="思维导图" min-width="300" prop="generatedContent" />
+      <el-table-column align="center" label="模型" prop="model" width="180" />
       <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
         :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
         width="180px"
       />
-      <el-table-column label="错误信息" align="center" prop="errorMessage" />
-      <el-table-column label="操作" align="center" width="120" fixed="right">
+      <el-table-column align="center" label="错误信息" prop="errorMessage" />
+      <el-table-column align="center" fixed="right" label="操作" width="120">
         <template #default="scope">
-          <el-button link type="primary" @click="openPreview(scope.row)"> 预览 </el-button>
+          <el-button link type="primary" @click="openPreview(scope.row)"> 预览</el-button>
           <el-button
+            v-hasPermi="['ai:mind-map:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['ai:mind-map:delete']"
           >
             删除
           </el-button>
@@ -86,9 +92,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -105,7 +111,7 @@
   </el-drawer>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import { AiMindMapApi, MindMapVO } from '@/api/ai/mindmap'
 import * as UserApi from '@/api/system/user'

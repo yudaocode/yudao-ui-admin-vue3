@@ -114,9 +114,9 @@
                         </el-checkbox>
                       </el-col>
                       <el-col :offset="6" :span="12">
-                        <el-link style="float: right" type="primary">{{
-                          t('login.forgetPassword')
-                        }}</el-link>
+                        <el-link style="float: right" type="primary"
+                          >{{ t('login.forgetPassword') }}
+                        </el-link>
                       </el-col>
                     </el-row>
                   </el-form-item>

@@ -3,9 +3,9 @@
     <!--表单区域-->
     <Left
       ref="leftRef"
+      :is-generating="isGenerating"
       @submit="submit"
       @direct-generate="directGenerate"
-      :is-generating="isGenerating"
     />
     <!--右边生成思维导图区域-->
     <Right
@@ -18,7 +18,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import Left from './components/Left.vue'
 import Right from './components/Right.vue'
 import { AiMindMapApi, AiMindMapGenerateReqVO } from '@/api/ai/mindmap'
