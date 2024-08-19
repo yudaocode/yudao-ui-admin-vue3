@@ -104,3 +104,15 @@ $prefix-cls: #{$namespace}-login;
   }
 }
 </style>
+
+<style lang="scss">
+.dark .login-form {
+  .el-divider__text {
+    background-color: var(--login-bg-color);
+  }
+
+  .el-card {
+    background-color: var(--login-bg-color);
+  }
+}
+</style>
