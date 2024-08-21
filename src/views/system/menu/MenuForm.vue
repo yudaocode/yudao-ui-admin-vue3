@@ -25,7 +25,7 @@
           <el-radio-button
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_MENU_TYPE)"
             :key="dict.label"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio-button>
