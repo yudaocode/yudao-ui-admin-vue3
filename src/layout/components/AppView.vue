@@ -38,24 +38,8 @@ provide('reload', reload)
     :class="[
       'p-[var(--app-content-padding)] w-full bg-[var(--app-content-bg-color)] dark:bg-[var(--el-bg-color)]',
       {
-        '!min-h-[calc(100%-var(--app-footer-height))]':
-          (fixedHeader &&
-            (layout === 'classic' || layout === 'topLeft' || layout === 'top') &&
-            footer) ||
-          (!tagsView && layout === 'top' && footer),
-        '!min-h-[calc(100%-var(--app-footer-height)-var(--tags-view-height))]':
-          tagsView && layout === 'top' && footer,
-
-        '!min-h-[calc(100%-var(--tags-view-height)-var(--top-tool-height)-var(--app-footer-height))]':
-          !fixedHeader && layout === 'classic' && footer,
-
-        '!min-h-[calc(100%-var(--tags-view-height)-var(--app-footer-height))]':
-          !fixedHeader && layout === 'topLeft' && footer,
-
-        '!min-h-[calc(100%-var(--top-tool-height))]': fixedHeader && layout === 'cutMenu' && footer,
-
-        '!min-h-[calc(100%-var(--top-tool-height)-var(--tags-view-height))]':
-          !fixedHeader && layout === 'cutMenu' && footer
+        '!min-h-[calc(100vh-var(--top-tool-height)-var(--tags-view-height)-var(--app-footer-height))] pb-0':
+          footer
       }
     ]"
   >
