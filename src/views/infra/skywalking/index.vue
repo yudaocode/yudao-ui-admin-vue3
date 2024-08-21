@@ -1,7 +1,7 @@
 <template>
   <doc-alert title="服务监控" url="https://doc.iocoder.cn/server-monitor/" />
 
-  <ContentWrap>
+  <ContentWrap :bodyStyle="{ padding: '0px' }" class="!mb-0">
     <IFrame v-if="!loading" v-loading="loading" :src="src" />
   </ContentWrap>
 </template>
