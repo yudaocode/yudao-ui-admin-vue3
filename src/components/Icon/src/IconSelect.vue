@@ -122,7 +122,7 @@ watch(
             placement: 'auto'
           }"
           :visible="visible"
-          :width="350"
+          :width="355"
           popper-class="pure-popper"
           trigger="click"
         >
@@ -147,7 +147,7 @@ watch(
             >
               <ElDivider border-style="dashed" class="tab-divider" />
               <ElScrollbar height="220px">
-                <ul class="ml-2 flex flex-wrap px-2">
+                <ul class="ml-2 flex flex-wrap">
                   <li
                     v-for="(item, key) in pageList"
                     :key="key"
@@ -171,7 +171,7 @@ watch(
             background
             class="h-10 flex items-center justify-center"
             layout="prev, pager, next"
-            small
+            size="small"
             @current-change="onCurrentChange"
           />
         </ElPopover>
