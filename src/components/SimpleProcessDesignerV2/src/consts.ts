@@ -6,49 +6,54 @@ import { DictDataVO } from '@/api/system/dict/types'
  */
 export enum NodeType {
   /**
-   * 发起人节点
-   */
-  START_EVENT_NODE = 0,
-  /**
    * 结束节点
    */
-  END_EVENT_NODE = -2,
-
+  END_EVENT_NODE = 1,
+  /**
+   * 发起人节点
+   */
+  START_USER_NODE = 10,
   /**
    * 审批人节点
    */
-  USER_TASK_NODE = 1,
+  USER_TASK_NODE = 11,
 
   /**
    * 抄送人节点
    */
-  COPY_TASK_NODE = 2,
+  COPY_TASK_NODE = 12,
 
   /**
    * 条件节点
    */
-  CONDITION_NODE = 3,
+  CONDITION_NODE = 50,
   /**
-   * 条件分支节点
+   * 条件分支节点 (对应排他网关)
    */
-  EXCLUSIVE_NODE = 4,
+  CONDITION_BRANCH_NODE = 51,
   /**
-   * 并行分支分叉节点
+   * 并行分支节点 (对应并行网关)
    */
-  PARALLEL_NODE_FORK = 5,
+  PARALLEL_BRANCH_NODE = 52,
+
   /**
-   * 并行分支聚合
+   * 包容分支节点 (对应包容网关)
    */
-  PARALLEL_NODE_JOIN = 6,
-  /**
-   * 包容分支分叉节点
-   */
-  INCLUSIVE_NODE_FORK = 7,
-  /**
-   * 包容分支聚合节点
-   */
-  INCLUSIVE_NODE_JOIN = 8
+  INCLUSIVE_BRANCH_NODE = 53
 }
+
+export enum NodeId {
+  /**
+   * 发起人节点 Id
+   */
+  START_USER_NODE_ID = 'StartUserNode',
+
+  /**
+   * 发起人节点 Id
+   */
+  END_EVENT_NODE_ID = 'EndEvent'
+}
+
 /**
  *  节点结构定义
  */
@@ -298,7 +303,23 @@ export enum ConditionConfigType {
    */
   RULE = 2
 }
-
+/**
+ * 表单权限的枚举
+ */
+export enum FieldPermissionType {
+  /**
+   * 只读
+   */
+  READ = '1',
+  /**
+   * 编辑
+   */
+  WRITE = '2',
+  /**
+   * 隐藏
+   */
+  NONE = '3'
+}
 /**
  * 操作按钮权限结构定义
  */
@@ -335,6 +356,7 @@ export enum OperationButtonType {
    */
   RETURN = 6
 }
+
 /**
  * 条件规则结构定义
  */
@@ -369,11 +391,13 @@ export const NODE_DEFAULT_TEXT = new Map<number, string>()
 NODE_DEFAULT_TEXT.set(NodeType.USER_TASK_NODE, '请配置审批人')
 NODE_DEFAULT_TEXT.set(NodeType.COPY_TASK_NODE, '请配置抄送人')
 NODE_DEFAULT_TEXT.set(NodeType.CONDITION_NODE, '请设置条件')
+NODE_DEFAULT_TEXT.set(NodeType.START_USER_NODE, '请设置发起人')
 
 export const NODE_DEFAULT_NAME = new Map<number, string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
 NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
+NODE_DEFAULT_NAME.set(NodeType.START_USER_NODE, '发起人')
 
 // 候选人策略。暂时不从字典中取。 后续可能调整。控制显示顺序
 export const CANDIDATE_STRATEGY: DictDataVO[] = [
@@ -477,6 +501,16 @@ OPERATION_BUTTON_NAME.set(OperationButtonType.RETURN, '回退')
 export const DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
   { id: OperationButtonType.APPROVE, displayName: '通过', enable: true },
   { id: OperationButtonType.REJECT, displayName: '拒绝', enable: true },
+  { id: OperationButtonType.TRANSFER, displayName: '转办', enable: false },
+  { id: OperationButtonType.DELEGATE, displayName: '委派', enable: false },
+  { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: false },
+  { id: OperationButtonType.RETURN, displayName: '回退', enable: false }
+]
+
+// 发起人的按钮权限。暂时定死，不可以编辑
+export const START_USER_BUTTON_SETTING: ButtonSetting[] = [
+  { id: OperationButtonType.APPROVE, displayName: '提交', enable: true },
+  { id: OperationButtonType.REJECT, displayName: '拒绝', enable: false },
   { id: OperationButtonType.TRANSFER, displayName: '转办', enable: false },
   { id: OperationButtonType.DELEGATE, displayName: '委派', enable: false },
   { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: false },

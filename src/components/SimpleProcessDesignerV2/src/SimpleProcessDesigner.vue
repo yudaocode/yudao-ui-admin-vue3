@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import ProcessNodeTree from './ProcessNodeTree.vue'
 import { updateBpmSimpleModel, getBpmSimpleModel } from '@/api/bpm/simple'
-import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from './consts'
+import { SimpleFlowNode, NodeType, NodeId, NODE_DEFAULT_TEXT } from './consts'
 
 defineOptions({
   name: 'SimpleProcessDesigner'
@@ -83,7 +83,7 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
     if (type == NodeType.END_EVENT_NODE) {
       return
     }
-    if (type == NodeType.START_EVENT_NODE) {
+    if (type == NodeType.START_USER_NODE) {
       validateNode(node.childNode, errorNodes)
     }
 
@@ -106,7 +106,7 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
       validateNode(node.childNode, errorNodes)
     }
 
-    if (type == NodeType.EXCLUSIVE_NODE) {
+    if (type == NodeType.CONDITION_BRANCH_NODE) {
       conditionNodes?.forEach((item) => {
         validateNode(item, errorNodes)
       })
@@ -138,17 +138,16 @@ const zoomIn = () => {
 
 onMounted(async () => {
   const result = await getBpmSimpleModel(props.modelId)
-  console.log('the result is :', result)
   if (result) {
     processNodeTree.value = result
   } else {
     // 初始值
     processNodeTree.value = {
-      name: '开始',
-      type: NodeType.START_EVENT_NODE,
-      id: 'StartEvent', 
+      name: '发起人',
+      type: NodeType.START_USER_NODE,
+      id: NodeId.START_USER_NODE_ID,
       childNode: {
-        id: 'EndEvent',
+        id: NodeId.END_EVENT_NODE_ID,
         name: '结束',
         type: NodeType.END_EVENT_NODE
       }

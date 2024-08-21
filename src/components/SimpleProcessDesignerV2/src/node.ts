@@ -12,7 +12,8 @@ import {
   RejectHandlerType,
   NODE_DEFAULT_NAME,
   AssignStartUserHandlerType,
-  AssignEmptyHandlerType
+  AssignEmptyHandlerType,
+  FieldPermissionType
 } from './consts'
 export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlowNode> {
   const node = ref<SimpleFlowNode>(props.flowNode)
@@ -26,9 +27,9 @@ export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlo
 }
 
 /**
- * @description 表单数据权限配置，用于审批节点、抄送节点
+ * @description 表单数据权限配置，用于发起人节点 、审批节点、抄送节点
  */
-export function useFormFieldsPermission() {
+export function useFormFieldsPermission(defaultPermission: FieldPermissionType) {
   // 字段权限配置. 需要有 field, title,  permissioin 属性
   const fieldsPermissionConfig = ref<Array<Record<string, string>>>([])
 
@@ -66,7 +67,7 @@ export function useFormFieldsPermission() {
       fieldsPermission.push({
         field,
         title,
-        permission: '1' // 只读
+        permission: defaultPermission
       })
       // TODO 子表单 需要处理子表单字段
       // if (type === 'group' && rule.props?.rule && Array.isArray(rule.props.rule)) {
@@ -139,7 +140,6 @@ export function useNodeForm(nodeType: NodeType) {
   const configForm = ref<UserTaskFormType | CopyTaskFormType>()
   if (nodeType === NodeType.USER_TASK_NODE) {
     configForm.value = {
-      //candidateParamArray: [],
       candidateStrategy: CandidateStrategy.USER,
       approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
       approveRatio: 100,
@@ -154,7 +154,6 @@ export function useNodeForm(nodeType: NodeType) {
     }
   } else {
     configForm.value = {
-      //candidateParamArray: [],
       candidateStrategy: CandidateStrategy.USER
     }
   }

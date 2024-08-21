@@ -20,13 +20,13 @@
             </div>
             <div class="handler-item-text">抄送</div>
           </div>
-          <div class="handler-item" @click="addNode(NodeType.EXCLUSIVE_NODE)">
+          <div class="handler-item" @click="addNode(NodeType.CONDITION_BRANCH_NODE)">
             <div class="handler-item-icon condition">
               <span class="iconfont icon-size icon-exclusive"></span>
             </div>
             <div class="handler-item-text">条件分支</div>
           </div>
-          <div class="handler-item" @click="addNode(NodeType.PARALLEL_NODE_FORK)">
+          <div class="handler-item" @click="addNode(NodeType.PARALLEL_BRANCH_NODE)">
             <div class="handler-item-icon condition">
               <span class="iconfont icon-size icon-parallel"></span>
             </div>
@@ -107,10 +107,10 @@ const addNode = (type: number) => {
     }
     emits('update:childNode', data)
   }
-  if (type === NodeType.EXCLUSIVE_NODE) {
+  if (type === NodeType.CONDITION_BRANCH_NODE) {
     const data: SimpleFlowNode = {
       name: '条件分支',
-      type: NodeType.EXCLUSIVE_NODE,
+      type: NodeType.CONDITION_BRANCH_NODE,
       id: 'GateWay_' + generateUUID(),
       childNode: props.childNode,
       conditionNodes: [
@@ -140,10 +140,10 @@ const addNode = (type: number) => {
     }
     emits('update:childNode', data)
   }
-  if (type === NodeType.PARALLEL_NODE_FORK) {
+  if (type === NodeType.PARALLEL_BRANCH_NODE) {
     const data: SimpleFlowNode = {
       name: '并行分支',
-      type: NodeType.PARALLEL_NODE_FORK,
+      type: NodeType.PARALLEL_BRANCH_NODE,
       id: 'GateWay_' + generateUUID(),
       childNode: props.childNode,
       conditionNodes: [

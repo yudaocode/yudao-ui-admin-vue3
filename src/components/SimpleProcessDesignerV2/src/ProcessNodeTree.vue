@@ -1,7 +1,7 @@
 <template>
-  <!-- 开始节点 -->
-  <StartEventNode
-    v-if="currentNode && currentNode.type === NodeType.START_EVENT_NODE"
+  <!-- 发起人节点 -->
+  <StartUserNode
+    v-if="currentNode && currentNode.type === NodeType.START_USER_NODE"
     :flow-node="currentNode"
   />
   <!-- 审批节点 -->
@@ -19,14 +19,14 @@
   />
   <!-- 条件节点 -->
   <ExclusiveNode
-    v-if="currentNode && currentNode.type === NodeType.EXCLUSIVE_NODE"
+    v-if="currentNode && currentNode.type === NodeType.CONDITION_BRANCH_NODE"
     :flow-node="currentNode"
     @update:model-value="handleModelValueUpdate"
     @find:parent-node="findFromParentNode"
   />
   <!-- 并行节点 -->
   <ParallelNode
-    v-if="currentNode && currentNode.type === NodeType.PARALLEL_NODE_FORK"
+    v-if="currentNode && currentNode.type === NodeType.PARALLEL_BRANCH_NODE"
     :flow-node="currentNode"
     @update:model-value="handleModelValueUpdate"
     @find:parent-node="findFromParentNode"
@@ -43,7 +43,7 @@
   <EndEventNode v-if="currentNode && currentNode.type === NodeType.END_EVENT_NODE" />
 </template>
 <script setup lang="ts">
-import StartEventNode from './nodes/StartEventNode.vue'
+import StartUserNode from './nodes/StartUserNode.vue'
 import EndEventNode from './nodes/EndEventNode.vue'
 import UserTaskNode from './nodes/UserTaskNode.vue'
 import CopyTaskNode from './nodes/CopyTaskNode.vue'
@@ -90,7 +90,11 @@ const recursiveFindParentNode = (
   findNode: SimpleFlowNode,
   nodeType: number
 ) => {
-  if (!findNode || findNode.type === NodeType.START_EVENT_NODE) {
+  if (!findNode) {
+    return
+  }
+  if (findNode.type === NodeType.START_USER_NODE) {
+    nodeList.push(findNode)
     return
   }
 

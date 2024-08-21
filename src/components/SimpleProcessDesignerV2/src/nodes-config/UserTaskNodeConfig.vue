@@ -25,7 +25,7 @@
       </div>
     </template>
     <div class="flex flex-items-center mb-3">
-      <span class="font-size-4 mr-3">审批类型 :</span>
+      <span class="font-size-16px mr-3">审批类型 :</span>
       <el-radio-group v-model="approveType">
         <el-radio
           v-for="(item, index) in APPROVE_TYPE"
@@ -390,13 +390,28 @@
             <div class="field-setting-item-label"> {{ item.title }} </div>
             <el-radio-group class="field-setting-item-group" v-model="item.permission">
               <div class="item-radio-wrap">
-                <el-radio value="1" size="large" label="1"><span></span></el-radio>
+                <el-radio
+                  :value="FieldPermissionType.READ"
+                  size="large"
+                  :label="FieldPermissionType.READ"
+                  ><span></span
+                ></el-radio>
               </div>
               <div class="item-radio-wrap">
-                <el-radio value="2" size="large" label="2"><span></span></el-radio>
+                <el-radio
+                  :value="FieldPermissionType.WRITE"
+                  size="large"
+                  :label="FieldPermissionType.WRITE"
+                  ><span></span
+                ></el-radio>
               </div>
               <div class="item-radio-wrap">
-                <el-radio value="3" size="large" label="3"><span></span></el-radio>
+                <el-radio
+                  :value="FieldPermissionType.NONE"
+                  size="large"
+                  :label="FieldPermissionType.NONE"
+                  ><span></span
+                ></el-radio>
               </div>
             </el-radio-group>
           </div>
@@ -435,7 +450,8 @@ import {
   ASSIGN_START_USER_HANDLER_TYPES,
   TimeoutHandlerType,
   ASSIGN_EMPTY_HANDLER_TYPES,
-  AssignEmptyHandlerType
+  AssignEmptyHandlerType,
+  FieldPermissionType
 } from '../consts'
 
 import {
@@ -479,7 +495,9 @@ const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.USER_
 // 激活的 Tab 标签页
 const activeTabName = ref('user')
 // 表单字段权限设置
-const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission()
+const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
+  FieldPermissionType.READ
+)
 // 操作按钮设置
 const { buttonsSetting, btnDisplayNameEdit, changeBtnDisplayName, btnDisplayNameBlurEvent } =
   useButtonsSetting()

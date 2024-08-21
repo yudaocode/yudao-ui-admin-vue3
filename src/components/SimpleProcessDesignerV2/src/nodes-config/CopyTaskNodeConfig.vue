@@ -157,13 +157,29 @@
             <div class="field-setting-item-label"> {{ item.title }} </div>
             <el-radio-group class="field-setting-item-group" v-model="item.permission">
               <div class="item-radio-wrap">
-                <el-radio value="1" size="large" label="1"><span></span></el-radio>
+                <el-radio
+                  :value="FieldPermissionType.READ"
+                  size="large"
+                  :label="FieldPermissionType.WRITE"
+                  ><span></span
+                ></el-radio>
               </div>
               <div class="item-radio-wrap">
-                <el-radio value="2" size="large" label="2" disabled><span></span></el-radio>
+                <el-radio
+                  :value="FieldPermissionType.WRITE"
+                  size="large"
+                  :label="FieldPermissionType.WRITE"
+                  disabled
+                  ><span></span
+                ></el-radio>
               </div>
               <div class="item-radio-wrap">
-                <el-radio value="3" size="large" label="3"><span></span></el-radio>
+                <el-radio
+                  :value="FieldPermissionType.NONE"
+                  size="large"
+                  :label="FieldPermissionType.NONE"
+                  ><span></span
+                ></el-radio>
               </div>
             </el-radio-group>
           </div>
@@ -180,7 +196,13 @@
   </el-drawer>
 </template>
 <script setup lang="ts">
-import { SimpleFlowNode, CandidateStrategy, NodeType, CANDIDATE_STRATEGY } from '../consts'
+import {
+  SimpleFlowNode,
+  CandidateStrategy,
+  NodeType,
+  CANDIDATE_STRATEGY,
+  FieldPermissionType
+} from '../consts'
 import {
   useWatchNode,
   useDrawer,
@@ -208,7 +230,9 @@ const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.COPY_
 // 激活的 Tab 标签页
 const activeTabName = ref('user')
 // 表单字段权限配置
-const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission()
+const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
+  FieldPermissionType.READ
+)
 // 抄送人表单配置
 const formRef = ref() // 表单 Ref
 // 表单校验规则
