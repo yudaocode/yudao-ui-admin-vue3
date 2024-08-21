@@ -11,7 +11,6 @@
       <el-form-item label="流程名称" prop="name">
         <el-input
           v-model="queryParams.processInstanceName"
-          @keyup.enter="handleQuery"
           class="!w-240px"
           clearable
           placeholder="请输入流程名称"

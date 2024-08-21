@@ -491,10 +491,10 @@ $prefix-cls: #{$namespace}-tags-view;
 
     &::before {
       position: absolute;
-      top: 0;
+      top: 1px;
       left: 0;
       width: 100%;
-      height: 100%;
+      height: calc(100% - 1px);
       border-left: 1px solid var(--el-border-color);
       content: '';
     }
@@ -502,10 +502,10 @@ $prefix-cls: #{$namespace}-tags-view;
     &--first {
       &::before {
         position: absolute;
-        top: 0;
+        top: 1px;
         left: 0;
         width: 100%;
-        height: 100%;
+        height: calc(100% - 1px);
         border-right: 1px solid var(--el-border-color);
         border-left: none;
         content: '';
