@@ -22,26 +22,12 @@ const crudSchemas = reactive<CrudSchema[]>([
   {
     label: '模板编码',
     field: 'code',
-    isSearch: true,
-    search: {
-      componentProps: {
-        style: {
-          width: '240px'
-        }
-      }
-    }
+    isSearch: true
   },
   {
     label: '模板名称',
     field: 'name',
-    isSearch: true,
-    search: {
-      componentProps: {
-        style: {
-          width: '240px'
-        }
-      }
-    }
+    isSearch: true
   },
   {
     label: '模板标题',
@@ -73,9 +59,6 @@ const crudSchemas = reactive<CrudSchema[]>([
         optionsAlias: {
           labelField: 'mail',
           valueField: 'id'
-        },
-        style: {
-          width: '240px'
         }
       }
     },
@@ -99,14 +82,7 @@ const crudSchemas = reactive<CrudSchema[]>([
     field: 'status',
     isSearch: true,
     dictType: DICT_TYPE.COMMON_STATUS,
-    dictClass: 'number',
-    search: {
-      componentProps: {
-        style: {
-          width: '240px'
-        }
-      }
-    }
+    dictClass: 'number'
   },
   {
     label: '备注',
@@ -124,10 +100,7 @@ const crudSchemas = reactive<CrudSchema[]>([
       componentProps: {
         valueFormat: 'YYYY-MM-DD HH:mm:ss',
         type: 'daterange',
-        defaultTime: [new Date('1 00:00:00'), new Date('1 23:59:59')],
-        style: {
-          width: '240px'
-        }
+        defaultTime: [new Date('1 00:00:00'), new Date('1 23:59:59')]
       }
     }
   },

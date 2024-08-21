@@ -8,17 +8,17 @@
         <el-form-item label="布局" prop="type">
           <el-radio-group v-model="formData.layoutType">
             <el-tooltip class="item" content="双列" placement="bottom">
-              <el-radio-button value="twoCol">
+              <el-radio-button label="twoCol">
                 <Icon icon="fluent:text-column-two-24-filled" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="三列" placement="bottom">
-              <el-radio-button value="threeCol">
+              <el-radio-button label="threeCol">
                 <Icon icon="fluent:text-column-three-24-filled" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="水平滑动" placement="bottom">
-              <el-radio-button value="horizSwiper">
+              <el-radio-button label="horizSwiper">
                 <Icon icon="system-uicons:carousel" />
               </el-radio-button>
             </el-tooltip>

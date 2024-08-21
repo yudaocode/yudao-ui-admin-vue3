@@ -17,12 +17,12 @@
         <el-form-item label="布局" prop="type">
           <el-radio-group v-model="formData.layoutType">
             <el-tooltip class="item" content="单列" placement="bottom">
-              <el-radio-button value="oneCol">
+              <el-radio-button label="oneCol">
                 <Icon icon="fluent:text-column-one-24-filled" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="三列" placement="bottom">
-              <el-radio-button value="threeCol">
+              <el-radio-button label="threeCol">
                 <Icon icon="fluent:text-column-three-24-filled" />
               </el-radio-button>
             </el-tooltip>

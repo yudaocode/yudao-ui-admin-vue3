@@ -82,7 +82,7 @@
               <el-radio
                 v-for="dict in getIntDictOptions(DICT_TYPE.BROKERAGE_ENABLED_CONDITION)"
                 :key="dict.value"
-                :value="dict.value"
+                :label="dict.value"
               >
                 {{ dict.label }}
               </el-radio>
@@ -99,7 +99,7 @@
               <el-radio
                 v-for="dict in getIntDictOptions(DICT_TYPE.BROKERAGE_BIND_MODE)"
                 :key="dict.value"
-                :value="dict.value"
+                :label="dict.value"
               >
                 {{ dict.label }}
               </el-radio>
