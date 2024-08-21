@@ -64,7 +64,7 @@
         <el-table-column align="center" width="65">
           <template #default="scope">
             <el-radio
-              :label="scope.row.id"
+              :value="scope.row.id"
               v-model="currentRowValue"
               @change="handleCurrentChange(scope.row)"
             >

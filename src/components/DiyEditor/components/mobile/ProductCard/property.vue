@@ -8,17 +8,17 @@
         <el-form-item label="布局" prop="type">
           <el-radio-group v-model="formData.layoutType">
             <el-tooltip class="item" content="单列大图" placement="bottom">
-              <el-radio-button label="oneColBigImg">
+              <el-radio-button value="oneColBigImg">
                 <Icon icon="fluent:text-column-one-24-filled" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="单列小图" placement="bottom">
-              <el-radio-button label="oneColSmallImg">
+              <el-radio-button value="oneColSmallImg">
                 <Icon icon="fluent:text-column-two-left-24-filled" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="双列" placement="bottom">
-              <el-radio-button label="twoCol">
+              <el-radio-button value="twoCol">
                 <Icon icon="fluent:text-column-two-24-filled" />
               </el-radio-button>
             </el-tooltip>
@@ -74,8 +74,8 @@
       <el-card header="按钮" class="property-group" shadow="never">
         <el-form-item label="按钮类型" prop="btnBuy.type">
           <el-radio-group v-model="formData.btnBuy.type">
-            <el-radio-button label="text">文字</el-radio-button>
-            <el-radio-button label="img">图片</el-radio-button>
+            <el-radio-button value="text">文字</el-radio-button>
+            <el-radio-button value="img">图片</el-radio-button>
           </el-radio-group>
         </el-form-item>
         <template v-if="formData.btnBuy.type === 'text'">

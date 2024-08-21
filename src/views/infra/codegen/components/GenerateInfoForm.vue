@@ -285,8 +285,8 @@
             </span>
           </template>
           <el-radio-group v-model="formData.subJoinMany" placeholder="请选择">
-            <el-radio :label="true">一对多</el-radio>
-            <el-radio :label="false">一对一</el-radio>
+            <el-radio :value="true">一对多</el-radio>
+            <el-radio :value="false">一对一</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-col>

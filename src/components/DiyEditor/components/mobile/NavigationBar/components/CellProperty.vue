@@ -14,9 +14,9 @@
     <template v-if="selectedHotAreaIndex === cellIndex">
       <el-form-item label="类型" :prop="`cell[${cellIndex}].type`">
         <el-radio-group v-model="cell.type">
-          <el-radio label="text">文字</el-radio>
-          <el-radio label="image">图片</el-radio>
-          <el-radio label="search">搜索框</el-radio>
+          <el-radio value="text">文字</el-radio>
+          <el-radio value="image">图片</el-radio>
+          <el-radio value="search">搜索框</el-radio>
         </el-radio-group>
       </el-form-item>
       <!-- 1. 文字 -->

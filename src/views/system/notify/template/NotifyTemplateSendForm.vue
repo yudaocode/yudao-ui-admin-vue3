@@ -20,7 +20,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.USER_TYPE)"
             :key="dict.value"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>

@@ -70,7 +70,7 @@
         <!-- 2. 单选模式 -->
         <el-table-column label="#" width="55" v-else>
           <template #default="{ row }">
-            <el-radio :label="row.id" v-model="selectedSpuId" @change="handleSingleSelected(row)">
+            <el-radio :value="row.id" v-model="selectedSpuId" @change="handleSingleSelected(row)">
               <!-- 空格不能省略，是为了让单选框不显示label，如果不指定label不会有选中的效果 -->
               &nbsp;
             </el-radio>
