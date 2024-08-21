@@ -20,7 +20,7 @@
               <el-radio
                 v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
                 :key="dict.value"
-                :label="dict.value"
+                :value="dict.value"
               >
                 {{ dict.label }}
               </el-radio>
@@ -106,14 +106,8 @@
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
-    <el-dialog
-      v-model="mapDialogVisible"
-      title="获取经纬度"
-      append-to-body
-      width="500px"
-      class="mapBox"
-    >
-      <iframe id="mapPage" width="100%" height="100%" frameborder="0" :src="tencentLbsUrl"></iframe>
+    <el-dialog v-model="mapDialogVisible" title="获取经纬度" append-to-body>
+      <IFrame class="h-609px" :src="tencentLbsUrl" />
     </el-dialog>
   </Dialog>
 </template>
@@ -266,8 +260,3 @@ onMounted(async () => {
   await initTencentLbsMap()
 })
 </script>
-<style lang="scss">
-.mapBox .el-dialog__body {
-  height: 640px !important;
-}
-</style>

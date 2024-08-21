@@ -28,13 +28,13 @@
       <div>
         <el-radio-group v-model="channelCode">
           <el-radio
-            label="alipay_pc"
+            value="alipay_pc"
             :disabled="transfer.type === 2 || transfer.type === 3 || transfer.type === 4"
           >
             <img :src="svg_alipay_app" />
           </el-radio>
           <el-radio
-            label="wx_app"
+            value="wx_app"
             :disabled="transfer.type === 1 || transfer.type === 3 || transfer.type === 4"
           >
             <img :src="svg_wx_app" />

@@ -39,7 +39,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="平台" prop="platform">
-        <el-select v-model="queryParams.platform" placeholder="请选择平台" clearable class="!w-240px">
+        <el-select
+          v-model="queryParams.platform"
+          placeholder="请选择平台"
+          clearable
+          class="!w-240px"
+        >
           <el-option
             v-for="dict in getStrDictOptions(DICT_TYPE.AI_PLATFORM)"
             :key="dict.value"
@@ -143,7 +148,7 @@
       <el-table-column label="错误信息" align="center" prop="errorMessage" />
       <el-table-column label="操作" align="center">
         <template #default="scope">
-<!--          TODO @YunaiV 目前没有修改接口，写作要可以更改吗-->
+          <!--          TODO @YunaiV 目前没有修改接口，写作要可以更改吗-->
           <el-button
             link
             type="primary"

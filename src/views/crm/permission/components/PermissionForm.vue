@@ -23,7 +23,7 @@
             v-for="dict in getIntDictOptions(DICT_TYPE.CRM_PERMISSION_LEVEL)"
             :key="dict.value"
           >
-            <el-radio v-if="dict.value != PermissionLevelEnum.OWNER" :label="dict.value">
+            <el-radio v-if="dict.value != PermissionLevelEnum.OWNER" :value="dict.value">
               {{ dict.label }}
             </el-radio>
           </template>

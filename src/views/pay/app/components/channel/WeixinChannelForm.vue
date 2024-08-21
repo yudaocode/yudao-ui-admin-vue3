@@ -34,7 +34,7 @@
             <el-radio
               v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
               :key="parseInt(dict.value)"
-              :label="parseInt(dict.value)"
+              :value="parseInt(dict.value)"
             >
               {{ dict.label }}
             </el-radio>
@@ -42,8 +42,8 @@
         </el-form-item>
         <el-form-item label-width="180px" label="API 版本" prop="config.apiVersion">
           <el-radio-group v-model="formData.config.apiVersion">
-            <el-radio label="v2">v2</el-radio>
-            <el-radio label="v3">v3</el-radio>
+            <el-radio value="v2">v2</el-radio>
+            <el-radio value="v3">v3</el-radio>
           </el-radio-group>
         </el-form-item>
         <div v-if="formData.config.apiVersion === 'v2'">

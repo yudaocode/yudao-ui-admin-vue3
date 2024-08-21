@@ -3,8 +3,8 @@
     <el-card header="按钮配置" class="property-group" shadow="never">
       <el-form-item label="展开方向" prop="direction">
         <el-radio-group v-model="formData.direction">
-          <el-radio label="vertical">垂直</el-radio>
-          <el-radio label="horizontal">水平</el-radio>
+          <el-radio value="vertical">垂直</el-radio>
+          <el-radio value="horizontal">水平</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="显示文字" prop="showText">

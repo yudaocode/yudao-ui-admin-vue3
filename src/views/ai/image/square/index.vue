@@ -9,6 +9,7 @@
       placeholder="请输入要搜索的内容"
       :suffix-icon="Search"
       @keyup.enter="handleQuery"
+      class="!w-240px"
     />
     <div class="gallery">
       <!-- TODO @fan：这个图片的风格，要不和 ImageCard.vue 界面一致？（只有卡片，没有操作）；因为看着更有相框的感觉~~~ -->
@@ -66,8 +67,8 @@ onMounted(async () => {
 </script>
 <style scoped lang="scss">
 .square-container {
-  background-color: #fff;
   padding: 20px;
+  background-color: #fff;
 
   .gallery {
     display: grid;
@@ -75,21 +76,21 @@ onMounted(async () => {
     gap: 10px;
     //max-width: 1000px;
     background-color: #fff;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgb(0 0 0 / 10%);
   }
 
   .gallery-item {
     position: relative;
     overflow: hidden;
-    background: #f0f0f0;
     cursor: pointer;
+    background: #f0f0f0;
     transition: transform 0.3s;
   }
 
   .gallery-item img {
+    display: block;
     width: 100%;
     height: auto;
-    display: block;
     transition: transform 0.3s;
   }
 

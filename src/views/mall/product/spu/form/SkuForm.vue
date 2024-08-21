@@ -14,14 +14,14 @@
         class="w-80"
         @change="changeSubCommissionType"
       >
-        <el-radio :label="false">默认设置</el-radio>
-        <el-radio :label="true" class="radio">单独设置</el-radio>
+        <el-radio :value="false">默认设置</el-radio>
+        <el-radio :value="true" class="radio">单独设置</el-radio>
       </el-radio-group>
     </el-form-item>
     <el-form-item label="商品规格" props="specType">
       <el-radio-group v-model="formData.specType" class="w-80" @change="onChangeSpec">
-        <el-radio :label="false" class="radio">单规格</el-radio>
-        <el-radio :label="true">多规格</el-radio>
+        <el-radio :value="false" class="radio">单规格</el-radio>
+        <el-radio :value="true">多规格</el-radio>
       </el-radio-group>
     </el-form-item>
     <!-- 多规格添加-->

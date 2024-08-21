@@ -124,6 +124,7 @@
               placeholder="选择回款日期"
               type="date"
               value-format="x"
+              class="!w-100%"
             />
           </el-form-item>
         </el-col>

@@ -2,27 +2,27 @@
   <el-form label-width="80px" :model="formData" :rules="rules">
     <el-form-item label="样式" prop="styleType">
       <el-radio-group v-model="formData!.styleType">
-        <el-radio label="normal">标准</el-radio>
+        <el-radio value="normal">标准</el-radio>
         <el-tooltip
           content="沉侵式头部仅支持微信小程序、APP，建议页面第一个组件为图片展示类组件"
           placement="top"
         >
-          <el-radio label="inner">沉浸式</el-radio>
+          <el-radio value="inner">沉浸式</el-radio>
         </el-tooltip>
       </el-radio-group>
     </el-form-item>
     <el-form-item label="常驻显示" prop="alwaysShow" v-if="formData.styleType === 'inner'">
       <el-radio-group v-model="formData!.alwaysShow">
-        <el-radio :label="false">关闭</el-radio>
+        <el-radio :value="false">关闭</el-radio>
         <el-tooltip content="常驻显示关闭后,头部小组件将在页面滑动时淡入" placement="top">
-          <el-radio :label="true">开启</el-radio>
+          <el-radio :value="true">开启</el-radio>
         </el-tooltip>
       </el-radio-group>
     </el-form-item>
     <el-form-item label="背景类型" prop="bgType">
       <el-radio-group v-model="formData.bgType">
-        <el-radio label="color">纯色</el-radio>
-        <el-radio label="img">图片</el-radio>
+        <el-radio value="color">纯色</el-radio>
+        <el-radio value="img">图片</el-radio>
       </el-radio-group>
     </el-form-item>
     <el-form-item label="背景颜色" prop="bgColor" v-if="formData.bgType === 'color'">

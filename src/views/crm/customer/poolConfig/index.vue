@@ -27,8 +27,8 @@
         <!-- 表单 -->
         <el-form-item label="客户公海规则设置" prop="enabled">
           <el-radio-group v-model="formData.enabled" @change="changeEnable" class="ml-4">
-            <el-radio :label="false" size="large">不启用</el-radio>
-            <el-radio :label="true" size="large">启用</el-radio>
+            <el-radio :value="false" size="large">不启用</el-radio>
+            <el-radio :value="true" size="large">启用</el-radio>
           </el-radio-group>
         </el-form-item>
         <div v-if="formData.enabled">
@@ -44,8 +44,8 @@
               @change="changeNotifyEnable"
               class="ml-4"
             >
-              <el-radio :label="false" size="large">不提醒</el-radio>
-              <el-radio :label="true" size="large">提醒</el-radio>
+              <el-radio :value="false" size="large">不提醒</el-radio>
+              <el-radio :value="true" size="large">提醒</el-radio>
             </el-radio-group>
           </el-form-item>
           <div v-if="formData.notifyEnabled">
