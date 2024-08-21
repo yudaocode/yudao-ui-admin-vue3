@@ -8,7 +8,7 @@
             <!-- 表单信息 -->
             <div
               v-loading="processInstanceLoading"
-              class="form-box border-1 border-solid border-[#ccc] p-20px flex flex-col"
+              class="form-box border-1 border-solid border-[#ccc] p-20px flex flex-col mb-50px"
             >
               <div class="mx-auto mb-10px text-22px font-bold">{{ processInstance.name }}</div>
               <!-- 情况一：流程表单 -->
@@ -32,7 +32,7 @@
 
             <!-- 审批信息 -->
             <el-divider content-position="center" v-if="runningTasks.length > 0">
-              审批意见
+              <div class="text-16px font-1000">审批意见</div>
             </el-divider>
             <div
               class="mt-50px"
@@ -485,9 +485,8 @@ const activities = [
 
 <style lang="scss" scoped>
 .form-box {
-  :deep(.el-card){
-    border: none
+  :deep(.el-card) {
+    border: none;
   }
 }
-  
 </style>
