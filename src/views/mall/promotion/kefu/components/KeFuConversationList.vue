@@ -23,7 +23,7 @@
           <div class="flex justify-between items-center w-100%">
             <span class="username">{{ item.userNickname }}</span>
             <span class="color-[#989EA6]">
-              {{ formatPast(item.lastMessageTime, 'YYYY-mm-dd') }}
+              {{ formatPast(item.lastMessageTime, 'YYYY-MM-DD') }}
             </span>
           </div>
           <!-- 最后聊天内容 -->
@@ -186,11 +186,11 @@ watch(showRightMenu, (val) => {
     transition: border-left 0.05s ease-in-out; /* 设置过渡效果 */
 
     .username {
-      min-width: 0;
+      display: -webkit-box;
       max-width: 60%;
+      min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
-      display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 1;
     }
@@ -198,14 +198,14 @@ watch(showRightMenu, (val) => {
     .last-message {
       width: 200px;
       overflow: hidden; // 隐藏超出的文本
-      white-space: nowrap; // 禁止换行
       text-overflow: ellipsis; // 添加省略号
+      white-space: nowrap; // 禁止换行
     }
   }
 
   .active {
-    border-left: 5px #3271ff solid;
     background-color: #eff0f1;
+    border-left: 5px #3271ff solid;
   }
 
   .pinned {
@@ -214,13 +214,13 @@ watch(showRightMenu, (val) => {
 
   .right-menu-ul {
     position: absolute;
-    background-color: #fff;
+    width: 130px;
     padding: 10px;
     margin: 0;
     list-style-type: none; /* 移除默认的项目符号 */
+    background-color: #fff;
     border-radius: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影效果 */
-    width: 130px;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 10%); /* 阴影效果 */
 
     li {
       padding: 8px 16px;
