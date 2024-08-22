@@ -13,9 +13,7 @@
         <img class="rounded-full h-28px" src="@/assets/imgs/avatar.jpg" alt="" />
         {{ processInstance?.startUser?.nickname }}
       </div>
-      <div class="text-#878c93">
-        {{ dayjs(processInstance.startTime).format('YYYY-MM-DD HH:mm:ss') }} 提交
-      </div>
+      <div class="text-#878c93"> {{ formatDate(processInstance.startTime) }} 提交 </div>
     </div>
 
     <el-tabs>
@@ -210,25 +208,33 @@
           </el-col>
           <el-col :span="6">
             <el-timeline class="pt-20px">
+              <el-timeline-item type="primary" size="large">
+                <div class="flex flex-col items-start gap-2">
+                  <div class="font-bold"> 发起人：{{ processInstance?.startUser?.nickname }}</div>
+                  <el-tag type="success">发起</el-tag>
+                  <div class="text-#a5a5a5 text-12px">
+                    发起时间：{{ formatDate(processInstance.startTime) }}
+                  </div>
+                </div>
+              </el-timeline-item>
               <el-timeline-item
-                v-for="(activity, index) in activities"
+                v-for="(activity, index) in tasks"
                 :key="index"
                 type="primary"
                 size="large"
               >
                 <div class="flex flex-col items-start gap-2">
-                  <div class="font-bold">
-                    {{ index === 0 ? '发起人' : '审批人' }}：{{ activity.createBy }}</div
-                  >
+                  <div class="font-bold"> 审批人：{{ activity.assigneeUser?.nickname }}</div>
                   <dict-tag
                     :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS"
                     :value="activity.status"
                   />
+                  <!-- TODO：暂无该字段 -->
                   <div v-if="activity.receiveTime" class="text-#a5a5a5 text-12px">
                     接收时间：{{ activity.receiveTime }}
                   </div>
-                  <div v-if="activity.auditTime" class="text-#a5a5a5 text-12px">
-                    审批时间：{{ activity.auditTime }}
+                  <div v-if="activity.createTime" class="text-#a5a5a5 text-12px">
+                    审批时间：{{ activity.createTime }}
                   </div>
                   <div v-if="activity.opinion" class="text-#a5a5a5 text-12px w-100%">
                     <div class="mb-5px">审批意见：</div>
@@ -284,7 +290,7 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
-import dayjs from 'dayjs'
+import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { useUserStore } from '@/store/modules/user'
 import { setConfAndFields2 } from '@/utils/formCreate'
@@ -546,41 +552,6 @@ onMounted(async () => {
   // 获得用户列表
   userOptions.value = await UserApi.getSimpleUserList()
 })
-
-/* 测试数据 */
-const activities = [
-  {
-    status: 1,
-    receiveTime: '2024-06-25 13:30',
-    createBy: '张三'
-  },
-  {
-    status: 1,
-    receiveTime: '2024-06-25 13:30',
-    auditTime: '2024-07-12 16:32',
-    opinion: '已阅，同意',
-    createBy: '李四'
-  },
-  {
-    status: 1,
-    receiveTime: '2024-06-25 13:30',
-    auditTime: '2024-07-12 16:32',
-    createBy: '王五'
-  },
-  {
-    status: 1,
-    receiveTime: '2024-06-25 13:30',
-    auditTime: '2024-07-12 16:32',
-    opinion: '已阅，同意',
-    createBy: '刘六'
-  },
-  {
-    status: 1,
-    receiveTime: '2024-06-25 13:30',
-    auditTime: '2024-07-12 16:32',
-    createBy: '徐七'
-  }
-]
 </script>
 
 <style lang="scss" scoped>
