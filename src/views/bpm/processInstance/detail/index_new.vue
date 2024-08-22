@@ -1,5 +1,6 @@
 <template>
-  <ContentWrap :bodyStyle="{ padding: '10px 20px' }">
+  <ContentWrap :bodyStyle="{ padding: '10px 20px' }" class="position-relative">
+    <Icon class="!position-absolute right-20px" :size="130" icon="svg-icon:auditing" />
     <div class="text-#878c93">编号：{{ id }}</div>
     <el-divider class="!my-8px" />
     <div class="flex items-center gap-5 mb-10px">
@@ -21,11 +22,11 @@
       <!-- 表单信息 -->
       <el-tab-pane label="表单信息">
         <el-row :gutter="10">
-          <el-col :span="18">
+          <el-col :span="18" class="!flex !flex-col">
             <!-- 表单信息 -->
             <div
               v-loading="processInstanceLoading"
-              class="form-box border-1 border-solid border-[#ccc] p-20px flex flex-col mb-50px"
+              class="form-box border-1 border-solid border-[#ccc] p-20px flex flex-col mb-30px"
             >
               <!-- 情况一：流程表单 -->
               <el-col
@@ -47,90 +48,98 @@
             </div>
 
             <!-- 审批信息 -->
-            <el-divider content-position="center" v-if="runningTasks.length > 0">
+            <el-divider content-position="center" v-if="runningTask">
               <div class="text-16px font-1000">审批意见</div>
             </el-divider>
-            <div
-              class="mt-50px"
-              v-for="(item, index) in runningTasks"
-              :key="index"
-              v-loading="processInstanceLoading"
-            >
-              <el-col :offset="4" :span="16">
-                <el-form
-                  :ref="'form' + index"
-                  :model="auditForms[index]"
-                  :rules="auditRule"
-                  label-width="100px"
+            <div class="flex flex-col flex-1" v-loading="processInstanceLoading">
+              <el-form
+                class="mb-auto"
+                ref="formRef"
+                :model="auditForm"
+                :rules="auditRule"
+                label-width="100px"
+              >
+                <el-form-item
+                  v-if="processInstance && processInstance.startUser"
+                  label="流程发起人"
                 >
-                  <el-form-item
-                    v-if="processInstance && processInstance.startUser"
-                    label="流程发起人"
-                  >
-                    {{ processInstance?.startUser.nickname }}
-                    <el-tag size="small" type="info" class="ml-8px">
-                      {{ processInstance?.startUser.deptName }}
-                    </el-tag>
-                  </el-form-item>
-                  <el-card v-if="runningTasks[index].formId > 0" class="mb-15px !-mt-10px">
-                    <template #header>
-                      <span class="el-icon-picture-outline">
-                        填写表单【{{ runningTasks[index]?.formName }}】
-                      </span>
-                    </template>
-                    <form-create
-                      v-model="approveForms[index].value"
-                      v-model:api="approveFormFApis[index]"
-                      :option="approveForms[index].option"
-                      :rule="approveForms[index].rule"
+                  {{ processInstance?.startUser.nickname }}
+                  <el-tag size="small" type="info" class="ml-8px">
+                    {{ processInstance?.startUser.deptName }}
+                  </el-tag>
+                </el-form-item>
+                <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
+                  <template #header>
+                    <span class="el-icon-picture-outline">
+                      填写表单【{{ runningTask?.formName }}】
+                    </span>
+                  </template>
+                  <form-create
+                    v-model="approveForm.value"
+                    v-model:api="approveFormFApi"
+                    :option="approveForm.option"
+                    :rule="approveForm.rule"
+                  />
+                </el-card>
+                <el-form-item label="审批建议" prop="reason">
+                  <el-input
+                    v-model="auditForm.reason"
+                    placeholder="请输入审批建议"
+                    type="textarea"
+                  />
+                </el-form-item>
+                <el-form-item label="抄送人" prop="copyUserIds">
+                  <el-select v-model="auditForm.copyUserIds" multiple placeholder="请选择抄送人">
+                    <el-option
+                      v-for="itemx in userOptions"
+                      :key="itemx.id"
+                      :label="itemx.nickname"
+                      :value="itemx.id"
                     />
-                  </el-card>
-                  <el-form-item label="审批建议" prop="reason">
-                    <el-input
-                      v-model="auditForms[index].reason"
-                      placeholder="请输入审批建议"
-                      type="textarea"
-                    />
-                  </el-form-item>
-                  <el-form-item label="抄送人" prop="copyUserIds">
-                    <el-select
-                      v-model="auditForms[index].copyUserIds"
-                      multiple
-                      placeholder="请选择抄送人"
-                    >
-                      <el-option
-                        v-for="itemx in userOptions"
-                        :key="itemx.id"
-                        :label="itemx.nickname"
-                        :value="itemx.id"
-                      />
-                    </el-select>
-                  </el-form-item>
-                </el-form>
-                <div style="margin-bottom: 20px; margin-left: 10%; font-size: 14px">
-                  <el-button type="success" @click="handleAudit(item, true)">
+                  </el-select>
+                </el-form-item>
+              </el-form>
+              <div class="h-60px">
+                <el-divider class="!my-8px" />
+                <div class="text-14px flex items-center color-#32373c font-bold">
+                  <el-button plain type="success" @click="handleAudit(true)">
                     <Icon icon="ep:select" />&nbsp; 通过
                   </el-button>
-                  <el-button type="danger" @click="handleAudit(item, false)">
+                  <el-button class="mr-20px" plain type="danger" @click="handleAudit(false)">
                     <Icon icon="ep:close" />&nbsp; 拒绝
                   </el-button>
-                  <el-button type="primary" @click="handleSend(item)">
-                    <Icon icon="svg-icon:send" />&nbsp; 抄送
-                  </el-button>
-                  <el-button @click="openTaskUpdateAssigneeForm(item.id)">
-                    <Icon icon="fa:share-square-o" />&nbsp; 转交
-                  </el-button>
-                  <el-button type="info" @click="handleDelegate(item)">
-                    <Icon icon="ep:position" />&nbsp; 委派
-                  </el-button>
-                  <el-button type="primary" @click="handleSign(item)">
-                    <Icon icon="ep:plus" />&nbsp; 加签
-                  </el-button>
-                  <el-button type="warning" @click="handleBack(item)">
-                    <Icon icon="fa:mail-reply" />&nbsp; 退回
-                  </el-button>
+                  <div
+                    class="mx-15px cursor-pointer !hover:color-#6db5ff flex items-center"
+                    @click="handleSend"
+                  >
+                    <Icon :size="14" icon="svg-icon:send" />&nbsp;抄送
+                  </div>
+                  <div
+                    class="mx-15px cursor-pointer !hover:color-#6db5ff flex items-center"
+                    @click="openTaskUpdateAssigneeForm"
+                  >
+                    <Icon :size="14" icon="fa:share-square-o" />&nbsp;转交
+                  </div>
+                  <div
+                    class="mx-15px cursor-pointer !hover:color-#6db5ff flex items-center"
+                    @click="handleDelegate"
+                  >
+                    <Icon :size="14" icon="ep:position" />&nbsp;委派
+                  </div>
+                  <div
+                    class="mx-15px cursor-pointer !hover:color-#6db5ff flex items-center"
+                    @click="handleSign"
+                  >
+                    <Icon :size="14" icon="ep:plus" />&nbsp;加签
+                  </div>
+                  <div
+                    class="mx-15px cursor-pointer !hover:color-#6db5ff flex items-center"
+                    @click="handleBack"
+                  >
+                    <Icon :size="14" icon="fa:mail-reply" />&nbsp;退回
+                  </div>
                 </div>
-              </el-col>
+              </div>
             </div>
           </el-col>
           <el-col :span="6">
@@ -241,13 +250,13 @@ const bpmnXml = ref('') // BPMN XML
 const tasksLoad = ref(true) // 任务的加载中
 const tasks = ref<any[]>([]) // 任务列表
 // ========== 审批信息 ==========
-const runningTasks = ref<any[]>([]) // 运行中的任务
-const auditForms = ref<any[]>([]) // 审批任务的表单
+const runningTask = ref<any>({}) // 运行中的任务
+const auditForm = ref<any>({}) // 审批任务的表单
 const auditRule = reactive({
   reason: [{ required: true, message: '审批建议不能为空', trigger: 'blur' }]
 })
-const approveForms = ref<any[]>([]) // 审批通过时，额外的补充信息
-const approveFormFApis = ref<ApiAttrs[]>([]) // approveForms 的 fAPi
+const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
+const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
 
 // ========== 申请信息 ==========
 const fApi = ref<ApiAttrs>() //
@@ -259,12 +268,10 @@ const detailForm = ref({
 
 /** 监听 approveFormFApis，实现它对应的 form-create 初始化后，隐藏掉对应的表单提交按钮 */
 watch(
-  () => approveFormFApis.value,
-  (value) => {
-    value?.forEach((api) => {
-      api.btn.show(false)
-      api.resetBtn.show(false)
-    })
+  () => approveFormFApi.value,
+  (val) => {
+    val?.btn?.show(false)
+    val?.resetBtn?.show(false)
   },
   {
     deep: true
@@ -272,10 +279,8 @@ watch(
 )
 
 /** 处理审批通过和不通过的操作 */
-const handleAudit = async (task, pass) => {
-  // 1.1 获得对应表单
-  const index = runningTasks.value.indexOf(task)
-  const auditFormRef = proxy.$refs['form' + index][0]
+const handleAudit = async (pass) => {
+  const auditFormRef = proxy.$refs['formRef']
   // 1.2 校验表单
   const elForm = unref(auditFormRef)
   if (!elForm) return
@@ -284,16 +289,17 @@ const handleAudit = async (task, pass) => {
 
   // 2.1 提交审批
   const data = {
-    id: task.id,
-    reason: auditForms.value[index].reason,
-    copyUserIds: auditForms.value[index].copyUserIds
+    id: runningTask.value.id,
+    reason: auditForm.value.reason,
+    copyUserIds: auditForm.value.copyUserIds
   }
   if (pass) {
     // 审批通过，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
-    const formCreateApi = approveFormFApis.value[index]
+    const formCreateApi = approveFormFApi.value
     if (formCreateApi) {
       await formCreateApi.validate()
-      data.variables = approveForms.value[index].value
+      // @ts-ignore
+      data.variables = approveForm.value.value
     }
     await TaskApi.approveTask(data)
     message.success('审批通过成功')
@@ -307,26 +313,26 @@ const handleAudit = async (task, pass) => {
 
 /** 转派审批人 */
 const taskTransferFormRef = ref()
-const openTaskUpdateAssigneeForm = (id: string) => {
-  taskTransferFormRef.value.open(id)
+const openTaskUpdateAssigneeForm = () => {
+  taskTransferFormRef.value.open(runningTask.value.id)
 }
 
 /** 处理审批退回的操作 */
 const taskDelegateForm = ref()
-const handleDelegate = async (task) => {
-  taskDelegateForm.value.open(task.id)
+const handleDelegate = async () => {
+  taskDelegateForm.value.open(runningTask.value.id)
 }
 
 /** 处理审批退回的操作 */
 const taskReturnFormRef = ref()
-const handleBack = async (task: any) => {
-  taskReturnFormRef.value.open(task.id)
+const handleBack = async () => {
+  taskReturnFormRef.value.open(runningTask.value.id)
 }
 
 /** 处理审批加签的操作 */
 const taskSignCreateFormRef = ref()
-const handleSign = async (task: any) => {
-  taskSignCreateFormRef.value.open(task.id)
+const handleSign = async () => {
+  taskSignCreateFormRef.value.open(runningTask.value.id)
 }
 
 /** 获得详情 */
@@ -338,7 +344,7 @@ const getDetail = () => {
 }
 
 /** 加载流程实例 */
-const BusinessFormComponent = ref(null) // 异步组件
+const BusinessFormComponent = ref<any>(null) // 异步组件
 const getProcessInstance = async () => {
   try {
     processInstanceLoading.value = true
@@ -369,9 +375,7 @@ const getProcessInstance = async () => {
     }
 
     // 加载流程图
-    bpmnXml.value = (
-      await DefinitionApi.getProcessDefinition(processDefinition.id as number)
-    )?.bpmnXml
+    bpmnXml.value = (await DefinitionApi.getProcessDefinition(processDefinition.id))?.bpmnXml
   } finally {
     processInstanceLoading.value = false
   }
@@ -379,10 +383,10 @@ const getProcessInstance = async () => {
 
 /** 加载任务列表 */
 const getTaskList = async () => {
-  runningTasks.value = []
-  auditForms.value = []
-  approveForms.value = []
-  approveFormFApis.value = []
+  runningTask.value = {}
+  auditForm.value = {}
+  approveForm.value = {}
+  approveFormFApi.value = {}
   try {
     // 获得未取消的任务
     tasksLoad.value = true
@@ -433,25 +437,25 @@ const loadRunningTask = (tasks) => {
       return
     }
     // 2.3 添加到处理任务
-    runningTasks.value.push({ ...task })
-    auditForms.value.push({
+    runningTask.value = { ...task }
+    auditForm.value = {
       reason: '',
       copyUserIds: []
-    })
+    }
 
     // 2.4 处理 approve 表单
     if (task.formId && task.formConf) {
-      const approveForm = {}
-      setConfAndFields2(approveForm, task.formConf, task.formFields, task.formVariables)
-      approveForms.value.push(approveForm)
+      const tempApproveForm = {}
+      setConfAndFields2(tempApproveForm, task.formConf, task.formFields, task.formVariables)
+      approveForm.value = tempApproveForm
     } else {
-      approveForms.value.push({}) // 占位，避免为空
+      approveForm.value = {} // 占位，避免为空
     }
   })
 }
 
 /* 抄送 TODO */
-const handleSend = (item) => {}
+const handleSend = () => {}
 
 /** 初始化 */
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
