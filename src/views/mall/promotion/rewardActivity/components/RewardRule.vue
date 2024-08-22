@@ -73,6 +73,7 @@
                 inactive-text="否"
                 inline-prompt
               />
+              <RewardRuleCouponShowcase v-if="rule.giveCoupon" />
             </el-col>
           </el-form-item>
         </el-form>
@@ -85,6 +86,7 @@
 </template>
 
 <script lang="ts" setup>
+import RewardRuleCouponShowcase from './RewardRuleCouponShowcase.vue'
 import { RewardActivityVO } from '@/api/mall/promotion/reward/rewardActivity'
 import { PromotionConditionTypeEnum } from '@/utils/constants'
 import { useVModel } from '@vueuse/core'
@@ -120,6 +122,8 @@ const addRule = () => {
     couponCounts: []
   })
 }
+
+// TODO puhui999: 规则校验完善
 </script>
 
 <style lang="scss" scoped></style>
