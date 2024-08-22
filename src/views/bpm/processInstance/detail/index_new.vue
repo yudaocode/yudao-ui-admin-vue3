@@ -24,10 +24,7 @@
         <el-row :gutter="10">
           <el-col :span="18" class="!flex !flex-col">
             <!-- 表单信息 -->
-            <div
-              v-loading="processInstanceLoading"
-              class="form-box border-1 border-solid border-[#ccc] p-20px flex flex-col mb-30px"
-            >
+            <div v-loading="processInstanceLoading" class="form-box flex flex-col mb-30px flex-1">
               <!-- 情况一：流程表单 -->
               <el-col
                 v-if="processInstance?.processDefinition?.formType === 10"
@@ -47,98 +44,167 @@
               </div>
             </div>
 
-            <!-- 审批信息 -->
-            <el-divider content-position="center" v-if="runningTask">
-              <div class="text-16px font-1000">审批意见</div>
-            </el-divider>
-            <div class="flex flex-col flex-1" v-loading="processInstanceLoading">
-              <el-form
-                class="mb-auto"
-                ref="formRef"
-                :model="auditForm"
-                :rules="auditRule"
-                label-width="100px"
-              >
-                <el-form-item
-                  v-if="processInstance && processInstance.startUser"
-                  label="流程发起人"
-                >
-                  {{ processInstance?.startUser.nickname }}
-                  <el-tag size="small" type="info" class="ml-8px">
-                    {{ processInstance?.startUser.deptName }}
-                  </el-tag>
-                </el-form-item>
-                <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
-                  <template #header>
-                    <span class="el-icon-picture-outline">
-                      填写表单【{{ runningTask?.formName }}】
-                    </span>
+            <div class="h-60px">
+              <el-divider class="!my-8px" />
+              <div class="text-14px flex items-center color-#32373c font-bold btn-container">
+                <el-popover :visible="passVisible" placement="top-end" :width="500" trigger="click">
+                  <template #reference>
+                    <el-button plain type="success" @click="openPopover('1')">
+                      <Icon icon="ep:select" />&nbsp; 通过
+                    </el-button>
                   </template>
-                  <form-create
-                    v-model="approveForm.value"
-                    v-model:api="approveFormFApi"
-                    :option="approveForm.option"
-                    :rule="approveForm.rule"
-                  />
-                </el-card>
-                <el-form-item label="审批建议" prop="reason">
-                  <el-input
-                    v-model="auditForm.reason"
-                    placeholder="请输入审批建议"
-                    type="textarea"
-                  />
-                </el-form-item>
-                <el-form-item label="抄送人" prop="copyUserIds">
-                  <el-select v-model="auditForm.copyUserIds" multiple placeholder="请选择抄送人">
-                    <el-option
-                      v-for="itemx in userOptions"
-                      :key="itemx.id"
-                      :label="itemx.nickname"
-                      :value="itemx.id"
-                    />
-                  </el-select>
-                </el-form-item>
-              </el-form>
-              <div class="h-60px">
-                <el-divider class="!my-8px" />
-                <div class="text-14px flex items-center color-#32373c font-bold">
-                  <el-button plain type="success" @click="handleAudit(true)">
-                    <Icon icon="ep:select" />&nbsp; 通过
-                  </el-button>
-                  <el-button class="mr-20px" plain type="danger" @click="handleAudit(false)">
-                    <Icon icon="ep:close" />&nbsp; 拒绝
-                  </el-button>
-                  <div
-                    class="mx-15px cursor-pointer !hover:color-#6db5ff flex items-center"
-                    @click="handleSend"
-                  >
-                    <Icon :size="14" icon="svg-icon:send" />&nbsp;抄送
+                  <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+                    <el-form
+                      label-position="top"
+                      class="mb-auto"
+                      ref="formRef"
+                      :model="auditForm"
+                      :rules="auditRule"
+                      label-width="100px"
+                    >
+                      <el-form-item
+                        v-if="processInstance && processInstance.startUser"
+                        label="流程发起人"
+                      >
+                        {{ processInstance?.startUser.nickname }}
+                        <el-tag size="small" type="info" class="ml-8px">
+                          {{ processInstance?.startUser.deptName }}
+                        </el-tag>
+                      </el-form-item>
+                      <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
+                        <template #header>
+                          <span class="el-icon-picture-outline">
+                            填写表单【{{ runningTask?.formName }}】
+                          </span>
+                        </template>
+                        <form-create
+                          v-model="approveForm.value"
+                          v-model:api="approveFormFApi"
+                          :option="approveForm.option"
+                          :rule="approveForm.rule"
+                        />
+                      </el-card>
+                      <el-form-item label="审批建议" prop="reason">
+                        <el-input
+                          v-model="auditForm.reason"
+                          placeholder="请输入审批建议"
+                          type="textarea"
+                        />
+                      </el-form-item>
+                      <el-form-item label="抄送人" prop="copyUserIds">
+                        <el-select
+                          v-model="auditForm.copyUserIds"
+                          multiple
+                          placeholder="请选择抄送人"
+                        >
+                          <el-option
+                            v-for="itemx in userOptions"
+                            :key="itemx.id"
+                            :label="itemx.nickname"
+                            :value="itemx.id"
+                          />
+                        </el-select>
+                      </el-form-item>
+
+                      <el-form-item>
+                        <el-button
+                          :disabled="formLoading"
+                          type="primary"
+                          @click="handleAudit(true)"
+                        >
+                          通过
+                        </el-button>
+                        <el-button @click="passVisible = false"> 取消 </el-button>
+                      </el-form-item>
+                    </el-form>
                   </div>
-                  <div
-                    class="mx-15px cursor-pointer !hover:color-#6db5ff flex items-center"
-                    @click="openTaskUpdateAssigneeForm"
-                  >
-                    <Icon :size="14" icon="fa:share-square-o" />&nbsp;转交
+                </el-popover>
+                <el-popover
+                  :visible="rejectVisible"
+                  placement="top-end"
+                  :width="500"
+                  trigger="click"
+                >
+                  <template #reference>
+                    <el-button class="mr-20px" plain type="danger" @click="openPopover('2')">
+                      <Icon icon="ep:close" />&nbsp; 拒绝
+                    </el-button>
+                  </template>
+                  <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+                    <el-form
+                      label-position="top"
+                      class="mb-auto"
+                      ref="formRef"
+                      :model="auditForm"
+                      :rules="auditRule"
+                      label-width="100px"
+                    >
+                      <el-form-item
+                        v-if="processInstance && processInstance.startUser"
+                        label="流程发起人"
+                      >
+                        {{ processInstance?.startUser.nickname }}
+                        <el-tag size="small" type="info" class="ml-8px">
+                          {{ processInstance?.startUser.deptName }}
+                        </el-tag>
+                      </el-form-item>
+                      <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
+                        <template #header>
+                          <span class="el-icon-picture-outline">
+                            填写表单【{{ runningTask?.formName }}】
+                          </span>
+                        </template>
+                        <form-create
+                          v-model="approveForm.value"
+                          v-model:api="approveFormFApi"
+                          :option="approveForm.option"
+                          :rule="approveForm.rule"
+                        />
+                      </el-card>
+                      <el-form-item label="审批建议" prop="reason">
+                        <el-input
+                          v-model="auditForm.reason"
+                          placeholder="请输入审批建议"
+                          type="textarea"
+                        />
+                      </el-form-item>
+                      <el-form-item label="抄送人" prop="copyUserIds">
+                        <el-select
+                          v-model="auditForm.copyUserIds"
+                          multiple
+                          placeholder="请选择抄送人"
+                        >
+                          <el-option
+                            v-for="itemx in userOptions"
+                            :key="itemx.id"
+                            :label="itemx.nickname"
+                            :value="itemx.id"
+                          />
+                        </el-select>
+                      </el-form-item>
+
+                      <el-form-item>
+                        <el-button
+                          :disabled="formLoading"
+                          type="danger"
+                          @click="handleAudit(false)"
+                        >
+                          拒绝
+                        </el-button>
+                        <el-button @click="rejectVisible = false"> 取消 </el-button>
+                      </el-form-item>
+                    </el-form>
                   </div>
-                  <div
-                    class="mx-15px cursor-pointer !hover:color-#6db5ff flex items-center"
-                    @click="handleDelegate"
-                  >
-                    <Icon :size="14" icon="ep:position" />&nbsp;委派
-                  </div>
-                  <div
-                    class="mx-15px cursor-pointer !hover:color-#6db5ff flex items-center"
-                    @click="handleSign"
-                  >
-                    <Icon :size="14" icon="ep:plus" />&nbsp;加签
-                  </div>
-                  <div
-                    class="mx-15px cursor-pointer !hover:color-#6db5ff flex items-center"
-                    @click="handleBack"
-                  >
-                    <Icon :size="14" icon="fa:mail-reply" />&nbsp;退回
-                  </div>
+                </el-popover>
+                <div @click="handleSend"> <Icon :size="14" icon="svg-icon:send" />&nbsp;抄送 </div>
+                <div @click="openTaskUpdateAssigneeForm">
+                  <Icon :size="14" icon="fa:share-square-o" />&nbsp;转交
                 </div>
+                <div @click="handleDelegate">
+                  <Icon :size="14" icon="ep:position" />&nbsp;委派
+                </div>
+                <div @click="handleSign"> <Icon :size="14" icon="ep:plus" />&nbsp;加签 </div>
+                <div @click="handleBack"> <Icon :size="14" icon="fa:mail-reply" />&nbsp;退回 </div>
               </div>
             </div>
           </el-col>
@@ -245,12 +311,16 @@ const { proxy } = getCurrentInstance() as any
 const userId = useUserStore().getUser.id // 当前登录的编号
 const id = query.id as unknown as string // 流程实例的编号
 const processInstanceLoading = ref(false) // 流程实例的加载中
+const formLoading = ref(false) // 表单加载中
+const passVisible = ref(false) // 是否显示
+const rejectVisible = ref(false) // 是否显示
 const processInstance = ref<any>({}) // 流程实例
 const bpmnXml = ref('') // BPMN XML
 const tasksLoad = ref(true) // 任务的加载中
 const tasks = ref<any[]>([]) // 任务列表
 // ========== 审批信息 ==========
 const runningTask = ref<any>({}) // 运行中的任务
+const formRef = ref()
 const auditForm = ref<any>({}) // 审批任务的表单
 const auditRule = reactive({
   reason: [{ required: true, message: '审批建议不能为空', trigger: 'blur' }]
@@ -280,35 +350,40 @@ watch(
 
 /** 处理审批通过和不通过的操作 */
 const handleAudit = async (pass) => {
-  const auditFormRef = proxy.$refs['formRef']
-  // 1.2 校验表单
-  const elForm = unref(auditFormRef)
-  if (!elForm) return
-  const valid = await elForm.validate()
-  if (!valid) return
+  formLoading.value = true
+  try {
+    const auditFormRef = proxy.$refs['formRef']
+    // 1.2 校验表单
+    const elForm = unref(auditFormRef)
+    if (!elForm) return
+    const valid = await elForm.validate()
+    if (!valid) return
 
-  // 2.1 提交审批
-  const data = {
-    id: runningTask.value.id,
-    reason: auditForm.value.reason,
-    copyUserIds: auditForm.value.copyUserIds
-  }
-  if (pass) {
-    // 审批通过，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
-    const formCreateApi = approveFormFApi.value
-    if (formCreateApi) {
-      await formCreateApi.validate()
-      // @ts-ignore
-      data.variables = approveForm.value.value
+    // 2.1 提交审批
+    const data = {
+      id: runningTask.value.id,
+      reason: auditForm.value.reason,
+      copyUserIds: auditForm.value.copyUserIds
     }
-    await TaskApi.approveTask(data)
-    message.success('审批通过成功')
-  } else {
-    await TaskApi.rejectTask(data)
-    message.success('审批不通过成功')
+    if (pass) {
+      // 审批通过，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
+      const formCreateApi = approveFormFApi.value
+      if (formCreateApi) {
+        await formCreateApi.validate()
+        // @ts-ignore
+        data.variables = approveForm.value.value
+      }
+      await TaskApi.approveTask(data)
+      message.success('审批通过成功')
+    } else {
+      await TaskApi.rejectTask(data)
+      message.success('审批不通过成功')
+    }
+    // 2.2 加载最新数据
+    getDetail()
+  } finally {
+    formLoading.value = false
   }
-  // 2.2 加载最新数据
-  getDetail()
 }
 
 /** 转派审批人 */
@@ -457,6 +532,13 @@ const loadRunningTask = (tasks) => {
 /* 抄送 TODO */
 const handleSend = () => {}
 
+const openPopover = (flag) => {
+  passVisible.value = false
+  rejectVisible.value = false
+  formRef.value.resetFields()
+  flag === '1' ? (passVisible.value = true) : (rejectVisible.value = true)
+}
+
 /** 初始化 */
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 onMounted(async () => {
@@ -505,6 +587,18 @@ const activities = [
 .form-box {
   :deep(.el-card) {
     border: none;
+  }
+}
+
+.btn-container {
+  > div {
+    margin: 0 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    &:hover {
+      color: #6db5ff;
+    }
   }
 }
 </style>
