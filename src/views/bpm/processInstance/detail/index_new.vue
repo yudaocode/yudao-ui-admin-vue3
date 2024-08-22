@@ -1,5 +1,22 @@
 <template>
-  <ContentWrap>
+  <ContentWrap :bodyStyle="{ padding: '10px 20px' }">
+    <div class="text-#878c93">编号：{{ id }}</div>
+    <el-divider class="!my-8px" />
+    <div class="flex items-center gap-5 mb-10px">
+      <div class="text-26px font-bold mb-5px">{{ processInstance.name }}</div>
+      <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="processInstance.status" />
+    </div>
+
+    <div class="flex items-center gap-5 mb-10px text-13px">
+      <div class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2">
+        <img class="rounded-full h-28px" src="@/assets/imgs/avatar.jpg" alt="" />
+        {{ processInstance?.startUser?.nickname }}
+      </div>
+      <div class="text-#878c93">
+        {{ dayjs(processInstance.startTime).format('YYYY-MM-DD HH:mm:ss') }} 提交
+      </div>
+    </div>
+
     <el-tabs>
       <!-- 表单信息 -->
       <el-tab-pane label="表单信息">
@@ -10,7 +27,6 @@
               v-loading="processInstanceLoading"
               class="form-box border-1 border-solid border-[#ccc] p-20px flex flex-col mb-50px"
             >
-              <div class="mx-auto mb-10px text-22px font-bold">{{ processInstance.name }}</div>
               <!-- 情况一：流程表单 -->
               <el-col
                 v-if="processInstance?.processDefinition?.formType === 10"
@@ -47,17 +63,14 @@
                   :rules="auditRule"
                   label-width="100px"
                 >
-                  <el-form-item v-if="processInstance && processInstance.name" label="流程名">
-                    {{ processInstance.name }}
-                  </el-form-item>
                   <el-form-item
                     v-if="processInstance && processInstance.startUser"
                     label="流程发起人"
                   >
                     {{ processInstance?.startUser.nickname }}
-                    <el-tag size="small" type="info">{{
-                      processInstance?.startUser.deptName
-                    }}</el-tag>
+                    <el-tag size="small" type="info" class="ml-8px">
+                      {{ processInstance?.startUser.deptName }}
+                    </el-tag>
                   </el-form-item>
                   <el-card v-if="runningTasks[index].formId > 0" class="mb-15px !-mt-10px">
                     <template #header>
@@ -196,6 +209,7 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
+import dayjs from 'dayjs'
 import { DICT_TYPE } from '@/utils/dict'
 import { useUserStore } from '@/store/modules/user'
 import { setConfAndFields2 } from '@/utils/formCreate'
