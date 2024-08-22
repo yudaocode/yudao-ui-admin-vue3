@@ -13,7 +13,7 @@
     </div>
 
     <div class="flex items-center gap-5 mb-10px text-13px">
-      <div class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2">
+      <div class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600">
         <img class="rounded-full h-28px" src="@/assets/imgs/avatar.jpg" alt="" />
         {{ processInstance?.startUser?.nickname }}
       </div>
@@ -48,7 +48,9 @@
 
             <div class="h-60px" v-if="runningTask?.id">
               <el-divider class="!my-8px" />
-              <div class="text-14px flex items-center color-#32373c font-bold btn-container">
+              <div
+                class="text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
+              >
                 <el-popover :visible="passVisible" placement="top-end" :width="500" trigger="click">
                   <template #reference>
                     <el-button plain type="success" @click="openPopover('1')">
