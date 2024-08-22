@@ -14,7 +14,7 @@
         <el-input v-model="formData.nickname" class="!w-240px" disabled />
       </el-form-item>
       <el-form-item label="变动前余额(元)" prop="balance">
-        <el-input-number v-model="formData.balance" class="!w-240px" disabled />
+        <el-input :model-value="formData.balance" class="!w-240px" disabled />
       </el-form-item>
       <el-form-item label="变动类型" prop="changeType">
         <el-radio-group v-model="formData.changeType">
@@ -32,7 +32,7 @@
         />
       </el-form-item>
       <el-form-item label="变动后余额(元)">
-        <el-input-number v-model="balanceResult" class="!w-240px" disabled />
+        <el-input :model-value="balanceResult" class="!w-240px" disabled />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -57,7 +57,7 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formData = ref({
   id: undefined,
   nickname: undefined,
-  balance: '0', // TODO @puhui999：貌似有 el-input-number 的报错，看看怎么解决。应该可以
+  balance: '0',
   changeBalance: 0,
   changeType: 1
 })
@@ -108,8 +108,8 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    await UserApi.updateUserBalance({
-      id: formData.value.id,
+    await WalletApi.updateWalletBalance({
+      userId: formData.value.id,
       balance: convertToInteger(formData.value.changeBalance) * formData.value.changeType
     })
 

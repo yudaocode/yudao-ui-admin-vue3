@@ -46,8 +46,3 @@ export const updateUserLevel = async (data: any) => {
 export const updateUserPoint = async (data: any) => {
   return await request.put({ url: `/member/user/update-point`, data })
 }
-
-// 修改会员用户余额
-export const updateUserBalance = async (data: any) => {
-  return await request.put({ url: `/member/user/update-balance`, data })
-}
