@@ -195,6 +195,16 @@ $prefix-cls: #{$namespace}-menu;
     }
   }
 
+  // 垂直菜单
+  &__vertical {
+    :deep(.#{$elNamespace}-menu--vertical) {
+      &:not(.#{$elNamespace}-menu--collapse) .#{$elNamespace}-sub-menu__title,
+      .#{$elNamespace}-menu-item {
+        padding-right: 0;
+      }
+    }
+  }
+
   // 水平菜单
   &__horizontal {
     height: calc(var(--top-tool-height)) !important;
