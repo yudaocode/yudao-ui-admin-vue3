@@ -80,8 +80,8 @@ export const useEmoji = () => {
   /**
    * 将文本中的表情替换成图片
    *
-   * @param data 文本
    * @return 替换后的文本
+   * @param content 消息内容
    */
   const replaceEmoji = (content: string) => {
     let newData = content
@@ -93,7 +93,7 @@ export const useEmoji = () => {
           const emojiFile = getEmojiFileByName(item)
           newData = newData.replace(
             item,
-            `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;" src="${emojiFile}"/>`
+            `<img class="chat-img" style="width: 24px;height: 24px;margin: 0 3px;" src="${emojiFile}" alt=""/>`
           )
         })
       }

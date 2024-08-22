@@ -41,7 +41,7 @@
           <template #header>
             <div
               class="mr-[20px] h-[35px] flex items-center pl-[10px] pr-[10px]"
-              style="background-color: #f7f7f7"
+              style="background-color: var(--app-content-bg-color)"
             >
               <span class="mr-20px">订单号：{{ scope.row.no }} </span>
               <span class="mr-20px">下单时间：{{ formatDate(scope.row.createTime) }}</span>

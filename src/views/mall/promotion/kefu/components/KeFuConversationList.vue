@@ -22,17 +22,16 @@
         <div class="ml-10px w-100%">
           <div class="flex justify-between items-center w-100%">
             <span class="username">{{ item.userNickname }}</span>
-            <span class="color-[#989EA6]">
-              {{ formatPast(item.lastMessageTime, 'YYYY-mm-dd') }}
+            <span class="color-[var(--left-menu-text-color)]" style="font-size: 13px;">
+              {{ formatPast(item.lastMessageTime, 'YYYY-MM-DD') }}
             </span>
           </div>
           <!-- 最后聊天内容 -->
           <div
-            v-dompurify-html="
-              getConversationDisplayText(item.lastMessageContentType, item.lastMessageContent)
-            "
-            class="last-message flex items-center color-[#989EA6]"
-          ></div>
+            v-dompurify-html="getConversationDisplayText(item.lastMessageContentType, item.lastMessageContent)"
+            class="last-message flex items-center color-[var(--left-menu-text-color)]"
+          >
+          </div>
         </div>
       </div>
     </div>
@@ -182,7 +181,7 @@ watch(showRightMenu, (val) => {
   &-conversation {
     height: 60px;
     padding: 10px;
-    background-color: #fff;
+    //background-color: #fff;
     transition: border-left 0.05s ease-in-out; /* 设置过渡效果 */
 
     .username {
@@ -196,6 +195,7 @@ watch(showRightMenu, (val) => {
     }
 
     .last-message {
+      font-size: 13px;
       width: 200px;
       overflow: hidden; // 隐藏超出的文本
       white-space: nowrap; // 禁止换行
@@ -205,16 +205,16 @@ watch(showRightMenu, (val) => {
 
   .active {
     border-left: 5px #3271ff solid;
-    background-color: #eff0f1;
+    background-color: var(--left-menu-bg-active-color);
   }
 
   .pinned {
-    background-color: #eff0f1;
+    background-color: var(--left-menu-bg-active-color);
   }
 
   .right-menu-ul {
     position: absolute;
-    background-color: #fff;
+    background-color: var(--app-content-bg-color);
     padding: 10px;
     margin: 0;
     list-style-type: none; /* 移除默认的项目符号 */
@@ -228,7 +228,7 @@ watch(showRightMenu, (val) => {
       border-radius: 12px;
       transition: background-color 0.3s; /* 平滑过渡 */
       &:hover {
-        background-color: #e0e0e0; /* 悬停时的背景颜色 */
+        background-color: var(--left-menu-bg-active-color); /* 悬停时的背景颜色 */
       }
     }
   }
