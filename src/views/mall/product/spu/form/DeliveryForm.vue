@@ -6,7 +6,7 @@
         <el-checkbox
           v-for="dict in getIntDictOptions(DICT_TYPE.TRADE_DELIVERY_TYPE)"
           :key="dict.value"
-          :label="dict.value"
+          :value="dict.value"
         >
           {{ dict.label }}
         </el-checkbox>

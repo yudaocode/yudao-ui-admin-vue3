@@ -33,7 +33,7 @@
       <el-form-item label="优惠设置">
         <template v-for="(item, index) in formData.rules" :key="index">
           <el-row type="flex">
-            <el-col :span="24" style="font-weight: bold; display: flex">
+            <el-col :span="24" style="display: flex; font-weight: bold">
               活动层级{{ index + 1 }}
               <el-button
                 link
@@ -45,7 +45,7 @@
                 删除
               </el-button>
             </el-col>
-            <e-form :ref="'formRef' + index" :model="item">
+            <el-form :ref="'formRef' + index" :model="item">
               <el-form-item
                 label="优惠门槛:"
                 prop="limit"
@@ -64,7 +64,7 @@
               <el-form-item label="优惠内容:" label-width="100px" style="padding-left: 50px">
                 <el-checkbox-group v-model="activityRules[index]" style="width: 100%">
                   <el-col :span="24">
-                    <el-checkbox label="订单金额优惠" name="type" />
+                    <el-checkbox label="订单金额优惠" value="订单金额优惠" name="type" />
                     <el-form-item v-if="activityRules[index].includes('订单金额优惠')">
                       减
                       <el-input
@@ -77,10 +77,15 @@
                     </el-form-item>
                   </el-col>
                   <el-col :span="24">
-                    <el-checkbox v-model="item.freeDelivery" label="包邮" name="type" />
+                    <el-checkbox
+                      v-model="item.freeDelivery"
+                      label="包邮"
+                      value="包邮"
+                      name="type"
+                    />
                   </el-col>
                   <el-col :span="24">
-                    <el-checkbox label="送积分" name="type" />
+                    <el-checkbox label="送积分" value="送积分" name="type" />
                     <el-form-item v-if="activityRules[index].includes('送积分')">
                       送
                       <el-input
@@ -95,11 +100,11 @@
                   <!-- 优惠券待处理  也可以参考优惠劵的SpuShowcase-->
                   <!-- TODO 待实现！-->
                   <el-col :span="24">
-                    <el-checkbox label="送优惠券" name="type" />
+                    <el-checkbox label="送优惠券" value="送优惠券" name="type" />
                   </el-col>
                 </el-checkbox-group>
               </el-form-item>
-            </e-form>
+            </el-form>
           </el-row>
         </template>
         <!-- TODO 实现：建议改成放在每一个【活动层级】的下面，有点类似主子表 -->
