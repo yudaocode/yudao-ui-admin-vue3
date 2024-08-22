@@ -107,7 +107,7 @@
                       <el-form-item>
                         <el-button
                           :disabled="formLoading"
-                          type="primary"
+                          type="success"
                           @click="handleAudit(true)"
                         >
                           通过
@@ -231,10 +231,10 @@
                   />
                   <!-- TODO：暂无该字段 -->
                   <div v-if="activity.receiveTime" class="text-#a5a5a5 text-12px">
-                    接收时间：{{ activity.receiveTime }}
+                    接收时间：{{ formatDate(activity.receiveTime) }}
                   </div>
                   <div v-if="activity.createTime" class="text-#a5a5a5 text-12px">
-                    审批时间：{{ activity.createTime }}
+                    审批时间：{{ formatDate(activity.createTime) }}
                   </div>
                   <div v-if="activity.opinion" class="text-#a5a5a5 text-12px w-100%">
                     <div class="mb-5px">审批意见：</div>
