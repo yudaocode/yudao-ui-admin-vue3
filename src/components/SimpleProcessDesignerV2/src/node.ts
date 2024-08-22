@@ -90,6 +90,55 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
     getNodeConfigFormFields
   }
 }
+/**
+ * @description 获取表单的字段
+ */
+export function useFormFields() {
+  // 解析后的表单字段
+  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
+  const parseFormFields = () => {
+    const parsedFormFields: Array<Record<string, string>> = []
+    if (formFields) {
+      formFields.value.forEach((fieldStr: string) => {
+        parseField(JSON.parse(fieldStr), parsedFormFields)
+      })
+    }
+    return parsedFormFields
+  }
+  // 解析字段。
+  const parseField = (
+    rule: Record<string, any>,
+    parsedFormFields: Array<Record<string, string>>,
+    parentTitle: string = ''
+  ) => {
+    const { field, title: tempTitle, children, type } = rule
+    if (field && tempTitle) {
+      let title = tempTitle
+      if (parentTitle) {
+        title = `${parentTitle}.${tempTitle}`
+      }
+      parsedFormFields.push({
+        field,
+        title,
+        type
+      })
+      // TODO 子表单 需要处理子表单字段
+      // if (type === 'group' && rule.props?.rule && Array.isArray(rule.props.rule)) {
+      //   // 解析子表单的字段
+      //   rule.props.rule.forEach((item) => {
+      //     parseFieldsSetDefaultPermission(item, fieldsPermission, title)
+      //   })
+      // }
+    }
+    if (children && Array.isArray(children)) {
+      children.forEach((rule) => {
+        parseField(rule, parsedFormFields)
+      })
+    }
+  }
+
+  return parseFormFields()
+}
 
 export type UserTaskFormType = {
   //candidateParamArray: any[]
@@ -405,6 +454,25 @@ export function useNodeName(nodeType: NodeType) {
     nodeName,
     showInput,
     clickIcon,
+    blurEvent
+  }
+}
+
+export function useNodeName2(node: Ref<SimpleFlowNode>, nodeType: NodeType) {
+  // 显示节点名称输入框
+  const showInput = ref(false)
+  // 节点名称输入框失去焦点
+  const blurEvent = () => {
+    showInput.value = false
+    node.value.name = node.value.name || (NODE_DEFAULT_NAME.get(nodeType) as string)
+  }
+  // 点击节点标题进行输入
+  const clickTitle = () => {
+    showInput.value = true
+  }
+  return {
+    showInput,
+    clickTitle,
     blurEvent
   }
 }

@@ -15,7 +15,7 @@
             v-model="currentNode.name"
             :placeholder="currentNode.name"
           />
-          <div v-else class="node-title" @click="clickEvent">
+          <div v-else class="node-title" @click="clickTitle">
             {{ currentNode.name }}
           </div>
         </div>
@@ -37,8 +37,8 @@
 </template>
 <script setup lang="ts">
 import NodeHandler from '../NodeHandler.vue'
-import { useWatchNode } from '../node'
-import { SimpleFlowNode, NODE_DEFAULT_NAME, NODE_DEFAULT_TEXT, NodeType } from '../consts'
+import { useWatchNode, useNodeName2 } from '../node'
+import { SimpleFlowNode, NODE_DEFAULT_TEXT, NodeType } from '../consts'
 import StartUserNodeConfig from '../nodes-config/StartUserNodeConfig.vue'
 defineOptions({
   name: 'StartEventNode'
@@ -53,21 +53,11 @@ const props = defineProps({
 const emits = defineEmits<{
   'update:modelValue': [node: SimpleFlowNode | undefined]
 }>()
-
+// 监控节点变化
 const currentNode = useWatchNode(props)
+// 节点名称编辑
+const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.START_USER_NODE)
 
-// 显示节点名称输入框
-const showInput = ref(false)
-// 节点名称输入框失去焦点
-const blurEvent = () => {
-  showInput.value = false
-  currentNode.value.name =
-    currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.START_USER_NODE) as string)
-}
-// 点击节点标题进行输入
-const clickEvent = () => {
-  showInput.value = true
-}
 const nodeSetting = ref()
 // 打开节点配置
 const openNodeConfig = () => {

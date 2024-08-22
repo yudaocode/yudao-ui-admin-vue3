@@ -119,6 +119,9 @@
             &.copy-task {
               color: #3296fa;
             }
+            &.start-user {
+              color: #676565;
+            }
           }
 
           .node-title {
@@ -669,9 +672,9 @@
 @font-face {
   font-family: 'iconfont'; /* Project id 4495938 */
   src:
-    url('iconfont.woff2?t=1712392083512') format('woff2'),
-    url('iconfont.woff?t=1712392083512') format('woff'),
-    url('iconfont.ttf?t=1712392083512') format('truetype');
+    url('iconfont.woff2?t=1724339470412') format('woff2'),
+    url('iconfont.woff?t=1724339470412') format('woff'),
+    url('iconfont.ttf?t=1724339470412') format('truetype');
 }
 
 .iconfont {
@@ -682,7 +685,11 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-Inclusive:before {
+.icon-start-user:before {
+  content: '\e679';
+}
+
+.icon-inclusive:before {
   content: '\e602';
 }
 

@@ -13,7 +13,7 @@
             v-model="currentNode.name"
             :placeholder="currentNode.name"
           />
-          <div v-else class="node-title" @click="clickEvent">
+          <div v-else class="node-title" @click="clickTitle">
             {{ currentNode.name }}
           </div>
         </div>
@@ -44,8 +44,8 @@
   />
 </template>
 <script setup lang="ts">
-import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT, NODE_DEFAULT_NAME } from '../consts'
-import { useWatchNode } from '../node'
+import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
+import { useWatchNode, useNodeName2 } from '../node'
 import NodeHandler from '../NodeHandler.vue'
 import UserTaskNodeConfig from '../nodes-config/UserTaskNodeConfig.vue'
 defineOptions({
@@ -61,28 +61,16 @@ const emits = defineEmits<{
   'update:flowNode': [node: SimpleFlowNode | undefined]
   'find:parentNode': [nodeList: SimpleFlowNode[], nodeType: NodeType]
 }>()
-
+// 监控节点变化
 const currentNode = useWatchNode(props)
-
+// 节点名称编辑
+const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.START_USER_NODE)
 const nodeSetting = ref()
 // 打开节点配置
 const openNodeConfig = () => {
   // 把当前节点传递给配置组件
   nodeSetting.value.showUserTaskNodeConfig(currentNode.value)
   nodeSetting.value.openDrawer()
-}
-
-// 显示节点名称输入框
-const showInput = ref(false)
-// 节点名称输入框失去焦点
-const blurEvent = () => {
-  showInput.value = false
-  currentNode.value.name =
-    currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
-}
-// 点击节点标题进行输入
-const clickEvent = () => {
-  showInput.value = true
 }
 
 const deleteNode = () => {

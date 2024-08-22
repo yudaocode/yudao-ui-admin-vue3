@@ -13,7 +13,7 @@
             v-model="currentNode.name"
             :placeholder="currentNode.name"
           />
-          <div v-else class="node-title" @click="clickEvent">
+          <div v-else class="node-title" @click="clickTitle">
             {{ currentNode.name }}
           </div>
         </div>
@@ -40,8 +40,9 @@
   </div>
 </template>
 <script setup lang="ts">
-import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT, NODE_DEFAULT_NAME } from '../consts'
+import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
 import NodeHandler from '../NodeHandler.vue'
+import { useNodeName2, useWatchNode } from '../node'
 import CopyTaskNodeConfig from '../nodes-config/CopyTaskNodeConfig.vue'
 defineOptions({
   name: 'CopyTaskNode'
@@ -56,27 +57,12 @@ const props = defineProps({
 const emits = defineEmits<{
   'update:flowNode': [node: SimpleFlowNode | undefined]
 }>()
-const currentNode = ref<SimpleFlowNode>(props.flowNode)
 
-// 监控当前节点的变化
-watch(
-  () => props.flowNode,
-  (newValue) => {
-    currentNode.value = newValue
-  }
-)
-// 显示节点名称输入框
-const showInput = ref(false)
-// 节点名称输入框失去焦点
-const blurEvent = () => {
-  showInput.value = false
-  currentNode.value.name =
-    currentNode.value.name || (NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string)
-}
-// 点击节点标题进行输入
-const clickEvent = () => {
-  showInput.value = true
-}
+// 监控节点的变化
+const currentNode = useWatchNode(props)
+// 节点名称编辑
+const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.COPY_TASK_NODE)
+
 const nodeSetting = ref()
 // 打开节点配置
 const openNodeConfig = () => {
