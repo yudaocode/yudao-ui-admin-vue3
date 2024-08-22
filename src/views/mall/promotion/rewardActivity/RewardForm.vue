@@ -33,7 +33,7 @@
       <el-form-item label="优惠设置">
         <RewardRule v-model="formData" />
       </el-form-item>
-      <el-form-item label="活动商品" prop="productScope">
+      <el-form-item label="活动范围" prop="productScope">
         <el-radio-group v-model="formData.productScope">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_PRODUCT_SCOPE)"
@@ -44,26 +44,18 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <!-- TODO：活动商品的开发，可以参考优惠劵的，已经搞好啦； -->
       <el-form-item
         v-if="formData.productScope === PromotionProductScopeEnum.SPU.scope"
         prop="productSpuIds"
       >
-        <el-select
-          v-model="formData.productSpuIds"
-          clearable
-          filterable
-          multiple
-          placeholder="请选择活动商品"
-          size="small"
-        >
-          <el-option v-for="item in productSpus" :key="item.id" :label="item.name" :value="item.id">
-            <span style="float: left">{{ item.name }}</span>
-            <span style="float: right; font-size: 13px; color: #8492a6">
-              ￥{{ fenToYuan(item.price) }}
-            </span>
-          </el-option>
-        </el-select>
+        <SpuShowcase v-model="formData.productSpuIds" />
+      </el-form-item>
+      <el-form-item
+        v-if="formData.productScope === PromotionProductScopeEnum.CATEGORY.scope"
+        label="分类"
+        prop="productCategoryIds"
+      >
+        <ProductCategorySelect v-model="formData.productCategoryIds" />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" placeholder="请输入备注" />
@@ -77,11 +69,11 @@
 </template>
 <script lang="ts" setup>
 import RewardRule from './components/RewardRule.vue'
-import { getSpuSimpleList } from '@/api/mall/product/spu'
+import SpuShowcase from '@/views/mall/product/spu/components/SpuShowcase.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as RewardActivityApi from '@/api/mall/promotion/reward/rewardActivity'
 import { PromotionConditionTypeEnum, PromotionProductScopeEnum } from '@/utils/constants'
-import { fenToYuan } from '@/utils'
+import ProductCategorySelect from '@/views/mall/product/category/components/ProductCategorySelect.vue'
 
 defineOptions({ name: 'ProductBrandForm' })
 
@@ -102,7 +94,8 @@ const formRules = reactive({
   startAndEndTime: [{ required: true, message: '活动时间不能为空', trigger: 'blur' }],
   conditionType: [{ required: true, message: '条件类型不能为空', trigger: 'change' }],
   productScope: [{ required: true, message: '商品范围不能为空', trigger: 'blur' }],
-  productSpuIds: [{ required: true, message: '商品范围不能为空', trigger: 'blur' }]
+  productSpuIds: [{ required: true, message: '商品不能为空', trigger: 'blur' }],
+  productCategoryIds: [{ required: true, message: '商品分类不能为空', trigger: 'blur' }]
 })
 const formRef = ref([]) // 表单 Ref
 
@@ -119,6 +112,8 @@ const open = async (type: string, id?: number) => {
       const data = await RewardActivityApi.getReward(id)
       data.startAndEndTime = [data.startTime, data.endTime]
       formData.value = data
+      // 获得商品范围
+      await getProductScope()
     } finally {
       formLoading.value = false
     }
@@ -140,6 +135,8 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value
+    // 设置商品范围
+    setProductScopeValues(data)
     if (formType.value === 'create') {
       await RewardActivityApi.createRewardActivity(data)
       message.success(t('common.createSuccess'))
@@ -164,9 +161,42 @@ const resetForm = () => {
   } as RewardActivityApi.RewardActivityVO
 }
 
-/** 初始化 **/
-const productSpus = ref<any[]>([]) // 商品数据
-onMounted(async () => {
-  productSpus.value = await getSpuSimpleList()
-})
+/** 获得商品范围 */
+const getProductScope = async () => {
+  switch (formData.value.productScope) {
+    case PromotionProductScopeEnum.SPU.scope:
+      // 设置商品编号
+      formData.value.productSpuIds = formData.value.productScopeValues
+      break
+    case PromotionProductScopeEnum.CATEGORY.scope:
+      await nextTick(() => {
+        let productCategoryIds = formData.value.productScopeValues as any
+        if (Array.isArray(productCategoryIds) && productCategoryIds.length > 0) {
+          // 单选时使用数组不能反显
+          productCategoryIds = productCategoryIds[0]
+        }
+        // 设置品类编号
+        formData.value.productCategoryIds = productCategoryIds
+      })
+      break
+    default:
+      break
+  }
+}
+
+/** 设置商品范围 */
+function setProductScopeValues(data: any) {
+  switch (formData.value.productScope) {
+    case PromotionProductScopeEnum.SPU.scope:
+      data.productScopeValues = formData.value.productSpuIds
+      break
+    case PromotionProductScopeEnum.CATEGORY.scope:
+      data.productScopeValues = Array.isArray(formData.value.productCategoryIds)
+        ? formData.value.productCategoryIds
+        : [formData.value.productCategoryIds]
+      break
+    default:
+      break
+  }
+}
 </script>
