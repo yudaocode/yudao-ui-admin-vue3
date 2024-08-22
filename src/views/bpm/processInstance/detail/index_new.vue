@@ -1,6 +1,10 @@
 <template>
   <ContentWrap :bodyStyle="{ padding: '10px 20px' }" class="position-relative">
-    <Icon class="!position-absolute right-20px" :size="130" icon="svg-icon:auditing" />
+    <Icon
+      class="!position-absolute right-20px"
+      :size="130"
+      :icon="`svg-icon:audit${processInstance.status}`"
+    />
     <div class="text-#878c93">编号：{{ id }}</div>
     <el-divider class="!my-8px" />
     <div class="flex items-center gap-5 mb-10px">
@@ -42,7 +46,7 @@
               </div>
             </div>
 
-            <div class="h-60px">
+            <div class="h-60px" v-if="runningTask?.id">
               <el-divider class="!my-8px" />
               <div class="text-14px flex items-center color-#32373c font-bold btn-container">
                 <el-popover :visible="passVisible" placement="top-end" :width="500" trigger="click">
@@ -374,7 +378,7 @@ const handleAudit = async (pass) => {
     if (pass) {
       // 审批通过，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
       const formCreateApi = approveFormFApi.value
-      if (formCreateApi) {
+      if (Object.keys(formCreateApi)?.length > 0) {
         await formCreateApi.validate()
         // @ts-ignore
         data.variables = approveForm.value.value
