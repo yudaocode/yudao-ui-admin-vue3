@@ -19,6 +19,7 @@
               placeholder=""
               type="number"
             />
+            <!-- TODO @puhui999：走字典数据？ -->
             {{ PromotionConditionTypeEnum.PRICE.type === formData.conditionType ? '元' : '件' }}
           </el-form-item>
           <el-form-item label="优惠内容:" label-width="100px">
@@ -26,6 +27,7 @@
               订单金额优惠
               <el-form-item>
                 减
+                <!-- TODO @puhui999：需要考虑 100 换算哈 -->
                 <el-input
                   v-model="rule.discountPrice"
                   class="w-150px! p-x-20px!"
@@ -90,8 +92,6 @@ import RewardRuleCouponShowcase from './RewardRuleCouponShowcase.vue'
 import { RewardActivityVO } from '@/api/mall/promotion/reward/rewardActivity'
 import { PromotionConditionTypeEnum } from '@/utils/constants'
 import { useVModel } from '@vueuse/core'
-
-defineOptions({ name: 'RewardRule' })
 
 const props = defineProps<{
   modelValue: RewardActivityVO

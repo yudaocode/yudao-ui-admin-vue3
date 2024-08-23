@@ -169,6 +169,7 @@ const getProductScope = async () => {
       formData.value.productSpuIds = formData.value.productScopeValues
       break
     case PromotionProductScopeEnum.CATEGORY.scope:
+      // TODO @puhui999：可以直接 await nextTick() 呀。
       await nextTick(() => {
         let productCategoryIds = formData.value.productScopeValues as any
         if (Array.isArray(productCategoryIds) && productCategoryIds.length > 0) {
