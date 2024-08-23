@@ -34,9 +34,9 @@
         label="同时添加至"
       >
         <el-checkbox-group v-model="formData.toBizTypes">
-          <el-checkbox :label="BizTypeEnum.CRM_CONTACT">联系人</el-checkbox>
-          <el-checkbox :label="BizTypeEnum.CRM_BUSINESS">商机</el-checkbox>
-          <el-checkbox :label="BizTypeEnum.CRM_CONTRACT">合同</el-checkbox>
+          <el-checkbox :value="BizTypeEnum.CRM_CONTACT">联系人</el-checkbox>
+          <el-checkbox :value="BizTypeEnum.CRM_BUSINESS">商机</el-checkbox>
+          <el-checkbox :value="BizTypeEnum.CRM_CONTRACT">合同</el-checkbox>
         </el-checkbox-group>
       </el-form-item>
     </el-form>
