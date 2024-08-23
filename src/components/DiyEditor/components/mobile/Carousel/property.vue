@@ -5,12 +5,12 @@
         <el-form-item label="样式" prop="type">
           <el-radio-group v-model="formData.type">
             <el-tooltip class="item" content="默认" placement="bottom">
-              <el-radio-button label="default">
+              <el-radio-button value="default">
                 <Icon icon="system-uicons:carousel" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="卡片" placement="bottom">
-              <el-radio-button label="card">
+              <el-radio-button value="card">
                 <Icon icon="ic:round-view-carousel" />
               </el-radio-button>
             </el-tooltip>
@@ -18,8 +18,8 @@
         </el-form-item>
         <el-form-item label="指示器" prop="indicator">
           <el-radio-group v-model="formData.indicator">
-            <el-radio label="dot">小圆点</el-radio>
-            <el-radio label="number">数字</el-radio>
+            <el-radio value="dot">小圆点</el-radio>
+            <el-radio value="number">数字</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="是否轮播" prop="autoplay">
@@ -43,8 +43,8 @@
           <template #default="{ element }">
             <el-form-item label="类型" prop="type" class="m-b-8px!" label-width="40px">
               <el-radio-group v-model="element.type">
-                <el-radio label="img">图片</el-radio>
-                <el-radio label="video">视频</el-radio>
+                <el-radio value="img">图片</el-radio>
+                <el-radio value="video">视频</el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item

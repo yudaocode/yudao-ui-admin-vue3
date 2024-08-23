@@ -1,9 +1,9 @@
 <template>
   <div class="flex flex-row items-center gap-2">
     <el-radio-group v-model="shortcutDays" @change="handleShortcutDaysChange">
-      <el-radio-button :label="1">昨天</el-radio-button>
-      <el-radio-button :label="7">最近7天</el-radio-button>
-      <el-radio-button :label="30">最近30天</el-radio-button>
+      <el-radio-button :value="1">昨天</el-radio-button>
+      <el-radio-button :value="7">最近7天</el-radio-button>
+      <el-radio-button :value="30">最近30天</el-radio-button>
     </el-radio-group>
     <el-date-picker
       v-model="times"

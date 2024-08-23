@@ -25,7 +25,7 @@
           <el-radio-button
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_MENU_TYPE)"
             :key="dict.label"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio-button>
@@ -66,7 +66,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.label"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>
@@ -77,8 +77,8 @@
           <Tooltip message="选择隐藏时，路由将不会出现在侧边栏，但仍然可以访问" title="显示状态" />
         </template>
         <el-radio-group v-model="formData.visible">
-          <el-radio key="true" :label="true" border>显示</el-radio>
-          <el-radio key="false" :label="false" border>隐藏</el-radio>
+          <el-radio key="true" :value="true" border>显示</el-radio>
+          <el-radio key="false" :value="false" border>隐藏</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="formData.type !== 3" label="总是显示" prop="alwaysShow">
@@ -89,8 +89,8 @@
           />
         </template>
         <el-radio-group v-model="formData.alwaysShow">
-          <el-radio key="true" :label="true" border>总是</el-radio>
-          <el-radio key="false" :label="false" border>不是</el-radio>
+          <el-radio key="true" :value="true" border>总是</el-radio>
+          <el-radio key="false" :value="false" border>不是</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="formData.type === 2" label="缓存状态" prop="keepAlive">
@@ -101,8 +101,8 @@
           />
         </template>
         <el-radio-group v-model="formData.keepAlive">
-          <el-radio key="true" :label="true" border>缓存</el-radio>
-          <el-radio key="false" :label="false" border>不缓存</el-radio>
+          <el-radio key="true" :value="true" border>缓存</el-radio>
+          <el-radio key="false" :value="false" border>不缓存</el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
