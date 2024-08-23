@@ -113,7 +113,8 @@ const skuString = computed(() => {
 .ss-order-card-warp {
   padding: 20px;
   border-radius: 10px;
-  background-color: #e2e2e2;
+  border: 1px #6a6a6a solid;
+  background-color: var(--app-content-bg-color);
 
   .img-box {
     width: 80px;
@@ -139,13 +140,13 @@ const skuString = computed(() => {
   }
 
   .title-text {
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 500;
     line-height: 20px;
   }
 
   .spec-text {
-    font-size: 16px;
+    font-size: 10px;
     font-weight: 400;
     color: #999999;
     min-width: 0;
@@ -157,13 +158,13 @@ const skuString = computed(() => {
   }
 
   .price-text {
-    font-size: 16px;
+    font-size: 11px;
     font-weight: 500;
     font-family: OPPOSANS;
   }
 
   .total-text {
-    font-size: 16px;
+    font-size: 10px;
     font-weight: 400;
     line-height: 16px;
     color: #999999;
