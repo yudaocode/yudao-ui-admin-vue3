@@ -325,13 +325,13 @@ onMounted(async () => {
     align-items: center;
     min-height: 30px;
     padding: 10px;
-    background-color: #f7f8fa;
+    background-color: var(--app-content-bg-color);
 
     &::before {
       position: absolute;
       top: 10px;
       left: 13px;
-      border-color: transparent #f7f8fa transparent transparent; /* 尖角颜色，左侧朝向 */
+      border-color: transparent var(--app-content-bg-color) transparent transparent; /* 尖角颜色，左侧朝向 */
       border-style: solid;
       border-width: 8px; /* 调整尖角大小 */
       content: '';
