@@ -176,6 +176,7 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
+const selectedCouponList = ref<CouponTemplateApi.CouponTemplateVO[]>([]) // 选择的数据
 
 /** 查询列表 */
 const getList = async () => {
@@ -214,11 +215,11 @@ const handleSelectionChange = (val: CouponTemplateApi.CouponTemplateVO[]) => {
     emit('update:multipleSelection', val)
     return
   }
-  emit('change', val)
+  selectedCouponList.value = val
 }
 
 const submitForm = () => {
   dialogVisible.value = false
+  emit('change', selectedCouponList.value)
 }
-// TODO @puhui999：提前 todo，先不用改；未来单独成组件，其它模块可以服用；例如说，满减送，可以选择优惠劵；
 </script>

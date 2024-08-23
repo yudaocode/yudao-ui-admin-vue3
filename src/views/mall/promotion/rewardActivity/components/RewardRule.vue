@@ -2,13 +2,11 @@
   <!-- 满减送活动规则组件 -->
   <el-row>
     <template v-if="formData.rules">
-      <div v-for="(rule, index) in formData.rules" :key="index">
-        <el-col :span="24">
-          <span class="font-bold">活动层级{{ index + 1 }}</span>
-          <el-button v-if="index !== 0" link type="danger" @click="deleteRule(index)">
-            删除
-          </el-button>
-        </el-col>
+      <el-col v-for="(rule, index) in formData.rules" :key="index" :span="24">
+        <span class="font-bold">活动层级{{ index + 1 }}</span>
+        <el-button v-if="index !== 0" link type="danger" @click="deleteRule(index)">
+          删除
+        </el-button>
         <el-form ref="formRef" :model="rule">
           <el-form-item label="优惠门槛:" label-width="100px" prop="limit">
             满
@@ -63,8 +61,6 @@
                 积分
               </el-form-item>
             </el-col>
-            <!-- 优惠券待处理  也可以参考优惠劵的SpuShowcase-->
-            <!-- TODO 待实现！-->
             <el-col :span="24">
               <span>送优惠券：</span>
               <el-switch
@@ -73,13 +69,13 @@
                 inactive-text="否"
                 inline-prompt
               />
-              <RewardRuleCouponShowcase v-if="rule.giveCoupon" />
+              <RewardRuleCouponShowcase v-if="rule.giveCoupon" v-model="rule!" />
             </el-col>
           </el-form-item>
         </el-form>
-      </div>
+      </el-col>
     </template>
-    <el-col :span="24">
+    <el-col :span="24" class="mt-10px">
       <el-button type="primary" @click="addRule">添加优惠规则</el-button>
     </el-col>
   </el-row>
