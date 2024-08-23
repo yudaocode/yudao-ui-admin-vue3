@@ -11,6 +11,10 @@ const props = defineProps({
   modelValue: {
     require: false,
     type: String
+  },
+  clearable: {
+    require: false,
+    type: Boolean
   }
 })
 const emit = defineEmits<{ (e: 'update:modelValue', v: string) }>()
@@ -92,6 +96,12 @@ function onCurrentChange(page) {
   currentPage.value = page
 }
 
+function clearIcon() {
+  icon.value = ''
+  emit('update:modelValue', '')
+  visible.value = false
+}
+
 watch(
   () => {
     return props.modelValue
@@ -115,7 +125,7 @@ watch(
 
 <template>
   <div class="selector">
-    <ElInput v-model="inputValue" @click="visible = !visible">
+    <ElInput v-model="inputValue" @click="visible = !visible" :clearable="props.clearable" @clear="clearIcon">
       <template #append>
         <ElPopover
           :popper-options="{
