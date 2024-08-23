@@ -40,7 +40,7 @@ import { isEmpty } from '@/utils/is'
 import { useVModel } from '@vueuse/core'
 import { findIndex } from '@/utils'
 
-defineOptions({ name: 'RewardRuleCouponShowcase' })
+// TODO @puhui999：要不就叫 RewardRuleCouponSelect
 
 const props = defineProps<{
   modelValue: RewardRule
@@ -58,11 +58,12 @@ interface GiveCouponVO extends CouponTemplateApi.CouponTemplateVO {
   giveCount?: number
 }
 
-const couponSelectRef = ref<InstanceType<typeof CouponSelect>>() // 优惠券选择
 /** 选择优惠券 */
+const couponSelectRef = ref<InstanceType<typeof CouponSelect>>() // 优惠券选择
 const selectCoupon = () => {
   couponSelectRef.value?.open()
 }
+
 /** 选择优惠券后的回调 */
 const handleCouponChange = (val: CouponTemplateApi.CouponTemplateVO[]) => {
   for (const item of val) {
@@ -72,23 +73,24 @@ const handleCouponChange = (val: CouponTemplateApi.CouponTemplateVO[]) => {
     list.value.push(item)
   }
 }
+
 /** 删除优惠券 */
 const deleteCoupon = (index: number) => {
   list.value.splice(index, 1)
 }
 
-/** 初始化赠送的优惠券列表-如果有的话*/
+/** 初始化赠送的优惠券列表 */
 const initGiveCouponList = async () => {
+  // 朝赵优惠劵
   if (isEmpty(rewardRule.value) || isEmpty(rewardRule.value.couponIds)) {
     return
   }
-
   const data = await CouponTemplateApi.getCouponTemplateList(rewardRule.value.couponIds!)
   if (!data) {
     return
   }
 
-  for (let i = 0, len = data.length; i < len; i++) {
+  for (let i = 0; i < data.length; i++) {
     const coupon = data[i]
     const index = findIndex(rewardRule.value.couponIds!, (item) => item.id === coupon.id)
     list.value.push({
@@ -110,6 +112,7 @@ const setGiveCouponList = () => {
     couponIds.push(list.value[i].id)
     couponCounts.push(list.value[i].giveCount!)
   }
+  // TODO @puhui999：可以考虑，直接使用 list 的 map 操作，简单一些。性能没啥差别的
   rewardRule.value.couponIds = couponIds
   rewardRule.value.couponCounts = couponCounts
 }
