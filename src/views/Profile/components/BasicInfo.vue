@@ -2,8 +2,8 @@
   <Form ref="formRef" :labelWidth="200" :rules="rules" :schema="schema">
     <template #sex="form">
       <el-radio-group v-model="form['sex']">
-        <el-radio :label="1">{{ t('profile.user.man') }}</el-radio>
-        <el-radio :label="2">{{ t('profile.user.woman') }}</el-radio>
+        <el-radio :value="1">{{ t('profile.user.man') }}</el-radio>
+        <el-radio :value="2">{{ t('profile.user.woman') }}</el-radio>
       </el-radio-group>
     </template>
   </Form>
@@ -27,7 +27,7 @@ defineOptions({ name: 'BasicInfo' })
 
 const { t } = useI18n()
 const message = useMessage() // 消息弹窗
-const userStore = useUserStore() 
+const userStore = useUserStore()
 // 表单校验
 const rules = reactive<FormRules>({
   nickname: [{ required: true, message: t('profile.rules.nickname'), trigger: 'blur' }],

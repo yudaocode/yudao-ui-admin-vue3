@@ -27,8 +27,8 @@
             @change="changeNotifyEnable"
             class="ml-4"
           >
-            <el-radio :label="false" size="large">不提醒</el-radio>
-            <el-radio :label="true" size="large">提醒</el-radio>
+            <el-radio :value="false" size="large">不提醒</el-radio>
+            <el-radio :value="true" size="large">提醒</el-radio>
           </el-radio-group>
         </el-form-item>
         <div v-if="formData.notifyEnabled">

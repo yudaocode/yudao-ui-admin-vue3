@@ -4,8 +4,8 @@
     <el-form label-width="80px" :model="formData" class="m-t-8px">
       <el-form-item label="每行数量" prop="column">
         <el-radio-group v-model="formData.column">
-          <el-radio :label="3">3个</el-radio>
-          <el-radio :label="4">4个</el-radio>
+          <el-radio :value="3">3个</el-radio>
+          <el-radio :value="4">4个</el-radio>
         </el-radio-group>
       </el-form-item>
 

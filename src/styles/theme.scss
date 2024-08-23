@@ -4,14 +4,3 @@
 // .dark .dark\:text-color {
 //   color: rgba(255, 255, 255, var(--dark-text-color));
 // }
-
-// 登录页
-.dark .login-form {
-  .el-divider__text {
-    background-color: var(--login-bg-color);
-  }
-
-  .el-card {
-    background-color: var(--login-bg-color);
-  }
-}

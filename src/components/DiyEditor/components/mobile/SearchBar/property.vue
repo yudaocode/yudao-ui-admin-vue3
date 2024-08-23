@@ -13,12 +13,12 @@
         <el-form-item label="框体样式">
           <el-radio-group v-model="formData!.borderRadius">
             <el-tooltip content="方形" placement="top">
-              <el-radio-button :label="0">
+              <el-radio-button :value="0">
                 <Icon icon="tabler:input-search" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip content="圆形" placement="top">
-              <el-radio-button :label="10">
+              <el-radio-button :value="10">
                 <Icon icon="iconoir:input-search" />
               </el-radio-button>
             </el-tooltip>
@@ -30,12 +30,12 @@
         <el-form-item label="文本位置" prop="placeholderPosition">
           <el-radio-group v-model="formData!.placeholderPosition">
             <el-tooltip content="居左" placement="top">
-              <el-radio-button label="left">
+              <el-radio-button value="left">
                 <Icon icon="ant-design:align-left-outlined" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip content="居中" placement="top">
-              <el-radio-button label="center">
+              <el-radio-button value="center">
                 <Icon icon="ant-design:align-center-outlined" />
               </el-radio-button>
             </el-tooltip>

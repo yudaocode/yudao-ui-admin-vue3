@@ -11,7 +11,7 @@
           :key="index"
           :content="item.text"
         >
-          <el-radio-button :label="item.type">
+          <el-radio-button :value="item.type">
             <Icon :icon="item.icon" />
           </el-radio-button>
         </el-tooltip>
@@ -24,12 +24,12 @@
       <el-form-item label="左右边距" prop="paddingType">
         <el-radio-group v-model="formData!.paddingType">
           <el-tooltip content="无边距" placement="top">
-            <el-radio-button label="none">
+            <el-radio-button value="none">
               <Icon icon="tabler:box-padding" />
             </el-radio-button>
           </el-tooltip>
           <el-tooltip content="左右留边" placement="top">
-            <el-radio-button label="horizontal">
+            <el-radio-button value="horizontal">
               <Icon icon="vaadin:padding" />
             </el-radio-button>
           </el-tooltip>

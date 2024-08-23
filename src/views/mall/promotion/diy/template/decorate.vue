@@ -18,7 +18,7 @@
         @change="handleTemplateItemChange"
       >
         <el-tooltip v-for="(item, index) in templateItems" :key="index" :content="item.name">
-          <el-radio-button :label="index">
+          <el-radio-button :value="index">
             <Icon :icon="item.icon" :size="24" />
           </el-radio-button>
         </el-tooltip>

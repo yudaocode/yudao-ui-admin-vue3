@@ -26,17 +26,17 @@
         <el-form-item label="列数" prop="type">
           <el-radio-group v-model="formData.columns">
             <el-tooltip class="item" content="一列" placement="bottom">
-              <el-radio-button :label="1">
+              <el-radio-button :value="1">
                 <Icon icon="fluent:text-column-one-24-filled" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="二列" placement="bottom">
-              <el-radio-button :label="2">
+              <el-radio-button :value="2">
                 <Icon icon="fluent:text-column-two-24-filled" />
               </el-radio-button>
             </el-tooltip>
             <el-tooltip class="item" content="三列" placement="bottom">
-              <el-radio-button :label="3">
+              <el-radio-button :value="3">
                 <Icon icon="fluent:text-column-three-24-filled" />
               </el-radio-button>
             </el-tooltip>

@@ -13,7 +13,7 @@
             <el-radio
               v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
               :key="parseInt(dict.value)"
-              :label="parseInt(dict.value)"
+              :value="parseInt(dict.value)"
             >
               {{ dict.label }}
             </el-radio>

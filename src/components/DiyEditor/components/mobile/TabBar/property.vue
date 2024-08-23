@@ -27,8 +27,8 @@
       </el-form-item>
       <el-form-item label="导航背景">
         <el-radio-group v-model="formData!.style.bgType">
-          <el-radio-button label="color">纯色</el-radio-button>
-          <el-radio-button label="img">图片</el-radio-button>
+          <el-radio-button value="color">纯色</el-radio-button>
+          <el-radio-button value="img">图片</el-radio-button>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="选择颜色" v-if="formData!.style.bgType === 'color'">

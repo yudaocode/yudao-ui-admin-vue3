@@ -12,7 +12,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.PAY_TRANSFER_TYPE)"
             :key="dict.value"
-            :label="dict.value"
+            :value="dict.value"
             :disabled="dict.value === 2 || dict.value === 3 || dict.value === 4"
           >
             {{ dict.label }}

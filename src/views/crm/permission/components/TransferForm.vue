@@ -20,8 +20,8 @@
       </el-form-item>
       <el-form-item label="老负责人">
         <el-radio-group v-model="oldOwnerHandler" @change="handleOwnerChange">
-          <el-radio :label="false" size="large">移除</el-radio>
-          <el-radio :label="true" size="large">加入团队</el-radio>
+          <el-radio :value="false" size="large">移除</el-radio>
+          <el-radio :value="true" size="large">加入团队</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="oldOwnerHandler" label="老负责人权限级别" prop="oldOwnerPermissionLevel">
@@ -30,7 +30,7 @@
             v-for="dict in getIntDictOptions(DICT_TYPE.CRM_PERMISSION_LEVEL)"
             :key="dict.value"
           >
-            <el-radio v-if="dict.value != PermissionLevelEnum.OWNER" :label="dict.value">
+            <el-radio v-if="dict.value != PermissionLevelEnum.OWNER" :value="dict.value">
               {{ dict.label }}
             </el-radio>
           </template>
@@ -38,9 +38,9 @@
       </el-form-item>
       <el-form-item v-if="bizType === BizTypeEnum.CRM_CUSTOMER" label="同时转移">
         <el-checkbox-group v-model="formData.toBizTypes">
-          <el-checkbox :label="BizTypeEnum.CRM_CONTACT">联系人</el-checkbox>
-          <el-checkbox :label="BizTypeEnum.CRM_BUSINESS">商机</el-checkbox>
-          <el-checkbox :label="BizTypeEnum.CRM_CONTRACT">合同</el-checkbox>
+          <el-checkbox :value="BizTypeEnum.CRM_CONTACT">联系人</el-checkbox>
+          <el-checkbox :value="BizTypeEnum.CRM_BUSINESS">商机</el-checkbox>
+          <el-checkbox :value="BizTypeEnum.CRM_CONTRACT">合同</el-checkbox>
         </el-checkbox-group>
       </el-form-item>
     </el-form>

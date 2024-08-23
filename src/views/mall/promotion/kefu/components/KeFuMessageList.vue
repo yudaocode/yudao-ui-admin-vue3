@@ -369,9 +369,10 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       position: absolute;
       bottom: 35px;
       right: 35px;
-      background-color: #fff;
+      background-color: var(--app-content-bg-color);
       padding: 10px;
       border-radius: 30px;
+      font-size: 12px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 阴影效果 */
     }
 
@@ -445,7 +446,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       border-radius: 12rpx;
       padding: 8rpx 16rpx;
       margin-bottom: 16rpx;
-      background-color: #e8e8e8;
+      //background-color: #e8e8e8;
       color: #999;
       font-size: 24rpx;
     }

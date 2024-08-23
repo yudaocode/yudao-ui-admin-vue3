@@ -66,10 +66,10 @@ export const defaultShortcuts = [
 export function formatDate(date: Date, format?: string): string {
   // 日期不存在，则返回空
   if (!date) {
-    return ''
+    return '';
   }
   // 日期存在，则进行格式化
-  return date ? dayjs(date).format(format ?? 'YYYY-MM-DD HH:mm:ss') : ''
+  return date ? dayjs(date).format(format ?? 'YYYY-MM-DD HH:mm:ss') : '';
 }
 
 /**
