@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="菜单权限" width="800">
+  <Dialog v-model="dialogVisible" title="数据权限" width="800">
     <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
       <el-form-item label="角色名称">
         <el-tag>{{ formData.name }}</el-tag>
@@ -21,9 +21,9 @@
     <el-form-item
       v-if="formData.dataScope === SystemDataScopeEnum.DEPT_CUSTOM"
       label="权限范围"
-      style="display: flex"
+      label-width="80px"
     >
-      <el-card class="card" shadow="never">
+      <el-card class="w-full h-400px !overflow-y-scroll" shadow="never">
         <template #header>
           全选/全不选:
           <el-switch
