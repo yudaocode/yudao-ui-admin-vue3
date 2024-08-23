@@ -12,7 +12,7 @@ export default defineConfig({
 ${selector} {
   display: flex;
   height: 100%;
-  padding: 1px 10px 0;
+  padding: 0 10px;
   cursor: pointer;
   align-items: center;
   transition: background var(--transition-time-02);
