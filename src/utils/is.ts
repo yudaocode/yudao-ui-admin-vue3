@@ -18,8 +18,8 @@ export const isObject = (val: any): val is Record<any, any> => {
   return val !== null && is(val, 'Object')
 }
 
-export const isEmpty = <T = unknown>(val: T): val is T => {
-  if (val === null) {
+export const isEmpty = (val: any): boolean => {
+  if (val === null || val === undefined || typeof val === 'undefined') {
     return true
   }
   if (isArray(val) || isString(val)) {

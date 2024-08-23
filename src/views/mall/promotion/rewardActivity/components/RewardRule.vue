@@ -2,13 +2,11 @@
   <!-- 满减送活动规则组件 -->
   <el-row>
     <template v-if="formData.rules">
-      <div v-for="(rule, index) in formData.rules" :key="index">
-        <el-col :span="24">
-          <span class="font-bold">活动层级{{ index + 1 }}</span>
-          <el-button v-if="index !== 0" link type="danger" @click="deleteRule(index)">
-            删除
-          </el-button>
-        </el-col>
+      <el-col v-for="(rule, index) in formData.rules" :key="index" :span="24">
+        <span class="font-bold">活动层级{{ index + 1 }}</span>
+        <el-button v-if="index !== 0" link type="danger" @click="deleteRule(index)">
+          删除
+        </el-button>
         <el-form ref="formRef" :model="rule">
           <el-form-item label="优惠门槛:" label-width="100px" prop="limit">
             满
@@ -65,8 +63,6 @@
                 积分
               </el-form-item>
             </el-col>
-            <!-- 优惠券待处理  也可以参考优惠劵的SpuShowcase-->
-            <!-- TODO 待实现！-->
             <el-col :span="24">
               <span>送优惠券：</span>
               <el-switch
@@ -75,13 +71,17 @@
                 inactive-text="否"
                 inline-prompt
               />
-              <RewardRuleCouponShowcase v-if="rule.giveCoupon" />
+              <RewardRuleCouponShowcase
+                v-if="rule.giveCoupon"
+                ref="rewardRuleCouponShowcaseRef"
+                v-model="rule!"
+              />
             </el-col>
           </el-form-item>
         </el-form>
-      </div>
+      </el-col>
     </template>
-    <el-col :span="24">
+    <el-col :span="24" class="mt-10px">
       <el-button type="primary" @click="addRule">添加优惠规则</el-button>
     </el-col>
   </el-row>
@@ -92,6 +92,7 @@ import RewardRuleCouponShowcase from './RewardRuleCouponShowcase.vue'
 import { RewardActivityVO } from '@/api/mall/promotion/reward/rewardActivity'
 import { PromotionConditionTypeEnum } from '@/utils/constants'
 import { useVModel } from '@vueuse/core'
+import { isEmpty } from '@/utils/is'
 
 const props = defineProps<{
   modelValue: RewardActivityVO
@@ -103,6 +104,7 @@ const emits = defineEmits<{
 }>()
 
 const formData = useVModel(props, 'modelValue', emits) // 活动数据
+const rewardRuleCouponShowcaseRef = ref<InstanceType<typeof RewardRuleCouponShowcase>[]>() // 活动规则优惠券 Ref
 
 /** 删除优惠规则 */
 const deleteRule = (ruleIndex: number) => {
@@ -123,7 +125,16 @@ const addRule = () => {
   })
 }
 
-// TODO puhui999: 规则校验完善
+/** 设置规则优惠券-提交时 */
+const setRuleCoupon = () => {
+  if (isEmpty(rewardRuleCouponShowcaseRef.value)) {
+    return
+  }
+
+  rewardRuleCouponShowcaseRef.value?.forEach((item) => item.setGiveCouponList())
+}
+
+defineExpose({ setRuleCoupon })
 </script>
 
 <style lang="scss" scoped></style>
