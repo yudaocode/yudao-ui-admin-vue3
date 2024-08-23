@@ -1,7 +1,7 @@
 <template>
   <ContentWrap :bodyStyle="{ padding: '10px 20px' }" class="position-relative">
     <Icon
-      class="!position-absolute right-20px"
+      class="!position-fixed right-80px"
       :size="130"
       :icon="`svg-icon:audit${processInstance.status}`"
     />
@@ -24,7 +24,7 @@
       <!-- 表单信息 -->
       <el-tab-pane label="表单信息">
         <el-row :gutter="10">
-          <el-col :span="18" class="!flex !flex-col">
+          <el-col :span="18" class="!flex !flex-col formCol">
             <!-- 表单信息 -->
             <div v-loading="processInstanceLoading" class="form-box flex flex-col mb-30px flex-1">
               <!-- 情况一：流程表单 -->
@@ -46,10 +46,10 @@
               </div>
             </div>
 
-            <div class="h-60px" v-if="runningTask?.id">
-              <el-divider class="!my-8px" />
+            <el-affix target=".formCol" position="bottom" class="h-50px" v-if="runningTask?.id">
+              <el-divider class="!mb-8px !mt-0" />
               <div
-                class="text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
+                class="pl-50px text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
               >
                 <el-popover :visible="passVisible" placement="top-end" :width="500" trigger="click">
                   <template #reference>
@@ -210,7 +210,7 @@
                 <div @click="handleSign"> <Icon :size="14" icon="ep:plus" />&nbsp;加签 </div>
                 <div @click="handleBack"> <Icon :size="14" icon="fa:mail-reply" />&nbsp;退回 </div>
               </div>
-            </div>
+            </el-affix>
           </el-col>
           <el-col :span="6">
             <el-timeline class="pt-20px">
@@ -565,6 +565,9 @@ onMounted(async () => {
   :deep(.el-card) {
     border: none;
   }
+}
+:deep(.el-affix--fixed) {
+  background-color: var(--el-bg-color);
 }
 
 .btn-container {
