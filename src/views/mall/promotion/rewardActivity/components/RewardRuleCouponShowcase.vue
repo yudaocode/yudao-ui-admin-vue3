@@ -38,6 +38,7 @@ import { DICT_TYPE } from '@/utils/dict'
 import { discountFormat } from '@/views/mall/promotion/coupon/formatter'
 import { isEmpty } from '@/utils/is'
 import { useVModel } from '@vueuse/core'
+import { findIndex } from '@/utils'
 
 defineOptions({ name: 'RewardRuleCouponShowcase' })
 
@@ -88,9 +89,11 @@ const initGiveCouponList = async () => {
   }
 
   for (let i = 0, len = data.length; i < len; i++) {
+    const coupon = data[i]
+    const index = findIndex(rewardRule.value.couponIds!, (item) => item.id === coupon.id)
     list.value.push({
-      ...data[i],
-      giveCount: rewardRule.value.couponCounts![i]
+      ...coupon,
+      giveCount: rewardRule.value.couponCounts![index]
     })
   }
 }
