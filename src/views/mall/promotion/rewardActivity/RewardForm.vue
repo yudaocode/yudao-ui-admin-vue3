@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" :title="dialogTitle" width="60%">
+  <Dialog v-model="dialogVisible" :title="dialogTitle" width="65%">
     <el-form
       ref="formRef"
       v-loading="formLoading"
@@ -31,7 +31,7 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item label="优惠设置">
-        <RewardRule v-model="formData" />
+        <RewardRule ref="rewardRuleRef" v-model="formData" />
       </el-form-item>
       <el-form-item label="活动范围" prop="productScope">
         <el-radio-group v-model="formData.productScope">
@@ -97,7 +97,8 @@ const formRules = reactive({
   productSpuIds: [{ required: true, message: '商品不能为空', trigger: 'blur' }],
   productCategoryIds: [{ required: true, message: '商品分类不能为空', trigger: 'blur' }]
 })
-const formRef = ref([]) // 表单 Ref
+const formRef = ref() // 表单 Ref
+const rewardRuleRef = ref<InstanceType<typeof RewardRule>>() // 活动规则 Ref
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -126,14 +127,14 @@ const emit = defineEmits(['success']) // 定义 success 事件，用于操作成
 const submitForm = async () => {
   // 校验表单
   if (!formRef) return
-  // TODO puhui999: 规则校验
-  // const valid = await formRef.value.validate()
-  // if (!valid) return
-  // TODO puhui999: 处理下数据兼容接口
+  const valid = await formRef.value.validate()
+  if (!valid) return
 
   // 提交请求
   formLoading.value = true
   try {
+    // 设置活动规则优惠券
+    rewardRuleRef.value?.setRuleCoupon()
     const data = formData.value
     // 设置商品范围
     setProductScopeValues(data)

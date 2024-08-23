@@ -69,7 +69,11 @@
                 inactive-text="否"
                 inline-prompt
               />
-              <RewardRuleCouponShowcase v-if="rule.giveCoupon" v-model="rule!" />
+              <RewardRuleCouponShowcase
+                v-if="rule.giveCoupon"
+                ref="rewardRuleCouponShowcaseRef"
+                v-model="rule!"
+              />
             </el-col>
           </el-form-item>
         </el-form>
@@ -86,6 +90,7 @@ import RewardRuleCouponShowcase from './RewardRuleCouponShowcase.vue'
 import { RewardActivityVO } from '@/api/mall/promotion/reward/rewardActivity'
 import { PromotionConditionTypeEnum } from '@/utils/constants'
 import { useVModel } from '@vueuse/core'
+import { isEmpty } from '@/utils/is'
 
 defineOptions({ name: 'RewardRule' })
 
@@ -99,6 +104,7 @@ const emits = defineEmits<{
 }>()
 
 const formData = useVModel(props, 'modelValue', emits) // 活动数据
+const rewardRuleCouponShowcaseRef = ref<InstanceType<typeof RewardRuleCouponShowcase>[]>() // 活动规则优惠券 Ref
 
 /** 删除优惠规则 */
 const deleteRule = (ruleIndex: number) => {
@@ -119,7 +125,16 @@ const addRule = () => {
   })
 }
 
-// TODO puhui999: 规则校验完善
+/** 设置规则优惠券-提交时 */
+const setRuleCoupon = () => {
+  if (isEmpty(rewardRuleCouponShowcaseRef.value)) {
+    return
+  }
+
+  rewardRuleCouponShowcaseRef.value?.forEach((item) => item.setGiveCouponList())
+}
+
+defineExpose({ setRuleCoupon })
 </script>
 
 <style lang="scss" scoped></style>
