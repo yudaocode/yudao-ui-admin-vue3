@@ -153,11 +153,12 @@ import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
 
 defineOptions({ name: 'CouponSelect' })
 
-defineProps<{
-  multipleSelection: CouponTemplateApi.CouponTemplateVO[]
+const props = defineProps<{
+  multipleSelection?: CouponTemplateApi.CouponTemplateVO[]
 }>()
 const emit = defineEmits<{
-  (e: 'update:multipleSelection', v: CouponTemplateApi.CouponTemplateVO[])
+  (e: 'update:multipleSelection', v: CouponTemplateApi.CouponTemplateVO[]): void
+  (e: 'change', v: CouponTemplateApi.CouponTemplateVO[]): void
 }>()
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('选择优惠卷') // 弹窗的标题
@@ -209,7 +210,11 @@ const open = async () => {
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 const handleSelectionChange = (val: CouponTemplateApi.CouponTemplateVO[]) => {
-  emit('update:multipleSelection', val)
+  if (props.multipleSelection) {
+    emit('update:multipleSelection', val)
+    return
+  }
+  emit('change', val)
 }
 
 const submitForm = () => {
