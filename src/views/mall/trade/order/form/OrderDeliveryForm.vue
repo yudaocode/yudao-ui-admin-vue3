@@ -3,8 +3,8 @@
     <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
       <el-form-item label="发货方式">
         <el-radio-group v-model="expressType">
-          <el-radio border label="express">快递物流</el-radio>
-          <el-radio border label="none">无需发货</el-radio>
+          <el-radio border value="express">快递物流</el-radio>
+          <el-radio border value="none">无需发货</el-radio>
         </el-radio-group>
       </el-form-item>
       <template v-if="expressType === 'express'">

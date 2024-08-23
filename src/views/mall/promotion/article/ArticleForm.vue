@@ -51,7 +51,7 @@
               <el-radio
                 v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
                 :key="dict.value"
-                :label="dict.value"
+                :value="dict.value"
               >
                 {{ dict.label }}
               </el-radio>
@@ -64,7 +64,7 @@
               <el-radio
                 v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
                 :key="dict.value"
-                :label="dict.value"
+                :value="dict.value"
               >
                 {{ dict.label }}
               </el-radio>
@@ -77,7 +77,7 @@
               <el-radio
                 v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
                 :key="dict.value"
-                :label="dict.value"
+                :value="dict.value"
               >
                 {{ dict.label }}
               </el-radio>

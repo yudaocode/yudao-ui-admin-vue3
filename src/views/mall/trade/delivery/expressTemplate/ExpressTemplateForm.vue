@@ -15,7 +15,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.EXPRESS_CHARGE_MODE)"
             :key="dict.value"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>

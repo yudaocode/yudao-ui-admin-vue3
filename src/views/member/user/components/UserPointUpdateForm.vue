@@ -18,8 +18,8 @@
       </el-form-item>
       <el-form-item label="变动类型" prop="changeType">
         <el-radio-group v-model="formData.changeType">
-          <el-radio :label="1">增加</el-radio>
-          <el-radio :label="-1">减少</el-radio>
+          <el-radio :value="1">增加</el-radio>
+          <el-radio :value="-1">减少</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="变动积分" prop="changePoint">

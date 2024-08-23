@@ -14,7 +14,7 @@
             <el-checkbox
               v-for="scope in queryParams.scopes"
               :key="scope"
-              :label="scope"
+              :value="scope"
               style="display: block; margin-bottom: -10px"
             >
               {{ formatScope(scope) }}

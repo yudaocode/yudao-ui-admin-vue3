@@ -45,17 +45,20 @@
           <el-checkbox
             v-model="loopInstanceForm.asyncBefore"
             label="异步前"
+            value="异步前"
             @change="updateLoopAsync('asyncBefore')"
           />
           <el-checkbox
             v-model="loopInstanceForm.asyncAfter"
             label="异步后"
+            value="异步后"
             @change="updateLoopAsync('asyncAfter')"
           />
           <el-checkbox
             v-model="loopInstanceForm.exclusive"
             v-if="loopInstanceForm.asyncAfter || loopInstanceForm.asyncBefore"
             label="排除"
+            value="排除"
             @change="updateLoopAsync('exclusive')"
           />
         </el-form-item>
