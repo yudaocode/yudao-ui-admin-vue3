@@ -188,7 +188,7 @@
                       :value="item.value"
                       :label="item.value"
                       :disabled="
-                        item.value !== ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE &&
+                        item.value !== ApproveMethodType.RANDOM_SELECT_ONE_APPROVE &&
                         notAllowedMultiApprovers
                       "
                     >
@@ -547,7 +547,7 @@ const changeCandidateStrategy = () => {
   configForm.value.postIds = []
   configForm.value.userGroups = []
   configForm.value.deptLevel = 1
-  configForm.value.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
+  configForm.value.approveMethod = ApproveMethodType.SEQUENTIAL_APPROVE
   if (
     configForm.value.candidateStrategy === CandidateStrategy.START_USER ||
     configForm.value.candidateStrategy === CandidateStrategy.USER
@@ -564,7 +564,7 @@ const changedCandidateUsers = () => {
     configForm.value.userIds?.length <= 1 &&
     configForm.value.candidateStrategy === CandidateStrategy.USER
   ) {
-    configForm.value.approveMethod = ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE
+    configForm.value.approveMethod = ApproveMethodType.RANDOM_SELECT_ONE_APPROVE
     configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
     notAllowedMultiApprovers.value = true
   } else {

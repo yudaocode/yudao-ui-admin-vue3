@@ -190,7 +190,7 @@ export function useNodeForm(nodeType: NodeType) {
   if (nodeType === NodeType.USER_TASK_NODE) {
     configForm.value = {
       candidateStrategy: CandidateStrategy.USER,
-      approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
+      approveMethod: ApproveMethodType.SEQUENTIAL_APPROVE,
       approveRatio: 100,
       rejectHandlerType: RejectHandlerType.FINISH_PROCESS,
       assignStartUserHandlerType: AssignStartUserHandlerType.START_USER_AUDIT,

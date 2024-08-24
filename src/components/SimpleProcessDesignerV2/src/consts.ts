@@ -147,7 +147,7 @@ export enum ApproveMethodType {
   /**
    * 随机挑选一人审批
    */
-  RRANDOM_SELECT_ONE_APPROVE = 1,
+  RANDOM_SELECT_ONE_APPROVE = 1,
 
   /**
    * 多人会签(按通过比例)
@@ -421,10 +421,10 @@ export const APPROVE_TYPE: DictDataVO[] = [
 ]
 
 export const APPROVE_METHODS: DictDataVO[] = [
-  { label: '随机挑选一人审批', value: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE },
-  { label: '多人会签(按通过比例%)', value: ApproveMethodType.APPROVE_BY_RATIO },
-  { label: '多人或签(一人通过或拒绝)', value: ApproveMethodType.ANY_APPROVE },
-  { label: '依次审批(按顺序依次审批)', value: ApproveMethodType.SEQUENTIAL_APPROVE }
+  { label: '按顺序依次审批', value: ApproveMethodType.SEQUENTIAL_APPROVE },
+  { label: '会签（可同时审批，至少 % 人必须审批通过）', value: ApproveMethodType.APPROVE_BY_RATIO },
+  { label: '或签(可同时审批，有一人通过即可)', value: ApproveMethodType.ANY_APPROVE },
+  { label: '随机挑选一人审批', value: ApproveMethodType.RANDOM_SELECT_ONE_APPROVE }
 ]
 
 export const CONDITION_CONFIG_TYPES: DictDataVO[] = [

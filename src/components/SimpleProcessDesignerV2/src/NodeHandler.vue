@@ -81,7 +81,7 @@ const addNode = (type: number) => {
       name: NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string,
       showText: '',
       type: NodeType.USER_TASK_NODE,
-      approveMethod: ApproveMethodType.RRANDOM_SELECT_ONE_APPROVE,
+      approveMethod: ApproveMethodType.SEQUENTIAL_APPROVE,
       // 超时处理
       rejectHandler: {
         type: RejectHandlerType.FINISH_PROCESS
