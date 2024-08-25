@@ -1,5 +1,5 @@
 <template>
-  <div v-if="isObject(getMessageContent)">
+  <div v-if="isObject(getMessageContent)" @click="openDetail(getMessageContent.id)" style="cursor: pointer;">
     <div :key="getMessageContent.id" class="order-list-card-box mt-14px">
       <div class="order-card-header flex items-center justify-between p-x-5px">
         <div class="order-no">订单号：{{ getMessageContent.no }}</div>
@@ -9,6 +9,7 @@
       </div>
       <div v-for="item in getMessageContent.items" :key="item.id" class="border-bottom">
         <ProductItem
+          :spu-id="item.spuId"
           :num="item.count"
           :picUrl="item.picUrl"
           :price="item.price"
@@ -36,6 +37,8 @@ import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
 import { isObject } from '@/utils/is'
 import ProductItem from '@/views/mall/promotion/kefu/components/message/ProductItem.vue'
 
+const { push } = useRouter()
+
 defineOptions({ name: 'OrderItem' })
 const props = defineProps<{
   message?: KeFuMessageRespVO
@@ -45,6 +48,12 @@ const props = defineProps<{
 const getMessageContent = computed(() =>
   typeof props.message !== 'undefined' ? jsonParse(props!.message!.content) : props.order
 )
+
+/** 查看订单详情 */
+const openDetail = (id: number) => {
+  console.log(getMessageContent)
+  push({ name: 'TradeOrderDetail', params: { id } })
+}
 
 /**
  * 格式化订单状态的颜色
@@ -97,7 +106,7 @@ function formatOrderStatus(order: any) {
 .order-list-card-box {
   border-radius: 10px;
   padding: 10px;
-  border: 1px #6a6a6a solid;
+  border: 1px var(--el-border-color) solid;
   background-color: var(--app-content-bg-color);
 
   .order-card-header {
