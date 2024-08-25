@@ -30,6 +30,6 @@ export const KeFuConversationApi = {
   },
   // 删除客服会话
   deleteConversation: async (id: number) => {
-    return await request.get({ url: '/promotion/kefu-conversation/delete?id' + id })
+    return await request.delete({ url: `/promotion/kefu-conversation/delete?id=${id}`})
   }
 }

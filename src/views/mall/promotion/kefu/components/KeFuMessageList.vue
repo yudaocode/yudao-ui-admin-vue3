@@ -71,6 +71,7 @@
                 <MessageItem :message="item">
                   <ProductItem
                     v-if="KeFuMessageContentTypeEnum.PRODUCT === item.contentType"
+                    :spuId="getMessageContent(item).spuId"
                     :picUrl="getMessageContent(item).picUrl"
                     :price="getMessageContent(item).price"
                     :skuText="getMessageContent(item).introduction"
@@ -393,7 +394,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
           border-left: 5px solid transparent;
           border-bottom: 5px solid transparent;
           border-top: 5px solid transparent;
-          border-right: 5px solid #ffffff;
+          border-right: 5px solid var(--app-content-bg-color);
         }
       }
     }
@@ -412,7 +413,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
           right: -19px;
           top: calc(50% - 10px);
           position: absolute;
-          border-left: 5px solid #ffffff;
+          border-left: 5px solid var(--app-content-bg-color);
           border-bottom: 5px solid transparent;
           border-top: 5px solid transparent;
           border-right: 5px solid transparent;
@@ -422,9 +423,9 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 
     // 消息气泡
     .kefu-message {
-      color: #333;
+      color: #A9A9A9;
       border-radius: 5px;
-      box-shadow: 3px 5px 15px rgba(0, 0, 0, 0.2);
+      box-shadow: 3px 3px 5px rgba(220,220,220, 0.1);
       padding: 5px 10px;
       width: auto;
       max-width: 50%;
@@ -432,7 +433,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       display: inline-block !important;
       position: relative;
       word-break: break-all;
-      background-color: #ffffff;
+      background-color: var(--app-content-bg-color);
       transition: all 0.2s;
 
       &:hover {
@@ -454,7 +455,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 
   .chat-tools {
     width: 100%;
-    border: #e4e0e0 solid 1px;
+    border: var(--el-border-color) solid 1px;
     border-radius: 10px;
     height: 44px;
   }
