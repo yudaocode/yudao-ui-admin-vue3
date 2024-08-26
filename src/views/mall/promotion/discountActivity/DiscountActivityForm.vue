@@ -19,6 +19,8 @@
           :rule-config="ruleConfig"
           :spu-list="spuList"
           :spu-property-list-p="spuPropertyList"
+          :isDelete="true"
+          @delete="deleteSpu"
         >
           <el-table-column align="center" label="优惠金额" min-width="168">
             <template #default="{ row: sku }">
@@ -47,6 +49,7 @@ import { cloneDeep } from 'lodash-es'
 import * as DiscountActivityApi from '@/api/mall/promotion/discount/discountActivity'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
+import {formatToFraction} from "@/utils";
 
 defineOptions({ name: 'PromotionDiscountActivityForm' })
 
@@ -65,8 +68,8 @@ const spuAndSkuListRef = ref() // sku 限时折扣  配置组件Ref
 const ruleConfig: RuleConfig[] = []
 const spuList = ref<DiscountActivityApi.SpuExtension[]>([]) // 选择的 spu
 const spuPropertyList = ref<SpuProperty<DiscountActivityApi.SpuExtension>[]>([])
+const spuIds = ref<number[]>([]);
 const selectSpu = (spuId: number, skuIds: number[]) => {
-  formRef.value.setValues({ spuId })
   getSpuDetails(spuId, skuIds)
 }
 /**
@@ -75,14 +78,22 @@ const selectSpu = (spuId: number, skuIds: number[]) => {
 const getSpuDetails = async (
   spuId: number,
   skuIds: number[] | undefined,
-  products?: DiscountActivityApi.DiscountProductVO[]
+  products?: DiscountActivityApi.DiscountProductVO[],
+  type?: string
 ) => {
-  const spuProperties: SpuProperty<DiscountActivityApi.SpuExtension>[] = []
+  //如果已经包含spu则跳过
+  if(spuIds.value.includes(spuId)){
+    if(type !== "load"){
+      message.error("数据重复选择！")
+    }
+    return;
+  }
+  spuIds.value.push(spuId)
   const res = (await ProductSpuApi.getSpuDetailList([spuId])) as DiscountActivityApi.SpuExtension[]
   if (res.length == 0) {
     return
   }
-  spuList.value = []
+  //spuList.value = []
   // 因为只能选择一个
   const spu = res[0]
   const selectSkus =
@@ -100,15 +111,19 @@ const getSpuDetails = async (
       config = product || config
     }
     sku.productConfig = config
+    sku.price = formatToFraction(sku.price)
+    sku.marketPrice = formatToFraction(sku.marketPrice)
+    sku.costPrice = formatToFraction(sku.costPrice)
+    sku.firstBrokeragePrice = formatToFraction(sku.firstBrokeragePrice)
+    sku.secondBrokeragePrice = formatToFraction(sku.secondBrokeragePrice)
   })
   spu.skus = selectSkus as DiscountActivityApi.SkuExtension[]
-  spuProperties.push({
+  spuPropertyList.value.push({
     spuId: spu.id!,
     spuDetail: spu,
     propertyList: getPropertyList(spu)
   })
   spuList.value.push(spu)
-  spuPropertyList.value = spuProperties
 }
 
 // ================= end =================
@@ -126,8 +141,10 @@ const open = async (type: string, id?: number) => {
       const data = (await DiscountActivityApi.getDiscountActivity(
         id
       )) as DiscountActivityApi.DiscountActivityVO
-      const supId = data.products[0].spuId
-      await getSpuDetails(supId!, data.products?.map((sku) => sku.skuId), data.products)
+      for (let productsKey in data.products) {
+        const supId = data.products[productsKey].spuId
+        await getSpuDetails(supId!, data.products?.map((sku) => sku.skuId), data.products,"load")
+      }
       formRef.value.setValues(data)
     } finally {
       formLoading.value = false
@@ -149,9 +166,20 @@ const submitForm = async () => {
     const data = formRef.value.formModel as DiscountActivityApi.DiscountActivityVO
     // 获取 折扣商品配置
     const products = cloneDeep(spuAndSkuListRef.value.getSkuConfigs('productConfig'))
+    let timp = false;
     products.forEach((item: DiscountActivityApi.DiscountProductVO) => {
-      item.discountType = data['discountType']
+      if(item.discountPrice != null && item.discountPrice > 0){
+        item.discountType = 1
+      }else if(item.discountPercent != null && item.discountPercent > 0){
+        item.discountType = 2
+      }else{
+        timp = true
+      }
     })
+    if(timp){
+      message.error("优惠金额和折扣百分比需要填写一个");
+      return;
+    }
     data.products = products
     // 真正提交
     if (formType.value === 'create') {
@@ -173,7 +201,16 @@ const submitForm = async () => {
 const resetForm = async () => {
   spuList.value = []
   spuPropertyList.value = []
+  spuIds.value = []
   await nextTick()
   formRef.value.getElFormRef().resetFields()
+}
+
+/**
+ * 删除spu
+ */
+const deleteSpu = (spuId: number) => {
+  spuIds.value.splice(spuIds.value.findIndex((item) => item == spuId), 1)
+  spuPropertyList.value.splice(spuPropertyList.value.findIndex((item) => item.spuId == spuId), 1)
 }
 </script>

@@ -70,17 +70,17 @@
           ~ {{ formatDate(scope.row.endTime, 'YYYY-MM-DD') }}
         </template>
       </el-table-column>
-      <el-table-column label="商品图片" prop="spuName" min-width="80">
-        <template #default="scope">
-          <el-image
-            :src="scope.row.picUrl"
-            class="h-40px w-40px"
-            :preview-src-list="[scope.row.picUrl]"
-            preview-teleported
-          />
-        </template>
-      </el-table-column>
-      <el-table-column label="商品标题" prop="spuName" min-width="300" />
+<!--      <el-table-column label="商品图片" prop="spuName" min-width="80">-->
+<!--        <template #default="scope">-->
+<!--          <el-image-->
+<!--            :src="scope.row.picUrl"-->
+<!--            class="h-40px w-40px"-->
+<!--            :preview-src-list="[scope.row.picUrl]"-->
+<!--            preview-teleported-->
+<!--          />-->
+<!--        </template>-->
+<!--      </el-table-column>-->
+<!--      <el-table-column label="商品标题" prop="spuName" min-width="300" />-->
       <el-table-column label="活动状态" align="center" prop="status" min-width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
