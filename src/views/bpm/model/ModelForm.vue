@@ -35,7 +35,7 @@
           placeholder="请输入流程名称"
         />
       </el-form-item>
-      <el-form-item v-if="formData.id" label="流程分类" prop="category">
+      <el-form-item label="流程分类" prop="category">
         <el-select
           v-model="formData.category"
           clearable
@@ -50,73 +50,84 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item v-if="formData.id" label="流程图标" prop="icon">
-        <UploadImg v-model="formData.icon" :limit="1" height="128px" width="128px" />
+      <el-form-item label="流程图标" prop="icon">
+        <UploadImg v-model="formData.icon" :limit="1" height="64px" width="64px" />
       </el-form-item>
       <el-form-item label="流程描述" prop="description">
         <el-input v-model="formData.description" clearable type="textarea" />
       </el-form-item>
-      <div v-if="formData.id">
-        <el-form-item label="表单类型" prop="formType">
-          <el-radio-group v-model="formData.formType">
-            <el-radio
-              v-for="dict in getIntDictOptions(DICT_TYPE.BPM_MODEL_FORM_TYPE)"
-              :key="dict.value"
-              :label="dict.value"
-            >
-              {{ dict.label }}
-            </el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item v-if="formData.formType === 10" label="流程表单" prop="formId">
-          <el-select v-model="formData.formId" clearable style="width: 100%">
-            <el-option
-              v-for="form in formList"
-              :key="form.id"
-              :label="form.name"
-              :value="form.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item
-          v-if="formData.formType === 20"
-          label="表单提交路由"
-          prop="formCustomCreatePath"
-        >
-          <el-input
-            v-model="formData.formCustomCreatePath"
-            placeholder="请输入表单提交路由"
-            style="width: 330px"
-          />
-          <el-tooltip
-            class="item"
-            content="自定义表单的提交路径，使用 Vue 的路由地址，例如说：bpm/oa/leave/create"
-            effect="light"
-            placement="top"
+      <el-form-item label="流程类型" prop="type">
+        <el-radio-group v-model="formData.type">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_MODEL_TYPE)"
+            :key="dict.value"
+            :label="dict.value"
           >
-            <i class="el-icon-question" style="padding-left: 5px"></i>
-          </el-tooltip>
-        </el-form-item>
-        <el-form-item
-          v-if="formData.formType === 20"
-          label="表单查看地址"
-          prop="formCustomViewPath"
-        >
-          <el-input
-            v-model="formData.formCustomViewPath"
-            placeholder="请输入表单查看的组件地址"
-            style="width: 330px"
-          />
-          <el-tooltip
-            class="item"
-            content="自定义表单的查看组件地址，使用 Vue 的组件地址，例如说：bpm/oa/leave/detail"
-            effect="light"
-            placement="top"
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="表单类型" prop="formType">
+        <el-radio-group v-model="formData.formType">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_MODEL_FORM_TYPE)"
+            :key="dict.value"
+            :label="dict.value"
           >
-            <i class="el-icon-question" style="padding-left: 5px"></i>
-          </el-tooltip>
-        </el-form-item>
-      </div>
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item v-if="formData.formType === 10" label="流程表单" prop="formId">
+        <el-select v-model="formData.formId" clearable style="width: 100%">
+          <el-option v-for="form in formList" :key="form.id" :label="form.name" :value="form.id" />
+        </el-select>
+      </el-form-item>
+      <el-form-item
+        v-if="formData.formType === 20"
+        label="表单提交路由"
+        prop="formCustomCreatePath"
+      >
+        <el-input
+          v-model="formData.formCustomCreatePath"
+          placeholder="请输入表单提交路由"
+          style="width: 330px"
+        />
+        <el-tooltip
+          class="item"
+          content="自定义表单的提交路径，使用 Vue 的路由地址，例如说：bpm/oa/leave/create.vue"
+          effect="light"
+          placement="top"
+        >
+          <i class="el-icon-question" style="padding-left: 5px"></i>
+        </el-tooltip>
+      </el-form-item>
+      <el-form-item v-if="formData.formType === 20" label="表单查看地址" prop="formCustomViewPath">
+        <el-input
+          v-model="formData.formCustomViewPath"
+          placeholder="请输入表单查看的组件地址"
+          style="width: 330px"
+        />
+        <el-tooltip
+          class="item"
+          content="自定义表单的查看组件地址，使用 Vue 的组件地址，例如说：bpm/oa/leave/detail.vue"
+          effect="light"
+          placement="top"
+        >
+          <i class="el-icon-question" style="padding-left: 5px"></i>
+        </el-tooltip>
+      </el-form-item>
+      <el-form-item label="是否可见" prop="visible">
+        <el-radio-group v-model="formData.visible">
+          <el-radio
+            v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
+            :key="dict.value as string"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -125,11 +136,12 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 import { ElMessageBox } from 'element-plus'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import { CategoryApi } from '@/api/bpm/category'
+import { BpmModelFormType, BpmModelType } from '@/utils/constants'
 
 defineOptions({ name: 'ModelForm' })
 
@@ -141,21 +153,27 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  formType: 10,
   name: '',
   category: undefined,
   icon: undefined,
   description: '',
+  type: BpmModelType.BPMN,
+  formType: BpmModelFormType.NORMAL,
   formId: '',
   formCustomCreatePath: '',
-  formCustomViewPath: ''
+  formCustomViewPath: '',
+  visible: true
 })
 const formRules = reactive({
-  name: [{ required: true, message: '参数名称不能为空', trigger: 'blur' }],
-  key: [{ required: true, message: '参数键名不能为空', trigger: 'blur' }],
-  category: [{ required: true, message: '参数分类不能为空', trigger: 'blur' }],
-  icon: [{ required: true, message: '参数图标不能为空', trigger: 'blur' }],
-  value: [{ required: true, message: '参数键值不能为空', trigger: 'blur' }],
+  name: [{ required: true, message: '流程名称不能为空', trigger: 'blur' }],
+  key: [{ required: true, message: '流程标识不能为空', trigger: 'blur' }],
+  category: [{ required: true, message: '流程分类不能为空', trigger: 'blur' }],
+  icon: [{ required: true, message: '流程图标不能为空', trigger: 'blur' }],
+  type: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
+  formType: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
+  formId: [{ required: true, message: '流程表单不能为空', trigger: 'blur' }],
+  formCustomCreatePath: [{ required: true, message: '表单提交路由不能为空', trigger: 'blur' }],
+  formCustomViewPath: [{ required: true, message: '表单查看地址不能为空', trigger: 'blur' }],
   visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
@@ -225,14 +243,16 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    formType: 10,
     name: '',
     category: undefined,
-    icon: '',
+    icon: undefined,
     description: '',
+    type: BpmModelType.BPMN,
+    formType: BpmModelFormType.NORMAL,
     formId: '',
     formCustomCreatePath: '',
-    formCustomViewPath: ''
+    formCustomViewPath: '',
+    visible: true
   }
   formRef.value?.resetFields()
 }

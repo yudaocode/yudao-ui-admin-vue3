@@ -38,6 +38,10 @@ export const updateModel = async (data: ModelVO) => {
   return await request.put({ url: '/bpm/model/update', data: data })
 }
 
+export const updateModelBpmn = async (data: ModelVO) => {
+  return await request.put({ url: '/bpm/model/update-bpmn', data: data })
+}
+
 // 任务状态修改
 export const updateModelState = async (id: number, state: number) => {
   const data = {

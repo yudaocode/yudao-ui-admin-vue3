@@ -58,7 +58,7 @@
           @click="openForm('create')"
           v-hasPermi="['bpm:model:create']"
         >
-          <Icon icon="ep:plus" class="mr-5px" /> 新建流程
+          <Icon icon="ep:plus" class="mr-5px" /> 新建
         </el-button>
       </el-form-item>
     </el-form>
@@ -147,7 +147,7 @@
           </template>
         </el-table-column>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="240" fixed="right">
+      <el-table-column label="操作" align="center" width="250" fixed="right">
         <template #default="scope">
           <el-button
             link
@@ -155,7 +155,7 @@
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['bpm:model:update']"
           >
-            修改流程
+            修改
           </el-button>
           <el-button
             link
@@ -163,15 +163,7 @@
             @click="handleDesign(scope.row)"
             v-hasPermi="['bpm:model:update']"
           >
-            设计流程
-          </el-button>
-          <el-button
-            link
-            type="primary"
-            @click="handleSimpleDesign(scope.row)"
-            v-hasPermi="['bpm:model:update']"
-          >
-            仿钉钉设计流程
+            设计
           </el-button>
           <el-button
             link
@@ -179,7 +171,7 @@
             @click="handleDeploy(scope.row)"
             v-hasPermi="['bpm:model:deploy']"
           >
-            发布流程
+            发布
           </el-button>
           <el-button
             link
@@ -187,7 +179,7 @@
             v-hasPermi="['bpm:process-definition:query']"
             @click="handleDefinitionList(scope.row)"
           >
-            流程定义
+            历史
           </el-button>
           <el-button
             link
@@ -237,6 +229,7 @@ import * as FormApi from '@/api/bpm/form'
 import ModelForm from './ModelForm.vue'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import { CategoryApi } from '@/api/bpm/category'
+import { BpmModelType } from '@/utils/constants'
 
 defineOptions({ name: 'BpmModel' })
 
@@ -321,21 +314,21 @@ const handleChangeState = async (row) => {
 
 /** 设计流程 */
 const handleDesign = (row) => {
-  push({
-    name: 'BpmModelEditor',
-    query: {
-      modelId: row.id
-    }
-  })
-}
-
-const handleSimpleDesign = (row) => {
-  push({
-    name: 'SimpleWorkflowDesignEditor',
-    query: {
-      modelId: row.id
-    }
-  })
+  if (row.type == BpmModelType.BPMN) {
+    push({
+      name: 'BpmModelEditor',
+      query: {
+        modelId: row.id
+      }
+    })
+  } else {
+    push({
+      name: 'SimpleWorkflowDesignEditor',
+      query: {
+        modelId: row.id
+      }
+    })
+  }
 }
 
 /** 发布流程 */
