@@ -74,6 +74,8 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as RewardActivityApi from '@/api/mall/promotion/reward/rewardActivity'
 import { PromotionConditionTypeEnum, PromotionProductScopeEnum } from '@/utils/constants'
 import ProductCategorySelect from '@/views/mall/product/category/components/ProductCategorySelect.vue'
+import { cloneDeep } from 'lodash-es'
+import { fenToYuan, yuanToFen } from '@/utils'
 
 defineOptions({ name: 'ProductBrandForm' })
 
@@ -111,7 +113,12 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       const data = await RewardActivityApi.getReward(id)
+      // 转区段时间
       data.startAndEndTime = [data.startTime, data.endTime]
+      // 规则分转元
+      data.rules.forEach((item: any) => {
+        item.discountPrice = fenToYuan(item.discountPrice || 0)
+      })
       formData.value = data
       // 获得商品范围
       await getProductScope()
@@ -126,7 +133,7 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const submitForm = async () => {
   // 校验表单
-  if (!formRef) return
+  if (!formRef.value) return
   const valid = await formRef.value.validate()
   if (!valid) return
 
@@ -135,7 +142,14 @@ const submitForm = async () => {
   try {
     // 设置活动规则优惠券
     rewardRuleRef.value?.setRuleCoupon()
-    const data = formData.value
+    const data = cloneDeep(formData.value)
+    // 时间段转换
+    data.startTime = data.startAndEndTime![0]
+    data.endTime = data.startAndEndTime![1]
+    // 规则元转分
+    data.rules.forEach((item) => {
+      item.discountPrice = yuanToFen(item.discountPrice || 0)
+    })
     // 设置商品范围
     setProductScopeValues(data)
     if (formType.value === 'create') {
@@ -170,16 +184,14 @@ const getProductScope = async () => {
       formData.value.productSpuIds = formData.value.productScopeValues
       break
     case PromotionProductScopeEnum.CATEGORY.scope:
-      // TODO @puhui999：可以直接 await nextTick() 呀。
-      await nextTick(() => {
-        let productCategoryIds = formData.value.productScopeValues as any
-        if (Array.isArray(productCategoryIds) && productCategoryIds.length > 0) {
-          // 单选时使用数组不能反显
-          productCategoryIds = productCategoryIds[0]
-        }
-        // 设置品类编号
-        formData.value.productCategoryIds = productCategoryIds
-      })
+      await nextTick()
+      let productCategoryIds = formData.value.productScopeValues as any
+      if (Array.isArray(productCategoryIds) && productCategoryIds.length > 0) {
+        // 单选时使用数组不能反显
+        productCategoryIds = productCategoryIds[0]
+      }
+      // 设置品类编号
+      formData.value.productCategoryIds = productCategoryIds
       break
     default:
       break

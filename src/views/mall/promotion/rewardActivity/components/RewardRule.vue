@@ -25,12 +25,13 @@
               订单金额优惠
               <el-form-item>
                 减
-                <!-- TODO @puhui999：需要考虑 100 换算哈 -->
-                <el-input
+                <el-input-number
                   v-model="rule.discountPrice"
+                  :min="0"
+                  :precision="2"
+                  :step="0.1"
                   class="w-150px! p-x-20px!"
-                  placeholder=""
-                  type="number"
+                  controls-position="right"
                 />
                 元
               </el-form-item>
@@ -71,9 +72,9 @@
                 inactive-text="否"
                 inline-prompt
               />
-              <RewardRuleCouponShowcase
+              <RewardRuleCouponSelect
                 v-if="rule.giveCoupon"
-                ref="rewardRuleCouponShowcaseRef"
+                ref="rewardRuleCouponSelectRef"
                 v-model="rule!"
               />
             </el-col>
@@ -88,11 +89,13 @@
 </template>
 
 <script lang="ts" setup>
-import RewardRuleCouponShowcase from './RewardRuleCouponShowcase.vue'
+import RewardRuleCouponSelect from './RewardRuleCouponSelect.vue'
 import { RewardActivityVO } from '@/api/mall/promotion/reward/rewardActivity'
 import { PromotionConditionTypeEnum } from '@/utils/constants'
 import { useVModel } from '@vueuse/core'
 import { isEmpty } from '@/utils/is'
+
+defineOptions({ name: 'RewardRule' })
 
 const props = defineProps<{
   modelValue: RewardActivityVO
@@ -104,7 +107,7 @@ const emits = defineEmits<{
 }>()
 
 const formData = useVModel(props, 'modelValue', emits) // 活动数据
-const rewardRuleCouponShowcaseRef = ref<InstanceType<typeof RewardRuleCouponShowcase>[]>() // 活动规则优惠券 Ref
+const rewardRuleCouponSelectRef = ref<InstanceType<typeof RewardRuleCouponSelect>[]>() // 活动规则优惠券 Ref
 
 /** 删除优惠规则 */
 const deleteRule = (ruleIndex: number) => {
@@ -127,14 +130,20 @@ const addRule = () => {
 
 /** 设置规则优惠券-提交时 */
 const setRuleCoupon = () => {
-  if (isEmpty(rewardRuleCouponShowcaseRef.value)) {
+  if (isEmpty(rewardRuleCouponSelectRef.value)) {
     return
   }
 
-  rewardRuleCouponShowcaseRef.value?.forEach((item) => item.setGiveCouponList())
+  // 情况一：不赠送优惠券
+  formData.value.rules.forEach((rule) => {
+    if (!rule.giveCoupon) {
+      rule.couponIds = []
+      rule.couponCounts = []
+    }
+  })
+  // 情况二：赠送优惠券
+  rewardRuleCouponSelectRef.value?.forEach((item) => item.setGiveCouponList())
 }
 
 defineExpose({ setRuleCoupon })
 </script>
-
-<style lang="scss" scoped></style>
