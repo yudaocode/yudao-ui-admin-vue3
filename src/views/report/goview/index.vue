@@ -2,7 +2,9 @@
   <ContentWrap>
     <doc-alert title="大屏设计器" url="https://doc.iocoder.cn/report/screen/" />
 
-    <IFrame :src="src" />
+    <ContentWrap :bodyStyle="{ padding: '0px' }" class="!mb-0">
+      <IFrame :src="src" />
+    </ContentWrap>
   </ContentWrap>
 </template>
 <script lang="ts" setup>

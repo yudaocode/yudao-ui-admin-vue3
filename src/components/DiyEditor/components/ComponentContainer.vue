@@ -165,6 +165,7 @@ $toolbar-position: -55px;
       width: 80px;
       height: 25px;
       font-size: 12px;
+      color: #6a6a6a;
       line-height: 25px;
       text-align: center;
       background: #fff;

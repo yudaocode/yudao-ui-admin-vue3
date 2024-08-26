@@ -7,26 +7,41 @@ const props = defineProps({
   src: propTypes.string.def('')
 })
 const loading = ref(true)
-const height = ref('')
 const frameRef = ref<HTMLElement | null>(null)
 const init = () => {
-  height.value = document.documentElement.clientHeight - 94.5 + 'px'
-  loading.value = false
+  nextTick(() => {
+    loading.value = true
+    if (!frameRef.value) return
+    frameRef.value.onload = () => {
+      loading.value = false
+    }
+  })
 }
 onMounted(() => {
-  setTimeout(() => {
-    init()
-  }, 300)
+  init()
 })
+watch(
+  () => props.src,
+  () => {
+    init()
+  }
+)
 </script>
 <template>
-  <div v-loading="loading" :style="'height:' + height">
+  <div
+    v-loading="loading"
+    class="w-full h-[calc(100vh-var(--top-tool-height)-var(--tags-view-height)-var(--app-content-padding)-var(--app-content-padding)-2px)]"
+  >
     <iframe
       ref="frameRef"
       :src="props.src"
-      frameborder="no"
+      frameborder="0"
       scrolling="auto"
-      style="width: 100%; height: 100%"
+      height="100%"
+      width="100%"
+      allowfullscreen="true"
+      webkitallowfullscreen="true"
+      mozallowfullscreen="true"
     ></iframe>
   </div>
 </template>
