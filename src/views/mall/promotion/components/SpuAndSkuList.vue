@@ -29,6 +29,17 @@
     </el-table-column>
     <el-table-column align="center" label="销量" min-width="90" prop="salesCount" />
     <el-table-column align="center" label="库存" min-width="90" prop="stock" />
+    <el-table-column v-if="spuData.length > 1 && isDelete" align="center" label="操作" min-width="90" >
+      <template #default="scope">
+        <el-button
+          type="primary"
+          link
+          @click="deleteSpu(scope.row.id)"
+        >
+          删除
+        </el-button>
+      </template>
+    </el-table-column>
   </el-table>
 </template>
 <script generic="T extends Spu" lang="ts" setup>
@@ -40,10 +51,13 @@ import { SpuProperty } from '@/views/mall/promotion/components/index'
 
 defineOptions({ name: 'PromotionSpuAndSkuList' })
 
+const message = useMessage() // 消息弹窗
+
 const props = defineProps<{
   spuList: T[]
   ruleConfig: RuleConfig[]
   spuPropertyListP: SpuProperty<T>[]
+  isDelete?: boolean //spu是否可以多选
 }>()
 
 const spuData = ref<Spu[]>([]) // spu 详情数据列表
@@ -75,6 +89,19 @@ const imagePreview = (imgUrl: string) => {
     zIndex: 99999999,
     urlList: [imgUrl]
   })
+}
+
+// 删除时的触发事件
+const emits = defineEmits<{
+  (e: 'delete', spuId: number): void
+}>()
+
+/** 多选时可以删除spu **/
+const deleteSpu = async (spuId: number) => {
+  await message.confirm('是否删除商品编号为' + spuId + '的数据？')
+  let index = spuData.value.findIndex((item) => item.id == spuId)
+  spuData.value.splice(index,1);
+  emits('delete',spuId)
 }
 
 /**

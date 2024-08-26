@@ -73,17 +73,6 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    label: '优惠类型',
-    field: 'discountType',
-    dictType: DICT_TYPE.PROMOTION_DISCOUNT_TYPE,
-    dictClass: 'number',
-    isSearch: true,
-    form: {
-      component: 'Radio',
-      value: 1
-    }
-  },
-  {
     label: '活动商品',
     field: 'spuId',
     isTable: true,
