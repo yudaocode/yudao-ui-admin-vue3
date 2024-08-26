@@ -40,7 +40,7 @@ import { isEmpty } from '@/utils/is'
 import { useVModel } from '@vueuse/core'
 import { findIndex } from '@/utils'
 
-// TODO @puhui999：要不就叫 RewardRuleCouponSelect
+defineOptions({ name: 'RewardRuleCouponSelect' })
 
 const props = defineProps<{
   modelValue: RewardRule
@@ -89,15 +89,13 @@ const initGiveCouponList = async () => {
   if (!data) {
     return
   }
-
-  for (let i = 0; i < data.length; i++) {
-    const coupon = data[i]
-    const index = findIndex(rewardRule.value.couponIds!, (item) => item.id === coupon.id)
+  data.forEach((coupon) => {
+    const index = findIndex(rewardRule.value.couponIds!, (couponId) => couponId === coupon.id)
     list.value.push({
       ...coupon,
       giveCount: rewardRule.value.couponCounts![index]
     })
-  }
+  })
 }
 
 /** 设置赠送的优惠券 */
@@ -106,15 +104,8 @@ const setGiveCouponList = () => {
     return
   }
 
-  const couponIds: number[] = []
-  const couponCounts: number[] = []
-  for (let i = 0, len = list.value.length; i < len; i++) {
-    couponIds.push(list.value[i].id)
-    couponCounts.push(list.value[i].giveCount!)
-  }
-  // TODO @puhui999：可以考虑，直接使用 list 的 map 操作，简单一些。性能没啥差别的
-  rewardRule.value.couponIds = couponIds
-  rewardRule.value.couponCounts = couponCounts
+  rewardRule.value.couponIds = list.value.map((rule) => rule.id)
+  rewardRule.value.couponCounts = list.value.map((rule) => rule.giveCount || 0)
 }
 defineExpose({ setGiveCouponList })
 

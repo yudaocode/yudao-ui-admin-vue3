@@ -32,7 +32,6 @@
           格式为 <b style="color: #f56c6c">{{ fileType.join('/') }}</b> 的文件
         </div>
       </template>
-      <!-- TODO @puhui999：1）表单展示的时候，位置会偏掉，已发微信-->
       <template #file="row">
         <div class="flex items-center">
           <span>{{ row.file.name }}</span>
