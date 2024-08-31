@@ -336,6 +336,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: undefined,
+    description: undefined,
     discountType: PromotionDiscountTypeEnum.PRICE.type,
     discountPrice: undefined,
     discountPercent: undefined,
