@@ -79,7 +79,7 @@
         <el-date-picker
           v-model="queryParams.createTime"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-260px"
+          class="!w-280px"
           end-placeholder="自定义时间"
           start-placeholder="自定义时间"
           type="daterange"
