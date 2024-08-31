@@ -10,6 +10,18 @@
       <el-form-item label="优惠券名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入优惠券名称" />
       </el-form-item>
+      <el-form-item label="优惠券描述" prop="description">
+        <el-input
+          v-model="formData.description"
+          :autosize="{ minRows: 2, maxRows: 2 }"
+          :clearable="true"
+          :show-word-limit="true"
+          class="w-1/1!"
+          maxlength="512"
+          placeholder="请输入优惠券描述"
+          type="textarea"
+        />
+      </el-form-item>
       <el-form-item label="优惠劵类型" prop="productScope">
         <el-radio-group v-model="formData.productScope">
           <el-radio
@@ -171,18 +183,6 @@
           placeholder="请输入结束天数"
         />
         天有效
-      </el-form-item>
-      <el-form-item label="优惠券描述" prop="description">
-        <el-input
-          v-model="formData.description"
-          :autosize="{ minRows: 2, maxRows: 2 }"
-          :clearable="true"
-          :show-word-limit="true"
-          class="w-100!"
-          maxlength="64"
-          placeholder="请输入优惠券描述"
-          type="textarea"
-        />
       </el-form-item>
     </el-form>
     <template #footer>
