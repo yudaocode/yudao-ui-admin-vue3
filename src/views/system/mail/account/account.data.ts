@@ -25,12 +25,26 @@ const crudSchemas = reactive<CrudSchema[]>([
   {
     label: '邮箱',
     field: 'mail',
-    isSearch: true
+    isSearch: true,
+    search: {
+      componentProps: {
+        style: {
+          width: '240px'
+        }
+      }
+    }
   },
   {
     label: '用户名',
     field: 'username',
-    isSearch: true
+    isSearch: true,
+    search: {
+      componentProps: {
+        style: {
+          width: '240px'
+        }
+      }
+    }
   },
   {
     label: '密码',

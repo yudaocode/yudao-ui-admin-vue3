@@ -153,6 +153,7 @@
               placeholder="选择下次联系时间"
               type="datetime"
               value-format="x"
+              class="!w-1/1"
             />
           </el-form-item>
         </el-col>
