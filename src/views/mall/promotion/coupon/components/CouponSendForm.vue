@@ -67,7 +67,7 @@
             :disabled="sendLoading"
             :loading="sendLoading"
             @click="handleSendCoupon(scope.row.id)"
-            v-hasPermi="['member:level:update']"
+            v-hasPermi="['promotion:coupon:send']"
           >
             发送
           </el-button>
