@@ -623,6 +623,12 @@ $prefix-cls: #{$namespace}-tags-view;
         }
       }
     }
+
+    &__item--immerse:not(.is-active) {
+      &:hover {
+        color: var(--el-color-white);
+      }
+    }
   }
 }
 </style>
