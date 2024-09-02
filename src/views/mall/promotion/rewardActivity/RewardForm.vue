@@ -17,6 +17,7 @@
           :start-placeholder="t('common.startTimeText')"
           range-separator="-"
           type="datetimerange"
+          value-format="x"
         />
       </el-form-item>
       <el-form-item label="条件类型" prop="conditionType">
@@ -146,6 +147,7 @@ const submitForm = async () => {
     // 时间段转换
     data.startTime = data.startAndEndTime![0]
     data.endTime = data.startAndEndTime![1]
+    delete data.startAndEndTime
     // 规则元转分
     data.rules.forEach((item) => {
       item.discountPrice = yuanToFen(item.discountPrice || 0)

@@ -47,13 +47,7 @@
             </el-col>
             <el-col :span="24">
               <span>送积分：</span>
-              <el-switch
-                v-model="rule.givePoint"
-                active-text="是"
-                inactive-text="否"
-                inline-prompt
-              />
-              <el-form-item v-if="rule.givePoint">
+              <el-form-item>
                 送
                 <el-input
                   v-model="rule.point"
@@ -65,18 +59,11 @@
               </el-form-item>
             </el-col>
             <el-col :span="24">
+              <el-tag type="warning"> 当赠送积分为 0 时，表示不赠送积分</el-tag>
+            </el-col>
+            <el-col :span="24">
               <span>送优惠券：</span>
-              <el-switch
-                v-model="rule.giveCoupon"
-                active-text="是"
-                inactive-text="否"
-                inline-prompt
-              />
-              <RewardRuleCouponSelect
-                v-if="rule.giveCoupon"
-                ref="rewardRuleCouponSelectRef"
-                v-model="rule!"
-              />
+              <RewardRuleCouponSelect ref="rewardRuleCouponSelectRef" v-model="rule!" />
             </el-col>
           </el-form-item>
         </el-form>
@@ -120,11 +107,7 @@ const addRule = () => {
     limit: 0,
     discountPrice: 0,
     freeDelivery: false,
-    givePoint: false,
-    point: 0,
-    giveCoupon: false,
-    couponIds: [],
-    couponCounts: []
+    point: 0
   })
 }
 
@@ -134,14 +117,6 @@ const setRuleCoupon = () => {
     return
   }
 
-  // 情况一：不赠送优惠券
-  formData.value.rules.forEach((rule) => {
-    if (!rule.giveCoupon) {
-      rule.couponIds = []
-      rule.couponCounts = []
-    }
-  })
-  // 情况二：赠送优惠券
   rewardRuleCouponSelectRef.value?.forEach((item) => item.setGiveCouponList())
 }
 

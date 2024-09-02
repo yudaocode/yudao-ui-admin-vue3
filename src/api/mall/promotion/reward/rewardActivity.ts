@@ -21,11 +21,10 @@ export interface RewardRule {
   limit?: number
   discountPrice?: number
   freeDelivery?: boolean
-  givePoint?: boolean
-  point?: number
-  giveCoupon?: boolean
-  couponIds?: number[]
-  couponCounts?: number[]
+  point: number
+  giveCoupons?: {
+    [key: number]: number
+  }
 }
 
 // 新增满减送活动

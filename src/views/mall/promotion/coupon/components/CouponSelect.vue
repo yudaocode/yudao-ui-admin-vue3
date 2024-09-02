@@ -33,32 +33,6 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="优惠券状态" prop="status">
-          <el-select
-            v-model="queryParams.status"
-            class="!w-240px"
-            clearable
-            placeholder="请选择优惠券状态"
-          >
-            <el-option
-              v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="创建时间" prop="createTime">
-          <el-date-picker
-            v-model="queryParams.createTime"
-            :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-            class="!w-240px"
-            end-placeholder="结束日期"
-            start-placeholder="开始日期"
-            type="daterange"
-            value-format="YYYY-MM-DD HH:mm:ss"
-          />
-        </el-form-item>
         <el-form-item>
           <el-button @click="handleQuery">
             <Icon class="mr-5px" icon="ep:search" />
@@ -118,13 +92,6 @@
             <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
           </template>
         </el-table-column>
-        <el-table-column
-          :formatter="dateFormatter"
-          align="center"
-          label="创建时间"
-          prop="createTime"
-          width="180"
-        />
       </el-table>
       <!-- 分页 -->
       <Pagination
@@ -148,13 +115,13 @@ import {
   takeLimitCountFormat,
   validityTypeFormat
 } from '@/views/mall/promotion/coupon/formatter'
-import { dateFormatter } from '@/utils/formatTime'
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
 
 defineOptions({ name: 'CouponSelect' })
 
 const props = defineProps<{
   multipleSelection?: CouponTemplateApi.CouponTemplateVO[]
+  takeType: number // 领取方式
 }>()
 const emit = defineEmits<{
   (e: 'update:multipleSelection', v: CouponTemplateApi.CouponTemplateVO[]): void
@@ -170,10 +137,8 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: null,
-  status: null,
   discountType: null,
-  type: null,
-  createTime: []
+  canTakeTypes: null
 })
 const queryFormRef = ref() // 搜索的表单
 const selectedCouponList = ref<CouponTemplateApi.CouponTemplateVO[]>([]) // 选择的数据
@@ -183,6 +148,7 @@ const getList = async () => {
   loading.value = true
   try {
     // 执行查询
+    queryParams.canTakeTypes = [props.takeType] as any
     const data = await CouponTemplateApi.getCouponTemplatePage(queryParams)
     list.value = data.list
     total.value = data.total
