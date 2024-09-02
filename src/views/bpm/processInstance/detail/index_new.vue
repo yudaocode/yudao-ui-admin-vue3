@@ -46,14 +46,6 @@
                 <BusinessFormComponent :id="processInstance.businessKey" />
               </div>
             </div>
-            <!-- 操作栏按钮 -->
-            <!-- TODO @GoldenZqqq：ProcessInstanceOperationButton，操作按钮。不叫 Container 会好点点，和后端也更统一 -->
-            <ProcessInstanceBtnConatiner
-              ref="processInstanceBtnRef"
-              :processInstance="processInstance"
-              :userOptions="userOptions"
-              @success="getDetail"
-            />
           </el-col>
           <el-col :span="6">
             <!-- TODO @GoldenZqqq：后续这个，也拆个小组件出来 -->
@@ -126,6 +118,14 @@
       <!-- 流转评论 -->
       <el-tab-pane label="流转评论"> 流转评论 </el-tab-pane>
     </el-tabs>
+
+    <!-- 操作栏按钮 -->
+    <ProcessInstanceOperationButton
+      ref="operationButtonRef"
+      :processInstance="processInstance"
+      :userOptions="userOptions"
+      @success="getDetail"
+    />
   </ContentWrap>
 </template>
 <script lang="ts" setup>
@@ -138,6 +138,7 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as TaskApi from '@/api/bpm/task'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
+import ProcessInstanceOperationButton from './ProcessInstanceOperationButton.vue'
 import { registerComponent } from '@/utils/routerHelper'
 import * as UserApi from '@/api/system/user'
 import audit1 from '@/assets/svgs/bpm/audit1.svg'
@@ -151,7 +152,7 @@ const message = useMessage() // 消息弹窗
 const id = query.id as unknown as string // 流程实例的编号
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
-const processInstanceBtnRef = ref()
+const operationButtonRef = ref()
 const bpmnXml = ref('') // BPMN XML
 const tasksLoad = ref(true) // 任务的加载中
 const tasks = ref<any[]>([]) // 任务列表
@@ -244,7 +245,7 @@ const getTaskList = async () => {
     })
 
     // 获得需要自己审批的任务
-    processInstanceBtnRef.value.loadRunningTask(tasks.value)
+    operationButtonRef.value?.loadRunningTask(tasks.value)
   } finally {
     tasksLoad.value = false
   }

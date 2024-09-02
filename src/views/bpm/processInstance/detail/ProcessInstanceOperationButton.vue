@@ -1,8 +1,7 @@
 <template>
-  <el-affix target=".formCol" position="bottom" class="h-50px" v-if="runningTask?.id">
-    <el-divider class="!mb-8px !mt-0" />
+  <Teleport v-if="runningTask?.id" to=".section-container">
     <div
-      class="pl-50px text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
+      class="h-50px position-fixed bottom-10 pl-50px text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
     >
       <el-popover :visible="passVisible" placement="top-end" :width="500" trigger="click">
         <template #reference>
@@ -126,7 +125,7 @@
       <div @click="handleSign"> <Icon :size="14" icon="ep:plus" />&nbsp;加签 </div>
       <div @click="handleBack"> <Icon :size="14" icon="fa:mail-reply" />&nbsp;退回 </div>
     </div>
-  </el-affix>
+  </Teleport>
   <!-- 弹窗：转派审批人 -->
   <TaskTransferForm ref="taskTransferFormRef" @success="getDetail" />
   <!-- 弹窗：回退节点 -->
