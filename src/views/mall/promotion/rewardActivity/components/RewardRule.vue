@@ -59,9 +59,6 @@
               </el-form-item>
             </el-col>
             <el-col :span="24">
-              <el-tag type="warning"> 当赠送积分为 0 时，表示不赠送积分</el-tag>
-            </el-col>
-            <el-col :span="24">
               <span>送优惠券：</span>
               <RewardRuleCouponSelect ref="rewardRuleCouponSelectRef" v-model="rule!" />
             </el-col>
@@ -71,6 +68,9 @@
     </template>
     <el-col :span="24" class="mt-10px">
       <el-button type="primary" @click="addRule">添加优惠规则</el-button>
+    </el-col>
+    <el-col :span="24">
+      <el-tag type="warning"> 赠送积分为 0 时不赠送。未选优惠券时不赠送。</el-tag>
     </el-col>
   </el-row>
 </template>

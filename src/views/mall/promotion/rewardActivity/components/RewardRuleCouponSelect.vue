@@ -1,8 +1,6 @@
 <template>
   <el-button class="ml-10px" type="text" @click="selectCoupon">添加优惠卷</el-button>
-  <el-col :span="24">
-    <el-tag type="warning"> 当没有选择优惠券时，表示不赠送优惠券</el-tag>
-  </el-col>
+
   <div
     v-for="(item, index) in list"
     :key="item.id"
