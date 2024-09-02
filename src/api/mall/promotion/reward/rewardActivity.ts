@@ -22,7 +22,7 @@ export interface RewardRule {
   discountPrice?: number
   freeDelivery?: boolean
   point: number
-  giveCoupons?: {
+  giveCouponTemplateCounts?: {
     [key: number]: number
   }
 }

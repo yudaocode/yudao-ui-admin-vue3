@@ -86,10 +86,12 @@ const deleteCoupon = (index: number) => {
 /** 初始化赠送的优惠券列表 */
 const initGiveCouponList = async () => {
   // 校验优惠券存在
-  if (isEmpty(rewardRule.value) || isEmpty(rewardRule.value.giveCoupons)) {
+  if (isEmpty(rewardRule.value) || isEmpty(rewardRule.value.giveCouponTemplateCounts)) {
     return
   }
-  const tempLateIds = Object.keys(rewardRule.value.giveCoupons!).map((item) => parseInt(item))
+  const tempLateIds = Object.keys(rewardRule.value.giveCouponTemplateCounts!).map((item) =>
+    parseInt(item)
+  )
   const data = await CouponTemplateApi.getCouponTemplateList(tempLateIds)
   if (!data) {
     return
@@ -98,7 +100,7 @@ const initGiveCouponList = async () => {
   data.forEach((coupon) => {
     list.value.push({
       ...coupon,
-      giveCount: rewardRule.value.giveCoupons![coupon.id]
+      giveCount: rewardRule.value.giveCouponTemplateCounts![coupon.id]
     })
   })
 }
@@ -111,10 +113,10 @@ const setGiveCouponList = () => {
 
   // 设置优惠券和其数量的对应
   list.value.forEach((rule) => {
-    if (!rewardRule.value.giveCoupons) {
-      rewardRule.value.giveCoupons = {}
+    if (!rewardRule.value.giveCouponTemplateCounts) {
+      rewardRule.value.giveCouponTemplateCounts = {}
     }
-    rewardRule.value.giveCoupons[rule.id] = rule.giveCount!
+    rewardRule.value.giveCouponTemplateCounts[rule.id] = rule.giveCount!
   })
 }
 defineExpose({ setGiveCouponList })

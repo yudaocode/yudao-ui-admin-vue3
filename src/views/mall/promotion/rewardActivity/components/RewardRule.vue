@@ -103,6 +103,9 @@ const deleteRule = (ruleIndex: number) => {
 
 /** 添加优惠规则 */
 const addRule = () => {
+  if (isEmpty(formData.value.rules)) {
+    formData.value.rules = []
+  }
   formData.value.rules.push({
     limit: 0,
     discountPrice: 0,

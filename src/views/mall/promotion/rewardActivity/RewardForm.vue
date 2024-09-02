@@ -117,7 +117,7 @@ const open = async (type: string, id?: number) => {
       // 转区段时间
       data.startAndEndTime = [data.startTime, data.endTime]
       // 规则分转元
-      data.rules.forEach((item: any) => {
+      data.rules?.forEach((item: any) => {
         item.discountPrice = fenToYuan(item.discountPrice || 0)
       })
       formData.value = data
