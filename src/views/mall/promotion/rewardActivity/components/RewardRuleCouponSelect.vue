@@ -27,7 +27,11 @@
   </div>
 
   <!-- 优惠券选择 -->
-  <CouponSelect ref="couponSelectRef" @change="handleCouponChange" />
+  <CouponSelect
+    ref="couponSelectRef"
+    :take-type="CouponTemplateTakeTypeEnum.ADMIN.type"
+    @change="handleCouponChange"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -35,10 +39,10 @@ import { CouponSelect } from '@/views/mall/promotion/coupon/components'
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
 import { RewardRule } from '@/api/mall/promotion/reward/rewardActivity'
 import { DICT_TYPE } from '@/utils/dict'
+import { CouponTemplateTakeTypeEnum } from '@/utils/constants'
 import { discountFormat } from '@/views/mall/promotion/coupon/formatter'
 import { isEmpty } from '@/utils/is'
 import { useVModel } from '@vueuse/core'
-import { findIndex } from '@/utils'
 
 defineOptions({ name: 'RewardRuleCouponSelect' })
 
@@ -81,19 +85,22 @@ const deleteCoupon = (index: number) => {
 
 /** 初始化赠送的优惠券列表 */
 const initGiveCouponList = async () => {
-  // 朝赵优惠劵
-  if (isEmpty(rewardRule.value) || isEmpty(rewardRule.value.couponIds)) {
+  // 校验优惠券存在
+  if (isEmpty(rewardRule.value) || isEmpty(rewardRule.value.giveCouponTemplateCounts)) {
     return
   }
-  const data = await CouponTemplateApi.getCouponTemplateList(rewardRule.value.couponIds!)
+  const tempLateIds = Object.keys(rewardRule.value.giveCouponTemplateCounts!).map((item) =>
+    parseInt(item)
+  )
+  const data = await CouponTemplateApi.getCouponTemplateList(tempLateIds)
   if (!data) {
     return
   }
+  // 回显
   data.forEach((coupon) => {
-    const index = findIndex(rewardRule.value.couponIds!, (couponId) => couponId === coupon.id)
     list.value.push({
       ...coupon,
-      giveCount: rewardRule.value.couponCounts![index]
+      giveCount: rewardRule.value.giveCouponTemplateCounts![coupon.id]
     })
   })
 }
@@ -104,8 +111,13 @@ const setGiveCouponList = () => {
     return
   }
 
-  rewardRule.value.couponIds = list.value.map((rule) => rule.id)
-  rewardRule.value.couponCounts = list.value.map((rule) => rule.giveCount || 0)
+  // 设置优惠券和其数量的对应
+  list.value.forEach((rule) => {
+    if (!rewardRule.value.giveCouponTemplateCounts) {
+      rewardRule.value.giveCouponTemplateCounts = {}
+    }
+    rewardRule.value.giveCouponTemplateCounts[rule.id] = rule.giveCount!
+  })
 }
 defineExpose({ setGiveCouponList })
 
