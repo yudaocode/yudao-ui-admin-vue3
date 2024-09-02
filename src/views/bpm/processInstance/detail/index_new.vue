@@ -46,6 +46,14 @@
                 <BusinessFormComponent :id="processInstance.businessKey" />
               </div>
             </div>
+
+            <!-- 操作栏按钮 -->
+            <ProcessInstanceOperationButton
+              ref="operationButtonRef"
+              :processInstance="processInstance"
+              :userOptions="userOptions"
+              @success="getDetail"
+            />
           </el-col>
           <el-col :span="6">
             <!-- TODO @GoldenZqqq：后续这个，也拆个小组件出来 -->
@@ -118,14 +126,6 @@
       <!-- 流转评论 -->
       <el-tab-pane label="流转评论"> 流转评论 </el-tab-pane>
     </el-tabs>
-
-    <!-- 操作栏按钮 -->
-    <ProcessInstanceOperationButton
-      ref="operationButtonRef"
-      :processInstance="processInstance"
-      :userOptions="userOptions"
-      @success="getDetail"
-    />
   </ContentWrap>
 </template>
 <script lang="ts" setup>
