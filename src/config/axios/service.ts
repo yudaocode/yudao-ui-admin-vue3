@@ -211,6 +211,7 @@ const handleAuthorized = () => {
       showCancelButton: false,
       closeOnClickModal: false,
       showClose: false,
+      closeOnPressEscape: false,
       confirmButtonText: t('login.relogin'),
       type: 'warning'
     }).then(() => {
