@@ -120,8 +120,8 @@ import * as ProductSpuApi from '@/api/mall/product/spu'
 import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationActivity'
 import {fenToYuan} from "@/utils";
 
-/** 商品卡片 */
-defineOptions({name: 'ProductCard'})
+/** 拼团卡片 */
+defineOptions({name: 'PromotionCombination'})
 // 定义属性
 // 定义属性
 const props = defineProps<{ property: PromotionCombinationProperty }>();
