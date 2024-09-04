@@ -65,7 +65,7 @@ export const component = {
     name: '拼团',
     icon: 'mdi:account-group',
     property: {
-        layoutType: 'oneColSmallImg',
+        layoutType: 'oneColBigImg',
         fields: {
             name: {show: true, color: '#000'},
             introduction: {show: true, color: '#999'},
