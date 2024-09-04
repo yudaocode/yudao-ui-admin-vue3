@@ -50,7 +50,7 @@ export const getCombinationActivity = async (id: number) => {
 
 // 查询拼团活动详情列表
 export const getCombinationActivityDetailList = (ids: number[]) => {
-    return request.get({url: `/promotion/combination-activity/list?combinationActivityIds=${ids}`})
+    return request.get({url: `/promotion/combination-activity/detail-list?ids=${ids}`})
 }
 
 // 新增拼团活动
