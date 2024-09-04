@@ -5,7 +5,7 @@
         ...style
       }"
     >
-      <component :is="component.id" :property="component.property" :component="component" />
+      <component :is="component.id" :property="component.property" />
     </div>
     <div class="component-wrap">
       <!-- 左侧：组件名（悬浮的小贴条） -->
