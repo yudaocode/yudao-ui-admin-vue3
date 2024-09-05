@@ -123,7 +123,6 @@ import {fenToYuan} from "@/utils";
 /** 拼团卡片 */
 defineOptions({name: 'PromotionCombination'})
 // 定义属性
-// 定义属性
 const props = defineProps<{ property: PromotionCombinationProperty }>();
 // 商品列表
 const spuList = ref<ProductSpuApi.Spu[]>([]);
@@ -150,13 +149,12 @@ watch(
               .map(activity => activity.spuId)
               .filter((spuId): spuId is number => typeof spuId === 'number');
 
-          // 如果有有效的 spuId，调用 API 获取详细信息
+          // 如果存在有效的 spuId，调用 API 获取详细信息
           if (spuIdList.value.length > 0) {
             spuList.value = await ProductSpuApi.getSpuDetailList(spuIdList.value);
           } else {
             console.warn('没有用于获取详细信息的有效 spuId。');
           }
-
           // 更新 SPU 的最低价格
           combinationActivityList.value.forEach(activity => {
             activity.products.forEach(product => {
