@@ -165,6 +165,7 @@ watch(
           activity.products.forEach((product) => {
             const spu = spuList.value.find((spu) => spu.id === product.spuId)
             if (spu) {
+              // 哪个最便宜就赋值哪个
               spu.price = Math.min(product.combinationPrice || Infinity, spu.price || Infinity)
             }
           })
