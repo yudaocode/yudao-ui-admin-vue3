@@ -1,41 +1,45 @@
 <template>
   <div class="flex flex-wrap items-center gap-8px">
     <div
-        v-for="(combinationActivity, index) in Activitys"
-        :key="combinationActivity.id"
-        class="select-box spu-pic">
+      v-for="(combinationActivity, index) in Activitys"
+      :key="combinationActivity.id"
+      class="select-box spu-pic"
+    >
       <el-tooltip :content="combinationActivity.name">
         <div class="relative h-full w-full">
-          <el-image :src="combinationActivity.picUrl" class="h-full w-full"/>
+          <el-image :src="combinationActivity.picUrl" class="h-full w-full" />
           <Icon
-              v-show="!disabled"
-              class="del-icon"
-              icon="ep:circle-close-filled"
-              @click="handleRemoveActivity(index)"
+            v-show="!disabled"
+            class="del-icon"
+            icon="ep:circle-close-filled"
+            @click="handleRemoveActivity(index)"
           />
         </div>
       </el-tooltip>
     </div>
     <el-tooltip content="选择活动" v-if="canAdd">
       <div class="select-box" @click="openCombinationActivityTableSelect">
-        <Icon icon="ep:plus"/>
+        <Icon icon="ep:plus" />
       </div>
     </el-tooltip>
   </div>
   <!-- 拼团活动选择对话框（表格形式） -->
-  <CombinationTableSelect ref="combinationActivityTableSelectRef" :multiple="limit != 1"
-                          @change="handleActivitySelected"/>
+  <CombinationTableSelect
+    ref="combinationActivityTableSelectRef"
+    :multiple="limit != 1"
+    @change="handleActivitySelected"
+  />
 </template>
 <script lang="ts" setup>
 import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationActivity'
-import {propTypes} from '@/utils/propTypes'
-import {oneOfType} from 'vue-types'
-import {isArray} from '@/utils/is'
-import CombinationTableSelect from "@/views/mall/promotion/combination/components/CombinationTableSelect.vue";
+import { propTypes } from '@/utils/propTypes'
+import { oneOfType } from 'vue-types'
+import { isArray } from '@/utils/is'
+import CombinationTableSelect from '@/views/mall/promotion/combination/components/CombinationTableSelect.vue'
 
 // 活动橱窗，一般用于装修时使用
 // 提供功能：展示活动列表、添加活动、删除活动
-defineOptions({name: 'CombinationShowcase'})
+defineOptions({ name: 'CombinationShowcase' })
 
 const props = defineProps({
   modelValue: oneOfType<number | Array<number>>([Number, Array]).isRequired,
@@ -58,26 +62,29 @@ const canAdd = computed(() => {
 const Activitys = ref<CombinationActivityApi.CombinationActivityVO[]>([])
 
 watch(
-    () => props.modelValue,
-    async () => {
-      const ids = isArray(props.modelValue)
-          ? // 情况一：多选
-          props.modelValue
-          : // 情况二：单选
-          props.modelValue
-              ? [props.modelValue]
-              : []
-      // 不需要返显
-      if (ids.length === 0) {
-        Activitys.value = []
-        return
-      }
-      // 只有活动发生变化之后，才会查询活动
-      if (Activitys.value.length === 0 || Activitys.value.some((combinationActivity) => !ids.includes(combinationActivity.id!))) {
-        Activitys.value = await CombinationActivityApi.getCombinationActivityDetailList(ids)
-      }
-    },
-    {immediate: true}
+  () => props.modelValue,
+  async () => {
+    const ids = isArray(props.modelValue)
+      ? // 情况一：多选
+        props.modelValue
+      : // 情况二：单选
+        props.modelValue
+        ? [props.modelValue]
+        : []
+    // 不需要返显
+    if (ids.length === 0) {
+      Activitys.value = []
+      return
+    }
+    // 只有活动发生变化之后，才会查询活动
+    if (
+      Activitys.value.length === 0 ||
+      Activitys.value.some((combinationActivity) => !ids.includes(combinationActivity.id!))
+    ) {
+      Activitys.value = await CombinationActivityApi.getCombinationActivityDetailList(ids)
+    }
+  },
+  { immediate: true }
 )
 
 /** 活动表格选择对话框 */
@@ -91,7 +98,11 @@ const openCombinationActivityTableSelect = () => {
  * 选择活动后触发
  * @param activityVOs 选中的活动列表
  */
-const handleActivitySelected = (activityVOs: CombinationActivityApi.CombinationActivityVO | CombinationActivityApi.CombinationActivityVO[]) => {
+const handleActivitySelected = (
+  activityVOs:
+    | CombinationActivityApi.CombinationActivityVO
+    | CombinationActivityApi.CombinationActivityVO[]
+) => {
   Activitys.value = isArray(activityVOs) ? activityVOs : [activityVOs]
   emitActivityChange()
 }
@@ -112,8 +123,8 @@ const emitActivityChange = () => {
     emit('change', combinationActivity)
   } else {
     emit(
-        'update:modelValue',
-        Activitys.value.map((combinationActivity) => combinationActivity.id)
+      'update:modelValue',
+      Activitys.value.map((combinationActivity) => combinationActivity.id)
     )
     emit('change', Activitys.value)
   }

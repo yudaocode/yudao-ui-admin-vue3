@@ -3,43 +3,43 @@
     <ContentWrap>
       <!-- 搜索工作栏 -->
       <el-form
-          ref="queryFormRef"
-          :inline="true"
-          :model="queryParams"
-          class="-mb-15px"
-          label-width="68px"
+        ref="queryFormRef"
+        :inline="true"
+        :model="queryParams"
+        class="-mb-15px"
+        label-width="68px"
       >
         <el-form-item label="活动名称" prop="name">
           <el-input
-              v-model="queryParams.name"
-              placeholder="请输入活动名称"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
+            v-model="queryParams.name"
+            placeholder="请输入活动名称"
+            clearable
+            @keyup.enter="handleQuery"
+            class="!w-240px"
           />
         </el-form-item>
         <el-form-item label="活动状态" prop="status">
           <el-select
-              v-model="queryParams.status"
-              placeholder="请选择活动状态"
-              clearable
-              class="!w-240px"
+            v-model="queryParams.status"
+            placeholder="请选择活动状态"
+            clearable
+            class="!w-240px"
           >
             <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
+              v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
             />
           </el-select>
         </el-form-item>
         <el-form-item>
           <el-button @click="handleQuery">
-            <Icon class="mr-5px" icon="ep:search"/>
+            <Icon class="mr-5px" icon="ep:search" />
             搜索
           </el-button>
           <el-button @click="resetQuery">
-            <Icon class="mr-5px" icon="ep:refresh"/>
+            <Icon class="mr-5px" icon="ep:refresh" />
             重置
           </el-button>
         </el-form-item>
@@ -49,29 +49,33 @@
         <el-table-column width="55" v-if="multiple">
           <template #header>
             <el-checkbox
-                v-model="isCheckAll"
-                :indeterminate="isIndeterminate"
-                @change="handleCheckAll"
+              v-model="isCheckAll"
+              :indeterminate="isIndeterminate"
+              @change="handleCheckAll"
             />
           </template>
           <template #default="{ row }">
             <el-checkbox
-                v-model="checkedStatus[row.id]"
-                @change="(checked: boolean) => handleCheckOne(checked, row, true)"
+              v-model="checkedStatus[row.id]"
+              @change="(checked: boolean) => handleCheckOne(checked, row, true)"
             />
           </template>
         </el-table-column>
         <!-- 2. 单选模式 -->
         <el-table-column label="#" width="55" v-else>
           <template #default="{ row }">
-            <el-radio :value="row.id" v-model="selectedActivityId" @change="handleSingleSelected(row)">
+            <el-radio
+              :value="row.id"
+              v-model="selectedActivityId"
+              @change="handleSingleSelected(row)"
+            >
               <!-- 空格不能省略，是为了让单选框不显示label，如果不指定label不会有选中的效果 -->
               &nbsp;
             </el-radio>
           </template>
         </el-table-column>
-        <el-table-column label="活动编号" prop="id" min-width="80"/>
-        <el-table-column label="活动名称" prop="name" min-width="140"/>
+        <el-table-column label="活动编号" prop="id" min-width="80" />
+        <el-table-column label="活动名称" prop="name" min-width="140" />
         <el-table-column label="活动时间" min-width="210">
           <template #default="scope">
             {{ formatDate(scope.row.startTime, 'YYYY-MM-DD') }}
@@ -81,47 +85,47 @@
         <el-table-column label="商品图片" prop="spuName" min-width="80">
           <template #default="scope">
             <el-image
-                :src="scope.row.picUrl"
-                class="h-40px w-40px"
-                :preview-src-list="[scope.row.picUrl]"
-                preview-teleported
+              :src="scope.row.picUrl"
+              class="h-40px w-40px"
+              :preview-src-list="[scope.row.picUrl]"
+              preview-teleported
             />
           </template>
         </el-table-column>
-        <el-table-column label="商品标题" prop="spuName" min-width="300"/>
+        <el-table-column label="商品标题" prop="spuName" min-width="300" />
         <el-table-column
-            label="原价"
-            prop="marketPrice"
-            min-width="100"
-            :formatter="fenToYuanFormat"
+          label="原价"
+          prop="marketPrice"
+          min-width="100"
+          :formatter="fenToYuanFormat"
         />
         <el-table-column label="拼团价" prop="seckillPrice" min-width="100">
           <template #default="scope">
             {{ formatCombinationPrice(scope.row.products) }}
           </template>
         </el-table-column>
-        <el-table-column label="开团组数" prop="groupCount" min-width="100"/>
-        <el-table-column label="成团组数" prop="groupSuccessCount" min-width="100"/>
-        <el-table-column label="购买次数" prop="recordCount" min-width="100"/>
+        <el-table-column label="开团组数" prop="groupCount" min-width="100" />
+        <el-table-column label="成团组数" prop="groupSuccessCount" min-width="100" />
+        <el-table-column label="购买次数" prop="recordCount" min-width="100" />
         <el-table-column label="活动状态" align="center" prop="status" min-width="100">
           <template #default="scope">
-            <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status"/>
+            <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
           </template>
         </el-table-column>
         <el-table-column
-            label="创建时间"
-            align="center"
-            prop="createTime"
-            :formatter="dateFormatter"
-            width="180px"
+          label="创建时间"
+          align="center"
+          prop="createTime"
+          :formatter="dateFormatter"
+          width="180px"
         />
       </el-table>
       <!-- 分页 -->
       <Pagination
-          v-model:limit="queryParams.pageSize"
-          v-model:page="queryParams.pageNo"
-          :total="total"
-          @pagination="getList"
+        v-model:limit="queryParams.pageSize"
+        v-model:page="queryParams.pageNo"
+        :total="total"
+        @pagination="getList"
       />
     </ContentWrap>
     <template #footer v-if="multiple">
@@ -132,16 +136,16 @@
 </template>
 
 <script lang="ts" setup>
-import {handleTree} from '@/utils/tree'
+import { handleTree } from '@/utils/tree'
 
 import * as ProductCategoryApi from '@/api/mall/product/category'
-import {propTypes} from '@/utils/propTypes'
-import {CHANGE_EVENT} from 'element-plus'
-import * as CombinationActivityApi from "@/api/mall/promotion/combination/combinationActivity";
-import {fenToYuanFormat} from "@/utils/formatter";
-import {DICT_TYPE, getIntDictOptions} from "@/utils/dict";
-import {dateFormatter, formatDate} from "@/utils/formatTime";
-import {fenToYuan} from "@/utils";
+import { propTypes } from '@/utils/propTypes'
+import { CHANGE_EVENT } from 'element-plus'
+import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationActivity'
+import { fenToYuanFormat } from '@/utils/formatter'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { dateFormatter, formatDate } from '@/utils/formatTime'
+import { fenToYuan } from '@/utils'
 
 type CombinationActivityVO = Required<CombinationActivityApi.CombinationActivityVO>
 
@@ -156,7 +160,7 @@ type CombinationActivityVO = Required<CombinationActivityApi.CombinationActivity
  *    2.3 点击右下角的确定按钮时，结束选择，关闭对话框
  *    2.4 再次打开时，保持选中状态
  */
-defineOptions({name: 'CombinationTableSelect'})
+defineOptions({ name: 'CombinationTableSelect' })
 
 defineProps({
   // 多选模式
@@ -190,14 +194,16 @@ const open = (CombinationList?: CombinationActivityVO[]) => {
   // 处理已选中
   if (CombinationList && CombinationList.length > 0) {
     checkedActivitys.value = [...CombinationList]
-    checkedStatus.value = Object.fromEntries(CombinationList.map((activityVO) => [activityVO.id, true]))
+    checkedStatus.value = Object.fromEntries(
+      CombinationList.map((activityVO) => [activityVO.id, true])
+    )
   }
 
   dialogVisible.value = true
   resetQuery()
 }
 // 提供 open 方法，用于打开弹窗
-defineExpose({open})
+defineExpose({ open })
 
 /** 查询列表 */
 const getList = async () => {
@@ -208,7 +214,8 @@ const getList = async () => {
     total.value = data.total
     // checkbox绑定undefined会有问题，需要给一个bool值
     list.value.forEach(
-        (activityVO) => (checkedStatus.value[activityVO.id] = checkedStatus.value[activityVO.id] || false)
+      (activityVO) =>
+        (checkedStatus.value[activityVO.id] = checkedStatus.value[activityVO.id] || false)
     )
     // 计算全选框状态
     calculateIsCheckAll()
@@ -289,7 +296,11 @@ const handleCheckAll = (checked: boolean) => {
  * @param combinationActivity 活动
  * @param isCalcCheckAll 是否计算全选
  */
-const handleCheckOne = (checked: boolean, combinationActivity: CombinationActivityVO, isCalcCheckAll: boolean) => {
+const handleCheckOne = (
+  checked: boolean,
+  combinationActivity: CombinationActivityVO,
+  isCalcCheckAll: boolean
+) => {
   if (checked) {
     checkedActivitys.value.push(combinationActivity)
     checkedStatus.value[combinationActivity.id] = true
@@ -309,13 +320,15 @@ const handleCheckOne = (checked: boolean, combinationActivity: CombinationActivi
 }
 
 // 查找活动在已选中活动列表中的索引
-const findCheckedIndex = (activityVO: CombinationActivityVO) => checkedActivitys.value.findIndex((item) => item.id === activityVO.id)
+const findCheckedIndex = (activityVO: CombinationActivityVO) =>
+  checkedActivitys.value.findIndex((item) => item.id === activityVO.id)
 
 // 计算全选框状态
 const calculateIsCheckAll = () => {
   isCheckAll.value = list.value.every((activityVO) => checkedStatus.value[activityVO.id])
   // 计算中间状态：不是全部选中 && 任意一个选中
-  isIndeterminate.value = !isCheckAll.value && list.value.some((activityVO) => checkedStatus.value[activityVO.id])
+  isIndeterminate.value =
+    !isCheckAll.value && list.value.some((activityVO) => checkedStatus.value[activityVO.id])
 }
 
 // 分类列表

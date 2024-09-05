@@ -153,7 +153,11 @@
           >
             <!--这里的 key 使用时间戳是为了保证每次点击组件都进行刷新-->
             <component
-              :key="selectedComponent?.uid || selectedComponent?.id + new Date().getTime() || new Date().getTime().toString()"
+              :key="
+                selectedComponent?.uid ||
+                selectedComponent?.id + new Date().getTime() ||
+                new Date().getTime().toString()
+              "
               :is="selectedComponent?.id + 'Property'"
               v-model="selectedComponent.property"
             />
