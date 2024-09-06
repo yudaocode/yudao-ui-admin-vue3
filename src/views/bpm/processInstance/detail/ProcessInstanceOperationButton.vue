@@ -1,132 +1,125 @@
 <template>
-  <el-affix target=".formCol" position="bottom" class="h-50px" v-if="runningTask?.id">
-    <el-divider class="!mb-8px !mt-0" />
-    <div
-      class="pl-50px text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
-    >
-      <el-popover :visible="passVisible" placement="top-end" :width="500" trigger="click">
-        <template #reference>
-          <el-button plain type="success" @click="openPopover('1')">
-            <Icon icon="ep:select" />&nbsp; 通过
-          </el-button>
-        </template>
-        <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
-          <el-form
-            label-position="top"
-            class="mb-auto"
-            ref="formRef"
-            :model="auditForm"
-            :rules="auditRule"
-            label-width="100px"
-          >
-            <el-form-item v-if="processInstance && processInstance.startUser" label="流程发起人">
-              {{ processInstance?.startUser.nickname }}
-              <el-tag size="small" type="info" class="ml-8px">
-                {{ processInstance?.startUser.deptName }}
-              </el-tag>
-            </el-form-item>
-            <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
-              <template #header>
-                <span class="el-icon-picture-outline">
-                  填写表单【{{ runningTask?.formName }}】
-                </span>
-              </template>
-              <form-create
-                v-model="approveForm.value"
-                v-model:api="approveFormFApi"
-                :option="approveForm.option"
-                :rule="approveForm.rule"
+  <div
+    class="h-50px position-fixed bottom-10 text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
+  >
+    <el-popover :visible="passVisible" placement="top-end" :width="500" trigger="click">
+      <template #reference>
+        <el-button plain type="success" @click="openPopover('1')">
+          <Icon icon="ep:select" />&nbsp; 通过
+        </el-button>
+      </template>
+      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+        <el-form
+          label-position="top"
+          class="mb-auto"
+          ref="formRef"
+          :model="auditForm"
+          :rules="auditRule"
+          label-width="100px"
+        >
+          <el-form-item v-if="processInstance && processInstance.startUser" label="流程发起人">
+            {{ processInstance?.startUser.nickname }}
+            <el-tag size="small" type="info" class="ml-8px">
+              {{ processInstance?.startUser.deptName }}
+            </el-tag>
+          </el-form-item>
+          <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
+            <template #header>
+              <span class="el-icon-picture-outline"> 填写表单【{{ runningTask?.formName }}】 </span>
+            </template>
+            <form-create
+              v-model="approveForm.value"
+              v-model:api="approveFormFApi"
+              :option="approveForm.option"
+              :rule="approveForm.rule"
+            />
+          </el-card>
+          <el-form-item label="审批建议" prop="reason">
+            <el-input v-model="auditForm.reason" placeholder="请输入审批建议" type="textarea" />
+          </el-form-item>
+          <el-form-item label="抄送人" prop="copyUserIds">
+            <el-select v-model="auditForm.copyUserIds" multiple placeholder="请选择抄送人">
+              <el-option
+                v-for="itemx in userOptions"
+                :key="itemx.id"
+                :label="itemx.nickname"
+                :value="itemx.id"
               />
-            </el-card>
-            <el-form-item label="审批建议" prop="reason">
-              <el-input v-model="auditForm.reason" placeholder="请输入审批建议" type="textarea" />
-            </el-form-item>
-            <el-form-item label="抄送人" prop="copyUserIds">
-              <el-select v-model="auditForm.copyUserIds" multiple placeholder="请选择抄送人">
-                <el-option
-                  v-for="itemx in userOptions"
-                  :key="itemx.id"
-                  :label="itemx.nickname"
-                  :value="itemx.id"
-                />
-              </el-select>
-            </el-form-item>
+            </el-select>
+          </el-form-item>
 
-            <el-form-item>
-              <el-button :disabled="formLoading" type="success" @click="handleAudit(true)">
-                通过
-              </el-button>
-              <el-button @click="passVisible = false"> 取消 </el-button>
-            </el-form-item>
-          </el-form>
-        </div>
-      </el-popover>
-      <el-popover :visible="rejectVisible" placement="top-end" :width="500" trigger="click">
-        <template #reference>
-          <el-button class="mr-20px" plain type="danger" @click="openPopover('2')">
-            <Icon icon="ep:close" />&nbsp; 拒绝
-          </el-button>
-        </template>
-        <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
-          <el-form
-            label-position="top"
-            class="mb-auto"
-            ref="formRef"
-            :model="auditForm"
-            :rules="auditRule"
-            label-width="100px"
-          >
-            <el-form-item v-if="processInstance && processInstance.startUser" label="流程发起人">
-              {{ processInstance?.startUser.nickname }}
-              <el-tag size="small" type="info" class="ml-8px">
-                {{ processInstance?.startUser.deptName }}
-              </el-tag>
-            </el-form-item>
-            <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
-              <template #header>
-                <span class="el-icon-picture-outline">
-                  填写表单【{{ runningTask?.formName }}】
-                </span>
-              </template>
-              <form-create
-                v-model="approveForm.value"
-                v-model:api="approveFormFApi"
-                :option="approveForm.option"
-                :rule="approveForm.rule"
-              />
-            </el-card>
-            <el-form-item label="审批建议" prop="reason">
-              <el-input v-model="auditForm.reason" placeholder="请输入审批建议" type="textarea" />
-            </el-form-item>
-            <el-form-item label="抄送人" prop="copyUserIds">
-              <el-select v-model="auditForm.copyUserIds" multiple placeholder="请选择抄送人">
-                <el-option
-                  v-for="itemx in userOptions"
-                  :key="itemx.id"
-                  :label="itemx.nickname"
-                  :value="itemx.id"
-                />
-              </el-select>
-            </el-form-item>
-
-            <el-form-item>
-              <el-button :disabled="formLoading" type="danger" @click="handleAudit(false)">
-                拒绝
-              </el-button>
-              <el-button @click="rejectVisible = false"> 取消 </el-button>
-            </el-form-item>
-          </el-form>
-        </div>
-      </el-popover>
-      <div @click="handleSend"> <Icon :size="14" icon="svg-icon:send" />&nbsp;抄送 </div>
-      <div @click="openTaskUpdateAssigneeForm">
-        <Icon :size="14" icon="fa:share-square-o" />&nbsp;转交
+          <el-form-item>
+            <el-button :disabled="formLoading" type="success" @click="handleAudit(true)">
+              通过
+            </el-button>
+            <el-button @click="passVisible = false"> 取消 </el-button>
+          </el-form-item>
+        </el-form>
       </div>
-      <div @click="handleDelegate"> <Icon :size="14" icon="ep:position" />&nbsp;委派 </div>
-      <div @click="handleSign"> <Icon :size="14" icon="ep:plus" />&nbsp;加签 </div>
-      <div @click="handleBack"> <Icon :size="14" icon="fa:mail-reply" />&nbsp;退回 </div>
+    </el-popover>
+    <el-popover :visible="rejectVisible" placement="top-end" :width="500" trigger="click">
+      <template #reference>
+        <el-button class="mr-20px" plain type="danger" @click="openPopover('2')">
+          <Icon icon="ep:close" />&nbsp; 拒绝
+        </el-button>
+      </template>
+      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+        <el-form
+          label-position="top"
+          class="mb-auto"
+          ref="formRef"
+          :model="auditForm"
+          :rules="auditRule"
+          label-width="100px"
+        >
+          <el-form-item v-if="processInstance && processInstance.startUser" label="流程发起人">
+            {{ processInstance?.startUser.nickname }}
+            <el-tag size="small" type="info" class="ml-8px">
+              {{ processInstance?.startUser.deptName }}
+            </el-tag>
+          </el-form-item>
+          <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
+            <template #header>
+              <span class="el-icon-picture-outline"> 填写表单【{{ runningTask?.formName }}】 </span>
+            </template>
+            <form-create
+              v-model="approveForm.value"
+              v-model:api="approveFormFApi"
+              :option="approveForm.option"
+              :rule="approveForm.rule"
+            />
+          </el-card>
+          <el-form-item label="审批建议" prop="reason">
+            <el-input v-model="auditForm.reason" placeholder="请输入审批建议" type="textarea" />
+          </el-form-item>
+          <el-form-item label="抄送人" prop="copyUserIds">
+            <el-select v-model="auditForm.copyUserIds" multiple placeholder="请选择抄送人">
+              <el-option
+                v-for="itemx in userOptions"
+                :key="itemx.id"
+                :label="itemx.nickname"
+                :value="itemx.id"
+              />
+            </el-select>
+          </el-form-item>
+
+          <el-form-item>
+            <el-button :disabled="formLoading" type="danger" @click="handleAudit(false)">
+              拒绝
+            </el-button>
+            <el-button @click="rejectVisible = false"> 取消 </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-popover>
+    <div @click="handleSend"> <Icon :size="14" icon="svg-icon:send" />&nbsp;抄送 </div>
+    <div @click="openTaskUpdateAssigneeForm">
+      <Icon :size="14" icon="fa:share-square-o" />&nbsp;转交
     </div>
-  </el-affix>
+    <div @click="handleDelegate"> <Icon :size="14" icon="ep:position" />&nbsp;委派 </div>
+    <div @click="handleSign"> <Icon :size="14" icon="ep:plus" />&nbsp;加签 </div>
+    <div @click="handleBack"> <Icon :size="14" icon="fa:mail-reply" />&nbsp;退回 </div>
+  </div>
   <!-- 弹窗：转派审批人 -->
   <TaskTransferForm ref="taskTransferFormRef" @success="getDetail" />
   <!-- 弹窗：回退节点 -->

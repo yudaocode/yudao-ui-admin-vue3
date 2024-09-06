@@ -46,61 +46,18 @@
                 <BusinessFormComponent :id="processInstance.businessKey" />
               </div>
             </div>
+
             <!-- 操作栏按钮 -->
-            <!-- TODO @GoldenZqqq：ProcessInstanceOperationButton，操作按钮。不叫 Container 会好点点，和后端也更统一 -->
-            <ProcessInstanceBtnConatiner
-              ref="processInstanceBtnRef"
+            <ProcessInstanceOperationButton
+              ref="operationButtonRef"
               :processInstance="processInstance"
               :userOptions="userOptions"
               @success="getDetail"
             />
           </el-col>
           <el-col :span="6">
-            <!-- TODO @GoldenZqqq：后续这个，也拆个小组件出来 -->
-            <el-timeline class="pt-20px">
-              <el-timeline-item type="primary" size="large">
-                <div class="flex flex-col items-start gap-2">
-                  <div class="font-bold"> 发起人：{{ processInstance?.startUser?.nickname }}</div>
-                  <el-tag type="success">发起</el-tag>
-                  <div class="text-#a5a5a5 text-12px">
-                    发起时间：{{ formatDate(processInstance.startTime) }}
-                  </div>
-                </div>
-              </el-timeline-item>
-              <el-timeline-item
-                v-for="(activity, index) in tasks"
-                :key="index"
-                type="primary"
-                size="large"
-              >
-                <div class="flex flex-col items-start gap-2">
-                  <div class="font-bold"> 审批人：{{ activity.assigneeUser?.nickname }}</div>
-                  <dict-tag
-                    :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS"
-                    :value="activity.status"
-                  />
-                  <!-- TODO：暂无该字段 -->
-                  <div v-if="activity.receiveTime" class="text-#a5a5a5 text-12px">
-                    接收时间：{{ formatDate(activity.receiveTime) }}
-                  </div>
-                  <div v-if="activity.createTime" class="text-#a5a5a5 text-12px">
-                    审批时间：{{ formatDate(activity.createTime) }}
-                  </div>
-                  <div v-if="activity.opinion" class="text-#a5a5a5 text-12px w-100%">
-                    <div class="mb-5px">审批意见：</div>
-                    <div
-                      class="w-100% border-1px border-#a5a5a5 border-dashed rounded py-5px px-15px text-#2d2d2d"
-                    >
-                      {{ activity.opinion }}
-                    </div>
-                  </div>
-                </div>
-                <!-- 该节点用户的头像 -->
-                <!-- <template #dot>
-                  <img :src="activity?.avatar" alt="" />
-                </template> -->
-              </el-timeline-item>
-            </el-timeline>
+            <!-- 审批记录时间线 -->
+            <ProcessInstanceTimeline :process-instance="processInstance" :tasks="tasks" />
           </el-col>
         </el-row>
       </el-tab-pane>
@@ -138,6 +95,8 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as TaskApi from '@/api/bpm/task'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
+import ProcessInstanceOperationButton from './ProcessInstanceOperationButton.vue'
+import ProcessInstanceTimeline from './ProcessInstanceTimeline.vue'
 import { registerComponent } from '@/utils/routerHelper'
 import * as UserApi from '@/api/system/user'
 import audit1 from '@/assets/svgs/bpm/audit1.svg'
@@ -151,7 +110,7 @@ const message = useMessage() // 消息弹窗
 const id = query.id as unknown as string // 流程实例的编号
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
-const processInstanceBtnRef = ref()
+const operationButtonRef = ref()
 const bpmnXml = ref('') // BPMN XML
 const tasksLoad = ref(true) // 任务的加载中
 const tasks = ref<any[]>([]) // 任务列表
@@ -244,7 +203,7 @@ const getTaskList = async () => {
     })
 
     // 获得需要自己审批的任务
-    processInstanceBtnRef.value.loadRunningTask(tasks.value)
+    operationButtonRef.value?.loadRunningTask(tasks.value)
   } finally {
     tasksLoad.value = false
   }
