@@ -17,6 +17,9 @@ export interface CombinationActivityVO {
   status?: number
   limitDuration?: number
   products: CombinationProductVO[]
+  spuName?: string
+  picUrl?: string
+  marketPrice?: number
 }
 
 // 拼团活动所需属性
@@ -43,6 +46,11 @@ export const getCombinationActivityPage = async (params) => {
 // 查询拼团活动详情
 export const getCombinationActivity = async (id: number) => {
   return await request.get({ url: '/promotion/combination-activity/get?id=' + id })
+}
+
+// 查询拼团活动详情列表
+export const getCombinationActivityDetailList = (ids: number[]) => {
+  return request.get({ url: `/promotion/combination-activity/list-by-ids?ids=${ids}` })
 }
 
 // 新增拼团活动
