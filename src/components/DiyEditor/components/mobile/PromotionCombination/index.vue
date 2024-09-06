@@ -152,13 +152,12 @@ watch(
 
         // 更新 SPU 的最低价格
         combinationActivityList.value.forEach((activity) => {
-          activity.products.forEach((product) => {
-            const spu = spuList.value.find((spu) => spu.id === product.spuId)
-            if (spu) {
-              // 哪个最便宜就赋值哪个
-              spu.price = Math.min(product.combinationPrice || Infinity, spu.price || Infinity)
-            }
-          })
+          // 匹配spuId
+          const spu = spuList.value.find((spu) => spu.id === activity.spuId)
+          if (spu) {
+            // 赋值活动价格，哪个最便宜就赋值哪个
+            spu.price = Math.min(activity.combinationPrice || Infinity, spu.price || Infinity)
+          }
         })
       }
     } catch (error) {

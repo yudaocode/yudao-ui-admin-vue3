@@ -16,6 +16,7 @@ export interface CombinationActivityVO {
   virtualGroup?: number
   status?: number
   limitDuration?: number
+  combinationPrice?: number
   products: CombinationProductVO[]
 }
 
