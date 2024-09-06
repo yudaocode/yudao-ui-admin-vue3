@@ -151,13 +151,8 @@
             class="m-[calc(0px-var(--el-card-padding))]"
             view-class="p-[var(--el-card-padding)] p-b-[calc(var(--el-card-padding)+var(--el-card-padding))] property"
           >
-            <!--这里的 key 使用时间戳是为了保证每次点击组件都进行刷新-->
             <component
-              :key="
-                selectedComponent?.uid ||
-                selectedComponent?.id + new Date().getTime() ||
-                new Date().getTime().toString()
-              "
+              :key="selectedComponent?.uid || selectedComponent?.id"
               :is="selectedComponent?.id + 'Property'"
               v-model="selectedComponent.property"
             />

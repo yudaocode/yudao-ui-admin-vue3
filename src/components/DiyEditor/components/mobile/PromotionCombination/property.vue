@@ -158,7 +158,6 @@ onMounted(async () => {
     status: CommonStatusEnum.ENABLE
   })
   activityList.value = list
-  console.log('formDa', props)
 })
 </script>
 

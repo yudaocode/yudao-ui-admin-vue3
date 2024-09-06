@@ -136,30 +136,20 @@ watch(
       // 新添加的拼团组件，是没有活动ID的
       const activityIds = props.property.activityIds
       // 检查活动ID的有效性
-      if (
-        Array.isArray(activityIds) &&
-        activityIds.length > 0 &&
-        activityIds.every((item) => item != null)
-      ) {
+      if (Array.isArray(activityIds) && activityIds.length > 0) {
         // 获取拼团活动详情列表
         combinationActivityList.value =
-          await CombinationActivityApi.getCombinationActivityDetailList(activityIds)
+          await CombinationActivityApi.getCombinationActivityListByIds(activityIds)
 
-        // 清空之前的数据，防止有重复
-        spuIdList.value = []
+        // 获取拼团活动的 SPU 详情列表
         spuList.value = []
-
-        // 生成有效的 spuId 列表
         spuIdList.value = combinationActivityList.value
           .map((activity) => activity.spuId)
           .filter((spuId): spuId is number => typeof spuId === 'number')
-
-        // 如果存在有效的 spuId，调用 API 获取详细信息
         if (spuIdList.value.length > 0) {
           spuList.value = await ProductSpuApi.getSpuDetailList(spuIdList.value)
-        } else {
-          console.warn('没有用于获取详细信息的有效 spuId。')
         }
+
         // 更新 SPU 的最低价格
         combinationActivityList.value.forEach((activity) => {
           activity.products.forEach((product) => {

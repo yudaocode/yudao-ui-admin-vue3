@@ -81,7 +81,7 @@ watch(
       Activitys.value.length === 0 ||
       Activitys.value.some((combinationActivity) => !ids.includes(combinationActivity.id!))
     ) {
-      Activitys.value = await CombinationActivityApi.getCombinationActivityDetailList(ids)
+      Activitys.value = await CombinationActivityApi.getCombinationActivityListByIds(ids)
     }
   },
   { immediate: true }
