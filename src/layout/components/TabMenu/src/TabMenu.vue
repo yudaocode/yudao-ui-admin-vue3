@@ -139,7 +139,7 @@ export default defineComponent({
         id={`${variables.namespace}-menu`}
         class={[
           prefixCls,
-          'relative bg-[var(--left-menu-bg-color)] top-1px layout-border__right',
+          'relative bg-[var(--left-menu-bg-color)] layout-border__right',
           {
             'w-[var(--tab-menu-max-width)]': !unref(collapse),
             'w-[var(--tab-menu-min-width)]': unref(collapse)
@@ -147,7 +147,7 @@ export default defineComponent({
         ]}
         onMouseleave={mouseleave}
       >
-        <ElScrollbar class="!h-[calc(100%-var(--tab-menu-collapse-height)-1px)]">
+        <ElScrollbar class="!h-[calc(100%-var(--tab-menu-collapse-height))]">
           <div>
             {() => {
               return unref(tabRouters).map((v) => {
@@ -199,7 +199,7 @@ export default defineComponent({
             {
               '!left-[var(--tab-menu-min-width)]': unref(collapse),
               '!left-[var(--tab-menu-max-width)]': !unref(collapse),
-              '!w-[calc(var(--left-menu-max-width)+1px)]': unref(showMenu) || unref(fixedMenu),
+              '!w-[var(--left-menu-max-width)]': unref(showMenu) || unref(fixedMenu),
               '!w-0': !unref(showMenu) && !unref(fixedMenu)
             }
           ]}

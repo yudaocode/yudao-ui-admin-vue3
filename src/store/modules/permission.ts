@@ -40,10 +40,12 @@ export const usePermissionStore = defineStore('permission', {
         }
         const routerMap: AppRouteRecordRaw[] = generateRoute(res)
         // 动态路由，404一定要放到最后面
+        // preschooler：vue-router@4以后已支持静态404路由，此处可不再追加
         this.addRouters = routerMap.concat([
           {
             path: '/:path(.*)*',
-            redirect: '/404',
+            // redirect: '/404',
+            component: () => import('@/views/Error/404.vue'),
             name: '404Page',
             meta: {
               hidden: true,

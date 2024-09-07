@@ -3,7 +3,7 @@
     v-show="getShow"
     :rules="rules"
     :schema="schema"
-    class="dark:(border-1 border-[var(--el-border-color)] border-solid)"
+    class="w-[100%] dark:(border-1 border-[var(--el-border-color)] border-solid)"
     hide-required-asterisk
     label-position="top"
     size="large"

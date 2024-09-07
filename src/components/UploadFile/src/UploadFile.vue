@@ -1,5 +1,5 @@
 <template>
-  <div class="upload-file">
+  <div v-if="!disabled" class="upload-file">
     <el-upload
       ref="uploadRef"
       v-model:file-list="fileList"
@@ -20,11 +20,11 @@
       class="upload-file-uploader"
       name="file"
     >
-      <el-button v-if="!disabled" type="primary">
+      <el-button type="primary">
         <Icon icon="ep:upload-filled" />
         选取文件
       </el-button>
-      <template v-if="isShowTip && !disabled" #tip>
+      <template v-if="isShowTip" #tip>
         <div style="font-size: 8px">
           大小不超过 <b style="color: #f56c6c">{{ fileSize }}MB</b>
         </div>
@@ -32,7 +32,6 @@
           格式为 <b style="color: #f56c6c">{{ fileType.join('/') }}</b> 的文件
         </div>
       </template>
-      <!-- TODO @puhui999：1）表单展示的时候，位置会偏掉，已发微信；2）disable 的时候，应该把【删除】按钮也隐藏掉？ -->
       <template #file="row">
         <div class="flex items-center">
           <span>{{ row.file.name }}</span>
@@ -53,6 +52,18 @@
         </div>
       </template>
     </el-upload>
+  </div>
+
+  <!-- 上传操作禁用时 -->
+  <div v-if="disabled" class="upload-file">
+    <div v-for="(file, index) in fileList" :key="index" class="flex items-center file-list-item">
+      <span>{{ file.name }}</span>
+      <div class="ml-10px">
+        <el-link :href="file.url" :underline="false" download target="_blank" type="primary">
+          下载
+        </el-link>
+      </div>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
@@ -210,5 +221,10 @@ const emitUpdateModelValue = () => {
 
 :deep(.ele-upload-list__item-content-action .el-link) {
   margin-right: 10px;
+}
+
+.file-list-item {
+  border: 1px dashed var(--el-border-color-darker);
+  border-radius: 8px;
 }
 </style>

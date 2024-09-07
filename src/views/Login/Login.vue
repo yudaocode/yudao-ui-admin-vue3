@@ -5,7 +5,7 @@
   >
     <div class="relative mx-auto h-full flex">
       <div
-        :class="`${prefixCls}__left flex-1 bg-gray-500 bg-opacity-20 relative p-30px lt-xl:hidden`"
+        :class="`${prefixCls}__left flex-1 bg-gray-500 bg-opacity-20 relative p-30px lt-xl:hidden overflow-x-hidden overflow-y-auto`"
       >
         <!-- 左上角的 logo + 系统标题 -->
         <div class="relative flex items-center text-white">
@@ -27,24 +27,27 @@
           </TransitionGroup>
         </div>
       </div>
-      <div class="relative flex-1 p-30px dark:bg-[var(--login-bg-color)] lt-sm:p-10px">
+      <div
+        class="relative flex-1 p-30px dark:bg-[var(--login-bg-color)] lt-sm:p-10px overflow-x-hidden overflow-y-auto"
+      >
         <!-- 右上角的主题、语言选择 -->
         <div
-          class="flex items-center justify-between text-white at-2xl:justify-end at-xl:justify-end"
+          class="flex items-center justify-between at-2xl:justify-end at-xl:justify-end"
+          style="color: var(--el-text-color-primary);"
         >
           <div class="flex items-center at-2xl:hidden at-xl:hidden">
             <img alt="" class="mr-10px h-48px w-48px" src="@/assets/imgs/logo.png" />
-            <span class="text-20px font-bold">{{ underlineToHump(appStore.getTitle) }}</span>
+            <span class="text-20px font-bold" >{{ underlineToHump(appStore.getTitle) }}</span>
           </div>
-          <div class="flex items-center justify-end space-x-10px">
+          <div class="flex items-center justify-end space-x-10px h-48px">
             <ThemeSwitch />
-            <LocaleDropdown class="dark:text-white lt-xl:text-white" />
+            <LocaleDropdown />
           </div>
         </div>
         <!-- 右边的登录界面 -->
         <Transition appear enter-active-class="animate__animated animate__bounceInRight">
           <div
-            class="m-auto h-full w-[100%] flex items-center at-2xl:max-w-500px at-lg:max-w-500px at-md:max-w-500px at-xl:max-w-500px"
+            class="m-auto h-[calc(100%-60px)] w-[100%] flex items-center at-2xl:max-w-500px at-lg:max-w-500px at-md:max-w-500px at-xl:max-w-500px"
           >
             <!-- 账号登录 -->
             <LoginForm class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)" />
@@ -99,6 +102,18 @@ $prefix-cls: #{$namespace}-login;
       background-repeat: no-repeat;
       content: '';
     }
+  }
+}
+</style>
+
+<style lang="scss">
+.dark .login-form {
+  .el-divider__text {
+    background-color: var(--login-bg-color);
+  }
+
+  .el-card {
+    background-color: var(--login-bg-color);
   }
 }
 </style>

@@ -15,6 +15,7 @@
           placeholder="请输入文件路径"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="文件类型" prop="type" width="80">
@@ -23,6 +24,7 @@
           placeholder="请输入文件类型"
           clearable
           @keyup.enter="handleQuery"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item label="创建时间" prop="createTime">
@@ -33,6 +35,7 @@
           start-placeholder="开始日期"
           end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          class="!w-240px"
         />
       </el-form-item>
       <el-form-item>

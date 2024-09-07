@@ -11,19 +11,34 @@
       label-width="68px"
     >
       <el-form-item label="回复状态" prop="replyStatus">
-        <el-select v-model="queryParams.replyStatus">
+        <el-select v-model="queryParams.replyStatus" class="!w-240px">
           <el-option label="已回复" :value="true" />
           <el-option label="未回复" :value="false" />
         </el-select>
       </el-form-item>
       <el-form-item label="商品名称" prop="spuName">
-        <el-input v-model="queryParams.spuName" placeholder="请输入商品名称" />
+        <el-input
+          v-model="queryParams.spuName"
+          placeholder="请输入商品名称"
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="用户名称" prop="userNickname">
-        <el-input v-model="queryParams.userNickname" placeholder="请输入用户名称" />
+        <el-input
+          v-model="queryParams.userNickname"
+          placeholder="请输入用户名称"
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="订单编号" prop="orderId">
-        <el-input v-model="queryParams.orderId" placeholder="请输入订单编号" />
+        <el-input
+          v-model="queryParams.orderId"
+          placeholder="请输入订单编号"
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="评论时间" prop="createTime">
         <el-date-picker

@@ -7,7 +7,7 @@
           <template #header>
             <div class="card-header">
               <CardTitle title="基本信息" />
-              <el-button type="primary" size="small" text @click="openForm('update')">
+              <el-button size="small" text type="primary" @click="openForm('update')">
                 编辑
               </el-button>
             </div>
@@ -16,16 +16,16 @@
       </el-col>
       <!-- 右上角：账户信息 -->
       <el-col :span="10" class="detail-info-item">
-        <el-card shadow="never" class="h-full">
+        <el-card class="h-full" shadow="never">
           <template #header>
             <CardTitle title="账户信息" />
           </template>
-          <UserAccountInfo :user="user" />
+          <UserAccountInfo :user="user" :wallet="wallet" />
         </el-card>
       </el-col>
       <!-- 下边：账户明细 -->
       <!-- TODO 芋艿：【订单管理】【售后管理】【收藏记录】-->
-      <el-card header="账户明细" style="width: 100%; margin-top: 20px" shadow="never">
+      <el-card header="账户明细" shadow="never" style="width: 100%; margin-top: 20px">
         <template #header>
           <CardTitle title="账户明细" />
         </template>
@@ -39,15 +39,18 @@
           <el-tab-pane label="成长值" lazy>
             <UserExperienceRecordList :user-id="id" />
           </el-tab-pane>
-          <!-- TODO @jason：增加一个余额变化； -->
-          <el-tab-pane label="余额" lazy>余额(WIP)</el-tab-pane>
+          <el-tab-pane label="余额" lazy>
+            <UserBalanceList :wallet-id="wallet.id" />
+          </el-tab-pane>
           <el-tab-pane label="收货地址" lazy>
             <UserAddressList :user-id="id" />
           </el-tab-pane>
           <el-tab-pane label="订单管理" lazy>
             <UserOrderList :user-id="id" />
           </el-tab-pane>
-          <el-tab-pane label="售后管理" lazy>售后管理(WIP)</el-tab-pane>
+          <el-tab-pane label="售后管理" lazy>
+            <UserAfterSaleList :user-id="id" />
+          </el-tab-pane>
           <el-tab-pane label="收藏记录" lazy>
             <UserFavoriteList :user-id="id" />
           </el-tab-pane>
@@ -65,7 +68,8 @@
   <!-- 表单弹窗：添加/修改 -->
   <UserForm ref="formRef" @success="getUserData(id)" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
+import * as WalletApi from '@/api/pay/wallet/balance'
 import * as UserApi from '@/api/member/user'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import UserForm from '@/views/member/user/UserForm.vue'
@@ -79,6 +83,8 @@ import UserOrderList from './UserOrderList.vue'
 import UserPointList from './UserPointList.vue'
 import UserSignList from './UserSignList.vue'
 import UserFavoriteList from './UserFavoriteList.vue'
+import UserAfterSaleList from './UserAftersaleList.vue'
+import UserBalanceList from './UserBalanceList.vue'
 import { CardTitle } from '@/components/Card/index'
 import { ElMessage } from 'element-plus'
 
@@ -108,6 +114,24 @@ const { currentRoute } = useRouter() // 路由
 const { delView } = useTagsViewStore() // 视图操作
 const route = useRoute()
 const id = Number(route.params.id)
+/* 用户钱包相关信息 */
+const WALLET_INIT_DATA = {
+  balance: 0,
+  totalExpense: 0,
+  totalRecharge: 0
+} as WalletApi.WalletVO // 钱包初始化数据
+const wallet = ref<WalletApi.WalletVO>(WALLET_INIT_DATA) // 钱包信息
+
+/** 查询用户钱包信息 */
+const getUserWallet = async () => {
+  if (!id) {
+    wallet.value = WALLET_INIT_DATA
+    return
+  }
+  const params = { userId: id }
+  wallet.value = (await WalletApi.getWallet(params)) || WALLET_INIT_DATA
+}
+
 onMounted(() => {
   if (!id) {
     ElMessage.warning('参数错误，会员编号不能为空！')
@@ -115,9 +139,10 @@ onMounted(() => {
     return
   }
   getUserData(id)
+  getUserWallet()
 })
 </script>
-<style scoped lang="css">
+<style lang="css" scoped>
 .detail-info-item:first-child {
   padding-left: 0 !important;
 }

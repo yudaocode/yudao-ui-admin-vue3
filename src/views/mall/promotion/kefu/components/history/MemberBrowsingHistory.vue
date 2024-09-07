@@ -7,7 +7,7 @@
       <el-tab-pane label="订单列表" name="b" />
     </el-tabs>
     <div>
-      <el-scrollbar ref="scrollbarRef" always height="calc(100vh - 400px)" @scroll="handleScroll">
+      <el-scrollbar ref="scrollbarRef" always height="calc(115vh - 400px)" @scroll="handleScroll">
         <!-- 最近浏览 -->
         <ProductBrowsingHistory v-if="activeName === 'a'" ref="productBrowsingHistoryRef" />
         <!-- 订单列表 -->
@@ -25,7 +25,7 @@ import OrderBrowsingHistory from './OrderBrowsingHistory.vue'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { isEmpty } from '@/utils/is'
 import { debounce } from 'lodash-es'
-import { ElScrollbar as ElScrollbarType } from 'element-plus/es/components/scrollbar'
+import { ElScrollbar as ElScrollbarType } from 'element-plus/es/components/scrollbar/index'
 
 defineOptions({ name: 'MemberBrowsingHistory' })
 

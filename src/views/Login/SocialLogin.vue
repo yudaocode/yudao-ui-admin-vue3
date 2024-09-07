@@ -1,11 +1,11 @@
 <template>
   <div
     :class="prefixCls"
-    class="relative h-[100%] lt-xl:bg-[var(--login-bg-color)] lt-md:px-10px lt-sm:px-10px lt-xl:px-10px"
+    class="relative h-[100%] lt-md:px-10px lt-sm:px-10px lt-xl:px-10px lt-xl:px-10px"
   >
     <div class="relative mx-auto h-full flex">
       <div
-        :class="`${prefixCls}__left flex-1 bg-gray-500 bg-opacity-20 relative p-30px lt-xl:hidden`"
+        :class="`${prefixCls}__left flex-1 bg-gray-500 bg-opacity-20 relative p-30px lt-xl:hidden overflow-x-hidden overflow-y-auto`"
       >
         <!-- 左上角的 logo + 系统标题 -->
         <div class="relative flex items-center text-white">
@@ -27,7 +27,9 @@
           </TransitionGroup>
         </div>
       </div>
-      <div class="relative flex-1 p-30px dark:bg-[var(--login-bg-color)] lt-sm:p-10px">
+      <div
+        class="relative flex-1 p-30px dark:bg-[var(--login-bg-color)] lt-sm:p-10px overflow-x-hidden overflow-y-auto"
+      >
         <!-- 右上角的主题、语言选择 -->
         <div
           class="flex items-center justify-between text-white at-2xl:justify-end at-xl:justify-end"
@@ -36,7 +38,7 @@
             <img alt="" class="mr-10px h-48px w-48px" src="@/assets/imgs/logo.png" />
             <span class="text-20px font-bold">{{ underlineToHump(appStore.getTitle) }}</span>
           </div>
-          <div class="flex items-center justify-end space-x-10px">
+          <div class="flex items-center justify-end space-x-10px h-48px">
             <ThemeSwitch />
             <LocaleDropdown class="dark:text-white lt-xl:text-white" />
           </div>
@@ -44,7 +46,7 @@
         <!-- 右边的登录界面 -->
         <Transition appear enter-active-class="animate__animated animate__bounceInRight">
           <div
-            class="m-auto h-full w-[100%] flex items-center at-2xl:max-w-500px at-lg:max-w-500px at-md:max-w-500px at-xl:max-w-500px"
+            class="m-auto h-[calc(100%-60px)] w-[100%] flex items-center at-2xl:max-w-500px at-lg:max-w-500px at-md:max-w-500px at-xl:max-w-500px"
           >
             <!-- 账号登录 -->
             <el-form
@@ -112,9 +114,9 @@
                         </el-checkbox>
                       </el-col>
                       <el-col :offset="6" :span="12">
-                        <el-link style="float: right" type="primary">{{
-                          t('login.forgetPassword')
-                        }}</el-link>
+                        <el-link style="float: right" type="primary"
+                          >{{ t('login.forgetPassword') }}
+                        </el-link>
                       </el-col>
                     </el-row>
                   </el-form-item>
@@ -274,10 +276,11 @@ const handleLogin = async (params) => {
     const code = route?.query?.code as string
     const state = route?.query?.state as string
 
+    const loginDataLoginForm = { ...loginData.loginForm }
     const res = await LoginApi.login({
       // 账号密码登录
-      username: loginData.loginForm.username,
-      password: loginData.loginForm.password,
+      username: loginDataLoginForm.username,
+      password: loginDataLoginForm.password,
       captchaVerification: params.captchaVerification,
       // 社交登录
       socialCode: code,
@@ -292,8 +295,8 @@ const handleLogin = async (params) => {
       text: '正在加载系统中...',
       background: 'rgba(0, 0, 0, 0.7)'
     })
-    if (loginData.loginForm.rememberMe) {
-      authUtil.setLoginForm(loginData.loginForm)
+    if (loginDataLoginForm.rememberMe) {
+      authUtil.setLoginForm(loginDataLoginForm)
     } else {
       authUtil.removeLoginForm()
     }

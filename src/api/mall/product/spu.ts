@@ -50,6 +50,8 @@ export interface Spu {
   giveIntegral?: number // 赠送积分
   virtualSalesCount?: number // 虚拟销量
   price?: number // 商品价格
+  combinationPrice?: number // 商品拼团价格
+  seckillPrice?: number // 商品秒杀价格
   salesCount?: number // 商品销量
   marketPrice?: number // 市场价
   costPrice?: number // 成本价

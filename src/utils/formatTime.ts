@@ -56,11 +56,11 @@ export const defaultShortcuts = [
  * 时间日期转换
  * @param date 当前时间，new Date() 格式
  * @param format 需要转换的时间格式字符串
- * @description format 字符串随意，如 `YYYY-mm、YYYY-mm-dd`
- * @description format 季度："YYYY-mm-dd HH:MM:SS QQQQ"
- * @description format 星期："YYYY-mm-dd HH:MM:SS WWW"
- * @description format 几周："YYYY-mm-dd HH:MM:SS ZZZ"
- * @description format 季度 + 星期 + 几周："YYYY-mm-dd HH:MM:SS WWW QQQQ ZZZ"
+ * @description format 字符串随意，如 `YYYY-MM、YYYY-MM-DD`
+ * @description format 季度："YYYY-MM-DD HH:mm:ss QQQQ"
+ * @description format 星期："YYYY-MM-DD HH:mm:ss WWW"
+ * @description format 几周："YYYY-MM-DD HH:mm:ss ZZZ"
+ * @description format 季度 + 星期 + 几周："YYYY-MM-DD HH:mm:ss WWW QQQQ ZZZ"
  * @returns 返回拼接后的时间字符串
  */
 export function formatDate(date: Date, format?: string): string {
@@ -110,7 +110,7 @@ export function getWeek(dateTime: Date): number {
  * @description param 3天：   60 * 60* 24 * 1000 * 3
  * @returns 返回拼接后的时间字符串
  */
-export function formatPast(param: string | Date, format = 'YYYY-mm-dd HH:MM:SS'): string {
+export function formatPast(param: string | Date, format = 'YYYY-MM-DD HH:mm:ss'): string {
   // 传入格式处理、存储转换值
   let t: any, s: number
   // 获取js 时间戳

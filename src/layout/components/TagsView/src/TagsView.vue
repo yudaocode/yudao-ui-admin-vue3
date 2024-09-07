@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import { onMounted, watch, computed, unref, ref, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, nextTick, onMounted, ref, unref, watch } from 'vue'
 import type { RouteLocationNormalizedLoaded, RouterLinkProps } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { usePermissionStore } from '@/store/modules/permission'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useAppStore } from '@/store/modules/app'
@@ -32,6 +32,8 @@ const visitedViews = computed(() => tagsViewStore.getVisitedViews)
 const affixTagArr = ref<RouteLocationNormalizedLoaded[]>([])
 
 const appStore = useAppStore()
+
+const tagsViewImmerse = computed(() => appStore.getTagsViewImmerse)
 
 const tagsViewIcon = computed(() => appStore.getTagsViewIcon)
 
@@ -266,21 +268,33 @@ watch(
     class="relative w-full flex bg-[#fff] dark:bg-[var(--el-bg-color)]"
   >
     <span
-      :class="`${prefixCls}__tool ${prefixCls}__tool--first`"
+      :class="tagsViewImmerse ? '' : `${prefixCls}__tool ${prefixCls}__tool--first`"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       @click="move(-200)"
     >
       <Icon
-        icon="ep:d-arrow-left"
-        color="var(--el-text-color-placeholder)"
         :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
+        color="var(--el-text-color-placeholder)"
+        icon="ep:d-arrow-left"
       />
     </span>
     <div class="flex-1 overflow-hidden">
       <ElScrollbar ref="scrollbarRef" class="h-full" @scroll="scroll">
-        <div class="h-full flex">
+        <div class="h-[var(--tags-view-height)] flex">
           <ContextMenu
+            v-for="item in visitedViews"
+            :key="item.fullPath"
             :ref="itemRefs.set"
+            :class="[
+              `${prefixCls}__item`,
+              tagsViewImmerse ? `${prefixCls}__item--immerse` : '',
+              tagsViewIcon ? `${prefixCls}__item--icon` : '',
+              tagsViewImmerse && tagsViewIcon ? `${prefixCls}__item--immerse--icon` : '',
+              item?.meta?.affix ? `${prefixCls}__item--affix` : '',
+              {
+                'is-active': isActive(item)
+              }
+            ]"
             :schema="[
               {
                 icon: 'ep:refresh',
@@ -338,41 +352,33 @@ watch(
                 }
               }
             ]"
-            v-for="item in visitedViews"
-            :key="item.fullPath"
             :tag-item="item"
-            :class="[
-              `${prefixCls}__item`,
-              item?.meta?.affix ? `${prefixCls}__item--affix` : '',
-              {
-                'is-active': isActive(item)
-              }
-            ]"
             @visible-change="visibleChange"
           >
             <div>
-              <router-link :ref="tagLinksRefs.set" :to="{ ...item }" custom v-slot="{ navigate }">
+              <router-link :ref="tagLinksRefs.set" v-slot="{ navigate }" :to="{ ...item }" custom>
                 <div
+                  :class="`h-full flex items-center justify-center whitespace-nowrap pl-15px ${prefixCls}__item--label`"
                   @click="navigate"
-                  class="h-full flex items-center justify-center whitespace-nowrap pl-15px"
                 >
                   <Icon
                     v-if="
-                      item?.matched &&
-                      item?.matched[1] &&
-                      item?.matched[1]?.meta?.icon &&
-                      tagsViewIcon
+                      tagsViewIcon &&
+                      (item?.meta?.icon ||
+                        (item?.matched &&
+                          item.matched[0] &&
+                          item.matched[item.matched.length - 1].meta?.icon))
                     "
-                    :icon="item?.matched[1]?.meta?.icon"
+                    :icon="item?.meta?.icon || item.matched[item.matched.length - 1].meta.icon"
                     :size="12"
                     class="mr-5px"
                   />
                   {{ t(item?.meta?.title as string) }}
                   <Icon
                     :class="`${prefixCls}__item--close`"
+                    :size="12"
                     color="#333"
                     icon="ep:close"
-                    :size="12"
                     @click.prevent.stop="closeSelectedTag(item)"
                   />
                 </div>
@@ -383,29 +389,28 @@ watch(
       </ElScrollbar>
     </div>
     <span
-      :class="`${prefixCls}__tool`"
+      :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       @click="move(200)"
     >
       <Icon
-        icon="ep:d-arrow-right"
-        color="var(--el-text-color-placeholder)"
         :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
+        color="var(--el-text-color-placeholder)"
+        icon="ep:d-arrow-right"
       />
     </span>
     <span
-      :class="`${prefixCls}__tool`"
+      :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
       class="h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       @click="refreshSelectedTag(selectedTag)"
     >
       <Icon
-        icon="ep:refresh-right"
-        color="var(--el-text-color-placeholder)"
         :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
+        color="var(--el-text-color-placeholder)"
+        icon="ep:refresh-right"
       />
     </span>
     <ContextMenu
-      trigger="click"
       :schema="[
         {
           icon: 'ep:refresh',
@@ -457,15 +462,16 @@ watch(
           }
         }
       ]"
+      trigger="click"
     >
       <span
-        :class="`${prefixCls}__tool`"
+        :class="tagsViewImmerse ? '' : `${prefixCls}__tool`"
         class="block h-[var(--tags-view-height)] w-[var(--tags-view-height)] flex cursor-pointer items-center justify-center"
       >
         <Icon
-          icon="ep:menu"
-          color="var(--el-text-color-placeholder)"
           :hover-color="isDark ? '#fff' : 'var(--el-color-black)'"
+          color="var(--el-text-color-placeholder)"
+          icon="ep:menu"
         />
       </span>
     </ContextMenu>
@@ -485,10 +491,10 @@ $prefix-cls: #{$namespace}-tags-view;
 
     &::before {
       position: absolute;
-      top: 1px;
+      top: 0;
       left: 0;
       width: 100%;
-      height: calc(100% - 1px);
+      height: 100%;
       border-left: 1px solid var(--el-border-color);
       content: '';
     }
@@ -496,10 +502,10 @@ $prefix-cls: #{$namespace}-tags-view;
     &--first {
       &::before {
         position: absolute;
-        top: 1px;
+        top: 0;
         left: 0;
         width: 100%;
-        height: calc(100% - 1px);
+        height: 100%;
         border-right: 1px solid var(--el-border-color);
         border-left: none;
         content: '';
@@ -509,14 +515,15 @@ $prefix-cls: #{$namespace}-tags-view;
 
   &__item {
     position: relative;
-    top: 2px;
+    top: 3px;
     height: calc(100% - 6px);
-    padding-right: 25px;
+    padding-right: 15px;
     margin-left: 4px;
     font-size: 12px;
     cursor: pointer;
     border: 1px solid #d9d9d9;
     border-radius: 2px;
+    box-sizing: border-box;
 
     &--close {
       position: absolute;
@@ -525,11 +532,16 @@ $prefix-cls: #{$namespace}-tags-view;
       display: none;
       transform: translate(0, -50%);
     }
+
     &:not(.#{$prefix-cls}__item--affix):hover {
       .#{$prefix-cls}__item--close {
         display: block;
       }
     }
+  }
+
+  &__item--icon {
+    padding-right: 20px;
   }
 
   &__item:not(.is-active) {
@@ -542,9 +554,45 @@ $prefix-cls: #{$namespace}-tags-view;
     color: var(--el-color-white);
     background-color: var(--el-color-primary);
     border: 1px solid var(--el-color-primary);
+
     .#{$prefix-cls}__item--close {
       :deep(span) {
         color: var(--el-color-white) !important;
+      }
+    }
+  }
+
+  &__item--immerse {
+    top: 2px;
+    height: calc(100% - 3px);
+    padding-right: 35px;
+    margin: 0 -10px;
+    border: none !important;
+    -webkit-mask-box-image: url("data:image/svg+xml,%3Csvg width='68' height='34' viewBox='0 0 68 34' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='m27,0c-7.99582,0 -11.95105,0.00205 -12,12l0,6c0,8.284 -0.48549,16.49691 -8.76949,16.49691l54.37857,-0.11145c-8.284,0 -8.60908,-8.10146 -8.60908,-16.38546l0,-6c0.11145,-12.08445 -4.38441,-12 -12,-12l-13,0z' fill='%23409eff'/%3E%3C/svg%3E")
+      12 27 15;
+
+    .#{$prefix-cls}__item--label {
+      padding-left: 35px;
+    }
+
+    .#{$prefix-cls}__item--close {
+      right: 20px;
+    }
+  }
+
+  &__item--immerse--icon {
+    padding-right: 35px;
+  }
+
+  &__item--immerse:not(.is-active) {
+    &:hover {
+      color: var(--el-color-white);
+      background-color: var(--el-color-primary);
+
+      .#{$prefix-cls}__item--close {
+        :deep(span) {
+          color: var(--el-color-white) !important;
+        }
       }
     }
   }
@@ -574,10 +622,17 @@ $prefix-cls: #{$namespace}-tags-view;
       color: var(--el-color-white);
       background-color: var(--el-color-primary);
       border: 1px solid var(--el-color-primary);
+
       .#{$prefix-cls}__item--close {
         :deep(span) {
           color: var(--el-color-white) !important;
         }
+      }
+    }
+
+    &__item--immerse:not(.is-active) {
+      &:hover {
+        color: var(--el-color-white);
       }
     }
   }
