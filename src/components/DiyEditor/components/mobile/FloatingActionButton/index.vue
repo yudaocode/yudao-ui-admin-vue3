@@ -44,7 +44,7 @@ defineOptions({ name: 'FloatingActionButton' })
 defineProps<{ property: FloatingActionButtonProperty }>()
 
 // 是否展开
-const expanded = ref(true)
+const expanded = ref(false)
 // 处理展开/折叠
 const handleToggleFab = () => {
   expanded.value = !expanded.value
