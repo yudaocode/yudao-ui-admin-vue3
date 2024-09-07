@@ -49,7 +49,7 @@ import { cloneDeep } from 'lodash-es'
 import * as DiscountActivityApi from '@/api/mall/promotion/discount/discountActivity'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import { getPropertyList, RuleConfig } from '@/views/mall/product/spu/components'
-import {formatToFraction} from "@/utils";
+import { formatToFraction } from '@/utils'
 
 defineOptions({ name: 'PromotionDiscountActivityForm' })
 
@@ -68,7 +68,7 @@ const spuAndSkuListRef = ref() // sku 限时折扣  配置组件Ref
 const ruleConfig: RuleConfig[] = []
 const spuList = ref<DiscountActivityApi.SpuExtension[]>([]) // 选择的 spu
 const spuPropertyList = ref<SpuProperty<DiscountActivityApi.SpuExtension>[]>([])
-const spuIds = ref<number[]>([]);
+const spuIds = ref<number[]>([])
 const selectSpu = (spuId: number, skuIds: number[]) => {
   getSpuDetails(spuId, skuIds)
 }
@@ -81,12 +81,12 @@ const getSpuDetails = async (
   products?: DiscountActivityApi.DiscountProductVO[],
   type?: string
 ) => {
-  //如果已经包含spu则跳过
-  if(spuIds.value.includes(spuId)){
-    if(type !== "load"){
-      message.error("数据重复选择！")
+  // 如果已经包含 SPU 则跳过
+  if (spuIds.value.includes(spuId)) {
+    if (type !== 'load') {
+      message.error('数据重复选择！')
     }
-    return;
+    return
   }
   spuIds.value.push(spuId)
   const res = (await ProductSpuApi.getSpuDetailList([spuId])) as DiscountActivityApi.SpuExtension[]
@@ -143,7 +143,12 @@ const open = async (type: string, id?: number) => {
       )) as DiscountActivityApi.DiscountActivityVO
       for (let productsKey in data.products) {
         const supId = data.products[productsKey].spuId
-        await getSpuDetails(supId!, data.products?.map((sku) => sku.skuId), data.products,"load")
+        await getSpuDetails(
+          supId!,
+          data.products?.map((sku) => sku.skuId),
+          data.products,
+          'load'
+        )
       }
       formRef.value.setValues(data)
     } finally {
@@ -164,21 +169,23 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formRef.value.formModel as DiscountActivityApi.DiscountActivityVO
-    // 获取 折扣商品配置
+    // 获取折扣商品配置
     const products = cloneDeep(spuAndSkuListRef.value.getSkuConfigs('productConfig'))
-    let timp = false;
+    // 校验优惠金额、折扣百分比，是否正确
+    // TODO @puhui999：这个交互，可以参考下 youzan 的
+    let discountInvalid = false
     products.forEach((item: DiscountActivityApi.DiscountProductVO) => {
-      if(item.discountPrice != null && item.discountPrice > 0){
+      if (item.discountPrice != null && item.discountPrice > 0) {
         item.discountType = 1
-      }else if(item.discountPercent != null && item.discountPercent > 0){
+      } else if (item.discountPercent != null && item.discountPercent > 0) {
         item.discountType = 2
-      }else{
-        timp = true
+      } else {
+        discountInvalid = true
       }
     })
-    if(timp){
-      message.error("优惠金额和折扣百分比需要填写一个");
-      return;
+    if (discountInvalid) {
+      message.error('优惠金额和折扣百分比需要填写一个')
+      return
     }
     data.products = products
     // 真正提交
@@ -207,10 +214,16 @@ const resetForm = async () => {
 }
 
 /**
- * 删除spu
+ * 删除 SPU
  */
 const deleteSpu = (spuId: number) => {
-  spuIds.value.splice(spuIds.value.findIndex((item) => item == spuId), 1)
-  spuPropertyList.value.splice(spuPropertyList.value.findIndex((item) => item.spuId == spuId), 1)
+  spuIds.value.splice(
+    spuIds.value.findIndex((item) => item == spuId),
+    1
+  )
+  spuPropertyList.value.splice(
+    spuPropertyList.value.findIndex((item) => item.spuId == spuId),
+    1
+  )
 }
 </script>

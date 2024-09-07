@@ -1,7 +1,7 @@
 import { getAccessToken } from '@/utils/auth'
 import { fetchEventSource } from '@microsoft/fetch-event-source'
 import { config } from '@/config/axios/config'
-import request from '@/config/axios'
+import request from '@/config/axios' // AI 思维导图 VO
 
 // AI 思维导图 VO
 export interface MindMapVO {

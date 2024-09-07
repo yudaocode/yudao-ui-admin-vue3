@@ -1,9 +1,9 @@
 <script lang="tsx">
-import { defineComponent, PropType, computed } from 'vue'
+import { computed, defineComponent, PropType } from 'vue'
 import { isHexColor } from '@/utils/color'
 import { ElTag } from 'element-plus'
 import { DictDataType, getDictOptions } from '@/utils/dict'
-import { isArray, isString, isNumber, isBoolean } from '@/utils/is'
+import { isArray, isBoolean, isNumber, isString } from '@/utils/is'
 
 export default defineComponent({
   name: 'DictTag',

@@ -3,12 +3,12 @@
     <Dialog v-model="dialogVisible" :title="dialogTitle" width="800px">
       <el-form
         ref="formRef"
+        v-loading="formLoading"
         :model="formData"
         :rules="formRules"
         label-width="100px"
-        v-loading="formLoading"
       >
-        <el-form-item label-width="180px" label="渠道状态" prop="status">
+        <el-form-item label="渠道状态" label-width="180px" prop="status">
           <el-radio-group v-model="formData.status">
             <el-radio
               v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -19,7 +19,7 @@
             </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label-width="180px" label="备注" prop="remark">
+        <el-form-item label="备注" label-width="180px" prop="remark">
           <el-input v-model="formData.remark" :style="{ width: '100%' }" />
         </el-form-item>
       </el-form>

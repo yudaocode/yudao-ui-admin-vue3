@@ -67,15 +67,15 @@
             class="text-16px"
             :style="{ color: property.fields.price.color }"
           >
-            ￥{{ spu.price }}
+            ￥{{ fenToYuan(spu.price) }}
           </span>
           <!-- 市场价 -->
           <span
             v-if="property.fields.marketPrice.show && spu.marketPrice"
             class="ml-4px text-10px line-through"
             :style="{ color: property.fields.marketPrice.color }"
-            >￥{{ spu.marketPrice }}</span
-          >
+            >￥{{ fenToYuan(spu.marketPrice) }}
+          </span>
         </div>
         <div class="text-12px">
           <!-- 销量 -->
@@ -117,6 +117,7 @@
 <script setup lang="ts">
 import { ProductCardProperty } from './config'
 import * as ProductSpuApi from '@/api/mall/product/spu'
+import { fenToYuan } from '../../../../../utils'
 
 /** 商品卡片 */
 defineOptions({ name: 'ProductCard' })
