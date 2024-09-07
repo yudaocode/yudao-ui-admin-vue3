@@ -23,7 +23,7 @@
             v-for="dict in getIntDictOptions(DICT_TYPE.CRM_PERMISSION_LEVEL)"
             :key="dict.value"
           >
-            <el-radio v-if="dict.value != PermissionLevelEnum.OWNER" :label="dict.value">
+            <el-radio v-if="dict.value != PermissionLevelEnum.OWNER" :value="dict.value">
               {{ dict.label }}
             </el-radio>
           </template>
@@ -34,9 +34,9 @@
         label="同时添加至"
       >
         <el-checkbox-group v-model="formData.toBizTypes">
-          <el-checkbox :label="BizTypeEnum.CRM_CONTACT">联系人</el-checkbox>
-          <el-checkbox :label="BizTypeEnum.CRM_BUSINESS">商机</el-checkbox>
-          <el-checkbox :label="BizTypeEnum.CRM_CONTRACT">合同</el-checkbox>
+          <el-checkbox :value="BizTypeEnum.CRM_CONTACT">联系人</el-checkbox>
+          <el-checkbox :value="BizTypeEnum.CRM_BUSINESS">商机</el-checkbox>
+          <el-checkbox :value="BizTypeEnum.CRM_CONTRACT">合同</el-checkbox>
         </el-checkbox-group>
       </el-form-item>
     </el-form>

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @click.stop="openDetail(props.spuId)" style="cursor: pointer;">
     <div>
       <slot name="top"></slot>
     </div>
@@ -15,6 +15,7 @@
           class="order-img"
           fit="contain"
           preview-teleported
+          @click.stop
         />
       </div>
       <div
@@ -53,8 +54,14 @@
 <script lang="ts" setup>
 import { fenToYuan } from '@/utils'
 
+const { push } = useRouter()
+
 defineOptions({ name: 'ProductItem' })
 const props = defineProps({
+  spuId: {
+    type: Number,
+    default: 0
+  },
   picUrl: {
     type: String,
     default: 'https://img1.baidu.com/it/u=1601695551,235775011&fm=26&fmt=auto'
@@ -107,13 +114,20 @@ const skuString = computed(() => {
   }
   return props.skuText
 })
+
+/** 查看商品详情 */
+const openDetail = (spuId: number) => {
+  console.log(props.spuId)
+  push({ name: 'ProductSpuDetail', params: { id: spuId } })
+}
 </script>
 
 <style lang="scss" scoped>
 .ss-order-card-warp {
   padding: 20px;
   border-radius: 10px;
-  background-color: #e2e2e2;
+  border: 1px var(--el-border-color) solid;
+  background-color: var(--app-content-bg-color);
 
   .img-box {
     width: 80px;
@@ -133,19 +147,19 @@ const skuString = computed(() => {
 
     .tool-box {
       position: absolute;
-      right: 0px;
+      right: 0;
       bottom: -10px;
     }
   }
 
   .title-text {
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 500;
     line-height: 20px;
   }
 
   .spec-text {
-    font-size: 16px;
+    font-size: 10px;
     font-weight: 400;
     color: #999999;
     min-width: 0;
@@ -157,13 +171,13 @@ const skuString = computed(() => {
   }
 
   .price-text {
-    font-size: 16px;
+    font-size: 11px;
     font-weight: 500;
     font-family: OPPOSANS;
   }
 
   .total-text {
-    font-size: 16px;
+    font-size: 10px;
     font-weight: 400;
     line-height: 16px;
     color: #999999;

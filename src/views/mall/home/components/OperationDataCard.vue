@@ -11,9 +11,9 @@
         @click="handleClick(item.routerName)"
       >
         <CountTo
-          :prefix="item.prefix"
-          :end-val="item.value"
           :decimals="item.decimals"
+          :end-val="item.value"
+          :prefix="item.prefix"
           class="text-3xl"
         />
         <span class="text-center">{{ item.name }}</span>

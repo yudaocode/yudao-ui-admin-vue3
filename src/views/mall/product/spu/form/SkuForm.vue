@@ -1,20 +1,27 @@
 <!-- 商品发布 - 库存价格 -->
 <template>
-  <el-form ref="formRef" :disabled="isDetail" :model="formData" :rules="rules" label-width="120px">
+  <el-form
+    ref="formRef"
+    v-loading="formLoading"
+    :disabled="isDetail"
+    :model="formData"
+    :rules="rules"
+    label-width="120px"
+  >
     <el-form-item label="分销类型" props="subCommissionType">
       <el-radio-group
         v-model="formData.subCommissionType"
         class="w-80"
         @change="changeSubCommissionType"
       >
-        <el-radio :label="false">默认设置</el-radio>
-        <el-radio :label="true" class="radio">单独设置</el-radio>
+        <el-radio :value="false">默认设置</el-radio>
+        <el-radio :value="true" class="radio">单独设置</el-radio>
       </el-radio-group>
     </el-form-item>
     <el-form-item label="商品规格" props="specType">
       <el-radio-group v-model="formData.specType" class="w-80" @change="onChangeSpec">
-        <el-radio :label="false" class="radio">单规格</el-radio>
-        <el-radio :label="true">多规格</el-radio>
+        <el-radio :value="false" class="radio">单规格</el-radio>
+        <el-radio :value="true">多规格</el-radio>
       </el-radio-group>
     </el-form-item>
     <!-- 多规格添加-->
@@ -94,7 +101,7 @@ const ruleConfig: RuleConfig[] = [
 ]
 
 const message = useMessage() // 消息弹窗
-
+const formLoading = ref(false)
 const props = defineProps({
   propFormData: {
     type: Object as PropType<Spu>,

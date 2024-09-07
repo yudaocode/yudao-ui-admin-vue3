@@ -4,7 +4,7 @@
       <h3 class="m-0 px-7 shrink-0 flex items-center justify-between">
         <span>思维导图预览</span>
         <!-- 展示在右上角 -->
-        <el-button type="primary" v-show="isEnd" @click="downloadImage" size="small">
+        <el-button v-show="isEnd" size="small" type="primary" @click="downloadImage">
           <template #icon>
             <Icon icon="ph:copy-bold" />
           </template>
@@ -20,14 +20,14 @@
       </div>
 
       <div ref="mindMapRef" class="wh-full">
-        <svg ref="svgRef" class="w-full" :style="{ height: `${contentAreaHeight}px` }" />
+        <svg ref="svgRef" :style="{ height: `${contentAreaHeight}px` }" class="w-full" />
         <div ref="toolBarRef" class="absolute bottom-[10px] right-5"></div>
       </div>
     </div>
   </el-card>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { Markmap } from 'markmap-view'
 import { Transformer } from 'markmap-lib'
 import { Toolbar } from 'markmap-toolbar'
@@ -43,7 +43,7 @@ const props = defineProps<{
   isGenerating: boolean // 是否正在生成
   isStart: boolean // 开始状态，开始时需要清除 html
 }>()
-const contentRef = ref<HTMLDivElement>() // 右侧出来header以下的区域
+const contentRef = ref<HTMLDivElement>() // 右侧出来 header 以下的区域
 const mdContainerRef = ref<HTMLDivElement>() // markdown 的容器，用来滚动到底下的
 const mindMapRef = ref<HTMLDivElement>() // 思维导图的容器
 const svgRef = ref<SVGElement>() // 思维导图的渲染 svg
@@ -106,8 +106,7 @@ const processContent = (text: string) => {
   return arr.join('\n')
 }
 
-/** 下载图片 */
-// download SVG to png file
+/** 下载图片：download SVG to png file */
 const downloadImage = () => {
   const svgElement = mindMapRef.value
   // 将 SVG 渲染到图片对象
@@ -138,6 +137,7 @@ defineExpose({
     height: 0;
   }
 }
+
 .my-card {
   display: flex;
   flex-direction: column;
@@ -150,13 +150,16 @@ defineExpose({
     @extend .hide-scroll-bar;
   }
 }
+
 // markmap的tool样式覆盖
 :deep(.markmap) {
   width: 100%;
 }
+
 :deep(.mm-toolbar-brand) {
   display: none;
 }
+
 :deep(.mm-toolbar) {
   display: flex;
   flex-direction: row;

@@ -21,7 +21,10 @@ const crudSchemas = reactive<CrudSchema[]>([
       componentProps: {
         valueFormat: 'YYYY-MM-DD HH:mm:ss',
         type: 'daterange',
-        defaultTime: [new Date('1 00:00:00'), new Date('1 23:59:59')]
+        defaultTime: [new Date('1 00:00:00'), new Date('1 23:59:59')],
+        style: {
+          width: '240px'
+        }
       }
     },
     detail: {
@@ -36,7 +39,14 @@ const crudSchemas = reactive<CrudSchema[]>([
     label: '用户编号',
     field: 'userId',
     isSearch: true,
-    isTable: false
+    isTable: false,
+    search: {
+      componentProps: {
+        style: {
+          width: '240px'
+        }
+      }
+    }
   },
   {
     label: '用户类型',
@@ -44,7 +54,14 @@ const crudSchemas = reactive<CrudSchema[]>([
     dictType: DICT_TYPE.USER_TYPE,
     dictClass: 'number',
     isSearch: true,
-    isTable: false
+    isTable: false,
+    search: {
+      componentProps: {
+        style: {
+          width: '240px'
+        }
+      }
+    }
   },
   {
     label: '邮件标题',
@@ -65,7 +82,14 @@ const crudSchemas = reactive<CrudSchema[]>([
     field: 'sendStatus',
     dictType: DICT_TYPE.SYSTEM_MAIL_SEND_STATUS,
     dictClass: 'string',
-    isSearch: true
+    isSearch: true,
+    search: {
+      componentProps: {
+        style: {
+          width: '240px'
+        }
+      }
+    }
   },
   {
     label: '邮箱账号',
@@ -79,6 +103,9 @@ const crudSchemas = reactive<CrudSchema[]>([
         optionsAlias: {
           labelField: 'mail',
           valueField: 'id'
+        },
+        style: {
+          width: '240px'
         }
       }
     }
@@ -93,7 +120,14 @@ const crudSchemas = reactive<CrudSchema[]>([
   {
     label: '模板编号',
     field: 'templateId',
-    isSearch: true
+    isSearch: true,
+    search: {
+      componentProps: {
+        style: {
+          width: '240px'
+        }
+      }
+    }
   },
   {
     label: '模板编码',

@@ -1,6 +1,7 @@
 <template>
   <ProductItem
     v-for="item in list"
+    :spu-id="item.spuId"
     :key="item.id"
     :picUrl="item.picUrl"
     :price="item.price"

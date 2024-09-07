@@ -24,6 +24,7 @@ export interface SeckillActivityVO {
 // 秒杀活动所需属性
 export interface SeckillProductVO {
   skuId: number
+  spuId: number
   seckillPrice: number
   stock: number
 }

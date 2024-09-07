@@ -9,7 +9,7 @@
     >
       <el-form-item label="减签任务" prop="id">
         <el-radio-group v-model="formData.id">
-          <el-radio-button v-for="item in childrenTaskList" :key="item.id" :label="item.id">
+          <el-radio-button v-for="item in childrenTaskList" :key="item.id" :value="item.id">
             {{ item.name }}
             ({{ item.assigneeUser?.deptName || item.ownerUser?.deptName }} -
             {{ item.assigneeUser?.nickname || item.ownerUser?.nickname }})

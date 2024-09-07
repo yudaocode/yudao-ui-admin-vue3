@@ -90,7 +90,7 @@
               <el-radio
                 v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
                 :key="dict.value"
-                :label="dict.value"
+                :value="dict.value"
               >
                 {{ dict.label }}
               </el-radio>
@@ -153,6 +153,7 @@
               placeholder="选择下次联系时间"
               type="datetime"
               value-format="x"
+              class="!w-1/1"
             />
           </el-form-item>
         </el-col>
