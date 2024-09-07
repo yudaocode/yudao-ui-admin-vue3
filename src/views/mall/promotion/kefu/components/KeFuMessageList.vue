@@ -86,7 +86,7 @@
                   <OrderItem
                     v-if="KeFuMessageContentTypeEnum.ORDER === item.contentType"
                     :message="item"
-                    class="max-w-70%"
+                    class="max-w-100%"
                   />
                 </MessageItem>
               </div>
