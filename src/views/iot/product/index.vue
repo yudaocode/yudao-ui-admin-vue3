@@ -37,15 +37,6 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['iot:product:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
-        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -57,7 +48,7 @@
       <el-table-column label="ProductKey" align="center" prop="productKey" />
       <el-table-column label="设备类型" align="center" prop="deviceType">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :code="scope.row.deviceType" />
+          <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="scope.row.deviceType" />
         </template>
       </el-table-column>
       <el-table-column
@@ -69,7 +60,7 @@
       />
       <el-table-column label="产品状态" align="center" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.IOT_PRODUCT_STATUS" :code="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.IOT_PRODUCT_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center">
@@ -77,16 +68,17 @@
           <el-button
             link
             type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['iot:product:update']"
+            @click="openDetail(scope.row.id)"
+            v-hasPermi="['iot:product:query']"
           >
-            编辑
+            查看
           </el-button>
           <el-button
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
             v-hasPermi="['iot:product:delete']"
+            :disabled="scope.row.status === 1"
           >
             删除
           </el-button>
@@ -169,6 +161,12 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 打开详情 */
+const { currentRoute, push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'IotProductDetail', params: { id } })
 }
 
 /** 删除按钮操作 */

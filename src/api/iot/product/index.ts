@@ -46,5 +46,10 @@ export const ProductApi = {
   // 导出iot 产品 Excel
   exportProduct: async (params) => {
     return await request.download({ url: `/iot/product/export-excel`, params })
+  },
+
+  // 更新产品状态
+  updateProductStatus: async (id: number, status: number) => {
+    return await request.put({ url: `/iot/product/update-status?id=` + id + `&status=` + status })
   }
 }
