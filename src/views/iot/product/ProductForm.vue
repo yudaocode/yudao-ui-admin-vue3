@@ -1,0 +1,203 @@
+<template>
+  <Dialog :title="dialogTitle" v-model="dialogVisible">
+    <el-form
+      ref="formRef"
+      :model="formData"
+      :rules="formRules"
+      label-width="100px"
+      v-loading="formLoading"
+    >
+      <el-form-item label="产品名称" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入产品名称" />
+      </el-form-item>
+      <el-form-item label="设备类型" prop="deviceType">
+        <el-radio-group v-model="formData.deviceType">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item
+        v-if="formData.deviceType === 0 || formData.deviceType === 2"
+        label="联网方式"
+        prop="netType"
+      >
+        <el-select v-model="formData.netType" placeholder="请选择联网方式">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_NET_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item v-if="formData.deviceType === 1" label="接入网关协议" prop="protocolType">
+        <el-select v-model="formData.protocolType" placeholder="请选择接入网关协议">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PROTOCOL_TYPE)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="数据格式" prop="dataFormat">
+        <el-select v-model="formData.dataFormat" placeholder="请选择接数据格式">
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_DATA_FORMAT)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="数据校验级别" prop="validateType">
+        <el-radio-group v-model="formData.validateType">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_VALIDATE_TYPE)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item label="产品描述" prop="description">
+        <el-input type="textarea" v-model="formData.description" placeholder="请输入产品描述" />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button @click="dialogVisible = false">取 消</el-button>
+    </template>
+  </Dialog>
+</template>
+<script setup lang="ts">
+import { ProductApi, ProductVO } from '@/api/iot/product'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+
+/** iot 产品 表单 */
+defineOptions({ name: 'ProductForm' })
+
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
+
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formData = ref({
+  name: undefined,
+  id: undefined,
+  productKey: undefined,
+  protocolId: undefined,
+  categoryId: undefined,
+  description: undefined,
+  validateType: undefined,
+  status: undefined,
+  deviceType: undefined,
+  netType: undefined,
+  protocolType: undefined,
+  dataFormat: undefined
+})
+const formRules = reactive({
+  name: [{ required: true, message: '产品名称不能为空', trigger: 'blur' }],
+  deviceType: [
+    {
+      required: true,
+      message: '设备类型不能为空',
+      trigger: 'change'
+    }
+  ],
+  netType: [
+    {
+      required: formData.deviceType === 0 || formData.deviceType === 2,
+      message: '联网方式不能为空',
+      trigger: 'change'
+    }
+  ],
+  protocolType: [
+    { required: formData.deviceType === 1, message: '接入网关协议不能为空', trigger: 'change' }
+  ],
+  dataFormat: [
+    {
+      required: true,
+      message: '数据格式不能为空',
+      trigger: 'change'
+    }
+  ],
+  validateType: [
+    {
+      required: true,
+      message: '数据校验级别不能为空',
+      trigger: 'change'
+    }
+  ]
+})
+const formRef = ref() // 表单 Ref
+
+/** 打开弹窗 */
+const open = async (type: string, id?: number) => {
+  dialogVisible.value = true
+  dialogTitle.value = t('action.' + type)
+  formType.value = type
+  resetForm()
+  // 修改时，设置数据
+  if (id) {
+    formLoading.value = true
+    try {
+      formData.value = await ProductApi.getProduct(id)
+    } finally {
+      formLoading.value = false
+    }
+  }
+}
+defineExpose({ open }) // 提供 open 方法，用于打开弹窗
+
+/** 提交表单 */
+const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
+const submitForm = async () => {
+  // 校验表单
+  await formRef.value.validate()
+  // 提交请求
+  formLoading.value = true
+  try {
+    const data = formData.value as unknown as ProductVO
+    if (formType.value === 'create') {
+      await ProductApi.createProduct(data)
+      message.success(t('common.createSuccess'))
+    } else {
+      await ProductApi.updateProduct(data)
+      message.success(t('common.updateSuccess'))
+    }
+    dialogVisible.value = false
+    // 发送操作成功的事件
+    emit('success')
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 重置表单 */
+const resetForm = () => {
+  formData.value = {
+    name: undefined,
+    id: undefined,
+    productKey: undefined,
+    protocolId: undefined,
+    categoryId: undefined,
+    description: undefined,
+    validateType: undefined,
+    status: undefined,
+    deviceType: undefined,
+    netType: undefined,
+    protocolType: undefined,
+    dataFormat: undefined
+  }
+  formRef.value?.resetFields()
+}
+</script>

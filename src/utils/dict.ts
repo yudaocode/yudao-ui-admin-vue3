@@ -226,5 +226,13 @@ export enum DICT_TYPE {
   AI_WRITE_LENGTH = 'ai_write_length', // AI 写作长度
   AI_WRITE_FORMAT = 'ai_write_format', // AI 写作格式
   AI_WRITE_TONE = 'ai_write_tone', // AI 写作语气
-  AI_WRITE_LANGUAGE = 'ai_write_language' // AI 写作语言
+  AI_WRITE_LANGUAGE = 'ai_write_language', // AI 写作语言
+
+  // ========== IOT - 物联网模块  ==========
+  IOT_NET_TYPE = 'iot_net_type', // IOT 联网方式
+  IOT_VALIDATE_TYPE = 'iot_validate_type', // IOT 数据校验级别
+  IOT_PRODUCT_STATUS = 'iot_product_status', // IOT 产品状态
+  IOT_PRODUCT_DEVICE_TYPE = 'iot_product_device_type', // IOT 产品设备类型
+  IOT_DATA_FORMAT = 'iot_data_format', // IOT 数据格式
+  IOT_PROTOCOL_TYPE = 'iot_protocol_type' // IOT 接入网关协议
 }
