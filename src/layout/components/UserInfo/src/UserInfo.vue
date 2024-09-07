@@ -23,7 +23,7 @@ const { getPrefixCls } = useDesign()
 
 const prefixCls = getPrefixCls('user-info')
 
-const avatar = computed(() => userStore.user.avatar ?? avatarImg)
+const avatar = computed(() => userStore.user.avatar || avatarImg)
 const userName = computed(() => userStore.user.nickname ?? 'Admin')
 
 // 锁定屏幕
