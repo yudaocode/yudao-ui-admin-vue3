@@ -2,12 +2,15 @@
   <ProductDetailsHeader :loading="loading" :product="product" @refresh="getProductData(id)" />
   <el-col>
     <el-tabs>
-      <el-tab-pane label="详细资料">
+      <el-tab-pane label="产品信息">
         <ProductDetailsInfo :product="product" />
       </el-tab-pane>
+      <el-tab-pane label="Topic 类列表" />
       <el-tab-pane label="物模型">
         <!--        <ProductDetailsModel :product="product" />-->
       </el-tab-pane>
+      <el-tab-pane label="消息解析" />
+      <el-tab-pane label="服务端订阅" />
     </el-tabs>
   </el-col>
 </template>
@@ -30,6 +33,7 @@ const getProductData = async (id: number) => {
   loading.value = true
   try {
     product.value = await ProductApi.getProduct(id)
+    console.log(product.value)
   } finally {
     loading.value = false
   }

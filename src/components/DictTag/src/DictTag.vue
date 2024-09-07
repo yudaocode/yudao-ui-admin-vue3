@@ -3,7 +3,7 @@ import { defineComponent, PropType, computed } from 'vue'
 import { isHexColor } from '@/utils/color'
 import { ElTag } from 'element-plus'
 import { DictDataType, getDictOptions } from '@/utils/dict'
-import { isArray, isString, isNumber } from '@/utils/is'
+import { isArray, isString, isNumber, isBoolean } from '@/utils/is'
 
 export default defineComponent({
   name: 'DictTag',
@@ -29,15 +29,15 @@ export default defineComponent({
   },
   setup(props) {
     const valueArr: any = computed(() => {
-      // 1.是Number类型的情况
-      if (isNumber(props.value)) {
+      // 1. 是 Number 类型和 Boolean 类型的情况
+      if (isNumber(props.value) || isBoolean(props.value)) {
         return [String(props.value)]
       }
-      // 2.是字符串（进一步判断是否有包含分隔符号 -> props.sepSymbol ）
+      // 2. 是字符串（进一步判断是否有包含分隔符号 -> props.sepSymbol ）
       else if (isString(props.value)) {
         return props.value.split(props.separator)
       }
-      // 3.数组
+      // 3. 数组
       else if (isArray(props.value)) {
         return props.value.map(String)
       }
@@ -57,7 +57,7 @@ export default defineComponent({
         <div
           class="dict-tag"
           style={{
-            display: 'flex',
+            display: 'inline-flex',
             gap: props.gutter,
             justifyContent: 'center',
             alignItems: 'center'
@@ -72,7 +72,7 @@ export default defineComponent({
                 // 添加标签的文字颜色为白色，解决自定义背景颜色时标签文字看不清的问题
                 <ElTag
                   style={dict?.cssClass ? 'color: #fff' : ''}
-                  type={dict?.colorType}
+                  type={dict?.colorType || null}
                   color={dict?.cssClass && isHexColor(dict?.cssClass) ? dict?.cssClass : ''}
                   disableTransitions={true}
                 >
