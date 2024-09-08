@@ -78,11 +78,19 @@ const formRef = ref() // 表单 Ref
 
 const spuSelectRef = ref() // 商品和属性选择 Ref
 const spuAndSkuListRef = ref() // sku 限时折扣  配置组件Ref
-const ruleConfig: RuleConfig[] = []
+const ruleConfig: RuleConfig[] = [
+  {
+    name: 'productConfig.discountPrice',
+    rule: (arg) => arg > 0,
+    message: '商品优惠金额不能为 0 ！！！'
+  }
+]
 const spuList = ref<DiscountActivityApi.SpuExtension[]>([]) // 选择的 spu
 const spuPropertyList = ref<SpuProperty<DiscountActivityApi.SpuExtension>[]>([])
 const spuIds = ref<number[]>([])
 const selectSpu = (spuId: number, skuIds: number[]) => {
+  // TODO puhui999: 艿艿现在限时折扣活动可以选择多个 spu ，那么 spuId 是不是得改成 spuIds 来存放多个？🤣
+  formRef.value.setValues({ spuId })
   getSpuDetails(spuId, skuIds)
 }
 /**
