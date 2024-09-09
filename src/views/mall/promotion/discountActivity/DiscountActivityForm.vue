@@ -90,6 +90,7 @@ const spuPropertyList = ref<SpuProperty<DiscountActivityApi.SpuExtension>[]>([])
 const spuIds = ref<number[]>([])
 const selectSpu = (spuId: number, skuIds: number[]) => {
   // TODO puhui999: 艿艿现在限时折扣活动可以选择多个 spu ，那么 spuId 是不是得改成 spuIds 来存放多个？🤣
+  // TODO @puhui999：DiscountActivityDO 不存 spuId，在 DiscountProductDO 存储哈。
   formRef.value.setValues({ spuId })
   getSpuDetails(spuId, skuIds)
 }
