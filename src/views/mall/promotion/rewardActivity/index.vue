@@ -55,7 +55,7 @@
           重置
         </el-button>
         <el-button
-          v-hasPermi="['product:brand:create']"
+          v-hasPermi="['promotion:reward-activity:create']"
           plain
           type="primary"
           @click="openForm('create')"
@@ -85,7 +85,7 @@
       />
       <el-table-column align="center" label="状态" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PROMOTION_ACTIVITY_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
@@ -98,7 +98,7 @@
       <el-table-column align="center" label="操作">
         <template #default="scope">
           <el-button
-            v-hasPermi="['product:brand:update']"
+            v-hasPermi="['promotion:reward-activity:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
@@ -106,7 +106,16 @@
             编辑
           </el-button>
           <el-button
-            v-hasPermi="['product:brand:delete']"
+            v-if="scope.row.status === 0"
+            v-hasPermi="['promotion:reward-activity:close']"
+            link
+            type="danger"
+            @click="handleClose(scope.row.id)"
+          >
+            关闭
+          </el-button>
+          <el-button
+            v-hasPermi="['promotion:reward-activity:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
@@ -178,6 +187,19 @@ const resetQuery = () => {
 const formRef = ref<InstanceType<typeof RewardForm>>()
 const openForm = (type: string, id?: number) => {
   formRef.value?.open(type, id)
+}
+
+/** 关闭按钮操作 */
+const handleClose = async (id: number) => {
+  try {
+    // 关闭的二次确认
+    await message.confirm('确认关闭该满减活动吗？')
+    // 发起关闭
+    await RewardActivityApi.closeRewardActivity(id)
+    message.success('关闭成功')
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 
 /** 删除按钮操作 */
