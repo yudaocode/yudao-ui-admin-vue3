@@ -2,8 +2,8 @@
   <!-- 定义 tab 组件：撰写/回复等 -->
   <DefineTab v-slot="{ active, text, itemClick }">
     <span
-      class="inline-block w-1/2 rounded-full cursor-pointer text-center leading-[30px] relative z-1 text-[5C6370] hover:text-black"
       :class="active ? 'text-black shadow-md' : 'hover:bg-[#DDDFE3]'"
+      class="inline-block w-1/2 rounded-full cursor-pointer text-center leading-[30px] relative z-1 text-[5C6370] hover:text-black"
       @click="itemClick"
     >
       {{ text }}
@@ -14,9 +14,9 @@
     <h3 class="mt-5 mb-3 flex items-center justify-between text-[14px]">
       <span>{{ label }}</span>
       <span
-        @click="hintClick"
         v-if="hint"
         class="flex items-center text-[12px] text-[#846af7] cursor-pointer select-none"
+        @click="hintClick"
       >
         <Icon icon="ep:question-filled" />
         {{ hint }}
@@ -29,17 +29,17 @@
     <div class="w-full pt-2 bg-[#f5f7f9] flex justify-center">
       <div class="w-[303px] rounded-full bg-[#DDDFE3] p-1 z-10">
         <div
-          class="flex items-center relative after:content-[''] after:block after:bg-white after:h-[30px] after:w-1/2 after:absolute after:top-0 after:left-0 after:transition-transform after:rounded-full"
           :class="
             selectedTab === AiWriteTypeEnum.REPLY && 'after:transform after:translate-x-[100%]'
           "
+          class="flex items-center relative after:content-[''] after:block after:bg-white after:h-[30px] after:w-1/2 after:absolute after:top-0 after:left-0 after:transition-transform after:rounded-full"
         >
           <ReuseTab
             v-for="tab in tabs"
             :key="tab.value"
-            :text="tab.text"
             :active="tab.value === selectedTab"
             :itemClick="() => switchTab(tab.value)"
+            :text="tab.text"
           />
         </div>
       </div>
@@ -49,36 +49,36 @@
     >
       <div>
         <template v-if="selectedTab === 1">
-          <ReuseLabel label="写作内容" hint="示例" :hint-click="() => example('write')" />
+          <ReuseLabel :hint-click="() => example('write')" hint="示例" label="写作内容" />
           <el-input
-            type="textarea"
-            :rows="5"
-            :maxlength="500"
             v-model="formData.prompt"
+            :maxlength="500"
+            :rows="5"
             placeholder="请输入写作内容"
             showWordLimit
+            type="textarea"
           />
         </template>
 
         <template v-else>
-          <ReuseLabel label="原文" hint="示例" :hint-click="() => example('reply')" />
+          <ReuseLabel :hint-click="() => example('reply')" hint="示例" label="原文" />
           <el-input
-            type="textarea"
-            :rows="5"
-            :maxlength="500"
             v-model="formData.originalContent"
+            :maxlength="500"
+            :rows="5"
             placeholder="请输入原文"
             showWordLimit
+            type="textarea"
           />
 
           <ReuseLabel label="回复内容" />
           <el-input
-            type="textarea"
-            :rows="5"
-            :maxlength="500"
             v-model="formData.prompt"
+            :maxlength="500"
+            :rows="5"
             placeholder="请输入回复内容"
             showWordLimit
+            type="textarea"
           />
         </template>
 
@@ -93,14 +93,14 @@
 
         <div class="flex items-center justify-center mt-3">
           <el-button :disabled="isWriting" @click="reset">重置</el-button>
-          <el-button :loading="isWriting" @click="submit" color="#846af7">生成</el-button>
+          <el-button :loading="isWriting" color="#846af7" @click="submit">生成</el-button>
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { createReusableTemplate } from '@vueuse/core'
 import { ref } from 'vue'
 import Tag from './Tag.vue'

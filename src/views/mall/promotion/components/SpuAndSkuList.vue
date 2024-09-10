@@ -29,15 +29,14 @@
     </el-table-column>
     <el-table-column align="center" label="销量" min-width="90" prop="salesCount" />
     <el-table-column align="center" label="库存" min-width="90" prop="stock" />
-    <el-table-column v-if="spuData.length > 1 && isDelete" align="center" label="操作" min-width="90" >
+    <el-table-column
+      v-if="spuData.length > 1 && isDelete"
+      align="center"
+      label="操作"
+      min-width="90"
+    >
       <template #default="scope">
-        <el-button
-          type="primary"
-          link
-          @click="deleteSpu(scope.row.id)"
-        >
-          删除
-        </el-button>
+        <el-button type="primary" link @click="deleteSpu(scope.row.id)"> 删除 </el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -57,7 +56,7 @@ const props = defineProps<{
   spuList: T[]
   ruleConfig: RuleConfig[]
   spuPropertyListP: SpuProperty<T>[]
-  isDelete?: boolean //spu是否可以多选
+  isDelete?: boolean // SPU 是否可删除；TODO deletable 换成这个名字好点。
 }>()
 
 const spuData = ref<Spu[]>([]) // spu 详情数据列表
@@ -96,12 +95,12 @@ const emits = defineEmits<{
   (e: 'delete', spuId: number): void
 }>()
 
-/** 多选时可以删除spu **/
+/** 多选时可以删除 SPU **/
 const deleteSpu = async (spuId: number) => {
   await message.confirm('是否删除商品编号为' + spuId + '的数据？')
-  let index = spuData.value.findIndex((item) => item.id == spuId)
-  spuData.value.splice(index,1);
-  emits('delete',spuId)
+  const index = spuData.value.findIndex((item) => item.id == spuId)
+  spuData.value.splice(index, 1)
+  emits('delete', spuId)
 }
 
 /**

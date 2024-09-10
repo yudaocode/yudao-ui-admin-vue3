@@ -78,7 +78,7 @@ const userStore = useUserStore()
 const messageContainer: any = ref(null)
 const isScrolling = ref(false) //用于判断用户是否在滚动
 
-const userAvatar = computed(() => userStore.user.avatar ?? userAvatarDefaultImg)
+const userAvatar = computed(() => userStore.user.avatar || userAvatarDefaultImg)
 const roleAvatar = computed(() => props.conversation.roleAvatar ?? roleAvatarDefaultImg)
 
 // 定义 props

@@ -54,7 +54,7 @@
               class="text-12px"
               :style="{ color: property.fields.price.color }"
             >
-              ￥{{ spu.price }}
+              ￥{{ fenToYuan(spu.price) }}
             </span>
           </div>
         </div>
@@ -65,6 +65,7 @@
 <script setup lang="ts">
 import { ProductListProperty } from './config'
 import * as ProductSpuApi from '@/api/mall/product/spu'
+import { fenToYuan } from '@/utils'
 
 /** 商品栏 */
 defineOptions({ name: 'ProductList' })

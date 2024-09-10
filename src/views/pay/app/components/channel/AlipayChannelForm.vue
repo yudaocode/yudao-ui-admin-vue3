@@ -1,22 +1,22 @@
 <template>
   <div>
-    <Dialog v-model="dialogVisible" :title="dialogTitle" @closed="close" width="830px">
+    <Dialog v-model="dialogVisible" :title="dialogTitle" width="830px" @closed="close">
       <el-form
         ref="formRef"
+        v-loading="formLoading"
         :model="formData"
         :rules="formRules"
         label-width="100px"
-        v-loading="formLoading"
       >
-        <el-form-item label-width="180px" label="渠道费率" prop="feeRate">
-          <el-input v-model="formData.feeRate" placeholder="请输入渠道费率" clearable>
+        <el-form-item label="渠道费率" label-width="180px" prop="feeRate">
+          <el-input v-model="formData.feeRate" clearable placeholder="请输入渠道费率">
             <template #append>%</template>
           </el-input>
         </el-form-item>
-        <el-form-item label-width="180px" label="开放平台 APPID" prop="config.appId">
-          <el-input v-model="formData.config.appId" placeholder="请输入开放平台 APPID" clearable />
+        <el-form-item label="开放平台 APPID" label-width="180px" prop="config.appId">
+          <el-input v-model="formData.config.appId" clearable placeholder="请输入开放平台 APPID" />
         </el-form-item>
-        <el-form-item label-width="180px" label="渠道状态" prop="status">
+        <el-form-item label="渠道状态" label-width="180px" prop="status">
           <el-radio-group v-model="formData.status">
             <el-radio
               v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -27,7 +27,7 @@
             </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label-width="180px" label="网关地址" prop="config.serverUrl">
+        <el-form-item label="网关地址" label-width="180px" prop="config.serverUrl">
           <el-radio-group v-model="formData.config.serverUrl">
             <el-radio value="https://openapi.alipay.com/gateway.do">线上环境</el-radio>
             <el-radio value="https://openapi-sandbox.dl.alipaydev.com/gateway.do">
@@ -35,145 +35,148 @@
             </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label-width="180px" label="算法类型" prop="config.signType">
+        <el-form-item label="算法类型" label-width="180px" prop="config.signType">
           <el-radio-group v-model="formData.config.signType">
             <el-radio key="RSA2" value="RSA2">RSA2</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label-width="180px" label="公钥类型" prop="config.mode">
+        <el-form-item label="公钥类型" label-width="180px" prop="config.mode">
           <el-radio-group v-model="formData.config.mode">
             <el-radio key="公钥模式" :value="1">公钥模式</el-radio>
             <el-radio key="证书模式" :value="2">证书模式</el-radio>
           </el-radio-group>
         </el-form-item>
         <div v-if="formData.config.mode === 1">
-          <el-form-item label-width="180px" label="应用私钥" prop="config.privateKey">
+          <el-form-item label="应用私钥" label-width="180px" prop="config.privateKey">
             <el-input
-              type="textarea"
-              :autosize="{ minRows: 8, maxRows: 8 }"
               v-model="formData.config.privateKey"
-              placeholder="请输入应用私钥"
-              clearable
+              :autosize="{ minRows: 8, maxRows: 8 }"
               :style="{ width: '100%' }"
+              clearable
+              placeholder="请输入应用私钥"
+              type="textarea"
             />
           </el-form-item>
-          <el-form-item label-width="180px" label="支付宝公钥" prop="config.alipayPublicKey">
+          <el-form-item label="支付宝公钥" label-width="180px" prop="config.alipayPublicKey">
             <el-input
-              type="textarea"
-              :autosize="{ minRows: 8, maxRows: 8 }"
               v-model="formData.config.alipayPublicKey"
-              placeholder="请输入支付宝公钥"
-              clearable
+              :autosize="{ minRows: 8, maxRows: 8 }"
               :style="{ width: '100%' }"
+              clearable
+              placeholder="请输入支付宝公钥"
+              type="textarea"
             />
           </el-form-item>
         </div>
         <div v-if="formData.config.mode === 2">
-          <el-form-item label-width="180px" label="应用私钥" prop="config.privateKey">
+          <el-form-item label="应用私钥" label-width="180px" prop="config.privateKey">
             <el-input
-              type="textarea"
-              :autosize="{ minRows: 8, maxRows: 8 }"
               v-model="formData.config.privateKey"
-              placeholder="请输入应用私钥"
-              clearable
+              :autosize="{ minRows: 8, maxRows: 8 }"
               :style="{ width: '100%' }"
+              clearable
+              placeholder="请输入应用私钥"
+              type="textarea"
             />
           </el-form-item>
-          <el-form-item label-width="180px" label="商户公钥应用证书" prop="config.appCertContent">
+          <el-form-item label="商户公钥应用证书" label-width="180px" prop="config.appCertContent">
             <el-input
               v-model="formData.config.appCertContent"
-              type="textarea"
-              placeholder="请上传商户公钥应用证书"
-              readonly
               :autosize="{ minRows: 8, maxRows: 8 }"
               :style="{ width: '100%' }"
+              placeholder="请上传商户公钥应用证书"
+              readonly
+              type="textarea"
             />
           </el-form-item>
-          <el-form-item label-width="180px" label="">
+          <el-form-item label="" label-width="180px">
             <el-upload
-              action=""
               ref="privateKeyContentFile"
-              :limit="1"
               :accept="fileAccept"
-              :http-request="appCertUpload"
               :before-upload="fileBeforeUpload"
+              :http-request="appCertUpload"
+              :limit="1"
+              action=""
             >
               <el-button type="primary">
-                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
+                <Icon class="mr-5px" icon="ep:upload" />
+                点击上传
               </el-button>
             </el-upload>
           </el-form-item>
           <el-form-item
-            label-width="180px"
             label="支付宝公钥证书"
+            label-width="180px"
             prop="config.alipayPublicCertContent"
           >
             <el-input
               v-model="formData.config.alipayPublicCertContent"
-              type="textarea"
-              placeholder="请上传支付宝公钥证书"
-              readonly
               :autosize="{ minRows: 8, maxRows: 8 }"
               :style="{ width: '100%' }"
+              placeholder="请上传支付宝公钥证书"
+              readonly
+              type="textarea"
             />
           </el-form-item>
-          <el-form-item label-width="180px" label="">
+          <el-form-item label="" label-width="180px">
             <el-upload
               ref="privateCertContentFile"
-              action=""
-              :limit="1"
               :accept="fileAccept"
               :before-upload="fileBeforeUpload"
               :http-request="alipayPublicCertUpload"
+              :limit="1"
+              action=""
             >
               <el-button type="primary">
-                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
+                <Icon class="mr-5px" icon="ep:upload" />
+                点击上传
               </el-button>
             </el-upload>
           </el-form-item>
-          <el-form-item label-width="180px" label="根证书" prop="config.rootCertContent">
+          <el-form-item label="根证书" label-width="180px" prop="config.rootCertContent">
             <el-input
               v-model="formData.config.rootCertContent"
-              type="textarea"
-              placeholder="请上传根证书"
-              readonly
               :autosize="{ minRows: 8, maxRows: 8 }"
               :style="{ width: '100%' }"
+              placeholder="请上传根证书"
+              readonly
+              type="textarea"
             />
           </el-form-item>
-          <el-form-item label-width="180px" label="">
+          <el-form-item label="" label-width="180px">
             <el-upload
               ref="privateCertContentFile"
-              :limit="1"
               :accept="fileAccept"
-              action=""
               :before-upload="fileBeforeUpload"
               :http-request="rootCertUpload"
+              :limit="1"
+              action=""
             >
               <el-button type="primary">
-                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
+                <Icon class="mr-5px" icon="ep:upload" />
+                点击上传
               </el-button>
             </el-upload>
           </el-form-item>
         </div>
 
-        <el-form-item label-width="180px" label="接口内容加密方式" prop="config.encryptType">
+        <el-form-item label="接口内容加密方式" label-width="180px" prop="config.encryptType">
           <el-radio-group v-model="formData.config.encryptType">
             <el-radio key="NONE" label="">无加密</el-radio>
             <el-radio key="AES" label="AES">AES</el-radio>
           </el-radio-group>
         </el-form-item>
         <div v-if="formData.config.encryptType === 'AES'">
-          <el-form-item label-width="180px" label="接口内容加密密钥" prop="config.encryptKey">
+          <el-form-item label="接口内容加密密钥" label-width="180px" prop="config.encryptKey">
             <el-input
               v-model="formData.config.encryptKey"
-              placeholder="请输入接口内容加密密钥"
               clearable
+              placeholder="请输入接口内容加密密钥"
             />
           </el-form-item>
         </div>
 
-        <el-form-item label-width="180px" label="备注" prop="remark">
+        <el-form-item label="备注" label-width="180px" prop="remark">
           <el-input v-model="formData.remark" :style="{ width: '100%' }" />
         </el-form-item>
       </el-form>

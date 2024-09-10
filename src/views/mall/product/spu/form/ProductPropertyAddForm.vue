@@ -12,12 +12,12 @@
       <el-form-item label="属性名称" prop="name">
         <el-select
           v-model="formData.name"
-          filterable
-          allow-create
-          default-first-option
           :reserve-keyword="false"
-          placeholder="请选择属性名称。如果不存在，可手动输入选择"
+          allow-create
           class="!w-360px"
+          default-first-option
+          filterable
+          placeholder="请选择属性名称。如果不存在，可手动输入选择"
         >
           <el-option
             v-for="item in attributeOptions"

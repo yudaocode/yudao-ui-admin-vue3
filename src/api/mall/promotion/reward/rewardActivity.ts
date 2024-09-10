@@ -1,34 +1,39 @@
 import request from '@/config/axios'
 
-export interface DiscountActivityVO {
+export interface RewardActivityVO {
   id?: number
   name?: string
   startTime?: Date
   endTime?: Date
+  startAndEndTime?: Date[] // 只前端使用
   remark?: string
   conditionType?: number
   productScope?: number
+  rules: RewardRule[]
+  // 如下仅用于表单，不提交
+  productScopeValues?: number[] // 商品范围：值为品类编号列表、商品编号列表
+  productCategoryIds?: number[]
   productSpuIds?: number[]
-  rules?: DiscountProductVO[]
 }
 
 // 优惠规则
-export interface DiscountProductVO {
-  limit: number
-  discountPrice: number
-  freeDelivery: boolean
+export interface RewardRule {
+  limit?: number
+  discountPrice?: number
+  freeDelivery?: boolean
   point: number
-  couponIds: number[]
-  couponCounts: number[]
+  giveCouponTemplateCounts?: {
+    [key: number]: number
+  }
 }
 
 // 新增满减送活动
-export const createRewardActivity = async (data: DiscountActivityVO) => {
+export const createRewardActivity = async (data: RewardActivityVO) => {
   return await request.post({ url: '/promotion/reward-activity/create', data })
 }
 
 // 更新满减送活动
-export const updateRewardActivity = async (data: DiscountActivityVO) => {
+export const updateRewardActivity = async (data: RewardActivityVO) => {
   return await request.put({ url: '/promotion/reward-activity/update', data })
 }
 
