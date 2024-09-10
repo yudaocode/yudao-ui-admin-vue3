@@ -56,7 +56,7 @@
         label="分类"
         prop="productCategoryIds"
       >
-        <ProductCategorySelect v-model="formData.productCategoryIds" />
+        <ProductCategorySelect v-model="formData.productCategoryIds" :multiple="true" />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" placeholder="请输入备注" />
@@ -188,7 +188,7 @@ const getProductScope = async () => {
     case PromotionProductScopeEnum.CATEGORY.scope:
       await nextTick()
       let productCategoryIds = formData.value.productScopeValues as any
-      if (Array.isArray(productCategoryIds) && productCategoryIds.length > 0) {
+      if (Array.isArray(productCategoryIds) && productCategoryIds.length === 1) {
         // 单选时使用数组不能反显
         productCategoryIds = productCategoryIds[0]
       }
