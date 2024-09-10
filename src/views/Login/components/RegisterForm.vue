@@ -105,7 +105,7 @@ import { usePermissionStore } from '@/store/modules/permission'
 import * as LoginApi from '@/api/login'
 import { LoginStateEnum, useLoginState } from './useLogin'
 
-defineOptions({ name: 'LoginForm' })
+defineOptions({ name: 'RegisterForm' })
 
 const { t } = useI18n()
 const iconHouse = useIcon({ icon: 'ep:house' })
@@ -159,7 +159,7 @@ const registerData = reactive({
   captchaEnable: import.meta.env.VITE_APP_CAPTCHA_ENABLE,
   tenantEnable: import.meta.env.VITE_APP_TENANT_ENABLE,
   registerForm: {
-    tenantName: '',
+    tenantName: import.meta.env.VITE_APP_DEFAULT_LOGIN_TENANT || '',
     nickname: '',
     tenantId: 0,
     username: '',
@@ -169,7 +169,8 @@ const registerData = reactive({
   }
 })
 
-async function handleRegister(params) {
+// 提交注册
+const handleRegister = async (params: any) => {
   loading.value = true
   try {
     if (registerData.tenantEnable) {
@@ -180,11 +181,6 @@ async function handleRegister(params) {
     if (registerData.captchaEnable) {
       registerData.registerForm.captchaVerification = params.captchaVerification
     }
-
-    console.log(
-      'registerData.registerForm.captchaVerification====',
-      registerData.registerForm.captchaVerification
-    )
 
     const res = await LoginApi.register(registerData.registerForm)
     if (!res) {
@@ -225,6 +221,7 @@ const getCode = async () => {
     verify.value.show()
   }
 }
+
 // 获取租户 ID
 const getTenantId = async () => {
   if (registerData.tenantEnable === 'true') {
