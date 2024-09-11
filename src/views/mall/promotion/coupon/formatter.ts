@@ -33,8 +33,19 @@ export const validityTypeFormat = (row: CouponTemplateVO) => {
   return '未知【' + row.validityType + '】'
 }
 
+// 格式化【totalCount】
+export const totalCountFormat = (row: CouponTemplateVO) => {
+  if (row.totalCount === -1) {
+    return '不限制'
+  }
+  return row.totalCount
+}
+
 // 格式化【剩余数量】
 export const remainedCountFormat = (row: CouponTemplateVO) => {
+  if (row.totalCount === -1) {
+    return '不限制'
+  }
   return row.totalCount - row.takeCount
 }
 
