@@ -25,7 +25,7 @@
       <template #file="{ file }">
         <img :src="file.url" class="upload-image" />
         <div class="upload-handle" @click.stop>
-          <div class="handle-icon" @click="handlePictureCardPreview(file)">
+          <div class="handle-icon" @click="imagePreview(file.url!)">
             <Icon icon="ep:zoom-in" />
             <span>查看</span>
           </div>
@@ -39,16 +39,12 @@
     <div class="el-upload__tip">
       <slot name="tip"></slot>
     </div>
-    <el-image-viewer
-      v-if="imgViewVisible"
-      :url-list="[viewImageUrl]"
-      @close="imgViewVisible = false"
-    />
   </div>
 </template>
 <script lang="ts" setup>
 import type { UploadFile, UploadProps, UploadUserFile } from 'element-plus'
 import { ElNotification } from 'element-plus'
+import { createImageViewer } from '@/components/ImageViewer'
 
 import { propTypes } from '@/utils/propTypes'
 import { useUpload } from '@/components/UploadFile/src/useUpload'
@@ -56,6 +52,13 @@ import { useUpload } from '@/components/UploadFile/src/useUpload'
 defineOptions({ name: 'UploadImgs' })
 
 const message = useMessage() // 消息弹窗
+// 查看图片
+const imagePreview = (imgUrl: string) => {
+  createImageViewer({
+    zIndex: 9999999,
+    urlList: [imgUrl]
+  })
+}
 
 type FileTypes =
   | 'image/apng'
@@ -177,14 +180,6 @@ const handleExceed = () => {
     message: `当前最多只能上传 ${props.limit} 张图片，请移除后上传！`,
     type: 'warning'
   })
-}
-
-// 图片预览
-const viewImageUrl = ref('')
-const imgViewVisible = ref(false)
-const handlePictureCardPreview: UploadProps['onPreview'] = (uploadFile) => {
-  viewImageUrl.value = uploadFile.url!
-  imgViewVisible.value = true
 }
 </script>
 
