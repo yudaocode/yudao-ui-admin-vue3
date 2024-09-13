@@ -88,7 +88,7 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
     // 2. 生成 data（AppRouteRecordRaw）
     // 路由地址转首字母大写驼峰，作为路由名称，适配keepAlive
     let data: AppRouteRecordRaw = {
-      path: route.path.indexOf('?') > -1 ? route.path.split('?')[0] : route.path,
+      path: route.path.indexOf('?') > -1 && !route.path.startsWith('http') ? route.path.split('?')[0] : route.path,
       name:
         route.componentName && route.componentName.length > 0
           ? route.componentName
