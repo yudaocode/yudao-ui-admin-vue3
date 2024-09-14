@@ -118,6 +118,7 @@ const open = async (type: string, id?: number) => {
       data.startAndEndTime = [data.startTime, data.endTime]
       // 规则分转元
       data.rules?.forEach((item: any) => {
+        item.limit = fenToYuan(item.limit || 0)
         item.discountPrice = fenToYuan(item.discountPrice || 0)
       })
       formData.value = data
@@ -150,6 +151,7 @@ const submitForm = async () => {
     delete data.startAndEndTime
     // 规则元转分
     data.rules.forEach((item) => {
+      item.limit = yuanToFen(item.limit || 0)
       item.discountPrice = yuanToFen(item.discountPrice || 0)
     })
     // 设置商品范围
