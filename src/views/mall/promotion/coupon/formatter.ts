@@ -16,10 +16,15 @@ export const discountFormat = (row: CouponTemplateVO) => {
 
 // 格式化【领取上限】
 export const takeLimitCountFormat = (row: CouponTemplateVO) => {
-  if (row.takeLimitCount === -1) {
-    return '无领取限制'
+  if(row.takeLimitCount){
+    if (row.takeLimitCount === -1) {
+      return '无领取限制'
+    }
+    return `${row.takeLimitCount} 张/人`
+  }else{
+    return ' '
   }
-  return `${row.takeLimitCount} 张/人`
+
 }
 
 // 格式化【有效期限】
