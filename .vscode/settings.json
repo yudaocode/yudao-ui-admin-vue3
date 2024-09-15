@@ -87,7 +87,7 @@
     "source.fixAll.stylelint": "explicit"
   },
   "[vue]": {
-    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "i18n-ally.localesPaths": ["src/locales"],
   "i18n-ally.keystyle": "nested",
