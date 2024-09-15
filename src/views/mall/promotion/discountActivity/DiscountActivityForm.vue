@@ -190,7 +190,7 @@ const submitForm = async () => {
     const products = cloneDeep(spuAndSkuListRef.value.getSkuConfigs('productConfig'))
     products.forEach((item: DiscountActivityApi.DiscountProductVO) => {
       item.discountPercent = convertToInteger(item.discountPercent)
-      item.discountPrice = convertToInteger(item.discountPrice)
+      item.discountPrice = convertToInteger(yuanToFen(item.discountPrice))
     })
     const data = cloneDeep(formRef.value.formModel) as DiscountActivityApi.DiscountActivityVO
     data.products = products

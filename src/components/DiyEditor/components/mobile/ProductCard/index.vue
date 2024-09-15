@@ -67,7 +67,7 @@
             class="text-16px"
             :style="{ color: property.fields.price.color }"
           >
-            ￥{{ fenToYuan(spu.price) }}
+            ￥{{ fenToYuan(spu.price as any) }}
           </span>
           <!-- 市场价 -->
           <span

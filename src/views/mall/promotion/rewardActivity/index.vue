@@ -27,7 +27,7 @@
           placeholder="请选择活动状态"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_ACTIVITY_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -71,6 +71,11 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" default-expand-all row-key="id">
       <el-table-column label="活动名称" prop="name" />
+      <el-table-column label="活动范围" prop="productScope" >
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.PROMOTION_PRODUCT_SCOPE" :value="scope.row.productScope" />
+        </template>
+      </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
