@@ -116,6 +116,7 @@ import {
   validityTypeFormat
 } from '@/views/mall/promotion/coupon/formatter'
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
+import { CouponTemplateTakeTypeEnum } from '@/utils/constants'
 
 defineOptions({ name: 'CouponSelect' })
 
@@ -138,7 +139,7 @@ const queryParams = reactive({
   pageSize: 10,
   name: null,
   discountType: null,
-  canTakeTypes:[1]//只获得直接领取的券
+  canTakeTypes: [CouponTemplateTakeTypeEnum.USER.type] // 只获得直接领取的券
 })
 const queryFormRef = ref() // 搜索的表单
 const selectedCouponList = ref<CouponTemplateApi.CouponTemplateVO[]>([]) // 选择的数据
