@@ -38,18 +38,44 @@
 import ProcessNodeTree from './ProcessNodeTree.vue'
 import { updateBpmSimpleModel, getBpmSimpleModel } from '@/api/bpm/simple'
 import { SimpleFlowNode, NodeType, NodeId, NODE_DEFAULT_TEXT } from './consts'
-
+import { getModel } from '@/api/bpm/model'
+import { getForm, FormVO } from '@/api/bpm/form'
+import { handleTree } from '@/utils/tree'
+import * as RoleApi from '@/api/system/role'
+import * as DeptApi from '@/api/system/dept'
+import * as PostApi from '@/api/system/post'
+import * as UserApi from '@/api/system/user'
+import * as UserGroupApi from '@/api/bpm/userGroup'
 defineOptions({
   name: 'SimpleProcessDesigner'
 })
-
 const router = useRouter() // 路由
 const props = defineProps({
-  modelId: String
+  modelId: {
+    type: String,
+    required: true
+  }
 })
+
+const formFields = ref<string[]>([])
+const formType = ref(20)
+const roleOptions = ref<RoleApi.RoleVO[]>([]) // 角色列表
+const postOptions = ref<PostApi.PostVO[]>([]) // 岗位列表
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
+const deptOptions = ref<DeptApi.DeptVO[]>([]) // 部门列表
+const deptTreeOptions = ref()
+const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
+provide('formFields', formFields)
+provide('formType', formType)
+provide('roleList', roleOptions)
+provide('postList', postOptions)
+provide('userList', userOptions)
+provide('deptList', deptOptions)
+provide('userGroupList', userGroupOptions)
+provide('deptTree', deptTreeOptions)
+
 const message = useMessage() // 国际化
 const processNodeTree = ref<SimpleFlowNode | undefined>()
-
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
 const saveSimpleFlowModel = async () => {
@@ -137,6 +163,29 @@ const zoomIn = () => {
 }
 
 onMounted(async () => {
+  // 获取表单字段
+  const bpmnModel = await getModel(props.modelId)
+  if (bpmnModel) {
+    formType.value = bpmnModel.formType
+    if (formType.value === 10) {
+      const bpmnForm = (await getForm(bpmnModel.formId)) as unknown as FormVO
+      formFields.value = bpmnForm?.fields
+    }
+  }
+  // 获得角色列表
+  roleOptions.value = await RoleApi.getSimpleRoleList()
+  // 获得岗位列表
+  postOptions.value = await PostApi.getSimplePostList()
+  // 获得用户列表
+  userOptions.value = await UserApi.getSimpleUserList()
+  // 获得部门列表
+  deptOptions.value = await DeptApi.getSimpleDeptList()
+
+  deptTreeOptions.value = handleTree(deptOptions.value as DeptApi.DeptVO[], 'id')
+  // 获取用户组列表
+  userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
+
+  // 获取 SIMPLE 设计器模型
   const result = await getBpmSimpleModel(props.modelId)
   if (result) {
     processNodeTree.value = result
