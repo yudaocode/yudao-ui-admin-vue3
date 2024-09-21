@@ -103,7 +103,7 @@
 import { ProductApi, ProductVO } from '@/api/iot/product'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
-defineOptions({ name: 'ProductForm' })
+defineOptions({ name: 'IoTProductForm' })
 
 const { t } = useI18n()
 const message = useMessage()

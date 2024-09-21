@@ -20,7 +20,7 @@ import { ProductApi, ProductVO } from '@/api/iot/product'
 import ProductDetailsHeader from '@/views/iot/product/detail/ProductDetailsHeader.vue'
 import ProductDetailsInfo from '@/views/iot/product/detail/ProductDetailsInfo.vue'
 
-defineOptions({ name: 'IotProductDetail' })
+defineOptions({ name: 'IoTProductDetail' })
 
 const route = useRoute()
 const message = useMessage()

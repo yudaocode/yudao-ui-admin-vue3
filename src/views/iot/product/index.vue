@@ -44,7 +44,11 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="产品名称" align="center" prop="name" />
+      <el-table-column label="产品名称" align="center" prop="name">
+        <template #default="scope">
+          <el-link @click="openDetail(scope.row.id)">{{ scope.row.name }}</el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="ProductKey" align="center" prop="productKey" />
       <el-table-column label="设备类型" align="center" prop="deviceType">
         <template #default="scope">
@@ -106,7 +110,7 @@ import ProductForm from './ProductForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 
 /** iot 产品 列表 */
-defineOptions({ name: 'Product' })
+defineOptions({ name: 'IoTProduct' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -166,7 +170,7 @@ const openForm = (type: string, id?: number) => {
 /** 打开详情 */
 const { currentRoute, push } = useRouter()
 const openDetail = (id: number) => {
-  push({ name: 'IotProductDetail', params: { id } })
+  push({ name: 'IoTProductDetail', params: { id } })
 }
 
 /** 删除按钮操作 */

@@ -51,5 +51,10 @@ export const ProductApi = {
   // 更新产品状态
   updateProductStatus: async (id: number, status: number) => {
     return await request.put({ url: `/iot/product/update-status?id=` + id + `&status=` + status })
+  },
+
+  // 查询产品（精简)列表
+  getSimpleProductList() {
+    return request.get({ url: '/iot/product/list-all-simple' })
   }
 }
