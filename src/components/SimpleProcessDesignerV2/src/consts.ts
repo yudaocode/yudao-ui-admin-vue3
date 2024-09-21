@@ -62,7 +62,6 @@ export interface SimpleFlowNode {
   type: NodeType
   name: string
   showText?: string
-  attributes?: any
   // 孩子节点
   childNode?: SimpleFlowNode
   // 条件节点
@@ -89,6 +88,15 @@ export interface SimpleFlowNode {
   assignEmptyHandler?: AssignEmptyHandler
   // 审批节点的审批人与发起人相同时，对应的处理类型
   assignStartUserHandlerType?: number
+  // 条件类型
+  conditionType?: ConditionType
+  // 条件表达式
+  conditionExpression?: string
+  // 条件组
+  conditionGroups?: ConditionGroup
+  // 是否默认的条件
+  defaultFlow?: boolean
+
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -292,7 +300,7 @@ export enum TimeUnitType {
 }
 
 // 条件配置类型 （ 用于条件节点配置 ）
-export enum ConditionConfigType {
+export enum ConditionType {
   /**
    * 条件表达式
    */
@@ -428,8 +436,8 @@ export const APPROVE_METHODS: DictDataVO[] = [
 ]
 
 export const CONDITION_CONFIG_TYPES: DictDataVO[] = [
-  { label: '条件表达式', value: 1 },
-  { label: '条件规则', value: 2 }
+  { label: '条件表达式', value: ConditionType.EXPRESSION },
+  { label: '条件规则', value: ConditionType.RULE }
 ]
 
 // 时间单位类型

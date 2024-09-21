@@ -120,10 +120,9 @@ const addNode = (type: number) => {
           showText: '',
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
-          attributes: {
-            conditionType: 1,
-            defaultFlow: false
-          }
+          conditionType: 1,
+          defaultFlow: false
+          
         },
         {
           id: 'Flow_' + generateUUID(),
@@ -131,10 +130,8 @@ const addNode = (type: number) => {
           showText: '其它情况进入此流程',
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
-          attributes: {
-            conditionType: undefined,
-            defaultFlow: true
-          }
+          conditionType: undefined,
+          defaultFlow: true
         }
       ]
     }

@@ -130,7 +130,7 @@ const blurEvent = (index: number) => {
   showInputs.value[index] = false
   const conditionNode = currentNode.value.conditionNodes?.at(index) as SimpleFlowNode
   conditionNode.name =
-    conditionNode.name || getDefaultConditionNodeName(index, conditionNode.attributes?.defaultFlow)
+    conditionNode.name || getDefaultConditionNodeName(index, conditionNode.defaultFlow)
 }
 
 // 点击条件名称
@@ -156,10 +156,8 @@ const addCondition = () => {
       type: NodeType.CONDITION_NODE,
       childNode: undefined,
       conditionNodes: [],
-      attributes: {
-        conditionType: 1,
-        defaultFlow: false
-      }
+      conditionType: 1,
+      defaultFlow: false
     }
     conditionNodes.splice(lastIndex, 0, conditionData)
   }

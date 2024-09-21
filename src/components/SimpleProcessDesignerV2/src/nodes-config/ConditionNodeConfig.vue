@@ -26,19 +26,17 @@
       </div>
     </template>
     <div>
-      <div class="mb-3 text-size-sm" v-if="currentNode.attributes.defaultFlow"
-        >其它条件不满足进入此分支（该分支不可编辑和删除）</div
-      >
+      <div class="mb-3 font-size-16px" v-if="currentNode.defaultFlow">其它条件不满足进入此分支（该分支不可编辑和删除）</div>
       <div v-else>
         <el-form
           ref="formRef"
-          :model="currentNode.attributes"
+          :model="currentNode"
           :rules="formRules"
           label-position="top"
         >
           <el-form-item label="配置方式" prop="conditionType">
             <el-radio-group
-              v-model="currentNode.attributes.conditionType"
+              v-model="currentNode.conditionType"
               @change="changeConditionType"
             >
               <el-radio
@@ -53,18 +51,18 @@
           </el-form-item>
 
           <el-form-item
-            v-if="currentNode.attributes.conditionType === 1"
+            v-if="currentNode.conditionType === 1"
             label="条件表达式"
             prop="conditionExpression"
           >
             <el-input
               type="textarea"
-              v-model="currentNode.attributes.conditionExpression"
+              v-model="currentNode.conditionExpression"
               clearable
               style="width: 100%"
             />
           </el-form-item>
-          <el-form-item v-if="currentNode.attributes.conditionType === 2" label="条件规则">
+          <el-form-item v-if="currentNode.conditionType === 2" label="条件规则">
             <div class="condition-group-tool">
               <div class="flex items-center">
                 <div class="mr-4">条件组关系</div>
@@ -75,9 +73,6 @@
                   inactive-text="或"
                 />
               </div>
-              <!-- <div class="flex items-center"> 
-                  <el-button size="small" type="primary">添加条件组</el-button>
-                </div>  -->
             </div>
             <el-space direction="vertical" :spacer="conditionGroups.and ? '且' : '或'">
               <el-card
@@ -166,7 +161,7 @@
 import {
   SimpleFlowNode,
   CONDITION_CONFIG_TYPES,
-  ConditionConfigType,
+  ConditionType,
   COMPARISON_OPERATORS,
   ConditionGroup,
   Condition,
@@ -183,7 +178,7 @@ const conditionConfigTypes = computed(() => {
   return CONDITION_CONFIG_TYPES.filter((item) => {
     // 业务表单暂时去掉条件规则选项
     if (formType?.value !== 10) {
-      return item.value === 1
+      return item.value === ConditionType.RULE
     } else {
       return true
     }
@@ -202,9 +197,9 @@ const props = defineProps({
 })
 const settingVisible = ref(false)
 const open = () => {
-  if (currentNode.value.attributes.conditionType === ConditionConfigType.RULE) {
-    if (currentNode.value.attributes.conditionGroups) {
-      conditionGroups.value = currentNode.value.attributes.conditionGroups
+  if (currentNode.value.conditionType === ConditionType.RULE) {
+    if (currentNode.value.conditionGroups) {
+      conditionGroups.value = currentNode.value.conditionGroups
     }
   }
   settingVisible.value = true
@@ -227,7 +222,7 @@ const blurEvent = () => {
   showInput.value = false
   currentNode.value.name =
     currentNode.value.name ||
-    getDefaultConditionNodeName(props.nodeIndex, currentNode.value.attributes?.defaultFlow)
+    getDefaultConditionNodeName(props.nodeIndex, currentNode.value?.defaultFlow)
 }
 
 const currentNode = ref<SimpleFlowNode>(props.conditionNode)
@@ -256,7 +251,7 @@ const formRef = ref() // 表单 Ref
 
 // 保存配置
 const saveConfig = async () => {
-  if (!currentNode.value.attributes.defaultFlow) {
+  if (!currentNode.value.defaultFlow) {
     // 校验表单
     if (!formRef) return false
     const valid = await formRef.value.validate()
@@ -266,12 +261,12 @@ const saveConfig = async () => {
       return false
     }
     currentNode.value.showText = showText
-    if (currentNode.value.attributes.conditionType === ConditionConfigType.EXPRESSION) {
-      currentNode.value.attributes.conditionGroups = undefined
+    if (currentNode.value.conditionType === ConditionType.EXPRESSION) {
+      currentNode.value.conditionGroups = undefined
     }
-    if (currentNode.value.attributes.conditionType === ConditionConfigType.RULE) {
-      currentNode.value.attributes.conditionExpression = undefined
-      currentNode.value.attributes.conditionGroups = conditionGroups.value
+    if (currentNode.value.conditionType === ConditionType.RULE) {
+      currentNode.value.conditionExpression = undefined
+      currentNode.value.conditionGroups = conditionGroups.value
     }
   }
   settingVisible.value = false
@@ -279,12 +274,12 @@ const saveConfig = async () => {
 }
 const getShowText = (): string => {
   let showText = ''
-  if (currentNode.value.attributes.conditionType === ConditionConfigType.EXPRESSION) {
-    if (currentNode.value.attributes.conditionExpression) {
-      showText = `表达式：${currentNode.value.attributes.conditionExpression}`
+  if (currentNode.value.conditionType === ConditionType.EXPRESSION) {
+    if (currentNode.value.conditionExpression) {
+      showText = `表达式：${currentNode.value.conditionExpression}`
     }
   }
-  if (currentNode.value.attributes.conditionType === ConditionConfigType.RULE) {
+  if (currentNode.value.conditionType === ConditionType.RULE) {
     // 条件组是否为与关系
     const groupAnd = conditionGroups.value.and
     let warningMesg: undefined | string = undefined
@@ -298,7 +293,7 @@ const getShowText = (): string => {
                 getFieldTitle(rule.leftSide) + ' ' + getOpName(rule.opCode) + ' ' + rule.rightSide
               )
             } else {
-              // 又一条规则不完善。提示错误
+              // 有一条规则不完善。提示错误
               warningMesg = '请完善条件规则'
               return ''
             }
