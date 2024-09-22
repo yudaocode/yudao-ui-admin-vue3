@@ -119,6 +119,9 @@ const open = async (type: string, id?: number) => {
       // 规则分转元
       data.rules?.forEach((item: any) => {
         item.discountPrice = fenToYuan(item.discountPrice || 0)
+        if (data.conditionType === PromotionConditionTypeEnum.PRICE.type) {
+          item.limit = fenToYuan(item.limit || 0)
+        }
       })
       formData.value = data
       // 获得商品范围
@@ -151,6 +154,9 @@ const submitForm = async () => {
     // 规则元转分
     data.rules.forEach((item) => {
       item.discountPrice = yuanToFen(item.discountPrice || 0)
+      if (data.conditionType === PromotionConditionTypeEnum.PRICE.type) {
+        item.limit = yuanToFen(item.limit || 0)
+      }
     })
     // 设置商品范围
     setProductScopeValues(data)
