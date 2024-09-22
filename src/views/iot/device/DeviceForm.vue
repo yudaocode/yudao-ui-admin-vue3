@@ -8,7 +8,12 @@
       v-loading="formLoading"
     >
       <el-form-item label="产品" prop="productId">
-        <el-select v-model="formData.productId" placeholder="请选择产品" clearable>
+        <el-select
+          v-model="formData.productId"
+          placeholder="请选择产品"
+          :disabled="formType === 'update'"
+          clearable
+        >
           <el-option
             v-for="product in products"
             :key="product.id"
@@ -18,7 +23,11 @@
         </el-select>
       </el-form-item>
       <el-form-item label="DeviceName" prop="deviceName">
-        <el-input v-model="formData.deviceName" placeholder="请输入 DeviceName" />
+        <el-input
+          v-model="formData.deviceName"
+          placeholder="请输入 DeviceName"
+          :disabled="formType === 'update'"
+        />
       </el-form-item>
       <el-form-item label="备注名称" prop="nickname">
         <el-input v-model="formData.nickname" placeholder="请输入备注名称" />
@@ -52,7 +61,34 @@ const formData = ref({
   serialNumber: undefined
 })
 const formRules = reactive({
-  productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }]
+  productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
+  deviceName: [
+    {
+      pattern: /^[a-zA-Z0-9_.\-:@]{4,32}$/,
+      message:
+        '支持英文字母、数字、下划线（_）、中划线（-）、点号（.）、半角冒号（:）和特殊字符@，长度限制为4~32个字符',
+      trigger: 'blur'
+    }
+  ],
+  nickname: [
+    {
+      validator: (rule, value, callback) => {
+        if (value === undefined || value === null) {
+          callback()
+          return
+        }
+        const length = value.replace(/[\u4e00-\u9fa5\u3040-\u30ff]/g, 'aa').length
+        if (length < 4 || length > 64) {
+          callback(new Error('备注名称长度限制为4~64个字符，中文及日文算2个字符'))
+        } else if (!/^[\u4e00-\u9fa5\u3040-\u30ff_a-zA-Z0-9]+$/.test(value)) {
+          callback(new Error('备注名称只能包含中文、英文字母、日文、数字和下划线（_）'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ]
 })
 const formRef = ref() // 表单 Ref
 

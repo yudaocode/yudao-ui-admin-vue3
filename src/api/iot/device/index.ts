@@ -1,6 +1,6 @@
 import request from '@/config/axios'
 
-// IoT 设备 VO
+// 设备 VO
 export interface DeviceVO {
   id: number // 设备 ID，主键，自增
   deviceKey: string // 设备唯一标识符，全局唯一，用于识别设备
@@ -29,34 +29,44 @@ export interface DeviceVO {
   serialNumber: string // 设备序列号
 }
 
-// IoT 设备 API
+export interface DeviceUpdateStatusVO {
+  id: number // 设备 ID，主键，自增
+  status: number // 设备状态：0 - 未激活，1 - 在线，2 - 离线，3 - 已禁用
+}
+
+// 设备 API
 export const DeviceApi = {
-  // 查询IoT 设备分页
+  // 查询设备分页
   getDevicePage: async (params: any) => {
     return await request.get({ url: `/iot/device/page`, params })
   },
 
-  // 查询IoT 设备详情
+  // 查询设备详情
   getDevice: async (id: number) => {
     return await request.get({ url: `/iot/device/get?id=` + id })
   },
 
-  // 新增IoT 设备
+  // 新增设备
   createDevice: async (data: DeviceVO) => {
     return await request.post({ url: `/iot/device/create`, data })
   },
 
-  // 修改IoT 设备
+  // 修改设备
   updateDevice: async (data: DeviceVO) => {
     return await request.put({ url: `/iot/device/update`, data })
   },
 
-  // 删除IoT 设备
+  // 修改设备状态
+  updateDeviceStatus: async (data: DeviceUpdateStatusVO) => {
+    return await request.put({ url: `/iot/device/update-status`, data })
+  },
+
+  // 删除设备
   deleteDevice: async (id: number) => {
     return await request.delete({ url: `/iot/device/delete?id=` + id })
   },
 
-  // 导出IoT 设备 Excel
+  // 导出设备 Excel
   exportDevice: async (params) => {
     return await request.download({ url: `/iot/device/export-excel`, params })
   }

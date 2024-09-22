@@ -72,24 +72,22 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery">
+          <Icon icon="ep:search" class="mr-5px" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon icon="ep:refresh" class="mr-5px" />
+          重置
+        </el-button>
         <el-button
           type="primary"
           plain
           @click="openForm('create')"
           v-hasPermi="['iot:device:create']"
         >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
-        </el-button>
-        <el-button
-          type="success"
-          plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['iot:device:export']"
-        >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon icon="ep:plus" class="mr-5px" />
+          新增
         </el-button>
       </el-form-item>
     </el-form>
@@ -100,9 +98,21 @@
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="DeviceName" align="center" prop="deviceName" />
       <el-table-column label="备注名称" align="center" prop="nickname" />
-      <el-table-column label="设备所属产品" align="center" prop="productName" />
-      <el-table-column label="设备类型" align="center" prop="deviceType" />
-      <el-table-column label="设备状态" align="center" prop="status" />
+      <el-table-column label="设备所属产品" align="center" prop="productId">
+        <template #default="scope">
+          {{ productMap[scope.row.productId] }}
+        </template>
+      </el-table-column>
+      <el-table-column label="设备类型" align="center" prop="deviceType">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="scope.row.deviceType" />
+        </template>
+      </el-table-column>
+      <el-table-column label="设备状态" align="center" prop="status">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
       <el-table-column
         label="最后上线时间"
         align="center"
@@ -110,18 +120,6 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="启用禁用">
-        <template #default="scope">
-          <el-switch
-            v-model="scope.row.status"
-            active-value="1"
-            inactive-value="0"
-            active-text="启用"
-            inactive-text="禁用"
-            @change="handleUpdate(scope.row)"
-          />
-        </template>
-      </el-table-column>
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button
@@ -160,7 +158,7 @@
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { DeviceApi, DeviceVO } from '@/api/iot/device'
+import { DeviceApi, DeviceUpdateStatusVO, DeviceVO } from '@/api/iot/device'
 import DeviceForm from './DeviceForm.vue'
 import { ProductApi } from '@/api/iot/product'
 
@@ -176,34 +174,17 @@ const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  deviceKey: undefined,
   deviceName: undefined,
   productId: undefined,
-  productKey: undefined,
   deviceType: undefined,
   nickname: undefined,
-  gatewayId: undefined,
-  status: undefined,
-  statusLastUpdateTime: [],
-  lastOnlineTime: [],
-  lastOfflineTime: [],
-  activeTime: [],
-  ip: undefined,
-  firmwareVersion: undefined,
-  deviceSecret: undefined,
-  mqttClientId: undefined,
-  mqttUsername: undefined,
-  mqttPassword: undefined,
-  authType: undefined,
-  latitude: undefined,
-  longitude: undefined,
-  areaId: undefined,
-  address: undefined,
-  serialNumber: undefined,
-  createTime: []
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+
+/** 产品ID到名称的映射 */
+const productMap = reactive({})
 
 /** 查询列表 */
 const getList = async () => {
@@ -212,6 +193,13 @@ const getList = async () => {
     const data = await DeviceApi.getDevicePage(queryParams)
     list.value = data.list
     total.value = data.total
+    // 获取产品ID列表
+    const productIds = [...new Set(data.list.map((device) => device.productId))]
+    // 获取产品名称
+    const products = await Promise.all(productIds.map((id) => ProductApi.getProduct(id)))
+    products.forEach((product) => {
+      productMap[product.id] = product.name
+    })
   } finally {
     loading.value = false
   }
