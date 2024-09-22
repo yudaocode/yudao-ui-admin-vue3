@@ -96,7 +96,11 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="DeviceName" align="center" prop="deviceName" />
+      <el-table-column label="DeviceName" align="center" prop="deviceName">
+        <template #default="scope">
+          <el-link @click="openDetail(scope.row.id)">{{ scope.row.deviceName }}</el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="备注名称" align="center" prop="nickname" />
       <el-table-column label="设备所属产品" align="center" prop="productId">
         <template #default="scope">
@@ -122,6 +126,14 @@
       />
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openDetail(scope.row.id)"
+            v-hasPermi="['iot:product:query']"
+          >
+            查看
+          </el-button>
           <el-button
             link
             type="primary"
@@ -157,8 +169,7 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
-import { DeviceApi, DeviceUpdateStatusVO, DeviceVO } from '@/api/iot/device'
+import { DeviceApi, DeviceVO } from '@/api/iot/device'
 import DeviceForm from './DeviceForm.vue'
 import { ProductApi } from '@/api/iot/product'
 
@@ -223,6 +234,12 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
+/** 打开详情 */
+const { currentRoute, push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'IoTDeviceDetail', params: { id } })
+}
+
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
@@ -234,21 +251,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await DeviceApi.exportDevice(queryParams)
-    download.excel(data, '设备.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 /** 查询字典下拉列表 */
 const products = ref()

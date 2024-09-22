@@ -15,6 +15,7 @@ export interface DeviceVO {
   lastOnlineTime: Date // 最后上线时间
   lastOfflineTime: Date // 最后离线时间
   activeTime: Date // 设备激活时间
+  createTime: Date // 创建时间
   ip: string // 设备的 IP 地址
   firmwareVersion: string // 设备的固件版本
   deviceSecret: string // 设备密钥，用于设备认证，需安全存储
