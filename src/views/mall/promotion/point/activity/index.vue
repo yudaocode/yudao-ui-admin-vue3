@@ -83,9 +83,10 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
+      <!-- TODO @puhui999：这里没读取到 -->
       <el-table-column align="center" label="库存" min-width="80" prop="stock" />
       <el-table-column align="center" label="总库存" min-width="80" prop="totalStock" />
-      <el-table-column label="已兑换数量" min-width="80" prop="redeemedQuantity" />
+      <el-table-column label="已兑换数量" min-width="100" prop="redeemedQuantity" />
       <el-table-column
         :formatter="dateFormatter"
         align="center"
