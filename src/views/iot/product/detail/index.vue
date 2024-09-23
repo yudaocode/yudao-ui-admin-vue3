@@ -1,11 +1,13 @@
 <template>
-  <ProductDetailsHeader :loading="loading" :product="product" @refresh="getProductData(id)" />
+  <ProductDetailsHeader :loading="loading" :product="product" @refresh="() => getProductData(id)" />
   <el-col>
     <el-tabs>
       <el-tab-pane label="产品信息">
         <ProductDetailsInfo :product="product" />
       </el-tab-pane>
-      <el-tab-pane label="Topic 类列表" />
+      <el-tab-pane label="Topic 类列表">
+        <ProductTopic :product="product" />
+      </el-tab-pane>
       <el-tab-pane label="物模型">
         <!--        <ProductDetailsModel :product="product" />-->
       </el-tab-pane>
@@ -15,10 +17,10 @@
   </el-col>
 </template>
 <script lang="ts" setup>
-import { useTagsViewStore } from '@/store/modules/tagsView'
 import { ProductApi, ProductVO } from '@/api/iot/product'
 import ProductDetailsHeader from '@/views/iot/product/detail/ProductDetailsHeader.vue'
 import ProductDetailsInfo from '@/views/iot/product/detail/ProductDetailsInfo.vue'
+import { DeviceApi } from '@/api/iot/device'
 
 defineOptions({ name: 'IoTProductDetail' })
 
@@ -33,17 +35,25 @@ const getProductData = async (id: number) => {
   loading.value = true
   try {
     product.value = await ProductApi.getProduct(id)
-    console.log(product.value)
+    console.log('Product data:', product.value)
   } finally {
     loading.value = false
   }
 }
 
-/** 获取物模型 */
+// 查询设备数量
+const getDeviceCount = async (productId: string) => {
+  try {
+    const count = await DeviceApi.getDeviceCount(productId)
+    console.log('Device count response:', count)
+    return count
+  } catch (error) {
+    console.error('Error fetching device count:', error)
+    return 0
+  }
+}
 
 /** 初始化 */
-const { delView } = useTagsViewStore() // 视图操作
-const { currentRoute } = useRouter() // 路由
 onMounted(async () => {
   if (!id) {
     message.warning('参数错误，产品不能为空！')
@@ -51,5 +61,12 @@ onMounted(async () => {
     return
   }
   await getProductData(id)
+  // 查询设备数量
+  if (product.value.id) {
+    product.value.deviceCount = await getDeviceCount(product.value.id)
+    console.log('Device count:', product.value.deviceCount)
+  } else {
+    console.error('Product ID is undefined')
+  }
 })
 </script>

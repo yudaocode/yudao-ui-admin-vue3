@@ -58,49 +58,10 @@ const emit = defineEmits(['refresh'])
  *
  * @param text 需要复制的文本
  */
-const copyToClipboard = async (text: string) => {
-  if (!navigator.clipboard) {
-    // 浏览器不支持 Clipboard API，使用回退方法
-    const textarea = document.createElement('textarea')
-    textarea.value = text
-    // 防止页面滚动
-    textarea.style.position = 'fixed'
-    textarea.style.top = '0'
-    textarea.style.left = '0'
-    textarea.style.width = '2em'
-    textarea.style.height = '2em'
-    textarea.style.padding = '0'
-    textarea.style.border = 'none'
-    textarea.style.outline = 'none'
-    textarea.style.boxShadow = 'none'
-    textarea.style.background = 'transparent'
-    document.body.appendChild(textarea)
-    textarea.focus()
-    textarea.select()
-
-    try {
-      const successful = document.execCommand('copy')
-      if (successful) {
-        message.success('复制成功！')
-      } else {
-        message.error('复制失败，请手动复制')
-      }
-    } catch (err) {
-      console.error('Fallback: Oops, unable to copy', err)
-      message.error('复制失败，请手动复制')
-    }
-
-    document.body.removeChild(textarea)
-    return
-  }
-
-  try {
-    await navigator.clipboard.writeText(text)
-    message.success('复制成功！')
-  } catch (err) {
-    console.error('Async: Could not copy text: ', err)
-    message.error('复制失败，请手动复制')
-  }
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text).then(() => {
+    message.success('复制成功')
+  })
 }
 
 /**

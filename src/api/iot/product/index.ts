@@ -14,6 +14,7 @@ export interface ProductVO {
   netType: number // 联网方式, 0: Wi-Fi, 1: Cellular, 2: Ethernet, 3: 其他
   protocolType: number // 接入网关协议, 0: modbus, 1: opc-ua, 2: customize, 3: ble, 4: zigbee
   dataFormat: number // 数据格式, 0: 透传模式, 1: Alink JSON
+  deviceCount: number // 设备数量
 }
 
 // iot 产品 API

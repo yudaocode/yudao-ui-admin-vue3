@@ -45,8 +45,8 @@
     </el-descriptions>
     <el-descriptions :column="5" direction="horizontal">
       <el-descriptions-item label="设备数">
-        0
-        <el-button @click="goToManagement(product.productKey)">前往管理</el-button>
+        {{ product.deviceCount }}
+        <el-button @click="goToManagement(product.id)">前往管理</el-button>
       </el-descriptions-item>
     </el-descriptions>
   </ContentWrap>
@@ -63,8 +63,11 @@ const copyToClipboard = (text: string) => {
     message.success('复制成功')
   })
 }
-const goToManagement = (productKey: string) => {
-  message.warning('暂未开放')
+
+// 路由跳转到设备管理
+const { currentRoute, push } = useRouter()
+const goToManagement = (productId: string) => {
+  push({ name: 'IoTDevice', query: { productId } })
 }
 
 // 操作修改
@@ -93,6 +96,9 @@ const confirmUnpublish = async (id: number) => {
   }
 }
 
+// 定义 Props
 const { product } = defineProps<{ product: ProductVO }>()
+
+// 定义 Emits
 const emit = defineEmits(['refresh'])
 </script>
