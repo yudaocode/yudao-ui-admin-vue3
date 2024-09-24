@@ -3,9 +3,16 @@ import CryptoJS from 'crypto-js'
 import { UploadRawFile, UploadRequestOptions } from 'element-plus/es/components/upload/src/upload'
 import axios from 'axios'
 
+/**
+ * 获得上传 URL
+ */
+export const getUploadUrl = (): string => {
+  return import.meta.env.VITE_BASE_URL + import.meta.env.VITE_API_URL + '/infra/file/upload'
+}
+
 export const useUpload = () => {
   // 后端上传地址
-  const uploadUrl = import.meta.env.VITE_UPLOAD_URL
+  const uploadUrl = getUploadUrl()
   // 是否使用前端直连上传
   const isClientUpload = UPLOAD_TYPE.CLIENT === import.meta.env.VITE_UPLOAD_TYPE
   // 重写ElUpload上传方法
@@ -17,16 +24,18 @@ export const useUpload = () => {
       // 1.2 获取文件预签名地址
       const presignedInfo = await FileApi.getFilePresignedUrl(fileName)
       // 1.3 上传文件（不能使用 ElUpload 的 ajaxUpload 方法的原因：其使用的是 FormData 上传，Minio 不支持）
-      return axios.put(presignedInfo.uploadUrl, options.file, {
-        headers: {
-          'Content-Type': options.file.type,
-        }
-      }).then(() => {
-        // 1.4. 记录文件信息到后端（异步）
-        createFile(presignedInfo, fileName, options.file)
-        // 通知成功，数据格式保持与后端上传的返回结果一致
-        return { data: presignedInfo.url }
-      })
+      return axios
+        .put(presignedInfo.uploadUrl, options.file, {
+          headers: {
+            'Content-Type': options.file.type
+          }
+        })
+        .then(() => {
+          // 1.4. 记录文件信息到后端（异步）
+          createFile(presignedInfo, fileName, options.file)
+          // 通知成功，数据格式保持与后端上传的返回结果一致
+          return { data: presignedInfo.url }
+        })
     } else {
       // 模式二：后端上传
       // 重写 el-upload httpRequest 文件上传成功会走成功的钩子，失败走失败的钩子
