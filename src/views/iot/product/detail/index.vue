@@ -18,9 +18,10 @@
 </template>
 <script lang="ts" setup>
 import { ProductApi, ProductVO } from '@/api/iot/product'
+import { DeviceApi } from '@/api/iot/device'
 import ProductDetailsHeader from '@/views/iot/product/detail/ProductDetailsHeader.vue'
 import ProductDetailsInfo from '@/views/iot/product/detail/ProductDetailsInfo.vue'
-import { DeviceApi } from '@/api/iot/device'
+import ProductTopic from '@/views/iot/product/detail/ProductTopic.vue'
 
 defineOptions({ name: 'IoTProductDetail' })
 
