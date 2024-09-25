@@ -65,7 +65,7 @@
 <script setup lang="ts">
 import { ProductListProperty } from './config'
 import * as ProductSpuApi from '@/api/mall/product/spu'
-import { fenToYuan } from './index'
+import { fenToYuan } from '@/utils'
 
 /** 商品栏 */
 defineOptions({ name: 'ProductList' })
