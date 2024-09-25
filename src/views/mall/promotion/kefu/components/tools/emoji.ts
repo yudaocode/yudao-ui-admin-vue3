@@ -66,7 +66,7 @@ export const useEmoji = () => {
     )
     for (const path in pathList) {
       const imageModule: any = await pathList[path]()
-      emojiPathList.value.push(imageModule.default)
+      emojiPathList.value.push({ path: path, src: imageModule.default })
     }
   }
 
@@ -116,7 +116,10 @@ export const useEmoji = () => {
   function getEmojiFileByName(name: string) {
     for (const emoji of emojiList) {
       if (emoji.name === name) {
-        return emojiPathList.value.find((item: string) => item.indexOf(emoji.file) > -1)
+        const emojiPath = emojiPathList.value.find(
+          (item: { path: string; src: string }) => item.path.indexOf(emoji.file) > -1
+        )
+        return emojiPath ? emojiPath.src : undefined
       }
     }
     return false
