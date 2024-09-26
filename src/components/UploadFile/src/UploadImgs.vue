@@ -84,7 +84,7 @@ const props = defineProps({
   borderradius: propTypes.string.def('8px') // 组件边框圆角 ==> 非必传（默认为 8px）
 })
 
-const { uploadUrl, httpRequest } = useUpload()
+const { uploadUrl, httpRequest } = useUpload(false)
 
 const fileList = ref<UploadUserFile[]>([])
 const uploadNumber = ref<number>(0)

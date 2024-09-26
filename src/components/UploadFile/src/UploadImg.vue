@@ -99,7 +99,7 @@ const deleteImg = () => {
   emit('update:modelValue', '')
 }
 
-const { uploadUrl, httpRequest } = useUpload()
+const { uploadUrl, httpRequest } = useUpload(false)
 
 const editImg = () => {
   const dom = document.querySelector(`#${uuid.value} .el-upload__input`)

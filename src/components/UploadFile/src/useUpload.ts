@@ -1,4 +1,5 @@
 import * as FileApi from '@/api/infra/file'
+import * as SchoolApi from '@/api/school/star'
 import CryptoJS from 'crypto-js'
 import { UploadRawFile, UploadRequestOptions } from 'element-plus/es/components/upload/src/upload'
 import axios from 'axios'
@@ -10,7 +11,7 @@ export const getUploadUrl = (): string => {
   return import.meta.env.VITE_BASE_URL + import.meta.env.VITE_API_URL + '/infra/file/upload'
 }
 
-export const useUpload = () => {
+export const  useUpload = (url) => {
   // 后端上传地址
   const uploadUrl = getUploadUrl()
   // 是否使用前端直连上传
@@ -39,19 +40,36 @@ export const useUpload = () => {
     } else {
       // 模式二：后端上传
       // 重写 el-upload httpRequest 文件上传成功会走成功的钩子，失败走失败的钩子
-      return new Promise((resolve, reject) => {
-        FileApi.updateFile({ file: options.file })
-          .then((res) => {
-            if (res.code === 0) {
-              resolve(res)
-            } else {
+      if (url) {
+        return new Promise((resolve, reject) => {
+          SchoolApi.updateFile({ file: options.file})
+            .then((res) => {
+              if (res.code === 0) {
+                resolve(res)
+              } else {
+                reject(res)
+              }
+            })
+            .catch((res) => {
               reject(res)
-            }
-          })
-          .catch((res) => {
-            reject(res)
-          })
-      })
+            })
+        })
+      } else {
+        return new Promise((resolve, reject) => {
+          FileApi.updateFile({ file: options.file})
+            .then((res) => {
+              if (res.code === 0) {
+                resolve(res)
+              } else {
+                reject(res)
+              }
+            })
+            .catch((res) => {
+              reject(res)
+            })
+        })
+      }
+
     }
   }
 

@@ -13,14 +13,14 @@
       :on-exceed="handleExceed"
       :on-success="submitFormSuccess"
       :http-request="httpRequest"
-      accept=".jpg, .png, .gif"
+      accept=".xls, .xlsx"
       drag
     >
       <i class="el-icon-upload"></i>
       <div class="el-upload__text"> 将文件拖到此处，或 <em>点击上传</em></div>
       <template #tip>
         <div class="el-upload__tip" style="color: red">
-          提示：仅允许导入 jpg、png、gif 格式文件！
+          提示：仅允许导入 .xls .xlsx 格式文件！
         </div>
       </template>
     </el-upload>
@@ -44,7 +44,7 @@ const fileList = ref([]) // 文件列表
 const data = ref({ path: '' })
 const uploadRef = ref()
 
-const { uploadUrl, httpRequest } = useUpload(false)
+const { uploadUrl, httpRequest } = useUpload(true)
 
 /** 打开弹窗 */
 const open = async () => {

@@ -95,7 +95,7 @@ const uploadList = ref<UploadUserFile[]>([])
 const fileList = ref<UploadUserFile[]>([])
 const uploadNumber = ref<number>(0)
 
-const { uploadUrl, httpRequest } = useUpload()
+const { uploadUrl, httpRequest } = useUpload(false)
 
 // 文件上传之前判断
 const beforeUpload: UploadProps['beforeUpload'] = (file: UploadRawFile) => {
