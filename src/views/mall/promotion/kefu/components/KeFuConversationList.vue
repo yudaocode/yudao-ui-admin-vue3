@@ -217,7 +217,7 @@ watch(showRightMenu, (val) => {
   .right-menu-ul {
     position: absolute;
     background-color: var(--app-content-bg-color);
-    padding: 10px;
+    padding: 5px;
     margin: 0;
     list-style-type: none; /* 移除默认的项目符号 */
     border-radius: 12px;
