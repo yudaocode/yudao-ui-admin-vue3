@@ -9,7 +9,7 @@
     >
       <!-- 先选择 -->
       <template #spuId>
-        <el-button @click="spuSelectRef.open()">选择商品</el-button>
+        <el-button v-if="!isFormUpdate" @click="spuSelectRef.open()">选择商品</el-button>
         <SpuAndSkuList
           ref="spuAndSkuListRef"
           :rule-config="ruleConfig"
@@ -18,7 +18,12 @@
         >
           <el-table-column align="center" label="可兑换库存" min-width="168">
             <template #default="{ row: sku }">
-              <el-input-number v-model="sku.productConfig.stock" :min="0" class="w-100%" />
+              <el-input-number
+                v-model="sku.productConfig.stock"
+                :max="sku.stock"
+                :min="0"
+                class="w-100%"
+              />
             </template>
           </el-table-column>
           <el-table-column align="center" label="可兑换次数" min-width="168">
@@ -77,6 +82,7 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formRef = ref() // 表单 Ref
+const isFormUpdate = ref(false) // 是否更新表单
 
 // ================= 商品选择相关 =================
 
@@ -163,6 +169,7 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       const data = (await PointActivityApi.getPointActivity(id)) as PointActivityVO
+      isFormUpdate.value = true
       await getSpuDetails(
         data.spuId!,
         data.products?.map((sku) => sku.skuId),
@@ -213,6 +220,7 @@ const submitForm = async () => {
 const resetForm = async () => {
   spuList.value = []
   spuPropertyList.value = []
+  isFormUpdate.value = false
   await nextTick()
   formRef.value.getElFormRef().resetFields()
 }
