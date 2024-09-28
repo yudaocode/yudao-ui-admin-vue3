@@ -67,9 +67,8 @@
             :style="{ color: property.fields.price.color }"
             class="text-16px"
           >
-            {{ spu.point }}积分{{
-              !spu.pointPrice || spu.pointPrice === 0 ? '' : `+${fenToYuan(spu.pointPrice)}元`
-            }}
+            {{ spu.point }}积分
+            {{ !spu.pointPrice || spu.pointPrice === 0 ? '' : `+${fenToYuan(spu.pointPrice)}元` }}
           </span>
           <!-- 市场价 -->
           <span
