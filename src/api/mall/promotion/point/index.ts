@@ -1,11 +1,13 @@
 import request from '@/config/axios'
-import { Sku, Spu } from '@/api/mall/product/spu'
+import { Sku, Spu } from '@/api/mall/product/spu' // 积分商城活动 VO
 
 // 积分商城活动 VO
 export interface PointActivityVO {
   id: number // 积分商城活动编号
   spuId: number // 积分商城活动商品
   status: number // 活动状态
+  stock: number // 积分商城活动库存
+  totalStock: number // 积分商城活动总库存
   remark?: string // 备注
   sort: number // 排序
   createTime: string // 创建时间
@@ -17,7 +19,6 @@ export interface PointActivityVO {
   marketPrice: number // 商品市场价，单位：分
 
   //======================= 显示所需兑换积分最少的 sku 信息 =======================
-  maxCount: number // 可兑换数量
   point: number // 兑换积分
   price: number // 兑换金额，单位：分
 }
@@ -44,6 +45,13 @@ export interface SpuExtension extends Spu {
   skus: SkuExtension[] // 重写类型
 }
 
+export interface SpuExtension0 extends Spu {
+  pointStock: number // 积分商城活动库存
+  pointTotalStock: number // 积分商城活动总库存
+  point: number // 兑换积分
+  pointPrice: number // 兑换金额，单位：分
+}
+
 // 积分商城活动 API
 export const PointActivityApi = {
   // 查询积分商城活动分页
@@ -54,6 +62,11 @@ export const PointActivityApi = {
   // 查询积分商城活动详情
   getPointActivity: async (id: number) => {
     return await request.get({ url: `/promotion/point-activity/get?id=` + id })
+  },
+
+  // 查询积分商城活动列表，基于活动编号数组
+  getPointActivityListByIds: async (ids: number[]) => {
+    return request.get({ url: `/promotion/point-activity/list-by-ids?ids=${ids}` })
   },
 
   // 新增积分商城活动

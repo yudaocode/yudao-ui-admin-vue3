@@ -10,15 +10,6 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <el-form-item label="活动名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          class="!w-240px"
-          clearable
-          placeholder="请输入活动名称"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="活动状态" prop="status">
         <el-select
           v-model="queryParams.status"
@@ -83,10 +74,13 @@
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
-      <!-- TODO @puhui999：这里没读取到 -->
       <el-table-column align="center" label="库存" min-width="80" prop="stock" />
       <el-table-column align="center" label="总库存" min-width="80" prop="totalStock" />
-      <el-table-column label="已兑换数量" min-width="100" prop="redeemedQuantity" />
+      <el-table-column align="center" label="已兑换数量" min-width="100" prop="redeemedQuantity">
+        <template #default="{ row }">
+          {{ getRedeemedQuantity(row) }}
+        </template>
+      </el-table-column>
       <el-table-column
         :formatter="dateFormatter"
         align="center"
@@ -160,6 +154,7 @@ const queryParams = reactive({
   status: null
 })
 const queryFormRef = ref() // 搜索的表单
+const getRedeemedQuantity = computed(() => (row: any) => (row.totalStock || 0) - (row.stock || 0)) // 获得商品已兑换数量
 
 /** 查询列表 */
 const getList = async () => {
