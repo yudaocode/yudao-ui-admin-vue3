@@ -10,15 +10,6 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <el-form-item label="活动名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          class="!w-240px"
-          clearable
-          placeholder="请输入活动名称"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="活动状态" prop="status">
         <el-select
           v-model="queryParams.status"
