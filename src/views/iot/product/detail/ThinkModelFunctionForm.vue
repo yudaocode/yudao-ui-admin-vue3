@@ -8,35 +8,40 @@
       v-loading="formLoading"
     >
       <el-form-item label="功能类型" prop="type">
-        <el-select v-model="formData.type" placeholder="请选择功能类型">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_FUNCTION_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+        <el-radio-group v-model="formData.type">
+          <el-radio-button value="1"> 属性 </el-radio-button>
+          <el-radio-button value="2"> 服务 </el-radio-button>
+          <el-radio-button value="3"> 事件 </el-radio-button>
+        </el-radio-group>
       </el-form-item>
       <el-form-item label="功能名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入功能名称" />
       </el-form-item>
       <el-form-item label="标识符" prop="identifier">
-        <el-input v-model="formData.identifier" placeholder="请输入标识符" />
+        <el-input
+          v-model="formData.identifier"
+          placeholder="请输入标识符"
+          :disabled="formType === 'update'"
+        />
       </el-form-item>
-      <el-form-item label="数据类型" prop="dataType">
-        <el-select v-model="formData.dataType" placeholder="请选择数据类型">
+      <el-form-item label="数据类型" prop="type">
+        <el-select
+          v-model="formData.property.dataType.type"
+          placeholder="请选择数据类型"
+          :disabled="formType === 'update'"
+        >
           <el-option key="int" label="int32 (整数型)" value="int" />
           <el-option key="float" label="float (单精度浮点型)" value="float" />
           <el-option key="double" label="double (双精度浮点型)" value="double" />
-          <el-option key="text" label="text (文本型)" value="text" />
-          <el-option key="date" label="date (日期型)" value="date" />
-          <el-option key="bool" label="bool (布尔型)" value="bool" />
-          <el-option key="enum" label="enum (枚举型)" value="enum" />
-          <el-option key="struct" label="struct (结构体)" value="struct" />
-          <el-option key="array" label="array (数组)" value="array" />
+          <!--          <el-option key="text" label="text (文本型)" value="text" />-->
+          <!--          <el-option key="date" label="date (日期型)" value="date" />-->
+          <!--          <el-option key="bool" label="bool (布尔型)" value="bool" />-->
+          <!--          <el-option key="enum" label="enum (枚举型)" value="enum" />-->
+          <!--          <el-option key="struct" label="struct (结构体)" value="struct" />-->
+          <!--          <el-option key="array" label="array (数组)" value="array" />-->
         </el-select>
       </el-form-item>
-      <el-form-item label="取值范围" prop="range">
+      <el-form-item label="取值范围" prop="max">
         <el-input v-model="formData.property.dataType.specs.min" placeholder="请输入最小值" />
         <span class="mx-2">~</span>
         <el-input v-model="formData.property.dataType.specs.max" placeholder="请输入最大值" />
@@ -46,14 +51,7 @@
         <el-input v-model="formData.property.dataType.specs.step" placeholder="请输入步长" />
       </el-form-item>
       <el-form-item label="单位" prop="unit">
-        <el-select v-model="formData.property.dataType.specs.unit" placeholder="请选择单位">
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_UNIT_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+        <el-input v-model="formData.property.dataType.specs.unit" placeholder="请输入单位" />
       </el-form-item>
       <el-form-item label="读写类型" prop="accessMode">
         <el-radio-group v-model="formData.property.accessMode">
@@ -61,8 +59,12 @@
           <el-radio label="r">只读</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="功能描述" prop="description">
-        <el-input type="textarea" v-model="formData.description" placeholder="请输入功能描述" />
+      <el-form-item label="属性描述" prop="property.description">
+        <el-input
+          type="textarea"
+          v-model="formData.property.description"
+          placeholder="请输入属性描述"
+        />
       </el-form-item>
     </el-form>
 
@@ -96,11 +98,11 @@ const formData = ref({
   identifier: undefined,
   name: undefined,
   description: undefined,
-  type: undefined,
+  type: '1',
   property: {
     identifier: undefined,
     name: undefined,
-    accessMode: undefined,
+    accessMode: 'rw',
     required: true,
     dataType: {
       type: undefined,
@@ -110,13 +112,44 @@ const formData = ref({
         step: undefined,
         unit: undefined
       }
-    }
+    },
+    description: undefined // 添加这一行
   }
 })
 const formRules = reactive({
-  name: [{ required: true, message: '功能名称不能为空', trigger: 'blur' }],
+  name: [
+    { required: true, message: '功能名称不能为空', trigger: 'blur' },
+    {
+      pattern: /^[\u4e00-\u9fa5a-zA-Z0-9][\u4e00-\u9fa5a-zA-Z0-9\-_/\.]{0,29}$/,
+      message:
+        '支持中文、大小写字母、日文、数字、短划线、下划线、斜杠和小数点，必须以中文、英文或数字开头，不超过 30 个字符',
+      trigger: 'blur'
+    }
+  ],
   type: [{ required: true, message: '功能类型不能为空', trigger: 'blur' }],
-  identifier: [{ required: true, message: '标识符不能为空', trigger: 'blur' }],
+  identifier: [
+    { required: true, message: '标识符不能为空', trigger: 'blur' },
+    {
+      pattern: /^[a-zA-Z0-9_]{1,50}$/,
+      message: '支持大小写字母、数字和下划线，不超过 50 个字符',
+      trigger: 'blur'
+    },
+    {
+      validator: (rule, value, callback) => {
+        const reservedKeywords = ['set', 'get', 'post', 'property', 'event', 'time', 'value']
+        if (reservedKeywords.includes(value)) {
+          callback(
+            new Error(
+              'set, get, post, property, event, time, value 是系统保留字段，不能用于标识符定义'
+            )
+          )
+        } else {
+          callback()
+        }
+      },
+      trigger: 'blur'
+    }
+  ],
   property: {
     dataType: {
       type: [{ required: true, message: '数据类型不能为空', trigger: 'blur' }]
@@ -172,11 +205,11 @@ const resetForm = () => {
     identifier: undefined,
     name: undefined,
     description: undefined,
-    type: undefined,
+    type: '1',
     property: {
       identifier: undefined,
       name: undefined,
-      accessMode: undefined,
+      accessMode: 'rw',
       required: true,
       dataType: {
         type: undefined,
@@ -186,7 +219,8 @@ const resetForm = () => {
           step: undefined,
           unit: undefined
         }
-      }
+      },
+      description: undefined // 确保重置 description 字段
     }
   }
   formRef.value?.resetFields()

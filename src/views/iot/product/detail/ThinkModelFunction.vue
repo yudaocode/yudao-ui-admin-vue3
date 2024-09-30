@@ -40,7 +40,11 @@
   <ContentWrap>
     <el-tabs>
       <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-        <el-table-column label="功能类型" align="center" prop="type" />
+        <el-table-column label="功能类型" align="center" prop="type">
+          <template #default="scope">
+            <dict-tag :type="DICT_TYPE.IOT_PRODUCT_FUNCTION_TYPE" :value="scope.row.type" />
+          </template>
+        </el-table-column>
         <el-table-column label="功能名称" align="center" prop="name" />
         <el-table-column label="标识符" align="center" prop="identifier" />
         <el-table-column label="操作" align="center">
