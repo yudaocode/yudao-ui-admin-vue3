@@ -1,8 +1,8 @@
 <template>
-  <doc-alert title="【营销】满减送" url="https://doc.iocoder.cn/mall/promotion-record/" />
+  <doc-alert title="【营销】积分商城活动" url="https://doc.iocoder.cn/mall/promotion-point/" />
 
-  <!-- 搜索工作栏 -->
   <ContentWrap>
+    <!-- 搜索工作栏 -->
     <el-form
       ref="queryFormRef"
       :inline="true"
@@ -10,15 +10,6 @@
       class="-mb-15px"
       label-width="68px"
     >
-      <el-form-item label="活动名称" prop="name">
-        <el-input
-          v-model="queryParams.name"
-          class="!w-240px"
-          clearable
-          placeholder="请输入活动名称"
-          @keyup.enter="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="活动状态" prop="status">
         <el-select
           v-model="queryParams.status"
@@ -34,17 +25,6 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="活动时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-          end-placeholder="活动结束日期"
-          start-placeholder="活动开始日期"
-          type="daterange"
-          value-format="YYYY-MM-DD HH:mm:ss"
-        />
-      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery">
           <Icon class="mr-5px" icon="ep:search" />
@@ -55,7 +35,7 @@
           重置
         </el-button>
         <el-button
-          v-hasPermi="['promotion:reward-activity:create']"
+          v-hasPermi="['promotion:point-activity:create']"
           plain
           type="primary"
           @click="openForm('create')"
@@ -69,28 +49,36 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" default-expand-all row-key="id">
-      <el-table-column label="活动名称" prop="name" />
-      <el-table-column label="活动范围" prop="productScope" >
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column label="活动编号" min-width="80" prop="id" />
+      <el-table-column label="商品图片" min-width="80" prop="spuName">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.PROMOTION_PRODUCT_SCOPE" :value="scope.row.productScope" />
+          <el-image
+            :preview-src-list="[scope.row.picUrl]"
+            :src="scope.row.picUrl"
+            class="h-40px w-40px"
+            preview-teleported
+          />
         </template>
       </el-table-column>
+      <el-table-column label="商品标题" min-width="300" prop="spuName" />
       <el-table-column
-        :formatter="dateFormatter"
-        align="center"
-        label="活动开始时间"
-        prop="startTime"
+        :formatter="fenToYuanFormat"
+        label="原价"
+        min-width="100"
+        prop="marketPrice"
       />
-      <el-table-column
-        :formatter="dateFormatter"
-        align="center"
-        label="活动结束时间"
-        prop="endTime"
-      />
-      <el-table-column align="center" label="状态" prop="status">
+      <el-table-column label="原价" min-width="100" prop="marketPrice" />
+      <el-table-column align="center" label="活动状态" min-width="100" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="库存" min-width="80" prop="stock" />
+      <el-table-column align="center" label="总库存" min-width="80" prop="totalStock" />
+      <el-table-column align="center" label="已兑换数量" min-width="100" prop="redeemedQuantity">
+        <template #default="{ row }">
+          {{ getRedeemedQuantity(row) }}
         </template>
       </el-table-column>
       <el-table-column
@@ -98,12 +86,12 @@
         align="center"
         label="创建时间"
         prop="createTime"
-        width="180"
+        width="180px"
       />
-      <el-table-column align="center" label="操作">
+      <el-table-column align="center" fixed="right" label="操作" width="150px">
         <template #default="scope">
           <el-button
-            v-hasPermi="['promotion:reward-activity:update']"
+            v-hasPermi="['promotion:point-activity:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
@@ -112,7 +100,7 @@
           </el-button>
           <el-button
             v-if="scope.row.status === 0"
-            v-hasPermi="['promotion:reward-activity:close']"
+            v-hasPermi="['promotion:point-activity:close']"
             link
             type="danger"
             @click="handleClose(scope.row.id)"
@@ -120,7 +108,8 @@
             关闭
           </el-button>
           <el-button
-            v-hasPermi="['promotion:reward-activity:delete']"
+            v-else
+            v-hasPermi="['promotion:point-activity:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
@@ -140,36 +129,38 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <RewardForm ref="formRef" @success="getList" />
+  <PointActivityForm ref="formRef" @success="getList" />
 </template>
+
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import * as RewardActivityApi from '@/api/mall/promotion/reward/rewardActivity'
-import RewardForm from './RewardForm.vue'
+import PointActivityForm from './PointActivityForm.vue'
+import { fenToYuanFormat } from '@/utils/formatter'
+import { PointActivityApi } from '@/api/mall/promotion/point'
 
-defineOptions({ name: 'PromotionRewardActivity' })
+defineOptions({ name: 'PointActivity' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
-const list = ref<any[]>([]) // 列表的数据
+const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: undefined,
-  status: undefined,
-  createTime: []
+  name: null,
+  status: null
 })
 const queryFormRef = ref() // 搜索的表单
+const getRedeemedQuantity = computed(() => (row: any) => (row.totalStock || 0) - (row.stock || 0)) // 获得商品已兑换数量
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    const data = await RewardActivityApi.getRewardActivityPage(queryParams)
+    const data = await PointActivityApi.getPointActivityPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -179,6 +170,7 @@ const getList = async () => {
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
+  queryParams.pageNo = 1
   getList()
 }
 
@@ -189,18 +181,18 @@ const resetQuery = () => {
 }
 
 /** 添加/修改操作 */
-const formRef = ref<InstanceType<typeof RewardForm>>()
+const formRef = ref()
 const openForm = (type: string, id?: number) => {
-  formRef.value?.open(type, id)
+  formRef.value.open(type, id)
 }
 
 /** 关闭按钮操作 */
 const handleClose = async (id: number) => {
   try {
     // 关闭的二次确认
-    await message.confirm('确认关闭该满减活动吗？')
+    await message.confirm('确认关闭该积分商城活动吗？')
     // 发起关闭
-    await RewardActivityApi.closeRewardActivity(id)
+    await PointActivityApi.closePointActivity(id)
     message.success('关闭成功')
     // 刷新列表
     await getList()
@@ -213,7 +205,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await RewardActivityApi.deleteRewardActivity(id)
+    await PointActivityApi.deletePointActivity(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -221,7 +213,7 @@ const handleDelete = async (id: number) => {
 }
 
 /** 初始化 **/
-onMounted(() => {
-  getList()
+onMounted(async () => {
+  await getList()
 })
 </script>

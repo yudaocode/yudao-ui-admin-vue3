@@ -47,7 +47,12 @@ export const getReward = async (id: number) => {
   return await request.get({ url: '/promotion/reward-activity/get?id=' + id })
 }
 
-// 删除限时折扣活动
+// 删除满减送活动
 export const deleteRewardActivity = async (id: number) => {
   return await request.delete({ url: '/promotion/reward-activity/delete?id=' + id })
+}
+
+// 关闭满减送活动
+export const closeRewardActivity = async (id: number) => {
+  return await request.put({ url: '/promotion/reward-activity/close?id=' + id })
 }

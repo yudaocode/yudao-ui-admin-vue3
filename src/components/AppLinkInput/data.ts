@@ -5,6 +5,7 @@ export interface AppLinkGroup {
   // 链接列表
   links: AppLink[]
 }
+
 // APP 链接
 export interface AppLink {
   // 链接名称
@@ -21,6 +22,8 @@ export const enum APP_LINK_TYPE_ENUM {
   ACTIVITY_COMBINATION,
   // 秒杀活动
   ACTIVITY_SECKILL,
+  // 积分商城活动
+  ACTIVITY_POINT,
   // 文章详情
   ARTICLE_DETAIL,
   // 优惠券详情
@@ -129,6 +132,11 @@ export const APP_LINK_GROUP_LIST = [
         name: '秒杀活动',
         path: '/pages/activity/seckill/list',
         type: APP_LINK_TYPE_ENUM.ACTIVITY_SECKILL
+      },
+      {
+        name: '积分商城活动',
+        path: '/pages/activity/point/list',
+        type: APP_LINK_TYPE_ENUM.ACTIVITY_POINT
       },
       {
         name: '签到中心',

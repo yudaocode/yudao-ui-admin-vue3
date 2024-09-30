@@ -10,14 +10,25 @@
         <el-form ref="formRef" :model="rule">
           <el-form-item label="优惠门槛:" label-width="100px" prop="limit">
             满
+            <el-input-number
+              v-if="PromotionConditionTypeEnum.PRICE.type === formData.conditionType"
+              v-model="rule.limit"
+              :min="0"
+              :precision="2"
+              :step="0.1"
+              class="w-150px! p-x-20px!"
+              placeholder=""
+              type="number"
+              controls-position="right"
+            />
             <el-input
+              v-else
               v-model="rule.limit"
               :min="0"
               class="w-150px! p-x-20px!"
               placeholder=""
               type="number"
             />
-            <!-- TODO @puhui999：走字典数据？ -->
             {{ PromotionConditionTypeEnum.PRICE.type === formData.conditionType ? '元' : '件' }}
           </el-form-item>
           <el-form-item label="优惠内容:" label-width="100px">

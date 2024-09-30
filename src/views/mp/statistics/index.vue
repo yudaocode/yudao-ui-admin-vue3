@@ -3,14 +3,7 @@
   <ContentWrap>
     <el-form class="-mb-15px" ref="queryForm" :inline="true" label-width="68px">
       <el-form-item label="公众号" prop="accountId">
-        <el-select v-model="accountId" @change="getSummary" class="!w-240px">
-          <el-option
-            v-for="item in accountList"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
-          />
-        </el-select>
+        <WxAccountSelect @change="onAccountChanged" />
       </el-form-item>
       <el-form-item label="时间范围" prop="dateRange">
         <el-date-picker
@@ -76,7 +69,7 @@
 <script lang="ts" setup>
 import { formatDate, addTime, betweenDay, beginOfDay, endOfDay } from '@/utils/formatTime'
 import * as StatisticsApi from '@/api/mp/statistics'
-import * as MpAccountApi from '@/api/mp/account'
+import WxAccountSelect from '@/views/mp/components/wx-account-select'
 
 defineOptions({ name: 'MpStatistics' })
 
@@ -88,7 +81,6 @@ const dateRange = ref([
   endOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24))
 ])
 const accountId = ref(-1) // 选中的公众号编号
-const accountList = ref<MpAccountApi.AccountVO[]>([]) // 公众号账号列表
 
 const xAxisDate = ref([] as any[]) // X 轴的日期范围
 // 用户增减数据图表配置项
@@ -230,13 +222,10 @@ const interfaceSummaryOption = reactive({
   ]
 })
 
-/** 加载公众号账号的列表 */
-const getAccountList = async () => {
-  accountList.value = await MpAccountApi.getSimpleAccountList()
-  // 默认选中第一个
-  if (accountList.value.length > 0) {
-    accountId.value = accountList.value[0].id!
-  }
+/** 侦听公众号变化 **/
+const onAccountChanged = (id: number) => {
+  accountId.value = id
+  getSummary()
 }
 
 /** 加载数据 */
@@ -357,12 +346,4 @@ const interfaceSummaryChart = async () => {
     })
   } catch {}
 }
-
-/** 初始化 */
-onMounted(async () => {
-  // 获取公众号下拉列表
-  await getAccountList()
-  // 加载数据
-  getSummary()
-})
 </script>
