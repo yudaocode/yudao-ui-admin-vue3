@@ -1,6 +1,6 @@
 <template>
   <div
-    class="h-50px position-fixed bottom-10 text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
+    class="h-50px bottom-10 text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
   >
     <el-popover :visible="passVisible" placement="top-end" :width="500" trigger="click">
       <template #reference>
@@ -120,6 +120,7 @@
     <div @click="handleSign"> <Icon :size="14" icon="ep:plus" />&nbsp;加签 </div>
     <div @click="handleBack"> <Icon :size="14" icon="fa:mail-reply" />&nbsp;退回 </div>
   </div>
+  <!-- </div> -->
   <!-- 弹窗：转派审批人 -->
   <TaskTransferForm ref="taskTransferFormRef" @success="getDetail" />
   <!-- 弹窗：回退节点 -->
@@ -299,10 +300,11 @@ defineExpose({ loadRunningTask })
 
 .btn-container {
   > div {
+    display: flex;
     margin: 0 15px;
     cursor: pointer;
-    display: flex;
     align-items: center;
+
     &:hover {
       color: #6db5ff;
     }

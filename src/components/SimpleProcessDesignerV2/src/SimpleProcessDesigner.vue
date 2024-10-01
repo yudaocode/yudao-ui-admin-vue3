@@ -1,6 +1,6 @@
 <template>
-  <div class="simple-flow-canvas">
-    <div class="simple-flow-container">
+  <div class="simple-flow-canvas" v-loading="loading">
+    <div class="simple-flow-container" >
       <div class="top-area-container">
         <div class="top-actions">
           <div class="canvas-control">
@@ -15,7 +15,10 @@
         </div>
       </div>
       <div class="scale-container" :style="`transform: scale(${scaleValue / 100});`">
-        <ProcessNodeTree v-if="processNodeTree" v-model:flow-node="processNodeTree" />
+        <ProcessNodeTree
+          v-if="processNodeTree"
+          v-model:flow-node="processNodeTree"
+        />
       </div>
     </div>
     <Dialog v-model="errorDialogVisible" title="保存失败" width="400" :fullscreen="false">
@@ -46,6 +49,7 @@ import * as DeptApi from '@/api/system/dept'
 import * as PostApi from '@/api/system/post'
 import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
+import { fa } from 'element-plus/es/locale'
 defineOptions({
   name: 'SimpleProcessDesigner'
 })
@@ -56,7 +60,7 @@ const props = defineProps({
     required: true
   }
 })
-
+const loading = ref(true)
 const formFields = ref<string[]>([])
 const formType = ref(20)
 const roleOptions = ref<RoleApi.RoleVO[]>([]) // 角色列表
@@ -163,44 +167,49 @@ const zoomIn = () => {
 }
 
 onMounted(async () => {
-  // 获取表单字段
-  const bpmnModel = await getModel(props.modelId)
-  if (bpmnModel) {
-    formType.value = bpmnModel.formType
-    if (formType.value === 10) {
-      const bpmnForm = (await getForm(bpmnModel.formId)) as unknown as FormVO
-      formFields.value = bpmnForm?.fields
-    }
-  }
-  // 获得角色列表
-  roleOptions.value = await RoleApi.getSimpleRoleList()
-  // 获得岗位列表
-  postOptions.value = await PostApi.getSimplePostList()
-  // 获得用户列表
-  userOptions.value = await UserApi.getSimpleUserList()
-  // 获得部门列表
-  deptOptions.value = await DeptApi.getSimpleDeptList()
-
-  deptTreeOptions.value = handleTree(deptOptions.value as DeptApi.DeptVO[], 'id')
-  // 获取用户组列表
-  userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
-
-  // 获取 SIMPLE 设计器模型
-  const result = await getBpmSimpleModel(props.modelId)
-  if (result) {
-    processNodeTree.value = result
-  } else {
-    // 初始值
-    processNodeTree.value = {
-      name: '发起人',
-      type: NodeType.START_USER_NODE,
-      id: NodeId.START_USER_NODE_ID,
-      childNode: {
-        id: NodeId.END_EVENT_NODE_ID,
-        name: '结束',
-        type: NodeType.END_EVENT_NODE
+  try {
+    loading.value = true
+    // 获取表单字段
+    const bpmnModel = await getModel(props.modelId)
+    if (bpmnModel) {
+      formType.value = bpmnModel.formType
+      if (formType.value === 10) {
+        const bpmnForm = (await getForm(bpmnModel.formId)) as unknown as FormVO
+        formFields.value = bpmnForm?.fields
       }
     }
+    // 获得角色列表
+    roleOptions.value = await RoleApi.getSimpleRoleList()
+    // 获得岗位列表
+    postOptions.value = await PostApi.getSimplePostList()
+    // 获得用户列表
+    userOptions.value = await UserApi.getSimpleUserList()
+    // 获得部门列表
+    deptOptions.value = await DeptApi.getSimpleDeptList()
+
+    deptTreeOptions.value = handleTree(deptOptions.value as DeptApi.DeptVO[], 'id')
+    // 获取用户组列表
+    userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
+
+    // 获取 SIMPLE 设计器模型
+    const result = await getBpmSimpleModel(props.modelId)
+    if (result) {
+      processNodeTree.value = result
+    } else {
+      // 初始值
+      processNodeTree.value = {
+        name: '发起人',
+        type: NodeType.START_USER_NODE,
+        id: NodeId.START_USER_NODE_ID,
+        childNode: {
+          id: NodeId.END_EVENT_NODE_ID,
+          name: '结束',
+          type: NodeType.END_EVENT_NODE
+        }
+      }
+    }
+  } finally {
+    loading.value = false
   }
 })
 </script>

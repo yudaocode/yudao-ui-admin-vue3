@@ -1,88 +1,104 @@
 <template>
   <ContentWrap :bodyStyle="{ padding: '10px 20px' }" class="position-relative">
-    <img
-      class="position-absolute right-20px"
-      width="150"
-      :src="auditIcons[processInstance.status]"
-      alt=""
-    />
-    <div class="text-#878c93">编号：{{ id }}</div>
-    <el-divider class="!my-8px" />
-    <div class="flex items-center gap-5 mb-10px">
-      <div class="text-26px font-bold mb-5px">{{ processInstance.name }}</div>
-      <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="processInstance.status" />
-    </div>
+    <div class="processInstance-wrap-main">
+      <el-scrollbar>
+        <img
+          class="position-absolute right-20px"
+          width="150"
+          :src="auditIcons[processInstance.status]"
+          alt=""
+        />
+        <div class="text-#878c93 h-15px">编号：{{ id }}</div>
+        <el-divider class="!my-8px" />
+        <div class="flex items-center gap-5 mb-10px h-40px">
+          <div class="text-26px font-bold mb-5px">{{ processInstance.name }}</div>
+          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="processInstance.status" />
+        </div>
 
-    <div class="flex items-center gap-5 mb-10px text-13px">
-      <div class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600">
-        <img class="rounded-full h-28px" src="@/assets/imgs/avatar.jpg" alt="" />
-        {{ processInstance?.startUser?.nickname }}
-      </div>
-      <div class="text-#878c93"> {{ formatDate(processInstance.startTime) }} 提交 </div>
-    </div>
+        <div class="flex items-center gap-5 mb-10px text-13px h-35px">
+          <div
+            class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600"
+          >
+            <img class="rounded-full h-28px" src="@/assets/imgs/avatar.jpg" alt="" />
+            {{ processInstance?.startUser?.nickname }}
+          </div>
+          <div class="text-#878c93"> {{ formatDate(processInstance.startTime) }} 提交 </div>
+        </div>
 
-    <el-tabs>
-      <!-- 表单信息 -->
-      <el-tab-pane label="表单信息">
-        <el-row :gutter="10">
-          <el-col :span="18" class="!flex !flex-col formCol">
-            <!-- 表单信息 -->
-            <div v-loading="processInstanceLoading" class="form-box flex flex-col mb-30px flex-1">
-              <!-- 情况一：流程表单 -->
-              <el-col
-                v-if="processInstance?.processDefinition?.formType === 10"
-                :offset="6"
-                :span="16"
-              >
-                <form-create
-                  v-model="detailForm.value"
-                  v-model:api="fApi"
-                  :option="detailForm.option"
-                  :rule="detailForm.rule"
-                />
-              </el-col>
-              <!-- 情况二：业务表单 -->
-              <div v-if="processInstance?.processDefinition?.formType === 20">
-                <BusinessFormComponent :id="processInstance.businessKey" />
-              </div>
+        <el-tabs v-model="activeTab">
+          <!-- 表单信息 -->
+          <el-tab-pane label="表单信息" name="form">
+            <div class="form-scoll-area">
+              <el-scrollbar>
+                <el-row :gutter="10">
+                  <el-col :span="18" class="!flex !flex-col formCol">
+                    <!-- 表单信息 -->
+                    <div
+                      v-loading="processInstanceLoading"
+                      class="form-box flex flex-col mb-30px flex-1"
+                    >
+                      <!-- 情况一：流程表单 -->
+                      <el-col
+                        v-if="processInstance?.processDefinition?.formType === 10"
+                        :offset="6"
+                        :span="16"
+                      >
+                        <form-create
+                          v-model="detailForm.value"
+                          v-model:api="fApi"
+                          :option="detailForm.option"
+                          :rule="detailForm.rule"
+                        />
+                      </el-col>
+                      <!-- 情况二：业务表单 -->
+                      <div v-if="processInstance?.processDefinition?.formType === 20">
+                        <BusinessFormComponent :id="processInstance.businessKey" />
+                      </div>
+                    </div>
+                  </el-col>
+                  <el-col :span="6">
+                    <!-- 审批记录时间线 -->
+                    <ProcessInstanceTimeline :process-instance-id="id" />
+                  </el-col>
+                </el-row>
+              </el-scrollbar>
             </div>
+          </el-tab-pane>
 
-            <!-- 操作栏按钮 -->
-            <ProcessInstanceOperationButton
-              ref="operationButtonRef"
-              :processInstance="processInstance"
-              :userOptions="userOptions"
-              @success="getDetail"
+          <!-- 流程图 -->
+          <el-tab-pane label="流程图" name="diagram">
+            <ProcessInstanceBpmnViewer
+              :id="`${id}`"
+              :bpmn-xml="bpmnXml"
+              :loading="processInstanceLoading"
+              :process-instance="processInstance"
+              :tasks="tasks"
             />
-          </el-col>
-          <el-col :span="6">
-            <!-- 审批记录时间线 -->
-            <ProcessInstanceTimeline :process-instance="processInstance" :tasks="tasks" />
-          </el-col>
-        </el-row>
-      </el-tab-pane>
-      <!-- 流程图 -->
-      <el-tab-pane label="流程图">
-        <ProcessInstanceBpmnViewer
-          :id="`${id}`"
-          :bpmn-xml="bpmnXml"
-          :loading="processInstanceLoading"
-          :process-instance="processInstance"
-          :tasks="tasks"
-        />
-      </el-tab-pane>
-      <!-- 流转记录 -->
-      <el-tab-pane label="流转记录">
-        <ProcessInstanceTaskList
-          :loading="tasksLoad"
-          :process-instance="processInstance"
-          :tasks="tasks"
-          @refresh="getTaskList"
-        />
-      </el-tab-pane>
-      <!-- 流转评论 -->
-      <el-tab-pane label="流转评论"> 流转评论 </el-tab-pane>
-    </el-tabs>
+          </el-tab-pane>
+          <!-- 流转记录 -->
+          <el-tab-pane label="流转记录" name="record">
+            <ProcessInstanceTaskList
+              :loading="tasksLoad"
+              :process-instance="processInstance"
+              :tasks="tasks"
+              @refresh="getTaskList"
+            />
+          </el-tab-pane>
+          <!-- 流转评论 -->
+          <el-tab-pane label="流转评论" name="comment"> 流转评论 </el-tab-pane>
+        </el-tabs>
+
+        <div class=" b-t-solid border-t-1px border-[var(--el-border-color)]" v-if="activeTab === 'form'">
+          <!-- 操作栏按钮 -->
+          <ProcessInstanceOperationButton
+            ref="operationButtonRef"
+            :processInstance="processInstance"
+            :userOptions="userOptions"
+            @success="getDetail"
+          />
+        </div>
+      </el-scrollbar>
+    </div>
   </ContentWrap>
 </template>
 <script lang="ts" setup>
@@ -209,6 +225,9 @@ const getTaskList = async () => {
   }
 }
 
+/** 当前的Tab */
+const activeTab = ref('form')
+
 /** 初始化 */
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 onMounted(async () => {
@@ -219,9 +238,29 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
+$wrap-padding-height: 30px ;
+$wrap-margin-height: 15px;
+$button-height: 51px;
+$process-header-height: 194px;
+
+.processInstance-wrap-main {
+  height: calc(100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px);
+  max-height: calc(100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px);
+  overflow: auto;
+
+  .form-scoll-area {
+    height: calc(100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px - $process-header-height - 40px);
+    max-height: calc(100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px - $process-header-height - 40px);
+    overflow: auto;
+  }
+}
+
 .form-box {
   :deep(.el-card) {
     border: none;
   }
 }
+
+
+
 </style>
