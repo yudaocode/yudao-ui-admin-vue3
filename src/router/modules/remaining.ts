@@ -603,6 +603,38 @@ const remainingRouter: AppRouteRecordRaw[] = [
       hidden: true,
       breadcrumb: false
     }
+  },
+  {
+    path: '/iot',
+    component: Layout,
+    name: 'IOT',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'product/detail/:id',
+        name: 'IoTProductDetail',
+        meta: {
+          title: '产品详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/iot/product'
+        },
+        component: () => import('@/views/iot/product/detail/index.vue')
+      },
+      {
+        path: 'device/detail/:id',
+        name: 'IoTDeviceDetail',
+        meta: {
+          title: '设备详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/iot/device'
+        },
+        component: () => import('@/views/iot/device/detail/index.vue')
+      }
+    ]
   }
 ]
 
