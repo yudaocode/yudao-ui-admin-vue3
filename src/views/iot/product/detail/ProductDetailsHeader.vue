@@ -58,19 +58,24 @@ import ProductForm from '@/views/iot/product/ProductForm.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product'
 
 const message = useMessage()
+
+const { product } = defineProps<{ product: ProductVO }>() // 定义 Props
+
+/** 处理复制 */
 const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text).then(() => {
     message.success('复制成功')
   })
 }
 
-// 路由跳转到设备管理
-const { currentRoute, push } = useRouter()
+/** 路由跳转到设备管理 */
+const { push } = useRouter()
 const goToManagement = (productId: string) => {
   push({ name: 'IoTDevice', query: { productId } })
 }
 
-// 操作修改
+/** 操作修改 */
+const emit = defineEmits(['refresh']) // 定义 Emits
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
@@ -95,10 +100,4 @@ const confirmUnpublish = async (id: number) => {
     message.error('撤销发布失败')
   }
 }
-
-// 定义 Props
-const { product } = defineProps<{ product: ProductVO }>()
-
-// 定义 Emits
-const emit = defineEmits(['refresh'])
 </script>

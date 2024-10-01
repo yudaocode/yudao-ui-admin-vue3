@@ -57,8 +57,7 @@ const formData = ref({
   id: undefined,
   productId: undefined,
   deviceName: undefined,
-  nickname: undefined,
-  serialNumber: undefined
+  nickname: undefined
 })
 const formRules = reactive({
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
@@ -66,7 +65,7 @@ const formRules = reactive({
     {
       pattern: /^[a-zA-Z0-9_.\-:@]{4,32}$/,
       message:
-        '支持英文字母、数字、下划线（_）、中划线（-）、点号（.）、半角冒号（:）和特殊字符@，长度限制为4~32个字符',
+        '支持英文字母、数字、下划线（_）、中划线（-）、点号（.）、半角冒号（:）和特殊字符@，长度限制为 4~32 个字符',
       trigger: 'blur'
     }
   ],
@@ -79,7 +78,7 @@ const formRules = reactive({
         }
         const length = value.replace(/[\u4e00-\u9fa5\u3040-\u30ff]/g, 'aa').length
         if (length < 4 || length > 64) {
-          callback(new Error('备注名称长度限制为4~64个字符，中文及日文算2个字符'))
+          callback(new Error('备注名称长度限制为 4~64 个字符，中文及日文算 2 个字符'))
         } else if (!/^[\u4e00-\u9fa5\u3040-\u30ff_a-zA-Z0-9]+$/.test(value)) {
           callback(new Error('备注名称只能包含中文、英文字母、日文、数字和下划线（_）'))
         } else {

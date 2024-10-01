@@ -88,6 +88,7 @@ import ThinkModelFunctionForm from '@/views/iot/product/detail/ThinkModelFunctio
 
 const props = defineProps<{ product: ProductVO }>()
 
+const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
@@ -97,7 +98,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   type: undefined,
-  productId: undefined
+  productId: -1
 })
 
 const queryFormRef = ref() // 搜索的表单

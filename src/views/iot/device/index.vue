@@ -192,9 +192,8 @@ const queryParams = reactive({
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
-/** 产品ID到名称的映射 */
+/** 产品标号和名称的映射 */
 const productMap = reactive({})
 
 /** 查询列表 */
@@ -207,6 +206,7 @@ const getList = async () => {
     // 获取产品ID列表
     const productIds = [...new Set(data.list.map((device) => device.productId))]
     // 获取产品名称
+    // TODO @haohao：最好后端拼接哈
     const products = await Promise.all(productIds.map((id) => ProductApi.getProduct(id)))
     products.forEach((product) => {
       productMap[product.id] = product.name
@@ -235,7 +235,7 @@ const openForm = (type: string, id?: number) => {
 }
 
 /** 打开详情 */
-const { currentRoute, push } = useRouter()
+const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'IoTDeviceDetail', params: { id } })
 }
@@ -252,6 +252,7 @@ const handleDelete = async (id: number) => {
     await getList()
   } catch {}
 }
+
 /** 查询字典下拉列表 */
 const products = ref()
 const getProducts = async () => {

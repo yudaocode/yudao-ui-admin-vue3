@@ -128,15 +128,10 @@ const formData = ref({
 })
 const formRules = reactive({
   name: [{ required: true, message: '产品名称不能为空', trigger: 'blur' }],
-  deviceType: [
-    {
-      required: true,
-      message: '设备类型不能为空',
-      trigger: 'change'
-    }
-  ],
+  deviceType: [{ required: true, message: '设备类型不能为空', trigger: 'change' }],
   netType: [
     {
+      // TODO @haohao：0、1、/2 最好前端也枚举下；另外，这里的 required 可以直接设置为 true。然后表单那些 v-if。只要不存在，它自动就不校验了哈
       required: formData.deviceType === 0 || formData.deviceType === 2,
       message: '联网方式不能为空',
       trigger: 'change'
@@ -145,23 +140,12 @@ const formRules = reactive({
   protocolType: [
     { required: formData.deviceType === 1, message: '接入网关协议不能为空', trigger: 'change' }
   ],
-  dataFormat: [
-    {
-      required: true,
-      message: '数据格式不能为空',
-      trigger: 'change'
-    }
-  ],
-  validateType: [
-    {
-      required: true,
-      message: '数据校验级别不能为空',
-      trigger: 'change'
-    }
-  ]
+  dataFormat: [{ required: true, message: '数据格式不能为空', trigger: 'change' }],
+  validateType: [{ required: true, message: '数据校验级别不能为空', trigger: 'change' }]
 })
 const formRef = ref()
 
+/** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
@@ -178,6 +162,7 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open, close: () => (dialogVisible.value = false) })
 
+/** 提交表单 */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
   await formRef.value.validate()
@@ -198,6 +183,7 @@ const submitForm = async () => {
   }
 }
 
+/** 重置表单 */
 const resetForm = () => {
   formData.value = {
     name: undefined,

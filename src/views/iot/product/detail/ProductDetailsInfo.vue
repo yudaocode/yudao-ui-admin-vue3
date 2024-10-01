@@ -6,9 +6,9 @@
         <el-descriptions-item label="设备类型">
           <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
         </el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{
-          formatDate(product.createTime)
-        }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">
+          {{ formatDate(product.createTime) }}
+        </el-descriptions-item>
         <el-descriptions-item label="数据格式">
           <dict-tag :type="DICT_TYPE.IOT_DATA_FORMAT" :value="product.dataFormat" />
         </el-descriptions-item>

@@ -59,6 +59,7 @@ const emit = defineEmits(['refresh'])
  * @param text 需要复制的文本
  */
 const copyToClipboard = (text: string) => {
+  // TODO @haohao：可以考虑用 await 异步转同步哈
   navigator.clipboard.writeText(text).then(() => {
     message.success('复制成功')
   })

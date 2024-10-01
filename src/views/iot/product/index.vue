@@ -104,7 +104,6 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import download from '@/utils/download'
 import { ProductApi, ProductVO } from '@/api/iot/product'
 import ProductForm from './ProductForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
@@ -135,7 +134,6 @@ const queryParams = reactive({
   dataFormat: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -168,7 +166,7 @@ const openForm = (type: string, id?: number) => {
 }
 
 /** 打开详情 */
-const { currentRoute, push } = useRouter()
+const { push } = useRouter()
 const openDetail = (id: number) => {
   push({ name: 'IoTProductDetail', params: { id } })
 }
@@ -184,21 +182,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-/** 导出按钮操作 */
-const handleExport = async () => {
-  try {
-    // 导出的二次确认
-    await message.exportConfirm()
-    // 发起导出
-    exportLoading.value = true
-    const data = await ProductApi.exportProduct(queryParams)
-    download.excel(data, 'iot 产品.xls')
-  } catch {
-  } finally {
-    exportLoading.value = false
-  }
 }
 
 /** 初始化 **/

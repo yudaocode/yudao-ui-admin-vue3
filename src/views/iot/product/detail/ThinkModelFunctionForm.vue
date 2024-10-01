@@ -46,7 +46,6 @@
         <span class="mx-2">~</span>
         <el-input v-model="formData.property.dataType.specs.max" placeholder="请输入最大值" />
       </el-form-item>
-
       <el-form-item label="步长" prop="step">
         <el-input v-model="formData.property.dataType.specs.step" placeholder="请输入步长" />
       </el-form-item>
@@ -77,7 +76,6 @@
 
 <script setup lang="ts">
 import { ProductVO } from '@/api/iot/product'
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { ThinkModelFunctionApi, ThinkModelFunctionVO } from '@/api/iot/thinkmodelfunction'
 
 const props = defineProps<{ product: ProductVO }>()
@@ -159,6 +157,7 @@ const formRules = reactive({
 })
 const formRef = ref()
 
+/** 打开弹窗 */
 const open = async (type: string, id?: number) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
@@ -175,6 +174,7 @@ const open = async (type: string, id?: number) => {
 }
 defineExpose({ open, close: () => (dialogVisible.value = false) })
 
+/** 提交表单 */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
   await formRef.value.validate()
@@ -197,6 +197,7 @@ const submitForm = async () => {
   }
 }
 
+/** 重置表单 */
 const resetForm = () => {
   formData.value = {
     id: undefined,
@@ -205,7 +206,7 @@ const resetForm = () => {
     identifier: undefined,
     name: undefined,
     description: undefined,
-    type: '1',
+    type: '1', // todo @HAOHAO：看看枚举下
     property: {
       identifier: undefined,
       name: undefined,

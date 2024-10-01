@@ -23,8 +23,13 @@ import ProductDetailsHeader from '@/views/iot/product/detail/ProductDetailsHeade
 import ProductDetailsInfo from '@/views/iot/product/detail/ProductDetailsInfo.vue'
 import ProductTopic from '@/views/iot/product/detail/ProductTopic.vue'
 import ThinkModelFunction from '@/views/iot/product/detail/ThinkModelFunction.vue'
+import { useTagsViewStore } from '@/store/modules/tagsView'
+import { useRouter } from 'vue-router'
 
 defineOptions({ name: 'IoTProductDetail' })
+
+const { delView } = useTagsViewStore() // 视图操作
+const { currentRoute } = useRouter()
 
 const route = useRoute()
 const message = useMessage()
@@ -45,7 +50,7 @@ const getProductData = async (id: number) => {
 }
 
 // 查询设备数量
-const getDeviceCount = async (productId: string) => {
+const getDeviceCount = async (productId: number) => {
   try {
     const count = await DeviceApi.getDeviceCount(productId)
     console.log('Device count response:', count)

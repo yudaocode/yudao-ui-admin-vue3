@@ -3,33 +3,33 @@
     <el-collapse v-model="activeNames">
       <el-descriptions :column="3" title="设备信息">
         <el-descriptions-item label="产品名称">{{ product.name }}</el-descriptions-item>
-        <el-descriptions-item label="ProductKey"
-          >{{ product.productKey }}
+        <el-descriptions-item label="ProductKey">
+          {{ product.productKey }}
           <el-button @click="copyToClipboard(product.productKey)">复制</el-button>
         </el-descriptions-item>
         <el-descriptions-item label="设备类型">
           <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
         </el-descriptions-item>
-        <el-descriptions-item label="DeviceName"
-          >{{ device.deviceName }}
+        <el-descriptions-item label="DeviceName">
+          {{ device.deviceName }}
           <el-button @click="copyToClipboard(device.deviceName)">复制</el-button>
         </el-descriptions-item>
         <el-descriptions-item label="备注名称">{{ device.nickname }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{
-          formatDate(device.createTime)
-        }}</el-descriptions-item>
-        <el-descriptions-item label="激活时间">{{
-          formatDate(device.activeTime)
-        }}</el-descriptions-item>
-        <el-descriptions-item label="最后上线时间">{{
-          formatDate(device.lastOnlineTime)
-        }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">
+          {{ formatDate(device.createTime) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="激活时间">
+          {{ formatDate(device.activeTime) }}
+        </el-descriptions-item>
+        <el-descriptions-item label="最后上线时间">
+          {{ formatDate(device.lastOnlineTime) }}
+        </el-descriptions-item>
         <el-descriptions-item label="当前状态">
           <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATUS" :value="device.status" />
         </el-descriptions-item>
-        <el-descriptions-item label="最后离线时间" :span="3">{{
-          formatDate(device.lastOfflineTime)
-        }}</el-descriptions-item>
+        <el-descriptions-item label="最后离线时间" :span="3">
+          {{ formatDate(device.lastOfflineTime) }}
+        </el-descriptions-item>
         <el-descriptions-item label="MQTT 连接参数">
           <el-button type="primary" @click="openMqttParams">查看</el-button>
         </el-descriptions-item>
@@ -53,7 +53,6 @@
             </template>
           </el-input>
         </el-form-item>
-
         <el-form-item label="username">
           <el-input v-model="mqttParams.mqttUsername" readonly>
             <template #append>
@@ -63,7 +62,6 @@
             </template>
           </el-input>
         </el-form-item>
-
         <el-form-item label="passwd">
           <el-input v-model="mqttParams.mqttPassword" readonly type="password">
             <template #append>
@@ -87,39 +85,28 @@ import { ProductVO } from '@/api/iot/product'
 import { formatDate } from '@/utils/formatTime'
 import { DeviceVO } from '@/api/iot/device'
 
-// 消息提示
-const message = useMessage()
+const message = useMessage() // 消息提示
 
-// 路由实例
-const router = useRouter()
+const { product, device } = defineProps<{ product: ProductVO; device: DeviceVO }>() // 定义 Props
 
-// 定义 Props
-const { product, device } = defineProps<{ product: ProductVO; device: DeviceVO }>()
+const emit = defineEmits(['refresh']) // 定义 Emits
 
-// 定义 Emits
-const emit = defineEmits(['refresh'])
+const activeNames = ref(['basicInfo']) // 展示的折叠面板
+const mqttDialogVisible = ref(false) // 定义 MQTT 弹框的可见性
+const mqttParams = ref({
+  mqttClientId: '',
+  mqttUsername: '',
+  mqttPassword: ''
+}) // 定义 MQTT 参数对象
 
-// 展示的折叠面板
-const activeNames = ref(['basicInfo'])
-
-// 复制到剪贴板方法
+/** 复制到剪贴板方法 */
 const copyToClipboard = (text: string) => {
   navigator.clipboard.writeText(text).then(() => {
     message.success('复制成功')
   })
 }
 
-// 定义 MQTT 弹框的可见性
-const mqttDialogVisible = ref(false)
-
-// 定义 MQTT 参数对象
-const mqttParams = ref({
-  mqttClientId: '',
-  mqttUsername: '',
-  mqttPassword: ''
-})
-
-// 打开 MQTT 参数弹框的方法
+/** 打开 MQTT 参数弹框的方法 */
 const openMqttParams = () => {
   mqttParams.value = {
     mqttClientId: device.mqttClientId || 'N/A',
@@ -129,7 +116,7 @@ const openMqttParams = () => {
   mqttDialogVisible.value = true
 }
 
-// 关闭 MQTT 弹框的方法
+/** 关闭 MQTT 弹框的方法 */
 const handleCloseMqttDialog = () => {
   mqttDialogVisible.value = false
 }

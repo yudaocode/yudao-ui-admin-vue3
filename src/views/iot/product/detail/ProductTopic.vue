@@ -44,6 +44,7 @@ const columns2 = reactive([
   { label: '描述', field: 'description' }
 ])
 
+// TODO @haohao：这个，有没可能写到一个枚举里，方便后续维护？ /Users/yunai/Java/yudao-ui-admin-vue3/src/views/ai/utils/constants.ts
 const data1 = computed(() => {
   if (!props.product || !props.product.productKey) return []
   return [
