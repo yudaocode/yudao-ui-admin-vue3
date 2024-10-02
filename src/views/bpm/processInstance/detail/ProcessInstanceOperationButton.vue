@@ -1,11 +1,18 @@
 <template>
   <div
     class="h-50px bottom-10 text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
+    v-if="runningTask.id"
   >
-    <el-popover :visible="passVisible" placement="top-end" :width="500" trigger="click">
+    <el-popover
+      :visible="passVisible"
+      placement="top-end"
+      :width="500"
+      trigger="click"
+      v-if="isShowButton(OperationButtonType.APPROVE)"
+    >
       <template #reference>
         <el-button plain type="success" @click="openPopover('1')">
-          <Icon icon="ep:select" />&nbsp; 通过
+          <Icon icon="ep:select" />&nbsp; {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
         </el-button>
       </template>
       <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
@@ -50,17 +57,23 @@
 
           <el-form-item>
             <el-button :disabled="formLoading" type="success" @click="handleAudit(true)">
-              通过
+              {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
             </el-button>
             <el-button @click="passVisible = false"> 取消 </el-button>
           </el-form-item>
         </el-form>
       </div>
     </el-popover>
-    <el-popover :visible="rejectVisible" placement="top-end" :width="500" trigger="click">
+    <el-popover
+      :visible="rejectVisible"
+      placement="top-end"
+      :width="500"
+      trigger="click"
+      v-if="isShowButton(OperationButtonType.REJECT)"
+    >
       <template #reference>
         <el-button class="mr-20px" plain type="danger" @click="openPopover('2')">
-          <Icon icon="ep:close" />&nbsp; 拒绝
+          <Icon icon="ep:close" />&nbsp; {{ getButtonDisplayName(OperationButtonType.REJECT) }}
         </el-button>
       </template>
       <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
@@ -105,7 +118,7 @@
 
           <el-form-item>
             <el-button :disabled="formLoading" type="danger" @click="handleAudit(false)">
-              拒绝
+              {{ getButtonDisplayName(OperationButtonType.REJECT) }}
             </el-button>
             <el-button @click="rejectVisible = false"> 取消 </el-button>
           </el-form-item>
@@ -113,12 +126,18 @@
       </div>
     </el-popover>
     <div @click="handleSend"> <Icon :size="14" icon="svg-icon:send" />&nbsp;抄送 </div>
-    <div @click="openTaskUpdateAssigneeForm">
-      <Icon :size="14" icon="fa:share-square-o" />&nbsp;转交
+    <div @click="openTaskUpdateAssigneeForm" v-if="isShowButton(OperationButtonType.TRANSFER)">
+      <Icon :size="14" icon="fa:share-square-o" />&nbsp;{{ getButtonDisplayName(OperationButtonType.TRANSFER) }}
     </div>
-    <div @click="handleDelegate"> <Icon :size="14" icon="ep:position" />&nbsp;委派 </div>
-    <div @click="handleSign"> <Icon :size="14" icon="ep:plus" />&nbsp;加签 </div>
-    <div @click="handleBack"> <Icon :size="14" icon="fa:mail-reply" />&nbsp;退回 </div>
+    <div @click="handleDelegate" v-if="isShowButton(OperationButtonType.DELEGATE)">
+      <Icon :size="14" icon="ep:position" />&nbsp;{{ getButtonDisplayName(OperationButtonType.DELEGATE) }}
+    </div>
+    <div @click="handleSign" v-if="isShowButton(OperationButtonType.ADD_SIGN)">
+      <Icon :size="14" icon="ep:plus" />&nbsp;{{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
+    </div>
+    <div @click="handleBack" v-if="isShowButton(OperationButtonType.RETURN)">
+      <Icon :size="14" icon="fa:mail-reply" />&nbsp;{{ getButtonDisplayName(OperationButtonType.RETURN) }}
+    </div>
   </div>
   <!-- </div> -->
   <!-- 弹窗：转派审批人 -->
@@ -141,7 +160,10 @@ import TaskDelegateForm from './dialog/TaskDelegateForm.vue'
 import TaskTransferForm from './dialog/TaskTransferForm.vue'
 import TaskSignCreateForm from './dialog/TaskSignCreateForm.vue'
 import { isEmpty } from '@/utils/is'
-
+import {
+  OperationButtonType,
+  OPERATION_BUTTON_NAME
+} from '@/components/SimpleProcessDesignerV2/src/consts'
 defineOptions({ name: 'ProcessInstanceBtnConatiner' })
 
 const userId = useUserStore().getUser.id // 当前登录的编号
@@ -288,6 +310,24 @@ const handleSign = async () => {
 /** 获得详情 */
 const getDetail = () => {
   emit('success')
+}
+
+/** 是否显示按钮 */
+const isShowButton = (btnType: OperationButtonType): boolean => {
+  let isShow = true
+  if (runningTask.value.buttonsSetting && runningTask.value.buttonsSetting[btnType]) {
+    isShow = runningTask.value.buttonsSetting[btnType].enable
+  }
+  return isShow
+}
+
+/** 获取按钮的显示名称 */
+const getButtonDisplayName = (btnType: OperationButtonType) => {
+  let diaplayName = OPERATION_BUTTON_NAME.get(btnType)
+  if (runningTask.value.buttonsSetting && runningTask.value.buttonsSetting[btnType]) {
+    diaplayName = runningTask.value.buttonsSetting[btnType].displayName
+  }
+  return diaplayName
 }
 
 defineExpose({ loadRunningTask })

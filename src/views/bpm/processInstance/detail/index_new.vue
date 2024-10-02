@@ -58,7 +58,7 @@
                   </el-col>
                   <el-col :span="6">
                     <!-- 审批记录时间线 -->
-                    <ProcessInstanceTimeline :process-instance-id="id" />
+                    <ProcessInstanceTimeline ref="timelineRef" :process-instance-id="id" />
                   </el-col>
                 </el-row>
               </el-scrollbar>
@@ -97,7 +97,7 @@
             ref="operationButtonRef"
             :processInstance="processInstance"
             :userOptions="userOptions"
-            @success="getDetail"
+            @success="refresh"
           />
         </div>
       </el-scrollbar>
@@ -133,6 +133,7 @@ const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
 const operationButtonRef = ref()
+const timelineRef = ref()
 const bpmnXml = ref('') // BPMN XML
 const tasksLoad = ref(true) // 任务的加载中
 const tasks = ref<any[]>([]) // 任务列表
@@ -258,6 +259,16 @@ const getTaskList = async () => {
   } finally {
     tasksLoad.value = false
   }
+}
+
+/**
+ * 操作成功后刷新
+ */
+const refresh = () => {
+  // 重新获取详情
+  getDetail()
+  // 刷新审批详情 Timeline 
+  timelineRef.value?.refresh();
 }
 
 /** 当前的Tab */
