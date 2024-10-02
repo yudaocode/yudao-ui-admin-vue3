@@ -87,7 +87,13 @@ export const getProcessInstanceCopyPage = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/copy/page', params })
 }
 
+// 获取审批详情
 export const getApprovalDetail = async (processInstanceId?:string, processDefinitionId?:string) => {
   const param = processInstanceId ? '?processInstanceId='+ processInstanceId : '?processDefinitionId='+ processDefinitionId
   return await request.get({ url: 'bpm/process-instance/get-approval-detail'+ param })
+}
+
+// 获取表单字段权限
+export const getFormFieldsPermission = async (params: any) => {
+  return await request.get({ url: '/bpm/process-instance/get-form-fields-permission', params })
 }

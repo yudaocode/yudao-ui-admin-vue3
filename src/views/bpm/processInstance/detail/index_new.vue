@@ -88,7 +88,10 @@
           <el-tab-pane label="流转评论" name="comment"> 流转评论 </el-tab-pane>
         </el-tabs>
 
-        <div class=" b-t-solid border-t-1px border-[var(--el-border-color)]" v-if="activeTab === 'form'">
+        <div
+          class="b-t-solid border-t-1px border-[var(--el-border-color)]"
+          v-if="activeTab === 'form'"
+        >
           <!-- 操作栏按钮 -->
           <ProcessInstanceOperationButton
             ref="operationButtonRef"
@@ -115,15 +118,18 @@ import ProcessInstanceOperationButton from './ProcessInstanceOperationButton.vue
 import ProcessInstanceTimeline from './ProcessInstanceTimeline.vue'
 import { registerComponent } from '@/utils/routerHelper'
 import * as UserApi from '@/api/system/user'
+import { FieldPermissionType } from '@/components/SimpleProcessDesignerV2/src/consts'
 import audit1 from '@/assets/svgs/bpm/audit1.svg'
 import audit2 from '@/assets/svgs/bpm/audit2.svg'
 import audit3 from '@/assets/svgs/bpm/audit3.svg'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
-
-const { query } = useRoute() // 查询参数
+const props = defineProps<{
+  id: string   // 流程实例的编号
+  taskId?: string  // 任务编号
+  activityId?: string  //流程活动编号，用于抄送查看
+}>()
 const message = useMessage() // 消息弹窗
-const id = query.id as unknown as string // 流程实例的编号
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
 const operationButtonRef = ref()
@@ -157,7 +163,7 @@ const BusinessFormComponent = ref<any>(null) // 异步组件
 const getProcessInstance = async () => {
   try {
     processInstanceLoading.value = true
-    const data = await ProcessInstanceApi.getProcessInstance(id)
+    const data = await ProcessInstanceApi.getProcessInstance(props.id)
     if (!data) {
       message.error('查询不到流程信息！')
       return
@@ -167,6 +173,15 @@ const getProcessInstance = async () => {
     // 设置表单信息
     const processDefinition = data.processDefinition
     if (processDefinition.formType === 10) {
+      // 获取表单字段权限
+      let fieldsPermission = undefined
+      if (props.taskId || props.activityId) {
+        fieldsPermission = await ProcessInstanceApi.getFormFieldsPermission({
+          processInstanceId: props.id,
+          taskId: props.taskId,
+          activityId: props.activityId
+        })
+      }
       setConfAndFields2(
         detailForm,
         processDefinition.formConf,
@@ -177,6 +192,11 @@ const getProcessInstance = async () => {
         fApi.value?.btn.show(false)
         fApi.value?.resetBtn.show(false)
         fApi.value?.disabled(true)
+        if (fieldsPermission) {
+          Object.keys(fieldsPermission).forEach((item) => {
+            setFieldPermission(item, fieldsPermission[item])
+          })
+        }
       })
     } else {
       // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue
@@ -190,12 +210,27 @@ const getProcessInstance = async () => {
   }
 }
 
+/**
+ * 设置表单权限
+ */
+const setFieldPermission = (field: string, permission: string) => {
+  if (permission === FieldPermissionType.READ) {
+    fApi.value?.disabled(true, field)
+  }
+  if (permission === FieldPermissionType.WRITE) {
+    fApi.value?.disabled(false, field)
+  }
+  if (permission === FieldPermissionType.NONE) {
+    fApi.value?.hidden(true, field)
+  }
+}
+
 /** 加载任务列表 */
 const getTaskList = async () => {
   try {
     // 获得未取消的任务
     tasksLoad.value = true
-    const data = await TaskApi.getTaskListByProcessInstanceId(id)
+    const data = await TaskApi.getTaskListByProcessInstanceId(props.id)
     tasks.value = []
     // 1.1 移除已取消的审批
     data.forEach((task) => {
@@ -238,19 +273,29 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-$wrap-padding-height: 30px ;
+$wrap-padding-height: 30px;
 $wrap-margin-height: 15px;
 $button-height: 51px;
 $process-header-height: 194px;
 
 .processInstance-wrap-main {
-  height: calc(100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px);
-  max-height: calc(100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px);
+  height: calc(
+    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px
+  );
+  max-height: calc(
+    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px
+  );
   overflow: auto;
 
   .form-scoll-area {
-    height: calc(100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px - $process-header-height - 40px);
-    max-height: calc(100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px - $process-header-height - 40px);
+    height: calc(
+      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px -
+        $process-header-height - 40px
+    );
+    max-height: calc(
+      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px -
+        $process-header-height - 40px
+    );
     overflow: auto;
   }
 }
@@ -260,7 +305,4 @@ $process-header-height: 194px;
     border: none;
   }
 }
-
-
-
 </style>

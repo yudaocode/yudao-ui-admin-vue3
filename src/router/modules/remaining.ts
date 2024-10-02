@@ -300,7 +300,14 @@ const remainingRouter: AppRouteRecordRaw[] = [
           canTo: true,
           title: '流程详情',
           activeMenu: '/bpm/task/my'
-        }
+        },
+        props: route => (
+          { 
+            id: route.query.id,
+            taskId: route.query.taskId,
+            activityId: route.query.activityId
+          }
+        )
       },
       {
         path: 'oa/leave/create',

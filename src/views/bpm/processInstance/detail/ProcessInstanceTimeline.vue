@@ -178,7 +178,6 @@ const getApprovalDetail = async () => {
     props.processInstanceId,
     props.processDefinitionId
   )
-  console.log('approveNodes is []', data)
   approveNodes.value = data.approveNodes
 }
 
