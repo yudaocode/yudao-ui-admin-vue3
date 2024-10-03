@@ -73,6 +73,26 @@
           <el-image :src="scope.row.icon" class="h-32px w-32px" />
         </template>
       </el-table-column>
+      <el-table-column label="可见范围" align="center" prop="startUserIds" min-width="100">
+        <template #default="scope">
+          <el-text v-if="!scope.row.startUsers || scope.row.startUsers.length === 0">
+            全部可见
+          </el-text>
+          <el-text v-else-if="scope.row.startUsers.length == 1">
+            {{ scope.row.startUsers[0].nickname }}
+          </el-text>
+          <el-text v-else>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              placement="top"
+              :content="scope.row.startUsers.map((user: any) => user.nickname).join('、')"
+            >
+              {{ scope.row.startUsers[0].nickname }}等 {{ scope.row.startUsers.length }} 人可见
+            </el-tooltip>
+          </el-text>
+        </template>
+      </el-table-column>
       <el-table-column label="流程分类" align="center" prop="categoryName" min-width="100" />
       <el-table-column label="表单信息" align="center" prop="formType" min-width="200">
         <template #default="scope">
@@ -95,17 +115,6 @@
           <label v-else>暂无表单</label>
         </template>
       </el-table-column>
-      <!--      <el-table-column label="激活状态" align="center" prop="processDefinition.version" width="85">-->
-      <!--        <template #default="scope">-->
-      <!--          <el-switch-->
-      <!--            v-if="scope.row.processDefinition"-->
-      <!--            v-model="scope.row.processDefinition.suspensionState"-->
-      <!--            :active-value="1"-->
-      <!--            :inactive-value="2"-->
-      <!--            @change="handleChangeState(scope.row)"-->
-      <!--          />-->
-      <!--        </template>-->
-      <!--      </el-table-column>-->
       <el-table-column label="最后发布" align="center" prop="deploymentTime" min-width="250">
         <template #default="scope">
           <span v-if="scope.row.processDefinition">
@@ -131,6 +140,7 @@
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['bpm:model:update']"
+            :disabled="!isManagerUser(scope.row)"
           >
             修改
           </el-button>
@@ -140,6 +150,7 @@
             type="primary"
             @click="handleDesign(scope.row)"
             v-hasPermi="['bpm:model:update']"
+            :disabled="!isManagerUser(scope.row)"
           >
             设计
           </el-button>
@@ -149,6 +160,7 @@
             type="primary"
             @click="handleDeploy(scope.row)"
             v-hasPermi="['bpm:model:deploy']"
+            :disabled="!isManagerUser(scope.row)"
           >
             发布
           </el-button>
@@ -169,6 +181,7 @@
                 <el-dropdown-item
                   command="handleChangeState"
                   v-if="checkPermi(['bpm:model:update'])"
+                  :disabled="!isManagerUser(scope.row)"
                 >
                   {{ scope.row.processDefinition.suspensionState === 1 ? '停用' : '启用' }}
                 </el-dropdown-item>
@@ -176,6 +189,7 @@
                   type="danger"
                   command="handleDelete"
                   v-if="checkPermi(['bpm:model:delete'])"
+                  :disabled="!isManagerUser(scope.row)"
                 >
                   删除
                 </el-dropdown-item>
@@ -212,12 +226,14 @@ import { setConfAndFields2 } from '@/utils/formCreate'
 import { CategoryApi } from '@/api/bpm/category'
 import { BpmModelType } from '@/utils/constants'
 import { checkPermi } from '@/utils/permission'
+import { useUserStoreWithOut } from '@/store/modules/user'
 
 defineOptions({ name: 'BpmModel' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由
+const userStore = useUserStoreWithOut() // 用户信息缓存
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -312,7 +328,7 @@ const handleChangeState = async (row: any) => {
 }
 
 /** 设计流程 */
-const handleDesign = (row) => {
+const handleDesign = (row: any) => {
   if (row.type == BpmModelType.BPMN) {
     push({
       name: 'BpmModelEditor',
@@ -331,7 +347,7 @@ const handleDesign = (row) => {
 }
 
 /** 发布流程 */
-const handleDeploy = async (row) => {
+const handleDeploy = async (row: any) => {
   try {
     // 删除的二次确认
     await message.confirm('是否部署该流程！！')
@@ -359,7 +375,7 @@ const formDetailPreview = ref({
   rule: [],
   option: {}
 })
-const handleFormDetail = async (row) => {
+const handleFormDetail = async (row: any) => {
   if (row.formType == 10) {
     // 设置表单
     const data = await FormApi.getForm(row.formId)
@@ -371,6 +387,12 @@ const handleFormDetail = async (row) => {
       path: row.formCustomCreatePath
     })
   }
+}
+
+/** 判断是否可以操作 */
+const isManagerUser = (row: any) => {
+  const userId = userStore.getUser.id
+  return row.managerUserIds && row.managerUserIds.includes(userId)
 }
 
 /** 初始化 **/

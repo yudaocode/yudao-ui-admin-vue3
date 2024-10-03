@@ -123,6 +123,30 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
+      <el-form-item label="谁可以发起" prop="startUserIds">
+        <el-select
+          v-model="formData.startUserIds"
+          multiple
+          placeholder="请选择可发起人，默认（不选择）则所有人都可以发起"
+        >
+          <el-option
+            v-for="user in userList"
+            :key="user.id"
+            :label="user.nickname"
+            :value="user.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="流程管理员" prop="managerUserIds">
+        <el-select v-model="formData.managerUserIds" multiple placeholder="请选择流程管理员">
+          <el-option
+            v-for="user in userList"
+            :key="user.id"
+            :label="user.nickname"
+            :value="user.id"
+          />
+        </el-select>
+      </el-form-item>
     </el-form>
     <template #footer>
       <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
@@ -137,18 +161,24 @@ import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import { CategoryApi } from '@/api/bpm/category'
 import { BpmModelFormType, BpmModelType } from '@/utils/constants'
+import { UserVO } from '@/api/system/user'
+import * as UserApi from '@/api/system/user'
+import { useUserStoreWithOut } from '@/store/modules/user'
 
 defineOptions({ name: 'ModelForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
+const userStore = useUserStoreWithOut() // 用户信息缓存
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
+  id: undefined,
   name: '',
+  key: '',
   category: undefined,
   icon: undefined,
   description: '',
@@ -157,7 +187,9 @@ const formData = ref({
   formId: '',
   formCustomCreatePath: '',
   formCustomViewPath: '',
-  visible: true
+  visible: true,
+  startUserIds: [],
+  managerUserIds: []
 })
 const formRules = reactive({
   name: [{ required: true, message: '流程名称不能为空', trigger: 'blur' }],
@@ -169,14 +201,16 @@ const formRules = reactive({
   formId: [{ required: true, message: '流程表单不能为空', trigger: 'blur' }],
   formCustomCreatePath: [{ required: true, message: '表单提交路由不能为空', trigger: 'blur' }],
   formCustomViewPath: [{ required: true, message: '表单查看地址不能为空', trigger: 'blur' }],
-  visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }]
+  visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
+  managerUserIds: [{ required: true, message: '流程管理员不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 const formList = ref([]) // 流程表单的下拉框的数据
 const categoryList = ref([]) // 流程分类列表
+const userList = ref<UserVO[]>([]) // 用户列表
 
 /** 打开弹窗 */
-const open = async (type: string, id?: number) => {
+const open = async (type: string, id?: string) => {
   dialogVisible.value = true
   dialogTitle.value = t('action.' + type)
   formType.value = type
@@ -189,11 +223,15 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  } else {
+    formData.value.managerUserIds.push(userStore.getUser.id)
   }
   // 获得流程表单的下拉框的数据
   formList.value = await FormApi.getFormSimpleList()
   // 查询流程分类列表
   categoryList.value = await CategoryApi.getCategorySimpleList()
+  // 查询用户列表
+  userList.value = await UserApi.getSimpleUserList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -237,7 +275,9 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
+    id: undefined,
     name: '',
+    key: '',
     category: undefined,
     icon: undefined,
     description: '',
@@ -246,7 +286,9 @@ const resetForm = () => {
     formId: '',
     formCustomCreatePath: '',
     formCustomViewPath: '',
-    visible: true
+    visible: true,
+    startUserIds: [],
+    managerUserIds: []
   }
   formRef.value?.resetFields()
 }
