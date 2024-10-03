@@ -116,6 +116,7 @@ import {
   validityTypeFormat
 } from '@/views/mall/promotion/coupon/formatter'
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
+import { CouponTemplateTakeTypeEnum } from '@/utils/constants'
 
 defineOptions({ name: 'CouponSelect' })
 
@@ -128,7 +129,7 @@ const emit = defineEmits<{
   (e: 'change', v: CouponTemplateApi.CouponTemplateVO[]): void
 }>()
 const dialogVisible = ref(false) // 弹窗的是否展示
-const dialogTitle = ref('选择优惠卷') // 弹窗的标题
+const dialogTitle = ref('选择优惠劵') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -138,7 +139,7 @@ const queryParams = reactive({
   pageSize: 10,
   name: null,
   discountType: null,
-  canTakeTypes: null
+  canTakeTypes: [CouponTemplateTakeTypeEnum.USER.type] // 只获得直接领取的券
 })
 const queryFormRef = ref() // 搜索的表单
 const selectedCouponList = ref<CouponTemplateApi.CouponTemplateVO[]>([]) // 选择的数据

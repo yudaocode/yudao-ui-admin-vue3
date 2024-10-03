@@ -18,6 +18,7 @@ export interface SeckillActivityVO {
   singleLimitCount?: number
   stock?: number
   totalStock?: number
+  seckillPrice?: number
   products?: SeckillProductVO[]
 }
 
@@ -41,6 +42,11 @@ export interface SpuExtension extends Spu {
 // 查询秒杀活动列表
 export const getSeckillActivityPage = async (params) => {
   return await request.get({ url: '/promotion/seckill-activity/page', params })
+}
+
+// 查询秒杀活动列表，基于活动编号数组
+export const getSeckillActivityListByIds = (ids: number[]) => {
+  return request.get({ url: `/promotion/seckill-activity/list-by-ids?ids=${ids}` })
 }
 
 // 查询秒杀活动详情

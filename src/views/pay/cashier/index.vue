@@ -231,7 +231,7 @@ const getDetail = async () => {
     goReturnUrl('cancel')
     return
   }
-  const data = await PayOrderApi.getOrder(id.value)
+  const data = await PayOrderApi.getOrder(id.value, true)
   payOrder.value = data
   // 1.2 无法查询到支付信息
   if (!data) {

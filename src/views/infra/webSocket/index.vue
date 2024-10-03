@@ -71,7 +71,7 @@
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import { useWebSocket } from '@vueuse/core'
-import { getAccessToken } from '@/utils/auth'
+import { getRefreshToken } from '@/utils/auth'
 import * as UserApi from '@/api/system/user'
 
 defineOptions({ name: 'InfraWebSocket' })
@@ -79,7 +79,9 @@ defineOptions({ name: 'InfraWebSocket' })
 const message = useMessage() // 消息弹窗
 
 const server = ref(
-  (import.meta.env.VITE_BASE_URL + '/infra/ws').replace('http', 'ws') + '?token=' + getAccessToken()
+  (import.meta.env.VITE_BASE_URL + '/infra/ws').replace('http', 'ws') +
+    '?token=' +
+    getRefreshToken() // 使用 getRefreshToken() 方法，而不使用 getAccessToken() 方法的原因：WebSocket 无法方便的刷新访问令牌
 ) // WebSocket 服务地址
 const getIsOpen = computed(() => status.value === 'OPEN') // WebSocket 连接是否打开
 const getTagColor = computed(() => (getIsOpen.value ? 'success' : 'red')) // WebSocket 连接的展示颜色

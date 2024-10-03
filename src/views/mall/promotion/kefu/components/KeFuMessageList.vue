@@ -86,7 +86,7 @@
                   <OrderItem
                     v-if="KeFuMessageContentTypeEnum.ORDER === item.contentType"
                     :message="item"
-                    class="max-w-70%"
+                    class="max-w-100%"
                   />
                 </MessageItem>
               </div>
@@ -423,9 +423,9 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 
     // 消息气泡
     .kefu-message {
-      color: #A9A9A9;
+      color: #a9a9a9;
       border-radius: 5px;
-      box-shadow: 3px 3px 5px rgba(220,220,220, 0.1);
+      box-shadow: 3px 3px 5px rgba(220, 220, 220, 0.1);
       padding: 5px 10px;
       width: auto;
       max-width: 50%;

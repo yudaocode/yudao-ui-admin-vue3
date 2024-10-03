@@ -115,6 +115,7 @@
         <el-radio-group v-model="formData.takeType">
           <el-radio :key="1" :value="1">直接领取</el-radio>
           <el-radio :key="2" :value="2">指定发放</el-radio>
+          <el-radio :key="2" :value="3">新人劵</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="formData.takeType === 1" label="发放数量" prop="totalCount">
@@ -309,7 +310,9 @@ const submitForm = async () => {
       validEndTime:
         formData.value.validTimes && formData.value.validTimes.length === 2
           ? formData.value.validTimes[1]
-          : undefined
+          : undefined,
+      totalCount: formData.value.takeType === 1 ? formData.value.totalCount : -1,
+      takeLimitCount: formData.value.takeType === 1 ? formData.value.takeLimitCount : -1
     } as unknown as CouponTemplateApi.CouponTemplateVO
 
     // 设置商品范围

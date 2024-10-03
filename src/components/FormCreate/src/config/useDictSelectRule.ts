@@ -48,7 +48,7 @@ export const useDictSelectRule = () => {
         },
         {
           type: 'select',
-          field: 'dictValueType',
+          field: 'valueType',
           title: '字典值类型',
           value: 'str',
           options: [

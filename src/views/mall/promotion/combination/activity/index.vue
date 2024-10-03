@@ -4,27 +4,27 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="活动名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入活动名称"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入活动名称"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="活动状态" prop="status">
         <el-select
           v-model="queryParams.status"
-          placeholder="请选择活动状态"
-          clearable
           class="!w-240px"
+          clearable
+          placeholder="请选择活动状态"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -35,15 +35,22 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
         <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
           v-hasPermi="['promotion:combination-activity:create']"
+          plain
+          type="primary"
+          @click="openForm('create')"
         >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
         </el-button>
       </el-form-item>
     </el-form>
@@ -51,77 +58,77 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="活动编号" prop="id" min-width="80" />
-      <el-table-column label="活动名称" prop="name" min-width="140" />
+    <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column label="活动编号" min-width="80" prop="id" />
+      <el-table-column label="活动名称" min-width="140" prop="name" />
       <el-table-column label="活动时间" min-width="210">
         <template #default="scope">
           {{ formatDate(scope.row.startTime, 'YYYY-MM-DD') }}
           ~ {{ formatDate(scope.row.endTime, 'YYYY-MM-DD') }}
         </template>
       </el-table-column>
-      <el-table-column label="商品图片" prop="spuName" min-width="80">
+      <el-table-column label="商品图片" min-width="80" prop="spuName">
         <template #default="scope">
           <el-image
+            :preview-src-list="[scope.row.picUrl]"
             :src="scope.row.picUrl"
             class="h-40px w-40px"
-            :preview-src-list="[scope.row.picUrl]"
             preview-teleported
           />
         </template>
       </el-table-column>
-      <el-table-column label="商品标题" prop="spuName" min-width="300" />
+      <el-table-column label="商品标题" min-width="300" prop="spuName" />
       <el-table-column
-        label="原价"
-        prop="marketPrice"
-        min-width="100"
         :formatter="fenToYuanFormat"
+        label="原价"
+        min-width="100"
+        prop="marketPrice"
       />
-      <el-table-column label="拼团价" prop="seckillPrice" min-width="100">
+      <el-table-column label="拼团价" min-width="100" prop="seckillPrice">
         <template #default="scope">
           {{ formatCombinationPrice(scope.row.products) }}
         </template>
       </el-table-column>
-      <el-table-column label="开团组数" prop="groupCount" min-width="100" />
-      <el-table-column label="成团组数" prop="groupSuccessCount" min-width="100" />
-      <el-table-column label="购买次数" prop="recordCount" min-width="100" />
-      <el-table-column label="活动状态" align="center" prop="status" min-width="100">
+      <el-table-column label="开团组数" min-width="100" prop="groupCount" />
+      <el-table-column label="成团组数" min-width="100" prop="groupSuccessCount" />
+      <el-table-column label="购买次数" min-width="100" prop="recordCount" />
+      <el-table-column align="center" label="活动状态" min-width="100" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
         :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
         width="180px"
       />
-      <el-table-column label="操作" align="center" width="150px" fixed="right">
+      <el-table-column align="center" fixed="right" label="操作" width="150px">
         <template #default="scope">
           <el-button
+            v-hasPermi="['promotion:combination-activity:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['promotion:combination-activity:update']"
           >
             编辑
           </el-button>
           <el-button
+            v-if="scope.row.status === 0"
+            v-hasPermi="['promotion:combination-activity:close']"
             link
             type="danger"
             @click="handleClose(scope.row.id)"
-            v-if="scope.row.status === 0"
-            v-hasPermi="['promotion:combination-activity:close']"
           >
             关闭
           </el-button>
           <el-button
+            v-else
+            v-hasPermi="['promotion:combination-activity:delete']"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-else
-            v-hasPermi="['promotion:combination-activity:delete']"
           >
             删除
           </el-button>
@@ -130,9 +137,9 @@
     </el-table>
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -141,12 +148,11 @@
   <CombinationActivityForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter, formatDate } from '@/utils/formatTime'
 import * as CombinationActivityApi from '@/api/mall/promotion/combination/combinationActivity'
 import CombinationActivityForm from './CombinationActivityForm.vue'
-import { formatDate } from '@/utils/formatTime'
 import { fenToYuanFormat } from '@/utils/formatter'
 import { fenToYuan } from '@/utils'
 
@@ -165,7 +171,6 @@ const queryParams = reactive({
   status: null
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -197,12 +202,11 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-// TODO 芋艿：这里要改下
 /** 关闭按钮操作 */
 const handleClose = async (id: number) => {
   try {
     // 关闭的二次确认
-    await message.confirm('确认关闭该秒杀活动吗？')
+    await message.confirm('确认关闭该拼团活动吗？')
     // 发起关闭
     await CombinationActivityApi.closeCombinationActivity(id)
     message.success('关闭成功')
