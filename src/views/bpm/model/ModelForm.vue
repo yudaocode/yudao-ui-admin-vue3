@@ -8,12 +8,7 @@
       label-width="110px"
     >
       <el-form-item label="流程标识" prop="key">
-        <el-input
-          v-model="formData.key"
-          :disabled="!!formData.id"
-          placeholder="请输入流标标识"
-          style="width: 330px"
-        />
+        <el-input v-model="formData.key" :disabled="!!formData.id" placeholder="请输入流标标识" />
         <el-tooltip
           v-if="!formData.id"
           class="item"
@@ -217,10 +212,9 @@ const submitForm = async () => {
       await ModelApi.createModel(data)
       // 提示，引导用户做后续的操作
       await ElMessageBox.alert(
-        '<strong>新建模型成功！</strong>后续需要执行如下 3 个步骤：' +
-          '<div>1. 点击【修改流程】按钮，配置流程的分类、表单信息</div>' +
-          '<div>2. 点击【设计流程】按钮，绘制流程图</div>' +
-          '<div>3. 点击【发布流程】按钮，完成流程的最终发布</div>' +
+        '<strong>新建模型成功！</strong>后续需要执行如下 2 个步骤：' +
+          '<div>1. 点击【设计流程】按钮，绘制流程图</div>' +
+          '<div>2. 点击【发布流程】按钮，完成流程的最终发布</div>' +
           '另外，每次流程修改后，都需要点击【发布流程】按钮，才能正式生效！！！',
         '重要提示',
         {
