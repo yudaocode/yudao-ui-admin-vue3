@@ -30,6 +30,9 @@
       <el-form-item label="退款结果的回调地址" prop="refundNotifyUrl">
         <el-input v-model="formData.refundNotifyUrl" placeholder="请输入退款结果的回调地址" />
       </el-form-item>
+      <el-form-item label="转账结果的回调地址" prop="transferNotifyUrl">
+        <el-input v-model="formData.transferNotifyUrl" placeholder="请输入转账结果的回调地址" />
+      </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" placeholder="请输入备注" />
       </el-form-item>
@@ -62,14 +65,16 @@ const formData = ref({
   status: CommonStatusEnum.ENABLE,
   remark: undefined,
   orderNotifyUrl: undefined,
-  refundNotifyUrl: undefined
+  refundNotifyUrl: undefined,
+  transferNotifyUrl: undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '应用名不能为空', trigger: 'blur' }],
   appKey: [{ required: true, message: '应用标识不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '开启状态不能为空', trigger: 'blur' }],
   orderNotifyUrl: [{ required: true, message: '支付结果的回调地址不能为空', trigger: 'blur' }],
-  refundNotifyUrl: [{ required: true, message: '退款结果的回调地址不能为空', trigger: 'blur' }]
+  refundNotifyUrl: [{ required: true, message: '退款结果的回调地址不能为空', trigger: 'blur' }],
+  transferNotifyUrl: [{ required: true, message: '转账结果的回调地址不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -126,6 +131,7 @@ const resetForm = () => {
     remark: undefined,
     orderNotifyUrl: undefined,
     refundNotifyUrl: undefined,
+    transferNotifyUrl: undefined,
     appKey: undefined
   }
   formRef.value?.resetFields()
