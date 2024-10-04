@@ -125,7 +125,7 @@
           </el-tag>
           <el-tag v-else type="warning">未部署</el-tag>
           <el-tag
-            v-if="scope.row.processDefinition.suspensionState === 2"
+            v-if="scope.row.processDefinition?.suspensionState === 2"
             type="warning"
             class="ml-10px"
           >
@@ -180,7 +180,7 @@
                 </el-dropdown-item>
                 <el-dropdown-item
                   command="handleChangeState"
-                  v-if="checkPermi(['bpm:model:update'])"
+                  v-if="checkPermi(['bpm:model:update']) && scope.row.processDefinition"
                   :disabled="!isManagerUser(scope.row)"
                 >
                   {{ scope.row.processDefinition.suspensionState === 1 ? '停用' : '启用' }}
