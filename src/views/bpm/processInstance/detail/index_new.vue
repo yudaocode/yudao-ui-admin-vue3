@@ -27,8 +27,8 @@
 
         <el-tabs v-model="activeTab">
           <!-- 表单信息 -->
-          <el-tab-pane label="表单信息" name="form">
-            <div class="form-scoll-area">
+          <el-tab-pane label="审批详情" name="form">
+            <div class="form-scroll-area">
               <el-scrollbar>
                 <el-row :gutter="10">
                   <el-col :span="18" class="!flex !flex-col formCol">
@@ -64,7 +64,6 @@
               </el-scrollbar>
             </div>
           </el-tab-pane>
-
           <!-- 流程图 -->
           <el-tab-pane label="流程图" name="diagram">
             <ProcessInstanceBpmnViewer
@@ -84,7 +83,7 @@
               @refresh="getTaskList"
             />
           </el-tab-pane>
-          <!-- 流转评论 -->
+          <!-- 流转评论 TODO 待开发 -->
           <el-tab-pane label="流转评论" name="comment"> 流转评论 </el-tab-pane>
         </el-tabs>
 
@@ -125,9 +124,9 @@ import audit3 from '@/assets/svgs/bpm/audit3.svg'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 const props = defineProps<{
-  id: string   // 流程实例的编号
-  taskId?: string  // 任务编号
-  activityId?: string  //流程活动编号，用于抄送查看
+  id: string // 流程实例的编号
+  taskId?: string // 任务编号
+  activityId?: string //流程活动编号，用于抄送查看
 }>()
 const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
@@ -234,7 +233,7 @@ const getTaskList = async () => {
     const data = await TaskApi.getTaskListByProcessInstanceId(props.id)
     tasks.value = []
     // 1.1 移除已取消的审批
-    data.forEach((task) => {
+    data.forEach((task: any) => {
       if (task.status !== 4) {
         tasks.value.push(task)
       }
@@ -267,8 +266,8 @@ const getTaskList = async () => {
 const refresh = () => {
   // 重新获取详情
   getDetail()
-  // 刷新审批详情 Timeline 
-  timelineRef.value?.refresh();
+  // 刷新审批详情 Timeline
+  timelineRef.value?.refresh()
 }
 
 /** 当前的Tab */
@@ -298,7 +297,7 @@ $process-header-height: 194px;
   );
   overflow: auto;
 
-  .form-scoll-area {
+  .form-scroll-area {
     height: calc(
       100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px -
         $process-header-height - 40px

@@ -3,6 +3,7 @@
     class="h-50px bottom-10 text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
     v-if="runningTask.id"
   >
+    <!-- 【通过】按钮 -->
     <el-popover
       :visible="passVisible"
       placement="top-end"
@@ -15,6 +16,7 @@
           <Icon icon="ep:select" />&nbsp; {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
         </el-button>
       </template>
+      <!-- 审批表单 -->
       <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
         <el-form
           label-position="top"
@@ -64,6 +66,8 @@
         </el-form>
       </div>
     </el-popover>
+
+    <!-- 【拒绝】按钮 -->
     <el-popover
       :visible="rejectVisible"
       placement="top-end"
@@ -76,6 +80,7 @@
           <Icon icon="ep:close" />&nbsp; {{ getButtonDisplayName(OperationButtonType.REJECT) }}
         </el-button>
       </template>
+      <!-- 审批表单 -->
       <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
         <el-form
           label-position="top"
@@ -125,21 +130,39 @@
         </el-form>
       </div>
     </el-popover>
+
+    <!-- 【抄送】按钮 -->
     <div @click="handleSend"> <Icon :size="14" icon="svg-icon:send" />&nbsp;抄送 </div>
+
+    <!-- 【转交】按钮 -->
     <div @click="openTaskUpdateAssigneeForm" v-if="isShowButton(OperationButtonType.TRANSFER)">
-      <Icon :size="14" icon="fa:share-square-o" />&nbsp;{{ getButtonDisplayName(OperationButtonType.TRANSFER) }}
+      <Icon :size="14" icon="fa:share-square-o" />&nbsp;
+      {{ getButtonDisplayName(OperationButtonType.TRANSFER) }}
     </div>
+
+    <!-- 【委托】按钮 -->
     <div @click="handleDelegate" v-if="isShowButton(OperationButtonType.DELEGATE)">
-      <Icon :size="14" icon="ep:position" />&nbsp;{{ getButtonDisplayName(OperationButtonType.DELEGATE) }}
+      <Icon :size="14" icon="ep:position" />&nbsp;
+      {{ getButtonDisplayName(OperationButtonType.DELEGATE) }}
     </div>
+
+    <!-- 【加签】 -->
     <div @click="handleSign" v-if="isShowButton(OperationButtonType.ADD_SIGN)">
-      <Icon :size="14" icon="ep:plus" />&nbsp;{{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
+      <Icon :size="14" icon="ep:plus" />&nbsp;
+      {{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
     </div>
+    <!-- TODO @jason：减签 -->
+
+    <!-- 【退回】按钮 -->
     <div @click="handleBack" v-if="isShowButton(OperationButtonType.RETURN)">
-      <Icon :size="14" icon="fa:mail-reply" />&nbsp;{{ getButtonDisplayName(OperationButtonType.RETURN) }}
+      <Icon :size="14" icon="fa:mail-reply" />&nbsp;
+      {{ getButtonDisplayName(OperationButtonType.RETURN) }}
     </div>
+
+    <!--TODO @jason：撤回 -->
+    <!--TODO @jason：再次发起 -->
   </div>
-  <!-- </div> -->
+
   <!-- 弹窗：转派审批人 -->
   <TaskTransferForm ref="taskTransferFormRef" @success="getDetail" />
   <!-- 弹窗：回退节点 -->
@@ -149,7 +172,6 @@
   <!-- 弹窗：加签，当前任务审批人为A，向前加签选了一个C，则需要C先审批，然后再是A审批，向后加签B，A审批完，需要B再审批完，才算完成这个任务节点 -->
   <TaskSignCreateForm ref="taskSignCreateFormRef" @success="getDetail" />
 </template>
-
 <script lang="ts" setup>
 import { setConfAndFields2 } from '@/utils/formCreate'
 import { useUserStore } from '@/store/modules/user'
@@ -198,15 +220,17 @@ watch(
     deep: true
   }
 )
+
+// TODO @jaosn：具体的审批任务，要不改成后端返回。让前端弱化下
 /**
  * 设置 runningTasks 中的任务
  */
-const loadRunningTask = (tasks) => {
+const loadRunningTask = (tasks: any[]) => {
   runningTask.value = {}
   auditForm.value = {}
   approveForm.value = {}
   approveFormFApi.value = {}
-  tasks.forEach((task) => {
+  tasks.forEach((task: any) => {
     if (!isEmpty(task.children)) {
       loadRunningTask(task.children)
     }
@@ -237,7 +261,7 @@ const loadRunningTask = (tasks) => {
 }
 
 /** 处理审批通过和不通过的操作 */
-const handleAudit = async (pass) => {
+const handleAudit = async (pass: any) => {
   formLoading.value = true
   try {
     const auditFormRef = proxy.$refs['formRef']
@@ -277,6 +301,7 @@ const handleAudit = async (pass) => {
 /* 抄送 TODO */
 const handleSend = () => {}
 
+// TODO 代码优化：这里 flag 改成 approve: boolean 。因为 flag 目前就只有 1 和 2
 const openPopover = (flag) => {
   passVisible.value = false
   rejectVisible.value = false
@@ -323,11 +348,11 @@ const isShowButton = (btnType: OperationButtonType): boolean => {
 
 /** 获取按钮的显示名称 */
 const getButtonDisplayName = (btnType: OperationButtonType) => {
-  let diaplayName = OPERATION_BUTTON_NAME.get(btnType)
+  let displayName = OPERATION_BUTTON_NAME.get(btnType)
   if (runningTask.value.buttonsSetting && runningTask.value.buttonsSetting[btnType]) {
-    diaplayName = runningTask.value.buttonsSetting[btnType].displayName
+    displayName = runningTask.value.buttonsSetting[btnType].displayName
   }
-  return diaplayName
+  return displayName
 }
 
 defineExpose({ loadRunningTask })
