@@ -56,29 +56,73 @@
           </el-form-item>
         </el-form>
         <div style="margin-bottom: 20px; margin-left: 10%; font-size: 14px">
-          <el-button type="success" @click="handleAudit(item, true)">
+          <!-- TODO @jason：建议搞个 if 来判断，替代现有的 !item.buttonsSetting || item.buttonsSetting[OpsButtonType.APPROVE]?.enable -->
+          <el-button
+            type="success"
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.APPROVE]?.enable"
+            @click="handleAudit(item, true)"
+          >
             <Icon icon="ep:select" />
-            通过
+            <!-- TODO @jason：这个也是类似哈，搞个方法来生成名字 -->
+            {{
+              item.buttonsSetting?.[OperationButtonType.APPROVE]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.APPROVE)
+            }}
           </el-button>
-          <el-button type="danger" @click="handleAudit(item, false)">
+          <el-button
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.REJECT]?.enable"
+            type="danger"
+            @click="handleAudit(item, false)"
+          >
             <Icon icon="ep:close" />
-            不通过
+            {{
+              item.buttonsSetting?.[OperationButtonType.REJECT].displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.REJECT)
+            }}
           </el-button>
-          <el-button type="primary" @click="openTaskUpdateAssigneeForm(item.id)">
+          <el-button
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.TRANSFER]?.enable"
+            type="primary"
+            @click="openTaskUpdateAssigneeForm(item.id)"
+          >
             <Icon icon="ep:edit" />
-            转办
+            {{
+              item.buttonsSetting?.[OperationButtonType.TRANSFER]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.TRANSFER)
+            }}
           </el-button>
-          <el-button type="primary" @click="handleDelegate(item)">
+          <el-button
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.DELEGATE]?.enable"
+            type="primary"
+            @click="handleDelegate(item)"
+          >
             <Icon icon="ep:position" />
-            委派
+            {{
+              item.buttonsSetting?.[OperationButtonType.DELEGATE]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.DELEGATE)
+            }}
           </el-button>
-          <el-button type="primary" @click="handleSign(item)">
+          <el-button
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.ADD_SIGN]?.enable"
+            type="primary"
+            @click="handleSign(item)"
+          >
             <Icon icon="ep:plus" />
-            加签
+            {{
+              item.buttonsSetting?.[OperationButtonType.ADD_SIGN]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.ADD_SIGN)
+            }}
           </el-button>
-          <el-button type="warning" @click="handleBack(item)">
+          <el-button
+            v-if="!item.buttonsSetting || item.buttonsSetting[OperationButtonType.RETURN]?.enable"
+            type="warning"
+            @click="handleBack(item)"
+          >
             <Icon icon="ep:back" />
-            回退
+            {{
+              item.buttonsSetting?.[OperationButtonType.RETURN]?.displayName ||
+              OPERATION_BUTTON_NAME.get(OperationButtonType.RETURN)
+            }}
           </el-button>
         </div>
       </el-col>
@@ -147,6 +191,10 @@ import TaskSignCreateForm from './dialog/TaskSignCreateForm.vue'
 import { registerComponent } from '@/utils/routerHelper'
 import { isEmpty } from '@/utils/is'
 import * as UserApi from '@/api/system/user'
+import {
+  OperationButtonType,
+  OPERATION_BUTTON_NAME
+} from '@/components/SimpleProcessDesignerV2/src/consts'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 
@@ -200,7 +248,11 @@ const handleAudit = async (task, pass) => {
   // 1.2 校验表单
   const elForm = unref(auditFormRef)
   if (!elForm) return
-  const valid = await elForm.validate()
+  let valid = await elForm.validate()
+  if (!valid) return
+  // 校验申请表单
+  if (!fApi.value) return
+  valid = await fApi.value.validate()
   if (!valid) return
 
   // 2.1 提交审批
@@ -216,6 +268,9 @@ const handleAudit = async (task, pass) => {
       await formCreateApi.validate()
       data.variables = approveForms.value[index].value
     }
+    // 获取表单可编辑字段的值
+    data.variables = getWritableValueOfForm(task.fieldsPermission)
+
     await TaskApi.approveTask(data)
     message.success('审批通过成功')
   } else {
@@ -251,11 +306,11 @@ const handleSign = async (task: any) => {
 }
 
 /** 获得详情 */
-const getDetail = () => {
-  // 1. 获得流程实例相关
+const getDetail = async () => {
+  // 1. 获得流程任务列表（审批记录）。 需要先获取任务，表单的权限设置需要根据任务来设置
+  await getTaskList()
+  // 2. 获得流程实例相关
   getProcessInstance()
-  // 2. 获得流程任务列表（审批记录）
-  getTaskList()
 }
 
 /** 加载流程实例 */
@@ -273,16 +328,29 @@ const getProcessInstance = async () => {
     // 设置表单信息
     const processDefinition = data.processDefinition
     if (processDefinition.formType === 10) {
-      setConfAndFields2(
-        detailForm,
-        processDefinition.formConf,
-        processDefinition.formFields,
-        data.formVariables
-      )
+      if (detailForm.value.rule.length > 0) {
+        detailForm.value.value = data.formVariables
+      } else {
+        setConfAndFields2(
+          detailForm,
+          processDefinition.formConf,
+          processDefinition.formFields,
+          data.formVariables
+        )
+      }
       nextTick().then(() => {
         fApi.value?.btn.show(false)
         fApi.value?.resetBtn.show(false)
         fApi.value?.disabled(true)
+        // 设置表单权限。后续需要改造成。只处理一个运行中的任务
+        if (runningTasks.value.length > 0) {
+          const task = runningTasks.value.at(0)
+          if (task.fieldsPermission) {
+            Object.keys(task.fieldsPermission).forEach((item) => {
+              setFieldPermission(item, task.fieldsPermission[item])
+            })
+          }
+        }
       })
     } else {
       // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue
@@ -353,6 +421,7 @@ const loadRunningTask = (tasks) => {
     if (!task.assigneeUser || task.assigneeUser.id !== userId) {
       return
     }
+
     // 2.3 添加到处理任务
     runningTasks.value.push({ ...task })
     auditForms.value.push({
@@ -369,6 +438,35 @@ const loadRunningTask = (tasks) => {
       approveForms.value.push({}) // 占位，避免为空
     }
   })
+}
+
+/**
+ * 设置表单权限
+ */
+const setFieldPermission = (field: string, permission: string) => {
+  if (permission === '1') {
+    fApi.value?.disabled(true, field)
+  }
+  if (permission === '2') {
+    fApi.value?.disabled(false, field)
+  }
+  if (permission === '3') {
+    fApi.value?.hidden(true, field)
+  }
+}
+/**
+ * 获取可以编辑字段的值
+ */
+const getWritableValueOfForm = (fieldsPermission: Object) => {
+  const fieldsValue = {}
+  if (fieldsPermission && fApi.value) {
+    Object.keys(fieldsPermission).forEach((item) => {
+      if (fieldsPermission[item] === '2') {
+        fieldsValue[item] = fApi.value.getValue(item)
+      }
+    })
+  }
+  return fieldsValue
 }
 
 /** 初始化 */

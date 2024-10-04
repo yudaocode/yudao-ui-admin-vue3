@@ -30,12 +30,16 @@ export const getModelPage = async (params) => {
   return await request.get({ url: '/bpm/model/page', params })
 }
 
-export const getModel = async (id: number) => {
+export const getModel = async (id: string) => {
   return await request.get({ url: '/bpm/model/get?id=' + id })
 }
 
 export const updateModel = async (data: ModelVO) => {
   return await request.put({ url: '/bpm/model/update', data: data })
+}
+
+export const updateModelBpmn = async (data: ModelVO) => {
+  return await request.put({ url: '/bpm/model/update-bpmn', data: data })
 }
 
 // 任务状态修改

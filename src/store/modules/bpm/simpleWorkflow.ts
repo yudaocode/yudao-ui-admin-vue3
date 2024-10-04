@@ -1,4 +1,4 @@
-import { store } from '../index'
+import { store } from '../../index'
 import { defineStore } from 'pinia'
 
 export const useWorkFlowStore = defineStore('simpleWorkflow', {
@@ -6,15 +6,15 @@ export const useWorkFlowStore = defineStore('simpleWorkflow', {
     tableId: '',
     isTried: false,
     promoterDrawer: false,
-    flowPermission1: {},
     approverDrawer: false,
     approverConfig1: {},
     copyerDrawer: false,
-    copyerConfig1: {},
+    copyerConfig: {},
     conditionDrawer: false,
     conditionsConfig1: {
       conditionNodes: []
-    }
+    },
+    userTaskConfig: {}
   }),
   actions: {
     setTableId(payload) {
@@ -26,26 +26,26 @@ export const useWorkFlowStore = defineStore('simpleWorkflow', {
     setPromoter(payload) {
       this.promoterDrawer = payload
     },
-    setFlowPermission(payload) {
-      this.flowPermission1 = payload
-    },
-    setApprover(payload) {
+    setApproverDrawer(payload) {
       this.approverDrawer = payload
     },
     setApproverConfig(payload) {
       this.approverConfig1 = payload
     },
-    setCopyer(payload) {
+    setCopyerDrawer(payload) {
       this.copyerDrawer = payload
     },
     setCopyerConfig(payload) {
-      this.copyerConfig1 = payload
+      this.copyerConfig = payload
     },
     setCondition(payload) {
       this.conditionDrawer = payload
     },
     setConditionsConfig(payload) {
       this.conditionsConfig1 = payload
+    },
+    setUserTaskConfig(payload) {
+      this.userTaskConfig = payload
     }
   }
 })

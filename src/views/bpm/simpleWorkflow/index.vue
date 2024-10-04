@@ -1,28 +1,13 @@
 <template>
-  <div>
-    <section class="dingflow-design">
-      <div class="box-scale">
-        <nodeWrap v-model:nodeConfig="nodeConfig" />
-        <div class="end-node">
-          <div class="end-node-circle"></div>
-          <div class="end-node-text">流程结束</div>
-        </div>
-      </div>
-    </section>
-  </div>
+  <SimpleProcessDesigner :model-id="modelId" />
 </template>
-<script lang="ts" setup>
-import nodeWrap from '@/components/SimpleProcessDesigner/src/nodeWrap.vue'
-defineOptions({ name: 'SimpleWorkflowDesignEditor' })
-let nodeConfig = ref({
-  nodeName: '发起人',
-  type: 0,
-  id: 'root',
-  formPerms: {},
-  nodeUserList: [],
-  childNode: {}
+<script setup lang="ts">
+import { SimpleProcessDesigner } from '@/components/SimpleProcessDesignerV2/src/'
+
+defineOptions({
+  name: 'SimpleWorkflowDesignEditor'
 })
+const { query } = useRoute() // 路由的查询
+const modelId = query.modelId as string
 </script>
-<style>
-@import url('@/components/SimpleProcessDesigner/theme/workflow.css');
-</style>
+<style lang="scss" scoped></style>

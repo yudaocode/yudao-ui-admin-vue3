@@ -143,6 +143,7 @@ export enum DICT_TYPE {
   INFRA_OPERATE_TYPE = 'infra_operate_type',
 
   // ========== BPM 模块 ==========
+  BPM_MODEL_TYPE = 'bpm_model_type',
   BPM_MODEL_FORM_TYPE = 'bpm_model_form_type',
   BPM_TASK_CANDIDATE_STRATEGY = 'bpm_task_candidate_strategy',
   BPM_PROCESS_INSTANCE_STATUS = 'bpm_process_instance_status',

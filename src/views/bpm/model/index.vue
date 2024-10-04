@@ -58,10 +58,7 @@
           @click="openForm('create')"
           v-hasPermi="['bpm:model:create']"
         >
-          <Icon icon="ep:plus" class="mr-5px" /> 新建流程
-        </el-button>
-        <el-button type="success" plain @click="openImportForm" v-hasPermi="['bpm:model:import']">
-          <Icon icon="ep:upload" class="mr-5px" /> 导入流程
+          <Icon icon="ep:plus" class="mr-5px" /> 新建
         </el-button>
       </el-form-item>
     </el-form>
@@ -70,21 +67,34 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="流程标识" align="center" prop="key" width="200" />
-      <el-table-column label="流程名称" align="center" prop="name" width="200">
+      <el-table-column label="流程名称" align="center" prop="name" min-width="200" />
+      <el-table-column label="流程图标" align="center" prop="icon" min-width="100">
         <template #default="scope">
-          <el-button type="primary" link @click="handleBpmnDetail(scope.row)">
-            <span>{{ scope.row.name }}</span>
-          </el-button>
+          <el-image :src="scope.row.icon" class="h-32px w-32px" />
         </template>
       </el-table-column>
-      <el-table-column label="流程图标" align="center" prop="icon" width="100">
+      <el-table-column label="可见范围" align="center" prop="startUserIds" min-width="100">
         <template #default="scope">
-          <el-image :src="scope.row.icon" class="w-32px h-32px" />
+          <el-text v-if="!scope.row.startUsers || scope.row.startUsers.length === 0">
+            全部可见
+          </el-text>
+          <el-text v-else-if="scope.row.startUsers.length == 1">
+            {{ scope.row.startUsers[0].nickname }}
+          </el-text>
+          <el-text v-else>
+            <el-tooltip
+              class="box-item"
+              effect="dark"
+              placement="top"
+              :content="scope.row.startUsers.map((user: any) => user.nickname).join('、')"
+            >
+              {{ scope.row.startUsers[0].nickname }}等 {{ scope.row.startUsers.length }} 人可见
+            </el-tooltip>
+          </el-text>
         </template>
       </el-table-column>
-      <el-table-column label="流程分类" align="center" prop="categoryName" width="100" />
-      <el-table-column label="表单信息" align="center" prop="formType" width="200">
+      <el-table-column label="流程分类" align="center" prop="categoryName" min-width="100" />
+      <el-table-column label="表单信息" align="center" prop="formType" min-width="200">
         <template #default="scope">
           <el-button
             v-if="scope.row.formType === 10"
@@ -105,101 +115,87 @@
           <label v-else>暂无表单</label>
         </template>
       </el-table-column>
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        width="180"
-        :formatter="dateFormatter"
-      />
-      <el-table-column label="最新部署的流程定义" align="center">
-        <el-table-column
-          label="流程版本"
-          align="center"
-          prop="processDefinition.version"
-          width="100"
-        >
-          <template #default="scope">
-            <el-tag v-if="scope.row.processDefinition">
-              v{{ scope.row.processDefinition.version }}
-            </el-tag>
-            <el-tag v-else type="warning">未部署</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="激活状态"
-          align="center"
-          prop="processDefinition.version"
-          width="85"
-        >
-          <template #default="scope">
-            <el-switch
-              v-if="scope.row.processDefinition"
-              v-model="scope.row.processDefinition.suspensionState"
-              :active-value="1"
-              :inactive-value="2"
-              @change="handleChangeState(scope.row)"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column label="部署时间" align="center" prop="deploymentTime" width="180">
-          <template #default="scope">
-            <span v-if="scope.row.processDefinition">
-              {{ formatDate(scope.row.processDefinition.deploymentTime) }}
-            </span>
-          </template>
-        </el-table-column>
+      <el-table-column label="最后发布" align="center" prop="deploymentTime" min-width="250">
+        <template #default="scope">
+          <span v-if="scope.row.processDefinition">
+            {{ formatDate(scope.row.processDefinition.deploymentTime) }}
+          </span>
+          <el-tag v-if="scope.row.processDefinition" class="ml-10px">
+            v{{ scope.row.processDefinition.version }}
+          </el-tag>
+          <el-tag v-else type="warning">未部署</el-tag>
+          <el-tag
+            v-if="scope.row.processDefinition?.suspensionState === 2"
+            type="warning"
+            class="ml-10px"
+          >
+            已停用
+          </el-tag>
+        </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" min-width="240" fixed="right">
+      <el-table-column label="操作" align="center" width="200" fixed="right">
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['bpm:model:update']"
+            :disabled="!isManagerUser(scope.row)"
           >
-            修改流程
+            修改
           </el-button>
           <el-button
             link
+            class="!ml-5px"
             type="primary"
             @click="handleDesign(scope.row)"
             v-hasPermi="['bpm:model:update']"
+            :disabled="!isManagerUser(scope.row)"
           >
-            设计流程
+            设计
           </el-button>
           <el-button
             link
-            type="primary"
-            @click="handleSimpleDesign(scope.row.id)"
-            v-hasPermi="['bpm:model:update']"
-          >
-            仿钉钉设计流程
-          </el-button>
-          <el-button
-            link
+            class="!ml-5px"
             type="primary"
             @click="handleDeploy(scope.row)"
             v-hasPermi="['bpm:model:deploy']"
+            :disabled="!isManagerUser(scope.row)"
           >
-            发布流程
+            发布
           </el-button>
-          <el-button
-            link
-            type="primary"
-            v-hasPermi="['bpm:process-definition:query']"
-            @click="handleDefinitionList(scope.row)"
+          <el-dropdown
+            class="!align-middle ml-5px"
+            @command="(command) => handleCommand(command, scope.row)"
+            v-hasPermi="['bpm:process-definition:query', 'bpm:model:update', 'bpm:model:delete']"
           >
-            流程定义
-          </el-button>
-          <el-button
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-            v-hasPermi="['bpm:model:delete']"
-          >
-            删除
-          </el-button>
+            <el-button type="primary" link>更多</el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  command="handleDefinitionList"
+                  v-if="checkPermi(['bpm:process-definition:query'])"
+                >
+                  历史
+                </el-dropdown-item>
+                <el-dropdown-item
+                  command="handleChangeState"
+                  v-if="checkPermi(['bpm:model:update']) && scope.row.processDefinition"
+                  :disabled="!isManagerUser(scope.row)"
+                >
+                  {{ scope.row.processDefinition.suspensionState === 1 ? '停用' : '启用' }}
+                </el-dropdown-item>
+                <el-dropdown-item
+                  type="danger"
+                  command="handleDelete"
+                  v-if="checkPermi(['bpm:model:delete'])"
+                  :disabled="!isManagerUser(scope.row)"
+                >
+                  删除
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
         </template>
       </el-table-column>
     </el-table>
@@ -215,41 +211,29 @@
   <!-- 表单弹窗：添加/修改流程 -->
   <ModelForm ref="formRef" @success="getList" />
 
-  <!-- 表单弹窗：导入流程 -->
-  <ModelImportForm ref="importFormRef" @success="getList" />
-
   <!-- 弹窗：表单详情 -->
   <Dialog title="表单详情" v-model="formDetailVisible" width="800">
     <form-create :rule="formDetailPreview.rule" :option="formDetailPreview.option" />
   </Dialog>
-
-  <!-- 弹窗：流程模型图的预览 -->
-  <Dialog title="流程图" v-model="bpmnDetailVisible" width="800">
-    <MyProcessViewer
-      key="designer"
-      v-model="bpmnXML"
-      :value="bpmnXML as any"
-      v-bind="bpmnControlForm"
-      :prefix="bpmnControlForm.prefix"
-    />
-  </Dialog>
 </template>
 
 <script lang="ts" setup>
-import { dateFormatter, formatDate } from '@/utils/formatTime'
-import { MyProcessViewer } from '@/components/bpmnProcessDesigner/package'
+import { formatDate } from '@/utils/formatTime'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import ModelForm from './ModelForm.vue'
-import ModelImportForm from '@/views/bpm/model/ModelImportForm.vue'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import { CategoryApi } from '@/api/bpm/category'
+import { BpmModelType } from '@/utils/constants'
+import { checkPermi } from '@/utils/permission'
+import { useUserStoreWithOut } from '@/store/modules/user'
 
 defineOptions({ name: 'BpmModel' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由
+const userStore = useUserStoreWithOut() // 用户信息缓存
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -288,25 +272,36 @@ const resetQuery = () => {
   handleQuery()
 }
 
+/** '更多'操作按钮 */
+const handleCommand = (command: string, row: any) => {
+  switch (command) {
+    case 'handleDefinitionList':
+      handleDefinitionList(row)
+      break
+    case 'handleDelete':
+      handleDelete(row)
+      break
+    case 'handleChangeState':
+      handleChangeState(row)
+      break
+    default:
+      break
+  }
+}
+
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
-/** 添加/修改操作 */
-const importFormRef = ref()
-const openImportForm = () => {
-  importFormRef.value.open()
-}
-
 /** 删除按钮操作 */
-const handleDelete = async (id: number) => {
+const handleDelete = async (row: any) => {
   try {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ModelApi.deleteModel(id)
+    await ModelApi.deleteModel(row.id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -314,45 +309,45 @@ const handleDelete = async (id: number) => {
 }
 
 /** 更新状态操作 */
-const handleChangeState = async (row) => {
+const handleChangeState = async (row: any) => {
   const state = row.processDefinition.suspensionState
+  const newState = state === 1 ? 2 : 1
   try {
     // 修改状态的二次确认
     const id = row.id
-    const statusState = state === 1 ? '激活' : '挂起'
+    debugger
+    const statusState = state === 1 ? '停用' : '启用'
     const content = '是否确认' + statusState + '流程名字为"' + row.name + '"的数据项?'
     await message.confirm(content)
     // 发起修改状态
-    await ModelApi.updateModelState(id, state)
+    await ModelApi.updateModelState(id, newState)
+    message.success(statusState + '成功')
     // 刷新列表
     await getList()
-  } catch {
-    // 取消后，进行恢复按钮
-    row.processDefinition.suspensionState = state === 1 ? 2 : 1
-  }
+  } catch {}
 }
 
 /** 设计流程 */
-const handleDesign = (row) => {
-  push({
-    name: 'BpmModelEditor',
-    query: {
-      modelId: row.id
-    }
-  })
-}
-
-const handleSimpleDesign = (row) => {
-  push({
-    name: 'SimpleWorkflowDesignEditor',
-    query: {
-      modelId: row.id
-    }
-  })
+const handleDesign = (row: any) => {
+  if (row.type == BpmModelType.BPMN) {
+    push({
+      name: 'BpmModelEditor',
+      query: {
+        modelId: row.id
+      }
+    })
+  } else {
+    push({
+      name: 'SimpleWorkflowDesignEditor',
+      query: {
+        modelId: row.id
+      }
+    })
+  }
 }
 
 /** 发布流程 */
-const handleDeploy = async (row) => {
+const handleDeploy = async (row: any) => {
   try {
     // 删除的二次确认
     await message.confirm('是否部署该流程！！')
@@ -380,7 +375,7 @@ const formDetailPreview = ref({
   rule: [],
   option: {}
 })
-const handleFormDetail = async (row) => {
+const handleFormDetail = async (row: any) => {
   if (row.formType == 10) {
     // 设置表单
     const data = await FormApi.getForm(row.formId)
@@ -394,16 +389,10 @@ const handleFormDetail = async (row) => {
   }
 }
 
-/** 流程图的详情按钮操作 */
-const bpmnDetailVisible = ref(false)
-const bpmnXML = ref(null)
-const bpmnControlForm = ref({
-  prefix: 'flowable'
-})
-const handleBpmnDetail = async (row) => {
-  const data = await ModelApi.getModel(row.id)
-  bpmnXML.value = data.bpmnXml || ''
-  bpmnDetailVisible.value = true
+/** 判断是否可以操作 */
+const isManagerUser = (row: any) => {
+  const userId = userStore.getUser.id
+  return row.managerUserIds && row.managerUserIds.includes(userId)
 }
 
 /** 初始化 **/
