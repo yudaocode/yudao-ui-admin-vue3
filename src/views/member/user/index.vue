@@ -140,7 +140,7 @@
                 'member:user:update',
                 'member:user:update-level',
                 'member:user:update-point',
-                'member:user:update-balance'
+                'pay:wallet:update-balance'
               ]"
               @command="(command) => handleCommand(command, scope.row)"
             >
@@ -169,7 +169,7 @@
                     修改积分
                   </el-dropdown-item>
                   <el-dropdown-item
-                    v-if="checkPermi(['member:user:update-balance'])"
+                    v-if="checkPermi(['pay:wallet:update-balance'])"
                     command="handleUpdateBlance"
                   >
                     修改余额
