@@ -139,7 +139,6 @@
                 clearable
                 multiple
                 style="width: 100%"
-                @change="changedCandidateUsers"
               >
                 <el-option
                   v-for="item in userOptions"
@@ -187,10 +186,6 @@
                     <el-radio
                       :value="item.value"
                       :label="item.value"
-                      :disabled="
-                        item.value !== ApproveMethodType.RANDOM_SELECT_ONE_APPROVE &&
-                        notAllowedMultiApprovers
-                      "
                     >
                       {{ item.label }}
                     </el-radio>
@@ -537,8 +532,7 @@ const {
   getShowText
 } = useNodeForm(NodeType.USER_TASK_NODE)
 const configForm = tempConfigForm as Ref<UserTaskFormType>
-// 不允许多人审批
-const notAllowedMultiApprovers = ref(false)
+
 // 改变审批人设置策略
 const changeCandidateStrategy = () => {
   configForm.value.userIds = []
@@ -548,29 +542,8 @@ const changeCandidateStrategy = () => {
   configForm.value.userGroups = []
   configForm.value.deptLevel = 1
   configForm.value.approveMethod = ApproveMethodType.SEQUENTIAL_APPROVE
-  if (
-    configForm.value.candidateStrategy === CandidateStrategy.START_USER ||
-    configForm.value.candidateStrategy === CandidateStrategy.USER
-  ) {
-    notAllowedMultiApprovers.value = true
-  } else {
-    notAllowedMultiApprovers.value = false
-  }
 }
-// 改变审批候选人
-const changedCandidateUsers = () => {
-  if (
-    configForm.value.userIds &&
-    configForm.value.userIds?.length <= 1 &&
-    configForm.value.candidateStrategy === CandidateStrategy.USER
-  ) {
-    configForm.value.approveMethod = ApproveMethodType.RANDOM_SELECT_ONE_APPROVE
-    configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
-    notAllowedMultiApprovers.value = true
-  } else {
-    notAllowedMultiApprovers.value = false
-  }
-}
+
 // 审批方式改变
 const approveMethodChanged = () => {
   configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
@@ -666,11 +639,6 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   configForm.value.candidateStrategy = node.candidateStrategy!
   // 解析候选人参数
   parseCandidateParam(node.candidateStrategy!, node?.candidateParam)
-  if (configForm.value.userIds && configForm.value.userIds.length > 1) {
-    notAllowedMultiApprovers.value = true
-  } else {
-    notAllowedMultiApprovers.value = false
-  }
   // 2.2 设置审批方式
   configForm.value.approveMethod = node.approveMethod!
   if (node.approveMethod == ApproveMethodType.APPROVE_BY_RATIO) {
