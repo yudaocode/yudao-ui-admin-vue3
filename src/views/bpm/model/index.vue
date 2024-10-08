@@ -42,11 +42,14 @@
     <!-- 分类卡片组 -->
     <div class="px-30px">
       <ContentWrap v-for="(list, title) in categoryGroup" :key="title">
-        <h3 class="ml-20px">{{ title }}</h3>
+        <div class="flex items-center mb-20px">
+          <h3 class="ml-20px mr-8px">{{ title }}</h3>
+          <div class="text-[var(--el-text-color-placeholder)]">({{ list?.length || 0 }})</div>
+        </div>
         <el-table v-loading="loading" :data="list">
           <el-table-column label="流程名" align="center" prop="name" min-width="200">
             <template #default="scope">
-              <div class="flex items-center justify-center">
+              <div class="flex items-center">
                 <el-image :src="scope.row.icon" class="h-32px w-32px mr-10px rounded" />
                 {{ scope.row.name }}
               </div>
@@ -206,6 +209,7 @@ import { BpmModelType } from '@/utils/constants'
 import { checkPermi } from '@/utils/permission'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { groupBy } from 'lodash-es'
+import { mockData } from './mock'
 
 defineOptions({ name: 'BpmModel' })
 
@@ -213,7 +217,6 @@ const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由
 const userStore = useUserStoreWithOut() // 用户信息缓存
-
 const loading = ref(true) // 列表的加载中
 const queryParams = reactive({
   pageNo: 1,
@@ -224,7 +227,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const categoryList = ref([]) // 流程分类列表
-const categoryGroup = ref({}) // 按照category分组的数据
+const categoryGroup = ref<any>({}) // 按照category分组的数据
 
 /** 查询列表 */
 const getList = async () => {
@@ -232,6 +235,7 @@ const getList = async () => {
   try {
     // TODO 芋艿：这里需要一个不分页查全部的流程模型接口
     const data = await ModelApi.getModelPage(queryParams)
+    data.list = mockData
     categoryGroup.value = groupBy(data.list, 'categoryName')
   } finally {
     loading.value = false
