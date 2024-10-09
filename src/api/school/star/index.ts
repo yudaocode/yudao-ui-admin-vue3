@@ -17,20 +17,6 @@ export const getStarPage = async (params: PageParam) => {
   return await request.get({ url: '/school/star/page', params })
 }
 
-// // 查询角色（精简)列表
-// export const getSimpleRoleList = async (): Promise<RoleVO[]> => {
-//   return await request.get({ url: '/system/role/simple-list' })
-// }
-
-// // 查询角色详情
-// export const getRole = async (id: number) => {
-//   return await request.get({ url: '/system/role/get?id=' + id })
-// }
-
-// // 新增角色
-// export const createRole = async (data: RoleVO) => {
-//   return await request.post({ url: '/system/role/create', data })
-// }
 
 // 修改角色
 export const updateStar = async (data: RoleVO) => {
@@ -47,13 +33,10 @@ export const deleteStar = async (id: number) => {
   return await request.delete({ url: '/school/star/delete?id=' + id })
 }
 
-// // 导出角色
-// export const exportRole = (params) => {
-//   return request.download({
-//     url: '/system/role/export-excel',
-//     params
-//   })
-// }
+// 查询六星总览
+export const getStarOverview = async (params) => {
+  return await request.get({ url: '/school/star/overview', params})
+}
 
 // 导入六星文件
 export const updateFile = (data: any) => {

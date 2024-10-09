@@ -43,7 +43,7 @@
           end-placeholder="结束日期"
           start-placeholder="开始日期"
           type="daterange"
-          value-format="YYYY-MM-DD HH:mm:ss"
+          value-format="YYYY-MM-DD"
         />
       </el-form-item>
       <el-form-item>
@@ -79,7 +79,7 @@
         <template #default="scope">
           {{ scope.row.grade }}级
           {{
-            new Date().getFullYear() + (Math.floor(new Date().getMonth() / 8)) - scope.row.grade - 1999 < 7 ? '-' + (new Date().getFullYear() + (Math.floor(new Date().getMonth() / 8)) - scope.row.grade - 1999) + '年级' : ''
+            new Date().getFullYear() + (Math.floor(new Date().getMonth() / 9)) - scope.row.grade - 2000 < 7 ? '-' + (new Date().getFullYear() + (Math.floor(new Date().getMonth() / 9)) - scope.row.grade - 2000) + '年级' : ''
           }}
         </template>
       </el-table-column>
@@ -138,7 +138,7 @@ const total = ref(0) // 列表的总页数
 const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
-  pageSize: 10,
+  pageSize: 20,
   type: '',
   stuName: '',
   grade: undefined,
@@ -218,6 +218,7 @@ const handleDelete = async (id: number) => {
 
 /** 初始化 **/
 onMounted(() => {
+  console.log(new Date().getFullYear(), new Date().getMonth())
   getList()
 })
 </script>

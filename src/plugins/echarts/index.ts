@@ -8,7 +8,8 @@ import {
   MapChart,
   PictorialBarChart,
   PieChart,
-  RadarChart
+  RadarChart,
+  TreeChart
 } from 'echarts/charts'
 
 import {
@@ -43,7 +44,8 @@ echarts.use([
   PictorialBarChart,
   RadarChart,
   GaugeChart,
-  FunnelChart
+  FunnelChart,
+  TreeChart
 ])
 
 export default echarts
