@@ -1,7 +1,7 @@
 <template>
   <ContentWrap>
     <div class="flex justify-between pl-20px items-center">
-      <h3>表单管理</h3>
+      <h3 class="font-extrabold">表单管理</h3>
       <!-- 搜索工作栏 -->
       <el-form
         class="-mb-15px flex"
@@ -31,7 +31,7 @@
 
         <el-form-item>
           <el-dropdown placement="bottom-end">
-            <el-button type="info" plain>
+            <el-button class="w-30px" plain>
               <Icon icon="ep:setting" />
             </el-button>
             <template #dropdown>
@@ -55,7 +55,7 @@
 
     <!-- 分类卡片组 -->
     <div class="px-15px">
-      <ContentWrap v-for="(list, title) in categoryGroup" :key="title">
+      <ContentWrap :body-style="{ padding: 0 }" v-for="(list, title) in categoryGroup" :key="title">
         <!-- 默认使其全部展开 -->
         <el-collapse :modelValue="title">
           <el-collapse-item :name="title">
@@ -64,20 +64,32 @@
                 class="ml-20px flex items-center"
                 :class="['transition-transform duration-300', isActive ? 'rotate-180' : 'rotate-0']"
               >
-                <Icon icon="ep:arrow-down" />
+                <Icon icon="ep:arrow-down-bold" color="#999" />
+              </div>
+              <div class="ml-auto mr-30px">
+                <el-button link type="info" class="mr-10px" @click.stop="handleSort">
+                  <Icon icon="fa:sort-amount-desc" class="mr-5px" />
+                  排序
+                </el-button>
+                <el-button link type="info" @click.stop="handleGroup">
+                  <Icon icon="ep:setting" class="mr-5px" />
+                  分组
+                </el-button>
               </div>
             </template>
             <template #title>
               <div class="flex items-center">
                 <h3 class="ml-20px mr-8px text-18px">{{ title }}</h3>
-                <div class="text-[var(--el-text-color-placeholder)] text-16px">
-                  ({{ list?.length || 0 }})
-                </div>
+                <div class="color-gray-600 text-16px"> ({{ list?.length || 0 }}) </div>
               </div>
             </template>
 
-            <el-table v-loading="loading" :data="list">
-              <el-table-column label="流程名" prop="name" min-width="200">
+            <el-table
+              :header-cell-style="{ backgroundColor: isDark ? '' : '#edeff0' }"
+              v-loading="loading"
+              :data="list"
+            >
+              <el-table-column label="流程名" prop="name" min-width="150">
                 <template #default="scope">
                   <div class="flex items-center">
                     <el-image :src="scope.row.icon" class="h-32px w-32px mr-10px rounded" />
@@ -240,11 +252,14 @@ import { CategoryApi } from '@/api/bpm/category'
 import { BpmModelType } from '@/utils/constants'
 import { checkPermi } from '@/utils/permission'
 import { useUserStoreWithOut } from '@/store/modules/user'
+import { useAppStore } from '@/store/modules/app'
 import { groupBy } from 'lodash-es'
 
 defineOptions({ name: 'BpmModel' })
 
+const appStore = useAppStore()
 const message = useMessage() // 消息弹窗
+const isDark = computed(() => appStore.getIsDark)
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由
 const userStore = useUserStoreWithOut() // 用户信息缓存
@@ -277,7 +292,6 @@ const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
 }
-
 
 /** '更多'操作按钮 */
 const handleCommand = (command: string, row: any) => {
@@ -402,6 +416,16 @@ const isManagerUser = (row: any) => {
   return row.managerUserIds && row.managerUserIds.includes(userId)
 }
 
+/* 排序 */
+const handleSort = () => {
+  console.log('排序')
+}
+
+/* 分组 */
+const handleGroup = () => {
+  console.log('分组')
+}
+
 /** 初始化 **/
 onMounted(async () => {
   await getList()
@@ -416,7 +440,7 @@ onMounted(async () => {
     margin-right: 10px;
   }
   .el-divider--horizontal {
-    margin-top: 10px;
+    margin-top: 6px;
   }
   .el-collapse,
   .el-collapse-item__header,
