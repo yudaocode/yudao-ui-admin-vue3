@@ -9,9 +9,9 @@
     >
       <el-form-item label="功能类型" prop="type">
         <el-radio-group v-model="formData.type">
-          <el-radio-button value="1"> 属性 </el-radio-button>
-          <el-radio-button value="2"> 服务 </el-radio-button>
-          <el-radio-button value="3"> 事件 </el-radio-button>
+          <el-radio-button :value="1"> 属性 </el-radio-button>
+          <el-radio-button :value="2"> 服务 </el-radio-button>
+          <el-radio-button :value="3"> 事件 </el-radio-button>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="功能名称" prop="name">
@@ -76,7 +76,12 @@
 
 <script setup lang="ts">
 import { ProductVO } from '@/api/iot/product'
-import { ThinkModelFunctionApi, ThinkModelFunctionVO } from '@/api/iot/thinkmodelfunction'
+import {
+  ProductFunctionAccessModeEnum,
+  ProductFunctionTypeEnum,
+  ThinkModelFunctionApi,
+  ThinkModelFunctionVO
+} from '@/api/iot/thinkmodelfunction'
 
 const props = defineProps<{ product: ProductVO }>()
 
@@ -96,11 +101,11 @@ const formData = ref({
   identifier: undefined,
   name: undefined,
   description: undefined,
-  type: '1',
+  type: ProductFunctionTypeEnum.PROPERTY,
   property: {
     identifier: undefined,
     name: undefined,
-    accessMode: 'rw',
+    accessMode: ProductFunctionAccessModeEnum.READ_WRITE,
     required: true,
     dataType: {
       type: undefined,
@@ -206,11 +211,11 @@ const resetForm = () => {
     identifier: undefined,
     name: undefined,
     description: undefined,
-    type: '1', // todo @HAOHAO：看看枚举下
+    type: ProductFunctionTypeEnum.PROPERTY,
     property: {
       identifier: undefined,
       name: undefined,
-      accessMode: 'rw',
+      accessMode: ProductFunctionAccessModeEnum.READ_WRITE,
       required: true,
       dataType: {
         type: undefined,

@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ProductApi, ProductVO } from '@/api/iot/product'
+import { ValidateTypeEnum, ProductApi, ProductVO } from '@/api/iot/product'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'IoTProductForm' })
@@ -119,7 +119,7 @@ const formData = ref({
   protocolId: undefined,
   categoryId: undefined,
   description: undefined,
-  validateType: undefined,
+  validateType: ValidateTypeEnum.WEAK,
   status: undefined,
   deviceType: undefined,
   netType: undefined,
@@ -132,13 +132,19 @@ const formRules = reactive({
   netType: [
     {
       // TODO @haohao：0、1、/2 最好前端也枚举下；另外，这里的 required 可以直接设置为 true。然后表单那些 v-if。只要不存在，它自动就不校验了哈
-      required: formData.deviceType === 0 || formData.deviceType === 2,
+      // required: formData.deviceType === 0 || formData.deviceType === 2,
+      required: true,
       message: '联网方式不能为空',
       trigger: 'change'
     }
   ],
   protocolType: [
-    { required: formData.deviceType === 1, message: '接入网关协议不能为空', trigger: 'change' }
+    {
+      // required: formData.deviceType === 1,
+      required: true,
+      message: '接入网关协议不能为空',
+      trigger: 'change'
+    }
   ],
   dataFormat: [{ required: true, message: '数据格式不能为空', trigger: 'change' }],
   validateType: [{ required: true, message: '数据校验级别不能为空', trigger: 'change' }]
@@ -192,7 +198,7 @@ const resetForm = () => {
     protocolId: undefined,
     categoryId: undefined,
     description: undefined,
-    validateType: undefined,
+    validateType: ValidateTypeEnum.WEAK,
     status: undefined,
     deviceType: undefined,
     netType: undefined,

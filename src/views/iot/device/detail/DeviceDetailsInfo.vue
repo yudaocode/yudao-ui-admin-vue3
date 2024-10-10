@@ -100,10 +100,13 @@ const mqttParams = ref({
 }) // 定义 MQTT 参数对象
 
 /** 复制到剪贴板方法 */
-const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text).then(() => {
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text)
     message.success('复制成功')
-  })
+  } catch (error) {
+    message.error('复制失败')
+  }
 }
 
 /** 打开 MQTT 参数弹框的方法 */

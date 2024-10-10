@@ -61,11 +61,14 @@ const message = useMessage()
 
 const { product } = defineProps<{ product: ProductVO }>() // 定义 Props
 
-/** 处理复制 */
-const copyToClipboard = (text: string) => {
-  navigator.clipboard.writeText(text).then(() => {
+/** 复制到剪贴板方法 */
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text)
     message.success('复制成功')
-  })
+  } catch (error) {
+    message.error('复制失败')
+  }
 }
 
 /** 路由跳转到设备管理 */

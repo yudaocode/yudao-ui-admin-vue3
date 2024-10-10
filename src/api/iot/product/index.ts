@@ -18,6 +18,12 @@ export interface ProductVO {
   createTime: Date // 创建时间
 }
 
+// IOT 数据校验级别枚举类
+export enum ValidateTypeEnum {
+  WEAK = 0, // 弱校验
+  NONE = 1 // 免校验
+}
+
 // IoT 产品 API
 export const ProductApi = {
   // 查询产品分页

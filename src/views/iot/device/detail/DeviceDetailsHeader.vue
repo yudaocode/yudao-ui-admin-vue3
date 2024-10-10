@@ -53,16 +53,14 @@ const openForm = (type: string, id?: number) => {
 const { product, device } = defineProps<{ product: ProductVO; device: DeviceVO }>()
 const emit = defineEmits(['refresh'])
 
-/**
- * 将文本复制到剪贴板
- *
- * @param text 需要复制的文本
- */
-const copyToClipboard = (text: string) => {
-  // TODO @haohao：可以考虑用 await 异步转同步哈
-  navigator.clipboard.writeText(text).then(() => {
+/** 复制到剪贴板方法 */
+const copyToClipboard = async (text: string) => {
+  try {
+    await navigator.clipboard.writeText(text)
     message.success('复制成功')
-  })
+  } catch (error) {
+    message.error('复制失败')
+  }
 }
 
 /**

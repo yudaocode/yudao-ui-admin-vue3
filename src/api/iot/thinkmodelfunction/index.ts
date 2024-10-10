@@ -14,6 +14,19 @@ export interface ThinkModelFunctionVO {
   service: string // 服务
 }
 
+// IOT 产品功能（物模型）类型枚举类
+export enum ProductFunctionTypeEnum {
+  PROPERTY = 1, // 属性
+  SERVICE = 2, // 服务
+  EVENT = 3 // 事件
+}
+
+// IOT 产品功能（物模型）访问模式枚举类
+export enum ProductFunctionAccessModeEnum {
+  READ_WRITE = 'rw', // 读写
+  READ_ONLY = 'r' // 只读
+}
+
 // IoT 产品物模型 API
 export const ThinkModelFunctionApi = {
   // 查询产品物模型分页
