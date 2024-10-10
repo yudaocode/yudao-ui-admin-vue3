@@ -106,6 +106,11 @@ export const signDeleteTask = async (data: any) => {
   return await request.delete({ url: '/bpm/task/delete-sign', data })
 }
 
+// 抄送
+export const copyTask = async (data: any) => {
+  return await request.put({ url: '/bpm/task/copy', data })
+}
+
 // 获取减签任务列表
 export const getChildrenTaskList = async (id: string) => {
   return await request.get({ url: '/bpm/task/list-by-parent-task-id?parentTaskId=' + id })

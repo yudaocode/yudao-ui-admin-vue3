@@ -202,12 +202,18 @@ const getProcessInstance = async () => {
           activityId: props.activityId
         })
       }
-      setConfAndFields2(
-        detailForm,
-        processDefinition.formConf,
-        processDefinition.formFields,
-        data.formVariables
-      )
+
+      if (detailForm.value.rule.length > 0) {  // 避免刷新 form-create 表单不显示
+        detailForm.value.value = data.formVariables
+      } else {
+        setConfAndFields2(
+          detailForm,
+          processDefinition.formConf,
+          processDefinition.formFields,
+          data.formVariables
+        )
+      }
+      
       nextTick().then(() => {
         fApi.value?.btn.show(false)
         fApi.value?.resetBtn.show(false)
