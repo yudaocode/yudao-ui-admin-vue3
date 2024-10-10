@@ -26,8 +26,8 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
-    "@form-create/designer": "^3.1.3",
-    "@form-create/element-ui": "^3.1.24",
+    "@form-create/designer": "^3.2.6",
+    "@form-create/element-ui": "^3.2.11",
     "@iconify/iconify": "^3.1.1",
     "@microsoft/fetch-event-source": "^2.0.1",
     "@videojs-player/vue": "^1.0.0",
