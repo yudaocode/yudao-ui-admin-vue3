@@ -1,14 +1,18 @@
 <template>
-  <ContentWrap>
+  <ContentWrap :body-style="{ padding: '0px' }" class="!mb-0">
     <!-- 表单设计器 -->
-    <FcDesigner ref="designer" height="780px">
-      <template #handle>
-        <el-button round size="small" type="primary" @click="handleSave">
-          <Icon class="mr-5px" icon="ep:plus" />
-          保存
-        </el-button>
-      </template>
-    </FcDesigner>
+    <div
+      class="h-[calc(100vh-var(--top-tool-height)-var(--tags-view-height)-var(--app-content-padding)-var(--app-content-padding)-2px)]"
+    >
+      <fc-designer class="my-designer" ref="designer" :config="designerConfig">
+        <template #handle>
+          <el-button size="small" type="success" plain @click="handleSave">
+            <Icon class="mr-5px" icon="ep:plus" />
+            保存
+          </el-button>
+        </template>
+      </fc-designer>
+    </div>
   </ContentWrap>
 
   <!-- 表单保存的弹窗 -->
@@ -55,6 +59,31 @@ const { push, currentRoute } = useRouter() // 路由
 const { query } = useRoute() // 路由信息
 const { delView } = useTagsViewStore() // 视图操作
 
+// 表单设计器配置
+const designerConfig = ref({
+  switchType: [], // 是否可以切换组件类型,或者可以相互切换的字段
+  autoActive: true, // 是否自动选中拖入的组件
+  useTemplate: false, // 是否生成vue2语法的模板组件
+  formOptions: {}, // 定义表单配置默认值
+  fieldReadonly: false, // 配置field是否可以编辑
+  hiddenDragMenu: false, // 隐藏拖拽操作按钮
+  hiddenDragBtn: false, // 隐藏拖拽按钮
+  hiddenMenu: [], // 隐藏部分菜单
+  hiddenItem: [], // 隐藏部分组件
+  hiddenItemConfig: {}, // 隐藏组件的部分配置项
+  disabledItemConfig: {}, // 禁用组件的部分配置项
+  showSaveBtn: false, // 是否显示保存按钮
+  showConfig: true, // 是否显示右侧的配置界面
+  showBaseForm: true, // 是否显示组件的基础配置表单
+  showControl: true, // 是否显示组件联动
+  showPropsForm: true, // 是否显示组件的属性配置表单
+  showEventForm: true, // 是否显示组件的事件配置表单
+  showValidateForm: true, // 是否显示组件的验证配置表单
+  showFormConfig: true, // 是否显示表单配置
+  showInputData: true, // 是否显示录入按钮
+  showDevice: true, // 是否显示多端适配选项
+  appendConfigData: [] // 定义渲染规则所需的formData
+})
 const designer = ref() // 表单设计器
 useFormCreateDesigner(designer) // 表单设计器增强
 const dialogVisible = ref(false) // 弹窗是否展示
@@ -119,3 +148,13 @@ onMounted(async () => {
   setConfAndFields(designer, data.conf, data.fields)
 })
 </script>
+
+<style>
+.my-designer {
+  ._fc-l,
+  ._fc-m,
+  ._fc-r {
+    border-top: none;
+  }
+}
+</style>
