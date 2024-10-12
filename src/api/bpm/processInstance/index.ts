@@ -46,7 +46,7 @@ export type ApprovalNodeInfo = {
   status: number
   startTime?: Date
   endTime?: Date
-  candidateUserList?: User[]
+  candidateUsers?: User[]
   tasks: ApprovalTaskInfo[]
 }
 

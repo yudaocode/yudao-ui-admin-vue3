@@ -55,6 +55,7 @@
       />
       <el-table-column align="center" label="抄送任务" prop="taskName" min-width="180" />
       <el-table-column align="center" label="抄送人" prop="creatorName" min-width="100" />
+      <el-table-column align="center" label="抄送意见" prop="reason" width="150" />
       <el-table-column
         align="center"
         label="抄送时间"

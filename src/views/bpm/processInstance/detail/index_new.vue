@@ -12,25 +12,37 @@
         <el-divider class="!my-8px" />
         <div class="flex items-center gap-5 mb-10px h-40px">
           <div class="text-26px font-bold mb-5px">{{ processInstance.name }}</div>
-          <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="processInstance.status" />
+          <dict-tag
+            v-if="processInstance.status"
+            :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS"
+            :value="processInstance.status"
+          />
         </div>
 
         <div class="flex items-center gap-5 mb-10px text-13px h-35px">
           <div
             class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600"
           >
-            <img class="rounded-full h-28px" src="@/assets/imgs/avatar.jpg" alt="" />
+            <!-- <img class="rounded-full h-28px" src="@/assets/imgs/avatar.jpg" alt="" /> -->
+            <el-avatar
+              :size="28"
+              v-if="processInstance?.startUser?.avatar"
+              :src="processInstance?.startUser?.avatar"
+            />
+            <el-avatar :size="28" v-else-if="processInstance?.startUser?.nickname">
+              {{ processInstance?.startUser?.nickname.substring(0, 1) }}
+            </el-avatar>
             {{ processInstance?.startUser?.nickname }}
           </div>
           <div class="text-#878c93"> {{ formatDate(processInstance.startTime) }} 提交 </div>
         </div>
 
-        <el-tabs v-model="activeTab">
+        <el-tabs v-model="activeTab" @tab-change="onTabChange">
           <!-- 表单信息 -->
           <el-tab-pane label="审批详情" name="form">
             <div class="form-scroll-area">
               <el-scrollbar>
-                <el-row :gutter="10">
+                <el-row>
                   <el-col :span="18" class="!flex !flex-col formCol">
                     <!-- 表单信息 -->
                     <div
@@ -38,11 +50,7 @@
                       class="form-box flex flex-col mb-30px flex-1"
                     >
                       <!-- 情况一：流程表单 -->
-                      <el-col
-                        v-if="processInstance?.processDefinition?.formType === 10"
-                        :offset="6"
-                        :span="16"
-                      >
+                      <el-col v-if="processInstance?.processDefinition?.formType === 10">
                         <form-create
                           v-model="detailForm.value"
                           v-model:api="fApi"
@@ -64,27 +72,36 @@
               </el-scrollbar>
             </div>
           </el-tab-pane>
+
           <!-- 流程图 -->
           <el-tab-pane label="流程图" name="diagram">
-            <ProcessInstanceBpmnViewer :id="`${id}`" :loading="processInstanceLoading" />
+            <div class="form-scroll-area">
+              <ProcessInstanceBpmnViewer :id="`${id}`" :loading="processInstanceLoading" />
+            </div>
           </el-tab-pane>
+
           <!-- 流转记录 -->
           <el-tab-pane label="流转记录" name="record">
-            <ProcessInstanceTaskList
-              :loading="tasksLoad"
-              :process-instance="processInstance"
-              :tasks="tasks"
-              @refresh="getTaskList"
-            />
+            <div class="form-scroll-area">
+              <el-scrollbar>
+                <ProcessInstanceTaskList
+                  :loading="tasksLoad"
+                  :process-instance="processInstance"
+                  :tasks="tasks"
+                />
+              </el-scrollbar>
+            </div>
           </el-tab-pane>
+
           <!-- 流转评论 TODO 待开发 -->
-          <el-tab-pane label="流转评论" name="comment"> 流转评论 </el-tab-pane>
+          <el-tab-pane label="流转评论" name="comment">
+            <div class="form-scroll-area">
+              <el-scrollbar> 流转评论 </el-scrollbar>
+            </div>
+          </el-tab-pane>
         </el-tabs>
 
-        <div
-          class="b-t-solid border-t-1px border-[var(--el-border-color)]"
-          v-if="activeTab === 'form'"
-        >
+        <div class="b-t-solid border-t-1px border-[var(--el-border-color)]">
           <!-- 操作栏按钮 -->
           <ProcessInstanceOperationButton
             ref="operationButtonRef"
@@ -125,6 +142,7 @@ const props = defineProps<{
 const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
+let processDefinitionId = undefined // 流程定义 Id
 const operationButtonRef = ref()
 const timelineRef = ref()
 const bpmnXml = ref('') // BPMN XML
@@ -145,10 +163,10 @@ const detailForm = ref({
 }) // 流程实例的表单详情
 
 /** 获得详情 */
-const getDetail = () => {
+const getDetail = async () => {
   // 1. 获得流程实例相关
   getProcessInstance()
-  // 2. 获得流程任务列表（审批记录）
+  // 2. 获得流程任务列表
   getTaskList()
 }
 
@@ -176,12 +194,18 @@ const getProcessInstance = async () => {
           activityId: props.activityId
         })
       }
-      setConfAndFields2(
-        detailForm,
-        processDefinition.formConf,
-        processDefinition.formFields,
-        data.formVariables
-      )
+
+      if (detailForm.value.rule.length > 0) {  // 避免刷新 form-create 表单不显示
+        detailForm.value.value = data.formVariables
+      } else {
+        setConfAndFields2(
+          detailForm,
+          processDefinition.formConf,
+          processDefinition.formFields,
+          data.formVariables
+        )
+      }
+
       nextTick().then(() => {
         fApi.value?.btn.show(false)
         fApi.value?.resetBtn.show(false)
@@ -196,9 +220,9 @@ const getProcessInstance = async () => {
       // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue
       BusinessFormComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
     }
-
+    processDefinitionId = processDefinition.id
     // 加载流程图
-    bpmnXml.value = (await DefinitionApi.getProcessDefinition(processDefinition.id))?.bpmnXml
+    // bpmnXml.value = (await DefinitionApi.getProcessDefinition(processDefinition.id))?.bpmnXml
   } finally {
     processInstanceLoading.value = false
   }
@@ -267,6 +291,13 @@ const refresh = () => {
 /** 当前的Tab */
 const activeTab = ref('form')
 
+/** Tab 切换 加载流程图，直接加载显示不出来，不知道啥原因，所以切换以后在加载 */
+const onTabChange = async (tabName: string) => {
+  if (tabName === 'diagram' && processDefinitionId && !bpmnXml.value) {
+    //加载流程图
+    bpmnXml.value = (await DefinitionApi.getProcessDefinition(processDefinitionId))?.bpmnXml
+  }
+}
 /** 初始化 */
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 onMounted(async () => {
