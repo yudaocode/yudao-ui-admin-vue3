@@ -1,6 +1,6 @@
 <template>
   <div class="simple-flow-canvas" v-loading="loading">
-    <div class="simple-flow-container" >
+    <div class="simple-flow-container">
       <div class="top-area-container">
         <div class="top-actions">
           <div class="canvas-control">
@@ -15,10 +15,7 @@
         </div>
       </div>
       <div class="scale-container" :style="`transform: scale(${scaleValue / 100});`">
-        <ProcessNodeTree
-          v-if="processNodeTree"
-          v-model:flow-node="processNodeTree"
-        />
+        <ProcessNodeTree v-if="processNodeTree" v-model:flow-node="processNodeTree" />
       </div>
     </div>
     <Dialog v-model="errorDialogVisible" title="保存失败" width="400" :fullscreen="false">
@@ -49,7 +46,7 @@ import * as DeptApi from '@/api/system/dept'
 import * as PostApi from '@/api/system/post'
 import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
-import { fa } from 'element-plus/es/locale'
+
 defineOptions({
   name: 'SimpleProcessDesigner'
 })

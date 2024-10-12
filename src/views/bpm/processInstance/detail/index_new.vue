@@ -66,13 +66,7 @@
           </el-tab-pane>
           <!-- 流程图 -->
           <el-tab-pane label="流程图" name="diagram">
-            <ProcessInstanceBpmnViewer
-              :id="`${id}`"
-              :bpmn-xml="bpmnXml"
-              :loading="processInstanceLoading"
-              :process-instance="processInstance"
-              :tasks="tasks"
-            />
+            <ProcessInstanceBpmnViewer :id="`${id}`" :loading="processInstanceLoading" />
           </el-tab-pane>
           <!-- 流转记录 -->
           <el-tab-pane label="流转记录" name="record">

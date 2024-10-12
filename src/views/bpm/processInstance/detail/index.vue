@@ -157,13 +157,7 @@
     />
 
     <!-- 高亮流程图 -->
-    <ProcessInstanceBpmnViewer
-      :id="`${id}`"
-      :bpmn-xml="bpmnXml"
-      :loading="processInstanceLoading"
-      :process-instance="processInstance"
-      :tasks="tasks"
-    />
+    <ProcessInstanceBpmnViewer :id="`${id}`" :loading="processInstanceLoading" />
 
     <!-- 弹窗：转派审批人 -->
     <TaskTransferForm ref="taskTransferFormRef" @success="getDetail" />

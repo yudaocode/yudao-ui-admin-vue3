@@ -24,24 +24,23 @@ export type ProcessInstanceVO = {
 
 // 用户信息
 export type User = {
-  id: number,
-  nickname: string,
+  id: number
+  nickname: string
   avatar: string
 }
 
 // 审批任务信息
 export type ApprovalTaskInfo = {
-  id: number,
-  ownerUser: User,
-  assigneeUser: User,
-  status: number,
+  id: number
+  ownerUser: User
+  assigneeUser: User
+  status: number
   reason: string
-
 }
 
 // 审批节点信息
 export type ApprovalNodeInfo = {
-  id : number
+  id: number
   name: string
   nodeType: NodeType
   status: number
@@ -88,12 +87,22 @@ export const getProcessInstanceCopyPage = async (params: any) => {
 }
 
 // 获取审批详情
-export const getApprovalDetail = async (processInstanceId?:string, processDefinitionId?:string) => {
-  const param = processInstanceId ? '?processInstanceId='+ processInstanceId : '?processDefinitionId='+ processDefinitionId
-  return await request.get({ url: 'bpm/process-instance/get-approval-detail'+ param })
+export const getApprovalDetail = async (
+  processInstanceId?: string,
+  processDefinitionId?: string
+) => {
+  const param = processInstanceId
+    ? '?processInstanceId=' + processInstanceId
+    : '?processDefinitionId=' + processDefinitionId
+  return await request.get({ url: 'bpm/process-instance/get-approval-detail' + param })
 }
 
 // 获取表单字段权限
 export const getFormFieldsPermission = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/get-form-fields-permission', params })
+}
+
+// 获取流程实例的 BPMN 模型视图
+export const getProcessInstanceBpmnModelView = async (id: string) => {
+  return await request.get({ url: '/bpm/process-instance/get-bpmn-model-view?id=' + id })
 }

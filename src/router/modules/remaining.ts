@@ -292,7 +292,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
       },
       {
         path: 'process-instance/detail',
-        component: () => import('@/views/bpm/processInstance/detail/index_new.vue'),
+        // component: () => import('@/views/bpm/processInstance/detail/index_new.vue'),
+        component: () => import('@/views/bpm/processInstance/detail/index.vue'),
         name: 'BpmProcessInstanceDetail',
         meta: {
           noCache: true,
@@ -301,13 +302,11 @@ const remainingRouter: AppRouteRecordRaw[] = [
           title: '流程详情',
           activeMenu: '/bpm/task/my'
         },
-        props: route => (
-          { 
-            id: route.query.id,
-            taskId: route.query.taskId,
-            activityId: route.query.activityId
-          }
-        )
+        props: (route) => ({
+          id: route.query.id,
+          taskId: route.query.taskId,
+          activityId: route.query.activityId
+        })
       },
       {
         path: 'oa/leave/create',
