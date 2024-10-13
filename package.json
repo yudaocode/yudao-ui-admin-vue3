@@ -64,6 +64,7 @@
     "pinia-plugin-persistedstate": "^3.2.1",
     "qrcode": "^1.5.3",
     "qs": "^6.12.0",
+    "sortablejs": "^1.15.3",
     "steady-xml": "^0.1.0",
     "url": "^0.11.3",
     "video.js": "^7.21.5",
