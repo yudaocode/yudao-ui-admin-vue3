@@ -73,8 +73,7 @@ const formRules = reactive({
   appKey: [{ required: true, message: '应用标识不能为空', trigger: 'blur' }],
   status: [{ required: true, message: '开启状态不能为空', trigger: 'blur' }],
   orderNotifyUrl: [{ required: true, message: '支付结果的回调地址不能为空', trigger: 'blur' }],
-  refundNotifyUrl: [{ required: true, message: '退款结果的回调地址不能为空', trigger: 'blur' }],
-  transferNotifyUrl: [{ required: true, message: '转账结果的回调地址不能为空', trigger: 'blur' }]
+  refundNotifyUrl: [{ required: true, message: '退款结果的回调地址不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
