@@ -250,10 +250,12 @@ const handleAudit = async (task, pass) => {
   if (!elForm) return
   let valid = await elForm.validate()
   if (!valid) return
-  // 校验申请表单
-  if (!fApi.value) return
-  valid = await fApi.value.validate()
-  if (!valid) return
+  // 校验申请表单（可编辑字段）
+  // TODO @jason：之前这里是 if (!fApi.value) return；针对业务表单的情况下，会导致没办法审核，可能要看下。我这里改了点，看看是不是还有别的地方兼容性
+  if (fApi.value) {
+    valid = await fApi.value.validate()
+    if (!valid) return
+  }
 
   // 2.1 提交审批
   const data = {
@@ -269,7 +271,9 @@ const handleAudit = async (task, pass) => {
       data.variables = approveForms.value[index].value
     }
     // 获取表单可编辑字段的值
-    data.variables = getWritableValueOfForm(task.fieldsPermission)
+    if (fApi.value) {
+      data.variables = getWritableValueOfForm(task.fieldsPermission)
+    }
 
     await TaskApi.approveTask(data)
     message.success('审批通过成功')
