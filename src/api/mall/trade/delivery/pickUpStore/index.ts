@@ -13,10 +13,11 @@ export interface DeliveryPickUpStoreVO {
   latitude: number
   longitude: number
   status: number
+  verifyUserIds: number[] // 绑定用户编号组数
 }
 
 // 查询自提门店列表
-export const getDeliveryPickUpStorePage = async (params) => {
+export const getDeliveryPickUpStorePage = async (params: any) => {
   return await request.get({ url: '/trade/delivery/pick-up-store/page', params })
 }
 
@@ -26,8 +27,8 @@ export const getDeliveryPickUpStore = async (id: number) => {
 }
 
 // 查询自提门店精简列表
-export const getListAllSimple = async (): Promise<DeliveryPickUpStoreVO[]> => {
-  return await request.get({ url: '/trade/delivery/pick-up-store/list-all-simple' })
+export const getSimpleDeliveryPickUpStoreList = async (): Promise<DeliveryPickUpStoreVO[]> => {
+  return await request.get({ url: '/trade/delivery/pick-up-store/simple-list' })
 }
 
 // 新增自提门店
@@ -45,12 +46,7 @@ export const deleteDeliveryPickUpStore = async (id: number) => {
   return await request.delete({ url: '/trade/delivery/pick-up-store/delete?id=' + id })
 }
 
-//绑定自提店员
+// 绑定自提店员
 export const bindStoreStaffId = async (data: any) => {
   return await request.post({ url: '/trade/delivery/pick-up-store/bind', data })
-}
-
-//查询门店绑定情况
-export const getDeliveryPickUpStoreStaff = async (id: number) => {
-  return await request.get({ url: '/trade/delivery/pick-up-store/get-store-staff?id=' + id })
 }

@@ -93,7 +93,7 @@
         prop="createTime"
         width="180"
       />
-      <el-table-column align="center" label="操作">
+      <el-table-column align="center" label="操作" min-width="110">
         <template #default="scope">
           <el-button
             v-hasPermi="['trade:delivery:pick-up-store:update']"
@@ -104,7 +104,7 @@
             编辑
           </el-button>
           <el-button
-            v-hasPermi="['trade:delivery:pick-up-store:bind']"
+            v-hasPermi="['trade:delivery:pick-up-store:update']"
             link
             type="primary"
             @click="openFormBind(scope.row.id)"
@@ -123,10 +123,11 @@
       </el-table-column>
     </el-table>
   </ContentWrap>
+
   <!-- 表单弹窗：添加/修改 -->
   <DeliveryPickUpStoreForm ref="formRef" @success="getList" />
   <!-- 表单弹窗：绑定店员 -->
-  <DeliveryPickUpStoreBindForm ref="formBindRef"/>
+  <DeliveryPickUpStoreBindForm ref="formBindRef" />
 </template>
 <script lang="ts" name="DeliveryPickUpStore" setup>
 import * as DeliveryPickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'

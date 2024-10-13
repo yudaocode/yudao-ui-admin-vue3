@@ -1,3 +1,4 @@
+<!-- TODO 芋艿：这块后续抽个独立的组件出来 -->
 <template>
   <Dialog :title="dialogTitle" v-model="dialogVisible" width="60%">
     <el-row :gutter="20">
@@ -147,8 +148,7 @@ const checkedUsers = ref([])
 // 选中状态：key为用户ID，value为是否选中
 const checkedStatus = ref<Record<string, boolean>>({})
 
-
-const dialogTitle = "选择店员"
+const dialogTitle = '选择店员'
 const dialogVisible = ref(false)
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -221,11 +221,7 @@ const handleCheckAll = (checked: boolean) => {
  * @param combinationActivity 活动
  * @param isCalcCheckAll 是否计算全选
  */
-const handleCheckOne = (
-  checked: boolean,
-  combinationActivity,
-  isCalcCheckAll: boolean
-) => {
+const handleCheckOne = (checked: boolean, combinationActivity, isCalcCheckAll: boolean) => {
   if (checked) {
     checkedUsers.value.push(combinationActivity as never)
     checkedStatus.value[combinationActivity.id] = true
@@ -245,8 +241,7 @@ const handleCheckOne = (
 }
 
 // 查找活动在已选中活动列表中的索引
-const findCheckedIndex = (user) =>
-  checkedUsers.value.findIndex((item) => item.id === user.id)
+const findCheckedIndex = (user) => checkedUsers.value.findIndex((item) => item.id === user.id)
 
 // 计算全选框状态
 const calculateIsCheckAll = () => {
@@ -260,7 +255,7 @@ const calculateIsCheckAll = () => {
 const handleEmitChange = () => {
   // 关闭弹窗
   dialogVisible.value = false
-  emits("change", [...checkedUsers.value])
+  emits('change', [...checkedUsers.value])
 }
 
 /** 确认选择时的触发事件 */

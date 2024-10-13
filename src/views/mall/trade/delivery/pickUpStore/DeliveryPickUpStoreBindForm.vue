@@ -10,18 +10,18 @@
       <el-row>
         <el-col :span="24">
           <el-form-item label="门店名称" prop="name">
-            <el-input v-model="formData.name" placeholder="请输入门店名称" :disabled="true"/>
+            <el-input v-model="formData.name" placeholder="请输入门店名称" readonly />
           </el-form-item>
         </el-col>
       </el-row>
       <el-row>
         <el-col :span="24">
-          <el-form-item label="门店店员" prop="storeStaffIds">
+          <el-form-item label="门店店员" prop="verifyUserIds">
             <el-button type="primary" @click="storeStaffTableSelect.open()">选择店员</el-button>
           </el-form-item>
           <!-- 店员列表 -->
-          <ContentWrap v-if="usersList.length > 0">
-            <el-table :data="usersList">
+          <ContentWrap v-if="formData.verifyUsers.length > 0">
+            <el-table :data="formData.verifyUsers">
               <el-table-column label="编号" align="center" prop="id" />
               <el-table-column
                 label="用户昵称"
@@ -56,15 +56,16 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <StoreStaffTableSelect ref="storeStaffTableSelect" @change="changeStoreStaff"/>
+
+  <!-- 选择员工弹窗 -->
+  <StoreStaffTableSelect ref="storeStaffTableSelect" @change="handleSelect" />
 </template>
 <script setup lang="ts">
 import * as DeliveryPickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
 import StoreStaffTableSelect from './components/StoreStaffTableSelect.vue'
-import {DICT_TYPE} from "@/utils/dict";
+import { DICT_TYPE } from '@/utils/dict'
 
 const message = useMessage() // 消息弹窗
-const { t } = useI18n() // 国际化
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
@@ -72,12 +73,10 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formData = ref({
   id: undefined,
   name: '',
-  storeStaffIds: [],
-  storeStaffs: [],
+  verifyUserIds: [],
+  verifyUsers: []
 })
-const formRules = reactive({
-  name: [{ required: true, message: '门店名称不能为空', trigger: 'blur' }],
-})
+const formRules = reactive({})
 const formRef = ref() // 表单 Ref
 const storeStaffTableSelect = ref() // 表单 Ref
 
@@ -88,7 +87,7 @@ const open = async (id: number) => {
   resetForm()
   formLoading.value = true
   try {
-    await getList(id)
+    formData.value = await DeliveryPickUpStoreApi.getDeliveryPickUpStore(id)
   } finally {
     formLoading.value = false
   }
@@ -97,7 +96,6 @@ defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 /** 提交表单 */
 const submitForm = async () => {
-  formData.value.storeStaffIds = usersList.value.map(item => item.id) as [];
   // 校验表单
   if (!formRef) return
   const valid = await formRef.value.validate()
@@ -105,42 +103,31 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value
+    const data = {
+      id: formData.value.id,
+      verifyUserIds: formData.value.verifyUsers.map((item: any) => item.id)
+    }
     await DeliveryPickUpStoreApi.bindStoreStaffId(data)
-    message.success("绑定成功")
+    message.success('绑定成功')
     dialogVisible.value = false
   } finally {
     formLoading.value = false
   }
 }
 
-/** 删除按钮操作 */
-const handleDelete = async (id: number) => {
-  try {
-    // 删除的二次确认
-    await message.delConfirm()
-    // 发起删除
-    const index = usersList.value.findIndex(item => {
-      if (item.id == id){
-        return true;
-      }
-    })
-    usersList.value.splice(index, 1);
-    //await DeliveryPickUpStoreStaffApi.deleteDeliveryPickUpStoreStaff(id,formData.value.id)
-    message.success(t('common.delSuccess'))
-    // 刷新列表
-    //await getList(formData.value.id)
-  } catch {}
+/** 处理选择员工操作 */
+const handleSelect = (checkedUsers: []) => {
+  formData.value.verifyUsers = checkedUsers
 }
 
-/**
- * 查询自提点员工绑定关系
- */
-const getList = async (id: number) => {
-  formData.value = await DeliveryPickUpStoreApi.getDeliveryPickUpStoreStaff(id)
-  if(formData.value.storeStaffs){
-    usersList.value = formData.value.storeStaffs;
-  }
+/** 删除按钮操作 */
+const handleDelete = async (id: number) => {
+  const index = formData.value.verifyUsers.findIndex((item: any) => {
+    if (item.id == id) {
+      return true
+    }
+  })
+  formData.value.verifyUsers.splice(index, 1)
 }
 
 /** 重置表单 */
@@ -148,14 +135,9 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: '',
-    storeStaffIds: [],
-    storeStaffs: [],
+    verifyUserIds: [],
+    verifyUsers: []
   }
   formRef.value?.resetFields()
-}
-
-const usersList = ref([])
-const changeStoreStaff = (checkedUsers : []) => {
-  usersList.value = checkedUsers
 }
 </script>
