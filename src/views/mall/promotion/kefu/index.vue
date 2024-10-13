@@ -25,7 +25,7 @@
 import { KeFuConversationList, KeFuMessageList, MemberBrowsingHistory } from './components'
 import { WebSocketMessageTypeConstants } from './components/tools/constants'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
-import { getAccessToken } from '@/utils/auth'
+import { getRefreshToken } from '@/utils/auth'
 import { useWebSocket } from '@vueuse/core'
 
 defineOptions({ name: 'KeFu' })
@@ -34,7 +34,9 @@ const message = useMessage() // 消息弹窗
 
 // ======================= WebSocket start =======================
 const server = ref(
-  (import.meta.env.VITE_BASE_URL + '/infra/ws').replace('http', 'ws') + '?token=' + getAccessToken()
+  (import.meta.env.VITE_BASE_URL + '/infra/ws').replace('http', 'ws') +
+    '?token=' +
+    getRefreshToken() // 使用 getRefreshToken() 方法，而不使用 getAccessToken() 方法的原因：WebSocket 无法方便的刷新访问令牌
 ) // WebSocket 服务地址
 
 /** 发起 WebSocket 连接 */

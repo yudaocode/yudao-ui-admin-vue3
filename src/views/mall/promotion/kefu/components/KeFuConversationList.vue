@@ -22,13 +22,15 @@
         <div class="ml-10px w-100%">
           <div class="flex justify-between items-center w-100%">
             <span class="username">{{ item.userNickname }}</span>
-            <span class="color-[var(--left-menu-text-color)]" style="font-size: 13px;">
+            <span class="color-[var(--left-menu-text-color)]" style="font-size: 13px">
               {{ formatPast(item.lastMessageTime, 'YYYY-MM-DD') }}
             </span>
           </div>
           <!-- 最后聊天内容 -->
           <div
-            v-dompurify-html="getConversationDisplayText(item.lastMessageContentType, item.lastMessageContent)"
+            v-dompurify-html="
+              getConversationDisplayText(item.lastMessageContentType, item.lastMessageContent)
+            "
             class="last-message flex items-center color-[var(--left-menu-text-color)]"
           >
           </div>
@@ -205,7 +207,7 @@ watch(showRightMenu, (val) => {
 
   .active {
     border-left: 5px #3271ff solid;
-    background-color: var(--left-menu-bg-active-color);
+    background-color: var(--login-bg-color);
   }
 
   .pinned {
@@ -215,7 +217,7 @@ watch(showRightMenu, (val) => {
   .right-menu-ul {
     position: absolute;
     background-color: var(--app-content-bg-color);
-    padding: 10px;
+    padding: 5px;
     margin: 0;
     list-style-type: none; /* 移除默认的项目符号 */
     border-radius: 12px;

@@ -1,5 +1,5 @@
 <template>
-  <el-button class="ml-10px" type="text" @click="selectCoupon">添加优惠卷</el-button>
+  <el-button class="ml-10px" type="text" @click="selectCoupon">添加优惠劵</el-button>
 
   <div
     v-for="(item, index) in list"
@@ -57,7 +57,7 @@ const emits = defineEmits<{
 const rewardRule = useVModel(props, 'modelValue', emits) // 赠送规则
 const list = ref<GiveCouponVO[]>([]) // 选择的优惠券列表
 
-/** 选择赠送的优惠卷类型拓展 */
+/** 选择赠送的优惠类型拓展 */
 interface GiveCouponVO extends CouponTemplateApi.CouponTemplateVO {
   giveCount?: number
 }

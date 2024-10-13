@@ -115,7 +115,7 @@
         <el-radio-group v-model="formData.takeType">
           <el-radio :key="1" :value="1">直接领取</el-radio>
           <el-radio :key="2" :value="2">指定发放</el-radio>
-          <el-radio :key="2" :value="3">新人卷</el-radio>
+          <el-radio :key="2" :value="3">新人劵</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="formData.takeType === 1" label="发放数量" prop="totalCount">

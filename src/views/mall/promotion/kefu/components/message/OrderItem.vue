@@ -1,8 +1,13 @@
 <template>
-  <div v-if="isObject(getMessageContent)" @click="openDetail(getMessageContent.id)" style="cursor: pointer;">
+  <div v-if="isObject(getMessageContent)">
     <div :key="getMessageContent.id" class="order-list-card-box mt-14px">
       <div class="order-card-header flex items-center justify-between p-x-5px">
-        <div class="order-no">订单号：{{ getMessageContent.no }}</div>
+        <div class="order-no">
+          订单号：
+          <span style="cursor: pointer" @click="openDetail(getMessageContent.id)">
+            {{ getMessageContent.no }}
+          </span>
+        </div>
         <div :class="formatOrderColor(getMessageContent)" class="order-state font-16">
           {{ formatOrderStatus(getMessageContent) }}
         </div>
@@ -113,8 +118,15 @@ function formatOrderStatus(order: any) {
     height: 28px;
 
     .order-no {
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 500;
+
+      span {
+        &:hover {
+          text-decoration: underline;
+          color: var(--left-menu-bg-active-color);
+        }
+      }
     }
   }
 

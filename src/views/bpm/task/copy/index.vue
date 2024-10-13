@@ -111,11 +111,16 @@ const getList = async () => {
 
 /** 处理审批按钮 */
 const handleAudit = (row: any) => {
+  const query = {
+    id: row.processInstanceId,
+    activityId: undefined
+  }
+  if (row.activityId) {
+    query.activityId = row.activityId
+  }
   push({
     name: 'BpmProcessInstanceDetail',
-    query: {
-      id: row.processInstanceId
-    }
+    query: query
   })
 }
 
