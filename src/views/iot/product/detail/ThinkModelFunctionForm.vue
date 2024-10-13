@@ -138,7 +138,7 @@ const formRules = reactive({
       trigger: 'blur'
     },
     {
-      validator: (rule, value, callback) => {
+      validator: (value, callback) => {
         const reservedKeywords = ['set', 'get', 'post', 'property', 'event', 'time', 'value']
         if (reservedKeywords.includes(value)) {
           callback(
@@ -153,12 +153,8 @@ const formRules = reactive({
       trigger: 'blur'
     }
   ],
-  property: {
-    dataType: {
-      type: [{ required: true, message: '数据类型不能为空', trigger: 'blur' }]
-    },
-    accessMode: [{ required: true, message: '读写类型不能为空', trigger: 'blur' }]
-  }
+  'property.dataType.type': [{ required: true, message: '数据类型不能为空', trigger: 'blur' }],
+  'property.accessMode': [{ required: true, message: '读写类型不能为空', trigger: 'blur' }]
 })
 const formRef = ref()
 
@@ -195,9 +191,9 @@ const submitForm = async () => {
       await ThinkModelFunctionApi.updateThinkModelFunction(data)
       message.success(t('common.updateSuccess'))
     }
+  } finally {
     dialogVisible.value = false // 确保关闭弹框
     emit('success')
-  } finally {
     formLoading.value = false
   }
 }
