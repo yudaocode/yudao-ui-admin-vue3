@@ -44,3 +44,13 @@ export const updateDeliveryPickUpStore = async (data: DeliveryPickUpStoreVO) => 
 export const deleteDeliveryPickUpStore = async (id: number) => {
   return await request.delete({ url: '/trade/delivery/pick-up-store/delete?id=' + id })
 }
+
+//绑定自提店员
+export const bindStoreStaffId = async (data: any) => {
+  return await request.post({ url: '/trade/delivery/pick-up-store/bind', data })
+}
+
+//查询门店绑定情况
+export const getDeliveryPickUpStoreStaff = async (id: number) => {
+  return await request.get({ url: '/trade/delivery/pick-up-store/get-store-staff?id=' + id })
+}

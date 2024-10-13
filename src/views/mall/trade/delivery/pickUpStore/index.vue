@@ -104,6 +104,14 @@
             编辑
           </el-button>
           <el-button
+            v-hasPermi="['trade:delivery:pick-up-store:bind']"
+            link
+            type="primary"
+            @click="openFormBind(scope.row.id)"
+          >
+            绑定店员
+          </el-button>
+          <el-button
             v-hasPermi="['trade:delivery:pick-up-store:delete']"
             link
             type="danger"
@@ -117,10 +125,13 @@
   </ContentWrap>
   <!-- 表单弹窗：添加/修改 -->
   <DeliveryPickUpStoreForm ref="formRef" @success="getList" />
+  <!-- 表单弹窗：绑定店员 -->
+  <DeliveryPickUpStoreBindForm ref="formBindRef"/>
 </template>
 <script lang="ts" name="DeliveryPickUpStore" setup>
 import * as DeliveryPickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
 import DeliveryPickUpStoreForm from './PickUpStoreForm.vue'
+import DeliveryPickUpStoreBindForm from './DeliveryPickUpStoreBindForm.vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 
@@ -144,6 +155,11 @@ const queryFormRef = ref() // 搜索的表单
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+const formBindRef = ref()
+const openFormBind = (id?: number) => {
+  formBindRef.value.open(id)
 }
 
 /** 删除按钮操作 */
