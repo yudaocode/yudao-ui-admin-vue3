@@ -37,7 +37,7 @@
           <div class="text-#878c93"> {{ formatDate(processInstance.startTime) }} 提交 </div>
         </div>
 
-        <el-tabs v-model="activeTab" @tab-change="onTabChange">
+        <el-tabs v-model="activeTab">
           <!-- 表单信息 -->
           <el-tab-pane label="审批详情" name="form">
             <div class="form-scroll-area">
@@ -104,8 +104,7 @@
         <div class="b-t-solid border-t-1px border-[var(--el-border-color)]">
           <!-- 操作栏按钮 -->
           <ProcessInstanceOperationButton
-            ref="operationButtonRef"
-            :processInstance="processInstance"
+            :process-instance-id="id"
             :userOptions="userOptions"
             @success="refresh"
           />
@@ -119,7 +118,6 @@ import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
-import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as TaskApi from '@/api/bpm/task'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
@@ -132,6 +130,7 @@ import { FieldPermissionType } from '@/components/SimpleProcessDesignerV2/src/co
 import audit1 from '@/assets/svgs/bpm/audit1.svg'
 import audit2 from '@/assets/svgs/bpm/audit2.svg'
 import audit3 from '@/assets/svgs/bpm/audit3.svg'
+import audit4 from '@/assets/svgs/bpm/audit4.svg'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 const props = defineProps<{
@@ -142,16 +141,14 @@ const props = defineProps<{
 const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
-let processDefinitionId = undefined // 流程定义 Id
-const operationButtonRef = ref()
 const timelineRef = ref()
-const bpmnXml = ref('') // BPMN XML
 const tasksLoad = ref(true) // 任务的加载中
 const tasks = ref<any[]>([]) // 任务列表
 const auditIcons = {
   1: audit1,
   2: audit2,
-  3: audit3
+  3: audit3,
+  4: audit4
 }
 
 // ========== 申请信息 ==========
@@ -220,9 +217,6 @@ const getProcessInstance = async () => {
       // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue
       BusinessFormComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
     }
-    processDefinitionId = processDefinition.id
-    // 加载流程图
-    // bpmnXml.value = (await DefinitionApi.getProcessDefinition(processDefinition.id))?.bpmnXml
   } finally {
     processInstanceLoading.value = false
   }
@@ -272,7 +266,7 @@ const getTaskList = async () => {
     })
 
     // 获得需要自己审批的任务
-    operationButtonRef.value?.loadRunningTask(tasks.value)
+    //operationButtonRef.value?.loadRunningTask(tasks.value)
   } finally {
     tasksLoad.value = false
   }
@@ -291,13 +285,6 @@ const refresh = () => {
 /** 当前的Tab */
 const activeTab = ref('form')
 
-/** Tab 切换 加载流程图，直接加载显示不出来，不知道啥原因，所以切换以后在加载 */
-const onTabChange = async (tabName: string) => {
-  if (tabName === 'diagram' && processDefinitionId && !bpmnXml.value) {
-    //加载流程图
-    bpmnXml.value = (await DefinitionApi.getProcessDefinition(processDefinitionId))?.bpmnXml
-  }
-}
 /** 初始化 */
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 onMounted(async () => {

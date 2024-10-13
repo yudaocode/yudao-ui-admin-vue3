@@ -9,10 +9,10 @@ export enum TaskStatusEnum {
    */
   NOT_START = -1,
 
-   /**
+  /**
    * 待审批
    */
-   WAIT = 0,
+  WAIT = 0,
   /**
    * 审批中
    */
@@ -26,7 +26,7 @@ export enum TaskStatusEnum {
    * 审批不通过
    */
   REJECT = 3,
-  
+
   /**
    * 已取消
    */
@@ -42,8 +42,7 @@ export enum TaskStatusEnum {
   /**
    * 审批通过中
    */
-  APPROVING = 7,
-
+  APPROVING = 7
 }
 
 export type TaskVO = {
@@ -109,6 +108,11 @@ export const signDeleteTask = async (data: any) => {
 // 抄送
 export const copyTask = async (data: any) => {
   return await request.put({ url: '/bpm/task/copy', data })
+}
+
+// 获取我的待办任务
+export const myTodoTask = async (processInstanceId: string) => {
+  return await request.get({ url: '/bpm/task/my-todo?processInstanceId=' + processInstanceId })
 }
 
 // 获取减签任务列表

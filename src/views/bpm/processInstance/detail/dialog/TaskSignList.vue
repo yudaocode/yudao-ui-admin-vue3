@@ -2,7 +2,7 @@
   <el-drawer v-model="drawerVisible" title="子任务" size="880px">
     <!-- 当前任务 -->
     <template #header>
-      <h4>【{{ parentTask.name }} 】审批人：{{ parentTask?.assigneeUser?.nickname }}</h4>
+      <h4>【{{ parentTask.name }} 】审批人：{{ parentTask?.ownerUser?.nickname }}</h4>
       <el-button
         style="margin-left: 5px"
         v-if="isSignDeleteButtonVisible(parentTask)"
