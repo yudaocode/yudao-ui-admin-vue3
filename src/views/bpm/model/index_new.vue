@@ -1,7 +1,7 @@
 <template>
   <ContentWrap>
     <div class="flex justify-between pl-20px items-center">
-      <h3 class="font-extrabold">表单管理</h3>
+      <h3 class="font-extrabold">流程模型</h3>
       <!-- 搜索工作栏 -->
       <el-form
         class="-mb-15px flex"
@@ -25,7 +25,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="openForm('create')" v-hasPermi="['bpm:model:create']">
-            <Icon icon="ep:plus" class="mr-5px" /> 新建流程
+            <Icon icon="ep:plus" class="mr-5px" /> 新建模型
           </el-button>
         </el-form-item>
 
@@ -38,11 +38,11 @@
               <el-dropdown-menu>
                 <el-dropdown-item>
                   <Icon icon="ep:circle-plus" :size="13" class="mr-5px" />
-                  新建分组
+                  新建分类
                 </el-dropdown-item>
                 <el-dropdown-item>
                   <Icon icon="fa:sort-amount-desc" :size="13" class="mr-5px" />
-                  分组排序
+                  分类排序
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>

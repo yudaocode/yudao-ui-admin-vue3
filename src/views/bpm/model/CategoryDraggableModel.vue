@@ -9,7 +9,7 @@
         >
           <Icon icon="ep:arrow-down-bold" color="#999" />
         </div>
-        <div class="ml-auto mr-30px">
+        <div class="ml-auto mr-45px">
           <template v-if="!isSorting">
             <el-button link type="info" class="mr-10px" @click.stop="handleSort">
               <Icon icon="fa:sort-amount-desc" class="mr-5px" />
@@ -36,7 +36,8 @@
       <el-table
         :class="title"
         ref="tableRef"
-        :header-cell-style="{ backgroundColor: isDark ? '' : '#edeff0' }"
+        :header-cell-style="{ backgroundColor: isDark ? '' : '#edeff0', paddingLeft: '10px' }"
+        :cell-style="{ paddingLeft: '10px' }"
         :data="dataList"
       >
         <el-table-column label="流程名" prop="name" min-width="150">
@@ -48,7 +49,7 @@
                   class="drag-icon cursor-move text-#8a909c mr-10px"
                 />
               </el-tooltip>
-              <el-image :src="scope.row.icon" class="h-32px w-32px mr-10px rounded" />
+              <el-image :src="scope.row.icon" class="h-38px w-38px mr-10px rounded" />
               {{ scope.row.name }}
             </div>
           </template>
@@ -96,20 +97,22 @@
         </el-table-column>
         <el-table-column label="最后发布" prop="deploymentTime" min-width="250">
           <template #default="scope">
-            <span v-if="scope.row.processDefinition">
-              {{ formatDate(scope.row.processDefinition.deploymentTime) }}
-            </span>
-            <el-tag v-if="scope.row.processDefinition" class="ml-10px">
-              v{{ scope.row.processDefinition.version }}
-            </el-tag>
-            <el-tag v-else type="warning">未部署</el-tag>
-            <el-tag
-              v-if="scope.row.processDefinition?.suspensionState === 2"
-              type="warning"
-              class="ml-10px"
-            >
-              已停用
-            </el-tag>
+            <div class="flex items-center">
+              <span v-if="scope.row.processDefinition" class="w-150px">
+                {{ formatDate(scope.row.processDefinition.deploymentTime) }}
+              </span>
+              <el-tag v-if="scope.row.processDefinition">
+                v{{ scope.row.processDefinition.version }}
+              </el-tag>
+              <el-tag v-else type="warning">未部署</el-tag>
+              <el-tag
+                v-if="scope.row.processDefinition?.suspensionState === 2"
+                type="warning"
+                class="ml-10px"
+              >
+                已停用
+              </el-tag>
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
@@ -384,6 +387,9 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 :deep() {
+  .el-card {
+    border-radius: 8px;
+  }
   .el-form--inline .el-form-item {
     margin-right: 10px;
   }
@@ -399,6 +405,15 @@ onMounted(() => {
     margin-left: 10px;
     font-size: 20px;
     font-weight: 500;
+  }
+  .el-collapse-item__content {
+    padding-bottom: 0;
+  }
+  .el-table__cell {
+    border-bottom: none !important;
+  }
+  .el-table__row {
+    height: 68px;
   }
 }
 </style>
