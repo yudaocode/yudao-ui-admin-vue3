@@ -3,13 +3,6 @@
     <el-form label-width="90px" :model="needProps" :rules="rules">
       <div v-if="needProps.type == 'bpmn:Process'">
         <!-- 如果是 Process 信息的时候，使用自定义表单 -->
-        <el-link
-          href="https://doc.iocoder.cn/bpm/#_3-%E6%B5%81%E7%A8%8B%E5%9B%BE%E7%A4%BA%E4%BE%8B"
-          type="danger"
-          target="_blank"
-        >
-          如何实现实现会签、或签？
-        </el-link>
         <el-form-item label="流程标识" prop="id">
           <el-input
             v-model="needProps.id"
@@ -68,13 +61,13 @@ const resetBaseInfo = () => {
   console.log(bpmnElement.value, 'bpmnElement')
 
   bpmnElement.value = bpmnInstances()?.bpmnElement
-  console.log(bpmnElement.value, 'resetBaseInfo11111111111')
+  // console.log(bpmnElement.value, 'resetBaseInfo11111111111')
   elementBaseInfo.value = bpmnElement.value.businessObject
   needProps.value['type'] = bpmnElement.value.businessObject.$type
   // elementBaseInfo.value['typess'] = bpmnElement.value.businessObject.$type
 
   // elementBaseInfo.value = JSON.parse(JSON.stringify(bpmnElement.value.businessObject))
-  console.log(elementBaseInfo.value, 'elementBaseInfo22222222222')
+  // console.log(elementBaseInfo.value, 'elementBaseInfo22222222222')
 }
 const handleKeyUpdate = (value) => {
   // 校验 value 的值，只有 XML NCName 通过的情况下，才进行赋值。否则，会导致流程图报错，无法绘制的问题
@@ -121,11 +114,11 @@ const updateBaseInfo = (key) => {
   //   id: elementBaseInfo.value[key]
   //   // di: { id: `${elementBaseInfo.value[key]}_di` }
   // }
-  console.log(elementBaseInfo, 'elementBaseInfo11111111111')
+  // console.log(elementBaseInfo, 'elementBaseInfo11111111111')
   needProps.value = { ...elementBaseInfo.value, ...needProps.value }
 
   if (key === 'id') {
-    console.log('jinru')
+    // console.log('jinru')
     console.log(window, 'window')
     console.log(bpmnElement.value, 'bpmnElement')
     console.log(toRaw(bpmnElement.value), 'bpmnElement')
@@ -138,20 +131,11 @@ const updateBaseInfo = (key) => {
     bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), attrObj)
   }
 }
-onMounted(() => {
-  // 针对上传的 bpmn 流程图时，需要延迟 1 秒的时间，保证 key 和 name 的更新
-  setTimeout(() => {
-    console.log(props.model, 'props.model')
-    handleKeyUpdate(props.model.key)
-    handleNameUpdate(props.model.name)
-    console.log(props, 'propsssssssssssssssssssss')
-  }, 1000)
-})
 
 watch(
   () => props.businessObject,
   (val) => {
-    console.log(val, 'val11111111111111111111')
+    // console.log(val, 'val11111111111111111111')
     if (val) {
       // nextTick(() => {
       resetBaseInfo()
@@ -159,6 +143,18 @@ watch(
     }
   }
 )
+
+watch(
+  () => props.model?.key,
+  (val) => {
+    // 针对上传的 bpmn 流程图时，保证 key 和 name 的更新
+    if (val) {
+      handleKeyUpdate(props.model.key)
+      handleNameUpdate(props.model.name)
+    }
+  }
+)
+
 // watch(
 //   () => ({ ...props }),
 //   (oldVal, newVal) => {

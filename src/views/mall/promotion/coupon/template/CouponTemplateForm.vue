@@ -10,12 +10,49 @@
       <el-form-item label="优惠券名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入优惠券名称" />
       </el-form-item>
-      <el-form-item label="优惠券类型" prop="discountType">
+      <el-form-item label="优惠券描述" prop="description">
+        <el-input
+          v-model="formData.description"
+          :autosize="{ minRows: 2, maxRows: 2 }"
+          :clearable="true"
+          :show-word-limit="true"
+          class="w-1/1!"
+          maxlength="512"
+          placeholder="请输入优惠券描述"
+          type="textarea"
+        />
+      </el-form-item>
+      <el-form-item label="优惠劵类型" prop="productScope">
+        <el-radio-group v-model="formData.productScope">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_PRODUCT_SCOPE)"
+            :key="dict.value"
+            :value="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item
+        v-if="formData.productScope === PromotionProductScopeEnum.SPU.scope"
+        label="商品"
+        prop="productSpuIds"
+      >
+        <SpuShowcase v-model="formData.productSpuIds" />
+      </el-form-item>
+      <el-form-item
+        v-if="formData.productScope === PromotionProductScopeEnum.CATEGORY.scope"
+        label="分类"
+        prop="productCategoryIds"
+      >
+        <ProductCategorySelect v-model="formData.productCategoryIds" />
+      </el-form-item>
+      <el-form-item label="优惠类型" prop="discountType">
         <el-radio-group v-model="formData.discountType">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_DISCOUNT_TYPE)"
             :key="dict.value"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>
@@ -28,10 +65,10 @@
       >
         <el-input-number
           v-model="formData.discountPrice"
-          placeholder="请输入优惠金额，单位：元"
-          style="width: 400px"
-          :precision="2"
           :min="0"
+          :precision="2"
+          class="mr-2 !w-400px"
+          placeholder="请输入优惠金额，单位：元"
         />
         元
       </el-form-item>
@@ -42,11 +79,11 @@
       >
         <el-input-number
           v-model="formData.discountPercent"
-          placeholder="优惠券折扣不能小于 1 折，且不可大于 9.9 折"
-          style="width: 400px"
-          :precision="1"
-          :min="1"
           :max="9.9"
+          :min="1"
+          :precision="1"
+          class="mr-2 !w-400px"
+          placeholder="优惠券折扣不能小于 1 折，且不可大于 9.9 折"
         />
         折
       </el-form-item>
@@ -57,46 +94,47 @@
       >
         <el-input-number
           v-model="formData.discountLimitPrice"
-          placeholder="请输入最多优惠"
-          style="width: 400px"
-          :precision="2"
           :min="0"
+          :precision="2"
+          class="mr-2 !w-400px"
+          placeholder="请输入最多优惠"
         />
         元
       </el-form-item>
       <el-form-item label="满多少元可以使用" prop="usePrice">
         <el-input-number
           v-model="formData.usePrice"
-          placeholder="无门槛请设为 0"
-          style="width: 400px"
-          :precision="2"
           :min="0"
+          :precision="2"
+          class="mr-2 !w-400px"
+          placeholder="无门槛请设为 0"
         />
         元
       </el-form-item>
       <el-form-item label="领取方式" prop="takeType">
         <el-radio-group v-model="formData.takeType">
-          <el-radio :key="1" :label="1">直接领取</el-radio>
-          <el-radio :key="2" :label="2">指定发放</el-radio>
+          <el-radio :key="1" :value="1">直接领取</el-radio>
+          <el-radio :key="2" :value="2">指定发放</el-radio>
+          <el-radio :key="2" :value="3">新人劵</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="formData.takeType === 1" label="发放数量" prop="totalCount">
         <el-input-number
           v-model="formData.totalCount"
-          placeholder="发放数量，没有之后不能领取或发放，-1 为不限制"
-          style="width: 400px"
-          :precision="0"
           :min="-1"
+          :precision="0"
+          class="mr-2 !w-400px"
+          placeholder="发放数量，没有之后不能领取或发放，-1 为不限制"
         />
         张
       </el-form-item>
       <el-form-item v-if="formData.takeType === 1" label="每人限领个数" prop="takeLimitCount">
         <el-input-number
           v-model="formData.takeLimitCount"
-          placeholder="设置为 -1 时，可无限领取"
-          style="width: 400px"
-          :precision="0"
           :min="-1"
+          :precision="0"
+          class="mr-2 !w-400px"
+          placeholder="设置为 -1 时，可无限领取"
         />
         张
       </el-form-item>
@@ -105,7 +143,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_COUPON_TEMPLATE_VALIDITY_TYPE)"
             :key="dict.value"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>
@@ -118,10 +156,9 @@
       >
         <el-date-picker
           v-model="formData.validTimes"
-          style="width: 240px"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="datetimerange"
           :default-time="[new Date(2000, 1, 1, 0, 0, 0), new Date(2000, 2, 1, 23, 59, 59)]"
+          type="datetimerange"
+          value-format="x"
         />
       </el-form-item>
       <el-form-item
@@ -132,51 +169,20 @@
         第
         <el-input-number
           v-model="formData.fixedStartTerm"
-          placeholder="0 为今天生效"
-          style="width: 165px"
-          :precision="0"
           :min="0"
+          :precision="0"
+          class="mx-2"
+          placeholder="0 为今天生效"
         />
         至
         <el-input-number
           v-model="formData.fixedEndTerm"
-          placeholder="请输入结束天数"
-          style="width: 165px"
-          :precision="0"
           :min="0"
+          :precision="0"
+          class="mx-2"
+          placeholder="请输入结束天数"
         />
         天有效
-      </el-form-item>
-      <el-form-item label="活动商品" prop="productScope">
-        <el-radio-group v-model="formData.productScope">
-          <el-radio
-            v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_PRODUCT_SCOPE)"
-            :key="dict.value"
-            :label="dict.value"
-          >
-            {{ dict.label }}
-          </el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item
-        v-if="formData.productScope === PromotionProductScopeEnum.SPU.scope"
-        prop="productSpuIds"
-      >
-        <el-select
-          v-model="formData.productSpuIds"
-          placeholder="请选择活动商品"
-          clearable
-          multiple
-          filterable
-          style="width: 400px"
-        >
-          <el-option v-for="item in productSpus" :key="item.id" :label="item.name" :value="item.id">
-            <span style="float: left">{{ item.name }}</span>
-            <span style="float: right; font-size: 13px; color: #8492a6">
-              ￥{{ (item.minPrice / 100.0).toFixed(2) }}
-            </span>
-          </el-option>
-        </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -188,12 +194,14 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
-import * as ProductSpuApi from '@/api/mall/product/spu'
 import {
   CouponTemplateValidityTypeEnum,
   PromotionDiscountTypeEnum,
   PromotionProductScopeEnum
 } from '@/utils/constants'
+import SpuShowcase from '@/views/mall/product/spu/components/SpuShowcase.vue'
+import ProductCategorySelect from '@/views/mall/product/category/components/ProductCategorySelect.vue'
+import { convertToInteger, formatToFraction } from '@/utils'
 
 defineOptions({ name: 'CouponTemplateForm' })
 
@@ -222,7 +230,10 @@ const formData = ref({
   fixedStartTerm: undefined,
   fixedEndTerm: undefined,
   productScope: PromotionProductScopeEnum.ALL.scope,
-  productSpuIds: []
+  description: undefined,
+  productScopeValues: [], // 商品范围：值为 品类编号列表 或 商品编号列表 ，用于提交
+  productCategoryIds: [], // 仅用于表单，不提交
+  productSpuIds: [] // 仅用于表单，不提交
 })
 const formRules = reactive({
   name: [{ required: true, message: '优惠券名称不能为空', trigger: 'blur' }],
@@ -239,10 +250,10 @@ const formRules = reactive({
   fixedStartTerm: [{ required: true, message: '开始领取天数不能为空', trigger: 'blur' }],
   fixedEndTerm: [{ required: true, message: '开始领取天数不能为空', trigger: 'blur' }],
   productScope: [{ required: true, message: '商品范围不能为空', trigger: 'blur' }],
-  productSpuIds: [{ required: true, message: '商品范围不能为空', trigger: 'blur' }]
+  productSpuIds: [{ required: true, message: '商品不能为空', trigger: 'blur' }],
+  productCategoryIds: [{ required: true, message: '分类不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const productSpus = ref([]) // 商品列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -257,20 +268,19 @@ const open = async (type: string, id?: number) => {
       const data = await CouponTemplateApi.getCouponTemplate(id)
       formData.value = {
         ...data,
-        discountPrice: data.discountPrice !== undefined ? data.discountPrice / 100.0 : undefined,
+        discountPrice: formatToFraction(data.discountPrice),
         discountPercent:
           data.discountPercent !== undefined ? data.discountPercent / 10.0 : undefined,
-        discountLimitPrice:
-          data.discountLimitPrice !== undefined ? data.discountLimitPrice / 100.0 : undefined,
-        usePrice: data.usePrice !== undefined ? data.usePrice / 100.0 : undefined,
+        discountLimitPrice: formatToFraction(data.discountLimitPrice),
+        usePrice: formatToFraction(data.usePrice),
         validTimes: [data.validStartTime, data.validEndTime]
       }
+      // 获得商品范围
+      await getProductScope()
     } finally {
       formLoading.value = false
     }
   }
-  // 获得商品列表
-  productSpus.value = await ProductSpuApi.getSpuSimpleList()
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -286,17 +296,13 @@ const submitForm = async () => {
   try {
     const data = {
       ...formData.value,
-      discountPrice:
-        formData.value.discountPrice !== undefined ? formData.value.discountPrice * 100 : undefined,
+      discountPrice: convertToInteger(formData.value.discountPrice),
       discountPercent:
         formData.value.discountPercent !== undefined
           ? formData.value.discountPercent * 10
           : undefined,
-      discountLimitPrice:
-        formData.value.discountLimitPrice !== undefined
-          ? formData.value.discountLimitPrice * 100
-          : undefined,
-      usePrice: formData.value.usePrice !== undefined ? formData.value.usePrice * 100 : undefined,
+      discountLimitPrice: convertToInteger(formData.value.discountLimitPrice),
+      usePrice: convertToInteger(formData.value.usePrice),
       validStartTime:
         formData.value.validTimes && formData.value.validTimes.length === 2
           ? formData.value.validTimes[0]
@@ -304,8 +310,14 @@ const submitForm = async () => {
       validEndTime:
         formData.value.validTimes && formData.value.validTimes.length === 2
           ? formData.value.validTimes[1]
-          : undefined
-    } as CouponTemplateApi.CouponTemplateVO
+          : undefined,
+      totalCount: formData.value.takeType === 1 ? formData.value.totalCount : -1,
+      takeLimitCount: formData.value.takeType === 1 ? formData.value.takeLimitCount : -1
+    } as unknown as CouponTemplateApi.CouponTemplateVO
+
+    // 设置商品范围
+    setProductScopeValues(data)
+
     if (formType.value === 'create') {
       await CouponTemplateApi.createCouponTemplate(data)
       message.success(t('common.createSuccess'))
@@ -326,6 +338,7 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: undefined,
+    description: undefined,
     discountType: PromotionDiscountTypeEnum.PRICE.type,
     discountPrice: undefined,
     discountPercent: undefined,
@@ -341,8 +354,51 @@ const resetForm = () => {
     fixedStartTerm: undefined,
     fixedEndTerm: undefined,
     productScope: PromotionProductScopeEnum.ALL.scope,
-    productSpuIds: []
+    productScopeValues: [],
+    productSpuIds: [],
+    productCategoryIds: []
   }
   formRef.value?.resetFields()
 }
+
+/** 获得商品范围 */
+const getProductScope = async () => {
+  switch (formData.value.productScope) {
+    case PromotionProductScopeEnum.SPU.scope:
+      // 设置商品编号
+      formData.value.productSpuIds = formData.value.productScopeValues
+      break
+    case PromotionProductScopeEnum.CATEGORY.scope:
+      await nextTick(() => {
+        let productCategoryIds = formData.value.productScopeValues
+        if (Array.isArray(productCategoryIds) && productCategoryIds.length > 0) {
+          // 单选时使用数组不能反显
+          productCategoryIds = productCategoryIds[0]
+        }
+        // 设置品类编号
+        formData.value.productCategoryIds = productCategoryIds
+      })
+      break
+    default:
+      break
+  }
+}
+
+/** 设置商品范围 */
+function setProductScopeValues(data: CouponTemplateApi.CouponTemplateVO) {
+  switch (formData.value.productScope) {
+    case PromotionProductScopeEnum.SPU.scope:
+      data.productScopeValues = formData.value.productSpuIds
+      break
+    case PromotionProductScopeEnum.CATEGORY.scope:
+      data.productScopeValues = Array.isArray(formData.value.productCategoryIds)
+        ? formData.value.productCategoryIds
+        : [formData.value.productCategoryIds]
+      break
+    default:
+      break
+  }
+}
 </script>
+
+<style lang="scss" scoped></style>

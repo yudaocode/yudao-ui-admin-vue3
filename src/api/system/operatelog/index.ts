@@ -2,25 +2,22 @@ import request from '@/config/axios'
 
 export type OperateLogVO = {
   id: number
-  userNickname: string
   traceId: string
+  userType: number
   userId: number
-  module: string
-  name: string
-  type: number
-  content: string
-  exts: Map<String, Object>
+  userName: string
+  type: string
+  subType: string
+  bizId: number
+  action: string
+  extra: string
   requestMethod: string
   requestUrl: string
   userIp: string
   userAgent: string
-  javaMethod: string
-  javaMethodArgs: string
-  startTime: Date
-  duration: number
-  resultCode: number
-  resultMsg: string
-  resultData: string
+  creator: string
+  creatorName: string
+  createTime: Date
 }
 
 // 查询操作日志列表
@@ -28,6 +25,6 @@ export const getOperateLogPage = (params: PageParam) => {
   return request.get({ url: '/system/operate-log/page', params })
 }
 // 导出操作日志
-export const exportOperateLog = (params) => {
+export const exportOperateLog = (params: any) => {
   return request.download({ url: '/system/operate-log/export', params })
 }

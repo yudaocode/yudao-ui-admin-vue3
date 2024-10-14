@@ -20,7 +20,7 @@
               <el-radio
                 v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
                 :key="dict.value"
-                :label="dict.value"
+                :value="dict.value"
               >
                 {{ dict.label }}
               </el-radio>
@@ -51,7 +51,7 @@
       <el-row>
         <el-col :span="12">
           <el-form-item label="门店所在地区" prop="areaId">
-            <el-cascader v-model="formData.areaId" :options="areaList" :props="areaTreeProps" />
+            <el-cascader v-model="formData.areaId" :options="areaList" :props="defaultProps" />
           </el-form-item>
         </el-col>
         <el-col :span="12">
@@ -99,21 +99,15 @@
         </el-col>
       </el-row>
       <el-form-item label="获取经纬度">
-        <el-button type="primary" @click="mapDialogVisible.value = true">获取</el-button>
+        <el-button type="primary" @click="mapDialogVisible = true">获取</el-button>
       </el-form-item>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
-    <el-dialog
-      v-model="mapDialogVisible"
-      title="获取经纬度"
-      append-to-body
-      width="500px"
-      class="mapBox"
-    >
-      <iframe id="mapPage" width="100%" height="100%" frameborder="0" :src="tencentLbsUrl"></iframe>
+    <el-dialog v-model="mapDialogVisible" title="获取经纬度" append-to-body>
+      <IFrame class="h-609px" :src="tencentLbsUrl" />
     </el-dialog>
   </Dialog>
 </template>
@@ -121,8 +115,9 @@
 import * as DeliveryPickUpStoreApi from '@/api/mall/trade/delivery/pickUpStore'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { CommonStatusEnum } from '@/utils/constants'
+import { defaultProps } from '@/utils/tree'
 import { getAreaTree } from '@/api/system/area'
-import * as ConfigApi from '@/api/infra/config'
+import * as ConfigApi from '@/api/mall/trade/config'
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
@@ -161,12 +156,6 @@ const formRules = reactive({
   status: [{ required: true, message: '开启状态不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const areaTreeProps = {
-  children: 'children',
-  label: 'name',
-  value: 'id',
-  emitPath: false
-}
 const areaList = ref() // 区域树
 const tencentLbsUrl = ref('') // 腾讯位置服务 url
 
@@ -244,16 +233,8 @@ const selectAddress = function (loc: any): void {
   mapDialogVisible.value = false
 }
 
-/** 初始化数据 */
-const initData = async () => {
-  formLoading.value = true
-  try {
-    const data = await getAreaTree()
-    areaList.value = data
-  } finally {
-    formLoading.value = false
-  }
-  // TODO @jason：要不创建一个 initTencentLbsMap
+/** 初始化腾讯地图 */
+const initTencentLbsMap = async () => {
   window.selectAddress = selectAddress
   window.addEventListener(
     'message',
@@ -267,21 +248,15 @@ const initData = async () => {
     },
     false
   )
-  const data = await ConfigApi.getConfigKey('tencent.lbs.key')
-  let key = ''
-  if (data && data.length > 0) {
-    key = data
-  }
+  const data = await ConfigApi.getTradeConfig()
+  const key = data.tencentLbsKey
   tencentLbsUrl.value = `https://apis.map.qq.com/tools/locpicker?type=1&key=${key}&referer=myapp`
 }
 
 /** 初始化 **/
-onMounted(() => {
-  initData()
+onMounted(async () => {
+  areaList.value = await getAreaTree()
+  // 加载地图
+  await initTencentLbsMap()
 })
 </script>
-<style lang="scss">
-.mapBox .el-dialog__body {
-  height: 640px !important;
-}
-</style>

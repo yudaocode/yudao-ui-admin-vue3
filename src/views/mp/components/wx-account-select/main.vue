@@ -6,6 +6,11 @@
 
 <script lang="ts" setup>
 import * as MpAccountApi from '@/api/mp/account'
+import { useTagsViewStore } from '@/store/modules/tagsView'
+
+const message = useMessage() // 消息弹窗
+const { delView } = useTagsViewStore() // 视图操作
+const { push, currentRoute } = useRouter() // 路由
 
 defineOptions({ name: 'WxAccountSelect' })
 
@@ -22,6 +27,12 @@ const emit = defineEmits<{
 
 const handleQuery = async () => {
   accountList.value = await MpAccountApi.getSimpleAccountList()
+  if (accountList.value.length == 0) {
+    message.error('未配置公众号，请在【公众号管理 -> 账号管理】菜单，进行配置')
+    delView(unref(currentRoute))
+    await push({ name: 'MpAccount' })
+    return
+  }
   // 默认选中第一个
   if (accountList.value.length > 0) {
     account.id = accountList.value[0].id

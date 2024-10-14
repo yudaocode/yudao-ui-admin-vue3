@@ -1,10 +1,4 @@
-import BasicInfoForm from './BasicInfoForm.vue'
-import DescriptionForm from './DescriptionForm.vue'
-import OtherSettingsForm from './OtherSettingsForm.vue'
-import ProductAttributes from './ProductAttributes.vue'
-import ProductPropertyAddForm from './ProductPropertyAddForm.vue'
 import SkuList from './SkuList.vue'
-
 import { Spu } from '@/api/mall/product/spu'
 
 interface PropertyAndValues {
@@ -30,7 +24,7 @@ interface RuleConfig {
 }
 
 /**
- * 获得商品的规格列表
+ * 获得商品的规格列表 - 商品相关的公共函数
  *
  * @param spu
  * @return PropertyAndValues 规格列表
@@ -57,14 +51,4 @@ const getPropertyList = (spu: Spu): PropertyAndValues[] => {
   return properties
 }
 
-export {
-  BasicInfoForm,
-  DescriptionForm,
-  OtherSettingsForm,
-  ProductAttributes,
-  ProductPropertyAddForm,
-  SkuList,
-  getPropertyList,
-  PropertyAndValues,
-  RuleConfig
-}
+export { SkuList, PropertyAndValues, RuleConfig, getPropertyList }

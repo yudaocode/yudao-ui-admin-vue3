@@ -58,7 +58,7 @@ import { Reply } from './types'
 
 const message = useMessage()
 
-const UPLOAD_URL = import.meta.env.VITE_API_BASEPATH + '/admin-api/mp/material/upload-temporary'
+const UPLOAD_URL = import.meta.env.VITE_BASE_URL + '/admin-api/mp/material/upload-temporary'
 const HEADERS = { Authorization: 'Bearer ' + getAccessToken() }
 
 const props = defineProps<{

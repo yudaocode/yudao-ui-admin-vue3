@@ -49,8 +49,8 @@ export const getFormPage = async (params) => {
 }
 
 // 获得动态表单的精简列表
-export const getSimpleFormList = async () => {
+export const getFormSimpleList = async () => {
   return await request.get({
-    url: '/bpm/form/list-all-simple'
+    url: '/bpm/form/simple-list'
   })
 }

@@ -1,6 +1,8 @@
 <template>
+  <doc-alert title="会员等级、积分、签到" url="https://doc.iocoder.cn/member/level/" />
+
+  <!-- 搜索工作栏 -->
   <ContentWrap>
-    <!-- 搜索工作栏 -->
     <el-button
       type="primary"
       plain
@@ -20,7 +22,8 @@
         prop="day"
         :formatter="(_, __, cellValue) => ['第', cellValue, '天'].join(' ')"
       />
-      <el-table-column label="获得积分" align="center" prop="point" />
+      <el-table-column label="奖励积分" align="center" prop="point" />
+      <el-table-column label="奖励经验" align="center" prop="experience" />
       <el-table-column label="状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />

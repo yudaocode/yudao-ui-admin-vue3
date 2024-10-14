@@ -6,7 +6,7 @@ export interface NotifyTemplateVO {
   nickname: string
   code: string
   content: string
-  type: number
+  type?: number
   params: string
   status: number
   remark: string

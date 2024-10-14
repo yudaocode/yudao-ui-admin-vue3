@@ -2,7 +2,7 @@ import request from '@/config/axios'
 
 export type LeaveVO = {
   id: number
-  result: number
+  status: number
   type: number
   reason: string
   processInstanceId: string

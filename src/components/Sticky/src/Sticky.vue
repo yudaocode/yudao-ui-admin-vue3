@@ -32,7 +32,7 @@ onMounted(() => {
 
   scrollContainer.value = getScrollContainer(refSticky.value!, true)
   useEventListener(scrollContainer, 'scroll', handleScroll)
-  useEventListener('resize', handleReize)
+  useEventListener('resize', handleResize)
   handleScroll()
 })
 onActivated(() => {
@@ -103,7 +103,7 @@ const handleScroll = () => {
     reset()
   }
 }
-const handleReize = () => {
+const handleResize = () => {
   if (isSticky.value && refSticky.value) {
     width.value = refSticky.value.getBoundingClientRect().width + 'px'
   }

@@ -13,6 +13,7 @@ export interface NotifyMessageVO {
   templateParams: string
   readStatus: boolean
   readTime: Date
+  createTime: Date
 }
 
 // 查询站内信消息列表

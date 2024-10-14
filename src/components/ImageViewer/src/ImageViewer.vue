@@ -13,7 +13,7 @@ const props = defineProps({
   initialIndex: propTypes.number.def(0),
   infinite: propTypes.bool.def(true),
   hideOnClickModal: propTypes.bool.def(false),
-  appendToBody: propTypes.bool.def(false),
+  teleported: propTypes.bool.def(false),
   show: propTypes.bool.def(false)
 })
 

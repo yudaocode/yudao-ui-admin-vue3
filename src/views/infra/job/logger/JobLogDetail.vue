@@ -26,7 +26,7 @@
         <dict-tag :type="DICT_TYPE.INFRA_JOB_LOG_STATUS" :value="detailData.status" />
       </el-descriptions-item>
       <el-descriptions-item label="执行结果">
-        {{ detailData.duration + ' result' }}
+        {{ detailData.result }}
       </el-descriptions-item>
     </el-descriptions>
   </Dialog>
@@ -40,7 +40,7 @@ defineOptions({ name: 'JobLogDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
-const detailData = ref({}) // 详情数据
+const detailData = ref({} as JobLogApi.JobLogVO) // 详情数据
 
 /** 打开弹窗 */
 const open = async (id: number) => {

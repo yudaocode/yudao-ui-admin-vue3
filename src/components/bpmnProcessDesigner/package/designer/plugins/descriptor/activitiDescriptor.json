@@ -332,6 +332,16 @@
           "name": "multiinstance_condition",
           "isAttr": true,
           "type": "String"
+        },
+        {
+          "name": "candidateStrategy",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "candidateParam",
+          "isAttr": true,
+          "type": "String"
         }
       ]
     },

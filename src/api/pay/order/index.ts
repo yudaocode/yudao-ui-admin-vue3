@@ -84,8 +84,14 @@ export const getOrderPage = async (params: OrderPageReqVO) => {
 }
 
 // 查询详情支付订单
-export const getOrder = async (id: number) => {
-  return await request.get({ url: '/pay/order/get?id=' + id })
+export const getOrder = async (id: number, sync?: boolean) => {
+  return await request.get({
+    url: '/pay/order/get',
+    params: {
+      id,
+      sync
+    }
+  })
 }
 
 // 获得支付订单的明细

@@ -14,6 +14,9 @@ declare global {
 
   type LocaleType = 'zh-CN' | 'en'
 
+  declare type TimeoutHandle = ReturnType<typeof setTimeout>
+  declare type IntervalHandle = ReturnType<typeof setInterval>
+
   type AxiosHeaders =
     | 'application/json'
     | 'application/x-www-form-urlencoded'
@@ -46,5 +49,10 @@ declare global {
     id: number
     name: string
     children?: Tree[] | any[]
+  }
+  // 分页数据公共返回
+  interface PageResult<T> {
+    list: T // 数据
+    total: number // 总量
   }
 }

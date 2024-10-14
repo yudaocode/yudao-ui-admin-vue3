@@ -37,7 +37,7 @@
       <el-table-column label="appId" align="center" prop="appId" width="180" />
       <el-table-column label="服务器地址(URL)" align="center" prop="appId" width="360">
         <template #default="scope">
-          {{ 'http://服务端地址/mp/open/' + scope.row.appId }}
+          {{ 'http://服务端地址/admin-api/mp/open/' + scope.row.appId }}
         </template>
       </el-table-column>
       <el-table-column label="二维码" align="center" prop="qrCodeUrl">

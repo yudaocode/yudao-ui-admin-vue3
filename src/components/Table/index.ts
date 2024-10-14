@@ -1,6 +1,7 @@
 import Table from './src/Table.vue'
 import { ElTable } from 'element-plus'
 import { TableSetPropsType } from '@/types/table'
+import TableSelectForm from './src/TableSelectForm.vue'
 
 export interface TableExpose {
   setProps: (props: Recordable) => void
@@ -9,4 +10,4 @@ export interface TableExpose {
   elTableRef: ComponentRef<typeof ElTable>
 }
 
-export { Table }
+export { Table, TableSelectForm }

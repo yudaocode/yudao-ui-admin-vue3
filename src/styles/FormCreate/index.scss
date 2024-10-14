@@ -1,0 +1,22 @@
+// 使用字体图标来源 https://fontello.com/
+
+@font-face {
+  font-family: 'fc-icon';
+  src: url('@/styles/FormCreate/fonts/fontello.woff') format('woff');
+}
+
+.icon-doc-text:before {
+  content: '\f0f6';
+}
+
+.icon-server:before {
+  content: '\f233';
+}
+
+.icon-address-card-o:before {
+  content: '\f2bc';
+}
+
+.icon-user-o:before {
+  content: '\f2c0';
+}

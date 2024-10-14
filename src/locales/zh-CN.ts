@@ -56,6 +56,16 @@ export default {
     copySuccess: '复制成功',
     copyError: '复制失败'
   },
+  lock: {
+    lockScreen: '锁定屏幕',
+    lock: '锁定',
+    lockPassword: '锁屏密码',
+    unlock: '点击解锁',
+    backToLogin: '返回登录',
+    entrySystem: '进入系统',
+    placeholder: '请输入锁屏密码',
+    message: '锁屏密码错误'
+  },
   error: {
     noPermission: `抱歉，您无权访问此页面。`,
     pageError: '抱歉，您访问的页面不存在。',
@@ -82,6 +92,7 @@ export default {
     localeIcon: '多语言图标',
     messageIcon: '消息图标',
     tagsView: '标签页',
+    tagsViewImmerse: '标签页沉浸',
     logo: '标志',
     greyMode: '灰色模式',
     fixedHeader: '固定头部',
@@ -141,6 +152,7 @@ export default {
   },
   router: {
     login: '登录',
+    socialLogin: '社交登录',
     home: '首页',
     analysis: '分析页',
     workplace: '工作台'
@@ -436,5 +448,6 @@ export default {
     btn_zoom_in: '放大',
     btn_zoom_out: '缩小',
     preview: '预览'
-  }
+  },
+  'OAuth 2.0': 'OAuth 2.0' // 避免菜单名是 OAuth 2.0 时，一直 warn 报错
 }

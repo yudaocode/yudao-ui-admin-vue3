@@ -11,6 +11,10 @@ const props = defineProps({
   modelValue: {
     require: false,
     type: String
+  },
+  clearable: {
+    require: false,
+    type: Boolean
   }
 })
 const emit = defineEmits<{ (e: 'update:modelValue', v: string) }>()
@@ -92,6 +96,12 @@ function onCurrentChange(page) {
   currentPage.value = page
 }
 
+function clearIcon() {
+  icon.value = ''
+  emit('update:modelValue', '')
+  visible.value = false
+}
+
 watch(
   () => {
     return props.modelValue
@@ -115,20 +125,20 @@ watch(
 
 <template>
   <div class="selector">
-    <ElInput v-model="inputValue" @click="visible = !visible">
+    <ElInput v-model="inputValue" @click="visible = !visible" :clearable="props.clearable" @clear="clearIcon">
       <template #append>
         <ElPopover
           :popper-options="{
             placement: 'auto'
           }"
           :visible="visible"
-          :width="350"
+          :width="355"
           popper-class="pure-popper"
           trigger="click"
         >
           <template #reference>
             <div
-              class="w-40px h-32px cursor-pointer flex justify-center items-center"
+              class="h-32px w-40px flex cursor-pointer items-center justify-center"
               @click="visible = !visible"
             >
               <Icon :icon="currentActiveType + icon" />
@@ -147,13 +157,13 @@ watch(
             >
               <ElDivider border-style="dashed" class="tab-divider" />
               <ElScrollbar height="220px">
-                <ul class="flex flex-wrap px-2 ml-2">
+                <ul class="ml-2 flex flex-wrap">
                   <li
                     v-for="(item, key) in pageList"
                     :key="key"
                     :style="iconItemStyle(item)"
                     :title="item"
-                    class="icon-item p-2 w-1/10 cursor-pointer mr-2 mt-1 flex justify-center items-center border border-solid"
+                    class="icon-item mr-2 mt-1 w-1/10 flex cursor-pointer items-center justify-center border border-solid p-2"
                     @click="onChangeIcon(item)"
                   >
                     <Icon :icon="currentActiveType + item" />
@@ -169,9 +179,9 @@ watch(
             :page-size="pageSize"
             :total="iconCount"
             background
-            class="flex items-center justify-center h-10"
+            class="h-10 flex items-center justify-center"
             layout="prev, pager, next"
-            small
+            size="small"
             @current-change="onCurrentChange"
           />
         </ElPopover>

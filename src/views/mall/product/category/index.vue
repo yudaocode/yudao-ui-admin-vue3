@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【商品】商品分类" url="https://doc.iocoder.cn/mall/product-category/" />
+
   <!-- 搜索工作栏 -->
   <ContentWrap>
     <el-form
@@ -35,14 +37,14 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" row-key="id" default-expand-all>
-      <el-table-column label="分类名称" prop="name" sortable />
-      <el-table-column label="移动端分类图" align="center" prop="picUrl">
+      <el-table-column label="名称" min-width="240" prop="name" sortable />
+      <el-table-column label="分类图标" align="center" min-width="80" prop="picUrl">
         <template #default="scope">
-          <img v-if="scope.row.picUrl" :src="scope.row.picUrl" alt="移动端分类图" class="h-100px" />
+          <img :src="scope.row.picUrl" alt="移动端分类图" class="h-36px" />
         </template>
       </el-table-column>
-      <el-table-column label="分类排序" align="center" prop="sort" />
-      <el-table-column label="开启状态" align="center" prop="status">
+      <el-table-column label="排序" align="center" min-width="150" prop="sort" />
+      <el-table-column label="状态" align="center" min-width="150" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
@@ -54,7 +56,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column label="操作" align="center" min-width="180">
         <template #default="scope">
           <el-button
             link
@@ -63,6 +65,15 @@
             v-hasPermi="['product:category:update']"
           >
             编辑
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            v-if="scope.row.parentId > 0"
+            @click="handleViewSpu(scope.row.id)"
+            v-hasPermi="['product:spu:query']"
+          >
+            查看商品
           </el-button>
           <el-button
             link
@@ -138,6 +149,15 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 查看商品操作 */
+const router = useRouter() // 路由
+const handleViewSpu = (id: number) => {
+  router.push({
+    name: 'ProductSpu',
+    query: { categoryId: id }
+  })
 }
 
 /** 初始化 **/

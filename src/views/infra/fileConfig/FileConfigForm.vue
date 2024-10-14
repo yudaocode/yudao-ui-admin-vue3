@@ -66,8 +66,8 @@
       </el-form-item>
       <el-form-item v-if="formData.storage === 11" label="连接模式" prop="config.mode">
         <el-radio-group v-model="formData.config.mode">
-          <el-radio key="Active" label="Active">主动模式</el-radio>
-          <el-radio key="Passive" label="Passive">被动模式</el-radio>
+          <el-radio key="Active" value="Active">主动模式</el-radio>
+          <el-radio key="Passive" value="Passive">被动模式</el-radio>
         </el-radio-group>
       </el-form-item>
       <!-- S3 -->
@@ -101,6 +101,7 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getDictOptions } from '@/utils/dict'
 import * as FileConfigApi from '@/api/infra/fileConfig'
+import { FormRules } from 'element-plus'
 
 defineOptions({ name: 'InfraFileConfigForm' })
 
@@ -116,9 +117,9 @@ const formData = ref({
   name: '',
   storage: 0,
   remark: '',
-  config: {}
+  config: {} as FileConfigApi.FileClientConfig
 })
-const formRules = reactive({
+const formRules = reactive<FormRules>({
   name: [{ required: true, message: '配置名不能为空', trigger: 'blur' }],
   storage: [{ required: true, message: '存储器不能为空', trigger: 'change' }],
   config: {
@@ -133,7 +134,7 @@ const formRules = reactive({
     accessKey: [{ required: true, message: 'accessKey 不能为空', trigger: 'blur' }],
     accessSecret: [{ required: true, message: 'accessSecret 不能为空', trigger: 'blur' }],
     domain: [{ required: true, message: '自定义域名不能为空', trigger: 'blur' }]
-  }
+  } as FormRules
 })
 const formRef = ref() // 表单 Ref
 
@@ -186,9 +187,9 @@ const resetForm = () => {
   formData.value = {
     id: undefined,
     name: '',
-    storage: 0,
+    storage: undefined!,
     remark: '',
-    config: {}
+    config: {} as FileConfigApi.FileClientConfig
   }
   formRef.value?.resetFields()
 }

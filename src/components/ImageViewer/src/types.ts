@@ -4,6 +4,6 @@ export interface ImageViewerProps {
   initialIndex?: number
   infinite?: boolean
   hideOnClickModal?: boolean
-  appendToBody?: boolean
+  teleported?: boolean
   show?: boolean
 }

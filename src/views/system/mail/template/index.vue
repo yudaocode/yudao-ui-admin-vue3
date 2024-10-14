@@ -10,7 +10,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['system:mail-account:create']"
+          v-hasPermi="['system:mail-template:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>

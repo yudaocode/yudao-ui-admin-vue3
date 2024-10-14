@@ -1,5 +1,5 @@
 import { defineConfig, toEscapedSelector as e, presetUno } from 'unocss'
-import transformerVariantGroup from '@unocss/transformer-variant-group'
+// import transformerVariantGroup from '@unocss/transformer-variant-group'
 
 export default defineConfig({
   // ...UnoCSS options
@@ -12,7 +12,7 @@ export default defineConfig({
 ${selector} {
   display: flex;
   height: 100%;
-  padding: 1px 10px 0;
+  padding: 0 10px;
   cursor: pointer;
   align-items: center;
   transition: background var(--transition-time-02);
@@ -101,5 +101,8 @@ ${selector}:after {
     ]
   ],
   presets: [presetUno({ dark: 'class', attributify: false })],
-  transformers: [transformerVariantGroup()]
+  // transformers: [transformerVariantGroup()],
+  shortcuts: {
+    'wh-full': 'w-full h-full'
+  }
 })

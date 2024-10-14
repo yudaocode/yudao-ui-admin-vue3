@@ -1,15 +1,15 @@
 import request from '@/config/axios'
 
 export interface SmsTemplateVO {
-  id: number | null
-  type: number | null
+  id?: number
+  type?: number
   status: number
   code: string
   name: string
   content: string
   remark: string
   apiTemplateId: string
-  channelId: number | null
+  channelId?: number
   channelCode?: string
   params?: string[]
   createTime?: Date

@@ -21,10 +21,6 @@ export interface CategoryVO {
    */
   picUrl: string
   /**
-   * PC 端分类图
-   */
-  bigPicUrl?: string
-  /**
    * 分类排序
    */
   sort: number

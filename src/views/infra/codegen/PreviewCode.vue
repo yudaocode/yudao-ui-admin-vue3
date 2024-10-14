@@ -31,7 +31,7 @@
       <el-card
         v-loading="loading"
         :gutter="12"
-        class="w-2/3 ml-3"
+        class="ml-3 w-2/3"
         element-loading-text="加载代码中..."
         shadow="hover"
       >

@@ -13,7 +13,7 @@ import { getAccessToken, getRefreshToken, getTenantId, removeToken, setToken } f
 import errorCode from './errorCode'
 
 import { resetRouter } from '@/router'
-import { useCache } from '@/hooks/web/useCache'
+import { deleteUserCache } from '@/hooks/web/useCache'
 
 const tenantEnable = import.meta.env.VITE_APP_TENANT_ENABLE
 const { result_code, base_url, request_timeout } = config
@@ -70,41 +70,25 @@ service.interceptors.request.use(
     }
     // get参数编码
     if (config.method?.toUpperCase() === 'GET' && params) {
-      let url = config.url + '?'
-      for (const propName of Object.keys(params)) {
-        const value = params[propName]
-        if (value !== void 0 && value !== null && typeof value !== 'undefined') {
-          if (typeof value === 'object') {
-            for (const val of Object.keys(value)) {
-              const params = propName + '[' + val + ']'
-              const subPart = encodeURIComponent(params) + '='
-              url += subPart + encodeURIComponent(value[val]) + '&'
-            }
-          } else {
-            url += `${propName}=${encodeURIComponent(value)}&`
-          }
-        }
-      }
-      // 给 get 请求加上时间戳参数，避免从缓存中拿数据
-      // const now = new Date().getTime()
-      // params = params.substring(0, url.length - 1) + `?_t=${now}`
-      url = url.slice(0, -1)
       config.params = {}
-      config.url = url
+      const paramsStr = qs.stringify(params, { allowDots: true })
+      if (paramsStr) {
+        config.url = config.url + '?' + paramsStr
+      }
     }
     return config
   },
   (error: AxiosError) => {
     // Do something with request error
     console.log(error) // for debug
-    Promise.reject(error)
+    return Promise.reject(error)
   }
 )
 
 // response 拦截器
 service.interceptors.response.use(
   async (response: AxiosResponse<any>) => {
-    const { data } = response
+    let { data } = response
     const config = response.config
     if (!data) {
       // 返回“[HTTP]请求没有返回值”;
@@ -112,14 +96,18 @@ service.interceptors.response.use(
     }
     const { t } = useI18n()
     // 未设置状态码则默认成功状态
-    const code = data.code || result_code
-    // 二进制数据则直接返回
+    // 二进制数据则直接返回，例如说 Excel 导出
     if (
       response.request.responseType === 'blob' ||
       response.request.responseType === 'arraybuffer'
     ) {
-      return response.data
+      // 注意：如果导出的响应为 json，说明可能失败了，不直接返回进行下载
+      if (response.data.type !== 'application/json') {
+        return response.data
+      }
+      data = await new Response(response.data).json()
     }
+    const code = data.code || result_code
     // 获取错误信息
     const msg = data.msg || errorCode[code] || errorCode['default']
     if (ignoreMsgs.indexOf(msg) !== -1) {
@@ -186,6 +174,7 @@ service.interceptors.response.use(
       if (msg === '无效的刷新令牌') {
         // hard coding：忽略这个提示，直接登出
         console.log(msg)
+        return handleAuthorized()
       } else {
         ElNotification.error({ title: msg })
       }
@@ -222,12 +211,12 @@ const handleAuthorized = () => {
       showCancelButton: false,
       closeOnClickModal: false,
       showClose: false,
+      closeOnPressEscape: false,
       confirmButtonText: t('login.relogin'),
       type: 'warning'
     }).then(() => {
-      const { wsCache } = useCache()
       resetRouter() // 重置静态路由表
-      wsCache.clear()
+      deleteUserCache() // 删除用户缓存
       removeToken()
       isRelogin.show = false
       // 干掉token后再走一次路由让它过router.beforeEach的校验

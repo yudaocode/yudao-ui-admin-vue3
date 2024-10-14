@@ -9,7 +9,7 @@
     :pager-count="pagerCount"
     :total="total"
     :small="isSmall"
-    class="float-right mt-15px mb-15px"
+    class="float-right mb-15px mt-15px"
     layout="total, sizes, prev, pager, next, jumper"
     @size-change="handleSizeChange"
     @current-change="handleCurrentChange"
@@ -53,7 +53,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:page', 'update:limit', 'pagination', 'pagination'])
+const emit = defineEmits(['update:page', 'update:limit', 'pagination'])
 const currentPage = computed({
   get() {
     return props.page

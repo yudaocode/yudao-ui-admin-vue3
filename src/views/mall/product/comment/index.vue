@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="【商品】商品评价" url="https://doc.iocoder.cn/mall/product-comment/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -9,19 +11,34 @@
       label-width="68px"
     >
       <el-form-item label="回复状态" prop="replyStatus">
-        <el-select v-model="queryParams.replyStatus">
+        <el-select v-model="queryParams.replyStatus" class="!w-240px">
           <el-option label="已回复" :value="true" />
           <el-option label="未回复" :value="false" />
         </el-select>
       </el-form-item>
       <el-form-item label="商品名称" prop="spuName">
-        <el-input v-model="queryParams.spuName" placeholder="请输入商品名称" />
+        <el-input
+          v-model="queryParams.spuName"
+          placeholder="请输入商品名称"
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="用户名称" prop="userNickname">
-        <el-input v-model="queryParams.userNickname" placeholder="请输入用户名称" />
+        <el-input
+          v-model="queryParams.userNickname"
+          placeholder="请输入用户名称"
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="订单编号" prop="orderId">
-        <el-input v-model="queryParams.orderId" placeholder="请输入订单编号" />
+        <el-input
+          v-model="queryParams.orderId"
+          placeholder="请输入订单编号"
+          @keyup.enter="handleQuery"
+          class="!w-240px"
+        />
       </el-form-item>
       <el-form-item label="评论时间" prop="createTime">
         <el-date-picker
@@ -59,16 +76,15 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="false">
-      <el-table-column label="评论编号" align="center" prop="id" min-width="60" />
-      <el-table-column label="用户名称" align="center" prop="userNickname" width="80" />
-      <el-table-column label="商品信息" align="center" min-width="300">
+      <el-table-column label="评论编号" align="center" prop="id" min-width="80" />
+      <el-table-column label="商品信息" align="center" min-width="400">
         <template #default="scope">
-          <div class="flex row items-center gap-x-4px">
+          <div class="row flex items-center gap-x-4px">
             <el-image
               v-if="scope.row.skuPicUrl"
               :src="scope.row.skuPicUrl"
               :preview-src-list="[scope.row.skuPicUrl]"
-              class="w-40px h-40px shrink-0"
+              class="h-40px w-40px shrink-0"
               preview-teleported
             />
             <div>{{ scope.row.spuName }}</div>
@@ -82,10 +98,10 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="评分星级" align="center" prop="scores" width="80" />
-      <el-table-column label="描述星级" align="center" prop="descriptionScores" width="80" />
-      <el-table-column label="服务星级" align="center" prop="benefitScores" width="80" />
-      <el-table-column label="评论内容" align="center" prop="content" min-width="80">
+      <el-table-column label="用户名称" align="center" prop="userNickname" width="100" />
+      <el-table-column label="商品评分" align="center" prop="descriptionScores" width="90" />
+      <el-table-column label="服务评分" align="center" prop="benefitScores" width="90" />
+      <el-table-column label="评论内容" align="center" prop="content" min-width="210">
         <template #default="scope">
           <p>{{ scope.row.content }}</p>
           <div class="flex justify-center gap-x-4px">
@@ -95,7 +111,7 @@
               :src="picUrl"
               :preview-src-list="scope.row.picUrls"
               :initial-index="index"
-              class="w-40px h-40px"
+              class="h-40px w-40px"
               preview-teleported
             />
           </div>
@@ -105,7 +121,7 @@
         label="回复内容"
         align="center"
         prop="replyContent"
-        min-width="100"
+        min-width="250"
         show-overflow-tooltip
       />
       <el-table-column
@@ -113,9 +129,9 @@
         align="center"
         prop="createTime"
         :formatter="dateFormatter"
-        width="170"
+        width="180"
       />
-      <el-table-column label="状态" align="center" width="65px">
+      <el-table-column label="是否展示" align="center" width="80px">
         <template #default="scope">
           <el-switch
             v-model="scope.row.visible"

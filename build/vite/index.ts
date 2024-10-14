@@ -60,18 +60,11 @@ export function createVitePlugins() {
       }
     }),
     Components({
-      // 要搜索组件的目录的相对路径
-      dirs: ['src/components'],
-      // 组件的有效文件扩展名
-      extensions: ['vue', 'md'],
-      // 搜索子目录
-      deep: true,
-      include: [/\.vue$/, /\.vue\?vue/],
       // 生成自定义 `auto-components.d.ts` 全局声明
       dts: 'src/types/auto-components.d.ts',
       // 自定义组件的解析器
       resolvers: [ElementPlusResolver()],
-      exclude: [/[\\/]node_modules[\\/]/]
+      globs: ["src/components/**/**.{vue, md}", '!src/components/DiyEditor/components/mobile/**']
     }),
     EslintPlugin({
       cache: false,

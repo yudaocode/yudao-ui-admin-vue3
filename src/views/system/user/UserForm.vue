@@ -75,7 +75,7 @@
                 v-for="item in postList"
                 :key="item.id"
                 :label="item.name"
-                :value="item.id"
+                :value="item.id!"
               />
             </el-select>
           </el-form-item>
@@ -102,6 +102,7 @@ import { defaultProps, handleTree } from '@/utils/tree'
 import * as PostApi from '@/api/system/post'
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
+import { FormRules } from 'element-plus'
 
 defineOptions({ name: 'SystemUserForm' })
 
@@ -126,7 +127,7 @@ const formData = ref({
   status: CommonStatusEnum.ENABLE,
   roleIds: []
 })
-const formRules = reactive({
+const formRules = reactive<FormRules>({
   username: [{ required: true, message: '用户名称不能为空', trigger: 'blur' }],
   nickname: [{ required: true, message: '用户昵称不能为空', trigger: 'blur' }],
   password: [{ required: true, message: '用户密码不能为空', trigger: 'blur' }],
@@ -147,7 +148,7 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 const deptList = ref<Tree[]>([]) // 树形结构
-const postList = ref([]) // 岗位列表
+const postList = ref([] as PostApi.PostVO[]) // 岗位列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {

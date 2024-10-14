@@ -62,7 +62,9 @@
     </el-descriptions>
     <el-descriptions :column="1" label-class-name="desc-label" direction="vertical" border>
       <el-descriptions-item label="支付通道异步回调内容">
-        {{ refundDetail.channelNotifyData }}
+        <el-text style="white-space: pre-wrap; word-break: break-word">
+          {{ refundDetail.channelNotifyData }}
+        </el-text>
       </el-descriptions-item>
     </el-descriptions>
   </Dialog>

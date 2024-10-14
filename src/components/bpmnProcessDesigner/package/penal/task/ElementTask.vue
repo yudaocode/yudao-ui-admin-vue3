@@ -1,17 +1,25 @@
 <template>
   <div class="panel-tab__content">
     <el-form size="small" label-width="90px">
-      <el-form-item label="异步延续">
+      <!-- add by 芋艿：由于「异步延续」暂时用不到，所以这里 display 为 none -->
+      <el-form-item label="异步延续" style="display: none">
         <el-checkbox
           v-model="taskConfigForm.asyncBefore"
           label="异步前"
+          value="异步前"
           @change="changeTaskAsync"
         />
-        <el-checkbox v-model="taskConfigForm.asyncAfter" label="异步后" @change="changeTaskAsync" />
+        <el-checkbox
+          v-model="taskConfigForm.asyncAfter"
+          label="异步后"
+          value="异步后"
+          @change="changeTaskAsync"
+        />
         <el-checkbox
           v-model="taskConfigForm.exclusive"
           v-if="taskConfigForm.asyncAfter || taskConfigForm.asyncBefore"
           label="排除"
+          value="排除"
           @change="changeTaskAsync"
         />
       </el-form-item>

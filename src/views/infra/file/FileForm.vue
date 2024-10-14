@@ -3,16 +3,16 @@
     <el-upload
       ref="uploadRef"
       v-model:file-list="fileList"
-      :action="url"
+      :action="uploadUrl"
       :auto-upload="false"
       :data="data"
       :disabled="formLoading"
-      :headers="uploadHeaders"
       :limit="1"
       :on-change="handleFileChange"
       :on-error="submitFormError"
       :on-exceed="handleExceed"
       :on-success="submitFormSuccess"
+      :http-request="httpRequest"
       accept=".jpg, .png, .gif"
       drag
     >
@@ -31,7 +31,7 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import { getAccessToken, getTenantId } from '@/utils/auth'
+import { useUpload } from '@/components/UploadFile/src/useUpload'
 
 defineOptions({ name: 'InfraFileForm' })
 
@@ -40,11 +40,11 @@ const message = useMessage() // 消息弹窗
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
-const url = import.meta.env.VITE_UPLOAD_URL
-const uploadHeaders = ref() // 上传 Header 头
 const fileList = ref([]) // 文件列表
 const data = ref({ path: '' })
 const uploadRef = ref()
+
+const { uploadUrl, httpRequest } = useUpload()
 
 /** 打开弹窗 */
 const open = async () => {
@@ -63,11 +63,6 @@ const submitFileForm = () => {
   if (fileList.value.length == 0) {
     message.error('请上传文件')
     return
-  }
-  // 提交请求
-  uploadHeaders.value = {
-    Authorization: 'Bearer ' + getAccessToken(),
-    'tenant-id': getTenantId()
   }
   unref(uploadRef)?.submit()
 }

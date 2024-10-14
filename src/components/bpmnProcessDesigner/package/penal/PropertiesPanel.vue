@@ -24,15 +24,10 @@
       </el-collapse-item>
       <el-collapse-item name="condition" v-if="formVisible" key="form">
         <template #title><Icon icon="ep:list" />表单</template>
-        <!-- <element-form :id="elementId" :type="elementType" /> -->
-        友情提示：使用
-        <router-link :to="{ path: '/bpm/manager/form' }"
-          ><el-link type="danger">流程表单</el-link>
-        </router-link>
-        替代，提供更好的表单设计功能
+        <element-form :id="elementId" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item name="task" v-if="elementType.indexOf('Task') !== -1" key="task">
-        <template #title><Icon icon="ep:checked" />任务</template>
+        <template #title><Icon icon="ep:checked" />任务（审批人）</template>
         <element-task :id="elementId" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item
@@ -40,7 +35,7 @@
         v-if="elementType.indexOf('Task') !== -1"
         key="multiInstance"
       >
-        <template #title><Icon icon="ep:help-filled" />多实例</template>
+        <template #title><Icon icon="ep:help-filled" />多实例（会签配置）</template>
         <element-multi-instance :business-object="elementBusinessObject" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item name="listeners" key="listeners">

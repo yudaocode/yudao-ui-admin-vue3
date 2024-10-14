@@ -1,5 +1,5 @@
 <template>
-  <doc-alert title="功能开启" url="https://doc.iocoder.cn/mall/build/" />
+  <doc-alert title="【营销】优惠劵" url="https://doc.iocoder.cn/mall/promotion-coupon/" />
 
   <!-- 搜索工作栏 -->
   <ContentWrap>
@@ -14,17 +14,17 @@
         <el-input
           v-model="queryParams.name"
           class="!w-240px"
-          placeholder="请输入优惠劵名"
           clearable
+          placeholder="请输入优惠劵名"
           @keyup="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="优惠券类型" prop="discountType">
+      <el-form-item label="优惠类型" prop="discountType">
         <el-select
           v-model="queryParams.discountType"
           class="!w-240px"
-          placeholder="请选择优惠券类型"
           clearable
+          placeholder="请选择优惠券类型"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.PROMOTION_DISCOUNT_TYPE)"
@@ -38,8 +38,8 @@
         <el-select
           v-model="queryParams.status"
           class="!w-240px"
-          placeholder="请选择优惠券状态"
           clearable
+          placeholder="请选择优惠券状态"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
@@ -52,32 +52,31 @@
       <el-form-item label="创建时间" prop="createTime">
         <el-date-picker
           v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
           :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
           class="!w-240px"
+          end-placeholder="结束日期"
+          start-placeholder="开始日期"
+          type="daterange"
+          value-format="YYYY-MM-DD HH:mm:ss"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"> <Icon icon="ep:search" class="mr-5px" />搜索 </el-button>
-        <el-button @click="resetQuery"> <Icon icon="ep:refresh" class="mr-5px" />重置 </el-button>
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
         <el-button
           v-hasPermi="['promotion:coupon-template:create']"
           plain
           type="primary"
           @click="openForm('create')"
         >
-          <Icon class="mr-5px" icon="ep:plus" /> 新增
-        </el-button>
-        <el-button
-          plain
-          type="success"
-          @click="$router.push('/promotion/coupon')"
-          v-hasPermi="['promotion:coupon:query']"
-        >
-          <Icon icon="ep:operation" class="mr-5px" />会员优惠劵
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
         </el-button>
       </el-form-item>
     </el-form>
@@ -86,39 +85,49 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
-      <el-table-column label="优惠券名称" align="center" prop="name" />
-      <el-table-column label="优惠券类型" align="center" prop="discountType">
+      <el-table-column label="优惠券名称" min-width="140" prop="name" />
+      <el-table-column label="类型" min-width="130" prop="productScope">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.PROMOTION_PRODUCT_SCOPE" :value="scope.row.productScope" />
+        </template>
+      </el-table-column>
+      <el-table-column label="优惠" min-width="110" prop="discount">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.PROMOTION_DISCOUNT_TYPE" :value="scope.row.discountType" />
+          <div>{{ discountFormat(scope.row) }}</div>
+        </template>
+      </el-table-column>
+      <el-table-column label="领取方式" min-width="100" prop="takeType">
+        <template #default="scope">
+          <dict-tag :type="DICT_TYPE.PROMOTION_COUPON_TAKE_TYPE" :value="scope.row.takeType" />
         </template>
       </el-table-column>
       <el-table-column
-        label="优惠金额 / 折扣"
-        align="center"
-        prop="discount"
-        :formatter="discountFormat"
-      />
-      <el-table-column label="发放数量" align="center" prop="totalCount" />
-      <el-table-column
-        label="剩余数量"
-        align="center"
-        prop="totalCount"
-        :formatter="(row) => row.totalCount - row.takeCount"
-      />
-      <el-table-column
-        label="领取上限"
-        align="center"
-        prop="takeLimitCount"
-        :formatter="takeLimitCountFormat"
-      />
-      <el-table-column
-        label="有效期限"
-        align="center"
-        prop="validityType"
-        width="190"
         :formatter="validityTypeFormat"
+        align="center"
+        label="使用时间"
+        prop="validityType"
+        width="185"
       />
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column
+        :formatter="totalCountFormat"
+        align="center"
+        label="发放数量"
+        prop="totalCount"
+      />
+      <el-table-column
+        :formatter="remainedCountFormat"
+        align="center"
+        label="剩余数量"
+        prop="totalCount"
+      />
+      <el-table-column
+        :formatter="takeLimitCountFormat"
+        align="center"
+        label="领取上限"
+        prop="takeLimitCount"
+      />
+      <el-table-column align="center" label="状态" prop="status">
         <template #default="scope">
           <el-switch
             v-model="scope.row.status"
@@ -129,13 +138,19 @@
         </template>
       </el-table-column>
       <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
         :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
         width="180"
       />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column
+        align="center"
+        class-name="small-padding fixed-width"
+        fixed="right"
+        label="操作"
+        width="120"
+      >
         <template #default="scope">
           <el-button
             v-hasPermi="['promotion:coupon-template:update']"
@@ -171,14 +186,17 @@
 
 <script lang="ts" setup>
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
-import {
-  CommonStatusEnum,
-  CouponTemplateValidityTypeEnum,
-  PromotionDiscountTypeEnum
-} from '@/utils/constants'
+import { CommonStatusEnum } from '@/utils/constants'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter, formatDate } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import CouponTemplateForm from './CouponTemplateForm.vue'
+import {
+  discountFormat,
+  remainedCountFormat,
+  takeLimitCountFormat,
+  totalCountFormat,
+  validityTypeFormat
+} from '@/views/mall/promotion/coupon/formatter'
 
 defineOptions({ name: 'PromotionCouponTemplate' })
 
@@ -193,6 +211,7 @@ const queryParams = reactive({
   pageSize: 10,
   name: null,
   status: null,
+  discountType: null,
   type: null,
   createTime: []
 })
@@ -256,36 +275,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-// 格式化【优惠金额/折扣】
-const discountFormat = (row: any) => {
-  if (row.discountType === PromotionDiscountTypeEnum.PRICE.type) {
-    return `￥${(row.discountPrice / 100.0).toFixed(2)}`
-  }
-  if (row.discountType === PromotionDiscountTypeEnum.PERCENT.type) {
-    return `￥${(row.discountPrice / 100.0).toFixed(2)}`
-  }
-  return '未知【' + row.discountType + '】'
-}
-
-// 格式化【领取上限】
-const takeLimitCountFormat = (row: any) => {
-  if (row.takeLimitCount === -1) {
-    return '无领取限制'
-  }
-  return `${row.takeLimitCount} 张/人`
-}
-
-// 格式化【有效期限】
-const validityTypeFormat = (row: any) => {
-  if (row.validityType === CouponTemplateValidityTypeEnum.DATE.type) {
-    return `${formatDate(row.validStartTime)} 至 ${formatDate(row.validEndTime)}`
-  }
-  if (row.validityType === CouponTemplateValidityTypeEnum.TERM.type) {
-    return `领取后第 ${row.fixedStartTerm} - ${row.fixedEndTerm} 天内可用`
-  }
-  return '未知【' + row.validityType + '】'
 }
 
 /** 初始化 **/

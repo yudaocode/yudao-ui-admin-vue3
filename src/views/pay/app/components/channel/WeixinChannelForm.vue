@@ -1,159 +1,130 @@
 <template>
   <div>
-    <Dialog v-model="dialogVisible" :title="dialogTitle" @close="close" width="800px">
+    <Dialog v-model="dialogVisible" :title="dialogTitle" width="800px">
       <el-form
         ref="formRef"
+        v-loading="formLoading"
         :model="formData"
         :rules="formRules"
         label-width="120px"
-        v-loading="formLoading"
       >
-        <el-form-item label-width="180px" label="渠道费率" prop="feeRate">
+        <el-form-item label="渠道费率" label-width="180px" prop="feeRate">
           <el-input
             v-model="formData.feeRate"
-            placeholder="请输入渠道费率"
-            clearable
             :style="{ width: '100%' }"
+            clearable
+            placeholder="请输入渠道费率"
           >
             <template #append>%</template>
           </el-input>
         </el-form-item>
-        <el-form-item label-width="180px" label="公众号 APPID" prop="config.appId">
+        <el-form-item label="微信 APPID" label-width="180px" prop="config.appId">
           <el-input
             v-model="formData.config.appId"
-            placeholder="请输入公众号 APPID"
-            clearable
             :style="{ width: '100%' }"
+            clearable
+            placeholder="请输入微信 APPID"
           />
         </el-form-item>
-        <el-form-item label-width="180px" label="商户号" prop="config.mchId">
+        <el-form-item label="商户号" label-width="180px" prop="config.mchId">
           <el-input v-model="formData.config.mchId" :style="{ width: '100%' }" />
         </el-form-item>
-        <el-form-item label-width="180px" label="渠道状态" prop="status">
+        <el-form-item label="渠道状态" label-width="180px" prop="status">
           <el-radio-group v-model="formData.status">
             <el-radio
               v-for="dict in getDictOptions(DICT_TYPE.COMMON_STATUS)"
               :key="parseInt(dict.value)"
-              :label="parseInt(dict.value)"
+              :value="parseInt(dict.value)"
             >
               {{ dict.label }}
             </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label-width="180px" label="API 版本" prop="config.apiVersion">
+        <el-form-item label="API 版本" label-width="180px" prop="config.apiVersion">
           <el-radio-group v-model="formData.config.apiVersion">
-            <el-radio label="v2">v2</el-radio>
-            <el-radio label="v3">v3</el-radio>
+            <el-radio value="v2">v2</el-radio>
+            <el-radio value="v3">v3</el-radio>
           </el-radio-group>
         </el-form-item>
         <div v-if="formData.config.apiVersion === 'v2'">
-          <el-form-item label-width="180px" label="商户密钥" prop="config.mchKey">
-            <el-input
-              v-model="formData.config.mchKey"
-              placeholder="请输入商户密钥"
-              clearable
-              :style="{ width: '100%' }"
-              type="textarea"
-              :autosize="{ minRows: 8, maxRows: 8 }"
-            />
+          <el-form-item label="商户密钥" label-width="180px" prop="config.mchKey">
+            <el-input v-model="formData.config.mchKey" clearable placeholder="请输入商户密钥" />
           </el-form-item>
           <el-form-item
-            label-width="180px"
             label="apiclient_cert.p12 证书"
+            label-width="180px"
             prop="config.keyContent"
           >
             <el-input
               v-model="formData.config.keyContent"
-              type="textarea"
-              placeholder="请上传 apiclient_cert.p12 证书"
-              readonly
               :autosize="{ minRows: 8, maxRows: 8 }"
               :style="{ width: '100%' }"
+              placeholder="请上传 apiclient_cert.p12 证书"
+              readonly
+              type="textarea"
             />
           </el-form-item>
-          <el-form-item label-width="180px" label="">
+          <el-form-item label="" label-width="180px">
             <el-upload
+              :before-upload="p12FileBeforeUpload"
+              :http-request="keyContentUpload"
               :limit="1"
               accept=".p12"
               action=""
-              :before-upload="p12FileBeforeUpload"
-              :http-request="keyContentUpload"
             >
               <el-button type="primary">
-                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
+                <Icon class="mr-5px" icon="ep:upload" />
+                点击上传
               </el-button>
             </el-upload>
           </el-form-item>
         </div>
         <div v-if="formData.config.apiVersion === 'v3'">
-          <el-form-item label-width="180px" label="API V3 密钥" prop="config.apiV3Key">
+          <el-form-item label="API V3 密钥" label-width="180px" prop="config.apiV3Key">
             <el-input
               v-model="formData.config.apiV3Key"
-              placeholder="请输入 API V3 密钥"
               clearable
-              :style="{ width: '100%' }"
-              type="textarea"
-              :autosize="{ minRows: 8, maxRows: 8 }"
+              placeholder="请输入 API V3 密钥"
             />
           </el-form-item>
           <el-form-item
-            label-width="180px"
             label="apiclient_key.pem 证书"
+            label-width="180px"
             prop="config.privateKeyContent"
           >
             <el-input
               v-model="formData.config.privateKeyContent"
-              type="textarea"
+              :autosize="{ minRows: 8, maxRows: 8 }"
+              :style="{ width: '100%' }"
               placeholder="请上传 apiclient_key.pem 证书"
               readonly
-              :autosize="{ minRows: 8, maxRows: 8 }"
-              :style="{ width: '100%' }"
+              type="textarea"
             />
           </el-form-item>
-          <el-form-item label-width="180px" label="" prop="privateKeyContentFile">
+          <el-form-item label="" label-width="180px" prop="privateKeyContentFile">
             <el-upload
               ref="privateKeyContentFile"
-              :limit="1"
-              accept=".pem"
-              action=""
               :before-upload="pemFileBeforeUpload"
               :http-request="privateKeyContentUpload"
-            >
-              <el-button type="primary">
-                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
-              </el-button>
-            </el-upload>
-          </el-form-item>
-          <el-form-item
-            label-width="180px"
-            label="apiclient_cert.pem证书"
-            prop="config.privateCertContent"
-          >
-            <el-input
-              v-model="formData.config.privateCertContent"
-              type="textarea"
-              placeholder="请上传apiclient_cert.pem证书"
-              readonly
-              :autosize="{ minRows: 8, maxRows: 8 }"
-              :style="{ width: '100%' }"
-            />
-          </el-form-item>
-          <el-form-item label-width="180px" label="" prop="privateCertContentFile">
-            <el-upload
-              ref="privateCertContentFile"
               :limit="1"
               accept=".pem"
               action=""
-              :before-upload="pemFileBeforeUpload"
-              :http-request="privateCertContentUpload"
             >
               <el-button type="primary">
-                <Icon icon="ep:upload" class="mr-5px" /> 点击上传
+                <Icon class="mr-5px" icon="ep:upload" />
+                点击上传
               </el-button>
             </el-upload>
           </el-form-item>
+          <el-form-item label="证书序列号" label-width="180px" prop="config.certSerialNo">
+            <el-input
+              v-model="formData.config.certSerialNo"
+              clearable
+              placeholder="请输入证书序列号"
+            />
+          </el-form-item>
         </div>
-        <el-form-item label-width="180px" label="备注" prop="remark">
+        <el-form-item label="备注" label-width="180px" prop="remark">
           <el-input v-model="formData.remark" :style="{ width: '100%' }" />
         </el-form-item>
       </el-form>
@@ -190,7 +161,7 @@ const formData = ref<any>({
     mchKey: '',
     keyContent: '',
     privateKeyContent: '',
-    privateCertContent: '',
+    certSerialNo: '',
     apiV3Key: ''
   }
 })
@@ -207,9 +178,7 @@ const formRules = {
   'config.privateKeyContent': [
     { required: true, message: '请上传 apiclient_key.pem 证书', trigger: 'blur' }
   ],
-  'config.privateCertContent': [
-    { required: true, message: '请上传 apiclient_cert.pem证 书', trigger: 'blur' }
-  ],
+  'config.certSerialNo': [{ required: true, message: '请输入证书序列号', trigger: 'blur' }],
   'config.apiV3Key': [{ required: true, message: '请上传 api V3 密钥值', trigger: 'blur' }]
 }
 const formRef = ref() // 表单 Ref
@@ -275,7 +244,7 @@ const resetForm = (appId, code) => {
       mchKey: '',
       keyContent: '',
       privateKeyContent: '',
-      privateCertContent: '',
+      certSerialNo: '',
       apiV3Key: ''
     }
   }
@@ -283,7 +252,7 @@ const resetForm = (appId, code) => {
 }
 
 /**
- * apiclient_cert.p12、apiclient_cert.pem、apiclient_key.pem 上传前的校验
+ * apiclient_cert.p12、apiclient_key.pem 上传前的校验
  */
 const fileBeforeUpload = (file, fileAccept) => {
   let format = '.' + file.name.split('.')[1]
@@ -310,7 +279,7 @@ const pemFileBeforeUpload = (file) => {
 /**
  * 读取 apiclient_key.pem 到 privateKeyContent 字段
  */
-const privateKeyContentUpload = (event) => {
+const privateKeyContentUpload = async (event) => {
   const readFile = new FileReader()
   readFile.onload = (e: any) => {
     formData.value.config.privateKeyContent = e.target.result
@@ -319,20 +288,9 @@ const privateKeyContentUpload = (event) => {
 }
 
 /**
- * 读取 apiclient_cert.pem 到 privateCertContent 字段
- */
-const privateCertContentUpload = (event) => {
-  const readFile = new FileReader()
-  readFile.onload = (e: any) => {
-    formData.value.config.privateCertContent = e.target.result
-  }
-  readFile.readAsText(event.file)
-}
-
-/**
  * 读取 apiclient_cert.p12 到 keyContent 字段
  */
-const keyContentUpload = (event) => {
+const keyContentUpload = async (event) => {
   const readFile = new FileReader()
   readFile.onload = (e: any) => {
     formData.value.config.keyContent = e.target.result.split(',')[1]

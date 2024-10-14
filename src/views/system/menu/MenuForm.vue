@@ -25,7 +25,7 @@
           <el-radio-button
             v-for="dict in getIntDictOptions(DICT_TYPE.SYSTEM_MENU_TYPE)"
             :key="dict.label"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio-button>
@@ -38,7 +38,7 @@
         <template #label>
           <Tooltip
             message="访问的路由地址，如：`user`。如需外网地址时，则以 `http(s)://` 开头"
-            titel="路由地址"
+            title="路由地址"
           />
         </template>
         <el-input v-model="formData.path" clearable placeholder="请输入路由地址" />
@@ -53,7 +53,7 @@
         <template #label>
           <Tooltip
             message="Controller 方法上的权限字符，如：@PreAuthorize(`@ss.hasPermission('system:user:list')`)"
-            titel="权限标识"
+            title="权限标识"
           />
         </template>
         <el-input v-model="formData.permission" clearable placeholder="请输入权限标识" />
@@ -66,7 +66,7 @@
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.label"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>
@@ -74,35 +74,35 @@
       </el-form-item>
       <el-form-item v-if="formData.type !== 3" label="显示状态" prop="visible">
         <template #label>
-          <Tooltip message="选择隐藏时，路由将不会出现在侧边栏，但仍然可以访问" titel="显示状态" />
+          <Tooltip message="选择隐藏时，路由将不会出现在侧边栏，但仍然可以访问" title="显示状态" />
         </template>
         <el-radio-group v-model="formData.visible">
-          <el-radio key="true" :label="true" border>显示</el-radio>
-          <el-radio key="false" :label="false" border>隐藏</el-radio>
+          <el-radio key="true" :value="true" border>显示</el-radio>
+          <el-radio key="false" :value="false" border>隐藏</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="formData.type !== 3" label="总是显示" prop="alwaysShow">
         <template #label>
           <Tooltip
             message="选择不是时，当该菜单只有一个子菜单时，不展示自己，直接展示子菜单"
-            titel="总是显示"
+            title="总是显示"
           />
         </template>
         <el-radio-group v-model="formData.alwaysShow">
-          <el-radio key="true" :label="true" border>总是</el-radio>
-          <el-radio key="false" :label="false" border>不是</el-radio>
+          <el-radio key="true" :value="true" border>总是</el-radio>
+          <el-radio key="false" :value="false" border>不是</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="formData.type === 2" label="缓存状态" prop="keepAlive">
         <template #label>
           <Tooltip
             message="选择缓存时，则会被 `keep-alive` 缓存，必须填写「组件名称」字段"
-            titel="缓存状态"
+            title="缓存状态"
           />
         </template>
         <el-radio-group v-model="formData.keepAlive">
-          <el-radio key="true" :label="true" border>缓存</el-radio>
-          <el-radio key="false" :label="false" border>不缓存</el-radio>
+          <el-radio key="true" :value="true" border>缓存</el-radio>
+          <el-radio key="false" :value="false" border>不缓存</el-radio>
         </el-radio-group>
       </el-form-item>
     </el-form>
@@ -130,7 +130,7 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
-  id: 0,
+  id: undefined,
   name: '',
   permission: '',
   type: SystemMenuTypeEnum.DIR,
@@ -231,7 +231,7 @@ const getTree = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: 0,
+    id: undefined,
     name: '',
     permission: '',
     type: SystemMenuTypeEnum.DIR,

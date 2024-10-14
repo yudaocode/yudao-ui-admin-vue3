@@ -123,9 +123,9 @@ const list = ref([]) // 列表的数据
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  name: null,
-  status: null,
-  remark: null,
+  name: undefined,
+  status: undefined,
+  remark: undefined,
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
@@ -134,7 +134,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   loading.value = true
   try {
-    const data = await TenantPackageApi.getTenantPackagePage(queryParams.value)
+    const data = await TenantPackageApi.getTenantPackagePage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {

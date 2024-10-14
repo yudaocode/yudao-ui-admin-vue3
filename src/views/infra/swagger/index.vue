@@ -1,8 +1,8 @@
 <template>
   <doc-alert title="接口文档" url="https://doc.iocoder.cn/api-doc/" />
 
-  <ContentWrap>
-    <IFrame :src="src" />
+  <ContentWrap :bodyStyle="{ padding: '0px' }" class="!mb-0">
+    <IFrame v-if="!loading" v-loading="loading" :src="src" />
   </ContentWrap>
 </template>
 <script lang="ts" setup>

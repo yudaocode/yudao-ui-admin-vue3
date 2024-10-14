@@ -51,7 +51,7 @@ defineOptions({ name: 'InfraJobDetail' })
 
 const dialogVisible = ref(false) // 弹窗的是否展示
 const detailLoading = ref(false) // 表单的加载中
-const detailData = ref({}) // 详情数据
+const detailData = ref({} as JobApi.JobVO) // 详情数据
 const nextTimes = ref([]) // 下一轮执行时间的数组
 
 /** 打开弹窗 */

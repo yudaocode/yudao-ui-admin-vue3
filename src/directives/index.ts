@@ -11,3 +11,14 @@ export const setupAuth = (app: App<Element>) => {
   hasRole(app)
   hasPermi(app)
 }
+
+/**
+ * 导出指令：v-mountedFocus
+ */
+export const setupMountedFocus = (app: App<Element>) => {
+  app.directive('mountedFocus', {
+    mounted(el) {
+      el.focus()
+    }
+  })
+}

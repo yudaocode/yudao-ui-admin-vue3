@@ -105,7 +105,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
       }
     ]
   },
-
   {
     path: '/dict',
     component: Layout,
@@ -197,21 +196,14 @@ const remainingRouter: AppRouteRecordRaw[] = [
     }
   },
   {
-    path: '/trade/order',
-    component: Layout,
-    name: 'order',
+    path: '/social-login',
+    component: () => import('@/views/Login/SocialLogin.vue'),
+    name: 'SocialLogin',
     meta: {
-      hidden: true
-    },
-    children: [
-      {
-        path: 'detail',
-        name: 'TradeOrderDetail',
-        // component: () => import('@/views/mall/trade/order/tradeOrderDetail.vue'),
-        component: () => import('@/views/mall/trade/order/detail/index.vue'),
-        meta: { title: '订单详情', hidden: true }
-      }
-    ]
+      hidden: true,
+      title: t('router.socialLogin'),
+      noTagsView: true
+    }
   },
   {
     path: '/403',
@@ -252,7 +244,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
     },
     children: [
       {
-        path: '/manager/form/edit',
+        path: 'manager/form/edit',
         component: () => import('@/views/bpm/form/editor/index.vue'),
         name: 'BpmFormEditor',
         meta: {
@@ -264,7 +256,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/manager/model/edit',
+        path: 'manager/model/edit',
         component: () => import('@/views/bpm/model/editor/index.vue'),
         name: 'BpmModelEditor',
         meta: {
@@ -276,7 +268,19 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/manager/definition',
+        path: 'manager/simple/workflow/model/edit',
+        component: () => import('@/views/bpm/simpleWorkflow/index.vue'),
+        name: 'SimpleWorkflowDesignEditor',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '仿钉钉设计流程',
+          activeMenu: '/bpm/manager/model'
+        }
+      },
+      {
+        path: 'manager/definition',
         component: () => import('@/views/bpm/definition/index.vue'),
         name: 'BpmProcessDefinition',
         meta: {
@@ -288,30 +292,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/manager/task-assign-rule',
-        component: () => import('@/views/bpm/taskAssignRule/index.vue'),
-        name: 'BpmTaskAssignRuleList',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: '任务分配规则'
-        }
-      },
-      {
-        path: '/process-instance/create',
-        component: () => import('@/views/bpm/processInstance/create/index.vue'),
-        name: 'BpmProcessInstanceCreate',
-        meta: {
-          noCache: true,
-          hidden: true,
-          canTo: true,
-          title: '发起流程',
-          activeMenu: 'bpm/processInstance/create'
-        }
-      },
-      {
-        path: '/process-instance/detail',
+        path: 'process-instance/detail',
+        // component: () => import('@/views/bpm/processInstance/detail/index_new.vue'), // TODO 芋艿：新审批界面，已适配 simple 模式，未来会适配 bpmn 模式
         component: () => import('@/views/bpm/processInstance/detail/index.vue'),
         name: 'BpmProcessInstanceDetail',
         meta: {
@@ -319,11 +301,16 @@ const remainingRouter: AppRouteRecordRaw[] = [
           hidden: true,
           canTo: true,
           title: '流程详情',
-          activeMenu: 'bpm/processInstance/detail'
-        }
+          activeMenu: '/bpm/task/my'
+        },
+        props: (route) => ({
+          id: route.query.id,
+          taskId: route.query.taskId,
+          activityId: route.query.activityId
+        })
       },
       {
-        path: '/bpm/oa/leave/create',
+        path: 'oa/leave/create',
         component: () => import('@/views/bpm/oa/leave/create.vue'),
         name: 'OALeaveCreate',
         meta: {
@@ -335,7 +322,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: '/bpm/oa/leave/detail',
+        path: 'oa/leave/detail',
         component: () => import('@/views/bpm/oa/leave/detail.vue'),
         name: 'OALeaveDetail',
         meta: {
@@ -349,42 +336,42 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/product',
+    path: '/mall/product', // 商品中心
     component: Layout,
-    name: 'Product',
+    name: 'ProductCenter',
     meta: {
       hidden: true
     },
     children: [
       {
         path: 'spu/add',
-        component: () => import('@/views/mall/product/spu/addForm.vue'),
+        component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuAdd',
         meta: {
-          noCache: true,
+          noCache: false, // 需要缓存
           hidden: true,
           canTo: true,
           icon: 'ep:edit',
-          title: '添加商品',
-          activeMenu: '/product/product-spu'
+          title: '商品添加',
+          activeMenu: '/mall/product/spu'
         }
       },
       {
-        path: 'spu/edit/:spuId(\\d+)',
-        component: () => import('@/views/mall/product/spu/addForm.vue'),
+        path: 'spu/edit/:id(\\d+)',
+        component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuEdit',
         meta: {
           noCache: true,
           hidden: true,
           canTo: true,
           icon: 'ep:edit',
-          title: '编辑商品',
-          activeMenu: '/product/product-spu'
+          title: '商品编辑',
+          activeMenu: '/mall/product/spu'
         }
       },
       {
-        path: 'spu/detail/:spuId(\\d+)',
-        component: () => import('@/views/mall/product/spu/addForm.vue'),
+        path: 'spu/detail/:id(\\d+)',
+        component: () => import('@/views/mall/product/spu/form/index.vue'),
         name: 'ProductSpuDetail',
         meta: {
           noCache: true,
@@ -392,7 +379,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
           canTo: true,
           icon: 'ep:view',
           title: '商品详情',
-          activeMenu: '/product/product-spu'
+          activeMenu: '/mall/product/spu'
         }
       },
       {
@@ -411,25 +398,31 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
-    path: '/trade/order',
+    path: '/mall/trade', // 交易中心
     component: Layout,
-    name: 'Detail',
+    name: 'TradeCenter',
     meta: {
       hidden: true
     },
     children: [
       {
-        path: 'detail/:orderId(\\d+)',
+        path: 'order/detail/:id(\\d+)',
         component: () => import('@/views/mall/trade/order/detail/index.vue'),
-        name: 'TradeOrderDetailForm',
-        meta: { title: '订单详情', icon: '', activeMenu: '/trade/trade/order' }
+        name: 'TradeOrderDetail',
+        meta: { title: '订单详情', icon: 'ep:view', activeMenu: '/mall/trade/order' }
+      },
+      {
+        path: 'after-sale/detail/:id(\\d+)',
+        component: () => import('@/views/mall/trade/afterSale/detail/index.vue'),
+        name: 'TradeAfterSaleDetail',
+        meta: { title: '退款详情', icon: 'ep:view', activeMenu: '/mall/trade/after-sale' }
       }
     ]
   },
   {
     path: '/member',
     component: Layout,
-    name: 'member',
+    name: 'MemberCenter',
     meta: { hidden: true },
     children: [
       {
@@ -463,6 +456,193 @@ const remainingRouter: AppRouteRecordRaw[] = [
     ]
   },
   {
+    path: '/diy',
+    name: 'DiyCenter',
+    meta: { hidden: true },
+    component: Layout,
+    children: [
+      {
+        path: 'template/decorate/:id',
+        name: 'DiyTemplateDecorate',
+        meta: {
+          title: '模板装修',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/mall/promotion/diy/template'
+        },
+        component: () => import('@/views/mall/promotion/diy/template/decorate.vue')
+      },
+      {
+        path: 'page/decorate/:id',
+        name: 'DiyPageDecorate',
+        meta: {
+          title: '页面装修',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/mall/promotion/diy/page'
+        },
+        component: () => import('@/views/mall/promotion/diy/page/decorate.vue')
+      }
+    ]
+  },
+  {
+    path: '/crm',
+    component: Layout,
+    name: 'CrmCenter',
+    meta: { hidden: true },
+    children: [
+      {
+        path: 'clue/detail/:id',
+        name: 'CrmClueDetail',
+        meta: {
+          title: '线索详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/clue'
+        },
+        component: () => import('@/views/crm/clue/detail/index.vue')
+      },
+      {
+        path: 'customer/detail/:id',
+        name: 'CrmCustomerDetail',
+        meta: {
+          title: '客户详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/customer'
+        },
+        component: () => import('@/views/crm/customer/detail/index.vue')
+      },
+      {
+        path: 'business/detail/:id',
+        name: 'CrmBusinessDetail',
+        meta: {
+          title: '商机详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/business'
+        },
+        component: () => import('@/views/crm/business/detail/index.vue')
+      },
+      {
+        path: 'contract/detail/:id',
+        name: 'CrmContractDetail',
+        meta: {
+          title: '合同详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/contract'
+        },
+        component: () => import('@/views/crm/contract/detail/index.vue')
+      },
+      {
+        path: 'receivable-plan/detail/:id',
+        name: 'CrmReceivablePlanDetail',
+        meta: {
+          title: '回款计划详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/receivable-plan'
+        },
+        component: () => import('@/views/crm/receivable/plan/detail/index.vue')
+      },
+      {
+        path: 'receivable/detail/:id',
+        name: 'CrmReceivableDetail',
+        meta: {
+          title: '回款详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/receivable'
+        },
+        component: () => import('@/views/crm/receivable/detail/index.vue')
+      },
+      {
+        path: 'contact/detail/:id',
+        name: 'CrmContactDetail',
+        meta: {
+          title: '联系人详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/contact'
+        },
+        component: () => import('@/views/crm/contact/detail/index.vue')
+      },
+      {
+        path: 'product/detail/:id',
+        name: 'CrmProductDetail',
+        meta: {
+          title: '产品详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/crm/product'
+        },
+        component: () => import('@/views/crm/product/detail/index.vue')
+      }
+    ]
+  },
+  {
+    path: '/ai',
+    component: Layout,
+    name: 'Ai',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'image/square',
+        component: () => import('@/views/ai/image/square/index.vue'),
+        name: 'AiImageSquare',
+        meta: {
+          title: '绘图作品',
+          icon: 'ep:home-filled',
+          noCache: false
+        }
+      }
+    ]
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    component: () => import('@/views/Error/404.vue'),
+    name: '',
+    meta: {
+      title: '404',
+      hidden: true,
+      breadcrumb: false
+    }
+  },
+  {
+    path: '/iot',
+    component: Layout,
+    name: 'IOT',
+    meta: {
+      hidden: true
+    },
+    children: [
+      {
+        path: 'product/detail/:id',
+        name: 'IoTProductDetail',
+        meta: {
+          title: '产品详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/iot/product'
+        },
+        component: () => import('@/views/iot/product/detail/index.vue')
+      },
+      {
+        path: 'device/detail/:id',
+        name: 'IoTDeviceDetail',
+        meta: {
+          title: '设备详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/iot/device'
+        },
+        component: () => import('@/views/iot/device/detail/index.vue')
+      }
+    ]
+  }, {
     path: '/chat',
     component: ChatPage,
     name: 'chat',

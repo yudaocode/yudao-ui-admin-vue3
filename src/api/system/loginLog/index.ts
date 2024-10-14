@@ -7,6 +7,7 @@ export interface LoginLogVO {
   userId: number
   userType: number
   username: string
+  result: number
   status: number
   userIp: string
   userAgent: string

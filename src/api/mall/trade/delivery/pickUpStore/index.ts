@@ -26,7 +26,7 @@ export const getDeliveryPickUpStore = async (id: number) => {
 }
 
 // 查询自提门店精简列表
-export const getListAllSimple = async () => {
+export const getListAllSimple = async (): Promise<DeliveryPickUpStoreVO[]> => {
   return await request.get({ url: '/trade/delivery/pick-up-store/list-all-simple' })
 }
 

@@ -1,24 +1,17 @@
 <template>
-  <Dialog title="添加虚拟评论" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" title="添加虚拟评论">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="100px"
-      v-loading="formLoading"
     >
       <el-form-item label="商品" prop="spuId">
-        <div @click="handleSelectSpu" class="w-60px h-60px">
-          <div v-if="spuData && spuData.picUrl">
-            <el-image :src="spuData.picUrl" />
-          </div>
-          <div v-else class="select-box">
-            <Icon icon="ep:plus" />
-          </div>
-        </div>
+        <SpuShowcase v-model="formData.spuId" :limit="1" />
       </el-form-item>
-      <el-form-item label="商品规格" prop="skuId" v-if="formData.spuId">
-        <div @click="handleSelectSku" class="w-60px h-60px">
+      <el-form-item v-if="formData.spuId" label="商品规格" prop="skuId">
+        <div class="h-60px w-60px" @click="handleSelectSku">
           <div v-if="skuData && skuData.picUrl">
             <el-image :src="skuData.picUrl" />
           </div>
@@ -34,7 +27,7 @@
         <el-input v-model="formData.userNickname" placeholder="请输入用户名称" />
       </el-form-item>
       <el-form-item label="评论内容" prop="content">
-        <el-input type="textarea" v-model="formData.content" />
+        <el-input v-model="formData.content" type="textarea" />
       </el-form-item>
       <el-form-item label="描述星级" prop="descriptionScores">
         <el-rate v-model="formData.descriptionScores" />
@@ -47,16 +40,15 @@
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
-  <SpuTableSelect ref="spuTableSelectRef" @change="handleSpuChange" />
-  <SkuTableSelect ref="skuTableSelectRef" @change="handleSkuChange" :spu-id="spuData.id" />
+  <SkuTableSelect ref="skuTableSelectRef" :spu-id="formData.spuId" @change="handleSkuChange" />
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import * as CommentApi from '@/api/mall/product/comment'
-import SpuTableSelect from '@/views/mall/product/spu/components/SpuTableSelect.vue'
+import SpuShowcase from '@/views/mall/product/spu/components/SpuShowcase.vue'
 import * as ProductSpuApi from '@/api/mall/product/spu'
 import SkuTableSelect from '@/views/mall/product/spu/components/SkuTableSelect.vue'
 
@@ -72,8 +64,7 @@ const formData = ref({
   userId: undefined,
   userNickname: undefined,
   userAvatar: undefined,
-  spuId: undefined,
-  spuName: undefined,
+  spuId: 0,
   skuId: undefined,
   descriptionScores: 5,
   benefitScores: 5,
@@ -90,7 +81,6 @@ const formRules = reactive({
   benefitScores: [{ required: true, message: '服务星级不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const spuData = ref<ProductSpuApi.Spu>({})
 const skuData = ref({
   id: -1,
   name: '',
@@ -125,13 +115,8 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    //处理评论图片
-    const picUrls = formData.value.picUrls.map((item) => {
-      return item?.url ? item.url : item
-    })
-    const data = { ...formData.value, picUrls }
     if (formType.value === 'create') {
-      await CommentApi.createComment(data)
+      await CommentApi.createComment(unref(formData.value) as any)
       message.success(t('common.createSuccess'))
     }
     dialogVisible.value = false
@@ -149,7 +134,7 @@ const resetForm = () => {
     userId: undefined,
     userNickname: undefined,
     userAvatar: undefined,
-    spuId: undefined,
+    spuId: 0,
     skuId: undefined,
     descriptionScores: 5,
     benefitScores: 5,
@@ -157,16 +142,6 @@ const resetForm = () => {
     picUrls: []
   }
   formRef.value?.resetFields()
-}
-
-/** SPU 表格选择 */
-const spuTableSelectRef = ref()
-const handleSelectSpu = () => {
-  spuTableSelectRef.value.open()
-}
-const handleSpuChange = (spu: ProductSpuApi.Spu) => {
-  spuData.value = spu
-  formData.value.spuId = spu.id
 }
 
 /** SKU 表格选择 */
@@ -182,11 +157,11 @@ const handleSkuChange = (sku: ProductSpuApi.Sku) => {
 <style>
 .select-box {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed var(--el-border-color-darker);
-  border-radius: 8px;
   width: 100%;
   height: 100%;
+  border: 1px dashed var(--el-border-color-darker);
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
 }
 </style>

@@ -7,13 +7,18 @@ import WebStorageCache from 'web-storage-cache'
 type CacheType = 'localStorage' | 'sessionStorage'
 
 export const CACHE_KEY = {
-  IS_DARK: 'isDark',
+  // 用户相关
+  ROLE_ROUTERS: 'roleRouters',
   USER: 'user',
+  // 系统设置
+  IS_DARK: 'isDark',
   LANG: 'lang',
   THEME: 'theme',
   LAYOUT: 'layout',
-  ROLE_ROUTERS: 'roleRouters',
-  DICT_CACHE: 'dictCache'
+  DICT_CACHE: 'dictCache',
+  // 登录表单
+  LoginForm: 'loginForm',
+  TenantId: 'tenantId'
 }
 
 export const useCache = (type: CacheType = 'localStorage') => {
@@ -24,4 +29,11 @@ export const useCache = (type: CacheType = 'localStorage') => {
   return {
     wsCache
   }
+}
+
+export const deleteUserCache = () => {
+  const { wsCache } = useCache()
+  wsCache.delete(CACHE_KEY.USER)
+  wsCache.delete(CACHE_KEY.ROLE_ROUTERS)
+  // 注意，不要清理 LoginForm 登录表单
 }

@@ -1,54 +1,53 @@
-const { t } = useI18n()
+import { useI18n } from '@/hooks/web/useI18n'
+import { FormItemRule } from 'element-plus'
 
-type Callback = (error?: string | Error | undefined) => void
+const { t } = useI18n()
 
 interface LengthRange {
   min: number
   max: number
-  message: string
+  message?: string
 }
 
 export const useValidator = () => {
-  const required = (message?: string) => {
+  const required = (message?: string): FormItemRule => {
     return {
       required: true,
       message: message || t('common.required')
     }
   }
 
-  const lengthRange = (val: any, callback: Callback, options: LengthRange) => {
+  const lengthRange = (options: LengthRange): FormItemRule => {
     const { min, max, message } = options
-    if (val.length < min || val.length > max) {
-      callback(new Error(message))
-    } else {
-      callback()
+
+    return {
+      min,
+      max,
+      message: message || t('common.lengthRange', { min, max })
     }
   }
 
-  const notSpace = (val: any, callback: Callback, message: string) => {
-    // 用户名不能有空格
-    if (val.indexOf(' ') !== -1) {
-      callback(new Error(message))
-    } else {
-      callback()
+  const notSpace = (message?: string): FormItemRule => {
+    return {
+      validator: (_, val, callback) => {
+        if (val?.indexOf(' ') !== -1) {
+          callback(new Error(message || t('common.notSpace')))
+        } else {
+          callback()
+        }
+      }
     }
   }
 
-  const notSpecialCharacters = (val: any, callback: Callback, message: string) => {
-    // 密码不能是特殊字符
-    if (/[`~!@#$%^&*()_+<>?:"{},.\/;'[\]]/gi.test(val)) {
-      callback(new Error(message))
-    } else {
-      callback()
-    }
-  }
-
-  // 两个字符串是否想等
-  const isEqual = (val1: string, val2: string, callback: Callback, message: string) => {
-    if (val1 === val2) {
-      callback()
-    } else {
-      callback(new Error(message))
+  const notSpecialCharacters = (message?: string): FormItemRule => {
+    return {
+      validator: (_, val, callback) => {
+        if (/[`~!@#$%^&*()_+<>?:"{},.\/;'[\]]/gi.test(val)) {
+          callback(new Error(message || t('common.notSpecialCharacters')))
+        } else {
+          callback()
+        }
+      }
     }
   }
 
@@ -56,7 +55,6 @@ export const useValidator = () => {
     required,
     lengthRange,
     notSpace,
-    notSpecialCharacters,
-    isEqual
+    notSpecialCharacters
   }
 }

@@ -28,8 +28,8 @@ import '@/plugins/animate.css'
 // 路由
 import router, { setupRouter } from '@/router'
 
-// 权限
-import { setupAuth } from '@/directives'
+// 指令
+import { setupAuth, setupMountedFocus } from '@/directives'
 
 import { createApp } from 'vue'
 
@@ -58,7 +58,9 @@ const setupAll = async () => {
 
   setupRouter(app)
 
+  // directives 指令
   setupAuth(app)
+  setupMountedFocus(app)
 
   await router.isReady()
 

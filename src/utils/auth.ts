@@ -1,4 +1,4 @@
-import { useCache } from '@/hooks/web/useCache'
+import { useCache, CACHE_KEY } from '@/hooks/web/useCache'
 import { TokenType } from '@/api/login/types'
 import { decrypt, encrypt } from '@/utils/jsencrypt'
 
@@ -36,8 +36,6 @@ export const formatToken = (token: string): string => {
 }
 // ========== 账号相关 ==========
 
-const LoginFormKey = 'LOGINFORM'
-
 export type LoginFormType = {
   tenantName: string
   username: string
@@ -46,7 +44,7 @@ export type LoginFormType = {
 }
 
 export const getLoginForm = () => {
-  const loginForm: LoginFormType = wsCache.get(LoginFormKey)
+  const loginForm: LoginFormType = wsCache.get(CACHE_KEY.LoginForm)
   if (loginForm) {
     loginForm.password = decrypt(loginForm.password) as string
   }
@@ -55,38 +53,19 @@ export const getLoginForm = () => {
 
 export const setLoginForm = (loginForm: LoginFormType) => {
   loginForm.password = encrypt(loginForm.password) as string
-  wsCache.set(LoginFormKey, loginForm, { exp: 30 * 24 * 60 * 60 })
+  wsCache.set(CACHE_KEY.LoginForm, loginForm, { exp: 30 * 24 * 60 * 60 })
 }
 
 export const removeLoginForm = () => {
-  wsCache.delete(LoginFormKey)
+  wsCache.delete(CACHE_KEY.LoginForm)
 }
 
 // ========== 租户相关 ==========
 
-const TenantIdKey = 'TENANT_ID'
-const TenantNameKey = 'TENANT_NAME'
-
-export const getTenantName = () => {
-  return wsCache.get(TenantNameKey)
-}
-
-export const setTenantName = (username: string) => {
-  wsCache.set(TenantNameKey, username, { exp: 30 * 24 * 60 * 60 })
-}
-
-export const removeTenantName = () => {
-  wsCache.delete(TenantNameKey)
-}
-
 export const getTenantId = () => {
-  return wsCache.get(TenantIdKey)
+  return wsCache.get(CACHE_KEY.TenantId)
 }
 
 export const setTenantId = (username: string) => {
-  wsCache.set(TenantIdKey, username)
-}
-
-export const removeTenantId = () => {
-  wsCache.delete(TenantIdKey)
+  wsCache.set(CACHE_KEY.TenantId, username)
 }

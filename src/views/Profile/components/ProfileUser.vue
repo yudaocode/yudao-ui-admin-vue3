@@ -41,7 +41,7 @@
       <li class="list-group-item">
         <Icon class="mr-5px" icon="ep:calendar" />
         {{ t('profile.user.createTime') }}
-        <div class="pull-right">{{ formatDate(userInfo?.createTime) }}</div>
+        <div class="pull-right">{{ formatDate(userInfo.createTime) }}</div>
       </li>
     </ul>
   </div>
@@ -55,7 +55,7 @@ import { getUserProfile, ProfileVO } from '@/api/system/user/profile'
 defineOptions({ name: 'ProfileUser' })
 
 const { t } = useI18n()
-const userInfo = ref<ProfileVO>()
+const userInfo = ref({} as ProfileVO)
 const getUserInfo = async () => {
   const users = await getUserProfile()
   userInfo.value = users

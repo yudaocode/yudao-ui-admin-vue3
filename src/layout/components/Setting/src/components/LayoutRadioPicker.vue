@@ -55,7 +55,7 @@ const layout = computed(() => appStore.getLayout)
       ]"
       @click="appStore.setLayout('cutMenu')"
     >
-      <div class="absolute h-full w-[33%] top-0 left-[10%] bg-gray-200"></div>
+      <div class="absolute left-[10%] top-0 h-full w-[33%] bg-gray-200"></div>
     </div>
   </div>
 </template>

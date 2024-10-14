@@ -58,17 +58,17 @@ const initModeler = (item) => {
 }
 
 /** 添加/修改模型 */
-const save = async (bpmnXml) => {
+const save = async (bpmnXml: string) => {
   const data = {
     ...model.value,
     bpmnXml: bpmnXml // bpmnXml 只是初始化流程图，后续修改无法通过它获得
   } as unknown as ModelApi.ModelVO
   // 提交
   if (data.id) {
-    await ModelApi.updateModel(data)
+    await ModelApi.updateModelBpmn(data)
     message.success('修改成功')
   } else {
-    await ModelApi.createModel(data)
+    await ModelApi.updateModelBpmn(data)
     message.success('新增成功')
   }
   // 跳转回去
@@ -89,11 +89,21 @@ onMounted(async () => {
   }
   // 查询模型
   const data = await ModelApi.getModel(modelId)
-  xmlString.value = data.bpmnXml
+  if (!data.bpmnXml) {
+    // 首次创建的 Model 模型，它是没有 bpmnXml，此时需要给它一个默认的
+    data.bpmnXml = ` <?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.activiti.org/processdef">
+  <process id="${data.key}" name="${data.name}" isExecutable="true" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram">
+    <bpmndi:BPMNPlane id="${data.key}_di" bpmnElement="${data.key}" />
+  </bpmndi:BPMNDiagram>
+</definitions>`
+  }
   model.value = {
     ...data,
     bpmnXml: undefined // 清空 bpmnXml 属性
   }
+  xmlString.value = data.bpmnXml
 })
 </script>
 <style lang="scss">

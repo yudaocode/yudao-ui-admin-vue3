@@ -6,7 +6,7 @@ export const rules = reactive({
   name: [required],
   startTime: [required],
   endTime: [required],
-  userSize: [required],
+  helpMaxCount: [required],
   bargainCount: [required],
   singleLimitCount: [required]
 })
@@ -72,7 +72,7 @@ const crudSchemas = reactive<CrudSchema[]>([
   },
   {
     label: '砍价人数',
-    field: 'userSize',
+    field: 'helpMaxCount',
     isSearch: false,
     form: {
       component: 'InputNumber',
@@ -133,21 +133,7 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    label: '砍价成功数量',
-    field: 'successCount',
-    isSearch: false,
-    isForm: false
-  },
-  {
-    label: '活动状态',
-    field: 'status',
-    dictType: DICT_TYPE.COMMON_STATUS,
-    dictClass: 'number',
-    isSearch: true,
-    isForm: false
-  },
-  {
-    label: '拼团商品',
+    label: '砍价商品',
     field: 'spuId',
     isSearch: false,
     form: {
@@ -155,11 +141,6 @@ const crudSchemas = reactive<CrudSchema[]>([
         span: 24
       }
     }
-  },
-  {
-    label: '操作',
-    field: 'action',
-    isForm: false
   }
 ])
 export const { allSchemas } = useCrudSchemas(crudSchemas)

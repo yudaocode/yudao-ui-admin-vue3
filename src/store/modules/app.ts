@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { store } from '../index'
-import { setCssVar, humpToUnderline } from '@/utils'
+import { humpToUnderline, setCssVar } from '@/utils'
 import { ElMessage } from 'element-plus'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 import { ElementPlusSize } from '@/types/elementPlus'
@@ -16,10 +16,12 @@ interface AppState {
   uniqueOpened: boolean
   hamburger: boolean
   screenfull: boolean
+  search: boolean
   size: boolean
   locale: boolean
   message: boolean
   tagsView: boolean
+  tagsViewImmerse: boolean
   tagsViewIcon: boolean
   logo: boolean
   fixedHeader: boolean
@@ -52,10 +54,12 @@ export const useAppStore = defineStore('app', {
       uniqueOpened: true, // 是否只保持一个子菜单的展开
       hamburger: true, // 折叠图标
       screenfull: true, // 全屏图标
+      search: true, // 搜索图标
       size: true, // 尺寸图标
       locale: true, // 多语言图标
       message: true, // 消息图标
       tagsView: true, // 标签页
+      tagsViewImmerse: false, // 标签页沉浸
       tagsViewIcon: true, // 是否显示标签图标
       logo: true, // logo
       fixedHeader: true, // 固定toolheader
@@ -128,6 +132,9 @@ export const useAppStore = defineStore('app', {
     },
     getTagsView(): boolean {
       return this.tagsView
+    },
+    getTagsViewImmerse(): boolean {
+      return this.tagsViewImmerse
     },
     getTagsViewIcon(): boolean {
       return this.tagsViewIcon
@@ -206,6 +213,9 @@ export const useAppStore = defineStore('app', {
     setTagsView(tagsView: boolean) {
       this.tagsView = tagsView
     },
+    setTagsViewImmerse(tagsViewImmerse: boolean) {
+      this.tagsViewImmerse = tagsViewImmerse
+    },
     setTagsViewIcon(tagsViewIcon: boolean) {
       this.tagsViewIcon = tagsViewIcon
     },
@@ -266,7 +276,8 @@ export const useAppStore = defineStore('app', {
     setFooter(footer: boolean) {
       this.footer = footer
     }
-  }
+  },
+  persist: false
 })
 
 export const useAppStoreWithOut = () => {

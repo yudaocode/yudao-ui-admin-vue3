@@ -1,26 +1,75 @@
 import dayjs from 'dayjs'
+import type { TableColumnCtx } from 'element-plus'
+
+/**
+ * 日期快捷选项适用于 el-date-picker
+ */
+export const defaultShortcuts = [
+  {
+    text: '今天',
+    value: () => {
+      return new Date()
+    }
+  },
+  {
+    text: '昨天',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24)
+      return [date, date]
+    }
+  },
+  {
+    text: '最近七天',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+      return [date, new Date()]
+    }
+  },
+  {
+    text: '最近 30 天',
+    value: () => {
+      const date = new Date()
+      date.setTime(date.getTime() - 3600 * 1000 * 24 * 30)
+      return [date, new Date()]
+    }
+  },
+  {
+    text: '本月',
+    value: () => {
+      const date = new Date()
+      date.setDate(1) // 设置为当前月的第一天
+      return [date, new Date()]
+    }
+  },
+  {
+    text: '今年',
+    value: () => {
+      const date = new Date()
+      return [new Date(`${date.getFullYear()}-01-01`), date]
+    }
+  }
+]
 
 /**
  * 时间日期转换
  * @param date 当前时间，new Date() 格式
  * @param format 需要转换的时间格式字符串
- * @description format 字符串随意，如 `YYYY-mm、YYYY-mm-dd`
- * @description format 季度："YYYY-mm-dd HH:MM:SS QQQQ"
- * @description format 星期："YYYY-mm-dd HH:MM:SS WWW"
- * @description format 几周："YYYY-mm-dd HH:MM:SS ZZZ"
- * @description format 季度 + 星期 + 几周："YYYY-mm-dd HH:MM:SS WWW QQQQ ZZZ"
+ * @description format 字符串随意，如 `YYYY-MM、YYYY-MM-DD`
+ * @description format 季度："YYYY-MM-DD HH:mm:ss QQQQ"
+ * @description format 星期："YYYY-MM-DD HH:mm:ss WWW"
+ * @description format 几周："YYYY-MM-DD HH:mm:ss ZZZ"
+ * @description format 季度 + 星期 + 几周："YYYY-MM-DD HH:mm:ss WWW QQQQ ZZZ"
  * @returns 返回拼接后的时间字符串
  */
-export function formatDate(date: Date | number, format?: string): string {
+export function formatDate(date: Date, format?: string): string {
   // 日期不存在，则返回空
   if (!date) {
     return ''
   }
   // 日期存在，则进行格式化
-  if (format === undefined) {
-    format = 'YYYY-MM-DD HH:mm:ss'
-  }
-  return dayjs(date).format(format)
+  return date ? dayjs(date).format(format ?? 'YYYY-MM-DD HH:mm:ss') : ''
 }
 
 /**
@@ -61,7 +110,7 @@ export function getWeek(dateTime: Date): number {
  * @description param 3天：   60 * 60* 24 * 1000 * 3
  * @returns 返回拼接后的时间字符串
  */
-export function formatPast(param: string | Date, format = 'YYYY-mm-dd HH:MM:SS'): string {
+export function formatPast(param: string | Date, format = 'YYYY-MM-DD HH:mm:ss'): string {
   // 传入格式处理、存储转换值
   let t: any, s: number
   // 获取js 时间戳
@@ -120,24 +169,24 @@ export function formatAxis(param: Date): string {
  * @param ms 毫秒
  * @returns {string} 字符串
  */
-export function formatPast2(ms) {
+export function formatPast2(ms: number): string {
   const day = Math.floor(ms / (24 * 60 * 60 * 1000))
   const hour = Math.floor(ms / (60 * 60 * 1000) - day * 24)
   const minute = Math.floor(ms / (60 * 1000) - day * 24 * 60 - hour * 60)
   const second = Math.floor(ms / 1000 - day * 24 * 60 * 60 - hour * 60 * 60 - minute * 60)
   if (day > 0) {
-    return day + '天' + hour + '小时' + minute + '分钟'
+    return day + ' 天' + hour + ' 小时 ' + minute + ' 分钟'
   }
   if (hour > 0) {
-    return hour + '小时' + minute + '分钟'
+    return hour + ' 小时 ' + minute + ' 分钟'
   }
   if (minute > 0) {
-    return minute + '分钟'
+    return minute + ' 分钟'
   }
   if (second > 0) {
-    return second + '秒'
+    return second + ' 秒'
   } else {
-    return 0 + '秒'
+    return 0 + ' 秒'
   }
 }
 
@@ -148,12 +197,8 @@ export function formatPast2(ms) {
  * @param column 字段
  * @param cellValue 字段值
  */
-// @ts-ignore
-export const dateFormatter = (row, column, cellValue) => {
-  if (!cellValue) {
-    return
-  }
-  return formatDate(cellValue)
+export function dateFormatter(_row: any, _column: TableColumnCtx<any>, cellValue: any): string {
+  return cellValue ? formatDate(cellValue) : ''
 }
 
 /**
@@ -163,12 +208,8 @@ export const dateFormatter = (row, column, cellValue) => {
  * @param column 字段
  * @param cellValue 字段值
  */
-// @ts-ignore
-export const dateFormatter2 = (row, column, cellValue) => {
-  if (!cellValue) {
-    return
-  }
-  return formatDate(cellValue, 'YYYY-MM-DD')
+export function dateFormatter2(_row: any, _column: TableColumnCtx<any>, cellValue: any): string {
+  return cellValue ? formatDate(cellValue, 'YYYY-MM-DD') : ''
 }
 
 /**
@@ -176,7 +217,7 @@ export const dateFormatter2 = (row, column, cellValue) => {
  * @param param 传入日期
  * @returns 带时间00:00:00的日期
  */
-export function beginOfDay(param: Date) {
+export function beginOfDay(param: Date): Date {
   return new Date(param.getFullYear(), param.getMonth(), param.getDate(), 0, 0, 0)
 }
 
@@ -185,7 +226,7 @@ export function beginOfDay(param: Date) {
  * @param param 传入日期
  * @returns 带时间23:59:59的日期
  */
-export function endOfDay(param: Date) {
+export function endOfDay(param: Date): Date {
   return new Date(param.getFullYear(), param.getMonth(), param.getDate(), 23, 59, 59)
 }
 
@@ -194,7 +235,7 @@ export function endOfDay(param: Date) {
  * @param param1 日期1
  * @param param2 日期2
  */
-export function betweenDay(param1: Date, param2: Date) {
+export function betweenDay(param1: Date, param2: Date): number {
   param1 = convertDate(param1)
   param2 = convertDate(param2)
   // 计算差值
@@ -206,7 +247,7 @@ export function betweenDay(param1: Date, param2: Date) {
  * @param param1 日期
  * @param param2 添加的时间
  */
-export function addTime(param1: Date, param2: number) {
+export function addTime(param1: Date, param2: number): Date {
   param1 = convertDate(param1)
   return new Date(param1.getTime() + param2)
 }
@@ -215,9 +256,77 @@ export function addTime(param1: Date, param2: number) {
  * 日期转换
  * @param param 日期
  */
-export function convertDate(param: Date | string) {
+export function convertDate(param: Date | string): Date {
   if (typeof param === 'string') {
     return new Date(param)
   }
   return param
+}
+
+/**
+ * 指定的两个日期, 是否为同一天
+ * @param a 日期 A
+ * @param b 日期 B
+ */
+export function isSameDay(a: dayjs.ConfigType, b: dayjs.ConfigType): boolean {
+  if (!a || !b) return false
+
+  const aa = dayjs(a)
+  const bb = dayjs(b)
+  return aa.year() == bb.year() && aa.month() == bb.month() && aa.day() == bb.day()
+}
+
+/**
+ * 获取一天的开始时间、截止时间
+ * @param date 日期
+ * @param days 天数
+ */
+export function getDayRange(
+  date: dayjs.ConfigType,
+  days: number
+): [dayjs.ConfigType, dayjs.ConfigType] {
+  const day = dayjs(date).add(days, 'd')
+  return getDateRange(day, day)
+}
+
+/**
+ * 获取最近7天的开始时间、截止时间
+ */
+export function getLast7Days(): [dayjs.ConfigType, dayjs.ConfigType] {
+  const lastWeekDay = dayjs().subtract(7, 'd')
+  const yesterday = dayjs().subtract(1, 'd')
+  return getDateRange(lastWeekDay, yesterday)
+}
+
+/**
+ * 获取最近30天的开始时间、截止时间
+ */
+export function getLast30Days(): [dayjs.ConfigType, dayjs.ConfigType] {
+  const lastMonthDay = dayjs().subtract(30, 'd')
+  const yesterday = dayjs().subtract(1, 'd')
+  return getDateRange(lastMonthDay, yesterday)
+}
+
+/**
+ * 获取最近1年的开始时间、截止时间
+ */
+export function getLast1Year(): [dayjs.ConfigType, dayjs.ConfigType] {
+  const lastYearDay = dayjs().subtract(1, 'y')
+  const yesterday = dayjs().subtract(1, 'd')
+  return getDateRange(lastYearDay, yesterday)
+}
+
+/**
+ * 获取指定日期的开始时间、截止时间
+ * @param beginDate 开始日期
+ * @param endDate 截止日期
+ */
+export function getDateRange(
+  beginDate: dayjs.ConfigType,
+  endDate: dayjs.ConfigType
+): [string, string] {
+  return [
+    dayjs(beginDate).startOf('d').format('YYYY-MM-DD HH:mm:ss'),
+    dayjs(endDate).endOf('d').format('YYYY-MM-DD HH:mm:ss')
+  ]
 }

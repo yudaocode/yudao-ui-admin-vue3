@@ -54,15 +54,15 @@
           value-format="x"
         />
       </el-form-item>
-      <el-form-item label="绑定域名" prop="domain">
-        <el-input v-model="formData.domain" placeholder="请输入绑定域名" />
+      <el-form-item label="绑定域名" prop="website">
+        <el-input v-model="formData.website" placeholder="请输入绑定域名" />
       </el-form-item>
       <el-form-item label="租户状态" prop="status">
         <el-radio-group v-model="formData.status">
           <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.COMMON_STATUS)"
             :key="dict.value"
-            :label="dict.value"
+            :value="dict.value"
           >
             {{ dict.label }}
           </el-radio>
@@ -97,8 +97,11 @@ const formData = ref({
   contactMobile: undefined,
   accountCount: undefined,
   expireTime: undefined,
-  domain: undefined,
-  status: CommonStatusEnum.ENABLE
+  website: undefined,
+  status: CommonStatusEnum.ENABLE,
+  // 新增专属
+  username: undefined,
+  password: undefined
 })
 const formRules = reactive({
   name: [{ required: true, message: '租户名不能为空', trigger: 'blur' }],
@@ -107,12 +110,12 @@ const formRules = reactive({
   status: [{ required: true, message: '租户状态不能为空', trigger: 'blur' }],
   accountCount: [{ required: true, message: '账号额度不能为空', trigger: 'blur' }],
   expireTime: [{ required: true, message: '过期时间不能为空', trigger: 'blur' }],
-  domain: [{ required: true, message: '绑定域名不能为空', trigger: 'blur' }],
+  website: [{ required: true, message: '绑定域名不能为空', trigger: 'blur' }],
   username: [{ required: true, message: '用户名称不能为空', trigger: 'blur' }],
   password: [{ required: true, message: '用户密码不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const packageList = ref([]) // 租户套餐
+const packageList = ref([] as TenantPackageApi.TenantPackageVO[]) // 租户套餐
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -170,8 +173,10 @@ const resetForm = () => {
     contactMobile: undefined,
     accountCount: undefined,
     expireTime: undefined,
-    domain: undefined,
-    status: CommonStatusEnum.ENABLE
+    website: undefined,
+    status: CommonStatusEnum.ENABLE,
+    username: undefined,
+    password: undefined
   }
   formRef.value?.resetFields()
 }

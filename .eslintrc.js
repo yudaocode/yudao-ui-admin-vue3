@@ -8,7 +8,6 @@ module.exports = defineConfig({
     es6: true
   },
   parser: 'vue-eslint-parser',
-  plugins: ['vue'],
   parserOptions: {
     parser: '@typescript-eslint/parser',
     ecmaVersion: 2020,
@@ -22,12 +21,13 @@ module.exports = defineConfig({
     'plugin:vue/vue3-recommended',
     'plugin:@typescript-eslint/recommended',
     'prettier',
-    'plugin:prettier/recommended'
+    'plugin:prettier/recommended',
+    '@unocss'
   ],
   rules: {
+    'vue/no-setup-props-destructure': 'off',
     'vue/script-setup-uses-vars': 'error',
     'vue/no-reserved-component-names': 'off',
-    'vue/no-setup-props-destructure': 'off',
     '@typescript-eslint/ban-ts-ignore': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
@@ -53,6 +53,7 @@ module.exports = defineConfig({
     'vue/attribute-hyphenation': 'off',
     'vue/require-default-prop': 'off',
     'vue/require-explicit-emits': 'off',
+    'vue/require-toggle-inside-transition': 'off',
     'vue/html-self-closing': [
       'error',
       {
@@ -66,6 +67,9 @@ module.exports = defineConfig({
       }
     ],
     'vue/multi-word-component-names': 'off',
-    'vue/no-v-html': 'off'
+    'vue/no-v-html': 'off',
+    'prettier/prettier': 'off', // 芋艿：默认关闭 prettier 的 ESLint 校验，因为我们使用的是 IDE 的 Prettier 插件
+    '@unocss/order': 'off', // 芋艿：禁用 unocss 【css】顺序的提示，因为暂时不需要这么严格，警告也有点繁琐
+    '@unocss/order-attributify': 'off' // 芋艿：禁用 unocss 【属性】顺序的提示，因为暂时不需要这么严格，警告也有点繁琐
   }
 })

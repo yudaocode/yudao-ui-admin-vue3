@@ -8,11 +8,12 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="部门名称" prop="title">
+      <el-form-item label="部门名称" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入部门名称"
           clearable
+          @keyup.enter="handleQuery"
           class="!w-240px"
         />
       </el-form-item>
@@ -58,14 +59,14 @@
       :default-expand-all="isExpandAll"
       v-if="refreshTable"
     >
-      <el-table-column prop="name" label="部门名称" width="260" />
-      <el-table-column prop="leader" label="负责人" width="120">
+      <el-table-column prop="name" label="部门名称" />
+      <el-table-column prop="leader" label="负责人">
         <template #default="scope">
           {{ userList.find((user) => user.id === scope.row.leaderUserId)?.nickname }}
         </template>
       </el-table-column>
-      <el-table-column prop="sort" label="排序" width="200" />
-      <el-table-column prop="status" label="状态" width="100">
+      <el-table-column prop="sort" label="排序" />
+      <el-table-column prop="status" label="状态">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
         </template>
@@ -77,7 +78,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="操作" align="center" class-name="fixed-width">
+      <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button
             link
@@ -119,11 +120,10 @@ const { t } = useI18n() // 国际化
 const loading = ref(true) // 列表的加载中
 const list = ref() // 列表的数据
 const queryParams = reactive({
-  title: '',
-  name: undefined,
-  status: undefined,
   pageNo: 1,
-  pageSize: 100
+  pageSize: 100,
+  name: undefined,
+  status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const isExpandAll = ref(true) // 是否展开，默认全部展开

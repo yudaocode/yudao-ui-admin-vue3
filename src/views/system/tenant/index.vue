@@ -125,7 +125,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column label="绑定域名" align="center" prop="domain" width="180" />
+      <el-table-column label="绑定域名" align="center" prop="website" width="180" />
       <el-table-column label="租户状态" align="center" prop="status">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
@@ -198,7 +198,7 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
-const packageList = ref([]) //租户套餐列表
+const packageList = ref([] as TenantPackageApi.TenantPackageVO[]) //租户套餐列表
 
 /** 查询列表 */
 const getList = async () => {

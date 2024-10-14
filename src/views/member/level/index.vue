@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="会员等级、积分、签到" url="https://doc.iocoder.cn/member/level/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
@@ -45,7 +47,7 @@
         <template #default="scope">
           <el-image
             :src="scope.row.icon"
-            class="w-30px h-30px"
+            class="h-30px w-30px"
             :preview-src-list="[scope.row.icon]"
           />
         </template>
@@ -54,7 +56,7 @@
         <template #default="scope">
           <el-image
             :src="scope.row.backgroundUrl"
-            class="w-30px h-30px"
+            class="h-30px w-30px"
             :preview-src-list="[scope.row.backgroundUrl]"
           />
         </template>

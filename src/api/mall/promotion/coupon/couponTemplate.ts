@@ -9,7 +9,7 @@ export interface CouponTemplateVO {
   takeType: number
   usePrice: number
   productScope: number
-  productSpuIds: string
+  productScopeValues: number[]
   validityType: number
   validStartTime: Date
   validEndTime: Date
@@ -70,6 +70,13 @@ export function getCouponTemplatePage(params: PageParam) {
   return request.get({
     url: '/promotion/coupon-template/page',
     params: params
+  })
+}
+
+// 获得优惠劵模板分页
+export function getCouponTemplateList(ids: number[]): Promise<CouponTemplateVO[]> {
+  return request.get({
+    url: `/promotion/coupon-template/list?ids=${ids}`
   })
 }
 

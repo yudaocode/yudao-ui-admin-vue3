@@ -1,5 +1,5 @@
 <template>
-  <h2 class="mb-3 text-2xl font-bold text-center xl:text-3xl enter-x xl:text-center">
+  <h2 class="enter-x mb-3 text-center text-2xl font-bold xl:text-center xl:text-3xl">
     {{ getFormTitle }}
   </h2>
 </template>

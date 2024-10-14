@@ -1,10 +1,11 @@
 import request from '@/config/axios'
 
 export interface SignInConfigVO {
-  id: number
-  day: number | null
-  point: number | null
-  enable: boolean | null
+  id?: number
+  day?: number
+  point?: number
+  experience?: number
+  status?: number
 }
 
 // 查询积分签到规则列表

@@ -9,7 +9,8 @@ export const rules = reactive({
   startTime: [required],
   endTime: [required],
   userSize: [required],
-  limitDuration: [required]
+  limitDuration: [required],
+  virtualGroup: [required]
 })
 
 // CrudSchema https://doc.iocoder.cn/vue3/crud-schema/
@@ -115,30 +116,15 @@ const crudSchemas = reactive<CrudSchema[]>([
     }
   },
   {
-    label: '购买人数',
-    field: 'userSize',
-    isSearch: false,
-    isForm: false
-  },
-  {
-    label: '开团组数',
-    field: 'totalCount',
-    isSearch: false,
-    isForm: false
-  },
-  {
-    label: '成团组数',
-    field: 'successCount',
-    isSearch: false,
-    isForm: false
-  },
-  {
-    label: '活动状态',
-    field: 'status',
-    dictType: DICT_TYPE.COMMON_STATUS,
-    dictClass: 'number',
+    label: '虚拟成团',
+    field: 'virtualGroup',
+    dictType: DICT_TYPE.INFRA_BOOLEAN_STRING,
+    dictClass: 'boolean',
     isSearch: true,
-    isForm: false
+    form: {
+      component: 'Radio',
+      value: false
+    }
   },
   {
     label: '拼团商品',
@@ -149,11 +135,6 @@ const crudSchemas = reactive<CrudSchema[]>([
         span: 24
       }
     }
-  },
-  {
-    label: '操作',
-    field: 'action',
-    isForm: false
   }
 ])
 export const { allSchemas } = useCrudSchemas(crudSchemas)

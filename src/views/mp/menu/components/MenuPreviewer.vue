@@ -26,7 +26,7 @@
             @end="onChildDragEnd"
           >
             <template #item="{ element: child, index: y }">
-              <div class="subtitle menu_bottom">
+              <div class="menu_bottom subtitle">
                 <div
                   class="menu_subItem"
                   v-if="parent.children"

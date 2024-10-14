@@ -113,7 +113,7 @@
             label="部门"
             align="center"
             key="deptName"
-            prop="dept.name"
+            prop="deptName"
             :show-overflow-tooltip="true"
           />
           <el-table-column label="手机号码" align="center" prop="mobile" width="120" />
@@ -136,7 +136,7 @@
           />
           <el-table-column label="操作" align="center" width="160">
             <template #default="scope">
-              <div class="flex justify-center items-center">
+              <div class="flex items-center justify-center">
                 <el-button
                   type="primary"
                   link

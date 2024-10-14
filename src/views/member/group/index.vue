@@ -1,4 +1,6 @@
 <template>
+  <doc-alert title="会员用户、标签、分组" url="https://doc.iocoder.cn/member/user/" />
+
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form

@@ -52,10 +52,10 @@ export default defineComponent({
         return (
           <ElBreadcrumbItem to={{ path: disabled ? '' : v.path }} key={v.name}>
             {meta?.icon && breadcrumbIcon.value ? (
-              <>
+              <div class="flex items-center">
                 <Icon icon={meta.icon} class="mr-[2px]" svgClass="inline-block"></Icon>
                 {t(v?.meta?.title)}
-              </>
+              </div>
             ) : (
               t(v?.meta?.title)
             )}
@@ -117,6 +117,8 @@ $prefix-cls: #{$elNamespace}-breadcrumb;
 
   :deep(&__item):last-child {
     .#{$prefix-cls}__inner {
+      display: flex;
+      align-items: center;
       color: var(--el-text-color-placeholder);
 
       &:hover {

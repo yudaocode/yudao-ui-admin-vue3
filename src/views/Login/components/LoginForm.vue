@@ -112,13 +112,13 @@
       <el-divider content-position="center">{{ t('login.otherLogin') }}</el-divider>
       <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item>
-          <div class="flex justify-between w-[100%]">
+          <div class="w-[100%] flex justify-between">
             <Icon
               v-for="(item, key) in socialList"
               :key="key"
               :icon="item.icon"
               :size="30"
-              class="cursor-pointer anticon"
+              class="anticon cursor-pointer"
               color="#999"
               @click="doSocialLogin(item.type)"
             />
@@ -128,7 +128,7 @@
       <el-divider content-position="center">萌新必读</el-divider>
       <el-col :span="24" style="padding-right: 10px; padding-left: 10px">
         <el-form-item>
-          <div class="flex justify-between w-[100%]">
+          <div class="w-[100%] flex justify-between">
             <el-link href="https://doc.iocoder.cn/" target="_blank">📚开发指南</el-link>
             <el-link href="https://doc.iocoder.cn/video/" target="_blank">🔥视频教程</el-link>
             <el-link href="https://www.iocoder.cn/Interview/good-collection/" target="_blank">
@@ -184,19 +184,19 @@ const loginData = reactive({
   captchaEnable: import.meta.env.VITE_APP_CAPTCHA_ENABLE,
   tenantEnable: import.meta.env.VITE_APP_TENANT_ENABLE,
   loginForm: {
-    tenantName: '芋道源码',
-    username: 'admin',
-    password: 'admin123',
+    tenantName: import.meta.env.VITE_APP_DEFAULT_LOGIN_TENANT || '',
+    username: import.meta.env.VITE_APP_DEFAULT_LOGIN_USERNAME || '',
+    password: import.meta.env.VITE_APP_DEFAULT_LOGIN_PASSWORD || '',
     captchaVerification: '',
-    rememberMe: false
+    rememberMe: true // 默认记录我。如果不需要，可手动修改
   }
 })
 
 const socialList = [
-  { icon: 'ant-design:github-filled', type: 0 },
   { icon: 'ant-design:wechat-filled', type: 30 },
-  { icon: 'ant-design:alipay-circle-filled', type: 0 },
-  { icon: 'ant-design:dingtalk-circle-filled', type: 20 }
+  { icon: 'ant-design:dingtalk-circle-filled', type: 20 },
+  { icon: 'ant-design:github-filled', type: 0 },
+  { icon: 'ant-design:alipay-circle-filled', type: 0 }
 ]
 
 // 获取验证码
@@ -210,7 +210,7 @@ const getCode = async () => {
     verify.value.show()
   }
 }
-//获取租户ID
+// 获取租户 ID
 const getTenantId = async () => {
   if (loginData.tenantEnable === 'true') {
     const res = await LoginApi.getTenantIdByName(loginData.loginForm.tenantName)
@@ -218,18 +218,28 @@ const getTenantId = async () => {
   }
 }
 // 记住我
-const getCookie = () => {
+const getLoginFormCache = () => {
   const loginForm = authUtil.getLoginForm()
   if (loginForm) {
     loginData.loginForm = {
       ...loginData.loginForm,
       username: loginForm.username ? loginForm.username : loginData.loginForm.username,
       password: loginForm.password ? loginForm.password : loginData.loginForm.password,
-      rememberMe: loginForm.rememberMe ? true : false,
+      rememberMe: loginForm.rememberMe,
       tenantName: loginForm.tenantName ? loginForm.tenantName : loginData.loginForm.tenantName
     }
   }
 }
+// 根据域名，获得租户信息
+const getTenantByWebsite = async () => {
+  const website = location.host
+  const res = await LoginApi.getTenantByWebsite(website)
+  if (res) {
+    loginData.loginForm.tenantName = res.name
+    authUtil.setTenantId(res.id)
+  }
+}
+const loading = ref() // ElLoading.service 返回的实例
 // 登录
 const handleLogin = async (params) => {
   loginLoading.value = true
@@ -239,18 +249,19 @@ const handleLogin = async (params) => {
     if (!data) {
       return
     }
-    loginData.loginForm.captchaVerification = params.captchaVerification
-    const res = await LoginApi.login(loginData.loginForm)
+    const loginDataLoginForm = { ...loginData.loginForm }
+    loginDataLoginForm.captchaVerification = params.captchaVerification
+    const res = await LoginApi.login(loginDataLoginForm)
     if (!res) {
       return
     }
-    ElLoading.service({
+    loading.value = ElLoading.service({
       lock: true,
       text: '正在加载系统中...',
       background: 'rgba(0, 0, 0, 0.7)'
     })
-    if (loginData.loginForm.rememberMe) {
-      authUtil.setLoginForm(loginData.loginForm)
+    if (loginDataLoginForm.rememberMe) {
+      authUtil.setLoginForm(loginDataLoginForm)
     } else {
       authUtil.removeLoginForm()
     }
@@ -264,13 +275,9 @@ const handleLogin = async (params) => {
     } else {
       push({ path: redirect.value || permissionStore.addRouters[0].path })
     }
-  } catch {
-    loginLoading.value = false
   } finally {
-    setTimeout(() => {
-      const loadingInstance = ElLoading.service()
-      loadingInstance.close()
-    }, 400)
+    loginLoading.value = false
+    loading.value.close()
   }
 }
 
@@ -281,14 +288,30 @@ const doSocialLogin = async (type: number) => {
   } else {
     loginLoading.value = true
     if (loginData.tenantEnable === 'true') {
-      await message.prompt('请输入租户名称', t('common.reminder')).then(async ({ value }) => {
-        const res = await LoginApi.getTenantIdByName(value)
-        authUtil.setTenantId(res)
-      })
+      // 尝试先通过 tenantName 获取租户
+      await getTenantId()
+      // 如果获取不到，则需要弹出提示，进行处理
+      if (!authUtil.getTenantId()) {
+        try {
+          const data = await message.prompt('请输入租户名称', t('common.reminder'))
+          if (data?.action !== 'confirm') throw 'cancel'
+          const res = await LoginApi.getTenantIdByName(data.value)
+          authUtil.setTenantId(res)
+        } catch (error) {
+          if (error === 'cancel') return
+        } finally {
+          loginLoading.value = false
+        }
+      }
     }
     // 计算 redirectUri
+    // tricky: type、redirect需要先encode一次，否则钉钉回调会丢失。
+    // 配合 Login/SocialLogin.vue#getUrlValue() 使用
     const redirectUri =
-      location.origin + '/social-login?type=' + type + '&redirect=' + (redirect.value || '/')
+      location.origin +
+      '/social-login?' +
+      encodeURIComponent(`type=${type}&redirect=${redirect.value || '/'}`)
+
     // 进行跳转
     const res = await LoginApi.socialAuthRedirect(type, encodeURIComponent(redirectUri))
     window.location.href = res
@@ -304,7 +327,8 @@ watch(
   }
 )
 onMounted(() => {
-  getCookie()
+  getLoginFormCache()
+  getTenantByWebsite()
 })
 </script>
 

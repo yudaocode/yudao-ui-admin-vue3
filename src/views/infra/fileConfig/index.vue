@@ -107,7 +107,7 @@
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['infra:config:delete']"
+            v-hasPermi="['infra:file-config:delete']"
           >
             删除
           </el-button>
@@ -206,7 +206,8 @@ const handleMaster = async (id) => {
 const handleTest = async (id) => {
   try {
     const response = await FileConfigApi.testFileConfig(id)
-    message.alert('测试通过，上传文件成功！访问地址：' + response)
+    await message.confirm('是否要访问该文件？', '测试上传成功')
+    window.open(response, '_blank')
   } catch {}
 }
 

@@ -26,8 +26,8 @@
         :src="props.url"
         poster=""
         crossorigin="anonymous"
-        playsinline
         controls
+        playsinline
         :volume="0.6"
         :width="800"
         :playback-rates="[0.7, 1.0, 1.5, 2.0]"

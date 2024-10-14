@@ -63,6 +63,7 @@ import { defaultProps, handleTree } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
 import { CommonStatusEnum } from '@/utils/constants'
+import { FormRules } from 'element-plus'
 
 defineOptions({ name: 'SystemDeptForm' })
 
@@ -84,7 +85,7 @@ const formData = ref({
   email: undefined,
   status: CommonStatusEnum.ENABLE
 })
-const formRules = reactive({
+const formRules = reactive<FormRules>({
   parentId: [{ required: true, message: '上级部门不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '部门名称不能为空', trigger: 'blur' }],
   sort: [{ required: true, message: '显示排序不能为空', trigger: 'blur' }],

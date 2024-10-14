@@ -13,7 +13,8 @@ export const defaultProps = {
   children: 'children',
   label: 'name',
   value: 'id',
-  isLeaf: 'leaf'
+  isLeaf: 'leaf',
+  emitPath: false // 用于 cascader 组件：在选中节点改变时，是否返回由该节点所在的各级菜单的值所组成的数组，若设置 false，则只返回该节点的值
 }
 
 const getConfig = (config: Partial<TreeHelperConfig>) => Object.assign({}, DEFAULT_CONFIG, config)
@@ -377,10 +378,10 @@ export const treeToString = (tree: any[], nodeId) => {
   function performAThoroughValidation(arr) {
     for (const item of arr) {
       if (item.id === nodeId) {
-        str += `/${item.name}`
+        str += ` / ${item.name}`
         return true
       } else if (typeof item.children !== 'undefined' && item.children.length !== 0) {
-        str += `/${item.name}`
+        str += ` / ${item.name}`
         if (performAThoroughValidation(item.children)) {
           return true
         }

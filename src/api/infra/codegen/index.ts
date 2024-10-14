@@ -28,7 +28,6 @@ export type CodegenColumnVO = {
   columnComment: string
   nullable: number
   primaryKey: number
-  autoIncrement: string
   ordinalPosition: number
   javaType: string
   javaField: string
@@ -68,6 +67,11 @@ export type CodegenCreateListReqVO = {
 }
 
 // 查询列表代码生成表定义
+export const getCodegenTableList = (dataSourceConfigId: number) => {
+  return request.get({ url: '/infra/codegen/table/list?dataSourceConfigId=' + dataSourceConfigId })
+}
+
+// 查询列表代码生成表定义
 export const getCodegenTablePage = (params: PageParam) => {
   return request.get({ url: '/infra/codegen/table/page', params })
 }
@@ -90,11 +94,6 @@ export const updateCodegenTable = (data: CodegenUpdateReqVO) => {
 // 基于数据库的表结构，同步数据库的表和字段定义
 export const syncCodegenFromDB = (id: number) => {
   return request.put({ url: '/infra/codegen/sync-from-db?tableId=' + id })
-}
-
-// 基于 SQL 建表语句，同步数据库的表和字段定义
-export const syncCodegenFromSQL = (id: number, sql: string) => {
-  return request.put({ url: '/infra/codegen/sync-from-sql?tableId=' + id + '&sql=' + sql })
 }
 
 // 预览生成代码

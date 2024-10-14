@@ -1,7 +1,7 @@
-import { store } from '../index'
+import { store } from '@/store'
 import { defineStore } from 'pinia'
 import { getAccessToken, removeToken } from '@/utils/auth'
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
+import { CACHE_KEY, useCache, deleteUserCache } from '@/hooks/web/useCache'
 import { getInfo, loginOut } from '@/api/login'
 
 const { wsCache } = useCache()
@@ -10,8 +10,11 @@ interface UserVO {
   id: number
   avatar: string
   nickname: string
+  deptId: number
 }
+
 interface UserInfoVO {
+  // USER 缓存
   permissions: string[]
   roles: string[]
   isSetUser: boolean
@@ -26,7 +29,8 @@ export const useUserStore = defineStore('admin-user', {
     user: {
       id: 0,
       avatar: '',
-      nickname: ''
+      nickname: '',
+      deptId: 0
     }
   }),
   getters: {
@@ -60,10 +64,24 @@ export const useUserStore = defineStore('admin-user', {
       wsCache.set(CACHE_KEY.USER, userInfo)
       wsCache.set(CACHE_KEY.ROLE_ROUTERS, userInfo.menus)
     },
+    async setUserAvatarAction(avatar: string) {
+      const userInfo = wsCache.get(CACHE_KEY.USER)
+      // NOTE: 是否需要像`setUserInfoAction`一样判断`userInfo != null`
+      this.user.avatar = avatar
+      userInfo.user.avatar = avatar
+      wsCache.set(CACHE_KEY.USER, userInfo)
+    },
+    async setUserNicknameAction(nickname: string) {
+      const userInfo = wsCache.get(CACHE_KEY.USER)
+      // NOTE: 是否需要像`setUserInfoAction`一样判断`userInfo != null`
+      this.user.nickname = nickname
+      userInfo.user.nickname = nickname
+      wsCache.set(CACHE_KEY.USER, userInfo)
+    },
     async loginOut() {
       await loginOut()
       removeToken()
-      wsCache.clear()
+      deleteUserCache() // 删除用户缓存
       this.resetState()
     },
     resetState() {
@@ -73,7 +91,8 @@ export const useUserStore = defineStore('admin-user', {
       this.user = {
         id: 0,
         avatar: '',
-        nickname: ''
+        nickname: '',
+        deptId: 0
       }
     }
   }

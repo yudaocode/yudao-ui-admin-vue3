@@ -12,7 +12,7 @@ export function createImageViewer(options: ImageViewerProps) {
     initialIndex = 0,
     infinite = true,
     hideOnClickModal = false,
-    appendToBody = false,
+    teleported = false,
     zIndex = 2000,
     show = true
   } = options
@@ -23,7 +23,7 @@ export function createImageViewer(options: ImageViewerProps) {
   propsData.initialIndex = initialIndex
   propsData.infinite = infinite
   propsData.hideOnClickModal = hideOnClickModal
-  propsData.appendToBody = appendToBody
+  propsData.teleported = teleported
   propsData.zIndex = zIndex
   propsData.show = show
 
