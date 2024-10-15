@@ -61,7 +61,12 @@
         v-for="(list, title) in categoryGroup"
         :key="title"
       >
-        <CategoryDraggableModel :dataList="list" :title="title" @success="getList" />
+        <CategoryDraggableModel
+          ref="draggableModelRef"
+          :dataList="list"
+          :title="title"
+          @success="getList"
+        />
       </ContentWrap>
     </div>
   </ContentWrap>
@@ -84,6 +89,7 @@ import CategoryDraggableModel from './CategoryDraggableModel.vue'
 
 defineOptions({ name: 'BpmModel' })
 
+const draggableModelRef = ref()
 const loading = ref(true) // 列表的加载中
 const queryParams = reactive({
   pageNo: 1,
@@ -103,6 +109,7 @@ const getList = async () => {
     const data = await ModelApi.getModelPage(queryParams)
     data.list = mockData
     categoryGroup.value = groupBy(data.list, 'categoryName')
+    draggableModelRef.value?.updateTableData()
   } finally {
     loading.value = false
   }
@@ -131,3 +138,11 @@ onMounted(async () => {
   await getList()
 })
 </script>
+
+<style lang="scss" scoped>
+:deep() {
+  .el-card {
+    border-radius: 8px;
+  }
+}
+</style>
