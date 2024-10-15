@@ -121,7 +121,7 @@
         label="创建时间"
         align="center"
         prop="createTime"
-        width="180"
+        width="170"
         :formatter="dateFormatter"
       />
       <el-table-column label="支付金额" align="center" prop="payPrice" width="100">
@@ -157,7 +157,7 @@
           </p>
         </template>
       </el-table-column>
-      <el-table-column label="退款状态" align="center" prop="status">
+      <el-table-column label="退款状态" align="center" prop="status" width="100">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.PAY_REFUND_STATUS" :value="scope.row.status" />
         </template>
