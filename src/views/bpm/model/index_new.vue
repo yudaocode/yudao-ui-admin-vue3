@@ -4,6 +4,7 @@
       <h3 class="font-extrabold">流程模型</h3>
       <!-- 搜索工作栏 -->
       <el-form
+        v-if="!isCategorySorting"
         class="-mb-15px flex"
         :model="queryParams"
         ref="queryFormRef"
@@ -30,17 +31,17 @@
         </el-form-item>
 
         <el-form-item>
-          <el-dropdown placement="bottom-end">
+          <el-dropdown @command="(command) => handleCommand(command)" placement="bottom-end">
             <el-button class="w-30px" plain>
               <Icon icon="ep:setting" />
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>
+                <el-dropdown-item command="handleAddCategory">
                   <Icon icon="ep:circle-plus" :size="13" class="mr-5px" />
                   新建分类
                 </el-dropdown-item>
-                <el-dropdown-item>
+                <el-dropdown-item command="handleSort">
                   <Icon icon="fa:sort-amount-desc" :size="13" class="mr-5px" />
                   分类排序
                 </el-dropdown-item>
@@ -49,6 +50,10 @@
           </el-dropdown>
         </el-form-item>
       </el-form>
+      <template v-else>
+        <el-button type="primary" @click="cancelSort"> 取 消 </el-button>
+        <el-button type="primary" @click="saveSort"> 保存排序 </el-button>
+      </template>
     </div>
 
     <el-divider />
@@ -63,6 +68,7 @@
       >
         <CategoryDraggableModel
           ref="draggableModelRef"
+          :isCategorySorting="isCategorySorting"
           :dataList="list"
           :title="title"
           @success="getList"
@@ -91,6 +97,7 @@ defineOptions({ name: 'BpmModel' })
 
 const draggableModelRef = ref()
 const loading = ref(true) // 列表的加载中
+const isCategorySorting = ref(false) // 是否正处于排序状态
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
@@ -105,7 +112,7 @@ const categoryGroup = ref<any>({}) // 按照category分组的数据
 const getList = async () => {
   loading.value = true
   try {
-    // TODO 芋艿：这里需要一个不分页查全部的流程模型接口
+    // TODO 芋艿：这里需要一个不分页查全部的流程模型接口，并且每条数据都应包含categoryId字段，用于重命名/删除分类。
     const data = await ModelApi.getModelPage(queryParams)
     data.list = mockData
     categoryGroup.value = groupBy(data.list, 'categoryName')
@@ -132,6 +139,33 @@ const formDetailPreview = ref({
   rule: [],
   option: {}
 })
+
+/** 右上角设置按钮 */
+const handleCommand = (command: string) => {
+  switch (command) {
+    case 'handleAddCategory':
+      handleAddCategory()
+      break
+    case 'handleSort':
+      handleSort()
+      break
+    default:
+      break
+  }
+}
+
+// 新建分类
+const handleAddCategory = () => {}
+// 分类排序
+const handleSort = () => {
+  isCategorySorting.value = true
+}
+// 取消排序
+const cancelSort = () => {
+  isCategorySorting.value = false
+}
+// 保存排序
+const saveSort = () => {}
 
 /** 初始化 **/
 onMounted(async () => {

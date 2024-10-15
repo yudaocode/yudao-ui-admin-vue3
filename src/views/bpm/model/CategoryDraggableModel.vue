@@ -36,6 +36,13 @@
       </template>
       <template #title>
         <div class="flex items-center">
+          <el-tooltip content="拖动排序" v-if="isCategorySorting">
+            <Icon
+              :size="22"
+              icon="ic:round-drag-indicator"
+              class="ml-10px category-drag-icon cursor-move text-#8a909c"
+            />
+          </el-tooltip>
           <h3 class="ml-20px mr-8px text-18px">{{ title }}</h3>
           <div class="color-gray-600 text-16px"> ({{ dataList?.length || 0 }}) </div>
         </div>
@@ -228,7 +235,8 @@ const renameVisible = ref(false)
 const props = defineProps({
   // 分类后的数据
   dataList: propTypes.object.def([]),
-  title: propTypes.string.def('')
+  title: propTypes.string.def(''),
+  isCategorySorting: propTypes.bool.def(false)
 })
 const emit = defineEmits(['success'])
 const appStore = useAppStore()
