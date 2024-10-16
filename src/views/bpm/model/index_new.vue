@@ -1,7 +1,7 @@
 <template>
   <ContentWrap>
     <div class="flex justify-between pl-20px items-center">
-      <h3 class="font-extrabold">表单管理</h3>
+      <h3 class="font-extrabold">流程模型</h3>
       <!-- 搜索工作栏 -->
       <el-form
         class="-mb-15px flex"
@@ -25,7 +25,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="openForm('create')" v-hasPermi="['bpm:model:create']">
-            <Icon icon="ep:plus" class="mr-5px" /> 新建流程
+            <Icon icon="ep:plus" class="mr-5px" /> 新建模型
           </el-button>
         </el-form-item>
 
@@ -37,12 +37,12 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item>
-                  <Icon icon="ep:circle-plus" size="13" class="mr-5px" />
-                  新建分组
+                  <Icon icon="ep:circle-plus" :size="13" class="mr-5px" />
+                  新建分类
                 </el-dropdown-item>
                 <el-dropdown-item>
-                  <Icon icon="fa:sort-amount-desc" size="13" class="mr-5px" />
-                  分组排序
+                  <Icon icon="fa:sort-amount-desc" :size="13" class="mr-5px" />
+                  分类排序
                 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
@@ -66,7 +66,7 @@
               >
                 <Icon icon="ep:arrow-down-bold" color="#999" />
               </div>
-              <div class="ml-auto mr-30px">
+              <div class="ml-auto mr-45px">
                 <el-button link type="info" class="mr-10px" @click.stop="handleSort">
                   <Icon icon="fa:sort-amount-desc" class="mr-5px" />
                   排序
@@ -85,14 +85,15 @@
             </template>
 
             <el-table
-              :header-cell-style="{ backgroundColor: isDark ? '' : '#edeff0' }"
+              :header-cell-style="{ backgroundColor: isDark ? '' : '#edeff0', paddingLeft: '10px' }"
+              :cell-style="{ paddingLeft: '10px' }"
               v-loading="loading"
               :data="list"
             >
               <el-table-column label="流程名" prop="name" min-width="150">
                 <template #default="scope">
                   <div class="flex items-center">
-                    <el-image :src="scope.row.icon" class="h-32px w-32px mr-10px rounded" />
+                    <el-image :src="scope.row.icon" class="h-38px w-38px mr-10px rounded" />
                     {{ scope.row.name }}
                   </div>
                 </template>
@@ -141,20 +142,22 @@
               </el-table-column>
               <el-table-column label="最后发布" prop="deploymentTime" min-width="250">
                 <template #default="scope">
-                  <span v-if="scope.row.processDefinition">
-                    {{ formatDate(scope.row.processDefinition.deploymentTime) }}
-                  </span>
-                  <el-tag v-if="scope.row.processDefinition" class="ml-10px">
-                    v{{ scope.row.processDefinition.version }}
-                  </el-tag>
-                  <el-tag v-else type="warning">未部署</el-tag>
-                  <el-tag
-                    v-if="scope.row.processDefinition?.suspensionState === 2"
-                    type="warning"
-                    class="ml-10px"
-                  >
-                    已停用
-                  </el-tag>
+                  <div class="flex items-center">
+                    <span v-if="scope.row.processDefinition" class="w-150px">
+                      {{ formatDate(scope.row.processDefinition.deploymentTime) }}
+                    </span>
+                    <el-tag v-if="scope.row.processDefinition">
+                      v{{ scope.row.processDefinition.version }}
+                    </el-tag>
+                    <el-tag v-else type="warning">未部署</el-tag>
+                    <el-tag
+                      v-if="scope.row.processDefinition?.suspensionState === 2"
+                      type="warning"
+                      class="ml-10px"
+                    >
+                      已停用
+                    </el-tag>
+                  </div>
                 </template>
               </el-table-column>
               <el-table-column label="操作" width="200" fixed="right">
@@ -436,6 +439,9 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 :deep() {
+  .el-card {
+    border-radius: 8px;
+  }
   .el-form--inline .el-form-item {
     margin-right: 10px;
   }
@@ -451,6 +457,15 @@ onMounted(async () => {
     margin-left: 10px;
     font-size: 20px;
     font-weight: 500;
+  }
+  .el-collapse-item__content {
+    padding-bottom: 0;
+  }
+  .el-table__cell {
+    border-bottom: none !important;
+  }
+  .el-table__row {
+    height: 68px;
   }
 }
 </style>
