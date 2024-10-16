@@ -134,23 +134,31 @@ import { TaskStatusEnum } from '@/api/bpm/task'
 import { NodeType } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { Check, Close, Loading, Clock, Minus, Delete } from '@element-plus/icons-vue'
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
-const props = defineProps({
-  // 流程实例编号
-  processInstanceId: {
-    type: String,
-    required: false,
-    default: ''
-  },
-  // 流程定义编号
-  processDefinitionId: {
-    type: String,
-    required: false,
-    default: ''
-  }
-})
+// const props = defineProps({
+//   // 流程实例编号
+//   processInstanceId: {
+//     type: String,
+//     required: false,
+//     default: ''
+//   },
+//   // 流程定义编号
+//   processDefinitionId: {
+//     type: String,
+//     required: false,
+//     default: ''
+//   },
+//   approveNodes : {
+//     type: ProcessInstanceApi.ApprovalNodeInfo[],
+//     required: false,
+//     default: ''
+//   }
+// })
+defineProps<{
+  approveNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
+}>()
 
 // 审批节点
-const approveNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
+
 
 const statusIconMap2 = {
   // 未开始
@@ -194,13 +202,13 @@ const statusIconMap = {
 }
 
 /** 获得审批详情 */
-const getApprovalDetail = async () => {
-  const data = await ProcessInstanceApi.getApprovalDetail(
-    props.processInstanceId,
-    props.processDefinitionId
-  )
-  approveNodes.value = data.approveNodes
-}
+// const getApprovalDetail = async () => {
+//   const data = await ProcessInstanceApi.getApprovalDetail(
+//     props.processInstanceId,
+//     props.processDefinitionId
+//   )
+//   approveNodes.value = data.approveNodes
+// }
 
 const getApprovalNodeIcon = (taskStatus: number, nodeType: NodeType) => {
   if (taskStatus == TaskStatusEnum.NOT_START) {
@@ -226,13 +234,13 @@ const getApprovalNodeTime = (node: ProcessInstanceApi.ApprovalNodeInfo) => {
 }
 
 /** 重新刷新审批详情 */
-const refresh = () => {
-  getApprovalDetail()
-}
+// const refresh = () => {
+//   getApprovalDetail()
+// }
 
-defineExpose({ refresh })
+// defineExpose({ refresh })
 
-onMounted(async () => {
-  await getApprovalDetail()
-})
+// onMounted(async () => {
+//   await getApprovalDetail()
+// })
 </script>

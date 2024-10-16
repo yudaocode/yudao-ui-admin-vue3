@@ -23,7 +23,6 @@
           <div
             class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600"
           >
-            <!-- <img class="rounded-full h-28px" src="@/assets/imgs/avatar.jpg" alt="" /> -->
             <el-avatar
               :size="28"
               v-if="processInstance?.startUser?.avatar"
@@ -50,7 +49,7 @@
                       class="form-box flex flex-col mb-30px flex-1"
                     >
                       <!-- 情况一：流程表单 -->
-                      <el-col v-if="processInstance?.processDefinition?.formType === 10">
+                      <el-col v-if="processDefinition?.formType === 10">
                         <form-create
                           v-model="detailForm.value"
                           v-model:api="fApi"
@@ -59,14 +58,14 @@
                         />
                       </el-col>
                       <!-- 情况二：业务表单 -->
-                      <div v-if="processInstance?.processDefinition?.formType === 20">
+                      <div v-if="processDefinition?.formType === 20">
                         <BusinessFormComponent :id="processInstance.businessKey" />
                       </div>
                     </div>
                   </el-col>
                   <el-col :span="6">
                     <!-- 审批记录时间线 -->
-                    <ProcessInstanceTimeline ref="timelineRef" :process-instance-id="id" />
+                    <ProcessInstanceTimeline ref="timelineRef" :approve-nodes="approveNodes" />
                   </el-col>
                 </el-row>
               </el-scrollbar>
@@ -104,6 +103,7 @@
         <div class="b-t-solid border-t-1px border-[var(--el-border-color)]">
           <!-- 操作栏按钮 -->
           <ProcessInstanceOperationButton
+            ref="operationButtonRef"
             :process-instance-id="id"
             :userOptions="userOptions"
             @success="refresh"
@@ -124,7 +124,6 @@ import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
 import ProcessInstanceOperationButton from './ProcessInstanceOperationButton.vue'
 import ProcessInstanceTimeline from './ProcessInstanceTimeline.vue'
-import { registerComponent } from '@/utils/routerHelper'
 import * as UserApi from '@/api/system/user'
 import { FieldPermissionType } from '@/components/SimpleProcessDesignerV2/src/consts'
 import audit1 from '@/assets/svgs/bpm/audit1.svg'
@@ -141,7 +140,10 @@ const props = defineProps<{
 const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
+const processDefinition = ref<any>({}) // 流程定义
 const timelineRef = ref()
+// 操作按钮组件 ref
+const operationButtonRef = ref()
 const tasksLoad = ref(true) // 任务的加载中
 const tasks = ref<any[]>([]) // 任务列表
 const auditIcons = {
@@ -161,78 +163,92 @@ const detailForm = ref({
 
 /** 获得详情 */
 const getDetail = async () => {
-  // 1. 获得流程实例相关
-  getProcessInstance()
+  // 1. 获取审批详情
+  getApprovalDetail()
   // 2. 获得流程任务列表
   getTaskList()
 }
 
 /** 加载流程实例 */
 const BusinessFormComponent = ref<any>(null) // 异步组件
-const getProcessInstance = async () => {
+/** 获取审批详情 */
+const getApprovalDetail = async () => {
+  processInstanceLoading.value = true
   try {
-    processInstanceLoading.value = true
-    const data = await ProcessInstanceApi.getProcessInstance(props.id)
+    const param = {
+      processInstanceId: props.id,
+      activityId: props.activityId,
+      taskId: props.taskId
+    }
+    const data = await ProcessInstanceApi.getApprovalDetail(param);
     if (!data) {
+      message.error('查询不到审批详情信息！')
+      return
+    }
+    if(!data.processDefinition || !data.processInstance) {
       message.error('查询不到流程信息！')
       return
     }
-    processInstance.value = data
+    processInstance.value = data.processInstance
+    processDefinition.value = data.processDefinition
 
     // 设置表单信息
-    const processDefinition = data.processDefinition
-    if (processDefinition.formType === 10) {
+    if (processDefinition.value.formType === 10) {
       // 获取表单字段权限
-      let fieldsPermission = undefined
-      if (props.taskId || props.activityId) {
-        fieldsPermission = await ProcessInstanceApi.getFormFieldsPermission({
-          processInstanceId: props.id,
-          taskId: props.taskId,
-          activityId: props.activityId
-        })
-      }
-
-      if (detailForm.value.rule.length > 0) {  // 避免刷新 form-create 表单不显示
-        detailForm.value.value = data.formVariables
+      const formFieldsPermission = data.formFieldsPermission
+     
+      if (detailForm.value.rule.length > 0) {  // 避免刷新 form-create 显示不了，
+        detailForm.value.value = processInstance.value.formVariables
       } else {
         setConfAndFields2(
           detailForm,
-          processDefinition.formConf,
-          processDefinition.formFields,
-          data.formVariables
+          processDefinition.value.formConf,
+          processDefinition.value.formFields,
+          processInstance.value.formVariables
         )
       }
-
       nextTick().then(() => {
         fApi.value?.btn.show(false)
         fApi.value?.resetBtn.show(false)
+        //@ts-ignore
         fApi.value?.disabled(true)
-        if (fieldsPermission) {
-          Object.keys(fieldsPermission).forEach((item) => {
-            setFieldPermission(item, fieldsPermission[item])
+        // 设置表单字段权限
+        if (formFieldsPermission) {
+          Object.keys(data.formFieldsPermission).forEach((item) => {
+            setFieldPermission(item, formFieldsPermission[item])
           })
         }
       })
-    } else {
-      // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue
-      BusinessFormComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
     }
+
+    // 获取审批节点，显示 Timeline 的数据
+    approveNodes.value = data.approveNodes
+
+    // 获取待办任务显示操作按钮
+    operationButtonRef.value?.loadTodoTask(data.todoTask)
+
   } finally {
     processInstanceLoading.value = false
   }
+  
 }
 
+// 审批节点信息
+const approveNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 /**
  * 设置表单权限
  */
 const setFieldPermission = (field: string, permission: string) => {
   if (permission === FieldPermissionType.READ) {
+    //@ts-ignore
     fApi.value?.disabled(true, field)
   }
   if (permission === FieldPermissionType.WRITE) {
+    //@ts-ignore
     fApi.value?.disabled(false, field)
   }
   if (permission === FieldPermissionType.NONE) {
+    //@ts-ignore
     fApi.value?.hidden(true, field)
   }
 }
@@ -264,9 +280,6 @@ const getTaskList = async () => {
         return b.createTime - a.createTime
       }
     })
-
-    // 获得需要自己审批的任务
-    //operationButtonRef.value?.loadRunningTask(tasks.value)
   } finally {
     tasksLoad.value = false
   }
@@ -278,8 +291,6 @@ const getTaskList = async () => {
 const refresh = () => {
   // 重新获取详情
   getDetail()
-  // 刷新审批详情 Timeline
-  timelineRef.value?.refresh()
 }
 
 /** 当前的Tab */

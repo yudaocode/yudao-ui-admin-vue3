@@ -657,7 +657,6 @@ const openChildrenTask = () => {
 
 /** 重新加载数据 */
 const reload = () => {
-  getMyTodoTask()
   emit('success')
 }
 
@@ -691,26 +690,23 @@ const getButtonDisplayName = (btnType: OperationButtonType) => {
   return displayName
 }
 
-/** 获取我的待办任务 */
-const getMyTodoTask = async () => {
+const loadTodoTask = (task: any) => {
   genericForm.value = {}
   approveForm.value = {}
   approveFormFApi.value = {}
-  const data = await TaskApi.myTodoTask(props.processInstanceId)
-  runningTask.value = data
+  runningTask.value = task
   // 处理 approve 表单.
-  if (data && data.formId && data.formConf) {
+  if (task && task.formId && task.formConf) {
     const tempApproveForm = {}
-    setConfAndFields2(tempApproveForm, data.formConf, data.formFields, data.formVariables)
+    setConfAndFields2(tempApproveForm, task.formConf, task.formFields, task.formVariables)
     approveForm.value = tempApproveForm
   } else {
     approveForm.value = {} // 占位，避免为空
   }
 }
 
-onMounted(async () => {
-  await getMyTodoTask()
-})
+defineExpose({ loadTodoTask })
+
 </script>
 
 <style lang="scss" scoped>

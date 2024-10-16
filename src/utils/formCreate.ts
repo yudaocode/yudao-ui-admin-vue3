@@ -44,6 +44,7 @@ export const setConfAndFields2 = (
   value?: object
 ) => {
   if (isRef(detailPreview)) {
+    // @ts-ignore
     detailPreview = detailPreview.value
   }
   // @ts-ignore
