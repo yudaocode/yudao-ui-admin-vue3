@@ -67,7 +67,7 @@
               ref="categoryDraggableModelRef"
               :isCategorySorting="isCategorySorting"
               :categoryInfo="element"
-              @success="getAllModel"
+              @success="getList"
             />
           </ContentWrap>
         </template>
@@ -76,7 +76,7 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改流程 -->
-  <ModelForm ref="formRef" @success="getAllModel" />
+  <ModelForm ref="formRef" @success="getList" />
   <!-- 表单弹窗：添加/修改分类 -->
   <CategoryForm ref="categoryFormRef" @success="getList" />
   <!-- 弹窗：表单详情 -->
@@ -133,7 +133,7 @@ const getAllModel = async () => {
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
-  getAllModel()
+  getList()
 }
 
 /** 添加/修改操作 */
@@ -171,9 +171,6 @@ const handleSort = () => {
   // 保存初始数据
   originalData.value = cloneDeep(categoryGroup.value)
   isCategorySorting.value = true
-  categoryDraggableModelRef.value?.forEach((element) => {
-    element.activeCollapse = []
-  })
 }
 // 取消排序
 const cancelSort = () => {
@@ -182,7 +179,9 @@ const cancelSort = () => {
   isCategorySorting.value = false
 }
 // 保存排序
-const saveSort = () => {}
+const saveSort = () => {
+  // TODO 芋艿：这里需要一个保存分类排序接口
+}
 
 const getList = async () => {
   loading.value = true

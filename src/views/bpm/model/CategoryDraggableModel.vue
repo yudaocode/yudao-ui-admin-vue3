@@ -1,10 +1,11 @@
 <template>
   <!-- 默认使其全部展开 -->
   <el-collapse v-model="activeCollapse">
-    <el-collapse-item :name="categoryInfo.id">
+    <el-collapse-item :name="categoryInfo.id" :disabled="categoryInfo.modelList.length === 0">
       <template #icon="{ isActive }">
         <div class="flex-1 flex" v-if="!isCategorySorting">
           <div
+            v-if="categoryInfo.modelList.length > 0"
             class="ml-20px flex items-center"
             :class="['transition-transform duration-300', isActive ? 'rotate-180' : 'rotate-0']"
           >
@@ -230,6 +231,7 @@
 </template>
 
 <script lang="ts" setup>
+import { CategoryApi } from '@/api/bpm/category'
 import Sortable from 'sortablejs'
 import { propTypes } from '@/utils/propTypes'
 import { formatDate } from '@/utils/formatTime'
@@ -409,8 +411,7 @@ const handleSort = () => {
 }
 
 const saveSort = () => {
-  // 接口调用
-  console.log(tableData.value)
+  // TODO 芋艿：这里需要一个保存分类下模型排序接口
   // 刷新列表
   emit('success')
   isModelSorting.value = false
@@ -451,6 +452,9 @@ const initSort = () => {
 // 更新表格数据
 const updateTableData = () => {
   tableData.value = cloneDeep(props.categoryInfo.modelList)
+  if (props.categoryInfo.modelList.length > 0) {
+    activeCollapse.value = [props.categoryInfo.id]
+  }
 }
 
 const renameVal = ref('')
@@ -463,15 +467,27 @@ const handleRenameConfirm = () => {
 
 // 删除分类
 const handleDeleteGroup = async () => {
-  if (props.categoryInfo.modelList.length > 0) {
-    return message.warning('该分类下仍有流程定义,不允许删除')
-  }
-  await message.confirm('确认删除分类吗?')
-  // 实际调用接口删除
+  try {
+    if (props.categoryInfo.modelList.length > 0) {
+      return message.warning('该分类下仍有流程定义,不允许删除')
+    }
+    await message.confirm('确认删除分类吗?')
+    // 发起删除
+    await CategoryApi.deleteCategory(props.categoryInfo.id)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    emit('success')
+  } catch {}
 }
 
 watch(() => props.categoryInfo.modelList, updateTableData, { immediate: true })
-
+watch(
+  () => props.isCategorySorting,
+  (val) => {
+    if (val) activeCollapse.value = []
+  },
+  { immediate: true }
+)
 defineExpose({
   activeCollapse
 })
