@@ -1,38 +1,51 @@
 <template>
   <!-- 默认使其全部展开 -->
-  <el-collapse :modelValue="title">
-    <el-collapse-item :name="title">
+  <el-collapse v-model="activeCollapse">
+    <el-collapse-item :name="categoryInfo.id">
       <template #icon="{ isActive }">
-        <div
-          class="ml-20px flex items-center"
-          :class="['transition-transform duration-300', isActive ? 'rotate-180' : 'rotate-0']"
-        >
-          <Icon icon="ep:arrow-down-bold" color="#999" />
-        </div>
-        <div class="ml-auto mr-45px flex items-center">
-          <template v-if="!isSorting">
-            <el-button link type="info" class="mr-20px" @click.stop="handleSort">
-              <Icon icon="fa:sort-amount-desc" class="mr-5px" />
-              排序
-            </el-button>
-            <el-dropdown @command="(command) => handleCategoryCommand(command)" placement="bottom">
-              <el-button link type="info" @click.stop="handleGroup">
-                <Icon icon="ep:setting" class="mr-5px" />
-                分类
+        <div class="flex-1 flex" v-if="!isCategorySorting">
+          <div
+            class="ml-20px flex items-center"
+            :class="['transition-transform duration-300', isActive ? 'rotate-180' : 'rotate-0']"
+          >
+            <Icon icon="ep:arrow-down-bold" color="#999" />
+          </div>
+          <div class="ml-auto mr-45px flex items-center">
+            <template v-if="!isModelSorting">
+              <el-button
+                v-if="categoryInfo.modelList.length > 0"
+                link
+                type="info"
+                class="mr-20px"
+                @click.stop="handleSort"
+              >
+                <Icon icon="fa:sort-amount-desc" class="mr-5px" />
+                排序
               </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="handleRename"> 重命名 </el-dropdown-item>
-                  <el-dropdown-item command="handleDeleteGroup"> 删除该类 </el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </template>
-          <template v-else>
-            <el-button @click.stop="cancelSort"> 取 消 </el-button>
-            <el-button type="primary" @click.stop="saveSort"> 保存排序 </el-button>
-          </template>
+              <el-dropdown
+                @command="(command) => handleCategoryCommand(command)"
+                placement="bottom"
+              >
+                <el-button link type="info" @click.stop="handleGroup">
+                  <Icon icon="ep:setting" class="mr-5px" />
+                  分类
+                </el-button>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="handleRename"> 重命名 </el-dropdown-item>
+                    <el-dropdown-item command="handleDeleteGroup"> 删除该类 </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </template>
+            <template v-else>
+              <el-button @click.stop="cancelSort"> 取 消 </el-button>
+              <el-button type="primary" @click.stop="saveSort"> 保存排序 </el-button>
+            </template>
+            <!-- <el-button v-else type="primary" @click.stop="addModel"> 新建模型 </el-button> -->
+          </div>
         </div>
+        <div></div>
       </template>
       <template #title>
         <div class="flex items-center">
@@ -43,12 +56,12 @@
               class="ml-10px category-drag-icon cursor-move text-#8a909c"
             />
           </el-tooltip>
-          <h3 class="ml-20px mr-8px text-18px">{{ title }}</h3>
-          <div class="color-gray-600 text-16px"> ({{ dataList?.length || 0 }}) </div>
+          <h3 class="ml-20px mr-8px text-18px">{{ categoryInfo.name }}</h3>
+          <div class="color-gray-600 text-16px"> ({{ categoryInfo.modelList?.length || 0 }}) </div>
         </div>
       </template>
       <el-table
-        :class="title"
+        :class="categoryInfo.name"
         ref="tableRef"
         :header-cell-style="{ backgroundColor: isDark ? '' : '#edeff0', paddingLeft: '10px' }"
         :cell-style="{ paddingLeft: '10px' }"
@@ -58,7 +71,7 @@
         <el-table-column label="流程名" prop="name" min-width="150">
           <template #default="scope">
             <div class="flex items-center">
-              <el-tooltip content="拖动排序" v-if="isSorting">
+              <el-tooltip content="拖动排序" v-if="isModelSorting">
                 <Icon
                   icon="ic:round-drag-indicator"
                   class="drag-icon cursor-move text-#8a909c mr-10px"
@@ -231,11 +244,11 @@ import { cloneDeep } from 'lodash-es'
 
 defineOptions({ name: 'BpmModel' })
 
+const activeCollapse: any = ref([])
 const renameVisible = ref(false)
 const props = defineProps({
   // 分类后的数据
-  dataList: propTypes.object.def([]),
-  title: propTypes.string.def(''),
+  categoryInfo: propTypes.object.def([]),
   isCategorySorting: propTypes.bool.def(false)
 })
 const emit = defineEmits(['success'])
@@ -245,7 +258,7 @@ const isDark = computed(() => appStore.getIsDark)
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由
 const userStore = useUserStoreWithOut() // 用户信息缓存
-const isSorting = ref(false) // 是否正处于排序状态
+const isModelSorting = ref(false) // 是否正处于排序状态
 const tableData: any = ref([])
 const originalData: any = ref([]) // 原始数据
 
@@ -270,7 +283,7 @@ const handleCommand = (command: string, row: any) => {
 const handleCategoryCommand = (command: string) => {
   switch (command) {
     case 'handleRename':
-      renameVal.value = props.title
+      renameVal.value = props.categoryInfo.name
       renameVisible.value = true
       break
     case 'handleDeleteGroup':
@@ -390,8 +403,8 @@ const isManagerUser = (row: any) => {
 /* 排序 */
 const handleSort = () => {
   // 保存初始数据
-  originalData.value = cloneDeep(props.dataList)
-  isSorting.value = true
+  originalData.value = cloneDeep(props.categoryInfo.modelList)
+  isModelSorting.value = true
   initSort()
 }
 
@@ -400,13 +413,13 @@ const saveSort = () => {
   console.log(tableData.value)
   // 刷新列表
   emit('success')
-  isSorting.value = false
+  isModelSorting.value = false
 }
 
 const cancelSort = () => {
   // 恢复初始数据
   tableData.value = cloneDeep(originalData.value)
-  isSorting.value = false
+  isModelSorting.value = false
 }
 
 /* 分类 */
@@ -416,7 +429,7 @@ const handleGroup = () => {
 const tableRef = ref()
 // 创建拖拽实例
 const initSort = () => {
-  const table = document.querySelector(`.${props.title} .el-table__body-wrapper tbody`)
+  const table = document.querySelector(`.${props.categoryInfo.name} .el-table__body-wrapper tbody`)
   Sortable.create(table, {
     group: 'shared',
     animation: 150,
@@ -437,7 +450,7 @@ const initSort = () => {
 
 // 更新表格数据
 const updateTableData = () => {
-  tableData.value = cloneDeep(props.dataList)
+  tableData.value = cloneDeep(props.categoryInfo.modelList)
 }
 
 const renameVal = ref('')
@@ -450,17 +463,18 @@ const handleRenameConfirm = () => {
 
 // 删除分类
 const handleDeleteGroup = async () => {
-  if (props.dataList.length > 0) {
+  if (props.categoryInfo.modelList.length > 0) {
     return message.warning('该分类下仍有流程定义,不允许删除')
   }
   await message.confirm('确认删除分类吗?')
   // 实际调用接口删除
 }
-onMounted(() => {
-  updateTableData()
-})
 
-defineExpose({ updateTableData })
+watch(() => props.categoryInfo.modelList, updateTableData, { immediate: true })
+
+defineExpose({
+  activeCollapse
+})
 </script>
 
 <style lang="scss">
@@ -476,12 +490,6 @@ defineExpose({ updateTableData })
 </style>
 <style lang="scss" scoped>
 :deep() {
-  .el-form--inline .el-form-item {
-    margin-right: 10px;
-  }
-  .el-divider--horizontal {
-    margin-top: 6px;
-  }
   .el-collapse,
   .el-collapse-item__header,
   .el-collapse-item__wrap {

@@ -5,7 +5,7 @@
       <!-- 搜索工作栏 -->
       <el-form
         v-if="!isCategorySorting"
-        class="-mb-15px flex"
+        class="-mb-15px flex mr-10px"
         :model="queryParams"
         ref="queryFormRef"
         :inline="true"
@@ -50,36 +50,35 @@
           </el-dropdown>
         </el-form-item>
       </el-form>
-      <template v-else>
-        <el-button type="primary" @click="cancelSort"> 取 消 </el-button>
+      <div class="mr-20px" v-else>
+        <el-button @click="cancelSort"> 取 消 </el-button>
         <el-button type="primary" @click="saveSort"> 保存排序 </el-button>
-      </template>
+      </div>
     </div>
 
     <el-divider />
 
     <!-- 分类卡片组 -->
     <div class="px-15px">
-      <ContentWrap
-        v-loading="loading"
-        :body-style="{ padding: 0 }"
-        v-for="(list, title) in categoryGroup"
-        :key="title"
-      >
-        <CategoryDraggableModel
-          ref="draggableModelRef"
-          :isCategorySorting="isCategorySorting"
-          :dataList="list"
-          :title="title"
-          @success="getList"
-        />
-      </ContentWrap>
+      <draggable v-model="categoryGroup" item-key="id" :animation="400">
+        <template #item="{ element }">
+          <ContentWrap v-loading="loading" :body-style="{ padding: 0 }" :key="element.id">
+            <CategoryDraggableModel
+              ref="categoryDraggableModelRef"
+              :isCategorySorting="isCategorySorting"
+              :categoryInfo="element"
+              @success="getAllModel"
+            />
+          </ContentWrap>
+        </template>
+      </draggable>
     </div>
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改流程 -->
-  <ModelForm ref="formRef" @success="getList" />
-
+  <ModelForm ref="formRef" @success="getAllModel" />
+  <!-- 表单弹窗：添加/修改分类 -->
+  <CategoryForm ref="categoryFormRef" @success="getList" />
   <!-- 弹窗：表单详情 -->
   <Dialog title="表单详情" v-model="formDetailVisible" width="800">
     <form-create :rule="formDetailPreview.rule" :option="formDetailPreview.option" />
@@ -87,15 +86,18 @@
 </template>
 
 <script lang="ts" setup>
+import draggable from 'vuedraggable'
+import { CategoryApi } from '@/api/bpm/category'
 import * as ModelApi from '@/api/bpm/model'
 import ModelForm from './ModelForm.vue'
-import { groupBy } from 'lodash-es'
-import { mockData } from './mock'
+import CategoryForm from '../category/CategoryForm.vue'
+import { groupBy, cloneDeep } from 'lodash-es'
 import CategoryDraggableModel from './CategoryDraggableModel.vue'
 
 defineOptions({ name: 'BpmModel' })
 
-const draggableModelRef = ref()
+const categoryDraggableModelRef = ref()
+const categoryFormRef = ref()
 const loading = ref(true) // 列表的加载中
 const isCategorySorting = ref(false) // 是否正处于排序状态
 const queryParams = reactive({
@@ -106,26 +108,32 @@ const queryParams = reactive({
   category: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const categoryGroup = ref<any>({}) // 按照category分组的数据
+const categoryGroup: any = ref([]) // 按照category分组的数据
+const originalData: any = ref([])
+// 查询所有分类数据
+const getAllCategory = async () => {
+  // TODO 芋艿：这里需要一个不分页查全部的流程分类接口
+  const data = await CategoryApi.getCategoryPage(queryParams)
+  categoryGroup.value = data.list.map((item) => ({ ...item, modelList: [] }))
+}
 
-/** 查询列表 */
-const getList = async () => {
-  loading.value = true
-  try {
-    // TODO 芋艿：这里需要一个不分页查全部的流程模型接口，并且每条数据都应包含categoryId字段，用于重命名/删除分类。
-    const data = await ModelApi.getModelPage(queryParams)
-    data.list = mockData
-    categoryGroup.value = groupBy(data.list, 'categoryName')
-    draggableModelRef.value?.updateTableData()
-  } finally {
-    loading.value = false
-  }
+/** 查询所有流程模型接口 */
+const getAllModel = async () => {
+  // TODO 芋艿：这里需要一个不分页查全部的流程模型接口
+  const data = await ModelApi.getModelPage(queryParams)
+  const groupedData = groupBy(data.list, 'categoryName')
+  Object.keys(groupedData).forEach((key) => {
+    const category = categoryGroup.value.find((item) => item.name === key)
+    if (category) {
+      category.modelList = groupedData[key]
+    }
+  })
 }
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
-  getList()
+  getAllModel()
 }
 
 /** 添加/修改操作 */
@@ -155,21 +163,40 @@ const handleCommand = (command: string) => {
 }
 
 // 新建分类
-const handleAddCategory = () => {}
+const handleAddCategory = () => {
+  categoryFormRef.value.open('create')
+}
 // 分类排序
 const handleSort = () => {
+  // 保存初始数据
+  originalData.value = cloneDeep(categoryGroup.value)
   isCategorySorting.value = true
+  categoryDraggableModelRef.value?.forEach((element) => {
+    element.activeCollapse = []
+  })
 }
 // 取消排序
 const cancelSort = () => {
+  // 恢复初始数据
+  categoryGroup.value = cloneDeep(originalData.value)
   isCategorySorting.value = false
 }
 // 保存排序
 const saveSort = () => {}
 
+const getList = async () => {
+  loading.value = true
+  try {
+    await getAllCategory()
+    await getAllModel()
+  } finally {
+    loading.value = false
+  }
+}
+
 /** 初始化 **/
 onMounted(async () => {
-  await getList()
+  getList()
 })
 </script>
 
@@ -177,6 +204,12 @@ onMounted(async () => {
 :deep() {
   .el-card {
     border-radius: 8px;
+  }
+  .el-form--inline .el-form-item {
+    margin-right: 10px;
+  }
+  .el-divider--horizontal {
+    margin-top: 6px;
   }
 }
 </style>
