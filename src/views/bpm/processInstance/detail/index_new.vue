@@ -20,9 +20,7 @@
         </div>
 
         <div class="flex items-center gap-5 mb-10px text-13px h-35px">
-          <div
-            class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600"
-          >
+          <div class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600">
             <el-avatar
               :size="28"
               v-if="processInstance?.startUser?.avatar"
@@ -104,7 +102,8 @@
           <!-- 操作栏按钮 -->
           <ProcessInstanceOperationButton
             ref="operationButtonRef"
-            :process-instance-id="id"
+            :process-instance="processInstance"
+            :process-definition="processDefinition"
             :userOptions="userOptions"
             @success="refresh"
           />

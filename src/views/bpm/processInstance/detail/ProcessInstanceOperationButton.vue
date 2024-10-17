@@ -1,7 +1,6 @@
 <template>
   <div
     class="h-50px bottom-10 text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
-    v-if="runningTask && runningTask.id"
   >
     <!-- 【通过】按钮 -->
     <el-popover
@@ -9,7 +8,7 @@
       placement="top-end"
       :width="420"
       trigger="click"
-      v-if=" isHandleTaskStatus() && isShowButton(OperationButtonType.APPROVE)"
+      v-if=" runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.APPROVE)"
     >
       <template #reference>
         <el-button plain type="success" @click="openPopover('approve')">
@@ -26,7 +25,7 @@
           :rules="genericRule"
           label-width="100px"
         >
-          <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
+          <el-card v-if="runningTask?.formId > 0" class="mb-15px !-mt-10px">
             <template #header>
               <span class="el-icon-picture-outline"> 填写表单【{{ runningTask?.formName }}】 </span>
             </template>
@@ -61,7 +60,7 @@
       placement="top-end"
       :width="420"
       trigger="click"
-      v-if=" isHandleTaskStatus() && isShowButton(OperationButtonType.REJECT)"
+      v-if=" runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.REJECT)"
     >
       <template #reference>
         <el-button class="mr-20px" plain type="danger" @click="openPopover('reject')">
@@ -78,7 +77,7 @@
           :rules="genericRule"
           label-width="100px"
         >
-          <el-card v-if="runningTask.formId > 0" class="mb-15px !-mt-10px">
+          <el-card v-if="runningTask?.formId > 0" class="mb-15px !-mt-10px">
             <template #header>
               <span class="el-icon-picture-outline"> 填写表单【{{ runningTask?.formName }}】 </span>
             </template>
@@ -113,7 +112,7 @@
       placement="top-start"
       :width="420"
       trigger="click"
-      v-if="isHandleTaskStatus() && isShowButton(OperationButtonType.COPY)"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.COPY)"
     >
       <template #reference>
         <div @click="openPopover('copy')" class="hover-bg-gray-100 rounded-xl p-6px">
@@ -172,7 +171,7 @@
       placement="top-start"
       :width="420"
       trigger="click"
-      v-if=" isHandleTaskStatus() && isShowButton(OperationButtonType.TRANSFER)"
+      v-if=" runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.TRANSFER)"
     >
       <template #reference>
         <div @click="openPopover('transfer')" class="hover-bg-gray-100 rounded-xl p-6px">
@@ -225,7 +224,7 @@
       placement="top-start"
       :width="420"
       trigger="click"
-      v-if="isHandleTaskStatus() && isShowButton(OperationButtonType.DELEGATE)"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.DELEGATE)"
     >
       <template #reference>
         <div @click="openPopover('delegate')" class="hover-bg-gray-100 rounded-xl p-6px">
@@ -280,7 +279,7 @@
       placement="top-start"
       :width="420"
       trigger="click"
-      v-if="isHandleTaskStatus() && isShowButton(OperationButtonType.ADD_SIGN)"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.ADD_SIGN)"
     >
       <template #reference>
         <div @click="openPopover('addSign')" class="hover-bg-gray-100 rounded-xl p-6px">
@@ -335,7 +334,7 @@
     <div
       @click="openChildrenTask()"
       class="hover-bg-gray-100 rounded-xl p-6px"
-      v-if="runningTask.children"
+      v-if="runningTask?.children"
     >
       <Icon :size="14" icon="ep:semi-select" />&nbsp; 减签
     </div>
@@ -346,11 +345,11 @@
       placement="top-start"
       :width="420"
       trigger="click"
-      v-if="isHandleTaskStatus() && isShowButton(OperationButtonType.RETURN)"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.RETURN)"
     >
       <template #reference>
         <div @click="openReturnPopover" class="hover-bg-gray-100 rounded-xl p-6px">
-          <Icon :size="14" icon="fa:mail-reply" />&nbsp;
+          <Icon :size="14" icon="ep:back" />&nbsp;
           {{ getButtonDisplayName(OperationButtonType.RETURN) }}
         </div>
       </template>
@@ -392,28 +391,82 @@
       </div>
     </el-popover>
 
+    <!--【取消】按钮 这个对应发起人的取消, 只有发起人可以取消 -->
+    <el-popover
+      :visible="popOverVisible.cancel"
+      placement="top-start"
+      :width="420"
+      trigger="click"
+      v-if="userId === processInstance?.startUser?.id && !isEndProcessStatus(processInstance?.status)"
+    >
+      <template #reference>
+        <div @click="openPopover('cancel')" class="hover-bg-gray-100 rounded-xl p-6px">
+          <Icon :size="14" icon="fa:mail-reply" />&nbsp; 取消
+        </div>
+      </template>
+      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+        <el-form
+          label-position="top"
+          class="mb-auto"
+          ref="formRef"
+          :model="genericForm"
+          :rules="genericRule"
+          label-width="100px"
+        >
+          <el-form-item label="取消理由" prop="cancelReason">
+            <span class=" text-#878c93 text-12px">&nbsp; 取消后，该审批流程将自动结束</span>
+            <el-input
+              v-model="genericForm.cancelReason"
+              clearable
+              placeholder="请输入取消理由"
+              type="textarea"
+              :rows="3"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="formLoading" type="primary" @click="handleCancel()">取消</el-button>
+            <el-button @click="popOverVisible.cancel = false"> 取消 </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-popover>
+    <!-- 【再次提交】 按钮-->
+    <div
+      @click="handleReCreate()"
+      class="hover-bg-gray-100 rounded-xl p-6px"
+      v-if="userId === processInstance?.startUser?.id && isEndProcessStatus(processInstance?.status) 
+            && processDefinition?.formType === 10"
+    >
+      <Icon :size="14" icon="ep:refresh" />&nbsp; 再次提交
+    </div>
     <!-- 弹窗：子任务  -->
     <TaskSignList ref="taskSignListRef" @success="reload" />
-    <!--TODO @jason：撤回 -->
-    <!--TODO @jason：再次发起 -->
+   
+  
   </div>
 </template>
 <script lang="ts" setup>
+import { useUserStoreWithOut } from '@/store/modules/user'
 import TaskSignList from './dialog/TaskSignList.vue'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import * as TaskApi from '@/api/bpm/task'
+import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { propTypes } from '@/utils/propTypes'
 import {
   OperationButtonType,
   OPERATION_BUTTON_NAME
 } from '@/components/SimpleProcessDesignerV2/src/consts'
+import { BpmProcessInstanceStatus } from '@/utils/constants'
 defineOptions({ name: 'ProcessInstanceBtnConatiner' })
 
+const router = useRouter() // 路由
 const message = useMessage() // 消息弹窗
 const { proxy } = getCurrentInstance() as any
+const userId = useUserStoreWithOut().getUser.id // 当前登录的编号
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const props = defineProps({
-  processInstanceId: propTypes.string, // 流程实例信息
+  processInstance: propTypes.object, // 流程实例信息
+  processDefinition : propTypes.object, // 流程定义信息
   userOptions: propTypes.any
 })
 const formLoading = ref(false) // 表单加载中
@@ -425,12 +478,13 @@ const popOverVisible = ref({
   delegate: false,
   addSign: false,
   return: false,
-  copy: false
+  copy: false,
+  cancel: false
 })
 /** 退回节点 */
 const returnList = ref([] as any)
 // ========== 审批信息 ==========
-const runningTask = ref<any>({}) // 运行中的任务
+const runningTask = ref<any>() // 运行中的任务
 const genericForm = ref<any>({}) // 通用表单
 const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
 const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
@@ -439,6 +493,7 @@ const formRef = ref()
 const genericRule = reactive({
   reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
   returnReason: [{ required: true, message: '退回理由不能为空', trigger: 'blur' }],
+  cancelReason: [{ required: true, message: '取消理由不能为空', trigger: 'blur' }],
   copyUserIds: [{ required: true, message: '抄送人不能为空', trigger: 'change' }],
   assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }],
   delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }],
@@ -649,6 +704,36 @@ const handleReturn = async () => {
   }
 }
 
+/** 处理取消 */
+const handleCancel = async () => {
+  formLoading.value = true
+  try {
+    const cancelFormRef = proxy.$refs['formRef']
+    // 1.1 校验表单
+    const elForm = unref(cancelFormRef)
+    if (!elForm) return
+    const valid = await elForm.validate()
+    if (!valid) return
+    // 1.2 提交取消
+    await ProcessInstanceApi.cancelProcessInstanceByStartUser(props.processInstance.id, genericForm.value.cancelReason)
+    popOverVisible.value.return = false
+    message.success('操作成功')
+    // 2 重新加载数据
+    reload()
+  } finally {
+    formLoading.value = false
+  }
+}
+
+/** 处理再次提交 */
+const handleReCreate = async () => {
+  // 跳转发起流程界面
+  await router.push({
+    name: 'BpmProcessInstanceCreate',
+    query: { processInstanceId: props.processInstance?.id }
+  })
+}
+
 /** 子任务 */
 const taskSignListRef = ref()
 const openChildrenTask = () => {
@@ -664,18 +749,30 @@ const reload = () => {
 const isHandleTaskStatus = () => {
   let canHandle = false
   if (
-    TaskApi.TaskStatusEnum.RUNNING === runningTask.value.status ||
-    TaskApi.TaskStatusEnum.DELEGATE === runningTask.value.status
+    TaskApi.TaskStatusEnum.RUNNING === runningTask.value?.status ||
+    TaskApi.TaskStatusEnum.DELEGATE === runningTask.value?.status
   ) {
     canHandle = true
   }
   return canHandle
 }
 
+/** 流程状态是否为结束状态 */
+const isEndProcessStatus = (status: number) => {
+  let isEndStatus = false
+  if (
+     BpmProcessInstanceStatus.APPROVE === status || BpmProcessInstanceStatus.REJECT === status ||
+     BpmProcessInstanceStatus.CANCEL === status
+  ) {
+    isEndStatus = true
+  }
+  return isEndStatus
+}
+
 /** 是否显示按钮 */
 const isShowButton = (btnType: OperationButtonType): boolean => {
   let isShow = true
-  if (runningTask.value.buttonsSetting && runningTask.value.buttonsSetting[btnType]) {
+  if (runningTask.value?.buttonsSetting && runningTask.value?.buttonsSetting[btnType]) {
     isShow = runningTask.value.buttonsSetting[btnType].enable
   }
   return isShow
@@ -684,7 +781,7 @@ const isShowButton = (btnType: OperationButtonType): boolean => {
 /** 获取按钮的显示名称 */
 const getButtonDisplayName = (btnType: OperationButtonType) => {
   let displayName = OPERATION_BUTTON_NAME.get(btnType)
-  if (runningTask.value.buttonsSetting && runningTask.value.buttonsSetting[btnType]) {
+  if (runningTask.value?.buttonsSetting && runningTask.value?.buttonsSetting[btnType]) {
     displayName = runningTask.value.buttonsSetting[btnType].displayName
   }
   return displayName
