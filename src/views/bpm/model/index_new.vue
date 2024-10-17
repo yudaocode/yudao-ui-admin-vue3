@@ -10,6 +10,7 @@
         ref="queryFormRef"
         :inline="true"
         label-width="68px"
+        @submit.prevent
       >
         <el-form-item align="right" prop="key" class="ml-auto">
           <el-input
