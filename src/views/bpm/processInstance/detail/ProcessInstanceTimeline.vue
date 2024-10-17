@@ -11,27 +11,31 @@
     >
       <div class="flex flex-col items-start">
         <div class="font-bold"> {{ activity.name }}</div>
-        <div class="flex items-center mt-1">
+        <div class="flex items-center flex-wrap mt-1 ">
           <!-- 情况一：遍历每个审批节点下的【进行中】task 任务 -->
           <div v-for="(task, idx) in activity.tasks" :key="idx" class="flex items-center">
             <div class="flex flex-col pr-2">
               <div class="position-relative" v-if="task.assigneeUser || task.ownerUser">
                 <!-- 信息：头像 -->
-                <el-avatar
-                  :size="36"
-                  v-if="task.assigneeUser && task.assigneeUser.avatar"
-                  :src="task.assigneeUser.avatar"
-                />
-                <el-avatar v-else-if="task.assigneeUser && task.assigneeUser.nickname">
-                  {{ task.assigneeUser.nickname.substring(0, 1) }}
-                </el-avatar>
-                <el-avatar
-                  v-else-if="task.ownerUser && task.ownerUser.avatar"
-                  :src="task.ownerUser.avatar"
-                />
-                <el-avatar v-else-if="task.ownerUser && task.ownerUser.nickname">
-                  {{ task.ownerUser.nickname.substring(0, 1) }}
-                </el-avatar>
+                <el-tooltip :content="task.reason" placement="bottom" v-if="task.assigneeUser && task.assigneeUser.avatar" effect="light">
+                  <el-avatar
+                    :size="36"
+                    :src="task.assigneeUser.avatar"
+                  />
+                </el-tooltip>
+                <el-tooltip :content="task.reason" placement="bottom" v-else-if="task.assigneeUser && task.assigneeUser.nickname" effect="light">
+                  <el-avatar >
+                    {{ task.assigneeUser.nickname.substring(0, 1) }}
+                  </el-avatar>
+                </el-tooltip>
+                <el-tooltip :content="task.reason" placement="bottom" v-else-if="task.ownerUser && task.ownerUser.avatar" effect="light">
+                  <el-avatar :src="task.ownerUser.avatar"/>
+                </el-tooltip>
+                <el-tooltip :content="task.reason" placement="bottom" v-else-if="task.ownerUser && task.ownerUser.nickname" effect="light">
+                  <el-avatar >
+                    {{ task.ownerUser.nickname.substring(0, 1) }}
+                  </el-avatar>
+                </el-tooltip>
                 <!-- 信息：任务 ICON -->
                 <div
                   class="position-absolute top-26px left-26px bg-#fff rounded-full flex items-center p-2px"
@@ -57,6 +61,7 @@
                 >
                   {{ task.ownerUser.nickname }}
                 </div>
+                <!--
                 <div v-if="task.reason" class="text-#a5a5a5 my-4px text-12px flex items-center w-100%">
                   <div
                     :title="task.reason"
@@ -65,6 +70,7 @@
                     {{ task.reason }}
                   </div>
                 </div>
+                -->
               </div>
             </div>
           </div>
@@ -134,25 +140,6 @@ import { TaskStatusEnum } from '@/api/bpm/task'
 import { NodeType } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { Check, Close, Loading, Clock, Minus, Delete } from '@element-plus/icons-vue'
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
-// const props = defineProps({
-//   // 流程实例编号
-//   processInstanceId: {
-//     type: String,
-//     required: false,
-//     default: ''
-//   },
-//   // 流程定义编号
-//   processDefinitionId: {
-//     type: String,
-//     required: false,
-//     default: ''
-//   },
-//   approveNodes : {
-//     type: ProcessInstanceApi.ApprovalNodeInfo[],
-//     required: false,
-//     default: ''
-//   }
-// })
 defineProps<{
   approveNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
 }>()
@@ -201,15 +188,6 @@ const statusIconMap = {
   '7': { color: '#00b32a', icon: Check }
 }
 
-/** 获得审批详情 */
-// const getApprovalDetail = async () => {
-//   const data = await ProcessInstanceApi.getApprovalDetail(
-//     props.processInstanceId,
-//     props.processDefinitionId
-//   )
-//   approveNodes.value = data.approveNodes
-// }
-
 const getApprovalNodeIcon = (taskStatus: number, nodeType: NodeType) => {
   if (taskStatus == TaskStatusEnum.NOT_START) {
     return statusIconMap[taskStatus]?.icon
@@ -232,15 +210,4 @@ const getApprovalNodeTime = (node: ProcessInstanceApi.ApprovalNodeInfo) => {
     return `创建时间：${formatDate(node.startTime)}`
   }
 }
-
-/** 重新刷新审批详情 */
-// const refresh = () => {
-//   getApprovalDetail()
-// }
-
-// defineExpose({ refresh })
-
-// onMounted(async () => {
-//   await getApprovalDetail()
-// })
 </script>
