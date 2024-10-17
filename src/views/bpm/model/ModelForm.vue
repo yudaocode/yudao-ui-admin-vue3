@@ -155,6 +155,7 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
+import { propTypes } from '@/utils/propTypes'
 import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 import { ElMessageBox } from 'element-plus'
 import * as ModelApi from '@/api/bpm/model'
@@ -170,7 +171,9 @@ defineOptions({ name: 'ModelForm' })
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 const userStore = useUserStoreWithOut() // 用户信息缓存
-
+const props = defineProps({
+  categoryId: propTypes.number
+})
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
@@ -232,6 +235,9 @@ const open = async (type: string, id?: string) => {
   categoryList.value = await CategoryApi.getCategorySimpleList()
   // 查询用户列表
   userList.value = await UserApi.getSimpleUserList()
+  if (props.categoryId) {
+    formData.value.category = props.categoryId
+  }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 

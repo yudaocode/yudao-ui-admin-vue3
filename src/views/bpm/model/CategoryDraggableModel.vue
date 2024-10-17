@@ -23,6 +23,16 @@
                 <Icon icon="fa:sort-amount-desc" class="mr-5px" />
                 排序
               </el-button>
+              <el-button
+                v-else
+                link
+                type="info"
+                class="mr-20px"
+                @click.stop="handleAddModel('create')"
+              >
+                <Icon icon="fa:plus" class="mr-5px" />
+                新建
+              </el-button>
               <el-dropdown
                 @command="(command) => handleCategoryCommand(command)"
                 placement="bottom"
@@ -228,9 +238,12 @@
       </div>
     </template>
   </Dialog>
+  <!-- 表单弹窗：添加流程模型 -->
+  <ModelForm :categoryId="categoryInfo.code" ref="modelFormRef" @success="emit('success')" />
 </template>
 
 <script lang="ts" setup>
+import ModelForm from './ModelForm.vue'
 import { CategoryApi } from '@/api/bpm/category'
 import Sortable from 'sortablejs'
 import { propTypes } from '@/utils/propTypes'
@@ -478,6 +491,12 @@ const handleDeleteGroup = async () => {
     // 刷新列表
     emit('success')
   } catch {}
+}
+
+// 添加流程模型弹窗
+const modelFormRef = ref()
+const handleAddModel = (type: string) => {
+  modelFormRef.value.open(type)
 }
 
 watch(() => props.categoryInfo.modelList, updateTableData, { immediate: true })
