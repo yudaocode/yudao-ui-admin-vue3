@@ -66,6 +66,7 @@
         ref="tableRef"
         :header-cell-style="{ backgroundColor: isDark ? '' : '#edeff0', paddingLeft: '10px' }"
         :cell-style="{ paddingLeft: '10px' }"
+        :row-style="{ height: '68px' }"
         :data="tableData"
         row-key="id"
       >
@@ -509,9 +510,7 @@ watch(
 :deep() {
   .el-table__cell {
     border-bottom: none !important;
-  }
-  .el-table__row {
-    height: 68px;
+    overflow: hidden;
   }
 }
 </style>
