@@ -10,6 +10,7 @@
         ref="queryFormRef"
         :inline="true"
         label-width="68px"
+        @submit.prevent
       >
         <el-form-item align="right" prop="key" class="ml-auto">
           <el-input
@@ -60,9 +61,19 @@
 
     <!-- 分类卡片组 -->
     <div class="px-15px">
-      <draggable v-model="categoryGroup" item-key="id" :animation="400">
+      <draggable
+        :disabled="!isCategorySorting"
+        v-model="categoryGroup"
+        item-key="id"
+        :animation="400"
+      >
         <template #item="{ element }">
-          <ContentWrap v-loading="loading" :body-style="{ padding: 0 }" :key="element.id">
+          <ContentWrap
+            class="rounded-lg transition-all duration-300 ease-in-out hover:shadow-xl"
+            v-loading="loading"
+            :body-style="{ padding: 0 }"
+            :key="element.id"
+          >
             <CategoryDraggableModel
               ref="categoryDraggableModelRef"
               :isCategorySorting="isCategorySorting"
@@ -201,6 +212,9 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 :deep() {
+  .el-table--fit .el-table__inner-wrapper:before {
+    height: 0;
+  }
   .el-card {
     border-radius: 8px;
   }
