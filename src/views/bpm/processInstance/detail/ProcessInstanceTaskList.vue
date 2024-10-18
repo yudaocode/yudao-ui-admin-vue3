@@ -1,6 +1,6 @@
 <template>
   <el-card v-loading="loading" class="box-card">
-    <template #header>
+    <template #header v-if="showHeader">
       <span class="el-icon-picture-outline">审批记录</span>
     </template>
     <el-col :offset="3" :span="17">
@@ -104,7 +104,8 @@ defineOptions({ name: 'BpmProcessInstanceTaskList' })
 defineProps({
   loading: propTypes.bool, // 是否加载中
   processInstance: propTypes.object, // 流程实例
-  tasks: propTypes.arrayOf(propTypes.object) // 流程任务的数组
+  tasks: propTypes.arrayOf(propTypes.object), // 流程任务的数组
+  showHeader: propTypes.bool.def(true), // 是否显示头
 })
 
 /** 获得流程实例对应的颜色 */

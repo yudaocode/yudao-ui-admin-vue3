@@ -507,7 +507,7 @@ OPERATION_BUTTON_NAME.set(OperationButtonType.REJECT, '拒绝')
 OPERATION_BUTTON_NAME.set(OperationButtonType.TRANSFER, '转办')
 OPERATION_BUTTON_NAME.set(OperationButtonType.DELEGATE, '委派')
 OPERATION_BUTTON_NAME.set(OperationButtonType.ADD_SIGN, '加签')
-OPERATION_BUTTON_NAME.set(OperationButtonType.RETURN, '回退')
+OPERATION_BUTTON_NAME.set(OperationButtonType.RETURN, '退回')
 OPERATION_BUTTON_NAME.set(OperationButtonType.COPY, '抄送')
 
 // 默认的按钮权限设置

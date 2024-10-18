@@ -1,5 +1,5 @@
 <template>
-  <ContentWrap :bodyStyle="{ padding: '10px 20px' }" class="position-relative">
+  <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }" class="position-relative">
     <div class="processInstance-wrap-main">
       <el-scrollbar>
         <img
@@ -73,7 +73,7 @@
           <!-- 流程图 -->
           <el-tab-pane label="流程图" name="diagram">
             <div class="form-scroll-area">
-              <ProcessInstanceBpmnViewer :id="`${id}`" :loading="processInstanceLoading" />
+              <ProcessInstanceBpmnViewer :id="`${id}`" :loading="processInstanceLoading" :show-header="false"/>
             </div>
           </el-tab-pane>
 
@@ -85,6 +85,7 @@
                   :loading="tasksLoad"
                   :process-instance="processInstance"
                   :tasks="tasks"
+                  :show-header="false"
                 />
               </el-scrollbar>
             </div>
@@ -305,27 +306,27 @@ onMounted(async () => {
 </script>
 
 <style lang="scss" scoped>
-$wrap-padding-height: 30px;
+$wrap-padding-height: 20px;
 $wrap-margin-height: 15px;
 $button-height: 51px;
 $process-header-height: 194px;
 
 .processInstance-wrap-main {
   height: calc(
-    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px
+    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px
   );
   max-height: calc(
-    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px
+    100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px
   );
   overflow: auto;
 
   .form-scroll-area {
     height: calc(
-      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px -
+      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px -
         $process-header-height - 40px
     );
     max-height: calc(
-      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 45px -
+      100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px -
         $process-header-height - 40px
     );
     overflow: auto;

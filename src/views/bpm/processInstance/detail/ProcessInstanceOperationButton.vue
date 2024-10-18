@@ -391,7 +391,7 @@
       </div>
     </el-popover>
 
-    <!--【取消】按钮 这个对应发起人的取消, 只有发起人可以取消 -->
+    <!--【撤消】按钮 这个对应发起人的取消, 只有发起人可以取消 -->
     <el-popover
       :visible="popOverVisible.cancel"
       placement="top-start"
@@ -401,7 +401,7 @@
     >
       <template #reference>
         <div @click="openPopover('cancel')" class="hover-bg-gray-100 rounded-xl p-6px">
-          <Icon :size="14" icon="fa:mail-reply" />&nbsp; 取消
+          <Icon :size="14" icon="fa:mail-reply" />&nbsp; 撤消
         </div>
       </template>
       <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
@@ -413,18 +413,18 @@
           :rules="genericRule"
           label-width="100px"
         >
-          <el-form-item label="取消理由" prop="cancelReason">
-            <span class=" text-#878c93 text-12px">&nbsp; 取消后，该审批流程将自动结束</span>
+          <el-form-item label="撤消理由" prop="cancelReason">
+            <span class=" text-#878c93 text-12px">&nbsp; 撤消后，该审批流程将自动结束</span>
             <el-input
               v-model="genericForm.cancelReason"
               clearable
-              placeholder="请输入取消理由"
+              placeholder="请输入撤消理由"
               type="textarea"
               :rows="3"
             />
           </el-form-item>
           <el-form-item>
-            <el-button :disabled="formLoading" type="primary" @click="handleCancel()">取消</el-button>
+            <el-button :disabled="formLoading" type="primary" @click="handleCancel()">撤消</el-button>
             <el-button @click="popOverVisible.cancel = false"> 取消 </el-button>
           </el-form-item>
         </el-form>
@@ -493,11 +493,12 @@ const formRef = ref()
 const genericRule = reactive({
   reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
   returnReason: [{ required: true, message: '退回理由不能为空', trigger: 'blur' }],
-  cancelReason: [{ required: true, message: '取消理由不能为空', trigger: 'blur' }],
+  cancelReason: [{ required: true, message: '撤消理由不能为空', trigger: 'blur' }],
   copyUserIds: [{ required: true, message: '抄送人不能为空', trigger: 'change' }],
   assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }],
   delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }],
-  addSignUserIds: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }]
+  addSignUserIds: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }],
+  targetTaskDefinitionKey:  [{ required: true, message: '退回节点不能为空', trigger: 'change' }]
 })
 
 /** 监听 approveFormFApis，实现它对应的 form-create 初始化后，隐藏掉对应的表单提交按钮 */
@@ -530,7 +531,9 @@ const openPopover = (type: string) => {
       popOverVisible.value[item] = false
     }
   })
-  formRef.value.resetFields()
+  nextTick().then(() => {
+    formRef.value.resetFields()
+  })
 }
 
 /** 处理审批通过和不通过的操作 */
@@ -814,7 +817,7 @@ defineExpose({ loadTodoTask })
 .btn-container {
   > div {
     display: flex;
-    margin: 0 15px;
+    margin: 0 8px;
     cursor: pointer;
     align-items: center;
 
