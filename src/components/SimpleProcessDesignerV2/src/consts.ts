@@ -96,7 +96,6 @@ export interface SimpleFlowNode {
   conditionGroups?: ConditionGroup
   // 是否默认的条件
   defaultFlow?: boolean
-
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -514,10 +513,10 @@ OPERATION_BUTTON_NAME.set(OperationButtonType.COPY, '抄送')
 export const DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
   { id: OperationButtonType.APPROVE, displayName: '通过', enable: true },
   { id: OperationButtonType.REJECT, displayName: '拒绝', enable: true },
-  { id: OperationButtonType.TRANSFER, displayName: '转办', enable: false },
-  { id: OperationButtonType.DELEGATE, displayName: '委派', enable: false },
-  { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: false },
-  { id: OperationButtonType.RETURN, displayName: '回退', enable: false }
+  { id: OperationButtonType.TRANSFER, displayName: '转办', enable: true },
+  { id: OperationButtonType.DELEGATE, displayName: '委派', enable: true },
+  { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: true },
+  { id: OperationButtonType.RETURN, displayName: '回退', enable: true }
 ]
 
 // 发起人的按钮权限。暂时定死，不可以编辑
