@@ -1,4 +1,4 @@
-import { MessageRole, MessageType, SendStatus } from '../types'
+import { MessageRole, ContentType, SendStatus } from '@/views/chat/types/index.d.ts'
 import BaseMessage from './BaseMessage'
 
 export default class TextMessage extends BaseMessage {
@@ -13,10 +13,23 @@ export default class TextMessage extends BaseMessage {
     content: string,
     role: MessageRole,
     sendStatus: SendStatus,
-    messageType: MessageType,
-    conversationId: string
+    conversationId: string,
+    receiverId: number,
+    conversationType: number
   ) {
-    super(id, avatar, nickname, createTime, isRead, role, sendStatus, messageType, conversationId)
+    super(
+      id,
+      avatar,
+      nickname,
+      createTime,
+      isRead,
+      role,
+      sendStatus,
+      ContentType.TEXT,
+      conversationId,
+      receiverId,
+      conversationType
+    )
     this.content = content
   }
 }

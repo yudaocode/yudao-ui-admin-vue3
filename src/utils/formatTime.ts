@@ -61,7 +61,7 @@ export function getWeek(dateTime: Date): number {
  * @description param 3天：   60 * 60* 24 * 1000 * 3
  * @returns 返回拼接后的时间字符串
  */
-export function formatPast(param: string | Date, format = 'YYYY-mm-dd HH:MM:SS'): string {
+export function formatPast(param: string | Date, format = 'YYYY-MM-DD HH:mm:ss'): string {
   // 传入格式处理、存储转换值
   let t: any, s: number
   // 获取js 时间戳

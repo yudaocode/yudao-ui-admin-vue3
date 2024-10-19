@@ -1,19 +1,23 @@
 <template>
   <view class="flex py-2 border-b-gray-3 border-b-solid items-center px-2" :class="bgColor()">
-    <el-avatar shape="square" size="default" class="mr-2" />
-    <view class="flex flex-col flex-1">
+    <el-avatar shape="square" size="default" class="mr-2">
+      {{ props.conversation.name || '' }}
+    </el-avatar>
+    <view class="flex flex-col flex-1 tems-end h-full">
       <label
         class="text-black-c text-size-sm font-medium text-ellipsis text-nowrap"
-        :class="fontColor()"
+        :class="namefontColor()"
         >{{ props.conversation.name }}</label
       >
-      <label class="text-gray-f text-size-sm text-ellipsis text-nowrap mr-1" :class="fontColor()">{{
-        props.conversation.description
-      }}</label>
+      <label
+        class="text-gray-f text-size-sm text-ellipsis text-nowrap mr-1"
+        :class="timefontColor()"
+        >{{ props.conversation.description }}</label
+      >
     </view>
-    <view class="flex items-end h-full">
-      <label class="text-gray-f text-size-sm text-nowrap" :class="fontColor()">{{
-        formatPast(new Date(props.conversation.updateTime))
+    <view class="flex items-end h-full flex-col">
+      <label class="text-gray-f text-size-xs text-nowrap" :class="timefontColor()">{{
+        formatPast(new Date(props.conversation.updateTime), 'YYYY-MM-DD')
       }}</label>
     </view>
   </view>
@@ -41,7 +45,20 @@ const bgColor = () => {
   return props.index === chatStore.currentSessionIndex ? 'bg-blue' : 'bg-white'
 }
 
-const fontColor = () => {
-  return props.index === chatStore.currentSessionIndex ? 'text-white' : 'text-gray-f'
+const namefontColor = () => {
+  return props.index === chatStore.currentSessionIndex ? 'text-white' : 'nameColor'
+}
+const timefontColor = () => {
+  return props.index === chatStore.currentSessionIndex ? 'text-white' : 'timeColor'
 }
 </script>
+
+<style lang="scss" scoped>
+.timeColor {
+  color: #999;
+}
+
+.nameColor {
+  color: black;
+}
+</style>
