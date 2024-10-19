@@ -134,12 +134,7 @@
               prop="userIds"
               span="24"
             >
-              <el-select
-                v-model="configForm.userIds"
-                clearable
-                multiple
-                style="width: 100%"
-              >
+              <el-select v-model="configForm.userIds" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in userOptions"
                   :key="item.id"
@@ -183,10 +178,7 @@
                     :key="index"
                     class="flex items-center"
                   >
-                    <el-radio
-                      :value="item.value"
-                      :label="item.value"
-                    >
+                    <el-radio :value="item.value" :label="item.value">
                       {{ item.label }}
                     </el-radio>
                     <el-form-item prop="approveRatio">
@@ -552,7 +544,7 @@ const approveMethodChanged = () => {
   }
   formRef.value.clearValidate('approveRatio')
 }
-// 审批拒绝 可回退的节点
+// 审批拒绝 可退回的节点
 const returnTaskList = ref<SimpleFlowNode[]>([])
 // 审批人超时未处理设置
 const {

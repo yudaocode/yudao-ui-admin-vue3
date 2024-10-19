@@ -1,5 +1,5 @@
 <template>
-  <Dialog v-model="dialogVisible" title="回退任务" width="500">
+  <Dialog v-model="dialogVisible" title="退回任务" width="500">
     <el-form
       ref="formRef"
       v-loading="formLoading"
@@ -17,8 +17,8 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="回退理由" prop="reason">
-        <el-input v-model="formData.reason" clearable placeholder="请输入回退理由" />
+      <el-form-item label="退回理由" prop="reason">
+        <el-input v-model="formData.reason" clearable placeholder="请输入退回理由" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -39,8 +39,8 @@ const formData = ref({
   reason: ''
 })
 const formRules = ref({
-  targetTaskDefinitionKey: [{ required: true, message: '必须选择回退节点', trigger: 'change' }],
-  reason: [{ required: true, message: '回退理由不能为空', trigger: 'blur' }]
+  targetTaskDefinitionKey: [{ required: true, message: '必须选择退回节点', trigger: 'change' }],
+  reason: [{ required: true, message: '退回理由不能为空', trigger: 'blur' }]
 })
 
 const formRef = ref() // 表单 Ref
@@ -49,7 +49,7 @@ const returnList = ref([] as any)
 const open = async (id: string) => {
   returnList.value = await TaskApi.getTaskListByReturn(id)
   if (returnList.value.length === 0) {
-    message.warning('当前没有可回退的节点')
+    message.warning('当前没有可退回的节点')
     return false
   }
   dialogVisible.value = true
@@ -69,7 +69,7 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     await TaskApi.returnTask(formData.value)
-    message.success('回退成功')
+    message.success('退回成功')
     dialogVisible.value = false
     // 发送操作成功的事件
     emit('success')

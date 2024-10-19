@@ -8,7 +8,7 @@
       placement="top-end"
       :width="420"
       trigger="click"
-      v-if=" runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.APPROVE)"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.APPROVE)"
     >
       <template #reference>
         <el-button plain type="success" @click="openPopover('approve')">
@@ -60,7 +60,7 @@
       placement="top-end"
       :width="420"
       trigger="click"
-      v-if=" runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.REJECT)"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.REJECT)"
     >
       <template #reference>
         <el-button class="mr-20px" plain type="danger" @click="openPopover('reject')">
@@ -171,7 +171,7 @@
       placement="top-start"
       :width="420"
       trigger="click"
-      v-if=" runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.TRANSFER)"
+      v-if="runningTask && isHandleTaskStatus() && isShowButton(OperationButtonType.TRANSFER)"
     >
       <template #reference>
         <div @click="openPopover('transfer')" class="hover-bg-gray-100 rounded-xl p-6px">
@@ -397,7 +397,9 @@
       placement="top-start"
       :width="420"
       trigger="click"
-      v-if="userId === processInstance?.startUser?.id && !isEndProcessStatus(processInstance?.status)"
+      v-if="
+        userId === processInstance?.startUser?.id && !isEndProcessStatus(processInstance?.status)
+      "
     >
       <template #reference>
         <div @click="openPopover('cancel')" class="hover-bg-gray-100 rounded-xl p-6px">
@@ -414,7 +416,7 @@
           label-width="100px"
         >
           <el-form-item label="撤消理由" prop="cancelReason">
-            <span class=" text-#878c93 text-12px">&nbsp; 撤消后，该审批流程将自动结束</span>
+            <span class="text-#878c93 text-12px">&nbsp; 撤消后，该审批流程将自动结束</span>
             <el-input
               v-model="genericForm.cancelReason"
               clearable
@@ -424,7 +426,9 @@
             />
           </el-form-item>
           <el-form-item>
-            <el-button :disabled="formLoading" type="primary" @click="handleCancel()">撤消</el-button>
+            <el-button :disabled="formLoading" type="primary" @click="handleCancel()"
+              >撤消</el-button
+            >
             <el-button @click="popOverVisible.cancel = false"> 取消 </el-button>
           </el-form-item>
         </el-form>
@@ -434,15 +438,16 @@
     <div
       @click="handleReCreate()"
       class="hover-bg-gray-100 rounded-xl p-6px"
-      v-if="userId === processInstance?.startUser?.id && isEndProcessStatus(processInstance?.status) 
-            && processDefinition?.formType === 10"
+      v-if="
+        userId === processInstance?.startUser?.id &&
+        isEndProcessStatus(processInstance?.status) &&
+        processDefinition?.formType === 10
+      "
     >
       <Icon :size="14" icon="ep:refresh" />&nbsp; 再次提交
     </div>
     <!-- 弹窗：子任务  -->
     <TaskSignList ref="taskSignListRef" @success="reload" />
-   
-  
   </div>
 </template>
 <script lang="ts" setup>
@@ -457,20 +462,22 @@ import {
   OPERATION_BUTTON_NAME
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { BpmProcessInstanceStatus } from '@/utils/constants'
-defineOptions({ name: 'ProcessInstanceBtnConatiner' })
+
+defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
 const router = useRouter() // 路由
 const message = useMessage() // 消息弹窗
 const { proxy } = getCurrentInstance() as any
+
 const userId = useUserStoreWithOut().getUser.id // 当前登录的编号
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 const props = defineProps({
   processInstance: propTypes.object, // 流程实例信息
-  processDefinition : propTypes.object, // 流程定义信息
+  processDefinition: propTypes.object, // 流程定义信息
   userOptions: propTypes.any
 })
+
 const formLoading = ref(false) // 表单加载中
-/** 气泡卡是否展示 */
 const popOverVisible = ref({
   approve: false,
   reject: false,
@@ -480,16 +487,15 @@ const popOverVisible = ref({
   return: false,
   copy: false,
   cancel: false
-})
-/** 退回节点 */
-const returnList = ref([] as any)
+}) // 气泡卡是否展示
+const returnList = ref([] as any) // 退回节点
+
 // ========== 审批信息 ==========
 const runningTask = ref<any>() // 运行中的任务
 const genericForm = ref<any>({}) // 通用表单
 const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
 const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
 const formRef = ref()
-/** 表单校验规则 */
 const genericRule = reactive({
   reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
   returnReason: [{ required: true, message: '退回理由不能为空', trigger: 'blur' }],
@@ -498,8 +504,8 @@ const genericRule = reactive({
   assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }],
   delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }],
   addSignUserIds: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }],
-  targetTaskDefinitionKey:  [{ required: true, message: '退回节点不能为空', trigger: 'change' }]
-})
+  targetTaskDefinitionKey: [{ required: true, message: '退回节点不能为空', trigger: 'change' }]
+}) // 表单校验规则
 
 /** 监听 approveFormFApis，实现它对应的 form-create 初始化后，隐藏掉对应的表单提交按钮 */
 watch(
@@ -520,20 +526,16 @@ const openReturnPopover = async () => {
     message.warning('当前没有可退回的节点')
     return
   }
-  openPopover('return')
+  await openPopover('return')
 }
+
 /** 弹出气泡卡 */
-const openPopover = (type: string) => {
+const openPopover = async (type: string) => {
   Object.keys(popOverVisible.value).forEach((item) => {
-    if (item === type) {
-      popOverVisible.value[item] = true
-    } else {
-      popOverVisible.value[item] = false
-    }
+    popOverVisible.value[item] = item === type
   })
-  nextTick().then(() => {
-    formRef.value.resetFields()
-  })
+  await nextTick()
+  formRef.value.resetFields()
 }
 
 /** 处理审批通过和不通过的操作 */
@@ -575,7 +577,7 @@ const handleAudit = async (pass: boolean) => {
   }
 }
 
-/* 处理抄送 */
+/** 处理抄送 */
 const handleCopy = async () => {
   formLoading.value = true
   try {
@@ -718,7 +720,10 @@ const handleCancel = async () => {
     const valid = await elForm.validate()
     if (!valid) return
     // 1.2 提交取消
-    await ProcessInstanceApi.cancelProcessInstanceByStartUser(props.processInstance.id, genericForm.value.cancelReason)
+    await ProcessInstanceApi.cancelProcessInstanceByStartUser(
+      props.processInstance.id,
+      genericForm.value.cancelReason
+    )
     popOverVisible.value.return = false
     message.success('操作成功')
     // 2 重新加载数据
@@ -764,8 +769,9 @@ const isHandleTaskStatus = () => {
 const isEndProcessStatus = (status: number) => {
   let isEndStatus = false
   if (
-     BpmProcessInstanceStatus.APPROVE === status || BpmProcessInstanceStatus.REJECT === status ||
-     BpmProcessInstanceStatus.CANCEL === status
+    BpmProcessInstanceStatus.APPROVE === status ||
+    BpmProcessInstanceStatus.REJECT === status ||
+    BpmProcessInstanceStatus.CANCEL === status
   ) {
     isEndStatus = true
   }
@@ -806,7 +812,6 @@ const loadTodoTask = (task: any) => {
 }
 
 defineExpose({ loadTodoTask })
-
 </script>
 
 <style lang="scss" scoped>

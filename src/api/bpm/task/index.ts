@@ -75,12 +75,12 @@ export const getTaskListByProcessInstanceId = async (processInstanceId: string) 
   })
 }
 
-// 获取所有可回退的节点
+// 获取所有可退回的节点
 export const getTaskListByReturn = async (id: string) => {
   return await request.get({ url: '/bpm/task/list-by-return', params: { id } })
 }
 
-// 回退
+// 退回
 export const returnTask = async (data: any) => {
   return await request.put({ url: '/bpm/task/return', data })
 }

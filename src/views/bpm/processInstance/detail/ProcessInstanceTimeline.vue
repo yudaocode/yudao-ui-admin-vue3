@@ -11,28 +11,45 @@
     >
       <div class="flex flex-col items-start">
         <div class="font-bold"> {{ activity.name }}</div>
-        <div class="flex items-center flex-wrap mt-1 ">
+        <div class="flex items-center flex-wrap mt-1">
           <!-- 情况一：遍历每个审批节点下的【进行中】task 任务 -->
           <div v-for="(task, idx) in activity.tasks" :key="idx" class="flex items-center">
             <div class="flex flex-col pr-2">
               <div class="position-relative" v-if="task.assigneeUser || task.ownerUser">
                 <!-- 信息：头像 -->
-                <el-tooltip :content="task.reason" placement="bottom" v-if="task.assigneeUser && task.assigneeUser.avatar" effect="light">
-                  <el-avatar
-                    :size="36"
-                    :src="task.assigneeUser.avatar"
-                  />
+                <el-tooltip
+                  :content="task.reason"
+                  placement="bottom"
+                  v-if="task.assigneeUser && task.assigneeUser.avatar"
+                  effect="light"
+                >
+                  <el-avatar :size="36" :src="task.assigneeUser.avatar" />
                 </el-tooltip>
-                <el-tooltip :content="task.reason" placement="bottom" v-else-if="task.assigneeUser && task.assigneeUser.nickname" effect="light">
-                  <el-avatar >
+                <el-tooltip
+                  :content="task.reason"
+                  placement="bottom"
+                  v-else-if="task.assigneeUser && task.assigneeUser.nickname"
+                  effect="light"
+                >
+                  <el-avatar>
                     {{ task.assigneeUser.nickname.substring(0, 1) }}
                   </el-avatar>
                 </el-tooltip>
-                <el-tooltip :content="task.reason" placement="bottom" v-else-if="task.ownerUser && task.ownerUser.avatar" effect="light">
-                  <el-avatar :src="task.ownerUser.avatar"/>
+                <el-tooltip
+                  :content="task.reason"
+                  placement="bottom"
+                  v-else-if="task.ownerUser && task.ownerUser.avatar"
+                  effect="light"
+                >
+                  <el-avatar :src="task.ownerUser.avatar" />
                 </el-tooltip>
-                <el-tooltip :content="task.reason" placement="bottom" v-else-if="task.ownerUser && task.ownerUser.nickname" effect="light">
-                  <el-avatar >
+                <el-tooltip
+                  :content="task.reason"
+                  placement="bottom"
+                  v-else-if="task.ownerUser && task.ownerUser.nickname"
+                  effect="light"
+                >
+                  <el-avatar>
                     {{ task.ownerUser.nickname.substring(0, 1) }}
                   </el-avatar>
                 </el-tooltip>
@@ -146,7 +163,6 @@ defineProps<{
 
 // 审批节点
 
-
 const statusIconMap2 = {
   // 未开始
   '-1': { color: '#e5e7ec', icon: 'ep-clock' },
@@ -160,7 +176,7 @@ const statusIconMap2 = {
   '3': { color: '#f46b6c', icon: 'fa-solid:times-circle' },
   // 取消
   '4': { color: '#cccccc', icon: 'ep:delete-filled' },
-  // 回退
+  // 退回
   '5': { color: '#f46b6c', icon: 'ep:remove-filled' },
   // 委派中
   '6': { color: '#448ef7', icon: 'ep:loading' },
@@ -180,7 +196,7 @@ const statusIconMap = {
   '3': { color: '#f46b6c', icon: Close },
   // 已取消
   '4': { color: '#cccccc', icon: Delete },
-  // 回退
+  // 退回
   '5': { color: '#f46b6c', icon: Minus },
   // 委派中
   '6': { color: '#448ef7', icon: Loading },

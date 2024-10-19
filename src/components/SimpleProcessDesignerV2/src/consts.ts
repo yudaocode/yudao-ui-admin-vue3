@@ -177,7 +177,7 @@ export enum ApproveMethodType {
 export type RejectHandler = {
   // 审批拒绝类型
   type: RejectHandlerType
-  // 回退节点 Id
+  // 退回节点 Id
   returnNodeId?: string
 }
 
@@ -359,7 +359,7 @@ export enum OperationButtonType {
    */
   ADD_SIGN = 5,
   /**
-   * 回退
+   * 退回
    */
   RETURN = 6,
   /**
@@ -516,7 +516,7 @@ export const DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
   { id: OperationButtonType.TRANSFER, displayName: '转办', enable: true },
   { id: OperationButtonType.DELEGATE, displayName: '委派', enable: true },
   { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: true },
-  { id: OperationButtonType.RETURN, displayName: '回退', enable: true }
+  { id: OperationButtonType.RETURN, displayName: '退回', enable: true }
 ]
 
 // 发起人的按钮权限。暂时定死，不可以编辑
@@ -526,7 +526,7 @@ export const START_USER_BUTTON_SETTING: ButtonSetting[] = [
   { id: OperationButtonType.TRANSFER, displayName: '转办', enable: false },
   { id: OperationButtonType.DELEGATE, displayName: '委派', enable: false },
   { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: false },
-  { id: OperationButtonType.RETURN, displayName: '回退', enable: false }
+  { id: OperationButtonType.RETURN, displayName: '退回', enable: false }
 ]
 
 export const MULTI_LEVEL_DEPT: DictDataVO = [

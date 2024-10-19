@@ -161,7 +161,7 @@
 
     <!-- 弹窗：转派审批人 -->
     <TaskTransferForm ref="taskTransferFormRef" @success="getDetail" />
-    <!-- 弹窗：回退节点 -->
+    <!-- 弹窗：退回节点 -->
     <TaskReturnForm ref="taskReturnFormRef" @success="getDetail" />
     <!-- 弹窗：委派，将任务委派给别人处理，处理完成后，会重新回到原审批人手中-->
     <TaskDelegateForm ref="taskDelegateForm" @success="getDetail" />

@@ -282,9 +282,12 @@ const importXML = async (xml: string) => {
 /** 高亮流程 */
 const setProcessStatus = (view: any) => {
   // 设置相关变量
+  if (!view || !view.processInstance) {
+    return
+  }
   processInstance.value = view.processInstance
   tasks.value = view.tasks
-  if (isLoading.value || !processInstance.value || !bpmnViewer.value) {
+  if (isLoading.value || !bpmnViewer.value) {
     return
   }
   const {
