@@ -111,32 +111,31 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
       return
     }
     if (type == NodeType.START_USER_NODE) {
+      // 发起人节点暂时不用校验，直接校验孩子节点
       validateNode(node.childNode, errorNodes)
     }
 
-    if (type === NodeType.USER_TASK_NODE) {
+    if (
+      type === NodeType.USER_TASK_NODE ||
+      type === NodeType.COPY_TASK_NODE ||
+      type === NodeType.CONDITION_NODE
+    ) {
       if (!showText) {
         errorNodes.push(node)
       }
       validateNode(node.childNode, errorNodes)
     }
-    if (type === NodeType.COPY_TASK_NODE) {
-      if (!showText) {
-        errorNodes.push(node)
-      }
-      validateNode(node.childNode, errorNodes)
-    }
-    if (type === NodeType.CONDITION_NODE) {
-      if (!showText) {
-        errorNodes.push(node)
-      }
-      validateNode(node.childNode, errorNodes)
-    }
-
-    if (type == NodeType.CONDITION_BRANCH_NODE) {
+    
+    if (
+      type == NodeType.CONDITION_BRANCH_NODE ||
+      type == NodeType.PARALLEL_BRANCH_NODE ||
+      type == NodeType.INCLUSIVE_BRANCH_NODE
+    ) { // 分支节点
+      // 1. 先校验各个分支
       conditionNodes?.forEach((item) => {
         validateNode(item, errorNodes)
       })
+      // 2. 校验孩子节点
       validateNode(node.childNode, errorNodes)
     }
   }

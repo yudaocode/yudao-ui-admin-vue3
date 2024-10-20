@@ -26,7 +26,7 @@
       </div>
     </template>
     <div>
-      <div class="mb-3 font-size-16px" v-if="currentNode.defaultFlow">其它条件不满足进入此分支（该分支不可编辑和删除）</div>
+      <div class="mb-3 font-size-16px" v-if="currentNode.defaultFlow">未满足其它条件时，将进入此分支（该分支不可编辑和删除）</div>
       <div v-else>
         <el-form
           ref="formRef"

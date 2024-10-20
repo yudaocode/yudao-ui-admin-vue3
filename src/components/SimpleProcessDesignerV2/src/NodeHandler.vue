@@ -27,10 +27,16 @@
             <div class="handler-item-text">条件分支</div>
           </div>
           <div class="handler-item" @click="addNode(NodeType.PARALLEL_BRANCH_NODE)">
-            <div class="handler-item-icon condition">
+            <div class="handler-item-icon parallel">
               <span class="iconfont icon-size icon-parallel"></span>
             </div>
             <div class="handler-item-text">并行分支</div>
+          </div>
+          <div class="handler-item" @click="addNode(NodeType.INCLUSIVE_BRANCH_NODE)">
+            <div class="handler-item-icon inclusive">
+              <span class="iconfont icon-size icon-inclusive"></span>
+            </div>
+            <div class="handler-item-text">包容分支</div>
           </div>
         </div>
         <template #reference>
@@ -127,7 +133,7 @@ const addNode = (type: number) => {
         {
           id: 'Flow_' + generateUUID(),
           name: '其它情况',
-          showText: '其它情况进入此流程',
+          showText: '未满足其它条件时，将进入此分支',
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
           conditionType: undefined,
@@ -157,6 +163,32 @@ const addNode = (type: number) => {
           showText: '无需配置条件同时执行',
           type: NodeType.CONDITION_NODE,
           childNode: undefined
+        }
+      ]
+    }
+    emits('update:childNode', data)
+  }
+  if (type === NodeType.INCLUSIVE_BRANCH_NODE) {
+    const data: SimpleFlowNode = {
+      name: '包容分支',
+      type: NodeType.INCLUSIVE_BRANCH_NODE,
+      id: 'GateWay_' + generateUUID(),
+      childNode: props.childNode,
+      conditionNodes: [
+        {
+          id: 'Flow_' + generateUUID(),
+          name: '包容条件1',
+          showText: '',
+          type: NodeType.CONDITION_NODE,
+          childNode: undefined
+        },
+        {
+          id: 'Flow_' + generateUUID(),
+          name: '其它情况',
+          showText: '未满足其它条件时，将进入此分支',
+          type: NodeType.CONDITION_NODE,
+          childNode: undefined,
+          defaultFlow: true
         }
       ]
     }

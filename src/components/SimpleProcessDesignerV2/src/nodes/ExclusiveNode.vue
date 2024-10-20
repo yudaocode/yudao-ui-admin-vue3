@@ -1,7 +1,7 @@
 <template>
   <div class="branch-node-wrapper">
     <div class="branch-node-container">
-      <div class="branch-node-add" @click="addCondition">添加条件</div>
+      <el-button class="branch-node-add" color="#67c23a" @click="addCondition"  plain>添加条件</el-button>
       <div
         class="branch-node-item"
         v-for="(item, index) in currentNode.conditionNodes"
@@ -94,10 +94,6 @@ defineOptions({
   name: 'ExclusiveNode'
 })
 const props = defineProps({
-  // parentNode : {
-  //   type: Object as () => SimpleFlowNode,
-  //   required: true
-  // },
   flowNode: {
     type: Object as () => SimpleFlowNode,
     required: true
@@ -193,7 +189,7 @@ const recursiveFindParentNode = (
   node: SimpleFlowNode,
   nodeType: number
 ) => {
-  if (!node || node.type === NodeType.START_EVENT_NODE) {
+  if (!node || node.type === NodeType.START_USER_NODE) {
     return
   }
   if (node.type === nodeType) {
