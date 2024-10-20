@@ -1,8 +1,5 @@
 <template>
   <el-card v-loading="loading" class="box-card">
-    <template #header v-if="showHeader">
-      <span class="el-icon-picture-outline">流程图</span>
-    </template>
     <MyProcessViewer key="designer" :xml="view.bpmnXml" :view="view" class="h-700px" />
   </el-card>
 </template>
@@ -16,8 +13,7 @@ defineOptions({ name: 'BpmProcessInstanceBpmnViewer' })
 const props = defineProps({
   loading: propTypes.bool.def(false), // 是否加载中
   id: propTypes.string, // 流程实例的编号
-  bpmnXml: propTypes.string, // BPMN XML
-  showHeader: propTypes.bool.def(true), // 是否显示头
+  bpmnXml: propTypes.string // BPMN XML
 })
 
 const view = ref({

@@ -1,9 +1,6 @@
 <template>
   <el-card v-loading="loading" class="box-card">
-    <template #header v-if="showHeader">
-      <span class="el-icon-picture-outline">审批记录</span>
-    </template>
-    <el-col :offset="3" :span="17">
+    <el-col>
       <div class="block">
         <el-timeline>
           <el-timeline-item
@@ -26,14 +23,6 @@
             <p style="font-weight: 700">
               审批任务：{{ item.name }}
               <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="item.status" />
-              <el-button
-                class="ml-10px"
-                v-if="!isEmpty(item.children)"
-                @click="openChildrenTask(item)"
-                size="small"
-              >
-                <Icon icon="ep:memo" /> 子任务
-              </el-button>
               <el-button
                 class="ml-10px"
                 size="small"
@@ -78,8 +67,6 @@
     </el-col>
   </el-card>
 
-  <!-- 弹窗：子任务  -->
-  <TaskSignList ref="taskSignListRef" @success="refresh" />
   <!-- 弹窗：表单 -->
   <Dialog title="表单详情" v-model="taskFormVisible" width="600">
     <form-create
@@ -94,8 +81,6 @@
 import { formatDate, formatPast2 } from '@/utils/formatTime'
 import { propTypes } from '@/utils/propTypes'
 import { DICT_TYPE } from '@/utils/dict'
-import { isEmpty } from '@/utils/is'
-import TaskSignList from './dialog/TaskSignList.vue'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { setConfAndFields2 } from '@/utils/formCreate'
 
@@ -104,8 +89,7 @@ defineOptions({ name: 'BpmProcessInstanceTaskList' })
 defineProps({
   loading: propTypes.bool, // 是否加载中
   processInstance: propTypes.object, // 流程实例
-  tasks: propTypes.arrayOf(propTypes.object), // 流程任务的数组
-  showHeader: propTypes.bool.def(true), // 是否显示头
+  tasks: propTypes.arrayOf(propTypes.object) // 流程任务的数组
 })
 
 /** 获得流程实例对应的颜色 */
@@ -140,12 +124,6 @@ const getTaskTimelineItemType = (item: any) => {
     return 'warning'
   }
   return ''
-}
-
-/** 子任务 */
-const taskSignListRef = ref()
-const openChildrenTask = (item: any) => {
-  taskSignListRef.value.open(item)
 }
 
 /** 查看表单 */

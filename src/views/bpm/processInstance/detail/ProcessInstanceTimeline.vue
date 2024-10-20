@@ -17,42 +17,21 @@
             <div class="flex flex-col pr-2">
               <div class="position-relative" v-if="task.assigneeUser || task.ownerUser">
                 <!-- 信息：头像 -->
-                <el-tooltip
-                  :content="task.reason"
-                  placement="bottom"
+                <el-avatar
                   v-if="task.assigneeUser && task.assigneeUser.avatar"
-                  effect="light"
-                >
-                  <el-avatar :size="36" :src="task.assigneeUser.avatar" />
-                </el-tooltip>
-                <el-tooltip
-                  :content="task.reason"
-                  placement="bottom"
-                  v-else-if="task.assigneeUser && task.assigneeUser.nickname"
-                  effect="light"
-                >
-                  <el-avatar>
-                    {{ task.assigneeUser.nickname.substring(0, 1) }}
-                  </el-avatar>
-                </el-tooltip>
-                <el-tooltip
-                  :content="task.reason"
-                  placement="bottom"
+                  :size="36"
+                  :src="task.assigneeUser.avatar"
+                />
+                <el-avatar v-else-if="task.assigneeUser && task.assigneeUser.nickname">
+                  {{ task.assigneeUser.nickname.substring(0, 1) }}
+                </el-avatar>
+                <el-avatar
                   v-else-if="task.ownerUser && task.ownerUser.avatar"
-                  effect="light"
-                >
-                  <el-avatar :src="task.ownerUser.avatar" />
-                </el-tooltip>
-                <el-tooltip
-                  :content="task.reason"
-                  placement="bottom"
-                  v-else-if="task.ownerUser && task.ownerUser.nickname"
-                  effect="light"
-                >
-                  <el-avatar>
-                    {{ task.ownerUser.nickname.substring(0, 1) }}
-                  </el-avatar>
-                </el-tooltip>
+                  :src="task.ownerUser.avatar"
+                />
+                <el-avatar v-else-if="task.ownerUser && task.ownerUser.nickname">
+                  {{ task.ownerUser.nickname.substring(0, 1) }}
+                </el-avatar>
                 <!-- 信息：任务 ICON -->
                 <div
                   class="position-absolute top-26px left-26px bg-#fff rounded-full flex items-center p-2px"
@@ -78,16 +57,12 @@
                 >
                   {{ task.ownerUser.nickname }}
                 </div>
-                <!--
-                <div v-if="task.reason" class="text-#a5a5a5 my-4px text-12px flex items-center w-100%">
-                  <div
-                    :title="task.reason"
-                    class="text-truncate w-200px border-1px border-#a5a5a5 border-dashed rounded py-5px px-15px text-#2d2d2d"
-                  >
-                    {{ task.reason }}
-                  </div>
+                <div
+                  v-if="task.reason && activity.nodeType === NodeType.USER_TASK_NODE"
+                  class="text-#a5a5a5 text-13px mt-1"
+                >
+                  审批意见：{{ task.reason }}
                 </div>
-                -->
               </div>
             </div>
           </div>
@@ -131,20 +106,6 @@
         >
           {{ getApprovalNodeTime(activity) }}
         </div>
-
-        <!-- TODO @jason：审批意见，要展示哈。 -->
-        <!-- <div class="color-#a1a6ae text-12px mb-10px"> {{ activity.assigneeUser.nickname }}</div>
-        <div v-if="activity.opinion" class="text-#a5a5a5 text-12px w-100%">
-          <div class="mb-5px">审批意见：</div>
-          <div
-            class="w-100% border-1px border-#a5a5a5 border-dashed rounded py-5px px-15px text-#2d2d2d"
-          >
-            {{ activity.opinion }}
-          </div>
-        </div>
-        <div v-if="activity.createTime" class="text-#a5a5a5 text-13px">
-          {{ formatDate(activity.createTime) }}
-        </div> -->
       </div>
     </el-timeline-item>
   </el-timeline>
@@ -219,8 +180,11 @@ const getApprovalNodeColor = (taskStatus: number) => {
 }
 
 const getApprovalNodeTime = (node: ProcessInstanceApi.ApprovalNodeInfo) => {
+  if (node.nodeType === NodeType.START_USER_NODE && node.startTime) {
+    return `发起时间：${formatDate(node.startTime)}`
+  }
   if (node.endTime) {
-    return `结束时间：${formatDate(node.endTime)}`
+    return `审批时间：${formatDate(node.endTime)}`
   }
   if (node.startTime) {
     return `创建时间：${formatDate(node.startTime)}`
