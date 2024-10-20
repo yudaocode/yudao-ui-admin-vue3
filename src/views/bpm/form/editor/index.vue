@@ -64,7 +64,11 @@ const designerConfig = ref({
   switchType: [], // 是否可以切换组件类型,或者可以相互切换的字段
   autoActive: true, // 是否自动选中拖入的组件
   useTemplate: false, // 是否生成vue2语法的模板组件
-  formOptions: {}, // 定义表单配置默认值
+  formOptions: {
+    form: {
+      labelWidth: '100px' // 设置默认的 label 宽度为 100px
+    }
+  }, // 定义表单配置默认值
   fieldReadonly: false, // 配置field是否可以编辑
   hiddenDragMenu: false, // 隐藏拖拽操作按钮
   hiddenDragBtn: false, // 隐藏拖拽按钮
