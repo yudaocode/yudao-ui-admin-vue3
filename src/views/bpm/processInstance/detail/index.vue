@@ -42,7 +42,7 @@
             <div class="form-scroll-area">
               <el-scrollbar>
                 <el-row>
-                  <el-col :span="18" class="!flex !flex-col formCol">
+                  <el-col :span="17" class="!flex !flex-col formCol">
                     <!-- 表单信息 -->
                     <div
                       v-loading="processInstanceLoading"
@@ -63,7 +63,7 @@
                       </div>
                     </div>
                   </el-col>
-                  <el-col :span="6">
+                  <el-col :span="7">
                     <!-- 审批记录时间线 -->
                     <ProcessInstanceTimeline ref="timelineRef" :approve-nodes="approveNodes" />
                   </el-col>
