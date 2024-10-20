@@ -1,7 +1,7 @@
 <template>
   <view
     class="flex flex-col items-center w-full border-b-1 border-b-gray border-b-solid"
-    style="height: 248px"
+    style="height: 248px; min-height: 248px"
   >
     <view class="flex p-2 w-full" style="height: 20px">
       <Icon icon="ep:apple" color="var(--top-header-text-color)" class="custom-hover" />
@@ -23,12 +23,13 @@
 
 <script lang="ts" setup>
 import TextMessage from '../../model/TextMessage'
-import { useChatStore } from '../../store/chatstore'
-import { SendStatus, MessageRole, MessageType } from '../../types/index.d.ts'
+import { useChatStoreWithOut } from '../../store/chatstore'
+import { CONVERSATION_TYPE } from '../../types/index.d.ts'
+import { SendStatus, MessageRole, ContentType } from '../../types/index.d.ts'
 
 defineOptions({ name: 'InputSection' })
 
-const chatStore = useChatStore()
+const chatStore = useChatStoreWithOut()
 const onEnter = () => {
   console.log('enter pressed')
   const msg = createTextMessage(chatStore.inputText)
@@ -38,19 +39,19 @@ const onEnter = () => {
 
 const createTextMessage = (content: string): TextMessage => {
   console.log('====>>>>', content)
-  const _localId = `${new Date().getTime()}`
   // 部分信息从account信息里面获取
   const msg = new TextMessage(
-    _localId,
-    'https://img0.baidu.com/it/u=1121635512,1294972039&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=889',
-    'Dylan May',
+    '',
+    '',
+    '',
     new Date().getTime(),
     false,
     content,
     MessageRole.SELF,
-    SendStatus.SUCCESS,
-    MessageType.TEXT,
-    chatStore.currentSession?.id || ''
+    SendStatus.SENDING,
+    chatStore.currentSession?.id || '',
+    chatStore.currentSession?.targetId,
+    chatStore.currentSession?.type || CONVERSATION_TYPE.SINGLE
   )
 
   return msg

@@ -1,4 +1,4 @@
-import { MessageModelType } from '../types'
+import { ConversationType, MessageModelType } from '../types'
 
 export default class BaseConversation {
   public id: string
@@ -9,7 +9,8 @@ export default class BaseConversation {
   public updateTime: number
   public unreadCount: number
   public msgList: Array<MessageModelType>
-
+  public type: ConversationType
+  public targetId: number
   constructor(
     id: string,
     avatar: string,
@@ -18,7 +19,9 @@ export default class BaseConversation {
     createTime: number,
     updateTime: number,
     unreadCount: number,
-    msgList: Array<MessageModelType>
+    msgList: Array<MessageModelType>,
+    type: ConversationType,
+    targetId: number
   ) {
     this.id = id
     this.avatar = avatar
@@ -28,5 +31,7 @@ export default class BaseConversation {
     this.updateTime = updateTime
     this.unreadCount = unreadCount
     this.msgList = msgList
+    this.type = type
+    this.targetId = targetId
   }
 }

@@ -1,7 +1,11 @@
+import { store } from '@/store/index'
 import { defineStore } from 'pinia'
 import BaseConversation from '../model/BaseConversation'
 import BaseMessage from '../model/BaseMessage'
-import { ConversationModelType, MessageRole, MessageType, SendStatus } from '../types/index.d.ts'
+import { ConversationModelType, MessageRole, ContentType, SendStatus } from '../types/index.d.ts'
+import SessionApi from '../api/sessionApi'
+import MessageApi, { SendMsg } from '../api/messageApi'
+import { useUserStoreWithOut } from '@/store/modules/user'
 
 interface ChatStoreModel {
   sessionList: Array<ConversationModelType>
@@ -12,71 +16,7 @@ interface ChatStoreModel {
 
 export const useChatStore = defineStore('chatStore', {
   state: (): ChatStoreModel => ({
-    sessionList: [
-      {
-        id: '11111',
-        name: '张三',
-        avatar:
-          'https://img.zcool.cn/community/019fb65925bc32a801216a3ef77f7b.png@1280w_1l_2o_100sh.png',
-        description: 'sss',
-        createTime: 1693970987760,
-        updateTime: 1693970987760,
-        unreadCount: 1,
-        msgList: [
-          {
-            avatar:
-              'https://img0.baidu.com/it/u=1121635512,1294972039&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=889',
-            nickname: 'Dylan May',
-            id: '222221111',
-            isRead: false,
-            messageType: MessageType.TEXT,
-            sendStatus: SendStatus.SUCCESS,
-            role: MessageRole.SELF,
-            createTime: 1693970987760,
-            conversationId: '11111',
-            content: 'hello MUSK'
-          },
-          {
-            avatar:
-              'https://img0.baidu.com/it/u=4211304696,1059959254&fm=253&fmt=auto&app=120&f=JPEG?w=800&h=1174',
-            nickname: 'Elon Musk',
-            id: '2222222222',
-            isRead: false,
-            messageType: MessageType.TEXT,
-            sendStatus: SendStatus.SUCCESS,
-            role: MessageRole.OTHER,
-            createTime: 1693970987760,
-            conversationId: '11111',
-            content: 'hello DYLAN'
-          }
-        ]
-      },
-      {
-        id: '22222',
-        name: '搞笑的一家人',
-        avatar:
-          'https://img.zcool.cn/community/019fb65925bc32a801216a3ef77f7b.png@1280w_1l_2o_100sh.png',
-        description: '今天晚上吃啥',
-        createTime: 1693970987760,
-        updateTime: 1693970987760,
-        unreadCount: 1,
-        msgList: [
-          {
-            avatar:
-              'https://img.zcool.cn/community/019fb65925bc32a801216a3ef77f7b.png@1280w_1l_2o_100sh.png',
-            nickname: '小艳',
-            id: '22222',
-            isRead: false,
-            messageType: MessageType.TEXT,
-            sendStatus: SendStatus.SUCCESS,
-            role: MessageRole.OTHER,
-            createTime: 1693970987760,
-            conversationId: '22222',
-            content: 'what your name'
-          }
-        ]
-      }
-    ],
+    sessionList: reactive<Array<ConversationModelType>>([]),
     currentSession: null,
     currentSessionIndex: 0,
     inputText: ''
@@ -103,6 +43,7 @@ export const useChatStore = defineStore('chatStore', {
 
     setCurrentConversation() {
       this.currentSession = this.sessionList[this.currentSessionIndex]
+      this.fetchSessionMsg()
     },
 
     setCurrentSessionIndex(index: number) {
@@ -113,8 +54,32 @@ export const useChatStore = defineStore('chatStore', {
       this.inputText = content
     },
 
-    addMessageToCurrentSession<T extends BaseMessage>(message: T): void {
+    async addMessageToCurrentSession<T extends BaseMessage>(message: T): Promise<void> {
       this.currentSession?.msgList.push(message)
+
+      try {
+        const res = await MessageApi.send(message as unknown as SendMsg)
+        console.log(res)
+        if (res.id) {
+          // 更新发送状态
+          const updateMsg = {
+            ...message,
+            id: res.id,
+            sendTime: res.sendTime,
+            sendStatus: SendStatus.SUCCESS
+          }
+
+          this.updateMsgToCurrentSession(updateMsg)
+        }
+      } catch (error) {
+        console.log(error)
+        const updateMsg = {
+          ...message,
+          sendStatus: SendStatus.SUCCESS
+        }
+
+        this.updateMsgToCurrentSession(updateMsg)
+      }
     },
 
     addMessageToSesstion<T extends BaseMessage>(message: T): void {
@@ -130,6 +95,71 @@ export const useChatStore = defineStore('chatStore', {
 
       // replace the old Conversation
       this.sessionList.splice(conversationIndex, 1, msgConversation)
+    },
+
+    /**
+     * 更新消息到当前会话
+     * @param updatedMsg
+     */
+    updateMsgToCurrentSession<T extends BaseMessage>(updatedMsg: T): void {
+      if (this.currentSession) {
+        this.currentSession.msgList = this.currentSession?.msgList.map((item) => {
+          if (item.clientMessageId === updatedMsg.clientMessageId) {
+            return updatedMsg
+          } else {
+            return item
+          }
+        })
+      }
+    },
+
+    async getSession() {
+      try {
+        const res = await SessionApi.getSessionList()
+        this.sessionList = res.map((item) => ({
+          ...item,
+          updateTime: item.lastReadTime,
+          name: item.targetId,
+          targetId: item.targetId,
+          msgList: []
+        }))
+      } catch (error) {
+        return error
+      }
+    },
+
+    async fetchSessionMsg() {
+      if (!this.currentSession) {
+        return
+      }
+
+      const receiverId = this.currentSession.targetId
+      const type = this.currentSession.type
+
+      try {
+        const res = await MessageApi.getSessionMsg({
+          receiverId: receiverId,
+          conversationType: type,
+          sendTime: new Date()
+        })
+
+        const userStore = useUserStoreWithOut()
+
+        this.currentSession.msgList = res.map((item) => {
+          return {
+            ...item,
+            role: item.senderId === userStore.user.id ? MessageRole.SELF : MessageRole.OTHER,
+            nickname: item.senderNickname,
+            avatar: item.senderAvatar
+          }
+        })
+      } catch (error) {
+        return error
+      }
     }
   }
 })
+
+export const useChatStoreWithOut = () => {
+  return useChatStore(store)
+}

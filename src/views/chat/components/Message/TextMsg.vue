@@ -10,18 +10,15 @@
 
 <script lang="ts" setup>
 import { PropType } from 'vue'
-import { useChatStore } from '../../store/chatstore'
-import BaseMesageLayout from '../Message/BaseMessage.vue'
-import { MessageModelType } from '../../types/index'
+import BaseMesageLayout from './BaseMsg.vue'
+import TextMessage from '../../model/TextMessage'
 
 defineOptions({ name: 'TextMessage' })
 
 const props = defineProps({
   message: {
-    type: Object as PropType<MessageModelType>,
+    type: Object as PropType<TextMessage>,
     default: () => {}
   }
 })
-
-const { sessionList, setCurrentConversation, setCurrentSessionIndex } = useChatStore()
 </script>

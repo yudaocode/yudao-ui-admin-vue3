@@ -10,8 +10,21 @@ export class ChatConversation extends BaseConversation {
     createTime: number,
     updateTime: number,
     unreadCount: number,
-    msgList: Array<BaseMessage>
+    msgList: Array<BaseMessage>,
+    type: number,
+    targetId: number
   ) {
-    super(id, avatar, name, descrition, createTime, updateTime, unreadCount, msgList)
+    super(
+      id,
+      avatar,
+      name,
+      descrition,
+      createTime,
+      updateTime,
+      unreadCount,
+      msgList,
+      type,
+      targetId
+    )
   }
 }

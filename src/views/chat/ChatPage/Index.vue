@@ -1,12 +1,14 @@
 <template>
   <view class="flex h-full flex-1">
-    <ToolSection />
-    <Session />
-    <view class="flex w-full flex-col">
+    <ToolSection @menuSelectChange="toolMenuSelectChange" />
+    <Session v-if="bussinessType === MENU_LIST_ENUM.CONVERSATION" />
+    <Friends v-if="bussinessType === MENU_LIST_ENUM.FRIENDS" />
+    <view v-if="bussinessType === MENU_LIST_ENUM.CONVERSATION" class="flex w-full flex-col">
       <ChatHeader />
       <ChatMessage />
       <InputSection />
     </view>
+    <FriendDetail v-if="bussinessType === MENU_LIST_ENUM.FRIENDS" />
   </view>
 </template>
 
@@ -17,14 +19,18 @@
 
 import ToolSection from '../components/ToolSection/Index.vue'
 import Session from '../components/Session/Index.vue'
+import Friends from '../components/Friends/Index.vue'
 import ChatHeader from '../components/ChatHeader/Index.vue'
 import ChatMessage from '../components/ChatMessage/Index.vue'
 import InputSection from '../components/InputSection/index.vue'
-
-/**
- * Define Data Structure of this page, then initialize it with reactive object
- */
-interface State {}
+import FriendDetail from '../components/FriendDetail/Index.vue'
+import { MENU_LIST_ENUM } from '../types/index.d.ts'
 
 defineOptions({ name: 'ChatPage' })
+
+const bussinessType = ref(1)
+
+const toolMenuSelectChange = (value) => {
+  bussinessType.value = value
+}
 </script>

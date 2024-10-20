@@ -16,12 +16,24 @@ export enum SendStatus {
   SUCCESS = 3
 }
 
-export enum MessageType {
-  TEXT = 1,
-  IMAGE = 2,
-  AUDIO = 3,
-  SYSTEM = 4
+export enum ContentType {
+  TEXT = 101,
+  IMAGE = 102,
+  AUDIO = 103,
+  SYSTEM = 1400
+}
+
+export const enum MENU_LIST_ENUM {
+  CONVERSATION = 1,
+  FRIENDS = 2
+}
+
+export const enum CONVERSATION_TYPE {
+  SINGLE = 1,
+  GROUP = 3,
+  NOTIFICATION = 4
 }
 
 export type MessageModelType = BaseMessage | TextMessage | ImageMessage
 export type ConversationModelType = BaseConversation | ChatConversation
+export type ConversationType = CONVERSATION_TYPE
