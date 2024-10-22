@@ -109,7 +109,7 @@ const handleAllTypeGot = (result) => {
       symbol: 'emptyCircle',
       orient: 'vertical',
       expandAndCollapse: true,
-      initialTreeDepth: 3,
+      initialTreeDepth: 2,
       label: {
         position: 'top',
         rotate: 0,
@@ -191,7 +191,7 @@ const handleSplitTypeStudent = (result) => {
       symbol: 'emptyCircle',
       orient: 'vertical',
       expandAndCollapse: true,
-      initialTreeDepth: 3,
+      initialTreeDepth: 2,
       label: {
         position: 'top',
         rotate: 0,

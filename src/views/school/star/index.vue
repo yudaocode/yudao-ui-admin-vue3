@@ -75,6 +75,11 @@
           <el-tag>{{ scope.row.type }}</el-tag>
         </template>
       </el-table-column>
+      <el-table-column label="获得期数" align="center" prop="item">
+        <template #default="scope">
+          <el-tag>第{{ scope.row.item }}期</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="年级" align="center" prop="grade">
         <template #default="scope">
           {{ scope.row.grade }}级
