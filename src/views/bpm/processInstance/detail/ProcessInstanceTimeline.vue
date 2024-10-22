@@ -9,8 +9,32 @@
       :icon="getApprovalNodeIcon(activity.status, activity.nodeType)"
       :color="getApprovalNodeColor(activity.status)"
     >
+      <template #dot>
+        <div
+          class="position-absolute left--10px top--6px rounded-full border border-solid border-#dedede w-30px h-30px flex justify-center items-center bg-#3f73f7 p-5px"
+        >
+          <img class="w-full h-full" :src="getApprovalNodeImg(activity.nodeType)" alt="" />
+          <div
+            class="position-absolute top-17px left-17px bg-#fff rounded-full flex items-center p-2px"
+          >
+            <el-icon :size="12" :color="getApprovalNodeColor(activity.status)">
+              <component :is="getApprovalNodeIcon(activity.status, activity.nodeType)" />
+            </el-icon>
+          </div>
+        </div>
+      </template>
       <div class="flex flex-col items-start">
-        <div class="font-bold"> {{ activity.name }}</div>
+        <!-- 第一行：节点名称、时间 -->
+        <div class="flex w-full">
+          <div class="font-bold"> {{ activity.name }}</div>
+          <!-- 信息：时间 -->
+          <div
+            v-if="activity.status !== TaskStatusEnum.NOT_START"
+            class="text-#a5a5a5 text-13px mt-1 ml-auto"
+          >
+            {{ getApprovalNodeTime(activity) }}
+          </div>
+        </div>
         <div class="flex items-center flex-wrap mt-1">
           <!-- 情况一：遍历每个审批节点下的【进行中】task 任务 -->
           <div v-for="(task, idx) in activity.tasks" :key="idx" class="flex items-center">
@@ -70,7 +94,7 @@
           <div
             v-for="(user, idx1) in activity.candidateUsers"
             :key="idx1"
-            class="flex items-center"
+            class="flex items-center self-start"
           >
             <div class="flex items-center flex-col pr-2">
               <div class="position-relative">
@@ -99,13 +123,6 @@
             </div>
           </div>
         </div>
-        <!-- 信息：时间 -->
-        <div
-          v-if="activity.status !== TaskStatusEnum.NOT_START"
-          class="text-#a5a5a5 text-13px mt-1"
-        >
-          {{ getApprovalNodeTime(activity) }}
-        </div>
       </div>
     </el-timeline-item>
   </el-timeline>
@@ -117,16 +134,105 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { TaskStatusEnum } from '@/api/bpm/task'
 import { NodeType } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { Check, Close, Loading, Clock, Minus, Delete } from '@element-plus/icons-vue'
+import starterSvg from '@/assets/svgs/bpm/starter.svg'
+import auditorSvg from '@/assets/svgs/bpm/auditor.svg'
+import copySvg from '@/assets/svgs/bpm/copy.svg'
+import conditionSvg from '@/assets/svgs/bpm/condition.svg'
+import parallelSvg from '@/assets/svgs/bpm/parallel.svg'
+
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
-defineProps<{
-  approveNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
-}>()
+// defineProps<{
+//   approveNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
+// }>()
+const approveNodes = [
+  {
+    id: 1,
+    name: '发起审批',
+    nodeType: NodeType.START_USER_NODE,
+    status: TaskStatusEnum.NOT_START,
+    startTime: new Date('2024-10-01 10:00:00'),
+    endTime: null,
+    candidateUsers: [],
+    tasks: []
+  },
+  {
+    id: 2,
+    name: '经理审批',
+    nodeType: NodeType.USER_TASK_NODE,
+    status: TaskStatusEnum.RUNNING, // 审批中
+    startTime: new Date('2024-10-02 11:00:00'),
+    endTime: null,
+    candidateUsers: [
+      {
+        nickname: '张经理',
+        avatar: 'https://picsum.photos/200?r=1'
+      },
+      {
+        nickname: '张经理',
+        avatar: 'https://picsum.photos/200?r=1'
+      },
+      {
+        nickname: '张经理',
+        avatar: 'https://picsum.photos/200?r=1'
+      },
+      {
+        nickname: '张经理',
+        avatar: 'https://picsum.photos/200?r=1'
+      }
+    ],
+    tasks: [
+      {
+        assigneeUser: {
+          nickname: '李经理',
+          avatar: 'https://picsum.photos/200?r=1'
+        },
+        ownerUser: null,
+        status: TaskStatusEnum.RUNNING, // 审批中
+        reason: '同意'
+      }
+    ]
+  },
+  {
+    id: 3,
+    name: '财务审批',
+    nodeType: NodeType.USER_TASK_NODE,
+    status: TaskStatusEnum.APPROVE, // 审批通过
+    startTime: new Date('2024-10-03 14:00:00'),
+    endTime: new Date('2024-10-03 15:00:00'),
+    candidateUsers: [],
+    tasks: [
+      {
+        assigneeUser: {
+          nickname: '王财务',
+          avatar: 'https://picsum.photos/200?r=1'
+        },
+        ownerUser: null,
+        status: TaskStatusEnum.APPROVE, // 审批通过
+        reason: '审批通过'
+      }
+    ]
+  },
+  {
+    id: 4,
+    name: '总经理审批',
+    nodeType: NodeType.USER_TASK_NODE,
+    status: TaskStatusEnum.NOT_START, // 未开始
+    startTime: null,
+    endTime: null,
+    candidateUsers: [
+      {
+        nickname: '总经理',
+        avatar: 'https://picsum.photos/200?r=1'
+      }
+    ],
+    tasks: []
+  }
+]
 
 // 审批节点
-
 const statusIconMap2 = {
   // 未开始
-  '-1': { color: '#e5e7ec', icon: 'ep-clock' },
+  '-1': { color: '#909398', icon: 'ep-clock' },
   // 待审批
   '0': { color: '#e5e7ec', icon: 'ep:loading' },
   // 审批中
@@ -147,7 +253,7 @@ const statusIconMap2 = {
 
 const statusIconMap = {
   // 审批未开始
-  '-1': { color: '#e5e7ec', icon: Clock },
+  '-1': { color: '#909398', icon: Clock },
   '0': { color: '#e5e7ec', icon: Clock },
   // 审批中
   '1': { color: '#448ef7', icon: Loading },
@@ -163,6 +269,23 @@ const statusIconMap = {
   '6': { color: '#448ef7', icon: Loading },
   // 审批通过中
   '7': { color: '#00b32a', icon: Check }
+}
+
+const nodeTypeSvgMap = {
+  // 发起人节点
+  [NodeType.START_USER_NODE]: { color: '', svg: starterSvg },
+  // 审批人节点
+  [NodeType.USER_TASK_NODE]: { color: '', svg: auditorSvg },
+  // 抄送人节点
+  [NodeType.COPY_TASK_NODE]: { color: '', svg: copySvg },
+  // 条件分支节点
+  [NodeType.CONDITION_NODE]: { color: '', svg: conditionSvg },
+  // 并行分支节点
+  [NodeType.PARALLEL_BRANCH_NODE]: { color: '', svg: parallelSvg }
+}
+
+const getApprovalNodeImg = (nodeType: NodeType) => {
+  return nodeTypeSvgMap[nodeType]?.svg
 }
 
 const getApprovalNodeIcon = (taskStatus: number, nodeType: NodeType) => {
@@ -181,13 +304,13 @@ const getApprovalNodeColor = (taskStatus: number) => {
 
 const getApprovalNodeTime = (node: ProcessInstanceApi.ApprovalNodeInfo) => {
   if (node.nodeType === NodeType.START_USER_NODE && node.startTime) {
-    return `发起时间：${formatDate(node.startTime)}`
+    return `${formatDate(node.startTime)}`
   }
   if (node.endTime) {
-    return `审批时间：${formatDate(node.endTime)}`
+    return `${formatDate(node.endTime)}`
   }
   if (node.startTime) {
-    return `创建时间：${formatDate(node.startTime)}`
+    return `${formatDate(node.startTime)}`
   }
 }
 </script>
