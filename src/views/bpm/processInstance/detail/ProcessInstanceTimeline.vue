@@ -38,87 +38,79 @@
         <div class="flex items-center flex-wrap mt-1">
           <!-- 情况一：遍历每个审批节点下的【进行中】task 任务 -->
           <div v-for="(task, idx) in activity.tasks" :key="idx" class="flex items-center">
-            <div class="flex flex-col pr-2">
-              <div class="position-relative" v-if="task.assigneeUser || task.ownerUser">
-                <!-- 信息：头像 -->
-                <el-avatar
-                  v-if="task.assigneeUser && task.assigneeUser.avatar"
-                  :size="36"
-                  :src="task.assigneeUser.avatar"
-                />
-                <el-avatar v-else-if="task.assigneeUser && task.assigneeUser.nickname">
-                  {{ task.assigneeUser.nickname.substring(0, 1) }}
-                </el-avatar>
-                <el-avatar
-                  v-else-if="task.ownerUser && task.ownerUser.avatar"
-                  :src="task.ownerUser.avatar"
-                />
-                <el-avatar v-else-if="task.ownerUser && task.ownerUser.nickname">
-                  {{ task.ownerUser.nickname.substring(0, 1) }}
-                </el-avatar>
-                <!-- 信息：任务 ICON -->
+            <div class="flex flex-col pr-2 gap2">
+              <div
+                class="position-relative flex flex-wrap gap2"
+                v-if="task.assigneeUser || task.ownerUser"
+              >
+                <!-- 信息：头像昵称 -->
                 <div
-                  class="position-absolute top-26px left-26px bg-#fff rounded-full flex items-center p-2px"
+                  class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600 position-relative"
                 >
-                  <Icon
-                    :size="12"
-                    :icon="statusIconMap2[task.status]?.icon"
-                    :color="statusIconMap2[task.status]?.color"
-                  />
+                  <template v-if="task.assigneeUser?.avatar || task.assigneeUser?.nickname">
+                    <el-avatar
+                      :size="28"
+                      v-if="task.assigneeUser?.avatar"
+                      :src="task.assigneeUser?.avatar"
+                    />
+                    <el-avatar :size="28" v-else>
+                      {{ task.assigneeUser?.nickname.substring(0, 1) }}
+                    </el-avatar>
+                    {{ task.assigneeUser?.nickname }}
+                  </template>
+                  <template v-else-if="task.ownerUser?.avatar || task.ownerUser?.nickname">
+                    <el-avatar
+                      :size="28"
+                      v-if="task.ownerUser?.avatar"
+                      :src="task.ownerUser?.avatar"
+                    />
+                    <el-avatar :size="28" v-else>
+                      {{ task.ownerUser?.nickname.substring(0, 1) }}
+                    </el-avatar>
+                    {{ task.ownerUser?.nickname }}
+                  </template>
+                  <!-- 信息：任务 ICON -->
+                  <div
+                    v-if="onlyStatusIconShow.includes(task.status)"
+                    class="position-absolute top-22px left-26px bg-#fff rounded-full flex items-center p-2px"
+                  >
+                    <Icon
+                      :size="12"
+                      :icon="statusIconMap2[task.status]?.icon"
+                      :color="statusIconMap2[task.status]?.color"
+                    />
+                  </div>
                 </div>
-              </div>
-              <div class="flex flex-col mt-1">
-                <!-- 信息：昵称 -->
+                <!-- 情况二：遍历每个审批节点下的【候选的】task 任务。例如说，1）依次审批，2）未来的审批任务等 -->
                 <div
-                  v-if="task.assigneeUser && task.assigneeUser.nickname"
-                  class="text-12px text-align-center"
+                  v-for="(user, idx1) in activity.candidateUsers"
+                  :key="idx1"
+                  class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600 position-relative"
                 >
-                  {{ task.assigneeUser.nickname }}
-                </div>
-                <div
-                  v-else-if="task.ownerUser && task.ownerUser.nickname"
-                  class="text-10px text-align-center"
-                >
-                  {{ task.ownerUser.nickname }}
-                </div>
-                <div
-                  v-if="task.reason && activity.nodeType === NodeType.USER_TASK_NODE"
-                  class="text-#a5a5a5 text-13px mt-1"
-                >
-                  审批意见：{{ task.reason }}
-                </div>
-              </div>
-            </div>
-          </div>
-          <!-- 情况二：遍历每个审批节点下的【候选的】task 任务。例如说，1）依次审批，2）未来的审批任务等 -->
-          <div
-            v-for="(user, idx1) in activity.candidateUsers"
-            :key="idx1"
-            class="flex items-center self-start"
-          >
-            <div class="flex items-center flex-col pr-2">
-              <div class="position-relative">
-                <!-- 信息：头像 -->
-                <el-avatar :size="36" v-if="user.avatar" :src="user.avatar" />
-                <el-avatar v-else-if="user.nickname && user.nickname">
-                  {{ user.nickname.substring(0, 1) }}
-                </el-avatar>
-                <!-- 信息：任务 ICON -->
-                <div
-                  class="position-absolute top-26px left-26px bg-#fff rounded-full flex items-center p-2px"
-                >
-                  <Icon
-                    :size="12"
-                    :icon="statusIconMap2['-1']?.icon"
-                    :color="statusIconMap2['-1']?.color"
-                  />
-                </div>
-              </div>
-              <div class="flex flex-col mt-1">
-                <!-- 信息：昵称 -->
-                <div v-if="user.nickname" class="text-10px text-align-center">
+                  <el-avatar :size="28" v-if="user.avatar" :src="user.avatar" />
+                  <el-avatar :size="28" v-else>
+                    {{ user.nickname.substring(0, 1) }}
+                  </el-avatar>
                   {{ user.nickname }}
+
+                  <!-- 信息：任务 ICON -->
+                  <div
+                    v-if="onlyStatusIconShow.includes(task.status)"
+                    class="position-absolute top-22px left-26px bg-#fff rounded-full flex items-center p-2px"
+                  >
+                    <Icon
+                      :size="12"
+                      :icon="statusIconMap2['-1']?.icon"
+                      :color="statusIconMap2['-1']?.color"
+                    />
+                  </div>
                 </div>
+              </div>
+              <div
+                v-if="task.reason && activity.nodeType === NodeType.USER_TASK_NODE"
+                class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
+              >
+                审批意见：{{ task.reason }}
               </div>
             </div>
           </div>
@@ -141,93 +133,9 @@ import conditionSvg from '@/assets/svgs/bpm/condition.svg'
 import parallelSvg from '@/assets/svgs/bpm/parallel.svg'
 
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
-// defineProps<{
-//   approveNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
-// }>()
-const approveNodes = [
-  {
-    id: 1,
-    name: '发起审批',
-    nodeType: NodeType.START_USER_NODE,
-    status: TaskStatusEnum.NOT_START,
-    startTime: new Date('2024-10-01 10:00:00'),
-    endTime: null,
-    candidateUsers: [],
-    tasks: []
-  },
-  {
-    id: 2,
-    name: '经理审批',
-    nodeType: NodeType.USER_TASK_NODE,
-    status: TaskStatusEnum.RUNNING, // 审批中
-    startTime: new Date('2024-10-02 11:00:00'),
-    endTime: null,
-    candidateUsers: [
-      {
-        nickname: '张经理',
-        avatar: 'https://picsum.photos/200?r=1'
-      },
-      {
-        nickname: '张经理',
-        avatar: 'https://picsum.photos/200?r=1'
-      },
-      {
-        nickname: '张经理',
-        avatar: 'https://picsum.photos/200?r=1'
-      },
-      {
-        nickname: '张经理',
-        avatar: 'https://picsum.photos/200?r=1'
-      }
-    ],
-    tasks: [
-      {
-        assigneeUser: {
-          nickname: '李经理',
-          avatar: 'https://picsum.photos/200?r=1'
-        },
-        ownerUser: null,
-        status: TaskStatusEnum.RUNNING, // 审批中
-        reason: '同意'
-      }
-    ]
-  },
-  {
-    id: 3,
-    name: '财务审批',
-    nodeType: NodeType.USER_TASK_NODE,
-    status: TaskStatusEnum.APPROVE, // 审批通过
-    startTime: new Date('2024-10-03 14:00:00'),
-    endTime: new Date('2024-10-03 15:00:00'),
-    candidateUsers: [],
-    tasks: [
-      {
-        assigneeUser: {
-          nickname: '王财务',
-          avatar: 'https://picsum.photos/200?r=1'
-        },
-        ownerUser: null,
-        status: TaskStatusEnum.APPROVE, // 审批通过
-        reason: '审批通过'
-      }
-    ]
-  },
-  {
-    id: 4,
-    name: '总经理审批',
-    nodeType: NodeType.USER_TASK_NODE,
-    status: TaskStatusEnum.NOT_START, // 未开始
-    startTime: null,
-    endTime: null,
-    candidateUsers: [
-      {
-        nickname: '总经理',
-        avatar: 'https://picsum.photos/200?r=1'
-      }
-    ],
-    tasks: []
-  }
-]
+defineProps<{
+  approveNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
+}>()
 
 // 审批节点
 const statusIconMap2 = {
@@ -273,17 +181,21 @@ const statusIconMap = {
 
 const nodeTypeSvgMap = {
   // 发起人节点
-  [NodeType.START_USER_NODE]: { color: '', svg: starterSvg },
+  [NodeType.START_USER_NODE]: { color: '#ffffff', svg: starterSvg },
   // 审批人节点
-  [NodeType.USER_TASK_NODE]: { color: '', svg: auditorSvg },
+  [NodeType.USER_TASK_NODE]: { color: '#ff943e', svg: auditorSvg },
   // 抄送人节点
-  [NodeType.COPY_TASK_NODE]: { color: '', svg: copySvg },
+  [NodeType.COPY_TASK_NODE]: { color: '#3296fb', svg: copySvg },
   // 条件分支节点
-  [NodeType.CONDITION_NODE]: { color: '', svg: conditionSvg },
+  [NodeType.CONDITION_NODE]: { color: '#14bb83', svg: conditionSvg },
   // 并行分支节点
-  [NodeType.PARALLEL_BRANCH_NODE]: { color: '', svg: parallelSvg }
+  [NodeType.PARALLEL_BRANCH_NODE]: { color: '#14bb83', svg: parallelSvg }
 }
 
+// 只有只有状态是 -1、0、1 才展示头像右小角状态小icon
+const onlyStatusIconShow = [-1, 0, 1]
+
+// timeline时间线上icon图标
 const getApprovalNodeImg = (nodeType: NodeType) => {
   return nodeTypeSvgMap[nodeType]?.svg
 }
