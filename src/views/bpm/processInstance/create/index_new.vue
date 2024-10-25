@@ -1,0 +1,294 @@
+<template>
+  <!-- 第一步，通过流程定义的列表，选择对应的流程 -->
+  <ContentWrap
+    class="process-definition-container position-relative pb-20px"
+    v-if="!selectProcessDefinition"
+    v-loading="loading"
+  >
+    <el-row :gutter="20" class="!flex-nowrap">
+      <el-col :span="5">
+        <div class="flex flex-col">
+          <div
+            v-for="category in categoryList"
+            :key="category.code"
+            class="flex items-center p-10px cursor-pointer text-14px rounded-md"
+            :class="categoryActive.code === category.code ? 'text-#3e7bff bg-#e8eeff' : ''"
+            @click="handleCategoryClick(category)"
+          >
+            {{ category.name }}
+          </div>
+        </div>
+      </el-col>
+      <el-col :span="19">
+        <h3 class="text-16px font-bold mb-10px mt-5px">{{ categoryActive.name }}</h3>
+        <div class="grid grid-cols-3 gap3" v-if="categoryProcessDefinitionList.length">
+          <el-card
+            v-for="definition in categoryProcessDefinitionList"
+            :key="definition.id"
+            shadow="hover"
+            class="cursor-pointer definition-item-card"
+            @click="handleSelect(definition)"
+          >
+            <template #default>
+              <div class="flex">
+                <el-image :src="definition.icon" class="w-32px h-32px" />
+                <el-text class="!ml-10px" size="large">{{ definition.name }}</el-text>
+              </div>
+            </template>
+          </el-card>
+        </div>
+        <el-empty v-else />
+      </el-col>
+    </el-row>
+  </ContentWrap>
+
+  <!-- 第二步，填写表单，进行流程的提交 -->
+  <ContentWrap v-else>
+    <el-card class="box-card">
+      <div class="clearfix">
+        <span class="el-icon-document">申请信息【{{ selectProcessDefinition.name }}】</span>
+        <el-button style="float: right" type="primary" @click="selectProcessDefinition = undefined">
+          <Icon icon="ep:delete" /> 选择其它流程
+        </el-button>
+      </div>
+      <el-col :span="16" :offset="6" style="margin-top: 20px">
+        <form-create
+          :rule="detailForm.rule"
+          v-model:api="fApi"
+          v-model="detailForm.value"
+          :option="detailForm.option"
+          @submit="submitForm"
+        >
+          <template #type-startUserSelect>
+            <el-col :span="24">
+              <el-card class="mb-10px">
+                <template #header>指定审批人</template>
+                <el-form
+                  :model="startUserSelectAssignees"
+                  :rules="startUserSelectAssigneesFormRules"
+                  ref="startUserSelectAssigneesFormRef"
+                >
+                  <el-form-item
+                    v-for="userTask in startUserSelectTasks"
+                    :key="userTask.id"
+                    :label="`任务【${userTask.name}】`"
+                    :prop="userTask.id"
+                  >
+                    <el-select
+                      v-model="startUserSelectAssignees[userTask.id]"
+                      multiple
+                      placeholder="请选择审批人"
+                    >
+                      <el-option
+                        v-for="user in userList"
+                        :key="user.id"
+                        :label="user.nickname"
+                        :value="user.id"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </el-form>
+              </el-card>
+            </el-col>
+          </template>
+        </form-create>
+      </el-col>
+    </el-card>
+    <!-- 流程图预览 -->
+    <ProcessInstanceBpmnViewer :bpmn-xml="bpmnXML" />
+  </ContentWrap>
+</template>
+
+<script lang="ts" setup>
+import * as DefinitionApi from '@/api/bpm/definition'
+import * as ProcessInstanceApi from '@/api/bpm/processInstance'
+import { setConfAndFields2 } from '@/utils/formCreate'
+import type { ApiAttrs } from '@form-create/element-ui/types/config'
+import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
+import { CategoryApi } from '@/api/bpm/category'
+import { useTagsViewStore } from '@/store/modules/tagsView'
+import * as UserApi from '@/api/system/user'
+import { categoryList as cl, processDefinitionList as pl } from './mock'
+
+defineOptions({ name: 'BpmProcessInstanceCreate' })
+
+const route = useRoute() // 路由
+const { push, currentRoute } = useRouter() // 路由
+const message = useMessage() // 消息
+const { delView } = useTagsViewStore() // 视图操作
+
+const processInstanceId: any = route.query.processInstanceId
+const loading = ref(true) // 加载中
+const categoryList: any = ref([]) // 分类的列表
+const categoryActive: any = ref({}) // 选中的分类
+const processDefinitionList = ref([]) // 流程定义的列表
+
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    // 流程分类
+    categoryList.value = await CategoryApi.getCategorySimpleList()
+    // 测试数据
+    categoryList.value = cl
+    if (categoryList.value.length > 0) {
+      categoryActive.value = categoryList.value[0]
+    }
+    console.log('[ categoryActive.value ] >', categoryActive.value)
+    // 流程定义
+    processDefinitionList.value = await DefinitionApi.getProcessDefinitionList({
+      suspensionState: 1
+    })
+    // 测试数据
+    processDefinitionList.value = pl as any
+
+    // 如果 processInstanceId 非空，说明是重新发起
+    if (processInstanceId?.length > 0) {
+      const processInstance = await ProcessInstanceApi.getProcessInstance(processInstanceId)
+      if (!processInstance) {
+        message.error('重新发起流程失败，原因：流程实例不存在')
+        return
+      }
+      const processDefinition = processDefinitionList.value.find(
+        (item: any) => item.key == processInstance.processDefinition?.key
+      )
+      if (!processDefinition) {
+        message.error('重新发起流程失败，原因：流程定义不存在')
+        return
+      }
+      await handleSelect(processDefinition, processInstance.formVariables)
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+/** 选中分类对应的流程定义列表 */
+const categoryProcessDefinitionList: any = computed(() => {
+  return processDefinitionList.value.filter(
+    (item: any) => item.category == categoryActive.value.code
+  )
+})
+
+// ========== 表单相关 ==========
+const fApi = ref<ApiAttrs>()
+const detailForm: any = ref({
+  rule: [],
+  option: {},
+  value: {}
+}) // 流程表单详情
+const selectProcessDefinition = ref() // 选择的流程定义
+
+// 指定审批人
+const bpmnXML: any = ref(null) // BPMN 数据
+const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人的用户任务列表
+const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
+const startUserSelectAssigneesFormRef = ref() // 发起人选择审批人的表单 Ref
+const startUserSelectAssigneesFormRules = ref({}) // 发起人选择审批人的表单 Rules
+const userList = ref<any[]>([]) // 用户列表
+
+/** 处理选择流程的按钮操作 **/
+const handleSelect = async (row, formVariables?) => {
+  // 设置选择的流程
+  selectProcessDefinition.value = row
+
+  // 重置指定审批人
+  startUserSelectTasks.value = []
+  startUserSelectAssignees.value = {}
+  startUserSelectAssigneesFormRules.value = {}
+
+  // 情况一：流程表单
+  if (row.formType == 10) {
+    // 设置表单
+    setConfAndFields2(detailForm, row.formConf, row.formFields, formVariables)
+    // 加载流程图
+    const processDefinitionDetail = await DefinitionApi.getProcessDefinition(row.id)
+    if (processDefinitionDetail) {
+      bpmnXML.value = processDefinitionDetail.bpmnXml
+      startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
+
+      // 设置指定审批人
+      if (startUserSelectTasks.value?.length > 0) {
+        detailForm.value.rule.push({
+          type: 'startUserSelect',
+          props: {
+            title: '指定审批人'
+          }
+        })
+        // 设置校验规则
+        for (const userTask of startUserSelectTasks.value) {
+          startUserSelectAssignees.value[userTask.id] = []
+          startUserSelectAssigneesFormRules.value[userTask.id] = [
+            { required: true, message: '请选择审批人', trigger: 'blur' }
+          ]
+        }
+        // 加载用户列表
+        userList.value = await UserApi.getSimpleUserList()
+      }
+    }
+    // 情况二：业务表单
+  } else if (row.formCustomCreatePath) {
+    await push({
+      path: row.formCustomCreatePath
+    })
+    // 这里暂时无需加载流程图，因为跳出到另外个 Tab；
+  }
+}
+
+/** 提交按钮 */
+const submitForm = async (formData) => {
+  if (!fApi.value || !selectProcessDefinition.value) {
+    return
+  }
+  // 如果有指定审批人，需要校验
+  if (startUserSelectTasks.value?.length > 0) {
+    await startUserSelectAssigneesFormRef.value.validate()
+  }
+
+  // 提交请求
+  fApi.value.btn.loading(true)
+  try {
+    await ProcessInstanceApi.createProcessInstance({
+      processDefinitionId: selectProcessDefinition.value.id,
+      variables: formData,
+      startUserSelectAssignees: startUserSelectAssignees.value
+    })
+    // 提示
+    message.success('发起流程成功')
+    // 跳转回去
+    delView(unref(currentRoute))
+    await push({
+      name: 'BpmProcessInstanceMy'
+    })
+  } finally {
+    fApi.value.btn.loading(false)
+  }
+}
+
+// 左侧分类切换
+const handleCategoryClick = (val) => {
+  categoryActive.value = val
+}
+
+/** 初始化 */
+onMounted(() => {
+  getList()
+})
+</script>
+
+<style lang="scss" scoped>
+.process-definition-container::before {
+  content: '';
+  border-left: 1px solid #e6e6e6;
+  position: absolute;
+  left: 20.8%;
+  height: 100%;
+}
+:deep() {
+  .definition-item-card {
+    .el-card__body {
+      padding: 14px;
+    }
+  }
+}
+</style>
