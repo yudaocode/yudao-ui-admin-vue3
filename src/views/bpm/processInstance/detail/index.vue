@@ -65,7 +65,7 @@
                   </el-col>
                   <el-col :span="7">
                     <!-- 审批记录时间线 -->
-                    <ProcessInstanceTimeline ref="timelineRef" :approve-nodes="approveNodes" />
+                    <ProcessInstanceTimeline ref="timelineRef" :activity-nodes="activityNodes" />
                   </el-col>
                 </el-row>
               </el-scrollbar>
@@ -229,7 +229,7 @@ const getApprovalDetail = async () => {
     }
 
     // 获取审批节点，显示 Timeline 的数据
-    approveNodes.value = data.approveNodes
+    activityNodes.value = data.activityNodes
 
     // 获取待办任务显示操作按钮
     operationButtonRef.value?.loadTodoTask(data.todoTask)
@@ -239,7 +239,7 @@ const getApprovalDetail = async () => {
 }
 
 // 审批节点信息
-const approveNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
+const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 /**
  * 设置表单权限
  */

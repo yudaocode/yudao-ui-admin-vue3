@@ -3,7 +3,7 @@
   <el-timeline class="pt-20px">
     <!-- 遍历每个审批节点 -->
     <el-timeline-item
-      v-for="(activity, index) in approveNodes"
+      v-for="(activity, index) in activityNodes"
       :key="index"
       size="large"
       :icon="getApprovalNodeIcon(activity.status, activity.nodeType)"
@@ -107,7 +107,10 @@
                 </div>
               </div>
               <div
-                v-if="task.reason && activity.nodeType === NodeType.USER_TASK_NODE"
+                v-if="
+                  task.reason &&
+                  [NodeType.USER_TASK_NODE, NodeType.END_EVENT_NODE].includes(activity.nodeType)
+                "
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
                 审批意见：{{ task.reason }}
@@ -135,7 +138,7 @@ import endSvg from '@/assets/svgs/bpm/end.svg'
 
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
 defineProps<{
-  approveNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
+  activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
 }>()
 
 // 审批节点
