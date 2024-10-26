@@ -6,25 +6,29 @@ export class ChatConversation extends BaseConversation {
     id: string,
     avatar: string,
     name: string,
-    descrition: string,
+    lastMessageDescription: string,
     createTime: number,
     updateTime: number,
-    unreadCount: number,
+    unreadMessagesCount: number,
     msgList: Array<BaseMessage>,
     type: number,
-    targetId: number
+    targetId: number,
+    senderId: number,
+    conversationNo: string
   ) {
     super(
       id,
       avatar,
       name,
-      descrition,
+      lastMessageDescription,
       createTime,
       updateTime,
-      unreadCount,
+      unreadMessagesCount,
       msgList,
       type,
-      targetId
+      targetId,
+      senderId,
+      conversationNo
     )
   }
 }

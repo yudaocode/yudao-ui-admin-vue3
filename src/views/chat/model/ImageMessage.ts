@@ -15,7 +15,8 @@ export default class ImageMessage extends BaseMessage {
     sendStatus: SendStatus,
     conversationId: string,
     receiverId: number,
-    conversationType: number
+    conversationType: number,
+    conversationNo: string
   ) {
     super(
       id,
@@ -28,7 +29,8 @@ export default class ImageMessage extends BaseMessage {
       ContentType.IMAGE,
       conversationId,
       receiverId,
-      conversationType
+      conversationType,
+      conversationNo
     )
     this.content = content
   }

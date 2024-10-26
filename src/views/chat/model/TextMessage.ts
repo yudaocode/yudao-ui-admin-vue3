@@ -15,7 +15,8 @@ export default class TextMessage extends BaseMessage {
     sendStatus: SendStatus,
     conversationId: string,
     receiverId: number,
-    conversationType: number
+    conversationType: number,
+    conversationNo: string
   ) {
     super(
       id,
@@ -28,7 +29,8 @@ export default class TextMessage extends BaseMessage {
       ContentType.TEXT,
       conversationId,
       receiverId,
-      conversationType
+      conversationType,
+      conversationNo
     )
     this.content = content
   }

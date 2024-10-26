@@ -4,7 +4,7 @@
     :class="props.message.role === MessageRole.SELF ? 'flex-row-reverse' : 'flex-row'"
   >
     <el-avatar shape="square" size="default" class="mx-2" :src="props.message.avatar" />
-    <view class="flex flex-col">
+    <view class="flex flex-col" :class="props.message.role === MessageRole.SELF ? 'items-end' : 'items-start'">
       <label class="text-xs text-gray-4 mb-1">{{ props.message.nickname }}</label>
       <view class="flex items-center">
         <el-icon v-if="props.message.sendStatus === SendStatus.SENDING" class="is-loading"

@@ -1,5 +1,5 @@
 <template>
-  <view class="flex flex-col items-center h-full py-2 b-1 b-gray b-solid" style="width: 248px">
+  <view class="flex flex-col items-center h-full py-2 b-1 b-gray b-solid" style="width: 258px">
     <view class="flex flex-col w-full">
       <SessionItem
         v-for="(item, index) in chatStore.sessionList"

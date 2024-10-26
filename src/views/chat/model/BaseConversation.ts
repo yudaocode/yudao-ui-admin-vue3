@@ -7,31 +7,39 @@ export default class BaseConversation {
   public description: string
   public createTime: number
   public updateTime: number
-  public unreadCount: number
+  public unreadMessagesCount: number
   public msgList: Array<MessageModelType>
   public type: ConversationType
   public targetId: number
+  public senderId: number
+  public conversationNo: string
+  public lastMessageDescription: string
+
   constructor(
     id: string,
     avatar: string,
     name: string,
-    descrition: string,
+    lastMessageDescription: string,
     createTime: number,
     updateTime: number,
-    unreadCount: number,
+    unreadMessagesCount: number,
     msgList: Array<MessageModelType>,
     type: ConversationType,
-    targetId: number
+    targetId: number,
+    senderId: number,
+    conversationNo: string
   ) {
     this.id = id
     this.avatar = avatar
     this.name = name
-    this.description = descrition
+    this.lastMessageDescription = lastMessageDescription
     this.createTime = createTime
     this.updateTime = updateTime
-    this.unreadCount = unreadCount
+    this.unreadMessagesCount = unreadMessagesCount
     this.msgList = msgList
     this.type = type
     this.targetId = targetId
+    this.senderId = senderId
+    this.conversationNo = conversationNo
   }
 }

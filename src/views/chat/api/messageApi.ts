@@ -17,8 +17,7 @@ export interface SendMsg {
 }
 
 export interface SessionMsgReq {
-  receiverId: number
-  conversationType: number
+  conversationNo: string
   sendTime: Date
 }
 
@@ -41,7 +40,7 @@ export default class MessageApi {
    * @returns Promise<Array<MessageModelType>>
    */
   static getSessionMsg(params: SessionMsgReq): Promise<Array<MessageModelType>> {
-    return request.get({ url: '/im/message/list', params })
+    return request.get({ url: '/im/message/listByNo', params })
   }
 
   /**

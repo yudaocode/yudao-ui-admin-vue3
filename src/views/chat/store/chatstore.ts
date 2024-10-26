@@ -11,12 +11,12 @@ interface ChatStoreModel {
   sessionList: Array<ConversationModelType>
   currentSession: ConversationModelType | null
   currentSessionIndex: number
-  inputText: string
+  inputText: string,
 }
 
 export const useChatStore = defineStore('chatStore', {
   state: (): ChatStoreModel => ({
-    sessionList: reactive<Array<ConversationModelType>>([]),
+    sessionList: [],
     currentSession: null,
     currentSessionIndex: 0,
     inputText: ''
@@ -121,6 +121,10 @@ export const useChatStore = defineStore('chatStore', {
           updateTime: item.lastReadTime,
           name: item.targetId,
           targetId: item.targetId,
+          senderId: item.userId,
+          conversationNo: item.no,
+          unreadMessagesCount: item.unreadMessagesCount,
+          description: item.lastMessageDescription,
           msgList: []
         }))
       } catch (error) {
@@ -133,17 +137,14 @@ export const useChatStore = defineStore('chatStore', {
         return
       }
 
-      const receiverId = this.currentSession.targetId
-      const type = this.currentSession.type
+      const userStore = useUserStoreWithOut()
 
       try {
         const res = await MessageApi.getSessionMsg({
-          receiverId: receiverId,
-          conversationType: type,
-          sendTime: new Date()
+          conversationNo: this.currentSession.conversationNo
+          // sendTime: new Date().toISOString().slice(0, -1)
         })
 
-        const userStore = useUserStoreWithOut()
 
         this.currentSession.msgList = res.map((item) => {
           return {
@@ -154,7 +155,7 @@ export const useChatStore = defineStore('chatStore', {
           }
         })
       } catch (error) {
-        return error
+      return error  
       }
     }
   }

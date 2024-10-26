@@ -1,6 +1,6 @@
 <template>
   <view class="flex h-full flex-1">
-    <ToolSection @menuSelectChange="toolMenuSelectChange" />
+    <ToolSection @menu-select-change="toolMenuSelectChange" />
     <Session v-if="bussinessType === MENU_LIST_ENUM.CONVERSATION" />
     <Friends v-if="bussinessType === MENU_LIST_ENUM.FRIENDS" />
     <view v-if="bussinessType === MENU_LIST_ENUM.CONVERSATION" class="flex w-full flex-col">
@@ -22,7 +22,7 @@ import Session from '../components/Session/Index.vue'
 import Friends from '../components/Friends/Index.vue'
 import ChatHeader from '../components/ChatHeader/Index.vue'
 import ChatMessage from '../components/ChatMessage/Index.vue'
-import InputSection from '../components/InputSection/index.vue'
+import InputSection from '../components/InputSection/Index.vue'
 import FriendDetail from '../components/FriendDetail/Index.vue'
 import { MENU_LIST_ENUM } from '../types/index.d.ts'
 

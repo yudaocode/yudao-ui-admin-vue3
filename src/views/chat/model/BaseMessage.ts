@@ -13,6 +13,7 @@ export default class BaseMessage {
   clientMessageId: string
   receiverId: number
   conversationType: number
+  conversationNo: string
   constructor(
     id: string,
     avatar: string,
@@ -24,7 +25,8 @@ export default class BaseMessage {
     contentType: ContentType,
     conversationId: string,
     receiverId: number,
-    conversationType: number
+    conversationType: number,
+    conversationNo: string
   ) {
     this.id = id
     this.avatar = avatar
@@ -38,6 +40,7 @@ export default class BaseMessage {
     this.receiverId = receiverId
     this.clientMessageId = this.generateClientMessageId()
     this.conversationType = conversationType
+    this.conversationNo = conversationNo
   }
 
   private generateClientMessageId() {
