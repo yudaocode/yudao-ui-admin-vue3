@@ -32,7 +32,7 @@ export function checkRole(value: string[]) {
   if (value && value instanceof Array && value.length > 0) {
     const { wsCache } = useCache()
     const permissionRoles = value
-    const super_admin = 'admin'
+    const super_admin = 'super_admin'
     const roles = wsCache.get(CACHE_KEY.USER).roles
     const hasRole = roles.some((role) => {
       return super_admin === role || permissionRoles.includes(role)

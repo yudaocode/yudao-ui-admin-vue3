@@ -7,7 +7,7 @@ export function hasRole(app: App<Element>) {
   app.directive('hasRole', (el, binding) => {
     const { wsCache } = useCache()
     const { value } = binding
-    const super_admin = 'admin'
+    const super_admin = 'super_admin'
     const roles = wsCache.get(CACHE_KEY.USER).roles
 
     if (value && value instanceof Array && value.length > 0) {
