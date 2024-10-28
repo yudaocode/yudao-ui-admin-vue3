@@ -1,12 +1,21 @@
 <template>
   <view
     class="flex flex-col items-start w-full border-b-1 border-b-gray border-b-solid flex-1 border-b-1 border-b-gray border-b-solid py-2 overflow-scroll"
-    ref="listBoxRef">
+    ref="listBoxRef"
+  >
     <template v-for="item in chatStore.currentSession?.msgList">
-      <TextMsg v-if="item.contentType === ContentType.TEXT" :key="item.clientMessageId" :message="item" class="py-1" />
+      <TextMsg
+        v-if="item.contentType === ContentType.TEXT"
+        :key="item.clientMessageId"
+        :message="item"
+        class="py-1"
+      />
       <ImageMsg
-v-if="item.contentType === ContentType.IMAGE" :key="item.clientMessageId" :message="item"
-        class="py-1" />
+        v-if="item.contentType === ContentType.IMAGE"
+        :key="item.clientMessageId"
+        :message="item"
+        class="py-1"
+      />
     </template>
   </view>
 </template>
@@ -22,6 +31,7 @@ defineOptions({ name: 'ChatMessage' })
 const chatStore = useChatStore()
 const listBoxRef = ref<HTMLElement | null>(null)
 
+// TODO @dylan：msg 尽量使用 message 哈。非必要不缩写
 const msgListLength = computed(() => {
   return chatStore.currentSession ? chatStore.currentSession.msgList.length : 0
 })
@@ -29,12 +39,11 @@ const msgListLength = computed(() => {
 const scrollToBottom = () => {
   nextTick(() => {
     if (listBoxRef.value) {
-      console.log("scrollToBottom");
-      listBoxRef.value.scrollTop = listBoxRef.value.scrollHeight;
+      console.log('scrollToBottom')
+      listBoxRef.value.scrollTop = listBoxRef.value.scrollHeight
     }
-  });
-};
-
+  })
+}
 
 watch(msgListLength, (newLength, oldLength) => {
   if (newLength > oldLength) {
@@ -42,9 +51,10 @@ watch(msgListLength, (newLength, oldLength) => {
   }
 })
 
-
-watch(() => chatStore.currentSessionIndex, () => {
-  scrollToBottom()
-})
-
+watch(
+  () => chatStore.currentSessionIndex,
+  () => {
+    scrollToBottom()
+  }
+)
 </script>

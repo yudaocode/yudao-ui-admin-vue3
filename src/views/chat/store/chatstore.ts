@@ -7,11 +7,12 @@ import SessionApi from '../api/sessionApi'
 import MessageApi, { SendMsg } from '../api/messageApi'
 import { useUserStoreWithOut } from '@/store/modules/user'
 
+// TODO @dylan：是不是 chat => im；session => conversation；这样统一一点哈。
 interface ChatStoreModel {
   sessionList: Array<ConversationModelType>
   currentSession: ConversationModelType | null
   currentSessionIndex: number
-  inputText: string,
+  inputText: string
 }
 
 export const useChatStore = defineStore('chatStore', {
@@ -145,7 +146,6 @@ export const useChatStore = defineStore('chatStore', {
           // sendTime: new Date().toISOString().slice(0, -1)
         })
 
-
         this.currentSession.msgList = res.map((item) => {
           return {
             ...item,
@@ -155,7 +155,7 @@ export const useChatStore = defineStore('chatStore', {
           }
         })
       } catch (error) {
-      return error  
+        return error
       }
     }
   }

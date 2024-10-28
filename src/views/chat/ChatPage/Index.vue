@@ -20,7 +20,7 @@
 import ToolSection from '../components/ToolSection/Index.vue'
 import Session from '../components/Session/Index.vue'
 import Friends from '../components/Friends/Index.vue'
-import ChatHeader from '../components/ChatHeader/Index.vue'
+import ChatHeader from '../components/ChatHeader/Index.vue' // TODO @dylan：为啥这个 index.vue 是大写哈？可以搞成小写哇？
 import ChatMessage from '../components/ChatMessage/Index.vue'
 import InputSection from '../components/InputSection/Index.vue'
 import FriendDetail from '../components/FriendDetail/Index.vue'
