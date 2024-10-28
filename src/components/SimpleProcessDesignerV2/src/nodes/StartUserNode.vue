@@ -1,7 +1,10 @@
 <template>
   <div class="node-wrapper">
     <div class="node-container">
-      <div class="node-box" :class="{ 'node-config-error': !currentNode.showText }">
+      <div
+        class="node-box"
+        :class="[{ 'node-config-error': !currentNode.showText }, `${taskStatusClass}`]"
+      >
         <div class="node-title-container">
           <div class="node-title-icon start-user"
             ><span class="iconfont icon-start-user"></span
@@ -26,18 +29,18 @@
           <div class="node-text" v-else>
             {{ NODE_DEFAULT_TEXT.get(NodeType.START_USER_NODE) }}
           </div>
-          <Icon icon="ep:arrow-right-bold" />
+          <Icon icon="ep:arrow-right-bold" v-if="!readonly" />
         </div>
       </div>
       <!-- 传递子节点给添加节点组件。会在子节点前面添加节点 -->
       <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
     </div>
   </div>
-  <StartUserNodeConfig v-if="currentNode" ref="nodeSetting" :flow-node="currentNode" />
+  <StartUserNodeConfig v-if="!readonly && currentNode" ref="nodeSetting" :flow-node="currentNode" />
 </template>
 <script setup lang="ts">
 import NodeHandler from '../NodeHandler.vue'
-import { useWatchNode, useNodeName2 } from '../node'
+import { useWatchNode, useNodeName2, useTaskStatusClass } from '../node'
 import { SimpleFlowNode, NODE_DEFAULT_TEXT, NodeType } from '../consts'
 import StartUserNodeConfig from '../nodes-config/StartUserNodeConfig.vue'
 defineOptions({
@@ -49,21 +52,28 @@ const props = defineProps({
     default: () => null
   }
 })
+const readonly = inject<Boolean>('readonly') // 是否只读
 // 定义事件，更新父组件。
 const emits = defineEmits<{
   'update:modelValue': [node: SimpleFlowNode | undefined]
 }>()
 // 监控节点变化
 const currentNode = useWatchNode(props)
+// 节点任务状态样式
+const taskStatusClass = useTaskStatusClass(currentNode.value?.activityStatus)
 // 节点名称编辑
 const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.START_USER_NODE)
 
 const nodeSetting = ref()
 // 打开节点配置
 const openNodeConfig = () => {
+  if (readonly) {
+    return
+  }
   // 把当前节点传递给配置组件
   nodeSetting.value.showStartUserNodeConfig(currentNode.value)
   nodeSetting.value.openDrawer()
 }
+
 </script>
 <style lang="scss" scoped></style>

@@ -6,6 +6,7 @@
         v-model:visible="popoverShow"
         placement="right-start"
         width="auto"
+        v-if="!readonly"
       >
         <div class="handler-item-wrapper">
           <div class="handler-item" @click="addNode(NodeType.USER_TASK_NODE)">
@@ -77,6 +78,8 @@ const props = defineProps({
 })
 
 const emits = defineEmits(['update:childNode'])
+
+const readonly = inject<Boolean>('readonly') // 是否只读
 
 const addNode = (type: number) => {
   popoverShow.value = false

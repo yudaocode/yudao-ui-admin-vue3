@@ -1,4 +1,5 @@
 import { cloneDeep } from 'lodash-es'
+import { TaskStatusEnum } from '@/api/bpm/task'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
 import * as PostApi from '@/api/system/post'
@@ -475,4 +476,27 @@ export function useNodeName2(node: Ref<SimpleFlowNode>, nodeType: NodeType) {
     clickTitle,
     blurEvent
   }
+}
+
+/**
+ * @description 根据节点任务状态，获取节点任务状态样式
+ */
+export function  useTaskStatusClass(taskStatus: TaskStatusEnum | undefined) : string {
+  if (!taskStatus) {
+    return ''
+  }
+  if (taskStatus === TaskStatusEnum.APPROVE ) {
+    return 'status-pass'
+  }
+  if (taskStatus === TaskStatusEnum.RUNNING ) {
+    return 'status-running'
+  }
+  if (taskStatus === TaskStatusEnum.REJECT ) {
+    return 'status-reject'
+  }
+  if (taskStatus === TaskStatusEnum.CANCEL ) {
+    return 'status-cancel'
+  }
+   
+  return '';
 }

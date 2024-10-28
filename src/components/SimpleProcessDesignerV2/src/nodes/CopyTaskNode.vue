@@ -5,7 +5,7 @@
         <div class="node-title-container">
           <div class="node-title-icon copy-task"><span class="iconfont icon-copy"></span></div>
           <input
-            v-if="showInput"
+            v-if="!readonly && showInput"
             type="text"
             class="editable-title-input"
             @blur="blurEvent()"
@@ -24,9 +24,9 @@
           <div class="node-text" v-else>
             {{ NODE_DEFAULT_TEXT.get(NodeType.COPY_TASK_NODE) }}
           </div>
-          <Icon icon="ep:arrow-right-bold" />
+          <Icon v-if="!readonly" icon="ep:arrow-right-bold" />
         </div>
-        <div class="node-toolbar">
+        <div v-if="!readonly" class="node-toolbar">
           <div class="toolbar-icon"
             ><Icon color="#0089ff" icon="ep:circle-close-filled" :size="18" @click="deleteNode"
           /></div>
@@ -36,7 +36,7 @@
       <!-- 传递子节点给添加节点组件。会在子节点前面添加节点 -->
       <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
     </div>
-    <CopyTaskNodeConfig v-if="currentNode" ref="nodeSetting" :flow-node="currentNode" />
+    <CopyTaskNodeConfig v-if="!readonly && currentNode" ref="nodeSetting" :flow-node="currentNode" />
   </div>
 </template>
 <script setup lang="ts">
@@ -57,7 +57,8 @@ const props = defineProps({
 const emits = defineEmits<{
   'update:flowNode': [node: SimpleFlowNode | undefined]
 }>()
-
+// 是否只读
+const readonly = inject<Boolean>('readonly') 
 // 监控节点的变化
 const currentNode = useWatchNode(props)
 // 节点名称编辑
@@ -66,6 +67,9 @@ const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.
 const nodeSetting = ref()
 // 打开节点配置
 const openNodeConfig = () => {
+  if (readonly) {
+    return
+  }
   nodeSetting.value.showCopyTaskNodeConfig(currentNode.value)
   nodeSetting.value.openDrawer()
 }

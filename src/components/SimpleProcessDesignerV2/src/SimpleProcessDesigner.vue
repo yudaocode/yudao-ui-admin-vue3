@@ -57,7 +57,7 @@ const props = defineProps({
     required: true
   }
 })
-const loading = ref(true)
+const loading = ref(false)
 const formFields = ref<string[]>([])
 const formType = ref(20)
 const roleOptions = ref<RoleApi.RoleVO[]>([]) // 角色列表
@@ -66,6 +66,7 @@ const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const deptOptions = ref<DeptApi.DeptVO[]>([]) // 部门列表
 const deptTreeOptions = ref()
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
+provide('readonly', false)
 provide('formFields', formFields)
 provide('formType', formType)
 provide('roleList', roleOptions)

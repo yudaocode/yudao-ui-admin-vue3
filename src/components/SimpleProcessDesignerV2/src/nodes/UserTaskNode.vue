@@ -1,11 +1,14 @@
 <template>
   <div class="node-wrapper">
     <div class="node-container">
-      <div class="node-box" :class="{ 'node-config-error': !currentNode.showText }">
+      <div
+        class="node-box"
+        :class="[{ 'node-config-error': !currentNode.showText }, `${taskStatusClass}`]"
+      >
         <div class="node-title-container">
           <div class="node-title-icon user-task"><span class="iconfont icon-approve"></span></div>
           <input
-            v-if="showInput"
+            v-if="!readonly && showInput"
             type="text"
             class="editable-title-input"
             @blur="blurEvent()"
@@ -24,9 +27,9 @@
           <div class="node-text" v-else>
             {{ NODE_DEFAULT_TEXT.get(NodeType.USER_TASK_NODE) }}
           </div>
-          <Icon icon="ep:arrow-right-bold" />
+          <Icon icon="ep:arrow-right-bold" v-if="!readonly" />
         </div>
-        <div class="node-toolbar">
+        <div v-if="!readonly" class="node-toolbar">
           <div class="toolbar-icon"
             ><Icon color="#0089ff" icon="ep:circle-close-filled" :size="18" @click="deleteNode"
           /></div>
@@ -45,7 +48,7 @@
 </template>
 <script setup lang="ts">
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
-import { useWatchNode, useNodeName2 } from '../node'
+import { useWatchNode, useNodeName2, useTaskStatusClass } from '../node'
 import NodeHandler from '../NodeHandler.vue'
 import UserTaskNodeConfig from '../nodes-config/UserTaskNodeConfig.vue'
 defineOptions({
@@ -61,13 +64,21 @@ const emits = defineEmits<{
   'update:flowNode': [node: SimpleFlowNode | undefined]
   'find:parentNode': [nodeList: SimpleFlowNode[], nodeType: NodeType]
 }>()
+
+// 是否只读
+const readonly = inject<Boolean>('readonly')
 // 监控节点变化
 const currentNode = useWatchNode(props)
+// 节点状态样式
+const taskStatusClass = useTaskStatusClass(currentNode.value?.activityStatus)
 // 节点名称编辑
 const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.START_USER_NODE)
 const nodeSetting = ref()
 // 打开节点配置
 const openNodeConfig = () => {
+  if (readonly) {
+    return
+  }
   // 把当前节点传递给配置组件
   nodeSetting.value.showUserTaskNodeConfig(currentNode.value)
   nodeSetting.value.openDrawer()

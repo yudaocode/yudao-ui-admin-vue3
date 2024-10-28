@@ -1,7 +1,13 @@
 <template>
   <div class="branch-node-wrapper">
     <div class="branch-node-container">
-      <el-button class="branch-node-add" color="#67c23a" @click="addCondition"  plain>添加条件</el-button>
+      <div v-if="readonly" class="branch-node-readonly" :class="taskStatusClass">
+        <span class="iconfont icon-exclusive icon-size"></span>
+      </div>
+      <el-button v-else class="branch-node-add" color="#67c23a" @click="addCondition" plain
+        >添加条件</el-button
+      >
+
       <div
         class="branch-node-item"
         v-for="(item, index) in currentNode.conditionNodes"
@@ -17,9 +23,9 @@
         </template>
         <div class="node-wrapper">
           <div class="node-container">
-            <div class="node-box" :class="{ 'node-config-error': !item.showText }">
+            <div class="node-box" :class="[{ 'node-config-error': !item.showText }, `${useTaskStatusClass(item.activityStatus)}`]">
               <div class="branch-node-title-container">
-                <div v-if="showInputs[index]">
+                <div v-if="!readonly && showInputs[index]">
                   <input
                     type="text"
                     class="input-max-width editable-title-input"
@@ -39,7 +45,10 @@
                   {{ NODE_DEFAULT_TEXT.get(NodeType.CONDITION_NODE) }}
                 </div>
               </div>
-              <div class="node-toolbar" v-if="index + 1 !== currentNode.conditionNodes?.length">
+              <div
+                class="node-toolbar"
+                v-if="!readonly && index + 1 !== currentNode.conditionNodes?.length"
+              >
                 <div class="toolbar-icon">
                   <Icon
                     color="#0089ff"
@@ -87,6 +96,7 @@ import NodeHandler from '../NodeHandler.vue'
 import ProcessNodeTree from '../ProcessNodeTree.vue'
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
 import { getDefaultConditionNodeName } from '../utils'
+import { useTaskStatusClass } from '../node'
 import { generateUUID } from '@/utils'
 import ConditionNodeConfig from '../nodes-config/ConditionNodeConfig.vue'
 const { proxy } = getCurrentInstance() as any
@@ -109,9 +119,11 @@ const emits = defineEmits<{
     nodeType: number
   ]
 }>()
-
+// 是否只读
+const readonly = inject<Boolean>('readonly') 
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
-// const conditionNodes = computed(() => currentNode.value.conditionNodes);
+// 节点状态样式
+const taskStatusClass = useTaskStatusClass(currentNode.value?.activityStatus)
 
 watch(
   () => props.flowNode,
@@ -135,6 +147,9 @@ const clickEvent = (index: number) => {
 }
 
 const conditionNodeConfig = (nodeId: string) => {
+  if (readonly) {
+    return
+  }
   const conditionNode = proxy.$refs[nodeId][0]
   conditionNode.open()
 }

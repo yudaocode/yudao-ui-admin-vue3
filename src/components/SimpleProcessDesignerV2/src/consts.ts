@@ -1,6 +1,6 @@
 // @ts-ignore
 import { DictDataVO } from '@/api/system/dict/types'
-
+import { TaskStatusEnum } from '@/api/bpm/task'
 /**
  * 节点类型
  */
@@ -96,6 +96,8 @@ export interface SimpleFlowNode {
   conditionGroups?: ConditionGroup
   // 是否默认的条件
   defaultFlow?: boolean
+  // 活动的状态，用于前端节点状态展示
+  activityStatus? : TaskStatusEnum
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {

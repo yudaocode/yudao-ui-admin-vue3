@@ -1,5 +1,8 @@
 <template>
-  <SimpleProcessDesigner :model-id="modelId" />
+   <ContentWrap :bodyStyle="{ padding: '0px 0px' }" class="position-relative">
+      <SimpleProcessDesigner :model-id="modelId" />
+   </ContentWrap>
+ 
 </template>
 <script setup lang="ts">
 import { SimpleProcessDesigner } from '@/components/SimpleProcessDesignerV2/src/'
