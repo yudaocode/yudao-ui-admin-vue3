@@ -13,8 +13,12 @@ export const processDefinitionList = [
     category: 'approval',
     icon: 'https://picsum.photos/200?r=1',
     formType: 10,
-    formConf: {}, // 根据需要定义表单配置
-    formFields: [], // 根据需要定义表单字段
+    formConf:
+      '{"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"right","size":"default","labelWidth":"100px"},"resetBtn":{"show":false,"innerText":"重置"},"submitBtn":{"show":true,"innerText":"提交"}}',
+    formFields: [
+      '{"type":"input","field":"F1yrm2sosxgeabc","title":"请假原因","info":"","$required":false,"props":{"type":"text","placeholder":"请输入123"},"_fc_id":"id_Fhrbm2sosxgeacc","name":"ref_Festm2sosxgeadc","display":true,"hidden":false,"_fc_drag_tag":"input"}',
+      '{"type":"radio","field":"F9r3m2sp1b34aec","title":"请假类型","info":"","$required":false,"props":{"_optionType":2},"_fc_id":"id_F4nwm2sp1b34afc","name":"ref_Fkodm2sp1b34agc","display":true,"hidden":false,"_fc_drag_tag":"radio","options":[{"label":"事假","value":"1"},{"label":"婚假","value":"2"},{"label":"丧假","value":"3"}]}'
+    ],
     startUserSelectTasks: [
       { id: 'task1', name: '部门经理' },
       { id: 'task2', name: '人力资源' }
@@ -27,8 +31,12 @@ export const processDefinitionList = [
     category: 'approval',
     icon: 'https://picsum.photos/200?r=2',
     formType: 10,
-    formConf: {},
-    formFields: [],
+    formConf:
+      '{"form":{"inline":false,"hideRequiredAsterisk":false,"labelPosition":"right","size":"default","labelWidth":"100px"},"resetBtn":{"show":false,"innerText":"重置"},"submitBtn":{"show":true,"innerText":"提交"}}',
+    formFields: [
+      '{"type":"input","field":"F1yrm2sosxgeabc","title":"请假原因","info":"","$required":false,"props":{"type":"text","placeholder":"请输入123"},"_fc_id":"id_Fhrbm2sosxgeacc","name":"ref_Festm2sosxgeadc","display":true,"hidden":false,"_fc_drag_tag":"input"}',
+      '{"type":"radio","field":"F9r3m2sp1b34aec","title":"请假类型","info":"","$required":false,"props":{"_optionType":2},"_fc_id":"id_F4nwm2sp1b34afc","name":"ref_Fkodm2sp1b34agc","display":true,"hidden":false,"_fc_drag_tag":"radio","options":[{"label":"事假","value":"1"},{"label":"婚假","value":"2"},{"label":"丧假","value":"3"}]}'
+    ],
     startUserSelectTasks: [{ id: 'task3', name: '财务' }]
   },
   {
@@ -55,7 +63,8 @@ export const processDefinitionList = [
     formConf: {},
     formFields: [],
     startUserSelectTasks: [{ id: 'task3', name: '财务' }]
-  },{
+  },
+  {
     id: '5',
     key: 'process_1',
     name: '请假申请',
