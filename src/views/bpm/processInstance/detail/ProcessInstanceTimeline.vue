@@ -3,7 +3,7 @@
   <el-timeline class="pt-20px">
     <!-- 遍历每个审批节点 -->
     <el-timeline-item
-      v-for="(activity, index) in approveNodes"
+      v-for="(activity, index) in activityNodes"
       :key="index"
       size="large"
       :icon="getApprovalNodeIcon(activity.status, activity.nodeType)"
@@ -107,7 +107,10 @@
                 </div>
               </div>
               <div
-                v-if="task.reason && activity.nodeType === NodeType.USER_TASK_NODE"
+                v-if="
+                  task.reason &&
+                  [NodeType.USER_TASK_NODE, NodeType.END_EVENT_NODE].includes(activity.nodeType)
+                "
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
                 审批意见：{{ task.reason }}
@@ -131,10 +134,11 @@ import auditorSvg from '@/assets/svgs/bpm/auditor.svg'
 import copySvg from '@/assets/svgs/bpm/copy.svg'
 import conditionSvg from '@/assets/svgs/bpm/condition.svg'
 import parallelSvg from '@/assets/svgs/bpm/parallel.svg'
+import endSvg from '@/assets/svgs/bpm/end.svg'
 
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
 defineProps<{
-  approveNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
+  activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
 }>()
 
 // 审批节点
@@ -189,7 +193,9 @@ const nodeTypeSvgMap = {
   // 条件分支节点
   [NodeType.CONDITION_NODE]: { color: '#14bb83', svg: conditionSvg },
   // 并行分支节点
-  [NodeType.PARALLEL_BRANCH_NODE]: { color: '#14bb83', svg: parallelSvg }
+  [NodeType.PARALLEL_BRANCH_NODE]: { color: '#14bb83', svg: parallelSvg },
+  // 结束节点
+  [NodeType.END_EVENT_NODE]: { color: '#ffffff', svg: endSvg }
 }
 
 // 只有只有状态是 -1、0、1 才展示头像右小角状态小icon
@@ -205,7 +211,11 @@ const getApprovalNodeIcon = (taskStatus: number, nodeType: NodeType) => {
     return statusIconMap[taskStatus]?.icon
   }
 
-  if (nodeType === NodeType.START_USER_NODE || nodeType === NodeType.USER_TASK_NODE) {
+  if (
+    nodeType === NodeType.START_USER_NODE ||
+    nodeType === NodeType.USER_TASK_NODE ||
+    nodeType === NodeType.END_EVENT_NODE
+  ) {
     return statusIconMap[taskStatus]?.icon
   }
 }
