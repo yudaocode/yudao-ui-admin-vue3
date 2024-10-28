@@ -95,7 +95,7 @@
 <script lang="ts" setup>
 import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { setConfAndFields2 } from '@/utils/formCreate'
+import { decodeFields, setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
 import { CategoryApi } from '@/api/bpm/category'
@@ -185,7 +185,17 @@ const handleSelect = async (row, formVariables) => {
   // 情况一：流程表单
   if (row.formType == 10) {
     // 设置表单
+    // 注意：需要从 formVariables 中，移除不在 row.formFields 的值。
+    // 原因是：后端返回的 formVariables 里面，会有一些非表单的信息。例如说，某个流程节点的审批人。
+    //        这样，就可能导致一个流程被审批不通过后，重新发起时，会直接后端报错！！！
+    const allowedFields = decodeFields(row.formFields).map((fieldObj: any) => fieldObj.field)
+    for (const key in formVariables) {
+      if (!allowedFields.includes(key)) {
+        delete formVariables[key]
+      }
+    }
     setConfAndFields2(detailForm, row.formConf, row.formFields, formVariables)
+
     // 加载流程图
     const processDefinitionDetail = await DefinitionApi.getProcessDefinition(row.id)
     if (processDefinitionDetail) {
