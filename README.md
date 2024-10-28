@@ -69,11 +69,11 @@
 
 支持 Spring Boot、Spring Cloud 两种架构：
 
-① Spring Boot 单体架构：<https://doc.iocoder.cn/>
+① Spring Boot 单体架构：<https://doc.iocoder.cn>
 
 ![架构图](/.image/common/ruoyi-vue-pro-architecture.png)
 
-② Spring Cloud 微服务架构：<https://cloud.iocoder.cn/>
+② Spring Cloud 微服务架构：<https://cloud.iocoder.cn>
 
 ![架构图](/.image/common/yudao-cloud-architecture.png)
 
