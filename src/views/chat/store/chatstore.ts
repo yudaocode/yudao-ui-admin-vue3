@@ -6,6 +6,7 @@ import { ConversationModelType, MessageRole, ContentType, SendStatus } from '../
 import SessionApi from '../api/sessionApi'
 import MessageApi, { SendMsg } from '../api/messageApi'
 import { useUserStoreWithOut } from '@/store/modules/user'
+import { formatDate } from '@/utils/formatTime'
 
 // TODO @dylan：是不是 chat => im；session => conversation；这样统一一点哈。
 interface ChatStoreModel {
@@ -142,8 +143,10 @@ export const useChatStore = defineStore('chatStore', {
 
       try {
         const res = await MessageApi.getSessionMsg({
-          conversationNo: this.currentSession.conversationNo
-          // sendTime: new Date().toISOString().slice(0, -1)
+          receiverId: this.currentSession.targetId,
+          userId: this.currentSession.senderId,
+          // sendTime: formatDate(new Date(), 'YYYY-MM-DD HH:mm:ss')
+          conversationType: this.currentSession.type
         })
 
         this.currentSession.msgList = res.map((item) => {

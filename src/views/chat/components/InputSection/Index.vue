@@ -55,7 +55,7 @@ const createTextMessage = (content: string): TextMessage => {
     chatStore.currentSession?.id || '',
     chatStore.currentSession ? chatStore.currentSession.targetId : 0,
     chatStore.currentSession?.type || CONVERSATION_TYPE.SINGLE,
-    chatStore.currentSession?.conversationNo || ''
+    chatStore.currentSession?.senderId || ''
   )
 
   return msg
