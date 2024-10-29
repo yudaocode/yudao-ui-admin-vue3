@@ -56,7 +56,6 @@ import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CategoryApi } from '@/api/bpm/category'
 import ProcessDefinitionDetail from './ProcessDefinitionDetail.vue'
-import { categoryList as cl, processDefinitionList as pl } from './mock'
 
 defineOptions({ name: 'BpmProcessInstanceCreate' })
 
@@ -74,8 +73,6 @@ const getList = async () => {
   try {
     // 流程分类
     categoryList.value = await CategoryApi.getCategorySimpleList()
-    // 测试数据
-    categoryList.value = cl
     if (categoryList.value.length > 0) {
       categoryActive.value = categoryList.value[0]
     }
@@ -83,8 +80,6 @@ const getList = async () => {
     processDefinitionList.value = await DefinitionApi.getProcessDefinitionList({
       suspensionState: 1
     })
-    // 测试数据
-    processDefinitionList.value = pl as any
 
     // 如果 processInstanceId 非空，说明是重新发起
     if (processInstanceId?.length > 0) {

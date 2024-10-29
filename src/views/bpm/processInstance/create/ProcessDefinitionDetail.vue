@@ -61,9 +61,14 @@
                     </form-create>
                   </el-col>
 
-                  <el-col :span="7">
-                    <!-- 审批记录时间线 -->
-                    <!-- <ProcessInstanceTimeline ref="timelineRef" :approve-nodes="approveNodes" /> -->
+                  <el-col :span="6" :offset="1">
+                    <!-- 流程时间线 -->
+                    <ProcessInstanceTimeline
+                      ref="timelineRef"
+                      :approve-nodes="approveNodes"
+                      :show-status-icon="false"
+                      candidateField="candidateUserList"
+                    />
                   </el-col>
                 </el-row>
               </el-scrollbar>
@@ -82,6 +87,7 @@
         <div class="b-t-solid border-t-1px border-[var(--el-border-color)]">
           <!-- 操作栏按钮 -->
           <div
+            v-if="activeTab === 'form'"
             class="h-50px bottom-10 text-14px flex items-center color-#32373c dark:color-#fff font-bold btn-container"
           >
             <el-button plain type="success" @click="submitForm">
@@ -99,6 +105,7 @@
 <script lang="ts" setup>
 import { setConfAndFields2 } from '@/utils/formCreate'
 import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
+import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
@@ -126,11 +133,13 @@ const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
 const startUserSelectAssigneesFormRules = ref({}) // 发起人选择审批人的表单 Rules
 const userList = ref<any[]>([]) // 用户列表
 const bpmnXML: any = ref(null) // BPMN 数据
-
 /** 当前的Tab */
 const activeTab = ref('form')
 const emit = defineEmits(['cancel'])
-/** 处理选择流程的按钮操作 **/
+// 审批节点信息
+const approveNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
+
+/** 设置表单信息、获取流程图数据 **/
 const initProcessInfo = async (row, formVariables?) => {
   // 重置指定审批人
   startUserSelectTasks.value = []
@@ -141,6 +150,11 @@ const initProcessInfo = async (row, formVariables?) => {
   if (row.formType == 10) {
     // 设置表单
     setConfAndFields2(detailForm, row.formConf, row.formFields, formVariables)
+    await nextTick()
+    fApi.value?.btn.show(false) // 隐藏提交按钮
+    // 获取流程审批信息
+    getApprovalDetail(row)
+
     // 加载流程图
     const processDefinitionDetail = await DefinitionApi.getProcessDefinition(row.id)
     if (processDefinitionDetail) {
@@ -172,6 +186,23 @@ const initProcessInfo = async (row, formVariables?) => {
       path: row.formCustomCreatePath
     })
     // 这里暂时无需加载流程图，因为跳出到另外个 Tab；
+  }
+}
+
+/** 获取审批详情 */
+const getApprovalDetail = async (row) => {
+  try {
+    const param = {
+      processDefinitionId: row.id
+    }
+    const data = await ProcessInstanceApi.getApprovalDetail(param)
+    if (!data) {
+      message.error('查询不到审批详情信息！')
+      return
+    }
+    // 获取审批节点，显示 Timeline 的数据
+    approveNodes.value = data.approveNodes
+  } finally {
   }
 }
 /** 提交按钮 */
