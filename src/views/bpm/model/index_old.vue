@@ -338,7 +338,7 @@ const handleDesign = (row: any) => {
     })
   } else {
     push({
-      name: 'SimpleWorkflowDesignEditor',
+      name: 'SimpleModelDesign',
       query: {
         modelId: row.id
       }

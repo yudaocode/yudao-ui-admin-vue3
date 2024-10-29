@@ -1,12 +1,11 @@
 <template>
-  <el-card v-loading="loading" class="box-card">
-    <SimpleProcessViewer :flow-node="simpleModel" />
-  </el-card>
+  <div v-loading="loading" class="mb-20px">
+      <SimpleProcessViewer :flow-node="simpleModel" :tasks="tasks"/>
+  </div>
 </template>
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { TaskStatusEnum } from '@/api/bpm/task'
-import { BpmProcessInstanceStatus } from '@/utils/constants'
 import { SimpleFlowNode, NodeType } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { SimpleProcessViewer } from '@/components/SimpleProcessDesignerV2/src/'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
@@ -18,10 +17,7 @@ const props = defineProps({
   id: propTypes.string // 流程实例的编号
 })
 
-// const view = ref({
-//   simpleModel: undefined
-// }) // simple 模型数据
-
+const tasks = ref([])
 const simpleModel = ref()
 
 /** 只有 loading 完成时，才去加载流程列表 */
@@ -31,6 +27,7 @@ watch(
     if (value && props.id) {
       const modelView = await ProcessInstanceApi.getProcessInstanceBpmnModelView(props.id)
       if (modelView) {
+        tasks.value = modelView.tasks;
         // 已经拒绝的活动节点编号集合，只包括 UserTask
         const rejectedTaskActivityIds: string[] = modelView.rejectedTaskActivityIds
         // 进行中的活动节点编号集合， 只包括 UserTask
@@ -47,7 +44,7 @@ watch(
           finishedActivityIds,
           finishedSequenceFlowActivityIds
         )
-        console.log("modelView.simpleModel==>", modelView.simpleModel)
+        console.log('modelView.simpleModel==>', modelView.simpleModel)
         simpleModel.value = modelView.simpleModel
       }
     }
@@ -60,8 +57,7 @@ const setSimpleModelNodeTaskStatus = (
   rejectedTaskActivityIds: string[],
   unfinishedTaskActivityIds: string[],
   finishedActivityIds: string[],
-  finishedSequenceFlowActivityIds: string[],
-  
+  finishedSequenceFlowActivityIds: string[]
 ) => {
   if (!simpleModel) {
     return
@@ -75,7 +71,7 @@ const setSimpleModelNodeTaskStatus = (
     }
     return
   }
-  
+
   // 审批节点
   if (
     simpleModel.type === NodeType.START_USER_NODE ||
@@ -84,7 +80,7 @@ const setSimpleModelNodeTaskStatus = (
     simpleModel.activityStatus = TaskStatusEnum.NOT_START
     if (rejectedTaskActivityIds.includes(simpleModel.id)) {
       simpleModel.activityStatus = TaskStatusEnum.REJECT
-    } else if(unfinishedTaskActivityIds.includes(simpleModel.id)) {
+    } else if (unfinishedTaskActivityIds.includes(simpleModel.id)) {
       simpleModel.activityStatus = TaskStatusEnum.RUNNING
     } else if (finishedActivityIds.includes(simpleModel.id)) {
       simpleModel.activityStatus = TaskStatusEnum.APPROVE
@@ -152,9 +148,3 @@ const setSimpleModelNodeTaskStatus = (
 //   }
 // )
 </script>
-<style>
-.box-card {
-  width: 100%;
-  margin-bottom: 20px;
-}
-</style>

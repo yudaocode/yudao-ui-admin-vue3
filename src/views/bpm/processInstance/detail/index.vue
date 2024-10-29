@@ -75,11 +75,14 @@
           <!-- 流程图 -->
           <el-tab-pane label="流程图" name="diagram">
             <div class="form-scroll-area">
-              <ProcessInstanceBpmnViewer
+              <ProcessInstanceSimpleViewer
+                v-show="processDefinition.modelType && processDefinition.modelType === BpmModelType.SIMPLE"
                 :id="`${id}`"
                 :loading="processInstanceLoading"
-                :show-header="false"
               />
+              <ProcessInstanceBpmnViewer
+                v-show="processDefinition.modelType && processDefinition.modelType === BpmModelType.BPMN"
+                :id="`${id}`" :loading="processInstanceLoading" />
             </div>
           </el-tab-pane>
 
@@ -122,11 +125,13 @@
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
+import { BpmModelType } from '@/utils/constants'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as TaskApi from '@/api/bpm/task'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
+import ProcessInstanceSimpleViewer from './ProcessInstanceSimpleViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
 import ProcessInstanceOperationButton from './ProcessInstanceOperationButton.vue'
 import ProcessInstanceTimeline from './ProcessInstanceTimeline.vue'

@@ -342,7 +342,7 @@ const handleDesign = (row: any) => {
     })
   } else {
     push({
-      name: 'SimpleWorkflowDesignEditor',
+      name: 'SimpleModelDesign',
       query: {
         modelId: row.id
       }
@@ -492,9 +492,11 @@ watch(
 <style lang="scss">
 .rename-dialog.el-dialog {
   padding: 0 !important;
+
   .el-dialog__header {
     border-bottom: none;
   }
+
   .el-dialog__footer {
     border-top: none !important;
   }
@@ -503,8 +505,8 @@ watch(
 <style lang="scss" scoped>
 :deep() {
   .el-table__cell {
-    border-bottom: none !important;
     overflow: hidden;
+    border-bottom: none !important;
   }
 }
 </style>

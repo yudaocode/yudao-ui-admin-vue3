@@ -47,7 +47,10 @@
   />
 
   <!-- 结束节点 -->
-  <EndEventNode v-if="currentNode && currentNode.type === NodeType.END_EVENT_NODE" :flow-node="currentNode" />
+  <EndEventNode
+    v-if="currentNode && currentNode.type === NodeType.END_EVENT_NODE"
+    :flow-node="currentNode"
+  />
 </template>
 <script setup lang="ts">
 import StartUserNode from './nodes/StartUserNode.vue'

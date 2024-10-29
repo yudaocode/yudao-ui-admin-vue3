@@ -1,23 +1,11 @@
 <template>
-  <div class="simple-flow-canvas" v-loading="loading">
-    <div class="simple-flow-container">
-      <div class="top-area-container">
-        <div class="top-actions">
-          <div class="canvas-control">
-            <span class="control-scale-group">
-              <span class="control-scale-button"> <Icon icon="ep:plus" @click="zoomOut()" /></span>
-              <span class="control-scale-label">{{ scaleValue }}%</span>
-              <span class="control-scale-button"><Icon icon="ep:minus" @click="zoomIn()" /></span>
-            </span>
-          </div>
-          <el-button type="primary" @click="saveSimpleFlowModel">保存</el-button>
-          <!-- <el-button type="primary">全局设置</el-button> -->
-        </div>
-      </div>
-      <div class="scale-container" :style="`transform: scale(${scaleValue / 100});`">
-        <ProcessNodeTree v-if="processNodeTree" v-model:flow-node="processNodeTree" />
-      </div>
-    </div>
+  <div v-loading="loading">
+    <SimpleProcessModel
+      v-if="processNodeTree"
+      :flow-node="processNodeTree"
+      :readonly="false"
+      @save="saveSimpleFlowModel"
+    />
     <Dialog v-model="errorDialogVisible" title="保存失败" width="400" :fullscreen="false">
       <div class="mb-2">以下节点内容不完善，请修改后保存</div>
       <div
@@ -35,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import ProcessNodeTree from './ProcessNodeTree.vue'
+import SimpleProcessModel from './SimpleProcessModel.vue'
 import { updateBpmSimpleModel, getBpmSimpleModel } from '@/api/bpm/simple'
 import { SimpleFlowNode, NodeType, NodeId, NODE_DEFAULT_TEXT } from './consts'
 import { getModel } from '@/api/bpm/model'
@@ -50,13 +38,15 @@ import * as UserGroupApi from '@/api/bpm/userGroup'
 defineOptions({
   name: 'SimpleProcessDesigner'
 })
-const router = useRouter() // 路由
+const emits = defineEmits(['success']) // 保存成功事件
+
 const props = defineProps({
   modelId: {
     type: String,
     required: true
   }
 })
+
 const loading = ref(false)
 const formFields = ref<string[]>([])
 const formType = ref(20)
@@ -66,7 +56,6 @@ const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const deptOptions = ref<DeptApi.DeptVO[]>([]) // 部门列表
 const deptTreeOptions = ref()
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
-provide('readonly', false)
 provide('formFields', formFields)
 provide('formType', formType)
 provide('roleList', roleOptions)
@@ -80,28 +69,26 @@ const message = useMessage() // 国际化
 const processNodeTree = ref<SimpleFlowNode | undefined>()
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
-const saveSimpleFlowModel = async () => {
-  if (!props.modelId) {
-    message.error('缺少模型 modelId 编号')
+const saveSimpleFlowModel = async (simpleModelNode: SimpleFlowNode) => {
+  if (!simpleModelNode) {
+    message.error('模型数据为空')
     return
   }
-  errorNodes = []
-  validateNode(processNodeTree.value, errorNodes)
-  if (errorNodes.length > 0) {
-    errorDialogVisible.value = true
-    return
-  }
-  const data = {
-    id: props.modelId,
-    simpleModel: processNodeTree.value
-  }
-
-  const result = await updateBpmSimpleModel(data)
-  if (result) {
-    message.success('修改成功')
-    close()
-  } else {
-    message.alert('修改失败')
+  try {
+    loading.value = true
+    const data = {
+      id: props.modelId,
+      simpleModel: simpleModelNode
+    }
+    const result = await updateBpmSimpleModel(data)
+    if (result) {
+      message.success('修改成功')
+      emits('success')
+    } else {
+      message.alert('修改失败')
+    }
+  } finally {
+    loading.value = false
   }
 }
 // 校验节点设置。 暂时以 showText 为空 未节点错误配置
@@ -126,12 +113,13 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
       }
       validateNode(node.childNode, errorNodes)
     }
-    
+
     if (
       type == NodeType.CONDITION_BRANCH_NODE ||
       type == NodeType.PARALLEL_BRANCH_NODE ||
       type == NodeType.INCLUSIVE_BRANCH_NODE
-    ) { // 分支节点
+    ) {
+      // 分支节点
       // 1. 先校验各个分支
       conditionNodes?.forEach((item) => {
         validateNode(item, errorNodes)
@@ -140,27 +128,6 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
       validateNode(node.childNode, errorNodes)
     }
   }
-}
-
-const close = () => {
-  router.push({ path: '/bpm/manager/model' })
-}
-let scaleValue = ref(100)
-const MAX_SCALE_VALUE = 200
-const MIN_SCALE_VALUE = 50
-// 放大
-const zoomOut = () => {
-  if (scaleValue.value == MAX_SCALE_VALUE) {
-    return
-  }
-  scaleValue.value += 10
-}
-// 缩小
-const zoomIn = () => {
-  if (scaleValue.value == MIN_SCALE_VALUE) {
-    return
-  }
-  scaleValue.value -= 10
 }
 
 onMounted(async () => {
@@ -188,7 +155,7 @@ onMounted(async () => {
     // 获取用户组列表
     userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
 
-    // 获取 SIMPLE 设计器模型
+    //获取 SIMPLE 设计器模型
     const result = await getBpmSimpleModel(props.modelId)
     if (result) {
       processNodeTree.value = result

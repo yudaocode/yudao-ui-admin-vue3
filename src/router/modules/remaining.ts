@@ -267,9 +267,9 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: 'manager/simple/workflow/model/edit',
-        component: () => import('@/views/bpm/simpleWorkflow/index.vue'),
-        name: 'SimpleWorkflowDesignEditor',
+        path: 'manager/simple/model',
+        component: () => import('@/views/bpm/simple/SimpleModelDesign.vue'),
+        name: 'SimpleModelDesign',
         meta: {
           noCache: true,
           hidden: true,
