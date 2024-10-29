@@ -1,6 +1,6 @@
 <template>
   <div v-loading="loading" class="mb-20px">
-      <SimpleProcessViewer :flow-node="simpleModel" :tasks="tasks"/>
+      <SimpleProcessViewer :flow-node="simpleModel" :tasks="tasks" :process-instance="processInstance"/>
   </div>
 </template>
 <script lang="ts" setup>
@@ -16,10 +16,11 @@ const props = defineProps({
   loading: propTypes.bool.def(false), // 是否加载中
   id: propTypes.string // 流程实例的编号
 })
-
-const tasks = ref([])
 const simpleModel = ref()
-
+// 用户任务
+const tasks = ref([])
+// 流程实例
+const processInstance = ref()
 /** 只有 loading 完成时，才去加载流程列表 */
 watch(
   () => props.loading,
@@ -27,7 +28,8 @@ watch(
     if (value && props.id) {
       const modelView = await ProcessInstanceApi.getProcessInstanceBpmnModelView(props.id)
       if (modelView) {
-        tasks.value = modelView.tasks;
+        tasks.value = modelView.tasks
+        processInstance.value = modelView.processInstance
         // 已经拒绝的活动节点编号集合，只包括 UserTask
         const rejectedTaskActivityIds: string[] = modelView.rejectedTaskActivityIds
         // 进行中的活动节点编号集合， 只包括 UserTask
@@ -44,7 +46,6 @@ watch(
           finishedActivityIds,
           finishedSequenceFlowActivityIds
         )
-        console.log('modelView.simpleModel==>', modelView.simpleModel)
         simpleModel.value = modelView.simpleModel
       }
     }
@@ -140,11 +141,4 @@ const setSimpleModelNodeTaskStatus = (
     finishedSequenceFlowActivityIds
   )
 }
-/** 监听 bpmnXml */
-// watch(
-//   () => props.bpmnXml,
-//   (value) => {
-//     view.value.bpmnXml = value
-//   }
-// )
 </script>
