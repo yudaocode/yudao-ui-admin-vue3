@@ -1,8 +1,8 @@
 <template>
   <div class="branch-node-wrapper">
     <div class="branch-node-container">
-      <div v-if="readonly" class="branch-node-readonly">
-        <span class="iconfont icon-inclusive icon-size"></span>
+      <div v-if="readonly" class="branch-node-readonly" :class="`${useTaskStatusClass(currentNode?.activityStatus)}`" >
+        <span class="iconfont icon-inclusive icon-size inclusive"></span>
       </div>
       <el-button v-else class="branch-node-add" color="#345da2" @click="addCondition"  plain>添加条件</el-button>
       <div
@@ -20,7 +20,7 @@
         </template>
         <div class="node-wrapper">
           <div class="node-container">
-            <div class="node-box" :class="{ 'node-config-error': !item.showText }">
+            <div class="node-box" :class="[{ 'node-config-error': !item.showText }, `${useTaskStatusClass(item.activityStatus)}`]">
               <div class="branch-node-title-container">
                 <div v-if="showInputs[index]">
                   <input
@@ -88,6 +88,7 @@
 import NodeHandler from '../NodeHandler.vue'
 import ProcessNodeTree from '../ProcessNodeTree.vue'
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
+import { useTaskStatusClass } from '../node'
 import { getDefaultInclusiveConditionNodeName } from '../utils'
 import { generateUUID } from '@/utils'
 import ConditionNodeConfig from '../nodes-config/ConditionNodeConfig.vue'

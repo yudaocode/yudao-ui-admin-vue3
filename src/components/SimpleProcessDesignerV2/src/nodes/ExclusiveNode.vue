@@ -1,8 +1,8 @@
 <template>
   <div class="branch-node-wrapper">
     <div class="branch-node-container">
-      <div v-if="readonly" class="branch-node-readonly" :class="taskStatusClass">
-        <span class="iconfont icon-exclusive icon-size"></span>
+      <div v-if="readonly" class="branch-node-readonly" :class="`${useTaskStatusClass(currentNode?.activityStatus)}`">
+        <span class="iconfont icon-exclusive icon-size condition"></span>
       </div>
       <el-button v-else class="branch-node-add" color="#67c23a" @click="addCondition" plain
         >添加条件</el-button
@@ -122,9 +122,6 @@ const emits = defineEmits<{
 // 是否只读
 const readonly = inject<Boolean>('readonly') 
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
-// 节点状态样式
-const taskStatusClass = useTaskStatusClass(currentNode.value?.activityStatus)
-
 watch(
   () => props.flowNode,
   (newValue) => {

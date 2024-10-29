@@ -3,7 +3,7 @@
     <div class="node-container">
       <div
         class="node-box"
-        :class="[{ 'node-config-error': !currentNode.showText }, `${taskStatusClass}`]"
+        :class="[{ 'node-config-error': !currentNode.showText }, `${useTaskStatusClass(currentNode?.activityStatus)}`]"
       >
         <div class="node-title-container">
           <div class="node-title-icon user-task"><span class="iconfont icon-approve"></span></div>
@@ -69,8 +69,7 @@ const emits = defineEmits<{
 const readonly = inject<Boolean>('readonly')
 // 监控节点变化
 const currentNode = useWatchNode(props)
-// 节点状态样式
-const taskStatusClass = useTaskStatusClass(currentNode.value?.activityStatus)
+
 // 节点名称编辑
 const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.START_USER_NODE)
 const nodeSetting = ref()

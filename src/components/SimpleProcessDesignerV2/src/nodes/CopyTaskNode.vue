@@ -1,7 +1,10 @@
 <template>
   <div class="node-wrapper">
     <div class="node-container">
-      <div class="node-box" :class="{ 'node-config-error': !currentNode.showText }">
+      <div
+        class="node-box"
+        :class="[{ 'node-config-error': !currentNode.showText }, `${useTaskStatusClass(currentNode?.activityStatus)}`]"
+      >
         <div class="node-title-container">
           <div class="node-title-icon copy-task"><span class="iconfont icon-copy"></span></div>
           <input
@@ -36,13 +39,17 @@
       <!-- 传递子节点给添加节点组件。会在子节点前面添加节点 -->
       <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
     </div>
-    <CopyTaskNodeConfig v-if="!readonly && currentNode" ref="nodeSetting" :flow-node="currentNode" />
+    <CopyTaskNodeConfig
+      v-if="!readonly && currentNode"
+      ref="nodeSetting"
+      :flow-node="currentNode"
+    />
   </div>
 </template>
 <script setup lang="ts">
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
 import NodeHandler from '../NodeHandler.vue'
-import { useNodeName2, useWatchNode } from '../node'
+import { useNodeName2, useWatchNode, useTaskStatusClass } from '../node'
 import CopyTaskNodeConfig from '../nodes-config/CopyTaskNodeConfig.vue'
 defineOptions({
   name: 'CopyTaskNode'
@@ -58,7 +65,7 @@ const emits = defineEmits<{
   'update:flowNode': [node: SimpleFlowNode | undefined]
 }>()
 // 是否只读
-const readonly = inject<Boolean>('readonly') 
+const readonly = inject<Boolean>('readonly')
 // 监控节点的变化
 const currentNode = useWatchNode(props)
 // 节点名称编辑

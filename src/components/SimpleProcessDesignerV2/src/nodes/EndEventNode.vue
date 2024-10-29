@@ -1,6 +1,6 @@
 <template>
   <div class="end-node-wrapper">
-    <div class="end-node-box" :class="taskStatusClass">
+    <div class="end-node-box" :class="`${useTaskStatusClass(currentNode?.activityStatus)}`">
       <span class="node-fixed-name" title="结束">结束</span>
     </div>
   </div>
@@ -20,8 +20,6 @@ const props = defineProps({
 })
 // 监控节点变化
 const currentNode = useWatchNode(props)
-// 节点任务状态样式
-const taskStatusClass = useTaskStatusClass(currentNode.value?.activityStatus)
 
 </script>
 <style lang="scss" scoped></style>

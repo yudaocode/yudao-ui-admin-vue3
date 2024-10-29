@@ -1096,7 +1096,15 @@
 
         .icon-size {
           font-size: 22px;
-          color: #67c23a;
+          &.condition {
+            color: #67c23a;
+          }
+          &.parallel {
+            color: #626aef;
+          }
+          &.inclusive {
+            color: #345da2;
+          }
         }
       }
 
