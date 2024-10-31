@@ -334,7 +334,7 @@
     <div
       @click="openChildrenTask()"
       class="hover-bg-gray-100 rounded-xl p-6px"
-      v-if="runningTask?.children"
+      v-if="runningTask?.children.length > 0"
     >
       <Icon :size="14" icon="ep:semi-select" />&nbsp; 减签
     </div>

@@ -81,30 +81,6 @@
                     />
                   </div>
                 </div>
-                <!-- 情况二：遍历每个审批节点下的【候选的】task 任务。例如说，1）依次审批，2）未来的审批任务等 -->
-                <div
-                  v-for="(user, idx1) in activity.candidateUsers"
-                  :key="idx1"
-                  class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600 position-relative"
-                >
-                  <el-avatar :size="28" v-if="user.avatar" :src="user.avatar" />
-                  <el-avatar :size="28" v-else>
-                    {{ user.nickname.substring(0, 1) }}
-                  </el-avatar>
-                  {{ user.nickname }}
-
-                  <!-- 信息：任务 ICON -->
-                  <div
-                    v-if="onlyStatusIconShow.includes(task.status)"
-                    class="position-absolute top-22px left-26px bg-#fff rounded-full flex items-center p-2px"
-                  >
-                    <Icon
-                      :size="12"
-                      :icon="statusIconMap2['-1']?.icon"
-                      :color="statusIconMap2['-1']?.color"
-                    />
-                  </div>
-                </div>
               </div>
               <div
                 v-if="
@@ -115,6 +91,29 @@
               >
                 审批意见：{{ task.reason }}
               </div>
+            </div>
+          </div>
+          <!-- 情况二：遍历每个审批节点下的【候选的】task 任务。例如说，1）依次审批，2）未来的审批任务等 -->
+          <div
+            v-for="(user, idx1) in activity.candidateUsers"
+            :key="idx1"
+            class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600 position-relative"
+          >
+            <el-avatar :size="28" v-if="user.avatar" :src="user.avatar" />
+            <el-avatar :size="28" v-else>
+              {{ user.nickname.substring(0, 1) }}
+            </el-avatar>
+            {{ user.nickname }}
+
+            <!-- 信息：任务 ICON -->
+            <div
+              class="position-absolute top-22px left-26px bg-#fff rounded-full flex items-center p-2px"
+            >
+              <Icon
+                :size="12"
+                :icon="statusIconMap2['-1']?.icon"
+                :color="statusIconMap2['-1']?.color"
+              />
             </div>
           </div>
         </div>
