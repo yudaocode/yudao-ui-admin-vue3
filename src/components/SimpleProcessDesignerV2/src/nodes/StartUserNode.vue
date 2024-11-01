@@ -33,7 +33,7 @@
         </div>
       </div>
       <!-- 传递子节点给添加节点组件。会在子节点前面添加节点 -->
-      <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
+      <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" :current-node="currentNode" />
     </div>
   </div>
   <StartUserNodeConfig v-if="!readonly && currentNode" ref="nodeSetting" :flow-node="currentNode" />

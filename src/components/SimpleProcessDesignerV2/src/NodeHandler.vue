@@ -1,6 +1,6 @@
 <template>
   <div class="node-handler-wrapper">
-    <div class="node-handler" v-if="props.showAdd">
+    <div class="node-handler">
       <el-popover
         trigger="hover"
         v-model:visible="popoverShow"
@@ -27,7 +27,14 @@
             </div>
             <div class="handler-item-text">条件分支</div>
           </div>
-          <div class="handler-item" @click="addNode(NodeType.PARALLEL_BRANCH_NODE)">
+          <div
+            class="handler-item"
+            @click="addNode(NodeType.PARALLEL_BRANCH_NODE)"
+            v-if="
+              NodeType.CONDITION_BRANCH_NODE !== currentNode?.type &&
+              NodeType.INCLUSIVE_BRANCH_NODE !== currentNode?.type
+            "
+          >
             <div class="handler-item-icon parallel">
               <span class="iconfont icon-size icon-parallel"></span>
             </div>
@@ -70,13 +77,11 @@ const props = defineProps({
     type: Object as () => SimpleFlowNode,
     default: null
   },
-  showAdd: {
-    // 是否显示添加节点
-    type: Boolean,
-    default: true
+  currentNode: {
+    type: Object as () => SimpleFlowNode,
+    required: true
   }
 })
-
 const emits = defineEmits(['update:childNode'])
 
 const readonly = inject<Boolean>('readonly') // 是否只读
@@ -131,7 +136,6 @@ const addNode = (type: number) => {
           childNode: undefined,
           conditionType: 1,
           defaultFlow: false
-          
         },
         {
           id: 'Flow_' + generateUUID(),
@@ -183,7 +187,8 @@ const addNode = (type: number) => {
           name: '包容条件1',
           showText: '',
           type: NodeType.CONDITION_NODE,
-          childNode: undefined
+          childNode: undefined,
+          defaultFlow: false
         },
         {
           id: 'Flow_' + generateUUID(),

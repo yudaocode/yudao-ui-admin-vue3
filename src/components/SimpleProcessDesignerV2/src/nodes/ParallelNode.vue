@@ -53,7 +53,7 @@
                 </div>
               </div>
             </div>
-            <NodeHandler v-model:child-node="item.childNode" />
+            <NodeHandler v-model:child-node="item.childNode" :current-node="item"/>
           </div>
         </div>
         <!-- 递归显示子节点  -->
@@ -65,7 +65,7 @@
         />
       </div>
     </div>
-    <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
+    <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" :current-node="currentNode" />
   </div>
 </template>
 

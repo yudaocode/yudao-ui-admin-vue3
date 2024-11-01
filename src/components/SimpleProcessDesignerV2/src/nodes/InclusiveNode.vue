@@ -67,7 +67,7 @@
                 <Icon icon="ep:arrow-right" />
               </div>
             </div>
-            <NodeHandler v-model:child-node="item.childNode" />
+            <NodeHandler v-model:child-node="item.childNode" :current-node="item"/>
           </div>
         </div>
         <ConditionNodeConfig :node-index="index" :condition-node="item" :ref="item.id" />
@@ -80,7 +80,7 @@
         />
       </div>
     </div>
-    <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
+    <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" :current-node="currentNode"/>
   </div>
 </template>
 
