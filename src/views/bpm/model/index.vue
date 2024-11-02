@@ -38,11 +38,11 @@
             </el-button>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item command="handleAddCategory">
+                <el-dropdown-item command="handleCategoryAdd">
                   <Icon icon="ep:circle-plus" :size="13" class="mr-5px" />
                   新建分类
                 </el-dropdown-item>
-                <el-dropdown-item command="handleSort">
+                <el-dropdown-item command="handleCategorySort">
                   <Icon icon="fa:sort-amount-desc" :size="13" class="mr-5px" />
                   分类排序
                 </el-dropdown-item>
@@ -101,7 +101,7 @@ import { CategoryApi } from '@/api/bpm/category'
 import * as ModelApi from '@/api/bpm/model'
 import ModelForm from './ModelForm.vue'
 import CategoryForm from '../category/CategoryForm.vue'
-import { groupBy, cloneDeep } from 'lodash-es'
+import { cloneDeep } from 'lodash-es'
 import CategoryDraggableModel from './CategoryDraggableModel.vue'
 
 defineOptions({ name: 'BpmModel' })
@@ -115,26 +115,6 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const categoryGroup: any = ref([]) // 按照 category 分组的数据
 const originalData: any = ref([]) // 原始数据
-
-/** 查询所有分类 */
-const getAllCategory = async () => {
-  const list = await CategoryApi.getCategorySimpleList()
-  categoryGroup.value = list.map((item: any) => ({ ...item, modelList: [] }))
-}
-
-/** 查询所有流程模型接口 */
-const getAllModel = async () => {
-  // 查询所有流程模型
-  const list = await ModelApi.getModelList(queryParams.name)
-  // 按照 categoryName 分组
-  const groupedData = groupBy(list, 'categoryName')
-  Object.keys(groupedData).forEach((key) => {
-    const category = categoryGroup.value.find((item: any) => item.name === key)
-    if (category) {
-      category.modelList = groupedData[key]
-    }
-  })
-}
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
@@ -157,10 +137,10 @@ const formDetailPreview = ref({
 /** 右上角设置按钮 */
 const handleCommand = (command: string) => {
   switch (command) {
-    case 'handleAddCategory':
-      handleAddCategory()
+    case 'handleCategoryAdd':
+      handleCategoryAdd()
       break
-    case 'handleSort':
+    case 'handleCategorySort':
       handleCategorySort()
       break
     default:
@@ -170,7 +150,7 @@ const handleCommand = (command: string) => {
 
 /** 新建分类 */
 const categoryFormRef = ref()
-const handleAddCategory = () => {
+const handleCategoryAdd = () => {
   categoryFormRef.value.open('create')
 }
 
@@ -203,8 +183,15 @@ const handleCategorySortSubmit = async () => {
 const getList = async () => {
   loading.value = true
   try {
-    await getAllCategory()
-    await getAllModel()
+    // 查询模型 + 分裂的列表
+    const modelList = await ModelApi.getModelList(queryParams.name)
+    const categoryList = await CategoryApi.getCategorySimpleList()
+    // 按照 category 聚合
+    // 注意：必须一次性赋值给 categoryGroup，否则每次操作后，列表会重新渲染，滚动条的位置会偏离！！！
+    categoryGroup.value = categoryList.map((category: any) => ({
+      ...category,
+      modelList: modelList.filter((model: any) => model.categoryName == category.name)
+    }))
   } finally {
     loading.value = false
   }

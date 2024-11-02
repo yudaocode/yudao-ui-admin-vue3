@@ -1,5 +1,6 @@
 <template>
   <div class="flex items-center h-50px">
+    <!-- 头部：分类名 -->
     <div class="flex items-center">
       <el-tooltip content="拖动排序" v-if="isCategorySorting">
         <Icon
@@ -11,6 +12,7 @@
       <h3 class="ml-20px mr-8px text-18px">{{ categoryInfo.name }}</h3>
       <div class="color-gray-600 text-16px"> ({{ categoryInfo.modelList?.length || 0 }}) </div>
     </div>
+    <!-- 头部：操作 -->
     <div class="flex-1 flex" v-if="!isCategorySorting">
       <div
         v-if="categoryInfo.modelList.length > 0"
@@ -62,6 +64,7 @@
       </div>
     </div>
   </div>
+  <!-- 模型列表 -->
   <el-collapse-transition>
     <div v-show="isExpand">
       <el-table
@@ -70,7 +73,7 @@
         :header-cell-style="{ backgroundColor: isDark ? '' : '#edeff0', paddingLeft: '10px' }"
         :cell-style="{ paddingLeft: '10px' }"
         :row-style="{ height: '68px' }"
-        :data="tableData"
+        :data="modelList"
         row-key="id"
       >
         <el-table-column label="流程名" prop="name" min-width="150">
@@ -110,7 +113,7 @@
         <el-table-column label="表单信息" prop="formType" min-width="200">
           <template #default="scope">
             <el-button
-              v-if="scope.row.formType === 10"
+              v-if="scope.row.formType === BpmModelFormType.NORMAL"
               type="primary"
               link
               @click="handleFormDetail(scope.row)"
@@ -118,7 +121,7 @@
               <span>{{ scope.row.formName }}</span>
             </el-button>
             <el-button
-              v-else-if="scope.row.formType === 20"
+              v-else-if="scope.row.formType === BpmModelFormType.CUSTOM"
               type="primary"
               link
               @click="handleFormDetail(scope.row)"
@@ -246,7 +249,7 @@ import { formatDate } from '@/utils/formatTime'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import { setConfAndFields2 } from '@/utils/formCreate'
-import { BpmModelType } from '@/utils/constants'
+import { BpmModelFormType, BpmModelType } from '@/utils/constants'
 import { checkPermi } from '@/utils/permission'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { useAppStore } from '@/store/modules/app'
@@ -255,20 +258,19 @@ import { cloneDeep } from 'lodash-es'
 defineOptions({ name: 'BpmModel' })
 
 const props = defineProps({
-  // 分类后的数据
-  categoryInfo: propTypes.object.def([]),
-  isCategorySorting: propTypes.bool.def(false)
+  categoryInfo: propTypes.object.def([]), // 分类后的数据
+  isCategorySorting: propTypes.bool.def(false) // 是否分类在排序
 })
 const emit = defineEmits(['success'])
-const appStore = useAppStore()
 const message = useMessage() // 消息弹窗
-const isDark = computed(() => appStore.getIsDark)
 const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由
 const userStore = useUserStoreWithOut() // 用户信息缓存
+const isDark = computed(() => useAppStore().getIsDark) // 是否黑暗模式
+
 const isModelSorting = ref(false) // 是否正处于排序状态
-const tableData: any = ref([]) // 模型列表
 const originalData: any = ref([]) // 原始数据
+const modelList: any = ref([]) // 模型列表
 const isExpand = ref(false) // 是否处于展开状态
 
 /** '更多'操作按钮 */
@@ -414,7 +416,7 @@ const handleModelSort = () => {
 /** 处理模型的排序提交 */
 const handleModelSortSubmit = async () => {
   // 保存排序
-  const ids = tableData.value.map((item: any) => item.id)
+  const ids = modelList.value.map((item: any) => item.id)
   await ModelApi.updateModelSortBatch(ids)
   // 刷新列表
   isModelSorting.value = false
@@ -425,12 +427,12 @@ const handleModelSortSubmit = async () => {
 /** 处理模型的排序取消 */
 const handleModelSortCancel = () => {
   // 恢复初始数据
-  tableData.value = cloneDeep(originalData.value)
+  modelList.value = cloneDeep(originalData.value)
   isModelSorting.value = false
 }
 
+/** 创建拖拽实例 */
 const tableRef = ref()
-// 创建拖拽实例
 const initSort = () => {
   const table = document.querySelector(`.${props.categoryInfo.name} .el-table__body-wrapper tbody`)
   Sortable.create(table, {
@@ -441,19 +443,19 @@ const initSort = () => {
     // 结束拖动事件
     onEnd: ({ newDraggableIndex, oldDraggableIndex }) => {
       if (oldDraggableIndex !== newDraggableIndex) {
-        tableData.value.splice(
+        modelList.value.splice(
           newDraggableIndex,
           0,
-          tableData.value.splice(oldDraggableIndex, 1)[0]
+          modelList.value.splice(oldDraggableIndex, 1)[0]
         )
       }
     }
   })
 }
 
-// 更新表格数据
-const updateTableData = () => {
-  tableData.value = cloneDeep(props.categoryInfo.modelList)
+/** 更新 modelList 模型列表 */
+const updateModeList = () => {
+  modelList.value = cloneDeep(props.categoryInfo.modelList)
   if (props.categoryInfo.modelList.length > 0) {
     isExpand.value = true
   }
@@ -497,7 +499,7 @@ const openModelForm = (type: string, id?: number) => {
   modelFormRef.value.open(type, id)
 }
 
-watch(() => props.categoryInfo.modelList, updateTableData, { immediate: true })
+watch(() => props.categoryInfo.modelList, updateModeList, { immediate: true })
 watch(
   () => props.isCategorySorting,
   (val) => {
