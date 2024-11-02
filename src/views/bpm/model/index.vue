@@ -52,8 +52,8 @@
         </el-form-item>
       </el-form>
       <div class="mr-20px" v-else>
-        <el-button @click="cancelSort"> 取 消 </el-button>
-        <el-button type="primary" @click="saveSort"> 保存排序 </el-button>
+        <el-button @click="handleCategorySortCancel"> 取 消 </el-button>
+        <el-button type="primary" @click="handleCategorySortSubmit"> 保存排序 </el-button>
       </div>
     </div>
 
@@ -106,7 +106,7 @@ import CategoryDraggableModel from './CategoryDraggableModel.vue'
 
 defineOptions({ name: 'BpmModel' })
 
-const categoryFormRef = ref()
+const message = useMessage() // 消息弹窗
 const loading = ref(true) // 列表的加载中
 const isCategorySorting = ref(false) // 是否 category 正处于排序状态
 const queryParams = reactive({
@@ -161,7 +161,7 @@ const handleCommand = (command: string) => {
       handleAddCategory()
       break
     case 'handleSort':
-      handleSort()
+      handleCategorySort()
       break
     default:
       break
@@ -169,29 +169,34 @@ const handleCommand = (command: string) => {
 }
 
 /** 新建分类 */
+const categoryFormRef = ref()
 const handleAddCategory = () => {
   categoryFormRef.value.open('create')
 }
 
-// TODO 芋艿：需要实现
-/** 分类排序 */
-const handleSort = () => {
+/** 分类排序的提交 */
+const handleCategorySort = () => {
   // 保存初始数据
   originalData.value = cloneDeep(categoryGroup.value)
   isCategorySorting.value = true
 }
 
-// TODO 芋艿：需要实现
-/** 取消排序 */
-const cancelSort = () => {
+/** 分类排序的取消 */
+const handleCategorySortCancel = () => {
   // 恢复初始数据
   categoryGroup.value = cloneDeep(originalData.value)
   isCategorySorting.value = false
 }
 
 /** 保存排序 */
-const saveSort = () => {
-  // TODO 芋艿：这里需要一个保存分类排序接口
+const handleCategorySortSubmit = async () => {
+  // 保存排序
+  const ids = categoryGroup.value.map((item: any) => item.id)
+  await CategoryApi.updateCategorySortBatch(ids)
+  // 刷新列表
+  isCategorySorting.value = false
+  message.success('排序分类成功')
+  await getList()
 }
 
 /** 加载数据 */

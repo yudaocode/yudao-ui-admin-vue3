@@ -465,13 +465,13 @@ const handleRenameConfirm = async () => {
   }
   // 发起修改
   await CategoryApi.updateCategory(renameCategoryForm.value as CategoryVO)
-  message.success('修改成功')
+  message.success('重命名成功')
   // 刷新列表
   renameCategoryVisible.value = false
   emit('success')
 }
 
-// 删除分类
+/** 删除分类 */
 const handleDeleteCategory = async () => {
   try {
     if (props.categoryInfo.modelList.length > 0) {
@@ -486,7 +486,7 @@ const handleDeleteCategory = async () => {
   } catch {}
 }
 
-// 添加流程模型弹窗
+/** 添加流程模型弹窗 */
 const modelFormRef = ref()
 const openModelForm = (type: string, id?: number) => {
   modelFormRef.value.open(type, id)
