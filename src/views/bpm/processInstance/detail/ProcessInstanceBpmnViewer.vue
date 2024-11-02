@@ -24,6 +24,11 @@ const view = ref({
 watch(
   () => props.loading,
   async (value) => {
+    // 重置
+    view.value = {
+      bpmnXml: ''
+    }
+    // 加载最新
     if (value && props.id) {
       view.value = await ProcessInstanceApi.getProcessInstanceBpmnModelView(props.id)
     }

@@ -76,13 +76,19 @@
           <el-tab-pane label="流程图" name="diagram">
             <div class="form-scroll-area">
               <ProcessInstanceSimpleViewer
-                v-show="processDefinition.modelType && processDefinition.modelType === BpmModelType.SIMPLE"
+                v-show="
+                  processDefinition.modelType && processDefinition.modelType === BpmModelType.SIMPLE
+                "
                 :id="`${id}`"
                 :loading="processInstanceLoading"
               />
               <ProcessInstanceBpmnViewer
-                v-show="processDefinition.modelType && processDefinition.modelType === BpmModelType.BPMN"
-                :id="`${id}`" :loading="processInstanceLoading" />
+                v-show="
+                  processDefinition.modelType && processDefinition.modelType === BpmModelType.BPMN
+                "
+                :id="`${id}`"
+                :loading="processInstanceLoading"
+              />
             </div>
           </el-tab-pane>
 
