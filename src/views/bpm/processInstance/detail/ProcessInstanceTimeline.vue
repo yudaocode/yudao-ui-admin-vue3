@@ -15,6 +15,7 @@
         >
           <img class="w-full h-full" :src="getApprovalNodeImg(activity.nodeType)" alt="" />
           <div
+            v-if="showStatusIcon"
             class="position-absolute top-17px left-17px bg-#fff rounded-full flex items-center p-2px"
           >
             <el-icon :size="12" :color="getApprovalNodeColor(activity.status)">
@@ -134,11 +135,21 @@ import copySvg from '@/assets/svgs/bpm/copy.svg'
 import conditionSvg from '@/assets/svgs/bpm/condition.svg'
 import parallelSvg from '@/assets/svgs/bpm/parallel.svg'
 import endSvg from '@/assets/svgs/bpm/end.svg'
+import finishSvg from '@/assets/svgs/bpm/finish.svg'
 
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
 defineProps<{
   activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
 }>()
+withDefaults(
+  defineProps<{
+    approveNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
+    showStatusIcon?: boolean // 是否显示头像右下角状态图标
+  }>(),
+  {
+    showStatusIcon: true // 默认值为 true
+  }
+)
 
 // 审批节点
 const statusIconMap2 = {
@@ -183,6 +194,8 @@ const statusIconMap = {
 }
 
 const nodeTypeSvgMap = {
+  // 结束节点
+  [NodeType.END_EVENT_NODE]: { color: '#ffffff', svg: finishSvg },
   // 发起人节点
   [NodeType.START_USER_NODE]: { color: '#ffffff', svg: starterSvg },
   // 审批人节点
