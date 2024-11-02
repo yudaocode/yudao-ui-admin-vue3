@@ -188,7 +188,7 @@ const handleCategorySortCancel = () => {
   isCategorySorting.value = false
 }
 
-/** 保存排序 */
+/** 分类排序的保存 */
 const handleCategorySortSubmit = async () => {
   // 保存排序
   const ids = categoryGroup.value.map((item: any) => item.id)

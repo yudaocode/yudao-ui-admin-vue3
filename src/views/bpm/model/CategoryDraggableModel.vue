@@ -30,7 +30,7 @@
             link
             type="info"
             class="mr-20px"
-            @click.stop="handleSort"
+            @click.stop="handleModelSort"
           >
             <Icon icon="fa:sort-amount-desc" class="mr-5px" />
             排序
@@ -56,8 +56,8 @@
           </el-dropdown>
         </template>
         <template v-else>
-          <el-button @click.stop="cancelSort"> 取 消 </el-button>
-          <el-button type="primary" @click.stop="saveSort"> 保存排序 </el-button>
+          <el-button @click.stop="handleModelSortCancel"> 取 消 </el-button>
+          <el-button type="primary" @click.stop="handleModelSortSubmit"> 保存排序 </el-button>
         </template>
       </div>
     </div>
@@ -267,7 +267,7 @@ const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由
 const userStore = useUserStoreWithOut() // 用户信息缓存
 const isModelSorting = ref(false) // 是否正处于排序状态
-const tableData: any = ref([])
+const tableData: any = ref([]) // 模型列表
 const originalData: any = ref([]) // 原始数据
 const isExpand = ref(false) // 是否处于展开状态
 
@@ -403,22 +403,27 @@ const isManagerUser = (row: any) => {
   return row.managerUserIds && row.managerUserIds.includes(userId)
 }
 
-/* 排序 */
-const handleSort = () => {
+/** 处理模型的排序 **/
+const handleModelSort = () => {
   // 保存初始数据
   originalData.value = cloneDeep(props.categoryInfo.modelList)
   isModelSorting.value = true
   initSort()
 }
 
-const saveSort = () => {
-  // TODO 芋艿：这里需要一个保存分类下模型排序接口
+/** 处理模型的排序提交 */
+const handleModelSortSubmit = async () => {
+  // 保存排序
+  const ids = tableData.value.map((item: any) => item.id)
+  await ModelApi.updateModelSortBatch(ids)
   // 刷新列表
-  emit('success')
   isModelSorting.value = false
+  message.success('排序模型成功')
+  emit('success')
 }
 
-const cancelSort = () => {
+/** 处理模型的排序取消 */
+const handleModelSortCancel = () => {
   // 恢复初始数据
   tableData.value = cloneDeep(originalData.value)
   isModelSorting.value = false
