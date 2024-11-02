@@ -252,7 +252,7 @@ const categoryList = ref([]) // 流程分类列表
 const getList = async () => {
   loading.value = true
   try {
-    const data = await ModelApi.getModelPage(queryParams)
+    const data = await ModelApi.getModelList(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {

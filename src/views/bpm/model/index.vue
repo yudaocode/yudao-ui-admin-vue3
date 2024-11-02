@@ -12,9 +12,9 @@
         label-width="68px"
         @submit.prevent
       >
-        <el-form-item align="right" prop="key" class="ml-auto">
+        <el-form-item prop="name" class="ml-auto">
           <el-input
-            v-model="queryParams.key"
+            v-model="queryParams.name"
             placeholder="搜索流程"
             clearable
             @keyup.enter="handleQuery"
@@ -25,12 +25,12 @@
             </template>
           </el-input>
         </el-form-item>
+        <!-- 右上角：新建模型、更多操作 -->
         <el-form-item>
           <el-button type="primary" @click="openForm('create')" v-hasPermi="['bpm:model:create']">
             <Icon icon="ep:plus" class="mr-5px" /> 新建模型
           </el-button>
         </el-form-item>
-
         <el-form-item>
           <el-dropdown @command="(command) => handleCommand(command)" placement="bottom-end">
             <el-button class="w-30px" plain>
@@ -59,7 +59,7 @@
 
     <el-divider />
 
-    <!-- 分类卡片组 -->
+    <!-- 按照分类，展示其所属的模型列表 -->
     <div class="px-15px">
       <draggable
         :disabled="!isCategorySorting"
@@ -75,7 +75,6 @@
             :key="element.id"
           >
             <CategoryDraggableModel
-              ref="categoryDraggableModelRef"
               :isCategorySorting="isCategorySorting"
               :categoryInfo="element"
               @success="getList"
@@ -88,7 +87,7 @@
 
   <!-- 表单弹窗：添加/修改流程 -->
   <ModelForm ref="formRef" @success="getList" />
-  <!-- 表单弹窗：添加/修改分类 -->
+  <!-- 表单弹窗：添加分类 -->
   <CategoryForm ref="categoryFormRef" @success="getList" />
   <!-- 弹窗：表单详情 -->
   <Dialog title="表单详情" v-model="formDetailVisible" width="800">
@@ -107,34 +106,30 @@ import CategoryDraggableModel from './CategoryDraggableModel.vue'
 
 defineOptions({ name: 'BpmModel' })
 
-const categoryDraggableModelRef = ref()
 const categoryFormRef = ref()
 const loading = ref(true) // 列表的加载中
-const isCategorySorting = ref(false) // 是否正处于排序状态
+const isCategorySorting = ref(false) // 是否 category 正处于排序状态
 const queryParams = reactive({
-  pageNo: 1,
-  pageSize: 10,
-  key: undefined,
-  name: undefined,
-  category: undefined
+  name: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const categoryGroup: any = ref([]) // 按照category分组的数据
-const originalData: any = ref([])
-// 查询所有分类数据
+const categoryGroup: any = ref([]) // 按照 category 分组的数据
+const originalData: any = ref([]) // 原始数据
+
+/** 查询所有分类 */
 const getAllCategory = async () => {
-  // TODO 芋艿：这里需要一个不分页查全部的流程分类接口
-  const data = await CategoryApi.getCategoryPage(queryParams)
-  categoryGroup.value = data.list.map((item) => ({ ...item, modelList: [] }))
+  const list = await CategoryApi.getCategorySimpleList()
+  categoryGroup.value = list.map((item: any) => ({ ...item, modelList: [] }))
 }
 
 /** 查询所有流程模型接口 */
 const getAllModel = async () => {
-  // TODO 芋艿：这里需要一个不分页查全部的流程模型接口
-  const data = await ModelApi.getModelPage(queryParams)
-  const groupedData = groupBy(data.list, 'categoryName')
+  // 查询所有流程模型
+  const list = await ModelApi.getModelList(queryParams.name)
+  // 按照 categoryName 分组
+  const groupedData = groupBy(list, 'categoryName')
   Object.keys(groupedData).forEach((key) => {
-    const category = categoryGroup.value.find((item) => item.name === key)
+    const category = categoryGroup.value.find((item: any) => item.name === key)
     if (category) {
       category.modelList = groupedData[key]
     }
@@ -143,7 +138,6 @@ const getAllModel = async () => {
 
 /** 搜索按钮操作 */
 const handleQuery = () => {
-  queryParams.pageNo = 1
   getList()
 }
 
@@ -152,6 +146,7 @@ const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
+
 /** 流程表单的详情按钮操作 */
 const formDetailVisible = ref(false)
 const formDetailPreview = ref({
@@ -173,27 +168,33 @@ const handleCommand = (command: string) => {
   }
 }
 
-// 新建分类
+/** 新建分类 */
 const handleAddCategory = () => {
   categoryFormRef.value.open('create')
 }
-// 分类排序
+
+// TODO 芋艿：需要实现
+/** 分类排序 */
 const handleSort = () => {
   // 保存初始数据
   originalData.value = cloneDeep(categoryGroup.value)
   isCategorySorting.value = true
 }
-// 取消排序
+
+// TODO 芋艿：需要实现
+/** 取消排序 */
 const cancelSort = () => {
   // 恢复初始数据
   categoryGroup.value = cloneDeep(originalData.value)
   isCategorySorting.value = false
 }
-// 保存排序
+
+/** 保存排序 */
 const saveSort = () => {
   // TODO 芋艿：这里需要一个保存分类排序接口
 }
 
+/** 加载数据 */
 const getList = async () => {
   loading.value = true
   try {
@@ -205,7 +206,7 @@ const getList = async () => {
 }
 
 /** 初始化 **/
-onMounted(async () => {
+onMounted(() => {
   getList()
 })
 </script>

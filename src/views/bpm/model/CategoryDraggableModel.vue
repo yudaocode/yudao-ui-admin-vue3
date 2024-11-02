@@ -39,7 +39,10 @@
             <Icon icon="fa:plus" class="mr-5px" />
             新建
           </el-button>
-          <el-dropdown @command="(command) => handleCategoryCommand(command)" placement="bottom">
+          <el-dropdown
+            @command="(command) => handleCategoryCommand(command, categoryInfo)"
+            placement="bottom"
+          >
             <el-button link type="info">
               <Icon icon="ep:setting" class="mr-5px" />
               分类
@@ -47,7 +50,7 @@
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item command="handleRename"> 重命名 </el-dropdown-item>
-                <el-dropdown-item command="handleDeleteGroup"> 删除该类 </el-dropdown-item>
+                <el-dropdown-item command="handleDeleteCategory"> 删除该类 </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -178,7 +181,7 @@
             </el-button>
             <el-dropdown
               class="!align-middle ml-5px"
-              @command="(command) => handleCommand(command, scope.row)"
+              @command="(command) => handleModelCommand(command, scope.row)"
               v-hasPermi="['bpm:process-definition:query', 'bpm:model:update', 'bpm:model:delete']"
             >
               <el-button type="primary" link>更多</el-button>
@@ -215,27 +218,28 @@
   </el-collapse-transition>
 
   <!-- 弹窗：重命名分类 -->
-  <Dialog :fullscreen="false" class="rename-dialog" v-model="renameVisible" width="400">
+  <Dialog :fullscreen="false" class="rename-dialog" v-model="renameCategoryVisible" width="400">
     <template #title>
       <div class="pl-10px font-bold text-18px"> 重命名分类 </div>
     </template>
     <div class="px-30px">
-      <el-input v-model="renameVal" />
+      <el-input v-model="renameCategoryForm.name" />
     </div>
     <template #footer>
       <div class="pr-25px pb-25px">
-        <el-button @click="renameVisible = false">取 消</el-button>
+        <el-button @click="renameCategoryVisible = false">取 消</el-button>
         <el-button type="primary" @click="handleRenameConfirm">确 定</el-button>
       </div>
     </template>
   </Dialog>
+
   <!-- 表单弹窗：添加流程模型 -->
   <ModelForm :categoryId="categoryInfo.code" ref="modelFormRef" @success="emit('success')" />
 </template>
 
 <script lang="ts" setup>
 import ModelForm from './ModelForm.vue'
-import { CategoryApi } from '@/api/bpm/category'
+import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import Sortable from 'sortablejs'
 import { propTypes } from '@/utils/propTypes'
 import { formatDate } from '@/utils/formatTime'
@@ -250,7 +254,6 @@ import { cloneDeep } from 'lodash-es'
 
 defineOptions({ name: 'BpmModel' })
 
-const renameVisible = ref(false)
 const props = defineProps({
   // 分类后的数据
   categoryInfo: propTypes.object.def([]),
@@ -267,8 +270,9 @@ const isModelSorting = ref(false) // 是否正处于排序状态
 const tableData: any = ref([])
 const originalData: any = ref([]) // 原始数据
 const isExpand = ref(false) // 是否处于展开状态
+
 /** '更多'操作按钮 */
-const handleCommand = (command: string, row: any) => {
+const handleModelCommand = (command: string, row: any) => {
   switch (command) {
     case 'handleDefinitionList':
       handleDefinitionList(row)
@@ -284,15 +288,15 @@ const handleCommand = (command: string, row: any) => {
   }
 }
 
-/* '分类'操作按钮 */
-const handleCategoryCommand = (command: string) => {
+/** '分类'操作按钮 */
+const handleCategoryCommand = async (command: string, row: any) => {
   switch (command) {
     case 'handleRename':
-      renameVal.value = props.categoryInfo.name
-      renameVisible.value = true
+      renameCategoryForm.value = await CategoryApi.getCategory(row.id)
+      renameCategoryVisible.value = true
       break
-    case 'handleDeleteGroup':
-      handleDeleteGroup()
+    case 'handleDeleteCategory':
+      await handleDeleteCategory()
       break
     default:
       break
@@ -364,7 +368,7 @@ const handleDeploy = async (row: any) => {
 }
 
 /** 跳转到指定流程定义列表 */
-const handleDefinitionList = (row) => {
+const handleDefinitionList = (row: any) => {
   push({
     name: 'BpmProcessDefinition',
     query: {
@@ -450,16 +454,25 @@ const updateTableData = () => {
   }
 }
 
-const renameVal = ref('')
-// 重命名弹窗确定
-const handleRenameConfirm = () => {
-  if (!renameVal.value) {
+/** 重命名弹窗确定 */
+const renameCategoryVisible = ref(false)
+const renameCategoryForm = ref({
+  name: ''
+})
+const handleRenameConfirm = async () => {
+  if (renameCategoryForm.value?.name.length === 0) {
     return message.warning('请输入名称')
   }
+  // 发起修改
+  await CategoryApi.updateCategory(renameCategoryForm.value as CategoryVO)
+  message.success('修改成功')
+  // 刷新列表
+  renameCategoryVisible.value = false
+  emit('success')
 }
 
 // 删除分类
-const handleDeleteGroup = async () => {
+const handleDeleteCategory = async () => {
   try {
     if (props.categoryInfo.modelList.length > 0) {
       return message.warning('该分类下仍有流程定义,不允许删除')
