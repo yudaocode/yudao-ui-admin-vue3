@@ -1,10 +1,16 @@
 <template>
   <div class="branch-node-wrapper">
     <div class="branch-node-container">
-      <div v-if="readonly" class="branch-node-readonly" :class="`${useTaskStatusClass(currentNode?.activityStatus)}`" >
+      <div
+        v-if="readonly"
+        class="branch-node-readonly"
+        :class="`${useTaskStatusClass(currentNode?.activityStatus)}`"
+      >
         <span class="iconfont icon-inclusive icon-size inclusive"></span>
       </div>
-      <el-button v-else class="branch-node-add" color="#345da2" @click="addCondition"  plain>添加条件</el-button>
+      <el-button v-else class="branch-node-add" color="#345da2" @click="addCondition" plain
+        >添加条件</el-button
+      >
       <div
         class="branch-node-item"
         v-for="(item, index) in currentNode.conditionNodes"
@@ -20,7 +26,13 @@
         </template>
         <div class="node-wrapper">
           <div class="node-container">
-            <div class="node-box" :class="[{ 'node-config-error': !item.showText }, `${useTaskStatusClass(item.activityStatus)}`]">
+            <div
+              class="node-box"
+              :class="[
+                { 'node-config-error': !item.showText },
+                `${useTaskStatusClass(item.activityStatus)}`
+              ]"
+            >
               <div class="branch-node-title-container">
                 <div v-if="showInputs[index]">
                   <input
@@ -41,7 +53,10 @@
                   {{ NODE_DEFAULT_TEXT.get(NodeType.CONDITION_NODE) }}
                 </div>
               </div>
-              <div class="node-toolbar" v-if="!readonly && index + 1 !== currentNode.conditionNodes?.length">
+              <div
+                class="node-toolbar"
+                v-if="!readonly && index + 1 !== currentNode.conditionNodes?.length"
+              >
                 <div class="toolbar-icon">
                   <Icon
                     color="#0089ff"
@@ -61,13 +76,17 @@
 
               <div
                 class="branch-node-move move-node-right"
-                v-if="!readonly && currentNode.conditionNodes && index < currentNode.conditionNodes.length - 2"
+                v-if="
+                  !readonly &&
+                  currentNode.conditionNodes &&
+                  index < currentNode.conditionNodes.length - 2
+                "
                 @click="moveNode(index, 1)"
               >
                 <Icon icon="ep:arrow-right" />
               </div>
             </div>
-            <NodeHandler v-model:child-node="item.childNode" :current-node="item"/>
+            <NodeHandler v-model:child-node="item.childNode" :current-node="item" />
           </div>
         </div>
         <ConditionNodeConfig :node-index="index" :condition-node="item" :ref="item.id" />
@@ -80,7 +99,11 @@
         />
       </div>
     </div>
-    <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" :current-node="currentNode"/>
+    <NodeHandler
+      v-if="currentNode"
+      v-model:child-node="currentNode.childNode"
+      :current-node="currentNode"
+    />
   </div>
 </template>
 

@@ -1,7 +1,11 @@
 <template>
   <div class="branch-node-wrapper">
     <div class="branch-node-container">
-      <div v-if="readonly" class="branch-node-readonly" :class="`${useTaskStatusClass(currentNode?.activityStatus)}`">
+      <div
+        v-if="readonly"
+        class="branch-node-readonly"
+        :class="`${useTaskStatusClass(currentNode?.activityStatus)}`"
+      >
         <span class="iconfont icon-exclusive icon-size condition"></span>
       </div>
       <el-button v-else class="branch-node-add" color="#67c23a" @click="addCondition" plain
@@ -23,7 +27,13 @@
         </template>
         <div class="node-wrapper">
           <div class="node-container">
-            <div class="node-box" :class="[{ 'node-config-error': !item.showText }, `${useTaskStatusClass(item.activityStatus)}`]">
+            <div
+              class="node-box"
+              :class="[
+                { 'node-config-error': !item.showText },
+                `${useTaskStatusClass(item.activityStatus)}`
+              ]"
+            >
               <div class="branch-node-title-container">
                 <div v-if="!readonly && showInputs[index]">
                   <input
@@ -87,7 +97,11 @@
         />
       </div>
     </div>
-    <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" :current-node="currentNode" />
+    <NodeHandler
+      v-if="currentNode"
+      v-model:child-node="currentNode.childNode"
+      :current-node="currentNode"
+    />
   </div>
 </template>
 
@@ -120,7 +134,7 @@ const emits = defineEmits<{
   ]
 }>()
 // 是否只读
-const readonly = inject<Boolean>('readonly') 
+const readonly = inject<Boolean>('readonly')
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
 watch(
   () => props.flowNode,

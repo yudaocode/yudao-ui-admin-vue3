@@ -27,14 +27,7 @@
             </div>
             <div class="handler-item-text">条件分支</div>
           </div>
-          <div
-            class="handler-item"
-            @click="addNode(NodeType.PARALLEL_BRANCH_NODE)"
-            v-if="
-              NodeType.CONDITION_BRANCH_NODE !== currentNode?.type &&
-              NodeType.INCLUSIVE_BRANCH_NODE !== currentNode?.type
-            "
-          >
+          <div class="handler-item" @click="addNode(NodeType.PARALLEL_BRANCH_NODE)">
             <div class="handler-item-icon parallel">
               <span class="iconfont icon-size icon-parallel"></span>
             </div>
@@ -70,8 +63,10 @@ import { generateUUID } from '@/utils'
 defineOptions({
   name: 'NodeHandler'
 })
-const popoverShow = ref(false)
 
+const message = useMessage() // 消息弹窗
+
+const popoverShow = ref(false)
 const props = defineProps({
   childNode: {
     type: Object as () => SimpleFlowNode,
@@ -87,6 +82,17 @@ const emits = defineEmits(['update:childNode'])
 const readonly = inject<Boolean>('readonly') // 是否只读
 
 const addNode = (type: number) => {
+  // 校验：条件分支、包容分支后面，不允许直接添加并行分支
+  if (
+    type === NodeType.PARALLEL_BRANCH_NODE &&
+    [NodeType.CONDITION_BRANCH_NODE, NodeType.INCLUSIVE_BRANCH_NODE].includes(
+      props.currentNode?.type
+    )
+  ) {
+    message.error('条件分支、包容分支后面，不允许直接添加并行分支')
+    return
+  }
+
   popoverShow.value = false
   if (type === NodeType.USER_TASK_NODE) {
     const id = 'Activity_' + generateUUID()

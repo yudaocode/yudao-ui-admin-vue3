@@ -3,7 +3,10 @@
     <div class="node-container">
       <div
         class="node-box"
-        :class="[{ 'node-config-error': !currentNode.showText }, `${useTaskStatusClass(currentNode?.activityStatus)}`]"
+        :class="[
+          { 'node-config-error': !currentNode.showText },
+          `${useTaskStatusClass(currentNode?.activityStatus)}`
+        ]"
       >
         <div class="node-title-container">
           <div class="node-title-icon copy-task"><span class="iconfont icon-copy"></span></div>
@@ -37,7 +40,11 @@
       </div>
 
       <!-- 传递子节点给添加节点组件。会在子节点前面添加节点 -->
-      <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" :current-node="currentNode"/>
+      <NodeHandler
+        v-if="currentNode"
+        v-model:child-node="currentNode.childNode"
+        :current-node="currentNode"
+      />
     </div>
     <CopyTaskNodeConfig
       v-if="!readonly && currentNode"

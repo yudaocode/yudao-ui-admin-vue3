@@ -3,7 +3,10 @@
     <div class="node-container">
       <div
         class="node-box"
-        :class="[{ 'node-config-error': !currentNode.showText }, `${useTaskStatusClass(currentNode?.activityStatus)}`]"
+        :class="[
+          { 'node-config-error': !currentNode.showText },
+          `${useTaskStatusClass(currentNode?.activityStatus)}`
+        ]"
       >
         <div class="node-title-container">
           <div class="node-title-icon start-user"
@@ -33,73 +36,68 @@
         </div>
       </div>
       <!-- 传递子节点给添加节点组件。会在子节点前面添加节点 -->
-      <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" :current-node="currentNode" />
+      <NodeHandler
+        v-if="currentNode"
+        v-model:child-node="currentNode.childNode"
+        :current-node="currentNode"
+      />
     </div>
   </div>
   <StartUserNodeConfig v-if="!readonly && currentNode" ref="nodeSetting" :flow-node="currentNode" />
-   <!-- 审批记录 -->
-   <el-dialog :title="dialogTitle || '审批记录'" v-model="dialogVisible" width="1000px"  append-to-body>
-      <el-row>
-        <el-table
-          :data="selectTasks"
-          size="small"
-          border
-          header-cell-class-name="table-header-gray"
-        >
-          <el-table-column
-            label="序号"
-            header-align="center"
-            align="center"
-            type="index"
-            width="50"
-          />
-          <el-table-column
-            label="审批人"
-            min-width="100"
-            align="center"
-          >
-            <template #default="scope">
-              {{ scope.row.assigneeUser?.nickname || scope.row.ownerUser?.nickname }}
-            </template>
-          </el-table-column>
-         
-          <el-table-column label="部门" min-width="100" align="center">
-            <template #default="scope">
-              {{ scope.row.assigneeUser?.deptName || scope.row.ownerUser?.deptName }}
-            </template>
-          </el-table-column>
-          <el-table-column
-            :formatter="dateFormatter"
-            align="center"
-            label="开始时间"
-            prop="createTime"
-            min-width="140"
-          />
-          <el-table-column
-            :formatter="dateFormatter"
-            align="center"
-            label="结束时间"
-            prop="endTime"
-            min-width="140"
-          />
-          <el-table-column align="center" label="审批状态" prop="status" min-width="90">
-            <template #default="scope">
-              <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
-            </template>
-          </el-table-column>
-          <el-table-column
-            align="center"
-            label="审批建议"
-            prop="reason"
-            min-width="120"
-          />
-          <el-table-column align="center" label="耗时" prop="durationInMillis" width="100">
-            <template #default="scope">
-              {{ formatPast2(scope.row.durationInMillis) }}
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-row>
+  <!-- 审批记录 -->
+  <el-dialog
+    :title="dialogTitle || '审批记录'"
+    v-model="dialogVisible"
+    width="1000px"
+    append-to-body
+  >
+    <el-row>
+      <el-table :data="selectTasks" size="small" border header-cell-class-name="table-header-gray">
+        <el-table-column
+          label="序号"
+          header-align="center"
+          align="center"
+          type="index"
+          width="50"
+        />
+        <el-table-column label="审批人" min-width="100" align="center">
+          <template #default="scope">
+            {{ scope.row.assigneeUser?.nickname || scope.row.ownerUser?.nickname }}
+          </template>
+        </el-table-column>
+
+        <el-table-column label="部门" min-width="100" align="center">
+          <template #default="scope">
+            {{ scope.row.assigneeUser?.deptName || scope.row.ownerUser?.deptName }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          :formatter="dateFormatter"
+          align="center"
+          label="开始时间"
+          prop="createTime"
+          min-width="140"
+        />
+        <el-table-column
+          :formatter="dateFormatter"
+          align="center"
+          label="结束时间"
+          prop="endTime"
+          min-width="140"
+        />
+        <el-table-column align="center" label="审批状态" prop="status" min-width="90">
+          <template #default="scope">
+            <dict-tag :type="DICT_TYPE.BPM_TASK_STATUS" :value="scope.row.status" />
+          </template>
+        </el-table-column>
+        <el-table-column align="center" label="审批建议" prop="reason" min-width="120" />
+        <el-table-column align="center" label="耗时" prop="durationInMillis" width="100">
+          <template #default="scope">
+            {{ formatPast2(scope.row.durationInMillis) }}
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-row>
   </el-dialog>
 </template>
 <script setup lang="ts">
@@ -130,13 +128,15 @@ const currentNode = useWatchNode(props)
 const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.START_USER_NODE)
 
 const nodeSetting = ref()
-// 
+//
 const nodeClick = () => {
   if (readonly) {
     // 只读模式，弹窗显示任务信息
-    if(tasks && tasks.value){
+    if (tasks && tasks.value) {
       dialogTitle.value = currentNode.value.name
-      selectTasks.value = tasks.value.filter((item: any) => item?.taskDefinitionKey === currentNode.value.id)
+      selectTasks.value = tasks.value.filter(
+        (item: any) => item?.taskDefinitionKey === currentNode.value.id
+      )
       dialogVisible.value = true
     }
   } else {
@@ -144,13 +144,11 @@ const nodeClick = () => {
     nodeSetting.value.showStartUserNodeConfig(currentNode.value)
     nodeSetting.value.openDrawer()
   }
- 
 }
 
 // 任务的弹窗显示，用于只读模式
 const dialogVisible = ref(false) // 弹窗可见性
 const dialogTitle = ref<string | undefined>(undefined) // 弹窗标题
-const selectTasks = ref<any[]|undefined>([]) // 选中的任务数组
-
+const selectTasks = ref<any[] | undefined>([]) // 选中的任务数组
 </script>
 <style lang="scss" scoped></style>

@@ -1,10 +1,16 @@
 <template>
   <div class="branch-node-wrapper">
     <div class="branch-node-container">
-      <div v-if="readonly" class="branch-node-readonly" :class="`${useTaskStatusClass(currentNode?.activityStatus)}`">
+      <div
+        v-if="readonly"
+        class="branch-node-readonly"
+        :class="`${useTaskStatusClass(currentNode?.activityStatus)}`"
+      >
         <span class="iconfont icon-parallel icon-size parallel"></span>
       </div>
-      <el-button v-else class="branch-node-add" color="#626aef" @click="addCondition"  plain>添加分支</el-button>
+      <el-button v-else class="branch-node-add" color="#626aef" @click="addCondition" plain
+        >添加分支</el-button
+      >
       <div
         class="branch-node-item"
         v-for="(item, index) in currentNode.conditionNodes"
@@ -42,7 +48,7 @@
                   {{ NODE_DEFAULT_TEXT.get(NodeType.CONDITION_NODE) }}
                 </div>
               </div>
-              <div  v-if="!readonly" class="node-toolbar">
+              <div v-if="!readonly" class="node-toolbar">
                 <div class="toolbar-icon">
                   <Icon
                     color="#0089ff"
@@ -53,7 +59,7 @@
                 </div>
               </div>
             </div>
-            <NodeHandler v-model:child-node="item.childNode" :current-node="item"/>
+            <NodeHandler v-model:child-node="item.childNode" :current-node="item" />
           </div>
         </div>
         <!-- 递归显示子节点  -->
@@ -65,7 +71,11 @@
         />
       </div>
     </div>
-    <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" :current-node="currentNode" />
+    <NodeHandler
+      v-if="currentNode"
+      v-model:child-node="currentNode.childNode"
+      :current-node="currentNode"
+    />
   </div>
 </template>
 
@@ -98,7 +108,7 @@ const emits = defineEmits<{
 
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
 // 是否只读
-const readonly = inject<Boolean>('readonly') 
+const readonly = inject<Boolean>('readonly')
 
 watch(
   () => props.flowNode,
