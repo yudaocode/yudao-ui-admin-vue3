@@ -222,7 +222,6 @@ const handleCreate = async (row?: ProcessInstanceVO) => {
     const processDefinitionDetail = await DefinitionApi.getProcessDefinition(
       row.processDefinitionId
     )
-    debugger
     if (processDefinitionDetail.formType === 20) {
       message.error('重新发起流程失败，原因：该流程使用业务表单，不支持重新发起')
       return

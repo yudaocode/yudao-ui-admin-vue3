@@ -204,7 +204,7 @@ const getApprovalDetail = async () => {
       const formFieldsPermission = data.formFieldsPermission
 
       if (detailForm.value.rule.length > 0) {
-        // 避免刷新 form-create 显示不了，
+        // 避免刷新 form-create 显示不了
         detailForm.value.value = processInstance.value.formVariables
       } else {
         setConfAndFields2(
