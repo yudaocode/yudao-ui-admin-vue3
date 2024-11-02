@@ -131,8 +131,6 @@ const formRules = reactive({
   deviceType: [{ required: true, message: '设备类型不能为空', trigger: 'change' }],
   netType: [
     {
-      // TODO @haohao：0、1、/2 最好前端也枚举下；另外，这里的 required 可以直接设置为 true。然后表单那些 v-if。只要不存在，它自动就不校验了哈
-      // required: formData.deviceType === 0 || formData.deviceType === 2,
       required: true,
       message: '联网方式不能为空',
       trigger: 'change'

@@ -23,6 +23,12 @@ export enum ValidateTypeEnum {
   WEAK = 0, // 弱校验
   NONE = 1 // 免校验
 }
+// IOT 产品设备类型枚举类 0: 直连设备, 1: 网关子设备, 2: 网关设备
+export enum DeviceTypeEnum {
+  DEVICE = 0, // 直连设备
+  GATEWAY_SUB = 1, // 网关子设备
+  GATEWAY = 2 // 网关设备
+}
 
 // IoT 产品 API
 export const ProductApi = {
@@ -63,6 +69,6 @@ export const ProductApi = {
 
   // 查询产品（精简）列表
   getSimpleProductList() {
-    return request.get({ url: '/iot/product/list-all-simple' })
+    return request.get({ url: '/iot/product/simple-list' })
   }
 }

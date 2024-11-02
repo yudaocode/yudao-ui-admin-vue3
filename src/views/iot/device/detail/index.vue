@@ -11,17 +11,21 @@
         <DeviceDetailsInfo :product="product" :device="device" />
       </el-tab-pane>
       <el-tab-pane label="Topic 列表" />
-      <el-tab-pane label="物模型数据" />
-      <el-tab-pane label="子设备管理" />
+      <el-tab-pane label="物模型数据">
+        <DeviceDetailsModel :product="product" :device="device" />
+      </el-tab-pane>
+      <el-tab-pane label="子设备管理" v-if="product.deviceType === DeviceTypeEnum.GATEWAY" />
+      <el-tab-pane label="设备影子" />
     </el-tabs>
   </el-col>
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DeviceApi, DeviceVO } from '@/api/iot/device'
-import { ProductApi, ProductVO } from '@/api/iot/product'
+import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product'
 import DeviceDetailsHeader from '@/views/iot/device/detail/DeviceDetailsHeader.vue'
 import DeviceDetailsInfo from '@/views/iot/device/detail/DeviceDetailsInfo.vue'
+import DeviceDetailsModel from '@/views/iot/device/detail/DeviceDetailsModel.vue'
 
 defineOptions({ name: 'IoTDeviceDetail' })
 

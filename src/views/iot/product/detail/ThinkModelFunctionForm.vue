@@ -138,7 +138,7 @@ const formRules = reactive({
       trigger: 'blur'
     },
     {
-      validator: (value, callback) => {
+      validator: (rule, value, callback) => {
         const reservedKeywords = ['set', 'get', 'post', 'property', 'event', 'time', 'value']
         if (reservedKeywords.includes(value)) {
           callback(
@@ -146,6 +146,8 @@ const formRules = reactive({
               'set, get, post, property, event, time, value 是系统保留字段，不能用于标识符定义'
             )
           )
+        } else if (/^\d+$/.test(value)) {
+          callback(new Error('标识符不能是纯数字'))
         } else {
           callback()
         }

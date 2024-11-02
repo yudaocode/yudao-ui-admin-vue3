@@ -35,6 +35,19 @@ export interface DeviceUpdateStatusVO {
   status: number // 设备状态
 }
 
+// IoT 设备数据 VO
+export interface DeviceDataVO {
+  deviceId: number // 设备编号
+  thinkModelFunctionId: number // 物模型编号
+  productKey: string // 产品标识
+  deviceName: string // 设备名称
+  identifier: string // 属性标识符
+  name: string // 属性名称
+  dataType: string // 数据类型
+  updateTime: Date // 更新时间
+  value: string // 最新值
+}
+
 // 设备 API
 export const DeviceApi = {
   // 查询设备分页
@@ -70,5 +83,10 @@ export const DeviceApi = {
   // 获取设备数量
   getDeviceCount: async (productId: number) => {
     return await request.get({ url: `/iot/device/count?productId=` + productId })
+  },
+
+  // 获取设备属性最新数据
+  getDevicePropertiesLatestData: async (params: any) => {
+    return await request.get({ url: `/iot/device/data/latest-data`, params })
   }
 }

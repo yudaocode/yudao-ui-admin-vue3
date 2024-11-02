@@ -47,6 +47,8 @@
         </el-table-column>
         <el-table-column label="功能名称" align="center" prop="name" />
         <el-table-column label="标识符" align="center" prop="identifier" />
+        <el-table-column label="数据类型" align="center" prop="identifier" />
+        <el-table-column label="数据定义" align="center" prop="identifier" />
         <el-table-column label="操作" align="center">
           <template #default="scope">
             <el-button
