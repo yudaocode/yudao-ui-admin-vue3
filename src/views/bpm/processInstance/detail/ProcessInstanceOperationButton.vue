@@ -756,10 +756,7 @@ const reload = () => {
 /** 任务是否为处理中状态 */
 const isHandleTaskStatus = () => {
   let canHandle = false
-  if (
-    TaskApi.TaskStatusEnum.RUNNING === runningTask.value?.status ||
-    TaskApi.TaskStatusEnum.DELEGATE === runningTask.value?.status
-  ) {
+  if (TaskApi.TaskStatusEnum.RUNNING === runningTask.value?.status) {
     canHandle = true
   }
   return canHandle

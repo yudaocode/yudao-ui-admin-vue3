@@ -36,17 +36,9 @@ export enum TaskStatusEnum {
    */
   RETURN = 5,
   /**
-   * 委派中
-   */
-  DELEGATE = 6,
-  /**
    * 审批通过中
    */
   APPROVING = 7
-}
-
-export type TaskVO = {
-  id: number
 }
 
 export const getTaskTodoPage = async (params: any) => {
