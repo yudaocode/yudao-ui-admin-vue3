@@ -134,16 +134,12 @@ import auditorSvg from '@/assets/svgs/bpm/auditor.svg'
 import copySvg from '@/assets/svgs/bpm/copy.svg'
 import conditionSvg from '@/assets/svgs/bpm/condition.svg'
 import parallelSvg from '@/assets/svgs/bpm/parallel.svg'
-import endSvg from '@/assets/svgs/bpm/end.svg'
 import finishSvg from '@/assets/svgs/bpm/finish.svg'
 
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
-defineProps<{
-  activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
-}>()
 withDefaults(
   defineProps<{
-    approveNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
+    activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
     showStatusIcon?: boolean // 是否显示头像右下角状态图标
   }>(),
   {
@@ -205,9 +201,7 @@ const nodeTypeSvgMap = {
   // 条件分支节点
   [NodeType.CONDITION_NODE]: { color: '#14bb83', svg: conditionSvg },
   // 并行分支节点
-  [NodeType.PARALLEL_BRANCH_NODE]: { color: '#14bb83', svg: parallelSvg },
-  // 结束节点
-  [NodeType.END_EVENT_NODE]: { color: '#ffffff', svg: endSvg }
+  [NodeType.PARALLEL_BRANCH_NODE]: { color: '#14bb83', svg: parallelSvg }
 }
 
 // 只有只有状态是 -1、0、1 才展示头像右小角状态小icon

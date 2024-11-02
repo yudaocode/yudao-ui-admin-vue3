@@ -2,16 +2,10 @@
   <ContentWrap :bodyStyle="{ padding: '10px 20px 0' }">
     <div class="processInstance-wrap-main">
       <el-scrollbar>
-        <div class="text-#878c93 h-15px">编号：{{ selectProcessDefinition.id }}</div>
+        <div class="text-#878c93 h-15px">流程：{{ selectProcessDefinition.name }}</div>
         <el-divider class="!my-8px" />
 
-        <div class="flex items-center justify-between gap-5 mb-10px h-40px">
-          <div class="text-26px font-bold mb-5px">{{ selectProcessDefinition.name }}</div>
-          <el-button style="float: right" type="primary" @click="handleCancel">
-            <Icon icon="ep:delete" /> 选择其它流程
-          </el-button>
-        </div>
-        <!-- 中间主要内容tab栏 -->
+        <!-- 中间主要内容 tab 栏 -->
         <el-tabs v-model="activeTab">
           <!-- 表单信息 -->
           <el-tab-pane label="表单填写" name="form">
@@ -65,7 +59,7 @@
                     <!-- 流程时间线 -->
                     <ProcessInstanceTimeline
                       ref="timelineRef"
-                      :approve-nodes="approveNodes"
+                      :activity-nodes="activityNodes"
                       :show-status-icon="false"
                       candidateField="candidateUserList"
                     />
@@ -103,7 +97,7 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
-import { setConfAndFields2 } from '@/utils/formCreate'
+import { decodeFields, setConfAndFields2 } from '@/utils/formCreate'
 import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
@@ -137,10 +131,10 @@ const bpmnXML: any = ref(null) // BPMN 数据
 const activeTab = ref('form')
 const emit = defineEmits(['cancel'])
 // 审批节点信息
-const approveNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
+const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
 
 /** 设置表单信息、获取流程图数据 **/
-const initProcessInfo = async (row, formVariables?) => {
+const initProcessInfo = async (row: any, formVariables?: any) => {
   // 重置指定审批人
   startUserSelectTasks.value = []
   startUserSelectAssignees.value = {}
@@ -149,11 +143,20 @@ const initProcessInfo = async (row, formVariables?) => {
   // 情况一：流程表单
   if (row.formType == 10) {
     // 设置表单
+    // 注意：需要从 formVariables 中，移除不在 row.formFields 的值。
+    // 原因是：后端返回的 formVariables 里面，会有一些非表单的信息。例如说，某个流程节点的审批人。
+    //        这样，就可能导致一个流程被审批不通过后，重新发起时，会直接后端报错！！！
+    const allowedFields = decodeFields(row.formFields).map((fieldObj: any) => fieldObj.field)
+    for (const key in formVariables) {
+      if (!allowedFields.includes(key)) {
+        delete formVariables[key]
+      }
+    }
     setConfAndFields2(detailForm, row.formConf, row.formFields, formVariables)
     await nextTick()
     fApi.value?.btn.show(false) // 隐藏提交按钮
     // 获取流程审批信息
-    getApprovalDetail(row)
+    await getApprovalDetail(row)
 
     // 加载流程图
     const processDefinitionDetail = await DefinitionApi.getProcessDefinition(row.id)
@@ -190,7 +193,7 @@ const initProcessInfo = async (row, formVariables?) => {
 }
 
 /** 获取审批详情 */
-const getApprovalDetail = async (row) => {
+const getApprovalDetail = async (row: any) => {
   try {
     const param = {
       processDefinitionId: row.id
@@ -201,13 +204,14 @@ const getApprovalDetail = async (row) => {
       return
     }
     // 获取审批节点，显示 Timeline 的数据
-    approveNodes.value = data.approveNodes
+    activityNodes.value = data.activityNodes
   } finally {
   }
 }
 /** 提交按钮 */
-const submitForm = async (formData) => {
-  if (!fApi.value || props.selectProcessDefinition) {
+const submitForm = async (formData: any) => {
+  debugger
+  if (!fApi.value || !props.selectProcessDefinition) {
     return
   }
   // 如果有指定审批人，需要校验
