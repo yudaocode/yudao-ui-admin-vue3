@@ -261,9 +261,7 @@ const configForm = tempConfigForm as Ref<CopyTaskFormType>
 // 抄送人策略， 去掉发起人自选 和 发起人自己
 const copyUserStrategies = computed(() => {
   return CANDIDATE_STRATEGY.filter(
-    (item) =>
-      item.value !== CandidateStrategy.START_USER_SELECT &&
-      item.value !== CandidateStrategy.START_USER
+    (item) => item.value !== CandidateStrategy.START_USER
   )
 })
 // 改变抄送人设置策略

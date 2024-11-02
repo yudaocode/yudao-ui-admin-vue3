@@ -331,13 +331,57 @@
     </el-popover>
 
     <!-- 【减签】按钮 -->
-    <div
-      @click="openChildrenTask()"
-      class="hover-bg-gray-100 rounded-xl p-6px"
+    <el-popover
+      :visible="popOverVisible.deleteSign"
+      placement="top-start"
+      :width="420"
+      trigger="click"
       v-if="runningTask?.children.length > 0"
     >
-      <Icon :size="14" icon="ep:semi-select" />&nbsp; 减签
-    </div>
+      <template #reference>
+        <div @click="openPopover('deleteSign')" class="hover-bg-gray-100 rounded-xl p-6px">
+          <Icon :size="14" icon="ep:semi-select" />&nbsp; 减签
+        </div>
+      </template>
+
+      <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
+        <el-form
+          label-position="top"
+          class="mb-auto"
+          ref="formRef"
+          :model="genericForm"
+          :rules="genericRule"
+          label-width="100px"
+        >
+          <el-form-item label="减签人员" prop="deleteSignTaskId">
+            <el-select v-model="genericForm.deleteSignTaskId" clearable style="width: 100%">
+              <el-option
+                v-for="item in runningTask.children"
+                :key="item.id"
+                :label="getDeleteSignUserLabel(item)"
+                :value="item.id"
+              />
+            </el-select>
+          </el-form-item>
+
+          <el-form-item label="审批意见" prop="reason">
+            <el-input
+              v-model="genericForm.reason"
+              clearable
+              placeholder="请输入审批意见"
+              type="textarea"
+              :rows="3"
+            />
+          </el-form-item>
+          <el-form-item>
+            <el-button :disabled="formLoading" type="primary" @click="handlerDeleteSign()">
+              减签
+            </el-button>
+            <el-button @click="popOverVisible.deleteSign = false"> 取消 </el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-popover>
 
     <!-- 【退回】按钮 -->
     <el-popover
@@ -446,13 +490,11 @@
     >
       <Icon :size="14" icon="ep:refresh" />&nbsp; 再次提交
     </div>
-    <!-- 弹窗：子任务  -->
-    <TaskSignList ref="taskSignListRef" @success="reload" />
+    
   </div>
 </template>
 <script lang="ts" setup>
 import { useUserStoreWithOut } from '@/store/modules/user'
-import TaskSignList from './dialog/TaskSignList.vue'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import * as TaskApi from '@/api/bpm/task'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
@@ -486,7 +528,8 @@ const popOverVisible = ref({
   addSign: false,
   return: false,
   copy: false,
-  cancel: false
+  cancel: false,
+  deleteSign: false
 }) // 气泡卡是否展示
 const returnList = ref([] as any) // 退回节点
 
@@ -504,6 +547,7 @@ const genericRule = reactive({
   assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }],
   delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }],
   addSignUserIds: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }],
+  deleteSignTaskId: [{ required: true, message: '减签人员不能为空', trigger: 'change' }],
   targetTaskDefinitionKey: [{ required: true, message: '退回节点不能为空', trigger: 'change' }]
 }) // 表单校验规则
 
@@ -742,12 +786,36 @@ const handleReCreate = async () => {
   })
 }
 
-/** 子任务 */
-const taskSignListRef = ref()
-const openChildrenTask = () => {
-  taskSignListRef.value.open(runningTask.value)
+/** 获取减签人员标签 */
+const getDeleteSignUserLabel =  (task:any) : string => {
+  const deptName = task?.assigneeUser?.deptName || task?.ownerUser?.deptName
+  const nickname = task?.assigneeUser?.nickname || task?.ownerUser?.nickname
+  return  `${nickname} ( 所属部门：${deptName} )`;
 }
-
+/** 处理减签 */
+const handlerDeleteSign = async () => {
+  formLoading.value = true
+  try {
+    const deleteFormRef = proxy.$refs['formRef']
+    // 1.1 校验表单
+    const elForm = unref(deleteFormRef)
+    if (!elForm) return
+    const valid = await elForm.validate()
+    if (!valid) return
+    // 1.2 提交减签
+    const data = {
+      id: genericForm.value.deleteSignTaskId,
+      reason: genericForm.value.reason,
+    }
+    await TaskApi.signDeleteTask(data)
+    message.success('减签成功')
+    popOverVisible.value.deleteSign = false
+    // 2 加载最新数据
+    reload()
+  } finally {
+    formLoading.value = false
+  }
+}
 /** 重新加载数据 */
 const reload = () => {
   emit('success')

@@ -41,7 +41,7 @@
           <div v-for="(task, idx) in activity.tasks" :key="idx" class="flex items-center">
             <div class="flex flex-col pr-2 gap2">
               <div
-                class="position-relative flex flex-wrap gap2"
+                class="position-relative pt-2 flex flex-wrap gap2"
                 v-if="task.assigneeUser || task.ownerUser"
               >
                 <!-- 信息：头像昵称 -->
