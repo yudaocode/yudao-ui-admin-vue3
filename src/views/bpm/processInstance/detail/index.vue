@@ -65,7 +65,7 @@
                   </el-col>
                   <el-col :span="7">
                     <!-- 审批记录时间线 -->
-                    <ProcessInstanceTimeline ref="timelineRef" :activity-nodes="activityNodes" />
+                    <ProcessInstanceTimeline :activity-nodes="activityNodes" />
                   </el-col>
                 </el-row>
               </el-scrollbar>
@@ -96,12 +96,7 @@
           <el-tab-pane label="流转记录" name="record">
             <div class="form-scroll-area">
               <el-scrollbar>
-                <ProcessInstanceTaskList
-                  :loading="tasksLoad"
-                  :process-instance="processInstance"
-                  :tasks="tasks"
-                  :show-header="false"
-                />
+                <ProcessInstanceTaskList :loading="processInstanceLoading" :id="id" />
               </el-scrollbar>
             </div>
           </el-tab-pane>
@@ -135,14 +130,14 @@ import { BpmModelType } from '@/utils/constants'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import * as TaskApi from '@/api/bpm/task'
+import * as UserApi from '@/api/system/user'
 import ProcessInstanceBpmnViewer from './ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceSimpleViewer from './ProcessInstanceSimpleViewer.vue'
 import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
 import ProcessInstanceOperationButton from './ProcessInstanceOperationButton.vue'
 import ProcessInstanceTimeline from './ProcessInstanceTimeline.vue'
-import * as UserApi from '@/api/system/user'
 import { FieldPermissionType } from '@/components/SimpleProcessDesignerV2/src/consts'
+// TODO 代码优化，换个明确的 icon 名字
 import audit1 from '@/assets/svgs/bpm/audit1.svg'
 import audit2 from '@/assets/svgs/bpm/audit2.svg'
 import audit3 from '@/assets/svgs/bpm/audit3.svg'
@@ -158,11 +153,8 @@ const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
 const processDefinition = ref<any>({}) // 流程定义
-const timelineRef = ref()
-// 操作按钮组件 ref
-const operationButtonRef = ref()
-const tasksLoad = ref(true) // 任务的加载中
-const tasks = ref<any[]>([]) // 任务列表
+
+const operationButtonRef = ref() // 操作按钮组件 ref
 const auditIcons = {
   1: audit1,
   2: audit2,
@@ -180,10 +172,7 @@ const detailForm = ref({
 
 /** 获得详情 */
 const getDetail = () => {
-  // 1. 获取审批详情
   getApprovalDetail()
-  // 2. 获得流程任务列表
-  getTaskList()
 }
 
 /** 加载流程实例 */
@@ -266,38 +255,6 @@ const setFieldPermission = (field: string, permission: string) => {
   if (permission === FieldPermissionType.NONE) {
     //@ts-ignore
     fApi.value?.hidden(true, field)
-  }
-}
-
-/** 加载任务列表 */
-const getTaskList = async () => {
-  try {
-    // 获得未取消的任务
-    tasksLoad.value = true
-    const data = await TaskApi.getTaskListByProcessInstanceId(props.id)
-    tasks.value = []
-    // 1.1 移除已取消的审批
-    data.forEach((task: any) => {
-      if (task.status !== 4) {
-        tasks.value.push(task)
-      }
-    })
-    // 1.2 排序，将未完成的排在前面，已完成的排在后面；
-    tasks.value.sort((a, b) => {
-      // 有已完成的情况，按照完成时间倒序
-      if (a.endTime && b.endTime) {
-        return b.endTime - a.endTime
-      } else if (a.endTime) {
-        return 1
-      } else if (b.endTime) {
-        return -1
-        // 都是未完成，按照创建时间倒序
-      } else {
-        return b.createTime - a.createTime
-      }
-    })
-  } finally {
-    tasksLoad.value = false
   }
 }
 
