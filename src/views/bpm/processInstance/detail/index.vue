@@ -79,15 +79,15 @@
                 v-show="
                   processDefinition.modelType && processDefinition.modelType === BpmModelType.SIMPLE
                 "
-                :id="`${id}`"
                 :loading="processInstanceLoading"
+                :model-view="processModelView"
               />
               <ProcessInstanceBpmnViewer
                 v-show="
                   processDefinition.modelType && processDefinition.modelType === BpmModelType.BPMN
                 "
-                :id="`${id}`"
                 :loading="processInstanceLoading"
+                :model-view="processModelView"
               />
             </div>
           </el-tab-pane>
@@ -153,7 +153,7 @@ const message = useMessage() // 消息弹窗
 const processInstanceLoading = ref(false) // 流程实例的加载中
 const processInstance = ref<any>({}) // 流程实例
 const processDefinition = ref<any>({}) // 流程定义
-
+const processModelView = ref<any>({}) // 流程模型视图
 const operationButtonRef = ref() // 操作按钮组件 ref
 const auditIcons = {
   1: audit1,
@@ -173,6 +173,8 @@ const detailForm = ref({
 /** 获得详情 */
 const getDetail = () => {
   getApprovalDetail()
+
+  getProcessModelView()
 }
 
 /** 加载流程实例 */
@@ -235,6 +237,21 @@ const getApprovalDetail = async () => {
     operationButtonRef.value?.loadTodoTask(data.todoTask)
   } finally {
     processInstanceLoading.value = false
+  }
+}
+
+/** 获取流程模型视图*/
+const getProcessModelView = async () => {
+
+  if (BpmModelType.BPMN === processDefinition.value?.modelType) {
+    // 重置，解决 BPMN 流程图刷新不会重新渲染问题
+    processModelView.value = {
+      bpmnXml: ''
+    }
+  }
+  const data = await ProcessInstanceApi.getProcessInstanceBpmnModelView(props.id)
+  if (data) {
+    processModelView.value = data
   }
 }
 

@@ -6,31 +6,28 @@
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
 import { MyProcessViewer } from '@/components/bpmnProcessDesigner/package'
-import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 
 defineOptions({ name: 'BpmProcessInstanceBpmnViewer' })
 
 const props = defineProps({
   loading: propTypes.bool.def(false), // 是否加载中
-  id: propTypes.string, // 流程实例的编号
-  bpmnXml: propTypes.string // BPMN XML
+  bpmnXml: propTypes.string, // BPMN XML
+  modelView: propTypes.object
 })
 
 const view = ref({
   bpmnXml: ''
 }) // BPMN 流程图数据
 
+
 /** 只有 loading 完成时，才去加载流程列表 */
 watch(
-  () => props.loading,
-  async (value) => {
-    // 重置
-    view.value = {
-      bpmnXml: ''
-    }
+  () => props.modelView,
+  async (newModelView) => {
     // 加载最新
-    if (value && props.id) {
-      view.value = await ProcessInstanceApi.getProcessInstanceBpmnModelView(props.id)
+    if (newModelView) {
+      //@ts-ignore
+      view.value = newModelView
     }
   }
 )
