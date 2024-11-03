@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="loading">
+  <div v-loading="loading" class="overflow-auto">
     <SimpleProcessModel
       v-if="processNodeTree"
       :flow-node="processNodeTree"

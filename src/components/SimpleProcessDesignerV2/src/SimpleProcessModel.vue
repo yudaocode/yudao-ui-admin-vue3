@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="simple-process-model-container position-relative"
-    :style="`transform: scale(${scaleValue / 100});`"
-  >
+  <div class="simple-process-model-container position-relative">
     <div class="position-absolute top-0px right-0px bg-#fff">
       <el-row type="flex" justify="end">
         <el-button-group key="scale-control" size="default">
@@ -22,7 +19,9 @@
         >
       </el-row>
     </div>
-    <ProcessNodeTree v-if="processNodeTree" v-model:flow-node="processNodeTree" />
+    <div class="simple-process-model" :style="`transform: scale(${scaleValue / 100});`">
+      <ProcessNodeTree v-if="processNodeTree" v-model:flow-node="processNodeTree" />
+    </div>
   </div>
   <Dialog v-model="errorDialogVisible" title="保存失败" width="400" :fullscreen="false">
     <div class="mb-2">以下节点内容不完善，请修改后保存</div>
