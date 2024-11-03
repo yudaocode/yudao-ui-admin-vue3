@@ -71,8 +71,17 @@
           <!-- 流程图 -->
           <el-tab-pane label="流程图" name="diagram">
             <div class="form-scroll-area">
-              <!-- 流程图预览 -->
-              <ProcessInstanceBpmnViewer :bpmn-xml="bpmnXML" />
+              <!-- BPMN 流程图预览 -->
+              <ProcessInstanceBpmnViewer 
+                :bpmn-xml="bpmnXML" 
+                v-if="BpmModelType.BPMN === selectProcessDefinition.modelType" 
+              />
+
+              <!-- Simple 流程图预览 -->
+              <ProcessInstanceSimpleViewer 
+                :simple-json="simpleJson" 
+                v-if="BpmModelType.SIMPLE === selectProcessDefinition.modelType" 
+              />
             </div>
           </el-tab-pane>
         </el-tabs>
@@ -98,7 +107,9 @@
 </template>
 <script lang="ts" setup>
 import { decodeFields, setConfAndFields2 } from '@/utils/formCreate'
+import { BpmModelType } from '@/utils/constants'
 import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
+import ProcessInstanceSimpleViewer from '../detail/ProcessInstanceSimpleViewer.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { useTagsViewStore } from '@/store/modules/tagsView'
@@ -127,6 +138,7 @@ const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
 const startUserSelectAssigneesFormRules = ref({}) // 发起人选择审批人的表单 Rules
 const userList = ref<any[]>([]) // 用户列表
 const bpmnXML: any = ref(null) // BPMN 数据
+const simpleJson = ref<string|undefined>() // Simple 设计器数据 json 格式
 /** 当前的Tab */
 const activeTab = ref('form')
 const emit = defineEmits(['cancel'])
@@ -162,6 +174,7 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     const processDefinitionDetail = await DefinitionApi.getProcessDefinition(row.id)
     if (processDefinitionDetail) {
       bpmnXML.value = processDefinitionDetail.bpmnXml
+      simpleJson.value = processDefinitionDetail.simpleModel
       startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
 
       // 设置指定审批人
