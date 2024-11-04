@@ -408,21 +408,12 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       justify-content: flex-start;
 
       .kefu-message {
-        margin-left: 20px;
-        position: relative;
-
-        &::before {
-          content: '';
-          width: 10px;
-          height: 10px;
-          left: -19px;
-          top: calc(50% - 10px);
-          position: absolute;
-          border-left: 5px solid transparent;
-          border-bottom: 5px solid transparent;
-          border-top: 5px solid transparent;
-          border-right: 5px solid var(--app-content-bg-color);
-        }
+        background-color: rgb(245, 245, 245);
+        margin-left: 10px;
+        margin-top: 18px;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        border-bottom-left-radius: 10px;
       }
     }
 
@@ -430,37 +421,25 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       justify-content: flex-end;
 
       .kefu-message {
-        margin-right: 20px;
-        position: relative;
-
-        &::after {
-          content: '';
-          width: 10px;
-          height: 10px;
-          right: -19px;
-          top: calc(50% - 10px);
-          position: absolute;
-          border-left: 5px solid var(--app-content-bg-color);
-          border-bottom: 5px solid transparent;
-          border-top: 5px solid transparent;
-          border-right: 5px solid transparent;
-        }
+        background-color: rgb(206, 223, 255);
+        margin-right: 10px;
+        margin-top: 18px;
+        border-top-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        border-bottom-left-radius: 10px;
       }
     }
 
     // 消息气泡
     .kefu-message {
-      color: #a9a9a9;
-      border-radius: 5px;
-      box-shadow: 3px 3px 5px rgba(220, 220, 220, 0.1);
+      color: #414141;
+      font-weight: 500;
       padding: 5px 10px;
       width: auto;
       max-width: 50%;
       text-align: left;
       display: inline-block !important;
-      position: relative;
       word-break: break-all;
-      background-color: var(--app-content-bg-color);
       transition: all 0.2s;
 
       &:hover {

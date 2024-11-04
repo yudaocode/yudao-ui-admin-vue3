@@ -1,5 +1,5 @@
 <template>
-  <el-aside class="kefu-conversation-aside p-10px h-100%" width="260px">
+  <el-aside class="kefu p-5px h-100%" width="260px">
     <div class="color-[#999] font-bold my-10px">会话记录({{ conversationList.length }})</div>
     <div
       v-for="item in conversationList"
@@ -180,14 +180,13 @@ watch(showRightMenu, (val) => {
 </script>
 
 <style lang="scss" scoped>
-.kefu-conversation-aside {
+.kefu {
   background-color: #fff;
 
   &-conversation {
     height: 60px;
-    padding: 10px;
     //background-color: #fff;
-    transition: border-left 0.05s ease-in-out; /* 设置过渡效果 */
+    //transition: border-left 0.05s ease-in-out; /* 设置过渡效果 */
 
     .username {
       min-width: 0;
@@ -208,14 +207,10 @@ watch(showRightMenu, (val) => {
     }
   }
 
-  .active {
-    //border-left: 5px #96afea solid;
-    background-color: rgba(128, 128, 128, 0.5); // 透明色，暗黑模式下也能体现
-    border-radius: 8px;
-  }
-
+  .active,
   .pinned {
     background-color: rgba(128, 128, 128, 0.5); // 透明色，暗黑模式下也能体现
+    border-radius: 8px;
   }
 
   .right-menu-ul {

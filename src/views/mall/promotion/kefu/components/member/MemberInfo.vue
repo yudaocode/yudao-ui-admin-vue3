@@ -142,7 +142,7 @@ const handleScroll = debounce(() => {
         left: 0;
         right: 0;
         bottom: 0; /* 覆盖整个元素 */
-        border-bottom: 2px solid black; /* 边框样式 */
+        border-bottom: 2px solid rgba(128, 128, 128, 0.5); /* 边框样式 */
         pointer-events: none; /* 确保点击事件不会被伪元素拦截 */
       }
 
@@ -153,7 +153,7 @@ const handleScroll = debounce(() => {
         left: 0;
         right: 0;
         bottom: 0; /* 覆盖整个元素 */
-        border-bottom: 2px solid black; /* 边框样式 */
+        border-bottom: 2px solid rgba(128, 128, 128, 0.5); /* 边框样式 */
         pointer-events: none; /* 确保点击事件不会被伪元素拦截 */
       }
     }
