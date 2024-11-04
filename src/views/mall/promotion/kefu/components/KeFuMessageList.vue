@@ -164,9 +164,8 @@ const messageList = ref<KeFuMessageRespVO[]>([]) // 消息列表
 const conversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
 const showNewMessageTip = ref(false) // 显示有新消息提示
 const queryParams = reactive({
-  pageNo: 1,
-  pageSize: 10,
-  conversationId: 0
+  conversationId: 0,
+  createTime: undefined
 })
 const total = ref(0) // 消息总条数
 const refreshContent = ref(false) // 内容刷新,主要解决会话消息页面高度不一致导致的滚动功能精度失效
@@ -175,14 +174,20 @@ const refreshContent = ref(false) // 内容刷新,主要解决会话消息页面
 const getMessageContent = computed(() => (item: any) => jsonParse(item.content))
 /** 获得消息列表 */
 const getMessageList = async () => {
-  const res = await KeFuMessageApi.getKeFuMessagePage(queryParams)
-  total.value = res.total
+  const res = await KeFuMessageApi.getKeFuMessageList(queryParams)
+  if (isEmpty(res)) {
+    // 当返回的是空列表说明没有消息或者已经查询完了历史消息
+    skipGetMessageList.value = true
+    return
+  }
+  queryParams.createTime = formatDate(res.at(-1).createTime) as any
+
   // 情况一：加载最新消息
-  if (queryParams.pageNo === 1) {
-    messageList.value = res.list
+  if (!queryParams.createTime) {
+    messageList.value = res
   } else {
     // 情况二：加载历史消息
-    for (const item of res.list) {
+    for (const item of res) {
       pushMessage(item)
     }
   }
@@ -216,8 +221,7 @@ const refreshMessageList = async (message?: any) => {
     }
     pushMessage(message)
   } else {
-    // TODO @puhui999：不基于 page 做。而是流式分页；通过 createTime 排序查询；
-    queryParams.pageNo = 1
+    queryParams.createTime = undefined
     await getMessageList()
   }
 
@@ -234,7 +238,6 @@ const refreshMessageList = async (message?: any) => {
 // TODO @puhui999：可优化：可以考虑本地做每个会话的消息 list 缓存；然后点击切换时，读取缓存；然后异步获取新消息，merge 下；
 const getNewMessageList = async (val: KeFuConversationRespVO) => {
   // 会话切换,重置相关参数
-  queryParams.pageNo = 1
   messageList.value = []
   total.value = 0
   loadHistory.value = false
@@ -242,16 +245,14 @@ const getNewMessageList = async (val: KeFuConversationRespVO) => {
   // 设置会话相关属性
   conversation.value = val
   queryParams.conversationId = val.id
+  queryParams.createTime = undefined
   // 获取消息
   await refreshMessageList()
 }
 defineExpose({ getNewMessageList, refreshMessageList })
 
 const showKeFuMessageList = computed(() => !isEmpty(conversation.value)) // 是否显示聊天区域
-const skipGetMessageList = computed(() => {
-  // 已加载到最后一页的话则不触发新的消息获取
-  return total.value > 0 && Math.ceil(total.value / queryParams.pageSize) === queryParams.pageNo
-}) // 跳过消息获取
+const skipGetMessageList = ref(false) // 跳过消息获取
 
 /** 处理表情选择 */
 const handleEmojiSelect = (item: Emoji) => {
@@ -345,8 +346,6 @@ const handleOldMessage = async () => {
     return
   }
   loadHistory.value = true
-  // 加载消息列表
-  queryParams.pageNo += 1
   await getMessageList()
   // 等页面加载完后，获得上一页最后一条消息的位置，控制滚动到它所在位置
   scrollbarRef.value!.setScrollTop(innerRef.value!.clientHeight - oldPageHeight)
