@@ -2,18 +2,35 @@
 <template>
   <el-container class="kefu">
     <el-header class="kefu-header">
-      <el-tabs v-model="activeName" class="kefu-tabs" @tab-click="handleClick">
-        <el-tab-pane label="最近浏览" name="a" />
-        <el-tab-pane label="订单列表" name="b" />
-      </el-tabs>
+      <div
+        :class="{ 'kefu-header-item-activation': tabActivation('会员信息') }"
+        class="kefu-header-item cursor-pointer flex items-center justify-center"
+        @click="handleClick('会员信息')"
+      >
+        会员信息
+      </div>
+      <div
+        :class="{ 'kefu-header-item-activation': tabActivation('最近浏览') }"
+        class="kefu-header-item cursor-pointer flex items-center justify-center"
+        @click="handleClick('最近浏览')"
+      >
+        最近浏览
+      </div>
+      <div
+        :class="{ 'kefu-header-item-activation': tabActivation('交易订单') }"
+        class="kefu-header-item cursor-pointer flex items-center justify-center"
+        @click="handleClick('交易订单')"
+      >
+        交易订单
+      </div>
     </el-header>
     <el-main class="kefu-content">
       <div v-show="!isEmpty(conversation)">
         <el-scrollbar ref="scrollbarRef" always @scroll="handleScroll">
           <!-- 最近浏览 -->
-          <ProductBrowsingHistory v-if="activeName === 'a'" ref="productBrowsingHistoryRef" />
-          <!-- 订单列表 -->
-          <OrderBrowsingHistory v-if="activeName === 'b'" ref="orderBrowsingHistoryRef" />
+          <ProductBrowsingHistory v-if="activeTab === '最近浏览'" ref="productBrowsingHistoryRef" />
+          <!-- 交易订单 -->
+          <OrderBrowsingHistory v-if="activeTab === '交易订单'" ref="orderBrowsingHistoryRef" />
         </el-scrollbar>
       </div>
       <el-empty v-show="isEmpty(conversation)" description="请选择左侧的一个会话后开始" />
@@ -22,7 +39,6 @@
 </template>
 
 <script lang="ts" setup>
-import type { TabsPaneContext } from 'element-plus'
 import ProductBrowsingHistory from './ProductBrowsingHistory.vue'
 import OrderBrowsingHistory from './OrderBrowsingHistory.vue'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
@@ -32,25 +48,26 @@ import { ElScrollbar as ElScrollbarType } from 'element-plus/es/components/scrol
 
 defineOptions({ name: 'MemberBrowsingHistory' })
 
-const activeName = ref('a')
-
+const activeTab = ref('会员信息')
+const tabActivation = computed(() => (tab: string) => activeTab.value === tab)
 /** tab 切换 */
 const productBrowsingHistoryRef = ref<InstanceType<typeof ProductBrowsingHistory>>()
 const orderBrowsingHistoryRef = ref<InstanceType<typeof OrderBrowsingHistory>>()
-const handleClick = async (tab: TabsPaneContext) => {
-  activeName.value = tab.paneName as string
+const handleClick = async (tab: string) => {
+  activeTab.value = tab
   await nextTick()
   await getHistoryList()
 }
 
 /** 获得历史数据 */
-// TODO @puhui：不要用 a、b 哈。就订单列表、浏览列表这种噶
 const getHistoryList = async () => {
-  switch (activeName.value) {
-    case 'a':
+  switch (activeTab.value) {
+    case '会员信息':
+      break
+    case '最近浏览':
       await productBrowsingHistoryRef.value?.getHistoryList(conversation.value)
       break
-    case 'b':
+    case '交易订单':
       await orderBrowsingHistoryRef.value?.getHistoryList(conversation.value)
       break
     default:
@@ -60,11 +77,13 @@ const getHistoryList = async () => {
 
 /** 加载下一页数据 */
 const loadMore = async () => {
-  switch (activeName.value) {
-    case 'a':
+  switch (activeTab.value) {
+    case '会员信息':
+      break
+    case '最近浏览':
       await productBrowsingHistoryRef.value?.loadMore()
       break
-    case 'b':
+    case '交易订单':
       await orderBrowsingHistoryRef.value?.loadMore()
       break
     default:
@@ -75,7 +94,7 @@ const loadMore = async () => {
 /** 浏览历史初始化 */
 const conversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
 const initHistory = async (val: KeFuConversationRespVO) => {
-  activeName.value = 'a'
+  activeTab.value = '会员信息'
   conversation.value = val
   await nextTick()
   await getHistoryList()
@@ -95,9 +114,6 @@ const handleScroll = debounce(() => {
 
 <style lang="scss" scoped>
 .kefu {
-  margin: 0;
-  padding: 0;
-  height: 100%;
   width: 300px !important;
   background-color: #fff;
   border-left: var(--el-border-color) solid 1px;
@@ -107,11 +123,39 @@ const handleScroll = debounce(() => {
     box-shadow: 0 0 0 0 #dcdfe6;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
 
     &-title {
       font-size: 18px;
       font-weight: bold;
+    }
+
+    &-item {
+      height: 100%;
+      width: 100%;
+      position: relative;
+
+      &-activation::before {
+        content: '';
+        position: absolute; /* 绝对定位 */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0; /* 覆盖整个元素 */
+        border-bottom: 2px solid black; /* 边框样式 */
+        pointer-events: none; /* 确保点击事件不会被伪元素拦截 */
+      }
+
+      &:hover::before {
+        content: '';
+        position: absolute; /* 绝对定位 */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0; /* 覆盖整个元素 */
+        border-bottom: 2px solid black; /* 边框样式 */
+        pointer-events: none; /* 确保点击事件不会被伪元素拦截 */
+      }
     }
   }
 
