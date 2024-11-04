@@ -1,21 +1,24 @@
 <!-- 目录是不是叫 member 好点。然后这个组件是 MemberInfo，里面有浏览足迹 -->
 <template>
-  <div v-show="!isEmpty(conversation)" class="kefu">
-    <div class="header-title h-60px flex justify-center items-center">他的足迹</div>
-    <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-      <el-tab-pane label="最近浏览" name="a" />
-      <el-tab-pane label="订单列表" name="b" />
-    </el-tabs>
-    <div>
-      <el-scrollbar ref="scrollbarRef" always height="calc(115vh - 400px)" @scroll="handleScroll">
-        <!-- 最近浏览 -->
-        <ProductBrowsingHistory v-if="activeName === 'a'" ref="productBrowsingHistoryRef" />
-        <!-- 订单列表 -->
-        <OrderBrowsingHistory v-if="activeName === 'b'" ref="orderBrowsingHistoryRef" />
-      </el-scrollbar>
-    </div>
-  </div>
-  <el-empty v-show="isEmpty(conversation)" description="请选择左侧的一个会话后开始" />
+  <el-container class="kefu">
+    <el-header class="kefu-header">
+      <el-tabs v-model="activeName" class="kefu-tabs" @tab-click="handleClick">
+        <el-tab-pane label="最近浏览" name="a" />
+        <el-tab-pane label="订单列表" name="b" />
+      </el-tabs>
+    </el-header>
+    <el-main class="kefu-content">
+      <div v-show="!isEmpty(conversation)">
+        <el-scrollbar ref="scrollbarRef" always @scroll="handleScroll">
+          <!-- 最近浏览 -->
+          <ProductBrowsingHistory v-if="activeName === 'a'" ref="productBrowsingHistoryRef" />
+          <!-- 订单列表 -->
+          <OrderBrowsingHistory v-if="activeName === 'b'" ref="orderBrowsingHistoryRef" />
+        </el-scrollbar>
+      </div>
+      <el-empty v-show="isEmpty(conversation)" description="请选择左侧的一个会话后开始" />
+    </el-main>
+  </el-container>
 </template>
 
 <script lang="ts" setup>
@@ -91,6 +94,41 @@ const handleScroll = debounce(() => {
 </script>
 
 <style lang="scss" scoped>
+.kefu {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 300px !important;
+  background-color: #fff;
+  border-left: var(--el-border-color) solid 1px;
+
+  &-header {
+    background: #fbfbfb;
+    box-shadow: 0 0 0 0 #dcdfe6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+  }
+
+  &-content {
+    margin: 0;
+    padding: 0;
+    position: relative;
+    height: 100%;
+    width: 100%;
+  }
+
+  &-tabs {
+    height: 100%;
+    width: 100%;
+  }
+}
+
 .header-title {
   border-bottom: #e4e0e0 solid 1px;
 }

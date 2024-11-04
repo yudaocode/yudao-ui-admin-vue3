@@ -1,11 +1,11 @@
 <template>
   <el-container v-if="showKeFuMessageList" class="kefu">
-    <el-header>
+    <el-header class="kefu-header">
       <div class="kefu-title">{{ conversation.userNickname }}</div>
     </el-header>
     <el-main class="kefu-content overflow-visible">
-      <el-scrollbar ref="scrollbarRef" always height="calc(100vh - 495px)" @scroll="handleScroll">
-        <div v-if="refreshContent" ref="innerRef" class="w-[100%] pb-3px">
+      <el-scrollbar ref="scrollbarRef" always @scroll="handleScroll">
+        <div v-if="refreshContent" ref="innerRef" class="w-[100%] px-10px">
           <!-- 消息列表 -->
           <div v-for="(item, index) in getMessageList0" :key="item.id" class="w-[100%]">
             <div class="flex justify-center items-center mb-20px">
@@ -43,7 +43,9 @@
                 class="w-60px h-60px"
               />
               <div
-                :class="{ 'kefu-message': KeFuMessageContentTypeEnum.TEXT === item.contentType }"
+                :class="{
+                  'kefu-message': KeFuMessageContentTypeEnum.TEXT === item.contentType
+                }"
                 class="p-10px"
               >
                 <!-- 文本消息 -->
@@ -71,10 +73,10 @@
                 <MessageItem :message="item">
                   <ProductItem
                     v-if="KeFuMessageContentTypeEnum.PRODUCT === item.contentType"
-                    :spuId="getMessageContent(item).spuId"
                     :picUrl="getMessageContent(item).picUrl"
                     :price="getMessageContent(item).price"
                     :skuText="getMessageContent(item).introduction"
+                    :spuId="getMessageContent(item).spuId"
                     :title="getMessageContent(item).spuName"
                     :titleWidth="400"
                     class="max-w-70%"
@@ -108,23 +110,29 @@
         <Icon class="ml-5px" icon="ep:bottom" />
       </div>
     </el-main>
-    <el-footer height="230px">
-      <div class="h-[100%]">
-        <div class="chat-tools flex items-center">
-          <EmojiSelectPopover @select-emoji="handleEmojiSelect" />
-          <PictureSelectUpload
-            class="ml-15px mt-3px cursor-pointer"
-            @send-picture="handleSendPicture"
-          />
-        </div>
-        <el-input v-model="message" :rows="6" style="border-style: none" type="textarea" />
-        <div class="h-45px flex justify-end">
-          <el-button class="mt-10px" type="primary" @click="handleSendMessage">发送</el-button>
-        </div>
+    <el-footer class="kefu-footer">
+      <div class="chat-tools flex items-center">
+        <EmojiSelectPopover @select-emoji="handleEmojiSelect" />
+        <PictureSelectUpload
+          class="ml-15px mt-3px cursor-pointer"
+          @send-picture="handleSendPicture"
+        />
       </div>
+      <el-input
+        v-model="message"
+        :rows="6"
+        placeholder="输入消息，Enter发送，Shift+Enter换行"
+        style="border-style: none"
+        type="textarea"
+        @keyup.enter.prevent="handleSendMessage"
+      />
     </el-footer>
   </el-container>
-  <el-empty v-else description="请选择左侧的一个会话后开始" />
+  <el-container v-else class="kefu">
+    <el-main>
+      <el-empty description="请选择左侧的一个会话后开始" />
+    </el-main>
+  </el-container>
 </template>
 
 <script lang="ts" setup>
@@ -262,7 +270,11 @@ const handleSendPicture = async (picUrl: string) => {
 }
 
 /** 发送文本消息 */
-const handleSendMessage = async () => {
+const handleSendMessage = async (event: any) => {
+  // shift 不发送
+  if (event.shiftKey) {
+    return
+  }
   // 1. 校验消息是否为空
   if (isEmpty(unref(message.value))) {
     messageTool.notifyWarning('请输入消息后再发送哦！')
@@ -357,14 +369,29 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 
 <style lang="scss" scoped>
 .kefu {
-  &-title {
-    border-bottom: #e4e0e0 solid 1px;
-    height: 60px;
-    line-height: 60px;
+  background-color: #fff;
+  width: calc(100% - 300px - 260px);
+  border-left: var(--el-border-color) solid 1px;
+
+  .kefu-header {
+    background: #fbfbfb;
+    box-shadow: 0 0 0 0 #dcdfe6;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    &-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
   }
 
   &-content {
+    margin: 0;
+    padding: 0;
     position: relative;
+    height: 100%;
+    width: 100%;
 
     .newMessageTip {
       position: absolute;
@@ -447,21 +474,36 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       border-radius: 12rpx;
       padding: 8rpx 16rpx;
       margin-bottom: 16rpx;
-      //background-color: #e8e8e8;
       color: #999;
       font-size: 24rpx;
     }
   }
 
-  .chat-tools {
-    width: 100%;
-    border: var(--el-border-color) solid 1px;
-    border-radius: 10px;
-    height: 44px;
+  .kefu-footer {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    border-top: var(--el-border-color) solid 1px;
+
+    .chat-tools {
+      width: 100%;
+      height: 44px;
+    }
   }
 
   ::v-deep(textarea) {
     resize: none;
+  }
+
+  :deep(.el-input__wrapper) {
+    box-shadow: none !important;
+    border-radius: 0;
+  }
+
+  ::v-deep(.el-textarea__inner) {
+    box-shadow: none !important;
   }
 }
 </style>

@@ -1,28 +1,16 @@
 <template>
-  <el-row :gutter="10">
+  <el-container class="kefu-layout">
     <!-- 会话列表 -->
-    <el-col :span="6">
-      <ContentWrap>
-        <KeFuConversationList ref="keFuConversationRef" @change="handleChange" />
-      </ContentWrap>
-    </el-col>
+    <KeFuConversationList ref="keFuConversationRef" @change="handleChange" />
     <!-- 会话详情（选中会话的消息列表） -->
-    <el-col :span="12">
-      <ContentWrap>
-        <KeFuMessageList ref="keFuChatBoxRef" @change="getConversationList" />
-      </ContentWrap>
-    </el-col>
+    <KeFuMessageList ref="keFuChatBoxRef" @change="getConversationList" />
     <!-- 会员足迹（选中会话的会员足迹） -->
-    <el-col :span="6">
-      <ContentWrap>
-        <MemberBrowsingHistory ref="memberBrowsingHistoryRef" />
-      </ContentWrap>
-    </el-col>
-  </el-row>
+    <MemberInfo ref="memberInfoRef" />
+  </el-container>
 </template>
 
 <script lang="ts" setup>
-import { KeFuConversationList, KeFuMessageList, MemberBrowsingHistory } from './components'
+import { KeFuConversationList, KeFuMessageList, MemberInfo } from './components'
 import { WebSocketMessageTypeConstants } from './components/tools/constants'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { getRefreshToken } from '@/utils/auth'
@@ -91,10 +79,10 @@ const getConversationList = () => {
 
 /** 加载指定会话的消息列表 */
 const keFuChatBoxRef = ref<InstanceType<typeof KeFuMessageList>>()
-const memberBrowsingHistoryRef = ref<InstanceType<typeof MemberBrowsingHistory>>()
+const memberInfoRef = ref<InstanceType<typeof MemberInfo>>()
 const handleChange = (conversation: KeFuConversationRespVO) => {
   keFuChatBoxRef.value?.getNewMessageList(conversation)
-  memberBrowsingHistoryRef.value?.initHistory(conversation)
+  memberInfoRef.value?.initHistory(conversation)
 }
 
 /** 初始化 */
@@ -112,9 +100,13 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss">
-.kefu {
-  height: calc(100vh - 165px);
-  overflow: auto; /* 确保内容可滚动 */
+.kefu-layout {
+  position: absolute;
+  flex: 1;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
 }
 
 /* 定义滚动条样式 */
