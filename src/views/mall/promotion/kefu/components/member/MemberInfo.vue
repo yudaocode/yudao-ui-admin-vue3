@@ -1,4 +1,4 @@
-<!-- 目录是不是叫 member 好点。然后这个组件是 MemberInfo，里面有浏览足迹 -->
+<!-- 右侧信息：会员信息 + 最近浏览 + 交易订单 -->
 <template>
   <el-container class="kefu">
     <el-header class="kefu-header">
