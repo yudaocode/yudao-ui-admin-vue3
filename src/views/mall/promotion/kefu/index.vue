@@ -4,7 +4,7 @@
     <KeFuConversationList ref="keFuConversationRef" @change="handleChange" />
     <!-- 会话详情（选中会话的消息列表） -->
     <KeFuMessageList ref="keFuChatBoxRef" @change="getConversationList" />
-    <!-- 会员足迹（选中会话的会员足迹） -->
+    <!-- 会员信息（选中会话的会员信息） -->
     <MemberInfo ref="memberInfoRef" />
   </el-container>
 </template>
