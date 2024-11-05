@@ -115,7 +115,7 @@ import { getPropertyList, PropertyAndValues, SkuList } from '@/views/mall/produc
 import { ElTable } from 'element-plus'
 import { dateFormatter } from '@/utils/formatTime'
 import { createImageViewer } from '@/components/ImageViewer'
-import { formatToFraction } from '@/utils'
+import { floatToFixed2, formatToFraction } from '@/utils'
 import { defaultProps, handleTree } from '@/utils/tree'
 
 import * as ProductCategoryApi from '@/api/mall/product/category'
@@ -228,6 +228,13 @@ const expandChange = async (row: ProductSpuApi.Spu, expandedRows?: ProductSpuApi
   }
   // 获取 SPU 详情
   const res = (await ProductSpuApi.getSpu(row.id as number)) as ProductSpuApi.Spu
+  res.skus?.forEach((item) => {
+    item.price = floatToFixed2(item.price)
+    item.marketPrice = floatToFixed2(item.marketPrice)
+    item.costPrice = floatToFixed2(item.costPrice)
+    item.firstBrokeragePrice = floatToFixed2(item.firstBrokeragePrice)
+    item.secondBrokeragePrice = floatToFixed2(item.secondBrokeragePrice)
+  })
   propertyList.value = getPropertyList(res)
   spuData.value = res
   isExpand.value = true
