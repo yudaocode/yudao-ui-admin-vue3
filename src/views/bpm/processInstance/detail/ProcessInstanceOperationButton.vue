@@ -154,7 +154,6 @@
               :rows="3"
             />
           </el-form-item>
-
           <el-form-item>
             <el-button :disabled="formLoading" type="primary" @click="handleCopy">
               {{ getButtonDisplayName(OperationButtonType.COPY) }}
@@ -207,7 +206,6 @@
               :rows="3"
             />
           </el-form-item>
-
           <el-form-item>
             <el-button :disabled="formLoading" type="primary" @click="handleTransfer()">
               {{ getButtonDisplayName(OperationButtonType.TRANSFER) }}
@@ -232,7 +230,6 @@
           {{ getButtonDisplayName(OperationButtonType.DELEGATE) }}
         </div>
       </template>
-
       <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
         <el-form
           label-position="top"
@@ -252,7 +249,6 @@
               />
             </el-select>
           </el-form-item>
-
           <el-form-item label="审批意见" prop="reason">
             <el-input
               v-model="genericForm.reason"
@@ -262,7 +258,6 @@
               :rows="3"
             />
           </el-form-item>
-
           <el-form-item>
             <el-button :disabled="formLoading" type="primary" @click="handleDelegate()">
               {{ getButtonDisplayName(OperationButtonType.DELEGATE) }}
@@ -287,7 +282,6 @@
           {{ getButtonDisplayName(OperationButtonType.ADD_SIGN) }}
         </div>
       </template>
-
       <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
         <el-form
           label-position="top"
@@ -307,7 +301,6 @@
               />
             </el-select>
           </el-form-item>
-
           <el-form-item label="审批意见" prop="reason">
             <el-input
               v-model="genericForm.reason"
@@ -343,7 +336,6 @@
           <Icon :size="14" icon="ep:semi-select" />&nbsp; 减签
         </div>
       </template>
-
       <div class="flex flex-col flex-1 pt-20px px-20px" v-loading="formLoading">
         <el-form
           label-position="top"
@@ -363,7 +355,6 @@
               />
             </el-select>
           </el-form-item>
-
           <el-form-item label="审批意见" prop="reason">
             <el-input
               v-model="genericForm.reason"
@@ -490,7 +481,6 @@
     >
       <Icon :size="14" icon="ep:refresh" />&nbsp; 再次提交
     </div>
-    
   </div>
 </template>
 <script lang="ts" setup>
@@ -787,10 +777,10 @@ const handleReCreate = async () => {
 }
 
 /** 获取减签人员标签 */
-const getDeleteSignUserLabel =  (task:any) : string => {
+const getDeleteSignUserLabel = (task: any): string => {
   const deptName = task?.assigneeUser?.deptName || task?.ownerUser?.deptName
   const nickname = task?.assigneeUser?.nickname || task?.ownerUser?.nickname
-  return  `${nickname} ( 所属部门：${deptName} )`;
+  return `${nickname} ( 所属部门：${deptName} )`
 }
 /** 处理减签 */
 const handlerDeleteSign = async () => {
@@ -805,7 +795,7 @@ const handlerDeleteSign = async () => {
     // 1.2 提交减签
     const data = {
       id: genericForm.value.deleteSignTaskId,
-      reason: genericForm.value.reason,
+      reason: genericForm.value.reason
     }
     await TaskApi.signDeleteTask(data)
     message.success('减签成功')
