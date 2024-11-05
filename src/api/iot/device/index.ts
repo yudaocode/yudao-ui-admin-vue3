@@ -48,6 +48,12 @@ export interface DeviceDataVO {
   value: string // 最新值
 }
 
+// IoT 设备数据 VO
+export interface DeviceHistoryDataVO {
+  time: number // 时间
+  data: string // 数据
+}
+
 // 设备 API
 export const DeviceApi = {
   // 查询设备分页
@@ -88,5 +94,10 @@ export const DeviceApi = {
   // 获取设备属性最新数据
   getDevicePropertiesLatestData: async (params: any) => {
     return await request.get({ url: `/iot/device/data/latest-data`, params })
+  },
+
+  // 获取设备属性历史数据
+  getDevicePropertiesHistoryData: async (params: any) => {
+    return await request.get({ url: `/iot/device/data/history-data`, params })
   }
 }
