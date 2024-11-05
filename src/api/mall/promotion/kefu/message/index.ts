@@ -29,8 +29,8 @@ export const KeFuMessageApi = {
       url: '/promotion/kefu-message/update-read-status?conversationId=' + conversationId
     })
   },
-  // 获得消息分页数据
-  getKeFuMessagePage: async (params: any) => {
-    return await request.get({ url: '/promotion/kefu-message/page', params })
+  // 获得消息数据
+  getKeFuMessageList: async (params: any) => {
+    return await request.get({ url: '/promotion/kefu-message/list', params })
   }
 }

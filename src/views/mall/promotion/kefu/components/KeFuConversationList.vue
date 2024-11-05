@@ -1,5 +1,6 @@
 <template>
-  <div class="kefu">
+  <el-aside class="kefu p-5px h-100%" width="260px">
+    <div class="color-[#999] font-bold my-10px">会话记录({{ conversationList.length }})</div>
     <div
       v-for="item in conversationList"
       :key="item.id"
@@ -22,7 +23,7 @@
         <div class="ml-10px w-100%">
           <div class="flex justify-between items-center w-100%">
             <span class="username">{{ item.userNickname }}</span>
-            <span class="color-[var(--left-menu-text-color)]" style="font-size: 13px">
+            <span class="color-[#999]" style="font-size: 13px">
               {{ formatPast(item.lastMessageTime, 'YYYY-MM-DD') }}
             </span>
           </div>
@@ -31,7 +32,7 @@
             v-dompurify-html="
               getConversationDisplayText(item.lastMessageContentType, item.lastMessageContent)
             "
-            class="last-message flex items-center color-[var(--left-menu-text-color)]"
+            class="last-message flex items-center color-[#999]"
           >
           </div>
         </div>
@@ -65,7 +66,7 @@
         取消
       </li>
     </ul>
-  </div>
+  </el-aside>
 </template>
 
 <script lang="ts" setup>
@@ -180,11 +181,12 @@ watch(showRightMenu, (val) => {
 
 <style lang="scss" scoped>
 .kefu {
+  background-color: #fff;
+
   &-conversation {
     height: 60px;
-    padding: 10px;
     //background-color: #fff;
-    transition: border-left 0.05s ease-in-out; /* 设置过渡效果 */
+    //transition: border-left 0.05s ease-in-out; /* 设置过渡效果 */
 
     .username {
       min-width: 0;
@@ -205,13 +207,10 @@ watch(showRightMenu, (val) => {
     }
   }
 
-  .active {
-    border-left: 5px #3271ff solid;
-    background-color: var(--login-bg-color);
-  }
-
+  .active,
   .pinned {
-    background-color: var(--left-menu-bg-active-color);
+    background-color: rgba(128, 128, 128, 0.5); // 透明色，暗黑模式下也能体现
+    border-radius: 8px;
   }
 
   .right-menu-ul {

@@ -1,0 +1,179 @@
+<!-- 目录是不是叫 member 好点。然后这个组件是 MemberInfo，里面有浏览足迹 -->
+<template>
+  <el-container class="kefu">
+    <el-header class="kefu-header">
+      <div
+        :class="{ 'kefu-header-item-activation': tabActivation('会员信息') }"
+        class="kefu-header-item cursor-pointer flex items-center justify-center"
+        @click="handleClick('会员信息')"
+      >
+        会员信息
+      </div>
+      <div
+        :class="{ 'kefu-header-item-activation': tabActivation('最近浏览') }"
+        class="kefu-header-item cursor-pointer flex items-center justify-center"
+        @click="handleClick('最近浏览')"
+      >
+        最近浏览
+      </div>
+      <div
+        :class="{ 'kefu-header-item-activation': tabActivation('交易订单') }"
+        class="kefu-header-item cursor-pointer flex items-center justify-center"
+        @click="handleClick('交易订单')"
+      >
+        交易订单
+      </div>
+    </el-header>
+    <el-main class="kefu-content">
+      <div v-show="!isEmpty(conversation)">
+        <el-scrollbar ref="scrollbarRef" always @scroll="handleScroll">
+          <!-- 最近浏览 -->
+          <ProductBrowsingHistory v-if="activeTab === '最近浏览'" ref="productBrowsingHistoryRef" />
+          <!-- 交易订单 -->
+          <OrderBrowsingHistory v-if="activeTab === '交易订单'" ref="orderBrowsingHistoryRef" />
+        </el-scrollbar>
+      </div>
+      <el-empty v-show="isEmpty(conversation)" description="请选择左侧的一个会话后开始" />
+    </el-main>
+  </el-container>
+</template>
+
+<script lang="ts" setup>
+import ProductBrowsingHistory from './ProductBrowsingHistory.vue'
+import OrderBrowsingHistory from './OrderBrowsingHistory.vue'
+import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
+import { isEmpty } from '@/utils/is'
+import { debounce } from 'lodash-es'
+import { ElScrollbar as ElScrollbarType } from 'element-plus/es/components/scrollbar/index'
+
+defineOptions({ name: 'MemberBrowsingHistory' })
+
+const activeTab = ref('会员信息')
+const tabActivation = computed(() => (tab: string) => activeTab.value === tab)
+/** tab 切换 */
+const productBrowsingHistoryRef = ref<InstanceType<typeof ProductBrowsingHistory>>()
+const orderBrowsingHistoryRef = ref<InstanceType<typeof OrderBrowsingHistory>>()
+const handleClick = async (tab: string) => {
+  activeTab.value = tab
+  await nextTick()
+  await getHistoryList()
+}
+
+/** 获得历史数据 */
+const getHistoryList = async () => {
+  switch (activeTab.value) {
+    case '会员信息':
+      break
+    case '最近浏览':
+      await productBrowsingHistoryRef.value?.getHistoryList(conversation.value)
+      break
+    case '交易订单':
+      await orderBrowsingHistoryRef.value?.getHistoryList(conversation.value)
+      break
+    default:
+      break
+  }
+}
+
+/** 加载下一页数据 */
+const loadMore = async () => {
+  switch (activeTab.value) {
+    case '会员信息':
+      break
+    case '最近浏览':
+      await productBrowsingHistoryRef.value?.loadMore()
+      break
+    case '交易订单':
+      await orderBrowsingHistoryRef.value?.loadMore()
+      break
+    default:
+      break
+  }
+}
+
+/** 浏览历史初始化 */
+const conversation = ref<KeFuConversationRespVO>({} as KeFuConversationRespVO) // 用户会话
+const initHistory = async (val: KeFuConversationRespVO) => {
+  activeTab.value = '会员信息'
+  conversation.value = val
+  await nextTick()
+  await getHistoryList()
+}
+defineExpose({ initHistory })
+
+/** 处理消息列表滚动事件(debounce 限流) */
+const scrollbarRef = ref<InstanceType<typeof ElScrollbarType>>()
+const handleScroll = debounce(() => {
+  const wrap = scrollbarRef.value?.wrapRef
+  // 触底重置
+  if (Math.abs(wrap!.scrollHeight - wrap!.clientHeight - wrap!.scrollTop) < 1) {
+    loadMore()
+  }
+}, 200)
+</script>
+
+<style lang="scss" scoped>
+.kefu {
+  width: 300px !important;
+  background-color: #fff;
+  border-left: var(--el-border-color) solid 1px;
+
+  &-header {
+    background: #fbfbfb;
+    box-shadow: 0 0 0 0 #dcdfe6;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+
+    &-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    &-item {
+      height: 100%;
+      width: 100%;
+      position: relative;
+
+      &-activation::before {
+        content: '';
+        position: absolute; /* 绝对定位 */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0; /* 覆盖整个元素 */
+        border-bottom: 2px solid rgba(128, 128, 128, 0.5); /* 边框样式 */
+        pointer-events: none; /* 确保点击事件不会被伪元素拦截 */
+      }
+
+      &:hover::before {
+        content: '';
+        position: absolute; /* 绝对定位 */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0; /* 覆盖整个元素 */
+        border-bottom: 2px solid rgba(128, 128, 128, 0.5); /* 边框样式 */
+        pointer-events: none; /* 确保点击事件不会被伪元素拦截 */
+      }
+    }
+  }
+
+  &-content {
+    margin: 0;
+    padding: 0;
+    position: relative;
+    height: 100%;
+    width: 100%;
+  }
+
+  &-tabs {
+    height: 100%;
+    width: 100%;
+  }
+}
+
+.header-title {
+  border-bottom: #e4e0e0 solid 1px;
+}
+</style>
