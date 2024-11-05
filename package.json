@@ -143,6 +143,7 @@
     "url": "https://gitee.com/yudaocode/yudao-ui-admin-vue3/issues"
   },
   "homepage": "https://gitee.com/yudaocode/yudao-ui-admin-vue3",
+  "web-types": "./web-types.json",
   "engines": {
     "node": ">= 16.0.0",
     "pnpm": ">=8.6.0"
