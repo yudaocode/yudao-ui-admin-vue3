@@ -24,7 +24,7 @@
           </div>
         </div>
       </template>
-      <div class="flex flex-col items-start">
+      <div class="flex flex-col items-start gap2" :id="`activity-task-${activity.id}`">
         <!-- 第一行：节点名称、时间 -->
         <div class="flex w-full">
           <div class="font-bold"> {{ activity.name }}</div>
@@ -36,53 +36,53 @@
             {{ getApprovalNodeTime(activity) }}
           </div>
         </div>
-        <div class="flex items-center flex-wrap mt-1">
+        <div class="flex items-center flex-wrap mt-1 gap2">
           <!-- 情况一：遍历每个审批节点下的【进行中】task 任务 -->
-          <div v-for="(task, idx) in activity.tasks" :key="idx" class="flex items-center">
-            <div class="flex flex-col pr-2 gap2">
+          <div v-for="(task, idx) in activity.tasks" :key="idx" class="flex flex-col pr-2 gap2">
+            <div
+              class="position-relative flex flex-wrap gap2"
+              v-if="task.assigneeUser || task.ownerUser"
+            >
+              <!-- 信息：头像昵称 -->
               <div
-                class="position-relative flex flex-wrap gap2"
-                v-if="task.assigneeUser || task.ownerUser"
+                class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600 position-relative"
               >
-                <!-- 信息：头像昵称 -->
+                <template v-if="task.assigneeUser?.avatar || task.assigneeUser?.nickname">
+                  <el-avatar
+                    :size="28"
+                    v-if="task.assigneeUser?.avatar"
+                    :src="task.assigneeUser?.avatar"
+                  />
+                  <el-avatar :size="28" v-else>
+                    {{ task.assigneeUser?.nickname.substring(0, 1) }}
+                  </el-avatar>
+                  {{ task.assigneeUser?.nickname }}
+                </template>
+                <template v-else-if="task.ownerUser?.avatar || task.ownerUser?.nickname">
+                  <el-avatar
+                    :size="28"
+                    v-if="task.ownerUser?.avatar"
+                    :src="task.ownerUser?.avatar"
+                  />
+                  <el-avatar :size="28" v-else>
+                    {{ task.ownerUser?.nickname.substring(0, 1) }}
+                  </el-avatar>
+                  {{ task.ownerUser?.nickname }}
+                </template>
+                <!-- 信息：任务 ICON -->
                 <div
-                  class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600 position-relative"
+                  v-if="onlyStatusIconShow.includes(task.status)"
+                  class="position-absolute top-22px left-26px bg-#fff rounded-full flex items-center p-2px"
                 >
-                  <template v-if="task.assigneeUser?.avatar || task.assigneeUser?.nickname">
-                    <el-avatar
-                      :size="28"
-                      v-if="task.assigneeUser?.avatar"
-                      :src="task.assigneeUser?.avatar"
-                    />
-                    <el-avatar :size="28" v-else>
-                      {{ task.assigneeUser?.nickname.substring(0, 1) }}
-                    </el-avatar>
-                    {{ task.assigneeUser?.nickname }}
-                  </template>
-                  <template v-else-if="task.ownerUser?.avatar || task.ownerUser?.nickname">
-                    <el-avatar
-                      :size="28"
-                      v-if="task.ownerUser?.avatar"
-                      :src="task.ownerUser?.avatar"
-                    />
-                    <el-avatar :size="28" v-else>
-                      {{ task.ownerUser?.nickname.substring(0, 1) }}
-                    </el-avatar>
-                    {{ task.ownerUser?.nickname }}
-                  </template>
-                  <!-- 信息：任务 ICON -->
-                  <div
-                    v-if="onlyStatusIconShow.includes(task.status)"
-                    class="position-absolute top-22px left-26px bg-#fff rounded-full flex items-center p-2px"
-                  >
-                    <Icon
-                      :size="12"
-                      :icon="statusIconMap2[task.status]?.icon"
-                      :color="statusIconMap2[task.status]?.color"
-                    />
-                  </div>
+                  <Icon
+                    :size="12"
+                    :icon="statusIconMap2[task.status]?.icon"
+                    :color="statusIconMap2[task.status]?.color"
+                  />
                 </div>
               </div>
+            </div>
+            <teleport defer :to="`#activity-task-${activity.id}`">
               <div
                 v-if="
                   task.reason &&
@@ -92,7 +92,7 @@
               >
                 审批意见：{{ task.reason }}
               </div>
-            </div>
+            </teleport>
           </div>
           <!-- 情况二：遍历每个审批节点下的【候选的】task 任务。例如说，1）依次审批，2）未来的审批任务等 -->
           <div
