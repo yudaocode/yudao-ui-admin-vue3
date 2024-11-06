@@ -20,7 +20,7 @@
                       :option="detailForm.option"
                       @submit="submitForm"
                     >
-                      <template #type-startUserSelect>
+                      <!-- <template #type-startUserSelect>
                         <el-col :span="24">
                           <el-card class="mb-10px">
                             <template #header>指定审批人</template>
@@ -51,7 +51,7 @@
                             </el-form>
                           </el-card>
                         </el-col>
-                      </template>
+                      </template> -->
                     </form-create>
                   </el-col>
 
@@ -61,7 +61,7 @@
                       ref="timelineRef"
                       :activity-nodes="activityNodes"
                       :show-status-icon="false"
-                      candidateField="candidateUserList"
+                      :startUserSelectTasks="startUserSelectTasks"
                     />
                   </el-col>
                 </el-row>
@@ -104,7 +104,8 @@ import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
-import * as UserApi from '@/api/system/user'
+// import * as UserApi from '@/api/system/user'
+import { activityNodes as aN, startUserSelectTasks as sUs } from './mock'
 
 defineOptions({ name: 'ProcessDefinitionDetail' })
 const props = defineProps<{
@@ -125,7 +126,7 @@ const startUserSelectAssigneesFormRef = ref() // 发起人选择审批人的表�
 const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人的用户任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
 const startUserSelectAssigneesFormRules = ref({}) // 发起人选择审批人的表单 Rules
-const userList = ref<any[]>([]) // 用户列表
+// const userList = ref<any[]>([]) // 用户列表
 const bpmnXML: any = ref(null) // BPMN 数据
 /** 当前的Tab */
 const activeTab = ref('form')
@@ -163,25 +164,25 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     if (processDefinitionDetail) {
       bpmnXML.value = processDefinitionDetail.bpmnXml
       startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
-
+      startUserSelectTasks.value = sUs
       // 设置指定审批人
-      if (startUserSelectTasks.value?.length > 0) {
-        detailForm.value.rule.push({
-          type: 'startUserSelect',
-          props: {
-            title: '指定审批人'
-          }
-        })
-        // 设置校验规则
-        for (const userTask of startUserSelectTasks.value) {
-          startUserSelectAssignees.value[userTask.id] = []
-          startUserSelectAssigneesFormRules.value[userTask.id] = [
-            { required: true, message: '请选择审批人', trigger: 'blur' }
-          ]
-        }
-        // 加载用户列表
-        userList.value = await UserApi.getSimpleUserList()
-      }
+      // if (startUserSelectTasks.value?.length > 0) {
+      //   detailForm.value.rule.push({
+      //     type: 'startUserSelect',
+      //     props: {
+      //       title: '指定审批人'
+      //     }
+      //   })
+      //   // 设置校验规则
+      //   for (const userTask of startUserSelectTasks.value) {
+      //     startUserSelectAssignees.value[userTask.id] = []
+      //     startUserSelectAssigneesFormRules.value[userTask.id] = [
+      //       { required: true, message: '请选择审批人', trigger: 'blur' }
+      //     ]
+      //   }
+      //   // 加载用户列表
+      //   userList.value = await UserApi.getSimpleUserList()
+      // }
     }
     // 情况二：业务表单
   } else if (row.formCustomCreatePath) {
@@ -205,6 +206,7 @@ const getApprovalDetail = async (row: any) => {
     }
     // 获取审批节点，显示 Timeline 的数据
     activityNodes.value = data.activityNodes
+    activityNodes.value = aN
   } finally {
   }
 }
@@ -250,7 +252,7 @@ defineExpose({ initProcessInfo })
 $wrap-padding-height: 20px;
 $wrap-margin-height: 15px;
 $button-height: 51px;
-$process-header-height: 194px;
+$process-header-height: 105px;
 
 .processInstance-wrap-main {
   height: calc(

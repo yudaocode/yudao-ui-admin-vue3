@@ -36,7 +36,15 @@
             {{ getApprovalNodeTime(activity) }}
           </div>
         </div>
-        <div class="flex items-center flex-wrap mt-1 gap2">
+        <!-- 需要自定义选择审批人 -->
+        <div
+          v-if="startUserSelectTasks?.length > 0 && activity.nodeType === NodeType.USER_TASK_NODE"
+        >
+          <el-button class="!px-8px" @click="handleSelectUser">
+            <Icon icon="fa:user-plus" />
+          </el-button>
+        </div>
+        <div v-else class="flex items-center flex-wrap mt-1 gap2">
           <!-- 情况一：遍历每个审批节点下的【进行中】task 任务 -->
           <div v-for="(task, idx) in activity.tasks" :key="idx" class="flex flex-col pr-2 gap2">
             <div
@@ -121,6 +129,8 @@
       </div>
     </el-timeline-item>
   </el-timeline>
+  <!-- 用户选择弹窗 -->
+  <UserSelectForm ref="userSelectFormRef" @confirm="handleUserSelectConfirm" />
 </template>
 
 <script lang="ts" setup>
@@ -141,9 +151,11 @@ withDefaults(
   defineProps<{
     activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
     showStatusIcon?: boolean // 是否显示头像右下角状态图标
+    startUserSelectTasks?: any[] // 发起人需要选择审批人的用户任务列表
   }>(),
   {
-    showStatusIcon: true // 默认值为 true
+    showStatusIcon: true, // 默认值为 true
+    startUserSelectTasks: () => [] // 默认值为空数组
   }
 )
 
@@ -240,5 +252,15 @@ const getApprovalNodeTime = (node: ProcessInstanceApi.ApprovalNodeInfo) => {
   if (node.startTime) {
     return `${formatDate(node.startTime)}`
   }
+}
+
+// 选择自定义审批人
+const userSelectFormRef = ref()
+const handleSelectUser = () => {
+  userSelectFormRef.value.open()
+}
+// 选择完成
+const handleUserSelectConfirm = (userList) => {
+  console.log('[ userList ] >', userList)
 }
 </script>
