@@ -73,7 +73,6 @@ import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
-// import { activityNodes as aN, startUserSelectTasks as sUs } from './mock'
 
 defineOptions({ name: 'ProcessDefinitionDetail' })
 const props = defineProps<{
