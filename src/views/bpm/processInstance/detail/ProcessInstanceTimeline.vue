@@ -38,11 +38,29 @@
         </div>
         <!-- 需要自定义选择审批人 -->
         <div
-          v-if="startUserSelectTasks?.length > 0 && activity.nodeType === NodeType.USER_TASK_NODE"
+          class="flex flex-wrap gap2 items-center"
+          v-if="
+            startUserSelectTasks?.length > 0 && Array.isArray(startUserSelectAssignees[activity.id])
+          "
         >
-          <el-button class="!px-8px" @click="handleSelectUser">
+          <!--  && activity.nodeType === NodeType.USER_TASK_NODE -->
+          <el-button
+            class="!px-8px"
+            @click="handleSelectUser(activity.id, customApprover[activity.id])"
+          >
             <Icon icon="fa:user-plus" />
           </el-button>
+          <div
+            v-for="(user, idx1) in customApprover[activity.id]"
+            :key="idx1"
+            class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600 position-relative"
+          >
+            <el-avatar :size="28" v-if="user.avatar" :src="user.avatar" />
+            <el-avatar :size="28" v-else>
+              {{ user.nickname.substring(0, 1) }}
+            </el-avatar>
+            {{ user.nickname }}
+          </div>
         </div>
         <div v-else class="flex items-center flex-wrap mt-1 gap2">
           <!-- 情况一：遍历每个审批节点下的【进行中】task 任务 -->
@@ -152,10 +170,12 @@ withDefaults(
     activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
     showStatusIcon?: boolean // 是否显示头像右下角状态图标
     startUserSelectTasks?: any[] // 发起人需要选择审批人的用户任务列表
+    startUserSelectAssignees?: any // 发起人选择审批人的数据
   }>(),
   {
     showStatusIcon: true, // 默认值为 true
-    startUserSelectTasks: () => [] // 默认值为空数组
+    startUserSelectTasks: () => [], // 默认值为空数组
+    startUserSelectAssignees: () => {}
   }
 )
 
@@ -256,11 +276,16 @@ const getApprovalNodeTime = (node: ProcessInstanceApi.ApprovalNodeInfo) => {
 
 // 选择自定义审批人
 const userSelectFormRef = ref()
-const handleSelectUser = () => {
-  userSelectFormRef.value.open()
+const handleSelectUser = (activityId, selectedList) => {
+  userSelectFormRef.value.open(activityId, selectedList)
 }
+const emit = defineEmits<{
+  selectUserConfirm: [id: any, userList: any[]]
+}>()
+const customApprover: any = ref({})
 // 选择完成
-const handleUserSelectConfirm = (userList) => {
-  console.log('[ userList ] >', userList)
+const handleUserSelectConfirm = (activityId, userList) => {
+  customApprover.value[activityId] = userList || []
+  emit('selectUserConfirm', activityId, userList)
 }
 </script>
