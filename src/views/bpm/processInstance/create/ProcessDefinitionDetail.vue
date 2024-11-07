@@ -19,40 +19,7 @@
                       v-model="detailForm.value"
                       :option="detailForm.option"
                       @submit="submitForm"
-                    >
-                      <template #type-startUserSelect>
-                        <el-col :span="24">
-                          <el-card class="mb-10px">
-                            <template #header>指定审批人</template>
-                            <el-form
-                              :model="startUserSelectAssignees"
-                              :rules="startUserSelectAssigneesFormRules"
-                              ref="startUserSelectAssigneesFormRef"
-                            >
-                              <el-form-item
-                                v-for="userTask in startUserSelectTasks"
-                                :key="userTask.id"
-                                :label="`任务【${userTask.name}】`"
-                                :prop="userTask.id"
-                              >
-                                <el-select
-                                  v-model="startUserSelectAssignees[userTask.id]"
-                                  multiple
-                                  placeholder="请选择审批人"
-                                >
-                                  <el-option
-                                    v-for="user in userList"
-                                    :key="user.id"
-                                    :label="user.nickname"
-                                    :value="user.id"
-                                  />
-                                </el-select>
-                              </el-form-item>
-                            </el-form>
-                          </el-card>
-                        </el-col>
-                      </template>
-                    </form-create>
+                    />
                   </el-col>
 
                   <el-col :span="6" :offset="1">
@@ -61,7 +28,9 @@
                       ref="timelineRef"
                       :activity-nodes="activityNodes"
                       :show-status-icon="false"
-                      candidateField="candidateUserList"
+                      :startUserSelectTasks="startUserSelectTasks"
+                      :startUserSelectAssignees="startUserSelectAssignees"
+                      @select-user-confirm="selectUserConfirm"
                     />
                   </el-col>
                 </el-row>
@@ -104,7 +73,6 @@ import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
-import * as UserApi from '@/api/system/user'
 
 defineOptions({ name: 'ProcessDefinitionDetail' })
 const props = defineProps<{
@@ -121,11 +89,8 @@ const detailForm: any = ref({
 }) // 流程表单详情
 const fApi = ref<ApiAttrs>()
 // 指定审批人
-const startUserSelectAssigneesFormRef = ref() // 发起人选择审批人的表单 Ref
 const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人的用户任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
-const startUserSelectAssigneesFormRules = ref({}) // 发起人选择审批人的表单 Rules
-const userList = ref<any[]>([]) // 用户列表
 const bpmnXML: any = ref(null) // BPMN 数据
 /** 当前的Tab */
 const activeTab = ref('form')
@@ -138,7 +103,6 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
   // 重置指定审批人
   startUserSelectTasks.value = []
   startUserSelectAssignees.value = {}
-  startUserSelectAssigneesFormRules.value = {}
 
   // 情况一：流程表单
   if (row.formType == 10) {
@@ -163,24 +127,12 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     if (processDefinitionDetail) {
       bpmnXML.value = processDefinitionDetail.bpmnXml
       startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
-
       // 设置指定审批人
       if (startUserSelectTasks.value?.length > 0) {
-        detailForm.value.rule.push({
-          type: 'startUserSelect',
-          props: {
-            title: '指定审批人'
-          }
-        })
-        // 设置校验规则
         for (const userTask of startUserSelectTasks.value) {
+          // 初始化数据
           startUserSelectAssignees.value[userTask.id] = []
-          startUserSelectAssigneesFormRules.value[userTask.id] = [
-            { required: true, message: '请选择审批人', trigger: 'blur' }
-          ]
         }
-        // 加载用户列表
-        userList.value = await UserApi.getSimpleUserList()
       }
     }
     // 情况二：业务表单
@@ -209,14 +161,19 @@ const getApprovalDetail = async (row: any) => {
   }
 }
 /** 提交按钮 */
-const submitForm = async (formData: any) => {
-  debugger
+const submitForm = async () => {
   if (!fApi.value || !props.selectProcessDefinition) {
     return
   }
   // 如果有指定审批人，需要校验
   if (startUserSelectTasks.value?.length > 0) {
-    await startUserSelectAssigneesFormRef.value.validate()
+    for (const userTask of startUserSelectTasks.value) {
+      if (
+        Array.isArray(startUserSelectAssignees.value[userTask.id]) &&
+        startUserSelectAssignees.value[userTask.id].length === 0
+      )
+        return message.warning(`请选择${userTask.name}的审批人`)
+    }
   }
 
   // 提交请求
@@ -224,7 +181,7 @@ const submitForm = async (formData: any) => {
   try {
     await ProcessInstanceApi.createProcessInstance({
       processDefinitionId: props.selectProcessDefinition.id,
-      variables: formData || detailForm.value.value,
+      variables: detailForm.value.value,
       startUserSelectAssignees: startUserSelectAssignees.value
     })
     // 提示
@@ -243,6 +200,10 @@ const handleCancel = () => {
   emit('cancel')
 }
 
+const selectUserConfirm = (id, userList) => {
+  startUserSelectAssignees.value[id] = userList?.map((item) => item.id)
+}
+
 defineExpose({ initProcessInfo })
 </script>
 
@@ -250,7 +211,7 @@ defineExpose({ initProcessInfo })
 $wrap-padding-height: 20px;
 $wrap-margin-height: 15px;
 $button-height: 51px;
-$process-header-height: 194px;
+$process-header-height: 105px;
 
 .processInstance-wrap-main {
   height: calc(
