@@ -162,7 +162,7 @@ const getApprovalDetail = async (row: any) => {
   }
 }
 /** 提交按钮 */
-const submitForm = async (formData: any) => {
+const submitForm = async () => {
   if (!fApi.value || !props.selectProcessDefinition) {
     return
   }
@@ -182,7 +182,7 @@ const submitForm = async (formData: any) => {
   try {
     await ProcessInstanceApi.createProcessInstance({
       processDefinitionId: props.selectProcessDefinition.id,
-      variables: formData || detailForm.value.value,
+      variables: detailForm.value.value,
       startUserSelectAssignees: startUserSelectAssignees.value
     })
     // 提示
