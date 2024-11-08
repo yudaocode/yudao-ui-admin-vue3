@@ -6,8 +6,8 @@
       class="!w-50% mb-15px"
       placeholder="请输入流程名称"
       clearable
-      @keyup.enter="handleQuery"
-      @clear="handleClear"
+      @input="handleQuery"
+      @clear="handleQuery"
     >
       <template #prefix>
         <Icon icon="ep:search" />
@@ -152,8 +152,8 @@ const getDefinitionList = async () => {
   }
 }
 
+/** 搜索流程 */
 const filteredProcessDefinitionList = ref([]) // 用于存储搜索过滤后的流程定义
-// 直接进行前端搜索
 const handleQuery = () => {
   if (currentSearchKey.value.trim()) {
     // 如果有搜索关键字，进行过滤
@@ -165,11 +165,6 @@ const handleQuery = () => {
     // 如果没有搜索关键字，恢复所有数据
     filteredProcessDefinitionList.value = processDefinitionList.value
   }
-}
-
-// 监听input `clearable` 事件
-const handleClear = () => {
-  filteredProcessDefinitionList.value = processDefinitionList.value
 }
 
 // 流程定义的分组
