@@ -36,11 +36,13 @@
           <el-scrollbar ref="scrollWrapper" height="700">
             <div
               class="mb-20px pl-10px"
-              v-for="(definitions, title) in processDefinitionGroup"
-              :key="title"
-              :ref="`category-${title}`"
+              v-for="(definitions, categoryCode) in processDefinitionGroup"
+              :key="categoryCode"
+              :ref="`category-${categoryCode}`"
             >
-              <h3 class="text-18px font-bold mb-10px mt-5px">{{ title }}</h3>
+              <h3 class="text-18px font-bold mb-10px mt-5px">
+                {{ getCategoryName(categoryCode) }}
+              </h3>
               <div class="grid grid-cols-3 gap3">
                 <el-tooltip
                   v-for="definition in definitions"
@@ -170,7 +172,7 @@ const handleQuery = () => {
 // 流程定义的分组
 const processDefinitionGroup: any = computed(() => {
   if (!processDefinitionList.value?.length) return {}
-  return groupBy(filteredProcessDefinitionList.value, 'categoryName')
+  return groupBy(filteredProcessDefinitionList.value, 'category')
 })
 
 // ========== 表单相关 ==========
@@ -188,7 +190,7 @@ const handleSelect = async (row, formVariables?) => {
 // 左侧分类切换
 const handleCategoryClick = (category) => {
   categoryActive.value = category
-  const categoryRef = proxy.$refs[`category-${category.name}`] // 获取点击分类对应的 DOM 元素
+  const categoryRef = proxy.$refs[`category-${category.code}`] // 获取点击分类对应的 DOM 元素
   if (categoryRef?.length) {
     const scrollWrapper = proxy.$refs.scrollWrapper // 获取右侧滚动容器
     const categoryOffsetTop = categoryRef[0].offsetTop
@@ -196,6 +198,11 @@ const handleCategoryClick = (category) => {
     // 滚动到对应位置
     scrollWrapper.scrollTo({ top: categoryOffsetTop, behavior: 'smooth' })
   }
+}
+
+// 通过分类code获取对应的名称
+const getCategoryName = (categoryCode) => {
+  return categoryList.value?.find((ctg) => ctg.code === categoryCode)?.name
 }
 
 /** 初始化 */
