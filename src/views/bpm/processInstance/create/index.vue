@@ -2,7 +2,7 @@
   <!-- 第一步，通过流程定义的列表，选择对应的流程 -->
   <template v-if="!selectProcessDefinition">
     <el-input
-      v-model="currentSearchKey"
+      v-model="searchName"
       class="!w-50% mb-15px"
       placeholder="请输入流程名称"
       clearable
@@ -48,6 +48,7 @@
                   v-for="definition in definitions"
                   :key="definition.id"
                   :content="definition.description"
+                  :disabled="!definition.description || definition.description.trim().length === 0"
                   placement="top"
                 >
                   <el-card
@@ -93,12 +94,14 @@ defineOptions({ name: 'BpmProcessInstanceCreate' })
 const { proxy } = getCurrentInstance() as any
 const route = useRoute() // 路由
 const message = useMessage() // 消息
-const currentSearchKey = ref('') // 当前搜索关键字
-const processInstanceId: any = route.query.processInstanceId
+
+const searchName = ref('') // 当前搜索关键字
+const processInstanceId: any = route.query.processInstanceId // 流程实例编号。场景：重新发起时
 const loading = ref(true) // 加载中
 const categoryList: any = ref([]) // 分类的列表
 const categoryActive: any = ref({}) // 选中的分类
 const processDefinitionList = ref([]) // 流程定义的列表
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -106,7 +109,7 @@ const getList = async () => {
     // 所有流程分类数据
     await getCategoryList()
     // 所有流程定义数据
-    await getDefinitionList()
+    await getProcessDefinitionList()
 
     // 如果 processInstanceId 非空，说明是重新发起
     if (processInstanceId?.length > 0) {
@@ -129,11 +132,12 @@ const getList = async () => {
   }
 }
 
-// 获取所有流程分类数据
+/** 获取所有流程分类数据 */
 const getCategoryList = async () => {
   try {
     // 流程分类
     categoryList.value = await CategoryApi.getCategorySimpleList()
+    // 选中首个分类
     if (categoryList.value.length > 0) {
       categoryActive.value = categoryList.value[0]
     }
@@ -141,8 +145,8 @@ const getCategoryList = async () => {
   }
 }
 
-// 获取所有流程定义数据
-const getDefinitionList = async () => {
+/** 获取所有流程定义数据 */
+const getProcessDefinitionList = async () => {
   try {
     // 流程定义
     processDefinitionList.value = await DefinitionApi.getProcessDefinitionList({
@@ -157,11 +161,10 @@ const getDefinitionList = async () => {
 /** 搜索流程 */
 const filteredProcessDefinitionList = ref([]) // 用于存储搜索过滤后的流程定义
 const handleQuery = () => {
-  if (currentSearchKey.value.trim()) {
+  if (searchName.value.trim()) {
     // 如果有搜索关键字，进行过滤
     filteredProcessDefinitionList.value = processDefinitionList.value.filter(
-      (definition: any) =>
-        definition.name.toLowerCase().includes(currentSearchKey.value.toLowerCase()) // 假设搜索依据是流程定义的名称
+      (definition: any) => definition.name.toLowerCase().includes(searchName.value.toLowerCase()) // 假设搜索依据是流程定义的名称
     )
   } else {
     // 如果没有搜索关键字，恢复所有数据
@@ -169,11 +172,29 @@ const handleQuery = () => {
   }
 }
 
-// 流程定义的分组
+/** 流程定义的分组 */
 const processDefinitionGroup: any = computed(() => {
   if (!processDefinitionList.value?.length) return {}
   return groupBy(filteredProcessDefinitionList.value, 'category')
 })
+
+/** 左侧分类切换 */
+const handleCategoryClick = (category: any) => {
+  categoryActive.value = category
+  const categoryRef = proxy.$refs[`category-${category.code}`] // 获取点击分类对应的 DOM 元素
+  if (categoryRef?.length) {
+    const scrollWrapper = proxy.$refs.scrollWrapper // 获取右侧滚动容器
+    const categoryOffsetTop = categoryRef[0].offsetTop
+
+    // 滚动到对应位置
+    scrollWrapper.scrollTo({ top: categoryOffsetTop, behavior: 'smooth' })
+  }
+}
+
+/** 通过分类 code 获取对应的名称 */
+const getCategoryName = (categoryCode: string) => {
+  return categoryList.value?.find((ctg: any) => ctg.code === categoryCode)?.name
+}
 
 // ========== 表单相关 ==========
 const selectProcessDefinition = ref() // 选择的流程定义
@@ -186,23 +207,6 @@ const handleSelect = async (row, formVariables?) => {
   // 初始化流程定义详情
   await nextTick()
   processDefinitionDetailRef.value?.initProcessInfo(row, formVariables)
-}
-// 左侧分类切换
-const handleCategoryClick = (category) => {
-  categoryActive.value = category
-  const categoryRef = proxy.$refs[`category-${category.code}`] // 获取点击分类对应的 DOM 元素
-  if (categoryRef?.length) {
-    const scrollWrapper = proxy.$refs.scrollWrapper // 获取右侧滚动容器
-    const categoryOffsetTop = categoryRef[0].offsetTop
-
-    // 滚动到对应位置
-    scrollWrapper.scrollTo({ top: categoryOffsetTop, behavior: 'smooth' })
-  }
-}
-
-// 通过分类code获取对应的名称
-const getCategoryName = (categoryCode) => {
-  return categoryList.value?.find((ctg) => ctg.code === categoryCode)?.name
 }
 
 /** 初始化 */

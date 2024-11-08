@@ -24,6 +24,7 @@
 
                   <el-col :span="6" :offset="1">
                     <!-- 流程时间线 -->
+                    <!-- TODO @芋艿：selectUserConfirm 调整一下，改成 activityNodes 里面的东西。 -->
                     <ProcessInstanceTimeline
                       ref="timelineRef"
                       :activity-nodes="activityNodes"
@@ -89,6 +90,8 @@ defineOptions({ name: 'ProcessDefinitionDetail' })
 const props = defineProps<{
   selectProcessDefinition: any
 }>()
+const emit = defineEmits(['cancel'])
+
 const { push, currentRoute } = useRouter() // 路由
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
@@ -103,12 +106,10 @@ const fApi = ref<ApiAttrs>()
 const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人的用户任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
 const bpmnXML: any = ref(null) // BPMN 数据
-const simpleJson = ref<string|undefined>() // Simple 设计器数据 json 格式
-/** 当前的Tab */
-const activeTab = ref('form')
-const emit = defineEmits(['cancel'])
-// 审批节点信息
-const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
+const simpleJson = ref<string | undefined>() // Simple 设计器数据 json 格式
+
+const activeTab = ref('form') // 当前的 Tab
+const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批节点信息
 
 /** 设置表单信息、获取流程图数据 **/
 const initProcessInfo = async (row: any, formVariables?: any) => {

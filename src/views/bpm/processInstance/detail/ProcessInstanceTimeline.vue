@@ -283,7 +283,7 @@ const handleSelectUser = (activityId, selectedList) => {
 const emit = defineEmits<{
   selectUserConfirm: [id: any, userList: any[]]
 }>()
-const customApprover: any = ref({})
+const customApprover: any = ref({}) // key：activityId，value：用户列表 TODO 芋艿：变量改下
 // 选择完成
 const handleUserSelectConfirm = (activityId, userList) => {
   customApprover.value[activityId] = userList || []
