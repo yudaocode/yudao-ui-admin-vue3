@@ -152,6 +152,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { debounce } from 'lodash-es'
 import { jsonParse } from '@/utils'
+import { useMallKefuStore } from '@/store/modules/mall/kefu'
 
 dayjs.extend(relativeTime)
 
@@ -169,6 +170,7 @@ const queryParams = reactive({
 })
 const total = ref(0) // 消息总条数
 const refreshContent = ref(false) // 内容刷新,主要解决会话消息页面高度不一致导致的滚动功能精度失效
+const kefuStore = useMallKefuStore() // 客服缓存
 
 /** 获悉消息内容 */
 const getMessageContent = computed(() => (item: any) => jsonParse(item.content))
@@ -234,19 +236,20 @@ const refreshMessageList = async (message?: any) => {
   }
 }
 
-/** 获得新会话的消息列表 */
-// TODO @puhui999：可优化：可以考虑本地做每个会话的消息 list 缓存；然后点击切换时，读取缓存；然后异步获取新消息，merge 下；
+/** 获得新会话的消息列表, 点击切换时，读取缓存；然后异步获取新消息，merge 下； */
 const getNewMessageList = async (val: KeFuConversationRespVO) => {
-  // 会话切换,重置相关参数
-  messageList.value = []
-  total.value = 0
+  // 1. 缓存当前会话消息列表
+  kefuStore.saveMessageList(conversation.value.id, messageList.value)
+  // 2.1 会话切换,重置相关参数
+  messageList.value = kefuStore.getConversationMessageList(val.id) || []
+  total.value = messageList.value.length || 0
   loadHistory.value = false
   refreshContent.value = false
-  // 设置会话相关属性
+  // 2.2 设置会话相关属性
   conversation.value = val
   queryParams.conversationId = val.id
   queryParams.createTime = undefined
-  // 获取消息
+  // 3. 获取消息
   await refreshMessageList()
 }
 defineExpose({ getNewMessageList, refreshMessageList })
@@ -297,6 +300,8 @@ const sendMessage = async (msg: any) => {
   message.value = ''
   // 加载消息列表
   await refreshMessageList()
+  // 更新会话缓存
+  await kefuStore.updateConversation(conversation.value.id)
 }
 
 /** 滚动到底部 */

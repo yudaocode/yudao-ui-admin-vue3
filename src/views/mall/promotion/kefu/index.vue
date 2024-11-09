@@ -3,7 +3,7 @@
     <!-- 会话列表 -->
     <KeFuConversationList ref="keFuConversationRef" @change="handleChange" />
     <!-- 会话详情（选中会话的消息列表） -->
-    <KeFuMessageList ref="keFuChatBoxRef" @change="getConversationList" />
+    <KeFuMessageList ref="keFuChatBoxRef" />
     <!-- 会员信息（选中会话的会员信息） -->
     <MemberInfo ref="memberInfoRef" />
   </el-container>
@@ -15,10 +15,12 @@ import { WebSocketMessageTypeConstants } from './components/tools/constants'
 import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { getRefreshToken } from '@/utils/auth'
 import { useWebSocket } from '@vueuse/core'
+import { useMallKefuStore } from '@/store/modules/mall/kefu'
 
 defineOptions({ name: 'KeFu' })
 
 const message = useMessage() // 消息弹窗
+const kefuStore = useMallKefuStore() // 客服缓存
 
 // ======================= WebSocket start =======================
 const server = ref(
@@ -53,29 +55,24 @@ watchEffect(() => {
     }
     // 2.2 消息类型：KEFU_MESSAGE_TYPE
     if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_TYPE) {
+      const message = JSON.parse(jsonMessage.content)
       // 刷新会话列表
       // TODO @puhui999：不应该刷新列表，而是根据消息，本地 update 列表的数据；
-      getConversationList()
+      kefuStore.updateConversation(message.conversationId)
       // 刷新消息列表
-      keFuChatBoxRef.value?.refreshMessageList(JSON.parse(jsonMessage.content))
+      keFuChatBoxRef.value?.refreshMessageList(message)
       return
     }
     // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
     if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_ADMIN_READ) {
-      // 刷新会话列表
-      // TODO @puhui999：不应该刷新列表，而是根据消息，本地 update 列表的数据；
-      getConversationList()
+      // 更新会话已读
+      kefuStore.updateConversationStatus(JSON.parse(jsonMessage.content)?.id)
     }
   } catch (error) {
     console.error(error)
   }
 })
 // ======================= WebSocket end =======================
-/** 加载会话列表 */
-const keFuConversationRef = ref<InstanceType<typeof KeFuConversationList>>()
-const getConversationList = () => {
-  keFuConversationRef.value?.getConversationList()
-}
 
 /** 加载指定会话的消息列表 */
 const keFuChatBoxRef = ref<InstanceType<typeof KeFuMessageList>>()
@@ -87,7 +84,8 @@ const handleChange = (conversation: KeFuConversationRespVO) => {
 
 /** 初始化 */
 onMounted(() => {
-  getConversationList()
+  /** 加载会话列表 */
+  kefuStore.setConversationList()
   // 打开 websocket 连接
   open()
 })
