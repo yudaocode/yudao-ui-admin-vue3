@@ -19,104 +19,102 @@
           class="!w-240px"
         />
       </el-form-item>
-      
+
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          v-hasPermi="['bpm:process-instance:query']"
-          @click="handleCreate(undefined)"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 发起流程
-        </el-button>
       </el-form-item>
 
+      <!-- TODO @ tuituji：style 可以使用 unocss -->
       <el-form-item label="" prop="category" :style="{ position: 'absolute', right: '130px' }">
-          <el-select
-            v-model="queryParams.category"
-            placeholder="请选择流程分类"
-            clearable
-            class="!w-240px"
-          >
-            <el-option
-              v-for="category in categoryList"
-              :key="category.code"
-              :label="category.name"
-              :value="category.code"
-            />
-          </el-select>
-      </el-form-item>
-
-      <el-form-item :style="{ position: 'absolute', right: '0px' }">
-      <el-button v-popover="popoverRef" v-click-outside="onClickOutside" :icon="List" >
-        高级筛选
-      </el-button>
-
-      <el-popover
-        ref="popoverRef"
-        trigger="click"
-        virtual-triggering
-        persistent
-        :width="400"
-        :show-arrow="false"
-        placement="bottom-end"
-      >
-        <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">   
-          <el-select
-            v-model="queryParams.category"
-            placeholder="请选择流程发起人"
-            clearable
-            class="!w-390px"
-          >
-            <el-option
-              v-for="category in categoryList"
-              :key="category.code"
-              :label="category.name"
-              :value="category.code"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="所属流程" class="bold-label" label-position="top" prop="processDefinitionKey">
-        <el-input
-          v-model="queryParams.processDefinitionKey"
-          placeholder="请输入流程定义的标识"
+        <!-- TODO @tuituji：应该选择好分类，就触发搜索啦。 -->
+        <el-select
+          v-model="queryParams.category"
+          placeholder="请选择流程分类"
           clearable
-          @keyup.enter="handleQuery"
-          class="!w-390px"
-        />
-        </el-form-item>
-        
-        <el-form-item label="流程状态" class="bold-label" label-position="top" prop="status">
-          <el-select
-            v-model="queryParams.status"
-            placeholder="请选择流程状态"
-            clearable
-            class="!w-390px"
-          >
-            <el-option
-              v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
-              :key="dict.value"
-              :label="dict.label"
-              :value="dict.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="发起时间" class="bold-label" label-position="top" prop="createTime">
-          <el-date-picker
-            v-model="queryParams.createTime"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            type="daterange"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
-            :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-            class="!w-240px"
+          class="!w-155px"
+        >
+          <el-option
+            v-for="category in categoryList"
+            :key="category.code"
+            :label="category.name"
+            :value="category.code"
           />
-        </el-form-item>
-      </el-popover>
+        </el-select>
       </el-form-item>
 
+      <!-- 高级筛选 -->
+      <!-- TODO @ tuituji：style 可以使用 unocss -->
+      <el-form-item :style="{ position: 'absolute', right: '0px' }">
+        <el-button v-popover="popoverRef" v-click-outside="onClickOutside" :icon="List">
+          高级筛选
+        </el-button>
+        <el-popover
+          ref="popoverRef"
+          trigger="click"
+          virtual-triggering
+          persistent
+          :width="400"
+          :show-arrow="false"
+          placement="bottom-end"
+        >
+          <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
+            <el-select
+              v-model="queryParams.category"
+              placeholder="请选择流程发起人"
+              clearable
+              class="!w-390px"
+            >
+              <el-option
+                v-for="category in categoryList"
+                :key="category.code"
+                :label="category.name"
+                :value="category.code"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item
+            label="所属流程"
+            class="bold-label"
+            label-position="top"
+            prop="processDefinitionKey"
+          >
+            <el-input
+              v-model="queryParams.processDefinitionKey"
+              placeholder="请输入流程定义的标识"
+              clearable
+              @keyup.enter="handleQuery"
+              class="!w-390px"
+            />
+          </el-form-item>
+          <el-form-item label="流程状态" class="bold-label" label-position="top" prop="status">
+            <el-select
+              v-model="queryParams.status"
+              placeholder="请选择流程状态"
+              clearable
+              class="!w-390px"
+            >
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="发起时间" class="bold-label" label-position="top" prop="createTime">
+            <el-date-picker
+              v-model="queryParams.createTime"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              type="daterange"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+              class="!w-240px"
+            />
+          </el-form-item>
+        </el-popover>
+        <!-- TODO @tuituji：这里应该有确认，和取消、清空搜索条件，三个按钮。 -->
+      </el-form-item>
     </el-form>
   </ContentWrap>
 
@@ -131,6 +129,8 @@
         min-width="100"
         fixed="left"
       />
+      <!-- TODO @芋艿：摘要 -->
+      <!-- TODO @tuituji：流程状态。可见需求文档里  -->
       <el-table-column label="流程状态" prop="status" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
@@ -162,7 +162,7 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="流程编号" align="center" prop="id" min-width="320px" />-->
+      -->
       <el-table-column label="操作" align="center" fixed="right" width="180">
         <template #default="scope">
           <el-button
@@ -198,12 +198,13 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
-import { Delete, Edit, Search, Share, Upload, List } from '@element-plus/icons-vue'
+// TODO @tuituji：List 改成 <Icon icon="ep:plus" class="mr-5px" /> 类似这种组件哈。
+import { List } from '@element-plus/icons-vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { dateFormatter, formatPast2 } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import { ElMessageBox } from 'element-plus'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { CategoryApi } from '@/api/bpm/category'
+import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import { ProcessInstanceVO } from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
 
@@ -226,7 +227,7 @@ const queryParams = reactive({
   createTime: []
 })
 const queryFormRef = ref() // 搜索的表单
-const categoryList = ref([]) // 流程分类列表
+const categoryList = ref<CategoryVO[]>([]) // 流程分类列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -297,6 +298,15 @@ const handleCancel = async (row) => {
   await getList()
 }
 
+// TODO @tuituji：这个 import 是不是没用哈？
+import { ClickOutside as vClickOutside } from 'element-plus'
+
+// TODO @tuituji：onClickAdvancedSearch。方法名叫这个，会更好一些哇？打开高级搜索。
+const popoverRef = ref()
+const onClickOutside = () => {
+  unref(popoverRef).popperRef?.delayHide?.()
+}
+
 /** 激活时 **/
 onActivated(() => {
   getList()
@@ -307,14 +317,6 @@ onMounted(async () => {
   await getList()
   categoryList.value = await CategoryApi.getCategorySimpleList()
 })
-
-import { ref, unref } from 'vue'
-import { ClickOutside as vClickOutside } from 'element-plus'
-
-const popoverRef = ref()
-const onClickOutside = () => {
-  unref(popoverRef).popperRef?.delayHide?.()
-}
 </script>
 <style>
 .bold-label .el-form-item__label {
