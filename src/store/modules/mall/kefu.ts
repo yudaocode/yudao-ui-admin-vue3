@@ -23,12 +23,13 @@ export const useMallKefuStore = defineStore('mall-kefu', {
     }
   },
   actions: {
-    //======================= 会话消息相关 =======================
+    // ======================= 会话消息相关 =======================
     /** 缓存历史消息 */
     saveMessageList(conversationId: number, messageList: KeFuMessageRespVO[]) {
       this.conversationMessageList.set(conversationId, messageList)
     },
-    //======================= 会话相关 =======================
+
+    // ======================= 会话相关 =======================
     /** 加载会话缓存列表 */
     async setConversationList() {
       this.conversationList = await KeFuConversationApi.getConversationList()
@@ -62,11 +63,16 @@ export const useMallKefuStore = defineStore('mall-kefu', {
       }
     },
     conversationSort() {
+      // TODO @puhui999：1）逻辑上，先按照置顶、再按照最后消息时间；2）感觉写的有一丢丢小复杂，发给大模型，看看有没可能简化哈。
       this.conversationList.sort((obj1, obj2) => {
         // 如果 obj1.adminPinned 为 true，obj2.adminPinned 为 false，obj1 应该排在前面
-        if (obj1.adminPinned && !obj2.adminPinned) return -1
+        if (obj1.adminPinned && !obj2.adminPinned) {
+          return -1
+        }
         // 如果 obj1.adminPinned 为 false，obj2.adminPinned 为 true，obj2 应该排在前面
-        if (!obj1.adminPinned && obj2.adminPinned) return 1
+        if (!obj1.adminPinned && obj2.adminPinned) {
+          return 1
+        }
 
         // 如果 obj1.adminPinned 和 obj2.adminPinned 都为 true，比较 adminUnreadMessageCount 的值
         if (obj1.adminPinned && obj2.adminPinned) {
