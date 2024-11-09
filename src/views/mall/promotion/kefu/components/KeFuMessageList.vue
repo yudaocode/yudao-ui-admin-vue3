@@ -152,6 +152,7 @@ import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { debounce } from 'lodash-es'
 import { jsonParse } from '@/utils'
+import { useMallKefuStore } from '@/store/modules/mall/kefu'
 
 dayjs.extend(relativeTime)
 
@@ -169,6 +170,7 @@ const queryParams = reactive({
 })
 const total = ref(0) // 消息总条数
 const refreshContent = ref(false) // 内容刷新,主要解决会话消息页面高度不一致导致的滚动功能精度失效
+const kefuStore = useMallKefuStore() // 客服缓存
 
 /** 获悉消息内容 */
 const getMessageContent = computed(() => (item: any) => jsonParse(item.content))
@@ -297,6 +299,8 @@ const sendMessage = async (msg: any) => {
   message.value = ''
   // 加载消息列表
   await refreshMessageList()
+  // 异步刷新
+  kefuStore.updateConversation(conversation.value.id)
 }
 
 /** 滚动到底部 */

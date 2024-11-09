@@ -21,6 +21,10 @@ export const KeFuConversationApi = {
   getConversationList: async () => {
     return await request.get({ url: '/promotion/kefu-conversation/list' })
   },
+  // 获得客服会话
+  getConversation: async (id: number) => {
+    return await request.get({ url: `/promotion/kefu-conversation/get?id=` + id })
+  },
   // 客服会话置顶
   updateConversationPinned: async (data: any) => {
     return await request.put({
@@ -30,6 +34,6 @@ export const KeFuConversationApi = {
   },
   // 删除客服会话
   deleteConversation: async (id: number) => {
-    return await request.delete({ url: `/promotion/kefu-conversation/delete?id=${id}`})
+    return await request.delete({ url: `/promotion/kefu-conversation/delete?id=${id}` })
   }
 }

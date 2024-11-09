@@ -1,8 +1,10 @@
 <template>
   <el-aside class="kefu p-5px h-100%" width="260px">
-    <div class="color-[#999] font-bold my-10px">会话记录({{ conversationList.length }})</div>
+    <div class="color-[#999] font-bold my-10px"
+      >会话记录({{ kefuStore.getConversationList.length }})
+    </div>
     <div
-      v-for="item in conversationList"
+      v-for="item in kefuStore.getConversationList"
       :key="item.id"
       :class="{ active: item.id === activeConversationId, pinned: item.adminPinned }"
       class="kefu-conversation flex items-center"
@@ -75,23 +77,16 @@ import { useEmoji } from './tools/emoji'
 import { formatPast } from '@/utils/formatTime'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 import { useAppStore } from '@/store/modules/app'
+import { useMallKefuStore } from '@/store/modules/mall/kefu'
 
 defineOptions({ name: 'KeFuConversationList' })
 
 const message = useMessage() // 消息弹窗
 const appStore = useAppStore()
+const kefuStore = useMallKefuStore() // 客服缓存
 const { replaceEmoji } = useEmoji()
-const conversationList = ref<KeFuConversationRespVO[]>([]) // 会话列表
 const activeConversationId = ref(-1) // 选中的会话
 const collapse = computed(() => appStore.getCollapse) // 折叠菜单
-
-/** 加载会话列表 */
-const getConversationList = async () => {
-  const list = await KeFuConversationApi.getConversationList()
-  list.sort((a: KeFuConversationRespVO, _) => (a.adminPinned ? -1 : 1))
-  conversationList.value = list
-}
-defineExpose({ getConversationList })
 
 /** 打开右侧的消息列表 */
 const emits = defineEmits<{
@@ -156,7 +151,7 @@ const updateConversationPinned = async (adminPinned: boolean) => {
   message.notifySuccess(adminPinned ? '置顶成功' : '取消置顶成功')
   // 2. 关闭右键菜单，更新会话列表
   closeRightMenu()
-  await getConversationList()
+  await kefuStore.updateConversation(rightClickConversation.value.id)
 }
 
 /** 删除会话 */
@@ -166,7 +161,7 @@ const deleteConversation = async () => {
   await KeFuConversationApi.deleteConversation(rightClickConversation.value.id)
   // 2. 关闭右键菜单，更新会话列表
   closeRightMenu()
-  await getConversationList()
+  kefuStore.deleteConversation(rightClickConversation.value.id)
 }
 
 /** 监听右键菜单的显示状态，添加点击事件监听器 */

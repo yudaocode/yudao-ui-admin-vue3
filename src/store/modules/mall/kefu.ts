@@ -2,6 +2,7 @@ import { store } from '@/store'
 import { defineStore } from 'pinia'
 import { KeFuConversationApi, KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
+import { isEmpty } from '@/utils/is'
 
 // TODO puhui999: 待优化完善
 interface MallKefuInfoVO {
@@ -23,15 +24,81 @@ export const useMallKefuStore = defineStore('mall-kefu', {
     }
   },
   actions: {
+    /** 加载会话缓存列表 */
     async setConversationList() {
-      const list = await KeFuConversationApi.getConversationList()
-      list.sort((a: KeFuConversationRespVO, _) => (a.adminPinned ? -1 : 1))
-      this.conversationList = list
+      this.conversationList = await KeFuConversationApi.getConversationList()
+      this.conversationSort()
+    },
+    /** 更新会话缓存已读 */
+    async updateConversationStatus(conversationId: number) {
+      if (isEmpty(this.conversationList)) {
+        return
+      }
+      const conversation = this.conversationList.find((item) => item.id === conversationId)
+      conversation && (conversation.adminUnreadMessageCount = 0)
+    },
+    /** 更新会话缓存 */
+    async updateConversation(conversationId: number) {
+      if (isEmpty(this.conversationList)) {
+        return
+      }
+
+      const conversation = await KeFuConversationApi.getConversation(conversationId)
+      this.deleteConversation(conversationId)
+      conversation && this.conversationList.push(conversation)
+      this.conversationSort()
+    },
+    /** 删除会话缓存 */
+    deleteConversation(conversationId: number) {
+      const index = this.conversationList.findIndex((item) => item.id === conversationId)
+      // 存在则删除
+      if (index > -1) {
+        this.conversationList.splice(index, 1)
+      }
+    },
+    conversationSort() {
+      this.conversationList.sort((obj1, obj2) => {
+        // 如果 obj1.adminPinned 为 true，obj2.adminPinned 为 false，obj1 应该排在前面
+        if (obj1.adminPinned && !obj2.adminPinned) return -1
+        // 如果 obj1.adminPinned 为 false，obj2.adminPinned 为 true，obj2 应该排在前面
+        if (!obj1.adminPinned && obj2.adminPinned) return 1
+
+        // 如果 obj1.adminPinned 和 obj2.adminPinned 都为 true，比较 adminUnreadMessageCount 的值
+        if (obj1.adminPinned && obj2.adminPinned) {
+          return obj1.adminUnreadMessageCount - obj2.adminUnreadMessageCount
+        }
+
+        // 如果 obj1.adminPinned 和 obj2.adminPinned 都为 false，比较 adminUnreadMessageCount 的值
+        if (!obj1.adminPinned && !obj2.adminPinned) {
+          return obj1.adminUnreadMessageCount - obj2.adminUnreadMessageCount
+        }
+
+        // 如果 obj1.adminPinned 为 true，obj2.adminPinned 为 true，且 b 都大于 0，比较 adminUnreadMessageCount 的值
+        if (
+          obj1.adminPinned &&
+          obj2.adminPinned &&
+          obj1.adminUnreadMessageCount > 0 &&
+          obj2.adminUnreadMessageCount > 0
+        ) {
+          return obj1.adminUnreadMessageCount - obj2.adminUnreadMessageCount
+        }
+
+        // 如果 obj1.adminPinned 为 false，obj2.adminPinned 为 false，且 b 都大于 0，比较 adminUnreadMessageCount 的值
+        if (
+          !obj1.adminPinned &&
+          !obj2.adminPinned &&
+          obj1.adminUnreadMessageCount > 0 &&
+          obj2.adminUnreadMessageCount > 0
+        ) {
+          return obj1.adminUnreadMessageCount - obj2.adminUnreadMessageCount
+        }
+
+        return 0
+      })
     }
-    // async setConversationMessageList(conversationId: number) {}
   }
 })
 
-export const useUserStoreWithOut = () => {
+export const useMallKefuStoreWithOut = () => {
   return useMallKefuStore(store)
 }
