@@ -10,7 +10,7 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="流程名称" prop="name">
+      <el-form-item label="" prop="name">
         <el-input
           v-model="queryParams.name"
           placeholder="请输入流程名称"
@@ -19,56 +19,7 @@
           class="!w-240px"
         />
       </el-form-item>
-      <el-form-item label="所属流程" prop="processDefinitionKey">
-        <el-input
-          v-model="queryParams.processDefinitionKey"
-          placeholder="请输入流程定义的标识"
-          clearable
-          @keyup.enter="handleQuery"
-          class="!w-240px"
-        />
-      </el-form-item>
-      <el-form-item label="流程分类" prop="category">
-        <el-select
-          v-model="queryParams.category"
-          placeholder="请选择流程分类"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="category in categoryList"
-            :key="category.code"
-            :label="category.name"
-            :value="category.code"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="流程状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择流程状态"
-          clearable
-          class="!w-240px"
-        >
-          <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="发起时间" prop="createTime">
-        <el-date-picker
-          v-model="queryParams.createTime"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="daterange"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
-          class="!w-240px"
-        />
-      </el-form-item>
+      
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -81,6 +32,91 @@
           <Icon icon="ep:plus" class="mr-5px" /> 发起流程
         </el-button>
       </el-form-item>
+
+      <el-form-item label="" prop="category" :style="{ position: 'absolute', right: '130px' }">
+          <el-select
+            v-model="queryParams.category"
+            placeholder="请选择流程分类"
+            clearable
+            class="!w-240px"
+          >
+            <el-option
+              v-for="category in categoryList"
+              :key="category.code"
+              :label="category.name"
+              :value="category.code"
+            />
+          </el-select>
+      </el-form-item>
+
+      <el-form-item :style="{ position: 'absolute', right: '0px' }">
+      <el-button v-popover="popoverRef" v-click-outside="onClickOutside" :icon="List" >
+        高级筛选
+      </el-button>
+
+      <el-popover
+        ref="popoverRef"
+        trigger="click"
+        virtual-triggering
+        persistent
+        :width="400"
+        :show-arrow="false"
+        placement="bottom-end"
+      >
+        <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">   
+          <el-select
+            v-model="queryParams.category"
+            placeholder="请选择流程发起人"
+            clearable
+            class="!w-390px"
+          >
+            <el-option
+              v-for="category in categoryList"
+              :key="category.code"
+              :label="category.name"
+              :value="category.code"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="所属流程" class="bold-label" label-position="top" prop="processDefinitionKey">
+        <el-input
+          v-model="queryParams.processDefinitionKey"
+          placeholder="请输入流程定义的标识"
+          clearable
+          @keyup.enter="handleQuery"
+          class="!w-390px"
+        />
+        </el-form-item>
+        
+        <el-form-item label="流程状态" class="bold-label" label-position="top" prop="status">
+          <el-select
+            v-model="queryParams.status"
+            placeholder="请选择流程状态"
+            clearable
+            class="!w-390px"
+          >
+            <el-option
+              v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="发起时间" class="bold-label" label-position="top" prop="createTime">
+          <el-date-picker
+            v-model="queryParams.createTime"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            type="daterange"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+            class="!w-240px"
+          />
+        </el-form-item>
+      </el-popover>
+      </el-form-item>
+
     </el-form>
   </ContentWrap>
 
@@ -114,7 +150,7 @@
         width="180"
         :formatter="dateFormatter"
       />
-      <el-table-column align="center" label="耗时" prop="durationInMillis" width="160">
+      <!--<el-table-column align="center" label="耗时" prop="durationInMillis" width="160">
         <template #default="scope">
           {{ scope.row.durationInMillis > 0 ? formatPast2(scope.row.durationInMillis) : '-' }}
         </template>
@@ -126,7 +162,7 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column label="流程编号" align="center" prop="id" min-width="320px" />
+      <el-table-column label="流程编号" align="center" prop="id" min-width="320px" />-->
       <el-table-column label="操作" align="center" fixed="right" width="180">
         <template #default="scope">
           <el-button
@@ -162,6 +198,7 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
+import { Delete, Edit, Search, Share, Upload, List } from '@element-plus/icons-vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter, formatPast2 } from '@/utils/formatTime'
 import { ElMessageBox } from 'element-plus'
@@ -270,4 +307,17 @@ onMounted(async () => {
   await getList()
   categoryList.value = await CategoryApi.getCategorySimpleList()
 })
+
+import { ref, unref } from 'vue'
+import { ClickOutside as vClickOutside } from 'element-plus'
+
+const popoverRef = ref()
+const onClickOutside = () => {
+  unref(popoverRef).popperRef?.delayHide?.()
+}
 </script>
+<style>
+.bold-label .el-form-item__label {
+  font-weight: bold; /* 将字体加粗 */
+}
+</style>
