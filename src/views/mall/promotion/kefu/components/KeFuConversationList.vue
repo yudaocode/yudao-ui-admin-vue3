@@ -93,6 +93,10 @@ const emits = defineEmits<{
   (e: 'change', v: KeFuConversationRespVO): void
 }>()
 const openRightMessage = (item: KeFuConversationRespVO) => {
+  // 同一个会话则不处理
+  if (activeConversationId.value === item.id) {
+    return
+  }
   activeConversationId.value = item.id
   emits('change', item)
 }

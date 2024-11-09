@@ -236,19 +236,20 @@ const refreshMessageList = async (message?: any) => {
   }
 }
 
-/** 获得新会话的消息列表 */
-// TODO @puhui999：可优化：可以考虑本地做每个会话的消息 list 缓存；然后点击切换时，读取缓存；然后异步获取新消息，merge 下；
+/** 获得新会话的消息列表, 点击切换时，读取缓存；然后异步获取新消息，merge 下； */
 const getNewMessageList = async (val: KeFuConversationRespVO) => {
-  // 会话切换,重置相关参数
-  messageList.value = []
-  total.value = 0
+  // 1. 缓存当前会话消息列表
+  kefuStore.saveMessageList(conversation.value.id, messageList.value)
+  // 2.1 会话切换,重置相关参数
+  messageList.value = kefuStore.getConversationMessageList(val.id) || []
+  total.value = messageList.value.length || 0
   loadHistory.value = false
   refreshContent.value = false
-  // 设置会话相关属性
+  // 2.2 设置会话相关属性
   conversation.value = val
   queryParams.conversationId = val.id
   queryParams.createTime = undefined
-  // 获取消息
+  // 3. 获取消息
   await refreshMessageList()
 }
 defineExpose({ getNewMessageList, refreshMessageList })
@@ -299,8 +300,8 @@ const sendMessage = async (msg: any) => {
   message.value = ''
   // 加载消息列表
   await refreshMessageList()
-  // 异步刷新
-  kefuStore.updateConversation(conversation.value.id)
+  // 更新会话缓存
+  await kefuStore.updateConversation(conversation.value.id)
 }
 
 /** 滚动到底部 */

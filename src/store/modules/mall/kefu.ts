@@ -4,7 +4,6 @@ import { KeFuConversationApi, KeFuConversationRespVO } from '@/api/mall/promotio
 import { KeFuMessageRespVO } from '@/api/mall/promotion/kefu/message'
 import { isEmpty } from '@/utils/is'
 
-// TODO puhui999: 待优化完善
 interface MallKefuInfoVO {
   conversationList: KeFuConversationRespVO[] // 会话列表
   conversationMessageList: Map<number, KeFuMessageRespVO[]> // 会话消息
@@ -19,11 +18,17 @@ export const useMallKefuStore = defineStore('mall-kefu', {
     getConversationList(): KeFuConversationRespVO[] {
       return this.conversationList
     },
-    getConversationMessageList(): Map<number, KeFuMessageRespVO[]> {
-      return this.conversationMessageList
+    getConversationMessageList(): (conversationId: number) => KeFuMessageRespVO[] | undefined {
+      return (conversationId: number) => this.conversationMessageList.get(conversationId)
     }
   },
   actions: {
+    //======================= 会话消息相关 =======================
+    /** 缓存历史消息 */
+    saveMessageList(conversationId: number, messageList: KeFuMessageRespVO[]) {
+      this.conversationMessageList.set(conversationId, messageList)
+    },
+    //======================= 会话相关 =======================
     /** 加载会话缓存列表 */
     async setConversationList() {
       this.conversationList = await KeFuConversationApi.getConversationList()
