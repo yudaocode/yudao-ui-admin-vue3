@@ -24,12 +24,10 @@
 
                   <el-col :span="6" :offset="1">
                     <!-- 流程时间线 -->
-                    <!-- TODO @芋艿：selectUserConfirm 调整一下，改成 activityNodes 里面的东西。 -->
                     <ProcessInstanceTimeline
                       ref="timelineRef"
                       :activity-nodes="activityNodes"
                       :show-status-icon="false"
-                      :startUserSelectAssignees="startUserSelectAssignees"
                       @select-user-confirm="selectUserConfirm"
                     />
                   </el-col>
@@ -85,6 +83,7 @@ import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as DefinitionApi from '@/api/bpm/definition'
+import { ApprovalNodeInfo } from '@/api/bpm/processInstance'
 
 defineOptions({ name: 'ProcessDefinitionDetail' })
 const props = defineProps<{
@@ -153,20 +152,20 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
 /** 获取审批详情 */
 const getApprovalDetail = async (row: any) => {
   try {
-    const param = {
-      processDefinitionId: row.id
-    }
-    const data = await ProcessInstanceApi.getApprovalDetail(param)
+    const data = await ProcessInstanceApi.getApprovalDetail({ processDefinitionId: row.id })
     if (!data) {
       message.error('查询不到审批详情信息！')
       return
     }
+
     // 获取发起人自选的任务
-    startUserSelectTasks.value = data.activityNodes?.filter(node => CandidateStrategy.START_USER_SELECT === node.candidateStrategy )
+    startUserSelectTasks.value = data.activityNodes?.filter(
+      (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
+    )
     for (const node of startUserSelectTasks.value) {
-      // 初始化数据
       startUserSelectAssignees.value[node.id] = []
     }
+
     // 获取审批节点，显示 Timeline 的数据
     activityNodes.value = data.activityNodes
   } finally {
@@ -209,12 +208,14 @@ const submitForm = async () => {
   }
 }
 
+/** 取消发起审批 */
 const handleCancel = () => {
   emit('cancel')
 }
 
-const selectUserConfirm = (id, userList) => {
-  startUserSelectAssignees.value[id] = userList?.map((item) => item.id)
+/** 选择发起人 */
+const selectUserConfirm = (id: string, userList: any[]) => {
+  startUserSelectAssignees.value[id] = userList?.map((item: any) => item.id)
 }
 
 defineExpose({ initProcessInfo })
