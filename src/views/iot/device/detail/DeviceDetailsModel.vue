@@ -1,7 +1,7 @@
 <template>
   <ContentWrap>
-    <el-tabs>
-      <el-tab-pane label="运行状态">
+    <el-tabs v-model="activeTab">
+      <el-tab-pane label="运行状态" name="status">
         <ContentWrap>
           <!-- 搜索工作栏 -->
           <el-form
@@ -68,10 +68,10 @@
           <DeviceDataDetail ref="detailRef" :device="device" :product="product" />
         </ContentWrap>
       </el-tab-pane>
-      <el-tab-pane label="事件管理">
+      <el-tab-pane label="事件管理" name="event">
         <p>事件管理</p>
       </el-tab-pane>
-      <el-tab-pane label="服务调用">
+      <el-tab-pane label="服务调用" name="service">
         <p>服务调用</p>
       </el-tab-pane>
     </el-tabs>
@@ -94,6 +94,7 @@ const queryParams = reactive({
 })
 
 const queryFormRef = ref() // 搜索的表单
+const activeTab = ref('status') // 默认选中的标签
 
 /** 查询列表 */
 const getList = async () => {

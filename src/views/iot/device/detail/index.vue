@@ -6,13 +6,13 @@
     @refresh="getDeviceData(id)"
   />
   <el-col>
-    <el-tabs>
-      <el-tab-pane label="设备信息">
-        <DeviceDetailsInfo :product="product" :device="device" />
+    <el-tabs v-model="activeTab">
+      <el-tab-pane label="设备信息" name="info">
+        <DeviceDetailsInfo v-if="activeTab === 'info'" :product="product" :device="device" />
       </el-tab-pane>
       <el-tab-pane label="Topic 列表" />
-      <el-tab-pane label="物模型数据">
-        <DeviceDetailsModel :product="product" :device="device" />
+      <el-tab-pane label="物模型数据" name="model">
+        <DeviceDetailsModel v-if="activeTab === 'model'" :product="product" :device="device" />
       </el-tab-pane>
       <el-tab-pane label="子设备管理" v-if="product.deviceType === DeviceTypeEnum.GATEWAY" />
       <el-tab-pane label="设备影子" />
@@ -35,6 +35,7 @@ const id = Number(route.params.id) // 编号
 const loading = ref(true) // 加载中
 const product = ref<ProductVO>({} as ProductVO) // 产品详情
 const device = ref<DeviceVO>({} as DeviceVO) // 设备详情
+const activeTab = ref('info') // 默认激活的标签页
 
 /** 获取设备详情 */
 const getDeviceData = async (id: number) => {
@@ -51,10 +52,7 @@ const getDeviceData = async (id: number) => {
 /** 获取产品详情 */
 const getProductData = async (id: number) => {
   product.value = await ProductApi.getProduct(id)
-  console.log(product.value)
 }
-
-/** 获取物模型 */
 
 /** 初始化 */
 const { delView } = useTagsViewStore() // 视图操作

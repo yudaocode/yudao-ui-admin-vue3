@@ -93,11 +93,11 @@ export const DeviceApi = {
 
   // 获取设备属性最新数据
   getDevicePropertiesLatestData: async (params: any) => {
-    return await request.get({ url: `/iot/device/data/latest-data`, params })
+    return await request.get({ url: `/iot/device/data/latest`, params })
   },
 
   // 获取设备属性历史数据
   getDevicePropertiesHistoryData: async (params: any) => {
-    return await request.get({ url: `/iot/device/data/history-data`, params })
+    return await request.get({ url: `/iot/device/data/history`, params })
   }
 }
