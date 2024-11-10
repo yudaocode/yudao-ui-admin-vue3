@@ -16,6 +16,7 @@ import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { getRefreshToken } from '@/utils/auth'
 import { useWebSocket } from '@vueuse/core'
 import { useMallKefuStore } from '@/store/modules/mall/kefu'
+import { jsonParse } from '@/utils'
 
 defineOptions({ name: 'KeFu' })
 
@@ -30,6 +31,7 @@ const server = ref(
 ) // WebSocket 服务地址
 
 /** 发起 WebSocket 连接 */
+// TODO puhui999: websocket 连接有点问题收不到消息 🤣
 const { data, close, open } = useWebSocket(server.value, {
   autoReconnect: true,
   heartbeat: true
@@ -45,9 +47,9 @@ watchEffect(() => {
     if (data.value === 'pong') {
       return
     }
-
     // 2.1 解析 type 消息类型
     const jsonMessage = JSON.parse(data.value)
+    console.log(jsonMessage)
     const type = jsonMessage.type
     if (!type) {
       message.error('未知的消息类型：' + data.value)
@@ -65,7 +67,7 @@ watchEffect(() => {
     // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
     if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_ADMIN_READ) {
       // 更新会话已读
-      kefuStore.updateConversationStatus(JSON.parse(jsonMessage.content))
+      kefuStore.updateConversationStatus(jsonParse(jsonMessage.content))
     }
   } catch (error) {
     console.error(error)
