@@ -1,4 +1,4 @@
-import { toNumber } from 'lodash-es'
+import {toNumber} from 'lodash-es'
 
 /**
  *

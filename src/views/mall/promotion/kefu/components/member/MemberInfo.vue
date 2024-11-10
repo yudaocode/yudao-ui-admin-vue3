@@ -24,7 +24,7 @@
         交易订单
       </div>
     </el-header>
-    <el-main class="kefu-content">
+    <el-main class="kefu-content p-10px!">
       <div v-if="!isEmpty(conversation)" v-loading="loading">
         <!-- 基本信息 -->
         <UserBasicInfo v-if="activeTab === '会员信息'" :user="user" mode="kefu">
@@ -33,7 +33,7 @@
           </template>
         </UserBasicInfo>
         <!-- 账户信息 -->
-        <el-card v-if="activeTab === '会员信息'" class="h-full" shadow="never">
+        <el-card v-if="activeTab === '会员信息'" class="h-full mt-10px" shadow="never">
           <template #header>
             <CardTitle title="账户信息" />
           </template>

@@ -75,12 +75,11 @@
                     v-if="KeFuMessageContentTypeEnum.PRODUCT === item.contentType"
                     :picUrl="getMessageContent(item).picUrl"
                     :price="getMessageContent(item).price"
-                    :skuText="getMessageContent(item).introduction"
+                    :sales-count="getMessageContent(item).salesCount"
                     :spuId="getMessageContent(item).spuId"
+                    :stock="getMessageContent(item).stock"
                     :title="getMessageContent(item).spuName"
-                    :titleWidth="400"
-                    class="max-w-70%"
-                    priceColor="#FF3000"
+                    class="max-w-300px"
                   />
                 </MessageItem>
                 <!-- 订单消息 -->
@@ -392,7 +391,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 
   &-content {
     margin: 0;
-    padding: 0;
+    padding: 10px;
     position: relative;
     height: 100%;
     width: 100%;
