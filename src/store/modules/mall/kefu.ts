@@ -63,48 +63,14 @@ export const useMallKefuStore = defineStore('mall-kefu', {
       }
     },
     conversationSort() {
-      // TODO @puhui999：1）逻辑上，先按照置顶、再按照最后消息时间；2）感觉写的有一丢丢小复杂，发给大模型，看看有没可能简化哈。
-      this.conversationList.sort((obj1, obj2) => {
-        // 如果 obj1.adminPinned 为 true，obj2.adminPinned 为 false，obj1 应该排在前面
-        if (obj1.adminPinned && !obj2.adminPinned) {
-          return -1
+      // 按置顶属性和最后消息时间排序
+      this.conversationList.sort((a, b) => {
+        // 按照置顶排序，置顶的会在前面
+        if (a.adminPinned !== b.adminPinned) {
+          return a.adminPinned ? -1 : 1
         }
-        // 如果 obj1.adminPinned 为 false，obj2.adminPinned 为 true，obj2 应该排在前面
-        if (!obj1.adminPinned && obj2.adminPinned) {
-          return 1
-        }
-
-        // 如果 obj1.adminPinned 和 obj2.adminPinned 都为 true，比较 adminUnreadMessageCount 的值
-        if (obj1.adminPinned && obj2.adminPinned) {
-          return obj1.adminUnreadMessageCount - obj2.adminUnreadMessageCount
-        }
-
-        // 如果 obj1.adminPinned 和 obj2.adminPinned 都为 false，比较 adminUnreadMessageCount 的值
-        if (!obj1.adminPinned && !obj2.adminPinned) {
-          return obj1.adminUnreadMessageCount - obj2.adminUnreadMessageCount
-        }
-
-        // 如果 obj1.adminPinned 为 true，obj2.adminPinned 为 true，且 b 都大于 0，比较 adminUnreadMessageCount 的值
-        if (
-          obj1.adminPinned &&
-          obj2.adminPinned &&
-          obj1.adminUnreadMessageCount > 0 &&
-          obj2.adminUnreadMessageCount > 0
-        ) {
-          return obj1.adminUnreadMessageCount - obj2.adminUnreadMessageCount
-        }
-
-        // 如果 obj1.adminPinned 为 false，obj2.adminPinned 为 false，且 b 都大于 0，比较 adminUnreadMessageCount 的值
-        if (
-          !obj1.adminPinned &&
-          !obj2.adminPinned &&
-          obj1.adminUnreadMessageCount > 0 &&
-          obj2.adminUnreadMessageCount > 0
-        ) {
-          return obj1.adminUnreadMessageCount - obj2.adminUnreadMessageCount
-        }
-
-        return 0
+        // 按照最后消息时间排序，最近的会在前面
+        return (b.lastMessageTime as unknown as number) - (a.lastMessageTime as unknown as number)
       })
     }
   }

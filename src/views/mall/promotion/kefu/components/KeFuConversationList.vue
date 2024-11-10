@@ -1,7 +1,7 @@
 <template>
   <el-aside class="kefu p-5px h-100%" width="260px">
-    <div class="color-[#999] font-bold my-10px"
-      >会话记录({{ kefuStore.getConversationList.length }})
+    <div class="color-[#999] font-bold my-10px">
+      会话记录({{ kefuStore.getConversationList.length }})
     </div>
     <div
       v-for="item in kefuStore.getConversationList"
@@ -78,6 +78,7 @@ import { formatPast } from '@/utils/formatTime'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 import { useAppStore } from '@/store/modules/app'
 import { useMallKefuStore } from '@/store/modules/mall/kefu'
+import { jsonParse } from '@/utils'
 
 defineOptions({ name: 'KeFuConversationList' })
 
@@ -118,7 +119,7 @@ const getConversationDisplayText = computed(
       case KeFuMessageContentTypeEnum.VOICE:
         return '[语音消息]'
       case KeFuMessageContentTypeEnum.TEXT:
-        return replaceEmoji(lastMessageContent)
+        return replaceEmoji(jsonParse(lastMessageContent).text || lastMessageContent)
       default:
         return ''
     }
