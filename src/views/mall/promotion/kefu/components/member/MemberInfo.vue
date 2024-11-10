@@ -134,28 +134,25 @@ const handleScroll = debounce(() => {
   }
 }, 200)
 
-/* 用户钱包相关信息 */
+/** 查询用户钱包信息 */
 const WALLET_INIT_DATA = {
   balance: 0,
   totalExpense: 0,
   totalRecharge: 0
 } as WalletApi.WalletVO // 钱包初始化数据
 const wallet = ref<WalletApi.WalletVO>(WALLET_INIT_DATA) // 钱包信息
-
-/** 查询用户钱包信息 */
 const getUserWallet = async () => {
   if (!conversation.value.userId) {
     wallet.value = WALLET_INIT_DATA
     return
   }
-  const params = { userId: conversation.value.userId }
-  wallet.value = (await WalletApi.getWallet(params)) || WALLET_INIT_DATA
+  wallet.value =
+    (await WalletApi.getWallet({ userId: conversation.value.userId })) || WALLET_INIT_DATA
 }
 
+/** 获得用户 */
 const loading = ref(true) // 加载中
 const user = ref<UserApi.UserVO>({} as UserApi.UserVO)
-
-/** 获得用户 */
 const getUserData = async () => {
   loading.value = true
   try {
