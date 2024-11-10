@@ -1,5 +1,5 @@
 <template>
-  <el-descriptions :column="2">
+  <el-descriptions :column="column">
     <el-descriptions-item>
       <template #label>
         <descriptions-item-label icon="svg-icon:member_level" label=" 等级 " />
@@ -50,7 +50,9 @@ import * as UserApi from '@/api/member/user'
 import * as WalletApi from '@/api/pay/wallet/balance'
 import { fenToYuan } from '@/utils'
 
-defineProps<{ user: UserApi.UserVO; wallet: WalletApi.WalletVO }>() // 用户信息
+withDefaults(defineProps<{ user: UserApi.UserVO; wallet: WalletApi.WalletVO; column?: number }>(), {
+  column: 2
+}) // 用户信息
 </script>
 <style lang="scss" scoped>
 .cell-item {

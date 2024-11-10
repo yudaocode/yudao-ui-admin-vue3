@@ -25,6 +25,21 @@
       </div>
     </el-header>
     <el-main class="kefu-content">
+      <div v-if="!isEmpty(conversation)" v-loading="loading">
+        <!-- 基本信息 -->
+        <UserBasicInfo v-if="activeTab === '会员信息'" :user="user" mode="kefu">
+          <template #header>
+            <CardTitle title="基本信息" />
+          </template>
+        </UserBasicInfo>
+        <!-- 账户信息 -->
+        <el-card v-if="activeTab === '会员信息'" class="h-full" shadow="never">
+          <template #header>
+            <CardTitle title="账户信息" />
+          </template>
+          <UserAccountInfo :column="1" :user="user" :wallet="wallet" />
+        </el-card>
+      </div>
       <div v-show="!isEmpty(conversation)">
         <el-scrollbar ref="scrollbarRef" always @scroll="handleScroll">
           <!-- 最近浏览 -->
@@ -45,11 +60,17 @@ import { KeFuConversationRespVO } from '@/api/mall/promotion/kefu/conversation'
 import { isEmpty } from '@/utils/is'
 import { debounce } from 'lodash-es'
 import { ElScrollbar as ElScrollbarType } from 'element-plus/es/components/scrollbar/index'
+import { CardTitle } from '@/components/Card'
+import UserBasicInfo from '@/views/member/user/detail/UserBasicInfo.vue'
+import UserAccountInfo from '@/views/member/user/detail/UserAccountInfo.vue'
+import * as UserApi from '@/api/member/user'
+import * as WalletApi from '@/api/pay/wallet/balance'
 
 defineOptions({ name: 'MemberBrowsingHistory' })
 
 const activeTab = ref('会员信息')
 const tabActivation = computed(() => (tab: string) => activeTab.value === tab)
+
 /** tab 切换 */
 const productBrowsingHistoryRef = ref<InstanceType<typeof ProductBrowsingHistory>>()
 const orderBrowsingHistoryRef = ref<InstanceType<typeof OrderBrowsingHistory>>()
@@ -63,6 +84,8 @@ const handleClick = async (tab: string) => {
 const getHistoryList = async () => {
   switch (activeTab.value) {
     case '会员信息':
+      await getUserData()
+      await getUserWallet()
       break
     case '最近浏览':
       await productBrowsingHistoryRef.value?.getHistoryList(conversation.value)
@@ -110,6 +133,37 @@ const handleScroll = debounce(() => {
     loadMore()
   }
 }, 200)
+
+/* 用户钱包相关信息 */
+const WALLET_INIT_DATA = {
+  balance: 0,
+  totalExpense: 0,
+  totalRecharge: 0
+} as WalletApi.WalletVO // 钱包初始化数据
+const wallet = ref<WalletApi.WalletVO>(WALLET_INIT_DATA) // 钱包信息
+
+/** 查询用户钱包信息 */
+const getUserWallet = async () => {
+  if (!conversation.value.userId) {
+    wallet.value = WALLET_INIT_DATA
+    return
+  }
+  const params = { userId: conversation.value.userId }
+  wallet.value = (await WalletApi.getWallet(params)) || WALLET_INIT_DATA
+}
+
+const loading = ref(true) // 加载中
+const user = ref<UserApi.UserVO>({} as UserApi.UserVO)
+
+/** 获得用户 */
+const getUserData = async () => {
+  loading.value = true
+  try {
+    user.value = await UserApi.getUser(conversation.value.userId)
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style lang="scss" scoped>
