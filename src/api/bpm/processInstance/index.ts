@@ -1,6 +1,6 @@
 import request from '@/config/axios'
 import { ProcessDefinitionVO } from '@/api/bpm/model'
-import { NodeType } from '@/components/SimpleProcessDesignerV2/src/consts'
+import { NodeType, CandidateStrategy } from '@/components/SimpleProcessDesignerV2/src/consts'
 export type Task = {
   id: string
   name: string
@@ -43,6 +43,7 @@ export type ApprovalNodeInfo = {
   id: number
   name: string
   nodeType: NodeType
+  candidateStrategy?: CandidateStrategy
   status: number
   startTime?: Date
   endTime?: Date

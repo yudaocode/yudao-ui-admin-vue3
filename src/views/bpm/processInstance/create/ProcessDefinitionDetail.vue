@@ -29,7 +29,6 @@
                       ref="timelineRef"
                       :activity-nodes="activityNodes"
                       :show-status-icon="false"
-                      :startUserSelectTasks="startUserSelectTasks"
                       :startUserSelectAssignees="startUserSelectAssignees"
                       @select-user-confirm="selectUserConfirm"
                     />
@@ -78,6 +77,7 @@
 <script lang="ts" setup>
 import { decodeFields, setConfAndFields2 } from '@/utils/formCreate'
 import { BpmModelType } from '@/utils/constants'
+import { CandidateStrategy } from '@/components/SimpleProcessDesignerV2/src/consts'
 import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceSimpleViewer from '../detail/ProcessInstanceSimpleViewer.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
@@ -103,7 +103,7 @@ const detailForm: any = ref({
 }) // 流程表单详情
 const fApi = ref<ApiAttrs>()
 // 指定审批人
-const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人的用户任务列表
+const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人或抄送人的任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
 const bpmnXML: any = ref(null) // BPMN 数据
 const simpleJson = ref<string | undefined>() // Simple 设计器数据 json 格式
@@ -140,14 +140,6 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     if (processDefinitionDetail) {
       bpmnXML.value = processDefinitionDetail.bpmnXml
       simpleJson.value = processDefinitionDetail.simpleModel
-      startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
-      // 设置指定审批人
-      if (startUserSelectTasks.value?.length > 0) {
-        for (const userTask of startUserSelectTasks.value) {
-          // 初始化数据
-          startUserSelectAssignees.value[userTask.id] = []
-        }
-      }
     }
     // 情况二：业务表单
   } else if (row.formCustomCreatePath) {
@@ -169,6 +161,12 @@ const getApprovalDetail = async (row: any) => {
       message.error('查询不到审批详情信息！')
       return
     }
+    // 获取发起人自选的任务
+    startUserSelectTasks.value = data.activityNodes?.filter(node => CandidateStrategy.START_USER_SELECT === node.candidateStrategy )
+    for (const node of startUserSelectTasks.value) {
+      // 初始化数据
+      startUserSelectAssignees.value[node.id] = []
+    }
     // 获取审批节点，显示 Timeline 的数据
     activityNodes.value = data.activityNodes
   } finally {
@@ -187,7 +185,7 @@ const submitForm = async () => {
         Array.isArray(startUserSelectAssignees.value[userTask.id]) &&
         startUserSelectAssignees.value[userTask.id].length === 0
       )
-        return message.warning(`请选择${userTask.name}的审批人`)
+        return message.warning(`请选择${userTask.name}的候选人`)
     }
   }
 

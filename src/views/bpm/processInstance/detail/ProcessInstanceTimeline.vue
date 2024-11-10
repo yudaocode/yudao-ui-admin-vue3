@@ -39,9 +39,7 @@
         <!-- 需要自定义选择审批人 -->
         <div
           class="flex flex-wrap gap2 items-center"
-          v-if="
-            startUserSelectTasks?.length > 0 && Array.isArray(startUserSelectAssignees[activity.id])
-          "
+          v-if="isEmpty(activity.tasks) && isEmpty(activity.candidateUsers) && CandidateStrategy.START_USER_SELECT === activity.candidateStrategy"
         >
           <!--  && activity.nodeType === NodeType.USER_TASK_NODE -->
           <el-button
@@ -156,7 +154,8 @@
 import { formatDate } from '@/utils/formatTime'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { TaskStatusEnum } from '@/api/bpm/task'
-import { NodeType } from '@/components/SimpleProcessDesignerV2/src/consts'
+import { NodeType, CandidateStrategy } from '@/components/SimpleProcessDesignerV2/src/consts'
+import { isEmpty } from '@/utils/is'
 import { Check, Close, Loading, Clock, Minus, Delete } from '@element-plus/icons-vue'
 import starterSvg from '@/assets/svgs/bpm/starter.svg'
 import auditorSvg from '@/assets/svgs/bpm/auditor.svg'
@@ -170,12 +169,10 @@ withDefaults(
   defineProps<{
     activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
     showStatusIcon?: boolean // 是否显示头像右下角状态图标
-    startUserSelectTasks?: any[] // 发起人需要选择审批人的用户任务列表
     startUserSelectAssignees?: any // 发起人选择审批人的数据
   }>(),
   {
     showStatusIcon: true, // 默认值为 true
-    startUserSelectTasks: () => [], // 默认值为空数组
     startUserSelectAssignees: () => {}
   }
 )
