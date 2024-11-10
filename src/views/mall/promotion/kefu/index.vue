@@ -57,7 +57,6 @@ watchEffect(() => {
     if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_TYPE) {
       const message = JSON.parse(jsonMessage.content)
       // 刷新会话列表
-      // TODO @puhui999：不应该刷新列表，而是根据消息，本地 update 列表的数据；
       kefuStore.updateConversation(message.conversationId)
       // 刷新消息列表
       keFuChatBoxRef.value?.refreshMessageList(message)
@@ -66,7 +65,7 @@ watchEffect(() => {
     // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
     if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_ADMIN_READ) {
       // 更新会话已读
-      kefuStore.updateConversationStatus(JSON.parse(jsonMessage.content)?.id)
+      kefuStore.updateConversationStatus(JSON.parse(jsonMessage.content))
     }
   } catch (error) {
     console.error(error)

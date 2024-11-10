@@ -52,7 +52,7 @@
                 <MessageItem :message="item">
                   <template v-if="KeFuMessageContentTypeEnum.TEXT === item.contentType">
                     <div
-                      v-dompurify-html="replaceEmoji(item.content)"
+                      v-dompurify-html="replaceEmoji(getMessageContent(item).text || item.content)"
                       class="flex items-center"
                     ></div>
                   </template>
@@ -62,8 +62,8 @@
                   <el-image
                     v-if="KeFuMessageContentTypeEnum.IMAGE === item.contentType"
                     :initial-index="0"
-                    :preview-src-list="[item.content]"
-                    :src="item.content"
+                    :preview-src-list="[getMessageContent(item).picUrl || item.content]"
+                    :src="getMessageContent(item).picUrl || item.content"
                     class="w-200px"
                     fit="contain"
                     preview-teleported
@@ -244,6 +244,7 @@ const getNewMessageList = async (val: KeFuConversationRespVO) => {
   total.value = messageList.value.length || 0
   loadHistory.value = false
   refreshContent.value = false
+  skipGetMessageList.value = false
   // 2.2 设置会话相关属性
   conversation.value = val
   queryParams.conversationId = val.id
@@ -267,7 +268,7 @@ const handleSendPicture = async (picUrl: string) => {
   const msg = {
     conversationId: conversation.value.id,
     contentType: KeFuMessageContentTypeEnum.IMAGE,
-    content: picUrl
+    content: JSON.stringify({ picUrl })
   }
   await sendMessage(msg)
 }
@@ -287,7 +288,7 @@ const handleSendMessage = async (event: any) => {
   const msg = {
     conversationId: conversation.value.id,
     contentType: KeFuMessageContentTypeEnum.TEXT,
-    content: message.value
+    content: JSON.stringify({ text: message.value })
   }
   await sendMessage(msg)
 }
