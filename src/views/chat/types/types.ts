@@ -34,6 +34,29 @@ export const enum CONVERSATION_TYPE {
   NOTIFICATION = 4
 }
 
+export enum WEBSOCKET_MESSAGE_TYPE_ENUM {
+  IM_MESSAGE_RECEIVE = 'im-message-receive'
+}
+
+
 export type MessageModelType = BaseMessage | TextMessage | ImageMessage
 export type ConversationModelType = BaseConversation | ChatConversation
 export type ConversationType = CONVERSATION_TYPE
+
+export type ImMessageReceiveResponse = {
+  type: WEBSOCKET_MESSAGE_TYPE_ENUM
+  content: string
+};
+
+export type ImMessageContent = {
+  id: number;
+  conversationType: number;
+  senderId: number;
+  senderNickname: string;
+  senderAvatar: string;
+  receiverId: number;
+  contentType: number;
+  content: string;
+  sendTime: number; // Use `Date` if you'd prefer the time to be a `Date` object
+  sequence: number;
+}
