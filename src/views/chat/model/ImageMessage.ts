@@ -1,4 +1,4 @@
-import { MessageRole, ContentType, SendStatus } from '@/views/chat/types/index.d.ts'
+import { MessageRole, ContentType, SendStatus } from '@/views/chat/types/types'
 import BaseMessage from './BaseMessage'
 
 export default class ImageMessage extends BaseMessage {

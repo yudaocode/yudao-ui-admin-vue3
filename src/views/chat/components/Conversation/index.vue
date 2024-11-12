@@ -3,7 +3,7 @@
     <view class="flex flex-col w-full">
       <SessionItem
         v-for="(item, index) in chatStore.sessionList"
-        :key="item.id"
+        :key="item.id" 
         :index="index"
         :conversation="item"
         @click="() => onSessionItemClick(index)"
@@ -13,17 +13,17 @@
 </template>
 
 <script lang="ts" setup>
-import SessionItem from '../SessionItem/Index.vue'
+import SessionItem from '@/views/chat/components/ConversationItem/index.vue'
 import { useChatStoreWithOut } from '../../store/chatstore'
 import { onMounted } from 'vue'
 
 defineOptions({ name: 'Session' })
 
 const chatStore = useChatStoreWithOut()
-const { setCurrentConversation, setCurrentSessionIndex, getSession } = useChatStoreWithOut()
+const { setCurrentConversation, setCurrentSessionIndex, getConversationList } = useChatStoreWithOut()
 
 onMounted(() => {
-  getSession()
+  getConversationList()
   // set default conversation
   nextTick(() => {
     setCurrentConversation()

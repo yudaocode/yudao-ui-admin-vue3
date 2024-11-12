@@ -1,4 +1,4 @@
-import { MessageRole, ContentType, SendStatus } from '../types'
+import { MessageRole, ContentType, SendStatus } from '../types/types'
 
 export default class BaseMessage {
   id?: string
@@ -11,6 +11,7 @@ export default class BaseMessage {
   contentType: ContentType
   conversationId: string
   clientMessageId: string
+  senderId: number
   receiverId: number
   conversationType: number
   conversationUserId: number
@@ -24,6 +25,7 @@ export default class BaseMessage {
     sendStauts: SendStatus,
     contentType: ContentType,
     conversationId: string,
+    senderId: number,
     receiverId: number,
     conversationType: number,
     conversationUserId: number
@@ -37,6 +39,7 @@ export default class BaseMessage {
     this.sendStatus = sendStauts
     this.contentType = contentType
     this.conversationId = conversationId
+    this.senderId = senderId
     this.receiverId = receiverId
     this.clientMessageId = this.generateClientMessageId()
     this.conversationType = conversationType

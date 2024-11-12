@@ -1,4 +1,4 @@
-import { ConversationType, MessageModelType } from '../types'
+import { ConversationType, MessageModelType } from '../types/types'
 
 export default class BaseConversation {
   public id: string

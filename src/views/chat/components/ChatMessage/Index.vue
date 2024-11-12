@@ -24,7 +24,7 @@
 import { useChatStore } from '../../store/chatstore'
 import TextMsg from '@/views/chat/components/Message/TextMsg.vue'
 import ImageMsg from '@/views/chat/components/Message/ImageMsg.vue'
-import { ContentType } from '../../types/index.d.ts'
+import { ContentType } from '../../types/types'
 
 defineOptions({ name: 'ChatMessage' })
 

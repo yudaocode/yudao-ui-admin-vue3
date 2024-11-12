@@ -50,6 +50,7 @@
     "element-plus": "2.8.4",
     "fast-xml-parser": "^4.3.2",
     "highlight.js": "^11.9.0",
+    "idb": "^8.0.0",
     "jsencrypt": "^3.3.2",
     "lodash-es": "^4.17.21",
     "markdown-it": "^14.1.0",

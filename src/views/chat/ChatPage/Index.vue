@@ -18,17 +18,22 @@
  */
 
 import ToolSection from '../components/ToolSection/Index.vue'
-import Session from '../components/Session/Index.vue'
+import Session from '../components/Conversation/index.vue'
 import Friends from '../components/Friends/Index.vue'
-import ChatHeader from '../components/ChatHeader/Index.vue' // TODO @dylan：为啥这个 index.vue 是大写哈？可以搞成小写哇？
-import ChatMessage from '../components/ChatMessage/Index.vue'
-import InputSection from '../components/InputSection/Index.vue'
+import ChatHeader from '../components/ChatHeader/index.vue'
+import ChatMessage from '../components/ChatMessage/index.vue'
+import InputSection from '../components/InputSection/index.vue'
 import FriendDetail from '../components/FriendDetail/Index.vue'
-import { MENU_LIST_ENUM } from '../types/index.d.ts'
+import { MENU_LIST_ENUM } from '../types/types'
+import { useWebSocketStore } from '../store/websocketStore'
 
 defineOptions({ name: 'ChatPage' })
 
 const bussinessType = ref(1)
+const webSocketStore = useWebSocketStore();
+onMounted(() => {
+  webSocketStore.connect()
+})
 
 const toolMenuSelectChange = (value) => {
   bussinessType.value = value

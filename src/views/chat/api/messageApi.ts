@@ -6,7 +6,7 @@
  */
 
 import request from '@/config/axios'
-import { MessageModelType } from '../types'
+import { MessageModelType } from '../types/types'
 
 export interface SendMsg {
   clientMessageId: string

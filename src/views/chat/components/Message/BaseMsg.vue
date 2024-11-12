@@ -19,7 +19,7 @@
 <script lang="ts" setup>
 import { PropType } from 'vue'
 import { Loading } from '@element-plus/icons-vue'
-import { MessageModelType, MessageRole, SendStatus } from '../../types/index.d.ts'
+import { MessageModelType, MessageRole, SendStatus } from '../../types/types'
 
 defineOptions({ name: 'BaseMessage' })
 

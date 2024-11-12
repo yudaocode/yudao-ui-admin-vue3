@@ -24,18 +24,27 @@
 <script lang="ts" setup>
 import TextMessage from '../../model/TextMessage'
 import { useChatStoreWithOut } from '../../store/chatstore'
-import { CONVERSATION_TYPE } from '../../types/index.d.ts'
-import { SendStatus, MessageRole, ContentType } from '../../types/index.d.ts'
+import { CONVERSATION_TYPE } from '../../types/types'
+import { SendStatus, MessageRole, ContentType } from '../../types/types'
 import { useUserStoreWithOut } from '../../../../store/modules/user';
+import { ElNotification } from 'element-plus';
 
 defineOptions({ name: 'InputSection' })
 
 const chatStore = useChatStoreWithOut()
 const onEnter = () => {
   console.log('enter pressed')
-  const msg = createTextMessage(chatStore.inputText)
+
+  if (!chatStore.inputText.trim())  {
+    ElNotification({
+      title: '温馨提示',
+      message: '请输入内容',
+      type: 'warning'
+    })
+    return 
+  }
+  const msg = createTextMessage(chatStore.inputText.trim())
   chatStore.addMessageToCurrentSession(msg)
-  chatStore.setInputText('')
 }
 
 const createTextMessage = (content: string): TextMessage => {
@@ -53,6 +62,7 @@ const createTextMessage = (content: string): TextMessage => {
     MessageRole.SELF,
     SendStatus.SENDING,
     chatStore.currentSession?.id || '',
+    userStore.user.id,
     chatStore.currentSession ? chatStore.currentSession.targetId : 0,
     chatStore.currentSession?.type || CONVERSATION_TYPE.SINGLE,
     chatStore.currentSession?.senderId || ''

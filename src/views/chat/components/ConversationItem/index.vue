@@ -18,10 +18,11 @@
 
 <script lang="ts" setup>
 import { PropType } from 'vue'
-import { ContentType, ConversationModelType } from '../../types/index.d.ts'
+import { ContentType, ConversationModelType } from '../../types/types'
+
 import { formatPast } from '@/utils/formatTime'
-import { useChatStore } from '../../store/chatstore'
-import TextMessage from '../../model/TextMessage';
+import { useChatStore } from '../../store/chatstore.js'
+import TextMessage from '../../model/TextMessage.js';
 
 defineOptions({ name: 'SessionItem' })
 

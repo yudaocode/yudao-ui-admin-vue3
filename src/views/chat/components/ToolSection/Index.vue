@@ -21,7 +21,7 @@
 </template>
 
 <script lang="ts" setup>
-import { MENU_LIST_ENUM } from '../../types/index.d.ts'
+import { MENU_LIST_ENUM } from '../../types/types'
 
 defineOptions({ name: 'ToolSection' })
 

@@ -12,7 +12,7 @@
 import { PropType } from 'vue'
 import { useChatStore } from '../../store/chatstore'
 import { onMounted } from 'vue'
-import { MessageModelType } from '../../types'
+import { MessageModelType } from '../../types/types'
 import BaseMesageLayout from './BaseMsg.vue'
 
 defineOptions({ name: 'ImageMessage' })
