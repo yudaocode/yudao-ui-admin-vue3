@@ -99,7 +99,7 @@
                 </template>
                 <!-- 信息：任务 ICON -->
                 <div
-                  v-if="onlyStatusIconShow.includes(task.status)"
+                  v-if="showStatusIcon && onlyStatusIconShow.includes(task.status)"
                   class="position-absolute top-22px left-26px bg-#fff rounded-full flex items-center p-2px"
                 >
                   <Icon
@@ -136,6 +136,7 @@
 
             <!-- 信息：任务 ICON -->
             <div
+              v-if="showStatusIcon"
               class="position-absolute top-22px left-26px bg-#fff rounded-full flex items-center p-2px"
             >
               <Icon
