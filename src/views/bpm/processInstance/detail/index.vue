@@ -5,7 +5,7 @@
         <img
           class="position-absolute right-20px"
           width="150"
-          :src="auditIcons[processInstance.status]"
+          :src="auditIconsMap[processInstance.status]"
           alt=""
         />
         <div class="text-#878c93 h-15px">编号：{{ id }}</div>
@@ -137,11 +137,11 @@ import ProcessInstanceTaskList from './ProcessInstanceTaskList.vue'
 import ProcessInstanceOperationButton from './ProcessInstanceOperationButton.vue'
 import ProcessInstanceTimeline from './ProcessInstanceTimeline.vue'
 import { FieldPermissionType } from '@/components/SimpleProcessDesignerV2/src/consts'
-// TODO 代码优化，换个明确的 icon 名字
-import audit1 from '@/assets/svgs/bpm/audit1.svg'
-import audit2 from '@/assets/svgs/bpm/audit2.svg'
-import audit3 from '@/assets/svgs/bpm/audit3.svg'
-import audit4 from '@/assets/svgs/bpm/audit4.svg'
+import { TaskStatusEnum } from '@/api/bpm/task'
+import runningSvg from '@/assets/svgs/bpm/running.svg'
+import approveSvg from '@/assets/svgs/bpm/approve.svg'
+import rejectSvg from '@/assets/svgs/bpm/reject.svg'
+import cancelSvg from '@/assets/svgs/bpm/cancel.svg'
 
 defineOptions({ name: 'BpmProcessInstanceDetail' })
 const props = defineProps<{
@@ -155,11 +155,11 @@ const processInstance = ref<any>({}) // 流程实例
 const processDefinition = ref<any>({}) // 流程定义
 const processModelView = ref<any>({}) // 流程模型视图
 const operationButtonRef = ref() // 操作按钮组件 ref
-const auditIcons = {
-  1: audit1,
-  2: audit2,
-  3: audit3,
-  4: audit4
+const auditIconsMap = {
+  [TaskStatusEnum.RUNNING]: runningSvg,
+  [TaskStatusEnum.APPROVE]: approveSvg,
+  [TaskStatusEnum.REJECT]: rejectSvg,
+  [TaskStatusEnum.CANCEL]: cancelSvg
 }
 
 // ========== 申请信息 ==========
@@ -242,7 +242,6 @@ const getApprovalDetail = async () => {
 
 /** 获取流程模型视图*/
 const getProcessModelView = async () => {
-
   if (BpmModelType.BPMN === processDefinition.value?.modelType) {
     // 重置，解决 BPMN 流程图刷新不会重新渲染问题
     processModelView.value = {
