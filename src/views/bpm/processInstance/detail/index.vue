@@ -319,6 +319,15 @@ $process-header-height: 194px;
         $process-header-height - 40px
     );
     overflow: auto;
+
+    :deep(.box-card) {
+      height: 100%;
+
+      .el-card__body {
+        height: 100%;
+        padding: 0;
+      }
+    }
   }
 }
 
