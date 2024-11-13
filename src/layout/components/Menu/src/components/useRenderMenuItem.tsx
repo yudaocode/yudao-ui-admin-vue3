@@ -3,7 +3,11 @@ import { hasOneShowingChild } from '../helper'
 import { isUrl } from '@/utils/is'
 import { useRenderMenuTitle } from './useRenderMenuTitle'
 import { pathResolve } from '@/utils/routerHelper'
+import { useMenuQueryStore } from '@/store/modules/menuQuery';
+import CryptoJS from 'crypto-js';
 
+const MenuQueryStore = useMenuQueryStore();
+const AllQueryData = MenuQueryStore.menuQuery
 const { renderMenuTitle } = useRenderMenuTitle()
 
 export const useRenderMenuItem = () =>
@@ -22,6 +26,9 @@ export const useRenderMenuItem = () =>
             (!onlyOneChild?.children || onlyOneChild?.noShowingChildren) &&
             !meta?.alwaysShow
           ) {
+            const md5Hash = CryptoJS.MD5((onlyOneChild ? pathResolve(fullPath, onlyOneChild.path) : fullPath)).toString()
+            AllQueryData[md5Hash] = (v.diyQuery??{})
+            MenuQueryStore.setMenuQuery(AllQueryData)
             return (
               <ElMenuItem
                 index={onlyOneChild ? pathResolve(fullPath, onlyOneChild.path) : fullPath}
@@ -32,6 +39,9 @@ export const useRenderMenuItem = () =>
               </ElMenuItem>
             )
           } else {
+            const md5Hash = CryptoJS.MD5(fullPath).toString()
+            AllQueryData[md5Hash] = (v.diyQuery??{})
+            MenuQueryStore.setMenuQuery(AllQueryData)
             return (
               <ElSubMenu index={fullPath}>
                 {{

@@ -7,6 +7,9 @@ import { useRenderMenuItem } from './components/useRenderMenuItem'
 import { isUrl } from '@/utils/is'
 import { useDesign } from '@/hooks/web/useDesign'
 import { LayoutType } from '@/types/layout'
+import { useMenuQueryStore } from '@/store/modules/menuQuery';
+import CryptoJS from 'crypto-js';
+const MenuQueryStore = useMenuQueryStore();
 
 const { getPrefixCls } = useDesign()
 
@@ -65,8 +68,14 @@ export default defineComponent({
       // 自定义事件
       if (isUrl(index)) {
         window.open(index)
-      } else {
-        push(index)
+      } else { 
+        // push(index)
+        //取出store中的路由传参
+        const AllQueryData = MenuQueryStore.menuQuery
+        const md5Hash = CryptoJS.MD5(index).toString()
+        const queryString = (AllQueryData?.[md5Hash] || {})
+        //将get传参加入到地址栏中
+        push({ path: index, query: queryString });
       }
     }
 

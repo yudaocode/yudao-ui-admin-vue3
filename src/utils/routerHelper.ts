@@ -85,6 +85,13 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
       meta.query = qs.parse(query)
     }
 
+    //将route.path中的get参数提取出来并合与 route.component的get参数合并
+    let diyQuery = meta.query // 完整的get 参数
+    if(route.path && route.path.indexOf('?') > -1){
+      const pathQuery = route.path.split('?')[1]
+      diyQuery = {...diyQuery,...(qs.parse(pathQuery))}
+    }
+
     // 2. 生成 data（AppRouteRecordRaw）
     // 路由地址转首字母大写驼峰，作为路由名称，适配keepAlive
     let data: AppRouteRecordRaw = {
@@ -95,7 +102,8 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
           ? route.componentName
           : toCamelCase(route.path, true),
       redirect: route.redirect,
-      meta: meta
+      meta: meta,
+      diyQuery: diyQuery //get查询参数
     }
     //处理顶级非目录路由
     if (!route.children && route.parentId == 0 && route.component) {

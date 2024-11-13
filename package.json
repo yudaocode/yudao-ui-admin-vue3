@@ -30,6 +30,7 @@
     "@form-create/element-ui": "^3.2.11",
     "@iconify/iconify": "^3.1.1",
     "@microsoft/fetch-event-source": "^2.0.1",
+    "@types/crypto-js": "^4.2.2",
     "@videojs-player/vue": "^1.0.0",
     "@vueuse/core": "^10.9.0",
     "@wangeditor/editor": "^5.1.23",
