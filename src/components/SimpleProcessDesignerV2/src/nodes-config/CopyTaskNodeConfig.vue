@@ -124,7 +124,7 @@
             </el-form-item>
             <el-form-item
               v-if="configForm.candidateStrategy === CandidateStrategy.USER_FIELD_ON_FORM"
-              label="表单内成员字段"
+              label="表单内用户字段"
               prop="userFieldOnForm"
             >
               <el-select v-model="configForm.userFieldOnForm" clearable style="width: 100%">
@@ -246,7 +246,7 @@ const activeTabName = ref('user')
 const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFields } = useFormFieldsPermission(
   FieldPermissionType.READ
 )
-// 表单内成员字段选项, 必须是必填和用户选择器
+// 表单内用户字段选项, 必须是必填和用户选择器
 const userFieldOnFormOptions = computed(() => {
   return formFieldOptions.filter(
     (item) => item.required && item.type === 'UserSelect'
@@ -262,7 +262,7 @@ const formRules = reactive({
   deptIds: [{ required: true, message: '部门不能为空', trigger: 'change' }],
   userGroups: [{ required: true, message: '用户组不能为空', trigger: 'change' }],
   postIds: [{ required: true, message: '岗位不能为空', trigger: 'change' }],
-  userFieldOnForm: [{ required: true, message: '表单内成员字段为空', trigger: 'change' }],
+  userFieldOnForm: [{ required: true, message: '表单内用户字段不能为空', trigger: 'change' }],
   expression: [{ required: true, message: '流程表达式不能为空', trigger: 'blur' }]
 })
 
