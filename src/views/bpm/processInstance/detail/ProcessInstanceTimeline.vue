@@ -39,17 +39,21 @@
         <!-- 需要自定义选择审批人 -->
         <div
           class="flex flex-wrap gap2 items-center"
-          v-if="isEmpty(activity.tasks) && isEmpty(activity.candidateUsers) && CandidateStrategy.START_USER_SELECT === activity.candidateStrategy"
+          v-if="
+            isEmpty(activity.tasks) &&
+            isEmpty(activity.candidateUsers) &&
+            CandidateStrategy.START_USER_SELECT === activity.candidateStrategy
+          "
         >
           <!--  && activity.nodeType === NodeType.USER_TASK_NODE -->
           <el-button
             class="!px-8px"
-            @click="handleSelectUser(activity.id, customApprover[activity.id])"
+            @click="handleSelectUser(activity.id, customApproveUsers[activity.id])"
           >
             <Icon icon="fa:user-plus" />
           </el-button>
           <div
-            v-for="(user, idx1) in customApprover[activity.id]"
+            v-for="(user, idx1) in customApproveUsers[activity.id]"
             :key="idx1"
             class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600 position-relative"
           >
@@ -169,11 +173,9 @@ withDefaults(
   defineProps<{
     activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
     showStatusIcon?: boolean // 是否显示头像右下角状态图标
-    startUserSelectAssignees?: any // 发起人选择审批人的数据
   }>(),
   {
-    showStatusIcon: true, // 默认值为 true
-    startUserSelectAssignees: () => {}
+    showStatusIcon: true // 默认值为 true
   }
 )
 
@@ -280,10 +282,10 @@ const handleSelectUser = (activityId, selectedList) => {
 const emit = defineEmits<{
   selectUserConfirm: [id: any, userList: any[]]
 }>()
-const customApprover: any = ref({}) // key：activityId，value：用户列表 TODO 芋艿：变量改下
+const customApproveUsers: any = ref({}) // key：activityId，value：用户列表
 // 选择完成
-const handleUserSelectConfirm = (activityId, userList) => {
-  customApprover.value[activityId] = userList || []
+const handleUserSelectConfirm = (activityId: string, userList: any[]) => {
+  customApproveUsers.value[activityId] = userList || []
   emit('selectUserConfirm', activityId, userList)
 }
 </script>
