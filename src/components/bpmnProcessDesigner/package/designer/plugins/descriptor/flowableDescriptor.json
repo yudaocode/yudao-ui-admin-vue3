@@ -1211,6 +1211,20 @@
           "isAttr": true
         }
       ]
+    },
+    {
+      "name": "AssignStartUserHandlerType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:StartEvent", "bpmn:UserTask"]
+      },
+      "properties": [
+      {
+        "name": "value",
+        "type": "Integer",
+        "isBody": true
+      }
+      ]
     }
   ],
   "emumerations": []
