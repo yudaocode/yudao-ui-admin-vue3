@@ -122,7 +122,20 @@
                 />
               </el-select>
             </el-form-item>
-
+            <el-form-item
+              v-if="configForm.candidateStrategy === CandidateStrategy.USER_FIELD_ON_FORM"
+              label="表单内成员字段"
+              prop="userFieldOnForm"
+            >
+              <el-select v-model="configForm.userFieldOnForm" clearable style="width: 100%">
+                <el-option
+                  v-for="(item,idx) in userFieldOnFormOptions"
+                  :key="idx"
+                  :label="item.title"
+                  :value="item.field"
+                />
+              </el-select>
+            </el-form-item>
             <el-form-item
               v-if="configForm.candidateStrategy === CandidateStrategy.EXPRESSION"
               label="流程表达式"
@@ -230,9 +243,15 @@ const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.COPY_
 // 激活的 Tab 标签页
 const activeTabName = ref('user')
 // 表单字段权限配置
-const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
+const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFields } = useFormFieldsPermission(
   FieldPermissionType.READ
 )
+// 表单内成员字段选项, 必须是必填和用户选择器
+const userFieldOnFormOptions = computed(() => {
+  return formFieldOptions.filter(
+    (item) => item.required && item.type === 'UserSelect'
+  )
+})
 // 抄送人表单配置
 const formRef = ref() // 表单 Ref
 // 表单校验规则
@@ -243,6 +262,7 @@ const formRules = reactive({
   deptIds: [{ required: true, message: '部门不能为空', trigger: 'change' }],
   userGroups: [{ required: true, message: '用户组不能为空', trigger: 'change' }],
   postIds: [{ required: true, message: '岗位不能为空', trigger: 'change' }],
+  userFieldOnForm: [{ required: true, message: '表单内成员字段为空', trigger: 'change' }],
   expression: [{ required: true, message: '流程表达式不能为空', trigger: 'blur' }]
 })
 
@@ -272,6 +292,7 @@ const changeCandidateStrategy = () => {
   configForm.value.postIds = []
   configForm.value.userGroups = []
   configForm.value.deptLevel = 1
+  configForm.value.userFieldOnForm = ''
 }
 // 保存配置
 const saveConfig = async () => {

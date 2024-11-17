@@ -32,7 +32,7 @@ export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlo
  */
 export function useFormFieldsPermission(defaultPermission: FieldPermissionType) {
   // 字段权限配置. 需要有 field, title,  permissioin 属性
-  const fieldsPermissionConfig = ref<Array<Record<string, string>>>([])
+  const fieldsPermissionConfig = ref<Array<Record<string, any>>>([])
 
   const formType = inject<Ref<number>>('formType') // 表单类型
 
@@ -45,49 +45,71 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
   }
   // 默认的表单权限： 获取表单的所有字段，设置字段默认权限为只读
   const getDefaultFieldsPermission = (formFields?: string[]) => {
-    const defaultFieldsPermission: Array<Record<string, string>> = []
+    let defaultFieldsPermission: Array<Record<string, any>> = []
     if (formFields) {
-      formFields.forEach((fieldStr: string) => {
-        parseFieldsSetDefaultPermission(JSON.parse(fieldStr), defaultFieldsPermission)
-      })
+      defaultFieldsPermission = parseFormCreateFields(formFields).map( item => {
+        return {
+          field: item.field,
+          title: item.title,
+          permission: defaultPermission
+        }
+      });
     }
     return defaultFieldsPermission
   }
-  // 解析字段。赋给默认权限
-  const parseFieldsSetDefaultPermission = (
+   // 解析 formCreate 所有表单字段, 并返回
+   const parseFormCreateFields = (formFields?: string[]) => {
+    const result: Array<Record<string, any>> = []
+    if (formFields) {
+      formFields.forEach((fieldStr: string) => {
+        parseFields(JSON.parse(fieldStr), result)
+      })
+    }
+    return result
+  }
+  const parseFields = (
     rule: Record<string, any>,
-    fieldsPermission: Array<Record<string, string>>,
+    fields: Array<Record<string, any>>,
     parentTitle: string = ''
   ) => {
-    const { /**type,*/ field, title: tempTitle, children } = rule
+    const { type, field, $required, title: tempTitle, children } = rule
     if (field && tempTitle) {
       let title = tempTitle
       if (parentTitle) {
         title = `${parentTitle}.${tempTitle}`
       }
-      fieldsPermission.push({
+      let required = false;
+      if($required) {
+        required = true;
+      }
+      fields.push({
         field,
         title,
-        permission: defaultPermission
+        type,
+        required
       })
       // TODO 子表单 需要处理子表单字段
       // if (type === 'group' && rule.props?.rule && Array.isArray(rule.props.rule)) {
       //   // 解析子表单的字段
       //   rule.props.rule.forEach((item) => {
-      //     parseFieldsSetDefaultPermission(item, fieldsPermission, title)
+      //     parseFields(item, fieldsPermission, title)
       //   })
       // }
     }
     if (children && Array.isArray(children)) {
       children.forEach((rule) => {
-        parseFieldsSetDefaultPermission(rule, fieldsPermission)
+        parseFields(rule, fields)
       })
     }
   }
+  
+  // 获取表单的所有字段，作为下拉框选项
+  const formFieldOptions = parseFormCreateFields(unref(formFields))
 
   return {
     formType,
     fieldsPermissionConfig,
+    formFieldOptions,
     getNodeConfigFormFields
   }
 }
@@ -152,6 +174,7 @@ export type UserTaskFormType = {
   userGroups?: number[] // 用户组
   postIds?: number[] // 岗位
   expression?: string // 流程表达式
+  userFieldOnForm?: string // 表单内成员字段
   approveRatio?: number
   rejectHandlerType?: RejectHandlerType
   returnNodeId?: string
@@ -174,6 +197,7 @@ export type CopyTaskFormType = {
   userIds?: number[] // 用户
   userGroups?: number[] // 用户组
   postIds?: number[] // 岗位
+  userFieldOnForm?: string // 表单内成员字段
   expression?: string // 流程表达式
 }
 
@@ -282,6 +306,11 @@ export function useNodeForm(nodeType: NodeType) {
       }
     }
 
+    // 表单内成员字段
+    if (configForm.value?.candidateStrategy === CandidateStrategy.USER_FIELD_ON_FORM) {
+        showText = `表单内用户字段`
+    }
+
     // 发起人自选
     if (configForm.value?.candidateStrategy === CandidateStrategy.START_USER_SELECT) {
       showText = `发起人自选`
@@ -327,6 +356,9 @@ export function useNodeForm(nodeType: NodeType) {
         break
       case CandidateStrategy.USER_GROUP:
         candidateParam = configForm.value.userGroups!.join(',')
+        break
+      case CandidateStrategy.USER_FIELD_ON_FORM:
+        candidateParam = configForm.value.userFieldOnForm!
         break
       case CandidateStrategy.EXPRESSION:
         candidateParam = configForm.value.expression!
@@ -375,6 +407,9 @@ export function useNodeForm(nodeType: NodeType) {
         break
       case CandidateStrategy.USER_GROUP:
         configForm.value.userGroups = candidateParam.split(',').map((item) => +item)
+        break
+      case CandidateStrategy.USER_FIELD_ON_FORM:
+        configForm.value.userFieldOnForm = candidateParam
         break
       case CandidateStrategy.EXPRESSION:
         configForm.value.expression = candidateParam

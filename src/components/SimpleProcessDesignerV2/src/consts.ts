@@ -79,7 +79,7 @@ export interface SimpleFlowNode {
   // 审批按钮设置
   buttonsSetting?: any[]
   // 表单权限
-  fieldsPermission?: Array<Record<string, string>>
+  fieldsPermission?: Array<Record<string, any>>
   // 审批任务超时处理
   timeoutHandler?: TimeoutHandler
   // 审批任务拒绝处理
@@ -145,6 +145,11 @@ export enum CandidateStrategy {
    * 指定用户组
    */
   USER_GROUP = 40,
+
+   /**
+   * 表单内成员字段
+   */
+   USER_FIELD_ON_FORM = 50,
   /**
    * 流程表达式
    */
@@ -424,6 +429,7 @@ export const CANDIDATE_STRATEGY: DictDataVO[] = [
   { label: '发起人部门负责人', value: CandidateStrategy.START_USER_DEPT_LEADER },
   { label: '发起人连续部门负责人', value: CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER },
   { label: '用户组', value: CandidateStrategy.USER_GROUP },
+  { label: '表单内成员字段', value: CandidateStrategy.USER_FIELD_ON_FORM },
   { label: '流程表达式', value: CandidateStrategy.EXPRESSION }
 ]
 // 审批节点 的审批类型
