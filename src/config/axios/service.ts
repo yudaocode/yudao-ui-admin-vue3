@@ -1,13 +1,6 @@
-import axios, {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestHeaders,
-  AxiosResponse,
-  InternalAxiosRequestConfig
-} from 'axios'
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
-import qs from 'qs'
 import { config } from '@/config/axios/config'
 import { getAccessToken, getRefreshToken, getTenantId, removeToken, setToken } from '@/utils/auth'
 import errorCode from './errorCode'
@@ -52,29 +45,12 @@ service.interceptors.request.use(
       }
     })
     if (getAccessToken() && !isToken) {
-      ;(config as Recordable).headers.Authorization = 'Bearer ' + getAccessToken() // 让每个请求携带自定义token
+      config.headers.Authorization = 'Bearer ' + getAccessToken() // 让每个请求携带自定义token
     }
     // 设置租户
     if (tenantEnable && tenantEnable === 'true') {
       const tenantId = getTenantId()
-      if (tenantId) (config as Recordable).headers['tenant-id'] = tenantId
-    }
-    const params = config.params || {}
-    const data = config.data || false
-    if (
-      config.method?.toUpperCase() === 'POST' &&
-      (config.headers as AxiosRequestHeaders)['Content-Type'] ===
-        'application/x-www-form-urlencoded'
-    ) {
-      config.data = qs.stringify(data)
-    }
-    // get参数编码
-    if (config.method?.toUpperCase() === 'GET' && params) {
-      config.params = {}
-      const paramsStr = qs.stringify(params, { allowDots: true })
-      if (paramsStr) {
-        config.url = config.url + '?' + paramsStr
-      }
+      if (tenantId) config.headers['tenant-id'] = tenantId
     }
     return config
   },
