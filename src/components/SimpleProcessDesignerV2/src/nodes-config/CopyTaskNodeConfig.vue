@@ -60,7 +60,8 @@
             <el-form-item
               v-if="
                 configForm.candidateStrategy == CandidateStrategy.DEPT_MEMBER ||
-                configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER
+                configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER ||
+                configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
               "
               label="指定部门"
               prop="deptIds"
@@ -133,6 +134,40 @@
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item
+              v-if="configForm.candidateStrategy === CandidateStrategy.DEPT_LEADER_ON_FORM"
+              label="表单内部门字段"
+              prop="deptFieldOnForm"
+            >
+              <el-select v-model="configForm.deptFieldOnForm" clearable style="width: 100%">
+                <el-option
+                  v-for="(item,idx) in deptFieldOnFormOptions"
+                  :key="idx"
+                  :label="item.title"
+                  :value="item.field"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item
+              v-if="
+                configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
+                configForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+                configForm.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
+                configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER_ON_FORM
+              "
+              :label="deptLevelLabel!"
+              prop="deptLevel"
+              span="24"
+            >
+              <el-select v-model="configForm.deptLevel" clearable>
+                <el-option
+                  v-for="(item, index) in MULTI_LEVEL_DEPT"
+                  :key="index"
+                  :label="item.label"
+                  :value="item.value"
                 />
               </el-select>
             </el-form-item>
@@ -214,7 +249,8 @@ import {
   CandidateStrategy,
   NodeType,
   CANDIDATE_STRATEGY,
-  FieldPermissionType
+  FieldPermissionType,
+  MULTI_LEVEL_DEPT
 } from '../consts'
 import {
   useWatchNode,
@@ -234,6 +270,15 @@ const props = defineProps({
     required: true
   }
 })
+const deptLevelLabel = computed(() => {
+  let label = '部门负责人来源'
+  if (configForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER) {
+    label = label + '(指定部门向上)'
+  } else {
+    label = label + '(发起人部门向上)'
+  }
+  return label
+})
 // 抽屉配置
 const { settingVisible, closeDrawer, openDrawer } = useDrawer()
 // 当前节点
@@ -252,6 +297,12 @@ const userFieldOnFormOptions = computed(() => {
     (item) => item.required && item.type === 'UserSelect'
   )
 })
+// 表单内部门字段选项, 必须是必填和部门选择器
+const deptFieldOnFormOptions = computed(() => {
+  return formFieldOptions.filter(
+    (item) => item.required && item.type === 'DeptSelect'
+  )
+})
 // 抄送人表单配置
 const formRef = ref() // 表单 Ref
 // 表单校验规则
@@ -263,6 +314,7 @@ const formRules = reactive({
   userGroups: [{ required: true, message: '用户组不能为空', trigger: 'change' }],
   postIds: [{ required: true, message: '岗位不能为空', trigger: 'change' }],
   userFieldOnForm: [{ required: true, message: '表单内用户字段不能为空', trigger: 'change' }],
+  deptFieldOnForm: [{ required: true, message: '表单内部门字段不能为空', trigger: 'change' }],
   expression: [{ required: true, message: '流程表达式不能为空', trigger: 'blur' }]
 })
 

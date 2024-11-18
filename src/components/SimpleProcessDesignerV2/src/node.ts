@@ -146,6 +146,7 @@ export type UserTaskFormType = {
   postIds?: number[] // 岗位
   expression?: string // 流程表达式
   userFieldOnForm?: string // 表单内用户字段
+  deptFieldOnForm?: string // 表单内部门字段
   approveRatio?: number
   rejectHandlerType?: RejectHandlerType
   returnNodeId?: string
@@ -169,6 +170,7 @@ export type CopyTaskFormType = {
   userGroups?: number[] // 用户组
   postIds?: number[] // 岗位
   userFieldOnForm?: string // 表单内用户字段
+  deptFieldOnForm?: string // 表单内部门字段
   expression?: string // 流程表达式
 }
 
@@ -285,6 +287,11 @@ export function useNodeForm(nodeType: NodeType) {
       showText = `表单用户：${item?.title}`
     }
 
+    // 表单内部门负责人
+    if (configForm.value?.candidateStrategy === CandidateStrategy.DEPT_LEADER_ON_FORM) {
+      showText = `表单内部门负责人`
+    }
+
     // 发起人自选
     if (configForm.value?.candidateStrategy === CandidateStrategy.START_USER_SELECT) {
       showText = `发起人自选`
@@ -353,6 +360,13 @@ export function useNodeForm(nodeType: NodeType) {
         candidateParam = deptIds.concat('|' + configForm.value.deptLevel + '')
         break
       }
+      // 表单内部门的负责人
+      case CandidateStrategy.DEPT_LEADER_ON_FORM: {
+        // 候选人参数格式: | 分隔 。左边为表单内部门字段。 右边为部门层级
+        const deptFieldOnForm = configForm.value.deptFieldOnForm!
+        candidateParam = deptFieldOnForm.concat('|' + configForm.value.deptLevel + '')
+        break
+      }
       default:
         break
     }
@@ -402,6 +416,14 @@ export function useNodeForm(nodeType: NodeType) {
         // 候选人参数格式: | 分隔 。左边为部门（多个部门用 , 分隔）。 右边为部门层级
         const paramArray = candidateParam.split('|')
         configForm.value.deptIds = paramArray[0].split(',').map((item) => +item)
+        configForm.value.deptLevel = +paramArray[1]
+        break
+      }
+      // 表单内的部门负责人
+      case CandidateStrategy.DEPT_LEADER_ON_FORM: {
+        // 候选人参数格式: | 分隔 。左边为表单内的部门字段。 右边为部门层级
+        const paramArray = candidateParam.split('|')
+        configForm.value.deptFieldOnForm = paramArray[0]
         configForm.value.deptLevel = +paramArray[1]
         break
       }
