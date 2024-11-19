@@ -16,10 +16,10 @@
           <img class="w-full h-full" :src="getApprovalNodeImg(activity.nodeType)" alt="" />
           <div
             v-if="showStatusIcon"
-            class="position-absolute top-17px left-17px rounded-full flex items-center p-2px"
+            class="position-absolute top-17px left-17px rounded-full flex items-center p-1px border-2 border-white border-solid"
             :style="{ backgroundColor: getApprovalNodeColor(activity.status) }"
           >
-            <el-icon :size="12" color="#fff">
+            <el-icon :size="11" color="#fff">
               <component :is="getApprovalNodeIcon(activity.status, activity.nodeType)" />
             </el-icon>
           </div>
@@ -106,10 +106,10 @@
                 <!-- 信息：任务 ICON -->
                 <div
                   v-if="showStatusIcon && onlyStatusIconShow.includes(task.status)"
-                  class="position-absolute top-19px left-23px rounded-full flex items-center p-2px"
+                  class="position-absolute top-19px left-23px rounded-full flex items-center p-1px border-2 border-white border-solid"
                   :style="{ backgroundColor: statusIconMap2[task.status]?.color }"
                 >
-                  <Icon :size="12" :icon="statusIconMap2[task.status]?.icon" color="#FFFFFF" />
+                  <Icon :size="11" :icon="statusIconMap2[task.status]?.icon" color="#FFFFFF" />
                 </div>
               </div>
             </div>
@@ -140,10 +140,10 @@
             <!-- 信息：任务 ICON -->
             <div
               v-if="showStatusIcon"
-              class="position-absolute top-19px left-23px rounded-full flex items-center p-2px"
+              class="position-absolute top-20px left-24px rounded-full flex items-center p-1px border-2 border-white border-solid"
               :style="{ backgroundColor: statusIconMap2['-1']?.color }"
             >
-              <Icon :size="12" :icon="statusIconMap2['-1']?.icon" color="#FFFFFF" />
+              <Icon :size="11" :icon="statusIconMap2['-1']?.icon" color="#FFFFFF" />
             </div>
           </div>
         </div>
