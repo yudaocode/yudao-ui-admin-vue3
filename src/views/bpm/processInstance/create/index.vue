@@ -33,7 +33,7 @@
           </div>
         </el-col>
         <el-col :span="19">
-          <el-scrollbar ref="scrollWrapper" height="700">
+          <el-scrollbar ref="scrollWrapper" height="700" @scroll="handleScroll">
             <div
               class="mb-20px pl-10px"
               v-for="(definitions, categoryCode) in processDefinitionGroup"
@@ -218,6 +218,43 @@ const handleSelect = async (row, formVariables?) => {
   // 初始化流程定义详情
   await nextTick()
   processDefinitionDetailRef.value?.initProcessInfo(row, formVariables)
+}
+
+/** 处理滚动事件 */
+const handleScroll = (e) => {
+  // 直接使用事件对象获取滚动位置
+  const scrollTop = e.scrollTop
+
+  // 获取所有分类区域的位置信息
+  const categoryPositions = categoryList.value
+    .map((category) => {
+      const categoryRef = proxy.$refs[`category-${category.code}`]
+      if (categoryRef?.[0]) {
+        return {
+          code: category.code,
+          offsetTop: categoryRef[0].offsetTop,
+          height: categoryRef[0].offsetHeight
+        }
+      }
+      return null
+    })
+    .filter(Boolean)
+
+  // 查找当前滚动位置对应的分类
+  let currentCategory = categoryPositions[0]
+  for (const position of categoryPositions) {
+    // 为了更好的用户体验，可以添加一个缓冲区域（比如 50px）
+    if (scrollTop >= position.offsetTop - 50) {
+      currentCategory = position
+    } else {
+      break
+    }
+  }
+
+  // 更新当前 active 的分类
+  if (currentCategory && categoryActive.value.code !== currentCategory.code) {
+    categoryActive.value = categoryList.value.find((c) => c.code === currentCategory.code)
+  }
 }
 
 /** 初始化 */
