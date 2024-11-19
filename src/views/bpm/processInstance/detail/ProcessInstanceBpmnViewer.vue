@@ -1,6 +1,6 @@
 <template>
   <el-card v-loading="loading" class="box-card">
-    <MyProcessViewer key="designer" :xml="view.bpmnXml" :view="view" class="h-700px" />
+    <MyProcessViewer key="designer" :xml="view.bpmnXml" :view="view" class="process-viewer" />
   </el-card>
 </template>
 <script lang="ts" setup>
@@ -44,5 +44,10 @@ watch(
 .box-card {
   width: 100%;
   margin-bottom: 20px;
+}
+
+:deep(.process-viewer) {
+  height: 100% !important;
+  min-height: 500px;
 }
 </style>

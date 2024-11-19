@@ -16,9 +16,10 @@
           <img class="w-full h-full" :src="getApprovalNodeImg(activity.nodeType)" alt="" />
           <div
             v-if="showStatusIcon"
-            class="position-absolute top-17px left-17px bg-#fff rounded-full flex items-center p-2px"
+            class="position-absolute top-17px left-17px rounded-full flex items-center p-2px"
+            :style="{ backgroundColor: getApprovalNodeColor(activity.status) }"
           >
-            <el-icon :size="12" :color="getApprovalNodeColor(activity.status)">
+            <el-icon :size="12" color="#fff">
               <component :is="getApprovalNodeIcon(activity.status, activity.nodeType)" />
             </el-icon>
           </div>
@@ -46,19 +47,22 @@
           "
         >
           <!--  && activity.nodeType === NodeType.USER_TASK_NODE -->
-          <el-button
-            class="!px-8px"
-            @click="handleSelectUser(activity.id, customApproveUsers[activity.id])"
-          >
-            <Icon icon="fa:user-plus" />
-          </el-button>
+
+          <el-tooltip content="添加用户" placement="left">
+            <el-button
+              class="!px-6px"
+              @click="handleSelectUser(activity.id, customApproveUsers[activity.id])"
+            >
+              <img class="w-18px text-#ccc" src="@/assets/svgs/bpm/add-user.svg" alt="" />
+            </el-button>
+          </el-tooltip>
           <div
             v-for="(user, idx1) in customApproveUsers[activity.id]"
             :key="idx1"
-            class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600 position-relative"
+            class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
           >
-            <el-avatar :size="28" v-if="user.avatar" :src="user.avatar" />
-            <el-avatar :size="28" v-else>
+            <el-avatar class="!m-5px" :size="28" v-if="user.avatar" :src="user.avatar" />
+            <el-avatar class="!m-5px" :size="28" v-else>
               {{ user.nickname.substring(0, 1) }}
             </el-avatar>
             {{ user.nickname }}
@@ -73,40 +77,39 @@
             >
               <!-- 信息：头像昵称 -->
               <div
-                class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600 position-relative"
+                class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
               >
                 <template v-if="task.assigneeUser?.avatar || task.assigneeUser?.nickname">
                   <el-avatar
+                    class="!m-5px"
                     :size="28"
                     v-if="task.assigneeUser?.avatar"
                     :src="task.assigneeUser?.avatar"
                   />
-                  <el-avatar :size="28" v-else>
+                  <el-avatar class="!m-5px" :size="28" v-else>
                     {{ task.assigneeUser?.nickname.substring(0, 1) }}
                   </el-avatar>
                   {{ task.assigneeUser?.nickname }}
                 </template>
                 <template v-else-if="task.ownerUser?.avatar || task.ownerUser?.nickname">
                   <el-avatar
+                    class="!m-5px"
                     :size="28"
                     v-if="task.ownerUser?.avatar"
                     :src="task.ownerUser?.avatar"
                   />
-                  <el-avatar :size="28" v-else>
+                  <el-avatar class="!m-5px" :size="28" v-else>
                     {{ task.ownerUser?.nickname.substring(0, 1) }}
                   </el-avatar>
                   {{ task.ownerUser?.nickname }}
                 </template>
                 <!-- 信息：任务 ICON -->
                 <div
-                  v-if="onlyStatusIconShow.includes(task.status)"
-                  class="position-absolute top-22px left-26px bg-#fff rounded-full flex items-center p-2px"
+                  v-if="showStatusIcon && onlyStatusIconShow.includes(task.status)"
+                  class="position-absolute top-19px left-23px rounded-full flex items-center p-2px"
+                  :style="{ backgroundColor: statusIconMap2[task.status]?.color }"
                 >
-                  <Icon
-                    :size="12"
-                    :icon="statusIconMap2[task.status]?.icon"
-                    :color="statusIconMap2[task.status]?.color"
-                  />
+                  <Icon :size="12" :icon="statusIconMap2[task.status]?.icon" color="#FFFFFF" />
                 </div>
               </div>
             </div>
@@ -126,23 +129,21 @@
           <div
             v-for="(user, idx1) in activity.candidateUsers"
             :key="idx1"
-            class="bg-gray-100 h-35px rounded-3xl flex items-center p-8px gap-2 dark:color-gray-600 position-relative"
+            class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
           >
-            <el-avatar :size="28" v-if="user.avatar" :src="user.avatar" />
-            <el-avatar :size="28" v-else>
+            <el-avatar class="!m-5px" :size="28" v-if="user.avatar" :src="user.avatar" />
+            <el-avatar class="!m-5px" :size="28" v-else>
               {{ user.nickname.substring(0, 1) }}
             </el-avatar>
             {{ user.nickname }}
 
             <!-- 信息：任务 ICON -->
             <div
-              class="position-absolute top-22px left-26px bg-#fff rounded-full flex items-center p-2px"
+              v-if="showStatusIcon"
+              class="position-absolute top-19px left-23px rounded-full flex items-center p-2px"
+              :style="{ backgroundColor: statusIconMap2['-1']?.color }"
             >
-              <Icon
-                :size="12"
-                :icon="statusIconMap2['-1']?.icon"
-                :color="statusIconMap2['-1']?.color"
-              />
+              <Icon :size="12" :icon="statusIconMap2['-1']?.icon" color="#FFFFFF" />
             </div>
           </div>
         </div>
@@ -184,7 +185,7 @@ const statusIconMap2 = {
   // 未开始
   '-1': { color: '#909398', icon: 'ep-clock' },
   // 待审批
-  '0': { color: '#e5e7ec', icon: 'ep:loading' },
+  '0': { color: '#00b32a', icon: 'ep:loading' },
   // 审批中
   '1': { color: '#448ef7', icon: 'ep:loading' },
   // 审批通过
@@ -204,7 +205,7 @@ const statusIconMap2 = {
 const statusIconMap = {
   // 审批未开始
   '-1': { color: '#909398', icon: Clock },
-  '0': { color: '#e5e7ec', icon: Clock },
+  '0': { color: '#00b32a', icon: Clock },
   // 审批中
   '1': { color: '#448ef7', icon: Loading },
   // 审批通过
@@ -223,9 +224,9 @@ const statusIconMap = {
 
 const nodeTypeSvgMap = {
   // 结束节点
-  [NodeType.END_EVENT_NODE]: { color: '#ffffff', svg: finishSvg },
+  [NodeType.END_EVENT_NODE]: { color: '#909398', svg: finishSvg },
   // 发起人节点
-  [NodeType.START_USER_NODE]: { color: '#ffffff', svg: starterSvg },
+  [NodeType.START_USER_NODE]: { color: '#909398', svg: starterSvg },
   // 审批人节点
   [NodeType.USER_TASK_NODE]: { color: '#ff943e', svg: auditorSvg },
   // 抄送人节点

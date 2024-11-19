@@ -4,6 +4,7 @@
       :flow-node="simpleModel"
       :tasks="tasks"
       :process-instance="processInstance"
+      class="process-viewer"
     />
   </div>
 </template>
@@ -151,3 +152,10 @@ const setSimpleModelNodeTaskStatus = (
   )
 }
 </script>
+
+<style lang="scss" scoped>
+:deep(.process-viewer) {
+  height: 100% !important;
+  min-height: 500px;
+}
+</style>

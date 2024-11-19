@@ -41,7 +41,7 @@
               :ref="`category-${categoryCode}`"
             >
               <h3 class="text-18px font-bold mb-10px mt-5px">
-                {{ getCategoryName(categoryCode) }}
+                {{ getCategoryName(categoryCode as any) }}
               </h3>
               <div class="grid grid-cols-3 gap3">
                 <el-tooltip
@@ -175,7 +175,17 @@ const handleQuery = () => {
 /** 流程定义的分组 */
 const processDefinitionGroup: any = computed(() => {
   if (!processDefinitionList.value?.length) return {}
-  return groupBy(filteredProcessDefinitionList.value, 'category')
+  const grouped = groupBy(filteredProcessDefinitionList.value, 'category')
+
+  const orderedGroup = {}
+  // 按照 categoryList 的顺序重新组织数据
+  categoryList.value.forEach((category: any) => {
+    if (grouped[category.code]) {
+      orderedGroup[category.code] = grouped[category.code]
+    }
+  })
+
+  return orderedGroup
 })
 
 /** 左侧分类切换 */
