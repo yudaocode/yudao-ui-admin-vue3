@@ -22,7 +22,7 @@
         <el-col :span="5">
           <div class="flex flex-col">
             <div
-              v-for="category in categoryList"
+              v-for="category in availableCategories"
               :key="category.code"
               class="flex items-center p-10px cursor-pointer text-14px rounded-md"
               :class="categoryActive.code === category.code ? 'text-#3e7bff bg-#e8eeff' : ''"
@@ -137,9 +137,11 @@ const getCategoryList = async () => {
   try {
     // 流程分类
     categoryList.value = await CategoryApi.getCategorySimpleList()
-    // 选中首个分类
-    if (categoryList.value.length > 0) {
-      categoryActive.value = categoryList.value[0]
+    // 等待流程定义数据加载完成后再设置默认选中分类
+    await nextTick()
+    // 选中第一个有流程的分类
+    if (availableCategories.value.length > 0) {
+      categoryActive.value = availableCategories.value[0]
     }
   } finally {
   }
@@ -260,6 +262,21 @@ const handleScroll = (e) => {
 /** 初始化 */
 onMounted(() => {
   getList()
+})
+
+/** 过滤出有流程的分类列表 */
+const availableCategories = computed(() => {
+  if (!categoryList.value?.length || !processDefinitionGroup.value) {
+    return []
+  }
+  
+  // 获取所有有流程的分类代码
+  const availableCategoryCodes = Object.keys(processDefinitionGroup.value)
+  
+  // 过滤出有流程的分类
+  return categoryList.value.filter(category => 
+    availableCategoryCodes.includes(category.code)
+  )
 })
 </script>
 
