@@ -174,17 +174,18 @@ const handleQuery = () => {
 
 /** 流程定义的分组 */
 const processDefinitionGroup: any = computed(() => {
-  if (!processDefinitionList.value?.length) return {}
-  const grouped = groupBy(filteredProcessDefinitionList.value, 'category')
+  if (!processDefinitionList.value?.length) {
+    return {}
+  }
 
-  const orderedGroup = {}
+  const grouped = groupBy(filteredProcessDefinitionList.value, 'category')
   // 按照 categoryList 的顺序重新组织数据
+  const orderedGroup = {}
   categoryList.value.forEach((category: any) => {
     if (grouped[category.code]) {
       orderedGroup[category.code] = grouped[category.code]
     }
   })
-
   return orderedGroup
 })
 

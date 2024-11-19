@@ -5,7 +5,7 @@
         <ContentWrap class="h-1/1">
           <el-tree
             ref="treeRef"
-            :data="deptList"
+            :data="deptTree"
             :expand-on-click-node="false"
             :props="defaultProps"
             default-expand-all
@@ -39,7 +39,7 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import { defaultProps, handleTree } from '@/utils/tree'
+import { defaultProps, findTreeNode, handleTree } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
 
@@ -49,27 +49,27 @@ const emit = defineEmits<{
 }>()
 const { t } = useI18n() // 国际
 const message = useMessage() // 消息弹窗
-const deptList = ref<Tree[]>([]) // 部门树形结构化
-const allUserList = ref<UserApi.UserVO[]>([]) // 所有用户列表
+const deptTree = ref<Tree[]>([]) // 部门树形结构化
+const userList = ref<UserApi.UserVO[]>([]) // 所有用户列表
 const filteredUserList = ref<UserApi.UserVO[]>([]) // 当前部门过滤后的用户列表
 const selectedUserIdList: any = ref([]) // 选中的用户列表
 const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const activityId = ref()
 
-// 计算属性：合并已选择的用户和当前部门过滤后的用户
+/** 计算属性：合并已选择的用户和当前部门过滤后的用户 */
 const transferUserList = computed(() => {
-  // 获取所有已选择的用户
-  const selectedUsers = allUserList.value.filter((user: any) =>
+  // 1.1 获取所有已选择的用户
+  const selectedUsers = userList.value.filter((user: any) =>
     selectedUserIdList.value.includes(user.id)
   )
 
-  // 获取当前部门过滤后的未选择用户
+  // 1.2 获取当前部门过滤后的未选择用户
   const filteredUnselectedUsers = filteredUserList.value.filter(
     (user: any) => !selectedUserIdList.value.includes(user.id)
   )
 
-  // 合并并去重
+  // 2. 合并并去重
   return [...selectedUsers, ...filteredUnselectedUsers]
 })
 
@@ -78,22 +78,14 @@ const open = async (id: number, selectedList?: any[]) => {
   activityId.value = id
   resetForm()
 
-  deptList.value = handleTree(await DeptApi.getSimpleDeptList())
-  // 初始加载所有用户
-  await getAllUserList()
+  // 加载部门、用户列表
+  deptTree.value = handleTree(await DeptApi.getSimpleDeptList())
+  userList.value = await UserApi.getSimpleUserList()
+
   // 初始状态下，过滤列表等于所有用户列表
-  filteredUserList.value = [...allUserList.value]
+  filteredUserList.value = [...userList.value]
   selectedUserIdList.value = selectedList?.map((item: any) => item.id) || []
   dialogVisible.value = true
-}
-/** 获取所有用户列表 */
-const getAllUserList = async () => {
-  try {
-    // @ts-ignore
-    const data = await UserApi.getSimpleUserList()
-    allUserList.value = data
-  } finally {
-  }
 }
 
 /** 获取部门过滤后的用户列表 */
@@ -102,6 +94,7 @@ const getUserList = async (deptId?: number) => {
   try {
     // @ts-ignore
     // TODO @芋艿：替换到 simple List 暂不支持 deptId 过滤
+    // TODO @Zqqq：这个，可以使用前端过滤么？通过 deptList 获取到 deptId 子节点，然后去 userList
     const data = await UserApi.getUserPage({ pageSize: 100, pageNo: 1, deptId })
     // 更新过滤后的用户列表
     filteredUserList.value = data.list
@@ -116,7 +109,7 @@ const submitForm = async () => {
     message.success(t('common.updateSuccess'))
     dialogVisible.value = false
     // 从所有用户列表中筛选出已选择的用户
-    const emitUserList = allUserList.value.filter((user: any) =>
+    const emitUserList = userList.value.filter((user: any) =>
       selectedUserIdList.value.includes(user.id)
     )
     // 发送操作成功的事件
@@ -127,8 +120,8 @@ const submitForm = async () => {
 
 /** 重置表单 */
 const resetForm = () => {
-  deptList.value = []
-  allUserList.value = []
+  deptTree.value = []
+  userList.value = []
   filteredUserList.value = []
   selectedUserIdList.value = []
 }
