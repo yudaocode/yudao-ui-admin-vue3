@@ -124,13 +124,13 @@
               </el-select>
             </el-form-item>
             <el-form-item
-              v-if="configForm.candidateStrategy === CandidateStrategy.USER_FIELD_ON_FORM"
+              v-if="configForm.candidateStrategy === CandidateStrategy.FORM_USER"
               label="表单内用户字段"
               prop="userFieldOnForm"
             >
               <el-select v-model="configForm.userFieldOnForm" clearable style="width: 100%">
                 <el-option
-                  v-for="(item,idx) in userFieldOnFormOptions"
+                  v-for="(item, idx) in userFieldOnFormOptions"
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
@@ -138,13 +138,13 @@
               </el-select>
             </el-form-item>
             <el-form-item
-              v-if="configForm.candidateStrategy === CandidateStrategy.DEPT_LEADER_ON_FORM"
+              v-if="configForm.candidateStrategy === CandidateStrategy.FORM_DEPT_LEADER"
               label="表单内部门字段"
               prop="deptFieldOnForm"
             >
               <el-select v-model="configForm.deptFieldOnForm" clearable style="width: 100%">
                 <el-option
-                  v-for="(item,idx) in deptFieldOnFormOptions"
+                  v-for="(item, idx) in deptFieldOnFormOptions"
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
@@ -155,8 +155,9 @@
               v-if="
                 configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
                 configForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER_ON_FORM
+                configForm.candidateStrategy ==
+                  CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
+                configForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
               "
               :label="deptLevelLabel!"
               prop="deptLevel"
@@ -288,20 +289,15 @@ const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.COPY_
 // 激活的 Tab 标签页
 const activeTabName = ref('user')
 // 表单字段权限配置
-const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFields } = useFormFieldsPermission(
-  FieldPermissionType.READ
-)
+const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFields } =
+  useFormFieldsPermission(FieldPermissionType.READ)
 // 表单内用户字段选项, 必须是必填和用户选择器
 const userFieldOnFormOptions = computed(() => {
-  return formFieldOptions.filter(
-    (item) => item.required && item.type === 'UserSelect'
-  )
+  return formFieldOptions.filter((item) => item.required && item.type === 'UserSelect')
 })
 // 表单内部门字段选项, 必须是必填和部门选择器
 const deptFieldOnFormOptions = computed(() => {
-  return formFieldOptions.filter(
-    (item) => item.required && item.type === 'DeptSelect'
-  )
+  return formFieldOptions.filter((item) => item.required && item.type === 'DeptSelect')
 })
 // 抄送人表单配置
 const formRef = ref() // 表单 Ref
@@ -332,9 +328,7 @@ const {
 const configForm = tempConfigForm as Ref<CopyTaskFormType>
 // 抄送人策略， 去掉发起人自选 和 发起人自己
 const copyUserStrategies = computed(() => {
-  return CANDIDATE_STRATEGY.filter(
-    (item) => item.value !== CandidateStrategy.START_USER
-  )
+  return CANDIDATE_STRATEGY.filter((item) => item.value !== CandidateStrategy.START_USER)
 })
 // 改变抄送人设置策略
 const changeCandidateStrategy = () => {

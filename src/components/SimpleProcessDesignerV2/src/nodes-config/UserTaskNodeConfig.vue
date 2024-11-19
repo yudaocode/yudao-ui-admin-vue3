@@ -138,13 +138,13 @@
               </el-select>
             </el-form-item>
             <el-form-item
-              v-if="configForm.candidateStrategy === CandidateStrategy.USER_FIELD_ON_FORM"
+              v-if="configForm.candidateStrategy === CandidateStrategy.FORM_USER"
               label="表单内用户字段"
               prop="userFieldOnForm"
             >
               <el-select v-model="configForm.userFieldOnForm" clearable style="width: 100%">
                 <el-option
-                  v-for="(item,idx) in userFieldOnFormOptions"
+                  v-for="(item, idx) in userFieldOnFormOptions"
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
@@ -152,13 +152,13 @@
               </el-select>
             </el-form-item>
             <el-form-item
-              v-if="configForm.candidateStrategy === CandidateStrategy.DEPT_LEADER_ON_FORM"
+              v-if="configForm.candidateStrategy === CandidateStrategy.FORM_DEPT_LEADER"
               label="表单内部门字段"
               prop="deptFieldOnForm"
             >
               <el-select v-model="configForm.deptFieldOnForm" clearable style="width: 100%">
                 <el-option
-                  v-for="(item,idx) in deptFieldOnFormOptions"
+                  v-for="(item, idx) in deptFieldOnFormOptions"
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
@@ -169,8 +169,9 @@
               v-if="
                 configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
                 configForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.DEPT_LEADER_ON_FORM
+                configForm.candidateStrategy ==
+                  CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
+                configForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
               "
               :label="deptLevelLabel!"
               prop="deptLevel"
@@ -496,10 +497,10 @@ const deptLevelLabel = computed(() => {
   let label = '部门负责人来源'
   if (configForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER) {
     label = label + '(指定部门向上)'
-  } else if (configForm.value.candidateStrategy == CandidateStrategy.DEPT_LEADER_ON_FORM) {
+  } else if (configForm.value.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER) {
     label = label + '(表单内部门向上)'
   } else {
-     label = label + '(发起人部门向上)'
+    label = label + '(发起人部门向上)'
   }
   return label
 })
@@ -512,20 +513,15 @@ const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.USER_
 // 激活的 Tab 标签页
 const activeTabName = ref('user')
 // 表单字段权限设置
-const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFields } = useFormFieldsPermission(
-  FieldPermissionType.READ
-)
+const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFields } =
+  useFormFieldsPermission(FieldPermissionType.READ)
 // 表单内用户字段选项, 必须是必填和用户选择器
 const userFieldOnFormOptions = computed(() => {
-  return formFieldOptions.filter(
-    (item) => item.required && item.type === 'UserSelect'
-  )
+  return formFieldOptions.filter((item) => item.required && item.type === 'UserSelect')
 })
 // 表单内部门字段选项, 必须是必填和部门选择器
 const deptFieldOnFormOptions = computed(() => {
-  return formFieldOptions.filter(
-    (item) => item.required && item.type === 'DeptSelect'
-  )
+  return formFieldOptions.filter((item) => item.required && item.type === 'DeptSelect')
 })
 // 操作按钮设置
 const { buttonsSetting, btnDisplayNameEdit, changeBtnDisplayName, btnDisplayNameBlurEvent } =
@@ -577,6 +573,7 @@ const changeCandidateStrategy = () => {
   configForm.value.postIds = []
   configForm.value.userGroups = []
   configForm.value.deptLevel = 1
+  // TODO @jason：是不是 userFieldOnForm => formUser；deptFieldOnForm => formDeptLeader；原因是：想通前缀，好管理点
   configForm.value.userFieldOnForm = ''
   configForm.value.deptFieldOnForm = ''
   configForm.value.approveMethod = ApproveMethodType.SEQUENTIAL_APPROVE

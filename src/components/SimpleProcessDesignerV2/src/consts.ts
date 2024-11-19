@@ -97,7 +97,7 @@ export interface SimpleFlowNode {
   // 是否默认的条件
   defaultFlow?: boolean
   // 活动的状态，用于前端节点状态展示
-  activityStatus? : TaskStatusEnum
+  activityStatus?: TaskStatusEnum
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -145,14 +145,14 @@ export enum CandidateStrategy {
    * 指定用户组
    */
   USER_GROUP = 40,
-   /**
+  /**
    * 表单内用户字段
    */
-   USER_FIELD_ON_FORM = 50,
+  FORM_USER = 50,
   /**
    * 表单内部门负责人
    */
-  DEPT_LEADER_ON_FORM = 51,
+  FORM_DEPT_LEADER = 51,
   /**
    * 流程表达式
    */
@@ -432,8 +432,8 @@ export const CANDIDATE_STRATEGY: DictDataVO[] = [
   { label: '发起人部门负责人', value: CandidateStrategy.START_USER_DEPT_LEADER },
   { label: '发起人连续部门负责人', value: CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER },
   { label: '用户组', value: CandidateStrategy.USER_GROUP },
-  { label: '表单内用户字段', value: CandidateStrategy.USER_FIELD_ON_FORM },
-  { label: '表单内部门负责人', value: CandidateStrategy.DEPT_LEADER_ON_FORM },
+  { label: '表单内用户字段', value: CandidateStrategy.FORM_USER },
+  { label: '表单内部门负责人', value: CandidateStrategy.FORM_DEPT_LEADER },
   { label: '流程表达式', value: CandidateStrategy.EXPRESSION }
 ]
 // 审批节点 的审批类型

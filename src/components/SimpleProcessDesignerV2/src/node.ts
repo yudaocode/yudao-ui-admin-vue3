@@ -37,7 +37,7 @@ const parseFormCreateFields = (formFields?: string[]) => {
     })
   }
   // 固定添加发起人 ID 字段
-  result.unshift( {
+  result.unshift({
     field: ProcessVariableEnum.START_USER_ID,
     title: '发起人',
     type: 'UserSelect',
@@ -46,6 +46,7 @@ const parseFormCreateFields = (formFields?: string[]) => {
   return result
 }
 
+// TODO @jason：parse 方法，是不是搞到 formCreate.ts。统一维护管理
 const parseFields = (
   rule: Record<string, any>,
   fields: Array<Record<string, any>>,
@@ -57,9 +58,10 @@ const parseFields = (
     if (parentTitle) {
       title = `${parentTitle}.${tempTitle}`
     }
-    let required = false;
-    if($required) {
-      required = true;
+    // TODO @jason：按照微信讨论的，非 $required 显示，但是 disable 不可选择
+    let required = false
+    if ($required) {
+      required = true
     }
     fields.push({
       field,
@@ -82,7 +84,6 @@ const parseFields = (
   }
 }
 
-
 /**
  * @description 表单数据权限配置，用于发起人节点 、审批节点、抄送节点
  */
@@ -103,19 +104,17 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
   const getDefaultFieldsPermission = (formFields?: string[]) => {
     let defaultFieldsPermission: Array<Record<string, any>> = []
     if (formFields) {
-      defaultFieldsPermission = parseFormCreateFields(formFields).map( item => {
+      defaultFieldsPermission = parseFormCreateFields(formFields).map((item) => {
         return {
           field: item.field,
           title: item.title,
           permission: defaultPermission
         }
-      });
+      })
     }
     return defaultFieldsPermission
   }
-   
-   
-  
+
   // 获取表单的所有字段，作为下拉框选项
   const formFieldOptions = parseFormCreateFields(unref(formFields))
 
@@ -281,14 +280,14 @@ export function useNodeForm(nodeType: NodeType) {
     }
 
     // 表单内用户字段
-    if (configForm.value?.candidateStrategy === CandidateStrategy.USER_FIELD_ON_FORM) {
+    if (configForm.value?.candidateStrategy === CandidateStrategy.FORM_USER) {
       const formFieldOptions = parseFormCreateFields(unref(formFields))
       const item = formFieldOptions.find((item) => item.field === configForm.value?.userFieldOnForm)
       showText = `表单用户：${item?.title}`
     }
 
     // 表单内部门负责人
-    if (configForm.value?.candidateStrategy === CandidateStrategy.DEPT_LEADER_ON_FORM) {
+    if (configForm.value?.candidateStrategy === CandidateStrategy.FORM_DEPT_LEADER) {
       showText = `表单内部门负责人`
     }
 
@@ -338,7 +337,7 @@ export function useNodeForm(nodeType: NodeType) {
       case CandidateStrategy.USER_GROUP:
         candidateParam = configForm.value.userGroups!.join(',')
         break
-      case CandidateStrategy.USER_FIELD_ON_FORM:
+      case CandidateStrategy.FORM_USER:
         candidateParam = configForm.value.userFieldOnForm!
         break
       case CandidateStrategy.EXPRESSION:
@@ -361,7 +360,7 @@ export function useNodeForm(nodeType: NodeType) {
         break
       }
       // 表单内部门的负责人
-      case CandidateStrategy.DEPT_LEADER_ON_FORM: {
+      case CandidateStrategy.FORM_DEPT_LEADER: {
         // 候选人参数格式: | 分隔 。左边为表单内部门字段。 右边为部门层级
         const deptFieldOnForm = configForm.value.deptFieldOnForm!
         candidateParam = deptFieldOnForm.concat('|' + configForm.value.deptLevel + '')
@@ -396,7 +395,7 @@ export function useNodeForm(nodeType: NodeType) {
       case CandidateStrategy.USER_GROUP:
         configForm.value.userGroups = candidateParam.split(',').map((item) => +item)
         break
-      case CandidateStrategy.USER_FIELD_ON_FORM:
+      case CandidateStrategy.FORM_USER:
         configForm.value.userFieldOnForm = candidateParam
         break
       case CandidateStrategy.EXPRESSION:
@@ -420,7 +419,7 @@ export function useNodeForm(nodeType: NodeType) {
         break
       }
       // 表单内的部门负责人
-      case CandidateStrategy.DEPT_LEADER_ON_FORM: {
+      case CandidateStrategy.FORM_DEPT_LEADER: {
         // 候选人参数格式: | 分隔 。左边为表单内的部门字段。 右边为部门层级
         const paramArray = candidateParam.split('|')
         configForm.value.deptFieldOnForm = paramArray[0]
@@ -512,22 +511,22 @@ export function useNodeName2(node: Ref<SimpleFlowNode>, nodeType: NodeType) {
 /**
  * @description 根据节点任务状态，获取节点任务状态样式
  */
-export function  useTaskStatusClass(taskStatus: TaskStatusEnum | undefined) : string {
+export function useTaskStatusClass(taskStatus: TaskStatusEnum | undefined): string {
   if (!taskStatus) {
     return ''
   }
-  if (taskStatus === TaskStatusEnum.APPROVE ) {
+  if (taskStatus === TaskStatusEnum.APPROVE) {
     return 'status-pass'
   }
-  if (taskStatus === TaskStatusEnum.RUNNING ) {
+  if (taskStatus === TaskStatusEnum.RUNNING) {
     return 'status-running'
   }
-  if (taskStatus === TaskStatusEnum.REJECT ) {
+  if (taskStatus === TaskStatusEnum.REJECT) {
     return 'status-reject'
   }
-  if (taskStatus === TaskStatusEnum.CANCEL ) {
+  if (taskStatus === TaskStatusEnum.CANCEL) {
     return 'status-cancel'
   }
-   
-  return '';
+
+  return ''
 }
