@@ -79,7 +79,7 @@ export interface SimpleFlowNode {
   // 审批按钮设置
   buttonsSetting?: any[]
   // 表单权限
-  fieldsPermission?: Array<Record<string, string>>
+  fieldsPermission?: Array<Record<string, any>>
   // 审批任务超时处理
   timeoutHandler?: TimeoutHandler
   // 审批任务拒绝处理
@@ -145,6 +145,14 @@ export enum CandidateStrategy {
    * 指定用户组
    */
   USER_GROUP = 40,
+   /**
+   * 表单内用户字段
+   */
+   USER_FIELD_ON_FORM = 50,
+  /**
+   * 表单内部门负责人
+   */
+  DEPT_LEADER_ON_FORM = 51,
   /**
    * 流程表达式
    */
@@ -424,6 +432,8 @@ export const CANDIDATE_STRATEGY: DictDataVO[] = [
   { label: '发起人部门负责人', value: CandidateStrategy.START_USER_DEPT_LEADER },
   { label: '发起人连续部门负责人', value: CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER },
   { label: '用户组', value: CandidateStrategy.USER_GROUP },
+  { label: '表单内用户字段', value: CandidateStrategy.USER_FIELD_ON_FORM },
+  { label: '表单内部门负责人', value: CandidateStrategy.DEPT_LEADER_ON_FORM },
   { label: '流程表达式', value: CandidateStrategy.EXPRESSION }
 ]
 // 审批节点 的审批类型
@@ -548,3 +558,13 @@ export const MULTI_LEVEL_DEPT: DictDataVO = [
   { label: '第 14 级部门', value: 14 },
   { label: '第 15 级部门', value: 15 }
 ]
+
+/**
+ * 流程实例的变量枚举
+ */
+export enum ProcessVariableEnum {
+  /**
+   * 发起用户 ID
+   */
+  START_USER_ID = 'PROCESS_START_USER_ID'
+}
