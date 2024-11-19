@@ -319,9 +319,12 @@ $process-header-height: 194px;
         $process-header-height - 40px
     );
     overflow: auto;
+    display: flex;
+    flex-direction: column;
 
     :deep(.box-card) {
       height: 100%;
+      flex: 1;
 
       .el-card__body {
         height: 100%;
