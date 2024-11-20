@@ -414,7 +414,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       .kefu-message {
         background-color: rgb(245, 245, 245);
         margin-left: 10px;
-        margin-top: 18px;
+        margin-top: 3px;
         border-top-right-radius: 10px;
         border-bottom-right-radius: 10px;
         border-bottom-left-radius: 10px;
@@ -427,7 +427,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       .kefu-message {
         background-color: rgb(206, 223, 255);
         margin-right: 10px;
-        margin-top: 18px;
+        margin-top: 3px;
         border-top-left-radius: 10px;
         border-bottom-right-radius: 10px;
         border-bottom-left-radius: 10px;
@@ -454,11 +454,11 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
     .date-message,
     .system-message {
       width: fit-content;
-      border-radius: 12rpx;
-      padding: 8rpx 16rpx;
-      margin-bottom: 16rpx;
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 0 5px;
       color: #999;
-      font-size: 24rpx;
+      font-size: 10px;
     }
   }
 
