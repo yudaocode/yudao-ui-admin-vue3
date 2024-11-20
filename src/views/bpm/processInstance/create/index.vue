@@ -137,12 +137,6 @@ const getCategoryList = async () => {
   try {
     // 流程分类
     categoryList.value = await CategoryApi.getCategorySimpleList()
-    // 等待流程定义数据加载完成后再设置默认选中分类
-    await nextTick()
-    // 选中第一个有流程的分类
-    if (availableCategories.value.length > 0) {
-      categoryActive.value = availableCategories.value[0]
-    }
   } finally {
   }
 }
@@ -156,6 +150,11 @@ const getProcessDefinitionList = async () => {
     })
     // 初始化过滤列表为全部流程定义
     filteredProcessDefinitionList.value = processDefinitionList.value
+
+    // 在获取完所有数据后，设置第一个有效分类为激活状态
+    if (availableCategories.value.length > 0 && !categoryActive.value?.code) {
+      categoryActive.value = availableCategories.value[0]
+    }
   } finally {
   }
 }
