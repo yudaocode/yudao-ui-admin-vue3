@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
+import qs from 'qs'
 import { config } from '@/config/axios/config'
 import { getAccessToken, getRefreshToken, getTenantId, removeToken, setToken } from '@/utils/auth'
 import errorCode from './errorCode'
@@ -30,7 +31,11 @@ const whiteList: string[] = ['/login', '/refresh-token']
 const service: AxiosInstance = axios.create({
   baseURL: base_url, // api 的 base_url
   timeout: request_timeout, // 请求超时时间
-  withCredentials: false // 禁用 Cookie 等信息
+  withCredentials: false, // 禁用 Cookie 等信息
+  // 自定义参数序列化函数
+  paramsSerializer: (params) => {
+    return qs.stringify(params, { allowDots: true })
+  }
 })
 
 // request拦截器
@@ -51,6 +56,21 @@ service.interceptors.request.use(
     if (tenantEnable && tenantEnable === 'true') {
       const tenantId = getTenantId()
       if (tenantId) config.headers['tenant-id'] = tenantId
+    }
+    const method = config.method?.toUpperCase()
+    // 防止 GET 请求缓存
+    if (method === 'GET') {
+      config.headers['Cache-Control'] = 'no-cache'
+      config.headers['Pragma'] = 'no-cache'
+    }
+    // 自定义参数序列化函数
+    else if (method === 'POST') {
+      const contentType = config.headers['Content-Type'] || config.headers['content-type']
+      if (contentType === 'application/x-www-form-urlencoded') {
+        if (config.data && typeof config.data !== 'string') {
+          config.data = qs.stringify(config.data)
+        }
+      }
     }
     return config
   },
