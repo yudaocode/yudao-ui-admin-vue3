@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="loading" class="mb-20px">
+  <div v-loading="loading" class="process-viewer-container">
     <SimpleProcessViewer
       :flow-node="simpleModel"
       :tasks="tasks"
@@ -154,8 +154,15 @@ const setSimpleModelNodeTaskStatus = (
 </script>
 
 <style lang="scss" scoped>
-:deep(.process-viewer) {
-  height: 100% !important;
-  min-height: 500px;
+.process-viewer-container {
+  height: 100%;
+  width: 100%;
+  
+  :deep(.process-viewer) {
+    height: 100% !important;
+    min-height: 100%;
+    width: 100%;
+    overflow: auto;
+  }
 }
 </style>

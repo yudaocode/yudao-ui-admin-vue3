@@ -22,7 +22,7 @@
         <el-col :span="5">
           <div class="flex flex-col">
             <div
-              v-for="category in categoryList"
+              v-for="category in availableCategories"
               :key="category.code"
               class="flex items-center p-10px cursor-pointer text-14px rounded-md"
               :class="categoryActive.code === category.code ? 'text-#3e7bff bg-#e8eeff' : ''"
@@ -33,7 +33,7 @@
           </div>
         </el-col>
         <el-col :span="19">
-          <el-scrollbar ref="scrollWrapper" height="700">
+          <el-scrollbar ref="scrollWrapper" height="700" @scroll="handleScroll">
             <div
               class="mb-20px pl-10px"
               v-for="(definitions, categoryCode) in processDefinitionGroup"
@@ -137,10 +137,6 @@ const getCategoryList = async () => {
   try {
     // 流程分类
     categoryList.value = await CategoryApi.getCategorySimpleList()
-    // 选中首个分类
-    if (categoryList.value.length > 0) {
-      categoryActive.value = categoryList.value[0]
-    }
   } finally {
   }
 }
@@ -154,6 +150,11 @@ const getProcessDefinitionList = async () => {
     })
     // 初始化过滤列表为全部流程定义
     filteredProcessDefinitionList.value = processDefinitionList.value
+
+    // 在获取完所有数据后，设置第一个有效分类为激活状态
+    if (availableCategories.value.length > 0 && !categoryActive.value?.code) {
+      categoryActive.value = availableCategories.value[0]
+    }
   } finally {
   }
 }
@@ -220,9 +221,61 @@ const handleSelect = async (row, formVariables?) => {
   processDefinitionDetailRef.value?.initProcessInfo(row, formVariables)
 }
 
+/** 处理滚动事件 */
+const handleScroll = (e) => {
+  // 直接使用事件对象获取滚动位置
+  const scrollTop = e.scrollTop
+
+  // 获取所有分类区域的位置信息
+  const categoryPositions = categoryList.value
+    .map((category) => {
+      const categoryRef = proxy.$refs[`category-${category.code}`]
+      if (categoryRef?.[0]) {
+        return {
+          code: category.code,
+          offsetTop: categoryRef[0].offsetTop,
+          height: categoryRef[0].offsetHeight
+        }
+      }
+      return null
+    })
+    .filter(Boolean)
+
+  // 查找当前滚动位置对应的分类
+  let currentCategory = categoryPositions[0]
+  for (const position of categoryPositions) {
+    // 为了更好的用户体验，可以添加一个缓冲区域（比如 50px）
+    if (scrollTop >= position.offsetTop - 50) {
+      currentCategory = position
+    } else {
+      break
+    }
+  }
+
+  // 更新当前 active 的分类
+  if (currentCategory && categoryActive.value.code !== currentCategory.code) {
+    categoryActive.value = categoryList.value.find((c) => c.code === currentCategory.code)
+  }
+}
+
 /** 初始化 */
 onMounted(() => {
   getList()
+})
+
+/** 过滤出有流程的分类列表 */
+const availableCategories = computed(() => {
+  if (!categoryList.value?.length || !processDefinitionGroup.value) {
+    return []
+  }
+  
+  // 获取所有有流程的分类代码
+  const availableCategoryCodes = Object.keys(processDefinitionGroup.value)
+  
+  // 过滤出有流程的分类
+  return categoryList.value.filter(category => 
+    availableCategoryCodes.includes(category.code)
+  )
 })
 </script>
 
