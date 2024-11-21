@@ -1,3 +1,6 @@
+<!-- UserTask 自定义配置：
+     1. 审批人与提交人为同一人时
+-->
 <template>
   <div class="panel-tab__content">
     <el-divider content-position="left">审批人与提交人为同一人时</el-divider>
@@ -12,7 +15,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ASSIGN_START_USER_HANDLER_TYPES } from '../../../../SimpleProcessDesignerV2/src/consts'
+import { ASSIGN_START_USER_HANDLER_TYPES } from '@/components/SimpleProcessDesignerV2/src/consts'
 
 defineOptions({ name: 'ElementCustomConfig' })
 const props = defineProps({
@@ -58,7 +61,7 @@ const updateAssignStartUserHandlerType = () => {
   updateElementExtensions()
 }
 
-const updateElementExtensions = (properties) => {
+const updateElementExtensions = () => {
   const extensions = bpmnInstances().moddle.create('bpmn:ExtensionElements', {
     values: otherExtensions.value.concat([assignStartUserHandlerTypeEl.value])
   })
