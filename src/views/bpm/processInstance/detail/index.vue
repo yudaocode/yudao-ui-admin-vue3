@@ -271,7 +271,7 @@ const handleAudit = async (task, pass) => {
       data.variables = approveForms.value[index].value
     }
     // 获取表单可编辑字段的值
-    if (fApi.value) {
+    if (fApi.value && task.fieldsPermission !== null) {
       data.variables = getWritableValueOfForm(task.fieldsPermission)
     }
 
