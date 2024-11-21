@@ -128,6 +128,7 @@ import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
 import { BpmModelType } from '@/utils/constants'
 import { setConfAndFields2 } from '@/utils/formCreate'
+import { registerComponent } from '@/utils/routerHelper'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as UserApi from '@/api/system/user'
@@ -228,6 +229,9 @@ const getApprovalDetail = async () => {
           })
         }
       })
+    } else {
+      // 注意：data.processDefinition.formCustomViewPath 是组件的全路径，例如说：/crm/contract/detail/index.vue
+      BusinessFormComponent.value = registerComponent(data.processDefinition.formCustomViewPath)
     }
 
     // 获取审批节点，显示 Timeline 的数据
