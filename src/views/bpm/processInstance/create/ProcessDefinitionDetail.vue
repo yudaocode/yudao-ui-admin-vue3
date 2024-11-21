@@ -162,8 +162,10 @@ const getApprovalDetail = async (row: any) => {
     startUserSelectTasks.value = data.activityNodes?.filter(
       (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
     )
-    for (const node of startUserSelectTasks.value) {
-      startUserSelectAssignees.value[node.id] = []
+    if (startUserSelectTasks.value?.length > 0) {
+      for (const node of startUserSelectTasks.value) {
+        startUserSelectAssignees.value[node.id] = []
+      }
     }
 
     // 获取审批节点，显示 Timeline 的数据
