@@ -1,10 +1,4 @@
-import axios, {
-  AxiosError,
-  AxiosInstance,
-  AxiosRequestHeaders,
-  AxiosResponse,
-  InternalAxiosRequestConfig
-} from 'axios'
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 
 import { ElMessage, ElMessageBox, ElNotification } from 'element-plus'
 import qs from 'qs'
@@ -37,7 +31,11 @@ const whiteList: string[] = ['/login', '/refresh-token']
 const service: AxiosInstance = axios.create({
   baseURL: base_url, // api 的 base_url
   timeout: request_timeout, // 请求超时时间
-  withCredentials: false // 禁用 Cookie 等信息
+  withCredentials: false, // 禁用 Cookie 等信息
+  // 自定义参数序列化函数
+  paramsSerializer: (params) => {
+    return qs.stringify(params, { allowDots: true })
+  }
 })
 
 // request拦截器
@@ -52,28 +50,26 @@ service.interceptors.request.use(
       }
     })
     if (getAccessToken() && !isToken) {
-      ;(config as Recordable).headers.Authorization = 'Bearer ' + getAccessToken() // 让每个请求携带自定义token
+      config.headers.Authorization = 'Bearer ' + getAccessToken() // 让每个请求携带自定义token
     }
     // 设置租户
     if (tenantEnable && tenantEnable === 'true') {
       const tenantId = getTenantId()
-      if (tenantId) (config as Recordable).headers['tenant-id'] = tenantId
+      if (tenantId) config.headers['tenant-id'] = tenantId
     }
-    const params = config.params || {}
-    const data = config.data || false
-    if (
-      config.method?.toUpperCase() === 'POST' &&
-      (config.headers as AxiosRequestHeaders)['Content-Type'] ===
-        'application/x-www-form-urlencoded'
-    ) {
-      config.data = qs.stringify(data)
+    const method = config.method?.toUpperCase()
+    // 防止 GET 请求缓存
+    if (method === 'GET') {
+      config.headers['Cache-Control'] = 'no-cache'
+      config.headers['Pragma'] = 'no-cache'
     }
-    // get参数编码
-    if (config.method?.toUpperCase() === 'GET' && params) {
-      config.params = {}
-      const paramsStr = qs.stringify(params, { allowDots: true })
-      if (paramsStr) {
-        config.url = config.url + '?' + paramsStr
+    // 自定义参数序列化函数
+    else if (method === 'POST') {
+      const contentType = config.headers['Content-Type'] || config.headers['content-type']
+      if (contentType === 'application/x-www-form-urlencoded') {
+        if (config.data && typeof config.data !== 'string') {
+          config.data = qs.stringify(config.data)
+        }
       }
     }
     return config
