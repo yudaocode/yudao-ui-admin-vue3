@@ -31,7 +31,6 @@ const server = ref(
 ) // WebSocket 服务地址
 
 /** 发起 WebSocket 连接 */
-// TODO puhui999: websocket 连接有点问题收不到消息 🤣
 const { data, close, open } = useWebSocket(server.value, {
   autoReconnect: true,
   heartbeat: true
@@ -49,7 +48,6 @@ watchEffect(() => {
     }
     // 2.1 解析 type 消息类型
     const jsonMessage = JSON.parse(data.value)
-    console.log(jsonMessage)
     const type = jsonMessage.type
     if (!type) {
       message.error('未知的消息类型：' + data.value)
@@ -83,10 +81,13 @@ const handleChange = (conversation: KeFuConversationRespVO) => {
   memberInfoRef.value?.initHistory(conversation)
 }
 
+const keFuConversationRef = ref<InstanceType<typeof KeFuConversationList>>()
 /** 初始化 */
 onMounted(() => {
   /** 加载会话列表 */
-  kefuStore.setConversationList()
+  kefuStore.setConversationList().then(() => {
+    keFuConversationRef.value?.calculationLastMessageTime()
+  })
   // 打开 websocket 连接
   open()
 })

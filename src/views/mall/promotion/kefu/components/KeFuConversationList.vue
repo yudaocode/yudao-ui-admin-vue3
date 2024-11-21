@@ -26,7 +26,7 @@
           <div class="flex justify-between items-center w-100%">
             <span class="username">{{ item.userNickname }}</span>
             <span class="color-[#999]" style="font-size: 13px">
-              {{ formatPast(item.lastMessageTime, 'YYYY-MM-DD') }}
+              {{ lastMessageTimeMap.get(item.id) ?? '计算中' }}
             </span>
           </div>
           <!-- 最后聊天内容 -->
@@ -89,6 +89,14 @@ const { replaceEmoji } = useEmoji()
 const activeConversationId = ref(-1) // 选中的会话
 const collapse = computed(() => appStore.getCollapse) // 折叠菜单
 
+const lastMessageTimeMap = ref<Map<number, string>>(new Map<number, string>())
+/** 计算消息最后发送时间距离现在过去了多久 */
+const calculationLastMessageTime = () => {
+  kefuStore.getConversationList?.forEach((item) => {
+    lastMessageTimeMap.value.set(item.id, formatPast(item.lastMessageTime, 'YYYY-MM-DD'))
+  })
+}
+defineExpose({ calculationLastMessageTime })
 /** 打开右侧的消息列表 */
 const emits = defineEmits<{
   (e: 'change', v: KeFuConversationRespVO): void
@@ -176,6 +184,16 @@ watch(showRightMenu, (val) => {
   } else {
     document.body.removeEventListener('click', closeRightMenu)
   }
+})
+
+const timer = ref<any>()
+/** 初始化 */
+onMounted(() => {
+  timer.value = setInterval(calculationLastMessageTime, 1000 * 10) // 十秒计算一次
+})
+/** 组件卸载前 */
+onBeforeUnmount(() => {
+  clearInterval(timer.value)
 })
 </script>
 
