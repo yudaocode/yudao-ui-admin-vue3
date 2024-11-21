@@ -268,9 +268,9 @@ const bpmnInstances = () => (window as any)?.bpmnInstances
 const resetFormList = () => {
   bpmnELement.value = bpmnInstances().bpmnElement
   formKey.value = bpmnELement.value.businessObject.formKey
-  if (formKey.value?.length > 0) {
-    formKey.value = parseInt(formKey.value)
-  }
+  // if (formKey.value?.length > 0) {
+  //   formKey.value = parseInt(formKey.value)
+  // }
   // 获取元素扩展属性 或者 创建扩展属性
   elExtensionElements.value =
     bpmnELement.value.businessObject.get('extensionElements') ||
