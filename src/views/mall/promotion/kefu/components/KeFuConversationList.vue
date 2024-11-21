@@ -89,14 +89,15 @@ const { replaceEmoji } = useEmoji()
 const activeConversationId = ref(-1) // 选中的会话
 const collapse = computed(() => appStore.getCollapse) // 折叠菜单
 
-const lastMessageTimeMap = ref<Map<number, string>>(new Map<number, string>())
 /** 计算消息最后发送时间距离现在过去了多久 */
+const lastMessageTimeMap = ref<Map<number, string>>(new Map<number, string>())
 const calculationLastMessageTime = () => {
   kefuStore.getConversationList?.forEach((item) => {
     lastMessageTimeMap.value.set(item.id, formatPast(item.lastMessageTime, 'YYYY-MM-DD'))
   })
 }
 defineExpose({ calculationLastMessageTime })
+
 /** 打开右侧的消息列表 */
 const emits = defineEmits<{
   (e: 'change', v: KeFuConversationRespVO): void
