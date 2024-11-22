@@ -85,7 +85,7 @@
 <script lang="ts" setup>
 import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { CategoryApi } from '@/api/bpm/category'
+import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import ProcessDefinitionDetail from './ProcessDefinitionDetail.vue'
 import { groupBy } from 'lodash-es'
 
@@ -221,14 +221,14 @@ const handleSelect = async (row, formVariables?) => {
   processDefinitionDetailRef.value?.initProcessInfo(row, formVariables)
 }
 
-/** 处理滚动事件 */
-const handleScroll = (e) => {
+/** 处理滚动事件，和左侧分类联动 */
+const handleScroll = (e: any) => {
   // 直接使用事件对象获取滚动位置
   const scrollTop = e.scrollTop
 
   // 获取所有分类区域的位置信息
   const categoryPositions = categoryList.value
-    .map((category) => {
+    .map((category: CategoryVO) => {
       const categoryRef = proxy.$refs[`category-${category.code}`]
       if (categoryRef?.[0]) {
         return {
@@ -254,28 +254,30 @@ const handleScroll = (e) => {
 
   // 更新当前 active 的分类
   if (currentCategory && categoryActive.value.code !== currentCategory.code) {
-    categoryActive.value = categoryList.value.find((c) => c.code === currentCategory.code)
+    categoryActive.value = categoryList.value.find(
+      (c: CategoryVO) => c.code === currentCategory.code
+    )
   }
 }
 
-/** 初始化 */
-onMounted(() => {
-  getList()
-})
-
-/** 过滤出有流程的分类列表 */
+/** 过滤出有流程的分类列表。目的：只展示有流程的分类 */
 const availableCategories = computed(() => {
   if (!categoryList.value?.length || !processDefinitionGroup.value) {
     return []
   }
-  
+
   // 获取所有有流程的分类代码
   const availableCategoryCodes = Object.keys(processDefinitionGroup.value)
-  
+
   // 过滤出有流程的分类
-  return categoryList.value.filter(category => 
+  return categoryList.value.filter((category: CategoryVO) =>
     availableCategoryCodes.includes(category.code)
   )
+})
+
+/** 初始化 */
+onMounted(() => {
+  getList()
 })
 </script>
 
