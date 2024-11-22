@@ -97,7 +97,7 @@
           plain
           @click="handleExport"
           :loading="exportLoading"
-          v-hasPermi="['system:tenant:export']"
+          v-hasPermi="['pay:order:export']"
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -192,6 +192,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as OrderApi from '@/api/pay/order'
 import OrderDetail from './OrderDetail.vue'
 import download from '@/utils/download'
+import { getAppList } from '@/api/pay/app'
 
 defineOptions({ name: 'PayOrder' })
 
@@ -263,6 +264,7 @@ const openDetail = (id: number) => {
 /** 初始化 **/
 onMounted(async () => {
   await getList()
+  appList.value = await getAppList()
 })
 </script>
 <style>
