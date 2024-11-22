@@ -17,6 +17,7 @@ import {
   FieldPermissionType,
   ProcessVariableEnum
 } from './consts'
+import { parseFormFields } from '@/components/FormCreate/src/utils/index'
 export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlowNode> {
   const node = ref<SimpleFlowNode>(props.flowNode)
   watch(
@@ -33,7 +34,7 @@ const parseFormCreateFields = (formFields?: string[]) => {
   const result: Array<Record<string, any>> = []
   if (formFields) {
     formFields.forEach((fieldStr: string) => {
-      parseFields(JSON.parse(fieldStr), result)
+      parseFormFields(JSON.parse(fieldStr), result)
     })
   }
   // 固定添加发起人 ID 字段
@@ -44,44 +45,6 @@ const parseFormCreateFields = (formFields?: string[]) => {
     required: true
   })
   return result
-}
-
-// TODO @jason：parse 方法，是不是搞到 formCreate.ts。统一维护管理
-const parseFields = (
-  rule: Record<string, any>,
-  fields: Array<Record<string, any>>,
-  parentTitle: string = ''
-) => {
-  const { type, field, $required, title: tempTitle, children } = rule
-  if (field && tempTitle) {
-    let title = tempTitle
-    if (parentTitle) {
-      title = `${parentTitle}.${tempTitle}`
-    }
-    // TODO @jason：按照微信讨论的，非 $required 显示，但是 disable 不可选择
-    let required = false
-    if ($required) {
-      required = true
-    }
-    fields.push({
-      field,
-      title,
-      type,
-      required
-    })
-    // TODO 子表单 需要处理子表单字段
-    // if (type === 'group' && rule.props?.rule && Array.isArray(rule.props.rule)) {
-    //   // 解析子表单的字段
-    //   rule.props.rule.forEach((item) => {
-    //     parseFields(item, fieldsPermission, title)
-    //   })
-    // }
-  }
-  if (children && Array.isArray(children)) {
-    children.forEach((rule) => {
-      parseFields(rule, fields)
-    })
-  }
 }
 
 /**
@@ -144,8 +107,8 @@ export type UserTaskFormType = {
   userGroups?: number[] // 用户组
   postIds?: number[] // 岗位
   expression?: string // 流程表达式
-  userFieldOnForm?: string // 表单内用户字段
-  deptFieldOnForm?: string // 表单内部门字段
+  formUser?: string // 表单内用户字段
+  formDept?: string // 表单内部门字段
   approveRatio?: number
   rejectHandlerType?: RejectHandlerType
   returnNodeId?: string
@@ -168,8 +131,8 @@ export type CopyTaskFormType = {
   userIds?: number[] // 用户
   userGroups?: number[] // 用户组
   postIds?: number[] // 岗位
-  userFieldOnForm?: string // 表单内用户字段
-  deptFieldOnForm?: string // 表单内部门字段
+  formUser?: string // 表单内用户字段
+  formDept?: string // 表单内部门字段
   expression?: string // 流程表达式
 }
 
@@ -282,7 +245,7 @@ export function useNodeForm(nodeType: NodeType) {
     // 表单内用户字段
     if (configForm.value?.candidateStrategy === CandidateStrategy.FORM_USER) {
       const formFieldOptions = parseFormCreateFields(unref(formFields))
-      const item = formFieldOptions.find((item) => item.field === configForm.value?.userFieldOnForm)
+      const item = formFieldOptions.find((item) => item.field === configForm.value?.formUser)
       showText = `表单用户：${item?.title}`
     }
 
@@ -338,7 +301,7 @@ export function useNodeForm(nodeType: NodeType) {
         candidateParam = configForm.value.userGroups!.join(',')
         break
       case CandidateStrategy.FORM_USER:
-        candidateParam = configForm.value.userFieldOnForm!
+        candidateParam = configForm.value.formUser!
         break
       case CandidateStrategy.EXPRESSION:
         candidateParam = configForm.value.expression!
@@ -362,7 +325,7 @@ export function useNodeForm(nodeType: NodeType) {
       // 表单内部门的负责人
       case CandidateStrategy.FORM_DEPT_LEADER: {
         // 候选人参数格式: | 分隔 。左边为表单内部门字段。 右边为部门层级
-        const deptFieldOnForm = configForm.value.deptFieldOnForm!
+        const deptFieldOnForm = configForm.value.formDept!
         candidateParam = deptFieldOnForm.concat('|' + configForm.value.deptLevel + '')
         break
       }
@@ -396,7 +359,7 @@ export function useNodeForm(nodeType: NodeType) {
         configForm.value.userGroups = candidateParam.split(',').map((item) => +item)
         break
       case CandidateStrategy.FORM_USER:
-        configForm.value.userFieldOnForm = candidateParam
+        configForm.value.formUser = candidateParam
         break
       case CandidateStrategy.EXPRESSION:
         configForm.value.expression = candidateParam
@@ -422,7 +385,7 @@ export function useNodeForm(nodeType: NodeType) {
       case CandidateStrategy.FORM_DEPT_LEADER: {
         // 候选人参数格式: | 分隔 。左边为表单内的部门字段。 右边为部门层级
         const paramArray = candidateParam.split('|')
-        configForm.value.deptFieldOnForm = paramArray[0]
+        configForm.value.formDept = paramArray[0]
         configForm.value.deptLevel = +paramArray[1]
         break
       }

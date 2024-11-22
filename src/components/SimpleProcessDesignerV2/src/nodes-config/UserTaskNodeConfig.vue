@@ -140,28 +140,30 @@
             <el-form-item
               v-if="configForm.candidateStrategy === CandidateStrategy.FORM_USER"
               label="表单内用户字段"
-              prop="userFieldOnForm"
+              prop="formUser"
             >
-              <el-select v-model="configForm.userFieldOnForm" clearable style="width: 100%">
+              <el-select v-model="configForm.formUser" clearable style="width: 100%">
                 <el-option
                   v-for="(item, idx) in userFieldOnFormOptions"
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
+                  :disabled ="!item.required"
                 />
               </el-select>
             </el-form-item>
             <el-form-item
               v-if="configForm.candidateStrategy === CandidateStrategy.FORM_DEPT_LEADER"
               label="表单内部门字段"
-              prop="deptFieldOnForm"
+              prop="formDept"
             >
-              <el-select v-model="configForm.deptFieldOnForm" clearable style="width: 100%">
+              <el-select v-model="configForm.formDept" clearable style="width: 100%">
                 <el-option
                   v-for="(item, idx) in deptFieldOnFormOptions"
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
+                  :disabled ="!item.required"
                 />
               </el-select>
             </el-form-item>
@@ -517,11 +519,11 @@ const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFie
   useFormFieldsPermission(FieldPermissionType.READ)
 // 表单内用户字段选项, 必须是必填和用户选择器
 const userFieldOnFormOptions = computed(() => {
-  return formFieldOptions.filter((item) => item.required && item.type === 'UserSelect')
+  return formFieldOptions.filter((item) => item.type === 'UserSelect')
 })
 // 表单内部门字段选项, 必须是必填和部门选择器
 const deptFieldOnFormOptions = computed(() => {
-  return formFieldOptions.filter((item) => item.required && item.type === 'DeptSelect')
+  return formFieldOptions.filter((item) => item.type === 'DeptSelect')
 })
 // 操作按钮设置
 const { buttonsSetting, btnDisplayNameEdit, changeBtnDisplayName, btnDisplayNameBlurEvent } =
@@ -536,8 +538,8 @@ const formRules = reactive({
   roleIds: [{ required: true, message: '角色不能为空', trigger: 'change' }],
   deptIds: [{ required: true, message: '部门不能为空', trigger: 'change' }],
   userGroups: [{ required: true, message: '用户组不能为空', trigger: 'change' }],
-  userFieldOnForm: [{ required: true, message: '表单内用户字段不能为空', trigger: 'change' }],
-  deptFieldOnForm: [{ required: true, message: '表单内部门字段不能为空', trigger: 'change' }],
+  formUser: [{ required: true, message: '表单内用户字段不能为空', trigger: 'change' }],
+  formDept: [{ required: true, message: '表单内部门字段不能为空', trigger: 'change' }],
   postIds: [{ required: true, message: '岗位不能为空', trigger: 'change' }],
   expression: [{ required: true, message: '流程表达式不能为空', trigger: 'blur' }],
   approveMethod: [{ required: true, message: '多人审批方式不能为空', trigger: 'change' }],
@@ -573,9 +575,8 @@ const changeCandidateStrategy = () => {
   configForm.value.postIds = []
   configForm.value.userGroups = []
   configForm.value.deptLevel = 1
-  // TODO @jason：是不是 userFieldOnForm => formUser；deptFieldOnForm => formDeptLeader；原因是：想通前缀，好管理点
-  configForm.value.userFieldOnForm = ''
-  configForm.value.deptFieldOnForm = ''
+  configForm.value.formUser = ''
+  configForm.value.formDept = ''
   configForm.value.approveMethod = ApproveMethodType.SEQUENTIAL_APPROVE
 }
 
