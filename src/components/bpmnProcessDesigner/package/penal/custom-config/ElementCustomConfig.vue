@@ -1,6 +1,7 @@
 <!-- UserTask 自定义配置：
      1. 审批人与提交人为同一人时
      2. 审批人拒绝时
+     3. 审批人为空时
 -->
 <template>
   <div class="panel-tab__content">
@@ -33,6 +34,38 @@
       </el-select>
     </el-form-item>
 
+    <el-divider content-position="left">审批人为空时</el-divider>
+    <el-form-item prop="assignEmptyHandlerType">
+      <el-radio-group v-model="assignEmptyHandlerType" @change="updateAssignEmptyHandlerType">
+        <div class="flex-col">
+          <div v-for="(item, index) in ASSIGN_EMPTY_HANDLER_TYPES" :key="index">
+            <el-radio :key="item.value" :value="item.value" :label="item.label" />
+          </div>
+        </div>
+      </el-radio-group>
+    </el-form-item>
+    <el-form-item
+      v-if="assignEmptyHandlerType == AssignEmptyHandlerType.ASSIGN_USER"
+      label="指定用户"
+      prop="assignEmptyHandlerUserIds"
+      span="24"
+    >
+      <el-select
+        v-model="assignEmptyUserIds"
+        clearable
+        multiple
+        style="width: 100%"
+        @change="updateAssignEmptyUserIds"
+      >
+        <el-option
+          v-for="item in userOptions"
+          :key="item.id"
+          :label="item.nickname"
+          :value="item.id"
+        />
+      </el-select>
+    </el-form-item>
+
     <el-divider content-position="left">审批人与提交人为同一人时</el-divider>
     <el-radio-group v-model="assignStartUserHandlerType" @change="updateAssignStartUserHandlerType">
       <div class="flex-col">
@@ -48,8 +81,11 @@
 import {
   ASSIGN_START_USER_HANDLER_TYPES,
   RejectHandlerType,
-  REJECT_HANDLER_TYPES
+  REJECT_HANDLER_TYPES,
+  ASSIGN_EMPTY_HANDLER_TYPES,
+  AssignEmptyHandlerType
 } from '@/components/SimpleProcessDesignerV2/src/consts'
+import * as UserApi from '@/api/system/user'
 
 defineOptions({ name: 'ElementCustomConfig' })
 const props = defineProps({
@@ -68,6 +104,12 @@ const rejectHandlerType = ref()
 const returnNodeIdEl = ref()
 const returnNodeId = ref()
 const returnTaskList = ref([])
+
+// 审批人为空时
+const assignEmptyHandlerTypeEl = ref()
+const assignEmptyHandlerType = ref()
+const assignEmptyUserIdsEl = ref()
+const assignEmptyUserIds = ref()
 
 const elExtensionElements = ref()
 const otherExtensions = ref()
@@ -107,13 +149,31 @@ const resetCustomConfigList = () => {
     )?.[0] || bpmnInstances().moddle.create(`${prefix}:RejectReturnTaskId`, { value: '' })
   returnNodeId.value = returnNodeIdEl.value.value
 
+  // 审批人为空时
+  assignEmptyHandlerTypeEl.value =
+    elExtensionElements.value.values?.filter(
+      (ex) => ex.$type === `${prefix}:AssignEmptyHandlerType`
+    )?.[0] || bpmnInstances().moddle.create(`${prefix}:AssignEmptyHandlerType`, { value: 1 })
+  assignEmptyHandlerType.value = assignEmptyHandlerTypeEl.value.value
+  assignEmptyUserIdsEl.value =
+    elExtensionElements.value.values?.filter(
+      (ex) => ex.$type === `${prefix}:AssignEmptyUserIds`
+    )?.[0] || bpmnInstances().moddle.create(`${prefix}:AssignEmptyUserIds`, { value: '' })
+  assignEmptyUserIds.value = assignEmptyUserIdsEl.value.value.split(',').map((item) => {
+    // 如果数字超出了最大安全整数范围，则将其作为字符串处理
+    let num = Number(item)
+    return num > Number.MAX_SAFE_INTEGER || num < -Number.MAX_SAFE_INTEGER ? item : num
+  })
+
   // 保留剩余扩展元素，便于后面更新该元素对应属性
   otherExtensions.value =
     elExtensionElements.value.values?.filter(
       (ex) =>
         ex.$type !== `${prefix}:AssignStartUserHandlerType` &&
         ex.$type !== `${prefix}:RejectHandlerType` &&
-        ex.$type !== `${prefix}:RejectReturnTaskId`
+        ex.$type !== `${prefix}:RejectReturnTaskId` &&
+        ex.$type !== `${prefix}:AssignEmptyHandlerType` &&
+        ex.$type !== `${prefix}:AssignEmptyUserIds`
     ) ?? []
 
   // 更新元素扩展属性，避免后续报错
@@ -141,6 +201,18 @@ const updateReturnNodeId = () => {
   updateElementExtensions()
 }
 
+const updateAssignEmptyHandlerType = () => {
+  assignEmptyHandlerTypeEl.value.value = assignEmptyHandlerType.value
+
+  updateElementExtensions()
+}
+
+const updateAssignEmptyUserIds = () => {
+  assignEmptyUserIdsEl.value.value = assignEmptyUserIds.value.toString()
+
+  updateElementExtensions()
+}
+
 const updateElementExtensions = () => {
   const extensions = bpmnInstances().moddle.create('bpmn:ExtensionElements', {
     values: [
@@ -148,6 +220,8 @@ const updateElementExtensions = () => {
       assignStartUserHandlerTypeEl.value,
       rejectHandlerTypeEl.value,
       returnNodeIdEl.value,
+      assignEmptyHandlerTypeEl.value,
+      assignEmptyUserIdsEl.value
     ]
   })
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
@@ -200,4 +274,10 @@ function findAllPredecessorsExcludingStart(elementId, modeler) {
 
   return Array.from(predecessors) // 返回前置节点数组
 }
+
+const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
+onMounted(async () => {
+  // 获得用户列表
+  userOptions.value = await UserApi.getSimpleUserList()
+})
 </script>
