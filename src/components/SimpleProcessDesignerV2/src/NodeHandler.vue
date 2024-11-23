@@ -1,11 +1,12 @@
 <template>
   <div class="node-handler-wrapper">
-    <div class="node-handler" v-if="props.showAdd">
+    <div class="node-handler">
       <el-popover
         trigger="hover"
         v-model:visible="popoverShow"
         placement="right-start"
         width="auto"
+        v-if="!readonly"
       >
         <div class="handler-item-wrapper">
           <div class="handler-item" @click="addNode(NodeType.USER_TASK_NODE)">
@@ -27,10 +28,16 @@
             <div class="handler-item-text">条件分支</div>
           </div>
           <div class="handler-item" @click="addNode(NodeType.PARALLEL_BRANCH_NODE)">
-            <div class="handler-item-icon condition">
+            <div class="handler-item-icon parallel">
               <span class="iconfont icon-size icon-parallel"></span>
             </div>
             <div class="handler-item-text">并行分支</div>
+          </div>
+          <div class="handler-item" @click="addNode(NodeType.INCLUSIVE_BRANCH_NODE)">
+            <div class="handler-item-icon inclusive">
+              <span class="iconfont icon-size icon-inclusive"></span>
+            </div>
+            <div class="handler-item-text">包容分支</div>
           </div>
         </div>
         <template #reference>
@@ -56,23 +63,36 @@ import { generateUUID } from '@/utils'
 defineOptions({
   name: 'NodeHandler'
 })
-const popoverShow = ref(false)
 
+const message = useMessage() // 消息弹窗
+
+const popoverShow = ref(false)
 const props = defineProps({
   childNode: {
     type: Object as () => SimpleFlowNode,
     default: null
   },
-  showAdd: {
-    // 是否显示添加节点
-    type: Boolean,
-    default: true
+  currentNode: {
+    type: Object as () => SimpleFlowNode,
+    required: true
   }
 })
-
 const emits = defineEmits(['update:childNode'])
 
+const readonly = inject<Boolean>('readonly') // 是否只读
+
 const addNode = (type: number) => {
+  // 校验：条件分支、包容分支后面，不允许直接添加并行分支
+  if (
+    type === NodeType.PARALLEL_BRANCH_NODE &&
+    [NodeType.CONDITION_BRANCH_NODE, NodeType.INCLUSIVE_BRANCH_NODE].includes(
+      props.currentNode?.type
+    )
+  ) {
+    message.error('条件分支、包容分支后面，不允许直接添加并行分支')
+    return
+  }
+
   popoverShow.value = false
   if (type === NodeType.USER_TASK_NODE) {
     const id = 'Activity_' + generateUUID()
@@ -122,12 +142,11 @@ const addNode = (type: number) => {
           childNode: undefined,
           conditionType: 1,
           defaultFlow: false
-          
         },
         {
           id: 'Flow_' + generateUUID(),
           name: '其它情况',
-          showText: '其它情况进入此流程',
+          showText: '未满足其它条件时，将进入此分支',
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
           conditionType: undefined,
@@ -157,6 +176,33 @@ const addNode = (type: number) => {
           showText: '无需配置条件同时执行',
           type: NodeType.CONDITION_NODE,
           childNode: undefined
+        }
+      ]
+    }
+    emits('update:childNode', data)
+  }
+  if (type === NodeType.INCLUSIVE_BRANCH_NODE) {
+    const data: SimpleFlowNode = {
+      name: '包容分支',
+      type: NodeType.INCLUSIVE_BRANCH_NODE,
+      id: 'GateWay_' + generateUUID(),
+      childNode: props.childNode,
+      conditionNodes: [
+        {
+          id: 'Flow_' + generateUUID(),
+          name: '包容条件1',
+          showText: '',
+          type: NodeType.CONDITION_NODE,
+          childNode: undefined,
+          defaultFlow: false
+        },
+        {
+          id: 'Flow_' + generateUUID(),
+          name: '其它情况',
+          showText: '未满足其它条件时，将进入此分支',
+          type: NodeType.CONDITION_NODE,
+          childNode: undefined,
+          defaultFlow: true
         }
       ]
     }

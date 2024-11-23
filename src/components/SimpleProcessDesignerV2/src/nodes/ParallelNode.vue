@@ -1,7 +1,16 @@
 <template>
   <div class="branch-node-wrapper">
     <div class="branch-node-container">
-      <div class="branch-node-add" @click="addCondition">添加分支</div>
+      <div
+        v-if="readonly"
+        class="branch-node-readonly"
+        :class="`${useTaskStatusClass(currentNode?.activityStatus)}`"
+      >
+        <span class="iconfont icon-parallel icon-size parallel"></span>
+      </div>
+      <el-button v-else class="branch-node-add" color="#626aef" @click="addCondition" plain
+        >添加分支</el-button
+      >
       <div
         class="branch-node-item"
         v-for="(item, index) in currentNode.conditionNodes"
@@ -17,7 +26,7 @@
         </template>
         <div class="node-wrapper">
           <div class="node-container">
-            <div class="node-box">
+            <div class="node-box" :class="`${useTaskStatusClass(item.activityStatus)}`">
               <div class="branch-node-title-container">
                 <div v-if="showInputs[index]">
                   <input
@@ -39,7 +48,7 @@
                   {{ NODE_DEFAULT_TEXT.get(NodeType.CONDITION_NODE) }}
                 </div>
               </div>
-              <div class="node-toolbar">
+              <div v-if="!readonly" class="node-toolbar">
                 <div class="toolbar-icon">
                   <Icon
                     color="#0089ff"
@@ -49,20 +58,8 @@
                   />
                 </div>
               </div>
-              <!-- <div 
-                class="branch-node-move move-node-left"
-                v-if="index != 0 && index + 1 !== currentNode.conditionNodes?.length" @click="moveNode(index, -1)">
-                <Icon icon="ep:arrow-left" />
-              </div> -->
-
-              <!-- <div 
-                class="branch-node-move move-node-right"
-                v-if="currentNode.conditionNodes && index < currentNode.conditionNodes.length - 2"
-                @click="moveNode(index, 1)">
-                <Icon icon="ep:arrow-right" />
-              </div> -->
             </div>
-            <NodeHandler v-model:child-node="item.childNode" />
+            <NodeHandler v-model:child-node="item.childNode" :current-node="item" />
           </div>
         </div>
         <!-- 递归显示子节点  -->
@@ -74,7 +71,11 @@
         />
       </div>
     </div>
-    <NodeHandler v-if="currentNode" v-model:child-node="currentNode.childNode" />
+    <NodeHandler
+      v-if="currentNode"
+      v-model:child-node="currentNode.childNode"
+      :current-node="currentNode"
+    />
   </div>
 </template>
 
@@ -82,8 +83,8 @@
 import NodeHandler from '../NodeHandler.vue'
 import ProcessNodeTree from '../ProcessNodeTree.vue'
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
+import { useTaskStatusClass } from '../node'
 import { generateUUID } from '@/utils'
-
 const { proxy } = getCurrentInstance() as any
 defineOptions({
   name: 'ParallelNode'
@@ -106,6 +107,8 @@ const emits = defineEmits<{
 }>()
 
 const currentNode = ref<SimpleFlowNode>(props.flowNode)
+// 是否只读
+const readonly = inject<Boolean>('readonly')
 
 watch(
   () => props.flowNode,
@@ -169,7 +172,7 @@ const recursiveFindParentNode = (
   node: SimpleFlowNode,
   nodeType: number
 ) => {
-  if (!node || node.type === NodeType.START_EVENT_NODE) {
+  if (!node || node.type === NodeType.START_USER_NODE) {
     return
   }
   if (node.type === nodeType) {

@@ -267,9 +267,9 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: 'manager/simple/workflow/model/edit',
-        component: () => import('@/views/bpm/simpleWorkflow/index.vue'),
-        name: 'SimpleWorkflowDesignEditor',
+        path: 'manager/simple/model',
+        component: () => import('@/views/bpm/simple/SimpleModelDesign.vue'),
+        name: 'SimpleModelDesign',
         meta: {
           noCache: true,
           hidden: true,
@@ -292,7 +292,6 @@ const remainingRouter: AppRouteRecordRaw[] = [
       },
       {
         path: 'process-instance/detail',
-        // component: () => import('@/views/bpm/processInstance/detail/index_new.vue'), // TODO 芋艿：新审批界面，已适配 simple 模式，未来会适配 bpmn 模式
         component: () => import('@/views/bpm/processInstance/detail/index.vue'),
         name: 'BpmProcessInstanceDetail',
         meta: {

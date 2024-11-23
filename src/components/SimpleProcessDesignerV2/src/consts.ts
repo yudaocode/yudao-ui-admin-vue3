@@ -1,6 +1,6 @@
 // @ts-ignore
 import { DictDataVO } from '@/api/system/dict/types'
-
+import { TaskStatusEnum } from '@/api/bpm/task'
 /**
  * 节点类型
  */
@@ -79,7 +79,7 @@ export interface SimpleFlowNode {
   // 审批按钮设置
   buttonsSetting?: any[]
   // 表单权限
-  fieldsPermission?: Array<Record<string, string>>
+  fieldsPermission?: Array<Record<string, any>>
   // 审批任务超时处理
   timeoutHandler?: TimeoutHandler
   // 审批任务拒绝处理
@@ -96,7 +96,8 @@ export interface SimpleFlowNode {
   conditionGroups?: ConditionGroup
   // 是否默认的条件
   defaultFlow?: boolean
-
+  // 活动的状态，用于前端节点状态展示
+  activityStatus?: TaskStatusEnum
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -145,6 +146,14 @@ export enum CandidateStrategy {
    */
   USER_GROUP = 40,
   /**
+   * 表单内用户字段
+   */
+  FORM_USER = 50,
+  /**
+   * 表单内部门负责人
+   */
+  FORM_DEPT_LEADER = 51,
+  /**
    * 流程表达式
    */
   EXPRESSION = 60
@@ -178,7 +187,7 @@ export enum ApproveMethodType {
 export type RejectHandler = {
   // 审批拒绝类型
   type: RejectHandlerType
-  // 回退节点 Id
+  // 退回节点 Id
   returnNodeId?: string
 }
 
@@ -360,9 +369,13 @@ export enum OperationButtonType {
    */
   ADD_SIGN = 5,
   /**
-   * 回退
+   * 退回
    */
-  RETURN = 6
+  RETURN = 6,
+  /**
+   * 抄送
+   */
+  COPY = 7
 }
 
 /**
@@ -419,6 +432,8 @@ export const CANDIDATE_STRATEGY: DictDataVO[] = [
   { label: '发起人部门负责人', value: CandidateStrategy.START_USER_DEPT_LEADER },
   { label: '发起人连续部门负责人', value: CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER },
   { label: '用户组', value: CandidateStrategy.USER_GROUP },
+  { label: '表单内用户字段', value: CandidateStrategy.FORM_USER },
+  { label: '表单内部门负责人', value: CandidateStrategy.FORM_DEPT_LEADER },
   { label: '流程表达式', value: CandidateStrategy.EXPRESSION }
 ]
 // 审批节点 的审批类型
@@ -503,16 +518,17 @@ OPERATION_BUTTON_NAME.set(OperationButtonType.REJECT, '拒绝')
 OPERATION_BUTTON_NAME.set(OperationButtonType.TRANSFER, '转办')
 OPERATION_BUTTON_NAME.set(OperationButtonType.DELEGATE, '委派')
 OPERATION_BUTTON_NAME.set(OperationButtonType.ADD_SIGN, '加签')
-OPERATION_BUTTON_NAME.set(OperationButtonType.RETURN, '回退')
+OPERATION_BUTTON_NAME.set(OperationButtonType.RETURN, '退回')
+OPERATION_BUTTON_NAME.set(OperationButtonType.COPY, '抄送')
 
 // 默认的按钮权限设置
 export const DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
   { id: OperationButtonType.APPROVE, displayName: '通过', enable: true },
   { id: OperationButtonType.REJECT, displayName: '拒绝', enable: true },
-  { id: OperationButtonType.TRANSFER, displayName: '转办', enable: false },
-  { id: OperationButtonType.DELEGATE, displayName: '委派', enable: false },
-  { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: false },
-  { id: OperationButtonType.RETURN, displayName: '回退', enable: false }
+  { id: OperationButtonType.TRANSFER, displayName: '转办', enable: true },
+  { id: OperationButtonType.DELEGATE, displayName: '委派', enable: true },
+  { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: true },
+  { id: OperationButtonType.RETURN, displayName: '退回', enable: true }
 ]
 
 // 发起人的按钮权限。暂时定死，不可以编辑
@@ -522,7 +538,7 @@ export const START_USER_BUTTON_SETTING: ButtonSetting[] = [
   { id: OperationButtonType.TRANSFER, displayName: '转办', enable: false },
   { id: OperationButtonType.DELEGATE, displayName: '委派', enable: false },
   { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: false },
-  { id: OperationButtonType.RETURN, displayName: '回退', enable: false }
+  { id: OperationButtonType.RETURN, displayName: '退回', enable: false }
 ]
 
 export const MULTI_LEVEL_DEPT: DictDataVO = [
@@ -542,3 +558,13 @@ export const MULTI_LEVEL_DEPT: DictDataVO = [
   { label: '第 14 级部门', value: 14 },
   { label: '第 15 级部门', value: 15 }
 ]
+
+/**
+ * 流程实例的变量枚举
+ */
+export enum ProcessVariableEnum {
+  /**
+   * 发起用户 ID
+   */
+  START_USER_ID = 'PROCESS_START_USER_ID'
+}

@@ -1,133 +1,115 @@
 <template>
-  <doc-alert title="流程发起、取消、重新发起" url="https://doc.iocoder.cn/bpm/process-instance/" />
-
   <!-- 第一步，通过流程定义的列表，选择对应的流程 -->
-  <ContentWrap v-if="!selectProcessDefinition" v-loading="loading">
-    <el-tabs tab-position="left" v-model="categoryActive">
-      <el-tab-pane
-        :label="category.name"
-        :name="category.code"
-        :key="category.code"
-        v-for="category in categoryList"
-      >
-        <el-row :gutter="20">
-          <el-col
-            :lg="6"
-            :sm="12"
-            :xs="24"
-            v-for="definition in categoryProcessDefinitionList"
-            :key="definition.id"
-          >
-            <el-card
-              shadow="hover"
-              class="mb-20px cursor-pointer"
-              @click="handleSelect(definition)"
+  <template v-if="!selectProcessDefinition">
+    <el-input
+      v-model="searchName"
+      class="!w-50% mb-15px"
+      placeholder="请输入流程名称"
+      clearable
+      @input="handleQuery"
+      @clear="handleQuery"
+    >
+      <template #prefix>
+        <Icon icon="ep:search" />
+      </template>
+    </el-input>
+    <ContentWrap
+      :class="{ 'process-definition-container': filteredProcessDefinitionList?.length }"
+      class="position-relative pb-20px h-700px"
+      v-loading="loading"
+    >
+      <el-row v-if="filteredProcessDefinitionList?.length" :gutter="20" class="!flex-nowrap">
+        <el-col :span="5">
+          <div class="flex flex-col">
+            <div
+              v-for="category in availableCategories"
+              :key="category.code"
+              class="flex items-center p-10px cursor-pointer text-14px rounded-md"
+              :class="categoryActive.code === category.code ? 'text-#3e7bff bg-#e8eeff' : ''"
+              @click="handleCategoryClick(category)"
             >
-              <template #default>
-                <div class="flex">
-                  <el-image :src="definition.icon" class="w-32px h-32px" />
-                  <el-text class="!ml-10px" size="large">{{ definition.name }}</el-text>
-                </div>
-              </template>
-            </el-card>
-          </el-col>
-        </el-row>
-      </el-tab-pane>
-    </el-tabs>
-  </ContentWrap>
+              {{ category.name }}
+            </div>
+          </div>
+        </el-col>
+        <el-col :span="19">
+          <el-scrollbar ref="scrollWrapper" height="700" @scroll="handleScroll">
+            <div
+              class="mb-20px pl-10px"
+              v-for="(definitions, categoryCode) in processDefinitionGroup"
+              :key="categoryCode"
+              :ref="`category-${categoryCode}`"
+            >
+              <h3 class="text-18px font-bold mb-10px mt-5px">
+                {{ getCategoryName(categoryCode as any) }}
+              </h3>
+              <div class="grid grid-cols-3 gap3">
+                <el-tooltip
+                  v-for="definition in definitions"
+                  :key="definition.id"
+                  :content="definition.description"
+                  :disabled="!definition.description || definition.description.trim().length === 0"
+                  placement="top"
+                >
+                  <el-card
+                    shadow="hover"
+                    class="cursor-pointer definition-item-card"
+                    @click="handleSelect(definition)"
+                  >
+                    <template #default>
+                      <div class="flex">
+                        <el-image :src="definition.icon" class="w-32px h-32px" />
+                        <el-text class="!ml-10px" size="large">{{ definition.name }}</el-text>
+                      </div>
+                    </template>
+                  </el-card>
+                </el-tooltip>
+              </div>
+            </div>
+          </el-scrollbar>
+        </el-col>
+      </el-row>
+      <el-empty class="!py-200px" :image-size="200" description="没有找到搜索结果" v-else />
+    </ContentWrap>
+  </template>
 
   <!-- 第二步，填写表单，进行流程的提交 -->
-  <ContentWrap v-else>
-    <el-card class="box-card">
-      <div class="clearfix">
-        <span class="el-icon-document">申请信息【{{ selectProcessDefinition.name }}】</span>
-        <el-button style="float: right" type="primary" @click="selectProcessDefinition = undefined">
-          <Icon icon="ep:delete" /> 选择其它流程
-        </el-button>
-      </div>
-      <el-col :span="16" :offset="6" style="margin-top: 20px">
-        <form-create
-          :rule="detailForm.rule"
-          v-model:api="fApi"
-          v-model="detailForm.value"
-          :option="detailForm.option"
-          @submit="submitForm"
-        >
-          <template #type-startUserSelect>
-            <el-col :span="24">
-              <el-card class="mb-10px">
-                <template #header>指定审批人</template>
-                <el-form
-                  :model="startUserSelectAssignees"
-                  :rules="startUserSelectAssigneesFormRules"
-                  ref="startUserSelectAssigneesFormRef"
-                >
-                  <el-form-item
-                    v-for="userTask in startUserSelectTasks"
-                    :key="userTask.id"
-                    :label="`任务【${userTask.name}】`"
-                    :prop="userTask.id"
-                  >
-                    <el-select
-                      v-model="startUserSelectAssignees[userTask.id]"
-                      multiple
-                      placeholder="请选择审批人"
-                    >
-                      <el-option
-                        v-for="user in userList"
-                        :key="user.id"
-                        :label="user.nickname"
-                        :value="user.id"
-                      />
-                    </el-select>
-                  </el-form-item>
-                </el-form>
-              </el-card>
-            </el-col>
-          </template>
-        </form-create>
-      </el-col>
-    </el-card>
-    <!-- 流程图预览 -->
-    <ProcessInstanceBpmnViewer :bpmn-xml="bpmnXML as any" />
-  </ContentWrap>
+  <ProcessDefinitionDetail
+    v-else
+    ref="processDefinitionDetailRef"
+    :selectProcessDefinition="selectProcessDefinition"
+    @cancel="selectProcessDefinition = undefined"
+  />
 </template>
+
 <script lang="ts" setup>
 import * as DefinitionApi from '@/api/bpm/definition'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { setConfAndFields2 } from '@/utils/formCreate'
-import type { ApiAttrs } from '@form-create/element-ui/types/config'
-import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
-import { CategoryApi } from '@/api/bpm/category'
-import { useTagsViewStore } from '@/store/modules/tagsView'
-import * as UserApi from '@/api/system/user'
+import { CategoryApi, CategoryVO } from '@/api/bpm/category'
+import ProcessDefinitionDetail from './ProcessDefinitionDetail.vue'
+import { groupBy } from 'lodash-es'
 
 defineOptions({ name: 'BpmProcessInstanceCreate' })
 
+const { proxy } = getCurrentInstance() as any
 const route = useRoute() // 路由
-const { push, currentRoute } = useRouter() // 路由
 const message = useMessage() // 消息
-const { delView } = useTagsViewStore() // 视图操作
 
-const processInstanceId = route.query.processInstanceId
+const searchName = ref('') // 当前搜索关键字
+const processInstanceId: any = route.query.processInstanceId // 流程实例编号。场景：重新发起时
 const loading = ref(true) // 加载中
-const categoryList = ref([]) // 分类的列表
-const categoryActive = ref('') // 选中的分类
+const categoryList: any = ref([]) // 分类的列表
+const categoryActive: any = ref({}) // 选中的分类
 const processDefinitionList = ref([]) // 流程定义的列表
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    // 流程分类
-    categoryList.value = await CategoryApi.getCategorySimpleList()
-    if (categoryList.value.length > 0) {
-      categoryActive.value = categoryList.value[0].code
-    }
-    // 流程定义
-    processDefinitionList.value = await DefinitionApi.getProcessDefinitionList({
-      suspensionState: 1
-    })
+    // 所有流程分类数据
+    await getCategoryList()
+    // 所有流程定义数据
+    await getProcessDefinitionList()
 
     // 如果 processInstanceId 非空，说明是重新发起
     if (processInstanceId?.length > 0) {
@@ -137,7 +119,7 @@ const getList = async () => {
         return
       }
       const processDefinition = processDefinitionList.value.find(
-        (item) => item.key == processInstance.processDefinition?.key
+        (item: any) => item.key == processInstance.processDefinition?.key
       )
       if (!processDefinition) {
         message.error('重新发起流程失败，原因：流程定义不存在')
@@ -150,108 +132,168 @@ const getList = async () => {
   }
 }
 
-/** 选中分类对应的流程定义列表 */
-const categoryProcessDefinitionList = computed(() => {
-  return processDefinitionList.value.filter((item) => item.category == categoryActive.value)
+/** 获取所有流程分类数据 */
+const getCategoryList = async () => {
+  try {
+    // 流程分类
+    categoryList.value = await CategoryApi.getCategorySimpleList()
+  } finally {
+  }
+}
+
+/** 获取所有流程定义数据 */
+const getProcessDefinitionList = async () => {
+  try {
+    // 流程定义
+    processDefinitionList.value = await DefinitionApi.getProcessDefinitionList({
+      suspensionState: 1
+    })
+    // 初始化过滤列表为全部流程定义
+    filteredProcessDefinitionList.value = processDefinitionList.value
+
+    // 在获取完所有数据后，设置第一个有效分类为激活状态
+    if (availableCategories.value.length > 0 && !categoryActive.value?.code) {
+      categoryActive.value = availableCategories.value[0]
+    }
+  } finally {
+  }
+}
+
+/** 搜索流程 */
+const filteredProcessDefinitionList = ref([]) // 用于存储搜索过滤后的流程定义
+const handleQuery = () => {
+  if (searchName.value.trim()) {
+    // 如果有搜索关键字，进行过滤
+    filteredProcessDefinitionList.value = processDefinitionList.value.filter(
+      (definition: any) => definition.name.toLowerCase().includes(searchName.value.toLowerCase()) // 假设搜索依据是流程定义的名称
+    )
+  } else {
+    // 如果没有搜索关键字，恢复所有数据
+    filteredProcessDefinitionList.value = processDefinitionList.value
+  }
+}
+
+/** 流程定义的分组 */
+const processDefinitionGroup: any = computed(() => {
+  if (!processDefinitionList.value?.length) {
+    return {}
+  }
+
+  const grouped = groupBy(filteredProcessDefinitionList.value, 'category')
+  // 按照 categoryList 的顺序重新组织数据
+  const orderedGroup = {}
+  categoryList.value.forEach((category: any) => {
+    if (grouped[category.code]) {
+      orderedGroup[category.code] = grouped[category.code]
+    }
+  })
+  return orderedGroup
 })
 
-// ========== 表单相关 ==========
-const fApi = ref<ApiAttrs>()
-const detailForm = ref({
-  rule: [],
-  option: {},
-  value: {}
-}) // 流程表单详情
-const selectProcessDefinition = ref() // 选择的流程定义
+/** 左侧分类切换 */
+const handleCategoryClick = (category: any) => {
+  categoryActive.value = category
+  const categoryRef = proxy.$refs[`category-${category.code}`] // 获取点击分类对应的 DOM 元素
+  if (categoryRef?.length) {
+    const scrollWrapper = proxy.$refs.scrollWrapper // 获取右侧滚动容器
+    const categoryOffsetTop = categoryRef[0].offsetTop
 
-// 指定审批人
-const bpmnXML = ref(null) // BPMN 数据
-const startUserSelectTasks = ref([]) // 发起人需要选择审批人的用户任务列表
-const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
-const startUserSelectAssigneesFormRef = ref() // 发起人选择审批人的表单 Ref
-const startUserSelectAssigneesFormRules = ref({}) // 发起人选择审批人的表单 Rules
-const userList = ref<any[]>([]) // 用户列表
+    // 滚动到对应位置
+    scrollWrapper.scrollTo({ top: categoryOffsetTop, behavior: 'smooth' })
+  }
+}
+
+/** 通过分类 code 获取对应的名称 */
+const getCategoryName = (categoryCode: string) => {
+  return categoryList.value?.find((ctg: any) => ctg.code === categoryCode)?.name
+}
+
+// ========== 表单相关 ==========
+const selectProcessDefinition = ref() // 选择的流程定义
+const processDefinitionDetailRef = ref()
 
 /** 处理选择流程的按钮操作 **/
-const handleSelect = async (row, formVariables) => {
+const handleSelect = async (row, formVariables?) => {
   // 设置选择的流程
   selectProcessDefinition.value = row
+  // 初始化流程定义详情
+  await nextTick()
+  processDefinitionDetailRef.value?.initProcessInfo(row, formVariables)
+}
 
-  // 重置指定审批人
-  startUserSelectTasks.value = []
-  startUserSelectAssignees.value = {}
-  startUserSelectAssigneesFormRules.value = {}
+/** 处理滚动事件，和左侧分类联动 */
+const handleScroll = (e: any) => {
+  // 直接使用事件对象获取滚动位置
+  const scrollTop = e.scrollTop
 
-  // 情况一：流程表单
-  if (row.formType == 10) {
-    // 设置表单
-    setConfAndFields2(detailForm, row.formConf, row.formFields, formVariables)
-    // 加载流程图
-    const processDefinitionDetail = await DefinitionApi.getProcessDefinition(row.id)
-    if (processDefinitionDetail) {
-      bpmnXML.value = processDefinitionDetail.bpmnXml
-      startUserSelectTasks.value = processDefinitionDetail.startUserSelectTasks
-
-      // 设置指定审批人
-      if (startUserSelectTasks.value?.length > 0) {
-        detailForm.value.rule.push({
-          type: 'startUserSelect',
-          props: {
-            title: '指定审批人'
-          }
-        })
-        // 设置校验规则
-        for (const userTask of startUserSelectTasks.value) {
-          startUserSelectAssignees.value[userTask.id] = []
-          startUserSelectAssigneesFormRules.value[userTask.id] = [
-            { required: true, message: '请选择审批人', trigger: 'blur' }
-          ]
+  // 获取所有分类区域的位置信息
+  const categoryPositions = categoryList.value
+    .map((category: CategoryVO) => {
+      const categoryRef = proxy.$refs[`category-${category.code}`]
+      if (categoryRef?.[0]) {
+        return {
+          code: category.code,
+          offsetTop: categoryRef[0].offsetTop,
+          height: categoryRef[0].offsetHeight
         }
-        // 加载用户列表
-        userList.value = await UserApi.getSimpleUserList()
       }
+      return null
+    })
+    .filter(Boolean)
+
+  // 查找当前滚动位置对应的分类
+  let currentCategory = categoryPositions[0]
+  for (const position of categoryPositions) {
+    // 为了更好的用户体验，可以添加一个缓冲区域（比如 50px）
+    if (scrollTop >= position.offsetTop - 50) {
+      currentCategory = position
+    } else {
+      break
     }
-    // 情况二：业务表单
-  } else if (row.formCustomCreatePath) {
-    await push({
-      path: row.formCustomCreatePath
-    })
-    // 这里暂时无需加载流程图，因为跳出到另外个 Tab；
+  }
+
+  // 更新当前 active 的分类
+  if (currentCategory && categoryActive.value.code !== currentCategory.code) {
+    categoryActive.value = categoryList.value.find(
+      (c: CategoryVO) => c.code === currentCategory.code
+    )
   }
 }
 
-/** 提交按钮 */
-const submitForm = async (formData) => {
-  if (!fApi.value || !selectProcessDefinition.value) {
-    return
-  }
-  // 如果有指定审批人，需要校验
-  if (startUserSelectTasks.value?.length > 0) {
-    await startUserSelectAssigneesFormRef.value.validate()
+/** 过滤出有流程的分类列表。目的：只展示有流程的分类 */
+const availableCategories = computed(() => {
+  if (!categoryList.value?.length || !processDefinitionGroup.value) {
+    return []
   }
 
-  // 提交请求
-  fApi.value.btn.loading(true)
-  try {
-    await ProcessInstanceApi.createProcessInstance({
-      processDefinitionId: selectProcessDefinition.value.id,
-      variables: formData,
-      startUserSelectAssignees: startUserSelectAssignees.value
-    })
-    // 提示
-    message.success('发起流程成功')
-    // 跳转回去
-    delView(unref(currentRoute))
-    await push({
-      name: 'BpmProcessInstanceMy'
-    })
-  } finally {
-    fApi.value.btn.loading(false)
-  }
-}
+  // 获取所有有流程的分类代码
+  const availableCategoryCodes = Object.keys(processDefinitionGroup.value)
+
+  // 过滤出有流程的分类
+  return categoryList.value.filter((category: CategoryVO) =>
+    availableCategoryCodes.includes(category.code)
+  )
+})
 
 /** 初始化 */
 onMounted(() => {
   getList()
 })
 </script>
+
+<style lang="scss" scoped>
+.process-definition-container::before {
+  content: '';
+  border-left: 1px solid #e6e6e6;
+  position: absolute;
+  left: 20.8%;
+  height: 100%;
+}
+:deep() {
+  .definition-item-card {
+    .el-card__body {
+      padding: 14px;
+    }
+  }
+}
+</style>

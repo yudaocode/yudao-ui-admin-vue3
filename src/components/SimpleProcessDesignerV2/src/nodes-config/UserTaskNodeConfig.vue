@@ -56,7 +56,6 @@
                 </el-radio>
               </el-radio-group>
             </el-form-item>
-
             <el-form-item
               v-if="configForm.candidateStrategy == CandidateStrategy.ROLE"
               label="指定角色"
@@ -95,25 +94,6 @@
               />
             </el-form-item>
             <el-form-item
-              v-if="
-                configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
-                configForm.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER
-              "
-              :label="deptLevelLabel!"
-              prop="deptLevel"
-              span="24"
-            >
-              <el-select v-model="configForm.deptLevel" clearable>
-                <el-option
-                  v-for="(item, index) in MULTI_LEVEL_DEPT"
-                  :key="index"
-                  :label="item.label"
-                  :value="item.value"
-                />
-              </el-select>
-            </el-form-item>
-            <el-form-item
               v-if="configForm.candidateStrategy == CandidateStrategy.POST"
               label="指定岗位"
               prop="postIds"
@@ -134,13 +114,7 @@
               prop="userIds"
               span="24"
             >
-              <el-select
-                v-model="configForm.userIds"
-                clearable
-                multiple
-                style="width: 100%"
-                @change="changedCandidateUsers"
-              >
+              <el-select v-model="configForm.userIds" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in userOptions"
                   :key="item.id"
@@ -160,6 +134,57 @@
                   :key="item.id"
                   :label="item.name"
                   :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item
+              v-if="configForm.candidateStrategy === CandidateStrategy.FORM_USER"
+              label="表单内用户字段"
+              prop="formUser"
+            >
+              <el-select v-model="configForm.formUser" clearable style="width: 100%">
+                <el-option
+                  v-for="(item, idx) in userFieldOnFormOptions"
+                  :key="idx"
+                  :label="item.title"
+                  :value="item.field"
+                  :disabled ="!item.required"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item
+              v-if="configForm.candidateStrategy === CandidateStrategy.FORM_DEPT_LEADER"
+              label="表单内部门字段"
+              prop="formDept"
+            >
+              <el-select v-model="configForm.formDept" clearable style="width: 100%">
+                <el-option
+                  v-for="(item, idx) in deptFieldOnFormOptions"
+                  :key="idx"
+                  :label="item.title"
+                  :value="item.field"
+                  :disabled ="!item.required"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item
+              v-if="
+                configForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
+                configForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+                configForm.candidateStrategy ==
+                  CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
+                configForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
+              "
+              :label="deptLevelLabel!"
+              prop="deptLevel"
+              span="24"
+            >
+              <el-select v-model="configForm.deptLevel" clearable>
+                <el-option
+                  v-for="(item, index) in MULTI_LEVEL_DEPT"
+                  :key="index"
+                  :label="item.label"
+                  :value="item.value"
                 />
               </el-select>
             </el-form-item>
@@ -184,14 +209,7 @@
                     :key="index"
                     class="flex items-center"
                   >
-                    <el-radio
-                      :value="item.value"
-                      :label="item.value"
-                      :disabled="
-                        item.value !== ApproveMethodType.RANDOM_SELECT_ONE_APPROVE &&
-                        notAllowedMultiApprovers
-                      "
-                    >
+                    <el-radio :value="item.value" :label="item.value">
                       {{ item.label }}
                     </el-radio>
                     <el-form-item prop="approveRatio">
@@ -481,6 +499,8 @@ const deptLevelLabel = computed(() => {
   let label = '部门负责人来源'
   if (configForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER) {
     label = label + '(指定部门向上)'
+  } else if (configForm.value.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER) {
+    label = label + '(表单内部门向上)'
   } else {
     label = label + '(发起人部门向上)'
   }
@@ -495,9 +515,16 @@ const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.USER_
 // 激活的 Tab 标签页
 const activeTabName = ref('user')
 // 表单字段权限设置
-const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
-  FieldPermissionType.READ
-)
+const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFields } =
+  useFormFieldsPermission(FieldPermissionType.READ)
+// 表单内用户字段选项, 必须是必填和用户选择器
+const userFieldOnFormOptions = computed(() => {
+  return formFieldOptions.filter((item) => item.type === 'UserSelect')
+})
+// 表单内部门字段选项, 必须是必填和部门选择器
+const deptFieldOnFormOptions = computed(() => {
+  return formFieldOptions.filter((item) => item.type === 'DeptSelect')
+})
 // 操作按钮设置
 const { buttonsSetting, btnDisplayNameEdit, changeBtnDisplayName, btnDisplayNameBlurEvent } =
   useButtonsSetting()
@@ -511,6 +538,8 @@ const formRules = reactive({
   roleIds: [{ required: true, message: '角色不能为空', trigger: 'change' }],
   deptIds: [{ required: true, message: '部门不能为空', trigger: 'change' }],
   userGroups: [{ required: true, message: '用户组不能为空', trigger: 'change' }],
+  formUser: [{ required: true, message: '表单内用户字段不能为空', trigger: 'change' }],
+  formDept: [{ required: true, message: '表单内部门字段不能为空', trigger: 'change' }],
   postIds: [{ required: true, message: '岗位不能为空', trigger: 'change' }],
   expression: [{ required: true, message: '流程表达式不能为空', trigger: 'blur' }],
   approveMethod: [{ required: true, message: '多人审批方式不能为空', trigger: 'change' }],
@@ -537,8 +566,7 @@ const {
   getShowText
 } = useNodeForm(NodeType.USER_TASK_NODE)
 const configForm = tempConfigForm as Ref<UserTaskFormType>
-// 不允许多人审批
-const notAllowedMultiApprovers = ref(false)
+
 // 改变审批人设置策略
 const changeCandidateStrategy = () => {
   configForm.value.userIds = []
@@ -547,30 +575,11 @@ const changeCandidateStrategy = () => {
   configForm.value.postIds = []
   configForm.value.userGroups = []
   configForm.value.deptLevel = 1
+  configForm.value.formUser = ''
+  configForm.value.formDept = ''
   configForm.value.approveMethod = ApproveMethodType.SEQUENTIAL_APPROVE
-  if (
-    configForm.value.candidateStrategy === CandidateStrategy.START_USER ||
-    configForm.value.candidateStrategy === CandidateStrategy.USER
-  ) {
-    notAllowedMultiApprovers.value = true
-  } else {
-    notAllowedMultiApprovers.value = false
-  }
 }
-// 改变审批候选人
-const changedCandidateUsers = () => {
-  if (
-    configForm.value.userIds &&
-    configForm.value.userIds?.length <= 1 &&
-    configForm.value.candidateStrategy === CandidateStrategy.USER
-  ) {
-    configForm.value.approveMethod = ApproveMethodType.RANDOM_SELECT_ONE_APPROVE
-    configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
-    notAllowedMultiApprovers.value = true
-  } else {
-    notAllowedMultiApprovers.value = false
-  }
-}
+
 // 审批方式改变
 const approveMethodChanged = () => {
   configForm.value.rejectHandlerType = RejectHandlerType.FINISH_PROCESS
@@ -579,7 +588,7 @@ const approveMethodChanged = () => {
   }
   formRef.value.clearValidate('approveRatio')
 }
-// 审批拒绝 可回退的节点
+// 审批拒绝 可退回的节点
 const returnTaskList = ref<SimpleFlowNode[]>([])
 // 审批人超时未处理设置
 const {
@@ -666,11 +675,6 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   configForm.value.candidateStrategy = node.candidateStrategy!
   // 解析候选人参数
   parseCandidateParam(node.candidateStrategy!, node?.candidateParam)
-  if (configForm.value.userIds && configForm.value.userIds.length > 1) {
-    notAllowedMultiApprovers.value = true
-  } else {
-    notAllowedMultiApprovers.value = false
-  }
   // 2.2 设置审批方式
   configForm.value.approveMethod = node.approveMethod!
   if (node.approveMethod == ApproveMethodType.APPROVE_BY_RATIO) {

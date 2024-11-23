@@ -26,8 +26,8 @@ export type ModelVO = {
   bpmnXml: string
 }
 
-export const getModelPage = async (params) => {
-  return await request.get({ url: '/bpm/model/page', params })
+export const getModelList = async (name: string | undefined) => {
+  return await request.get({ url: '/bpm/model/list', params: { name } })
 }
 
 export const getModel = async (id: string) => {
@@ -36,6 +36,16 @@ export const getModel = async (id: string) => {
 
 export const updateModel = async (data: ModelVO) => {
   return await request.put({ url: '/bpm/model/update', data: data })
+}
+
+// 批量修改流程分类的排序
+export const updateModelSortBatch = async (ids: number[]) => {
+  return await request.put({
+    url: `/bpm/model/update-sort-batch`,
+    params: {
+      ids: ids.join(',')
+    }
+  })
 }
 
 export const updateModelBpmn = async (data: ModelVO) => {

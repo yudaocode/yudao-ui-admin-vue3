@@ -13,10 +13,10 @@ importers:
         version: 2.3.1(vue@3.5.12(typescript@5.3.3))
       '@form-create/designer':
         specifier: ^3.2.6
-        version: 3.2.7(vue@3.5.12(typescript@5.3.3))
+        version: 3.2.8(vue@3.5.12(typescript@5.3.3))
       '@form-create/element-ui':
         specifier: ^3.2.11
-        version: 3.2.11(vue@3.5.12(typescript@5.3.3))
+        version: 3.2.13(vue@3.5.12(typescript@5.3.3))
       '@iconify/iconify':
         specifier: ^3.1.1
         version: 3.1.1
@@ -125,6 +125,9 @@ importers:
       qs:
         specifier: ^6.12.0
         version: 6.12.1
+      sortablejs:
+        specifier: ^1.15.3
+        version: 1.15.3
       steady-xml:
         specifier: ^0.1.0
         version: 0.1.0
@@ -214,11 +217,11 @@ importers:
         specifier: ^10.4.17
         version: 10.4.19(postcss@8.4.38)
       bpmn-js:
-        specifier: 8.9.0
-        version: 8.9.0
+        specifier: 8.10.0
+        version: 8.10.0
       bpmn-js-properties-panel:
         specifier: 0.46.0
-        version: 0.46.0(bpmn-js@8.9.0)
+        version: 0.46.0(bpmn-js@8.10.0)
       consola:
         specifier: ^3.2.3
         version: 3.2.3
@@ -296,7 +299,7 @@ importers:
         version: 0.8.0(rollup@4.17.1)
       unplugin-vue-components:
         specifier: ^0.25.2
-        version: 0.25.2(@babel/parser@7.25.8)(rollup@4.17.1)(vue@3.5.12(typescript@5.3.3))
+        version: 0.25.2(@babel/parser@7.26.2)(rollup@4.17.1)(vue@3.5.12(typescript@5.3.3))
       vite:
         specifier: 5.1.4
         version: 5.1.4(@types/node@20.12.7)(sass@1.75.0)(terser@5.30.4)
@@ -451,16 +454,16 @@ packages:
     resolution: {integrity: sha512-2ofRCjnnA9y+wk8b9IAREroeUP02KHp431N2mhKniy2yKIDKpbrHv9eXwm8cBeWQYcJmzv5qKCu65P47eCF7CQ==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/helper-string-parser@7.25.7':
-    resolution: {integrity: sha512-CbkjYdsJNHFk8uqpEkpCvRs3YRp9tY6FmFY7wLMSYuGYkrdUi7r2lc4/wqsvlHoMznX3WJ9IP8giGPq68T/Y6g==, tarball: https://registry.npmmirror.com/@babel/helper-string-parser/-/helper-string-parser-7.25.7.tgz}
+  '@babel/helper-string-parser@7.25.9':
+    resolution: {integrity: sha512-4A/SCr/2KLd5jrtOMFzaKjVtAei3+2r/NChoBNoZ3EyP/+GlhoaEGoWOZUmFmoITP7zOJyHIMm+DYRd8o3PvHA==, tarball: https://registry.npmmirror.com/@babel/helper-string-parser/-/helper-string-parser-7.25.9.tgz}
     engines: {node: '>=6.9.0'}
 
   '@babel/helper-validator-identifier@7.22.20':
     resolution: {integrity: sha512-Y4OZ+ytlatR8AI+8KZfKuL5urKp7qey08ha31L8b3BwewJAoJamTzyvxPR/5D+KkdJCGPq/+8TukHBlY10FX9A==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/helper-validator-identifier@7.25.7':
-    resolution: {integrity: sha512-AM6TzwYqGChO45oiuPqwL2t20/HdMC1rTPAesnBCgPCSF1x3oN9MVUwQV2iyz4xqWrctwK5RNC8LV22kaQCNYg==, tarball: https://registry.npmmirror.com/@babel/helper-validator-identifier/-/helper-validator-identifier-7.25.7.tgz}
+  '@babel/helper-validator-identifier@7.25.9':
+    resolution: {integrity: sha512-Ed61U6XJc3CVRfkERJWDz4dJwKe7iLmmJsbOGu9wSloNSFttHV0I8g6UAgb7qnK5ly5bGLPd4oXZlxCdANBOWQ==, tarball: https://registry.npmmirror.com/@babel/helper-validator-identifier/-/helper-validator-identifier-7.25.9.tgz}
     engines: {node: '>=6.9.0'}
 
   '@babel/helper-validator-option@7.23.5':
@@ -484,8 +487,8 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  '@babel/parser@7.25.8':
-    resolution: {integrity: sha512-HcttkxzdPucv3nNFmfOOMfFf64KgdJVqm1KaCm25dPGMLElo9nsLvXeJECQg8UzPuBGLyTSA0ZzqCtDSzKTEoQ==, tarball: https://registry.npmmirror.com/@babel/parser/-/parser-7.25.8.tgz}
+  '@babel/parser@7.26.2':
+    resolution: {integrity: sha512-DWMCZH9WA4Maitz2q21SRKHo9QXZxkDsbNZoVD62gusNtNBBqDg9i7uOhASfTfIGNzW+O+r7+jAlM8dwphcJKQ==, tarball: https://registry.npmmirror.com/@babel/parser/-/parser-7.26.2.tgz}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -961,8 +964,8 @@ packages:
     resolution: {integrity: sha512-+j7a5c253RfKh8iABBhywc8NSfP5LURe7Uh4qpsh6jc+aLJguvmIUBdjSdEMQv2bENrCR5MfRdjGo7vzS/ob7w==}
     engines: {node: '>=6.9.0'}
 
-  '@babel/types@7.25.8':
-    resolution: {integrity: sha512-JWtuCu8VQsMladxVz/P4HzHUGCAwpuqacmowgXFs5XjxIgKuNjnLokQzuVjlTvIzODaDmpjT3oxcC48vyk9EWg==, tarball: https://registry.npmmirror.com/@babel/types/-/types-7.25.8.tgz}
+  '@babel/types@7.26.0':
+    resolution: {integrity: sha512-Z/yiTPj+lDVnF7lWeKCIJzaIkI0vYO87dMpZ4bg4TDrFe4XXLFWL1TbXU27gBP3QccxV9mZICCrnjnYlJjXHOA==, tarball: https://registry.npmmirror.com/@babel/types/-/types-7.26.0.tgz}
     engines: {node: '>=6.9.0'}
 
   '@bpmn-io/diagram-js-ui@0.2.3':
@@ -1070,7 +1073,7 @@ packages:
       postcss-selector-parser: ^6.0.13
 
   '@ctrl/tinycolor@3.6.1':
-    resolution: {integrity: sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA==, tarball: https://registry.npmmirror.com/@ctrl/tinycolor/-/tinycolor-3.6.1.tgz}
+    resolution: {integrity: sha512-SITSV6aIXsuVNV3f3O0f2n/cgyEDWoSqtZMYiAmcsYHydcKrOz3gUxB/iXd/Qf08+IZX4KpgNbvUdMBmWz+kcA==}
     engines: {node: '>=10'}
 
   '@dual-bundle/import-meta-resolve@4.0.0':
@@ -1238,13 +1241,13 @@ packages:
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
   '@floating-ui/core@1.6.1':
-    resolution: {integrity: sha512-42UH54oPZHPdRHdw6BgoBD6cg/eVTmVrFcgeRDM3jbO7uxSoipVcmcIGFcA5jmOHO5apcyvBhkSKES3fQJnu7A==, tarball: https://registry.npmmirror.com/@floating-ui/core/-/core-1.6.1.tgz}
+    resolution: {integrity: sha512-42UH54oPZHPdRHdw6BgoBD6cg/eVTmVrFcgeRDM3jbO7uxSoipVcmcIGFcA5jmOHO5apcyvBhkSKES3fQJnu7A==}
 
   '@floating-ui/dom@1.6.4':
-    resolution: {integrity: sha512-0G8R+zOvQsAG1pg2Q99P21jiqxqGBW1iRe/iXHsBRBxnpXKFI8QwbB4x5KmYLggNO5m34IQgOIu9SCRfR/WWiQ==, tarball: https://registry.npmmirror.com/@floating-ui/dom/-/dom-1.6.4.tgz}
+    resolution: {integrity: sha512-0G8R+zOvQsAG1pg2Q99P21jiqxqGBW1iRe/iXHsBRBxnpXKFI8QwbB4x5KmYLggNO5m34IQgOIu9SCRfR/WWiQ==}
 
   '@floating-ui/utils@0.2.2':
-    resolution: {integrity: sha512-J4yDIIthosAsRZ5CPYP/jQvUAQtlZTTD/4suA08/FEnlxqW3sKS9iAhgsa9VYLZ6vDHn/ixJgIqRQPotoBjxIw==, tarball: https://registry.npmmirror.com/@floating-ui/utils/-/utils-0.2.2.tgz}
+    resolution: {integrity: sha512-J4yDIIthosAsRZ5CPYP/jQvUAQtlZTTD/4suA08/FEnlxqW3sKS9iAhgsa9VYLZ6vDHn/ixJgIqRQPotoBjxIw==}
 
   '@form-create/component-elm-checkbox@3.2.8':
     resolution: {integrity: sha512-ol/SyzzeDueUTd87MPnYydOe7Sc6cL8S/Uhv5QmWofMY1TuuBet9DPb65JjyS6Lk51/cl3TabvtJj93EAxL6KA==, tarball: https://registry.npmmirror.com/@form-create/component-elm-checkbox/-/component-elm-checkbox-3.2.8.tgz}
@@ -1264,8 +1267,8 @@ packages:
   '@form-create/component-elm-tree@3.2.9':
     resolution: {integrity: sha512-5NG4YeFZ5jzN9Aa0JFuFD8OGKXBqSHSN0KRgxxUgdhzRg8hcRq/JODuN7yYMa7YrBP0ecTKyel8Q4ufR5Ct8iw==, tarball: https://registry.npmmirror.com/@form-create/component-elm-tree/-/component-elm-tree-3.2.9.tgz}
 
-  '@form-create/component-elm-upload@3.2.9':
-    resolution: {integrity: sha512-PdYlUCRs7x/zQjkDkTX9q3116ysKUPZ4R4OwzhSc430JPLSVUCx/CqlhenbAnqZFEj5khwnvppbYSzrTTaDa4A==, tarball: https://registry.npmmirror.com/@form-create/component-elm-upload/-/component-elm-upload-3.2.9.tgz}
+  '@form-create/component-elm-upload@3.2.13':
+    resolution: {integrity: sha512-qngh1Hzb/Oo51gbh3LDiMmUnDaa2+k7sXS4GEZujoDuKCctBjG60y3pi214CmOqBq9PiynM8knf6yQKqpjlRqA==, tarball: https://registry.npmmirror.com/@form-create/component-elm-upload/-/component-elm-upload-3.2.13.tgz}
 
   '@form-create/component-subform@3.1.34':
     resolution: {integrity: sha512-OJcFH/7MTHx7JLEjDK/weS27qfuFWAI+OK+gXTJ2jIt9aZkGWF/EWkjetiJLt5a0KMw4Z15wOS2XCY9pVK9vlA==, tarball: https://registry.npmmirror.com/@form-create/component-subform/-/component-subform-3.1.34.tgz}
@@ -1273,18 +1276,18 @@ packages:
   '@form-create/component-wangeditor@3.1.20':
     resolution: {integrity: sha512-lAjpltmYfr3a2AeXasCehGsZNL/1WB6vWqqV9TIsJ4pleTr0/D/oPwEYQjfv+gG+NoB2Sa25SRGhtlnephjyhg==, tarball: https://registry.npmmirror.com/@form-create/component-wangeditor/-/component-wangeditor-3.1.20.tgz}
 
-  '@form-create/core@3.2.11':
-    resolution: {integrity: sha512-xcaAxFSpAaVRWSpZ3ikrr89OmGidtN1y2YC7mQcQ/Hs7KvdbipH2I27JF5qm98+S7gs/e3Z9jrscngmSwsLw7g==, tarball: https://registry.npmmirror.com/@form-create/core/-/core-3.2.11.tgz}
+  '@form-create/core@3.2.13':
+    resolution: {integrity: sha512-HVLfZ5gf9DRO74OJTw3bt/GwFXhyBWvMmrOG9WkRTEQEMIeGOWudH843iaYp2ljgJN6jrn3RcCfONC9nzAmk8g==, tarball: https://registry.npmmirror.com/@form-create/core/-/core-3.2.13.tgz}
     peerDependencies:
       vue: ^3.1.0
 
-  '@form-create/designer@3.2.7':
-    resolution: {integrity: sha512-jLpX51yXt2SOmsGOiDey5wq6K6gQLfd7CcGtW6zH2tDQTJd4ddS/QstVKmei6ddIwA9GWuk3JWnktGLk4ry2sg==, tarball: https://registry.npmmirror.com/@form-create/designer/-/designer-3.2.7.tgz}
+  '@form-create/designer@3.2.8':
+    resolution: {integrity: sha512-SgrGiWOFaQTARAmysepHDtFyRi97rERrlkv1joz+DCOAzZME3RKRTXVqA7ALzJ2jI3psiCosGAK4rPSLh6EvgA==, tarball: https://registry.npmmirror.com/@form-create/designer/-/designer-3.2.8.tgz}
     peerDependencies:
       vue: ^3.1.5
 
-  '@form-create/element-ui@3.2.11':
-    resolution: {integrity: sha512-cJpKuu5zGNJK5TlsXTLqfc972aAVYk4q2ljn0ERfxM89oRl+2tkatOVr2vPYqGj/Z4Ufpr1R/ZP+RGGl2jVIHQ==, tarball: https://registry.npmmirror.com/@form-create/element-ui/-/element-ui-3.2.11.tgz}
+  '@form-create/element-ui@3.2.13':
+    resolution: {integrity: sha512-b/ilL9/huwQhXhGM3irzKTqlF7n69ld/CPiLQzuzSEUFC4VqBNFcy8kpCQ9/j4+VvuEPCvro1ax3v4V7Mxol9g==, tarball: https://registry.npmmirror.com/@form-create/element-ui/-/element-ui-3.2.13.tgz}
     peerDependencies:
       vue: ^3.1.0
 
@@ -1437,7 +1440,7 @@ packages:
     resolution: {integrity: sha512-s2t+1oVtGDV6KtqfCXtUOhxfeYvOdDF90IVm+nMs/6bUP0HeGZLslguuL/AibpwtfL4FA/oCsIu/RhwapgAdJw==}
 
   '@rollup/plugin-virtual@3.0.2':
-    resolution: {integrity: sha512-10monEYsBp3scM4/ND4LNH5Rxvh3e/cVeL3jWTgZ2SrQ+BmUoQcopVQvnaMcOnykb1VkxUFuDAN+0FnpTFRy2A==, tarball: https://registry.npmmirror.com/@rollup/plugin-virtual/-/plugin-virtual-3.0.2.tgz}
+    resolution: {integrity: sha512-10monEYsBp3scM4/ND4LNH5Rxvh3e/cVeL3jWTgZ2SrQ+BmUoQcopVQvnaMcOnykb1VkxUFuDAN+0FnpTFRy2A==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
@@ -1615,7 +1618,7 @@ packages:
     os: [win32]
 
   '@swc/core@1.7.26':
-    resolution: {integrity: sha512-f5uYFf+TmMQyYIoxkn/evWhNGuUzC730dFwAKGwBVHHVoPyak1/GvJUm6i1SKl+2Hrj9oN0i3WSoWWZ4pgI8lw==, tarball: https://registry.npmmirror.com/@swc/core/-/core-1.7.26.tgz}
+    resolution: {integrity: sha512-f5uYFf+TmMQyYIoxkn/evWhNGuUzC730dFwAKGwBVHHVoPyak1/GvJUm6i1SKl+2Hrj9oN0i3WSoWWZ4pgI8lw==}
     engines: {node: '>=10'}
     peerDependencies:
       '@swc/helpers': '*'
@@ -1624,10 +1627,10 @@ packages:
         optional: true
 
   '@swc/counter@0.1.3':
-    resolution: {integrity: sha512-e2BR4lsJkkRlKZ/qCHPw9ZaSxc0MVUd7gtbtaB7aMvHeJVYe8sOB8DBZkP2DtISHGSku9sCK6T6cnY0CtXrOCQ==, tarball: https://registry.npmmirror.com/@swc/counter/-/counter-0.1.3.tgz}
+    resolution: {integrity: sha512-e2BR4lsJkkRlKZ/qCHPw9ZaSxc0MVUd7gtbtaB7aMvHeJVYe8sOB8DBZkP2DtISHGSku9sCK6T6cnY0CtXrOCQ==}
 
   '@swc/types@0.1.12':
-    resolution: {integrity: sha512-wBJA+SdtkbFhHjTMYH+dEH1y4VpfGdAc2Kw/LK09i9bXd/K6j6PkDcFCEzb6iVfZMkPRrl/q0e3toqTAJdkIVA==, tarball: https://registry.npmmirror.com/@swc/types/-/types-0.1.12.tgz}
+    resolution: {integrity: sha512-wBJA+SdtkbFhHjTMYH+dEH1y4VpfGdAc2Kw/LK09i9bXd/K6j6PkDcFCEzb6iVfZMkPRrl/q0e3toqTAJdkIVA==}
 
   '@sxzz/popperjs-es@2.11.7':
     resolution: {integrity: sha512-Ccy0NlLkzr0Ex2FKvh2X+OyERHXJ88XJ1MXtsI9y9fGexlaXaVTPzBCRBwIxFkORuOb+uBqeu+RqnpgYTEZRUQ==, tarball: https://registry.npmmirror.com/@sxzz/popperjs-es/-/popperjs-es-2.11.7.tgz}
@@ -1781,7 +1784,7 @@ packages:
     resolution: {integrity: sha512-1CQjuSrgbv1/dhmcfQ83eVyYbvGyqhTvb2Opxr0QCV+iJ4J6/J+XWQ3Om59WiwCd1MN3rDUHasx5XRrpUtewYQ==, tarball: https://registry.npmmirror.com/@types/video.js/-/video.js-7.3.58.tgz}
 
   '@types/web-bluetooth@0.0.16':
-    resolution: {integrity: sha512-oh8q2Zc32S6gd/j50GowEjKLoOVOwHP/bWVjKJInBwQqdOYMdPrf1oVlelTlyfFK3CKxL1uahMDAr+vy8T7yMQ==, tarball: https://registry.npmmirror.com/@types/web-bluetooth/-/web-bluetooth-0.0.16.tgz}
+    resolution: {integrity: sha512-oh8q2Zc32S6gd/j50GowEjKLoOVOwHP/bWVjKJInBwQqdOYMdPrf1oVlelTlyfFK3CKxL1uahMDAr+vy8T7yMQ==}
 
   '@types/web-bluetooth@0.0.20':
     resolution: {integrity: sha512-g9gZnnXVq7gM7v3tJCWV/qw7w+KeOlSHAhgF9RytFyifW6AF61hdT2ucrYhPq9hLs5JIryeupHV3qGk95dH9ow==}
@@ -2127,19 +2130,19 @@ packages:
     resolution: {integrity: sha512-/1vjTol8SXnx6xewDEKfS0Ra//ncg4Hb0DaZiwKf7drgfMsKFExQ+FnnENcN6efPen+1kIzhLQoGSy0eDUVOMg==}
 
   '@vueuse/core@9.13.0':
-    resolution: {integrity: sha512-pujnclbeHWxxPRqXWmdkKV5OX4Wk4YeK7wusHqRwU0Q7EFusHoqNA/aPhB6KCh9hEqJkLAJo7bb0Lh9b+OIVzw==, tarball: https://registry.npmmirror.com/@vueuse/core/-/core-9.13.0.tgz}
+    resolution: {integrity: sha512-pujnclbeHWxxPRqXWmdkKV5OX4Wk4YeK7wusHqRwU0Q7EFusHoqNA/aPhB6KCh9hEqJkLAJo7bb0Lh9b+OIVzw==}
 
   '@vueuse/metadata@10.9.0':
     resolution: {integrity: sha512-iddNbg3yZM0X7qFY2sAotomgdHK7YJ6sKUvQqbvwnf7TmaVPxS4EJydcNsVejNdS8iWCtDk+fYXr7E32nyTnGA==}
 
   '@vueuse/metadata@9.13.0':
-    resolution: {integrity: sha512-gdU7TKNAUVlXXLbaF+ZCfte8BjRJQWPCa2J55+7/h+yDtzw3vOoGQDRXzI6pyKyo6bXFT5/QoPE4hAknExjRLQ==, tarball: https://registry.npmmirror.com/@vueuse/metadata/-/metadata-9.13.0.tgz}
+    resolution: {integrity: sha512-gdU7TKNAUVlXXLbaF+ZCfte8BjRJQWPCa2J55+7/h+yDtzw3vOoGQDRXzI6pyKyo6bXFT5/QoPE4hAknExjRLQ==}
 
   '@vueuse/shared@10.9.0':
     resolution: {integrity: sha512-Uud2IWncmAfJvRaFYzv5OHDli+FbOzxiVEQdLCKQKLyhz94PIyFC3CHcH7EDMwIn8NPtD06+PNbC/PiO0LGLtw==}
 
   '@vueuse/shared@9.13.0':
-    resolution: {integrity: sha512-UrnhU+Cnufu4S6JLCPZnkWh0WwZGUp72ktOF2DFptMlOs3TOdVv8xJN53zhHGARmVOsz5KqOls09+J1NR6sBKw==, tarball: https://registry.npmmirror.com/@vueuse/shared/-/shared-9.13.0.tgz}
+    resolution: {integrity: sha512-UrnhU+Cnufu4S6JLCPZnkWh0WwZGUp72ktOF2DFptMlOs3TOdVv8xJN53zhHGARmVOsz5KqOls09+J1NR6sBKw==}
 
   '@wangeditor/basic-modules@1.1.7':
     resolution: {integrity: sha512-cY9CPkLJaqF05STqfpZKWG4LpxTMeGSIIF1fHvfm/mz+JXatCagjdkbxdikOuKYlxDdeqvOeBmsUBItufDLXZg==}
@@ -2347,7 +2350,7 @@ packages:
     engines: {node: '>=8'}
 
   async-validator@4.2.5:
-    resolution: {integrity: sha512-7HhHjtERjqlNbZtqNqy2rckN/SpOOlmDliet+lP7k+eKZEjPk3DgyeU9lIXLdeLz0uBbbVp+9Qdow9wJWgwwfg==, tarball: https://registry.npmmirror.com/async-validator/-/async-validator-4.2.5.tgz}
+    resolution: {integrity: sha512-7HhHjtERjqlNbZtqNqy2rckN/SpOOlmDliet+lP7k+eKZEjPk3DgyeU9lIXLdeLz0uBbbVp+9Qdow9wJWgwwfg==}
 
   async@3.2.5:
     resolution: {integrity: sha512-baNZyqaaLhyLVKm/DlvdW051MSgO6b8eVfIezl9E5PqWxFgzLm/wQntEW4zOytVburDEr0JlALEpdOFwvErLsg==}
@@ -2432,11 +2435,11 @@ packages:
   bpmn-js-token-simulation@0.10.0:
     resolution: {integrity: sha512-QuZQ/KVXKt9Vl+XENyOBoTW2Aw+uKjuBlKdCJL6El7AyM7DkJ5bZkSYURshId1SkBDdYg2mJ1flSmsrhGuSfwg==}
 
-  bpmn-js@8.9.0:
-    resolution: {integrity: sha512-cthSxiJUpEHspiUKiL0YA8/mRCYngNKwALWieLKPtFo42n+vWTFgmxnASNRwhxpPEbSXjYuTah1lZ0lSyLWPpw==}
+  bpmn-js@8.10.0:
+    resolution: {integrity: sha512-NozeOi01qL0ZdVq8+5hWZcikyEvgrP1yzCBqlhSufJdHFsnEMBCwn2bJJ0B/6JgX+IBwy1sk/Uw+Ds8rQ8vfrw==, tarball: https://registry.npmmirror.com/bpmn-js/-/bpmn-js-8.10.0.tgz}
 
   bpmn-moddle@7.1.3:
-    resolution: {integrity: sha512-ZcBfw0NSOdYTSXFKEn7MOXHItz7VfLZTrFYKO8cK6V8ZzGjCcdiLIOiw7Lctw1PJsihhLiZQS8Htj2xKf+NwCg==}
+    resolution: {integrity: sha512-ZcBfw0NSOdYTSXFKEn7MOXHItz7VfLZTrFYKO8cK6V8ZzGjCcdiLIOiw7Lctw1PJsihhLiZQS8Htj2xKf+NwCg==, tarball: https://registry.npmmirror.com/bpmn-moddle/-/bpmn-moddle-7.1.3.tgz}
 
   brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
@@ -2733,7 +2736,7 @@ packages:
     engines: {node: '>= 6'}
 
   css.escape@1.5.1:
-    resolution: {integrity: sha512-YUifsXXuknHlUsmlgyY0PKzgPOr7/FjCePfHNt0jxm83wHZi44VDMQ7/fGNkjY3/jV1MC+1CmZbaHzugyeRtpg==}
+    resolution: {integrity: sha512-YUifsXXuknHlUsmlgyY0PKzgPOr7/FjCePfHNt0jxm83wHZi44VDMQ7/fGNkjY3/jV1MC+1CmZbaHzugyeRtpg==, tarball: https://registry.npmmirror.com/css.escape/-/css.escape-1.5.1.tgz}
 
   cssesc@3.0.0:
     resolution: {integrity: sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==}
@@ -2968,7 +2971,7 @@ packages:
     resolution: {integrity: sha512-2N3BOUU4gYMpTP24s5rF5iP7BDr7uNTCs4ozw3kf/eKfvWSIu93GEBi5m427YoyJoeOzQ5smuu4nNAPGb8idSQ==}
 
   diagram-js-direct-editing@1.8.0:
-    resolution: {integrity: sha512-B4Xj+PJfgBjbPEzT3uZQEkZI5xHFB0Izc+7BhDFuHidzrEMzQKZrFGdA3PqfWhReHf3dp+iB6Tt11G9eGNjKMw==}
+    resolution: {integrity: sha512-B4Xj+PJfgBjbPEzT3uZQEkZI5xHFB0Izc+7BhDFuHidzrEMzQKZrFGdA3PqfWhReHf3dp+iB6Tt11G9eGNjKMw==, tarball: https://registry.npmmirror.com/diagram-js-direct-editing/-/diagram-js-direct-editing-1.8.0.tgz}
     peerDependencies:
       diagram-js: '*'
 
@@ -2976,10 +2979,10 @@ packages:
     resolution: {integrity: sha512-LF9BiwjbOPpZd0ez5VSlYRbdbEA59YQX43bWvNDp1rLMv0xwZ5yIg4oaYDK82nIQ0kH1tjvoQRpNevMTCgQVyw==}
 
   diagram-js@7.9.0:
-    resolution: {integrity: sha512-o1yUtX5TXV1pmpevP55gxU/AEG6nCidOXGs/HLuxNXG0zMZ3jQta7kMqRxTK93rNw/XuHmP1eMOwdvdJ2RP5qA==}
+    resolution: {integrity: sha512-o1yUtX5TXV1pmpevP55gxU/AEG6nCidOXGs/HLuxNXG0zMZ3jQta7kMqRxTK93rNw/XuHmP1eMOwdvdJ2RP5qA==, tarball: https://registry.npmmirror.com/diagram-js/-/diagram-js-7.9.0.tgz}
 
   didi@5.2.1:
-    resolution: {integrity: sha512-IKNnajUlD4lWMy/Q9Emkk7H1qnzREgY4UyE3IhmOi/9IKua0JYtYldk928bOdt1yNxN8EiOy1sqtSozEYsmjCg==}
+    resolution: {integrity: sha512-IKNnajUlD4lWMy/Q9Emkk7H1qnzREgY4UyE3IhmOi/9IKua0JYtYldk928bOdt1yNxN8EiOy1sqtSozEYsmjCg==, tarball: https://registry.npmmirror.com/didi/-/didi-5.2.1.tgz}
 
   didi@9.0.2:
     resolution: {integrity: sha512-q2+aj+lnJcUweV7A9pdUrwFr4LHVmRPwTmQLtHPFz4aT7IBoryN6Iy+jmFku+oIzr5ebBkvtBCOb87+dJhb7bg==}
@@ -3075,7 +3078,7 @@ packages:
     resolution: {integrity: sha512-9ItEpeu15hW5m8jKdriL+BQrgwDTXEL9pn4SkillWFu73ZNNNQ2BKKLS+ZHv2vC9UkNhosAeyfxOf/5OSeTCPA==}
 
   element-plus@2.8.4:
-    resolution: {integrity: sha512-ZlVAdUOoJliv4kW3ntWnnSHMT+u/Os7mXJjk2xzOlqNeHaI2/ozlF+R58ZCEak8ZnDi6+5A2viWEYRsq64IuiA==, tarball: https://registry.npmmirror.com/element-plus/-/element-plus-2.8.4.tgz}
+    resolution: {integrity: sha512-ZlVAdUOoJliv4kW3ntWnnSHMT+u/Os7mXJjk2xzOlqNeHaI2/ozlF+R58ZCEak8ZnDi6+5A2viWEYRsq64IuiA==}
     peerDependencies:
       vue: ^3.2.0
 
@@ -3160,7 +3163,7 @@ packages:
     engines: {node: '>=6'}
 
   escape-html@1.0.3:
-    resolution: {integrity: sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==, tarball: https://registry.npmmirror.com/escape-html/-/escape-html-1.0.3.tgz}
+    resolution: {integrity: sha512-NiSupZ4OeuGwr68lGIeym/ksIZMJodUGOSCZ/FSnTxcrekbvqrgdUxlJOMpijaKZVjAJrWrGs/6Jy8OMuyj9ow==}
 
   escape-string-regexp@1.0.5:
     resolution: {integrity: sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg==}
@@ -4019,7 +4022,7 @@ packages:
     resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
 
   lodash-unified@1.0.3:
-    resolution: {integrity: sha512-WK9qSozxXOD7ZJQlpSqOT+om2ZfcT4yO+03FuzAHD0wF6S0l0090LRPDx3vhTTLZ8cFKpBn+IOcVXK6qOcIlfQ==, tarball: https://registry.npmmirror.com/lodash-unified/-/lodash-unified-1.0.3.tgz}
+    resolution: {integrity: sha512-WK9qSozxXOD7ZJQlpSqOT+om2ZfcT4yO+03FuzAHD0wF6S0l0090LRPDx3vhTTLZ8cFKpBn+IOcVXK6qOcIlfQ==}
     peerDependencies:
       '@types/lodash-es': '*'
       lodash: '*'
@@ -4158,7 +4161,7 @@ packages:
     resolution: {integrity: sha512-Lf+9+2r+Tdp5wXDXC4PcIBjTDtq4UKjCPMQhKIuzpJNW0b96kVqSwW0bT7FhRSfmAiFYgP+SCRvdrDozfh0U5w==}
 
   memoize-one@6.0.0:
-    resolution: {integrity: sha512-rkpe71W0N0c0Xz6QD0eJETuWAJGnJ9afsl1srmwPrI+yBCkge5EycXXbYRyvL29zZVUWQCY7InPRCv3GDXuZNw==, tarball: https://registry.npmmirror.com/memoize-one/-/memoize-one-6.0.0.tgz}
+    resolution: {integrity: sha512-rkpe71W0N0c0Xz6QD0eJETuWAJGnJ9afsl1srmwPrI+yBCkge5EycXXbYRyvL29zZVUWQCY7InPRCv3GDXuZNw==}
 
   meow@12.1.1:
     resolution: {integrity: sha512-BhXM0Au22RwUneMPwSCnyhTOizdWoIEPU9sp0Aqa1PnDMR5Wv2FGXYDjuzJEIX+Eo2Rb8xuYe5jrnm5QowQFkw==}
@@ -4207,7 +4210,7 @@ packages:
     engines: {node: '>=12'}
 
   min-dash@3.8.1:
-    resolution: {integrity: sha512-evumdlmIlg9mbRVPbC4F5FuRhNmcMS5pvuBUbqb1G9v09Ro0ImPEgz5n3khir83lFok1inKqVDjnKEg3GpDxQg==}
+    resolution: {integrity: sha512-evumdlmIlg9mbRVPbC4F5FuRhNmcMS5pvuBUbqb1G9v09Ro0ImPEgz5n3khir83lFok1inKqVDjnKEg3GpDxQg==, tarball: https://registry.npmmirror.com/min-dash/-/min-dash-3.8.1.tgz}
 
   min-dash@4.2.1:
     resolution: {integrity: sha512-to+unsToePnm7cUeR9TrMzFlETHd/UXmU+ELTRfWZj5XGT41KF6X3L233o3E/GdEs3sk2Tbw/lOLD1avmWkg8A==}
@@ -4260,10 +4263,10 @@ packages:
     resolution: {integrity: sha512-vLgaHvaeunuOXHSmEbZ9izxPx3USsk8KCQ8iC+aTlp5sKRSoZvwhHh5L9VbKSaVC6sJDqbyohIS76E2VmHIPAA==}
 
   moddle-xml@9.0.6:
-    resolution: {integrity: sha512-tl0reHpsY/aKlLGhXeFlQWlYAQHFxTkFqC8tq8jXRYpQSnLVw13T6swMaourLd7EXqHdWsc+5ggsB+fEep6xZQ==}
+    resolution: {integrity: sha512-tl0reHpsY/aKlLGhXeFlQWlYAQHFxTkFqC8tq8jXRYpQSnLVw13T6swMaourLd7EXqHdWsc+5ggsB+fEep6xZQ==, tarball: https://registry.npmmirror.com/moddle-xml/-/moddle-xml-9.0.6.tgz}
 
   moddle@5.0.4:
-    resolution: {integrity: sha512-Kjb+hjuzO+YlojNGxEUXvdhLYTHTtAABDlDcJTtTcn5MbJF9Zkv4I1Fyvp3Ypmfgg1EfHDZ3PsCQTuML9JD6wg==}
+    resolution: {integrity: sha512-Kjb+hjuzO+YlojNGxEUXvdhLYTHTtAABDlDcJTtTcn5MbJF9Zkv4I1Fyvp3Ypmfgg1EfHDZ3PsCQTuML9JD6wg==, tarball: https://registry.npmmirror.com/moddle/-/moddle-5.0.4.tgz}
 
   mpd-parser@0.22.1:
     resolution: {integrity: sha512-fwBebvpyPUU8bOzvhX0VQZgSohncbgYwUyJJoTSNpmy7ccD2ryiCvM7oRkn/xQH5cv73/xU7rJSNCLjdGFor0Q==}
@@ -4329,7 +4332,7 @@ packages:
     engines: {node: '>=0.10.0'}
 
   normalize-wheel-es@1.2.0:
-    resolution: {integrity: sha512-Wj7+EJQ8mSuXr2iWfnujrimU35R2W4FAErEyTmJoJ7ucwTn2hOUSsRehMb5RSYkxXGTM7Y9QpvPmp++w5ftoJw==, tarball: https://registry.npmmirror.com/normalize-wheel-es/-/normalize-wheel-es-1.2.0.tgz}
+    resolution: {integrity: sha512-Wj7+EJQ8mSuXr2iWfnujrimU35R2W4FAErEyTmJoJ7ucwTn2hOUSsRehMb5RSYkxXGTM7Y9QpvPmp++w5ftoJw==}
 
   npm-run-path@4.0.1:
     resolution: {integrity: sha512-S48WzZW777zhNIrn7gxOlISNAqi9ZC/uQFnRdbeIHhZhCA6UqpkOT8T1G7BvfdgP4Er8gF4sUbaS0i7QvIfCWw==}
@@ -4364,7 +4367,7 @@ packages:
     engines: {node: '>= 0.4'}
 
   object-refs@0.3.0:
-    resolution: {integrity: sha512-eP0ywuoWOaDoiake/6kTJlPJhs+k0qNm4nYRzXLNHj6vh+5M3i9R1epJTdxIPGlhWc4fNRQ7a6XJNCX+/L4FOQ==}
+    resolution: {integrity: sha512-eP0ywuoWOaDoiake/6kTJlPJhs+k0qNm4nYRzXLNHj6vh+5M3i9R1epJTdxIPGlhWc4fNRQ7a6XJNCX+/L4FOQ==, tarball: https://registry.npmmirror.com/object-refs/-/object-refs-0.3.0.tgz}
 
   object-visit@1.0.1:
     resolution: {integrity: sha512-GBaMwwAVK9qbQN3Scdo0OyvgPW7l3lnaVMj84uTOZlswkX0KpF6fyDBJhtTthf7pymztoN36/KEr1DyhF96zEA==}
@@ -4491,8 +4494,8 @@ packages:
   picocolors@1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
 
-  picocolors@1.1.0:
-    resolution: {integrity: sha512-TQ92mBOW0l3LeMeyLV6mzy/kWr8lkd/hp3mTg7wYK7zJhuBStmGMBG0BdeDZS/dZx1IukaX6Bk11zcln25o1Aw==, tarball: https://registry.npmmirror.com/picocolors/-/picocolors-1.1.0.tgz}
+  picocolors@1.1.1:
+    resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==, tarball: https://registry.npmmirror.com/picocolors/-/picocolors-1.1.1.tgz}
 
   picomatch@2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
@@ -4852,7 +4855,7 @@ packages:
     resolution: {integrity: sha512-0s+oAmw9zLl1V1cS9BtZN7JAd0cW5e0QH4W3LWEK6a4LaLEA2OTpGYWDY+6XasBLtz6wkm3u1xRw95mRuJ59WA==}
 
   saxen@8.1.2:
-    resolution: {integrity: sha512-xUOiiFbc3Ow7p8KMxwsGICPx46ZQvy3+qfNVhrkwfz3Vvq45eGt98Ft5IQaA1R/7Tb5B5MKh9fUR9x3c3nDTxw==}
+    resolution: {integrity: sha512-xUOiiFbc3Ow7p8KMxwsGICPx46ZQvy3+qfNVhrkwfz3Vvq45eGt98Ft5IQaA1R/7Tb5B5MKh9fUR9x3c3nDTxw==, tarball: https://registry.npmmirror.com/saxen/-/saxen-8.1.2.tgz}
 
   scroll-into-view-if-needed@2.2.31:
     resolution: {integrity: sha512-dGCXy99wZQivjmjIqihaBQNjryrz5rueJY7eHfTdyWEiR4ttYpsajb14rn9s5d4DY4EcY6+4+U/maARBXJedkA==}
@@ -4956,6 +4959,9 @@ packages:
   sortablejs@1.14.0:
     resolution: {integrity: sha512-pBXvQCs5/33fdN1/39pPL0NZF20LeRbLQ5jtnheIPN9JQAaufGjKdWduZn4U7wCtVuzKhmRkI0DFYHYRbB2H1w==}
 
+  sortablejs@1.15.3:
+    resolution: {integrity: sha512-zdK3/kwwAK1cJgy1rwl1YtNTbRmc8qW/+vgXf75A7NHag5of4pyI6uK86ktmQETyWRH7IGaE73uZOOBcGxgqZg==}
+
   source-map-js@1.2.0:
     resolution: {integrity: sha512-itJW8lvSA0TXEphiRoawsCksnlf8SyvmFzIhltqAHluXd88pkCd+cXJVHTDwdCr0IzwptSm035IHQktUu1QUMg==}
     engines: {node: '>=0.10.0'}
@@ -4980,7 +4986,7 @@ packages:
     engines: {node: '>=0.10.0'}
 
   source-map@0.6.1:
-    resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==, tarball: https://registry.npmmirror.com/source-map/-/source-map-0.6.1.tgz}
+    resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
     engines: {node: '>=0.10.0'}
 
   split-string@3.1.0:
@@ -5167,7 +5173,7 @@ packages:
     resolution: {integrity: sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==}
 
   tiny-svg@2.2.4:
-    resolution: {integrity: sha512-NOi39lBknf4UdDEahNkbEAJnzhu1ZcN2j75IS2vLRmIhsfxdZpTChfLKBcN1ShplVmPIXJAIafk6YY5/Aa80lQ==}
+    resolution: {integrity: sha512-NOi39lBknf4UdDEahNkbEAJnzhu1ZcN2j75IS2vLRmIhsfxdZpTChfLKBcN1ShplVmPIXJAIafk6YY5/Aa80lQ==, tarball: https://registry.npmmirror.com/tiny-svg/-/tiny-svg-2.2.4.tgz}
 
   tiny-svg@3.0.1:
     resolution: {integrity: sha512-P8T4iwiW1t95vpHVHqrD36Brn7TqFYCPSHIWk9WLJtYK1X4aDd+5cgqcAADIWSjf1/i5idKnpCh9mim8hEdRBg==}
@@ -5376,7 +5382,7 @@ packages:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
   uuid@10.0.0:
-    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==, tarball: https://registry.npmmirror.com/uuid/-/uuid-10.0.0.tgz}
+    resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
     hasBin: true
 
   vary@1.1.2:
@@ -5426,7 +5432,7 @@ packages:
       vite: '>=2.0.0'
 
   vite-plugin-top-level-await@1.4.4:
-    resolution: {integrity: sha512-QyxQbvcMkgt+kDb12m2P8Ed35Sp6nXP+l8ptGrnHV9zgYDUpraO0CPdlqLSeBqvY2DToR52nutDG7mIHuysdiw==, tarball: https://registry.npmmirror.com/vite-plugin-top-level-await/-/vite-plugin-top-level-await-1.4.4.tgz}
+    resolution: {integrity: sha512-QyxQbvcMkgt+kDb12m2P8Ed35Sp6nXP+l8ptGrnHV9zgYDUpraO0CPdlqLSeBqvY2DToR52nutDG7mIHuysdiw==}
     peerDependencies:
       vite: '>=2.8'
 
@@ -5812,11 +5818,11 @@ snapshots:
 
   '@babel/helper-string-parser@7.24.1': {}
 
-  '@babel/helper-string-parser@7.25.7': {}
+  '@babel/helper-string-parser@7.25.9': {}
 
   '@babel/helper-validator-identifier@7.22.20': {}
 
-  '@babel/helper-validator-identifier@7.25.7': {}
+  '@babel/helper-validator-identifier@7.25.9': {}
 
   '@babel/helper-validator-option@7.23.5': {}
 
@@ -5845,9 +5851,9 @@ snapshots:
     dependencies:
       '@babel/types': 7.24.0
 
-  '@babel/parser@7.25.8':
+  '@babel/parser@7.26.2':
     dependencies:
-      '@babel/types': 7.25.8
+      '@babel/types': 7.26.0
 
   '@babel/plugin-bugfix-firefox-class-in-computed-class-key@7.24.4(@babel/core@7.24.4)':
     dependencies:
@@ -6418,11 +6424,10 @@ snapshots:
       '@babel/helper-validator-identifier': 7.22.20
       to-fast-properties: 2.0.0
 
-  '@babel/types@7.25.8':
+  '@babel/types@7.26.0':
     dependencies:
-      '@babel/helper-string-parser': 7.25.7
-      '@babel/helper-validator-identifier': 7.25.7
-      to-fast-properties: 2.0.0
+      '@babel/helper-string-parser': 7.25.9
+      '@babel/helper-validator-identifier': 7.25.9
 
   '@bpmn-io/diagram-js-ui@0.2.3':
     dependencies:
@@ -6702,7 +6707,7 @@ snapshots:
     dependencies:
       '@form-create/utils': 3.2.0
 
-  '@form-create/component-elm-upload@3.2.9':
+  '@form-create/component-elm-upload@3.2.13':
     dependencies:
       '@form-create/utils': 3.2.0
 
@@ -6712,15 +6717,15 @@ snapshots:
     dependencies:
       wangeditor: 4.7.15
 
-  '@form-create/core@3.2.11(vue@3.5.12(typescript@5.3.3))':
+  '@form-create/core@3.2.13(vue@3.5.12(typescript@5.3.3))':
     dependencies:
       '@form-create/utils': 3.2.0
       vue: 3.5.12(typescript@5.3.3)
 
-  '@form-create/designer@3.2.7(vue@3.5.12(typescript@5.3.3))':
+  '@form-create/designer@3.2.8(vue@3.5.12(typescript@5.3.3))':
     dependencies:
       '@form-create/component-wangeditor': 3.1.20
-      '@form-create/element-ui': 3.2.11(vue@3.5.12(typescript@5.3.3))
+      '@form-create/element-ui': 3.2.13(vue@3.5.12(typescript@5.3.3))
       '@form-create/utils': 3.2.0
       codemirror: 6.65.7
       element-plus: 2.8.4(vue@3.5.12(typescript@5.3.3))
@@ -6729,7 +6734,7 @@ snapshots:
     transitivePeerDependencies:
       - '@vue/composition-api'
 
-  '@form-create/element-ui@3.2.11(vue@3.5.12(typescript@5.3.3))':
+  '@form-create/element-ui@3.2.13(vue@3.5.12(typescript@5.3.3))':
     dependencies:
       '@form-create/component-elm-checkbox': 3.2.8
       '@form-create/component-elm-frame': 3.2.0
@@ -6737,9 +6742,9 @@ snapshots:
       '@form-create/component-elm-radio': 3.2.8
       '@form-create/component-elm-select': 3.2.0
       '@form-create/component-elm-tree': 3.2.9
-      '@form-create/component-elm-upload': 3.2.9
+      '@form-create/component-elm-upload': 3.2.13
       '@form-create/component-subform': 3.1.34
-      '@form-create/core': 3.2.11(vue@3.5.12(typescript@5.3.3))
+      '@form-create/core': 3.2.13(vue@3.5.12(typescript@5.3.3))
       '@form-create/utils': 3.2.0
       vue: 3.5.12(typescript@5.3.3)
 
@@ -7674,7 +7679,7 @@ snapshots:
 
   '@vue/compiler-core@3.5.12':
     dependencies:
-      '@babel/parser': 7.25.8
+      '@babel/parser': 7.26.2
       '@vue/shared': 3.5.12
       entities: 4.5.0
       estree-walker: 2.0.2
@@ -7704,7 +7709,7 @@ snapshots:
 
   '@vue/compiler-sfc@3.5.12':
     dependencies:
-      '@babel/parser': 7.25.8
+      '@babel/parser': 7.26.2
       '@vue/compiler-core': 3.5.12
       '@vue/compiler-dom': 3.5.12
       '@vue/compiler-ssr': 3.5.12
@@ -8109,11 +8114,11 @@ snapshots:
 
   boolbase@1.0.0: {}
 
-  bpmn-js-properties-panel@0.46.0(bpmn-js@8.9.0):
+  bpmn-js-properties-panel@0.46.0(bpmn-js@8.10.0):
     dependencies:
       '@bpmn-io/element-templates-validator': 0.2.0
       '@bpmn-io/extract-process-variables': 0.4.5
-      bpmn-js: 8.9.0
+      bpmn-js: 8.10.0
       ids: 1.0.5
       inherits: 2.0.4
       lodash: 4.17.21
@@ -8128,7 +8133,7 @@ snapshots:
       min-dom: 0.2.0
       svg.js: 2.7.1
 
-  bpmn-js@8.9.0:
+  bpmn-js@8.10.0:
     dependencies:
       bpmn-moddle: 7.1.3
       css.escape: 1.5.1
@@ -10377,7 +10382,7 @@ snapshots:
 
   picocolors@1.0.0: {}
 
-  picocolors@1.1.0: {}
+  picocolors@1.1.1: {}
 
   picomatch@2.3.1: {}
 
@@ -10463,7 +10468,7 @@ snapshots:
   postcss@8.4.47:
     dependencies:
       nanoid: 3.3.7
-      picocolors: 1.1.0
+      picocolors: 1.1.1
       source-map-js: 1.2.1
 
   posthtml-parser@0.2.1:
@@ -10861,6 +10866,8 @@ snapshots:
       - supports-color
 
   sortablejs@1.14.0: {}
+
+  sortablejs@1.15.3: {}
 
   source-map-js@1.2.0: {}
 
@@ -11328,7 +11335,7 @@ snapshots:
     transitivePeerDependencies:
       - rollup
 
-  unplugin-vue-components@0.25.2(@babel/parser@7.25.8)(rollup@4.17.1)(vue@3.5.12(typescript@5.3.3)):
+  unplugin-vue-components@0.25.2(@babel/parser@7.26.2)(rollup@4.17.1)(vue@3.5.12(typescript@5.3.3)):
     dependencies:
       '@antfu/utils': 0.7.7
       '@rollup/pluginutils': 5.1.0(rollup@4.17.1)
@@ -11342,7 +11349,7 @@ snapshots:
       unplugin: 1.10.1
       vue: 3.5.12(typescript@5.3.3)
     optionalDependencies:
-      '@babel/parser': 7.25.8
+      '@babel/parser': 7.26.2
     transitivePeerDependencies:
       - rollup
       - supports-color

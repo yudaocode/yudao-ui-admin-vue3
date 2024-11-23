@@ -119,7 +119,6 @@ const saveConfig = async () => {
   currentNode.value.fieldsPermission = fieldsPermissionConfig.value
   // 设置发起人的按钮权限
   currentNode.value.buttonsSetting = START_USER_BUTTON_SETTING
-  console.log('currentNode.value.buttonsSetting==>', currentNode.value.buttonsSetting)
   settingVisible.value = false
   return true
 }
