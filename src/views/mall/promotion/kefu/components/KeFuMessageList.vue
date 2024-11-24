@@ -374,8 +374,19 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 <style lang="scss" scoped>
 .kefu {
   background-color: #fff;
+  position: relative;
   width: calc(100% - 300px - 260px);
-  border-left: var(--el-border-color) solid 1px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px; /* 实际宽度 */
+    height: 100%;
+    background-color: var(--el-border-color);
+    transform: scaleX(0.3); /* 缩小宽度 */
+  }
 
   .kefu-header {
     background: #fbfbfb;
@@ -463,12 +474,23 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
   }
 
   .kefu-footer {
+    position: relative;
     display: flex;
     flex-direction: column;
     height: auto;
     margin: 0;
     padding: 0;
-    border-top: var(--el-border-color) solid 1px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1px; /* 初始宽度 */
+      background-color: var(--el-border-color);
+      transform: scaleY(0.3); /* 缩小视觉高度 */
+    }
 
     .chat-tools {
       width: 100%;

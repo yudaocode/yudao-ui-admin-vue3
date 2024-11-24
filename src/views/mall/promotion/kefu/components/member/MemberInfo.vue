@@ -165,9 +165,20 @@ const getUserData = async () => {
 
 <style lang="scss" scoped>
 .kefu {
+  position: relative;
   width: 300px !important;
   background-color: #fff;
-  border-left: var(--el-border-color) solid 1px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px; /* 实际宽度 */
+    height: 100%;
+    background-color: var(--el-border-color);
+    transform: scaleX(0.3); /* 缩小宽度 */
+  }
 
   &-header {
     background: #fbfbfb;
