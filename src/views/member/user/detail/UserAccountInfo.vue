@@ -1,5 +1,5 @@
 <template>
-  <el-descriptions :column="column">
+  <el-descriptions :class="{ 'kefu-descriptions': column === 1 }" :column="column">
     <el-descriptions-item>
       <template #label>
         <descriptions-item-label icon="svg-icon:member_level" label=" 等级 " />
@@ -61,5 +61,24 @@ withDefaults(defineProps<{ user: UserApi.UserVO; wallet: WalletApi.WalletVO; col
 
 .cell-item::after {
   content: ':';
+}
+
+.kefu-descriptions {
+  ::v-deep(.el-descriptions__cell) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .el-descriptions__label {
+      width: 120px;
+      display: block;
+      text-align: left;
+    }
+
+    .el-descriptions__content {
+      flex: 1;
+      text-align: end;
+    }
+  }
 }
 </style>
