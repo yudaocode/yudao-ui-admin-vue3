@@ -1,5 +1,5 @@
 <template>
-  <el-aside class="kefu p-5px h-100%" width="260px">
+  <el-aside class="kefu pt-5px h-100%" width="260px">
     <div class="color-[#999] font-bold my-10px">
       会话记录({{ kefuStore.getConversationList.length }})
     </div>
@@ -7,7 +7,7 @@
       v-for="item in kefuStore.getConversationList"
       :key="item.id"
       :class="{ active: item.id === activeConversationId, pinned: item.adminPinned }"
-      class="kefu-conversation flex items-center"
+      class="kefu-conversation px-10px flex items-center"
       @click="openRightMessage(item)"
       @contextmenu.prevent="rightClick($event as PointerEvent, item)"
     >
@@ -210,26 +210,24 @@ onBeforeUnmount(() => {
     .username {
       min-width: 0;
       max-width: 60%;
+    }
+
+    .last-message {
+      font-size: 13px;
+    }
+
+    .last-message,
+    .username {
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 1;
     }
-
-    .last-message {
-      font-size: 13px;
-      width: 200px;
-      overflow: hidden; // 隐藏超出的文本
-      white-space: nowrap; // 禁止换行
-      text-overflow: ellipsis; // 添加省略号
-    }
   }
 
-  .active,
-  .pinned {
+  .active {
     background-color: rgba(128, 128, 128, 0.5); // 透明色，暗黑模式下也能体现
-    border-radius: 8px;
   }
 
   .right-menu-ul {
