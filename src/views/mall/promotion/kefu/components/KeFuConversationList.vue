@@ -200,7 +200,7 @@ onBeforeUnmount(() => {
 
 <style lang="scss" scoped>
 .kefu {
-  background-color: #fff;
+  background-color: #e5e4e4;
 
   &-conversation {
     height: 60px;

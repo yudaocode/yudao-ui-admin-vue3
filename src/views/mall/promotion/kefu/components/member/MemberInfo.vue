@@ -167,7 +167,7 @@ const getUserData = async () => {
 .kefu {
   position: relative;
   width: 300px !important;
-  background-color: #fff;
+  background-color: #f5f5f5;
 
   &::after {
     content: '';
@@ -181,11 +181,22 @@ const getUserData = async () => {
   }
 
   &-header {
-    background: #fbfbfb;
-    box-shadow: 0 0 0 0 #dcdfe6;
+    background-color: #f5f5f5;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-around;
+
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1px; /* 初始宽度 */
+      background-color: var(--el-border-color);
+      transform: scaleY(0.3); /* 缩小视觉高度 */
+    }
 
     &-title {
       font-size: 18px;

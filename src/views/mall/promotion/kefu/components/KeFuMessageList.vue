@@ -46,14 +46,13 @@
                 :class="{
                   'kefu-message': KeFuMessageContentTypeEnum.TEXT === item.contentType
                 }"
-                class="p-10px"
               >
                 <!-- 文本消息 -->
                 <MessageItem :message="item">
                   <template v-if="KeFuMessageContentTypeEnum.TEXT === item.contentType">
                     <div
                       v-dompurify-html="replaceEmoji(getMessageContent(item).text || item.content)"
-                      class="flex items-center"
+                      class="flex items-center h-1/1"
                     ></div>
                   </template>
                 </MessageItem>
@@ -64,7 +63,7 @@
                     :initial-index="0"
                     :preview-src-list="[getMessageContent(item).picUrl || item.content]"
                     :src="getMessageContent(item).picUrl || item.content"
-                    class="w-200px"
+                    class="w-200px mx-10px"
                     fit="contain"
                     preview-teleported
                   />
@@ -79,7 +78,7 @@
                     :spuId="getMessageContent(item).spuId"
                     :stock="getMessageContent(item).stock"
                     :title="getMessageContent(item).spuName"
-                    class="max-w-300px"
+                    class="max-w-300px mx-10px"
                   />
                 </MessageItem>
                 <!-- 订单消息 -->
@@ -87,7 +86,7 @@
                   <OrderItem
                     v-if="KeFuMessageContentTypeEnum.ORDER === item.contentType"
                     :message="item"
-                    class="max-w-100%"
+                    class="max-w-100% mx-10px"
                   />
                 </MessageItem>
               </div>
@@ -373,7 +372,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 
 <style lang="scss" scoped>
 .kefu {
-  background-color: #fff;
+  background-color: #f5f5f5;
   position: relative;
   width: calc(100% - 300px - 260px);
 
@@ -389,11 +388,22 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
   }
 
   .kefu-header {
-    background: #fbfbfb;
-    box-shadow: 0 0 0 0 #dcdfe6;
+    background-color: #f5f5f5;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1px; /* 初始宽度 */
+      background-color: var(--el-border-color);
+      transform: scaleY(0.3); /* 缩小视觉高度 */
+    }
 
     &-title {
       font-size: 18px;
@@ -423,7 +433,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       justify-content: flex-start;
 
       .kefu-message {
-        background-color: rgb(245, 245, 245);
+        background-color: #fff;
         margin-left: 10px;
         margin-top: 3px;
         border-top-right-radius: 10px;
@@ -452,9 +462,9 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       padding: 5px 10px;
       width: auto;
       max-width: 50%;
-      text-align: left;
-      display: inline-block !important;
-      word-break: break-all;
+      //text-align: left;
+      //display: inline-block !important;
+      //word-break: break-all;
       transition: all 0.2s;
 
       &:hover {
@@ -468,7 +478,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
       background-color: rgba(0, 0, 0, 0.1);
       border-radius: 8px;
       padding: 0 5px;
-      color: #999;
+      color: #fff;
       font-size: 10px;
     }
   }
@@ -500,6 +510,7 @@ const showTime = computed(() => (item: KeFuMessageRespVO, index: number) => {
 
   ::v-deep(textarea) {
     resize: none;
+    background-color: #f5f5f5;
   }
 
   :deep(.el-input__wrapper) {
