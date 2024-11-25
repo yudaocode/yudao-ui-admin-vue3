@@ -68,7 +68,7 @@
     </el-row>
     <template v-if="mode === 'kefu'">
       <ElAvatar :size="140" :src="user.avatar || undefined" shape="square" />
-      <el-descriptions :column="1">
+      <el-descriptions :column="1" class="kefu-descriptions">
         <el-descriptions-item>
           <template #label>
             <descriptions-item-label icon="ep:user" label="用户名" />
@@ -81,7 +81,7 @@
           </template>
           {{ user.nickname }}
         </el-descriptions-item>
-        <el-descriptions-item label="手机号">
+        <el-descriptions-item>
           <template #label>
             <descriptions-item-label icon="ep:phone" label="手机号" />
           </template>
@@ -142,5 +142,24 @@ withDefaults(defineProps<{ user: UserApi.UserVO; mode?: string }>(), {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+::v-deep(.kefu-descriptions) {
+  .el-descriptions__cell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .el-descriptions__label {
+      width: 120px;
+      display: block;
+      text-align: left;
+    }
+
+    .el-descriptions__content {
+      flex: 1;
+      text-align: end;
+    }
+  }
 }
 </style>

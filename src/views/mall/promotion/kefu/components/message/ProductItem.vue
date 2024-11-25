@@ -77,7 +77,7 @@ const openDetail = (spuId: number) => {
 
 .product-warp {
   width: 100%;
-  background-color: rgba(128, 128, 128, 0.5); // 透明色，暗黑模式下也能体现
+  background-color: #fff;
   border-radius: 8px;
   display: flex;
   align-items: center;

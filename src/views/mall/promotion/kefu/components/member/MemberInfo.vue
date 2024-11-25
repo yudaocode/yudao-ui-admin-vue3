@@ -165,16 +165,38 @@ const getUserData = async () => {
 
 <style lang="scss" scoped>
 .kefu {
+  position: relative;
   width: 300px !important;
-  background-color: #fff;
-  border-left: var(--el-border-color) solid 1px;
+  background-color: #f5f5f5;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px; /* 实际宽度 */
+    height: 100%;
+    background-color: var(--el-border-color);
+    transform: scaleX(0.3); /* 缩小宽度 */
+  }
 
   &-header {
-    background: #fbfbfb;
-    box-shadow: 0 0 0 0 #dcdfe6;
+    background-color: #f5f5f5;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-around;
+
+    &::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 1px; /* 初始宽度 */
+      background-color: var(--el-border-color);
+      transform: scaleY(0.3); /* 缩小视觉高度 */
+    }
 
     &-title {
       font-size: 18px;
