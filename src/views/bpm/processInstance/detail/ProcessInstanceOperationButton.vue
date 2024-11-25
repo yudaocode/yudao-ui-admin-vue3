@@ -77,17 +77,6 @@
           :rules="genericRule"
           label-width="100px"
         >
-          <el-card v-if="runningTask?.formId > 0" class="mb-15px !-mt-10px">
-            <template #header>
-              <span class="el-icon-picture-outline"> 填写表单【{{ runningTask?.formName }}】 </span>
-            </template>
-            <form-create
-              v-model="approveForm.value"
-              v-model:api="approveFormFApi"
-              :option="approveForm.option"
-              :rule="approveForm.rule"
-            />
-          </el-card>
           <el-form-item label="审批意见" prop="reason">
             <el-input
               v-model="genericForm.reason"
