@@ -1,15 +1,14 @@
 <template>
   <ProductItem
     v-for="item in list"
-    :spu-id="item.spuId"
     :key="item.id"
     :picUrl="item.picUrl"
     :price="item.price"
-    :skuText="item.introduction"
+    :sales-count="item.salesCount"
+    :spu-id="item.spuId"
+    :stock="item.stock"
     :title="item.spuName"
-    :titleWidth="400"
     class="mb-10px"
-    priceColor="#FF3000"
   />
 </template>
 
