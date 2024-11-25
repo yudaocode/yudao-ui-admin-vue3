@@ -2,6 +2,7 @@
      1. 审批人与提交人为同一人时
      2. 审批人拒绝时
      3. 审批人为空时
+     4. 操作按钮
 -->
 <template>
   <div class="panel-tab__content">
@@ -74,6 +75,35 @@
         </div>
       </div>
     </el-radio-group>
+
+    <el-divider content-position="left">操作按钮</el-divider>
+    <div class="button-setting-pane">
+      <div class="button-setting-title">
+        <div class="button-title-label">操作按钮</div>
+        <div class="pl-4 button-title-label">显示名称</div>
+        <div class="button-title-label">启用</div>
+      </div>
+      <div class="button-setting-item" v-for="(item, index) in buttonsSettingEl" :key="index">
+        <div class="button-setting-item-label"> {{ OPERATION_BUTTON_NAME.get(item.id) }} </div>
+        <div class="button-setting-item-label">
+          <input
+            type="text"
+            class="editable-title-input"
+            @blur="btnDisplayNameBlurEvent(index)"
+            v-mountedFocus
+            v-model="item.displayName"
+            :placeholder="item.displayName"
+            v-if="btnDisplayNameEdit[index]"
+          />
+          <el-button v-else text @click="changeBtnDisplayName(index)"
+            >{{ item.displayName }} &nbsp;<Icon icon="ep:edit"
+          /></el-button>
+        </div>
+        <div class="button-setting-item-label">
+          <el-switch v-model="item.enable" />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -83,7 +113,9 @@ import {
   RejectHandlerType,
   REJECT_HANDLER_TYPES,
   ASSIGN_EMPTY_HANDLER_TYPES,
-  AssignEmptyHandlerType
+  AssignEmptyHandlerType,
+  OPERATION_BUTTON_NAME,
+  DEFAULT_BUTTON_SETTING
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import * as UserApi from '@/api/system/user'
 
@@ -110,6 +142,11 @@ const assignEmptyHandlerTypeEl = ref()
 const assignEmptyHandlerType = ref()
 const assignEmptyUserIdsEl = ref()
 const assignEmptyUserIds = ref()
+
+// 操作按钮
+const buttonsSettingEl = ref()
+const { buttonsSetting, btnDisplayNameEdit, changeBtnDisplayName, btnDisplayNameBlurEvent } =
+  useButtonsSetting()
 
 const elExtensionElements = ref()
 const otherExtensions = ref()
@@ -165,6 +202,22 @@ const resetCustomConfigList = () => {
     return num > Number.MAX_SAFE_INTEGER || num < -Number.MAX_SAFE_INTEGER ? item : num
   })
 
+  // 操作按钮
+  buttonsSettingEl.value = elExtensionElements.value.values?.filter(
+    (ex) => ex.$type === `${prefix}:ButtonsSetting`
+  )
+  if (buttonsSettingEl.value.length === 0) {
+    DEFAULT_BUTTON_SETTING.forEach((item) => {
+      buttonsSettingEl.value.push(
+        bpmnInstances().moddle.create(`${prefix}:ButtonsSetting`, {
+          'flowable:id': item.id,
+          'flowable:displayName': item.displayName,
+          'flowable:enable': item.enable
+        })
+      )
+    })
+  }
+
   // 保留剩余扩展元素，便于后面更新该元素对应属性
   otherExtensions.value =
     elExtensionElements.value.values?.filter(
@@ -173,7 +226,8 @@ const resetCustomConfigList = () => {
         ex.$type !== `${prefix}:RejectHandlerType` &&
         ex.$type !== `${prefix}:RejectReturnTaskId` &&
         ex.$type !== `${prefix}:AssignEmptyHandlerType` &&
-        ex.$type !== `${prefix}:AssignEmptyUserIds`
+        ex.$type !== `${prefix}:AssignEmptyUserIds` &&
+        ex.$type !== `${prefix}:ButtonsSetting`
     ) ?? []
 
   // 更新元素扩展属性，避免后续报错
@@ -221,7 +275,8 @@ const updateElementExtensions = () => {
       rejectHandlerTypeEl.value,
       returnNodeIdEl.value,
       assignEmptyHandlerTypeEl.value,
-      assignEmptyUserIdsEl.value
+      assignEmptyUserIdsEl.value,
+      ...buttonsSettingEl.value
     ]
   })
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
@@ -284,9 +339,114 @@ function findAllPredecessorsExcludingStart(elementId, modeler) {
   return Array.from(predecessors) // 返回前置节点数组
 }
 
+function useButtonsSetting() {
+  const buttonsSetting = ref<ButtonSetting[]>()
+  // 操作按钮显示名称可编辑
+  const btnDisplayNameEdit = ref<boolean[]>([])
+  const changeBtnDisplayName = (index: number) => {
+    btnDisplayNameEdit.value[index] = true
+  }
+  const btnDisplayNameBlurEvent = (index: number) => {
+    btnDisplayNameEdit.value[index] = false
+    const buttonItem = buttonsSetting.value![index]
+    buttonItem.displayName = buttonItem.displayName || OPERATION_BUTTON_NAME.get(buttonItem.id)!
+  }
+  return {
+    buttonsSetting,
+    btnDisplayNameEdit,
+    changeBtnDisplayName,
+    btnDisplayNameBlurEvent
+  }
+}
+
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 onMounted(async () => {
   // 获得用户列表
   userOptions.value = await UserApi.getSimpleUserList()
 })
 </script>
+
+<style lang="scss" scoped>
+.button-setting-pane {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  margin-top: 8px;
+
+  .button-setting-desc {
+    padding-right: 8px;
+    margin-bottom: 16px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .button-setting-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 45px;
+    padding-left: 12px;
+    background-color: #f8fafc0a;
+    border: 1px solid #1f38581a;
+
+    & > :first-child {
+      width: 100px !important;
+      text-align: left !important;
+    }
+
+    & > :last-child {
+      text-align: center !important;
+    }
+
+    .button-title-label {
+      width: 150px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+      text-align: left;
+    }
+  }
+
+  .button-setting-item {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    height: 38px;
+    padding-left: 12px;
+    border: 1px solid #1f38581a;
+    border-top: 0;
+
+    & > :first-child {
+      width: 100px !important;
+    }
+
+    & > :last-child {
+      text-align: center !important;
+    }
+
+    .button-setting-item-label {
+      width: 150px;
+      overflow: hidden;
+      text-align: left;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .editable-title-input {
+      height: 24px;
+      max-width: 130px;
+      margin-left: 4px;
+      line-height: 24px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      transition: all 0.3s;
+
+      &:focus {
+        border-color: #40a9ff;
+        outline: 0;
+        box-shadow: 0 0 0 2px rgb(24 144 255 / 20%);
+      }
+    }
+  }
+}
+</style>
