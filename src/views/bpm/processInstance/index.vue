@@ -25,7 +25,7 @@
       </el-form-item>
 
       <!-- TODO @ tuituji：style 可以使用 unocss -->
-      <el-form-item label="" prop="category" :style="{ position: 'absolute', right: '130px' }">
+      <el-form-item label="" prop="category" :style="{ position: 'absolute', right: '300px' }">
         <!-- TODO @tuituji：应该选择好分类，就触发搜索啦。 RE:done & to check-->
         <el-select
           v-model="queryParams.category"
@@ -42,6 +42,23 @@
           />
         </el-select>
       </el-form-item>
+
+      <el-form-item label="" prop="status" :style="{ position: 'absolute', right: '130px' }">
+            <el-select
+              v-model="queryParams.status"
+              placeholder="请选择流程状态"
+              clearable
+              class="!w-155px"
+              @change="handleQuery"
+            >
+              <el-option
+                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
+                :key="dict.value"
+                :label="dict.label"
+                :value="dict.value"
+              />
+            </el-select>
+          </el-form-item>      
 
       <!-- 高级筛选 -->
       <!-- TODO @ tuituji：style 可以使用 unocss -->
@@ -87,21 +104,6 @@
               @keyup.enter="handleQuery"
               class="!w-390px"
             />
-          </el-form-item>
-          <el-form-item label="流程状态" class="bold-label" label-position="top" prop="status">
-            <el-select
-              v-model="queryParams.status"
-              placeholder="请选择流程状态"
-              clearable
-              class="!w-390px"
-            >
-              <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
           </el-form-item>
           <el-form-item label="发起时间" class="bold-label" label-position="top" prop="createTime">
             <el-date-picker
