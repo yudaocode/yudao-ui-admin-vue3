@@ -245,6 +245,7 @@ function findAllPredecessorsExcludingStart(elementId, modeler) {
   const elementRegistry = modeler.get('elementRegistry')
   const allConnections = elementRegistry.filter((element) => element.type === 'bpmn:SequenceFlow')
   const predecessors = new Set() // 使用 Set 来避免重复节点
+  const visited = new Set() // 用于记录已访问的节点
 
   // 检查是否是开始事件节点
   function isStartEvent(element) {
@@ -252,6 +253,14 @@ function findAllPredecessorsExcludingStart(elementId, modeler) {
   }
 
   function findPredecessorsRecursively(element) {
+    // 如果该节点已经访问过，直接返回，避免循环
+    if (visited.has(element)) {
+      return
+    }
+
+    // 标记当前节点为已访问
+    visited.add(element)
+
     // 获取与当前节点相连的所有连接
     const incomingConnections = allConnections.filter((connection) => connection.target === element)
 
