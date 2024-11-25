@@ -1281,7 +1281,32 @@
           "isBody": true
         }
       ]
+    },
+    {
+      "name": "ButtonsSetting",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "flowable:id",
+          "type": "Integer",
+          "isAttr": true
+        },
+        {
+          "name": "flowable:enable",
+          "type": "Boolean",
+          "isAttr": true
+        },
+        {
+          "name": "flowable:displayName",
+          "type": "String",
+          "isAttr": true
+        }
+      ]
     }
+
   ],
   "emumerations": []
 }
