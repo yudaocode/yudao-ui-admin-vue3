@@ -52,7 +52,7 @@
                   <template v-if="KeFuMessageContentTypeEnum.TEXT === item.contentType">
                     <div
                       v-dompurify-html="replaceEmoji(getMessageContent(item).text || item.content)"
-                      class="flex items-center h-1/1"
+                      class="line-height-normal text-justify h-1/1 w-full"
                     ></div>
                   </template>
                 </MessageItem>
