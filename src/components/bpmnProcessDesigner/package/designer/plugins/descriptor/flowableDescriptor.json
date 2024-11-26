@@ -1305,8 +1305,31 @@
           "isAttr": true
         }
       ]
+    },
+    {
+      "name": "FieldsPermission",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "flowable:field",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "flowable:title",
+          "type": "String",
+          "isAttr": true
+        },
+        {
+          "name": "flowable:permission",
+          "type": "String",
+          "isAttr": true
+        }
+      ]
     }
-
   ],
   "emumerations": []
 }

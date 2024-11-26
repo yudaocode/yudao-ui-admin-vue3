@@ -3,6 +3,7 @@
      2. 审批人拒绝时
      3. 审批人为空时
      4. 操作按钮
+     5. 字段权限
 -->
 <template>
   <div class="panel-tab__content">
@@ -104,6 +105,47 @@
         </div>
       </div>
     </div>
+
+    <el-divider content-position="left">字段权限</el-divider>
+    <div class="field-setting-pane" v-if="formType === 10">
+      <div class="field-permit-title">
+        <div class="setting-title-label first-title"> 字段名称 </div>
+        <div class="other-titles">
+          <span class="setting-title-label">只读</span>
+          <span class="setting-title-label">可编辑</span>
+          <span class="setting-title-label">隐藏</span>
+        </div>
+      </div>
+      <div class="field-setting-item" v-for="(item, index) in fieldsPermissionEl" :key="index">
+        <div class="field-setting-item-label"> {{ item.title }} </div>
+        <el-radio-group class="field-setting-item-group" v-model="item.permission">
+          <div class="item-radio-wrap">
+            <el-radio
+              :value="FieldPermissionType.READ"
+              size="large"
+              :label="FieldPermissionType.READ"
+              ><span></span
+            ></el-radio>
+          </div>
+          <div class="item-radio-wrap">
+            <el-radio
+              :value="FieldPermissionType.WRITE"
+              size="large"
+              :label="FieldPermissionType.WRITE"
+              ><span></span
+            ></el-radio>
+          </div>
+          <div class="item-radio-wrap">
+            <el-radio
+              :value="FieldPermissionType.NONE"
+              size="large"
+              :label="FieldPermissionType.NONE"
+              ><span></span
+            ></el-radio>
+          </div>
+        </el-radio-group>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -115,9 +157,11 @@ import {
   ASSIGN_EMPTY_HANDLER_TYPES,
   AssignEmptyHandlerType,
   OPERATION_BUTTON_NAME,
-  DEFAULT_BUTTON_SETTING
+  DEFAULT_BUTTON_SETTING,
+  FieldPermissionType
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import * as UserApi from '@/api/system/user'
+import { cloneDeep } from 'lodash-es'
 
 defineOptions({ name: 'ElementCustomConfig' })
 const props = defineProps({
@@ -147,6 +191,12 @@ const assignEmptyUserIds = ref()
 const buttonsSettingEl = ref()
 const { buttonsSetting, btnDisplayNameEdit, changeBtnDisplayName, btnDisplayNameBlurEvent } =
   useButtonsSetting()
+
+// 字段权限
+const fieldsPermissionEl = ref()
+const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
+  FieldPermissionType.READ
+)
 
 const elExtensionElements = ref()
 const otherExtensions = ref()
@@ -218,6 +268,21 @@ const resetCustomConfigList = () => {
     })
   }
 
+  // 字段权限
+  if (formType.value === 10) {
+    fieldsPermissionEl.value = elExtensionElements.value.values?.filter(
+      (ex) => ex.$type === `${prefix}:FieldsPermission`
+    )
+    if (fieldsPermissionEl.value.length === 0) {
+      getNodeConfigFormFields()
+      fieldsPermissionConfig.value.forEach((el) => {
+        fieldsPermissionEl.value.push(
+          bpmnInstances().moddle.create(`${prefix}:FieldsPermission`, el)
+        )
+      })
+    }
+  }
+
   // 保留剩余扩展元素，便于后面更新该元素对应属性
   otherExtensions.value =
     elExtensionElements.value.values?.filter(
@@ -227,7 +292,8 @@ const resetCustomConfigList = () => {
         ex.$type !== `${prefix}:RejectReturnTaskId` &&
         ex.$type !== `${prefix}:AssignEmptyHandlerType` &&
         ex.$type !== `${prefix}:AssignEmptyUserIds` &&
-        ex.$type !== `${prefix}:ButtonsSetting`
+        ex.$type !== `${prefix}:ButtonsSetting` &&
+        ex.$type !== `${prefix}:FieldsPermission`
     ) ?? []
 
   // 更新元素扩展属性，避免后续报错
@@ -276,7 +342,8 @@ const updateElementExtensions = () => {
       returnNodeIdEl.value,
       assignEmptyHandlerTypeEl.value,
       assignEmptyUserIdsEl.value,
-      ...buttonsSettingEl.value
+      ...buttonsSettingEl.value,
+      ...fieldsPermissionEl.value
     ]
   })
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
@@ -356,6 +423,69 @@ function useButtonsSetting() {
     btnDisplayNameEdit,
     changeBtnDisplayName,
     btnDisplayNameBlurEvent
+  }
+}
+
+// 表单字段权限设置
+function useFormFieldsPermission(defaultPermission) {
+  // 字段权限配置. 需要有 field, title,  permissioin 属性
+  const fieldsPermissionConfig = ref<Array<Record<string, string>>>([])
+
+  const formType = inject<Ref<number>>('formType') // 表单类型
+
+  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
+
+  const getNodeConfigFormFields = (nodeFormFields?: Array<Record<string, string>>) => {
+    nodeFormFields = toRaw(nodeFormFields)
+    fieldsPermissionConfig.value =
+      cloneDeep(nodeFormFields) || getDefaultFieldsPermission(unref(formFields))
+  }
+  // 默认的表单权限： 获取表单的所有字段，设置字段默认权限为只读
+  const getDefaultFieldsPermission = (formFields?: string[]) => {
+    const defaultFieldsPermission: Array<Record<string, string>> = []
+    if (formFields) {
+      formFields.forEach((fieldStr: string) => {
+        parseFieldsSetDefaultPermission(JSON.parse(fieldStr), defaultFieldsPermission)
+      })
+    }
+    return defaultFieldsPermission
+  }
+  // 解析字段。赋给默认权限
+  const parseFieldsSetDefaultPermission = (
+    rule: Record<string, any>,
+    fieldsPermission: Array<Record<string, string>>,
+    parentTitle: string = ''
+  ) => {
+    const { /**type,*/ field, title: tempTitle, children } = rule
+    if (field && tempTitle) {
+      let title = tempTitle
+      if (parentTitle) {
+        title = `${parentTitle}.${tempTitle}`
+      }
+      fieldsPermission.push({
+        field,
+        title,
+        permission: defaultPermission
+      })
+      // TODO 子表单 需要处理子表单字段
+      // if (type === 'group' && rule.props?.rule && Array.isArray(rule.props.rule)) {
+      //   // 解析子表单的字段
+      //   rule.props.rule.forEach((item) => {
+      //     parseFieldsSetDefaultPermission(item, fieldsPermission, title)
+      //   })
+      // }
+    }
+    if (children && Array.isArray(children)) {
+      children.forEach((rule) => {
+        parseFieldsSetDefaultPermission(rule, fieldsPermission)
+      })
+    }
+  }
+
+  return {
+    formType,
+    fieldsPermissionConfig,
+    getNodeConfigFormFields
   }
 }
 
@@ -445,6 +575,80 @@ onMounted(async () => {
         border-color: #40a9ff;
         outline: 0;
         box-shadow: 0 0 0 2px rgb(24 144 255 / 20%);
+      }
+    }
+  }
+}
+
+.field-setting-pane {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+
+  .field-setting-desc {
+    padding-right: 8px;
+    margin-bottom: 16px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .field-permit-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 45px;
+    padding-left: 12px;
+    line-height: 45px;
+    background-color: #f8fafc0a;
+    border: 1px solid #1f38581a;
+
+    .first-title {
+      text-align: left !important;
+    }
+
+    .other-titles {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .setting-title-label {
+      display: inline-block;
+      width: 100px;
+      padding: 5px 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: #000;
+      text-align: center;
+    }
+  }
+
+  .field-setting-item {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    height: 38px;
+    padding-left: 12px;
+    border: 1px solid #1f38581a;
+    border-top: 0;
+
+    .field-setting-item-label {
+      display: inline-block;
+      width: 100px;
+      min-height: 16px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: text;
+    }
+
+    .field-setting-item-group {
+      display: flex;
+      justify-content: space-between;
+
+      .item-radio-wrap {
+        display: inline-block;
+        width: 100px;
+        text-align: center;
       }
     }
   }
