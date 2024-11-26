@@ -26,12 +26,12 @@
 
       <!-- TODO @ tuituji：style 可以使用 unocss -->
       <el-form-item label="" prop="category" :style="{ position: 'absolute', right: '130px' }">
-        <!-- TODO @tuituji：应该选择好分类，就触发搜索啦。 -->
         <el-select
           v-model="queryParams.category"
           placeholder="请选择流程分类"
           clearable
           class="!w-155px"
+          @change="handleQuery"
         >
           <el-option
             v-for="category in categoryList"
@@ -42,21 +42,19 @@
         </el-select>
       </el-form-item>
 
-      <!-- 高级筛选 -->
-      <!-- TODO @ tuituji：style 可以使用 unocss -->
       <el-form-item :style="{ position: 'absolute', right: '0px' }">
-        <el-button v-popover="popoverRef" v-click-outside="onClickOutside" :icon="List">
-          高级筛选
-        </el-button>
         <el-popover
-          ref="popoverRef"
-          trigger="click"
-          virtual-triggering
+          :visible="showPopover"
           persistent
           :width="400"
           :show-arrow="false"
           placement="bottom-end"
         >
+          <template #reference>
+            <el-button @click="showPopover = !showPopover">
+              <Icon icon="ep:plus" class="mr-5px" />高级筛选
+            </el-button>
+          </template>
           <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
             <el-select
               v-model="queryParams.category"
@@ -112,8 +110,12 @@
               class="!w-240px"
             />
           </el-form-item>
+          <el-form-item class="bold-label" label-position="top">
+            <el-button @click="resetQuery"> 清空</el-button>
+            <el-button @click="showPopover = false"> 取消</el-button>
+            <el-button @click="handleQuery" type="primary"> 确认</el-button>
+          </el-form-item>
         </el-popover>
-        <!-- TODO @tuituji：这里应该有确认，和取消、清空搜索条件，三个按钮。 -->
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -130,7 +132,7 @@
         fixed="left"
       />
       <!-- TODO @芋艿：摘要 -->
-      <!-- TODO @tuituji：流程状态。可见需求文档里  -->
+      <!-- TODO @tuituji：流程状态。可见需求文档里  Re:没看懂；回复：1）就是审批中的时候，展示审批人；2）审批结束的时候，就展示状态 -->
       <el-table-column label="流程状态" prop="status" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
@@ -198,8 +200,6 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
-// TODO @tuituji：List 改成 <Icon icon="ep:plus" class="mr-5px" /> 类似这种组件哈。
-import { List } from '@element-plus/icons-vue'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { ElMessageBox } from 'element-plus'
@@ -241,6 +241,8 @@ const getList = async () => {
   }
 }
 
+const showPopover = ref(false)
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
@@ -273,7 +275,7 @@ const handleCreate = async (row?: ProcessInstanceVO) => {
 }
 
 /** 查看详情 */
-const handleDetail = (row) => {
+const handleDetail = (row: any) => {
   router.push({
     name: 'BpmProcessInstanceDetail',
     query: {
@@ -283,7 +285,7 @@ const handleDetail = (row) => {
 }
 
 /** 取消按钮操作 */
-const handleCancel = async (row) => {
+const handleCancel = async (row: any) => {
   // 二次确认
   const { value } = await ElMessageBox.prompt('请输入取消原因', '取消流程', {
     confirmButtonText: t('common.ok'),
@@ -296,15 +298,6 @@ const handleCancel = async (row) => {
   message.success('取消成功')
   // 刷新列表
   await getList()
-}
-
-// TODO @tuituji：这个 import 是不是没用哈？
-import { ClickOutside as vClickOutside } from 'element-plus'
-
-// TODO @tuituji：onClickAdvancedSearch。方法名叫这个，会更好一些哇？打开高级搜索。
-const popoverRef = ref()
-const onClickOutside = () => {
-  unref(popoverRef).popperRef?.delayHide?.()
 }
 
 /** 激活时 **/

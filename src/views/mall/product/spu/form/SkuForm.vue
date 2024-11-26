@@ -8,7 +8,7 @@
     :rules="rules"
     label-width="120px"
   >
-    <el-form-item label="分销类型" props="subCommissionType">
+    <el-form-item label="分销类型" prop="subCommissionType">
       <el-radio-group
         v-model="formData.subCommissionType"
         class="w-80"
@@ -18,7 +18,7 @@
         <el-radio :value="true" class="radio">单独设置</el-radio>
       </el-radio-group>
     </el-form-item>
-    <el-form-item label="商品规格" props="specType">
+    <el-form-item label="商品规格" prop="specType">
       <el-radio-group v-model="formData.specType" class="w-80" @change="onChangeSpec">
         <el-radio :value="false" class="radio">单规格</el-radio>
         <el-radio :value="true">多规格</el-radio>
