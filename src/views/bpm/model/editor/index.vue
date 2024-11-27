@@ -31,12 +31,19 @@ import CustomContentPadProvider from '@/components/bpmnProcessDesigner/package/d
 // 自定义左侧菜单（修改 默认任务 为 用户任务）
 import CustomPaletteProvider from '@/components/bpmnProcessDesigner/package/designer/plugins/palette'
 import * as ModelApi from '@/api/bpm/model'
+import { getForm, FormVO } from '@/api/bpm/form'
 
 defineOptions({ name: 'BpmModelEditor' })
 
 const router = useRouter() // 路由
 const { query } = useRoute() // 路由的查询
 const message = useMessage() // 国际化
+
+// 表单信息
+const formFields = ref<string[]>([])
+const formType = ref(20)
+provide('formFields', formFields)
+provide('formType', formType)
 
 const xmlString = ref(undefined) // BPMN XML
 const modeler = ref(null) // BPMN Modeler
@@ -99,6 +106,13 @@ onMounted(async () => {
   </bpmndi:BPMNDiagram>
 </definitions>`
   }
+
+  formType.value = data.formType
+  if (data.formType === 10) {
+    const bpmnForm = (await getForm(data.formId)) as unknown as FormVO
+    formFields.value = bpmnForm?.fields
+  }
+
   model.value = {
     ...data,
     bpmnXml: undefined // 清空 bpmnXml 属性
