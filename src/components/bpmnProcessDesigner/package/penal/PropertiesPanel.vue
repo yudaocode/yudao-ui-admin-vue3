@@ -1,5 +1,5 @@
 <template>
-  <div class="process-panel__container" :style="{ width: `${width}px`,maxHeight: '700px' }">
+  <div class="process-panel__container" :style="{ width: `${width}px`, maxHeight: '700px' }">
     <el-collapse v-model="activeTab">
       <el-collapse-item name="base">
         <!-- class="panel-tab__title" -->
@@ -26,13 +26,13 @@
         <template #title><Icon icon="ep:list" />表单</template>
         <element-form :id="elementId" :type="elementType" />
       </el-collapse-item>
-      <el-collapse-item name="task" v-if="elementType.indexOf('Task') !== -1" key="task">
-        <template #title><Icon icon="ep:checked" />任务</template>
+      <el-collapse-item name="task" v-if="isTaskCollapseItemShow(elementType)" key="task">
+        <template #title><Icon icon="ep:checked" />{{ getTaskCollapseItemName(elementType) }}</template>
         <element-task :id="elementId" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item
         name="multiInstance"
-        v-if="elementType.indexOf('Task') !== -1 && elementType !== 'UserTask'"
+        v-if="elementType.indexOf('Task') !== -1"
         key="multiInstance"
       >
         <template #title><Icon icon="ep:help-filled" />多实例（会签配置）</template>
@@ -72,6 +72,7 @@ import ElementListeners from './listeners/ElementListeners.vue'
 import ElementProperties from './properties/ElementProperties.vue'
 // import ElementForm from './form/ElementForm.vue'
 import UserTaskListeners from './listeners/UserTaskListeners.vue'
+import { getTaskCollapseItemName,isTaskCollapseItemShow } from './task/data'
 
 defineOptions({ name: 'MyPropertiesPanel' })
 
