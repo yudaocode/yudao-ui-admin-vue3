@@ -27,12 +27,12 @@
         <element-form :id="elementId" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item name="task" v-if="elementType.indexOf('Task') !== -1" key="task">
-        <template #title><Icon icon="ep:checked" />任务（审批人）</template>
+        <template #title><Icon icon="ep:checked" />任务</template>
         <element-task :id="elementId" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item
         name="multiInstance"
-        v-if="elementType.indexOf('Task') !== -1"
+        v-if="elementType.indexOf('Task') !== -1 && elementType !== 'UserTask'"
         key="multiInstance"
       >
         <template #title><Icon icon="ep:help-filled" />多实例（会签配置）</template>

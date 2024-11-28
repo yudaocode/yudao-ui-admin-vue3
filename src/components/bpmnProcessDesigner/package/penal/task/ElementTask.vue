@@ -30,6 +30,7 @@
 
 <script lang="ts" setup>
 import UserTask from './task-components/UserTask.vue'
+import ServiceTask from './task-components/ServiceTask.vue'
 import ScriptTask from './task-components/ScriptTask.vue'
 import ReceiveTask from './task-components/ReceiveTask.vue'
 
@@ -50,6 +51,7 @@ const installedComponent = ref({
   // 接收消息任务，需要在全局下插入新的消息实例，并在该节点下的 messageRef 属性绑定该实例
   // 发送任务、服务任务、业务规则任务共用一个相同配置
   UserTask: 'UserTask', // 用户任务配置
+  ServiceTask: 'ServiceTask', // 服务任务配置
   ScriptTask: 'ScriptTask', // 脚本任务配置
   ReceiveTask: 'ReceiveTask' // 消息接收任务
 })
@@ -81,6 +83,9 @@ watch(
     // witchTaskComponent.value = installedComponent.value[props.type]
     if (props.type == installedComponent.value.UserTask) {
       witchTaskComponent.value = UserTask
+    }
+    if (props.type == installedComponent.value.ServiceTask) {
+      witchTaskComponent.value = ServiceTask
     }
     if (props.type == installedComponent.value.ScriptTask) {
       witchTaskComponent.value = ScriptTask
