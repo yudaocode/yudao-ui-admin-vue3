@@ -51,7 +51,10 @@ import {
   ElMenu,
   ElMenuItem,
   ElFooter,
-  ElMessage
+  ElMessage,
+  ElCollapse,
+  ElCollapseItem,
+  ElCard,
   // ElFormItem,
   // ElOption
 } from 'element-plus'
@@ -113,7 +116,10 @@ const components = [
   UserSelect,
   DeptSelect,
   ApiSelect,
-  Editor
+  Editor,
+  ElCollapse,
+  ElCollapseItem,
+  ElCard,
 ]
 
 // 参考 http://www.form-create.com/v3/element-ui/auto-import.html 文档
