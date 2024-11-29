@@ -120,7 +120,7 @@ export const generateRoute = (routes: AppCustomRouteRecordRaw[]): AppRouteRecord
       data.children = [childrenData]
     } else {
       // 目录
-      if (route.children) {
+      if (route.children?.length) {
         data.component = Layout
         data.redirect = getRedirect(route.path, route.children)
         // 外链
