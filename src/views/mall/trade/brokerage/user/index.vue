@@ -194,13 +194,13 @@
     />
   </ContentWrap>
   <!-- 修改上级推广人表单 -->
-  <UpdateBindUserForm ref="updateBindUserFormRef" @success="getList" />
+  <BrokerageUserUpdateForm ref="updateFormRef" @success="getList" />
   <!-- 推广人列表 -->
-  <BrokerageUserListDialog ref="brokerageUserListDialogRef" />
+  <BrokerageUserListDialog ref="listDialogRef" />
   <!-- 推广订单列表 -->
-  <BrokerageOrderListDialog ref="brokerageOrderListDialogRef" />
+  <BrokerageOrderListDialog ref="orderDialogRef" />
   <!-- 创建分销员 -->
-  <CreateUserForm ref="createUserFormRef" />
+  <BrokerageUserCreateForm ref="createFormRef" />
 </template>
 
 <script lang="ts" setup>
@@ -208,10 +208,10 @@ import { dateFormatter } from '@/utils/formatTime'
 import * as BrokerageUserApi from '@/api/mall/trade/brokerage/user'
 import { checkPermi } from '@/utils/permission'
 import { fenToYuanFormat } from '@/utils/formatter'
-import UpdateBindUserForm from '@/views/mall/trade/brokerage/user/UpdateBindUserForm.vue'
+import BrokerageUserUpdateForm from '@/views/mall/trade/brokerage/user/BrokerageUserUpdateForm.vue'
 import BrokerageUserListDialog from '@/views/mall/trade/brokerage/user/BrokerageUserListDialog.vue'
 import BrokerageOrderListDialog from '@/views/mall/trade/brokerage/user/BrokerageOrderListDialog.vue'
-import CreateUserForm from '@/views/mall/trade/brokerage/user/CreateUserForm.vue'
+import BrokerageUserCreateForm from '@/views/mall/trade/brokerage/user/BrokerageUserCreateForm.vue'
 
 defineOptions({ name: 'TradeBrokerageUser' })
 
@@ -271,27 +271,27 @@ const handleCommand = (command: string, row: BrokerageUserApi.BrokerageUserVO) =
 }
 
 /** 打开推广人列表 */
-const brokerageUserListDialogRef = ref()
+const listDialogRef = ref()
 const openBrokerageUserTable = (id: number) => {
-  brokerageUserListDialogRef.value.open(id)
+  listDialogRef.value.open(id)
 }
 
 /** 打开推广订单列表 */
-const brokerageOrderListDialogRef = ref()
+const orderDialogRef = ref()
 const openBrokerageOrderTable = (id: number) => {
-  brokerageOrderListDialogRef.value.open(id)
+  orderDialogRef.value.open(id)
 }
 
 /** 打开表单：修改上级推广人 */
-const updateBindUserFormRef = ref()
+const updateFormRef = ref()
 const openUpdateBindUserForm = (row: BrokerageUserApi.BrokerageUserVO) => {
-  updateBindUserFormRef.value.open(row)
+  updateFormRef.value.open(row)
 }
 
 /** 创建分销员 */
-const createUserFormRef = ref<InstanceType<typeof CreateUserForm>>()
+const createFormRef = ref<InstanceType<typeof CreateUserForm>>()
 const openCreateUserForm = () => {
-  createUserFormRef.value?.open()
+  createFormRef.value?.open()
 }
 
 /** 清除上级推广人 */

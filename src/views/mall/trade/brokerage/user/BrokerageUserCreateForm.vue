@@ -5,21 +5,34 @@
       v-loading="formLoading"
       :model="formData"
       :rules="formRules"
-      label-width="80"
+      label-width="90"
     >
       <el-row :gutter="20">
         <el-col :span="12" :xs="24">
-          <el-form-item label="可用佣金" prop="price">
-            <el-input-number v-model="formData.price" :min="0" class="w-1/1!" />
+          <el-form-item label="分销员" prop="userId">
+            <el-input
+              v-model="formData.userId"
+              v-loading="formLoading"
+              placeholder="请输入分销员编号"
+            >
+              <template #append>
+                <el-button @click="handleGetUser(formData.userId, '分销员')">
+                  <Icon class="mr-5px" icon="ep:search" />
+                </el-button>
+              </template>
+            </el-input>
           </el-form-item>
+          <!-- 展示分销员的信息 -->
+          <el-descriptions v-if="userInfo.user" :column="1" border>
+            <el-descriptions-item label="头像">
+              <el-avatar :src="userInfo.user?.avatar" />
+            </el-descriptions-item>
+            <el-descriptions-item label="昵称">{{ userInfo.user?.nickname }}</el-descriptions-item>
+          </el-descriptions>
         </el-col>
+
         <el-col :span="12" :xs="24">
-          <el-form-item label="冻结佣金" prop="price">
-            <el-input-number v-model="formData.frozenPrice" :min="0" class="w-1/1!" />
-          </el-form-item>
-        </el-col>
-        <el-col :span="12" :xs="24">
-          <el-form-item label="推广人" prop="bindUserId">
+          <el-form-item label="上级推广人" prop="bindUserId">
             <el-input
               v-model="formData.bindUserId"
               v-loading="formLoading"
@@ -49,40 +62,6 @@
             </el-descriptions-item>
           </el-descriptions>
         </el-col>
-        <el-col :span="12" :xs="24">
-          <el-form-item label="分销员" prop="userId">
-            <el-input
-              v-model="formData.userId"
-              v-loading="formLoading"
-              placeholder="请输入分销员编号"
-            >
-              <template #append>
-                <el-button @click="handleGetUser(formData.userId, '分销员')">
-                  <Icon class="mr-5px" icon="ep:search" />
-                </el-button>
-              </template>
-            </el-input>
-          </el-form-item>
-          <!-- 展示分销员的信息 -->
-          <el-descriptions v-if="userInfo.user" :column="1" border>
-            <el-descriptions-item label="头像">
-              <el-avatar :src="userInfo.user?.avatar" />
-            </el-descriptions-item>
-            <el-descriptions-item label="昵称">{{ userInfo.user?.nickname }}</el-descriptions-item>
-            <el-descriptions-item label="推广资格">
-              <el-switch
-                v-model="formData.brokerageEnabled"
-                :disabled="!checkPermi(['trade:brokerage-user:update-bind-user'])"
-                active-text="有"
-                inactive-text="无"
-                inline-prompt
-              />
-            </el-descriptions-item>
-            <el-descriptions-item label="成为推广员的时间">
-              {{ formatDate(userInfo.user?.brokerageTime) }}
-            </el-descriptions-item>
-          </el-descriptions>
-        </el-col>
       </el-row>
     </el-form>
     <template #footer>
@@ -95,7 +74,6 @@
 import * as BrokerageUserApi from '@/api/mall/trade/brokerage/user'
 import * as UserApi from '@/api/member/user'
 import { formatDate } from '@/utils/formatTime'
-import { checkPermi } from '@/utils/permission'
 
 defineOptions({ name: 'CreateUserForm' })
 
@@ -107,9 +85,7 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formData = ref({
   userId: undefined,
   bindUserId: undefined,
-  brokerageEnabled: false,
-  price: 0,
-  frozenPrice: 0
+  brokerageEnabled: false
 })
 const formRef = ref() // 表单 Ref
 const formRules = reactive({
