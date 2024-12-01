@@ -200,7 +200,7 @@
   <!-- 推广订单列表 -->
   <BrokerageOrderListDialog ref="orderDialogRef" />
   <!-- 创建分销员 -->
-  <BrokerageUserCreateForm ref="createFormRef" />
+  <BrokerageUserCreateForm ref="createFormRef" @success="getList" />
 </template>
 
 <script lang="ts" setup>
