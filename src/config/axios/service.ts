@@ -44,8 +44,7 @@ service.interceptors.request.use(
     // 是否需要设置 token
     let isToken = (config!.headers || {}).isToken === false
     whiteList.some((v) => {
-      if (config.url) {
-        config.url.indexOf(v) > -1
+      if (config.url && config.url.indexOf(v) > -1) {
         return (isToken = false)
       }
     })
