@@ -27,7 +27,7 @@ defineOptions({ name: 'IoTDeviceDetail' })
 
 const route = useRoute()
 const message = useMessage()
-const id = Number(route.params.id) // 编号
+const id = route.params.id // 编号
 const loading = ref(true) // 加载中
 const product = ref<ProductVO>({} as ProductVO) // 产品详情
 const device = ref<DeviceVO>({} as DeviceVO) // 设备详情

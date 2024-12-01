@@ -3,155 +3,189 @@
   <el-timeline class="pt-20px">
     <!-- 遍历每个审批节点 -->
     <el-timeline-item
-      v-for="(activity, index) in approveNodes"
+      v-for="(activity, index) in activityNodes"
       :key="index"
       size="large"
       :icon="getApprovalNodeIcon(activity.status, activity.nodeType)"
       :color="getApprovalNodeColor(activity.status)"
     >
-      <div class="flex flex-col items-start">
-        <div class="font-bold"> {{ activity.name }}</div>
-        <div class="flex items-center mt-1">
+      <template #dot>
+        <div
+          class="position-absolute left--10px top--6px rounded-full border border-solid border-#dedede w-30px h-30px flex justify-center items-center bg-#3f73f7 p-5px"
+        >
+          <img class="w-full h-full" :src="getApprovalNodeImg(activity.nodeType)" alt="" />
+          <div
+            v-if="showStatusIcon"
+            class="position-absolute top-17px left-17px rounded-full flex items-center p-1px border-2 border-white border-solid"
+            :style="{ backgroundColor: getApprovalNodeColor(activity.status) }"
+          >
+            <el-icon :size="11" color="#fff">
+              <component :is="getApprovalNodeIcon(activity.status, activity.nodeType)" />
+            </el-icon>
+          </div>
+        </div>
+      </template>
+      <div class="flex flex-col items-start gap2" :id="`activity-task-${activity.id}`">
+        <!-- 第一行：节点名称、时间 -->
+        <div class="flex w-full">
+          <div class="font-bold"> {{ activity.name }}</div>
+          <!-- 信息：时间 -->
+          <div
+            v-if="activity.status !== TaskStatusEnum.NOT_START"
+            class="text-#a5a5a5 text-13px mt-1 ml-auto"
+          >
+            {{ getApprovalNodeTime(activity) }}
+          </div>
+        </div>
+        <!-- 需要自定义选择审批人 -->
+        <div
+          class="flex flex-wrap gap2 items-center"
+          v-if="
+            isEmpty(activity.tasks) &&
+            isEmpty(activity.candidateUsers) &&
+            CandidateStrategy.START_USER_SELECT === activity.candidateStrategy
+          "
+        >
+          <!--  && activity.nodeType === NodeType.USER_TASK_NODE -->
+
+          <el-tooltip content="添加用户" placement="left">
+            <el-button
+              class="!px-6px"
+              @click="handleSelectUser(activity.id, customApproveUsers[activity.id])"
+            >
+              <img class="w-18px text-#ccc" src="@/assets/svgs/bpm/add-user.svg" alt="" />
+            </el-button>
+          </el-tooltip>
+          <div
+            v-for="(user, idx1) in customApproveUsers[activity.id]"
+            :key="idx1"
+            class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
+          >
+            <el-avatar class="!m-5px" :size="28" v-if="user.avatar" :src="user.avatar" />
+            <el-avatar class="!m-5px" :size="28" v-else>
+              {{ user.nickname.substring(0, 1) }}
+            </el-avatar>
+            {{ user.nickname }}
+          </div>
+        </div>
+        <div v-else class="flex items-center flex-wrap mt-1 gap2">
           <!-- 情况一：遍历每个审批节点下的【进行中】task 任务 -->
-          <div v-for="(task, idx) in activity.tasks" :key="idx" class="flex items-center">
-            <div class="flex items-center flex-col pr-2">
-              <div class="position-relative" v-if="task.assigneeUser || task.ownerUser">
-                <!-- 信息：头像 -->
-                <el-avatar
-                  :size="36"
-                  v-if="task.assigneeUser && task.assigneeUser.avatar"
-                  :src="task.assigneeUser.avatar"
-                />
-                <el-avatar v-else-if="task.assigneeUser && task.assigneeUser.nickname">
-                  {{ task.assigneeUser.nickname.substring(0, 1) }}
-                </el-avatar>
-                <el-avatar
-                  v-else-if="task.ownerUser && task.ownerUser.avatar"
-                  :src="task.ownerUser.avatar"
-                />
-                <el-avatar v-else-if="task.ownerUser && task.ownerUser.nickname">
-                  {{ task.ownerUser.nickname.substring(0, 1) }}
-                </el-avatar>
+          <div v-for="(task, idx) in activity.tasks" :key="idx" class="flex flex-col pr-2 gap2">
+            <div
+              class="position-relative flex flex-wrap gap2"
+              v-if="task.assigneeUser || task.ownerUser"
+            >
+              <!-- 信息：头像昵称 -->
+              <div
+                class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
+              >
+                <template v-if="task.assigneeUser?.avatar || task.assigneeUser?.nickname">
+                  <el-avatar
+                    class="!m-5px"
+                    :size="28"
+                    v-if="task.assigneeUser?.avatar"
+                    :src="task.assigneeUser?.avatar"
+                  />
+                  <el-avatar class="!m-5px" :size="28" v-else>
+                    {{ task.assigneeUser?.nickname.substring(0, 1) }}
+                  </el-avatar>
+                  {{ task.assigneeUser?.nickname }}
+                </template>
+                <template v-else-if="task.ownerUser?.avatar || task.ownerUser?.nickname">
+                  <el-avatar
+                    class="!m-5px"
+                    :size="28"
+                    v-if="task.ownerUser?.avatar"
+                    :src="task.ownerUser?.avatar"
+                  />
+                  <el-avatar class="!m-5px" :size="28" v-else>
+                    {{ task.ownerUser?.nickname.substring(0, 1) }}
+                  </el-avatar>
+                  {{ task.ownerUser?.nickname }}
+                </template>
                 <!-- 信息：任务 ICON -->
                 <div
-                  class="position-absolute top-26px left-26px bg-#fff rounded-full flex items-center p-2px"
+                  v-if="showStatusIcon && onlyStatusIconShow.includes(task.status)"
+                  class="position-absolute top-19px left-23px rounded-full flex items-center p-1px border-2 border-white border-solid"
+                  :style="{ backgroundColor: statusIconMap2[task.status]?.color }"
                 >
-                  <Icon
-                    :size="12"
-                    :icon="statusIconMap2[task.status]?.icon"
-                    :color="statusIconMap2[task.status]?.color"
-                  />
+                  <Icon :size="11" :icon="statusIconMap2[task.status]?.icon" color="#FFFFFF" />
                 </div>
-              </div>
-              <div class="flex flex-col mt-1">
-                <!-- 信息：昵称 -->
-                <div
-                  v-if="task.assigneeUser && task.assigneeUser.nickname"
-                  class="text-10px text-align-center"
-                >
-                  {{ task.assigneeUser.nickname }}
-                </div>
-                <div
-                  v-else-if="task.ownerUser && task.ownerUser.nickname"
-                  class="text-10px text-align-center"
-                >
-                  {{ task.ownerUser.nickname }}
-                </div>
-                <!-- TODO @jason：审批意见，要展示哈。 -->
-                <!-- <div v-if="task.reason" :title="task.reason" class="text-13px text-truncate w-150px mt-1"> 审批意见: {{ task.reason }}</div> -->
               </div>
             </div>
+            <teleport defer :to="`#activity-task-${activity.id}`">
+              <div
+                v-if="
+                  task.reason &&
+                  [NodeType.USER_TASK_NODE, NodeType.END_EVENT_NODE].includes(activity.nodeType)
+                "
+                class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
+              >
+                审批意见：{{ task.reason }}
+              </div>
+            </teleport>
           </div>
           <!-- 情况二：遍历每个审批节点下的【候选的】task 任务。例如说，1）依次审批，2）未来的审批任务等 -->
           <div
-            v-for="(user, idx1) in activity.candidateUserList"
+            v-for="(user, idx1) in activity.candidateUsers"
             :key="idx1"
-            class="flex items-center"
+            class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
           >
-            <div class="flex items-center flex-col pr-2">
-              <div class="position-relative">
-                <!-- 信息：头像 -->
-                <el-avatar :size="36" v-if="user.avatar" :src="user.avatar" />
-                <el-avatar v-else-if="user.nickname && user.nickname">
-                  {{ user.nickname.substring(0, 1) }}
-                </el-avatar>
-                <!-- 信息：任务 ICON -->
-                <div
-                  class="position-absolute top-26px left-26px bg-#fff rounded-full flex items-center p-2px"
-                >
-                  <Icon
-                    :size="12"
-                    :icon="statusIconMap2['-1']?.icon"
-                    :color="statusIconMap2['-1']?.color"
-                  />
-                </div>
-              </div>
-              <div class="flex flex-col mt-1">
-                <!-- 信息：昵称 -->
-                <div v-if="user.nickname" class="text-10px text-align-center">
-                  {{ user.nickname }}
-                </div>
-                <!-- <div v-if="task.reason" :title="task.reason" class="text-13px text-truncate w-150px mt-1"> 审批意见: {{ task.reason }}</div> -->
-              </div>
+            <el-avatar class="!m-5px" :size="28" v-if="user.avatar" :src="user.avatar" />
+            <el-avatar class="!m-5px" :size="28" v-else>
+              {{ user.nickname.substring(0, 1) }}
+            </el-avatar>
+            {{ user.nickname }}
+
+            <!-- 信息：任务 ICON -->
+            <div
+              v-if="showStatusIcon"
+              class="position-absolute top-20px left-24px rounded-full flex items-center p-1px border-2 border-white border-solid"
+              :style="{ backgroundColor: statusIconMap2['-1']?.color }"
+            >
+              <Icon :size="11" :icon="statusIconMap2['-1']?.icon" color="#FFFFFF" />
             </div>
           </div>
         </div>
-        <!-- 信息：时间 -->
-        <div
-          v-if="activity.status !== TaskStatusEnum.NOT_START"
-          class="text-#a5a5a5 text-13px mt-1"
-        >
-          {{ getApprovalNodeTime(activity) }}
-        </div>
-
-        <!-- TODO @jason：审批意见，要展示哈。 -->
-        <!-- <div class="color-#a1a6ae text-12px mb-10px"> {{ activity.assigneeUser.nickname }}</div>
-        <div v-if="activity.opinion" class="text-#a5a5a5 text-12px w-100%">
-          <div class="mb-5px">审批意见：</div>
-          <div
-            class="w-100% border-1px border-#a5a5a5 border-dashed rounded py-5px px-15px text-#2d2d2d"
-          >
-            {{ activity.opinion }}
-          </div>
-        </div>
-        <div v-if="activity.createTime" class="text-#a5a5a5 text-13px">
-          {{ formatDate(activity.createTime) }}
-        </div> -->
       </div>
     </el-timeline-item>
   </el-timeline>
+
+  <!-- 用户选择弹窗 -->
+  <UserSelectForm ref="userSelectFormRef" @confirm="handleUserSelectConfirm" />
 </template>
 
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { TaskStatusEnum } from '@/api/bpm/task'
-import { NodeType } from '@/components/SimpleProcessDesignerV2/src/consts'
+import { NodeType, CandidateStrategy } from '@/components/SimpleProcessDesignerV2/src/consts'
+import { isEmpty } from '@/utils/is'
 import { Check, Close, Loading, Clock, Minus, Delete } from '@element-plus/icons-vue'
+import starterSvg from '@/assets/svgs/bpm/starter.svg'
+import auditorSvg from '@/assets/svgs/bpm/auditor.svg'
+import copySvg from '@/assets/svgs/bpm/copy.svg'
+import conditionSvg from '@/assets/svgs/bpm/condition.svg'
+import parallelSvg from '@/assets/svgs/bpm/parallel.svg'
+import finishSvg from '@/assets/svgs/bpm/finish.svg'
+
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
-const props = defineProps({
-  // 流程实例编号
-  processInstanceId: {
-    type: String,
-    required: false,
-    default: ''
-  },
-  // 流程定义编号
-  processDefinitionId: {
-    type: String,
-    required: false,
-    default: ''
+withDefaults(
+  defineProps<{
+    activityNodes: ProcessInstanceApi.ApprovalNodeInfo[] // 审批节点信息
+    showStatusIcon?: boolean // 是否显示头像右下角状态图标
+  }>(),
+  {
+    showStatusIcon: true // 默认值为 true
   }
-})
+)
 
 // 审批节点
-const approveNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([])
-
 const statusIconMap2 = {
   // 未开始
-  '-1': { color: '#e5e7ec', icon: 'ep-clock' },
+  '-1': { color: '#909398', icon: 'ep-clock' },
   // 待审批
-  '0': { color: '#e5e7ec', icon: 'ep:loading' },
+  '0': { color: '#00b32a', icon: 'ep:loading' },
   // 审批中
   '1': { color: '#448ef7', icon: 'ep:loading' },
   // 审批通过
@@ -160,7 +194,7 @@ const statusIconMap2 = {
   '3': { color: '#f46b6c', icon: 'fa-solid:times-circle' },
   // 取消
   '4': { color: '#cccccc', icon: 'ep:delete-filled' },
-  // 回退
+  // 退回
   '5': { color: '#f46b6c', icon: 'ep:remove-filled' },
   // 委派中
   '6': { color: '#448ef7', icon: 'ep:loading' },
@@ -170,8 +204,8 @@ const statusIconMap2 = {
 
 const statusIconMap = {
   // 审批未开始
-  '-1': { color: '#e5e7ec', icon: Clock },
-  '0': { color: '#e5e7ec', icon: Clock },
+  '-1': { color: '#909398', icon: Clock },
+  '0': { color: '#00b32a', icon: Clock },
   // 审批中
   '1': { color: '#448ef7', icon: Loading },
   // 审批通过
@@ -180,7 +214,7 @@ const statusIconMap = {
   '3': { color: '#f46b6c', icon: Close },
   // 已取消
   '4': { color: '#cccccc', icon: Delete },
-  // 回退
+  // 退回
   '5': { color: '#f46b6c', icon: Minus },
   // 委派中
   '6': { color: '#448ef7', icon: Loading },
@@ -188,13 +222,27 @@ const statusIconMap = {
   '7': { color: '#00b32a', icon: Check }
 }
 
-/** 获得审批详情 */
-const getApprovalDetail = async () => {
-  const data = await ProcessInstanceApi.getApprovalDetail(
-    props.processInstanceId,
-    props.processDefinitionId
-  )
-  approveNodes.value = data.approveNodes
+const nodeTypeSvgMap = {
+  // 结束节点
+  [NodeType.END_EVENT_NODE]: { color: '#909398', svg: finishSvg },
+  // 发起人节点
+  [NodeType.START_USER_NODE]: { color: '#909398', svg: starterSvg },
+  // 审批人节点
+  [NodeType.USER_TASK_NODE]: { color: '#ff943e', svg: auditorSvg },
+  // 抄送人节点
+  [NodeType.COPY_TASK_NODE]: { color: '#3296fb', svg: copySvg },
+  // 条件分支节点
+  [NodeType.CONDITION_NODE]: { color: '#14bb83', svg: conditionSvg },
+  // 并行分支节点
+  [NodeType.PARALLEL_BRANCH_NODE]: { color: '#14bb83', svg: parallelSvg }
+}
+
+// 只有只有状态是 -1、0、1 才展示头像右小角状态小icon
+const onlyStatusIconShow = [-1, 0, 1]
+
+// timeline时间线上icon图标
+const getApprovalNodeImg = (nodeType: NodeType) => {
+  return nodeTypeSvgMap[nodeType]?.svg
 }
 
 const getApprovalNodeIcon = (taskStatus: number, nodeType: NodeType) => {
@@ -202,7 +250,11 @@ const getApprovalNodeIcon = (taskStatus: number, nodeType: NodeType) => {
     return statusIconMap[taskStatus]?.icon
   }
 
-  if (nodeType === NodeType.START_USER_NODE || nodeType === NodeType.USER_TASK_NODE) {
+  if (
+    nodeType === NodeType.START_USER_NODE ||
+    nodeType === NodeType.USER_TASK_NODE ||
+    nodeType === NodeType.END_EVENT_NODE
+  ) {
     return statusIconMap[taskStatus]?.icon
   }
 }
@@ -212,22 +264,29 @@ const getApprovalNodeColor = (taskStatus: number) => {
 }
 
 const getApprovalNodeTime = (node: ProcessInstanceApi.ApprovalNodeInfo) => {
+  if (node.nodeType === NodeType.START_USER_NODE && node.startTime) {
+    return `${formatDate(node.startTime)}`
+  }
   if (node.endTime) {
-    return `结束时间：${formatDate(node.endTime)}`
+    return `${formatDate(node.endTime)}`
   }
   if (node.startTime) {
-    return `创建时间：${formatDate(node.startTime)}`
+    return `${formatDate(node.startTime)}`
   }
 }
 
-/** 重新刷新审批详情 */
-const refresh = () => {
-  getApprovalDetail()
+// 选择自定义审批人
+const userSelectFormRef = ref()
+const handleSelectUser = (activityId, selectedList) => {
+  userSelectFormRef.value.open(activityId, selectedList)
 }
-
-defineExpose({ refresh })
-
-onMounted(async () => {
-  await getApprovalDetail()
-})
+const emit = defineEmits<{
+  selectUserConfirm: [id: any, userList: any[]]
+}>()
+const customApproveUsers: any = ref({}) // key：activityId，value：用户列表
+// 选择完成
+const handleUserSelectConfirm = (activityId: string, userList: any[]) => {
+  customApproveUsers.value[activityId] = userList || []
+  emit('selectUserConfirm', activityId, userList)
+}
 </script>

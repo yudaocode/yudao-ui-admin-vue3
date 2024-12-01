@@ -9,10 +9,10 @@ export enum TaskStatusEnum {
    */
   NOT_START = -1,
 
-   /**
+  /**
    * 待审批
    */
-   WAIT = 0,
+  WAIT = 0,
   /**
    * 审批中
    */
@@ -26,7 +26,7 @@ export enum TaskStatusEnum {
    * 审批不通过
    */
   REJECT = 3,
-  
+
   /**
    * 已取消
    */
@@ -36,18 +36,9 @@ export enum TaskStatusEnum {
    */
   RETURN = 5,
   /**
-   * 委派中
-   */
-  DELEGATE = 6,
-  /**
    * 审批通过中
    */
-  APPROVING = 7,
-
-}
-
-export type TaskVO = {
-  id: number
+  APPROVING = 7
 }
 
 export const getTaskTodoPage = async (params: any) => {
@@ -76,12 +67,12 @@ export const getTaskListByProcessInstanceId = async (processInstanceId: string) 
   })
 }
 
-// 获取所有可回退的节点
+// 获取所有可退回的节点
 export const getTaskListByReturn = async (id: string) => {
   return await request.get({ url: '/bpm/task/list-by-return', params: { id } })
 }
 
-// 回退
+// 退回
 export const returnTask = async (data: any) => {
   return await request.put({ url: '/bpm/task/return', data })
 }
@@ -104,6 +95,16 @@ export const signCreateTask = async (data: any) => {
 // 减签
 export const signDeleteTask = async (data: any) => {
   return await request.delete({ url: '/bpm/task/delete-sign', data })
+}
+
+// 抄送
+export const copyTask = async (data: any) => {
+  return await request.put({ url: '/bpm/task/copy', data })
+}
+
+// 获取我的待办任务
+export const myTodoTask = async (processInstanceId: string) => {
+  return await request.get({ url: '/bpm/task/my-todo?processInstanceId=' + processInstanceId })
 }
 
 // 获取减签任务列表

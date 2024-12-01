@@ -31,6 +31,13 @@
     @update:model-value="handleModelValueUpdate"
     @find:parent-node="findFromParentNode"
   />
+  <!-- 包容分支节点 -->
+  <InclusiveNode
+    v-if="currentNode && currentNode.type === NodeType.INCLUSIVE_BRANCH_NODE"
+    :flow-node="currentNode"
+    @update:model-value="handleModelValueUpdate"
+    @find:parent-node="findFromParentNode"
+  />
   <!-- 递归显示孩子节点  -->
   <ProcessNodeTree
     v-if="currentNode && currentNode.childNode"
@@ -40,7 +47,10 @@
   />
 
   <!-- 结束节点 -->
-  <EndEventNode v-if="currentNode && currentNode.type === NodeType.END_EVENT_NODE" />
+  <EndEventNode
+    v-if="currentNode && currentNode.type === NodeType.END_EVENT_NODE"
+    :flow-node="currentNode"
+  />
 </template>
 <script setup lang="ts">
 import StartUserNode from './nodes/StartUserNode.vue'
@@ -49,6 +59,7 @@ import UserTaskNode from './nodes/UserTaskNode.vue'
 import CopyTaskNode from './nodes/CopyTaskNode.vue'
 import ExclusiveNode from './nodes/ExclusiveNode.vue'
 import ParallelNode from './nodes/ParallelNode.vue'
+import InclusiveNode from './nodes/InclusiveNode.vue'
 import { SimpleFlowNode, NodeType } from './consts'
 import { useWatchNode } from './node'
 defineOptions({
