@@ -1329,6 +1329,34 @@
           "isAttr": true
         }
       ]
+    },
+    {
+      "name": "BoundaryEventType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:BoundaryEvent"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "TimeoutHandlerType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:BoundaryEvent"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
     }
   ],
   "emumerations": []
