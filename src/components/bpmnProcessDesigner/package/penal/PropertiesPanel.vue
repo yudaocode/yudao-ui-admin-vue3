@@ -56,7 +56,7 @@
       </el-collapse-item>
       <el-collapse-item name="customConfig" key="customConfig">
         <template #title><Icon icon="ep:tools" />自定义配置</template>
-        <element-custom-config :id="elementId" :type="elementType" />
+        <element-custom-config :id="elementId" :type="elementType" :business-object="elementBusinessObject" />
       </el-collapse-item>
     </el-collapse>
   </div>
