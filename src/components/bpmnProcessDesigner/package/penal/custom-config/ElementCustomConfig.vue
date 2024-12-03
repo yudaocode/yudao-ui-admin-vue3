@@ -11,27 +11,25 @@ defineOptions({ name: 'ElementCustomConfig' })
 
 const props = defineProps({
   id: String,
-  type: String
+  type: String,
+  businessObject: {
+    type: Object,
+    default: () => {}
+  }
 })
 
 const bpmnInstances = () => (window as any)?.bpmnInstances
 const customConfigComponent = ref<any>(null)
 
 watch(
-  () => props.type,
+  () => props.businessObject,
   () => {
-    if (props.type) {
-      const element = bpmnInstances().bpmnElement.businessObject
-      let elementType = props.type
-      if (element.eventDefinitions) {
-        // 处理类似共用BoundaryEvent类型的TimerEvent
-        elementType += element.eventDefinitions[0].$type.split(':')[1]
+    if (props.type && props.businessObject) {
+      let val = props.type
+      if (props.businessObject.eventDefinitions) {
+        val += props.businessObject.eventDefinitions[0]?.$type.split(':')[1] || ''
       }
-      const config = CustomConfigMap[elementType]
-      if (config) {
-        customConfigComponent.value = config.componet
-        return
-      }
+      customConfigComponent.value = CustomConfigMap[val]?.componet
     }
   },
   { immediate: true }
