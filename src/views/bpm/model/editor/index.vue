@@ -34,6 +34,10 @@ import * as ModelApi from '@/api/bpm/model'
 
 defineOptions({ name: 'BpmModelEditor' })
 
+const props = defineProps<{
+  modelId: string
+}>()
+const emit = defineEmits(['success'])
 const router = useRouter() // 路由
 const { query } = useRoute() // 路由的查询
 const message = useMessage() // 国际化
@@ -59,36 +63,28 @@ const initModeler = (item) => {
 
 /** 添加/修改模型 */
 const save = async (bpmnXml: string) => {
-  const data = {
-    ...model.value,
-    bpmnXml: bpmnXml // bpmnXml 只是初始化流程图，后续修改无法通过它获得
-  } as unknown as ModelApi.ModelVO
-  // 提交
-  if (data.id) {
+  try {
+    const data = {
+      ...model.value,
+      bpmnXml: bpmnXml
+    } as unknown as ModelApi.ModelVO
+    // 提交
     await ModelApi.updateModelBpmn(data)
-    message.success('修改成功')
-  } else {
-    await ModelApi.updateModelBpmn(data)
-    message.success('新增成功')
+    emit('success')
+  } catch (error) {
+    console.error('保存失败:', error)
+    message.error('保存失败')
   }
-  // 跳转回去
-  close()
-}
-
-/** 关闭按钮 */
-const close = () => {
-  router.push({ path: '/bpm/manager/model' })
 }
 
 /** 初始化 */
 onMounted(async () => {
-  const modelId = query.modelId as unknown as number
-  if (!modelId) {
+  if (!props.modelId) {
     message.error('缺少模型 modelId 编号')
     return
   }
   // 查询模型
-  const data = await ModelApi.getModel(modelId)
+  const data = await ModelApi.getModel(String(props.modelId))
   if (!data.bpmnXml) {
     // 首次创建的 Model 模型，它是没有 bpmnXml，此时需要给它一个默认的
     data.bpmnXml = ` <?xml version="1.0" encoding="UTF-8"?>

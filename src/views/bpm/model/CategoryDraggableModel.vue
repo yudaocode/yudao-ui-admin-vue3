@@ -339,21 +339,22 @@ const handleChangeState = async (row: any) => {
 
 /** 设计流程 */
 const handleDesign = (row: any) => {
-  if (row.type == BpmModelType.BPMN) {
-    push({
-      name: 'BpmModelEditor',
-      query: {
-        modelId: row.id
-      }
-    })
-  } else {
-    push({
-      name: 'SimpleModelDesign',
-      query: {
-        modelId: row.id
-      }
-    })
-  }
+  // if (row.type == BpmModelType.BPMN) {
+  //   push({
+  //     name: 'BpmModelEditor',
+  //     query: {
+  //       modelId: row.id
+  //     }
+  //   })
+  // } else {
+  //   push({
+  //     name: 'SimpleModelDesign',
+  //     query: {
+  //       modelId: row.id
+  //     }
+  //   })
+  // }
+  push(`/bpm/manager/model/create-update?id=${row.id}`)
 }
 
 /** 发布流程 */
@@ -496,7 +497,11 @@ const handleDeleteCategory = async () => {
 /** 添加流程模型弹窗 */
 const modelFormRef = ref()
 const openModelForm = (type: string, id?: number) => {
-  modelFormRef.value.open(type, id)
+  if (type === 'create') {
+    push('/bpm/manager/model/create-update')
+  } else {
+    push(`/bpm/manager/model/create-update?id=${id}`)
+  }
 }
 
 watch(() => props.categoryInfo.modelList, updateModeList, { immediate: true })
