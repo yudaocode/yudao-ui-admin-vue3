@@ -1,6 +1,30 @@
 <template>
   <div class="panel-tab__content">
-    <el-form label-width="90px">
+    <el-radio-group v-model="approveMethod" @change="onApproveMethodChange">
+      <div class="flex-col">
+        <div v-for="(item, index) in APPROVE_METHODS" :key="index">
+          <el-radio :value="item.value" :label="item.value">
+            {{ item.label }}
+          </el-radio>
+          <el-form-item prop="approveRatio">
+            <el-input-number
+              v-model="approveRatio"
+              :min="10"
+              :max="100"
+              :step="10"
+              size="small"
+              v-if="
+                item.value === ApproveMethodType.APPROVE_BY_RATIO &&
+                approveMethod === ApproveMethodType.APPROVE_BY_RATIO
+              "
+              @change="onApproveRatioChange"
+            />
+          </el-form-item>
+        </div>
+      </div>
+    </el-radio-group>
+    <!-- 与Simple设计器配置合并，保留以前的代码 -->
+    <el-form label-width="90px" style="display: none">
       <el-form-item label="快捷配置">
         <el-button size="small" @click="changeConfig('依次审批')">依次审批</el-button>
         <el-button size="small" @click="changeConfig('会签')">会签</el-button>
@@ -76,6 +100,8 @@
 </template>
 
 <script lang="ts" setup>
+import { ApproveMethodType, APPROVE_METHODS } from '@/components/SimpleProcessDesignerV2/src/consts'
+
 defineOptions({ name: 'ElementMultiInstance' })
 
 const props = defineProps({
@@ -267,6 +293,91 @@ const changeConfig = (config) => {
   }
 }
 
+/**
+ * -----新版本多实例-----
+ */
+const approveMethod = ref(1)
+const approveRatio = ref(100)
+const getElementLoopNew = ({ loopCharacteristics }) => {
+  if (!loopCharacteristics) {
+    approveMethod.value = ApproveMethodType.RANDOM_SELECT_ONE_APPROVE
+    return
+  }
+  if (loopCharacteristics.isSequential) {
+    approveMethod.value = ApproveMethodType.SEQUENTIAL_APPROVE
+  } else {
+    if (loopCharacteristics.completionCondition.body === '${ nrOfCompletedInstances > 0 }') {
+      approveMethod.value = ApproveMethodType.ANY_APPROVE
+    }
+    if (
+      loopCharacteristics.completionCondition.body.includes('nrOfCompletedInstances/nrOfInstances')
+    ) {
+      approveMethod.value = ApproveMethodType.APPROVE_BY_RATIO
+    }
+  }
+}
+const onApproveMethodChange = () => {
+  approveRatio.value = 100
+  updateLoopCharacteristics()
+}
+const onApproveRatioChange = () => {
+  updateLoopCharacteristics()
+}
+const updateLoopCharacteristics = () => {
+  if (approveMethod.value === ApproveMethodType.RANDOM_SELECT_ONE_APPROVE) {
+    bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
+      loopCharacteristics: null
+    })
+    return
+  }
+  if (approveMethod.value === ApproveMethodType.APPROVE_BY_RATIO) {
+    multiLoopInstance.value = bpmnInstances().moddle.create(
+      'bpmn:MultiInstanceLoopCharacteristics',
+      { isSequential: false, collection: '${coll_userList}' }
+    )
+    multiLoopInstance.value.completionCondition = bpmnInstances().moddle.create(
+      'bpmn:FormalExpression',
+      {
+        body: '${ nrOfCompletedInstances/nrOfInstances >= ' + approveRatio.value / 100 + '}'
+      }
+    )
+  }
+  if (approveMethod.value === ApproveMethodType.ANY_APPROVE) {
+    multiLoopInstance.value = bpmnInstances().moddle.create(
+      'bpmn:MultiInstanceLoopCharacteristics',
+      { isSequential: false, collection: '${coll_userList}' }
+    )
+    multiLoopInstance.value.completionCondition = bpmnInstances().moddle.create(
+      'bpmn:FormalExpression',
+      {
+        body: '${ nrOfCompletedInstances > 0 }'
+      }
+    )
+  }
+  if (approveMethod.value === ApproveMethodType.SEQUENTIAL_APPROVE) {
+    multiLoopInstance.value = bpmnInstances().moddle.create(
+      'bpmn:MultiInstanceLoopCharacteristics',
+      { isSequential: true, collection: '${coll_userList}' }
+    )
+    multiLoopInstance.value.loopCardinality = bpmnInstances().moddle.create(
+      'bpmn:FormalExpression',
+      {
+        body: '1'
+      }
+    )
+    multiLoopInstance.value.completionCondition = bpmnInstances().moddle.create(
+      'bpmn:FormalExpression',
+      {
+        body: '${ nrOfCompletedInstances >= nrOfInstances }'
+      }
+    )
+  }
+
+  bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
+    loopCharacteristics: toRaw(multiLoopInstance.value)
+  })
+}
+
 onBeforeUnmount(() => {
   multiLoopInstance.value = null
   bpmnElement.value = null
@@ -276,7 +387,8 @@ watch(
   () => props.businessObject,
   (val) => {
     bpmnElement.value = bpmnInstances().bpmnElement
-    getElementLoop(val)
+    // getElementLoop(val)
+    getElementLoopNew(val)
   },
   { immediate: true }
 )
