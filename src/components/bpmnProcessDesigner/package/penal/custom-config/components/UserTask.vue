@@ -193,7 +193,7 @@ const { buttonsSetting, btnDisplayNameEdit, changeBtnDisplayName, btnDisplayName
   useButtonsSetting()
 
 // 字段权限
-const fieldsPermissionEl = ref()
+const fieldsPermissionEl = ref([])
 const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
   FieldPermissionType.READ
 )
