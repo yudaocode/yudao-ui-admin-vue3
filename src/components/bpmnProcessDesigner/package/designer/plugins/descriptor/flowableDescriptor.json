@@ -1357,6 +1357,62 @@
           "isBody": true
         }
       ]
+    },
+    {
+      "name": "ApproveType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "ApproveMethod",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "CandidateStrategy",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "CandidateParam",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
     }
   ],
   "emumerations": []
