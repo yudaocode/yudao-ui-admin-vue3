@@ -142,6 +142,7 @@ const props = defineProps({
   id: String,
   type: String
 })
+const prefix = inject('prefix')
 const userTaskForm = ref({
   candidateStrategy: undefined, // 分配规则
   candidateParam: [] // 分配选项
@@ -154,12 +155,39 @@ const deptTreeOptions = ref() // 部门树
 const postOptions = ref<PostApi.PostVO[]>([]) // 岗位列表
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
+const otherExtensions = ref()
 
 const resetTaskForm = () => {
   const businessObject = bpmnElement.value.businessObject
   if (!businessObject) {
     return
   }
+
+  const extensionElements = businessObject?.extensionElements ?? []
+  userTaskForm.value.candidateStrategy = extensionElements.values?.filter(
+    (ex) => ex.$type === `${prefix}:CandidateStrategy`
+  )?.[0]?.value
+  const candidateParamStr = extensionElements.values?.filter(
+    (ex) => ex.$type === `${prefix}:CandidateParam`
+  )?.[0]?.value
+  if (candidateParamStr && candidateParamStr.length > 0) {
+    if (userTaskForm.value.candidateStrategy === 60) {
+      // 特殊：流程表达式，只有一个 input 输入框
+      userTaskForm.value.candidateParam = [candidateParamStr]
+    } else {
+      userTaskForm.value.candidateParam = candidateParamStr.split(',').map((item) => item)
+    }
+  } else {
+    userTaskForm.value.candidateParam = []
+  }
+
+  otherExtensions.value =
+    extensionElements.values?.filter(
+      (ex) => ex.$type !== `${prefix}:CandidateStrategy` && ex.$type !== `${prefix}:CandidateParam`
+    ) ?? []
+
+  // 改用通过extensionElements来存储数据
+  return
   if (businessObject.candidateStrategy != undefined) {
     userTaskForm.value.candidateStrategy = parseInt(businessObject.candidateStrategy) as any
   } else {
@@ -187,6 +215,23 @@ const changeCandidateStrategy = () => {
 
 /** 选中某个 options 时候，更新 bpmn 图  */
 const updateElementTask = () => {
+  const extensions = bpmnInstances().moddle.create('bpmn:ExtensionElements', {
+    values: [
+      ...otherExtensions.value,
+      bpmnInstances().moddle.create(`${prefix}:CandidateStrategy`, {
+        value: userTaskForm.value.candidateStrategy
+      }),
+      bpmnInstances().moddle.create(`${prefix}:CandidateParam`, {
+        value: userTaskForm.value.candidateParam.join(',')
+      })
+    ]
+  })
+  bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
+    extensionElements: extensions
+  })
+
+  // 改用通过extensionElements来存储数据
+  return
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
     candidateStrategy: userTaskForm.value.candidateStrategy,
     candidateParam: userTaskForm.value.candidateParam.join(',')
