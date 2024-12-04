@@ -270,17 +270,18 @@ const resetCustomConfigList = () => {
 
   // 字段权限
   if (formType.value === 10) {
-    fieldsPermissionEl.value = elExtensionElements.value.values?.filter(
+    const fieldsPermissionList = elExtensionElements.value.values?.filter(
       (ex) => ex.$type === `${prefix}:FieldsPermission`
     )
-    if (fieldsPermissionEl.value.length === 0) {
-      getNodeConfigFormFields()
-      fieldsPermissionConfig.value.forEach((el) => {
-        fieldsPermissionEl.value.push(
-          bpmnInstances().moddle.create(`${prefix}:FieldsPermission`, el)
-        )
-      })
-    }
+    fieldsPermissionEl.value = []
+    getNodeConfigFormFields()
+    fieldsPermissionConfig.value.forEach((element) => {
+      element.permission =
+        fieldsPermissionList?.find((obj) => obj.field === element.field)?.permission ?? '1'
+      fieldsPermissionEl.value.push(
+        bpmnInstances().moddle.create(`${prefix}:FieldsPermission`, element)
+      )
+    })
   }
 
   // 保留剩余扩展元素，便于后面更新该元素对应属性

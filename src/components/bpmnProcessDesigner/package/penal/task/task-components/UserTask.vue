@@ -175,7 +175,11 @@ const resetTaskForm = () => {
       // 特殊：流程表达式，只有一个 input 输入框
       userTaskForm.value.candidateParam = [candidateParamStr]
     } else {
-      userTaskForm.value.candidateParam = candidateParamStr.split(',').map((item) => item)
+      userTaskForm.value.candidateParam = candidateParamStr.split(',').map((item) => {
+        // 如果数字超出了最大安全整数范围，则将其作为字符串处理
+        let num = Number(item)
+        return num > Number.MAX_SAFE_INTEGER || num < -Number.MAX_SAFE_INTEGER ? item : num
+      })
     }
   } else {
     userTaskForm.value.candidateParam = []
