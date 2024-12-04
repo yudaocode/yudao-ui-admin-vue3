@@ -246,7 +246,7 @@ const resetCustomConfigList = () => {
     elExtensionElements.value.values?.filter(
       (ex) => ex.$type === `${prefix}:AssignEmptyUserIds`
     )?.[0] || bpmnInstances().moddle.create(`${prefix}:AssignEmptyUserIds`, { value: '' })
-  assignEmptyUserIds.value = assignEmptyUserIdsEl.value.value.split(',').map((item) => {
+  assignEmptyUserIds.value = assignEmptyUserIdsEl.value.value?.split(',').map((item) => {
     // 如果数字超出了最大安全整数范围，则将其作为字符串处理
     let num = Number(item)
     return num > Number.MAX_SAFE_INTEGER || num < -Number.MAX_SAFE_INTEGER ? item : num

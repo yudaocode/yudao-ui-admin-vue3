@@ -36,7 +36,7 @@
         key="multiInstance"
       >
         <template #title><Icon icon="ep:help-filled" />多实例（会签配置）</template>
-        <element-multi-instance :business-object="elementBusinessObject" :type="elementType" />
+        <element-multi-instance :id="elementId" :business-object="elementBusinessObject" :type="elementType" />
       </el-collapse-item>
       <el-collapse-item name="listeners" key="listeners">
         <template #title><Icon icon="ep:bell-filled" />执行监听器</template>

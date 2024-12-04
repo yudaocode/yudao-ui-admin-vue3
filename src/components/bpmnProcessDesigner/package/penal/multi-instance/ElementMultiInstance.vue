@@ -106,7 +106,8 @@ defineOptions({ name: 'ElementMultiInstance' })
 
 const props = defineProps({
   businessObject: Object,
-  type: String
+  type: String,
+  id: String
 })
 const prefix = inject('prefix')
 const loopCharacteristics = ref('')
@@ -296,25 +297,17 @@ const changeConfig = (config) => {
 /**
  * -----新版本多实例-----
  */
-const approveMethod = ref(1)
+const approveMethod = ref()
 const approveRatio = ref(100)
-const getElementLoopNew = ({ loopCharacteristics }) => {
-  if (!loopCharacteristics) {
-    approveMethod.value = ApproveMethodType.RANDOM_SELECT_ONE_APPROVE
-    return
-  }
-  if (loopCharacteristics.isSequential) {
-    approveMethod.value = ApproveMethodType.SEQUENTIAL_APPROVE
-  } else {
-    if (loopCharacteristics.completionCondition.body === '${ nrOfCompletedInstances > 0 }') {
-      approveMethod.value = ApproveMethodType.ANY_APPROVE
-    }
-    if (
-      loopCharacteristics.completionCondition.body.includes('nrOfCompletedInstances/nrOfInstances')
-    ) {
-      approveMethod.value = ApproveMethodType.APPROVE_BY_RATIO
-    }
-  }
+const otherExtensions = ref()
+const getElementLoopNew = () => {
+  const extensionElements = bpmnElement.value.businessObject?.extensionElements ?? []
+  approveMethod.value = extensionElements.values.filter(
+    (ex) => ex.$type === `${prefix}:ApproveMethod`
+  )?.[0]?.value
+
+  otherExtensions.value =
+    extensionElements.values.filter((ex) => ex.$type !== `${prefix}:ApproveMethod`) ?? []
 }
 const onApproveMethodChange = () => {
   approveRatio.value = 100
@@ -324,57 +317,70 @@ const onApproveRatioChange = () => {
   updateLoopCharacteristics()
 }
 const updateLoopCharacteristics = () => {
+  // 根据ApproveMethod生成multiInstanceLoopCharacteristics节点
   if (approveMethod.value === ApproveMethodType.RANDOM_SELECT_ONE_APPROVE) {
     bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
       loopCharacteristics: null
     })
-    return
-  }
-  if (approveMethod.value === ApproveMethodType.APPROVE_BY_RATIO) {
-    multiLoopInstance.value = bpmnInstances().moddle.create(
-      'bpmn:MultiInstanceLoopCharacteristics',
-      { isSequential: false, collection: '${coll_userList}' }
-    )
-    multiLoopInstance.value.completionCondition = bpmnInstances().moddle.create(
-      'bpmn:FormalExpression',
-      {
-        body: '${ nrOfCompletedInstances/nrOfInstances >= ' + approveRatio.value / 100 + '}'
-      }
-    )
-  }
-  if (approveMethod.value === ApproveMethodType.ANY_APPROVE) {
-    multiLoopInstance.value = bpmnInstances().moddle.create(
-      'bpmn:MultiInstanceLoopCharacteristics',
-      { isSequential: false, collection: '${coll_userList}' }
-    )
-    multiLoopInstance.value.completionCondition = bpmnInstances().moddle.create(
-      'bpmn:FormalExpression',
-      {
-        body: '${ nrOfCompletedInstances > 0 }'
-      }
-    )
-  }
-  if (approveMethod.value === ApproveMethodType.SEQUENTIAL_APPROVE) {
-    multiLoopInstance.value = bpmnInstances().moddle.create(
-      'bpmn:MultiInstanceLoopCharacteristics',
-      { isSequential: true, collection: '${coll_userList}' }
-    )
-    multiLoopInstance.value.loopCardinality = bpmnInstances().moddle.create(
-      'bpmn:FormalExpression',
-      {
-        body: '1'
-      }
-    )
-    multiLoopInstance.value.completionCondition = bpmnInstances().moddle.create(
-      'bpmn:FormalExpression',
-      {
-        body: '${ nrOfCompletedInstances >= nrOfInstances }'
-      }
-    )
+  } else {
+    if (approveMethod.value === ApproveMethodType.APPROVE_BY_RATIO) {
+      multiLoopInstance.value = bpmnInstances().moddle.create(
+        'bpmn:MultiInstanceLoopCharacteristics',
+        { isSequential: false, collection: '${coll_userList}' }
+      )
+      multiLoopInstance.value.completionCondition = bpmnInstances().moddle.create(
+        'bpmn:FormalExpression',
+        {
+          body: '${ nrOfCompletedInstances/nrOfInstances >= ' + approveRatio.value / 100 + '}'
+        }
+      )
+    }
+    if (approveMethod.value === ApproveMethodType.ANY_APPROVE) {
+      multiLoopInstance.value = bpmnInstances().moddle.create(
+        'bpmn:MultiInstanceLoopCharacteristics',
+        { isSequential: false, collection: '${coll_userList}' }
+      )
+      multiLoopInstance.value.completionCondition = bpmnInstances().moddle.create(
+        'bpmn:FormalExpression',
+        {
+          body: '${ nrOfCompletedInstances > 0 }'
+        }
+      )
+    }
+    if (approveMethod.value === ApproveMethodType.SEQUENTIAL_APPROVE) {
+      multiLoopInstance.value = bpmnInstances().moddle.create(
+        'bpmn:MultiInstanceLoopCharacteristics',
+        { isSequential: true, collection: '${coll_userList}' }
+      )
+      multiLoopInstance.value.loopCardinality = bpmnInstances().moddle.create(
+        'bpmn:FormalExpression',
+        {
+          body: '1'
+        }
+      )
+      multiLoopInstance.value.completionCondition = bpmnInstances().moddle.create(
+        'bpmn:FormalExpression',
+        {
+          body: '${ nrOfCompletedInstances >= nrOfInstances }'
+        }
+      )
+    }
+    bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
+      loopCharacteristics: toRaw(multiLoopInstance.value)
+    })
   }
 
+  // 添加ApproveMethod到ExtensionElements
+  const extensions = bpmnInstances().moddle.create('bpmn:ExtensionElements', {
+    values: [
+      ...otherExtensions.value,
+      bpmnInstances().moddle.create(`${prefix}:ApproveMethod`, {
+        value: approveMethod.value
+      })
+    ]
+  })
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
-    loopCharacteristics: toRaw(multiLoopInstance.value)
+    extensionElements: extensions
   })
 }
 
@@ -384,11 +390,15 @@ onBeforeUnmount(() => {
 })
 
 watch(
-  () => props.businessObject,
+  () => props.id,
   (val) => {
-    bpmnElement.value = bpmnInstances().bpmnElement
-    // getElementLoop(val)
-    getElementLoopNew(val)
+    if (val) {
+      nextTick(() => {
+        bpmnElement.value = bpmnInstances().bpmnElement
+        // getElementLoop(val)
+        getElementLoopNew()
+      })
+    }
   },
   { immediate: true }
 )
