@@ -172,7 +172,7 @@ const resetTaskForm = () => {
     } else {
       userTaskForm.value.candidateParam = businessObject.candidateParam
         .split(',')
-        .map((item) => +item)
+        .map((item) => item)
     }
   } else {
     userTaskForm.value.candidateParam = []
