@@ -1409,7 +1409,7 @@
       "properties": [
         {
           "name": "value",
-          "type": "Integer",
+          "type": "String",
           "isBody": true
         }
       ]
