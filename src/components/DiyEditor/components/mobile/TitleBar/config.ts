@@ -1,9 +1,7 @@
-import { ComponentStyle, DiyComponent } from '@/components/DiyEditor/util'
+import {ComponentStyle, DiyComponent} from '@/components/DiyEditor/util'
 
 /** 标题栏属性 */
 export interface TitleBarProperty {
-  // 背景图
-  bgImgUrl: string
   // 偏移
   marginLeft: number
   // 显示位置
