@@ -1211,6 +1211,76 @@
           "isAttr": true
         }
       ]
+    },
+    {
+      "name": "AssignStartUserHandlerType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:StartEvent", "bpmn:UserTask"]
+      },
+      "properties": [
+      {
+        "name": "value",
+        "type": "Integer",
+        "isBody": true
+      }
+      ]
+    },
+    {
+      "name": "RejectHandlerType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "RejectReturnTaskId",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "String",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "AssignEmptyHandlerType",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Integer",
+          "isBody": true
+        }
+      ]
+    },
+    {
+      "name": "AssignEmptyUserIds",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "String",
+          "isBody": true
+        }
+      ]
     }
   ],
   "emumerations": []

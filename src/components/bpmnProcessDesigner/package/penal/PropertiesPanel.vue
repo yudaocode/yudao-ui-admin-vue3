@@ -1,5 +1,5 @@
 <template>
-  <div class="process-panel__container" :style="{ width: `${width}px` }">
+  <div class="process-panel__container" :style="{ width: `${width}px`,maxHeight: '700px' }">
     <el-collapse v-model="activeTab">
       <el-collapse-item name="base">
         <!-- class="panel-tab__title" -->
@@ -53,6 +53,10 @@
       <el-collapse-item name="other" key="other">
         <template #title><Icon icon="ep:promotion" />其他</template>
         <element-other-config :id="elementId" />
+      </el-collapse-item>
+      <el-collapse-item name="customConfig" v-if="elementType.indexOf('Task') !== -1" key="customConfig">
+        <template #title><Icon icon="ep:circle-plus-filled" />自定义配置</template>
+        <element-custom-config :id="elementId" :type="elementType" />
       </el-collapse-item>
     </el-collapse>
   </div>

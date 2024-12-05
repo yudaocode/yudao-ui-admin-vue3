@@ -10,7 +10,7 @@
       <el-form-item label="应用名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入应用名" />
       </el-form-item>
-      <el-form-item label="应用标识" prop="name">
+      <el-form-item label="应用标识" prop="appKey">
         <el-input v-model="formData.appKey" placeholder="请输入应用标识" />
       </el-form-item>
       <el-form-item label="开启状态" prop="status">

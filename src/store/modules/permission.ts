@@ -35,8 +35,9 @@ export const usePermissionStore = defineStore('permission', {
       return new Promise<void>(async (resolve) => {
         // 获得菜单列表，它在登录的时候，setUserInfoAction 方法中已经进行获取
         let res: AppCustomRouteRecordRaw[] = []
-        if (wsCache.get(CACHE_KEY.ROLE_ROUTERS)) {
-          res = wsCache.get(CACHE_KEY.ROLE_ROUTERS) as AppCustomRouteRecordRaw[]
+        const roleRouters = wsCache.get(CACHE_KEY.ROLE_ROUTERS)
+        if (roleRouters) {
+          res = roleRouters as AppCustomRouteRecordRaw[]
         }
         const routerMap: AppRouteRecordRaw[] = generateRoute(res)
         // 动态路由，404一定要放到最后面

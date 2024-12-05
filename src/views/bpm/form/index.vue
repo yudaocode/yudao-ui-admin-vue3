@@ -143,8 +143,9 @@ const openForm = (id?: number) => {
   const toRouter: { name: string; query?: { id: number } } = {
     name: 'BpmFormEditor'
   }
+  console.log(typeof id)
   // 表单新建的时候id传的是event需要排除
-  if (typeof id === 'number') {
+  if (typeof id === 'number' || typeof id === 'string') {
     toRouter.query = {
       id
     }

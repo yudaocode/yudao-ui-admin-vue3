@@ -36,6 +36,16 @@ export const CategoryApi = {
     return await request.put({ url: `/bpm/category/update`, data })
   },
 
+  // 批量修改流程分类的排序
+  updateCategorySortBatch: async (ids: number[]) => {
+    return await request.put({
+      url: `/bpm/category/update-sort-batch`,
+      params: {
+        ids: ids.join(',')
+      }
+    })
+  },
+
   // 删除流程分类
   deleteCategory: async (id: number) => {
     return await request.delete({ url: `/bpm/category/delete?id=` + id })

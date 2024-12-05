@@ -127,12 +127,8 @@ const toLastView = () => {
 const moveToCurrentTag = async () => {
   await nextTick()
   for (const v of unref(visitedViews)) {
-    if (v.fullPath === unref(currentRoute).path) {
+    if (v.fullPath === unref(currentRoute).fullPath) {
       moveToTarget(v)
-      if (v.fullPath !== unref(currentRoute).fullPath) {
-        tagsViewStore.updateVisitedView(unref(currentRoute))
-      }
-
       break
     }
   }
@@ -207,7 +203,7 @@ const moveToTarget = (currentTag: RouteLocationNormalizedLoaded) => {
 
 // 是否是当前tag
 const isActive = (route: RouteLocationNormalizedLoaded): boolean => {
-  return route.path === unref(currentRoute).path
+  return route.fullPath === unref(currentRoute).fullPath
 }
 
 // 所有右键菜单组件的元素
@@ -373,7 +369,10 @@ watch(
                     :size="12"
                     class="mr-5px"
                   />
-                  {{ t(item?.meta?.title as string) }}
+                  {{
+                    t(item?.meta?.title as string) +
+                    (item?.meta?.titleSuffix ? ` (${item?.meta?.titleSuffix})` : '')
+                  }}
                   <Icon
                     :class="`${prefixCls}__item--close`"
                     :size="12"

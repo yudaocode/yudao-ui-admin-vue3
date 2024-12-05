@@ -257,7 +257,6 @@ const resetForm = (appId, code) => {
 const fileBeforeUpload = (file, fileAccept) => {
   let format = '.' + file.name.split('.')[1]
   if (format !== fileAccept) {
-    debugger
     message.error('请上传指定格式"' + fileAccept + '"文件')
     return false
   }

@@ -70,13 +70,7 @@
 
   <!-- 弹窗：流程模型图的预览 -->
   <Dialog title="流程图" v-model="bpmnDetailVisible" width="800">
-    <MyProcessViewer
-      key="designer"
-      v-model="bpmnXml"
-      :value="bpmnXml as any"
-      v-bind="bpmnControlForm"
-      :prefix="bpmnControlForm.prefix"
-    />
+    <MyProcessViewer style="height: 700px" key="designer" :xml="bpmnXml" />
   </Dialog>
 </template>
 
@@ -118,7 +112,7 @@ const formDetailPreview = ref({
   rule: [],
   option: {}
 })
-const handleFormDetail = async (row) => {
+const handleFormDetail = async (row: any) => {
   if (row.formType == 10) {
     // 设置表单
     setConfAndFields2(formDetailPreview, row.formConf, row.formFields)
@@ -133,13 +127,13 @@ const handleFormDetail = async (row) => {
 
 /** 流程图的详情按钮操作 */
 const bpmnDetailVisible = ref(false)
-const bpmnXml = ref(null)
-const bpmnControlForm = ref({
-  prefix: 'flowable'
-})
-const handleBpmnDetail = async (row) => {
-  bpmnXml.value = (await DefinitionApi.getProcessDefinition(row.id))?.bpmnXml
+const bpmnXml = ref('')
+const handleBpmnDetail = async (row: any) => {
+  // 设置可见
+  bpmnXml.value = ''
   bpmnDetailVisible.value = true
+  // 加载 BPMN XML
+  bpmnXml.value = (await DefinitionApi.getProcessDefinition(row.id))?.bpmnXml
 }
 
 /** 初始化 **/
