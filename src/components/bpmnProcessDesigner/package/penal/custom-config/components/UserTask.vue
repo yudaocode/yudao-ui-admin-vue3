@@ -193,7 +193,7 @@ const { buttonsSetting, btnDisplayNameEdit, changeBtnDisplayName, btnDisplayName
   useButtonsSetting()
 
 // 字段权限
-const fieldsPermissionEl = ref()
+const fieldsPermissionEl = ref([])
 const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
   FieldPermissionType.READ
 )
@@ -246,7 +246,7 @@ const resetCustomConfigList = () => {
     elExtensionElements.value.values?.filter(
       (ex) => ex.$type === `${prefix}:AssignEmptyUserIds`
     )?.[0] || bpmnInstances().moddle.create(`${prefix}:AssignEmptyUserIds`, { value: '' })
-  assignEmptyUserIds.value = assignEmptyUserIdsEl.value.value.split(',').map((item) => {
+  assignEmptyUserIds.value = assignEmptyUserIdsEl.value.value?.split(',').map((item) => {
     // 如果数字超出了最大安全整数范围，则将其作为字符串处理
     let num = Number(item)
     return num > Number.MAX_SAFE_INTEGER || num < -Number.MAX_SAFE_INTEGER ? item : num
@@ -270,17 +270,18 @@ const resetCustomConfigList = () => {
 
   // 字段权限
   if (formType.value === 10) {
-    fieldsPermissionEl.value = elExtensionElements.value.values?.filter(
+    const fieldsPermissionList = elExtensionElements.value.values?.filter(
       (ex) => ex.$type === `${prefix}:FieldsPermission`
     )
-    if (fieldsPermissionEl.value.length === 0) {
-      getNodeConfigFormFields()
-      fieldsPermissionConfig.value.forEach((el) => {
-        fieldsPermissionEl.value.push(
-          bpmnInstances().moddle.create(`${prefix}:FieldsPermission`, el)
-        )
-      })
-    }
+    fieldsPermissionEl.value = []
+    getNodeConfigFormFields()
+    fieldsPermissionConfig.value.forEach((element) => {
+      element.permission =
+        fieldsPermissionList?.find((obj) => obj.field === element.field)?.permission ?? '1'
+      fieldsPermissionEl.value.push(
+        bpmnInstances().moddle.create(`${prefix}:FieldsPermission`, element)
+      )
+    })
   }
 
   // 保留剩余扩展元素，便于后面更新该元素对应属性
