@@ -301,7 +301,7 @@ const approveMethod = ref()
 const approveRatio = ref(100)
 const otherExtensions = ref()
 const getElementLoopNew = () => {
-  const extensionElements = bpmnElement.value.businessObject?.extensionElements ?? []
+  const extensionElements = bpmnElement.value.businessObject?.extensionElements ?? bpmnInstances().moddle.create('bpmn:ExtensionElements', { values: [] })
   approveMethod.value = extensionElements.values.filter(
     (ex) => ex.$type === `${prefix}:ApproveMethod`
   )?.[0]?.value

@@ -163,7 +163,7 @@ const resetTaskForm = () => {
     return
   }
 
-  const extensionElements = businessObject?.extensionElements ?? []
+  const extensionElements = businessObject?.extensionElements ?? bpmnInstances().moddle.create('bpmn:ExtensionElements', { values: [] })
   userTaskForm.value.candidateStrategy = extensionElements.values?.filter(
     (ex) => ex.$type === `${prefix}:CandidateStrategy`
   )?.[0]?.value
