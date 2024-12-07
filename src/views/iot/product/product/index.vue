@@ -47,12 +47,71 @@
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
       </el-form-item>
+      <!-- 视图切换按钮 -->
+      <el-form-item class="float-right !mr-0 !mb-0">
+        <el-button-group>
+          <el-button :type="viewMode === 'card' ? 'primary' : 'default'" @click="viewMode = 'card'">
+            <Icon icon="ep:grid" />
+          </el-button>
+          <el-button :type="viewMode === 'list' ? 'primary' : 'default'" @click="viewMode = 'list'">
+            <Icon icon="ep:list" />
+          </el-button>
+        </el-button-group>
+      </el-form-item>
     </el-form>
   </ContentWrap>
 
-  <!-- 列表 -->
+  <!-- 卡片视图 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <div
+      v-if="viewMode === 'card'"
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+    >
+      <el-card
+        v-for="item in list"
+        :key="item.id"
+        class="cursor-pointer hover:shadow-lg transition-shadow"
+        @click="openDetail(item.id)"
+      >
+        <div class="flex items-center mb-4">
+          <el-image
+            :src="item.picUrl || '/src/assets/default-product.png'"
+            class="w-12 h-12 mr-4"
+            fit="cover"
+          />
+          <div class="flex-1">
+            <div class="font-bold text-lg">{{ item.name }}</div>
+            <div class="text-gray-500 text-sm">{{ item.productKey }}</div>
+          </div>
+        </div>
+        <div class="flex justify-between text-sm text-gray-500">
+          <span>{{ item.categoryName }}</span>
+          <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="item.deviceType" />
+        </div>
+        <div class="flex justify-end mt-4">
+          <el-button
+            link
+            type="primary"
+            @click.stop="openForm('update', item.id)"
+            v-hasPermi="['iot:product:update']"
+          >
+            编辑
+          </el-button>
+          <el-button
+            link
+            type="danger"
+            @click.stop="handleDelete(item.id)"
+            v-hasPermi="['iot:product:delete']"
+            :disabled="item.status === 1"
+          >
+            删除
+          </el-button>
+        </div>
+      </el-card>
+    </div>
+
+    <!-- 列表视图 -->
+    <el-table v-else v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="ID" align="center" prop="id" />
       <el-table-column label="ProductKey" align="center" prop="productKey" />
       <el-table-column label="品类" align="center" prop="categoryName" />
@@ -120,6 +179,7 @@
         </template>
       </el-table-column>
     </el-table>
+
     <!-- 分页 -->
     <Pagination
       :total="total"
@@ -140,7 +200,7 @@ import ProductForm from './ProductForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
 
-/** iot 产品 列表 */
+/** iot 产品列表 */
 defineOptions({ name: 'IoTProduct' })
 
 const message = useMessage() // 消息弹窗
@@ -153,21 +213,11 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   name: undefined,
-  createTime: [],
-  productKey: undefined,
-  protocolId: undefined,
-  categoryId: undefined,
-  description: undefined,
-  validateType: undefined,
-  status: undefined,
-  deviceType: undefined,
-  netType: undefined,
-  protocolType: undefined,
-  dataFormat: undefined
+  productKey: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-
 const exportLoading = ref(false) // 导出的加载中
+const viewMode = ref<'card' | 'list'>('card') // 视图模式状态
 
 /** 查询列表 */
 const getList = async () => {
