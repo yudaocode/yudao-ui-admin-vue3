@@ -437,3 +437,23 @@ export const ErpBizType = {
   SALE_OUT: 21,
   SALE_RETURN: 22
 }
+
+// ========== BPM 模块 ==========
+
+export const BpmModelType = {
+  BPMN: 10, // BPMN 设计器
+  SIMPLE: 20 // 简易设计器
+}
+
+export const BpmModelFormType = {
+  NORMAL: 10, // 流程表单
+  CUSTOM: 20 // 业务表单
+}
+
+export const BpmProcessInstanceStatus = {
+  NOT_START: -1, // 未开始
+  RUNNING: 1, // 审批中
+  APPROVE: 2, // 审批通过
+  REJECT: 3, // 审批不通过
+  CANCEL: 4 // 已取消
+}

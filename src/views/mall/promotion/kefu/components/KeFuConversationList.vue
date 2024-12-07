@@ -1,10 +1,13 @@
 <template>
-  <div class="kefu">
+  <el-aside class="kefu pt-5px h-100%" width="260px">
+    <div class="color-[#999] font-bold my-10px">
+      会话记录({{ kefuStore.getConversationList.length }})
+    </div>
     <div
-      v-for="item in conversationList"
+      v-for="item in kefuStore.getConversationList"
       :key="item.id"
       :class="{ active: item.id === activeConversationId, pinned: item.adminPinned }"
-      class="kefu-conversation flex items-center"
+      class="kefu-conversation px-10px flex items-center"
       @click="openRightMessage(item)"
       @contextmenu.prevent="rightClick($event as PointerEvent, item)"
     >
@@ -22,14 +25,16 @@
         <div class="ml-10px w-100%">
           <div class="flex justify-between items-center w-100%">
             <span class="username">{{ item.userNickname }}</span>
-            <span class="color-[var(--left-menu-text-color)]" style="font-size: 13px;">
-              {{ formatPast(item.lastMessageTime, 'YYYY-MM-DD') }}
+            <span class="color-[#999]" style="font-size: 13px">
+              {{ lastMessageTimeMap.get(item.id) ?? '计算中' }}
             </span>
           </div>
           <!-- 最后聊天内容 -->
           <div
-            v-dompurify-html="getConversationDisplayText(item.lastMessageContentType, item.lastMessageContent)"
-            class="last-message flex items-center color-[var(--left-menu-text-color)]"
+            v-dompurify-html="
+              getConversationDisplayText(item.lastMessageContentType, item.lastMessageContent)
+            "
+            class="last-message flex items-center color-[#999]"
           >
           </div>
         </div>
@@ -63,7 +68,7 @@
         取消
       </li>
     </ul>
-  </div>
+  </el-aside>
 </template>
 
 <script lang="ts" setup>
@@ -72,29 +77,36 @@ import { useEmoji } from './tools/emoji'
 import { formatPast } from '@/utils/formatTime'
 import { KeFuMessageContentTypeEnum } from './tools/constants'
 import { useAppStore } from '@/store/modules/app'
+import { useMallKefuStore } from '@/store/modules/mall/kefu'
+import { jsonParse } from '@/utils'
 
 defineOptions({ name: 'KeFuConversationList' })
 
 const message = useMessage() // 消息弹窗
 const appStore = useAppStore()
+const kefuStore = useMallKefuStore() // 客服缓存
 const { replaceEmoji } = useEmoji()
-const conversationList = ref<KeFuConversationRespVO[]>([]) // 会话列表
 const activeConversationId = ref(-1) // 选中的会话
 const collapse = computed(() => appStore.getCollapse) // 折叠菜单
 
-/** 加载会话列表 */
-const getConversationList = async () => {
-  const list = await KeFuConversationApi.getConversationList()
-  list.sort((a: KeFuConversationRespVO, _) => (a.adminPinned ? -1 : 1))
-  conversationList.value = list
+/** 计算消息最后发送时间距离现在过去了多久 */
+const lastMessageTimeMap = ref<Map<number, string>>(new Map<number, string>())
+const calculationLastMessageTime = () => {
+  kefuStore.getConversationList?.forEach((item) => {
+    lastMessageTimeMap.value.set(item.id, formatPast(item.lastMessageTime, 'YYYY-MM-DD'))
+  })
 }
-defineExpose({ getConversationList })
+defineExpose({ calculationLastMessageTime })
 
 /** 打开右侧的消息列表 */
 const emits = defineEmits<{
   (e: 'change', v: KeFuConversationRespVO): void
 }>()
 const openRightMessage = (item: KeFuConversationRespVO) => {
+  // 同一个会话则不处理
+  if (activeConversationId.value === item.id) {
+    return
+  }
   activeConversationId.value = item.id
   emits('change', item)
 }
@@ -116,7 +128,7 @@ const getConversationDisplayText = computed(
       case KeFuMessageContentTypeEnum.VOICE:
         return '[语音消息]'
       case KeFuMessageContentTypeEnum.TEXT:
-        return replaceEmoji(lastMessageContent)
+        return replaceEmoji(jsonParse(lastMessageContent).text || lastMessageContent)
       default:
         return ''
     }
@@ -153,7 +165,7 @@ const updateConversationPinned = async (adminPinned: boolean) => {
   message.notifySuccess(adminPinned ? '置顶成功' : '取消置顶成功')
   // 2. 关闭右键菜单，更新会话列表
   closeRightMenu()
-  await getConversationList()
+  await kefuStore.updateConversation(rightClickConversation.value.id)
 }
 
 /** 删除会话 */
@@ -163,7 +175,7 @@ const deleteConversation = async () => {
   await KeFuConversationApi.deleteConversation(rightClickConversation.value.id)
   // 2. 关闭右键菜单，更新会话列表
   closeRightMenu()
-  await getConversationList()
+  kefuStore.deleteConversation(rightClickConversation.value.id)
 }
 
 /** 监听右键菜单的显示状态，添加点击事件监听器 */
@@ -174,48 +186,54 @@ watch(showRightMenu, (val) => {
     document.body.removeEventListener('click', closeRightMenu)
   }
 })
+
+const timer = ref<any>()
+/** 初始化 */
+onMounted(() => {
+  timer.value = setInterval(calculationLastMessageTime, 1000 * 10) // 十秒计算一次
+})
+/** 组件卸载前 */
+onBeforeUnmount(() => {
+  clearInterval(timer.value)
+})
 </script>
 
 <style lang="scss" scoped>
 .kefu {
+  background-color: #e5e4e4;
+
   &-conversation {
     height: 60px;
-    padding: 10px;
     //background-color: #fff;
-    transition: border-left 0.05s ease-in-out; /* 设置过渡效果 */
+    //transition: border-left 0.05s ease-in-out; /* 设置过渡效果 */
 
     .username {
       min-width: 0;
       max-width: 60%;
+    }
+
+    .last-message {
+      font-size: 13px;
+    }
+
+    .last-message,
+    .username {
       overflow: hidden;
       text-overflow: ellipsis;
       display: -webkit-box;
       -webkit-box-orient: vertical;
       -webkit-line-clamp: 1;
     }
-
-    .last-message {
-      font-size: 13px;
-      width: 200px;
-      overflow: hidden; // 隐藏超出的文本
-      white-space: nowrap; // 禁止换行
-      text-overflow: ellipsis; // 添加省略号
-    }
   }
 
   .active {
-    border-left: 5px #3271ff solid;
-    background-color: var(--left-menu-bg-active-color);
-  }
-
-  .pinned {
-    background-color: var(--left-menu-bg-active-color);
+    background-color: rgba(128, 128, 128, 0.5); // 透明色，暗黑模式下也能体现
   }
 
   .right-menu-ul {
     position: absolute;
     background-color: var(--app-content-bg-color);
-    padding: 10px;
+    padding: 5px;
     margin: 0;
     list-style-type: none; /* 移除默认的项目符号 */
     border-radius: 12px;

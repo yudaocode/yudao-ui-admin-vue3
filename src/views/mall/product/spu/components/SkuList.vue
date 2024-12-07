@@ -180,17 +180,17 @@
     </el-table-column>
     <el-table-column align="center" label="销售价(元)" min-width="80">
       <template #default="{ row }">
-        {{ formatToFraction(row.price) }}
+        {{ row.price }}
       </template>
     </el-table-column>
     <el-table-column align="center" label="市场价(元)" min-width="80">
       <template #default="{ row }">
-        {{ formatToFraction(row.marketPrice) }}
+        {{ row.marketPrice }}
       </template>
     </el-table-column>
     <el-table-column align="center" label="成本价(元)" min-width="80">
       <template #default="{ row }">
-        {{ formatToFraction(row.costPrice) }}
+        {{ row.costPrice }}
       </template>
     </el-table-column>
     <el-table-column align="center" label="库存" min-width="80">
@@ -211,12 +211,12 @@
     <template v-if="formData!.subCommissionType">
       <el-table-column align="center" label="一级返佣(元)" min-width="80">
         <template #default="{ row }">
-          {{ formatToFraction(row.firstBrokeragePrice) }}
+          {{ row.firstBrokeragePrice }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="二级返佣(元)" min-width="80">
         <template #default="{ row }">
-          {{ formatToFraction(row.secondBrokeragePrice) }}
+          {{ row.secondBrokeragePrice }}
         </template>
       </el-table-column>
     </template>

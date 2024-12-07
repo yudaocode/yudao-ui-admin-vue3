@@ -56,7 +56,7 @@
         label="分类"
         prop="productCategoryIds"
       >
-        <ProductCategorySelect v-model="formData.productCategoryIds" />
+        <ProductCategorySelect v-model="formData.productCategoryIds" :multiple="true" />
       </el-form-item>
       <el-form-item label="备注" prop="remark">
         <el-input v-model="formData.remark" placeholder="请输入备注" />
@@ -119,6 +119,9 @@ const open = async (type: string, id?: number) => {
       // 规则分转元
       data.rules?.forEach((item: any) => {
         item.discountPrice = fenToYuan(item.discountPrice || 0)
+        if (data.conditionType === PromotionConditionTypeEnum.PRICE.type) {
+          item.limit = fenToYuan(item.limit || 0)
+        }
       })
       formData.value = data
       // 获得商品范围
@@ -151,6 +154,9 @@ const submitForm = async () => {
     // 规则元转分
     data.rules.forEach((item) => {
       item.discountPrice = yuanToFen(item.discountPrice || 0)
+      if (data.conditionType === PromotionConditionTypeEnum.PRICE.type) {
+        item.limit = yuanToFen(item.limit || 0)
+      }
     })
     // 设置商品范围
     setProductScopeValues(data)
@@ -188,7 +194,7 @@ const getProductScope = async () => {
     case PromotionProductScopeEnum.CATEGORY.scope:
       await nextTick()
       let productCategoryIds = formData.value.productScopeValues as any
-      if (Array.isArray(productCategoryIds) && productCategoryIds.length > 0) {
+      if (Array.isArray(productCategoryIds) && productCategoryIds.length === 1) {
         // 单选时使用数组不能反显
         productCategoryIds = productCategoryIds[0]
       }

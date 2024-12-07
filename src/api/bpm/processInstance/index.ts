@@ -1,6 +1,6 @@
 import request from '@/config/axios'
 import { ProcessDefinitionVO } from '@/api/bpm/model'
-
+import { NodeType, CandidateStrategy } from '@/components/SimpleProcessDesignerV2/src/consts'
 export type Task = {
   id: string
   name: string
@@ -20,6 +20,35 @@ export type ProcessInstanceVO = {
   createTime: string
   endTime: string
   processDefinition?: ProcessDefinitionVO
+}
+
+// 用户信息
+export type User = {
+  id: number
+  nickname: string
+  avatar: string
+}
+
+// 审批任务信息
+export type ApprovalTaskInfo = {
+  id: number
+  ownerUser: User
+  assigneeUser: User
+  status: number
+  reason: string
+}
+
+// 审批节点信息
+export type ApprovalNodeInfo = {
+  id: number
+  name: string
+  nodeType: NodeType
+  candidateStrategy?: CandidateStrategy
+  status: number
+  startTime?: Date
+  endTime?: Date
+  candidateUsers?: User[]
+  tasks: ApprovalTaskInfo[]
 }
 
 export const getProcessInstanceMyPage = async (params: any) => {
@@ -56,4 +85,19 @@ export const getProcessInstance = async (id: string) => {
 
 export const getProcessInstanceCopyPage = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/copy/page', params })
+}
+
+// 获取审批详情
+export const getApprovalDetail = async (params: any) => {
+  return await request.get({ url: 'bpm/process-instance/get-approval-detail' , params })
+}
+
+// 获取表单字段权限
+export const getFormFieldsPermission = async (params: any) => {
+  return await request.get({ url: '/bpm/process-instance/get-form-fields-permission', params })
+}
+
+// 获取流程实例的 BPMN 模型视图
+export const getProcessInstanceBpmnModelView = async (id: string) => {
+  return await request.get({ url: '/bpm/process-instance/get-bpmn-model-view?id=' + id })
 }

@@ -58,17 +58,17 @@ const initModeler = (item) => {
 }
 
 /** 添加/修改模型 */
-const save = async (bpmnXml) => {
+const save = async (bpmnXml: string) => {
   const data = {
     ...model.value,
     bpmnXml: bpmnXml // bpmnXml 只是初始化流程图，后续修改无法通过它获得
   } as unknown as ModelApi.ModelVO
   // 提交
   if (data.id) {
-    await ModelApi.updateModel(data)
+    await ModelApi.updateModelBpmn(data)
     message.success('修改成功')
   } else {
-    await ModelApi.createModel(data)
+    await ModelApi.updateModelBpmn(data)
     message.success('新增成功')
   }
   // 跳转回去

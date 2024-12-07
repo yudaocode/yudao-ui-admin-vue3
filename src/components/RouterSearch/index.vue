@@ -20,6 +20,7 @@
   <div v-else class="custom-hover" @click.stop="showTopSearch = !showTopSearch">
     <Icon icon="ep:search" />
     <el-select
+      @click.stop
       filterable
       :reserve-keyword="false"
       remote

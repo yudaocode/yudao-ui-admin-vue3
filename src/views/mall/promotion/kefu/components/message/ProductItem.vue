@@ -1,51 +1,27 @@
 <template>
-  <div @click.stop="openDetail(props.spuId)" style="cursor: pointer;">
-    <div>
-      <slot name="top"></slot>
+  <div class="product-warp" style="cursor: pointer" @click.stop="openDetail(spuId)">
+    <!-- 左侧商品图片-->
+    <div class="product-warp-left mr-24px">
+      <el-image
+        :initial-index="0"
+        :preview-src-list="[picUrl]"
+        :src="picUrl"
+        class="product-warp-left-img"
+        fit="contain"
+        preview-teleported
+        @click.stop
+      />
     </div>
-    <div
-      :style="[{ borderRadius: radius + 'px', marginBottom: marginBottom + 'px' }]"
-      class="ss-order-card-warp flex items-stretch justify-between bg-white"
-    >
-      <div class="img-box mr-24px">
-        <el-image
-          :initial-index="0"
-          :preview-src-list="[picUrl]"
-          :src="picUrl"
-          class="order-img"
-          fit="contain"
-          preview-teleported
-          @click.stop
-        />
+    <!-- 右侧商品信息 -->
+    <div class="product-warp-right">
+      <div class="description">{{ title }}</div>
+      <div class="my-5px">
+        <span class="mr-20px">库存: {{ stock || 0 }}</span>
+        <span>销量: {{ salesCount || 0 }}</span>
       </div>
-      <div
-        :style="[{ width: titleWidth ? titleWidth + 'px' : '' }]"
-        class="box-right flex flex-col justify-between"
-      >
-        <div v-if="title" class="title-text ss-line-2">{{ title }}</div>
-        <div v-if="skuString" class="spec-text mt-8px mb-12px">{{ skuString }}</div>
-        <div class="groupon-box">
-          <slot name="groupon"></slot>
-        </div>
-        <div class="flex">
-          <div class="flex items-center">
-            <div
-              v-if="price && Number(price) > 0"
-              :style="[{ color: priceColor }]"
-              class="price-text flex items-center"
-            >
-              ￥{{ fenToYuan(price) }}
-            </div>
-            <div v-if="num" class="total-text flex items-center">x {{ num }}</div>
-            <slot name="priceSuffix"></slot>
-          </div>
-        </div>
-        <div class="tool-box">
-          <slot name="tool"></slot>
-        </div>
-        <div>
-          <slot name="rightBottom"></slot>
-        </div>
+      <div class="flex justify-between items-center">
+        <span class="price">￥{{ fenToYuan(price) }}</span>
+        <el-button size="small" text type="primary">详情</el-button>
       </div>
     </div>
   </div>
@@ -57,7 +33,7 @@ import { fenToYuan } from '@/utils'
 const { push } = useRouter()
 
 defineOptions({ name: 'ProductItem' })
-const props = defineProps({
+defineProps({
   spuId: {
     type: Number,
     default: 0
@@ -70,134 +46,70 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  titleWidth: {
-    type: Number,
-    default: 0
-  },
-  skuText: {
-    type: [String, Array],
-    default: ''
-  },
   price: {
     type: [String, Number],
     default: ''
   },
-  priceColor: {
-    type: [String],
-    default: ''
-  },
-  num: {
-    type: [String, Number],
-    default: 0
-  },
-  score: {
+  salesCount: {
     type: [String, Number],
     default: ''
   },
-  radius: {
-    type: [String],
-    default: ''
-  },
-  marginBottom: {
-    type: [String],
+  stock: {
+    type: [String, Number],
     default: ''
   }
-})
-
-/** SKU 展示字符串 */
-const skuString = computed(() => {
-  if (!props.skuText) {
-    return ''
-  }
-  if (typeof props.skuText === 'object') {
-    return props.skuText.join(',')
-  }
-  return props.skuText
 })
 
 /** 查看商品详情 */
 const openDetail = (spuId: number) => {
-  console.log(props.spuId)
   push({ name: 'ProductSpuDetail', params: { id: spuId } })
 }
 </script>
 
 <style lang="scss" scoped>
-.ss-order-card-warp {
-  padding: 20px;
-  border-radius: 10px;
-  border: 1px var(--el-border-color) solid;
-  background-color: var(--app-content-bg-color);
-
-  .img-box {
-    width: 80px;
-    height: 80px;
-    border-radius: 10px;
-    overflow: hidden;
-
-    .order-img {
-      width: 80px;
-      height: 80px;
-    }
-  }
-
-  .box-right {
-    flex: 1;
-    position: relative;
-
-    .tool-box {
-      position: absolute;
-      right: 0;
-      bottom: -10px;
-    }
-  }
-
-  .title-text {
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 20px;
-  }
-
-  .spec-text {
-    font-size: 10px;
-    font-weight: 400;
-    color: #999999;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-  }
-
-  .price-text {
-    font-size: 11px;
-    font-weight: 500;
-    font-family: OPPOSANS;
-  }
-
-  .total-text {
-    font-size: 10px;
-    font-weight: 400;
-    line-height: 16px;
-    color: #999999;
-    margin-left: 8px;
-  }
+.button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
 }
 
-.ss-line {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
+.product-warp {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 10px;
 
-  &-1 {
-    -webkit-line-clamp: 1;
+  &-left {
+    width: 70px;
+
+    &-img {
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+    }
   }
 
-  &-2 {
-    -webkit-line-clamp: 2;
+  &-right {
+    flex: 1;
+
+    .description {
+      width: 100%;
+      font-size: 16px;
+      font-weight: bold;
+      display: -webkit-box;
+      -webkit-line-clamp: 1; /* 显示一行 */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .price {
+      color: #ff3000;
+    }
   }
 }
 </style>

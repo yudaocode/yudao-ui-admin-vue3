@@ -185,7 +185,6 @@ export const useApiSelect = (option: ApiSelectProps) => {
             </el-select>
           )
         }
-        debugger
         return (
           <el-select
             class="w-1/1"
