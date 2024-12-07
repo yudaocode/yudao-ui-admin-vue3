@@ -37,6 +37,15 @@
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
+        <el-button
+          type="success"
+          plain
+          @click="handleExport"
+          :loading="exportLoading"
+          v-hasPermi="['iot:product:export']"
+        >
+          <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -44,15 +53,34 @@
   <!-- 列表 -->
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="产品名称" align="center" prop="name">
-        <template #default="scope">
-          <el-link @click="openDetail(scope.row.id)">{{ scope.row.name }}</el-link>
-        </template>
-      </el-table-column>
+      <el-table-column label="ID" align="center" prop="id" />
       <el-table-column label="ProductKey" align="center" prop="productKey" />
+      <el-table-column label="品类" align="center" prop="categoryName" />
       <el-table-column label="设备类型" align="center" prop="deviceType">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="scope.row.deviceType" />
+        </template>
+      </el-table-column>
+      <el-table-column label="产品图标" align="center" prop="icon">
+        <template #default="scope">
+          <el-image
+            v-if="scope.row.icon"
+            :src="scope.row.icon"
+            class="w-40px h-40px"
+            :preview-src-list="[scope.row.icon]"
+          />
+          <span v-else>-</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="产品图片" align="center" prop="picture">
+        <template #default="scope">
+          <el-image
+            v-if="scope.row.picUrl"
+            :src="scope.row.picUrl"
+            class="w-40px h-40px"
+            :preview-src-list="[scope.row.picture]"
+          />
+          <span v-else>-</span>
         </template>
       </el-table-column>
       <el-table-column
@@ -62,11 +90,6 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="产品状态" align="center" prop="status">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.IOT_PRODUCT_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
       <el-table-column label="操作" align="center">
         <template #default="scope">
           <el-button
@@ -76,6 +99,14 @@
             v-hasPermi="['iot:product:query']"
           >
             查看
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            @click="openForm('update', scope.row.id)"
+            v-hasPermi="['iot:product:update']"
+          >
+            编辑
           </el-button>
           <el-button
             link
@@ -107,6 +138,7 @@ import { dateFormatter } from '@/utils/formatTime'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import ProductForm from './ProductForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
+import download from '@/utils/download'
 
 /** iot 产品 列表 */
 defineOptions({ name: 'IoTProduct' })
@@ -134,6 +166,8 @@ const queryParams = reactive({
   dataFormat: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+
+const exportLoading = ref(false) // 导出的加载中
 
 /** 查询列表 */
 const getList = async () => {
@@ -182,6 +216,21 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 导出按钮操作 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await ProductApi.exportProduct(queryParams)
+    download.excel(data, '物联网产品.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
 }
 
 /** 初始化 **/
