@@ -4,28 +4,40 @@
       ref="formRef"
       :model="formData"
       :rules="formRules"
-      label-width="100px"
+      label-width="110px"
       v-loading="formLoading"
     >
+      <el-form-item label="产品标识" prop="productKey">
+        <el-input
+          v-model="formData.productKey"
+          placeholder="请输入产品标识"
+          :readonly="formType === 'update'"
+        />
+      </el-form-item>
       <el-form-item label="产品名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入产品名称" />
       </el-form-item>
-
-      <el-form-item label="设备类型" prop="deviceType">
-        <el-select
-          v-model="formData.deviceType"
-          placeholder="请选择设备类型"
-          :disabled="formType === 'update'"
-        >
+      <el-form-item label="产品分类" prop="categoryId">
+        <el-select v-model="formData.categoryId" placeholder="请选择产品分类" clearable>
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE)"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
+            v-for="category in categoryList"
+            :key="category.id"
+            :label="category.name"
+            :value="category.id"
           />
         </el-select>
       </el-form-item>
-
+      <el-form-item label="设备类型" prop="deviceType">
+        <el-radio-group v-model="formData.deviceType" :disabled="formType === 'update'">
+          <el-radio
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE)"
+            :key="dict.value"
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
+      </el-form-item>
       <el-form-item
         v-if="formData.deviceType === 0 || formData.deviceType === 2"
         label="联网方式"
@@ -44,7 +56,6 @@
           />
         </el-select>
       </el-form-item>
-
       <el-form-item v-if="formData.deviceType === 1" label="接入网关协议" prop="protocolType">
         <el-select
           v-model="formData.protocolType"
@@ -59,22 +70,17 @@
           />
         </el-select>
       </el-form-item>
-
       <el-form-item label="数据格式" prop="dataFormat">
-        <el-select
-          v-model="formData.dataFormat"
-          placeholder="请选择接数据格式"
-          :disabled="formType === 'update'"
-        >
-          <el-option
+        <el-radio-group v-model="formData.dataFormat" :disabled="formType === 'update'">
+          <el-radio
             v-for="dict in getIntDictOptions(DICT_TYPE.IOT_DATA_FORMAT)"
             :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
+            :label="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio>
+        </el-radio-group>
       </el-form-item>
-
       <el-form-item label="数据校验级别" prop="validateType">
         <el-radio-group v-model="formData.validateType" :disabled="formType === 'update'">
           <el-radio
@@ -86,12 +92,20 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-
-      <el-form-item label="产品描述" prop="description">
-        <el-input type="textarea" v-model="formData.description" placeholder="请输入产品描述" />
-      </el-form-item>
+      <el-collapse>
+        <el-collapse-item title="更多配置">
+          <el-form-item label="产品图标" prop="icon">
+            <UploadImg v-model="formData.icon" :height="'80px'" :width="'80px'" />
+          </el-form-item>
+          <el-form-item label="产品图片" prop="picUrl">
+            <UploadImg v-model="formData.picUrl" :height="'120px'" :width="'120px'" />
+          </el-form-item>
+          <el-form-item label="产品描述" prop="description">
+            <el-input type="textarea" v-model="formData.description" placeholder="请输入产品描述" />
+          </el-form-item>
+        </el-collapse-item>
+      </el-collapse>
     </el-form>
-
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
@@ -100,8 +114,11 @@
 </template>
 
 <script setup lang="ts">
-import { ValidateTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
+import { ValidateTypeEnum, ProductApi, ProductVO, DataFormatEnum } from '@/api/iot/product/product'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { ProductCategoryApi, ProductCategoryVO } from '@/api/iot/product/category'
+import { UploadImg } from '@/components/UploadFile'
+import { generateRandomStr } from '@/utils'
 
 defineOptions({ name: 'IoTProductForm' })
 
@@ -113,21 +130,24 @@ const dialogTitle = ref('')
 const formLoading = ref(false)
 const formType = ref('')
 const formData = ref({
-  name: undefined,
   id: undefined,
-  productKey: undefined,
-  protocolId: undefined,
+  name: undefined,
+  productKey: '',
   categoryId: undefined,
+  icon: undefined,
+  picUrl: undefined,
   description: undefined,
-  validateType: ValidateTypeEnum.WEAK,
-  status: undefined,
   deviceType: undefined,
   netType: undefined,
   protocolType: undefined,
-  dataFormat: undefined
+  protocolId: undefined,
+  dataFormat: DataFormatEnum.JSON,
+  validateType: ValidateTypeEnum.WEAK
 })
 const formRules = reactive({
+  productKey: [{ required: true, message: '产品标识不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '产品名称不能为空', trigger: 'blur' }],
+  categoryId: [{ required: true, message: '产品分类不能为空', trigger: 'change' }],
   deviceType: [{ required: true, message: '设备类型不能为空', trigger: 'change' }],
   netType: [
     {
@@ -138,7 +158,6 @@ const formRules = reactive({
   ],
   protocolType: [
     {
-      // required: formData.deviceType === 1,
       required: true,
       message: '接入网关协议不能为空',
       trigger: 'change'
@@ -148,6 +167,7 @@ const formRules = reactive({
   validateType: [{ required: true, message: '数据校验级别不能为空', trigger: 'change' }]
 })
 const formRef = ref()
+const categoryList = ref<ProductCategoryVO[]>([]) // 产品分类列表
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -162,7 +182,12 @@ const open = async (type: string, id?: number) => {
     } finally {
       formLoading.value = false
     }
+  } else {
+    // 新增时，生成随机 productKey
+    formData.value.productKey = generateRandomStr(16)
   }
+  // 加载分类列表
+  categoryList.value = await ProductCategoryApi.getSimpleProductCategoryList()
 }
 defineExpose({ open, close: () => (dialogVisible.value = false) })
 
@@ -190,18 +215,19 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    name: undefined,
     id: undefined,
-    productKey: undefined,
-    protocolId: undefined,
+    name: undefined,
+    productKey: '',
     categoryId: undefined,
+    icon: undefined,
+    picUrl: undefined,
     description: undefined,
-    validateType: ValidateTypeEnum.WEAK,
-    status: undefined,
     deviceType: undefined,
     netType: undefined,
     protocolType: undefined,
-    dataFormat: undefined
+    protocolId: undefined,
+    dataFormat: DataFormatEnum.JSON,
+    validateType: ValidateTypeEnum.WEAK
   }
   formRef.value?.resetFields()
 }

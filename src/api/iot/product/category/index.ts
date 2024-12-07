@@ -34,5 +34,10 @@ export const ProductCategoryApi = {
   // 删除产品分类
   deleteProductCategory: async (id: number) => {
     return await request.delete({ url: `/iot/product-category/delete?id=` + id })
+  },
+
+  /** 获取产品分类精简列表 */
+  getSimpleProductCategoryList: () => {
+    return request.get({ url: '/iot/product-category/simple-list' })
   }
 }
