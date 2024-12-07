@@ -45,8 +45,8 @@
     </el-descriptions>
     <el-descriptions :column="5" direction="horizontal">
       <el-descriptions-item label="设备数">
-        {{ product.deviceCount }}
-        <el-button @click="goToManagement(product.id)">前往管理</el-button>
+        {{ product.deviceCount ?? '加载中...' }}
+        <el-button @click="goToDeviceList(product.id)">前往管理</el-button>
       </el-descriptions-item>
     </el-descriptions>
   </ContentWrap>
@@ -73,16 +73,18 @@ const copyToClipboard = async (text: string) => {
 
 /** 路由跳转到设备管理 */
 const { push } = useRouter()
-const goToManagement = (productId: string) => {
-  push({ name: 'IoTDevice', query: { productId } })
+const goToDeviceList = (productId: number) => {
+  push({ name: 'IoTDevice', params: { productId } })
 }
 
-/** 操作修改 */
+/** 修改操作 */
 const emit = defineEmits(['refresh']) // 定义 Emits
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
+
+/** 发布操作 */
 const confirmPublish = async (id: number) => {
   try {
     await ProductApi.updateProductStatus(id, 1)
@@ -93,6 +95,8 @@ const confirmPublish = async (id: number) => {
     message.error('发布失败')
   }
 }
+
+/** 撤销发布操作 */
 const confirmUnpublish = async (id: number) => {
   try {
     await ProductApi.updateProductStatus(id, 0)

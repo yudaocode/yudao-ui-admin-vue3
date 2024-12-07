@@ -7,6 +7,7 @@ export interface ProductVO {
   productKey: string // 产品标识
   protocolId: number // 协议编号
   categoryId: number // 产品所属品类标识符
+  categoryName?: string // 产品所属品类名称
   description: string // 产品描述
   validateType: number // 数据校验级别
   status: number // 产品状态
@@ -28,6 +29,11 @@ export enum DeviceTypeEnum {
   DEVICE = 0, // 直连设备
   GATEWAY_SUB = 1, // 网关子设备
   GATEWAY = 2 // 网关设备
+}
+// IOT 数据格式枚举类
+export enum DataFormatEnum {
+  JSON = 0, // 标准数据格式（JSON）
+  CUSTOMIZE = 1 // 透传/自定义
 }
 
 // IoT 产品 API

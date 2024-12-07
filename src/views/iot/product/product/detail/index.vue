@@ -33,7 +33,7 @@ const { currentRoute } = useRouter()
 
 const route = useRoute()
 const message = useMessage()
-const id = route.params.id // 编号
+const id = Number(route.params.id) // 编号
 const loading = ref(true) // 加载中
 const product = ref<ProductVO>({} as ProductVO) // 详情
 const activeTab = ref('info') // 默认激活的标签页
@@ -43,20 +43,17 @@ const getProductData = async (id: number) => {
   loading.value = true
   try {
     product.value = await ProductApi.getProduct(id)
-    console.log('Product data:', product.value)
   } finally {
     loading.value = false
   }
 }
 
-// 查询设备数量
+/** 查询设备数量 */
 const getDeviceCount = async (productId: number) => {
   try {
-    const count = await DeviceApi.getDeviceCount(productId)
-    console.log('Device count response:', count)
-    return count
+    return await DeviceApi.getDeviceCount(productId)
   } catch (error) {
-    console.error('Error fetching device count:', error)
+    console.error('Error fetching device count:', error, 'productId:', productId)
     return 0
   }
 }
@@ -72,9 +69,6 @@ onMounted(async () => {
   // 查询设备数量
   if (product.value.id) {
     product.value.deviceCount = await getDeviceCount(product.value.id)
-    console.log('Device count:', product.value.deviceCount)
-  } else {
-    console.error('Product ID is undefined')
   }
 })
 </script>

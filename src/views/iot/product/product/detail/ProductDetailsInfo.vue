@@ -3,6 +3,7 @@
     <el-collapse v-model="activeNames">
       <el-descriptions :column="3" title="产品信息">
         <el-descriptions-item label="产品名称">{{ product.name }}</el-descriptions-item>
+        <el-descriptions-item label="所属分类">{{ product.categoryName }}</el-descriptions-item>
         <el-descriptions-item label="设备类型">
           <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="product.deviceType" />
         </el-descriptions-item>
@@ -20,11 +21,14 @@
         </el-descriptions-item>
         <el-descriptions-item
           label="联网方式"
-          v-if="product.deviceType === 0 || product.deviceType === 2"
+          v-if="[DeviceTypeEnum.DEVICE, DeviceTypeEnum.GATEWAY].includes(product.deviceType)"
         >
           <dict-tag :type="DICT_TYPE.IOT_NET_TYPE" :value="product.netType" />
         </el-descriptions-item>
-        <el-descriptions-item label="接入网关协议" v-if="product.deviceType === 1">
+        <el-descriptions-item
+          label="接入网关协议"
+          v-if="product.deviceType === DeviceTypeEnum.GATEWAY_SUB"
+        >
           <dict-tag :type="DICT_TYPE.IOT_PROTOCOL_TYPE" :value="product.protocolType" />
         </el-descriptions-item>
         <el-descriptions-item label="产品描述">{{ product.description }}</el-descriptions-item>
@@ -34,7 +38,7 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
-import { ProductVO } from '@/api/iot/product/product'
+import { DeviceTypeEnum, ProductVO } from '@/api/iot/product/product'
 import { formatDate } from '@/utils/formatTime'
 
 const { product } = defineProps<{ product: ProductVO }>()
