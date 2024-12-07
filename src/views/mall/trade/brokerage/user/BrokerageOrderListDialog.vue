@@ -135,10 +135,9 @@ const getList = async () => {
   loading.value = true
   try {
     // 处理全部的情况
-    const userLevel = queryParams.sourceUserLevel === 0 ? undefined : queryParams.sourceUserLevel
     const data = await BrokerageRecordApi.getBrokerageRecordPage({
       ...queryParams,
-      sourceUserLevel: userLevel
+      sourceUserLevel: queryParams.sourceUserLevel === 0 ? undefined : queryParams.sourceUserLevel
     })
     list.value = data.list
     total.value = data.total
