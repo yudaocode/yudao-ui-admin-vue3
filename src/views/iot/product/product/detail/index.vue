@@ -17,12 +17,12 @@
   </el-col>
 </template>
 <script lang="ts" setup>
-import { ProductApi, ProductVO } from '@/api/iot/product'
+import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceApi } from '@/api/iot/device'
-import ProductDetailsHeader from '@/views/iot/product/detail/ProductDetailsHeader.vue'
-import ProductDetailsInfo from '@/views/iot/product/detail/ProductDetailsInfo.vue'
-import ProductTopic from '@/views/iot/product/detail/ProductTopic.vue'
-import ThinkModelFunction from '@/views/iot/product/detail/ThinkModelFunction.vue'
+import ProductDetailsHeader from './ProductDetailsHeader.vue'
+import ProductDetailsInfo from './ProductDetailsInfo.vue'
+import ProductTopic from './ProductTopic.vue'
+import ThinkModelFunction from './ThinkModelFunction.vue'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useRouter } from 'vue-router'
 

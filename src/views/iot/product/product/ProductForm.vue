@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ValidateTypeEnum, ProductApi, ProductVO } from '@/api/iot/product'
+import { ValidateTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
 defineOptions({ name: 'IoTProductForm' })

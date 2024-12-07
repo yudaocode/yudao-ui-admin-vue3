@@ -83,10 +83,10 @@
   <ThinkModelFunctionForm ref="formRef" :product="product" @success="getList" />
 </template>
 <script setup lang="ts">
-import { ProductVO } from '@/api/iot/product'
+import { ProductVO } from '@/api/iot/product/product'
 import { ThinkModelFunctionApi, ThinkModelFunctionVO } from '@/api/iot/thinkmodelfunction'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import ThinkModelFunctionForm from '@/views/iot/product/detail/ThinkModelFunctionForm.vue'
+import ThinkModelFunctionForm from './ThinkModelFunctionForm.vue'
 
 const props = defineProps<{ product: ProductVO }>()
 

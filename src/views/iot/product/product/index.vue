@@ -104,7 +104,7 @@
 
 <script setup lang="ts">
 import { dateFormatter } from '@/utils/formatTime'
-import { ProductApi, ProductVO } from '@/api/iot/product'
+import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import ProductForm from './ProductForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 

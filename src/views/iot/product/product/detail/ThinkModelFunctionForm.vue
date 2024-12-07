@@ -75,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { ProductVO } from '@/api/iot/product'
+import { ProductVO } from '@/api/iot/product/product'
 import {
   ProductFunctionAccessModeEnum,
   ProductFunctionTypeEnum,

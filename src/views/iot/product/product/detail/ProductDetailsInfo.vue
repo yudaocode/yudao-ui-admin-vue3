@@ -34,7 +34,7 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE } from '@/utils/dict'
-import { ProductVO } from '@/api/iot/product'
+import { ProductVO } from '@/api/iot/product/product'
 import { formatDate } from '@/utils/formatTime'
 
 const { product } = defineProps<{ product: ProductVO }>()

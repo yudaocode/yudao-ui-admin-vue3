@@ -25,7 +25,7 @@
   </ContentWrap>
 </template>
 <script setup lang="ts">
-import { ProductVO } from '@/api/iot/product'
+import { ProductVO } from '@/api/iot/product/product'
 
 const props = defineProps<{ product: ProductVO }>()
 

@@ -54,8 +54,8 @@
   <ProductForm ref="formRef" @success="emit('refresh')" />
 </template>
 <script setup lang="ts">
-import ProductForm from '@/views/iot/product/ProductForm.vue'
-import { ProductApi, ProductVO } from '@/api/iot/product'
+import ProductForm from '@/views/iot/product/product/ProductForm.vue'
+import { ProductApi, ProductVO } from '@/api/iot/product/product'
 
 const message = useMessage()
 
