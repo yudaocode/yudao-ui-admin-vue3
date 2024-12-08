@@ -179,6 +179,8 @@ const submitForm = async () => {
   if (!fApi.value || !props.selectProcessDefinition) {
     return
   }
+  // 流程表单校验
+  await fApi.value.validate()
   // 如果有指定审批人，需要校验
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
