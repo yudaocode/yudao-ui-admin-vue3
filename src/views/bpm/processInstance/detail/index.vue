@@ -116,7 +116,7 @@
             :process-instance="processInstance"
             :process-definition="processDefinition"
             :userOptions="userOptions"
-            :normal-form ="detailForm"
+            :normal-form="detailForm"
             :normal-form-api="fApi"
             :writable-fields="writableFields"
             @success="refresh"
@@ -129,7 +129,7 @@
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
-import { BpmModelType,BpmModelFormType } from '@/utils/constants'
+import { BpmModelType, BpmModelFormType } from '@/utils/constants'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import { registerComponent } from '@/utils/routerHelper'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
@@ -174,8 +174,7 @@ const detailForm = ref({
   value: {}
 }) // 流程实例的表单详情
 
-// 表单可以编辑的字段
-const writableFields : Array<string> = [];
+const writableFields: Array<string> = [] // 表单可以编辑的字段
 
 /** 获得详情 */
 const getDetail = () => {
@@ -279,7 +278,7 @@ const setFieldPermission = (field: string, permission: string) => {
     //@ts-ignore
     fApi.value?.disabled(false, field)
     // 加入可以编辑的字段
-    writableFields.push(field);
+    writableFields.push(field)
   }
   if (permission === FieldPermissionType.NONE) {
     //@ts-ignore

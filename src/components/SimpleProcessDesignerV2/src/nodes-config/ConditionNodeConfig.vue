@@ -106,7 +106,7 @@
                         :key="index"
                         :label="item.title"
                         :value="item.field"
-                        :disabled ="!item.required"
+                        :disabled="!item.required"
                       />
                     </el-select>
                   </div>
@@ -369,7 +369,7 @@ const fieldsInfo = useFormFields()
 
 /** 条件规则可选择的表单字段 */
 const fieldOptions = computed(() => {
-  const fieldsCopy = fieldsInfo.slice();
+  const fieldsCopy = fieldsInfo.slice()
   // 固定添加发起人 ID 字段
   fieldsCopy.unshift({
     field: ProcessVariableEnum.START_USER_ID,
@@ -379,14 +379,15 @@ const fieldOptions = computed(() => {
   return fieldsCopy
 })
 
-
+/** 获取字段名称 */
 const getFieldTitle = (field: string) => {
   const item = fieldsInfo.find((item) => item.field === field)
   return item?.title
 }
 
+/** 获取操作符名称 */
 const getOpName = (opCode: string): string => {
-  const opName = COMPARISON_OPERATORS.find((item) => item.value === opCode)
+  const opName = COMPARISON_OPERATORS.find((item: any) => item.value === opCode)
   return opName?.label
 }
 </script>
