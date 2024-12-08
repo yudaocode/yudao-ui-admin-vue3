@@ -451,7 +451,7 @@
           </el-form-item>
           <el-form-item>
             <el-button :disabled="formLoading" type="primary" @click="handleCancel()">
-              取消
+              确认
             </el-button>
             <el-button @click="closePropover('cancel', cancelFormRef)"> 取消 </el-button>
           </el-form-item>
