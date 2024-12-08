@@ -477,13 +477,12 @@ import { useUserStoreWithOut } from '@/store/modules/user'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import * as TaskApi from '@/api/bpm/task'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
-import { propTypes } from '@/utils/propTypes'
+import * as UserApi from '@/api/system/user'
 import {
   OperationButtonType,
   OPERATION_BUTTON_NAME
 } from '@/components/SimpleProcessDesignerV2/src/consts'
-import { BpmProcessInstanceStatus } from '@/utils/constants'
-
+import { BpmProcessInstanceStatus, BpmModelFormType } from '@/utils/constants'
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
 const router = useRouter() // 路由
@@ -492,11 +491,15 @@ const { proxy } = getCurrentInstance() as any
 
 const userId = useUserStoreWithOut().getUser.id // 当前登录的编号
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
-const props = defineProps({
-  processInstance: propTypes.object, // 流程实例信息
-  processDefinition: propTypes.object, // 流程定义信息
-  userOptions: propTypes.any
-})
+
+const props = defineProps< {
+  processInstance: any,  // 流程实例信息
+  processDefinition: any,  // 流程定义信息
+  userOptions: UserApi.UserVO[],
+  normalForm: any, // 流程表单 formCreate
+  normalFormApi: any, // 流程表单 formCreate Api
+  writableFields: string[] // 流程表单可以编辑的字段
+}>()
 
 const formLoading = ref(false) // 表单加载中
 const popOverVisible = ref({
@@ -554,6 +557,14 @@ const openReturnPopover = async () => {
 
 /** 弹出气泡卡 */
 const openPopover = async (type: string) => {
+  if (type === 'approve') {
+    // 校验流程表单
+     const valid = await validateNormalForm();
+     if (!valid) {
+      message.error('表单校验不通过，请先完善表单!!')
+      return;
+     }
+  }
   Object.keys(popOverVisible.value).forEach((item) => {
     popOverVisible.value[item] = item === type
   })
@@ -565,24 +576,29 @@ const openPopover = async (type: string) => {
 const handleAudit = async (pass: boolean) => {
   formLoading.value = true
   try {
+    // 校验审批表单
     const genericFormRef = proxy.$refs['formRef']
-    // 1.2 校验表单
     const elForm = unref(genericFormRef)
     if (!elForm) return
     const valid = await elForm.validate()
     if (!valid) return
-
-    // 2.1 提交审批
+    // 提交审批
     const data = {
       id: runningTask.value.id,
-      reason: genericForm.value.reason
+      reason: genericForm.value.reason,
     }
     if (pass) {
+       // 获取修改的流程变量, 暂时只支持流程表单
+      const variables = getUpdatedProcessInstanceVaiables();
+      // 审批通过, 把修改的字段值赋于流程实例变量
+      // @ts-ignore
+      data.variables = variables
       // 审批通过，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
       const formCreateApi = approveFormFApi.value
       if (Object.keys(formCreateApi)?.length > 0) {
         await formCreateApi.validate()
         // @ts-ignore
+        // TODO 芋艿 任务有多表单这里要如何处理，会和可编辑的字段冲突
         data.variables = approveForm.value.value
       }
       await TaskApi.approveTask(data)
@@ -853,6 +869,30 @@ const loadTodoTask = (task: any) => {
   } else {
     approveForm.value = {} // 占位，避免为空
   }
+}
+
+/** 校验流程表单 */
+const validateNormalForm = async () => {
+  if (props.processDefinition?.formType === BpmModelFormType.NORMAL) {
+    let valid = true
+    try {
+      await props.normalFormApi?.validate()
+    } catch {
+      valid = false;
+    }
+    return valid;
+  } else {
+    return true;
+  }
+}
+/** 从可以编辑的流程表单字段，获取需要修改的流程实例的变量 */
+const getUpdatedProcessInstanceVaiables = ()=> {
+  const variables = {}
+  props.writableFields.forEach( (field) => {
+    const fieldValue = props.normalFormApi.getValue(field)
+    variables[field] = fieldValue;
+  })
+  return variables
 }
 
 defineExpose({ loadTodoTask })

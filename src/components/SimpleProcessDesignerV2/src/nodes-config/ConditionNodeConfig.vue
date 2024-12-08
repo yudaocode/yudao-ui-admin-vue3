@@ -102,7 +102,7 @@
                   <div class="mr-2">
                     <el-select style="width: 160px" v-model="rule.leftSide">
                       <el-option
-                        v-for="(item, index) in fieldsInfo"
+                        v-for="(item, index) in fieldOptions"
                         :key="index"
                         :label="item.title"
                         :value="item.field"
@@ -160,7 +160,8 @@ import {
   COMPARISON_OPERATORS,
   ConditionGroup,
   Condition,
-  ConditionRule
+  ConditionRule,
+  ProcessVariableEnum
 } from '../consts'
 import { getDefaultConditionNodeName } from '../utils'
 import { useFormFields } from '../node'
@@ -364,8 +365,20 @@ const addConditionRule = (condition: Condition, idx: number) => {
 const deleteConditionRule = (condition: Condition, idx: number) => {
   condition.rules.splice(idx, 1)
 }
-
 const fieldsInfo = useFormFields()
+
+/** 条件规则可选择的表单字段 */
+const fieldOptions = computed(() => {
+  const fieldsCopy = fieldsInfo.slice();
+  // 固定添加发起人 ID 字段
+  fieldsCopy.unshift({
+    field: ProcessVariableEnum.START_USER_ID,
+    title: '发起人',
+    required: true
+  })
+  return fieldsCopy
+})
+
 
 const getFieldTitle = (field: string) => {
   const item = fieldsInfo.find((item) => item.field === field)
