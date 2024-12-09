@@ -81,7 +81,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { DICT_TYPE } from '@/utils/dict'
-import { ProductVO } from '@/api/iot/product'
+import { ProductVO } from '@/api/iot/product/product'
 import { formatDate } from '@/utils/formatTime'
 import { DeviceVO } from '@/api/iot/device'
 

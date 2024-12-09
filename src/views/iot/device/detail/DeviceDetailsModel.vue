@@ -78,7 +78,7 @@
   </ContentWrap>
 </template>
 <script setup lang="ts">
-import { ProductVO } from '@/api/iot/product'
+import { ProductVO } from '@/api/iot/product/product'
 import { DeviceApi, DeviceDataVO, DeviceVO } from '@/api/iot/device'
 import { dateFormatter } from '@/utils/formatTime'
 import DeviceDataDetail from './DeviceDataDetail.vue'

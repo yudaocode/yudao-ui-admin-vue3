@@ -54,7 +54,7 @@
 </template>
 <script setup lang="ts">
 import { DeviceApi, DeviceHistoryDataVO, DeviceVO } from '@/api/iot/device'
-import { ProductVO } from '@/api/iot/product'
+import { ProductVO } from '@/api/iot/product/product'
 import { beginOfDay, dateFormatter, endOfDay, formatDate } from '@/utils/formatTime'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 

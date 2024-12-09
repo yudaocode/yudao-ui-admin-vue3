@@ -37,7 +37,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import DeviceForm from '@/views/iot/device/DeviceForm.vue'
-import { ProductVO } from '@/api/iot/product'
+import { ProductVO } from '@/api/iot/product/product'
 import { DeviceVO } from '@/api/iot/device'
 import { useRouter } from 'vue-router'
 

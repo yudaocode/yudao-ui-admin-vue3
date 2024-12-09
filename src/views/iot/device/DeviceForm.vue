@@ -41,7 +41,7 @@
 </template>
 <script setup lang="ts">
 import { DeviceApi, DeviceVO } from '@/api/iot/device'
-import { ProductApi } from '@/api/iot/product'
+import { ProductApi } from '@/api/iot/product/product'
 
 /** IoT 设备 表单 */
 defineOptions({ name: 'IoTDeviceForm' })

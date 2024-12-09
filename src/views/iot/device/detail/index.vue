@@ -22,7 +22,7 @@
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DeviceApi, DeviceVO } from '@/api/iot/device'
-import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product'
+import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
 import DeviceDetailsHeader from '@/views/iot/device/detail/DeviceDetailsHeader.vue'
 import DeviceDetailsInfo from '@/views/iot/device/detail/DeviceDetailsInfo.vue'
 import DeviceDetailsModel from '@/views/iot/device/detail/DeviceDetailsModel.vue'

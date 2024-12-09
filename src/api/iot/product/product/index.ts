@@ -17,6 +17,7 @@ export interface ProductVO {
   dataFormat: number // 数据格式
   deviceCount: number // 设备数量
   createTime: Date // 创建时间
+  picUrl: string // 产品图片 URL
 }
 
 // IOT 数据校验级别枚举类

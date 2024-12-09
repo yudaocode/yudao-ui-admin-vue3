@@ -171,7 +171,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { DeviceApi, DeviceVO } from '@/api/iot/device'
 import DeviceForm from './DeviceForm.vue'
-import { ProductApi } from '@/api/iot/product'
+import { ProductApi } from '@/api/iot/product/product'
 
 /** IoT 设备 列表 */
 defineOptions({ name: 'IoTDevice' })
