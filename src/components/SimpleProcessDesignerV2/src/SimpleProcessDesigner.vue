@@ -38,12 +38,21 @@ import * as UserGroupApi from '@/api/bpm/userGroup'
 defineOptions({
   name: 'SimpleProcessDesigner'
 })
+
 const emits = defineEmits(['success']) // 保存成功事件
 
 const props = defineProps({
   modelId: {
     type: String,
-    required: true
+    required: false
+  },
+  modelKey: {
+    type: String,
+    required: false
+  },
+  modelName: {
+    type: String,
+    required: false
   }
 })
 
@@ -69,6 +78,7 @@ const message = useMessage() // 国际化
 const processNodeTree = ref<SimpleFlowNode | undefined>()
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
+
 const saveSimpleFlowModel = async (simpleModelNode: SimpleFlowNode) => {
   if (!simpleModelNode) {
     message.error('模型数据为空')
@@ -76,21 +86,28 @@ const saveSimpleFlowModel = async (simpleModelNode: SimpleFlowNode) => {
   }
   try {
     loading.value = true
-    const data = {
-      id: props.modelId,
-      simpleModel: simpleModelNode
-    }
-    const result = await updateBpmSimpleModel(data)
-    if (result) {
-      message.success('修改成功')
-      emits('success')
+    if (props.modelId) {
+      // 编辑模式
+      const data = {
+        id: props.modelId,
+        simpleModel: simpleModelNode
+      }
+      const result = await updateBpmSimpleModel(data)
+      if (result) {
+        message.success('修改成功')
+        emits('success')
+      } else {
+        message.alert('修改失败')
+      }
     } else {
-      message.alert('修改失败')
+      // 新建模式，直接返回数据
+      emits('success', simpleModelNode)
     }
   } finally {
     loading.value = false
   }
 }
+
 // 校验节点设置。 暂时以 showText 为空 未节点错误配置
 const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNode[]) => {
   if (node) {
@@ -134,12 +151,14 @@ onMounted(async () => {
   try {
     loading.value = true
     // 获取表单字段
-    const bpmnModel = await getModel(props.modelId)
-    if (bpmnModel) {
-      formType.value = bpmnModel.formType
-      if (formType.value === 10) {
-        const bpmnForm = (await getForm(bpmnModel.formId)) as unknown as FormVO
-        formFields.value = bpmnForm?.fields
+    if (props.modelId) {
+      const bpmnModel = await getModel(props.modelId)
+      if (bpmnModel) {
+        formType.value = bpmnModel.formType
+        if (formType.value === 10) {
+          const bpmnForm = (await getForm(bpmnModel.formId)) as unknown as FormVO
+          formFields.value = bpmnForm?.fields
+        }
       }
     }
     // 获得角色列表
@@ -155,14 +174,18 @@ onMounted(async () => {
     // 获取用户组列表
     userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
 
-    //获取 SIMPLE 设计器模型
-    const result = await getBpmSimpleModel(props.modelId)
-    if (result) {
-      processNodeTree.value = result
-    } else {
-      // 初始值
+    if (props.modelId) {
+      //获取 SIMPLE 设计器模型
+      const result = await getBpmSimpleModel(props.modelId)
+      if (result) {
+        processNodeTree.value = result
+      }
+    }
+    
+    // 如果没有现有模型，创建初始模型
+    if (!processNodeTree.value) {
       processNodeTree.value = {
-        name: '发起人',
+        name: props.modelName || '发起人',
         type: NodeType.START_USER_NODE,
         id: NodeId.START_USER_NODE_ID,
         childNode: {

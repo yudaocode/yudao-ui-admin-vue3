@@ -1,42 +1,47 @@
 <template>
   <!-- 头部导航栏 -->
   <div
-    class="absolute top-0 left-0 right-0 h-50px bg-white border-bottom z-10 flex items-center justify-between px-20px"
+    class="absolute top-0 left-0 right-0 h-50px bg-white border-bottom z-10 flex items-center px-20px"
   >
-    <div class="flex items-center">
-      <Icon icon="ep:arrow-left" class="cursor-pointer" @click="router.back()" />
-      <span class="ml-10px text-16px">{{ formData.name || '创建流程' }}</span>
+    <!-- 左侧标题，固定宽度 -->
+    <div class="w-200px flex items-center overflow-hidden">
+      <Icon icon="ep:arrow-left" class="cursor-pointer flex-shrink-0" @click="router.back()" />
+      <span class="ml-10px text-16px truncate" :title="formData.name || '创建流程'">
+        {{ formData.name || '创建流程' }}
+      </span>
     </div>
 
-    <!-- 步骤条 -->
+    <!-- 步骤条，固定在中间 -->
     <div class="flex-1 flex items-center justify-center h-full">
-      <div
-        v-for="(step, index) in steps"
-        :key="index"
-        class="flex items-center cursor-pointer mx-15px relative h-full"
-        :class="[
-          currentStep === index
-            ? 'text-[#3473ff] border-[#3473ff] border-b-2 border-b-solid'
-            : 'text-gray-500'
-        ]"
-        @click="currentStep = index"
-      >
+      <div class="w-400px flex items-center justify-between h-full">
         <div
-          class="w-28px h-28px rounded-full flex items-center justify-center mr-8px border-2 border-solid text-15px"
+          v-for="(step, index) in steps"
+          :key="index"
+          class="flex items-center cursor-pointer mx-15px relative h-full"
           :class="[
             currentStep === index
-              ? ' bg-[#3473ff] text-white'
-              : 'border-gray-300 bg-white text-gray-500'
+              ? 'text-[#3473ff] border-[#3473ff] border-b-2 border-b-solid'
+              : 'text-gray-500'
           ]"
+          @click="handleStepClick(index)"
         >
-          {{ index + 1 }}
+          <div
+            class="w-28px h-28px rounded-full flex items-center justify-center mr-8px border-2 border-solid text-15px"
+            :class="[
+              currentStep === index
+                ? 'bg-[#3473ff] text-white border-[#3473ff]'
+                : 'border-gray-300 bg-white text-gray-500'
+            ]"
+          >
+            {{ index + 1 }}
+          </div>
+          <span class="text-16px font-bold whitespace-nowrap">{{ step.title }}</span>
         </div>
-        <span class="text-16px font-bold">{{ step.title }}</span>
       </div>
     </div>
 
-    <!-- 操作按钮 -->
-    <div class="flex items-center gap-1">
+    <!-- 右侧按钮，固定宽度 -->
+    <div class="w-200px flex items-center justify-end gap-2">
       <el-button @click="handleSave">保 存</el-button>
       <el-button type="primary" @click="handleDeploy">发 布</el-button>
     </div>
@@ -264,15 +269,26 @@
       </el-form>
     </div>
 
+    <!-- 第三步：流程设计 -->
     <div v-show="currentStep === 2">
       <!-- BPMN设计器 -->
       <template v-if="formData.type === BpmModelType.BPMN">
-        <BpmModelEditor :model-id="formData.id" @success="handleDesignSuccess" />
+        <BpmModelEditor
+          :model-id="formData.id"
+          :model-key="formData.key"
+          :model-name="formData.name"
+          @success="handleDesignSuccess"
+        />
       </template>
 
       <!-- Simple设计器 -->
       <template v-else>
-        <SimpleModelDesign :model-id="formData.id" @success="handleDesignSuccess" />
+        <SimpleModelDesign
+          :model-id="formData.id"
+          :model-key="formData.key"
+          :model-name="formData.name"
+          @success="handleDesignSuccess"
+        />
       </template>
     </div>
   </ContentWrap>
@@ -520,8 +536,26 @@ const steps = [
 ]
 
 // 处理设计器保存成功
-const handleDesignSuccess = () => {
+const handleDesignSuccess = (bpmnXml?: string) => {
+  if (bpmnXml) {
+    // 新建时，保存设计器生成的XML
+    formData.value.bpmnXml = bpmnXml
+  }
   message.success('保存成功')
+}
+
+// 步骤切换处理
+const handleStepClick = async (index: number) => {
+  // 如果是切换到第三步（流程设计），需要校验key和name
+  if (index === 2 && !formData.value.id) {
+    // 新增时才校验
+    if (!formData.value.key || !formData.value.name) {
+      message.warning('请先填写流程标识和流程名称')
+      return
+    }
+  }
+
+  currentStep.value = index
 }
 </script>
 

@@ -11,6 +11,7 @@
       ref="processDesigner"
       @init-finished="initModeler"
       :additionalModel="controlForm.additionalModel"
+      :model="model"
       @save="save"
     />
     <!-- 流程属性器，负责编辑每个流程节点的属性 -->
@@ -35,14 +36,15 @@ import * as ModelApi from '@/api/bpm/model'
 defineOptions({ name: 'BpmModelEditor' })
 
 const props = defineProps<{
-  modelId: string
+  modelId?: string
+  modelKey?: string
+  modelName?: string
 }>()
+
 const emit = defineEmits(['success'])
-const router = useRouter() // 路由
-const { query } = useRoute() // 路由的查询
 const message = useMessage() // 国际化
 
-const xmlString = ref(undefined) // BPMN XML
+const xmlString = ref<string>() // BPMN XML
 const modeler = ref(null) // BPMN Modeler
 const controlForm = ref({
   simulation: true,
@@ -61,16 +63,32 @@ const initModeler = (item) => {
   }, 10)
 }
 
+/** 获取默认的BPMN XML */
+const getDefaultBpmnXml = (key: string, name: string) => {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.activiti.org/processdef">
+  <process id="${key}" name="${name}" isExecutable="true" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram">
+    <bpmndi:BPMNPlane id="${key}_di" bpmnElement="${key}" />
+  </bpmndi:BPMNDiagram>
+</definitions>`
+}
+
 /** 添加/修改模型 */
 const save = async (bpmnXml: string) => {
   try {
-    const data = {
-      ...model.value,
-      bpmnXml: bpmnXml
-    } as unknown as ModelApi.ModelVO
-    // 提交
-    await ModelApi.updateModelBpmn(data)
-    emit('success')
+    if (props.modelId) {
+      // 编辑模式
+      const data = {
+        ...model.value,
+        bpmnXml: bpmnXml
+      } as unknown as ModelApi.ModelVO
+      await ModelApi.updateModelBpmn(data)
+      emit('success')
+    } else {
+      // 新建模式，直接返回XML
+      emit('success', bpmnXml)
+    }
   } catch (error) {
     console.error('保存失败:', error)
     message.error('保存失败')
@@ -79,28 +97,40 @@ const save = async (bpmnXml: string) => {
 
 /** 初始化 */
 onMounted(async () => {
-  if (!props.modelId) {
-    message.error('缺少模型 modelId 编号')
-    return
+  if (props.modelId) {
+    // 编辑模式
+    try {
+      // 查询模型
+      const data = await ModelApi.getModel(props.modelId)
+      model.value = {
+        ...data,
+        bpmnXml: undefined // 清空 bpmnXml 属性
+      }
+      xmlString.value = data.bpmnXml || getDefaultBpmnXml(data.key, data.name)
+    } catch (error) {
+      console.error('获取模型失败:', error)
+      message.error('获取模型失败')
+    }
+  } else if (props.modelKey && props.modelName) {
+    // 新建模式，使用传入的key和name创建默认XML
+    xmlString.value = getDefaultBpmnXml(props.modelKey, props.modelName)
+    model.value = {
+      key: props.modelKey,
+      name: props.modelName
+    } as ModelApi.ModelVO
   }
-  // 查询模型
-  const data = await ModelApi.getModel(String(props.modelId))
-  if (!data.bpmnXml) {
-    // 首次创建的 Model 模型，它是没有 bpmnXml，此时需要给它一个默认的
-    data.bpmnXml = ` <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.activiti.org/processdef">
-  <process id="${data.key}" name="${data.name}" isExecutable="true" />
-  <bpmndi:BPMNDiagram id="BPMNDiagram">
-    <bpmndi:BPMNPlane id="${data.key}_di" bpmnElement="${data.key}" />
-  </bpmndi:BPMNDiagram>
-</definitions>`
-  }
-  model.value = {
-    ...data,
-    bpmnXml: undefined // 清空 bpmnXml 属性
-  }
-  xmlString.value = data.bpmnXml
 })
+
+// 监听key和name的变化
+watch([() => props.modelKey, () => props.modelName], ([newKey, newName]) => {
+  if (!props.modelId && newKey && newName) {
+    xmlString.value = getDefaultBpmnXml(newKey, newName)
+    model.value = {
+      key: newKey,
+      name: newName
+    } as ModelApi.ModelVO
+  }
+}, { immediate: true })
 </script>
 <style lang="scss">
 .process-panel__container {
