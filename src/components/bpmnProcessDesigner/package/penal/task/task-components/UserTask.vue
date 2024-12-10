@@ -1,5 +1,5 @@
 <template>
-  <el-form label-width="100px">
+  <el-form label-width="120px">
     <el-form-item label="规则类型" prop="candidateStrategy">
       <el-select
         v-model="userTaskForm.candidateStrategy"
@@ -111,7 +111,7 @@
     </el-form-item>
     <el-form-item
       v-if="userTaskForm.candidateStrategy === CandidateStrategy.FORM_USER"
-      label="用户字段"
+      label="表单内用户字段"
       prop="formUser"
     >
       <el-select
@@ -140,7 +140,7 @@
       prop="deptLevel"
       span="24"
     >
-      <el-select v-model="deptLevel" clearable>
+      <el-select v-model="deptLevel" clearable @change="updateElementTask">
         <el-option
           v-for="(item, index) in MULTI_LEVEL_DEPT"
           :key="index"
@@ -258,6 +258,12 @@ const resetTaskForm = () => {
           return num > Number.MAX_SAFE_INTEGER || num < -Number.MAX_SAFE_INTEGER ? item : num
         })
       deptLevel.value = +candidateParamStr.split('|')[1]
+    } else if (
+      userTaskForm.value.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+      userTaskForm.value.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER
+    ) {
+      userTaskForm.value.candidateParam = +candidateParamStr
+      deptLevel.value = +candidateParamStr
     } else {
       userTaskForm.value.candidateParam = candidateParamStr.split(',').map((item) => {
         // 如果数字超出了最大安全整数范围，则将其作为字符串处理
@@ -319,6 +325,14 @@ const updateElementTask = () => {
   if (userTaskForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER) {
     candidateParam += '|' + deptLevel.value
   }
+  // 特殊处理发起人部门负责人、发起人连续部门负责人
+  if (
+    userTaskForm.value.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+    userTaskForm.value.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER
+  ) {
+    candidateParam = deptLevel.value + ''
+  }
+
   const extensions = bpmnInstances().moddle.create('bpmn:ExtensionElements', {
     values: [
       ...otherExtensions.value,
