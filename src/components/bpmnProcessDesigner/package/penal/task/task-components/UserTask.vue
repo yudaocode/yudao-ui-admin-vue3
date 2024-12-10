@@ -110,6 +110,26 @@
       </el-select>
     </el-form-item>
     <el-form-item
+      v-if="userTaskForm.candidateStrategy === CandidateStrategy.FORM_USER"
+      label="用户字段"
+      prop="formUser"
+    >
+      <el-select
+        v-model="userTaskForm.candidateParam"
+        clearable
+        style="width: 100%"
+        @change="handleFormUserChange"
+      >
+        <el-option
+          v-for="(item, idx) in userFieldOnFormOptions"
+          :key="idx"
+          :label="item.title"
+          :value="item.field"
+          :disabled="!item.required"
+        />
+      </el-select>
+    </el-form-item>
+    <el-form-item
       v-if="userTaskForm.candidateStrategy === CandidateStrategy.EXPRESSION"
       label="流程表达式"
       prop="candidateParam"
@@ -133,7 +153,8 @@
 <script lang="ts" setup>
 import {
   CANDIDATE_STRATEGY,
-  CandidateStrategy
+  CandidateStrategy,
+  FieldPermissionType
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'
@@ -143,6 +164,7 @@ import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
 import ProcessExpressionDialog from './ProcessExpressionDialog.vue'
 import { ProcessExpressionVO } from '@/api/bpm/processExpression'
+import { useFormFieldsPermission } from '@/components/SimpleProcessDesignerV2/src/node'
 
 defineOptions({ name: 'UserTask' })
 const props = defineProps({
@@ -162,6 +184,14 @@ const deptTreeOptions = ref() // 部门树
 const postOptions = ref<PostApi.PostVO[]>([]) // 岗位列表
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
+
+// 表单内用户字段
+const { formFieldOptions } = useFormFieldsPermission(FieldPermissionType.READ)
+// 表单内用户字段选项, 必须是必填和用户选择器
+const userFieldOnFormOptions = computed(() => {
+  return formFieldOptions.filter((item) => item.type === 'UserSelect')
+})
+
 const otherExtensions = ref()
 
 const resetTaskForm = () => {
@@ -223,6 +253,12 @@ const resetTaskForm = () => {
 /** 更新 candidateStrategy 字段时，需要清空 candidateParam，并触发 bpmn 图更新 */
 const changeCandidateStrategy = () => {
   userTaskForm.value.candidateParam = []
+  if (userTaskForm.value.candidateStrategy === CandidateStrategy.FORM_USER) {
+    // 特殊处理表单内用户字段，当只有发起人选项时应选中发起人
+    if (!userFieldOnFormOptions.value || userFieldOnFormOptions.value.length <= 1) {
+      userTaskForm.value.candidateStrategy = CandidateStrategy.START_USER
+    }
+  }
   updateElementTask()
 }
 
@@ -235,7 +271,10 @@ const updateElementTask = () => {
         value: userTaskForm.value.candidateStrategy
       }),
       bpmnInstances().moddle.create(`${prefix}:CandidateParam`, {
-        value: userTaskForm.value.candidateParam.join(',')
+        value:
+          userTaskForm.value.candidateParam instanceof Array
+            ? userTaskForm.value.candidateParam.join(',')
+            : userTaskForm.value.candidateParam
       })
     ]
   })
@@ -258,6 +297,14 @@ const openProcessExpressionDialog = async () => {
 }
 const selectProcessExpression = (expression: ProcessExpressionVO) => {
   userTaskForm.value.candidateParam = [expression.expression]
+  updateElementTask()
+}
+
+const handleFormUserChange = (e) => {
+  if (e === 'PROCESS_START_USER_ID') {
+    userTaskForm.value.candidateParam = []
+    userTaskForm.value.candidateStrategy = CandidateStrategy.START_USER
+  }
   updateElementTask()
 }
 
