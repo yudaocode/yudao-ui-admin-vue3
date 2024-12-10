@@ -8,15 +8,15 @@
         @change="changeCandidateStrategy"
       >
         <el-option
-          v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY)"
-          :key="dict.value"
+          v-for="(dict, index) in CANDIDATE_STRATEGY"
+          :key="index"
           :label="dict.label"
           :value="dict.value"
         />
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy == 10"
+      v-if="userTaskForm.candidateStrategy == CandidateStrategy.ROLE"
       label="指定角色"
       prop="candidateParam"
     >
@@ -31,7 +31,11 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy == 20 || userTaskForm.candidateStrategy == 21"
+      v-if="
+        userTaskForm.candidateStrategy == CandidateStrategy.DEPT_MEMBER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.DEPT_LEADER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
+      "
       label="指定部门"
       prop="candidateParam"
       span="24"
@@ -49,7 +53,7 @@
       />
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy == 22"
+      v-if="userTaskForm.candidateStrategy == CandidateStrategy.POST"
       label="指定岗位"
       prop="candidateParam"
       span="24"
@@ -65,7 +69,7 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy == 30"
+      v-if="userTaskForm.candidateStrategy == CandidateStrategy.USER"
       label="指定用户"
       prop="candidateParam"
       span="24"
@@ -86,7 +90,7 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy === 40"
+      v-if="userTaskForm.candidateStrategy === CandidateStrategy.USER_GROUP"
       label="指定用户组"
       prop="candidateParam"
     >
@@ -106,7 +110,7 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy === 60"
+      v-if="userTaskForm.candidateStrategy === CandidateStrategy.EXPRESSION"
       label="流程表达式"
       prop="candidateParam"
     >
@@ -127,7 +131,10 @@
 </template>
 
 <script lang="ts" setup>
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import {
+  CANDIDATE_STRATEGY,
+  CandidateStrategy
+} from '@/components/SimpleProcessDesignerV2/src/consts'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
@@ -163,7 +170,9 @@ const resetTaskForm = () => {
     return
   }
 
-  const extensionElements = businessObject?.extensionElements ?? bpmnInstances().moddle.create('bpmn:ExtensionElements', { values: [] })
+  const extensionElements =
+    businessObject?.extensionElements ??
+    bpmnInstances().moddle.create('bpmn:ExtensionElements', { values: [] })
   userTaskForm.value.candidateStrategy = extensionElements.values?.filter(
     (ex) => ex.$type === `${prefix}:CandidateStrategy`
   )?.[0]?.value
