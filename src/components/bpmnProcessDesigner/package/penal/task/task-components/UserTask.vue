@@ -130,6 +130,26 @@
       </el-select>
     </el-form-item>
     <el-form-item
+      v-if="
+        userTaskForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
+      "
+      :label="deptLevelLabel!"
+      prop="deptLevel"
+      span="24"
+    >
+      <el-select v-model="deptLevel" clearable>
+        <el-option
+          v-for="(item, index) in MULTI_LEVEL_DEPT"
+          :key="index"
+          :label="item.label"
+          :value="item.value"
+        />
+      </el-select>
+    </el-form-item>
+    <el-form-item
       v-if="userTaskForm.candidateStrategy === CandidateStrategy.EXPRESSION"
       label="流程表达式"
       prop="candidateParam"
@@ -154,7 +174,8 @@
 import {
   CANDIDATE_STRATEGY,
   CandidateStrategy,
-  FieldPermissionType
+  FieldPermissionType,
+  MULTI_LEVEL_DEPT
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'
@@ -192,6 +213,19 @@ const userFieldOnFormOptions = computed(() => {
   return formFieldOptions.filter((item) => item.type === 'UserSelect')
 })
 
+const deptLevel = ref(1)
+const deptLevelLabel = computed(() => {
+  let label = '部门负责人来源'
+  if (userTaskForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER) {
+    label = label + '(指定部门向上)'
+  } else if (userTaskForm.value.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER) {
+    label = label + '(表单内部门向上)'
+  } else {
+    label = label + '(发起人部门向上)'
+  }
+  return label
+})
+
 const otherExtensions = ref()
 
 const resetTaskForm = () => {
@@ -210,9 +244,20 @@ const resetTaskForm = () => {
     (ex) => ex.$type === `${prefix}:CandidateParam`
   )?.[0]?.value
   if (candidateParamStr && candidateParamStr.length > 0) {
-    if (userTaskForm.value.candidateStrategy === 60) {
+    if (userTaskForm.value.candidateStrategy === CandidateStrategy.EXPRESSION) {
       // 特殊：流程表达式，只有一个 input 输入框
       userTaskForm.value.candidateParam = [candidateParamStr]
+    } else if (userTaskForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER) {
+      // 特殊：多级不部门负责人，需要通过'|'分割
+      userTaskForm.value.candidateParam = candidateParamStr
+        .split('|')[0]
+        .split(',')
+        .map((item) => {
+          // 如果数字超出了最大安全整数范围，则将其作为字符串处理
+          let num = Number(item)
+          return num > Number.MAX_SAFE_INTEGER || num < -Number.MAX_SAFE_INTEGER ? item : num
+        })
+      deptLevel.value = +candidateParamStr.split('|')[1]
     } else {
       userTaskForm.value.candidateParam = candidateParamStr.split(',').map((item) => {
         // 如果数字超出了最大安全整数范围，则将其作为字符串处理
@@ -253,6 +298,7 @@ const resetTaskForm = () => {
 /** 更新 candidateStrategy 字段时，需要清空 candidateParam，并触发 bpmn 图更新 */
 const changeCandidateStrategy = () => {
   userTaskForm.value.candidateParam = []
+  deptLevel.value = 1
   if (userTaskForm.value.candidateStrategy === CandidateStrategy.FORM_USER) {
     // 特殊处理表单内用户字段，当只有发起人选项时应选中发起人
     if (!userFieldOnFormOptions.value || userFieldOnFormOptions.value.length <= 1) {
@@ -264,6 +310,15 @@ const changeCandidateStrategy = () => {
 
 /** 选中某个 options 时候，更新 bpmn 图  */
 const updateElementTask = () => {
+  let candidateParam =
+    userTaskForm.value.candidateParam instanceof Array
+      ? userTaskForm.value.candidateParam.join(',')
+      : userTaskForm.value.candidateParam
+
+  // 特殊处理多级部门情况
+  if (userTaskForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER) {
+    candidateParam += '|' + deptLevel.value
+  }
   const extensions = bpmnInstances().moddle.create('bpmn:ExtensionElements', {
     values: [
       ...otherExtensions.value,
@@ -271,10 +326,7 @@ const updateElementTask = () => {
         value: userTaskForm.value.candidateStrategy
       }),
       bpmnInstances().moddle.create(`${prefix}:CandidateParam`, {
-        value:
-          userTaskForm.value.candidateParam instanceof Array
-            ? userTaskForm.value.candidateParam.join(',')
-            : userTaskForm.value.candidateParam
+        value: candidateParam
       })
     ]
   })
