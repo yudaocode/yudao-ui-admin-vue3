@@ -4,9 +4,24 @@
      3. 审批人为空时
      4. 操作按钮
      5. 字段权限
+     6. 审批类型
 -->
 <template>
   <div>
+    <el-divider content-position="left">审批类型</el-divider>
+    <el-form-item prop="approveType">
+      <el-radio-group v-model="approveType.value">
+        <el-radio
+          v-for="(item, index) in APPROVE_TYPE"
+          :key="index"
+          :value="item.value"
+          :label="item.value"
+        >
+          {{ item.label }}
+        </el-radio>
+      </el-radio-group>
+    </el-form-item>
+
     <el-divider content-position="left">审批人拒绝时</el-divider>
     <el-form-item prop="rejectHandlerType">
       <el-radio-group
@@ -158,10 +173,13 @@ import {
   AssignEmptyHandlerType,
   OPERATION_BUTTON_NAME,
   DEFAULT_BUTTON_SETTING,
-  FieldPermissionType
+  FieldPermissionType,
+  APPROVE_TYPE,
+  ApproveType,
+  ButtonSetting
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import * as UserApi from '@/api/system/user'
-import { cloneDeep } from 'lodash-es'
+import { useFormFieldsPermission } from '@/components/SimpleProcessDesignerV2/src/node'
 
 defineOptions({ name: 'ElementCustomConfig4UserTask' })
 const props = defineProps({
@@ -189,14 +207,16 @@ const assignEmptyUserIds = ref()
 
 // 操作按钮
 const buttonsSettingEl = ref()
-const { buttonsSetting, btnDisplayNameEdit, changeBtnDisplayName, btnDisplayNameBlurEvent } =
-  useButtonsSetting()
+const { btnDisplayNameEdit, changeBtnDisplayName, btnDisplayNameBlurEvent } = useButtonsSetting()
 
 // 字段权限
 const fieldsPermissionEl = ref([])
 const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
   FieldPermissionType.READ
 )
+
+// 审批类型
+const approveType = ref({ value: ApproveType.USER })
 
 const elExtensionElements = ref()
 const otherExtensions = ref()
@@ -216,6 +236,11 @@ const resetCustomConfigList = () => {
   elExtensionElements.value =
     bpmnElement.value.businessObject?.extensionElements ??
     bpmnInstances().moddle.create('bpmn:ExtensionElements', { values: [] })
+
+  // 审批类型
+  approveType.value =
+    elExtensionElements.value.values?.filter((ex) => ex.$type === `${prefix}:ApproveType`)?.[0] ||
+    bpmnInstances().moddle.create(`${prefix}:ApproveType`, { value: ApproveType.USER })
 
   // 审批人与提交人为同一人时
   assignStartUserHandlerTypeEl.value =
@@ -275,6 +300,8 @@ const resetCustomConfigList = () => {
     )
     fieldsPermissionEl.value = []
     getNodeConfigFormFields()
+    // 由于默认添加了发起人元素，这里需要删掉
+    fieldsPermissionConfig.value = fieldsPermissionConfig.value.slice(1)
     fieldsPermissionConfig.value.forEach((element) => {
       element.permission =
         fieldsPermissionList?.find((obj) => obj.field === element.field)?.permission ?? '1'
@@ -294,7 +321,8 @@ const resetCustomConfigList = () => {
         ex.$type !== `${prefix}:AssignEmptyHandlerType` &&
         ex.$type !== `${prefix}:AssignEmptyUserIds` &&
         ex.$type !== `${prefix}:ButtonsSetting` &&
-        ex.$type !== `${prefix}:FieldsPermission`
+        ex.$type !== `${prefix}:FieldsPermission` &&
+        ex.$type !== `${prefix}:ApproveType`
     ) ?? []
 
   // 更新元素扩展属性，避免后续报错
@@ -343,6 +371,7 @@ const updateElementExtensions = () => {
       returnNodeIdEl.value,
       assignEmptyHandlerTypeEl.value,
       assignEmptyUserIdsEl.value,
+      approveType.value,
       ...buttonsSettingEl.value,
       ...fieldsPermissionEl.value
     ]
@@ -424,69 +453,6 @@ function useButtonsSetting() {
     btnDisplayNameEdit,
     changeBtnDisplayName,
     btnDisplayNameBlurEvent
-  }
-}
-
-// 表单字段权限设置
-function useFormFieldsPermission(defaultPermission) {
-  // 字段权限配置. 需要有 field, title,  permissioin 属性
-  const fieldsPermissionConfig = ref<Array<Record<string, string>>>([])
-
-  const formType = inject<Ref<number>>('formType') // 表单类型
-
-  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
-
-  const getNodeConfigFormFields = (nodeFormFields?: Array<Record<string, string>>) => {
-    nodeFormFields = toRaw(nodeFormFields)
-    fieldsPermissionConfig.value =
-      cloneDeep(nodeFormFields) || getDefaultFieldsPermission(unref(formFields))
-  }
-  // 默认的表单权限： 获取表单的所有字段，设置字段默认权限为只读
-  const getDefaultFieldsPermission = (formFields?: string[]) => {
-    const defaultFieldsPermission: Array<Record<string, string>> = []
-    if (formFields) {
-      formFields.forEach((fieldStr: string) => {
-        parseFieldsSetDefaultPermission(JSON.parse(fieldStr), defaultFieldsPermission)
-      })
-    }
-    return defaultFieldsPermission
-  }
-  // 解析字段。赋给默认权限
-  const parseFieldsSetDefaultPermission = (
-    rule: Record<string, any>,
-    fieldsPermission: Array<Record<string, string>>,
-    parentTitle: string = ''
-  ) => {
-    const { /**type,*/ field, title: tempTitle, children } = rule
-    if (field && tempTitle) {
-      let title = tempTitle
-      if (parentTitle) {
-        title = `${parentTitle}.${tempTitle}`
-      }
-      fieldsPermission.push({
-        field,
-        title,
-        permission: defaultPermission
-      })
-      // TODO 子表单 需要处理子表单字段
-      // if (type === 'group' && rule.props?.rule && Array.isArray(rule.props.rule)) {
-      //   // 解析子表单的字段
-      //   rule.props.rule.forEach((item) => {
-      //     parseFieldsSetDefaultPermission(item, fieldsPermission, title)
-      //   })
-      // }
-    }
-    if (children && Array.isArray(children)) {
-      children.forEach((rule) => {
-        parseFieldsSetDefaultPermission(rule, fieldsPermission)
-      })
-    }
-  }
-
-  return {
-    formType,
-    fieldsPermissionConfig,
-    getNodeConfigFormFields
   }
 }
 
