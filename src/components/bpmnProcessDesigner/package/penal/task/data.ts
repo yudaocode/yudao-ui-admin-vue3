@@ -2,6 +2,7 @@ import UserTask from './task-components/UserTask.vue'
 import ServiceTask from './task-components/ServiceTask.vue'
 import ScriptTask from './task-components/ScriptTask.vue'
 import ReceiveTask from './task-components/ReceiveTask.vue'
+import CallActivity from './task-components/CallActivity.vue'
 
 export const installedComponent = {
   UserTask: {
@@ -19,6 +20,10 @@ export const installedComponent = {
   ReceiveTask: {
     name: '接收任务',
     component: ReceiveTask
+  },
+  CallActivity: {
+    name: '调用活动',
+    component: CallActivity
   }
 }
 

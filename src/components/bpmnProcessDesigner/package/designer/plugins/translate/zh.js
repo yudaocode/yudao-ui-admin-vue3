@@ -56,6 +56,7 @@ export default {
   'Create EndEvent': '创建结束事件',
   'Create Task': '创建任务',
   'Create User Task': '创建用户任务',
+  'Create Call Activity': '创建调用活动',
   'Create Service Task': '创建服务任务',
   'Create Gateway': '创建网关',
   'Create DataObjectReference': '创建数据对象',
