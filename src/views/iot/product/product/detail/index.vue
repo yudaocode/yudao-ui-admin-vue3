@@ -8,8 +8,8 @@
       <el-tab-pane label="Topic 类列表" name="topic">
         <ProductTopic v-if="activeTab === 'topic'" :product="product" />
       </el-tab-pane>
-      <el-tab-pane label="功能定义" name="function">
-        <ThinkModelFunction v-if="activeTab === 'function'" :product="product" />
+      <el-tab-pane label="功能定义" lazy name="function">
+        <IoTProductThingModel ref="thingModelRef" />
       </el-tab-pane>
       <el-tab-pane label="消息解析" name="message" />
       <el-tab-pane label="服务端订阅" name="subscription" />
@@ -22,9 +22,10 @@ import { DeviceApi } from '@/api/iot/device'
 import ProductDetailsHeader from './ProductDetailsHeader.vue'
 import ProductDetailsInfo from './ProductDetailsInfo.vue'
 import ProductTopic from './ProductTopic.vue'
-import ThinkModelFunction from './ThinkModelFunction.vue'
+import IoTProductThingModel from './ThingModel/index.vue'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useRouter } from 'vue-router'
+import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 
 defineOptions({ name: 'IoTProductDetail' })
 
@@ -37,6 +38,8 @@ const id = Number(route.params.id) // 编号
 const loading = ref(true) // 加载中
 const product = ref<ProductVO>({} as ProductVO) // 详情
 const activeTab = ref('info') // 默认激活的标签页
+
+provide(IOT_PROVIDE_KEY.PRODUCT, product) // 提供产品信息给产品信息详情页的所有子组件
 
 /** 获取详情 */
 const getProductData = async (id: number) => {

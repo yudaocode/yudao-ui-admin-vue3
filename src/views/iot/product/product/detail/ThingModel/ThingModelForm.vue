@@ -1,17 +1,17 @@
 <template>
-  <Dialog :title="dialogTitle" v-model="dialogVisible">
+  <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form
       ref="formRef"
+      v-loading="formLoading"
       :model="formData"
       :rules="formRules"
       label-width="100px"
-      v-loading="formLoading"
     >
       <el-form-item label="功能类型" prop="type">
         <el-radio-group v-model="formData.type">
-          <el-radio-button :value="1"> 属性 </el-radio-button>
-          <el-radio-button :value="2"> 服务 </el-radio-button>
-          <el-radio-button :value="3"> 事件 </el-radio-button>
+          <el-radio-button :value="1"> 属性</el-radio-button>
+          <el-radio-button :value="2"> 服务</el-radio-button>
+          <el-radio-button :value="3"> 事件</el-radio-button>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="功能名称" prop="name">
@@ -20,38 +20,14 @@
       <el-form-item label="标识符" prop="identifier">
         <el-input
           v-model="formData.identifier"
-          placeholder="请输入标识符"
           :disabled="formType === 'update'"
+          placeholder="请输入标识符"
         />
       </el-form-item>
       <el-form-item label="数据类型" prop="type">
-        <el-select
-          v-model="formData.property.dataType.type"
-          placeholder="请选择数据类型"
-          :disabled="formType === 'update'"
-        >
-          <el-option key="int" label="int32 (整数型)" value="int" />
-          <el-option key="float" label="float (单精度浮点型)" value="float" />
-          <el-option key="double" label="double (双精度浮点型)" value="double" />
-          <!--          <el-option key="text" label="text (文本型)" value="text" />-->
-          <!--          <el-option key="date" label="date (日期型)" value="date" />-->
-          <!--          <el-option key="bool" label="bool (布尔型)" value="bool" />-->
-          <!--          <el-option key="enum" label="enum (枚举型)" value="enum" />-->
-          <!--          <el-option key="struct" label="struct (结构体)" value="struct" />-->
-          <!--          <el-option key="array" label="array (数组)" value="array" />-->
-        </el-select>
+        <ThingModelDataType v-model="formData" />
       </el-form-item>
-      <el-form-item label="取值范围" prop="max">
-        <el-input v-model="formData.property.dataType.specs.min" placeholder="请输入最小值" />
-        <span class="mx-2">~</span>
-        <el-input v-model="formData.property.dataType.specs.max" placeholder="请输入最大值" />
-      </el-form-item>
-      <el-form-item label="步长" prop="step">
-        <el-input v-model="formData.property.dataType.specs.step" placeholder="请输入步长" />
-      </el-form-item>
-      <el-form-item label="单位" prop="unit">
-        <el-input v-model="formData.property.dataType.specs.unit" placeholder="请输入单位" />
-      </el-form-item>
+      <ThingModelNumberTypeDataSpecs v-model="formData" />
       <el-form-item label="读写类型" prop="accessMode">
         <el-radio-group v-model="formData.property.accessMode">
           <el-radio label="rw">读写</el-radio>
@@ -60,21 +36,22 @@
       </el-form-item>
       <el-form-item label="属性描述" prop="property.description">
         <el-input
-          type="textarea"
           v-model="formData.property.description"
           placeholder="请输入属性描述"
+          type="textarea"
         />
       </el-form-item>
     </el-form>
 
     <template #footer>
-      <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
+      <el-button :disabled="formLoading" type="primary" @click="submitForm">确 定</el-button>
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
+import ThingModelNumberTypeDataSpecs from './ThingModelNumberTypeDataSpecs.vue'
 import { ProductVO } from '@/api/iot/product/product'
 import {
   ProductFunctionAccessModeEnum,
@@ -82,10 +59,11 @@ import {
   ThinkModelFunctionApi,
   ThinkModelFunctionVO
 } from '@/api/iot/thinkmodelfunction'
+import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 
-const props = defineProps<{ product: ProductVO }>()
+defineOptions({ name: 'IoTProductThingModelForm' })
 
-defineOptions({ name: 'ThinkModelFunctionForm' })
+const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
 
 const { t } = useI18n()
 const message = useMessage()
@@ -184,8 +162,8 @@ const submitForm = async () => {
   formLoading.value = true
   try {
     const data = formData.value as unknown as ThinkModelFunctionVO
-    data.productId = props.product.id
-    data.productKey = props.product.productKey
+    data.productId = product!.value.id
+    data.productKey = product!.value.productKey
     if (formType.value === 'create') {
       await ThinkModelFunctionApi.createThinkModelFunction(data)
       message.success(t('common.createSuccess'))

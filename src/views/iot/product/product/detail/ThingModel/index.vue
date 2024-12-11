@@ -2,18 +2,18 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="功能类型" prop="name">
         <el-select
           v-model="queryParams.type"
-          placeholder="请选择功能类型"
-          clearable
           class="!w-240px"
+          clearable
+          placeholder="请选择功能类型"
         >
           <el-option
             v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_FUNCTION_TYPE)"
@@ -24,46 +24,48 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['iot:think-model-function:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 添加功能
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
+        </el-button>
+        <el-button plain type="primary" @click="openForm('create')">
+          <Icon class="mr-5px" icon="ep:plus" />
+          添加功能
         </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
   <ContentWrap>
     <el-tabs>
-      <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-        <el-table-column label="功能类型" align="center" prop="type">
+      <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+        <el-table-column align="center" label="功能类型" prop="type">
           <template #default="scope">
             <dict-tag :type="DICT_TYPE.IOT_PRODUCT_FUNCTION_TYPE" :value="scope.row.type" />
           </template>
         </el-table-column>
-        <el-table-column label="功能名称" align="center" prop="name" />
-        <el-table-column label="标识符" align="center" prop="identifier" />
-        <el-table-column label="数据类型" align="center" prop="identifier" />
-        <el-table-column label="数据定义" align="center" prop="identifier" />
-        <el-table-column label="操作" align="center">
+        <el-table-column align="center" label="功能名称" prop="name" />
+        <el-table-column align="center" label="标识符" prop="identifier" />
+        <el-table-column align="center" label="数据类型" prop="identifier" />
+        <el-table-column align="center" label="数据定义" prop="identifier" />
+        <el-table-column align="center" label="操作">
           <template #default="scope">
             <el-button
+              v-hasPermi="[`iot:think-model-function:update`]"
               link
               type="primary"
               @click="openForm('update', scope.row.id)"
-              v-hasPermi="[`iot:think-model-function:update`]"
             >
               编辑
             </el-button>
             <el-button
+              v-hasPermi="['iot:think-model-function:delete']"
               link
               type="danger"
               @click="handleDelete(scope.row.id)"
-              v-hasPermi="['iot:think-model-function:delete']"
             >
               删除
             </el-button>
@@ -72,23 +74,24 @@
       </el-table>
       <!-- 分页 -->
       <Pagination
-        :total="total"
-        v-model:page="queryParams.pageNo"
         v-model:limit="queryParams.pageSize"
+        v-model:page="queryParams.pageNo"
+        :total="total"
         @pagination="getList"
       />
     </el-tabs>
   </ContentWrap>
   <!-- 表单弹窗：添加/修改 -->
-  <ThinkModelFunctionForm ref="formRef" :product="product" @success="getList" />
+  <ThingModelForm ref="formRef" @success="getList" />
 </template>
-<script setup lang="ts">
-import { ProductVO } from '@/api/iot/product/product'
+<script lang="ts" setup>
 import { ThinkModelFunctionApi, ThinkModelFunctionVO } from '@/api/iot/thinkmodelfunction'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import ThinkModelFunctionForm from './ThinkModelFunctionForm.vue'
+import ThingModelForm from './ThingModelForm.vue'
+import { ProductVO } from '@/api/iot/product/product'
+import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 
-const props = defineProps<{ product: ProductVO }>()
+defineOptions({ name: 'IoTProductThingModel' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -104,12 +107,12 @@ const queryParams = reactive({
 })
 
 const queryFormRef = ref() // 搜索的表单
-
+const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
-    queryParams.productId = props.product.id
+    queryParams.productId = product?.value?.id || -1
     const data = await ThinkModelFunctionApi.getThinkModelFunctionPage(queryParams)
     list.value = data.list
     total.value = data.total
