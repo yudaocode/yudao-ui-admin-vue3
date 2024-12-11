@@ -130,6 +130,26 @@
       </el-select>
     </el-form-item>
     <el-form-item
+      v-if="userTaskForm.candidateStrategy === CandidateStrategy.FORM_DEPT_LEADER"
+      label="表单内部门字段"
+      prop="formDept"
+    >
+      <el-select
+        v-model="userTaskForm.candidateParam"
+        clearable
+        style="width: 100%"
+        @change="updateElementTask"
+      >
+        <el-option
+          v-for="(item, idx) in deptFieldOnFormOptions"
+          :key="idx"
+          :label="item.title"
+          :value="item.field"
+          :disabled="!item.required"
+        />
+      </el-select>
+    </el-form-item>
+    <el-form-item
       v-if="
         userTaskForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
         userTaskForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
@@ -206,11 +226,14 @@ const postOptions = ref<PostApi.PostVO[]>([]) // 岗位列表
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
 
-// 表单内用户字段
 const { formFieldOptions } = useFormFieldsPermission(FieldPermissionType.READ)
 // 表单内用户字段选项, 必须是必填和用户选择器
 const userFieldOnFormOptions = computed(() => {
   return formFieldOptions.filter((item) => item.type === 'UserSelect')
+})
+// 表单内部门字段选项, 必须是必填和部门选择器
+const deptFieldOnFormOptions = computed(() => {
+  return formFieldOptions.filter((item) => item.type === 'DeptSelect')
 })
 
 const deptLevel = ref(1)
@@ -264,6 +287,9 @@ const resetTaskForm = () => {
     ) {
       userTaskForm.value.candidateParam = +candidateParamStr
       deptLevel.value = +candidateParamStr
+    } else if (userTaskForm.value.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER) {
+      userTaskForm.value.candidateParam = candidateParamStr.split('|')[0]
+      deptLevel.value = +candidateParamStr.split('|')[1]
     } else {
       userTaskForm.value.candidateParam = candidateParamStr.split(',').map((item) => {
         // 如果数字超出了最大安全整数范围，则将其作为字符串处理
@@ -322,7 +348,10 @@ const updateElementTask = () => {
       : userTaskForm.value.candidateParam
 
   // 特殊处理多级部门情况
-  if (userTaskForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER) {
+  if (
+    userTaskForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
+    userTaskForm.value.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
+  ) {
     candidateParam += '|' + deptLevel.value
   }
   // 特殊处理发起人部门负责人、发起人连续部门负责人
