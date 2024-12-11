@@ -178,12 +178,17 @@
         type="textarea"
         v-model="userTaskForm.candidateParam[0]"
         clearable
-        style="width: 72%"
+        style="width: 100%"
         @change="updateElementTask"
       />
-      <el-button class="ml-5px" size="small" type="success" @click="openProcessExpressionDialog"
-        >选择表达式</el-button
-      >
+      <XButton
+        class="!w-1/1 mt-5px"
+        type="success"
+        preIcon="ep:select"
+        title="选择表达式"
+        size="small"
+        @click="openProcessExpressionDialog"
+      />
       <!-- 选择弹窗 -->
       <ProcessExpressionDialog ref="processExpressionDialogRef" @select="selectProcessExpression" />
     </el-form-item>
