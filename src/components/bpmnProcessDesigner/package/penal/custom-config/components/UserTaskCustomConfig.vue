@@ -4,9 +4,24 @@
      3. 审批人为空时
      4. 操作按钮
      5. 字段权限
+     6. 审批类型
 -->
 <template>
   <div>
+    <el-divider content-position="left">审批类型</el-divider>
+    <el-form-item prop="approveType">
+      <el-radio-group v-model="approveType.value">
+        <el-radio
+          v-for="(item, index) in APPROVE_TYPE"
+          :key="index"
+          :value="item.value"
+          :label="item.value"
+        >
+          {{ item.label }}
+        </el-radio>
+      </el-radio-group>
+    </el-form-item>
+
     <el-divider content-position="left">审批人拒绝时</el-divider>
     <el-form-item prop="rejectHandlerType">
       <el-radio-group
@@ -158,7 +173,9 @@ import {
   AssignEmptyHandlerType,
   OPERATION_BUTTON_NAME,
   DEFAULT_BUTTON_SETTING,
-  FieldPermissionType
+  FieldPermissionType,
+  APPROVE_TYPE,
+  ApproveType
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import * as UserApi from '@/api/system/user'
 import { cloneDeep } from 'lodash-es'
@@ -198,6 +215,9 @@ const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFie
   FieldPermissionType.READ
 )
 
+// 审批类型
+const approveType = ref({ value: ApproveType.USER })
+
 const elExtensionElements = ref()
 const otherExtensions = ref()
 const bpmnElement = ref()
@@ -216,6 +236,11 @@ const resetCustomConfigList = () => {
   elExtensionElements.value =
     bpmnElement.value.businessObject?.extensionElements ??
     bpmnInstances().moddle.create('bpmn:ExtensionElements', { values: [] })
+
+  // 审批类型
+  approveType.value =
+    elExtensionElements.value.values?.filter((ex) => ex.$type === `${prefix}:ApproveType`)?.[0] ||
+    bpmnInstances().moddle.create(`${prefix}:ApproveType`, { value: ApproveType.USER })
 
   // 审批人与提交人为同一人时
   assignStartUserHandlerTypeEl.value =
@@ -294,7 +319,8 @@ const resetCustomConfigList = () => {
         ex.$type !== `${prefix}:AssignEmptyHandlerType` &&
         ex.$type !== `${prefix}:AssignEmptyUserIds` &&
         ex.$type !== `${prefix}:ButtonsSetting` &&
-        ex.$type !== `${prefix}:FieldsPermission`
+        ex.$type !== `${prefix}:FieldsPermission` &&
+        ex.$type !== `${prefix}:ApproveType`
     ) ?? []
 
   // 更新元素扩展属性，避免后续报错
@@ -343,6 +369,7 @@ const updateElementExtensions = () => {
       returnNodeIdEl.value,
       assignEmptyHandlerTypeEl.value,
       assignEmptyUserIdsEl.value,
+      approveType.value,
       ...buttonsSettingEl.value,
       ...fieldsPermissionEl.value
     ]
