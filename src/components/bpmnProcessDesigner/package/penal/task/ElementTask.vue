@@ -70,7 +70,7 @@ watch(
   () => props.type,
   () => {
     if (props.type) {
-      witchTaskComponent.value = installedComponent[props.type].componet
+      witchTaskComponent.value = installedComponent[props.type].component
     }
   },
   { immediate: true }
