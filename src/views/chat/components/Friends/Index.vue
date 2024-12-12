@@ -1,6 +1,6 @@
 <template>
   <view
-    class="flex flex-col items-center h-full py-2 b-1 b-gray b-solid"
+    class="flex flex-col items-center h-full py-2 b-1 b-gray b-solid b-l-white"
     style="width: 248px; min-width: 248px"
   >
     <view class="flex flex-col w-full">
@@ -24,8 +24,9 @@ import Friend from '../../model/Friend'
 defineOptions({ name: 'Friends' })
 
 const friendStore = useFriendStore()
-onMounted(() => {
+onMounted(async () => {
   // set default conversation
+  // await friendStore.fetchFriend()
 })
 
 const onFriendClick = (friend: Friend) => {

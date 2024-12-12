@@ -2,7 +2,7 @@ import { store } from '@/store/index'
 import { defineStore } from 'pinia'
 import BaseConversation from '../model/BaseConversation'
 import BaseMessage from '../model/BaseMessage'
-import { ConversationModelType, MessageRole, ContentType, SendStatus } from '../types/types'
+import { ConversationModelType, MessageRole, ContentType, SendStatus, MENU_LIST_ENUM } from '../types/types'
 import SessionApi from '../api/sessionApi'
 import MessageApi, { SendMsg } from '../api/messageApi'
 import { useUserStore, useUserStoreWithOut } from '@/store/modules/user'
@@ -16,7 +16,8 @@ interface ChatStoreModel {
   sessionList: Array<ConversationModelType>
   currentSession: ConversationModelType | null
   currentSessionIndex: number
-  inputText: string
+  inputText: string,
+  bussinessType: number  // conversation 1, friends 2
 }
 
 export const useChatStore = defineStore('chatStore', {
@@ -24,7 +25,8 @@ export const useChatStore = defineStore('chatStore', {
     sessionList: [],
     currentSession: null,
     currentSessionIndex: 0,
-    inputText: ''
+    inputText: '',
+    bussinessType: 1,
   }),
 
   getters: {
@@ -57,6 +59,10 @@ export const useChatStore = defineStore('chatStore', {
 
     setInputText(content: string) {
       this.inputText = content
+    },
+
+    setBussinessType(type: number) {
+      this.bussinessType = type
     },
 
     async addMessageToCurrentSession<T extends BaseMessage>(message: T): Promise<void> {
@@ -109,6 +115,7 @@ export const useChatStore = defineStore('chatStore', {
      * @param message
      */
     addMessageToConversation<T extends BaseMessage>(message: T): void {
+      
       // 无论是converstionNo1还是converstionNo2都都需要试一下
       const converstionNo1 = generateConversationNo(
         message.senderId,
@@ -138,6 +145,11 @@ export const useChatStore = defineStore('chatStore', {
 
       // 更新消息到indexeddb
       addConversation(toRaw(msgConversation) as ChatConversation )
+
+      // 更新当前会话 
+      if (conversationIndex === this.currentSessionIndex) {
+        this.setCurrentConversation()
+      }
     },
 
     /**
@@ -236,7 +248,60 @@ export const useChatStore = defineStore('chatStore', {
       } catch (error) {
         return error
       }
+    },
+
+
+    /**
+     * 创建会话
+     */
+    async createConversation(targetId, type, avatar, nickname) {
+      try {
+        const param = {
+          targetId,
+          type
+        }
+        const res = await SessionApi.createConversation(param)
+        if (res) {
+
+          // 切换到聊天模式
+          this.bussinessType = MENU_LIST_ENUM.CONVERSATION
+
+          // 插入用户名和昵称
+          res.avatar = avatar;
+          res.nickname = nickname;
+          const localConversation = this.convertCoversationFromServer(res)
+          // 存入到数据库
+          addConversation(toRaw(localConversation) as ChatConversation)
+          // 从数据库同步到内存
+          await this.getConversationList()
+          // 设置当前的会话
+          const addIndex = this.sessionList.findIndex(item => item.conversationNo === localConversation.conversationNo)
+          this.setCurrentSessionIndex(addIndex)
+          this.setCurrentConversation()
+
+        }
+
+      } catch (error) {
+        console.log(error)
+      }
+    },
+
+    convertCoversationFromServer(item: any) {
+      return {
+        ...item,
+        updateTime: item.updateTime,
+        targetId: item.targetId,
+        senderId: item.userId,
+        conversationNo: item.no,
+        unreadMessagesCount: item.unreadMessagesCount,
+        description: item.lastMessageDescription,
+        avatar: item.avatar,
+        name: item.name,
+        msgList: []
+      }
     }
+
+
   }
 })
 

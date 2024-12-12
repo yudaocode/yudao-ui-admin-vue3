@@ -1,7 +1,7 @@
 <template>
   <view class="flex py-2 border-b-gray-3 border-b-solid items-center px-2" :class="bgColor()">
     <el-avatar shape="square" size="default" class="mr-2" :src="friend.avatar" />
-    <label>{{ friend.name }}</label>
+    <label :class="fontColor()">{{ friend.name }}</label>
   </view>
 </template>
 
@@ -24,5 +24,9 @@ const friendStore = useFriendStore()
 
 const bgColor = () => {
   return props.friend.id === friendStore.currentFriend?.id ? 'bg-blue' : 'bg-white'
+}
+
+const fontColor = () => {
+  return props.friend.id === friendStore.currentFriend?.id ? 'text-white' : 'text-black'
 }
 </script>

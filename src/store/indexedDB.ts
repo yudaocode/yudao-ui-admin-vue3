@@ -1,3 +1,4 @@
+import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
 import { ConversationModelType } from '@/views/chat/types/types'
 import { openDB, DBSchema, IDBPDatabase } from 'idb'
 
@@ -14,7 +15,9 @@ let dbPromise: Promise<IDBPDatabase<MyDB>>
 export const initDB = () => {
   if (!dbPromise) {
     try {
-      dbPromise = openDB<MyDB>('yudao-im-indexeddb', 1, {
+      const { wsCache } = useCache()
+      const user = wsCache.get(CACHE_KEY.USER).user
+      dbPromise = openDB<MyDB>('yudao-im-indexeddb-' + user.id, 1, {
         upgrade(db) {
           db.createObjectStore('Conversations', { keyPath: 'conversationNo' })
         }

@@ -11,6 +11,7 @@ import {
 import TextMessage from '../model/TextMessage'
 import { debug } from 'console'
 import { useUserStore } from '@/store/modules/user'
+import BaseConversation from '../model/BaseConversation'
 
 interface Message {
   type: string
@@ -101,6 +102,13 @@ export const useWebSocketStore = defineStore('webSocket', () => {
 
           }
 
+        } else if (websoketMessage.type === WEBSOCKET_MESSAGE_TYPE_ENUM.IM_CONVERSATION_ADD.toString()) {
+          const chatStore = useChatStore()
+          const conversation = JSON.parse(websoketMessage.content) as BaseConversation
+          chatStore.addSession(conversation)
+          // 同步到内存
+          chatStore.getConversationList()
+          
         } else {
           // TODO:[dylan]
         }

@@ -1,33 +1,23 @@
 import { defineStore } from 'pinia'
+import { store } from '@/store/index'
 import BaseConversation from '../model/BaseConversation'
 import Friend from '../model/Friend'
+import { getAllUser, getDeptUser } from '@/api/system/user'
+import * as DeptApi from '@/api/system/dept'
 
 interface FriendStoreModel {
   friendList: Array<Friend>
-  currentFriend: Friend | null
+  currentFriend: Friend | null,
+  selectedDepartmentId: number,
+  departmentList: DeptApi.DeptVO[]
 }
 
 export const useFriendStore = defineStore('friendStore', {
   state: (): FriendStoreModel => ({
-    friendList: [
-      {
-        id: '1111',
-        name: 'Elon Musk',
-        avatar:
-          'https://img0.baidu.com/it/u=4211304696,1059959254&fm=253&fmt=auto&app=120&f=JPEG?w=800&h=1174',
-        description: 'cool boy',
-        createTime: 1695201147622
-      },
-      {
-        id: '2222',
-        name: 'Spider Man',
-        avatar:
-          'https://www.hottoys.com.cn/wp-content/uploads/2019/06/bloggerreview_spiderman_advanced_ben-9.jpg',
-        description: 'hero',
-        createTime: 1695201147622
-      }
-    ],
-    currentFriend: null
+    friendList: [],
+    currentFriend: null,
+    selectedDepartmentId: 0,
+    departmentList: []
   }),
 
   getters: {
@@ -42,6 +32,82 @@ export const useFriendStore = defineStore('friendStore', {
     },
     setCurrentFriend(friend: Friend) {
       this.currentFriend = friend
-    }
+    },
+    setCurrentDepartmentId(id: number) {
+      this.selectedDepartmentId = id
+    },
+    resetFriendList() {
+      this.friendList = []
+      this.currentFriend = null
+    },
+    async fetchDepartment () {
+      try {
+        const result = await DeptApi.getSimpleDeptList()
+        this.departmentList = this.buildHierarchy(result)
+      } catch (e) {
+        console.log(e)
+      }
+    },
+
+    async fetchFriend() {
+
+      try {
+        const res  = await getAllUser()
+        this.friendList = res
+
+      } catch (error) {
+        console.error(error)
+      }
+    },
+
+    async fetchDeptUser(id) {
+
+      try {
+        const res = await getDeptUser(id)
+        if (res) {
+          this.friendList = res.map(item =>  {
+            return {
+              ...item,
+              name: item.nickname
+            }
+          })
+        } else {
+          this.friendList = []
+        }
+   
+
+      } catch (error) {
+        console.error(error)
+      }
+    },
+    
+     buildHierarchy(data: DeptApi.DeptVO[]): DeptApi.DeptVO[] {
+      const map = new Map<number, DeptApi.DeptVO>();
+  
+      // 初始化 map，确保每个 id 都有一条记录
+      data.forEach(item => map.set(item.id, { ...item, children: [] }));
+  
+      const result: DeptApi.DeptVO[] = [];
+  
+      data.forEach(item => {
+          if (item.parentId === 0) {
+              // 根节点
+              result.push(map.get(item.id)!);
+          } else {
+              // 子节点，放入父节点的 children 数组
+              const parent = map.get(item.parentId);
+              if (parent) {
+                  parent.children!.push(map.get(item.id)!);
+              }
+          }
+      });
+  
+      return result;
+  }
   }
 })
+
+
+export const useFriendStoreWithOut = () => {
+  return useFriendStore(store)
+}

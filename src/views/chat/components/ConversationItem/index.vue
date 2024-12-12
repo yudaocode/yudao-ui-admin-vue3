@@ -53,8 +53,8 @@ const timefontColor = () => {
  */
 const lastMessage = computed(() => {
 
-  if (props.conversation.msgList.length === 0) {
-    return props.conversation.lastMessageDescription
+  if (!props.conversation.msgList || props.conversation.msgList.length === 0) {
+    return props.conversation.lastMessageDescription || ''
   }
   
   const lastIndex = props.conversation.msgList.length - 1

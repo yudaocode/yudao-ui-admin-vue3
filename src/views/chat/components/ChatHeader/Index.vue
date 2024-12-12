@@ -4,7 +4,7 @@
     style="height: 60px; min-height: 60px"
   >
     <label class="text-black text-size-xl font-medium mx-4">{{
-      chatStore.currentSession?.name
+      chatStore.currentSession?.nickname || chatStore.currentSession?.name 
     }}</label>
   </view>
 </template>

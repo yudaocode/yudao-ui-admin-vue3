@@ -27,6 +27,15 @@ export const getAllUser = () => {
   return request.get({ url: '/system/user/all' })
 }
 
+/**
+ * 获取部门成员
+ * @param id 
+ * @returns 
+ */
+export const getDeptUser = (id: number) => {
+  return request.get({ url: '/system/user/listByDept?id='+ id })
+}
+
 // 查询用户详情
 export const getUser = (id: number) => {
   return request.get({ url: '/system/user/get?id=' + id })

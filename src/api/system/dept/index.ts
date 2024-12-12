@@ -1,7 +1,7 @@
 import request from '@/config/axios'
 
 export interface DeptVO {
-  id?: number
+  id: number
   name: string
   parentId: number
   status: number
@@ -10,6 +10,7 @@ export interface DeptVO {
   phone: string
   email: string
   createTime: Date
+  children?: DeptVO[]
 }
 
 // 查询部门（精简)列表

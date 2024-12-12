@@ -35,7 +35,8 @@ export const enum CONVERSATION_TYPE {
 }
 
 export enum WEBSOCKET_MESSAGE_TYPE_ENUM {
-  IM_MESSAGE_RECEIVE = 'im-message-receive'
+  IM_MESSAGE_RECEIVE = 'im-message-receive',
+  IM_CONVERSATION_ADD = 'im-conversation-add'
 }
 
 
