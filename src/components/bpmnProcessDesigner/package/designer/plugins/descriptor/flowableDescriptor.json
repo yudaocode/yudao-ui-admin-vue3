@@ -406,6 +406,31 @@
           "name": "variableMappingDelegateExpression",
           "isAttr": true,
           "type": "String"
+        },
+        {
+          "name": "calledElementType",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "processInstanceName",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "inheritBusinessKey",
+          "isAttr": true,
+          "type": "Boolean"
+        },
+        {
+          "name": "businessKey",
+          "isAttr": true,
+          "type": "String"
+        },
+        {
+          "name": "inheritVariables",
+          "isAttr": true,
+          "type": "Boolean"
         }
       ]
     },
