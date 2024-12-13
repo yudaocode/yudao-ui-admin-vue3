@@ -1,31 +1,43 @@
 <template>
-  <el-select
-    v-model="formData.property.dataType.type"
-    :disabled="!!formData.id"
-    placeholder="请选择数据类型"
-  >
-    <el-option key="int" label="int32 (整数型)" value="int" />
-    <el-option key="float" label="float (单精度浮点型)" value="float" />
-    <el-option key="double" label="double (双精度浮点型)" value="double" />
-    <el-option key="enum" label="enum(枚举型)" value="enum" />
-    <el-option key="bool" label="bool (布尔型)" value="bool" />
-    <el-option key="text" label="text (文本型)" value="text" />
-    <el-option key="date" label="date (时间型)" value="date" />
-    <el-option key="struct" label="struct (结构体)" value="struct" />
-    <el-option key="array" label="array (数组)" value="array" />
-  </el-select>
-  <!-- 情况一：数值型 -->
+  <el-form-item label="数据类型" prop="dataType">
+    <ThingModelDataType v-model="formData.dataType" @change="handleChange" />
+  </el-form-item>
+  <!-- 数值型配置 -->
+  <ThingModelNumberTypeDataSpecs
+    v-if="
+      [DataSpecsDataType.INT, DataSpecsDataType.DOUBLE, DataSpecsDataType.FLOAT].includes(
+        formData.dataType || ''
+      )
+    "
+    v-model="formData.dataSpecs"
+  />
+  <!-- 枚举型配置 -->
+  <ThingModelEnumTypeDataSpecs
+    v-if="formData.dataType === DataSpecsDataType.ENUM"
+    v-model="formData.dataSpecsList"
+  />
 </template>
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
+import { DataSpecsDataType } from './config'
+import {
+  ThingModelDataType,
+  ThingModelEnumTypeDataSpecs,
+  ThingModelNumberTypeDataSpecs
+} from './dataSpecs'
 
-/** 物模型数据类型 */
+/** 物模型数据 */
 defineOptions({ name: 'ThingModelDataSpecs' })
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
-const formData = useVModel(props, 'modelValue', emits)
+const formData = useVModel(props, 'modelValue', emits) as Ref<any>
 
+/** 属性值的数据类型切换时 */
+const handleChange = () => {
+  formData.value.dataSpecsList = []
+  formData.value.dataSpecs = {}
+}
 // dataType为INT的dataSpecs示例：
 //
 // {

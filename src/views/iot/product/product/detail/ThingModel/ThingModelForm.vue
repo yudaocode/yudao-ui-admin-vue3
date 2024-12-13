@@ -18,28 +18,17 @@
         <el-input v-model="formData.name" placeholder="请输入功能名称" />
       </el-form-item>
       <el-form-item label="标识符" prop="identifier">
-        <el-input
-          v-model="formData.identifier"
-          :disabled="formType === 'update'"
-          placeholder="请输入标识符"
-        />
+        <el-input v-model="formData.identifier" placeholder="请输入标识符" />
       </el-form-item>
-      <el-form-item label="数据类型" prop="type">
-        <ThingModelDataType v-model="formData" />
-      </el-form-item>
-      <ThingModelNumberTypeDataSpecs v-model="formData" />
+      <ThingModelDataSpecs v-model="formData" />
       <el-form-item label="读写类型" prop="accessMode">
-        <el-radio-group v-model="formData.property.accessMode">
+        <el-radio-group v-model="formData.accessMode">
           <el-radio label="rw">读写</el-radio>
           <el-radio label="r">只读</el-radio>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="属性描述" prop="property.description">
-        <el-input
-          v-model="formData.property.description"
-          placeholder="请输入属性描述"
-          type="textarea"
-        />
+        <el-input v-model="formData.description" placeholder="请输入属性描述" type="textarea" />
       </el-form-item>
     </el-form>
 
@@ -51,10 +40,9 @@
 </template>
 
 <script lang="ts" setup>
-import ThingModelNumberTypeDataSpecs from './ThingModelNumberTypeDataSpecs.vue'
 import { ProductVO } from '@/api/iot/product/product'
+import ThingModelDataSpecs from './ThingModelDataSpecs.vue'
 import {
-  ProductFunctionAccessModeEnum,
   ProductFunctionTypeEnum,
   ThinkModelFunctionApi,
   ThinkModelFunctionVO
@@ -80,22 +68,10 @@ const formData = ref({
   name: undefined,
   description: undefined,
   type: ProductFunctionTypeEnum.PROPERTY,
-  property: {
-    identifier: undefined,
-    name: undefined,
-    accessMode: ProductFunctionAccessModeEnum.READ_WRITE,
-    required: true,
-    dataType: {
-      type: undefined,
-      specs: {
-        min: undefined,
-        max: undefined,
-        step: undefined,
-        unit: undefined
-      }
-    },
-    description: undefined // 添加这一行
-  }
+  dataType: undefined,
+  dataSpecsList: [],
+  dataSpecs: undefined,
+  accessMode: undefined
 })
 const formRules = reactive({
   name: [
@@ -188,22 +164,10 @@ const resetForm = () => {
     name: undefined,
     description: undefined,
     type: ProductFunctionTypeEnum.PROPERTY,
-    property: {
-      identifier: undefined,
-      name: undefined,
-      accessMode: ProductFunctionAccessModeEnum.READ_WRITE,
-      required: true,
-      dataType: {
-        type: undefined,
-        specs: {
-          min: undefined,
-          max: undefined,
-          step: undefined,
-          unit: undefined
-        }
-      },
-      description: undefined // 确保重置 description 字段
-    }
+    dataType: undefined,
+    dataSpecsList: [],
+    dataSpecs: undefined,
+    accessMode: undefined
   }
   formRef.value?.resetFields()
 }

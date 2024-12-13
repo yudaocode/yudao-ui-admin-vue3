@@ -30,23 +30,13 @@
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
 import { UnifyUnitSpecsDTO } from '@/views/iot/utils/constants'
+import { DataSpecsNumberDataVO } from '../config'
 
+/** 数值型的 dataSpecs 配置组件 */
 defineOptions({ name: 'ThingModelNumberTypeDataSpecs' })
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
-const formData = useVModel(props, 'modelValue', emits) as Ref<DataConfig>
-type DataType = 'INT' | 'FLOAT' | 'DOUBLE'
-
-interface DataConfig {
-  dataType: DataType // 数据类型，取值为 INT、FLOAT 或 DOUBLE
-  max: string // 最大值，必须与 dataType 设置一致，且为 STRING 类型
-  min: string // 最小值，必须与 dataType 设置一致，且为 STRING 类型
-  step: string // 步长，必须与 dataType 设置一致，且为 STRING 类型
-  precise?: string // 精度，当 dataType 为 FLOAT 或 DOUBLE 时可选
-  defaultValue?: string // 默认值，可选
-  unit: string // 单位的符号
-  unitName: string // 单位的名称
-}
+const formData = useVModel(props, 'modelValue', emits) as Ref<DataSpecsNumberDataVO>
 
 /** 单位发生变化时触发 */
 const unitChange = (UnitSpecs: string) => {
