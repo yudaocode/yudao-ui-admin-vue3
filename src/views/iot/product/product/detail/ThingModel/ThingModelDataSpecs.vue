@@ -33,10 +33,19 @@ const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
 const formData = useVModel(props, 'modelValue', emits) as Ref<any>
 
-/** 属性值的数据类型切换时 */
-const handleChange = () => {
+/** 属性值的数据类型切换时初始化相关数据 */
+const handleChange = (dataType: any) => {
   formData.value.dataSpecsList = []
   formData.value.dataSpecs = {}
+
+  switch (dataType) {
+    case DataSpecsDataType.ENUM:
+      formData.value.dataSpecsList.push({
+        dataType: 'ENUM',
+        name: '', // 枚举项的名称
+        value: undefined // 枚举值
+      })
+  }
 }
 // dataType为INT的dataSpecs示例：
 //

@@ -48,6 +48,7 @@ import {
   ThinkModelFunctionVO
 } from '@/api/iot/thinkmodelfunction'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
+import { DataSpecsDataType } from './config'
 
 defineOptions({ name: 'IoTProductThingModelForm' })
 
@@ -68,9 +69,9 @@ const formData = ref({
   name: undefined,
   description: undefined,
   type: ProductFunctionTypeEnum.PROPERTY,
-  dataType: undefined,
+  dataType: DataSpecsDataType.INT,
   dataSpecsList: [],
-  dataSpecs: undefined,
+  dataSpecs: {},
   accessMode: undefined
 })
 const formRules = reactive({
@@ -164,9 +165,9 @@ const resetForm = () => {
     name: undefined,
     description: undefined,
     type: ProductFunctionTypeEnum.PROPERTY,
-    dataType: undefined,
+    dataType: DataSpecsDataType.INT,
     dataSpecsList: [],
-    dataSpecs: undefined,
+    dataSpecs: {},
     accessMode: undefined
   }
   formRef.value?.resetFields()

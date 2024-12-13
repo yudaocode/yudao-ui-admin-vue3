@@ -21,7 +21,7 @@ export interface DataSpecsEnumDataVO {
   dataType: 'ENUM' | 'BOOL'
   defaultValue?: string // 默认值，可选
   name: string // 枚举项的名称
-  value: number // 枚举值
+  value: number | undefined // 枚举值
 }
 
 /** 属性值的数据类型 */

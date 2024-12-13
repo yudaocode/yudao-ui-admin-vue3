@@ -30,8 +30,8 @@ const dataTypeOptions = [
   { value: DataSpecsDataType.STRUCT, label: 'struct (结构体)' },
   { value: DataSpecsDataType.ARRAY, label: 'array (数组)' }
 ]
-const handleChange = () => {
-  emits('change')
+const handleChange = (value: any) => {
+  emits('change', value)
 }
 </script>
 
