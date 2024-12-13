@@ -79,6 +79,32 @@ const processNodeTree = ref<SimpleFlowNode | undefined>()
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
 
+// 添加更新模型的方法
+const updateModel = (key?: string, name?: string) => {
+  if (!processNodeTree.value) {
+    processNodeTree.value = {
+      name: name || '发起人',
+      type: NodeType.START_USER_NODE,
+      id: NodeId.START_USER_NODE_ID,
+      childNode: {
+        id: NodeId.END_EVENT_NODE_ID,
+        name: '结束',
+        type: NodeType.END_EVENT_NODE
+      }
+    }
+  } else if (name) {
+    // 更新现有模型的名称
+    processNodeTree.value.name = name
+  }
+}
+
+// 监听属性变化
+watch([() => props.modelKey, () => props.modelName], ([newKey, newName]) => {
+  if (!props.modelId && newKey && newName) {
+    updateModel(newKey, newName)
+  }
+}, { immediate: true, deep: true })
+
 const saveSimpleFlowModel = async (simpleModelNode: SimpleFlowNode) => {
   if (!simpleModelNode) {
     message.error('模型数据为空')

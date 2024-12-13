@@ -3,7 +3,6 @@
     <!-- 流程设计器，负责绘制流程等 -->
     <MyProcessDesigner
       key="designer"
-      v-if="xmlString !== undefined"
       v-model="xmlString"
       :value="xmlString"
       v-bind="controlForm"
@@ -16,8 +15,9 @@
     />
     <!-- 流程属性器，负责编辑每个流程节点的属性 -->
     <MyProcessPenal
+      v-if="isModelerReady && modeler"
       key="penal"
-      :bpmnModeler="modeler as any"
+      :bpmnModeler="modeler"
       :prefix="controlForm.prefix"
       class="process-panel"
       :model="model"
@@ -44,8 +44,10 @@ const props = defineProps<{
 const emit = defineEmits(['success'])
 const message = useMessage() // 国际化
 
-const xmlString = ref<string>() // BPMN XML
-const modeler = ref(null) // BPMN Modeler
+const xmlString = ref<string>('') // BPMN XML
+const modeler = shallowRef() // BPMN Modeler
+const processDesigner = ref()
+const isModelerReady = ref(false)
 const controlForm = ref({
   simulation: true,
   labelEditing: false,
@@ -56,11 +58,49 @@ const controlForm = ref({
 })
 const model = ref<ModelApi.ModelVO>() // 流程模型的信息
 
+// 初始化 bpmnInstances
+const initBpmnInstances = () => {
+  if (!modeler.value) return false
+  try {
+    const instances = {
+      modeler: modeler.value,
+      modeling: modeler.value.get('modeling'),
+      moddle: modeler.value.get('moddle'),
+      eventBus: modeler.value.get('eventBus'),
+      bpmnFactory: modeler.value.get('bpmnFactory'),
+      elementFactory: modeler.value.get('elementFactory'),
+      elementRegistry: modeler.value.get('elementRegistry'),
+      replace: modeler.value.get('replace'),
+      selection: modeler.value.get('selection')
+    }
+    
+    // 检查所有实例是否都存在
+    return Object.values(instances).every(instance => instance)
+  } catch (error) {
+    console.error('初始化 bpmnInstances 失败:', error)
+    return false
+  }
+}
+
 /** 初始化 modeler */
-const initModeler = (item) => {
-  setTimeout(() => {
+const initModeler = async (item) => {
+  try {
     modeler.value = item
-  }, 10)
+    // 等待 modeler 初始化完成
+    await nextTick()
+    
+    // 确保 modeler 的所有实例都已经准备好
+    if (initBpmnInstances()) {
+      isModelerReady.value = true
+      if (!props.modelId && props.modelKey && props.modelName) {
+        await updateModelData(props.modelKey, props.modelName)
+      }
+    } else {
+      console.error('modeler 实例未完全初始化')
+    }
+  } catch (error) {
+    console.error('初始化 modeler 失败:', error)
+  }
 }
 
 /** 获取默认的BPMN XML */
@@ -97,9 +137,9 @@ const save = async (bpmnXml: string) => {
 
 /** 初始化 */
 onMounted(async () => {
-  if (props.modelId) {
-    // 编辑模式
-    try {
+  try {
+    if (props.modelId) {
+      // 编辑模式
       // 查询模型
       const data = await ModelApi.getModel(props.modelId)
       model.value = {
@@ -107,30 +147,54 @@ onMounted(async () => {
         bpmnXml: undefined // 清空 bpmnXml 属性
       }
       xmlString.value = data.bpmnXml || getDefaultBpmnXml(data.key, data.name)
-    } catch (error) {
-      console.error('获取模型失败:', error)
-      message.error('获取模型失败')
+    } else if (props.modelKey && props.modelName) {
+      // 新建模式
+      xmlString.value = getDefaultBpmnXml(props.modelKey, props.modelName)
+      model.value = {
+        key: props.modelKey,
+        name: props.modelName
+      } as ModelApi.ModelVO
     }
-  } else if (props.modelKey && props.modelName) {
-    // 新建模式，使用传入的key和name创建默认XML
-    xmlString.value = getDefaultBpmnXml(props.modelKey, props.modelName)
-    model.value = {
-      key: props.modelKey,
-      name: props.modelName
-    } as ModelApi.ModelVO
+  } catch (error) {
+    console.error('初始化失败:', error)
+    message.error('初始化失败')
   }
 })
 
-// 监听key和name的变化
-watch([() => props.modelKey, () => props.modelName], ([newKey, newName]) => {
-  if (!props.modelId && newKey && newName) {
-    xmlString.value = getDefaultBpmnXml(newKey, newName)
+// 更新模型数据
+const updateModelData = async (key?: string, name?: string) => {
+  if (key && name) {
+    xmlString.value = getDefaultBpmnXml(key, name)
     model.value = {
-      key: newKey,
-      name: newName
+      ...model.value,
+      key: key,
+      name: name
     } as ModelApi.ModelVO
+    // 确保更新后重新渲染
+    await nextTick()
+    if (processDesigner.value?.refresh) {
+      processDesigner.value.refresh()
+    }
   }
-}, { immediate: true })
+}
+
+// 监听key和name的变化
+watch([() => props.modelKey, () => props.modelName], async ([newKey, newName]) => {
+  if (!props.modelId && newKey && newName && modeler.value) {
+    await updateModelData(newKey, newName)
+  }
+}, { immediate: true, deep: true })
+
+// 在组件卸载时清理
+onBeforeUnmount(() => {
+  isModelerReady.value = false
+  modeler.value = null
+  // 清理全局实例
+  const w = window as any
+  if (w.bpmnInstances) {
+    w.bpmnInstances = null
+  }
+})
 </script>
 <style lang="scss">
 .process-panel__container {

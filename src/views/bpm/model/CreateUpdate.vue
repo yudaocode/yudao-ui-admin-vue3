@@ -274,6 +274,7 @@
       <!-- BPMN设计器 -->
       <template v-if="formData.type === BpmModelType.BPMN">
         <BpmModelEditor
+          v-if="showDesigner"
           :model-id="formData.id"
           :model-key="formData.key"
           :model-name="formData.name"
@@ -284,6 +285,7 @@
       <!-- Simple设计器 -->
       <template v-else>
         <SimpleModelDesign
+          v-if="showDesigner"
           :model-id="formData.id"
           :model-key="formData.key"
           :model-name="formData.name"
@@ -547,16 +549,43 @@ const handleDesignSuccess = (bpmnXml?: string) => {
 // 步骤切换处理
 const handleStepClick = async (index: number) => {
   // 如果是切换到第三步（流程设计），需要校验key和name
-  if (index === 2 && !formData.value.id) {
-    // 新增时才校验
-    if (!formData.value.key || !formData.value.name) {
-      message.warning('请先填写流程标识和流程名称')
-      return
+  if (index === 2) {
+    if (!formData.value.id) {
+      // 新增时才校验
+      try {
+        await formRef.value?.validateField(['key', 'name'])
+        // 确保数据已经准备好
+        await nextTick()
+      } catch (error) {
+        message.warning('请先填写流程标识和流程名称')
+        return
+      }
     }
+    // 确保数据已经准备好再切换
+    await nextTick()
   }
-
   currentStep.value = index
 }
+
+// 添加一个计算属性来判断是否显示设计器
+const showDesigner = computed(() => {
+  return currentStep.value === 2 && Boolean(formData.value.id || (formData.value.key && formData.value.name))
+})
+
+// 监听步骤变化，确保数据准备完成
+watch(() => currentStep.value, async (newStep) => {
+  if (newStep === 2) {
+    await nextTick()
+  }
+}, { immediate: false })
+
+// 在组件卸载时清理
+onBeforeUnmount(() => {
+  const w = window as any
+  if (w.bpmnInstances) {
+    w.bpmnInstances = null
+  }
+})
 </script>
 
 <style lang="scss" scoped>

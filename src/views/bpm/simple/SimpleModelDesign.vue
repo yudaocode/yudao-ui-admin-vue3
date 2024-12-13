@@ -5,6 +5,7 @@
       :model-key="modelKey"
       :model-name="modelName"
       @success="handleSuccess" 
+      ref="designerRef"
     />
   </ContentWrap>
 </template>
@@ -15,13 +16,21 @@ defineOptions({
   name: 'SimpleModelDesign'
 })
 
-defineProps<{
+const props = defineProps<{
   modelId?: string
   modelKey?: string
   modelName?: string
 }>()
 
 const emit = defineEmits(['success'])
+const designerRef = ref()
+
+// 监听属性变化
+watch([() => props.modelKey, () => props.modelName], ([newKey, newName]) => {
+  if (designerRef.value && newKey && newName) {
+    designerRef.value.updateModel(newKey, newName)
+  }
+}, { immediate: true, deep: true })
 
 // 修改成功回调
 const handleSuccess = (data?: any) => {
