@@ -10,12 +10,6 @@ export interface DataSpecsNumberDataVO {
   unitName: string // 单位的名称
 }
 
-/** dataSpecs 文本型数据结构 */
-export interface DataSpecsTextDataVO {
-  dataType: 'TEXT'
-  length: number
-}
-
 /** dataSpecs 枚举型数据结构 */
 export interface DataSpecsEnumOrBoolDataVO {
   dataType: 'enum' | 'bool'

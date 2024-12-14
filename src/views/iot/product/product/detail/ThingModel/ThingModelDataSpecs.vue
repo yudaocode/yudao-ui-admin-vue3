@@ -47,12 +47,21 @@
   <el-form-item label="时间格式" prop="date" v-if="formData.dataType === DataSpecsDataType.DATE">
     <el-input disabled class="w-255px!" placeholder="String类型的UTC时间戳（毫秒）" />
   </el-form-item>
+  <!-- 数组型配置-->
+  <ThingModelArrayTypeDataSpecs
+    v-model="formData.dataSpecs"
+    v-if="formData.dataType === DataSpecsDataType.ARRAY"
+  />
 </template>
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
 import { DataSpecsDataType, dataTypeOptions } from './config'
-import { ThingModelEnumTypeDataSpecs, ThingModelNumberTypeDataSpecs } from './dataSpecs'
+import {
+  ThingModelArrayTypeDataSpecs,
+  ThingModelEnumTypeDataSpecs,
+  ThingModelNumberTypeDataSpecs
+} from './dataSpecs'
 
 /** 物模型数据 */
 defineOptions({ name: 'ThingModelDataSpecs' })
@@ -90,6 +99,9 @@ const handleChange = (dataType: any) => {
           value: i // 布尔值
         })
       }
+      break
+    case DataSpecsDataType.ARRAY:
+      formData.value.dataSpecs.dataType = DataSpecsDataType.ARRAY
       break
   }
 }
