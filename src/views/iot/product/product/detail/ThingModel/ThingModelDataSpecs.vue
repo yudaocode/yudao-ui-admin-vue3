@@ -1,6 +1,13 @@
 <template>
   <el-form-item label="数据类型" prop="dataType">
-    <ThingModelDataType v-model="formData.dataType" @change="handleChange" />
+    <el-select v-model="formData.dataType" placeholder="请选择数据类型" @change="handleChange">
+      <el-option
+        v-for="option in dataTypeOptions"
+        :key="option.value"
+        :label="option.label"
+        :value="option.value"
+      />
+    </el-select>
   </el-form-item>
   <!-- 数值型配置 -->
   <ThingModelNumberTypeDataSpecs
@@ -36,16 +43,16 @@
       <template #append>字节</template>
     </el-input>
   </el-form-item>
+  <!-- 时间型配置 -->
+  <el-form-item label="时间格式" prop="date" v-if="formData.dataType === DataSpecsDataType.DATE">
+    <el-input disabled class="w-255px!" placeholder="String类型的UTC时间戳（毫秒）" />
+  </el-form-item>
 </template>
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import { DataSpecsDataType } from './config'
-import {
-  ThingModelDataType,
-  ThingModelEnumTypeDataSpecs,
-  ThingModelNumberTypeDataSpecs
-} from './dataSpecs'
+import { DataSpecsDataType, dataTypeOptions } from './config'
+import { ThingModelEnumTypeDataSpecs, ThingModelNumberTypeDataSpecs } from './dataSpecs'
 
 /** 物模型数据 */
 defineOptions({ name: 'ThingModelDataSpecs' })
@@ -59,6 +66,15 @@ const handleChange = (dataType: any) => {
   formData.value.dataSpecs = {}
 
   switch (dataType) {
+    case DataSpecsDataType.INT:
+      formData.value.dataSpecs.dataType = DataSpecsDataType.INT
+      break
+    case DataSpecsDataType.DOUBLE:
+      formData.value.dataSpecs.dataType = DataSpecsDataType.DOUBLE
+      break
+    case DataSpecsDataType.FLOAT:
+      formData.value.dataSpecs.dataType = DataSpecsDataType.FLOAT
+      break
     case DataSpecsDataType.ENUM:
       formData.value.dataSpecsList.push({
         dataType: DataSpecsDataType.ENUM,
@@ -74,75 +90,9 @@ const handleChange = (dataType: any) => {
           value: i // 布尔值
         })
       }
+      break
   }
 }
-// dataType为INT的dataSpecs示例：
-//
-// {
-//   "dataSpecs": {
-//   "custom": true,
-//       "dataType": "INT",
-//       "defaultValue": "30",
-//       "max": "1440",
-//       "min": "0",
-//       "step": "10",
-//       "unit": "min"
-// }
-// }
-// dataType为TEXT的dataSpecs示例：
-//
-// {
-//   "dataSpecs": {
-//   "custom": true,
-//       "dataType": "TEXT",
-//       "id": 2412127,
-//       "length": 2048
-// }
-// }
-// dataType为ARRAY的dataSpecs示例：
-//
-// {
-//   "dataSpecs": {
-//   "childDataType": "INT",
-//       "custom": true,
-//       "dataType": "ARRAY",
-//       "size": 1
-// }
-// }
-// dataType为ENUM的dataSpecsList示例：
-//
-// {
-//   "dataSpecsList": [
-//   {
-//     "custom": false,
-//     "dataType": "ENUM",
-//     "defaultValue": "true",
-//     "name": "打开",
-//     "value": 1
-//   },
-//   {
-//     "custom": false,
-//     "dataType": "ENUM",
-//     "defaultValue": "false",
-//     "name": "关闭",
-//     "value": 0
-//   }
-// ]
-// }
-// dataType为STRUCT的dataSpecsList示例：
-//
-// {
-//   "childDataType": "TEXT",
-//     "childName": "卡编号",
-//     "dataSpecs": {
-//   "custom": true,
-//       "dataType": "TEXT",
-//       "length": 128
-// },
-//   "dataType": "STRUCT",
-//     "identifier": "CardNo",
-//     "name": "NVR所拥有的芯片信息"
-// }
 </script>
 
 <style lang="scss" scoped></style>

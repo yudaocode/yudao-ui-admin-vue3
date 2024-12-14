@@ -36,3 +36,16 @@ export const DataSpecsDataType = {
   STRUCT: 'struct',
   ARRAY: 'array'
 } as const
+
+/** 物体模型数据类型配置项 */
+export const dataTypeOptions = [
+  { value: DataSpecsDataType.INT, label: 'int32 (整数型)' },
+  { value: DataSpecsDataType.FLOAT, label: 'float (单精度浮点型)' },
+  { value: DataSpecsDataType.DOUBLE, label: 'double (双精度浮点型)' },
+  { value: DataSpecsDataType.ENUM, label: 'enum(枚举型)' },
+  { value: DataSpecsDataType.BOOL, label: 'bool (布尔型)' },
+  { value: DataSpecsDataType.TEXT, label: 'text (文本型)' },
+  { value: DataSpecsDataType.DATE, label: 'date (时间型)' },
+  { value: DataSpecsDataType.STRUCT, label: 'struct (结构体)' },
+  { value: DataSpecsDataType.ARRAY, label: 'array (数组)' }
+]
