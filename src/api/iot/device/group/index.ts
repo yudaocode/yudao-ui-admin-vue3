@@ -6,6 +6,7 @@ export interface DeviceGroupVO {
   name: string // 分组名字
   status: number // 分组状态
   description: string // 分组描述
+  deviceCount?: number // 设备数量
 }
 
 // IoT 设备分组 API
@@ -33,5 +34,10 @@ export const DeviceGroupApi = {
   // 删除IoT 设备分组
   deleteDeviceGroup: async (id: number) => {
     return await request.delete({ url: `/iot/device-group/delete?id=` + id })
+  },
+
+  // 获取设备分组的精简信息列表
+  getSimpleDeviceGroupList: async () => {
+    return await request.get({ url: `/iot/device-group/simple-list` })
   }
 }

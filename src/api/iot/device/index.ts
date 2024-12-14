@@ -28,6 +28,7 @@ export interface DeviceVO {
   areaId: number // 地区编码
   address: string // 设备详细地址
   serialNumber: string // 设备序列号
+  groupIds?: number[] // 添加分组 ID
 }
 
 export interface DeviceUpdateStatusVO {

@@ -71,6 +71,21 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="设备分组" prop="groupId">
+        <el-select
+          v-model="queryParams.groupId"
+          placeholder="请选择设备分组"
+          clearable
+          class="!w-240px"
+        >
+          <el-option
+            v-for="group in deviceGroups"
+            :key="group.id"
+            :label="group.name"
+            :value="group.id"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery">
           <Icon icon="ep:search" class="mr-5px" />
@@ -104,7 +119,7 @@
       <el-table-column label="备注名称" align="center" prop="nickname" />
       <el-table-column label="设备所属产品" align="center" prop="productId">
         <template #default="scope">
-          {{ productMap[scope.row.productId] }}
+          {{ products.find((p) => p.id === scope.row.productId)?.name || '-' }}
         </template>
       </el-table-column>
       <el-table-column label="设备类型" align="center" prop="deviceType">
@@ -124,6 +139,15 @@
         :formatter="dateFormatter"
         width="180px"
       />
+      <el-table-column label="所属分组" align="center" prop="groupId">
+        <template #default="scope">
+          <template v-if="scope.row.groupIds?.length">
+            <el-tag v-for="id in scope.row.groupIds" :key="id" class="ml-5px" size="small">
+              {{ deviceGroups.find((g) => g.id === id)?.name }}
+            </el-tag>
+          </template>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button
@@ -171,7 +195,8 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { DeviceApi, DeviceVO } from '@/api/iot/device'
 import DeviceForm from './DeviceForm.vue'
-import { ProductApi } from '@/api/iot/product/product'
+import { ProductApi, ProductVO } from '@/api/iot/product/product'
+import { DeviceGroupApi, DeviceGroupVO } from '@/api/iot/device/group'
 
 /** IoT 设备 列表 */
 defineOptions({ name: 'IoTDevice' })
@@ -189,12 +214,12 @@ const queryParams = reactive({
   productId: undefined,
   deviceType: undefined,
   nickname: undefined,
-  status: undefined
+  status: undefined,
+  groupId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-
-/** 产品标号和名称的映射 */
-const productMap = reactive({})
+const products = ref<ProductVO[]>([]) // 产品列表
+const deviceGroups = ref<DeviceGroupVO[]>([]) // 设备分组列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -203,14 +228,6 @@ const getList = async () => {
     const data = await DeviceApi.getDevicePage(queryParams)
     list.value = data.list
     total.value = data.total
-    // 获取产品ID列表
-    const productIds = [...new Set(data.list.map((device) => device.productId))]
-    // 获取产品名称
-    // TODO @haohao：最好后端拼接哈
-    const products = await Promise.all(productIds.map((id) => ProductApi.getProduct(id)))
-    products.forEach((product) => {
-      productMap[product.id] = product.name
-    })
   } finally {
     loading.value = false
   }
@@ -245,7 +262,7 @@ const handleDelete = async (id: number) => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    // 发起删除
+    // 起删除
     await DeviceApi.deleteDevice(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
@@ -253,15 +270,13 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 查询字典下拉列表 */
-const products = ref()
-const getProducts = async () => {
-  products.value = await ProductApi.getSimpleProductList()
-}
-
 /** 初始化 **/
-onMounted(() => {
+onMounted(async () => {
   getList()
-  getProducts()
+
+  // 获取产品列表
+  products.value = await ProductApi.getSimpleProductList()
+  // 获取分组列表
+  deviceGroups.value = await DeviceGroupApi.getSimpleDeviceGroupList()
 })
 </script>

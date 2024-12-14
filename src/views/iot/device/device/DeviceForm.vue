@@ -62,6 +62,16 @@
           <el-form-item label="设备图片" prop="picUrl">
             <UploadImg v-model="formData.picUrl" :height="'120px'" :width="'120px'" />
           </el-form-item>
+          <el-form-item label="设备分组" prop="groupIds">
+            <el-select v-model="formData.groupIds" placeholder="请选择设备分组" multiple clearable>
+              <el-option
+                v-for="group in deviceGroups"
+                :key="group.id"
+                :label="group.name"
+                :value="group.id"
+              />
+            </el-select>
+          </el-form-item>
           <el-form-item label="设备序列号" prop="serialNumber">
             <el-input v-model="formData.serialNumber" placeholder="请输入设备序列号" />
           </el-form-item>
@@ -76,6 +86,7 @@
 </template>
 <script setup lang="ts">
 import { DeviceApi, DeviceVO } from '@/api/iot/device'
+import { DeviceGroupApi } from '@/api/iot/device/group'
 import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
 import { UploadImg } from '@/components/UploadFile'
 import { generateRandomStr } from '@/utils'
@@ -99,7 +110,8 @@ const formData = ref({
   picUrl: undefined,
   gatewayId: undefined,
   deviceType: undefined as number | undefined,
-  serialNumber: undefined
+  serialNumber: undefined,
+  groupIds: [] as number[]
 })
 const formRules = reactive({
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
@@ -150,6 +162,7 @@ const formRules = reactive({
 const formRef = ref() // 表单 Ref
 const products = ref<ProductVO[]>([]) // 产品列表
 const gatewayDevices = ref<DeviceVO[]>([]) // 网关设备列表
+const deviceGroups = ref<any[]>([])
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -178,6 +191,13 @@ const open = async (type: string, id?: number) => {
   }
   // 加载产品列表
   products.value = await ProductApi.getSimpleProductList()
+
+  // 加载设备分组列表
+  try {
+    deviceGroups.value = await DeviceGroupApi.getSimpleDeviceGroupList()
+  } catch (error) {
+    console.error('加载设备分组列表失败:', error)
+  }
 }
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
@@ -216,7 +236,8 @@ const resetForm = () => {
     picUrl: undefined,
     gatewayId: undefined,
     deviceType: undefined,
-    serialNumber: undefined
+    serialNumber: undefined,
+    groupIds: []
   }
   formRef.value?.resetFields()
 }

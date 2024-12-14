@@ -61,6 +61,7 @@
         :formatter="dateFormatter"
         width="180px"
       />
+      <el-table-column label="设备数量" align="center" prop="deviceCount" />
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button
