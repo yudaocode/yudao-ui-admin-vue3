@@ -150,14 +150,45 @@
     <template v-if="viewMode === 'card'">
       <el-row :gutter="16">
         <el-col v-for="item in list" :key="item.id" :xs="24" :sm="12" :md="12" :lg="6" class="mb-4">
-          <el-card class="h-full transition-colors" :body-style="{ padding: '0' }">
-            <div class="p-4">
+          <el-card
+            class="h-full transition-colors relative overflow-hidden"
+            :body-style="{ padding: '0' }"
+          >
+            <!-- 添加渐变背景层 -->
+            <div
+              class="absolute top-0 left-0 right-0 h-[50px] pointer-events-none"
+              :class="[
+                item.status === DeviceStatusEnum.ONLINE
+                  ? 'bg-gradient-to-b from-[#eefaff] to-transparent'
+                  : 'bg-gradient-to-b from-[#fff1f1] to-transparent'
+              ]"
+            >
+            </div>
+            <div class="p-4 relative">
               <!-- 标题区域 -->
               <div class="flex items-center mb-3">
                 <div class="mr-2.5 flex items-center">
                   <el-image :src="defaultIconUrl" class="w-[18px] h-[18px]" />
                 </div>
-                <div class="text-[16px] font-600">{{ item.deviceName }}</div>
+                <div class="text-[16px] font-600 flex-1">{{ item.deviceName }}</div>
+                <!-- 添加设备状态标签 -->
+                <div class="inline-flex items-center">
+                  <div
+                    class="w-1 h-1 rounded-full mr-1.5"
+                    :class="
+                      item.status === DeviceStatusEnum.ONLINE
+                        ? 'bg-[var(--el-color-success)]'
+                        : 'bg-[var(--el-color-danger)]'
+                    "
+                  >
+                  </div>
+                  <el-text
+                    class="!text-xs font-bold"
+                    :type="item.status === DeviceStatusEnum.ONLINE ? 'success' : 'danger'"
+                  >
+                    {{ getDictLabel(DICT_TYPE.IOT_DEVICE_STATUS, item.status) }}
+                  </el-text>
+                </div>
               </div>
 
               <!-- 信息区域 -->
@@ -186,7 +217,7 @@
               <!-- 分隔线 -->
               <el-divider class="!my-3" />
 
-              <!-- 按钮组 -->
+              <!-- 按钮 -->
               <div class="flex items-center px-0">
                 <el-button
                   class="flex-1 !px-2 !h-[32px] text-[13px]"
@@ -327,9 +358,9 @@
 </template>
 
 <script setup lang="ts">
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { DeviceApi, DeviceVO } from '@/api/iot/device'
+import { DeviceApi, DeviceVO, DeviceStatusEnum } from '@/api/iot/device'
 import DeviceForm from './DeviceForm.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceGroupApi, DeviceGroupVO } from '@/api/iot/device/group'
@@ -342,7 +373,7 @@ defineOptions({ name: 'IoTDevice' })
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
-const loading = ref(true) // 列表的加载中
+const loading = ref(true) // 列表���加载中
 const list = ref<DeviceVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
@@ -389,7 +420,7 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** 添加/修改操作 */
+/** ���加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)

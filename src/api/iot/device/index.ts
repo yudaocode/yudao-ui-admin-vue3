@@ -55,6 +55,14 @@ export interface DeviceHistoryDataVO {
   data: string // 数据
 }
 
+// IoT 设备状态枚举
+export enum DeviceStatusEnum {
+  INACTIVE = 0, // 未激活
+  ONLINE = 1,   // 在线
+  OFFLINE = 2,  // 离线
+  DISABLED = 3  // 已禁用
+}
+
 // 设备 API
 export const DeviceApi = {
   // 查询设备分页
