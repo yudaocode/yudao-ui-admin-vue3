@@ -104,6 +104,15 @@
           <Icon icon="ep:plus" class="mr-5px" />
           新增
         </el-button>
+        <el-button
+          type="success"
+          plain
+          @click="handleExport"
+          :loading="exportLoading"
+          v-hasPermi="['iot:device:export']"
+        >
+          <Icon icon="ep:download" class="mr-5px" /> 导出
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -117,7 +126,7 @@
         </template>
       </el-table-column>
       <el-table-column label="备注名称" align="center" prop="nickname" />
-      <el-table-column label="设备所属产品" align="center" prop="productId">
+      <el-table-column label="所属产品" align="center" prop="productId">
         <template #default="scope">
           {{ products.find((p) => p.id === scope.row.productId)?.name || '-' }}
         </template>
@@ -125,6 +134,15 @@
       <el-table-column label="设备类型" align="center" prop="deviceType">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="scope.row.deviceType" />
+        </template>
+      </el-table-column>
+      <el-table-column label="所属分组" align="center" prop="groupId">
+        <template #default="scope">
+          <template v-if="scope.row.groupIds?.length">
+            <el-tag v-for="id in scope.row.groupIds" :key="id" class="ml-5px" size="small">
+              {{ deviceGroups.find((g) => g.id === id)?.name }}
+            </el-tag>
+          </template>
         </template>
       </el-table-column>
       <el-table-column label="设备状态" align="center" prop="status">
@@ -139,15 +157,6 @@
         :formatter="dateFormatter"
         width="180px"
       />
-      <el-table-column label="所属分组" align="center" prop="groupId">
-        <template #default="scope">
-          <template v-if="scope.row.groupIds?.length">
-            <el-tag v-for="id in scope.row.groupIds" :key="id" class="ml-5px" size="small">
-              {{ deviceGroups.find((g) => g.id === id)?.name }}
-            </el-tag>
-          </template>
-        </template>
-      </el-table-column>
       <el-table-column label="操作" align="center" min-width="120px">
         <template #default="scope">
           <el-button
@@ -197,6 +206,7 @@ import { DeviceApi, DeviceVO } from '@/api/iot/device'
 import DeviceForm from './DeviceForm.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceGroupApi, DeviceGroupVO } from '@/api/iot/device/group'
+import download from '@/utils/download'
 
 /** IoT 设备 列表 */
 defineOptions({ name: 'IoTDevice' })
@@ -218,6 +228,7 @@ const queryParams = reactive({
   groupId: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const exportLoading = ref(false) // 导出加载状态
 const products = ref<ProductVO[]>([]) // 产品列表
 const deviceGroups = ref<DeviceGroupVO[]>([]) // 设备分组列表
 
@@ -279,4 +290,19 @@ onMounted(async () => {
   // 获取分组列表
   deviceGroups.value = await DeviceGroupApi.getSimpleDeviceGroupList()
 })
+
+/** 导出方法 */
+const handleExport = async () => {
+  try {
+    // 导出的二次确认
+    await message.exportConfirm()
+    // 发起导出
+    exportLoading.value = true
+    const data = await DeviceApi.exportDeviceExcel(queryParams)
+    download.excel(data, '物联网设备.xls')
+  } catch {
+  } finally {
+    exportLoading.value = false
+  }
+}
 </script>

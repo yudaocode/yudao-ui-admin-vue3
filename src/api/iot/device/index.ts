@@ -87,6 +87,11 @@ export const DeviceApi = {
     return await request.delete({ url: `/iot/device/delete?id=` + id })
   },
 
+  // 导出设备
+  exportDeviceExcel: async (params: any) => {
+    return await request.download({ url: `/iot/device/export-excel`, params })
+  },
+
   // 获取设备数量
   getDeviceCount: async (productId: number) => {
     return await request.get({ url: `/iot/device/count?productId=` + productId })
