@@ -114,6 +114,15 @@
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
         <el-button
+          type="primary"
+          plain
+          @click="openGroupForm"
+          :disabled="selectedIds.length === 0"
+          v-hasPermi="['iot:device:update']"
+        >
+          <Icon icon="ep:folder-add" class="mr-5px" /> 添加到分组
+        </el-button>
+        <el-button
           type="danger"
           plain
           @click="handleDeleteList"
@@ -213,6 +222,8 @@
 
   <!-- 表单弹窗：添加/修改 -->
   <DeviceForm ref="formRef" @success="getList" />
+  <!-- 分组表单组件 -->
+  <DeviceGroupForm ref="groupFormRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
@@ -223,8 +234,9 @@ import DeviceForm from './DeviceForm.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceGroupApi, DeviceGroupVO } from '@/api/iot/device/group'
 import download from '@/utils/download'
+import DeviceGroupForm from './DeviceGroupForm.vue'
 
-/** IoT 设备 列表 */
+/** IoT 设备列表 */
 defineOptions({ name: 'IoTDevice' })
 
 const message = useMessage() // 消息弹窗
@@ -299,16 +311,6 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-/** 初始化 **/
-onMounted(async () => {
-  getList()
-
-  // 获取产品列表
-  products.value = await ProductApi.getSimpleProductList()
-  // 获取分组列表
-  deviceGroups.value = await DeviceGroupApi.getSimpleDeviceGroupList()
-})
-
 /** 导出方法 */
 const handleExport = async () => {
   try {
@@ -340,4 +342,20 @@ const handleDeleteList = async () => {
     await getList()
   } catch {}
 }
+
+/** 添加到分组操作 */
+const groupFormRef = ref()
+const openGroupForm = () => {
+  groupFormRef.value.open(selectedIds.value)
+}
+
+/** 初始化 **/
+onMounted(async () => {
+  getList()
+
+  // 获取产品列表
+  products.value = await ProductApi.getSimpleProductList()
+  // 获取分组列表
+  deviceGroups.value = await DeviceGroupApi.getSimpleDeviceGroupList()
+})
 </script>
