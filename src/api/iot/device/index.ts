@@ -91,6 +91,11 @@ export const DeviceApi = {
     return await request.get({ url: `/iot/device/count?productId=` + productId })
   },
 
+  // 获取设备的精简信息列表
+  getSimpleDeviceList: async (deviceType?: number) => {
+    return await request.get({ url: `/iot/device/simple-list?`, params: { deviceType } })
+  },
+
   // 获取设备属性最新数据
   getDevicePropertiesLatestData: async (params: any) => {
     return await request.get({ url: `/iot/device/data/latest`, params })

@@ -12,7 +12,13 @@
           v-model="formData.productKey"
           placeholder="请输入 ProductKey"
           :readonly="formType === 'update'"
-        />
+        >
+          <template #append>
+            <el-button @click="generateProductKey" :disabled="formType === 'update'">
+              重新生成
+            </el-button>
+          </template>
+        </el-input>
       </el-form-item>
       <el-form-item label="产品名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入产品名称" />
@@ -184,7 +190,7 @@ const open = async (type: string, id?: number) => {
     }
   } else {
     // 新增时，生成随机 productKey
-    formData.value.productKey = generateRandomStr(16)
+    generateProductKey()
   }
   // 加载分类列表
   categoryList.value = await ProductCategoryApi.getSimpleProductCategoryList()
@@ -230,5 +236,10 @@ const resetForm = () => {
     validateType: ValidateTypeEnum.WEAK
   }
   formRef.value?.resetFields()
+}
+
+/** 生成 ProductKey */
+const generateProductKey = () => {
+  formData.value.productKey = generateRandomStr(16)
 }
 </script>
