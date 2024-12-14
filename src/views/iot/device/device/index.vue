@@ -113,13 +113,29 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
+        <el-button
+          type="danger"
+          plain
+          @click="handleDeleteList"
+          :disabled="selectedIds.length === 0"
+          v-hasPermi="['iot:device:delete']"
+        >
+          <Icon icon="ep:delete" class="mr-5px" /> 批量删除
+        </el-button>
       </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+    <el-table
+      v-loading="loading"
+      :data="list"
+      :stripe="true"
+      :show-overflow-tooltip="true"
+      @selection-change="handleSelectionChange"
+    >
+      <el-table-column type="selection" width="55" />
       <el-table-column label="DeviceName" align="center" prop="deviceName">
         <template #default="scope">
           <el-link @click="openDetail(scope.row.id)">{{ scope.row.deviceName }}</el-link>
@@ -231,6 +247,7 @@ const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出加载状态
 const products = ref<ProductVO[]>([]) // 产品列表
 const deviceGroups = ref<DeviceGroupVO[]>([]) // 设备分组列表
+const selectedIds = ref<number[]>([]) // 选中的设备编号数组
 
 /** 查询列表 */
 const getList = async () => {
@@ -253,6 +270,7 @@ const handleQuery = () => {
 /** 重置按钮操作 */
 const resetQuery = () => {
   queryFormRef.value.resetFields()
+  selectedIds.value = [] // 清空选择
   handleQuery()
 }
 
@@ -304,5 +322,22 @@ const handleExport = async () => {
   } finally {
     exportLoading.value = false
   }
+}
+
+/** 多选框选中数据 */
+const handleSelectionChange = (selection: DeviceVO[]) => {
+  selectedIds.value = selection.map((item) => item.id)
+}
+
+/** 批量删除按钮操作 */
+const handleDeleteList = async () => {
+  try {
+    await message.delConfirm()
+    // 执行批量删除
+    await DeviceApi.deleteDeviceList(selectedIds.value)
+    message.success(t('common.delSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {}
 }
 </script>

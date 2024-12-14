@@ -82,9 +82,14 @@ export const DeviceApi = {
     return await request.put({ url: `/iot/device/update-status`, data })
   },
 
-  // 删除设备
+  // 删除单个设备
   deleteDevice: async (id: number) => {
     return await request.delete({ url: `/iot/device/delete?id=` + id })
+  },
+
+  // 删除多个设备
+  deleteDeviceList: async (ids: number[]) => {
+    return await request.delete({ url: `/iot/device/delete-list`, params: { ids: ids.join(',') } })
   },
 
   // 导出设备
