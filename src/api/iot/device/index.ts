@@ -28,6 +28,7 @@ export interface DeviceVO {
   areaId: number // 地区编码
   address: string // 设备详细地址
   serialNumber: string // 设备序列号
+  groupIds?: number[] // 添加分组 ID
 }
 
 export interface DeviceUpdateStatusVO {
@@ -81,14 +82,37 @@ export const DeviceApi = {
     return await request.put({ url: `/iot/device/update-status`, data })
   },
 
-  // 删除设备
+  // 修改设备分组
+  updateDeviceGroup: async (data: {
+    ids: number[]
+    groupIds: number[]
+  }) => {
+    return await request.put({ url: `/iot/device/update-group`, data })
+  },
+
+  // 删除单个设备
   deleteDevice: async (id: number) => {
     return await request.delete({ url: `/iot/device/delete?id=` + id })
+  },
+
+  // 删除多个设备
+  deleteDeviceList: async (ids: number[]) => {
+    return await request.delete({ url: `/iot/device/delete-list`, params: { ids: ids.join(',') } })
+  },
+
+  // 导出设备
+  exportDeviceExcel: async (params: any) => {
+    return await request.download({ url: `/iot/device/export-excel`, params })
   },
 
   // 获取设备数量
   getDeviceCount: async (productId: number) => {
     return await request.get({ url: `/iot/device/count?productId=` + productId })
+  },
+
+  // 获取设备的精简信息列表
+  getSimpleDeviceList: async (deviceType?: number) => {
+    return await request.get({ url: `/iot/device/simple-list?`, params: { deviceType } })
   },
 
   // 获取设备属性最新数据

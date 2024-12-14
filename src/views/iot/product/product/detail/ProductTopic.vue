@@ -3,9 +3,9 @@
     <el-tabs>
       <el-tab-pane label="基础通信 Topic">
         <Table
-          :columns="columns1"
-          :data="data1"
-          :span-method="createSpanMethod(data1)"
+          :columns="basicColumn"
+          :data="basicData"
+          :span-method="createSpanMethod(basicData)"
           align="left"
           headerAlign="left"
           border="true"
@@ -13,9 +13,9 @@
       </el-tab-pane>
       <el-tab-pane label="物模型通信 Topic">
         <Table
-          :columns="columns2"
-          :data="data2"
-          :span-method="createSpanMethod(data2)"
+          :columns="functionColumn"
+          :data="functionData"
+          :span-method="createSpanMethod(functionData)"
           align="left"
           headerAlign="left"
           border="true"
@@ -29,23 +29,18 @@ import { ProductVO } from '@/api/iot/product/product'
 
 const props = defineProps<{ product: ProductVO }>()
 
-// 定义列
-const columns1 = reactive([
+// TODO 芋艿：不确定未来会不会改，所以先写死
+
+// 基础通信 Topic 列
+const basicColumn = reactive([
   { label: '功能', field: 'function', width: 150 },
   { label: 'Topic 类', field: 'topicClass', width: 800 },
   { label: '操作权限', field: 'operationPermission', width: 100 },
   { label: '描述', field: 'description' }
 ])
 
-const columns2 = reactive([
-  { label: '功能', field: 'function', width: 150 },
-  { label: 'Topic 类', field: 'topicClass', width: 800 },
-  { label: '操作权限', field: 'operationPermission', width: 100 },
-  { label: '描述', field: 'description' }
-])
-
-// TODO @haohao：这个，有没可能写到一个枚举里，方便后续维护？ /Users/yunai/Java/yudao-ui-admin-vue3/src/views/ai/utils/constants.ts
-const data1 = computed(() => {
+// 基础通信 Topic 数据
+const basicData = computed(() => {
   if (!props.product || !props.product.productKey) return []
   return [
     {
@@ -147,7 +142,16 @@ const data1 = computed(() => {
   ]
 })
 
-const data2 = computed(() => {
+// 物模型通信 Topic 列
+const functionColumn = reactive([
+  { label: '功能', field: 'function', width: 150 },
+  { label: 'Topic 类', field: 'topicClass', width: 800 },
+  { label: '操作权限', field: 'operationPermission', width: 100 },
+  { label: '描述', field: 'description' }
+])
+
+// 物模型通信 Topic 数据
+const functionData = computed(() => {
   if (!props.product || !props.product.productKey) return []
   return [
     {

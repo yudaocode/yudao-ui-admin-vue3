@@ -37,7 +37,7 @@ const message = useMessage()
 const id = Number(route.params.id) // 编号
 const loading = ref(true) // 加载中
 const product = ref<ProductVO>({} as ProductVO) // 详情
-const activeTab = ref('info') // 默认激活的标签页
+const activeTab = ref('info') // 默认为 info 标签页
 
 provide(IOT_PROVIDE_KEY.PRODUCT, product) // 提供产品信息给产品信息详情页的所有子组件
 
@@ -69,6 +69,11 @@ onMounted(async () => {
     return
   }
   await getProductData(id)
+  // 处理 tab 参数
+  const { tab } = route.query
+  if (tab) {
+    activeTab.value = tab as string
+  }
   // 查询设备数量
   if (product.value.id) {
     product.value.deviceCount = await getDeviceCount(product.value.id)

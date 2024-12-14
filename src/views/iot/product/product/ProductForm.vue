@@ -7,12 +7,18 @@
       label-width="110px"
       v-loading="formLoading"
     >
-      <el-form-item label="产品标识" prop="productKey">
+      <el-form-item label="ProductKey" prop="productKey">
         <el-input
           v-model="formData.productKey"
-          placeholder="请输入产品标识"
+          placeholder="请输入 ProductKey"
           :readonly="formType === 'update'"
-        />
+        >
+          <template #append>
+            <el-button @click="generateProductKey" :disabled="formType === 'update'">
+              重新生成
+            </el-button>
+          </template>
+        </el-input>
       </el-form-item>
       <el-form-item label="产品名称" prop="name">
         <el-input v-model="formData.name" placeholder="请输入产品名称" />
@@ -145,7 +151,7 @@ const formData = ref({
   validateType: ValidateTypeEnum.WEAK
 })
 const formRules = reactive({
-  productKey: [{ required: true, message: '产品标识不能为空', trigger: 'blur' }],
+  productKey: [{ required: true, message: 'ProductKey 不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '产品名称不能为空', trigger: 'blur' }],
   categoryId: [{ required: true, message: '产品分类不能为空', trigger: 'change' }],
   deviceType: [{ required: true, message: '设备类型不能为空', trigger: 'change' }],
@@ -184,7 +190,7 @@ const open = async (type: string, id?: number) => {
     }
   } else {
     // 新增时，生成随机 productKey
-    formData.value.productKey = generateRandomStr(16)
+    generateProductKey()
   }
   // 加载分类列表
   categoryList.value = await ProductCategoryApi.getSimpleProductCategoryList()
@@ -230,5 +236,10 @@ const resetForm = () => {
     validateType: ValidateTypeEnum.WEAK
   }
   formRef.value?.resetFields()
+}
+
+/** 生成 ProductKey */
+const generateProductKey = () => {
+  formData.value.productKey = generateRandomStr(16)
 }
 </script>
