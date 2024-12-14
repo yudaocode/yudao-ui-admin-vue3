@@ -17,7 +17,7 @@ export interface DataSpecsTextDataVO {
 }
 
 /** dataSpecs 枚举型数据结构 */
-export interface DataSpecsEnumDataVO {
+export interface DataSpecsEnumOrBoolDataVO {
   dataType: 'enum' | 'bool'
   defaultValue?: string // 默认值，可选
   name: string // 枚举项的名称

@@ -24,14 +24,14 @@
 import { useVModel } from '@vueuse/core'
 import {
   DataSpecsDataType,
-  DataSpecsEnumDataVO
+  DataSpecsEnumOrBoolDataVO
 } from '@/views/iot/product/product/detail/ThingModel/config'
 
 /** 枚举型的 dataSpecs 配置组件 */
 defineOptions({ name: 'ThingModelEnumTypeDataSpecs' })
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
-const dataSpecsList = useVModel(props, 'modelValue', emits) as Ref<DataSpecsEnumDataVO[]>
+const dataSpecsList = useVModel(props, 'modelValue', emits) as Ref<DataSpecsEnumOrBoolDataVO[]>
 const message = useMessage()
 
 /** 添加枚举项 */

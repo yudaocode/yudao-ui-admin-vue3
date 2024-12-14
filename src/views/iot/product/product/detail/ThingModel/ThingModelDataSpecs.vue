@@ -16,6 +16,20 @@
     v-if="formData.dataType === DataSpecsDataType.ENUM"
     v-model="formData.dataSpecsList"
   />
+  <!-- 布尔型配置 -->
+  <el-form-item label="布尔值" prop="bool" v-if="formData.dataType === DataSpecsDataType.BOOL">
+    <template v-for="item in formData.dataSpecsList" :key="item.value">
+      <div class="flex items-center justify-start w-1/1 mb-5px">
+        <span>{{ item.value }}</span>
+        <span class="mx-2">-</span>
+        <el-input
+          v-model="item.name"
+          class="w-255px!"
+          :placeholder="`如：${item.value === 0 ? '关' : '开'}`"
+        />
+      </div>
+    </template>
+  </el-form-item>
 </template>
 
 <script lang="ts" setup>
@@ -41,10 +55,19 @@ const handleChange = (dataType: any) => {
   switch (dataType) {
     case DataSpecsDataType.ENUM:
       formData.value.dataSpecsList.push({
-        dataType: 'ENUM',
+        dataType: DataSpecsDataType.ENUM,
         name: '', // 枚举项的名称
         value: undefined // 枚举值
       })
+      break
+    case DataSpecsDataType.BOOL:
+      for (let i = 0; i < 2; i++) {
+        formData.value.dataSpecsList.push({
+          dataType: DataSpecsDataType.BOOL,
+          name: '', // 布尔值的名称
+          value: i // 布尔值
+        })
+      }
   }
 }
 // dataType为INT的dataSpecs示例：
