@@ -86,6 +86,16 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item class="float-right !mr-0 !mb-0">
+        <el-button-group>
+          <el-button :type="viewMode === 'card' ? 'primary' : 'default'" @click="viewMode = 'card'">
+            <Icon icon="ep:grid" />
+          </el-button>
+          <el-button :type="viewMode === 'list' ? 'primary' : 'default'" @click="viewMode = 'list'">
+            <Icon icon="ep:list" />
+          </el-button>
+        </el-button-group>
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery">
           <Icon icon="ep:search" class="mr-5px" />
@@ -137,7 +147,95 @@
 
   <!-- 列表 -->
   <ContentWrap>
+    <template v-if="viewMode === 'card'">
+      <el-row :gutter="16">
+        <el-col v-for="item in list" :key="item.id" :xs="24" :sm="12" :md="12" :lg="6" class="mb-4">
+          <el-card class="h-full transition-colors" :body-style="{ padding: '0' }">
+            <div class="p-4">
+              <!-- 标题区域 -->
+              <div class="flex items-center mb-3">
+                <div class="mr-2.5 flex items-center">
+                  <el-image :src="defaultIconUrl" class="w-[18px] h-[18px]" />
+                </div>
+                <div class="text-[16px] font-600">{{ item.deviceName }}</div>
+              </div>
+
+              <!-- 信息区域 -->
+              <div class="flex items-center text-[14px]">
+                <div class="flex-1">
+                  <div class="mb-2.5 last:mb-0">
+                    <span class="text-[#717c8e] mr-2.5">所属产品</span>
+                    <span class="text-[#0070ff]">{{
+                      products.find((p) => p.id === item.productId)?.name
+                    }}</span>
+                  </div>
+                  <div class="mb-2.5 last:mb-0">
+                    <span class="text-[#717c8e] mr-2.5">设备类型</span>
+                    <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="item.deviceType" />
+                  </div>
+                  <div class="mb-2.5 last:mb-0">
+                    <span class="text-[#717c8e] mr-2.5">DeviceKey</span>
+                    <span class="text-[#0b1d30]">{{ item.deviceKey }}</span>
+                  </div>
+                </div>
+                <div class="w-[100px] h-[100px]">
+                  <el-image :src="defaultPicUrl" class="w-full h-full" />
+                </div>
+              </div>
+
+              <!-- 分隔线 -->
+              <el-divider class="!my-3" />
+
+              <!-- 按钮组 -->
+              <div class="flex items-center px-0">
+                <el-button
+                  class="flex-1 !px-2 !h-[32px] text-[13px]"
+                  type="primary"
+                  plain
+                  @click="openForm('update', item.id)"
+                  v-hasPermi="['iot:device:update']"
+                >
+                  <Icon icon="ep:edit-pen" class="mr-1" />
+                  编辑
+                </el-button>
+                <el-button
+                  class="flex-1 !px-2 !h-[32px] !ml-[10px] text-[13px]"
+                  type="warning"
+                  plain
+                  @click="openDetail(item.id)"
+                >
+                  <Icon icon="ep:view" class="mr-1" />
+                  详情
+                </el-button>
+                <el-button
+                  class="flex-1 !px-2 !h-[32px] !ml-[10px] text-[13px]"
+                  type="info"
+                  plain
+                  @click="openLog(item.id)"
+                >
+                  <Icon icon="ep:tickets" class="mr-1" />
+                  日志
+                </el-button>
+                <div class="mx-[10px] h-[20px] w-[1px] bg-[#dcdfe6]"></div>
+                <el-button
+                  class="!px-2 !h-[32px] text-[13px]"
+                  type="danger"
+                  plain
+                  @click="handleDelete(item.id)"
+                  v-hasPermi="['iot:device:delete']"
+                >
+                  <Icon icon="ep:delete" />
+                </el-button>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </template>
+
+    <!-- 列表视图 -->
     <el-table
+      v-else
       v-loading="loading"
       :data="list"
       :stripe="true"
@@ -192,6 +290,7 @@
           >
             查看
           </el-button>
+          <el-button link type="primary" @click="openLog(scope.row.id)"> 日志 </el-button>
           <el-button
             link
             type="primary"
@@ -211,6 +310,7 @@
         </template>
       </el-table-column>
     </el-table>
+
     <!-- 分页 -->
     <Pagination
       :total="total"
@@ -260,6 +360,9 @@ const exportLoading = ref(false) // 导出加载状态
 const products = ref<ProductVO[]>([]) // 产品列表
 const deviceGroups = ref<DeviceGroupVO[]>([]) // 设备分组列表
 const selectedIds = ref<number[]>([]) // 选中的设备编号数组
+const viewMode = ref<'card' | 'list'>('card') // 视图模式状态
+const defaultPicUrl = ref('/src/assets/imgs/iot/device.png') // 默认设备图片
+const defaultIconUrl = ref('/src/assets/svgs/iot/card-fill.svg') // 默认设备图标
 
 /** 查询列表 */
 const getList = async () => {
@@ -347,6 +450,11 @@ const handleDeleteList = async () => {
 const groupFormRef = ref()
 const openGroupForm = () => {
   groupFormRef.value.open(selectedIds.value)
+}
+
+/** 打开日志 */
+const openLog = (id: number) => {
+  push({ name: 'IoTDeviceDetail', params: { id }, query: { tab: 'log' } })
 }
 
 /** 初始化 **/
