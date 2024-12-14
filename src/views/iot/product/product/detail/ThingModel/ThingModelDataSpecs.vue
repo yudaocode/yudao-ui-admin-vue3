@@ -30,6 +30,12 @@
       </div>
     </template>
   </el-form-item>
+  <!-- 文本型配置 -->
+  <el-form-item label="数据长度" prop="text" v-if="formData.dataType === DataSpecsDataType.TEXT">
+    <el-input v-model="formData.length" class="w-255px!" placeholder="请输入文本字节长度">
+      <template #append>字节</template>
+    </el-input>
+  </el-form-item>
 </template>
 
 <script lang="ts" setup>
