@@ -7,10 +7,10 @@
       label-width="110px"
       v-loading="formLoading"
     >
-      <el-form-item label="产品标识" prop="productKey">
+      <el-form-item label="ProductKey" prop="productKey">
         <el-input
           v-model="formData.productKey"
-          placeholder="请输入产品标识"
+          placeholder="请输入 ProductKey"
           :readonly="formType === 'update'"
         />
       </el-form-item>
@@ -145,7 +145,7 @@ const formData = ref({
   validateType: ValidateTypeEnum.WEAK
 })
 const formRules = reactive({
-  productKey: [{ required: true, message: '产品标识不能为空', trigger: 'blur' }],
+  productKey: [{ required: true, message: 'ProductKey 不能为空', trigger: 'blur' }],
   name: [{ required: true, message: '产品名称不能为空', trigger: 'blur' }],
   categoryId: [{ required: true, message: '产品分类不能为空', trigger: 'change' }],
   deviceType: [{ required: true, message: '设备类型不能为空', trigger: 'change' }],

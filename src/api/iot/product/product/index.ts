@@ -8,6 +8,8 @@ export interface ProductVO {
   protocolId: number // 协议编号
   categoryId: number // 产品所属品类标识符
   categoryName?: string // 产品所属品类名称
+  icon: string // 产品图标
+  picUrl: string // 产品图片
   description: string // 产品描述
   validateType: number // 数据校验级别
   status: number // 产品状态
@@ -17,7 +19,6 @@ export interface ProductVO {
   dataFormat: number // 数据格式
   deviceCount: number // 设备数量
   createTime: Date // 创建时间
-  picUrl: string // 产品图片 URL
 }
 
 // IOT 数据校验级别枚举类

@@ -63,49 +63,93 @@
 
   <!-- 卡片视图 -->
   <ContentWrap>
-    <div
-      v-if="viewMode === 'card'"
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-    >
+    <div v-if="viewMode === 'card'" class="flex flex-wrap gap-4">
       <el-card
         v-for="item in list"
         :key="item.id"
-        class="cursor-pointer hover:shadow-lg transition-shadow"
-        @click="openDetail(item.id)"
+        class="w-[calc(25%-12px)] transition-colors"
+        :body-style="{ padding: '0' }"
       >
-        <div class="flex items-center mb-4">
-          <el-image
-            :src="item.picUrl || '/src/assets/default-product.png'"
-            class="w-12 h-12 mr-4"
-            fit="cover"
-          />
-          <div class="flex-1">
-            <div class="font-bold text-lg">{{ item.name }}</div>
-            <div class="text-gray-500 text-sm">{{ item.productKey }}</div>
+        <!-- 内容区域 -->
+        <div class="p-4">
+          <!-- 标题区域 -->
+          <div class="flex items-center mb-3">
+            <div class="mr-2.5 flex items-center">
+              <el-image
+                :src="item.icon || defaultIconUrl"
+                class="w-[35px] h-[35px]"
+                fit="contain"
+              />
+            </div>
+            <div class="text-[16px] font-600">{{ item.name }}</div>
           </div>
-        </div>
-        <div class="flex justify-between text-sm text-gray-500">
-          <span>{{ item.categoryName }}</span>
-          <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="item.deviceType" />
-        </div>
-        <div class="flex justify-end mt-4">
-          <el-button
-            link
-            type="primary"
-            @click.stop="openForm('update', item.id)"
-            v-hasPermi="['iot:product:update']"
-          >
-            编辑
-          </el-button>
-          <el-button
-            link
-            type="danger"
-            @click.stop="handleDelete(item.id)"
-            v-hasPermi="['iot:product:delete']"
-            :disabled="item.status === 1"
-          >
-            删除
-          </el-button>
+
+          <!-- 信息区域 -->
+          <div class="flex items-center text-[14px]">
+            <div class="flex-1">
+              <div class="mb-2.5 last:mb-0">
+                <span class="text-[#717c8e] mr-2.5">产品分类</span>
+                <span class="text-[#0070ff]">{{ item.categoryName }}</span>
+              </div>
+              <div class="mb-2.5 last:mb-0">
+                <span class="text-[#717c8e] mr-2.5">产品类型</span>
+                <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="item.deviceType" />
+              </div>
+              <div class="mb-2.5 last:mb-0">
+                <span class="text-[#717c8e] mr-2.5">产品标识</span>
+                <span class="text-[#0b1d30]">{{ item.productKey }}</span>
+              </div>
+            </div>
+            <div class="w-[100px] h-[100px]">
+              <el-image :src="item.picUrl || defaultPicUrl" class="w-full h-full" fit="cover" />
+            </div>
+          </div>
+
+          <!-- 分隔线 -->
+          <el-divider class="!my-3" />
+
+          <!-- 按钮组 -->
+          <div class="flex items-center">
+            <el-button
+              class="flex-1 !px-2 !h-[32px]"
+              type="primary"
+              plain
+              @click="openForm('update', item.id)"
+              v-hasPermi="['iot:product:update']"
+            >
+              <Icon icon="ep:edit-pen" class="mr-1" />
+              编辑
+            </el-button>
+            <el-button
+              class="flex-1 !px-2 !h-[32px] !ml-[12px]"
+              type="warning"
+              plain
+              @click="openDetail(item.id)"
+            >
+              <Icon icon="ep:view" class="mr-1" />
+              详情
+            </el-button>
+            <el-button
+              class="flex-1 !px-2 !h-[32px] !ml-[12px]"
+              type="success"
+              plain
+              @click="openObjectModel(item)"
+            >
+              <Icon icon="ep:scale-to-original" class="mr-1" />
+              物模型
+            </el-button>
+            <div class="mx-[12px] h-[20px] w-[1px] bg-[#dcdfe6]"></div>
+            <el-button
+              class="!px-2 !h-[32px]"
+              type="danger"
+              plain
+              @click="handleDelete(item.id)"
+              v-hasPermi="['iot:product:delete']"
+              :disabled="item.status === 1"
+            >
+              <Icon icon="ep:delete" />
+            </el-button>
+          </div>
         </div>
       </el-card>
     </div>
@@ -199,6 +243,8 @@ import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import ProductForm from './ProductForm.vue'
 import { DICT_TYPE } from '@/utils/dict'
 import download from '@/utils/download'
+import defaultPicUrl from '@/assets/imgs/iot/device.png'
+import defaultIconUrl from '@/assets/svgs/iot/cube.svg'
 
 /** iot 产品列表 */
 defineOptions({ name: 'IoTProduct' })
@@ -216,7 +262,7 @@ const queryParams = reactive({
   productKey: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const exportLoading = ref(false) // 导出的加载中
+const exportLoading = ref(false) // 导出加载中
 const viewMode = ref<'card' | 'list'>('card') // 视图模式状态
 
 /** 查询列表 */
