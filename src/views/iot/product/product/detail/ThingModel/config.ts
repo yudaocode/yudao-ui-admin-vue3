@@ -1,6 +1,6 @@
 /** dataSpecs 数值型数据结构 */
 export interface DataSpecsNumberDataVO {
-  dataType: 'INT' | 'FLOAT' | 'DOUBLE' // 数据类型，取值为 INT、FLOAT 或 DOUBLE
+  dataType: 'int' | 'float' | 'double' // 数据类型，取值为 INT、FLOAT 或 DOUBLE
   max: string // 最大值，必须与 dataType 设置一致，且为 STRING 类型
   min: string // 最小值，必须与 dataType 设置一致，且为 STRING 类型
   step: string // 步长，必须与 dataType 设置一致，且为 STRING 类型
@@ -18,7 +18,7 @@ export interface DataSpecsTextDataVO {
 
 /** dataSpecs 枚举型数据结构 */
 export interface DataSpecsEnumDataVO {
-  dataType: 'ENUM' | 'BOOL'
+  dataType: 'enum' | 'bool'
   defaultValue?: string // 默认值，可选
   name: string // 枚举项的名称
   value: number | undefined // 枚举值
@@ -35,4 +35,4 @@ export const DataSpecsDataType = {
   DATE: 'date',
   STRUCT: 'struct',
   ARRAY: 'array'
-}
+} as const
