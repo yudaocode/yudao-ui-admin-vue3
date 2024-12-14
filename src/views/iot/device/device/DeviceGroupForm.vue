@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { DeviceApi } from '@/api/iot/device'
+import { DeviceApi } from '@/api/iot/device/device'
 import { DeviceGroupApi } from '@/api/iot/device/group'
 
 defineOptions({ name: 'IoTDeviceGroupForm' })

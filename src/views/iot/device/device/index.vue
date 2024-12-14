@@ -242,10 +242,10 @@
                   class="flex-1 !px-2 !h-[32px] !ml-[10px] text-[13px]"
                   type="info"
                   plain
-                  @click="openLog(item.id)"
+                  @click="openModel(item.id)"
                 >
                   <Icon icon="ep:tickets" class="mr-1" />
-                  日志
+                  数据
                 </el-button>
                 <div class="mx-[10px] h-[20px] w-[1px] bg-[#dcdfe6]"></div>
                 <el-button
@@ -321,7 +321,7 @@
           >
             查看
           </el-button>
-          <el-button link type="primary" @click="openLog(scope.row.id)"> 日志 </el-button>
+          <el-button link type="primary" @click="openModel(scope.row.id)"> 日志 </el-button>
           <el-button
             link
             type="primary"
@@ -360,7 +360,7 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { DeviceApi, DeviceVO, DeviceStatusEnum } from '@/api/iot/device'
+import { DeviceApi, DeviceVO, DeviceStatusEnum } from '@/api/iot/device/device'
 import DeviceForm from './DeviceForm.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceGroupApi, DeviceGroupVO } from '@/api/iot/device/group'
@@ -483,9 +483,9 @@ const openGroupForm = () => {
   groupFormRef.value.open(selectedIds.value)
 }
 
-/** 打开日志 */
-const openLog = (id: number) => {
-  push({ name: 'IoTDeviceDetail', params: { id }, query: { tab: 'log' } })
+/** 打开物模型数据 */
+const openModel = (id: number) => {
+  push({ name: 'IoTDeviceDetail', params: { id }, query: { tab: 'model' } })
 }
 
 /** 初始化 **/

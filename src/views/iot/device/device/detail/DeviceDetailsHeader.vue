@@ -35,23 +35,21 @@
   <DeviceForm ref="formRef" @success="emit('refresh')" />
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
-import DeviceForm from '@/views/iot/device/DeviceForm.vue'
+import DeviceForm from '@/views/iot/device/device/DeviceForm.vue'
 import { ProductVO } from '@/api/iot/product/product'
-import { DeviceVO } from '@/api/iot/device'
-import { useRouter } from 'vue-router'
+import { DeviceVO } from '@/api/iot/device/device'
 
 const message = useMessage()
 const router = useRouter()
 
-// 操作修改
+const { product, device } = defineProps<{ product: ProductVO; device: DeviceVO }>()
+const emit = defineEmits(['refresh'])
+
+/** 操作修改 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
-
-const { product, device } = defineProps<{ product: ProductVO; device: DeviceVO }>()
-const emit = defineEmits(['refresh'])
 
 /** 复制到剪贴板方法 */
 const copyToClipboard = async (text: string) => {
@@ -63,11 +61,7 @@ const copyToClipboard = async (text: string) => {
   }
 }
 
-/**
- * 跳转到产品详情页面
- *
- * @param productId 产品 ID
- */
+/** 跳转到产品详情页面 */
 const goToProductDetail = (productId: number) => {
   router.push({ name: 'IoTProductDetail', params: { id: productId } })
 }

@@ -79,16 +79,14 @@
   </ContentWrap>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue'
 import { DICT_TYPE } from '@/utils/dict'
 import { ProductVO } from '@/api/iot/product/product'
 import { formatDate } from '@/utils/formatTime'
-import { DeviceVO } from '@/api/iot/device'
+import { DeviceVO } from '@/api/iot/device/device'
 
 const message = useMessage() // 消息提示
 
 const { product, device } = defineProps<{ product: ProductVO; device: DeviceVO }>() // 定义 Props
-
 const emit = defineEmits(['refresh']) // 定义 Emits
 
 const activeNames = ref(['basicInfo']) // 展示的折叠面板
