@@ -8,8 +8,8 @@
         <!-- 中间主要内容 tab 栏 -->
         <el-tabs v-model="activeTab">
           <!-- 表单信息 -->
-          <el-tab-pane label="表单填写" name="form">
-            <div class="form-scroll-area">
+          <el-tab-pane label="表单填写" name="form" >
+            <div class="form-scroll-area" v-loading="processInstanceStartLoading">
               <el-scrollbar>
                 <el-row>
                   <el-col :span="17">
@@ -90,7 +90,7 @@ const props = defineProps<{
   selectProcessDefinition: any
 }>()
 const emit = defineEmits(['cancel'])
-
+const processInstanceStartLoading = ref(false) // 流程实例发起中
 const { push, currentRoute } = useRouter() // 路由
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
@@ -179,6 +179,8 @@ const submitForm = async () => {
   if (!fApi.value || !props.selectProcessDefinition) {
     return
   }
+  // 流程表单校验
+  await fApi.value.validate()
   // 如果有指定审批人，需要校验
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
@@ -191,7 +193,7 @@ const submitForm = async () => {
   }
 
   // 提交请求
-  fApi.value.btn.loading(true)
+  processInstanceStartLoading.value = true
   try {
     await ProcessInstanceApi.createProcessInstance({
       processDefinitionId: props.selectProcessDefinition.id,
@@ -206,7 +208,7 @@ const submitForm = async () => {
       name: 'BpmProcessInstanceMy'
     })
   } finally {
-    fApi.value.btn.loading(false)
+    processInstanceStartLoading.value = false
   }
 }
 

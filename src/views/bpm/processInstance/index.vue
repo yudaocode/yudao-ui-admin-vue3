@@ -25,13 +25,14 @@
       </el-form-item>
 
       <!-- TODO @ tuituji：style 可以使用 unocss -->
-      <el-form-item label="" prop="category" :style="{ position: 'absolute', right: '130px' }">
-        <!-- TODO @tuituji：应该选择好分类，就触发搜索啦。 -->
+      <el-form-item label="" prop="category" :style="{ position: 'absolute', right: '300px' }">
+        <!-- TODO @tuituji：应该选择好分类，就触发搜索啦。 RE:done & to check-->
         <el-select
           v-model="queryParams.category"
           placeholder="请选择流程分类"
           clearable
           class="!w-155px"
+          @change="handleQuery"
         >
           <el-option
             v-for="category in categoryList"
@@ -42,21 +43,38 @@
         </el-select>
       </el-form-item>
 
+      <el-form-item label="" prop="status" :style="{ position: 'absolute', right: '130px' }">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择流程状态"
+          clearable
+          class="!w-155px"
+          @change="handleQuery"
+        >
+          <el-option
+            v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+
       <!-- 高级筛选 -->
       <!-- TODO @ tuituji：style 可以使用 unocss -->
       <el-form-item :style="{ position: 'absolute', right: '0px' }">
-        <el-button v-popover="popoverRef" v-click-outside="onClickOutside" :icon="List">
-          高级筛选
-        </el-button>
         <el-popover
-          ref="popoverRef"
-          trigger="click"
-          virtual-triggering
+          :visible="showPopover"
           persistent
           :width="400"
           :show-arrow="false"
           placement="bottom-end"
         >
+          <template #reference>
+            <el-button @click="showPopover = !showPopover">
+              <Icon icon="ep:plus" class="mr-5px" />高级筛选
+            </el-button>
+          </template>
           <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
             <el-select
               v-model="queryParams.category"
@@ -86,21 +104,6 @@
               class="!w-390px"
             />
           </el-form-item>
-          <el-form-item label="流程状态" class="bold-label" label-position="top" prop="status">
-            <el-select
-              v-model="queryParams.status"
-              placeholder="请选择流程状态"
-              clearable
-              class="!w-390px"
-            >
-              <el-option
-                v-for="dict in getIntDictOptions(DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS)"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-              />
-            </el-select>
-          </el-form-item>
           <el-form-item label="发起时间" class="bold-label" label-position="top" prop="createTime">
             <el-date-picker
               v-model="queryParams.createTime"
@@ -112,8 +115,13 @@
               class="!w-240px"
             />
           </el-form-item>
+          <!-- TODO tuituiji：参考钉钉，1）按照清空、取消、确认排序。2）右对齐。3）确认增加 primary -->
+          <el-form-item class="bold-label" label-position="top">
+            <el-button @click="handleQuery"> 确认</el-button>
+            <el-button @click="showPopover = false"> 取消</el-button>
+            <el-button @click="resetQuery"> 清空</el-button>
+          </el-form-item>
         </el-popover>
-        <!-- TODO @tuituji：这里应该有确认，和取消、清空搜索条件，三个按钮。 -->
       </el-form-item>
     </el-form>
   </ContentWrap>
@@ -130,7 +138,7 @@
         fixed="left"
       />
       <!-- TODO @芋艿：摘要 -->
-      <!-- TODO @tuituji：流程状态。可见需求文档里  -->
+      <!-- TODO tuituiji：参考钉钉；1）审批中时，展示审批任务；2）非审批中，展示状态 -->
       <el-table-column label="流程状态" prop="status" width="120">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.BPM_PROCESS_INSTANCE_STATUS" :value="scope.row.status" />
@@ -198,8 +206,7 @@
   </ContentWrap>
 </template>
 <script lang="ts" setup>
-// TODO @tuituji：List 改成 <Icon icon="ep:plus" class="mr-5px" /> 类似这种组件哈。
-import { List } from '@element-plus/icons-vue'
+// TODO @tuituji：List 改成 <Icon icon="ep:plus" class="mr-5px" /> 类似这种组件哈。 RE:done & to check
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { ElMessageBox } from 'element-plus'
@@ -241,6 +248,8 @@ const getList = async () => {
   }
 }
 
+const showPopover = ref(false)
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1
@@ -273,7 +282,7 @@ const handleCreate = async (row?: ProcessInstanceVO) => {
 }
 
 /** 查看详情 */
-const handleDetail = (row) => {
+const handleDetail = (row: ProcessInstanceVO) => {
   router.push({
     name: 'BpmProcessInstanceDetail',
     query: {
@@ -283,7 +292,7 @@ const handleDetail = (row) => {
 }
 
 /** 取消按钮操作 */
-const handleCancel = async (row) => {
+const handleCancel = async (row: ProcessInstanceVO) => {
   // 二次确认
   const { value } = await ElMessageBox.prompt('请输入取消原因', '取消流程', {
     confirmButtonText: t('common.ok'),
@@ -296,15 +305,6 @@ const handleCancel = async (row) => {
   message.success('取消成功')
   // 刷新列表
   await getList()
-}
-
-// TODO @tuituji：这个 import 是不是没用哈？
-import { ClickOutside as vClickOutside } from 'element-plus'
-
-// TODO @tuituji：onClickAdvancedSearch。方法名叫这个，会更好一些哇？打开高级搜索。
-const popoverRef = ref()
-const onClickOutside = () => {
-  unref(popoverRef).popperRef?.delayHide?.()
 }
 
 /** 激活时 **/

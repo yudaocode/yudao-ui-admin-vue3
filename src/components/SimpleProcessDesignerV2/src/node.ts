@@ -15,7 +15,6 @@ import {
   AssignStartUserHandlerType,
   AssignEmptyHandlerType,
   FieldPermissionType,
-  ProcessVariableEnum
 } from './consts'
 import { parseFormFields } from '@/components/FormCreate/src/utils/index'
 export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlowNode> {
@@ -37,13 +36,6 @@ const parseFormCreateFields = (formFields?: string[]) => {
       parseFormFields(JSON.parse(fieldStr), result)
     })
   }
-  // 固定添加发起人 ID 字段
-  result.unshift({
-    field: ProcessVariableEnum.START_USER_ID,
-    title: '发起人',
-    type: 'UserSelect',
-    required: true
-  })
   return result
 }
 

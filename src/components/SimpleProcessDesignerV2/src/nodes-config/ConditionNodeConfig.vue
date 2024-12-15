@@ -26,19 +26,13 @@
       </div>
     </template>
     <div>
-      <div class="mb-3 font-size-16px" v-if="currentNode.defaultFlow">未满足其它条件时，将进入此分支（该分支不可编辑和删除）</div>
+      <div class="mb-3 font-size-16px" v-if="currentNode.defaultFlow"
+        >未满足其它条件时，将进入此分支（该分支不可编辑和删除）</div
+      >
       <div v-else>
-        <el-form
-          ref="formRef"
-          :model="currentNode"
-          :rules="formRules"
-          label-position="top"
-        >
+        <el-form ref="formRef" :model="currentNode" :rules="formRules" label-position="top">
           <el-form-item label="配置方式" prop="conditionType">
-            <el-radio-group
-              v-model="currentNode.conditionType"
-              @change="changeConditionType"
-            >
+            <el-radio-group v-model="currentNode.conditionType" @change="changeConditionType">
               <el-radio
                 v-for="(dict, index) in conditionConfigTypes"
                 :key="index"
@@ -108,10 +102,11 @@
                   <div class="mr-2">
                     <el-select style="width: 160px" v-model="rule.leftSide">
                       <el-option
-                        v-for="(item, index) in fieldsInfo"
+                        v-for="(item, index) in fieldOptions"
                         :key="index"
                         :label="item.title"
                         :value="item.field"
+                        :disabled="!item.required"
                       />
                     </el-select>
                   </div>
@@ -165,10 +160,12 @@ import {
   COMPARISON_OPERATORS,
   ConditionGroup,
   Condition,
-  ConditionRule
+  ConditionRule,
+  ProcessVariableEnum
 } from '../consts'
 import { getDefaultConditionNodeName } from '../utils'
 import { useFormFields } from '../node'
+import { BpmModelFormType } from '@/utils/constants'
 const message = useMessage() // 消息弹窗
 defineOptions({
   name: 'ConditionNodeConfig'
@@ -177,8 +174,8 @@ const formType = inject<Ref<number>>('formType') // 表单类型
 const conditionConfigTypes = computed(() => {
   return CONDITION_CONFIG_TYPES.filter((item) => {
     // 业务表单暂时去掉条件规则选项
-    if (formType?.value !== 10) {
-      return item.value === ConditionType.RULE
+    if (formType?.value === BpmModelFormType.CUSTOM && item.value === ConditionType.RULE) {
+      return false
     } else {
       return true
     }
@@ -368,16 +365,29 @@ const addConditionRule = (condition: Condition, idx: number) => {
 const deleteConditionRule = (condition: Condition, idx: number) => {
   condition.rules.splice(idx, 1)
 }
-
 const fieldsInfo = useFormFields()
 
+/** 条件规则可选择的表单字段 */
+const fieldOptions = computed(() => {
+  const fieldsCopy = fieldsInfo.slice()
+  // 固定添加发起人 ID 字段
+  fieldsCopy.unshift({
+    field: ProcessVariableEnum.START_USER_ID,
+    title: '发起人',
+    required: true
+  })
+  return fieldsCopy
+})
+
+/** 获取字段名称 */
 const getFieldTitle = (field: string) => {
   const item = fieldsInfo.find((item) => item.field === field)
   return item?.title
 }
 
+/** 获取操作符名称 */
 const getOpName = (opCode: string): string => {
-  const opName = COMPARISON_OPERATORS.find((item) => item.value === opCode)
+  const opName = COMPARISON_OPERATORS.find((item: any) => item.value === opCode)
   return opName?.label
 }
 </script>
