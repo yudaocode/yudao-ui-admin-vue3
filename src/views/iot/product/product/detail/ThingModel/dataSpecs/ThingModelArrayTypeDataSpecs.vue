@@ -24,7 +24,7 @@
 import { useVModel } from '@vueuse/core'
 import { DataSpecsDataType, dataTypeOptions } from '../config'
 
-/** 数值型的 dataSpecs 配置组件 */
+/** 数组型的 dataSpecs 配置组件 */
 defineOptions({ name: 'ThingModelArrayTypeDataSpecs' })
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])

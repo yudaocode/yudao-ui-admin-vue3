@@ -1,17 +1,40 @@
 import request from '@/config/axios'
 
-// IoT 产品物模型 VO
-export interface ThinkModelFunctionVO {
-  id: number // 物模型功能编号
-  identifier: string // 功能标识
-  name: string // 功能名称
-  description: string // 功能描述
-  productId: number // 产品编号
-  productKey: string // 产品标识
-  type: number // 功能类型
-  property: string // 属性
-  event: string // 事件
-  service: string // 服务
+/**
+ * IoT 产品物模型
+ */
+export interface ThingModelData {
+  id?: number // 物模型功能编号
+  identifier?: string // 功能标识
+  name?: string // 功能名称
+  description?: string // 功能描述
+  productId?: number // 产品编号
+  productKey?: string // 产品标识
+  type: ProductFunctionTypeEnum // 功能类型
+  property: ThingModelProperty // 属性
+  event?: ThingModelEvent // 事件
+  service?: ThingModelService // 服务
+}
+
+/**
+ * ThingModelProperty 类型
+ */
+export interface ThingModelProperty {
+  [key: string]: any
+}
+
+/**
+ * ThingModelEvent 类型
+ */
+export interface ThingModelEvent {
+  [key: string]: any
+}
+
+/**
+ * ThingModelService 类型
+ */
+export interface ThingModelService {
+  [key: string]: any
 }
 
 // IOT 产品功能（物模型）类型枚举类
@@ -47,22 +70,17 @@ export const ThinkModelFunctionApi = {
   },
 
   // 新增产品物模型
-  createThinkModelFunction: async (data: ThinkModelFunctionVO) => {
+  createThinkModelFunction: async (data: ThingModelData) => {
     return await request.post({ url: `/iot/think-model-function/create`, data })
   },
 
   // 修改产品物模型
-  updateThinkModelFunction: async (data: ThinkModelFunctionVO) => {
+  updateThinkModelFunction: async (data: ThingModelData) => {
     return await request.put({ url: `/iot/think-model-function/update`, data })
   },
 
   // 删除产品物模型
   deleteThinkModelFunction: async (id: number) => {
     return await request.delete({ url: `/iot/think-model-function/delete?id=` + id })
-  },
-
-  // 导出产品物模型 Excel
-  exportThinkModelFunction: async (params) => {
-    return await request.download({ url: `/iot/think-model-function/export-excel`, params })
   }
 }

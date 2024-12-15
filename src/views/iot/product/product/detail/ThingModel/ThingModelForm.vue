@@ -20,16 +20,11 @@
       <el-form-item label="标识符" prop="identifier">
         <el-input v-model="formData.identifier" placeholder="请输入标识符" />
       </el-form-item>
-      <ThingModelDataSpecs v-model="formData" />
-      <el-form-item label="读写类型" prop="accessMode">
-        <el-radio-group v-model="formData.accessMode">
-          <el-radio label="rw">读写</el-radio>
-          <el-radio label="r">只读</el-radio>
-        </el-radio-group>
-      </el-form-item>
-      <el-form-item label="属性描述" prop="property.description">
-        <el-input v-model="formData.description" placeholder="请输入属性描述" type="textarea" />
-      </el-form-item>
+      <!-- 属性配置 -->
+      <ThingModelDataSpecs
+        v-model="formData.property"
+        v-if="formData.type === ProductFunctionTypeEnum.PROPERTY"
+      />
     </el-form>
 
     <template #footer>
@@ -45,7 +40,7 @@ import ThingModelDataSpecs from './ThingModelDataSpecs.vue'
 import {
   ProductFunctionTypeEnum,
   ThinkModelFunctionApi,
-  ThinkModelFunctionVO
+  ThingModelData
 } from '@/api/iot/thinkmodelfunction'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 import { DataSpecsDataType } from './config'
@@ -61,18 +56,13 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formLoading = ref(false)
 const formType = ref('')
-const formData = ref({
-  id: undefined,
-  productId: undefined,
-  productKey: undefined,
-  identifier: undefined,
-  name: undefined,
-  description: undefined,
+const formData = ref<ThingModelData>({
   type: ProductFunctionTypeEnum.PROPERTY,
-  dataType: DataSpecsDataType.INT,
-  dataSpecsList: [],
-  dataSpecs: {},
-  accessMode: undefined
+  property: {
+    dataType: DataSpecsDataType.INT,
+    dataSpecsList: [],
+    dataSpecs: {}
+  }
 })
 const formRules = reactive({
   name: [
@@ -138,7 +128,7 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ThinkModelFunctionVO
+    const data = formData.value as unknown as ThingModelData
     data.productId = product!.value.id
     data.productKey = product!.value.productKey
     if (formType.value === 'create') {
@@ -158,17 +148,12 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    id: undefined,
-    productId: undefined,
-    productKey: undefined,
-    identifier: undefined,
-    name: undefined,
-    description: undefined,
     type: ProductFunctionTypeEnum.PROPERTY,
-    dataType: DataSpecsDataType.INT,
-    dataSpecsList: [],
-    dataSpecs: {},
-    accessMode: undefined
+    property: {
+      dataType: DataSpecsDataType.INT,
+      dataSpecsList: [],
+      dataSpecs: {}
+    }
   }
   formRef.value?.resetFields()
 }
