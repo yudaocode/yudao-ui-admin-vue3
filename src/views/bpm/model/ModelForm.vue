@@ -201,11 +201,12 @@ import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 import { ElMessageBox } from 'element-plus'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
-import { CategoryApi } from '@/api/bpm/category'
+import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import { BpmModelFormType, BpmModelType } from '@/utils/constants'
 import { UserVO } from '@/api/system/user'
 import * as UserApi from '@/api/system/user'
 import { useUserStoreWithOut } from '@/store/modules/user'
+import { FormVO } from '@/api/bpm/form'
 
 defineOptions({ name: 'ModelForm' })
 
@@ -251,12 +252,12 @@ const formRules = reactive({
   managerUserIds: [{ required: true, message: '流程管理员不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const formList = ref([]) // 流程表单的下拉框的数据
-const categoryList = ref([]) // 流程分类列表
+const formList = ref<FormVO[]>([]) // 流程表单的下拉框的数据
+const categoryList = ref<CategoryVO[]>([]) // 流程分类列表
 const userList = ref<UserVO[]>([]) // 用户列表
 const selectedStartUsers = ref<UserVO[]>([]) // 已选择的发起人列表
 const selectedManagerUsers = ref<UserVO[]>([]) // 已选择的管理员列表
-const userSelectFormRef = ref() // 用户选择弹窗ref
+const userSelectFormRef = ref() // 用户选择弹窗 ref
 const currentSelectType = ref<'start' | 'manager'>('start') // 当前选择的是发起人还是管理员
 
 /** 打开弹窗 */
@@ -363,7 +364,7 @@ const resetForm = () => {
   selectedManagerUsers.value = []
 }
 
-// 处理发起人类型变化
+/** 处理发起人类型变化 */
 const handleStartUserTypeChange = (value: number) => {
   if (value !== 1) {
     selectedStartUsers.value = []
@@ -371,7 +372,7 @@ const handleStartUserTypeChange = (value: number) => {
   }
 }
 
-// 处理管理员类型变化
+/** 处理管理员类型变化 */
 const handleManagerUserTypeChange = (value: number) => {
   if (value !== 1) {
     selectedManagerUsers.value = []
@@ -379,19 +380,19 @@ const handleManagerUserTypeChange = (value: number) => {
   }
 }
 
-// 打开发起人选择
+/** 打开发起人选择 */
 const openStartUserSelect = () => {
   currentSelectType.value = 'start'
   userSelectFormRef.value.open(0, selectedStartUsers.value)
 }
 
-// 打开管理员选择
+/** 打开管理员选择 */
 const openManagerUserSelect = () => {
   currentSelectType.value = 'manager'
   userSelectFormRef.value.open(0, selectedManagerUsers.value)
 }
 
-// 处理用户选择确认
+/** 处理用户选择确认 */
 const handleUserSelectConfirm = (_, users: UserVO[]) => {
   if (currentSelectType.value === 'start') {
     selectedStartUsers.value = users
@@ -402,16 +403,18 @@ const handleUserSelectConfirm = (_, users: UserVO[]) => {
   }
 }
 
-// 移除发起人
+/** 移除发起人 */
 const handleRemoveStartUser = (user: UserVO) => {
   selectedStartUsers.value = selectedStartUsers.value.filter((u) => u.id !== user.id)
-  formData.value.startUserIds = formData.value.startUserIds.filter((id) => id !== user.id)
+  formData.value.startUserIds = formData.value.startUserIds.filter((id: number) => id !== user.id)
 }
 
-// 移除管理员
+/** 移除管理员 */
 const handleRemoveManagerUser = (user: UserVO) => {
   selectedManagerUsers.value = selectedManagerUsers.value.filter((u) => u.id !== user.id)
-  formData.value.managerUserIds = formData.value.managerUserIds.filter((id) => id !== user.id)
+  formData.value.managerUserIds = formData.value.managerUserIds.filter(
+    (id: number) => id !== user.id
+  )
 }
 </script>
 

@@ -332,8 +332,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: 'manager/model/create-update',
-        component: () => import('@/views/bpm/model/CreateUpdate.vue'),
+        path: 'manager/model/create-update', // TODO @goldenzqqq：是不是拆分成两个，一个 create 创建流程；一个 update 修改流程？
+        component: () => import('@/views/bpm/model/CreateUpdate.vue'), // TODO @goldenzqqq：是不是放到 '@/views/bpm/model/form/index.vue'。然后，原本的 editor/index.vue 是不是可以清理了呀？
         name: 'BpmModelCreateUpdate',
         meta: {
           noCache: true,

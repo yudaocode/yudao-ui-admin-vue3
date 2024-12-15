@@ -32,7 +32,6 @@ import CustomContentPadProvider from '@/components/bpmnProcessDesigner/package/d
 // 自定义左侧菜单（修改 默认任务 为 用户任务）
 import CustomPaletteProvider from '@/components/bpmnProcessDesigner/package/designer/plugins/palette'
 import * as ModelApi from '@/api/bpm/model'
-import { getForm, FormVO } from '@/api/bpm/form'
 
 defineOptions({ name: 'BpmModelEditor' })
 
@@ -82,7 +81,7 @@ const initBpmnInstances = () => {
     }
 
     // 检查所有实例是否都存在
-    return Object.values(instances).every(instance => instance)
+    return Object.values(instances).every((instance) => instance)
   } catch (error) {
     console.error('初始化 bpmnInstances 失败:', error)
     return false
@@ -168,7 +167,7 @@ onMounted(async () => {
   }
 })
 
-// 更新模型数据
+/** 更新模型数据 */
 const updateModelData = async (key?: string, name?: string) => {
   if (key && name) {
     xmlString.value = getDefaultBpmnXml(key, name)
@@ -185,12 +184,16 @@ const updateModelData = async (key?: string, name?: string) => {
   }
 }
 
-// 监听key和name的变化
-watch([() => props.modelKey, () => props.modelName], async ([newKey, newName]) => {
-  if (!props.modelId && newKey && newName && modeler.value) {
-    await updateModelData(newKey, newName)
-  }
-}, { immediate: true, deep: true })
+// 监听 key 和 name 的变化
+watch(
+  [() => props.modelKey, () => props.modelName],
+  async ([newKey, newName]) => {
+    if (!props.modelId && newKey && newName && modeler.value) {
+      await updateModelData(newKey, newName)
+    }
+  },
+  { immediate: true, deep: true }
+)
 
 // 在组件卸载时清理
 onBeforeUnmount(() => {

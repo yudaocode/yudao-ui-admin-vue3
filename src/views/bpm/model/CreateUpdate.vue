@@ -50,6 +50,8 @@
   <!-- 主体内容 -->
   <ContentWrap class="mt-50px">
     <!-- 第一步：基本信息 -->
+    <!-- TODO @goldenzqqq：是不是可以居中哈，1024 -->
+    <!-- TODO @goldenzqqq：有必要，把第一步、第二步，拆成独立的 vue 组件哇？主要是，把相关的 html、还有 js 逻辑，可以挪进去，让主的 index.vue 更精简一点 -->
     <div v-show="currentStep === 0">
       <el-form
         ref="formRef"
@@ -200,6 +202,7 @@
 
     <div v-if="currentStep === 1">
       <!-- 第二步：表单设计 -->
+      <!-- TODO @goldenzqqq：是不是可以居中哈，1024 -->
       <el-form
         ref="formRef"
         :model="formData"
@@ -316,9 +319,7 @@ const router = useRouter()
 const route = useRoute()
 const userStore = useUserStoreWithOut()
 
-// 步骤控制
-const currentStep = ref(0)
-// 表单数据
+const currentStep = ref(0) // 步骤控制
 const formRef = ref()
 const formData: any = ref({
   id: undefined,
@@ -337,9 +338,7 @@ const formData: any = ref({
   managerUserType: undefined,
   startUserIds: [],
   managerUserIds: []
-})
-
-// 表单校验规则
+}) // 表单数据
 const formRules = {
   name: [{ required: true, message: '流程名称不能为空', trigger: 'blur' }],
   key: [{ required: true, message: '流程标识不能为空', trigger: 'blur' }],
@@ -352,7 +351,7 @@ const formRules = {
   formCustomViewPath: [{ required: true, message: '表单查看地址不能为空', trigger: 'blur' }],
   visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
   managerUserIds: [{ required: true, message: '流程管理员不能为空', trigger: 'blur' }]
-}
+} // 表单校验规则
 
 // 流程设计器相关
 const xmlString = ref(undefined)
@@ -368,19 +367,19 @@ const selectedManagerUsers = ref<UserVO[]>([])
 const userSelectFormRef = ref()
 const currentSelectType = ref<'start' | 'manager'>('start')
 
-// 打开发起人选择
+/** 打开发起人选择 */
 const openStartUserSelect = () => {
   currentSelectType.value = 'start'
   userSelectFormRef.value.open(0, selectedStartUsers.value)
 }
 
-// 打开管理员选择
+/** 打开管理员选择 */
 const openManagerUserSelect = () => {
   currentSelectType.value = 'manager'
   userSelectFormRef.value.open(0, selectedManagerUsers.value)
 }
 
-// 处理用户选择确认
+/** 处理用户选择确认 */
 const handleUserSelectConfirm = (_, users: UserVO[]) => {
   if (currentSelectType.value === 'start') {
     selectedStartUsers.value = users
@@ -391,7 +390,7 @@ const handleUserSelectConfirm = (_, users: UserVO[]) => {
   }
 }
 
-// 处理发起人类型变化
+/** 处理发起人类型变化 */
 const handleStartUserTypeChange = (value: number) => {
   if (value !== 1) {
     selectedStartUsers.value = []
@@ -399,7 +398,7 @@ const handleStartUserTypeChange = (value: number) => {
   }
 }
 
-// 处理管理员类型变化
+/** 处理管理员类型变化 */
 const handleManagerUserTypeChange = (value: number) => {
   if (value !== 1) {
     selectedManagerUsers.value = []
@@ -407,19 +406,21 @@ const handleManagerUserTypeChange = (value: number) => {
   }
 }
 
-// 移除发起人
+/** 移除发起人 */
 const handleRemoveStartUser = (user: UserVO) => {
   selectedStartUsers.value = selectedStartUsers.value.filter((u) => u.id !== user.id)
-  formData.value.startUserIds = formData.value.startUserIds.filter((id) => id !== user.id)
+  formData.value.startUserIds = formData.value.startUserIds.filter((id: number) => id !== user.id)
 }
 
-// 移除管理员
+/** 移除管理员 */
 const handleRemoveManagerUser = (user: UserVO) => {
   selectedManagerUsers.value = selectedManagerUsers.value.filter((u) => u.id !== user.id)
-  formData.value.managerUserIds = formData.value.managerUserIds.filter((id) => id !== user.id)
+  formData.value.managerUserIds = formData.value.managerUserIds.filter(
+    (id: number) => id !== user.id
+  )
 }
 
-// 保存操作
+/** 保存操作 */
 const handleSave = async () => {
   try {
     if (formData.value.id) {
@@ -436,7 +437,7 @@ const handleSave = async () => {
   }
 }
 
-// 发布操作
+/** 发布操作 */
 const handleDeploy = async () => {
   try {
     await message.confirm('是否确认发布该流程？')
@@ -445,7 +446,8 @@ const handleDeploy = async () => {
     await handleSave()
     await ModelApi.deployModel(formData.value.id)
     message.success('发布成功')
-    router.push({ path: '/bpm/manager/model' })
+    // TODO @goldenzqqq：最好使用 name 哈
+    await router.push({ path: '/bpm/manager/model' })
   } catch (error) {
     if (error instanceof Error) {
       // 校验失败时,跳转到对应步骤
@@ -465,7 +467,7 @@ const handleDeploy = async () => {
   }
 }
 
-// 初始化数据
+/** 初始化数据 */
 const initData = async () => {
   const modelId = route.query.id as unknown as string
   if (modelId) {
@@ -497,16 +499,12 @@ const initData = async () => {
   userList.value = await UserApi.getSimpleUserList()
 }
 
-onMounted(async () => {
-  await initData()
-})
-
-// 第一步校验
+/** 第一步校验 */
 const validateStep1 = async () => {
   await formRef.value?.validate(['name', 'key', 'category', 'icon', 'type', 'visible'])
 }
 
-// 第二步校验
+/** 第二步校验 */
 const validateStep2 = async () => {
   await formRef.value?.validate([
     'formType',
@@ -516,13 +514,14 @@ const validateStep2 = async () => {
   ])
 }
 
-// 第三步校验
+/** 第三步校验 */
 const validateStep3 = async () => {
   if (!xmlString.value) {
     throw new Error('请设计流程')
   }
 }
 
+/** 校验全部 */
 const validateAllSteps = async () => {
   for (const step of steps) {
     if (step.validator) {
@@ -531,13 +530,14 @@ const validateAllSteps = async () => {
   }
 }
 
+// TODO @goldenzqqq：是不是可以把 step1、step2、step3，改成 basic、form、designer。这样，可读性会好点。
 const steps = [
   { title: '基本信息', validator: validateStep1 },
   { title: '表单设计', validator: validateStep2 },
   { title: '流程设计', validator: validateStep3 }
 ]
 
-// 处理设计器保存成功
+/** 处理设计器保存成功 */
 const handleDesignSuccess = (bpmnXml?: string) => {
   if (bpmnXml) {
     // 新建时，保存设计器生成的XML
@@ -546,7 +546,7 @@ const handleDesignSuccess = (bpmnXml?: string) => {
   message.success('保存成功')
 }
 
-// 步骤切换处理
+/** 步骤切换处理 */
 const handleStepClick = async (index: number) => {
   // 如果是切换到第三步（流程设计），需要校验key和name
   if (index === 2) {
@@ -555,11 +555,12 @@ const handleStepClick = async (index: number) => {
       return
     }
   }
+  // TODO @goldenzqqq：感觉这里可以优化下，切换的时候，必须当前表单填写正确，不然不允许切换。
 
   currentStep.value = index
 }
 
-// 添加一个计算属性来判断是否显示设计器
+/** 添加一个计算属性来判断是否显示设计器 */
 const showDesigner = computed(() => {
   return (
     currentStep.value === 2 &&
@@ -584,6 +585,11 @@ onBeforeUnmount(() => {
   if (w.bpmnInstances) {
     w.bpmnInstances = null
   }
+})
+
+/** 初始化 */
+onMounted(async () => {
+  await initData()
 })
 </script>
 
