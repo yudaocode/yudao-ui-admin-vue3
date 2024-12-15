@@ -1,6 +1,6 @@
 <template>
-  <div class="process-panel__container" :style="{ width: `${width}px`, maxHeight: '700px' }">
-    <el-collapse v-model="activeTab">
+  <div class="process-panel__container" :style="{ width: `${width}px` }">
+    <el-collapse v-model="activeTab" v-if="isReady">
       <el-collapse-item name="base">
         <!-- class="panel-tab__title" -->
         <template #title>
@@ -119,24 +119,16 @@ const elementBusinessObject = ref<any>({}) // 元素 businessObject 镜像，提
 const conditionFormVisible = ref(false) // 流转条件设置
 const formVisible = ref(false) // 表单配置
 const bpmnElement = ref()
+const isReady = ref(false)
 
 provide('prefix', props.prefix)
 provide('width', props.width)
-const bpmnInstances = () => (window as any)?.bpmnInstances
 
-// 监听 props.bpmnModeler 然后 initModels
-const unwatchBpmn = watch(
-  () => props.bpmnModeler,
-  () => {
-    // 避免加载时 流程图 并未加载完成
-    if (!props.bpmnModeler) {
-      console.log('缺少props.bpmnModeler')
-      return
-    }
-
-    console.log('props.bpmnModeler 有值了！！！')
-    const w = window as any
-    w.bpmnInstances = {
+// 初始化 bpmnInstances
+const initBpmnInstances = () => {
+  if (!props.bpmnModeler) return false
+  try {
+    const instances = {
       modeler: props.bpmnModeler,
       modeling: props.bpmnModeler.get('modeling'),
       moddle: props.bpmnModeler.get('moddle'),
@@ -148,9 +140,45 @@ const unwatchBpmn = watch(
       selection: props.bpmnModeler.get('selection')
     }
 
-    console.log(bpmnInstances(), 'window.bpmnInstances')
-    getActiveElement()
-    unwatchBpmn()
+    // 检查所有实例是否都存在
+    const allInstancesExist = Object.values(instances).every(instance => instance)
+    if (allInstancesExist) {
+      const w = window as any
+      w.bpmnInstances = instances
+      return true
+    }
+    return false
+  } catch (error) {
+    console.error('初始化 bpmnInstances 失败:', error)
+    return false
+  }
+}
+
+const bpmnInstances = () => (window as any)?.bpmnInstances
+
+// 监听 props.bpmnModeler 然后 initModels
+const unwatchBpmn = watch(
+  () => props.bpmnModeler,
+  async () => {
+    // 避免加载时 流程图 并未加载完成
+    if (!props.bpmnModeler) {
+      console.log('缺少props.bpmnModeler')
+      return
+    }
+
+    try {
+      // 等待 modeler 初始化完成
+      await nextTick()
+      if (initBpmnInstances()) {
+        isReady.value = true
+        await nextTick()
+        getActiveElement()
+      } else {
+        console.error('modeler 实例未完全初始化')
+      }
+    } catch (error) {
+      console.error('初始化失败:', error)
+    }
   },
   {
     immediate: true
@@ -158,6 +186,8 @@ const unwatchBpmn = watch(
 )
 
 const getActiveElement = () => {
+  if (!isReady.value || !props.bpmnModeler) return
+
   // 初始第一个选中元素 bpmn:Process
   initFormOnChanged(null)
   props.bpmnModeler.on('import.done', (e) => {
@@ -175,8 +205,11 @@ const getActiveElement = () => {
     }
   })
 }
+
 // 初始化数据
 const initFormOnChanged = (element) => {
+  if (!isReady.value || !bpmnInstances()) return
+
   let activatedElement = element
   if (!activatedElement) {
     activatedElement =
@@ -184,32 +217,36 @@ const initFormOnChanged = (element) => {
       bpmnInstances().elementRegistry.find((el) => el.type === 'bpmn:Collaboration')
   }
   if (!activatedElement) return
-  console.log(`
-              ----------
-      select element changed:
-                id:  ${activatedElement.id}
-              type:  ${activatedElement.businessObject.$type}
-              ----------
-              `)
-  console.log('businessObject: ', activatedElement.businessObject)
-  bpmnInstances().bpmnElement = activatedElement
-  bpmnElement.value = activatedElement
-  elementId.value = activatedElement.id
-  elementType.value = activatedElement.type.split(':')[1] || ''
-  elementBusinessObject.value = JSON.parse(JSON.stringify(activatedElement.businessObject))
-  conditionFormVisible.value = !!(
-    elementType.value === 'SequenceFlow' &&
-    activatedElement.source &&
-    activatedElement.source.type.indexOf('StartEvent') === -1
-  )
-  formVisible.value = elementType.value === 'UserTask' || elementType.value === 'StartEvent'
+
+  try {
+    console.log(`
+                ----------
+        select element changed:
+                  id:  ${activatedElement.id}
+                type:  ${activatedElement.businessObject.$type}
+                ----------
+                `)
+    console.log('businessObject: ', activatedElement.businessObject)
+    bpmnInstances().bpmnElement = activatedElement
+    bpmnElement.value = activatedElement
+    elementId.value = activatedElement.id
+    elementType.value = activatedElement.type.split(':')[1] || ''
+    elementBusinessObject.value = JSON.parse(JSON.stringify(activatedElement.businessObject))
+    conditionFormVisible.value = !!(
+      elementType.value === 'SequenceFlow' &&
+      activatedElement.source &&
+      activatedElement.source.type.indexOf('StartEvent') === -1
+    )
+    formVisible.value = elementType.value === 'UserTask' || elementType.value === 'StartEvent'
+  } catch (error) {
+    console.error('初始化表单数据失败:', error)
+  }
 }
 
 onBeforeUnmount(() => {
   const w = window as any
   w.bpmnInstances = null
-  console.log(props, 'props1')
-  console.log(props.bpmnModeler, 'props.bpmnModeler1')
+  isReady.value = false
 })
 
 watch(
