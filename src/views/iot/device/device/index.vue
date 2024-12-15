@@ -123,6 +123,9 @@
         >
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
+        <el-button type="warning" plain @click="handleImport" v-hasPermi="['iot:device:import']">
+          <Icon icon="ep:upload" /> 导入
+        </el-button>
         <el-button
           type="primary"
           plain
@@ -355,6 +358,8 @@
   <DeviceForm ref="formRef" @success="getList" />
   <!-- 分组表单组件 -->
   <DeviceGroupForm ref="groupFormRef" @success="getList" />
+  <!-- 导入表单组件 -->
+  <DeviceImportForm ref="importFormRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
@@ -366,6 +371,7 @@ import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceGroupApi, DeviceGroupVO } from '@/api/iot/device/group'
 import download from '@/utils/download'
 import DeviceGroupForm from './DeviceGroupForm.vue'
+import DeviceImportForm from './DeviceImportForm.vue'
 
 /** IoT 设备列表 */
 defineOptions({ name: 'IoTDevice' })
@@ -373,7 +379,7 @@ defineOptions({ name: 'IoTDevice' })
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
-const loading = ref(true) // 列表���加载中
+const loading = ref(true) // 列表加载中
 const list = ref<DeviceVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
@@ -420,7 +426,7 @@ const resetQuery = () => {
   handleQuery()
 }
 
-/** ���加/修改操作 */
+/** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
@@ -486,6 +492,12 @@ const openGroupForm = () => {
 /** 打开物模型数据 */
 const openModel = (id: number) => {
   push({ name: 'IoTDeviceDetail', params: { id }, query: { tab: 'model' } })
+}
+
+/** 设备导入 */
+const importFormRef = ref()
+const handleImport = () => {
+  importFormRef.value.open()
 }
 
 /** 初始化 **/

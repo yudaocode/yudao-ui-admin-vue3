@@ -123,7 +123,7 @@ export const DeviceApi = {
     return await request.get({ url: `/iot/device/simple-list?`, params: { deviceType } })
   },
 
-  // 获取设备属性最新数据
+  // 获取设备属性最���数据
   getDevicePropertiesLatestData: async (params: any) => {
     return await request.get({ url: `/iot/device/data/latest`, params })
   },
@@ -131,5 +131,10 @@ export const DeviceApi = {
   // 获取设备属性历史数据
   getDevicePropertiesHistoryData: async (params: any) => {
     return await request.get({ url: `/iot/device/data/history`, params })
+  },
+
+  // 获取导入模板
+  importDeviceTemplate: async () => {
+    return await request.download({ url: `/iot/device/get-import-template` })
   }
 }
