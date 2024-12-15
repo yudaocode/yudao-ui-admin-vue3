@@ -330,6 +330,18 @@ const remainingRouter: AppRouteRecordRaw[] = [
           title: '查看 OA 请假',
           activeMenu: '/bpm/oa/leave'
         }
+      },
+      {
+        path: 'manager/model/create-update',
+        component: () => import('@/views/bpm/model/CreateUpdate.vue'),
+        name: 'BpmModelCreateUpdate',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '创建/修改流程',
+          activeMenu: '/bpm/manager/model'
+        }
       }
     ]
   },
