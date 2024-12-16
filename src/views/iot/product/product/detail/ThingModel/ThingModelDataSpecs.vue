@@ -74,8 +74,9 @@ import {
 } from './dataSpecs'
 import { ThingModelProperty } from '@/api/iot/thinkmodelfunction'
 
-/** 物模型数据 */
+/** IoT 物模型数据 */
 defineOptions({ name: 'ThingModelDataSpecs' })
+
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
 const property = useVModel(props, 'modelValue', emits) as Ref<ThingModelProperty>

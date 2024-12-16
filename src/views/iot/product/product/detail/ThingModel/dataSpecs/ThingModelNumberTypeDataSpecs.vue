@@ -34,6 +34,7 @@ import { DataSpecsNumberDataVO } from '../config'
 
 /** 数值型的 dataSpecs 配置组件 */
 defineOptions({ name: 'ThingModelNumberTypeDataSpecs' })
+
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
 const dataSpecs = useVModel(props, 'modelValue', emits) as Ref<DataSpecsNumberDataVO>

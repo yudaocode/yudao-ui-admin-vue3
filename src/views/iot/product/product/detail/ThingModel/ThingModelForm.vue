@@ -9,6 +9,7 @@
     >
       <el-form-item label="功能类型" prop="type">
         <el-radio-group v-model="formData.type">
+          <!-- TODO @puhui999：从字典拿 -->
           <el-radio-button :value="1"> 属性</el-radio-button>
           <el-radio-button :value="2"> 服务</el-radio-button>
           <el-radio-button :value="3"> 事件</el-radio-button>
@@ -46,10 +47,12 @@ import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 import { DataSpecsDataType } from './config'
 import { cloneDeep } from 'lodash-es'
 
+// TODO @puhui999：这里注释下哈
 defineOptions({ name: 'IoTProductThingModelForm' })
 
 const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
 
+// TODO @puhui999：变量必要的注释哈。 = = 虽然有点啰嗦，但是写下，保持统一；
 const { t } = useI18n()
 const message = useMessage()
 
