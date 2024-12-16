@@ -22,8 +22,8 @@
       </el-form-item>
       <!-- 属性配置 -->
       <ThingModelDataSpecs
-        v-model="formData.property"
         v-if="formData.type === ProductFunctionTypeEnum.PROPERTY"
+        v-model="formData.property"
       />
     </el-form>
 
@@ -39,11 +39,12 @@ import { ProductVO } from '@/api/iot/product/product'
 import ThingModelDataSpecs from './ThingModelDataSpecs.vue'
 import {
   ProductFunctionTypeEnum,
-  ThinkModelFunctionApi,
-  ThingModelData
+  ThingModelData,
+  ThinkModelFunctionApi
 } from '@/api/iot/thinkmodelfunction'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 import { DataSpecsDataType } from './config'
+import { cloneDeep } from 'lodash-es'
 
 defineOptions({ name: 'IoTProductThingModelForm' })
 
@@ -58,12 +59,15 @@ const formLoading = ref(false)
 const formType = ref('')
 const formData = ref<ThingModelData>({
   type: ProductFunctionTypeEnum.PROPERTY,
+  dataType: DataSpecsDataType.INT,
   property: {
     dataType: DataSpecsDataType.INT,
-    dataSpecsList: [],
-    dataSpecs: {}
+    dataSpecs: {
+      dataType: DataSpecsDataType.INT
+    }
   }
 })
+// TODO puhui999: 表单校验待完善
 const formRules = reactive({
   name: [
     { required: true, message: '功能名称不能为空', trigger: 'blur' },
@@ -114,7 +118,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ThinkModelFunctionApi.getThinkModelFunction(id)
+      formData.value = await ThinkModelFunctionApi.getProductThingModel(id)
     } finally {
       formLoading.value = false
     }
@@ -128,14 +132,19 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = formData.value as unknown as ThingModelData
+    const data = cloneDeep(formData.value) as ThingModelData
+    // 信息补全
     data.productId = product!.value.id
     data.productKey = product!.value.productKey
+    data.description = data.property.description
+    data.dataType = data.property.dataType
+    data.property.identifier = data.identifier
+    data.property.name = data.name
     if (formType.value === 'create') {
-      await ThinkModelFunctionApi.createThinkModelFunction(data)
+      await ThinkModelFunctionApi.createProductThingModel(data)
       message.success(t('common.createSuccess'))
     } else {
-      await ThinkModelFunctionApi.updateThinkModelFunction(data)
+      await ThinkModelFunctionApi.updateProductThingModel(data)
       message.success(t('common.updateSuccess'))
     }
   } finally {
@@ -149,10 +158,12 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     type: ProductFunctionTypeEnum.PROPERTY,
+    dataType: DataSpecsDataType.INT,
     property: {
       dataType: DataSpecsDataType.INT,
-      dataSpecsList: [],
-      dataSpecs: {}
+      dataSpecs: {
+        dataType: DataSpecsDataType.INT
+      }
     }
   }
   formRef.value?.resetFields()

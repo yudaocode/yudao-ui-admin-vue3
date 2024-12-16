@@ -32,7 +32,12 @@
           <Icon class="mr-5px" icon="ep:refresh" />
           重置
         </el-button>
-        <el-button plain type="primary" @click="openForm('create')">
+        <el-button
+          v-hasPermi="[`iot:product-thing-model:create`]"
+          plain
+          type="primary"
+          @click="openForm('create')"
+        >
           <Icon class="mr-5px" icon="ep:plus" />
           添加功能
         </el-button>
@@ -49,12 +54,21 @@
         </el-table-column>
         <el-table-column align="center" label="功能名称" prop="name" />
         <el-table-column align="center" label="标识符" prop="identifier" />
-        <el-table-column align="center" label="数据类型" prop="identifier" />
-        <el-table-column align="center" label="数据定义" prop="identifier" />
+        <el-table-column align="center" label="数据类型" prop="identifier">
+          <template #default="{ row }">
+            {{ dataTypeOptionsLabel(row.property.dataType) ?? '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column align="center" label="数据定义" prop="identifier">
+          <template #default="{ row }">
+            <!-- TODO puhui999: 数据定义展示待完善 -->
+            {{ row.property.dataSpecs ?? row.property.dataSpecsList }}
+          </template>
+        </el-table-column>
         <el-table-column align="center" label="操作">
           <template #default="scope">
             <el-button
-              v-hasPermi="[`iot:think-model-function:update`]"
+              v-hasPermi="[`iot:product-thing-model:update`]"
               link
               type="primary"
               @click="openForm('update', scope.row.id)"
@@ -62,7 +76,7 @@
               编辑
             </el-button>
             <el-button
-              v-hasPermi="['iot:think-model-function:delete']"
+              v-hasPermi="['iot:product-thing-model:delete']"
               link
               type="danger"
               @click="handleDelete(scope.row.id)"
@@ -85,11 +99,12 @@
   <ThingModelForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
-import { ThinkModelFunctionApi, ThinkModelFunctionVO } from '@/api/iot/thinkmodelfunction'
+import { ThingModelData, ThinkModelFunctionApi } from '@/api/iot/thinkmodelfunction'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ThingModelForm from './ThingModelForm.vue'
 import { ProductVO } from '@/api/iot/product/product'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
+import { getDataTypeOptionsLabel } from '@/views/iot/product/product/detail/ThingModel/config'
 
 defineOptions({ name: 'IoTProductThingModel' })
 
@@ -97,7 +112,7 @@ const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
-const list = ref<ThinkModelFunctionVO[]>([]) // 列表的数据
+const list = ref<ThingModelData[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
@@ -108,12 +123,14 @@ const queryParams = reactive({
 
 const queryFormRef = ref() // 搜索的表单
 const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
+const dataTypeOptionsLabel = computed(() => (value: string) => getDataTypeOptionsLabel(value)) // 解析数据类型
+
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
     queryParams.productId = product?.value?.id || -1
-    const data = await ThinkModelFunctionApi.getThinkModelFunctionPage(queryParams)
+    const data = await ThinkModelFunctionApi.getProductThingModelPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -145,7 +162,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ThinkModelFunctionApi.deleteThinkModelFunction(id)
+    await ThinkModelFunctionApi.deleteProductThingModel(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

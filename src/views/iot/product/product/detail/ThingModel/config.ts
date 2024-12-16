@@ -43,3 +43,8 @@ export const dataTypeOptions = [
   { value: DataSpecsDataType.STRUCT, label: 'struct (结构体)' },
   { value: DataSpecsDataType.ARRAY, label: 'array (数组)' }
 ]
+
+/** 获得物体模型数据类型配置项名称 */
+export const getDataTypeOptionsLabel = (value: string) => {
+  return dataTypeOptions.find((option) => option.value === value)?.label
+}

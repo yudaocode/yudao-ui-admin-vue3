@@ -2,49 +2,57 @@
   <ContentWrap>
     <!-- 搜索工作栏 -->
     <el-form
-      class="-mb-15px"
-      :model="queryParams"
       ref="queryFormRef"
       :inline="true"
+      :model="queryParams"
+      class="-mb-15px"
       label-width="68px"
     >
       <el-form-item label="产品名称" prop="name">
         <el-input
           v-model="queryParams.name"
-          placeholder="请输入产品名称"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入产品名称"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item label="ProductKey" prop="productKey">
         <el-input
           v-model="queryParams.productKey"
-          placeholder="请输入产品标识"
-          clearable
-          @keyup.enter="handleQuery"
           class="!w-240px"
+          clearable
+          placeholder="请输入产品标识"
+          @keyup.enter="handleQuery"
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
-        <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['iot:product:create']"
-        >
-          <Icon icon="ep:plus" class="mr-5px" /> 新增
+        <el-button @click="handleQuery">
+          <Icon class="mr-5px" icon="ep:search" />
+          搜索
+        </el-button>
+        <el-button @click="resetQuery">
+          <Icon class="mr-5px" icon="ep:refresh" />
+          重置
         </el-button>
         <el-button
-          type="success"
+          v-hasPermi="['iot:product:create']"
           plain
-          @click="handleExport"
-          :loading="exportLoading"
-          v-hasPermi="['iot:product:export']"
+          type="primary"
+          @click="openForm('create')"
         >
-          <Icon icon="ep:download" class="mr-5px" /> 导出
+          <Icon class="mr-5px" icon="ep:plus" />
+          新增
+        </el-button>
+        <el-button
+          v-hasPermi="['iot:product:export']"
+          :loading="exportLoading"
+          plain
+          type="success"
+          @click="handleExport"
+        >
+          <Icon class="mr-5px" icon="ep:download" />
+          导出
         </el-button>
       </el-form-item>
       <!-- 视图切换按钮 -->
@@ -64,8 +72,8 @@
   <!-- 卡片视图 -->
   <ContentWrap>
     <el-row v-if="viewMode === 'card'" :gutter="16">
-      <el-col v-for="item in list" :key="item.id" :xs="24" :sm="12" :md="12" :lg="6" class="mb-4">
-        <el-card class="h-full transition-colors" :body-style="{ padding: '0' }">
+      <el-col v-for="item in list" :key="item.id" :lg="6" :md="12" :sm="12" :xs="24" class="mb-4">
+        <el-card :body-style="{ padding: '0' }" class="h-full transition-colors">
           <!-- 内容区域 -->
           <div class="p-4">
             <!-- 标题区域 -->
@@ -103,41 +111,41 @@
             <!-- 按钮组 -->
             <div class="flex items-center px-0">
               <el-button
-                class="flex-1 !px-2 !h-[32px] text-[13px]"
-                type="primary"
-                plain
-                @click="openForm('update', item.id)"
                 v-hasPermi="['iot:product:update']"
+                class="flex-1 !px-2 !h-[32px] text-[13px]"
+                plain
+                type="primary"
+                @click="openForm('update', item.id)"
               >
-                <Icon icon="ep:edit-pen" class="mr-1" />
+                <Icon class="mr-1" icon="ep:edit-pen" />
                 编辑
               </el-button>
               <el-button
                 class="flex-1 !px-2 !h-[32px] !ml-[10px] text-[13px]"
-                type="warning"
                 plain
+                type="warning"
                 @click="openDetail(item.id)"
               >
-                <Icon icon="ep:view" class="mr-1" />
+                <Icon class="mr-1" icon="ep:view" />
                 详情
               </el-button>
               <el-button
                 class="flex-1 !px-2 !h-[32px] !ml-[10px] text-[13px]"
-                type="success"
                 plain
+                type="success"
                 @click="openObjectModel(item)"
               >
-                <Icon icon="ep:scale-to-original" class="mr-1" />
+                <Icon class="mr-1" icon="ep:scale-to-original" />
                 物模型
               </el-button>
               <div class="mx-[10px] h-[20px] w-[1px] bg-[#dcdfe6]"></div>
               <el-button
-                class="!px-2 !h-[32px] text-[13px]"
-                type="danger"
-                plain
-                @click="handleDelete(item.id)"
                 v-hasPermi="['iot:product:delete']"
                 :disabled="item.status === 1"
+                class="!px-2 !h-[32px] text-[13px]"
+                plain
+                type="danger"
+                @click="handleDelete(item.id)"
               >
                 <Icon icon="ep:delete" />
               </el-button>
@@ -148,68 +156,68 @@
     </el-row>
 
     <!-- 列表视图 -->
-    <el-table v-else v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="ID" align="center" prop="id" />
-      <el-table-column label="ProductKey" align="center" prop="productKey" />
-      <el-table-column label="品类" align="center" prop="categoryName" />
-      <el-table-column label="设备类型" align="center" prop="deviceType">
+    <el-table v-else v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+      <el-table-column align="center" label="ID" prop="id" />
+      <el-table-column align="center" label="ProductKey" prop="productKey" />
+      <el-table-column align="center" label="品类" prop="categoryName" />
+      <el-table-column align="center" label="设备类型" prop="deviceType">
         <template #default="scope">
           <dict-tag :type="DICT_TYPE.IOT_PRODUCT_DEVICE_TYPE" :value="scope.row.deviceType" />
         </template>
       </el-table-column>
-      <el-table-column label="产品图标" align="center" prop="icon">
+      <el-table-column align="center" label="产品图标" prop="icon">
         <template #default="scope">
           <el-image
             v-if="scope.row.icon"
+            :preview-src-list="[scope.row.icon]"
             :src="scope.row.icon"
             class="w-40px h-40px"
-            :preview-src-list="[scope.row.icon]"
           />
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="产品图片" align="center" prop="picture">
+      <el-table-column align="center" label="产品图片" prop="picture">
         <template #default="scope">
           <el-image
             v-if="scope.row.picUrl"
+            :preview-src-list="[scope.row.picture]"
             :src="scope.row.picUrl"
             class="w-40px h-40px"
-            :preview-src-list="[scope.row.picture]"
           />
           <span v-else>-</span>
         </template>
       </el-table-column>
       <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
         :formatter="dateFormatter"
+        align="center"
+        label="创建时间"
+        prop="createTime"
         width="180px"
       />
-      <el-table-column label="操作" align="center">
+      <el-table-column align="center" label="操作">
         <template #default="scope">
           <el-button
+            v-hasPermi="['iot:product:query']"
             link
             type="primary"
             @click="openDetail(scope.row.id)"
-            v-hasPermi="['iot:product:query']"
           >
             查看
           </el-button>
           <el-button
+            v-hasPermi="['iot:product:update']"
             link
             type="primary"
             @click="openForm('update', scope.row.id)"
-            v-hasPermi="['iot:product:update']"
           >
             编辑
           </el-button>
           <el-button
+            v-hasPermi="['iot:product:delete']"
+            :disabled="scope.row.status === 1"
             link
             type="danger"
             @click="handleDelete(scope.row.id)"
-            v-hasPermi="['iot:product:delete']"
-            :disabled="scope.row.status === 1"
           >
             删除
           </el-button>
@@ -219,9 +227,9 @@
 
     <!-- 分页 -->
     <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
       v-model:limit="queryParams.pageSize"
+      v-model:page="queryParams.pageNo"
+      :total="total"
       @pagination="getList"
     />
   </ContentWrap>
@@ -230,7 +238,7 @@
   <ProductForm ref="formRef" @success="getList" />
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { dateFormatter } from '@/utils/formatTime'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import ProductForm from './ProductForm.vue'
@@ -301,7 +309,7 @@ const openObjectModel = (item: ProductVO) => {
   push({
     name: 'IoTProductDetail',
     params: { id: item.id },
-    query: { tab: 'function' }
+    query: { tab: 'thingModel' }
   })
 }
 

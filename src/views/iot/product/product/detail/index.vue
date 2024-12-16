@@ -8,7 +8,7 @@
       <el-tab-pane label="Topic 类列表" name="topic">
         <ProductTopic v-if="activeTab === 'topic'" :product="product" />
       </el-tab-pane>
-      <el-tab-pane label="功能定义" lazy name="function">
+      <el-tab-pane label="功能定义" lazy name="thingModel">
         <IoTProductThingModel ref="thingModelRef" />
       </el-tab-pane>
       <el-tab-pane label="消息解析" name="message" />

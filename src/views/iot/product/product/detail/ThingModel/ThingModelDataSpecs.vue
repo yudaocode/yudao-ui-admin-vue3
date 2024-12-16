@@ -24,34 +24,35 @@
     v-model="property.dataSpecsList"
   />
   <!-- 布尔型配置 -->
-  <el-form-item label="布尔值" prop="bool" v-if="property.dataType === DataSpecsDataType.BOOL">
+  <el-form-item v-if="property.dataType === DataSpecsDataType.BOOL" label="布尔值" prop="bool">
     <template v-for="item in property.dataSpecsList" :key="item.value">
       <div class="flex items-center justify-start w-1/1 mb-5px">
         <span>{{ item.value }}</span>
         <span class="mx-2">-</span>
         <el-input
           v-model="item.name"
-          class="w-255px!"
           :placeholder="`如：${item.value === 0 ? '关' : '开'}`"
+          class="w-255px!"
         />
       </div>
     </template>
   </el-form-item>
   <!-- 文本型配置 -->
-  <el-form-item label="数据长度" prop="text" v-if="property.dataType === DataSpecsDataType.TEXT">
-    <el-input v-model="property.length" class="w-255px!" placeholder="请输入文本字节长度">
+  <el-form-item v-if="property.dataType === DataSpecsDataType.TEXT" label="数据长度" prop="text">
+    <el-input v-model="property.dataSpecs.length" class="w-255px!" placeholder="请输入文本字节长度">
       <template #append>字节</template>
     </el-input>
   </el-form-item>
   <!-- 时间型配置 -->
-  <el-form-item label="时间格式" prop="date" v-if="property.dataType === DataSpecsDataType.DATE">
-    <el-input disabled class="w-255px!" placeholder="String类型的UTC时间戳（毫秒）" />
+  <el-form-item v-if="property.dataType === DataSpecsDataType.DATE" label="时间格式" prop="date">
+    <el-input class="w-255px!" disabled placeholder="String类型的UTC时间戳（毫秒）" />
   </el-form-item>
   <!-- 数组型配置-->
   <ThingModelArrayTypeDataSpecs
-    v-model="property.dataSpecs"
     v-if="property.dataType === DataSpecsDataType.ARRAY"
+    v-model="property.dataSpecs"
   />
+  <!-- TODO puhui999: Struct 属性待完善 -->
   <el-form-item label="读写类型" prop="accessMode">
     <el-radio-group v-model="property.accessMode">
       <el-radio label="rw">读写</el-radio>
@@ -84,16 +85,8 @@ const handleChange = (dataType: any) => {
   property.value.dataSpecsList = []
   property.value.dataSpecs = {}
 
+  property.value.dataSpecs.dataType = dataType
   switch (dataType) {
-    case DataSpecsDataType.INT:
-      property.value.dataSpecs.dataType = DataSpecsDataType.INT
-      break
-    case DataSpecsDataType.DOUBLE:
-      property.value.dataSpecs.dataType = DataSpecsDataType.DOUBLE
-      break
-    case DataSpecsDataType.FLOAT:
-      property.value.dataSpecs.dataType = DataSpecsDataType.FLOAT
-      break
     case DataSpecsDataType.ENUM:
       property.value.dataSpecsList.push({
         dataType: DataSpecsDataType.ENUM,
@@ -109,9 +102,6 @@ const handleChange = (dataType: any) => {
           value: i // 布尔值
         })
       }
-      break
-    case DataSpecsDataType.ARRAY:
-      property.value.dataSpecs.dataType = DataSpecsDataType.ARRAY
       break
   }
 }
