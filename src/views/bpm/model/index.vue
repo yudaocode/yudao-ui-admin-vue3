@@ -126,9 +126,12 @@ const handleQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   if (type === 'create') {
-    push('/bpm/manager/model/create-update')
+    push({ name: 'BpmModelCreate' })
   } else {
-    push(`/bpm/manager/model/create-update?id=${id}`)
+    push({
+      name: 'BpmModelUpdate',
+      params: { id }
+    })
   }
 }
 
