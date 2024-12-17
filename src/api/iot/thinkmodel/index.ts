@@ -55,34 +55,34 @@ export enum ProductFunctionAccessModeEnum {
 export const ThinkModelApi = {
   // 查询产品物模型分页
   getThinkModelPage: async (params: any) => {
-    return await request.get({ url: `/iot/product-thing-model/page`, params })
+    return await request.get({ url: `/iot/product-think-model/page`, params })
   },
 
   // 获得产品物模型
   getThinkModelListByProductId: async (params: any) => {
     return await request.get({
-      url: `/iot/product-thing-model/list-by-product-id`,
+      url: `/iot/product-think-model/list-by-product-id`,
       params
     })
   },
 
   // 查询产品物模型详情
   getThinkModel: async (id: number) => {
-    return await request.get({ url: `/iot/product-thing-model/get?id=` + id })
+    return await request.get({ url: `/iot/product-think-model/get?id=` + id })
   },
 
   // 新增产品物模型
   createThinkModel: async (data: ThinkModelData) => {
-    return await request.post({ url: `/iot/product-thing-model/create`, data })
+    return await request.post({ url: `/iot/product-think-model/create`, data })
   },
 
   // 修改产品物模型
   updateThinkModel: async (data: ThinkModelData) => {
-    return await request.put({ url: `/iot/product-thing-model/update`, data })
+    return await request.put({ url: `/iot/product-think-model/update`, data })
   },
 
   // 删除产品物模型
   deleteThinkModel: async (id: number) => {
-    return await request.delete({ url: `/iot/product-thing-model/delete?id=` + id })
+    return await request.delete({ url: `/iot/product-think-model/delete?id=` + id })
   }
 }
