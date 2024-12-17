@@ -67,7 +67,6 @@ const formData = ref<ThingModelData>({
     }
   }
 })
-// TODO puhui999: 表单校验待完善
 const formRules = reactive({
   name: [
     { required: true, message: '功能名称不能为空', trigger: 'blur' },
@@ -87,7 +86,7 @@ const formRules = reactive({
       trigger: 'blur'
     },
     {
-      validator: (rule, value, callback) => {
+      validator: (_: any, value: string, callback: any) => {
         const reservedKeywords = ['set', 'get', 'post', 'property', 'event', 'time', 'value']
         if (reservedKeywords.includes(value)) {
           callback(
@@ -103,9 +102,7 @@ const formRules = reactive({
       },
       trigger: 'blur'
     }
-  ],
-  'property.dataType.type': [{ required: true, message: '数据类型不能为空', trigger: 'blur' }],
-  'property.accessMode': [{ required: true, message: '读写类型不能为空', trigger: 'blur' }]
+  ]
 })
 const formRef = ref()
 
