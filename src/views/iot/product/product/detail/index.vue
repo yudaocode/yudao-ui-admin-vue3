@@ -18,7 +18,7 @@
 </template>
 <script lang="ts" setup>
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
-import { DeviceApi } from '@/api/iot/device'
+import { DeviceApi } from '@/api/iot/device/device'
 import ProductDetailsHeader from './ProductDetailsHeader.vue'
 import ProductDetailsInfo from './ProductDetailsInfo.vue'
 import ProductTopic from './ProductTopic.vue'

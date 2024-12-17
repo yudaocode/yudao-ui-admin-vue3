@@ -51,6 +51,7 @@ export enum ProductFunctionAccessModeEnum {
   READ_ONLY = 'r' // 只读
 }
 
+// TODO @puhui999：getProductThingModelPage => getThingModelPage 哈，不用带 product 前缀
 // IoT 产品物模型 API
 export const ThinkModelApi = {
   // 查询产品物模型分页

@@ -21,17 +21,17 @@
 </template>
 <script lang="ts" setup>
 import { useTagsViewStore } from '@/store/modules/tagsView'
-import { DeviceApi, DeviceVO } from '@/api/iot/device'
+import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import { DeviceTypeEnum, ProductApi, ProductVO } from '@/api/iot/product/product'
-import DeviceDetailsHeader from '@/views/iot/device/detail/DeviceDetailsHeader.vue'
-import DeviceDetailsInfo from '@/views/iot/device/detail/DeviceDetailsInfo.vue'
-import DeviceDetailsModel from '@/views/iot/device/detail/DeviceDetailsModel.vue'
+import DeviceDetailsHeader from './DeviceDetailsHeader.vue'
+import DeviceDetailsInfo from './DeviceDetailsInfo.vue'
+import DeviceDetailsModel from './DeviceDetailsModel.vue'
 
 defineOptions({ name: 'IoTDeviceDetail' })
 
 const route = useRoute()
 const message = useMessage()
-const id = route.params.id // 编号
+const id = Number(route.params.id) // 将字符串转换为数字
 const loading = ref(true) // 加载中
 const product = ref<ProductVO>({} as ProductVO) // 产品详情
 const device = ref<DeviceVO>({} as DeviceVO) // 设备详情
@@ -42,7 +42,6 @@ const getDeviceData = async (id: number) => {
   loading.value = true
   try {
     device.value = await DeviceApi.getDevice(id)
-    console.log(product.value)
     await getProductData(device.value.productId)
   } finally {
     loading.value = false
@@ -64,5 +63,6 @@ onMounted(async () => {
     return
   }
   await getDeviceData(id)
+  activeTab.value = route.query.tab as string
 })
 </script>
