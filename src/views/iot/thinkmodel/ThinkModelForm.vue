@@ -9,9 +9,13 @@
     >
       <el-form-item label="功能类型" prop="type">
         <el-radio-group v-model="formData.type">
-          <el-radio-button :value="1"> 属性</el-radio-button>
-          <el-radio-button :value="2"> 服务</el-radio-button>
-          <el-radio-button :value="3"> 事件</el-radio-button>
+          <el-radio-button
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_THINK_MODEL_TYPE)"
+            :key="dict.value"
+            :value="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio-button>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="功能名称" prop="name">
@@ -41,18 +45,20 @@ import { ProductFunctionTypeEnum, ThinkModelApi, ThinkModelData } from '@/api/io
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 import { DataSpecsDataType } from './config'
 import { cloneDeep } from 'lodash-es'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
+/** IoT 物模型数据表单 */
 defineOptions({ name: 'IoTProductThinkModelForm' })
 
 const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
 
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<ThinkModelData>({
   type: ProductFunctionTypeEnum.PROPERTY,
   dataType: DataSpecsDataType.INT,
@@ -100,7 +106,7 @@ const formRules = reactive({
     }
   ]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -111,7 +117,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ThinkModelApi.getProductThinkModel(id)
+      formData.value = await ThinkModelApi.getThinkModel(id)
     } finally {
       formLoading.value = false
     }
@@ -134,10 +140,10 @@ const submitForm = async () => {
     data.property.identifier = data.identifier
     data.property.name = data.name
     if (formType.value === 'create') {
-      await ThinkModelApi.createProductThinkModel(data)
+      await ThinkModelApi.createThinkModel(data)
       message.success(t('common.createSuccess'))
     } else {
-      await ThinkModelApi.updateProductThinkModel(data)
+      await ThinkModelApi.updateThinkModel(data)
       message.success(t('common.updateSuccess'))
     }
   } finally {

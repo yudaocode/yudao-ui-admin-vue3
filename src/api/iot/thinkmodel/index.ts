@@ -51,16 +51,15 @@ export enum ProductFunctionAccessModeEnum {
   READ_ONLY = 'r' // 只读
 }
 
-// TODO @puhui999：getProductThingModelPage => getThingModelPage 哈，不用带 product 前缀
 // IoT 产品物模型 API
 export const ThinkModelApi = {
   // 查询产品物模型分页
-  getProductThinkModelPage: async (params: any) => {
+  getThinkModelPage: async (params: any) => {
     return await request.get({ url: `/iot/product-thing-model/page`, params })
   },
 
   // 获得产品物模型
-  getProductThinkModelListByProductId: async (params: any) => {
+  getThinkModelListByProductId: async (params: any) => {
     return await request.get({
       url: `/iot/product-thing-model/list-by-product-id`,
       params
@@ -68,22 +67,22 @@ export const ThinkModelApi = {
   },
 
   // 查询产品物模型详情
-  getProductThinkModel: async (id: number) => {
+  getThinkModel: async (id: number) => {
     return await request.get({ url: `/iot/product-thing-model/get?id=` + id })
   },
 
   // 新增产品物模型
-  createProductThinkModel: async (data: ThinkModelData) => {
+  createThinkModel: async (data: ThinkModelData) => {
     return await request.post({ url: `/iot/product-thing-model/create`, data })
   },
 
   // 修改产品物模型
-  updateProductThinkModel: async (data: ThinkModelData) => {
+  updateThinkModel: async (data: ThinkModelData) => {
     return await request.put({ url: `/iot/product-thing-model/update`, data })
   },
 
   // 删除产品物模型
-  deleteProductThinkModel: async (id: number) => {
+  deleteThinkModel: async (id: number) => {
     return await request.delete({ url: `/iot/product-thing-model/delete?id=` + id })
   }
 }

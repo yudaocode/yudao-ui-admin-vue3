@@ -48,7 +48,8 @@ import { DataSpecsDataType, DataSpecsEnumOrBoolDataVO } from '../config'
 import { isEmpty } from '@/utils/is'
 
 /** 枚举型的 dataSpecs 配置组件 */
-defineOptions({ name: 'IoTProductThinkModelEnumTypeDataSpecs' })
+defineOptions({ name: 'ThinkModelEnumTypeDataSpecs' })
+
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
 const dataSpecsList = useVModel(props, 'modelValue', emits) as Ref<DataSpecsEnumOrBoolDataVO[]>

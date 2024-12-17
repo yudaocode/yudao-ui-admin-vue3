@@ -17,7 +17,7 @@
           placeholder="请选择功能类型"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_FUNCTION_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_THINK_MODEL_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -50,7 +50,7 @@
       <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
         <el-table-column align="center" label="功能类型" prop="type">
           <template #default="scope">
-            <dict-tag :type="DICT_TYPE.IOT_PRODUCT_FUNCTION_TYPE" :value="scope.row.type" />
+            <dict-tag :type="DICT_TYPE.IOT_PRODUCT_THINK_MODEL_TYPE" :value="scope.row.type" />
           </template>
         </el-table-column>
         <el-table-column align="center" label="功能名称" prop="name" />
@@ -131,7 +131,7 @@ const getList = async () => {
   loading.value = true
   try {
     queryParams.productId = product?.value?.id || -1
-    const data = await ThinkModelApi.getProductThinkModelPage(queryParams)
+    const data = await ThinkModelApi.getThinkModelPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -163,7 +163,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ThinkModelApi.deleteProductThinkModel(id)
+    await ThinkModelApi.deleteThinkModel(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()

@@ -62,7 +62,8 @@ import { UnifyUnitSpecsDTO } from '@/views/iot/utils/constants'
 import { DataSpecsNumberDataVO } from '../config'
 
 /** 数值型的 dataSpecs 配置组件 */
-defineOptions({ name: 'IoTProductThinkModelNumberTypeDataSpecs' })
+defineOptions({ name: 'ThinkModelNumberTypeDataSpecs' })
+
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
 const dataSpecs = useVModel(props, 'modelValue', emits) as Ref<DataSpecsNumberDataVO>
@@ -74,7 +75,7 @@ const unitChange = (UnitSpecs: string) => {
   dataSpecs.value.unit = unit
 }
 
-// 校验最小值
+/** 校验最小值 */
 const validateMin = (_: any, __: any, callback: any) => {
   const min = Number(dataSpecs.value.min)
   const max = Number(dataSpecs.value.max)
@@ -92,7 +93,7 @@ const validateMin = (_: any, __: any, callback: any) => {
   callback()
 }
 
-// 校验最大值
+/** 校验最大值 */
 const validateMax = (_: any, __: any, callback: any) => {
   const min = Number(dataSpecs.value.min)
   const max = Number(dataSpecs.value.max)
@@ -110,7 +111,7 @@ const validateMax = (_: any, __: any, callback: any) => {
   callback()
 }
 
-// 校验步长
+/** 校验步长 */
 const validateStep = (_: any, __: any, callback: any) => {
   const step = Number(dataSpecs.value.step)
   const min = Number(dataSpecs.value.min)

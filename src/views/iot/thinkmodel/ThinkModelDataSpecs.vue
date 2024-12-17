@@ -111,8 +111,9 @@ import {
 import { ThinkModelProperty } from '@/api/iot/thinkmodel'
 import { isEmpty } from '@/utils/is'
 
-/** 物模型数据 */
-defineOptions({ name: 'IoTProductThinkModelDataSpecs' })
+/** IoT 物模型数据 */
+defineOptions({ name: 'ThinkModelDataSpecs' })
+
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
 const property = useVModel(props, 'modelValue', emits) as Ref<ThinkModelProperty>
