@@ -1,11 +1,5 @@
 <template>
-  <el-form
-    ref="formRef"
-    :model="modelData"
-    :rules="rules"
-    label-width="120px"
-    class="mt-20px"
-  >
+  <el-form ref="formRef" :model="modelData" :rules="rules" label-width="120px" class="mt-20px">
     <el-form-item label="表单类型" prop="formType" class="mb-20px">
       <el-radio-group v-model="modelData.formType">
         <el-radio
@@ -19,19 +13,10 @@
     </el-form-item>
     <el-form-item v-if="modelData.formType === 10" label="流程表单" prop="formId">
       <el-select v-model="modelData.formId" clearable style="width: 100%">
-        <el-option
-          v-for="form in formList"
-          :key="form.id"
-          :label="form.name"
-          :value="form.id"
-        />
+        <el-option v-for="form in formList" :key="form.id" :label="form.name" :value="form.id" />
       </el-select>
     </el-form-item>
-    <el-form-item
-      v-if="modelData.formType === 20"
-      label="表单提交路由"
-      prop="formCustomCreatePath"
-    >
+    <el-form-item v-if="modelData.formType === 20" label="表单提交路由" prop="formCustomCreatePath">
       <el-input
         v-model="modelData.formCustomCreatePath"
         placeholder="请输入表单提交路由"
@@ -46,11 +31,7 @@
         <Icon icon="ep:question" class="ml-5px" />
       </el-tooltip>
     </el-form-item>
-    <el-form-item
-      v-if="modelData.formType === 20"
-      label="表单查看地址"
-      prop="formCustomViewPath"
-    >
+    <el-form-item v-if="modelData.formType === 20" label="表单查看地址" prop="formCustomViewPath">
       <el-input
         v-model="modelData.formCustomViewPath"
         placeholder="请输入表单查看的组件地址"
@@ -65,12 +46,28 @@
         <Icon icon="ep:question" class="ml-5px" />
       </el-tooltip>
     </el-form-item>
+    <!-- 表单预览 -->
+    <div
+      v-if="modelData.formType === 10 && modelData.formId && formPreview.rule.length > 0"
+      class="mt-20px"
+    >
+      <div class="flex items-center mb-15px">
+        <div class="h-15px w-4px bg-[#1890ff] mr-10px"></div>
+        <span class="text-15px font-bold">表单预览</span>
+      </div>
+      <form-create
+        v-model="formPreview.formData"
+        :rule="formPreview.rule"
+        :option="formPreview.option"
+      />
+    </div>
   </el-form>
 </template>
 
 <script lang="ts" setup>
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { BpmModelFormType } from '@/utils/constants'
+import * as FormApi from '@/api/bpm/form'
+import { setConfAndFields2 } from '@/utils/formCreate'
 
 const props = defineProps({
   modelValue: {
@@ -93,6 +90,35 @@ const modelData = computed({
   set: (val) => emit('update:modelValue', val)
 })
 
+// 表单预览数据
+const formPreview = ref({
+  formData: {},
+  rule: [],
+  option: {
+    submitBtn: false,
+    resetBtn: false,
+    formData: {}
+  }
+})
+
+// 监听表单ID变化，加载表单数据
+watch(
+  () => modelData.value.formId,
+  async (newFormId) => {
+    if (newFormId && modelData.value.formType === 10) {
+      const data = await FormApi.getForm(newFormId)
+      setConfAndFields2(formPreview.value, data.conf, data.fields)
+      // 设置只读
+      formPreview.value.rule.forEach((item: any) => {
+        item.props = { ...item.props, disabled: true }
+      })
+    } else {
+      formPreview.value.rule = []
+    }
+  },
+  { immediate: true }
+)
+
 const rules = {
   formType: [{ required: true, message: '表单类型不能为空', trigger: 'blur' }],
   formId: [{ required: true, message: '流程表单不能为空', trigger: 'blur' }],
@@ -108,4 +134,4 @@ const validate = async () => {
 defineExpose({
   validate
 })
-</script> 
+</script>

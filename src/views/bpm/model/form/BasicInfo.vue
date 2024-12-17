@@ -144,7 +144,6 @@
 
 <script lang="ts" setup>
 import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
-import { BpmModelType } from '@/utils/constants'
 import { UserVO } from '@/api/system/user'
 
 const props = defineProps({

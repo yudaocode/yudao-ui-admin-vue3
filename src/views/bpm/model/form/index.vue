@@ -1,8 +1,10 @@
 <template>
   <ContentWrap>
-    <div class="max-w-1024px mx-auto">
+    <div class="mx-auto">
       <!-- 头部导航栏 -->
-      <div class="absolute top-0 left-0 right-0 h-50px bg-white border-bottom z-10 flex items-center px-20px">
+      <div
+        class="absolute top-0 left-0 right-0 h-50px bg-white border-bottom z-10 flex items-center px-20px"
+      >
         <!-- 左侧标题 -->
         <div class="w-200px flex items-center overflow-hidden">
           <Icon icon="ep:arrow-left" class="cursor-pointer flex-shrink-0" @click="router.back()" />
@@ -14,12 +16,25 @@
         <!-- 步骤条 -->
         <div class="flex-1 flex items-center justify-center h-full">
           <div class="w-400px flex items-center justify-between h-full">
-            <div v-for="(step, index) in steps" :key="index"
+            <div
+              v-for="(step, index) in steps"
+              :key="index"
               class="flex items-center cursor-pointer mx-15px relative h-full"
-              :class="[currentStep === index ? 'text-[#3473ff] border-[#3473ff] border-b-2 border-b-solid' : 'text-gray-500']"
-              @click="handleStepClick(index)">
-              <div class="w-28px h-28px rounded-full flex items-center justify-center mr-8px border-2 border-solid text-15px"
-                :class="[currentStep === index ? 'bg-[#3473ff] text-white border-[#3473ff]' : 'border-gray-300 bg-white text-gray-500']">
+              :class="[
+                currentStep === index
+                  ? 'text-[#3473ff] border-[#3473ff] border-b-2 border-b-solid'
+                  : 'text-gray-500'
+              ]"
+              @click="handleStepClick(index)"
+            >
+              <div
+                class="w-28px h-28px rounded-full flex items-center justify-center mr-8px border-2 border-solid text-15px"
+                :class="[
+                  currentStep === index
+                    ? 'bg-[#3473ff] text-white border-[#3473ff]'
+                    : 'border-gray-300 bg-white text-gray-500'
+                ]"
+              >
                 {{ index + 1 }}
               </div>
               <span class="text-16px font-bold whitespace-nowrap">{{ step.title }}</span>
@@ -37,23 +52,31 @@
       <!-- 主体内容 -->
       <div class="mt-50px">
         <!-- 第一步：基本信息 -->
-        <BasicInfo v-if="currentStep === 0" 
-          v-model="formData"
-          :categoryList="categoryList"
-          :userList="userList"
-          ref="basicInfoRef" />
+        <div v-if="currentStep === 0" class="mx-auto" style="max-width: 1024px">
+          <BasicInfo
+            v-model="formData"
+            :categoryList="categoryList"
+            :userList="userList"
+            ref="basicInfoRef"
+          />
+        </div>
 
         <!-- 第二步：表单设计 -->
-        <FormDesign v-if="currentStep === 1"
-          v-model="formData"
-          :formList="formList"
-          ref="formDesignRef" />
+        <div v-if="currentStep === 1" class="mx-auto" style="max-width: 1024px">
+          <FormDesign
+            v-model="formData"
+            :formList="formList"
+            ref="formDesignRef"
+          />
+        </div>
 
         <!-- 第三步：流程设计 -->
-        <ProcessDesign v-if="currentStep === 2"
+        <ProcessDesign
+          v-if="currentStep === 2"
           v-model="formData"
           ref="processDesignRef"
-          @success="handleDesignSuccess" />
+          @success="handleDesignSuccess"
+        />
       </div>
     </div>
   </ContentWrap>
@@ -61,7 +84,6 @@
 
 <script lang="ts" setup>
 import { useRouter, useRoute } from 'vue-router'
-import { useI18n } from 'vue-i18n'
 import { useMessage } from '@/hooks/web/useMessage'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
@@ -75,7 +97,6 @@ import ProcessDesign from './ProcessDesign.vue'
 
 const router = useRouter()
 const route = useRoute()
-const { t } = useI18n()
 const message = useMessage()
 const userStore = useUserStoreWithOut()
 
@@ -106,7 +127,7 @@ const steps = [
 ]
 
 // 表单数据
-const formData = ref({
+const formData: any = ref({
   id: undefined,
   name: '',
   key: '',
@@ -128,11 +149,11 @@ const formData = ref({
 // 数据列表
 const formList = ref([])
 const categoryList = ref([])
-const userList = ref([])
+const userList = ref<UserApi.UserVO[]>([])
 
 /** 初始化数据 */
 const initData = async () => {
-  const modelId = route.params.id
+  const modelId = route.params.id as string
   if (modelId) {
     // 修改场景
     formData.value = await ModelApi.getModel(modelId)
@@ -209,7 +230,7 @@ const handleStepClick = async (index: number) => {
   }
   // 校验当前步骤
   try {
-    if (steps[currentStep.value].validator) {
+    if (typeof steps[currentStep.value].validator === 'function') {
       await steps[currentStep.value].validator()
     }
     currentStep.value = index
