@@ -309,7 +309,7 @@ const openObjectModel = (item: ProductVO) => {
   push({
     name: 'IoTProductDetail',
     params: { id: item.id },
-    query: { tab: 'thingModel' }
+    query: { tab: 'thinkModel' }
   })
 }
 

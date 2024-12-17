@@ -21,7 +21,7 @@
         <el-input v-model="formData.identifier" placeholder="请输入标识符" />
       </el-form-item>
       <!-- 属性配置 -->
-      <ThingModelDataSpecs
+      <ThinkModelDataSpecs
         v-if="formData.type === ProductFunctionTypeEnum.PROPERTY"
         v-model="formData.property"
       />
@@ -36,17 +36,13 @@
 
 <script lang="ts" setup>
 import { ProductVO } from '@/api/iot/product/product'
-import ThingModelDataSpecs from './ThingModelDataSpecs.vue'
-import {
-  ProductFunctionTypeEnum,
-  ThingModelData,
-  ThinkModelFunctionApi
-} from '@/api/iot/thinkmodelfunction'
+import ThinkModelDataSpecs from './ThinkModelDataSpecs.vue'
+import { ProductFunctionTypeEnum, ThinkModelApi, ThinkModelData } from '@/api/iot/thinkmodel'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 import { DataSpecsDataType } from './config'
 import { cloneDeep } from 'lodash-es'
 
-defineOptions({ name: 'IoTProductThingModelForm' })
+defineOptions({ name: 'IoTProductThinkModelForm' })
 
 const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
 
@@ -57,7 +53,7 @@ const dialogVisible = ref(false)
 const dialogTitle = ref('')
 const formLoading = ref(false)
 const formType = ref('')
-const formData = ref<ThingModelData>({
+const formData = ref<ThinkModelData>({
   type: ProductFunctionTypeEnum.PROPERTY,
   dataType: DataSpecsDataType.INT,
   property: {
@@ -115,7 +111,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ThinkModelFunctionApi.getProductThingModel(id)
+      formData.value = await ThinkModelApi.getProductThinkModel(id)
     } finally {
       formLoading.value = false
     }
@@ -129,7 +125,7 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = cloneDeep(formData.value) as ThingModelData
+    const data = cloneDeep(formData.value) as ThinkModelData
     // 信息补全
     data.productId = product!.value.id
     data.productKey = product!.value.productKey
@@ -138,10 +134,10 @@ const submitForm = async () => {
     data.property.identifier = data.identifier
     data.property.name = data.name
     if (formType.value === 'create') {
-      await ThinkModelFunctionApi.createProductThingModel(data)
+      await ThinkModelApi.createProductThinkModel(data)
       message.success(t('common.createSuccess'))
     } else {
-      await ThinkModelFunctionApi.updateProductThingModel(data)
+      await ThinkModelApi.updateProductThinkModel(data)
       message.success(t('common.updateSuccess'))
     }
   } finally {

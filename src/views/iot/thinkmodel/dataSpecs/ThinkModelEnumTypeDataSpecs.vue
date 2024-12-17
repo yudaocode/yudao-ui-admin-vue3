@@ -44,14 +44,11 @@
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import {
-  DataSpecsDataType,
-  DataSpecsEnumOrBoolDataVO
-} from '@/views/iot/product/product/detail/ThingModel/config'
+import { DataSpecsDataType, DataSpecsEnumOrBoolDataVO } from '../config'
 import { isEmpty } from '@/utils/is'
 
 /** 枚举型的 dataSpecs 配置组件 */
-defineOptions({ name: 'ThingModelEnumTypeDataSpecs' })
+defineOptions({ name: 'IoTProductThinkModelEnumTypeDataSpecs' })
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
 const dataSpecsList = useVModel(props, 'modelValue', emits) as Ref<DataSpecsEnumOrBoolDataVO[]>

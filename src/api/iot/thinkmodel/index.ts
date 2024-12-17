@@ -3,7 +3,7 @@ import request from '@/config/axios'
 /**
  * IoT 产品物模型
  */
-export interface ThingModelData {
+export interface ThinkModelData {
   id?: number // 物模型功能编号
   identifier?: string // 功能标识
   name?: string // 功能名称
@@ -12,29 +12,29 @@ export interface ThingModelData {
   productKey?: string // 产品标识
   dataType: string // 数据类型，与 dataSpecs 的 dataType 保持一致
   type: ProductFunctionTypeEnum // 功能类型
-  property: ThingModelProperty // 属性
-  event?: ThingModelEvent // 事件
-  service?: ThingModelService // 服务
+  property: ThinkModelProperty // 属性
+  event?: ThinkModelEvent // 事件
+  service?: ThinkModelService // 服务
 }
 
 /**
- * ThingModelProperty 类型
+ * ThinkModelProperty 类型
  */
-export interface ThingModelProperty {
+export interface ThinkModelProperty {
   [key: string]: any
 }
 
 /**
- * ThingModelEvent 类型
+ * ThinkModelEvent 类型
  */
-export interface ThingModelEvent {
+export interface ThinkModelEvent {
   [key: string]: any
 }
 
 /**
- * ThingModelService 类型
+ * ThinkModelService 类型
  */
-export interface ThingModelService {
+export interface ThinkModelService {
   [key: string]: any
 }
 
@@ -52,14 +52,14 @@ export enum ProductFunctionAccessModeEnum {
 }
 
 // IoT 产品物模型 API
-export const ThinkModelFunctionApi = {
+export const ThinkModelApi = {
   // 查询产品物模型分页
-  getProductThingModelPage: async (params: any) => {
+  getProductThinkModelPage: async (params: any) => {
     return await request.get({ url: `/iot/product-thing-model/page`, params })
   },
 
   // 获得产品物模型
-  getProductThingModelListByProductId: async (params: any) => {
+  getProductThinkModelListByProductId: async (params: any) => {
     return await request.get({
       url: `/iot/product-thing-model/list-by-product-id`,
       params
@@ -67,22 +67,22 @@ export const ThinkModelFunctionApi = {
   },
 
   // 查询产品物模型详情
-  getProductThingModel: async (id: number) => {
+  getProductThinkModel: async (id: number) => {
     return await request.get({ url: `/iot/product-thing-model/get?id=` + id })
   },
 
   // 新增产品物模型
-  createProductThingModel: async (data: ThingModelData) => {
+  createProductThinkModel: async (data: ThinkModelData) => {
     return await request.post({ url: `/iot/product-thing-model/create`, data })
   },
 
   // 修改产品物模型
-  updateProductThingModel: async (data: ThingModelData) => {
+  updateProductThinkModel: async (data: ThinkModelData) => {
     return await request.put({ url: `/iot/product-thing-model/update`, data })
   },
 
   // 删除产品物模型
-  deleteProductThingModel: async (id: number) => {
+  deleteProductThinkModel: async (id: number) => {
     return await request.delete({ url: `/iot/product-thing-model/delete?id=` + id })
   }
 }
