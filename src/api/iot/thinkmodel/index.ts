@@ -54,6 +54,7 @@ export enum ProductFunctionAccessModeEnum {
 // IoT 产品物模型 API
 export const ThinkModelApi = {
   // 查询产品物模型分页
+  // TODO @puhui999：product 前缀，是不是去掉哈。
   getThinkModelPage: async (params: any) => {
     return await request.get({ url: `/iot/product-think-model/page`, params })
   },

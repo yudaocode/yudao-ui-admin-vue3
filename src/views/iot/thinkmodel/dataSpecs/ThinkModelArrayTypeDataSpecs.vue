@@ -36,6 +36,8 @@ import { useVModel } from '@vueuse/core'
 import { DataSpecsDataType, dataTypeOptions } from '../config'
 import { isEmpty } from '@/utils/is'
 
+// TODO @puhui999：参数校验，是不是还是定义一个变量，统一管，好阅读点哈？
+
 /** 数组型的 dataSpecs 配置组件 */
 defineOptions({ name: 'ThinkModelArrayTypeDataSpecs' })
 

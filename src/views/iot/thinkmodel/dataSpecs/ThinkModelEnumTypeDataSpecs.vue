@@ -98,19 +98,16 @@ const validateEnumName = (_: any, value: string, callback: any) => {
     callback(new Error('枚举描述不能为空'))
     return
   }
-
   // 检查开头字符
   if (!/^[\u4e00-\u9fa5a-zA-Z0-9]/.test(value)) {
     callback(new Error('枚举描述必须以中文、英文字母或数字开头'))
     return
   }
-
   // 检查整体格式
   if (!/^[\u4e00-\u9fa5a-zA-Z0-9][a-zA-Z0-9\u4e00-\u9fa5_-]*$/.test(value)) {
     callback(new Error('枚举描述只能包含中文、英文字母、数字、下划线和短划线'))
     return
   }
-
   // 检查长度（一个中文算一个字符）
   if (value.length > 20) {
     callback(new Error('枚举描述长度不能超过20个字符'))

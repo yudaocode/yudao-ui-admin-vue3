@@ -144,25 +144,23 @@ const handleChange = (dataType: any) => {
   }
 }
 
+// TODO @puhui999：一些校验的规则，是不是写到 utils 里。
 /** 校验布尔值名称 */
 const validateBoolName = (_: any, value: string, callback: any) => {
   if (isEmpty(value)) {
     callback(new Error('布尔值名称不能为空'))
     return
   }
-
   // 检查开头字符
   if (!/^[\u4e00-\u9fa5a-zA-Z0-9]/.test(value)) {
     callback(new Error('布尔值名称必须以中文、英文字母或数字开头'))
     return
   }
-
   // 检查整体格式
   if (!/^[\u4e00-\u9fa5a-zA-Z0-9][a-zA-Z0-9\u4e00-\u9fa5_-]*$/.test(value)) {
     callback(new Error('布尔值名称只能包含中文、英文字母、数字、下划线和短划线'))
     return
   }
-
   // 检查长度（一个中文算一个字符）
   if (value.length > 20) {
     callback(new Error('布尔值名称长度不能超过20个字符'))
