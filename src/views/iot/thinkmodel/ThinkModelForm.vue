@@ -9,10 +9,13 @@
     >
       <el-form-item label="功能类型" prop="type">
         <el-radio-group v-model="formData.type">
-          <!-- TODO @puhui999：从字典拿 -->
-          <el-radio-button :value="1"> 属性</el-radio-button>
-          <el-radio-button :value="2"> 服务</el-radio-button>
-          <el-radio-button :value="3"> 事件</el-radio-button>
+          <el-radio-button
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_THINK_MODEL_TYPE)"
+            :key="dict.value"
+            :value="dict.value"
+          >
+            {{ dict.label }}
+          </el-radio-button>
         </el-radio-group>
       </el-form-item>
       <el-form-item label="功能名称" prop="name">
@@ -22,7 +25,7 @@
         <el-input v-model="formData.identifier" placeholder="请输入标识符" />
       </el-form-item>
       <!-- 属性配置 -->
-      <ThingModelDataSpecs
+      <ThinkModelDataSpecs
         v-if="formData.type === ProductFunctionTypeEnum.PROPERTY"
         v-model="formData.property"
       />
@@ -37,30 +40,26 @@
 
 <script lang="ts" setup>
 import { ProductVO } from '@/api/iot/product/product'
-import ThingModelDataSpecs from './ThingModelDataSpecs.vue'
-import {
-  ProductFunctionTypeEnum,
-  ThingModelData,
-  ThinkModelFunctionApi
-} from '@/api/iot/thinkmodelfunction'
+import ThinkModelDataSpecs from './ThinkModelDataSpecs.vue'
+import { ProductFunctionTypeEnum, ThinkModelApi, ThinkModelData } from '@/api/iot/thinkmodel'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 import { DataSpecsDataType } from './config'
 import { cloneDeep } from 'lodash-es'
+import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
-// TODO @puhui999：这里注释下哈
-defineOptions({ name: 'IoTProductThingModelForm' })
+/** IoT 物模型数据表单 */
+defineOptions({ name: 'IoTProductThinkModelForm' })
 
 const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
 
-// TODO @puhui999：变量必要的注释哈。 = = 虽然有点啰嗦，但是写下，保持统一；
-const { t } = useI18n()
-const message = useMessage()
+const { t } = useI18n() // 国际化
+const message = useMessage() // 消息弹窗
 
-const dialogVisible = ref(false)
-const dialogTitle = ref('')
-const formLoading = ref(false)
-const formType = ref('')
-const formData = ref<ThingModelData>({
+const dialogVisible = ref(false) // 弹窗的是否展示
+const dialogTitle = ref('') // 弹窗的标题
+const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
+const formType = ref('') // 表单的类型：create - 新增；update - 修改
+const formData = ref<ThinkModelData>({
   type: ProductFunctionTypeEnum.PROPERTY,
   dataType: DataSpecsDataType.INT,
   property: {
@@ -70,7 +69,6 @@ const formData = ref<ThingModelData>({
     }
   }
 })
-// TODO puhui999: 表单校验待完善
 const formRules = reactive({
   name: [
     { required: true, message: '功能名称不能为空', trigger: 'blur' },
@@ -90,7 +88,7 @@ const formRules = reactive({
       trigger: 'blur'
     },
     {
-      validator: (rule, value, callback) => {
+      validator: (_: any, value: string, callback: any) => {
         const reservedKeywords = ['set', 'get', 'post', 'property', 'event', 'time', 'value']
         if (reservedKeywords.includes(value)) {
           callback(
@@ -106,11 +104,9 @@ const formRules = reactive({
       },
       trigger: 'blur'
     }
-  ],
-  'property.dataType.type': [{ required: true, message: '数据类型不能为空', trigger: 'blur' }],
-  'property.accessMode': [{ required: true, message: '读写类型不能为空', trigger: 'blur' }]
+  ]
 })
-const formRef = ref()
+const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
 const open = async (type: string, id?: number) => {
@@ -121,7 +117,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await ThinkModelFunctionApi.getProductThingModel(id)
+      formData.value = await ThinkModelApi.getThinkModel(id)
     } finally {
       formLoading.value = false
     }
@@ -135,7 +131,7 @@ const submitForm = async () => {
   await formRef.value.validate()
   formLoading.value = true
   try {
-    const data = cloneDeep(formData.value) as ThingModelData
+    const data = cloneDeep(formData.value) as ThinkModelData
     // 信息补全
     data.productId = product!.value.id
     data.productKey = product!.value.productKey
@@ -144,10 +140,10 @@ const submitForm = async () => {
     data.property.identifier = data.identifier
     data.property.name = data.name
     if (formType.value === 'create') {
-      await ThinkModelFunctionApi.createProductThingModel(data)
+      await ThinkModelApi.createThinkModel(data)
       message.success(t('common.createSuccess'))
     } else {
-      await ThinkModelFunctionApi.updateProductThingModel(data)
+      await ThinkModelApi.updateThinkModel(data)
       message.success(t('common.updateSuccess'))
     }
   } finally {
