@@ -97,7 +97,7 @@
                 </div>
                 <div class="mb-2.5 last:mb-0">
                   <span class="text-[#717c8e] mr-2.5">产品标识</span>
-                  <span class="text-[#0b1d30]">{{ item.productKey }}</span>
+                  <span class="text-[#0b1d30] whitespace-normal break-all">{{ item.productKey }}</span>
                 </div>
               </div>
               <div class="w-[100px] h-[100px]">
