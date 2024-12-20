@@ -8,7 +8,7 @@
         <!-- 中间主要内容 tab 栏 -->
         <el-tabs v-model="activeTab">
           <!-- 表单信息 -->
-          <el-tab-pane label="表单填写" name="form" >
+          <el-tab-pane label="表单填写" name="form">
             <div class="form-scroll-area" v-loading="processInstanceStartLoading">
               <el-scrollbar>
                 <el-row>
@@ -75,7 +75,11 @@
 <script lang="ts" setup>
 import { decodeFields, setConfAndFields2 } from '@/utils/formCreate'
 import { BpmModelType } from '@/utils/constants'
-import { CandidateStrategy, NodeId, FieldPermissionType } from '@/components/SimpleProcessDesignerV2/src/consts'
+import {
+  CandidateStrategy,
+  NodeId,
+  FieldPermissionType
+} from '@/components/SimpleProcessDesignerV2/src/consts'
 import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceSimpleViewer from '../detail/ProcessInstanceSimpleViewer.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
@@ -129,10 +133,10 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
       }
     }
     setConfAndFields2(detailForm, row.formConf, row.formFields, formVariables)
-    
-    await nextTick();
+
+    await nextTick()
     fApi.value?.btn.show(false) // 隐藏提交按钮
-     
+
     // 获取流程审批信息
     await getApprovalDetail(row)
 
@@ -154,8 +158,11 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
 /** 获取审批详情 */
 const getApprovalDetail = async (row: any) => {
   try {
-    // 获取审批详情，设置 activityId 为发起人节点（为了获取字段权限。暂时只对 Simple 设计器有效）
-    const data = await ProcessInstanceApi.getApprovalDetail({ processDefinitionId: row.id, activityId : NodeId.START_USER_NODE_ID })
+    // TODO 获取审批详情，设置 activityId 为发起人节点（为了获取字段权限。暂时只对 Simple 设计器有效）
+    const data = await ProcessInstanceApi.getApprovalDetail({
+      processDefinitionId: row.id,
+      activityId: NodeId.START_USER_NODE_ID
+    })
 
     if (!data) {
       message.error('查询不到审批详情信息！')
@@ -175,7 +182,7 @@ const getApprovalDetail = async (row: any) => {
     // 获取审批节点，显示 Timeline 的数据
     activityNodes.value = data.activityNodes
     // 获取表单字段权限
-    const formFieldsPermission =  data.formFieldsPermission
+    const formFieldsPermission = data.formFieldsPermission
     // 设置表单字段权限
     if (formFieldsPermission) {
       Object.keys(formFieldsPermission).forEach((item) => {
@@ -189,7 +196,7 @@ const getApprovalDetail = async (row: any) => {
 /**
  * 设置表单权限
  */
- const setFieldPermission = (field: string, permission: string) => {
+const setFieldPermission = (field: string, permission: string) => {
   if (permission === FieldPermissionType.READ) {
     //@ts-ignore
     fApi.value?.disabled(true, field)
@@ -197,7 +204,6 @@ const getApprovalDetail = async (row: any) => {
   if (permission === FieldPermissionType.WRITE) {
     //@ts-ignore
     fApi.value?.disabled(false, field)
- 
   }
   if (permission === FieldPermissionType.NONE) {
     //@ts-ignore
