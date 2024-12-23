@@ -1,4 +1,3 @@
-<!-- TODO 目录，应该是 thinkModel 哈。 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -100,7 +99,7 @@
   <ThingModelForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
-import { ThingModelApi, ThingModelData } from 'src/api/iot/thingmodel'
+import { ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ThingModelForm from './ThingModelForm.vue'
 import { ProductVO } from '@/api/iot/product/product'

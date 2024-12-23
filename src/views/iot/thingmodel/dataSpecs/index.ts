@@ -1,5 +1,5 @@
-import ThingModelEnumTypeDataSpecs from './ThingModelEnumTypeDataSpecs.vue'
-import ThingModelNumberTypeDataSpecs from './ThingModelNumberTypeDataSpecs.vue'
-import ThingModelArrayTypeDataSpecs from './ThingModelArrayTypeDataSpecs.vue'
+import ThingModelEnumDataSpecs from './ThingModelEnumDataSpecs.vue'
+import ThingModelNumberDataSpecs from './ThingModelNumberDataSpecs.vue'
+import ThingModelArrayDataSpecs from './ThingModelArrayDataSpecs.vue'
 
-export { ThingModelEnumTypeDataSpecs, ThingModelNumberTypeDataSpecs, ThingModelArrayTypeDataSpecs }
+export { ThingModelEnumDataSpecs, ThingModelNumberDataSpecs, ThingModelArrayDataSpecs }

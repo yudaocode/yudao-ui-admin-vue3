@@ -5,8 +5,9 @@
     prop="property.dataType"
   >
     <el-select v-model="property.dataType" placeholder="请选择数据类型" @change="handleChange">
+      <!-- ARRAY 和 STRUCT 类型数据相互嵌套时，最多支持递归嵌套2层（父和子） -->
       <el-option
-        v-for="option in dataTypeOptions"
+        v-for="option in getDataTypeOptions"
         :key="option.value"
         :label="option.label"
         :value="option.value"
@@ -14,7 +15,7 @@
     </el-select>
   </el-form-item>
   <!-- 数值型配置 -->
-  <ThingModelNumberTypeDataSpecs
+  <ThingModelNumberDataSpecs
     v-if="
       [DataSpecsDataType.INT, DataSpecsDataType.DOUBLE, DataSpecsDataType.FLOAT].includes(
         property.dataType || ''
@@ -23,7 +24,7 @@
     v-model="property.dataSpecs"
   />
   <!-- 枚举型配置 -->
-  <ThingModelEnumTypeDataSpecs
+  <ThingModelEnumDataSpecs
     v-if="property.dataType === DataSpecsDataType.ENUM"
     v-model="property.dataSpecsList"
   />
@@ -74,12 +75,17 @@
     <el-input class="w-255px!" disabled placeholder="String类型的UTC时间戳（毫秒）" />
   </el-form-item>
   <!-- 数组型配置-->
-  <ThingModelArrayTypeDataSpecs
+  <ThingModelArrayDataSpecs
     v-if="property.dataType === DataSpecsDataType.ARRAY"
     v-model="property.dataSpecs"
   />
-  <!-- TODO puhui999: Struct 属性待完善 -->
+  <!-- Struct 型配置-->
+  <ThingModelStructDataSpecs
+    v-if="property.dataType === DataSpecsDataType.STRUCT"
+    v-model="property.dataSpecsList"
+  />
   <el-form-item
+    v-if="!isStructDataSpecs"
     :rules="[{ required: true, message: '请选择读写类型', trigger: 'change' }]"
     label="读写类型"
     prop="property.accessMode"
@@ -104,20 +110,28 @@
 import { useVModel } from '@vueuse/core'
 import { DataSpecsDataType, dataTypeOptions } from './config'
 import {
-  ThingModelArrayTypeDataSpecs,
-  ThingModelEnumTypeDataSpecs,
-  ThingModelNumberTypeDataSpecs
+  ThingModelArrayDataSpecs,
+  ThingModelEnumDataSpecs,
+  ThingModelNumberDataSpecs
 } from './dataSpecs'
-import { ThingModelProperty } from 'src/api/iot/thingmodel'
+import ThingModelStructDataSpecs from './ThingModelStructDataSpecs.vue'
+import { ThingModelProperty } from '@/api/iot/thingmodel'
 import { isEmpty } from '@/utils/is'
 
 /** IoT 物模型数据 */
 defineOptions({ name: 'ThingModelDataSpecs' })
 
-const props = defineProps<{ modelValue: any }>()
+const props = defineProps<{ modelValue: any; isStructDataSpecs?: boolean }>()
 const emits = defineEmits(['update:modelValue'])
 const property = useVModel(props, 'modelValue', emits) as Ref<ThingModelProperty>
-
+const getDataTypeOptions = computed(() => {
+  return !props.isStructDataSpecs
+    ? dataTypeOptions
+    : dataTypeOptions.filter(
+        (item) =>
+          !([DataSpecsDataType.STRUCT, DataSpecsDataType.ARRAY] as any[]).includes(item.value)
+      )
+}) // 获得数据类型列表
 /** 属性值的数据类型切换时初始化相关数据 */
 const handleChange = (dataType: any) => {
   property.value.dataSpecsList = []

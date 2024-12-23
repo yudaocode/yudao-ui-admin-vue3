@@ -48,7 +48,7 @@ import { DataSpecsDataType, DataSpecsEnumOrBoolDataVO } from '../config'
 import { isEmpty } from '@/utils/is'
 
 /** 枚举型的 dataSpecs 配置组件 */
-defineOptions({ name: 'ThingModelEnumTypeDataSpecs' })
+defineOptions({ name: 'ThingModelEnumDataSpecs' })
 
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
@@ -113,7 +113,6 @@ const validateEnumName = (_: any, value: string, callback: any) => {
     callback(new Error('枚举描述长度不能超过20个字符'))
     return
   }
-
   callback()
 }
 
@@ -147,7 +146,6 @@ const validateEnumList = (_: any, __: any, callback: any) => {
     callback(new Error('存在重复的枚举值'))
     return
   }
-
   callback()
 }
 </script>

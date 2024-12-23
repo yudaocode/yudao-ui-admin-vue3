@@ -8,8 +8,8 @@
       <el-tab-pane label="Topic 类列表" name="topic">
         <ProductTopic v-if="activeTab === 'topic'" :product="product" />
       </el-tab-pane>
-      <el-tab-pane label="功能定义" lazy name="thinkModel">
-        <IoTProductThinkModel ref="thinkModelRef" />
+      <el-tab-pane label="功能定义" lazy name="thingModel">
+        <IoTProductThingModel ref="thingModelRef" />
       </el-tab-pane>
       <el-tab-pane label="消息解析" name="message" />
       <el-tab-pane label="服务端订阅" name="subscription" />
@@ -22,7 +22,7 @@ import { DeviceApi } from '@/api/iot/device/device'
 import ProductDetailsHeader from './ProductDetailsHeader.vue'
 import ProductDetailsInfo from './ProductDetailsInfo.vue'
 import ProductTopic from './ProductTopic.vue'
-import IoTProductThinkModel from '@/views/iot/thingmodel/index.vue'
+import IoTProductThingModel from '@/views/iot/thingmodel/index.vue'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { useRouter } from 'vue-router'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'

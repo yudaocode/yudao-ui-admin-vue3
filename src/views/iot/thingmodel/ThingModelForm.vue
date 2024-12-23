@@ -4,7 +4,7 @@
       ref="formRef"
       v-loading="formLoading"
       :model="formData"
-      :rules="formRules"
+      :rules="ThingModelFormRules"
       label-width="100px"
     >
       <el-form-item label="功能类型" prop="type">
@@ -41,9 +41,9 @@
 <script lang="ts" setup>
 import { ProductVO } from '@/api/iot/product/product'
 import ThingModelDataSpecs from './ThingModelDataSpecs.vue'
-import { ProductFunctionTypeEnum, ThingModelApi, ThingModelData } from 'src/api/iot/thingmodel'
+import { ProductFunctionTypeEnum, ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
-import { DataSpecsDataType } from './config'
+import { DataSpecsDataType, ThingModelFormRules } from './config'
 import { cloneDeep } from 'lodash-es'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 
@@ -69,43 +69,7 @@ const formData = ref<ThingModelData>({
     }
   }
 })
-const formRules = reactive({
-  name: [
-    { required: true, message: '功能名称不能为空', trigger: 'blur' },
-    {
-      pattern: /^[\u4e00-\u9fa5a-zA-Z0-9][\u4e00-\u9fa5a-zA-Z0-9\-_/\.]{0,29}$/,
-      message:
-        '支持中文、大小写字母、日文、数字、短划线、下划线、斜杠和小数点，必须以中文、英文或数字开头，不超过 30 个字符',
-      trigger: 'blur'
-    }
-  ],
-  type: [{ required: true, message: '功能类型不能为空', trigger: 'blur' }],
-  identifier: [
-    { required: true, message: '标识符不能为空', trigger: 'blur' },
-    {
-      pattern: /^[a-zA-Z0-9_]{1,50}$/,
-      message: '支持大小写字母、数字和下划线，不超过 50 个字符',
-      trigger: 'blur'
-    },
-    {
-      validator: (_: any, value: string, callback: any) => {
-        const reservedKeywords = ['set', 'get', 'post', 'property', 'event', 'time', 'value']
-        if (reservedKeywords.includes(value)) {
-          callback(
-            new Error(
-              'set, get, post, property, event, time, value 是系统保留字段，不能用于标识符定义'
-            )
-          )
-        } else if (/^\d+$/.test(value)) {
-          callback(new Error('标识符不能是纯数字'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur'
-    }
-  ]
-})
+
 const formRef = ref() // 表单 Ref
 
 /** 打开弹窗 */
