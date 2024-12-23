@@ -1,6 +1,9 @@
 <template>
   <!-- struct 数据展示 -->
-  <el-form-item label="JSON 对象">
+  <el-form-item
+    :rules="[{ required: true, validator: validateList, trigger: 'change' }]"
+    label="JSON 对象"
+  >
     <div
       v-for="(item, index) in dataSpecsList"
       :key="index"
@@ -44,8 +47,8 @@
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import ThingModelDataSpecs from '@/views/iot/thingmodel/ThingModelDataSpecs.vue'
-import { DataSpecsDataType, ThingModelFormRules } from '@/views/iot/thingmodel/config'
+import ThingModelDataSpecs from '../ThingModelDataSpecs.vue'
+import { DataSpecsDataType, ThingModelFormRules } from '../config'
 import { isEmpty } from '@/utils/is'
 
 /** Struct 型的 dataSpecs 配置组件 */
@@ -139,6 +142,15 @@ const resetForm = () => {
     }
   }
   structFormRef.value?.resetFields()
+}
+
+/** 校验 struct 不能为空 */
+const validateList = (_: any, __: any, callback: any) => {
+  if (isEmpty(dataSpecsList.value)) {
+    callback(new Error('struct 不能为空'))
+    return
+  }
+  callback()
 }
 </script>
 

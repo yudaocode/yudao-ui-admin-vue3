@@ -29,12 +29,7 @@
     v-model="property.dataSpecsList"
   />
   <!-- 布尔型配置 -->
-  <el-form-item
-    v-if="property.dataType === DataSpecsDataType.BOOL"
-    :rules="[{ required: true, message: '请输入布尔值名称', trigger: 'blur' }]"
-    label="布尔值"
-    prop="property.dataSpecsList"
-  >
+  <el-form-item v-if="property.dataType === DataSpecsDataType.BOOL" label="布尔值">
     <template v-for="(item, index) in property.dataSpecsList" :key="item.value">
       <div class="flex items-center justify-start w-1/1 mb-5px">
         <span>{{ item.value }}</span>
@@ -59,10 +54,6 @@
   <!-- 文本型配置 -->
   <el-form-item
     v-if="property.dataType === DataSpecsDataType.TEXT"
-    :rules="[
-      { required: true, message: '请输入文本字节长度', trigger: 'blur' },
-      { validator: validateTextLength, trigger: 'blur' }
-    ]"
     label="数据长度"
     prop="property.dataSpecs.length"
   >
@@ -84,12 +75,7 @@
     v-if="property.dataType === DataSpecsDataType.STRUCT"
     v-model="property.dataSpecsList"
   />
-  <el-form-item
-    v-if="!isStructDataSpecs"
-    :rules="[{ required: true, message: '请选择读写类型', trigger: 'change' }]"
-    label="读写类型"
-    prop="property.accessMode"
-  >
+  <el-form-item v-if="!isStructDataSpecs" label="读写类型" prop="property.accessMode">
     <el-radio-group v-model="property.accessMode">
       <el-radio label="rw">读写</el-radio>
       <el-radio label="r">只读</el-radio>
@@ -108,15 +94,14 @@
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import { DataSpecsDataType, dataTypeOptions } from './config'
+import { DataSpecsDataType, dataTypeOptions, validateBoolName } from './config'
 import {
   ThingModelArrayDataSpecs,
   ThingModelEnumDataSpecs,
-  ThingModelNumberDataSpecs
+  ThingModelNumberDataSpecs,
+  ThingModelStructDataSpecs
 } from './dataSpecs'
-import ThingModelStructDataSpecs from './ThingModelStructDataSpecs.vue'
 import { ThingModelProperty } from '@/api/iot/thingmodel'
-import { isEmpty } from '@/utils/is'
 
 /** IoT 物模型数据 */
 defineOptions({ name: 'ThingModelDataSpecs' })
@@ -156,45 +141,6 @@ const handleChange = (dataType: any) => {
       }
       break
   }
-}
-
-// TODO @puhui999：一些校验的规则，是不是写到 utils 里。
-/** 校验布尔值名称 */
-const validateBoolName = (_: any, value: string, callback: any) => {
-  if (isEmpty(value)) {
-    callback(new Error('布尔值名称不能为空'))
-    return
-  }
-  // 检查开头字符
-  if (!/^[\u4e00-\u9fa5a-zA-Z0-9]/.test(value)) {
-    callback(new Error('布尔值名称必须以中文、英文字母或数字开头'))
-    return
-  }
-  // 检查整体格式
-  if (!/^[\u4e00-\u9fa5a-zA-Z0-9][a-zA-Z0-9\u4e00-\u9fa5_-]*$/.test(value)) {
-    callback(new Error('布尔值名称只能包含中文、英文字母、数字、下划线和短划线'))
-    return
-  }
-  // 检查长度（一个中文算一个字符）
-  if (value.length > 20) {
-    callback(new Error('布尔值名称长度不能超过20个字符'))
-    return
-  }
-
-  callback()
-}
-
-/** 校验文本长度 */
-const validateTextLength = (_: any, value: any, callback: any) => {
-  if (isEmpty(value)) {
-    callback(new Error('文本长度不能为空'))
-    return
-  }
-  if (isNaN(Number(value))) {
-    callback(new Error('文本长度必须是数字'))
-    return
-  }
-  callback()
 }
 </script>
 

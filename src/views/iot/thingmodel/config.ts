@@ -105,5 +105,47 @@ export const ThingModelFormRules = {
       },
       trigger: 'blur'
     }
-  ]
+  ],
+  'property.dataSpecs.length': [
+    { required: true, message: '请输入文本字节长度', trigger: 'blur' },
+    {
+      validator: (_: any, value: any, callback: any) => {
+        if (isEmpty(value)) {
+          callback(new Error('文本长度不能为空'))
+          return
+        }
+        if (isNaN(Number(value))) {
+          callback(new Error('文本长度必须是数字'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur'
+    }
+  ],
+  'property.accessMode': [{ required: true, message: '请选择读写类型', trigger: 'change' }]
+}
+/** 校验布尔值名称 */
+export const validateBoolName = (_: any, value: string, callback: any) => {
+  if (isEmpty(value)) {
+    callback(new Error('布尔值名称不能为空'))
+    return
+  }
+  // 检查开头字符
+  if (!/^[\u4e00-\u9fa5a-zA-Z0-9]/.test(value)) {
+    callback(new Error('布尔值名称必须以中文、英文字母或数字开头'))
+    return
+  }
+  // 检查整体格式
+  if (!/^[\u4e00-\u9fa5a-zA-Z0-9][a-zA-Z0-9\u4e00-\u9fa5_-]*$/.test(value)) {
+    callback(new Error('布尔值名称只能包含中文、英文字母、数字、下划线和短划线'))
+    return
+  }
+  // 检查长度（一个中文算一个字符）
+  if (value.length > 20) {
+    callback(new Error('布尔值名称长度不能超过20个字符'))
+    return
+  }
+
+  callback()
 }

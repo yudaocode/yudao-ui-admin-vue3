@@ -2,7 +2,6 @@
   <el-form-item
     :rules="[{ required: true, validator: validateEnumList, trigger: 'change' }]"
     label="枚举项"
-    prop="property.dataSpecsList"
   >
     <div class="flex flex-col">
       <div class="flex items-center">
