@@ -14,7 +14,7 @@
     </el-select>
   </el-form-item>
   <!-- 数值型配置 -->
-  <ThinkModelNumberTypeDataSpecs
+  <ThingModelNumberTypeDataSpecs
     v-if="
       [DataSpecsDataType.INT, DataSpecsDataType.DOUBLE, DataSpecsDataType.FLOAT].includes(
         property.dataType || ''
@@ -23,7 +23,7 @@
     v-model="property.dataSpecs"
   />
   <!-- 枚举型配置 -->
-  <ThinkModelEnumTypeDataSpecs
+  <ThingModelEnumTypeDataSpecs
     v-if="property.dataType === DataSpecsDataType.ENUM"
     v-model="property.dataSpecsList"
   />
@@ -74,7 +74,7 @@
     <el-input class="w-255px!" disabled placeholder="String类型的UTC时间戳（毫秒）" />
   </el-form-item>
   <!-- 数组型配置-->
-  <ThinkModelArrayTypeDataSpecs
+  <ThingModelArrayTypeDataSpecs
     v-if="property.dataType === DataSpecsDataType.ARRAY"
     v-model="property.dataSpecs"
   />
@@ -104,19 +104,19 @@
 import { useVModel } from '@vueuse/core'
 import { DataSpecsDataType, dataTypeOptions } from './config'
 import {
-  ThinkModelArrayTypeDataSpecs,
-  ThinkModelEnumTypeDataSpecs,
-  ThinkModelNumberTypeDataSpecs
+  ThingModelArrayTypeDataSpecs,
+  ThingModelEnumTypeDataSpecs,
+  ThingModelNumberTypeDataSpecs
 } from './dataSpecs'
-import { ThinkModelProperty } from '@/api/iot/thinkmodel'
+import { ThingModelProperty } from 'src/api/iot/thingmodel'
 import { isEmpty } from '@/utils/is'
 
 /** IoT 物模型数据 */
-defineOptions({ name: 'ThinkModelDataSpecs' })
+defineOptions({ name: 'ThingModelDataSpecs' })
 
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
-const property = useVModel(props, 'modelValue', emits) as Ref<ThinkModelProperty>
+const property = useVModel(props, 'modelValue', emits) as Ref<ThingModelProperty>
 
 /** 属性值的数据类型切换时初始化相关数据 */
 const handleChange = (dataType: any) => {

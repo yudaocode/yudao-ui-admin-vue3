@@ -48,7 +48,7 @@ import { DataSpecsDataType, DataSpecsEnumOrBoolDataVO } from '../config'
 import { isEmpty } from '@/utils/is'
 
 /** 枚举型的 dataSpecs 配置组件 */
-defineOptions({ name: 'ThinkModelEnumTypeDataSpecs' })
+defineOptions({ name: 'ThingModelEnumTypeDataSpecs' })
 
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])

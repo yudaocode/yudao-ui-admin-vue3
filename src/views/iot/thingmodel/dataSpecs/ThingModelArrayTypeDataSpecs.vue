@@ -39,7 +39,7 @@ import { isEmpty } from '@/utils/is'
 // TODO @puhui999：参数校验，是不是还是定义一个变量，统一管，好阅读点哈？
 
 /** 数组型的 dataSpecs 配置组件 */
-defineOptions({ name: 'ThinkModelArrayTypeDataSpecs' })
+defineOptions({ name: 'ThingModelArrayTypeDataSpecs' })
 
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])

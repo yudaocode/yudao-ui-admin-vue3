@@ -62,7 +62,7 @@ import { UnifyUnitSpecsDTO } from '@/views/iot/utils/constants'
 import { DataSpecsNumberDataVO } from '../config'
 
 /** 数值型的 dataSpecs 配置组件 */
-defineOptions({ name: 'ThinkModelNumberTypeDataSpecs' })
+defineOptions({ name: 'ThingModelNumberTypeDataSpecs' })
 
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])

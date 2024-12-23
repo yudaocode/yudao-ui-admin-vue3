@@ -17,7 +17,7 @@
           placeholder="请选择功能类型"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_THINK_MODEL_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_THING_MODEL_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -50,7 +50,7 @@
       <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
         <el-table-column align="center" label="功能类型" prop="type">
           <template #default="scope">
-            <dict-tag :type="DICT_TYPE.IOT_PRODUCT_THINK_MODEL_TYPE" :value="scope.row.type" />
+            <dict-tag :type="DICT_TYPE.IOT_PRODUCT_THING_MODEL_TYPE" :value="scope.row.type" />
           </template>
         </el-table-column>
         <el-table-column align="center" label="功能名称" prop="name" />
@@ -97,23 +97,23 @@
     </el-tabs>
   </ContentWrap>
   <!-- 表单弹窗：添加/修改 -->
-  <ThinkModelForm ref="formRef" @success="getList" />
+  <ThingModelForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
-import { ThinkModelApi, ThinkModelData } from '@/api/iot/thinkmodel'
+import { ThingModelApi, ThingModelData } from 'src/api/iot/thingmodel'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import ThinkModelForm from './ThinkModelForm.vue'
+import ThingModelForm from './ThingModelForm.vue'
 import { ProductVO } from '@/api/iot/product/product'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
-import { getDataTypeOptionsLabel } from '@/views/iot/thinkmodel/config'
+import { getDataTypeOptionsLabel } from '@/views/iot/thingmodel/config'
 
-defineOptions({ name: 'IoTProductThinkModel' })
+defineOptions({ name: 'IoTProductThingModel' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
 const loading = ref(true) // 列表的加载中
-const list = ref<ThinkModelData[]>([]) // 列表的数据
+const list = ref<ThingModelData[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
@@ -131,7 +131,7 @@ const getList = async () => {
   loading.value = true
   try {
     queryParams.productId = product?.value?.id || -1
-    const data = await ThinkModelApi.getThinkModelPage(queryParams)
+    const data = await ThingModelApi.getThingModelPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -163,7 +163,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await ThinkModelApi.deleteThinkModel(id)
+    await ThingModelApi.deleteThingModel(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
