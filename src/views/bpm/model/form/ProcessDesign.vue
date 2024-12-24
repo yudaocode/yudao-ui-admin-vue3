@@ -6,6 +6,7 @@
       :model-id="modelData.id"
       :model-key="modelData.key"
       :model-name="modelData.name"
+      :value="modelData.bpmnXml"
       @success="handleDesignSuccess"
     />
   </template>
@@ -17,6 +18,7 @@
       :model-id="modelData.id"
       :model-key="modelData.key"
       :model-name="modelData.name"
+      :value="modelData.bpmnXml"
       @success="handleDesignSuccess"
     />
   </template>
@@ -44,6 +46,13 @@ const modelData = computed({
   set: (val) => emit('update:modelValue', val)
 })
 
+// 监听modelValue变化,确保XML数据同步
+watch(() => props.modelValue, (newVal) => {
+  if (newVal.bpmnXml) {
+    xmlString.value = newVal.bpmnXml
+  }
+}, { immediate: true, deep: true })
+
 /** 处理设计器保存成功 */
 const handleDesignSuccess = (bpmnXml?: string) => {
   if (bpmnXml) {
@@ -52,8 +61,8 @@ const handleDesignSuccess = (bpmnXml?: string) => {
       ...modelData.value,
       bpmnXml
     })
+    emit('success', bpmnXml)
   }
-  emit('success', bpmnXml)
 }
 
 /** 表单校验 */
@@ -61,14 +70,16 @@ const validate = async () => {
   if (!xmlString.value) {
     throw new Error('请设计流程')
   }
+  return true
 }
 
 /** 是否显示设计器 */
 const showDesigner = computed(() => {
-  return Boolean(modelData.value.id || (modelData.value.key && modelData.value.name))
+  return Boolean(modelData.value.key && modelData.value.name)
 })
 
 defineExpose({
-  validate
+  validate,
+  getXmlString: () => xmlString.value
 })
 </script> 

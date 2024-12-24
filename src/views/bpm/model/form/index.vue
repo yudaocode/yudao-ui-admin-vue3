@@ -173,6 +173,19 @@ const initData = async () => {
 /** 保存操作 */
 const handleSave = async () => {
   try {
+    // 保存前确保当前步骤的数据已经验证通过
+    if (typeof steps[currentStep.value].validator === 'function') {
+      await steps[currentStep.value].validator()
+    }
+    
+    // 如果是第三步，需要先获取最新的流程设计数据
+    if (currentStep.value === 2) {
+      const bpmnXml = processDesignRef.value?.getXmlString()
+      if (bpmnXml) {
+        formData.value.bpmnXml = bpmnXml
+      }
+    }
+    
     if (formData.value.id) {
       await ModelApi.updateModel(formData.value)
       message.success('修改成功')
@@ -183,6 +196,7 @@ const handleSave = async () => {
     }
   } catch (error) {
     console.error('保存失败:', error)
+    message.error(error.message || '保存失败')
   }
 }
 
@@ -194,6 +208,13 @@ const handleDeploy = async () => {
     for (const step of steps) {
       if (step.validator) {
         await step.validator()
+      }
+    }
+    // 如果是第三步，需要先获取最新的流程设计数据
+    if (currentStep.value === 2) {
+      const bpmnXml = processDesignRef.value?.getXmlString()
+      if (bpmnXml) {
+        formData.value.bpmnXml = bpmnXml
       }
     }
     await handleSave()
@@ -250,8 +271,6 @@ const handleDesignSuccess = (bpmnXml?: string) => {
   if (bpmnXml) {
     formData.value.bpmnXml = bpmnXml
   }
-  handleSave() // 自动保存
-  message.success('保存成功')
 }
 
 /** 初始化 */
