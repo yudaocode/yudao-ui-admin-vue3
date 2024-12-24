@@ -1,10 +1,6 @@
 <template>
-  <el-form-item
-    :rules="[{ required: true, message: '元素类型不能为空' }]"
-    label="元素类型"
-    prop="property.dataSpecs.childDataType"
-  >
-    <el-radio-group v-model="dataSpecs.childDataType">
+  <el-form-item label="元素类型" prop="property.dataSpecs.childDataType">
+    <el-radio-group v-model="dataSpecs.childDataType" @change="handleChange">
       <template v-for="item in dataTypeOptions" :key="item.value">
         <el-radio
           v-if="
@@ -19,43 +15,35 @@
       </template>
     </el-radio-group>
   </el-form-item>
-  <el-form-item
-    :rules="[
-      { required: true, message: '元素个数不能为空' },
-      { validator: validateSize, trigger: 'blur' }
-    ]"
-    label="元素个数"
-    prop="property.dataSpecs.size"
-  >
+  <el-form-item label="元素个数" prop="property.dataSpecs.size">
     <el-input v-model="dataSpecs.size" placeholder="请输入数组中的元素个数" />
   </el-form-item>
+  <!-- Struct 型配置-->
+  <ThingModelStructDataSpecs
+    v-if="dataSpecs.childDataType === DataSpecsDataType.STRUCT"
+    v-model="dataSpecs.dataSpecsList"
+  />
 </template>
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
 import { DataSpecsDataType, dataTypeOptions } from '../config'
-import { isEmpty } from '@/utils/is'
-
-// TODO @puhui999：参数校验，是不是还是定义一个变量，统一管，好阅读点哈？
+import ThingModelStructDataSpecs from './ThingModelStructDataSpecs.vue'
 
 /** 数组型的 dataSpecs 配置组件 */
-defineOptions({ name: 'ThinkModelArrayTypeDataSpecs' })
+defineOptions({ name: 'ThingModelArrayDataSpecs' })
 
 const props = defineProps<{ modelValue: any }>()
 const emits = defineEmits(['update:modelValue'])
 const dataSpecs = useVModel(props, 'modelValue', emits) as Ref<any>
 
-/** 校验元素个数 */
-const validateSize = (_: any, value: any, callback: any) => {
-  if (isEmpty(value)) {
-    callback(new Error('元素个数不能为空'))
+/** 元素类型改变时间。当值为 struct 时，对 dataSpecs 中的 dataSpecsList 进行初始化 */
+const handleChange = (val: string) => {
+  if (val !== DataSpecsDataType.STRUCT) {
     return
   }
-  if (isNaN(Number(value))) {
-    callback(new Error('元素个数必须是数字'))
-    return
-  }
-  callback()
+
+  dataSpecs.value.dataSpecsList = []
 }
 </script>
 
