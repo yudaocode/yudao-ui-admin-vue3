@@ -228,14 +228,20 @@ const handleStepClick = async (index: number) => {
       return
     }
   }
-  // 校验当前步骤
-  try {
-    if (typeof steps[currentStep.value].validator === 'function') {
-      await steps[currentStep.value].validator()
+  
+  // 只有在向后切换时才进行校验
+  if (index > currentStep.value) {
+    try {
+      if (typeof steps[currentStep.value].validator === 'function') {
+        await steps[currentStep.value].validator()
+      }
+      currentStep.value = index
+    } catch (error) {
+      message.warning('请先完善当前步骤必填信息')
     }
+  } else {
+    // 向前切换时直接切换
     currentStep.value = index
-  } catch (error) {
-    message.warning('请先完善当前步骤必填信息')
   }
 }
 
@@ -244,6 +250,7 @@ const handleDesignSuccess = (bpmnXml?: string) => {
   if (bpmnXml) {
     formData.value.bpmnXml = bpmnXml
   }
+  handleSave() // 自动保存
   message.success('保存成功')
 }
 
