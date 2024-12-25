@@ -7,19 +7,22 @@
     class="mt-20px w-600px"
   >
     <el-form-item label="流程标识" prop="key" class="mb-20px">
-      <el-input v-model="modelData.key" :disabled="!!modelData.id" placeholder="请输入流标标识" />
-      <el-tooltip
-        v-if="!modelData.id"
-        class="item"
-        content="新建后，流程标识不可修改！"
-        effect="light"
-        placement="top"
-      >
-        <Icon icon="ep:question" class="ml-5px" />
-      </el-tooltip>
-      <el-tooltip v-else class="item" content="流程标识不可修改！" effect="light" placement="top">
-        <Icon icon="ep:question" class="ml-5px" />
-      </el-tooltip>
+      <div class="flex items-center">
+        <el-input
+          class="!w-480px"
+          v-model="modelData.key"
+          :disabled="!!modelData.id"
+          placeholder="请输入流标标识"
+        />
+        <el-tooltip
+          class="item"
+          :content="modelData.id ? '流程标识不可修改！' : '新建后，流程标识不可修改！'"
+          effect="light"
+          placement="top"
+        >
+          <Icon icon="ep:question-filled" class="ml-5px" />
+        </el-tooltip>
+      </div>
     </el-form-item>
     <el-form-item label="流程名称" prop="name" class="mb-20px">
       <el-input
@@ -31,10 +34,10 @@
     </el-form-item>
     <el-form-item label="流程分类" prop="category" class="mb-20px">
       <el-select
+        class="!w-full"
         v-model="modelData.category"
         clearable
         placeholder="请选择流程分类"
-        style="width: 100%"
       >
         <el-option
           v-for="category in categoryList"

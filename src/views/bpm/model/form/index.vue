@@ -62,12 +62,8 @@
         </div>
 
         <!-- 第二步：表单设计 -->
-        <div v-if="currentStep === 1" class="mx-auto" style="max-width: 1024px">
-          <FormDesign
-            v-model="formData"
-            :formList="formList"
-            ref="formDesignRef"
-          />
+        <div v-if="currentStep === 1" class="mx-auto w-1024px">
+          <FormDesign v-model="formData" :formList="formList" ref="formDesignRef" />
         </div>
 
         <!-- 第三步：流程设计 -->
