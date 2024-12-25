@@ -35,7 +35,7 @@
         <el-input v-model="formData.identifier" placeholder="请输入标识符" />
       </el-form-item>
       <!-- 属性配置 -->
-      <ThingModelDataSpecs v-model="formData.property" is-struct-data-specs />
+      <ThingModelProperty v-model="formData.property" is-struct-data-specs />
     </el-form>
 
     <template #footer>
@@ -47,7 +47,7 @@
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import ThingModelDataSpecs from '../ThingModelDataSpecs.vue'
+import ThingModelProperty from '../ThingModelProperty.vue'
 import { DataSpecsDataType, ThingModelFormRules } from '../config'
 import { isEmpty } from '@/utils/is'
 

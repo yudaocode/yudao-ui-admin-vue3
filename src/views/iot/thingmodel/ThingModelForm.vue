@@ -25,10 +25,17 @@
         <el-input v-model="formData.identifier" placeholder="请输入标识符" />
       </el-form-item>
       <!-- 属性配置 -->
-      <ThingModelDataSpecs
-        v-if="formData.type === ProductFunctionTypeEnum.PROPERTY"
+      <ThingModelProperty
+        v-if="formData.type === ThingModelType.PROPERTY"
         v-model="formData.property"
       />
+      <!-- 服务配置 -->
+      <ThingModelService
+        v-if="formData.type === ThingModelType.SERVICE"
+        v-model="formData.service"
+      />
+      <!-- 事件配置 -->
+      <ThingModelEvent v-if="formData.type === ThingModelType.EVENT" v-model="formData.event" />
     </el-form>
 
     <template #footer>
@@ -40,8 +47,10 @@
 
 <script lang="ts" setup>
 import { ProductVO } from '@/api/iot/product/product'
-import ThingModelDataSpecs from './ThingModelDataSpecs.vue'
-import { ProductFunctionTypeEnum, ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
+import ThingModelProperty from './ThingModelProperty.vue'
+import ThingModelService from './ThingModelService.vue'
+import ThingModelEvent from './ThingModelEvent.vue'
+import { ThingModelApi, ThingModelData, ThingModelType } from '@/api/iot/thingmodel'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 import { DataSpecsDataType, ThingModelFormRules } from './config'
 import { cloneDeep } from 'lodash-es'
@@ -61,14 +70,16 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<ThingModelData>({
-  type: ProductFunctionTypeEnum.PROPERTY,
+  type: ThingModelType.PROPERTY,
   dataType: DataSpecsDataType.INT,
   property: {
     dataType: DataSpecsDataType.INT,
     dataSpecs: {
       dataType: DataSpecsDataType.INT
     }
-  }
+  },
+  service: {},
+  event: {}
 })
 
 const formRef = ref() // 表单 Ref
@@ -104,13 +115,7 @@ const submitForm = async () => {
     data.dataType = data.property.dataType
     data.property.identifier = data.identifier
     data.property.name = data.name
-    // 处理 dataSpecs 为空的情况
-    if (isEmpty(data.property.dataSpecs)) {
-      delete data.property.dataSpecs
-    }
-    if (isEmpty(data.property.dataSpecsList)) {
-      delete data.property.dataSpecsList
-    }
+    removeExtraAttributes(data)
     if (formType.value === 'create') {
       await ThingModelApi.createThingModel(data)
       message.success(t('common.createSuccess'))
@@ -125,10 +130,34 @@ const submitForm = async () => {
   }
 }
 
+/** 删除额外的属性 */
+const removeExtraAttributes = (data: any) => {
+  // 处理 dataSpecs 为空的情况
+  if (isEmpty(data.property.dataSpecs)) {
+    delete data.property.dataSpecs
+  }
+  if (isEmpty(data.property.dataSpecsList)) {
+    delete data.property.dataSpecsList
+  }
+  // 处理不同类型的情况
+  if (data.type === ThingModelType.PROPERTY) {
+    delete data.service
+    delete data.event
+  }
+  if (data.type === ThingModelType.SERVICE) {
+    delete data.property
+    delete data.event
+  }
+  if (data.type === ThingModelType.EVENT) {
+    delete data.property
+    delete data.service
+  }
+}
+
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    type: ProductFunctionTypeEnum.PROPERTY,
+    type: ThingModelType.PROPERTY,
     dataType: DataSpecsDataType.INT,
     property: {
       dataType: DataSpecsDataType.INT,

@@ -11,7 +11,7 @@ export interface ThingModelData {
   productId?: number // 产品编号
   productKey?: string // 产品标识
   dataType: string // 数据类型，与 dataSpecs 的 dataType 保持一致
-  type: ProductFunctionTypeEnum // 功能类型
+  type: number // 功能类型
   property: ThingModelProperty // 属性
   event?: ThingModelEvent // 事件
   service?: ThingModelService // 服务
@@ -38,18 +38,58 @@ export interface ThingModelService {
   [key: string]: any
 }
 
-// IOT 产品功能（物模型）类型枚举类
-export enum ProductFunctionTypeEnum {
-  PROPERTY = 1, // 属性
-  SERVICE = 2, // 服务
-  EVENT = 3 // 事件
-}
+// IOT 产品物模型类型枚举类
+export const ThingModelType = {
+  PROPERTY: 1, // 属性
+  SERVICE: 2, // 服务
+  EVENT: 3 // 事件
+} as const
 
-// IOT 产品功能（物模型）访问模式枚举类
-export enum ProductFunctionAccessModeEnum {
-  READ_WRITE = 'rw', // 读写
-  READ_ONLY = 'r' // 只读
-}
+// IOT 产品物模型访问模式枚举类
+export const ThingModelAccessMode = {
+  READ_WRITE: {
+    label: '读写',
+    value: 'rw'
+  },
+  READ_ONLY: {
+    label: '只读',
+    value: 'r'
+  }
+} as const
+
+// IOT 产品物模型服务调用方式枚举
+export const ThingModelServiceCallType = {
+  ASYNC: {
+    label: '异步调用',
+    value: 'async'
+  },
+  SYNC: {
+    label: '同步调用',
+    value: 'sync'
+  }
+} as const
+
+// IOT 产品物模型事件类型枚举
+export const ThingModelServiceEventType = {
+  INFO: {
+    label: '信息',
+    value: 'info'
+  },
+  ALERT: {
+    label: '告警',
+    value: 'alert'
+  },
+  ERROR: {
+    label: '故障',
+    value: 'error'
+  }
+} as const
+
+// IOT 产品物模型参数是输入参数还是输出参数
+export const ThingModelParamDirection = {
+  INPUT: 'input', // 输入参数
+  OUTPUT: 'output' // 输出参数
+} as const
 
 // IoT 产品物模型 API
 export const ThingModelApi = {

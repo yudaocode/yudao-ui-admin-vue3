@@ -77,8 +77,12 @@
   />
   <el-form-item v-if="!isStructDataSpecs" label="读写类型" prop="property.accessMode">
     <el-radio-group v-model="property.accessMode">
-      <el-radio label="rw">读写</el-radio>
-      <el-radio label="r">只读</el-radio>
+      <el-radio :label="ThingModelAccessMode.READ_WRITE.value">
+        {{ ThingModelAccessMode.READ_WRITE.label }}
+      </el-radio>
+      <el-radio :label="ThingModelAccessMode.READ_ONLY.value">
+        {{ ThingModelAccessMode.READ_ONLY.label }}
+      </el-radio>
     </el-radio-group>
   </el-form-item>
   <el-form-item label="属性描述" prop="description">
@@ -101,10 +105,10 @@ import {
   ThingModelNumberDataSpecs,
   ThingModelStructDataSpecs
 } from './dataSpecs'
-import { ThingModelProperty } from '@/api/iot/thingmodel'
+import { ThingModelAccessMode, ThingModelProperty } from '@/api/iot/thingmodel'
 
 /** IoT 物模型数据 */
-defineOptions({ name: 'ThingModelDataSpecs' })
+defineOptions({ name: 'ThingModelProperty' })
 
 const props = defineProps<{ modelValue: any; isStructDataSpecs?: boolean }>()
 const emits = defineEmits(['update:modelValue'])
@@ -117,6 +121,7 @@ const getDataTypeOptions = computed(() => {
           !([DataSpecsDataType.STRUCT, DataSpecsDataType.ARRAY] as any[]).includes(item.value)
       )
 }) // 获得数据类型列表
+
 /** 属性值的数据类型切换时初始化相关数据 */
 const handleChange = (dataType: any) => {
   property.value.dataSpecsList = []

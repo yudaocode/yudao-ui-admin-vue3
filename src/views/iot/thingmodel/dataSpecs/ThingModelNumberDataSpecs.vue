@@ -47,10 +47,10 @@
       @change="unitChange"
     >
       <el-option
-        v-for="(item, index) in UnifyUnitSpecsDTO"
+        v-for="(item, index) in getStrDictOptions(DICT_TYPE.IOT_PRODUCT_THING_MODEL_UNIT)"
         :key="index"
-        :label="item.Name + '-' + item.Symbol"
-        :value="item.Name + '-' + item.Symbol"
+        :label="item.label + '-' + item.value"
+        :value="item.label + '-' + item.value"
       />
     </el-select>
   </el-form-item>
@@ -58,8 +58,8 @@
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import { UnifyUnitSpecsDTO } from '@/views/iot/utils/constants'
 import { DataSpecsNumberDataVO } from '../config'
+import { DICT_TYPE, getStrDictOptions } from '@/utils/dict'
 
 /** 数值型的 dataSpecs 配置组件 */
 defineOptions({ name: 'ThingModelNumberDataSpecs' })
