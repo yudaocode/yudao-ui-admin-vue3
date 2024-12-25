@@ -113,6 +113,7 @@ defineExpose({ open, close: () => (dialogVisible.value = false) })
 /** 提交表单 */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
+  debugger
   await formRef.value.validate()
   formLoading.value = true
   try {
@@ -120,10 +121,7 @@ const submitForm = async () => {
     // 信息补全
     data.productId = product!.value.id
     data.productKey = product!.value.productKey
-    data.dataType = data.property.dataType
-    data.property.identifier = data.identifier
-    data.property.name = data.name
-    removeExtraAttributes(data)
+    fillExtraAttributes(data)
     if (formType.value === 'create') {
       await ThingModelApi.createThingModel(data)
       message.success(t('common.createSuccess'))
@@ -138,27 +136,44 @@ const submitForm = async () => {
   }
 }
 
-/** 删除额外的属性 */
-const removeExtraAttributes = (data: any) => {
-  // 处理 dataSpecs 为空的情况
-  if (isEmpty(data.property.dataSpecs)) {
-    delete data.property.dataSpecs
-  }
-  if (isEmpty(data.property.dataSpecsList)) {
-    delete data.property.dataSpecsList
-  }
+/** 填写额外的属性 */
+const fillExtraAttributes = (data: any) => {
   // 处理不同类型的情况
+  // 属性
   if (data.type === ThingModelType.PROPERTY) {
+    removeDataSpecs(data.property)
+    data.dataType = data.property.dataType
+    data.property.identifier = data.identifier
+    data.property.name = data.name
     delete data.service
     delete data.event
   }
+  // 服务
   if (data.type === ThingModelType.SERVICE) {
+    removeDataSpecs(data.service)
+    data.dataType = data.service.dataType
+    data.service.identifier = data.identifier
+    data.service.name = data.name
     delete data.property
     delete data.event
   }
+  // 事件
   if (data.type === ThingModelType.EVENT) {
+    removeDataSpecs(data.event)
+    data.dataType = data.event.dataType
+    data.event.identifier = data.identifier
+    data.event.name = data.name
     delete data.property
     delete data.service
+  }
+}
+/** 处理 dataSpecs 为空的情况 */
+const removeDataSpecs = (val: any) => {
+  if (isEmpty(val.dataSpecs)) {
+    delete val.dataSpecs
+  }
+  if (isEmpty(val.dataSpecsList)) {
+    delete val.dataSpecsList
   }
 }
 
