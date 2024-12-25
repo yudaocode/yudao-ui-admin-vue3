@@ -169,19 +169,24 @@ const initData = async () => {
 /** 保存操作 */
 const handleSave = async () => {
   try {
-    // 保存前确保当前步骤的数据已经验证通过
-    if (typeof steps[currentStep.value].validator === 'function') {
-      await steps[currentStep.value].validator()
-    }
-    
-    // 如果是第三步，需要先获取最新的流程设计数据
-    if (currentStep.value === 2) {
-      const bpmnXml = processDesignRef.value?.getXmlString()
-      if (bpmnXml) {
-        formData.value.bpmnXml = bpmnXml
+    // 保存前确保所有步骤的数据都已经验证通过
+    for (const step of steps) {
+      if (step.validator) {
+        await step.validator()
       }
     }
-    
+
+    // 如果是在第三步，需要先获取最新的流程设计数据
+    if (currentStep.value === 2) {
+      await nextTick()
+      const bpmnXml = processDesignRef.value?.getXmlString()
+      // 确保有XML数据
+      if (!bpmnXml) {
+        throw new Error('请设计流程')
+      }
+      formData.value.bpmnXml = bpmnXml
+    }
+
     if (formData.value.id) {
       await ModelApi.updateModel(formData.value)
       message.success('修改成功')
@@ -193,6 +198,7 @@ const handleSave = async () => {
   } catch (error) {
     console.error('保存失败:', error)
     message.error(error.message || '保存失败')
+    throw error
   }
 }
 
@@ -200,24 +206,14 @@ const handleSave = async () => {
 const handleDeploy = async () => {
   try {
     await message.confirm('是否确认发布该流程？')
-    // 发布时才进行全部校验
-    for (const step of steps) {
-      if (step.validator) {
-        await step.validator()
-      }
-    }
-    // 如果是第三步，需要先获取最新的流程设计数据
-    if (currentStep.value === 2) {
-      const bpmnXml = processDesignRef.value?.getXmlString()
-      if (bpmnXml) {
-        formData.value.bpmnXml = bpmnXml
-      }
-    }
+    // 先保存所有数据
     await handleSave()
+    // 发布
     await ModelApi.deployModel(formData.value.id)
     message.success('发布成功')
     router.push({ name: 'BpmModel' })
   } catch (error) {
+    console.error('发布失败:', error)
     if (error instanceof Error) {
       // 校验失败时,跳转到对应步骤
       const failedStep = steps.findIndex((step) => {
@@ -231,6 +227,8 @@ const handleDeploy = async () => {
       if (failedStep !== -1) {
         currentStep.value = failedStep
         message.warning('请完善必填信息')
+      } else {
+        message.error(error.message || '发布失败')
       }
     }
   }
