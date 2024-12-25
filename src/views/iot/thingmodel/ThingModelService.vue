@@ -13,11 +13,25 @@
       </el-radio>
     </el-radio-group>
   </el-form-item>
+  <el-form-item label="输入参数">
+    <ThingModelInputOutputParam
+      v-model="service.inputParams"
+      :direction="ThingModelParamDirection.INPUT"
+    />
+  </el-form-item>
+  <el-form-item label="输出参数">
+    <ThingModelInputOutputParam
+      v-model="service.outputParams"
+      :direction="ThingModelParamDirection.OUTPUT"
+    />
+  </el-form-item>
 </template>
 
 <script lang="ts" setup>
+import ThingModelInputOutputParam from './ThingModelInputOutputParam.vue'
 import { useVModel } from '@vueuse/core'
-import { ThingModelService, ThingModelServiceCallType } from '@/api/iot/thingmodel'
+import { ThingModelService } from '@/api/iot/thingmodel'
+import { ThingModelParamDirection, ThingModelServiceCallType } from './config'
 
 /** IoT 物模型服务 */
 defineOptions({ name: 'ThingModelService' })

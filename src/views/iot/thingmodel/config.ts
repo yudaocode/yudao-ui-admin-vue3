@@ -1,4 +1,4 @@
-import {isEmpty} from '@/utils/is'
+import { isEmpty } from '@/utils/is'
 
 /** dataSpecs 数值型数据结构 */
 export interface DataSpecsNumberDataVO {
@@ -48,8 +48,68 @@ export const dataTypeOptions = [
 
 /** 获得物体模型数据类型配置项名称 */
 export const getDataTypeOptionsLabel = (value: string) => {
+  if (isEmpty(value)) {
+    return value
+  }
   return dataTypeOptions.find((option) => option.value === value)?.label
 }
+
+// IOT 产品物模型类型枚举类
+export const ThingModelType = {
+  PROPERTY: 1, // 属性
+  SERVICE: 2, // 服务
+  EVENT: 3 // 事件
+} as const
+
+// IOT 产品物模型访问模式枚举类
+export const ThingModelAccessMode = {
+  READ_WRITE: {
+    label: '读写',
+    value: 'rw'
+  },
+  READ_ONLY: {
+    label: '只读',
+    value: 'r'
+  }
+} as const
+
+// IOT 产品物模型服务调用方式枚举
+export const ThingModelServiceCallType = {
+  ASYNC: {
+    label: '异步调用',
+    value: 'async'
+  },
+  SYNC: {
+    label: '同步调用',
+    value: 'sync'
+  }
+} as const
+export const getCallTypeByValue = (value: string): string | undefined =>
+  Object.values(ThingModelServiceCallType).find((type) => type.value === value)?.label
+
+// IOT 产品物模型事件类型枚举
+export const ThingModelEventType = {
+  INFO: {
+    label: '信息',
+    value: 'info'
+  },
+  ALERT: {
+    label: '告警',
+    value: 'alert'
+  },
+  ERROR: {
+    label: '故障',
+    value: 'error'
+  }
+} as const
+export const getEventTypeByValue = (value: string): string | undefined =>
+  Object.values(ThingModelEventType).find((type) => type.value === value)?.label
+
+// IOT 产品物模型参数是输入参数还是输出参数
+export const ThingModelParamDirection = {
+  INPUT: 'input', // 输入参数
+  OUTPUT: 'output' // 输出参数
+} as const
 
 /** 公共校验规则 */
 export const ThingModelFormRules = {

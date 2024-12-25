@@ -36,6 +36,15 @@
       />
       <!-- 事件配置 -->
       <ThingModelEvent v-if="formData.type === ThingModelType.EVENT" v-model="formData.event" />
+      <el-form-item label="描述" prop="description">
+        <el-input
+          v-model="formData.description"
+          :maxlength="200"
+          :rows="3"
+          placeholder="请输入属性描述"
+          type="textarea"
+        />
+      </el-form-item>
     </el-form>
 
     <template #footer>
@@ -50,9 +59,9 @@ import { ProductVO } from '@/api/iot/product/product'
 import ThingModelProperty from './ThingModelProperty.vue'
 import ThingModelService from './ThingModelService.vue'
 import ThingModelEvent from './ThingModelEvent.vue'
-import { ThingModelApi, ThingModelData, ThingModelType } from '@/api/iot/thingmodel'
+import { ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
-import { DataSpecsDataType, ThingModelFormRules } from './config'
+import { DataSpecsDataType, ThingModelFormRules, ThingModelType } from './config'
 import { cloneDeep } from 'lodash-es'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
@@ -111,7 +120,6 @@ const submitForm = async () => {
     // 信息补全
     data.productId = product!.value.id
     data.productKey = product!.value.productKey
-    data.description = data.property.description
     data.dataType = data.property.dataType
     data.property.identifier = data.identifier
     data.property.name = data.name
@@ -164,7 +172,9 @@ const resetForm = () => {
       dataSpecs: {
         dataType: DataSpecsDataType.INT
       }
-    }
+    },
+    service: {},
+    event: {}
   }
   formRef.value?.resetFields()
 }

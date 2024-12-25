@@ -75,7 +75,7 @@
     v-if="property.dataType === DataSpecsDataType.STRUCT"
     v-model="property.dataSpecsList"
   />
-  <el-form-item v-if="!isStructDataSpecs" label="读写类型" prop="property.accessMode">
+  <el-form-item v-if="!isStructDataSpecs && !isParams" label="读写类型" prop="property.accessMode">
     <el-radio-group v-model="property.accessMode">
       <el-radio :label="ThingModelAccessMode.READ_WRITE.value">
         {{ ThingModelAccessMode.READ_WRITE.label }}
@@ -85,32 +85,28 @@
       </el-radio>
     </el-radio-group>
   </el-form-item>
-  <el-form-item label="属性描述" prop="description">
-    <el-input
-      v-model="property.description"
-      :maxlength="200"
-      :rows="3"
-      placeholder="请输入属性描述"
-      type="textarea"
-    />
-  </el-form-item>
 </template>
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import { DataSpecsDataType, dataTypeOptions, validateBoolName } from './config'
+import {
+  DataSpecsDataType,
+  dataTypeOptions,
+  ThingModelAccessMode,
+  validateBoolName
+} from './config'
 import {
   ThingModelArrayDataSpecs,
   ThingModelEnumDataSpecs,
   ThingModelNumberDataSpecs,
   ThingModelStructDataSpecs
 } from './dataSpecs'
-import { ThingModelAccessMode, ThingModelProperty } from '@/api/iot/thingmodel'
+import { ThingModelProperty } from '@/api/iot/thingmodel'
 
-/** IoT 物模型数据 */
+/** IoT 物模型属性 */
 defineOptions({ name: 'ThingModelProperty' })
 
-const props = defineProps<{ modelValue: any; isStructDataSpecs?: boolean }>()
+const props = defineProps<{ modelValue: any; isStructDataSpecs?: boolean; isParams?: boolean }>()
 const emits = defineEmits(['update:modelValue'])
 const property = useVModel(props, 'modelValue', emits) as Ref<ThingModelProperty>
 const getDataTypeOptions = computed(() => {

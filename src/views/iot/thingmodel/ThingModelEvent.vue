@@ -2,25 +2,33 @@
   <el-form-item
     :rules="[{ required: true, message: '请选择事件类型', trigger: 'change' }]"
     label="事件类型"
-    prop="thingModelEvent.type"
+    prop="event.type"
   >
     <el-radio-group v-model="thingModelEvent.type">
-      <el-radio :value="ThingModelServiceEventType.INFO.value">
-        {{ ThingModelServiceEventType.INFO.label }}
+      <el-radio :value="ThingModelEventType.INFO.value">
+        {{ ThingModelEventType.INFO.label }}
       </el-radio>
-      <el-radio :value="ThingModelServiceEventType.ALERT.value">
-        {{ ThingModelServiceEventType.ALERT.label }}
+      <el-radio :value="ThingModelEventType.ALERT.value">
+        {{ ThingModelEventType.ALERT.label }}
       </el-radio>
-      <el-radio :value="ThingModelServiceEventType.ERROR.value">
-        {{ ThingModelServiceEventType.ERROR.label }}
+      <el-radio :value="ThingModelEventType.ERROR.value">
+        {{ ThingModelEventType.ERROR.label }}
       </el-radio>
     </el-radio-group>
+  </el-form-item>
+  <el-form-item label="输出参数">
+    <ThingModelInputOutputParam
+      v-model="thingModelEvent.outputParams"
+      :direction="ThingModelParamDirection.OUTPUT"
+    />
   </el-form-item>
 </template>
 
 <script lang="ts" setup>
+import ThingModelInputOutputParam from './ThingModelInputOutputParam.vue'
 import { useVModel } from '@vueuse/core'
-import { ThingModelEvent, ThingModelServiceEventType } from '@/api/iot/thingmodel'
+import { ThingModelEvent } from '@/api/iot/thingmodel'
+import { ThingModelParamDirection, ThingModelEventType } from './config'
 
 /** IoT 物模型事件 */
 defineOptions({ name: 'ThingModelEvent' })
