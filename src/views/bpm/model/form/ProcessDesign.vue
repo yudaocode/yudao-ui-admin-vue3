@@ -47,11 +47,15 @@ const modelData = computed({
 })
 
 // 监听modelValue变化,确保XML数据同步
-watch(() => props.modelValue, (newVal) => {
-  if (newVal.bpmnXml) {
-    xmlString.value = newVal.bpmnXml
-  }
-}, { immediate: true, deep: true })
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (newVal.bpmnXml) {
+      xmlString.value = newVal.bpmnXml
+    }
+  },
+  { immediate: true, deep: true }
+)
 
 /** 处理设计器保存成功 */
 const handleDesignSuccess = (bpmnXml?: string) => {
@@ -67,6 +71,11 @@ const handleDesignSuccess = (bpmnXml?: string) => {
 
 /** 表单校验 */
 const validate = async () => {
+  // 修改场景下，如果已有 modelData.bpmnXml 则不需要重新校验
+  if (modelData.value.id && modelData.value.bpmnXml) {
+    return true
+  }
+  // 新增场景或无 bpmnXml 时才校验
   if (!xmlString.value) {
     throw new Error('请设计流程')
   }
@@ -75,11 +84,17 @@ const validate = async () => {
 
 /** 是否显示设计器 */
 const showDesigner = computed(() => {
-  return Boolean(modelData.value.key && modelData.value.name)
+  return Boolean(modelData.value?.key && modelData.value?.name)
 })
+
+/** 获取当前XML字符串 */
+const getXmlString = () => {
+  // 优先返回最新的 xmlString
+  return xmlString.value || modelData.value?.bpmnXml
+}
 
 defineExpose({
   validate,
-  getXmlString: () => xmlString.value
+  getXmlString
 })
-</script> 
+</script>
