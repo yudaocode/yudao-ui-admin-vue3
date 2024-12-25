@@ -121,8 +121,9 @@ const getDataTypeOptions = computed(() => {
 const handleChange = (dataType: any) => {
   property.value.dataSpecsList = []
   property.value.dataSpecs = {}
-
-  property.value.dataSpecs.dataType = dataType
+  // 不是列表型数据才设置 dataSpecs.dataType
+  ![DataSpecsDataType.ENUM, DataSpecsDataType.BOOL, DataSpecsDataType.STRUCT].includes(dataType) &&
+    (property.value.dataSpecs.dataType = dataType)
   switch (dataType) {
     case DataSpecsDataType.ENUM:
       property.value.dataSpecsList.push({

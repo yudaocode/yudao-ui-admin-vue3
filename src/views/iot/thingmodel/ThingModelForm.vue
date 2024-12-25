@@ -46,6 +46,7 @@ import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
 import { DataSpecsDataType, ThingModelFormRules } from './config'
 import { cloneDeep } from 'lodash-es'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { isEmpty } from '@/utils/is'
 
 /** IoT 物模型数据表单 */
 defineOptions({ name: 'IoTProductThingModelForm' })
@@ -103,6 +104,13 @@ const submitForm = async () => {
     data.dataType = data.property.dataType
     data.property.identifier = data.identifier
     data.property.name = data.name
+    // 处理 dataSpecs 为空的情况
+    if (isEmpty(data.property.dataSpecs)) {
+      delete data.property.dataSpecs
+    }
+    if (isEmpty(data.property.dataSpecsList)) {
+      delete data.property.dataSpecsList
+    }
     if (formType.value === 'create') {
       await ThingModelApi.createThingModel(data)
       message.success(t('common.createSuccess'))

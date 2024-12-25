@@ -111,7 +111,7 @@ const submitForm = async () => {
         !!data.property.dataSpecs && Object.keys(data.property.dataSpecs).length > 1
           ? data.property.dataSpecs
           : undefined,
-      dataSpecsList: data.property.dataSpecsList
+      dataSpecsList: isEmpty(data.property.dataSpecsList) ? undefined : data.property.dataSpecsList
     }
 
     // 查找是否已有相同 identifier 的项
