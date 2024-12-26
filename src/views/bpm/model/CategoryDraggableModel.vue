@@ -339,8 +339,10 @@ const handleChangeState = async (row: any) => {
 
 /** 设计流程 */
 const handleDesign = (row: any) => {
-  // TODO @goldenzqqq：最好使用 name 哈
-  push(`/bpm/manager/model/create-update?id=${row.id}`)
+  push({
+    name: 'BpmModelUpdate',
+    params: { id: row.id }
+  })
 }
 
 /** 发布流程 */
@@ -483,11 +485,13 @@ const handleDeleteCategory = async () => {
 /** 添加流程模型弹窗 */
 const modelFormRef = ref()
 const openModelForm = (type: string, id?: number) => {
-  // TODO @goldenzqqq：最好使用 name 哈
   if (type === 'create') {
-    push('/bpm/manager/model/create-update')
+    push({ name: 'BpmModelCreate' })
   } else {
-    push(`/bpm/manager/model/create-update?id=${id}`)
+    push({
+      name: 'BpmModelUpdate',
+      params: { id }
+    })
   }
 }
 

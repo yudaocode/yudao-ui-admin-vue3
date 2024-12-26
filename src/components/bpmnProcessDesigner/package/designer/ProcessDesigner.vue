@@ -315,6 +315,20 @@ const props = defineProps({
   }
 })
 
+// 监听value变化,重新加载流程图
+watch(() => props.value, (newValue) => {
+  if (newValue && bpmnModeler) {
+    createNewDiagram(newValue)
+  }
+}, { immediate: true })
+
+// 监听processId和processName变化
+watch([() => props.processId, () => props.processName], ([newId, newName]) => {
+  if (newId && newName && !props.value) {
+    createNewDiagram(null)
+  }
+}, { immediate: true })
+
 provide('configGlobal', props)
 let bpmnModeler: any = null
 const defaultZoom = ref(1)
@@ -666,18 +680,17 @@ const previewProcessJson = () => {
 }
 /* ------------------------------------------------ 芋道源码 methods ------------------------------------------------------ */
 const processSave = async () => {
-  // console.log(bpmnModeler, 'bpmnModelerbpmnModelerbpmnModelerbpmnModeler')
-  const { err, xml } = await bpmnModeler.saveXML()
-  // console.log(err, 'errerrerrerrerr')
-  // console.log(xml, 'xmlxmlxmlxmlxml')
-  // 读取异常时抛出异常
-  if (err) {
-    // this.$modal.msgError('保存模型失败，请重试！')
-    alert('保存模型失败，请重试！')
-    return
+  try {
+    const { err, xml } = await bpmnModeler.saveXML()
+    if (err) {
+      ElMessage.error('保存流程设计失败，请重试！')
+      return
+    }
+    emit('save', xml)
+  } catch (error) {
+    console.error(error)
+    ElMessage.error('保存流程设计失败，请重试！')
   }
-  // 触发 save 事件
-  emit('save', xml)
 }
 /** 高亮显示 */
 // const highlightedCode = (previewType, previewResult) => {
