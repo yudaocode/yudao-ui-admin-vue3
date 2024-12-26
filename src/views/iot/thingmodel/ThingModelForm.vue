@@ -25,10 +25,26 @@
         <el-input v-model="formData.identifier" placeholder="请输入标识符" />
       </el-form-item>
       <!-- 属性配置 -->
-      <ThingModelDataSpecs
-        v-if="formData.type === ProductFunctionTypeEnum.PROPERTY"
+      <ThingModelProperty
+        v-if="formData.type === ThingModelType.PROPERTY"
         v-model="formData.property"
       />
+      <!-- 服务配置 -->
+      <ThingModelService
+        v-if="formData.type === ThingModelType.SERVICE"
+        v-model="formData.service"
+      />
+      <!-- 事件配置 -->
+      <ThingModelEvent v-if="formData.type === ThingModelType.EVENT" v-model="formData.event" />
+      <el-form-item label="描述" prop="description">
+        <el-input
+          v-model="formData.description"
+          :maxlength="200"
+          :rows="3"
+          placeholder="请输入属性描述"
+          type="textarea"
+        />
+      </el-form-item>
     </el-form>
 
     <template #footer>
@@ -40,12 +56,15 @@
 
 <script lang="ts" setup>
 import { ProductVO } from '@/api/iot/product/product'
-import ThingModelDataSpecs from './ThingModelDataSpecs.vue'
-import { ProductFunctionTypeEnum, ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
+import ThingModelProperty from './ThingModelProperty.vue'
+import ThingModelService from './ThingModelService.vue'
+import ThingModelEvent from './ThingModelEvent.vue'
+import { ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
-import { DataSpecsDataType, ThingModelFormRules } from './config'
+import { DataSpecsDataType, ThingModelFormRules, ThingModelType } from './config'
 import { cloneDeep } from 'lodash-es'
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import { isEmpty } from '@/utils/is'
 
 /** IoT 物模型数据表单 */
 defineOptions({ name: 'IoTProductThingModelForm' })
@@ -60,14 +79,16 @@ const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref<ThingModelData>({
-  type: ProductFunctionTypeEnum.PROPERTY,
+  type: ThingModelType.PROPERTY,
   dataType: DataSpecsDataType.INT,
   property: {
     dataType: DataSpecsDataType.INT,
     dataSpecs: {
       dataType: DataSpecsDataType.INT
     }
-  }
+  },
+  service: {},
+  event: {}
 })
 
 const formRef = ref() // 表单 Ref
@@ -92,6 +113,7 @@ defineExpose({ open, close: () => (dialogVisible.value = false) })
 /** 提交表单 */
 const emit = defineEmits(['success'])
 const submitForm = async () => {
+  debugger
   await formRef.value.validate()
   formLoading.value = true
   try {
@@ -99,10 +121,7 @@ const submitForm = async () => {
     // 信息补全
     data.productId = product!.value.id
     data.productKey = product!.value.productKey
-    data.description = data.property.description
-    data.dataType = data.property.dataType
-    data.property.identifier = data.identifier
-    data.property.name = data.name
+    fillExtraAttributes(data)
     if (formType.value === 'create') {
       await ThingModelApi.createThingModel(data)
       message.success(t('common.createSuccess'))
@@ -117,17 +136,60 @@ const submitForm = async () => {
   }
 }
 
+/** 填写额外的属性 */
+const fillExtraAttributes = (data: any) => {
+  // 处理不同类型的情况
+  // 属性
+  if (data.type === ThingModelType.PROPERTY) {
+    removeDataSpecs(data.property)
+    data.dataType = data.property.dataType
+    data.property.identifier = data.identifier
+    data.property.name = data.name
+    delete data.service
+    delete data.event
+  }
+  // 服务
+  if (data.type === ThingModelType.SERVICE) {
+    removeDataSpecs(data.service)
+    data.dataType = data.service.dataType
+    data.service.identifier = data.identifier
+    data.service.name = data.name
+    delete data.property
+    delete data.event
+  }
+  // 事件
+  if (data.type === ThingModelType.EVENT) {
+    removeDataSpecs(data.event)
+    data.dataType = data.event.dataType
+    data.event.identifier = data.identifier
+    data.event.name = data.name
+    delete data.property
+    delete data.service
+  }
+}
+/** 处理 dataSpecs 为空的情况 */
+const removeDataSpecs = (val: any) => {
+  if (isEmpty(val.dataSpecs)) {
+    delete val.dataSpecs
+  }
+  if (isEmpty(val.dataSpecsList)) {
+    delete val.dataSpecsList
+  }
+}
+
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
-    type: ProductFunctionTypeEnum.PROPERTY,
+    type: ThingModelType.PROPERTY,
     dataType: DataSpecsDataType.INT,
     property: {
       dataType: DataSpecsDataType.INT,
       dataSpecs: {
         dataType: DataSpecsDataType.INT
       }
-    }
+    },
+    service: {},
+    event: {}
   }
   formRef.value?.resetFields()
 }

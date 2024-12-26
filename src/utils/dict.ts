@@ -238,7 +238,7 @@ export enum DICT_TYPE {
   IOT_DEVICE_STATUS = 'iot_device_status', // IOT 设备状态
   IOT_PRODUCT_THING_MODEL_TYPE = 'iot_product_thing_model_type', // IOT 产品功能类型
   IOT_DATA_TYPE = 'iot_data_type', // IOT 数据类型
-  IOT_UNIT_TYPE = 'iot_unit_type', // IOT 单位类型
+  IOT_PRODUCT_THING_MODEL_UNIT = 'iot_product_thing_model_unit', // IOT 物模型单位
   IOT_RW_TYPE = 'iot_rw_type', // IOT 读写类型
   IOT_PLUGIN_DEPLOY_TYPE = 'iot_plugin_deploy_type', // IOT 插件部署类型
   IOT_PLUGIN_STATUS = 'iot_plugin_status', // IOT 插件状态

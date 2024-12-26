@@ -11,7 +11,7 @@ export interface ThingModelData {
   productId?: number // 产品编号
   productKey?: string // 产品标识
   dataType: string // 数据类型，与 dataSpecs 的 dataType 保持一致
-  type: ProductFunctionTypeEnum // 功能类型
+  type: number // 功能类型
   property: ThingModelProperty // 属性
   event?: ThingModelEvent // 事件
   service?: ThingModelService // 服务
@@ -36,19 +36,6 @@ export interface ThingModelEvent {
  */
 export interface ThingModelService {
   [key: string]: any
-}
-
-// IOT 产品功能（物模型）类型枚举类
-export enum ProductFunctionTypeEnum {
-  PROPERTY = 1, // 属性
-  SERVICE = 2, // 服务
-  EVENT = 3 // 事件
-}
-
-// IOT 产品功能（物模型）访问模式枚举类
-export enum ProductFunctionAccessModeEnum {
-  READ_WRITE = 'rw', // 读写
-  READ_ONLY = 'r' // 只读
 }
 
 // IoT 产品物模型 API

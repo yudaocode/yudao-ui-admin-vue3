@@ -1,28 +1,22 @@
 <template>
-  <!-- struct 数据展示 -->
-  <el-form-item
-    :rules="[{ required: true, validator: validateList, trigger: 'change' }]"
-    label="JSON 对象"
+  <div
+    v-for="(item, index) in thingModelParams"
+    :key="index"
+    class="w-1/1 param-item flex justify-between px-10px mb-10px"
   >
-    <div
-      v-for="(item, index) in dataSpecsList"
-      :key="index"
-      class="w-1/1 struct-item flex justify-between px-10px mb-10px"
-    >
-      <span>参数名称：{{ item.name }}</span>
-      <div class="btn">
-        <el-button link type="primary" @click="openStructForm(item)">编辑</el-button>
-        <el-divider direction="vertical" />
-        <el-button link type="danger" @click="deleteStructItem(index)">删除</el-button>
-      </div>
+    <span>参数名称：{{ item.name }}</span>
+    <div class="btn">
+      <el-button link type="primary" @click="openParamForm(item)">编辑</el-button>
+      <el-divider direction="vertical" />
+      <el-button link type="danger" @click="deleteParamItem(index)">删除</el-button>
     </div>
-    <el-button link type="primary" @click="openStructForm(null)">+新增参数</el-button>
-  </el-form-item>
+  </div>
+  <el-button link type="primary" @click="openParamForm(null)">+新增参数</el-button>
 
-  <!-- struct 表单 -->
+  <!-- param 表单 -->
   <Dialog v-model="dialogVisible" :title="dialogTitle" append-to-body>
     <el-form
-      ref="structFormRef"
+      ref="paramFormRef"
       v-loading="formLoading"
       :model="formData"
       :rules="ThingModelFormRules"
@@ -35,7 +29,7 @@
         <el-input v-model="formData.identifier" placeholder="请输入标识符" />
       </el-form-item>
       <!-- 属性配置 -->
-      <ThingModelProperty v-model="formData.property" is-struct-data-specs />
+      <ThingModelProperty v-model="formData.property" is-params />
     </el-form>
 
     <template #footer>
@@ -47,21 +41,22 @@
 
 <script lang="ts" setup>
 import { useVModel } from '@vueuse/core'
-import ThingModelProperty from '../ThingModelProperty.vue'
-import { DataSpecsDataType, ThingModelFormRules } from '../config'
+import ThingModelProperty from './ThingModelProperty.vue'
+import { DataSpecsDataType, ThingModelFormRules } from './config'
 import { isEmpty } from '@/utils/is'
 
-/** Struct 型的 dataSpecs 配置组件 */
-defineOptions({ name: 'ThingModelStructDataSpecs' })
+/** 输入输出参数配置组件 */
+defineOptions({ name: 'ThingModelInputOutputParam' })
 
-const props = defineProps<{ modelValue: any }>()
+const props = defineProps<{ modelValue: any; direction: string }>()
 const emits = defineEmits(['update:modelValue'])
-const dataSpecsList = useVModel(props, 'modelValue', emits) as Ref<any[]>
+const thingModelParams = useVModel(props, 'modelValue', emits) as Ref<any[]>
 const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('新增参数') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
-const structFormRef = ref() // 表单 ref
+const paramFormRef = ref() // 表单 ref
 const formData = ref<any>({
+  dataType: DataSpecsDataType.INT,
   property: {
     dataType: DataSpecsDataType.INT,
     dataSpecs: {
@@ -70,8 +65,8 @@ const formData = ref<any>({
   }
 })
 
-/** 打开 struct 表单 */
-const openStructForm = (val: any) => {
+/** 打开 param 表单 */
+const openParamForm = (val: any) => {
   dialogVisible.value = true
   resetForm()
   if (isEmpty(val)) {
@@ -83,21 +78,25 @@ const openStructForm = (val: any) => {
     name: val.name,
     description: val.description,
     property: {
-      dataType: val.childDataType,
+      dataType: val.dataType,
       dataSpecs: val.dataSpecs,
       dataSpecsList: val.dataSpecsList
     }
   }
 }
-/** 删除 struct 项 */
-const deleteStructItem = (index: number) => {
-  dataSpecsList.value.splice(index, 1)
+/** 删除 param 项 */
+const deleteParamItem = (index: number) => {
+  thingModelParams.value.splice(index, 1)
 }
 
 /** 添加参数 */
 const submitForm = async () => {
-  await structFormRef.value.validate()
-
+  // 初始化参数列表
+  if (isEmpty(thingModelParams.value)) {
+    thingModelParams.value = []
+  }
+  // 校验参数
+  await paramFormRef.value.validate()
   try {
     const data = unref(formData)
     // 构建数据对象
@@ -105,8 +104,9 @@ const submitForm = async () => {
       identifier: data.identifier,
       name: data.name,
       description: data.description,
-      dataType: DataSpecsDataType.STRUCT,
-      childDataType: data.property.dataType,
+      dataType: data.property.dataType,
+      paraOrder: 0, // TODO @puhui999: 先写死默认看看后续
+      direction: props.direction,
       dataSpecs:
         !!data.property.dataSpecs && Object.keys(data.property.dataSpecs).length > 1
           ? data.property.dataSpecs
@@ -115,15 +115,15 @@ const submitForm = async () => {
     }
 
     // 查找是否已有相同 identifier 的项
-    const existingIndex = dataSpecsList.value.findIndex(
+    const existingIndex = thingModelParams.value.findIndex(
       (spec) => spec.identifier === data.identifier
     )
     if (existingIndex > -1) {
       // 更新已有项
-      dataSpecsList.value[existingIndex] = item
+      thingModelParams.value[existingIndex] = item
     } else {
       // 添加新项
-      dataSpecsList.value.push(item)
+      thingModelParams.value.push(item)
     }
   } finally {
     // 隐藏对话框
@@ -134,6 +134,7 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   formData.value = {
+    dataType: DataSpecsDataType.INT,
     property: {
       dataType: DataSpecsDataType.INT,
       dataSpecs: {
@@ -141,21 +142,12 @@ const resetForm = () => {
       }
     }
   }
-  structFormRef.value?.resetFields()
-}
-
-/** 校验 struct 不能为空 */
-const validateList = (_: any, __: any, callback: any) => {
-  if (isEmpty(dataSpecsList.value)) {
-    callback(new Error('struct 不能为空'))
-    return
-  }
-  callback()
+  paramFormRef.value?.resetFields()
 }
 </script>
 
 <style lang="scss" scoped>
-.struct-item {
+.param-item {
   background-color: #e4f2fd;
 }
 </style>
