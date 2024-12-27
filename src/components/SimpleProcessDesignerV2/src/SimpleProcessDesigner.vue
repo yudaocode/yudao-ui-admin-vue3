@@ -135,7 +135,7 @@ const saveSimpleFlowModel = async (simpleModelNode: SimpleFlowNode) => {
   }
 }
 
-// ���验节点设置。 暂时以 showText 为空 未节点错误配置
+// 校验节点设置。 暂时以 showText 为空 未节点错误配置
 const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNode[]) => {
   if (node) {
     const { type, showText, conditionNodes } = node
