@@ -8,15 +8,6 @@
           <el-button size="default" class="w-80px"> {{ scaleValue }}% </el-button>
           <el-button size="default" :plain="true" :icon="ZoomIn" @click="zoomIn()" />
         </el-button-group>
-        <el-button
-          v-if="!readonly"
-          size="default"
-          class="ml-4px"
-          type="primary"
-          :icon="Select"
-          @click="saveSimpleFlowModel"
-          >保存模型</el-button
-        >
       </el-row>
     </div>
     <div class="simple-process-model" :style="`transform: scale(${scaleValue / 100});`">
@@ -42,7 +33,8 @@
 import ProcessNodeTree from './ProcessNodeTree.vue'
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from './consts'
 import { useWatchNode } from './node'
-import { Select, ZoomOut, ZoomIn, ScaleToOriginal } from '@element-plus/icons-vue'
+import { ZoomOut, ZoomIn, ScaleToOriginal } from '@element-plus/icons-vue'
+
 defineOptions({
   name: 'SimpleProcessModel'
 })
@@ -58,6 +50,7 @@ const props = defineProps({
     default: true
   }
 })
+
 const emits = defineEmits<{
   'save': [node: SimpleFlowNode | undefined]
 }>()
@@ -68,6 +61,7 @@ provide('readonly', props.readonly)
 let scaleValue = ref(100)
 const MAX_SCALE_VALUE = 200
 const MIN_SCALE_VALUE = 50
+
 // 放大
 const zoomIn = () => {
   if (scaleValue.value == MAX_SCALE_VALUE) {
@@ -75,6 +69,7 @@ const zoomIn = () => {
   }
   scaleValue.value += 10
 }
+
 // 缩小
 const zoomOut = () => {
   if (scaleValue.value == MIN_SCALE_VALUE) {
@@ -82,21 +77,14 @@ const zoomOut = () => {
   }
   scaleValue.value -= 10
 }
+
 const processReZoom = () => {
   scaleValue.value = 100
 }
 
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
-const saveSimpleFlowModel = async () => {
-  errorNodes = []
-  validateNode(processNodeTree.value, errorNodes)
-  if (errorNodes.length > 0) {
-    errorDialogVisible.value = true
-    return
-  }
-  emits('save', processNodeTree.value)
-}
+
 // 校验节点设置。 暂时以 showText 为空 未节点错误配置
 const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNode[]) => {
   if (node) {
@@ -135,6 +123,26 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
     }
   }
 }
+
+/** 获取当前流程数据 */
+const getCurrentFlowData = async () => {
+  try {
+    errorNodes = []
+    validateNode(processNodeTree.value, errorNodes)
+    if (errorNodes.length > 0) {
+      errorDialogVisible.value = true
+      return undefined
+    }
+    return processNodeTree.value
+  } catch (error) {
+    console.error('获取流程数据失败:', error)
+    return undefined
+  }
+}
+
+defineExpose({
+  getCurrentFlowData
+})
 </script>
 
 <style lang="scss" scoped></style>
