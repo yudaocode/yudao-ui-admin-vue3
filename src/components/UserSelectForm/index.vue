@@ -39,7 +39,7 @@
   </Dialog>
 </template>
 <script lang="ts" setup>
-import { defaultProps, findTreeNode, handleTree } from '@/utils/tree'
+import { defaultProps, handleTree } from '@/utils/tree'
 import * as DeptApi from '@/api/system/dept'
 import * as UserApi from '@/api/system/user'
 
@@ -50,6 +50,7 @@ const emit = defineEmits<{
 const { t } = useI18n() // 国际
 const message = useMessage() // 消息弹窗
 const deptTree = ref<Tree[]>([]) // 部门树形结构化
+const deptList = ref<any[]>([]) // 保存扁平化的部门列表数据
 const userList = ref<UserApi.UserVO[]>([]) // 所有用户列表
 const filteredUserList = ref<UserApi.UserVO[]>([]) // 当前部门过滤后的用户列表
 const selectedUserIdList: any = ref([]) // 选中的用户列表
@@ -79,7 +80,9 @@ const open = async (id: number, selectedList?: any[]) => {
   resetForm()
 
   // 加载部门、用户列表
-  deptTree.value = handleTree(await DeptApi.getSimpleDeptList())
+  const deptData = await DeptApi.getSimpleDeptList()
+  deptList.value = deptData // 保存扁平结构的部门数据
+  deptTree.value = handleTree(deptData) // 转换成树形结构
   userList.value = await UserApi.getSimpleUserList()
 
   // 初始状态下，过滤列表等于所有用户列表
@@ -88,16 +91,31 @@ const open = async (id: number, selectedList?: any[]) => {
   dialogVisible.value = true
 }
 
+/** 获取指定部门及其所有子部门的ID列表 */
+const getChildDeptIds = (deptId: number, deptList: any[]): number[] => {
+  const ids = [deptId]
+  const children = deptList.filter((dept) => dept.parentId === deptId)
+  children.forEach((child) => {
+    ids.push(...getChildDeptIds(child.id, deptList))
+  })
+  return ids
+}
+
 /** 获取部门过滤后的用户列表 */
-const getUserList = async (deptId?: number) => {
+const filterUserList = async (deptId?: number) => {
   formLoading.value = true
   try {
-    // @ts-ignore
-    // TODO @芋艿：替换到 simple List 暂不支持 deptId 过滤
-    // TODO @Zqqq：这个，可以使用前端过滤么？通过 deptList 获取到 deptId 子节点，然后去 userList
-    const data = await UserApi.getUserPage({ pageSize: 100, pageNo: 1, deptId })
-    // 更新过滤后的用户列表
-    filteredUserList.value = data.list
+    if (!deptId) {
+      // 如果没有选择部门，显示所有用户
+      filteredUserList.value = [...userList.value]
+      return
+    }
+
+    // 直接使用已保存的部门列表数据进行过滤
+    const deptIds = getChildDeptIds(deptId, deptList.value)
+
+    // 过滤出这些部门下的用户
+    filteredUserList.value = userList.value.filter((user) => deptIds.includes(user.deptId))
   } finally {
     formLoading.value = false
   }
@@ -121,6 +139,7 @@ const submitForm = async () => {
 /** 重置表单 */
 const resetForm = () => {
   deptTree.value = []
+  deptList.value = []
   userList.value = []
   filteredUserList.value = []
   selectedUserIdList.value = []
@@ -128,7 +147,7 @@ const resetForm = () => {
 
 /** 处理部门被点击 */
 const handleNodeClick = (row: { [key: string]: any }) => {
-  getUserList(row.id)
+  filterUserList(row.id)
 }
 
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗

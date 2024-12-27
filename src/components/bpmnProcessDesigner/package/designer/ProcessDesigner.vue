@@ -160,13 +160,6 @@
             <XButton preIcon="ep:refresh" @click="processRestart()" />
           </el-tooltip>
         </ElButtonGroup>
-        <XButton
-          preIcon="ep:plus"
-          title="保存模型"
-          @click="processSave"
-          :type="props.headerButtonType"
-          :disabled="simulationStatus"
-        />
       </template>
       <!-- 用于打开本地文件-->
       <input
@@ -314,6 +307,28 @@ const props = defineProps({
       ['default', 'primary', 'success', 'warning', 'danger', 'info'].indexOf(value) !== -1
   }
 })
+
+// 监听value变化,重新加载流程图
+watch(
+  () => props.value,
+  (newValue) => {
+    if (newValue && bpmnModeler) {
+      createNewDiagram(newValue)
+    }
+  },
+  { immediate: true }
+)
+
+// 监听processId和processName变化
+watch(
+  [() => props.processId, () => props.processName],
+  ([newId, newName]) => {
+    if (newId && newName && !props.value) {
+      createNewDiagram(null)
+    }
+  },
+  { immediate: true }
+)
 
 provide('configGlobal', props)
 let bpmnModeler: any = null
@@ -592,16 +607,6 @@ const processZoomOut = (zoomStep = 0.1) => {
   defaultZoom.value = newZoom
   bpmnModeler.get('canvas').zoom(defaultZoom.value)
 }
-// const processZoomTo = (newZoom = 1) => {
-//   if (newZoom < 0.2) {
-//     throw new Error('[Process Designer Warn ]: The zoom ratio cannot be less than 0.2')
-//   }
-//   if (newZoom > 4) {
-//     throw new Error('[Process Designer Warn ]: The zoom ratio cannot be greater than 4')
-//   }
-//   defaultZoom = newZoom
-//   bpmnModeler.get('canvas').zoom(newZoom)
-// }
 const processReZoom = () => {
   defaultZoom.value = 1
   bpmnModeler.get('canvas').zoom('fit-viewport', 'auto')
@@ -640,63 +645,19 @@ const previewProcessXML = () => {
 }
 const previewProcessJson = () => {
   bpmnModeler.saveXML({ format: true }).then(({ xml }) => {
-    // console.log(xml, 'xml')
-
-    // const rootNode = parseXmlString(xml)
-    // console.log(rootNode, 'rootNoderootNode')
     const rootNodes = new XmlNode(XmlNodeType.Root, parseXmlString(xml))
-    // console.log(rootNodes, 'rootNodesrootNodesrootNodes')
-    // console.log(rootNodes.parent.toJsObject(), 'rootNodes.toJSON()')
-    // console.log(JSON.stringify(rootNodes.parent.toJsObject()), 'rootNodes.toJSON()')
-    // console.log(JSON.stringify(rootNodes.parent.toJSON()), 'rootNodes.toJSON()')
-
-    // const parser = new xml2js.XMLParser()
-    // let jObj = parser.parse(xml)
-    // console.log(jObj, 'jObjjObjjObjjObjjObj')
-    // const builder = new xml2js.XMLBuilder(xml)
-    // const xmlContent = builder
-    // console.log(xmlContent, 'xmlContent')
-    // console.log(xml2js, 'convertconvertconvert')
     previewResult.value = rootNodes.parent?.toJSON() as unknown as string
-    // previewResult.value = jObj
-    // previewResult.value = convert.xml2json(xml,  {explicitArray : false},{ spaces: 2 })
     previewType.value = 'json'
     previewModelVisible.value = true
   })
 }
+
 /* ------------------------------------------------ 芋道源码 methods ------------------------------------------------------ */
-const processSave = async () => {
-  // console.log(bpmnModeler, 'bpmnModelerbpmnModelerbpmnModelerbpmnModeler')
-  const { err, xml } = await bpmnModeler.saveXML()
-  // console.log(err, 'errerrerrerrerr')
-  // console.log(xml, 'xmlxmlxmlxmlxml')
-  // 读取异常时抛出异常
-  if (err) {
-    // this.$modal.msgError('保存模型失败，请重试！')
-    alert('保存模型失败，请重试！')
-    return
-  }
-  // 触发 save 事件
-  emit('save', xml)
-}
-/** 高亮显示 */
-// const highlightedCode = (previewType, previewResult) => {
-//   console.log(previewType, 'previewType, previewResult')
-//   console.log(previewResult, 'previewType, previewResult')
-//   console.log(hljs.highlight, 'hljs.highlight')
-//   const result = hljs.highlight(previewType, previewResult.value || '', true)
-//   return result.value || '&nbsp;'
-// }
-onBeforeMount(() => {
-  console.log(props, 'propspropspropsprops')
-})
 onMounted(() => {
   initBpmnModeler()
   createNewDiagram(props.value)
 })
 onBeforeUnmount(() => {
-  // this.$once('hook:beforeDestroy', () => {
-  // })
   if (bpmnModeler) bpmnModeler.destroy()
   emit('destroy', bpmnModeler)
   bpmnModeler = null

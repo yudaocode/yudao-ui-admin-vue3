@@ -249,7 +249,7 @@ import { formatDate } from '@/utils/formatTime'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import { setConfAndFields2 } from '@/utils/formCreate'
-import { BpmModelFormType, BpmModelType } from '@/utils/constants'
+import { BpmModelFormType } from '@/utils/constants'
 import { checkPermi } from '@/utils/permission'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { useAppStore } from '@/store/modules/app'
@@ -339,21 +339,10 @@ const handleChangeState = async (row: any) => {
 
 /** 设计流程 */
 const handleDesign = (row: any) => {
-  if (row.type == BpmModelType.BPMN) {
-    push({
-      name: 'BpmModelEditor',
-      query: {
-        modelId: row.id
-      }
-    })
-  } else {
-    push({
-      name: 'SimpleModelDesign',
-      query: {
-        modelId: row.id
-      }
-    })
-  }
+  push({
+    name: 'BpmModelUpdate',
+    params: { id: row.id }
+  })
 }
 
 /** 发布流程 */
@@ -496,7 +485,14 @@ const handleDeleteCategory = async () => {
 /** 添加流程模型弹窗 */
 const modelFormRef = ref()
 const openModelForm = (type: string, id?: number) => {
-  modelFormRef.value.open(type, id)
+  if (type === 'create') {
+    push({ name: 'BpmModelCreate' })
+  } else {
+    push({
+      name: 'BpmModelUpdate',
+      params: { id }
+    })
+  }
 }
 
 watch(() => props.categoryInfo.modelList, updateModeList, { immediate: true })
