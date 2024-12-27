@@ -10,7 +10,7 @@
       <el-form-item label="功能类型" prop="type">
         <el-radio-group v-model="formData.type">
           <el-radio-button
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_THING_MODEL_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_THING_MODEL_TYPE)"
             :key="dict.value"
             :value="dict.value"
           >
@@ -103,6 +103,24 @@ const open = async (type: string, id?: number) => {
     formLoading.value = true
     try {
       formData.value = await ThingModelApi.getThingModel(id)
+      // 情况一：属性初始化
+      if (isEmpty(formData.value.property)) {
+        formData.value.dataType = DataSpecsDataType.INT
+        formData.value.property = {
+          dataType: DataSpecsDataType.INT,
+          dataSpecs: {
+            dataType: DataSpecsDataType.INT
+          }
+        }
+      }
+      // 情况二：服务初始化
+      if (isEmpty(formData.value.service)) {
+        formData.value.service = {}
+      }
+      // 情况三：事件初始化
+      if (isEmpty(formData.value.event)) {
+        formData.value.event = {}
+      }
     } finally {
       formLoading.value = false
     }

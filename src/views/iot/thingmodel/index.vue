@@ -16,7 +16,7 @@
           placeholder="请选择功能类型"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_THING_MODEL_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_THING_MODEL_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -49,7 +49,7 @@
       <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
         <el-table-column align="center" label="功能类型" prop="type">
           <template #default="scope">
-            <dict-tag :type="DICT_TYPE.IOT_PRODUCT_THING_MODEL_TYPE" :value="scope.row.type" />
+            <dict-tag :type="DICT_TYPE.IOT_THING_MODEL_TYPE" :value="scope.row.type" />
           </template>
         </el-table-column>
         <el-table-column align="center" label="功能名称" prop="name" />
