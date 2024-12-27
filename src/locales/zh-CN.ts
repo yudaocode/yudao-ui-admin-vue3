@@ -187,7 +187,7 @@ export default {
     videoAdvertising: '视频广告',
     searchEngines: '搜索引擎',
     weeklyUserActivity: '每周用户活跃量',
-    allTypeStudent: "获得所有星章学生",
+    allTypeStudent: "获得星章学生",
     maxStarStudent: '获得星章最多学生',
     splitTypeStudent: '每种星章最多学生',
     activeQuantity: '活跃量',

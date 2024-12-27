@@ -29,6 +29,15 @@
           value-format="YYYY-MM-DD"
         />
       </el-form-item>
+      <el-form-item label="星章次数" prop="times">
+        <el-input
+          v-model="queryParams.times"
+          class="!w-240px"
+          clearable
+          placeholder="请输入星章次数"
+          @keyup.enter="handleQuery"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery">
           <Icon class="mr-5px" icon="ep:search" />
@@ -45,6 +54,13 @@
   <el-row :gutter="20" justify="space-between">
     <el-col :span="24">
       <el-card class="mb-20px" shadow="hover">
+        <el-skeleton :loading="loading" :rows="4" animated>
+          <Echart :height="500" :options="allTypeGotOptionData" />
+        </el-skeleton>
+      </el-card>
+    </el-col>
+    <el-col :span="24">
+      <el-card class="mb-20px" shadow="hover">
         <el-skeleton :loading="loading" animated>
           <Echart :height="500" :options="splitTypeStudentOptionData" />
         </el-skeleton>
@@ -54,13 +70,6 @@
       <el-card class="mb-20px" shadow="hover">
         <el-skeleton :loading="loading" animated>
           <Echart :height="500" :options="maxStarStudentOptionData" />
-        </el-skeleton>
-      </el-card>
-    </el-col>
-    <el-col :span="24">
-      <el-card class="mb-20px" shadow="hover">
-        <el-skeleton :loading="loading" :rows="4" animated>
-          <Echart :height="500" :options="allTypeGotOptionData" />
         </el-skeleton>
       </el-card>
     </el-col>
@@ -82,6 +91,7 @@ const queryFormRef = ref() // 搜索的表单
 const queryParams = reactive({
   grade: undefined,
   getStarTime: [],
+  times: undefined
 })
 
 const result = ref()
