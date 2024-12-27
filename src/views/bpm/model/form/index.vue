@@ -177,7 +177,7 @@ const validateAllSteps = async () => {
       currentStep.value = 0
       throw new Error('请完善基本信息')
     }
-
+    
     // 表单设计校验
     await formDesignRef.value?.validate()
     if (formData.value.formType === 10 && !formData.value.formId) {
@@ -191,15 +191,15 @@ const validateAllSteps = async () => {
       currentStep.value = 1
       throw new Error('请完善自定义表单信息')
     }
-
+    
     // 流程设计校验
     await processDesignRef.value?.validate()
-    const bpmnXml = processDesignRef.value?.getXmlString()
-    if (!bpmnXml) {
+    const processData = await processDesignRef.value?.getProcessData()
+    if (!processData) {
       currentStep.value = 2
       throw new Error('请设计流程')
     }
-
+    
     return true
   } catch (error) {
     throw error
@@ -211,22 +211,28 @@ const handleSave = async () => {
   try {
     // 保存前校验所有步骤的数据
     await validateAllSteps()
-
+    
     // 获取最新的流程设计数据
-    const bpmnXml = await processDesignRef.value?.getXmlString()
-    if (!bpmnXml) {
+    const processData = await processDesignRef.value?.getProcessData()
+    if (!processData) {
       throw new Error('获取流程数据失败')
     }
 
     // 更新表单数据
-    formData.value = {
-      ...formData.value,
-      bpmnXml: bpmnXml
+    const modelData = {
+      ...formData.value
     }
-
+    if (formData.value.type === BpmModelType.BPMN) {
+      modelData.bpmnXml = processData
+      modelData.simpleModel = null
+    } else {
+      modelData.bpmnXml = null
+      modelData.simpleModel = processData // 直接使用流程数据对象
+    }
+    
     if (formData.value.id) {
       // 修改场景
-      await ModelApi.updateModel(formData.value)
+      await ModelApi.updateModel(modelData)
       message.success('修改成功')
       // 询问是否发布流程
       try {
@@ -238,7 +244,7 @@ const handleSave = async () => {
       }
     } else {
       // 新增场景
-      const result = await ModelApi.createModel(formData.value)
+      const result = await ModelApi.createModel(modelData)
       formData.value.id = result
       message.success('新增成功')
       try {
@@ -275,24 +281,30 @@ const handleDeploy = async () => {
 
     // 校验所有步骤
     await validateAllSteps()
-
+    
     // 获取最新的流程设计数据
-    const bpmnXml = await processDesignRef.value?.getXmlString()
-    if (!bpmnXml) {
+    const processData = await processDesignRef.value?.getProcessData()
+    if (!processData) {
       throw new Error('获取流程数据失败')
     }
 
     // 更新表单数据
-    formData.value = {
-      ...formData.value,
-      bpmnXml: bpmnXml
+    const modelData = {
+      ...formData.value
+    }
+    if (formData.value.type === BpmModelType.BPMN) {
+      modelData.bpmnXml = processData
+      modelData.simpleModel = null
+    } else {
+      modelData.bpmnXml = null
+      modelData.simpleModel = processData // 直接使用流程数据对象
     }
 
     // 先保存所有数据
     if (formData.value.id) {
-      await ModelApi.updateModel(formData.value)
+      await ModelApi.updateModel(modelData)
     } else {
-      const result = await ModelApi.createModel(formData.value)
+      const result = await ModelApi.createModel(modelData)
       formData.value.id = result.id
     }
 

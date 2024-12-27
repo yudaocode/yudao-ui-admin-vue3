@@ -49,57 +49,23 @@ const modelData = computed({
   set: (val) => emit('update:modelValue', val)
 })
 
-/** 表单校验 */
-const validate = async () => {
-  try {
-    // 根据流程类型获取对应的编辑器引用
-    const editorRef =
-      modelData.value.type === BpmModelType.BPMN ? bpmnEditorRef.value : simpleEditorRef.value
-    if (!editorRef) {
-      throw new Error('流程设计器未初始化')
-    }
-
-    // 获取最新的XML数据
-    const bpmnXml = await getXmlString()
-    console.warn(bpmnXml, 'bpmnXml')
-    if (!bpmnXml) {
-      throw new Error('请设计流程')
-    }
-
-    return true
-  } catch (error) {
-    throw error
-  }
-}
-
-/** 获取当前XML字符串 */
-const getXmlString = async () => {
+/** 获取当前流程数据 */
+const getProcessData = async () => {
   try {
     if (modelData.value.type === BpmModelType.BPMN) {
       // BPMN设计器
       if (bpmnEditorRef.value) {
         const { xml } = await bpmnEditorRef.value.saveXML()
         if (xml) {
-          // 更新本地数据
-          modelData.value = {
-            ...modelData.value,
-            bpmnXml: xml
-          }
+          return xml
         }
-        return xml
       }
     } else {
       // Simple设计器
       if (simpleEditorRef.value) {
         const flowData = await simpleEditorRef.value.getCurrentFlowData()
         if (flowData) {
-          const jsonData = JSON.stringify(flowData)
-          // 更新本地数据
-          modelData.value = {
-            ...modelData.value,
-            bpmnXml: jsonData
-          }
-          return jsonData
+          return flowData // 直接返回流程数据对象，不需要转换为字符串
         }
       }
     }
@@ -110,14 +76,45 @@ const getXmlString = async () => {
   }
 }
 
-/** 处理设计器保存成功 */
-const handleDesignSuccess = (bpmnXml?: string) => {
-  if (bpmnXml) {
-    modelData.value = {
-      ...modelData.value,
-      bpmnXml
+/** 表单校验 */
+const validate = async () => {
+  try {
+    // 根据流程类型获取对应的编辑器引用
+    const editorRef =
+      modelData.value.type === BpmModelType.BPMN ? bpmnEditorRef.value : simpleEditorRef.value
+    if (!editorRef) {
+      throw new Error('流程设计器未初始化')
     }
-    emit('success', bpmnXml)
+
+    // 获取最新的流程数据
+    const processData = await getProcessData()
+    if (!processData) {
+      throw new Error('请设计流程')
+    }
+
+    return true
+  } catch (error) {
+    throw error
+  }
+}
+
+/** 处理设计器保存成功 */
+const handleDesignSuccess = (data?: any) => {
+  if (data) {
+    if (modelData.value.type === BpmModelType.BPMN) {
+      modelData.value = {
+        ...modelData.value,
+        bpmnXml: data,
+        simpleModel: null
+      }
+    } else {
+      modelData.value = {
+        ...modelData.value,
+        bpmnXml: null,
+        simpleModel: data
+      }
+    }
+    emit('success', data)
   }
 }
 
@@ -128,6 +125,6 @@ const showDesigner = computed(() => {
 
 defineExpose({
   validate,
-  getXmlString
+  getProcessData
 })
 </script>
