@@ -1,6 +1,7 @@
 <template>
   <div v-loading="loading" class="overflow-auto">
     <SimpleProcessModel
+      ref="simpleProcessModelRef"
       v-if="processNodeTree"
       :flow-node="processNodeTree"
       :readonly="false"
@@ -134,7 +135,7 @@ const saveSimpleFlowModel = async (simpleModelNode: SimpleFlowNode) => {
   }
 }
 
-// 校验节点设置。 暂时以 showText 为空 未节点错误配置
+// ���验节点设置。 暂时以 showText 为空 未节点错误配置
 const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNode[]) => {
   if (node) {
     const { type, showText, conditionNodes } = node
@@ -224,5 +225,20 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+})
+
+const simpleProcessModelRef = ref()
+
+/** 获取当前流程数据 */
+const getCurrentFlowData = async () => {
+  if (simpleProcessModelRef.value) {
+    return await simpleProcessModelRef.value.getCurrentFlowData()
+  }
+  return undefined
+}
+
+defineExpose({
+  getCurrentFlowData,
+  updateModel
 })
 </script>

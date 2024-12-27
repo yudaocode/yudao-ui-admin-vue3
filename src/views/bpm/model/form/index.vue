@@ -213,8 +213,16 @@ const handleSave = async () => {
     await validateAllSteps()
 
     // 获取最新的流程设计数据
-    const bpmnXml = processDesignRef.value?.getXmlString()
-    formData.value.bpmnXml = bpmnXml
+    const bpmnXml = await processDesignRef.value?.getXmlString()
+    if (!bpmnXml) {
+      throw new Error('获取流程数据失败')
+    }
+
+    // 更新表单数据
+    formData.value = {
+      ...formData.value,
+      bpmnXml: bpmnXml
+    }
 
     if (formData.value.id) {
       // 修改场景
@@ -245,6 +253,8 @@ const handleSave = async () => {
           params: { id: formData.value.id }
         })
       } catch {
+        // 先删除当前页签
+        delView(unref(router.currentRoute))
         // 用户点击返回列表
         await router.push({ name: 'BpmModel' })
       }
@@ -267,8 +277,16 @@ const handleDeploy = async () => {
     await validateAllSteps()
 
     // 获取最新的流程设计数据
-    const bpmnXml = processDesignRef.value?.getXmlString()
-    formData.value.bpmnXml = bpmnXml
+    const bpmnXml = await processDesignRef.value?.getXmlString()
+    if (!bpmnXml) {
+      throw new Error('获取流程数据失败')
+    }
+
+    // 更新表单数据
+    formData.value = {
+      ...formData.value,
+      bpmnXml: bpmnXml
+    }
 
     // 先保存所有数据
     if (formData.value.id) {

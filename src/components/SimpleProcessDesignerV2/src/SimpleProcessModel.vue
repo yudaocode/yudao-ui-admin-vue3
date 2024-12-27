@@ -125,14 +125,19 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
 }
 
 /** 获取当前流程数据 */
-const getCurrentFlowData = () => {
-  errorNodes = []
-  validateNode(processNodeTree.value, errorNodes)
-  if (errorNodes.length > 0) {
-    errorDialogVisible.value = true
+const getCurrentFlowData = async () => {
+  try {
+    errorNodes = []
+    validateNode(processNodeTree.value, errorNodes)
+    if (errorNodes.length > 0) {
+      errorDialogVisible.value = true
+      return undefined
+    }
+    return processNodeTree.value
+  } catch (error) {
+    console.error('获取流程数据失败:', error)
     return undefined
   }
-  return processNodeTree.value
 }
 
 defineExpose({

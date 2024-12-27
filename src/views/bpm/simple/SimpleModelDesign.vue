@@ -36,5 +36,22 @@ watch([() => props.modelKey, () => props.modelName], ([newKey, newName]) => {
 const handleSuccess = (data?: any) => {
   emit('success', data)
 }
+
+/** 获取当前流程数据 */
+const getCurrentFlowData = async () => {
+  try {
+    if (designerRef.value) {
+      return await designerRef.value.getCurrentFlowData()
+    }
+    return undefined
+  } catch (error) {
+    console.error('获取流程数据失败:', error)
+    return undefined
+  }
+}
+
+defineExpose({
+  getCurrentFlowData
+})
 </script>
 <style lang="scss" scoped></style>

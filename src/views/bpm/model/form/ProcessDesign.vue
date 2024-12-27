@@ -76,17 +76,31 @@ const validate = async () => {
 const getXmlString = async () => {
   try {
     if (modelData.value.type === BpmModelType.BPMN) {
-      console.warn('bpmnEditorRef.value', bpmnEditorRef.value)
       // BPMN设计器
       if (bpmnEditorRef.value) {
         const { xml } = await bpmnEditorRef.value.saveXML()
+        if (xml) {
+          // 更新本地数据
+          modelData.value = {
+            ...modelData.value,
+            bpmnXml: xml
+          }
+        }
         return xml
       }
     } else {
       // Simple设计器
       if (simpleEditorRef.value) {
-        const flowData = simpleEditorRef.value.getCurrentFlowData()
-        return flowData ? JSON.stringify(flowData) : undefined
+        const flowData = await simpleEditorRef.value.getCurrentFlowData()
+        if (flowData) {
+          const jsonData = JSON.stringify(flowData)
+          // 更新本地数据
+          modelData.value = {
+            ...modelData.value,
+            bpmnXml: jsonData
+          }
+          return jsonData
+        }
       }
     }
     return undefined
