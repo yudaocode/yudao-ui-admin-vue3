@@ -52,7 +52,7 @@
       <!-- 主体内容 -->
       <div class="mt-50px">
         <!-- 第一步：基本信息 -->
-        <div v-if="currentStep === 0" class="mx-auto max-w-1024px">
+        <div v-if="currentStep === 0" class="mx-auto w-560px">
           <BasicInfo
             v-model="formData"
             :categoryList="categoryList"
@@ -62,7 +62,7 @@
         </div>
 
         <!-- 第二步：表单设计 -->
-        <div v-if="currentStep === 1" class="mx-auto max-w-1024px">
+        <div v-if="currentStep === 1" class="mx-auto w-560px">
           <FormDesign v-model="formData" :formList="formList" ref="formDesignRef" />
         </div>
 

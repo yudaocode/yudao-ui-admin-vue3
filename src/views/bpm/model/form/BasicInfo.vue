@@ -1,15 +1,9 @@
 <template>
-  <el-form
-    ref="formRef"
-    :model="modelData"
-    :rules="rules"
-    label-width="120px"
-    class="mt-20px w-600px"
-  >
+  <el-form ref="formRef" :model="modelData" :rules="rules" label-width="120px" class="mt-20px">
     <el-form-item label="流程标识" prop="key" class="mb-20px">
       <div class="flex items-center">
         <el-input
-          class="!w-480px"
+          class="!w-440px"
           v-model="modelData.key"
           :disabled="!!modelData.id"
           placeholder="请输入流标标识"
