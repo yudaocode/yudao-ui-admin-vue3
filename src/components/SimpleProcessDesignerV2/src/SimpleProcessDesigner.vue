@@ -84,7 +84,7 @@ let errorNodes: SimpleFlowNode[] = []
 const updateModel = (key?: string, name?: string) => {
   if (!processNodeTree.value) {
     processNodeTree.value = {
-      name: name || '发起人',
+      name: '发起人',
       type: NodeType.START_USER_NODE,
       id: NodeId.START_USER_NODE_ID,
       childNode: {
@@ -93,9 +93,6 @@ const updateModel = (key?: string, name?: string) => {
         type: NodeType.END_EVENT_NODE
       }
     }
-  } else if (name) {
-    // 更新现有模型的名称
-    processNodeTree.value.name = name
   }
 }
 
