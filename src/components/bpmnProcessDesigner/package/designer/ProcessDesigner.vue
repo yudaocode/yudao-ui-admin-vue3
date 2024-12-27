@@ -309,18 +309,26 @@ const props = defineProps({
 })
 
 // 监听value变化,重新加载流程图
-watch(() => props.value, (newValue) => {
-  if (newValue && bpmnModeler) {
-    createNewDiagram(newValue)
-  }
-}, { immediate: true })
+watch(
+  () => props.value,
+  (newValue) => {
+    if (newValue && bpmnModeler) {
+      createNewDiagram(newValue)
+    }
+  },
+  { immediate: true }
+)
 
 // 监听processId和processName变化
-watch([() => props.processId, () => props.processName], ([newId, newName]) => {
-  if (newId && newName && !props.value) {
-    createNewDiagram(null)
-  }
-}, { immediate: true })
+watch(
+  [() => props.processId, () => props.processName],
+  ([newId, newName]) => {
+    if (newId && newName && !props.value) {
+      createNewDiagram(null)
+    }
+  },
+  { immediate: true }
+)
 
 provide('configGlobal', props)
 let bpmnModeler: any = null
@@ -599,16 +607,6 @@ const processZoomOut = (zoomStep = 0.1) => {
   defaultZoom.value = newZoom
   bpmnModeler.get('canvas').zoom(defaultZoom.value)
 }
-// const processZoomTo = (newZoom = 1) => {
-//   if (newZoom < 0.2) {
-//     throw new Error('[Process Designer Warn ]: The zoom ratio cannot be less than 0.2')
-//   }
-//   if (newZoom > 4) {
-//     throw new Error('[Process Designer Warn ]: The zoom ratio cannot be greater than 4')
-//   }
-//   defaultZoom = newZoom
-//   bpmnModeler.get('canvas').zoom(newZoom)
-// }
 const processReZoom = () => {
   defaultZoom.value = 1
   bpmnModeler.get('canvas').zoom('fit-viewport', 'auto')
@@ -647,62 +645,19 @@ const previewProcessXML = () => {
 }
 const previewProcessJson = () => {
   bpmnModeler.saveXML({ format: true }).then(({ xml }) => {
-    // console.log(xml, 'xml')
-
-    // const rootNode = parseXmlString(xml)
-    // console.log(rootNode, 'rootNoderootNode')
     const rootNodes = new XmlNode(XmlNodeType.Root, parseXmlString(xml))
-    // console.log(rootNodes, 'rootNodesrootNodesrootNodes')
-    // console.log(rootNodes.parent.toJsObject(), 'rootNodes.toJSON()')
-    // console.log(JSON.stringify(rootNodes.parent.toJsObject()), 'rootNodes.toJSON()')
-    // console.log(JSON.stringify(rootNodes.parent.toJSON()), 'rootNodes.toJSON()')
-
-    // const parser = new xml2js.XMLParser()
-    // let jObj = parser.parse(xml)
-    // console.log(jObj, 'jObjjObjjObjjObjjObj')
-    // const builder = new xml2js.XMLBuilder(xml)
-    // const xmlContent = builder
-    // console.log(xmlContent, 'xmlContent')
-    // console.log(xml2js, 'convertconvertconvert')
     previewResult.value = rootNodes.parent?.toJSON() as unknown as string
-    // previewResult.value = jObj
-    // previewResult.value = convert.xml2json(xml,  {explicitArray : false},{ spaces: 2 })
     previewType.value = 'json'
     previewModelVisible.value = true
   })
 }
+
 /* ------------------------------------------------ 芋道源码 methods ------------------------------------------------------ */
-const processSave = async () => {
-  try {
-    const { err, xml } = await bpmnModeler.saveXML()
-    if (err) {
-      ElMessage.error('保存流程设计失败，请重试！')
-      return
-    }
-    emit('save', xml)
-  } catch (error) {
-    console.error(error)
-    ElMessage.error('保存流程设计失败，请重试！')
-  }
-}
-/** 高亮显示 */
-// const highlightedCode = (previewType, previewResult) => {
-//   console.log(previewType, 'previewType, previewResult')
-//   console.log(previewResult, 'previewType, previewResult')
-//   console.log(hljs.highlight, 'hljs.highlight')
-//   const result = hljs.highlight(previewType, previewResult.value || '', true)
-//   return result.value || '&nbsp;'
-// }
-onBeforeMount(() => {
-  console.log(props, 'propspropspropsprops')
-})
 onMounted(() => {
   initBpmnModeler()
   createNewDiagram(props.value)
 })
 onBeforeUnmount(() => {
-  // this.$once('hook:beforeDestroy', () => {
-  // })
   if (bpmnModeler) bpmnModeler.destroy()
   emit('destroy', bpmnModeler)
   bpmnModeler = null
