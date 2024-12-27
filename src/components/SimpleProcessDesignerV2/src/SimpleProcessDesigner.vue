@@ -1,6 +1,7 @@
 <template>
   <div v-loading="loading" class="overflow-auto">
     <SimpleProcessModel
+      ref="simpleProcessModelRef"
       v-if="processNodeTree"
       :flow-node="processNodeTree"
       :readonly="false"
@@ -224,5 +225,20 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+})
+
+const simpleProcessModelRef = ref()
+
+/** 获取当前流程数据 */
+const getCurrentFlowData = async () => {
+  if (simpleProcessModelRef.value) {
+    return await simpleProcessModelRef.value.getCurrentFlowData()
+  }
+  return undefined
+}
+
+defineExpose({
+  getCurrentFlowData,
+  updateModel
 })
 </script>

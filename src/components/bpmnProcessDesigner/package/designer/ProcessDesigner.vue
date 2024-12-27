@@ -160,13 +160,6 @@
             <XButton preIcon="ep:refresh" @click="processRestart()" />
           </el-tooltip>
         </ElButtonGroup>
-        <XButton
-          preIcon="ep:plus"
-          title="保存模型"
-          @click="processSave"
-          :type="props.headerButtonType"
-          :disabled="simulationStatus"
-        />
       </template>
       <!-- 用于打开本地文件-->
       <input
