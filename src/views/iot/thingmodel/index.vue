@@ -33,7 +33,7 @@
           重置
         </el-button>
         <el-button
-          v-hasPermi="[`iot:product-thing-model:create`]"
+          v-hasPermi="[`iot:thing-model:create`]"
           plain
           type="primary"
           @click="openForm('create')"
@@ -118,7 +118,7 @@
         <el-table-column align="center" label="操作">
           <template #default="scope">
             <el-button
-              v-hasPermi="[`iot:product-thing-model:update`]"
+              v-hasPermi="[`iot:thing-model:update`]"
               link
               type="primary"
               @click="openForm('update', scope.row.id)"
@@ -126,7 +126,7 @@
               编辑
             </el-button>
             <el-button
-              v-hasPermi="['iot:product-thing-model:delete']"
+              v-hasPermi="['iot:thing-model:delete']"
               link
               type="danger"
               @click="handleDelete(scope.row.id)"
@@ -161,9 +161,8 @@ import {
   getEventTypeByValue,
   ThingModelType
 } from './config'
-import { ThingModelNumberDataSpecs } from '@/views/iot/thingmodel/dataSpecs'
 
-defineOptions({ name: 'IoTProductThingModel' })
+defineOptions({ name: 'IoTThingModel' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

@@ -67,7 +67,7 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { isEmpty } from '@/utils/is'
 
 /** IoT 物模型数据表单 */
-defineOptions({ name: 'IoTProductThingModelForm' })
+defineOptions({ name: 'IoTThingModelForm' })
 
 const product = inject<Ref<ProductVO>>(IOT_PROVIDE_KEY.PRODUCT) // 注入产品信息
 

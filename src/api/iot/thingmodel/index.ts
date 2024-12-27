@@ -42,34 +42,34 @@ export interface ThingModelService {
 export const ThingModelApi = {
   // 查询产品物模型分页
   getThingModelPage: async (params: any) => {
-    return await request.get({ url: `/iot/product-thing-model/page`, params })
+    return await request.get({ url: `/iot/thing-model/page`, params })
   },
 
   // 获得产品物模型
   getThingModelListByProductId: async (params: any) => {
     return await request.get({
-      url: `/iot/product-thing-model/list-by-product-id`,
+      url: `/iot/thing-model/list-by-product-id`,
       params
     })
   },
 
   // 查询产品物模型详情
   getThingModel: async (id: number) => {
-    return await request.get({ url: `/iot/product-thing-model/get?id=` + id })
+    return await request.get({ url: `/iot/thing-model/get?id=` + id })
   },
 
   // 新增产品物模型
   createThingModel: async (data: ThingModelData) => {
-    return await request.post({ url: `/iot/product-thing-model/create`, data })
+    return await request.post({ url: `/iot/thing-model/create`, data })
   },
 
   // 修改产品物模型
   updateThingModel: async (data: ThingModelData) => {
-    return await request.put({ url: `/iot/product-thing-model/update`, data })
+    return await request.put({ url: `/iot/thing-model/update`, data })
   },
 
   // 删除产品物模型
   deleteThingModel: async (id: number) => {
-    return await request.delete({ url: `/iot/product-thing-model/delete?id=` + id })
+    return await request.delete({ url: `/iot/thing-model/delete?id=` + id })
   }
 }
