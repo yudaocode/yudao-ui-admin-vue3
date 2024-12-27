@@ -7,6 +7,7 @@
       :model-key="modelData.key"
       :model-name="modelData.name"
       :value="modelData.bpmnXml"
+      ref="bpmnEditorRef"
       @success="handleDesignSuccess"
     />
   </template>
@@ -19,6 +20,7 @@
       :model-key="modelData.key"
       :model-name="modelData.name"
       :value="modelData.bpmnXml"
+      ref="simpleEditorRef"
       @success="handleDesignSuccess"
     />
   </template>
@@ -38,7 +40,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'success'])
 
-const xmlString = ref<string>()
+const bpmnEditorRef = ref()
+const simpleEditorRef = ref()
 
 // 创建本地数据副本
 const modelData = computed({
@@ -46,21 +49,56 @@ const modelData = computed({
   set: (val) => emit('update:modelValue', val)
 })
 
-// 监听modelValue变化,确保XML数据同步
-watch(
-  () => props.modelValue,
-  (newVal) => {
-    if (newVal?.bpmnXml) {
-      xmlString.value = newVal.bpmnXml
+/** 表单校验 */
+const validate = async () => {
+  try {
+    // 根据流程类型获取对应的编辑器引用
+    const editorRef =
+      modelData.value.type === BpmModelType.BPMN ? bpmnEditorRef.value : simpleEditorRef.value
+    if (!editorRef) {
+      throw new Error('流程设计器未初始化')
     }
-  },
-  { immediate: true, deep: true }
-)
+
+    // 获取最新的XML数据
+    const bpmnXml = await getXmlString()
+    console.warn(bpmnXml, 'bpmnXml')
+    if (!bpmnXml) {
+      throw new Error('请设计流程')
+    }
+
+    return true
+  } catch (error) {
+    throw error
+  }
+}
+
+/** 获取当前XML字符串 */
+const getXmlString = async () => {
+  try {
+    if (modelData.value.type === BpmModelType.BPMN) {
+      console.warn('bpmnEditorRef.value', bpmnEditorRef.value)
+      // BPMN设计器
+      if (bpmnEditorRef.value) {
+        const { xml } = await bpmnEditorRef.value.saveXML()
+        return xml
+      }
+    } else {
+      // Simple设计器
+      if (simpleEditorRef.value) {
+        const flowData = simpleEditorRef.value.getCurrentFlowData()
+        return flowData ? JSON.stringify(flowData) : undefined
+      }
+    }
+    return undefined
+  } catch (error) {
+    console.error('获取流程数据失败:', error)
+    return undefined
+  }
+}
 
 /** 处理设计器保存成功 */
 const handleDesignSuccess = (bpmnXml?: string) => {
   if (bpmnXml) {
-    xmlString.value = bpmnXml
     modelData.value = {
       ...modelData.value,
       bpmnXml
@@ -69,33 +107,10 @@ const handleDesignSuccess = (bpmnXml?: string) => {
   }
 }
 
-/** 表单校验 */
-const validate = async () => {
-  // 获取最新的XML数据
-  const currentXml = xmlString.value || modelData.value?.bpmnXml
-
-  // 如果是修改场景且有XML数据（无论是新的还是原有的）
-  if (modelData.value.id && currentXml) {
-    return true
-  }
-
-  // 新增场景必须有XML数据
-  if (!currentXml) {
-    throw new Error('请设计流程')
-  }
-
-  return true
-}
-
 /** 是否显示设计器 */
 const showDesigner = computed(() => {
   return Boolean(modelData.value?.key && modelData.value?.name)
 })
-
-/** 获取当前XML字符串 */
-const getXmlString = () => {
-  return xmlString.value || modelData.value?.bpmnXml || ''
-}
 
 defineExpose({
   validate,

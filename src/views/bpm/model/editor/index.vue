@@ -205,11 +205,53 @@ onBeforeUnmount(() => {
     w.bpmnInstances = null
   }
 })
+
+/** 获取XML字符串 */
+const saveXML = async () => {
+  if (!modeler.value) {
+    return { xml: undefined }
+  }
+  try {
+    return await modeler.value.saveXML({ format: true })
+  } catch (error) {
+    console.error('获取XML失败:', error)
+    return { xml: undefined }
+  }
+}
+
+/** 获取SVG字符串 */
+const saveSVG = async () => {
+  if (!modeler.value) {
+    return { svg: undefined }
+  }
+  try {
+    return await modeler.value.saveSVG()
+  } catch (error) {
+    console.error('获取SVG失败:', error)
+    return { svg: undefined }
+  }
+}
+
+/** 刷新视图 */
+const refresh = () => {
+  if (processDesigner.value?.refresh) {
+    processDesigner.value.refresh()
+  }
+}
+
+// 暴露必要的属性和方法给父组件
+defineExpose({
+  modeler,
+  isModelerReady,
+  saveXML,
+  saveSVG,
+  refresh
+})
 </script>
 <style lang="scss">
 .process-panel__container {
   position: absolute;
-  top: 90px;
+  top: 180px;
   right: 60px;
 }
 </style>

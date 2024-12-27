@@ -7,7 +7,7 @@
       >
         <!-- 左侧标题 -->
         <div class="w-200px flex items-center overflow-hidden">
-          <Icon icon="ep:arrow-left" class="cursor-pointer flex-shrink-0" @click="router.back()" />
+          <Icon icon="ep:arrow-left" class="cursor-pointer flex-shrink-0" @click="handleBack" />
           <span class="ml-10px text-16px truncate" :title="formData.name || '创建流程'">
             {{ formData.name || '创建流程' }}
           </span>
@@ -320,6 +320,14 @@ const handleDesignSuccess = (bpmnXml?: string) => {
   if (bpmnXml) {
     formData.value.bpmnXml = bpmnXml
   }
+}
+
+/** 返回列表页 */
+const handleBack = () => {
+  // 先删除当前页签
+  delView(unref(router.currentRoute))
+  // 跳转到列表页
+  router.push({ name: 'BpmModel' })
 }
 
 /** 初始化 */
