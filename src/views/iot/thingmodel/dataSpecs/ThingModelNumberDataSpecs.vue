@@ -47,7 +47,7 @@
       @change="unitChange"
     >
       <el-option
-        v-for="(item, index) in getStrDictOptions(DICT_TYPE.IOT_PRODUCT_THING_MODEL_UNIT)"
+        v-for="(item, index) in getStrDictOptions(DICT_TYPE.IOT_THING_MODEL_UNIT)"
         :key="index"
         :label="item.label + '-' + item.value"
         :value="item.label + '-' + item.value"

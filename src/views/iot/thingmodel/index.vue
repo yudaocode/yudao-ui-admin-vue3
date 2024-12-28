@@ -16,7 +16,7 @@
           placeholder="请选择功能类型"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_PRODUCT_THING_MODEL_TYPE)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_THING_MODEL_TYPE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -33,7 +33,7 @@
           重置
         </el-button>
         <el-button
-          v-hasPermi="[`iot:product-thing-model:create`]"
+          v-hasPermi="[`iot:thing-model:create`]"
           plain
           type="primary"
           @click="openForm('create')"
@@ -49,7 +49,7 @@
       <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
         <el-table-column align="center" label="功能类型" prop="type">
           <template #default="scope">
-            <dict-tag :type="DICT_TYPE.IOT_PRODUCT_THING_MODEL_TYPE" :value="scope.row.type" />
+            <dict-tag :type="DICT_TYPE.IOT_THING_MODEL_TYPE" :value="scope.row.type" />
           </template>
         </el-table-column>
         <el-table-column align="center" label="功能名称" prop="name" />
@@ -118,7 +118,7 @@
         <el-table-column align="center" label="操作">
           <template #default="scope">
             <el-button
-              v-hasPermi="[`iot:product-thing-model:update`]"
+              v-hasPermi="[`iot:thing-model:update`]"
               link
               type="primary"
               @click="openForm('update', scope.row.id)"
@@ -126,7 +126,7 @@
               编辑
             </el-button>
             <el-button
-              v-hasPermi="['iot:product-thing-model:delete']"
+              v-hasPermi="['iot:thing-model:delete']"
               link
               type="danger"
               @click="handleDelete(scope.row.id)"
@@ -161,9 +161,8 @@ import {
   getEventTypeByValue,
   ThingModelType
 } from './config'
-import { ThingModelNumberDataSpecs } from '@/views/iot/thingmodel/dataSpecs'
 
-defineOptions({ name: 'IoTProductThingModel' })
+defineOptions({ name: 'IoTThingModel' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
