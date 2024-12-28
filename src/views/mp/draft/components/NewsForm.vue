@@ -144,7 +144,7 @@ const accountId = inject<number>('accountId')
 
 // ========== 文件上传 ==========
 const UPLOAD_URL = import.meta.env.VITE_BASE_URL + '/admin-api/mp/material/upload-permanent' // 上传永久素材的地址
-const editorConfig = createEditorConfig(UPLOAD_URL, accountId)
+const editorConfig = createEditorConfig(UPLOAD_URL, unref(accountId))
 
 // v-model=newsList
 const emit = defineEmits<{
