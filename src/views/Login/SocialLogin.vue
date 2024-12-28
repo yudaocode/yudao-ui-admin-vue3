@@ -133,6 +133,7 @@
                   </el-form-item>
                 </el-col>
                 <Verify
+                  v-if="loginData.captchaEnable === 'true'"
                   ref="verify"
                   :captchaType="captchaType"
                   :imgSize="{ width: '400px', height: '200px' }"
