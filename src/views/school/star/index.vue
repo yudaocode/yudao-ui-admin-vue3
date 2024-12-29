@@ -35,14 +35,23 @@
           @keyup.enter="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="创建时间" prop="getStarTime">
+      <el-form-item label="开始日期" prop="startTime">
         <el-date-picker
-          v-model="queryParams.getStarTime"
-          :default-time="[new Date('1 00:00:00'), new Date('1 23:59:59')]"
+          v-model="queryParams.startTime"
+          :default-time="new Date('1 00:00:00')"
           class="!w-240px"
-          end-placeholder="结束日期"
-          start-placeholder="开始日期"
-          type="daterange"
+          placeholder="开始日期"
+          type="date"
+          value-format="YYYY-MM-DD"
+        />
+      </el-form-item>
+      <el-form-item label="结束日期" prop="endTime1">
+        <el-date-picker
+          v-model="queryParams.endTime1"
+          :default-time="new Date('1 00:00:00')"
+          class="!w-240px"
+          placeholder="结束日期"
+          type="date"
           value-format="YYYY-MM-DD"
         />
       </el-form-item>
@@ -89,7 +98,7 @@
         </template>
       </el-table-column>
       <el-table-column
-        :formatter="dateFormatter"
+        :formatter="dateFormatter2"
         align="center"
         label="创建时间"
         prop="getStarTime"
@@ -129,7 +138,7 @@
   <FileForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter2 } from '@/utils/formatTime'
 import * as SchoolApi from '@/api/school/star'
 import FileForm from './FileForm.vue'
 
@@ -147,7 +156,8 @@ const queryParams = reactive({
   type: '',
   stuName: '',
   grade: undefined,
-  getStarTime: []
+  startTime: undefined,
+  endTime1: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 

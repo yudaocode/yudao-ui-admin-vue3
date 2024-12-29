@@ -42,3 +42,8 @@ export const getStarOverview = async (params) => {
 export const updateFile = (data: any) => {
   return request.upload({ url: '/school/star/import', data })
 }
+
+// 导出采购订单 Excel
+export const exportSixStarOverview = async (params: any) => {
+  return await request.download({ url: `/school/star/export-excel`, params })
+}
