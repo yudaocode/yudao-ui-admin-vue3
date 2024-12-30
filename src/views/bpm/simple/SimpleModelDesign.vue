@@ -4,6 +4,7 @@
       :model-id="modelId" 
       :model-key="modelKey"
       :model-name="modelName"
+      :start-user-ids="startUserIds"
       @success="handleSuccess" 
       ref="designerRef"
     />
@@ -20,6 +21,7 @@ const props = defineProps<{
   modelId?: string
   modelKey?: string
   modelName?: string
+  startUserIds?: number[]
 }>()
 
 const emit = defineEmits(['success'])

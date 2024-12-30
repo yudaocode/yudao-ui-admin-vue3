@@ -54,6 +54,11 @@ const props = defineProps({
   modelName: {
     type: String,
     required: false
+  },
+  // 可发起流程的人员编号
+  startUserIds : {
+    type: Array,
+    required: false
   }
 })
 
@@ -74,6 +79,7 @@ provide('userList', userOptions)
 provide('deptList', deptOptions)
 provide('userGroupList', userGroupOptions)
 provide('deptTree', deptTreeOptions)
+provide('startUserIds', props.startUserIds)
 
 const message = useMessage() // 国际化
 const processNodeTree = ref<SimpleFlowNode | undefined>()
@@ -185,6 +191,7 @@ onMounted(async () => {
         if (formType.value === 10) {
           const bpmnForm = (await getForm(bpmnModel.formId)) as unknown as FormVO
           formFields.value = bpmnForm?.fields
+          console.log('formFields.value', formFields.value)
         }
       }
     }

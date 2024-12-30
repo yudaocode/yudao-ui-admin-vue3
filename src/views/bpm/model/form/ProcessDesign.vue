@@ -19,7 +19,7 @@
       :model-id="modelData.id"
       :model-key="modelData.key"
       :model-name="modelData.name"
-      :value="modelData.bpmnXml"
+      :start-user-ids="modelData.startUserIds"
       ref="simpleEditorRef"
       @success="handleDesignSuccess"
     />

@@ -25,7 +25,20 @@
     </template>
     <el-tabs type="border-card" v-model="activeTabName">
       <el-tab-pane label="权限" name="user">
-        <div> 待实现 </div>
+        <el-text v-if="!startUserIds || startUserIds.length === 0"> 全部成员可以发起流程 </el-text>
+        <el-text v-else-if="startUserIds.length == 1">
+          {{ getUserNicknames(startUserIds) }} 可发起流程
+        </el-text>
+        <el-text v-else>
+          <el-tooltip
+            class="box-item"
+            effect="dark"
+            placement="top"
+            :content="getUserNicknames(startUserIds)"
+          >
+            {{ getUserNicknames(startUserIds.slice(0,2)) }} 等 {{ startUserIds.length }} 人可发起流程
+          </el-tooltip>
+        </el-text>
       </el-tab-pane>
       <el-tab-pane label="表单字段权限" name="fields" v-if="formType === 10">
         <div class="field-setting-pane">
@@ -86,7 +99,7 @@
 <script setup lang="ts">
 import { SimpleFlowNode, NodeType, FieldPermissionType, START_USER_BUTTON_SETTING } from '../consts'
 import { useWatchNode, useDrawer, useNodeName, useFormFieldsPermission } from '../node'
-
+import * as UserApi from '@/api/system/user'
 defineOptions({
   name: 'StartUserNodeConfig'
 })
@@ -96,6 +109,10 @@ const props = defineProps({
     required: true
   }
 })
+// 可发起流程的用户编号
+const startUserIds = inject<Ref<any[]>>('startUserIds')
+// 用户列表
+const userOptions = inject<Ref<UserApi.UserVO[]>>('userList')
 // 抽屉配置
 const { settingVisible, closeDrawer, openDrawer } = useDrawer()
 // 当前节点
@@ -108,12 +125,23 @@ const activeTabName = ref('user')
 const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFieldsPermission(
   FieldPermissionType.WRITE
 )
-
+const getUserNicknames = (userIds: number[]): string => {
+  if (!userIds || userIds.length === 0) {
+    return ''
+  }
+  const nicknames: string[] = []
+  userIds.forEach((userId) => {
+    const found = userOptions?.value.find((item) => item.id === userId)
+    if (found && found.nickname) {
+      nicknames.push(found.nickname)
+    }
+  })
+  return nicknames.join(',')
+}
 // 保存配置
 const saveConfig = async () => {
   activeTabName.value = 'user'
   currentNode.value.name = nodeName.value!
-  // TODO 暂时写死。后续可以显示谁有权限可以发起
   currentNode.value.showText = '已设置'
   // 设置表单权限
   currentNode.value.fieldsPermission = fieldsPermissionConfig.value
