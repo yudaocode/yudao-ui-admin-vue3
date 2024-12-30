@@ -14,8 +14,8 @@
         <el-descriptions-item label="插件名称">
           {{ pluginInfo.name }}
         </el-descriptions-item>
-        <el-descriptions-item label="插件ID">
-          {{ pluginInfo.pluginId }}
+        <el-descriptions-item label="插件标识">
+          {{ pluginInfo.pluginKey }}
         </el-descriptions-item>
         <el-descriptions-item label="版本号">
           {{ pluginInfo.version }}

@@ -52,7 +52,7 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="插件名称" align="center" prop="name" />
-      <el-table-column label="组件id" align="center" prop="pluginId" />
+      <el-table-column label="插件标识" align="center" prop="pluginKey" />
       <el-table-column label="jar包" align="center" prop="file" />
       <el-table-column label="版本号" align="center" prop="version" />
       <el-table-column label="部署方式" align="center" prop="deployType">

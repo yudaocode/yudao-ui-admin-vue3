@@ -3,7 +3,7 @@ import request from '@/config/axios'
 // IoT 插件信息 VO
 export interface PluginInfoVO {
   id: number // 主键ID
-  pluginId: string // 插件包id
+  pluginKey: string // 插件标识
   name: string // 插件名称
   description: string // 描述
   deployType: number // 部署方式
