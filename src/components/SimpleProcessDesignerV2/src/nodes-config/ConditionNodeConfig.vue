@@ -381,7 +381,7 @@ const fieldOptions = computed(() => {
 
 /** 获取字段名称 */
 const getFieldTitle = (field: string) => {
-  const item = fieldsInfo.find((item) => item.field === field)
+  const item = fieldOptions.value.find((item) => item.field === field)
   return item?.title
 }
 

@@ -221,7 +221,7 @@ onBeforeUnmount(() => {
   }
 })
 
-/** 获取XML字符串 */
+/** 获取 XML 字符串 */
 const saveXML = async () => {
   if (!modeler.value) {
     return { xml: xmlString.value }
@@ -273,7 +273,7 @@ defineExpose({
 <style lang="scss">
 .process-panel__container {
   position: absolute;
-  top: 180px;
-  right: 60px;
+  top: 172px;
+  right: 70px;
 }
 </style>

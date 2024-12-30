@@ -79,14 +79,14 @@
 </template>
 
 <script lang="ts" setup>
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useMessage } from '@/hooks/web/useMessage'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import { CategoryApi } from '@/api/bpm/category'
 import * as UserApi from '@/api/system/user'
 import { useUserStoreWithOut } from '@/store/modules/user'
-import { BpmModelType, BpmModelFormType } from '@/utils/constants'
+import { BpmModelFormType, BpmModelType } from '@/utils/constants'
 import BasicInfo from './BasicInfo.vue'
 import FormDesign from './FormDesign.vue'
 import ProcessDesign from './ProcessDesign.vue'
@@ -108,16 +108,17 @@ const validateBasic = async () => {
   await basicInfoRef.value?.validate()
 }
 
+/** 表单设计校验 */
 const validateForm = async () => {
   await formDesignRef.value?.validate()
 }
 
+/** 流程设计校验 */
 const validateProcess = async () => {
   await processDesignRef.value?.validate()
 }
 
-// 步骤控制
-const currentStep = ref(0)
+const currentStep = ref(0) // 步骤控制
 const steps = [
   { title: '基本信息', validator: validateBasic },
   { title: '表单设计', validator: validateForm },
@@ -255,7 +256,6 @@ const handleSave = async () => {
     if (formData.value.id) {
       // 修改场景
       await ModelApi.updateModel(modelData)
-      message.success('修改成功')
       // 询问是否发布流程
       try {
         await message.confirm('修改流程成功，是否发布流程？')
@@ -266,8 +266,7 @@ const handleSave = async () => {
       }
     } else {
       // 新增场景
-      const result = await ModelApi.createModel(modelData)
-      formData.value.id = result
+      formData.value.id = await ModelApi.createModel(modelData)
       message.success('新增成功')
       try {
         await message.confirm('创建流程成功，是否继续编辑？')
@@ -335,7 +334,7 @@ const handleDeploy = async () => {
     await ModelApi.deployModel(formData.value.id)
     message.success('发布成功')
     // 返回列表页
-    router.push({ name: 'BpmModel' })
+    await router.push({ name: 'BpmModel' })
   } catch (error: any) {
     console.error('发布失败:', error)
     message.warning(error.message || '发布失败')

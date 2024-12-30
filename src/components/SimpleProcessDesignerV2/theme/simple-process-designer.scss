@@ -173,13 +173,16 @@
   height: 100%;
   padding-top: 32px;
   background-color: #fafafa;
+  overflow-x: auto;
+  width: 100%;
+
   .simple-process-model {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     transform-origin: 50% 0 0;
-    overflow: auto;
+    min-width: fit-content;
     transform: scale(1);
     transition: transform 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
     background: url(@/assets/svgs/bpm/simple-process-bg.svg) 0 0 repeat;
@@ -473,6 +476,7 @@
       .branch-node-container {
         position: relative;
         display: flex;
+        min-width: fit-content;
 
         &::before {
           position: absolute;
@@ -548,6 +552,7 @@
           background: transparent;
           border-top: 2px solid #dedede;
           border-bottom: 2px solid #dedede;
+          flex-shrink: 0;
 
           &::before {
             position: absolute;
