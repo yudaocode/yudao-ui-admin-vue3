@@ -638,6 +638,17 @@ const remainingRouter: AppRouteRecordRaw[] = [
           activeMenu: '/iot/device'
         },
         component: () => import('@/views/iot/device/device/detail/index.vue')
+      },
+      {
+        path: 'plugin/detail/:id',
+        name: 'IoTPluginDetail',
+        meta: {
+          title: '插件详情',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/iot/plugin'
+        },
+        component: () => import('@/views/iot/plugin/detail/index.vue')
       }
     ]
   }

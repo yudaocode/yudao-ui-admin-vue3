@@ -47,5 +47,15 @@ export const PluginInfoApi = {
   // 导出IoT 插件信息 Excel
   exportPluginInfo: async (params) => {
     return await request.download({ url: `/iot/plugin-info/export-excel`, params })
+  },
+
+  // 修改IoT 插件状态
+  updatePluginStatus: async (data: any) => {
+    return await request.put({ url: `/iot/plugin-info/update-status`, data })
+  },
+
+  // 上传Jar包
+  uploadPluginFile: async (data: any) => {
+    return await request.post({ url: `/iot/plugin-info/upload-file`, data })
   }
 }

@@ -45,25 +45,11 @@
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
-      <!-- 视图切换按钮 -->
-      <el-form-item class="float-right !mr-0 !mb-0">
-        <el-button-group>
-          <el-button :type="viewType === 'card' ? 'primary' : 'default'" @click="viewType = 'card'">
-            <Icon icon="ep:grid" />
-          </el-button>
-          <el-button
-            :type="viewType === 'table' ? 'primary' : 'default'"
-            @click="viewType = 'table'"
-          >
-            <Icon icon="ep:list" />
-          </el-button>
-        </el-button-group>
-      </el-form-item>
     </el-form>
   </ContentWrap>
 
   <!-- 列表 -->
-  <ContentWrap v-if="viewType === 'table'">
+  <ContentWrap>
     <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="插件名称" align="center" prop="name" />
       <el-table-column label="组件id" align="center" prop="pluginId" />
@@ -91,6 +77,14 @@
           <el-button
             link
             type="primary"
+            @click="openDetail(scope.row.id)"
+            v-hasPermi="['iot:product:query']"
+          >
+            查看
+          </el-button>
+          <el-button
+            link
+            type="primary"
             @click="openForm('update', scope.row.id)"
             v-hasPermi="['iot:plugin-info:update']"
           >
@@ -104,67 +98,9 @@
           >
             删除
           </el-button>
-          <el-button
-            link
-            type="info"
-            @click="viewDetail(scope.row.id)"
-          >
-            详情
-          </el-button>
         </template>
       </el-table-column>
     </el-table>
-    <!-- 分页 -->
-    <Pagination
-      :total="total"
-      v-model:page="queryParams.pageNo"
-      v-model:limit="queryParams.pageSize"
-      @pagination="getList"
-    />
-  </ContentWrap>
-
-  <!-- 卡片视图 -->
-  <ContentWrap v-else>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <el-card
-        v-for="item in list"
-        :key="item.pluginId"
-        class="cursor-pointer hover:shadow-lg transition-shadow"
-      >
-        <div class="flex items-center mb-4">
-          <div class="flex-1">
-            <div class="font-bold text-lg">{{ item.name }}</div>
-            <div class="text-gray-500 text-sm">组件ID: {{ item.pluginId }}</div>
-          </div>
-        </div>
-        <div class="text-sm text-gray-500">
-          <div>Jar包: {{ item.file }}</div>
-          <div>版本号: {{ item.version }}</div>
-          <div
-            >部署方式: <dict-tag :type="DICT_TYPE.IOT_PLUGIN_DEPLOY_TYPE" :value="item.deployType"
-          /></div>
-          <div>状态: <dict-tag :type="DICT_TYPE.IOT_PLUGIN_STATUS" :value="item.status" /></div>
-        </div>
-        <div class="flex justify-end mt-4">
-          <el-button
-            link
-            type="primary"
-            @click.stop="openForm('update', item.id)"
-            v-hasPermi="['iot:plugin-info:update']"
-          >
-            编辑
-          </el-button>
-          <el-button
-            link
-            type="danger"
-            @click.stop="handleDelete(item.id)"
-            v-hasPermi="['iot:plugin-info:delete']"
-          >
-            删除
-          </el-button>
-        </div>
-      </el-card>
-    </div>
     <!-- 分页 -->
     <Pagination
       :total="total"
@@ -185,7 +121,7 @@ import { PluginInfoApi, PluginInfoVO } from '@/api/iot/plugininfo'
 import PluginInfoForm from './PluginInfoForm.vue'
 
 /** IoT 插件信息 列表 */
-defineOptions({ name: 'PluginInfo' })
+defineOptions({ name: 'IoTPlugin' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -200,7 +136,6 @@ const queryParams = reactive({
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const viewType = ref<'card' | 'table'>('table') // 视图类型，默认为表格视图
 
 /** 查询列表 */
 const getList = async () => {
@@ -232,6 +167,12 @@ const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
 }
 
+/** 打开详情 */
+const { push } = useRouter()
+const openDetail = (id: number) => {
+  push({ name: 'IoTPluginDetail', params: { id } })
+}
+
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
   try {
@@ -243,11 +184,6 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
-}
-
-/** 查看详情操作 */
-const viewDetail = (id: number) => {
-  router.push({ path: `/iot/plugininfo/detail/${id}` })
 }
 
 /** 初始化 **/
