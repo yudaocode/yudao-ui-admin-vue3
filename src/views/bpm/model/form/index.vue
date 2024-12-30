@@ -177,7 +177,7 @@ const validateAllSteps = async () => {
       currentStep.value = 0
       throw new Error('请完善基本信息')
     }
-    
+
     // 表单设计校验
     await formDesignRef.value?.validate()
     if (formData.value.formType === 10 && !formData.value.formId) {
@@ -191,15 +191,36 @@ const validateAllSteps = async () => {
       currentStep.value = 1
       throw new Error('请完善自定义表单信息')
     }
-    
+
     // 流程设计校验
-    await processDesignRef.value?.validate()
-    const processData = await processDesignRef.value?.getProcessData()
-    if (!processData) {
-      currentStep.value = 2
-      throw new Error('请设计流程')
+    // 如果已经有流程数据，则不需要重新校验
+    if (!formData.value.bpmnXml && !formData.value.simpleModel) {
+      // 如果当前不在第三步，需要先保存当前步骤数据
+      if (currentStep.value !== 2) {
+        await steps[currentStep.value].validator()
+        // 切换到第三步
+        currentStep.value = 2
+        // 等待组件渲染完成
+        await nextTick()
+      }
+
+      // 校验流程设计
+      await processDesignRef.value?.validate()
+      const processData = await processDesignRef.value?.getProcessData()
+      if (!processData) {
+        throw new Error('请设计流程')
+      }
+
+      // 保存流程数据
+      if (formData.value.type === BpmModelType.BPMN) {
+        formData.value.bpmnXml = processData
+        formData.value.simpleModel = null
+      } else {
+        formData.value.bpmnXml = null
+        formData.value.simpleModel = processData
+      }
     }
-    
+
     return true
   } catch (error) {
     throw error
@@ -211,25 +232,26 @@ const handleSave = async () => {
   try {
     // 保存前校验所有步骤的数据
     await validateAllSteps()
-    
-    // 获取最新的流程设计数据
-    const processData = await processDesignRef.value?.getProcessData()
-    if (!processData) {
-      throw new Error('获取流程数据失败')
-    }
 
     // 更新表单数据
     const modelData = {
       ...formData.value
     }
-    if (formData.value.type === BpmModelType.BPMN) {
-      modelData.bpmnXml = processData
-      modelData.simpleModel = null
-    } else {
-      modelData.bpmnXml = null
-      modelData.simpleModel = processData // 直接使用流程数据对象
+
+    // 如果当前在第三步，获取最新的流程设计数据
+    if (currentStep.value === 2) {
+      const processData = await processDesignRef.value?.getProcessData()
+      if (processData) {
+        if (formData.value.type === BpmModelType.BPMN) {
+          modelData.bpmnXml = processData
+          modelData.simpleModel = null
+        } else {
+          modelData.bpmnXml = null
+          modelData.simpleModel = processData
+        }
+      }
     }
-    
+
     if (formData.value.id) {
       // 修改场景
       await ModelApi.updateModel(modelData)
@@ -281,23 +303,24 @@ const handleDeploy = async () => {
 
     // 校验所有步骤
     await validateAllSteps()
-    
-    // 获取最新的流程设计数据
-    const processData = await processDesignRef.value?.getProcessData()
-    if (!processData) {
-      throw new Error('获取流程数据失败')
-    }
 
     // 更新表单数据
     const modelData = {
       ...formData.value
     }
-    if (formData.value.type === BpmModelType.BPMN) {
-      modelData.bpmnXml = processData
-      modelData.simpleModel = null
-    } else {
-      modelData.bpmnXml = null
-      modelData.simpleModel = processData // 直接使用流程数据对象
+
+    // 如果当前在第三步，获取最新的流程设计数据
+    if (currentStep.value === 2) {
+      const processData = await processDesignRef.value?.getProcessData()
+      if (processData) {
+        if (formData.value.type === BpmModelType.BPMN) {
+          modelData.bpmnXml = processData
+          modelData.simpleModel = null
+        } else {
+          modelData.bpmnXml = null
+          modelData.simpleModel = processData
+        }
+      }
     }
 
     // 先保存所有数据
@@ -321,27 +344,51 @@ const handleDeploy = async () => {
 
 /** 步骤切换处理 */
 const handleStepClick = async (index: number) => {
-  // 如果是切换到第三步（流程设计），需要校验key和name
-  if (index === 2) {
-    if (!formData.value.key || !formData.value.name) {
-      message.warning('请先填写流程标识和流程名称')
-      return
-    }
-  }
-
-  // 只有在向后切换时才进行校验
-  if (index > currentStep.value) {
-    try {
-      if (typeof steps[currentStep.value].validator === 'function') {
-        await steps[currentStep.value].validator()
+  try {
+    // 如果是切换到第三步（流程设计），需要校验key和name
+    if (index === 2) {
+      if (!formData.value.key || !formData.value.name) {
+        message.warning('请先填写流程标识和流程名称')
+        return
       }
-      currentStep.value = index
-    } catch (error) {
-      message.warning('请先完善当前步骤必填信息')
     }
-  } else {
-    // 向前切换时直接切换
+
+    // 保存当前步骤的数据
+    if (currentStep.value === 2) {
+      const processData = await processDesignRef.value?.getProcessData()
+      if (processData) {
+        if (formData.value.type === BpmModelType.BPMN) {
+          formData.value.bpmnXml = processData
+          formData.value.simpleModel = null
+        } else {
+          formData.value.bpmnXml = null
+          formData.value.simpleModel = processData
+        }
+      }
+    } else {
+      // 只有在向后切换时才进行校验
+      if (index > currentStep.value) {
+        if (typeof steps[currentStep.value].validator === 'function') {
+          await steps[currentStep.value].validator()
+        }
+      }
+    }
+
+    // 切换步骤
     currentStep.value = index
+
+    // 如果切换到流程设计步骤，等待组件渲染完成后刷新设计器
+    if (index === 2) {
+      await nextTick()
+      // 等待更长时间确保组件完全初始化
+      await new Promise(resolve => setTimeout(resolve, 200))
+      if (processDesignRef.value?.refresh) {
+        await processDesignRef.value.refresh()
+      }
+    }
+  } catch (error) {
+    console.error('步骤切换失败:', error)
+    message.warning('请先完善当前步骤必填信息')
   }
 }
 
