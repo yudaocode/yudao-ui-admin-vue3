@@ -54,6 +54,15 @@ const props = defineProps({
   modelName: {
     type: String,
     required: false
+  },
+  // 可发起流程的人员编号
+  startUserIds : {
+    type: Array,
+    required: false
+  },
+  value: {
+    type: [String, Object],
+    required: false
   }
 })
 
@@ -66,6 +75,10 @@ const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const deptOptions = ref<DeptApi.DeptVO[]>([]) // 部门列表
 const deptTreeOptions = ref()
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
+
+// 添加当前值的引用
+const currentValue = ref<SimpleFlowNode | undefined>()
+
 provide('formFields', formFields)
 provide('formType', formType)
 provide('roleList', roleOptions)
@@ -74,6 +87,7 @@ provide('userList', userOptions)
 provide('deptList', deptOptions)
 provide('userGroupList', userGroupOptions)
 provide('deptTree', deptTreeOptions)
+provide('startUserIds', props.startUserIds)
 
 const message = useMessage() // 国际化
 const processNodeTree = ref<SimpleFlowNode | undefined>()
@@ -81,10 +95,10 @@ const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
 
 // 添加更新模型的方法
-const updateModel = (key?: string, name?: string) => {
+const updateModel = () => {
   if (!processNodeTree.value) {
     processNodeTree.value = {
-      name: name || '发起人',
+      name: '发起人',
       type: NodeType.START_USER_NODE,
       id: NodeId.START_USER_NODE_ID,
       childNode: {
@@ -93,45 +107,78 @@ const updateModel = (key?: string, name?: string) => {
         type: NodeType.END_EVENT_NODE
       }
     }
-  } else if (name) {
-    // 更新现有模型的名称
-    processNodeTree.value.name = name
+    // 初始化时也触发一次保存
+    saveSimpleFlowModel(processNodeTree.value)
+  }
+}
+
+// 加载流程数据
+const loadProcessData = async (data: any) => {
+  try {
+    if (data) {
+      const parsedData = typeof data === 'string' ? JSON.parse(data) : data
+      processNodeTree.value = parsedData
+      currentValue.value = parsedData
+      // 确保数据加载后刷新视图
+      await nextTick()
+      if (simpleProcessModelRef.value?.refresh) {
+        await simpleProcessModelRef.value.refresh()
+      }
+    }
+  } catch (error) {
+    console.error('加载流程数据失败:', error)
   }
 }
 
 // 监听属性变化
-watch([() => props.modelKey, () => props.modelName], ([newKey, newName]) => {
-  if (!props.modelId && newKey && newName) {
-    updateModel(newKey, newName)
-  }
-}, { immediate: true, deep: true })
+watch(
+  () => props.value,
+  async (newValue, oldValue) => {
+    if (newValue && newValue !== oldValue) {
+      await loadProcessData(newValue)
+    }
+  },
+  { immediate: true, deep: true }
+)
+
+// 监听流程节点树变化，自动保存
+watch(
+  () => processNodeTree.value,
+  async (newValue, oldValue) => {
+    if (newValue && oldValue && JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
+      await saveSimpleFlowModel(newValue)
+    }
+  },
+  { deep: true }
+)
 
 const saveSimpleFlowModel = async (simpleModelNode: SimpleFlowNode) => {
   if (!simpleModelNode) {
-    message.error('模型数据为空')
     return
   }
+
+  // 校验节点
+  errorNodes = []
+  validateNode(simpleModelNode, errorNodes)
+  if (errorNodes.length > 0) {
+    errorDialogVisible.value = true
+    return
+  }
+
   try {
-    loading.value = true
     if (props.modelId) {
       // 编辑模式
       const data = {
         id: props.modelId,
         simpleModel: simpleModelNode
       }
-      const result = await updateBpmSimpleModel(data)
-      if (result) {
-        message.success('修改成功')
-        emits('success')
-      } else {
-        message.alert('修改失败')
-      }
-    } else {
-      // 新建模式，直接返回数据
-      emits('success', simpleModelNode)
+      await updateBpmSimpleModel(data)
     }
-  } finally {
-    loading.value = false
+    // 无论是编辑还是新建模式，都更新当前值并触发事件
+    currentValue.value = simpleModelNode
+    emits('success', simpleModelNode)
+  } catch (error) {
+    console.error('保存失败:', error)
   }
 }
 
@@ -196,31 +243,23 @@ onMounted(async () => {
     userOptions.value = await UserApi.getSimpleUserList()
     // 获得部门列表
     deptOptions.value = await DeptApi.getSimpleDeptList()
-
     deptTreeOptions.value = handleTree(deptOptions.value as DeptApi.DeptVO[], 'id')
     // 获取用户组列表
     userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
 
+    // 加载流程数据
     if (props.modelId) {
-      //获取 SIMPLE 设计器模型
+      // 获取 SIMPLE 设计器模型
       const result = await getBpmSimpleModel(props.modelId)
       if (result) {
-        processNodeTree.value = result
+        await loadProcessData(result)
+      } else {
+        updateModel()
       }
-    }
-    
-    // 如果没有现有模型，创建初始模型
-    if (!processNodeTree.value) {
-      processNodeTree.value = {
-        name: props.modelName || '发起人',
-        type: NodeType.START_USER_NODE,
-        id: NodeId.START_USER_NODE_ID,
-        childNode: {
-          id: NodeId.END_EVENT_NODE_ID,
-          name: '结束',
-          type: NodeType.END_EVENT_NODE
-        }
-      }
+    } else if (props.value) {
+      await loadProcessData(props.value)
+    } else {
+      updateModel()
     }
   } finally {
     loading.value = false
@@ -231,14 +270,36 @@ const simpleProcessModelRef = ref()
 
 /** 获取当前流程数据 */
 const getCurrentFlowData = async () => {
-  if (simpleProcessModelRef.value) {
-    return await simpleProcessModelRef.value.getCurrentFlowData()
+  try {
+    if (simpleProcessModelRef.value) {
+      const data = await simpleProcessModelRef.value.getCurrentFlowData()
+      if (data) {
+        currentValue.value = data
+        return data
+      }
+    }
+    return currentValue.value
+  } catch (error) {
+    console.error('获取流程数据失败:', error)
+    return currentValue.value
   }
-  return undefined
+}
+
+// 刷新方法
+const refresh = async () => {
+  try {
+    if (currentValue.value) {
+      await loadProcessData(currentValue.value)
+    }
+  } catch (error) {
+    console.error('刷新失败:', error)
+  }
 }
 
 defineExpose({
   getCurrentFlowData,
-  updateModel
+  updateModel,
+  loadProcessData,
+  refresh
 })
 </script>

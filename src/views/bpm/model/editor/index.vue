@@ -39,9 +39,10 @@ const props = defineProps<{
   modelId?: string
   modelKey?: string
   modelName?: string
+  value?: string
 }>()
 
-const emit = defineEmits(['success'])
+const emit = defineEmits(['success', 'init-finished'])
 const message = useMessage() // 国际化
 
 // 表单信息
@@ -98,8 +99,35 @@ const initModeler = async (item) => {
     // 确保 modeler 的所有实例都已经准备好
     if (initBpmnInstances()) {
       isModelerReady.value = true
-      if (!props.modelId && props.modelKey && props.modelName) {
-        await updateModelData(props.modelKey, props.modelName)
+      emit('init-finished')
+
+      // 初始化完成后，设置初始值
+      if (props.modelId) {
+        // 编辑模式
+        const data = await ModelApi.getModel(props.modelId)
+        model.value = {
+          ...data,
+          bpmnXml: undefined // 清空 bpmnXml 属性
+        }
+        xmlString.value = data.bpmnXml || getDefaultBpmnXml(data.key, data.name)
+      } else if (props.modelKey && props.modelName) {
+        // 新建模式
+        xmlString.value = props.value || getDefaultBpmnXml(props.modelKey, props.modelName)
+        model.value = {
+          key: props.modelKey,
+          name: props.modelName
+        } as ModelApi.ModelVO
+      }
+
+      // 导入XML并刷新视图
+      await nextTick()
+      try {
+        await modeler.value.importXML(xmlString.value)
+        if (processDesigner.value?.refresh) {
+          processDesigner.value.refresh()
+        }
+      } catch (error) {
+        console.error('导入XML失败:', error)
       }
     } else {
       console.error('modeler 实例未完全初始化')
@@ -123,6 +151,7 @@ const getDefaultBpmnXml = (key: string, name: string) => {
 /** 添加/修改模型 */
 const save = async (bpmnXml: string) => {
   try {
+    xmlString.value = bpmnXml
     if (props.modelId) {
       // 编辑模式
       const data = {
@@ -141,58 +170,44 @@ const save = async (bpmnXml: string) => {
   }
 }
 
-/** 初始化 */
-onMounted(async () => {
-  try {
-    if (props.modelId) {
-      // 编辑模式
-      // 查询模型
-      const data = await ModelApi.getModel(props.modelId)
-      model.value = {
-        ...data,
-        bpmnXml: undefined // 清空 bpmnXml 属性
-      }
-      xmlString.value = data.bpmnXml || getDefaultBpmnXml(data.key, data.name)
-    } else if (props.modelKey && props.modelName) {
-      // 新建模式
-      xmlString.value = getDefaultBpmnXml(props.modelKey, props.modelName)
-      model.value = {
-        key: props.modelKey,
-        name: props.modelName
-      } as ModelApi.ModelVO
-    }
-  } catch (error) {
-    console.error('初始化失败:', error)
-    message.error('初始化失败')
-  }
-})
-
-/** 更新模型数据 */
-const updateModelData = async (key?: string, name?: string) => {
-  if (key && name) {
-    xmlString.value = getDefaultBpmnXml(key, name)
-    model.value = {
-      ...model.value,
-      key: key,
-      name: name
-    } as ModelApi.ModelVO
-    // 确保更新后重新渲染
-    await nextTick()
-    if (processDesigner.value?.refresh) {
-      processDesigner.value.refresh()
-    }
-  }
-}
-
-// 监听 key 和 name 的变化
+// 监听 key、name 和 value 的变化
 watch(
-  [() => props.modelKey, () => props.modelName],
-  async ([newKey, newName]) => {
-    if (!props.modelId && newKey && newName && modeler.value) {
-      await updateModelData(newKey, newName)
+  [() => props.modelKey, () => props.modelName, () => props.value],
+  async ([newKey, newName, newValue]) => {
+    if (!props.modelId && isModelerReady.value) {
+      let shouldRefresh = false
+
+      if (newKey && newName) {
+        const newXml = newValue || getDefaultBpmnXml(newKey, newName)
+        if (newXml !== xmlString.value) {
+          xmlString.value = newXml
+          shouldRefresh = true
+        }
+        model.value = {
+          ...model.value,
+          key: newKey,
+          name: newName
+        } as ModelApi.ModelVO
+      } else if (newValue && newValue !== xmlString.value) {
+        xmlString.value = newValue
+        shouldRefresh = true
+      }
+
+      if (shouldRefresh) {
+        // 确保更新后重新渲染
+        await nextTick()
+        if (processDesigner.value?.refresh) {
+          try {
+            await modeler.value?.importXML(xmlString.value)
+            processDesigner.value.refresh()
+          } catch (error) {
+            console.error('导入XML失败:', error)
+          }
+        }
+      }
     }
   },
-  { immediate: true, deep: true }
+  { deep: true }
 )
 
 // 在组件卸载时清理
@@ -209,13 +224,15 @@ onBeforeUnmount(() => {
 /** 获取 XML 字符串 */
 const saveXML = async () => {
   if (!modeler.value) {
-    return { xml: undefined }
+    return { xml: xmlString.value }
   }
   try {
-    return await modeler.value.saveXML({ format: true })
+    const result = await modeler.value.saveXML({ format: true })
+    xmlString.value = result.xml
+    return result
   } catch (error) {
     console.error('获取XML失败:', error)
-    return { xml: undefined }
+    return { xml: xmlString.value }
   }
 }
 
@@ -233,9 +250,14 @@ const saveSVG = async () => {
 }
 
 /** 刷新视图 */
-const refresh = () => {
-  if (processDesigner.value?.refresh) {
-    processDesigner.value.refresh()
+const refresh = async () => {
+  if (processDesigner.value?.refresh && modeler.value) {
+    try {
+      await modeler.value.importXML(xmlString.value)
+      processDesigner.value.refresh()
+    } catch (error) {
+      console.error('刷新视图失败:', error)
+    }
   }
 }
 
