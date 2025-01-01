@@ -33,6 +33,16 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item class="float-right !mr-0 !mb-0">
+        <el-button-group>
+          <el-button :type="viewMode === 'card' ? 'primary' : 'default'" @click="viewMode = 'card'">
+            <Icon icon="ep:grid" />
+          </el-button>
+          <el-button :type="viewMode === 'list' ? 'primary' : 'default'" @click="viewMode = 'list'">
+            <Icon icon="ep:list" />
+          </el-button>
+        </el-button-group>
+      </el-form-item>
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
@@ -50,57 +60,154 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-      <el-table-column label="插件名称" align="center" prop="name" />
-      <el-table-column label="插件标识" align="center" prop="pluginKey" />
-      <el-table-column label="jar包" align="center" prop="file" />
-      <el-table-column label="版本号" align="center" prop="version" />
-      <el-table-column label="部署方式" align="center" prop="deployType">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.IOT_PLUGIN_DEPLOY_TYPE" :value="scope.row.deployType" />
-        </template>
-      </el-table-column>
-      <el-table-column label="状态" align="center" prop="status">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.IOT_PLUGIN_STATUS" :value="scope.row.status" />
-        </template>
-      </el-table-column>
-      <el-table-column
-        label="创建时间"
-        align="center"
-        prop="createTime"
-        :formatter="dateFormatter"
-        width="180px"
-      />
-      <el-table-column label="操作" align="center" min-width="120px">
-        <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openDetail(scope.row.id)"
-            v-hasPermi="['iot:product:query']"
+    <template v-if="viewMode === 'list'">
+      <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
+        <el-table-column label="插件名称" align="center" prop="name" />
+        <el-table-column label="插件标识" align="center" prop="pluginKey" />
+        <el-table-column label="jar包" align="center" prop="file" />
+        <el-table-column label="版本号" align="center" prop="version" />
+        <el-table-column label="部署方式" align="center" prop="deployType">
+          <template #default="scope">
+            <dict-tag :type="DICT_TYPE.IOT_PLUGIN_DEPLOY_TYPE" :value="scope.row.deployType" />
+          </template>
+        </el-table-column>
+        <el-table-column label="状态" align="center" prop="status">
+          <template #default="scope">
+            <el-switch
+              v-model="scope.row.status"
+              :active-value="1"
+              :inactive-value="0"
+              @change="handleStatusChange(scope.row.id, Number($event))"
+            />
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="创建时间"
+          align="center"
+          prop="createTime"
+          :formatter="dateFormatter"
+          width="180px"
+        />
+        <el-table-column label="操作" align="center" min-width="120px">
+          <template #default="scope">
+            <el-button
+              link
+              type="primary"
+              @click="openDetail(scope.row.id)"
+              v-hasPermi="['iot:product:query']"
+            >
+              查看
+            </el-button>
+            <el-button
+              link
+              type="primary"
+              @click="openForm('update', scope.row.id)"
+              v-hasPermi="['iot:plugin-info:update']"
+            >
+              编辑
+            </el-button>
+            <el-button
+              link
+              type="danger"
+              @click="handleDelete(scope.row.id)"
+              v-hasPermi="['iot:plugin-info:delete']"
+            >
+              删除
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </template>
+    <template v-if="viewMode === 'card'">
+      <el-row :gutter="16">
+        <el-col v-for="item in list" :key="item.id" :xs="24" :sm="12" :md="12" :lg="6" class="mb-4">
+          <el-card
+            class="h-full transition-colors relative overflow-hidden"
+            :body-style="{ padding: '0' }"
           >
-            查看
-          </el-button>
-          <el-button
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-            v-hasPermi="['iot:plugin-info:update']"
-          >
-            编辑
-          </el-button>
-          <el-button
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-            v-hasPermi="['iot:plugin-info:delete']"
-          >
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+            <div class="p-4 relative">
+              <!-- 标题区域 -->
+              <div class="flex items-center mb-3">
+                <div class="mr-2.5 flex items-center">
+                  <el-image :src="defaultIconUrl" class="w-[18px] h-[18px]" />
+                </div>
+                <div class="text-[16px] font-600 flex-1">{{ item.name }}</div>
+              </div>
+
+              <!-- 信息区域 -->
+              <div class="flex items-center text-[14px]">
+                <div class="flex-1">
+                  <div class="mb-2.5 last:mb-0">
+                    <span class="text-[#717c8e] mr-2.5">插件标识</span>
+                    <span class="text-[#0b1d30] whitespace-normal break-all">{{
+                      item.pluginKey
+                    }}</span>
+                  </div>
+                  <div class="mb-2.5 last:mb-0">
+                    <span class="text-[#717c8e] mr-2.5">jar包</span>
+                    <span class="text-[#0b1d30]">{{ item.fileName }}</span>
+                  </div>
+                  <div class="mb-2.5 last:mb-0">
+                    <span class="text-[#717c8e] mr-2.5">版本号</span>
+                    <span class="text-[#0b1d30]">{{ item.version }}</span>
+                  </div>
+                  <div class="mb-2.5 last:mb-0">
+                    <span class="text-[#717c8e] mr-2.5">部署方式</span>
+                    <dict-tag :type="DICT_TYPE.IOT_PLUGIN_DEPLOY_TYPE" :value="item.deployType" />
+                  </div>
+                  <div class="mb-2.5 last:mb-0">
+                    <span class="text-[#717c8e] mr-2.5">状态</span>
+                    <el-switch
+                      v-model="item.status"
+                      :active-value="1"
+                      :inactive-value="0"
+                      @change="handleStatusChange(item.id, Number($event))"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- 分隔线 -->
+              <el-divider class="!my-3" />
+
+              <!-- 按钮 -->
+              <div class="flex items-center px-0">
+                <el-button
+                  class="flex-1 !px-2 !h-[32px] text-[13px]"
+                  type="primary"
+                  plain
+                  @click="openForm('update', item.id)"
+                  v-hasPermi="['iot:plugin-info:update']"
+                >
+                  <Icon icon="ep:edit-pen" class="mr-1" />
+                  编辑
+                </el-button>
+                <el-button
+                  class="flex-1 !px-2 !h-[32px] !ml-[10px] text-[13px]"
+                  type="warning"
+                  plain
+                  @click="openDetail(item.id)"
+                >
+                  <Icon icon="ep:view" class="mr-1" />
+                  详情
+                </el-button>
+                <div class="mx-[10px] h-[20px] w-[1px] bg-[#dcdfe6]"></div>
+                <el-button
+                  class="!px-2 !h-[32px] text-[13px]"
+                  type="danger"
+                  plain
+                  @click="handleDelete(item.id)"
+                  v-hasPermi="['iot:device:delete']"
+                >
+                  <Icon icon="ep:delete" />
+                </el-button>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </template>
+
     <!-- 分页 -->
     <Pagination
       :total="total"
@@ -136,6 +243,8 @@ const queryParams = reactive({
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
+const defaultIconUrl = ref('/src/assets/svgs/iot/card-fill.svg') // 默认插件图标
+const viewMode = ref<'card' | 'list'>('card') // 视图模式状态
 
 /** 查询列表 */
 const getList = async () => {
@@ -184,6 +293,23 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 处理状态变更 */
+const handleStatusChange = async (id: number, status: number) => {
+  try {
+    // 修改状态的二次确认
+    const text = status === 1 ? '启用' : '停用'
+    await message.confirm('确认要"' + text + '"插件吗?')
+    await PluginInfoApi.updatePluginStatus({
+      id: id,
+      status
+    })
+    message.success('更新状态成功')
+    getList()
+  } catch (error) {
+    message.error('更新状态失败')
+  }
 }
 
 /** 初始化 **/

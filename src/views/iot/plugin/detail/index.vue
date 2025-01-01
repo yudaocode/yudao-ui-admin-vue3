@@ -55,7 +55,21 @@ import PluginImportForm from './PluginImportForm.vue'
 
 const message = useMessage()
 const route = useRoute()
-const pluginInfo = ref<PluginInfoVO>({})
+const pluginInfo = ref<PluginInfoVO>({
+  id: 0,
+  pluginKey: '',
+  name: '',
+  description: '',
+  version: '',
+  status: 0,
+  deployType: 0,
+  fileName: '',
+  type: 0,
+  protocol: '',
+  configSchema: '',
+  config: '',
+  script: ''
+})
 const isInitialLoad = ref(true) // 初始化标志位
 
 onMounted(() => {

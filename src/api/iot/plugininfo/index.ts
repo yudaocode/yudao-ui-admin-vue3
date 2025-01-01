@@ -7,7 +7,7 @@ export interface PluginInfoVO {
   name: string // 插件名称
   description: string // 描述
   deployType: number // 部署方式
-  file: string // 插件包文件名
+  fileName: string // 插件包文件名
   version: string // 插件版本
   type: number // 插件类型
   protocol: string // 设备插件协议类型
