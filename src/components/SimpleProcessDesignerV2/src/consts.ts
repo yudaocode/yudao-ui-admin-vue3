@@ -26,7 +26,7 @@ export enum NodeType {
   /**
    * 延迟器节点
    */
-  DELAY_TIMER_NODE = 13,
+  DELAY_TIMER_NODE = 14,
 
   /**
    * 条件节点
@@ -602,5 +602,5 @@ export enum DelayTypeEnum {
 }
 export const DELAY_TYPE = [
   { label: '固定时长', value: DelayTypeEnum.FIXED_TIME_DURATION },
-  { label: '固定日期时间', value: DelayTypeEnum.FIXED_DATE_TIME }
+  { label: '固定日期', value: DelayTypeEnum.FIXED_DATE_TIME }
 ]
