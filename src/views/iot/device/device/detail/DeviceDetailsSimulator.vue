@@ -10,16 +10,83 @@
               <!-- 属性上报 -->
               <el-tab-pane label="属性上报" name="property">
                 <ContentWrap>
-                  <el-table v-loading="loading" :data="propertyList" :stripe="true">
+                  <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
                     <el-table-column label="值" align="center" width="80">
                       <template #default="scope">
                         <el-input v-model="scope.row.value" class="!w-60px" />
                       </template>
                     </el-table-column>
-                    <el-table-column label="功能名称" align="center" prop="name" />
-                    <el-table-column label="标识符" align="center" prop="identifier" />
-                    <el-table-column label="数据类型" align="center" prop="dataType" />
-                    <el-table-column label="数据定义" align="center" prop="specs" :show-overflow-tooltip="true" />
+                    <el-table-column align="center" label="功能名称" prop="name" />
+                    <el-table-column align="center" label="标识符" prop="identifier" />
+                    <el-table-column align="center" label="数据类型" prop="identifier">
+                      <template #default="{ row }">
+                        {{ dataTypeOptionsLabel(row.property?.dataType) ?? '-' }}
+                      </template>
+                    </el-table-column>
+                    <el-table-column align="left" label="数据定义" prop="identifier">
+                      <template #default="{ row }">
+                        <!-- 属性 -->
+                        <template v-if="row.type === ThingModelType.PROPERTY">
+                          <!-- 非列表型：数值 -->
+                          <div
+                            v-if="
+                              [
+                                DataSpecsDataType.INT,
+                                DataSpecsDataType.DOUBLE,
+                                DataSpecsDataType.FLOAT
+                              ].includes(row.property.dataType)
+                            "
+                          >
+                            取值范围：{{
+                              `${row.property.dataSpecs.min}~${row.property.dataSpecs.max}`
+                            }}
+                          </div>
+                          <!-- 非列表型：文本 -->
+                          <div v-if="DataSpecsDataType.TEXT === row.property.dataType">
+                            数据长度：{{ row.property.dataSpecs.length }}
+                          </div>
+                          <!-- 列表型: 数组、结构、时间（特殊） -->
+                          <div
+                            v-if="
+                              [
+                                DataSpecsDataType.ARRAY,
+                                DataSpecsDataType.STRUCT,
+                                DataSpecsDataType.DATE
+                              ].includes(row.property.dataType)
+                            "
+                          >
+                            -
+                          </div>
+                          <!-- 列表型: 布尔值、枚举 -->
+                          <div
+                            v-if="
+                              [DataSpecsDataType.BOOL, DataSpecsDataType.ENUM].includes(
+                                row.property.dataType
+                              )
+                            "
+                          >
+                            <div>
+                              {{
+                                DataSpecsDataType.BOOL === row.property.dataType
+                                  ? '布尔值'
+                                  : '枚举值'
+                              }}：
+                            </div>
+                            <div v-for="item in row.property.dataSpecsList" :key="item.value">
+                              {{ `${item.name}-${item.value}` }}
+                            </div>
+                          </div>
+                        </template>
+                        <!-- 服务 -->
+                        <div v-if="row.type === ThingModelType.SERVICE">
+                          调用方式：{{ getCallTypeByValue(row.service.callType) }}
+                        </div>
+                        <!-- 事件 -->
+                        <div v-if="row.type === ThingModelType.EVENT">
+                          事件类型：{{ getEventTypeByValue(row.event.type) }}
+                        </div>
+                      </template>
+                    </el-table-column>
                   </el-table>
                   <div class="mt-10px">
                     <el-button type="primary" @click="handlePropertyReport">发送</el-button>
@@ -39,7 +106,12 @@
                     <el-table-column label="功能名称" align="center" prop="name" />
                     <el-table-column label="标识符" align="center" prop="identifier" />
                     <el-table-column label="数据类型" align="center" prop="dataType" />
-                    <el-table-column label="数据定义" align="center" prop="specs" :show-overflow-tooltip="true" />
+                    <el-table-column
+                      label="数据定义"
+                      align="center"
+                      prop="specs"
+                      :show-overflow-tooltip="true"
+                    />
                   </el-table>
                   <div class="mt-10px">
                     <el-button type="primary" @click="handleEventReport">发送</el-button>
@@ -51,8 +123,12 @@
               <el-tab-pane label="状态变更" name="status">
                 <ContentWrap>
                   <div class="flex gap-4">
-                    <el-button type="primary" @click="handleDeviceState('online')">设备上线</el-button>
-                    <el-button type="primary" @click="handleDeviceState('offline')">设备下线</el-button>
+                    <el-button type="primary" @click="handleDeviceState('online')"
+                      >设备上线</el-button
+                    >
+                    <el-button type="primary" @click="handleDeviceState('offline')"
+                      >设备下线</el-button
+                    >
                   </div>
                 </ContentWrap>
               </el-tab-pane>
@@ -74,7 +150,12 @@
                     <el-table-column label="功能名称" align="center" prop="name" />
                     <el-table-column label="标识符" align="center" prop="identifier" />
                     <el-table-column label="数据类型" align="center" prop="dataType" />
-                    <el-table-column label="数据定义" align="center" prop="specs" :show-overflow-tooltip="true" />
+                    <el-table-column
+                      label="数据定义"
+                      align="center"
+                      prop="specs"
+                      :show-overflow-tooltip="true"
+                    />
                   </el-table>
                   <div class="mt-10px">
                     <el-button type="primary" @click="handlePropertyGet">获取</el-button>
@@ -107,15 +188,44 @@
 
 <script setup lang="ts">
 import { ProductVO } from '@/api/iot/product/product'
+import { ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
 import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
 import DeviceDetailsLog from './DeviceDetailsLog.vue'
+import {
+  DataSpecsDataType,
+  getCallTypeByValue,
+  getDataTypeOptionsLabel,
+  getEventTypeByValue,
+  ThingModelType
+} from '@/views/iot/thingmodel/config'
 
 const message = useMessage() // 消息弹窗
 const loading = ref(false)
 const activeTab = ref('up')
 const subTab = ref('property')
 
+const queryParams = reactive({
+  type: undefined,
+  productId: -1
+})
+const dataTypeOptionsLabel = computed(() => (value: string) => getDataTypeOptionsLabel(value)) // 解析数据类型
 const props = defineProps<{ product: ProductVO; device: DeviceVO }>()
+const list = ref<ThingModelData[]>([]) // 物模型列表的数据
+
+/** 查询列表 */
+const getList = async () => {
+  loading.value = true
+  try {
+    queryParams.productId = props.product?.id || -1
+    const data = await ThingModelApi.getThingModelList(queryParams)
+    list.value = data
+    console.log(data)
+    console.log(list.value)
+    console.log(queryParams)
+  } finally {
+    loading.value = false
+  }
+}
 
 // 功能列表数据结构定义
 interface TableItem {
@@ -126,40 +236,62 @@ interface TableItem {
   value: string | number
 }
 
-// 属性列表数据
-const propertyList = ref<TableItem[]>([
-  {
-    name: '电量',
-    identifier: 'power',
-    dataType: 'int32',
-    specs: '',
-    value: ''
-  },
-  {
-    name: '设备型号',
-    identifier: 'DeviceType',
-    dataType: 'text',
-    specs: '{ "length": "128" }',
-    value: ''
-  },
-  {
-    name: '信号强度',
-    identifier: 'rssi',
-    dataType: 'int32',
-    specs: '{ "min": "-127", "max": "127" }',
-    value: ''
-  },
-  {
-    name: '门状态',
-    identifier: 'doorStatus',
-    dataType: 'enum',
-    specs: '{ "0": "关", "1": "开" }',
-    value: ''
-  }
-])
+// 添加计算属性来过滤物模型数据
+const propertyList = computed(() => {
+  return list.value
+    .filter((item) => item.type === 'property')
+    .map((item) => ({
+      name: item.name,
+      identifier: item.identifier,
+      dataType: item.dataType,
+      specs: item.specs,
+      value: ''
+    }))
+})
 
-// 事件列表数据
-const eventList = ref<TableItem[]>([])
+const eventList = computed(() => {
+  return list.value
+    .filter((item) => item.type === 'event')
+    .map((item) => ({
+      name: item.name,
+      identifier: item.identifier,
+      dataType: item.dataType,
+      specs: item.specs,
+      value: ''
+    }))
+})
+
+// 监听标签页变化 todo:后续改成查询字典
+watch(
+  [activeTab, subTab],
+  ([newActiveTab, newSubTab]) => {
+    // 根据标签页设置查询类型
+    if (newActiveTab === 'up') {
+      switch (newSubTab) {
+        case 'property':
+          queryParams.type = 1
+          break
+        case 'event':
+          queryParams.type = 3
+          break
+        // case 'status':
+        //   queryParams.type = 'status'
+        //   break
+      }
+    } else if (newActiveTab === 'down') {
+      switch (newSubTab) {
+        case 'propertyDebug':
+          queryParams.type = 1
+          break
+        case 'service':
+          queryParams.type = 2
+          break
+      }
+    }
+    getList() // 切换标签时重新获取数据
+  },
+  { immediate: true }
+)
 
 // 处理属性上报
 const handlePropertyReport = async () => {
@@ -187,6 +319,6 @@ const handlePropertyGet = async () => {
 
 // 初始化
 onMounted(() => {
-  // TODO: 获取初始数据
+  getList()
 })
 </script>

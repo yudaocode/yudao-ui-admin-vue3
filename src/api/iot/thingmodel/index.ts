@@ -45,6 +45,11 @@ export const ThingModelApi = {
     return await request.get({ url: `/iot/thing-model/page`, params })
   },
 
+  // 获得产品物模型列表
+  getThingModelList: async (params: any) => {
+    return await request.get({ url: `/iot/thing-model/list`, params })
+  },
+
   // 获得产品物模型
   getThingModelListByProductId: async (params: any) => {
     return await request.get({
