@@ -63,7 +63,7 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <div style="width: 100%; height: 700px">
+    <div style="height: 700px">
       <!-- AutoResizer 自动调节大小 -->
       <el-auto-resizer>
         <template #default="{ height, width }">
@@ -123,27 +123,27 @@ const columns: Column[] = [
   {
     dataKey: 'sort',
     title: '排序',
-    width: 60
+    width: 100
   },
   {
     dataKey: 'permission',
     title: '权限标识',
-    width: 180
+    width: 240
   },
   {
     dataKey: 'component',
     title: '组件路径',
-    width: 180
+    width: 240
   },
   {
     dataKey: 'componentName',
     title: '组件名称',
-    width: 180
+    width: 240
   },
   {
     dataKey: 'status',
     title: '状态',
-    width: 120,
+    width: 160,
     cellRenderer: ({ rowData }) => {
       return h(ElSwitch, {
         modelValue: rowData.status,
