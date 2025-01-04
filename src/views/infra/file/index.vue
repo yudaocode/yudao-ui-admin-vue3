@@ -95,11 +95,7 @@
       />
       <el-table-column label="操作" align="center">
         <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="copyToClipboard(scope.row.url)"
-          >
+          <el-button link type="primary" @click="copyToClipboard(scope.row.url)">
             复制链接
           </el-button>
           <el-button
