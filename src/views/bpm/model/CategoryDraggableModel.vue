@@ -64,6 +64,7 @@
       </div>
     </div>
   </div>
+
   <!-- 模型列表 -->
   <el-collapse-transition>
     <div v-show="isExpand">
@@ -90,7 +91,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="可见范围" prop="startUserIds" min-width="100">
+        <el-table-column label="可见范围" prop="startUserIds" min-width="150">
           <template #default="scope">
             <el-text v-if="!scope.row.startUsers || scope.row.startUsers.length === 0">
               全部可见
@@ -110,7 +111,7 @@
             </el-text>
           </template>
         </el-table-column>
-        <el-table-column label="表单信息" prop="formType" min-width="200">
+        <el-table-column label="表单信息" prop="formType" min-width="150">
           <template #default="scope">
             <el-button
               v-if="scope.row.formType === BpmModelFormType.NORMAL"
@@ -161,16 +162,6 @@
               :disabled="!isManagerUser(scope.row)"
             >
               修改
-            </el-button>
-            <el-button
-              link
-              class="!ml-5px"
-              type="primary"
-              @click="handleDesign(scope.row)"
-              v-hasPermi="['bpm:model:update']"
-              :disabled="!isManagerUser(scope.row)"
-            >
-              设计
             </el-button>
             <el-button
               link
@@ -335,14 +326,6 @@ const handleChangeState = async (row: any) => {
     // 刷新列表
     emit('success')
   } catch {}
-}
-
-/** 设计流程 */
-const handleDesign = (row: any) => {
-  push({
-    name: 'BpmModelUpdate',
-    params: { id: row.id }
-  })
 }
 
 /** 发布流程 */

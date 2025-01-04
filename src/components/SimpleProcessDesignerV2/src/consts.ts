@@ -24,6 +24,11 @@ export enum NodeType {
   COPY_TASK_NODE = 12,
 
   /**
+   * 延迟器节点
+   */
+  DELAY_TIMER_NODE = 14,
+
+  /**
    * 条件节点
    */
   CONDITION_NODE = 50,
@@ -98,6 +103,8 @@ export interface SimpleFlowNode {
   defaultFlow?: boolean
   // 活动的状态，用于前端节点状态展示
   activityStatus?: TaskStatusEnum
+  // 延迟设置
+  delaySetting?: DelaySetting
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -413,12 +420,14 @@ NODE_DEFAULT_TEXT.set(NodeType.USER_TASK_NODE, '请配置审批人')
 NODE_DEFAULT_TEXT.set(NodeType.COPY_TASK_NODE, '请配置抄送人')
 NODE_DEFAULT_TEXT.set(NodeType.CONDITION_NODE, '请设置条件')
 NODE_DEFAULT_TEXT.set(NodeType.START_USER_NODE, '请设置发起人')
+NODE_DEFAULT_TEXT.set(NodeType.DELAY_TIMER_NODE, '请设置延迟器')
 
 export const NODE_DEFAULT_NAME = new Map<number, string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
 NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 NODE_DEFAULT_NAME.set(NodeType.START_USER_NODE, '发起人')
+NODE_DEFAULT_NAME.set(NodeType.DELAY_TIMER_NODE, '延迟器')
 
 // 候选人策略。暂时不从字典中取。 后续可能调整。控制显示顺序
 export const CANDIDATE_STRATEGY: DictDataVO[] = [
@@ -568,3 +577,30 @@ export enum ProcessVariableEnum {
    */
   START_USER_ID = 'PROCESS_START_USER_ID'
 }
+
+/**
+ * 延迟设置
+ */
+export type DelaySetting = {
+  // 延迟类型
+  delayType: number
+  // 延迟时间表达式
+  delayTime: string
+}
+/**
+ * 延迟类型
+ */
+export enum DelayTypeEnum {
+  /**
+   * 固定时长
+   */
+  FIXED_TIME_DURATION = 1,
+  /**
+   * 固定日期时间
+   */
+  FIXED_DATE_TIME = 2
+}
+export const DELAY_TYPE = [
+  { label: '固定时长', value: DelayTypeEnum.FIXED_TIME_DURATION },
+  { label: '固定日期', value: DelayTypeEnum.FIXED_DATE_TIME }
+]
