@@ -79,7 +79,12 @@ function remoteMethod(data) {
 
 function handleChange(path) {
   router.push({ path })
+  hiddenSearch()
   hiddenTopSearch()
+}
+
+function hiddenSearch() {
+  showSearch.value = false
 }
 
 function hiddenTopSearch() {
@@ -99,6 +104,8 @@ onUnmounted(() => {
 // 监听 ctrl + k
 function listenKey(event) {
   if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+    // 阻止触发浏览器默认事件
+    event.preventDefault()
     showSearch.value = !showSearch.value
     // 这里可以执行相应的操作（例如打开搜索框等）
   }

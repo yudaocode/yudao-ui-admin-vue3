@@ -14,8 +14,7 @@ import {
   NODE_DEFAULT_NAME,
   AssignStartUserHandlerType,
   AssignEmptyHandlerType,
-  FieldPermissionType,
-  ProcessVariableEnum
+  FieldPermissionType
 } from './consts'
 import { parseFormFields } from '@/components/FormCreate/src/utils/index'
 export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlowNode> {
@@ -37,13 +36,6 @@ const parseFormCreateFields = (formFields?: string[]) => {
       parseFormFields(JSON.parse(fieldStr), result)
     })
   }
-  // 固定添加发起人 ID 字段
-  result.unshift({
-    field: ProcessVariableEnum.START_USER_ID,
-    title: '发起人',
-    type: 'UserSelect',
-    required: true
-  })
   return result
 }
 
@@ -60,9 +52,33 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
 
   const getNodeConfigFormFields = (nodeFormFields?: Array<Record<string, string>>) => {
     nodeFormFields = toRaw(nodeFormFields)
-    fieldsPermissionConfig.value =
-      cloneDeep(nodeFormFields) || getDefaultFieldsPermission(unref(formFields))
+    if (!nodeFormFields || nodeFormFields.length === 0) {
+      fieldsPermissionConfig.value = getDefaultFieldsPermission(unref(formFields))
+    } else {
+      fieldsPermissionConfig.value = mergeFieldsPermission(nodeFormFields, unref(formFields))
+    }
   }
+  // 合并已经设置的表单字段权限，当前流程表单字段 (可能新增，或删除了字段)
+  const mergeFieldsPermission = (
+    formFieldsPermisson: Array<Record<string, string>>,
+    formFields?: string[]
+  ) => {
+    let mergedFieldsPermission: Array<Record<string, any>> = []
+    if (formFields) {
+      mergedFieldsPermission = parseFormCreateFields(formFields).map((item) => {
+        const found = formFieldsPermisson.find(
+          (fieldPermission) => fieldPermission.field == item.field
+        )
+        return {
+          field: item.field,
+          title: item.title,
+          permission: found ? found.permission : defaultPermission
+        }
+      })
+    }
+    return mergedFieldsPermission
+  }
+
   // 默认的表单权限： 获取表单的所有字段，设置字段默认权限为只读
   const getDefaultFieldsPermission = (formFields?: string[]) => {
     let defaultFieldsPermission: Array<Record<string, any>> = []

@@ -43,8 +43,8 @@
 import * as BrokerageUserApi from '@/api/mall/trade/brokerage/user'
 import { formatDate } from '@/utils/formatTime'
 
-/** 修改上级推广人表单 */
-defineOptions({ name: 'UpdateBindUserForm' })
+/** 修改分销用户 */
+defineOptions({ name: 'BrokerageUserUpdateForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗

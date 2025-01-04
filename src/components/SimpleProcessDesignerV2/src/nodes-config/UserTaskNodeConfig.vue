@@ -469,7 +469,8 @@ import {
   TimeoutHandlerType,
   ASSIGN_EMPTY_HANDLER_TYPES,
   AssignEmptyHandlerType,
-  FieldPermissionType
+  FieldPermissionType,
+  ProcessVariableEnum
 } from '../consts'
 
 import {
@@ -519,6 +520,13 @@ const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFie
   useFormFieldsPermission(FieldPermissionType.READ)
 // 表单内用户字段选项, 必须是必填和用户选择器
 const userFieldOnFormOptions = computed(() => {
+  // 固定添加发起人 ID 字段
+  formFieldOptions.unshift({
+    field: ProcessVariableEnum.START_USER_ID,
+    title: '发起人',
+    type: 'UserSelect',
+    required: true
+  })
   return formFieldOptions.filter((item) => item.type === 'UserSelect')
 })
 // 表单内部门字段选项, 必须是必填和部门选择器

@@ -1,5 +1,5 @@
 <template>
-  <el-form label-width="100px">
+  <el-form label-width="120px">
     <el-form-item label="规则类型" prop="candidateStrategy">
       <el-select
         v-model="userTaskForm.candidateStrategy"
@@ -8,15 +8,15 @@
         @change="changeCandidateStrategy"
       >
         <el-option
-          v-for="dict in getIntDictOptions(DICT_TYPE.BPM_TASK_CANDIDATE_STRATEGY)"
-          :key="dict.value"
+          v-for="(dict, index) in CANDIDATE_STRATEGY"
+          :key="index"
           :label="dict.label"
           :value="dict.value"
         />
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy == 10"
+      v-if="userTaskForm.candidateStrategy == CandidateStrategy.ROLE"
       label="指定角色"
       prop="candidateParam"
     >
@@ -31,7 +31,11 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy == 20 || userTaskForm.candidateStrategy == 21"
+      v-if="
+        userTaskForm.candidateStrategy == CandidateStrategy.DEPT_MEMBER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.DEPT_LEADER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER
+      "
       label="指定部门"
       prop="candidateParam"
       span="24"
@@ -49,7 +53,7 @@
       />
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy == 22"
+      v-if="userTaskForm.candidateStrategy == CandidateStrategy.POST"
       label="指定岗位"
       prop="candidateParam"
       span="24"
@@ -65,7 +69,7 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy == 30"
+      v-if="userTaskForm.candidateStrategy == CandidateStrategy.USER"
       label="指定用户"
       prop="candidateParam"
       span="24"
@@ -86,7 +90,7 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy === 40"
+      v-if="userTaskForm.candidateStrategy === CandidateStrategy.USER_GROUP"
       label="指定用户组"
       prop="candidateParam"
     >
@@ -106,7 +110,67 @@
       </el-select>
     </el-form-item>
     <el-form-item
-      v-if="userTaskForm.candidateStrategy === 60"
+      v-if="userTaskForm.candidateStrategy === CandidateStrategy.FORM_USER"
+      label="表单内用户字段"
+      prop="formUser"
+    >
+      <el-select
+        v-model="userTaskForm.candidateParam"
+        clearable
+        style="width: 100%"
+        @change="handleFormUserChange"
+      >
+        <el-option
+          v-for="(item, idx) in userFieldOnFormOptions"
+          :key="idx"
+          :label="item.title"
+          :value="item.field"
+          :disabled="!item.required"
+        />
+      </el-select>
+    </el-form-item>
+    <el-form-item
+      v-if="userTaskForm.candidateStrategy === CandidateStrategy.FORM_DEPT_LEADER"
+      label="表单内部门字段"
+      prop="formDept"
+    >
+      <el-select
+        v-model="userTaskForm.candidateParam"
+        clearable
+        style="width: 100%"
+        @change="updateElementTask"
+      >
+        <el-option
+          v-for="(item, idx) in deptFieldOnFormOptions"
+          :key="idx"
+          :label="item.title"
+          :value="item.field"
+          :disabled="!item.required"
+        />
+      </el-select>
+    </el-form-item>
+    <el-form-item
+      v-if="
+        userTaskForm.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER ||
+        userTaskForm.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
+      "
+      :label="deptLevelLabel!"
+      prop="deptLevel"
+      span="24"
+    >
+      <el-select v-model="deptLevel" clearable @change="updateElementTask">
+        <el-option
+          v-for="(item, index) in MULTI_LEVEL_DEPT"
+          :key="index"
+          :label="item.label"
+          :value="item.value"
+        />
+      </el-select>
+    </el-form-item>
+    <el-form-item
+      v-if="userTaskForm.candidateStrategy === CandidateStrategy.EXPRESSION"
       label="流程表达式"
       prop="candidateParam"
     >
@@ -114,12 +178,17 @@
         type="textarea"
         v-model="userTaskForm.candidateParam[0]"
         clearable
-        style="width: 72%"
+        style="width: 100%"
         @change="updateElementTask"
       />
-      <el-button class="ml-5px" size="small" type="success" @click="openProcessExpressionDialog"
-        >选择表达式</el-button
-      >
+      <XButton
+        class="!w-1/1 mt-5px"
+        type="success"
+        preIcon="ep:select"
+        title="选择表达式"
+        size="small"
+        @click="openProcessExpressionDialog"
+      />
       <!-- 选择弹窗 -->
       <ProcessExpressionDialog ref="processExpressionDialogRef" @select="selectProcessExpression" />
     </el-form-item>
@@ -127,7 +196,12 @@
 </template>
 
 <script lang="ts" setup>
-import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
+import {
+  CANDIDATE_STRATEGY,
+  CandidateStrategy,
+  FieldPermissionType,
+  MULTI_LEVEL_DEPT
+} from '@/components/SimpleProcessDesignerV2/src/consts'
 import { defaultProps, handleTree } from '@/utils/tree'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
@@ -136,12 +210,14 @@ import * as UserApi from '@/api/system/user'
 import * as UserGroupApi from '@/api/bpm/userGroup'
 import ProcessExpressionDialog from './ProcessExpressionDialog.vue'
 import { ProcessExpressionVO } from '@/api/bpm/processExpression'
+import { useFormFieldsPermission } from '@/components/SimpleProcessDesignerV2/src/node'
 
 defineOptions({ name: 'UserTask' })
 const props = defineProps({
   id: String,
   type: String
 })
+const prefix = inject('prefix')
 const userTaskForm = ref({
   candidateStrategy: undefined, // 分配规则
   candidateParam: [] // 分配选项
@@ -155,11 +231,88 @@ const postOptions = ref<PostApi.PostVO[]>([]) // 岗位列表
 const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
 
+const { formFieldOptions } = useFormFieldsPermission(FieldPermissionType.READ)
+// 表单内用户字段选项, 必须是必填和用户选择器
+const userFieldOnFormOptions = computed(() => {
+  return formFieldOptions.filter((item) => item.type === 'UserSelect')
+})
+// 表单内部门字段选项, 必须是必填和部门选择器
+const deptFieldOnFormOptions = computed(() => {
+  return formFieldOptions.filter((item) => item.type === 'DeptSelect')
+})
+
+const deptLevel = ref(1)
+const deptLevelLabel = computed(() => {
+  let label = '部门负责人来源'
+  if (userTaskForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER) {
+    label = label + '(指定部门向上)'
+  } else if (userTaskForm.value.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER) {
+    label = label + '(表单内部门向上)'
+  } else {
+    label = label + '(发起人部门向上)'
+  }
+  return label
+})
+
+const otherExtensions = ref()
+
 const resetTaskForm = () => {
   const businessObject = bpmnElement.value.businessObject
   if (!businessObject) {
     return
   }
+
+  const extensionElements =
+    businessObject?.extensionElements ??
+    bpmnInstances().moddle.create('bpmn:ExtensionElements', { values: [] })
+  userTaskForm.value.candidateStrategy = extensionElements.values?.filter(
+    (ex) => ex.$type === `${prefix}:CandidateStrategy`
+  )?.[0]?.value
+  const candidateParamStr = extensionElements.values?.filter(
+    (ex) => ex.$type === `${prefix}:CandidateParam`
+  )?.[0]?.value
+  if (candidateParamStr && candidateParamStr.length > 0) {
+    if (userTaskForm.value.candidateStrategy === CandidateStrategy.EXPRESSION) {
+      // 特殊：流程表达式，只有一个 input 输入框
+      userTaskForm.value.candidateParam = [candidateParamStr]
+    } else if (userTaskForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER) {
+      // 特殊：多级不部门负责人，需要通过'|'分割
+      userTaskForm.value.candidateParam = candidateParamStr
+        .split('|')[0]
+        .split(',')
+        .map((item) => {
+          // 如果数字超出了最大安全整数范围，则将其作为字符串处理
+          let num = Number(item)
+          return num > Number.MAX_SAFE_INTEGER || num < -Number.MAX_SAFE_INTEGER ? item : num
+        })
+      deptLevel.value = +candidateParamStr.split('|')[1]
+    } else if (
+      userTaskForm.value.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+      userTaskForm.value.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER
+    ) {
+      userTaskForm.value.candidateParam = +candidateParamStr
+      deptLevel.value = +candidateParamStr
+    } else if (userTaskForm.value.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER) {
+      userTaskForm.value.candidateParam = candidateParamStr.split('|')[0]
+      deptLevel.value = +candidateParamStr.split('|')[1]
+    } else {
+      userTaskForm.value.candidateParam = candidateParamStr.split(',').map((item) => {
+        // 如果数字超出了最大安全整数范围，则将其作为字符串处理
+        let num = Number(item)
+        return num > Number.MAX_SAFE_INTEGER || num < -Number.MAX_SAFE_INTEGER ? item : num
+      })
+    }
+  } else {
+    userTaskForm.value.candidateParam = []
+  }
+
+  otherExtensions.value =
+    extensionElements.values?.filter(
+      (ex) => ex.$type !== `${prefix}:CandidateStrategy` && ex.$type !== `${prefix}:CandidateParam`
+    ) ?? []
+
+  // 改用通过extensionElements来存储数据
+  return
   if (businessObject.candidateStrategy != undefined) {
     userTaskForm.value.candidateStrategy = parseInt(businessObject.candidateStrategy) as any
   } else {
@@ -172,7 +325,7 @@ const resetTaskForm = () => {
     } else {
       userTaskForm.value.candidateParam = businessObject.candidateParam
         .split(',')
-        .map((item) => +item)
+        .map((item) => item)
     }
   } else {
     userTaskForm.value.candidateParam = []
@@ -182,11 +335,55 @@ const resetTaskForm = () => {
 /** 更新 candidateStrategy 字段时，需要清空 candidateParam，并触发 bpmn 图更新 */
 const changeCandidateStrategy = () => {
   userTaskForm.value.candidateParam = []
+  deptLevel.value = 1
+  if (userTaskForm.value.candidateStrategy === CandidateStrategy.FORM_USER) {
+    // 特殊处理表单内用户字段，当只有发起人选项时应选中发起人
+    if (!userFieldOnFormOptions.value || userFieldOnFormOptions.value.length <= 1) {
+      userTaskForm.value.candidateStrategy = CandidateStrategy.START_USER
+    }
+  }
   updateElementTask()
 }
 
 /** 选中某个 options 时候，更新 bpmn 图  */
 const updateElementTask = () => {
+  let candidateParam =
+    userTaskForm.value.candidateParam instanceof Array
+      ? userTaskForm.value.candidateParam.join(',')
+      : userTaskForm.value.candidateParam
+
+  // 特殊处理多级部门情况
+  if (
+    userTaskForm.value.candidateStrategy == CandidateStrategy.MULTI_LEVEL_DEPT_LEADER ||
+    userTaskForm.value.candidateStrategy == CandidateStrategy.FORM_DEPT_LEADER
+  ) {
+    candidateParam += '|' + deptLevel.value
+  }
+  // 特殊处理发起人部门负责人、发起人连续部门负责人
+  if (
+    userTaskForm.value.candidateStrategy == CandidateStrategy.START_USER_DEPT_LEADER ||
+    userTaskForm.value.candidateStrategy == CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER
+  ) {
+    candidateParam = deptLevel.value + ''
+  }
+
+  const extensions = bpmnInstances().moddle.create('bpmn:ExtensionElements', {
+    values: [
+      ...otherExtensions.value,
+      bpmnInstances().moddle.create(`${prefix}:CandidateStrategy`, {
+        value: userTaskForm.value.candidateStrategy
+      }),
+      bpmnInstances().moddle.create(`${prefix}:CandidateParam`, {
+        value: candidateParam
+      })
+    ]
+  })
+  bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
+    extensionElements: extensions
+  })
+
+  // 改用通过extensionElements来存储数据
+  return
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
     candidateStrategy: userTaskForm.value.candidateStrategy,
     candidateParam: userTaskForm.value.candidateParam.join(',')
@@ -200,6 +397,14 @@ const openProcessExpressionDialog = async () => {
 }
 const selectProcessExpression = (expression: ProcessExpressionVO) => {
   userTaskForm.value.candidateParam = [expression.expression]
+  updateElementTask()
+}
+
+const handleFormUserChange = (e) => {
+  if (e === 'PROCESS_START_USER_ID') {
+    userTaskForm.value.candidateParam = []
+    userTaskForm.value.candidateStrategy = CandidateStrategy.START_USER
+  }
   updateElementTask()
 }
 

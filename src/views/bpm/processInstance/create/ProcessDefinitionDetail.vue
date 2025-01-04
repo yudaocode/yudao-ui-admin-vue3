@@ -9,7 +9,7 @@
         <el-tabs v-model="activeTab">
           <!-- 表单信息 -->
           <el-tab-pane label="表单填写" name="form">
-            <div class="form-scroll-area">
+            <div class="form-scroll-area" v-loading="processInstanceStartLoading">
               <el-scrollbar>
                 <el-row>
                   <el-col :span="17">
@@ -75,7 +75,11 @@
 <script lang="ts" setup>
 import { decodeFields, setConfAndFields2 } from '@/utils/formCreate'
 import { BpmModelType } from '@/utils/constants'
-import { CandidateStrategy } from '@/components/SimpleProcessDesignerV2/src/consts'
+import {
+  CandidateStrategy,
+  NodeId,
+  FieldPermissionType
+} from '@/components/SimpleProcessDesignerV2/src/consts'
 import ProcessInstanceBpmnViewer from '../detail/ProcessInstanceBpmnViewer.vue'
 import ProcessInstanceSimpleViewer from '../detail/ProcessInstanceSimpleViewer.vue'
 import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
@@ -90,7 +94,7 @@ const props = defineProps<{
   selectProcessDefinition: any
 }>()
 const emit = defineEmits(['cancel'])
-
+const processInstanceStartLoading = ref(false) // 流程实例发起中
 const { push, currentRoute } = useRouter() // 路由
 const message = useMessage() // 消息弹窗
 const { delView } = useTagsViewStore() // 视图操作
@@ -129,8 +133,10 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
       }
     }
     setConfAndFields2(detailForm, row.formConf, row.formFields, formVariables)
+
     await nextTick()
     fApi.value?.btn.show(false) // 隐藏提交按钮
+
     // 获取流程审批信息
     await getApprovalDetail(row)
 
@@ -152,7 +158,12 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
 /** 获取审批详情 */
 const getApprovalDetail = async (row: any) => {
   try {
-    const data = await ProcessInstanceApi.getApprovalDetail({ processDefinitionId: row.id })
+    // TODO 获取审批详情，设置 activityId 为发起人节点（为了获取字段权限。暂时只对 Simple 设计器有效）
+    const data = await ProcessInstanceApi.getApprovalDetail({
+      processDefinitionId: row.id,
+      activityId: NodeId.START_USER_NODE_ID
+    })
+
     if (!data) {
       message.error('查询不到审批详情信息！')
       return
@@ -170,7 +181,33 @@ const getApprovalDetail = async (row: any) => {
 
     // 获取审批节点，显示 Timeline 的数据
     activityNodes.value = data.activityNodes
+    // 获取表单字段权限
+    const formFieldsPermission = data.formFieldsPermission
+    // 设置表单字段权限
+    if (formFieldsPermission) {
+      Object.keys(formFieldsPermission).forEach((item) => {
+        setFieldPermission(item, formFieldsPermission[item])
+      })
+    }
   } finally {
+  }
+}
+
+/**
+ * 设置表单权限
+ */
+const setFieldPermission = (field: string, permission: string) => {
+  if (permission === FieldPermissionType.READ) {
+    //@ts-ignore
+    fApi.value?.disabled(true, field)
+  }
+  if (permission === FieldPermissionType.WRITE) {
+    //@ts-ignore
+    fApi.value?.disabled(false, field)
+  }
+  if (permission === FieldPermissionType.NONE) {
+    //@ts-ignore
+    fApi.value?.hidden(true, field)
   }
 }
 
@@ -179,6 +216,8 @@ const submitForm = async () => {
   if (!fApi.value || !props.selectProcessDefinition) {
     return
   }
+  // 流程表单校验
+  await fApi.value.validate()
   // 如果有指定审批人，需要校验
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
@@ -191,7 +230,7 @@ const submitForm = async () => {
   }
 
   // 提交请求
-  fApi.value.btn.loading(true)
+  processInstanceStartLoading.value = true
   try {
     await ProcessInstanceApi.createProcessInstance({
       processDefinitionId: props.selectProcessDefinition.id,
@@ -206,7 +245,7 @@ const submitForm = async () => {
       name: 'BpmProcessInstanceMy'
     })
   } finally {
-    fApi.value.btn.loading(false)
+    processInstanceStartLoading.value = false
   }
 }
 

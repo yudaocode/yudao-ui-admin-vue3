@@ -1,21 +1,30 @@
 <template>
-  <div class="title-bar">
-    <el-image v-if="property.bgImgUrl" :src="property.bgImgUrl" fit="cover" class="w-full" />
-    <div class="absolute left-0 top-0 w-full">
+  <div
+    :style="{
+      background:
+        property.style.bgType === 'color' ? property.style.bgColor : `url(${property.style.bgImg})`,
+      backgroundSize: '100% 100%',
+      backgroundRepeat: 'no-repeat'
+    }"
+    class="title-bar"
+  >
+    <!-- 内容 -->
+    <div>
       <!-- 标题 -->
       <div
+        v-if="property.title"
         :style="{
           fontSize: `${property.titleSize}px`,
           fontWeight: property.titleWeight,
           color: property.titleColor,
           textAlign: property.textAlign
         }"
-        v-if="property.title"
       >
         {{ property.title }}
       </div>
       <!-- 副标题 -->
       <div
+        v-if="property.description"
         :style="{
           fontSize: `${property.descriptionSize}px`,
           fontWeight: property.descriptionWeight,
@@ -23,25 +32,24 @@
           textAlign: property.textAlign
         }"
         class="m-t-8px"
-        v-if="property.description"
       >
         {{ property.description }}
       </div>
     </div>
     <!-- 更多 -->
     <div
-      class="more"
       v-show="property.more.show"
       :style="{
         color: property.descriptionColor
       }"
+      class="more"
     >
       <span v-if="property.more.type !== 'icon'"> {{ property.more.text }} </span>
-      <Icon icon="ep:arrow-right" v-if="property.more.type !== 'text'" />
+      <Icon v-if="property.more.type !== 'text'" icon="ep:arrow-right" />
     </div>
   </div>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 import { TitleBarProperty } from './config'
 
 /** 标题栏 */
@@ -49,7 +57,7 @@ defineOptions({ name: 'TitleBar' })
 
 defineProps<{ property: TitleBarProperty }>()
 </script>
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .title-bar {
   position: relative;
   width: 100%;

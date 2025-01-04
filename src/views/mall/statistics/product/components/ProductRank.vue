@@ -10,7 +10,7 @@
     </template>
     <!-- 排行列表 -->
     <el-table v-loading="loading" :data="list" @sort-change="handleSortChange">
-      <el-table-column label="商品ID" prop="spuId" min-width="70" />
+      <el-table-column label="商品 ID" prop="spuId" min-width="70" />
       <el-table-column label="商品图片" align="center" prop="picUrl" width="80">
         <template #default="{ row }">
           <el-image
@@ -27,7 +27,13 @@
       <el-table-column label="加购件数" prop="cartCount" min-width="105" sortable="custom" />
       <el-table-column label="下单件数" prop="orderCount" min-width="105" sortable="custom" />
       <el-table-column label="支付件数" prop="orderPayCount" min-width="105" sortable="custom" />
-      <el-table-column label="支付金额" prop="orderPayPrice" min-width="105" sortable="custom" />
+      <el-table-column
+        label="支付金额"
+        prop="orderPayPrice"
+        min-width="105"
+        sortable="custom"
+        :formatter="fenToYuanFormat"
+      />
       <el-table-column label="收藏数" prop="favoriteCount" min-width="90" sortable="custom" />
       <el-table-column
         label="访客-支付转化率(%)"
@@ -50,6 +56,7 @@
 import { ProductStatisticsApi, ProductStatisticsVO } from '@/api/mall/statistics/product'
 import { CardTitle } from '@/components/Card'
 import { buildSortingField } from '@/utils'
+import { fenToYuanFormat } from '@/utils/formatter'
 
 /** 商品排行 */
 defineOptions({ name: 'ProductRank' })
