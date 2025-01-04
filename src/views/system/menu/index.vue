@@ -53,10 +53,6 @@
           <Icon class="mr-5px" icon="ep:plus" />
           新增
         </el-button>
-        <el-button plain type="danger" @click="toggleExpandAll">
-          <Icon class="mr-5px" icon="ep:sort" />
-          展开/折叠
-        </el-button>
         <el-button plain @click="refreshMenu">
           <Icon class="mr-5px" icon="ep:refresh" />
           刷新菜单缓存
@@ -79,7 +75,6 @@
             :width="width"
             :height="height"
             expand-column-key="name"
-            :default-expanded-keys="isExpandAll ? list.map((item) => item.name) : []"
           />
         </template>
       </el-auto-resizer>
@@ -210,7 +205,6 @@ const queryParams = reactive({
   status: undefined
 })
 const queryFormRef = ref() // 搜索的表单
-const isExpandAll = ref(false) // 是否展开，默认全部折叠
 
 /** 查询列表 */
 const getList = async () => {
@@ -238,11 +232,6 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number, parentId?: number) => {
   formRef.value.open(type, id, parentId)
-}
-
-/** 展开/折叠操作 */
-const toggleExpandAll = () => {
-  isExpandAll.value = !isExpandAll.value
 }
 
 /** 刷新菜单缓存按钮操作 */
