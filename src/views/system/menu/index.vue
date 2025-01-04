@@ -67,65 +67,87 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-table
+    <el-tree-v2
       v-if="refreshTable"
       v-loading="loading"
       :data="list"
-      :default-expand-all="isExpandAll"
-      row-key="id"
+      :props="{
+        label: 'name',
+        children: 'children'
+      }"
+      :default-expanded-keys="isExpandAll ? list.map(item => item.id) : []"
+      :height="600"
+      :item-size="40"
+      :virtual-scroll-horizontal="true"
+      :highlight-current="true"
+      @current-change="handleCurrentChange"
     >
-      <el-table-column :show-overflow-tooltip="true" label="菜单名称" prop="name" width="250" />
-      <el-table-column align="center" label="图标" prop="icon" width="100">
-        <template #default="scope">
-          <Icon :icon="scope.row.icon" />
-        </template>
-      </el-table-column>
-      <el-table-column label="排序" prop="sort" width="60" />
-      <el-table-column :show-overflow-tooltip="true" label="权限标识" prop="permission" />
-      <el-table-column :show-overflow-tooltip="true" label="组件路径" prop="component" />
-      <el-table-column :show-overflow-tooltip="true" label="组件名称" prop="componentName" />
-      <el-table-column label="状态" prop="status">
-        <template #default="scope">
-          <el-switch
-            class="ml-4px"
-            v-model="scope.row.status"
-            v-hasPermi="['system:menu:update']"
-            :active-value="CommonStatusEnum.ENABLE"
-            :inactive-value="CommonStatusEnum.DISABLE"
-            :loading="menuStatusUpdating[scope.row.id]"
-            @change="(val) => handleStatusChanged(scope.row, val as number)"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column align="center" label="操作">
-        <template #default="scope">
-          <el-button
-            v-hasPermi="['system:menu:update']"
-            link
-            type="primary"
-            @click="openForm('update', scope.row.id)"
-          >
-            修改
-          </el-button>
-          <el-button
-            v-hasPermi="['system:menu:create']"
-            link
-            type="primary"
-            @click="openForm('create', undefined, scope.row.id)"
-          >
-            新增
-          </el-button>
-          <el-button
-            v-hasPermi="['system:menu:delete']"
-            link
-            type="danger"
-            @click="handleDelete(scope.row.id)"
-          >
-            删除
-          </el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+      <template #default="{ data }">
+        <div 
+          class="custom-tree-node"
+          :class="{ 'menu-item': true }"
+        >
+          <div class="node-content">
+            <span class="label">{{ data.name }}</span>
+            <div v-if="currentNode === data" class="menu-info">
+              <span class="info-item" v-if="data.icon">
+                <span class="info-label">图标：</span>
+                <span class="icon-preview">
+                  <Icon :icon="data.icon" />
+                  <span class="icon-name">{{ data.icon }}</span>
+                </span>
+              </span>
+              <span class="info-item">
+                <span class="info-label">排序：</span>
+                <span class="info-value">{{ data.sort }}</span>
+              </span>
+              <span class="info-item" v-if="data.permission">
+                <span class="info-label">权限标识：</span>
+                <span class="info-value">{{ data.permission }}</span>
+              </span>
+              <span class="info-item" v-if="data.path">
+                <span class="info-label">路由地址：</span>
+                <span class="info-value">{{ data.path }}</span>
+              </span>
+              <span class="info-item" v-if="data.component">
+                <span class="info-label">组件路径：</span>
+                <span class="info-value">{{ data.component }}</span>
+              </span>
+              <span class="info-item" v-if="data.componentName">
+                <span class="info-label">组件名称：</span>
+                <span class="info-value">{{ data.componentName }}</span>
+              </span>
+            </div>
+          </div>
+          <div v-show="currentNode === data" class="operations">
+            <el-button
+              v-hasPermi="['system:menu:update']"
+              link
+              type="primary"
+              @click.stop="openForm('update', data.id)"
+            >
+              修改
+            </el-button>
+            <el-button
+              v-hasPermi="['system:menu:create']"
+              link
+              type="primary"
+              @click.stop="openForm('create', undefined, data.id)"
+            >
+              新增
+            </el-button>
+            <el-button
+              v-hasPermi="['system:menu:delete']"
+              link
+              type="danger"
+              @click.stop="handleDelete(data.id)"
+            >
+              删除
+            </el-button>
+          </div>
+        </div>
+      </template>
+    </el-tree-v2>
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
@@ -155,13 +177,26 @@ const queryParams = reactive({
 const queryFormRef = ref() // 搜索的表单
 const isExpandAll = ref(false) // 是否展开，默认全部折叠
 const refreshTable = ref(true) // 重新渲染表格状态
+const currentNode = ref<any>(null) // 当前选中节点
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
     const data = await MenuApi.getMenuList(queryParams)
-    list.value = handleTree(data)
+    // 为每个节点添加 showInfo 属性和样式对象
+    const addProps = (items: any[]) => {
+      items.forEach(item => {
+        item.showInfo = false
+        item.popupStyle = {}
+        if (item.children && item.children.length > 0) {
+          addProps(item.children)
+        }
+      })
+    }
+    const processedData = handleTree(data)
+    addProps(processedData)
+    list.value = processedData
   } finally {
     loading.value = false
   }
@@ -233,8 +268,136 @@ const handleStatusChanged = async (menu: MenuVO, val: number) => {
   }
 }
 
+const handleCurrentChange = (data: any) => {
+  currentNode.value = data
+  // 关闭所有信息面板
+  list.value.forEach((item: any) => {
+    item.showInfo = false
+  })
+}
+
+// 添加点击外部关闭弹出层的处理
+onMounted(() => {
+  document.addEventListener('click', (event: MouseEvent) => {
+    const target = event.target as HTMLElement
+    if (!target.closest('.menu-info-popup') && !target.closest('.info-button')) {
+      list.value.forEach((item: any) => {
+        item.showInfo = false
+      })
+    }
+  })
+})
+
 /** 初始化 **/
 onMounted(() => {
   getList()
 })
 </script>
+
+<style lang="scss" scoped>
+:deep(.el-tree-node.is-current > .el-tree-node__content) {
+  background-color: var(--el-color-primary-light-7) !important;
+
+  .custom-tree-node {
+    background-color: var(--el-color-primary-light-7);
+    
+    .operations {
+      background-color: var(--el-color-primary-light-7);
+    }
+  }
+}
+
+.custom-tree-node {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  height: 40px;
+  position: relative;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  min-width: 800px;
+  transition: background-color 0.3s;
+
+  .node-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 100%;
+    flex: 1;
+    min-width: 0;
+
+    .label {
+      flex-shrink: 0;
+    }
+
+    .menu-info {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      overflow-x: auto;
+      flex: 1;
+      margin-right: 16px;
+      padding: 0 4px;
+      
+      &::-webkit-scrollbar {
+        height: 6px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: var(--el-border-color);
+        border-radius: 3px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+    }
+
+    .info-item {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .info-label {
+        color: var(--el-text-color-secondary);
+        font-size: 13px;
+      }
+
+      .info-value {
+        color: var(--el-text-color-primary);
+        font-size: 13px;
+      }
+
+      .icon-preview {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0 8px;
+        height: 24px;
+        border-radius: 4px;
+        border: 1px solid var(--el-border-color-lighter);
+        background-color: var(--el-bg-color);
+        
+        .icon-name {
+          font-size: 13px;
+          color: var(--el-text-color-regular);
+        }
+      }
+    }
+  }
+
+  .operations {
+    display: flex;
+    gap: 8px;
+    height: 100%;
+    align-items: center;
+    flex-shrink: 0;
+    position: sticky;
+    right: 8px;
+    padding-left: 8px;
+    transition: background-color 0.3s;
+  }
+}
+</style>
