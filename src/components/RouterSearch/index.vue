@@ -79,7 +79,12 @@ function remoteMethod(data) {
 
 function handleChange(path) {
   router.push({ path })
+  hiddenSearch()
   hiddenTopSearch()
+}
+
+function hiddenSearch() {
+  showSearch.value = false
 }
 
 function hiddenTopSearch() {
