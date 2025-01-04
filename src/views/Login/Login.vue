@@ -59,6 +59,8 @@
             <RegisterForm class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)" />
             <!-- 三方登录 -->
             <SSOLoginVue class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)" />
+            <!-- 忘记密码 -->
+            <ForgetPasswordForm class="m-auto h-auto p-20px lt-xl:(rounded-3xl light:bg-white)" />
           </div>
         </Transition>
       </div>
@@ -73,7 +75,7 @@ import { useAppStore } from '@/store/modules/app'
 import { ThemeSwitch } from '@/layout/components/ThemeSwitch'
 import { LocaleDropdown } from '@/layout/components/LocaleDropdown'
 
-import { LoginForm, MobileForm, QrCodeForm, RegisterForm, SSOLoginVue } from './components'
+import { LoginForm, MobileForm, QrCodeForm, RegisterForm, SSOLoginVue, ForgetPasswordForm } from './components'
 
 defineOptions({ name: 'Login' })
 

@@ -85,3 +85,8 @@ export const getCode = (data) => {
 export const reqCheck = (data) => {
   return request.postOriginal({ url: 'system/captcha/check', data })
 }
+
+// 通过短信重置密码
+export const smsResetPassword = (data) => {
+  return request.post({ url: '/system/auth/sms-reset-password', data })
+}
