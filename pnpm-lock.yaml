@@ -72,8 +72,8 @@ dependencies:
     specifier: ^2.1.0
     version: 2.1.0(echarts@5.5.1)
   element-plus:
-    specifier: 2.8.4
-    version: 2.8.4(vue@3.5.12)
+    specifier: 2.9.1
+    version: 2.9.1(vue@3.5.12)
   fast-xml-parser:
     specifier: ^4.3.2
     version: 4.5.0
@@ -2122,7 +2122,7 @@ packages:
       '@form-create/element-ui': 3.2.14(vue@3.5.12)
       '@form-create/utils': 3.2.14
       codemirror: 6.65.7
-      element-plus: 2.8.4(vue@3.5.12)
+      element-plus: 2.9.1(vue@3.5.12)
       vue: 3.5.12(typescript@5.3.3)
       vuedraggable: 4.1.0(vue@3.5.12)
     transitivePeerDependencies:
@@ -5795,8 +5795,8 @@ packages:
     resolution: {integrity: sha512-nz88NNBsD7kQSAGGJyp8hS6xSPtWwqNogA0mjtc2nUYeEf3nURK9qpV18TuBdDmEDgVWotS8Wkzf+V52dSQ/LQ==, tarball: https://registry.npmmirror.com/electron-to-chromium/-/electron-to-chromium-1.5.67.tgz}
     dev: true
 
-  /element-plus@2.8.4(vue@3.5.12):
-    resolution: {integrity: sha512-ZlVAdUOoJliv4kW3ntWnnSHMT+u/Os7mXJjk2xzOlqNeHaI2/ozlF+R58ZCEak8ZnDi6+5A2viWEYRsq64IuiA==, tarball: https://registry.npmmirror.com/element-plus/-/element-plus-2.8.4.tgz}
+  /element-plus@2.9.1(vue@3.5.12):
+    resolution: {integrity: sha512-9Agqf/jt4Ugk7EZ6C5LME71sgkvauPCsnvJN12Xid2XVobjufxMGpRE4L7pS4luJMOmFAH3J0NgYEGZT5r+NDg==, tarball: https://registry.npmmirror.com/element-plus/-/element-plus-2.9.1.tgz}
     peerDependencies:
       vue: ^3.2.0
     dependencies:
