@@ -67,87 +67,23 @@
 
   <!-- 列表 -->
   <ContentWrap>
-    <el-tree-v2
-      v-if="refreshTable"
-      v-loading="loading"
-      :data="list"
-      :props="{
-        label: 'name',
-        children: 'children'
-      }"
-      :default-expanded-keys="isExpandAll ? list.map(item => item.id) : []"
-      :height="600"
-      :item-size="40"
-      :virtual-scroll-horizontal="true"
-      :highlight-current="true"
-      @current-change="handleCurrentChange"
-    >
-      <template #default="{ data }">
-        <div 
-          class="custom-tree-node"
-          :class="{ 'menu-item': true }"
-        >
-          <div class="node-content">
-            <span class="label">{{ data.name }}</span>
-            <div v-if="currentNode === data" class="menu-info">
-              <span class="info-item" v-if="data.icon">
-                <span class="info-label">图标：</span>
-                <span class="icon-preview">
-                  <Icon :icon="data.icon" />
-                  <span class="icon-name">{{ data.icon }}</span>
-                </span>
-              </span>
-              <span class="info-item">
-                <span class="info-label">排序：</span>
-                <span class="info-value">{{ data.sort }}</span>
-              </span>
-              <span class="info-item" v-if="data.permission">
-                <span class="info-label">权限标识：</span>
-                <span class="info-value">{{ data.permission }}</span>
-              </span>
-              <span class="info-item" v-if="data.path">
-                <span class="info-label">路由地址：</span>
-                <span class="info-value">{{ data.path }}</span>
-              </span>
-              <span class="info-item" v-if="data.component">
-                <span class="info-label">组件路径：</span>
-                <span class="info-value">{{ data.component }}</span>
-              </span>
-              <span class="info-item" v-if="data.componentName">
-                <span class="info-label">组件名称：</span>
-                <span class="info-value">{{ data.componentName }}</span>
-              </span>
-            </div>
-          </div>
-          <div v-show="currentNode === data" class="operations">
-            <el-button
-              v-hasPermi="['system:menu:update']"
-              link
-              type="primary"
-              @click.stop="openForm('update', data.id)"
-            >
-              修改
-            </el-button>
-            <el-button
-              v-hasPermi="['system:menu:create']"
-              link
-              type="primary"
-              @click.stop="openForm('create', undefined, data.id)"
-            >
-              新增
-            </el-button>
-            <el-button
-              v-hasPermi="['system:menu:delete']"
-              link
-              type="danger"
-              @click.stop="handleDelete(data.id)"
-            >
-              删除
-            </el-button>
-          </div>
-        </div>
-      </template>
-    </el-tree-v2>
+    <div style="width: 100%; height: 700px">
+      <!-- AutoResizer 自动调节大小 -->
+      <el-auto-resizer>
+        <template #default="{ height, width }">
+          <!-- Virtualized Table 虚拟化表格：高性能，解决表格在大数据量下的卡顿问题 -->
+          <el-table-v2
+            v-loading="loading"
+            :columns="columns"
+            :data="list"
+            :width="width"
+            :height="height"
+            expand-column-key="name"
+            :default-expanded-keys="isExpandAll ? list.map((item) => item.name) : []"
+          />
+        </template>
+      </el-auto-resizer>
+    </div>
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
@@ -160,6 +96,10 @@ import * as MenuApi from '@/api/system/menu'
 import { MenuVO } from '@/api/system/menu'
 import MenuForm from './MenuForm.vue'
 import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
+import { h } from 'vue'
+import { Column, ElButton } from 'element-plus'
+import { Icon } from '@/components/Icon'
+import { hasPermission } from '@/directives/permission/hasPermi'
 import { CommonStatusEnum } from '@/utils/constants'
 
 defineOptions({ name: 'SystemMenu' })
@@ -168,6 +108,101 @@ const { wsCache } = useCache()
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
 
+// 表格的 column 字段
+const columns: Column[] = [
+  {
+    dataKey: 'name',
+    title: '菜单名称',
+    width: 250
+  },
+  {
+    dataKey: 'icon',
+    title: '图标',
+    width: 150,
+    cellRenderer: ({ rowData }) => {
+      return h(Icon, {
+        icon: rowData.icon
+      })
+    }
+  },
+  {
+    dataKey: 'sort',
+    title: '排序',
+    width: 60
+  },
+  {
+    dataKey: 'permission',
+    title: '权限标识',
+    width: 180
+  },
+  {
+    dataKey: 'component',
+    title: '组件路径',
+    width: 180
+  },
+  {
+    dataKey: 'componentName',
+    title: '组件名称',
+    width: 180
+  },
+  {
+    dataKey: 'status',
+    title: '状态',
+    width: 120,
+    cellRenderer: ({ rowData }) => {
+      return h(ElSwitch, {
+        modelValue: rowData.status,
+        activeValue: CommonStatusEnum.ENABLE,
+        inactiveValue: CommonStatusEnum.DISABLE,
+        loading: menuStatusUpdating.value[rowData.id],
+        disabled: !hasPermission(['system:menu:update']),
+        onChange: (val) => handleStatusChanged(rowData, val as number)
+      })
+    }
+  },
+  {
+    dataKey: 'operation',
+    title: '操作',
+    width: 200,
+    cellRenderer: ({ rowData }) => {
+      return h(
+        'div',
+        [
+          hasPermission(['system:menu:update']) &&
+            h(
+              ElButton,
+              {
+                link: true,
+                type: 'primary',
+                onClick: () => openForm('update', rowData.id)
+              },
+              '修改'
+            ),
+          hasPermission(['system:menu:create']) &&
+            h(
+              ElButton,
+              {
+                link: true,
+                type: 'primary',
+                onClick: () => openForm('create', undefined, rowData.id)
+              },
+              '新增'
+            ),
+          hasPermission(['system:menu:delete']) &&
+            h(
+              ElButton,
+              {
+                link: true,
+                type: 'danger',
+                onClick: () => handleDelete(rowData.id)
+              },
+              '删除'
+            )
+        ].filter(Boolean)
+      )
+    }
+  }
+]
 const loading = ref(true) // 列表的加载中
 const list = ref<any>([]) // 列表的数据
 const queryParams = reactive({
@@ -176,27 +211,13 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const isExpandAll = ref(false) // 是否展开，默认全部折叠
-const refreshTable = ref(true) // 重新渲染表格状态
-const currentNode = ref<any>(null) // 当前选中节点
 
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
   try {
     const data = await MenuApi.getMenuList(queryParams)
-    // 为每个节点添加 showInfo 属性和样式对象
-    const addProps = (items: any[]) => {
-      items.forEach(item => {
-        item.showInfo = false
-        item.popupStyle = {}
-        if (item.children && item.children.length > 0) {
-          addProps(item.children)
-        }
-      })
-    }
-    const processedData = handleTree(data)
-    addProps(processedData)
-    list.value = processedData
+    list.value = handleTree(data)
   } finally {
     loading.value = false
   }
@@ -221,11 +242,7 @@ const openForm = (type: string, id?: number, parentId?: number) => {
 
 /** 展开/折叠操作 */
 const toggleExpandAll = () => {
-  refreshTable.value = false
   isExpandAll.value = !isExpandAll.value
-  nextTick(() => {
-    refreshTable.value = true
-  })
 }
 
 /** 刷新菜单缓存按钮操作 */
@@ -268,136 +285,8 @@ const handleStatusChanged = async (menu: MenuVO, val: number) => {
   }
 }
 
-const handleCurrentChange = (data: any) => {
-  currentNode.value = data
-  // 关闭所有信息面板
-  list.value.forEach((item: any) => {
-    item.showInfo = false
-  })
-}
-
-// 添加点击外部关闭弹出层的处理
-onMounted(() => {
-  document.addEventListener('click', (event: MouseEvent) => {
-    const target = event.target as HTMLElement
-    if (!target.closest('.menu-info-popup') && !target.closest('.info-button')) {
-      list.value.forEach((item: any) => {
-        item.showInfo = false
-      })
-    }
-  })
-})
-
 /** 初始化 **/
 onMounted(() => {
   getList()
 })
 </script>
-
-<style lang="scss" scoped>
-:deep(.el-tree-node.is-current > .el-tree-node__content) {
-  background-color: var(--el-color-primary-light-7) !important;
-
-  .custom-tree-node {
-    background-color: var(--el-color-primary-light-7);
-    
-    .operations {
-      background-color: var(--el-color-primary-light-7);
-    }
-  }
-}
-
-.custom-tree-node {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 8px;
-  height: 40px;
-  position: relative;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-  min-width: 800px;
-  transition: background-color 0.3s;
-
-  .node-content {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    height: 100%;
-    flex: 1;
-    min-width: 0;
-
-    .label {
-      flex-shrink: 0;
-    }
-
-    .menu-info {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      overflow-x: auto;
-      flex: 1;
-      margin-right: 16px;
-      padding: 0 4px;
-      
-      &::-webkit-scrollbar {
-        height: 6px;
-      }
-      
-      &::-webkit-scrollbar-thumb {
-        background: var(--el-border-color);
-        border-radius: 3px;
-      }
-      
-      &::-webkit-scrollbar-track {
-        background: transparent;
-      }
-    }
-
-    .info-item {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-
-      .info-label {
-        color: var(--el-text-color-secondary);
-        font-size: 13px;
-      }
-
-      .info-value {
-        color: var(--el-text-color-primary);
-        font-size: 13px;
-      }
-
-      .icon-preview {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 0 8px;
-        height: 24px;
-        border-radius: 4px;
-        border: 1px solid var(--el-border-color-lighter);
-        background-color: var(--el-bg-color);
-        
-        .icon-name {
-          font-size: 13px;
-          color: var(--el-text-color-regular);
-        }
-      }
-    }
-  }
-
-  .operations {
-    display: flex;
-    gap: 8px;
-    height: 100%;
-    align-items: center;
-    flex-shrink: 0;
-    position: sticky;
-    right: 8px;
-    padding-left: 8px;
-    transition: background-color 0.3s;
-  }
-}
-</style>

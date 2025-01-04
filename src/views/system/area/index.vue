@@ -16,6 +16,7 @@
         <template #default="{ height, width }">
           <!-- Virtualized Table 虚拟化表格：高性能，解决表格在大数据量下的卡顿问题 -->
           <el-table-v2
+            v-loading="loading"
             :columns="columns"
             :data="list"
             :width="width"
@@ -31,7 +32,7 @@
   <AreaForm ref="formRef" />
 </template>
 <script setup lang="tsx">
-import type { Column } from 'element-plus'
+import { Column } from 'element-plus'
 import AreaForm from './AreaForm.vue'
 import * as AreaApi from '@/api/system/area'
 
@@ -40,7 +41,7 @@ defineOptions({ name: 'SystemArea' })
 // 表格的 column 字段
 const columns: Column[] = [
   {
-    dataKey: 'id', // 需要渲染当前列的数据字段。例如说：{id:9527, name:'Mike'}，则填 id
+    dataKey: 'id', // 需要渲染当前列的数据字段
     title: '编号', // 显示在单元格表头的文本
     width: 400, // 当前列的宽度，必须设置
     fixed: true, // 是否固定列
@@ -52,14 +53,17 @@ const columns: Column[] = [
     width: 200
   }
 ]
-// 表格的数据
-const list = ref([])
+const loading = ref(true) // 列表的加载中
+const list = ref([]) // 表格的数据
 
-/**
- * 获得数据列表
- */
+/** 获得数据列表 */
 const getList = async () => {
-  list.value = await AreaApi.getAreaTree()
+  loading.value = true
+  try {
+    list.value = await AreaApi.getAreaTree()
+  } finally {
+    loading.value = false
+  }
 }
 
 /** 添加/修改操作 */
