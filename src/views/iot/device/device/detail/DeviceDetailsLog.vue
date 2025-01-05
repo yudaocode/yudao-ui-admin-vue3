@@ -90,23 +90,23 @@ const typeMap = {
 
 /** 查询日志列表 */
 const getLogList = async () => {
-  if (!props.deviceId) return
-  loading.value = true
-  try {
-    const res = await DeviceApi.getDeviceLogs(props.deviceId, queryParams)
-    total.value = res.total
-    logList.value = res.list.map((item: any) => {
-      const log = {
-        time: item.time,
-        type: typeMap[item.type as keyof typeof typeMap] || item.type,
-        name: getLogName(item),
-        content: item.content
-      }
-      return log
-    })
-  } finally {
-    loading.value = false
-  }
+  // if (!props.deviceId) return
+  // loading.value = true
+  // try {
+  //   const res = await DeviceApi.getDeviceLogs(props.deviceId, queryParams)
+  //   total.value = res.total
+  //   logList.value = res.list.map((item: any) => {
+  //     const log = {
+  //       time: item.time,
+  //       type: typeMap[item.type as keyof typeof typeMap] || item.type,
+  //       name: getLogName(item),
+  //       content: item.content
+  //     }
+  //     return log
+  //   })
+  // } finally {
+  //   loading.value = false
+  // }
 }
 
 /** 获取日志名称 */
