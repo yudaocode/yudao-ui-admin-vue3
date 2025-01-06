@@ -97,7 +97,6 @@ const getLogList = async () => {
       }
       return log
     })
-    console.log(logList.value)
   } finally {
     loading.value = false
   }
