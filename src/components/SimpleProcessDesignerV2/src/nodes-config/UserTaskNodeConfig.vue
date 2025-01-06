@@ -3,7 +3,7 @@
     :append-to-body="true"
     v-model="settingVisible"
     :show-close="false"
-    :size="550"
+    :size="580"
     :before-close="saveConfig"
     class="justify-start"
   >
@@ -46,14 +46,13 @@
                 v-model="configForm.candidateStrategy"
                 @change="changeCandidateStrategy"
               >
-                <el-radio
-                  v-for="(dict, index) in CANDIDATE_STRATEGY"
-                  :key="index"
-                  :value="dict.value"
-                  :label="dict.value"
-                >
-                  {{ dict.label }}
-                </el-radio>
+                <el-row>
+                  <el-col v-for="(dict, index) in CANDIDATE_STRATEGY" :key="index" :span="8">
+                    <el-radio :value="dict.value" :label="dict.value">
+                      {{ dict.label }}
+                    </el-radio>
+                  </el-col>
+                </el-row>
               </el-radio-group>
             </el-form-item>
             <el-form-item
@@ -148,7 +147,7 @@
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
-                  :disabled ="!item.required"
+                  :disabled="!item.required"
                 />
               </el-select>
             </el-form-item>
@@ -163,7 +162,7 @@
                   :key="idx"
                   :label="item.title"
                   :value="item.field"
-                  :disabled ="!item.required"
+                  :disabled="!item.required"
                 />
               </el-select>
             </el-form-item>
