@@ -97,7 +97,7 @@
               <!-- 事件上报 -->
               <el-tab-pane label="事件上报" name="event">
                 <ContentWrap>
-                  <el-table v-loading="loading" :data="eventList" :stripe="true">
+                  <!-- <el-table v-loading="loading" :data="eventList" :stripe="true">
                     <el-table-column label="功能名称" align="center" prop="name" />
                     <el-table-column label="标识符" align="center" prop="identifier" />
                     <el-table-column label="数据类型" align="center" prop="dataType" />
@@ -115,7 +115,7 @@
                   </el-table>
                   <div class="mt-10px">
                     <el-button type="primary" @click="handleEventReport">发送</el-button>
-                  </div>
+                  </div> -->
                 </ContentWrap>
               </el-tab-pane>
 
@@ -141,7 +141,7 @@
               <!-- 属性调试 -->
               <el-tab-pane label="属性调试" name="propertyDebug">
                 <ContentWrap>
-                  <el-table v-loading="loading" :data="propertyList" :stripe="true">
+                  <!-- <el-table v-loading="loading" :data="propertyList" :stripe="true">
                     <el-table-column label="功能名称" align="center" prop="name" />
                     <el-table-column label="标识符" align="center" prop="identifier" />
                     <el-table-column label="数据类型" align="center" prop="dataType" />
@@ -159,7 +159,7 @@
                   </el-table>
                   <div class="mt-10px">
                     <el-button type="primary" @click="handlePropertyGet">获取</el-button>
-                  </div>
+                  </div> -->
                 </ContentWrap>
               </el-tab-pane>
 
@@ -178,7 +178,7 @@
       <el-col :span="12">
         <el-tabs type="border-card">
           <el-tab-pane label="设备日志">
-            <DeviceDetailsLog :device-id="device.id" />
+            <DeviceDetailsLog :deviceKey="device.deviceKey" />
           </el-tab-pane>
         </el-tabs>
       </el-col>
@@ -188,7 +188,7 @@
 
 <script setup lang="ts">
 import { ProductVO } from '@/api/iot/product/product'
-import { ThingModelApi, ThingModelData } from '@/api/iot/thingmodel'
+import { ThingModelApi, ThingModelData,SimulatorData } from '@/api/iot/thingmodel'
 import { DeviceApi, DeviceVO,SimulatorDataVO } from '@/api/iot/device/device'
 import DeviceDetailsLog from './DeviceDetailsLog.vue'
 import {
@@ -212,9 +212,6 @@ const dataTypeOptionsLabel = computed(() => (value: string) => getDataTypeOption
 const props = defineProps<{ product: ProductVO; device: DeviceVO }>()
 const list = ref<SimulatorData[]>([]) // 物模型列表的数据
 
-interface SimulatorData extends ThingModelData {
-  simulateValue?: string | number // 用于存储模拟值
-}
 /** 查询列表 */
 const getList = async () => {
   loading.value = true
@@ -231,33 +228,33 @@ const getList = async () => {
   }
 }
 
-// 功能列表数据结构定义
-interface TableItem {
-  name: string
-  identifier: string
-  value: string | number
-}
+// // 功能列表数据结构定义
+// interface TableItem {
+//   name: string
+//   identifier: string
+//   value: string | number
+// }
 
-// 添加计算属性来过滤物模型数据
-const propertyList = computed(() => {
-  return list.value
-    .filter((item) => item.type === 'property')
-    .map((item) => ({
-      name: item.name,
-      identifier: item.identifier,
-      value: ''
-    }))
-})
+// // 添加计算属性来过滤物模型数据
+// const propertyList = computed(() => {
+//   return list.value
+//     .filter((item) => item.type === 'property')
+//     .map((item) => ({
+//       name: item.name,
+//       identifier: item.identifier,
+//       value: ''
+//     }))
+// })
 
-const eventList = computed(() => {
-  return list.value
-    .filter((item) => item.type === 'event')
-    .map((item) => ({
-      name: item.name,
-      identifier: item.identifier,
-      value: ''
-    }))
-})
+// const eventList = computed(() => {
+//   return list.value
+//     .filter((item) => item.type === 'event')
+//     .map((item) => ({
+//       name: item.name,
+//       identifier: item.identifier,
+//       value: ''
+//     }))
+// })
 
 // 监听标签页变化 todo:后续改成查询字典
 watch(
@@ -291,16 +288,16 @@ watch(
   { immediate: true }
 )
 
-interface ReportData {
-  productKey: string
-  deviceKey: string
-  type: string
-  subType: string
-  reportTime: string
-  content: string  // 改为 string 类型，存储 JSON 字符串
-}
+// interface ReportData {
+//   productKey: string
+//   deviceKey: string
+//   type: string
+//   subType: string
+//   reportTime: string
+//   content: string  // 改为 string 类型，存储 JSON 字符串
+// }
 
-// 处理属性上报
+// 处理属性上报    TODO:数据类型效验
 const handlePropertyReport = async () => {
   const contentObj: Record<string, any> = {}
   list.value.forEach((item) => {
@@ -315,71 +312,67 @@ const handlePropertyReport = async () => {
     deviceKey: props.device.deviceKey,
     type: 'property',
     subType: 'report',
-    reportTime: new Date().toISOString(),
+    reportTime: Date.now(), // 将 reportTime 变为数字类型的时间戳
     content: JSON.stringify(contentObj)  // 转换为 JSON 字符串
   }
 
   try {
-    // TODO: 调用API发送数据
-    console.log('上报数据:', reportData)
-    console.log('reportData.content', reportData.content)
-    const data = await DeviceApi.simulatorDevice(reportData)
-    console.log(data)
-    message.success('属性上报成功123')
+    await DeviceApi.simulatorDevice(reportData)
+    message.success('属性上报成功')
   } catch (error) {
     message.error('属性上报失败')
   }
 }
 
-// 处理事件上报
-const handleEventReport = async () => {
-  const contentObj: Record<string, any> = {}
-  list.value
-    .filter(item => item.type === 'event')
-    .forEach((item) => {
-      if (item.simulateValue !== undefined && item.simulateValue !== '') {
-        contentObj[item.identifier] = item.simulateValue
-      }
-    })
+// // 处理事件上报
+// const handleEventReport = async () => {
+//   const contentObj: Record<string, any> = {}
+//   list.value
+//     .filter(item => item.type === 'event')
+//     .forEach((item) => {
+//       if (item.simulateValue !== undefined && item.simulateValue !== '') {
+//         contentObj[item.identifier] = item.simulateValue
+//       }
+//     })
 
-  const reportData: ReportData = {
-    productKey: props.product.productKey,
-    deviceKey: props.device.deviceKey,
-    type: 'event',
-    subType: list.value.find(item => item.type === 'event')?.identifier || '',
-    reportTime: new Date().toISOString(),
-    content: JSON.stringify(contentObj)  // 转换为 JSON 字符串
-  }
+//   const reportData: ReportData = {
+//     productKey: props.product.productKey,
+//     deviceKey: props.device.deviceKey,
+//     type: 'event',
+//     subType: list.value.find(item => item.type === 'event')?.identifier || '',
+//     reportTime: new Date().toISOString(),
+//     content: JSON.stringify(contentObj)  // 转换为 JSON 字符串
+//   }
 
-  try {
-    // TODO: 调用API发送数据
-    console.log('上报数据:', reportData)
-    message.success('事件上报成功')
-  } catch (error) {
-    message.error('事件上报失败')
-  }
-}
+//   try {
+//     // TODO: 调用API发送数据
+//     console.log('上报数据:', reportData)
+//     message.success('事件上报成功')
+//   } catch (error) {
+//     message.error('事件上报失败')
+//   }
+// }
 
-// 处理设备状态变更
-const handleDeviceState = async (state: 'online' | 'offline') => {
-  const reportData: ReportData = {
-    productKey: props.product.productKey,
-    deviceKey: props.device.deviceKey,
-    type: 'status',
-    subType: state,
-    reportTime: new Date().toISOString(),
-    content: JSON.stringify({ status: state })  // 转换为 JSON 字符串
-  }
+// // 处理设备状态变更
+// const handleDeviceState = async (state: 'online' | 'offline') => {
+//   const reportData: ReportData = {
+//     productKey: props.product.productKey,
+//     deviceKey: props.device.deviceKey,
+//     type: 'status',
+//     subType: state,
+//     reportTime: new Date().toISOString(),
+//     content: JSON.stringify({ status: state })  // 转换为 JSON 字符串
+//   }
 
-  try {
-    // TODO: 调用API发送数据
-    console.log('状态变更数据:', reportData)
-    console.log('reportData.content111111111', reportData.content)
-    message.success(`设备${state === 'online' ? '上线' : '下线'}成功`)
-  } catch (error) {
-    message.error(`设备${state === 'online' ? '上线' : '下线'}失败`)
-  }
-}
+//   try {
+//     // TODO: 调用API发送数据
+//     console.log('状态变更数据:', reportData)
+//     console.log('reportData.content111111111', reportData.content)
+//     message.success(`设备${state === 'online' ? '上线' : '下线'}成功`)
+//   } catch (error) {
+//     message.error(`设备${state === 'online' ? '上线' : '下线'}失败`)
+//   }
+// }
 
 // 处理属性获取
 const handlePropertyGet = async () => {

@@ -18,6 +18,13 @@ export interface ThingModelData {
 }
 
 /**
+ * IoT 模拟设备
+ */
+export interface SimulatorData extends ThingModelData {
+  simulateValue?: string | number // 用于存储模拟值
+}
+
+/**
  * ThingModelProperty 类型
  */
 export interface ThingModelProperty {

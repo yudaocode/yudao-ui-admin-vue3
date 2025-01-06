@@ -69,7 +69,7 @@ export interface SimulatorDataVO {
   deviceKey: string
   type: string
   subType: string
-  reportTime: string
+  reportTime: number // 时间戳
   content: string  // 存储 JSON 字符串
 }
 
@@ -151,5 +151,9 @@ export const DeviceApi = {
   // 模拟设备
   simulatorDevice: async (data: SimulatorDataVO) => {
     return await request.post({ url: `/iot/device/data/simulator`, data })
+  },
+  //查询设备日志分页
+  getDeviceLogPage: async (params: any) => {
+    return await request.get({ url: `/iot/device/data/log/page`, params })
   }
 }

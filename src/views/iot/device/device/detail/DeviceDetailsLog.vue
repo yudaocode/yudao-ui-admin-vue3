@@ -29,27 +29,18 @@
           {{ formatDate(scope.row.time) }}
         </template>
       </el-table-column>
-      <el-table-column label="类型" align="center" prop="type" width="120">
-        <template #default="scope">
-          <dict-tag :type="DICT_TYPE.IOT_MESSAGE_TYPE" :value="scope.row.type" />
-        </template>
-      </el-table-column>
-      <el-table-column label="名称(标识符)" align="center" prop="name" />
+      <el-table-column label="类型" align="center" prop="type" width="120" />
+      <el-table-column label="名称(标识符)" align="center" prop="subType" width="120" />
       <el-table-column label="内容" align="center" prop="content" :show-overflow-tooltip="true" />
     </el-table>
 
     <!-- 分页 -->
     <div class="mt-10px flex justify-end">
-      <el-pagination
-        v-model:current-page="queryParams.pageNo"
-        v-model:page-size="queryParams.pageSize"
+      <Pagination
         :total="total"
-        :page-sizes="[10, 20, 50, 100]"
-        small
-        background
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleQuery"
-        @current-change="handleQuery"
+        v-model:page="queryParams.pageNo"
+        v-model:limit="queryParams.pageSize"
+        @pagination="getLogList"
       />
     </div>
   </ContentWrap>
@@ -61,15 +52,17 @@ import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 
 const props = defineProps<{
-  deviceId: number
+  deviceKey: number
 }>()
 
-// 查询参数
+//TODO:后续看看使用什么查询条件  目前后端是留了时间范围  type  subType
+// 查询参数 
 const queryParams = reactive({
-  type: '',
-  keyword: '',
+  deviceKey: props.deviceKey,
+  // type: '',
+  // keyword: '',
   pageNo: 1,
-  pageSize: 20
+  pageSize: 10
 })
 
 // 列表数据
@@ -90,30 +83,31 @@ const typeMap = {
 
 /** 查询日志列表 */
 const getLogList = async () => {
-  // if (!props.deviceId) return
-  // loading.value = true
-  // try {
-  //   const res = await DeviceApi.getDeviceLogs(props.deviceId, queryParams)
-  //   total.value = res.total
-  //   logList.value = res.list.map((item: any) => {
-  //     const log = {
-  //       time: item.time,
-  //       type: typeMap[item.type as keyof typeof typeMap] || item.type,
-  //       name: getLogName(item),
-  //       content: item.content
-  //     }
-  //     return log
-  //   })
-  // } finally {
-  //   loading.value = false
-  // }
+  if (!props.deviceKey) return
+  loading.value = true
+  try {
+    const res = await DeviceApi.getDeviceLogPage(queryParams)
+    total.value = res.total
+    logList.value = res.list.map((item: any) => {
+      const log = {
+        time: item.reportTime,
+        type: item.type,
+        subType: item.subType,
+        content: item.content
+      }
+      return log
+    })
+    console.log(logList.value)
+  } finally {
+    loading.value = false
+  }
 }
 
 /** 获取日志名称 */
 const getLogName = (log: any) => {
   const { type, identifier } = log
   let name = '未知'
-  
+
   if (type === 'property') {
     if (identifier === 'set_reply') name = '设置回复'
     else if (identifier === 'report') name = '上报'
@@ -123,7 +117,7 @@ const getLogName = (log: any) => {
   } else if (type === 'lifetime') {
     name = identifier === 'register' ? '注册' : name
   }
-  
+
   return `${name}(${identifier})`
 }
 
@@ -146,11 +140,14 @@ watch(autoRefresh, (newValue) => {
 })
 
 /** 监听设备ID变化 */
-watch(() => props.deviceId, (newValue) => {
-  if (newValue) {
-    handleQuery()
+watch(
+  () => props.deviceKey,
+  (newValue) => {
+    if (newValue) {
+      handleQuery()
+    }
   }
-})
+)
 
 /** 组件卸载时清除定时器 */
 onBeforeUnmount(() => {
@@ -161,7 +158,7 @@ onBeforeUnmount(() => {
 
 /** 初始化 */
 onMounted(() => {
-  if (props.deviceId) {
+  if (props.deviceKey) {
     getLogList()
   }
 })
