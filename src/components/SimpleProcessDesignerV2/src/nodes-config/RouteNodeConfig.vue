@@ -54,6 +54,7 @@
               </el-radio>
             </el-radio-group>
           </el-form-item>
+          <!-- TODO @lesan：1）1、2 使用枚举；2）默认先 条件组关系，再 条件表达式；3）这种可以封装成一个小组件么？ -->
           <el-form-item
             v-if="item.conditionType === 1"
             label="条件表达式"
@@ -278,6 +279,7 @@ const getShowText = () => {
   return `${routeGroup.value.length}条路由分支`
 }
 
+// TODO @lesan：这个需要实现么？
 const changeConditionType = () => {}
 
 const deleteConditionGroup = (conditions, index) => {

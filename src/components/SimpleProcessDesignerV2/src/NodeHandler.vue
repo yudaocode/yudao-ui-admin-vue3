@@ -236,6 +236,7 @@ const addNode = (type: number) => {
     emits('update:childNode', data)
   }
   if (type === NodeType.ROUTE_BRANCH_NODE) {
+    // TODO @lesan：高亮那边，需要考虑下。
     const data: SimpleFlowNode = {
       id: 'GateWay_' + generateUUID(),
       name: NODE_DEFAULT_NAME.get(NodeType.ROUTE_BRANCH_NODE) as string,

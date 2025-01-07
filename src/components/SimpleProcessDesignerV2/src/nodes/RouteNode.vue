@@ -10,7 +10,9 @@
       >
         <div class="node-title-container">
           <!-- TODO @芋艿 需要更换一下iconfont的图标 -->
-          <div class="node-title-icon copy-task"><span class="iconfont icon-copy"></span></div>
+          <div class="node-title-icon copy-task">
+            <span class="iconfont icon-copy"></span>
+          </div>
           <input
             v-if="!readonly && showInput"
             type="text"
@@ -47,11 +49,7 @@
         :current-node="currentNode"
       />
     </div>
-    <RouteNodeConfig
-      v-if="!readonly && currentNode"
-      ref="nodeSetting"
-      :flow-node="currentNode"
-    />
+    <RouteNodeConfig v-if="!readonly && currentNode" ref="nodeSetting" :flow-node="currentNode" />
   </div>
 </template>
 <script setup lang="ts">
@@ -59,16 +57,18 @@ import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
 import NodeHandler from '../NodeHandler.vue'
 import { useNodeName2, useWatchNode, useTaskStatusClass } from '../node'
 import RouteNodeConfig from '../nodes-config/RouteNodeConfig.vue'
+
 defineOptions({
   name: 'RouteNode'
 })
+
 const props = defineProps({
   flowNode: {
     type: Object as () => SimpleFlowNode,
     required: true
   }
 })
-// 定义事件，更新父组件。
+// 定义事件，更新父组件
 const emits = defineEmits<{
   'update:flowNode': [node: SimpleFlowNode | undefined]
 }>()

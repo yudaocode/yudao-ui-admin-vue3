@@ -98,7 +98,7 @@ export interface SimpleFlowNode {
   // 审批节点的审批人与发起人相同时，对应的处理类型
   assignStartUserHandlerType?: number
   // 创建任务监听器
-  createTaskListener: ListenerHandler
+  createTaskListener?: ListenerHandler
   // 条件类型
   conditionType?: ConditionType
   // 条件表达式
@@ -646,7 +646,7 @@ export const DELAY_TYPE = [
  */
 export type RouteCondition = {
   nodeId: string
-  conditionType: number
+  conditionType: number // TODO @lesan：ConditionType
   conditionExpression: string
   conditionGroups: ConditionGroup
 }
