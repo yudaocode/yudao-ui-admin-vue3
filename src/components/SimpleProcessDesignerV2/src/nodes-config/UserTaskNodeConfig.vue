@@ -19,7 +19,8 @@
           :placeholder="nodeName"
         />
         <div v-else class="node-name">
-          {{ nodeName }} <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()" />
+          {{ nodeName }}
+          <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()" />
         </div>
         <div class="divide-line"></div>
       </div>
@@ -440,6 +441,7 @@
             <el-divider content-position="left">
               <el-text tag="b" size="large">创建任务</el-text>
             </el-divider>
+            <!-- TODO @lesan：createTaskListenerEnable、createTaskListenerPath 等 idea 红色的告警！ -->
             <el-form-item prop="createTaskListenerEnable">
               <el-switch
                 v-model="configForm.createTaskListenerEnable"
@@ -450,7 +452,7 @@
             <div v-if="configForm.createTaskListenerEnable">
               <el-form-item>
                 <el-alert
-                  title="仅支持POST请求，以请求体方式接收参数"
+                  title="仅支持 POST 请求，以请求体方式接收参数"
                   type="warning"
                   show-icon
                   :closable="false"
@@ -465,6 +467,7 @@
                   v-for="(item, index) in configForm.createTaskListenerHeader"
                   :key="index"
                 >
+                  <!-- TODO @lesan：css 尽量用 unocss 哈 -->
                   <div class="mr-2">
                     <el-input v-model="item.key" style="width: 160px" />
                   </div>
@@ -537,6 +540,7 @@
               </el-form-item>
             </div>
 
+            <!-- TODO lesan：待实现 -->
             <el-divider content-position="left">
               <el-text tag="b" size="large">指派任务执行人员</el-text>
             </el-divider>
@@ -548,6 +552,7 @@
               />
             </el-form-item>
 
+            <!-- TODO lesan：待实现 -->
             <el-divider content-position="left">
               <el-text tag="b" size="large">完成任务</el-text>
             </el-divider>
@@ -641,7 +646,7 @@ const { settingVisible, closeDrawer, openDrawer } = useDrawer()
 // 节点名称配置
 const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.USER_TASK_NODE)
 // 激活的 Tab 标签页
-const activeTabName = ref('listener')
+const activeTabName = ref('user')
 // 表单字段权限设置
 const { formType, fieldsPermissionConfig, formFieldOptions, getNodeConfigFormFields } =
   useFormFieldsPermission(FieldPermissionType.READ)
@@ -848,7 +853,7 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   buttonsSetting.value = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
   // 4. 表单字段权限配置
   getNodeConfigFormFields(node.fieldsPermission)
-  // 创建任务监听器
+  // 5. 创建任务监听器
   configForm.value.createTaskListenerEnable = node.createTaskListener.enable
   configForm.value.createTaskListenerPath = node.createTaskListener.path
   configForm.value.createTaskListenerHeader = node.createTaskListener.header ?? []
