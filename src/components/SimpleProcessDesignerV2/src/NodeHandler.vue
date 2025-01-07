@@ -46,6 +46,13 @@
             </div>
             <div class="handler-item-text">延迟器</div>
           </div>
+          <div class="handler-item" @click="addNode(NodeType.ROUTE_BRANCH_NODE)">
+            <!-- TODO @芋艿 需要更换一下iconfont的图标 -->
+            <div class="handler-item-icon copy">
+              <span class="iconfont icon-size icon-copy"></span>
+            </div>
+            <div class="handler-item-text">路由分支</div>
+          </div>
         </div>
         <template #reference>
           <div class="add-icon"><Icon icon="ep:plus" /></div>
@@ -225,6 +232,17 @@ const addNode = (type: number) => {
       showText: '',
       type: NodeType.DELAY_TIMER_NODE,
       childNode: props.childNode
+    }
+    emits('update:childNode', data)
+  }
+  if (type === NodeType.ROUTE_BRANCH_NODE) {
+    const data: SimpleFlowNode = {
+      id: 'GateWay_' + generateUUID(),
+      name: NODE_DEFAULT_NAME.get(NodeType.ROUTE_BRANCH_NODE) as string,
+      showText: '',
+      type: NodeType.ROUTE_BRANCH_NODE,
+      childNode: props.childNode,
+      defaultFlowId: 'Flow_' + generateUUID()
     }
     emits('update:childNode', data)
   }
