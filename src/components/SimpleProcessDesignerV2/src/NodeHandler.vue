@@ -128,7 +128,13 @@ const addNode = (type: number) => {
       },
       assignStartUserHandlerType: AssignStartUserHandlerType.START_USER_AUDIT,
       childNode: props.childNode,
-      createTaskListener: {
+      taskCreateListener: {
+        enable: false
+      },
+      taskAssignListener: {
+        enable: false
+      },
+      taskCompleteListener: {
         enable: false
       }
     }

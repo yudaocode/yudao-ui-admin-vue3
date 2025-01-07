@@ -98,7 +98,11 @@ export interface SimpleFlowNode {
   // 审批节点的审批人与发起人相同时，对应的处理类型
   assignStartUserHandlerType?: number
   // 创建任务监听器
-  createTaskListener?: ListenerHandler
+  taskCreateListener?: ListenerHandler
+  // 创建任务监听器
+  taskAssignListener?: ListenerHandler
+  // 创建任务监听器
+  taskCompleteListener?: ListenerHandler
   // 条件类型
   conditionType?: ConditionType
   // 条件表达式
@@ -236,14 +240,24 @@ export type AssignEmptyHandler = {
  */
 export type ListenerHandler = {
   enable: boolean
-  path: string
-  header: ListenerMap[]
-  body: ListenerMap[]
+  path?: string
+  header?: ListenerMap[]
+  body?: ListenerMap[]
 }
 export type ListenerMap = {
   key: string
   type: number
   value: string
+}
+export enum ListenerMapTypeEnum {
+  /**
+   * 固定值
+   */
+  FIXED_VALUE = 1,
+  /**
+   * 表单
+   */
+  FROM_FORM = 2
 }
 export const LISTENER_MAP_TYPES = [
   {

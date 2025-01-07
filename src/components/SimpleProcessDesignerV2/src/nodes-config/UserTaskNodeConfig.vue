@@ -436,133 +436,153 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="监听器" name="listener">
-        <div>
+        <div v-for="(listener, listenerIdx) in taskListener" :key="listenerIdx">
           <el-form label-position="top">
-            <el-divider content-position="left">
-              <el-text tag="b" size="large">创建任务</el-text>
-            </el-divider>
-            <!-- TODO @lesan：createTaskListenerEnable、createTaskListenerPath 等 idea 红色的告警！ -->
-            <el-form-item prop="createTaskListenerEnable">
-              <el-switch
-                v-model="configForm.createTaskListenerEnable"
-                active-text="开启"
-                inactive-text="关闭"
-              />
-            </el-form-item>
-            <div v-if="configForm.createTaskListenerEnable">
+            <div>
+              <el-divider content-position="left">
+                <el-text tag="b" size="large">{{ listener.name }}</el-text>
+              </el-divider>
               <el-form-item>
-                <el-alert
-                  title="仅支持 POST 请求，以请求体方式接收参数"
-                  type="warning"
-                  show-icon
-                  :closable="false"
+                <el-switch
+                  v-model="configForm[`task${listener.type}ListenerEnable`]"
+                  active-text="开启"
+                  inactive-text="关闭"
                 />
               </el-form-item>
-              <el-form-item label="请求地址" prop="createTaskListenerPath">
-                <el-input v-model="configForm.createTaskListenerPath" />
-              </el-form-item>
-              <el-form-item label="请求头" prop="createTaskListenerHeader">
-                <div
-                  class="flex pt-2"
-                  v-for="(item, index) in configForm.createTaskListenerHeader"
-                  :key="index"
-                >
-                  <!-- TODO @lesan：css 尽量用 unocss 哈 -->
-                  <div class="mr-2">
-                    <el-input v-model="item.key" style="width: 160px" />
-                  </div>
-                  <div class="mr-2">
-                    <el-select v-model="item.type" style="width: 100px">
-                      <el-option
-                        v-for="types in LISTENER_MAP_TYPES"
-                        :key="types.value"
-                        :label="types.label"
-                        :value="types.value"
+              <div v-if="configForm[`task${listener.type}ListenerEnable`]">
+                <el-form-item>
+                  <el-alert
+                    title="仅支持 POST 请求，以请求体方式接收参数"
+                    type="warning"
+                    show-icon
+                    :closable="false"
+                  />
+                </el-form-item>
+                <el-form-item label="请求地址">
+                  <el-input v-model="configForm[`task${listener.type}ListenerPath`]" />
+                </el-form-item>
+                <el-form-item label="请求头">
+                  <div
+                    class="flex pt-2"
+                    v-for="(item, index) in configForm[`task${listener.type}ListenerHeader`]"
+                    :key="index"
+                  >
+                    <div class="mr-2">
+                      <el-input class="w-160px" v-model="item.key" />
+                    </div>
+                    <div class="mr-2">
+                      <el-select class="w-100px!" v-model="item.type">
+                        <el-option
+                          v-for="types in LISTENER_MAP_TYPES"
+                          :key="types.value"
+                          :label="types.label"
+                          :value="types.value"
+                        />
+                      </el-select>
+                    </div>
+                    <div class="mr-2">
+                      <el-input
+                        v-if="item.type === ListenerMapTypeEnum.FIXED_VALUE"
+                        class="w-160px"
+                        v-model="item.value"
                       />
-                    </el-select>
-                  </div>
-                  <div class="mr-2">
-                    <el-input v-model="item.value" style="width: 160px" />
-                  </div>
-                  <div class="mr-1 flex items-center">
-                    <Icon
-                      icon="ep:delete"
-                      :size="18"
-                      @click="deleteTaskListenerMap(configForm.createTaskListenerHeader, index)"
-                    />
-                  </div>
-                </div>
-                <el-button
-                  type="primary"
-                  text
-                  @click="addTaskListenerMap(configForm.createTaskListenerHeader)"
-                >
-                  <Icon icon="ep:plus" class="mr-5px" />添加一行
-                </el-button>
-              </el-form-item>
-              <el-form-item label="请求体" prop="createTaskListenerBody">
-                <div
-                  class="flex pt-2"
-                  v-for="(item, index) in configForm.createTaskListenerBody"
-                  :key="index"
-                >
-                  <div class="mr-2">
-                    <el-input v-model="item.key" style="width: 160px" />
-                  </div>
-                  <div class="mr-2">
-                    <el-select v-model="item.type" style="width: 100px">
-                      <el-option
-                        v-for="types in LISTENER_MAP_TYPES"
-                        :key="types.value"
-                        :label="types.label"
-                        :value="types.value"
+                      <el-select
+                        v-if="item.type === ListenerMapTypeEnum.FROM_FORM"
+                        class="w-160px!"
+                        v-model="item.value"
+                      >
+                        <el-option
+                          v-for="(field, fIdx) in formFieldOptions"
+                          :key="fIdx"
+                          :label="field.title"
+                          :value="field.field"
+                          :disabled="!field.required"
+                        />
+                      </el-select>
+                    </div>
+                    <div class="mr-1 flex items-center">
+                      <Icon
+                        icon="ep:delete"
+                        :size="18"
+                        @click="
+                          deleteTaskListenerMap(
+                            configForm[`task${listener.type}ListenerHeader`],
+                            index
+                          )
+                        "
                       />
-                    </el-select>
+                    </div>
                   </div>
-                  <div class="mr-2">
-                    <el-input v-model="item.value" style="width: 160px" />
+                  <el-button
+                    type="primary"
+                    text
+                    @click="addTaskListenerMap(configForm[`task${listener.type}ListenerHeader`])"
+                  >
+                    <Icon icon="ep:plus" class="mr-5px" />添加一行
+                  </el-button>
+                </el-form-item>
+                <el-form-item label="请求体">
+                  <div
+                    class="flex pt-2"
+                    v-for="(item, index) in configForm[`task${listener.type}ListenerBody`]"
+                    :key="index"
+                  >
+                    <div class="mr-2">
+                      <el-input class="w-160px" v-model="item.key" />
+                    </div>
+                    <div class="mr-2">
+                      <el-select class="w-100px!" v-model="item.type">
+                        <el-option
+                          v-for="types in LISTENER_MAP_TYPES"
+                          :key="types.value"
+                          :label="types.label"
+                          :value="types.value"
+                        />
+                      </el-select>
+                    </div>
+                    <div class="mr-2">
+                      <el-input
+                        v-if="item.type === ListenerMapTypeEnum.FIXED_VALUE"
+                        class="w-160px"
+                        v-model="item.value"
+                      />
+                      <el-select
+                        v-if="item.type === ListenerMapTypeEnum.FROM_FORM"
+                        class="w-160px!"
+                        v-model="item.value"
+                      >
+                        <el-option
+                          v-for="(field, fIdx) in formFieldOptions"
+                          :key="fIdx"
+                          :label="field.title"
+                          :value="field.field"
+                          :disabled="!field.required"
+                        />
+                      </el-select>
+                    </div>
+                    <div class="mr-1 flex items-center">
+                      <Icon
+                        icon="ep:delete"
+                        :size="18"
+                        @click="
+                          deleteTaskListenerMap(
+                            configForm[`task${listener.type}ListenerBody`],
+                            index
+                          )
+                        "
+                      />
+                    </div>
                   </div>
-                  <div class="mr-1 flex items-center">
-                    <Icon
-                      icon="ep:delete"
-                      :size="18"
-                      @click="deleteTaskListenerMap(configForm.createTaskListenerBody, index)"
-                    />
-                  </div>
-                </div>
-                <el-button
-                  type="primary"
-                  text
-                  @click="addTaskListenerMap(configForm.createTaskListenerBody)"
-                >
-                  <Icon icon="ep:plus" class="mr-5px" />添加一行
-                </el-button>
-              </el-form-item>
+                  <el-button
+                    type="primary"
+                    text
+                    @click="addTaskListenerMap(configForm[`task${listener.type}ListenerBody`])"
+                  >
+                    <Icon icon="ep:plus" class="mr-5px" />添加一行
+                  </el-button>
+                </el-form-item>
+              </div>
             </div>
-
-            <!-- TODO lesan：待实现 -->
-            <el-divider content-position="left">
-              <el-text tag="b" size="large">指派任务执行人员</el-text>
-            </el-divider>
-            <el-form-item prop="assignTaskListenerEnable">
-              <el-switch
-                v-model="configForm.assignTaskListenerEnable"
-                active-text="开启"
-                inactive-text="关闭"
-              />
-            </el-form-item>
-
-            <!-- TODO lesan：待实现 -->
-            <el-divider content-position="left">
-              <el-text tag="b" size="large">完成任务</el-text>
-            </el-divider>
-            <el-form-item prop="completeTaskListenerEnable">
-              <el-switch
-                v-model="configForm.completeTaskListenerEnable"
-                active-text="开启"
-                inactive-text="关闭"
-              />
-            </el-form-item>
           </el-form>
         </div>
       </el-tab-pane>
@@ -602,7 +622,8 @@ import {
   AssignEmptyHandlerType,
   FieldPermissionType,
   ProcessVariableEnum,
-  LISTENER_MAP_TYPES
+  LISTENER_MAP_TYPES,
+  ListenerMapTypeEnum
 } from '../consts'
 
 import {
@@ -693,6 +714,21 @@ const formRules = reactive({
   assignEmptyHandlerUserIds: [{ required: true, message: '用户不能为空', trigger: 'change' }],
   assignStartUserHandlerType: [{ required: true }]
 })
+// 监听器数组
+const taskListener = ref([
+  {
+    name: '创建任务',
+    type: 'Create'
+  },
+  {
+    name: '指派任务执行人员',
+    type: 'Assign'
+  },
+  {
+    name: '完成任务',
+    type: 'Complete'
+  }
+])
 
 const {
   configForm: tempConfigForm,
@@ -796,11 +832,25 @@ const saveConfig = async () => {
   // 设置按钮权限
   currentNode.value.buttonsSetting = buttonsSetting.value
   // 创建任务监听器
-  currentNode.value.createTaskListener = {
-    enable: configForm.value.createTaskListenerEnable,
-    path: configForm.value.createTaskListenerPath,
-    header: configForm.value.createTaskListenerHeader,
-    body: configForm.value.createTaskListenerBody
+  currentNode.value.taskCreateListener = {
+    enable: configForm.value.taskCreateListenerEnable ?? false,
+    path: configForm.value.taskCreateListenerPath,
+    header: configForm.value.taskCreateListenerHeader,
+    body: configForm.value.taskCreateListenerBody
+  }
+  // 指派任务监听器
+  currentNode.value.taskAssignListener = {
+    enable: configForm.value.taskAssignListenerEnable ?? false,
+    path: configForm.value.taskAssignListenerPath,
+    header: configForm.value.taskAssignListenerHeader,
+    body: configForm.value.taskAssignListenerBody
+  }
+  // 完成任务监听器
+  currentNode.value.taskCompleteListener = {
+    enable: configForm.value.taskCompleteListenerEnable ?? false,
+    path: configForm.value.taskCompleteListenerPath,
+    header: configForm.value.taskCompleteListenerHeader,
+    body: configForm.value.taskCompleteListenerBody
   }
 
   currentNode.value.showText = showText
@@ -853,11 +903,22 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   buttonsSetting.value = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
   // 4. 表单字段权限配置
   getNodeConfigFormFields(node.fieldsPermission)
-  // 5. 创建任务监听器
-  configForm.value.createTaskListenerEnable = node.createTaskListener.enable
-  configForm.value.createTaskListenerPath = node.createTaskListener.path
-  configForm.value.createTaskListenerHeader = node.createTaskListener.header ?? []
-  configForm.value.createTaskListenerBody = node.createTaskListener.body ?? []
+  // 5. 监听器
+  // 5.1 创建任务
+  configForm.value.taskCreateListenerEnable = node.taskCreateListener!.enable
+  configForm.value.taskCreateListenerPath = node.taskCreateListener!.path
+  configForm.value.taskCreateListenerHeader = node.taskCreateListener?.header ?? []
+  configForm.value.taskCreateListenerBody = node.taskCreateListener?.body ?? []
+  // 5.2 指派任务
+  configForm.value.taskAssignListenerEnable = node.taskAssignListener!.enable
+  configForm.value.taskAssignListenerPath = node.taskAssignListener!.path
+  configForm.value.taskAssignListenerHeader = node.taskAssignListener?.header ?? []
+  configForm.value.taskAssignListenerBody = node.taskAssignListener?.body ?? []
+  // 5.3 完成任务
+  configForm.value.taskCompleteListenerEnable = node.taskCompleteListener!.enable
+  configForm.value.taskCompleteListenerPath = node.taskCompleteListener!.path
+  configForm.value.taskCompleteListenerHeader = node.taskCompleteListener?.header ?? []
+  configForm.value.taskCompleteListenerBody = node.taskCompleteListener?.body ?? []
 }
 
 defineExpose({ openDrawer, showUserTaskNodeConfig }) // 暴露方法给父组件
