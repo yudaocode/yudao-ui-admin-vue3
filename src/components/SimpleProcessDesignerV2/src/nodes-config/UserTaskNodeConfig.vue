@@ -481,7 +481,24 @@
                       </el-select>
                     </div>
                     <div class="mr-2">
-                      <el-input class="w-160px" v-model="item.value" />
+                      <el-input
+                        v-if="item.type === ListenerMapTypeEnum.FIXED_VALUE"
+                        class="w-160px"
+                        v-model="item.value"
+                      />
+                      <el-select
+                        v-if="item.type === ListenerMapTypeEnum.FROM_FORM"
+                        class="w-160px!"
+                        v-model="item.value"
+                      >
+                        <el-option
+                          v-for="(field, fIdx) in formFieldOptions"
+                          :key="fIdx"
+                          :label="field.title"
+                          :value="field.field"
+                          :disabled="!field.required"
+                        />
+                      </el-select>
                     </div>
                     <div class="mr-1 flex items-center">
                       <Icon
@@ -524,7 +541,24 @@
                       </el-select>
                     </div>
                     <div class="mr-2">
-                      <el-input class="w-160px" v-model="item.value" />
+                      <el-input
+                        v-if="item.type === ListenerMapTypeEnum.FIXED_VALUE"
+                        class="w-160px"
+                        v-model="item.value"
+                      />
+                      <el-select
+                        v-if="item.type === ListenerMapTypeEnum.FROM_FORM"
+                        class="w-160px!"
+                        v-model="item.value"
+                      >
+                        <el-option
+                          v-for="(field, fIdx) in formFieldOptions"
+                          :key="fIdx"
+                          :label="field.title"
+                          :value="field.field"
+                          :disabled="!field.required"
+                        />
+                      </el-select>
                     </div>
                     <div class="mr-1 flex items-center">
                       <Icon
@@ -588,7 +622,8 @@ import {
   AssignEmptyHandlerType,
   FieldPermissionType,
   ProcessVariableEnum,
-  LISTENER_MAP_TYPES
+  LISTENER_MAP_TYPES,
+  ListenerMapTypeEnum
 } from '../consts'
 
 import {

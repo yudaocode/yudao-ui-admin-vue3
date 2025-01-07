@@ -249,6 +249,16 @@ export type ListenerMap = {
   type: number
   value: string
 }
+export enum ListenerMapTypeEnum {
+  /**
+   * 固定值
+   */
+  FIXED_VALUE = 1,
+  /**
+   * 表单
+   */
+  FROM_FORM = 2
+}
 export const LISTENER_MAP_TYPES = [
   {
     value: 1,
