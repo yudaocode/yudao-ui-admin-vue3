@@ -1,3 +1,4 @@
+<!-- TODO @lesan：看着没啥问题，哈哈哈，我还搜了下；嘿嘿，有没人封装好了组件库哈？https://github.com/WangShayne/vue3-signature （https://www.npmjs.com/package/vue3-signature） -->
 <template>
   <div style="position: relative">
     <canvas
