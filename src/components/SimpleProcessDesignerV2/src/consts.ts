@@ -44,7 +44,11 @@ export enum NodeType {
   /**
    * 包容分支节点 (对应包容网关)
    */
-  INCLUSIVE_BRANCH_NODE = 53
+  INCLUSIVE_BRANCH_NODE = 53,
+  /**
+   * 路由分支节点
+   */
+  ROUTE_BRANCH_NODE = 54
 }
 
 export enum NodeId {
@@ -93,6 +97,8 @@ export interface SimpleFlowNode {
   assignEmptyHandler?: AssignEmptyHandler
   // 审批节点的审批人与发起人相同时，对应的处理类型
   assignStartUserHandlerType?: number
+  // 创建任务监听器
+  createTaskListener: ListenerHandler
   // 条件类型
   conditionType?: ConditionType
   // 条件表达式
@@ -105,6 +111,9 @@ export interface SimpleFlowNode {
   activityStatus?: TaskStatusEnum
   // 延迟设置
   delaySetting?: DelaySetting
+  // 路由分支
+  routeGroup?: RouteCondition[]
+  defaultFlowId?: string
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -221,6 +230,31 @@ export type AssignEmptyHandler = {
   // 指定用户的编号数组
   userIds?: number[]
 }
+
+/**
+ * 监听器的结构定义
+ */
+export type ListenerHandler = {
+  enable: boolean
+  path: string
+  header: ListenerMap[]
+  body: ListenerMap[]
+}
+export type ListenerMap = {
+  key: string
+  type: number
+  value: string
+}
+export const LISTENER_MAP_TYPES = [
+  {
+    value: 1,
+    label: '固定值'
+  },
+  {
+    value: 2,
+    label: '表单'
+  }
+]
 
 // 审批拒绝类型枚举
 export enum RejectHandlerType {
@@ -421,6 +455,7 @@ NODE_DEFAULT_TEXT.set(NodeType.COPY_TASK_NODE, '请配置抄送人')
 NODE_DEFAULT_TEXT.set(NodeType.CONDITION_NODE, '请设置条件')
 NODE_DEFAULT_TEXT.set(NodeType.START_USER_NODE, '请设置发起人')
 NODE_DEFAULT_TEXT.set(NodeType.DELAY_TIMER_NODE, '请设置延迟器')
+NODE_DEFAULT_TEXT.set(NodeType.ROUTE_BRANCH_NODE, '请设置路由节点')
 
 export const NODE_DEFAULT_NAME = new Map<number, string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
@@ -428,6 +463,7 @@ NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 NODE_DEFAULT_NAME.set(NodeType.START_USER_NODE, '发起人')
 NODE_DEFAULT_NAME.set(NodeType.DELAY_TIMER_NODE, '延迟器')
+NODE_DEFAULT_NAME.set(NodeType.ROUTE_BRANCH_NODE, '路由分支')
 
 // 候选人策略。暂时不从字典中取。 后续可能调整。控制显示顺序
 export const CANDIDATE_STRATEGY: DictDataVO[] = [
@@ -604,3 +640,13 @@ export const DELAY_TYPE = [
   { label: '固定时长', value: DelayTypeEnum.FIXED_TIME_DURATION },
   { label: '固定日期', value: DelayTypeEnum.FIXED_DATE_TIME }
 ]
+
+/**
+ * 路由分支结构定义
+ */
+export type RouteCondition = {
+  nodeId: string
+  conditionType: number
+  conditionExpression: string
+  conditionGroups: ConditionGroup
+}

@@ -19,7 +19,8 @@
           :placeholder="nodeName"
         />
         <div v-else class="node-name">
-          {{ nodeName }} <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()" />
+          {{ nodeName }}
+          <Icon class="ml-1" icon="ep:edit-pen" :size="16" @click="clickIcon()" />
         </div>
         <div class="divide-line"></div>
       </div>
@@ -434,6 +435,137 @@
           </div>
         </div>
       </el-tab-pane>
+      <el-tab-pane label="监听器" name="listener">
+        <div>
+          <el-form label-position="top">
+            <el-divider content-position="left">
+              <el-text tag="b" size="large">创建任务</el-text>
+            </el-divider>
+            <!-- TODO @lesan：createTaskListenerEnable、createTaskListenerPath 等 idea 红色的告警！ -->
+            <el-form-item prop="createTaskListenerEnable">
+              <el-switch
+                v-model="configForm.createTaskListenerEnable"
+                active-text="开启"
+                inactive-text="关闭"
+              />
+            </el-form-item>
+            <div v-if="configForm.createTaskListenerEnable">
+              <el-form-item>
+                <el-alert
+                  title="仅支持 POST 请求，以请求体方式接收参数"
+                  type="warning"
+                  show-icon
+                  :closable="false"
+                />
+              </el-form-item>
+              <el-form-item label="请求地址" prop="createTaskListenerPath">
+                <el-input v-model="configForm.createTaskListenerPath" />
+              </el-form-item>
+              <el-form-item label="请求头" prop="createTaskListenerHeader">
+                <div
+                  class="flex pt-2"
+                  v-for="(item, index) in configForm.createTaskListenerHeader"
+                  :key="index"
+                >
+                  <!-- TODO @lesan：css 尽量用 unocss 哈 -->
+                  <div class="mr-2">
+                    <el-input v-model="item.key" style="width: 160px" />
+                  </div>
+                  <div class="mr-2">
+                    <el-select v-model="item.type" style="width: 100px">
+                      <el-option
+                        v-for="types in LISTENER_MAP_TYPES"
+                        :key="types.value"
+                        :label="types.label"
+                        :value="types.value"
+                      />
+                    </el-select>
+                  </div>
+                  <div class="mr-2">
+                    <el-input v-model="item.value" style="width: 160px" />
+                  </div>
+                  <div class="mr-1 flex items-center">
+                    <Icon
+                      icon="ep:delete"
+                      :size="18"
+                      @click="deleteTaskListenerMap(configForm.createTaskListenerHeader, index)"
+                    />
+                  </div>
+                </div>
+                <el-button
+                  type="primary"
+                  text
+                  @click="addTaskListenerMap(configForm.createTaskListenerHeader)"
+                >
+                  <Icon icon="ep:plus" class="mr-5px" />添加一行
+                </el-button>
+              </el-form-item>
+              <el-form-item label="请求体" prop="createTaskListenerBody">
+                <div
+                  class="flex pt-2"
+                  v-for="(item, index) in configForm.createTaskListenerBody"
+                  :key="index"
+                >
+                  <div class="mr-2">
+                    <el-input v-model="item.key" style="width: 160px" />
+                  </div>
+                  <div class="mr-2">
+                    <el-select v-model="item.type" style="width: 100px">
+                      <el-option
+                        v-for="types in LISTENER_MAP_TYPES"
+                        :key="types.value"
+                        :label="types.label"
+                        :value="types.value"
+                      />
+                    </el-select>
+                  </div>
+                  <div class="mr-2">
+                    <el-input v-model="item.value" style="width: 160px" />
+                  </div>
+                  <div class="mr-1 flex items-center">
+                    <Icon
+                      icon="ep:delete"
+                      :size="18"
+                      @click="deleteTaskListenerMap(configForm.createTaskListenerBody, index)"
+                    />
+                  </div>
+                </div>
+                <el-button
+                  type="primary"
+                  text
+                  @click="addTaskListenerMap(configForm.createTaskListenerBody)"
+                >
+                  <Icon icon="ep:plus" class="mr-5px" />添加一行
+                </el-button>
+              </el-form-item>
+            </div>
+
+            <!-- TODO lesan：待实现 -->
+            <el-divider content-position="left">
+              <el-text tag="b" size="large">指派任务执行人员</el-text>
+            </el-divider>
+            <el-form-item prop="assignTaskListenerEnable">
+              <el-switch
+                v-model="configForm.assignTaskListenerEnable"
+                active-text="开启"
+                inactive-text="关闭"
+              />
+            </el-form-item>
+
+            <!-- TODO lesan：待实现 -->
+            <el-divider content-position="left">
+              <el-text tag="b" size="large">完成任务</el-text>
+            </el-divider>
+            <el-form-item prop="completeTaskListenerEnable">
+              <el-switch
+                v-model="configForm.completeTaskListenerEnable"
+                active-text="开启"
+                inactive-text="关闭"
+              />
+            </el-form-item>
+          </el-form>
+        </div>
+      </el-tab-pane>
     </el-tabs>
     <template #footer>
       <el-divider />
@@ -469,7 +601,8 @@ import {
   ASSIGN_EMPTY_HANDLER_TYPES,
   AssignEmptyHandlerType,
   FieldPermissionType,
-  ProcessVariableEnum
+  ProcessVariableEnum,
+  LISTENER_MAP_TYPES
 } from '../consts'
 
 import {
@@ -662,6 +795,13 @@ const saveConfig = async () => {
   currentNode.value.fieldsPermission = fieldsPermissionConfig.value
   // 设置按钮权限
   currentNode.value.buttonsSetting = buttonsSetting.value
+  // 创建任务监听器
+  currentNode.value.createTaskListener = {
+    enable: configForm.value.createTaskListenerEnable,
+    path: configForm.value.createTaskListenerPath,
+    header: configForm.value.createTaskListenerHeader,
+    body: configForm.value.createTaskListenerBody
+  }
 
   currentNode.value.showText = showText
   settingVisible.value = false
@@ -713,6 +853,11 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   buttonsSetting.value = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
   // 4. 表单字段权限配置
   getNodeConfigFormFields(node.fieldsPermission)
+  // 5. 创建任务监听器
+  configForm.value.createTaskListenerEnable = node.createTaskListener.enable
+  configForm.value.createTaskListenerPath = node.createTaskListener.path
+  configForm.value.createTaskListenerHeader = node.createTaskListener.header ?? []
+  configForm.value.createTaskListenerBody = node.createTaskListener.body ?? []
 }
 
 defineExpose({ openDrawer, showUserTaskNodeConfig }) // 暴露方法给父组件
@@ -824,6 +969,17 @@ function useTimeoutHandler() {
     isoTimeDuration,
     cTimeoutMaxRemindCount
   }
+}
+
+const addTaskListenerMap = (arr) => {
+  arr.push({
+    key: '',
+    type: 1,
+    value: ''
+  })
+}
+const deleteTaskListenerMap = (arr, index) => {
+  arr.splice(index, 1)
 }
 </script>
 

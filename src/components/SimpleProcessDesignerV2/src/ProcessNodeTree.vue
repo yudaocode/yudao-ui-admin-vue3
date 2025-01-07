@@ -44,6 +44,12 @@
     :flow-node="currentNode"
     @update:flow-node="handleModelValueUpdate"
   />
+  <!-- 路由分支节点 -->
+  <RouteNode
+    v-if="currentNode && currentNode.type === NodeType.ROUTE_BRANCH_NODE"
+    :flow-node="currentNode"
+    @update:flow-node="handleModelValueUpdate"
+  />
   <!-- 递归显示孩子节点  -->
   <ProcessNodeTree
     v-if="currentNode && currentNode.childNode"
@@ -67,6 +73,7 @@ import ExclusiveNode from './nodes/ExclusiveNode.vue'
 import ParallelNode from './nodes/ParallelNode.vue'
 import InclusiveNode from './nodes/InclusiveNode.vue'
 import DelayTimerNode from './nodes/DelayTimerNode.vue'
+import RouteNode from './nodes/RouteNode.vue'
 import { SimpleFlowNode, NodeType } from './consts'
 import { useWatchNode } from './node'
 defineOptions({
