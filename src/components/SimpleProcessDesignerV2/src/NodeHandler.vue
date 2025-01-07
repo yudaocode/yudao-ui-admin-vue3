@@ -120,7 +120,10 @@ const addNode = (type: number) => {
         type: AssignEmptyHandlerType.APPROVE
       },
       assignStartUserHandlerType: AssignStartUserHandlerType.START_USER_AUDIT,
-      childNode: props.childNode
+      childNode: props.childNode,
+      createTaskListener: {
+        enable: false
+      }
     }
     emits('update:childNode', data)
   }
