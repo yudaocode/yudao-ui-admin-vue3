@@ -116,7 +116,7 @@ export interface SimpleFlowNode {
   // 延迟设置
   delaySetting?: DelaySetting
   // 路由分支
-  routeGroups?: RouteCondition[]
+  routerGroups?: RouteCondition[]
   defaultFlowId?: string
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
@@ -241,15 +241,15 @@ export type AssignEmptyHandler = {
 export type ListenerHandler = {
   enable: boolean
   path?: string
-  header?: ListenerMap[]
-  body?: ListenerMap[]
+  header?: ListenerParam[]
+  body?: ListenerParam[]
 }
-export type ListenerMap = {
+export type ListenerParam = {
   key: string
   type: number
   value: string
 }
-export enum ListenerMapTypeEnum {
+export enum ListenerParamTypeEnum {
   /**
    * 固定值
    */

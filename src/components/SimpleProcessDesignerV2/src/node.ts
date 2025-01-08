@@ -15,7 +15,7 @@ import {
   AssignStartUserHandlerType,
   AssignEmptyHandlerType,
   FieldPermissionType,
-  ListenerMap
+  ListenerParam
 } from './consts'
 import { parseFormFields } from '@/components/FormCreate/src/utils/index'
 export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlowNode> {
@@ -139,16 +139,16 @@ export type UserTaskFormType = {
   buttonsSetting: any[]
   taskCreateListenerEnable?: boolean
   taskCreateListenerPath?: string
-  taskCreateListenerHeader?: ListenerMap[]
-  taskCreateListenerBody?: ListenerMap[]
+  taskCreateListenerHeader?: ListenerParam[]
+  taskCreateListenerBody?: ListenerParam[]
   taskAssignListenerEnable?: boolean
   taskAssignListenerPath?: string
-  taskAssignListenerHeader?: ListenerMap[]
-  taskAssignListenerBody?: ListenerMap[]
+  taskAssignListenerHeader?: ListenerParam[]
+  taskAssignListenerBody?: ListenerParam[]
   taskCompleteListenerEnable?: boolean
   taskCompleteListenerPath?: string
-  taskCompleteListenerHeader?: ListenerMap[]
-  taskCompleteListenerBody?: ListenerMap[]
+  taskCompleteListenerHeader?: ListenerParam[]
+  taskCompleteListenerBody?: ListenerParam[]
 }
 
 export type CopyTaskFormType = {

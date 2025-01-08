@@ -482,12 +482,12 @@
                     </div>
                     <div class="mr-2">
                       <el-input
-                        v-if="item.type === ListenerMapTypeEnum.FIXED_VALUE"
+                        v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
                         class="w-160px"
                         v-model="item.value"
                       />
                       <el-select
-                        v-if="item.type === ListenerMapTypeEnum.FROM_FORM"
+                        v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
                         class="w-160px!"
                         v-model="item.value"
                       >
@@ -505,7 +505,7 @@
                         icon="ep:delete"
                         :size="18"
                         @click="
-                          deleteTaskListenerMap(
+                          deleteTaskListenerParam(
                             configForm[`task${listener.type}ListenerHeader`],
                             index
                           )
@@ -516,7 +516,7 @@
                   <el-button
                     type="primary"
                     text
-                    @click="addTaskListenerMap(configForm[`task${listener.type}ListenerHeader`])"
+                    @click="addTaskListenerParam(configForm[`task${listener.type}ListenerHeader`])"
                   >
                     <Icon icon="ep:plus" class="mr-5px" />添加一行
                   </el-button>
@@ -542,12 +542,12 @@
                     </div>
                     <div class="mr-2">
                       <el-input
-                        v-if="item.type === ListenerMapTypeEnum.FIXED_VALUE"
+                        v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
                         class="w-160px"
                         v-model="item.value"
                       />
                       <el-select
-                        v-if="item.type === ListenerMapTypeEnum.FROM_FORM"
+                        v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
                         class="w-160px!"
                         v-model="item.value"
                       >
@@ -565,7 +565,7 @@
                         icon="ep:delete"
                         :size="18"
                         @click="
-                          deleteTaskListenerMap(
+                          deleteTaskListenerParam(
                             configForm[`task${listener.type}ListenerBody`],
                             index
                           )
@@ -576,7 +576,7 @@
                   <el-button
                     type="primary"
                     text
-                    @click="addTaskListenerMap(configForm[`task${listener.type}ListenerBody`])"
+                    @click="addTaskListenerParam(configForm[`task${listener.type}ListenerBody`])"
                   >
                     <Icon icon="ep:plus" class="mr-5px" />添加一行
                   </el-button>
@@ -623,7 +623,7 @@ import {
   FieldPermissionType,
   ProcessVariableEnum,
   LISTENER_MAP_TYPES,
-  ListenerMapTypeEnum
+  ListenerParamTypeEnum
 } from '../consts'
 
 import {
@@ -1032,14 +1032,14 @@ function useTimeoutHandler() {
   }
 }
 
-const addTaskListenerMap = (arr) => {
+const addTaskListenerParam = (arr) => {
   arr.push({
     key: '',
     type: 1,
     value: ''
   })
 }
-const deleteTaskListenerMap = (arr, index) => {
+const deleteTaskListenerParam = (arr, index) => {
   arr.splice(index, 1)
 }
 </script>

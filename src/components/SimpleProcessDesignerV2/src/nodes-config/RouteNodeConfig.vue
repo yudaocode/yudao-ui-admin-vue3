@@ -25,7 +25,7 @@
     </template>
     <div>
       <el-form label-position="top">
-        <el-card class="mb-15px" v-for="(item, index) in routeGroups" :key="index">
+        <el-card class="mb-15px" v-for="(item, index) in routerGroups" :key="index">
           <template #header>
             <div class="flex flex-items-center">
               <el-text size="large">路由{{ index + 1 }}</el-text>
@@ -42,7 +42,7 @@
               >
             </div>
           </template>
-          <Condition v-model="routeGroups[index]" />
+          <Condition v-model="routerGroups[index]" />
         </el-card>
       </el-form>
 
@@ -81,7 +81,7 @@ const { settingVisible, closeDrawer, openDrawer } = useDrawer()
 const currentNode = useWatchNode(props)
 // 节点名称
 const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.ROUTE_BRANCH_NODE)
-const routeGroups = ref<RouteCondition[]>([])
+const routerGroups = ref<RouteCondition[]>([])
 const nodeOptions = ref()
 
 // 保存配置
@@ -90,26 +90,26 @@ const saveConfig = async () => {
   if (!showText) return false
   currentNode.value.name = nodeName.value!
   currentNode.value.showText = showText
-  currentNode.value.routeGroups = routeGroups.value
+  currentNode.value.routerGroups = routerGroups.value
   settingVisible.value = false
   return true
 }
 // 显示路由分支节点配置， 由父组件传过来
 const showRouteNodeConfig = (node: SimpleFlowNode) => {
   getRoutableNode()
-  routeGroups.value = []
+  routerGroups.value = []
   nodeName.value = node.name
-  if (node.routeGroups) {
-    routeGroups.value = node.routeGroups
+  if (node.routerGroups) {
+    routerGroups.value = node.routerGroups
   }
 }
 
 const getShowText = () => {
-  if (!routeGroups.value || !Array.isArray(routeGroups.value) || routeGroups.value.length <= 0) {
+  if (!routerGroups.value || !Array.isArray(routerGroups.value) || routerGroups.value.length <= 0) {
     message.warning('请配置路由！')
     return ''
   }
-  for (const route of routeGroups.value) {
+  for (const route of routerGroups.value) {
     if (!route.nodeId || !route.conditionType) {
       message.warning('请完善路由配置项！')
       return ''
@@ -129,11 +129,11 @@ const getShowText = () => {
       }
     }
   }
-  return `${routeGroups.value.length}条路由分支`
+  return `${routerGroups.value.length}条路由分支`
 }
 
 const addRouteGroup = () => {
-  routeGroups.value.push({
+  routerGroups.value.push({
     nodeId: '',
     conditionType: ConditionType.RULE,
     conditionExpression: '',
@@ -158,7 +158,7 @@ const addRouteGroup = () => {
 }
 
 const deleteRouteGroup = (index) => {
-  routeGroups.value.splice(index, 1)
+  routerGroups.value.splice(index, 1)
 }
 
 const getRoutableNode = () => {
