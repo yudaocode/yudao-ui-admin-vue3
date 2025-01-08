@@ -510,8 +510,8 @@ export const APPROVE_METHODS: DictDataVO[] = [
 ]
 
 export const CONDITION_CONFIG_TYPES: DictDataVO[] = [
-  { label: '条件表达式', value: ConditionType.EXPRESSION },
-  { label: '条件规则', value: ConditionType.RULE }
+  { label: '条件规则', value: ConditionType.RULE },
+  { label: '条件表达式', value: ConditionType.EXPRESSION }
 ]
 
 // 时间单位类型

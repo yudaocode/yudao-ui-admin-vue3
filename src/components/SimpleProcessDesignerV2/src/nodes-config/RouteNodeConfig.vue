@@ -42,123 +42,7 @@
               >
             </div>
           </template>
-          <el-form-item label="配置方式" prop="conditionType">
-            <el-radio-group v-model="item.conditionType" @change="changeConditionType">
-              <el-radio
-                v-for="(dict, indexConditionType) in conditionConfigTypes"
-                :key="indexConditionType"
-                :value="dict.value"
-                :label="dict.value"
-              >
-                {{ dict.label }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-          <!-- TODO @lesan：1）1、2 使用枚举；2）默认先 条件组关系，再 条件表达式；3）这种可以封装成一个小组件么？ -->
-          <el-form-item
-            v-if="item.conditionType === 1"
-            label="条件表达式"
-            prop="conditionExpression"
-          >
-            <el-input
-              type="textarea"
-              v-model="item.conditionExpression"
-              clearable
-              style="width: 100%"
-            />
-          </el-form-item>
-          <el-form-item v-if="item.conditionType === 2" label="条件规则">
-            <div class="condition-group-tool">
-              <div class="flex items-center">
-                <div class="mr-4">条件组关系</div>
-                <el-switch
-                  v-model="item.conditionGroups.and"
-                  inline-prompt
-                  active-text="且"
-                  inactive-text="或"
-                />
-              </div>
-            </div>
-            <el-space direction="vertical" :spacer="item.conditionGroups.and ? '且' : '或'">
-              <el-card
-                class="condition-group"
-                style="width: 530px"
-                v-for="(condition, cIdx) in item.conditionGroups.conditions"
-                :key="cIdx"
-              >
-                <div
-                  class="condition-group-delete"
-                  v-if="item.conditionGroups.conditions.length > 1"
-                >
-                  <Icon
-                    color="#0089ff"
-                    icon="ep:circle-close-filled"
-                    :size="18"
-                    @click="deleteConditionGroup(item.conditionGroups.conditions, cIdx)"
-                  />
-                </div>
-                <template #header>
-                  <div class="flex items-center justify-between">
-                    <div>条件组</div>
-                    <div class="flex">
-                      <div class="mr-4">规则关系</div>
-                      <el-switch
-                        v-model="condition.and"
-                        inline-prompt
-                        active-text="且"
-                        inactive-text="或"
-                      />
-                    </div>
-                  </div>
-                </template>
-
-                <div class="flex pt-2" v-for="(rule, rIdx) in condition.rules" :key="rIdx">
-                  <div class="mr-2">
-                    <el-select style="width: 160px" v-model="rule.leftSide">
-                      <el-option
-                        v-for="(field, fIdx) in fieldOptions"
-                        :key="fIdx"
-                        :label="field.title"
-                        :value="field.field"
-                        :disabled="!field.required"
-                      />
-                    </el-select>
-                  </div>
-                  <div class="mr-2">
-                    <el-select v-model="rule.opCode" style="width: 100px">
-                      <el-option
-                        v-for="operator in COMPARISON_OPERATORS"
-                        :key="operator.value"
-                        :label="operator.label"
-                        :value="operator.value"
-                      />
-                    </el-select>
-                  </div>
-                  <div class="mr-2">
-                    <el-input v-model="rule.rightSide" style="width: 160px" />
-                  </div>
-                  <div class="mr-1 flex items-center" v-if="condition.rules.length > 1">
-                    <Icon
-                      icon="ep:delete"
-                      :size="18"
-                      @click="deleteConditionRule(condition, rIdx)"
-                    />
-                  </div>
-                  <div class="flex items-center">
-                    <Icon icon="ep:plus" :size="18" @click="addConditionRule(condition, rIdx)" />
-                  </div>
-                </div>
-              </el-card>
-            </el-space>
-            <div title="添加条件组" class="mt-4 cursor-pointer">
-              <Icon
-                color="#0089ff"
-                icon="ep:plus"
-                :size="24"
-                @click="addConditionGroup(item.conditionGroups.conditions)"
-              />
-            </div>
-          </el-form-item>
+          <Condition v-model="routeGroups[index]" />
         </el-card>
       </el-form>
 
@@ -177,18 +61,9 @@
 </template>
 <script setup lang="ts">
 import { Plus } from '@element-plus/icons-vue'
-import {
-  SimpleFlowNode,
-  NodeType,
-  CONDITION_CONFIG_TYPES,
-  ConditionType,
-  COMPARISON_OPERATORS,
-  RouteCondition,
-  ProcessVariableEnum
-} from '../consts'
+import { SimpleFlowNode, NodeType, ConditionType, RouteCondition } from '../consts'
 import { useWatchNode, useDrawer, useNodeName } from '../node'
-import { BpmModelFormType } from '@/utils/constants'
-import { useFormFields } from '../node'
+import Condition from './components/Condition.vue'
 defineOptions({
   name: 'RouteNodeConfig'
 })
@@ -206,28 +81,6 @@ const { settingVisible, closeDrawer, openDrawer } = useDrawer()
 const currentNode = useWatchNode(props)
 // 节点名称
 const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.ROUTE_BRANCH_NODE)
-const formType = inject<Ref<number>>('formType') // 表单类型
-const conditionConfigTypes = computed(() => {
-  return CONDITION_CONFIG_TYPES.filter((item) => {
-    // 业务表单暂时去掉条件规则选项
-    if (formType?.value === BpmModelFormType.CUSTOM && item.value === ConditionType.RULE) {
-      return false
-    } else {
-      return true
-    }
-  })
-})
-/** 条件规则可选择的表单字段 */
-const fieldOptions = computed(() => {
-  const fieldsCopy = useFormFields().slice()
-  // 固定添加发起人 ID 字段
-  fieldsCopy.unshift({
-    field: ProcessVariableEnum.START_USER_ID,
-    title: '发起人',
-    required: true
-  })
-  return fieldsCopy
-})
 const routeGroups = ref<RouteCondition[]>([])
 const nodeOptions = ref()
 
@@ -279,48 +132,10 @@ const getShowText = () => {
   return `${routeGroups.value.length}条路由分支`
 }
 
-// TODO @lesan：这个需要实现么？
-const changeConditionType = () => {}
-
-const deleteConditionGroup = (conditions, index) => {
-  conditions.splice(index, 1)
-}
-
-const deleteConditionRule = (condition, index) => {
-  condition.rules.splice(index, 1)
-}
-
-const addConditionRule = (condition, index) => {
-  const rule = {
-    type: 1,
-    opName: '等于',
-    opCode: '==',
-    leftSide: '',
-    rightSide: ''
-  }
-  condition.rules.splice(index + 1, 0, rule)
-}
-
-const addConditionGroup = (conditions) => {
-  const condition = {
-    and: true,
-    rules: [
-      {
-        type: 1,
-        opName: '等于',
-        opCode: '==',
-        leftSide: '',
-        rightSide: ''
-      }
-    ]
-  }
-  conditions.push(condition)
-}
-
 const addRouteGroup = () => {
   routeGroups.value.push({
     nodeId: '',
-    conditionType: ConditionType.EXPRESSION,
+    conditionType: ConditionType.RULE,
     conditionExpression: '',
     conditionGroups: {
       and: true,
@@ -347,7 +162,7 @@ const deleteRouteGroup = (index) => {
 }
 
 const getRoutableNode = () => {
-  // TODO 还需要满足以下要求
+  // TODO @lesan 还需要满足以下要求
   // 并行分支、包容分支内部节点不能跳转到外部节点
   // 条件分支节点可以向上跳转到外部节点
   let node = processNodeTree?.value
@@ -369,39 +184,3 @@ const getRoutableNode = () => {
 
 defineExpose({ openDrawer, showRouteNodeConfig }) // 暴露方法给父组件
 </script>
-
-<style lang="scss" scoped>
-.condition-group-tool {
-  display: flex;
-  justify-content: space-between;
-  width: 500px;
-  margin-bottom: 20px;
-}
-
-.condition-group {
-  position: relative;
-
-  &:hover {
-    border-color: #0089ff;
-
-    .condition-group-delete {
-      opacity: 1;
-    }
-  }
-
-  .condition-group-delete {
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: flex;
-    cursor: pointer;
-    opacity: 0;
-  }
-}
-
-::v-deep(.el-card__header) {
-  padding: 8px var(--el-card-padding);
-  border-bottom: 1px solid var(--el-card-border-color);
-  box-sizing: border-box;
-}
-</style>
