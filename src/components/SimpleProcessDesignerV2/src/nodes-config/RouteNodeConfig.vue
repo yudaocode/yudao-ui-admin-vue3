@@ -25,7 +25,7 @@
     </template>
     <div>
       <el-form label-position="top">
-        <el-card class="mb-15px" v-for="(item, index) in routeGroup" :key="index">
+        <el-card class="mb-15px" v-for="(item, index) in routeGroups" :key="index">
           <template #header>
             <div class="flex flex-items-center">
               <el-text size="large">路由{{ index + 1 }}</el-text>
@@ -228,7 +228,7 @@ const fieldOptions = computed(() => {
   })
   return fieldsCopy
 })
-const routeGroup = ref<RouteCondition[]>([])
+const routeGroups = ref<RouteCondition[]>([])
 const nodeOptions = ref()
 
 // 保存配置
@@ -237,26 +237,26 @@ const saveConfig = async () => {
   if (!showText) return false
   currentNode.value.name = nodeName.value!
   currentNode.value.showText = showText
-  currentNode.value.routeGroup = routeGroup.value
+  currentNode.value.routeGroups = routeGroups.value
   settingVisible.value = false
   return true
 }
 // 显示路由分支节点配置， 由父组件传过来
 const showRouteNodeConfig = (node: SimpleFlowNode) => {
   getRoutableNode()
-  routeGroup.value = []
+  routeGroups.value = []
   nodeName.value = node.name
-  if (node.routeGroup) {
-    routeGroup.value = node.routeGroup
+  if (node.routeGroups) {
+    routeGroups.value = node.routeGroups
   }
 }
 
 const getShowText = () => {
-  if (!routeGroup.value || !Array.isArray(routeGroup.value) || routeGroup.value.length <= 0) {
+  if (!routeGroups.value || !Array.isArray(routeGroups.value) || routeGroups.value.length <= 0) {
     message.warning('请配置路由！')
     return ''
   }
-  for (const route of routeGroup.value) {
+  for (const route of routeGroups.value) {
     if (!route.nodeId || !route.conditionType) {
       message.warning('请完善路由配置项！')
       return ''
@@ -276,7 +276,7 @@ const getShowText = () => {
       }
     }
   }
-  return `${routeGroup.value.length}条路由分支`
+  return `${routeGroups.value.length}条路由分支`
 }
 
 // TODO @lesan：这个需要实现么？
@@ -318,7 +318,7 @@ const addConditionGroup = (conditions) => {
 }
 
 const addRouteGroup = () => {
-  routeGroup.value.push({
+  routeGroups.value.push({
     nodeId: '',
     conditionType: ConditionType.EXPRESSION,
     conditionExpression: '',
@@ -343,7 +343,7 @@ const addRouteGroup = () => {
 }
 
 const deleteRouteGroup = (index) => {
-  routeGroup.value.splice(index, 1)
+  routeGroups.value.splice(index, 1)
 }
 
 const getRoutableNode = () => {

@@ -116,7 +116,7 @@ export interface SimpleFlowNode {
   // 延迟设置
   delaySetting?: DelaySetting
   // 路由分支
-  routeGroup?: RouteCondition[]
+  routeGroups?: RouteCondition[]
   defaultFlowId?: string
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
