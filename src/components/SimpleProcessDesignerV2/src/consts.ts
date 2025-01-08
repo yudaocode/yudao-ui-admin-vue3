@@ -116,8 +116,10 @@ export interface SimpleFlowNode {
   // 延迟设置
   delaySetting?: DelaySetting
   // 路由分支
-  routeGroup?: RouteCondition[]
+  routerGroups?: RouteCondition[]
   defaultFlowId?: string
+  // 签名
+  signEnable?: boolean
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -241,15 +243,15 @@ export type AssignEmptyHandler = {
 export type ListenerHandler = {
   enable: boolean
   path?: string
-  header?: ListenerMap[]
-  body?: ListenerMap[]
+  header?: ListenerParam[]
+  body?: ListenerParam[]
 }
-export type ListenerMap = {
+export type ListenerParam = {
   key: string
   type: number
   value: string
 }
-export enum ListenerMapTypeEnum {
+export enum ListenerParamTypeEnum {
   /**
    * 固定值
    */
@@ -510,8 +512,8 @@ export const APPROVE_METHODS: DictDataVO[] = [
 ]
 
 export const CONDITION_CONFIG_TYPES: DictDataVO[] = [
-  { label: '条件表达式', value: ConditionType.EXPRESSION },
-  { label: '条件规则', value: ConditionType.RULE }
+  { label: '条件规则', value: ConditionType.RULE },
+  { label: '条件表达式', value: ConditionType.EXPRESSION }
 ]
 
 // 时间单位类型
@@ -660,7 +662,7 @@ export const DELAY_TYPE = [
  */
 export type RouteCondition = {
   nodeId: string
-  conditionType: number // TODO @lesan：ConditionType
+  conditionType: ConditionType
   conditionExpression: string
   conditionGroups: ConditionGroup
 }

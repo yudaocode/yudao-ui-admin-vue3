@@ -356,6 +356,15 @@
                 </div>
               </el-radio-group>
             </el-form-item>
+
+            <el-divider content-position="left">是否需要签名</el-divider>
+            <el-form-item prop="signEnable">
+              <el-switch
+                v-model="configForm.signEnable"
+                active-text="是"
+                inactive-text="否"
+              />
+            </el-form-item>
           </el-form>
         </div>
       </el-tab-pane>
@@ -436,155 +445,161 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="监听器" name="listener">
-        <div v-for="(listener, listenerIdx) in taskListener" :key="listenerIdx">
-          <el-form label-position="top">
-            <div>
-              <el-divider content-position="left">
-                <el-text tag="b" size="large">{{ listener.name }}</el-text>
-              </el-divider>
+        <el-form :model="configForm" label-position="top">
+          <div v-for="(listener, listenerIdx) in taskListener" :key="listenerIdx">
+            <el-divider content-position="left">
+              <el-text tag="b" size="large">{{ listener.name }}</el-text>
+            </el-divider>
+            <el-form-item>
+              <el-switch
+                v-model="configForm[`task${listener.type}ListenerEnable`]"
+                active-text="开启"
+                inactive-text="关闭"
+              />
+            </el-form-item>
+            <div v-if="configForm[`task${listener.type}ListenerEnable`]">
               <el-form-item>
-                <el-switch
-                  v-model="configForm[`task${listener.type}ListenerEnable`]"
-                  active-text="开启"
-                  inactive-text="关闭"
+                <el-alert
+                  title="仅支持 POST 请求，以请求体方式接收参数"
+                  type="warning"
+                  show-icon
+                  :closable="false"
                 />
               </el-form-item>
-              <div v-if="configForm[`task${listener.type}ListenerEnable`]">
-                <el-form-item>
-                  <el-alert
-                    title="仅支持 POST 请求，以请求体方式接收参数"
-                    type="warning"
-                    show-icon
-                    :closable="false"
-                  />
-                </el-form-item>
-                <el-form-item label="请求地址">
-                  <el-input v-model="configForm[`task${listener.type}ListenerPath`]" />
-                </el-form-item>
-                <el-form-item label="请求头">
-                  <div
-                    class="flex pt-2"
-                    v-for="(item, index) in configForm[`task${listener.type}ListenerHeader`]"
-                    :key="index"
-                  >
-                    <div class="mr-2">
-                      <el-input class="w-160px" v-model="item.key" />
-                    </div>
-                    <div class="mr-2">
-                      <el-select class="w-100px!" v-model="item.type">
-                        <el-option
-                          v-for="types in LISTENER_MAP_TYPES"
-                          :key="types.value"
-                          :label="types.label"
-                          :value="types.value"
-                        />
-                      </el-select>
-                    </div>
-                    <div class="mr-2">
-                      <el-input
-                        v-if="item.type === ListenerMapTypeEnum.FIXED_VALUE"
-                        class="w-160px"
-                        v-model="item.value"
-                      />
-                      <el-select
-                        v-if="item.type === ListenerMapTypeEnum.FROM_FORM"
-                        class="w-160px!"
-                        v-model="item.value"
-                      >
-                        <el-option
-                          v-for="(field, fIdx) in formFieldOptions"
-                          :key="fIdx"
-                          :label="field.title"
-                          :value="field.field"
-                          :disabled="!field.required"
-                        />
-                      </el-select>
-                    </div>
-                    <div class="mr-1 flex items-center">
-                      <Icon
-                        icon="ep:delete"
-                        :size="18"
-                        @click="
-                          deleteTaskListenerMap(
-                            configForm[`task${listener.type}ListenerHeader`],
-                            index
-                          )
-                        "
-                      />
-                    </div>
+              <el-form-item
+                label="请求地址"
+                :prop="`task${listener.type}ListenerPath`"
+                :rules="{
+                  required: true,
+                  message: '请求地址不能为空',
+                  trigger: 'blur'
+                }"
+              >
+                <el-input v-model="configForm[`task${listener.type}ListenerPath`]" />
+              </el-form-item>
+              <el-form-item label="请求头">
+                <div
+                  class="flex pt-2"
+                  v-for="(item, index) in configForm[`task${listener.type}ListenerHeader`]"
+                  :key="index"
+                >
+                  <div class="mr-2">
+                    <el-input class="w-160px" v-model="item.key" />
                   </div>
-                  <el-button
-                    type="primary"
-                    text
-                    @click="addTaskListenerMap(configForm[`task${listener.type}ListenerHeader`])"
-                  >
-                    <Icon icon="ep:plus" class="mr-5px" />添加一行
-                  </el-button>
-                </el-form-item>
-                <el-form-item label="请求体">
-                  <div
-                    class="flex pt-2"
-                    v-for="(item, index) in configForm[`task${listener.type}ListenerBody`]"
-                    :key="index"
-                  >
-                    <div class="mr-2">
-                      <el-input class="w-160px" v-model="item.key" />
-                    </div>
-                    <div class="mr-2">
-                      <el-select class="w-100px!" v-model="item.type">
-                        <el-option
-                          v-for="types in LISTENER_MAP_TYPES"
-                          :key="types.value"
-                          :label="types.label"
-                          :value="types.value"
-                        />
-                      </el-select>
-                    </div>
-                    <div class="mr-2">
-                      <el-input
-                        v-if="item.type === ListenerMapTypeEnum.FIXED_VALUE"
-                        class="w-160px"
-                        v-model="item.value"
+                  <div class="mr-2">
+                    <el-select class="w-100px!" v-model="item.type">
+                      <el-option
+                        v-for="types in LISTENER_MAP_TYPES"
+                        :key="types.value"
+                        :label="types.label"
+                        :value="types.value"
                       />
-                      <el-select
-                        v-if="item.type === ListenerMapTypeEnum.FROM_FORM"
-                        class="w-160px!"
-                        v-model="item.value"
-                      >
-                        <el-option
-                          v-for="(field, fIdx) in formFieldOptions"
-                          :key="fIdx"
-                          :label="field.title"
-                          :value="field.field"
-                          :disabled="!field.required"
-                        />
-                      </el-select>
-                    </div>
-                    <div class="mr-1 flex items-center">
-                      <Icon
-                        icon="ep:delete"
-                        :size="18"
-                        @click="
-                          deleteTaskListenerMap(
-                            configForm[`task${listener.type}ListenerBody`],
-                            index
-                          )
-                        "
-                      />
-                    </div>
+                    </el-select>
                   </div>
-                  <el-button
-                    type="primary"
-                    text
-                    @click="addTaskListenerMap(configForm[`task${listener.type}ListenerBody`])"
-                  >
-                    <Icon icon="ep:plus" class="mr-5px" />添加一行
-                  </el-button>
-                </el-form-item>
-              </div>
+                  <div class="mr-2">
+                    <el-input
+                      v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
+                      class="w-160px"
+                      v-model="item.value"
+                    />
+                    <el-select
+                      v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
+                      class="w-160px!"
+                      v-model="item.value"
+                    >
+                      <el-option
+                        v-for="(field, fIdx) in formFieldOptions"
+                        :key="fIdx"
+                        :label="field.title"
+                        :value="field.field"
+                        :disabled="!field.required"
+                      />
+                    </el-select>
+                  </div>
+                  <div class="mr-1 flex items-center">
+                    <Icon
+                      icon="ep:delete"
+                      :size="18"
+                      @click="
+                        deleteTaskListenerParam(
+                          configForm[`task${listener.type}ListenerHeader`],
+                          index
+                        )
+                      "
+                    />
+                  </div>
+                </div>
+                <el-button
+                  type="primary"
+                  text
+                  @click="addTaskListenerParam(configForm[`task${listener.type}ListenerHeader`])"
+                >
+                  <Icon icon="ep:plus" class="mr-5px" />添加一行
+                </el-button>
+              </el-form-item>
+              <el-form-item label="请求体">
+                <div
+                  class="flex pt-2"
+                  v-for="(item, index) in configForm[`task${listener.type}ListenerBody`]"
+                  :key="index"
+                >
+                  <div class="mr-2">
+                    <el-input class="w-160px" v-model="item.key" />
+                  </div>
+                  <div class="mr-2">
+                    <el-select class="w-100px!" v-model="item.type">
+                      <el-option
+                        v-for="types in LISTENER_MAP_TYPES"
+                        :key="types.value"
+                        :label="types.label"
+                        :value="types.value"
+                      />
+                    </el-select>
+                  </div>
+                  <div class="mr-2">
+                    <el-input
+                      v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
+                      class="w-160px"
+                      v-model="item.value"
+                    />
+                    <el-select
+                      v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
+                      class="w-160px!"
+                      v-model="item.value"
+                    >
+                      <el-option
+                        v-for="(field, fIdx) in formFieldOptions"
+                        :key="fIdx"
+                        :label="field.title"
+                        :value="field.field"
+                        :disabled="!field.required"
+                      />
+                    </el-select>
+                  </div>
+                  <div class="mr-1 flex items-center">
+                    <Icon
+                      icon="ep:delete"
+                      :size="18"
+                      @click="
+                        deleteTaskListenerParam(
+                          configForm[`task${listener.type}ListenerBody`],
+                          index
+                        )
+                      "
+                    />
+                  </div>
+                </div>
+                <el-button
+                  type="primary"
+                  text
+                  @click="addTaskListenerParam(configForm[`task${listener.type}ListenerBody`])"
+                >
+                  <Icon icon="ep:plus" class="mr-5px" />添加一行
+                </el-button>
+              </el-form-item>
             </div>
-          </el-form>
-        </div>
+          </div>
+        </el-form>
       </el-tab-pane>
     </el-tabs>
     <template #footer>
@@ -623,7 +638,7 @@ import {
   FieldPermissionType,
   ProcessVariableEnum,
   LISTENER_MAP_TYPES,
-  ListenerMapTypeEnum
+  ListenerParamTypeEnum
 } from '../consts'
 
 import {
@@ -852,6 +867,8 @@ const saveConfig = async () => {
     header: configForm.value.taskCompleteListenerHeader,
     body: configForm.value.taskCompleteListenerBody
   }
+  // 签名
+  currentNode.value.signEnable = configForm.value.signEnable
 
   currentNode.value.showText = showText
   settingVisible.value = false
@@ -919,6 +936,8 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   configForm.value.taskCompleteListenerPath = node.taskCompleteListener!.path
   configForm.value.taskCompleteListenerHeader = node.taskCompleteListener?.header ?? []
   configForm.value.taskCompleteListenerBody = node.taskCompleteListener?.body ?? []
+  // 6. 签名
+  configForm.value.signEnable = node.signEnable ?? false
 }
 
 defineExpose({ openDrawer, showUserTaskNodeConfig }) // 暴露方法给父组件
@@ -1032,14 +1051,14 @@ function useTimeoutHandler() {
   }
 }
 
-const addTaskListenerMap = (arr) => {
+const addTaskListenerParam = (arr) => {
   arr.push({
     key: '',
     type: 1,
     value: ''
   })
 }
-const deleteTaskListenerMap = (arr, index) => {
+const deleteTaskListenerParam = (arr, index) => {
   arr.splice(index, 1)
 }
 </script>
