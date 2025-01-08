@@ -83,8 +83,8 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.fixAll.stylelint": "explicit"
+    // "source.fixAll.eslint": "explicit",
+    // "source.fixAll.stylelint": "explicit"
   },
   "[vue]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -138,7 +138,7 @@
     "*.ts": "$(capture).test.ts, $(capture).test.tsx",
     "*.tsx": "$(capture).test.ts, $(capture).test.tsx",
     "*.env": "$(capture).env.*",
-    "package.json": "pnpm-lock.yaml,yarn.lock,LICENSE,README*,CHANGELOG*,CNAME,.gitattributes,.eslintrc-auto-import.json,.gitignore,prettier.config.js,stylelint.config.js,commitlint.config.js,.stylelintignore,.prettierignore,.gitpod.yml,.eslintrc.js,.eslintignore"
+    "package.json": "pnpm-lock.yaml,yarn.lock,LICENSE,README*,CHANGELOG*,CNAME,.gitattributes,.eslintrc-auto-import.json,.gitignore,prettier.config.js,stylelint.config.js,commitlint.config.js,.stylelintignore,.prettierignore,.gitpod.yml,.eslintrc.cjs,.eslintignore"
   },
   "terminal.integrated.scrollback": 10000,
   "nuxt.isNuxtApp": false
