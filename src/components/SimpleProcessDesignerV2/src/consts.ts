@@ -118,6 +118,8 @@ export interface SimpleFlowNode {
   // 路由分支
   routerGroups?: RouteCondition[]
   defaultFlowId?: string
+  // 签名
+  signEnable?: boolean
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {

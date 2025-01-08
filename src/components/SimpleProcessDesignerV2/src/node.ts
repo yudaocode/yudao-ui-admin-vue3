@@ -149,6 +149,7 @@ export type UserTaskFormType = {
   taskCompleteListenerPath?: string
   taskCompleteListenerHeader?: ListenerParam[]
   taskCompleteListenerBody?: ListenerParam[]
+  signEnable: boolean
 }
 
 export type CopyTaskFormType = {
