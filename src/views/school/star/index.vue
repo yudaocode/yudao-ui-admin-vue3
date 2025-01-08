@@ -5,6 +5,7 @@
       ref="queryFormRef"
       :inline="true"
       :model="queryParams"
+      :rules="formRules"
       class="-mb-15px"
       label-width="68px"
     >
@@ -31,7 +32,7 @@
           v-model="queryParams.grade"
           class="!w-240px"
           clearable
-          placeholder="请输入年级"
+          placeholder="例：24年入学一年级，输入24"
           @keyup.enter="handleQuery"
         />
       </el-form-item>
@@ -56,7 +57,7 @@
         />
       </el-form-item>
       <el-form-item>
-        <el-button @click="handleQuery">
+        <el-button @click="handleQuery(queryFormRef)">
           <Icon class="mr-5px" icon="ep:search" />
           搜索
         </el-button>
@@ -66,7 +67,7 @@
         </el-button>
         <el-button type="primary" 
           plain 
-          @click="openForm"
+          @click="openImportForm()"
           v-hasPermi = "['school:star:import']"
         >
           <Icon icon="ep:upload" class="mr-5px" /> 导入文件
@@ -134,13 +135,17 @@
     />
   </ContentWrap>
 
-  <!-- 表单弹窗：添加/修改 -->
-  <FileForm ref="formRef" @success="getList" />
+  <!-- 表单弹窗：导入 -->
+  <FileForm ref="importFormRef" @success="getList" />
+  <!-- 表单弹窗：编辑 -->
+  <SixStarForm ref="formRef" @success="getList" />
 </template>
 <script lang="ts" setup>
 import { dateFormatter2 } from '@/utils/formatTime'
 import * as SchoolApi from '@/api/school/star'
 import FileForm from './FileForm.vue'
+import SixStarForm from './SixStarForm.vue'
+import type { FormInstance, FormRules } from 'element-plus'
 
 defineOptions({ name: 'SchoolStar' })
 
@@ -159,7 +164,17 @@ const queryParams = reactive({
   startTime: undefined,
   endTime1: undefined
 })
-const queryFormRef = ref() // 搜索的表单
+const queryFormRef = ref<FormInstance>() // 搜索的表单
+const limitNumber = (rule: any, _value: any, callback: any) => {
+  if (_value && !Number.isInteger(+_value)) {
+    callback(new Error('请输入整数'))
+    return
+  }
+  callback()
+}
+const formRules = reactive<FormRules<queryParams>>({
+  grade : [{ required: false, message: '请输入整数', trigger: 'change', validator: limitNumber}],
+})
 
 /** 查询角色列表 */
 const getList = async () => {
@@ -174,34 +189,35 @@ const getList = async () => {
 }
 
 /** 搜索按钮操作 */
-const handleQuery = () => {
-  queryParams.pageNo = 1
-  getList()
+const handleQuery = async (formEl: FormInstance | undefined) => {
+  if (!formEl) return
+  formEl.validate((valid, fields) => {
+    if (valid) {
+      queryParams.pageNo = 1
+      getList()
+    }
+    return
+  })
+
 }
 
 /** 重置按钮操作 */
 const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  handleQuery()
+  // queryFormRef.value.resetFields()
+  // handleQuery(queryFormRef)
 }
 
-/** 添加/修改操作 */
+/** 导入操作 */
+const importFormRef = ref()
+const openImportForm = (type?: string, id?: number) => {
+  formRef.value.open(type, id)
+}
+
+// 更新操作
 const formRef = ref()
 const openForm = (type?: string, id?: number) => {
   formRef.value.open(type, id)
 }
-
-// /** 数据权限操作 */
-// const dataPermissionFormRef = ref()
-// const openDataPermissionForm = async (row: SchoolApi.RoleVO) => {
-//   dataPermissionFormRef.value.open(row)
-// }
-
-// /** 菜单权限操作 */
-// const assignMenuFormRef = ref()
-// const openAssignMenuForm = async (row: SchoolApi.RoleVO) => {
-//   assignMenuFormRef.value.open(row)
-// }
 
 /** 删除按钮操作 */
 const handleDelete = async (id: number) => {
@@ -216,24 +232,8 @@ const handleDelete = async (id: number) => {
   } catch {}
 }
 
-// /** 导出按钮操作 */
-// const handleExport = async () => {
-//   try {
-//     // 导出的二次确认
-//     await message.exportConfirm()
-//     // 发起导出
-//     exportLoading.value = true
-//     const data = await SchoolApi.exportRole(queryParams)
-//     download.excel(data, '角色列表.xls')
-//   } catch {
-//   } finally {
-//     exportLoading.value = false
-//   }
-// }
-
 /** 初始化 **/
 onMounted(() => {
-  console.log(new Date().getFullYear(), new Date().getMonth())
   getList()
 })
 </script>

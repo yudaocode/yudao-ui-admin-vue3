@@ -1,10 +1,8 @@
 import request from '@/config/axios'
 
-export interface RoleVO {
+export interface SixStarVO {
   id: number
   stuName: string
-  type: number
-  getStarTime: Date
 }
 
 export interface UpdateStatusReqVO {
@@ -17,10 +15,15 @@ export const getStarPage = async (params: PageParam) => {
   return await request.get({ url: '/school/star/page', params })
 }
 
+// 修改六星
+export const getSixStrOne = async (id: number) => {
+  return await request.get({ url: '/school/star/get?id=' + id })
+}
 
-// 修改角色
-export const updateStar = async (data: RoleVO) => {
-  return await request.put({ url: '/school/star/update', data })
+
+// 修改六星
+export const updateStar = async (data: SixStarVO) => {
+  return await request.post({ url: '/school/star/update', data })
 }
 
 // // 修改角色状态

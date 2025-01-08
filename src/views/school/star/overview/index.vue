@@ -3,12 +3,12 @@
     <el-card shadow="never">
       <el-skeleton :loading="loading" animated>
         <el-row :gutter="16" justify="space-between">
-          <el-col :xl="12" :lg="12" :md="12" :sm="24" :xs="24">
+          <el-col :xl="24" :lg="24" :md="24" :sm="24" :xs="24">
             <div class="flex items-center">
               <div>
                 <div class="text-15px">
-                  使用说明：1、年级为入学年份，如现在的1年级为24级，默认搜索1-6年级
-                           2、如需指定时间范围，结束日期1和结束日期2均可填，两者都填写为对比
+                  使用说明：1、年级为入学年份，如现在的1年级为24级，默认搜索1-6年级 
+                  2、如需指定时间范围，结束日期1和结束日期2均可填，两者都填写为对比
                   <!-- {{ t('workplace.welcome') }} {{ username }} {{ t('workplace.happyDay') }} -->
                 </div>
               </div>
