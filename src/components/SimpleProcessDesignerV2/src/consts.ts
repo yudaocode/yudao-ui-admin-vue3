@@ -660,7 +660,7 @@ export const DELAY_TYPE = [
  */
 export type RouteCondition = {
   nodeId: string
-  conditionType: number // TODO @lesan：ConditionType
+  conditionType: ConditionType
   conditionExpression: string
   conditionGroups: ConditionGroup
 }
