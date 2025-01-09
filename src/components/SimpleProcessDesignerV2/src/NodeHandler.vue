@@ -67,12 +67,13 @@ import {
   ApproveMethodType,
   AssignEmptyHandlerType,
   AssignStartUserHandlerType,
+  ConditionType,
   NODE_DEFAULT_NAME,
   NodeType,
   RejectHandlerType,
   SimpleFlowNode
 } from './consts'
-import { generateUUID } from '@/utils'
+import {generateUUID} from '@/utils'
 
 defineOptions({
   name: 'NodeHandler'
@@ -163,7 +164,7 @@ const addNode = (type: number) => {
           showText: '',
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
-          conditionType: 1,
+          conditionType: ConditionType.RULE,
           defaultFlow: false
         },
         {

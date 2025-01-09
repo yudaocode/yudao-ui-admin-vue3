@@ -1,4 +1,3 @@
-<!-- TODO @lesan：其它路由条件，可以使用这个哇？ -->
 <template>
   <el-form ref="formRef" :model="condition" :rules="formRules" label-position="top">
     <el-form-item label="配置方式" prop="conditionType">
@@ -118,13 +117,13 @@
 
 <script setup lang="ts">
 import {
-  CONDITION_CONFIG_TYPES,
   COMPARISON_OPERATORS,
+  CONDITION_CONFIG_TYPES,
   ConditionType,
   ProcessVariableEnum
 } from '../../consts'
-import { BpmModelFormType } from '@/utils/constants'
-import { useFormFields } from '../../node'
+import {BpmModelFormType} from '@/utils/constants'
+import {useFormFields} from '../../node'
 
 const props = defineProps({
   modelValue: {
@@ -200,6 +199,13 @@ const addConditionGroup = (conditions) => {
   }
   conditions.push(condition)
 }
+
+const validate = async () => {
+  if (!formRef) return false
+  return await formRef.value.validate();
+}
+
+defineExpose({validate})
 </script>
 
 <style lang="scss" scoped>
