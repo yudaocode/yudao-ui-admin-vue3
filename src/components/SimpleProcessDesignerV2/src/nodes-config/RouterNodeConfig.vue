@@ -144,8 +144,6 @@ const addRouterGroup = () => {
           and: true,
           rules: [
             {
-              type: 1,
-              opName: '等于',
               opCode: '==',
               leftSide: '',
               rightSide: ''
