@@ -20,8 +20,9 @@ export interface ThingModelData {
 /**
  * IoT 模拟设备
  */
+// TODO @super：和 ThingModelSimulatorData 会不会好点
 export interface SimulatorData extends ThingModelData {
-  simulateValue?: string | number // 用于存储模拟值
+  simulateValue?: string | number // 用于存储模拟值 TODO @super：字段使用 value 会不会好点
 }
 
 /**

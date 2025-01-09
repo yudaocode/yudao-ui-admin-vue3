@@ -1,5 +1,6 @@
 <template>
   <ContentWrap>
+    <!-- TODO @super：建议每个 tab 做成一个小的组件。命名为了排版整齐点，可以叫 DeviceDetailsSimulatorPropertyUpstream、DeviceDetailsSimulatorEventUpstream -->
     <el-row :gutter="20">
       <!-- 左侧指令调试区域 -->
       <el-col :span="12">
@@ -10,7 +11,12 @@
               <!-- 属性上报 -->
               <el-tab-pane label="属性上报" name="property">
                 <ContentWrap>
-                  <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
+                  <el-table
+                    v-loading="loading"
+                    :data="list"
+                    :show-overflow-tooltip="true"
+                    :stripe="true"
+                  >
                     <el-table-column align="center" label="功能名称" prop="name" />
                     <el-table-column align="center" label="标识符" prop="identifier" />
                     <el-table-column align="center" label="数据类型" prop="identifier">
@@ -188,8 +194,8 @@
 
 <script setup lang="ts">
 import { ProductVO } from '@/api/iot/product/product'
-import { ThingModelApi, ThingModelData,SimulatorData } from '@/api/iot/thingmodel'
-import { DeviceApi, DeviceVO,SimulatorDataVO } from '@/api/iot/device/device'
+import { ThingModelApi, SimulatorData } from '@/api/iot/thingmodel'
+import { DeviceApi, DeviceVO, SimulatorDataVO } from '@/api/iot/device/device'
 import DeviceDetailsLog from './DeviceDetailsLog.vue'
 import {
   DataSpecsDataType,
@@ -219,7 +225,7 @@ const getList = async () => {
     queryParams.productId = props.product?.id || -1
     const data = await ThingModelApi.getThingModelList(queryParams)
     // 转换数据，添加 simulateValue 字段
-    list.value = data.map(item => ({
+    list.value = data.map((item) => ({
       ...item,
       simulateValue: ''
     }))
@@ -313,7 +319,7 @@ const handlePropertyReport = async () => {
     type: 'property',
     subType: 'report',
     reportTime: Date.now(), // 将 reportTime 变为数字类型的时间戳
-    content: JSON.stringify(contentObj)  // 转换为 JSON 字符串
+    content: JSON.stringify(contentObj) // 转换为 JSON 字符串
   }
 
   try {
@@ -384,4 +390,5 @@ const handlePropertyGet = async () => {
 onMounted(() => {
   getList()
 })
+// TODO @芋艿：后续再详细 review 下；
 </script>

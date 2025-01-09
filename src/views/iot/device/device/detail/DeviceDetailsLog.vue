@@ -5,6 +5,7 @@
       <el-form-item>
         <el-select v-model="queryParams.type" placeholder="所有" class="!w-120px">
           <el-option label="所有" value="" />
+          <!-- TODO @super：搞成枚举 -->
           <el-option label="状态" value="state" />
           <el-option label="事件" value="event" />
           <el-option label="属性" value="property" />
@@ -48,7 +49,6 @@
 
 <script setup lang="ts">
 import { DeviceApi } from '@/api/iot/device/device'
-import { DICT_TYPE } from '@/utils/dict'
 import { formatDate } from '@/utils/formatTime'
 
 const props = defineProps<{
@@ -56,7 +56,7 @@ const props = defineProps<{
 }>()
 
 //TODO:后续看看使用什么查询条件  目前后端是留了时间范围  type  subType
-// 查询参数 
+// 查询参数
 const queryParams = reactive({
   deviceKey: props.deviceKey,
   // type: '',
@@ -68,11 +68,12 @@ const queryParams = reactive({
 // 列表数据
 const loading = ref(false)
 const total = ref(0)
+// TODO @super：字段的风格，还是类似一般 table 见面哈
 const logList = ref([])
 const autoRefresh = ref(false)
-let timer: any = null
+let timer: any = null // TODO @super：autoRefreshEnable，autoRefreshTimer；对应上
 
-// 类型映射
+// 类型映射 TODO @super：需要删除么？
 const typeMap = {
   lifetime: '生命周期',
   state: '设备状态',
@@ -88,6 +89,7 @@ const getLogList = async () => {
   try {
     const res = await DeviceApi.getDeviceLogPage(queryParams)
     total.value = res.total
+    // TODO @super：尽量不转换
     logList.value = res.list.map((item: any) => {
       const log = {
         time: item.reportTime,
@@ -138,7 +140,7 @@ watch(autoRefresh, (newValue) => {
   }
 })
 
-/** 监听设备ID变化 */
+/** 监听设备 ID 变化 */
 watch(
   () => props.deviceKey,
   (newValue) => {

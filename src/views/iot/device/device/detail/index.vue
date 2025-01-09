@@ -17,11 +17,16 @@
       <el-tab-pane label="子设备管理" v-if="product.deviceType === DeviceTypeEnum.GATEWAY" />
       <el-tab-pane label="设备影子" />
       <el-tab-pane label="设备日志" name="log">
-        <DeviceDetailsLog v-if="activeTab === 'log'"  :deviceKey="device.deviceKey" />
+        <!-- TODO @super：字段类型，:device-key。idea 会告警，应该是 string -->
+        <DeviceDetailsLog v-if="activeTab === 'log'" :device-key="device.deviceKey" />
       </el-tab-pane>
       <el-tab-pane label="模拟设备" name="simulator">
-        <DeviceDetailsSimulator v-if="activeTab === 'simulator'" :product="product" :device="device" />
-     </el-tab-pane>
+        <DeviceDetailsSimulator
+          v-if="activeTab === 'simulator'"
+          :product="product"
+          :device="device"
+        />
+      </el-tab-pane>
     </el-tabs>
   </el-col>
 </template>
@@ -34,6 +39,7 @@ import DeviceDetailsInfo from './DeviceDetailsInfo.vue'
 import DeviceDetailsModel from './DeviceDetailsModel.vue'
 import DeviceDetailsLog from './DeviceDetailsLog.vue'
 import DeviceDetailsSimulator from './DeviceDetailsSimulator.vue'
+
 defineOptions({ name: 'IoTDeviceDetail' })
 
 const route = useRoute()

@@ -58,19 +58,20 @@ export interface DeviceHistoryDataVO {
 // IoT 设备状态枚举
 export enum DeviceStatusEnum {
   INACTIVE = 0, // 未激活
-  ONLINE = 1,   // 在线
-  OFFLINE = 2,  // 离线
-  DISABLED = 3  // 已禁用
+  ONLINE = 1, // 在线
+  OFFLINE = 2, // 离线
+  DISABLED = 3 // 已禁用
 }
 
 // IoT 模拟设备数据
+// TODO @super：DeviceSimulatorDataReqVO
 export interface SimulatorDataVO {
   productKey: string
   deviceKey: string
   type: string
   subType: string
   reportTime: number // 时间戳
-  content: string  // 存储 JSON 字符串
+  content: string // 存储 JSON 字符串
 }
 
 // 设备 API
@@ -101,10 +102,7 @@ export const DeviceApi = {
   },
 
   // 修改设备分组
-  updateDeviceGroup: async (data: {
-    ids: number[]
-    groupIds: number[]
-  }) => {
+  updateDeviceGroup: async (data: { ids: number[]; groupIds: number[] }) => {
     return await request.put({ url: `/iot/device/update-group`, data })
   },
 
@@ -150,10 +148,12 @@ export const DeviceApi = {
 
   // 模拟设备
   simulatorDevice: async (data: SimulatorDataVO) => {
+    // TODO @super：/iot/device/simulator
     return await request.post({ url: `/iot/device/data/simulator`, data })
   },
-  //查询设备日志分页
+  // 查询设备日志分页
   getDeviceLogPage: async (params: any) => {
+    // TODO @super：/iot/log-page 或者  /iot/log/page
     return await request.get({ url: `/iot/device/data/log/page`, params })
   }
 }
