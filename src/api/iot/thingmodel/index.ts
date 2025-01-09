@@ -18,6 +18,13 @@ export interface ThingModelData {
 }
 
 /**
+ * IoT 模拟设备
+ */
+export interface SimulatorData extends ThingModelData {
+  simulateValue?: string | number // 用于存储模拟值
+}
+
+/**
  * ThingModelProperty 类型
  */
 export interface ThingModelProperty {
@@ -43,6 +50,11 @@ export const ThingModelApi = {
   // 查询产品物模型分页
   getThingModelPage: async (params: any) => {
     return await request.get({ url: `/iot/thing-model/page`, params })
+  },
+
+  // 获得产品物模型列表
+  getThingModelList: async (params: any) => {
+    return await request.get({ url: `/iot/thing-model/list`, params })
   },
 
   // 获得产品物模型
