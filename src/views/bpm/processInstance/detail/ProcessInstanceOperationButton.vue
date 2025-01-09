@@ -44,6 +44,12 @@
               :rows="4"
             />
           </el-form-item>
+          <el-form-item v-if="runningTask.signEnable" label="签名" prop="sign" ref="approveSignFormRef">
+            <el-button @click="signRef.open()">点击签名</el-button>
+            <el-image class="w-90px h-40px ml-5px" v-if="approveReasonForm.sign"
+                      :src="approveReasonForm.sign"
+                      :preview-src-list="[approveReasonForm.sign]"/>
+          </el-form-item>
           <el-form-item>
             <el-button :disabled="formLoading" type="success" @click="handleAudit(true, approveFormRef)">
               {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
@@ -471,6 +477,8 @@
       <Icon :size="14" icon="ep:refresh" />&nbsp; 再次提交
     </div>
   </div>
+
+  <SignDialog ref="signRef" @success="handleSignFinish"/>
 </template>
 <script lang="ts" setup>
 import { useUserStoreWithOut } from '@/store/modules/user'
@@ -484,6 +492,7 @@ import {
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { BpmProcessInstanceStatus, BpmModelFormType } from '@/utils/constants'
 import type { FormInstance, FormRules } from 'element-plus'
+import SignDialog from "./SignDialog.vue";
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
 const router = useRouter() // 路由
@@ -522,11 +531,15 @@ const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
 
 // 审批通过意见表单
 const approveFormRef = ref<FormInstance>()
+const signRef = ref()
+const approveSignFormRef = ref()
 const approveReasonForm = reactive({
-  reason: ''
+  reason: '',
+  sign: ''
 })
 const approveReasonRule = reactive<FormRules<typeof approveReasonForm>>({
   reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
+  sign: [{ required: true, message: '签名不能为空', trigger: 'change' }]
 })
 // 拒绝表单
 const rejectFormRef = ref<FormInstance>()
@@ -671,6 +684,10 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
         id: runningTask.value.id,
         reason: approveReasonForm.reason,
         variables // 审批通过, 把修改的字段值赋于流程实例变量
+      }
+      // 签名
+      if (runningTask.value.signEnable) {
+        data.sign = approveReasonForm.sign
       }
       // 多表单处理，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
       // TODO 芋艿 任务有多表单这里要如何处理，会和可编辑的字段冲突
@@ -964,6 +981,11 @@ const getUpdatedProcessInstanceVaiables = ()=> {
     variables[field] = fieldValue;
   })
   return variables
+}
+
+const handleSignFinish = (url) => {
+  approveReasonForm.sign = url
+  approveSignFormRef.value.validate('change')
 }
 
 defineExpose({ loadTodoTask })

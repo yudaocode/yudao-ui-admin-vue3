@@ -36,6 +36,7 @@ export type ApprovalTaskInfo = {
   assigneeUser: User
   status: number
   reason: string
+  sign: string
 }
 
 // 审批节点信息
