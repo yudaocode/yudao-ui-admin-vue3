@@ -439,8 +439,6 @@ export enum OperationButtonType {
  * 条件规则结构定义
  */
 export type ConditionRule = {
-  type: number
-  opName: string
   opCode: string
   leftSide: string
   rightSide: string

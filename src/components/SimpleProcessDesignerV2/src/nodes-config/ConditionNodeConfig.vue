@@ -319,8 +319,6 @@ const conditionGroups = ref<ConditionGroup>({
       and: true,
       rules: [
         {
-          type: 1,
-          opName: '等于',
           opCode: '==',
           leftSide: '',
           rightSide: ''
@@ -353,8 +351,6 @@ const deleteConditionGroup = (idx: number) => {
 // 添加条件规则
 const addConditionRule = (condition: Condition, idx: number) => {
   const rule: ConditionRule = {
-    type: 1,
-    opName: '等于',
     opCode: '==',
     leftSide: '',
     rightSide: ''
