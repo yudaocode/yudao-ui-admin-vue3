@@ -247,8 +247,7 @@ const addNode = (type: number) => {
       name: NODE_DEFAULT_NAME.get(NodeType.ROUTE_BRANCH_NODE) as string,
       showText: '',
       type: NodeType.ROUTE_BRANCH_NODE,
-      childNode: props.childNode,
-      defaultFlowId: 'Flow_' + generateUUID()
+      childNode: props.childNode
     }
     emits('update:childNode', data)
   }
