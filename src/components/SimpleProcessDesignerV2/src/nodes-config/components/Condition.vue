@@ -1,5 +1,7 @@
+<!-- TODO @lesan：其它路由条件，可以使用这个哇？ -->
 <template>
   <el-form ref="formRef" :model="condition" :rules="formRules" label-position="top">
+    <!-- TODO @lesan：1）默认选中 条件规则；2）条件规则放前面，因为更常用！-->
     <el-form-item label="配置方式" prop="conditionType">
       <el-radio-group v-model="condition.conditionType">
         <el-radio
@@ -193,7 +195,7 @@ const addConditionGroup = (conditions) => {
     and: true,
     rules: [
       {
-        type: 1,
+        type: 1, // TODO @lesan：枚举~
         opName: '等于',
         opCode: '==',
         leftSide: '',

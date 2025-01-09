@@ -157,10 +157,11 @@ const addRouteGroup = () => {
   })
 }
 
-const deleteRouteGroup = (index) => {
+const deleteRouteGroup = (index: number) => {
   routerGroups.value.splice(index, 1)
 }
 
+// TODO @lesan：还有一些 router 的命名，没改过来呢
 const getRoutableNode = () => {
   // TODO @lesan 还需要满足以下要求
   // 并行分支、包容分支内部节点不能跳转到外部节点
