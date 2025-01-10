@@ -42,7 +42,10 @@
               >
             </div>
           </template>
-          <Condition v-model="routerGroups[index]" />
+          <Condition
+            :ref="($event) => (conditionRef[index] = $event)"
+            v-model="routerGroups[index]"
+          />
         </el-card>
       </el-form>
 
@@ -84,8 +87,17 @@ const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.ROUTE
 const routerGroups = ref<RouterCondition[]>([])
 const nodeOptions = ref()
 
+const conditionRef = ref([])
 // 保存配置
 const saveConfig = async () => {
+  // 校验表单
+  let valid = true
+  for (const item of conditionRef.value) {
+    if (!(await item.validate())) {
+      valid = false
+    }
+  }
+  if (!valid) return false
   const showText = getShowText()
   if (!showText) return false
   currentNode.value.name = nodeName.value!

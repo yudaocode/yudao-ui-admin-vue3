@@ -59,15 +59,24 @@
 
           <div class="flex pt-2" v-for="(rule, rIdx) in equation.rules" :key="rIdx">
             <div class="mr-2">
-              <el-select style="width: 160px" v-model="rule.leftSide">
-                <el-option
-                  v-for="(field, fIdx) in fieldOptions"
-                  :key="fIdx"
-                  :label="field.title"
-                  :value="field.field"
-                  :disabled="!field.required"
-                />
-              </el-select>
+              <el-form-item
+                :prop="`conditionGroups.conditions.${cIdx}.rules.${rIdx}.leftSide`"
+                :rules="{
+                  required: true,
+                  message: '左值不能为空',
+                  trigger: 'change'
+                }"
+              >
+                <el-select style="width: 160px" v-model="rule.leftSide">
+                  <el-option
+                    v-for="(field, fIdx) in fieldOptions"
+                    :key="fIdx"
+                    :label="field.title"
+                    :value="field.field"
+                    :disabled="!field.required"
+                  />
+                </el-select>
+              </el-form-item>
             </div>
             <div class="mr-2">
               <el-select v-model="rule.opCode" style="width: 100px">
@@ -80,7 +89,16 @@
               </el-select>
             </div>
             <div class="mr-2">
-              <el-input v-model="rule.rightSide" style="width: 160px" />
+              <el-form-item
+                :prop="`conditionGroups.conditions.${cIdx}.rules.${rIdx}.rightSide`"
+                :rules="{
+                  required: true,
+                  message: '右值不能为空',
+                  trigger: 'blur'
+                }"
+              >
+                <el-input v-model="rule.rightSide" style="width: 160px" />
+              </el-form-item>
             </div>
             <div class="mr-1 flex items-center" v-if="equation.rules.length > 1">
               <Icon icon="ep:delete" :size="18" @click="deleteConditionRule(equation, rIdx)" />
@@ -122,8 +140,8 @@ import {
   ConditionType,
   ProcessVariableEnum
 } from '../../consts'
-import {BpmModelFormType} from '@/utils/constants'
-import {useFormFields} from '../../node'
+import { BpmModelFormType } from '@/utils/constants'
+import { useFormFields } from '../../node'
 
 const props = defineProps({
   modelValue: {
@@ -202,10 +220,10 @@ const addConditionGroup = (conditions) => {
 
 const validate = async () => {
   if (!formRef) return false
-  return await formRef.value.validate();
+  return await formRef.value.validate()
 }
 
-defineExpose({validate})
+defineExpose({ validate })
 </script>
 
 <style lang="scss" scoped>
