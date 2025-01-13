@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="loading" class="overflow-auto">
+  <div class="overflow-auto">
     <SimpleProcessModel
       ref="simpleProcessModelRef"
       v-if="processNodeTree"
@@ -56,7 +56,7 @@ const props = defineProps({
     required: false
   },
   // 可发起流程的人员编号
-  startUserIds : {
+  startUserIds: {
     type: Array,
     required: false
   },
@@ -75,6 +75,7 @@ const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const deptOptions = ref<DeptApi.DeptVO[]>([]) // 部门列表
 const deptTreeOptions = ref()
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
+const isDataInitialized = ref(false) // 添加标记，用于判断数据是否已初始化
 
 // 添加当前值的引用
 const currentValue = ref<SimpleFlowNode | undefined>()
@@ -221,9 +222,32 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
   }
 }
 
-onMounted(async () => {
+// 初始化数据的方法
+const initializeData = async () => {
+  if (isDataInitialized.value) {
+    return
+  }
+
   try {
     loading.value = true
+
+    // 并行加载所有数据
+    const [roleList, postList, userList, deptList, userGroupList] = await Promise.all([
+      RoleApi.getSimpleRoleList(),
+      PostApi.getSimplePostList(),
+      UserApi.getSimpleUserList(),
+      DeptApi.getSimpleDeptList(),
+      UserGroupApi.getUserGroupSimpleList()
+    ])
+
+    // 更新数据
+    roleOptions.value = roleList
+    postOptions.value = postList
+    userOptions.value = userList
+    deptOptions.value = deptList
+    deptTreeOptions.value = handleTree(deptList as DeptApi.DeptVO[], 'id')
+    userGroupOptions.value = userGroupList
+
     // 获取表单字段
     if (props.modelId) {
       const bpmnModel = await getModel(props.modelId)
@@ -234,21 +258,7 @@ onMounted(async () => {
           formFields.value = bpmnForm?.fields
         }
       }
-    }
-    // 获得角色列表
-    roleOptions.value = await RoleApi.getSimpleRoleList()
-    // 获得岗位列表
-    postOptions.value = await PostApi.getSimplePostList()
-    // 获得用户列表
-    userOptions.value = await UserApi.getSimpleUserList()
-    // 获得部门列表
-    deptOptions.value = await DeptApi.getSimpleDeptList()
-    deptTreeOptions.value = handleTree(deptOptions.value as DeptApi.DeptVO[], 'id')
-    // 获取用户组列表
-    userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
 
-    // 加载流程数据
-    if (props.modelId) {
       // 获取 SIMPLE 设计器模型
       const result = await getBpmSimpleModel(props.modelId)
       if (result) {
@@ -261,8 +271,26 @@ onMounted(async () => {
     } else {
       updateModel()
     }
+
+    isDataInitialized.value = true
+  } catch (error) {
+    console.error('初始化数据失败:', error)
   } finally {
     loading.value = false
+  }
+}
+
+onMounted(async () => {
+  await initializeData()
+})
+
+// 添加 activated 生命周期钩子
+onActivated(() => {
+  // 组件被激活时，只需要刷新视图
+  if (isDataInitialized.value) {
+    refresh()
+  } else {
+    initializeData()
   }
 })
 
