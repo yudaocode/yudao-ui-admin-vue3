@@ -4,7 +4,6 @@
       :flow-node="simpleModel"
       :tasks="tasks"
       :process-instance="processInstance"
-      class="process-viewer"
     />
   </div>
 </template>
@@ -20,7 +19,7 @@ const props = defineProps({
   modelView: propTypes.object,
   simpleJson: propTypes.string // Simple 模型结构数据 (json 格式)
 })
-const simpleModel = ref()
+const simpleModel = ref<any>({})
 // 用户任务
 const tasks = ref([])
 // 流程实例
@@ -161,15 +160,4 @@ const setSimpleModelNodeTaskStatus = (
 </script>
 
 <style lang="scss" scoped>
-.process-viewer-container {
-  width: 100%;
-  height: 100%;
-
-  :deep(.process-viewer) {
-    width: 100%;
-    height: 100% !important;
-    min-height: 100%;
-    overflow: auto;
-  }
-}
 </style>
