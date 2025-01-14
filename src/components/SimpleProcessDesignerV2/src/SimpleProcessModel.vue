@@ -3,11 +3,31 @@
     <div class="position-absolute top-0px right-0px bg-#fff">
       <el-row type="flex" justify="end">
         <el-button-group key="scale-control" size="default">
+          <el-button size="default" @click="exportJson()"><Icon icon="ep:download" />导出</el-button>
+          <el-button size="default" @click="importJson()"><Icon icon="ep:upload" />导入</el-button>
+          <!-- 用于打开本地文件-->
+          <input
+            type="file"
+            id="files"
+            ref="refFile"
+            style="display: none"
+            accept=".json"
+            @change="importLocalFile"
+          />
           <el-button size="default" :icon="ScaleToOriginal" @click="processReZoom()" />
           <el-button size="default" :plain="true" :icon="ZoomOut" @click="zoomOut()" />
           <el-button size="default" class="w-80px"> {{ scaleValue }}% </el-button>
           <el-button size="default" :plain="true" :icon="ZoomIn" @click="zoomIn()" />
         </el-button-group>
+<!--        <el-button-->
+<!--          v-if="!readonly"-->
+<!--          size="default"-->
+<!--          class="ml-4px"-->
+<!--          type="primary"-->
+<!--          :icon="Select"-->
+<!--          @click="saveSimpleFlowModel"-->
+<!--          >保存模型</el-button-->
+<!--        >-->
       </el-row>
     </div>
     <div class="simple-process-model" :style="`transform: scale(${scaleValue / 100});`">
@@ -33,7 +53,8 @@
 import ProcessNodeTree from './ProcessNodeTree.vue'
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from './consts'
 import { useWatchNode } from './node'
-import { ZoomOut, ZoomIn, ScaleToOriginal } from '@element-plus/icons-vue'
+import { ZoomOut, ZoomIn, ScaleToOriginal, Select } from '@element-plus/icons-vue'
+import { isString } from '@/utils/is'
 
 defineOptions({
   name: 'SimpleProcessModel'
@@ -84,6 +105,16 @@ const processReZoom = () => {
 
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
+
+const saveSimpleFlowModel = async () => {
+  errorNodes = []
+  validateNode(processNodeTree.value, errorNodes)
+  if (errorNodes.length > 0) {
+    errorDialogVisible.value = true
+    return
+  }
+  emits('save', processNodeTree.value)
+}
 
 // 校验节点设置。 暂时以 showText 为空 未节点错误配置
 const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNode[]) => {
@@ -143,6 +174,36 @@ const getCurrentFlowData = async () => {
 defineExpose({
   getCurrentFlowData
 })
+
+const exportJson = () => {
+  const blob = new Blob([JSON.stringify(processNodeTree.value)]);
+  const tempLink = document.createElement('a'); // 创建a标签
+  const href = window.URL.createObjectURL(blob); // 创建下载的链接
+  //filename
+  const fileName = `model.json`;
+  tempLink.href = href;
+  tempLink.target = '_blank';
+  tempLink.download = fileName;
+  document.body.appendChild(tempLink);
+  tempLink.click(); // 点击下载
+  document.body.removeChild(tempLink); // 下载完成移除元素
+  window.URL.revokeObjectURL(href); // 释放掉blob对象
+}
+const importJson = () => {
+  refFile.value.click()
+}
+const refFile = ref()
+// 加载本地文件
+const importLocalFile = () => {
+  const file = refFile.value.files[0]
+  const reader = new FileReader()
+  reader.readAsText(file)
+  reader.onload = function () {
+    if (isString(this.result)) {
+      processNodeTree.value = JSON.parse(this.result)
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped></style>
