@@ -38,7 +38,7 @@
     "animate.css": "^4.1.1",
     "axios": "^1.6.8",
     "benz-amr-recorder": "^1.1.5",
-    "bpmn-js-token-simulation": "^0.10.0",
+    "bpmn-js-token-simulation": "^0.36.0",
     "camunda-bpmn-moddle": "^7.0.1",
     "cropperjs": "^1.6.1",
     "crypto-js": "^4.2.0",
