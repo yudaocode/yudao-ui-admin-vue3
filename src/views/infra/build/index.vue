@@ -162,7 +162,7 @@ const highlightedCode = (code: string) => {
   }
   // 高亮
   const result = hljs.highlight(code, { language: language, ignoreIllegals: true })
-  return result.value
+  return result.value || '&nbsp;'
 }
 
 /** 初始化 **/
