@@ -990,7 +990,7 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   configForm.value.taskCompleteListenerHeader = node.taskCompleteListener?.header ?? []
   configForm.value.taskCompleteListenerBody = node.taskCompleteListener?.body ?? []
   // 6. 签名
-  configForm.value.signEnable = node.signEnable ?? false
+  configForm.value.signEnable = node?.signEnable ?? false
 }
 
 defineExpose({ openDrawer, showUserTaskNodeConfig }) // 暴露方法给父组件
