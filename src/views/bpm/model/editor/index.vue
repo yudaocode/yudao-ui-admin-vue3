@@ -3,7 +3,6 @@
     <!-- 流程设计器，负责绘制流程等 -->
     <MyProcessDesigner
       key="designer"
-      v-if="xmlString != undefined"
       v-model="xmlString"
       :value="xmlString"
       v-bind="controlForm"
