@@ -23,7 +23,7 @@ const props = defineProps<{
   modelId?: string
   modelKey?: string
   modelName?: string
-  value?: string
+  value?: any
   startUserIds?: number[]
 }>()
 
@@ -34,7 +34,6 @@ const currentValue = ref('')
 
 // 初始化或更新当前值
 const initOrUpdateValue = async () => {
-  console.log('initOrUpdateValue', props.value)
   if (props.value) {
     currentValue.value = props.value
     // 如果设计器已经初始化，立即加载数据

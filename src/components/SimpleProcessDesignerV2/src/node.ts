@@ -1,4 +1,3 @@
-import { cloneDeep } from 'lodash-es'
 import { TaskStatusEnum } from '@/api/bpm/task'
 import * as RoleApi from '@/api/system/role'
 import * as DeptApi from '@/api/system/dept'
@@ -47,9 +46,9 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
   // 字段权限配置. 需要有 field, title,  permissioin 属性
   const fieldsPermissionConfig = ref<Array<Record<string, any>>>([])
 
-  const formType = inject<Ref<number>>('formType') // 表单类型
+  const formType = inject<Ref<number|undefined>>('formType', ref()) // 表单类型
 
-  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
+  const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
 
   const getNodeConfigFormFields = (nodeFormFields?: Array<Record<string, string>>) => {
     nodeFormFields = toRaw(nodeFormFields)
@@ -170,13 +169,13 @@ export type CopyTaskFormType = {
  * @description 节点表单数据。 用于审批节点、抄送节点
  */
 export function useNodeForm(nodeType: NodeType) {
-  const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList') // 角色列表
-  const postOptions = inject<Ref<PostApi.PostVO[]>>('postList') // 岗位列表
-  const userOptions = inject<Ref<UserApi.UserVO[]>>('userList') // 用户列表
-  const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList') // 部门列表
-  const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList') // 用户组列表
-  const deptTreeOptions = inject('deptTree') // 部门树
-  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
+  const roleOptions = inject<Ref<RoleApi.RoleVO[]>>('roleList', ref([])) // 角色列表
+  const postOptions = inject<Ref<PostApi.PostVO[]>>('postList', ref([])) // 岗位列表
+  const userOptions = inject<Ref<UserApi.UserVO[]>>('userList', ref([])) // 用户列表
+  const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList', ref([])) // 部门列表
+  const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList',ref([])) // 用户组列表
+  const deptTreeOptions = inject('deptTree', ref()) // 部门树
+  const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   const configForm = ref<UserTaskFormType | CopyTaskFormType>()
   if (nodeType === NodeType.USER_TASK_NODE) {
     configForm.value = {
