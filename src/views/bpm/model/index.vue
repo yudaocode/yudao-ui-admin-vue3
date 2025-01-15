@@ -207,6 +207,8 @@ const getList = async () => {
 
 /** 初始化 **/
 onMounted(() => {
+})
+onActivated(()=>{
   getList()
 })
 </script>
