@@ -95,6 +95,9 @@
       />
       <el-table-column label="操作" align="center">
         <template #default="scope">
+          <el-button link type="primary" @click="copyToClipboard(scope.row.url)">
+            复制链接
+          </el-button>
           <el-button
             link
             type="danger"
@@ -170,6 +173,13 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = () => {
   formRef.value.open()
+}
+
+/** 复制到剪贴板方法 */
+const copyToClipboard = (text: string) => {
+  navigator.clipboard.writeText(text).then(() => {
+    message.success('复制成功')
+  })
 }
 
 /** 删除按钮操作 */

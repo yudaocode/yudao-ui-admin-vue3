@@ -140,7 +140,10 @@ export default {
     btnQRCode: 'QR code sign in',
     qrcode: 'Scan the QR code to log in',
     btnRegister: 'Sign up',
-    SmsSendMsg: 'code has been sent'
+    SmsSendMsg: 'code has been sent',
+    resetPassword: "Reset Password",
+    resetPasswordSuccess: "Reset Password Success",
+    invalidTenantName:"Invalid Tenant Name"
   },
   captcha: {
     verification: 'Please complete security verification',
