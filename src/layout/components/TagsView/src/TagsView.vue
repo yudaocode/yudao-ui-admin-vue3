@@ -243,7 +243,7 @@ const move = (to: number) => {
   start()
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   initTags()
   addTags()
 })

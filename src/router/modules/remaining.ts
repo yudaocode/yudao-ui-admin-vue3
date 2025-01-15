@@ -344,7 +344,7 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: 'manager/model/update/:id',
+        path: 'manager/model/:type/:id',
         component: () => import('@/views/bpm/model/form/index.vue'),
         name: 'BpmModelUpdate',
         meta: {
