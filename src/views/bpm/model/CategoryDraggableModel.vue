@@ -165,6 +165,15 @@
             </el-button>
             <el-button
               link
+              type="primary"
+              @click="openModelForm('copy', scope.row.id)"
+              v-hasPermi="['bpm:model:update']"
+              :disabled="!isManagerUser(scope.row)"
+            >
+              复制
+            </el-button>
+            <el-button
+              link
               class="!ml-5px"
               type="primary"
               @click="handleDeploy(scope.row)"
@@ -473,7 +482,7 @@ const openModelForm = (type: string, id?: number) => {
   } else {
     push({
       name: 'BpmModelUpdate',
-      params: { id }
+      params: { id, type }
     })
   }
 }

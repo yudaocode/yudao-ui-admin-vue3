@@ -162,7 +162,10 @@ const initData = async () => {
   if (modelId) {
     // 修改场景
     formData.value = await ModelApi.getModel(modelId)
-
+    // 复制场景
+    if (route.params.type === 'copy') {
+      delete formData.value.id
+    }
   } else {
     // 新增场景
     formData.value.managerUserIds.push(userStore.getUser.id)
