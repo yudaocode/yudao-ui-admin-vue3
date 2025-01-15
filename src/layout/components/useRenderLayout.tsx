@@ -197,7 +197,7 @@ export const useRenderLayout = () => {
               `${prefixCls}-content-scrollbar`,
               {
                 '!h-[calc(100%-var(--tags-view-height))] mt-[calc(var(--tags-view-height))]':
-                  fixedHeader.value
+                  fixedHeader.value && tagsView.value
               }
             ]}
           >
