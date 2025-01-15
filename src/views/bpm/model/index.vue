@@ -206,9 +206,7 @@ const getList = async () => {
 }
 
 /** 初始化 **/
-onMounted(() => {
-})
-onActivated(()=>{
+onActivated(() => {
   getList()
 })
 </script>

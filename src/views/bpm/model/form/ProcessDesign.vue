@@ -65,16 +65,6 @@ const handleDesignSuccess = async (data?: any) => {
 const showDesigner = computed(() => {
   return Boolean(modelData.value?.key && modelData.value?.name)
 })
-
-// 组件创建时初始化数据
-onMounted(() => {
-})
-
-// 组件卸载前保存数据
-onBeforeUnmount(async () => {
-
-})
-
 defineExpose({
   validate
 })

@@ -17,7 +17,7 @@ defineOptions({
   name: 'SimpleModelDesign'
 })
 
-const props = defineProps<{
+defineProps<{
   modelId?: string
   modelKey?: string
   modelName?: string
@@ -34,17 +34,5 @@ const handleSuccess = (data?: any) => {
     emit('success', data)
   }
 }
-
-// 组件创建时初始化数据
-onMounted(() => {
-})
-
-// 组件卸载前保存数据
-onBeforeUnmount(async () => {
-
-})
-
-defineExpose({
-})
 </script>
 <style lang="scss" scoped></style>

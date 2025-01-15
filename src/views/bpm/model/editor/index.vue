@@ -51,7 +51,7 @@ const formType = ref(20)
 provide('formFields', formFields)
 provide('formType', formType)
 
-//注入 流程数据
+// 注入流程数据
 const xmlString = inject('processData') as Ref
 
 const modeler = shallowRef() // BPMN Modeler
@@ -66,12 +66,11 @@ const controlForm = ref({
 })
 const model = ref<ModelApi.ModelVO>() // 流程模型的信息
 
-
 /** 初始化 modeler */
+// TODO @zws：需要初始化，不然首次创建后，无法发布！相当于说，key、name 要去赋值下
 const initModeler = async (item) => {
   modeler.value = item
 }
-
 
 /** 添加/修改模型 */
 const save = async (bpmnXml: string) => {
@@ -84,7 +83,6 @@ const save = async (bpmnXml: string) => {
   }
 }
 
-
 // 在组件卸载时清理
 onBeforeUnmount(() => {
   modeler.value = null
@@ -94,8 +92,6 @@ onBeforeUnmount(() => {
     w.bpmnInstances = null
   }
 })
-
-
 </script>
 <style lang="scss">
 .process-panel__container {

@@ -67,11 +67,7 @@
         </div>
 
         <!-- 第三步：流程设计 -->
-        <ProcessDesign
-          v-if="currentStep === 2"
-          v-model="formData"
-          ref="processDesignRef"
-        />
+        <ProcessDesign v-if="currentStep === 2" v-model="formData" ref="processDesignRef" />
       </div>
     </div>
   </ContentWrap>
@@ -117,7 +113,7 @@ const validateProcess = async () => {
   await processDesignRef.value?.validate()
 }
 
-const currentStep = ref(-1) // 步骤控制 一开始全部不展示等当前页面数据初始化完成
+const currentStep = ref(-1) // 步骤控制。-1 用于，一开始全部不展示等当前页面数据初始化完成
 
 const steps = [
   { title: '基本信息', validator: validateBasic },
@@ -148,13 +144,12 @@ const formData: any = ref({
 //流程数据
 const processData = ref<any>()
 
-provide("processData", processData)
+provide('processData', processData)
 
 // 数据列表
 const formList = ref([])
 const categoryList = ref([])
 const userList = ref<UserApi.UserVO[]>([])
-
 
 /** 初始化数据 */
 const initData = async () => {
@@ -178,20 +173,25 @@ const initData = async () => {
   // 获取用户列表
   userList.value = await UserApi.getSimpleUserList()
 
+  // 最终，设置 currentStep 切换到第一步
   currentStep.value = 0
 }
 
-//根据类型切换流程数据
-watch(async () => formData.value.type, (newValue, oldValue) => {
-  if (formData.value.type === BpmModelType.BPMN) {
-    processData.value = formData.value.bpmnXml
-  } else if (formData.value.type === BpmModelType.SIMPLE) {
-    processData.value = formData.value.simpleModel
+/** 根据类型切换流程数据 */
+watch(
+  async () => formData.value.type,
+  () => {
+    if (formData.value.type === BpmModelType.BPMN) {
+      processData.value = formData.value.bpmnXml
+    } else if (formData.value.type === BpmModelType.SIMPLE) {
+      processData.value = formData.value.simpleModel
+    }
+    console.log('加载流程数据', processData.value)
+  },
+  {
+    immediate: true
   }
-  console.log('加载流程数据', processData.value)
-}, {
-  immediate: true,
-})
+)
 
 /** 校验所有步骤数据是否完整 */
 const validateAllSteps = async () => {
@@ -316,7 +316,7 @@ const handleDeploy = async () => {
 /** 步骤切换处理 */
 const handleStepClick = async (index: number) => {
   try {
-    console.log('index', index);
+    console.log('index', index)
     if (index !== 0) {
       await validateBasic()
     }
@@ -329,13 +329,11 @@ const handleStepClick = async (index: number) => {
 
     // 切换步骤
     currentStep.value = index
-
   } catch (error) {
     console.error('步骤切换失败:', error)
     message.warning('请先完善当前步骤必填信息')
   }
 }
-
 
 /** 返回列表页 */
 const handleBack = () => {

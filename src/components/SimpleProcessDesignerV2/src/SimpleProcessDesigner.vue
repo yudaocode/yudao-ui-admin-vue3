@@ -63,8 +63,6 @@ const props = defineProps({
 })
 
 const processData = inject('processData') as Ref
-
-
 const loading = ref(false)
 const formFields = ref<string[]>([])
 const formType = ref(20)
@@ -109,7 +107,6 @@ const updateModel = () => {
     saveSimpleFlowModel(processNodeTree.value)
   }
 }
-
 
 const saveSimpleFlowModel = async (simpleModelNode: SimpleFlowNode) => {
   if (!simpleModelNode) {
@@ -201,7 +198,5 @@ onMounted(async () => {
 
 const simpleProcessModelRef = ref()
 
-
-defineExpose({
-})
+defineExpose({})
 </script>

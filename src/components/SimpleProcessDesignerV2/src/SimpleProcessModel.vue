@@ -3,10 +3,15 @@
     <div class="position-absolute top-0px right-0px bg-#fff">
       <el-row type="flex" justify="end">
         <el-button-group key="scale-control" size="default">
-          <el-button size="default" @click="exportJson()"><Icon icon="ep:download" />导出</el-button>
-          <el-button size="default" @click="importJson()"><Icon icon="ep:upload" />导入</el-button>
+          <el-button v-if="!readonly" size="default" @click="exportJson">
+            <Icon icon="ep:download" /> 导出
+          </el-button>
+          <el-button v-if="!readonly" size="default" @click="importJson">
+            <Icon icon="ep:upload" />导入
+          </el-button>
           <!-- 用于打开本地文件-->
           <input
+            v-if="!readonly"
             type="file"
             id="files"
             ref="refFile"
@@ -19,15 +24,6 @@
           <el-button size="default" class="w-80px"> {{ scaleValue }}% </el-button>
           <el-button size="default" :plain="true" :icon="ZoomIn" @click="zoomIn()" />
         </el-button-group>
-<!--        <el-button-->
-<!--          v-if="!readonly"-->
-<!--          size="default"-->
-<!--          class="ml-4px"-->
-<!--          type="primary"-->
-<!--          :icon="Select"-->
-<!--          @click="saveSimpleFlowModel"-->
-<!--          >保存模型</el-button-->
-<!--        >-->
       </el-row>
     </div>
     <div class="simple-process-model" :style="`transform: scale(${scaleValue / 100});`">
@@ -53,7 +49,7 @@
 import ProcessNodeTree from './ProcessNodeTree.vue'
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from './consts'
 import { useWatchNode } from './node'
-import { ZoomOut, ZoomIn, ScaleToOriginal, Select } from '@element-plus/icons-vue'
+import { ZoomOut, ZoomIn, ScaleToOriginal } from '@element-plus/icons-vue'
 import { isString } from '@/utils/is'
 
 defineOptions({
@@ -73,7 +69,7 @@ const props = defineProps({
 })
 
 const emits = defineEmits<{
-  'save': [node: SimpleFlowNode | undefined]
+  save: [node: SimpleFlowNode | undefined]
 }>()
 
 const processNodeTree = useWatchNode(props)
@@ -175,25 +171,28 @@ defineExpose({
   getCurrentFlowData
 })
 
+/** 导出 JSON */
+// TODO @zws：增加一个 download 里面搞个 json 更好
 const exportJson = () => {
-  const blob = new Blob([JSON.stringify(processNodeTree.value)]);
-  const tempLink = document.createElement('a'); // 创建a标签
-  const href = window.URL.createObjectURL(blob); // 创建下载的链接
-  //filename
-  const fileName = `model.json`;
-  tempLink.href = href;
-  tempLink.target = '_blank';
-  tempLink.download = fileName;
-  document.body.appendChild(tempLink);
-  tempLink.click(); // 点击下载
-  document.body.removeChild(tempLink); // 下载完成移除元素
-  window.URL.revokeObjectURL(href); // 释放掉blob对象
+  const blob = new Blob([JSON.stringify(processNodeTree.value)])
+  const tempLink = document.createElement('a') // 创建a标签
+  const href = window.URL.createObjectURL(blob) // 创建下载的链接
+  // filename
+  const fileName = `model.json`
+  tempLink.href = href
+  tempLink.target = '_blank'
+  tempLink.download = fileName
+  document.body.appendChild(tempLink)
+  tempLink.click() // 点击下载
+  document.body.removeChild(tempLink) // 下载完成移除元素
+  window.URL.revokeObjectURL(href) // 释放掉 blob 对象
 }
+
+/** 导入 JSON */
+const refFile = ref()
 const importJson = () => {
   refFile.value.click()
 }
-const refFile = ref()
-// 加载本地文件
 const importLocalFile = () => {
   const file = refFile.value.files[0]
   const reader = new FileReader()
