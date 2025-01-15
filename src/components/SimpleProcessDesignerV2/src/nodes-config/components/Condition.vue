@@ -1,7 +1,5 @@
-<!-- TODO @lesan：其它路由条件，可以使用这个哇？ -->
 <template>
   <el-form ref="formRef" :model="condition" :rules="formRules" label-position="top">
-    <!-- TODO @lesan：1）默认选中 条件规则；2）条件规则放前面，因为更常用！-->
     <el-form-item label="配置方式" prop="conditionType">
       <el-radio-group v-model="condition.conditionType">
         <el-radio
@@ -13,18 +11,6 @@
           {{ dict.label }}
         </el-radio>
       </el-radio-group>
-    </el-form-item>
-    <el-form-item
-      v-if="condition.conditionType === ConditionType.EXPRESSION"
-      label="条件表达式"
-      prop="conditionExpression"
-    >
-      <el-input
-        type="textarea"
-        v-model="condition.conditionExpression"
-        clearable
-        style="width: 100%"
-      />
     </el-form-item>
     <el-form-item v-if="condition.conditionType === ConditionType.RULE" label="条件规则">
       <div class="condition-group-tool">
@@ -73,15 +59,24 @@
 
           <div class="flex pt-2" v-for="(rule, rIdx) in equation.rules" :key="rIdx">
             <div class="mr-2">
-              <el-select style="width: 160px" v-model="rule.leftSide">
-                <el-option
-                  v-for="(field, fIdx) in fieldOptions"
-                  :key="fIdx"
-                  :label="field.title"
-                  :value="field.field"
-                  :disabled="!field.required"
-                />
-              </el-select>
+              <el-form-item
+                :prop="`conditionGroups.conditions.${cIdx}.rules.${rIdx}.leftSide`"
+                :rules="{
+                  required: true,
+                  message: '左值不能为空',
+                  trigger: 'change'
+                }"
+              >
+                <el-select style="width: 160px" v-model="rule.leftSide">
+                  <el-option
+                    v-for="(field, fIdx) in fieldOptions"
+                    :key="fIdx"
+                    :label="field.title"
+                    :value="field.field"
+                    :disabled="!field.required"
+                  />
+                </el-select>
+              </el-form-item>
             </div>
             <div class="mr-2">
               <el-select v-model="rule.opCode" style="width: 100px">
@@ -94,7 +89,16 @@
               </el-select>
             </div>
             <div class="mr-2">
-              <el-input v-model="rule.rightSide" style="width: 160px" />
+              <el-form-item
+                :prop="`conditionGroups.conditions.${cIdx}.rules.${rIdx}.rightSide`"
+                :rules="{
+                  required: true,
+                  message: '右值不能为空',
+                  trigger: 'blur'
+                }"
+              >
+                <el-input v-model="rule.rightSide" style="width: 160px" />
+              </el-form-item>
             </div>
             <div class="mr-1 flex items-center" v-if="equation.rules.length > 1">
               <Icon icon="ep:delete" :size="18" @click="deleteConditionRule(equation, rIdx)" />
@@ -114,13 +118,25 @@
         />
       </div>
     </el-form-item>
+    <el-form-item
+      v-if="condition.conditionType === ConditionType.EXPRESSION"
+      label="条件表达式"
+      prop="conditionExpression"
+    >
+      <el-input
+        type="textarea"
+        v-model="condition.conditionExpression"
+        clearable
+        style="width: 100%"
+      />
+    </el-form-item>
   </el-form>
 </template>
 
 <script setup lang="ts">
 import {
-  CONDITION_CONFIG_TYPES,
   COMPARISON_OPERATORS,
+  CONDITION_CONFIG_TYPES,
   ConditionType,
   ProcessVariableEnum
 } from '../../consts'
@@ -181,8 +197,6 @@ const deleteConditionRule = (condition, index) => {
 
 const addConditionRule = (condition, index) => {
   const rule = {
-    type: 1,
-    opName: '等于',
     opCode: '==',
     leftSide: '',
     rightSide: ''
@@ -195,8 +209,6 @@ const addConditionGroup = (conditions) => {
     and: true,
     rules: [
       {
-        type: 1, // TODO @lesan：枚举~
-        opName: '等于',
         opCode: '==',
         leftSide: '',
         rightSide: ''
@@ -205,6 +217,13 @@ const addConditionGroup = (conditions) => {
   }
   conditions.push(condition)
 }
+
+const validate = async () => {
+  if (!formRef) return false
+  return await formRef.value.validate()
+}
+
+defineExpose({ validate })
 </script>
 
 <style lang="scss" scoped>

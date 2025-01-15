@@ -128,7 +128,7 @@ const setSimpleModelNodeTaskStatus = (
     simpleModel.type === NodeType.CONDITION_BRANCH_NODE ||
     simpleModel.type === NodeType.PARALLEL_BRANCH_NODE ||
     simpleModel.type === NodeType.INCLUSIVE_BRANCH_NODE ||
-    simpleModel.type === NodeType.ROUTE_BRANCH_NODE
+    simpleModel.type === NodeType.ROUTER_BRANCH_NODE
   ) {
     // 网关节点。只有通过和未执行状态
     if (finishedActivityIds.includes(simpleModel.id)) {

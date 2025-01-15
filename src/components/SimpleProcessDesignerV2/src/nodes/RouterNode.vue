@@ -31,7 +31,7 @@
             {{ currentNode.showText }}
           </div>
           <div class="node-text" v-else>
-            {{ NODE_DEFAULT_TEXT.get(NodeType.ROUTE_BRANCH_NODE) }}
+            {{ NODE_DEFAULT_TEXT.get(NodeType.ROUTER_BRANCH_NODE) }}
           </div>
           <Icon v-if="!readonly" icon="ep:arrow-right-bold" />
         </div>
@@ -49,17 +49,17 @@
         :current-node="currentNode"
       />
     </div>
-    <RouteNodeConfig v-if="!readonly && currentNode" ref="nodeSetting" :flow-node="currentNode" />
+    <RouterNodeConfig v-if="!readonly && currentNode" ref="nodeSetting" :flow-node="currentNode" />
   </div>
 </template>
 <script setup lang="ts">
 import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
 import NodeHandler from '../NodeHandler.vue'
 import { useNodeName2, useWatchNode, useTaskStatusClass } from '../node'
-import RouteNodeConfig from '../nodes-config/RouteNodeConfig.vue'
+import RouterNodeConfig from '../nodes-config/RouterNodeConfig.vue'
 
 defineOptions({
-  name: 'RouteNode'
+  name: 'RouterNode'
 })
 
 const props = defineProps({
@@ -77,7 +77,7 @@ const readonly = inject<Boolean>('readonly')
 // 监控节点的变化
 const currentNode = useWatchNode(props)
 // 节点名称编辑
-const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.ROUTE_BRANCH_NODE)
+const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.ROUTER_BRANCH_NODE)
 
 const nodeSetting = ref()
 // 打开节点配置

@@ -359,11 +359,7 @@
 
             <el-divider content-position="left">是否需要签名</el-divider>
             <el-form-item prop="signEnable">
-              <el-switch
-                v-model="configForm.signEnable"
-                active-text="是"
-                inactive-text="否"
-              />
+              <el-switch v-model="configForm.signEnable" active-text="是" inactive-text="否" />
             </el-form-item>
           </el-form>
         </div>
@@ -445,7 +441,7 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="监听器" name="listener">
-        <el-form :model="configForm" label-position="top">
+        <el-form ref="listenerFormRef" :model="configForm" label-position="top">
           <div v-for="(listener, listenerIdx) in taskListener" :key="listenerIdx">
             <el-divider content-position="left">
               <el-text tag="b" size="large">{{ listener.name }}</el-text>
@@ -484,7 +480,16 @@
                   :key="index"
                 >
                   <div class="mr-2">
-                    <el-input class="w-160px" v-model="item.key" />
+                    <el-form-item
+                      :prop="`task${listener.type}ListenerHeader.${index}.key`"
+                      :rules="{
+                        required: true,
+                        message: '参数名不能为空',
+                        trigger: 'blur'
+                      }"
+                    >
+                      <el-input class="w-160px" v-model="item.key" />
+                    </el-form-item>
                   </div>
                   <div class="mr-2">
                     <el-select class="w-100px!" v-model="item.type">
@@ -497,24 +502,42 @@
                     </el-select>
                   </div>
                   <div class="mr-2">
-                    <el-input
-                      v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
-                      class="w-160px"
-                      v-model="item.value"
-                    />
-                    <el-select
-                      v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
-                      class="w-160px!"
-                      v-model="item.value"
+                    <el-form-item
+                      :prop="`task${listener.type}ListenerHeader.${index}.value`"
+                      :rules="{
+                        required: true,
+                        message: '参数值不能为空',
+                        trigger: 'blur'
+                      }"
                     >
-                      <el-option
-                        v-for="(field, fIdx) in formFieldOptions"
-                        :key="fIdx"
-                        :label="field.title"
-                        :value="field.field"
-                        :disabled="!field.required"
+                      <el-input
+                        v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
+                        class="w-160px"
+                        v-model="item.value"
                       />
-                    </el-select>
+                    </el-form-item>
+                    <el-form-item
+                      :prop="`task${listener.type}ListenerHeader.${index}.value`"
+                      :rules="{
+                        required: true,
+                        message: '参数值不能为空',
+                        trigger: 'change'
+                      }"
+                    >
+                      <el-select
+                        v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
+                        class="w-160px!"
+                        v-model="item.value"
+                      >
+                        <el-option
+                          v-for="(field, fIdx) in formFieldOptions"
+                          :key="fIdx"
+                          :label="field.title"
+                          :value="field.field"
+                          :disabled="!field.required"
+                        />
+                      </el-select>
+                    </el-form-item>
                   </div>
                   <div class="mr-1 flex items-center">
                     <Icon
@@ -544,7 +567,16 @@
                   :key="index"
                 >
                   <div class="mr-2">
-                    <el-input class="w-160px" v-model="item.key" />
+                    <el-form-item
+                      :prop="`task${listener.type}ListenerBody.${index}.key`"
+                      :rules="{
+                        required: true,
+                        message: '参数名不能为空',
+                        trigger: 'blur'
+                      }"
+                    >
+                      <el-input class="w-160px" v-model="item.key" />
+                    </el-form-item>
                   </div>
                   <div class="mr-2">
                     <el-select class="w-100px!" v-model="item.type">
@@ -557,24 +589,42 @@
                     </el-select>
                   </div>
                   <div class="mr-2">
-                    <el-input
-                      v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
-                      class="w-160px"
-                      v-model="item.value"
-                    />
-                    <el-select
-                      v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
-                      class="w-160px!"
-                      v-model="item.value"
+                    <el-form-item
+                      :prop="`task${listener.type}ListenerBody.${index}.value`"
+                      :rules="{
+                        required: true,
+                        message: '参数值不能为空',
+                        trigger: 'blur'
+                      }"
                     >
-                      <el-option
-                        v-for="(field, fIdx) in formFieldOptions"
-                        :key="fIdx"
-                        :label="field.title"
-                        :value="field.field"
-                        :disabled="!field.required"
+                      <el-input
+                        v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
+                        class="w-160px"
+                        v-model="item.value"
                       />
-                    </el-select>
+                    </el-form-item>
+                    <el-form-item
+                      :prop="`task${listener.type}ListenerBody.${index}.value`"
+                      :rules="{
+                        required: true,
+                        message: '参数值不能为空',
+                        trigger: 'change'
+                      }"
+                    >
+                      <el-select
+                        v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
+                        class="w-160px!"
+                        v-model="item.value"
+                      >
+                        <el-option
+                          v-for="(field, fIdx) in formFieldOptions"
+                          :key="fIdx"
+                          :label="field.title"
+                          :value="field.field"
+                          :disabled="!field.required"
+                        />
+                      </el-select>
+                    </el-form-item>
                   </div>
                   <div class="mr-1 flex items-center">
                     <Icon
@@ -792,6 +842,8 @@ const {
   cTimeoutMaxRemindCount
 } = useTimeoutHandler()
 
+const listenerFormRef = ref()
+
 // 保存配置
 const saveConfig = async () => {
   activeTabName.value = 'user'
@@ -807,7 +859,8 @@ const saveConfig = async () => {
   }
 
   if (!formRef) return false
-  const valid = await formRef.value.validate()
+  if (!listenerFormRef) return false
+  const valid = (await formRef.value.validate()) && (await listenerFormRef.value.validate())
   if (!valid) return false
   const showText = getShowText()
   if (!showText) return false
@@ -937,7 +990,7 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   configForm.value.taskCompleteListenerHeader = node.taskCompleteListener?.header ?? []
   configForm.value.taskCompleteListenerBody = node.taskCompleteListener?.body ?? []
   // 6. 签名
-  configForm.value.signEnable = node.signEnable ?? false
+  configForm.value.signEnable = node?.signEnable ?? false
 }
 
 defineExpose({ openDrawer, showUserTaskNodeConfig }) // 暴露方法给父组件

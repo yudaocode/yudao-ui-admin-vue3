@@ -48,7 +48,7 @@ export enum NodeType {
   /**
    * 路由分支节点
    */
-  ROUTE_BRANCH_NODE = 54
+  ROUTER_BRANCH_NODE = 54
 }
 
 export enum NodeId {
@@ -116,7 +116,7 @@ export interface SimpleFlowNode {
   // 延迟设置
   delaySetting?: DelaySetting
   // 路由分支
-  routerGroups?: RouteCondition[]
+  routerGroups?: RouterCondition[]
   defaultFlowId?: string
   // 签名
   signEnable?: boolean
@@ -439,8 +439,6 @@ export enum OperationButtonType {
  * 条件规则结构定义
  */
 export type ConditionRule = {
-  type: number
-  opName: string
   opCode: string
   leftSide: string
   rightSide: string
@@ -471,7 +469,7 @@ NODE_DEFAULT_TEXT.set(NodeType.COPY_TASK_NODE, '请配置抄送人')
 NODE_DEFAULT_TEXT.set(NodeType.CONDITION_NODE, '请设置条件')
 NODE_DEFAULT_TEXT.set(NodeType.START_USER_NODE, '请设置发起人')
 NODE_DEFAULT_TEXT.set(NodeType.DELAY_TIMER_NODE, '请设置延迟器')
-NODE_DEFAULT_TEXT.set(NodeType.ROUTE_BRANCH_NODE, '请设置路由节点')
+NODE_DEFAULT_TEXT.set(NodeType.ROUTER_BRANCH_NODE, '请设置路由节点')
 
 export const NODE_DEFAULT_NAME = new Map<number, string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
@@ -479,7 +477,7 @@ NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 NODE_DEFAULT_NAME.set(NodeType.START_USER_NODE, '发起人')
 NODE_DEFAULT_NAME.set(NodeType.DELAY_TIMER_NODE, '延迟器')
-NODE_DEFAULT_NAME.set(NodeType.ROUTE_BRANCH_NODE, '路由分支')
+NODE_DEFAULT_NAME.set(NodeType.ROUTER_BRANCH_NODE, '路由分支')
 
 // 候选人策略。暂时不从字典中取。 后续可能调整。控制显示顺序
 export const CANDIDATE_STRATEGY: DictDataVO[] = [
@@ -660,7 +658,7 @@ export const DELAY_TYPE = [
 /**
  * 路由分支结构定义
  */
-export type RouteCondition = {
+export type RouterCondition = {
   nodeId: string
   conditionType: ConditionType
   conditionExpression: string
