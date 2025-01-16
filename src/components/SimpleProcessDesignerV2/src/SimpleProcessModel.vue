@@ -51,6 +51,7 @@ import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from './consts'
 import { useWatchNode } from './node'
 import { ZoomOut, ZoomIn, ScaleToOriginal } from '@element-plus/icons-vue'
 import { isString } from '@/utils/is'
+import download from "@/utils/download";
 
 defineOptions({
   name: 'SimpleProcessModel'
@@ -174,18 +175,7 @@ defineExpose({
 /** 导出 JSON */
 // TODO @zws：增加一个 download 里面搞个 json 更好
 const exportJson = () => {
-  const blob = new Blob([JSON.stringify(processNodeTree.value)])
-  const tempLink = document.createElement('a') // 创建a标签
-  const href = window.URL.createObjectURL(blob) // 创建下载的链接
-  // filename
-  const fileName = `model.json`
-  tempLink.href = href
-  tempLink.target = '_blank'
-  tempLink.download = fileName
-  document.body.appendChild(tempLink)
-  tempLink.click() // 点击下载
-  document.body.removeChild(tempLink) // 下载完成移除元素
-  window.URL.revokeObjectURL(href) // 释放掉 blob 对象
+  download.json(new Blob([JSON.stringify(processNodeTree.value)]), 'model.json')
 }
 
 /** 导入 JSON */
