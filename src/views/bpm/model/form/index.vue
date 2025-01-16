@@ -160,6 +160,8 @@ const initData = async () => {
     // 复制场景
     if (route.params.type === 'copy') {
       delete formData.value.id
+      formData.value.name += '副本'
+      formData.value.key += '_copy'
     }
   } else {
     // 新增场景
