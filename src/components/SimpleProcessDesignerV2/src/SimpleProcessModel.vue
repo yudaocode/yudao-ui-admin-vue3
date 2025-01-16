@@ -190,6 +190,7 @@ const importLocalFile = () => {
   reader.onload = function () {
     if (isString(this.result)) {
       processNodeTree.value = JSON.parse(this.result)
+      emits('save', processNodeTree.value)
     }
   }
 }
