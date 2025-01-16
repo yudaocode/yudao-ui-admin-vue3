@@ -128,9 +128,11 @@
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
                 签名：
-                <el-image class="w-90px h-40px ml-5px"
-                          :src="task.sign"
-                          :preview-src-list="[task.sign]"/>
+                <el-image
+                  class="w-90px h-40px ml-5px"
+                  :src="task.sign"
+                  :preview-src-list="[task.sign]"
+                />
               </div>
             </teleport>
           </div>

@@ -36,7 +36,7 @@ export type ApprovalTaskInfo = {
   assigneeUser: User
   status: number
   reason: string
-  sign: string
+  sign: string // TODO @lesan：字段改成 signPicUrl 签名照片。只有 sign 感觉是签名文本哈。
 }
 
 // 审批节点信息
@@ -90,7 +90,7 @@ export const getProcessInstanceCopyPage = async (params: any) => {
 
 // 获取审批详情
 export const getApprovalDetail = async (params: any) => {
-  return await request.get({ url: 'bpm/process-instance/get-approval-detail' , params })
+  return await request.get({ url: 'bpm/process-instance/get-approval-detail', params })
 }
 
 // 获取表单字段权限

@@ -44,14 +44,26 @@
               :rows="4"
             />
           </el-form-item>
-          <el-form-item v-if="runningTask.signEnable" label="签名" prop="sign" ref="approveSignFormRef">
+          <el-form-item
+            v-if="runningTask.signEnable"
+            label="签名"
+            prop="sign"
+            ref="approveSignFormRef"
+          >
             <el-button @click="signRef.open()">点击签名</el-button>
-            <el-image class="w-90px h-40px ml-5px" v-if="approveReasonForm.sign"
-                      :src="approveReasonForm.sign"
-                      :preview-src-list="[approveReasonForm.sign]"/>
+            <el-image
+              class="w-90px h-40px ml-5px"
+              v-if="approveReasonForm.sign"
+              :src="approveReasonForm.sign"
+              :preview-src-list="[approveReasonForm.sign]"
+            />
           </el-form-item>
           <el-form-item>
-            <el-button :disabled="formLoading" type="success" @click="handleAudit(true, approveFormRef)">
+            <el-button
+              :disabled="formLoading"
+              type="success"
+              @click="handleAudit(true, approveFormRef)"
+            >
               {{ getButtonDisplayName(OperationButtonType.APPROVE) }}
             </el-button>
             <el-button @click="closePropover('approve', approveFormRef)"> 取消 </el-button>
@@ -92,7 +104,11 @@
             />
           </el-form-item>
           <el-form-item>
-            <el-button :disabled="formLoading" type="danger" @click="handleAudit(false,rejectFormRef)">
+            <el-button
+              :disabled="formLoading"
+              type="danger"
+              @click="handleAudit(false, rejectFormRef)"
+            >
               {{ getButtonDisplayName(OperationButtonType.REJECT) }}
             </el-button>
             <el-button @click="closePropover('reject', rejectFormRef)"> 取消 </el-button>
@@ -478,7 +494,8 @@
     </div>
   </div>
 
-  <SignDialog ref="signRef" @success="handleSignFinish"/>
+  <!-- 签名弹窗 -->
+  <SignDialog ref="signRef" @success="handleSignFinish" />
 </template>
 <script lang="ts" setup>
 import { useUserStoreWithOut } from '@/store/modules/user'
@@ -487,12 +504,13 @@ import * as TaskApi from '@/api/bpm/task'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as UserApi from '@/api/system/user'
 import {
-  OperationButtonType,
-  OPERATION_BUTTON_NAME
+  OPERATION_BUTTON_NAME,
+  OperationButtonType
 } from '@/components/SimpleProcessDesignerV2/src/consts'
-import { BpmProcessInstanceStatus, BpmModelFormType } from '@/utils/constants'
+import { BpmModelFormType, BpmProcessInstanceStatus } from '@/utils/constants'
 import type { FormInstance, FormRules } from 'element-plus'
-import SignDialog from "./SignDialog.vue";
+import SignDialog from './SignDialog.vue'
+
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
 const router = useRouter() // 路由
@@ -501,12 +519,12 @@ const message = useMessage() // 消息弹窗
 const userId = useUserStoreWithOut().getUser.id // 当前登录的编号
 const emit = defineEmits(['success']) // 定义 success 事件，用于操作成功后的回调
 
-const props = defineProps< {
-  processInstance: any,  // 流程实例信息
-  processDefinition: any,  // 流程定义信息
-  userOptions: UserApi.UserVO[],
-  normalForm: any, // 流程表单 formCreate
-  normalFormApi: any, // 流程表单 formCreate Api
+const props = defineProps<{
+  processInstance: any // 流程实例信息
+  processDefinition: any // 流程定义信息
+  userOptions: UserApi.UserVO[]
+  normalForm: any // 流程表单 formCreate
+  normalFormApi: any // 流程表单 formCreate Api
   writableFields: string[] // 流程表单可以编辑的字段
 }>()
 
@@ -547,7 +565,7 @@ const rejectReasonForm = reactive({
   reason: ''
 })
 const rejectReasonRule = reactive<FormRules<typeof rejectReasonForm>>({
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
+  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
 })
 
 // 抄送表单
@@ -568,7 +586,7 @@ const transferForm = reactive({
 })
 const transferFormRule = reactive<FormRules<typeof transferForm>>({
   assigneeUserId: [{ required: true, message: '新审批人不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
+  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
 })
 
 // 委派表单
@@ -579,7 +597,7 @@ const delegateForm = reactive({
 })
 const delegateFormRule = reactive<FormRules<typeof delegateForm>>({
   delegateUserId: [{ required: true, message: '接收人不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
+  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
 })
 
 // 加签表单
@@ -590,7 +608,7 @@ const addSignForm = reactive({
 })
 const addSignFormRule = reactive<FormRules<typeof addSignForm>>({
   addSignUserIds: [{ required: true, message: '加签处理人不能为空', trigger: 'change' }],
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
+  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
 })
 
 // 减签表单
@@ -601,7 +619,7 @@ const deleteSignForm = reactive({
 })
 const deleteSignFormRule = reactive<FormRules<typeof deleteSignForm>>({
   deleteSignTaskId: [{ required: true, message: '减签人员不能为空', trigger: 'change' }],
- reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
+  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
 })
 
 // 退回表单
@@ -621,7 +639,7 @@ const cancelForm = reactive({
   cancelReason: ''
 })
 const cancelFormRule = reactive<FormRules<typeof cancelForm>>({
-  cancelReason: [{ required: true, message: '取消理由不能为空', trigger: 'blur' }],
+  cancelReason: [{ required: true, message: '取消理由不能为空', trigger: 'blur' }]
 })
 
 /** 监听 approveFormFApis，实现它对应的 form-create 初始化后，隐藏掉对应的表单提交按钮 */
@@ -640,11 +658,11 @@ watch(
 const openPopover = async (type: string) => {
   if (type === 'approve') {
     // 校验流程表单
-     const valid = await validateNormalForm();
-     if (!valid) {
+    const valid = await validateNormalForm()
+    if (!valid) {
       message.warning('表单校验不通过，请先完善表单!!')
-      return;
-     }
+      return
+    }
   }
   if (type === 'return') {
     // 获取退回节点
@@ -665,7 +683,7 @@ const openPopover = async (type: string) => {
 const closePropover = (type: string, formRef: FormInstance | undefined) => {
   if (formRef) {
     formRef.resetFields()
-  } 
+  }
   popOverVisible.value[type] = false
 }
 
@@ -677,8 +695,8 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
     if (!formRef) return
     await formRef.validate()
     if (pass) {
-       // 获取修改的流程变量, 暂时只支持流程表单
-       const variables = getUpdatedProcessInstanceVaiables();
+      // 获取修改的流程变量, 暂时只支持流程表单
+      const variables = getUpdatedProcessInstanceVariables()
       // 审批通过数据
       const data = {
         id: runningTask.value.id,
@@ -701,10 +719,10 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
       popOverVisible.value.approve = false
       message.success('审批通过成功')
     } else {
-       // 审批不通过数据
-       const data = {
+      // 审批不通过数据
+      const data = {
         id: runningTask.value.id,
-        reason: rejectReasonForm.reason,
+        reason: rejectReasonForm.reason
       }
       await TaskApi.rejectTask(data)
       popOverVisible.value.reject = false
@@ -730,7 +748,7 @@ const handleCopy = async () => {
     const data = {
       id: runningTask.value.id,
       reason: copyForm.copyReason,
-      copyUserIds:copyForm.copyUserIds
+      copyUserIds: copyForm.copyUserIds
     }
     await TaskApi.copyTask(data)
     copyFormRef.value.resetFields()
@@ -769,7 +787,6 @@ const handleTransfer = async () => {
 const handleDelegate = async () => {
   formLoading.value = true
   try {
- 
     // 1.1 校验表单
     if (!delegateFormRef.value) return
     await delegateFormRef.value.validate()
@@ -966,24 +983,25 @@ const validateNormalForm = async () => {
     try {
       await props.normalFormApi?.validate()
     } catch {
-      valid = false;
+      valid = false
     }
-    return valid;
+    return valid
   } else {
-    return true;
+    return true
   }
 }
+
 /** 从可以编辑的流程表单字段，获取需要修改的流程实例的变量 */
-const getUpdatedProcessInstanceVaiables = ()=> {
+const getUpdatedProcessInstanceVariables = () => {
   const variables = {}
-  props.writableFields.forEach( (field) => {
-    const fieldValue = props.normalFormApi.getValue(field)
-    variables[field] = fieldValue;
+  props.writableFields.forEach((field) => {
+    variables[field] = props.normalFormApi.getValue(field)
   })
   return variables
 }
 
-const handleSignFinish = (url) => {
+/** 处理签名完成 */
+const handleSignFinish = (url: string) => {
   approveReasonForm.sign = url
   approveSignFormRef.value.validate('change')
 }
