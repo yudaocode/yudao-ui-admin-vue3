@@ -47,15 +47,15 @@
           <el-form-item
             v-if="runningTask.signEnable"
             label="签名"
-            prop="sign"
+            prop="signPicUrl"
             ref="approveSignFormRef"
           >
             <el-button @click="signRef.open()">点击签名</el-button>
             <el-image
               class="w-90px h-40px ml-5px"
-              v-if="approveReasonForm.sign"
-              :src="approveReasonForm.sign"
-              :preview-src-list="[approveReasonForm.sign]"
+              v-if="approveReasonForm.signPicUrl"
+              :src="approveReasonForm.signPicUrl"
+              :preview-src-list="[approveReasonForm.signPicUrl]"
             />
           </el-form-item>
           <el-form-item>
@@ -553,11 +553,11 @@ const signRef = ref()
 const approveSignFormRef = ref()
 const approveReasonForm = reactive({
   reason: '',
-  sign: ''
+  signPicUrl: ''
 })
 const approveReasonRule = reactive<FormRules<typeof approveReasonForm>>({
   reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
-  sign: [{ required: true, message: '签名不能为空', trigger: 'change' }]
+  signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }]
 })
 // 拒绝表单
 const rejectFormRef = ref<FormInstance>()
@@ -705,7 +705,7 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
       }
       // 签名
       if (runningTask.value.signEnable) {
-        data.sign = approveReasonForm.sign
+        data.signPicUrl = approveReasonForm.signPicUrl
       }
       // 多表单处理，并且有额外的 approveForm 表单，需要校验 + 拼接到 data 表单里提交
       // TODO 芋艿 任务有多表单这里要如何处理，会和可编辑的字段冲突
@@ -1002,7 +1002,7 @@ const getUpdatedProcessInstanceVariables = () => {
 
 /** 处理签名完成 */
 const handleSignFinish = (url: string) => {
-  approveReasonForm.sign = url
+  approveReasonForm.signPicUrl = url
   approveSignFormRef.value.validate('change')
 }
 

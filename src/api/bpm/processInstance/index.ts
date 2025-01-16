@@ -36,7 +36,7 @@ export type ApprovalTaskInfo = {
   assigneeUser: User
   status: number
   reason: string
-  sign: string // TODO @lesan：字段改成 signPicUrl 签名照片。只有 sign 感觉是签名文本哈。
+  signPicUrl: string
 }
 
 // 审批节点信息
