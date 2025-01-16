@@ -145,6 +145,7 @@ const formData: any = ref({
 const processData = ref<any>()
 
 provide('processData', processData)
+provide('modelData', formData)
 
 // 数据列表
 const formList = ref([])
