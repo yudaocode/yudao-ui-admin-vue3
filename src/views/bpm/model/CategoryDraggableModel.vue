@@ -205,6 +205,14 @@
                   </el-dropdown-item>
                   <el-dropdown-item
                     type="danger"
+                    command="handleClean"
+                    v-if="checkPermi(['bpm:model:delete'])"
+                    :disabled="!isManagerUser(scope.row)"
+                  >
+                    清理
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    type="danger"
                     command="handleDelete"
                     v-if="checkPermi(['bpm:model:delete'])"
                     :disabled="!isManagerUser(scope.row)"
@@ -285,6 +293,9 @@ const handleModelCommand = (command: string, row: any) => {
     case 'handleChangeState':
       handleChangeState(row)
       break
+    case 'handleClean':
+      handleClean(row)
+      break
     default:
       break
   }
@@ -313,6 +324,19 @@ const handleDelete = async (row: any) => {
     // 发起删除
     await ModelApi.deleteModel(row.id)
     message.success(t('common.delSuccess'))
+    // 刷新列表
+    emit('success')
+  } catch {}
+}
+
+/** 清理按钮操作 */
+const handleClean = async (row: any) => {
+  try {
+    // 清理的二次确认
+    await message.confirm('是否确认清理流程名字为"' + row.name + '"的数据项?')
+    // 发起清理
+    await ModelApi.cleanModel(row.id)
+    message.success('清理成功')
     // 刷新列表
     emit('success')
   } catch {}
