@@ -71,8 +71,7 @@ const controlForm = ref({
 const model = ref<ModelApi.ModelVO>() // 流程模型的信息
 
 /** 初始化 modeler */
-// TODO @zws：需要初始化，不然首次创建后，无法发布！相当于说，key、name 要去赋值下
-const initModeler = async (item) => {
+const initModeler = async (item: any) => {
   //先初始化模型数据
   model.value = modelData.value
   modeler.value = item

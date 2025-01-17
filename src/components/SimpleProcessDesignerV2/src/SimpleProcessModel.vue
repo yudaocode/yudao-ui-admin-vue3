@@ -51,7 +51,7 @@ import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from './consts'
 import { useWatchNode } from './node'
 import { ZoomOut, ZoomIn, ScaleToOriginal } from '@element-plus/icons-vue'
 import { isString } from '@/utils/is'
-import download from "@/utils/download";
+import download from '@/utils/download'
 
 defineOptions({
   name: 'SimpleProcessModel'
@@ -173,7 +173,6 @@ defineExpose({
 })
 
 /** 导出 JSON */
-// TODO @zws：增加一个 download 里面搞个 json 更好
 const exportJson = () => {
   download.json(new Blob([JSON.stringify(processNodeTree.value)]), 'model.json')
 }

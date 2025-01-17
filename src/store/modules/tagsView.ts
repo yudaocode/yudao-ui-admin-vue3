@@ -156,7 +156,7 @@ export const useTagsViewStore = defineStore('tagsView', {
         }
       }
     },
-    // 设置当前选中的tag
+    // 设置当前选中的 tag
     setSelectedTag(tag: RouteLocationNormalizedLoaded) {
       this.selectedTag = tag
     },
