@@ -12,6 +12,8 @@
       :additionalModel="controlForm.additionalModel"
       :model="model"
       @save="save"
+      :process-id="modelKey"
+      :process-name="modelName"
     />
     <!-- 流程属性器，负责编辑每个流程节点的属性 -->
     <MyProcessPenal
@@ -53,6 +55,8 @@ provide('formType', formType)
 
 // 注入流程数据
 const xmlString = inject('processData') as Ref
+// 注入模型数据
+const modelData = inject('modelData') as Ref
 
 const modeler = shallowRef() // BPMN Modeler
 const processDesigner = ref()
@@ -69,6 +73,8 @@ const model = ref<ModelApi.ModelVO>() // 流程模型的信息
 /** 初始化 modeler */
 // TODO @zws：需要初始化，不然首次创建后，无法发布！相当于说，key、name 要去赋值下
 const initModeler = async (item) => {
+  //先初始化模型数据
+  model.value = modelData.value
   modeler.value = item
 }
 

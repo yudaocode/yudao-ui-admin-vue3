@@ -547,6 +547,7 @@ const importLocalFile = () => {
   reader.onload = function () {
     let xmlStr = this.result
     createNewDiagram(xmlStr)
+    emit('save', xmlStr)
   }
 }
 /* ------------------------------------------------ refs methods ------------------------------------------------------ */
