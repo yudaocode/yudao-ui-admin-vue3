@@ -206,7 +206,7 @@
                   <el-dropdown-item
                     type="danger"
                     command="handleClean"
-                    v-if="checkPermi(['bpm:model:delete'])"
+                    v-if="checkPermi(['bpm:model:clean'])"
                     :disabled="!isManagerUser(scope.row)"
                   >
                     清理
