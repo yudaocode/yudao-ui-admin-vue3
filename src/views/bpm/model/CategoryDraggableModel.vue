@@ -254,6 +254,7 @@ import { checkPermi } from '@/utils/permission'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { useAppStore } from '@/store/modules/app'
 import { cloneDeep } from 'lodash-es'
+import {useTagsView} from "@/hooks/web/useTagsView";
 
 defineOptions({ name: 'BpmModel' })
 
@@ -474,6 +475,7 @@ const handleDeleteCategory = async () => {
   } catch {}
 }
 
+const tagsView = useTagsView();
 /** 添加流程模型弹窗 */
 const modelFormRef = ref()
 const openModelForm = (type: string, id?: number) => {
@@ -483,6 +485,10 @@ const openModelForm = (type: string, id?: number) => {
     push({
       name: 'BpmModelUpdate',
       params: { id, type }
+    }).then((_) => {
+      if (type === 'copy') {
+        tagsView.setTitle('复制流程')
+      }
     })
   }
 }

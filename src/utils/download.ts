@@ -33,6 +33,10 @@ const download = {
   markdown: (data: Blob, fileName: string) => {
     download0(data, fileName, 'text/markdown')
   },
+  // 下载 Json 方法
+  json: (data: Blob, fileName: string) => {
+    download0(data, fileName, 'application/json')
+  },
   // 下载图片（允许跨域）
   image: ({
     url,

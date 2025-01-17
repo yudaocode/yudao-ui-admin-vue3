@@ -145,6 +145,7 @@ const formData: any = ref({
 const processData = ref<any>()
 
 provide('processData', processData)
+provide('modelData', formData)
 
 // 数据列表
 const formList = ref([])
@@ -160,6 +161,8 @@ const initData = async () => {
     // 复制场景
     if (route.params.type === 'copy') {
       delete formData.value.id
+      formData.value.name += '副本'
+      formData.value.key += '_copy'
     }
   } else {
     // 新增场景
