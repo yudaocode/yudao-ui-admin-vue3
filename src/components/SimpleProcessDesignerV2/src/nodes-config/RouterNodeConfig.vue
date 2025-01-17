@@ -37,9 +37,9 @@
                   :value="node.value"
                 />
               </el-select>
-              <el-button class="mla" type="danger" link @click="deleteRouterGroup(index)"
-                >删除</el-button
-              >
+              <el-button class="mla" type="danger" link @click="deleteRouterGroup(index)">
+                删除
+              </el-button>
             </div>
           </template>
           <Condition
@@ -67,6 +67,7 @@ import { Plus } from '@element-plus/icons-vue'
 import { SimpleFlowNode, NodeType, ConditionType, RouterCondition } from '../consts'
 import { useWatchNode, useDrawer, useNodeName } from '../node'
 import Condition from './components/Condition.vue'
+
 defineOptions({
   name: 'RouterNodeConfig'
 })
@@ -86,9 +87,9 @@ const currentNode = useWatchNode(props)
 const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.ROUTER_BRANCH_NODE)
 const routerGroups = ref<RouterCondition[]>([])
 const nodeOptions = ref()
-
 const conditionRef = ref([])
-// 保存配置
+
+/** 保存配置 */
 const saveConfig = async () => {
   // 校验表单
   let valid = true

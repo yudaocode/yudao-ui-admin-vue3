@@ -440,6 +440,7 @@
           </div>
         </div>
       </el-tab-pane>
+      <!-- TODO @lesan：要不抽成 Listener 小组件？类似 Condition.vue -->
       <el-tab-pane label="监听器" name="listener">
         <el-form ref="listenerFormRef" :model="configForm" label-position="top">
           <div v-for="(listener, listenerIdx) in taskListener" :key="listenerIdx">
