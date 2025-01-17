@@ -1452,6 +1452,17 @@
           "isBody": true
         }
       ]
+    },
+    {
+      "name": "SkipExpression",
+      "extends": ["bpmn:UserTask"],
+      "properties": [
+        {
+          "name": "skipExpression",
+          "isAttr": true,
+          "type": "String"
+        }
+      ]
     }
   ],
   "emumerations": []
