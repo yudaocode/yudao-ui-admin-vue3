@@ -66,7 +66,7 @@ const download = {
       a.click()
     }
   },
-  base64ToFile: (base64, fileName) => {
+  base64ToFile: (base64: any, fileName: string) => {
     // 将base64按照 , 进行分割 将前缀  与后续内容分隔开
     const data = base64.split(',')
     // 利用正则表达式 从前缀中获取图片的类型信息（image/png、image/jpeg、image/webp等）
@@ -85,13 +85,11 @@ const download = {
       // charCodeAt()：获取给定索引处字符对应的 UTF-16 代码单元
       u8arr[n] = bstr.charCodeAt(n)
     }
-    // 利用构造函数创建File文件对象
-    // new File(bits, name, options)
-    const file = new File([u8arr], `${fileName}.${suffix}`, {
+
+    // 将File文件对象返回给方法的调用者
+    return new File([u8arr], `${fileName}.${suffix}`, {
       type: type
     })
-    // 将File文件对象返回给方法的调用者
-    return file
   }
 }
 
