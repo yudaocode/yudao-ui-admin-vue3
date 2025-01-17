@@ -124,6 +124,7 @@
                 :active-value="0"
                 :inactive-value="1"
                 @change="handleStatusChange(scope.row)"
+                :disabled="!checkPermi(['system:user:update'])"
               />
             </template>
           </el-table-column>
