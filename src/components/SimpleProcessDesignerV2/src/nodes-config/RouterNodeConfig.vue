@@ -86,7 +86,7 @@ const currentNode = useWatchNode(props)
 // 节点名称
 const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.ROUTER_BRANCH_NODE)
 const routerGroups = ref<RouterCondition[]>([])
-const nodeOptions = ref()
+const nodeOptions = ref<any>([])
 const conditionRef = ref([])
 
 /** 保存配置 */
@@ -94,7 +94,7 @@ const saveConfig = async () => {
   // 校验表单
   let valid = true
   for (const item of conditionRef.value) {
-    if (!(await item.validate())) {
+    if (item && !(await item.validate())) {
       valid = false
     }
   }
@@ -109,7 +109,7 @@ const saveConfig = async () => {
 }
 // 显示路由分支节点配置， 由父组件传过来
 const showRouteNodeConfig = (node: SimpleFlowNode) => {
-  getRouterNode()
+  getRouterNode(processNodeTree?.value)
   routerGroups.value = []
   nodeName.value = node.name
   if (node.routerGroups) {
@@ -172,15 +172,14 @@ const deleteRouterGroup = (index: number) => {
   routerGroups.value.splice(index, 1)
 }
 
-const getRouterNode = () => {
-  // TODO @lesan 还需要满足以下要求
+// 递归获取所有节点
+const getRouterNode = (node) => {
+  // TODO 最好还需要满足以下要求
   // 并行分支、包容分支内部节点不能跳转到外部节点
   // 条件分支节点可以向上跳转到外部节点
-  let node = processNodeTree?.value
-  nodeOptions.value = []
   while (true) {
     if (!node) break
-    if (node.type !== NodeType.ROUTER_BRANCH_NODE) {
+    if (node.type !== NodeType.ROUTER_BRANCH_NODE && node.type !== NodeType.CONDITION_NODE) {
       nodeOptions.value.push({
         label: node.name,
         value: node.id
@@ -188,6 +187,11 @@ const getRouterNode = () => {
     }
     if (!node.childNode || node.type === NodeType.END_EVENT_NODE) {
       break
+    }
+    if (node.conditionNodes && node.conditionNodes.length) {
+      node.conditionNodes.forEach((item) => {
+        getRouterNode(item)
+      })
     }
     node = node.childNode
   }

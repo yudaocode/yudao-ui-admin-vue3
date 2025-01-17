@@ -124,14 +124,14 @@
                 审批意见：{{ task.reason }}
               </div>
               <div
-                v-if="task.sign && activity.nodeType === NodeType.USER_TASK_NODE"
+                v-if="task.signPicUrl && activity.nodeType === NodeType.USER_TASK_NODE"
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
                 签名：
                 <el-image
                   class="w-90px h-40px ml-5px"
-                  :src="task.sign"
-                  :preview-src-list="[task.sign]"
+                  :src="task.signPicUrl"
+                  :preview-src-list="[task.signPicUrl]"
                 />
               </div>
             </teleport>
