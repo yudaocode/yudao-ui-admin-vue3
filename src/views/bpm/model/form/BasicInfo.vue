@@ -77,7 +77,6 @@
       >
         <el-option label="全员" :value="0" />
         <el-option label="指定人员" :value="1" />
-        <el-option label="均不可提交" :value="2" />
       </el-select>
       <div v-if="modelData.startUserType === 1" class="mt-2 flex flex-wrap gap-2">
         <div
@@ -97,21 +96,12 @@
           />
         </div>
         <el-button type="primary" link @click="openStartUserSelect">
-          <Icon icon="ep:plus" />选择人员
+          <Icon icon="ep:plus" /> 选择人员
         </el-button>
       </div>
     </el-form-item>
-    <el-form-item label="流程管理员" prop="managerUserType" class="mb-20px">
-      <el-select
-        v-model="modelData.managerUserType"
-        placeholder="请选择流程管理员"
-        @change="handleManagerUserTypeChange"
-      >
-        <el-option label="全员" :value="0" />
-        <el-option label="指定人员" :value="1" />
-        <el-option label="均不可提交" :value="2" />
-      </el-select>
-      <div v-if="modelData.managerUserType === 1" class="mt-2 flex flex-wrap gap-2">
+    <el-form-item label="流程管理员" prop="managerUserIds" class="mb-20px">
+      <div class="flex flex-wrap gap-2">
         <div
           v-for="user in selectedManagerUsers"
           :key="user.id"
@@ -230,16 +220,6 @@ const handleStartUserTypeChange = (value: number) => {
     modelData.value = {
       ...modelData.value,
       startUserIds: []
-    }
-  }
-}
-
-/** 处理管理员类型变化 */
-const handleManagerUserTypeChange = (value: number) => {
-  if (value !== 1) {
-    modelData.value = {
-      ...modelData.value,
-      managerUserIds: []
     }
   }
 }
