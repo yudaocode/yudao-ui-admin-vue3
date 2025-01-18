@@ -243,13 +243,9 @@
       </div>
     </template>
   </Dialog>
-
-  <!-- 表单弹窗：添加流程模型 -->
-  <ModelForm :categoryId="categoryInfo.code" ref="modelFormRef" @success="emit('success')" />
 </template>
 
 <script lang="ts" setup>
-import ModelForm from './ModelForm.vue'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import Sortable from 'sortablejs'
 import { propTypes } from '@/utils/propTypes'
@@ -501,7 +497,6 @@ const handleDeleteCategory = async () => {
 
 /** 添加流程模型弹窗 */
 const tagsView = useTagsView()
-const modelFormRef = ref()
 const openModelForm = async (type: string, id?: number) => {
   if (type === 'create') {
     await push({ name: 'BpmModelCreate' })
