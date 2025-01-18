@@ -140,7 +140,7 @@
 
 <script setup lang="ts">
 import { PromotionSeckillProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import * as SeckillActivityApi from '@/api/mall/promotion/seckill/seckillActivity'
 import { CommonStatusEnum } from '@/utils/constants'
 import SeckillShowcase from '@/views/mall/promotion/seckill/components/SeckillShowcase.vue'
@@ -150,7 +150,7 @@ defineOptions({ name: 'PromotionSeckillProperty' })
 
 const props = defineProps<{ modelValue: PromotionSeckillProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 // 活动列表
 const activityList = ref<SeckillActivityApi.SeckillActivityVO[]>([])
 onMounted(async () => {

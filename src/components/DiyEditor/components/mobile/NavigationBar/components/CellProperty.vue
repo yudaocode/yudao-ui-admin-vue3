@@ -64,7 +64,7 @@
 
 <script lang="ts" setup>
 import { NavigationBarCellProperty } from '../config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 // 导航栏属性面板
 defineOptions({ name: 'NavigationBarCellProperty' })
 

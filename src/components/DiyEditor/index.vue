@@ -110,7 +110,7 @@
           <el-tag
             v-if="showPageConfig"
             :effect="selectedComponent?.uid === pageConfigComponent.uid ? 'dark' : 'plain'"
-            :type="selectedComponent?.uid === pageConfigComponent.uid ? '' : 'info'"
+            :type="selectedComponent?.uid === pageConfigComponent.uid ? 'primary' : 'info'"
             size="large"
             @click="handleComponentSelected(pageConfigComponent)"
           >
@@ -121,7 +121,7 @@
             <el-tag
               v-if="component.position === 'fixed'"
               :effect="selectedComponent?.uid === component.uid ? 'dark' : 'plain'"
-              :type="selectedComponent?.uid === component.uid ? '' : 'info'"
+              :type="selectedComponent?.uid === component.uid ? 'primary' : 'info'"
               closable
               size="large"
               @click="handleComponentSelected(component)"
@@ -191,7 +191,7 @@ import { cloneDeep, includes } from 'lodash-es'
 import { component as PAGE_CONFIG_COMPONENT } from '@/components/DiyEditor/components/mobile/PageConfig/config'
 import { component as NAVIGATION_BAR_COMPONENT } from './components/mobile/NavigationBar/config'
 import { component as TAB_BAR_COMPONENT } from './components/mobile/TabBar/config'
-import { isString } from '@/utils/is'
+import { isEmpty, isString } from '@/utils/is'
 import { DiyComponent, DiyComponentLibrary, PageConfig } from '@/components/DiyEditor/util'
 import { componentConfigs } from '@/components/DiyEditor/components/mobile'
 import { array, oneOfType } from 'vue-types'
@@ -238,22 +238,40 @@ const props = defineProps({
 watch(
   () => props.modelValue,
   () => {
-    const modelValue = isString(props.modelValue)
-      ? (JSON.parse(props.modelValue) as PageConfig)
-      : props.modelValue
-    pageConfigComponent.value.property = modelValue?.page || PAGE_CONFIG_COMPONENT.property
+    const modelValue =
+      isString(props.modelValue) && !isEmpty(props.modelValue)
+        ? (JSON.parse(props.modelValue) as PageConfig)
+        : props.modelValue
+    pageConfigComponent.value.property =
+      (typeof modelValue !== 'string' && modelValue?.page) || PAGE_CONFIG_COMPONENT.property
     navigationBarComponent.value.property =
-      modelValue?.navigationBar || NAVIGATION_BAR_COMPONENT.property
-    tabBarComponent.value.property = modelValue?.tabBar || TAB_BAR_COMPONENT.property
+      (typeof modelValue !== 'string' && modelValue?.navigationBar) ||
+      NAVIGATION_BAR_COMPONENT.property
+    tabBarComponent.value.property =
+      (typeof modelValue !== 'string' && modelValue?.tabBar) || TAB_BAR_COMPONENT.property
     // 查找对应的页面组件
-    pageComponents.value = (modelValue?.components || []).map((item) => {
-      const component = componentConfigs[item.id]
-      return { ...component, property: item.property }
-    })
+    pageComponents.value = ((typeof modelValue !== 'string' && modelValue?.components) || []).map(
+      (item) => {
+        const component = componentConfigs[item.id]
+        return { ...component, property: item.property }
+      }
+    )
   },
   {
     immediate: true
   }
+)
+
+/** 选择组件修改其属性后更新它的配置 */
+watch(
+  selectedComponent,
+  (val: any) => {
+    if (!val || selectedComponentIndex.value === -1) {
+      return
+    }
+    pageComponents.value[selectedComponentIndex.value] = selectedComponent.value!
+  },
+  { deep: true }
 )
 
 // 保存

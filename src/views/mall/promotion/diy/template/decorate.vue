@@ -52,7 +52,9 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formData = ref<DiyTemplateApi.DiyTemplatePropertyVO>()
 const formRef = ref() // 表单 Ref
 // 当前编辑的属性
-const currentFormData = ref<DiyTemplateApi.DiyTemplatePropertyVO | DiyPageApi.DiyPageVO>()
+const currentFormData = ref<DiyTemplateApi.DiyTemplatePropertyVO | DiyPageApi.DiyPageVO>({
+  property: ''
+} as DiyPageApi.DiyPageVO)
 // templateItem 对应的缓存
 const currentFormDataMap = ref<
   Map<string, DiyTemplateApi.DiyTemplatePropertyVO | DiyPageApi.DiyPageVO>
@@ -92,17 +94,21 @@ const handleTemplateItemChange = (val: number) => {
   // 编辑模板
   if (val === 0) {
     libs.value = templateLibs
-    currentFormData.value = isEmpty(data) ? formData.value : data
+    currentFormData.value = (isEmpty(data) ? formData.value : data) as
+      | DiyTemplateApi.DiyTemplatePropertyVO
+      | DiyPageApi.DiyPageVO
     return
   }
 
   // 编辑页面
   libs.value = PAGE_LIBS
-  currentFormData.value = isEmpty(data)
-    ? formData.value!.pages.find(
-        (page: DiyPageApi.DiyPageVO) => page.name === templateItems[val].name
-      )
-    : data
+  currentFormData.value = (
+    isEmpty(data)
+      ? formData.value!.pages.find(
+          (page: DiyPageApi.DiyPageVO) => page.name === templateItems[val].name
+        )
+      : data
+  ) as DiyTemplateApi.DiyTemplatePropertyVO | DiyPageApi.DiyPageVO
 }
 
 // 提交表单
@@ -170,7 +176,9 @@ const recoverPageIndex = () => {
   sessionStorage.removeItem(DIY_PAGE_INDEX_KEY)
 
   // 重新初始化数据
-  currentFormData.value = formData.value
+  currentFormData.value = formData.value as
+    | DiyTemplateApi.DiyTemplatePropertyVO
+    | DiyPageApi.DiyPageVO
   currentFormDataMap.value = new Map<
     string,
     DiyTemplateApi.DiyTemplatePropertyVO | DiyPageApi.DiyPageVO
