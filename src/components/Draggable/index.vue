@@ -13,9 +13,16 @@
         class="mb-4px flex flex-col gap-4px border border-gray-2 border-rounded rounded border-solid p-8px"
       >
         <!-- 操作按钮区 -->
-        <div class="m--8px m-b-4px flex flex-row items-center justify-between p-8px" style="background-color: var(--app-content-bg-color);">
+        <div
+          class="m--8px m-b-4px flex flex-row items-center justify-between p-8px"
+          style="background-color: var(--app-content-bg-color)"
+        >
           <el-tooltip content="拖动排序">
-            <Icon icon="ic:round-drag-indicator" class="drag-icon cursor-move" style="color: #8a909c;" />
+            <Icon
+              icon="ic:round-drag-indicator"
+              class="drag-icon cursor-move"
+              style="color: #8a909c"
+            />
           </el-tooltip>
           <el-tooltip content="删除">
             <Icon
@@ -47,7 +54,7 @@
 <script setup lang="ts">
 // 拖拽组件
 import VueDraggable from 'vuedraggable'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import { any, array } from 'vue-types'
 import { propTypes } from '@/utils/propTypes'
 import { cloneDeep } from 'lodash-es'
@@ -66,7 +73,7 @@ const props = defineProps({
 })
 // 定义事件
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 
 // 处理添加
 const handleAdd = () => formData.value.push(cloneDeep(props.emptyItem || {}))
