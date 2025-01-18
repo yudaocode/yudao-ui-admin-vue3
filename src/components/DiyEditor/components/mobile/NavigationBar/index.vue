@@ -4,7 +4,7 @@
       <div v-for="(cell, cellIndex) in cellList" :key="cellIndex" :style="getCellStyle(cell)">
         <span v-if="cell.type === 'text'">{{ cell.text }}</span>
         <img v-else-if="cell.type === 'image'" :src="cell.imgUrl" alt="" class="h-full w-full" />
-        <SearchBar v-else :property="getSearchProp" />
+        <SearchBar v-else :property="getSearchProp(cell)" />
       </div>
     </div>
     <img
@@ -51,14 +51,14 @@ const getCellStyle = (cell: NavigationBarCellProperty) => {
   } as StyleValue
 }
 // 获得搜索框属性
-const getSearchProp = (cell: NavigationBarCellProperty) => {
+const getSearchProp = computed(() => (cell: NavigationBarCellProperty) => {
   return {
     height: 30,
     showScan: false,
     placeholder: cell.placeholder,
     borderRadius: cell.borderRadius
   } as SearchProperty
-}
+})
 </script>
 <style lang="scss" scoped>
 .navigation-bar {
