@@ -78,7 +78,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useMessage } from '@/hooks/web/useMessage'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
-import { CategoryApi } from '@/api/bpm/category'
+import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import * as UserApi from '@/api/system/user'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { BpmModelFormType, BpmModelType } from '@/utils/constants'
@@ -136,7 +136,6 @@ const formData: any = ref({
   formCustomViewPath: '',
   visible: true,
   startUserType: undefined,
-  managerUserType: undefined,
   startUserIds: [],
   managerUserIds: []
 })
@@ -149,7 +148,7 @@ provide('modelData', formData)
 
 // 数据列表
 const formList = ref([])
-const categoryList = ref([])
+const categoryList = ref<CategoryVO[]>([])
 const userList = ref<UserApi.UserVO[]>([])
 
 /** 初始化数据 */
@@ -158,6 +157,7 @@ const initData = async () => {
   if (modelId) {
     // 修改场景
     formData.value = await ModelApi.getModel(modelId)
+    formData.value.startUserType = formData.value.startUserIds?.length > 0 ? 1 : 0
     // 复制场景
     if (route.params.type === 'copy') {
       delete formData.value.id
@@ -166,6 +166,7 @@ const initData = async () => {
     }
   } else {
     // 新增场景
+    formData.value.startUserType = 0 // 全体
     formData.value.managerUserIds.push(userStore.getUser.id)
   }
 

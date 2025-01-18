@@ -62,7 +62,7 @@
       <el-radio-group v-model="modelData.visible">
         <el-radio
           v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-          :key="dict.value"
+          :key="dict.value as string"
           :value="dict.value"
         >
           {{ dict.label }}
@@ -132,10 +132,11 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 import { UserVO } from '@/api/system/user'
+import { CategoryVO } from '@/api/bpm/category'
 
 const props = defineProps({
   categoryList: {
-    type: Array,
+    type: Array as PropType<CategoryVO[]>,
     required: true
   },
   userList: {
