@@ -73,7 +73,7 @@
 
 <script setup lang="ts">
 import { CouponCardProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
 import { floatToFixed2 } from '@/utils'
 import { PromotionDiscountTypeEnum } from '@/utils/constants'
@@ -84,7 +84,7 @@ defineOptions({ name: 'CouponCardProperty' })
 
 const props = defineProps<{ modelValue: CouponCardProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 
 // 优惠券列表
 const couponList = ref<CouponTemplateApi.CouponTemplateVO[]>([])

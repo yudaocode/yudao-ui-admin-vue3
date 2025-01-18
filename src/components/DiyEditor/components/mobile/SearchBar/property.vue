@@ -59,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import { SearchProperty } from '@/components/DiyEditor/components/mobile/SearchBar/config'
 
 /** 搜索框属性面板 */
@@ -67,7 +67,7 @@ defineOptions({ name: 'SearchProperty' })
 
 const props = defineProps<{ modelValue: SearchProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 </script>
 
 <style scoped lang="scss"></style>
