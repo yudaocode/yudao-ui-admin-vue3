@@ -71,7 +71,8 @@ import {
   NODE_DEFAULT_NAME,
   NodeType,
   RejectHandlerType,
-  SimpleFlowNode
+  SimpleFlowNode,
+  DEFAULT_CONDITION_GROUP_VALUE
 } from './consts'
 import {generateUUID} from '@/utils'
 
@@ -167,21 +168,7 @@ const addNode = (type: number) => {
           conditionSetting: {
             defaultFlow: false,
             conditionType: ConditionType.RULE,
-            conditionGroups: {
-              and: true,
-              conditions: [
-                {
-                  and: true,
-                  rules: [
-                    {
-                      opCode: '==',
-                      leftSide: '',
-                      rightSide: ''
-                    }
-                  ]
-                }
-              ]
-            }
+            conditionGroups: DEFAULT_CONDITION_GROUP_VALUE
           }
         },
         {
@@ -239,21 +226,7 @@ const addNode = (type: number) => {
           conditionSetting: {
             defaultFlow: false,
             conditionType: ConditionType.RULE,
-            conditionGroups: {
-              and: true,
-              conditions: [
-                {
-                  and: true,
-                  rules: [
-                    {
-                      opCode: '==',
-                      leftSide: '',
-                      rightSide: ''
-                    }
-                  ]
-                }
-              ]
-            }
+            conditionGroups: DEFAULT_CONDITION_GROUP_VALUE
           }
         },
         {

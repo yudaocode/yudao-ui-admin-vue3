@@ -463,6 +463,24 @@ export type ConditionGroup = {
   // 条件数组
   conditions: Condition[]
 }
+/**
+ * 条件组默认值
+ */
+export const DEFAULT_CONDITION_GROUP_VALUE = {
+  and: true,
+  conditions: [
+    {
+      and: true,
+      rules: [
+        {
+          opCode: '==',
+          leftSide: '',
+          rightSide: ''
+        }
+      ]
+    }
+  ]
+}
 
 /**
  * 条件结构定义

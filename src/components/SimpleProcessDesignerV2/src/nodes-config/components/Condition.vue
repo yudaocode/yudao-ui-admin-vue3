@@ -1,7 +1,7 @@
 <template>
   <el-form ref="formRef" :model="condition" :rules="formRules" label-position="top">
     <el-form-item label="配置方式" prop="conditionType">
-      <el-radio-group v-model="condition!.conditionType">
+      <el-radio-group v-model="condition.conditionType" @change="changeConditionType">
         <el-radio
           v-for="(dict, indexConditionType) in conditionConfigTypes"
           :key="indexConditionType"
@@ -12,34 +12,34 @@
         </el-radio>
       </el-radio-group>
     </el-form-item>
-    <el-form-item v-if="condition.conditionType === ConditionType.RULE" label="条件规则">
+    <el-form-item v-if="condition.conditionType === ConditionType.RULE && condition.conditionGroups" label="条件规则">
       <div class="condition-group-tool">
         <div class="flex items-center">
           <div class="mr-4">条件组关系</div>
           <el-switch
-            v-model="condition!.conditionGroups!.and"
+            v-model="condition.conditionGroups.and"
             inline-prompt
             active-text="且"
             inactive-text="或"
           />
         </div>
       </div>
-      <el-space direction="vertical" :spacer="condition!.conditionGroups!.and ? '且' : '或'">
+      <el-space direction="vertical" :spacer="condition.conditionGroups.and ? '且' : '或'">
         <el-card
           class="condition-group"
           style="width: 530px"
-          v-for="(equation, cIdx) in condition!.conditionGroups!.conditions"
+          v-for="(equation, cIdx) in condition.conditionGroups.conditions"
           :key="cIdx"
         >
           <div
             class="condition-group-delete"
-            v-if="condition!.conditionGroups!.conditions.length > 1"
+            v-if="condition.conditionGroups.conditions.length > 1"
           >
             <Icon
               color="#0089ff"
               icon="ep:circle-close-filled"
               :size="18"
-              @click="deleteConditionGroup(condition!.conditionGroups!.conditions, cIdx)"
+              @click="deleteConditionGroup(condition.conditionGroups.conditions, cIdx)"
             />
           </div>
           <template #header>
@@ -114,7 +114,7 @@
           color="#0089ff"
           icon="ep:plus"
           :size="24"
-          @click="addConditionGroup(condition?.conditionGroups!.conditions)"
+          @click="addConditionGroup(condition.conditionGroups?.conditions)"
         />
       </div>
     </el-form-item>
@@ -125,7 +125,7 @@
     >
       <el-input
         type="textarea"
-        v-model="condition!.conditionExpression"
+        v-model="condition.conditionExpression"
         clearable
         style="width: 100%"
       />
@@ -138,13 +138,18 @@ import {
   COMPARISON_OPERATORS,
   CONDITION_CONFIG_TYPES,
   ConditionType,
-  ConditionSetting,
+  DEFAULT_CONDITION_GROUP_VALUE,
   ProcessVariableEnum
 } from '../../consts'
 import { BpmModelFormType } from '@/utils/constants'
 import { useFormFields } from '../../node'
 
-const props = defineProps<{modelValue: ConditionSetting}>()
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    required: true
+  }
+})
 const emit = defineEmits(['update:modelValue'])
 const condition = computed({
   get() {
@@ -183,6 +188,14 @@ const formRules = reactive({
 })
 const formRef = ref() // 表单 Ref
 
+/** 切换条件配置方式 */
+const changeConditionType = () => {
+  if (condition.value.conditionType === ConditionType.RULE) {
+    if (!condition.value.conditionGroups) {
+      condition.value.conditionGroups = DEFAULT_CONDITION_GROUP_VALUE
+    }
+  }
+}
 const deleteConditionGroup = (conditions, index) => {
   conditions.splice(index, 1)
 }

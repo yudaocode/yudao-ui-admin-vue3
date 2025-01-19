@@ -46,7 +46,6 @@
 import {
   SimpleFlowNode,
   ConditionType,
-  ConditionSetting,
   COMPARISON_OPERATORS,
   ProcessVariableEnum
 } from '../consts'
@@ -69,7 +68,7 @@ const props = defineProps({
 })
 const settingVisible = ref(false)
 const currentNode = ref<SimpleFlowNode>(props.conditionNode)
-const condition = ref<ConditionSetting>()
+const condition = ref<any>()
 const open = () => {
   condition.value = currentNode.value.conditionSetting
   settingVisible.value = true
