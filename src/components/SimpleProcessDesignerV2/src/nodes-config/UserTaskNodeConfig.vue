@@ -361,6 +361,11 @@
             <el-form-item prop="signEnable">
               <el-switch v-model="configForm.signEnable" active-text="是" inactive-text="否" />
             </el-form-item>
+
+            <el-divider content-position="left">审批意见</el-divider>
+            <el-form-item prop="reasonRequire">
+              <el-switch v-model="configForm.reasonRequire" active-text="必填" inactive-text="非必填" />
+            </el-form-item>
           </el-form>
         </div>
       </el-tab-pane>
@@ -698,6 +703,8 @@ const saveConfig = async () => {
   }
   // 签名
   currentNode.value.signEnable = configForm.value.signEnable
+  // 审批意见
+  currentNode.value.reasonRequire = configForm.value.reasonRequire
 
   currentNode.value.showText = showText
   settingVisible.value = false
@@ -767,6 +774,8 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   configForm.value.taskCompleteListenerBody = node.taskCompleteListener?.body ?? []
   // 6. 签名
   configForm.value.signEnable = node?.signEnable ?? false
+  // 7. 审批意见
+  configForm.value.reasonRequire = node?.reasonRequire ?? false
 }
 
 defineExpose({ openDrawer, showUserTaskNodeConfig }) // 暴露方法给父组件

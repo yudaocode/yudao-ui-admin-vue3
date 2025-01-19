@@ -120,6 +120,8 @@ export interface SimpleFlowNode {
   defaultFlowId?: string
   // 签名
   signEnable?: boolean
+  // 审批意见
+  reasonRequire?: boolean
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {

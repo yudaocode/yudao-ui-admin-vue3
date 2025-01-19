@@ -1463,6 +1463,20 @@
           "type": "String"
         }
       ]
+    },
+    {
+      "name": "ReasonRequire",
+      "superClass": ["Element"],
+      "meta": {
+        "allowedIn": ["bpmn:UserTask"]
+      },
+      "properties": [
+        {
+          "name": "value",
+          "type": "Boolean",
+          "isBody": true
+        }
+      ]
     }
   ],
   "emumerations": []
