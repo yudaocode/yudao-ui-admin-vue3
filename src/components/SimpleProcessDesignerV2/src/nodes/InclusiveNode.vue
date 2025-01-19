@@ -34,7 +34,7 @@
               ]"
             >
               <div class="branch-node-title-container">
-                <div v-if="showInputs[index]">
+                <div v-if="!readonly && showInputs[index]">
                   <input
                     type="text"
                     class="editable-title-input"

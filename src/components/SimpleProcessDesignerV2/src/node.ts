@@ -113,7 +113,6 @@ export function useFormFields() {
 }
 
 export type UserTaskFormType = {
-  //candidateParamArray: any[]
   candidateStrategy: CandidateStrategy
   approveMethod: ApproveMethodType
   roleIds?: number[] // 角色
@@ -152,7 +151,6 @@ export type UserTaskFormType = {
 }
 
 export type CopyTaskFormType = {
-  // candidateParamArray: any[]
   candidateStrategy: CandidateStrategy
   roleIds?: number[] // 角色
   deptIds?: number[] // 部门

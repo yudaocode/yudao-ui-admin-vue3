@@ -103,14 +103,8 @@ export interface SimpleFlowNode {
   taskAssignListener?: ListenerHandler
   // 创建任务监听器
   taskCompleteListener?: ListenerHandler
-  // 条件类型
-  conditionType?: ConditionType
-  // 条件表达式
-  conditionExpression?: string
-  // 条件组
-  conditionGroups?: ConditionGroup
-  // 是否默认的条件
-  defaultFlow?: boolean
+  // 条件设置
+  conditionSetting?: ConditionSetting
   // 活动的状态，用于前端节点状态展示
   activityStatus?: TaskStatusEnum
   // 延迟设置
@@ -363,6 +357,20 @@ export enum TimeUnitType {
    * 天
    */
   DAY = 3
+}
+
+/**
+ * 条件节点设置结构定义，用于条件节点
+ */
+export type ConditionSetting =  {
+  // 条件类型
+  conditionType?: ConditionType,
+  // 条件表达式
+  conditionExpression?: string,
+  // 条件组
+  conditionGroups?: ConditionGroup,
+  // 是否默认的条件
+  defaultFlow?: boolean
 }
 
 // 条件配置类型 （ 用于条件节点配置 ）

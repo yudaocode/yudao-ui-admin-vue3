@@ -163,8 +163,10 @@ const addNode = (type: number) => {
           showText: '',
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
-          conditionType: 1,
-          defaultFlow: false
+          conditionSetting: {
+            defaultFlow: false
+          },
+          
         },
         {
           id: 'Flow_' + generateUUID(),
@@ -172,8 +174,9 @@ const addNode = (type: number) => {
           showText: '未满足其它条件时，将进入此分支',
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
-          conditionType: undefined,
-          defaultFlow: true
+          conditionSetting: {
+            defaultFlow: true
+          }
         }
       ]
     }
@@ -217,7 +220,10 @@ const addNode = (type: number) => {
           showText: '',
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
-          defaultFlow: false
+          conditionSetting: {
+            defaultFlow: false
+          }
+          
         },
         {
           id: 'Flow_' + generateUUID(),
@@ -225,7 +231,9 @@ const addNode = (type: number) => {
           showText: '未满足其它条件时，将进入此分支',
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
-          defaultFlow: true
+          conditionSetting: {
+            defaultFlow: true
+          }
         }
       ]
     }

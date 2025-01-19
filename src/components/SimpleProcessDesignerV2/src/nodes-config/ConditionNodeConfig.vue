@@ -26,13 +26,16 @@
       </div>
     </template>
     <div>
-      <div class="mb-3 font-size-16px" v-if="currentNode.defaultFlow"
-        >未满足其它条件时，将进入此分支（该分支不可编辑和删除）</div
-      >
+      <div class="mb-3 font-size-16px" v-if="currentNode.conditionSetting?.defaultFlow">
+        未满足其它条件时，将进入此分支（该分支不可编辑和删除）
+      </div>
       <div v-else>
-        <el-form ref="formRef" :model="currentNode" :rules="formRules" label-position="top">
+        <el-form ref="formRef" :model="currentNode.conditionSetting" :rules="formRules" label-position="top">
           <el-form-item label="配置方式" prop="conditionType">
-            <el-radio-group v-model="currentNode.conditionType" @change="changeConditionType">
+            <el-radio-group
+              v-model="currentNode.conditionSetting!.conditionType"
+              @change="changeConditionType"
+            >
               <el-radio
                 v-for="(dict, index) in conditionConfigTypes"
                 :key="index"
@@ -45,18 +48,21 @@
           </el-form-item>
 
           <el-form-item
-            v-if="currentNode.conditionType === 1"
+            v-if="currentNode.conditionSetting?.conditionType === ConditionType.EXPRESSION"
             label="条件表达式"
             prop="conditionExpression"
           >
             <el-input
               type="textarea"
-              v-model="currentNode.conditionExpression"
+              v-model="currentNode.conditionSetting.conditionExpression"
               clearable
               style="width: 100%"
             />
           </el-form-item>
-          <el-form-item v-if="currentNode.conditionType === 2" label="条件规则">
+          <el-form-item
+            v-if="currentNode.conditionSetting?.conditionType === ConditionType.RULE"
+            label="条件规则"
+          >
             <div class="condition-group-tool">
               <div class="flex items-center">
                 <div class="mr-4">条件组关系</div>
@@ -194,9 +200,9 @@ const props = defineProps({
 })
 const settingVisible = ref(false)
 const open = () => {
-  if (currentNode.value.conditionType === ConditionType.RULE) {
-    if (currentNode.value.conditionGroups) {
-      conditionGroups.value = currentNode.value.conditionGroups
+  if (currentNode.value.conditionSetting?.conditionType === ConditionType.RULE) {
+    if (currentNode.value.conditionSetting?.conditionGroups) {
+      conditionGroups.value = currentNode.value.conditionSetting.conditionGroups
     }
   }
   settingVisible.value = true
@@ -219,7 +225,7 @@ const blurEvent = () => {
   showInput.value = false
   currentNode.value.name =
     currentNode.value.name ||
-    getDefaultConditionNodeName(props.nodeIndex, currentNode.value?.defaultFlow)
+    getDefaultConditionNodeName(props.nodeIndex, currentNode.value?.conditionSetting?.defaultFlow)
 }
 
 const currentNode = ref<SimpleFlowNode>(props.conditionNode)
@@ -248,7 +254,7 @@ const formRef = ref() // 表单 Ref
 
 // 保存配置
 const saveConfig = async () => {
-  if (!currentNode.value.defaultFlow) {
+  if (!currentNode.value.conditionSetting?.defaultFlow) {
     // 校验表单
     if (!formRef) return false
     const valid = await formRef.value.validate()
@@ -258,12 +264,12 @@ const saveConfig = async () => {
       return false
     }
     currentNode.value.showText = showText
-    if (currentNode.value.conditionType === ConditionType.EXPRESSION) {
-      currentNode.value.conditionGroups = undefined
+    if (currentNode.value.conditionSetting?.conditionType === ConditionType.EXPRESSION) {
+      currentNode.value.conditionSetting.conditionGroups = undefined
     }
-    if (currentNode.value.conditionType === ConditionType.RULE) {
-      currentNode.value.conditionExpression = undefined
-      currentNode.value.conditionGroups = conditionGroups.value
+    if (currentNode.value.conditionSetting?.conditionType === ConditionType.RULE) {
+      currentNode.value.conditionSetting.conditionExpression = undefined
+      currentNode.value.conditionSetting.conditionGroups = conditionGroups.value
     }
   }
   settingVisible.value = false
@@ -271,12 +277,12 @@ const saveConfig = async () => {
 }
 const getShowText = (): string => {
   let showText = ''
-  if (currentNode.value.conditionType === ConditionType.EXPRESSION) {
-    if (currentNode.value.conditionExpression) {
-      showText = `表达式：${currentNode.value.conditionExpression}`
+  if (currentNode.value.conditionSetting?.conditionType === ConditionType.EXPRESSION) {
+    if (currentNode.value.conditionSetting.conditionExpression) {
+      showText = `表达式：${currentNode.value.conditionSetting.conditionExpression}`
     }
   }
-  if (currentNode.value.conditionType === ConditionType.RULE) {
+  if (currentNode.value.conditionSetting?.conditionType === ConditionType.RULE) {
     // 条件组是否为与关系
     const groupAnd = conditionGroups.value.and
     let warningMesg: undefined | string = undefined
