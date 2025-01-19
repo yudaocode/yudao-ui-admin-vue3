@@ -6,9 +6,7 @@
       </template>
       <el-checkbox v-model="modelData.allowCancelRunningProcess" label="允许撤销审批中的申请" />
       <div class="ml-22px">
-        <el-text type="info">
-          第一个审批节点通过后，提交人仍可撤销申请（配置前已发起的申请不生效）
-        </el-text>
+        <el-text type="info"> 第一个审批节点通过后，提交人仍可撤销申请 </el-text>
       </div>
     </el-form-item>
   </el-form>
