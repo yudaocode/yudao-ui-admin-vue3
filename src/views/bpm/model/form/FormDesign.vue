@@ -70,25 +70,16 @@ import * as FormApi from '@/api/bpm/form'
 import { setConfAndFields2 } from '@/utils/formCreate'
 
 const props = defineProps({
-  modelValue: {
-    type: Object,
-    required: true
-  },
   formList: {
     type: Array,
     required: true
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
-
 const formRef = ref()
 
 // 创建本地数据副本
-const modelData = computed({
-  get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
-})
+const modelData = defineModel<any>()
 
 // 表单预览数据
 const formPreview = ref({

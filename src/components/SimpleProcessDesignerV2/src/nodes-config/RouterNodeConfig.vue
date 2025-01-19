@@ -37,16 +37,19 @@
                   :value="node.value"
                 />
               </el-select>
-              <el-button class="mla" type="danger" link @click="deleteRouteGroup(index)"
-                >删除</el-button
-              >
+              <el-button class="mla" type="danger" link @click="deleteRouterGroup(index)">
+                删除
+              </el-button>
             </div>
           </template>
-          <Condition v-model="routerGroups[index]" />
+          <Condition
+            :ref="($event) => (conditionRef[index] = $event)"
+            v-model="routerGroups[index]"
+          />
         </el-card>
       </el-form>
 
-      <el-button class="w-1/1" type="primary" :icon="Plus" @click="addRouteGroup">
+      <el-button class="w-1/1" type="primary" :icon="Plus" @click="addRouterGroup">
         新增路由分支
       </el-button>
     </div>
@@ -61,11 +64,12 @@
 </template>
 <script setup lang="ts">
 import { Plus } from '@element-plus/icons-vue'
-import { SimpleFlowNode, NodeType, ConditionType, RouteCondition } from '../consts'
+import { SimpleFlowNode, NodeType, ConditionType, RouterCondition } from '../consts'
 import { useWatchNode, useDrawer, useNodeName } from '../node'
 import Condition from './components/Condition.vue'
+
 defineOptions({
-  name: 'RouteNodeConfig'
+  name: 'RouterNodeConfig'
 })
 const message = useMessage() // 消息弹窗
 const props = defineProps({
@@ -80,12 +84,21 @@ const { settingVisible, closeDrawer, openDrawer } = useDrawer()
 // 当前节点
 const currentNode = useWatchNode(props)
 // 节点名称
-const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.ROUTE_BRANCH_NODE)
-const routerGroups = ref<RouteCondition[]>([])
-const nodeOptions = ref()
+const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.ROUTER_BRANCH_NODE)
+const routerGroups = ref<RouterCondition[]>([])
+const nodeOptions = ref<any>([])
+const conditionRef = ref([])
 
-// 保存配置
+/** 保存配置 */
 const saveConfig = async () => {
+  // 校验表单
+  let valid = true
+  for (const item of conditionRef.value) {
+    if (item && !(await item.validate())) {
+      valid = false
+    }
+  }
+  if (!valid) return false
   const showText = getShowText()
   if (!showText) return false
   currentNode.value.name = nodeName.value!
@@ -96,7 +109,7 @@ const saveConfig = async () => {
 }
 // 显示路由分支节点配置， 由父组件传过来
 const showRouteNodeConfig = (node: SimpleFlowNode) => {
-  getRoutableNode()
+  getRouterNode(processNodeTree?.value)
   routerGroups.value = []
   nodeName.value = node.name
   if (node.routerGroups) {
@@ -132,7 +145,7 @@ const getShowText = () => {
   return `${routerGroups.value.length}条路由分支`
 }
 
-const addRouteGroup = () => {
+const addRouterGroup = () => {
   routerGroups.value.push({
     nodeId: '',
     conditionType: ConditionType.RULE,
@@ -144,8 +157,6 @@ const addRouteGroup = () => {
           and: true,
           rules: [
             {
-              type: 1,
-              opName: '等于',
               opCode: '==',
               leftSide: '',
               rightSide: ''
@@ -157,20 +168,18 @@ const addRouteGroup = () => {
   })
 }
 
-const deleteRouteGroup = (index: number) => {
+const deleteRouterGroup = (index: number) => {
   routerGroups.value.splice(index, 1)
 }
 
-// TODO @lesan：还有一些 router 的命名，没改过来呢
-const getRoutableNode = () => {
-  // TODO @lesan 还需要满足以下要求
+// 递归获取所有节点
+const getRouterNode = (node) => {
+  // TODO 最好还需要满足以下要求
   // 并行分支、包容分支内部节点不能跳转到外部节点
   // 条件分支节点可以向上跳转到外部节点
-  let node = processNodeTree?.value
-  nodeOptions.value = []
   while (true) {
     if (!node) break
-    if (node.type !== NodeType.ROUTE_BRANCH_NODE) {
+    if (node.type !== NodeType.ROUTER_BRANCH_NODE && node.type !== NodeType.CONDITION_NODE) {
       nodeOptions.value.push({
         label: node.name,
         value: node.id
@@ -178,6 +187,11 @@ const getRoutableNode = () => {
     }
     if (!node.childNode || node.type === NodeType.END_EVENT_NODE) {
       break
+    }
+    if (node.conditionNodes && node.conditionNodes.length) {
+      node.conditionNodes.forEach((item) => {
+        getRouterNode(item)
+      })
     }
     node = node.childNode
   }

@@ -165,6 +165,15 @@
             </el-button>
             <el-button
               link
+              type="primary"
+              @click="openModelForm('copy', scope.row.id)"
+              v-hasPermi="['bpm:model:update']"
+              :disabled="!isManagerUser(scope.row)"
+            >
+              复制
+            </el-button>
+            <el-button
+              link
               class="!ml-5px"
               type="primary"
               @click="handleDeploy(scope.row)"
@@ -193,6 +202,14 @@
                     :disabled="!isManagerUser(scope.row)"
                   >
                     {{ scope.row.processDefinition.suspensionState === 1 ? '停用' : '启用' }}
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    type="danger"
+                    command="handleClean"
+                    v-if="checkPermi(['bpm:model:clean'])"
+                    :disabled="!isManagerUser(scope.row)"
+                  >
+                    清理
                   </el-dropdown-item>
                   <el-dropdown-item
                     type="danger"
@@ -226,13 +243,9 @@
       </div>
     </template>
   </Dialog>
-
-  <!-- 表单弹窗：添加流程模型 -->
-  <ModelForm :categoryId="categoryInfo.code" ref="modelFormRef" @success="emit('success')" />
 </template>
 
 <script lang="ts" setup>
-import ModelForm from './ModelForm.vue'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import Sortable from 'sortablejs'
 import { propTypes } from '@/utils/propTypes'
@@ -245,6 +258,7 @@ import { checkPermi } from '@/utils/permission'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { useAppStore } from '@/store/modules/app'
 import { cloneDeep } from 'lodash-es'
+import { useTagsView } from '@/hooks/web/useTagsView'
 
 defineOptions({ name: 'BpmModel' })
 
@@ -276,6 +290,9 @@ const handleModelCommand = (command: string, row: any) => {
     case 'handleChangeState':
       handleChangeState(row)
       break
+    case 'handleClean':
+      handleClean(row)
+      break
     default:
       break
   }
@@ -304,6 +321,19 @@ const handleDelete = async (row: any) => {
     // 发起删除
     await ModelApi.deleteModel(row.id)
     message.success(t('common.delSuccess'))
+    // 刷新列表
+    emit('success')
+  } catch {}
+}
+
+/** 清理按钮操作 */
+const handleClean = async (row: any) => {
+  try {
+    // 清理的二次确认
+    await message.confirm('是否确认清理流程名字为"' + row.name + '"的数据项?')
+    // 发起清理
+    await ModelApi.cleanModel(row.id)
+    message.success('清理成功')
     // 刷新列表
     emit('success')
   } catch {}
@@ -466,15 +496,19 @@ const handleDeleteCategory = async () => {
 }
 
 /** 添加流程模型弹窗 */
-const modelFormRef = ref()
-const openModelForm = (type: string, id?: number) => {
+const tagsView = useTagsView()
+const openModelForm = async (type: string, id?: number) => {
   if (type === 'create') {
-    push({ name: 'BpmModelCreate' })
+    await push({ name: 'BpmModelCreate' })
   } else {
-    push({
+    await push({
       name: 'BpmModelUpdate',
-      params: { id }
+      params: { id, type }
     })
+    // 设置标题
+    if (type === 'copy') {
+      tagsView.setTitle('复制流程')
+    }
   }
 }
 

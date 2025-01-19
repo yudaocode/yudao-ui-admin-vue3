@@ -46,7 +46,7 @@
             </div>
             <div class="handler-item-text">延迟器</div>
           </div>
-          <div class="handler-item" @click="addNode(NodeType.ROUTE_BRANCH_NODE)">
+          <div class="handler-item" @click="addNode(NodeType.ROUTER_BRANCH_NODE)">
             <!-- TODO @芋艿 需要更换一下iconfont的图标 -->
             <div class="handler-item-icon copy">
               <span class="iconfont icon-size icon-copy"></span>
@@ -67,12 +67,13 @@ import {
   ApproveMethodType,
   AssignEmptyHandlerType,
   AssignStartUserHandlerType,
+  ConditionType,
   NODE_DEFAULT_NAME,
   NodeType,
   RejectHandlerType,
   SimpleFlowNode
 } from './consts'
-import { generateUUID } from '@/utils'
+import {generateUUID} from '@/utils'
 
 defineOptions({
   name: 'NodeHandler'
@@ -164,9 +165,24 @@ const addNode = (type: number) => {
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
           conditionSetting: {
-            defaultFlow: false
-          },
-          
+            defaultFlow: false,
+            conditionType: ConditionType.RULE,
+            conditionGroups: {
+              and: true,
+              conditions: [
+                {
+                  and: true,
+                  rules: [
+                    {
+                      opCode: '==',
+                      leftSide: '',
+                      rightSide: ''
+                    }
+                  ]
+                }
+              ]
+            }
+          }
         },
         {
           id: 'Flow_' + generateUUID(),
@@ -221,9 +237,24 @@ const addNode = (type: number) => {
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
           conditionSetting: {
-            defaultFlow: false
+            defaultFlow: false,
+            conditionType: ConditionType.RULE,
+            conditionGroups: {
+              and: true,
+              conditions: [
+                {
+                  and: true,
+                  rules: [
+                    {
+                      opCode: '==',
+                      leftSide: '',
+                      rightSide: ''
+                    }
+                  ]
+                }
+              ]
+            }
           }
-          
         },
         {
           id: 'Flow_' + generateUUID(),
@@ -249,14 +280,13 @@ const addNode = (type: number) => {
     }
     emits('update:childNode', data)
   }
-  if (type === NodeType.ROUTE_BRANCH_NODE) {
+  if (type === NodeType.ROUTER_BRANCH_NODE) {
     const data: SimpleFlowNode = {
       id: 'GateWay_' + generateUUID(),
-      name: NODE_DEFAULT_NAME.get(NodeType.ROUTE_BRANCH_NODE) as string,
+      name: NODE_DEFAULT_NAME.get(NodeType.ROUTER_BRANCH_NODE) as string,
       showText: '',
-      type: NodeType.ROUTE_BRANCH_NODE,
-      childNode: props.childNode,
-      defaultFlowId: 'Flow_' + generateUUID()
+      type: NodeType.ROUTER_BRANCH_NODE,
+      childNode: props.childNode
     }
     emits('update:childNode', data)
   }

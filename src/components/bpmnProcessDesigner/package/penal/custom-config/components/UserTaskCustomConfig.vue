@@ -5,6 +5,7 @@
      4. 操作按钮
      5. 字段权限
      6. 审批类型
+     7. 是否需要签名
 -->
 <template>
   <div>
@@ -161,6 +162,16 @@
         </el-radio-group>
       </div>
     </div>
+
+    <el-divider content-position="left">是否需要签名</el-divider>
+    <el-form-item prop="signEnable">
+      <el-switch v-model="signEnable.value" active-text="是" inactive-text="否" />
+    </el-form-item>
+
+    <el-divider content-position="left">审批意见</el-divider>
+    <el-form-item prop="reasonRequire">
+      <el-switch v-model="reasonRequire.value" active-text="必填" inactive-text="非必填" />
+    </el-form-item>
   </div>
 </template>
 
@@ -217,6 +228,12 @@ const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFie
 
 // 审批类型
 const approveType = ref({ value: ApproveType.USER })
+
+// 是否需要签名
+const signEnable = ref({ value: false })
+
+// 审批意见
+const reasonRequire = ref({ value: false })
 
 const elExtensionElements = ref()
 const otherExtensions = ref()
@@ -311,6 +328,16 @@ const resetCustomConfigList = () => {
     })
   }
 
+  // 是否需要签名
+  signEnable.value =
+    elExtensionElements.value.values?.filter((ex) => ex.$type === `${prefix}:SignEnable`)?.[0] ||
+    bpmnInstances().moddle.create(`${prefix}:SignEnable`, { value: false })
+
+  // 审批意见
+  reasonRequire.value =
+    elExtensionElements.value.values?.filter((ex) => ex.$type === `${prefix}:ReasonRequire`)?.[0] ||
+    bpmnInstances().moddle.create(`${prefix}:ReasonRequire`, { value: false })
+
   // 保留剩余扩展元素，便于后面更新该元素对应属性
   otherExtensions.value =
     elExtensionElements.value.values?.filter(
@@ -322,7 +349,9 @@ const resetCustomConfigList = () => {
         ex.$type !== `${prefix}:AssignEmptyUserIds` &&
         ex.$type !== `${prefix}:ButtonsSetting` &&
         ex.$type !== `${prefix}:FieldsPermission` &&
-        ex.$type !== `${prefix}:ApproveType`
+        ex.$type !== `${prefix}:ApproveType` &&
+        ex.$type !== `${prefix}:SignEnable` &&
+        ex.$type !== `${prefix}:ReasonRequire`
     ) ?? []
 
   // 更新元素扩展属性，避免后续报错
@@ -373,7 +402,9 @@ const updateElementExtensions = () => {
       assignEmptyUserIdsEl.value,
       approveType.value,
       ...buttonsSettingEl.value,
-      ...fieldsPermissionEl.value
+      ...fieldsPermissionEl.value,
+      signEnable.value,
+      reasonRequire.value
     ]
   })
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {

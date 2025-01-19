@@ -9,6 +9,10 @@ import { useAppStore } from '@/store/modules/app'
 import { isString } from '@/utils/is'
 import { useDesign } from '@/hooks/web/useDesign'
 
+import 'echarts/lib/component/markPoint'
+import 'echarts/lib/component/markLine'
+import 'echarts/lib/component/markArea'
+
 defineOptions({ name: 'EChart' })
 
 const { getPrefixCls, variables } = useDesign()
