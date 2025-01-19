@@ -68,6 +68,11 @@
 
         <!-- 第三步：流程设计 -->
         <ProcessDesign v-if="currentStep === 2" v-model="formData" ref="processDesignRef" />
+
+        <!-- 第四步：更多设置 -->
+        <div v-if="currentStep === 3" class="mx-auto w-700px">
+          <ExtraSettings v-model="formData" ref="extraSettingsRef" />
+        </div>
       </div>
     </div>
   </ContentWrap>
@@ -86,6 +91,7 @@ import BasicInfo from './BasicInfo.vue'
 import FormDesign from './FormDesign.vue'
 import ProcessDesign from './ProcessDesign.vue'
 import { useTagsViewStore } from '@/store/modules/tagsView'
+import ExtraSettings from './ExtraSettings.vue'
 
 const router = useRouter()
 const { delView } = useTagsViewStore() // 视图操作
@@ -118,7 +124,8 @@ const currentStep = ref(-1) // 步骤控制。-1 用于，一开始全部不展�
 const steps = [
   { title: '基本信息', validator: validateBasic },
   { title: '表单设计', validator: validateForm },
-  { title: '流程设计', validator: validateProcess }
+  { title: '流程设计', validator: validateProcess },
+  { title: '更多设置', validator: null }
 ]
 
 // 表单数据
@@ -137,7 +144,8 @@ const formData: any = ref({
   visible: true,
   startUserType: undefined,
   startUserIds: [],
-  managerUserIds: []
+  managerUserIds: [],
+  allowCancelRunningProcess: true
 })
 
 //流程数据
