@@ -68,7 +68,12 @@
     </el-form>
   </ComponentContainerProperty>
   <!-- 优惠券选择 -->
-  <CouponSelect ref="couponSelectDialog" v-model:multiple-selection="couponList" />
+  <CouponSelect
+    ref="couponSelectDialog"
+    v-model:multiple-selection="couponList"
+    :take-type="CouponTemplateTakeTypeEnum.USER.type"
+    @change="handleCouponSelect"
+  />
 </template>
 
 <script setup lang="ts">
@@ -76,7 +81,7 @@ import { CouponCardProperty } from './config'
 import { useVModel } from '@vueuse/core'
 import * as CouponTemplateApi from '@/api/mall/promotion/coupon/couponTemplate'
 import { floatToFixed2 } from '@/utils'
-import { PromotionDiscountTypeEnum } from '@/utils/constants'
+import { CouponTemplateTakeTypeEnum, PromotionDiscountTypeEnum } from '@/utils/constants'
 import CouponSelect from '@/views/mall/promotion/coupon/components/CouponSelect.vue'
 
 // 优惠券卡片属性面板
@@ -93,10 +98,20 @@ const couponSelectDialog = ref()
 const handleAddCoupon = () => {
   couponSelectDialog.value.open()
 }
+const handleCouponSelect = () => {
+  formData.value.couponIds = couponList.value.map((coupon) => coupon.id)
+}
+
 watch(
-  () => couponList.value,
-  () => {
-    formData.value.couponIds = couponList.value.map((coupon) => coupon.id)
+  () => formData.value.couponIds,
+  async () => {
+    if (formData.value.couponIds?.length > 0) {
+      couponList.value = await CouponTemplateApi.getCouponTemplateList(formData.value.couponIds)
+    }
+  },
+  {
+    immediate: true,
+    deep: true
   }
 )
 </script>
