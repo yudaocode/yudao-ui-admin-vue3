@@ -548,6 +548,7 @@ const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
 const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
 
 // 审批通过意见表单
+const reasonRequire = ref()
 const approveFormRef = ref<FormInstance>()
 const signRef = ref()
 const approveSignFormRef = ref()
@@ -555,17 +556,21 @@ const approveReasonForm = reactive({
   reason: '',
   signPicUrl: ''
 })
-const approveReasonRule = reactive<FormRules<typeof approveReasonForm>>({
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }],
-  signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }]
+const approveReasonRule = computed(() => {
+  return {
+    reason: [{ required: reasonRequire.value, message: '审批意见不能为空', trigger: 'blur' }],
+    signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }]
+  }
 })
 // 拒绝表单
 const rejectFormRef = ref<FormInstance>()
 const rejectReasonForm = reactive({
   reason: ''
 })
-const rejectReasonRule = reactive<FormRules<typeof rejectReasonForm>>({
-  reason: [{ required: true, message: '审批意见不能为空', trigger: 'blur' }]
+const rejectReasonRule = computed(() => {
+  return {
+    reason: [{ required: reasonRequire.value, message: '审批意见不能为空', trigger: 'blur' }]
+  }
 })
 
 // 抄送表单
@@ -966,6 +971,7 @@ const loadTodoTask = (task: any) => {
   approveForm.value = {}
   approveFormFApi.value = {}
   runningTask.value = task
+  reasonRequire.value = task?.reasonRequire ?? false
   // 处理 approve 表单.
   if (task && task.formId && task.formConf) {
     const tempApproveForm = {}
