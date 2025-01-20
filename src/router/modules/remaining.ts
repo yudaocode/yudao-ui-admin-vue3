@@ -344,7 +344,8 @@ const remainingRouter: AppRouteRecordRaw[] = [
         }
       },
       {
-        path: 'manager/model/update/:id',
+        // TODO @zws：1）建议，在加一个路由。然后标题是“复制流程”，这样体验会好点；2）复制出来的数据，在名字前面，加“副本 ”，和钉钉保持一致！
+        path: 'manager/model/:type/:id',
         component: () => import('@/views/bpm/model/form/index.vue'),
         name: 'BpmModelUpdate',
         meta: {

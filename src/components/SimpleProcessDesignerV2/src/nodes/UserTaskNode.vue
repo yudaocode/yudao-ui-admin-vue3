@@ -131,7 +131,7 @@ const emits = defineEmits<{
 
 // 是否只读
 const readonly = inject<Boolean>('readonly')
-const tasks = inject<Ref<any[]>>('tasks')
+const tasks = inject<Ref<any[]>>('tasks', ref([]))
 // 监控节点变化
 const currentNode = useWatchNode(props)
 // 节点名称编辑

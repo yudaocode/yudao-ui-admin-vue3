@@ -25,7 +25,7 @@
           </div>
         </div>
       </template>
-      <div class="flex flex-col items-start gap2" :id="`activity-task-${activity.id}`">
+      <div class="flex flex-col items-start gap2" :id="`activity-task-${activity.id}-${index}`">
         <!-- 第一行：节点名称、时间 -->
         <div class="flex w-full">
           <div class="font-bold"> {{ activity.name }}</div>
@@ -113,7 +113,7 @@
                 </div>
               </div>
             </div>
-            <teleport defer :to="`#activity-task-${activity.id}`">
+            <teleport defer :to="`#activity-task-${activity.id}-${index}`">
               <div
                 v-if="
                   task.reason &&
@@ -122,6 +122,17 @@
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
                 审批意见：{{ task.reason }}
+              </div>
+              <div
+                v-if="task.signPicUrl && activity.nodeType === NodeType.USER_TASK_NODE"
+                class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
+              >
+                签名：
+                <el-image
+                  class="w-90px h-40px ml-5px"
+                  :src="task.signPicUrl"
+                  :preview-src-list="[task.signPicUrl]"
+                />
               </div>
             </teleport>
           </div>

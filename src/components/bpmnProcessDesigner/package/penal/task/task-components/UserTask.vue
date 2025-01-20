@@ -192,6 +192,16 @@
       <!-- 选择弹窗 -->
       <ProcessExpressionDialog ref="processExpressionDialogRef" @select="selectProcessExpression" />
     </el-form-item>
+
+    <el-form-item label="跳过表达式" prop="skipExpression">
+      <el-input
+        type="textarea"
+        v-model="userTaskForm.skipExpression"
+        clearable
+        style="width: 100%"
+        @change="updateSkipExpression"
+      />
+    </el-form-item>
   </el-form>
 </template>
 
@@ -220,7 +230,8 @@ const props = defineProps({
 const prefix = inject('prefix')
 const userTaskForm = ref({
   candidateStrategy: undefined, // 分配规则
-  candidateParam: [] // 分配选项
+  candidateParam: [], // 分配选项
+  skipExpression: '' // 跳过表达式
 })
 const bpmnElement = ref()
 const bpmnInstances = () => (window as any)?.bpmnInstances
@@ -311,6 +322,13 @@ const resetTaskForm = () => {
       (ex) => ex.$type !== `${prefix}:CandidateStrategy` && ex.$type !== `${prefix}:CandidateParam`
     ) ?? []
 
+  // 跳过表达式
+  if (businessObject.skipExpression != undefined) {
+    userTaskForm.value.skipExpression = businessObject.skipExpression
+  } else {
+    userTaskForm.value.skipExpression = ''
+  }
+
   // 改用通过extensionElements来存储数据
   return
   if (businessObject.candidateStrategy != undefined) {
@@ -388,6 +406,18 @@ const updateElementTask = () => {
     candidateStrategy: userTaskForm.value.candidateStrategy,
     candidateParam: userTaskForm.value.candidateParam.join(',')
   })
+}
+
+const updateSkipExpression = () => {
+  if (userTaskForm.value.skipExpression && userTaskForm.value.skipExpression !== '') {
+    bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
+      skipExpression: userTaskForm.value.skipExpression
+    })
+  } else {
+    bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
+      skipExpression: null
+    })
+  }
 }
 
 // 打开监听器弹窗

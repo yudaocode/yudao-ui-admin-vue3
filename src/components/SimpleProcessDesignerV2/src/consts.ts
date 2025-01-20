@@ -24,6 +24,11 @@ export enum NodeType {
   COPY_TASK_NODE = 12,
 
   /**
+   * 延迟器节点
+   */
+  DELAY_TIMER_NODE = 14,
+
+  /**
    * 条件节点
    */
   CONDITION_NODE = 50,
@@ -39,7 +44,11 @@ export enum NodeType {
   /**
    * 包容分支节点 (对应包容网关)
    */
-  INCLUSIVE_BRANCH_NODE = 53
+  INCLUSIVE_BRANCH_NODE = 53,
+  /**
+   * 路由分支节点
+   */
+  ROUTER_BRANCH_NODE = 54
 }
 
 export enum NodeId {
@@ -88,6 +97,12 @@ export interface SimpleFlowNode {
   assignEmptyHandler?: AssignEmptyHandler
   // 审批节点的审批人与发起人相同时，对应的处理类型
   assignStartUserHandlerType?: number
+  // 创建任务监听器
+  taskCreateListener?: ListenerHandler
+  // 创建任务监听器
+  taskAssignListener?: ListenerHandler
+  // 创建任务监听器
+  taskCompleteListener?: ListenerHandler
   // 条件类型
   conditionType?: ConditionType
   // 条件表达式
@@ -98,6 +113,13 @@ export interface SimpleFlowNode {
   defaultFlow?: boolean
   // 活动的状态，用于前端节点状态展示
   activityStatus?: TaskStatusEnum
+  // 延迟设置
+  delaySetting?: DelaySetting
+  // 路由分支
+  routerGroups?: RouterCondition[]
+  defaultFlowId?: string
+  // 签名
+  signEnable?: boolean
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -214,6 +236,41 @@ export type AssignEmptyHandler = {
   // 指定用户的编号数组
   userIds?: number[]
 }
+
+/**
+ * 监听器的结构定义
+ */
+export type ListenerHandler = {
+  enable: boolean
+  path?: string
+  header?: ListenerParam[]
+  body?: ListenerParam[]
+}
+export type ListenerParam = {
+  key: string
+  type: number
+  value: string
+}
+export enum ListenerParamTypeEnum {
+  /**
+   * 固定值
+   */
+  FIXED_VALUE = 1,
+  /**
+   * 表单
+   */
+  FROM_FORM = 2
+}
+export const LISTENER_MAP_TYPES = [
+  {
+    value: 1,
+    label: '固定值'
+  },
+  {
+    value: 2,
+    label: '表单'
+  }
+]
 
 // 审批拒绝类型枚举
 export enum RejectHandlerType {
@@ -382,8 +439,6 @@ export enum OperationButtonType {
  * 条件规则结构定义
  */
 export type ConditionRule = {
-  type: number
-  opName: string
   opCode: string
   leftSide: string
   rightSide: string
@@ -413,12 +468,16 @@ NODE_DEFAULT_TEXT.set(NodeType.USER_TASK_NODE, '请配置审批人')
 NODE_DEFAULT_TEXT.set(NodeType.COPY_TASK_NODE, '请配置抄送人')
 NODE_DEFAULT_TEXT.set(NodeType.CONDITION_NODE, '请设置条件')
 NODE_DEFAULT_TEXT.set(NodeType.START_USER_NODE, '请设置发起人')
+NODE_DEFAULT_TEXT.set(NodeType.DELAY_TIMER_NODE, '请设置延迟器')
+NODE_DEFAULT_TEXT.set(NodeType.ROUTER_BRANCH_NODE, '请设置路由节点')
 
 export const NODE_DEFAULT_NAME = new Map<number, string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
 NODE_DEFAULT_NAME.set(NodeType.COPY_TASK_NODE, '抄送人')
 NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 NODE_DEFAULT_NAME.set(NodeType.START_USER_NODE, '发起人')
+NODE_DEFAULT_NAME.set(NodeType.DELAY_TIMER_NODE, '延迟器')
+NODE_DEFAULT_NAME.set(NodeType.ROUTER_BRANCH_NODE, '路由分支')
 
 // 候选人策略。暂时不从字典中取。 后续可能调整。控制显示顺序
 export const CANDIDATE_STRATEGY: DictDataVO[] = [
@@ -451,8 +510,8 @@ export const APPROVE_METHODS: DictDataVO[] = [
 ]
 
 export const CONDITION_CONFIG_TYPES: DictDataVO[] = [
-  { label: '条件表达式', value: ConditionType.EXPRESSION },
-  { label: '条件规则', value: ConditionType.RULE }
+  { label: '条件规则', value: ConditionType.RULE },
+  { label: '条件表达式', value: ConditionType.EXPRESSION }
 ]
 
 // 时间单位类型
@@ -567,4 +626,41 @@ export enum ProcessVariableEnum {
    * 发起用户 ID
    */
   START_USER_ID = 'PROCESS_START_USER_ID'
+}
+
+/**
+ * 延迟设置
+ */
+export type DelaySetting = {
+  // 延迟类型
+  delayType: number
+  // 延迟时间表达式
+  delayTime: string
+}
+/**
+ * 延迟类型
+ */
+export enum DelayTypeEnum {
+  /**
+   * 固定时长
+   */
+  FIXED_TIME_DURATION = 1,
+  /**
+   * 固定日期时间
+   */
+  FIXED_DATE_TIME = 2
+}
+export const DELAY_TYPE = [
+  { label: '固定时长', value: DelayTypeEnum.FIXED_TIME_DURATION },
+  { label: '固定日期', value: DelayTypeEnum.FIXED_DATE_TIME }
+]
+
+/**
+ * 路由分支结构定义
+ */
+export type RouterCondition = {
+  nodeId: string
+  conditionType: ConditionType
+  conditionExpression: string
+  conditionGroups: ConditionGroup
 }

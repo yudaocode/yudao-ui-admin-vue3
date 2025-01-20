@@ -64,6 +64,7 @@
       </div>
     </div>
   </div>
+
   <!-- 模型列表 -->
   <el-collapse-transition>
     <div v-show="isExpand">
@@ -90,7 +91,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="可见范围" prop="startUserIds" min-width="100">
+        <el-table-column label="可见范围" prop="startUserIds" min-width="150">
           <template #default="scope">
             <el-text v-if="!scope.row.startUsers || scope.row.startUsers.length === 0">
               全部可见
@@ -110,7 +111,7 @@
             </el-text>
           </template>
         </el-table-column>
-        <el-table-column label="表单信息" prop="formType" min-width="200">
+        <el-table-column label="表单信息" prop="formType" min-width="150">
           <template #default="scope">
             <el-button
               v-if="scope.row.formType === BpmModelFormType.NORMAL"
@@ -164,13 +165,12 @@
             </el-button>
             <el-button
               link
-              class="!ml-5px"
               type="primary"
-              @click="handleDesign(scope.row)"
+              @click="openModelForm('copy', scope.row.id)"
               v-hasPermi="['bpm:model:update']"
               :disabled="!isManagerUser(scope.row)"
             >
-              设计
+              复制
             </el-button>
             <el-button
               link
@@ -205,6 +205,14 @@
                   </el-dropdown-item>
                   <el-dropdown-item
                     type="danger"
+                    command="handleClean"
+                    v-if="checkPermi(['bpm:model:clean'])"
+                    :disabled="!isManagerUser(scope.row)"
+                  >
+                    清理
+                  </el-dropdown-item>
+                  <el-dropdown-item
+                    type="danger"
                     command="handleDelete"
                     v-if="checkPermi(['bpm:model:delete'])"
                     :disabled="!isManagerUser(scope.row)"
@@ -235,13 +243,9 @@
       </div>
     </template>
   </Dialog>
-
-  <!-- 表单弹窗：添加流程模型 -->
-  <ModelForm :categoryId="categoryInfo.code" ref="modelFormRef" @success="emit('success')" />
 </template>
 
 <script lang="ts" setup>
-import ModelForm from './ModelForm.vue'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import Sortable from 'sortablejs'
 import { propTypes } from '@/utils/propTypes'
@@ -254,6 +258,7 @@ import { checkPermi } from '@/utils/permission'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { useAppStore } from '@/store/modules/app'
 import { cloneDeep } from 'lodash-es'
+import { useTagsView } from '@/hooks/web/useTagsView'
 
 defineOptions({ name: 'BpmModel' })
 
@@ -284,6 +289,9 @@ const handleModelCommand = (command: string, row: any) => {
       break
     case 'handleChangeState':
       handleChangeState(row)
+      break
+    case 'handleClean':
+      handleClean(row)
       break
     default:
       break
@@ -318,6 +326,19 @@ const handleDelete = async (row: any) => {
   } catch {}
 }
 
+/** 清理按钮操作 */
+const handleClean = async (row: any) => {
+  try {
+    // 清理的二次确认
+    await message.confirm('是否确认清理流程名字为"' + row.name + '"的数据项?')
+    // 发起清理
+    await ModelApi.cleanModel(row.id)
+    message.success('清理成功')
+    // 刷新列表
+    emit('success')
+  } catch {}
+}
+
 /** 更新状态操作 */
 const handleChangeState = async (row: any) => {
   const state = row.processDefinition.suspensionState
@@ -335,14 +356,6 @@ const handleChangeState = async (row: any) => {
     // 刷新列表
     emit('success')
   } catch {}
-}
-
-/** 设计流程 */
-const handleDesign = (row: any) => {
-  push({
-    name: 'BpmModelUpdate',
-    params: { id: row.id }
-  })
 }
 
 /** 发布流程 */
@@ -483,15 +496,19 @@ const handleDeleteCategory = async () => {
 }
 
 /** 添加流程模型弹窗 */
-const modelFormRef = ref()
-const openModelForm = (type: string, id?: number) => {
+const tagsView = useTagsView()
+const openModelForm = async (type: string, id?: number) => {
   if (type === 'create') {
-    push({ name: 'BpmModelCreate' })
+    await push({ name: 'BpmModelCreate' })
   } else {
-    push({
+    await push({
       name: 'BpmModelUpdate',
-      params: { id }
+      params: { id, type }
     })
+    // 设置标题
+    if (type === 'copy') {
+      tagsView.setTitle('复制流程')
+    }
   }
 }
 

@@ -308,28 +308,6 @@ const props = defineProps({
   }
 })
 
-// 监听value变化,重新加载流程图
-watch(
-  () => props.value,
-  (newValue) => {
-    if (newValue && bpmnModeler) {
-      createNewDiagram(newValue)
-    }
-  },
-  { immediate: true }
-)
-
-// 监听processId和processName变化
-watch(
-  [() => props.processId, () => props.processName],
-  ([newId, newName]) => {
-    if (newId && newName && !props.value) {
-      createNewDiagram(null)
-    }
-  },
-  { immediate: true }
-)
-
 provide('configGlobal', props)
 let bpmnModeler: any = null
 const defaultZoom = ref(1)
@@ -480,6 +458,7 @@ const initModelListeners = () => {
       emit('commandStack-changed', event)
       emit('input', xml)
       emit('change', xml)
+      emit('save', xml)
     } catch (e: any) {
       console.error(`[Process Designer Warn]: ${e.message || e}`)
     }
@@ -568,6 +547,7 @@ const importLocalFile = () => {
   reader.onload = function () {
     let xmlStr = this.result
     createNewDiagram(xmlStr)
+    emit('save', xmlStr)
   }
 }
 /* ------------------------------------------------ refs methods ------------------------------------------------------ */

@@ -2,18 +2,18 @@
   <DiyEditor
     v-if="formData && !formLoading"
     v-model="currentFormData!.property"
-    :title="templateItems[selectedTemplateItem].name"
     :libs="libs"
+    :preview-url="previewUrl"
+    :show-navigation-bar="selectedTemplateItem !== 0"
     :show-page-config="selectedTemplateItem !== 0"
     :show-tab-bar="selectedTemplateItem === 0"
-    :show-navigation-bar="selectedTemplateItem !== 0"
-    :preview-url="previewUrl"
-    @save="submitForm"
+    :title="templateItems[selectedTemplateItem].name"
     @reset="handleEditorReset"
+    @save="submitForm"
   >
     <template #toolBarLeft>
       <el-radio-group
-        v-model="selectedTemplateItem"
+        :model-value="selectedTemplateItem"
         class="h-full!"
         @change="handleTemplateItemChange"
       >
@@ -26,13 +26,14 @@
     </template>
   </DiyEditor>
 </template>
-<script setup lang="ts">
+<script lang="ts" setup>
 // TODO @疯狂：要不要建个 decorate 目录，然后挪进去，改成 index.vue，这样可以更明确看到是个独立界面哈，更好找
 import * as DiyTemplateApi from '@/api/mall/promotion/diy/template'
 import * as DiyPageApi from '@/api/mall/promotion/diy/page'
 import { useTagsViewStore } from '@/store/modules/tagsView'
 import { DiyComponentLibrary, PAGE_LIBS } from '@/components/DiyEditor/util' // 商城的 DIY 组件，在 DiyEditor 目录下
 import { toNumber } from 'lodash-es'
+import { isEmpty } from '@/utils/is'
 
 /** 装修模板表单 */
 defineOptions({ name: 'DiyTemplateDecorate' })
@@ -52,6 +53,10 @@ const formData = ref<DiyTemplateApi.DiyTemplatePropertyVO>()
 const formRef = ref() // 表单 Ref
 // 当前编辑的属性
 const currentFormData = ref<DiyTemplateApi.DiyTemplatePropertyVO | DiyPageApi.DiyPageVO>()
+// templateItem 对应的缓存
+const currentFormDataMap = ref<
+  Map<string, DiyTemplateApi.DiyTemplatePropertyVO | DiyPageApi.DiyPageVO>
+>(new Map())
 // 商城 H5 预览地址
 const previewUrl = ref('')
 
@@ -60,8 +65,6 @@ const getPageDetail = async (id: any) => {
   formLoading.value = true
   try {
     formData.value = await DiyTemplateApi.getDiyTemplateProperty(id)
-    currentFormData.value = formData.value
-
     // 拼接手机预览链接
     const domain = import.meta.env.VITE_MALL_H5_DOMAIN
     previewUrl.value = `${domain}/#/pages/index/index?templateId=${formData.value.id}`
@@ -75,19 +78,31 @@ const templateLibs = [] as DiyComponentLibrary[]
 // 当前组件库
 const libs = ref<DiyComponentLibrary[]>(templateLibs)
 // 模板选项切换
-const handleTemplateItemChange = () => {
+const handleTemplateItemChange = (val: number) => {
+  // 缓存模版编辑数据
+  currentFormDataMap.value.set(
+    templateItems[selectedTemplateItem.value].name,
+    currentFormData.value!
+  )
+  // 读取模版缓存
+  const data = currentFormDataMap.value.get(templateItems[val].name)
+
+  // 切换模版
+  selectedTemplateItem.value = val
   // 编辑模板
-  if (selectedTemplateItem.value === 0) {
+  if (val === 0) {
     libs.value = templateLibs
-    currentFormData.value = formData.value
+    currentFormData.value = isEmpty(data) ? formData.value : data
     return
   }
 
   // 编辑页面
   libs.value = PAGE_LIBS
-  currentFormData.value = formData.value!.pages.find(
-    (page: DiyPageApi.DiyPageVO) => page.name === templateItems[selectedTemplateItem.value].name
-  )
+  currentFormData.value = isEmpty(data)
+    ? formData.value!.pages.find(
+        (page: DiyPageApi.DiyPageVO) => page.name === templateItems[val].name
+      )
+    : data
 }
 
 // 提交表单
@@ -97,12 +112,25 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    if (selectedTemplateItem.value === 0) {
-      // 提交模板属性
-      await DiyTemplateApi.updateDiyTemplateProperty(unref(formData)!)
-    } else {
+    // 对所有的 templateItems 都进行保存，有缓存则保存缓存，解决都有修改时只保存了当前所编辑的 templateItem，导致装修效果存在差异
+    for (let i = 0; i < templateItems.length; i++) {
+      const data = currentFormDataMap.value.get(templateItems[i].name) as any
+      // 情况一：基础设置
+      if (i === 0) {
+        // 提交模板属性
+        await DiyTemplateApi.updateDiyTemplateProperty(isEmpty(data) ? unref(formData)! : data)
+        continue
+      }
       // 提交页面属性
-      await DiyPageApi.updateDiyPageProperty(unref(currentFormData)!)
+      // 情况二：提交当前正在编辑的页面
+      if (currentFormData.value?.name.includes(templateItems[i].name)) {
+        await DiyPageApi.updateDiyPageProperty(unref(currentFormData)!)
+        continue
+      }
+      // 情况三：提交页面编辑缓存
+      if (!isEmpty(data)) {
+        await DiyPageApi.updateDiyPageProperty(data!)
+      }
     }
     message.success('保存成功')
   } finally {
@@ -140,10 +168,16 @@ const recoverPageIndex = () => {
   const pageIndex = toNumber(sessionStorage.getItem(DIY_PAGE_INDEX_KEY)) || 0
   // 移除标记
   sessionStorage.removeItem(DIY_PAGE_INDEX_KEY)
+
+  // 重新初始化数据
+  currentFormData.value = formData.value
+  currentFormDataMap.value = new Map<
+    string,
+    DiyTemplateApi.DiyTemplatePropertyVO | DiyPageApi.DiyPageVO
+  >()
   // 切换页面
   if (pageIndex !== selectedTemplateItem.value) {
-    selectedTemplateItem.value = pageIndex
-    handleTemplateItemChange()
+    handleTemplateItemChange(pageIndex)
   }
 }
 //#endregion

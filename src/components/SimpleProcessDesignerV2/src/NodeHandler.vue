@@ -39,6 +39,20 @@
             </div>
             <div class="handler-item-text">包容分支</div>
           </div>
+          <div class="handler-item" @click="addNode(NodeType.DELAY_TIMER_NODE)">
+            <!-- TODO @芋艿 需要更换一下iconfont的图标 -->
+            <div class="handler-item-icon copy">
+              <span class="iconfont icon-size icon-copy"></span>
+            </div>
+            <div class="handler-item-text">延迟器</div>
+          </div>
+          <div class="handler-item" @click="addNode(NodeType.ROUTER_BRANCH_NODE)">
+            <!-- TODO @芋艿 需要更换一下iconfont的图标 -->
+            <div class="handler-item-icon copy">
+              <span class="iconfont icon-size icon-copy"></span>
+            </div>
+            <div class="handler-item-text">路由分支</div>
+          </div>
         </div>
         <template #reference>
           <div class="add-icon"><Icon icon="ep:plus" /></div>
@@ -53,12 +67,13 @@ import {
   ApproveMethodType,
   AssignEmptyHandlerType,
   AssignStartUserHandlerType,
+  ConditionType,
   NODE_DEFAULT_NAME,
   NodeType,
   RejectHandlerType,
   SimpleFlowNode
 } from './consts'
-import { generateUUID } from '@/utils'
+import {generateUUID} from '@/utils'
 
 defineOptions({
   name: 'NodeHandler'
@@ -113,7 +128,16 @@ const addNode = (type: number) => {
         type: AssignEmptyHandlerType.APPROVE
       },
       assignStartUserHandlerType: AssignStartUserHandlerType.START_USER_AUDIT,
-      childNode: props.childNode
+      childNode: props.childNode,
+      taskCreateListener: {
+        enable: false
+      },
+      taskAssignListener: {
+        enable: false
+      },
+      taskCompleteListener: {
+        enable: false
+      }
     }
     emits('update:childNode', data)
   }
@@ -140,7 +164,7 @@ const addNode = (type: number) => {
           showText: '',
           type: NodeType.CONDITION_NODE,
           childNode: undefined,
-          conditionType: 1,
+          conditionType: ConditionType.RULE,
           defaultFlow: false
         },
         {
@@ -205,6 +229,26 @@ const addNode = (type: number) => {
           defaultFlow: true
         }
       ]
+    }
+    emits('update:childNode', data)
+  }
+  if (type === NodeType.DELAY_TIMER_NODE) {
+    const data: SimpleFlowNode = {
+      id: 'Activity_' + generateUUID(),
+      name: NODE_DEFAULT_NAME.get(NodeType.DELAY_TIMER_NODE) as string,
+      showText: '',
+      type: NodeType.DELAY_TIMER_NODE,
+      childNode: props.childNode
+    }
+    emits('update:childNode', data)
+  }
+  if (type === NodeType.ROUTER_BRANCH_NODE) {
+    const data: SimpleFlowNode = {
+      id: 'GateWay_' + generateUUID(),
+      name: NODE_DEFAULT_NAME.get(NodeType.ROUTER_BRANCH_NODE) as string,
+      showText: '',
+      type: NodeType.ROUTER_BRANCH_NODE,
+      childNode: props.childNode
     }
     emits('update:childNode', data)
   }

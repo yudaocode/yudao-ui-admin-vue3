@@ -159,7 +159,7 @@
             <el-input
               disabled
               v-model="formData.totalProductPrice"
-              :formatter="erpPriceTableColumnFormatter"
+              :formatter="erpPriceInputFormatter"
             />
           </el-form-item>
         </el-col>
@@ -181,7 +181,7 @@
               disabled
               v-model="formData.totalPrice"
               placeholder="请输入商机金额"
-              :formatter="erpPriceTableColumnFormattere"
+              :formatter="erpPriceInputFormatter"
             />
           </el-form-item>
         </el-col>
@@ -199,7 +199,7 @@ import * as ContractApi from '@/api/crm/contract'
 import * as UserApi from '@/api/system/user'
 import * as ContactApi from '@/api/crm/contact'
 import * as BusinessApi from '@/api/crm/business'
-import { erpPriceMultiply, erpPriceTableColumnFormatter } from '@/utils'
+import { erpPriceMultiply, erpPriceInputFormatter } from '@/utils'
 import { useUserStore } from '@/store/modules/user'
 import ContractProductForm from '@/views/crm/contract/components/ContractProductForm.vue'
 

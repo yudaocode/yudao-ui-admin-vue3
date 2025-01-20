@@ -5,6 +5,7 @@
      4. 操作按钮
      5. 字段权限
      6. 审批类型
+     7. 是否需要签名
 -->
 <template>
   <div>
@@ -161,6 +162,11 @@
         </el-radio-group>
       </div>
     </div>
+
+    <el-divider content-position="left">是否需要签名</el-divider>
+    <el-form-item prop="signEnable">
+      <el-switch v-model="signEnable.value" active-text="是" inactive-text="否" />
+    </el-form-item>
   </div>
 </template>
 
@@ -217,6 +223,9 @@ const { formType, fieldsPermissionConfig, getNodeConfigFormFields } = useFormFie
 
 // 审批类型
 const approveType = ref({ value: ApproveType.USER })
+
+// 是否需要签名
+const signEnable = ref({ value: false })
 
 const elExtensionElements = ref()
 const otherExtensions = ref()
@@ -325,6 +334,11 @@ const resetCustomConfigList = () => {
         ex.$type !== `${prefix}:ApproveType`
     ) ?? []
 
+  // 是否需要签名
+  signEnable.value =
+    elExtensionElements.value.values?.filter((ex) => ex.$type === `${prefix}:SignEnable`)?.[0] ||
+    bpmnInstances().moddle.create(`${prefix}:SignEnable`, { value: false })
+
   // 更新元素扩展属性，避免后续报错
   updateElementExtensions()
 }
@@ -373,7 +387,8 @@ const updateElementExtensions = () => {
       assignEmptyUserIdsEl.value,
       approveType.value,
       ...buttonsSettingEl.value,
-      ...fieldsPermissionEl.value
+      ...fieldsPermissionEl.value,
+      signEnable.value
     ]
   })
   bpmnInstances().modeling.updateProperties(toRaw(bpmnElement.value), {
