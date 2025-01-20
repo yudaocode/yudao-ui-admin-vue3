@@ -70,7 +70,7 @@
         <ProcessDesign v-if="currentStep === 2" v-model="formData" ref="processDesignRef" />
 
         <!-- 第四步：更多设置 -->
-        <div v-if="currentStep === 3" class="mx-auto w-700px">
+        <div v-show="currentStep === 3" class="mx-auto w-700px">
           <ExtraSettings v-model="formData" ref="extraSettingsRef" />
         </div>
       </div>
@@ -103,6 +103,7 @@ const userStore = useUserStoreWithOut()
 const basicInfoRef = ref()
 const formDesignRef = ref()
 const processDesignRef = ref()
+const extraSettingsRef = ref()
 
 /** 步骤校验函数 */
 const validateBasic = async () => {
@@ -145,7 +146,14 @@ const formData: any = ref({
   startUserType: undefined,
   startUserIds: [],
   managerUserIds: [],
-  allowCancelRunningProcess: true
+  allowCancelRunningProcess: true,
+  processIdRule: {
+    enable: false,
+    prefix: '',
+    infix: '',
+    postfix: '',
+    length: 5
+  }
 })
 
 //流程数据
@@ -187,6 +195,8 @@ const initData = async () => {
 
   // 最终，设置 currentStep 切换到第一步
   currentStep.value = 0
+
+  extraSettingsRef.value.initData()
 }
 
 /** 根据类型切换流程数据 */
