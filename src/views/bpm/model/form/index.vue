@@ -196,6 +196,7 @@ const initData = async () => {
   // 最终，设置 currentStep 切换到第一步
   currentStep.value = 0
 
+  // 兼容，以前未配置更多设置的流程
   extraSettingsRef.value.initData()
 }
 

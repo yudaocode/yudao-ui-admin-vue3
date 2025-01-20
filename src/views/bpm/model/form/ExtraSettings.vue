@@ -119,7 +119,7 @@ const numberExample = computed(() => {
   }
 })
 
-// 兼容以前未配置更多设置的流程
+/** 兼容以前未配置更多设置的流程 */
 const initData = () => {
   if (!modelData.value.processIdRule) {
     modelData.value.processIdRule = {
