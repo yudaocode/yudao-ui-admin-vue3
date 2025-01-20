@@ -64,7 +64,7 @@
 </template>
 <script setup lang="ts">
 import { Plus } from '@element-plus/icons-vue'
-import { SimpleFlowNode, NodeType, ConditionType, RouterCondition } from '../consts'
+import { SimpleFlowNode, NodeType, ConditionType, RouterSetting } from '../consts'
 import { useWatchNode, useDrawer, useNodeName } from '../node'
 import Condition from './components/Condition.vue'
 
@@ -85,7 +85,7 @@ const { settingVisible, closeDrawer, openDrawer } = useDrawer()
 const currentNode = useWatchNode(props)
 // 节点名称
 const { nodeName, showInput, clickIcon, blurEvent } = useNodeName(NodeType.ROUTER_BRANCH_NODE)
-const routerGroups = ref<RouterCondition[]>([])
+const routerGroups = ref<RouterSetting[]>([])
 const nodeOptions = ref<any>([])
 const conditionRef = ref([])
 

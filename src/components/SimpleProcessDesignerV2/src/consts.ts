@@ -110,7 +110,7 @@ export interface SimpleFlowNode {
   // 延迟设置
   delaySetting?: DelaySetting
   // 路由分支
-  routerGroups?: RouterCondition[]
+  routerGroups?: RouterSetting[]
   defaultFlowId?: string
   // 签名
   signEnable?: boolean
@@ -686,7 +686,7 @@ export const DELAY_TYPE = [
 /**
  * 路由分支结构定义
  */
-export type RouterCondition = {
+export type RouterSetting = {
   nodeId: string
   conditionType: ConditionType
   conditionExpression: string
