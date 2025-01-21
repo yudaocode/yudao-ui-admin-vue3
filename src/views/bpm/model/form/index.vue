@@ -153,7 +153,8 @@ const formData: any = ref({
     infix: '',
     postfix: '',
     length: 5
-  }
+  },
+  autoApprovalType: 1
 })
 
 //流程数据
