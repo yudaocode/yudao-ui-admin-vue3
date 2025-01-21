@@ -1,5 +1,5 @@
-import type { App } from 'vue'
-import { CACHE_KEY, useCache } from '@/hooks/web/useCache'
+import type {App} from 'vue'
+import {useUserStore} from "@/store/modules/user";
 
 const { t } = useI18n() // 国际化
 
@@ -18,14 +18,9 @@ export function hasPermi(app: App<Element>) {
     }
   })
 }
-
+const userStore = useUserStore();
+const all_permission = '*:*:*'
 export const hasPermission = (permission: string[]) => {
-  const { wsCache } = useCache()
-  const all_permission = '*:*:*'
-  const userInfo = wsCache.get(CACHE_KEY.USER)
-  const permissions = userInfo?.permissions || []
-
-  return permissions.some((p: string) => {
-    return all_permission === p || permission.includes(p)
-  })
+  return userStore.permissionsSet.has(all_permission) ||
+    permission.some(permission => userStore.permissionsSet.has(permission))
 }
