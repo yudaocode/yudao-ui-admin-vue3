@@ -86,7 +86,7 @@ import * as FormApi from '@/api/bpm/form'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import * as UserApi from '@/api/system/user'
 import { useUserStoreWithOut } from '@/store/modules/user'
-import { BpmModelFormType, BpmModelType } from '@/utils/constants'
+import { BpmModelFormType, BpmModelType, BpmAutoApproveType } from '@/utils/constants'
 import BasicInfo from './BasicInfo.vue'
 import FormDesign from './FormDesign.vue'
 import ProcessDesign from './ProcessDesign.vue'
@@ -153,7 +153,8 @@ const formData: any = ref({
     infix: '',
     postfix: '',
     length: 5
-  }
+  },
+  autoApprovalType: BpmAutoApproveType.NONE
 })
 
 //流程数据

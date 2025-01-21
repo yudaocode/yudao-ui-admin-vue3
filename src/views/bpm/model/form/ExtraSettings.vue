@@ -58,11 +58,29 @@
         </div>
       </div>
     </el-form-item>
+    <el-form-item class="mb-20px">
+      <template #label>
+        <el-text size="large" tag="b">自动去重</el-text>
+      </template>
+      <div class="flex flex-col">
+        <div>
+          <el-text> 同一审批人在流程中重复出现时： </el-text>
+        </div>
+        <el-radio-group v-model="modelData.autoApprovalType">
+          <div class="flex flex-col">
+            <el-radio :value="1">不自动通过</el-radio>
+            <el-radio :value="2">仅审批一次，后续重复的审批节点均自动通过</el-radio>
+            <el-radio :value="3">仅针对连续审批的节点自动通过</el-radio>
+          </div>
+        </el-radio-group>
+      </div>
+    </el-form-item>
   </el-form>
 </template>
 
 <script setup lang="ts">
 import dayjs from 'dayjs'
+import { BpmAutoApproveType } from '@/utils/constants'
 
 const modelData = defineModel<any>()
 
@@ -129,6 +147,9 @@ const initData = () => {
       postfix: '',
       length: 5
     }
+  }
+  if (!modelData.value.autoApprovalType) {
+    modelData.value.autoApprovalType = BpmAutoApproveType.NONE
   }
 }
 defineExpose({ initData })
