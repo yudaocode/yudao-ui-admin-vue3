@@ -68,9 +68,9 @@
         </div>
         <el-radio-group v-model="modelData.autoApprovalType">
           <div class="flex flex-col">
-            <el-radio :value="1">不自动通过</el-radio>
-            <el-radio :value="2">仅审批一次，后续重复的审批节点均自动通过</el-radio>
-            <el-radio :value="3">仅针对连续审批的节点自动通过</el-radio>
+            <el-radio :value="0">不自动通过</el-radio>
+            <el-radio :value="1">仅审批一次，后续重复的审批节点均自动通过</el-radio>
+            <el-radio :value="2">仅针对连续审批的节点自动通过</el-radio>
           </div>
         </el-radio-group>
       </div>
