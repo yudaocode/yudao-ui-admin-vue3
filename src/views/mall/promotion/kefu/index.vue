@@ -37,40 +37,45 @@ const { data, close, open } = useWebSocket(server.value, {
 })
 
 /** 监听 WebSocket 数据 */
-watchEffect(() => {
-  if (!data.value) {
-    return
+watch(
+  () => data.value,
+  (newData) => {
+    if (!newData) return
+    try {
+      // 1. 收到心跳
+      if (newData === 'pong') return
+
+      // 2.1 解析 type 消息类型
+      const jsonMessage = JSON.parse(newData)
+      const type = jsonMessage.type
+      if (!type) {
+        message.error('未知的消息类型：' + newData)
+        return
+      }
+
+      // 2.2 消息类型：KEFU_MESSAGE_TYPE
+      if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_TYPE) {
+        const message = JSON.parse(jsonMessage.content)
+        // 刷新会话列表
+        kefuStore.updateConversation(message.conversationId)
+        // 刷新消息列表
+        keFuChatBoxRef.value?.refreshMessageList(message)
+        return
+      }
+
+      // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
+      if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_ADMIN_READ) {
+        // 更新会话已读
+        kefuStore.updateConversationStatus(jsonParse(jsonMessage.content))
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  },
+  {
+    immediate: false // 不立即执行
   }
-  try {
-    // 1. 收到心跳
-    if (data.value === 'pong') {
-      return
-    }
-    // 2.1 解析 type 消息类型
-    const jsonMessage = JSON.parse(data.value)
-    const type = jsonMessage.type
-    if (!type) {
-      message.error('未知的消息类型：' + data.value)
-      return
-    }
-    // 2.2 消息类型：KEFU_MESSAGE_TYPE
-    if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_TYPE) {
-      const message = JSON.parse(jsonMessage.content)
-      // 刷新会话列表
-      kefuStore.updateConversation(message.conversationId)
-      // 刷新消息列表
-      keFuChatBoxRef.value?.refreshMessageList(message)
-      return
-    }
-    // 2.3 消息类型：KEFU_MESSAGE_ADMIN_READ
-    if (type === WebSocketMessageTypeConstants.KEFU_MESSAGE_ADMIN_READ) {
-      // 更新会话已读
-      kefuStore.updateConversationStatus(jsonParse(jsonMessage.content))
-    }
-  } catch (error) {
-    console.error(error)
-  }
-})
+)
 // ======================= WebSocket end =======================
 
 /** 加载指定会话的消息列表 */
