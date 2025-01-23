@@ -158,7 +158,7 @@
               link
               type="primary"
               @click="openModelForm('update', scope.row.id)"
-              v-hasPermi="['bpm:model:update']"
+              v-if="hasPermiUpdate"
               :disabled="!isManagerUser(scope.row)"
             >
               修改
@@ -167,7 +167,7 @@
               link
               type="primary"
               @click="openModelForm('copy', scope.row.id)"
-              v-hasPermi="['bpm:model:update']"
+              v-if="hasPermiUpdate"
               :disabled="!isManagerUser(scope.row)"
             >
               复制
@@ -177,7 +177,7 @@
               class="!ml-5px"
               type="primary"
               @click="handleDeploy(scope.row)"
-              v-hasPermi="['bpm:model:deploy']"
+              v-if="hasPermiDeploy"
               :disabled="!isManagerUser(scope.row)"
             >
               发布
@@ -185,20 +185,20 @@
             <el-dropdown
               class="!align-middle ml-5px"
               @command="(command) => handleModelCommand(command, scope.row)"
-              v-hasPermi="['bpm:process-definition:query', 'bpm:model:update', 'bpm:model:delete']"
+              v-if="hasPermiMore"
             >
               <el-button type="primary" link>更多</el-button>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item
                     command="handleDefinitionList"
-                    v-if="checkPermi(['bpm:process-definition:query'])"
+                    v-if="hasPermiPdQuery"
                   >
                     历史
                   </el-dropdown-item>
                   <el-dropdown-item
                     command="handleChangeState"
-                    v-if="checkPermi(['bpm:model:update']) && scope.row.processDefinition"
+                    v-if="hasPermiUpdate && scope.row.processDefinition"
                     :disabled="!isManagerUser(scope.row)"
                   >
                     {{ scope.row.processDefinition.suspensionState === 1 ? '停用' : '启用' }}
@@ -214,7 +214,7 @@
                   <el-dropdown-item
                     type="danger"
                     command="handleDelete"
-                    v-if="checkPermi(['bpm:model:delete'])"
+                    v-if="hasPermiDelete"
                     :disabled="!isManagerUser(scope.row)"
                   >
                     删除
@@ -277,6 +277,23 @@ const isModelSorting = ref(false) // 是否正处于排序状态
 const originalData: any = ref([]) // 原始数据
 const modelList: any = ref([]) // 模型列表
 const isExpand = ref(false) // 是否处于展开状态
+
+const hasPermiUpdate = computed(() => {
+  return checkPermi(['bpm:model:update'])
+})
+const hasPermiDelete = computed(() => {
+  return checkPermi(['bpm:model:delete'])
+})
+const hasPermiDeploy = computed(() => {
+  return checkPermi(['bpm:model:deploy'])
+})
+const hasPermiMore = computed(() => {
+  return checkPermi(['bpm:process-definition:query', 'bpm:model:update', 'bpm:model:delete'])
+})
+const hasPermiPdQuery = computed(() => {
+  return checkPermi(['bpm:process-definition:query'])
+})
+
 
 /** '更多'操作按钮 */
 const handleModelCommand = (command: string, row: any) => {
