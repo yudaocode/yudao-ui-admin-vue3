@@ -113,13 +113,14 @@
 
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import { BpmAutoApproveType } from '@/utils/constants'
+import { BpmAutoApproveType, BpmModelFormType } from '@/utils/constants'
 import * as FormApi from '@/api/bpm/form'
-import { parseFormFields } from '@/components/FormCreate/src/utils/index'
-import { ProcessVariableEnum } from "@/components/SimpleProcessDesignerV2/src/consts";
+import { parseFormFields } from '@/components/FormCreate/src/utils'
+import { ProcessVariableEnum } from '@/components/SimpleProcessDesignerV2/src/consts'
 
 const modelData = defineModel<any>()
 
+/** 自定义 ID 流程编码 */
 const timeOptions = ref([
   {
     value: '',
@@ -142,7 +143,6 @@ const timeOptions = ref([
     label: '精确到秒'
   }
 ])
-
 const numberExample = computed(() => {
   if (modelData.value.processIdRule.enable) {
     let infix = ''
@@ -173,20 +173,21 @@ const numberExample = computed(() => {
   }
 })
 
-const formField = ref([])
-const formFieldOptions  = computed(() => {
+/** 表单选项 */
+const formField = ref<Array<{ field: ProcessVariableEnum; title: string }>>([])
+const formFieldOptions = computed(() => {
   // 固定添加发起人 ID 字段
   formField.value.unshift({
     field: ProcessVariableEnum.PROCESS_DEFINITION_NAME,
-    title: '流程名称',
+    title: '流程名称'
   })
   formField.value.unshift({
     field: ProcessVariableEnum.START_TIME,
-    title: '发起时间',
+    title: '发起时间'
   })
   formField.value.unshift({
     field: ProcessVariableEnum.START_USER_ID,
-    title: '发起人',
+    title: '发起人'
   })
   return formField.value.map((item) => {
     return {
@@ -219,13 +220,13 @@ const initData = () => {
 }
 defineExpose({ initData })
 
-// 监听表单ID变化，加载表单数据
+/** 监听表单 ID 变化，加载表单数据 */
 watch(
   () => modelData.value.formId,
   async (newFormId) => {
-    if (newFormId && modelData.value.formType === 10) {
+    if (newFormId && modelData.value.formType === BpmModelFormType.CUSTOM) {
       const data = await FormApi.getForm(newFormId)
-      const result: Array<Record<string, any>> = []
+      const result: Array<{ field: ProcessVariableEnum; title: string }> = []
       if (data.fields) {
         data.fields.forEach((fieldStr: string) => {
           parseFormFields(JSON.parse(fieldStr), result)
