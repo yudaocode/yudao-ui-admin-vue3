@@ -1,8 +1,9 @@
-import type {App} from 'vue'
-import {useUserStore} from "@/store/modules/user";
+import type { App } from 'vue'
+import { useUserStore } from '@/store/modules/user'
 
 const { t } = useI18n() // 国际化
 
+/** 判断权限的指令 directive */
 export function hasPermi(app: App<Element>) {
   app.directive('hasPermi', (el, binding) => {
     const { value } = binding
@@ -18,9 +19,13 @@ export function hasPermi(app: App<Element>) {
     }
   })
 }
-const userStore = useUserStore();
+
+/** 判断权限的方法 function */
+const userStore = useUserStore()
 const all_permission = '*:*:*'
 export const hasPermission = (permission: string[]) => {
-  return userStore.permissionsSet.has(all_permission) ||
-    permission.some(permission => userStore.permissionsSet.has(permission))
+  return (
+    userStore.permissions.has(all_permission) ||
+    permission.some((permission) => userStore.permissions.has(permission))
+  )
 }

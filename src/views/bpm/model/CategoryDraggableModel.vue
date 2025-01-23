@@ -190,10 +190,7 @@
               <el-button type="primary" link>更多</el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item
-                    command="handleDefinitionList"
-                    v-if="hasPermiPdQuery"
-                  >
+                  <el-dropdown-item command="handleDefinitionList" v-if="hasPermiPdQuery">
                     历史
                   </el-dropdown-item>
                   <el-dropdown-item
@@ -278,6 +275,7 @@ const originalData: any = ref([]) // 原始数据
 const modelList: any = ref([]) // 模型列表
 const isExpand = ref(false) // 是否处于展开状态
 
+/** 权限校验：通过 computed 解决列表的卡顿问题 */
 const hasPermiUpdate = computed(() => {
   return checkPermi(['bpm:model:update'])
 })
@@ -293,7 +291,6 @@ const hasPermiMore = computed(() => {
 const hasPermiPdQuery = computed(() => {
   return checkPermi(['bpm:process-definition:query'])
 })
-
 
 /** '更多'操作按钮 */
 const handleModelCommand = (command: string, row: any) => {
