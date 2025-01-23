@@ -108,7 +108,7 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
  * @description 获取表单的字段
  */
 export function useFormFields() {
-  const formFields = inject<Ref<string[]>>('formFields') // 流程表单字段
+  const formFields = inject<Ref<string[]>>('formFields',ref([])) // 流程表单字段
   return parseFormCreateFields(unref(formFields))
 }
 
