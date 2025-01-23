@@ -86,7 +86,7 @@ const modelData = defineModel<any>()
 
 const timeOptions = ref([
   {
-    value: 'NULL', // TODO @lesan：用 '' 会好会更好一点哈。
+    value: '',
     label: '无'
   },
   {
