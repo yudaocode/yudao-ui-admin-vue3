@@ -29,6 +29,11 @@ export enum NodeType {
   DELAY_TIMER_NODE = 14,
 
   /**
+   * 触发器节点
+   */
+  TRIGGER_NODE = 15,
+
+  /**
    * 条件节点
    */
   CONDITION_NODE = 50,
@@ -498,6 +503,7 @@ NODE_DEFAULT_TEXT.set(NodeType.CONDITION_NODE, '请设置条件')
 NODE_DEFAULT_TEXT.set(NodeType.START_USER_NODE, '请设置发起人')
 NODE_DEFAULT_TEXT.set(NodeType.DELAY_TIMER_NODE, '请设置延迟器')
 NODE_DEFAULT_TEXT.set(NodeType.ROUTER_BRANCH_NODE, '请设置路由节点')
+NODE_DEFAULT_TEXT.set(NodeType.TRIGGER_NODE, '请设置触发器')
 
 export const NODE_DEFAULT_NAME = new Map<number, string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
@@ -506,6 +512,7 @@ NODE_DEFAULT_NAME.set(NodeType.CONDITION_NODE, '条件')
 NODE_DEFAULT_NAME.set(NodeType.START_USER_NODE, '发起人')
 NODE_DEFAULT_NAME.set(NodeType.DELAY_TIMER_NODE, '延迟器')
 NODE_DEFAULT_NAME.set(NodeType.ROUTER_BRANCH_NODE, '路由分支')
+NODE_DEFAULT_NAME.set(NodeType.TRIGGER_NODE, '触发器')
 
 // 候选人策略。暂时不从字典中取。 后续可能调整。控制显示顺序
 export const CANDIDATE_STRATEGY: DictDataVO[] = [

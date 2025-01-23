@@ -9,9 +9,8 @@
         ]"
       >
         <div class="node-title-container">
-          <!-- TODO @芋艿 需要更换一下iconfont的图标 -->
-          <div class="node-title-icon copy-task">
-            <span class="iconfont icon-copy"></span>
+          <div class="node-title-icon router-node">
+            <span class="iconfont icon-router"></span>
           </div>
           <input
             v-if="!readonly && showInput"
