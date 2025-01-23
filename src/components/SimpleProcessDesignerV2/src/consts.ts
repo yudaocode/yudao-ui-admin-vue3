@@ -653,7 +653,15 @@ export enum ProcessVariableEnum {
   /**
    * 发起用户 ID
    */
-  START_USER_ID = 'PROCESS_START_USER_ID'
+  START_USER_ID = 'PROCESS_START_USER_ID',
+  /**
+   * 发起时间
+   */
+  START_TIME = 'PROCESS_START_TIME',
+  /**
+   * 流程定义名称
+   */
+  PROCESS_DEFINITION_NAME = 'PROCESS_DEFINITION_NAME'
 }
 
 /**
