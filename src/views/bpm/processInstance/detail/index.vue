@@ -49,7 +49,7 @@
                       class="form-box flex flex-col mb-30px flex-1"
                     >
                       <!-- 情况一：流程表单 -->
-                      <el-col v-if="processDefinition?.formType === 10">
+                      <el-col v-if="processDefinition?.formType === BpmModelFormType.NORMAL">
                         <form-create
                           v-model="detailForm.value"
                           v-model:api="fApi"
@@ -58,7 +58,7 @@
                         />
                       </el-col>
                       <!-- 情况二：业务表单 -->
-                      <div v-if="processDefinition?.formType === 20">
+                      <div v-if="processDefinition?.formType === BpmModelFormType.CUSTOM">
                         <BusinessFormComponent :id="processInstance.businessKey" />
                       </div>
                     </div>
@@ -116,6 +116,9 @@
             :process-instance="processInstance"
             :process-definition="processDefinition"
             :userOptions="userOptions"
+            :normal-form="detailForm"
+            :normal-form-api="fApi"
+            :writable-fields="writableFields"
             @success="refresh"
           />
         </div>
@@ -126,7 +129,7 @@
 <script lang="ts" setup>
 import { formatDate } from '@/utils/formatTime'
 import { DICT_TYPE } from '@/utils/dict'
-import { BpmModelType } from '@/utils/constants'
+import { BpmModelType, BpmModelFormType } from '@/utils/constants'
 import { setConfAndFields2 } from '@/utils/formCreate'
 import { registerComponent } from '@/utils/routerHelper'
 import type { ApiAttrs } from '@form-create/element-ui/types/config'
@@ -171,6 +174,8 @@ const detailForm = ref({
   value: {}
 }) // 流程实例的表单详情
 
+const writableFields: Array<string> = [] // 表单可以编辑的字段
+
 /** 获得详情 */
 const getDetail = () => {
   getApprovalDetail()
@@ -202,11 +207,12 @@ const getApprovalDetail = async () => {
     processDefinition.value = data.processDefinition
 
     // 设置表单信息
-    if (processDefinition.value.formType === 10) {
+    if (processDefinition.value.formType === BpmModelFormType.NORMAL) {
       // 获取表单字段权限
       const formFieldsPermission = data.formFieldsPermission
-
-      if (detailForm.value.rule.length > 0) {
+      // 清空可编辑字段为空
+      writableFields.splice(0)
+      if (detailForm.value.rule?.length > 0) {
         // 避免刷新 form-create 显示不了
         detailForm.value.value = processInstance.value.formVariables
       } else {
@@ -271,6 +277,8 @@ const setFieldPermission = (field: string, permission: string) => {
   if (permission === FieldPermissionType.WRITE) {
     //@ts-ignore
     fApi.value?.disabled(false, field)
+    // 加入可以编辑的字段
+    writableFields.push(field)
   }
   if (permission === FieldPermissionType.NONE) {
     //@ts-ignore
@@ -314,6 +322,7 @@ $process-header-height: 194px;
   overflow: auto;
 
   .form-scroll-area {
+    display: flex;
     height: calc(
       100vh - var(--top-tool-height) - var(--tags-view-height) - var(--app-footer-height) - 35px -
         $process-header-height - 40px
@@ -323,7 +332,6 @@ $process-header-height: 194px;
         $process-header-height - 40px
     );
     overflow: auto;
-    display: flex;
     flex-direction: column;
 
     :deep(.box-card) {

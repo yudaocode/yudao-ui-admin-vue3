@@ -64,6 +64,7 @@
       </div>
     </div>
   </div>
+
   <!-- 模型列表 -->
   <el-collapse-transition>
     <div v-show="isExpand">
@@ -90,7 +91,7 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column label="可见范围" prop="startUserIds" min-width="100">
+        <el-table-column label="可见范围" prop="startUserIds" min-width="150">
           <template #default="scope">
             <el-text v-if="!scope.row.startUsers || scope.row.startUsers.length === 0">
               全部可见
@@ -110,7 +111,7 @@
             </el-text>
           </template>
         </el-table-column>
-        <el-table-column label="表单信息" prop="formType" min-width="200">
+        <el-table-column label="表单信息" prop="formType" min-width="150">
           <template #default="scope">
             <el-button
               v-if="scope.row.formType === BpmModelFormType.NORMAL"
@@ -161,16 +162,6 @@
               :disabled="!isManagerUser(scope.row)"
             >
               修改
-            </el-button>
-            <el-button
-              link
-              class="!ml-5px"
-              type="primary"
-              @click="handleDesign(scope.row)"
-              v-hasPermi="['bpm:model:update']"
-              :disabled="!isManagerUser(scope.row)"
-            >
-              设计
             </el-button>
             <el-button
               link
@@ -249,7 +240,7 @@ import { formatDate } from '@/utils/formatTime'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
 import { setConfAndFields2 } from '@/utils/formCreate'
-import { BpmModelFormType, BpmModelType } from '@/utils/constants'
+import { BpmModelFormType } from '@/utils/constants'
 import { checkPermi } from '@/utils/permission'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { useAppStore } from '@/store/modules/app'
@@ -335,25 +326,6 @@ const handleChangeState = async (row: any) => {
     // 刷新列表
     emit('success')
   } catch {}
-}
-
-/** 设计流程 */
-const handleDesign = (row: any) => {
-  if (row.type == BpmModelType.BPMN) {
-    push({
-      name: 'BpmModelEditor',
-      query: {
-        modelId: row.id
-      }
-    })
-  } else {
-    push({
-      name: 'SimpleModelDesign',
-      query: {
-        modelId: row.id
-      }
-    })
-  }
 }
 
 /** 发布流程 */
@@ -496,7 +468,14 @@ const handleDeleteCategory = async () => {
 /** 添加流程模型弹窗 */
 const modelFormRef = ref()
 const openModelForm = (type: string, id?: number) => {
-  modelFormRef.value.open(type, id)
+  if (type === 'create') {
+    push({ name: 'BpmModelCreate' })
+  } else {
+    push({
+      name: 'BpmModelUpdate',
+      params: { id }
+    })
+  }
 }
 
 watch(() => props.categoryInfo.modelList, updateModeList, { immediate: true })

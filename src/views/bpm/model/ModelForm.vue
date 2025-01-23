@@ -123,29 +123,69 @@
           </el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="谁可以发起" prop="startUserIds">
+      <el-form-item label="谁可以发起" prop="startUserType">
         <el-select
-          v-model="formData.startUserIds"
-          multiple
-          placeholder="请选择可发起人，默认（不选择）则所有人都可以发起"
+          v-model="formData.startUserType"
+          placeholder="请选择谁可以发起"
+          @change="handleStartUserTypeChange"
         >
-          <el-option
-            v-for="user in userList"
-            :key="user.id"
-            :label="user.nickname"
-            :value="user.id"
-          />
+          <el-option label="全员" :value="0" />
+          <el-option label="指定人员" :value="1" />
+          <el-option label="均不可提交" :value="2" />
         </el-select>
+        <div v-if="formData.startUserType === 1" class="mt-2 flex flex-wrap gap-2">
+          <div
+            v-for="user in selectedStartUsers"
+            :key="user.id"
+            class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
+          >
+            <el-avatar class="!m-5px" :size="28" v-if="user.avatar" :src="user.avatar" />
+            <el-avatar class="!m-5px" :size="28" v-else>
+              {{ user.nickname.substring(0, 1) }}
+            </el-avatar>
+            {{ user.nickname }}
+            <Icon
+              icon="ep:close"
+              class="ml-2 cursor-pointer hover:text-red-500"
+              @click="handleRemoveStartUser(user)"
+            />
+          </div>
+          <el-button type="primary" link @click="openStartUserSelect">
+            <Icon icon="ep:plus" />选择人员
+          </el-button>
+        </div>
       </el-form-item>
-      <el-form-item label="流程管理员" prop="managerUserIds">
-        <el-select v-model="formData.managerUserIds" multiple placeholder="请选择流程管理员">
-          <el-option
-            v-for="user in userList"
-            :key="user.id"
-            :label="user.nickname"
-            :value="user.id"
-          />
+      <el-form-item label="流程管理员" prop="managerUserType">
+        <el-select
+          v-model="formData.managerUserType"
+          placeholder="请选择流程管理员"
+          @change="handleManagerUserTypeChange"
+        >
+          <el-option label="全员" :value="0" />
+          <el-option label="指定人员" :value="1" />
+          <el-option label="均不可提交" :value="2" />
         </el-select>
+        <div v-if="formData.managerUserType === 1" class="mt-2 flex flex-wrap gap-2">
+          <div
+            v-for="user in selectedManagerUsers"
+            :key="user.id"
+            class="bg-gray-100 h-35px rounded-3xl flex items-center pr-8px dark:color-gray-600 position-relative"
+          >
+            <el-avatar class="!m-5px" :size="28" v-if="user.avatar" :src="user.avatar" />
+            <el-avatar class="!m-5px" :size="28" v-else>
+              {{ user.nickname.substring(0, 1) }}
+            </el-avatar>
+            {{ user.nickname }}
+            <Icon
+              icon="ep:close"
+              class="ml-2 cursor-pointer hover:text-red-500"
+              @click="handleRemoveManagerUser(user)"
+            />
+          </div>
+          <el-button type="primary" link @click="openManagerUserSelect">
+            <Icon icon="ep:plus" />选择人员
+          </el-button>
+        </div>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -153,6 +193,7 @@
       <el-button @click="dialogVisible = false">取 消</el-button>
     </template>
   </Dialog>
+  <UserSelectForm ref="userSelectFormRef" @confirm="handleUserSelectConfirm" />
 </template>
 <script lang="ts" setup>
 import { propTypes } from '@/utils/propTypes'
@@ -160,11 +201,12 @@ import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 import { ElMessageBox } from 'element-plus'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
-import { CategoryApi } from '@/api/bpm/category'
+import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import { BpmModelFormType, BpmModelType } from '@/utils/constants'
 import { UserVO } from '@/api/system/user'
 import * as UserApi from '@/api/system/user'
 import { useUserStoreWithOut } from '@/store/modules/user'
+import { FormVO } from '@/api/bpm/form'
 
 defineOptions({ name: 'ModelForm' })
 
@@ -178,7 +220,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const dialogTitle = ref('') // 弹窗的标题
 const formLoading = ref(false) // 表单的加载中：1）修改时的数据加载；2）提交的按钮禁用
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
-const formData = ref({
+const formData: any = ref({
   id: undefined,
   name: '',
   key: '',
@@ -191,6 +233,8 @@ const formData = ref({
   formCustomCreatePath: '',
   formCustomViewPath: '',
   visible: true,
+  startUserType: undefined,
+  managerUserType: undefined,
   startUserIds: [],
   managerUserIds: []
 })
@@ -208,9 +252,13 @@ const formRules = reactive({
   managerUserIds: [{ required: true, message: '流程管理员不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
-const formList = ref([]) // 流程表单的下拉框的数据
-const categoryList = ref([]) // 流程分类列表
+const formList = ref<FormVO[]>([]) // 流程表单的下拉框的数据
+const categoryList = ref<CategoryVO[]>([]) // 流程分类列表
 const userList = ref<UserVO[]>([]) // 用户列表
+const selectedStartUsers = ref<UserVO[]>([]) // 已选择的发起人列表
+const selectedManagerUsers = ref<UserVO[]>([]) // 已选择的管理员列表
+const userSelectFormRef = ref() // 用户选择弹窗 ref
+const currentSelectType = ref<'start' | 'manager'>('start') // 当前选择的是发起人还是管理员
 
 /** 打开弹窗 */
 const open = async (type: string, id?: string) => {
@@ -225,6 +273,19 @@ const open = async (type: string, id?: string) => {
       formData.value = await ModelApi.getModel(id)
     } finally {
       formLoading.value = false
+    }
+    // 加载数据时，根据已有的用户ID列表初始化已选用户
+    if (formData.value.startUserIds?.length) {
+      formData.value.startUserType = 1
+      selectedStartUsers.value = userList.value.filter((user) =>
+        formData.value.startUserIds.includes(user.id)
+      )
+    }
+    if (formData.value.managerUserIds?.length) {
+      formData.value.managerUserType = 1
+      selectedManagerUsers.value = userList.value.filter((user) =>
+        formData.value.managerUserIds.includes(user.id)
+      )
     }
   } else {
     formData.value.managerUserIds.push(userStore.getUser.id)
@@ -293,9 +354,87 @@ const resetForm = () => {
     formCustomCreatePath: '',
     formCustomViewPath: '',
     visible: true,
+    startUserType: undefined,
+    managerUserType: undefined,
     startUserIds: [],
     managerUserIds: []
   }
   formRef.value?.resetFields()
+  selectedStartUsers.value = []
+  selectedManagerUsers.value = []
+}
+
+/** 处理发起人类型变化 */
+const handleStartUserTypeChange = (value: number) => {
+  if (value !== 1) {
+    selectedStartUsers.value = []
+    formData.value.startUserIds = []
+  }
+}
+
+/** 处理管理员类型变化 */
+const handleManagerUserTypeChange = (value: number) => {
+  if (value !== 1) {
+    selectedManagerUsers.value = []
+    formData.value.managerUserIds = []
+  }
+}
+
+/** 打开发起人选择 */
+const openStartUserSelect = () => {
+  currentSelectType.value = 'start'
+  userSelectFormRef.value.open(0, selectedStartUsers.value)
+}
+
+/** 打开管理员选择 */
+const openManagerUserSelect = () => {
+  currentSelectType.value = 'manager'
+  userSelectFormRef.value.open(0, selectedManagerUsers.value)
+}
+
+/** 处理用户选择确认 */
+const handleUserSelectConfirm = (_, users: UserVO[]) => {
+  if (currentSelectType.value === 'start') {
+    selectedStartUsers.value = users
+    formData.value.startUserIds = users.map((u) => u.id)
+  } else {
+    selectedManagerUsers.value = users
+    formData.value.managerUserIds = users.map((u) => u.id)
+  }
+}
+
+/** 移除发起人 */
+const handleRemoveStartUser = (user: UserVO) => {
+  selectedStartUsers.value = selectedStartUsers.value.filter((u) => u.id !== user.id)
+  formData.value.startUserIds = formData.value.startUserIds.filter((id: number) => id !== user.id)
+}
+
+/** 移除管理员 */
+const handleRemoveManagerUser = (user: UserVO) => {
+  selectedManagerUsers.value = selectedManagerUsers.value.filter((u) => u.id !== user.id)
+  formData.value.managerUserIds = formData.value.managerUserIds.filter(
+    (id: number) => id !== user.id
+  )
 }
 </script>
+
+<style lang="scss" scoped>
+.bg-gray-100 {
+  background-color: #f5f7fa;
+  transition: all 0.3s;
+
+  &:hover {
+    background-color: #e6e8eb;
+  }
+
+  .ep-close {
+    font-size: 14px;
+    color: #909399;
+    transition: color 0.3s;
+
+    &:hover {
+      color: #f56c6c;
+    }
+  }
+}
+</style>

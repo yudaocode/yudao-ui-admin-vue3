@@ -25,7 +25,7 @@
           </div>
         </div>
       </template>
-      <div class="flex flex-col items-start gap2" :id="`activity-task-${activity.id}`">
+      <div class="flex flex-col items-start gap2" :id="`activity-task-${activity.id}-${index}`">
         <!-- 第一行：节点名称、时间 -->
         <div class="flex w-full">
           <div class="font-bold"> {{ activity.name }}</div>
@@ -113,7 +113,7 @@
                 </div>
               </div>
             </div>
-            <teleport defer :to="`#activity-task-${activity.id}`">
+            <teleport defer :to="`#activity-task-${activity.id}-${index}`">
               <div
                 v-if="
                   task.reason &&

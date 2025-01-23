@@ -151,7 +151,6 @@ import * as BargainActivityApi from '@/api/mall/promotion/bargain/bargainActivit
 import BargainActivityForm from './BargainActivityForm.vue'
 import { formatDate } from '@/utils/formatTime'
 import { fenToYuanFormat } from '@/utils/formatter'
-import { closeBargainActivity } from '@/api/mall/promotion/bargain/bargainActivity'
 
 defineOptions({ name: 'PromotionBargainActivity' })
 

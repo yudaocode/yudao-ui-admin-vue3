@@ -135,7 +135,8 @@ const makeTemplate = () => {
 
 /** 复制 **/
 const copy = async (text: string) => {
-  const { copy, copied, isSupported } = useClipboard({ source: text })
+  const textToCopy = JSON.stringify(text, null, 2)
+  const { copy, copied, isSupported } = useClipboard({ source: textToCopy })
   if (!isSupported) {
     message.error(t('common.copyError'))
   } else {
@@ -149,17 +150,18 @@ const copy = async (text: string) => {
 /**
  * 代码高亮
  */
-const highlightedCode = (code) => {
+const highlightedCode = (code: string) => {
   // 处理语言和代码
   let language = 'json'
   if (formType.value === 2) {
     language = 'xml'
   }
+  // debugger
   if (!isString(code)) {
-    code = JSON.stringify(code)
+    code = JSON.stringify(code, null, 2)
   }
   // 高亮
-  const result = hljs.highlight(language, code, true)
+  const result = hljs.highlight(code, { language: language, ignoreIllegals: true })
   return result.value || '&nbsp;'
 }
 

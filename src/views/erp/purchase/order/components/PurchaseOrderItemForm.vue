@@ -66,7 +66,11 @@
       </el-table-column>
       <el-table-column label="产品单价" fixed="right" min-width="120">
         <template #default="{ row, $index }">
-          <el-form-item :prop="`${$index}.productPrice`" class="mb-0px!">
+          <el-form-item
+            :prop="`${$index}.productPrice`"
+            :rules="formRules.productPrice"
+            class="mb-0px!"
+          >
             <el-input-number
               v-model="row.productPrice"
               controls-position="right"
@@ -153,6 +157,7 @@ const formLoading = ref(false) // 表单的加载中
 const formData = ref([])
 const formRules = reactive({
   productId: [{ required: true, message: '产品不能为空', trigger: 'blur' }],
+  productPrice: [{ required: true, message: '产品单价不能为空', trigger: 'blur' }],
   count: [{ required: true, message: '产品数量不能为空', trigger: 'blur' }]
 })
 const formRef = ref([]) // 表单 Ref

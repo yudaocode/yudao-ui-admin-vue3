@@ -106,6 +106,7 @@ import CategoryDraggableModel from './CategoryDraggableModel.vue'
 
 defineOptions({ name: 'BpmModel' })
 
+const { push } = useRouter()
 const message = useMessage() // 消息弹窗
 const loading = ref(true) // 列表的加载中
 const isCategorySorting = ref(false) // 是否 category 正处于排序状态
@@ -124,7 +125,14 @@ const handleQuery = () => {
 /** 添加/修改操作 */
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
-  formRef.value.open(type, id)
+  if (type === 'create') {
+    push({ name: 'BpmModelCreate' })
+  } else {
+    push({
+      name: 'BpmModelUpdate',
+      params: { id }
+    })
+  }
 }
 
 /** 流程表单的详情按钮操作 */
