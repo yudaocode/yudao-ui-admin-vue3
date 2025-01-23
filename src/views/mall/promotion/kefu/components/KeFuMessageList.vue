@@ -279,8 +279,9 @@ const handleSendMessage = async (event: any) => {
     return
   }
   // 1. 校验消息是否为空
-  if (isEmpty(unref(message.value))) {
+  if (isEmpty(unref(message.value)?.trim())) {
     messageTool.notifyWarning('请输入消息后再发送哦！')
+    message.value = ''
     return
   }
   // 2. 组织发送消息
