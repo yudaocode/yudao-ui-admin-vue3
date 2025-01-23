@@ -154,7 +154,11 @@ const formData: any = ref({
     postfix: '',
     length: 5
   },
-  autoApprovalType: BpmAutoApproveType.NONE
+  autoApprovalType: BpmAutoApproveType.NONE,
+  customTitleSetting: {
+    enable: false,
+    title: ''
+  }
 })
 
 //流程数据

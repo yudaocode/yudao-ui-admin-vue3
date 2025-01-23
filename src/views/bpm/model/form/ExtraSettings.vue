@@ -75,12 +75,48 @@
         </el-radio-group>
       </div>
     </el-form-item>
+    <el-form-item v-if="modelData.customTitleSetting" class="mb-20px">
+      <template #label>
+        <el-text size="large" tag="b">标题设置</el-text>
+      </template>
+      <div class="flex flex-col">
+        <el-radio-group v-model="modelData.customTitleSetting.enable">
+          <div class="flex flex-col">
+            <el-radio :value="false"
+              >系统默认 <el-text type="info"> 展示流程名称 </el-text></el-radio
+            >
+            <el-radio :value="true">
+              自定义标题
+              <el-text>
+                <el-tooltip content="输入字符 '{' 即可插入表单字段" effect="light" placement="top">
+                  <Icon icon="ep:question-filled" class="ml-5px" />
+                </el-tooltip>
+              </el-text>
+            </el-radio>
+          </div>
+        </el-radio-group>
+        <el-mention
+          v-if="modelData.customTitleSetting.enable"
+          v-model="modelData.customTitleSetting.title"
+          type="textarea"
+          prefix="{"
+          split="}"
+          whole
+          :options="formFieldOptions"
+          placeholder="请插入表单字段或输入文本"
+          class="w-600px!"
+        />
+      </div>
+    </el-form-item>
   </el-form>
 </template>
 
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import { BpmAutoApproveType } from '@/utils/constants'
+import * as FormApi from '@/api/bpm/form'
+import { parseFormFields } from '@/components/FormCreate/src/utils/index'
+import { ProcessVariableEnum } from "@/components/SimpleProcessDesignerV2/src/consts";
 
 const modelData = defineModel<any>()
 
@@ -137,6 +173,29 @@ const numberExample = computed(() => {
   }
 })
 
+const formField = ref([])
+const formFieldOptions  = computed(() => {
+  // 固定添加发起人 ID 字段
+  formField.value.unshift({
+    field: ProcessVariableEnum.PROCESS_DEFINITION_NAME,
+    title: '流程名称',
+  })
+  formField.value.unshift({
+    field: ProcessVariableEnum.START_TIME,
+    title: '发起时间',
+  })
+  formField.value.unshift({
+    field: ProcessVariableEnum.START_USER_ID,
+    title: '发起人',
+  })
+  return formField.value.map((item) => {
+    return {
+      label: item.title,
+      value: item.field
+    }
+  })
+})
+
 /** 兼容以前未配置更多设置的流程 */
 const initData = () => {
   if (!modelData.value.processIdRule) {
@@ -151,6 +210,32 @@ const initData = () => {
   if (!modelData.value.autoApprovalType) {
     modelData.value.autoApprovalType = BpmAutoApproveType.NONE
   }
+  if (!modelData.value.customTitleSetting) {
+    modelData.value.customTitleSetting = {
+      enable: false,
+      title: ''
+    }
+  }
 }
 defineExpose({ initData })
+
+// 监听表单ID变化，加载表单数据
+watch(
+  () => modelData.value.formId,
+  async (newFormId) => {
+    if (newFormId && modelData.value.formType === 10) {
+      const data = await FormApi.getForm(newFormId)
+      const result: Array<Record<string, any>> = []
+      if (data.fields) {
+        data.fields.forEach((fieldStr: string) => {
+          parseFormFields(JSON.parse(fieldStr), result)
+        })
+      }
+      formField.value = result
+    } else {
+      formField.value = []
+    }
+  },
+  { immediate: true }
+)
 </script>
