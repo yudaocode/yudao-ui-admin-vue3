@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-auto">
+  <div v-loading="loading" class="overflow-auto">
     <SimpleProcessModel
       ref="simpleProcessModelRef"
       v-if="processNodeTree"
@@ -72,7 +72,6 @@ const userOptions = ref<UserApi.UserVO[]>([]) // 用户列表
 const deptOptions = ref<DeptApi.DeptVO[]>([]) // 部门列表
 const deptTreeOptions = ref()
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
-const isDataInitialized = ref(false) // 添加标记，用于判断数据是否已初始化
 
 provide('formFields', formFields)
 provide('formType', formType)
@@ -161,32 +160,9 @@ const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNo
   }
 }
 
-// 初始化数据的方法
-const initializeData = async () => {
-  if (isDataInitialized.value) {
-    return
-  }
-
+onMounted(async () => {
   try {
     loading.value = true
-
-    // 并行加载所有数据
-    const [roleList, postList, userList, deptList, userGroupList] = await Promise.all([
-      RoleApi.getSimpleRoleList(),
-      PostApi.getSimplePostList(),
-      UserApi.getSimpleUserList(),
-      DeptApi.getSimpleDeptList(),
-      UserGroupApi.getUserGroupSimpleList()
-    ])
-
-    // 更新数据
-    roleOptions.value = roleList
-    postOptions.value = postList
-    userOptions.value = userList
-    deptOptions.value = deptList
-    deptTreeOptions.value = handleTree(deptList as DeptApi.DeptVO[], 'id')
-    userGroupOptions.value = userGroupList
-
     // 获取表单字段
     if (props.modelId) {
       const bpmnModel = await getModel(props.modelId)
@@ -215,26 +191,8 @@ const initializeData = async () => {
     } else {
       updateModel()
     }
-
-    isDataInitialized.value = true
-  } catch (error) {
-    console.error('初始化数据失败:', error)
   } finally {
     loading.value = false
-  }
-}
-
-onMounted(async () => {
-  await initializeData()
-})
-
-// 添加 activated 生命周期钩子
-onActivated(() => {
-  // 组件被激活时，只需要刷新视图
-  if (isDataInitialized.value) {
-    refresh()
-  } else {
-    initializeData()
   }
 })
 
