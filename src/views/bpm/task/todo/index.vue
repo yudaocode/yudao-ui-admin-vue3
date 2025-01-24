@@ -60,9 +60,9 @@
         >
           <template #reference>
             <el-button @click="showPopover = !showPopover" >
-              <Icon icon="ep:plus" class="mr-5px" />高级筛选 
+              <Icon icon="ep:plus" class="mr-5px" />高级筛选
             </el-button>
-            
+
           </template>
           <el-form-item label="流程发起人" class="bold-label" label-position="top" prop="category">
             <el-select
@@ -78,7 +78,7 @@
                 :value="category.code"
               />
             </el-select>
-          </el-form-item>          
+          </el-form-item>
           <el-form-item label="发起时间" class="bold-label" label-position="top" prop="createTime">
             <el-date-picker
               v-model="queryParams.createTime"
@@ -105,6 +105,15 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column align="center" label="流程" prop="processInstance.name" width="180" />
+      <el-table-column label="摘要" prop="summary" min-width="180">
+        <template #default="scope">
+          <div class="flex flex-col" v-if="scope.row.summary && scope.row.summary.length > 0">
+            <div v-for="(item, index) in scope.row.summary" :key="index">
+              <el-text type="info"> {{ item.key }} : {{ item.value }} </el-text>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
         align="center"
         label="发起人"

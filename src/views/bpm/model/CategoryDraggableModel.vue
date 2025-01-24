@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center h-50px">
+  <div class="flex items-center h-50px" v-memo="[categoryInfo.name, isCategorySorting]">
     <!-- 头部：分类名 -->
     <div class="flex items-center">
       <el-tooltip content="拖动排序" v-if="isCategorySorting">
@@ -13,7 +13,7 @@
       <div class="color-gray-600 text-16px"> ({{ categoryInfo.modelList?.length || 0 }}) </div>
     </div>
     <!-- 头部：操作 -->
-    <div class="flex-1 flex" v-if="!isCategorySorting">
+    <div class="flex-1 flex" v-show="!isCategorySorting">
       <div
         v-if="categoryInfo.modelList.length > 0"
         class="ml-20px flex items-center"
@@ -69,16 +69,17 @@
   <el-collapse-transition>
     <div v-show="isExpand">
       <el-table
+        v-if="modelList && modelList.length > 0"
         :class="categoryInfo.name"
         ref="tableRef"
-        :header-cell-style="{ backgroundColor: isDark ? '' : '#edeff0', paddingLeft: '10px' }"
-        :cell-style="{ paddingLeft: '10px' }"
-        :row-style="{ height: '68px' }"
         :data="modelList"
         row-key="id"
+        :header-cell-style="tableHeaderStyle"
+        :cell-style="tableCellStyle"
+        :row-style="{ height: '68px' }"
       >
         <el-table-column label="流程名" prop="name" min-width="150">
-          <template #default="scope">
+          <template #default="{ row }">
             <div class="flex items-center">
               <el-tooltip content="拖动排序" v-if="isModelSorting">
                 <Icon
@@ -86,27 +87,25 @@
                   class="drag-icon cursor-move text-#8a909c mr-10px"
                 />
               </el-tooltip>
-              <el-image :src="scope.row.icon" class="h-38px w-38px mr-10px rounded" />
-              {{ scope.row.name }}
+              <el-image v-if="row.icon" :src="row.icon" class="h-38px w-38px mr-10px rounded" />
+              {{ row.name }}
             </div>
           </template>
         </el-table-column>
         <el-table-column label="可见范围" prop="startUserIds" min-width="150">
-          <template #default="scope">
-            <el-text v-if="!scope.row.startUsers || scope.row.startUsers.length === 0">
-              全部可见
-            </el-text>
-            <el-text v-else-if="scope.row.startUsers.length == 1">
-              {{ scope.row.startUsers[0].nickname }}
+          <template #default="{ row }">
+            <el-text v-if="!row.startUsers?.length"> 全部可见 </el-text>
+            <el-text v-else-if="row.startUsers.length === 1">
+              {{ row.startUsers[0].nickname }}
             </el-text>
             <el-text v-else>
               <el-tooltip
                 class="box-item"
                 effect="dark"
                 placement="top"
-                :content="scope.row.startUsers.map((user: any) => user.nickname).join('、')"
+                :content="row.startUsers.map((user: any) => user.nickname).join('、')"
               >
-                {{ scope.row.startUsers[0].nickname }}等 {{ scope.row.startUsers.length }} 人可见
+                {{ row.startUsers[0].nickname }}等 {{ row.startUsers.length }} 人可见
               </el-tooltip>
             </el-text>
           </template>
@@ -245,7 +244,6 @@
 <script lang="ts" setup>
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import Sortable from 'sortablejs'
-import { propTypes } from '@/utils/propTypes'
 import { formatDate } from '@/utils/formatTime'
 import * as ModelApi from '@/api/bpm/model'
 import * as FormApi from '@/api/bpm/form'
@@ -254,15 +252,49 @@ import { BpmModelFormType } from '@/utils/constants'
 import { checkPermi } from '@/utils/permission'
 import { useUserStoreWithOut } from '@/store/modules/user'
 import { useAppStore } from '@/store/modules/app'
-import { cloneDeep } from 'lodash-es'
+import { cloneDeep, isEqual } from 'lodash-es'
 import { useTagsView } from '@/hooks/web/useTagsView'
+import { useDebounceFn } from '@vueuse/core'
 
 defineOptions({ name: 'BpmModel' })
 
-const props = defineProps({
-  categoryInfo: propTypes.object.def([]), // 分类后的数据
-  isCategorySorting: propTypes.bool.def(false) // 是否分类在排序
-})
+// 优化 Props 类型定义
+interface UserInfo {
+  nickname: string
+  [key: string]: any
+}
+
+interface ProcessDefinition {
+  deploymentTime: string
+  version: number
+  suspensionState: number
+}
+
+interface ModelInfo {
+  id: number
+  name: string
+  icon?: string
+  startUsers?: UserInfo[]
+  processDefinition?: ProcessDefinition
+  formType?: number
+  formId?: number
+  formName?: string
+  formCustomCreatePath?: string
+  managerUserIds?: number[]
+  [key: string]: any
+}
+
+interface CategoryInfoProps {
+  id: number
+  name: string
+  modelList: ModelInfo[]
+}
+
+const props = defineProps<{
+  categoryInfo: CategoryInfoProps
+  isCategorySorting: boolean
+}>()
+
 const emit = defineEmits(['success'])
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
@@ -271,9 +303,19 @@ const userStore = useUserStoreWithOut() // 用户信息缓存
 const isDark = computed(() => useAppStore().getIsDark) // 是否黑暗模式
 
 const isModelSorting = ref(false) // 是否正处于排序状态
-const originalData: any = ref([]) // 原始数据
-const modelList: any = ref([]) // 模型列表
+const originalData = ref<ModelInfo[]>([]) // 原始数据
+const modelList = ref<ModelInfo[]>([]) // 模型列表
 const isExpand = ref(false) // 是否处于展开状态
+
+// 使用 computed 优化表格样式计算
+const tableHeaderStyle = computed(() => ({
+  backgroundColor: isDark.value ? '' : '#edeff0',
+  paddingLeft: '10px'
+}))
+
+const tableCellStyle = computed(() => ({
+  paddingLeft: '10px'
+}))
 
 /** 权限校验：通过 computed 解决列表的卡顿问题 */
 const hasPermiUpdate = computed(() => {
@@ -449,14 +491,15 @@ const handleModelSortCancel = () => {
 
 /** 创建拖拽实例 */
 const tableRef = ref()
-const initSort = () => {
+const initSort = useDebounceFn(() => {
   const table = document.querySelector(`.${props.categoryInfo.name} .el-table__body-wrapper tbody`)
+  if (!table) return
+
   Sortable.create(table, {
     group: 'shared',
     animation: 150,
     draggable: '.el-table__row',
     handle: '.drag-icon',
-    // 结束拖动事件
     onEnd: ({ newDraggableIndex, oldDraggableIndex }) => {
       if (oldDraggableIndex !== newDraggableIndex) {
         modelList.value.splice(
@@ -467,15 +510,18 @@ const initSort = () => {
       }
     }
   })
-}
+}, 200)
 
 /** 更新 modelList 模型列表 */
-const updateModeList = () => {
-  modelList.value = cloneDeep(props.categoryInfo.modelList)
-  if (props.categoryInfo.modelList.length > 0) {
-    isExpand.value = true
+const updateModeList = useDebounceFn(() => {
+  const newModelList = props.categoryInfo.modelList
+  if (!isEqual(modelList.value, newModelList)) {
+    modelList.value = cloneDeep(newModelList)
+    if (newModelList?.length > 0) {
+      isExpand.value = true
+    }
   }
-}
+}, 100)
 
 /** 重命名弹窗确定 */
 const renameCategoryVisible = ref(false)
@@ -526,14 +572,15 @@ const openModelForm = async (type: string, id?: number) => {
   }
 }
 
-watch(() => props.categoryInfo.modelList, updateModeList, { immediate: true })
-watch(
-  () => props.isCategorySorting,
-  (val) => {
-    if (val) isExpand.value = false
-  },
-  { immediate: true }
-)
+watchEffect(() => {
+  if (props.categoryInfo?.modelList) {
+    updateModeList()
+  }
+
+  if (props.isCategorySorting) {
+    isExpand.value = false
+  }
+})
 </script>
 
 <style lang="scss">
@@ -550,10 +597,16 @@ watch(
 }
 </style>
 <style lang="scss" scoped>
-:deep() {
-  .el-table__cell {
+.category-draggable-model {
+  :deep(.el-table__cell) {
     overflow: hidden;
     border-bottom: none !important;
+  }
+
+  // 优化表格渲染性能
+  :deep(.el-table__body) {
+    will-change: transform;
+    transform: translateZ(0);
   }
 }
 </style>

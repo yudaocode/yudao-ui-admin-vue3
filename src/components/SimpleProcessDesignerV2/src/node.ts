@@ -16,7 +16,8 @@ import {
   FieldPermissionType,
   ListenerParam
 } from './consts'
-import { parseFormFields } from '@/components/FormCreate/src/utils/index'
+import { parseFormFields } from '@/components/FormCreate/src/utils'
+
 export function useWatchNode(props: { flowNode: SimpleFlowNode }): Ref<SimpleFlowNode> {
   const node = ref<SimpleFlowNode>(props.flowNode)
   watch(
@@ -46,7 +47,7 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
   // 字段权限配置. 需要有 field, title,  permissioin 属性
   const fieldsPermissionConfig = ref<Array<Record<string, any>>>([])
 
-  const formType = inject<Ref<number|undefined>>('formType', ref()) // 表单类型
+  const formType = inject<Ref<number | undefined>>('formType', ref()) // 表单类型
 
   const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
 
@@ -108,7 +109,7 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
  * @description 获取表单的字段
  */
 export function useFormFields() {
-  const formFields = inject<Ref<string[]>>('formFields',ref([])) // 流程表单字段
+  const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   return parseFormCreateFields(unref(formFields))
 }
 
@@ -178,7 +179,7 @@ export function useNodeForm(nodeType: NodeType) {
   const postOptions = inject<Ref<PostApi.PostVO[]>>('postList', ref([])) // 岗位列表
   const userOptions = inject<Ref<UserApi.UserVO[]>>('userList', ref([])) // 用户列表
   const deptOptions = inject<Ref<DeptApi.DeptVO[]>>('deptList', ref([])) // 部门列表
-  const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList',ref([])) // 用户组列表
+  const userGroupOptions = inject<Ref<UserGroupApi.UserGroupVO[]>>('userGroupList', ref([])) // 用户组列表
   const deptTreeOptions = inject('deptTree', ref()) // 部门树
   const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   const configForm = ref<UserTaskFormType | CopyTaskFormType>()
