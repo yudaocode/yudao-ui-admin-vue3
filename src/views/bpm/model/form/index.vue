@@ -155,9 +155,13 @@ const formData: any = ref({
     length: 5
   },
   autoApprovalType: BpmAutoApproveType.NONE,
-  customTitleSetting: {
+  titleSetting: {
     enable: false,
     title: ''
+  },
+  summarySetting: {
+    enable: false,
+    summary: []
   }
 })
 
