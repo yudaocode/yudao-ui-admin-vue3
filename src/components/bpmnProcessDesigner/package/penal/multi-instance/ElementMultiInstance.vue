@@ -1,6 +1,10 @@
 <template>
   <div class="panel-tab__content">
-    <el-radio-group v-model="approveMethod" @change="onApproveMethodChange">
+    <el-radio-group
+      v-if="type === 'UserTask'"
+      v-model="approveMethod"
+      @change="onApproveMethodChange"
+    >
       <div class="flex-col">
         <div v-for="(item, index) in APPROVE_METHODS" :key="index">
           <el-radio :value="item.value" :label="item.value">
@@ -23,6 +27,9 @@
         </div>
       </div>
     </el-radio-group>
+    <div v-else>
+      除了UserTask以外节点的多实例待实现
+    </div>
     <!-- 与Simple设计器配置合并，保留以前的代码 -->
     <el-form label-width="90px" style="display: none">
       <el-form-item label="快捷配置">
@@ -301,19 +308,21 @@ const approveMethod = ref()
 const approveRatio = ref(100)
 const otherExtensions = ref()
 const getElementLoopNew = () => {
-  const extensionElements =
-    bpmnElement.value.businessObject?.extensionElements ??
-    bpmnInstances().moddle.create('bpmn:ExtensionElements', { values: [] })
-  approveMethod.value = extensionElements.values.filter(
-    (ex) => ex.$type === `${prefix}:ApproveMethod`
-  )?.[0]?.value
+  if (props.type === 'UserTask') {
+    const extensionElements =
+      bpmnElement.value.businessObject?.extensionElements ??
+      bpmnInstances().moddle.create('bpmn:ExtensionElements', { values: [] })
+    approveMethod.value = extensionElements.values.filter(
+      (ex) => ex.$type === `${prefix}:ApproveMethod`
+    )?.[0]?.value
 
-  otherExtensions.value =
-    extensionElements.values.filter((ex) => ex.$type !== `${prefix}:ApproveMethod`) ?? []
+    otherExtensions.value =
+      extensionElements.values.filter((ex) => ex.$type !== `${prefix}:ApproveMethod`) ?? []
 
-  if (!approveMethod.value) {
-    approveMethod.value = ApproveMethodType.SEQUENTIAL_APPROVE
-    updateLoopCharacteristics()
+    if (!approveMethod.value) {
+      approveMethod.value = ApproveMethodType.SEQUENTIAL_APPROVE
+      updateLoopCharacteristics()
+    }
   }
 }
 const onApproveMethodChange = () => {
