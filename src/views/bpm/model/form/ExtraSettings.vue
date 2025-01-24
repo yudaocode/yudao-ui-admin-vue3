@@ -75,12 +75,12 @@
         </el-radio-group>
       </div>
     </el-form-item>
-    <el-form-item v-if="modelData.customTitleSetting" class="mb-20px">
+    <el-form-item v-if="modelData.titleSetting" class="mb-20px">
       <template #label>
         <el-text size="large" tag="b">标题设置</el-text>
       </template>
       <div class="flex flex-col">
-        <el-radio-group v-model="modelData.customTitleSetting.enable">
+        <el-radio-group v-model="modelData.titleSetting.enable">
           <div class="flex flex-col">
             <el-radio :value="false"
               >系统默认 <el-text type="info"> 展示流程名称 </el-text></el-radio
@@ -96,16 +96,48 @@
           </div>
         </el-radio-group>
         <el-mention
-          v-if="modelData.customTitleSetting.enable"
-          v-model="modelData.customTitleSetting.title"
+          v-if="modelData.titleSetting.enable"
+          v-model="modelData.titleSetting.title"
           type="textarea"
           prefix="{"
           split="}"
           whole
-          :options="formFieldOptions"
-          placeholder="请插入表单字段或输入文本"
+          :options="formFieldOptions4Title"
+          placeholder="请插入表单字段（输入 '{' 可以选择表单字段）或输入文本"
           class="w-600px!"
         />
+      </div>
+    </el-form-item>
+    <el-form-item
+      v-if="modelData.summarySetting && modelData.formType === BpmModelFormType.NORMAL"
+      class="mb-20px"
+    >
+      <template #label>
+        <el-text size="large" tag="b">摘要设置</el-text>
+      </template>
+      <div class="flex flex-col">
+        <el-radio-group v-model="modelData.summarySetting.enable">
+          <div class="flex flex-col">
+            <el-radio :value="false">
+              系统默认 <el-text type="info"> 展示表单前 3 个字段 </el-text>
+            </el-radio>
+            <el-radio :value="true"> 自定义摘要 </el-radio>
+          </div>
+        </el-radio-group>
+        <el-select
+          class="w-500px!"
+          v-if="modelData.summarySetting.enable"
+          v-model="modelData.summarySetting.summary"
+          multiple
+          placeholder="请选择要展示的表单字段"
+        >
+          <el-option
+            v-for="item in formFieldOptions4Summary"
+            :key="item.value"
+            :label="item.lable"
+            :value="item.value"
+          />
+        </el-select>
       </div>
     </el-form-item>
   </el-form>
@@ -174,21 +206,30 @@ const numberExample = computed(() => {
 })
 
 /** 表单选项 */
-const formField = ref<Array<{ field: ProcessVariableEnum; title: string }>>([])
-const formFieldOptions = computed(() => {
+const formField = ref<Array<{ field: string; title: string }>>([])
+const formFieldOptions4Title = computed(() => {
+  let cloneFormField = formField.value.map((item) => {
+    return {
+      label: item.title,
+      value: item.field
+    }
+  })
   // 固定添加发起人 ID 字段
-  formField.value.unshift({
-    field: ProcessVariableEnum.PROCESS_DEFINITION_NAME,
-    title: '流程名称'
+  cloneFormField.unshift({
+    label: ProcessVariableEnum.PROCESS_DEFINITION_NAME,
+    value: '流程名称'
   })
-  formField.value.unshift({
-    field: ProcessVariableEnum.START_TIME,
-    title: '发起时间'
+  cloneFormField.unshift({
+    label: ProcessVariableEnum.START_TIME,
+    value: '发起时间'
   })
-  formField.value.unshift({
-    field: ProcessVariableEnum.START_USER_ID,
-    title: '发起人'
+  cloneFormField.unshift({
+    label: ProcessVariableEnum.START_USER_ID,
+    value: '发起人'
   })
+  return cloneFormField
+})
+const formFieldOptions4Summary = computed(() => {
   return formField.value.map((item) => {
     return {
       label: item.title,
@@ -211,10 +252,16 @@ const initData = () => {
   if (!modelData.value.autoApprovalType) {
     modelData.value.autoApprovalType = BpmAutoApproveType.NONE
   }
-  if (!modelData.value.customTitleSetting) {
-    modelData.value.customTitleSetting = {
+  if (!modelData.value.titleSetting) {
+    modelData.value.titleSetting = {
       enable: false,
       title: ''
+    }
+  }
+  if (!modelData.value.summarySetting) {
+    modelData.value.summarySetting = {
+      enable: false,
+      summary: []
     }
   }
 }
@@ -224,9 +271,9 @@ defineExpose({ initData })
 watch(
   () => modelData.value.formId,
   async (newFormId) => {
-    if (newFormId && modelData.value.formType === BpmModelFormType.CUSTOM) {
+    if (newFormId && modelData.value.formType === BpmModelFormType.NORMAL) {
       const data = await FormApi.getForm(newFormId)
-      const result: Array<{ field: ProcessVariableEnum; title: string }> = []
+      const result: Array<{ field: string; title: string }> = []
       if (data.fields) {
         data.fields.forEach((fieldStr: string) => {
           parseFormFields(JSON.parse(fieldStr), result)
