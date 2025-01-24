@@ -134,7 +134,7 @@
           <el-option
             v-for="item in formFieldOptions4Summary"
             :key="item.value"
-            :label="item.lable"
+            :label="item.label"
             :value="item.value"
           />
         </el-select>
