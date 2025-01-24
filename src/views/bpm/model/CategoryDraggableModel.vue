@@ -94,9 +94,7 @@
         </el-table-column>
         <el-table-column label="可见范围" prop="startUserIds" min-width="150">
           <template #default="{ row }">
-            <el-text v-if="!row.startUsers?.length">
-              全部可见
-            </el-text>
+            <el-text v-if="!row.startUsers?.length"> 全部可见 </el-text>
             <el-text v-else-if="row.startUsers.length === 1">
               {{ row.startUsers[0].nickname }}
             </el-text>
@@ -318,12 +316,6 @@ const tableHeaderStyle = computed(() => ({
 const tableCellStyle = computed(() => ({
   paddingLeft: '10px'
 }))
-
-// 使用 computed 优化可见性判断
-const isManagerUser = computed(() => {
-  const userId = userStore.getUser?.id
-  return (row: ModelInfo) => row.managerUserIds?.includes(userId)
-})
 
 /** 权限校验：通过 computed 解决列表的卡顿问题 */
 const hasPermiUpdate = computed(() => {
