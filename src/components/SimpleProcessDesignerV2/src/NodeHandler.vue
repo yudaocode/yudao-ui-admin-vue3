@@ -51,15 +51,13 @@
             </div>
             <div class="handler-item-text">路由分支</div>
           </div>
-          <!--  TODO 触发器
-            <div class="handler-item" @click="addNode(NodeType.TRIGGER_NODE)">
-              <div class="handler-item-icon trigger">
-                <span class="iconfont icon-size icon-trigger"></span>
-              </div>
-              <div class="handler-item-text">触发器</div>
+          <div class="handler-item" @click="addNode(NodeType.TRIGGER_NODE)">
+            <div class="handler-item-icon trigger">
+              <span class="iconfont icon-size icon-trigger"></span>
             </div>
-           -->
-          </div> 
+            <div class="handler-item-text">触发器</div>
+          </div>
+        </div> 
         <template #reference>
           <div class="add-icon"><Icon icon="ep:plus" /></div>
         </template>
@@ -272,7 +270,7 @@ const addNode = (type: number) => {
   if (type === NodeType.TRIGGER_NODE) {
     const data: SimpleFlowNode = {
       id: 'Activity_' + generateUUID(),
-      name: NODE_DEFAULT_NAME.get(NodeType.ROUTER_BRANCH_NODE) as string,
+      name: NODE_DEFAULT_NAME.get(NodeType.TRIGGER_NODE) as string,
       showText: '',
       type: NodeType.TRIGGER_NODE,
       childNode: props.childNode

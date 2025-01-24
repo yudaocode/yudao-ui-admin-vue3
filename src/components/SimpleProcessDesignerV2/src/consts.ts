@@ -121,6 +121,8 @@ export interface SimpleFlowNode {
   signEnable?: boolean
   // 审批意见
   reasonRequire?: boolean
+  // 触发器设置
+  triggerSetting?: TriggerSetting
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -707,3 +709,38 @@ export type RouterSetting = {
   conditionExpression: string
   conditionGroups: ConditionGroup
 }
+
+// ==================== 触发器相关定义 ==================== 
+/**
+ * 触发器节点结构定义
+ */
+export type TriggerSetting = {
+  type: TriggerTypeEnum
+  httpRequestSetting: HttpRequestTriggerSetting
+}
+
+/**
+ * 触发器类型枚举
+ */
+export enum TriggerTypeEnum {
+  /**
+   * 发送 HTTP 请求触发器
+   */
+  HTTP_REQUEST = 1,
+}
+
+/**
+ * HTTP 请求触发器结构定义
+ */
+export type HttpRequestTriggerSetting = {
+  // 请求 URL
+  url: string
+  // 请求头参数设置
+  header?: ListenerParam[] // TODO 需要重命名一下
+  // 请求体参数设置
+  body?: ListenerParam[]
+}
+
+export const TRIGGER_TYPES: DictDataVO[] = [
+  { label: 'HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST }
+]

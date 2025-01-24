@@ -627,7 +627,7 @@ const userTaskListenerRef = ref()
 
 // 保存配置
 const saveConfig = async () => {
-  activeTabName.value = 'user'
+  // activeTabName.value = 'user'
   // 设置审批节点名称
   currentNode.value.name = nodeName.value!
   // 设置审批类型
@@ -684,22 +684,22 @@ const saveConfig = async () => {
   currentNode.value.taskCreateListener = {
     enable: configForm.value.taskCreateListenerEnable ?? false,
     path: configForm.value.taskCreateListenerPath,
-    header: configForm.value.taskCreateListenerHeader,
-    body: configForm.value.taskCreateListenerBody
+    header: configForm.value.taskCreateListener?.header,
+    body: configForm.value.taskCreateListener?.body
   }
   // 指派任务监听器
   currentNode.value.taskAssignListener = {
     enable: configForm.value.taskAssignListenerEnable ?? false,
     path: configForm.value.taskAssignListenerPath,
-    header: configForm.value.taskAssignListenerHeader,
-    body: configForm.value.taskAssignListenerBody
+    header: configForm.value.taskAssignListener?.header,
+    body: configForm.value.taskAssignListener?.body
   }
   // 完成任务监听器
   currentNode.value.taskCompleteListener = {
     enable: configForm.value.taskCompleteListenerEnable ?? false,
     path: configForm.value.taskCompleteListenerPath,
-    header: configForm.value.taskCompleteListenerHeader,
-    body: configForm.value.taskCompleteListenerBody
+    header: configForm.value.taskCompleteListener?.header,
+    body: configForm.value.taskCompleteListener?.body
   }
   // 签名
   currentNode.value.signEnable = configForm.value.signEnable
@@ -760,18 +760,24 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   // 5.1 创建任务
   configForm.value.taskCreateListenerEnable = node.taskCreateListener!.enable
   configForm.value.taskCreateListenerPath = node.taskCreateListener!.path
-  configForm.value.taskCreateListenerHeader = node.taskCreateListener?.header ?? []
-  configForm.value.taskCreateListenerBody = node.taskCreateListener?.body ?? []
+  configForm.value.taskCreateListener = {
+    header: node.taskCreateListener?.header ?? [],
+    body: node.taskCreateListener?.body ?? []
+  }
   // 5.2 指派任务
   configForm.value.taskAssignListenerEnable = node.taskAssignListener!.enable
   configForm.value.taskAssignListenerPath = node.taskAssignListener!.path
-  configForm.value.taskAssignListenerHeader = node.taskAssignListener?.header ?? []
-  configForm.value.taskAssignListenerBody = node.taskAssignListener?.body ?? []
-  // 5.3 完成任务
+  configForm.value.taskAssignListener = {
+    header: node.taskAssignListener?.header ?? [],
+    body: node.taskAssignListener?.body ?? []
+  }
+ // 5.3 完成任务
   configForm.value.taskCompleteListenerEnable = node.taskCompleteListener!.enable
   configForm.value.taskCompleteListenerPath = node.taskCompleteListener!.path
-  configForm.value.taskCompleteListenerHeader = node.taskCompleteListener?.header ?? []
-  configForm.value.taskCompleteListenerBody = node.taskCompleteListener?.body ?? []
+  configForm.value.taskCompleteListener = {
+    header: node.taskCompleteListener?.header ?? [],
+    body: node.taskCompleteListener?.body ?? []
+  }
   // 6. 签名
   configForm.value.signEnable = node?.signEnable ?? false
   // 7. 审批意见

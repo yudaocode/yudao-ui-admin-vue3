@@ -137,16 +137,22 @@ export type UserTaskFormType = {
   buttonsSetting: any[]
   taskCreateListenerEnable?: boolean
   taskCreateListenerPath?: string
-  taskCreateListenerHeader?: ListenerParam[]
-  taskCreateListenerBody?: ListenerParam[]
+  taskCreateListener?: {
+    header: ListenerParam[],
+    body: ListenerParam[]
+  }
   taskAssignListenerEnable?: boolean
   taskAssignListenerPath?: string
-  taskAssignListenerHeader?: ListenerParam[]
-  taskAssignListenerBody?: ListenerParam[]
+  taskAssignListener?: {
+    header: ListenerParam[],
+    body: ListenerParam[]
+  }
   taskCompleteListenerEnable?: boolean
   taskCompleteListenerPath?: string
-  taskCompleteListenerHeader?: ListenerParam[]
-  taskCompleteListenerBody?: ListenerParam[]
+  taskCompleteListener?:{
+    header: ListenerParam[],
+    body: ListenerParam[]
+  }
   signEnable: boolean
   reasonRequire: boolean
 }

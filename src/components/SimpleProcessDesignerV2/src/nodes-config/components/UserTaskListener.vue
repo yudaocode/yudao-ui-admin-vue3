@@ -31,181 +31,19 @@
         >
           <el-input v-model="configForm[`task${listener.type}ListenerPath`]" />
         </el-form-item>
-        <el-form-item label="请求头">
-          <div
-            class="flex pt-2"
-            v-for="(item, index) in configForm[`task${listener.type}ListenerHeader`]"
-            :key="index"
-          >
-            <div class="mr-2">
-              <el-form-item
-                :prop="`task${listener.type}ListenerHeader.${index}.key`"
-                :rules="{
-                  required: true,
-                  message: '参数名不能为空',
-                  trigger: 'blur'
-                }"
-              >
-                <el-input class="w-160px" v-model="item.key" />
-              </el-form-item>
-            </div>
-            <div class="mr-2">
-              <el-select class="w-100px!" v-model="item.type">
-                <el-option
-                  v-for="types in LISTENER_MAP_TYPES"
-                  :key="types.value"
-                  :label="types.label"
-                  :value="types.value"
-                />
-              </el-select>
-            </div>
-            <div class="mr-2">
-              <el-form-item
-                :prop="`task${listener.type}ListenerHeader.${index}.value`"
-                :rules="{
-                  required: true,
-                  message: '参数值不能为空',
-                  trigger: 'blur'
-                }"
-              >
-                <el-input
-                  v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
-                  class="w-160px"
-                  v-model="item.value"
-                />
-              </el-form-item>
-              <el-form-item
-                :prop="`task${listener.type}ListenerHeader.${index}.value`"
-                :rules="{
-                  required: true,
-                  message: '参数值不能为空',
-                  trigger: 'change'
-                }"
-              >
-                <el-select
-                  v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
-                  class="w-160px!"
-                  v-model="item.value"
-                >
-                  <el-option
-                    v-for="(field, fIdx) in formFieldOptions"
-                    :key="fIdx"
-                    :label="field.title"
-                    :value="field.field"
-                    :disabled="!field.required"
-                  />
-                </el-select>
-              </el-form-item>
-            </div>
-            <div class="mr-1 flex items-center">
-              <Icon
-                icon="ep:delete"
-                :size="18"
-                @click="
-                  deleteTaskListenerParam(configForm[`task${listener.type}ListenerHeader`], index)
-                "
-              />
-            </div>
-          </div>
-          <el-button
-            type="primary"
-            text
-            @click="addTaskListenerParam(configForm[`task${listener.type}ListenerHeader`])"
-          >
-            <Icon icon="ep:plus" class="mr-5px" />添加一行
-          </el-button>
-        </el-form-item>
-        <el-form-item label="请求体">
-          <div
-            class="flex pt-2"
-            v-for="(item, index) in configForm[`task${listener.type}ListenerBody`]"
-            :key="index"
-          >
-            <div class="mr-2">
-              <el-form-item
-                :prop="`task${listener.type}ListenerBody.${index}.key`"
-                :rules="{
-                  required: true,
-                  message: '参数名不能为空',
-                  trigger: 'blur'
-                }"
-              >
-                <el-input class="w-160px" v-model="item.key" />
-              </el-form-item>
-            </div>
-            <div class="mr-2">
-              <el-select class="w-100px!" v-model="item.type">
-                <el-option
-                  v-for="types in LISTENER_MAP_TYPES"
-                  :key="types.value"
-                  :label="types.label"
-                  :value="types.value"
-                />
-              </el-select>
-            </div>
-            <div class="mr-2">
-              <el-form-item
-                :prop="`task${listener.type}ListenerBody.${index}.value`"
-                :rules="{
-                  required: true,
-                  message: '参数值不能为空',
-                  trigger: 'blur'
-                }"
-              >
-                <el-input
-                  v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
-                  class="w-160px"
-                  v-model="item.value"
-                />
-              </el-form-item>
-              <el-form-item
-                :prop="`task${listener.type}ListenerBody.${index}.value`"
-                :rules="{
-                  required: true,
-                  message: '参数值不能为空',
-                  trigger: 'change'
-                }"
-              >
-                <el-select
-                  v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
-                  class="w-160px!"
-                  v-model="item.value"
-                >
-                  <el-option
-                    v-for="(field, fIdx) in formFieldOptions"
-                    :key="fIdx"
-                    :label="field.title"
-                    :value="field.field"
-                    :disabled="!field.required"
-                  />
-                </el-select>
-              </el-form-item>
-            </div>
-            <div class="mr-1 flex items-center">
-              <Icon
-                icon="ep:delete"
-                :size="18"
-                @click="
-                  deleteTaskListenerParam(configForm[`task${listener.type}ListenerBody`], index)
-                "
-              />
-            </div>
-          </div>
-          <el-button
-            type="primary"
-            text
-            @click="addTaskListenerParam(configForm[`task${listener.type}ListenerBody`])"
-          >
-            <Icon icon="ep:plus" class="mr-5px" />添加一行
-          </el-button>
-        </el-form-item>
+        <HttpRequestParamSetting 
+          :header="configForm[`task${listener.type}Listener`].header"
+          :body="configForm[`task${listener.type}Listener`].body"
+          :bind="`task${listener.type}Listener`"
+        />
       </div>
     </div>
   </el-form>
 </template>
 
 <script setup lang="ts">
-import { LISTENER_MAP_TYPES, ListenerParamTypeEnum } from '../../consts'
+// import { LISTENER_MAP_TYPES, ListenerParamTypeEnum } from '../../consts'
+import HttpRequestParamSetting from './HttpRequestParamSetting.vue'
 const props = defineProps({
   modelValue: {
     type: Object,
@@ -240,17 +78,6 @@ const taskListener = ref([
     type: 'Complete'
   }
 ])
-
-const addTaskListenerParam = (arr) => {
-  arr.push({
-    key: '',
-    type: 1,
-    value: ''
-  })
-}
-const deleteTaskListenerParam = (arr, index) => {
-  arr.splice(index, 1)
-}
 
 const validate = async () => {
   if (!listenerFormRef) return false
