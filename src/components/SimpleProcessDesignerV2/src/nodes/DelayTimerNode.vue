@@ -9,7 +9,6 @@
         ]"
       >
         <div class="node-title-container">
-          <!-- TODO @芋艿 需要更换图标 -->
           <div class="node-title-icon delay-node"><span class="iconfont icon-delay"></span></div>
           <input
             v-if="!readonly && showInput"
