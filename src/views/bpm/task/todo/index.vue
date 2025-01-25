@@ -105,10 +105,10 @@
   <ContentWrap>
     <el-table v-loading="loading" :data="list">
       <el-table-column align="center" label="流程" prop="processInstance.name" width="180" />
-      <el-table-column label="摘要" prop="summary" min-width="180">
+      <el-table-column label="摘要" prop="processInstance.summary" min-width="180">
         <template #default="scope">
-          <div class="flex flex-col" v-if="scope.row.summary && scope.row.summary.length > 0">
-            <div v-for="(item, index) in scope.row.summary" :key="index">
+          <div class="flex flex-col" v-if="scope.row.processInstance.summary && scope.row.processInstance.summary.length > 0">
+            <div v-for="(item, index) in scope.row.processInstance.summary" :key="index">
               <el-text type="info"> {{ item.key }} : {{ item.value }} </el-text>
             </div>
           </div>
