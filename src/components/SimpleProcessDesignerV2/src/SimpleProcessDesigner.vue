@@ -40,7 +40,7 @@ defineOptions({
   name: 'SimpleProcessDesigner'
 })
 
-const emits = defineEmits(['success', 'init-finished']) // 保存成功事件
+const emits = defineEmits(['success']) // 保存成功事件
 
 const props = defineProps({
   modelId: {
@@ -56,16 +56,13 @@ const props = defineProps({
     required: false
   },
   // 可发起流程的人员编号
-  startUserIds : {
+  startUserIds: {
     type: Array,
-    required: false
-  },
-  value: {
-    type: [String, Object],
     required: false
   }
 })
 
+const processData = inject('processData') as Ref
 const loading = ref(false)
 const formFields = ref<string[]>([])
 const formType = ref(20)
@@ -76,9 +73,6 @@ const deptOptions = ref<DeptApi.DeptVO[]>([]) // 部门列表
 const deptTreeOptions = ref()
 const userGroupOptions = ref<UserGroupApi.UserGroupVO[]>([]) // 用户组列表
 
-// 添加当前值的引用
-const currentValue = ref<SimpleFlowNode | undefined>()
-
 provide('formFields', formFields)
 provide('formType', formType)
 provide('roleList', roleOptions)
@@ -88,9 +82,11 @@ provide('deptList', deptOptions)
 provide('userGroupList', userGroupOptions)
 provide('deptTree', deptTreeOptions)
 provide('startUserIds', props.startUserIds)
-
+provide('tasks', [])
+provide('processInstance', {})
 const message = useMessage() // 国际化
 const processNodeTree = ref<SimpleFlowNode | undefined>()
+provide('processNodeTree', processNodeTree)
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
 
@@ -112,70 +108,13 @@ const updateModel = () => {
   }
 }
 
-// 加载流程数据
-const loadProcessData = async (data: any) => {
-  try {
-    if (data) {
-      const parsedData = typeof data === 'string' ? JSON.parse(data) : data
-      processNodeTree.value = parsedData
-      currentValue.value = parsedData
-      // 确保数据加载后刷新视图
-      await nextTick()
-      if (simpleProcessModelRef.value?.refresh) {
-        await simpleProcessModelRef.value.refresh()
-      }
-    }
-  } catch (error) {
-    console.error('加载流程数据失败:', error)
-  }
-}
-
-// 监听属性变化
-watch(
-  () => props.value,
-  async (newValue, oldValue) => {
-    if (newValue && newValue !== oldValue) {
-      await loadProcessData(newValue)
-    }
-  },
-  { immediate: true, deep: true }
-)
-
-// 监听流程节点树变化，自动保存
-watch(
-  () => processNodeTree.value,
-  async (newValue, oldValue) => {
-    if (newValue && oldValue && JSON.stringify(newValue) !== JSON.stringify(oldValue)) {
-      await saveSimpleFlowModel(newValue)
-    }
-  },
-  { deep: true }
-)
-
 const saveSimpleFlowModel = async (simpleModelNode: SimpleFlowNode) => {
   if (!simpleModelNode) {
     return
   }
 
-  // 校验节点
-  errorNodes = []
-  validateNode(simpleModelNode, errorNodes)
-  if (errorNodes.length > 0) {
-    errorDialogVisible.value = true
-    return
-  }
-
   try {
-    if (props.modelId) {
-      // 编辑模式
-      const data = {
-        id: props.modelId,
-        simpleModel: simpleModelNode
-      }
-      await updateBpmSimpleModel(data)
-    }
-    // 无论是编辑还是新建模式，都更新当前值并触发事件
-    currentValue.value = simpleModelNode
+    processData.value = simpleModelNode
     emits('success', simpleModelNode)
   } catch (error) {
     console.error('保存失败:', error)
@@ -246,61 +185,18 @@ onMounted(async () => {
     deptTreeOptions.value = handleTree(deptOptions.value as DeptApi.DeptVO[], 'id')
     // 获取用户组列表
     userGroupOptions.value = await UserGroupApi.getUserGroupSimpleList()
-
     // 加载流程数据
-    if (props.modelId) {
-      // 获取 SIMPLE 设计器模型
-      const result = await getBpmSimpleModel(props.modelId)
-      if (result) {
-        await loadProcessData(result)
-      } else {
-        updateModel()
-      }
-    } else if (props.value) {
-      await loadProcessData(props.value)
+    if (processData.value) {
+      processNodeTree.value = processData?.value
     } else {
       updateModel()
     }
   } finally {
     loading.value = false
-    emits('init-finished')
   }
 })
 
 const simpleProcessModelRef = ref()
 
-/** 获取当前流程数据 */
-const getCurrentFlowData = async () => {
-  try {
-    if (simpleProcessModelRef.value) {
-      const data = await simpleProcessModelRef.value.getCurrentFlowData()
-      if (data) {
-        currentValue.value = data
-        return data
-      }
-    }
-    return currentValue.value
-  } catch (error) {
-    console.error('获取流程数据失败:', error)
-    return currentValue.value
-  }
-}
-
-// 刷新方法
-const refresh = async () => {
-  try {
-    if (currentValue.value) {
-      await loadProcessData(currentValue.value)
-    }
-  } catch (error) {
-    console.error('刷新失败:', error)
-  }
-}
-
-defineExpose({
-  getCurrentFlowData,
-  updateModel,
-  loadProcessData,
-  refresh
-})
+defineExpose({})
 </script>

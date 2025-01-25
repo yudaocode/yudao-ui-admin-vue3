@@ -62,7 +62,7 @@
       <el-radio-group v-model="modelData.visible">
         <el-radio
           v-for="dict in getBoolDictOptions(DICT_TYPE.INFRA_BOOLEAN_STRING)"
-          :key="dict.value"
+          :key="dict.value as string"
           :value="dict.value"
         >
           {{ dict.label }}
@@ -77,7 +77,6 @@
       >
         <el-option label="全员" :value="0" />
         <el-option label="指定人员" :value="1" />
-        <el-option label="均不可提交" :value="2" />
       </el-select>
       <div v-if="modelData.startUserType === 1" class="mt-2 flex flex-wrap gap-2">
         <div
@@ -97,21 +96,12 @@
           />
         </div>
         <el-button type="primary" link @click="openStartUserSelect">
-          <Icon icon="ep:plus" />选择人员
+          <Icon icon="ep:plus" /> 选择人员
         </el-button>
       </div>
     </el-form-item>
-    <el-form-item label="流程管理员" prop="managerUserType" class="mb-20px">
-      <el-select
-        v-model="modelData.managerUserType"
-        placeholder="请选择流程管理员"
-        @change="handleManagerUserTypeChange"
-      >
-        <el-option label="全员" :value="0" />
-        <el-option label="指定人员" :value="1" />
-        <el-option label="均不可提交" :value="2" />
-      </el-select>
-      <div v-if="modelData.managerUserType === 1" class="mt-2 flex flex-wrap gap-2">
+    <el-form-item label="流程管理员" prop="managerUserIds" class="mb-20px">
+      <div class="flex flex-wrap gap-2">
         <div
           v-for="user in selectedManagerUsers"
           :key="user.id"
@@ -142,14 +132,11 @@
 <script lang="ts" setup>
 import { DICT_TYPE, getBoolDictOptions, getIntDictOptions } from '@/utils/dict'
 import { UserVO } from '@/api/system/user'
+import { CategoryVO } from '@/api/bpm/category'
 
 const props = defineProps({
-  modelValue: {
-    type: Object,
-    required: true
-  },
   categoryList: {
-    type: Array,
+    type: Array as PropType<CategoryVO[]>,
     required: true
   },
   userList: {
@@ -157,8 +144,6 @@ const props = defineProps({
     required: true
   }
 })
-
-const emit = defineEmits(['update:modelValue'])
 
 const formRef = ref()
 const selectedStartUsers = ref<UserVO[]>([])
@@ -177,27 +162,30 @@ const rules = {
 }
 
 // 创建本地数据副本
-const modelData = computed({
-  get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
-})
+const modelData = defineModel<any>()
 
 // 初始化选中的用户
 watch(
-  () => props.modelValue,
+  () => modelData.value,
   (newVal) => {
     if (newVal.startUserIds?.length) {
       selectedStartUsers.value = props.userList.filter((user: UserVO) =>
         newVal.startUserIds.includes(user.id)
       ) as UserVO[]
+    } else {
+      selectedStartUsers.value = []
     }
     if (newVal.managerUserIds?.length) {
       selectedManagerUsers.value = props.userList.filter((user: UserVO) =>
         newVal.managerUserIds.includes(user.id)
       ) as UserVO[]
+    } else {
+      selectedManagerUsers.value = []
     }
   },
-  { immediate: true }
+  {
+    immediate: true
+  }
 )
 
 /** 打开发起人选择 */
@@ -215,58 +203,42 @@ const openManagerUserSelect = () => {
 /** 处理用户选择确认 */
 const handleUserSelectConfirm = (_, users: UserVO[]) => {
   if (currentSelectType.value === 'start') {
-    selectedStartUsers.value = users
-    emit('update:modelValue', {
+    modelData.value = {
       ...modelData.value,
       startUserIds: users.map((u) => u.id)
-    })
+    }
   } else {
-    selectedManagerUsers.value = users
-    emit('update:modelValue', {
+    modelData.value = {
       ...modelData.value,
       managerUserIds: users.map((u) => u.id)
-    })
+    }
   }
 }
 
 /** 处理发起人类型变化 */
 const handleStartUserTypeChange = (value: number) => {
   if (value !== 1) {
-    selectedStartUsers.value = []
-    emit('update:modelValue', {
+    modelData.value = {
       ...modelData.value,
       startUserIds: []
-    })
-  }
-}
-
-/** 处理管理员类型变化 */
-const handleManagerUserTypeChange = (value: number) => {
-  if (value !== 1) {
-    selectedManagerUsers.value = []
-    emit('update:modelValue', {
-      ...modelData.value,
-      managerUserIds: []
-    })
+    }
   }
 }
 
 /** 移除发起人 */
 const handleRemoveStartUser = (user: UserVO) => {
-  selectedStartUsers.value = selectedStartUsers.value.filter((u) => u.id !== user.id)
-  emit('update:modelValue', {
+  modelData.value = {
     ...modelData.value,
     startUserIds: modelData.value.startUserIds.filter((id: number) => id !== user.id)
-  })
+  }
 }
 
 /** 移除管理员 */
 const handleRemoveManagerUser = (user: UserVO) => {
-  selectedManagerUsers.value = selectedManagerUsers.value.filter((u) => u.id !== user.id)
-  emit('update:modelValue', {
+  modelData.value = {
     ...modelData.value,
     managerUserIds: modelData.value.managerUserIds.filter((id: number) => id !== user.id)
-  })
+  }
 }
 
 /** 表单校验 */
