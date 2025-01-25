@@ -246,15 +246,15 @@ export type AssignEmptyHandler = {
 export type ListenerHandler = {
   enable: boolean
   path?: string
-  header?: ListenerParam[]
-  body?: ListenerParam[]
+  header?: HttpRequestParam[]
+  body?: HttpRequestParam[]
 }
-export type ListenerParam = {
+export type HttpRequestParam = {
   key: string
   type: number
   value: string
 }
-export enum ListenerParamTypeEnum {
+export enum BpmHttpRequestParamTypeEnum {
   /**
    * 固定值
    */
@@ -264,7 +264,7 @@ export enum ListenerParamTypeEnum {
    */
   FROM_FORM = 2
 }
-export const LISTENER_MAP_TYPES = [
+export const BPM_HTTP_REQUEST_PARAM_TYPES = [
   {
     value: 1,
     label: '固定值'
@@ -710,7 +710,7 @@ export type RouterSetting = {
   conditionGroups: ConditionGroup
 }
 
-// ==================== 触发器相关定义 ==================== 
+// ==================== 触发器相关定义 ====================
 /**
  * 触发器节点结构定义
  */
@@ -736,9 +736,9 @@ export type HttpRequestTriggerSetting = {
   // 请求 URL
   url: string
   // 请求头参数设置
-  header?: ListenerParam[] // TODO 需要重命名一下
+  header?: HttpRequestParam[]
   // 请求体参数设置
-  body?: ListenerParam[]
+  body?: HttpRequestParam[]
 }
 
 export const TRIGGER_TYPES: DictDataVO[] = [

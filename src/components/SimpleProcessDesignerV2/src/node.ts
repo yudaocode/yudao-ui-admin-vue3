@@ -14,7 +14,7 @@ import {
   AssignStartUserHandlerType,
   AssignEmptyHandlerType,
   FieldPermissionType,
-  ListenerParam
+  HttpRequestParam
 } from './consts'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
 
@@ -139,20 +139,20 @@ export type UserTaskFormType = {
   taskCreateListenerEnable?: boolean
   taskCreateListenerPath?: string
   taskCreateListener?: {
-    header: ListenerParam[],
-    body: ListenerParam[]
+    header: HttpRequestParam[],
+    body: HttpRequestParam[]
   }
   taskAssignListenerEnable?: boolean
   taskAssignListenerPath?: string
   taskAssignListener?: {
-    header: ListenerParam[],
-    body: ListenerParam[]
+    header: HttpRequestParam[],
+    body: HttpRequestParam[]
   }
   taskCompleteListenerEnable?: boolean
   taskCompleteListenerPath?: string
   taskCompleteListener?:{
-    header: ListenerParam[],
-    body: ListenerParam[]
+    header: HttpRequestParam[],
+    body: HttpRequestParam[]
   }
   signEnable: boolean
   reasonRequire: boolean
