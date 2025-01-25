@@ -106,7 +106,7 @@
       >
         <!-- TODO 可以根据formField的type进行展示方式的控制，现在全部以字符串 -->
         <template #default="scope">
-          {{ scope.row.variables.find(variable => variable.key === item.field)?.value }}
+          {{ scope.row.variables.find((variable) => variable.key === item.field)?.value }}
         </template>
       </el-table-column>
     </el-table>
@@ -157,6 +157,7 @@ const getList = async () => {
     const data = await ProcessInstanceApi.getProcessInstanceReportPage(queryParams)
     list.value = data.pageResult.list
     total.value = data.pageResult.total
+    // TODO @lesan：不确定，能不能通过 processDefinitionId 获取流程定义哈，从而拿到 formFields；
     formFieldsList.value = data.formFields
   } finally {
     loading.value = false
