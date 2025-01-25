@@ -60,6 +60,10 @@ export const getProcessInstanceManagerPage = async (params: any) => {
   return await request.get({ url: '/bpm/process-instance/manager-page', params })
 }
 
+export const getProcessInstanceReportPage = async (params: any) => {
+  return await request.get({ url: '/bpm/process-instance/report-page', params })
+}
+
 export const createProcessInstance = async (data) => {
   return await request.post({ url: '/bpm/process-instance/create', data: data })
 }
