@@ -166,14 +166,14 @@ const props = defineProps({
 
 const formFieldOptions = useFormFields()
 
-const addHttpRequestParam = (arr) => {
+const addHttpRequestParam = (arr: ListenerParam[]) => {
   arr.push({
     key: '',
-    type: 1,
+    type: ListenerParamTypeEnum.FIXED_VALUE,
     value: ''
   })
 }
-const deleteHttpRequestParam = (arr, index) => {
+const deleteHttpRequestParam = (arr: ListenerParam[], index: number) => {
   arr.splice(index, 1)
 }
 </script>

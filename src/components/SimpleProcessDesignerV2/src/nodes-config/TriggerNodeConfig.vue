@@ -70,6 +70,7 @@
 import { SimpleFlowNode, NodeType, TriggerSetting, TRIGGER_TYPES, TriggerTypeEnum } from '../consts'
 import { useWatchNode, useDrawer, useNodeName } from '../node'
 import HttpRequestParamSetting from './components/HttpRequestParamSetting.vue'
+
 defineOptions({
   name: 'TriggerNodeConfig'
 })
@@ -104,7 +105,7 @@ const configForm = ref<TriggerSetting>({
   }
 })
 
-// 保存配置
+/** 保存配置 */
 const saveConfig = async () => {
   if (!formRef) return false
   const valid = await formRef.value.validate()
@@ -116,7 +117,7 @@ const saveConfig = async () => {
   settingVisible.value = false
   return true
 }
-// 获取节点展示内容
+/** 获取节点展示内容 */
 const getShowText = (): string => {
   let showText = ''
   if (configForm.value.type === TriggerTypeEnum.HTTP_REQUEST) {
@@ -125,7 +126,7 @@ const getShowText = (): string => {
   return showText
 }
 
-// 显示触发器节点配置， 由父组件传过来
+/** 显示触发器节点配置， 由父组件传过来 */
 const showTriggerNodeConfig = (node: SimpleFlowNode) => {
   nodeName.value = node.name
   if (node.triggerSetting) {

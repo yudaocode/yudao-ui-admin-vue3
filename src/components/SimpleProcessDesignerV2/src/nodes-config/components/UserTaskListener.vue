@@ -31,7 +31,7 @@
         >
           <el-input v-model="configForm[`task${listener.type}ListenerPath`]" />
         </el-form-item>
-        <HttpRequestParamSetting 
+        <HttpRequestParamSetting
           :header="configForm[`task${listener.type}Listener`].header"
           :body="configForm[`task${listener.type}Listener`].body"
           :bind="`task${listener.type}Listener`"
@@ -42,8 +42,8 @@
 </template>
 
 <script setup lang="ts">
-// import { LISTENER_MAP_TYPES, ListenerParamTypeEnum } from '../../consts'
 import HttpRequestParamSetting from './HttpRequestParamSetting.vue'
+
 const props = defineProps({
   modelValue: {
     type: Object,
