@@ -138,11 +138,10 @@ import {
   COMPARISON_OPERATORS,
   CONDITION_CONFIG_TYPES,
   ConditionType,
-  DEFAULT_CONDITION_GROUP_VALUE,
-  ProcessVariableEnum
+  DEFAULT_CONDITION_GROUP_VALUE
 } from '../../consts'
 import { BpmModelFormType } from '@/utils/constants'
-import { useFormFields } from '../../node'
+import { useFormFieldsAndStartUser } from '../../node'
 
 const props = defineProps({
   modelValue: {
@@ -170,17 +169,10 @@ const conditionConfigTypes = computed(() => {
     }
   })
 })
+
 /** 条件规则可选择的表单字段 */
-const fieldOptions = computed(() => {
-  const fieldsCopy = useFormFields().slice()
-  // 固定添加发起人 ID 字段
-  fieldsCopy.unshift({
-    field: ProcessVariableEnum.START_USER_ID,
-    title: '发起人',
-    required: true
-  })
-  return fieldsCopy
-})
+const fieldOptions = useFormFieldsAndStartUser()
+
 // 表单校验规则
 const formRules = reactive({
   conditionType: [{ required: true, message: '配置方式不能为空', trigger: 'blur' }],

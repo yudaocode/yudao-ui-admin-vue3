@@ -192,6 +192,7 @@ const saveConfig = async () => {
   if (!valid) return false
   const showText = getShowText()
   if (!showText) return false
+  currentNode.value.name = nodeName.value!
   currentNode.value.showText = showText
   currentNode.value.triggerSetting = configForm.value
   settingVisible.value = false
