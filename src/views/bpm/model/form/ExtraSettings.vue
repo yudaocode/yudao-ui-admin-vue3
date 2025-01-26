@@ -216,16 +216,16 @@ const formFieldOptions4Title = computed(() => {
   })
   // 固定添加发起人 ID 字段
   cloneFormField.unshift({
-    label: ProcessVariableEnum.PROCESS_DEFINITION_NAME,
-    value: '流程名称'
+    label: '流程名称',
+    value: ProcessVariableEnum.PROCESS_DEFINITION_NAME
   })
   cloneFormField.unshift({
-    label: ProcessVariableEnum.START_TIME,
-    value: '发起时间'
+    label: '发起时间',
+    value: ProcessVariableEnum.START_TIME
   })
   cloneFormField.unshift({
-    label: ProcessVariableEnum.START_USER_ID,
-    value: '发起人'
+    label: '发起人',
+    value: ProcessVariableEnum.START_USER_ID
   })
   return cloneFormField
 })
