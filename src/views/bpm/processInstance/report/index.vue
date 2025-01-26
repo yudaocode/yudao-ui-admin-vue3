@@ -72,7 +72,7 @@
         :label="item.title"
         :prop="item.field"
       >
-        <!-- TODO 目前只支持input类型的字符串搜索 -->
+        <!-- TODO @lesan：目前只支持input类型的字符串搜索 -->
         <el-input
           :disabled="item.type !== 'input'"
           v-model="queryParams.formFieldsParams[item.field]"
@@ -120,11 +120,12 @@
         :prop="item.field"
         width="120"
       >
-        <!-- TODO 可以根据formField的type进行展示方式的控制，现在全部以字符串 -->
+        <!-- TODO @lesan：可以根据formField的type进行展示方式的控制，现在全部以字符串 -->
         <template #default="scope">
           {{ scope.row.formVariables[item.field] ?? '' }}
         </template>
       </el-table-column>
+      <!-- TODO @lesan：可能要类似 manager 那，加个详情和取消？ -->
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -180,11 +181,13 @@ const getList = async () => {
   }
 }
 
+/** 获取流程定义 */
 const getProcessDefinition = async () => {
   const processDefinition = await DefinitionApi.getProcessDefinition(processDefinitionId)
   formFields.value = parseFormCreateFields(processDefinition.formFields)
 }
 
+/** 解析表单字段 */
 const parseFormCreateFields = (formFields?: string[]) => {
   const result: Array<Record<string, any>> = []
   if (formFields) {
@@ -210,8 +213,11 @@ const resetQuery = () => {
 
 /** 初始化 **/
 onMounted(async () => {
+  // 获取流程定义，用于 table column 的展示
   await getProcessDefinition()
+  // 获取流程列表
   await getList()
+  // 获取用户列表
   userList.value = await UserApi.getSimpleUserList()
 })
 </script>
