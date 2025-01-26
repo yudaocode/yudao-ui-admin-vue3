@@ -106,14 +106,16 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
     getNodeConfigFormFields
   }
 }
+
 /**
- * @description 获取流程表单的字段。
+ * @description 获取流程表单的字段
  */
 export function useFormFields() {
   const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   return parseFormCreateFields(unref(formFields))
 }
 
+// TODO @芋艿：后续需要把各种类似 useFormFieldsPermission 的逻辑，抽成一个通用方法。
 /**
  * @description 获取流程表单的字段和发起人字段
  */
@@ -155,19 +157,19 @@ export type UserTaskFormType = {
   taskCreateListenerEnable?: boolean
   taskCreateListenerPath?: string
   taskCreateListener?: {
-    header: HttpRequestParam[],
+    header: HttpRequestParam[]
     body: HttpRequestParam[]
   }
   taskAssignListenerEnable?: boolean
   taskAssignListenerPath?: string
   taskAssignListener?: {
-    header: HttpRequestParam[],
+    header: HttpRequestParam[]
     body: HttpRequestParam[]
   }
   taskCompleteListenerEnable?: boolean
   taskCompleteListenerPath?: string
-  taskCompleteListener?:{
-    header: HttpRequestParam[],
+  taskCompleteListener?: {
+    header: HttpRequestParam[]
     body: HttpRequestParam[]
   }
   signEnable: boolean

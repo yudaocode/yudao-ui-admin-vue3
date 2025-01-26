@@ -194,7 +194,10 @@
                   </el-dropdown-item>
                   <el-dropdown-item
                     command="handleReport"
-                    v-if="checkPermi(['bpm:model:report']) && scope.row.processDefinition"
+                    v-if="
+                      checkPermi(['bpm:process-instance:manager-query']) &&
+                      scope.row.processDefinition
+                    "
                     :disabled="!isManagerUser(scope.row)"
                   >
                     报表
