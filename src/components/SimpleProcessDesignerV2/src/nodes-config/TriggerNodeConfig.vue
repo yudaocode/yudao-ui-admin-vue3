@@ -35,6 +35,7 @@
             />
           </el-select>
         </el-form-item>
+        <!-- HTTP 请求触发器 -->
         <div
           v-if="configForm.type === TriggerTypeEnum.HTTP_REQUEST && configForm.httpRequestSetting"
         >
@@ -46,14 +47,79 @@
               :closable="false"
             />
           </el-form-item>
+          <!-- 请求地址-->
           <el-form-item label="请求地址" prop="httpRequestSetting.url">
             <el-input v-model="configForm.httpRequestSetting.url" />
           </el-form-item>
+          <!-- 请求头，请求体设置-->
           <HttpRequestParamSetting
             :header="configForm.httpRequestSetting.header"
             :body="configForm.httpRequestSetting.body"
             :bind="'httpRequestSetting'"
           />
+          <!-- 返回值设置-->
+          <el-form-item label="返回值">
+            <el-alert
+              title="通过请求返回值, 可以修改流程表单的值"
+              type="warning"
+              show-icon
+              :closable="false"
+            />
+          </el-form-item>
+          <el-form-item>
+            <div
+              class="flex pt-2"
+              v-for="(item, index) in configForm.httpRequestSetting.response"
+              :key="index"
+            >
+              <div class="mr-2">
+                <el-form-item
+                  :prop="`httpRequestSetting.response.${index}.key`"
+                  :rules="{
+                    required: true,
+                    message: '表单字段不能为空',
+                    trigger: 'blur'
+                  }"
+                >
+                  <el-select class="w-160px!" v-model="item.key" placeholder="请选择表单字段">
+                    <el-option
+                      v-for="(field, fIdx) in formFieldOptions"
+                      :key="fIdx"
+                      :label="field.title"
+                      :value="field.field"
+                      :disabled="!field.required"
+                    />
+                  </el-select>
+                </el-form-item>
+              </div>
+              <div class="mr-2">
+                <el-form-item
+                  :prop="`httpRequestSetting.response.${index}.value`"
+                  :rules="{
+                    required: true,
+                    message: '请求返回字段不能为空',
+                    trigger: 'blur'
+                  }"
+                >
+                  <el-input class="w-160px" v-model="item.value" placeholder="请求返回字段" />
+                </el-form-item>
+              </div>
+              <div class="mr-1 pt-1 cursor-pointer">
+                <Icon
+                  icon="ep:delete"
+                  :size="18"
+                  @click="deleteHttpResponseSetting(configForm.httpRequestSetting.response!, index)"
+                />
+              </div>
+            </div>
+            <el-button
+              type="primary"
+              text
+              @click="addHttpResponseSetting(configForm.httpRequestSetting.response!)"
+            >
+              <Icon icon="ep:plus" class="mr-5px" />添加一行
+            </el-button>
+          </el-form-item>
         </div>
       </el-form>
     </div>
@@ -68,7 +134,7 @@
 </template>
 <script setup lang="ts">
 import { SimpleFlowNode, NodeType, TriggerSetting, TRIGGER_TYPES, TriggerTypeEnum } from '../consts'
-import { useWatchNode, useDrawer, useNodeName } from '../node'
+import { useWatchNode, useDrawer, useNodeName, useFormFields } from '../node'
 import HttpRequestParamSetting from './components/HttpRequestParamSetting.vue'
 
 defineOptions({
@@ -91,9 +157,7 @@ const formRef = ref() // 表单 Ref
 // 表单校验规则
 const formRules = reactive({
   type: [{ required: true, message: '触发器类型不能为空', trigger: 'change' }],
-  httpRequestSetting: {
-    url: [{ required: true, message: '请求地址不能为空', trigger: 'blur' }]
-  }
+  'httpRequestSetting.url': [{ required: true, message: '请求地址不能为空', trigger: 'blur' }]
 })
 // 触发器配置表单数据
 const configForm = ref<TriggerSetting>({
@@ -101,9 +165,25 @@ const configForm = ref<TriggerSetting>({
   httpRequestSetting: {
     url: '',
     header: [],
-    body: []
+    body: [],
+    response: []
   }
 })
+// 流程表单字段
+const formFieldOptions = useFormFields()
+
+/** 添加 HTTP 请求返回值设置项*/
+const addHttpResponseSetting = (responseSetting: Record<string, string>[]) => {
+  responseSetting.push({
+    key: '',
+    value: ''
+  })
+}
+
+/** 删除 HTTP 请求返回值设置项 */
+const deleteHttpResponseSetting = (responseSetting: Record<string, string>[], index: number) => {
+  responseSetting.splice(index, 1)
+}
 
 /** 保存配置 */
 const saveConfig = async () => {

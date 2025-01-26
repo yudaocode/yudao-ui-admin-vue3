@@ -14,7 +14,8 @@ import {
   AssignStartUserHandlerType,
   AssignEmptyHandlerType,
   FieldPermissionType,
-  HttpRequestParam
+  HttpRequestParam,
+  ProcessVariableEnum
 } from './consts'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
 
@@ -106,11 +107,26 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
   }
 }
 /**
- * @description 获取表单的字段
+ * @description 获取流程表单的字段。
  */
 export function useFormFields() {
   const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   return parseFormCreateFields(unref(formFields))
+}
+
+/**
+ * @description 获取流程表单的字段和发起人字段
+ */
+export function useFormFieldsAndStartUser() {
+  const injectFormFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
+  const formFields = parseFormCreateFields(unref(injectFormFields))
+  // 添加发起人
+  formFields.unshift({
+    field: ProcessVariableEnum.START_USER_ID,
+    title: '发起人',
+    required: true
+  })
+  return formFields
 }
 
 export type UserTaskFormType = {

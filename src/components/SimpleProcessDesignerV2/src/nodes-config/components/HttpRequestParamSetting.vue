@@ -142,7 +142,7 @@
 </template>
 <script setup lang="ts">
 import { HttpRequestParam, BPM_HTTP_REQUEST_PARAM_TYPES, BpmHttpRequestParamTypeEnum } from '../../consts'
-import { useFormFields } from '../../node'
+import { useFormFieldsAndStartUser } from '../../node'
 defineOptions({
   name: 'HttpRequestParamSetting'
 })
@@ -164,16 +164,19 @@ const props = defineProps({
   }
 })
 
-const formFieldOptions = useFormFields()
-
-const addHttpRequestParam = (arr: ListenerParam[]) => {
+// 流程表单字段，发起人字段
+const formFieldOptions = useFormFieldsAndStartUser()
+/** 添加请求配置项 */
+const addHttpRequestParam = (arr: HttpRequestParam[]) => {
   arr.push({
     key: '',
-    type: ListenerParamTypeEnum.FIXED_VALUE,
+    type: BpmHttpRequestParamTypeEnum.FIXED_VALUE,
     value: ''
   })
 }
-const deleteHttpRequestParam = (arr: ListenerParam[], index: number) => {
+
+/** 删除请求配置项 */
+const deleteHttpRequestParam = (arr: HttpRequestParam[], index: number) => {
   arr.splice(index, 1)
 }
 </script>

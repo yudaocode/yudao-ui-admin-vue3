@@ -371,13 +371,13 @@ export enum TimeUnitType {
 /**
  * 条件节点设置结构定义，用于条件节点
  */
-export type ConditionSetting =  {
+export type ConditionSetting = {
   // 条件类型
-  conditionType?: ConditionType,
+  conditionType?: ConditionType
   // 条件表达式
-  conditionExpression?: string,
+  conditionExpression?: string
   // 条件组
-  conditionGroups?: ConditionGroup,
+  conditionGroups?: ConditionGroup
   // 是否默认的条件
   defaultFlow?: boolean
 }
@@ -726,7 +726,7 @@ export enum TriggerTypeEnum {
   /**
    * 发送 HTTP 请求触发器
    */
-  HTTP_REQUEST = 1,
+  HTTP_REQUEST = 1
 }
 
 /**
@@ -739,6 +739,8 @@ export type HttpRequestTriggerSetting = {
   header?: HttpRequestParam[]
   // 请求体参数设置
   body?: HttpRequestParam[]
+  // 请求响应设置
+  response?: Record<string, string>[]
 }
 
 export const TRIGGER_TYPES: DictDataVO[] = [
