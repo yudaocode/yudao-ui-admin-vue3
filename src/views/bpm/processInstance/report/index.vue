@@ -171,9 +171,10 @@ const userList = ref<any[]>([]) // 用户列表
 const getList = async () => {
   loading.value = true
   try {
-    let queryParamsClone = { ...queryParams }
-    queryParamsClone.formFieldsParams = JSON.stringify(queryParamsClone.formFieldsParams)
-    const data = await ProcessInstanceApi.getProcessInstanceManagerPage(queryParamsClone)
+    const data = await ProcessInstanceApi.getProcessInstanceManagerPage({
+      ...queryParams,
+      formFieldsParams: JSON.stringify(queryParams.formFieldsParams)
+    })
     list.value = data.list
     total.value = data.total
   } finally {
@@ -205,6 +206,7 @@ const handleQuery = () => {
 }
 
 /** 重置按钮操作 */
+// TODO @lesan：动态表单的 search ，无法重置的样子
 const resetQuery = () => {
   queryFormRef.value.resetFields()
   queryFormRef.value.formFieldsParams = {}

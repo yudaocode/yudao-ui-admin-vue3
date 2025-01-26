@@ -308,6 +308,18 @@ const remainingRouter: AppRouteRecordRaw[] = [
         })
       },
       {
+        path: 'process-instance/report',
+        component: () => import('@/views/bpm/processInstance/report/index.vue'),
+        name: 'BpmProcessInstanceReport',
+        meta: {
+          noCache: true,
+          hidden: true,
+          canTo: true,
+          title: '数据报表',
+          activeMenu: '/bpm/manager/model'
+        }
+      },
+      {
         path: 'oa/leave/create',
         component: () => import('@/views/bpm/oa/leave/create.vue'),
         name: 'OALeaveCreate',
