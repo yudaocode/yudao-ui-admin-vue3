@@ -125,7 +125,27 @@
           {{ scope.row.formVariables[item.field] ?? '' }}
         </template>
       </el-table-column>
-      <!-- TODO @lesan：可能要类似 manager 那，加个详情和取消？ -->
+      <el-table-column label="操作" align="center" fixed="right" width="180">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            v-hasPermi="['bpm:process-instance:cancel']"
+            @click="handleDetail(scope.row)"
+          >
+            详情
+          </el-button>
+          <el-button
+            link
+            type="primary"
+            v-if="scope.row.status === 1"
+            v-hasPermi="['bpm:process-instance:query']"
+            @click="handleCancel(scope.row)"
+          >
+            取消
+          </el-button>
+        </template>
+      </el-table-column>
     </el-table>
     <!-- 分页 -->
     <Pagination
@@ -143,10 +163,14 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as UserApi from '@/api/system/user'
 import * as DefinitionApi from '@/api/bpm/definition'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
+import { ElMessageBox } from 'element-plus'
 
 defineOptions({ name: 'BpmProcessInstanceReport' })
 
+const router = useRouter() // 路由
 const { query } = useRoute()
+const message = useMessage() // 消息弹窗
+const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
 const total = ref(0) // 列表的总页数
@@ -206,11 +230,36 @@ const handleQuery = () => {
 }
 
 /** 重置按钮操作 */
-// TODO @lesan：动态表单的 search ，无法重置的样子
 const resetQuery = () => {
   queryFormRef.value.resetFields()
-  queryFormRef.value.formFieldsParams = {}
+  queryParams.formFieldsParams = {}
   handleQuery()
+}
+
+/** 查看详情 */
+const handleDetail = (row) => {
+  router.push({
+    name: 'BpmProcessInstanceDetail',
+    query: {
+      id: row.id
+    }
+  })
+}
+
+/** 取消按钮操作 */
+const handleCancel = async (row) => {
+  // 二次确认
+  const { value } = await ElMessageBox.prompt('请输入取消原因', '取消流程', {
+    confirmButtonText: t('common.ok'),
+    cancelButtonText: t('common.cancel'),
+    inputPattern: /^[\s\S]*.*\S[\s\S]*$/, // 判断非空，且非空格
+    inputErrorMessage: '取消原因不能为空'
+  })
+  // 发起取消
+  await ProcessInstanceApi.cancelProcessInstanceByAdmin(row.id, value)
+  message.success('取消成功')
+  // 刷新列表
+  await getList()
 }
 
 /** 初始化 **/
