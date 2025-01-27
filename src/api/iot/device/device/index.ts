@@ -63,15 +63,12 @@ export enum DeviceStatusEnum {
   DISABLED = 3 // 已禁用
 }
 
-// IoT 模拟设备数据
-// TODO @super：DeviceSimulatorDataReqVO
-export interface SimulatorDataVO {
-  productKey: string
-  deviceKey: string
-  type: string
-  subType: string
-  reportTime: number // 时间戳
-  content: string // 存储 JSON 字符串
+// IoT 模拟设备上报数据 Request VO
+export interface IotDeviceSimulationReportReqVO {
+  id: number // 设备编号
+  type: string // 消息类型
+  identifier: string // 标识符
+  data: object // 请求参数
 }
 
 // 设备 API
@@ -146,11 +143,12 @@ export const DeviceApi = {
     return await request.download({ url: `/iot/device/get-import-template` })
   },
 
-  // 模拟设备
-  simulatorDevice: async (data: SimulatorDataVO) => {
+  // 模拟设备上报
+  simulationReportDevice: async (data: IotDeviceSimulationReportReqVO) => {
     // TODO @super：/iot/device/simulator
-    return await request.post({ url: `/iot/device/data/simulator`, data })
+    return await request.post({ url: `/iot/device/simulation-report`, data })
   },
+
   // 查询设备日志分页
   getDeviceLogPage: async (params: any) => {
     // TODO @super：/iot/log-page 或者  /iot/log/page

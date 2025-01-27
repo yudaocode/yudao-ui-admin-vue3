@@ -52,7 +52,7 @@ import { DeviceApi } from '@/api/iot/device/device'
 import { formatDate } from '@/utils/formatTime'
 
 const props = defineProps<{
-  deviceKey: number
+  deviceKey: string
 }>()
 
 //TODO:后续看看使用什么查询条件  目前后端是留了时间范围  type  subType
