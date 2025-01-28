@@ -1,3 +1,4 @@
+<!-- TODO 芋艿：待 review -->
 <template>
   <Dialog title="查看数据" v-model="dialogVisible">
     <ContentWrap>
@@ -57,7 +58,7 @@ import { DeviceApi, DeviceHistoryDataVO, DeviceVO } from '@/api/iot/device/devic
 import { ProductVO } from '@/api/iot/product/product'
 import { beginOfDay, dateFormatter, endOfDay, formatDate } from '@/utils/formatTime'
 
-const props = defineProps<{ product: ProductVO; device: DeviceVO }>()
+defineProps<{ product: ProductVO; device: DeviceVO }>()
 
 /** IoT 设备 数据详情 */
 defineOptions({ name: 'IoTDeviceDataDetail' })

@@ -1,3 +1,4 @@
+<!-- 设备信息（头部） -->
 <template>
   <div>
     <div class="flex items-start justify-between">

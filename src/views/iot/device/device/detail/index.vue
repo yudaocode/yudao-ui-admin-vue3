@@ -17,7 +17,6 @@
       <el-tab-pane label="子设备管理" v-if="product.deviceType === DeviceTypeEnum.GATEWAY" />
       <el-tab-pane label="设备影子" />
       <el-tab-pane label="设备日志" name="log">
-        <!-- TODO @super：字段类型，:device-key。idea 会告警，应该是 string -->
         <DeviceDetailsLog v-if="activeTab === 'log'" :device-key="device.deviceKey" />
       </el-tab-pane>
       <el-tab-pane label="模拟设备" name="simulator">

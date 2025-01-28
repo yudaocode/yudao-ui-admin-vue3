@@ -1,9 +1,10 @@
+<!-- 设备日志 -->
 <template>
   <ContentWrap>
     <!-- 搜索区域 -->
     <el-form :model="queryParams" inline>
       <el-form-item>
-        <el-select v-model="queryParams.type" placeholder="所有" class="!w-120px">
+        <el-select v-model="queryParams.type" placeholder="所有" class="!w-160px">
           <el-option label="所有" value="" />
           <!-- TODO @super：搞成枚举 -->
           <el-option label="状态" value="state" />
@@ -13,13 +14,22 @@
         </el-select>
       </el-form-item>
       <el-form-item>
-        <el-input v-model="queryParams.keyword" placeholder="日志识符" class="!w-200px" />
+        <el-input v-model="queryParams.identifier" placeholder="日志识符" class="!w-200px" />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="handleQuery">
           <Icon icon="ep:search" class="mr-5px" /> 搜索
         </el-button>
-        <el-switch v-model="autoRefresh" class="ml-10px" /> 定时刷新
+        <el-switch
+          size="large"
+          width="80"
+          v-model="autoRefresh"
+          class="ml-20px"
+          inline-prompt
+          active-text="定时刷新"
+          inactive-text="定时刷新"
+          style="--el-switch-on-color: #13ce66"
+        />
       </el-form-item>
     </el-form>
 
@@ -31,7 +41,8 @@
         </template>
       </el-table-column>
       <el-table-column label="类型" align="center" prop="type" width="120" />
-      <el-table-column label="名称(标识符)" align="center" prop="subType" width="120" />
+      <!-- TODO @super：标识符需要翻译 -->
+      <el-table-column label="标识符" align="center" prop="identifier" width="120" />
       <el-table-column label="内容" align="center" prop="content" :show-overflow-tooltip="true" />
     </el-table>
 
@@ -55,12 +66,11 @@ const props = defineProps<{
   deviceKey: string
 }>()
 
-//TODO:后续看看使用什么查询条件  目前后端是留了时间范围  type  subType
 // 查询参数
 const queryParams = reactive({
   deviceKey: props.deviceKey,
-  // type: '',
-  // keyword: '',
+  type: '',
+  identifier: '',
   pageNo: 1,
   pageSize: 10
 })
@@ -68,8 +78,7 @@ const queryParams = reactive({
 // 列表数据
 const loading = ref(false)
 const total = ref(0)
-// TODO @super：字段的风格，还是类似一般 table 见面哈
-const logList = ref([])
+const logList = ref([]) // TODO @super：logList -> list，简洁一点。因为当前就一个 table 哈
 const autoRefresh = ref(false)
 let timer: any = null // TODO @super：autoRefreshEnable，autoRefreshTimer；对应上
 
@@ -140,7 +149,7 @@ watch(autoRefresh, (newValue) => {
   }
 })
 
-/** 监听设备 ID 变化 */
+/** 监听设备标识变化 */
 watch(
   () => props.deviceKey,
   (newValue) => {

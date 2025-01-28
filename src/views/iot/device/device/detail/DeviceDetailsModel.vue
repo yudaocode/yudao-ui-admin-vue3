@@ -1,3 +1,4 @@
+<!-- 设备物模型：运行状态（属性）、事件管理、服务调用 -->
 <template>
   <ContentWrap>
     <el-tabs v-model="activeTab">

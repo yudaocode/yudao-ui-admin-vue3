@@ -1,3 +1,4 @@
+<!-- 设备信息 -->
 <template>
   <ContentWrap>
     <el-collapse v-model="activeNames">

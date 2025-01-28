@@ -1,3 +1,4 @@
+<!-- 模拟设备 -->
 <template>
   <ContentWrap>
     <el-row :gutter="20">
@@ -17,9 +18,11 @@
                     :stripe="true"
                   >
                     <!-- TODO @super：每个 colum 搞下宽度，避免 table 每一列最后有个 . -->
+                    <!-- TODO @super：可以左侧 fixed -->
                     <el-table-column align="center" label="功能名称" prop="name" />
                     <el-table-column align="center" label="标识符" prop="identifier" />
                     <el-table-column align="center" label="数据类型" prop="identifier">
+                      <!-- TODO @super：不用翻译，可以减少宽度的占用 -->
                       <template #default="{ row }">
                         {{ dataTypeOptionsLabel(row.property?.dataType) ?? '-' }}
                       </template>
@@ -76,6 +79,7 @@
                               {{ `${item.name}-${item.value}` }}
                             </div>
                           </div>
+                          <!-- TODO @super：要不要兜底下，没翻译的类型，直接展示 json？ -->
                         </template>
                         <!-- 服务 -->
                         <div v-if="row.type === ThingModelType.SERVICE">
@@ -87,12 +91,14 @@
                         </div>
                       </template>
                     </el-table-column>
+                    <!-- TODO @super：可以右侧 fixed -->
                     <el-table-column label="值" align="center" width="80">
                       <template #default="scope">
                         <el-input v-model="scope.row.simulateValue" class="!w-60px" />
                       </template>
                     </el-table-column>
                   </el-table>
+                  <!-- TODO @super：发送按钮，可以放在右侧哈。因为我们的 simulateValue 就在最右侧 -->
                   <div class="mt-10px">
                     <el-button
                       type="primary"
@@ -109,6 +115,7 @@
               <!-- TODO @super：待实现 -->
               <el-tab-pane label="事件上报" name="event">
                 <ContentWrap>
+                  <!-- TODO @super：因为事件是每个 event 去模拟，而不是类似属性的批量上传。所以，可以每一列后面有个“模拟”按钮。另外，“值”使用 textarea，高度 3 -->
                   <!-- <el-table v-loading="loading" :data="eventList" :stripe="true">
                     <el-table-column label="功能名称" align="center" prop="name" />
                     <el-table-column label="标识符" align="center" prop="identifier" />

@@ -151,7 +151,6 @@ export const DeviceApi = {
 
   // 查询设备日志分页
   getDeviceLogPage: async (params: any) => {
-    // TODO @super：/iot/log-page 或者  /iot/log/page
-    return await request.get({ url: `/iot/device/data/log/page`, params })
+    return await request.get({ url: `/iot/device/log/page`, params })
   }
 }
