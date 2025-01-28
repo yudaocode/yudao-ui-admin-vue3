@@ -5,6 +5,7 @@
     :rules="[{ required: true, validator: validateList, trigger: 'change' }]"
     label="JSON 对象"
   >
+    <!-- TODO @puhui999：编辑已经添加的结构体，里面的参数加不上 -->
     <div
       v-for="(item, index) in dataSpecsList"
       :key="index"
