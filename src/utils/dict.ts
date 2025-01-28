@@ -1,8 +1,8 @@
 /**
  * 数据字典工具类
  */
-import {useDictStoreWithOut} from '@/store/modules/dict'
-import {ElementPlusInfoType} from '@/types/elementPlus'
+import { useDictStoreWithOut } from '@/store/modules/dict'
+import { ElementPlusInfoType } from '@/types/elementPlus'
 
 const dictStore = useDictStoreWithOut()
 
@@ -235,7 +235,7 @@ export enum DICT_TYPE {
   IOT_PRODUCT_DEVICE_TYPE = 'iot_product_device_type', // IOT 产品设备类型
   IOT_DATA_FORMAT = 'iot_data_format', // IOT 数据格式
   IOT_PROTOCOL_TYPE = 'iot_protocol_type', // IOT 接入网关协议
-  IOT_DEVICE_STATUS = 'iot_device_status', // IOT 设备状态
+  IOT_DEVICE_STATE = 'iot_device_state', // IOT 设备状态
   IOT_THING_MODEL_TYPE = 'iot_thing_model_type', // IOT 产品功能类型
   IOT_DATA_TYPE = 'iot_data_type', // IOT 数据类型
   IOT_THING_MODEL_UNIT = 'iot_thing_model_unit', // IOT 物模型单位

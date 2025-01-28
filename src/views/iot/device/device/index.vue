@@ -64,7 +64,7 @@
           class="!w-240px"
         >
           <el-option
-            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_DEVICE_STATUS)"
+            v-for="dict in getIntDictOptions(DICT_TYPE.IOT_DEVICE_STATE)"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -161,7 +161,7 @@
             <div
               class="absolute top-0 left-0 right-0 h-[50px] pointer-events-none"
               :class="[
-                item.status === DeviceStatusEnum.ONLINE
+                item.state === DeviceStatusEnum.ONLINE
                   ? 'bg-gradient-to-b from-[#eefaff] to-transparent'
                   : 'bg-gradient-to-b from-[#fff1f1] to-transparent'
               ]"
@@ -179,7 +179,7 @@
                   <div
                     class="w-1 h-1 rounded-full mr-1.5"
                     :class="
-                      item.status === DeviceStatusEnum.ONLINE
+                      item.state === DeviceStatusEnum.ONLINE
                         ? 'bg-[var(--el-color-success)]'
                         : 'bg-[var(--el-color-danger)]'
                     "
@@ -187,9 +187,9 @@
                   </div>
                   <el-text
                     class="!text-xs font-bold"
-                    :type="item.status === DeviceStatusEnum.ONLINE ? 'success' : 'danger'"
+                    :type="item.state === DeviceStatusEnum.ONLINE ? 'success' : 'danger'"
                   >
-                    {{ getDictLabel(DICT_TYPE.IOT_DEVICE_STATUS, item.status) }}
+                    {{ getDictLabel(DICT_TYPE.IOT_DEVICE_STATE, item.state) }}
                   </el-text>
                 </div>
               </div>
@@ -199,9 +199,9 @@
                 <div class="flex-1">
                   <div class="mb-2.5 last:mb-0">
                     <span class="text-[#717c8e] mr-2.5">所属产品</span>
-                    <span class="text-[#0070ff]">{{
-                      products.find((p) => p.id === item.productId)?.name
-                    }}</span>
+                    <span class="text-[#0070ff]">
+                      {{ products.find((p) => p.id === item.productId)?.name }}
+                    </span>
                   </div>
                   <div class="mb-2.5 last:mb-0">
                     <span class="text-[#717c8e] mr-2.5">设备类型</span>
@@ -209,7 +209,9 @@
                   </div>
                   <div class="mb-2.5 last:mb-0">
                     <span class="text-[#717c8e] mr-2.5">DeviceKey</span>
-                    <span class="text-[#0b1d30] inline-block align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[130px]">
+                    <span
+                      class="text-[#0b1d30] inline-block align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[130px]"
+                    >
                       {{ item.deviceKey }}
                     </span>
                   </div>
@@ -306,13 +308,13 @@
       </el-table-column>
       <el-table-column label="设备状态" align="center" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATUS" :value="scope.row.status" />
+          <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="scope.row.status" />
         </template>
       </el-table-column>
       <el-table-column
         label="最后上线时间"
         align="center"
-        prop="lastOnlineTime"
+        prop="onlineTime"
         :formatter="dateFormatter"
         width="180px"
       />

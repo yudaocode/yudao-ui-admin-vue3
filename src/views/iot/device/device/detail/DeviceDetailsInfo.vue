@@ -23,13 +23,13 @@
           {{ formatDate(device.activeTime) }}
         </el-descriptions-item>
         <el-descriptions-item label="最后上线时间">
-          {{ formatDate(device.lastOnlineTime) }}
+          {{ formatDate(device.onlineTime) }}
         </el-descriptions-item>
         <el-descriptions-item label="当前状态">
-          <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATUS" :value="device.status" />
+          <dict-tag :type="DICT_TYPE.IOT_DEVICE_STATE" :value="device.status" />
         </el-descriptions-item>
         <el-descriptions-item label="最后离线时间" :span="3">
-          {{ formatDate(device.lastOfflineTime) }}
+          {{ formatDate(device.offlineTime) }}
         </el-descriptions-item>
         <el-descriptions-item label="MQTT 连接参数">
           <el-button type="primary" @click="openMqttParams">查看</el-button>

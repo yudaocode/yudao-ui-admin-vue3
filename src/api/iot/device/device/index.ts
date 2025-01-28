@@ -10,10 +10,9 @@ export interface DeviceVO {
   deviceType: number // 设备类型
   nickname: string // 设备备注名称
   gatewayId: number // 网关设备 ID
-  status: number // 设备状态
-  statusLastUpdateTime: Date // 设备状态最后更新时间
-  lastOnlineTime: Date // 最后上线时间
-  lastOfflineTime: Date // 最后离线时间
+  state: number // 设备状态
+  onlineTime: Date // 最后上线时间
+  offlineTime: Date // 最后离线时间
   activeTime: Date // 设备激活时间
   createTime: Date // 创建时间
   ip: string // 设备的 IP 地址
@@ -29,11 +28,6 @@ export interface DeviceVO {
   address: string // 设备详细地址
   serialNumber: string // 设备序列号
   groupIds?: number[] // 添加分组 ID
-}
-
-export interface DeviceUpdateStatusVO {
-  id: number // 设备 ID，主键，自增
-  status: number // 设备状态
 }
 
 // IoT 设备数据 VO
@@ -91,11 +85,6 @@ export const DeviceApi = {
   // 修改设备
   updateDevice: async (data: DeviceVO) => {
     return await request.put({ url: `/iot/device/update`, data })
-  },
-
-  // 修改设备状态
-  updateDeviceStatus: async (data: DeviceUpdateStatusVO) => {
-    return await request.put({ url: `/iot/device/update-status`, data })
   },
 
   // 修改设备分组
