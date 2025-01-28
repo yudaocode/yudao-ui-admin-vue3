@@ -1,3 +1,4 @@
+<!-- 产品的物模型表单（event、service 项里的参数） -->
 <template>
   <div
     v-for="(item, index) in thingModelParams"
@@ -84,6 +85,7 @@ const openParamForm = (val: any) => {
     }
   }
 }
+
 /** 删除 param 项 */
 const deleteParamItem = (index: number) => {
   thingModelParams.value.splice(index, 1)

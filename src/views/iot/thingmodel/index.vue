@@ -1,3 +1,4 @@
+<!-- 产品的物模型列表 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -44,6 +45,8 @@
       </el-form-item>
     </el-form>
   </ContentWrap>
+
+  <!-- 列表 -->
   <ContentWrap>
     <el-tabs>
       <el-table v-loading="loading" :data="list" :show-overflow-tooltip="true" :stripe="true">
@@ -73,6 +76,7 @@
                   ].includes(row.property.dataType)
                 "
               >
+                <!-- TODO @puhui999：把数据定义，抽成一个方法？这样，其它地方也可以复用哈。 -->
                 取值范围：{{ `${row.property.dataSpecs.min}~${row.property.dataSpecs.max}` }}
               </div>
               <!-- 非列表型：文本 -->
@@ -193,6 +197,7 @@ const getList = async () => {
     loading.value = false
   }
 }
+
 /** 搜索按钮操作 */
 const handleQuery = () => {
   queryParams.pageNo = 1

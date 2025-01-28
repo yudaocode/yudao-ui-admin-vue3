@@ -21,6 +21,7 @@ export interface DataSpecsEnumOrBoolDataVO {
 }
 
 /** 属性值的数据类型 */
+// TODO @puhui999：这个枚举类，要不放到 dict 里？
 export const DataSpecsDataType = {
   INT: 'int',
   FLOAT: 'float',
@@ -34,6 +35,7 @@ export const DataSpecsDataType = {
 } as const
 
 /** 物体模型数据类型配置项 */
+// TODO @puhui999：搞到字典里；label 只使用（）部分，就是整数型、单精度浮点型等，这种哈。这样，拼接 value(label) 就可以渲染出来，通用性更强
 export const dataTypeOptions = [
   { value: DataSpecsDataType.INT, label: 'int32 (整数型)' },
   { value: DataSpecsDataType.FLOAT, label: 'float (单精度浮点型)' },
@@ -185,6 +187,7 @@ export const ThingModelFormRules = {
   ],
   'property.accessMode': [{ required: true, message: '请选择读写类型', trigger: 'change' }]
 }
+
 /** 校验布尔值名称 */
 export const validateBoolName = (_: any, value: string, callback: any) => {
   if (isEmpty(value)) {
@@ -203,7 +206,7 @@ export const validateBoolName = (_: any, value: string, callback: any) => {
   }
   // 检查长度（一个中文算一个字符）
   if (value.length > 20) {
-    callback(new Error('布尔值名称长度不能超过20个字符'))
+    callback(new Error('布尔值名称长度不能超过 20 个字符'))
     return
   }
 

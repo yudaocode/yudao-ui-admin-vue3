@@ -1,3 +1,4 @@
+<!-- dataType：enum 数组类型 -->
 <template>
   <el-form-item
     :rules="[{ required: true, validator: validateEnumList, trigger: 'change' }]"

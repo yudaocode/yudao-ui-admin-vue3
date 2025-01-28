@@ -1,3 +1,4 @@
+<!-- dataType：struct 数组类型 -->
 <template>
   <!-- struct 数据展示 -->
   <el-form-item
@@ -89,6 +90,7 @@ const openStructForm = (val: any) => {
     }
   }
 }
+
 /** 删除 struct 项 */
 const deleteStructItem = (index: number) => {
   dataSpecsList.value.splice(index, 1)

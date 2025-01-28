@@ -1,9 +1,11 @@
+<!-- 产品的物模型表单（service 项） -->
 <template>
   <el-form-item
     :rules="[{ required: true, message: '请选择调用方式', trigger: 'change' }]"
     label="调用方式"
     prop="service.callType"
   >
+    <!-- TODO @puhui999：默认选中，ASYNC 异步 -->
     <el-radio-group v-model="service.callType">
       <el-radio :value="ThingModelServiceCallType.ASYNC.value">
         {{ ThingModelServiceCallType.ASYNC.label }}

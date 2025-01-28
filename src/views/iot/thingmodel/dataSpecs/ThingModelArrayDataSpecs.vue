@@ -1,3 +1,4 @@
+<!-- dataType：array 数组类型 -->
 <template>
   <el-form-item label="元素类型" prop="property.dataSpecs.childDataType">
     <el-radio-group v-model="dataSpecs.childDataType" @change="handleChange">

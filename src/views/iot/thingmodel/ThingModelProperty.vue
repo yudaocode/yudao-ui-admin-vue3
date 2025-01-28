@@ -1,3 +1,4 @@
+<!-- 产品的物模型表单（property 项） -->
 <template>
   <el-form-item
     :rules="[{ required: true, message: '请选择数据类型', trigger: 'change' }]"
@@ -5,7 +6,7 @@
     prop="property.dataType"
   >
     <el-select v-model="property.dataType" placeholder="请选择数据类型" @change="handleChange">
-      <!-- ARRAY 和 STRUCT 类型数据相互嵌套时，最多支持递归嵌套2层（父和子） -->
+      <!-- ARRAY 和 STRUCT 类型数据相互嵌套时，最多支持递归嵌套 2 层（父和子） -->
       <el-option
         v-for="option in getDataTypeOptions"
         :key="option.value"
@@ -63,7 +64,7 @@
   </el-form-item>
   <!-- 时间型配置 -->
   <el-form-item v-if="property.dataType === DataSpecsDataType.DATE" label="时间格式" prop="date">
-    <el-input class="w-255px!" disabled placeholder="String类型的UTC时间戳（毫秒）" />
+    <el-input class="w-255px!" disabled placeholder="String 类型的 UTC 时间戳（毫秒）" />
   </el-form-item>
   <!-- 数组型配置-->
   <ThingModelArrayDataSpecs
@@ -75,6 +76,7 @@
     v-if="property.dataType === DataSpecsDataType.STRUCT"
     v-model="property.dataSpecsList"
   />
+  <!-- TODO @puhui999：默认选中第一个 -->
   <el-form-item v-if="!isStructDataSpecs && !isParams" label="读写类型" prop="property.accessMode">
     <el-radio-group v-model="property.accessMode">
       <el-radio :label="ThingModelAccessMode.READ_WRITE.value">
@@ -120,8 +122,8 @@ const getDataTypeOptions = computed(() => {
 
 /** 属性值的数据类型切换时初始化相关数据 */
 const handleChange = (dataType: any) => {
-  property.value.dataSpecsList = []
   property.value.dataSpecs = {}
+  property.value.dataSpecsList = []
   // 不是列表型数据才设置 dataSpecs.dataType
   ![DataSpecsDataType.ENUM, DataSpecsDataType.BOOL, DataSpecsDataType.STRUCT].includes(dataType) &&
     (property.value.dataSpecs.dataType = dataType)

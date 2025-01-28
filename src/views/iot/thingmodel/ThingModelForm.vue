@@ -1,3 +1,4 @@
+<!-- 产品的物模型表单 -->
 <template>
   <Dialog v-model="dialogVisible" :title="dialogTitle">
     <el-form

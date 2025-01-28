@@ -1,9 +1,11 @@
+<!-- 产品的物模型表单（event 项） -->
 <template>
   <el-form-item
     :rules="[{ required: true, message: '请选择事件类型', trigger: 'change' }]"
     label="事件类型"
     prop="event.type"
   >
+    <!-- TODO @puhui999：默认选中，INFO 信息 -->
     <el-radio-group v-model="thingModelEvent.type">
       <el-radio :value="ThingModelEventType.INFO.value">
         {{ ThingModelEventType.INFO.label }}

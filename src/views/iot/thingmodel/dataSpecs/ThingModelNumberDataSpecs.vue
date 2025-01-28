@@ -1,3 +1,4 @@
+<!-- dataType：number 数组类型 -->
 <template>
   <el-form-item label="取值范围">
     <div class="flex items-center justify-between">
@@ -43,7 +44,7 @@
       :model-value="dataSpecs.unit ? dataSpecs.unitName + '-' + dataSpecs.unit : ''"
       filterable
       placeholder="请选择单位"
-      style="width: 240px"
+      class="w-1/1"
       @change="unitChange"
     >
       <el-option
