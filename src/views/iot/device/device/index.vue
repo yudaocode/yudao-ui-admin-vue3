@@ -209,7 +209,9 @@
                   </div>
                   <div class="mb-2.5 last:mb-0">
                     <span class="text-[#717c8e] mr-2.5">DeviceKey</span>
-                    <span class="text-[#0b1d30] whitespace-normal break-all">{{ item.deviceKey }}</span>
+                    <span class="text-[#0b1d30] inline-block align-middle overflow-hidden text-ellipsis whitespace-nowrap max-w-[130px]">
+                      {{ item.deviceKey }}
+                    </span>
                   </div>
                 </div>
                 <div class="w-[100px] h-[100px]">

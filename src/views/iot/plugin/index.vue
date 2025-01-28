@@ -139,9 +139,9 @@
                 <div class="flex-1">
                   <div class="mb-2.5 last:mb-0">
                     <span class="text-[#717c8e] mr-2.5">插件标识</span>
-                    <span class="text-[#0b1d30] whitespace-normal break-all">{{
-                      item.pluginKey
-                    }}</span>
+                    <span class="text-[#0b1d30] whitespace-normal break-all">
+                      {{ item.pluginKey }}
+                    </span>
                   </div>
                   <div class="mb-2.5 last:mb-0">
                     <span class="text-[#717c8e] mr-2.5">jar包</span>
