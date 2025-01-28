@@ -37,11 +37,11 @@
         <el-table-column
           label="时间"
           align="center"
-          prop="time"
+          prop="updateTime"
           :formatter="dateFormatter"
           width="180px"
         />
-        <el-table-column label="原始值" align="center" prop="data" />
+        <el-table-column label="属性值" align="center" prop="value" />
       </el-table>
       <!-- 分页 -->
       <Pagination
@@ -72,7 +72,7 @@ const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
   deviceId: -1,
-  identifier: undefined as string | undefined,
+  identifier: '',
   times: [
     // 默认显示最近一周的数据
     formatDate(beginOfDay(new Date(new Date().getTime() - 3600 * 1000 * 24 * 7))),
@@ -85,7 +85,7 @@ const queryFormRef = ref() // 搜索的表单
 const getList = async () => {
   detailLoading.value = true
   try {
-    const data = await DeviceApi.getDevicePropertiesHistoryData(queryParams)
+    const data = await DeviceApi.getHistoryDevicePropertyPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -94,7 +94,7 @@ const getList = async () => {
 }
 
 /** 打开弹窗 */
-const open = async (deviceId: number, identifier: String) => {
+const open = (deviceId: number, identifier: string) => {
   dialogVisible.value = true
   queryParams.deviceId = deviceId
   queryParams.identifier = identifier

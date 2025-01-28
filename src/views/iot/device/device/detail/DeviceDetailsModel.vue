@@ -57,7 +57,7 @@
                   <el-button
                     link
                     type="primary"
-                    @click="openDetail(scope.row.deviceId, scope.row.identifier)"
+                    @click="openDetail(props.device.id, scope.row.identifier)"
                   >
                     查看数据
                   </el-button>
@@ -102,7 +102,7 @@ const getList = async () => {
   loading.value = true
   try {
     queryParams.deviceId = props.device.id
-    list.value = await DeviceApi.getDevicePropertiesLatestData(queryParams)
+    list.value = await DeviceApi.getLatestDeviceProperties(queryParams)
   } finally {
     loading.value = false
   }
@@ -123,7 +123,7 @@ const resetQuery = () => {
 
 /** 添加/修改操作 */
 const detailRef = ref()
-const openDetail = (deviceId: number, identifier: String) => {
+const openDetail = (deviceId: number, identifier: string) => {
   detailRef.value.open(deviceId, identifier)
 }
 
