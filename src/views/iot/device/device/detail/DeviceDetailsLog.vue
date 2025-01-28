@@ -34,10 +34,10 @@
     </el-form>
 
     <!-- 日志列表 -->
-    <el-table v-loading="loading" :data="logList" :stripe="true" class="whitespace-nowrap">
-      <el-table-column label="时间" align="center" prop="time" width="180">
+    <el-table v-loading="loading" :data="list" :stripe="true" class="whitespace-nowrap">
+      <el-table-column label="时间" align="center" prop="ts" width="180">
         <template #default="scope">
-          {{ formatDate(scope.row.time) }}
+          {{ formatDate(scope.row.ts) }}
         </template>
       </el-table-column>
       <el-table-column label="类型" align="center" prop="type" width="120" />
@@ -78,7 +78,7 @@ const queryParams = reactive({
 // 列表数据
 const loading = ref(false)
 const total = ref(0)
-const logList = ref([]) // TODO @super：logList -> list，简洁一点。因为当前就一个 table 哈
+const list = ref([])
 const autoRefresh = ref(false)
 let timer: any = null // TODO @super：autoRefreshEnable，autoRefreshTimer；对应上
 
@@ -96,18 +96,9 @@ const getLogList = async () => {
   if (!props.deviceKey) return
   loading.value = true
   try {
-    const res = await DeviceApi.getDeviceLogPage(queryParams)
-    total.value = res.total
-    // TODO @super：尽量不转换
-    logList.value = res.list.map((item: any) => {
-      const log = {
-        time: item.reportTime,
-        type: item.type,
-        subType: item.subType,
-        content: item.content
-      }
-      return log
-    })
+    const data = await DeviceApi.getDeviceLogPage(queryParams)
+    total.value = data.total
+    list.value = data.list
   } finally {
     loading.value = false
   }

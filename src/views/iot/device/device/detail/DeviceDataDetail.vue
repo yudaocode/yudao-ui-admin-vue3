@@ -1,4 +1,4 @@
-<!-- TODO 芋艿：待 review -->
+<!-- 设备物模型 -> 运行状态 -> 查看数据（设备的属性值历史）-->
 <template>
   <Dialog title="查看数据" v-model="dialogVisible">
     <ContentWrap>
@@ -32,6 +32,9 @@
         </el-form-item>
       </el-form>
     </ContentWrap>
+
+    <!-- TODO @haohao：可参考阿里云 IoT，改成“图标”、“表格”两个选项 -->
+    <!-- 列表 -->
     <ContentWrap>
       <el-table v-loading="detailLoading" :data="list" :stripe="true" :show-overflow-tooltip="true">
         <el-table-column

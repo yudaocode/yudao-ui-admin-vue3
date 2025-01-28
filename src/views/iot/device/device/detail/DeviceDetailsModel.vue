@@ -44,6 +44,7 @@
               <el-table-column label="属性标识符" align="center" prop="identifier" />
               <el-table-column label="属性名称" align="center" prop="name" />
               <el-table-column label="数据类型" align="center" prop="dataType" />
+              <el-table-column label="属性值" align="center" prop="value" />
               <el-table-column
                 label="更新时间"
                 align="center"
@@ -51,7 +52,6 @@
                 :formatter="dateFormatter"
                 width="180px"
               />
-              <el-table-column label="最新值" align="center" prop="value" />
               <el-table-column label="操作" align="center">
                 <template #default="scope">
                   <el-button
@@ -59,7 +59,7 @@
                     type="primary"
                     @click="openDetail(props.device.id, scope.row.identifier)"
                   >
-                    查看数据
+                    历史
                   </el-button>
                 </template>
               </el-table-column>

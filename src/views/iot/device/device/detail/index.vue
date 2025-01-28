@@ -75,6 +75,6 @@ onMounted(async () => {
     return
   }
   await getDeviceData(id)
-  activeTab.value = route.query.tab as string
+  activeTab.value = (route.query.tab as string) || 'info'
 })
 </script>
