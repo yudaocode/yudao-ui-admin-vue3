@@ -25,10 +25,6 @@
             <Icon icon="ep:search" class="mr-5px" />
             搜索
           </el-button>
-          <el-button @click="resetQuery">
-            <Icon icon="ep:refresh" class="mr-5px" />
-            重置
-          </el-button>
         </el-form-item>
       </el-form>
     </ContentWrap>
@@ -108,12 +104,6 @@ const open = (deviceId: number, identifier: string) => {
 const handleQuery = () => {
   queryParams.pageNo = 1
   getList()
-}
-
-/** 重置按钮操作 */
-const resetQuery = () => {
-  queryFormRef.value.resetFields()
-  handleQuery()
 }
 
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗

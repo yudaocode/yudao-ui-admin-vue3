@@ -41,9 +41,9 @@
         <ContentWrap>
           <el-tabs>
             <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
-              <el-table-column label="属性标识符" align="center" prop="identifier" />
-              <el-table-column label="属性名称" align="center" prop="name" />
-              <el-table-column label="数据类型" align="center" prop="dataType" />
+              <el-table-column label="属性标识符" align="center" prop="property.identifier" />
+              <el-table-column label="属性名称" align="center" prop="property.name" />
+              <el-table-column label="数据类型" align="center" prop="property.dataType" />
               <el-table-column label="属性值" align="center" prop="value" />
               <el-table-column
                 label="更新时间"
@@ -57,9 +57,9 @@
                   <el-button
                     link
                     type="primary"
-                    @click="openDetail(props.device.id, scope.row.identifier)"
+                    @click="openDetail(props.device.id, scope.row.property.identifier)"
                   >
-                    历史
+                    查看数据
                   </el-button>
                 </template>
               </el-table-column>
