@@ -142,10 +142,10 @@
               <el-tab-pane label="状态变更" name="status">
                 <ContentWrap>
                   <div class="flex gap-4">
-                    <el-button type="primary" @click="handleDeviceState('online')">
+                    <el-button type="primary" @click="handleDeviceState(DeviceStateEnum.ONLINE)">
                       设备上线
                     </el-button>
-                    <el-button type="primary" @click="handleDeviceState('offline')">
+                    <el-button type="danger" @click="handleDeviceState(DeviceStateEnum.OFFLINE)">
                       设备下线
                     </el-button>
                   </div>
@@ -210,7 +210,7 @@
 <script setup lang="ts">
 import { ProductVO } from '@/api/iot/product/product'
 import { ThingModelApi, SimulatorData } from '@/api/iot/thingmodel'
-import { DeviceApi, DeviceVO } from '@/api/iot/device/device'
+import { DeviceApi, DeviceStateEnum, DeviceVO } from '@/api/iot/device/device'
 import DeviceDetailsLog from './DeviceDetailsLog.vue'
 import {
   DataSpecsDataType,
@@ -372,26 +372,20 @@ const handlePropertyReport = async () => {
 //   }
 // }
 
-// // 处理设备状态变更
-// const handleDeviceState = async (state: 'online' | 'offline') => {
-//   const reportData: ReportData = {
-//     productKey: props.product.productKey,
-//     deviceKey: props.device.deviceKey,
-//     type: 'status',
-//     subType: state,
-//     reportTime: new Date().toISOString(),
-//     content: JSON.stringify({ status: state })  // 转换为 JSON 字符串
-//   }
-
-//   try {
-//     // TODO: 调用API发送数据
-//     console.log('状态变更数据:', reportData)
-//     console.log('reportData.content111111111', reportData.content)
-//     message.success(`设备${state === 'online' ? '上线' : '下线'}成功`)
-//   } catch (error) {
-//     message.error(`设备${state === 'online' ? '上线' : '下线'}失败`)
-//   }
-// }
+/** 处理设备状态 */
+const handleDeviceState = async (state: number) => {
+  try {
+    await DeviceApi.simulationReportDevice({
+      id: props.device.id,
+      type: 'state',
+      identifier: 'report',
+      data: state
+    })
+    message.success(`设备${state === DeviceStateEnum.ONLINE ? '上线' : '下线'}成功`)
+  } catch (error) {
+    message.error(`设备${state === DeviceStateEnum.ONLINE ? '上线' : '下线'}失败`)
+  }
+}
 
 // 处理属性获取
 const handlePropertyGet = async () => {

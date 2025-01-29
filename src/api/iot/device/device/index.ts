@@ -50,11 +50,10 @@ export interface DeviceHistoryDataVO {
 }
 
 // IoT 设备状态枚举
-export enum DeviceStatusEnum {
+export enum DeviceStateEnum {
   INACTIVE = 0, // 未激活
   ONLINE = 1, // 在线
-  OFFLINE = 2, // 离线
-  DISABLED = 3 // 已禁用
+  OFFLINE = 2 // 离线
 }
 
 // IoT 模拟设备上报数据 Request VO
@@ -62,7 +61,7 @@ export interface IotDeviceSimulationReportReqVO {
   id: number // 设备编号
   type: string // 消息类型
   identifier: string // 标识符
-  data: object // 请求参数
+  data: any // 请求参数
 }
 
 // 设备 API

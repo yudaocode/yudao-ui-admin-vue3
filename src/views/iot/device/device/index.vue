@@ -161,7 +161,7 @@
             <div
               class="absolute top-0 left-0 right-0 h-[50px] pointer-events-none"
               :class="[
-                item.state === DeviceStatusEnum.ONLINE
+                item.state === DeviceStateEnum.ONLINE
                   ? 'bg-gradient-to-b from-[#eefaff] to-transparent'
                   : 'bg-gradient-to-b from-[#fff1f1] to-transparent'
               ]"
@@ -179,7 +179,7 @@
                   <div
                     class="w-1 h-1 rounded-full mr-1.5"
                     :class="
-                      item.state === DeviceStatusEnum.ONLINE
+                      item.state === DeviceStateEnum.ONLINE
                         ? 'bg-[var(--el-color-success)]'
                         : 'bg-[var(--el-color-danger)]'
                     "
@@ -187,7 +187,7 @@
                   </div>
                   <el-text
                     class="!text-xs font-bold"
-                    :type="item.state === DeviceStatusEnum.ONLINE ? 'success' : 'danger'"
+                    :type="item.state === DeviceStateEnum.ONLINE ? 'success' : 'danger'"
                   >
                     {{ getDictLabel(DICT_TYPE.IOT_DEVICE_STATE, item.state) }}
                   </el-text>
@@ -369,7 +369,7 @@
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions, getDictLabel } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { DeviceApi, DeviceVO, DeviceStatusEnum } from '@/api/iot/device/device'
+import { DeviceApi, DeviceVO, DeviceStateEnum } from '@/api/iot/device/device'
 import DeviceForm from './DeviceForm.vue'
 import { ProductApi, ProductVO } from '@/api/iot/product/product'
 import { DeviceGroupApi, DeviceGroupVO } from '@/api/iot/device/group'
