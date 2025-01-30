@@ -103,7 +103,7 @@
                     <el-button
                       type="primary"
                       @click="handlePropertyReport"
-                      v-hasPermi="['iot:device:simulation-report']"
+                      v-hasPermi="['iot:device:simulation']"
                     >
                       发送
                     </el-button>
@@ -331,7 +331,7 @@ const handlePropertyReport = async () => {
   })
 
   try {
-    await DeviceApi.simulationReportDevice({
+    await DeviceApi.simulationDeviceUpstream({
       id: props.device.id,
       type: 'property',
       identifier: 'report',
@@ -375,7 +375,7 @@ const handlePropertyReport = async () => {
 /** 处理设备状态 */
 const handleDeviceState = async (state: number) => {
   try {
-    await DeviceApi.simulationReportDevice({
+    await DeviceApi.simulationDeviceUpstream({
       id: props.device.id,
       type: 'state',
       identifier: 'report',

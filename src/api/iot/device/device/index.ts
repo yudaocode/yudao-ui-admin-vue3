@@ -56,8 +56,16 @@ export enum DeviceStateEnum {
   OFFLINE = 2 // 离线
 }
 
-// IoT 模拟设备上报数据 Request VO
-export interface IotDeviceSimulationReportReqVO {
+// IoT 模拟设备上行数据 Request VO
+export interface IotDeviceSimulationUpstreamReqVO {
+  id: number // 设备编号
+  type: string // 消息类型
+  identifier: string // 标识符
+  data: any // 请求参数
+}
+
+// IoT 模拟设备下行数据 Request VO
+export interface IotDeviceSimulationDownstreamReqVO {
   id: number // 设备编号
   type: string // 消息类型
   identifier: string // 标识符
@@ -121,9 +129,14 @@ export const DeviceApi = {
     return await request.download({ url: `/iot/device/get-import-template` })
   },
 
-  // 模拟设备上报
-  simulationReportDevice: async (data: IotDeviceSimulationReportReqVO) => {
-    return await request.post({ url: `/iot/device/simulation-report`, data })
+  // 模拟设备上行
+  simulationDeviceUpstream: async (data: IotDeviceSimulationUpstreamReqVO) => {
+    return await request.post({ url: `/iot/device/simulation-upstream`, data })
+  },
+
+  // 模拟设备下行
+  simulationDeviceDownstream: async (data: IotDeviceSimulationDownstreamReqVO) => {
+    return await request.post({ url: `/iot/device/simulation-downstream`, data })
   },
 
   // 获取设备属性最新数据
