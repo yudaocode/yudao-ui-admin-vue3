@@ -100,13 +100,7 @@
                   </el-table>
                   <!-- TODO @super：发送按钮，可以放在右侧哈。因为我们的 simulateValue 就在最右侧 -->
                   <div class="mt-10px">
-                    <el-button
-                      type="primary"
-                      @click="handlePropertyReport"
-                      v-hasPermi="['iot:device:simulation']"
-                    >
-                      发送
-                    </el-button>
+                    <el-button type="primary" @click="handlePropertyReport"> 发送 </el-button>
                   </div>
                 </ContentWrap>
               </el-tab-pane>
@@ -331,7 +325,7 @@ const handlePropertyReport = async () => {
   })
 
   try {
-    await DeviceApi.simulationDeviceUpstream({
+    await DeviceApi.upstreamDevice({
       id: props.device.id,
       type: 'property',
       identifier: 'report',
@@ -375,7 +369,7 @@ const handlePropertyReport = async () => {
 /** 处理设备状态 */
 const handleDeviceState = async (state: number) => {
   try {
-    await DeviceApi.simulationDeviceUpstream({
+    await DeviceApi.upstreamDevice({
       id: props.device.id,
       type: 'state',
       identifier: 'report',
