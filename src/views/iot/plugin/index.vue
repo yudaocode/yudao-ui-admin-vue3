@@ -1,3 +1,4 @@
+<!-- TODO @芋艿：增加一个【运维管理】，然后把插件放过去？ -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -64,7 +65,7 @@
       <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
         <el-table-column label="插件名称" align="center" prop="name" />
         <el-table-column label="插件标识" align="center" prop="pluginKey" />
-        <el-table-column label="jar包" align="center" prop="file" />
+        <el-table-column label="jar 包" align="center" prop="file" />
         <el-table-column label="版本号" align="center" prop="version" />
         <el-table-column label="部署方式" align="center" prop="deployType">
           <template #default="scope">
@@ -144,7 +145,7 @@
                     </span>
                   </div>
                   <div class="mb-2.5 last:mb-0">
-                    <span class="text-[#717c8e] mr-2.5">jar包</span>
+                    <span class="text-[#717c8e] mr-2.5">jar 包</span>
                     <span class="text-[#0b1d30]">{{ item.fileName }}</span>
                   </div>
                   <div class="mb-2.5 last:mb-0">
@@ -155,6 +156,7 @@
                     <span class="text-[#717c8e] mr-2.5">部署方式</span>
                     <dict-tag :type="DICT_TYPE.IOT_PLUGIN_DEPLOY_TYPE" :value="item.deployType" />
                   </div>
+                  <!-- TODO @haohao：这里【状态】要不去掉，变成：1）通过颜色，区分开启、禁用，类似 device 上线状态；2）开启、禁用操作，放到下面的“按钮”，3 个一排，好看电 -->
                   <div class="mb-2.5 last:mb-0">
                     <span class="text-[#717c8e] mr-2.5">状态</span>
                     <el-switch
