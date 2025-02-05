@@ -36,7 +36,7 @@ const dialogVisible = ref(false) // 弹窗的是否展示
 const formLoading = ref(false) // 表单的加载中
 const uploadRef = ref()
 const importUrl =
-  import.meta.env.VITE_BASE_URL + import.meta.env.VITE_API_URL + '/iot/plugin-info/upload-file'
+  import.meta.env.VITE_BASE_URL + import.meta.env.VITE_API_URL + '/iot/plugin-config/upload-file'
 const uploadHeaders = ref() // 上传 Header 头
 const fileList = ref([]) // 文件列表
 

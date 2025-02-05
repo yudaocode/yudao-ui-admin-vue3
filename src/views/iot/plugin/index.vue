@@ -1,4 +1,3 @@
-<!-- TODO @芋艿：增加一个【运维管理】，然后把插件放过去？ -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
@@ -51,7 +50,7 @@
           type="primary"
           plain
           @click="openForm('create')"
-          v-hasPermi="['iot:plugin-info:create']"
+          v-hasPermi="['iot:plugin-config:create']"
         >
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
@@ -65,7 +64,7 @@
       <el-table v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
         <el-table-column label="插件名称" align="center" prop="name" />
         <el-table-column label="插件标识" align="center" prop="pluginKey" />
-        <el-table-column label="jar 包" align="center" prop="file" />
+        <el-table-column label="jar 包" align="center" prop="fileName" />
         <el-table-column label="版本号" align="center" prop="version" />
         <el-table-column label="部署方式" align="center" prop="deployType">
           <template #default="scope">
@@ -103,7 +102,7 @@
               link
               type="primary"
               @click="openForm('update', scope.row.id)"
-              v-hasPermi="['iot:plugin-info:update']"
+              v-hasPermi="['iot:plugin-config:update']"
             >
               编辑
             </el-button>
@@ -111,7 +110,7 @@
               link
               type="danger"
               @click="handleDelete(scope.row.id)"
-              v-hasPermi="['iot:plugin-info:delete']"
+              v-hasPermi="['iot:plugin-config:delete']"
             >
               删除
             </el-button>
@@ -133,6 +132,24 @@
                   <el-image :src="defaultIconUrl" class="w-[18px] h-[18px]" />
                 </div>
                 <div class="text-[16px] font-600 flex-1">{{ item.name }}</div>
+                <!-- 添加插件状态标签 -->
+                <div class="inline-flex items-center">
+                  <div
+                    class="w-1 h-1 rounded-full mr-1.5"
+                    :class="
+                      item.status === 1
+                        ? 'bg-[var(--el-color-success)]'
+                        : 'bg-[var(--el-color-danger)]'
+                    "
+                  >
+                  </div>
+                  <el-text
+                    class="!text-xs font-bold"
+                    :type="item.status === 1 ? 'success' : 'danger'"
+                  >
+                    {{ item.status === 1 ? '开启' : '禁用' }}
+                  </el-text>
+                </div>
               </div>
 
               <!-- 信息区域 -->
@@ -156,16 +173,6 @@
                     <span class="text-[#717c8e] mr-2.5">部署方式</span>
                     <dict-tag :type="DICT_TYPE.IOT_PLUGIN_DEPLOY_TYPE" :value="item.deployType" />
                   </div>
-                  <!-- TODO @haohao：这里【状态】要不去掉，变成：1）通过颜色，区分开启、禁用，类似 device 上线状态；2）开启、禁用操作，放到下面的“按钮”，3 个一排，好看电 -->
-                  <div class="mb-2.5 last:mb-0">
-                    <span class="text-[#717c8e] mr-2.5">状态</span>
-                    <el-switch
-                      v-model="item.status"
-                      :active-value="1"
-                      :inactive-value="0"
-                      @change="handleStatusChange(item.id, Number($event))"
-                    />
-                  </div>
                 </div>
               </div>
 
@@ -179,7 +186,7 @@
                   type="primary"
                   plain
                   @click="openForm('update', item.id)"
-                  v-hasPermi="['iot:plugin-info:update']"
+                  v-hasPermi="['iot:plugin-config:update']"
                 >
                   <Icon icon="ep:edit-pen" class="mr-1" />
                   编辑
@@ -220,23 +227,23 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <PluginInfoForm ref="formRef" @success="getList" />
+  <PluginConfigForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
-import { PluginInfoApi, PluginInfoVO } from '@/api/iot/plugininfo'
-import PluginInfoForm from './PluginInfoForm.vue'
+import { PluginConfigApi, PluginConfigVO } from '@/api/iot/plugin'
+import PluginConfigForm from './PluginConfigForm.vue'
 
-/** IoT 插件信息 列表 */
+/** IoT 插件配置 列表 */
 defineOptions({ name: 'IoTPlugin' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<PluginInfoVO[]>([]) // 列表的数据
+const list = ref<PluginConfigVO[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
@@ -252,7 +259,7 @@ const viewMode = ref<'card' | 'list'>('card') // 视图模式状态
 const getList = async () => {
   loading.value = true
   try {
-    const data = await PluginInfoApi.getPluginInfoPage(queryParams)
+    const data = await PluginConfigApi.getPluginConfigPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -290,7 +297,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await PluginInfoApi.deletePluginInfo(id)
+    await PluginConfigApi.deletePluginConfig(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -303,7 +310,7 @@ const handleStatusChange = async (id: number, status: number) => {
     // 修改状态的二次确认
     const text = status === 1 ? '启用' : '停用'
     await message.confirm('确认要"' + text + '"插件吗?')
-    await PluginInfoApi.updatePluginStatus({
+    await PluginConfigApi.updatePluginStatus({
       id: id,
       status
     })

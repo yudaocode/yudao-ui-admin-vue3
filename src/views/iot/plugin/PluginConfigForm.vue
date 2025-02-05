@@ -29,10 +29,10 @@
 </template>
 <script setup lang="ts">
 import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
-import { PluginInfoApi, PluginInfoVO } from '@/api/iot/plugininfo'
+import { PluginConfigApi, PluginConfigVO } from '@/api/iot/plugin'
 
-/** IoT 插件信息 表单 */
-defineOptions({ name: 'PluginInfoForm' })
+/** IoT 插件配置 表单 */
+defineOptions({ name: 'PluginConfigForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -62,7 +62,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await PluginInfoApi.getPluginInfo(id)
+      formData.value = await PluginConfigApi.getPluginConfig(id)
     } finally {
       formLoading.value = false
     }
@@ -78,12 +78,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as PluginInfoVO
+    const data = formData.value as unknown as PluginConfigVO
     if (formType.value === 'create') {
-      await PluginInfoApi.createPluginInfo(data)
+      await PluginConfigApi.createPluginConfig(data)
       message.success(t('common.createSuccess'))
     } else {
-      await PluginInfoApi.updatePluginInfo(data)
+      await PluginConfigApi.updatePluginConfig(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
