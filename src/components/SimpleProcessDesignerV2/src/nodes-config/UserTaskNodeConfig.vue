@@ -760,22 +760,22 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   getNodeConfigFormFields(node.fieldsPermission)
   // 5. 监听器
   // 5.1 创建任务
-  configForm.value.taskCreateListenerEnable = node.taskCreateListener!.enable
-  configForm.value.taskCreateListenerPath = node.taskCreateListener!.path
+  configForm.value.taskCreateListenerEnable = node.taskCreateListener?.enable
+  configForm.value.taskCreateListenerPath = node.taskCreateListener?.path
   configForm.value.taskCreateListener = {
     header: node.taskCreateListener?.header ?? [],
     body: node.taskCreateListener?.body ?? []
   }
   // 5.2 指派任务
-  configForm.value.taskAssignListenerEnable = node.taskAssignListener!.enable
-  configForm.value.taskAssignListenerPath = node.taskAssignListener!.path
+  configForm.value.taskAssignListenerEnable = node.taskAssignListener?.enable
+  configForm.value.taskAssignListenerPath = node.taskAssignListener?.path
   configForm.value.taskAssignListener = {
     header: node.taskAssignListener?.header ?? [],
     body: node.taskAssignListener?.body ?? []
   }
  // 5.3 完成任务
-  configForm.value.taskCompleteListenerEnable = node.taskCompleteListener!.enable
-  configForm.value.taskCompleteListenerPath = node.taskCompleteListener!.path
+  configForm.value.taskCompleteListenerEnable = node.taskCompleteListener?.enable
+  configForm.value.taskCompleteListenerPath = node.taskCompleteListener?.path
   configForm.value.taskCompleteListener = {
     header: node.taskCompleteListener?.header ?? [],
     body: node.taskCompleteListener?.body ?? []
