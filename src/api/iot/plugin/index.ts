@@ -19,32 +19,32 @@ export interface PluginConfigVO {
 
 // IoT 插件配置 API
 export const PluginConfigApi = {
-  // 查询IoT 插件配置分页
+  // 查询插件配置分页
   getPluginConfigPage: async (params: any) => {
     return await request.get({ url: `/iot/plugin-config/page`, params })
   },
 
-  // 查询IoT 插件配置详情
+  // 查询插件配置详情
   getPluginConfig: async (id: number) => {
     return await request.get({ url: `/iot/plugin-config/get?id=` + id })
   },
 
-  // 新增IoT 插件配置
+  // 新增插件配置
   createPluginConfig: async (data: PluginConfigVO) => {
     return await request.post({ url: `/iot/plugin-config/create`, data })
   },
 
-  // 修改IoT 插件配置
+  // 修改插件配置
   updatePluginConfig: async (data: PluginConfigVO) => {
     return await request.put({ url: `/iot/plugin-config/update`, data })
   },
 
-  // 删除IoT 插件配置
+  // 删除插件配置
   deletePluginConfig: async (id: number) => {
     return await request.delete({ url: `/iot/plugin-config/delete?id=` + id })
   },
 
-  // 修改IoT 插件状态
+  // 修改插件状态
   updatePluginStatus: async (data: any) => {
     return await request.put({ url: `/iot/plugin-config/update-status`, data })
   }
