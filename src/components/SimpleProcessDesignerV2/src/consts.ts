@@ -716,7 +716,8 @@ export type RouterSetting = {
  */
 export type TriggerSetting = {
   type: TriggerTypeEnum
-  httpRequestSetting: HttpRequestTriggerSetting
+  httpRequestSetting?: HttpRequestTriggerSetting
+  normalFormSetting?: NormalFormTriggerSetting
 }
 
 /**
@@ -726,7 +727,11 @@ export enum TriggerTypeEnum {
   /**
    * 发送 HTTP 请求触发器
    */
-  HTTP_REQUEST = 1
+  HTTP_REQUEST = 1,
+  /**
+   * 更新流程表单触发器
+   */
+  UPDATE_NORMAL_FORM = 2
 }
 
 /**
@@ -743,6 +748,15 @@ export type HttpRequestTriggerSetting = {
   response?: Record<string, string>[]
 }
 
+/**
+ * 流程表单触发器配置结构定义
+ */
+export type NormalFormTriggerSetting = {
+  // 更新表单字段
+  updateFormFields?: Record<string, any>
+}
+
 export const TRIGGER_TYPES: DictDataVO[] = [
-  { label: 'HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST }
+  { label: 'HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST },
+  { label: '修改表单数据', value: TriggerTypeEnum.UPDATE_NORMAL_FORM }
 ]
