@@ -61,7 +61,7 @@
               label="指定角色"
               prop="roleIds"
             >
-              <el-select v-model="configForm.roleIds" clearable multiple style="width: 100%">
+              <el-select filterable v-model="configForm.roleIds" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in roleOptions"
                   :key="item.id"
@@ -99,7 +99,7 @@
               prop="postIds"
               span="24"
             >
-              <el-select v-model="configForm.postIds" clearable multiple style="width: 100%">
+              <el-select filterable v-model="configForm.postIds" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in postOptions"
                   :key="item.id"
@@ -114,7 +114,7 @@
               prop="userIds"
               span="24"
             >
-              <el-select v-model="configForm.userIds" clearable multiple style="width: 100%">
+              <el-select filterable v-model="configForm.userIds" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in userOptions"
                   :key="item.id"
@@ -128,7 +128,7 @@
               label="指定用户组"
               prop="userGroups"
             >
-              <el-select v-model="configForm.userGroups" clearable multiple style="width: 100%">
+              <el-select filterable v-model="configForm.userGroups" clearable multiple style="width: 100%">
                 <el-option
                   v-for="item in userGroupOptions"
                   :key="item.id"
@@ -142,7 +142,7 @@
               label="表单内用户字段"
               prop="formUser"
             >
-              <el-select v-model="configForm.formUser" clearable style="width: 100%">
+              <el-select filterable v-model="configForm.formUser" clearable style="width: 100%">
                 <el-option
                   v-for="(item, idx) in userFieldOnFormOptions"
                   :key="idx"
@@ -157,7 +157,7 @@
               label="表单内部门字段"
               prop="formDept"
             >
-              <el-select v-model="configForm.formDept" clearable style="width: 100%">
+              <el-select filterable v-model="configForm.formDept" clearable style="width: 100%">
                 <el-option
                   v-for="(item, idx) in deptFieldOnFormOptions"
                   :key="idx"
@@ -179,7 +179,7 @@
               prop="deptLevel"
               span="24"
             >
-              <el-select v-model="configForm.deptLevel" clearable>
+              <el-select filterable v-model="configForm.deptLevel" clearable>
                 <el-option
                   v-for="(item, index) in MULTI_LEVEL_DEPT"
                   :key="index"
@@ -245,7 +245,7 @@
               label="驳回节点"
               prop="returnNodeId"
             >
-              <el-select v-model="configForm.returnNodeId" clearable style="width: 100%">
+              <el-select filterable v-model="configForm.returnNodeId" clearable style="width: 100%">
                 <el-option
                   v-for="item in returnTaskList"
                   :key="item.id"
@@ -293,6 +293,7 @@
                 />
               </el-form-item>
               <el-select
+                filterable
                 v-model="timeUnit"
                 class="mr-2"
                 :style="{ width: '100px' }"
@@ -332,6 +333,7 @@
               span="24"
             >
               <el-select
+                filterable
                 v-model="configForm.assignEmptyHandlerUserIds"
                 clearable
                 multiple
@@ -758,22 +760,22 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   getNodeConfigFormFields(node.fieldsPermission)
   // 5. 监听器
   // 5.1 创建任务
-  configForm.value.taskCreateListenerEnable = node.taskCreateListener!.enable
-  configForm.value.taskCreateListenerPath = node.taskCreateListener!.path
+  configForm.value.taskCreateListenerEnable = node.taskCreateListener?.enable
+  configForm.value.taskCreateListenerPath = node.taskCreateListener?.path
   configForm.value.taskCreateListener = {
     header: node.taskCreateListener?.header ?? [],
     body: node.taskCreateListener?.body ?? []
   }
   // 5.2 指派任务
-  configForm.value.taskAssignListenerEnable = node.taskAssignListener!.enable
-  configForm.value.taskAssignListenerPath = node.taskAssignListener!.path
+  configForm.value.taskAssignListenerEnable = node.taskAssignListener?.enable
+  configForm.value.taskAssignListenerPath = node.taskAssignListener?.path
   configForm.value.taskAssignListener = {
     header: node.taskAssignListener?.header ?? [],
     body: node.taskAssignListener?.body ?? []
   }
  // 5.3 完成任务
-  configForm.value.taskCompleteListenerEnable = node.taskCompleteListener!.enable
-  configForm.value.taskCompleteListenerPath = node.taskCompleteListener!.path
+  configForm.value.taskCompleteListenerEnable = node.taskCompleteListener?.enable
+  configForm.value.taskCompleteListenerPath = node.taskCompleteListener?.path
   configForm.value.taskCompleteListener = {
     header: node.taskCompleteListener?.header ?? [],
     body: node.taskCompleteListener?.body ?? []
