@@ -83,5 +83,5 @@ export const reqCheck = (data: any) => {
 
 // 通过短信重置密码
 export const smsResetPassword = (data: any) => {
-  return request.post({ url: '/system/auth/sms-reset-password', data })
+  return request.post({ url: '/system/auth/reset-password', data })
 }
