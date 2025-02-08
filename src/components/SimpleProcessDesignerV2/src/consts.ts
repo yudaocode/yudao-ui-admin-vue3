@@ -731,7 +731,7 @@ export enum TriggerTypeEnum {
   /**
    * 更新流程表单触发器
    */
-  UPDATE_NORMAL_FORM = 2
+  UPDATE_NORMAL_FORM = 2 // TODO @jason：FORM_UPDATE？
 }
 
 /**
