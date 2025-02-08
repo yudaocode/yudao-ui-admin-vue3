@@ -16,7 +16,7 @@
       <div class="mr-2">
         <el-select class="w-100px!" v-model="item.type">
           <el-option
-            v-for="types in LISTENER_MAP_TYPES"
+            v-for="types in BPM_HTTP_REQUEST_PARAM_TYPES"
             :key="types.value"
             :label="types.label"
             :value="types.value"
@@ -33,7 +33,7 @@
           }"
         >
           <el-input
-            v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
+            v-if="item.type === BpmHttpRequestParamTypeEnum.FIXED_VALUE"
             class="w-160px"
             v-model="item.value"
           />
@@ -47,7 +47,7 @@
           }"
         >
           <el-select
-            v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
+            v-if="item.type === BpmHttpRequestParamTypeEnum.FROM_FORM"
             class="w-160px!"
             v-model="item.value"
           >
@@ -86,7 +86,7 @@
       <div class="mr-2">
         <el-select class="w-100px!" v-model="item.type">
           <el-option
-            v-for="types in LISTENER_MAP_TYPES"
+            v-for="types in BPM_HTTP_REQUEST_PARAM_TYPES"
             :key="types.value"
             :label="types.label"
             :value="types.value"
@@ -103,7 +103,7 @@
           }"
         >
           <el-input
-            v-if="item.type === ListenerParamTypeEnum.FIXED_VALUE"
+            v-if="item.type === BpmHttpRequestParamTypeEnum.FIXED_VALUE"
             class="w-160px"
             v-model="item.value"
           />
@@ -117,7 +117,7 @@
           }"
         >
           <el-select
-            v-if="item.type === ListenerParamTypeEnum.FROM_FORM"
+            v-if="item.type === BpmHttpRequestParamTypeEnum.FROM_FORM"
             class="w-160px!"
             v-model="item.value"
           >
@@ -141,20 +141,20 @@
   </el-form-item>
 </template>
 <script setup lang="ts">
-import { ListenerParam, LISTENER_MAP_TYPES, ListenerParamTypeEnum } from '../../consts'
-import { useFormFields } from '../../node'
+import { HttpRequestParam, BPM_HTTP_REQUEST_PARAM_TYPES, BpmHttpRequestParamTypeEnum } from '../../consts'
+import { useFormFieldsAndStartUser } from '../../node'
 defineOptions({
   name: 'HttpRequestParamSetting'
 })
 
 const props = defineProps({
   header: {
-    type: Array as () => ListenerParam[],
+    type: Array as () => HttpRequestParam[],
     required: false,
     default: () => []
   },
   body: {
-    type: Array as () => ListenerParam[],
+    type: Array as () => HttpRequestParam[],
     required: false,
     default: () => []
   },
@@ -164,16 +164,19 @@ const props = defineProps({
   }
 })
 
-const formFieldOptions = useFormFields()
-
-const addHttpRequestParam = (arr: ListenerParam[]) => {
+// 流程表单字段，发起人字段
+const formFieldOptions = useFormFieldsAndStartUser()
+/** 添加请求配置项 */
+const addHttpRequestParam = (arr: HttpRequestParam[]) => {
   arr.push({
     key: '',
-    type: ListenerParamTypeEnum.FIXED_VALUE,
+    type: BpmHttpRequestParamTypeEnum.FIXED_VALUE,
     value: ''
   })
 }
-const deleteHttpRequestParam = (arr: ListenerParam[], index: number) => {
+
+/** 删除请求配置项 */
+const deleteHttpRequestParam = (arr: HttpRequestParam[], index: number) => {
   arr.splice(index, 1)
 }
 </script>

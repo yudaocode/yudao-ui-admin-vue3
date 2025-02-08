@@ -14,7 +14,8 @@ import {
   AssignStartUserHandlerType,
   AssignEmptyHandlerType,
   FieldPermissionType,
-  ListenerParam
+  HttpRequestParam,
+  ProcessVariableEnum
 } from './consts'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
 
@@ -105,12 +106,29 @@ export function useFormFieldsPermission(defaultPermission: FieldPermissionType) 
     getNodeConfigFormFields
   }
 }
+
 /**
- * @description 获取表单的字段
+ * @description 获取流程表单的字段
  */
 export function useFormFields() {
   const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   return parseFormCreateFields(unref(formFields))
+}
+
+// TODO @芋艿：后续需要把各种类似 useFormFieldsPermission 的逻辑，抽成一个通用方法。
+/**
+ * @description 获取流程表单的字段和发起人字段
+ */
+export function useFormFieldsAndStartUser() {
+  const injectFormFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
+  const formFields = parseFormCreateFields(unref(injectFormFields))
+  // 添加发起人
+  formFields.unshift({
+    field: ProcessVariableEnum.START_USER_ID,
+    title: '发起人',
+    required: true
+  })
+  return formFields
 }
 
 export type UserTaskFormType = {
@@ -139,20 +157,20 @@ export type UserTaskFormType = {
   taskCreateListenerEnable?: boolean
   taskCreateListenerPath?: string
   taskCreateListener?: {
-    header: ListenerParam[],
-    body: ListenerParam[]
+    header: HttpRequestParam[]
+    body: HttpRequestParam[]
   }
   taskAssignListenerEnable?: boolean
   taskAssignListenerPath?: string
   taskAssignListener?: {
-    header: ListenerParam[],
-    body: ListenerParam[]
+    header: HttpRequestParam[]
+    body: HttpRequestParam[]
   }
   taskCompleteListenerEnable?: boolean
   taskCompleteListenerPath?: string
-  taskCompleteListener?:{
-    header: ListenerParam[],
-    body: ListenerParam[]
+  taskCompleteListener?: {
+    header: HttpRequestParam[]
+    body: HttpRequestParam[]
   }
   signEnable: boolean
   reasonRequire: boolean

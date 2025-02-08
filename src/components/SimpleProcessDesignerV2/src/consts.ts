@@ -246,15 +246,15 @@ export type AssignEmptyHandler = {
 export type ListenerHandler = {
   enable: boolean
   path?: string
-  header?: ListenerParam[]
-  body?: ListenerParam[]
+  header?: HttpRequestParam[]
+  body?: HttpRequestParam[]
 }
-export type ListenerParam = {
+export type HttpRequestParam = {
   key: string
   type: number
   value: string
 }
-export enum ListenerParamTypeEnum {
+export enum BpmHttpRequestParamTypeEnum {
   /**
    * 固定值
    */
@@ -264,7 +264,7 @@ export enum ListenerParamTypeEnum {
    */
   FROM_FORM = 2
 }
-export const LISTENER_MAP_TYPES = [
+export const BPM_HTTP_REQUEST_PARAM_TYPES = [
   {
     value: 1,
     label: '固定值'
@@ -371,13 +371,13 @@ export enum TimeUnitType {
 /**
  * 条件节点设置结构定义，用于条件节点
  */
-export type ConditionSetting =  {
+export type ConditionSetting = {
   // 条件类型
-  conditionType?: ConditionType,
+  conditionType?: ConditionType
   // 条件表达式
-  conditionExpression?: string,
+  conditionExpression?: string
   // 条件组
-  conditionGroups?: ConditionGroup,
+  conditionGroups?: ConditionGroup
   // 是否默认的条件
   defaultFlow?: boolean
 }
@@ -710,13 +710,14 @@ export type RouterSetting = {
   conditionGroups: ConditionGroup
 }
 
-// ==================== 触发器相关定义 ==================== 
+// ==================== 触发器相关定义 ====================
 /**
  * 触发器节点结构定义
  */
 export type TriggerSetting = {
   type: TriggerTypeEnum
-  httpRequestSetting: HttpRequestTriggerSetting
+  httpRequestSetting?: HttpRequestTriggerSetting
+  normalFormSetting?: NormalFormTriggerSetting
 }
 
 /**
@@ -727,6 +728,10 @@ export enum TriggerTypeEnum {
    * 发送 HTTP 请求触发器
    */
   HTTP_REQUEST = 1,
+  /**
+   * 更新流程表单触发器
+   */
+  UPDATE_NORMAL_FORM = 2 // TODO @jason：FORM_UPDATE？
 }
 
 /**
@@ -736,11 +741,22 @@ export type HttpRequestTriggerSetting = {
   // 请求 URL
   url: string
   // 请求头参数设置
-  header?: ListenerParam[] // TODO 需要重命名一下
+  header?: HttpRequestParam[]
   // 请求体参数设置
-  body?: ListenerParam[]
+  body?: HttpRequestParam[]
+  // 请求响应设置
+  response?: Record<string, string>[]
+}
+
+/**
+ * 流程表单触发器配置结构定义
+ */
+export type NormalFormTriggerSetting = {
+  // 更新表单字段
+  updateFormFields?: Record<string, any>
 }
 
 export const TRIGGER_TYPES: DictDataVO[] = [
-  { label: 'HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST }
+  { label: 'HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST },
+  { label: '修改表单数据', value: TriggerTypeEnum.UPDATE_NORMAL_FORM }
 ]

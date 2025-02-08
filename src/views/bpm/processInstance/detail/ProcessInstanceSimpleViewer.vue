@@ -114,6 +114,16 @@ const setSimpleModelNodeTaskStatus = (
       simpleModel.activityStatus = TaskStatusEnum.NOT_START
     }
   }
+  // 触发器节点
+  if (simpleModel.type === NodeType.TRIGGER_NODE) {
+    // 触发器节点,只有通过和未执行状态
+    if (finishedActivityIds.includes(simpleModel.id)) {
+      simpleModel.activityStatus = TaskStatusEnum.APPROVE
+    } else {
+      simpleModel.activityStatus = TaskStatusEnum.NOT_START
+    }
+  }
+
   // 条件节点对应 SequenceFlow
   if (simpleModel.type === NodeType.CONDITION_NODE) {
     // 条件节点,只有通过和未执行状态

@@ -193,6 +193,16 @@
                     历史
                   </el-dropdown-item>
                   <el-dropdown-item
+                    command="handleReport"
+                    v-if="
+                      checkPermi(['bpm:process-instance:manager-query']) &&
+                      scope.row.processDefinition
+                    "
+                    :disabled="!isManagerUser(scope.row)"
+                  >
+                    报表
+                  </el-dropdown-item>
+                  <el-dropdown-item
                     command="handleChangeState"
                     v-if="hasPermiUpdate && scope.row.processDefinition"
                     :disabled="!isManagerUser(scope.row)"
@@ -301,6 +311,7 @@ const { t } = useI18n() // 国际化
 const { push } = useRouter() // 路由
 const userStore = useUserStoreWithOut() // 用户信息缓存
 const isDark = computed(() => useAppStore().getIsDark) // 是否黑暗模式
+const router = useRouter() // 路由
 
 const isModelSorting = ref(false) // 是否正处于排序状态
 const originalData = ref<ModelInfo[]>([]) // 原始数据
@@ -348,6 +359,15 @@ const handleModelCommand = (command: string, row: any) => {
       break
     case 'handleClean':
       handleClean(row)
+      break
+    case 'handleReport':
+      router.push({
+        name: 'BpmProcessInstanceReport',
+        query: {
+          processDefinitionId: row.processDefinition.id,
+          processDefinitionKey: row.key
+        }
+      })
       break
     default:
       break

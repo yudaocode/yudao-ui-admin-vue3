@@ -47,10 +47,9 @@ import {
   SimpleFlowNode,
   ConditionType,
   COMPARISON_OPERATORS,
-  ProcessVariableEnum
 } from '../consts'
 import { getDefaultConditionNodeName } from '../utils'
-import { useFormFields } from '../node'
+import { useFormFieldsAndStartUser } from '../node'
 import Condition from './components/Condition.vue'
 const message = useMessage() // 消息弹窗
 defineOptions({
@@ -176,23 +175,12 @@ const getShowText = (): string => {
   }
   return showText
 }
-
-const fieldsInfo = useFormFields()
-/** 条件规则可选择的表单字段 */
-const fieldOptions = computed(() => {
-  const fieldsCopy = fieldsInfo.slice()
-  // 固定添加发起人 ID 字段
-  fieldsCopy.unshift({
-    field: ProcessVariableEnum.START_USER_ID,
-    title: '发起人',
-    required: true
-  })
-  return fieldsCopy
-})
+// 流程表单字段和发起人字段
+const fieldOptions = useFormFieldsAndStartUser()
 
 /** 获取字段名称 */
 const getFieldTitle = (field: string) => {
-  const item = fieldOptions.value.find((item) => item.field === field)
+  const item = fieldOptions.find((item) => item.field === field)
   return item?.title
 }
 
