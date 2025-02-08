@@ -1,3 +1,4 @@
+<!-- TODO @haohao：搞到 config 目录，会不会更好哈 -->
 <template>
   <ContentWrap>
     <!-- 搜索工作栏 -->
