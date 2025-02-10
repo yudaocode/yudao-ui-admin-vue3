@@ -24,16 +24,16 @@ export const getUserPage = (params: PageParam) => {
 
 // 查询所有用户列表
 export const getAllUser = () => {
-  return request.get({ url: '/system/user/all' })
+  return request.get({ url: '/system/user/simple-list' })
 }
 
 /**
  * 获取部门成员
- * @param id 
- * @returns 
+ * @param id
+ * @returns
  */
-export const getDeptUser = (id: number) => {
-  return request.get({ url: '/system/user/listByDept?id='+ id })
+export const getDeptUser = (id: number): Promise<UserVO[]> => {
+  return request.get({ url: '/system/user/simple-list?id=' + id })
 }
 
 // 查询用户详情

@@ -2,7 +2,7 @@ import { store } from '@/store/index'
 import { defineStore } from 'pinia'
 import BaseConversation from '../model/BaseConversation'
 import BaseMessage from '../model/BaseMessage'
-import { ConversationModelType, MessageRole, ContentType, SendStatus, MENU_LIST_ENUM } from '../types/types'
+import { ConversationModelType, MessageRole, ContentType, SendStatus, MENU_LIST_ENUM, CONVERSATION_TYPE } from '../types/types'
 import SessionApi from '../api/sessionApi'
 import MessageApi, { SendMsg } from '../api/messageApi'
 import { useUserStore, useUserStoreWithOut } from '@/store/modules/user'
@@ -116,24 +116,19 @@ export const useChatStore = defineStore('chatStore', {
      */
     addMessageToConversation<T extends BaseMessage>(message: T): void {
       
-      // 无论是converstionNo1还是converstionNo2都都需要试一下
-      const converstionNo1 = generateConversationNo(
+      const converstionNo = generateConversationNo(
         message.senderId,
         message.receiverId,
-        message.conversationType
-      )
-      const converstionNo2 = generateConversationNo(
-        message.receiverId,
-        message.senderId,
         message.conversationType
       )
 
       const conversationIndex = this.sessionList.findIndex(
-        (item) => item.conversationNo === converstionNo1 || item.conversationNo === converstionNo2
+        (item) => item.conversationNo === converstionNo
       )
 
       if (conversationIndex < 0) {
-        console.log('conversation not exist')
+        console.log('conversation not exist, create it')
+        // Todo 
         return
       }
 
@@ -150,6 +145,36 @@ export const useChatStore = defineStore('chatStore', {
       if (conversationIndex === this.currentSessionIndex) {
         this.setCurrentConversation()
       }
+    },
+
+    /**
+     * 根据消息创建会话
+     * @param BaseMessage 
+     * @param msg 
+     */
+    createConversation(BaseMessage: msg) {
+      
+    },
+
+    /**
+     * 生成会话No
+     * @param id1
+     * @param id2 
+     * @param conversationType 
+     * @returns 
+     */
+    generateConversationNo(id1: string, id2: string, conversationType: CONVERSATION_TYPE): string {
+      const SINGLE_PREFIX = 's_'
+      const GROUP_PREFIX = 'g_'
+      const [smallId, largeId] = id1 < id2 ? [id1, id2] : [id2, id1];
+
+      if (conversationType === CONVERSATION_TYPE.SINGLE) {
+        return SINGLE_PREFIX + smallId + "_" + largeId
+      } else if (conversationType === CONVERSATION_TYPE.GROUP) {
+        return GROUP_PREFIX + smallId + "_" + largeId
+      }
+
+      return ''
     },
 
     /**
