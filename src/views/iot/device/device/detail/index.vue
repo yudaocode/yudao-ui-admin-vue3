@@ -26,6 +26,9 @@
           :device="device"
         />
       </el-tab-pane>
+      <el-tab-pane label="设备配置" name="config">
+        <DeviceDetailConfig />
+      </el-tab-pane>
     </el-tabs>
   </el-col>
 </template>
@@ -38,6 +41,7 @@ import DeviceDetailsInfo from './DeviceDetailsInfo.vue'
 import DeviceDetailsModel from './DeviceDetailsModel.vue'
 import DeviceDetailsLog from './DeviceDetailsLog.vue'
 import DeviceDetailsSimulator from './DeviceDetailsSimulator.vue'
+import DeviceDetailConfig from './DeviceDetailConfig.vue';
 
 defineOptions({ name: 'IoTDeviceDetail' })
 
