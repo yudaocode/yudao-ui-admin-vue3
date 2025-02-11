@@ -41,7 +41,7 @@
         />
       </el-select>
     </el-form-item>
-    <el-form-item label="流程图标" prop="icon" class="mb-20px">
+    <el-form-item label="流程图标" class="mb-20px">
       <UploadImg v-model="modelData.icon" :limit="1" height="64px" width="64px" />
     </el-form-item>
     <el-form-item label="流程描述" prop="description" class="mb-20px">
@@ -155,7 +155,6 @@ const rules = {
   name: [{ required: true, message: '流程名称不能为空', trigger: 'blur' }],
   key: [{ required: true, message: '流程标识不能为空', trigger: 'blur' }],
   category: [{ required: true, message: '流程分类不能为空', trigger: 'blur' }],
-  icon: [{ required: true, message: '流程图标不能为空', trigger: 'blur' }],
   type: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
   visible: [{ required: true, message: '是否可见不能为空', trigger: 'blur' }],
   managerUserIds: [{ required: true, message: '流程管理员不能为空', trigger: 'blur' }]

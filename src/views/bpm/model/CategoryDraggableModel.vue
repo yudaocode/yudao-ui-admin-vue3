@@ -88,6 +88,9 @@
                 />
               </el-tooltip>
               <el-image v-if="row.icon" :src="row.icon" class="h-38px w-38px mr-10px rounded" />
+              <div v-else class="flow-icon">
+                <span style="font-size: 12px; color: #fff">{{ sliceName(row.name) }}</span>
+              </div>
               {{ row.name }}
             </div>
           </template>
@@ -592,6 +595,13 @@ const openModelForm = async (type: string, id?: number) => {
   }
 }
 
+// 处理显示的名称
+const sliceName = (name: string) => {
+  if (name.length > 2) {
+    return name.slice(0, 2)
+  }
+  return name
+}
 watchEffect(() => {
   if (props.categoryInfo?.modelList) {
     updateModeList()
@@ -617,6 +627,17 @@ watchEffect(() => {
 }
 </style>
 <style lang="scss" scoped>
+.flow-icon {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  margin-right: 10px;
+  background-color: var(--el-color-primary);
+  border-radius: 0.25rem;
+  align-items: center;
+  justify-content: center;
+}
+
 .category-draggable-model {
   :deep(.el-table__cell) {
     overflow: hidden;
