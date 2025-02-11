@@ -168,7 +168,8 @@ onMounted(async () => {
       const bpmnModel = await getModel(props.modelId)
       if (bpmnModel) {
         formType.value = bpmnModel.formType
-        if (formType.value === 10) {
+        //fix 解决修改时流程模型时formId为空报错问题
+        if (formType.value === 10 && bpmnModel.formId) {
           const bpmnForm = (await getForm(bpmnModel.formId)) as unknown as FormVO
           formFields.value = bpmnForm?.fields
         }
