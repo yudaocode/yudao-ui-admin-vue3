@@ -252,6 +252,11 @@
       </div>
     </template>
   </Dialog>
+
+  <!-- 弹窗：表单详情 -->
+  <Dialog title="表单详情" :fullscreen="true" v-model="formDetailVisible">
+    <form-create :rule="formDetailPreview.rule" :option="formDetailPreview.option" />
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -467,6 +472,8 @@ const formDetailPreview = ref({
   option: {}
 })
 const handleFormDetail = async (row: any) => {
+  console.log(row)
+
   if (row.formType == 10) {
     // 设置表单
     const data = await FormApi.getForm(row.formId)
