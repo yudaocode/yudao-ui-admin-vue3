@@ -58,7 +58,16 @@
                   >
                     <template #default>
                       <div class="flex">
-                        <el-image :src="definition.icon" class="w-32px h-32px" />
+                        <el-image
+                          v-if="definition.icon"
+                          :src="definition.icon"
+                          class="w-32px h-32px"
+                        />
+                        <div v-else class="flow-icon">
+                          <span style="font-size: 12px; color: #fff">{{
+                            sliceName(definition.name)
+                          }}</span>
+                        </div>
                         <el-text class="!ml-10px" size="large">{{ definition.name }}</el-text>
                       </div>
                     </template>
@@ -275,6 +284,14 @@ const availableCategories = computed(() => {
   )
 })
 
+// 处理显示的名称
+const sliceName = (name: string) => {
+  if (name.length > 2) {
+    return name.slice(0, 2)
+  }
+  return name
+}
+
 /** 初始化 */
 onMounted(() => {
   getList()
@@ -282,13 +299,25 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.flow-icon {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+  background-color: var(--el-color-primary);
+  border-radius: 0.25rem;
+  align-items: center;
+  justify-content: center;
+}
+
 .process-definition-container::before {
-  content: '';
-  border-left: 1px solid #e6e6e6;
   position: absolute;
   left: 20.8%;
   height: 100%;
+  border-left: 1px solid #e6e6e6;
+  content: '';
 }
+
 :deep() {
   .definition-item-card {
     .el-card__body {
