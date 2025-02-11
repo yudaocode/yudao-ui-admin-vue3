@@ -162,7 +162,8 @@ const formData: any = ref({
   summarySetting: {
     enable: false,
     summary: []
-  }
+  },
+  processDefinitionId: undefined
 })
 
 //流程数据
@@ -285,9 +286,8 @@ const handleSave = async () => {
     } else {
       // 新增场景
       formData.value.id = await ModelApi.createModel(modelData)
-      message.success('新增成功')
       try {
-        await message.confirm('创建流程成功，是否继续编辑？')
+        await message.confirm('流程创建成功，是否继续编辑？')
         // 用户点击继续编辑，跳转到编辑页面
         await nextTick()
         // 先删除当前页签
@@ -295,7 +295,7 @@ const handleSave = async () => {
         // 跳转到编辑页面
         await router.push({
           name: 'BpmModelUpdate',
-          params: { id: formData.value.id }
+          params: { id: formData.value.id, processDefinitionId: formData.value.processDefinitionId }
         })
       } catch {
         // 先删除当前页签
@@ -316,6 +316,13 @@ const handleDeploy = async () => {
     // 修改场景下直接发布，新增场景下需要先确认
     if (!formData.value.id) {
       await message.confirm('是否确认发布该流程？')
+    }
+
+    //校验当前版本的流程下是否存在正在进行中的单据
+    const res = await ModelApi.getProcessInstance(row.processDefinition.id)
+    if (res) {
+      message.error('当前版本下存在正在进行中的单据，请先结束单据后再发布')
+      return
     }
 
     // 校验所有步骤
@@ -343,6 +350,11 @@ const handleDeploy = async () => {
     console.error('发布失败:', error)
     message.warning(error.message || '发布失败')
   }
+}
+
+const validateProcessInstance = async (processDefinitionId) => {
+  const valid = await ModelApi.getProcessInstance(processDefinitionId)
+  console.log(valid)
 }
 
 /** 步骤切换处理 */

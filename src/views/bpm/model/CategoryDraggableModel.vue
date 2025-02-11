@@ -159,7 +159,7 @@
             <el-button
               link
               type="primary"
-              @click="openModelForm('update', scope.row.id)"
+              @click="openModelForm('update', scope.row.id, scope.row.processDefinition.id)"
               v-if="hasPermiUpdate"
               :disabled="!isManagerUser(scope.row)"
             >
@@ -445,11 +445,17 @@ const handleChangeState = async (row: any) => {
 /** 发布流程 */
 const handleDeploy = async (row: any) => {
   try {
-    // 删除的二次确认
-    await message.confirm('是否部署该流程！！')
+    // 发布的二次确认
+    await message.confirm('是否发布该流程！！')
+    //校验当前版本的流程下是否存在正在进行中的单据
+    const res = await ModelApi.getProcessInstance(row.processDefinition.id)
+    if (res) {
+      message.error('当前版本下存在正在进行中的单据，请先结束单据后再发布')
+      return
+    }
     // 发起部署
     await ModelApi.deployModel(row.id)
-    message.success(t('部署成功'))
+    message.success(t('发布成功'))
     // 刷新列表
     emit('success')
   } catch {}
@@ -587,7 +593,8 @@ const handleDeleteCategory = async () => {
 
 /** 添加流程模型弹窗 */
 const tagsView = useTagsView()
-const openModelForm = async (type: string, id?: number) => {
+const openModelForm = async (type: string, id?: number, processDefinitionId?: string) => {
+  alert(processDefinitionId)
   if (type === 'create') {
     await push({ name: 'BpmModelCreate' })
   } else {
