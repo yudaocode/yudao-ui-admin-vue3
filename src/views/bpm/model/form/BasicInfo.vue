@@ -6,7 +6,7 @@
           class="!w-440px"
           v-model="modelData.key"
           :disabled="!!modelData.id"
-          placeholder="请输入流标标识"
+          placeholder="请输入流程标识，以字母或下划线开头"
         />
         <el-tooltip
           class="item"
