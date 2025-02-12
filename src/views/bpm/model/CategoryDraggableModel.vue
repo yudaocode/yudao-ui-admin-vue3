@@ -89,7 +89,7 @@
               </el-tooltip>
               <el-image v-if="row.icon" :src="row.icon" class="h-38px w-38px mr-10px rounded" />
               <div v-else class="flow-icon">
-                <span style="font-size: 12px; color: #fff">{{ sliceName(row.name) }}</span>
+                <span style="font-size: 12px; color: #fff">{{ sliceName(row.name,0,2) }}</span>
               </div>
               {{ row.name }}
             </div>
@@ -273,6 +273,7 @@ import { useAppStore } from '@/store/modules/app'
 import { cloneDeep, isEqual } from 'lodash-es'
 import { useTagsView } from '@/hooks/web/useTagsView'
 import { useDebounceFn } from '@vueuse/core'
+import { sliceName } from '@/utils/index'
 
 defineOptions({ name: 'BpmModel' })
 
@@ -445,11 +446,7 @@ const handleChangeState = async (row: any) => {
 /** 发布流程 */
 const handleDeploy = async (row: any) => {
   try {
-    //校验当前版本的流程下是否存在正在进行中的单据
-    const res = await ModelApi.getProcessInstance(row.id)
-    if (res) {
-      await message.confirm('流程下存在进行中的单据，是否确认发布该流程？')
-    }
+    await message.confirm('是否确认发布该流程？')
     // 发起部署
     await ModelApi.deployModel(row.id)
     message.success(t('发布成功'))
@@ -605,13 +602,6 @@ const openModelForm = async (type: string, id?: number) => {
   }
 }
 
-// 处理显示的名称
-const sliceName = (name: string) => {
-  if (name.length > 2) {
-    return name.slice(0, 2)
-  }
-  return name
-}
 watchEffect(() => {
   if (props.categoryInfo?.modelList) {
     updateModeList()

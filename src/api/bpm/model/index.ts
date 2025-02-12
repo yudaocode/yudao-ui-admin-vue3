@@ -76,13 +76,4 @@ export const deployModel = async (id: number) => {
 export const cleanModel = async (id: number) => {
   return await request.delete({ url: '/bpm/model/clean?id=' + id })
 }
-/**
- * 查询当前流程实例下是否存在正在进行中的单据
- * @param modelId  模型定义id
- * @returns true/false
- */
-export const getProcessInstance = async (modelId: string) => {
-  return await request.get({
-    url: '/bpm/task/manager-list?modelId=' + modelId
-  })
-}
+

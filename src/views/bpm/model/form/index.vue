@@ -316,11 +316,6 @@ const handleDeploy = async () => {
     if (!formData.value.id) {
       await message.confirm('是否确认发布该流程？')
     }
-    //校验当前版本的流程下是否存在正在进行中的单据
-    const res = await ModelApi.getProcessInstance(formData.value.id)
-    if (res) {
-      await message.confirm('流程下存在进行中的单据，是否确认发布该流程？')
-    }
     // 校验所有步骤
     await validateAllSteps()
 

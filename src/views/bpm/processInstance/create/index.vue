@@ -65,7 +65,7 @@
                         />
                         <div v-else class="flow-icon">
                           <span style="font-size: 12px; color: #fff">{{
-                            sliceName(definition.name)
+                            sliceName(definition.name,0,2)
                           }}</span>
                         </div>
                         <el-text class="!ml-10px" size="large">{{ definition.name }}</el-text>
@@ -97,6 +97,7 @@ import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import { CategoryApi, CategoryVO } from '@/api/bpm/category'
 import ProcessDefinitionDetail from './ProcessDefinitionDetail.vue'
 import { groupBy } from 'lodash-es'
+import { sliceName } from '@/utils/index'
 
 defineOptions({ name: 'BpmProcessInstanceCreate' })
 
@@ -283,14 +284,6 @@ const availableCategories = computed(() => {
     availableCategoryCodes.includes(category.code)
   )
 })
-
-// 处理显示的名称
-const sliceName = (name: string) => {
-  if (name.length > 2) {
-    return name.slice(0, 2)
-  }
-  return name
-}
 
 /** 初始化 */
 onMounted(() => {
