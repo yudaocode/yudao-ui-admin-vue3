@@ -240,6 +240,8 @@ const nodeTypeSvgMap = {
   [NodeType.START_USER_NODE]: { color: '#909398', svg: starterSvg },
   // 审批人节点
   [NodeType.USER_TASK_NODE]: { color: '#ff943e', svg: auditorSvg },
+  // 办理人节点
+  [NodeType.TRANSACTOR_NODE]: { color: '#ff943e', svg: auditorSvg },
   // 抄送人节点
   [NodeType.COPY_TASK_NODE]: { color: '#3296fb', svg: copySvg },
   // 条件分支节点
@@ -264,6 +266,7 @@ const getApprovalNodeIcon = (taskStatus: number, nodeType: NodeType) => {
   if (
     nodeType === NodeType.START_USER_NODE ||
     nodeType === NodeType.USER_TASK_NODE ||
+    nodeType === NodeType.TRANSACTOR_NODE ||
     nodeType === NodeType.END_EVENT_NODE
   ) {
     return statusIconMap[taskStatus]?.icon

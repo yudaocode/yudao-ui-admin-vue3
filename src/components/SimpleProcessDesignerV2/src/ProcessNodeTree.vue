@@ -6,7 +6,11 @@
   />
   <!-- 审批节点 -->
   <UserTaskNode
-    v-if="currentNode && currentNode.type === NodeType.USER_TASK_NODE"
+    v-if="
+      currentNode &&
+      (currentNode.type === NodeType.USER_TASK_NODE ||
+        currentNode.type === NodeType.TRANSACTOR_NODE)
+    "
     :flow-node="currentNode"
     @update:flow-node="handleModelValueUpdate"
     @find:parent-node="findFromParentNode"
