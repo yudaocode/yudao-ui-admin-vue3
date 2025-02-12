@@ -36,6 +36,7 @@
               :rule="approveForm.rule"
             />
           </el-card>
+          <!-- TODO @lesan：需要分成“审批”和“办理”意见，包括 label、placeholder、rule 校验 -->
           <el-form-item label="审批意见" prop="reason">
             <el-input
               v-model="approveReasonForm.reason"

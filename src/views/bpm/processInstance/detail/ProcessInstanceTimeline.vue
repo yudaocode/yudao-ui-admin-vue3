@@ -121,6 +121,7 @@
                 "
                 class="text-#a5a5a5 text-13px mt-1 w-full bg-#f8f8fa p2 rounded-md"
               >
+                <!-- TODO lesan：这里如果是办理，需要是办理意见 -->
                 审批意见：{{ task.reason }}
               </div>
               <div
@@ -240,7 +241,7 @@ const nodeTypeSvgMap = {
   [NodeType.START_USER_NODE]: { color: '#909398', svg: starterSvg },
   // 审批人节点
   [NodeType.USER_TASK_NODE]: { color: '#ff943e', svg: auditorSvg },
-  // 办理人节点
+  // 办理人节点 TODO @lesan：
   [NodeType.TRANSACTOR_NODE]: { color: '#ff943e', svg: auditorSvg },
   // 抄送人节点
   [NodeType.COPY_TASK_NODE]: { color: '#3296fb', svg: copySvg },

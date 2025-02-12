@@ -1,3 +1,4 @@
+<!-- TODO @lesan：涉及到“审批”关键字，需要换成“办理”，建议通过一个变量控制哈 -->
 <template>
   <el-drawer
     :append-to-body="true"
@@ -61,7 +62,13 @@
               label="指定角色"
               prop="roleIds"
             >
-              <el-select filterable v-model="configForm.roleIds" clearable multiple style="width: 100%">
+              <el-select
+                filterable
+                v-model="configForm.roleIds"
+                clearable
+                multiple
+                style="width: 100%"
+              >
                 <el-option
                   v-for="item in roleOptions"
                   :key="item.id"
@@ -99,7 +106,13 @@
               prop="postIds"
               span="24"
             >
-              <el-select filterable v-model="configForm.postIds" clearable multiple style="width: 100%">
+              <el-select
+                filterable
+                v-model="configForm.postIds"
+                clearable
+                multiple
+                style="width: 100%"
+              >
                 <el-option
                   v-for="item in postOptions"
                   :key="item.id"
@@ -114,7 +127,13 @@
               prop="userIds"
               span="24"
             >
-              <el-select filterable v-model="configForm.userIds" clearable multiple style="width: 100%">
+              <el-select
+                filterable
+                v-model="configForm.userIds"
+                clearable
+                multiple
+                style="width: 100%"
+              >
                 <el-option
                   v-for="item in userOptions"
                   :key="item.id"
@@ -128,7 +147,13 @@
               label="指定用户组"
               prop="userGroups"
             >
-              <el-select filterable v-model="configForm.userGroups" clearable multiple style="width: 100%">
+              <el-select
+                filterable
+                v-model="configForm.userGroups"
+                clearable
+                multiple
+                style="width: 100%"
+              >
                 <el-option
                   v-for="item in userGroupOptions"
                   :key="item.id"
@@ -424,6 +449,7 @@
           </div>
         </div>
       </el-tab-pane>
+      <!-- TODO @lesan：办理时，应该还是有字段权限 -->
       <el-tab-pane label="表单字段权限" name="fields" v-if="formType === 10">
         <div class="field-setting-pane">
           <div class="field-setting-desc">字段权限</div>
@@ -471,7 +497,11 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="监听器" name="listener">
-        <UserTaskListener ref="userTaskListenerRef" v-model="configForm" :form-field-options="formFieldOptions" />
+        <UserTaskListener
+          ref="userTaskListenerRef"
+          v-model="configForm"
+          :form-field-options="formFieldOptions"
+        />
       </el-tab-pane>
     </el-tabs>
     <template #footer>
