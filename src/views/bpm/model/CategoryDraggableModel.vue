@@ -445,13 +445,10 @@ const handleChangeState = async (row: any) => {
 /** 发布流程 */
 const handleDeploy = async (row: any) => {
   try {
-    // 发布的二次确认
-    await message.confirm('是否发布该流程！！')
     //校验当前版本的流程下是否存在正在进行中的单据
     const res = await ModelApi.getProcessInstance(row.id)
     if (res) {
-      message.error('当前版本下存在正在进行中的单据，请先结束单据后再发布')
-      return
+      await message.confirm('流程下存在进行中的单据，是否确认发布该流程？')
     }
     // 发起部署
     await ModelApi.deployModel(row.id)

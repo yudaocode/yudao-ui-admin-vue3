@@ -179,8 +179,6 @@ const userList = ref<UserApi.UserVO[]>([])
 
 /** 初始化数据 */
 const initData = async () => {
-  console.log(route.params);
-  
   const modelId = route.params.id as string
   if (modelId) {
     // 修改场景
@@ -297,7 +295,7 @@ const handleSave = async () => {
         // 跳转到编辑页面
         await router.push({
           name: 'BpmModelUpdate',
-          params: { id: formData.value.id}
+          params: { id: formData.value.id }
         })
       } catch {
         // 先删除当前页签
@@ -314,21 +312,16 @@ const handleSave = async () => {
 
 /** 发布操作 */
 const handleDeploy = async () => {
-  console.log(route.params);
-  
   try {
     // 修改场景下直接发布，新增场景下需要先确认
     if (!formData.value.id) {
       await message.confirm('是否确认发布该流程？')
     }
-
     //校验当前版本的流程下是否存在正在进行中的单据
     const res = await ModelApi.getProcessInstance(formData.value.id)
     if (res) {
-      message.error('当前版本下存在正在进行中的单据，请先结束单据后再发布')
-      return
+      await message.confirm('流程下存在进行中的单据，是否确认发布该流程？')
     }
-
     // 校验所有步骤
     await validateAllSteps()
 
@@ -350,10 +343,7 @@ const handleDeploy = async () => {
     message.success('发布成功')
     // 返回列表页
     await router.push({ name: 'BpmModel' })
-  } catch (error: any) {
-    console.error('发布失败:', error)
-    message.warning(error.message || '发布失败')
-  }
+  } catch (error: any) {}
 }
 
 /** 步骤切换处理 */

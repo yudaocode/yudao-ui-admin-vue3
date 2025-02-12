@@ -78,11 +78,11 @@ export const cleanModel = async (id: number) => {
 }
 /**
  * 查询当前流程实例下是否存在正在进行中的单据
- * @param processDefinitionId  流程定义id
+ * @param modelId  模型定义id
  * @returns true/false
  */
-export const getProcessInstance = async (processDefinitionId: string) => {
+export const getProcessInstance = async (modelId: string) => {
   return await request.get({
-    url: '/bpm/task/manager-list?processDefinitionId=' + processDefinitionId
+    url: '/bpm/task/manager-list?modelId=' + modelId
   })
 }
