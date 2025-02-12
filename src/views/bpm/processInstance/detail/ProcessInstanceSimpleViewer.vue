@@ -84,7 +84,8 @@ const setSimpleModelNodeTaskStatus = (
   // 审批节点
   if (
     simpleModel.type === NodeType.START_USER_NODE ||
-    simpleModel.type === NodeType.USER_TASK_NODE
+    simpleModel.type === NodeType.USER_TASK_NODE ||
+    simpleModel.type === NodeType.TRANSACTOR_NODE
   ) {
     simpleModel.activityStatus = TaskStatusEnum.NOT_START
     if (rejectedTaskActivityIds.includes(simpleModel.id)) {
