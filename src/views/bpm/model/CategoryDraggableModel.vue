@@ -159,7 +159,7 @@
             <el-button
               link
               type="primary"
-              @click="openModelForm('update', scope.row.id, scope.row.processDefinition?.id)"
+              @click="openModelForm('update', scope.row.id)"
               v-if="hasPermiUpdate"
               :disabled="!isManagerUser(scope.row)"
             >
@@ -590,14 +590,13 @@ const handleDeleteCategory = async () => {
 
 /** 添加流程模型弹窗 */
 const tagsView = useTagsView()
-const openModelForm = async (type: string, id?: number, processDefinitionId?: any) => {
+const openModelForm = async (type: string, id?: number) => {
   if (type === 'create') {
     await push({ name: 'BpmModelCreate' })
   } else {
-    const params = processDefinitionId ? { id, type, processDefinitionId } : { id, type }
     await push({
       name: 'BpmModelUpdate',
-      params: params
+      params: { id, type }
     })
     // 设置标题
     if (type === 'copy') {

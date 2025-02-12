@@ -162,8 +162,7 @@ const formData: any = ref({
   summarySetting: {
     enable: false,
     summary: []
-  },
-  processDefinitionId: undefined
+  }
 })
 
 //流程数据
