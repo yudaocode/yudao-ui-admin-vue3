@@ -15,6 +15,12 @@
             </div>
             <div class="handler-item-text">审批人</div>
           </div>
+          <div class="handler-item" @click="addNode(NodeType.TRANSACTOR_NODE)">
+            <div class="approve handler-item-icon">
+              <span class="iconfont icon-approve icon-size"></span>
+            </div>
+            <div class="handler-item-text">办理人</div>
+          </div>
           <div class="handler-item" @click="addNode(NodeType.COPY_TASK_NODE)">
             <div class="handler-item-icon copy">
               <span class="iconfont icon-size icon-copy"></span>
@@ -114,13 +120,13 @@ const addNode = (type: number) => {
   }
 
   popoverShow.value = false
-  if (type === NodeType.USER_TASK_NODE) {
+  if (type === NodeType.USER_TASK_NODE || type === NodeType.TRANSACTOR_NODE) {
     const id = 'Activity_' + generateUUID()
     const data: SimpleFlowNode = {
       id: id,
-      name: NODE_DEFAULT_NAME.get(NodeType.USER_TASK_NODE) as string,
+      name: NODE_DEFAULT_NAME.get(type) as string,
       showText: '',
-      type: NodeType.USER_TASK_NODE,
+      type: type,
       approveMethod: ApproveMethodType.SEQUENTIAL_APPROVE,
       // 超时处理
       rejectHandler: {

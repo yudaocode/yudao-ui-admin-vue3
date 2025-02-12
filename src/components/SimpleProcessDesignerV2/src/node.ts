@@ -201,7 +201,7 @@ export function useNodeForm(nodeType: NodeType) {
   const deptTreeOptions = inject('deptTree', ref()) // 部门树
   const formFields = inject<Ref<string[]>>('formFields', ref([])) // 流程表单字段
   const configForm = ref<UserTaskFormType | CopyTaskFormType>()
-  if (nodeType === NodeType.USER_TASK_NODE) {
+  if (nodeType === NodeType.USER_TASK_NODE || nodeType === NodeType.TRANSACTOR_NODE) {
     configForm.value = {
       candidateStrategy: CandidateStrategy.USER,
       approveMethod: ApproveMethodType.SEQUENTIAL_APPROVE,

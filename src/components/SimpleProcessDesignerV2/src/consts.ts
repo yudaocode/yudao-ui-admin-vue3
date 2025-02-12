@@ -24,6 +24,11 @@ export enum NodeType {
   COPY_TASK_NODE = 12,
 
   /**
+   * 办理人节点
+   */
+  TRANSACTOR_NODE = 13,
+
+  /**
    * 延迟器节点
    */
   DELAY_TIMER_NODE = 14,
@@ -506,6 +511,7 @@ NODE_DEFAULT_TEXT.set(NodeType.START_USER_NODE, '请设置发起人')
 NODE_DEFAULT_TEXT.set(NodeType.DELAY_TIMER_NODE, '请设置延迟器')
 NODE_DEFAULT_TEXT.set(NodeType.ROUTER_BRANCH_NODE, '请设置路由节点')
 NODE_DEFAULT_TEXT.set(NodeType.TRIGGER_NODE, '请设置触发器')
+NODE_DEFAULT_TEXT.set(NodeType.TRANSACTOR_NODE, '请设置办理人')
 
 export const NODE_DEFAULT_NAME = new Map<number, string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
@@ -515,6 +521,7 @@ NODE_DEFAULT_NAME.set(NodeType.START_USER_NODE, '发起人')
 NODE_DEFAULT_NAME.set(NodeType.DELAY_TIMER_NODE, '延迟器')
 NODE_DEFAULT_NAME.set(NodeType.ROUTER_BRANCH_NODE, '路由分支')
 NODE_DEFAULT_NAME.set(NodeType.TRIGGER_NODE, '触发器')
+NODE_DEFAULT_NAME.set(NodeType.TRANSACTOR_NODE, '办理人')
 
 // 候选人策略。暂时不从字典中取。 后续可能调整。控制显示顺序
 export const CANDIDATE_STRATEGY: DictDataVO[] = [
@@ -625,6 +632,16 @@ export const DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
   { id: OperationButtonType.DELEGATE, displayName: '委派', enable: true },
   { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: true },
   { id: OperationButtonType.RETURN, displayName: '退回', enable: true }
+]
+
+// 办理人默认的按钮权限设置
+export const TRANSACTOR_DEFAULT_BUTTON_SETTING: ButtonSetting[] = [
+  { id: OperationButtonType.APPROVE, displayName: '办理', enable: true },
+  { id: OperationButtonType.REJECT, displayName: '拒绝', enable: false },
+  { id: OperationButtonType.TRANSFER, displayName: '转办', enable: false },
+  { id: OperationButtonType.DELEGATE, displayName: '委派', enable: false },
+  { id: OperationButtonType.ADD_SIGN, displayName: '加签', enable: false },
+  { id: OperationButtonType.RETURN, displayName: '退回', enable: false }
 ]
 
 // 发起人的按钮权限。暂时定死，不可以编辑

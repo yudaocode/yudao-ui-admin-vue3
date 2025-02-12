@@ -25,7 +25,7 @@
         <div class="divide-line"></div>
       </div>
     </template>
-    <div class="flex flex-items-center mb-3">
+    <div v-if="currentNode.type === NodeType.USER_TASK_NODE" class="flex flex-items-center mb-3">
       <span class="font-size-16px mr-3">审批类型 :</span>
       <el-radio-group v-model="approveType">
         <el-radio
@@ -230,91 +230,100 @@
               </el-radio-group>
             </el-form-item>
 
-            <el-divider content-position="left">审批人拒绝时</el-divider>
-            <el-form-item prop="rejectHandlerType">
-              <el-radio-group v-model="configForm.rejectHandlerType">
-                <div class="flex-col">
-                  <div v-for="(item, index) in REJECT_HANDLER_TYPES" :key="index">
-                    <el-radio :key="item.value" :value="item.value" :label="item.label" />
+            <div v-if="currentNode.type === NodeType.USER_TASK_NODE">
+              <el-divider content-position="left">审批人拒绝时</el-divider>
+              <el-form-item prop="rejectHandlerType">
+                <el-radio-group v-model="configForm.rejectHandlerType">
+                  <div class="flex-col">
+                    <div v-for="(item, index) in REJECT_HANDLER_TYPES" :key="index">
+                      <el-radio :key="item.value" :value="item.value" :label="item.label" />
+                    </div>
                   </div>
-                </div>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item
-              v-if="configForm.rejectHandlerType == RejectHandlerType.RETURN_USER_TASK"
-              label="驳回节点"
-              prop="returnNodeId"
-            >
-              <el-select filterable v-model="configForm.returnNodeId" clearable style="width: 100%">
-                <el-option
-                  v-for="item in returnTaskList"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id"
-                />
-              </el-select>
-            </el-form-item>
-
-            <el-divider content-position="left">审批人超时未处理时</el-divider>
-            <el-form-item label="启用开关" prop="timeoutHandlerEnable">
-              <el-switch
-                v-model="configForm.timeoutHandlerEnable"
-                active-text="开启"
-                inactive-text="关闭"
-                @change="timeoutHandlerChange"
-              />
-            </el-form-item>
-            <el-form-item
-              label="执行动作"
-              prop="timeoutHandlerType"
-              v-if="configForm.timeoutHandlerEnable"
-            >
-              <el-radio-group
-                v-model="configForm.timeoutHandlerType"
-                @change="timeoutHandlerTypeChanged"
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item
+                v-if="configForm.rejectHandlerType == RejectHandlerType.RETURN_USER_TASK"
+                label="驳回节点"
+                prop="returnNodeId"
               >
-                <el-radio-button
-                  v-for="item in TIMEOUT_HANDLER_TYPES"
-                  :key="item.value"
-                  :value="item.value"
-                  :label="item.label"
-                />
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item label="超时时间设置" v-if="configForm.timeoutHandlerEnable">
-              <span class="mr-2">当超过</span>
-              <el-form-item prop="timeDuration">
-                <el-input-number
-                  class="mr-2"
-                  :style="{ width: '100px' }"
-                  v-model="configForm.timeDuration"
-                  :min="1"
-                  controls-position="right"
+                <el-select
+                  filterable
+                  v-model="configForm.returnNodeId"
+                  clearable
+                  style="width: 100%"
+                >
+                  <el-option
+                    v-for="item in returnTaskList"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id"
+                  />
+                </el-select>
+              </el-form-item>
+            </div>
+
+            <div v-if="currentNode.type === NodeType.USER_TASK_NODE">
+              <el-divider content-position="left">审批人超时未处理时</el-divider>
+              <el-form-item label="启用开关" prop="timeoutHandlerEnable">
+                <el-switch
+                  v-model="configForm.timeoutHandlerEnable"
+                  active-text="开启"
+                  inactive-text="关闭"
+                  @change="timeoutHandlerChange"
                 />
               </el-form-item>
-              <el-select
-                filterable
-                v-model="timeUnit"
-                class="mr-2"
-                :style="{ width: '100px' }"
-                @change="timeUnitChange"
+              <el-form-item
+                label="执行动作"
+                prop="timeoutHandlerType"
+                v-if="configForm.timeoutHandlerEnable"
               >
-                <el-option
-                  v-for="item in TIME_UNIT_TYPES"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
-              </el-select>
-              未处理
-            </el-form-item>
-            <el-form-item
-              label="最大提醒次数"
-              prop="maxRemindCount"
-              v-if="configForm.timeoutHandlerEnable && configForm.timeoutHandlerType === 1"
-            >
-              <el-input-number v-model="configForm.maxRemindCount" :min="1" :max="10" />
-            </el-form-item>
+                <el-radio-group
+                  v-model="configForm.timeoutHandlerType"
+                  @change="timeoutHandlerTypeChanged"
+                >
+                  <el-radio-button
+                    v-for="item in TIMEOUT_HANDLER_TYPES"
+                    :key="item.value"
+                    :value="item.value"
+                    :label="item.label"
+                  />
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item label="超时时间设置" v-if="configForm.timeoutHandlerEnable">
+                <span class="mr-2">当超过</span>
+                <el-form-item prop="timeDuration">
+                  <el-input-number
+                    class="mr-2"
+                    :style="{ width: '100px' }"
+                    v-model="configForm.timeDuration"
+                    :min="1"
+                    controls-position="right"
+                  />
+                </el-form-item>
+                <el-select
+                  filterable
+                  v-model="timeUnit"
+                  class="mr-2"
+                  :style="{ width: '100px' }"
+                  @change="timeUnitChange"
+                >
+                  <el-option
+                    v-for="item in TIME_UNIT_TYPES"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+                未处理
+              </el-form-item>
+              <el-form-item
+                label="最大提醒次数"
+                prop="maxRemindCount"
+                v-if="configForm.timeoutHandlerEnable && configForm.timeoutHandlerType === 1"
+              >
+                <el-input-number v-model="configForm.maxRemindCount" :min="1" :max="10" />
+              </el-form-item>
+            </div>
 
             <el-divider content-position="left">审批人为空时</el-divider>
             <el-form-item prop="assignEmptyHandlerType">
@@ -348,30 +357,44 @@
               </el-select>
             </el-form-item>
 
-            <el-divider content-position="left">审批人与提交人为同一人时</el-divider>
-            <el-form-item prop="assignStartUserHandlerType">
-              <el-radio-group v-model="configForm.assignStartUserHandlerType">
-                <div class="flex-col">
-                  <div v-for="(item, index) in ASSIGN_START_USER_HANDLER_TYPES" :key="index">
-                    <el-radio :key="item.value" :value="item.value" :label="item.label" />
+            <div v-if="currentNode.type === NodeType.USER_TASK_NODE">
+              <el-divider content-position="left">审批人与提交人为同一人时</el-divider>
+              <el-form-item prop="assignStartUserHandlerType">
+                <el-radio-group v-model="configForm.assignStartUserHandlerType">
+                  <div class="flex-col">
+                    <div v-for="(item, index) in ASSIGN_START_USER_HANDLER_TYPES" :key="index">
+                      <el-radio :key="item.value" :value="item.value" :label="item.label" />
+                    </div>
                   </div>
-                </div>
-              </el-radio-group>
-            </el-form-item>
+                </el-radio-group>
+              </el-form-item>
+            </div>
 
-            <el-divider content-position="left">是否需要签名</el-divider>
-            <el-form-item prop="signEnable">
-              <el-switch v-model="configForm.signEnable" active-text="是" inactive-text="否" />
-            </el-form-item>
+            <div v-if="currentNode.type === NodeType.USER_TASK_NODE">
+              <el-divider content-position="left">是否需要签名</el-divider>
+              <el-form-item prop="signEnable">
+                <el-switch v-model="configForm.signEnable" active-text="是" inactive-text="否" />
+              </el-form-item>
+            </div>
 
-            <el-divider content-position="left">审批意见</el-divider>
-            <el-form-item prop="reasonRequire">
-              <el-switch v-model="configForm.reasonRequire" active-text="必填" inactive-text="非必填" />
-            </el-form-item>
+            <div v-if="currentNode.type === NodeType.USER_TASK_NODE">
+              <el-divider content-position="left">审批意见</el-divider>
+              <el-form-item prop="reasonRequire">
+                <el-switch
+                  v-model="configForm.reasonRequire"
+                  active-text="必填"
+                  inactive-text="非必填"
+                />
+              </el-form-item>
+            </div>
           </el-form>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="操作按钮设置" name="buttons">
+      <el-tab-pane
+        label="操作按钮设置"
+        v-if="currentNode.type === NodeType.USER_TASK_NODE"
+        name="buttons"
+      >
         <div class="button-setting-pane">
           <div class="button-setting-desc">操作按钮</div>
           <div class="button-setting-title">
@@ -485,7 +508,8 @@ import {
   ASSIGN_EMPTY_HANDLER_TYPES,
   AssignEmptyHandlerType,
   FieldPermissionType,
-  ProcessVariableEnum
+  ProcessVariableEnum,
+  TRANSACTOR_DEFAULT_BUTTON_SETTING
 } from '../consts'
 
 import {
@@ -588,7 +612,7 @@ const {
   handleCandidateParam,
   parseCandidateParam,
   getShowText
-} = useNodeForm(NodeType.USER_TASK_NODE)
+} = useNodeForm(currentNode.value.type)
 const configForm = tempConfigForm as Ref<UserTaskFormType>
 
 // 改变审批人设置策略
@@ -733,13 +757,13 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
     configForm.value.approveRatio = node.approveRatio!
   }
   // 2.3 设置审批拒绝处理
-  configForm.value.rejectHandlerType = node.rejectHandler!.type
+  configForm.value.rejectHandlerType = node.rejectHandler?.type
   configForm.value.returnNodeId = node.rejectHandler?.returnNodeId
   const matchNodeList = []
   emits('find:returnTaskNodes', matchNodeList)
   returnTaskList.value = matchNodeList
   // 2.4 设置审批超时处理
-  configForm.value.timeoutHandlerEnable = node.timeoutHandler!.enable
+  configForm.value.timeoutHandlerEnable = node.timeoutHandler?.enable
   if (node.timeoutHandler?.enable && node.timeoutHandler?.timeDuration) {
     const strTimeDuration = node.timeoutHandler.timeDuration
     let parseTime = strTimeDuration.slice(2, strTimeDuration.length - 1)
@@ -755,7 +779,11 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   // 2.6 设置用户任务的审批人与发起人相同时
   configForm.value.assignStartUserHandlerType = node.assignStartUserHandlerType
   // 3. 操作按钮设置
-  buttonsSetting.value = cloneDeep(node.buttonsSetting) || DEFAULT_BUTTON_SETTING
+  buttonsSetting.value =
+    cloneDeep(node.buttonsSetting) ||
+    (node.type === NodeType.TRANSACTOR_NODE
+      ? TRANSACTOR_DEFAULT_BUTTON_SETTING
+      : DEFAULT_BUTTON_SETTING)
   // 4. 表单字段权限配置
   getNodeConfigFormFields(node.fieldsPermission)
   // 5. 监听器
@@ -773,7 +801,7 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
     header: node.taskAssignListener?.header ?? [],
     body: node.taskAssignListener?.body ?? []
   }
- // 5.3 完成任务
+  // 5.3 完成任务
   configForm.value.taskCompleteListenerEnable = node.taskCompleteListener?.enable
   configForm.value.taskCompleteListenerPath = node.taskCompleteListener?.path
   configForm.value.taskCompleteListener = {

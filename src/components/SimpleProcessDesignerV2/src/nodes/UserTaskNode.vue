@@ -28,7 +28,7 @@
             {{ currentNode.showText }}
           </div>
           <div class="node-text" v-else>
-            {{ NODE_DEFAULT_TEXT.get(NodeType.USER_TASK_NODE) }}
+            {{ NODE_DEFAULT_TEXT.get(currentNode.type) }}
           </div>
           <Icon icon="ep:arrow-right-bold" v-if="!readonly" />
         </div>
