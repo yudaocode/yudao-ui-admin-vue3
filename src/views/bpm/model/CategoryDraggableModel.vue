@@ -88,6 +88,9 @@
                 />
               </el-tooltip>
               <el-image v-if="row.icon" :src="row.icon" class="h-38px w-38px mr-10px rounded" />
+              <div v-else class="flow-icon">
+                <span style="font-size: 12px; color: #fff">{{ sliceName(row.name,0,2) }}</span>
+              </div>
               {{ row.name }}
             </div>
           </template>
@@ -249,6 +252,11 @@
       </div>
     </template>
   </Dialog>
+
+  <!-- 弹窗：表单详情 -->
+  <Dialog title="表单详情" :fullscreen="true" v-model="formDetailVisible">
+    <form-create :rule="formDetailPreview.rule" :option="formDetailPreview.option" />
+  </Dialog>
 </template>
 
 <script lang="ts" setup>
@@ -265,6 +273,7 @@ import { useAppStore } from '@/store/modules/app'
 import { cloneDeep, isEqual } from 'lodash-es'
 import { useTagsView } from '@/hooks/web/useTagsView'
 import { useDebounceFn } from '@vueuse/core'
+import { sliceName } from '@/utils/index'
 
 defineOptions({ name: 'BpmModel' })
 
@@ -437,11 +446,10 @@ const handleChangeState = async (row: any) => {
 /** 发布流程 */
 const handleDeploy = async (row: any) => {
   try {
-    // 删除的二次确认
-    await message.confirm('是否部署该流程！！')
+    await message.confirm('是否确认发布该流程？')
     // 发起部署
     await ModelApi.deployModel(row.id)
-    message.success(t('部署成功'))
+    message.success(t('发布成功'))
     // 刷新列表
     emit('success')
   } catch {}
@@ -464,7 +472,7 @@ const formDetailPreview = ref({
   option: {}
 })
 const handleFormDetail = async (row: any) => {
-  if (row.formType == 10) {
+  if (row.formType == BpmModelFormType.NORMAL) {
     // 设置表单
     const data = await FormApi.getForm(row.formId)
     setConfAndFields2(formDetailPreview, data.conf, data.fields)
@@ -617,6 +625,17 @@ watchEffect(() => {
 }
 </style>
 <style lang="scss" scoped>
+.flow-icon {
+  display: flex;
+  width: 38px;
+  height: 38px;
+  margin-right: 10px;
+  background-color: var(--el-color-primary);
+  border-radius: 0.25rem;
+  align-items: center;
+  justify-content: center;
+}
+
 .category-draggable-model {
   :deep(.el-table__cell) {
     overflow: hidden;

@@ -285,9 +285,8 @@ const handleSave = async () => {
     } else {
       // 新增场景
       formData.value.id = await ModelApi.createModel(modelData)
-      message.success('新增成功')
       try {
-        await message.confirm('创建流程成功，是否继续编辑？')
+        await message.confirm('流程创建成功，是否继续编辑？')
         // 用户点击继续编辑，跳转到编辑页面
         await nextTick()
         // 先删除当前页签
@@ -317,7 +316,6 @@ const handleDeploy = async () => {
     if (!formData.value.id) {
       await message.confirm('是否确认发布该流程？')
     }
-
     // 校验所有步骤
     await validateAllSteps()
 
