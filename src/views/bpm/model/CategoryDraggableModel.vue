@@ -472,9 +472,7 @@ const formDetailPreview = ref({
   option: {}
 })
 const handleFormDetail = async (row: any) => {
-  console.log(row)
-
-  if (row.formType == 10) {
+  if (row.formType == BpmModelFormType.NORMAL) {
     // 设置表单
     const data = await FormApi.getForm(row.formId)
     setConfAndFields2(formDetailPreview, data.conf, data.fields)
