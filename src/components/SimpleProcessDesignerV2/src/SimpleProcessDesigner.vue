@@ -168,7 +168,7 @@ onMounted(async () => {
       const bpmnModel = await getModel(props.modelId)
       if (bpmnModel) {
         formType.value = bpmnModel.formType
-        if (formType.value === BpmModelFormType.CUSTOM && bpmnModel.formId) {
+        if (formType.value === BpmModelFormType.NORMAL && bpmnModel.formId) {
           const bpmnForm = (await getForm(bpmnModel.formId)) as unknown as FormVO
           formFields.value = bpmnForm?.fields
         }
