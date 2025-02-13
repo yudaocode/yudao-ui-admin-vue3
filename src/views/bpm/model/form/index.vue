@@ -337,7 +337,10 @@ const handleDeploy = async () => {
     message.success('发布成功')
     // 返回列表页
     await router.push({ name: 'BpmModel' })
-  } catch (error: any) {}
+  } catch (error: any) {
+    console.error('发布失败:', error)
+    message.warning(error.message || '发布失败')
+  }
 }
 
 /** 步骤切换处理 */

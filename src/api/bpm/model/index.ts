@@ -76,4 +76,3 @@ export const deployModel = async (id: number) => {
 export const cleanModel = async (id: number) => {
   return await request.delete({ url: '/bpm/model/clean?id=' + id })
 }
-
