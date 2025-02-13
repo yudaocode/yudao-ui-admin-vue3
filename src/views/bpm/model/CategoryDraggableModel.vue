@@ -89,7 +89,7 @@
               </el-tooltip>
               <el-image v-if="row.icon" :src="row.icon" class="h-38px w-38px mr-10px rounded" />
               <div v-else class="flow-icon">
-                <span style="font-size: 12px; color: #fff">{{ sliceName(row.name,0,2) }}</span>
+                <span style="font-size: 12px; color: #fff">{{ subString(row.name, 0, 2) }}</span>
               </div>
               {{ row.name }}
             </div>
@@ -273,7 +273,7 @@ import { useAppStore } from '@/store/modules/app'
 import { cloneDeep, isEqual } from 'lodash-es'
 import { useTagsView } from '@/hooks/web/useTagsView'
 import { useDebounceFn } from '@vueuse/core'
-import { sliceName } from '@/utils/index'
+import { subString } from '@/utils/index'
 
 defineOptions({ name: 'BpmModel' })
 
