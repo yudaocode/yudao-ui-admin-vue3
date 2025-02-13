@@ -1,19 +1,10 @@
 <template>
   <div v-loading="loading" class="process-viewer-container">
-    <div
-      ref="wrapperRef"
-      class="process-viewer-wrapper"
-      @mousedown="startDrag"
-      @mousemove="onDrag"
-      @mouseup="stopDrag"
-      @mouseleave="stopDrag"
-    >
-      <SimpleProcessViewer
-        :flow-node="simpleModel"
-        :tasks="tasks"
-        :process-instance="processInstance"
-      />
-    </div>
+    <SimpleProcessViewer
+      :flow-node="simpleModel"
+      :tasks="tasks"
+      :process-instance="processInstance"
+    />
   </div>
 </template>
 <script lang="ts" setup>
@@ -33,32 +24,6 @@ const simpleModel = ref<any>({})
 const tasks = ref([])
 // 流程实例
 const processInstance = ref()
-
-const wrapperRef = ref<HTMLElement>()
-const isDragging = ref(false)
-const startX = ref(0)
-const startY = ref(0)
-const currentX = ref(0)
-const currentY = ref(0)
-
-const startDrag = (e: MouseEvent) => {
-  if (!wrapperRef.value) return
-  isDragging.value = true
-  startX.value = e.clientX - currentX.value
-  startY.value = e.clientY - currentY.value
-}
-
-const onDrag = (e: MouseEvent) => {
-  if (!isDragging.value || !wrapperRef.value) return
-  e.preventDefault()
-  currentX.value = e.clientX - startX.value
-  currentY.value = e.clientY - startY.value
-  wrapperRef.value.style.transform = `translate(${currentX.value}px, ${currentY.value}px)`
-}
-
-const stopDrag = () => {
-  isDragging.value = false
-}
 
 /** 监控模型视图 包括任务列表、进行中的活动节点编号等 */
 watch(
@@ -119,7 +84,8 @@ const setSimpleModelNodeTaskStatus = (
   // 审批节点
   if (
     simpleModel.type === NodeType.START_USER_NODE ||
-    simpleModel.type === NodeType.USER_TASK_NODE
+    simpleModel.type === NodeType.USER_TASK_NODE ||
+    simpleModel.type === NodeType.TRANSACTOR_NODE
   ) {
     simpleModel.activityStatus = TaskStatusEnum.NOT_START
     if (rejectedTaskActivityIds.includes(simpleModel.id)) {
@@ -205,24 +171,4 @@ const setSimpleModelNodeTaskStatus = (
 </script>
 
 <style lang="scss" scoped>
-.process-viewer-container {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-
-  .process-viewer-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    min-width: 100%;
-    min-height: 100%;
-    cursor: grab;
-    user-select: none;
-
-    &:active {
-      cursor: grabbing;
-    }
-  }
-}
 </style>

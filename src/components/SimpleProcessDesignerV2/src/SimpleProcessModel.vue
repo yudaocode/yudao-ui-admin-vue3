@@ -26,7 +26,15 @@
         </el-button-group>
       </el-row>
     </div>
-    <div class="simple-process-model" :style="`transform: scale(${scaleValue / 100});`">
+    <div
+      class="simple-process-model"
+      :style="`transform: translate(${currentX}px, ${currentY}px) scale(${scaleValue / 100});`"
+      @mousedown="startDrag"
+      @mousemove="onDrag"
+      @mouseup="stopDrag"
+      @mouseleave="stopDrag"
+      @mouseenter="setGrabCursor"
+    >
       <ProcessNodeTree v-if="processNodeTree" v-model:flow-node="processNodeTree" />
     </div>
   </div>
@@ -80,24 +88,41 @@ let scaleValue = ref(100)
 const MAX_SCALE_VALUE = 200
 const MIN_SCALE_VALUE = 50
 
-// 放大
-const zoomIn = () => {
-  if (scaleValue.value == MAX_SCALE_VALUE) {
-    return
-  }
-  scaleValue.value += 10
+const isDragging = ref(false)
+const startX = ref(0)
+const startY = ref(0)
+const currentX = ref(0)
+const currentY = ref(0)
+
+const setGrabCursor = () => {
+  document.body.style.cursor = 'grab';
 }
 
-// 缩小
-const zoomOut = () => {
-  if (scaleValue.value == MIN_SCALE_VALUE) {
-    return
-  }
-  scaleValue.value -= 10
+const resetCursor = () => {
+  document.body.style.cursor = 'default';
 }
 
-const processReZoom = () => {
-  scaleValue.value = 100
+const startDrag = (e: MouseEvent) => {
+  isDragging.value = true;
+  startX.value = e.clientX - currentX.value;
+  startY.value = e.clientY - currentY.value;
+  setGrabCursor(); // 设置小手光标
+}
+
+const onDrag = (e: MouseEvent) => {
+  if (!isDragging.value) return;
+  e.preventDefault();
+  
+  // 使用 requestAnimationFrame 优化性能
+  requestAnimationFrame(() => {
+    currentX.value = e.clientX - startX.value;
+    currentY.value = e.clientY - startY.value;
+  });
+}
+
+const stopDrag = () => {
+  isDragging.value = false;
+  resetCursor(); // 重置光标
 }
 
 const errorDialogVisible = ref(false)
@@ -193,6 +218,39 @@ const importLocalFile = () => {
     }
   }
 }
+
+// 放大
+const zoomIn = () => {
+  if (scaleValue.value == MAX_SCALE_VALUE) {
+    return
+  }
+  scaleValue.value += 10
+}
+
+// 缩小
+const zoomOut = () => {
+  if (scaleValue.value == MIN_SCALE_VALUE) {
+    return
+  }
+  scaleValue.value -= 10
+}
+
+const processReZoom = () => {
+  scaleValue.value = 100
+}
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.simple-process-model-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.simple-process-model {
+  position: relative; // 确保相对定位
+  min-width: 100%; // 确保宽度为100%
+  min-height: 100%; // 确保高度为100%
+}
+</style>
