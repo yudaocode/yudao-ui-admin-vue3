@@ -449,3 +449,18 @@ export function jsonParse(str: string) {
     return ''
   }
 }
+
+/**
+ * 截取字符串
+ *
+ * @param name
+ * @param start
+ * @param end
+ */
+
+export const sliceName = (name: string,start: number, end : number) => {
+  if (name.length > end) {
+    return name.slice(start, end)
+  }
+  return name
+}

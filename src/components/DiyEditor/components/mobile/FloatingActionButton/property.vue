@@ -31,14 +31,14 @@
 
 <script setup lang="ts">
 import { FloatingActionButtonProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 
 // 悬浮按钮属性面板
 defineOptions({ name: 'FloatingActionButtonProperty' })
 
 const props = defineProps<{ modelValue: FloatingActionButtonProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 </script>
 
 <style scoped lang="scss"></style>

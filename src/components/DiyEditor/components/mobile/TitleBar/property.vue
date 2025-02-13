@@ -101,13 +101,13 @@
 </template>
 <script lang="ts" setup>
 import { TitleBarProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 // 导航栏属性面板
 defineOptions({ name: 'TitleBarProperty' })
 
 const props = defineProps<{ modelValue: TitleBarProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 
 // 表单校验
 const rules = {}

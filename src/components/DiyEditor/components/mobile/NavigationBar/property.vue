@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import { NavigationBarProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import NavigationBarCellProperty from '@/components/DiyEditor/components/mobile/NavigationBar/components/CellProperty.vue'
 // 导航栏属性面板
 defineOptions({ name: 'NavigationBarProperty' })
@@ -77,7 +77,7 @@ const rules = {
 
 const props = defineProps<{ modelValue: NavigationBarProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 if (!formData.value._local) {
   formData.value._local = { previewMp: true, previewOther: false }
 }

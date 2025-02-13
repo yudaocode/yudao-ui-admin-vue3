@@ -140,7 +140,7 @@
 
 <script lang="ts" setup>
 import { PromotionPointProperty } from './config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 import PointShowcase from '@/views/mall/promotion/point/components/PointShowcase.vue'
 
 // 秒杀属性面板
@@ -148,7 +148,7 @@ defineOptions({ name: 'PromotionPointProperty' })
 
 const props = defineProps<{ modelValue: PromotionPointProperty }>()
 const emit = defineEmits(['update:modelValue'])
-const { formData } = usePropertyForm(props.modelValue, emit)
+const formData = useVModel(props, 'modelValue', emit)
 </script>
 
 <style lang="scss" scoped></style>

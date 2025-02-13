@@ -64,17 +64,22 @@
 
 <script lang="ts" setup>
 import { NavigationBarCellProperty } from '../config'
-import { usePropertyForm } from '@/components/DiyEditor/util'
+import { useVModel } from '@vueuse/core'
 // 导航栏属性面板
 defineOptions({ name: 'NavigationBarCellProperty' })
 
-const props = defineProps<{
-  modelValue: NavigationBarCellProperty[]
-  isMp: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    modelValue: NavigationBarCellProperty[]
+    isMp: boolean
+  }>(),
+  {
+    modelValue: () => [],
+    isMp: true
+  }
+)
 const emit = defineEmits(['update:modelValue'])
-const { formData: cellList } = usePropertyForm(props.modelValue, emit)
-if (!cellList.value) cellList.value = []
+const cellList = useVModel(props, 'modelValue', emit)
 
 // 单元格数量：小程序6个（右侧胶囊按钮占了2个），其它平台8个
 const cellCount = computed(() => (props.isMp ? 6 : 8))
