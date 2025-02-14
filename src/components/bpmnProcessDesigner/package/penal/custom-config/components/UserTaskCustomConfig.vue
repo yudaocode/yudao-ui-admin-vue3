@@ -191,6 +191,7 @@ import {
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import * as UserApi from '@/api/system/user'
 import { useFormFieldsPermission } from '@/components/SimpleProcessDesignerV2/src/node'
+import { BpmModelFormType } from '@/utils/constants'
 
 defineOptions({ name: 'ElementCustomConfig4UserTask' })
 const props = defineProps({
@@ -310,14 +311,12 @@ const resetCustomConfigList = () => {
   }
 
   // 字段权限
-  if (formType.value === 10) {
+  if (formType.value === BpmModelFormType.NORMAL) {
     const fieldsPermissionList = elExtensionElements.value.values?.filter(
       (ex) => ex.$type === `${prefix}:FieldsPermission`
     )
     fieldsPermissionEl.value = []
     getNodeConfigFormFields()
-    // 由于默认添加了发起人元素，这里需要删掉
-    // fieldsPermissionConfig.value = fieldsPermissionConfig.value.slice(1)
     fieldsPermissionConfig.value = fieldsPermissionConfig.value
     fieldsPermissionConfig.value.forEach((element) => {
       element.permission =
