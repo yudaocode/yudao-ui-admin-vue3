@@ -123,7 +123,7 @@
     </div>
 
     <el-divider content-position="left">字段权限</el-divider>
-    <div class="field-setting-pane" v-if="formType === BpmModelFormType.NORMAL">
+    <div class="field-setting-pane" v-if="formType === 10">
       <div class="field-permit-title">
         <div class="setting-title-label first-title"> 字段名称 </div>
         <div class="other-titles">
@@ -191,7 +191,6 @@ import {
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import * as UserApi from '@/api/system/user'
 import { useFormFieldsPermission } from '@/components/SimpleProcessDesignerV2/src/node'
-import { BpmModelFormType } from '@/utils/constants'
 
 defineOptions({ name: 'ElementCustomConfig4UserTask' })
 const props = defineProps({
@@ -249,7 +248,6 @@ const resetCustomConfigList = () => {
     bpmnElement.value.id,
     bpmnInstances().modeler
   )
-
   // 获取元素扩展属性 或者 创建扩展属性
   elExtensionElements.value =
     bpmnElement.value.businessObject?.extensionElements ??
@@ -319,7 +317,8 @@ const resetCustomConfigList = () => {
     fieldsPermissionEl.value = []
     getNodeConfigFormFields()
     // 由于默认添加了发起人元素，这里需要删掉
-    fieldsPermissionConfig.value = fieldsPermissionConfig.value.slice(1)
+    // fieldsPermissionConfig.value = fieldsPermissionConfig.value.slice(1)
+    fieldsPermissionConfig.value = fieldsPermissionConfig.value
     fieldsPermissionConfig.value.forEach((element) => {
       element.permission =
         fieldsPermissionList?.find((obj) => obj.field === element.field)?.permission ?? '1'
