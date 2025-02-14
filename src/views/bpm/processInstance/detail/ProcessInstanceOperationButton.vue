@@ -969,7 +969,6 @@ const getButtonDisplayName = (btnType: OperationButtonType) => {
 
 const loadTodoTask = (task: any) => {
   approveForm.value = {}
-  approveFormFApi.value = {}
   runningTask.value = task
   reasonRequire.value = task?.reasonRequire ?? false
   // 处理 approve 表单.
