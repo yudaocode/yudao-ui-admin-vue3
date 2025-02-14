@@ -123,7 +123,7 @@
     </div>
 
     <el-divider content-position="left">字段权限</el-divider>
-    <div class="field-setting-pane" v-if="formType === 10">
+    <div class="field-setting-pane" v-if="formType === BpmModelFormType.NORMAL">
       <div class="field-permit-title">
         <div class="setting-title-label first-title"> 字段名称 </div>
         <div class="other-titles">
@@ -191,6 +191,7 @@ import {
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import * as UserApi from '@/api/system/user'
 import { useFormFieldsPermission } from '@/components/SimpleProcessDesignerV2/src/node'
+import { BpmModelFormType } from '@/utils/constants'
 
 defineOptions({ name: 'ElementCustomConfig4UserTask' })
 const props = defineProps({
@@ -497,9 +498,9 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .button-setting-pane {
   display: flex;
-  flex-direction: column;
-  font-size: 14px;
   margin-top: 8px;
+  font-size: 14px;
+  flex-direction: column;
 
   .button-setting-desc {
     padding-right: 8px;
