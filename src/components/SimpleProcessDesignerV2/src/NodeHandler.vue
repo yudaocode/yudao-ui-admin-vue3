@@ -16,8 +16,8 @@
             <div class="handler-item-text">审批人</div>
           </div>
           <div class="handler-item" @click="addNode(NodeType.TRANSACTOR_NODE)">
-            <div class="handle handler-item-icon">
-              <span class="iconfont icon-handle icon-size"></span>
+            <div class="transactor handler-item-icon">
+              <span class="iconfont icon-transactor icon-size"></span>
             </div>
             <div class="handler-item-text">办理人</div>
           </div>

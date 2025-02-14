@@ -180,7 +180,7 @@ import copySvg from '@/assets/svgs/bpm/copy.svg'
 import conditionSvg from '@/assets/svgs/bpm/condition.svg'
 import parallelSvg from '@/assets/svgs/bpm/parallel.svg'
 import finishSvg from '@/assets/svgs/bpm/finish.svg'
-import handleSvg from '@/assets/svgs/bpm/handle.svg'
+import transactorSvg from '@/assets/svgs/bpm/transactor.svg'
 
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
 withDefaults(
@@ -243,7 +243,7 @@ const nodeTypeSvgMap = {
   // 审批人节点
   [NodeType.USER_TASK_NODE]: { color: '#ff943e', svg: auditorSvg },
   // 办理人节点
-  [NodeType.TRANSACTOR_NODE]: { color: '#ff943e', svg: handleSvg },
+  [NodeType.TRANSACTOR_NODE]: { color: '#ff943e', svg: transactorSvg },
   // 抄送人节点
   [NodeType.COPY_TASK_NODE]: { color: '#3296fb', svg: copySvg },
   // 条件分支节点

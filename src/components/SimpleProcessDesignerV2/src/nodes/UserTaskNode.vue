@@ -13,7 +13,7 @@
             :class="`node-title-icon ${currentNode.type === NodeType.TRANSACTOR_NODE ? 'transactor-task' : 'user-task'}`"
           >
             <span
-              :class="`iconfont ${currentNode.type === NodeType.TRANSACTOR_NODE ? 'icon-handle' : 'icon-approve'}`"
+              :class="`iconfont ${currentNode.type === NodeType.TRANSACTOR_NODE ? 'icon-transactor' : 'icon-approve'}`"
             ></span>
           </div>
           <input
