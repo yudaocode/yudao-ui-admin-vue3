@@ -9,7 +9,13 @@
         ]"
       >
         <div class="node-title-container">
-          <div class="node-title-icon user-task"><span class="iconfont icon-approve"></span></div>
+          <div
+            :class="`node-title-icon ${currentNode.type === NodeType.TRANSACTOR_NODE ? 'transactor-task' : 'user-task'}`"
+          >
+            <span
+              :class="`iconfont ${currentNode.type === NodeType.TRANSACTOR_NODE ? 'icon-handle' : 'icon-approve'}`"
+            ></span>
+          </div>
           <input
             v-if="!readonly && showInput"
             type="text"

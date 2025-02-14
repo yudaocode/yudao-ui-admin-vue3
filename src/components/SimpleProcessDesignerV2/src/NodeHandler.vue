@@ -15,10 +15,9 @@
             </div>
             <div class="handler-item-text">审批人</div>
           </div>
-          <!-- TODO @lesan：办理人增加自定义 icon 哈，可以换 jason 怎么弄！ -->
           <div class="handler-item" @click="addNode(NodeType.TRANSACTOR_NODE)">
-            <div class="approve handler-item-icon">
-              <span class="iconfont icon-approve icon-size"></span>
+            <div class="handle handler-item-icon">
+              <span class="iconfont icon-handle icon-size"></span>
             </div>
             <div class="handler-item-text">办理人</div>
           </div>

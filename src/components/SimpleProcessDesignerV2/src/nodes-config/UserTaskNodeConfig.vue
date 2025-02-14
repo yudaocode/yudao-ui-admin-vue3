@@ -1,4 +1,3 @@
-<!-- TODO @lesan：涉及到“审批”关键字，需要换成“办理”，建议通过一个变量控制哈 -->
 <template>
   <el-drawer
     :append-to-body="true"
@@ -40,10 +39,10 @@
       </el-radio-group>
     </div>
     <el-tabs type="border-card" v-model="activeTabName" v-if="approveType === ApproveType.USER">
-      <el-tab-pane label="审批人" name="user">
+      <el-tab-pane :label="`${nodeTypeName}人`" name="user">
         <div>
           <el-form ref="formRef" :model="configForm" label-position="top" :rules="formRules">
-            <el-form-item label="审批人设置" prop="candidateStrategy">
+            <el-form-item :label="`${nodeTypeName}人设置`" prop="candidateStrategy">
               <el-radio-group
                 v-model="configForm.candidateStrategy"
                 @change="changeCandidateStrategy"
@@ -226,7 +225,7 @@
                 style="width: 100%"
               />
             </el-form-item>
-            <el-form-item label="多人审批方式" prop="approveMethod">
+            <el-form-item :label="`多人${nodeTypeName}方式`" prop="approveMethod">
               <el-radio-group v-model="configForm.approveMethod" @change="approveMethodChanged">
                 <div class="flex-col">
                   <div
@@ -350,7 +349,7 @@
               </el-form-item>
             </div>
 
-            <el-divider content-position="left">审批人为空时</el-divider>
+            <el-divider content-position="left">{{ nodeTypeName }}人为空时</el-divider>
             <el-form-item prop="assignEmptyHandlerType">
               <el-radio-group v-model="configForm.assignEmptyHandlerType">
                 <div class="flex-col">
@@ -449,7 +448,6 @@
           </div>
         </div>
       </el-tab-pane>
-      <!-- TODO @lesan：办理时，应该还是有字段权限 -->
       <el-tab-pane label="表单字段权限" name="fields" v-if="formType === 10">
         <div class="field-setting-pane">
           <div class="field-setting-desc">字段权限</div>
@@ -680,6 +678,11 @@ const {
 } = useTimeoutHandler()
 
 const userTaskListenerRef = ref()
+
+// 节点类型名称
+const nodeTypeName = computed(() => {
+  return currentNode.value.type === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
+})
 
 // 保存配置
 const saveConfig = async () => {
