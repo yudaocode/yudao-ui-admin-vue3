@@ -34,6 +34,8 @@ import CustomContentPadProvider from '@/components/bpmnProcessDesigner/package/d
 // 自定义左侧菜单（修改 默认任务 为 用户任务）
 import CustomPaletteProvider from '@/components/bpmnProcessDesigner/package/designer/plugins/palette'
 import * as ModelApi from '@/api/bpm/model'
+import { BpmModelFormType } from '@/utils/constants'
+import * as FormApi from '@/api/bpm/form'
 
 defineOptions({ name: 'BpmModelEditor' })
 
@@ -49,7 +51,8 @@ const message = useMessage() // 国际化
 
 // 表单信息
 const formFields = ref<string[]>([])
-const formType = ref(20)
+// 表单类型，暂仅限流程表单
+const formType = ref(BpmModelFormType.NORMAL)
 provide('formFields', formFields)
 provide('formType', formType)
 
@@ -87,6 +90,20 @@ const save = async (bpmnXml: string) => {
     message.error('保存失败')
   }
 }
+
+/** 监听表单 ID 变化，加载表单数据 */
+watch(
+  () => modelData.value.formId,
+  async (newFormId) => {
+    if (newFormId && modelData.value.formType === BpmModelFormType.NORMAL) {
+      const data = await FormApi.getForm(newFormId)
+      formFields.value = data.fields
+    } else {
+      formFields.value = []
+    }
+  },
+  { immediate: true }
+)
 
 // 在组件卸载时清理
 onBeforeUnmount(() => {

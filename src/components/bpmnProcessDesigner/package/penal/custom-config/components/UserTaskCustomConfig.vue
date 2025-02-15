@@ -191,6 +191,7 @@ import {
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import * as UserApi from '@/api/system/user'
 import { useFormFieldsPermission } from '@/components/SimpleProcessDesignerV2/src/node'
+import { BpmModelFormType } from '@/utils/constants'
 
 defineOptions({ name: 'ElementCustomConfig4UserTask' })
 const props = defineProps({
@@ -248,7 +249,6 @@ const resetCustomConfigList = () => {
     bpmnElement.value.id,
     bpmnInstances().modeler
   )
-
   // 获取元素扩展属性 或者 创建扩展属性
   elExtensionElements.value =
     bpmnElement.value.businessObject?.extensionElements ??
@@ -311,14 +311,13 @@ const resetCustomConfigList = () => {
   }
 
   // 字段权限
-  if (formType.value === 10) {
+  if (formType.value === BpmModelFormType.NORMAL) {
     const fieldsPermissionList = elExtensionElements.value.values?.filter(
       (ex) => ex.$type === `${prefix}:FieldsPermission`
     )
     fieldsPermissionEl.value = []
     getNodeConfigFormFields()
-    // 由于默认添加了发起人元素，这里需要删掉
-    fieldsPermissionConfig.value = fieldsPermissionConfig.value.slice(1)
+    fieldsPermissionConfig.value = fieldsPermissionConfig.value
     fieldsPermissionConfig.value.forEach((element) => {
       element.permission =
         fieldsPermissionList?.find((obj) => obj.field === element.field)?.permission ?? '1'
@@ -497,9 +496,9 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .button-setting-pane {
   display: flex;
-  flex-direction: column;
-  font-size: 14px;
   margin-top: 8px;
+  font-size: 14px;
+  flex-direction: column;
 
   .button-setting-desc {
     padding-right: 8px;
