@@ -177,6 +177,10 @@
     color: #ca3a31
   }
 
+  .transactor {
+    color: #330099;
+  }
+
   .handler-item-text {
     margin-top: 4px;
     width: 80px;
@@ -290,9 +294,13 @@
           &.trigger-node {
             color: #3373d2;
           }
-          
+
           &.router-node {
             color: #ca3a31
+          }
+
+          &.transactor-task {
+            color: #330099;
           }
         }
 
@@ -777,7 +785,7 @@
   content: "\e7eb";
 }
 
-.icon-handle:before {
+.icon-transactor:before {
   content: "\e61c";
 }
 

@@ -36,11 +36,10 @@
               :rule="approveForm.rule"
             />
           </el-card>
-          <!-- TODO @lesan：需要分成“审批”和“办理”意见，包括 label、placeholder、rule 校验 -->
-          <el-form-item label="审批意见" prop="reason">
+          <el-form-item :label="`${taskName}意见`" prop="reason">
             <el-input
               v-model="approveReasonForm.reason"
-              placeholder="请输入审批意见"
+              :placeholder="`请输入${taskName}意见`"
               type="textarea"
               :rows="4"
             />
@@ -505,6 +504,7 @@ import * as TaskApi from '@/api/bpm/task'
 import * as ProcessInstanceApi from '@/api/bpm/processInstance'
 import * as UserApi from '@/api/system/user'
 import {
+  NodeType,
   OPERATION_BUTTON_NAME,
   OperationButtonType
 } from '@/components/SimpleProcessDesignerV2/src/consts'
@@ -559,7 +559,9 @@ const approveReasonForm = reactive({
 })
 const approveReasonRule = computed(() => {
   return {
-    reason: [{ required: reasonRequire.value, message: '审批意见不能为空', trigger: 'blur' }],
+    reason: [
+      { required: reasonRequire.value, message: taskName + '意见不能为空', trigger: 'blur' }
+    ],
     signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }]
   }
 })
@@ -968,11 +970,14 @@ const getButtonDisplayName = (btnType: OperationButtonType) => {
   return displayName
 }
 
+const taskName = ref('审批')
+
 const loadTodoTask = (task: any) => {
   approveForm.value = {}
   approveFormFApi.value = {}
   runningTask.value = task
   reasonRequire.value = task?.reasonRequire ?? false
+  taskName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
   // 处理 approve 表单.
   if (task && task.formId && task.formConf) {
     const tempApproveForm = {}
