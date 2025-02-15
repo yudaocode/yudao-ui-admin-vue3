@@ -974,6 +974,7 @@ const getButtonDisplayName = (btnType: OperationButtonType) => {
 const loadTodoTask = (task: any) => {
   approveForm.value = {}
   runningTask.value = task
+  approveFormFApi.value = {}
   reasonRequire.value = task?.reasonRequire ?? false
   nodeTypeName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
   // 处理 approve 表单.
