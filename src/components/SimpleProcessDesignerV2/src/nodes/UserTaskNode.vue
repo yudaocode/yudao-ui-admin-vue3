@@ -14,7 +14,8 @@
           >
             <span
               :class="`iconfont ${currentNode.type === NodeType.TRANSACTOR_NODE ? 'icon-transactor' : 'icon-approve'}`"
-            ></span>
+            >
+            </span>
           </div>
           <input
             v-if="!readonly && showInput"

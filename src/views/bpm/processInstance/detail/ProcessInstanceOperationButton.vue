@@ -36,10 +36,10 @@
               :rule="approveForm.rule"
             />
           </el-card>
-          <el-form-item :label="`${taskName}意见`" prop="reason">
+          <el-form-item :label="`${nodeTypeName}意见`" prop="reason">
             <el-input
               v-model="approveReasonForm.reason"
-              :placeholder="`请输入${taskName}意见`"
+              :placeholder="`请输入${nodeTypeName}意见`"
               type="textarea"
               :rows="4"
             />
@@ -547,6 +547,7 @@ const returnList = ref([] as any) // 退回节点
 const runningTask = ref<any>() // 运行中的任务
 const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
 const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
+const nodeTypeName = ref('审批') // 节点类型名称
 
 // 审批通过意见表单
 const reasonRequire = ref()
@@ -560,7 +561,7 @@ const approveReasonForm = reactive({
 const approveReasonRule = computed(() => {
   return {
     reason: [
-      { required: reasonRequire.value, message: taskName + '意见不能为空', trigger: 'blur' }
+      { required: reasonRequire.value, message: nodeTypeName + '意见不能为空', trigger: 'blur' }
     ],
     signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }]
   }
@@ -970,14 +971,12 @@ const getButtonDisplayName = (btnType: OperationButtonType) => {
   return displayName
 }
 
-const taskName = ref('审批')
-
 const loadTodoTask = (task: any) => {
   approveForm.value = {}
   approveFormFApi.value = {}
   runningTask.value = task
   reasonRequire.value = task?.reasonRequire ?? false
-  taskName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
+  nodeTypeName.value = task?.nodeType === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
   // 处理 approve 表单.
   if (task && task.formId && task.formConf) {
     const tempApproveForm = {}

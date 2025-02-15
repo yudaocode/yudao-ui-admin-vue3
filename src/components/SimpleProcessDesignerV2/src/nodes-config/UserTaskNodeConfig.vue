@@ -679,12 +679,12 @@ const {
 
 const userTaskListenerRef = ref()
 
-// 节点类型名称
+/** 节点类型名称 */
 const nodeTypeName = computed(() => {
   return currentNode.value.type === NodeType.TRANSACTOR_NODE ? '办理' : '审批'
 })
 
-// 保存配置
+/** 保存配置 */
 const saveConfig = async () => {
   // activeTabName.value = 'user'
   // 设置审批节点名称
@@ -770,7 +770,7 @@ const saveConfig = async () => {
   return true
 }
 
-// 显示审批节点配置， 由父组件传过来
+/** 显示审批节点配置， 由父组件传过来 */
 const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
   nodeName.value = node.name
   // 1 审批类型
@@ -849,9 +849,7 @@ const showUserTaskNodeConfig = (node: SimpleFlowNode) => {
 
 defineExpose({ openDrawer, showUserTaskNodeConfig }) // 暴露方法给父组件
 
-/**
- * @description 操作按钮设置
- */
+/** 操作按钮设置 */
 function useButtonsSetting() {
   const buttonsSetting = ref<ButtonSetting[]>()
   // 操作按钮显示名称可编辑
@@ -872,9 +870,7 @@ function useButtonsSetting() {
   }
 }
 
-/**
- * @description 审批人超时未处理配置
- */
+/** 审批人超时未处理配置 */
 function useTimeoutHandler() {
   // 时间单位
   const timeUnit = ref(TimeUnitType.HOUR)
