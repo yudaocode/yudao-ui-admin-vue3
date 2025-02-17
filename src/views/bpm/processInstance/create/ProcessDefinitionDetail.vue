@@ -74,7 +74,7 @@
 </template>
 <script lang="ts" setup>
 import { decodeFields, setConfAndFields2 } from '@/utils/formCreate'
-import { BpmModelType } from '@/utils/constants'
+import { BpmModelType, BpmModelFormType } from '@/utils/constants'
 import {
   CandidateStrategy,
   NodeId,
@@ -121,7 +121,7 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
   startUserSelectAssignees.value = {}
 
   // 情况一：流程表单
-  if (row.formType == 10) {
+  if (row.formType == BpmModelFormType.NORMAL) {
     // 设置表单
     // 注意：需要从 formVariables 中，移除不在 row.formFields 的值。
     // 原因是：后端返回的 formVariables 里面，会有一些非表单的信息。例如说，某个流程节点的审批人。
