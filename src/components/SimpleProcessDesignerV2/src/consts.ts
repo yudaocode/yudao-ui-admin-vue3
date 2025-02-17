@@ -735,7 +735,7 @@ export type RouterSetting = {
 export type TriggerSetting = {
   type: TriggerTypeEnum
   httpRequestSetting?: HttpRequestTriggerSetting
-  normalFormSetting?: NormalFormTriggerSetting
+  formSettings?: FormTriggerSetting[]
 }
 
 /**
@@ -769,7 +769,13 @@ export type HttpRequestTriggerSetting = {
 /**
  * 流程表单触发器配置结构定义
  */
-export type NormalFormTriggerSetting = {
+export type FormTriggerSetting = {
+  // 条件类型
+  conditionType?: ConditionType
+  // 条件表达式
+  conditionExpression?: string
+  // 条件组
+  conditionGroups?: ConditionGroup
   // 更新表单字段
   updateFormFields?: Record<string, any>
 }

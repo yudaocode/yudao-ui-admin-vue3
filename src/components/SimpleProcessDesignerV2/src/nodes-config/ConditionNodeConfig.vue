@@ -43,13 +43,9 @@
   </el-drawer>
 </template>
 <script setup lang="ts">
-import {
-  SimpleFlowNode,
-  ConditionType,
-  COMPARISON_OPERATORS,
-} from '../consts'
+import { SimpleFlowNode, ConditionType } from '../consts'
 import { getDefaultConditionNodeName } from '../utils'
-import { useFormFieldsAndStartUser } from '../node'
+import { useFormFieldsAndStartUser, getConditionShowText } from '../node'
 import Condition from './components/Condition.vue'
 const message = useMessage() // 消息弹窗
 defineOptions({
@@ -93,8 +89,6 @@ const blurEvent = () => {
     getDefaultConditionNodeName(props.nodeIndex, currentNode.value?.conditionSetting?.defaultFlow)
 }
 
-
-
 defineExpose({ open }) // 提供 open 方法，用于打开弹窗
 
 // 关闭
@@ -110,6 +104,8 @@ const handleClose = async (done: (cancel?: boolean) => void) => {
     done()
   }
 }
+// 流程表单字段和发起人字段
+const fieldOptions = useFormFieldsAndStartUser()
 
 const conditionRef = ref()
 // 保存配置
@@ -118,7 +114,12 @@ const saveConfig = async () => {
     // 校验表单
     const valid = await conditionRef.value.validate()
     if (!valid) return false
-    const showText = getShowText()
+    const showText = getConditionShowText(
+      condition.value?.conditionType,
+      condition.value?.conditionExpression,
+      condition.value.conditionGroups,
+      fieldOptions
+    )
     if (!showText) {
       return false
     }
@@ -135,59 +136,6 @@ const saveConfig = async () => {
   }
   settingVisible.value = false
   return true
-}
-const getShowText = (): string => {
-  let showText = ''
-  if (condition.value?.conditionType === ConditionType.EXPRESSION) {
-    if (condition.value.conditionExpression) {
-      showText = `表达式：${condition.value.conditionExpression}`
-    }
-  }
-  if (condition.value?.conditionType === ConditionType.RULE) {
-    // 条件组是否为与关系
-    const groupAnd = condition.value.conditionGroups?.and
-    let warningMesg: undefined | string = undefined
-    const conditionGroup = condition.value.conditionGroups?.conditions.map((item) => {
-      return (
-        '(' +
-        item.rules
-          .map((rule) => {
-            if (rule.leftSide && rule.rightSide) {
-              return (
-                getFieldTitle(rule.leftSide) + ' ' + getOpName(rule.opCode) + ' ' + rule.rightSide
-              )
-            } else {
-              // 有一条规则不完善。提示错误
-              warningMesg = '请完善条件规则'
-              return ''
-            }
-          })
-          .join(item.and ? ' 且 ' : ' 或 ') +
-        ' ) '
-      )
-    })
-    if (warningMesg) {
-      message.warning(warningMesg)
-      showText = ''
-    } else {
-      showText = conditionGroup!.join(groupAnd ? ' 且 ' : ' 或 ')
-    }
-  }
-  return showText
-}
-// 流程表单字段和发起人字段
-const fieldOptions = useFormFieldsAndStartUser()
-
-/** 获取字段名称 */
-const getFieldTitle = (field: string) => {
-  const item = fieldOptions.find((item) => item.field === field)
-  return item?.title
-}
-
-/** 获取操作符名称 */
-const getOpName = (opCode: string): string => {
-  const opName = COMPARISON_OPERATORS.find((item: any) => item.value === opCode)
-  return opName?.label
 }
 </script>
 
