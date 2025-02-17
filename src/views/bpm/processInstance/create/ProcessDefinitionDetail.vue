@@ -161,7 +161,8 @@ const getApprovalDetail = async (row: any) => {
     // TODO 获取审批详情，设置 activityId 为发起人节点（为了获取字段权限。暂时只对 Simple 设计器有效）
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: row.id,
-      activityId: NodeId.START_USER_NODE_ID
+      activityId: NodeId.START_USER_NODE_ID,
+      processVariables: row.processVariables
     })
 
     if (!data) {
@@ -218,6 +219,19 @@ const submitForm = async () => {
   }
   // 流程表单校验
   await fApi.value.validate()
+  // 临时保存已选择的审批人信息，避免重新预测后已选择的审批人丢失
+  const savedAssignees = { ...startUserSelectAssignees.value }
+  // 预测流程节点会因为输入的参数值而产生新的预测结果值，所以在提交时需重新预测一次
+  await getApprovalDetail({
+    id: props.selectProcessDefinition.id,
+    processVariables: detailForm.value?.value
+  })
+  // 恢复已选择的审批人信息
+  Object.keys(savedAssignees).forEach((id) => {
+    if (startUserSelectAssignees.value[id]) {
+      startUserSelectAssignees.value[id] = savedAssignees[id]
+    }
+  })
   // 如果有指定审批人，需要校验
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
@@ -235,7 +249,8 @@ const submitForm = async () => {
     await ProcessInstanceApi.createProcessInstance({
       processDefinitionId: props.selectProcessDefinition.id,
       variables: detailForm.value.value,
-      startUserSelectAssignees: startUserSelectAssignees.value
+      startUserSelectAssignees: startUserSelectAssignees.value,
+      nodeIds: activityNodes.value?.map((item: any) => item.id)
     })
     // 提示
     message.success('发起流程成功')
