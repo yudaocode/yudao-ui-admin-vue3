@@ -747,9 +747,9 @@ export enum TriggerTypeEnum {
    */
   HTTP_REQUEST = 1,
   /**
-   * 更新流程表单触发器
+   * 流程表单更新触发器
    */
-  UPDATE_NORMAL_FORM = 2 // TODO @jason：FORM_UPDATE？
+  FORM_UPDATE = 2 
 }
 
 /**
@@ -782,5 +782,5 @@ export type FormTriggerSetting = {
 
 export const TRIGGER_TYPES: DictDataVO[] = [
   { label: 'HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST },
-  { label: '修改表单数据', value: TriggerTypeEnum.UPDATE_NORMAL_FORM }
+  { label: '修改表单数据', value: TriggerTypeEnum.FORM_UPDATE }
 ]

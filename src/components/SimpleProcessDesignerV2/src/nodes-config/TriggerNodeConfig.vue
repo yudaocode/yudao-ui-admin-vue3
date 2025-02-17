@@ -122,7 +122,7 @@
           </el-form-item>
         </div>
         <!-- 表单数据修改触发器 -->
-        <div v-if="configForm.type === TriggerTypeEnum.UPDATE_NORMAL_FORM">
+        <div v-if="configForm.type === TriggerTypeEnum.FORM_UPDATE">
           <div v-for="(formSetting, index) in configForm.formSettings" :key="index">
             <el-card class="w-580px mt-4">
               <template #header>
@@ -404,7 +404,7 @@ const saveConfig = async () => {
   if (configForm.value.type === TriggerTypeEnum.HTTP_REQUEST) {
     configForm.value.formSettings = undefined
   }
-  if (configForm.value.type === TriggerTypeEnum.UPDATE_NORMAL_FORM) {
+  if (configForm.value.type === TriggerTypeEnum.FORM_UPDATE) {
     configForm.value.httpRequestSetting = undefined
   }
   currentNode.value.triggerSetting = configForm.value
@@ -417,7 +417,7 @@ const getShowText = (): string => {
   let showText = ''
   if (configForm.value.type === TriggerTypeEnum.HTTP_REQUEST) {
     showText = `${configForm.value.httpRequestSetting?.url}`
-  } else if (configForm.value.type === TriggerTypeEnum.UPDATE_NORMAL_FORM) {
+  } else if (configForm.value.type === TriggerTypeEnum.FORM_UPDATE) {
     for (const [index, setting] of configForm.value.formSettings!.entries()) {
       if (!setting.updateFormFields || Object.keys(setting.updateFormFields).length === 0) {
         message.warning(`请添加表单设置${index + 1}的修改字段`)
