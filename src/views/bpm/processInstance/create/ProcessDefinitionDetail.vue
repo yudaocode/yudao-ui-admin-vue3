@@ -162,7 +162,7 @@ const getApprovalDetail = async (row: any) => {
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: row.id,
       activityId: NodeId.START_USER_NODE_ID,
-      processVariablesStr: JSON.stringify(row.processVariables)
+      processVariablesStr: JSON.stringify(row.processVariablesStr)
     })
 
     if (!data) {
@@ -224,7 +224,7 @@ const submitForm = async () => {
   // 预测流程节点会因为输入的参数值而产生新的预测结果值，所以在提交时需重新预测一次
   await getApprovalDetail({
     id: props.selectProcessDefinition.id,
-    processVariablesStr: JSON.stringify(detailForm.value?.value)
+    processVariablesStr: detailForm.value?.value
   })
   // 恢复已选择的审批人信息
   Object.keys(savedAssignees).forEach((id) => {
