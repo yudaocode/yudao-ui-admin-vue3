@@ -195,9 +195,13 @@
           <div class="field-permit-title">
             <div class="setting-title-label first-title"> 字段名称 </div>
             <div class="other-titles">
-              <span class="setting-title-label">只读</span>
+              <span class="setting-title-label">只读
+                              <el-switch v-model="readSwitch" @change="updatePermission('READ')" />
+              </span>
               <span class="setting-title-label">可编辑</span>
-              <span class="setting-title-label">隐藏</span>
+              <span class="setting-title-label">隐藏
+                                <el-switch v-model="noneSwitch" @change="updatePermission('NONE')" />
+              </span>
             </div>
           </div>
           <div
@@ -367,7 +371,23 @@ const showCopyTaskNodeConfig = (node: SimpleFlowNode) => {
   // 表单字段权限
   getNodeConfigFormFields(node.fieldsPermission)
 }
+const readSwitch = ref(false);
+const noneSwitch = ref(false);
+const updatePermission = (type: string) => {
+  if (type === 'READ') {
+    readSwitch.value = true;
 
+    noneSwitch.value = false;
+  }  else if (type === 'NONE') {
+    readSwitch.value = false;
+
+    noneSwitch.value = true;
+  }
+
+  fieldsPermissionConfig.value.forEach(field => {
+    field.permission = type === 'READ' ? FieldPermissionType.READ : FieldPermissionType.NONE;
+  });
+};
 defineExpose({ openDrawer, showCopyTaskNodeConfig }) // 暴露方法给父组件
 </script>
 
