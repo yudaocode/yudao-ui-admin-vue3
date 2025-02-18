@@ -89,8 +89,8 @@ export const getProcessInstanceCopyPage = async (params: any) => {
 }
 
 // 获取审批详情
-export const getApprovalDetail = async (data: any) => {
-  return await request.post({ url: '/bpm/process-instance/get-approval-detail', data: data })
+export const getApprovalDetail = async (params: any) => {
+  return await request.get({ url: '/bpm/process-instance/get-approval-detail', params })
 }
 
 // 获取表单字段权限
