@@ -154,17 +154,21 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     // 这里暂时无需加载流程图，因为跳出到另外个 Tab；
   }
 }
-
-// 监听 formVariables 的变化
+// 预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次
 watch(
   detailForm.value,
-  (newValue, oldValue) => {
-    console.log('formVariables 发生了变化')
-    console.log('新值:', newValue)
-    console.log('旧值:', oldValue)
+  (newValue) => {
+    if (newValue && Object.keys(newValue.value).length > 0) {
+      // startUserSelectTasks.value = []
+      // startUserSelectAssignees.value = []
+      getApprovalDetail({
+        id: props.selectProcessDefinition.id,
+        processVariablesStr: newValue.value
+      })
+    }
   },
   {
-    deep: true // 深度监听，当对象内部属性变化时也会触发回调
+    immediate: true
   }
 )
 
@@ -232,19 +236,7 @@ const submitForm = async () => {
   }
   // 流程表单校验
   await fApi.value.validate()
-  // 临时保存已选择的审批人信息，避免重新预测后已选择的审批人丢失
-  const savedAssignees = { ...startUserSelectAssignees.value }
-  // 预测流程节点会因为输入的参数值而产生新的预测结果值，所以在提交时需重新预测一次
-  await getApprovalDetail({
-    id: props.selectProcessDefinition.id,
-    processVariablesStr: detailForm.value?.value
-  })
-  // 恢复已选择的审批人信息
-  Object.keys(savedAssignees).forEach((id) => {
-    if (startUserSelectAssignees.value[id]) {
-      startUserSelectAssignees.value[id] = savedAssignees[id]
-    }
-  })
+  // debugger
   // 如果有指定审批人，需要校验
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
