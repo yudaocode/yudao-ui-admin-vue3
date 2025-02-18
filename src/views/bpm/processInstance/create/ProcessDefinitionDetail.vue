@@ -155,6 +155,19 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
   }
 }
 
+// 监听 formVariables 的变化
+watch(
+  detailForm.value,
+  (newValue, oldValue) => {
+    console.log('formVariables 发生了变化')
+    console.log('新值:', newValue)
+    console.log('旧值:', oldValue)
+  },
+  {
+    deep: true // 深度监听，当对象内部属性变化时也会触发回调
+  }
+)
+
 /** 获取审批详情 */
 const getApprovalDetail = async (row: any) => {
   try {
@@ -249,8 +262,7 @@ const submitForm = async () => {
     await ProcessInstanceApi.createProcessInstance({
       processDefinitionId: props.selectProcessDefinition.id,
       variables: detailForm.value.value,
-      startUserSelectAssignees: startUserSelectAssignees.value,
-      nodeIds: activityNodes.value?.map((item: any) => item.id)
+      startUserSelectAssignees: startUserSelectAssignees.value
     })
     // 提示
     message.success('发起流程成功')
