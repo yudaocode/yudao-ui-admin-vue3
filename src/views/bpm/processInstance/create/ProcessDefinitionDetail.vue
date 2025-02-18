@@ -108,6 +108,7 @@ const fApi = ref<ApiAttrs>()
 // 指定审批人
 const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人或抄送人的任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
+const hisStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据
 const bpmnXML: any = ref(null) // BPMN 数据
 const simpleJson = ref<string | undefined>() // Simple 设计器数据 json 格式
 
@@ -154,13 +155,15 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
     // 这里暂时无需加载流程图，因为跳出到另外个 Tab；
   }
 }
+
 // 预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次
 watch(
   detailForm.value,
   (newValue) => {
     if (newValue && Object.keys(newValue.value).length > 0) {
-      // startUserSelectTasks.value = []
-      // startUserSelectAssignees.value = []
+      //记录之前的节点审批人
+      hisStartUserSelectAssignees.value = startUserSelectAssignees.value
+      startUserSelectAssignees.value = {}
       getApprovalDetail({
         id: props.selectProcessDefinition.id,
         processVariablesStr: newValue.value
@@ -186,19 +189,24 @@ const getApprovalDetail = async (row: any) => {
       message.error('查询不到审批详情信息！')
       return
     }
+    // 获取审批节点，显示 Timeline 的数据
+    activityNodes.value = data.activityNodes
 
     // 获取发起人自选的任务
     startUserSelectTasks.value = data.activityNodes?.filter(
       (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
     )
+    
     if (startUserSelectTasks.value?.length > 0) {
       for (const node of startUserSelectTasks.value) {
-        startUserSelectAssignees.value[node.id] = []
+        if (hisStartUserSelectAssignees.value[node.id] && hisStartUserSelectAssignees.value[node.id].length > 0) {
+          startUserSelectAssignees.value[node.id] = hisStartUserSelectAssignees.value[node.id]
+        } else {
+          startUserSelectAssignees.value[node.id] = []
+        }
       }
     }
-
-    // 获取审批节点，显示 Timeline 的数据
-    activityNodes.value = data.activityNodes
+    
     // 获取表单字段权限
     const formFieldsPermission = data.formFieldsPermission
     // 设置表单字段权限
@@ -236,7 +244,6 @@ const submitForm = async () => {
   }
   // 流程表单校验
   await fApi.value.validate()
-  // debugger
   // 如果有指定审批人，需要校验
   if (startUserSelectTasks.value?.length > 0) {
     for (const userTask of startUserSelectTasks.value) {
