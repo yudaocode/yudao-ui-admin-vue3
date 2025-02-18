@@ -1,6 +1,6 @@
 <template>
   <div class="simple-process-model-container position-relative">
-    <div class="position-absolute top-0px right-0px bg-#fff">
+    <div class="position-absolute top-0px right-0px bg-#fff z-index-button-group">
       <el-row type="flex" justify="end">
         <el-button-group key="scale-control" size="default">
           <el-button v-if="!readonly" size="default" @click="exportJson">
@@ -23,6 +23,7 @@
           <el-button size="default" :plain="true" :icon="ZoomOut" @click="zoomOut()" />
           <el-button size="default" class="w-80px"> {{ scaleValue }}% </el-button>
           <el-button size="default" :plain="true" :icon="ZoomIn" @click="zoomIn()" />
+          <el-button size="default" @click="resetPosition">重置</el-button>
         </el-button-group>
       </el-row>
     </div>
@@ -93,6 +94,8 @@ const startX = ref(0)
 const startY = ref(0)
 const currentX = ref(0)
 const currentY = ref(0)
+const initialX = ref(0)
+const initialY = ref(0)
 
 const setGrabCursor = () => {
   document.body.style.cursor = 'grab';
@@ -238,6 +241,18 @@ const zoomOut = () => {
 const processReZoom = () => {
   scaleValue.value = 100
 }
+
+// 在组件初始化时记录初始位置
+onMounted(() => {
+  initialX.value = currentX.value
+  initialY.value = currentY.value
+})
+
+// 重置位置的函数
+const resetPosition = () => {
+  currentX.value = initialX.value
+  currentY.value = initialY.value
+}
 </script>
 
 <style lang="scss" scoped>
@@ -252,5 +267,9 @@ const processReZoom = () => {
   position: relative; // 确保相对定位
   min-width: 100%; // 确保宽度为100%
   min-height: 100%; // 确保高度为100%
+}
+
+.z-index-button-group {
+  z-index: 10;
 }
 </style>
