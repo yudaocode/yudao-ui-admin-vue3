@@ -114,7 +114,7 @@ const startDrag = (e: MouseEvent) => {
 
 const onDrag = (e: MouseEvent) => {
   if (!isDragging.value) return;
-  e.preventDefault();
+  e.preventDefault(); // 禁用文本选择
   
   // 使用 requestAnimationFrame 优化性能
   requestAnimationFrame(() => {
@@ -261,6 +261,7 @@ const resetPosition = () => {
   height: 100%;
   position: relative;
   overflow: hidden;
+  user-select: none; // 禁用文本选择
 }
 
 .simple-process-model {
