@@ -454,14 +454,14 @@
           <div class="field-permit-title">
             <div class="setting-title-label first-title"> 字段名称 </div>
             <div class="other-titles">
-              <span class="setting-title-label">只读
-                <el-switch v-model="readSwitch" @change="updatePermission('READ')" />
-                </span>
-              <span class="setting-title-label">可编辑
-                <el-switch v-model="writeSwitch" @change="updatePermission('WRITE')" />
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')">
+                只读
               </span>
-              <span class="setting-title-label">隐藏
-                <el-switch v-model="noneSwitch" @change="updatePermission('NONE')" />
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')">
+                可编辑
+              </span>
+              <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')">
+                隐藏
               </span>
             </div>
           </div>
@@ -959,31 +959,18 @@ function useTimeoutHandler() {
     cTimeoutMaxRemindCount
   }
 }
-const readSwitch = ref(false);
-const writeSwitch = ref(false);
-const noneSwitch = ref(false);
 
+/** 批量更新权限 */
 const updatePermission = (type: string) => {
-  if (type === 'READ') {
-    readSwitch.value = true;
-    writeSwitch.value = false;
-    noneSwitch.value = false;
-  } else if (type === 'WRITE') {
-    readSwitch.value = false;
-    writeSwitch.value = true;
-    noneSwitch.value = false;
-  } else if (type === 'NONE') {
-    readSwitch.value = false;
-    writeSwitch.value = false;
-    noneSwitch.value = true;
-  }
-
-  fieldsPermissionConfig.value.forEach(field => {
-    field.permission = type === 'READ' ? FieldPermissionType.READ :
-      type === 'WRITE' ? FieldPermissionType.WRITE :
-        FieldPermissionType.NONE;
-  });
-};
+  fieldsPermissionConfig.value.forEach((field) => {
+    field.permission =
+      type === 'READ'
+        ? FieldPermissionType.READ
+        : type === 'WRITE'
+          ? FieldPermissionType.WRITE
+          : FieldPermissionType.NONE
+  })
+}
 </script>
 
 <style lang="scss" scoped>
