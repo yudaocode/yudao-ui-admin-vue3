@@ -98,48 +98,38 @@ const initialX = ref(0)
 const initialY = ref(0)
 
 const setGrabCursor = () => {
-  document.body.style.cursor = 'grab';
+  document.body.style.cursor = 'grab'
 }
 
 const resetCursor = () => {
-  document.body.style.cursor = 'default';
+  document.body.style.cursor = 'default'
 }
 
 const startDrag = (e: MouseEvent) => {
-  isDragging.value = true;
-  startX.value = e.clientX - currentX.value;
-  startY.value = e.clientY - currentY.value;
-  setGrabCursor(); // 设置小手光标
+  isDragging.value = true
+  startX.value = e.clientX - currentX.value
+  startY.value = e.clientY - currentY.value
+  setGrabCursor() // 设置小手光标
 }
 
 const onDrag = (e: MouseEvent) => {
-  if (!isDragging.value) return;
-  e.preventDefault(); // 禁用文本选择
-  
+  if (!isDragging.value) return
+  e.preventDefault() // 禁用文本选择
+
   // 使用 requestAnimationFrame 优化性能
   requestAnimationFrame(() => {
-    currentX.value = e.clientX - startX.value;
-    currentY.value = e.clientY - startY.value;
-  });
+    currentX.value = e.clientX - startX.value
+    currentY.value = e.clientY - startY.value
+  })
 }
 
 const stopDrag = () => {
-  isDragging.value = false;
-  resetCursor(); // 重置光标
+  isDragging.value = false
+  resetCursor() // 重置光标
 }
 
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
-
-const saveSimpleFlowModel = async () => {
-  errorNodes = []
-  validateNode(processNodeTree.value, errorNodes)
-  if (errorNodes.length > 0) {
-    errorDialogVisible.value = true
-    return
-  }
-  emits('save', processNodeTree.value)
-}
 
 // 校验节点设置。 暂时以 showText 为空 未节点错误配置
 const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNode[]) => {
