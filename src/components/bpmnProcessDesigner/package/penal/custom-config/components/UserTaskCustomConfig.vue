@@ -123,7 +123,7 @@
     </div>
 
     <el-divider content-position="left">字段权限</el-divider>
-    <div class="field-setting-pane" v-if="formType === 10">
+    <div class="field-setting-pane" v-if="formType === BpmModelFormType.NORMAL">
       <div class="field-permit-title">
         <div class="setting-title-label first-title"> 字段名称 </div>
         <div class="other-titles">

@@ -703,6 +703,12 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
     // 校验表单
     if (!formRef) return
     await formRef.validate()
+    //校验流程表单必填字段
+    const valid = await validateNormalForm()
+    if (!valid) {
+      message.warning('表单校验不通过，请先完善表单!!')
+      return
+    }
     if (pass) {
       // 获取修改的流程变量, 暂时只支持流程表单
       const variables = getUpdatedProcessInstanceVariables()

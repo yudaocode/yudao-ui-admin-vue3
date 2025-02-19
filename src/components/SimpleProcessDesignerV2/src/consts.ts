@@ -532,6 +532,7 @@ export const CANDIDATE_STRATEGY: DictDataVO[] = [
   { label: '部门负责人', value: CandidateStrategy.DEPT_LEADER },
   { label: '连续多级部门负责人', value: CandidateStrategy.MULTI_LEVEL_DEPT_LEADER },
   { label: '指定岗位', value: CandidateStrategy.MULTI_LEVEL_DEPT_LEADER },
+  { label: '发起人自选', value: CandidateStrategy.START_USER_SELECT },
   { label: '发起人本人', value: CandidateStrategy.START_USER },
   { label: '发起人部门负责人', value: CandidateStrategy.START_USER_DEPT_LEADER },
   { label: '发起人连续部门负责人', value: CandidateStrategy.START_USER_MULTI_LEVEL_DEPT_LEADER },

@@ -74,7 +74,7 @@
 </template>
 <script lang="ts" setup>
 import { decodeFields, setConfAndFields2 } from '@/utils/formCreate'
-import { BpmModelType } from '@/utils/constants'
+import { BpmModelType, BpmModelFormType } from '@/utils/constants'
 import {
   CandidateStrategy,
   NodeId,
@@ -108,6 +108,7 @@ const fApi = ref<ApiAttrs>()
 // 指定审批人
 const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人或抄送人的任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
+const hisStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据
 const bpmnXML: any = ref(null) // BPMN 数据
 const simpleJson = ref<string | undefined>() // Simple 设计器数据 json 格式
 
@@ -121,7 +122,7 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
   startUserSelectAssignees.value = {}
 
   // 情况一：流程表单
-  if (row.formType == 10) {
+  if (row.formType == BpmModelFormType.NORMAL) {
     // 设置表单
     // 注意：需要从 formVariables 中，移除不在 row.formFields 的值。
     // 原因是：后端返回的 formVariables 里面，会有一些非表单的信息。例如说，某个流程节点的审批人。
@@ -155,32 +156,57 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
   }
 }
 
+// 预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次
+watch(
+  detailForm.value,
+  (newValue) => {
+    if (newValue && Object.keys(newValue.value).length > 0) {
+      //记录之前的节点审批人
+      hisStartUserSelectAssignees.value = startUserSelectAssignees.value
+      startUserSelectAssignees.value = {}
+      getApprovalDetail({
+        id: props.selectProcessDefinition.id,
+        processVariablesStr: newValue.value
+      })
+    }
+  },
+  {
+    immediate: true
+  }
+)
+
 /** 获取审批详情 */
 const getApprovalDetail = async (row: any) => {
   try {
     // TODO 获取审批详情，设置 activityId 为发起人节点（为了获取字段权限。暂时只对 Simple 设计器有效）
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: row.id,
-      activityId: NodeId.START_USER_NODE_ID
+      activityId: NodeId.START_USER_NODE_ID,
+      processVariablesStr: JSON.stringify(row.processVariablesStr)
     })
 
     if (!data) {
       message.error('查询不到审批详情信息！')
       return
     }
+    // 获取审批节点，显示 Timeline 的数据
+    activityNodes.value = data.activityNodes
 
     // 获取发起人自选的任务
     startUserSelectTasks.value = data.activityNodes?.filter(
       (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
     )
+    
     if (startUserSelectTasks.value?.length > 0) {
       for (const node of startUserSelectTasks.value) {
-        startUserSelectAssignees.value[node.id] = []
+        if (hisStartUserSelectAssignees.value[node.id] && hisStartUserSelectAssignees.value[node.id].length > 0) {
+          startUserSelectAssignees.value[node.id] = hisStartUserSelectAssignees.value[node.id]
+        } else {
+          startUserSelectAssignees.value[node.id] = []
+        }
       }
     }
-
-    // 获取审批节点，显示 Timeline 的数据
-    activityNodes.value = data.activityNodes
+    
     // 获取表单字段权限
     const formFieldsPermission = data.formFieldsPermission
     // 设置表单字段权限
