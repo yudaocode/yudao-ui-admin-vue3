@@ -108,7 +108,7 @@ const fApi = ref<ApiAttrs>()
 // 指定审批人
 const startUserSelectTasks: any = ref([]) // 发起人需要选择审批人或抄送人的任务列表
 const startUserSelectAssignees = ref({}) // 发起人选择审批人的数据
-const hisStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据
+const tempStartUserSelectAssignees = ref({}) // 历史发起人选择审批人的数据，用于每次表单变更时，临时保存
 const bpmnXML: any = ref(null) // BPMN 数据
 const simpleJson = ref<string | undefined>() // Simple 设计器数据 json 格式
 
@@ -156,17 +156,18 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
   }
 }
 
-// 预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次
+/** 预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次 */
 watch(
   detailForm.value,
   (newValue) => {
     if (newValue && Object.keys(newValue.value).length > 0) {
-      //记录之前的节点审批人
-      hisStartUserSelectAssignees.value = startUserSelectAssignees.value
+      // 记录之前的节点审批人
+      tempStartUserSelectAssignees.value = startUserSelectAssignees.value
       startUserSelectAssignees.value = {}
+      // 加载最新的审批详情
       getApprovalDetail({
         id: props.selectProcessDefinition.id,
-        processVariablesStr: newValue.value
+        processVariablesStr: JSON.stringify(newValue.value) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
       })
     }
   },
@@ -178,11 +179,11 @@ watch(
 /** 获取审批详情 */
 const getApprovalDetail = async (row: any) => {
   try {
-    // TODO 获取审批详情，设置 activityId 为发起人节点（为了获取字段权限。暂时只对 Simple 设计器有效）
+    // TODO 获取审批详情，设置 activityId 为发起人节点（为了获取字段权限。暂时只对 Simple 设计器有效）；@jason：这里可以去掉 activityId 么？
     const data = await ProcessInstanceApi.getApprovalDetail({
       processDefinitionId: row.id,
       activityId: NodeId.START_USER_NODE_ID,
-      processVariablesStr: JSON.stringify(row.processVariablesStr)
+      processVariablesStr: JSON.stringify(row.processVariablesStr) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
     })
 
     if (!data) {
@@ -196,17 +197,20 @@ const getApprovalDetail = async (row: any) => {
     startUserSelectTasks.value = data.activityNodes?.filter(
       (node: ApprovalNodeInfo) => CandidateStrategy.START_USER_SELECT === node.candidateStrategy
     )
-    
+    // 恢复之前的选择审批人
     if (startUserSelectTasks.value?.length > 0) {
       for (const node of startUserSelectTasks.value) {
-        if (hisStartUserSelectAssignees.value[node.id] && hisStartUserSelectAssignees.value[node.id].length > 0) {
-          startUserSelectAssignees.value[node.id] = hisStartUserSelectAssignees.value[node.id]
+        if (
+          tempStartUserSelectAssignees.value[node.id] &&
+          tempStartUserSelectAssignees.value[node.id].length > 0
+        ) {
+          startUserSelectAssignees.value[node.id] = tempStartUserSelectAssignees.value[node.id]
         } else {
           startUserSelectAssignees.value[node.id] = []
         }
       }
     }
-    
+
     // 获取表单字段权限
     const formFieldsPermission = data.formFieldsPermission
     // 设置表单字段权限
