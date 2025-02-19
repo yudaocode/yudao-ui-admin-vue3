@@ -46,9 +46,15 @@
           <div class="field-permit-title">
             <div class="setting-title-label first-title"> 字段名称 </div>
             <div class="other-titles">
-              <span class="setting-title-label">只读</span>
-              <span class="setting-title-label">可编辑</span>
-              <span class="setting-title-label">隐藏</span>
+              <span class="setting-title-label">只读
+                <el-switch v-model="readSwitch" @change="updatePermission('READ')" />
+              </span>
+              <span class="setting-title-label">可编辑
+                <el-switch v-model="writeSwitch" @change="updatePermission('WRITE')" />
+              </span>
+              <span class="setting-title-label">隐藏
+                <el-switch v-model="noneSwitch" @change="updatePermission('NONE')" />
+              </span>
             </div>
           </div>
           <div
@@ -156,8 +162,32 @@ const showStartUserNodeConfig = (node: SimpleFlowNode) => {
   // 表单字段权限
   getNodeConfigFormFields(node.fieldsPermission)
 }
+const readSwitch = ref(false)
+const writeSwitch = ref(false)
+const noneSwitch = ref(false)
+const updatePermission = (type) => {
+  if (type === 'READ') {
+    readSwitch.value = true;
+    writeSwitch.value = false;
+    noneSwitch.value = false;
+  } else if (type === 'WRITE') {
+    readSwitch.value = false;
+    writeSwitch.value = true;
+    noneSwitch.value = false;
+  } else if (type === 'NONE') {
+    readSwitch.value = false;
+    writeSwitch.value = false;
+    noneSwitch.value = true;
+  }
 
+  fieldsPermissionConfig.value.forEach(item => {
+    item.permission = type === 'READ' ? FieldPermissionType.READ :
+      type === 'WRITE' ? FieldPermissionType.WRITE :
+        FieldPermissionType.NONE;
+  });
+}
 defineExpose({ openDrawer, showStartUserNodeConfig }) // 暴露方法给父组件
+
 </script>
 
 <style lang="scss" scoped></style>
