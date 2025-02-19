@@ -252,17 +252,11 @@ import {
   FormTriggerSetting,
   DEFAULT_CONDITION_GROUP_VALUE
 } from '../consts'
-import {
-  useWatchNode,
-  useDrawer,
-  useNodeName,
-  useFormFields,
-  useFormFieldsAndStartUser,
-  getConditionShowText
-} from '../node'
+import { useWatchNode, useDrawer, useNodeName, useFormFields, getConditionShowText } from '../node'
 import HttpRequestParamSetting from './components/HttpRequestParamSetting.vue'
 import ConditionDialog from './components/ConditionDialog.vue'
 const { proxy } = getCurrentInstance() as any
+
 defineOptions({
   name: 'TriggerNodeConfig'
 })
@@ -314,7 +308,7 @@ const optionalUpdateFormFields = computed(() => {
   }))
 })
 
-/** 添加 HTTP 请求返回值设置项*/
+/** 添加 HTTP 请求返回值设置项 */
 const addHttpResponseSetting = (responseSetting: Record<string, string>[]) => {
   responseSetting.push({
     key: '',

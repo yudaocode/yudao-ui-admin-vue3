@@ -551,21 +551,21 @@ export function useTaskStatusClass(taskStatus: TaskStatusEnum | undefined): stri
 
 /** 条件组件文字展示 */
 export function getConditionShowText(
-  conditonType: ConditionType | undefined,
+  conditionType: ConditionType | undefined,
   conditionExpression: string | undefined,
   conditionGroups: ConditionGroup | undefined,
   fieldOptions: Array<Record<string, any>>
 ) {
   let showText = ''
-  if (conditonType === ConditionType.EXPRESSION) {
+  if (conditionType === ConditionType.EXPRESSION) {
     if (conditionExpression) {
       showText = `表达式：${conditionExpression}`
     }
   }
-  if (conditonType === ConditionType.RULE) {
+  if (conditionType === ConditionType.RULE) {
     // 条件组是否为与关系
     const groupAnd = conditionGroups?.and
-    let warningMesg: undefined | string = undefined
+    let warningMessage: undefined | string = undefined
     const conditionGroup = conditionGroups?.conditions.map((item) => {
       return (
         '(' +
@@ -581,7 +581,7 @@ export function getConditionShowText(
               )
             } else {
               // 有一条规则不完善。提示错误
-              warningMesg = '请完善条件规则'
+              warningMessage = '请完善条件规则'
               return ''
             }
           })
@@ -589,7 +589,7 @@ export function getConditionShowText(
         ' ) '
       )
     })
-    if (warningMesg) {
+    if (warningMessage) {
       showText = ''
     } else {
       showText = conditionGroup!.join(groupAnd ? ' 且 ' : ' 或 ')

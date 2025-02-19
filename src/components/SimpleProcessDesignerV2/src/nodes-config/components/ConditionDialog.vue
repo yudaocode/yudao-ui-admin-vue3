@@ -1,3 +1,4 @@
+<!-- TODO @jason：有可能，它里面套 Condition 么？ -->
 <template>
   <Dialog v-model="dialogVisible" title="条件配置" width="600px" :fullscreen="false">
     <div class="h-410px">
@@ -106,7 +107,10 @@
                       <el-input v-model="rule.rightSide" style="width: 160px" />
                     </el-form-item>
                   </div>
-                  <div class="cursor-pointer mr-1 flex items-center" v-if="equation.rules.length > 1">
+                  <div
+                    class="cursor-pointer mr-1 flex items-center"
+                    v-if="equation.rules.length > 1"
+                  >
                     <Icon
                       icon="ep:delete"
                       :size="18"

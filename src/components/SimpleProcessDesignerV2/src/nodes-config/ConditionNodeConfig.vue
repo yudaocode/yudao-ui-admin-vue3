@@ -104,11 +104,10 @@ const handleClose = async (done: (cancel?: boolean) => void) => {
     done()
   }
 }
-// 流程表单字段和发起人字段
-const fieldOptions = useFormFieldsAndStartUser()
 
+/** 保存配置 */
+const fieldOptions = useFormFieldsAndStartUser() // 流程表单字段和发起人字段
 const conditionRef = ref()
-// 保存配置
 const saveConfig = async () => {
   if (!currentNode.value.conditionSetting?.defaultFlow) {
     // 校验表单
