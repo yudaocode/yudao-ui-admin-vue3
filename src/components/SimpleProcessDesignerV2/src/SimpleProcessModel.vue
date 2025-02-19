@@ -85,10 +85,12 @@ const emits = defineEmits<{
 const processNodeTree = useWatchNode(props)
 
 provide('readonly', props.readonly)
+
+// TODO 可优化：拖拽有点卡顿
+/** 拖拽、放大缩小等操作 */
 let scaleValue = ref(100)
 const MAX_SCALE_VALUE = 200
 const MIN_SCALE_VALUE = 50
-
 const isDragging = ref(false)
 const startX = ref(0)
 const startY = ref(0)
@@ -128,10 +130,33 @@ const stopDrag = () => {
   resetCursor() // 重置光标
 }
 
+const zoomIn = () => {
+  if (scaleValue.value == MAX_SCALE_VALUE) {
+    return
+  }
+  scaleValue.value += 10
+}
+
+const zoomOut = () => {
+  if (scaleValue.value == MIN_SCALE_VALUE) {
+    return
+  }
+  scaleValue.value -= 10
+}
+
+const processReZoom = () => {
+  scaleValue.value = 100
+}
+
+const resetPosition = () => {
+  currentX.value = initialX.value
+  currentY.value = initialY.value
+}
+
+/** 校验节点设置 */
 const errorDialogVisible = ref(false)
 let errorNodes: SimpleFlowNode[] = []
 
-// 校验节点设置。 暂时以 showText 为空 未节点错误配置
 const validateNode = (node: SimpleFlowNode | undefined, errorNodes: SimpleFlowNode[]) => {
   if (node) {
     const { type, showText, conditionNodes } = node
@@ -212,37 +237,11 @@ const importLocalFile = () => {
   }
 }
 
-// 放大
-const zoomIn = () => {
-  if (scaleValue.value == MAX_SCALE_VALUE) {
-    return
-  }
-  scaleValue.value += 10
-}
-
-// 缩小
-const zoomOut = () => {
-  if (scaleValue.value == MIN_SCALE_VALUE) {
-    return
-  }
-  scaleValue.value -= 10
-}
-
-const processReZoom = () => {
-  scaleValue.value = 100
-}
-
 // 在组件初始化时记录初始位置
 onMounted(() => {
   initialX.value = currentX.value
   initialY.value = currentY.value
 })
-
-// 重置位置的函数
-const resetPosition = () => {
-  currentX.value = initialX.value
-  currentY.value = initialY.value
-}
 </script>
 
 <style lang="scss" scoped>
