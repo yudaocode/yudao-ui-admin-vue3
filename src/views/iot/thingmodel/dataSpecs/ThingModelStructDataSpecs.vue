@@ -5,7 +5,6 @@
     :rules="[{ required: true, validator: validateList, trigger: 'change' }]"
     label="JSON 对象"
   >
-    <!-- TODO @puhui999：编辑已经添加的结构体，里面的参数加不上 -->
     <div
       v-for="(item, index) in dataSpecsList"
       :key="index"
@@ -118,9 +117,6 @@ const submitForm = async () => {
     }
 
     // 查找是否已有相同 identifier 的项
-    if (isEmpty(dataSpecsList.value)) {
-      dataSpecsList.value = []
-    }
     const existingIndex = dataSpecsList.value.findIndex(
       (spec) => spec.identifier === data.identifier
     )
@@ -158,6 +154,13 @@ const validateList = (_: any, __: any, callback: any) => {
   }
   callback()
 }
+
+/** 组件初始化 */
+onMounted(async () => {
+  await nextTick()
+  // 预防 dataSpecsList 空指针
+  isEmpty(dataSpecsList.value) && (dataSpecsList.value = [])
+})
 </script>
 
 <style lang="scss" scoped>
