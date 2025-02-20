@@ -64,59 +64,7 @@
         </el-table-column>
         <el-table-column align="left" label="数据定义" prop="identifier">
           <template #default="{ row }">
-            <!-- 属性 -->
-            <template v-if="row.type === ThingModelType.PROPERTY">
-              <!-- 非列表型：数值 -->
-              <div
-                v-if="
-                  [
-                    DataSpecsDataType.INT,
-                    DataSpecsDataType.DOUBLE,
-                    DataSpecsDataType.FLOAT
-                  ].includes(row.property.dataType)
-                "
-              >
-                <!-- TODO @puhui999：把数据定义，抽成一个方法？这样，其它地方也可以复用哈。 -->
-                取值范围：{{ `${row.property.dataSpecs.min}~${row.property.dataSpecs.max}` }}
-              </div>
-              <!-- 非列表型：文本 -->
-              <div v-if="DataSpecsDataType.TEXT === row.property.dataType">
-                数据长度：{{ row.property.dataSpecs.length }}
-              </div>
-              <!-- 列表型: 数组、结构、时间（特殊） -->
-              <div
-                v-if="
-                  [
-                    DataSpecsDataType.ARRAY,
-                    DataSpecsDataType.STRUCT,
-                    DataSpecsDataType.DATE
-                  ].includes(row.property.dataType)
-                "
-              >
-                -
-              </div>
-              <!-- 列表型: 布尔值、枚举 -->
-              <div
-                v-if="
-                  [DataSpecsDataType.BOOL, DataSpecsDataType.ENUM].includes(row.property.dataType)
-                "
-              >
-                <div>
-                  {{ DataSpecsDataType.BOOL === row.property.dataType ? '布尔值' : '枚举值' }}：
-                </div>
-                <div v-for="item in row.property.dataSpecsList" :key="item.value">
-                  {{ `${item.name}-${item.value}` }}
-                </div>
-              </div>
-            </template>
-            <!-- 服务 -->
-            <div v-if="row.type === ThingModelType.SERVICE">
-              调用方式：{{ getCallTypeByValue(row.service.callType) }}
-            </div>
-            <!-- 事件 -->
-            <div v-if="row.type === ThingModelType.EVENT">
-              事件类型：{{ getEventTypeByValue(row.event.type) }}
-            </div>
+            <DataDefinition :data="row" />
           </template>
         </el-table-column>
         <el-table-column align="center" label="操作">
@@ -158,13 +106,8 @@ import { DICT_TYPE, getIntDictOptions } from '@/utils/dict'
 import ThingModelForm from './ThingModelForm.vue'
 import { ProductVO } from '@/api/iot/product/product'
 import { IOT_PROVIDE_KEY } from '@/views/iot/utils/constants'
-import {
-  DataSpecsDataType,
-  getCallTypeByValue,
-  getDataTypeOptionsLabel,
-  getEventTypeByValue,
-  ThingModelType
-} from './config'
+import { getDataTypeOptionsLabel } from './config'
+import { DataDefinition } from './components'
 
 defineOptions({ name: 'IoTThingModel' })
 

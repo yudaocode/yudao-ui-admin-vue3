@@ -118,6 +118,9 @@ const submitForm = async () => {
     }
 
     // 查找是否已有相同 identifier 的项
+    if (isEmpty(dataSpecsList.value)) {
+      dataSpecsList.value = []
+    }
     const existingIndex = dataSpecsList.value.findIndex(
       (spec) => spec.identifier === data.identifier
     )

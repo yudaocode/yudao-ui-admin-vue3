@@ -7,7 +7,7 @@
         <el-tabs v-model="activeTab" type="border-card">
           <!-- 上行指令调试 -->
           <el-tab-pane label="上行指令调试" name="up">
-            <el-tabs v-model="subTab" v-if="activeTab === 'up'">
+            <el-tabs v-if="activeTab === 'up'" v-model="subTab">
               <!-- 属性上报 -->
               <el-tab-pane label="属性上报" name="property">
                 <ContentWrap>
@@ -29,70 +29,11 @@
                     </el-table-column>
                     <el-table-column align="left" label="数据定义" prop="identifier">
                       <template #default="{ row }">
-                        <!-- 属性 -->
-                        <template v-if="row.type === ThingModelType.PROPERTY">
-                          <!-- 非列表型：数值 -->
-                          <div
-                            v-if="
-                              [
-                                DataSpecsDataType.INT,
-                                DataSpecsDataType.DOUBLE,
-                                DataSpecsDataType.FLOAT
-                              ].includes(row.property.dataType)
-                            "
-                          >
-                            取值范围：
-                            {{ `${row.property.dataSpecs.min}~${row.property.dataSpecs.max}` }}
-                          </div>
-                          <!-- 非列表型：文本 -->
-                          <div v-if="DataSpecsDataType.TEXT === row.property.dataType">
-                            数据长度：{{ row.property.dataSpecs.length }}
-                          </div>
-                          <!-- 列表型: 数组、结构、时间（特殊） -->
-                          <div
-                            v-if="
-                              [
-                                DataSpecsDataType.ARRAY,
-                                DataSpecsDataType.STRUCT,
-                                DataSpecsDataType.DATE
-                              ].includes(row.property.dataType)
-                            "
-                          >
-                            -
-                          </div>
-                          <!-- 列表型: 布尔值、枚举 -->
-                          <div
-                            v-if="
-                              [DataSpecsDataType.BOOL, DataSpecsDataType.ENUM].includes(
-                                row.property.dataType
-                              )
-                            "
-                          >
-                            <div>
-                              {{
-                                DataSpecsDataType.BOOL === row.property.dataType
-                                  ? '布尔值'
-                                  : '枚举值'
-                              }}：
-                            </div>
-                            <div v-for="item in row.property.dataSpecsList" :key="item.value">
-                              {{ `${item.name}-${item.value}` }}
-                            </div>
-                          </div>
-                          <!-- TODO @super：要不要兜底下，没翻译的类型，直接展示 json？ -->
-                        </template>
-                        <!-- 服务 -->
-                        <div v-if="row.type === ThingModelType.SERVICE">
-                          调用方式：{{ getCallTypeByValue(row.service.callType) }}
-                        </div>
-                        <!-- 事件 -->
-                        <div v-if="row.type === ThingModelType.EVENT">
-                          事件类型：{{ getEventTypeByValue(row.event.type) }}
-                        </div>
+                        <DataDefinition :data="row" />
                       </template>
                     </el-table-column>
                     <!-- TODO @super：可以右侧 fixed -->
-                    <el-table-column label="值" align="center" width="80">
+                    <el-table-column align="center" label="值" width="80">
                       <template #default="scope">
                         <el-input v-model="scope.row.simulateValue" class="!w-60px" />
                       </template>
@@ -100,7 +41,7 @@
                   </el-table>
                   <!-- TODO @super：发送按钮，可以放在右侧哈。因为我们的 simulateValue 就在最右侧 -->
                   <div class="mt-10px">
-                    <el-button type="primary" @click="handlePropertyReport"> 发送 </el-button>
+                    <el-button type="primary" @click="handlePropertyReport"> 发送</el-button>
                   </div>
                 </ContentWrap>
               </el-tab-pane>
@@ -151,7 +92,7 @@
           <!-- 下行指令调试 -->
           <!-- TODO @super：待实现 -->
           <el-tab-pane label="下行指令调试" name="down">
-            <el-tabs v-model="subTab" v-if="activeTab === 'down'">
+            <el-tabs v-if="activeTab === 'down'" v-model="subTab">
               <!-- 属性调试 -->
               <el-tab-pane label="属性调试" name="propertyDebug">
                 <ContentWrap>
@@ -201,18 +142,13 @@
   </ContentWrap>
 </template>
 
-<script setup lang="ts">
+<script lang="ts" setup>
 import { ProductVO } from '@/api/iot/product/product'
-import { ThingModelApi, SimulatorData } from '@/api/iot/thingmodel'
+import { SimulatorData, ThingModelApi } from '@/api/iot/thingmodel'
 import { DeviceApi, DeviceStateEnum, DeviceVO } from '@/api/iot/device/device'
 import DeviceDetailsLog from './DeviceDetailsLog.vue'
-import {
-  DataSpecsDataType,
-  getCallTypeByValue,
-  getDataTypeOptionsLabel,
-  getEventTypeByValue,
-  ThingModelType
-} from '@/views/iot/thingmodel/config'
+import { getDataTypeOptionsLabel } from '@/views/iot/thingmodel/config'
+import { DataDefinition } from '@/views/iot/thingmodel/components'
 
 const props = defineProps<{
   product: ProductVO

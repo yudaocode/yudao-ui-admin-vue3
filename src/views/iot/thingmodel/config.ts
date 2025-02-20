@@ -1,4 +1,4 @@
-import { isEmpty } from '@/utils/is'
+import {isEmpty} from '@/utils/is'
 
 /** dataSpecs 数值型数据结构 */
 export interface DataSpecsNumberDataVO {
@@ -21,7 +21,7 @@ export interface DataSpecsEnumOrBoolDataVO {
 }
 
 /** 属性值的数据类型 */
-// TODO @puhui999：这个枚举类，要不放到 dict 里？
+// TODO @puhui999：这个枚举类，要不放到 dict 里？ 这个全是当常量来使用的不好放 dict 里 🤣
 export const DataSpecsDataType = {
   INT: 'int',
   FLOAT: 'float',
@@ -37,15 +37,15 @@ export const DataSpecsDataType = {
 /** 物体模型数据类型配置项 */
 // TODO @puhui999：搞到字典里；label 只使用（）部分，就是整数型、单精度浮点型等，这种哈。这样，拼接 value(label) 就可以渲染出来，通用性更强
 export const dataTypeOptions = [
-  { value: DataSpecsDataType.INT, label: 'int32 (整数型)' },
-  { value: DataSpecsDataType.FLOAT, label: 'float (单精度浮点型)' },
-  { value: DataSpecsDataType.DOUBLE, label: 'double (双精度浮点型)' },
-  { value: DataSpecsDataType.ENUM, label: 'enum(枚举型)' },
-  { value: DataSpecsDataType.BOOL, label: 'bool (布尔型)' },
-  { value: DataSpecsDataType.TEXT, label: 'text (文本型)' },
-  { value: DataSpecsDataType.DATE, label: 'date (时间型)' },
-  { value: DataSpecsDataType.STRUCT, label: 'struct (结构体)' },
-  { value: DataSpecsDataType.ARRAY, label: 'array (数组)' }
+  { value: DataSpecsDataType.INT, label: '整数型' },
+  { value: DataSpecsDataType.FLOAT, label: '单精度浮点型' },
+  { value: DataSpecsDataType.DOUBLE, label: '双精度浮点型' },
+  { value: DataSpecsDataType.ENUM, label: '枚举型' },
+  { value: DataSpecsDataType.BOOL, label: '布尔型' },
+  { value: DataSpecsDataType.TEXT, label: '文本型' },
+  { value: DataSpecsDataType.DATE, label: '时间型' },
+  { value: DataSpecsDataType.STRUCT, label: '结构体' },
+  { value: DataSpecsDataType.ARRAY, label: '数组' }
 ]
 
 /** 获得物体模型数据类型配置项名称 */
@@ -53,7 +53,8 @@ export const getDataTypeOptionsLabel = (value: string) => {
   if (isEmpty(value)) {
     return value
   }
-  return dataTypeOptions.find((option) => option.value === value)?.label
+  const dataType = dataTypeOptions.find((option) => option.value === value)
+  return dataType && `${dataType.value}(${dataType.label})`
 }
 
 // IOT 产品物模型类型枚举类

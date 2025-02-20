@@ -1,4 +1,4 @@
-import { toNumber } from 'lodash-es'
+import {toNumber} from 'lodash-es'
 
 /**
  *
@@ -118,7 +118,7 @@ export function toAnyString() {
 
 /**
  * 生成指定长度的随机字符串
- * 
+ *
  * @param length 字符串长度
  */
 export function generateRandomStr(length: number): string {
@@ -459,7 +459,7 @@ export function jsonParse(str: string) {
   try {
     return JSON.parse(str)
   } catch (e) {
-    console.error(`str[${str}] 不是一个 JSON 字符串`)
+    // console.error(`str[${str}] 不是一个 JSON 字符串`)
     return ''
   }
 }
