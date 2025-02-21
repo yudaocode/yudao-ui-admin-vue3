@@ -77,7 +77,8 @@ const openDetail = (spuId: number) => {
 
 .product-warp {
   width: 100%;
-  background-color: #fff;
+  background-color: var(--app-content-bg-color);
+  border: 1px solid var(--el-border-color);
   border-radius: 8px;
   display: flex;
   align-items: center;

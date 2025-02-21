@@ -105,7 +105,7 @@ const editorConfig = computed((): IEditorConfig => {
           },
 
           // 超时时间，默认为 10 秒
-          timeout: 5 * 1000, // 5 秒
+          timeout: 15 * 1000, // 15 秒
 
           // form-data fieldName，后端接口参数名称，默认值wangeditor-uploaded-image
           fieldName: 'file',

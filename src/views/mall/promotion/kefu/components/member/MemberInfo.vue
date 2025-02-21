@@ -167,7 +167,7 @@ const getUserData = async () => {
 .kefu {
   position: relative;
   width: 300px !important;
-  background-color: #f5f5f5;
+  background-color: var(--app-content-bg-color);
 
   &::after {
     content: '';
@@ -181,7 +181,7 @@ const getUserData = async () => {
   }
 
   &-header {
-    background-color: #f5f5f5;
+    background-color: var(--app-content-bg-color);
     position: relative;
     display: flex;
     align-items: center;
