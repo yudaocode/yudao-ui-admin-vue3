@@ -1,4 +1,5 @@
-<!-- TODO @jason：有可能，它里面套 Condition 么？ -->
+<!-- TODO @jason：有可能，它里面套 Condition 么？  -->
+<!-- TODO 怕影响其它节点功能，后面看看如何如何复用 Condtion --> 
 <template>
   <Dialog v-model="dialogVisible" title="条件配置" width="600px" :fullscreen="false">
     <div class="h-410px">
