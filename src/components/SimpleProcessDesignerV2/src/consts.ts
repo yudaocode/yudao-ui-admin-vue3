@@ -39,6 +39,16 @@ export enum NodeType {
   TRIGGER_NODE = 15,
 
   /**
+   * 触发器节点
+   */
+  CHILD_PROCESS_NODE = 20,
+
+  /**
+   * 触发器节点
+   */
+  ASYNC_CHILD_PROCESS_NODE = 21,
+
+  /**
    * 条件节点
    */
   CONDITION_NODE = 50,
@@ -128,6 +138,8 @@ export interface SimpleFlowNode {
   reasonRequire?: boolean
   // 触发器设置
   triggerSetting?: TriggerSetting
+  // 子流程
+  childProcessSetting?: ChildProcessSetting
 }
 // 候选人策略枚举 （ 用于审批节点。抄送节点 )
 export enum CandidateStrategy {
@@ -512,6 +524,7 @@ NODE_DEFAULT_TEXT.set(NodeType.DELAY_TIMER_NODE, '请设置延迟器')
 NODE_DEFAULT_TEXT.set(NodeType.ROUTER_BRANCH_NODE, '请设置路由节点')
 NODE_DEFAULT_TEXT.set(NodeType.TRIGGER_NODE, '请设置触发器')
 NODE_DEFAULT_TEXT.set(NodeType.TRANSACTOR_NODE, '请设置办理人')
+NODE_DEFAULT_TEXT.set(NodeType.CHILD_PROCESS_NODE, '请设置子流程')
 
 export const NODE_DEFAULT_NAME = new Map<number, string>()
 NODE_DEFAULT_NAME.set(NodeType.USER_TASK_NODE, '审批人')
@@ -522,6 +535,7 @@ NODE_DEFAULT_NAME.set(NodeType.DELAY_TIMER_NODE, '延迟器')
 NODE_DEFAULT_NAME.set(NodeType.ROUTER_BRANCH_NODE, '路由分支')
 NODE_DEFAULT_NAME.set(NodeType.TRIGGER_NODE, '触发器')
 NODE_DEFAULT_NAME.set(NodeType.TRANSACTOR_NODE, '办理人')
+NODE_DEFAULT_NAME.set(NodeType.CHILD_PROCESS_NODE, '子流程')
 
 // 候选人策略。暂时不从字典中取。 后续可能调整。控制显示顺序
 export const CANDIDATE_STRATEGY: DictDataVO[] = [
@@ -750,7 +764,7 @@ export enum TriggerTypeEnum {
   /**
    * 流程表单更新触发器
    */
-  FORM_UPDATE = 2 
+  FORM_UPDATE = 2
 }
 
 /**
@@ -785,3 +799,29 @@ export const TRIGGER_TYPES: DictDataVO[] = [
   { label: 'HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST },
   { label: '修改表单数据', value: TriggerTypeEnum.FORM_UPDATE }
 ]
+
+/**
+ * 子流程节点结构定义
+ */
+export type ChildProcessSetting = {
+  calledElement: string
+  calledElementName: string
+  async: boolean,
+  inVariable?: IOParameter[],
+  outVariable?: IOParameter[],
+  skipStartUserNode: boolean,
+  startUserSetting: StartUserSetting,
+}
+
+export type IOParameter = {
+  source: string
+  sourceExpression: string
+  target: string
+  targetExpression: string
+}
+
+export type StartUserSetting = {
+  type: number
+  formField?: string
+  emptyHandleType?: number
+}

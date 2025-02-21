@@ -157,24 +157,24 @@ const initProcessInfo = async (row: any, formVariables?: any) => {
 }
 
 /** 预测流程节点会因为输入的参数值而产生新的预测结果值，所以需重新预测一次 */
-watch(
-  detailForm.value,
-  (newValue) => {
-    if (newValue && Object.keys(newValue.value).length > 0) {
-      // 记录之前的节点审批人
-      tempStartUserSelectAssignees.value = startUserSelectAssignees.value
-      startUserSelectAssignees.value = {}
-      // 加载最新的审批详情
-      getApprovalDetail({
-        id: props.selectProcessDefinition.id,
-        processVariablesStr: JSON.stringify(newValue.value) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
-      })
-    }
-  },
-  {
-    immediate: true
-  }
-)
+// watch(
+//   detailForm.value,
+//   (newValue) => {
+//     if (newValue && Object.keys(newValue.value).length > 0) {
+//       // 记录之前的节点审批人
+//       tempStartUserSelectAssignees.value = startUserSelectAssignees.value
+//       startUserSelectAssignees.value = {}
+//       // 加载最新的审批详情
+//       getApprovalDetail({
+//         id: props.selectProcessDefinition.id,
+//         processVariablesStr: JSON.stringify(newValue.value) // 解决 GET 无法传递对象的问题，后端 String 再转 JSON
+//       })
+//     }
+//   },
+//   {
+//     immediate: true
+//   }
+// )
 
 /** 获取审批详情 */
 const getApprovalDetail = async (row: any) => {

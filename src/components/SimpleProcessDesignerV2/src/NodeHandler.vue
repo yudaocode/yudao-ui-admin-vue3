@@ -63,6 +63,18 @@
             </div>
             <div class="handler-item-text">触发器</div>
           </div>
+          <div class="handler-item" @click="addNode(NodeType.CHILD_PROCESS_NODE)">
+            <div class="handler-item-icon child-process">
+              <span class="iconfont icon-size icon-child-process"></span>
+            </div>
+            <div class="handler-item-text">子流程</div>
+          </div>
+          <div class="handler-item" @click="addNode(NodeType.ASYNC_CHILD_PROCESS_NODE)">
+            <div class="handler-item-icon async-child-process">
+              <span class="iconfont icon-size icon-async-child-process"></span>
+            </div>
+            <div class="handler-item-text">异步子流程</div>
+          </div>
         </div>
         <template #reference>
           <div class="add-icon"><Icon icon="ep:plus" /></div>
@@ -280,6 +292,25 @@ const addNode = (type: number) => {
       showText: '',
       type: NodeType.TRIGGER_NODE,
       childNode: props.childNode
+    }
+    emits('update:childNode', data)
+  }
+  if (type === NodeType.CHILD_PROCESS_NODE) {
+    const data: SimpleFlowNode = {
+      id: 'Activity_' + generateUUID(),
+      name: NODE_DEFAULT_NAME.get(NodeType.CHILD_PROCESS_NODE) as string,
+      showText: '',
+      type: NodeType.CHILD_PROCESS_NODE,
+      childNode: props.childNode,
+      childProcessSetting: {
+        calledElement: '',
+        calledElementName: '',
+        async: false,
+        skipStartUserNode: false,
+        startUserSetting: {
+          type: 1
+        }
+      }
     }
     emits('update:childNode', data)
   }
