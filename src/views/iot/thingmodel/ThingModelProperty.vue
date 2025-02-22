@@ -10,7 +10,7 @@
       <el-option
         v-for="option in getDataTypeOptions"
         :key="option.value"
-        :label="option.label"
+        :label="`${option.value}(${option.label})`"
         :value="option.value"
       />
     </el-select>
@@ -76,7 +76,6 @@
     v-if="property.dataType === DataSpecsDataType.STRUCT"
     v-model="property.dataSpecsList"
   />
-  <!-- TODO @puhui999：默认选中第一个 -->
   <el-form-item v-if="!isStructDataSpecs && !isParams" label="读写类型" prop="property.accessMode">
     <el-radio-group v-model="property.accessMode">
       <el-radio :label="ThingModelAccessMode.READ_WRITE.value">
@@ -104,6 +103,7 @@ import {
   ThingModelStructDataSpecs
 } from './dataSpecs'
 import { ThingModelProperty } from '@/api/iot/thingmodel'
+import { isEmpty } from '@/utils/is'
 
 /** IoT 物模型属性 */
 defineOptions({ name: 'ThingModelProperty' })
@@ -146,6 +146,18 @@ const handleChange = (dataType: any) => {
       break
   }
 }
+
+// 默认选中读写
+watch(
+  () => property.value.accessMode,
+  (val: string) => {
+    if (props.isStructDataSpecs || props.isParams) {
+      return
+    }
+    isEmpty(val) && (property.value.accessMode = ThingModelAccessMode.READ_WRITE.value)
+  },
+  { immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>

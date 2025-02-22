@@ -4,15 +4,15 @@
     <el-radio-group v-model="dataSpecs.childDataType" @change="handleChange">
       <template v-for="item in dataTypeOptions" :key="item.value">
         <el-radio
-          class="w-1/3"
           v-if="
             !(
               [DataSpecsDataType.ENUM, DataSpecsDataType.ARRAY, DataSpecsDataType.DATE] as any[]
             ).includes(item.value)
           "
           :value="item.value"
+          class="w-1/3"
         >
-          {{ item.label }}
+          {{ `${item.value}(${item.label})` }}
         </el-radio>
       </template>
     </el-radio-group>

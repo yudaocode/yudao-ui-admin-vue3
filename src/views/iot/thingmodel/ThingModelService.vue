@@ -5,7 +5,6 @@
     label="调用方式"
     prop="service.callType"
   >
-    <!-- TODO @puhui999：默认选中，ASYNC 异步 -->
     <el-radio-group v-model="service.callType">
       <el-radio :value="ThingModelServiceCallType.ASYNC.value">
         {{ ThingModelServiceCallType.ASYNC.label }}
@@ -34,6 +33,7 @@ import ThingModelInputOutputParam from './ThingModelInputOutputParam.vue'
 import { useVModel } from '@vueuse/core'
 import { ThingModelService } from '@/api/iot/thingmodel'
 import { ThingModelParamDirection, ThingModelServiceCallType } from './config'
+import { isEmpty } from '@/utils/is'
 
 /** IoT 物模型服务 */
 defineOptions({ name: 'ThingModelService' })
@@ -41,6 +41,13 @@ defineOptions({ name: 'ThingModelService' })
 const props = defineProps<{ modelValue: any; isStructDataSpecs?: boolean }>()
 const emits = defineEmits(['update:modelValue'])
 const service = useVModel(props, 'modelValue', emits) as Ref<ThingModelService>
+
+// 默认选中，ASYNC 异步
+watch(
+  () => service.value.callType,
+  (val: string) => isEmpty(val) && (service.value.callType = ThingModelServiceCallType.ASYNC.value),
+  { immediate: true }
+)
 </script>
 
 <style lang="scss" scoped>
