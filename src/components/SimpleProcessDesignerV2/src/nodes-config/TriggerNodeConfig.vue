@@ -37,7 +37,11 @@
         </el-form-item>
         <!-- HTTP 请求触发器 -->
         <div
-          v-if="configForm.type === TriggerTypeEnum.HTTP_REQUEST && configForm.httpRequestSetting"
+          v-if="
+            (configForm.type === TriggerTypeEnum.HTTP_REQUEST ||
+              configForm.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST) &&
+            configForm.httpRequestSetting
+          "
         >
           <el-form-item>
             <el-alert
@@ -58,68 +62,72 @@
             :bind="'httpRequestSetting'"
           />
           <!-- 返回值设置-->
-          <el-form-item label="返回值">
-            <el-alert
-              title="通过请求返回值, 可以修改流程表单的值"
-              type="warning"
-              show-icon
-              :closable="false"
-            />
-          </el-form-item>
-          <el-form-item>
-            <div
-              class="flex pt-2"
-              v-for="(item, index) in configForm.httpRequestSetting.response"
-              :key="index"
-            >
-              <div class="mr-2">
-                <el-form-item
-                  :prop="`httpRequestSetting.response.${index}.key`"
-                  :rules="{
-                    required: true,
-                    message: '表单字段不能为空',
-                    trigger: 'blur'
-                  }"
-                >
-                  <el-select class="w-160px!" v-model="item.key" placeholder="请选择表单字段">
-                    <el-option
-                      v-for="(field, fIdx) in formFields"
-                      :key="fIdx"
-                      :label="field.title"
-                      :value="field.field"
-                      :disabled="!field.required"
-                    />
-                  </el-select>
-                </el-form-item>
+          <div v-if="configForm.type === TriggerTypeEnum.HTTP_REQUEST">
+            <el-form-item label="返回值">
+              <el-alert
+                title="通过请求返回值, 可以修改流程表单的值"
+                type="warning"
+                show-icon
+                :closable="false"
+              />
+            </el-form-item>
+            <el-form-item>
+              <div
+                class="flex pt-2"
+                v-for="(item, index) in configForm.httpRequestSetting.response"
+                :key="index"
+              >
+                <div class="mr-2">
+                  <el-form-item
+                    :prop="`httpRequestSetting.response.${index}.key`"
+                    :rules="{
+                      required: true,
+                      message: '表单字段不能为空',
+                      trigger: 'blur'
+                    }"
+                  >
+                    <el-select class="w-160px!" v-model="item.key" placeholder="请选择表单字段">
+                      <el-option
+                        v-for="(field, fIdx) in formFields"
+                        :key="fIdx"
+                        :label="field.title"
+                        :value="field.field"
+                        :disabled="!field.required"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </div>
+                <div class="mr-2">
+                  <el-form-item
+                    :prop="`httpRequestSetting.response.${index}.value`"
+                    :rules="{
+                      required: true,
+                      message: '请求返回字段不能为空',
+                      trigger: 'blur'
+                    }"
+                  >
+                    <el-input class="w-160px" v-model="item.value" placeholder="请求返回字段" />
+                  </el-form-item>
+                </div>
+                <div class="mr-1 pt-1 cursor-pointer">
+                  <Icon
+                    icon="ep:delete"
+                    :size="18"
+                    @click="
+                      deleteHttpResponseSetting(configForm.httpRequestSetting.response!, index)
+                    "
+                  />
+                </div>
               </div>
-              <div class="mr-2">
-                <el-form-item
-                  :prop="`httpRequestSetting.response.${index}.value`"
-                  :rules="{
-                    required: true,
-                    message: '请求返回字段不能为空',
-                    trigger: 'blur'
-                  }"
-                >
-                  <el-input class="w-160px" v-model="item.value" placeholder="请求返回字段" />
-                </el-form-item>
-              </div>
-              <div class="mr-1 pt-1 cursor-pointer">
-                <Icon
-                  icon="ep:delete"
-                  :size="18"
-                  @click="deleteHttpResponseSetting(configForm.httpRequestSetting.response!, index)"
-                />
-              </div>
-            </div>
-            <el-button
-              type="primary"
-              text
-              @click="addHttpResponseSetting(configForm.httpRequestSetting.response!)"
-            >
-              <Icon icon="ep:plus" class="mr-5px" />添加一行
-            </el-button>
-          </el-form-item>
+              <el-button
+                type="primary"
+                text
+                @click="addHttpResponseSetting(configForm.httpRequestSetting.response!)"
+              >
+                <Icon icon="ep:plus" class="mr-5px" />添加一行
+              </el-button>
+            </el-form-item>
+          </div>
         </div>
 
         <!-- 表单数据修改触发器 -->
@@ -385,14 +393,28 @@ let originalSetting: TriggerSetting | undefined
 /** 触发器类型改变了 */
 const changeTriggerType = () => {
   if (configForm.value.type === TriggerTypeEnum.HTTP_REQUEST) {
-    configForm.value.httpRequestSetting = originalSetting?.httpRequestSetting || {
-      url: '',
-      header: [],
-      body: [],
-      response: []
-    }
+    configForm.value.httpRequestSetting =
+      originalSetting?.type === TriggerTypeEnum.HTTP_REQUEST && originalSetting.httpRequestSetting
+        ? originalSetting.httpRequestSetting
+        : {
+            url: '',
+            header: [],
+            body: [],
+            response: []
+          }
     configForm.value.formSettings = undefined
-  } else if (configForm.value.type === TriggerTypeEnum.FORM_UPDATE) {
+  } else if (configForm.value.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST) {
+    configForm.value.httpRequestSetting =
+      originalSetting?.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST && originalSetting.httpRequestSetting
+        ? originalSetting.httpRequestSetting
+        : {
+            url: '',
+            header: [],
+            body: [],
+            response: []
+          }
+    configForm.value.formSettings = undefined
+  }else if (configForm.value.type === TriggerTypeEnum.FORM_UPDATE) {
     configForm.value.formSettings =
       originalSetting?.type === TriggerTypeEnum.FORM_UPDATE && originalSetting.formSettings
         ? originalSetting.formSettings
@@ -405,7 +427,6 @@ const changeTriggerType = () => {
           ]
     configForm.value.httpRequestSetting = undefined
   } else if (configForm.value.type === TriggerTypeEnum.FORM_DELETE) {
-    console.log('originalSetting?.type', originalSetting?.type)
     configForm.value.formSettings =
       originalSetting?.type === TriggerTypeEnum.FORM_DELETE && originalSetting.formSettings
         ? originalSetting.formSettings
@@ -531,7 +552,10 @@ const saveConfig = async () => {
 /** 获取节点展示内容 */
 const getShowText = (): string => {
   let showText = ''
-  if (configForm.value.type === TriggerTypeEnum.HTTP_REQUEST) {
+  if (
+    configForm.value.type === TriggerTypeEnum.HTTP_REQUEST ||
+    configForm.value.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST
+  ) {
     showText = `${configForm.value.httpRequestSetting?.url}`
   } else if (configForm.value.type === TriggerTypeEnum.FORM_UPDATE) {
     for (const [index, setting] of configForm.value.formSettings!.entries()) {
@@ -556,7 +580,7 @@ const getShowText = (): string => {
 /** 显示触发器节点配置， 由父组件传过来 */
 const showTriggerNodeConfig = (node: SimpleFlowNode) => {
   nodeName.value = node.name
-  originalSetting = node.triggerSetting
+  originalSetting = node.triggerSetting ? JSON.parse(JSON.stringify(node.triggerSetting)) : {}
   if (node.triggerSetting) {
     configForm.value = {
       type: node.triggerSetting.type,

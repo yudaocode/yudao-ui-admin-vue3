@@ -754,7 +754,11 @@ export enum TriggerTypeEnum {
   /**
    * 表单数据删除触发器
    */
-  FORM_DELETE = 3
+  FORM_DELETE = 3,
+  /**
+   * 发起异步 HTTP 请求
+   */
+  ASYNC_HTTP_REQUEST = 4
 }
 
 /**
@@ -789,6 +793,7 @@ export type FormTriggerSetting = {
 
 export const TRIGGER_TYPES: DictDataVO[] = [
   { label: 'HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST },
+  { label: '异步 HTTP 请求', value: TriggerTypeEnum.ASYNC_HTTP_REQUEST },
   { label: '修改表单数据', value: TriggerTypeEnum.FORM_UPDATE },
   { label: '删除表单数据', value: TriggerTypeEnum.FORM_DELETE } 
 ]
