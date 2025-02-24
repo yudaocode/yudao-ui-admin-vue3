@@ -58,8 +58,8 @@
           <dict-tag :type="DICT_TYPE.AI_PLATFORM" :value="scope.row.platform" />
         </template>
       </el-table-column>
-      <el-table-column label="模型名字" align="center" prop="name" />
-      <el-table-column label="模型标识" align="center" prop="model" />
+      <el-table-column label="模型名字" align="center" prop="name" min-width="120" />
+      <el-table-column label="模型标识" align="center" prop="model" min-width="120" />
       <el-table-column label="API 秘钥" align="center" prop="keyId" min-width="140">
         <template #default="scope">
           <span>{{ apiKeyList.find((item) => item.id === scope.row.keyId)?.name }}</span>
