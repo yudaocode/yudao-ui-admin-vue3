@@ -28,11 +28,7 @@
         <div>
           <el-form ref="formRef" :model="configForm" label-position="top" :rules="formRules">
             <el-form-item label="是否异步" prop="async">
-              <el-switch
-                v-model="configForm.async"
-                active-text="异步"
-                inactive-text="不异步"
-              />
+              <el-switch v-model="configForm.async" active-text="异步" inactive-text="不异步" />
             </el-form-item>
             <el-form-item label="选择子流程" prop="calledProcessDefinitionKey">
               <el-select
@@ -107,6 +103,7 @@
                 <Icon icon="ep:plus" class="mr-5px" />添加一行
               </el-button>
             </el-form-item>
+            <!-- TODO @lesan：async、source、target 几个字段，会告警 -->
             <el-form-item
               v-if="configForm.async === false"
               label="子→主变量传递"
@@ -163,6 +160,7 @@
                 <Icon icon="ep:plus" class="mr-5px" />添加一行
               </el-button>
             </el-form-item>
+            <!-- TODO @lesan：startUserType、startUserEmptyType 要不走写下枚举类？ -->
             <el-form-item label="子流程发起人" prop="startUserType">
               <el-radio-group v-model="configForm.startUserType">
                 <el-radio :value="1">同主流程发起人</el-radio>
@@ -213,6 +211,7 @@ import { getForm } from '@/api/bpm/form'
 import { SimpleFlowNode, NodeType } from '../consts'
 import { useWatchNode, useDrawer, useNodeName, useFormFieldsAndStartUser } from '../node'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
+
 defineOptions({
   name: 'ChildProcessNodeConfig'
 })
@@ -264,6 +263,7 @@ const saveConfig = async () => {
   if (!formRef) return false
   const valid = await formRef.value.validate()
   if (!valid) return false
+  // TODO @lesan：这里的 option 黄色告警，也处理下哈
   const childInfo = childProcessOptions.value.find(
     (option) => option.key === configForm.value.calledProcessDefinitionKey
   )
@@ -286,11 +286,11 @@ const saveConfig = async () => {
   return true
 }
 // 显示子流程节点配置， 由父组件传过来
+// TODO @lesan：inVariables、outVariables 红色告警
 const showChildProcessNodeConfig = (node: SimpleFlowNode) => {
   nodeName.value = node.name
   if (node.childProcessSetting) {
-    configForm.value.async =
-      node.childProcessSetting.async
+    configForm.value.async = node.childProcessSetting.async
     configForm.value.calledProcessDefinitionKey =
       node.childProcessSetting.calledProcessDefinitionKey
     configForm.value.skipStartUserNode = node.childProcessSetting.skipStartUserNode
@@ -305,6 +305,7 @@ const showChildProcessNodeConfig = (node: SimpleFlowNode) => {
 
 defineExpose({ openDrawer, showChildProcessNodeConfig }) // 暴露方法给父组件
 
+// TODO @lesan：这里的 arr 黄色告警，也处理下哈，可以用 cursor quick fix 哈
 const addVariable = (arr) => {
   arr.push({
     source: '',
