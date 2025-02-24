@@ -86,8 +86,7 @@ const setSimpleModelNodeTaskStatus = (
     simpleModel.type === NodeType.START_USER_NODE ||
     simpleModel.type === NodeType.USER_TASK_NODE ||
     simpleModel.type === NodeType.TRANSACTOR_NODE ||
-    simpleModel.type === NodeType.CHILD_PROCESS_NODE ||
-    simpleModel.type === NodeType.ASYNC_CHILD_PROCESS_NODE
+    simpleModel.type === NodeType.CHILD_PROCESS_NODE
   ) {
     simpleModel.activityStatus = TaskStatusEnum.NOT_START
     if (rejectedTaskActivityIds.includes(simpleModel.id)) {

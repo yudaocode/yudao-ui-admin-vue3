@@ -27,9 +27,16 @@
       <el-tab-pane label="子流程" name="child">
         <div>
           <el-form ref="formRef" :model="configForm" label-position="top" :rules="formRules">
-            <el-form-item label="选择子流程" prop="calledElement">
+            <el-form-item label="是否异步" prop="async">
+              <el-switch
+                v-model="configForm.async"
+                active-text="异步"
+                inactive-text="不异步"
+              />
+            </el-form-item>
+            <el-form-item label="选择子流程" prop="calledProcessDefinitionKey">
               <el-select
-                v-model="configForm.calledElement"
+                v-model="configForm.calledProcessDefinitionKey"
                 clearable
                 @change="handleCalledElementChange"
               >
@@ -48,11 +55,11 @@
                 inactive-text="不跳过"
               />
             </el-form-item>
-            <el-form-item label="主→子变量传递" prop="inVariable">
-              <div class="flex pt-2" v-for="(item, index) in configForm.inVariable" :key="index">
+            <el-form-item label="主→子变量传递" prop="inVariables">
+              <div class="flex pt-2" v-for="(item, index) in configForm.inVariables" :key="index">
                 <div class="mr-2">
                   <el-form-item
-                    :prop="`inVariable.${index}.source`"
+                    :prop="`inVariables.${index}.source`"
                     :rules="{
                       required: true,
                       message: '变量不能为空',
@@ -71,7 +78,7 @@
                 </div>
                 <div class="mr-2">
                   <el-form-item
-                    :prop="`inVariable.${index}.target`"
+                    :prop="`inVariables.${index}.target`"
                     :rules="{
                       required: true,
                       message: '变量不能为空',
@@ -92,23 +99,23 @@
                   <Icon
                     icon="ep:delete"
                     :size="18"
-                    @click="deleteVariable(configForm.inVariable, index)"
+                    @click="deleteVariable(configForm.inVariables, index)"
                   />
                 </div>
               </div>
-              <el-button type="primary" text @click="addVariable(configForm.inVariable)">
+              <el-button type="primary" text @click="addVariable(configForm.inVariables)">
                 <Icon icon="ep:plus" class="mr-5px" />添加一行
               </el-button>
             </el-form-item>
             <el-form-item
-              v-if="currentNode.childProcessSetting?.async === false"
+              v-if="configForm.async === false"
               label="子→主变量传递"
-              prop="outVariable"
+              prop="outVariables"
             >
-              <div class="flex pt-2" v-for="(item, index) in configForm.outVariable" :key="index">
+              <div class="flex pt-2" v-for="(item, index) in configForm.outVariables" :key="index">
                 <div class="mr-2">
                   <el-form-item
-                    :prop="`outVariable.${index}.source`"
+                    :prop="`outVariables.${index}.source`"
                     :rules="{
                       required: true,
                       message: '变量不能为空',
@@ -127,7 +134,7 @@
                 </div>
                 <div class="mr-2">
                   <el-form-item
-                    :prop="`outVariable.${index}.target`"
+                    :prop="`outVariables.${index}.target`"
                     :rules="{
                       required: true,
                       message: '变量不能为空',
@@ -148,11 +155,11 @@
                   <Icon
                     icon="ep:delete"
                     :size="18"
-                    @click="deleteVariable(configForm.outVariable, index)"
+                    @click="deleteVariable(configForm.outVariables, index)"
                   />
                 </div>
               </div>
-              <el-button type="primary" text @click="addVariable(configForm.outVariable)">
+              <el-button type="primary" text @click="addVariable(configForm.outVariables)">
                 <Icon icon="ep:plus" class="mr-5px" />添加一行
               </el-button>
             </el-form-item>
@@ -227,7 +234,8 @@ const activeTabName = ref('child')
 const formRef = ref() // 表单 Ref
 // 表单校验规则
 const formRules = reactive({
-  calledElement: [{ required: true, message: '子流程不能为空', trigger: 'change' }],
+  async: [{ required: true, message: '是否异步不能为空', trigger: 'change' }],
+  calledProcessDefinitionKey: [{ required: true, message: '子流程不能为空', trigger: 'change' }],
   skipStartUserNode: [
     { required: true, message: '是否自动跳过子流程发起节点不能为空', trigger: 'change' }
   ],
@@ -238,10 +246,10 @@ const formRules = reactive({
   startUserFormField: [{ required: true, message: '发起人表单不能为空', trigger: 'change' }]
 })
 const configForm = ref({
-  calledElement: '',
+  calledProcessDefinitionKey: '',
   skipStartUserNode: false,
-  inVariable: [],
-  outVariable: [],
+  inVariables: [],
+  outVariables: [],
   startUserType: 1,
   startUserEmptyType: 1,
   startUserFormField: ''
@@ -257,17 +265,18 @@ const saveConfig = async () => {
   const valid = await formRef.value.validate()
   if (!valid) return false
   const childInfo = childProcessOptions.value.find(
-    (option) => option.key === configForm.value.calledElement
+    (option) => option.key === configForm.value.calledProcessDefinitionKey
   )
   currentNode.value.name = nodeName.value!
   if (currentNode.value.childProcessSetting) {
-    currentNode.value.childProcessSetting.calledElement = childInfo.key
-    currentNode.value.childProcessSetting.calledElementName = childInfo.name
+    currentNode.value.childProcessSetting.async = configForm.value.async
+    currentNode.value.childProcessSetting.calledProcessDefinitionKey = childInfo.key
+    currentNode.value.childProcessSetting.calledProcessDefinitionName = childInfo.name
     currentNode.value.childProcessSetting.skipStartUserNode = configForm.value.skipStartUserNode
-    currentNode.value.childProcessSetting.inVariable = configForm.value.inVariable
-    currentNode.value.childProcessSetting.outVariable = configForm.value.outVariable
+    currentNode.value.childProcessSetting.inVariables = configForm.value.inVariables
+    currentNode.value.childProcessSetting.outVariables = configForm.value.outVariables
     currentNode.value.childProcessSetting.startUserSetting.type = configForm.value.startUserType
-    currentNode.value.childProcessSetting.startUserSetting.emptyHandleType =
+    currentNode.value.childProcessSetting.startUserSetting.emptyType =
       configForm.value.startUserEmptyType
     currentNode.value.childProcessSetting.startUserSetting.formField =
       configForm.value.startUserFormField
@@ -280,13 +289,15 @@ const saveConfig = async () => {
 const showChildProcessNodeConfig = (node: SimpleFlowNode) => {
   nodeName.value = node.name
   if (node.childProcessSetting) {
-    configForm.value.calledElement = node.childProcessSetting.calledElement
+    configForm.value.async =
+      node.childProcessSetting.async
+    configForm.value.calledProcessDefinitionKey =
+      node.childProcessSetting.calledProcessDefinitionKey
     configForm.value.skipStartUserNode = node.childProcessSetting.skipStartUserNode
-    configForm.value.inVariable = node.childProcessSetting.inVariable
-    configForm.value.outVariable = node.childProcessSetting.outVariable
+    configForm.value.inVariables = node.childProcessSetting.inVariables
+    configForm.value.outVariables = node.childProcessSetting.outVariables
     configForm.value.startUserType = node.childProcessSetting.startUserSetting.type
-    configForm.value.startUserEmptyType =
-      node.childProcessSetting.startUserSetting.emptyHandleType ?? 1
+    configForm.value.startUserEmptyType = node.childProcessSetting.startUserSetting.emptyType ?? 1
     configForm.value.startUserFormField = node.childProcessSetting.startUserSetting.formField ?? ''
   }
   loadFormInfo()
@@ -304,13 +315,13 @@ const deleteVariable = (arr, index: number) => {
   arr.splice(index, 1)
 }
 const handleCalledElementChange = () => {
-  configForm.value.inVariable = []
-  configForm.value.outVariable = []
+  configForm.value.inVariables = []
+  configForm.value.outVariables = []
   loadFormInfo()
 }
 const loadFormInfo = async () => {
   const childInfo = childProcessOptions.value.find(
-    (option) => option.key === configForm.value.calledElement
+    (option) => option.key === configForm.value.calledProcessDefinitionKey
   )
   const formInfo = await getForm(childInfo.formId)
   childFormFieldOptions.value = []

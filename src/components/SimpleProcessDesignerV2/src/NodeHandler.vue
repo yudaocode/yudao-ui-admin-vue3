@@ -69,12 +69,6 @@
             </div>
             <div class="handler-item-text">子流程</div>
           </div>
-          <div class="handler-item" @click="addNode(NodeType.ASYNC_CHILD_PROCESS_NODE)">
-            <div class="handler-item-icon async-child-process">
-              <span class="iconfont icon-size icon-async-child-process"></span>
-            </div>
-            <div class="handler-item-text">异步子流程</div>
-          </div>
         </div>
         <template #reference>
           <div class="add-icon"><Icon icon="ep:plus" /></div>
@@ -303,8 +297,8 @@ const addNode = (type: number) => {
       type: NodeType.CHILD_PROCESS_NODE,
       childNode: props.childNode,
       childProcessSetting: {
-        calledElement: '',
-        calledElementName: '',
+        calledProcessDefinitionKey: '',
+        calledProcessDefinitionName: '',
         async: false,
         skipStartUserNode: false,
         startUserSetting: {

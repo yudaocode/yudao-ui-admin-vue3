@@ -39,14 +39,9 @@ export enum NodeType {
   TRIGGER_NODE = 15,
 
   /**
-   * 触发器节点
+   * 子流程节点
    */
   CHILD_PROCESS_NODE = 20,
-
-  /**
-   * 触发器节点
-   */
-  ASYNC_CHILD_PROCESS_NODE = 21,
 
   /**
    * 条件节点
@@ -804,11 +799,11 @@ export const TRIGGER_TYPES: DictDataVO[] = [
  * 子流程节点结构定义
  */
 export type ChildProcessSetting = {
-  calledElement: string
-  calledElementName: string
+  calledProcessDefinitionKey: string
+  calledProcessDefinitionName: string
   async: boolean,
-  inVariable?: IOParameter[],
-  outVariable?: IOParameter[],
+  inVariables?: IOParameter[],
+  outVariables?: IOParameter[],
   skipStartUserNode: boolean,
   startUserSetting: StartUserSetting,
 }
@@ -823,5 +818,5 @@ export type IOParameter = {
 export type StartUserSetting = {
   type: number
   formField?: string
-  emptyHandleType?: number
+  emptyType?: number
 }
