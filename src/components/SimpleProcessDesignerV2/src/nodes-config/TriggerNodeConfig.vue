@@ -26,7 +26,7 @@
     <div>
       <el-form ref="formRef" :model="configForm" label-position="top" :rules="formRules">
         <el-form-item label="触发器类型" prop="type">
-          <el-select v-model="configForm.type">
+          <el-select v-model="configForm.type" @change="changeTriggerType">
             <el-option
               v-for="(item, index) in TRIGGER_TYPES"
               :key="index"
@@ -37,7 +37,11 @@
         </el-form-item>
         <!-- HTTP 请求触发器 -->
         <div
-          v-if="configForm.type === TriggerTypeEnum.HTTP_REQUEST && configForm.httpRequestSetting"
+          v-if="
+            (configForm.type === TriggerTypeEnum.HTTP_REQUEST ||
+              configForm.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST) &&
+            configForm.httpRequestSetting
+          "
         >
           <el-form-item>
             <el-alert
@@ -58,69 +62,74 @@
             :bind="'httpRequestSetting'"
           />
           <!-- 返回值设置-->
-          <el-form-item label="返回值">
-            <el-alert
-              title="通过请求返回值, 可以修改流程表单的值"
-              type="warning"
-              show-icon
-              :closable="false"
-            />
-          </el-form-item>
-          <el-form-item>
-            <div
-              class="flex pt-2"
-              v-for="(item, index) in configForm.httpRequestSetting.response"
-              :key="index"
-            >
-              <div class="mr-2">
-                <el-form-item
-                  :prop="`httpRequestSetting.response.${index}.key`"
-                  :rules="{
-                    required: true,
-                    message: '表单字段不能为空',
-                    trigger: 'blur'
-                  }"
-                >
-                  <el-select class="w-160px!" v-model="item.key" placeholder="请选择表单字段">
-                    <el-option
-                      v-for="(field, fIdx) in formFields"
-                      :key="fIdx"
-                      :label="field.title"
-                      :value="field.field"
-                      :disabled="!field.required"
-                    />
-                  </el-select>
-                </el-form-item>
+          <div v-if="configForm.type === TriggerTypeEnum.HTTP_REQUEST">
+            <el-form-item label="返回值">
+              <el-alert
+                title="通过请求返回值, 可以修改流程表单的值"
+                type="warning"
+                show-icon
+                :closable="false"
+              />
+            </el-form-item>
+            <el-form-item>
+              <div
+                class="flex pt-2"
+                v-for="(item, index) in configForm.httpRequestSetting.response"
+                :key="index"
+              >
+                <div class="mr-2">
+                  <el-form-item
+                    :prop="`httpRequestSetting.response.${index}.key`"
+                    :rules="{
+                      required: true,
+                      message: '表单字段不能为空',
+                      trigger: 'blur'
+                    }"
+                  >
+                    <el-select class="w-160px!" v-model="item.key" placeholder="请选择表单字段">
+                      <el-option
+                        v-for="(field, fIdx) in formFields"
+                        :key="fIdx"
+                        :label="field.title"
+                        :value="field.field"
+                        :disabled="!field.required"
+                      />
+                    </el-select>
+                  </el-form-item>
+                </div>
+                <div class="mr-2">
+                  <el-form-item
+                    :prop="`httpRequestSetting.response.${index}.value`"
+                    :rules="{
+                      required: true,
+                      message: '请求返回字段不能为空',
+                      trigger: 'blur'
+                    }"
+                  >
+                    <el-input class="w-160px" v-model="item.value" placeholder="请求返回字段" />
+                  </el-form-item>
+                </div>
+                <div class="mr-1 pt-1 cursor-pointer">
+                  <Icon
+                    icon="ep:delete"
+                    :size="18"
+                    @click="
+                      deleteHttpResponseSetting(configForm.httpRequestSetting.response!, index)
+                    "
+                  />
+                </div>
               </div>
-              <div class="mr-2">
-                <el-form-item
-                  :prop="`httpRequestSetting.response.${index}.value`"
-                  :rules="{
-                    required: true,
-                    message: '请求返回字段不能为空',
-                    trigger: 'blur'
-                  }"
-                >
-                  <el-input class="w-160px" v-model="item.value" placeholder="请求返回字段" />
-                </el-form-item>
-              </div>
-              <div class="mr-1 pt-1 cursor-pointer">
-                <Icon
-                  icon="ep:delete"
-                  :size="18"
-                  @click="deleteHttpResponseSetting(configForm.httpRequestSetting.response!, index)"
-                />
-              </div>
-            </div>
-            <el-button
-              type="primary"
-              text
-              @click="addHttpResponseSetting(configForm.httpRequestSetting.response!)"
-            >
-              <Icon icon="ep:plus" class="mr-5px" />添加一行
-            </el-button>
-          </el-form-item>
+              <el-button
+                type="primary"
+                text
+                @click="addHttpResponseSetting(configForm.httpRequestSetting.response!)"
+              >
+                <Icon icon="ep:plus" class="mr-5px" />添加一行
+              </el-button>
+            </el-form-item>
+          </div>
         </div>
+
         <!-- 表单数据修改触发器 -->
         <div v-if="configForm.type === TriggerTypeEnum.FORM_UPDATE">
           <div v-for="(formSetting, index) in configForm.formSettings" :key="index">
@@ -150,8 +159,8 @@
                   type="success"
                   effect="light"
                   closable
-                  @close="deleteFormUpdateCondition(formSetting)"
-                  @click="openFormUpdateCondition(index, formSetting)"
+                  @close="deleteFormSettingCondition(formSetting)"
+                  @click="openFormSettingCondition(index, formSetting)"
                 >
                   {{ showConditionText(formSetting) }}
                 </el-tag>
@@ -160,7 +169,7 @@
                 v-else
                 type="primary"
                 text
-                @click="addFormUpdateCondition(index, formSetting)"
+                @click="addFormSettingCondition(index, formSetting)"
               >
                 <Icon icon="ep:link" class="mr-5px" />添加条件
               </el-button>
@@ -231,6 +240,76 @@
             <Icon icon="ep:setting" class="mr-5px" />添加设置
           </el-button>
         </div>
+
+        <!-- 表单数据删除触发器 -->
+        <div v-if="configForm.type === TriggerTypeEnum.FORM_DELETE">
+          <div v-for="(formSetting, index) in configForm.formSettings" :key="index">
+            <el-card class="w-580px mt-4">
+              <template #header>
+                <div class="flex items-center justify-between">
+                  <div>删除表单设置 {{ index + 1 }}</div>
+                  <el-button
+                    type="primary"
+                    plain
+                    circle
+                    v-if="configForm.formSettings!.length > 1"
+                    @click="deleteFormSetting(index)"
+                  >
+                    <Icon icon="ep:close" />
+                  </el-button>
+                </div>
+              </template>
+
+              <!-- 条件设置 -->
+              <ConditionDialog
+                :ref="`condition-${index}`"
+                @update-condition="(val) => handleConditionUpdate(index, val)"
+              />
+              <div class="cursor-pointer" v-if="formSetting.conditionType">
+                <el-tag
+                  type="warning"
+                  effect="light"
+                  closable
+                  @close="deleteFormSettingCondition(formSetting)"
+                  @click="openFormSettingCondition(index, formSetting)"
+                >
+                  {{ showConditionText(formSetting) }}
+                </el-tag>
+              </div>
+              <el-button
+                v-else
+                type="primary"
+                text
+                @click="addFormSettingCondition(index, formSetting)"
+              >
+                <Icon icon="ep:link" class="mr-5px" />添加条件
+              </el-button>
+
+              <el-divider content-position="left">删除表单字段设置</el-divider>
+              <!-- 表单字段删除设置 -->
+              <div class="flex flex-wrap gap-2">
+                <el-select
+                  v-model="formSetting.deleteFields"
+                  multiple
+                  placeholder="请选择要删除的字段"
+                  class="w-full"
+                >
+                  <el-option
+                    v-for="field in formFields"
+                    :key="field.field"
+                    :label="field.title"
+                    :value="field.field"
+                  />
+                </el-select>
+              </div>
+            </el-card>
+          </div>
+
+          <!-- 添加新的设置 -->
+          <el-button class="mt-6" type="primary" text @click="addFormSetting">
+            <Icon icon="ep:setting" class="mr-5px" />添加设置
+          </el-button>
+        </div>
       </el-form>
     </div>
     <template #footer>
@@ -292,7 +371,8 @@ const configForm = ref<TriggerSetting>({
   formSettings: [
     {
       conditionGroups: DEFAULT_CONDITION_GROUP_VALUE,
-      updateFormFields: {}
+      updateFormFields: {},
+      deleteFields: []
     }
   ]
 })
@@ -307,6 +387,69 @@ const optionalUpdateFormFields = computed(() => {
     disabled: false
   }))
 })
+
+let originalSetting: TriggerSetting | undefined
+
+/** 触发器类型改变了 */
+const changeTriggerType = () => {
+  if (configForm.value.type === TriggerTypeEnum.HTTP_REQUEST) {
+    configForm.value.httpRequestSetting =
+      originalSetting?.type === TriggerTypeEnum.HTTP_REQUEST && originalSetting.httpRequestSetting
+        ? originalSetting.httpRequestSetting
+        : {
+            url: '',
+            header: [],
+            body: [],
+            response: []
+          }
+    configForm.value.formSettings = undefined
+    return
+  } 
+  
+  if (configForm.value.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST) {
+    configForm.value.httpRequestSetting =
+      originalSetting?.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST && originalSetting.httpRequestSetting
+        ? originalSetting.httpRequestSetting
+        : {
+            url: '',
+            header: [],
+            body: [],
+            response: []
+          }
+    configForm.value.formSettings = undefined
+    return
+  }
+
+  if (configForm.value.type === TriggerTypeEnum.FORM_UPDATE) {
+    configForm.value.formSettings =
+      originalSetting?.type === TriggerTypeEnum.FORM_UPDATE && originalSetting.formSettings
+        ? originalSetting.formSettings
+        : [
+            {
+              conditionGroups: DEFAULT_CONDITION_GROUP_VALUE,
+              updateFormFields: {},
+              deleteFields: []
+            }
+          ]
+    configForm.value.httpRequestSetting = undefined
+    return
+  }
+
+  if (configForm.value.type === TriggerTypeEnum.FORM_DELETE) {
+    configForm.value.formSettings =
+      originalSetting?.type === TriggerTypeEnum.FORM_DELETE && originalSetting.formSettings
+        ? originalSetting.formSettings
+        : [
+            {
+              conditionGroups: DEFAULT_CONDITION_GROUP_VALUE,
+              updateFormFields: undefined,
+              deleteFields: []
+            }
+          ]
+    configForm.value.httpRequestSetting = undefined
+    return
+  }
+}
 
 /** 添加 HTTP 请求返回值设置项 */
 const addHttpResponseSetting = (responseSetting: Record<string, string>[]) => {
@@ -325,7 +468,8 @@ const deleteHttpResponseSetting = (responseSetting: Record<string, string>[], in
 const addFormSetting = () => {
   configForm.value.formSettings!.push({
     conditionGroups: DEFAULT_CONDITION_GROUP_VALUE,
-    updateFormFields: {}
+    updateFormFields: {},
+    deleteFields: []
   })
 }
 
@@ -335,16 +479,16 @@ const deleteFormSetting = (index: number) => {
 }
 
 /** 添加条件配置 */
-const addFormUpdateCondition = (index: number, formSetting: FormTriggerSetting) => {
+const addFormSettingCondition = (index: number, formSetting: FormTriggerSetting) => {
   const conditionDialog = proxy.$refs[`condition-${index}`][0]
   conditionDialog.open(formSetting)
 }
 /** 删除条件配置 */
-const deleteFormUpdateCondition = (formSetting: FormTriggerSetting) => {
+const deleteFormSettingCondition = (formSetting: FormTriggerSetting) => {
   formSetting.conditionType = undefined
 }
 /** 打开条件配置弹窗 */
-const openFormUpdateCondition = (index: number, formSetting: FormTriggerSetting) => {
+const openFormSettingCondition = (index: number, formSetting: FormTriggerSetting) => {
   const conditionDialog = proxy.$refs[`condition-${index}`][0]
   conditionDialog.open(formSetting)
 }
@@ -397,9 +541,18 @@ const saveConfig = async () => {
   currentNode.value.showText = showText
   if (configForm.value.type === TriggerTypeEnum.HTTP_REQUEST) {
     configForm.value.formSettings = undefined
-  }
-  if (configForm.value.type === TriggerTypeEnum.FORM_UPDATE) {
+  } else if (configForm.value.type === TriggerTypeEnum.FORM_UPDATE) {
     configForm.value.httpRequestSetting = undefined
+    // 清理删除字段相关的数据
+    configForm.value.formSettings?.forEach((setting) => {
+      setting.deleteFields = undefined
+    })
+  } else if (configForm.value.type === TriggerTypeEnum.FORM_DELETE) {
+    configForm.value.httpRequestSetting = undefined
+    // 清理修改字段相关的数据
+    configForm.value.formSettings?.forEach((setting) => {
+      setting.updateFormFields = undefined
+    })
   }
   currentNode.value.triggerSetting = configForm.value
   settingVisible.value = false
@@ -409,7 +562,10 @@ const saveConfig = async () => {
 /** 获取节点展示内容 */
 const getShowText = (): string => {
   let showText = ''
-  if (configForm.value.type === TriggerTypeEnum.HTTP_REQUEST) {
+  if (
+    configForm.value.type === TriggerTypeEnum.HTTP_REQUEST ||
+    configForm.value.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST
+  ) {
     showText = `${configForm.value.httpRequestSetting?.url}`
   } else if (configForm.value.type === TriggerTypeEnum.FORM_UPDATE) {
     for (const [index, setting] of configForm.value.formSettings!.entries()) {
@@ -419,6 +575,14 @@ const getShowText = (): string => {
       }
     }
     showText = '修改表单数据'
+  } else if (configForm.value.type === TriggerTypeEnum.FORM_DELETE) {
+    for (const [index, setting] of configForm.value.formSettings!.entries()) {
+      if (!setting.deleteFields || setting.deleteFields.length === 0) {
+        message.warning(`请选择表单设置${index + 1}要删除的字段`)
+        return ''
+      }
+    }
+    showText = '删除表单数据'
   }
   return showText
 }
@@ -426,6 +590,7 @@ const getShowText = (): string => {
 /** 显示触发器节点配置， 由父组件传过来 */
 const showTriggerNodeConfig = (node: SimpleFlowNode) => {
   nodeName.value = node.name
+  originalSetting = node.triggerSetting ? JSON.parse(JSON.stringify(node.triggerSetting)) : {}
   if (node.triggerSetting) {
     configForm.value = {
       type: node.triggerSetting.type,
@@ -438,7 +603,8 @@ const showTriggerNodeConfig = (node: SimpleFlowNode) => {
       formSettings: node.triggerSetting.formSettings || [
         {
           conditionGroups: DEFAULT_CONDITION_GROUP_VALUE,
-          updateFormFields: {}
+          updateFormFields: {},
+          deleteFields: []
         }
       ]
     }
