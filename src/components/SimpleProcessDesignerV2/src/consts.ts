@@ -756,6 +756,7 @@ export enum TriggerTypeEnum {
    * 发送 HTTP 请求触发器
    */
   HTTP_REQUEST = 1,
+  // TODO @jason：要不把 FORM_UPDATE、FORM_DELETE 调整从 10、11 这样？
   /**
    * 表单数据更新触发器
    */
@@ -764,6 +765,7 @@ export enum TriggerTypeEnum {
    * 表单数据删除触发器
    */
   FORM_DELETE = 3,
+  // TODO @jason：1）HTTP_REQUEST_ASYNC 这个枚举值？；2）枚举值改成 2？；3）【有点纠结，微信讨论】异步是里面加个属性 async 属性，还是作为单独的枚举值。
   /**
    * 发起异步 HTTP 请求
    */
@@ -795,7 +797,7 @@ export type FormTriggerSetting = {
   // 条件组
   conditionGroups?: ConditionGroup
   // 更新表单字段配置
-  updateFormFields?: Record<string, any>,
+  updateFormFields?: Record<string, any>
   // 删除表单字段配置
   deleteFields?: string[]
 }
@@ -813,11 +815,11 @@ export const TRIGGER_TYPES: DictDataVO[] = [
 export type ChildProcessSetting = {
   calledProcessDefinitionKey: string
   calledProcessDefinitionName: string
-  async: boolean,
-  inVariables?: IOParameter[],
-  outVariables?: IOParameter[],
-  skipStartUserNode: boolean,
-  startUserSetting: StartUserSetting,
+  async: boolean
+  inVariables?: IOParameter[]
+  outVariables?: IOParameter[]
+  skipStartUserNode: boolean
+  startUserSetting: StartUserSetting
 }
 
 export type IOParameter = {
