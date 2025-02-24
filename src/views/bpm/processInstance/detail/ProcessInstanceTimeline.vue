@@ -181,6 +181,7 @@ import conditionSvg from '@/assets/svgs/bpm/condition.svg'
 import parallelSvg from '@/assets/svgs/bpm/parallel.svg'
 import finishSvg from '@/assets/svgs/bpm/finish.svg'
 import transactorSvg from '@/assets/svgs/bpm/transactor.svg'
+import childProcessSvg from '@/assets/svgs/bpm/child-process.svg'
 
 defineOptions({ name: 'BpmProcessInstanceTimeline' })
 withDefaults(
@@ -249,7 +250,9 @@ const nodeTypeSvgMap = {
   // 条件分支节点
   [NodeType.CONDITION_NODE]: { color: '#14bb83', svg: conditionSvg },
   // 并行分支节点
-  [NodeType.PARALLEL_BRANCH_NODE]: { color: '#14bb83', svg: parallelSvg }
+  [NodeType.PARALLEL_BRANCH_NODE]: { color: '#14bb83', svg: parallelSvg },
+  // 子流程节点
+  [NodeType.CHILD_PROCESS_NODE]: { color: '#14bb83', svg: childProcessSvg },
 }
 
 // 只有只有状态是 -1、0、1 才展示头像右小角状态小icon
@@ -269,6 +272,7 @@ const getApprovalNodeIcon = (taskStatus: number, nodeType: NodeType) => {
     nodeType === NodeType.START_USER_NODE ||
     nodeType === NodeType.USER_TASK_NODE ||
     nodeType === NodeType.TRANSACTOR_NODE ||
+    nodeType === NodeType.CHILD_PROCESS_NODE ||
     nodeType === NodeType.END_EVENT_NODE
   ) {
     return statusIconMap[taskStatus]?.icon
