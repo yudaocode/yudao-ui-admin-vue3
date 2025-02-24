@@ -765,7 +765,7 @@ export enum TriggerTypeEnum {
    * 表单数据删除触发器
    */
   FORM_DELETE = 3,
-  // TODO @jason：1）HTTP_REQUEST_ASYNC 这个枚举值？；2）枚举值改成 2？；3）【有点纠结，微信讨论】异步是里面加个属性 async 属性，还是作为单独的枚举值。
+  // TODO @jason：1）HTTP_CALLBACK 这个枚举值？然后，相关注释，朝着“HTTP 回调”走；2）枚举值改成 2？
   /**
    * 发起异步 HTTP 请求
    */
