@@ -818,17 +818,21 @@ export type ChildProcessSetting = {
   outVariables?: IOParameter[],
   skipStartUserNode: boolean,
   startUserSetting: StartUserSetting,
+  timeoutSetting: TimeoutSetting,
 }
-
 export type IOParameter = {
   source: string
   sourceExpression: string
   target: string
   targetExpression: string
 }
-
 export type StartUserSetting = {
   type: number
   formField?: string
   emptyType?: number
+}
+export type TimeoutSetting = {
+  enable: boolean,
+  type?: DelayTypeEnum,
+  timeExpression?: string,
 }

@@ -28,11 +28,7 @@
         <div>
           <el-form ref="formRef" :model="configForm" label-position="top" :rules="formRules">
             <el-form-item label="是否异步" prop="async">
-              <el-switch
-                v-model="configForm.async"
-                active-text="异步"
-                inactive-text="不异步"
-              />
+              <el-switch v-model="configForm.async" active-text="异步" inactive-text="不异步" />
             </el-form-item>
             <el-form-item label="选择子流程" prop="calledProcessDefinitionKey">
               <el-select
@@ -194,6 +190,60 @@
                 />
               </el-select>
             </el-form-item>
+
+            <el-divider content-position="left">超时设置</el-divider>
+            <el-form-item label="启用开关" prop="timeoutEnable">
+              <el-switch
+                v-model="configForm.timeoutEnable"
+                active-text="开启"
+                inactive-text="关闭"
+              />
+            </el-form-item>
+            <div v-if="configForm.timeoutEnable">
+              <el-form-item prop="timeoutType">
+                <el-radio-group v-model="configForm.timeoutType">
+                  <el-radio-button
+                    v-for="item in DELAY_TYPE"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-radio-group>
+              </el-form-item>
+              <el-form-item v-if="configForm.timeoutType === DelayTypeEnum.FIXED_TIME_DURATION">
+                <el-form-item prop="timeDuration">
+                  <el-input-number
+                    class="mr-2"
+                    :style="{ width: '100px' }"
+                    v-model="configForm.timeDuration"
+                    :min="1"
+                    controls-position="right"
+                  />
+                </el-form-item>
+                <el-select v-model="configForm.timeUnit" class="mr-2" :style="{ width: '100px' }">
+                  <el-option
+                    v-for="item in TIME_UNIT_TYPES"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+                <el-text>后进入下一节点</el-text>
+              </el-form-item>
+              <el-form-item
+                v-if="configForm.timeoutType === DelayTypeEnum.FIXED_DATE_TIME"
+                prop="dateTime"
+              >
+                <el-date-picker
+                  class="mr-2"
+                  v-model="configForm.dateTime"
+                  type="datetime"
+                  placeholder="请选择日期和时间"
+                  value-format="YYYY-MM-DDTHH:mm:ss"
+                />
+                <el-text>后进入下一节点</el-text>
+              </el-form-item>
+            </div>
           </el-form>
         </div>
       </el-tab-pane>
@@ -210,9 +260,17 @@
 <script setup lang="ts">
 import { getModelList } from '@/api/bpm/model'
 import { getForm } from '@/api/bpm/form'
-import { SimpleFlowNode, NodeType } from '../consts'
+import {
+  SimpleFlowNode,
+  NodeType,
+  TIME_UNIT_TYPES,
+  TimeUnitType,
+  DelayTypeEnum,
+  DELAY_TYPE
+} from '../consts'
 import { useWatchNode, useDrawer, useNodeName, useFormFieldsAndStartUser } from '../node'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
+import { convertTimeUnit } from '../utils'
 defineOptions({
   name: 'ChildProcessNodeConfig'
 })
@@ -243,16 +301,26 @@ const formRules = reactive({
   startUserEmptyType: [
     { required: true, message: '当子流程发起人为空时不能为空', trigger: 'change' }
   ],
-  startUserFormField: [{ required: true, message: '发起人表单不能为空', trigger: 'change' }]
+  startUserFormField: [{ required: true, message: '发起人表单不能为空', trigger: 'change' }],
+  timeoutEnable: [{ required: true, message: '超时设置是否开启不能为空', trigger: 'change' }],
+  timeoutType: [{ required: true, message: '超时设置时间不能为空', trigger: 'change' }],
+  timeDuration: [{ required: true, message: '超时设置时间不能为空', trigger: 'change' }],
+  dateTime: [{ required: true, message: '超时设置时间不能为空', trigger: 'change' }]
 })
 const configForm = ref({
+  async: false,
   calledProcessDefinitionKey: '',
   skipStartUserNode: false,
   inVariables: [],
   outVariables: [],
   startUserType: 1,
   startUserEmptyType: 1,
-  startUserFormField: ''
+  startUserFormField: '',
+  timeoutEnable: false,
+  timeoutType: DelayTypeEnum.FIXED_TIME_DURATION,
+  timeDuration: 1,
+  timeUnit: TimeUnitType.HOUR,
+  dateTime: ''
 })
 const childProcessOptions = ref()
 const formFieldOptions = useFormFieldsAndStartUser()
@@ -269,18 +337,39 @@ const saveConfig = async () => {
   )
   currentNode.value.name = nodeName.value!
   if (currentNode.value.childProcessSetting) {
+    // 1. 是否异步
     currentNode.value.childProcessSetting.async = configForm.value.async
+    // 2. 调用流程
     currentNode.value.childProcessSetting.calledProcessDefinitionKey = childInfo.key
     currentNode.value.childProcessSetting.calledProcessDefinitionName = childInfo.name
+    // 3. 是否跳过发起人
     currentNode.value.childProcessSetting.skipStartUserNode = configForm.value.skipStartUserNode
+    // 4. 主->子变量
     currentNode.value.childProcessSetting.inVariables = configForm.value.inVariables
+    // 5. 子->主变量
     currentNode.value.childProcessSetting.outVariables = configForm.value.outVariables
+    // 6. 发起人设置
     currentNode.value.childProcessSetting.startUserSetting.type = configForm.value.startUserType
     currentNode.value.childProcessSetting.startUserSetting.emptyType =
       configForm.value.startUserEmptyType
     currentNode.value.childProcessSetting.startUserSetting.formField =
       configForm.value.startUserFormField
+    // 7. 超时设置
+    currentNode.value.childProcessSetting.timeoutSetting = {
+      enable: configForm.value.timeoutEnable
+    }
+    if (configForm.value.timeoutEnable) {
+      currentNode.value.childProcessSetting.timeoutSetting.type = configForm.value.timeoutType
+      if (configForm.value.timeoutType === DelayTypeEnum.FIXED_TIME_DURATION) {
+        currentNode.value.childProcessSetting.timeoutSetting.timeExpression = getIsoTimeDuration()
+      }
+      if (configForm.value.timeoutType === DelayTypeEnum.FIXED_DATE_TIME) {
+        currentNode.value.childProcessSetting.timeoutSetting.timeExpression =
+          configForm.value.dateTime
+      }
+    }
   }
+
   currentNode.value.showText = `调用子流程：${childInfo.name}`
   settingVisible.value = false
   return true
@@ -289,16 +378,39 @@ const saveConfig = async () => {
 const showChildProcessNodeConfig = (node: SimpleFlowNode) => {
   nodeName.value = node.name
   if (node.childProcessSetting) {
-    configForm.value.async =
-      node.childProcessSetting.async
+    // 1. 是否异步
+    configForm.value.async = node.childProcessSetting.async
+    // 2. 调用流程
     configForm.value.calledProcessDefinitionKey =
-      node.childProcessSetting.calledProcessDefinitionKey
+      node.childProcessSetting?.calledProcessDefinitionKey
+    // 3. 是否跳过发起人
     configForm.value.skipStartUserNode = node.childProcessSetting.skipStartUserNode
+    // 4. 主->子变量
     configForm.value.inVariables = node.childProcessSetting.inVariables
+    // 5. 子->主变量
     configForm.value.outVariables = node.childProcessSetting.outVariables
+    // 6. 发起人设置
     configForm.value.startUserType = node.childProcessSetting.startUserSetting.type
     configForm.value.startUserEmptyType = node.childProcessSetting.startUserSetting.emptyType ?? 1
     configForm.value.startUserFormField = node.childProcessSetting.startUserSetting.formField ?? ''
+    // 7. 超时设置
+    configForm.value.timeoutEnable = node.childProcessSetting.timeoutSetting.enable ?? false
+    if (configForm.value.timeoutEnable) {
+      configForm.value.timeoutType =
+        node.childProcessSetting.timeoutSetting.type ?? DelayTypeEnum.FIXED_TIME_DURATION
+      // 固定时长
+      if (configForm.value.timeoutType === DelayTypeEnum.FIXED_TIME_DURATION) {
+        const strTimeDuration = node.childProcessSetting.timeoutSetting.timeExpression ?? ''
+        let parseTime = strTimeDuration.slice(2, strTimeDuration.length - 1)
+        let parseTimeUnit = strTimeDuration.slice(strTimeDuration.length - 1)
+        configForm.value.timeDuration = parseInt(parseTime)
+        configForm.value.timeUnit = convertTimeUnit(parseTimeUnit)
+      }
+      // 固定日期时间
+      if (configForm.value.timeoutType === DelayTypeEnum.FIXED_DATE_TIME) {
+        configForm.value.dateTime = node.childProcessSetting.timeoutSetting.timeExpression ?? ''
+      }
+    }
   }
   loadFormInfo()
 }
@@ -330,7 +442,19 @@ const loadFormInfo = async () => {
       parseFormFields(JSON.parse(fieldStr), childFormFieldOptions.value)
     })
   }
-  console.log(childFormFieldOptions.value)
+}
+const getIsoTimeDuration = () => {
+  let strTimeDuration = 'PT'
+  if (configForm.value.timeUnit === TimeUnitType.MINUTE) {
+    strTimeDuration += configForm.value.timeDuration + 'M'
+  }
+  if (configForm.value.timeUnit === TimeUnitType.HOUR) {
+    strTimeDuration += configForm.value.timeDuration + 'H'
+  }
+  if (configForm.value.timeUnit === TimeUnitType.DAY) {
+    strTimeDuration += configForm.value.timeDuration + 'D'
+  }
+  return strTimeDuration
 }
 
 onMounted(async () => {
