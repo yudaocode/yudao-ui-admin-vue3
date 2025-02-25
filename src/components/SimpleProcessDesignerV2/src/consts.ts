@@ -815,22 +815,26 @@ export const TRIGGER_TYPES: DictDataVO[] = [
 export type ChildProcessSetting = {
   calledProcessDefinitionKey: string
   calledProcessDefinitionName: string
-  async: boolean
-  inVariables?: IOParameter[]
-  outVariables?: IOParameter[]
-  skipStartUserNode: boolean
-  startUserSetting: StartUserSetting
+  async: boolean,
+  inVariables?: IOParameter[],
+  outVariables?: IOParameter[],
+  skipStartUserNode: boolean,
+  startUserSetting: StartUserSetting,
+  timeoutSetting: TimeoutSetting,
 }
-
 export type IOParameter = {
   source: string
   sourceExpression: string
   target: string
   targetExpression: string
 }
-
 export type StartUserSetting = {
   type: number
   formField?: string
   emptyType?: number
+}
+export type TimeoutSetting = {
+  enable: boolean,
+  type?: DelayTypeEnum,
+  timeExpression?: string,
 }

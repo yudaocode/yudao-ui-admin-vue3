@@ -303,6 +303,9 @@ const addNode = (type: number) => {
         skipStartUserNode: false,
         startUserSetting: {
           type: 1
+        },
+        timeoutSetting: {
+          enable: false
         }
       }
     }
