@@ -36,8 +36,16 @@
               :rule="approveForm.rule"
             />
           </el-card>
+          <el-form-item :label="`${nodeTypeName}意见`" prop="reason">
+            <el-input
+              v-model="approveReasonForm.reason"
+              :placeholder="`请输入${nodeTypeName}意见`"
+              type="textarea"
+              :rows="4"
+            />
+          </el-form-item>
           <el-form-item
-            label="选择审批人"
+            label="选择下一个节点的审批人"
             prop="selectApproveUser"
             v-if="dialogVisibleSelectApproveUser"
           >
@@ -46,14 +54,6 @@
               :activity-nodes="activityNodes"
               :show-status-icon="false"
               @select-user-confirm="selectUserConfirm"
-            />
-          </el-form-item>
-          <el-form-item :label="`${nodeTypeName}意见`" prop="reason">
-            <el-input
-              v-model="approveReasonForm.reason"
-              :placeholder="`请输入${nodeTypeName}意见`"
-              type="textarea"
-              :rows="4"
             />
           </el-form-item>
           <el-form-item
@@ -695,30 +695,7 @@ const openPopover = async (type: string) => {
       message.warning('表单校验不通过，请先完善表单!!')
       return
     }
-    // 获取修改的流程变量, 暂时只支持流程表单
-    const variables = getUpdatedProcessInstanceVariables()
-    const param = {
-      processInstanceId: props.processInstance.id,
-      processVariablesStr: JSON.stringify(variables)
-    }
-    // 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人
-    const res = await ProcessInstanceApi.getApprovalDetail(param)
-    //当前待审批节点id
-    const activityId = res.todoTask?.taskDefinitionKey
-    if (res.activityNodes && res.activityNodes.length > 0) {
-      // 找到当前节点的索引
-      const currentNodeIndex = res.activityNodes.findIndex((node) => node.id === activityId)
-      const nextNode = res.activityNodes[currentNodeIndex + 1]
-      if (
-        nextNode.candidateStrategy === CandidateStrategy.START_USER_SELECT &&
-        !nextNode.tasks &&
-        nextNode.candidateUsers?.length === 0
-      ) {
-        // 自选审批人，则弹出选择审批人弹窗
-        activityNodes.value = [nextNode]
-        dialogVisibleSelectApproveUser.value = true
-      }
-    }
+    initNextTaskSelectAssigneeFormField()
   }
   if (type === 'return') {
     // 获取退回节点
@@ -744,6 +721,33 @@ const closePropover = (type: string, formRef: FormInstance | undefined) => {
   dialogVisibleSelectApproveUser.value = false
 }
 
+/** // 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人 */
+const initNextTaskSelectAssigneeFormField = async () => {
+  // 获取修改的流程变量, 暂时只支持流程表单
+  const variables = getUpdatedProcessInstanceVariables()
+  const param = {
+    processInstanceId: props.processInstance.id,
+    processVariablesStr: JSON.stringify(variables)
+  }
+  const res = await ProcessInstanceApi.getApprovalDetail(param)
+  //当前待审批节点id
+  const activityId = res.todoTask?.taskDefinitionKey
+  if (res.activityNodes && res.activityNodes.length > 0) {
+    // 找到当前节点的索引
+    const currentNodeIndex = res.activityNodes.findIndex((node) => node.id === activityId)
+    const nextNode = res.activityNodes[currentNodeIndex + 1]
+    if (
+      nextNode.candidateStrategy === CandidateStrategy.START_USER_SELECT &&
+      !nextNode.tasks &&
+      nextNode.candidateUsers?.length === 0
+    ) {
+      // 自选审批人，则弹出选择审批人弹窗
+      activityNodes.value = [nextNode]
+      dialogVisibleSelectApproveUser.value = true
+    }
+  }
+}
+
 /** 处理审批通过和不通过的操作 */
 const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => {
   formLoading.value = true
@@ -764,33 +768,10 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
         dialogVisibleSelectApproveUser.value &&
         Object.keys(approveReasonForm.selectApproveUser).length === 0
       ) {
-        message.warning('审批人不能为空!')
+        message.warning('下一个节点的审批人不能为空!')
         return
       }
-      // 获取修改的流程变量, 暂时只支持流程表单
       const variables = getUpdatedProcessInstanceVariables()
-      const param = {
-        processInstanceId: props.processInstance.id,
-        processVariablesStr: JSON.stringify(variables)
-      }
-      // 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人
-      const res = await ProcessInstanceApi.getApprovalDetail(param)
-      //当前待审批节点id
-      const activityId = res.todoTask?.taskDefinitionKey
-      if (res.activityNodes && res.activityNodes.length > 0) {
-        // 找到当前节点的索引
-        const currentNodeIndex = res.activityNodes.findIndex((node) => node.id === activityId)
-        const nextNode = res.activityNodes[currentNodeIndex + 1]
-        if (
-          nextNode.candidateStrategy === CandidateStrategy.START_USER_SELECT &&
-          !nextNode.tasks &&
-          nextNode.candidateUsers?.length === 0
-        ) {
-          // 自选审批人，则弹出选择审批人弹窗
-          activityNodes.value = [nextNode]
-          dialogVisibleSelectApproveUser.value = true
-        }
-      }
       // 审批通过数据
       const data = {
         id: runningTask.value.id,

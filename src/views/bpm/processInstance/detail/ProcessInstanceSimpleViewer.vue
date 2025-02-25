@@ -48,7 +48,7 @@ watch(
         finishedActivityIds,
         finishedSequenceFlowActivityIds
       )
-      simpleModel.value = newModelView.simpleModel == null ? {} : newModelView.simpleModel
+      simpleModel.value = newModelView.simpleModel ? newModelView.simpleModel : {}
     }
   }
 )

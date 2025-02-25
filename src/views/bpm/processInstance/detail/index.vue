@@ -178,21 +178,21 @@ const writableFields: Array<string> = [] // 表单可以编辑的字段
 
 /** 获得详情 */
 const getDetail = () => {
-  const param = {
-    processInstanceId: props.id,
-    activityId: props.activityId,
-    taskId: props.taskId
-  }
-  getApprovalDetail(param)
+  getApprovalDetail()
   getProcessModelView()
 }
 
 /** 加载流程实例 */
 const BusinessFormComponent = ref<any>(null) // 异步组件
 /** 获取审批详情 */
-const getApprovalDetail = async (param?: any) => {
+const getApprovalDetail = async () => {
   processInstanceLoading.value = true
   try {
+    const param = {
+      processInstanceId: props.id,
+      activityId: props.activityId,
+      taskId: props.taskId
+    }
     const data = await ProcessInstanceApi.getApprovalDetail(param)
     if (!data) {
       message.error('查询不到审批详情信息！')
