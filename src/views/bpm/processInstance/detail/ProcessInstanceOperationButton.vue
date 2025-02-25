@@ -36,6 +36,18 @@
               :rule="approveForm.rule"
             />
           </el-card>
+          <el-form-item
+            label="选择审批人"
+            prop="selectApproveUser"
+            v-if="dialogVisibleSelectApproveUser"
+          >
+            <ProcessInstanceTimeline
+              ref="timelineRef"
+              :activity-nodes="activityNodes"
+              :show-status-icon="false"
+              @select-user-confirm="selectUserConfirm"
+            />
+          </el-form-item>
           <el-form-item :label="`${nodeTypeName}意见`" prop="reason">
             <el-input
               v-model="approveReasonForm.reason"
@@ -506,11 +518,13 @@ import * as UserApi from '@/api/system/user'
 import {
   NodeType,
   OPERATION_BUTTON_NAME,
-  OperationButtonType
+  OperationButtonType,
+  CandidateStrategy
 } from '@/components/SimpleProcessDesignerV2/src/consts'
 import { BpmModelFormType, BpmProcessInstanceStatus } from '@/utils/constants'
 import type { FormInstance, FormRules } from 'element-plus'
 import SignDialog from './SignDialog.vue'
+import ProcessInstanceTimeline from '../detail/ProcessInstanceTimeline.vue'
 
 defineOptions({ name: 'ProcessInstanceBtnContainer' })
 
@@ -548,6 +562,8 @@ const runningTask = ref<any>() // 运行中的任务
 const approveForm = ref<any>({}) // 审批通过时，额外的补充信息
 const approveFormFApi = ref<any>({}) // approveForms 的 fAPi
 const nodeTypeName = ref('审批') // 节点类型名称
+const activityNodes = ref<ProcessInstanceApi.ApprovalNodeInfo[]>([]) // 审批节点信息
+const dialogVisibleSelectApproveUser = ref(false) // 是否显示节点审批人选择框
 
 // 审批通过意见表单
 const reasonRequire = ref()
@@ -556,14 +572,16 @@ const signRef = ref()
 const approveSignFormRef = ref()
 const approveReasonForm = reactive({
   reason: '',
-  signPicUrl: ''
+  signPicUrl: '',
+  selectApproveUser: {}
 })
 const approveReasonRule = computed(() => {
   return {
     reason: [
       { required: reasonRequire.value, message: nodeTypeName + '意见不能为空', trigger: 'blur' }
     ],
-    signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }]
+    signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }],
+    selectApproveUser: [{ required: true, message: '审批人不能为空', trigger: 'change' }]
   }
 })
 // 拒绝表单
@@ -663,6 +681,11 @@ watch(
   }
 )
 
+/** 选择发起人 */
+const selectUserConfirm = (id: string, userList: any[]) => {
+  approveReasonForm.selectApproveUser[id] = userList?.map((item: any) => item.id)
+}
+
 /** 弹出气泡卡 */
 const openPopover = async (type: string) => {
   if (type === 'approve') {
@@ -694,6 +717,7 @@ const closePropover = (type: string, formRef: FormInstance | undefined) => {
     formRef.resetFields()
   }
   popOverVisible.value[type] = false
+  dialogVisibleSelectApproveUser.value = false
 }
 
 /** 处理审批通过和不通过的操作 */
@@ -711,13 +735,44 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
     }
 
     if (pass) {
+      // 如果需要自选审批人，则校验自选审批人
+      if (
+        dialogVisibleSelectApproveUser.value &&
+        Object.keys(approveReasonForm.selectApproveUser).length === 0
+      ) {
+        message.warning('审批人不能为空!')
+        return
+      }
       // 获取修改的流程变量, 暂时只支持流程表单
       const variables = getUpdatedProcessInstanceVariables()
+      const param = {
+        processInstanceId: props.processInstance.id,
+        processVariablesStr: JSON.stringify(variables)
+      }
+      // 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人
+      const res = await ProcessInstanceApi.getApprovalDetail(param)
+      //当前待审批节点id
+      const activityId = res.todoTask?.taskDefinitionKey
+      if (res.activityNodes && res.activityNodes.length > 0) {
+        // 找到当前节点的索引
+        const currentNodeIndex = res.activityNodes.findIndex((node) => node.id === activityId)
+        const nextNode = res.activityNodes[currentNodeIndex + 1]
+        if (
+          nextNode.candidateStrategy === CandidateStrategy.START_USER_SELECT &&
+          !nextNode.tasks &&
+          nextNode.candidateUsers?.length === 0
+        ) {
+          // 自选审批人，则弹出选择审批人弹窗
+          activityNodes.value = [nextNode]
+          dialogVisibleSelectApproveUser.value = true
+        }
+      }
       // 审批通过数据
       const data = {
         id: runningTask.value.id,
         reason: approveReasonForm.reason,
-        variables // 审批通过, 把修改的字段值赋于流程实例变量
+        variables, // 审批通过, 把修改的字段值赋于流程实例变量
+        startUserSelectAssignees: approveReasonForm.selectApproveUser // 下个自选节点选择的审批人信息
       }
       // 签名
       if (runningTask.value.signEnable) {
