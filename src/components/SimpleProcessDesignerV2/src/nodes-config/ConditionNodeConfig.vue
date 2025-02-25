@@ -47,6 +47,7 @@ import { SimpleFlowNode, ConditionType } from '../consts'
 import { getDefaultConditionNodeName } from '../utils'
 import { useFormFieldsAndStartUser, getConditionShowText } from '../node'
 import Condition from './components/Condition.vue'
+import { cloneDeep } from 'lodash-es'
 const message = useMessage() // 消息弹窗
 defineOptions({
   name: 'ConditionNodeConfig'
@@ -81,7 +82,7 @@ const condition = ref<any>({
 const open = () => {
   // 如果有已存在的配置则使用，否则使用默认值
   if (currentNode.value.conditionSetting) {
-    condition.value = JSON.parse(JSON.stringify(currentNode.value.conditionSetting))
+    condition.value = cloneDeep(currentNode.value.conditionSetting)
   } else {
     // 重置为默认值
     condition.value = {
@@ -157,13 +158,13 @@ const saveConfig = async () => {
       return false
     }
     currentNode.value.showText = showText
-    // 深拷贝保存的条件设置,避免引用问题
-    currentNode.value.conditionSetting = JSON.parse(JSON.stringify({
+    // 使用 cloneDeep 进行深拷贝
+    currentNode.value.conditionSetting = cloneDeep({
       ...currentNode.value.conditionSetting,
       conditionType: condition.value?.conditionType,
       conditionExpression: condition.value?.conditionType === ConditionType.EXPRESSION ? condition.value?.conditionExpression : undefined,
       conditionGroups: condition.value?.conditionType === ConditionType.RULE ? condition.value?.conditionGroups : undefined
-    }))
+    })
   }
   settingVisible.value = false
   return true
