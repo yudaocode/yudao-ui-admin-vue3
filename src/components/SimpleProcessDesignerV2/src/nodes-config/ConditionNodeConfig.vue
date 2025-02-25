@@ -47,6 +47,7 @@ import { SimpleFlowNode, ConditionType } from '../consts'
 import { getDefaultConditionNodeName } from '../utils'
 import { useFormFieldsAndStartUser, getConditionShowText } from '../node'
 import Condition from './components/Condition.vue'
+import { cloneDeep } from 'lodash-es'
 const message = useMessage() // 消息弹窗
 defineOptions({
   name: 'ConditionNodeConfig'
@@ -63,9 +64,43 @@ const props = defineProps({
 })
 const settingVisible = ref(false)
 const currentNode = ref<SimpleFlowNode>(props.conditionNode)
-const condition = ref<any>()
+const condition = ref<any>({
+  conditionType: ConditionType.RULE, // 设置默认值
+  conditionExpression: '',
+  conditionGroups: {
+    and: true,
+    conditions: [{
+      and: true,
+      rules: [{
+        opCode: '==',
+        leftSide: '',
+        rightSide: ''
+      }]
+    }]
+  }
+})
 const open = () => {
-  condition.value = currentNode.value.conditionSetting
+  // 如果有已存在的配置则使用，否则使用默认值
+  if (currentNode.value.conditionSetting) {
+    condition.value = cloneDeep(currentNode.value.conditionSetting)
+  } else {
+    // 重置为默认值
+    condition.value = {
+      conditionType: ConditionType.RULE,
+      conditionExpression: '',
+      conditionGroups: {
+        and: true,
+        conditions: [{
+          and: true,
+          rules: [{
+            opCode: '==',
+            leftSide: '',
+            rightSide: ''
+          }]
+        }]
+      }
+    }
+  }
   settingVisible.value = true
 }
 
@@ -123,15 +158,13 @@ const saveConfig = async () => {
       return false
     }
     currentNode.value.showText = showText
-    currentNode.value.conditionSetting!.conditionType = condition.value?.conditionType
-    if (currentNode.value.conditionSetting?.conditionType === ConditionType.EXPRESSION) {
-      currentNode.value.conditionSetting.conditionGroups = undefined
-      currentNode.value.conditionSetting.conditionExpression = condition.value?.conditionExpression
-    }
-    if (currentNode.value.conditionSetting!.conditionType === ConditionType.RULE) {
-      currentNode.value.conditionSetting!.conditionExpression = undefined
-      currentNode.value.conditionSetting!.conditionGroups = condition.value?.conditionGroups
-    }
+    // 使用 cloneDeep 进行深拷贝
+    currentNode.value.conditionSetting = cloneDeep({
+      ...currentNode.value.conditionSetting,
+      conditionType: condition.value?.conditionType,
+      conditionExpression: condition.value?.conditionType === ConditionType.EXPRESSION ? condition.value?.conditionExpression : undefined,
+      conditionGroups: condition.value?.conditionType === ConditionType.RULE ? condition.value?.conditionGroups : undefined
+    })
   }
   settingVisible.value = false
   return true
