@@ -695,6 +695,30 @@ const openPopover = async (type: string) => {
       message.warning('表单校验不通过，请先完善表单!!')
       return
     }
+    // 获取修改的流程变量, 暂时只支持流程表单
+    const variables = getUpdatedProcessInstanceVariables()
+    const param = {
+      processInstanceId: props.processInstance.id,
+      processVariablesStr: JSON.stringify(variables)
+    }
+    // 流程通过时，根据表单变量查询新的流程节点，判断下一个节点类型是否为自选审批人
+    const res = await ProcessInstanceApi.getApprovalDetail(param)
+    //当前待审批节点id
+    const activityId = res.todoTask?.taskDefinitionKey
+    if (res.activityNodes && res.activityNodes.length > 0) {
+      // 找到当前节点的索引
+      const currentNodeIndex = res.activityNodes.findIndex((node) => node.id === activityId)
+      const nextNode = res.activityNodes[currentNodeIndex + 1]
+      if (
+        nextNode.candidateStrategy === CandidateStrategy.START_USER_SELECT &&
+        !nextNode.tasks &&
+        nextNode.candidateUsers?.length === 0
+      ) {
+        // 自选审批人，则弹出选择审批人弹窗
+        activityNodes.value = [nextNode]
+        dialogVisibleSelectApproveUser.value = true
+      }
+    }
   }
   if (type === 'return') {
     // 获取退回节点
@@ -788,6 +812,7 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
       }
       await TaskApi.approveTask(data)
       popOverVisible.value.approve = false
+      dialogVisibleSelectApproveUser.value = false
       message.success('审批通过成功')
     } else {
       // 审批不通过数据
