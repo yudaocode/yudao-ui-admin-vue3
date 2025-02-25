@@ -756,6 +756,7 @@ export enum TriggerTypeEnum {
    * 发送 HTTP 请求触发器
    */
   HTTP_REQUEST = 1,
+  // TODO @jason：要不把 FORM_UPDATE、FORM_DELETE 调整从 10、11 这样？
   /**
    * 表单数据更新触发器
    */
@@ -764,6 +765,7 @@ export enum TriggerTypeEnum {
    * 表单数据删除触发器
    */
   FORM_DELETE = 3,
+  // TODO @jason：1）HTTP_CALLBACK 这个枚举值？然后，相关注释，朝着“HTTP 回调”走；2）枚举值改成 2？
   /**
    * 发起异步 HTTP 请求
    */
@@ -795,7 +797,7 @@ export type FormTriggerSetting = {
   // 条件组
   conditionGroups?: ConditionGroup
   // 更新表单字段配置
-  updateFormFields?: Record<string, any>,
+  updateFormFields?: Record<string, any>
   // 删除表单字段配置
   deleteFields?: string[]
 }

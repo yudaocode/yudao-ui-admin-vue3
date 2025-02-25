@@ -66,6 +66,7 @@ import { SimpleFlowNode, NodeType, NODE_DEFAULT_TEXT } from '../consts'
 import NodeHandler from '../NodeHandler.vue'
 import { useNodeName2, useWatchNode, useTaskStatusClass } from '../node'
 import ChildProcessNodeConfig from '../nodes-config/ChildProcessNodeConfig.vue'
+
 defineOptions({
   name: 'ChildProcessNode'
 })
@@ -86,6 +87,7 @@ const currentNode = useWatchNode(props)
 // 节点名称编辑
 const { showInput, blurEvent, clickTitle } = useNodeName2(currentNode, NodeType.CHILD_PROCESS_NODE)
 const nodeSetting = ref()
+
 // 打开节点配置
 const openNodeConfig = () => {
   if (readonly) {
