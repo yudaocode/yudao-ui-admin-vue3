@@ -815,13 +815,13 @@ export const TRIGGER_TYPES: DictDataVO[] = [
 export type ChildProcessSetting = {
   calledProcessDefinitionKey: string
   calledProcessDefinitionName: string
-  async: boolean,
-  inVariables?: IOParameter[],
-  outVariables?: IOParameter[],
-  skipStartUserNode: boolean,
-  startUserSetting: StartUserSetting,
-  timeoutSetting: TimeoutSetting,
-  multiInstanceSetting: MultiInstanceSetting,
+  async: boolean
+  inVariables?: IOParameter[]
+  outVariables?: IOParameter[]
+  skipStartUserNode: boolean
+  startUserSetting: StartUserSetting
+  timeoutSetting: TimeoutSetting
+  multiInstanceSetting: MultiInstanceSetting
 }
 export type IOParameter = {
   source: string
@@ -833,16 +833,16 @@ export type StartUserSetting = {
   emptyType?: ChildProcessStartUserEmptyTypeEnum
 }
 export type TimeoutSetting = {
-  enable: boolean,
-  type?: DelayTypeEnum,
-  timeExpression?: string,
+  enable: boolean
+  type?: DelayTypeEnum
+  timeExpression?: string
 }
 export type MultiInstanceSetting = {
-  enable: boolean,
-  sequential?: boolean,
-  completeRatio?: number,
-  sourceType?: ChildProcessMultiInstanceSourceTypeEnum,
-  source?: string,
+  enable: boolean
+  sequential?: boolean
+  completeRatio?: number
+  sourceType?: ChildProcessMultiInstanceSourceTypeEnum
+  source?: string
 }
 export enum ChildProcessStartUserTypeEnum {
   /**
@@ -852,7 +852,7 @@ export enum ChildProcessStartUserTypeEnum {
   /**
    * 表单
    */
-  FROM_FORM = 2,
+  FROM_FORM = 2
 }
 export const CHILD_PROCESS_START_USER_TYPE = [
   { label: '同主流程发起人', value: ChildProcessStartUserTypeEnum.MAIN_PROCESS_START_USER },
@@ -870,7 +870,7 @@ export enum ChildProcessStartUserEmptyTypeEnum {
   /**
    * 主流程管理员
    */
-  MAIN_PROCESS_ADMIN = 3,
+  MAIN_PROCESS_ADMIN = 3
 }
 export const CHILD_PROCESS_START_USER_EMPTY_TYPE = [
   { label: '同主流程发起人', value: ChildProcessStartUserEmptyTypeEnum.MAIN_PROCESS_START_USER },
@@ -889,10 +889,10 @@ export enum ChildProcessMultiInstanceSourceTypeEnum {
   /**
    * 多项表单
    */
-  MULTI_FORM = 3,
+  MULTI_FORM = 3
 }
 export const CHILD_PROCESS_MULTI_INSTANCE_SOURCE_TYPE = [
   { label: '固定数量', value: ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY },
-  { label: '数字表单', value: ChildProcessMultiInstanceSourceTypeEnum.DIGITAL_FORM },
-  { label: '多项表单', value: ChildProcessMultiInstanceSourceTypeEnum.MULTI_FORM }
+  { label: '数字表单', value: ChildProcessMultiInstanceSourceTypeEnum.DIGITAL_FORM }, // TODO @lesan：DIGITAL 改成 NUMBER，和 Element plus 更接近？
+  { label: '多项表单', value: ChildProcessMultiInstanceSourceTypeEnum.MULTI_FORM } // TODO @lesan：多选表单？multiple 是这个解释。另外 MULTI => MULTIPLE
 ]

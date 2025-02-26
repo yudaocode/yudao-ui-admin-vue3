@@ -166,12 +166,12 @@
                   :key="item.value"
                   :value="item.value"
                 >
-                  {{ item.label }}</el-radio
-                >
+                  {{ item.label }}
+                </el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item
-              v-if="configForm.startUserType === 2"
+              v-if="configForm.startUserType === ChildProcessStartUserTypeEnum.FROM_FORM"
               label="当子流程发起人为空时"
               prop="startUserType"
             >
@@ -181,8 +181,8 @@
                   :key="item.value"
                   :value="item.value"
                 >
-                  {{ item.label }}</el-radio
-                >
+                  {{ item.label }}
+                </el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item
@@ -282,7 +282,11 @@
               </el-form-item>
               <el-form-item prop="multiInstanceSourceType">
                 <el-text>多实例来源</el-text>
-                <el-select class="ml-10px w-200px!" v-model="configForm.multiInstanceSourceType" @change="handleMultiInstanceSourceTypeChange">
+                <el-select
+                  class="ml-10px w-200px!"
+                  v-model="configForm.multiInstanceSourceType"
+                  @change="handleMultiInstanceSourceTypeChange"
+                >
                   <el-option
                     v-for="item in CHILD_PROCESS_MULTI_INSTANCE_SOURCE_TYPE"
                     :key="item.value"
@@ -291,6 +295,7 @@
                   />
                 </el-select>
               </el-form-item>
+              <!-- TODO @lesan：枚举 -->
               <el-form-item v-if="configForm.multiInstanceSourceType === 1">
                 <el-input-number v-model="configForm.multiInstanceSource" :min="1" />
               </el-form-item>
@@ -483,7 +488,8 @@ const saveConfig = async () => {
       enable: configForm.value.multiInstanceEnable
     }
     if (configForm.value.multiInstanceEnable) {
-      currentNode.value.childProcessSetting.multiInstanceSetting.sequential = configForm.value.sequential
+      currentNode.value.childProcessSetting.multiInstanceSetting.sequential =
+        configForm.value.sequential
       currentNode.value.childProcessSetting.multiInstanceSetting.completeRatio =
         configForm.value.completeRatio
       currentNode.value.childProcessSetting.multiInstanceSetting.sourceType =
@@ -538,11 +544,15 @@ const showChildProcessNodeConfig = (node: SimpleFlowNode) => {
     configForm.value.multiInstanceEnable =
       node.childProcessSetting.multiInstanceSetting.enable ?? false
     if (configForm.value.multiInstanceEnable) {
-      configForm.value.sequential = node.childProcessSetting.multiInstanceSetting.sequential ?? false
-      configForm.value.completeRatio = node.childProcessSetting.multiInstanceSetting.completeRatio ?? 100
+      configForm.value.sequential =
+        node.childProcessSetting.multiInstanceSetting.sequential ?? false
+      configForm.value.completeRatio =
+        node.childProcessSetting.multiInstanceSetting.completeRatio ?? 100
       configForm.value.multiInstanceSourceType =
-        node.childProcessSetting.multiInstanceSetting.sourceType ?? ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY
-      configForm.value.multiInstanceSource = node.childProcessSetting.multiInstanceSetting.source ?? ''
+        node.childProcessSetting.multiInstanceSetting.sourceType ??
+        ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY
+      configForm.value.multiInstanceSource =
+        node.childProcessSetting.multiInstanceSetting.source ?? ''
     }
   }
   loadFormInfo()
