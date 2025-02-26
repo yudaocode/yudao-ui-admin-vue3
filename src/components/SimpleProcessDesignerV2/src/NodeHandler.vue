@@ -306,6 +306,9 @@ const addNode = (type: number) => {
         },
         timeoutSetting: {
           enable: false
+        },
+        multiInstanceSetting: {
+          enable: false
         }
       }
     }

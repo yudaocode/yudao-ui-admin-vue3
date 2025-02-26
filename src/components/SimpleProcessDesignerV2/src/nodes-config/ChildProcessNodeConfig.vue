@@ -164,8 +164,10 @@
                 <el-radio
                   v-for="item in CHILD_PROCESS_START_USER_TYPE"
                   :key="item.value"
-                  :value="item.value">
-                  {{ item.label }}</el-radio>
+                  :value="item.value"
+                >
+                  {{ item.label }}</el-radio
+                >
               </el-radio-group>
             </el-form-item>
             <el-form-item
@@ -177,8 +179,10 @@
                 <el-radio
                   v-for="item in CHILD_PROCESS_START_USER_EMPTY_TYPE"
                   :key="item.value"
-                  :value="item.value">
-                  {{ item.label }}</el-radio>
+                  :value="item.value"
+                >
+                  {{ item.label }}</el-radio
+                >
               </el-radio-group>
             </el-form-item>
             <el-form-item
@@ -249,6 +253,68 @@
                 <el-text>后进入下一节点</el-text>
               </el-form-item>
             </div>
+
+            <el-divider content-position="left">多实例设置</el-divider>
+            <el-form-item label="启用开关" prop="multiInstanceEnable">
+              <el-switch
+                v-model="configForm.multiInstanceEnable"
+                active-text="开启"
+                inactive-text="关闭"
+              />
+            </el-form-item>
+            <div v-if="configForm.multiInstanceEnable">
+              <el-form-item prop="sequential">
+                <el-switch
+                  v-model="configForm.sequential"
+                  active-text="串行"
+                  inactive-text="并行"
+                />
+              </el-form-item>
+              <el-form-item prop="completeRatio">
+                <el-text>完成比例(%)</el-text>
+                <el-input-number
+                  class="ml-10px"
+                  v-model="configForm.completeRatio"
+                  :min="10"
+                  :max="100"
+                  :step="10"
+                />
+              </el-form-item>
+              <el-form-item prop="multiInstanceSourceType">
+                <el-text>多实例来源</el-text>
+                <el-select class="ml-10px w-200px!" v-model="configForm.multiInstanceSourceType" @change="handleMultiInstanceSourceTypeChange">
+                  <el-option
+                    v-for="item in CHILD_PROCESS_MULTI_INSTANCE_SOURCE_TYPE"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item v-if="configForm.multiInstanceSourceType === 1">
+                <el-input-number v-model="configForm.multiInstanceSource" :min="1" />
+              </el-form-item>
+              <el-form-item v-if="configForm.multiInstanceSourceType === 2">
+                <el-select class="w-200px!" v-model="configForm.multiInstanceSource">
+                  <el-option
+                    v-for="(field, fIdx) in digitalFormFieldOptions"
+                    :key="fIdx"
+                    :label="field.title"
+                    :value="field.field"
+                  />
+                </el-select>
+              </el-form-item>
+              <el-form-item v-if="configForm.multiInstanceSourceType === 3">
+                <el-select class="w-200px!" v-model="configForm.multiInstanceSource">
+                  <el-option
+                    v-for="(field, fIdx) in multiFormFieldOptions"
+                    :key="fIdx"
+                    :label="field.title"
+                    :value="field.field"
+                  />
+                </el-select>
+              </el-form-item>
+            </div>
           </el-form>
         </div>
       </el-tab-pane>
@@ -276,7 +342,9 @@ import {
   ChildProcessStartUserTypeEnum,
   CHILD_PROCESS_START_USER_TYPE,
   ChildProcessStartUserEmptyTypeEnum,
-  CHILD_PROCESS_START_USER_EMPTY_TYPE
+  CHILD_PROCESS_START_USER_EMPTY_TYPE,
+  CHILD_PROCESS_MULTI_INSTANCE_SOURCE_TYPE,
+  ChildProcessMultiInstanceSourceTypeEnum
 } from '../consts'
 import { useWatchNode, useDrawer, useNodeName, useFormFieldsAndStartUser } from '../node'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
@@ -315,7 +383,8 @@ const formRules = reactive({
   timeoutEnable: [{ required: true, message: '超时设置是否开启不能为空', trigger: 'change' }],
   timeoutType: [{ required: true, message: '超时设置时间不能为空', trigger: 'change' }],
   timeDuration: [{ required: true, message: '超时设置时间不能为空', trigger: 'change' }],
-  dateTime: [{ required: true, message: '超时设置时间不能为空', trigger: 'change' }]
+  dateTime: [{ required: true, message: '超时设置时间不能为空', trigger: 'change' }],
+  multiInstanceEnable: [{ required: true, message: '多实例设置不能为空', trigger: 'change' }]
 })
 type ChildProcessFormType = {
   async: boolean
@@ -331,6 +400,11 @@ type ChildProcessFormType = {
   timeDuration: number
   timeUnit: TimeUnitType
   dateTime: string
+  multiInstanceEnable: boolean
+  sequential: boolean
+  completeRatio: number
+  multiInstanceSourceType: ChildProcessMultiInstanceSourceTypeEnum
+  multiInstanceSource: string
 }
 const configForm = ref<ChildProcessFormType>({
   async: false,
@@ -345,10 +419,21 @@ const configForm = ref<ChildProcessFormType>({
   timeoutType: DelayTypeEnum.FIXED_TIME_DURATION,
   timeDuration: 1,
   timeUnit: TimeUnitType.HOUR,
-  dateTime: ''
+  dateTime: '',
+  multiInstanceEnable: false,
+  sequential: false,
+  completeRatio: 100,
+  multiInstanceSourceType: ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY,
+  multiInstanceSource: ''
 })
 const childProcessOptions = ref()
 const formFieldOptions = useFormFieldsAndStartUser()
+const digitalFormFieldOptions = computed(() => {
+  return formFieldOptions.filter((item) => item.type === 'inputNumber')
+})
+const multiFormFieldOptions = computed(() => {
+  return formFieldOptions.filter((item) => item.type === 'select' || item.type === 'checkbox')
+})
 const childFormFieldOptions = ref()
 
 // 保存配置
@@ -393,6 +478,19 @@ const saveConfig = async () => {
           configForm.value.dateTime
       }
     }
+    // 8. 多实例设置
+    currentNode.value.childProcessSetting.multiInstanceSetting = {
+      enable: configForm.value.multiInstanceEnable
+    }
+    if (configForm.value.multiInstanceEnable) {
+      currentNode.value.childProcessSetting.multiInstanceSetting.sequential = configForm.value.sequential
+      currentNode.value.childProcessSetting.multiInstanceSetting.completeRatio =
+        configForm.value.completeRatio
+      currentNode.value.childProcessSetting.multiInstanceSetting.sourceType =
+        configForm.value.multiInstanceSourceType
+      currentNode.value.childProcessSetting.multiInstanceSetting.source =
+        configForm.value.multiInstanceSource
+    }
   }
 
   currentNode.value.showText = `调用子流程：${childInfo.name}`
@@ -435,6 +533,16 @@ const showChildProcessNodeConfig = (node: SimpleFlowNode) => {
       if (configForm.value.timeoutType === DelayTypeEnum.FIXED_DATE_TIME) {
         configForm.value.dateTime = node.childProcessSetting.timeoutSetting.timeExpression ?? ''
       }
+    }
+    // 8. 多实例设置
+    configForm.value.multiInstanceEnable =
+      node.childProcessSetting.multiInstanceSetting.enable ?? false
+    if (configForm.value.multiInstanceEnable) {
+      configForm.value.sequential = node.childProcessSetting.multiInstanceSetting.sequential ?? false
+      configForm.value.completeRatio = node.childProcessSetting.multiInstanceSetting.completeRatio ?? 100
+      configForm.value.multiInstanceSourceType =
+        node.childProcessSetting.multiInstanceSetting.sourceType ?? ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY
+      configForm.value.multiInstanceSource = node.childProcessSetting.multiInstanceSetting.source ?? ''
     }
   }
   loadFormInfo()
@@ -480,6 +588,9 @@ const getIsoTimeDuration = () => {
     strTimeDuration += configForm.value.timeDuration + 'D'
   }
   return strTimeDuration
+}
+const handleMultiInstanceSourceTypeChange = () => {
+  configForm.value.multiInstanceSource = ''
 }
 
 onMounted(async () => {
