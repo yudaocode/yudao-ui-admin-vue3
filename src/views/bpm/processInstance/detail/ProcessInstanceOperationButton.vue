@@ -46,7 +46,7 @@
           </el-form-item>
           <el-form-item
             label="选择下一个节点的审批人"
-            prop="selectApproveUser"
+            prop="nextAssignees"
             v-if="dialogVisibleSelectApproveUser"
           >
             <ProcessInstanceTimeline
@@ -573,7 +573,7 @@ const approveSignFormRef = ref()
 const approveReasonForm = reactive({
   reason: '',
   signPicUrl: '',
-  selectApproveUser: {}
+  nextAssignees: {}
 })
 const approveReasonRule = computed(() => {
   return {
@@ -581,7 +581,7 @@ const approveReasonRule = computed(() => {
       { required: reasonRequire.value, message: nodeTypeName + '意见不能为空', trigger: 'blur' }
     ],
     signPicUrl: [{ required: true, message: '签名不能为空', trigger: 'change' }],
-    selectApproveUser: [{ required: true, message: '审批人不能为空', trigger: 'change' }]
+    nextAssignees: [{ required: true, message: '审批人不能为空', trigger: 'blur' }]
   }
 })
 // 拒绝表单
@@ -681,9 +681,9 @@ watch(
   }
 )
 
-/** 选择发起人 */
+/** 选择下一个节点的审批人 */
 const selectUserConfirm = (id: string, userList: any[]) => {
-  approveReasonForm.selectApproveUser[id] = userList?.map((item: any) => item.id)
+  approveReasonForm.nextAssignees[id] = userList?.map((item: any) => item.id)
 }
 
 /** 弹出气泡卡 */
@@ -766,7 +766,7 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
       // 如果需要自选审批人，则校验自选审批人
       if (
         dialogVisibleSelectApproveUser.value &&
-        Object.keys(approveReasonForm.selectApproveUser).length === 0
+        Object.keys(approveReasonForm.nextAssignees).length === 0
       ) {
         message.warning('下一个节点的审批人不能为空!')
         return
@@ -777,7 +777,7 @@ const handleAudit = async (pass: boolean, formRef: FormInstance | undefined) => 
         id: runningTask.value.id,
         reason: approveReasonForm.reason,
         variables, // 审批通过, 把修改的字段值赋于流程实例变量
-        startUserSelectAssignees: approveReasonForm.selectApproveUser // 下个自选节点选择的审批人信息
+        nextAssignees: approveReasonForm.nextAssignees // 下个自选节点选择的审批人信息
       }
       // 签名
       if (runningTask.value.signEnable) {
