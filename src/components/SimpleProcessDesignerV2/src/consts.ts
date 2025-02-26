@@ -824,17 +824,48 @@ export type ChildProcessSetting = {
 }
 export type IOParameter = {
   source: string
-  sourceExpression: string
   target: string
-  targetExpression: string
 }
 export type StartUserSetting = {
-  type: number
+  type: ChildProcessStartUserTypeEnum
   formField?: string
-  emptyType?: number
+  emptyType?: ChildProcessStartUserEmptyTypeEnum
 }
 export type TimeoutSetting = {
   enable: boolean,
   type?: DelayTypeEnum,
   timeExpression?: string,
 }
+export enum ChildProcessStartUserTypeEnum {
+  /**
+   * 同主流程发起人
+   */
+  MAIN_PROCESS_START_USER = 1,
+  /**
+   * 表单
+   */
+  FROM_FORM = 2,
+}
+export const CHILD_PROCESS_START_USER_TYPE = [
+  { label: '同主流程发起人', value: ChildProcessStartUserTypeEnum.MAIN_PROCESS_START_USER },
+  { label: '表单', value: ChildProcessStartUserTypeEnum.FROM_FORM }
+]
+export enum ChildProcessStartUserEmptyTypeEnum {
+  /**
+   * 同主流程发起人
+   */
+  MAIN_PROCESS_START_USER = 1,
+  /**
+   * 子流程管理员
+   */
+  CHILD_PROCESS_ADMIN = 2,
+  /**
+   * 主流程管理员
+   */
+  MAIN_PROCESS_ADMIN = 3,
+}
+export const CHILD_PROCESS_START_USER_EMPTY_TYPE = [
+  { label: '同主流程发起人', value: ChildProcessStartUserEmptyTypeEnum.MAIN_PROCESS_START_USER },
+  { label: '子流程管理员', value: ChildProcessStartUserEmptyTypeEnum.CHILD_PROCESS_ADMIN },
+  { label: '主流程管理员', value: ChildProcessStartUserEmptyTypeEnum.MAIN_PROCESS_ADMIN }
+]

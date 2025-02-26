@@ -95,7 +95,7 @@
                   <Icon
                     icon="ep:delete"
                     :size="18"
-                    @click="deleteVariable(configForm.inVariables, index)"
+                    @click="deleteVariable(index, configForm.inVariables)"
                   />
                 </div>
               </div>
@@ -103,7 +103,6 @@
                 <Icon icon="ep:plus" class="mr-5px" />添加一行
               </el-button>
             </el-form-item>
-            <!-- TODO @lesan：async、source、target 几个字段，会告警 -->
             <el-form-item
               v-if="configForm.async === false"
               label="子→主变量传递"
@@ -152,7 +151,7 @@
                   <Icon
                     icon="ep:delete"
                     :size="18"
-                    @click="deleteVariable(configForm.outVariables, index)"
+                    @click="deleteVariable(index, configForm.outVariables)"
                   />
                 </div>
               </div>
@@ -160,11 +159,13 @@
                 <Icon icon="ep:plus" class="mr-5px" />添加一行
               </el-button>
             </el-form-item>
-            <!-- TODO @lesan：startUserType、startUserEmptyType 要不走写下枚举类？ -->
             <el-form-item label="子流程发起人" prop="startUserType">
               <el-radio-group v-model="configForm.startUserType">
-                <el-radio :value="1">同主流程发起人</el-radio>
-                <el-radio :value="2">表单</el-radio>
+                <el-radio
+                  v-for="item in CHILD_PROCESS_START_USER_TYPE"
+                  :key="item.value"
+                  :value="item.value">
+                  {{ item.label }}</el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item
@@ -173,9 +174,11 @@
               prop="startUserType"
             >
               <el-radio-group v-model="configForm.startUserEmptyType">
-                <el-radio :value="1">同主流程发起人</el-radio>
-                <el-radio :value="2">子流程管理员</el-radio>
-                <el-radio :value="3">主流程管理员</el-radio>
+                <el-radio
+                  v-for="item in CHILD_PROCESS_START_USER_EMPTY_TYPE"
+                  :key="item.value"
+                  :value="item.value">
+                  {{ item.label }}</el-radio>
               </el-radio-group>
             </el-form-item>
             <el-form-item
@@ -268,7 +271,12 @@ import {
   TIME_UNIT_TYPES,
   TimeUnitType,
   DelayTypeEnum,
-  DELAY_TYPE
+  DELAY_TYPE,
+  IOParameter,
+  ChildProcessStartUserTypeEnum,
+  CHILD_PROCESS_START_USER_TYPE,
+  ChildProcessStartUserEmptyTypeEnum,
+  CHILD_PROCESS_START_USER_EMPTY_TYPE
 } from '../consts'
 import { useWatchNode, useDrawer, useNodeName, useFormFieldsAndStartUser } from '../node'
 import { parseFormFields } from '@/components/FormCreate/src/utils'
@@ -309,14 +317,29 @@ const formRules = reactive({
   timeDuration: [{ required: true, message: '超时设置时间不能为空', trigger: 'change' }],
   dateTime: [{ required: true, message: '超时设置时间不能为空', trigger: 'change' }]
 })
-const configForm = ref({
+type ChildProcessFormType = {
+  async: boolean
+  calledProcessDefinitionKey: string
+  skipStartUserNode: boolean
+  inVariables?: IOParameter[]
+  outVariables?: IOParameter[]
+  startUserType: ChildProcessStartUserTypeEnum
+  startUserEmptyType: ChildProcessStartUserEmptyTypeEnum
+  startUserFormField: string
+  timeoutEnable: boolean
+  timeoutType: DelayTypeEnum
+  timeDuration: number
+  timeUnit: TimeUnitType
+  dateTime: string
+}
+const configForm = ref<ChildProcessFormType>({
   async: false,
   calledProcessDefinitionKey: '',
   skipStartUserNode: false,
   inVariables: [],
   outVariables: [],
-  startUserType: 1,
-  startUserEmptyType: 1,
+  startUserType: ChildProcessStartUserTypeEnum.MAIN_PROCESS_START_USER,
+  startUserEmptyType: ChildProcessStartUserEmptyTypeEnum.MAIN_PROCESS_START_USER,
   startUserFormField: '',
   timeoutEnable: false,
   timeoutType: DelayTypeEnum.FIXED_TIME_DURATION,
@@ -334,9 +357,8 @@ const saveConfig = async () => {
   if (!formRef) return false
   const valid = await formRef.value.validate()
   if (!valid) return false
-  // TODO @lesan：这里的 option 黄色告警，也处理下哈
   const childInfo = childProcessOptions.value.find(
-    (option) => option.key === configForm.value.calledProcessDefinitionKey
+    (option: any) => option.key === configForm.value.calledProcessDefinitionKey
   )
   currentNode.value.name = nodeName.value!
   if (currentNode.value.childProcessSetting) {
@@ -378,7 +400,6 @@ const saveConfig = async () => {
   return true
 }
 // 显示子流程节点配置， 由父组件传过来
-// TODO @lesan：inVariables、outVariables 红色告警
 const showChildProcessNodeConfig = (node: SimpleFlowNode) => {
   nodeName.value = node.name
   if (node.childProcessSetting) {
@@ -421,15 +442,14 @@ const showChildProcessNodeConfig = (node: SimpleFlowNode) => {
 
 defineExpose({ openDrawer, showChildProcessNodeConfig }) // 暴露方法给父组件
 
-// TODO @lesan：这里的 arr 黄色告警，也处理下哈，可以用 cursor quick fix 哈
-const addVariable = (arr) => {
-  arr.push({
+const addVariable = (arr?: IOParameter[]) => {
+  arr?.push({
     source: '',
     target: ''
   })
 }
-const deleteVariable = (arr, index: number) => {
-  arr.splice(index, 1)
+const deleteVariable = (index: number, arr?: IOParameter[]) => {
+  arr?.splice(index, 1)
 }
 const handleCalledElementChange = () => {
   configForm.value.inVariables = []
