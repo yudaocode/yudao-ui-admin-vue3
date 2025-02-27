@@ -1,56 +1,56 @@
 <template>
   <div class="min-h-full bg-gray-50">
-    <el-space direction="vertical" :fill="true" size="large" class="w-full p-4">
+    <el-space direction="vertical" :fill="true" size="small" class="w-full p-2">
       <!-- 统计卡片行 -->
-      <el-row :gutter="20" class="mb-6">
+      <el-row :gutter="16" class="mb-4">
         <el-col :span="6">
-          <el-card class="stat-card hover:shadow-lg transition-shadow duration-300" shadow="hover">
+          <el-card class="stat-card" shadow="never">
             <div class="flex flex-col">
-              <span class="text-gray-600 text-lg font-medium mb-2">品类数量</span>
-              <span class="text-4xl font-bold text-blue-600 mb-4">{{ statsData.categoryTotal }}</span>
+              <span class="text-gray-500 text-base mb-1">品类数量</span>
+              <span class="text-3xl font-bold text-gray-700">{{ statsData.categoryTotal }}</span>
               <el-divider class="my-2" />
-              <div class="flex items-center text-gray-500">
+              <div class="flex items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="ml-2 text-green-500 text-lg">↑ 0</span>
+                <span class="ml-1 text-green-500">↑ 0</span>
               </div>
             </div>
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card class="stat-card hover:shadow-lg transition-shadow duration-300" shadow="hover">
+          <el-card class="stat-card" shadow="never">
             <div class="flex flex-col">
-              <span class="text-gray-600 text-lg font-medium mb-2">产品数量</span>
-              <span class="text-4xl font-bold text-indigo-600 mb-4">{{ statsData.productTotal }}</span>
+              <span class="text-gray-500 text-base mb-1">产品数量</span>
+              <span class="text-3xl font-bold text-gray-700">{{ statsData.productTotal }}</span>
               <el-divider class="my-2" />
-              <div class="flex items-center text-gray-500">
+              <div class="flex items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="ml-2 text-green-500 text-lg">↑ 0</span>
+                <span class="ml-1 text-green-500">↑ 0</span>
               </div>
             </div>
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card class="stat-card hover:shadow-lg transition-shadow duration-300" shadow="hover">
+          <el-card class="stat-card" shadow="never">
             <div class="flex flex-col">
-              <span class="text-gray-600 text-lg font-medium mb-2">设备数量</span>
-              <span class="text-4xl font-bold text-purple-600 mb-4">{{ statsData.deviceTotal }}</span>
+              <span class="text-gray-500 text-base mb-1">设备数量</span>
+              <span class="text-3xl font-bold text-gray-700">{{ statsData.deviceTotal }}</span>
               <el-divider class="my-2" />
-              <div class="flex items-center text-gray-500">
+              <div class="flex items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="ml-2 text-green-500 text-lg">↑ 0</span>
+                <span class="ml-1 text-green-500">↑ 0</span>
               </div>
             </div>
           </el-card>
         </el-col>
         <el-col :span="6">
-          <el-card class="stat-card hover:shadow-lg transition-shadow duration-300" shadow="hover">
+          <el-card class="stat-card" shadow="never">
             <div class="flex flex-col">
-              <span class="text-gray-600 text-lg font-medium mb-2">物模型消息</span>
-              <span class="text-4xl font-bold text-teal-600 mb-4">{{ statsData.reportTotal }}</span>
+              <span class="text-gray-500 text-base mb-1">物模型消息</span>
+              <span class="text-3xl font-bold text-gray-700">{{ statsData.reportTotal }}</span>
               <el-divider class="my-2" />
-              <div class="flex items-center text-gray-500">
+              <div class="flex items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="ml-2 text-green-500 text-lg">↑ 0</span>
+                <span class="ml-1 text-green-500">↑ 0</span>
               </div>
             </div>
           </el-card>
@@ -58,41 +58,41 @@
       </el-row>
 
       <!-- 图表行 -->
-      <el-row :gutter="20" class="mb-6">
+      <el-row :gutter="16" class="mb-4">
         <el-col :span="12">
-          <el-card class="h-full hover:shadow-lg transition-shadow duration-300" shadow="hover">
+          <el-card class="chart-card" shadow="never">
             <template #header>
               <div class="flex items-center">
-                <h3 class="text-lg font-semibold text-gray-700">设备数量统计</h3>
+                <span class="text-base font-medium text-gray-600">设备数量统计</span>
               </div>
             </template>
-            <div ref="chartDeviceNumStat" class="h-[300px]" ></div>
+            <div ref="chartDeviceNumStat" class="h-[240px]"></div>
           </el-card>
         </el-col>
         <el-col :span="12">
-          <el-card class="h-full hover:shadow-lg transition-shadow duration-300" shadow="hover">
+          <el-card class="chart-card" shadow="never">
             <template #header>
               <div class="flex items-center">
-                <h3 class="text-lg font-semibold text-gray-700">设备状态统计</h3>
+                <span class="text-base font-medium text-gray-600">设备状态统计</span>
               </div>
             </template>
-            <el-row class="h-[300px]">
+            <el-row class="h-[240px]">
               <el-col :span="8" class="flex flex-col items-center">
-                <div ref="chartDeviceOnline" class="h-[200px] w-full" ></div>
-                <div class="text-center mt-4">
-                  <span class="text-sm font-medium text-green-600">在线设备</span>
+                <div ref="chartDeviceOnline" class="h-[160px] w-full"></div>
+                <div class="text-center mt-2">
+                  <span class="text-sm text-gray-600">在线设备</span>
                 </div>
               </el-col>
               <el-col :span="8" class="flex flex-col items-center">
-                <div ref="chartDeviceOffline" class="h-[200px] w-full" ></div>
-                <div class="text-center mt-4">
-                  <span class="text-sm font-medium text-red-600">离线设备</span>
+                <div ref="chartDeviceOffline" class="h-[160px] w-full"></div>
+                <div class="text-center mt-2">
+                  <span class="text-sm text-gray-600">离线设备</span>
                 </div>
               </el-col>
               <el-col :span="8" class="flex flex-col items-center">
-                <div ref="chartDeviceActive" class="h-[200px] w-full" ></div>
-                <div class="text-center mt-4">
-                  <span class="text-sm font-medium text-blue-600">待激活设备</span>
+                <div ref="chartDeviceActive" class="h-[160px] w-full"></div>
+                <div class="text-center mt-2">
+                  <span class="text-sm text-gray-600">待激活设备</span>
                 </div>
               </el-col>
             </el-row>
@@ -103,13 +103,13 @@
       <!-- 消息统计行 -->
       <el-row>
         <el-col :span="24">
-          <el-card class="hover:shadow-lg transition-shadow duration-300" shadow="hover">
+          <el-card class="chart-card" shadow="never">
             <template #header>
               <div class="flex items-center">
-                <h3 class="text-lg font-semibold text-gray-700">消息量统计</h3>
+                <span class="text-base font-medium text-gray-600">消息量统计</span>
               </div>
             </template>
-            <div ref="chartMsgStat" class="h-[400px]" ></div>
+            <div ref="chartMsgStat" class="h-[300px]"></div>
           </el-card>
         </el-col>
       </el-row>
@@ -385,18 +385,41 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .stat-card {
-  @apply bg-white rounded-lg overflow-hidden;
+  @apply bg-white rounded overflow-hidden;
   
-  &:hover {
-    @apply transform transition-transform duration-300 -translate-y-1;
+  :deep(.el-card__body) {
+    @apply p-3;
+  }
+
+  .el-divider {
+    @apply my-2;
   }
 }
 
-:deep(.el-card__body) {
-  @apply p-6;
+.chart-card {
+  @apply bg-white rounded overflow-hidden;
+  
+  :deep(.el-card__header) {
+    @apply py-2 px-3 border-b border-gray-100 bg-white;
+  }
+
+  :deep(.el-card__body) {
+    @apply p-3;
+  }
 }
 
-:deep(.el-card__header) {
-  @apply p-4 border-b border-gray-200 bg-gray-50;
+// 修改图表配色方案，使其更加柔和
+:deep(.echarts) {
+  .tooltip {
+    @apply bg-white/90 border border-gray-200 shadow-sm;
+  }
+  
+  .axis-line {
+    @apply text-gray-300;
+  }
+  
+  .split-line {
+    @apply text-gray-100;
+  }
 }
 </style>
