@@ -120,7 +120,7 @@
               <div class="flex items-center justify-between">
                 <span class="text-base font-medium text-gray-600">上下行消息量统计</span>
                 <div class="flex items-center space-x-2">
-                  <el-radio-group v-model="timeRange" size="small" @change="handleTimeRangeChange">
+                  <el-radio-group v-model="timeRange"  @change="handleTimeRangeChange">
                     <el-radio-button label="1h">最近1小时</el-radio-button>
                     <el-radio-button label="24h">最近24小时</el-radio-button>
                     <el-radio-button label="7d">近一周</el-radio-button>
@@ -128,7 +128,7 @@
                   <el-date-picker
                     v-model="dateRange"
                     type="datetimerange"
-                    size="small"
+                    
                     range-separator="至"
                     start-placeholder="开始时间"
                     end-placeholder="结束时间"
@@ -159,12 +159,12 @@ import { Icon } from '@/components/Icon'
 /** IoT 首页 */
 defineOptions({ name: 'IotHome' })
 
-const timeRange = ref('24h') // 默认选择最近24小时
+const timeRange = ref('7d') // 修改默认选择为近一周
 const dateRange = ref<[Date, Date] | null>(null)
 
 const queryParams = reactive({
-  startTime: undefined as number | undefined,
-  endTime: undefined as number | undefined
+  startTime: Date.now() - 7 * 24 * 60 * 60 * 1000, // 设置默认开始时间为7天前
+  endTime: Date.now() // 设置默认结束时间为当前时间
 })
 
 echarts.use([
