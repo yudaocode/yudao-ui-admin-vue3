@@ -48,7 +48,7 @@ import { getDefaultConditionNodeName } from '../utils'
 import { useFormFieldsAndStartUser, getConditionShowText } from '../node'
 import Condition from './components/Condition.vue'
 import { cloneDeep } from 'lodash-es'
-const message = useMessage() // 消息弹窗
+
 defineOptions({
   name: 'ConditionNodeConfig'
 })
@@ -69,14 +69,18 @@ const condition = ref<any>({
   conditionExpression: '',
   conditionGroups: {
     and: true,
-    conditions: [{
-      and: true,
-      rules: [{
-        opCode: '==',
-        leftSide: '',
-        rightSide: ''
-      }]
-    }]
+    conditions: [
+      {
+        and: true,
+        rules: [
+          {
+            opCode: '==',
+            leftSide: '',
+            rightSide: ''
+          }
+        ]
+      }
+    ]
   }
 })
 const open = () => {
@@ -90,14 +94,18 @@ const open = () => {
       conditionExpression: '',
       conditionGroups: {
         and: true,
-        conditions: [{
-          and: true,
-          rules: [{
-            opCode: '==',
-            leftSide: '',
-            rightSide: ''
-          }]
-        }]
+        conditions: [
+          {
+            and: true,
+            rules: [
+              {
+                opCode: '==',
+                leftSide: '',
+                rightSide: ''
+              }
+            ]
+          }
+        ]
       }
     }
   }
@@ -162,8 +170,14 @@ const saveConfig = async () => {
     currentNode.value.conditionSetting = cloneDeep({
       ...currentNode.value.conditionSetting,
       conditionType: condition.value?.conditionType,
-      conditionExpression: condition.value?.conditionType === ConditionType.EXPRESSION ? condition.value?.conditionExpression : undefined,
-      conditionGroups: condition.value?.conditionType === ConditionType.RULE ? condition.value?.conditionGroups : undefined
+      conditionExpression:
+        condition.value?.conditionType === ConditionType.EXPRESSION
+          ? condition.value?.conditionExpression
+          : undefined,
+      conditionGroups:
+        condition.value?.conditionType === ConditionType.RULE
+          ? condition.value?.conditionGroups
+          : undefined
     })
   }
   settingVisible.value = false
