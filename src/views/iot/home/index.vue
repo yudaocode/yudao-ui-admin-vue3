@@ -8,7 +8,7 @@
             <div class="flex flex-col">
               <div class="flex justify-between items-center mb-1">
                 <span class="text-gray-500 text-base font-medium">品类数量</span>
-                <Icon icon="ep:menu" class="text-2xl text-blue-400" />
+                <Icon icon="ep:menu" class="text-[32px] text-blue-400" />
               </div>
               <span class="text-3xl font-bold text-gray-700">{{ statsData.categoryTotal }}</span>
               <el-divider class="my-2" />
@@ -24,7 +24,7 @@
             <div class="flex flex-col">
               <div class="flex justify-between items-center mb-1">
                 <span class="text-gray-500 text-base font-medium">产品数量</span>
-                <Icon icon="ep:box" class="text-2xl text-orange-400" />
+                <Icon icon="ep:box" class="text-[32px] text-orange-400" />
               </div>
               <span class="text-3xl font-bold text-gray-700">{{ statsData.productTotal }}</span>
               <el-divider class="my-2" />
@@ -40,7 +40,7 @@
             <div class="flex flex-col">
               <div class="flex justify-between items-center mb-1">
                 <span class="text-gray-500 text-base font-medium">设备数量</span>
-                <Icon icon="ep:cpu" class="text-2xl text-purple-400" />
+                <Icon icon="ep:cpu" class="text-[32px] text-purple-400" />
               </div>
               <span class="text-3xl font-bold text-gray-700">{{ statsData.deviceTotal }}</span>
               <el-divider class="my-2" />
@@ -56,7 +56,7 @@
             <div class="flex flex-col">
               <div class="flex justify-between items-center mb-1">
                 <span class="text-gray-500 text-base font-medium">物模型消息</span>
-                <Icon icon="ep:message" class="text-2xl text-teal-400" />
+                <Icon icon="ep:message" class="text-[32px] text-teal-400" />
               </div>
               <span class="text-3xl font-bold text-gray-700">{{ statsData.reportTotal }}</span>
               <el-divider class="my-2" />
@@ -236,12 +236,19 @@ const initCharts = () => {
 
 /** 初始化仪表盘图表 */
 const initGaugeChart = (el: any, value: number, color: string) => {
+  // 计算百分比，保留1位小数
+  const percentage = statsData.value.deviceTotal > 0 
+    ? Number(((value / statsData.value.deviceTotal) * 100).toFixed(1))
+    : 0
+
   echarts.init(el).setOption({
     series: [
       {
         type: 'gauge',
         startAngle: 360,
         endAngle: 0,
+        min: 0,
+        max: 100, // 将最大值设为100
         progress: {
           show: true,
           width: 12,
@@ -263,16 +270,29 @@ const initGaugeChart = (el: any, value: number, color: string) => {
         title: { show: false },
         detail: {
           valueAnimation: true,
-          fontSize: 24,
+          fontSize: 20,
           fontWeight: 'bold',
           fontFamily: 'Inter, sans-serif',
           color: color,
           offsetCenter: [0, '0'],
           formatter: (value: number) => {
-            return value + '个'
+            return `${value}%\n(${statsData.value.deviceTotal > 0 ? Math.round((value / 100) * statsData.value.deviceTotal) : 0}个)`
+          },
+          rich: {
+            value: {
+              fontSize: 20,
+              fontWeight: 'bold',
+              color: color,
+              padding: [0, 0, 10, 0]
+            },
+            unit: {
+              fontSize: 14,
+              color: '#6B7280',
+              padding: [0, 0, 0, 0]
+            }
           }
         },
-        data: [{ value: value }]
+        data: [{ value: percentage }]
       }
     ]
   })
