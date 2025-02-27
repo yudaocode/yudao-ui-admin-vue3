@@ -39,7 +39,7 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import Vue3Jsoneditor from 'v3-jsoneditor/src/Vue3Jsoneditor.vue'
+// import Vue3Jsoneditor from 'v3-jsoneditor/src/Vue3Jsoneditor.vue'
 
 const deviceConfig = ref({
   name: 'dyla1n'
