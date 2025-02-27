@@ -36,11 +36,9 @@
           </el-select>
         </el-form-item>
         <!-- HTTP 请求触发器 -->
-        <!-- TODO @jason：可以考虑用 [].include 更简洁 -->
         <div
           v-if="
-            (configForm.type === TriggerTypeEnum.HTTP_REQUEST ||
-              configForm.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST) &&
+            [TriggerTypeEnum.HTTP_REQUEST, TriggerTypeEnum.HTTP_CALLBACK].includes(configForm.type) &&
             configForm.httpRequestSetting
           "
         >
@@ -407,9 +405,9 @@ const changeTriggerType = () => {
     return
   }
 
-  if (configForm.value.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST) {
+  if (configForm.value.type === TriggerTypeEnum.HTTP_CALLBACK) {
     configForm.value.httpRequestSetting =
-      originalSetting?.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST &&
+      originalSetting?.type === TriggerTypeEnum.HTTP_CALLBACK &&
       originalSetting.httpRequestSetting
         ? originalSetting.httpRequestSetting
         : {
@@ -566,7 +564,7 @@ const getShowText = (): string => {
   let showText = ''
   if (
     configForm.value.type === TriggerTypeEnum.HTTP_REQUEST ||
-    configForm.value.type === TriggerTypeEnum.ASYNC_HTTP_REQUEST
+    configForm.value.type === TriggerTypeEnum.HTTP_CALLBACK
   ) {
     showText = `${configForm.value.httpRequestSetting?.url}`
   } else if (configForm.value.type === TriggerTypeEnum.FORM_UPDATE) {

@@ -756,20 +756,19 @@ export enum TriggerTypeEnum {
    * 发送 HTTP 请求触发器
    */
   HTTP_REQUEST = 1,
-  // TODO @jason：要不把 FORM_UPDATE、FORM_DELETE 调整从 10、11 这样？
+  /**
+   * 发起 HTTP 回调请求触发器
+   */
+  HTTP_CALLBACK = 2,
   /**
    * 表单数据更新触发器
    */
-  FORM_UPDATE = 2,
+  FORM_UPDATE = 10,
   /**
    * 表单数据删除触发器
    */
-  FORM_DELETE = 3,
-  // TODO @jason：1）HTTP_CALLBACK 这个枚举值？然后，相关注释，朝着“HTTP 回调”走；2）枚举值改成 2？
-  /**
-   * 发起异步 HTTP 请求
-   */
-  ASYNC_HTTP_REQUEST = 4
+  FORM_DELETE = 11
+ 
 }
 
 /**
@@ -804,7 +803,7 @@ export type FormTriggerSetting = {
 
 export const TRIGGER_TYPES: DictDataVO[] = [
   { label: 'HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST },
-  { label: '异步 HTTP 请求', value: TriggerTypeEnum.ASYNC_HTTP_REQUEST },
+  { label: 'HTTP 回调', value: TriggerTypeEnum.HTTP_CALLBACK },
   { label: '修改表单数据', value: TriggerTypeEnum.FORM_UPDATE },
   { label: '删除表单数据', value: TriggerTypeEnum.FORM_DELETE }
 ]
