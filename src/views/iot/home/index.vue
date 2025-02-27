@@ -6,12 +6,15 @@
         <el-col :span="6">
           <el-card class="stat-card" shadow="never">
             <div class="flex flex-col">
-              <span class="text-gray-500 text-base mb-1">品类数量</span>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-gray-500 text-base font-medium">品类数量</span>
+                <Icon icon="ep:menu" class="text-2xl text-blue-400" />
+              </div>
               <span class="text-3xl font-bold text-gray-700">{{ statsData.categoryTotal }}</span>
               <el-divider class="my-2" />
-              <div class="flex items-center text-gray-400 text-sm">
+              <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="ml-1 text-green-500">↑ 0</span>
+                <span class="text-green-500">↑ 0</span>
               </div>
             </div>
           </el-card>
@@ -19,12 +22,15 @@
         <el-col :span="6">
           <el-card class="stat-card" shadow="never">
             <div class="flex flex-col">
-              <span class="text-gray-500 text-base mb-1">产品数量</span>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-gray-500 text-base font-medium">产品数量</span>
+                <Icon icon="ep:box" class="text-2xl text-orange-400" />
+              </div>
               <span class="text-3xl font-bold text-gray-700">{{ statsData.productTotal }}</span>
               <el-divider class="my-2" />
-              <div class="flex items-center text-gray-400 text-sm">
+              <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="ml-1 text-green-500">↑ 0</span>
+                <span class="text-green-500">↑ 0</span>
               </div>
             </div>
           </el-card>
@@ -32,12 +38,15 @@
         <el-col :span="6">
           <el-card class="stat-card" shadow="never">
             <div class="flex flex-col">
-              <span class="text-gray-500 text-base mb-1">设备数量</span>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-gray-500 text-base font-medium">设备数量</span>
+                <Icon icon="ep:cpu" class="text-2xl text-purple-400" />
+              </div>
               <span class="text-3xl font-bold text-gray-700">{{ statsData.deviceTotal }}</span>
               <el-divider class="my-2" />
-              <div class="flex items-center text-gray-400 text-sm">
+              <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="ml-1 text-green-500">↑ 0</span>
+                <span class="text-green-500">↑ 0</span>
               </div>
             </div>
           </el-card>
@@ -45,12 +54,15 @@
         <el-col :span="6">
           <el-card class="stat-card" shadow="never">
             <div class="flex flex-col">
-              <span class="text-gray-500 text-base mb-1">物模型消息</span>
+              <div class="flex justify-between items-center mb-1">
+                <span class="text-gray-500 text-base font-medium">物模型消息</span>
+                <Icon icon="ep:message" class="text-2xl text-teal-400" />
+              </div>
               <span class="text-3xl font-bold text-gray-700">{{ statsData.reportTotal }}</span>
               <el-divider class="my-2" />
-              <div class="flex items-center text-gray-400 text-sm">
+              <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="ml-1 text-green-500">↑ 0</span>
+                <span class="text-green-500">↑ 0</span>
               </div>
             </div>
           </el-card>
@@ -125,6 +137,7 @@ import { LabelLayout, UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
 import { ProductCategoryApi } from '@/api/iot/statistics'
 import { formatDate } from '@/utils/formatTime'
+import { Icon } from '@/components/Icon'
 
 /** IoT 首页 */
 defineOptions({ name: 'IotHome' })
@@ -165,8 +178,6 @@ const statsData = ref({
 const getStats = async () => {
   const res = await ProductCategoryApi.getIotMainStats()
   statsData.value = res
-  console.log(res)
-  console.log(statsData.value)
   initCharts()
 }
 
