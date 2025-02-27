@@ -236,11 +236,6 @@ const initCharts = () => {
 
 /** 初始化仪表盘图表 */
 const initGaugeChart = (el: any, value: number, color: string) => {
-  // 计算百分比，保留1位小数
-  const percentage = statsData.value.deviceTotal > 0 
-    ? Number(((value / statsData.value.deviceTotal) * 100).toFixed(1))
-    : 0
-
   echarts.init(el).setOption({
     series: [
       {
@@ -248,7 +243,7 @@ const initGaugeChart = (el: any, value: number, color: string) => {
         startAngle: 360,
         endAngle: 0,
         min: 0,
-        max: 100, // 将最大值设为100
+        max: statsData.value.deviceTotal || 100, // 使用设备总数作为最大值
         progress: {
           show: true,
           width: 12,
@@ -270,29 +265,16 @@ const initGaugeChart = (el: any, value: number, color: string) => {
         title: { show: false },
         detail: {
           valueAnimation: true,
-          fontSize: 20,
+          fontSize: 24,
           fontWeight: 'bold',
           fontFamily: 'Inter, sans-serif',
           color: color,
           offsetCenter: [0, '0'],
           formatter: (value: number) => {
-            return `${value}%\n(${statsData.value.deviceTotal > 0 ? Math.round((value / 100) * statsData.value.deviceTotal) : 0}个)`
-          },
-          rich: {
-            value: {
-              fontSize: 20,
-              fontWeight: 'bold',
-              color: color,
-              padding: [0, 0, 10, 0]
-            },
-            unit: {
-              fontSize: 14,
-              color: '#6B7280',
-              padding: [0, 0, 0, 0]
-            }
+            return `${value}个`
           }
         },
-        data: [{ value: percentage }]
+        data: [{ value: value }]
       }
     ]
   })
