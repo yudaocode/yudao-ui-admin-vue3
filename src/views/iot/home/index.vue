@@ -14,7 +14,7 @@
               <el-divider class="my-2" />
               <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="text-green-500">↑ 0</span>
+                <span class="text-green-500">↑ {{ statsData.categoryTodayTotal }}</span>
               </div>
             </div>
           </el-card>
@@ -30,7 +30,7 @@
               <el-divider class="my-2" />
               <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="text-green-500">↑ 0</span>
+                <span class="text-green-500">↑ {{ statsData.productTodayTotal }}</span>
               </div>
             </div>
           </el-card>
@@ -46,7 +46,7 @@
               <el-divider class="my-2" />
               <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="text-green-500">↑ 0</span>
+                <span class="text-green-500">↑ {{ statsData.deviceTodayTotal }}</span>
               </div>
             </div>
           </el-card>
@@ -62,7 +62,7 @@
               <el-divider class="my-2" />
               <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="text-green-500">↑ 0</span>
+                <span class="text-green-500">↑ {{ statsData.reportTodayTotal }}</span>
               </div>
             </div>
           </el-card>
@@ -192,6 +192,10 @@ const statsData = ref({
   productTotal: 0,
   deviceTotal: 0,
   reportTotal: 0,
+  categoryTodayTotal: 0,
+  productTodayTotal: 0,
+  deviceTodayTotal: 0,
+  reportTodayTotal: 0,
   onlineTotal: 0,
   offlineTotal: 0,
   neverOnlineTotal: 0,
