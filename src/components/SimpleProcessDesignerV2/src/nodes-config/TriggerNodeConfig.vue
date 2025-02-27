@@ -38,8 +38,9 @@
         <!-- HTTP 请求触发器 -->
         <div
           v-if="
-            [TriggerTypeEnum.HTTP_REQUEST, TriggerTypeEnum.HTTP_CALLBACK].includes(configForm.type) &&
-            configForm.httpRequestSetting
+            [TriggerTypeEnum.HTTP_REQUEST, TriggerTypeEnum.HTTP_CALLBACK].includes(
+              configForm.type
+            ) && configForm.httpRequestSetting
           "
         >
           <el-form-item>
@@ -407,8 +408,7 @@ const changeTriggerType = () => {
 
   if (configForm.value.type === TriggerTypeEnum.HTTP_CALLBACK) {
     configForm.value.httpRequestSetting =
-      originalSetting?.type === TriggerTypeEnum.HTTP_CALLBACK &&
-      originalSetting.httpRequestSetting
+      originalSetting?.type === TriggerTypeEnum.HTTP_CALLBACK && originalSetting.httpRequestSetting
         ? originalSetting.httpRequestSetting
         : {
             url: '',

@@ -757,7 +757,7 @@ export enum TriggerTypeEnum {
    */
   HTTP_REQUEST = 1,
   /**
-   * 发起 HTTP 回调请求触发器
+   * 接收 HTTP 回调请求触发器
    */
   HTTP_CALLBACK = 2,
   /**
@@ -768,7 +768,6 @@ export enum TriggerTypeEnum {
    * 表单数据删除触发器
    */
   FORM_DELETE = 11
- 
 }
 
 /**
@@ -802,8 +801,8 @@ export type FormTriggerSetting = {
 }
 
 export const TRIGGER_TYPES: DictDataVO[] = [
-  { label: 'HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST },
-  { label: 'HTTP 回调', value: TriggerTypeEnum.HTTP_CALLBACK },
+  { label: '发送 HTTP 请求', value: TriggerTypeEnum.HTTP_REQUEST },
+  { label: '接收 HTTP 回调', value: TriggerTypeEnum.HTTP_CALLBACK },
   { label: '修改表单数据', value: TriggerTypeEnum.FORM_UPDATE },
   { label: '删除表单数据', value: TriggerTypeEnum.FORM_DELETE }
 ]
