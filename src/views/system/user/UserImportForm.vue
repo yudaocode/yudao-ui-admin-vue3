@@ -93,16 +93,16 @@ const submitFormSuccess = (response: any) => {
   // 拼接提示语
   const data = response.data
   let text = '上传成功数量：' + data.createUsernames.length + ';'
-  for (let username of data.createUsernames) {
-    text += '< ' + username + ' >'
+  for (let mobile of data.createUsernames) {
+    text += '< ' + mobile + ' >'
   }
   text += '更新成功数量：' + data.updateUsernames.length + ';'
-  for (const username of data.updateUsernames) {
-    text += '< ' + username + ' >'
+  for (const mobile of data.updateUsernames) {
+    text += '< ' + mobile + ' >'
   }
   text += '更新失败数量：' + Object.keys(data.failureUsernames).length + ';'
-  for (const username in data.failureUsernames) {
-    text += '< ' + username + ': ' + data.failureUsernames[username] + ' >'
+  for (const mobile in data.failureUsernames) {
+    text += '< ' + mobile + ': ' + data.failureUsernames[username] + ' >'
   }
   message.alert(text)
   formLoading.value = false

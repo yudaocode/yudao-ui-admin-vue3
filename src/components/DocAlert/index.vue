@@ -1,7 +1,7 @@
 <template>
   <el-alert v-if="getEnable()" type="success" show-icon>
     <template #title>
-      <div @click="goToUrl">{{ '【' + title + '】文档地址：' + url }}</div>
+      <div> {{ title }}</div>
     </template>
   </el-alert>
 </template>

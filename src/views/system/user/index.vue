@@ -1,7 +1,5 @@
 <template>
-  <doc-alert title="用户体系" url="https://doc.iocoder.cn/user-center/" />
-  <doc-alert title="三方登陆" url="https://doc.iocoder.cn/social-user/" />
-  <doc-alert title="Excel 导入导出" url="https://doc.iocoder.cn/excel-import-and-export/" />
+  <doc-alert title="用户管理"/>
 
   <el-row :gutter="20">
     <!-- 左侧部门树 -->
@@ -20,15 +18,6 @@
           :inline="true"
           label-width="68px"
         >
-          <el-form-item label="用户名称" prop="username">
-            <el-input
-              v-model="queryParams.username"
-              placeholder="请输入用户名称"
-              clearable
-              @keyup.enter="handleQuery"
-              class="!w-240px"
-            />
-          </el-form-item>
           <el-form-item label="手机号码" prop="mobile">
             <el-input
               v-model="queryParams.mobile"
@@ -98,17 +87,12 @@
         <el-table v-loading="loading" :data="list">
           <el-table-column label="用户编号" align="center" key="id" prop="id" />
           <el-table-column
-            label="用户名称"
-            align="center"
-            prop="username"
-            :show-overflow-tooltip="true"
-          />
-          <el-table-column
             label="用户昵称"
             align="center"
             prop="nickname"
             :show-overflow-tooltip="true"
           />
+          <el-table-column label="手机号码" align="center" prop="mobile" width="120" />
           <el-table-column
             label="部门"
             align="center"
@@ -116,7 +100,6 @@
             prop="deptName"
             :show-overflow-tooltip="true"
           />
-          <el-table-column label="手机号码" align="center" prop="mobile" width="120" />
           <el-table-column label="状态" key="status">
             <template #default="scope">
               <el-switch
@@ -222,7 +205,6 @@ const list = ref([]) // 列表的数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  username: undefined,
   mobile: undefined,
   status: undefined,
   deptId: undefined,
@@ -277,7 +259,7 @@ const handleStatusChange = async (row: UserApi.UserVO) => {
   try {
     // 修改状态的二次确认
     const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '停用'
-    await message.confirm('确认要"' + text + '""' + row.username + '"用户吗?')
+    await message.confirm('确认要"' + text + '""' + row.nickname + '"用户吗?')
     // 发起修改状态
     await UserApi.updateUserStatus(row.id, row.status)
     // 刷新列表
@@ -340,7 +322,7 @@ const handleResetPwd = async (row: UserApi.UserVO) => {
   try {
     // 重置的二次确认
     const result = await message.prompt(
-      '请输入"' + row.username + '"的新密码',
+      '请输入"' + row.nickname + '"的新密码',
       t('common.reminder')
     )
     const password = result.value

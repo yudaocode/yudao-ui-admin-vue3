@@ -1,13 +1,13 @@
 <template>
   <Dialog v-model="dialogVisible" title="分配角色">
     <el-form ref="formRef" v-loading="formLoading" :model="formData" label-width="80px">
-      <el-form-item label="用户名称">
-        <el-input v-model="formData.username" :disabled="true" />
+      <el-form-item label="用户手机号码" label-width="100px">
+        <el-input v-model="formData.mobile" :disabled="true" />
       </el-form-item>
-      <el-form-item label="用户昵称">
+      <el-form-item label="用户昵称" label-width="100px">
         <el-input v-model="formData.nickname" :disabled="true" />
       </el-form-item>
-      <el-form-item label="角色">
+      <el-form-item label="角色" label-width="100px">
         <el-select v-model="formData.roleIds" multiple placeholder="请选择角色">
           <el-option v-for="item in roleList" :key="item.id" :label="item.name" :value="item.id" />
         </el-select>
@@ -34,7 +34,7 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formData = ref({
   id: -1,
   nickname: '',
-  username: '',
+  mobile: '',
   roleIds: []
 })
 const formRef = ref() // 表单 Ref
@@ -46,7 +46,7 @@ const open = async (row: UserApi.UserVO) => {
   resetForm()
   // 设置数据
   formData.value.id = row.id
-  formData.value.username = row.username
+  formData.value.mobile = row.mobile
   formData.value.nickname = row.nickname
   // 获得角色拥有的菜单集合
   formLoading.value = true
@@ -88,7 +88,7 @@ const resetForm = () => {
   formData.value = {
     id: -1,
     nickname: '',
-    username: '',
+    mobile: '',
     roleIds: []
   }
   formRef.value?.resetFields()
