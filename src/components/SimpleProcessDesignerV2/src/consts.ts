@@ -838,7 +838,7 @@ export type TimeoutSetting = {
 export type MultiInstanceSetting = {
   enable: boolean
   sequential?: boolean
-  completeRatio?: number
+  approveRatio?: number
   sourceType?: ChildProcessMultiInstanceSourceTypeEnum
   source?: string
 }
@@ -883,14 +883,14 @@ export enum ChildProcessMultiInstanceSourceTypeEnum {
   /**
    * 数字表单
    */
-  DIGITAL_FORM = 2,
+  NUMBER_FORM = 2,
   /**
-   * 多项表单
+   * 多选表单
    */
-  MULTI_FORM = 3
+  MULTIPLE_FORM = 3
 }
 export const CHILD_PROCESS_MULTI_INSTANCE_SOURCE_TYPE = [
   { label: '固定数量', value: ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY },
-  { label: '数字表单', value: ChildProcessMultiInstanceSourceTypeEnum.DIGITAL_FORM }, // TODO @lesan：DIGITAL 改成 NUMBER，和 Element plus 更接近？
-  { label: '多项表单', value: ChildProcessMultiInstanceSourceTypeEnum.MULTI_FORM } // TODO @lesan：多选表单？multiple 是这个解释。另外 MULTI => MULTIPLE
+  { label: '数字表单', value: ChildProcessMultiInstanceSourceTypeEnum.NUMBER_FORM },
+  { label: '多选表单', value: ChildProcessMultiInstanceSourceTypeEnum.MULTIPLE_FORM }
 ]
