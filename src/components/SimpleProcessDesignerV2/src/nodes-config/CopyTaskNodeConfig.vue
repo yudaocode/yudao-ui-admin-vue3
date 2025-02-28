@@ -375,7 +375,6 @@ const showCopyTaskNodeConfig = (node: SimpleFlowNode) => {
 }
 
 /** 批量更新权限 */
-// TODO @lesan：要不要 bpmn 也加下？
 const updatePermission = (type: string) => {
   fieldsPermissionConfig.value.forEach((field) => {
     field.permission =

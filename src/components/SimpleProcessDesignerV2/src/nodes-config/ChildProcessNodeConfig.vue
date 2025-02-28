@@ -270,11 +270,11 @@
                   inactive-text="并行"
                 />
               </el-form-item>
-              <el-form-item prop="completeRatio">
+              <el-form-item prop="approveRatio">
                 <el-text>完成比例(%)</el-text>
                 <el-input-number
                   class="ml-10px"
-                  v-model="configForm.completeRatio"
+                  v-model="configForm.approveRatio"
                   :min="10"
                   :max="100"
                   :step="10"
@@ -295,11 +295,10 @@
                   />
                 </el-select>
               </el-form-item>
-              <!-- TODO @lesan：枚举 -->
-              <el-form-item v-if="configForm.multiInstanceSourceType === 1">
+              <el-form-item v-if="configForm.multiInstanceSourceType === ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY">
                 <el-input-number v-model="configForm.multiInstanceSource" :min="1" />
               </el-form-item>
-              <el-form-item v-if="configForm.multiInstanceSourceType === 2">
+              <el-form-item v-if="configForm.multiInstanceSourceType === ChildProcessMultiInstanceSourceTypeEnum.NUMBER_FORM">
                 <el-select class="w-200px!" v-model="configForm.multiInstanceSource">
                   <el-option
                     v-for="(field, fIdx) in digitalFormFieldOptions"
@@ -309,7 +308,7 @@
                   />
                 </el-select>
               </el-form-item>
-              <el-form-item v-if="configForm.multiInstanceSourceType === 3">
+              <el-form-item v-if="configForm.multiInstanceSourceType === ChildProcessMultiInstanceSourceTypeEnum.MULTIPLE_FORM">
                 <el-select class="w-200px!" v-model="configForm.multiInstanceSource">
                   <el-option
                     v-for="(field, fIdx) in multiFormFieldOptions"
@@ -407,7 +406,7 @@ type ChildProcessFormType = {
   dateTime: string
   multiInstanceEnable: boolean
   sequential: boolean
-  completeRatio: number
+  approveRatio: number
   multiInstanceSourceType: ChildProcessMultiInstanceSourceTypeEnum
   multiInstanceSource: string
 }
@@ -427,7 +426,7 @@ const configForm = ref<ChildProcessFormType>({
   dateTime: '',
   multiInstanceEnable: false,
   sequential: false,
-  completeRatio: 100,
+  approveRatio: 100,
   multiInstanceSourceType: ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY,
   multiInstanceSource: ''
 })
@@ -490,8 +489,8 @@ const saveConfig = async () => {
     if (configForm.value.multiInstanceEnable) {
       currentNode.value.childProcessSetting.multiInstanceSetting.sequential =
         configForm.value.sequential
-      currentNode.value.childProcessSetting.multiInstanceSetting.completeRatio =
-        configForm.value.completeRatio
+      currentNode.value.childProcessSetting.multiInstanceSetting.approveRatio =
+        configForm.value.approveRatio
       currentNode.value.childProcessSetting.multiInstanceSetting.sourceType =
         configForm.value.multiInstanceSourceType
       currentNode.value.childProcessSetting.multiInstanceSetting.source =
@@ -520,7 +519,7 @@ const showChildProcessNodeConfig = (node: SimpleFlowNode) => {
     configForm.value.outVariables = node.childProcessSetting.outVariables
     // 6. 发起人设置
     configForm.value.startUserType = node.childProcessSetting.startUserSetting.type
-    configForm.value.startUserEmptyType = node.childProcessSetting.startUserSetting.emptyType ?? 1
+    configForm.value.startUserEmptyType = node.childProcessSetting.startUserSetting.emptyType ?? ChildProcessStartUserEmptyTypeEnum.MAIN_PROCESS_START_USER
     configForm.value.startUserFormField = node.childProcessSetting.startUserSetting.formField ?? ''
     // 7. 超时设置
     configForm.value.timeoutEnable = node.childProcessSetting.timeoutSetting.enable ?? false
@@ -546,8 +545,8 @@ const showChildProcessNodeConfig = (node: SimpleFlowNode) => {
     if (configForm.value.multiInstanceEnable) {
       configForm.value.sequential =
         node.childProcessSetting.multiInstanceSetting.sequential ?? false
-      configForm.value.completeRatio =
-        node.childProcessSetting.multiInstanceSetting.completeRatio ?? 100
+      configForm.value.approveRatio =
+        node.childProcessSetting.multiInstanceSetting.approveRatio ?? 100
       configForm.value.multiInstanceSourceType =
         node.childProcessSetting.multiInstanceSetting.sourceType ??
         ChildProcessMultiInstanceSourceTypeEnum.FIXED_QUANTITY
