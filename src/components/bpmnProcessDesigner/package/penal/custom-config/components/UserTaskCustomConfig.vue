@@ -140,6 +140,7 @@
               :value="FieldPermissionType.READ"
               size="large"
               :label="FieldPermissionType.READ"
+              @change="updateElementExtensions"
               ><span></span
             ></el-radio>
           </div>
@@ -148,6 +149,7 @@
               :value="FieldPermissionType.WRITE"
               size="large"
               :label="FieldPermissionType.WRITE"
+              @change="updateElementExtensions"
               ><span></span
             ></el-radio>
           </div>
@@ -156,6 +158,7 @@
               :value="FieldPermissionType.NONE"
               size="large"
               :label="FieldPermissionType.NONE"
+              @change="updateElementExtensions"
               ><span></span
             ></el-radio>
           </div>
@@ -165,12 +168,12 @@
 
     <el-divider content-position="left">是否需要签名</el-divider>
     <el-form-item prop="signEnable">
-      <el-switch v-model="signEnable.value" active-text="是" inactive-text="否" />
+      <el-switch v-model="signEnable.value" active-text="是" inactive-text="否" @change="updateElementExtensions"/>
     </el-form-item>
 
     <el-divider content-position="left">审批意见</el-divider>
     <el-form-item prop="reasonRequire">
-      <el-switch v-model="reasonRequire.value" active-text="必填" inactive-text="非必填" />
+      <el-switch v-model="reasonRequire.value" active-text="必填" inactive-text="非必填" @change="updateElementExtensions"/>
     </el-form-item>
   </div>
 </template>
