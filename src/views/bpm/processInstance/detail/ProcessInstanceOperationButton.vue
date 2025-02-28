@@ -1071,6 +1071,11 @@ const validateNormalForm = async () => {
 }
 
 /** 从可以编辑的流程表单字段，获取需要修改的流程实例的变量 */
+/**
+ * TODO @小北  TO  @芋道
+ * 问题：这里存在一种场景会出现问题，流程发起后，A节点审批完成，B节点没有可编辑的流程字段且B节点为自选审批人节点，会导致流程审批人为空，
+ * 原因：因为没有可编辑的流程字段时props.writableFields为空，参数variables传递时也为空
+ */
 const getUpdatedProcessInstanceVariables = () => {
   const variables = {}
   props.writableFields.forEach((field) => {
