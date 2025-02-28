@@ -1,66 +1,71 @@
 <template>
   <div class="document-segment">
+    <!-- 上部分段设置部分 -->
     <div class="mb-20px">
-      <el-alert
-        title="文档分段说明"
-        type="info"
-        description="系统会自动将文档内容分割成多个段落，您可以根据需要调整分段方式和内容。"
-        show-icon
-        :closable="false"
-      />
-    </div>
+      <div class="mb-20px flex justify-between items-center">
+        <div class="text-16px font-bold flex items-center">
+          分段设置
+          <el-tooltip
+            content="系统会自动将文档内容分割成多个段落，您可以根据需要调整分段方式和内容。"
+            placement="top"
+          >
+            <el-icon class="ml-5px text-gray-400"><Warning /></el-icon>
+          </el-tooltip>
+        </div>
+        <div>
+          <el-button type="primary" plain size="small" @click="handleAutoSegment">
+            预览分段
+          </el-button>
+        </div>
+      </div>
 
-    <div class="mb-20px flex justify-between items-center">
-      <div class="text-16px font-bold">分段设置</div>
-      <div>
-        <el-button type="primary" @click="handleAutoSegment">自动分段</el-button>
-        <el-button @click="handleAddSegment">添加段落</el-button>
+      <div class="segment-settings mb-20px">
+        <el-form :model="segmentSettings" label-width="120px">
+          <el-form-item label="最大 Token 数">
+            <el-input-number v-model="modelData.segmentMaxTokens" :min="100" :max="2000" />
+          </el-form-item>
+        </el-form>
       </div>
     </div>
 
-    <div class="segment-settings mb-20px">
-      <el-form :model="segmentSettings" label-width="120px">
-        <el-form-item label="分段方式">
-          <el-radio-group v-model="segmentSettings.type">
-            <el-radio :label="1">按段落分割</el-radio>
-            <el-radio :label="2">按字数分割</el-radio>
-            <el-radio :label="3">按标题分割</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="最大字数" v-if="segmentSettings.type === 2">
-          <el-input-number v-model="segmentSettings.maxChars" :min="100" :max="5000" />
-        </el-form-item>
-      </el-form>
-    </div>
+    <!-- 下部文件预览部分 -->
+    <div class="mb-10px">
+      <div class="text-16px font-bold mb-10px">分段预览</div>
 
-    <div class="segment-list">
-      <div class="text-16px font-bold mb-10px">段落列表 ({{ modelData.segments.length }})</div>
+      <!-- 文件选择器 -->
+      <div class="file-selector mb-10px">
+        <el-dropdown v-if="uploadedFiles.length > 0" trigger="click">
+          <div class="flex items-center cursor-pointer">
+            <el-icon class="text-danger mr-5px"><Document /></el-icon>
+            <span>{{ currentFile.name }}</span>
+            <el-icon class="ml-5px"><ArrowDown /></el-icon>
+          </div>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                v-for="(file, index) in uploadedFiles"
+                :key="index"
+                @click="selectFile(index)"
+              >
+                {{ file.name }}
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <div v-else class="text-gray-400">暂无上传文件</div>
+      </div>
 
-      <el-empty v-if="modelData.segments.length === 0" description="暂无段落数据" />
-
-      <div v-else>
-        <el-collapse v-model="activeSegments">
-          <el-collapse-item
-            v-for="(segment, index) in modelData.segments"
-            :key="index"
-            :title="`段落 ${index + 1}`"
-            :name="index"
-          >
-            <div class="segment-content">
-              <el-input
-                v-model="segment.content"
-                type="textarea"
-                :rows="5"
-                placeholder="段落内容"
-              />
-              <div class="mt-10px flex justify-end">
-                <el-button type="danger" size="small" @click="handleDeleteSegment(index)">
-                  删除段落
-                </el-button>
-              </div>
-            </div>
-          </el-collapse-item>
-        </el-collapse>
+      <!-- 文件内容预览 -->
+      <div class="file-preview bg-gray-50 p-15px rounded-md">
+        <template v-if="currentFile">
+          <div v-for="(chunk, index) in currentFile.chunks" :key="index" class="mb-10px">
+            <div class="text-gray-500 text-12px mb-5px"
+              >Chunk-{{ index + 1 }} · {{ chunk.characters }} characters</div
+            >
+            <div class="bg-white p-10px rounded-md">{{ chunk.content }}</div>
+          </div>
+        </template>
+        <el-empty v-else description="暂无预览内容" />
       </div>
     </div>
 
@@ -73,7 +78,8 @@
 </template>
 
 <script lang="ts" setup>
-import { PropType } from 'vue'
+import { PropType, ref, computed, inject, onMounted, getCurrentInstance } from 'vue'
+import { Document, ArrowDown, Warning } from '@element-plus/icons-vue' // TODO @芋艿：icon 的处理
 
 const props = defineProps({
   modelValue: {
@@ -94,52 +100,84 @@ const modelData = computed({
 })
 
 // 分段设置
-const segmentSettings = ref({
-  type: 1, // 1: 按段落, 2: 按字数, 3: 按标题
-  maxChars: 1000
-})
+const segmentSettings = ref({})
 
-// 当前展开的段落
-const activeSegments = ref([0])
+// 模拟上传的文件数据
+const uploadedFiles = ref([
+  {
+    name: '项目说明文档.pdf',
+    type: 'pdf',
+    chunks: [
+      {
+        characters: 120,
+        content:
+          '项目说明文档 - 智能知识库系统 本项目旨在构建一个智能知识库系统，能够对各类文档进行智能分析、分类和检索，提高企业知识管理效率。'
+      },
+      {
+        characters: 180,
+        content:
+          '系统架构：前端采用Vue3+Element Plus构建用户界面，后端采用Spring Boot微服务架构，数据存储使用MySQL和Elasticsearch，文档解析使用Apache Tika，向量检索使用Milvus。'
+      },
+      {
+        characters: 150,
+        content:
+          '核心功能：1. 文档上传与解析：支持多种格式文档上传，自动提取文本内容。2. 智能分段：根据语义自动将文档分割成合适的段落。3. 向量化存储：将文本转换为向量存储，支持语义检索。'
+      },
+      {
+        characters: 160,
+        content:
+          '4. 智能检索：支持关键词和语义检索，快速找到相关内容。5. 知识图谱：自动构建领域知识图谱，展示知识间关联。6. 权限管理：细粒度的文档访问权限控制。7. 操作日志：记录用户操作，支持审计追踪。'
+      },
+      {
+        characters: 130,
+        content:
+          '技术特点：1. 高性能：采用分布式架构，支持横向扩展。2. 高可用：关键组件冗余部署，确保系统稳定性。3. 安全性：数据传输加密，存储加密，多层次安全防护。'
+      }
+    ]
+  },
+  {
+    name: '项目说明文档.pdf',
+    type: 'pdf',
+    chunks: []
+  }
+])
+
+// 当前选中的文件
+const currentFile = ref(uploadedFiles.value[0] || null)
+
+// 选择文件
+const selectFile = (index) => {
+  currentFile.value = uploadedFiles.value[index]
+}
 
 // 自动分段
 const handleAutoSegment = () => {
   // 根据文档类型和分段设置进行自动分段
   // 这里只是模拟实现，实际需要根据文档内容进行分析
 
+  // 确保 segments 存在
+  if (!modelData.value.segments) {
+    modelData.value.segments = []
+  }
+
   // 清空现有段落
   modelData.value.segments = []
 
   // 模拟生成段落
   if (modelData.value.documentType === 'text' && modelData.value.content) {
-    // 文本类型，直接按段落或字数分割
+    // 文本类型，按Token数分割
     const content = modelData.value.content
+    const maxChars = Math.floor(modelData.value.segmentMaxTokens / 2) // 简单估算：1个token约等于2个字符
+    let remaining = content
 
-    if (segmentSettings.value.type === 1) {
-      // 按段落分割
-      const paragraphs = content.split(/\n\s*\n/)
-      paragraphs.forEach((paragraph) => {
-        if (paragraph.trim()) {
-          modelData.value.segments.push({
-            content: paragraph.trim(),
-            order: modelData.value.segments.length + 1
-          })
-        }
+    while (remaining.length > 0) {
+      const segment = remaining.substring(0, maxChars)
+      remaining = remaining.substring(maxChars)
+
+      modelData.value.segments.push({
+        content: segment,
+        order: modelData.value.segments.length + 1
       })
-    } else if (segmentSettings.value.type === 2) {
-      // 按字数分割
-      const maxChars = segmentSettings.value.maxChars
-      let remaining = content
-
-      while (remaining.length > 0) {
-        const segment = remaining.substring(0, maxChars)
-        remaining = remaining.substring(maxChars)
-
-        modelData.value.segments.push({
-          content: segment,
-          order: modelData.value.segments.length + 1
-        })
-      }
     }
   } else {
     // 其他类型文档，模拟生成5个段落
@@ -150,30 +188,6 @@ const handleAutoSegment = () => {
       })
     }
   }
-
-  // 默认展开第一个段落
-  activeSegments.value = [0]
-}
-
-// 添加段落
-const handleAddSegment = () => {
-  modelData.value.segments.push({
-    content: '',
-    order: modelData.value.segments.length + 1
-  })
-
-  // 展开新添加的段落
-  activeSegments.value = [modelData.value.segments.length - 1]
-}
-
-// 删除段落
-const handleDeleteSegment = (index) => {
-  modelData.value.segments.splice(index, 1)
-
-  // 更新段落顺序
-  modelData.value.segments.forEach((segment, idx) => {
-    segment.order = idx + 1
-  })
 }
 
 // 上一步按钮处理
@@ -197,16 +211,11 @@ const handleNextStep = () => {
 // 表单校验
 const validate = () => {
   return new Promise((resolve, reject) => {
-    if (modelData.value.segments.length === 0) {
-      reject(new Error('请至少添加一个段落'))
+    // 确保 segments 存在
+    if (!modelData.value.segments || modelData.value.segments.length === 0) {
+      reject(new Error('请先进行预览分段'))
     } else {
-      // 检查是否有空段落
-      const emptySegment = modelData.value.segments.find((segment) => !segment.content.trim())
-      if (emptySegment) {
-        reject(new Error('存在空段落，请填写内容或删除'))
-      } else {
-        resolve(true)
-      }
+      resolve(true)
     }
   })
 }
@@ -218,9 +227,14 @@ defineExpose({
 
 // 初始化
 onMounted(() => {
-  // 如果已有段落数据，默认展开第一个
-  if (modelData.value.segments && modelData.value.segments.length > 0) {
-    activeSegments.value = [0]
+  // 确保 segments 存在
+  if (!modelData.value.segments) {
+    modelData.value.segments = []
+  }
+
+  // 确保 segmentMaxTokens 存在
+  if (!modelData.value.segmentMaxTokens) {
+    modelData.value.segmentMaxTokens = 500
   }
 })
 </script>
@@ -229,6 +243,11 @@ onMounted(() => {
 .document-segment {
   .segment-content {
     padding: 10px;
+  }
+
+  .file-preview {
+    max-height: 600px;
+    overflow-y: auto;
   }
 }
 </style>

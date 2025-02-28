@@ -2,7 +2,9 @@
   <el-form ref="formRef" :model="modelData" label-width="0" class="mt-20px">
     <el-form-item class="mb-20px">
       <div class="w-full">
-        <div class="w-full border-2 border-[#dcdfe6] rounded-md text-center hover:border-[#409eff]">
+        <div
+          class="w-full border-2 border-dashed border-[#dcdfe6] rounded-md p-20px text-center hover:border-[#409eff]"
+        >
           <el-upload
             ref="uploadRef"
             class="upload-demo"
@@ -35,18 +37,18 @@
 
         <div
           v-if="modelData.list && modelData.list.length > 0"
-          class="mt-15px grid grid-cols-1 gap-3"
+          class="mt-15px grid grid-cols-1 gap-2"
         >
           <div
             v-for="(file, index) in modelData.list"
             :key="index"
-            class="flex justify-between items-center p-10px border-2 border-[#c0c4cc] rounded-md shadow-sm hover:border-[#409eff] transition-colors duration-300"
+            class="flex justify-between items-center py-4px px-12px border-l-4 border-l-[#409eff] rounded-sm shadow-sm hover:bg-[#ecf5ff] transition-all duration-300"
           >
             <div class="flex items-center">
-              <el-icon class="mr-8px text-[#909399]"><document /></el-icon>
-              <span class="text-[14px] text-[#606266] break-all">{{ file.name }}</span>
+              <el-icon class="mr-8px text-[#409eff]"><document /></el-icon>
+              <span class="text-[13px] text-[#303133] break-all">{{ file.name }}</span>
             </div>
-            <el-button type="danger" link @click="removeFile(index)">
+            <el-button type="danger" link @click="removeFile(index)" class="ml-2">
               <el-icon><delete /></el-icon>
             </el-button>
           </div>
@@ -67,7 +69,7 @@
 
 <script lang="ts" setup>
 import { PropType, ref, computed, inject, getCurrentInstance, onMounted } from 'vue'
-import { UploadFilled, Document, Delete } from '@element-plus/icons-vue'
+import { Document, Delete } from '@element-plus/icons-vue' // TODO @芋艿：晚点改
 import { useMessage } from '@/hooks/web/useMessage'
 import { useUpload } from '@/components/UploadFile/src/useUpload'
 import { generateAcceptedFileTypes } from '@/utils'
