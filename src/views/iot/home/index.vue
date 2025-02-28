@@ -373,17 +373,30 @@ const initGaugeChart = (el: any, value: number, color: string) => {
 
 /** 初始化消息统计图表 */
 const initMessageChart = () => {
+  // 获取所有时间戳并排序
   const timestamps = Array.from(
     new Set([
-      ...Object.keys(messageStats.value.upstreamCounts),
-      ...Object.keys(messageStats.value.downstreamCounts)
+      ...messageStats.value.upstreamCounts.map(item => Number(Object.keys(item)[0])),
+      ...messageStats.value.downstreamCounts.map(item => Number(Object.keys(item)[0]))
     ])
-  ).sort()
+  ).sort((a, b) => a - b) // 确保时间戳从小到大排序
 
-  const xdata = timestamps.map(ts => formatDate(Number(ts), 'YYYY-MM-DD HH:mm'))
-  const upData = timestamps.map(ts => messageStats.value.upstreamCounts[Number(ts)] || 0)
-  const downData = timestamps.map(ts => messageStats.value.downstreamCounts[Number(ts)] || 0)
+  // 准备数据
+  const xdata = timestamps.map(ts => formatDate(ts, 'YYYY-MM-DD HH:mm'))
+  const upData = timestamps.map(ts => {
+    const item = messageStats.value.upstreamCounts.find(
+      count => Number(Object.keys(count)[0]) === ts
+    )
+    return item ? Object.values(item)[0] : 0
+  })
+  const downData = timestamps.map(ts => {
+    const item = messageStats.value.downstreamCounts.find(
+      count => Number(Object.keys(count)[0]) === ts
+    )
+    return item ? Object.values(item)[0] : 0
+  })
 
+  // 配置图表
   echarts.init(chartMsgStat.value).setOption({
     tooltip: {
       trigger: 'axis',
@@ -439,7 +452,7 @@ const initMessageChart = () => {
       {
         name: '上行消息量',
         type: 'line',
-        stack: 'Total',
+        smooth: true, // 添加平滑曲线
         data: upData,
         itemStyle: {
           color: '#3B82F6'
@@ -457,7 +470,7 @@ const initMessageChart = () => {
       {
         name: '下行消息量',
         type: 'line',
-        stack: 'Total',
+        smooth: true, // 添加平滑曲线
         data: downData,
         itemStyle: {
           color: '#10B981'
