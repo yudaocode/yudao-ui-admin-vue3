@@ -10,11 +10,11 @@
                 <span class="text-gray-500 text-base font-medium">品类数量</span>
                 <Icon icon="ep:menu" class="text-[32px] text-blue-400" />
               </div>
-              <span class="text-3xl font-bold text-gray-700">{{ statsData.categoryTotal }}</span>
+              <span class="text-3xl font-bold text-gray-700">{{ statsData.productCategoryCount }}</span>
               <el-divider class="my-2" />
               <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="text-green-500">↑ {{ statsData.categoryTodayTotal }}</span>
+                <span class="text-green-500">↑ {{ statsData.productCategoryTodayCount }}</span>
               </div>
             </div>
           </el-card>
@@ -26,11 +26,11 @@
                 <span class="text-gray-500 text-base font-medium">产品数量</span>
                 <Icon icon="ep:box" class="text-[32px] text-orange-400" />
               </div>
-              <span class="text-3xl font-bold text-gray-700">{{ statsData.productTotal }}</span>
+              <span class="text-3xl font-bold text-gray-700">{{ statsData.productCount }}</span>
               <el-divider class="my-2" />
               <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="text-green-500">↑ {{ statsData.productTodayTotal }}</span>
+                <span class="text-green-500">↑ {{ statsData.productTodayCount }}</span>
               </div>
             </div>
           </el-card>
@@ -42,11 +42,11 @@
                 <span class="text-gray-500 text-base font-medium">设备数量</span>
                 <Icon icon="ep:cpu" class="text-[32px] text-purple-400" />
               </div>
-              <span class="text-3xl font-bold text-gray-700">{{ statsData.deviceTotal }}</span>
+              <span class="text-3xl font-bold text-gray-700">{{ statsData.deviceCount }}</span>
               <el-divider class="my-2" />
               <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="text-green-500">↑ {{ statsData.deviceTodayTotal }}</span>
+                <span class="text-green-500">↑ {{ statsData.deviceTodayCount }}</span>
               </div>
             </div>
           </el-card>
@@ -58,11 +58,11 @@
                 <span class="text-gray-500 text-base font-medium">物模型消息</span>
                 <Icon icon="ep:message" class="text-[32px] text-teal-400" />
               </div>
-              <span class="text-3xl font-bold text-gray-700">{{ statsData.reportTotal }}</span>
+              <span class="text-3xl font-bold text-gray-700">{{ statsData.deviceMessageCount }}</span>
               <el-divider class="my-2" />
               <div class="flex justify-between items-center text-gray-400 text-sm">
                 <span>今日新增</span>
-                <span class="text-green-500">↑ {{ statsData.reportTodayTotal }}</span>
+                <span class="text-green-500">↑ {{ statsData.deviceMessageTodayCount }}</span>
               </div>
             </div>
           </el-card>
@@ -152,7 +152,7 @@ import { TooltipComponent, LegendComponent, TitleComponent, ToolboxComponent, Gr
 import { PieChart, LineChart, GaugeChart } from 'echarts/charts'
 import { LabelLayout, UniversalTransition } from 'echarts/features'
 import { CanvasRenderer } from 'echarts/renderers'
-import { ProductCategoryApi } from '@/api/iot/statistics'
+import { ProductCategoryApi,IotStatisticsSummaryRespVO, IotStatisticsDeviceMessageSummaryRespVO} from '@/api/iot/statistics'
 import { formatDate } from '@/utils/formatTime'
 import { Icon } from '@/components/Icon'
 
@@ -187,20 +187,27 @@ const chartDeviceOffline = ref()
 const chartDeviceActive = ref()
 const chartMsgStat = ref()
 
-const statsData = ref({
-  categoryTotal: 0,
-  productTotal: 0,
-  deviceTotal: 0,
-  reportTotal: 0,
-  categoryTodayTotal: 0,
-  productTodayTotal: 0,
-  deviceTodayTotal: 0,
-  reportTodayTotal: 0,
-  onlineTotal: 0,
-  offlineTotal: 0,
-  neverOnlineTotal: 0,
-  deviceStatsOfCategory: [],
-  reportDataStats: []
+
+// 基础统计数据
+const statsData = ref<IotStatisticsSummaryRespVO>({
+  productCategoryCount: 0,
+  productCount: 0,
+  deviceCount: 0,
+  deviceMessageCount: 0,
+  productCategoryTodayCount: 0,
+  productTodayCount: 0,
+  deviceTodayCount: 0,
+  deviceMessageTodayCount: 0,
+  deviceOnlineCount: 0,
+  deviceOfflineCount: 0,
+  deviceInactiveCount: 0,
+  productCategoryDeviceCounts: {}
+})
+
+// 消息统计数据
+const messageStats = ref<IotStatisticsDeviceMessageSummaryRespVO>({
+  upstreamCounts: {},
+  downstreamCounts: {}
 })
 
 /** 处理快捷时间范围选择 */
@@ -250,8 +257,15 @@ const handleDateRangeChange = (value: [Date, Date] | null) => {
 
 /** 获取统计数据 */
 const getStats = async () => {
-  const res = await ProductCategoryApi.getIotMainStats(queryParams)
-  statsData.value = res
+  // 获取基础统计数据
+  const summaryRes = await ProductCategoryApi.getIotStatisticsSummary()
+  statsData.value = summaryRes
+  
+  // 获取消息统计数据
+  const messageRes = await ProductCategoryApi.getIotStatisticsDeviceMessageSummary(queryParams)
+  messageStats.value = messageRes
+  
+  // 初始化图表
   initCharts()
 }
 
@@ -290,19 +304,22 @@ const initCharts = () => {
         labelLine: {
           show: false
         },
-        data: statsData.value.deviceStatsOfCategory
+        data: Object.entries(statsData.value.productCategoryDeviceCounts).map(([name, value]) => ({
+          name,
+          value
+        }))
       }
     ]
   })
 
   // 在线设备统计
-  initGaugeChart(chartDeviceOnline.value, statsData.value.onlineTotal, '#0d9')
+  initGaugeChart(chartDeviceOnline.value, statsData.value.deviceOnlineCount, '#0d9')
 
   // 离线设备统计
-  initGaugeChart(chartDeviceOffline.value, statsData.value.offlineTotal, '#f50')
+  initGaugeChart(chartDeviceOffline.value, statsData.value.deviceOfflineCount, '#f50')
 
   // 待激活设备统计
-  initGaugeChart(chartDeviceActive.value, statsData.value.neverOnlineTotal, '#05b')
+  initGaugeChart(chartDeviceActive.value, statsData.value.deviceInactiveCount, '#05b')
 
   // 消息量统计
   initMessageChart()
@@ -317,7 +334,7 @@ const initGaugeChart = (el: any, value: number, color: string) => {
         startAngle: 360,
         endAngle: 0,
         min: 0,
-        max: statsData.value.deviceTotal || 100, // 使用设备总数作为最大值
+        max: statsData.value.deviceCount || 100, // 使用设备总数作为最大值
         progress: {
           show: true,
           width: 12,
@@ -356,18 +373,16 @@ const initGaugeChart = (el: any, value: number, color: string) => {
 
 /** 初始化消息统计图表 */
 const initMessageChart = () => {
-  const xdata: string[] = []
-  const upData: string[] = []
-  const downData: string[] = []
+  const timestamps = Array.from(
+    new Set([
+      ...Object.keys(messageStats.value.upstreamCounts),
+      ...Object.keys(messageStats.value.downstreamCounts)
+    ])
+  ).sort()
 
-  statsData.value.deviceUpMessageStats.forEach((msg) => {
-    xdata.push(formatDate(msg.time, 'YYYY-MM-DD HH:mm'))
-    upData.push(msg.data)
-  })
-
-  statsData.value.deviceDownMessageStats.forEach((msg) => {
-    downData.push(msg.data)
-  })
+  const xdata = timestamps.map(ts => formatDate(Number(ts), 'YYYY-MM-DD HH:mm'))
+  const upData = timestamps.map(ts => messageStats.value.upstreamCounts[Number(ts)] || 0)
+  const downData = timestamps.map(ts => messageStats.value.downstreamCounts[Number(ts)] || 0)
 
   echarts.init(chartMsgStat.value).setOption({
     tooltip: {
