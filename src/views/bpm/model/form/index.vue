@@ -380,7 +380,7 @@ const handleStepClick = async (index: number) => {
     if (index === 2) {
       await nextTick()
       // 等待更长时间确保组件完全初始化
-      await new Promise(resolve => setTimeout(resolve, 200))
+      await new Promise((resolve) => setTimeout(resolve, 200))
       if (processDesignRef.value?.refresh) {
         await processDesignRef.value.refresh()
       }

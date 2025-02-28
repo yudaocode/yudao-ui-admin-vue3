@@ -630,6 +630,18 @@ const remainingRouter: AppRouteRecordRaw[] = [
           icon: 'ep:document',
           noCache: false
         }
+      },
+      {
+        path: 'console/knowledge/document/create',
+        component: () => import('@/views/ai/knowledge/document/create/index.vue'),
+        name: 'AiKnowledgeDocumentCreate',
+        meta: {
+          title: '创建文档',
+          icon: 'ep:plus',
+          noCache: true,
+          hidden: true,
+          activeMenu: '/ai/console/knowledge/document'
+        }
       }
     ]
   },

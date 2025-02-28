@@ -35,12 +35,7 @@
       <el-form-item>
         <el-button @click="handleQuery"><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button>
         <el-button @click="resetQuery"><Icon icon="ep:refresh" class="mr-5px" /> 重置</el-button>
-        <el-button
-          type="primary"
-          plain
-          @click="openForm('create')"
-          v-hasPermi="['ai:knowledge:create']"
-        >
+        <el-button type="primary" plain @click="handleCreate" v-hasPermi="['ai:knowledge:create']">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
       </el-form-item>
@@ -106,7 +101,7 @@
 import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { KnowledgeDocumentApi, KnowledgeDocumentVO } from '@/api/ai/knowledge/document'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 // import KnowledgeDocumentForm from './KnowledgeDocumentForm.vue'
 
 /** AI 知识库文档 列表 */
@@ -115,6 +110,7 @@ defineOptions({ name: 'KnowledgeDocument' })
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 const route = useRoute() // 路由
+const router = useRouter() // 路由
 
 const loading = ref(true) // 列表的加载中
 const list = ref<KnowledgeDocumentVO[]>([]) // 列表的数据
@@ -156,6 +152,11 @@ const resetQuery = () => {
 const formRef = ref()
 const openForm = (type: string, id?: number) => {
   formRef.value.open(type, id)
+}
+
+/** 跳转到创建文档页面 */
+const handleCreate = () => {
+  router.push({ name: 'AiKnowledgeDocumentCreate' })
 }
 
 /** 删除按钮操作 */
