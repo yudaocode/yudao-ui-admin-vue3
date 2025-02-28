@@ -1069,17 +1069,13 @@ const validateNormalForm = async () => {
     return true
   }
 }
-// TODO @小北 这里存在问题，如果当前节点没有可编辑的字段，在提交审批时 variables = {}，会导致流程走向出错 @芋道
-/** 场景：
-  流程发起后，A节点字段可编辑，因为变量值变更，流程预测节点发生变化，A审批通过后,
-  B节点无可编辑字段且为审批人自选节点，在提交审批时variables = {} 
-  */ 
-/** 从可以编辑的流程表单字段，获取需要修改的流程实例的变量 */
+
 /**
  * TODO @小北  TO  @芋道
  * 问题：这里存在一种场景会出现问题，流程发起后，A节点审批完成，B节点没有可编辑的流程字段且B节点为自选审批人节点，会导致流程审批人为空，
  * 原因：因为没有可编辑的流程字段时props.writableFields为空，参数variables传递时也为空
  */
+/** 从可以编辑的流程表单字段，获取需要修改的流程实例的变量 */
 const getUpdatedProcessInstanceVariables = () => {
   const variables = {}
   props.writableFields.forEach((field) => {
