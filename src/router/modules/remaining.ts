@@ -620,6 +620,16 @@ const remainingRouter: AppRouteRecordRaw[] = [
           icon: 'ep:home-filled',
           noCache: false
         }
+      },
+      {
+        path: 'console/knowledge/document',
+        component: () => import('@/views/ai/knowledge/document/index.vue'),
+        name: 'AiKnowledgeDocument',
+        meta: {
+          title: '知识库文档',
+          icon: 'ep:document',
+          noCache: false
+        }
       }
     ]
   },
