@@ -90,12 +90,7 @@ const steps = [{ title: '上传文档' }, { title: '文档分段' }, { title: '�
 // 表单数据
 const formData = ref({
   id: undefined,
-  name: '',
-  knowledgeBaseId: undefined,
-  documentType: undefined,
-  content: '',
-  file: null,
-  segments: [],
+  list: [], // 用于存储上传的文件列表
   status: 0 // 0: 草稿, 1: 处理中, 2: 已完成
 })
 
