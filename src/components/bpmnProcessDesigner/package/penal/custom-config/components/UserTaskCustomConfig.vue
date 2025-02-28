@@ -127,9 +127,15 @@
       <div class="field-permit-title">
         <div class="setting-title-label first-title"> 字段名称 </div>
         <div class="other-titles">
-          <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')">只读</span>
-          <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')">可编辑</span>
-          <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')">隐藏</span>
+          <span class="setting-title-label cursor-pointer" @click="updatePermission('READ')"
+            >只读</span
+          >
+          <span class="setting-title-label cursor-pointer" @click="updatePermission('WRITE')"
+            >可编辑</span
+          >
+          <span class="setting-title-label cursor-pointer" @click="updatePermission('NONE')"
+            >隐藏</span
+          >
         </div>
       </div>
       <div class="field-setting-item" v-for="(item, index) in fieldsPermissionEl" :key="index">
@@ -487,6 +493,7 @@ function useButtonsSetting() {
 }
 
 /** 批量更新权限 */
+// TODO @lesan：这个页面，有一些 idea 红色报错，咱要不要 fix 下！
 const updatePermission = (type: string) => {
   fieldsPermissionEl.value.forEach((field) => {
     field.permission =
