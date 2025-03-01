@@ -89,18 +89,41 @@ const steps = [{ title: '上传文档' }, { title: '文档分段' }, { title: '�
 
 // 表单数据
 const formData = ref({
-  id: undefined,
-  list: [], // 用于存储上传的文件列表
+  knowlegeId: undefined, // 知识库编号
+  id: undefined, // 文档编号(documentId)
+  segmentMaxTokens: 500, // 分段最大 token 数
+  list: [] as Array<{
+    name: string
+    url: string
+    segments: Array<{
+      content?: string
+      contentLength?: number
+      tokens?: number
+    }>
+  }>, // 用于存储上传的文件列表
   status: 0 // 0: 草稿, 1: 处理中, 2: 已完成
 })
 
 /** 初始化数据 */
 const initData = async () => {
+  // TODO @芋艿：knowlegeId 解析
   const documentId = route.params.id as string
   if (documentId) {
     // 修改场景
     // 这里需要调用API获取文档数据
     // formData.value = await DocumentApi.getDocument(documentId)
+  }
+
+  // TODO @芋艿：为了开发方便，强制设置
+  if (false) {
+    formData.value.list = [
+      {
+        name: '项目说明文档.pdf',
+        url: 'https://static.iocoder.cn/README_yudao.md',
+        segments: []
+      }
+    ]
+    goToNextStep()
   }
 }
 

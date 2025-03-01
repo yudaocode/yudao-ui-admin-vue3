@@ -23,11 +23,11 @@
             :accept="acceptedFileTypes"
           >
             <div class="flex flex-col items-center justify-center py-20px">
-              <el-icon class="text-[48px] text-[#c0c4cc] mb-10px"><upload-filled /></el-icon>
-              <div class="el-upload__text text-[16px] text-[#606266]"
-                >拖拽文件至此，或者
-                <em class="text-[#409eff] not-italic cursor-pointer">选择文件</em></div
-              >
+              <Icon icon="ep:upload-filled" class="text-[48px] text-[#c0c4cc] mb-10px" />
+              <div class="el-upload__text text-[16px] text-[#606266]">
+                拖拽文件至此，或者
+                <em class="text-[#409eff] not-italic cursor-pointer">选择文件</em>
+              </div>
               <div class="el-upload__tip mt-10px text-[#909399] text-[12px]">
                 已支持 {{ supportedFileTypes.join('、') }}，每个文件不超过 {{ maxFileSize }} MB。
               </div>
@@ -45,11 +45,11 @@
             class="flex justify-between items-center py-4px px-12px border-l-4 border-l-[#409eff] rounded-sm shadow-sm hover:bg-[#ecf5ff] transition-all duration-300"
           >
             <div class="flex items-center">
-              <el-icon class="mr-8px text-[#409eff]"><document /></el-icon>
+              <Icon icon="ep:document" class="mr-8px text-[#409eff]" />
               <span class="text-[13px] text-[#303133] break-all">{{ file.name }}</span>
             </div>
             <el-button type="danger" link @click="removeFile(index)" class="ml-2">
-              <el-icon><delete /></el-icon>
+              <Icon icon="ep:delete" />
             </el-button>
           </div>
         </div>
@@ -69,10 +69,10 @@
 
 <script lang="ts" setup>
 import { PropType, ref, computed, inject, getCurrentInstance, onMounted } from 'vue'
-import { Document, Delete } from '@element-plus/icons-vue' // TODO @芋艿：晚点改
 import { useMessage } from '@/hooks/web/useMessage'
 import { useUpload } from '@/components/UploadFile/src/useUpload'
 import { generateAcceptedFileTypes } from '@/utils'
+import { Icon } from '@/components/Icon'
 
 const props = defineProps({
   modelValue: {
@@ -173,8 +173,8 @@ const beforeUpload = (file) => {
  * @param file 上传的文件
  */
 const handleUploadSuccess = (response, file) => {
+  // 添加到文件列表
   if (response && response.data) {
-    // 添加到文件列表
     ensureListExists()
     emit('update:modelValue', {
       ...props.modelValue,

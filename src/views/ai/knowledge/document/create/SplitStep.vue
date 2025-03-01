@@ -1,5 +1,5 @@
 <template>
-  <div class="document-segment">
+  <div>
     <!-- 上部分段设置部分 -->
     <div class="mb-20px">
       <div class="mb-20px flex justify-between items-center">
@@ -9,7 +9,7 @@
             content="系统会自动将文档内容分割成多个段落，您可以根据需要调整分段方式和内容。"
             placement="top"
           >
-            <el-icon class="ml-5px text-gray-400"><Warning /></el-icon>
+            <Icon icon="ep:warning" class="ml-5px text-gray-400" />
           </el-tooltip>
         </div>
         <div>
@@ -20,7 +20,7 @@
       </div>
 
       <div class="segment-settings mb-20px">
-        <el-form :model="segmentSettings" label-width="120px">
+        <el-form label-width="120px">
           <el-form-item label="最大 Token 数">
             <el-input-number v-model="modelData.segmentMaxTokens" :min="100" :max="2000" />
           </el-form-item>
@@ -34,16 +34,16 @@
 
       <!-- 文件选择器 -->
       <div class="file-selector mb-10px">
-        <el-dropdown v-if="uploadedFiles.length > 0" trigger="click">
+        <el-dropdown v-if="modelData.list && modelData.list.length > 0" trigger="click">
           <div class="flex items-center cursor-pointer">
-            <el-icon class="text-danger mr-5px"><Document /></el-icon>
-            <span>{{ currentFile.name }}</span>
-            <el-icon class="ml-5px"><ArrowDown /></el-icon>
+            <Icon icon="ep:document" class="text-danger mr-5px" />
+            <span>{{ currentFile?.name || '请选择文件' }}</span>
+            <Icon icon="ep:arrow-down" class="ml-5px" />
           </div>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item
-                v-for="(file, index) in uploadedFiles"
+                v-for="(file, index) in modelData.list"
                 :key="index"
                 @click="selectFile(index)"
               >
@@ -56,13 +56,20 @@
       </div>
 
       <!-- 文件内容预览 -->
-      <div class="file-preview bg-gray-50 p-15px rounded-md">
-        <template v-if="currentFile">
-          <div v-for="(chunk, index) in currentFile.chunks" :key="index" class="mb-10px">
-            <div class="text-gray-500 text-12px mb-5px"
-              >Chunk-{{ index + 1 }} · {{ chunk.characters }} characters</div
-            >
-            <div class="bg-white p-10px rounded-md">{{ chunk.content }}</div>
+      <div class="file-preview bg-gray-50 p-15px rounded-md max-h-600px overflow-y-auto">
+        <div v-if="splitLoading" class="flex justify-center items-center py-20px">
+          <Icon icon="ep:loading" class="is-loading" />
+          <span class="ml-10px">正在加载分段内容...</span>
+        </div>
+        <template
+          v-else-if="currentFile && currentFile.segments && currentFile.segments.length > 0"
+        >
+          <div v-for="(segment, index) in currentFile.segments" :key="index" class="mb-10px">
+            <div class="text-gray-500 text-12px mb-5px">
+              分片-{{ index + 1 }} · {{ segment.contentLength || 0 }} 字符数 ·
+              {{ segment.tokens || 0 }} Token
+            </div>
+            <div class="bg-white p-10px rounded-md">{{ segment.content }}</div>
           </div>
         </template>
         <el-empty v-else description="暂无预览内容" />
@@ -79,7 +86,9 @@
 
 <script lang="ts" setup>
 import { PropType, ref, computed, inject, onMounted, getCurrentInstance } from 'vue'
-import { Document, ArrowDown, Warning } from '@element-plus/icons-vue' // TODO @芋艿：icon 的处理
+import { Icon } from '@/components/Icon'
+import { KnowledgeSegmentApi } from '@/api/ai/knowledge/segment'
+import { useMessage } from '@/hooks/web/useMessage'
 
 const props = defineProps({
   modelValue: {
@@ -89,165 +98,99 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+const message = useMessage() // 消息提示
+const parent = inject('parent', null) // 获取父组件实例
 
-// 获取父组件实例
-const parent = inject('parent', null)
-
-// 表单数据
 const modelData = computed({
   get: () => props.modelValue,
   set: (val) => emit('update:modelValue', val)
-})
+}) // 表单数据
 
-// 分段设置
-const segmentSettings = ref({})
+const splitLoading = ref(false) // 分段加载状态
+const currentFile = ref<any>(null) // 当前选中的文件
 
-// 模拟上传的文件数据
-const uploadedFiles = ref([
-  {
-    name: '项目说明文档.pdf',
-    type: 'pdf',
-    chunks: [
-      {
-        characters: 120,
-        content:
-          '项目说明文档 - 智能知识库系统 本项目旨在构建一个智能知识库系统，能够对各类文档进行智能分析、分类和检索，提高企业知识管理效率。'
-      },
-      {
-        characters: 180,
-        content:
-          '系统架构：前端采用Vue3+Element Plus构建用户界面，后端采用Spring Boot微服务架构，数据存储使用MySQL和Elasticsearch，文档解析使用Apache Tika，向量检索使用Milvus。'
-      },
-      {
-        characters: 150,
-        content:
-          '核心功能：1. 文档上传与解析：支持多种格式文档上传，自动提取文本内容。2. 智能分段：根据语义自动将文档分割成合适的段落。3. 向量化存储：将文本转换为向量存储，支持语义检索。'
-      },
-      {
-        characters: 160,
-        content:
-          '4. 智能检索：支持关键词和语义检索，快速找到相关内容。5. 知识图谱：自动构建领域知识图谱，展示知识间关联。6. 权限管理：细粒度的文档访问权限控制。7. 操作日志：记录用户操作，支持审计追踪。'
-      },
-      {
-        characters: 130,
-        content:
-          '技术特点：1. 高性能：采用分布式架构，支持横向扩展。2. 高可用：关键组件冗余部署，确保系统稳定性。3. 安全性：数据传输加密，存储加密，多层次安全防护。'
-      }
-    ]
-  },
-  {
-    name: '项目说明文档.pdf',
-    type: 'pdf',
-    chunks: []
-  }
-])
-
-// 当前选中的文件
-const currentFile = ref(uploadedFiles.value[0] || null)
-
-// 选择文件
-const selectFile = (index) => {
-  currentFile.value = uploadedFiles.value[index]
+/** 选择文件 */
+const selectFile = async (index: number) => {
+  currentFile.value = modelData.value.list[index]
+  await splitContent(currentFile.value)
 }
 
-// 自动分段
-const handleAutoSegment = () => {
-  // 根据文档类型和分段设置进行自动分段
-  // 这里只是模拟实现，实际需要根据文档内容进行分析
-
-  // 确保 segments 存在
-  if (!modelData.value.segments) {
-    modelData.value.segments = []
+/** 获取文件分段内容 */
+const splitContent = async (file: any) => {
+  if (!file || !file.url) {
+    message.warning('文件 URL 不存在')
+    return
   }
 
-  // 清空现有段落
-  modelData.value.segments = []
-
-  // 模拟生成段落
-  if (modelData.value.documentType === 'text' && modelData.value.content) {
-    // 文本类型，按Token数分割
-    const content = modelData.value.content
-    const maxChars = Math.floor(modelData.value.segmentMaxTokens / 2) // 简单估算：1个token约等于2个字符
-    let remaining = content
-
-    while (remaining.length > 0) {
-      const segment = remaining.substring(0, maxChars)
-      remaining = remaining.substring(maxChars)
-
-      modelData.value.segments.push({
-        content: segment,
-        order: modelData.value.segments.length + 1
-      })
-    }
-  } else {
-    // 其他类型文档，模拟生成5个段落
-    for (let i = 0; i < 5; i++) {
-      modelData.value.segments.push({
-        content: `这是第 ${i + 1} 个自动生成的段落，实际内容将根据文档解析结果填充。`,
-        order: i + 1
-      })
-    }
+  splitLoading.value = true
+  try {
+    const data = await KnowledgeSegmentApi.splitContent(file.url, modelData.value.segmentMaxTokens) // 调用后端分段接口，获取文档的分段内容、字符数和 Token 数
+    file.segments = data
+  } catch (error) {
+    console.error('获取分段内容失败:', file, error)
+    message.error('获取分段内容失败')
+  } finally {
+    splitLoading.value = false
   }
 }
 
-// 上一步按钮处理
+/** 处理预览分段 */
+const handleAutoSegment = async () => {
+  // 如果没有选中文件，默认选中第一个
+  if (!currentFile.value && modelData.value.list && modelData.value.list.length > 0) {
+    currentFile.value = modelData.value.list[0]
+  }
+  // 如果没有选中文件，提示请先选择文件
+  if (!currentFile.value) {
+    message.warning('请先选择文件')
+    return
+  }
+
+  // 获取分段内容
+  await splitContent(currentFile.value)
+}
+
+/** 上一步按钮处理 */
 const handlePrevStep = () => {
-  // 获取父组件的goToPrevStep方法
   const parentEl = parent || getCurrentInstance()?.parent
   if (parentEl && typeof parentEl.exposed?.goToPrevStep === 'function') {
     parentEl.exposed.goToPrevStep()
   }
 }
 
-// 下一步按钮处理
+/** 下一步按钮处理 */
 const handleNextStep = () => {
-  // 获取父组件的goToNextStep方法
   const parentEl = parent || getCurrentInstance()?.parent
   if (parentEl && typeof parentEl.exposed?.goToNextStep === 'function') {
     parentEl.exposed.goToNextStep()
   }
 }
 
-// 表单校验
-const validate = () => {
-  return new Promise((resolve, reject) => {
-    // 确保 segments 存在
-    if (!modelData.value.segments || modelData.value.segments.length === 0) {
-      reject(new Error('请先进行预览分段'))
-    } else {
-      resolve(true)
-    }
-  })
-}
-
-// 对外暴露方法
-defineExpose({
-  validate
-})
-
-// 初始化
-onMounted(() => {
-  // 确保 segments 存在
-  if (!modelData.value.segments) {
-    modelData.value.segments = []
+/** 组件激活时自动调用分段接口 TODO 芋艿：需要看下 */
+const activated = async () => {
+  if (!currentFile.value && modelData.value.list && modelData.value.list.length > 0) {
+    currentFile.value = modelData.value.list[0] // 如果没有选中文件，默认选中第一个
   }
 
+  if (currentFile.value) {
+    await splitContent(currentFile.value) // 如果有选中的文件，获取分段内容
+  }
+}
+
+/** 初始化 */
+onMounted(async () => {
   // 确保 segmentMaxTokens 存在
   if (!modelData.value.segmentMaxTokens) {
     modelData.value.segmentMaxTokens = 500
   }
+  // 如果没有选中文件，默认选中第一个
+  if (!currentFile.value && modelData.value.list && modelData.value.list.length > 0) {
+    currentFile.value = modelData.value.list[0]
+  }
+
+  // 如果有选中的文件，获取分段内容
+  if (currentFile.value) {
+    await splitContent(currentFile.value)
+  }
 })
 </script>
-
-<style lang="scss" scoped>
-.document-segment {
-  .segment-content {
-    padding: 10px;
-  }
-
-  .file-preview {
-    max-height: 600px;
-    overflow-y: auto;
-  }
-}
-</style>
