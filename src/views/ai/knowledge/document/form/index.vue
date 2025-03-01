@@ -89,16 +89,17 @@ const formData = ref({
   id: undefined, // 编辑的文档编号(documentId)
   segmentMaxTokens: 500, // 分段最大 token 数
   list: [] as Array<{
-    name: string
-    url: string
+    id: number // 文档编号
+    name: string // 文档名称
+    url: string // 文档 URL
     segments: Array<{
       content?: string
       contentLength?: number
       tokens?: number
     }>
-  }>, // 用于存储上传的文件列表
-  documentIds: [], // 最终提交的创建/修改的文档编号，用于 ProcessStep 组件的轮询
-  status: 0 // 0: 草稿, 1: 处理中, 2: 已完成
+    count?: number // 段落数量
+    process?: number // 处理进度
+  }> // 用于存储上传的文件列表
 }) // 表单数据
 
 provide('parent', getCurrentInstance()) // 提供 parent 给子组件使用
@@ -119,6 +120,7 @@ const initData = async () => {
     formData.value.segmentMaxTokens = document.segmentMaxTokens
     formData.value.list = [
       {
+        id: document.id,
         name: document.name,
         url: document.url,
         segments: []
@@ -132,6 +134,17 @@ const initData = async () => {
   if (false) {
     formData.value.list = [
       {
+        name: '项目说明文档.pdf',
+        url: 'https://static.iocoder.cn/README_yudao.md',
+        segments: []
+      }
+    ]
+    goToNextStep()
+  }
+  if (false) {
+    formData.value.list = [
+      {
+        id: 1,
         name: '项目说明文档.pdf',
         url: 'https://static.iocoder.cn/README_yudao.md',
         segments: []
@@ -179,7 +192,8 @@ onBeforeUnmount(() => {
 /** 暴露方法给子组件使用 */
 defineExpose({
   goToNextStep,
-  goToPrevStep
+  goToPrevStep,
+  handleBack
 })
 </script>
 

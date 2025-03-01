@@ -188,19 +188,22 @@ const handleSave = async () => {
   try {
     if (modelData.value.id) {
       // 修改场景
-      modelData.value.ids = await KnowledgeDocumentApi.updateKnowledgeDocument({
+      await KnowledgeDocumentApi.updateKnowledgeDocument({
         id: modelData.value.id,
         segmentMaxTokens: modelData.value.segmentMaxTokens
       })
     } else {
       // 新增场景
-      modelData.value.ids = await KnowledgeDocumentApi.createKnowledgeDocumentList({
+      const data = await KnowledgeDocumentApi.createKnowledgeDocumentList({
         knowledgeId: modelData.value.knowledgeId,
         segmentMaxTokens: modelData.value.segmentMaxTokens,
         list: modelData.value.list.map((item: any) => ({
           name: item.name,
           url: item.url
         }))
+      })
+      modelData.value.list.forEach((document: any, index: number) => {
+        document.id = data[index]
       })
     }
 

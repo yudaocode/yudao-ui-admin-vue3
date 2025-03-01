@@ -1,235 +1,146 @@
 <template>
-  <div class="process-complete">
-    <div class="mb-20px">
-      <el-alert
-        title="处理说明"
-        type="info"
-        description="系统将对文档进行处理，包括文本提取、向量化等操作，处理完成后文档将被添加到知识库中。"
-        show-icon
-        :closable="false"
-      />
+  <div>
+    <!-- 文件处理列表 -->
+    <div class="mt-15px grid grid-cols-1 gap-2">
+      <div
+        v-for="(file, index) in modelValue.list"
+        :key="index"
+        class="flex items-center py-4px px-12px border-l-4 border-l-[#409eff] rounded-sm shadow-sm hover:bg-[#ecf5ff] transition-all duration-300"
+      >
+        <!-- 文件图标和名称 -->
+        <div class="flex items-center min-w-[200px] mr-10px">
+          <Icon icon="ep:document" class="mr-8px text-[#409eff]" />
+          <span class="text-[13px] text-[#303133] break-all">{{ file.name }}</span>
+        </div>
+
+        <!-- 处理进度 -->
+        <div class="flex-1">
+          <el-progress
+            :percentage="file.progress || 0"
+            :stroke-width="10"
+            :status="isProcessComplete(file) ? 'success' : ''"
+          />
+        </div>
+
+        <!-- 分段数量 -->
+        <div class="ml-10px text-[13px] text-[#606266]">
+          分段数量：{{ file.count ? file.count : '-' }}
+        </div>
+      </div>
     </div>
 
-    <div class="mb-20px">
-      <el-card class="box-card">
-        <template #header>
-          <div class="card-header">
-            <span class="text-16px font-bold">文档信息</span>
-          </div>
-        </template>
-        <div class="document-info">
-          <div class="info-item">
-            <span class="label">文档名称：</span>
-            <span class="value">{{ modelData.name }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">知识库：</span>
-            <span class="value">{{ getKnowledgeBaseName(modelData.knowledgeBaseId) }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">文档类型：</span>
-            <span class="value">{{ getDocumentTypeName(modelData.documentType) }}</span>
-          </div>
-          <div class="info-item">
-            <span class="label">段落数量：</span>
-            <span class="value">{{ modelData.segments.length }}</span>
-          </div>
-        </div>
-      </el-card>
-    </div>
-
-    <div class="mb-20px">
-      <el-card class="box-card">
-        <template #header>
-          <div class="card-header">
-            <span class="text-16px font-bold">处理选项</span>
-          </div>
-        </template>
-        <div class="process-options">
-          <el-form :model="processOptions" label-width="120px">
-            <el-form-item label="处理模式">
-              <el-radio-group v-model="processOptions.mode">
-                <el-radio :label="1">标准处理</el-radio>
-                <el-radio :label="2">高级处理</el-radio>
-              </el-radio-group>
-            </el-form-item>
-            <el-form-item label="向量模型" v-if="processOptions.mode === 2">
-              <el-select v-model="processOptions.vectorModel" placeholder="请选择向量模型">
-                <el-option label="文本嵌入模型-基础版" value="text-embedding-basic" />
-                <el-option label="文本嵌入模型-高级版" value="text-embedding-advanced" />
-                <el-option label="多模态嵌入模型" value="multimodal-embedding" />
-              </el-select>
-            </el-form-item>
-            <el-form-item label="处理优先级" v-if="processOptions.mode === 2">
-              <el-select v-model="processOptions.priority" placeholder="请选择处理优先级">
-                <el-option label="低" value="low" />
-                <el-option label="中" value="medium" />
-                <el-option label="高" value="high" />
-              </el-select>
-            </el-form-item>
-          </el-form>
-        </div>
-      </el-card>
-    </div>
-
-    <div class="mb-20px">
-      <el-card class="box-card">
-        <template #header>
-          <div class="card-header">
-            <span class="text-16px font-bold">处理状态</span>
-          </div>
-        </template>
-        <div class="process-status">
-          <div v-if="!isProcessing && !isProcessed">
-            <el-empty description="尚未开始处理" />
-            <div class="flex justify-center mt-20px">
-              <el-button type="primary" @click="handleStartProcess">开始处理</el-button>
-            </div>
-          </div>
-          <div v-else-if="isProcessing">
-            <div class="flex flex-col items-center">
-              <el-progress type="circle" :percentage="processPercentage" />
-              <div class="mt-10px">{{ processStatus }}</div>
-            </div>
-          </div>
-          <div v-else>
-            <div class="flex items-center justify-center">
-              <el-result icon="success" title="处理完成" sub-title="文档已成功处理并添加到知识库中">
-                <template #extra>
-                  <el-button type="primary" @click="handleViewDocument">查看文档</el-button>
-                </template>
-              </el-result>
-            </div>
-          </div>
-        </div>
-      </el-card>
+    <!-- 底部完成按钮 -->
+    <div class="flex justify-end mt-20px">
+      <el-button
+        :type="allProcessComplete ? 'success' : 'primary'"
+        :disabled="!allProcessComplete"
+        @click="handleComplete"
+      >
+        完成
+      </el-button>
     </div>
   </div>
 </template>
 
-<script lang="ts" setup>
-import { PropType } from 'vue'
+<script setup lang="ts">
+import { KnowledgeSegmentApi } from '@/api/ai/knowledge/segment'
 
 const props = defineProps({
   modelValue: {
-    type: Object as PropType<any>,
+    type: Object,
     required: true
   }
 })
 
 const emit = defineEmits(['update:modelValue'])
+const parent = inject('parent') as any
+const pollingTimer = ref<number | null>(null) // 轮询定时器 ID，用于跟踪和清除轮询进程
 
-// 表单数据
-const modelData = computed({
-  get: () => props.modelValue,
-  set: (val) => emit('update:modelValue', val)
-})
-
-// 处理选项
-const processOptions = ref({
-  mode: 1, // 1: 标准处理, 2: 高级处理
-  vectorModel: 'text-embedding-basic',
-  priority: 'medium'
-})
-
-// 处理状态
-const isProcessing = ref(false)
-const isProcessed = ref(false)
-const processPercentage = ref(0)
-const processStatus = ref('正在准备处理...')
-
-// 知识库列表（模拟数据）
-const knowledgeBaseList = [
-  { id: 1, name: '产品知识库' },
-  { id: 2, name: '技术文档库' },
-  { id: 3, name: '客户服务知识库' }
-]
-
-// 获取知识库名称
-const getKnowledgeBaseName = (id) => {
-  const base = knowledgeBaseList.find((item) => item.id === id)
-  return base ? base.name : '未知知识库'
+/** 判断文件处理是否完成 */
+const isProcessComplete = (file) => {
+  return file.progress === 100
 }
 
-// 获取文档类型名称
-const getDocumentTypeName = (type) => {
-  const typeMap = {
-    pdf: 'PDF文档',
-    word: 'Word文档',
-    text: '文本文件',
-    url: '网页链接'
+/** 判断所有文件是否都处理完成 */
+const allProcessComplete = computed(() => {
+  return props.modelValue.list.every((file) => isProcessComplete(file))
+})
+
+/** 完成按钮点击事件处理 */
+const handleComplete = () => {
+  if (parent?.exposed?.handleBack) {
+    parent.exposed.handleBack()
   }
-  return typeMap[type] || '未知类型'
 }
 
-// 开始处理
-const handleStartProcess = () => {
-  isProcessing.value = true
-  processPercentage.value = 0
-  processStatus.value = '正在准备处理...'
-
-  // 模拟处理过程
-  const timer = setInterval(() => {
-    processPercentage.value += 10
-
-    if (processPercentage.value < 30) {
-      processStatus.value = '正在提取文本内容...'
-    } else if (processPercentage.value < 60) {
-      processStatus.value = '正在进行向量化处理...'
-    } else if (processPercentage.value < 90) {
-      processStatus.value = '正在写入知识库...'
-    } else {
-      processStatus.value = '处理完成，正在整理结果...'
+/** 获取文件处理进度 */
+const getProcessList = async () => {
+  try {
+    // 1. 调用 API 获取处理进度
+    const documentIds = props.modelValue.list.filter((item) => item.id).map((item) => item.id)
+    if (documentIds.length === 0) {
+      return
     }
+    const result = await KnowledgeSegmentApi.getKnowledgeSegmentProcessList(documentIds)
 
-    if (processPercentage.value >= 100) {
-      clearInterval(timer)
-      isProcessing.value = false
-      isProcessed.value = true
-      modelData.value.status = 2 // 已完成
+    // 2.1更新进度
+    const updatedList = props.modelValue.list.map((file) => {
+      const processInfo = result.find((item) => item.documentId === file.id)
+      if (processInfo) {
+        // 计算进度百分比：已嵌入数量 / 总数量 * 100
+        const progress =
+          processInfo.embeddingCount && processInfo.count
+            ? Math.floor((processInfo.embeddingCount / processInfo.count) * 100)
+            : 0
+        return {
+          ...file,
+          progress: progress,
+          count: processInfo.count || 0
+        }
+      }
+      return file
+    })
+
+    // 2.2 更新数据
+    emit('update:modelValue', {
+      ...props.modelValue,
+      list: updatedList
+    })
+
+    // 3. 如果未完成，继续轮询
+    if (!updatedList.every((file) => isProcessComplete(file))) {
+      pollingTimer.value = window.setTimeout(getProcessList, 3000)
     }
-  }, 500)
+  } catch (error) {
+    // 出错后也继续轮询
+    console.error('获取处理进度失败:', error)
+    pollingTimer.value = window.setTimeout(getProcessList, 5000)
+  }
 }
 
-// 查看文档
-const handleViewDocument = () => {
-  // 跳转到文档详情页
-  console.log('查看文档:', modelData.value.id)
-}
+/** 组件挂载时开始轮询 */
+onMounted(() => {
+  // 1. 初始化进度为 0
+  const initialList = props.modelValue.list.map((file) => ({
+    ...file,
+    progress: 0
+  }))
 
-// 表单校验
-const validate = () => {
-  return new Promise((resolve, reject) => {
-    if (modelData.value.status === 2) {
-      resolve(true)
-    } else {
-      reject(new Error('请先完成文档处理'))
-    }
+  emit('update:modelValue', {
+    ...props.modelValue,
+    list: initialList
   })
-}
 
-// 对外暴露方法
-defineExpose({
-  validate
+  // 2. 开始轮询获取进度
+  getProcessList()
+})
+
+/** 组件卸载前清除轮询 */
+onBeforeUnmount(() => {
+  // 1. 清除定时器
+  if (pollingTimer.value) {
+    clearTimeout(pollingTimer.value)
+    pollingTimer.value = null
+  }
 })
 </script>
-
-<style lang="scss" scoped>
-.process-complete {
-  .document-info {
-    .info-item {
-      margin-bottom: 10px;
-      display: flex;
-
-      .label {
-        width: 100px;
-        color: #606266;
-      }
-
-      .value {
-        font-weight: bold;
-      }
-    }
-  }
-}
-</style>
