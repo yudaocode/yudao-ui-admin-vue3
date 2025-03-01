@@ -53,7 +53,13 @@
       <el-table-column label="召回次数" align="center" prop="retrievalCount" />
       <el-table-column label="是否启用" align="center" prop="status">
         <template #default="scope">
-          <dict-tag :type="DICT_TYPE.COMMON_STATUS" :value="scope.row.status" />
+          <el-switch
+            v-model="scope.row.status"
+            :active-value="0"
+            :inactive-value="1"
+            @change="handleStatusChange(scope.row)"
+            :disabled="!checkPermi(['ai:knowledge:update'])"
+          />
         </template>
       </el-table-column>
       <el-table-column
@@ -102,6 +108,8 @@ import { getIntDictOptions, DICT_TYPE } from '@/utils/dict'
 import { dateFormatter } from '@/utils/formatTime'
 import { KnowledgeDocumentApi, KnowledgeDocumentVO } from '@/api/ai/knowledge/document'
 import { useRoute, useRouter } from 'vue-router'
+import { checkPermi } from '@/utils/permission'
+import { CommonStatusEnum } from '@/utils/constants'
 // import KnowledgeDocumentForm from './KnowledgeDocumentForm.vue'
 
 /** AI 知识库文档 列表 */
@@ -175,6 +183,24 @@ const handleDelete = async (id: number) => {
     // 刷新列表
     await getList()
   } catch {}
+}
+
+/** 修改状态操作 */
+const handleStatusChange = async (row: KnowledgeDocumentVO) => {
+  try {
+    // 修改状态的二次确认
+    const text = row.status === CommonStatusEnum.ENABLE ? '启用' : '禁用'
+    await message.confirm('确认要"' + text + '""' + row.name + '"文档吗?')
+    // 发起修改状态
+    await KnowledgeDocumentApi.updateKnowledgeDocumentStatus({ id: row.id, status: row.status })
+    message.success(t('common.updateSuccess'))
+    // 刷新列表
+    await getList()
+  } catch {
+    // 取消后，进行恢复按钮
+    row.status =
+      row.status === CommonStatusEnum.ENABLE ? CommonStatusEnum.DISABLE : CommonStatusEnum.ENABLE
+  }
 }
 
 /** 初始化 **/

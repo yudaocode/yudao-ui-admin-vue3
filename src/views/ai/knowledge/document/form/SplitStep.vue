@@ -22,7 +22,7 @@
       <div class="segment-settings mb-20px">
         <el-form label-width="120px">
           <el-form-item label="最大 Token 数">
-            <el-input-number v-model="modelData.segmentMaxTokens" :min="100" :max="2000" />
+            <el-input-number v-model="modelData.segmentMaxTokens" :min="1" :max="2048" />
           </el-form-item>
         </el-form>
       </div>
@@ -38,6 +38,9 @@
           <div class="flex items-center cursor-pointer">
             <Icon icon="ep:document" class="text-danger mr-5px" />
             <span>{{ currentFile?.name || '请选择文件' }}</span>
+            <span v-if="currentFile?.segments" class="ml-5px text-gray-500 text-12px">
+              ({{ currentFile.segments.length }}个分片)
+            </span>
             <Icon icon="ep:arrow-down" class="ml-5px" />
           </div>
           <template #dropdown>
@@ -48,6 +51,9 @@
                 @click="selectFile(index)"
               >
                 {{ file.name }}
+                <span v-if="file.segments" class="ml-5px text-gray-500 text-12px">
+                  ({{ file.segments.length }}个分片)
+                </span>
               </el-dropdown-item>
             </el-dropdown-menu>
           </template>
@@ -182,7 +188,7 @@ const handleSave = async () => {
   try {
     if (modelData.value.id) {
       // 修改场景
-      modelData.value.ids = await KnowledgeDocumentApi.createKnowledgeDocumentList({
+      modelData.value.ids = await KnowledgeDocumentApi.updateKnowledgeDocument({
         id: modelData.value.id,
         segmentMaxTokens: modelData.value.segmentMaxTokens
       })

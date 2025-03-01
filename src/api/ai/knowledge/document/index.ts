@@ -25,19 +25,27 @@ export const KnowledgeDocumentApi = {
   },
 
   // 新增知识库文档（单个）
-  createKnowledgeDocument: async (data: KnowledgeDocumentVO) => {
+  createKnowledgeDocument: async (data: any) => {
     return await request.post({ url: `/ai/knowledge/document/create`, data })
   },
 
-  // 新增知识库文档（批量）
+  // 新增知识库文档（多个）
   createKnowledgeDocumentList: async (data: any) => {
     return await request.post({ url: `/ai/knowledge/document/create-list`, data })
   },
 
-  // // 修改AI 知识库文档
-  // updateKnowledgeDocument: async (data: KnowledgeDocumentVO) => {
-  //   return await request.put({ url: `/ai/knowledge/document/update`, data })
-  // },
+  // 修改知识库文档
+  updateKnowledgeDocument: async (data: any) => {
+    return await request.put({ url: `/ai/knowledge/document/update`, data })
+  },
+
+  // 修改知识库文档状态
+  updateKnowledgeDocumentStatus: async (data: any) => {
+    return await request.put({
+      url: `/ai/knowledge/document/update-status`,
+      data
+    })
+  },
 
   // 删除知识库文档
   deleteKnowledgeDocument: async (id: number) => {
