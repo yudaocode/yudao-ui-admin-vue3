@@ -42,13 +42,13 @@ watch(
       const finishedSequenceFlowActivityIds: string[] = newModelView.finishedSequenceFlowActivityIds
       setSimpleModelNodeTaskStatus(
         newModelView.simpleModel,
-        newModelView.processInstance.status,
+        newModelView.processInstance?.status,
         rejectedTaskActivityIds,
         unfinishedTaskActivityIds,
         finishedActivityIds,
         finishedSequenceFlowActivityIds
       )
-      simpleModel.value = newModelView.simpleModel
+      simpleModel.value = newModelView.simpleModel ? newModelView.simpleModel : {}
     }
   }
 )
@@ -171,5 +171,4 @@ const setSimpleModelNodeTaskStatus = (
 }
 </script>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss" scoped></style>
